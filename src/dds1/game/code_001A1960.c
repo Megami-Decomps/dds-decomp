@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "btl_ui.h"
+#include "sdf.h"
 
 typedef struct ActorEntrySlot {
     s16 code;
@@ -3498,7 +3499,49 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BBE18);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC540);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC978);
+typedef struct UiDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct UiDrawSurface *, void *);
+} UiDrawSurface;
+
+extern UiDrawSurface D_003255A8;
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(SdfListHead *list);
+extern s32 sdfConsCreateDrawPacket(s32 list, s32 texture, s32 context);
+extern void sdfQueueGouraudTexturedQuad(
+    s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
+    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2,
+    s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
+    s32 depth, s32 (*allocate)(s32));
+
+/* Draw a textured command-panel quad with independently colored corners. */
+s32 func_001BC978(s32 x0, s32 y0, s32 x1, s32 y1,
+                  s32 x2, s32 y2, s32 x3, s32 y3,
+                  s32 u, s32 v, s32 width, s32 height,
+                  const s32 *colors, s32 texture) {
+    SdfListHead *list;
+    s32 uFixed;
+    s32 vFixed;
+    s32 uRight;
+    s32 vBottom;
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfConsCreateDrawPacket((s32)list, texture, 0);
+    uFixed = u * 0x10;
+    vFixed = v * 0x10;
+    uRight = uFixed + width * 0x10;
+    vBottom = vFixed + height * 0x10;
+    sdfQueueGouraudTexturedQuad((s32)list, 0x40,
+        x0 * 0x10 + 0x7000, y0 * 8 + 0x7900, uFixed, vFixed, colors[0],
+        x1 * 0x10 + 0x7000, y1 * 8 + 0x7900, uRight, vFixed, colors[1],
+        x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
+        x3 * 0x10 + 0x7000, y3 * 8 + 0x7900, uRight, vBottom, colors[3],
+        0xFEFFD0, NULL);
+    D_003255A8.submit(&D_003255A8, list);
+    return 1;
+}
 
 s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
     s64 first;

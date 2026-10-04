@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -53,15 +54,6 @@ typedef struct ParReleaseRecord {
     u8 pad14[0x2C];
     u32 asset;          /* 0x40 */
 } ParReleaseRecord;
-
-/* 20-byte cell initialized by parCellInit (grey plus zeros). */
-typedef struct ParCell {
-    u128 *history;   /* 0x00 */
-    void *vertices;  /* 0x04 */
-    s32 vertexCount; /* 0x08: processed in groups of three */
-    s32 unk0C;       /* 0x0C cleared */
-    u32 color;       /* 0x10 set to grey 0x80808080 */
-} ParCell; /* 0x14 */
 
 typedef struct ParDrawState {
     u16 width;      /* 0x00 */
@@ -840,6 +832,12 @@ void parFadeAlphaUpDownAllCells(ParSystem *system, u32 color) {
     }
 }
 
+typedef struct ParTriangleVertexColors {
+    s32 edge0;
+    s32 middle;
+    s32 edge1;
+} ParTriangleVertexColors;
+
 void parFillTriangleCellColors(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -847,20 +845,20 @@ void parFillTriangleCellColors(ParSystem *system, s32 middleWord, s32 edgeWord) 
     s32 i;
     s32 j;
     u8 *cell;
-    u8 *vertex;
+    ParTriangleVertexColors *vertex;
     if (count > 0) {
         i = count;
         cell = (u8 *)system->cells + 4;
         do {
-            vertex = *(u8 **)cell;
+            vertex = *(ParTriangleVertexColors **)cell;
             if (perCell > 0) {
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 4) = middleWord;
-                    *(s32 *)(vertex + 8) = edgeWord;
-                    *(s32 *)(vertex + 0) = edgeWord;
-                    vertex += 0xC;
+                    vertex->middle = middleWord;
+                    vertex->edge1 = edgeWord;
+                    vertex->edge0 = edgeWord;
+                    vertex++;
                 } while (j != 0);
             }
             i--;
@@ -886,7 +884,7 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
     u32 i;
     u32 j;
     u8 *cell;
-    u32 *vertex;
+    ParTriangleVertexColors *vertex;
     u32 packedMiddle;
     u32 packedEdge;
     alpha0[0] = middleWord & 0xFF000000;
@@ -905,7 +903,7 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
     if (count != 0) {
         cell = (u8 *)system->cells + 4;
         do {
-            vertex = *(u32 **)cell;
+            vertex = *(ParTriangleVertexColors **)cell;
             col0[0] = middleWord;
             EE_MMI_RGBA_UNPACK(col0, 1.0f / 128.0f);
             VU0_STORE_VF(vf10, cur0);
@@ -917,7 +915,7 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
                 VU0_MOVE_VF(vf11, vf10);
                 EE_MMI_RGBA_PACK_UNIT(packedMiddle, 128.0f);
                 out0[0] = packedMiddle;
-                vertex[1] = packedMiddle;
+                vertex->middle = packedMiddle;
                 VU0_LOAD_VF(vf12, step0);
                 VU0_SUB(vf11, vf11, vf12);
                 VU0_STORE_VF(vf11, cur0);
@@ -925,12 +923,12 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
                 VU0_MOVE_VF(vf11, vf10);
                 EE_MMI_RGBA_PACK_UNIT(packedEdge, 128.0f);
                 out1[0] = packedEdge;
-                vertex[0] = packedEdge;
-                vertex[2] = packedEdge;
+                vertex->edge0 = packedEdge;
+                vertex->edge1 = packedEdge;
                 VU0_LOAD_VF(vf12, step1);
                 VU0_SUB(vf11, vf11, vf12);
                 VU0_STORE_VF(vf11, cur1);
-                vertex += 3;
+                vertex++;
             }
             i++;
             cell += 0x14;
@@ -938,7 +936,49 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C618);
+void func_0015C618(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 halfCount = (words / 3) >> 1;
+    u32 middleStep = middleAlpha / halfCount;
+    u32 edgeStep = edgeAlpha / halfCount;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParTriangleVertexColors *vertex;
+
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParTriangleVertexColors **)cell;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                vertex->middle = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->middle = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 /* Ordered packed color words for the three particle vertex layouts. */
 typedef struct ParStripVertexColors {
@@ -1207,7 +1247,52 @@ void parFillSymmetricCellColors(ParSystem *system, s32 centerWord, s32 middleWor
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CCD0);
+/* Fade the three symmetric colors toward transparent across each cell. */
+void func_0015CCD0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 perCell = words / 5;
+    u32 centerStep = centerAlpha / perCell;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParSymmetricVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParSymmetricVertexColors **)cell;
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < perCell; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 /* Increase each symmetric color's alpha from zero across the cell. */
 void func_0015CDF0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)

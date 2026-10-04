@@ -109,7 +109,60 @@ s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, Menu
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC8F0);
+typedef struct MenuCatalogItem {
+    u16 itemId;
+    u8 pad02[0x1A];
+} MenuCatalogItem;
+
+extern const MenuCatalogItem D_003E7200[18];
+extern char (*D_00435E5C)[25];
+extern char D_00437BC8[];
+extern void func_002AC750();
+extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowContainerState(MenuStaffList *, u32);
+extern void mnuSetWindowPanelBounds(MenuStaffList *, const void *, u32, u32, u32, u32);
+extern void mnuSetWindowEntryParameters(u32, MenuStaffList *, u32, u32, u32);
+extern MenuStaffNode *mnuAppendWindowListNode(MenuStaffList *, s32);
+extern void mnuSetWindowContainerLayout(MenuStaffList *, u32, u32, u32, u32, u32, u32, u32, u32);
+extern void mnuCreateListWithDefaults(MenuStaffList *, u32, u32, u32, u32);
+
+/* Build the catalog window from the eighteen item records and owned quantities. */
+void func_002AC8F0(MenuStaffContext *owner) {
+    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
+    MenuStaffList *window;
+    MenuStaffNode *node;
+    const MenuCatalogItem *catalog;
+    u32 ordinal = 0;
+    u32 itemId;
+    u32 frameResource;
+
+    window = (MenuStaffList *)mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    window->window->owner = owner;
+    window->window->drawEntry = func_002AC750;
+    node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
+    node->label = 0;
+    node->entryIndex = 0;
+    node->catalogOrdinal = 0;
+    catalog = D_003E7200;
+    for (; ordinal < ARRAY_COUNT(D_003E7200); ordinal++) {
+        itemId = catalog->itemId;
+        catalog++;
+        if (((SaveItemCounts *)datGameState)->counts[itemId] != 0) {
+            node = mnuAppendWindowListNode(window, (s32)D_00435E5C[itemId]);
+            node->label = ((SaveItemCounts *)datGameState)->counts[itemId];
+            node->entryIndex = itemId;
+            node->catalogOrdinal = ordinal;
+        }
+    }
+    frameResource = owner->spriteArg2;
+    resources->fifth = (u32)window;
+    mnuSetWindowContainerLayout(window, frameResource, 0x15, frameResource,
+        0x410, 0x16, frameResource, 0x17, 0x3E0);
+    mnuCreateListWithDefaults((MenuStaffList *)resources->fifth, 0, 0, 0, owner->spriteArg0);
+}
 
 void func_002ACA98(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->fifth);

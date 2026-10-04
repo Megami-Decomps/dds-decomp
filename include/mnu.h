@@ -81,13 +81,19 @@ struct MenuStaffList {
 };
 
 struct MenuStaffWindow {
-    u8 pad00[0x10];
+    s32 flags; /* Selection-control bits, including mask 0x8. */
+    u8 pad04[0x0C];
     MenuStaffNode *head; /* 0x10 */
     u8 pad14[4];
     s32 *cursor;
     MenuStaffNode *selectedNode; /* 0x1C */
     s32 panelActive; /* 0x20: selects the alternate panel drawing path */
     s32 rowCount; /* 0x24 */
+    u8 pad28[4];
+    void (*drawEntry)(); /* +0x2C: caller supplies the list and current node. */
+    MenuStaffContext *owner; /* +0x30 */
+    u8 pad34[8];
+    s32 drawAlpha; /* +0x3C: 8.8 fixed-point drawing level. */
 };
 
 struct MenuStaffNode {
@@ -98,6 +104,7 @@ struct MenuStaffNode {
     u8 pad5C[4];
     s32 label;
     s32 entryIndex; /* 0x64 */
+    u32 catalogOrdinal; /* +0x68: stable index in the source catalog. */
 };
 
 #endif /* VERSION_DDS2 */
