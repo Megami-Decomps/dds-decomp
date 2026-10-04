@@ -199,7 +199,19 @@ void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   context);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C278);
+void func_0025C278(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+                   s32 placementIndex, s32 flags, s32 context) {
+    func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] +
+                   D_0036C268[placementIndex][2]) << 4,
+                  (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] +
+                   D_0036C268[placementIndex][3]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[D_0036C268[placementIndex][0]],
+                  D_0036C268[placementIndex][1],
+                  context);
+}
 
 void func_0025C350(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 flags, s32 context) {
@@ -215,9 +227,29 @@ void func_0025C350(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C418);
+void func_0025C418(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+                   s32 flags, s32 context) {
+    func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
+                  (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C6CC[0],
+                  D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX],
+                  context);
+}
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C4C8);
+void func_0025C4C8(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+                   s32 spriteIndex, s32 flags, s32 context) {
+    func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
+                  (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[1],
+                  spriteIndex,
+                  context);
+}
 
 void mnuAdvanceLoopingFrame(s32 *frame) {
     s32 oldFrame;
