@@ -398,7 +398,8 @@ s32 evtGetUnitMotionState(EvtUnit *unit) {
     return unit->motionState;
 }
 
-void evtUnitSetStoredParameter(EvtUnit *unit, u16 value) {
+/* Callers pass the promoted full-width value; only the low halfword is stored. */
+void evtUnitSetStoredParameter(EvtUnit *unit, s32 value) {
     unit->unkBC = value;
 }
 
