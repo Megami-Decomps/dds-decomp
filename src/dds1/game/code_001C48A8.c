@@ -141,9 +141,12 @@ typedef struct BattleSceneWork {
     SceneTask *groupHandles[8];
     SceneFadingRecord fading[8]; /* 0x44C */
     SceneTask *currentTask;
-    u8 pad_490[0x120];
+    u8 pad_490[0x108];
+    s32 (*selectScriptArg)(void); /* 0x598 */
+    u8 pad59C[0x14];
     s32 (*sceneCallback)();
-    u8 pad_5B4[0x44];
+    u8 pad_5B4[0x40];
+    s32 (*selectScriptState)(void); /* 0x5F4 */
     void (*completionHook)(void);
 } BattleSceneWork;
 
@@ -488,7 +491,74 @@ s32 func_001C5910(BattleSceneWork *scene) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C5B90);
+extern void fldClearSceneAdvanceFlag(void);
+extern s32 btlCanStartPrimaryScriptTask(void);
+extern s32 btlHasScriptResource(void);
+extern void btlStartPrimaryScriptTask(void);
+extern void btlStartSecondaryScriptTask(void);
+extern void btlStartSkillEventTask(s32);
+extern struct SoundTask *btlCreateCommandSoundUpdateTask(void);
+extern u8 *btlCreateSecondaryCommandSoundTask(void);
+extern void *btlCreateCommandSoundTask(s32, s32);
+extern void evtBeginSolarOverlayFadeOut(s32);
+extern s32 fldGetActiveSceneGroupValue(void);
+extern u32 kwlnDrawControlFlags;
+
+void func_001C5B90(BattleSceneWork *scene) {
+    scene->scriptState = -1;
+    fldClearSceneAdvanceFlag();
+    scene->flags |= 0x20;
+    if (scene->selectScriptState != NULL) {
+        scene->scriptState = scene->selectScriptState();
+    }
+    if (scene->scriptState == -1) {
+        if (btlCanStartPrimaryScriptTask() != 0) {
+            scene->scriptState = 0xF000002;
+        } else if (btlHasScriptResource() != 0) {
+            scene->scriptState = 0xF000003;
+        } else if (scene->selectScriptArg != NULL) {
+            s32 arg = scene->selectScriptArg();
+
+            if (arg >= 0) {
+                scene->scriptArg = arg;
+                scene->scriptState = 0xF000000;
+            }
+        }
+    }
+    switch (scene->scriptState) {
+    case 0xF000002:
+        btlStartTask(btlCreateCommandSoundTask(0, 3));
+        btlStartPrimaryScriptTask();
+        return;
+    case 0xF000003:
+        evtBeginSolarOverlayFadeOut(8);
+        btlStartSecondaryScriptTask();
+        kwlnDrawControlFlags &= 0xDFFFFFFF;
+        return;
+    case 0xF000000: {
+        SceneTask *task = (SceneTask *)fldGetActiveSceneGroupValue();
+
+        if (task != NULL) {
+            btlStartTask(btlCreateCommandSoundUpdateTask());
+            btlStartTask(btlCreateSecondaryCommandSoundTask());
+            if (task->actor->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) {
+                btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
+            } else {
+                btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
+            }
+        }
+        func_001BCB88(0, 20);
+        return;
+    }
+    default:
+        if (scene->scriptState != -1) {
+            btlStartTask(btlCreateCommandSoundUpdateTask());
+            btlStartTask(btlCreateCommandSoundTask(0, 3));
+            btlStartSkillEventTask(scene->scriptState);
+        }
+        break;
+    }
+}
 
 s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
     s32 finished = 1;
