@@ -3593,9 +3593,37 @@ SoundTask *btlCreateUnitFadeOutTask(BtlUnit *unit, u32 value, u32 variant) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E5E40);
+s32 func_001E5E40(u32 *arguments) {
+    BtlUnit *unit = (BtlUnit *)arguments[0];
+    u32 alpha;
 
-extern u32 func_001E5E40(s32);
+    if ((s32)arguments[1] == -1) {
+        unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
+        evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
+        evtSetUnitAlphaTransition((u32)unit->ext, 0, unit->overlayColor);
+        btlClearUnitDefeatCandidate(unit);
+        return 1;
+    }
+    if (arguments[2] == 0) {
+        btlFlagUnitDefeatCandidate(unit);
+    }
+    if (arguments[1] == 0) {
+        evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
+        evtSetUnitAlphaTransition((u32)unit->ext, 0,
+                                  (unit->overlayColor & 0xFFFFFF) | 0x80000000);
+    }
+    if ((s32)arguments[2] >= (s32)arguments[1]) {
+        unit->flags &= ~0x20000;
+        unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
+        return 1;
+    }
+    unit->flags |= 0x20000;
+    alpha = (u32)((f32)(s32)arguments[2] * 128.0f / (f32)(s32)arguments[1]);
+    alpha <<= 24;
+    unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
+    arguments[2]++;
+    return 0;
+}
 
 SoundTask *func_001E5FF8(BtlUnit *actor, s32 option) {
     SoundTask *task = btlAllocTask(0xC);
@@ -3613,9 +3641,25 @@ SoundTask *func_001E5FF8(BtlUnit *actor, s32 option) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E6080);
+s32 func_001E6080(u32 *arguments) {
+    BtlUnit *unit = (BtlUnit *)arguments[0];
+    u32 alpha;
 
-extern u32 func_001E6080(s32);
+    if (arguments[2] == 0) {
+        btlFlagUnitDefeatCandidate(unit);
+    }
+    if ((s32)arguments[2] >= (s32)arguments[1]) {
+        unit->flags &= ~0x20000;
+        unit->overlayColor = unit->baseColor & 0xFFFFFF;
+        return 1;
+    }
+    unit->flags |= 0x20000;
+    alpha = (u32)((1.0f - (f32)(s32)arguments[2] / (f32)(s32)arguments[1]) * 128.0f);
+    alpha <<= 24;
+    unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
+    arguments[2]++;
+    return 0;
+}
 
 SoundTask *func_001E61A0(BtlUnit *actor, s32 option) {
     SoundTask *task = btlAllocTask(0xC);
@@ -4131,7 +4175,55 @@ SoundTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E7648);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E7960);
+extern s32 mdlGetBroadcastValue(void *);
+extern void func_001E3E20(BtlUnit *);
+extern void func_002034A8(struct SoundResourceLink *);
+extern void func_00203890(struct SoundLink *);
+extern void func_0020EA18(BtlUnit *);
+
+void func_001E7960(void) {
+    BtlWork *work = (BtlWork *)btlGetRuntime();
+    BtlUnit *unit = work->actorList;
+    s32 color;
+
+    for (; unit != 0; unit = unit->nextActor) {
+        if (unit->flags & 2) {
+            BtlUnitInfo *model = unit->ext->info;
+            if (!(unit->stateFlags & 0x20000)) {
+                unit->unkEC = mdlGetNodeField2C((s32)model, 0);
+            }
+            if (!(unit->flags & 0x40000)) {
+                if (unit->flags & 0x100000) {
+                    color = mdlGetBroadcastValue(unit->ext->info);
+                    unit->overlayColor = color;
+                    if ((color & 0xFF000000) == 0x80000000) {
+                        btlFlagUnitDefeatCandidate(unit);
+                        unit->flags &= ~0x100000;
+                    }
+                } else if (unit->flags & 0x200000) {
+                    color = mdlGetBroadcastValue(unit->ext->info);
+                    unit->overlayColor = color;
+                    if ((color & 0xFF000000) == 0) {
+                        if (!(unit->flags & 0xC0)) {
+                            btlClearUnitDefeatCandidate(unit);
+                        }
+                        unit->flags &= ~0x200000;
+                    }
+                }
+                if (unit->flags & 0x10000) {
+                    func_001E3E20(unit);
+                } else {
+                    btlUpdateUnitTransparency(unit);
+                }
+            }
+            func_002034A8(unit->link31C);
+            func_00203890(unit->link320);
+            if (!(work->flags21C & 0x10000)) {
+                func_0020EA18(unit);
+            }
+        }
+    }
+}
 
 void btlResetUnitLinks(BtlUnit *unit) {
     unit->unk310 = -1;
@@ -6197,7 +6289,39 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F17C8);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1B00);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1F20);
+/* vu0 routine: measure camera clearance from the actor's adjusted muzzle position. */
+void func_001F1F20(void *unit, f32 *pose, u8 *out) {
+    BtlUnit *actor = ((BtlWork *)btlGetRuntime())->actorList;
+    f32 *target = (f32 *)out;
+    f32 span;
+    f32 distance;
+
+    for (; actor != 0; actor = actor->nextActor) {
+        s32 flags = actor->flags;
+        if (!(flags & 1)) {
+            continue;
+        }
+        if (flags & 0x200) {
+            break;
+        }
+    }
+    func_001ECBF8(unit, target);
+    btlCopyMotionTransform((XformData *)pose, (XformData *)out);
+    span = func_00208000(0x200, 0, 0) * 0.5f;
+    pose[0] -= span;
+    target[0] += span;
+    target[8] *= 0.8f;
+    btlUnitGetMuzzlePosVU(actor);
+    VU0_SET_VF10_COMPONENT(y, -btlUnitGetTopY(actor));
+    VU0_LOAD_VF(vf11, out);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    distance += (actor->unkC0 * actor->scale * 2.0f) /
+                func_00353228(target[9] * 0.5f);
+    if (target[8] < distance) {
+        target[8] = distance;
+    }
+}
 
 void func_001F20B0(void *unit, f32 *pose, u8 *out) {
     btlPrepareUnitPoseWithTiltRotation(unit, pose, out);
