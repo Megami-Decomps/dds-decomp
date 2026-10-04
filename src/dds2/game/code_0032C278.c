@@ -37,6 +37,68 @@ extern u8 sdfCurrentBufferIndex;
 #define SDF_DMA_TAG_END_BYTE 0x70
 #define SDF_DMA_QWC_MASK 0xFFFF
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
+#define SDF_QWORD_BYTES 0x10
+#define SDF_QWORD_ALIGNMENT_MASK 0xF
+#define SDF_PACKET_BUFFER_ALIGNMENT_MASK 0x7F
+#define SDF_PACKET_BUFFER_COUNT 2
+#define SDF_PENDING_NODE_BYTES 0x10
+#define SDF_PENDING_BUFFER_BYTES 0x100
+#define SDF_PENDING_BUFFER_CAPACITY 0x3F
+#define SDF_PENDING_SLOT_COUNT 2
+#define SDF_PENDING_LAST_SLOT 1
+#define SDF_PATCHABLE_PACKET_BYTES 0x100
+#define SDF_PATCHABLE_PACKET_TAIL_OFFSET 0xD0
+#define SDF_DESCRIPTOR_PACKET_BYTES 0xB0
+#define SDF_DESCRIPTOR_PACKET_TAIL_OFFSET 0x80
+#define SDF_DMA_EXTENDED_TAIL_OFFSET 0x30
+#define SDF_DMA_REFERENCE_NODE_BYTES 0x20
+#define SDF_DMA_TAG_REF_WORD 0x30000000
+#define SDF_DMA_TAG_NEXT_WORD 0x20000000
+#define SDF_PACKET_LIST_BYTES 0x20
+
+#define SDF_VIF_DIRECT_WORD 0x50000000
+#define SDF_VIF_FLUSHE_WORD 0x10000000
+#define SDF_GIF_ONE_REGISTER_WORD 0x10000000
+#define SDF_GIF_EOP_BIT 0x8000
+#define SDF_GIF_REGISTER_AD 0xE
+#define SDF_DMA_CNT_ONE_WORD 0x10000001
+#define SDF_VIF_DIRECT_ONE_FLUSHE 0x5000000110000000ULL
+#define SDF_GIF_PACKED_AD_BITS 0x1000000000008000ULL
+#define SDF_VIF_DIRECT_ONE_NOP 0x5000000100000000ULL
+#define SDF_GS_FRAME_PRIMARY 0x4C
+#define SDF_GS_FRAME_SECONDARY 0x4D
+#define SDF_GS_ZBUF_PRIMARY 0x4E
+#define SDF_GS_ZBUF_SECONDARY 0x4F
+#define SDF_GS_XYOFFSET_PRIMARY 0x18
+#define SDF_GS_XYOFFSET_SECONDARY 0x19
+#define SDF_GS_SCISSOR_PRIMARY 0x40
+#define SDF_GS_SCISSOR_SECONDARY 0x41
+#define SDF_GS_CENTER_BIAS 0x1000
+#define SDF_GS_FIELD_OFFSET_STEP 8
+#define SDF_GS_PRMODECONT 0x1A
+#define SDF_GS_COLCLAMP 0x46
+#define SDF_GS_DTHE 0x45
+#define SDF_GS_TEXA 0x3B
+#define SDF_GS_DEFAULT_TEXA 0x4000000080ULL
+#define SDF_GS_TEST_PRIMARY 0x47
+#define SDF_GS_TEST_SECONDARY 0x48
+#define SDF_GS_ALPHA_PRIMARY 0x42
+#define SDF_GS_ALPHA_SECONDARY 0x43
+#define SDF_GS_DEFAULT_ALPHA 0x44
+#define SDF_GS_SCENE_TEST 0x517FB
+#define SDF_GS_ALPHA_TEST 0x717FB
+#define SDF_SCENE_DRAW_PAYLOAD_QWORDS 5
+#define SDF_TEXTURE_SCENE_PAYLOAD_QWORDS 0x15
+#define SDF_GRAPH_DEPTH_BUFFER_INDEX 2
+#define SDF_ALPHA_DMA_QWORDS 3
+#define SDF_VIF_DIRECT_THREE_WORD 0x50000003
+#define SDF_VIF_FLUSHE_HALFWORD 0x1000
+#define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
+#define SDF_GS_BOUNDS_TEST 0x30003
+#define SDF_GS_PRIM_SPRITE 6
+#define SDF_GS_PRIM 0
+#define SDF_GS_RGBAQ 1
+#define SDF_GS_XYZ2 5
 
 /* Native DMAC tag: QWC/ID/ADDR followed by the two packed VIF command words. */
 typedef struct SdfDmaTag {
@@ -206,19 +268,21 @@ void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex]->baseAddress >> 6);
 }
 
+/* Allocate metadata plus a patchable DMA payload, registering both list views.
+ * The drawing arguments remain opaque and are forwarded to the native builder. */
 void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
                    s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
-                   s32 (*alloc)(s32)) {
-    s32 packet;
+                   s32 (*allocatePacket)(s32)) {
+    s32 packetAddress;
 
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfAllocPacketAligned;
     }
-    packet = alloc(0x100);
-    ((SdfNode *)packet)->unk4 = (u32)sdfPatchPacketResourceField;
-    func_0032C468(packet + 0x10, sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
-    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
-    sdfAppendPacketRange(list, packet + 0x10, packet + 0xD0);
+    packetAddress = allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
+    ((SdfNode *)packetAddress)->unk4 = (u32)sdfPatchPacketResourceField;
+    func_0032C468(packetAddress + SDF_QWORD_BYTES, sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    sdfAppendLinkedPacketNode(linkedList, (u32 *)packetAddress);
+    sdfAppendPacketRange(list, packetAddress + SDF_QWORD_BYTES, packetAddress + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
 
 typedef struct SdfDescriptorSource {
@@ -272,16 +336,17 @@ void func_0032C860(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
     packet->finishRegister = 0x3F;
 }
 
-void sdfCreateDescriptorPacket(SdfListHead *list, s32 source, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 (*alloc)(s32)) {
-    s32 block;
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+/* Allocate a descriptor packet, delegate its opaque options, and append its range. */
+void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress, s32 a, s32 b, s32 c, s32 d, s32 e,
+                   s32 (*allocatePacket)(s32)) {
+    s32 packetAddress;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfAllocPacketAligned;
     }
-    block = alloc(0xB0);
-    func_0032C860((SdfDescriptorPacket *)block, (SdfDescriptorSource *)source,
+    packetAddress = allocatePacket(SDF_DESCRIPTOR_PACKET_BYTES);
+    func_0032C860((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)descriptorAddress,
                   a, b, c, d, e);
-    sdfAppendPacketRange(list, block, block + 0x80);
+    sdfAppendPacketRange(list, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
 }
 
 /* Lazily create the shared semaphore and reset this request's state. */
@@ -315,33 +380,33 @@ struct SdfPendingOwner {
 
 /* Queue an entry on the owner's pending node, adding a node or buffer chunk as needed. */
 void sdfPendingQueuePush(SdfPendingOwner *owner, u32 entry) {
-    SdfPendingNode *node;
-    SdfPendingBuffer *buffer;
-    s32 remaining;
+    SdfPendingNode *pendingNode;
+    SdfPendingBuffer *entryBuffer;
+    s32 freeEntries;
 
     if (entry != 0) {
         WaitSema(sdfPendingQueueSemaphore);
-        node = owner->pending;
-        if (node == NULL) {
-            node = (SdfPendingNode *)sdfAllocSizeClassBlock(0x10);
-            node->remaining = 0;
-            node->next = sdfPendingQueueHead;
-            node->buffer = NULL;
-            node->owner = owner;
-            owner->pending = node;
-            sdfPendingQueueHead = node;
+        pendingNode = owner->pending;
+        if (pendingNode == NULL) {
+            pendingNode = (SdfPendingNode *)sdfAllocSizeClassBlock(SDF_PENDING_NODE_BYTES);
+            pendingNode->remaining = 0;
+            pendingNode->next = sdfPendingQueueHead;
+            pendingNode->buffer = NULL;
+            pendingNode->owner = owner;
+            owner->pending = pendingNode;
+            sdfPendingQueueHead = pendingNode;
         }
-        remaining = node->remaining;
-        buffer = node->buffer;
-        if (remaining == 0) {
-            SdfPendingBuffer *fresh = (SdfPendingBuffer *)sdfAllocSizeClassBlock(0x100);
-            fresh->next = buffer;
-            node->buffer = fresh;
-            buffer = fresh;
-            remaining = 0x3F;
+        freeEntries = pendingNode->remaining;
+        entryBuffer = pendingNode->buffer;
+        if (freeEntries == 0) {
+            SdfPendingBuffer *newBuffer = (SdfPendingBuffer *)sdfAllocSizeClassBlock(SDF_PENDING_BUFFER_BYTES);
+            newBuffer->next = entryBuffer;
+            pendingNode->buffer = newBuffer;
+            entryBuffer = newBuffer;
+            freeEntries = SDF_PENDING_BUFFER_CAPACITY;
         }
-        buffer->entry[0x3F - remaining] = entry;
-        node->remaining = remaining - 1;
+        entryBuffer->entry[SDF_PENDING_BUFFER_CAPACITY - freeEntries] = entry;
+        pendingNode->remaining = freeEntries - 1;
         SignalSema(sdfPendingQueueSemaphore);
     }
 }
@@ -367,75 +432,76 @@ SdfLink *sdfDetachQueue(void) {
     return head;
 }
 
-/* Run each node's handler over its queued entries, freeing chunks and nodes. */
-void sdfPendingQueueFlush(SdfPendingNode *node) {
-    SdfPendingNode *nextNode;
-    SdfPendingBuffer *buffer;
-    SdfPendingBuffer *nextBuffer;
-    void (*handler)(u32);
-    s32 count;
-    s32 i;
+/* Flush the newest buffer's populated entries first, then older full buffers.
+ * Invoke the owner's handler in entry order within each buffer before freeing it. */
+void sdfPendingQueueFlush(SdfPendingNode *pendingNode) {
+    SdfPendingNode *nextPendingNode;
+    SdfPendingBuffer *entryBuffer;
+    SdfPendingBuffer *nextEntryBuffer;
+    void (*entryHandler)(u32);
+    s32 entryCount;
+    s32 entryIndex;
 
-    if (node != NULL) {
+    if (pendingNode != NULL) {
         do {
-            count = 0x3F - node->remaining;
-            handler = node->owner->handler;
-            buffer = node->buffer;
-            if (buffer != NULL) {
+            entryCount = SDF_PENDING_BUFFER_CAPACITY - pendingNode->remaining;
+            entryHandler = pendingNode->owner->handler;
+            entryBuffer = pendingNode->buffer;
+            if (entryBuffer != NULL) {
                 do {
-                    i = 0;
+                    entryIndex = 0;
                     do {
-                        handler(buffer->entry[i]);
-                        i++;
-                    } while (i < count);
-                    nextBuffer = buffer->next;
-                    sdfReleaseChipBlock(buffer);
-                    buffer = nextBuffer;
-                    count = 0x3F;
-                } while (buffer != NULL);
+                        entryHandler(entryBuffer->entry[entryIndex]);
+                        entryIndex++;
+                    } while (entryIndex < entryCount);
+                    nextEntryBuffer = entryBuffer->next;
+                    sdfReleaseChipBlock(entryBuffer);
+                    entryBuffer = nextEntryBuffer;
+                    entryCount = SDF_PENDING_BUFFER_CAPACITY;
+                } while (entryBuffer != NULL);
             }
-            nextNode = node->next;
-            sdfReleaseChipBlock(node);
-            node = nextNode;
-        } while (node != NULL);
+            nextPendingNode = pendingNode->next;
+            sdfReleaseChipBlock(pendingNode);
+            pendingNode = nextPendingNode;
+        } while (pendingNode != NULL);
     }
 }
 
 /* Hand the oldest pending slot to the worker, shift the slot list down and
  * refill the last slot with the newly detached list. */
 void sdfRotatePendingSlots(void) {
-    u32 i;
+    u32 slotIndex;
 
     sdfPendingQueueRotationActive = 1;
     WaitSema(sdfPendingQueueSemaphore);
     sdfPendingQueueFlush(sdfPendingQueueSlots[0]);
-    for (i = 0; i < 1; i++) {
-        sdfPendingQueueSlots[i] = sdfPendingQueueSlots[i + 1];
+    for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
+        sdfPendingQueueSlots[slotIndex] = sdfPendingQueueSlots[slotIndex + 1];
     }
-    sdfPendingQueueSlots[1] = (s32)sdfDetachQueue();
+    sdfPendingQueueSlots[SDF_PENDING_LAST_SLOT] = (s32)sdfDetachQueue();
     SignalSema(sdfPendingQueueSemaphore);
     sdfPendingQueueRotationActive = 0;
 }
 
 /* Test all three pending-work sources: flag, chain, and two slots. */
 u64 sdfGraphHasPendingWork(void) {
-    u32 i;
-    s32 *entry;
+    u32 slotIndex;
+    s32 *slotCursor;
     if (sdfPendingQueueRotationActive != 0) {
         return 1;
     }
     if (sdfPendingQueueHead != NULL) {
         return 1;
     }
-    i = 0;
-    entry = sdfPendingQueueSlots;
+    slotIndex = 0;
+    slotCursor = sdfPendingQueueSlots;
     do {
-        if (*entry != 0) {
+        if (*slotCursor != 0) {
             return 1;
         }
-        entry++;
-        i++;
-    } while (i < 2);
+        slotCursor++;
+        slotIndex++;
+    } while (slotIndex < SDF_PENDING_SLOT_COUNT);
     return 0;
 }
 
@@ -452,26 +518,26 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
     return pendingWork;
 }
 
-/* Reallocate two 0x80-aligned halves from one contiguous allocation. */
-void sdfResizeDoubleBuffer(s32 size) {
-    s32 memory;
+/* Replace both packet buffers with one allocation, rounding each half to 128 bytes. */
+void sdfResizeDoubleBuffer(s32 bufferBytes) {
+    s32 allocationAddress;
 
     if (sdfDoubleBufferAllocation != 0) {
         sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
         sdfDoubleBufferAllocation = 0;
     }
-    size = (size + 0x7F) & ~0x7F;
-    sdfPacketBufferSize = size;
-    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(size * 2);
-    memory = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
-    sdfPacketBuffers[0] = memory;
-    sdfPacketBuffers[1] = memory + size;
+    bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
+    sdfPacketBufferSize = bufferBytes;
+    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
+    allocationAddress = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
+    sdfPacketBuffers[0] = allocationAddress;
+    sdfPacketBuffers[1] = allocationAddress + bufferBytes;
 }
 
 /* Select one half and expose its bounds to the packet allocator. */
-void sdfSelectDoubleBuffer(s32 index) {
-    sdfPacketCursor = sdfPacketBuffers[index];
-    sdfPacketBufferEnd = sdfPacketBuffers[index] + sdfPacketBufferSize;
+void sdfSelectDoubleBuffer(s32 bufferIndex) {
+    sdfPacketCursor = sdfPacketBuffers[bufferIndex];
+    sdfPacketBufferEnd = sdfPacketBuffers[bufferIndex] + sdfPacketBufferSize;
 }
 
 s32 sdfGetBufferRemaining(void) {
@@ -491,8 +557,9 @@ s32 sdfGetPacketCursor(void) {
     return sdfPacketCursor;
 }
 
-void sdfSetPacketCursorAligned(s32 cursor) {
-    sdfPacketCursor = (cursor + 0xF) & ~0xF;
+/* Round a supplied byte address upward to the next quadword boundary. */
+void sdfSetPacketCursorAligned(s32 cursorAddress) {
+    sdfPacketCursor = (cursorAddress + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
 }
 
 /* Clear all links and metadata before building a new packet list. */
@@ -522,81 +589,83 @@ void sdfAppendPacket(SdfListHead *list, u32 packet) {
     list->last = packet;
 }
 
-/* Like sdfAppendPacket, but the tail points to the end of a packet range. */
-void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end) {
-    s32 last;
+/* Append a DMA range, keeping its start and trailing tag addresses distinct. */
+void sdfAppendPacketRange(SdfListHead *list, u32 packetAddress, u32 rangeTailAddress) {
+    s32 previousTailAddress;
 
-    last = list->last;
-    if (last == 0) {
-        list->first = packet;
+    previousTailAddress = list->last;
+    if (previousTailAddress == 0) {
+        list->first = packetAddress;
     }
     else {
-        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
     }
-    list->last = end;
+    list->last = rangeTailAddress;
 }
 
 /* Tag the new packet as REF and chain it into the DMA list. */
-void sdfAppendReferencePacket(SdfListHead *list, u32 packet) {
-    s32 last;
+void sdfAppendReferencePacket(SdfListHead *list, u32 packetAddress) {
+    s32 previousTailAddress;
 
-    ((SdfDmaTag *)packet)->kind = SDF_DMA_TAG_REF_BYTE;
-    last = list->last;
-    if (last == 0) {
-        list->first = packet;
+    ((SdfDmaTag *)packetAddress)->kind = SDF_DMA_TAG_REF_BYTE;
+    previousTailAddress = list->last;
+    if (previousTailAddress == 0) {
+        list->first = packetAddress;
     }
     else {
-        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
     }
-    list->last = packet + 0x10;
+    list->last = packetAddress + SDF_QWORD_BYTES;
 }
 
-void sdfAppendDmaTagToList(SdfListHead *list, u32 packet) {
-    s32 last;
+/* Append a DMA packet whose trailing tag is three quadwords after its start. */
+void sdfAppendDmaTagToList(SdfListHead *list, u32 packetAddress) {
+    s32 previousTailAddress;
 
-    last = list->last;
-    if (last == 0) {
-        list->first = packet;
+    previousTailAddress = list->last;
+    if (previousTailAddress == 0) {
+        list->first = packetAddress;
     }
     else {
-        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
     }
-    list->last = packet + 0x30;
+    list->last = packetAddress + SDF_DMA_EXTENDED_TAIL_OFFSET;
 }
 
 /* Tag the new packet as CALL and chain it into the DMA list. */
-void sdfAppendCallPacket(SdfListHead *list, u32 packet) {
-    s32 last;
+void sdfAppendCallPacket(SdfListHead *list, u32 packetAddress) {
+    s32 previousTailAddress;
 
-    ((SdfDmaTag *)packet)->kind = SDF_DMA_TAG_CALL_BYTE;
-    last = list->last;
-    if (last == 0) {
-        list->first = packet;
+    ((SdfDmaTag *)packetAddress)->kind = SDF_DMA_TAG_CALL_BYTE;
+    previousTailAddress = list->last;
+    if (previousTailAddress == 0) {
+        list->first = packetAddress;
     }
     else {
-        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
     }
-    list->last = packet + 0x10;
+    list->last = packetAddress + SDF_QWORD_BYTES;
 }
 
-void sdfPrependPacketList(SdfListHead *list, SdfListHead *item) {
-    SdfListHead *head;
+/* Prepend a nonempty packet list, connecting its DMA tail to the former first list. */
+void sdfPrependPacketList(SdfListHead *destinationList, SdfListHead *incomingList) {
+    SdfListHead *firstList;
 
-    if (item->last == 0) {
+    if (incomingList->last == 0) {
         return;
     }
-    head = (SdfListHead *)list->first;
-    if (head == NULL) {
-        list->last = (u32)item;
+    firstList = (SdfListHead *)destinationList->first;
+    if (firstList == NULL) {
+        destinationList->last = (u32)incomingList;
     } else {
-        sdfConnectPacketLists(item, head);
+        sdfConnectPacketLists(incomingList, firstList);
     }
-    item->unk0 = (u32)head;
-    list->first = (u32)item;
+    incomingList->unk0 = (u32)firstList;
+    destinationList->first = (u32)incomingList;
 }
 
 void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
@@ -661,61 +730,63 @@ next_node:
 }
 
 /* Make a REF DMA node for the payload following the source tag. */
-u32 sdfCreateReferenceDmaNode(u32 source) {
-    SdfDmaNode *node = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
-    SdfDmaTag *src = (SdfDmaTag *)source;
-    u64 tag = src->quadwordCount;
-    u32 address = ((u32)src + 0x10) & SDF_DMA_ADDRESS_MASK;
-    s64 shifted = (s64)address << 32;
+u32 sdfCreateReferenceDmaNode(u32 sourceTagAddress) {
+    SdfDmaNode *referenceNode = (SdfDmaNode *)sdfAllocPacketAligned(SDF_DMA_REFERENCE_NODE_BYTES);
+    SdfDmaTag *sourceTag = (SdfDmaTag *)sourceTagAddress;
+    u64 dmaHeader = sourceTag->quadwordCount;
+    u32 payloadAddress = ((u32)sourceTag + SDF_QWORD_BYTES) & SDF_DMA_ADDRESS_MASK;
+    s64 packedAddress = (s64)payloadAddress << 32;
 
-    tag |= 0x30000000;
-    tag |= shifted;
-    node->unk0 = tag;
-    node->unk10 = 0;
-    node->unk8 = src->vifCommands;
-    return (u32)node;
+    dmaHeader |= SDF_DMA_TAG_REF_WORD;
+    dmaHeader |= packedAddress;
+    referenceNode->unk0 = dmaHeader;
+    referenceNode->unk10 = 0;
+    referenceNode->unk8 = sourceTag->vifCommands;
+    return (u32)referenceNode;
 }
 
 /* Create a reference node and patch the preceding DMA NEXT tag to point at it. */
-s32 sdfLinkReferenceDmaNode(s32 previous, u32 source) {
-    u32 node;
+s32 sdfLinkReferenceDmaNode(s32 previousTagAddress, u32 sourceTagAddress) {
+    u32 referenceAddress;
 
-    node = sdfCreateReferenceDmaNode(source);
-    ((SdfDmaTag *)previous)->kind = SDF_DMA_TAG_NEXT_BYTE;
-    ((SdfDmaTag *)previous)->address = node & SDF_DMA_ADDRESS_MASK;
-    return node + 0x10;
+    referenceAddress = sdfCreateReferenceDmaNode(sourceTagAddress);
+    ((SdfDmaTag *)previousTagAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+    ((SdfDmaTag *)previousTagAddress)->address = referenceAddress & SDF_DMA_ADDRESS_MASK;
+    return referenceAddress + SDF_QWORD_BYTES;
 }
 
 extern s32 sdfLinkReferenceDmaNode(s32 previous, u32 source);
 
-void sdfConnectPacketLists(previous, item)
-    SdfListHead *previous;
-    SdfListHead *item;
+/* Insert differing nonzero reference sources before linking the incoming DMA chain.
+ * Zero incoming sources inherit prior state; the locals cover both source slots. */
+void sdfConnectPacketLists(previousList, incomingList)
+    SdfListHead *previousList;
+    SdfListHead *incomingList;
 {
-    u32 head = previous->last;
-    u32 source;
-    u32 pending;
+    u32 tailTagAddress = previousList->last;
+    u32 previousSource;
+    u32 incomingSource;
 
-    source = previous->firstReferenceSource;
-    pending = item->firstReferenceSource;
-    if (source != pending) {
-        if (pending != 0) {
-            head = sdfLinkReferenceDmaNode(head, pending);
+    previousSource = previousList->firstReferenceSource;
+    incomingSource = incomingList->firstReferenceSource;
+    if (previousSource != incomingSource) {
+        if (incomingSource != 0) {
+            tailTagAddress = sdfLinkReferenceDmaNode(tailTagAddress, incomingSource);
         } else {
-            item->firstReferenceSource = source;
+            incomingList->firstReferenceSource = previousSource;
         }
     }
-    source = previous->secondReferenceSource;
-    pending = item->secondReferenceSource;
-    if (source != pending) {
-        if (pending != 0) {
-            head = sdfLinkReferenceDmaNode(head, pending);
+    previousSource = previousList->secondReferenceSource;
+    incomingSource = incomingList->secondReferenceSource;
+    if (previousSource != incomingSource) {
+        if (incomingSource != 0) {
+            tailTagAddress = sdfLinkReferenceDmaNode(tailTagAddress, incomingSource);
         } else {
-            item->secondReferenceSource = source;
+            incomingList->secondReferenceSource = previousSource;
         }
     }
-    ((SdfDmaTag *)head)->kind = SDF_DMA_TAG_NEXT_BYTE;
-    ((SdfDmaTag *)head)->address = item->first & SDF_DMA_ADDRESS_MASK;
+    ((SdfDmaTag *)tailTagAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+    ((SdfDmaTag *)tailTagAddress)->address = incomingList->first & SDF_DMA_ADDRESS_MASK;
 }
 
 typedef struct SdfRefNode {
@@ -723,25 +794,25 @@ typedef struct SdfRefNode {
     u64 chain; /* 0x10: NEXT tag chaining to the previous head */
 } SdfRefNode;
 
-/* Give each pending reference (+0x14, then +0x10) its own DMA node, chained in front of the list. */
+/* Prepend the second reference, then the first: the resulting order is first, second, payload. */
 void sdfChainReferenceNodes(SdfListHead *list) {
-    SdfRefNode *node;
-    u32 address;
-    u32 source;
+    SdfRefNode *referenceNode;
+    u32 priorHeadAddress;
+    u32 sourceTagAddress;
 
-    source = list->secondReferenceSource;
-    if (source != 0) {
-        node = (SdfRefNode *)sdfCreateReferenceDmaNode(source);
-        address = list->first & 0xFFFFFFF;
-        list->first = (u32)node;
-        node->chain = ((s64)address << 32) | 0x20000000;
+    sourceTagAddress = list->secondReferenceSource;
+    if (sourceTagAddress != 0) {
+        referenceNode = (SdfRefNode *)sdfCreateReferenceDmaNode(sourceTagAddress);
+        priorHeadAddress = list->first & SDF_DMA_ADDRESS_MASK;
+        list->first = (u32)referenceNode;
+        referenceNode->chain = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
-    source = list->firstReferenceSource;
-    if (source != 0) {
-        node = (SdfRefNode *)sdfCreateReferenceDmaNode(source);
-        address = list->first & 0xFFFFFFF;
-        list->first = (u32)node;
-        node->chain = ((s64)address << 32) | 0x20000000;
+    sourceTagAddress = list->firstReferenceSource;
+    if (sourceTagAddress != 0) {
+        referenceNode = (SdfRefNode *)sdfCreateReferenceDmaNode(sourceTagAddress);
+        priorHeadAddress = list->first & SDF_DMA_ADDRESS_MASK;
+        list->first = (u32)referenceNode;
+        referenceNode->chain = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
 }
 
@@ -807,94 +878,96 @@ void sdfInitializeDmaReferenceTag(SdfPacket *packet, s32 payloadQwords) {
     s64 dmaQwords;
 
     dmaQwords = payloadQwords + 1;
-    packet->unk8 = (((dmaQwords | 0x50000000) << 32) | 0x10000000);
-    packet->unk10 = (payloadQwords | (((s64)0x10000000 << 32) | 0x8000));
+    packet->unk8 = (((dmaQwords | SDF_VIF_DIRECT_WORD) << 32) | SDF_VIF_FLUSHE_WORD);
+    packet->unk10 = (payloadQwords | (((s64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_EOP_BIT));
     packet->unk0 = dmaQwords;
-    packet->unk18 = 0xE;
+    packet->unk18 = SDF_GIF_REGISTER_AD;
 }
 
 /* Emit a GIF header, a REF tag with masked count/address, and the trailing NEXT tag. */
 void sdfBuildDmaReferenceChain(u64 *packet, u32 sourceAddress, s32 qwordCount) {
-    packet[0] = 0x10000001;
-    packet[1] = 0x5000000110000000ULL;
-    packet[2] = (u64)qwordCount | 0x1000000000008000ULL;
-    packet[3] = 0xE;
-    packet[4] = (u32)((qwordCount & SDF_DMA_QWC_MASK) | 0x30000000) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
-    packet[5] = 0x5000000100000000ULL;
-    packet[6] = 0x20000000;
+    packet[0] = SDF_DMA_CNT_ONE_WORD;
+    packet[1] = SDF_VIF_DIRECT_ONE_FLUSHE;
+    packet[2] = (u64)qwordCount | SDF_GIF_PACKED_AD_BITS;
+    packet[3] = SDF_GIF_REGISTER_AD;
+    packet[4] = (u32)((qwordCount & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
+    packet[5] = SDF_VIF_DIRECT_ONE_NOP;
+    packet[6] = SDF_DMA_TAG_NEXT_WORD;
     packet[7] = 0;
 }
 
+/* Emit FRAME/ZBUF/XYOFFSET/SCISSOR A+D pairs for the selected GS context.
+ * Register IDs are separate from their values; fieldOffset adds a half-pixel Y step. */
 void sdfBuildFrameDepthScissorPacket(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
                   s32 frameFormat, s32 depthAddress, s32 depthFormat,
-                  s32 fieldOffset, s32 context) {
-    s64 frameRegister;
-    s64 depthRegister;
-    s64 offsetRegister;
-    s64 scissorRegister;
-    s32 x;
-    s32 y;
+                  s32 fieldOffset, s32 gsContext) {
+    s64 frameRegisterId;
+    s64 depthRegisterId;
+    s64 offsetRegisterId;
+    s64 scissorRegisterId;
+    s32 xOffset;
+    s32 yOffset;
 
-    if (context == 0) {
-        frameRegister = 0x4C;
-        depthRegister = 0x4E;
-        offsetRegister = 0x18;
-        scissorRegister = 0x40;
+    if (gsContext == 0) {
+        frameRegisterId = SDF_GS_FRAME_PRIMARY;
+        depthRegisterId = SDF_GS_ZBUF_PRIMARY;
+        offsetRegisterId = SDF_GS_XYOFFSET_PRIMARY;
+        scissorRegisterId = SDF_GS_SCISSOR_PRIMARY;
     } else {
-        frameRegister = 0x4D;
-        depthRegister = 0x4F;
-        offsetRegister = 0x19;
-        scissorRegister = 0x41;
+        frameRegisterId = SDF_GS_FRAME_SECONDARY;
+        depthRegisterId = SDF_GS_ZBUF_SECONDARY;
+        offsetRegisterId = SDF_GS_XYOFFSET_SECONDARY;
+        scissorRegisterId = SDF_GS_SCISSOR_SECONDARY;
     }
-    packet[1].unk18 = scissorRegister;
-    y = (0x1000 - height) << 3;
-    x = (0x1000 - width) << 3;
+    packet[1].unk18 = scissorRegisterId;
+    yOffset = (SDF_GS_CENTER_BIAS - height) << 3;
+    xOffset = (SDF_GS_CENTER_BIAS - width) << 3;
     packet[0].unk0 = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
     if (fieldOffset != 0) {
-        y += 8;
+        yOffset += SDF_GS_FIELD_OFFSET_STEP;
     }
-    packet[0].unk8 = frameRegister;
+    packet[0].unk8 = frameRegisterId;
     packet[0].unk10 = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
-    packet[0].unk18 = depthRegister;
-    packet[1].unk8 = offsetRegister;
+    packet[0].unk18 = depthRegisterId;
+    packet[1].unk8 = offsetRegisterId;
     packet[1].unk10 = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
-    packet[1].unk0 = x | ((s64)y << 32);
+    packet[1].unk0 = xOffset | ((s64)yOffset << 32);
 }
 
 /* Encode centered viewport bounds in GS coordinate words; the last two arguments are unused. */
 void sdfBuildCenteredViewBoundsPacket(u64 *packet, s32 width, s32 height, s32 unused0, s32 unused1) {
-    u32 lowerBounds = ((0x1000 - height) << 19) | ((0x1000 - width) << 3);
-    u32 upperBounds = ((height + 0x1000) << 19) | ((width + 0x1000) << 3);
+    u32 lowerBounds = ((SDF_GS_CENTER_BIAS - height) << 19) | ((SDF_GS_CENTER_BIAS - width) << 3);
+    u32 upperBounds = ((height + SDF_GS_CENTER_BIAS) << 19) | ((width + SDF_GS_CENTER_BIAS) << 3);
 
-    packet[3] = 0;
-    packet[7] = 5;
-    packet[0] = 0x30003;
-    packet[1] = 0x47;
-    packet[2] = 6;
+    packet[3] = SDF_GS_PRIM;
+    packet[7] = SDF_GS_XYZ2;
+    packet[0] = SDF_GS_BOUNDS_TEST;
+    packet[1] = SDF_GS_TEST_PRIMARY;
+    packet[2] = SDF_GS_PRIM_SPRITE;
     packet[4] = (u64)0xFE00 << 46;
-    packet[5] = 1;
+    packet[5] = SDF_GS_RGBAQ;
     packet[6] = lowerBounds;
     packet[8] = upperBounds;
-    packet[9] = 5;
+    packet[9] = SDF_GS_XYZ2;
 }
 
 /* Seed PRMODECONT, COLCLAMP, DTHE and TEXA drawing registers. */
 void sdfInitDrawPacket(u64 *packet) {
     packet[0] = 1;
-    packet[1] = 0x1A;
+    packet[1] = SDF_GS_PRMODECONT;
     packet[2] = 1;
-    packet[3] = 0x46;
+    packet[3] = SDF_GS_COLCLAMP;
     packet[4] = 0;
-    packet[5] = 0x45;
-    packet[6] = 0x4000000080ULL;
-    packet[7] = 0x3B;
+    packet[5] = SDF_GS_DTHE;
+    packet[6] = SDF_GS_DEFAULT_TEXA;
+    packet[7] = SDF_GS_TEXA;
 }
 
 /* Build the common header and FRAME/ZBUF/XYOFFSET/SCISSOR state for one GS context. */
 void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
-                           s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 context) {
-    sdfInitializeDmaReferenceTag(packet, 5);
-    sdfBuildFrameDepthScissorPacket(packet + 1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, context);
+                           s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 gsContext) {
+    sdfInitializeDmaReferenceTag(packet, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
+    sdfBuildFrameDepthScissorPacket(packet + 1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
 /* Native VRAM range returned by sdfAllocImageBuffer; offsets match its owner unit. */
@@ -939,9 +1012,9 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     s32 frameFormat;
     s32 depthFormat;
 
-    sdfInitializeDmaReferenceTag(&packet->header, 0x15);
+    sdfInitializeDmaReferenceTag(&packet->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     frameAddress = view->buffers[bufferIndex]->address;
-    depthAddress = view->buffers[2]->address;
+    depthAddress = view->buffers[SDF_GRAPH_DEPTH_BUFFER_INDEX]->address;
     width = view->width;
     frameFormat = view->bufferFormat;
     height = view->height;
@@ -949,14 +1022,14 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     sdfBuildFrameDepthScissorPacket(packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 0);
     sdfBuildFrameDepthScissorPacket(packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 1);
     sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    packet->regs[0] = 0x517FB;
-    packet->regs[1] = 0x47;
-    packet->regs[2] = 0x44;
-    packet->regs[3] = 0x42;
-    packet->regs[4] = 0x517FB;
-    packet->regs[5] = 0x48;
-    packet->regs[6] = 0x44;
-    packet->regs[7] = 0x43;
+    packet->regs[0] = SDF_GS_SCENE_TEST;
+    packet->regs[1] = SDF_GS_TEST_PRIMARY;
+    packet->regs[2] = SDF_GS_DEFAULT_ALPHA;
+    packet->regs[3] = SDF_GS_ALPHA_PRIMARY;
+    packet->regs[4] = SDF_GS_SCENE_TEST;
+    packet->regs[5] = SDF_GS_TEST_SECONDARY;
+    packet->regs[6] = SDF_GS_DEFAULT_ALPHA;
+    packet->regs[7] = SDF_GS_ALPHA_SECONDARY;
     sdfInitDrawPacket(packet->draw);
 }
 
@@ -977,24 +1050,25 @@ extern void func_0032D898();
 
 /* Retain the render-target view and initialize the scene callback and fixed drawing state. */
 void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
-    sdfInitializeDmaReferenceTag(&node->header, 0x15);
+    sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
     node->handler = func_0032D898;
     sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    node->regs[0] = 0x517FB;
-    node->regs[1] = 0x47;
-    node->regs[2] = 0x44;
-    node->regs[3] = 0x42;
-    node->regs[4] = 0x517FB;
-    node->regs[5] = 0x48;
-    node->regs[6] = 0x44;
-    node->regs[7] = 0x43;
+    node->regs[0] = SDF_GS_SCENE_TEST;
+    node->regs[1] = SDF_GS_TEST_PRIMARY;
+    node->regs[2] = SDF_GS_DEFAULT_ALPHA;
+    node->regs[3] = SDF_GS_ALPHA_PRIMARY;
+    node->regs[4] = SDF_GS_SCENE_TEST;
+    node->regs[5] = SDF_GS_TEST_SECONDARY;
+    node->regs[6] = SDF_GS_DEFAULT_ALPHA;
+    node->regs[7] = SDF_GS_ALPHA_SECONDARY;
     sdfInitDrawPacket(node->draw);
 }
 
-void sdfAppendLinkedPacketPayload(SdfListHead *list, SdfListHead *other, u32 *node) {
-    sdfAppendLinkedPacketNode(other, node);
-    sdfAppendPacket(list, (s32)node + 0x10);
+/* Link the metadata node separately from the DMA payload one quadword later. */
+void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfListHead *linkedList, u32 *linkedNode) {
+    sdfAppendLinkedPacketNode(linkedList, linkedNode);
+    sdfAppendPacket(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
 
 void func_0032DB30(s32 source, u32 packet, s32 variant) {
@@ -1104,58 +1178,62 @@ void sdfWaitSlotReady(void) {
 }
 
 /* Allocate and initialize an empty packet list using the selected allocator. */
-s32 sdfAllocatePacketList(s32 (*allocate)(s32)) {
-    s32 (*allocator)(s32) = allocate;
-    s32 list;
+s32 sdfAllocatePacketList(s32 (*allocatorArgument)(s32)) {
+    s32 (*allocator)(s32) = allocatorArgument;
+    s32 listAddress;
 
     if (allocator == NULL) {
         allocator = sdfAllocPacketAligned;
     }
-    list = allocator(0x20);
-    sdfInitPacketList((SdfListHead *)list);
-    return list;
+    listAddress = allocator(SDF_PACKET_LIST_BYTES);
+    sdfInitPacketList((SdfListHead *)listAddress);
+    return listAddress;
 }
 
-/* Allocate a packet, initialize it with a callback, then append it. */
-void sdfAppendInitializedPacket(s32 list, void (*initialize)(s32), s32 size, s32 (*allocate)(s32)) {
-    s32 (*allocator)(s32) = allocate;
-    s32 packet;
+/* Allocate the requested packet bytes, initialize through the callback, and append. */
+void sdfAppendInitializedPacket(s32 listAddress, void (*initialize)(s32), s32 packetBytes, s32 (*allocatorArgument)(s32)) {
+    s32 (*allocator)(s32) = allocatorArgument;
+    s32 packetAddress;
 
     if (allocator == NULL) {
         allocator = sdfAllocPacketAligned;
     }
-    packet = allocator(size);
-    initialize(packet);
-    sdfAppendPacket(list, packet);
+    packetAddress = allocator(packetBytes);
+    initialize(packetAddress);
+    sdfAppendPacket(listAddress, packetAddress);
 }
+/* Set primary-context TEST and ALPHA values; 0x44 is blend data, not a register ID. */
 void sdfInitPrimaryAlphaBlendRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x717FB;
-    packet->unk8 = 0x47;
-    packet->unk10 = 0x44;
-    packet->unk18 = 0x42;
+    packet->unk0 = SDF_GS_ALPHA_TEST;
+    packet->unk8 = SDF_GS_TEST_PRIMARY;
+    packet->unk10 = SDF_GS_DEFAULT_ALPHA;
+    packet->unk18 = SDF_GS_ALPHA_PRIMARY;
 }
 
+/* Set the same TEST/ALPHA values for the secondary GS context. */
 void sdfInitSecondaryAlphaBlendRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x717FB;
-    packet->unk8 = 0x48;
-    packet->unk10 = 0x44;
-    packet->unk18 = 0x43;
+    packet->unk0 = SDF_GS_ALPHA_TEST;
+    packet->unk8 = SDF_GS_TEST_SECONDARY;
+    packet->unk10 = SDF_GS_DEFAULT_ALPHA;
+    packet->unk18 = SDF_GS_ALPHA_SECONDARY;
 }
 
+/* Transfer a GIF tag and two primary-context A+D register writes with FLUSHE/DIRECT. */
 void sdfBuildPrimaryAlphaBlendDmaPacket(SdfPacket *packet) {
     sdfInitPrimaryAlphaBlendRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+    packet->unk0 = SDF_ALPHA_DMA_QWORDS;
+    packet->unk8 = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
+    packet->unk10 = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
+    packet->unk18 = SDF_GIF_REGISTER_AD;
 }
 
+/* Transfer the corresponding secondary-context A+D pair without changing tag encoding. */
 void sdfBuildSecondaryAlphaBlendDmaPacket(SdfPacket *packet) {
     sdfInitSecondaryAlphaBlendRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+    packet->unk0 = SDF_ALPHA_DMA_QWORDS;
+    packet->unk8 = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
+    packet->unk10 = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
+    packet->unk18 = SDF_GIF_REGISTER_AD;
 }
 
 void sdfSetPrimaryTestBlendRegisters(SdfPacket *packet) {
