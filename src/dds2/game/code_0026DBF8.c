@@ -1,6 +1,25 @@
 #include "common.h"
 #include "kwln.h"
 
+#define MNU_MANTRA_DRAW_ITEM_BYTES 0x24
+#define MNU_MANTRA_DRAW_POOL_HEADER_BYTES 0xC
+#define MNU_MANTRA_DRAW_ACTIVE_FLAG 1
+#define MNU_MANTRA_DRAW_STATE_CLEAR_MASK 0xFFFFF807
+#define MNU_MANTRA_DRAW_STATE_SHIFT 3
+#define MNU_MANTRA_DRAW_STATE_START_DELAY 1
+#define MNU_MANTRA_DRAW_STATE_END_DELAY 2
+#define MNU_MANTRA_DRAW_STATE_CREATE 3
+#define MNU_MANTRA_DRAW_STATE_RUNNING 4
+#define MNU_MANTRA_DRAW_STATE_RELEASE 5
+#define MNU_MANTRA_DRAW_STATE_DEACTIVATE 6
+
+#define MNU_MANTRA_COST_TEXT_FLAGS 0xA09DC300
+#define MNU_MANTRA_COST_TEXT_BUFFER_BYTES 8
+#define MNU_MANTRA_COST_MULTI_DIGIT_X_OFFSET 0x1E0
+#define MNU_MANTRA_COST_SINGLE_DIGIT_X_OFFSET 0x1E4
+#define MNU_MANTRA_COST_TEXT_Y_OFFSET 0x173
+#define MNU_MANTRA_COST_MARKER_CODE 0x76
+
 /* Mantra-menu draw processes and their per-kind animation records.
  * Creation arguments and resulting state pointers occupy separate fields;
  * startup/exit delays bracket frame callbacks and final release. */
@@ -583,34 +602,36 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250B0);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", mnuMantraSpriteTaskName);
 
-void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 fade, s32 drawArg) {
+void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 amount, s32 drawArg) {
     char buttons[9] = {0, 'n', 's', 'o', 'q', 'p', 'r', 't', 'u'};
-    char text[8];
-    s32 drawFlags = fade | 0xA09DC300;
+    char text[MNU_MANTRA_COST_TEXT_BUFFER_BYTES];
+    s32 drawFlags = amount | MNU_MANTRA_COST_TEXT_FLAGS;
 
-    func_0026E788(x, y, depth, fade, buttons[((MantraCostRecord *)record)->iconIndex], 0, drawArg);
-    func_0026E788(x, y, depth, fade, 0x76, 0, drawArg);
+    func_0026E788(x, y, depth, amount, buttons[((MantraCostRecord *)record)->iconIndex], 0, drawArg);
+    func_0026E788(x, y, depth, amount, MNU_MANTRA_COST_MARKER_CODE, 0, drawArg);
     memset(text, 0, sizeof(text));
     func_0035C860(text, mnuMantraNumberFormat, ((MantraCostRecord *)record)->cost);
     if (strlen(text) > 1) {
-        func_00311DB0(x + 0x1E0, y + 0x173, depth, drawFlags, 0, text, 0, drawArg);
+        func_00311DB0(x + MNU_MANTRA_COST_MULTI_DIGIT_X_OFFSET, y + MNU_MANTRA_COST_TEXT_Y_OFFSET, depth, drawFlags, 0, text, 0, drawArg);
     } else {
-        func_00311DB0(x + 0x1E4, y + 0x173, depth, drawFlags, 0, text, 0, drawArg);
+        func_00311DB0(x + MNU_MANTRA_COST_SINGLE_DIGIT_X_OFFSET, y + MNU_MANTRA_COST_TEXT_Y_OFFSET, depth, drawFlags, 0, text, 0, drawArg);
     }
 }
 
-void mnuDrawMantraCostIcon(u32 unused1, u32 unused2, u32 third, u32 record,
-                   u32 position, u32 packet) {
+/* Draw the record's cost marker at the renderer origin; x/y inputs are unused in DDS2. */
+void mnuDrawMantraCostIcon(u32 unusedX, u32 unusedY, u32 depth, u32 recordAddress,
+                   u32 amount, u32 drawArg) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
-    u16 index = ((MantraCostRecord *)record)->iconIndex;
-    func_0026E788(0, 0, third, position, markers[index], 0, packet);
+    u16 index = ((MantraCostRecord *)recordAddress)->iconIndex;
+    func_0026E788(0, 0, depth, amount, markers[index], 0, drawArg);
 }
 
-void mnuDrawMantraCostIconOffset(u32 unused1, u32 unused2, u32 third, u32 record,
-                   u32 position, u32 packet) {
+/* Draw the alternate cost marker, eight codes above the base marker. */
+void mnuDrawMantraCostIconOffset(u32 unusedX, u32 unusedY, u32 depth, u32 recordAddress,
+                   u32 amount, u32 drawArg) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
-    u16 index = ((MantraCostRecord *)record)->iconIndex;
-    func_0026E788(0, 0, third, position, markers[index] + 8, 0, packet);
+    u16 index = ((MantraCostRecord *)recordAddress)->iconIndex;
+    func_0026E788(0, 0, depth, amount, markers[index] + 8, 0, drawArg);
 }
 
 extern s32 func_0026F1F0(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 index, s32 drawArg);
@@ -795,15 +816,16 @@ u32 func_0026FAC0(void) {
 void func_0026FAC8(void) {
 }
 
-u32 mnuCreateMantraDrawPool(u32 count) {
-    u32 size = count * 0x24 + 0xc;
-    u32 handle = sdfAllocGeneralBlock(size);
-    MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(handle);
-    memset(pool, 0, size);
-    pool->handle = handle;
-    pool->count = count;
-    pool->items = (MantraDrawItem *)((u8 *)pool + 0xc);
-    evtPrintDeveloperConsoleMessage("mtrDrawProcessCreate!! num[%d]\n", count);
+/* Allocate one header followed by fixed-size draw items; return the pool address word. */
+u32 mnuCreateMantraDrawPool(u32 itemCount) {
+    u32 poolBytes = itemCount * MNU_MANTRA_DRAW_ITEM_BYTES + MNU_MANTRA_DRAW_POOL_HEADER_BYTES;
+    u32 allocationHandle = sdfAllocGeneralBlock(poolBytes);
+    MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(allocationHandle);
+    memset(pool, 0, poolBytes);
+    pool->handle = allocationHandle;
+    pool->count = itemCount;
+    pool->items = (MantraDrawItem *)((u8 *)pool + MNU_MANTRA_DRAW_POOL_HEADER_BYTES);
+    evtPrintDeveloperConsoleMessage("mtrDrawProcessCreate!! num[%d]\n", itemCount);
     return (u32)pool;
 }
 
@@ -845,13 +867,13 @@ s32 mnuFindFreeMantraDrawItem(s32 address) {
 }
 
 /* Claim an inactive slot; null update/draw callbacks use the zero-return stub. */
-u32 mnuRegisterMantraDrawItem(u32 pool, u32 kind, s32 (*update)(), void (*draw)(), u32 (*create)(), void (*release)(), s16 startDelay, s16 endDelay, u32 data) {
+u32 mnuRegisterMantraDrawItem(u32 pool, u32 kind, s32 (*update)(), void (*draw)(), u32 (*create)(), void (*release)(), s16 startDelay, s16 endDelay, u32 createArg) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindFreeMantraDrawItem(pool);
 
-    memset(item, 0, 0x24);
-    item->flags |= 1;
+    memset(item, 0, MNU_MANTRA_DRAW_ITEM_BYTES);
+    item->flags |= MNU_MANTRA_DRAW_ACTIVE_FLAG;
     item->kind = kind;
-    item->createArg = data;
+    item->createArg = createArg;
     item->endDelay = endDelay;
     item->startDelay = startDelay;
     item->create = create;
@@ -867,11 +889,11 @@ u32 mnuRegisterMantraDrawItem(u32 pool, u32 kind, s32 (*update)(), void (*draw)(
     }
     item->release = release;
     if (startDelay > 0) {
-        item->flags = (item->flags & 0xFFFFF807) | 8;
+        item->flags = (item->flags & MNU_MANTRA_DRAW_STATE_CLEAR_MASK) | (MNU_MANTRA_DRAW_STATE_START_DELAY << MNU_MANTRA_DRAW_STATE_SHIFT);
     } else if (create != 0) {
-        item->flags = (item->flags & 0xFFFFF807) | 0x18;
+        item->flags = (item->flags & MNU_MANTRA_DRAW_STATE_CLEAR_MASK) | (MNU_MANTRA_DRAW_STATE_CREATE << MNU_MANTRA_DRAW_STATE_SHIFT);
     } else {
-        item->flags = (item->flags & 0xFFFFF807) | 0x20;
+        item->flags = (item->flags & MNU_MANTRA_DRAW_STATE_CLEAR_MASK) | (MNU_MANTRA_DRAW_STATE_RUNNING << MNU_MANTRA_DRAW_STATE_SHIFT);
     }
     return (u32)item;
 }
@@ -893,64 +915,64 @@ s32 mnuFindMantraDrawItemByKind(u32 address, u32 kind) {
 /* Advance every active process. Completion stays latched for later items in
  * this call; do not reset it at the start of each iteration. */
 void mnuUpdateMantraDrawPool(u8 *pool) {
-    s32 i;
-    s32 ready = 0;
-    s32 count = ((MantraDrawPool *)pool)->count;
+    s32 itemIndex;
+    s32 exitRequested = 0;
+    s32 itemCount = ((MantraDrawPool *)pool)->count;
     MantraDrawItem *item = ((MantraDrawPool *)pool)->items;
 
-    for (i = 0; i < count; i++, item = (MantraDrawItem *)((u8 *)item + 0x24)) {
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++, item = (MantraDrawItem *)((u8 *)item + MNU_MANTRA_DRAW_ITEM_BYTES)) {
         if (!item->bits.active) {
             continue;
         }
         switch (item->bits.state) {
-        case 1:
+        case MNU_MANTRA_DRAW_STATE_START_DELAY:
             item->startDelay -= 1;
             if (item->startDelay == 0) {
                 if (item->create != 0) {
-                    item->bits.state = 3;
+                    item->bits.state = MNU_MANTRA_DRAW_STATE_CREATE;
                 } else {
-                    item->bits.state = 4;
+                    item->bits.state = MNU_MANTRA_DRAW_STATE_RUNNING;
                 }
             }
             break;
-        case 2:
+        case MNU_MANTRA_DRAW_STATE_END_DELAY:
             item->endDelay -= 1;
             if (item->endDelay == 0) {
                 if (item->release != 0) {
-                    item->bits.state = 5;
+                    item->bits.state = MNU_MANTRA_DRAW_STATE_RELEASE;
                 } else {
-                    item->bits.state = 6;
+                    item->bits.state = MNU_MANTRA_DRAW_STATE_DEACTIVATE;
                 }
             }
             break;
-        case 3:
-            item->bits.state = 4;
+        case MNU_MANTRA_DRAW_STATE_CREATE:
+            item->bits.state = MNU_MANTRA_DRAW_STATE_RUNNING;
             item->data = (void *)item->create(pool, item->createArg);
             break;
-        case 4:
+        case MNU_MANTRA_DRAW_STATE_RUNNING:
             if (item->update(pool, item) == 1) {
-                ready = 1;
+                exitRequested = 1;
             }
             item->draw(pool, item);
-            if (ready != 0) {
+            if (exitRequested != 0) {
                 if (item->endDelay > 0) {
-                    item->bits.state = 2;
+                    item->bits.state = MNU_MANTRA_DRAW_STATE_END_DELAY;
                 } else {
-                    item->bits.state = 5;
+                    item->bits.state = MNU_MANTRA_DRAW_STATE_RELEASE;
                 }
             }
             break;
-        case 5:
+        case MNU_MANTRA_DRAW_STATE_RELEASE:
             if (!item->bits.released) {
                 item->release(item);
             }
             item->bits.released = 1;
             item->bits.active = 0;
             break;
-        case 6:
+        case MNU_MANTRA_DRAW_STATE_DEACTIVATE:
             item->bits.active = 0;
             break;
-        case 7:
+        case 7: /* Native no-action state; purpose is not established. */
             break;
         }
     }
