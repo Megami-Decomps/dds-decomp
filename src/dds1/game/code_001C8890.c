@@ -9590,6 +9590,13 @@ s32 sndHasActiveFileLoad(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", btlQueueUnitSoundSlotFileLoad);
 
+extern s32 mnuGetSoundBufferStateLocked(void);
+extern void mnuResetSoundBufferLocked(void);
+extern void mnuReleaseSoundBufferLocked(void);
+extern void mnuPrintTitleDebugBanner(void);
+extern void func_0026ABA8(u32, u32, s32);
+extern s32 func_003003F0(const char *, ...);
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5178);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5188);
@@ -9599,13 +9606,6 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5198);
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A51A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A51D0);
-
-extern s32 mnuGetSoundBufferStateLocked(void);
-extern void mnuResetSoundBufferLocked(void);
-extern void mnuReleaseSoundBufferLocked(void);
-extern void mnuPrintTitleDebugBanner(void);
-extern void func_0026ABA8(u32, u32, s32);
-extern s32 func_003003F0(const char *, ...);
 
 u32 func_001F41C0(SoundTaskArgs *args) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
