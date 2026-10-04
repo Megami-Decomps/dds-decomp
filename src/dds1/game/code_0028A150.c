@@ -122,7 +122,7 @@ extern u32 fileSaveReadBuffer;
 
 extern u32 D_003BD8EC;
 
-extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
@@ -644,7 +644,7 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 }
 
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    D_003BD8EC = func_00197760(x << 4, y << 3, 0, colors, text, 0);
+    D_003BD8EC = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
     frFontQueueGlyphInSelectedSlot(D_003BD8EC);
 }

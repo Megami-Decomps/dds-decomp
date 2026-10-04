@@ -292,7 +292,7 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
     mnuReleaseMenuResourceGroup(address, 0);
 }
 
-extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern s32 func_0019F6C8();
 extern void func_0019D550(s32, s32, s32);
 extern s32 frFontQueueGlyphInSelectedSlot(s32);
@@ -316,7 +316,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
     } else {
         text = D_003A47E8[slot].encodedText;
     }
-    handle = func_0019F460(gridX - 0x120, gridY, depth, value, text, 0);
+    handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
     func_0019D550(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphInSelectedSlot(handle);
 }

@@ -97,7 +97,7 @@ extern void fldRestoreCameraModelColor(void);
 extern void func_0012D528(void);
 extern void func_0012D3D8(void);
 extern void func_0012DD70(void);
-extern void func_0012E510(void);
+extern void fldUpdateCameraMoveOscillation(void);
 extern s32 fldTestSceneControlFlags(s32);
 extern u8 *dds3GetObjectOwnedHandle(s32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
@@ -217,7 +217,7 @@ extern u32 D_003BACF8;
 extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfAllocPacketAligned(s32);
 
-extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 fldBackgroundBuffer;
 extern s32 sdfAllocateBlockBySizeThreshold(u32);
@@ -1856,7 +1856,7 @@ const u8 *second;
 {
     u32 object;
 
-    object = func_00197760(x << 4, y << 4, 0, first, second, 0);
+    object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, first, second, 0);
     frFontDrawGlyphInDefaultMode(object);
     frFontQueueGlyphInSelectedSlot(object);
 }
@@ -2272,7 +2272,7 @@ typedef struct FldWorldCamera {
 
 extern void effObjSetNodeFlags(void *, s32);
 
-void func_0012E510(void) {
+void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
     f32 phase = D_003BAD20;
     FldWorldCamera *camera;
@@ -2375,7 +2375,7 @@ s32 fldUpdateCameraFollow(void) {
         fldRestoreCameraModelColor();
         if (fldGetUnselectedWorldEntry() != 0) {
             fldToggleWorldNodeState(1);
-            func_0012E510();
+            fldUpdateCameraMoveOscillation();
             fldClearCameraObjectHighlightFlag();
             return 0;
         }
@@ -4484,7 +4484,7 @@ extern void fldLoadActorWaypointTable(s32);
 struct FieldSequenceRecord;
 extern void fldInitializeLinkedSequence(struct FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
 
-void func_0013EF10(s32 mode, s32 index, u8 *sequence) {
+void fldInitializeActorLinkedSequence(s32 mode, s32 index, u8 *sequence) {
     s32 field;
     s32 motion;
     s32 kind;

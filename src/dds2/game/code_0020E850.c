@@ -438,7 +438,7 @@ extern BtlUnit *btlGetIndexListEntry(s32, u32);
 extern s32 btlCheckCommandRequiredEntryMatches(s32, s32);
 extern s32 effOffsetIfOwnerFlagClear(BtlEffActor *, s32);
 
-s16 func_0020F3B0(BattleActionLinkState *link, s32 command) {
+s16 btlGetCommandEffectId(BattleActionLinkState *link, s32 command) {
     BtlOperandGroup *result = link->groups;
     u32 i;
     u32 count = btlGetIndexListCount(link->actorIndices);

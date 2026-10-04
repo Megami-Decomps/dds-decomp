@@ -492,7 +492,7 @@ void func_00197748(void) {
 }
 
 /* Decode two-byte glyph codes before building and linking the text glyph. */
-u32 func_00197760(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 parent) {
+u32 itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 parent) {
     u8 buffer[0x400];
     s32 i;
     s32 length = strlen((const char *)text);
@@ -687,7 +687,7 @@ u32 itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
         if (segmentIndex < segment || (i >= length - 1 && count > 0)) {
             memcpy(buffer, text + start, count);
             buffer[count] = 0;
-            return func_00197760(x, y, depth, color, buffer, 0);
+            return itfCreateConvertedTextGlyph(x, y, depth, color, buffer, 0);
         }
         if (separator != 0) {
             count = 0;

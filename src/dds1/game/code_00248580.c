@@ -185,7 +185,7 @@ void mnuReleaseBothVisualResourceTextures(MenuVisualWork *work) {
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
 
-extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 /* Fixed-width text rows used by both font drawing and message substitution.
  * The font helper decodes single-byte and two-byte characters from this data. */
 typedef struct MenuTextEntry {
@@ -206,7 +206,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
     } else {
         text = D_003482A8[slot].encodedText;
     }
-    handle = func_00197760(gridX, gridY, depth, value, text, 0);
+    handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, value, text, 0);
     func_001958A0(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphInSelectedSlot(handle);
 }

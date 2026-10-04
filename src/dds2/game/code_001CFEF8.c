@@ -327,7 +327,7 @@ extern s32 btlCreateApplyToActiveActorsTask();
 
 extern s32 btlCreateFadeStateResetTask();
 
-extern void func_001B8078();
+extern void btlCreateGuidePanelTask();
 
 extern void func_001B81B0();
 
@@ -536,7 +536,7 @@ extern void btlRefreshUnitMotionSelection(u8 *);
 extern SceneEffectRequest *btlCreateEffObjC(SceneActor *, s32);
 
 /* Advance the scene after its bound actor tasks finish their preparation. */
-s32 func_001D1200(BattleSceneWork *scene) {
+s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
     s32 ready = 1;
     u32 group = scene->variant == 1 ? FLD_SCENE_ACTOR_PRIMARY_BIT : FLD_SCENE_ACTOR_SECONDARY_BIT;
     SceneLinkedNode *head = scene->linkedNodes;
@@ -648,7 +648,7 @@ s32 fldSceneStateWaitScriptRelease(BattleSceneWork *scene) {
     case 0xF000000:
         finished = 0;
         if (scene->frame == 0x14) {
-            func_001B8078(scene->scriptTarget, scene->scriptArg);
+            btlCreateGuidePanelTask(scene->scriptTarget, scene->scriptArg);
         } else if (scene->frame >= 0x2D) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_0037F531[0] < 0) {

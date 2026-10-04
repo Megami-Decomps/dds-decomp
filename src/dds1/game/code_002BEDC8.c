@@ -84,7 +84,7 @@ extern void func_002BEEA0(s32, s32, s32, s32, s32, u32 *, u32 *,
 extern void func_002BE8A8(s32, s32, s32, s32, s32, s32 *, s32,
                         s32, f32, s32, s32, u32, s32);
 
-void func_002BF198(s32 x, s32 y, s32 z, s32 color, u32 flags,
+void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
                   EffectSlotSet *set, s32 slotIndex, BdWork *draw, s32 buffer) {
     s32 colors[4];
     EffectSlotDescription *description = &set->descriptions[slotIndex];
@@ -142,10 +142,10 @@ void func_002BF198(s32 x, s32 y, s32 z, s32 color, u32 flags,
     }
 }
 void func_002BF400(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8) {
-    func_002BF198(a0, a1, a2, a6 + 0x14, a3, (EffectSlotSet *)a4, a5, (BdWork *)a6, a7);
+    effDrawTextureSlot(a0, a1, a2, a6 + 0x14, a3, (EffectSlotSet *)a4, a5, (BdWork *)a6, a7);
 }
 void func_002BF438(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7) {
-    func_002BF198(a0, a1, a2, a3, a4, (EffectSlotSet *)a5, a6,
+    effDrawTextureSlot(a0, a1, a2, a3, a4, (EffectSlotSet *)a5, a6,
                   (BdWork *)effGetSlotWorkOrOverride(a5, a6), a7);
 }
 

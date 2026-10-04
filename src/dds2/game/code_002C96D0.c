@@ -82,7 +82,7 @@ extern u32 D_00437D44;
 extern u32 D_00437D3C;
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
-extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 D_00439004;
 extern u32 D_00439008;
 
@@ -652,14 +652,14 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
 }
 
 void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
-    u32 handle = func_0019F460(x << 4, y << 3, 0, colors, text, 0);
+    u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(D_00439004);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    u32 handle = func_0019F460(x << 4, y << 3, 0, colors, text, 0);
+    u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439008 = handle;
     frFontSetChainFlag(handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);

@@ -1174,7 +1174,7 @@ extern s32 effAppendTexturedTrianglePacket(s32, s32, s32,
     s32, s32, f32, f32, s32, s32, f32, f32, s32, s32, f32, f32, s32);
 
 /* The textured cell uses the same six-triangle rim as the flat cell above. */
-void func_002127A8(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
+void btlDrawTexturedGridCell(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
     f32 widthScale = scale * 16.0f;
     f32 heightScale = scale * 8.0f;
     s32 x0;

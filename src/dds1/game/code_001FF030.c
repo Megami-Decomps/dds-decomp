@@ -3907,7 +3907,7 @@ s32 btlMapSkillRange(u32 skill) {
 }
 
 /* Restore Hariti and the children's positions, with left-side children first. */
-void func_0020ADA8(void) {
+void btlRestoreHaritiFormation(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
 
     for (; unit != NULL; unit = unit->next) {

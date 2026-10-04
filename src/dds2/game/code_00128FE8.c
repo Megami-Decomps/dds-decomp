@@ -22,7 +22,7 @@ extern s32 sdfCreateResetPacketList(void);
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern u32 fldPendingArea;
 
@@ -1934,7 +1934,7 @@ void fldSubmitBackgroundDescriptorPacket(void) {
 void func_0012DDC0(s32 x, s32 y, u32 firstPayload, const u8 *secondPayload) {
     u32 object;
 
-    object = func_0019F460(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
+    object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     frFontDrawGlyphInDefaultMode(object);
     frFontQueueGlyphInSelectedSlot(object);
 }
@@ -2320,7 +2320,7 @@ typedef struct FldWorldCamera {
 
 extern void effObjSetNodeFlags(void *, s32);
 
-void func_00130A40(void) {
+void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
     f32 phase = D_004360B0;
     FldWorldCamera *camera;
@@ -2425,7 +2425,7 @@ void fldUpdateCameraProximity(void) {
 }
 
 extern void fldRestoreSceneModelColors(void);
-extern void func_00130A40(void);
+extern void fldUpdateCameraMoveOscillation(void);
 extern void func_0012FA58(void);
 extern void func_001302A0(void);
 extern void func_0012F908(void);
@@ -2437,7 +2437,7 @@ s32 fldUpdateCameraFollow(void) {
         fldRestoreSceneModelColors();
         if (fldGetUnselectedWorldEntry() != 0) {
             fldToggleWorldNodeState(1);
-            func_00130A40();
+            fldUpdateCameraMoveOscillation();
             fldClearCameraObjectHighlightFlag();
             return 0;
         }

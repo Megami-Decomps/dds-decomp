@@ -49,7 +49,7 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
 /* Draw the two mantra-entry passes, then restore the surface's GS state. */
-void func_002573E8(MantraPulseDisplayWork *work, s32 surface) {
+void mnuDrawMantraPulseGridPasses(MantraPulseDisplayWork *work, s32 surface) {
     MantraPulseGrid *grid;
     MantraPulseEntry *entry;
     s32 row;

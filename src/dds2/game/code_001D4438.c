@@ -312,7 +312,7 @@ extern s32 btlCreateSoundReleaseTask();
 extern s32 btlCreateWaitUnitListIdleTask();
 extern s32 btlCreateApplyToActiveActorsTask();
 extern s32 btlCreateFadeStateResetTask();
-extern void func_001B8078();
+extern void btlCreateGuidePanelTask();
 extern void func_001B81B0();
 extern void fldEnableSceneGroupAdvancement(void);
 extern s8 D_0037F531[];

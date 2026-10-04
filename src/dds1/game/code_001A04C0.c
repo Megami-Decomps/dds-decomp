@@ -43,7 +43,7 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A0B28);
+INCLUDE_ASM(const s32, "game/code_001A04C0", itfDrawPulsingTestOverlay);
 
 void btlResetRuntimeSequenceCounter(void) {
     D_003BB2E8 = 1;
@@ -106,7 +106,7 @@ s32 btlUpdateBattleFieldPresentation(void) {
         btlTickFieldSwayAndTint();
         btlDispatchLinkedEffectWhenBattleGatesClear();
         btlSweepFloorModelLists();
-        func_001DA780();
+        btlUpdateActorModelColorAndLinks();
         func_0020FC48();
         func_001FB090();
         fldInitializeBattleSceneFlow();

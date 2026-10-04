@@ -58,7 +58,7 @@ extern s32 ptyGetCurrentProfileId(s32);
 
 extern s32 func_002CD240(s32, s32 *);
 
-extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern void func_00196088(s32, s32, s32);
 
@@ -1943,11 +1943,11 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuPageMotion *page, s3
         i++;
     } while (i < 2);
     if (value != 0) {
-        item = func_00197760(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
+        item = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
         func_003014F0(text, D_003BC720, *(s16 *)(datCommandRecords + evtGetIndexedEventRecordId(value) * 0x38 + 0x18));
         item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)text, item);
     } else {
-        item = func_00197760(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
+        item = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
         item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, item);
     }
     func_001958A0(item, 1, param);
@@ -2017,7 +2017,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             mnuDrawCenteredLabel(0x1120, 0x5F0, depth, texture, code, param);
             return;
         }
-        item = func_00197760(0, 0, depth, texture, (const u8 *)outValue, 0);
+        item = itfCreateConvertedTextGlyph(0, 0, depth, texture, (const u8 *)outValue, 0);
         func_00196088(0x1710, 0x5F0, item);
         func_001958A0(item, 1, param);
         frFontQueueGlyphInSelectedSlot(item);

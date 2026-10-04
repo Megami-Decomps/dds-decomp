@@ -255,7 +255,7 @@ extern s32 btlGetRuntime(void);
 
 extern u8 *datBattleSceneRecords;
 
-extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern char D_003BB450[];
 
@@ -903,7 +903,7 @@ s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
-f32 func_001A4A30(UiObject *unit, u32 index, s8 includeCharge) {
+f32 btlGetActorEntryMultiplier(UiObject *unit, u32 index, s8 includeCharge) {
     f32 factor;
     s32 stage;
 
@@ -1212,7 +1212,7 @@ typedef struct BtlTargetResult {
     BtlHitResult hits[64];
 } BtlTargetResult;
 
-s32 func_001A6570(u8 *action) {
+s32 btlSumOtherTargetHitAmounts(u8 *action) {
     BtlTargetResult *result = *(BtlTargetResult **)(action + 0x80);
     u32 count = btlGetIndexListCount(*(s32 *)(action + 0x60));
     u32 i;
@@ -2692,7 +2692,7 @@ extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern void btlSetTrackedTaskHandle(s32, s32);
 
-s32 func_001AD468(s32 arg0, s32 arg1) {
+s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     BattleController *context = (BattleController *)btlGetRuntime();
     BtlGuidePanelWork *data;
     s32 task;
@@ -2979,7 +2979,7 @@ typedef struct BattlePanelEdgeWork {
 extern f32 D_003A2450[4];
 
 /* Advance one corner toward the panel boundary before moving to the next edge. */
-s32 func_001AEE78(s32 task, BattlePanelEdgeWork *work) {
+s32 btlAdvancePanelCornerPhase(s32 task, BattlePanelEdgeWork *work) {
     f32 center[4];
 
     memcpy(center, D_003A2450, sizeof(center));
@@ -3895,7 +3895,7 @@ extern u8 *D_003BAA8C;
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
-    handle = func_00197760(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
+    handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);
@@ -3906,7 +3906,7 @@ extern u8 *D_003BAA84;
 void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
-    handle = func_00197760(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
+    handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);
@@ -3939,7 +3939,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DC8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DD8);
 
-u32 func_001BD190(s32 object, s8 mode, s8 unlimited) {
+u32 btlGetCommandOptionCount(s32 object, s8 mode, s8 unlimited) {
     s32 kind = func_001BD0D0(object, mode);
     s16 count;
 
@@ -4058,7 +4058,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x89FEFF00;
     }
     itfSetTextDrawLimit(0x13);
-    handle = func_00197760(0x1A0, 0xA60, 0xFF0010, color, text, 0);
+    handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);

@@ -352,7 +352,7 @@ extern char D_00426208[];
 extern char D_00426218[];
 
 /* Initialize the equip panel from the selected party entry and selector. */
-s32 func_00287930(void) {
+s32 mtrMantraEquipInit(void) {
     MnuStatusResource *work = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
     MnuPartySnapshot *snapshot = &work->snapshot;
     MtrEquipState *equip = &work->equip;
@@ -388,7 +388,7 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287C20);
 
 extern void func_0026C900(void);
 extern void mnuUpdateMantraDrawPool(u32 pool);
-extern void func_0026E788(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mnuDrawLoadedProgressPanels(s32, MenuProgressHost *, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, u32);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
@@ -410,8 +410,8 @@ s32 func_00288158(void) {
         ratio = (f32)work->equip.timer / 30.0f;
     }
     value = (s32)(ratio * 128.0f);
-    func_0026E788(0, 0, 0, value, 0x68, 0, 0x4A);
-    func_0026E788(0, 0, 0, value, 0x69, 0, 0x4A);
+    mnuDrawMantraSprite(0, 0, 0, value, 0x68, 0, 0x4A);
+    mnuDrawMantraSprite(0, 0, 0, value, 0x69, 0, 0x4A);
     if (mnuDrawLoadedProgressPanels((s32)&work->snapshot, work->progressHost, 0x53) != 0) {
         if (!work->flags.profileReady) {
             evtStageTestSelectEntryWithoutInitialValue(work->snapshot.rosterIndex, 0);

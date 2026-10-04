@@ -2,7 +2,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
-extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 typedef struct Vec3 {
     float x; // 0x00
@@ -23,7 +23,7 @@ extern void *sdfMemoryGetBlockAddress(u32 handle);
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
     u32 glyph;
 
-    glyph = func_00197760(gridX << 4, gridY << 3, 0, style, text, 0);
+    glyph = itfCreateConvertedTextGlyph(gridX << 4, gridY << 3, 0, style, text, 0);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
     frFontQueueGlyphInSelectedSlot(glyph);
 }

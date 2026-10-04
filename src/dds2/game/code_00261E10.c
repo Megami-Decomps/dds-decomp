@@ -811,7 +811,7 @@ extern u8 D_003CE5E8[];
 extern char D_00437848[];
 extern char D_00437850[];
 
-s32 func_00264850(s32 callbackContext) {
+s32 evtAdvancePendingRewards(s32 callbackContext) {
     char text[64];
     EvtStateTableContext *state;
     s32 *dispatchSlot;

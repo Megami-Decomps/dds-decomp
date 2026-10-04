@@ -405,7 +405,7 @@ extern void btlClearActorSelectedEntryIndex(UiObject *);
 extern void btlRefreshUnitMotionSelection(u8 *);
 extern SceneEffectRequest *btlCreateEffObjC(UiObject *, s32);
 
-s32 func_001C5910(BattleSceneWork *scene) {
+s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
     s32 ready = 1;
     u32 group = scene->variant == 1 ? FLD_SCENE_ACTOR_PRIMARY_BIT : FLD_SCENE_ACTOR_SECONDARY_BIT;
     SceneLinkedNode *head = scene->linkedNodes;
@@ -580,7 +580,7 @@ s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
     case 0xF000000:
         finished = 0;
         if (*(s32 *)(arg0 + 0x210) == 0x14) {
-            func_001AD468(*(s32 *)(arg0 + 0x4A0), *(s32 *)(arg0 + 0x220));
+            btlCreateGuidePanelTask(*(s32 *)(arg0 + 0x4A0), *(s32 *)(arg0 + 0x220));
         } else if (*(s32 *)(arg0 + 0x210) >= 0x2D) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_00324530[1] < 0) {

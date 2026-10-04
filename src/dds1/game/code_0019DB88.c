@@ -391,13 +391,13 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E048);
 
 void itfUpdateBattleDisplayAndFadeIndicator(u32 object) {
-    func_0019E130();
+    itfMesUpdatePanelFades();
     func_0019E320(object);
     func_0019E4F8(object);
     btlUpdateFadeIndicator(object);
 }
 
-void func_0019E130(UiPanel *panel) {
+void itfMesUpdatePanelFades(UiPanel *panel) {
     UiPanelPlacement *place = &panel->place;
     s32 *sprite;
     s32 transition;

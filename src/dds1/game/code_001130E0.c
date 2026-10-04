@@ -664,7 +664,7 @@ extern u8 D_00325808[];
 
 /* Submit the normal pass and the opacity-mode pass, temporarily neutralizing
  * the tint while the player is hidden. */
-s32 func_001141C0(EffectObject *obj) {
+s32 effObjSubmitTransformOpacityPasses(EffectObject *obj) {
     EffectTransformData *data;
     u32 opacityMode;
 

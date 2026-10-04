@@ -247,7 +247,7 @@ void sdfTexAcquireAlternateResourceTexture(u32 resourceAddress) {
 }
 
 /* Build one intensity byte for every source pixel. */
-void func_0032C168(SdfTex *texture) {
+void sdfTexBuildIntensityMap(SdfTex *texture) {
     s32 stride;
     s32 count;
     u8 *output;
