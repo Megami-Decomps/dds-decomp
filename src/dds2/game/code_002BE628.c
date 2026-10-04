@@ -88,7 +88,7 @@ extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
 extern void mdlProcessContextNodesAndTransforms(s32, s32);
-extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
+extern s32 ptySkillApplyFieldUseEffect(s32, u16, s32, s32);
 extern u32 ptyGetSkillNibbleState(s32, u16);
 
 extern void evtStageTestStop(void);
@@ -1741,15 +1741,84 @@ s32 mnuGetAbilityByteCategory(u16 commandId) {
     return 0;
 }
 
-void func_002C5128(u16 ability) {
+void func_002C5128(u16 ability, s32 target, BtlEntry *entry) {
     sdfApplyCommandResults(ability);
 }
 
-u32 func_002C5140(void) {
+u32 func_002C5140(s32 context, s32 ability, s32 target, BtlEntry *entry) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", ptySkillApplyFieldUseEffect);
+s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 selectedEntry) {
+    BtlEntry *entry = (BtlEntry *)selectedEntry;
+    s32 multiTarget = 0;
+    s32 applied = 0;
+    s32 mask;
+
+    if (func_002C5140(context, ability, target, entry) != 0) {
+        return 1;
+    }
+
+    if (mnuGetAbilityByteCategory(ability) == 1) {
+        mask = mnuGetMatchingPartyEntryMask((s32)entry);
+
+        if (func_0022C600(ability, mask) != 0) {
+            return 0;
+        }
+        func_002C5128(ability, target, entry);
+        mnuQueueListEntry((MenuPageWindow *)context,
+                          mnuFindMatchingPartyEntryIndex((s32)entry), 0, 0);
+    } else {
+        s32 remaining;
+        s32 entryOffset = 0;
+
+        remaining = MNU_PARTY_SLOT_COUNT - 1;
+
+        do {
+            entry = (BtlEntry *)(datGameState + MNU_PARTY_ENTRY_BASE + entryOffset);
+            entryOffset += MNU_PARTY_ENTRY_BYTES;
+            if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
+                mask = mnuGetMatchingPartyEntryMask((s32)entry);
+
+                if (func_0022C600(ability, mask) == 0) {
+                    func_002C5128(ability, target, entry);
+                    applied = 1;
+                }
+            }
+        } while (--remaining >= 0);
+
+        if (applied == 0) {
+            return 0;
+        }
+
+        {
+            s32 queueArgument = 0;
+            s32 queueOffset = 0;
+
+            remaining = MNU_PARTY_SLOT_COUNT - 1;
+            do {
+                entry = (BtlEntry *)(datGameState + MNU_PARTY_ENTRY_BASE + queueOffset);
+                queueOffset += MNU_PARTY_ENTRY_BYTES;
+                if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
+                    mnuQueueListEntry((MenuPageWindow *)context,
+                                      mnuFindMatchingPartyEntryIndex((s32)entry), 0,
+                                      queueArgument);
+                }
+                queueArgument += 3;
+            } while (--remaining >= 0);
+        }
+        multiTarget = 1;
+    }
+
+    if (mnuGetSecondaryValueIfKind2(ability) & 0x4000) {
+        sndSetSequenceVolumePan(0x17, 0x7F, 0x3F);
+    } else if (multiTarget == 0) {
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+    } else {
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+    }
+    return 1;
+}
 
 /* Test for the exact signed-byte marker one, not merely a nonzero selector byte. */
 u8 mnuIsAbilityValueMarked(u32 commandId) {

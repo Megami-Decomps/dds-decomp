@@ -19,6 +19,7 @@ orig/*/
 /.ninja_*
 /objdiff.json
 /report.json
+/report.json.raw
 /ctx.c
 /nonmatchings/
 /permuter/
