@@ -4,6 +4,21 @@
 #include "pcp_vu0.h"
 #include "fpu.h"
 
+typedef struct SceneAiEntry {
+    u8 kind;
+    u8 pad01;
+    u16 slot;
+    u8 pad04[0x158];
+} SceneAiEntry;
+
+extern SceneAiEntry *datEnemyAiRecords;
+extern s32 btlAllocAndCheck(s32);
+extern u32 btlAssignTaskResultAndArgument(s32);
+extern void btlBindActorSlot(void *, s32);
+extern s32 btlRunRandomWeightedAiTableAction(BtlTask *);
+extern s32 kwlnTaskIsRegistered(s32);
+extern void btlDebugPrintf(const char *, ...);
+extern s32 btlBossDebugPrintf(const char *, ...);
 extern u32 effMiscRandMod(void *state, u32 modulus);
 extern s64 btlStartTask(void *);
 extern void btlDispatchStateHandler(void *, s32);
@@ -65,7 +80,9 @@ typedef struct BattleController {
     s32 mode;
     u8 pad_280[0x1C];
     s32 taskParent;
-    u8 pad_2A0[0xC];
+    u8 pad_2A0[4];
+    s32 boundTask;
+    u8 pad_2A8[4];
     s32 spriteObject;
     u8 pad_2B0[0x24];
     SceneSlot slots[8];
@@ -149,7 +166,8 @@ typedef struct BtlUnit {
     u8 lookupId;
     u8 pad_11D[3];
     u32 statBits;
-    u8 pad_124[0x1A0];
+    u16 mode; /* Species/actor entry identifier used by the AI table. */
+    u8 pad_126[0x19E];
     s8 unk2C4;
     u8 pad_2C5[0x2B];
     s32 unk2F0;
@@ -1185,7 +1203,52 @@ void func_001C9C20(s32 arg0) {
     *(u32 *)(arg0 + 8) = *(u32 *)(arg0 + 8) & 0xffffff7f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlAiTaskUpdate);
+/* Bind the acting unit's AI slot once, then wait for its script task. */
+s32 btlAiTaskUpdate(BtlTask *task) {
+    BattleController *scene = (BattleController *)btlGetRuntime();
+    u16 index;
+
+    if (!(scene->flags & 0x20)) {
+        if (sndHasActiveActor() == 0) {
+            if (fldCheckSceneResourcesIdle((s32)task->unit) != 0) {
+                if (!(task->flags & 0x80)) {
+                    index = task->unit->mode;
+                    scene->boundTask = 0;
+                    if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck((s32)task) != 0) {
+                        btlAssignTaskResultAndArgument((s32)task);
+                    } else if (datEnemyAiRecords[index].slot != 0) {
+                        btlBindActorSlot(task, datEnemyAiRecords[index].slot);
+                    } else {
+                        btlRunRandomWeightedAiTableAction(task);
+                    }
+                    task->flags |= 0x80;
+                    scene->flags &= ~0x100000;
+                }
+                if (scene->boundTask == 0) {
+                    scene->flags |= 0x100000;
+                    if (btlAiCheckStatusRollEligibility(task) != 0) {
+                        btlDispatchStateHandler(task, 0xB);
+                    } else {
+                        btlDispatchStateHandler(task, 0xC);
+                    }
+                } else if (kwlnTaskIsRegistered(scene->boundTask) == 0) {
+                    if (task->result == -1) {
+                        btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
+                        btlDebugPrintf("AI script return NULL\n");
+                        btlRunRandomWeightedAiTableAction(task);
+                    }
+                    scene->flags |= 0x100000;
+                    if (btlAiCheckStatusRollEligibility(task) != 0) {
+                        btlDispatchStateHandler(task, 0xB);
+                    } else {
+                        btlDispatchStateHandler(task, 0xC);
+                    }
+                    scene->boundTask = 0;
+                }
+            }
+        }
+    }
+}
 
 void btlMarkSceneTaskAfterReset(s32 arg0) {
     func_001B83D8(arg0, 0, 0);
@@ -2962,7 +3025,6 @@ void *btlCreateImmediateCompletionTask(void) {
     return task;
 }
 
-extern s32 btlBossDebugPrintf(const char *, ...);
 
 void btlDumpTaskQueue(void) {
     s32 context = btlGetRuntime();
