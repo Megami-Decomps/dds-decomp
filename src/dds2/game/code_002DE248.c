@@ -31,10 +31,16 @@ typedef struct EffGsPacket {
     u64 registerAddress;
 } EffGsPacket;
 
+/* Kernel surface entries have a 0x20-byte stride and submit at +0x10. */
 typedef struct EffDrawSurface {
     u8 pad00[0x10];
     void (*submit)(struct EffDrawSurface *, void *);
+    u8 pad14[0xC];
 } EffDrawSurface;
+
+static inline void effSubmitSurfacePacket(EffDrawSurface *surface, void *list) {
+    surface->submit(surface, list);
+}
 
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
@@ -45,6 +51,9 @@ extern void *func_00167A10(EffPacketParams *);
 extern u32 D_003E9D80[];
 extern EffDrawSurface *D_003E9DC0[];
 extern EffDrawSurface *D_003E9F38[];
+extern u32 D_003E9BE0[];
+extern EffDrawSurface *D_003E9C28[];
+extern EffDrawSurface kwlnDrawSurfaces[];
 
 typedef struct EffectStateSnapshot {
     s128 vectors[8];
@@ -3554,7 +3563,7 @@ void effSetClassWorkScale(Matrix4 *mat, float value) {
 }
 
 
-extern u16 D_004582E0[];
+extern EffPacketParams D_004582E0[];
 
 u8 *effCreatePointSet4(u32 count) {
     s32 rows = count * 4 + 4;
@@ -3578,7 +3587,7 @@ u8 *effCreatePointSet4(u32 count) {
     set->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(set->handle, 1.0f);
     memset(D_004582E0, 0, 0x2C);
-    D_004582E0[2] = 0x4000;
+    D_004582E0[0].primitive = 0x4000;
     return (u8 *)set;
 }
 
@@ -3588,7 +3597,99 @@ void effAssetQueueRelease(s32 work) {
     sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E76C8);
+/* vu0 routine: SDK loads the supplied transform or constructs identity. */
+void func_002E76C8(u8 *work, void *matrix) {
+    EffPointSet *set = (EffPointSet *)work;
+    void *list;
+    void *setup;
+    EffGsPacket *packet;
+    s32 remaining;
+    s32 surfaceId;
+
+    if (set->color & 0xFF000000) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        if (matrix == NULL) {
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+        } else {
+            VU0_LOAD_MATRIX(matrix);
+        }
+        sdfConsAppendVuPacket(list, 0);
+        sdfConsAppendAssetPacket(list, set->handle, 0);
+        if (set->flag == 0) {
+            packet = sdfAllocPacketAligned(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x31801;
+            packet->registerAddress = 0x47;
+            sdfAppendPacket(list, packet);
+        }
+        remaining = set->rows;
+        D_004582E0[0].colors = (u32 *)set->tail;
+        D_004582E0[0].positions = (u128 *)set->buffer;
+        D_004582E0[0].unk08 = set->color;
+        D_004582E0[0].parameterCount = 12;
+        D_004582E0[0].vertexCount = 12;
+        D_004582E0[0].parameters = D_003E9BE0;
+        while (remaining >= 12) {
+            remaining -= 8;
+            sdfAppendPacket(list, func_00167A10(D_004582E0));
+            D_004582E0[0].positions += 8;
+            D_004582E0[0].colors += 8;
+        }
+        if (remaining >= 8) {
+            D_004582E0[0].parameterCount = 6;
+            D_004582E0[0].vertexCount = remaining;
+            sdfAppendPacket(list, func_00167A10(D_004582E0));
+        }
+        if (set->flag == 0) {
+            packet = sdfAllocPacketAligned(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x51801;
+            packet->registerAddress = 0x47;
+            sdfAppendPacket(list, packet);
+        }
+        if (set->type < 5) {
+            effSubmitSurfacePacket(D_003E9C28[set->type], list);
+        } else {
+            EffGsPacket *blendPacket;
+
+            surfaceId = set->type == 5 ? 51 : 56;
+            setup = sdfAllocPacketAligned(0x20);
+            sdfInitPacketList(setup);
+            blendPacket = sdfAllocPacketAligned(0x30);
+            blendPacket->registerValue = 6;
+            blendPacket->dmaTag = 2;
+            blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            blendPacket->registerList = 0xE;
+            blendPacket->registerAddress = 0x42;
+            sdfAppendPacket(setup, blendPacket);
+            effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], setup);
+            blendPacket = sdfAllocPacketAligned(0x30);
+            blendPacket->dmaTag = 2;
+            blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            blendPacket->registerList = 0xE;
+            switch (surfaceId) {
+            case 51:
+                blendPacket->registerValue = 0x44;
+                break;
+            case 56:
+                blendPacket->registerValue = 0x42;
+                break;
+            }
+            blendPacket->registerAddress = 0x42;
+            sdfAppendPacket(list, blendPacket);
+            effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
+        }
+    }
+}
 
 typedef struct EffectSlotNode54 {
     u32 count;
