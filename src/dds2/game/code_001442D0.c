@@ -144,6 +144,8 @@ extern s32 D_0039A028[];
 
 extern s32 func_0035C860(char *, const char *, ...);
 
+extern char D_00413F20[];
+
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 sdfReadNamedResource(char *resource, void *info, s32 options);
@@ -3010,7 +3012,32 @@ void fldResetViewState(void) {
     fldTargetGuideState.disabled = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001514F8);
+void func_001514F8(void) {
+    typedef struct {
+        u32 firstOffset;
+        u32 unk04;
+        u32 secondOffset;
+    } FieldCoordinateResource;
+    char directory[0x20];
+    char path[0x40];
+    FieldCoordinateResource *resource;
+    u32 base;
+    u32 first;
+    u32 second;
+    u32 third;
+
+    fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
+    func_0035C860(path, D_00413F20, directory, fldAreaState[4], fldAreaState[5] + 1);
+    D_004363C4 = sdfReadNamedResource(path, &resource, 0);
+    base = (u32)resource;
+    first = base + resource->firstOffset;
+    second = base + resource->secondOffset;
+    third = base + *(u32 *)(second + 4);
+    D_004363C8 = base;
+    D_004363CC = first;
+    D_004363D0 = second;
+    D_004363D4 = third;
+}
 
 
 void fldReleaseTargetGuideResource(void) {
@@ -3182,6 +3209,8 @@ void func_001523D0(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001523F0);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F20);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001525F0);
 
