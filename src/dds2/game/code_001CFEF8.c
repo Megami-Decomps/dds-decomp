@@ -36,7 +36,8 @@
 
 extern s32 btlGetRuntime(void);
 
-extern void btlDispatchStateHandler();
+extern void btlDispatchStateHandler(void *, s32);
+extern s64 btlStartTask(void *);
 
 extern s32 btlHasRegisteredGuidePanelTask(void);
 
@@ -159,8 +160,13 @@ typedef struct SceneFadingRecord {
 } SceneFadingRecord;
 
 typedef struct SceneLinkedNode {
-    s32 state;
-    u8 pad04[0x174];
+    u32 state;
+    u8 pad04[4];
+    u32 flags;
+    u32 options;
+    u8 pad10[8];
+    SceneActor *actor;
+    u8 pad1C[0x15C];
     struct SceneLinkedNode *next; /* 0x178: scene-linked chain */
 } SceneLinkedNode;
 
@@ -517,7 +523,108 @@ void fldAdvanceSceneGroupInitialization(BattleSceneWork *scene) {
     func_001B73E8();
 }
 
-INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D1200);
+typedef struct SceneEffectRequest {
+    u8 startKind;
+    u8 pad01[7];
+    u16 taskId;
+} SceneEffectRequest;
+
+extern void btlTickActorEntryCountdowns(u8 *);
+extern void btlResetBattleHistoryCounters(void);
+extern void btlClearActorSelectedEntryIndex(SceneActor *);
+extern void btlRefreshUnitMotionSelection(u8 *);
+extern SceneEffectRequest *btlCreateEffObjC(SceneActor *, s32);
+
+/* Advance the scene after its bound actor tasks finish their preparation. */
+s32 func_001D1200(BattleSceneWork *scene) {
+    s32 ready = 1;
+    u32 group = scene->variant == 1 ? FLD_SCENE_ACTOR_PRIMARY_BIT : FLD_SCENE_ACTOR_SECONDARY_BIT;
+    SceneLinkedNode *head = scene->linkedNodes;
+    SceneLinkedNode *node;
+    SceneActor *actor;
+
+    for (node = head; node != NULL; node = node->next) {
+        if ((node->flags & FLD_SCENE_TASK_BOUND_BIT) &&
+            (node->actor->status.words.activeFlags & FLD_SCENE_TASK_ACTIVE_BIT) &&
+            node->state >= 3) {
+            ready = 0;
+            break;
+        }
+    }
+    for (node = head; node != NULL; node = node->next) {
+        if (node->flags & FLD_SCENE_TASK_BOUND_BIT) {
+            actor = node->actor;
+            if ((actor->status.words.activeFlags & group) &&
+                (actor->status.words.activeFlags & FLD_SCENE_TASK_ACTIVE_BIT) &&
+                !(actor->status.words.activeFlags & 0xE0)) {
+                if (node->state != 2) {
+                    ready = 0;
+                }
+            }
+        }
+    }
+    if (ready && scene->frame > 16) {
+        for (node = head; node != NULL; node = node->next) {
+            if (node->flags & FLD_SCENE_TASK_BOUND_BIT) {
+                actor = node->actor;
+                if (actor->status.words.activeFlags & FLD_SCENE_TASK_ACTIVE_BIT) {
+                    if (!(actor->status.words.activeFlags & 0xE0)) {
+                        actor->status.words.activeFlags &= ~0x10U;
+                        btlTickActorEntryCountdowns((u8 *)actor);
+                        if (actor->selectionFlags & 0x322F) {
+                            btlDispatchStateHandler(node, 4);
+                        }
+                        node->options &= ~4U;
+                        if (!(actor->status.words.activeFlags & group)) {
+                            actor->status.words.stateFlags &= ~0x800000U;
+                        } else {
+                            btlResetBattleHistoryCounters();
+                            btlClearActorSelectedEntryIndex(actor);
+                            btlRefreshUnitMotionSelection((u8 *)actor);
+                        }
+                    }
+                }
+            }
+        }
+        if (scene->subFlags & FLD_SCENE_COUNTERS_ENABLED_BIT) {
+            s32 affected = 0;
+            s32 total = 0;
+            SceneActor *selected = NULL;
+            s32 message;
+            SceneEffectRequest *request;
+            u16 status;
+
+            for (actor = scene->actors; actor != NULL; actor = actor->next) {
+                if (actor->status.words.activeFlags & FLD_SCENE_TASK_ACTIVE_BIT) {
+                    if (actor->status.words.activeFlags & FLD_SCENE_ACTOR_SECONDARY_BIT) {
+                        total++;
+                        status = actor->selectionFlags & 1;
+                        if (status != 0) {
+                            affected++;
+                            selected = actor;
+                        }
+                    }
+                }
+            }
+            if (affected == 1) {
+                message = 0;
+            } else if (affected == total) {
+                message = 1;
+            } else {
+                message = 2;
+            }
+            if (affected != 0) {
+                request = btlCreateEffObjC(selected, message);
+                request->startKind = 0xA;
+                request->taskId = 0x2E;
+                btlStartTask(request);
+            }
+            scene->subFlags &= ~FLD_SCENE_COUNTERS_ENABLED_BIT;
+        }
+        return 8;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D14B0);
 
