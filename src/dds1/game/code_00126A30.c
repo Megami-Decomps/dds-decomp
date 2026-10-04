@@ -2026,7 +2026,50 @@ void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
     D_00325708.invoke(&D_00325708, quad.packetList);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C1F0);
+void func_0012C1F0(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
+    s32 color;
+    s32 angle;
+    s32 prev;
+    s32 i;
+    f32 a;
+    f32 b;
+    f32 sinA;
+    f32 cosA;
+    f32 sinB;
+    f32 cosB;
+
+    if (fade != 0) {
+        color = fade & 0xFF;
+        fldSelectDisplayBuffer(0x39);
+        func_00129900(5);
+        if (color > 0x80) {
+            color = 0x80;
+        }
+        color = 0x80 - color;
+        if (color >= 0x80) {
+            color = 0x7F;
+        }
+        if (color < 0x10) {
+            color = 0x10;
+        }
+        color = (color << 24) | 0x10101;
+        for (i = 0; i < 360; i += 10) {
+            angle = (i + 360) % 360;
+            prev = (i + 350) % 360;
+            a = (f32)angle * 3.14f / 180.0f;
+            sinA = sdfSinPoly(a) * radius;
+            cosA = sdfEvaluateCosineViaSinePhaseShift(a) * radius;
+            b = (f32)prev * 3.14f / 180.0f;
+            sinB = sdfSinPoly(b) * radius;
+            cosB = sdfEvaluateCosineViaSinePhaseShift(b) * radius;
+            fldSubmitGsTriangle(color, 0x80101010, 0x80101010,
+                                x + 0.0f, y - 2.0f, z + 0.0f,
+                                x + sinA, y - 2.0f, z + cosA,
+                                x + sinB, y - 2.0f, z + cosB);
+        }
+        func_00129900(0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C428);
 
