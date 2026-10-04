@@ -3882,16 +3882,16 @@ s32 btlIsSceneActorLimitSatisfied(s32 unused, u32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD0D0);
 
+extern s32 func_001BD0D0(s32, s8);
+extern void func_001BD2C0(s32, s16 *, s32, s32, s32);
+extern void btlBuildEligibleActorList(s32, s16 *);
+extern u8 *func_001BD708(u8 *, u16 *);
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DB0);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DC8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DD8);
-
-extern s32 func_001BD0D0(s32, s8);
-extern void func_001BD2C0(s32, s16 *, s32, s32, s32);
-extern void btlBuildEligibleActorList(s32, s16 *);
-extern u8 *func_001BD708(u8 *, u16 *);
 
 u32 func_001BD190(s32 object, s8 mode, s8 unlimited) {
     s32 kind = func_001BD0D0(object, mode);
