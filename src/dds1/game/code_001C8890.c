@@ -5939,7 +5939,29 @@ void func_001DD698(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD6A0);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD7E8);
+extern s32 func_001E2970(s32, s32);
+extern s32 func_001E2D20(s32);
+extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
+
+void func_001DD7E8(s32 actor) {
+    s32 (*callback)(s32) = *(s32 (**)(s32))(btlGetRuntime() + 0x614);
+
+    if (callback != 0 && callback(actor) != 0) {
+        return;
+    }
+
+    switch (*(u16 *)(actor + 0x10C)) {
+    case 9:
+        func_001E2970(actor, actor);
+        break;
+    case 10:
+        func_001E2D20(actor);
+        break;
+    case 11:
+        btlAdvanceCursorForUnmarkedUnit(actor, actor);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD890);
 
@@ -6699,8 +6721,6 @@ void btlClearCommandCursorAndRunAction(s32 actor) {
 }
 
 extern s32 D_0035DAF0[];
-
-extern s32 func_001E2970(s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", btlAdvanceCommandCursorOrAction);
 INCLUDE_ASM(const s32, "game/code_001C8890", btlInitCommandCursorForCategory);
