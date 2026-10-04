@@ -4,7 +4,7 @@
   "extension_vaddr": "0x0048E000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 169,
+  "expected_replacement_symbols": 168,
   "expected_shifted_replacement_symbols": 91,
   "expected_shifted_symbol_relocations": 1455,
   "expected_cross_replacement_relocations": 128,
@@ -94,7 +94,7 @@
     {
       "retail_object": "build/dds2/src/dds2/game/code_002C83F0.o",
       "object": "build/dds2/dev/code_002C83F0.o",
-      "expected_symbols": 25,
+      "expected_symbols": 24,
       "expected_shifted_symbols": 23,
       "fallback_symbols": [
         "fileManUpdate",
@@ -114,7 +114,7 @@
           "storage": "file",
           "expected_symbols": 2,
           "expected_retail_gp_references": 10,
-          "expected_gp_references": 6
+          "expected_gp_references": 0
         },
         {
           "section": ".bss",
@@ -347,7 +347,7 @@
       "new_size": "0xF20",
       "alignment": 8,
       "old_vaddr": "0x002C83F0",
-      "expected_relocations": 148,
+      "expected_relocations": 152,
       "expected_target_relocations": 114
     },
     {
