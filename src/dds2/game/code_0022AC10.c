@@ -1283,7 +1283,42 @@ s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CD60);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CE30);
+extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
+extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                                 s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 xOffset;
+    s32 yOffset;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 horizontal[4];
+    s32 vertical[4];
+
+    sdfConsCreateDrawPacket(list, kwlnHeldTextureReference, (primitive >> 9) & 1);
+    halfWidth = 0x1000;
+    halfHeight = 0x700;
+    xOffset = (s32)((f32)halfWidth * scale);
+    yOffset = (s32)((f32)halfHeight * scale);
+    horizontal[0] = halfWidth - xOffset;
+    horizontal[1] = halfWidth + xOffset;
+    vertical[0] = halfHeight - yOffset;
+    vertical[1] = halfHeight + yOffset;
+    left = horizontal[0] + 0x7000;
+    top = vertical[0] + 0x7900;
+    right = horizontal[1] + 0x7000;
+    bottom = vertical[1] + 0x7900;
+    sdfQueueTexturedQuad(list, color, primitive,
+                         left, top, 0, 0,
+                         right, top, 0x2000, 0,
+                         left, bottom, 0, 0xE00,
+                         right, bottom, 0x2000, 0xE00,
+                         depth, 0);
+}
 
 void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
     sdfBuildPacketE(packet, second, first, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,

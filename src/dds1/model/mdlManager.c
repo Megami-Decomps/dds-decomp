@@ -133,6 +133,26 @@ extern u8 D_003BBB60[];
 extern void sdfDestroyMotion(void *arg);
 extern char *strcat(char *dst, const char *src);
 
+typedef struct MdlResourceSelection {
+    u16 pathTable;
+    u16 pathIndex;
+    u32 unk4;
+} MdlResourceSelection;
+
+typedef struct MdlResourcePath {
+    u32 unk0;
+    char *path;
+    u32 unk8;
+} MdlResourcePath;
+
+typedef struct MdlResourceTable {
+    void *entries;
+    s32 count;
+} MdlResourceTable;
+
+extern MdlResourceTable D_00367900[];
+extern MdlResourceTable D_00365858[];
+
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
@@ -913,7 +933,55 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
     sdfUpdateActiveResourceListScalars(ctx->inner->resourceHandle);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218460);
+/* Copy a resource path's basename without its extension into destination. */
+void func_00218460(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
+    MdlResourceSelection *selection;
+    MdlResourcePath *pathEntry;
+    char *path;
+    char *basename;
+    s32 pathLength;
+    s32 startIndex;
+    s32 endIndex;
+    s32 copyLength;
+
+    selection = (MdlResourceSelection *)D_00367900[selectionListIndex].entries;
+    selection += selectionIndex;
+    pathEntry = (MdlResourcePath *)D_00365858[selection->pathTable].entries;
+    pathEntry += selection->pathIndex;
+    path = pathEntry->path;
+    startIndex = strlen(path);
+    pathLength = startIndex;
+    startIndex--;
+
+    while (1) {
+        basename = &path[startIndex];
+        if (*basename == '/') {
+            startIndex++;
+            basename = &path[startIndex];
+            break;
+        }
+        if (startIndex == 0) {
+            break;
+        }
+        startIndex--;
+    }
+
+    endIndex = startIndex;
+    do {
+        endIndex++;
+        if (endIndex >= pathLength) {
+            break;
+        }
+    } while (path[endIndex] != '.');
+
+    copyLength = endIndex - startIndex;
+    capacity--;
+    if (capacity < copyLength) {
+        copyLength = capacity;
+    }
+    memcpy(destination, basename, copyLength);
+    destination[copyLength] = '\0';
+}
 
 #define MDL_SENTINEL_CURRENT_BYTE 1
 #define MDL_PART_INFO_TAG 0x30424950
