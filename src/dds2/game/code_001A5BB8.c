@@ -382,7 +382,11 @@ extern SndPad D_0037F510;
 extern s32 func_001A6AB8();
 extern void itfResetBattleFadeState(s32, s32);
 
-typedef struct UiSurface { u8 pad0[0x20]; } UiSurface;
+typedef struct UiSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct UiSurface *, s32);
+    u8 pad14[0xC];
+} UiSurface;
 typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
 extern UiSurface kwlnDrawSurfaces[];
 extern UiOwnerRef *D_003B4778[];
@@ -686,7 +690,19 @@ typedef struct BtlFade {
     s16 phase;
     s16 alpha;
     s16 timer;
+    u32 unk08;
 } BtlFade;
+
+/* Both the sequence selector and fade belong to the same sound UI object. */
+typedef struct SoundUiState {
+    u8 pad00[0xC];
+    s32 depth;
+    s16 surfaceIndex;
+    u8 pad12[0x2E];
+    SndSeqSelect selection;
+    u8 pad64[0x16C];
+    BtlFade fade;
+} SoundUiState;
 
 void btlUpdateFadeIndicator(u8 *obj) {
     BtlFade *fade = (BtlFade *)(obj + 0x1D0);
@@ -742,7 +758,45 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6E88);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7120);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A74F0);
+extern u8 D_003B49F8[];
+extern u8 D_003B49E8[];
+extern s32 D_003B4A08[];
+
+/* Draw the sound selector frame, its fade layer and the expanding timer outline. */
+void func_001A74F0(SoundUiState *object) {
+    s32 bounds[4];
+    BtlFade *fade = &object->fade;
+    s32 packet;
+    s32 expansion;
+    UiSurface *surface;
+
+    bounds[0] = 0x1AA0;
+    bounds[1] = 0xC60;
+    bounds[2] = 0x1BD0;
+    bounds[3] = 0xD58;
+    packet = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    D_003B4A08[3] = 0xFF;
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->depth,
+                                  itfMesWork.allocation, 0, packet);
+    D_003B4A08[3] = fade->alpha;
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->depth,
+                                  itfMesWork.allocation, 0, packet);
+    if (fade->timer > 0) {
+        expansion = 0x80 - fade->timer;
+        bounds[0] -= expansion * 2;
+        bounds[1] -= expansion;
+        bounds[2] += expansion * 2;
+        bounds[3] += expansion;
+        D_003B4A08[3] = fade->timer;
+        itfSendTablePacket(packet, 1, 0);
+        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->depth,
+                                      itfMesWork.allocation, 0, packet);
+        itfSendTablePacket(packet, 0, 0);
+    }
+    surface = &kwlnDrawSurfaces[object->surfaceIndex];
+    surface->submit(surface, packet);
+}
 
 typedef struct SndQueueNode {
     u32 unk0;
