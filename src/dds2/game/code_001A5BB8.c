@@ -307,6 +307,7 @@ typedef struct UiPanelPlacement {
     s32 unk1C;
     s32 unk20;
     s32 unk24;
+    s32 fadeLimit;
 } UiPanelPlacement;
 typedef struct UiTexRef { u8 pad0[4]; s32 unk4; s32 unk8; s32 unkC; } UiTexRef;
 typedef struct UiPos { s32 x; s32 y; s32 unk8; UiTexRef *chain; } UiPos;
@@ -601,7 +602,73 @@ void itfUpdateBattleDisplayAndFadeIndicator(u32 arg0) {
     btlUpdateFadeIndicator(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6160);
+void func_001A6160(UiPanel *panel) {
+    UiPanelPlacement *place = &panel->place;
+    s32 *sprite;
+    s32 transition;
+
+    /* The panel fade word is at +0x38 in each sprite record. */
+    sprite = (s32 *)place->sprite;
+    transition = panel->flags & 0x300;
+    switch (transition) {
+    case 0x100:
+        sprite[14] += 24;
+        if (sprite[14] >= place->fadeLimit || panel->state == 3) {
+            sprite[14] = place->fadeLimit;
+            panel->flags = (panel->flags & ~0x307) | 0x203;
+        }
+        break;
+    case 0x300:
+        sprite[14] -= 8;
+        if (sprite[14] <= 0 || panel->state == 3) {
+            sprite[14] = 0;
+            panel->flags &= ~0x300;
+        }
+        break;
+    }
+
+    sprite = (s32 *)place->frame;
+    transition = panel->flags & 0x3000;
+    switch (transition) {
+    case 0x1000:
+        sprite[14] += 32;
+        if (sprite[14] >= 200) {
+            sprite[14] = 200;
+            panel->flags = (panel->flags & ~0x3000) | 0x2000;
+        }
+        break;
+    case 0x3000:
+        sprite[14] -= 32;
+        if (sprite[14] <= 0) {
+            sprite[14] = 0;
+            panel->flags &= ~0x3000;
+            itfPanelReleasePrimitiveResources(sprite);
+            place->frame = NULL;
+        }
+        break;
+    }
+
+    sprite = (s32 *)place->overlay;
+    transition = panel->flags & 0xC00;
+    switch (transition) {
+    case 0x400:
+        sprite[14] += 24;
+        if (sprite[14] >= place->fadeLimit) {
+            sprite[14] = place->fadeLimit;
+            panel->flags = (panel->flags & ~0xC07) | 0x803;
+        }
+        break;
+    case 0xC00:
+        sprite[14] -= 8;
+        if (sprite[14] <= 0) {
+            sprite[14] = 0;
+            panel->flags &= ~0xC00;
+            itfPanelReleasePrimitiveResources(sprite);
+            place->overlay = NULL;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6350);
 
@@ -1150,7 +1217,37 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9798);
+extern s32 D_00438F3C;
+extern UiQuadColor D_003B4D80;
+extern f32 sdfSinPoly(f32);
+extern s32 sdfCreateResetPacketList(void);
+extern void sdfAppendPacket(s32, u64 *);
+extern u64 *func_001A9580(s32, s32, s32, s32, s32, u32, u32);
+
+void func_001A9798(s32 surfaceIndex) {
+    u32 color = 0;
+    s32 alpha;
+    s32 i;
+    u8 *component;
+    s32 list;
+    UiSurface *surface;
+    f32 phase;
+
+    phase = (f32)(D_00438F3C % 4096) * (1.0f / 4096.0f);
+    phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
+    alpha = (s32)((sdfSinPoly(phase) + 1.0f) * 0.5f * D_003B4D80.alpha);
+    component = (u8 *)&D_003B4D80;
+    for (i = 0; i != 3; i++, component += 4) {
+        color |= *component << (i * 8);
+    }
+    color |= alpha << 24;
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list, btlCreateGsTestRegisterPacket(0x33001, 0));
+    sdfAppendPacket(list, btlCreateGsAlphaRegisterPacket(6, 0));
+    sdfAppendPacket(list, func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->submit(surface, list);
+}
 
 void btlResetRuntimeSequenceCounter(void) {
     D_004366E8 = 1;
@@ -2598,7 +2695,53 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AF4A0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AFF38);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0760);
+typedef struct BtlHitResult {
+    s32 amount;
+    u8 pad04[0x28];
+} BtlHitResult;
+
+typedef struct BtlTargetResult {
+    u8 hitCount;
+    u8 pad01[7];
+    u32 kind;
+    u8 pad0C[4];
+    u8 skipped;
+    u8 pad11[3];
+    u8 blocked;
+    u8 pad15[7];
+    BtlHitResult hits[32];
+} BtlTargetResult;
+
+s32 func_001B0760(u8 *action) {
+    BtlTargetResult *result = *(BtlTargetResult **)(action + 0x88);
+    u32 count = btlGetIndexListCount(*(s32 *)(action + 0x60));
+    u32 i;
+    u32 j;
+    s32 total = 0;
+
+    for (i = 0; i < count; i++, result++) {
+        if (result->skipped != 0 || result->blocked != 0) {
+            continue;
+        }
+        switch (result->kind) {
+        case 2:
+        case 4:
+        case 0x10000:
+        case 0x20000:
+        case 0x40000:
+            break;
+        default:
+            if (*(s32 *)(action + 0x18) !=
+                btlGetIndexListEntry(*(s32 *)(action + 0x60), i)) {
+                for (j = 0; j < result->hitCount; j++) {
+                    total += result->hits[j].amount;
+                }
+            }
+            break;
+        }
+    }
+    return total;
+}
 
 s32 btlTestActorStatusPredicate(u8 *unit) {
     s32 (*hook)(u8 *) = *(s32 (**)(u8 *))(btlGetRuntime() + 0x698);
