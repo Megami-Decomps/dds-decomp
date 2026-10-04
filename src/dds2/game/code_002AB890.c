@@ -225,6 +225,13 @@ extern char D_003E7488[];
 extern char D_003E74A4[];
 extern char D_003E74C0[];
 extern char D_003E7418[];
+extern s32 evtGetMessageWindowControlState(void);
+extern void func_002C1B68(s32, s32);
+extern s32 mnuGetAbilityByteCategory(u16);
+extern void mnuClearActionFlags(s32, u8 *);
+extern void mnuHandlePanelListPageJumpInput(u32, u32);
+extern char D_003E7434[];
+extern char D_003E74DC[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
 s32 mnuHandleStaffPopupSelection(u64 callback) {
@@ -384,7 +391,77 @@ u32 func_002AD0E8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AD118);
+s32 func_002AD118(u64 callback) {
+    MenuStaffContext *context;
+    MenuResourceSet *resources;
+    MenuStaffList *window;
+    MenuStaffWindow *panel;
+    MenuStaffNode *node;
+    s32 *popup;
+    s32 itemId;
+    u32 input;
+    s32 result;
+
+    context = (MenuStaffContext *)kwlnTaskGetUserValue();
+    resources = (MenuResourceSet *)context->menu;
+    popup = (s32 *)((u8 *)context + 0x54);
+    input = mnuMapPadMaskToFlags(0xC33);
+    result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
+    if (result != 0) {
+        return result;
+    }
+    if (evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    func_002C1B68((s32)((u8 *)context + 0xAA50), 0);
+    if (resources->selection == 0) {
+        if (input & 1) {
+            panel = ((MenuStaffList *)resources->windows[0])->window;
+            if (panel->panelActive != 0) {
+                node = panel->selectedNode;
+                if (node->flags == 0) {
+                    itemId = node->entryIndex;
+                    if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(itemId)) == 0) {
+                        mnuApplyResourceSelection(itemId, (s32)context);
+                    } else {
+                        mnuSetPopupEntry((s32)popup, (s32)D_003E74DC);
+                    }
+                } else {
+                    input = 0x8000;
+                }
+            } else {
+                input = 0;
+            }
+        }
+        if (input & 2) {
+            mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7434);
+        }
+    } else {
+        if (mnuIsStaffWindowReadyForItem(resources->selection & 0xFFFF, context) == 0) {
+            mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7434);
+            mnuClearActionFlags(0, (u8 *)&context->windowFlags);
+            mnuBeginWindowFadeTransition(0, (s32)context->tail);
+        } else {
+            resources->selection = 0;
+        }
+    }
+    window = (MenuStaffList *)resources->windows[0];
+    if (window != NULL) {
+        if ((input & 0x300000) == 0) {
+            func_002B9808((s32)window);
+        }
+        if (input & 0x10) {
+            mnuRetreatWindowListSelection((s32)window);
+        }
+        if (input & 0x20) {
+            mnuAdvanceWindowListSelection((s32)window);
+        }
+        mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
+        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuPlayInputSound(0, input, window->window);
+    }
+    return 0;
+}
 
 extern s32 D_00435E70;
 extern void func_002AAC70(s32, s32, s32, s32, s32, s32, s32);
