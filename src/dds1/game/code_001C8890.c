@@ -5,6 +5,8 @@
 #include "fpu.h"
 
 extern u32 effMiscRandMod(void *state, u32 modulus);
+extern s64 btlStartTask(void *);
+extern void btlDispatchStateHandler(void *, s32);
 
 typedef struct ActorEntrySlot {
     s16 code;
@@ -121,7 +123,8 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 typedef struct BtlUnit {
     u8 pad_00[0x50];
     f32 effectScale;
-    u8 pad_54[0x1C];
+    u32 baseColor;
+    u8 pad_58[0x18];
     s128 orientation;
     f32 scale;
     u32 overlayColor;
@@ -1108,18 +1111,18 @@ void func_001C9660(BtlTask *task) {
     state = fldGetSceneObjectState();
     if (state == 3 || state == 8) {
         if (btlIsSupportedCommandKind(&task->result) != 0) {
-            btlDispatchStateHandler((s32)task, 7);
+            btlDispatchStateHandler(task, 7);
         } else {
             fldSetSceneObjectAndGroupStates();
             if (btlAiCheckStatusRollEligibility(task) != 0) {
-                btlDispatchStateHandler((s32)task, 0xB);
+                btlDispatchStateHandler(task, 0xB);
             } else {
-                btlDispatchStateHandler((s32)task, 0xC);
+                btlDispatchStateHandler(task, 0xC);
             }
         }
     } else if (scene->flags & 0x8000) {
         fldSetSceneObjectAndGroupStates();
-        btlDispatchStateHandler((s32)task, 9);
+        btlDispatchStateHandler(task, 9);
     }
 }
 
@@ -1354,16 +1357,16 @@ void func_001CEA70(u8 *task) {
         *(s32 *)(actor + 0xC4), *(s32 *)(actor + 0xC8));
     model = *(u16 *)((u8 *)statusTable + 0x2A);
     effectTask = (u8 *)btlCreateEffObjB(actor, 0x7E);
-    btlStartTask((s32)effectTask);
+    btlStartTask(effectTask);
     modelTask = btlCreateModelChangeTask(actor, 0, 0x1F, model, 0x12, 1);
-    btlStartTask((s32)modelTask);
+    btlStartTask(modelTask);
 
     *(u32 *)(actor + 0x110) = (*(u32 *)(actor + 0x110) | 0x1000) & 0xEFFFFFFF;
     *(u16 *)(actor + 0x120) |= 0x1000;
     if (*(u32 *)(task + 8) & 0x10) {
-        btlDispatchStateHandler((s32)task, 0x1B);
+        btlDispatchStateHandler(task, 0x1B);
     } else {
-        btlDispatchStateHandler((s32)task, 0x1A);
+        btlDispatchStateHandler(task, 0x1A);
     }
 }
 
@@ -1419,7 +1422,6 @@ void btlCommandTaskStartEffects(u8 *task) {
     }
 }
 
-extern u64 btlStartTask(s32);
 
 u64 btlCommandTaskReturnStart(u8 *task) {
     u8 *linked = *(u8 **)(task + 0x34);
@@ -1453,10 +1455,10 @@ u64 btlCommandTaskReturnStart(u8 *task) {
     object = fldCreateSceneGroupAction(task, 0x64, 1);
     *(s32 *)(object + 0x28) = 0xF;
     *(u64 *)(object + 0x40) = *(u64 *)(*(u8 **)(task + 0x18) + 0x108);
-    btlStartTask((s32)object);
+    btlStartTask(object);
     object = func_001D9468(actor, 1);
     *(s32 *)(object + 0x28) = 0xF;
-    return btlStartTask((s32)object);
+    return btlStartTask(object);
 }
 
 extern s32 btlCountTasksByKind(u16 kind);
@@ -1469,7 +1471,6 @@ extern void fldUpdateSceneGroupTask(s32 task);
 
 extern void btlRemoveTaskFromSceneGroup(SceneTask *task);
 
-extern void btlDispatchStateHandler(s32 object, s32 state);
 
 void btlCommandTaskReturnUpdate(s32 task) {
     s32 unit = *(s32 *)(task + 0x18);
@@ -1711,14 +1712,14 @@ void btlAdvanceUnitWhenActionGateClears(u32 arg0) {
 }
 
 typedef struct BattleActionState {
-    void (*start)(s32);
-    void (*update)(s32);
-    void (*finish)(s32);
+    void (*start)(void *);
+    void (*update)(void *);
+    void (*finish)(void *);
 } BattleActionState;
 
 extern BattleActionState D_00359B28[];
 
-void btlDispatchStateHandler(s32 object, s32 kind) {
+void btlDispatchStateHandler(void *object, s32 kind) {
     ((s32 *)object)[0] = kind;
     ((s32 *)object)[4] = 0;
     D_00359B28[kind].start(object);
@@ -1742,7 +1743,7 @@ u8 *btlCreateActionSeq(void) {
         *(u8 **)(sequence + 0x16C) = 0;
     }
     *(u8 **)(context + 0x224) = sequence;
-    btlDispatchStateHandler((s32)sequence, 0);
+    btlDispatchStateHandler(sequence, 0);
     btlBossDebugPrintf(D_003A3788, sequence);
     return sequence;
 }
@@ -1822,13 +1823,13 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
     if (handler != 0) {
         s32 result = handler((s32)command, (s32)argument);
         if (result != -1) {
-            btlDispatchStateHandler((s32)command, result);
+            btlDispatchStateHandler(command, result);
             return;
         }
     }
     switch (*(s32 *)argument) {
     case 1:
-        btlDispatchStateHandler((s32)command, 0xD);
+        btlDispatchStateHandler(command, 0xD);
         break;
     case 4:
         *(s32 *)(argument + 4) = btlGetLoggedIndexedCommandItem(*(s32 *)(argument + 8));
@@ -1838,56 +1839,56 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
     case 7:
     case 8:
         if (*(s8 *)(datCommandSelectors + *(s32 *)(argument + 4) * 2 + 1) != 1) {
-            btlDispatchStateHandler((s32)command, 0xE);
+            btlDispatchStateHandler(command, 0xE);
         } else {
             if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x200) {
                 scrSetGlobalSeenBit(*(u16 *)(argument + 4));
             }
-            btlDispatchStateHandler((s32)command, 0xF);
+            btlDispatchStateHandler(command, 0xF);
         }
         break;
     case 5:
         if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x1000) {
-            btlDispatchStateHandler((s32)command, 0x10);
+            btlDispatchStateHandler(command, 0x10);
         } else {
-            btlDispatchStateHandler((s32)command, 0x11);
+            btlDispatchStateHandler(command, 0x11);
         }
         break;
     case 10:
     case 13:
     case 14:
-        btlDispatchStateHandler((s32)command, 0x13);
+        btlDispatchStateHandler(command, 0x13);
         break;
     case 9:
         if (*(u32 *)(*(s32 *)(command + 0x34) + 0x110) & 1) {
-            btlDispatchStateHandler((s32)command, 0x16);
+            btlDispatchStateHandler(command, 0x16);
         } else {
-            btlDispatchStateHandler((s32)command, 0x15);
+            btlDispatchStateHandler(command, 0x15);
         }
         break;
     case 12:
-        btlDispatchStateHandler((s32)command, 0x15);
+        btlDispatchStateHandler(command, 0x15);
         break;
     case 6: {
         u32 flags = *(u32 *)(*(s32 *)(command + 0x18) + 0x110);
         if (flags & 0x200) {
-            btlDispatchStateHandler((s32)command, 0x17);
+            btlDispatchStateHandler(command, 0x17);
         } else if (flags & 0x400) {
-            btlDispatchStateHandler((s32)command, 0x14);
+            btlDispatchStateHandler(command, 0x14);
         }
         break;
     }
     case 11:
-        btlDispatchStateHandler((s32)command, 0x14);
+        btlDispatchStateHandler(command, 0x14);
         break;
     case 15:
-        btlDispatchStateHandler((s32)command, 0x18);
+        btlDispatchStateHandler(command, 0x18);
         break;
     case 16:
-        btlDispatchStateHandler((s32)command, 0x19);
+        btlDispatchStateHandler(command, 0x19);
         break;
     case 17:
-        btlDispatchStateHandler((s32)command, 0x1F);
+        btlDispatchStateHandler(command, 0x1F);
         break;
     }
 }
@@ -2828,9 +2829,9 @@ void btlFreeTask(s32 taskAddress) {
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
-u64 btlStartTask(s32 taskAddress) {
+s64 btlStartTask(void *taskObject) {
     u64 value = btlAdvanceRuntimeSequenceCounter();
-    SoundTask *task = (SoundTask *)taskAddress;
+    SoundTask *task = taskObject;
     void (*callback)(u32) = task->onStart;
     task->flags |= 8;
     task->handle = value;
@@ -4446,9 +4447,37 @@ u8 *btlCreateUnitFadeOutTask(u8 *owner, u32 value, u32 variant) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D8E80);
+u32 func_001D8E80(u32 *arguments) {
+    BtlUnit *unit = (BtlUnit *)arguments[0];
+    u32 alpha;
 
-extern u32 func_001D8E80(u32 *);
+    if ((s32)arguments[1] == -1) {
+        unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
+        evtSetUnitRgbTransition((struct EvtUnit *)unit->ext, 0, unit->overlayColor);
+        evtSetUnitAlphaTransition((struct EvtUnit *)unit->ext, 0, unit->overlayColor);
+        btlClearUnitDefeatCandidate((u8 *)unit);
+        return 1;
+    }
+    if (arguments[2] == 0) {
+        btlFlagUnitDefeatCandidate((u8 *)unit);
+    }
+    if (arguments[1] == 0) {
+        evtSetUnitRgbTransition((struct EvtUnit *)unit->ext, 0, unit->overlayColor);
+        evtSetUnitAlphaTransition((struct EvtUnit *)unit->ext, 0,
+                                  (unit->overlayColor & 0xFFFFFF) | 0x80000000);
+    }
+    if ((s32)arguments[2] >= (s32)arguments[1]) {
+        unit->flags &= ~0x20000;
+        unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
+        return 1;
+    }
+    unit->flags |= 0x20000;
+    alpha = (u32)((f32)(s32)arguments[2] * 128.0f / (f32)(s32)arguments[1]);
+    alpha <<= 24;
+    unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
+    arguments[2]++;
+    return 0;
+}
 
 u8 *func_001D9038(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
@@ -4467,9 +4496,26 @@ u8 *func_001D9038(u8 *owner, u32 value) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D90C0);
+u32 func_001D90C0(u32 *arguments) {
+    u8 *unit = (u8 *)arguments[0];
+    u32 alpha;
 
-extern u32 func_001D90C0(u32 *);
+    if (arguments[2] == 0) {
+        btlFlagUnitDefeatCandidate(unit);
+    }
+    if ((s32)arguments[2] >= (s32)arguments[1]) {
+        *(u32 *)(unit + 0x110) &= ~0x20000;
+        *(u32 *)(unit + 0x84) = *(u32 *)(unit + 0x54) & 0xFFFFFF;
+        return 1;
+    }
+    *(u32 *)(unit + 0x110) |= 0x20000;
+    alpha = (u32)((1.0f - (f32)(s32)arguments[2] / (f32)(s32)arguments[1]) * 128.0f);
+    alpha <<= 24;
+    *(u32 *)(unit + 0x84) = alpha | (*(u32 *)(unit + 0x54) & 0xFFFFFF);
+    arguments[2]++;
+    return 0;
+}
+
 
 u8 *func_001D91E0(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
@@ -4924,7 +4970,43 @@ u8 *btlCreateActorModelBlendTask(u8 *actor, u32 target, u32 index, u32 value, f3
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DA468);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DA780);
+void func_001DA780(void) {
+    BtlUnit *unit = ((BtlActorWork *)btlGetRuntime())->actorList;
+    s32 color;
+
+    for (; unit != 0; unit = unit->nextActor) {
+        if (unit->flags & 2) {
+            unit->unkEC = mdlGetNodeField2C(*(s32 *)(unit->ext + 0x8C), 0);
+            if (!(unit->flags & 0x40000)) {
+                if (unit->flags & 0x100000) {
+                    color = mdlGetBroadcastValue(*(s32 *)(unit->ext + 0x8C));
+                    unit->overlayColor = color;
+                    if ((color & 0xFF000000) == 0x80000000) {
+                        btlFlagUnitDefeatCandidate((u8 *)unit);
+                        unit->flags &= ~0x100000;
+                    }
+                } else if (unit->flags & 0x200000) {
+                    color = mdlGetBroadcastValue(*(s32 *)(unit->ext + 0x8C));
+                    unit->overlayColor = color;
+                    if ((color & 0xFF000000) == 0) {
+                        if (!(unit->flags & 0xC0)) {
+                            btlClearUnitDefeatCandidate((u8 *)unit);
+                        }
+                        unit->flags &= ~0x200000;
+                    }
+                }
+                if (unit->flags & 0x10000) {
+                    func_001D6FB0(unit);
+                } else {
+                    btlUpdateUnitTransparency(unit);
+                }
+            }
+            func_001F2818(unit->resourceLink);
+            func_001F2C00(unit->link);
+            func_001FC998(unit);
+        }
+    }
+}
 
 void btlResetUnitLinks(u8 *actor) {
     *(s32 *)(actor + 0x2F0) = -1;
@@ -6244,7 +6326,7 @@ void func_001DD4A8(void) {
 void func_001DD4B0(void) {
 }
 
-extern s32 func_001E4578(void *unit, f32 *pose, u8 *out);
+extern void func_001E4578(void *unit, f32 *pose, u8 *out);
 extern void func_001E4708(void *unit, f32 *pose, u8 *out);
 extern s32 func_001E4720(void *unit, f32 *pose, u8 *out);
 
@@ -6866,7 +6948,39 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E3E58);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4180);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4578);
+/* vu0 routine: measure camera clearance from the actor's adjusted muzzle position. */
+void func_001E4578(void *unit, f32 *pose, u8 *out) {
+    BtlUnit *actor = ((BtlActorWork *)btlGetRuntime())->actorList;
+    f32 *target = (f32 *)out;
+    f32 span;
+    f32 distance;
+
+    for (; actor != 0; actor = actor->nextActor) {
+        s32 flags = actor->flags;
+        if (!(flags & 1)) {
+            continue;
+        }
+        if (flags & 0x200) {
+            break;
+        }
+    }
+    func_001DF358((s32)unit, (s32)out);
+    btlCopyMotionTransform((u8 *)pose, out);
+    span = func_001F66D8(0x200, 0, 0) * 0.5f;
+    pose[0] -= span;
+    target[0] += span;
+    target[8] *= 0.8f;
+    btlUnitGetMuzzlePosVU(actor);
+    VU0_SET_VF10_COMPONENT(y, -btlUnitGetTopY(actor));
+    VU0_LOAD_VF(vf11, out);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    distance += (actor->cameraRadius * actor->scale * 2.0f) /
+                func_002FA148(target[9] * 0.5f);
+    if (target[8] < distance) {
+        target[8] = distance;
+    }
+}
 
 extern void btlPrepareUnitPoseWithTiltRotation();
 
@@ -9797,7 +9911,50 @@ void btlOrientFrontAndBackUnitsTowardTargets(BattleActionLinkState *link, BtlUni
     }
     btlUnitFaceTarget((u8 *)back, (u8 *)front);
 }
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F5B50);
+/* vu0 routine: measure the center actor's displacement from its sole target. */
+void func_001F5B50(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+    BtlUnit *slot[3];
+    f32 position[4];
+    f32 targetPosition[4];
+    u8 *runtime;
+    BtlUnit *target;
+    f32 offsetX;
+    f32 offsetZ;
+    u32 i;
+
+    runtime = (u8 *)btlGetRuntime();
+    if (btlGetIndexListCount(link->actorIndices) == 1) {
+        target = (BtlUnit *)btlGetIndexListEntry(link->actorIndices, 0);
+        btlFlagAllUnitsDefeatCandidate();
+        btlClearMatchingUnitDefeatCandidates(target->flags & 0x600);
+        btlFlagUnitDefeatCandidate((u8 *)target);
+        slot[0] = NULL;
+        slot[1] = NULL;
+        slot[2] = NULL;
+        slot[link->unit->lookupId] = link->unit;
+        slot[first->lookupId] = first;
+        slot[second->lookupId] = second;
+        btlUnitGetMuzzlePosVU(slot[1]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlUnitGetMuzzlePosVU(target);
+        VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
+        VU0_LOAD_VF(vf11, position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_GET_VF10_X(offsetX);
+        targetPosition[2] -= target->reach * target->scale;
+        offsetZ = -(500.0f - (targetPosition[2] - position[2]));
+        if (*(u32 *)(runtime + 0x1F8) & 0x200) {
+            offsetZ = 0.0f;
+        }
+        for (i = 0; i < 3; i++) {
+            func_001D6300((u8 *)slot[i], position);
+            position[0] += offsetX;
+            position[2] += offsetZ;
+            btlSetUnitPosition((u8 *)slot[i], position);
+            btlUnitFaceTarget((u8 *)slot[i], (u8 *)target);
+        }
+    }
+}
 
 void func_001F5D00(void) {
 }
