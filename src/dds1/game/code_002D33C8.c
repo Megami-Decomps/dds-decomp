@@ -1275,7 +1275,25 @@ void sdfInitializeTextureFlushPacket(SdfPacket *packet) {
     packet->unk18 = 0xE;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5A68);
+/* Emit the four A+D registers controlling an image transfer. */
+void func_002D5A68(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
+                  s64 destinationFormat, s64 destinationX, s64 destinationY,
+                  u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
+                  s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection) {
+    packet[0].unk0 = (destinationFormat << 56) |
+        ((u64)(destinationBufferWidth >> 6) << 48) |
+        ((u64)(destinationBufferAddress >> 6) << 32) |
+        (sourceFormat << 24) | ((sourceBufferWidth >> 6) << 16) |
+        (sourceBufferAddress >> 6);
+    packet[0].unk8 = 0x50;
+    packet[0].unk10 = (destinationY << 48) | (destinationX << 32) |
+        (sourceY << 16) | sourceX;
+    packet[0].unk18 = 0x51;
+    packet[1].unk0 = transferWidth | ((u64)transferHeight << 32);
+    packet[1].unk8 = 0x52;
+    packet[1].unk10 = transferDirection;
+    packet[1].unk18 = 0x53;
+}
 
 /* Wrap BITBLTBUF, TRXPOS, TRXREG and TRXDIR image-transfer settings in a DMA/GIF header. */
 void sdfInitializeExtendedDrawPacket(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
@@ -1773,13 +1791,15 @@ typedef struct SdfFreeRoot {
     void *workspace;       /* 0x30 */
 } SdfFreeRoot;
 
-void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
-    u32 workspace;
+/* Return the root's workspace, allocating it on first use. */
+void *sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
+    void *workspace = root->workspace;
 
-    if (root->workspace == NULL) {
-        workspace = sdfAllocSizeClassBlock(0x100);
-        root->workspace = (void *)workspace;
+    if (workspace == NULL) {
+        workspace = (void *)sdfAllocSizeClassBlock(0x100);
+        root->workspace = workspace;
     }
+    return workspace;
 }
 
 extern void sdfReleaseResourceAllocation(s32 allocation);

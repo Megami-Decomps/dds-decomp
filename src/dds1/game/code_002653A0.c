@@ -108,6 +108,8 @@ typedef struct BrsExpUnit {
     u16 flags;          /* 0x00: bit 1 means active party member */
     u8 pad02[0xC];
     u16 apStatus;       /* 0x0E: bit 6 prevents AP gain */
+    u8 pad10[0x45];
+    s8 profileId;
 } BrsExpUnit;
 
 s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
@@ -294,7 +296,45 @@ s32 btlAddBaseStats(u8 *src, u8 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyAccumulateStatGains);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", ptyBuildProfileCapSkillList);
+typedef struct PrfSkillList {
+    u32 flags[8];
+    u32 count;
+    u16 skills[8];
+} PrfSkillList;
+
+extern void scrClearFlags(ScrVmOperand *);
+extern s32 scrSetFlag(ScrVmOperand *, u16);
+extern void scrSetSecondaryScriptFlag(ScrVmOperand *, u16);
+
+/* Apply the capped profile's pending skills and return their list to the caller. */
+u32 ptyBuildProfileCapSkillList(u32 unitAddress, s32 outputAddress) {
+    PrfSkillList skills;
+    ScrVmOperand *unit = (ScrVmOperand *)unitAddress;
+    s32 *profile;
+    u32 count = 0;
+    u32 i;
+
+    memset(&skills, 0, sizeof(skills));
+    profile = (s32 *)ptyGetCurrentProfileRecord(unit);
+    if (((BrsExpUnit *)unit)->profileId != 0) {
+        if (prfGetCapValue((u16)((BrsExpUnit *)unit)->profileId) == *profile) {
+            if (ptyTestProfileFlag0((s32)unit, (u16)((BrsExpUnit *)unit)->profileId) == 0) {
+                prfBuildSkillListState0(unitAddress, (u32)profile, (u32)&skills);
+                count = skills.count;
+                if (count != 0) {
+                    scrClearFlags(unit);
+                    for (i = 0; i < skills.count; i++) {
+                        u16 skill = skills.skills[i];
+                        scrSetFlag(unit, skill);
+                        scrSetSecondaryScriptFlag(unit, skill);
+                    }
+                }
+            }
+        }
+    }
+    *(PrfSkillList *)outputAddress = skills;
+    return count;
+}
 
 void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u32 fourth) {
     memset(state, 0, 0x10);

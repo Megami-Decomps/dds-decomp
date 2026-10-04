@@ -1,4 +1,4 @@
-#include "common.h"
+#include "itf.h"
 #include "fpu.h"
 
 extern s32 func_00309638(u32);
@@ -30,13 +30,6 @@ typedef struct GridQuantizedEntry {
     s32 width;
     s32 height;
 } GridQuantizedEntry;
-
-typedef struct GridEntryStorage {
-    u8 pad00[0x10];
-    u8 *quantizedEntries; /* 0x10: 0x80 bytes per entry */
-    u8 pad14[4];
-    u8 *renderEntries;     /* 0x18: 0xA0 bytes per entry */
-} GridEntryStorage;
 
 typedef struct GridScrollRange {
     u32 reserved;
@@ -185,7 +178,7 @@ void itfSetGridEntryQuantizedAndRefresh(GridEntryStorage *object, s32 index, s32
 void itfGridSetQuantizedBounds(GridEntryStorage *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->quantizedEntries + index * 0x80);
-    u32 *destination = (u32 *)(object->renderEntries + index * 0xA0 + 0x6C);
+    u32 *destination = (u32 *)object->renderEntries[index].quantizedBounds;
     u32 *source;
     s32 remaining = 3;
     entry->x = x >> 4;

@@ -785,13 +785,13 @@ s32 prfBuildSkillList(ScriptFlagWork *unit, u32 unusedProfile, PrfSkillList *out
     return compactedList.count;
 }
 
-/* Build the stored selection's list without flagged skills; the explicit ID is ignored. */
-void prfBuildSkillListState0(unit, unusedProfile, output)
+/* Return the selected profile's skill count without flagged skills; the explicit ID is ignored. */
+s32 prfBuildSkillListState0(unit, unusedProfile, output)
 s32 unit;
 s32 unusedProfile;
 s32 output;
 {
-    prfBuildSkillList((ScriptFlagWork *)unit, unusedProfile, (PrfSkillList *)output, 0);
+    return prfBuildSkillList((ScriptFlagWork *)unit, unusedProfile, (PrfSkillList *)output, 0);
 }
 
 /* The +8 threshold is compared with counts or a global counter. */

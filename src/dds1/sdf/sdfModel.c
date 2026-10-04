@@ -14,7 +14,7 @@ extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(void);
-extern void sdfEnsureFreeRootWorkspace(void *arg0);
+extern void *sdfEnsureFreeRootWorkspace(void *arg0);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_002D86E0(void *arg0, void *arg1);
 extern void sdfMultiplyVuMatrixInPlace(void);

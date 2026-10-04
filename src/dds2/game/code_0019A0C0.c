@@ -66,9 +66,10 @@ typedef struct EffVert {
 
 extern void func_0019AB08(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 
-extern void *sdfAllocGeneralBlock(s32 arg0);
+typedef struct SdfMemBlock SdfMemBlock;
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 arg0);
 
-extern void *sdfResourceRetainAddress(void *arg0);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *arg0);
 
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 
@@ -135,7 +136,7 @@ extern void effParamWorkInvokeCallback(void *param);
 EffChanWork *effChanWorkCreate(EffChanSource *source) {
     u32 recordCount = source->head.count;
     void *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
-    EffChanWork *work = sdfResourceRetainAddress(allocationHandle);
+    EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocationHandle);
     EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
     void *parameterTemplate;
     s32 delayModulus;
@@ -391,7 +392,42 @@ void effFillRandRecords(EffEmit *emitter) {
     } while (recordIndex < recordCount);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019A900);
+extern void effBuildAndDispatch(EffPrim *, s32);
+
+EffPrim *func_0019A900(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
+    SdfMemBlock *primaryResource = sdfAllocGeneralBlock(0x2C);
+    f32 step = EFF_CHANNEL_DEFAULT_STEP;
+    EffPrim *primitive = (EffPrim *)sdfResourceRetainAddress(primaryResource);
+    SdfMemBlock *coefficientResource;
+    f32 (*coefficients)[EFF_CURVE_COMPONENT_COUNT];
+
+    primitive->primaryResource = primaryResource;
+    primitive->recordCount = recordCount;
+    primitive->unk10 = (s32)keys;
+    primitive->cursorIndex = 0;
+    primitive->cursorPosition = 0.0f;
+    primitive->cursorStep = step;
+    if (recordCount < 3) {
+        primitive->unk14 = NULL;
+        primitive->unkC = 1;
+    } else {
+        coefficientResource = sdfAllocGeneralBlock(recordCount * 36);
+        coefficients = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])sdfResourceRetainAddress(coefficientResource);
+        primitive->primaryResource = primaryResource;
+        primitive->secondaryResource = coefficientResource;
+        primitive->unkC = EFF_PRIMITIVE_CUBIC_MODE;
+        primitive->recordCount = recordCount;
+        primitive->unk10 = (s32)keys;
+        primitive->unk14 = coefficients;
+        primitive->unk18 = coefficients + recordCount;
+        primitive->unk1C = coefficients + recordCount * 2;
+        primitive->cursorIndex = 0;
+        primitive->cursorPosition = 0.0f;
+        primitive->cursorStep = step;
+        effBuildAndDispatch(primitive, flattenEqualComponents);
+    }
+    return primitive;
+}
 
 /* Release the optional coefficient allocation, then the primary buffer; do not free or clear the object. */
 void effFreeBuffers(EffPrim *primitive) {
@@ -494,7 +530,7 @@ void effSetPrimitiveRecordCursorStep(EffPrim *primitive, f32 step) {
 /* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
 void effBuildAndDispatch(EffPrim *primitive, s32 flattenEqualComponents) {
     void *allocation = sdfAllocGeneralBlock(primitive->recordCount * EFF_CURVE_POINT_BYTES);
-    void *tangentData = sdfResourceRetainAddress(allocation);
+    void *tangentData = (void *)sdfResourceRetainAddress(allocation);
 
     func_0019AE18(tangentData, primitive->unk10, primitive->recordCount);
     if (flattenEqualComponents == 0) {
@@ -507,7 +543,38 @@ void effBuildAndDispatch(EffPrim *primitive, s32 flattenEqualComponents) {
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AFA0);
+/* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
+void func_0019AFA0(f32 *solution, f32 *rhs, s32 count) {
+    s32 byteCount = count * sizeof(f32);
+    void *allocation = sdfAllocGeneralBlock(byteCount);
+    f32 *upper;
+    s32 i;
+    f32 denominator;
+    f32 *upperEnd;
+    f32 *solutionEnd;
+    f32 *rhsEnd;
+
+    count -= 2;
+    upper = (f32 *)sdfResourceRetainAddress(allocation);
+    denominator = 2.0f;
+
+    solution[0] = rhs[0] / denominator;
+    for (i = 1; i <= count; i++) {
+        upper[i] = 1.0f / denominator;
+        denominator = 4.0f - upper[i];
+        solution[i] = (rhs[i] - solution[i - 1]) / denominator;
+    }
+    upperEnd = (f32 *)((u8 *)upper + byteCount);
+    solutionEnd = (f32 *)((u8 *)solution + byteCount);
+    rhsEnd = (f32 *)((u8 *)rhs + byteCount);
+    upperEnd[-1] = 1.0f / denominator;
+    denominator = 2.0f - upperEnd[-1];
+    solutionEnd[-1] = (rhsEnd[-1] - solutionEnd[-2]) / denominator;
+    for (i = count; i >= 0; i--) {
+        solution[i] -= upper[i + 1] * solution[i + 1];
+    }
+    sdfReleaseResourceAllocation(allocation);
+}
 
 /* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
 void func_0019B120(EffPrim *primitive, f32 *tangents) {
@@ -575,7 +642,7 @@ void *effCreateChannel(void *rows, u32 recordCount) {
         return channel;
     }
     allocation = sdfAllocGeneralBlock(EFF_CHANNEL_BYTES);
-    channel = sdfResourceRetainAddress(allocation);
+    channel = (void *)sdfResourceRetainAddress(allocation);
     channelObject = channel;
     channelObject->unk0 = allocation;
     channelObject->cursorStep = EFF_CHANNEL_DEFAULT_STEP;
