@@ -571,7 +571,58 @@ s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E788);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E998);
+typedef struct MnuSpriteWork {
+    u8 pad00[0xC];
+    s32 width;
+    s32 height;
+    u8 pad14[0x10];
+    f32 rotation;
+    u8 pad28[0x54];
+    s32 nativeWidth;
+    s32 nativeHeight;
+    u8 pad84[0x1C];
+} MnuSpriteWork;
+
+typedef struct MnuSpriteResource {
+    u8 pad00[0x18];
+    MnuSpriteWork *sprites;
+} MnuSpriteResource;
+
+extern s32 D_003CE9D0[][4];
+extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
+
+void func_0026E998(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context, f32 scale, f32 rotation) {
+    s32 width;
+    s32 height;
+
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
+    width = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].width =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth) << 4;
+    height = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].height =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
+    func_00306CD0(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
+                  ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
+                  z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
+                  D_003CE9D0[placementIndex][1], context);
+    /* Reload the slot after drawing before restoring its native dimensions. */
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].rotation = 0.0f;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].width =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth << 4;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].height =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EBA8);
 
