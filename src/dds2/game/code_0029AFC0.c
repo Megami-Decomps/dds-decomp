@@ -23,11 +23,29 @@ extern char D_003D64C8[];
 typedef struct MenuSumBytes {
     u8 pad00[0x16];
     s8 values[MENU_SUM_COUNT];
-} MenuSumBytes;
+} __attribute__((aligned(4))) MenuSumBytes;
+
+typedef struct MenuSumState {
+    MenuSumBytes *entry;
+    s32 increment;
+} MenuSumState;
 
 typedef struct MenuSumTable {
-    u8 pad00[0x3F4];
+    u8 pad00[0x54];
+    s32 panelState;
+    u8 pad58[0x44];
+    MenuSumState *state;
+    u32 previewUnit[0x71];
+    u8 pad264[0x188];
+    s32 assignedPoints;
+    s32 availablePoints;
     s32 values[MENU_SUM_COUNT];
+    u8 pad408[0xA92C];
+    s32 panelGroup;
+    u8 padAD38[0x9AC];
+    u32 selectionInitialized;
+    u8 padB6E8[4];
+    u32 commitComplete;
 } MenuSumTable;
 
 typedef struct MenuProgressItem {
@@ -77,7 +95,87 @@ s32 mnuCheckTableSums(MenuSumBytes *bytes, MenuSumTable *table) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B008);
+extern s32 mnuMapPadMaskToFlags(s32);
+extern s32 mnuGetPanelGroupSelection(s32);
+extern void mnuSetPanelGroupSelection(s32, s32);
+extern void mnuPlayInputSound(s32, s32, s32);
+extern char D_003D6490[];
+
+s32 func_0029B008(u64 request) {
+    MenuSumTable *work;
+    MenuSumBytes *entry;
+    s32 inputFlags;
+    s32 selection;
+    s32 changed = 0;
+    s32 result;
+
+    work = (MenuSumTable *)kwlnTaskGetUserValue();
+    inputFlags = mnuMapPadMaskToFlags(0xF3);
+    entry = work->state->entry;
+    evtStageTestUpdateCamera();
+    result = func_002C4038((s32)work + 8, &work->panelState, 0, request);
+    if (result != 0) {
+        return result;
+    }
+    if (work->panelState != 0 || evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    if (work->selectionInitialized == 0) {
+        mnuSetPanelGroupSelection(work->panelGroup, 0);
+        work->selectionInitialized = 1;
+    }
+    if (work->availablePoints == work->assignedPoints ||
+        mnuCheckTableSums(entry, work) != 0) {
+        dspStartEntry(0x17);
+        evtSetMessageWindowOptionWhenOpen(0);
+        evtStoreValueAndCaptureWindowPanelValue(0xA3);
+        mnuSetPopupEntryFlagged(&work->panelState, D_003D6490);
+    } else {
+        selection = mnuGetPanelGroupSelection(work->panelGroup);
+        if ((inputFlags & 0x81) != 0) {
+            if (entry->values[selection] + work->values[selection] < 99) {
+                inputFlags = 1;
+                changed = 1;
+                work->availablePoints++;
+                work->values[selection]++;
+            } else {
+                inputFlags = 0x8000;
+            }
+        }
+        if ((inputFlags & 0x40) != 0) {
+            if (work->availablePoints > 0 && work->values[selection] > 0) {
+                changed = 1;
+                work->availablePoints--;
+                work->values[selection]--;
+            } else {
+                inputFlags = 0x8000;
+            }
+        }
+        if ((inputFlags & 2) != 0) {
+            changed = 1;
+            mnuClearItemSelectionSlots(work);
+        }
+        if (changed != 0) {
+            memcpy(entry, work->previewUnit, 0x1C4);
+            mnuRefreshPartyUnitVitalsPanels((u32)entry, (u32)work);
+        }
+        if ((inputFlags & 0x10) != 0) {
+            selection--;
+        }
+        if ((inputFlags & 0x20) != 0) {
+            selection++;
+        }
+        if (selection < 0) {
+            selection = 4;
+        }
+        if (selection >= 5) {
+            selection = 0;
+        }
+        mnuSetPanelGroupSelection(work->panelGroup, selection);
+    }
+    mnuPlayInputSound(0, inputFlags, 0);
+    return 0;
+}
 
 s32 mnuDrawItemPanelDuringRequest(s32 request) {
     s32 context = kwlnTaskGetUserValue();
@@ -109,7 +207,44 @@ u32 func_0029B410(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B418);
+extern s8 evtGetCapturedWindowPanelValue(void);
+extern s32 btlAddBaseStats(u8 *, u8 *);
+extern void mnuClearPanelGroupSelection(s32);
+extern void mnuBindPresentMenuEntry(void *, s32 *);
+extern char D_003D64AC[];
+
+s32 func_0029B418(u64 request) {
+    MenuSumTable *work;
+    MenuSumBytes *entry;
+    s32 result;
+
+    work = (MenuSumTable *)kwlnTaskGetUserValue();
+    entry = work->state->entry;
+    evtStageTestUpdateCamera();
+    result = func_002C4038((s32)work + 8, &work->panelState, 0, request);
+    if (result != 0) {
+        return result;
+    }
+    if (work->panelState == 0 && evtGetMessageWindowControlState() == 0) {
+        s8 capturedValue = evtGetCapturedWindowPanelValue();
+        s32 *stats = work->values;
+
+        if (capturedValue == 0) {
+            btlAddBaseStats((u8 *)stats, (u8 *)work->state->entry);
+            mnuClearItemSelectionSlots(work);
+            mnuClearPanelGroupSelection(work->panelGroup);
+            mnuSetPopupEntryFlagged(&work->panelState, D_003D64AC);
+            work->commitComplete = 1;
+        } else {
+            mnuClearItemSelectionSlots(work);
+            mnuSetPanelGroupSelection(work->panelGroup, 0);
+            memcpy(entry, work->previewUnit, 0x1C4);
+            mnuRefreshPartyUnitVitalsPanels((u32)entry, (u32)work);
+            mnuBindPresentMenuEntry((u8 *)work + 8, &work->panelState);
+        }
+    }
+    return 0;
+}
 
 s32 func_0029B600(s32 request) {
     s32 context = kwlnTaskGetUserValue();
