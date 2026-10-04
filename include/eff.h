@@ -180,6 +180,15 @@ typedef struct EffectBufferTail {
     EffectBufferRecord *records;
 } EffectBufferTail;
 
+/* Particle cell shared by the DDS1/2 particle subroutines (0x14 bytes). */
+typedef struct ParCell {
+    u128 *history;   /* 0x00 */
+    void *vertices;  /* 0x04 */
+    s32 vertexCount; /* 0x08: processed in groups of three */
+    s32 unk0C;       /* 0x0C cleared */
+    u32 color;       /* 0x10 initialized to grey 0x80808080 */
+} ParCell;
+
 /* Ring-effect geometry: starting angle (-pi/2) and one full turn. */
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
