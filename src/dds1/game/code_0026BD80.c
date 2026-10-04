@@ -403,70 +403,7 @@ void mnuSwapStateWords(void) {
     }
 }
 
-void func_0026CB10(f32 *position, f32 *rotation) {
-    f32 initialRotation[4] = {-0.47f, 0.0f, 0.0f, -0.88f};
-    f32 path[3][4] = {
-        {-922.0f, -4160.0f, -3650.0f, 1.0f},
-        {-1221.0f, -3680.0f, -1050.0f, 1.0f},
-        {3313.0f, -3847.0f, 1194.0f, 1.0f},
-    };
-    s32 segmentIndex = 0;
-    s32 i;
-    s32 segmentTime;
-    f32 firstLength;
-    f32 segmentLength;
-
-    {
-        MenuState *state = (MenuState *)mnuMovieMenuState;
-        s32 transitionOffset = state->transitionOffset;
-
-        if (transitionOffset < 3600) {
-            state->transitionOffset = transitionOffset + 1;
-        } else {
-            state->transitionOffset = 0;
-        }
-    }
-
-    {
-        MenuState *state = (MenuState *)mnuMovieMenuState;
-
-        i = 0;
-        if (state->transitionOffset > (i + 1) * 3600) {
-            goto checkSegment;
-        }
-        segmentIndex = 0;
-        goto haveSegment;
-
-checkSegment:
-        i++;
-        if (i > 0) {
-            goto haveSegment;
-        }
-        if (((volatile MenuState *)state)->transitionOffset >
-            (i + 1) * 3600) {
-            goto checkSegment;
-        }
-        segmentIndex = i;
-
-haveSegment:
-        segmentTime = ((volatile MenuState *)state)->transitionOffset -
-                      segmentIndex * 3600;
-    }
-    {
-        f32 origin[4] = {1000.0f, -4160.0f, -1000.0f, 1.0f};
-
-        firstLength = fldVectorLength(path[0]);
-        segmentLength = fldVectorLength(path[segmentIndex]);
-        memcpy(position, path[segmentIndex], sizeof(path[0]));
-        sdfVec3SubtractInPlace(position, origin);
-        fldRotateVectorAroundY(position,
-                              ((f32)segmentTime / 3600.0f) * -6.28318525f *
-                                  firstLength / segmentLength);
-        sdfVec3AddInPlace(position, origin);
-    }
-    memcpy(rotation, initialRotation, sizeof(initialRotation));
-    sdfQuaternionNormalize(rotation);
-}
+INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CB10);
 
 void func_0026CD88(f32 *position, f32 *rotation) {
     f32 delta[4];
@@ -611,6 +548,12 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
     }
     return 0;
 }
+
+INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE40);
+
+INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE50);
+
+INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE80);
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5D8);
 
