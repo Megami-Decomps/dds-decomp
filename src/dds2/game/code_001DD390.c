@@ -102,7 +102,7 @@ typedef struct BtlWork {
     u8 pad280[4];
     u16 earringPlaybackCount; /* 0x284 */
     u8 pad286[2];
-    s32 unk288;
+    u32 unk288;
     u32 unk28C;
     u8 pad290[0x3C];
     s32 unk2CC;
@@ -8781,16 +8781,21 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
-/* Shared motion-SE owner: queued files become resource handles before playback. */
-typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
-    s32 category;
-    s32 id;
+/* Retain and per-slot loading state, embedded after the category/id key. */
+typedef struct SoundSlotWork {
     u32 refCount; /* Shared retain count; release frees only on the zero transition. */
     s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
     s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
     s32 fileRequests[0x1D];
     s32 resourceHandles[0x1D];
+} SoundSlotWork;
+
+/* Shared motion-SE owner: queued files become resource handles before playback. */
+typedef struct SoundSlotOwner {
+    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
+    s32 category;
+    s32 id;
+    SoundSlotWork work;
     struct SoundSlotOwner *prev;
     struct SoundSlotOwner *next;
 } SoundSlotOwner;
@@ -8881,13 +8886,13 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
     BtlWork *work;
     if (owner != 0) {
         btlBossDebugPrintf("btl:motSE search hit[%p]\n", owner);
-        owner->refCount++;
+        owner->work.refCount++;
         return owner;
     }
     owner = sdfAllocAndClearQuadwords(0x108);
     owner->category = category;
     owner->id = id;
-    owner->refCount = 1;
+    owner->work.refCount = 1;
     work = (BtlWork *)btlGetRuntime();
     owner->prev = 0;
     if (work->soundSlotOwners != 0) {
@@ -8910,13 +8915,13 @@ extern void sdfReleaseResourceAllocation(u32);
 /* The last reference cleans queued files and resource handles, then unlinks/frees. */
 void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     u32 i;
-    if (--owner->refCount == 0) {
+    if (--owner->work.refCount == 0) {
         for (i = 0; i < 0x1D; i++) {
-            if (owner->fileRequests[i] != 0) {
-                filePollEntryCleanup(owner->fileRequests[i]);
+            if (owner->work.fileRequests[i] != 0) {
+                filePollEntryCleanup(owner->work.fileRequests[i]);
             }
-            if (owner->resourceHandles[i] != 0) {
-                sdfReleaseResourceAllocation(owner->resourceHandles[i]);
+            if (owner->work.resourceHandles[i] != 0) {
+                sdfReleaseResourceAllocation(owner->work.resourceHandles[i]);
             }
         }
         if (owner->next != 0) {
@@ -8974,24 +8979,80 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (!(owner->flags & 2)) {
         return;
     }
-    if (owner->resourceHandles[args->unk_08] == 0) {
+    if (owner->work.resourceHandles[args->unk_08] == 0) {
         return;
     }
     table = btlSelectSideIndexedActorParameterTable(owner->category, owner->id);
     entry = &table[args->unk_08];
     args->option = entry->fileId;
     if (args->unk_08 != 0xB) {
-        owner->pendingSoundId = sndBuildMotSeResourceKey(owner, args->unk_08);
-        owner->pendingSlot = args->unk_08;
+        owner->work.pendingSoundId = sndBuildMotSeResourceKey(owner, args->unk_08);
+        owner->work.pendingSlot = args->unk_08;
         owner->flags |= 4;
         owner->flags &= ~8;
         owner->flags &= ~0x10;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00204E50);
+extern void mnuResetSoundBufferLocked(void);
+extern void mnuClearInactiveSoundBufferState(void);
 
-extern u32 func_00204E50(u32 *);
+u32 func_00204E50(SoundTaskArgs *args) {
+    BtlWork *work = (BtlWork *)btlGetRuntime();
+    SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
+    SoundSlotWork *soundWork;
+    u32 key;
+    u32 data;
+    u32 size;
+
+    if (owner == 0) {
+        return 1;
+    }
+    if (owner->flags & 1) {
+        return 1;
+    }
+    if (!(owner->flags & 2)) {
+        return 1;
+    }
+    soundWork = &owner->work;
+    if (soundWork->resourceHandles[args->unk_08] == 0) {
+        return 1;
+    }
+    if (args->unk_08 != 0xB) {
+        key = sndBuildMotSeResourceKey((u32 *)owner, args->unk_08);
+        if (owner->flags & 0x10) {
+            sndSetStationedSeHighVolume(key);
+            btlBossDebugPrintf("btl:motSE play[%X-%X]\n", key >> 16, key & 0xFFFF);
+            return 1;
+        }
+        key >>= 16;
+        btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
+    } else {
+        if (work->unk288 >= 0xB) {
+            if (mnuGetSoundBufferStateLocked() != 0) {
+                mnuResetSoundBufferLocked();
+                mnuReleaseSoundBufferLocked();
+            }
+            data = sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->unk_08]);
+            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->unk_08]);
+            func_002A27A8(data, size, 2);
+            mnuClearInactiveSoundBufferState();
+            work->unk288 = 0;
+            btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
+        } else {
+            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->unk288);
+        }
+        return 1;
+    }
+    if ((s32)args->unk_0C > 90) {
+        owner->flags &= ~8;
+        owner->flags |= 0x10;
+        btlBossDebugPrintf("btl:motSE load time out[%X]\n", key);
+        return 1;
+    }
+    args->unk_0C++;
+    return 0;
+}
 
 struct SoundTask *btlCreateHookedUnitSoundTask(unit, option)
     BtlUnit *unit;
@@ -9051,7 +9112,7 @@ s32 sndHasOccupiedNodeSlots(void) {
     for (owner = ((BtlWork *)btlGetRuntime())->soundSlotOwners; owner != 0; owner = owner->next) {
         if (!(owner->flags & 2)) {
             for (i = 0; i < 0x1D; i++) {
-                if (owner->fileRequests[i] != 0) {
+                if (owner->work.fileRequests[i] != 0) {
                     return 1;
                 }
             }
