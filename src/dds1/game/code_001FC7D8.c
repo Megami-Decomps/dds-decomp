@@ -34,12 +34,26 @@ extern void btlSelectTargetsExcludingActorUnit();
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 extern void btlSelectTargetsBlockingElement();
 
+/* Resource-name record consumed by the overwrite prompt, not an effect task.
+ * The adjacent name-record allocator reserves 0x38 bytes in both games. */
+typedef struct BtlResourceNameRecord {
+    s32 x;
+    s32 y;
+    u32 unk8;
+    s32 selection;
+    s32 nameLength;
+    u32 unk14;
+    s32 promptState;
+    char name[0x1C]; /* Suffix at 0x1C; editable name starts at 0x21. */
+} BtlResourceNameRecord;
+
 /* Linked-effect arguments share an owner and carry task-specific timing data.
  * The linked-number task allocates 0x34 bytes; the counter task uses 0x2C. */
+/* The ASM transfers two qwords, but the argument type retains natural alignment:
+ * the existing allocation sizes are 0x34 and 0x2C, not rounded-up vector structs. */
 typedef struct BtlLinkedEffectArgs {
-    u8 pad00[0x14];
-    u32 unk14;
-    u8 pad18[8];
+    f32 anchorOffset[4]; /* Initial label anchor minus referencePosition. */
+    f32 referencePosition[4]; /* Saved reference; the update flags can select a live one. */
     BtlUnit *unit; /* 0x20: also used by both destruction callbacks */
     union {
         struct {
@@ -67,6 +81,7 @@ extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern void func_0019C590(s32, s32, s32, s32);
 extern void func_003003F0(const char *fmt, ...);
 extern s8 D_00324510[];
+/* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC7D8);
 
 void func_001FC990(void) {
@@ -217,6 +232,7 @@ s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
     return base + ((((s32)owner->flags >> 9) ^ 1U) & 1);
 }
 
+/* Number display: initializes both anchor vectors, then adds the offset before projection. */
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD5C8);
 
 /* Decrement the linked-number task's unit counter without underflowing zero. */
@@ -307,6 +323,7 @@ BtlEffectTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     return task;
 }
 
+/* Counter display shares the same vector prefix, with the shorter counter payload. */
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDA78);
 
 /* Decrement the counter-display task's unit counter without underflowing zero. */
