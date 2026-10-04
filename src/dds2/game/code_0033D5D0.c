@@ -5,6 +5,49 @@
 #define SDF_DEV_OVERRIDE_PRIORITY 0x78
 #define SDF_DEV_PRIORITY_OVERRIDE_TICKS 3
 
+/* One-based request IDs; host-file dispatch subtracts the first ID. */
+#define SDF_DEV_OPERATION_NONE 0
+#define SDF_DEV_OPERATION_OPEN_READ 1
+#define SDF_DEV_OPERATION_OPEN_WRITE 2
+#define SDF_DEV_OPERATION_SEEK 3
+#define SDF_DEV_OPERATION_GET_SIZE 4
+#define SDF_DEV_OPERATION_READ 5
+#define SDF_DEV_OPERATION_WRITE 6
+#define SDF_DEV_OPERATION_CLOSE 7
+#define SDF_DEV_OPERATION_READ_BUFFER 8
+#define SDF_DEV_OPERATION_WRITE_BUFFER 9
+
+#define SDF_DEV_EVENT_INACTIVE 0
+#define SDF_DEV_EVENT_OPENED 2
+#define SDF_DEV_EVENT_SEEK_REPLY 3
+#define SDF_DEV_EVENT_SIZE_REPLY 4
+#define SDF_DEV_EVENT_READ_REPLY 5
+#define SDF_DEV_EVENT_WRITE_REPLY 6
+#define SDF_DEV_EVENT_CLOSED 7
+#define SDF_DEV_EVENT_BUFFER_REPLY 8
+
+#define SDF_DEV_FILE_OPEN_READ 1
+#define SDF_DEV_FILE_OPEN_WRITE 0x202
+#define SDF_DEV_SEEK_START 0
+#define SDF_DEV_SEEK_CURRENT 1
+#define SDF_DEV_SEEK_END 2
+#define SDF_DEV_STATE_BYTES 0x40
+#define SDF_DEV_INVALID_FILE_HANDLE -1
+#define SDF_DEV_CACHE_EVICTION_THRESHOLD 9
+
+#define SDF_DEV_RPC_QUEUE_BYTES 0x20
+#define SDF_DEV_RPC_SERVER_BYTES 0x50
+#define SDF_DEV_RPC_SERVER_ID 0x32647270
+#define SDF_DEV_RPC_CLIENT_ID 0x646E7270
+#define SDF_DEV_RPC_THREAD_STACK_BYTES 0x1000
+#define SDF_DEV_RPC_THREAD_PRIORITY 0x4C
+#define SDF_DEV_RPC_BIND_POLL_TICKS 4
+#define SDF_DEV_DISC_FILE_WORDS 12
+#define SDF_DEV_IOP_BUFFER_BYTES 0x28010
+#define SDF_DEV_IOP_ALIGNMENT_BIAS 15
+#define SDF_DEV_IOP_ALIGNMENT_MASK -16
+#define SDF_DEV_REPLY_SEMAPHORE_LIMIT 0x80
+
 #define SDF_BCD_DIGIT_BITS 4
 #define SDF_DECIMAL_RADIX 10
 
@@ -236,22 +279,24 @@ void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index
     sdfPktSetCmd(packet, index);
 }
 
+/* Copy a positive source/end span into the RPC reply buffer; otherwise return NULL. */
 void *sdfRpcBufHandler(s32 unused, SifCommand *packet) {
-    s32 size = packet->end - packet->source;
+    s32 copyBytes = packet->end - packet->source;
 
-    if (size > 0) {
-        memcpy(packet, (void *)packet->source, size);
+    if (copyBytes > 0) {
+        memcpy(packet, (void *)packet->source, copyBytes);
         return packet;
     }
     return NULL;
 }
 
+/* Register the EE-side buffer service and run its RPC queue on the current thread. */
 void sdfDevStartRpcServer(void) {
-    u8 queue[0x20];
-    u8 server[0x50];
-    sceSifSetRpcQueue(queue, GetThreadId());
-    sceSifRegisterRpc(server, 0x32647270, sdfRpcBufHandler, sdfDevRpcBuffer, 0, 0, queue);
-    sceSifRpcLoop(queue);
+    u8 rpcQueue[SDF_DEV_RPC_QUEUE_BYTES];
+    u8 rpcServer[SDF_DEV_RPC_SERVER_BYTES];
+    sceSifSetRpcQueue(rpcQueue, GetThreadId());
+    sceSifRegisterRpc(rpcServer, SDF_DEV_RPC_SERVER_ID, sdfRpcBufHandler, sdfDevRpcBuffer, 0, 0, rpcQueue);
+    sceSifRpcLoop(rpcQueue);
 }
 
 typedef struct SifClient {
@@ -273,16 +318,16 @@ extern void _StartThread(s32, s32);
 
 /* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
 void sdfStartDevRpcServerAndBindClient(void) {
-    s32 start;
+    s32 waitStart;
 
-    _StartThread(sdfCreateThreadWithAllocatedWorkspace(sdfDevStartRpcServer, 0x1000, 0x4C), 0);
-    while (sceSifMBindRpc(&D_004764D0, 0x646E7270, 0) >= 0) {
+    _StartThread(sdfCreateThreadWithAllocatedWorkspace(sdfDevStartRpcServer, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
+    while (sceSifMBindRpc(&D_004764D0, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
         if (D_004764D0.server != NULL) {
             D_00438AB8 = 1;
             break;
         }
-        start = func_003287E0();
-        while (sdfGetElapsedTimerTicks(start) < 4) {
+        waitStart = func_003287E0();
+        while (sdfGetElapsedTimerTicks(waitStart) < SDF_DEV_RPC_BIND_POLL_TICKS) {
         }
     }
 }
@@ -512,35 +557,37 @@ extern s32 func_0035A828(s32);
 extern s32 func_0036A1B0(s32, s32, s32);
 extern s32 func_00369DF8(s32);
 
-void sdfDevLoadWholeFile(s32 name) {
-    s32 fd = func_00369B70(name, 1);
-    s32 size;
-    s32 buffer;
+/* Read a whole named file into the loader's allocated EE buffer, then close it. */
+void sdfDevLoadWholeFile(s32 fileNameAddress) {
+    s32 fileHandle = func_00369B70(fileNameAddress, SDF_DEV_FILE_OPEN_READ);
+    s32 fileBytes;
+    s32 bufferAddress;
 
-    if (fd < 0) {
-        sdfPanicHaltPrintf(D_0042E288, name);
+    if (fileHandle < 0) {
+        sdfPanicHaltPrintf(D_0042E288, fileNameAddress);
     }
-    size = func_00369F78(fd, 0, 2);
-    func_00369F78(fd, 0, 0);
-    buffer = func_0035A828(size);
-    D_004391A4 = buffer;
-    func_0036A1B0(fd, buffer, size);
-    func_00369DF8(fd);
+    fileBytes = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
+    func_00369F78(fileHandle, 0, SDF_DEV_SEEK_START);
+    bufferAddress = func_0035A828(fileBytes);
+    D_004391A4 = bufferAddress;
+    func_0036A1B0(fileHandle, bufferAddress, fileBytes);
+    func_00369DF8(fileHandle);
 }
 
-void sdfDevStartLoad(s32 name, s32 mode) {
-    u32 file[12];
-    s32 heap;
+/* Record the disc search path, preload a separate file, and initialize an aligned IOP buffer. */
+void sdfDevStartLoad(s32 discFileNameAddress, s32 preloadFileNameAddress) {
+    u32 discFileRecord[SDF_DEV_DISC_FILE_WORDS];
+    s32 iopHeapAddress;
 
-    sdfDiscLoadFilename = name;
-    sdfDevLoadWholeFile(mode);
-    if (sceCdSearchFile(file, name) == 0) {
-        sdfPanicHaltPrintf(D_0042E288, name);
+    sdfDiscLoadFilename = discFileNameAddress;
+    sdfDevLoadWholeFile(preloadFileNameAddress);
+    if (sceCdSearchFile(discFileRecord, discFileNameAddress) == 0) {
+        sdfPanicHaltPrintf(D_0042E288, discFileNameAddress);
     }
-    D_004391A0 = file[0];
-    heap = sceSifAllocIopHeap(0x28010);
-    D_0043919C = heap;
-    func_0034D400(0x50, 5, (heap + 15) & -16);
+    D_004391A0 = discFileRecord[0];
+    iopHeapAddress = sceSifAllocIopHeap(SDF_DEV_IOP_BUFFER_BYTES);
+    D_0043919C = iopHeapAddress;
+    func_0034D400(0x50, 5, (iopHeapAddress + SDF_DEV_IOP_ALIGNMENT_BIAS) & SDF_DEV_IOP_ALIGNMENT_MASK);
 }
 
 void sdfInitDeviceSemaphores(void) {
@@ -609,9 +656,10 @@ u32 func_0033E810(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E818);
 
-void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
-    if (event != 3) {
-        if (event == 4) {
+/* Capture seek/size replies, then wake the synchronous command waiter. */
+void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 callbackContext) {
+    if (event != SDF_DEV_EVENT_SEEK_REPLY) {
+        if (event == SDF_DEV_EVENT_SIZE_REPLY) {
             sdfDevControlReplyValue = value;
         }
     } else {
@@ -620,12 +668,13 @@ void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 valu
     SignalSema(sdfDevReplySemaphore);
 }
 
-DevState *sdfDevCreateCommandState(s32 command) {
+/* Open a path using the shared reply callback and wait for its initial completion. */
+DevState *sdfDevCreateCommandState(s32 path) {
     DevState *state;
     if (sdfDevReplySemaphore < 0) {
-        sdfDevReplySemaphore = sdfCreateSemaphore(0, 0x80, 0);
+        sdfDevReplySemaphore = sdfCreateSemaphore(0, SDF_DEV_REPLY_SEMAPHORE_LIMIT, 0);
     }
-    state = sdfDevCreateCallbackState(command, sdfDevCommandReplyCallback, 0);
+    state = sdfDevCreateCallbackState(path, sdfDevCommandReplyCallback, 0);
     WaitSema(sdfDevReplySemaphore);
     sdfDevReactivate(state);
     return state;
@@ -659,9 +708,9 @@ void sdfDevWaitThenReleaseCommandState(DevState *state) {
     sdfDevQueueReleaseState(state);
 }
 
-/* Forward the queued request's arguments, then wait for its reply callback. */
-void sdfDevQueueReadAndWait(DevState *state, void *data, s32 extra) {
-    sdfDevQueueRead(state, data, extra);
+/* Queue a byte-counted read, then wait for its reply callback. */
+void sdfDevQueueReadAndWait(DevState *state, void *buffer, s32 byteCount) {
+    sdfDevQueueRead(state, buffer, byteCount);
     WaitSema(sdfDevReplySemaphore);
 }
 
@@ -817,7 +866,7 @@ void sdfDevRecycleCompletedState(DevState *state) {
     if (interrupts != 0) {
         EIntr();
     }
-    if (D_00438B10 >= 9) {
+    if (D_00438B10 >= SDF_DEV_CACHE_EVICTION_THRESHOLD) {
         sdfDevUnlinkAndFreeState(D_00438B14);
     }
     if (worker->first != NULL) {
@@ -825,23 +874,25 @@ void sdfDevRecycleCompletedState(DevState *state) {
     }
 }
 
+/* Close a valid file handle, invalidate it, and retain the completed state in the cache. */
 void sdfDevRelease(DevState *state) {
-    s32 resourceId;
+    s32 fileHandle;
 
-    resourceId = state->resourceId;
-    state->resourceId = -1;
-    if (resourceId >= 0) {
-        func_00369DF8(resourceId);
+    fileHandle = state->resourceId;
+    state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
+    if (fileHandle >= 0) {
+        func_00369DF8(fileHandle);
     }
     sdfDevRecycleCompletedState(state);
 }
 
+/* Store an error/result, release the request, and notify its callback of inactivity. */
 void sdfDevDeactivate(DevState *state, s32 result) {
     state->result = result;
     state->state = SDF_DEV_STATE_INACTIVE;
     sdfDevRelease(state);
     if (state->callback != NULL) {
-        state->callback(state, 0, 0, 0, state->callbackContext);
+        state->callback(state, SDF_DEV_EVENT_INACTIVE, 0, 0, state->callbackContext);
     }
 }
 
@@ -854,13 +905,13 @@ INCLUDE_RODATA(const s32, "game/code_0033D5D0", D_0042E288);
 void sdfDevWorkerThread(DevWorkerEntry *worker) {
     DevState *state;
     void (*callback)(DevState *, s32, s32, s32, s32);
-    s32 openResult;
+    s32 fileHandle;
     s32 result;
     s32 position;
     s32 transferResult;
     s32 endOffset;
-    void *data;
-    u32 operation;
+    void *buffer;
+    u32 operationIndex;
 
     for (;;) {
         WaitSema(worker->semaphore);
@@ -869,42 +920,42 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             continue;
         }
 
-        operation = state->operation - 1;
-        state->operation = 0;
-        switch (operation) {
-        case 0:
+        operationIndex = state->operation - SDF_DEV_OPERATION_OPEN_READ;
+        state->operation = SDF_DEV_OPERATION_NONE;
+        switch (operationIndex) {
+        case SDF_DEV_OPERATION_OPEN_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            openResult = func_00369B70(state->resource, 1, 0);
-            if (openResult < 0) {
-                sdfDevDeactivate(state, openResult);
+            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_READ, 0);
+            if (fileHandle < 0) {
+                sdfDevDeactivate(state, fileHandle);
                 continue;
             }
             state->state = SDF_DEV_STATE_ACTIVE;
-            state->resourceId = openResult;
+            state->resourceId = fileHandle;
             state->transferred = 0;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 2, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, state->callbackContext);
             }
             continue;
 
-        case 1:
+        case SDF_DEV_OPERATION_OPEN_WRITE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            openResult = func_00369B70(state->resource, 0x202, state->options);
-            if (openResult < 0) {
-                sdfDevDeactivate(state, openResult);
+            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_WRITE, state->options);
+            if (fileHandle < 0) {
+                sdfDevDeactivate(state, fileHandle);
                 continue;
             }
             state->state = SDF_DEV_STATE_ACTIVE;
-            state->resourceId = openResult;
+            state->resourceId = fileHandle;
             state->transferred = 0;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 2, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, state->callbackContext);
             }
             continue;
 
-        case 2:
+        case SDF_DEV_OPERATION_SEEK - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
             endOffset = func_00369F78(state->resourceId, state->operationArg, state->options);
             if (endOffset < 0) {
@@ -915,23 +966,23 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             state->transferred = endOffset;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 3, 0, endOffset, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_SEEK_REPLY, 0, endOffset, state->callbackContext);
             }
             continue;
 
-        case 3:
+        case SDF_DEV_OPERATION_GET_SIZE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            position = func_00369F78(state->resourceId, 0, 1);
+            position = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_CURRENT);
             if (position < 0) {
                 sdfDevDeactivate(state, position);
                 continue;
             }
-            endOffset = func_00369F78(state->resourceId, 0, 2);
+            endOffset = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_END);
             if (endOffset < 0) {
                 sdfDevDeactivate(state, endOffset);
                 continue;
             }
-            result = func_00369F78(state->resourceId, position, 0);
+            result = func_00369F78(state->resourceId, position, SDF_DEV_SEEK_START);
             if (result < 0) {
                 sdfDevDeactivate(state, result);
                 continue;
@@ -940,11 +991,11 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             state->transferred = endOffset;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 4, 0, endOffset, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_SIZE_REPLY, 0, endOffset, state->callbackContext);
             }
             continue;
 
-        case 4:
+        case SDF_DEV_OPERATION_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_READING;
             result = func_0036A1B0(state->resourceId, (s32)state->requestData,
                            state->requestExtra);
@@ -956,12 +1007,12 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             state->transferred += result;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 5, (s32)state->requestData, result,
+                callback(state, SDF_DEV_EVENT_READ_REPLY, (s32)state->requestData, result,
                                 state->callbackContext);
             }
             continue;
 
-        case 5:
+        case SDF_DEV_OPERATION_WRITE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_WRITING;
             result = func_0036A420(state->resourceId, (s32)state->requestData,
                             state->requestExtra);
@@ -973,15 +1024,15 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             state->transferred += result;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 6, (s32)state->requestData, result,
+                callback(state, SDF_DEV_EVENT_WRITE_REPLY, (s32)state->requestData, result,
                                 state->callbackContext);
             }
             continue;
 
-        case 6:
+        case SDF_DEV_OPERATION_CLOSE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_CLOSING;
             result = func_00369DF8(state->resourceId);
-            state->resourceId = -1;
+            state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
             if (result < 0) {
                 sdfDevDeactivate(state, result);
                 continue;
@@ -990,40 +1041,41 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             state->state = SDF_DEV_STATE_COMPLETE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 7, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_CLOSED, 0, 0, state->callbackContext);
             }
             continue;
 
-        case 7:
+        case SDF_DEV_OPERATION_READ_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            openResult = func_00369B70(state->resource, 1, 0);
-            if (openResult < 0) {
-                sdfDevDeactivate(state, openResult);
+            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_READ, 0);
+            if (fileHandle < 0) {
+                sdfDevDeactivate(state, fileHandle);
                 continue;
             }
-            state->resourceId = openResult;
+            state->resourceId = fileHandle;
             transferResult = state->requestExtra;
+            /* A negative count means the whole file; NULL storage is allocated below. */
             if (transferResult < 0) {
                 state->state = SDF_DEV_STATE_SEEKING;
-                transferResult = func_00369F78(openResult, 0, 2);
+                transferResult = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
                 }
-                result = func_00369F78(state->resourceId, 0, 0);
+                result = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_START);
                 if (result < 0) {
                     sdfDevDeactivate(state, result);
                     continue;
                 }
             }
             if (transferResult != 0) {
-                data = state->requestData;
-                if (data == NULL) {
-                    data = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(transferResult));
+                buffer = state->requestData;
+                if (buffer == NULL) {
+                    buffer = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(transferResult));
                 }
-                state->requestData = data;
+                state->requestData = buffer;
                 state->state = SDF_DEV_STATE_READING;
-                transferResult = func_0036A1B0(state->resourceId, (s32)data, transferResult);
+                transferResult = func_0036A1B0(state->resourceId, (s32)buffer, transferResult);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
@@ -1031,29 +1083,29 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             }
             state->state = SDF_DEV_STATE_CLOSING;
             func_00369DF8(state->resourceId);
-            state->resourceId = -1;
+            state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
             sdfDevRecycleCompletedState(state);
             state->state = SDF_DEV_STATE_COMPLETE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 8, (s32)state->requestData, transferResult,
+                callback(state, SDF_DEV_EVENT_BUFFER_REPLY, (s32)state->requestData, transferResult,
                          state->callbackContext);
             }
             SignalSema(worker->semaphore);
             continue;
 
-        case 8:
+        case SDF_DEV_OPERATION_WRITE_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            openResult = func_00369B70(state->resource, 0x202, state->options);
-            if (openResult < 0) {
-                sdfDevDeactivate(state, openResult);
+            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_WRITE, state->options);
+            if (fileHandle < 0) {
+                sdfDevDeactivate(state, fileHandle);
                 continue;
             }
-            state->resourceId = openResult;
+            state->resourceId = fileHandle;
             transferResult = state->requestExtra;
             if (transferResult != 0) {
                 state->state = SDF_DEV_STATE_WRITING;
-                transferResult = func_0036A420(openResult, (s32)state->requestData, transferResult);
+                transferResult = func_0036A420(fileHandle, (s32)state->requestData, transferResult);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
@@ -1067,12 +1119,12 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         state->state = SDF_DEV_STATE_CLOSING;
         func_00369DF8(state->resourceId);
-        state->resourceId = -1;
+        state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
         sdfDevRecycleCompletedState(state);
         state->state = SDF_DEV_STATE_COMPLETE;
         callback = state->callback;
         if (callback != NULL) {
-            callback(state, 8, (s32)state->requestData, transferResult,
+            callback(state, SDF_DEV_EVENT_BUFFER_REPLY, (s32)state->requestData, transferResult,
                             state->callbackContext);
         }
         SignalSema(worker->semaphore);
@@ -1201,66 +1253,69 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F650);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
 
+/* Allocate a request state and retain the callback's opaque context word. */
 DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
-                        void (*callback)(DevState *, s32, s32, s32, s32), s32 context) {
-    DevState *state = (DevState *)sdfAllocAndClearQuadwords(0x40);
+                        void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
+    DevState *state = (DevState *)sdfAllocAndClearQuadwords(SDF_DEV_STATE_BYTES);
     state->resource = resource;
     state->workerIndex = workerIndex;
     state->operation = operation;
     state->state = 0;
-    state->resourceId = -1;
+    state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
     state->callback = callback;
-    state->callbackContext = context;
+    state->callbackContext = callbackContext;
     return state;
 }
 
+/* Resolve a path to its worker and enqueue an asynchronous read-only open. */
 DevState *sdfDevCreateCallbackState(s32 path, void (*callback)(DevState *, s32, s32, s32, s32),
-                        s32 context) {
+                        s32 callbackContext) {
     void *resource;
-    s32 id = func_0033F898(path, &resource);
+    s32 workerIndex = func_0033F898(path, &resource);
     DevState *state;
 
-    if (id < 0) {
+    if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, id, 1, callback, context);
+    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_OPEN_READ, callback, callbackContext);
     sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
 
+/* Enqueue a write open; zero options select the device's default creation options. */
 DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32, s32, s32),
-                        s32 context, s32 options) {
+                        s32 callbackContext, s32 options) {
     void *resource;
-    s32 id = func_0033F898(path, &resource);
+    s32 workerIndex = func_0033F898(path, &resource);
     DevState *state;
 
-    if (id < 0) {
+    if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, id, 2, callback, context);
+    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_OPEN_WRITE, callback, callbackContext);
     state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
     sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
 
-/* Store operation arguments and wake the owning worker; return 0 if active, otherwise -1. */
-s32 sdfDevQueueOperation(DevState *state, s32 operationArg, s32 options) {
-    if (state->state != 7) {
+/* Queue a seek with its offset and origin; return -1 unless the request is active. */
+s32 sdfDevQueueOperation(DevState *state, s32 seekOffset, s32 seekOrigin) {
+    if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    state->operationArg = operationArg;
-    state->options = options;
-    state->operation = 3;
+    state->operationArg = seekOffset;
+    state->options = seekOrigin;
+    state->operation = SDF_DEV_OPERATION_SEEK;
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
 
-/* Queue the control request; return 0 if active, otherwise -1 without changing the state. */
+/* Query file size without changing the file position; return -1 unless active. */
 s32 sdfDevQueueControlRequest(DevState *state) {
-    if (state->state != 7) {
+    if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    state->operation = 4;
+    state->operation = SDF_DEV_OPERATION_GET_SIZE;
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
@@ -1277,42 +1332,44 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
     return 0;
 }
 
-/* Queue a write using the supplied data pointer and extra word; reject inactive states with -1. */
-s32 sdfDevQueueWrite(DevState *state, void *data, s32 extra) {
-    if (state->state != 7) {
+/* Queue a byte-counted write; return -1 without changing an inactive request. */
+s32 sdfDevQueueWrite(DevState *state, void *buffer, s32 byteCount) {
+    if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    state->requestExtra = extra;
-    state->operation = 6;
-    state->requestData = data;
+    state->requestExtra = byteCount;
+    state->operation = SDF_DEV_OPERATION_WRITE;
+    state->requestData = buffer;
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
 
+/* Clear an inactive request's result and return it to the active state. */
 s32 sdfDevReactivate(DevState *state) {
-    if (state->state != 9) {
+    if (state->state != SDF_DEV_STATE_INACTIVE) {
         return -1;
     }
     state->result = 0;
-    state->state = 7;
+    state->state = SDF_DEV_STATE_ACTIVE;
     return 0;
 }
 
-/* Use the active-state value as the operation and wake its worker; return -1 unless active. */
+/* Active state and close operation share an ID; retain the original byte assignment. */
 s32 sdfDevQueueActiveOperation(DevState *request) {
-    s8 state = request->state;
+    s8 requestState = request->state;
 
-    if (state != 7) {
+    if (requestState != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    request->operation = state;
+    request->operation = requestState;
     SignalSema(sdfDeviceWorkerEntries[request->workerIndex].semaphore);
     return 0;
 }
 
+/* Free a retained active/completed state; reject other states with -1. */
 s32 sdfDevQueueReleaseState(DevState *state) {
-    if (state->state < 9) {
-        if (state->state >= 7) {
+    if (state->state < SDF_DEV_STATE_INACTIVE) {
+        if (state->state >= SDF_DEV_STATE_ACTIVE) {
             sdfDevUnlinkAndFreeState(state);
             return 0;
         }
@@ -1320,36 +1377,38 @@ s32 sdfDevQueueReleaseState(DevState *state) {
     return -1;
 }
 
-DevState *sdfDevCreateRequest(s32 path, void *data, s32 extra,
-                        void (*completion)(DevState *, s32, s32, s32, s32), s32 completionContext) {
+/* Enqueue a one-shot read: negative byte count requests the whole file. */
+DevState *sdfDevCreateRequest(s32 path, void *buffer, s32 byteCount,
+                        void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
     void *resource;
-    s32 id = func_0033F898(path, &resource);
+    s32 workerIndex = func_0033F898(path, &resource);
     DevState *state;
 
-    if (id < 0) {
+    if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, id, 8, completion, completionContext);
-    state->requestExtra = extra;
-    state->requestData = data;
+    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_READ_BUFFER, callback, callbackContext);
+    state->requestExtra = byteCount;
+    state->requestData = buffer;
     state->operationArg = 0;
     sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
 
-DevState *sdfDevOpenRequest(s32 path, void *data, s32 extra,
-                        void (*completion)(DevState *, s32, s32, s32, s32),
-                        s32 completionContext, s32 options) {
+/* Enqueue a one-shot write using the supplied buffer, byte count and creation options. */
+DevState *sdfDevOpenRequest(s32 path, void *buffer, s32 byteCount,
+                        void (*callback)(DevState *, s32, s32, s32, s32),
+                        s32 callbackContext, s32 options) {
     void *resource;
-    s32 id = func_0033F898(path, &resource);
+    s32 workerIndex = func_0033F898(path, &resource);
     DevState *state;
 
-    if (id < 0) {
+    if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, id, 9, completion, completionContext);
-    state->requestExtra = extra;
-    state->requestData = data;
+    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_WRITE_BUFFER, callback, callbackContext);
+    state->requestExtra = byteCount;
+    state->requestData = buffer;
     state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
     state->operationArg = 0;
     sdfDevEnqueueStateAndWakeWorker(state);
@@ -1550,15 +1609,16 @@ s32 sdfDecimalToPackedDigits(s32 number) {
     return packedDigits;
 }
 
-DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
+/* Allocate element storage; mode records the number of elements added by each grow. */
+DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32 growthStep) {
     DevRequest *request = sdfAllocSizeClassBlock(sizeof(*request));
 
-    request->mode = mode;
+    request->mode = growthStep;
     request->flags = 0;
-    request->count = count;
-    request->stride = stride;
-    if (count != 0) {
-        request->handle = sdfAllocGeneralBlock(stride * count);
+    request->count = elementCount;
+    request->stride = elementStride;
+    if (elementCount != 0) {
+        request->handle = sdfAllocGeneralBlock(elementStride * elementCount);
         request->buffer = sdfResourceRetainAddress(request->handle);
     } else {
         request->handle = 0;
@@ -1567,6 +1627,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
     return request;
 }
 
+/* Release the backing allocation and the request object. */
 void sdfDestroyDevRequest(DevRequest *request) {
     sdfReleaseResourceAllocation(request->handle);
     sdfReleaseChipBlock(request);
@@ -1576,6 +1637,7 @@ extern void sdfDecrementAllocationReferenceCount(s32 handle);
 extern void func_00329600(s32 handle, s32 size);
 void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 
+/* Grow by mode elements; preserve the native 16-bit count and signed-size cast. */
 void sdfDevBufferedRequestGrow(DevRequest *request) {
     if (request->handle == 0) {
         sdfDevResizeBufferedRequest(request, request->mode);
@@ -1587,14 +1649,15 @@ void sdfDevBufferedRequestGrow(DevRequest *request) {
     request->buffer = sdfResourceRetainAddress(request->handle);
 }
 
-void sdfDevResizeBufferedRequest(DevRequest *request, s32 count) {
+/* Resize storage; nonpositive counts release existing storage, and flags are clamped. */
+void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     if (request->handle == 0) {
-        if (count > 0) {
-            request->count = count;
-            request->handle = sdfAllocGeneralBlock(request->stride * count);
+        if (elementCount > 0) {
+            request->count = elementCount;
+            request->handle = sdfAllocGeneralBlock(request->stride * elementCount);
             request->buffer = sdfResourceRetainAddress(request->handle);
         }
-    } else if (count <= 0) {
+    } else if (elementCount <= 0) {
         sdfReleaseResourceAllocation(request->handle);
         request->handle = 0;
         request->flags = 0;
@@ -1602,11 +1665,11 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 count) {
         request->buffer = 0;
     } else {
         sdfDecrementAllocationReferenceCount(request->handle);
-        request->count = count;
-        func_00329600(request->handle, request->stride * count);
+        request->count = elementCount;
+        func_00329600(request->handle, request->stride * elementCount);
         request->buffer = sdfResourceRetainAddress(request->handle);
-        if (count < request->flags) {
-            request->flags = count;
+        if (elementCount < request->flags) {
+            request->flags = elementCount;
         }
     }
 }
