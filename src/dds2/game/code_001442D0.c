@@ -3140,11 +3140,93 @@ void fldTickTargetGuideCounter(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00151E00);
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00151FF8);
-
 extern void func_001519E8(s32);
+extern f32 sdfSinPoly(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern FieldGridCoordPair D_00438EF8;
+
+void func_00151E00(void) {
+    f32 distance, angle;
+    FieldTargetGuideState *state = &fldTargetGuideState;
+    FieldGuidePoint *point;
+    f32 originX = D_004363BC;
+    f32 originY = D_004363BE;
+
+    if (state->age < 300) {
+        state->age++;
+    }
+    if (state->moveTimer <= 0 || --state->moveTimer <= 0) {
+        if (state->routeIndex < state->routeEnd) {
+            state->routeIndex++;
+            state->moveTimer = 20;
+        }
+        point = state->route;
+        if (point != NULL) {
+            point += state->routeIndex;
+            state->gridX = point->x;
+            state->gridY = point->y;
+            state->position[0] = originX + (f32)point->x * (f32)D_004363C0;
+            state->position[2] = originY + (f32)point->y * (f32)-D_004363C2;
+        }
+        if (D_00438EF8.x == state->gridX && D_00438EF8.y == state->gridY) {
+            state->routeRecord = NULL;
+            state->route = NULL;
+            state->routeIndex = 0;
+            state->routeEnd = 0;
+            state->moveTimer = 20;
+            state->stepDistance = 0.0f;
+        } else {
+            func_001519E8(3);
+        }
+    } else {
+        state->position[0] += sdfSinPoly(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
+        state->position[2] += sdfEvaluateCosineViaSinePhaseShift(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
+        state->yaw = fldApproachTargetAngleWithMinimumStep(state->yaw, 180.0f - state->targetYaw, 10.0f, 1.0f);
+    }
+    fldCalcTargetDistanceYaw(&distance, &angle);
+}
+
+void func_00151FF8(void) {
+    f32 distance, angle;
+    FieldTargetGuideState *state = &fldTargetGuideState;
+    FieldGuidePoint *point;
+    f32 originX = D_004363BC;
+    f32 originY = D_004363BE;
+
+    if (state->age < 300) {
+        state->age++;
+    }
+    if (state->moveTimer <= 0 || --state->moveTimer <= 0) {
+        if (state->routeIndex < state->routeEnd) {
+            state->routeIndex++;
+            state->moveTimer = 80;
+        }
+        point = state->route;
+        if (point != NULL) {
+            point += state->routeIndex;
+            state->gridX = point->x;
+            state->gridY = point->y;
+            state->position[0] = originX + (f32)point->x * (f32)D_004363C0;
+            state->position[2] = originY + (f32)point->y * (f32)-D_004363C2;
+        }
+        if (D_00438EF8.x == state->gridX && D_00438EF8.y == state->gridY) {
+            state->routeRecord = NULL;
+            state->route = NULL;
+            state->routeIndex = 0;
+            state->routeEnd = 0;
+            state->moveTimer = 20;
+            state->stepDistance = 0.0f;
+        } else {
+            func_001519E8(2);
+        }
+    } else {
+        state->position[0] += sdfSinPoly(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
+        state->position[2] += sdfEvaluateCosineViaSinePhaseShift(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
+        state->yaw = fldApproachTargetAngleWithMinimumStep(state->yaw, 180.0f - state->targetYaw, 15.0f, 1.0f);
+    }
+    fldCalcTargetDistanceYaw(&distance, &angle);
+}
+
 
 void fldTickTargetGuideAndNotify(void) {
     s32 count = fldTargetGuideState.moveTimer;
@@ -3158,8 +3240,6 @@ void fldTickTargetGuideAndNotify(void) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void fldUpdateTargetGuideCycleMotion(void) {
     f32 distance, angle;
