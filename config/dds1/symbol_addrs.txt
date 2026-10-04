@@ -6644,6 +6644,7 @@ frFontSharedGlyphFlags = 0x003BB174;
 frFontSharedRenderFlags = 0x003BB178;
 itfFontTestScriptTask = 0x003BB190;
 itfMessageFlags = 0x003BB1E8;
+D_003BB200 = 0x003BB200;
 sndTestMessageResourceIndex = 0x003BB240;
 sndTestMessageTexture = 0x003BB244;
 btlRuntime = 0x003BB2E4;
