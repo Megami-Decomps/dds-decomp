@@ -48,7 +48,7 @@ extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 func_0023D030(EvtUnit *unit, f32 *dir, f32 angle);
 extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
-void func_0023C870(EvtUnit *unit, s32 a, s32 b, s32 c);
+void func_0023C870(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
 
@@ -201,7 +201,39 @@ void evtClearUnitValueChangeFlag(EvtUnit *unit) {
     func_0023C5F0(unit);
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C870);
+typedef struct EvtUnitColorEndpoints {
+    u8 pad00[4];
+    u32 firstCurrent; /* 0x04 */
+    u32 firstTarget;  /* 0x08 */
+    u8 pad0C[0x48];
+    u32 secondCurrent; /* 0x54 */
+    u32 secondTarget;  /* 0x58 */
+} EvtUnitColorEndpoints;
+
+void func_0023C870(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor) {
+    s32 color1[4];
+    s32 color2[4];
+    u32 packed1;
+    u32 packed2;
+    union {
+        f32 value;
+        u32 bits;
+    } scale;
+
+    unit->unused1B0 = duration;
+    ((EvtUnitColorEndpoints *)unit)->firstTarget = firstColor;
+    ((EvtUnitColorEndpoints *)unit)->secondTarget = secondColor;
+    scale.value = 128.0f;
+    evtLoadUnitFirstColorVectorVU(unit);
+    EE_MMI_RGBA_PACK_UNIT(packed1, scale.bits);
+    color1[0] = packed1;
+    ((EvtUnitColorEndpoints *)unit)->firstCurrent = packed1;
+    evtLoadUnitSecondColorVectorVU(unit);
+    EE_MMI_RGBA_PACK_UNIT(packed2, scale.bits);
+    color2[0] = packed2;
+    ((EvtUnitColorEndpoints *)unit)->secondCurrent = packed2;
+    unit->flags = (unit->flags | 0x800) & ~0x1000;
+}
 
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from evtLoadUnitDirectionVectorVU to vec20 */
 void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
