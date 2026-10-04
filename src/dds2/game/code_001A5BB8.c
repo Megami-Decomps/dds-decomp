@@ -3887,12 +3887,12 @@ void func_001B75F8(s32 selector, s32 count) {
     }
 }
 
-void func_001B76F0(void) {
-    s32 temp_v0;
-    s32 buf[4];
+s32 func_001B76F0(void) {
+    s32 runtime;
+    s32 fadeCounts[4];
 
-    temp_v0 = btlGetRuntime();
-    fldCountSceneFadeKinds(temp_v0, buf);
+    runtime = btlGetRuntime();
+    return fldCountSceneFadeKinds(runtime, fadeCounts);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7718);

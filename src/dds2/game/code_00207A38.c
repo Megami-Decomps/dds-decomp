@@ -87,7 +87,7 @@ extern s32 scrGetCurrentCommandWork(void);
 
 extern u16 scrReadIntParameter(u32);
 
-extern u64 func_001B76F0(void);
+extern s32 func_001B76F0(void);
 
 extern u64 func_00220958(void);
 
@@ -2252,7 +2252,7 @@ s32 btlCommandReportLinkedActionScene(void) {
 }
 
 u32 btlScriptReturnBattleValue(void) {
-    u64 result;
+    s32 result;
 
     result = func_001B76F0();
     scrSetIntegerReturnValue(result);
