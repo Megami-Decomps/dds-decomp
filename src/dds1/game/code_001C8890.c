@@ -158,7 +158,7 @@ typedef struct BtlUnit {
     s32 resourceLink;
     s32 link;
     s32 listNode;
-    u8 pad_308[4];
+    struct SoundSlotOwner *soundSlotOwner;
     void *gunResource;
     u8 pad_310[4];
     s32 unk314;
@@ -192,7 +192,10 @@ typedef struct BtlActorWork {
     struct SoundResourceNode *soundResourceHead; /* Allocated resource nodes. */
     struct ActiveSoundNode *soundList;           /* Independent active-node list. */
     struct SoundSlotOwner *soundSlotOwners;     /* Shared category/id owners. */
-    u8 pad240[0x64];
+    u8 pad240[0x24];
+    u32 unk264;
+    s32 unk268;
+    u8 pad26C[0x38];
     s32 unk2A4;
     u8 pad2A8[0x210];
     struct SoundResourceNode *soundResourceSlots[BTL_SOUND_ENTRY_COUNT];
@@ -9393,19 +9396,31 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
-/* Shared motion-SE owner: queued files become resource handles before playback. */
-typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
-    s32 category;
-    s32 id;
+/* Retain and per-slot loading state, embedded after the category/id key. */
+typedef struct SoundSlotWork {
     u32 refCount; /* Shared retain count; release frees only on the zero transition. */
     s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
     s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
     s32 fileRequests[0x1D];
     s32 resourceHandles[0x1D];
+} SoundSlotWork;
+
+/* Shared motion-SE owner: queued files become resource handles before playback. */
+typedef struct SoundSlotOwner {
+    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
+    s32 category;
+    s32 id;
+    SoundSlotWork work;
     struct SoundSlotOwner *prev;
     struct SoundSlotOwner *next;
 } SoundSlotOwner;
+
+typedef struct SoundTaskArgs {
+    BtlUnit *actor;
+    s32 option;
+    u32 slot;
+    s32 waitFrames;
+} SoundTaskArgs;
 
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
@@ -9492,13 +9507,13 @@ u8 *sndAcquireSlotOwner(s32 category, s32 id) {
 
     if (node != 0) {
         btlBossDebugPrintf(D_003A51D0, node);
-        node->refCount++;
+        node->work.refCount++;
         return (u8 *)node;
     }
     node = sdfAllocAndClearQuadwords(0x108);
     node->category = category;
     node->id = id;
-    node->refCount = 1;
+    node->work.refCount = 1;
     context = (BtlActorWork *)btlGetRuntime();
     node->prev = 0;
     head = context->soundSlotOwners;
@@ -9518,12 +9533,12 @@ u8 *sndAcquireSlotOwner(s32 category, s32 id) {
 /* The last reference cleans queued files and resource handles, then unlinks/frees. */
 void sndReleaseSlotOwner(u8 *ownerAddress) {
     SoundSlotOwner *node = (SoundSlotOwner *)ownerAddress;
-    u32 count = node->refCount - 1;
-    node->refCount = count;
+    u32 count = node->work.refCount - 1;
+    node->work.refCount = count;
     if (count == 0) {
         u32 i = 0;
-        u32 *resources = (u32 *)node->resourceHandles;
-        u32 *requests = (u32 *)node->fileRequests;
+        u32 *resources = (u32 *)node->work.resourceHandles;
+        u32 *requests = (u32 *)node->work.fileRequests;
         for (; i < 0x1D; i++, requests++, resources++) {
             if (*requests != 0) {
                 filePollEntryCleanup(*requests);
@@ -9585,15 +9600,76 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A51A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A51D0);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F41C0);
+extern s32 mnuGetSoundBufferStateLocked(void);
+extern void mnuResetSoundBufferLocked(void);
+extern void mnuReleaseSoundBufferLocked(void);
+extern void mnuPrintTitleDebugBanner(void);
+extern void func_0026ABA8(u32, u32, s32);
+extern s32 func_003003F0(const char *, ...);
 
-extern void btlQueueUnitSoundSlotFileLoad(s32);
+u32 func_001F41C0(SoundTaskArgs *args) {
+    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
+    SoundSlotOwner *owner = args->actor->soundSlotOwner;
+    SoundSlotWork *soundWork;
+    u32 key;
+    u32 data;
+    u32 size;
 
-extern u32 func_001F41C0(u32 *);
+    if (owner == 0) {
+        return 1;
+    }
+    if (owner->flags & 1) {
+        return 1;
+    }
+    if (!(owner->flags & 2)) {
+        return 1;
+    }
+    soundWork = &owner->work;
+    if (soundWork->resourceHandles[args->slot] == 0) {
+        return 1;
+    }
+    if (args->slot != 0xB) {
+        key = sndBuildMotSeResourceKey((u32 *)owner, args->slot);
+        if (owner->flags & 0x10) {
+            sndSetStationedSeHighVolume(key);
+            btlBossDebugPrintf("btl:motSE play[%X-%X]\n", key >> 16, key & 0xFFFF);
+            return 1;
+        }
+        key >>= 16;
+        btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
+    } else {
+        if (work->unk264 >= 0xB) {
+            if (mnuGetSoundBufferStateLocked() != 0) {
+                mnuResetSoundBufferLocked();
+                mnuReleaseSoundBufferLocked();
+            }
+            data = sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->slot]);
+            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->slot]);
+            func_0026ABA8(data, size, 2);
+            func_003003F0("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
+            mnuPrintTitleDebugBanner();
+            work->unk264 = 0;
+            btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
+        } else {
+            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->unk264);
+        }
+        return 1;
+    }
+    if (args->waitFrames > 90) {
+        owner->flags &= ~8;
+        owner->flags |= 0x10;
+        btlBossDebugPrintf("btl:motSE load time out[%X]\n", key);
+        return 1;
+    }
+    args->waitFrames++;
+    return 0;
+}
+
+extern void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *);
 
 s32 btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     u8 *task = btlAllocTask(16);
-    u32 *arguments;
+    SoundTaskArgs *arguments;
 
     task[0x10] = 0;
     task[0] = 1;
@@ -9601,20 +9677,19 @@ s32 btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(void **)(task + 0x48) = btlQueueUnitSoundSlotFileLoad;
     *(void **)(task + 0x4C) = func_001F41C0;
-    arguments = (u32 *)btlGetTaskArguments((s32)task);
-    arguments[0] = (u32)owner;
-    arguments[2] = soundId;
-    arguments[1] = 0;
-    arguments[3] = 0;
+    arguments = (SoundTaskArgs *)btlGetTaskArguments((s32)task);
+    arguments->actor = (BtlUnit *)owner;
+    arguments->slot = soundId;
+    arguments->option = 0;
+    arguments->waitFrames = 0;
     return (s32)task;
 }
 
 void func_001F4430(void) {
-    s32 temp_v0;
+    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
-    temp_v0 = btlGetRuntime();
-    *(s32 *)(temp_v0 + 0x264) = -1;
-    *(s32 *)(temp_v0 + 0x268) = -1;
+    work->unk264 = -1;
+    work->unk268 = -1;
 }
 
 void sndLoadBattleBank(void) {
@@ -9640,7 +9715,7 @@ s32 sndHasOccupiedNodeSlots(void) {
     while (node != 0) {
         if ((node->flags & 2) == 0) {
             u32 index = 0;
-            u32 *requests = (u32 *)node->fileRequests;
+            u32 *requests = (u32 *)node->work.fileRequests;
             for (; index < 0x1D; index++) {
                 if (*requests != 0) {
                     return 1;
@@ -9653,9 +9728,7 @@ s32 sndHasOccupiedNodeSlots(void) {
     return 0;
 }
 
-extern s32 mnuGetSoundBufferStateLocked(void);
 
-extern void mnuPrintTitleDebugBanner(void);
 
 u32 sndFinishEarringPlayback(void) {
     s32 status = mnuGetSoundBufferStateLocked();
