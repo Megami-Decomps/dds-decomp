@@ -409,7 +409,35 @@ s32 mnuClaimPositionedEffectRecord(void *listAddress, void *stepAddress, s32 del
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B960);
+MnuEffectRecord *func_0031B960(MnuEffectList *list, s32 delay, f32 x, f32 y, f32 z) {
+    f32 position[4];
+    MnuEffectRecord *record;
+    s32 index = 0;
+    s32 count;
+    u32 flags;
+
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    position[3] = 0.0f;
+    count = list->count;
+    record = list->records;
+    for (; index < count; index++, record++) {
+        if ((record->flags & 1) == 0) {
+            if (record->queue != NULL) {
+                fileQueueSetPosition(record->queue, position);
+                fileQueueSetScale(record->queue, 0.2f);
+                func_0031BC10(record, 10.0f, 0.0f, 0.0f);
+                flags = record->flags;
+                record->delay = delay;
+                record->flags = flags | 1;
+                return record;
+            }
+            return NULL;
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BA28);
 
