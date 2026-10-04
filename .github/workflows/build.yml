@@ -27,6 +27,7 @@ jobs:
           python3 tools/test_lb.py
           python3 tools/test_battle_tbl.py
           python3 tools/test_check_unit.py
+          python3 tools/test_reconcile_report.py
           python3 tools/test_dev_elf.py
           python3 tools/test_include_sdata.py
           python3 tools/test_ee_gcc_aslr.py

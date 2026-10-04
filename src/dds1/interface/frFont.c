@@ -43,13 +43,14 @@ typedef struct FrFontGlyph {
         s16 h;                        /* 0x0: halfword view */
         struct { s8 b0; s8 b1; } b;   /* 0x0: byte views */
     } u0;
-    s16 unk2;         /* 0x2 */
+    u16 unk2;         /* 0x2 */
     s32 x;            /* 0x4: horizontal position */
     s32 y;            /* 0x8: vertical position */
     s32 advance;      /* 0xC: advance shifted by four when linking glyphs */
     union {
         u32 word;     /* 0x10: word view */
         u16 half[2];  /* 0x10: halfword views */
+        u8 byte[4];   /* 0x10: byte views */
     } u10;
     union {
         u32 w;        /* 0x14: word view */
@@ -145,6 +146,11 @@ extern void frFontSetContextEncodedByte(FrFontCtx *ctx, s32 inputValue);
 extern s32 kwlnGetDrawBufferIndex(void);
 
 extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
+
+extern s32 func_00193D70(s32 x, s32 y, u8 width, u8 halfHeight, u8 style,
+                         s32 flags, s32 color, s32 enabled, s32 sourceY,
+                         void *table, s32 drawFlags);
+extern u8 D_003D6DE0[];
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
@@ -711,7 +717,104 @@ s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph) {
     return didChange;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001955D8);
+/* Advance one rendered glyph's fade state and return its transient X jitter. */
+s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step) {
+    FrFontGlyph *previousParent;
+    FrFontGlyph *previousGlyph;
+    u32 *fadeWord;
+    u8 previousOption;
+    u8 fade = 0x80;
+    s32 ready = 0;
+    s32 canStopLips = 1;
+    s32 jitter = 0;
+
+    previousGlyph = glyph->previous;
+    previousOption = 0;
+    if (previousGlyph == NULL) {
+        previousParent = parent->previous;
+        if (previousParent != NULL && previousParent->unk20 != NULL) {
+            fade = previousParent->unk20->u10.byte[0];
+            previousOption = previousParent->unk20->u14.b[2];
+        }
+    } else {
+        fade = previousGlyph->u10.byte[0];
+        previousParent = parent->previous;
+    }
+
+    fadeWord = &glyph->u10.word;
+    if (previousOption == 0 || previousOption == glyph->u14.b[2]) {
+        if (fade >= threshold) {
+            ready = 1;
+        }
+    } else {
+        ready = fade == 0x80;
+    }
+
+    if (previousParent != NULL && parent->firstChild == glyph && parent->unk40 == 0) {
+        switch (previousParent->unk30) {
+        case 0xF214:
+            if (previousParent->unk3C > 0) {
+                ready = 0;
+                if (fade == 0x80) {
+                    previousParent->unk3C = previousParent->unk3C - 1;
+                }
+            }
+            break;
+        case 0xF215:
+            if (previousParent->unk3C != 0xFFFF) {
+                if (previousParent->unk3C > 0) {
+                    previousParent->unk3C--;
+                    ready = 0;
+                }
+            } else if (mnuQueryTitleSoundBusy() != 0) {
+                ready = 0;
+            }
+            break;
+        }
+    }
+
+    if (parent->unk34 == 0xF117 && parent->unk20->u10.byte[0] == 0x80) {
+        if (parent->unk38 == 0 && parent->unk3C > 0) {
+            if (parent->unk3C == 0xFFFF) {
+                if (mnuQueryTitleSoundBusy() != 0) {
+                    canStopLips = 0;
+                }
+            } else {
+                canStopLips = 0;
+            }
+        }
+        if (canStopLips != 0) {
+            evtLipsStopFunction();
+            parent->unk34 = 0;
+        }
+    }
+
+    if (ready != 0) {
+        u32 word;
+
+        if ((s8)step >= 0) {
+            step = (step * 22) / (glyph->advance + parent->u0.b.b1);
+        }
+        word = *fadeWord;
+        if ((u32)(0x80 - (word & 0xFF)) >= step) {
+            *fadeWord = word + step;
+        } else {
+            *fadeWord = (word & ~0xFF) | 0x80;
+        }
+    }
+
+    {
+        s8 currentFade = fadeWord[0];
+        u16 glyphValue = glyph->unk2;
+
+        if (currentFade >= 0) {
+            if (glyph->u14.b[2] == 1) {
+                jitter = -((((glyphValue * 2) % 5) - 2) << 4);
+            }
+        }
+    }
+    return jitter;
+}
 
 /* Draw through the shared render flags with mode zero. */
 void frFontDrawGlyphInDefaultMode(FrFontGlyph *glyph) {
@@ -723,7 +826,96 @@ void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
     func_001958A0(glyph, mode, frFontSharedRenderFlags);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001958A0);
+/* Draw every child glyph, advance each parent chain, and report its measured
+ * width only while all control/fade conditions remain ready. */
+s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags) {
+    FrFontGlyph *child;
+    s32 ready = 1;
+    s32 enabled = 1;
+    s32 result = 0;
+    s32 totalAdvance = 0;
+    s32 titleSoundBusy;
+    u8 *table;
+
+    if (glyph != NULL) {
+        glyph = glyph->chainHead;
+        if (glyph != NULL) {
+            do {
+                s32 x = glyph->x;
+                s32 y = glyph->y;
+                s8 spacing = glyph->u0.b.b1;
+
+                child = glyph->firstChild;
+                if (child != NULL) {
+                    table = D_003D6DE0;
+                    do {
+                        s32 xOffset = mode != 0 ? 0 :
+                            func_001955D8(glyph, child, 0x1C, (u8)glyph->u0.b.b0);
+                        u32 glyphState;
+                        if (child->unk20 == NULL) {
+                            if ((u16)child->u0.h < 0x80) {
+                                enabled = 1;
+                            }
+                            func_00193D70(x + child->x + xOffset, y + child->y,
+                                         child->unk18.b[0], child->unk18.b[1] >> 1,
+                                         child->u14.b[0], child->u10.word,
+                                         glyph->u14.w, enabled,
+                                         child->firstChild->y + 4,
+                                         table, flags);
+                        } else {
+                            func_00193D70(x + child->x + xOffset, y + child->y,
+                                         child->unk18.b[0], child->unk18.b[1] >> 1,
+                                         child->u14.b[0], child->u10.word,
+                                         glyph->u14.w, enabled,
+                                         child->unk20->y + 4,
+                                         table, flags);
+                        }
+                        glyphState = child->u10.byte[0];
+                        if (glyphState != 0) {
+                            child->unk2++;
+                        }
+                        if (glyphState < 0x80) {
+                            ready = 0;
+                        }
+                        x += (child->advance + spacing) << 4;
+                        child = child->next;
+                    } while (child != NULL);
+                }
+
+                if (glyph->next == NULL && glyph->unk40 == 0) {
+                    switch (glyph->unk30) {
+                    case 0xF214:
+                        if (ready != 0 && glyph->unk3C > 0) {
+                            glyph->unk3C--;
+                            ready = 0;
+                        }
+                        break;
+                    case 0xF215:
+                        if (glyph->unk3C != 0xFFFF) {
+                            if (glyph->unk3C > 0) {
+                                glyph->unk3C--;
+                                ready = 0;
+                            }
+                        } else {
+                            titleSoundBusy = mnuQueryTitleSoundBusy();
+                            if (titleSoundBusy != 0) {
+                                ready = 0;
+                            }
+                        }
+                        break;
+                    }
+                }
+                totalAdvance += glyph->unk18.w;
+                glyph = glyph->next;
+            } while (glyph != NULL);
+        }
+        result = totalAdvance;
+        if (ready == 0) {
+            result = 0;
+        }
+    }
+    return result;
+}
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
@@ -1045,4 +1237,3 @@ INCLUDE_SDATA(const s32, "interface/frFont", frFontSharedRenderFlags);
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB180);
-
