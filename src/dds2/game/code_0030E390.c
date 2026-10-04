@@ -147,12 +147,48 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
     D_004390A4 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030EAA8);
-
 extern s32 sdfCounterGetDisplayValue(void);
+extern f32 D_00400700[][4];
+extern s8 D_004388D1;
+extern void fldAdvanceMapRequest(s32, u32, u32, u32);
+extern void func_0030EF90(SdfRing *);
+
+void func_0030EAA8(s32 enabled) {
+    s8 index = sdfCounterGetDisplayValue() - 1;
+
+    if (D_004390A4 != 0 && enabled != 0) {
+        D_004388D1 = 0;
+        if (D_004390A4 == 1) {
+            fldAdvanceMapRequest(D_004390B0, D_0045C7B0[0], D_0045C7B0[1], D_0045C7B0[2]);
+            fldAdvanceMapRequest(D_004390B0, (s32)D_00400700[index][0],
+                (s32)D_00400700[index][1], (s32)D_00400700[index][2]);
+        }
+        D_004390A4++;
+        D_0045C7A0[0] = (s32)D_00400700[index][0];
+        D_0045C7A0[1] = (s32)D_00400700[index][1];
+        D_0045C7A0[2] = (s32)D_00400700[index][2];
+        if (D_004390A4 >= 7) {
+            D_004390A4 = 0;
+        }
+        fldAdvanceMapRequest(D_004390AC, D_0045C7A0[0], D_0045C7A0[1], D_0045C7A0[2]);
+    } else {
+        if (++D_004388D1 == 0x1C) {
+            if (enabled != 0) {
+                fldAdvanceMapRequest(D_004390B0, (s32)D_00400700[index][0],
+                    (s32)D_00400700[index][1], (s32)D_00400700[index][2]);
+            }
+            D_004388D1 = 0;
+        }
+        D_0045C7A0[0] = (s32)D_00400700[index][0];
+        D_0045C7A0[1] = (s32)D_00400700[index][1];
+        D_0045C7A0[2] = (s32)D_00400700[index][2];
+    }
+    func_0030EF90((SdfRing *)D_004390AC);
+    func_0030EF90((SdfRing *)D_004390B0);
+}
+
 extern f32 sdfCounterGetScaledValue(void);
 extern void func_0030F038(SdfRing *);
-extern f32 D_00400700[][4];
 
 /* Draw the selected map marker and overlay its highlight twice. */
 void fldDrawSelectedMapMarker(void) {
