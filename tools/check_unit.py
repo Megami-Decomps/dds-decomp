@@ -22,6 +22,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pairing import RETAIL, ROOT, load_segments, va_to_off  # noqa: E402
+from resolved_code import (  # noqa: E402
+    instruction_shape_matches,
+    linked_gprel_field,
+    linked_hi_field,
+    linked_jump_field,
+    linked_lo_field,
+    literal_pool_offset,
+    retail_literal_address,
+    sext16,
+)
 
 BIN = ROOT / "tools/bin"
 VERSIONS = __import__("json").loads((ROOT / "config/versions.json").read_text())
@@ -609,8 +619,7 @@ def main():
             rtype, sym = relocations_at
             base = sym.split("+")[0]
             target = address(base, syms)
-            if (mine & 0xFC000000 if rtype == "R_MIPS_26" else mine & 0xFFFF0000) != \
-                    (want & 0xFC000000 if rtype == "R_MIPS_26" else want & 0xFFFF0000):
+            if not instruction_shape_matches(mine, want, rtype):
                 diffs.append((i, mine, want, f"{rtype} {sym}"))
                 continue
             if target is not None and lit4_lo <= target < lit4_hi:
@@ -619,9 +628,9 @@ def main():
             if base == ".lit4":
                 # A float constant: our pool offset differs from retail's (asm
                 # functions are not compiled here), so compare the value itself.
-                at = (((mine & 0xFFFF) ^ 0x8000) - 0x8000) + gp0  # object gp is .reginfo's
+                at = literal_pool_offset(mine, gp0)  # object gp is .reginfo's
                 ours = struct.unpack_from("<I", lit4, at)[0] if 0 <= at <= len(lit4) - 4 else None
-                theirs = struct.unpack_from("<I", retail, va_to_off(segs, gp + (((want & 0xFFFF) ^ 0x8000) - 0x8000)))[0]
+                theirs = struct.unpack_from("<I", retail, va_to_off(segs, retail_literal_address(want, gp)))[0]
                 if ours != theirs:
                     diffs.append((i, mine, want, f"float constant {ours if ours is None else hex(ours)} vs retail {theirs:#x}"))
                 continue
@@ -631,21 +640,18 @@ def main():
                 if rtype == "R_MIPS_HI16":
                     sdata_hi = (mine & 0xFFFF, want & 0xFFFF)
                 elif rtype == "R_MIPS_LO16" and sdata_hi:
-                    sext = lambda v: (v ^ 0x8000) - 0x8000
-                    small.append(((sdata_hi[0] << 16) + sext(mine & 0xFFFF),
-                                  (sdata_hi[1] << 16) + sext(want & 0xFFFF), name))
+                    small.append(((sdata_hi[0] << 16) + sext16(mine),
+                                  (sdata_hi[1] << 16) + sext16(want), name))
                 elif rtype == "R_MIPS_GPREL16":
-                    sext = lambda v: (v ^ 0x8000) - 0x8000
-                    small.append((sext(mine & 0xFFFF) + gp0, gp + sext(want & 0xFFFF), name))
+                    small.append((sext16(mine) + gp0, gp + sext16(want), name))
                 continue
             if base == ".rodata":
                 # A switch's jump table: remember where each side keeps it.
                 if rtype == "R_MIPS_HI16":
                     rodata_hi = (mine & 0xFFFF, want & 0xFFFF)
                 elif rtype == "R_MIPS_LO16" and rodata_hi:
-                    sext = lambda v: (v ^ 0x8000) - 0x8000
-                    tables.append(((rodata_hi[0] << 16) + sext(mine & 0xFFFF),
-                                   (rodata_hi[1] << 16) + sext(want & 0xFFFF), name))
+                    tables.append(((rodata_hi[0] << 16) + sext16(mine),
+                                   (rodata_hi[1] << 16) + sext16(want), name))
                 continue
             if base == ".text" and rtype == "R_MIPS_26":
                 # A call into this unit's own C: the field holds our offset.
@@ -667,9 +673,8 @@ def main():
                 hi = text_hi.get((mine >> 21) & 0x1F)
                 if hi is None:
                     continue
-                sext = lambda v: (v ^ 0x8000) - 0x8000
-                tgt = ((hi[1] & 0xFFFF) << 16) + sext(mine & 0xFFFF)
-                theirs = ((hi[2] & 0xFFFF) << 16) + sext(want & 0xFFFF)
+                tgt = ((hi[1] & 0xFFFF) << 16) + sext16(mine)
+                theirs = ((hi[2] & 0xFFFF) << 16) + sext16(want)
                 owner = next(((o, n) for o, s, n in funcs if o <= tgt < o + s), None)
                 where = address(owner[1], syms) if owner else None
                 if where is None or where + tgt - owner[0] != theirs:
@@ -678,21 +683,20 @@ def main():
                 continue
             if target is None:
                 continue  # other local section: masked
-            addend = mine & 0x3FFFFFF if rtype == "R_MIPS_26" else ((mine & 0xFFFF) ^ 0x8000) - 0x8000
+            addend = mine & 0x3FFFFFF if rtype == "R_MIPS_26" else sext16(mine)
             if rtype == "R_MIPS_26":
-                good = (want & 0x3FFFFFF) == (((target >> 2) + addend) & 0x3FFFFFF)
+                good = (want & 0x3FFFFFF) == linked_jump_field(target, addend)
             elif rtype == "R_MIPS_HI16":
                 pending_hi[base] = (i, mine, want, rtype, sym, want & 0xFFFF)
                 good = True
             elif rtype == "R_MIPS_LO16":
-                full = target + addend
-                good = (want & 0xFFFF) == full & 0xFFFF
+                good = (want & 0xFFFF) == linked_lo_field(target, addend)
                 if base in pending_hi:
                     hi = pending_hi.pop(base)
-                    if hi[5] != ((full + 0x8000) >> 16) & 0xFFFF:
+                    if hi[5] != linked_hi_field(target, addend):
                         diffs.append(hi[:3] + (f"{hi[3]} {hi[4]}",))
             elif rtype == "R_MIPS_GPREL16":
-                good = (want & 0xFFFF) == (target + addend - gp) & 0xFFFF
+                good = (want & 0xFFFF) == linked_gprel_field(target, addend, gp)
             else:
                 good = True
             if not good:
