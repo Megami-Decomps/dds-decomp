@@ -1781,12 +1781,12 @@ extern SoundTask *btlFindTaskByHandle(u64);
 extern SoundTask *btlFindTaskByOwner(u64);
 extern SoundTask *btlFindTaskByKind(u16);
 
+/* Return whether the predicate is satisfied by value or registered tasks.
+ * Kinds 5/8 accept running (phase 2) or absent, not an existing finishing task. */
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178A8);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178B8);
 
-/* Return whether the predicate is satisfied by value or registered tasks.
- * Kinds 5/8 accept running (phase 2) or absent, not an existing finishing task. */
 s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
     s32 result = 0;
     SoundTask *task;
@@ -7963,11 +7963,26 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
+/* Shared motion-SE owner: queued files become resource handles before playback. */
+typedef struct SoundSlotOwner {
+    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
+    s32 category;
+    s32 id;
+    s32 refCount;
+    s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
+    s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
+    s32 fileRequests[0x1D];
+    s32 resourceHandles[0x1D];
+    struct SoundSlotOwner *prev;
+    struct SoundSlotOwner *next;
+} SoundSlotOwner;
+
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
+/* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
 u32 func_002048C8(u32 *sound, u32 slot) {
-    u32 id = sound[2];
-    u32 category = sound[1];
+    u32 id = ((SoundSlotOwner *)sound)->id;
+    u32 category = ((SoundSlotOwner *)sound)->category;
     SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
     s32 specialCategory = 1;
     s32 scaledId = id * 0x20;
@@ -8029,29 +8044,20 @@ void sndLoadMotSeFiles(u32 *sound) {
     sound[0] |= 1;
 }
 
+/* Find the newest registered owner with both keys equal; return null if absent. */
 void *sndFindListNodeForChannel(s32 category, s32 id) {
-    u8 *node = *(u8 **)(btlGetRuntime() + 0x260);
+    SoundSlotOwner *node = ((BtlWork *)btlGetRuntime())->soundSlotOwners;
     while (node != 0) {
-        if (*(s32 *)(node + 4) == category && *(s32 *)(node + 8) == id) {
+        if (node->category == category && node->id == id) {
             return node;
         }
-        node = *(u8 **)(node + 0x104);
+        node = node->next;
     }
     return 0;
 }
 
-typedef struct SoundSlotOwner {
-    u32 flags;
-    s32 category;
-    s32 id;
-    s32 refCount;
-    s32 load[2];
-    s32 slot[0x1D];
-    s32 handle[0x1D];
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
+/* Retain or register an owner; model flag 0xC0F suppresses initial file queuing. */
 SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
     SoundSlotOwner *owner = sndFindListNodeForChannel(category, id);
     BtlWork *work;
@@ -8083,15 +8089,16 @@ extern s32 filePollEntryCleanup(s32);
 
 extern void sdfReleaseResourceAllocation(u32);
 
+/* The last reference cleans queued files and resource handles, then unlinks/frees. */
 void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     u32 i;
     if (--owner->refCount == 0) {
         for (i = 0; i < 0x1D; i++) {
-            if (owner->slot[i] != 0) {
-                filePollEntryCleanup(owner->slot[i]);
+            if (owner->fileRequests[i] != 0) {
+                filePollEntryCleanup(owner->fileRequests[i]);
             }
-            if (owner->handle[i] != 0) {
-                sdfReleaseResourceAllocation(owner->handle[i]);
+            if (owner->resourceHandles[i] != 0) {
+                sdfReleaseResourceAllocation(owner->resourceHandles[i]);
             }
         }
         if (owner->next != 0) {
@@ -8106,6 +8113,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     }
 }
 
+/* Release once per owner; preserve the next link before a final release may free. */
 void sndReleaseAllSlotOwners(void) {
     SoundSlotOwner *owner;
     SoundSlotOwner *next;
@@ -8122,17 +8130,19 @@ void btlStartMoveOtherUnitsTask(void) {
     btlStartTask(task);
 }
 
+/* Flag 8 denotes packed-track loading, distinct from queued motion-SE files. */
 s32 sndHasActiveFileLoad(void) {
-    u8 *node = (u8 *)((BtlWork *)btlGetRuntime())->soundSlotOwners;
+    SoundSlotOwner *node = ((BtlWork *)btlGetRuntime())->soundSlotOwners;
     while (node != 0) {
-        if ((*(u32 *)node & 8) != 0) {
+        if ((node->flags & 8) != 0) {
             return 1;
         }
-        node = *(u8 **)(node + 0x104);
+        node = node->next;
     }
     return 0;
 }
 
+/* Queue a ready owner's packed track; stream slot 11 only supplies its file ID. */
 void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
     SoundSlotTableEntry *table;
@@ -8146,15 +8156,15 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (!(owner->flags & 2)) {
         return;
     }
-    if (owner->handle[args->unk_08] == 0) {
+    if (owner->resourceHandles[args->unk_08] == 0) {
         return;
     }
     table = btlSelectSideIndexedActorParameterTable(owner->category, owner->id);
     entry = &table[args->unk_08];
     args->option = entry->fileId;
     if (args->unk_08 != 0xB) {
-        owner->load[0] = func_002048C8(owner, args->unk_08);
-        owner->load[1] = args->unk_08;
+        owner->pendingSoundId = func_002048C8(owner, args->unk_08);
+        owner->pendingSlot = args->unk_08;
         owner->flags |= 4;
         owner->flags &= ~8;
         owner->flags &= ~0x10;
@@ -8216,13 +8226,14 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00419408);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00205160);
 
+/* Return whether a not-yet-file-ready owner still has an outstanding request. */
 s32 sndHasOccupiedNodeSlots(void) {
     SoundSlotOwner *owner;
     u32 i;
     for (owner = ((BtlWork *)btlGetRuntime())->soundSlotOwners; owner != 0; owner = owner->next) {
         if (!(owner->flags & 2)) {
             for (i = 0; i < 0x1D; i++) {
-                if (owner->slot[i] != 0) {
+                if (owner->fileRequests[i] != 0) {
                     return 1;
                 }
             }
