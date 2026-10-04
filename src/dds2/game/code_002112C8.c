@@ -365,7 +365,7 @@ extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 extern s32 btlElementToBitIndex(s32, s32);
 
 
-extern s32 func_001AE8C0(void *, s32);
+extern s32 func_001AE8C0(s32, u32);
 
 extern s32 btlHasSpecialAbility274(void *, s32);
 
@@ -1548,7 +1548,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                             continue;
                         }
                         if (btlTestSelectedItemCategoryMask(unit, index) != 0 ||
-                            func_001AE8C0(unit, index) != 0 ||
+                            func_001AE8C0((s32)unit, index) != 0 ||
                             btlHasSpecialAbility274(unit, index) != 0 ||
                             btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
                             return 0;
@@ -1557,7 +1557,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                     return 1;
                 }
                 if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
-                    func_001AE8C0(unit, action) != 0 ||
+                    func_001AE8C0((s32)unit, action) != 0 ||
                     btlHasSpecialAbility274(unit, action) != 0) {
                     return 0;
                 }
@@ -3614,7 +3614,26 @@ void func_0021B4A8(void) {
     func_0021B368();
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B4C0);
+BtlUnit *func_0021B4C0(s32 mode, u32 species) {
+    BtlUnit *unit;
+
+    if (mode != 1) {
+        return NULL;
+    }
+    switch (species) {
+    case 0x110:
+    case 0x111:
+    case 0x112:
+        break;
+    default:
+        return NULL;
+    }
+    unit = *(BtlUnit **)((BattleWork *)btlGetRuntime())->sub;
+    if (unit == NULL) {
+        return NULL;
+    }
+    return (unit->flags & 2) ? unit : NULL;
+}
 
 extern s64 btlAdvanceRuntimeSequenceCounter(void);
 
