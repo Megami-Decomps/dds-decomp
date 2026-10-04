@@ -1502,3 +1502,115 @@ calculations), as C89 code with all declarations at the top often does. It is a
 fake when the reuse only reads correctly under a misleading name (a `column`
 counter holding a row bound), or when the variable exists only to steer
 register allocation.
+
+## Pure two-word swaps: identify the decisive scheduler key
+
+A residual consisting of two exchanged instructions is a phenotype, not a
+single source idiom. The same final diff can originate in readonly memory,
+native pointer fields, or a real return-value lifetime. It does not justify
+declaration-order searches or adding a value that the function does not need.
+
+The following corpus comes from existing parked notes. Some entries have
+already been resolved in production; an old park is not evidence that its
+function still needs decompilation. Paths below are relative to `build/parked`.
+
+| Game | Function(s) | Historical exchanged pair | Park |
+| --- | --- | --- | --- |
+| DDS2 | `func_001552E0`, `func_00155690` | `a0 = sp` / `a2 = v0`, `+0x70/+0x7C` | `dds2/game/code_00154558/func_001552E0_Fam_Mid.c`, sibling `_Fam_Mid.c` |
+| DDS1 | `bfOpWaitDispatch` | command parameter count / VM stack pointer, `+0x54/+0x60` | `dds1/script/scrTraceCode/bfOpWaitDispatch_P3_Med3.c` |
+| DDS2 | `bfOpWaitDispatch` | same two loads as DDS1 | `dds2/script/scrTraceCode/bfOpWaitDispatch_P3_Med3.c` |
+| DDS1 | `func_00199828` | allocation-pointer store / kind-byte store, `+0x3C/+0x40` | `dds1/game/code_00196478/func_00199828_W16_Snd.c` |
+| DDS2 | `func_001A1858` | corresponding sprite-constructor stores | `dds2/game/code_0019E138/func_001A1858_P8_FreshA.c` |
+| DDS1 | `func_002BA058`, `func_002BA0C0`, `func_002BA170`, `func_002BA230`, `func_002BA2D0`, `func_002BA3C8`, `func_002BA498` | epilogue `ld s0` / `ld s1` | `dds1/game/code_0029A840/func_002BA058_family_W16_Snd.c` |
+| DDS1 | `func_002D5CD0` | resource-header / packet-source loads, `+0xA8/+0xB0` | `dds1/game/code_002D33C8/func_002D5CD0_P2_Med2.c` |
+| DDS1 | `func_0013D650` | return-address save / actor-task flag store | `dds1/game/code_00126A30/func_0013D650.c` |
+| DDS2 | `func_00140238` | same pair, `+0x18/+0x1C` | `dds2/game/code_00136EF8/func_00140238_P1_Med0.c` |
+| DDS2 | `func_00219BD0` | flags / motion-parameter stores, `+0xBC/+0xCC` with native types | `dds2/game/code_002112C8/func_00219BD0_M86.c` |
+| DDS2 | `func_002F6A80` | entry argument / path-work pointer loads, `+0x88/+0x90` | `dds2/game/code_002DE248/func_002F6A80_Fam_Tail.c` |
+| DDS2 | `func_002DFAB0` | address high half / stack-address setup, `+0x114/+0x118` | `dds2/game/code_002DE248/func_002DFAB0_Fam_Tail.c` |
+
+This is nineteen functions, not nineteen independent fixes. In particular,
+the seven mapping wrappers now live in `src/dds1/game/code_0029C530.c`;
+the historical park directory predates the current TU boundary.
+
+### Use the actual gcc 2.96 comparator
+
+The shipped `cc1` has `rank_for_schedule` at host address
+`0x0816C6AC`. Its descending preference order is:
+
+1. Greater critical-path priority.
+2. Before reload only, smaller register weight.
+3. Interblock target/speculation/probability preferences, where applicable.
+4. Dependency class relative to the last-issued instruction: independent
+   (or cost-one) before costly anti/output dependence before costly true
+   dependence.
+5. More forward dependents.
+6. Earlier logical instruction UID.
+
+Thus sched2 does not use the register-weight tier. A different load/store unit
+or floating-point register class is not an additional comparator key. Consult
+the actual ready list and dependency edges before blaming the final UID tie.
+`tools/ee_gcc_probe.py --cflag=-fsched-verbose=5` exposes these in `17.sched`
+and `25.sched2`; `29.dbr` shows subsequent delay-slot donation.
+
+### Two readonly-table controls
+
+Both games' existing `bfOpWaitDispatch` are exact with an `extern const
+ScrCommand` table. Removing only that `const` in private snapshots reproduces
+exactly the two `+0x54/+0x60` loads, leaving the other 37 words identical.
+The unmodified production script units each pass `41 match, 0 differ`.
+
+In the DDS2 sched2 success block, both loads have priority 4. With the mutable
+table, instruction 70 (parameter count) and instruction 68 (VM stack pointer)
+each have three forward dependents, so the earlier UID wins. The readonly
+`mem/s/u:SI` removes 70's anti-dependence to instruction 74's stack-pointer
+store: 70 then has two dependents while 68 still has three. The forward-count
+key now chooses the VM load first. Delay-slot donation turns this into the
+retail success-branch slot. This is a real rodata/alias fact, not an instruction
+order requirement to encode in C.
+
+### Three return-liveness controls
+
+`func_002BA170`, `func_002BA230`, and `func_002BA498` have ordinary `s32`
+returns that forward `func_002B9320`'s result after restoring the mapping
+table. Private controls changing just those wrappers to `void` and ignoring
+the result each reproduce exactly two swapped epilogue loads: `+0x4C/+0x50`,
+22 of 24 words identical. The combined negative control gives
+`516 match, 3 differ`; after a stable resplit the positive snapshot passes
+`519 match, 0 differ`, with no PAD or other diagnostics. These wrappers were
+already C before this experiment; this validates a cause, not a new landing.
+
+For `func_002BA170`, the positive sched2 has a legitimate `USE v0`
+(instruction 85) after the last table-pointer store (66). It emits no extra
+machine word, but becomes the last-issued instruction before restoring
+callee-saved registers. The `s0` and `s1` loads have equal priority 4 and two
+forward dependents; relative to that USE they tie, and the earlier `s0` UID
+wins. In the void control, the last-issued instruction is the table-pointer
+store (61). The `s0` restore has an anti-dependence on it, while the `s1`
+restore does not, so the dependency-class tier chooses `s1` first.
+
+The source fact is the wrapper's real result contract, not a dummy local or
+an epilogue-order rule. Recover it from the provider and callers; do not
+change a genuinely void function to return an unused value merely to move
+restores.
+
+### The numeric-room reference remains unresolved
+
+DDS2 `func_001552E0` and `func_00155690` are each 440 bytes without padding.
+The honest candidates still have 108/110 exact words, and their combined
+private TU passes `95 match, 2 differ` with no other diagnostics. In
+`func_00155690`'s sched2 formatter block, instruction 108 (`a0 = sp`) has
+priority 10 and **five** forward dependents, while instruction 112
+(`a2 = v0`) has priority 10 and **four**. The former wins before the logical
+UID tie, despite its later position after sched1. The last `a2` move is then
+donated into the formatter's `jal` slot. Retail instead donates `a0`.
+
+Separating the numeric input from the parsed room's lifetime, combining the
+parse-and-apply expression, and using the SDK's actual `sprintf` spelling
+with its `int (char *, const char *, ...)` prototype all retain that pair.
+The immutable format declaration was already present. None supplies the
+missing original-source fact that would change the dependency graph.
+Do not generalize the readonly or hidden-return fixes to this stack buffer:
+both reference functions remain `INCLUDE_ASM`. No declaration enumeration,
+invented wide return, compiler-flag change, or artificial dependency was
+used to turn this unresolved case green.
