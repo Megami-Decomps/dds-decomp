@@ -345,12 +345,14 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
+extern void *mdlRequestAsset(u32 group, u32 id, u32 option);
+
 INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
 /* Request the group/id asset with option 1; that option's meaning is not
  * established by this forwarding body. */
-void func_00217298(u32 group, u32 id) {
-    mdlRequestAsset(group, id, 1);
+void *func_00217298(u32 group, u32 id) {
+    return mdlRequestAsset(group, id, 1);
 }
 
 typedef struct MdlGroup {
