@@ -9455,7 +9455,93 @@ void btlOrientFrontAndBackUnitsTowardTargets(BattleActionLinkState *link, BtlUni
     btlUnitFaceTarget(back, front);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00206970);
+extern s32 btlGetBossSceneStateWhenActive(void);
+
+/* vu0 routine: measure the center actor's displacement from its sole target. */
+void func_00206970(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+    BtlUnit *slot[3];
+    f32 position[4];
+    f32 targetPosition[4];
+    BtlWork *work;
+    BtlUnit *target;
+    f32 offsetX;
+    f32 offset;
+    u32 i;
+
+    work = (BtlWork *)btlGetRuntime();
+    if (btlGetIndexListCount(link->actorIndices) == 1) {
+        target = (BtlUnit *)btlGetIndexListEntry(link->actorIndices, 0);
+        btlFlagAllUnitsDefeatCandidate();
+        btlClearMatchingUnitDefeatCandidates(target->flags & 0x600);
+        btlFlagUnitDefeatCandidate(target);
+        slot[0] = NULL;
+        slot[1] = NULL;
+        slot[2] = NULL;
+        slot[link->unit->lookupId] = link->unit;
+        slot[first->lookupId] = first;
+        slot[second->lookupId] = second;
+        if ((work->flags21C & 0x400000) != 0 &&
+            btlGetBossSceneStateWhenActive() == 0) {
+            switch (target->mode) {
+            case 0x111:
+                offset = -550.0f;
+                position[0] = offset;
+                position[1] = 0.0f;
+                position[2] = 350.0f;
+                btlSetUnitPosition(slot[0], position);
+                btlUnitFaceTarget(slot[0], target);
+                position[0] = offset;
+                position[1] = 0.0f;
+                position[2] = 120.0f;
+                btlSetUnitPosition(slot[1], position);
+                btlUnitFaceTarget(slot[1], target);
+                position[0] = offset;
+                position[1] = 0.0f;
+                position[2] = -110.0f;
+                btlSetUnitPosition(slot[2], position);
+                btlUnitFaceTarget(slot[2], target);
+                return;
+            case 0x112:
+                offset = 550.0f;
+                position[0] = offset;
+                position[1] = 0.0f;
+                position[2] = 350.0f;
+                btlSetUnitPosition(slot[0], position);
+                btlUnitFaceTarget(slot[0], target);
+                position[0] = offset;
+                position[1] = 0.0f;
+                position[2] = 120.0f;
+                btlSetUnitPosition(slot[1], position);
+                btlUnitFaceTarget(slot[1], target);
+                position[0] = offset;
+                position[1] = 0.0f;
+                position[2] = -110.0f;
+                btlSetUnitPosition(slot[2], position);
+                btlUnitFaceTarget(slot[2], target);
+                return;
+            }
+        }
+        btlUnitGetMuzzlePosVU(slot[1]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlUnitGetMuzzlePosVU(target);
+        VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
+        VU0_LOAD_VF(vf11, position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_GET_VF10_X(offsetX);
+        targetPosition[2] -= target->reach * target->scale;
+        offset = -(500.0f - (targetPosition[2] - position[2]));
+        if (work->flags21C & 0x200) {
+            offset = 0.0f;
+        }
+        for (i = 0; i < 3; i++) {
+            func_001E3108((u8 *)slot[i], (s128 *)position);
+            position[0] += offsetX;
+            position[2] += offset;
+            btlSetUnitPosition(slot[i], position);
+            btlUnitFaceTarget(slot[i], target);
+        }
+    }
+}
 
 void func_00206C10(void) {
 }
