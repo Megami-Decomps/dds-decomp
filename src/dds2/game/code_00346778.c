@@ -334,7 +334,17 @@ void func_00346AE8(PacState *state) {
     state->flags = state->flags | PAC_STATE_ALLOCATE_HIGH;
 }
 
-INCLUDE_ASM(const s32, "game/code_00346778", func_00346AF8);
+/* Advance the queue cursor before returning each node to the chip allocator. */
+void func_00346AF8(PacState *state) {
+    PacWork *cursor = state->queueHead;
+    PacWork *current = cursor;
+
+    while (cursor != NULL) {
+        cursor = cursor->next;
+        sdfReleaseChipBlock(current);
+        current = cursor;
+    }
+}
 
 /* Mark the caller's phase byte finished. */
 void func_00346B30(u8 *phaseByte) {
