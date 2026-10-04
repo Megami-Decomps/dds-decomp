@@ -6,7 +6,21 @@
 
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
-    BTL_RESOURCE_NAME_RECORD_BYTES = 0x38
+    BTL_RESOURCE_NAME_RECORD_BYTES = 0x38,
+    BTL_PACKED_SCREEN_X_BIAS = 0x7000,
+    BTL_PACKED_SCREEN_Y_BIAS = 0x7900,
+    BTL_HP_PERCENT_SCALE = 100,
+    BTL_DIRECTORY_PATH_BYTES = 0x70,
+    BTL_BUILTIN_NAME_COUNT = 8,
+    BTL_DIRECTORY_FLAG_CLEAR = 0x1000,
+    BTL_RESOURCE_ENTRY_BYTES = 0x44,
+    BTL_BUTTON_ICON_SIZE = 0x40,
+    /* High-bit selectors are game-specific callback-table positions. */
+    BTL_PACKED_ENEMY_COUNT_LIMIT = 0x1C00000,
+    BTL_PACKED_ENEMY_QUEUED_QUERY = 0x12000000,
+    BTL_PACKED_PARTY_QUEUED_QUERY = 0x12400000,
+    BTL_PACKED_PARTY_ELEMENT_BLOCK = 0x11C00000,
+    BTL_PACKED_PARTY_EMPTY_MP = 0x12800000
 };
 
 typedef struct BtlActor {
@@ -344,16 +358,17 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     return 1;
 }
 
-/* vu0 routine: forward-cone projection to packed screen coordinates; input is vf10 */
-s32 func_00207C28(s32 out[4]) {
-    f32 distance, facing;
-    f32 *projection;
+/* Project the vf10 position into four screen-coordinate words with four fractional bits.
+   Return zero outside the distance/forward-cone checks, without writing the output. */
+s32 func_00207C28(s32 screenPosition[4]) {
+    f32 viewDistance, forwardDot;
+    f32 *projectionData;
 
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
-    if (!(distance > 16.0))
+    VU0_LENGTH_VF10(viewDistance);
+    if (!(viewDistance > 16.0))
         return 0;
 
     VU0_NORMALIZE_VF10();
@@ -363,8 +378,8 @@ s32 func_00207C28(s32 out[4]) {
     sdfInvertRigidVuTransform();
     VU0_MOVE_VF(vf10, vf30);
     VU0_NORMALIZE_VF10();
-    VU0_DOT_XYZ(facing, vf10, vf11);
-    if (facing <= 0.5f)
+    VU0_DOT_XYZ(forwardDot, vf10, vf11);
+    if (forwardDot <= 0.5f)
         return 0;
 
     VU0_MOVE_VF(vf10, vf12);
@@ -372,19 +387,19 @@ s32 func_00207C28(s32 out[4]) {
     VU0_MOVE_VF(vf29, vf25);
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
-    projection = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory(projection);
+    projectionData = sdfProjectionMatrix;
+    sdfPostmultiplyVuMatrixFromMemory(projectionData);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();
-    projection += 16;
-    VU0_LOAD_VF(vf11, projection);
+    projectionData += 16;
+    VU0_LOAD_VF(vf11, projectionData);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_0037F660);
     VU0_ADD(vf10, vf10, vf11);
     VU0_FTOI4(vf10, vf10);
-    VU0_STORE_VF(vf10, out);
-    out[0] -= 0x7000;
-    out[1] -= 0x7900;
+    VU0_STORE_VF(vf10, screenPosition);
+    screenPosition[0] -= BTL_PACKED_SCREEN_X_BIAS;
+    screenPosition[1] -= BTL_PACKED_SCREEN_Y_BIAS;
     return 1;
 }
 
@@ -792,10 +807,11 @@ static inline f32 btlAbsF32(f32 value) {
     return result;
 }
 
-s32 btlAimHorizontalDirectionVU(f32 *from, f32 *to) {
+/* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
+s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
     f32 delta[4];
-    delta[0] = to[0] - from[0];
-    delta[2] = to[2] - from[2];
+    delta[0] = targetPosition[0] - origin[0];
+    delta[2] = targetPosition[2] - origin[2];
     if (delta[0] != 0.0f || delta[2] != 0.0f) {
         func_00340DC8(0.0f, func_003532E8(delta[0], delta[2]), 0.0f);
         return 1;
@@ -804,37 +820,39 @@ s32 btlAimHorizontalDirectionVU(f32 *from, f32 *to) {
     return 0;
 }
 
-s32 func_00209258(f32 *from, f32 *to, f32 angle) {
+/* Bound horizontal X by abs(tan(angleLimit) * deltaZ), then load the yaw rotation.
+   Return zero for a zero XZ delta; unlike the unbounded variant, vf10 is not reset. */
+s32 func_00209258(f32 *origin, f32 *targetPosition, f32 angleLimit) {
     f32 delta[4];
-    f32 absX;
-    f32 limit;
-    f32 slope;
-    f32 clamped;
+    f32 absDeltaX;
+    f32 maxAbsX;
+    f32 tanAngle;
+    f32 aimX;
     f32 zero;
     f32 radians;
 
-    radians = angle;
+    radians = angleLimit;
     zero = 0.0f;
-    delta[0] = to[0];
-    delta[0] -= from[0];
-    delta[2] = to[2] - from[2];
+    delta[0] = targetPosition[0];
+    delta[0] -= origin[0];
+    delta[2] = targetPosition[2] - origin[2];
     if (delta[0] == zero && delta[2] == zero) {
         return 0;
     }
 
-    slope = sdfSinPoly(radians);
-    slope /= sdfEvaluateCosineViaSinePhaseShift(radians);
-    absX = btlAbsF32(delta[0]);
-    clamped = slope * delta[2];
-    limit = __builtin_fabsf(clamped);
-    if (absX < limit) {
-        clamped = delta[0];
+    tanAngle = sdfSinPoly(radians);
+    tanAngle /= sdfEvaluateCosineViaSinePhaseShift(radians);
+    absDeltaX = btlAbsF32(delta[0]);
+    aimX = tanAngle * delta[2];
+    maxAbsX = __builtin_fabsf(aimX);
+    if (absDeltaX < maxAbsX) {
+        aimX = delta[0];
     } else if (delta[0] >= zero) {
-        clamped = limit;
+        aimX = maxAbsX;
     } else {
-        clamped = -limit;
+        aimX = -maxAbsX;
     }
-    func_00340DC8(zero, func_003532E8(clamped, delta[2]), zero);
+    func_00340DC8(zero, func_003532E8(aimX, delta[2]), zero);
     return 1;
 }
 
@@ -970,20 +988,22 @@ void btlScalarRangeSetStartClearEnd(s32 rangeAddress, f32 start) {
     ((BtlScalarRange *)rangeAddress)->end = 0;
 }
 
-f32 func_002096C8(s32 range) {
-    BtlScalarRange *state = (BtlScalarRange *)range;
+/* Advance progress by (1 - progress) / span and return at most one.
+   Only the return is capped: stored progress is raw. A nonpositive span is unchanged. */
+f32 func_002096C8(s32 rangeAddress) {
+    BtlScalarRange *state = (BtlScalarRange *)rangeAddress;
     f32 result = 0.0f;
-    f32 start = state->start;
-    f32 end = state->end;
+    f32 span = state->start;
+    f32 progress = state->end;
     f32 one;
 
-    if (start <= result) {
+    if (span <= result) {
         result = 1.0f;
     } else {
         one = 1.0f;
-        end = (end * (start - one) + one) / start;
-        state->end = end;
-        result = end;
+        progress = (progress * (span - one) + one) / span;
+        state->end = progress;
+        result = progress;
         if (!(result < one)) {
             result = one;
         }
@@ -1006,34 +1026,37 @@ void btlScalarRangeInitQuadratic(s32 rangeAddress, f32 start) {
     ((BtlScalarRange *)rangeAddress)->inverseSpan = 1.0f / (start * start * 0.25f);
 }
 
-f32 func_00209770(BtlScalarRange *state, f32 step) {
-    f32 target = state->target;
-    f32 rate = state->zero;
-    f32 remaining = state->end;
+/* Integrate the quadratic accumulator, reversing acceleration after the midpoint.
+   Completion returns one without updating state; intermediate values are not capped. */
+f32 func_00209770(BtlScalarRange *state, f32 timeStep) {
+    f32 accumulatedValue = state->target;
+    f32 velocity = state->zero;
+    f32 remainingSpan = state->end;
 
-    remaining -= step;
+    remainingSpan -= timeStep;
 
-    if (remaining <= 0.0f) {
+    if (remainingSpan <= 0.0f) {
         return 1.0f;
     }
-    if (remaining < state->start * 0.5f) {
-        rate -= state->inverseSpan * step;
+    if (remainingSpan < state->start * 0.5f) {
+        velocity -= state->inverseSpan * timeStep;
     } else {
-        rate += state->inverseSpan * step;
+        velocity += state->inverseSpan * timeStep;
     }
-    state->end = remaining;
-    state->zero = rate;
-    target += rate * step;
-    state->target = target;
-    return target;
+    state->end = remainingSpan;
+    state->zero = velocity;
+    accumulatedValue += velocity * timeStep;
+    state->target = accumulatedValue;
+    return accumulatedValue;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawIconAtSize);
 
 extern void btlDrawIconAtSize(BtnSurface *, s32, s32, s32, s32, s32, s32, s32, s32, u16);
 
-void btlDrawButtonIconFixed64(BtnSurface *surface, s32 x, s32 y, s32 c0, s32 c1, s32 c2, s32 c3, s32 index) {
-    btlDrawIconAtSize(surface, x, y, 0x40, 0x40, c0, c1, c2, c3, index);
+/* Draw a button glyph at the fixed 64-pixel size using the four supplied corner colors. */
+void btlDrawButtonIconFixed64(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
+    btlDrawIconAtSize(surface, x, y, BTL_BUTTON_ICON_SIZE, BTL_BUTTON_ICON_SIZE, topLeftColor, topRightColor, bottomLeftColor, bottomRightColor, button);
 }
 
 extern BtnUv D_003BE130[];
@@ -1178,16 +1201,17 @@ extern s8 *datCommandSelectors;
 extern s32 func_001B2F50(void *, s32);
 extern s32 func_001ACD10(void *, s32, BtlActionProbe *);
 
+/* Resolve a command-table entry through its probe, or store the direct command id. */
 u32 btlScriptSelectActionEntry(void) {
     BtlCommandCtx *context;
     BtlActionProbe probe;
-    s32 index;
+    s32 commandId;
 
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
-    index = scrReadIntParameter(0);
-    if (datCommandSelectors[index * 2 + 1] == 1) {
-        if (func_001B2F50((void *)context->actor, index) != 0 &&
-            func_001ACD10((void *)context->actor, index, &probe) != 0) {
+    commandId = scrReadIntParameter(0);
+    if (datCommandSelectors[commandId * 2 + 1] == 1) {
+        if (func_001B2F50((void *)context->actor, commandId) != 0 &&
+            func_001ACD10((void *)context->actor, commandId, &probe) != 0) {
             context->actionProbeFirst = probe.actionProbeFirst;
             context->commandMode = 3;
             context->commandValue = probe.id;
@@ -1198,29 +1222,30 @@ u32 btlScriptSelectActionEntry(void) {
         }
     } else {
         context->commandMode = 2;
-        context->commandValue = index;
+        context->commandValue = commandId;
     }
     return 1;
 }
 
 u32 btlScriptSelectByKind(void) {
     BtlCommandCtx *context;
-    s32 kind;
-    s32 value;
+    s32 commandId;
+    s32 selectionValue;
 
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
-    kind = scrReadIntParameter(0);
-    value = scrReadIntParameter(1);
+    commandId = scrReadIntParameter(0);
+    selectionValue = scrReadIntParameter(1);
     context->commandMode = 2;
-    context->commandValue = kind;
-    if (kind == 0x196) {
-        value = func_0021F698();
+    context->commandValue = commandId;
+    if (commandId == 0x196) {
+        selectionValue = func_0021F698();
     }
-    context->pendingValue = value;
-    context->selectedValue = value;
+    context->pendingValue = selectionValue;
+    context->selectedValue = selectionValue;
     return 1;
 }
 
+/* value starts as the weighted-table selector and is then replaced by the chosen entry. */
 u32 btlScriptSelectWeightedEntry(void) {
     BtlCommandCtx *context;
     s32 value;
@@ -1237,14 +1262,14 @@ u32 btlScriptSelectWeightedEntry(void) {
 
 u32 btlScriptSelectDirect(void) {
     BtlCommandCtx *context;
-    s32 value;
+    s32 selectionValue;
 
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
-    value = scrReadIntParameter(0);
+    selectionValue = scrReadIntParameter(0);
     context->commandMode = 5;
     context->commandValue = 0;
-    context->pendingValue = value;
-    context->selectedValue = value;
+    context->pendingValue = selectionValue;
+    context->selectedValue = selectionValue;
     return 1;
 }
 
@@ -1262,24 +1287,24 @@ u32 btlEnableCommandStateFlag(void) {
 }
 
 u32 btlScriptSetActorUnitParameter(void) {
-    u16 value;
+    u16 parameterValue;
     s32 context;
 
     context = scrGetCurrentCommandWork();
-    value = scrReadIntParameter(0);
-    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk122 = value;
+    parameterValue = scrReadIntParameter(0);
+    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk122 = parameterValue;
     return 1;
 }
 
 u32 btlScriptSetBattleWorkParameter(void) {
-    s32 battle;
-    s16 value;
+    s32 battleAddress;
+    s16 requestArgument;
 
-    battle = btlGetRuntime();
+    battleAddress = btlGetRuntime();
     scrGetCurrentCommandWork();
-    value = scrReadIntParameter(0);
-    ((BtlState *)battle)->requestMode = 4;
-    ((BtlState *)battle)->requestArgument = value;
+    requestArgument = scrReadIntParameter(0);
+    ((BtlState *)battleAddress)->requestMode = 4;
+    ((BtlState *)battleAddress)->requestArgument = requestArgument;
     return 1;
 }
 
@@ -1475,10 +1500,12 @@ s32 func_0020A7C0(void) {
     return 1;
 }
 
+/* Remember the count limit only when the eligible enemy count is at most that limit.
+   Failure clears the selection flag but leaves the previous stored choice intact. */
 s32 btlCmdSelectChoiceSlot3Code1C(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x1c00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | BTL_PACKED_ENEMY_COUNT_LIMIT)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[3] = choice;
         context->selectionFlagsA |= 8;
@@ -2128,21 +2155,23 @@ u32 btlScriptReturnMarkedActionSceneActive(void) {
     return 1;
 }
 
+/* Report an eligible matching unit at or below the scripted HP percentage.
+   Preserve the native signed products and their unsigned comparison. */
 u32 btlScriptReturnUnitHpRatioPercent(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    s32 side = scrReadIntParameter(0);
-    s32 id = scrReadIntParameter(1);
-    s32 percent = scrReadIntParameter(2);
-    u32 mask = 0x200;
-    if (side) {
-        mask = 0x400;
+    s32 sideChoice = scrReadIntParameter(0);
+    s32 lookupId = scrReadIntParameter(1);
+    s32 hpPercentThreshold = scrReadIntParameter(2);
+    u32 sideMask = 0x200;
+    if (sideChoice) {
+        sideMask = 0x400;
     }
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->owner == id) {
-            u8 *stats = (u8 *)unit + 0x120;
-            s32 current = btlReadCurrentUnitHp(stats);
-            s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
-            if (!((u32)(maximum * percent) < (u32)(current * 100))) {
+        if ((unit->flags & 1) && (unit->flags & sideMask) && !(unit->flags & 0x20) && unit->owner == lookupId) {
+            u8 *unitStats = (u8 *)unit + 0x120;
+            s32 currentHp = btlReadCurrentUnitHp(unitStats);
+            s32 maximumHp = btlComputeSkillAdjustedMaxHp(unitStats);
+            if (!((u32)(maximumHp * hpPercentThreshold) < (u32)(currentHp * BTL_HP_PERCENT_SCALE))) {
                 scrSetIntegerReturnValue(1);
                 return 1;
             }
@@ -2157,10 +2186,11 @@ u32 func_0020C290(void) {
     return 1;
 }
 
+/* Remember the choice when an enemy's queued query matches; failure clears only its flag. */
 s32 btlCmdRememberUpperQueuedQuery(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_ENEMY_QUEUED_QUERY)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[10] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x4000;
@@ -2171,10 +2201,11 @@ s32 btlCmdRememberUpperQueuedQuery(void) {
     return 1;
 }
 
+/* Remember the choice when a party unit's queued query matches; failure clears only its flag. */
 s32 btlCmdRememberLowerQueuedQuery(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_PARTY_QUEUED_QUERY)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[11] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x8000;
@@ -2185,10 +2216,11 @@ s32 btlCmdRememberLowerQueuedQuery(void) {
     return 1;
 }
 
+/* Remember the choice on a successful party-element block check; failure clears only its flag. */
 s32 btlCmdRememberLowerElementBlock(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x11C00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_PARTY_ELEMENT_BLOCK)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[9] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x2000;
@@ -2199,9 +2231,10 @@ s32 btlCmdRememberLowerElementBlock(void) {
     return 1;
 }
 
+/* Report whether an eligible party unit has zero current MP; the handler tests unit +0x12A. */
 s32 func_0020C450(void) {
     s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x12800000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, BTL_PACKED_PARTY_EMPTY_MP)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2818,33 +2851,38 @@ INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419880);
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419890);
 
-s32 btlOpenPfsDebugDirectory(s32 path) {
-    char buf[0x70];
+s32 btlOpenPfsDebugDirectory(s32 directoryName) {
+    char pathBuffer[BTL_DIRECTORY_PATH_BYTES];
+
+    /* Debug mode opens a formatted pfs0 path; built-in mode resets name iteration. */
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(buf, "pfs0:/%s", path);
-        return sceDopen(buf);
+        func_0035C860(pathBuffer, "pfs0:/%s", directoryName);
+        return sceDopen(pathBuffer);
     }
     D_00438F80 = 0;
     return 0;
 }
 
-void func_0020D370(s32 dir) {
+/* Close the scanned directory only in debug filesystem mode; ignore the native result. */
+void func_0020D370(s32 directoryHandle) {
     if (sdfPfsDebugMode == 0) {
         return;
     }
     func_0036B420();
 }
 
-s32 btlReadBattleResourceDirectoryEntry(s32 unused, BtlReader *reader) {
+/* Debug mode delegates to the native reader. Built-in mode returns each name's length,
+   clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
+s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, BtlReader *reader) {
     if (sdfPfsDebugMode != 0) {
         return func_0036B588();
     }
-    if ((u32)D_00438F80 >= 8) {
+    if ((u32)D_00438F80 >= BTL_BUILTIN_NAME_COUNT) {
         return 0;
     }
     strcpy(reader->name, D_003BEA80[D_00438F80]);
-    reader->flags &= ~0x1000;
+    reader->flags &= ~BTL_DIRECTORY_FLAG_CLEAR;
     D_00438F80++;
     return strlen(reader->name);
 }
@@ -2869,7 +2907,7 @@ void btlDestroyEntryList(BtlResourceEntryList *list) {
 
 /* Append a named browser entry without changing the current scan order. */
 void btlAppendEntry(BtlResourceEntryList *list, char *name, s32 category, s32 value, s32 id) {
-    BtlResourceEntry *entry = sdfAllocSizeClassBlock(0x44);
+    BtlResourceEntry *entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
     BtlResourceEntry *tail;
     entry->category = category;
     entry->value = value;
@@ -2939,17 +2977,17 @@ typedef struct BtlResourceNameRecord {
     char name[0x1C]; /* 0x1C */
 } BtlResourceNameRecord;
 
-void btlSetResourceNameHeaderPair(s32 record, s32 first, s32 second) {
-    ((BtlResourceNameRecord *)record)->word00 = first;
-    ((BtlResourceNameRecord *)record)->word04 = second;
+void btlSetResourceNameHeaderPair(s32 recordAddress, s32 firstWord, s32 secondWord) {
+    ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
+    ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
 }
 
-u32 func_0020DFC0(s32 record) {
-    return ((BtlResourceNameRecord *)record)->word14;
+u32 func_0020DFC0(s32 recordAddress) {
+    return ((BtlResourceNameRecord *)recordAddress)->word14;
 }
 
-u32 func_0020DFC8(s32 record) {
-    return ((BtlResourceNameRecord *)record)->word08;
+u32 func_0020DFC8(s32 recordAddress) {
+    return ((BtlResourceNameRecord *)recordAddress)->word08;
 }
 
 /* Format prefix + selected name; return its resource category, not its id. */
@@ -3032,13 +3070,13 @@ void func_0020E368(void) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
 
-void btlSetResourceNameHeaderPairAlternate(s32 record, s32 first, s32 second) {
-    ((BtlResourceNameRecord *)record)->word00 = first;
-    ((BtlResourceNameRecord *)record)->word04 = second;
+void btlSetResourceNameHeaderPairAlternate(s32 recordAddress, s32 firstWord, s32 secondWord) {
+    ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
+    ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
 }
 
-u32 func_0020E7B0(s32 record) {
-    return ((BtlResourceNameRecord *)record)->word08;
+u32 func_0020E7B0(s32 recordAddress) {
+    return ((BtlResourceNameRecord *)recordAddress)->word08;
 }
 
 /* Copy text at native byte 0x21 and record its length, unlike the constructor's 0x1C copy. */
@@ -3047,12 +3085,12 @@ void btlResourceRecordSetName(char *recordBytes, char *text) {
     ((BtlResourceNameRecord *)recordBytes)->nameLength = strlen(text);
 }
 
-void btlFormatResourceNameWithPrefix(s32 record, void *output) {
-    func_0035C860(output, D_00436C50, record + 0x21, record + 0x1c);
+void btlFormatResourceNameWithPrefix(s32 recordAddress, void *output) {
+    func_0035C860(output, D_00436C50, recordAddress + 0x21, recordAddress + 0x1c);
 }
 
-void btlFormatResourceNameWithoutPrefix(s32 record, void *output) {
-    func_0035C860(output, D_00436C58, record + 0x21);
+void btlFormatResourceNameWithoutPrefix(s32 recordAddress, void *output) {
+    func_0035C860(output, D_00436C58, recordAddress + 0x21);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436AF0);
