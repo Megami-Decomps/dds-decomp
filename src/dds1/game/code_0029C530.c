@@ -2862,8 +2862,12 @@ typedef struct EffCounterHeader {
     u32 frame;
 } EffCounterHeader;
 
+/* Class draw modes own either a counter header or per-segment scales. */
 typedef struct EffClassDrawState {
-    EffCounterHeader *ring;
+    union {
+        EffCounterHeader *ring;
+        f32 *scales;
+    };
     u32 effect;
     u32 references;
     u32 allocation;
@@ -2967,7 +2971,59 @@ void effResetClassFrameAndFlags(s32 work) {
     effInitializeClassFrame(effect);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A4878);
+extern s8 effSharedRandomState[];
+extern float effMiscRandUnitFloat(void *);
+/* The cached class payload is copied from the 0x5C-byte source prefix. */
+typedef struct EffRingClassConfig {
+    EffRingSource ring;
+    u8 pad50[0xC];
+    u8 classConfig[0x5C];
+    u8 padB8[0x10];
+    f32 scale;
+    f32 scaleRand;
+} EffRingClassConfig;
+
+extern u8 *effPayloadPointerSet(u16, void *);
+
+EffClassDrawState *func_002A4878(EffRingClassConfig *source) {
+    u32 count = source->ring.segments;
+    u32 size;
+    void *allocation;
+    f32 *scales;
+    EffClassDrawState *state;
+    EffTrackSet *tracks;
+    u32 *colors;
+    u32 first;
+    u32 second;
+    u32 i;
+
+    if (count < 3) {
+        source->ring.segments = 3;
+        count = 3;
+    }
+    size = count * sizeof(f32);
+    allocation = sdfAllocGeneralBlock(size + sizeof(EffClassDrawState));
+    scales = (f32 *)sdfResourceRetainAddress((u32)allocation);
+    state = (EffClassDrawState *)((u8 *)scales + size);
+    state->allocation = (u32)allocation;
+    state->scales = scales;
+    memcpy(source->classConfig, source, sizeof(source->classConfig));
+    state->effect = (u32)effPayloadPointerSet(1, source->classConfig);
+    tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 2, 0);
+    first = source->ring.firstColor;
+    state->references = (u32)tracks;
+    colors = (u32 *)tracks->tail;
+    second = source->ring.middleColor;
+    for (i = 0; i < count; i++) {
+        colors[0] = first;
+        colors[1] = first;
+        colors[2] = (first & second) + (((first ^ second) & 0xFEFEFEFE) >> 1);
+        colors[3] = first;
+        colors += 4;
+        *scales++ = source->scale * (effMiscRandUnitFloat(effSharedRandomState) * source->scaleRand + (1.0f - source->scaleRand));
+    }
+    return state;
+}
 
 void effReleaseClassDrawResources(s32 work) {
     effReleaseResourceRefs(((EffClassDrawState *)work)->references);
@@ -3840,7 +3896,6 @@ void effSetRenderResourceMatrixComponent(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-extern s8 effSharedRandomState[];
 
 extern u32 effMiscRand(void *);
 
@@ -3990,7 +4045,6 @@ void effResetIndexedInstanceFrames(u8 *work) {
 }
 
 extern u8 *effCreateClassResourceWork(u16, void *);
-extern float effMiscRandUnitFloat(void *);
 
 u8 *func_002A93A0(EffPointSetTableSource *config) {
     u32 count = config->count;
