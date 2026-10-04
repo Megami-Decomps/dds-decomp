@@ -86,8 +86,9 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
     }
 }
 
-void sdfQueueNonzeroResourceId(s32 arg0) {
-    s32 id = arg0;
+/* Zero is a sentinel and is never submitted to the pending queue. */
+void sdfQueueNonzeroResourceId(s32 resourceId) {
+    s32 id = resourceId;
 
     if (id != 0) {
         sdfPendingQueuePush(&D_00439128, id);
