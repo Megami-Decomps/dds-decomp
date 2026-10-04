@@ -2,7 +2,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
-extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
+extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
@@ -24,10 +24,10 @@ typedef struct SdfMat4 {
     f32 m[16];
 } SdfMat4;
 
-void sdfCounterDrawGlyphAtGridCell(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 handle;
+void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
+    u32 handle;
 
-    handle = func_0019F460(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
+    handle = func_0019F460(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
 }

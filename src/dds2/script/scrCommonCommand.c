@@ -17,7 +17,7 @@ extern s8 sdfPadButtonStates[];
 
 f32 bfWaitReadArgFloat(s32 idx);
 
-s32 func_00107EF8(s32 arg0, s32 arg1, void *arg2);
+s32 kwlnSetLightColorTarget(s32 arg0, s32 arg1, void *arg2);
 
 s32 kwlnSetBackgroundColorTarget(s32 arg0, void *arg1);
 
@@ -318,7 +318,7 @@ s32 scrCmdStoreDirectionVector(void)
     VU0_SET_AXIS_GPR(z, z);
     VU0_CLEAR_W(vf10);
     VU0_STORE_VF_TO(vf10, v);
-    func_00107EF8(scrReadIntParameter(0), 0, &v);
+    kwlnSetLightColorTarget(scrReadIntParameter(0), 0, &v);
     return 1;
 }
 
@@ -866,7 +866,7 @@ s32 func_0010F068(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
-    func_0011A118(p0, scrReadIntParameter(1));
+    ptyAdjustItemQuantity(p0, scrReadIntParameter(1));
     return 1;
 }
 

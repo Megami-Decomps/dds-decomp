@@ -212,7 +212,7 @@ extern BattleGroupIdEntry *btlGroupIdHeads[];
 
 extern void scrSetIntegerReturnValue();
 
-extern void func_0011A118(u32, u32);
+extern void ptyAdjustItemQuantity(u32, u32);
 
 extern s32 func_0022D2F8(u32, u32);
 
@@ -715,7 +715,7 @@ u32 func_0022B988(void) {
 u32 func_0022B9D0(void) {
     s32 index = scrReadIntParameter(0);
     if (index < 0x100) {
-        func_0011A118(index, 1);
+        ptyAdjustItemQuantity(index, 1);
     }
     return 1;
 }

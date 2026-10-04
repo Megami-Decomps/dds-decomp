@@ -106,7 +106,7 @@ typedef struct StaffImageContext {
 } StaffImageContext;
 
 extern void mnuSelectPage(void *, u32);
-extern void func_002730A0();
+extern void mnuCreateStaffBulletItemWindow();
 extern void mnuReleaseStaffMenuResources();
 extern void mnuSetWindowResource();
 extern void mnuAttachPartyIconBundle();
@@ -148,7 +148,7 @@ s32 mnuStaffImageEnterA(s32 task) {
     return menuRunPanel(context, 1, task);
 }
 
-INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273B98);
+INCLUDE_ASM(const s32, "game/code_00273AB0", mnuStaffImageExitA);
 
 
 u32 func_00273C40(void) {
@@ -197,7 +197,7 @@ s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
 }
 
 /* Run the label-image state's teardown phase and return its scheduler word. */
-s32 func_00273DE8(s32 task) {
+s32 mnuExitStaffImageAndSelectionLabel(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, task);
 }
@@ -255,7 +255,7 @@ s32 mnuStaffImageEnterD(s32 task) {
 }
 
 /* Run the secondary-image state's teardown phase and return its scheduler word. */
-s32 func_00274008(s32 task) {
+s32 mnuStaffImageExitD(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, task);
 }
@@ -288,7 +288,7 @@ s32 mnuStaffImageEnterB(s32 task) {
 }
 
 /* Run the alternate primary-image state's teardown phase and return its scheduler word. */
-s32 func_00274310(s32 task) {
+s32 mnuStaffImageExitB(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     return menuRunPanel(context, 2, task);
 }
@@ -300,7 +300,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     s32 index = ((StaffImageContext *)context)->selection->cursor->index;
 
     mnuSelectPage(context + 0x15C, index);
-    func_002730A0(context);
+    mnuCreateStaffBulletItemWindow(context);
     mnuReleaseStaffMenuResources(context + 0x60);
     mnuSetWindowResource(index, context + 0x15C, ((StaffImageContext *)context)->spriteScene, ((StaffImageContext *)context)->windowParam);
     mnuAttachPartyIconBundle(index, context + 0x15C, ((StaffImageContext *)context)->spriteScene);
@@ -338,7 +338,7 @@ extern u16 mnuGetPartyEntryMenuValue(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void dspStartEntry(s32);
 extern void func_00283BF0(s32, s32);
-extern void func_00119900(s32, s32);
+extern void ptyAdjustItemQuantity(s32, s32);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA84;
 
@@ -372,9 +372,9 @@ void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
         evtCopyEntryStringToActiveWindow(2, D_003BAA84 + itemId * 25);
         dspStartEntry(0);
         if (equipped != 0) {
-            func_00119900(equipped, 1);
+            ptyAdjustItemQuantity(equipped, 1);
         }
-        func_00119900(itemId, -1);
+        ptyAdjustItemQuantity(itemId, -1);
         equipContext->previousItem = equipped;
         equipContext->selectedItem = itemId;
     } else {
@@ -436,7 +436,7 @@ s32 mnuHandleStaffValuePageInput(s32 task) {
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274768);
 
 /* Draw the selected party member's value page and advance its primary dispatch. */
-s32 func_00274978(s32 task) {
+s32 mnuDrawStaffPartyValuePage(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->selection->cursor->index;
@@ -475,7 +475,7 @@ s32 func_00274978(s32 task) {
 }
 
 /* Request message-window mode one before the value-page teardown phase. */
-s32 func_00274B30(s32 task) {
+s32 mnuExitStaffValuePage(s32 task) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();

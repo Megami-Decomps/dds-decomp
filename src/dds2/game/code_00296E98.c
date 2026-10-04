@@ -63,7 +63,7 @@ typedef struct MenuIconBatch {
     u32 resource;
 } MenuIconBatch;
 
-extern void func_0011A118(s32, s32);
+extern void ptyAdjustItemQuantity(s32, s32);
 
 extern char brsStaffInputTaskName[];
 
@@ -354,7 +354,7 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
 
         refs++;
         if (id != 0) {
-            func_0011A118(id, param);
+            ptyAdjustItemQuantity(id, param);
         }
     }
 }
@@ -669,7 +669,7 @@ void *brsCreateRewardTaskWork(void) {
     primary = &work->primaryRewards;
     func_0029D2D8(primary);
     secondary = &work->secondaryRewards;
-    func_0029D3D8(secondary);
+    brsBuildProfileCapList(secondary);
     func_0029DA98(party);
     brsMarkPartyRowsFromLists((u32)party, (u32)primary, (u32)secondary);
     work->unusedB6E0 = 0x100;

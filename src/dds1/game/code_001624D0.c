@@ -554,7 +554,7 @@ typedef struct {
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
-extern void func_0015CEF8(void *system, u32 arg1, u32 arg2, u32 arg3);
+extern void parRiseFallSymmetricCellAlpha(void *system, u32 arg1, u32 arg2, u32 arg3);
 extern void func_0015D078(void *system, u32 value);
 
 /* Allocate the copied head and its trailing cells as one block, then create
@@ -571,7 +571,7 @@ ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *source) {
     work->baseSecond = source->scaledSecond;
     work->handle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, EFF_CELL_SYSTEM_KIND);
-    func_0015CEF8(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
+    parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     func_0015D078(work->system, work->head.systemParam);
     for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
         work->cells[cellIndex].unk00 = 0;

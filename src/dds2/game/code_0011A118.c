@@ -180,7 +180,7 @@ typedef struct EventModeSlot {
     s8 kind;             /* 0x01 */
 } EventModeSlot;
 
-extern void func_0011A118(s32 itemId, s32 quantityDelta);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 extern void func_0011CA88(Entry1A4 *entry);
 
@@ -258,7 +258,7 @@ extern void mdlFlagSet(s32 flagIndex);
 /* Flag-range items set their model flag regardless of quantityDelta.
  * Other items add the delta to their byte quantity and clamp it; DDS2 also
  * caps IDs at or above 0xC0 to one. Keep the native branches and goto layout. */
-void func_0011A118(s32 itemId, s32 quantityDelta) {
+void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
     s32 quantity;
 
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
@@ -342,7 +342,7 @@ s32 dds3FindEntryIndex(rosterIndex)
 
 /* Read a signed byte relative to the first roster entry's stat-byte base;
  * the caller supplies a byte offset, not a whole-entry index. */
-s8 func_0011A318(s32 byteOffset) {
+s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
     return *(s8 *)(byteOffset + datGameState + 0xa76);
 }
 
@@ -393,7 +393,7 @@ void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
 extern s32 datAbilityParameters;
 
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
-void func_0011A808(Entry1A4 *entry, u32 skillId) {
+void ptyApplySkillRecovery(Entry1A4 *entry, u32 skillId) {
     f32 recoveryRate;
     s32 hpRecovery;
     s32 mpRecovery;
@@ -436,8 +436,8 @@ void evtUpdateFlaggedStats(void) {
         entryOffset += PTY_ACTIVE_ROSTER_STRIDE;
         if (entry->flags & 1) {
             if (entry->flags & 2) {
-                func_0011A808(entry, 0x24C);
-                func_0011A808(entry, 0x270);
+                ptyApplySkillRecovery(entry, 0x24C);
+                ptyApplySkillRecovery(entry, 0x270);
             }
         }
         remaining--;
@@ -465,7 +465,7 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
  * value is intentionally reused: incoming command ID, then resolved result. */
-s32 func_0011AA58(Entry1A4 *entry, s32 value) {
+s32 datCalculateCommandBaseValue(Entry1A4 *entry, s32 value) {
     s32 commandId = value;
     CommandValueRecord *commands = (CommandValueRecord *)datCommandRecords;
 
@@ -578,7 +578,7 @@ extern Entry1A4 *D_00435DD4;
 void ptyAssignRosterItemAndMarkOwned(Entry1A4 *entry);
 
 /* Clone an entry template and raise it to the maximum occupied party level. */
-void func_0011B328(Entry1A4 *entry, s32 templateIndex) {
+void ptyCloneTemplateAtPartyMaxLevel(Entry1A4 *entry, s32 templateIndex) {
     s32 targetLevel = dds3EntryMax();
     s32 statGains[PTY_ENTRY_STAT_COUNT];
     u8 *stat;
@@ -607,7 +607,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B4B0);
 /* Clone template 1 into roster 2 and inherit its mantra state, then clear the
  * assigned item. The maximum-party-level flag overrides keep-base-level;
  * otherwise use the rounded party average only when keep-base-level is clear. */
-void func_0011B6F0(Entry1A4 *entry, s32 initFlags) {
+void ptyInitRosterAndClearItem(Entry1A4 *entry, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -773,7 +773,7 @@ void dds3ForEachEntry(void) {
 
         updates++;
         if (valueIndex != 0) {
-            func_0011A118(valueIndex, delta);
+            ptyAdjustItemQuantity(valueIndex, delta);
         }
         updateIndex++;
     } while (updateIndex < 2);
@@ -1445,7 +1445,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E528);
  * all three flag masks 1/2/4. No eligible entries returns zero.
  * count and remaining serve both loops; word holds enemy IDs, then entry flags.
  * partyLevel is accumulated first and divided in place before comparison. */
-s32 func_0011E728(s32 sceneIndex) {
+s32 btlCheckScenePartyLevelThreshold(s32 sceneIndex) {
     s32 meetsThreshold = 0;
     s32 enemyLevelSum;
     s32 partyLevelAddress;

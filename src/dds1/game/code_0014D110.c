@@ -119,9 +119,9 @@ extern char *D_003BAE44;
 
 extern void *dds3FindWorldObjectNodeByKey(u64, s32, s32);
 
-extern s32 func_0013A720(s32, void *);
+extern s32 fldTestRoomProbeFacingAndRange(s32, void *);
 
-extern s32 func_0013A9B0(s32, void *);
+extern s32 fldTestRoomProbeFacing(s32, void *);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
@@ -252,7 +252,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    if (func_0013A720(unit, entry) == 0) {
+    if (fldTestRoomProbeFacingAndRange(unit, entry) == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
@@ -286,7 +286,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    if (func_0013A9B0(unit, entry) == 0) {
+    if (fldTestRoomProbeFacing(unit, entry) == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
@@ -337,7 +337,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    if (func_0013A720(unit, entry) == 0) {
+    if (fldTestRoomProbeFacingAndRange(unit, entry) == 0) {
         scrSetIntegerReturnValue(0);
     } else {
         scrSetIntegerReturnValue(1);

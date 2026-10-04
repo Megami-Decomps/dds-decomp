@@ -394,7 +394,7 @@ void effFillRandRecords(EffEmit *emitter) {
 
 extern void effBuildAndDispatch(EffPrim *, s32);
 
-EffPrim *func_0019A900(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
+EffPrim *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
     SdfMemBlock *primaryResource = sdfAllocGeneralBlock(0x2C);
     f32 step = EFF_CHANNEL_DEFAULT_STEP;
     EffPrim *primitive = (EffPrim *)sdfResourceRetainAddress(primaryResource);
@@ -544,7 +544,7 @@ void effBuildAndDispatch(EffPrim *primitive, s32 flattenEqualComponents) {
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
 
 /* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
-void func_0019AFA0(f32 *solution, f32 *rhs, s32 count) {
+void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
     s32 byteCount = count * sizeof(f32);
     void *allocation = sdfAllocGeneralBlock(byteCount);
     f32 *upper;

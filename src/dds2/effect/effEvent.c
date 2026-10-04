@@ -1459,7 +1459,7 @@ extern void *effAllocSlotArray(u32);
 extern void *effParamWorkCreate(u16, void *);
 extern void *effParamWorkDuplicate(void *);
 
-void *func_00199E88(void *source, u16 kind, void *params) {
+void *effEventCreateChannelFromParams(void *source, u16 kind, void *params) {
     EffEventChannelHead *head = source;
     u32 recordCount = head->count;
     s32 handle = sdfAllocGeneralBlock(recordCount * sizeof(EffEventChannelRecord) + sizeof(EffEventChannelWork));
@@ -1499,7 +1499,7 @@ void effEventParticleSetCreateFromTable(void *data) {
     void *block0 = effParamTableGetBlock(data, 0);
     void *block1 = effParamTableGetBlock(data, 1);
 
-    func_00199E88(block0, effParamTableGetWord2(data, 1), block1);
+    effEventCreateChannelFromParams(block0, effParamTableGetWord2(data, 1), block1);
 }
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436458);

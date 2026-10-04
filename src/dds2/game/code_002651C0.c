@@ -52,7 +52,7 @@ extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
 extern void datAddCurrencyClamped();
-extern void func_0011A118();
+extern void ptyAdjustItemQuantity();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
@@ -248,7 +248,7 @@ void mnuAwardCampProgressCurrency(void) {
     evtCopyEntryStringToActiveWindow(0, (s32)text);
     dspStartEntry(0x19);
     datAddCurrencyClamped(index);
-    func_0011A118(0x81, -*(u8 *)(datGameState + 0x13c1));
+    ptyAdjustItemQuantity(0x81, -*(u8 *)(datGameState + 0x13c1));
     mdlFlagClear(0xa01);
 }
 

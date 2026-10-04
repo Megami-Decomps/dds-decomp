@@ -64,7 +64,7 @@ void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
 extern s32 func_00314C10(s32);
 extern s32 uiBlendColors();
 extern s32 scrGetIndexedRecordAddress(s32, s32 *);
-extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
+extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
 extern void func_0019D550(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 
@@ -83,7 +83,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             func_002BE080(0x16B0, 0x4B8, depth, texture, code, param);
             return;
         }
-        item = func_0019F460(0x16B0, 0x4B8, depth, texture, outValue, 0);
+        item = func_0019F460(0x16B0, 0x4B8, depth, texture, (const u8 *)outValue, 0);
         func_0019D550(item, 1, param);
         frFontQueueGlyphInSelectedSlot(item);
     }

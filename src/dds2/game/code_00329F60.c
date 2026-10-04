@@ -167,7 +167,7 @@ extern void sdfGraphSelectDisplayBuffer(s32);
 
 /* Service device requests, select the GS field's buffer, and age packet slots.
  * Capture state 1 wakes its worker; state 2 precedes the semaphore wait. */
-void func_0032A378(void) {
+void sdfServiceGraphicsBuffers(void) {
     s8 bufferIndex;
     s32 invertedField;
 

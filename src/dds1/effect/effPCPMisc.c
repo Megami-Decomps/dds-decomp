@@ -3089,7 +3089,7 @@ EffPCPBlockSetWork *effPcpBuildBlockSet(args)
 }
 
 /* Duplicate the block-set handles and allocate its three optional instance lists. */
-void func_0017D8A8(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src) {
+void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src) {
     EffPCPBlockModel *model;
     u32 i;
     u32 j;
@@ -3136,7 +3136,7 @@ EffPCPBlockSetWork *effPcpBlockSetCloneShared(EffPCPBlockSetWork *src) {
     work->color = 0x80808080;
     work->mode = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
-    func_0017D8A8(work, src);
+    effPcpDuplicateBlockSetHandles(work, src);
     work->source = NULL;
     return work;
 }

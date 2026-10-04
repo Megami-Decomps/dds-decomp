@@ -276,11 +276,11 @@ s32 dds3RegisterObjectInHandlerIndex(void *object) {
 }
 
 extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
-extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_00108BD8(s32 arg);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
 extern void func_00108D80(void);
 extern void func_00108E20(void);
-extern void func_00109248();
+extern void evtSubmitGradientRectAtDepth();
 extern void mdlProcessContextNodesAndTransforms(void *context, const void *state);
 extern s32 D_00380818[4];
 
@@ -301,16 +301,16 @@ void func_00112328(void *object) {
 
     base = (ObjBase *)dds3GetObjectOwnedHandle(object);
     evtSetDrawSurfaceIndex(0x4A);
-    func_00108BD8(0);
+    evtSubmitPrimaryAlphaBlendMode(0);
     func_00108D80();
-    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
-    func_00109248(0, 0, 0x200, 0x1C0, 0x0FFFFFFF, 0x80000000, 0x80000000, 0x80000000, 0x80000000);
-    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
+    evtSubmitGradientRectAtDepth(0, 0, 0x200, 0x1C0, 0x0FFFFFFF, 0x80000000, 0x80000000, 0x80000000, 0x80000000);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     evtSetDrawSurfaceIndex(0x4B);
-    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     func_00108D80();
     evtSetDrawSurfaceIndex(0x4C);
-    evtSubmitGsRegister47(1, 1, 0x80, 2, 0, 0, 1, 1);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     func_00108D80();
 
     context = (ObjRenderContext *)base->unkC;
@@ -322,10 +322,10 @@ void func_00112328(void *object) {
 
     evtSetDrawSurfaceIndex(0x4E);
     func_00108E20();
-    func_00108BD8(0);
-    evtSubmitGsRegister47(1, 0, 0x80, 1, 0, 0, 1, 2);
-    func_00109248(0, 0, 0x200, 0x1C0, 0x0EFFFFFF, 0x30586670, 0x30586670, 0x30586670, 0x30586670);
-    evtSubmitGsRegister47(1, 5, 0x80, 1, 0, 0, 1, 2);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 2);
+    evtSubmitGradientRectAtDepth(0, 0, 0x200, 0x1C0, 0x0EFFFFFF, 0x30586670, 0x30586670, 0x30586670, 0x30586670);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 1, 0, 0, 1, 2);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112518);

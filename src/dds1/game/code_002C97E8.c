@@ -4,7 +4,7 @@
 
 extern s8 D_00324510[];
 
-extern u32 func_00197760(s32, s32, s32, u32, u32, s32);
+extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
 
 extern void frFontDrawGlyphWithSharedFlags(u32, s32);
 
@@ -357,14 +357,14 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     memcpy(out, forward, 16);
 }
 
-void sdfFontRegisterShort(s32 x, s32 y, u32 first, u32 second) {
-    u32 handle = func_00197760(x << 4, y << 3, 0, first, second, 0);
+void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
+    u32 handle = func_00197760(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, u32 first, u32 second, u32 third, s32 option) {
-    u32 handle = func_00197760(x << 4, y << 3, first, second, third, 0);
+s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
+    u32 handle = func_00197760(x << 4, y << 3, depth, colors, text, 0);
     s32 result = frFontMeasureGlyphChain(handle);
     func_001958A0(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);
@@ -385,8 +385,8 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 
     return result;
 }
 
-s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
-    u32 handle = func_00197760(x << 4, y << 3, z, w, style, 0);
+s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const void *text, s32 width, u32 color) {
+    u32 handle = func_00197760(x << 4, y << 3, z, w, text, 0);
     s32 result;
 
     frFontSetChainFlag(handle, flags);

@@ -1,7 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern u64 func_00119AF8(u64);
+extern u64 ptyReadSignedRosterStatByte(u64);
 extern u64 scrReadIntParameter(u64);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -70,7 +70,7 @@ u32 func_0010EF38(void) {
     u64 context;
 
     context = scrReadIntParameter(0);
-    context = func_00119AF8(context);
+    context = ptyReadSignedRosterStatByte(context);
     scrSetIntegerReturnValue(context);
     return 1;
 }

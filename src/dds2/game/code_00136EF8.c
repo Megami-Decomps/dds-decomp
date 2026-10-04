@@ -59,8 +59,8 @@ extern s32 mdlFlagTest(s32);
 extern int strcmp(const char *, const char *);
 
 extern void evtSetDrawSurfaceIndex();
-extern void evtSubmitGsRegister47();
-extern void func_00108BD8();
+extern void evtSubmitPrimaryGsTest();
+extern void evtSubmitPrimaryAlphaBlendMode();
 extern void func_00108EC0();
 
 extern s32 fldCameraColorEffect;
@@ -821,7 +821,7 @@ typedef struct FldProbeActor {
 
 extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
-s32 func_0013D308(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
     f32 dir[4];
     f32 position[4];
     f32 length;
@@ -889,7 +889,7 @@ s32 func_0013D308(FldProbeActor *actor, NodeA *entry) {
 }
 
 /* vu0 routine: the alternate entry probe only constrains facing, not range. */
-s32 func_0013D598(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacing(FldProbeActor *actor, NodeA *entry) {
     f32 dir[4];
     f32 position[4];
     f32 dot;
@@ -1829,8 +1829,8 @@ extern s32 D_00399F90[];
 
 void fldDrawTitleBannerFrame(s32 mode) {
     evtSetDrawSurfaceIndex(0x53);
-    func_00108BD8(0);
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108EC0(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                   fldAreaState[0x7F]);
     func_00108EC0(0xD1, 0x128, 0x5E, 0x24, 0x3A, 2, 1, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
@@ -1838,12 +1838,12 @@ void fldDrawTitleBannerFrame(s32 mode) {
     func_00108EC0(0x12F, 0x128, 0x3A, 0x24, 0x3B, 2, -0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                   fldAreaState[0x7F]);
     if (mode < 0x18) {
-        func_00108BD8(1);
+        evtSubmitPrimaryAlphaBlendMode(1);
         func_00108EC0(0xA0, 0x12B, 0x22, 0x24, 1, 0x21, 0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
                       D_00399F90[mode], D_00399F90[mode], fldAreaState[0x7F]);
         func_00108EC0(0x13E, 0x12B, 0x22, 0x24, 0x23, 0x21, -0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
                       D_00399F90[mode], D_00399F90[mode], fldAreaState[0x7F]);
-        func_00108BD8(0);
+        evtSubmitPrimaryAlphaBlendMode(0);
     }
 }
 
@@ -1851,10 +1851,10 @@ extern s32 D_00389978[];
 
 void fldDrawTitleBannerCursor(s32 x, s32 y) {
     evtSetDrawSurfaceIndex(0x53);
-    func_00108BD8(0);
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108EC0(x, y, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00389978[0]);
-    func_00108BD8(0);
+    evtSubmitPrimaryAlphaBlendMode(0);
 }
 
 typedef struct FldMenuState {

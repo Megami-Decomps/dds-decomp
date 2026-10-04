@@ -147,7 +147,7 @@ void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *
 
 extern void *memset(void *, s32, u32);
 extern void func_002CD0D8(u32, s32, void *);
-extern void frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, s32, void *, u32, s32);
+extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const void *, s32, u32);
 
 /* Fetch the low-16-bit display record ID and draw its text with the supplied attributes and fixed RGB. */
 void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 textAttributes, u32 packedEntryId, s32 drawContext) {

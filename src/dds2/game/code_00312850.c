@@ -18,7 +18,6 @@ extern void sdfClearTaskList();
 
 extern void sdfDestroyCallbackWork();
 
-extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
 
 extern s32 kwlnTaskGetTaskByName(u32);
 

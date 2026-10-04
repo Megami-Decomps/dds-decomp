@@ -25,10 +25,10 @@ extern MapResource fldLocalMapTextureResource;
 
 extern s32 fldLoadMapResource(const char *, MapResource *);
 
-extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32,
                          u32, u32, u32, u32, u32);
-extern void func_00108CB8(s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
 extern s32 func_003014F0(char *, const char *, ...);
@@ -242,7 +242,7 @@ s32 fldCollectMapSelectionMask(MapSelectionContext *context) {
 }
 
 extern SdfCounterRuntime *sdfActiveCounterRuntime;
-extern void func_001093B8(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, const u8 *);
 
 void sdfCounterDrawFadingLabelPanel(s32 x, s32 y) {
@@ -253,12 +253,12 @@ void sdfCounterDrawFadingLabelPanel(s32 x, s32 y) {
     u32 style;
 
     fade -= (f32)sdfActiveCounterRuntime->timer->value / 10.0f;
-    func_001093B8(0, 0x120, 0x200, 0xA0, 0, 0,
+    evtSubmitDefaultDepthGradientRect(0, 0x120, 0x200, 0xA0, 0, 0,
                  (s32)(fade * 64.0f) << 24, (s32)(fade * 64.0f) << 24);
     fade *= 128.0f;
     color = ((s32)(fade * 0.3f) << 24) | 0x5A3335;
-    func_001093B8(0, 0x17E, 0x100, 0x1A, 0x5A3335, color, color, 0x5A3335);
-    func_001093B8(0x100, 0x17E, 0x100, 0x1A, color, 0x5A3335, 0x5A3335, color);
+    evtSubmitDefaultDepthGradientRect(0, 0x17E, 0x100, 0x1A, 0x5A3335, color, color, 0x5A3335);
+    evtSubmitDefaultDepthGradientRect(0x100, 0x17E, 0x100, 0x1A, color, 0x5A3335, 0x5A3335, color);
     width = sdfCounterMeasureLabelWidth((u32)display->info);
     x = (s32)((f32)x - (f32)width * 0.5f);
     style = ((u32)fade & 0xFF) | 0x80808000;
@@ -348,7 +348,7 @@ void fldReleaseMapRequestQueues(void) {
 
 /* Draw the auxiliary map texture centred on the requested position. */
 void fldDrawScaledAuxMapTexture(s32 x, s32 y, u32 colour, f32 scale) {
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108FA0((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f),
                   0, 0, 32, 32, colour, colour, colour, colour,
@@ -374,7 +374,7 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapReque
             progress = 0.0f;
         }
     }
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
     func_00108FA0((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 16.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 32.0f), 0, 0, 32, 32,
@@ -401,14 +401,14 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequ
         progress /= 0.7f;
     }
     fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108CB8(1);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(1);
     func_00108FA0((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
                   fldLocalMapAuxTextureResource.image);
-    func_00108CB8(0);
+    evtSubmitPrimaryAlphaBlendMode(0);
 }
 
 void sdfCommitPendingVectorAndMarkChanged(void) {

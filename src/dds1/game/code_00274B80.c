@@ -239,7 +239,7 @@ extern u32 kwlnTaskGetUserValue();
 extern s32 datGameState;
 
 extern s32 D_003BAA7C;
-extern s32 itfDrawUnderscoreTextSegment();
+extern u32 itfDrawUnderscoreTextSegment();
 extern s32 D_003BAA70;
 extern void func_00283110();
 extern void func_002833B0();

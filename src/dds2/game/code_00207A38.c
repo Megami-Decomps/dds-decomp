@@ -360,7 +360,7 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
 
 /* Project the vf10 position into four screen-coordinate words with four fractional bits.
    Return zero outside the distance/forward-cone checks, without writing the output. */
-s32 func_00207C28(s32 screenPosition[4]) {
+s32 btlProjectForwardPositionToPackedScreen(s32 screenPosition[4]) {
     f32 viewDistance, forwardDot;
     f32 *projectionData;
 
@@ -744,7 +744,7 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
     }
 }
 
-extern void func_001E22D8(u8 *, u32, s32, f32);
+extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
 
 /* Refresh each unit's transform/effect state, then invoke the runtime callback. */
 void btlUpdateUnitActors(void) {
@@ -757,10 +757,10 @@ void btlUpdateUnitActors(void) {
         btlSetUnitRotation((s32)unit, (s32)((u8 *)unit + 0x40));
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
-            func_001E2758((s32)unit);
+            btlRefreshUnitMotionSelection((s32)unit);
             unit->unkF8 = 0;
             unit->unkFA = 0;
-            func_001E22D8((u8 *)unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
+            btlApplyUnitMotionSelection((u8 *)unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
         }
         unit->stateFlags &= ~0x8000;
         unit->stateFlags &= ~0x200000;
@@ -822,7 +822,7 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
 
 /* Bound horizontal X by abs(tan(angleLimit) * deltaZ), then load the yaw rotation.
    Return zero for a zero XZ delta; unlike the unbounded variant, vf10 is not reset. */
-s32 func_00209258(f32 *origin, f32 *targetPosition, f32 angleLimit) {
+s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 angleLimit) {
     f32 delta[4];
     f32 absDeltaX;
     f32 maxAbsX;
@@ -990,7 +990,7 @@ void btlScalarRangeSetStartClearEnd(s32 rangeAddress, f32 start) {
 
 /* Advance progress by (1 - progress) / span and return at most one.
    Only the return is capped: stored progress is raw. A nonpositive span is unchanged. */
-f32 func_002096C8(s32 rangeAddress) {
+f32 btlScalarRangeStepExponential(s32 rangeAddress) {
     BtlScalarRange *state = (BtlScalarRange *)rangeAddress;
     f32 result = 0.0f;
     f32 span = state->start;
@@ -1028,7 +1028,7 @@ void btlScalarRangeInitQuadratic(s32 rangeAddress, f32 start) {
 
 /* Integrate the quadratic accumulator, reversing acceleration after the midpoint.
    Completion returns one without updating state; intermediate values are not capped. */
-f32 func_00209770(BtlScalarRange *state, f32 timeStep) {
+f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
     f32 accumulatedValue = state->target;
     f32 velocity = state->zero;
     f32 remainingSpan = state->end;
@@ -1502,7 +1502,7 @@ s32 func_0020A7C0(void) {
 
 /* Remember the count limit only when the eligible enemy count is at most that limit.
    Failure clears the selection flag but leaves the previous stored choice intact. */
-s32 btlCmdSelectChoiceSlot3Code1C(void) {
+s32 btlCmdStoreEnemyCountCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | BTL_PACKED_ENEMY_COUNT_LIMIT)) {
@@ -2232,7 +2232,7 @@ s32 btlCmdRememberLowerElementBlock(void) {
 }
 
 /* Report whether an eligible party unit has zero current MP; the handler tests unit +0x12A. */
-s32 func_0020C450(void) {
+s32 btlCmdReportPartyEmptyMp(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, BTL_PACKED_PARTY_EMPTY_MP)) {
         scrSetIntegerReturnValue(1);
@@ -2865,7 +2865,7 @@ s32 btlOpenPfsDebugDirectory(s32 directoryName) {
 }
 
 /* Close the scanned directory only in debug filesystem mode; ignore the native result. */
-void func_0020D370(s32 directoryHandle) {
+void btlClosePfsDebugDirectory(s32 directoryHandle) {
     if (sdfPfsDebugMode == 0) {
         return;
     }

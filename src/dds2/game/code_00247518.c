@@ -1065,7 +1065,7 @@ INCLUDE_RODATA(const s32, "game/code_00247518", D_00422AC0);
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024B6A8);
 
 /* Store the edited timing or selector halfword in the pending timeline key. */
-s32 func_0024C540(s32 unused0, s32 unused1, EventViewerState *viewer) {
+s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EventViewerState *viewer) {
     EvtViewKey *key = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
     EvtViewTrack *track;
     s32 kind;

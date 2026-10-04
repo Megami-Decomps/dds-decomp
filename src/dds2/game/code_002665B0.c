@@ -97,7 +97,7 @@ extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_002B86E8(u32);
 
-extern void func_002686F0(s32);
+extern void mnuDrawTerminalBackdrop(s32);
 
 extern s8 mnuTerminalTaskState;
 
@@ -292,7 +292,7 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
     mnuReleaseMenuResourceGroup(address, 0);
 }
 
-extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
+extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
 extern s32 func_0019F6C8();
 extern void func_0019D550(s32, s32, s32);
 extern s32 frFontQueueGlyphInSelectedSlot(s32);
@@ -316,7 +316,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
     } else {
         text = D_003A47E8[slot].encodedText;
     }
-    handle = func_0019F460(gridX - 0x120, gridY, depth, value, (s32)text, 0);
+    handle = func_0019F460(gridX - 0x120, gridY, depth, value, text, 0);
     func_0019D550(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphInSelectedSlot(handle);
 }
@@ -1079,7 +1079,7 @@ extern void mnuDrawCampIconBackdrop(void *work, s32 priority);
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw and animate the mode-dependent terminal backdrop. */
-void func_002686F0(s32 address) {
+void mnuDrawTerminalBackdrop(s32 address) {
     MenuSlotState *state = (MenuSlotState *)address;
     MenuBackdropBank *bank;
     MenuBackdropSprite *sprite;
@@ -1566,7 +1566,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     func_00268838(0, state);
     if (fldClassifyRemainingFrames(state) != 2) {
         return 0;
@@ -1725,7 +1725,7 @@ s32 func_0026A2E0(u64 request) {
 s32 func_0026A3F8(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
@@ -1796,7 +1796,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
 s32 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
@@ -1923,7 +1923,7 @@ extern void mnuDrawTerminalSelectedSlots(s32);
 s32 func_0026AC90(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
@@ -1987,7 +1987,7 @@ s32 evtOpenTerminalOwnerStatePopup(s32 request) {
 s32 func_0026AEB0(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
@@ -2037,7 +2037,7 @@ s32 evtBContinueDispatchOrRestoreTable(u64 request) {
 s32 mnuPrepareDispatchStateAndBindHandler(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     func_00268838(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
@@ -2117,7 +2117,7 @@ s32 evtBDispatchSyncD2(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     if (func_00268C08(state) == 0) {
         func_00268838(1, state);
     } else {
@@ -2219,7 +2219,7 @@ s32 evtWaitForTerminalExitPopup(u64 request) {
 s32 evtBLateDispatchStart(s32 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
 
-    func_002686F0((s32)state);
+    mnuDrawTerminalBackdrop((s32)state);
     return menuSetHandler((s32)state, 1, request);
 }
 

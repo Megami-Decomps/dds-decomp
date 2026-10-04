@@ -79,7 +79,7 @@ extern s32 func_002C6480();
 
 extern char D_003E75C4[];
 
-extern void func_002B9CF8(s32, s32, s32, s32, s32);
+extern void mnuDrawWindowDecorations(s32, s32, s32, s32, s32);
 
 extern s32 func_002B86E8(u32);
 
@@ -89,7 +89,7 @@ extern void mnuReleasePartyIconBundles();
 
 extern void mnuClearEntries();
 
-extern s32 itfDrawUnderscoreTextSegment();
+extern u32 itfDrawUnderscoreTextSegment();
 
 extern s32 D_00435E54;
 
@@ -180,7 +180,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern void mnuSetPopupEntryFlagged();
 
-extern void func_002BAF50();
+extern void mnuBeginWindowFadeTransition();
 
 extern void mnuInitPartyPanelSlots();
 
@@ -819,7 +819,7 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     mnuRestorePartyEntriesAndRefresh();
     mnuSetPopupEntryFlagged(menu + 0x54, D_003E7588);
     mnuConfigurePanelResource(((MenuContext *)menu)->panelHandle, ((MenuContext *)menu)->displayHandle, 0, 1);
-    func_002BAF50(((MenuContext *)menu)->imageHandle, menu + 0xB10C);
+    mnuBeginWindowFadeTransition(((MenuContext *)menu)->imageHandle, menu + 0xB10C);
     party->freezePanel = 1;
 }
 
@@ -1074,7 +1074,7 @@ s32 mnuCreatePanels(s32 callback) {
     }
     evtStageTestSelectEntry(*(u16 *)(data + 4), party[11], 0);
     func_002B2C88(window, 1, party[5], party[4]);
-    func_002BAF50(0, context + 0xB10C);
+    mnuBeginWindowFadeTransition(0, context + 0xB10C);
     return 1;
 }
 
@@ -1082,7 +1082,7 @@ s32 mnuDestroyPanels(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *menu = (s32 *)((MenuContext *)context)->party;
     s32 window;
-    func_002BAF50(((MenuContext *)context)->imageHandle, context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, context + 0xb10c);
     window = context + 0x284;
     func_002B2C88(window, 0, menu[5], menu[4]);
     evtStageTestStop();
@@ -1323,8 +1323,8 @@ MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback
     selected = party->selectedWindow;
     selected->scale50 = 0x200;
     selected->scale54 = 0x100;
-    func_002BAF50(0, window);
-    func_002BAF50(party->selectedWindow, window);
+    mnuBeginWindowFadeTransition(0, window);
+    mnuBeginWindowFadeTransition(party->selectedWindow, window);
     party->selectedWindow->panel.fade = 0x100;
     *(s32 *)(context + 0xB1CC) = 0x200;
     return party->selectedWindow;
@@ -1489,7 +1489,7 @@ u32 mnuClearSkillSelectionImageState(void) {
     u32 *state = (u32 *)((MenuContext *)context)->party;
     s32 image = ((MenuContext *)context)->imageHandle;
     if (((MenuWindowContainer *)image)->list->cursor->index == 0) {
-        func_002BAF50(image, context + 0xb10c);
+        mnuBeginWindowFadeTransition(image, context + 0xb10c);
     }
     state[12] = 0;
     return 1;
@@ -1815,13 +1815,13 @@ s32 ptySkillMenuOpenPartyPage(s32 callback) {
     func_002B4848(context);
     window = ((MenuPartyRuntime *)party)->selectedWindow;
     window->list->stateFlags |= 8;
-    func_002BAF50(window, context + 0xB10C);
+    mnuBeginWindowFadeTransition(window, context + 0xB10C);
     return 1;
 }
 
 u32 ptySkillMenuClosePartyPage(u32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    func_002BAF50(((MenuContext *)context)->imageHandle, context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, context + 0xb10c);
     mnuDestroySelectedPartyWindow(callback);
     mnuDestroySkillMenuWindows(context);
     mnuClearPageSelectionHandles(context + 0x284);
@@ -2048,13 +2048,13 @@ u32 mnuResetSelection(u32 callback) {
     func_002B6D78(callback);
     mnuFlagActiveWindows(context + 0x284);
     state[11] = 0;
-    func_002BAF50(state[9], context + 0xb10c);
+    mnuBeginWindowFadeTransition(state[9], context + 0xb10c);
     return 1;
 }
 
 u32 mnuCloseSkillSelection(u32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    func_002BAF50(((MenuContext *)context)->imageHandle, context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, context + 0xb10c);
     mnuDestroySkillSelectionWindow(callback);
     mnuClearPartyPanelActiveFlags(context + 0x284);
     mnuCloseItemSelectionState(callback);

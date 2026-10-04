@@ -2052,7 +2052,7 @@ void btlResetUnitPlacement(void) {
     } while (unit != 0);
 }
 
-extern void func_001D5990(void *);
+extern void btlRefreshUnitMotionSelection(void *);
 
 void btlClearSpecialEnemyEntryFlags(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
@@ -2067,7 +2067,7 @@ void btlClearSpecialEnemyEntryFlags(void) {
                 }
                 if (species >= 0x102) {
                     ((BtlUnit *)unit)->statBits &= ~0x2000;
-                    func_001D5990(unit);
+                    btlRefreshUnitMotionSelection(unit);
                 }
             }
         }
@@ -2317,7 +2317,7 @@ void btlBeginEffectActorFadeOut(void) {
         *(BtlUnit **)effect = 0;
         actor->flags = flags;
         actor->stateFlags = state;
-        func_001D5990(actor);
+        btlRefreshUnitMotionSelection(actor);
         actor->flags |= 8;
         /* +0x10 is a float in this effect variant, but a u32 in BattleEffectState. */
         *(f32 *)((u8 *)effect + 0x10) = -125.0f;
@@ -3906,7 +3906,64 @@ s32 btlMapSkillRange(u32 skill) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020ADA8);
+/* Restore Hariti and the children's positions, with left-side children first. */
+void func_0020ADA8(void) {
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
+
+    for (; unit != NULL; unit = unit->next) {
+        u32 flags = unit->flags;
+
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (unit->mode) {
+                case 0x11B:
+                    unit->position[0] = 0.0f;
+                    unit->position[1] = 0.0f;
+                    unit->position[2] = 248.813782f;
+                    unit->flags = flags & ~0x80000;
+                    break;
+                case 0x13E:
+                    unit->position[0] = -521.0f;
+                    unit->position[1] = -1100.0f;
+                    unit->position[2] = 537.0f;
+                    unit->position[3] = 0.0f;
+                    break;
+                case 0x140:
+                    unit->position[0] = -707.0f;
+                    unit->position[1] = -690.0f;
+                    unit->position[2] = 315.0f;
+                    unit->position[3] = 0.0f;
+                    break;
+                case 0x141:
+                    unit->position[0] = -826.0f;
+                    unit->position[1] = -250.0f;
+                    unit->position[2] = 131.0f;
+                    unit->position[3] = 0.0f;
+                    break;
+                case 0x13D:
+                    unit->position[0] = 521.0f;
+                    unit->position[1] = -1100.0f;
+                    unit->position[2] = 737.0f;
+                    unit->position[3] = 0.0f;
+                    break;
+                case 0x13F:
+                    unit->position[0] = 707.0f;
+                    unit->position[1] = -690.0f;
+                    unit->position[2] = 465.0f;
+                    unit->position[3] = 0.0f;
+                    break;
+                case 0x142:
+                    unit->position[0] = 826.0f;
+                    unit->position[1] = -250.0f;
+                    unit->position[2] = 281.0f;
+                    unit->position[3] = 0.0f;
+                    break;
+                }
+                btlSetUnitPosition(unit, unit->position);
+            }
+        }
+    }
+}
 
 /* Map populated boss-action descriptors to species-specific variants; -1 rejects. */
 s32 btlMapSpeciesToActionVariant(u8 *unit, s32 action) {

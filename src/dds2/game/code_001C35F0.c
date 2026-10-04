@@ -195,7 +195,7 @@ extern void sdfQueueGouraudTexturedQuad(
     s32 depth, s32 (*allocate)(s32));
 
 /* Draw a textured command-panel quad with independently colored corners. */
-s32 func_001C7BA8(s32 x0, s32 y0, s32 x1, s32 y1,
+s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
                   s32 u, s32 v, s32 width, s32 height,
                   const s32 *colors, s32 texture) {
@@ -258,7 +258,7 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7DB8);
 extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 extern void func_001C35F0(s32, s32, s32);
 
-s32 func_001C7F10(void) {
+s32 btlUpdateCommandUiTransition(void) {
     BtlTrackedState *flow;
     void *task;
     s32 counter;

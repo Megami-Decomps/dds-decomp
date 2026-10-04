@@ -512,8 +512,8 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3220);
 
 extern void func_00132010(void);
 extern void evtSetDrawSurfaceIndex(s32);
-extern void func_00108CB8(s32);
-extern void func_001093B8(s32, s32, s32, s32, u32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32, s32);
 extern void func_002C4850(s32);
 extern void fldDrawCounterMapMarker(void);
 extern void func_002C6448(s32);
@@ -522,8 +522,8 @@ extern s32 func_00134CD8(void);
 void func_002C3420(void) {
     func_00132010();
     evtSetDrawSurfaceIndex(84);
-    func_00108CB8(0);
-    func_001093B8(0, 0, 170, 195, 0x3300101E, 0x101E, 0x101E, 0x101E);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitDefaultDepthGradientRect(0, 0, 170, 195, 0x3300101E, 0x101E, 0x101E, 0x101E);
 
     switch (D_003BD25C) {
     case 1:

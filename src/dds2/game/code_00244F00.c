@@ -61,9 +61,9 @@ void evtInitializeVisualData(s32 visualAddress) {
     visualValues[7] = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00244F00", func_00245590);
+INCLUDE_ASM(const s32, "game/code_00244F00", evtUpdateSolarPhaseTransition);
 extern s32 evtGetMirroredSolarPhase(void);
-extern void func_00245590(u32 overlayAddress);
+extern void evtUpdateSolarPhaseTransition(u32 overlayAddress);
 extern void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha, s32 mirroredPhase, u32 overlayAddress, s32 renderContext);
 
 /* Advance the fade and draw with scaled alpha; renderContext is forwarded unchanged. */
@@ -71,7 +71,7 @@ void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, u32 overl
     s32 mirroredPhase;
     /* Preserve signed-byte narrowing before forwarding the mirrored phase. */
     mirroredPhase = (s8)evtGetMirroredSolarPhase();
-    func_00245590(overlayAddress);
+    evtUpdateSolarPhaseTransition(overlayAddress);
     if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
         if ((evtSolarOverlayFadeFlags & SOLAR_FADE_IN) != 0) {
             if (evtSolarOverlayFadeCounter < evtSolarOverlayFadeDuration) {
@@ -138,13 +138,13 @@ u32 func_00245818(void) {
 }
 
 /* Test-task teardown destroys the named script processes. */
-void func_00245820(void) {
+void evtDestroyTestTaskScripts(void) {
     scrDestroyAllNamedProcesses();
 }
 
 void evtStartTestTask(void) {
     D_00435CBC = 0x80000000;
-    kwlnTaskCreate(D_004221D8, 0x2AF9, 1, 1, func_00245818, func_00245820, 0);
+    kwlnTaskCreate(D_004221D8, 0x2AF9, 1, 1, func_00245818, evtDestroyTestTaskScripts, 0);
 }
 
 void evtStopTestTasks(void) {
@@ -174,7 +174,7 @@ typedef struct {
     EventListNode *last;  /* 0x58 */
 } EventList;
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
-void func_00245F88(EventList *list, EventListNode *insertedNode) {
+void evtInsertListNodeByOrderKey(EventList *list, EventListNode *insertedNode) {
     EventListNode *cursor = list->first;
 
     if (cursor == 0) {
@@ -247,7 +247,7 @@ void evtReorderListNodes(EventList *list) {
             while (candidateNode != 0) {
                 if (candidateNode->orderKey < anchorNode->orderKey) {
                     evtUnlinkListNode(list, candidateNode);
-                    func_00245F88(list, candidateNode);
+                    evtInsertListNodeByOrderKey(list, candidateNode);
                     /* Resume from the relocated node's new successor, not its old one. */
                     resumeNode = candidateNode->next;
                     break;

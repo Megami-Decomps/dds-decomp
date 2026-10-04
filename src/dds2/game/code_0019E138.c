@@ -62,6 +62,7 @@ extern void frFontSetContextPair(FrFontCtx *, u32, u32);
 extern void frFontSetChildColors(struct TextStyleNode *, u32);
 extern void frFontSetFlagAndMeasureGlyphs();
 extern FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *, FrFontGlyph *);
+extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *, FrFontGlyph *, s32);
 
 extern void frFontAddSharedGlyphFlags(s32 value);
 extern u8 D_003B4378[];
@@ -377,7 +378,7 @@ void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
     frFontLinkGlyph(parent, (FrFontGlyph *)glyph, 0);
 }
 
-FrFontGlyph *func_0019F280(s32 x, s32 y, s32 depth, u32 colors, const char *text,
+FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const char *text,
                          s8 glyphMode, s8 sharedFlag, FrFontGlyph *previousGlyph) {
     char glyphData[3];
     s32 length;
@@ -426,7 +427,7 @@ FrFontGlyph *func_0019F280(s32 x, s32 y, s32 depth, u32 colors, const char *text
     return chain;
 }
 
-extern FrFontGlyph *func_0019F280();
+extern FrFontGlyph *itfAppendTextGlyphChain();
 
 
 s32 frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
@@ -437,7 +438,7 @@ s32 frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
     s32 text;
     s32 parent;
 {
-    s32 handle = (s32)func_0019F280(x, y, depth, colors, (const char *)text, 1, 0, (FrFontGlyph *)parent);
+    s32 handle = (s32)itfAppendTextGlyphChain(x, y, depth, colors, (const char *)text, 1, 0, (FrFontGlyph *)parent);
     frFontSetFlagAndMeasureGlyphs(handle, 3);
     return handle;
 }
@@ -446,7 +447,43 @@ void func_0019F448(void) {
     frFontCreateMeasuredFlaggedGlyph();
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F460);
+/* Decode two-byte glyph codes before building and linking the text glyph. */
+u32 func_0019F460(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 parent) {
+    u8 buffer[0x400];
+    s32 i;
+    s32 length = strlen((const char *)text);
+    FrFontCtx *glyph;
+
+    buffer[length] = 0;
+    for (i = 0; i < length; i++) {
+        u16 code = text[i];
+
+        if (code < 0x80) {
+            buffer[i] = code;
+        } else {
+            u32 decoded;
+
+            code = (code << 8) | text[i + 1];
+            decoded = itfDecodeGlyph(code);
+            if (decoded != 0xffff) {
+                buffer[i] = decoded >> 8;
+                buffer[i + 1] = decoded;
+            } else {
+                buffer[i] = 0x80;
+                buffer[i + 1] = 0x80;
+            }
+            i++;
+        }
+    }
+    frFontAddSharedGlyphFlags(1);
+    glyph = frFontAppendGlyphFromData(buffer, 1, 0, 0, 0);
+    frFontAddSharedGlyphFlags(2);
+    frFontClearFlagBits(1);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetChildColors((struct TextStyleNode *)glyph, colors);
+    return (u32)frFontLinkGlyph((FrFontGlyph *)parent, (FrFontGlyph *)glyph, 0);
+}
 
 u32 func_0019F5E8(s32 x, s32 y, s32 depth, u32 colors, char *text, s32 previousGlyph) {
     FrFontGlyph *glyph;
@@ -615,13 +652,12 @@ s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 te
     return result;
 }
 
-extern s64 func_0019F460(s64, s64, s32, s64, const void *, s32);
 
-s64 itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
-    s64 x;
-    s64 y;
+u32 itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
+    s32 x;
+    s32 y;
     s32 depth;
-    s64 color;
+    u32 color;
     const u8 *text;
     s32 segmentIndex;
 {

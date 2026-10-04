@@ -82,7 +82,7 @@ extern u32 D_00437D44;
 extern u32 D_00437D3C;
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
-extern u32 func_0019F460(s32, s32, u64, u64, u64, u64);
+extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
 extern u32 D_00439004;
 extern u32 D_00439008;
 
@@ -291,9 +291,9 @@ extern void *(*fileMenuStateHandler)(s32);
 
 extern void evtSetDrawSurfaceIndex(s32);
 
-extern void func_00108BD8(s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
-extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern s32 D_00437D70;
 
@@ -651,15 +651,15 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
     return condition != 0 && D_00437CE4 == 1;
 }
 
-void func_002C9818(s32 x, s32 y, u64 width, u64 height) {
-    u32 handle = func_0019F460(x << 4, y << 3, 0, width, height, 0);
+void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
+    u32 handle = func_0019F460(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(D_00439004);
 }
 
-void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u64 width, u64 height) {
-    u32 handle = func_0019F460(x << 4, y << 3, 0, width, height, 0);
+void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
+    u32 handle = func_0019F460(x << 4, y << 3, 0, colors, text, 0);
     D_00439008 = handle;
     frFontSetChainFlag(handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
@@ -692,7 +692,7 @@ void fileDrawPulsingSaveHighlight(void) {
     f32 wave;
 
     evtSetDrawSurfaceIndex(0x56);
-    func_00108BD8(0);
+    evtSubmitPrimaryAlphaBlendMode(0);
     fileSaveHighlightPhase = fileSaveHighlightPhase + 0.39999998f;
     sdfSinPoly(fileSaveHighlightPhase);
     angle = ((s32)D_003E8008[2] + 8) % 360;
@@ -706,7 +706,7 @@ void fileDrawPulsingSaveHighlight(void) {
 
 void fileDrawSaveWindow(void) {
     evtSetDrawSurfaceIndex(0x56);
-    func_00108BD8(0);
+    evtSubmitPrimaryAlphaBlendMode(0);
     func_00108EC0(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D78);
     func_00108EC0(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D78);
     fileCursorPulseUpdate();
@@ -1889,8 +1889,8 @@ s32 fileDrawMenuFrame(s32 task) {
     s32 alpha;
 
     evtSetDrawSurfaceIndex(0x52);
-    func_00108BD8(0);
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     if (D_00437CF4 != 0) {
         func_00108EC0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                       D_00437D74);
@@ -1914,8 +1914,8 @@ s32 fileDrawMenuFrame(s32 task) {
     func_002CA1F0();
     func_002CEEC0();
     func_002C9CF8();
-    func_00108BD8(0);
-    evtSubmitGsRegister47(1, 5, 0x80, 3, 0, 0, 1, 2);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     return 0;
 }
 
@@ -2108,8 +2108,8 @@ void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     };
 
     evtSetDrawSurfaceIndex(0x53);
-    func_00108BD8(0);
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108EC0(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
                   (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, D_00437D70);
 }

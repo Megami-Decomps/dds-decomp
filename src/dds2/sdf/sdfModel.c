@@ -115,7 +115,7 @@ typedef struct SdfDrawNode {
 
 extern void sdfFreeNodeLists(void);
 
-extern void sdfEnsureFreeRootWorkspace(void *arg0);
+extern void *sdfEnsureFreeRootWorkspace(void *arg0);
 extern void *sdfAllocSizeClassBlock(s32 size);
 
 

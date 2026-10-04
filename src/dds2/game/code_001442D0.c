@@ -3145,7 +3145,7 @@ extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern FieldGridCoordPair D_00438EF8;
 
-void func_00151E00(void) {
+void fldUpdateTargetGuideFastRoute(void) {
     f32 distance, angle;
     FieldTargetGuideState *state = &fldTargetGuideState;
     FieldGuidePoint *point;
@@ -3186,7 +3186,7 @@ void func_00151E00(void) {
     fldCalcTargetDistanceYaw(&distance, &angle);
 }
 
-void func_00151FF8(void) {
+void fldUpdateTargetGuideSlowRoute(void) {
     f32 distance, angle;
     FieldTargetGuideState *state = &fldTargetGuideState;
     FieldGuidePoint *point;

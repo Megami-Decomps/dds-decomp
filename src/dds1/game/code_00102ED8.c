@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     s8 r;
@@ -20,7 +21,7 @@ extern KwlnFadeColor kwlnFadeColor;
 
 extern u16 D_003BA918;
 extern s16 D_003BA91A;
-extern s16 D_003BA91C;
+extern u16 D_003BA91C;
 extern u16 D_003BA91E;
 
 extern u32 kwlnTextureReferenceFlag;
@@ -841,7 +842,58 @@ s32 kwlnTextureGetHeldReference(void) {
     return kwlnHeldTextureReference;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105630);
+extern f32 D_00324590[];
+extern f32 D_003BA940[];
+extern f32 effMiscRandUnitFloat(s32 mode);
+extern f32 fabsf(f32 value);
+
+/* Advance the two bounded shake offsets and taper finite-duration amplitudes. */
+void func_00105630(void) {
+    f32 limits[2];
+    f32 weights[2];
+    s32 axis;
+
+    memcpy(weights, D_003BA940, sizeof(weights));
+    if (D_003BA918 == 0) {
+        VU0_MOVE_VF(vf10, vf0);
+        VU0_CLEAR_W(vf10);
+        return;
+    }
+    if (D_003BA91A == 0) {
+        D_003BA918 = 0;
+        return;
+    }
+    limits[0] = D_003BA91C * 0.01f;
+    limits[1] = D_003BA91E * 0.01f;
+    for (axis = 0; axis < 2; axis++) {
+        if (limits[axis] != 0.0f) {
+            f32 step = effMiscRandUnitFloat(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
+
+            if (limits[axis] * weights[axis] <= fabsf(D_00324590[axis])) {
+                if (D_00324590[axis] <= 0.0f) {
+                    D_00324590[axis] += step;
+                } else {
+                    D_00324590[axis] -= step;
+                }
+            } else {
+                D_00324590[axis] += 2.0f * (step * (effMiscRandUnitFloat(0) - 0.5f));
+            }
+            if (D_00324590[axis] < -limits[axis]) {
+                D_00324590[axis] = -limits[axis];
+            }
+            if (limits[axis] < D_00324590[axis]) {
+                D_00324590[axis] = limits[axis];
+            }
+        }
+    }
+    if (D_003BA91A > 0) {
+        s32 divisor = D_003BA91A + 5;
+
+        D_003BA91C -= D_003BA91C / divisor;
+        D_003BA91E -= D_003BA91E / divisor;
+        D_003BA91A--;
+    }
+}
 
 #define KWLN_FADE_TICKS_PER_FRAME 10
 #define KWLN_FADE_MARK_NUMERATOR 4
@@ -1265,11 +1317,11 @@ void func_00106368(void) {
     }
 
     evtSetDrawSurfaceIndex(0x4F);
-    func_00108CB8(0);
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     alpha = (KWLN_FADE_MAX_ALPHA - fade) << 24;
-    func_001093B8(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
-    func_001093B8(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
+    evtSubmitDefaultDepthGradientRect(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
+    evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
 }
 
 void func_00106488(f32 value) {

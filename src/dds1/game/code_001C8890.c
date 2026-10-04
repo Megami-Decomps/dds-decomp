@@ -451,9 +451,9 @@ extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
 extern s32 btlTestActorStatusPredicate(s32);
 extern void btlApplyUnitModelScaledValue(u8 *);
 extern s32 btlIsActorModeAcceptedByBattleHook(u8 *);
-extern void func_001D5578(u8 *, u32, s32, f32);
-extern void func_001D5990(u8 *);
-extern void func_001D74B8(u8 *);
+extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
+extern void btlRefreshUnitMotionSelection(u8 *);
+extern void btlRefreshUnitEffectMotionAndEntry(u8 *);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 extern void mdlAddEntryPlain(void *, s32, s32);
 extern void sdfMotionSampleAtFrame(void *, f32);
@@ -929,7 +929,7 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(u8 *task) {
         masked &= ~0x08000000;
         *(u32 *)(unit + 0x110) = masked;
         btlFlagUnitDefeatCandidate(unit);
-        func_001D5990(unit);
+        btlRefreshUnitMotionSelection(unit);
         btlStartTask(btlAllocateIndexedUnitEffectTask(unit, 0xE, 0, 1.0f));
         fldAppendTaskToGroup((SceneTask *)task);
         btlDispatchStateHandler(task, 2);
@@ -2230,7 +2230,7 @@ u32 btlApplyDeferredActorStats(u8 *arguments) {
     resource = actor + 0x120;
     btlAdjustUnitHp(resource, primary);
     btlAdjustUnitMp(resource, *(s32 *)(arguments + 0x24));
-    func_001D5990(actor);
+    btlRefreshUnitMotionSelection(actor);
     btlIsUnitDefeatTriggeredByValueDelta(actor, 0);
     return 1;
 }
@@ -2259,7 +2259,7 @@ u32 btlApplyDeferredUnitStatus(void *argument) {
         return 1;
     }
     func_001A1948(owner + 0x120, args[1]);
-    func_001D5990(owner);
+    btlRefreshUnitMotionSelection(owner);
     btlIsUnitDefeatTriggeredByValueDelta(owner, 0);
     return 1;
 }
@@ -2358,7 +2358,7 @@ void *func_001D3400(u8 *owner, BattleDeltaSpec *spec) {
 u32 btlApplyQueuedActorEntrySelection(u32 *arg0) {
     if (0 < (s32)arg0[7]) {
         btlSetActorSelectedEntryIndex(*arg0, arg0[7]);
-        func_001D5990(*arg0);
+        btlRefreshUnitMotionSelection(*arg0);
     }
     return 1;
 }
@@ -2380,7 +2380,7 @@ void *func_001D3510(u8 *owner, BattleDeltaSpec *spec) {
 }
 u32 btlClearQueuedActorEntrySelection(u32 *arg0) {
     btlClearActorSelectedEntryIndex(*arg0);
-    func_001D5990(*arg0);
+    btlRefreshUnitMotionSelection(*arg0);
     return 1;
 }
 
@@ -2421,7 +2421,7 @@ u8 *btlCreateActorSoundOptionTask(u8 *arg0, s32 arg1) {
 
 u32 func_001D3A20(s32 arg0) {
     if ((*(u8 *)(*(s32 *)(arg0 + 4) * 8 + datItemSkillRecords + 1) & 4) != 0) {
-        func_00119900(*(s32 *)(arg0 + 4), 0xffffffffffffffff);
+        ptyAdjustItemQuantity(*(s32 *)(arg0 + 4), 0xffffffffffffffff);
     }
     return 1;
 }
@@ -2443,7 +2443,7 @@ u8 *btlCreatePermittedBattleVoiceTask(s32 arg0, s32 arg1) {
 }
 
 u32 btlPlayQueuedBattleVoice(s32 arg0) {
-    func_00119900(*(u16 *)(arg0 + 4), 1);
+    ptyAdjustItemQuantity(*(u16 *)(arg0 + 4), 1);
     return 1;
 }
 
@@ -2544,7 +2544,7 @@ u32 btlRefreshEligibleActors(void) {
                             if ((*(u32 *)(actor + 0x114) & 8) == 0) {
                                 u16 prior = *(u16 *)(actor + 0x12E);
                                 func_001A1948(actor + 0x120, 1);
-                                func_001D5990(actor);
+                                btlRefreshUnitMotionSelection(actor);
                                 if (*(u16 *)(actor + 0x12E) == 1 &&
                                     prior != *(u16 *)(actor + 0x12E)) {
                                     *(u32 *)(actor + 0x114) |= 4;
@@ -3163,7 +3163,7 @@ u32 btlIsUnitInfoFlagOneEligible(u8 *object) {
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3AD0);
 
-void func_001D5578(u8 *unit, u32 index, s32 mode, f32 rate) {
+void btlApplyUnitMotionSelection(u8 *unit, u32 index, s32 mode, f32 rate) {
     u8 *context;
     BtlEffectResource *table;
     u8 *task;
@@ -3297,7 +3297,7 @@ void func_001D5578(u8 *unit, u32 index, s32 mode, f32 rate) {
     *(s16 *)(unit + 0xFA) = table->nodes[*(s32 *)(unit + 0xFC)].frameCount;
 }
 
-void func_001D5990(u8 *unit) {
+void btlRefreshUnitMotionSelection(u8 *unit) {
     s32 entryFlags;
     u8 *context;
     s32 index;
@@ -3390,7 +3390,7 @@ void func_001D5990(u8 *unit) {
     if (*(s32 *)(unit + 0xEC) != 11 &&
         (btlIsActorModeAcceptedByBattleHook(unit) != 0 || index == 11) &&
         *(s32 *)(unit + 0xEC) != index) {
-        func_001D5578(unit, index, mode, rate);
+        btlApplyUnitMotionSelection(unit, index, mode, rate);
     }
 }
 
@@ -3417,12 +3417,12 @@ s32 btlIsActorModeAcceptedByBattleHook(u8 *object) {
     return 0;
 }
 
-extern void func_001D5578(u8 *, u32, s32, f32);
+extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
 
 void btlApplyScaledUnitEffectParameter(u8 *object, s32 index, s32 argument, f32 scale) {
     u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)(object + 0xC4), *(s32 *)(object + 0xC8));
     f32 value = *(f32 *)(resource + index * 20 + 0x34);
-    func_001D5578(object, index, argument, value * scale);
+    btlApplyUnitMotionSelection(object, index, argument, value * scale);
 }
 
 s32 btlGetSlotRateKind(u8 *object, s32 index) {
@@ -3452,8 +3452,8 @@ void btlUpdateUnitEffects(void) {
             s32 node = mdlGetNodeField2C(model, 0);
             if (*(s16 *)(resource + node * 20 + 0x30) == 1 &&
                 btlIsActorModeAcceptedByBattleHook(object) == 0) {
-                func_001D5990(object);
-                func_001D5578(object, *(s32 *)(object + 0xFC),
+                btlRefreshUnitMotionSelection(object);
+                btlApplyUnitMotionSelection(object, *(s32 *)(object + 0xFC),
                               *(s32 *)(object + 0x100),
                               *(f32 *)(object + 0x104));
             }
@@ -3745,7 +3745,7 @@ void btlUnitFaceTarget(u8 *object, u8 *target) {
     }
 }
 
-extern s32 func_001F7868(void *, void *, f32);
+extern s32 btlAimHorizontalDirectionClampedVU(void *, void *, f32);
 
 void btlUnitFaceTargetScaled(u8 *object, u8 *target, f32 scale) {
     u8 first[16];
@@ -3756,7 +3756,7 @@ void btlUnitFaceTargetScaled(u8 *object, u8 *target, f32 scale) {
         __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(first));
         btlUnitGetBodyPosVU(target);
         __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(second));
-        func_001F7868(first, second, scale);
+        btlAimHorizontalDirectionClampedVU(first, second, scale);
         __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(result));
         btlSetUnitRotation(object, result);
     }
@@ -3866,16 +3866,16 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BA8);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D7258);
 
-void func_001D74B8(u8 *unit) {
+void btlRefreshUnitEffectMotionAndEntry(u8 *unit) {
     u32 flags = *(u32 *)(unit + 0x110);
     if ((flags & 2) == 0) {
         return;
     }
     if (*(s32 *)(unit + 0xEC) != *(s32 *)(unit + 0xFC)) {
-        func_001D5990(unit);
+        btlRefreshUnitMotionSelection(unit);
         *(u16 *)(unit + 0xF8) = 0;
         *(u16 *)(unit + 0xFA) = 0;
-        func_001D5578(unit, *(s32 *)(unit + 0xFC),
+        btlApplyUnitMotionSelection(unit, *(s32 *)(unit + 0xFC),
                       *(s32 *)(unit + 0x100), *(f32 *)(unit + 0x104));
         flags = *(u32 *)(unit + 0x110);
     }
@@ -4662,7 +4662,7 @@ u32 btlStiffenDamageShakeStep(u32 *task) {
             u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)((u8 *)*task + 0xC4),
                                                  *(s32 *)((u8 *)*task + 0xC8));
             if (*(s16 *)(resource + node * 20 + 0x30) == 2) {
-                func_001D74B8(*(s32 *)task);
+                btlRefreshUnitEffectMotionAndEntry(*(s32 *)task);
                 btlBossDebugPrintf(D_003A3CA0);
             }
         }
@@ -5236,7 +5236,7 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001DB370);
 
 extern void btlScalarRangeInitQuadratic(u8 *, f32);
 
-extern f32 func_001F7D80(u8 *, f32);
+extern f32 btlScalarRangeStepQuadratic(u8 *, f32);
 
 extern void func_001DB370(u8 *, u8 *, u8 *, f32);
 
@@ -5248,7 +5248,7 @@ s32 btlStepPoseBlendHalf(u8 *object) {
         btlCopyMotionTransform(object, object + 0x30);
         return 0;
     }
-    blend = func_001F7D80(object + 0x13C, 1.0f);
+    blend = btlScalarRangeStepQuadratic(object + 0x13C, 1.0f);
     if (blend > 0.5f) {
         blend = 0.5f;
     }
@@ -5262,7 +5262,7 @@ s32 btlStepPoseBlendHalf(u8 *object) {
 
 extern void btlScalarRangeSetStartClearEnd(u8 *, f32);
 
-extern f32 func_001F7CD8(u8 *);
+extern f32 btlScalarRangeStepExponential(u8 *);
 
 extern void btlCopyMotionTransform(u8 *, u8 *);
 
@@ -5276,7 +5276,7 @@ s32 btlStepPoseBlend(u8 *actor) {
         btlScalarRangeSetStartClearEnd(motion, *(f32 *)(actor + 0x130));
         btlCopyMotionTransform(actor, position);
     }
-    value = func_001F7CD8(motion);
+    value = btlScalarRangeStepExponential(motion);
     func_001DB370(actor, position, actor + 0xC0, value);
     *(f32 *)(actor + 0x128) = value;
     return 0.9999990f <= value;
@@ -5284,7 +5284,7 @@ s32 btlStepPoseBlend(u8 *actor) {
 
 extern void btlScalarRangeInitQuadratic(u8 *, f32);
 
-extern f32 func_001F7D80(u8 *, f32);
+extern f32 btlScalarRangeStepQuadratic(u8 *, f32);
 
 s32 btlStepPoseBlendFrame(u8 *actor) {
     f32 value;
@@ -5294,7 +5294,7 @@ s32 btlStepPoseBlendFrame(u8 *actor) {
         btlCopyMotionTransform(actor, actor + 0x30);
         return 0;
     }
-    value = func_001F7D80(actor + 0x13C, 1.0f);
+    value = btlScalarRangeStepQuadratic(actor + 0x13C, 1.0f);
     func_001DB370(actor, actor + 0x30, actor + 0xC0, value);
     *(f32 *)(actor + 0x128) = value;
     return 0.9999990f <= value;
@@ -6225,7 +6225,7 @@ extern void func_001E4708(void *unit, f32 *pose, u8 *out);
 extern s32 func_001E4720(void *unit, f32 *pose, u8 *out);
 
 /* Choose the action's camera pose from active ally and enemy height maxima. */
-void func_001DD4B8(ActionUnit *action) {
+void btlChooseCameraPoseByActorHeights(ActionUnit *action) {
     BtlUnit *unit;
     s32 enemyCount = 0;
     f32 enemyHeight = 0.0f;
@@ -7104,7 +7104,7 @@ void btlInitCommandCursorForFirstActor(s32 arg0, s32 arg1) {
     BattleController *work = (BattleController *)btlGetRuntime();
     s32 first = btlGetIndexListEntry(*(s32 *)(arg0 + 0x118), 0);
     memset(CURSOR, 0, 0x130);
-    func_001D74B8(first);
+    btlRefreshUnitEffectMotionAndEntry(first);
     if (btlHasFirstLinkedCategoryFlag1000((u8 *)arg0) != 0) {
         func_001E6BB0(arg0, arg1, 5, 1);
     } else {
@@ -7127,7 +7127,7 @@ void btlAdvanceTargetCursorAnimation(s32 action, s32 state) {
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
-extern void func_001D74B8(u8 *);
+extern void btlRefreshUnitEffectMotionAndEntry(u8 *);
 
 extern void func_001E6BB0(s32, s32, s32, s32);
 
@@ -7139,7 +7139,7 @@ void btlInitLinkedUnitActionCursor(u8 *arg0) {
     memset(CURSOR, 0, 0x130);
     CURSOR->unk_0A = 0;
     CURSOR->unk_0E = 0;
-    func_001D74B8(*(s32 *)(arg0 + 0x18));
+    btlRefreshUnitEffectMotionAndEntry(*(s32 *)(arg0 + 0x18));
     func_001E6BB0(context, context, 6, 0);
     btlClearAllUnitDefeatCandidatesTask();
     btlFlagUnitDefeatCandidate(*(s32 *)(arg0 + 0x18));
@@ -7147,7 +7147,7 @@ void btlInitLinkedUnitActionCursor(u8 *arg0) {
     func_001E6668(context, context, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001EF1F8);
+INCLUDE_ASM(const s32, "game/code_001C8890", btlInitTargetCursorAndFacing);
 
 extern void func_001E6BB0(s32, s32, s32, s32);
 
@@ -9468,7 +9468,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 
 /* Place the three actor slots around the common battle center supplied in vf10. */
-void func_001F5410(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+void btlPlaceTripleFormationAroundCenter(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
     BtlUnit *slot[3];
     f32 center[4];
     f32 pos[4];
@@ -9653,3 +9653,4 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5410);
+

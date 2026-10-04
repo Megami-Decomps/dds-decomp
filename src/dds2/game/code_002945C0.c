@@ -31,7 +31,7 @@ typedef struct ItfGlyphDisplayContext {
     ItfGlyphList *glyphList;
 } ItfGlyphDisplayContext;
 
-void func_002945C0(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
+void itfEmitSelectedGlyph(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
                   u64 color, u64 glyphAttribute) {
     ItfGlyphEntry *entry;
     ItfGlyphInfo *data;

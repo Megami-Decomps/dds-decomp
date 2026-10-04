@@ -267,7 +267,7 @@ typedef struct MenuIconBatch {
     u32 resource;        /* 0x0C */
 } MenuIconBatch;
 
-extern void func_00119900(s32, s32);
+extern void ptyAdjustItemQuantity(s32, s32);
 
 void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     u32 i;
@@ -278,7 +278,7 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
 
         refs++;
         if (id != 0) {
-            func_00119900(id, param);
+            ptyAdjustItemQuantity(id, param);
         }
     }
 }

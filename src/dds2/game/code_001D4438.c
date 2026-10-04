@@ -1331,7 +1331,7 @@ void func_001D48F0(s32 task) {
 
 extern void func_001AA850();
 extern void btlFlagUnitDefeatCandidate();
-extern void func_001E2758();
+extern void btlRefreshUnitMotionSelection();
 extern s32 btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 /* Keep raw task/unit accesses: typed SceneTask/SceneActor fields change

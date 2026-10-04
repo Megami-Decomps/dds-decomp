@@ -103,7 +103,7 @@ typedef struct SceneDescriptor {
 extern s32 datBattleSceneRecords;
 
 /* Only scene-listed special units use these alternate action codes. */
-s32 func_0020EC20(BtlUnit *unit, s32 action) {
+s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     BtlState *battle;
     u16 *listedMode;
     u32 i;

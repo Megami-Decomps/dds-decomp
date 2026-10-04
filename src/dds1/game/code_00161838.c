@@ -53,7 +53,7 @@ void effBTLFieldColorGetFixedVector(u32 unused, f32 *color) {
 INCLUDE_ASM(const s32, "game/code_00161838", effBTLFieldColorGetBaseColor);
 
 /* Variant and kind are narrowed to their stored widths before the lookup. */
-s32 func_001619A0(s32 colorId, s16 variant, s16 kind, s32 arg3) {
+s32 effBTLFieldColorLookupNarrowSelectors(s32 colorId, s16 variant, s16 kind, s32 arg3) {
     return effBTLFieldColorGetBaseColor(colorId, variant, kind, arg3);
 }
 
@@ -84,7 +84,7 @@ void effBTLFieldColorResetFlags(void) {
     effFieldColorFlags = 0;
 }
 
-f32 func_00161A20(BtlUnit *unit) {
+f32 effBTLFieldColorGetActorScale(BtlUnit *unit) {
     f32 scale = unit->scale;
     f32 maximum = 3.0f;
     f32 radius = ((unit->reach * scale) + (unit->height * scale * 0.5f)) * 0.5f * (1.0f / 87.5f);
@@ -98,7 +98,7 @@ f32 func_00161A20(BtlUnit *unit) {
 }
 
 void func_00161A88(BtlUnit *unit) {
-    func_00161A20(unit);
+    effBTLFieldColorGetActorScale(unit);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorOriginalSelector);

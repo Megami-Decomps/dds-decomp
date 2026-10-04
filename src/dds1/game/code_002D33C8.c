@@ -134,7 +134,7 @@ extern SdfResEntry *sdfPacketResourceEntries[];
 void sdfTexRelease(void);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
 void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
-void func_002D5A68(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
+void sdfWriteImageTransferRegisters(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
@@ -259,7 +259,7 @@ void func_002D39B0(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
     packet->header[1] = 0x5000000611000000;
     packet->header[2] = 0x1000000000000004;
     packet->header[3] = 0xE;
-    func_002D5A68((SdfPacket *)packet->transfer, source->baseAddress, source->bufferWidth,
+    sdfWriteImageTransferRegisters((SdfPacket *)packet->transfer, source->baseAddress, source->bufferWidth,
                   source->pixelFormat, destinationX, destinationY, 0, 0, 0, 0, 0,
                   transferWidth, transferHeight, 0);
 
@@ -1276,7 +1276,7 @@ void sdfInitializeTextureFlushPacket(SdfPacket *packet) {
 }
 
 /* Emit the four A+D registers controlling an image transfer. */
-void func_002D5A68(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
+void sdfWriteImageTransferRegisters(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection) {
@@ -1304,7 +1304,7 @@ void sdfInitializeExtendedDrawPacket(SdfPacket *packet, u32 destinationBufferAdd
     packet->unk8 = (((u64)0x50000005 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8004);
     packet->unk18 = 0xE;
-    func_002D5A68(packet + 1, destinationBufferAddress, destinationBufferWidth,
+    sdfWriteImageTransferRegisters(packet + 1, destinationBufferAddress, destinationBufferWidth,
                   destinationFormat, destinationX, destinationY, sourceBufferAddress, sourceBufferWidth,
                   sourceFormat, sourceX, sourceY, transferWidth, transferHeight, transferDirection);
 }

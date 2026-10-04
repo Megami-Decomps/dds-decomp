@@ -2,7 +2,7 @@
 
 extern u32 kwlnTaskGetUserValue();
 
-extern void func_002686F0(s32);
+extern void mnuDrawTerminalBackdrop(s32);
 
 extern void func_0026C900(void);
 
@@ -130,7 +130,7 @@ s32 dspUpdateFlagEvent(s32 request) {
 s32 mnuDispatchTerminalPanel(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     return menuSetHandler(state, 1, request);
 }
 
@@ -184,7 +184,7 @@ s32 func_0026BAF8(u64 request) {
 s32 func_0026BB78(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
-    func_002686F0(state);
+    mnuDrawTerminalBackdrop(state);
     return menuSetHandler(state, 1, request);
 }
 

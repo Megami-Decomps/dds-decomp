@@ -77,6 +77,7 @@ typedef struct CampCurrency {
 
 
 extern void scrClearPackedScriptFlags(void *);
+extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
 
 extern void mnuClearEntryBlocked(s32);
 
@@ -621,7 +622,7 @@ extern void mnuSetWindowContainerState(s32, s32);
 
 extern void mnuInitializeWindowFadeState(u8 *);
 
-extern void func_002BAF50(s32, u8 *);
+extern void mnuBeginWindowFadeTransition(s32, u8 *);
 
 extern u8 D_003E56D0[], D_003E56F0[], D_003E5708[], D_003E6978[], D_003E6998[];
 
@@ -640,7 +641,7 @@ void mnuStaffInitResourceLists(u8 *work) {
     ((StaffResourceHeader *)work)->resourceLists[2] = list;
     mnuSetWindowContainerState(list, 0x100);
     mnuInitializeWindowFadeState(ctx);
-    func_002BAF50(((StaffResourceHeader *)work)->resourceLists[0], ctx);
+    mnuBeginWindowFadeTransition(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }
 
 extern void mnuDestroyWindowContainer(u32);
@@ -916,7 +917,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
     }
 }
 
-extern u32 D_003E5710[];
+extern u8 *D_003E5710[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {

@@ -31,7 +31,7 @@ typedef struct MenuResourceSet {
 extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
 extern void func_002AB8F0(s32);
 
-extern void func_002BAF50(s32, s32);
+extern void mnuBeginWindowFadeTransition(s32, s32);
 extern u8 func_002BDA50(s32 index);
 
 
@@ -123,7 +123,7 @@ extern void mnuSetWindowContainerLayout(MenuStaffList *, u32, u32, u32, u32, u32
 extern void mnuCreateListWithDefaults(MenuStaffList *, u32, u32, u32, u32);
 
 /* Build the catalog window from the eighteen item records and owned quantities. */
-void func_002AC8F0(MenuStaffContext *owner) {
+void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
     MenuStaffList *window;
     MenuStaffNode *node;
@@ -192,7 +192,7 @@ u32 mnuInitializeWindowOwnerResourceSet(void) {
     func_002AB8F0((s32)context);
     /* This input word at +0x118 is not identified in the shared context yet. */
     mnuConfigurePanelResource(*(s32 *)((u8 *)context + 0x118), context->spriteArg2, 0, 0);
-    func_002BAF50((s32)context->activeWindow, (s32)context->tail);
+    mnuBeginWindowFadeTransition((s32)context->activeWindow, (s32)context->tail);
     mnuSeekListNode(0, context->activeWindow->window);
     return 1;
 }
@@ -227,7 +227,7 @@ extern char D_003E74C0[];
 extern char D_003E7418[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
-s32 func_002ACC50(u64 callback) {
+s32 mnuHandleStaffPopupSelection(u64 callback) {
     MenuStaffContext *context;
     MenuResourceSet *resources;
     MenuStaffList *window;
@@ -271,7 +271,7 @@ s32 func_002ACC50(u64 callback) {
         if (input & 2) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7418);
             mnuConfigurePanelResource(*(s32 *)((u8 *)context + 0x118), context->group, 0, 1);
-            func_002BAF50(*(s32 *)((u8 *)context + 0x104), (s32)context->tail);
+            mnuBeginWindowFadeTransition(*(s32 *)((u8 *)context + 0x104), (s32)context->tail);
         }
         window = context->activeWindow;
         if (window != NULL) {
@@ -315,7 +315,7 @@ s32 mnuFinishStaffReturnPopup(s32 callback) {
 extern s32 func_002C5A28(s32, s32, s32, s32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
-extern void func_0011A118(s32, s32);
+extern void ptyAdjustItemQuantity(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
 extern void func_002BCA98(s32);
 extern void func_002BCAB0(s32);
@@ -346,7 +346,7 @@ s32 context;
             return 0;
         }
     }
-    func_0011A118(itemId, -1);
+    ptyAdjustItemQuantity(itemId, -1);
     mnuInitPartyPanelSlots(context + 0xA928);
     func_002BCA98(partyPanel);
     func_002BCAB0(partyPanel);
@@ -372,7 +372,7 @@ u32 func_002AD0A8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002BAF50(((MenuResourceSet *)((MenuStaffContext *)context)->menu)->windows[0], context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuResourceSet *)((MenuStaffContext *)context)->menu)->windows[0], context + 0xb10c);
     return 1;
 }
 
@@ -380,7 +380,7 @@ u32 func_002AD0E8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002BAF50((u32)((MenuStaffContext *)context)->activeWindow, (s32)((MenuStaffContext *)context)->tail);
+    mnuBeginWindowFadeTransition((u32)((MenuStaffContext *)context)->activeWindow, (s32)((MenuStaffContext *)context)->tail);
     return 1;
 }
 
@@ -390,7 +390,7 @@ extern s32 D_00435E70;
 extern void func_002AAC70(s32, s32, s32, s32, s32, s32, s32);
 
 /* Refresh a staff window's description from the selected item's label. */
-void func_002AD330(MenuStaffContext *context, s32 windowIndex) {
+void mnuRefreshStaffWindowDescription(MenuStaffContext *context, s32 windowIndex) {
     MenuResourceSet *resources = (MenuResourceSet *)context->menu;
     MenuStaffNode *node = ((MenuStaffList *)resources->windows[windowIndex])->window->selectedNode;
     s32 emptyLabel = 0;

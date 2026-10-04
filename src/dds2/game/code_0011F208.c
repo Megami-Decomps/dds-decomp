@@ -697,7 +697,7 @@ extern u8 D_00386480[];
 extern char *D_00386488[];
 
 /* Draw three RGB value rows and their clamped colour preview. */
-void func_0011FD18(void *packetList, s32 x, s32 y, s32 selected, f32 *values) {
+void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values) {
     char text[16];
     u32 color = 0x80000000;
     s32 i;

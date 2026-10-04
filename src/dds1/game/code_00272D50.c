@@ -142,7 +142,7 @@ extern void mnuAttachWindowTextureState(StaffWindowHeader *, u32, u32, u32, u32)
 extern void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *, u32);
 
 /* Create the extra staff window and populate it with owned bullet items. */
-void func_002730A0(StaffDisplayContext *context) {
+void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     StaffWindowResources *resources = context->resources;
     StaffWindowHeader *window;
     StaffWindowNode *node;
@@ -313,7 +313,7 @@ s32 mnuStaffRunPanel2b(u64 request) {
 extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern void func_00119900(s32, s32);
+extern void ptyAdjustItemQuantity(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
 extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
@@ -334,7 +334,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
             return 0;
         }
     }
-    func_00119900(itemId, -1);
+    ptyAdjustItemQuantity(itemId, -1);
     mnuInitPartyPanelSlots(context + 0x7EC);
     mnuUpdateHandleStates(partyPanel);
     func_00280048(partyPanel);

@@ -155,7 +155,7 @@ extern void func_0030F038(SdfRing *);
 extern f32 D_00400700[][4];
 
 /* Draw the selected map marker and overlay its highlight twice. */
-void func_0030ECC0(void) {
+void fldDrawSelectedMapMarker(void) {
     s8 index = sdfCounterGetDisplayValue() - 1;
     f32 alpha = 1.0f;
     f32 remaining = 1.0f - sdfCounterGetScaledValue();

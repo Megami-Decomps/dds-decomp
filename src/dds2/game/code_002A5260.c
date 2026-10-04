@@ -967,7 +967,7 @@ extern s32 func_002A7DB0();
 
 /* Retain the current movie parameters while its stream is stopped, then queue
  * the replacement playback task. */
-KwlnTask *func_002A7E60(const char *file, const MovieDrawParams *params) {
+KwlnTask *mnuRequestMoviePlayback(const char *file, const MovieDrawParams *params) {
     MoviePlaybackContext *context;
 
     D_00457DB0 = *params;
@@ -994,7 +994,7 @@ KwlnTask *func_002A7E60(const char *file, const MovieDrawParams *params) {
 
 void func_002A7F98(s32 index) {
     u32 *entry = (u32 *)&D_003E4C48[index];
-    func_002A7E60((const char *)*entry, (const MovieDrawParams *)(entry + 1));
+    mnuRequestMoviePlayback((const char *)*entry, (const MovieDrawParams *)(entry + 1));
 }
 
 void mnuStopMovieDrawTask(void) {

@@ -1537,7 +1537,7 @@ typedef struct ShopProgressPrice {
 extern ShopSourcePriceRow D_003C9BC0[];
 extern ShopProgressPrice D_003CD0C4[];
 
-s32 func_00260950(s32 index, s32 source, s32 halfPrice) {
+s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     u32 rowIndex;
     u32 itemId;
     u32 rowPercent;
@@ -1819,7 +1819,7 @@ extern s32 mnuAdvanceListCursorDefault();
 extern void mnuSelectFirstListNode();
 extern void func_002B9808();
 extern s32 func_002958B0();
-extern s32 func_00260950(s32, s32, s32);
+extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
 s32 func_00261538(ShopScene *scene) {
     s32 rowIndex;
@@ -1895,7 +1895,7 @@ s32 func_00261670(ShopScene *scene) {
         func_002B9808((struct MenuWindowContainer *)scene->extra);
         mnuAdvanceListCursorDefault(scene->extra->list);
         params = &node->params;
-        price = func_00260950(i, scene->stockGroup, 0);
+        price = mnuCampGetSourceItemPrice(i, scene->stockGroup, 0);
         params->value = price;
         params->id = id;
         params->price = price;
@@ -1995,7 +1995,7 @@ s32 func_002619A8(ShopScene *scene, s32 filterMode) {
         func_002B9808((struct MenuWindowContainer *)scene->extra);
         mnuAdvanceListCursorDefault(scene->extra->list);
         params = &node->params;
-        price = func_00260950(i, scene->stockGroup, 0);
+        price = mnuCampGetSourceItemPrice(i, scene->stockGroup, 0);
         params->value = price;
         params->id = id;
         params->price = price;
@@ -2045,3 +2045,4 @@ INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437828);
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437830);
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437838);
+

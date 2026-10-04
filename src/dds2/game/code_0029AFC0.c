@@ -101,7 +101,7 @@ extern void mnuSetPanelGroupSelection(s32, s32);
 extern void mnuPlayInputSound(s32, s32, s32);
 extern char D_003D6490[];
 
-s32 func_0029B008(u64 request) {
+s32 mnuHandleStatPointAssignment(u64 request) {
     MenuSumTable *work;
     MenuSumBytes *entry;
     s32 inputFlags;
@@ -213,7 +213,7 @@ extern void mnuClearPanelGroupSelection(s32);
 extern void mnuBindPresentMenuEntry(void *, s32 *);
 extern char D_003D64AC[];
 
-s32 func_0029B418(u64 request) {
+s32 mnuCommitAssignedStatPoints(u64 request) {
     MenuSumTable *work;
     MenuSumBytes *entry;
     s32 result;

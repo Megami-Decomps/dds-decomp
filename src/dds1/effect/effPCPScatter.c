@@ -909,7 +909,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *work)
 }
 
 /* Submit six-vertex scatter groups using the optional shared texture owner. */
-void func_00172DB0(PcpScatterPool *pool) {
+void effPcpScatterDrawPool(PcpScatterPool *pool) {
     f32 matrix[16];
     void *packet = sdfAllocPacketAligned(0x20);
     s32 remainingVertices;

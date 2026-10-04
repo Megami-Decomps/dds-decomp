@@ -12,9 +12,9 @@ s32 kwlnSetDrawColorTarget(s32 arg0, void *arg1);
  * parameter order and schedules the last one into the jal delay slot, so
  * retail moves the kind argument ($16) last, in the delay slot. */
 s32 kwlnDrawSetC70FloatTriple(f32 arg0, f32 arg1, s32 arg2);
-s32 func_00107FD8(s32 arg0, s32 arg1, void *arg2);
+s32 kwlnSetLightColorTarget(s32 arg0, s32 arg1, void *arg2);
 s32 kwlnSetBackgroundColorTarget(s32 arg0, void *arg1);
-s32 func_001080D8(s32 arg0, s32 arg1, void *arg2);
+s32 kwlnSetLightDirectionTarget(s32 arg0, s32 arg1, void *arg2);
 /* Declared floats-first: gcc 2.96 emits the outgoing register moves in
  * parameter order and schedules the last one into the jal delay slot, so
  * retail moves the kind argument ($16) last, in the delay slot. */
@@ -309,7 +309,7 @@ s32 scrCmdStoreDirectionVector(void)
     VU0_SET_AXIS_GPR(z, z);
     VU0_CLEAR_W(vf10);
     VU0_STORE_VF_TO(vf10, v);
-    func_00107FD8(scrReadIntParameter(0), 0, &v);
+    kwlnSetLightColorTarget(scrReadIntParameter(0), 0, &v);
     return 1;
 }
 
@@ -855,7 +855,7 @@ s32 func_0010EE40(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
-    func_00119900(p0, scrReadIntParameter(1));
+    ptyAdjustItemQuantity(p0, scrReadIntParameter(1));
     return 1;
 }
 

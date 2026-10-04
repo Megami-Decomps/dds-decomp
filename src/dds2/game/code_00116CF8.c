@@ -121,7 +121,7 @@ typedef struct Dds3PathCurveWork {
 
 extern void *sdfAllocSizeClassBlock(s32 bytes);
 extern void *memset(void *destination, s32 value, u32 bytes);
-extern EffPrim *func_0019A900(f32 *data, u32 count, s32 mode);
+extern EffPrim *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
 
 Dds3PathCurveWork *dds3CreatePathCurveWork(ActionObj *object) {
     Dds3PathCurveTable *table = object->unk18;
@@ -152,7 +152,7 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(ActionObj *object) {
         case 0:
             work->flags |= 1;
             work->unk14 = keys;
-            work->unk10 = func_0019A900(keys->data, keys->count, 1);
+            work->unk10 = effCreatePrimitiveCurve(keys->data, keys->count, 1);
             break;
         case 2:
             work->unk18 = keys;

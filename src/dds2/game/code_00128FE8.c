@@ -22,7 +22,7 @@ extern s32 sdfCreateResetPacketList(void);
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
+extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
 
 extern u32 fldPendingArea;
 
@@ -1180,7 +1180,7 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B690);
 
-void func_0012B7F8(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 drawMode) {
+void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 drawMode) {
     s32 handle = (s32)sdfConsAllocateColumnPacket(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
     s32 r = color & 0xFF;
@@ -1931,8 +1931,8 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     }
 }
 
-void func_0012DDC0(s32 x, s32 y, u64 firstPayload, u64 secondPayload) {
-    u64 object;
+void func_0012DDC0(s32 x, s32 y, u32 firstPayload, const u8 *secondPayload) {
+    u32 object;
 
     object = func_0019F460(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     frFontDrawGlyphInDefaultMode(object);

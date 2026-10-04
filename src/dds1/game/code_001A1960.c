@@ -247,7 +247,7 @@ extern s32 btlGetRuntime(void);
 
 extern u8 *datBattleSceneRecords;
 
-extern s32 func_00197760(s32, s32, s32, s32, s32, s32);
+extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
 
 extern char D_003BB450[];
 
@@ -413,7 +413,7 @@ u32 func_001A29D0(s32 arg0, s32 arg1) {
 extern u8 *datAbilityParameters;
 
 s32 btlApplyCommandAbilityMultiplier(s32 arg0, s32 arg1) {
-    u32 value = func_0011A158(arg0, arg1);
+    u32 value = datCalculateCommandBaseValue(arg0, arg1);
     f32 scale;
 
     if (value == 0) {
@@ -445,7 +445,7 @@ s8 func_001A2AE8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2B00);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2CC0);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlGetCombinedPartyCommandPower);
 
 extern s32 func_001A2B00(s32, s32);
 
@@ -1966,7 +1966,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A9F40);
 
 extern s32 D_00358690[];
 
-s32 func_001AA030(u8 *actor) {
+s32 btlRollPassiveAbilityAction(u8 *actor) {
     u32 i;
     s32 result;
     s32 threshold;
@@ -2163,7 +2163,7 @@ void btlPopulateCommandPanelGrid(void) {
 }
 
 /* Ramp both five-row banks by panel state; narrow each update before clamping. */
-void func_001AB270(void) {
+void btlUpdateCommandPanelRowFades(void) {
     s32 i;
 
     switch (btlCommandPanelWork->state) {
@@ -2600,7 +2600,7 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
     }
 }
 
-void func_001AD6D8(s32 unused) {
+void btlInvalidateSceneFadeCounts(s32 unused) {
     btlGetRuntime();
     kwlnTaskGetUserValue(btlGetTrackedTaskHandle(7));
     btlTrackedTaskHandles->fadeKindsCached = 0;
@@ -3237,7 +3237,7 @@ void btlReleaseWindowTask(s64 task) {
 
 extern u8 btlSoundSlotDefaults[];
 
-void btlInitSoundSlotTable(void) {
+void btlInitializeSelectionWork(void) {
     u8 initial[0x20];
     BattleSelectionWork *allocated;
     u32 *source;
@@ -3537,7 +3537,7 @@ extern void sdfQueueGouraudTexturedQuad(
     s32 depth, s32 (*allocate)(s32));
 
 /* Draw a textured command-panel quad with independently colored corners. */
-s32 func_001BC978(s32 x0, s32 y0, s32 x1, s32 y1,
+s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
                   s32 u, s32 v, s32 width, s32 height,
                   const s32 *colors, s32 texture) {
@@ -3584,7 +3584,7 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BCB88);
 
 
-s32 func_001BCCE0(void) {
+s32 btlUpdateCommandUiTransition(void) {
     BattleTrackedTaskWork *flow;
     s64 task;
     s32 counter;
@@ -3625,15 +3625,15 @@ void fldInitializeBattleSceneFlow(void) {
     btlNextScaledRandom(7);
     if ((*(u32 *)(context + 0x1F4) & 0x400) != 0) {
         if (*(u16 *)(context + 0x24C) == 1) {
-            func_001AD6D8(0);
+            btlInvalidateSceneFadeCounts(0);
             btlClearNodeFlags();
         } else {
-            func_001AD6D8(1);
+            btlInvalidateSceneFadeCounts(1);
             btlClearNodeFlags();
         }
     }
     btlToggleModelFlagOnInput();
-    func_001BCCE0();
+    btlUpdateCommandUiTransition();
 }
 
 void btlDebugPrintf(const char *fmt, ...) {
@@ -3655,7 +3655,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     itfSetTextDrawLimit(0xffffffffffffffff);
 }
 
-extern u32 D_003BAA8C;
+extern u8 *D_003BAA8C;
 
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
@@ -3666,7 +3666,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(-1);
 }
 
-extern u32 D_003BAA84;
+extern u8 *D_003BAA84;
 
 void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
@@ -3770,7 +3770,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BE590);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BE8A0);
 
 void btlDrawRetreatCommandLabel(s32 unused) {
-    char text[8];
+    u8 text[8];
     BattleController *battle;
     s8 *modeFlags;
     s32 color;
@@ -3785,7 +3785,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x89FEFF00;
     }
     itfSetTextDrawLimit(0x13);
-    handle = func_00197760(0x1A0, 0xA60, 0xFF0010, color, (s32)text, 0);
+    handle = func_00197760(0x1A0, 0xA60, 0xFF0010, color, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);

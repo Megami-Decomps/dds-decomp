@@ -53,7 +53,7 @@ extern void func_00216D10();
 
 extern void btlAppendSelfAfterTargetScan();
 
-extern void func_00216988();
+extern void btlSelectTargetsExcludingActorUnit();
 
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 
@@ -268,7 +268,7 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
 extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *unit);
 extern f32 btlUnitGetTopY(BtlUnit *unit);
-extern s32 func_00207C28(s32 screen[4]);
+extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
 extern void btlBossDebugPrintf(s32 format, ...);
 
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
@@ -300,13 +300,13 @@ void func_0020EC20(BtlUnit *unit) {
         return;
     }
     VU0_LOAD_VF(vf10, baseline);
-    visible = func_00207C28(screen);
+    visible = btlProjectForwardPositionToPackedScreen(screen);
     x = screen[0] >> 4;
     y = screen[1] >> 3;
     if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
         if (btlSetActorEffectParameter((u8 *)unit, 1) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
-            visible = func_00207C28(screen);
+            visible = btlProjectForwardPositionToPackedScreen(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && !(unit->stateFlags & 0x400000) &&
@@ -326,7 +326,7 @@ void func_0020EC20(BtlUnit *unit) {
             candidate[2] = baseline[2];
             candidate[1] -= unit->height * unit->scale * 0.25f;
             VU0_LOAD_VF(vf10, candidate);
-            visible = func_00207C28(screen);
+            visible = btlProjectForwardPositionToPackedScreen(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -337,7 +337,7 @@ void func_0020EC20(BtlUnit *unit) {
         }
         btlUnitGetMuzzlePosVU(unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
-        visible = func_00207C28(screen);
+        visible = btlProjectForwardPositionToPackedScreen(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -347,7 +347,7 @@ void func_0020EC20(BtlUnit *unit) {
         }
         candidate[1] += unit->height * unit->scale * 0.5f;
         VU0_LOAD_VF(vf10, candidate);
-        visible = func_00207C28(screen);
+        visible = btlProjectForwardPositionToPackedScreen(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -359,7 +359,7 @@ void func_0020EC20(BtlUnit *unit) {
         VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
         candidate[1] -= unit->height * unit->scale * 0.5f;
         VU0_LOAD_VF(vf10, candidate);
-        visible = func_00207C28(screen);
+        visible = btlProjectForwardPositionToPackedScreen(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -1032,10 +1032,10 @@ void func_00211108(s32 context) {
     btlAppendCurrentUnitIdToCommandIndices(context, 0);
 }
 
-extern void func_00215D78(s32, s32);
+extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
 
 void btlCmdSimpleA(s32 context, s32 value) {
-    func_00215D78(context, value);
+    btlSelectLowestHealthElementBlockTarget(context, value);
 }
 
 void btlCmdWithArgD(s32 context) {
@@ -1083,7 +1083,7 @@ void btlCmdSimpleH(void) {
 }
 
 void btlCmdSimpleI(void) {
-    func_00216988();
+    btlSelectTargetsExcludingActorUnit();
 }
 
 void btlCmdWithArgF(s32 context) {
