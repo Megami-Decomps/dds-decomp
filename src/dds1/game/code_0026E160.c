@@ -187,7 +187,67 @@ void mnuLoadMovieRollSprite(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E8D8);
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026EA70);
+typedef struct MnuMovieRollEntry {
+    f32 x;
+    f32 y;
+    s16 timer;
+    s16 duration;
+    s8 active;
+    u8 pad0D[3];
+    f32 velocity;
+    s32 sprite;
+    s32 column;
+} MnuMovieRollEntry;
+
+extern s32 effMiscRandMod(s32, s32);
+
+void func_0026EA70(MnuMovieRollEntry *entry) {
+    entry->y += entry->velocity;
+    entry->timer--;
+    if (entry->active && entry->y < -256.0f) {
+        entry->active = 0;
+        entry->duration = effMiscRandMod(0, 200) + 1;
+        entry->timer = entry->duration;
+    } else if (entry->timer < 0) {
+        if (entry->active) {
+            entry->active = 0;
+        } else if ((s32)mnuMovieWork[3] < 17000) {
+            entry->active = 1;
+            switch (effMiscRandMod(0, 8)) {
+            case 0:
+            case 1:
+                entry->sprite = 2;
+                break;
+            case 2:
+                entry->sprite = 1;
+                break;
+            default:
+                entry->sprite = 0;
+                break;
+            }
+            entry->duration = effMiscRandMod(0, 800) + 4000;
+            entry->timer = entry->duration;
+            entry->velocity = -(effMiscRandUnitFloat(0) + 0.5f) * 0.5f;
+            entry->x = effMiscRandUnitFloat(0) * 768.0f / 6.0f + (-256.0f);
+            if (entry->column >= 2) {
+                entry->x += 128.0f;
+            }
+            if (entry->column >= 3) {
+                entry->x += 128.0f;
+            }
+            if (entry->column >= 4) {
+                entry->x += 128.0f;
+            }
+            if (entry->column >= 5) {
+                entry->x += 128.0f;
+            }
+            if (entry->column >= 6) {
+                entry->x += 128.0f;
+            }
+            entry->y = effMiscRandUnitFloat(0) * 112.0f + 448.0f;
+        }
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_0026E160", mnuMovieWork);
 
