@@ -350,6 +350,23 @@ struct MenuPanelHandles {
     s32 transition;
 };
 
+typedef struct MenuPanelPosition {
+    s32 x;
+    s32 y;
+} MenuPanelPosition;
+
+typedef struct MenuPanelPositionTable4 {
+    MenuPanelPosition positions[4];
+} MenuPanelPositionTable4;
+
+typedef struct MenuPanelPositionTable2 {
+    MenuPanelPosition positions[2];
+} MenuPanelPositionTable2;
+
+extern MenuPanelPositionTable4 D_003B2380;
+
+extern MenuPanelPositionTable2 D_003B23A0;
+
 /* One 0x8c-byte drawable window owns a list and its panel sprite handles. */
 struct MenuWindowContainer {
     s32 id;             /* 0x00 */
@@ -694,9 +711,33 @@ void mnuReleaseResourceList(s32 *object) {
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027D850);
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027DA80);
+/* Draw the four row icons at their table-owned offsets. */
+void func_0027DA80(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
+    MenuPanelPositionTable4 table = D_003B2380;
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027DBD0);
+    func_002BF4E0(x + table.positions[0].x, y + table.positions[0].y, depth, alpha, 1,
+                  (s32)panel->handles[0], 0, drawArg);
+    func_002BF4E0(x + table.positions[1].x, y + table.positions[1].y, depth, alpha, 1,
+                  (s32)panel->handles[1], 0, drawArg);
+    func_002BF4E0(x + table.positions[2].x, y + table.positions[2].y, depth, alpha, 1,
+                  (s32)panel->handles[2], 0, drawArg);
+    func_002BF4E0(x + table.positions[3].x, y + table.positions[3].y, depth, alpha, 1,
+                  (s32)panel->handles[3], 0, drawArg);
+}
+
+/* Draw two stacked icon pairs; the table already contains absolute screen positions. */
+void func_0027DBD0(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
+    MenuPanelPositionTable2 table = D_003B23A0;
+    s32 positionX = table.positions[0].x;
+    s32 positionY = table.positions[0].y;
+
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[1], 0, drawArg);
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[3], 0, drawArg);
+    positionX = table.positions[1].x;
+    positionY = table.positions[1].y;
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[0], 0, drawArg);
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[2], 0, drawArg);
+}
 
 /* Dispatch the three DDS1 panel kinds; only kind one forces full fade. */
 void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *panel, s32 selectionMode, s32 drawArg) {
