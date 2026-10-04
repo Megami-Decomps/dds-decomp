@@ -281,7 +281,48 @@ void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D100);
+extern void func_0025CA50(s32, s32, s32, s32, s32,
+                          MnuProfileOwner *, u8 *, s32);
+extern void func_0025C588(s32, s32, s32, s32, s32, s32);
+
+void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
+                   MnuProfileOwner *profileOwner, s32 gridOwner,
+                   s32 context) {
+    u8 *grid = *(u8 **)(gridOwner + 0x484);
+    u8 *entry;
+    u8 *counter;
+    s32 row;
+    s32 column;
+
+    func_0025C1C8(x, y, z, alpha, 0xF, 0x20, context);
+    mnuDrawCappedProfileMarkers(x, y, z,
+                                (s32)((f32)alpha * 0.5f),
+                                profileOwner, context);
+    for (row = 0; row < 0x11; row++) {
+        entry = (u8 *)(*(s32 *)(grid + 4) +
+                       row * *(s32 *)(grid + 0x14) * 8);
+        for (column = 0; column < 0xF; column++, entry += 8) {
+            counter = (u8 *)*(s32 *)(entry + 4);
+            if (counter != NULL) {
+                func_0025CA50(x, y, z,
+                              (s32)((f32)alpha * 0.5f),
+                              gridOwner, profileOwner, counter, context);
+            }
+        }
+    }
+    for (row = 0; row < 0x11; row++) {
+        entry = (u8 *)(*(s32 *)(grid + 4) +
+                       row * *(s32 *)(grid + 0x14) * 8);
+        for (column = 0; column < 0xF; column++, entry += 8) {
+            counter = (u8 *)*(s32 *)(entry + 4);
+            if (counter != NULL) {
+                func_0025C8D0(x, y, z, alpha,
+                              (s32)profileOwner, counter, context);
+            }
+        }
+    }
+    func_0025C588(x, y, z, alpha, gridOwner, context);
+}
 
 extern void mnuAdvanceActiveGridSlotAnimations(s32, s32);
 
