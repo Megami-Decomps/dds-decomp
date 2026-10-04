@@ -160,7 +160,18 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0D8);
 
 typedef s16 MnuSpritePlacement[4];
 
+/* Packed 12-byte scene row used by the profile-menu placement table. */
+typedef s16 MnuSceneSpriteEntry[6];
+
+enum {
+    MNU_SCENE_SPRITE_INDEX = 1,
+    MNU_SCENE_SPRITE_X_OFFSET,
+    MNU_SCENE_SPRITE_Y_OFFSET,
+};
+
 extern MnuSpritePlacement D_0036C268[];
+extern MnuSceneSpriteEntry D_0036BE38[];
+extern s32 D_0036C6CC[];
 
 void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 flags, s32 context) {
@@ -176,7 +187,19 @@ void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C278);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C350);
+void func_0025C350(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+                   s32 flags, s32 context) {
+    if (D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX] != 0) {
+        func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] + 23) << 4,
+                      (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] + 15) << 3,
+                      z,
+                      (u32)((f32)(alpha << 8) * 0.0078125f),
+                      flags,
+                      D_0036C6CC[0],
+                      D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX],
+                      context);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C418);
 
