@@ -9635,7 +9635,33 @@ s32 sndHasActiveFileLoad(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlQueueUnitSoundSlotFileLoad);
+void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
+    SoundSlotOwner *owner = args->actor->soundSlotOwner;
+    SoundSlotTableEntry *table;
+    SoundSlotTableEntry *entry;
+    if (owner == 0) {
+        return;
+    }
+    if (owner->flags & 1) {
+        return;
+    }
+    if (!(owner->flags & 2)) {
+        return;
+    }
+    if (owner->work.resourceHandles[args->slot] == 0) {
+        return;
+    }
+    table = btlSelectSideIndexedActorParameterTable(owner->category, owner->id);
+    entry = &table[args->slot];
+    args->option = entry->fileId;
+    if (args->slot != 0xB) {
+        owner->work.pendingSoundId = sndBuildMotSeResourceKey(owner, args->slot);
+        owner->work.pendingSlot = args->slot;
+        owner->flags |= 4;
+        owner->flags &= ~8;
+        owner->flags &= ~0x10;
+    }
+}
 
 extern s32 mnuGetSoundBufferStateLocked(void);
 extern void mnuResetSoundBufferLocked(void);
@@ -9711,8 +9737,6 @@ u32 func_001F41C0(SoundTaskArgs *args) {
     args->waitFrames++;
     return 0;
 }
-
-extern void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *);
 
 s32 btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     u8 *task = btlAllocTask(16);
