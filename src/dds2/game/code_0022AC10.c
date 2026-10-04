@@ -297,8 +297,7 @@ extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-struct SoundTask;
-extern u64 btlStartTask(struct SoundTask *task);
+extern s64 btlStartTask(void *);
 
 extern s32 scrReadIntParameter(s32);
 

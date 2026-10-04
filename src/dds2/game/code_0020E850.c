@@ -843,7 +843,7 @@ extern s32 scrReadIntParameter(s32 index);
 extern BtlEffActor *btlFindUnitByModeClear(s32 id);
 extern BtlEffActor *btlFindUnitByModeFlagged(s32 id);
 extern BtlEffectTask *btlCreateEffObjB(BtlEffActor *actor, s32 arg);
-extern void btlStartTask(BtlEffectTask *task);
+extern s64 btlStartTask(void *);
 extern s64 btlAdvanceRuntimeSequenceCounter();
 
 s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {

@@ -69,8 +69,7 @@ extern s32 btlHasEffectActor(void);
 
 extern s32 btlHasEffectActor(void);
 
-struct SoundTask;
-extern u64 btlStartTask(struct SoundTask *task);
+extern s64 btlStartTask(void *);
 
 extern s32 btlCreateCommandSoundUpdateTask();
 
