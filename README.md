@@ -66,23 +66,28 @@ executable does not mean all its code has been decompiled.
 - The reports do not currently set objdiff's **complete/linked** metadata.
   A zero there is not a measurement of source coverage or build success.
 
-There is a known comparison-context limitation: objdiff bases are compiled
-separately with `-DSKIP_ASM`. ee-gcc 2.96 can select different instructions
-when the surrounding source or compiler pathnames change, so an accepted C
-function can score below 100% in that comparison. `tools/check_unit.py` also
-checks the full build context and recognizes these as-built matches. See
+Objdiff bases are compiled separately with `-DSKIP_ASM`. ee-gcc 2.96 can select
+different instructions when the surrounding source or compiler pathnames
+change, so an accepted C function can score below 100% in that comparison.
+Relocatable objects can also represent the same linked address or literal with
+different relocation kinds. `tools/check_unit.py` checks against the linked
+retail executable and recognizes these matches. See
 [the matching workflow](docs/CONTRIBUTING.md#3-verify) and
 [compiler context](docs/idioms.md#code-that-changes-with-unrelated-text-context).
-The reporting-context discrepancy remains open; use the unit checks and
-retail checksum build when validating a match.
+The report generator corrects only explicitly configured relocation-only
+cases after resolving every source instruction against that same executable.
+Its checked source-object/fallback partition keeps assembly functions in the
+denominator with zero C credit. Other context discrepancies remain visible;
+use the unit checks and retail checksum build when validating a match.
 
 `ninja report` generates both views: `build/<v>/report.json` is the primary
 game-code report, and `build/<v>/report.all.json` retains game, SDK/runtime,
 and VU1 units with their separate categories. The root `report.json` combines
 both games' full-binary reports. CI publishes the primary files as
 `dds1_report` and `dds2_report` for decomp.dev and the full-binary files in the
-separate **build-audit** artifact on [the build run][actions]. objdiff computes
-each report's totals from its included units; no match results are rewritten.
+separate **build-audit** artifact on [the build run][actions]. Objdiff computes
+each report's scope and raw totals. `tools/reconcile_report.py` applies the
+bounded linked-word corrections to the primary, audit, and combined reports.
 
 ## Quickstart
 
