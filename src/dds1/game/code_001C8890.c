@@ -180,17 +180,25 @@ enum {
     BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26
 };
 
-/* Battle runtime prefix: actor/task registrations and indexed SYSEFF sources. */
+/* Battle runtime prefix: actor/task/sound registrations and packed battle tint. */
 typedef struct BtlActorWork {
-    u8 pad_00[0x228];
+    u8 pad_00[0x208];
+    s32 unk208;
+    u8 pad20C[0x1C];
     BtlUnit *actorList;
     struct SoundTask *taskTail; /* Newest registration; reverse traversal. */
     struct SoundTask *taskHead; /* Oldest registration; forward traversal. */
     struct SoundResourceNode *soundResourceHead; /* Allocated resource nodes. */
     struct ActiveSoundNode *soundList;           /* Independent active-node list. */
     struct SoundSlotOwner *soundSlotOwners;     /* Shared category/id owners. */
-    u8 pad240[0x278];
+    u8 pad240[0x64];
+    s32 unk2A4;
+    u8 pad2A8[0x210];
     struct SoundResourceNode *soundResourceSlots[BTL_SOUND_ENTRY_COUNT];
+    u8 pad57C[8];
+    u8 fadeEnabled; /* 0 raises the tint, 1 lowers it; refreshed by the frame updater. */
+    u8 pad585[3];
+    u32 fadeColor; /* Packed tint; retain the original whole-word arithmetic. */
 } BtlActorWork;
 
 /* Tagged scheduler predicate, embedded for task entry and exit. */
@@ -7923,40 +7931,40 @@ void sndFreeResourceNode(SoundResourceNode *node) {
 
 /* Advance resource countdowns and battle tint, then tick slot-volume fades. */
 void btlUpdateFadeColor(void) {
-    s32 context = btlGetRuntime();
+    BtlActorWork *context = (BtlActorWork *)btlGetRuntime();
     SoundResourceNode *node;
 
-    for (node = ((BtlActorWork *)context)->soundResourceHead; node != 0; node = node->next) {
+    for (node = context->soundResourceHead; node != 0; node = node->next) {
         if (node->unk_04 == 0) {
             node->fadeCountdown = 0;
         } else if (node->fadeCountdown > 0) {
             node->fadeCountdown = node->fadeCountdown - 1;
         }
     }
-    if ((u32)(btlGetActiveUnitId() - 9) < 2 || *(s32 *)(context + 0x2A4) != 0 || *(s32 *)(context + 0x208) == 8) {
-        *(u8 *)(context + 0x584) = 0;
+    if ((u32)(btlGetActiveUnitId() - 9) < 2 || context->unk2A4 != 0 || context->unk208 == 8) {
+        context->fadeEnabled = 0;
     } else {
-        *(u8 *)(context + 0x584) = 1;
+        context->fadeEnabled = 1;
     }
-    switch (*(u8 *)(context + 0x584)) {
+    switch (context->fadeEnabled) {
     case 0: {
-        u32 packedColor = *(u32 *)(context + 0x588);
+        u32 packedColor = context->fadeColor;
 
-        /* The high byte rises by 0x10 per frame, capped at the opaque gray tint. */
+        /* Test the packed threshold before adding; do not clamp the high byte alone. */
         if (packedColor <= 0x8080807F) {
-            *(u32 *)(context + 0x588) = packedColor + 0x10000000;
+            context->fadeColor = packedColor + 0x10000000;
         } else {
-            *(u32 *)(context + 0x588) = 0x80808080;
+            context->fadeColor = 0x80808080;
         }
         break;
     }
     case 1: {
-        u32 packedColor = *(u32 *)(context + 0x588);
+        u32 packedColor = context->fadeColor;
 
         if (packedColor > 0x808080) {
-            *(u32 *)(context + 0x588) = packedColor - 0x10000000;
+            context->fadeColor = packedColor - 0x10000000;
         } else {
-            *(u32 *)(context + 0x588) = 0x808080;
+            context->fadeColor = 0x808080;
         }
         break;
     }
@@ -8074,11 +8082,12 @@ void sndFreeLink(SoundLink *node) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F2C00);
 
+/* Clear the fade gate and report completion; the frame updater may overwrite it. */
 u32 btlDisableBattleFade(void) {
-    s32 temp_v0;
+    BtlActorWork *work;
 
-    temp_v0 = btlGetRuntime();
-    *(u8 *)(temp_v0 + 0x584) = 0;
+    work = (BtlActorWork *)btlGetRuntime();
+    work->fadeEnabled = 0;
     return 1;
 }
 
@@ -8092,11 +8101,12 @@ SoundTask *sndCreateClearStateTask(void) {
     return task;
 }
 
+/* Set the fade gate and report completion; the frame updater may overwrite it. */
 u32 btlEnableBattleFade(void) {
-    s32 temp_v0;
+    BtlActorWork *work;
 
-    temp_v0 = btlGetRuntime();
-    *(u8 *)(temp_v0 + 0x584) = 1;
+    work = (BtlActorWork *)btlGetRuntime();
+    work->fadeEnabled = 1;
     return 1;
 }
 
