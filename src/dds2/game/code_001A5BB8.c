@@ -3,6 +3,15 @@
 #include "btl_state.h"
 #include "btl_ui.h"
 
+typedef struct BattlePanelEdgeWork {
+    u8 pad00[0x31];
+    s8 edgePhase;
+    u8 pad32[0x1E];
+    f32 corners[4][4];
+} BattlePanelEdgeWork;
+
+extern f32 D_00415F80[4];
+
 extern s32 func_001ABB10(BtlUnit *, s32);
 
 typedef struct UiQuadColor {
@@ -4567,7 +4576,58 @@ void btlReleaseTaskAndRefreshCursorIfFlagged(s32 handle) {
     *(u32 *)(work + 0x218) |= 0x100000;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlAdvancePanelCornerPhase);
+/* Advance one corner toward the panel boundary before moving to the next edge. */
+s32 btlAdvancePanelCornerPhase(s32 task, BattlePanelEdgeWork *work) {
+    f32 center[4];
+
+    memcpy(center, D_00415F80, sizeof(center));
+
+    switch (work->edgePhase) {
+    case 0:
+        work->corners[0][1] += 80.0f;
+        work->corners[0][1] =
+            work->corners[0][1] <= center[1] - 174.0f ? center[1] - 174.0f :
+            center[1] + 174.0f <= work->corners[0][1] ? center[1] + 174.0f :
+            work->corners[0][1];
+        if (center[1] + 174.0f <= work->corners[0][1]) {
+            work->edgePhase++;
+        }
+        break;
+    case 1:
+        work->corners[2][0] += 80.0f;
+        work->corners[2][0] =
+            work->corners[2][0] <= center[0] - 200.0f ? center[0] - 200.0f :
+            center[0] + 200.0f <= work->corners[2][0] ? center[0] + 200.0f :
+            work->corners[2][0];
+        if (center[0] + 200.0f <= work->corners[2][0]) {
+            work->edgePhase++;
+        }
+        break;
+    case 2:
+        work->corners[1][1] -= 80.0f;
+        work->corners[1][1] =
+            work->corners[1][1] <= center[1] - 174.0f ? center[1] - 174.0f :
+            center[1] + 174.0f <= work->corners[1][1] ? center[1] + 174.0f :
+            work->corners[1][1];
+        if (work->corners[1][1] <= center[1] - 174.0f) {
+            work->edgePhase++;
+        }
+        break;
+    case 3:
+        work->corners[3][0] -= 80.0f;
+        work->corners[3][0] =
+            work->corners[3][0] <= center[0] - 200.0f ? center[0] - 200.0f :
+            center[0] + 200.0f <= work->corners[3][0] ? center[0] + 200.0f :
+            work->corners[3][0];
+        if (work->corners[3][0] <= center[0] - 200.0f) {
+            work->edgePhase++;
+        }
+        break;
+    default:
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415F80);
 
