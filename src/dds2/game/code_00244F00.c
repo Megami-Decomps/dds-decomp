@@ -1,10 +1,16 @@
 #include "common.h"
 
+#define SOLAR_FADE_DRAW_ENABLED 1
+#define SOLAR_FADE_IN 2
+#define SOLAR_FADE_OUT 4
+#define SOLAR_FADE_IN_STATE (SOLAR_FADE_DRAW_ENABLED | SOLAR_FADE_IN)
+#define SOLAR_FADE_OUT_STATE (SOLAR_FADE_DRAW_ENABLED | SOLAR_FADE_OUT)
+
 extern s32 evtSolarOverlayFadeCounter;
 
 extern s32 evtSolarOverlayFadeDuration;
 
-void evtInitializeVisualData(s32 arg0);
+void evtInitializeVisualData(s32 visualAddress);
 
 extern s8 evtSolarOverlayFadeFlags;
 
@@ -36,85 +42,91 @@ extern s32 D_0043722C;
 INCLUDE_ASM(const s32, "game/code_00244F00", evtDrawFadingSolarOverlayFrame);
 
 /* Seed both visual-value tables and cache the current raw solar phase. */
-void evtInitializeVisualData(s32 object) {
-    s32 solarPhase = evtGetSolarPhase(object);
-    s16 *values = ((EventVisualData *)object)->firstValues;
-    ((EventVisualData *)object)->solarPhase = solarPhase;
-    values[0] = 0x39;
-    values[1] = 0x33;
-    values[2] = 0x1D;
-    values[3] = 0x23;
-    values[5] = 5;
-    values[7] = 10;
-    values = ((EventVisualData *)object)->secondValues;
-    values[0] = 0x37;
-    values[1] = 0x32;
-    values[2] = 15;
-    values[3] = 15;
-    values[5] = 10;
-    values[7] = 0;
+void evtInitializeVisualData(s32 visualAddress) {
+    s32 solarPhase = evtGetSolarPhase(visualAddress);
+    s16 *visualValues = ((EventVisualData *)visualAddress)->firstValues;
+    ((EventVisualData *)visualAddress)->solarPhase = solarPhase;
+    visualValues[0] = 0x39;
+    visualValues[1] = 0x33;
+    visualValues[2] = 0x1D;
+    visualValues[3] = 0x23;
+    visualValues[5] = 5;
+    visualValues[7] = 10;
+    visualValues = ((EventVisualData *)visualAddress)->secondValues;
+    visualValues[0] = 0x37;
+    visualValues[1] = 0x32;
+    visualValues[2] = 15;
+    visualValues[3] = 15;
+    visualValues[5] = 10;
+    visualValues[7] = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00245590);
 extern s32 evtGetMirroredSolarPhase(void);
-extern void func_00245590(u32);
-extern void evtDrawFadingSolarOverlayFrame(s32, s32, s32, s32, s32, u32, s32);
+extern void func_00245590(u32 overlayAddress);
+extern void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha, s32 mirroredPhase, u32 overlayAddress, s32 renderContext);
 
-void evtAdvanceSolarOverlayFadeAndDraw(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 arg4, s32 arg5) {
-    s32 mirrored;
-    mirrored = (s8)evtGetMirroredSolarPhase();
-    func_00245590(arg4);
-    if ((evtSolarOverlayFadeFlags & 1) != 0) {
-        if ((evtSolarOverlayFadeFlags & 2) != 0) {
+/* Advance the fade and draw with scaled alpha; renderContext is forwarded unchanged. */
+void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, u32 overlayAddress, s32 renderContext) {
+    s32 mirroredPhase;
+    /* Preserve signed-byte narrowing before forwarding the mirrored phase. */
+    mirroredPhase = (s8)evtGetMirroredSolarPhase();
+    func_00245590(overlayAddress);
+    if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
+        if ((evtSolarOverlayFadeFlags & SOLAR_FADE_IN) != 0) {
             if (evtSolarOverlayFadeCounter < evtSolarOverlayFadeDuration) {
                 evtSolarOverlayFadeCounter++;
             } else {
                 evtSolarOverlayFadeFlags = 0;
             }
-        } else if ((evtSolarOverlayFadeFlags & 4) != 0) {
+        } else if ((evtSolarOverlayFadeFlags & SOLAR_FADE_OUT) != 0) {
             if (evtSolarOverlayFadeCounter > 0) {
                 evtSolarOverlayFadeCounter--;
             } else {
-                evtSolarOverlayFadeFlags &= ~1;
+                /* Clears only bit 0 while testing bit 2: the original quirk, kept verbatim. */
+                evtSolarOverlayFadeFlags &= ~SOLAR_FADE_DRAW_ENABLED;
             }
         }
-        if ((evtSolarOverlayFadeFlags & 1) != 0) {
-            f32 ratio = (f32)evtSolarOverlayFadeCounter / (f32)evtSolarOverlayFadeDuration;
-            s32 scaled = (s32)((f32)arg3 * ratio);
-            evtDrawFadingSolarOverlayFrame(arg0, arg1, arg2, scaled, mirrored, arg4, arg5);
+        if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
+            f32 fadeRatio = (f32)evtSolarOverlayFadeCounter / (f32)evtSolarOverlayFadeDuration;
+            s32 fadedAlpha = (s32)((f32)alpha * fadeRatio);
+            evtDrawFadingSolarOverlayFrame(x, y, z, fadedAlpha, mirroredPhase, overlayAddress, renderContext);
             return;
         }
     }
-    if ((evtSolarOverlayFadeFlags & 4) == 0) {
-        evtDrawFadingSolarOverlayFrame(arg0, arg1, arg2, arg3, mirrored, arg4, arg5);
+    if ((evtSolarOverlayFadeFlags & SOLAR_FADE_OUT) == 0) {
+        evtDrawFadingSolarOverlayFrame(x, y, z, alpha, mirroredPhase, overlayAddress, renderContext);
     }
 }
 
+/* The whole flags byte is tested: a latched fade-out flag still reports state. */
 s32 evtHasSolarOverlayTransitionState(void) {
     return evtSolarOverlayFadeFlags != 0;
 }
 
-void evtBeginSolarOverlayFadeIn(s32 value) {
-    if (value == 0) {
+/* Zero cancels the transition; otherwise start from zero for the supplied duration. */
+void evtBeginSolarOverlayFadeIn(s32 fadeDuration) {
+    if (fadeDuration == 0) {
         evtSolarOverlayFadeFlags = 0;
         evtSolarOverlayFadeCounter = 0;
         evtSolarOverlayFadeDuration = 0;
         return;
     }
-    evtSolarOverlayFadeDuration = (s32)value;
-    evtSolarOverlayFadeFlags = 3;
+    evtSolarOverlayFadeDuration = (s32)fadeDuration;
+    evtSolarOverlayFadeFlags = SOLAR_FADE_IN_STATE;
     evtSolarOverlayFadeCounter = 0;
 }
 
-void evtBeginSolarOverlayFadeOut(s32 value) {
-    if (value == 0) {
-        evtSolarOverlayFadeFlags = 5;
+/* Zero requests an immediate hidden state, retaining the fade-out direction flag. */
+void evtBeginSolarOverlayFadeOut(s32 fadeDuration) {
+    if (fadeDuration == 0) {
+        evtSolarOverlayFadeFlags = SOLAR_FADE_OUT_STATE;
         evtSolarOverlayFadeDuration = 1;
         evtSolarOverlayFadeCounter = 0;
     } else {
-        evtSolarOverlayFadeCounter = value;
-        evtSolarOverlayFadeFlags = 5;
-        evtSolarOverlayFadeDuration = value;
+        evtSolarOverlayFadeCounter = fadeDuration;
+        evtSolarOverlayFadeFlags = SOLAR_FADE_OUT_STATE;
+        evtSolarOverlayFadeDuration = fadeDuration;
     }
 }
 
@@ -125,6 +137,7 @@ u32 func_00245818(void) {
     return 0;
 }
 
+/* Test-task teardown destroys the named script processes. */
 void func_00245820(void) {
     scrDestroyAllNamedProcesses();
 }
@@ -160,85 +173,88 @@ typedef struct {
     EventListNode *first; /* 0x54 */
     EventListNode *last;  /* 0x58 */
 } EventList;
-void func_00245F88(EventList *owner, EventListNode *node) {
-    EventListNode *current = owner->first;
+/* Insert after existing equal keys, keeping ascending order and incrementing count. */
+void func_00245F88(EventList *list, EventListNode *insertedNode) {
+    EventListNode *cursor = list->first;
 
-    if (current == 0) {
-        owner->first = node;
-        owner->last = node;
-        node->next = 0;
-        node->prev = 0;
+    if (cursor == 0) {
+        list->first = insertedNode;
+        list->last = insertedNode;
+        insertedNode->next = 0;
+        insertedNode->prev = 0;
     } else {
-        while (current != 0) {
-            if (node->orderKey < current->orderKey) {
-                if (current->prev == 0) {
-                    owner->first = node;
-                    current->prev = node;
-                    node->next = current;
-                    node->prev = 0;
+        while (cursor != 0) {
+            if (insertedNode->orderKey < cursor->orderKey) {
+                if (cursor->prev == 0) {
+                    list->first = insertedNode;
+                    cursor->prev = insertedNode;
+                    insertedNode->next = cursor;
+                    insertedNode->prev = 0;
                 } else {
-                    current->prev->next = node;
-                    node->prev = current->prev;
-                    node->next = current;
-                    current->prev = node;
+                    cursor->prev->next = insertedNode;
+                    insertedNode->prev = cursor->prev;
+                    insertedNode->next = cursor;
+                    cursor->prev = insertedNode;
                 }
                 break;
             }
-            current = current->next;
+            cursor = cursor->next;
         }
-        if (current == 0) {
-            EventListNode *last = owner->last;
-            last->next = node;
-            node->prev = owner->last;
-            node->next = 0;
-            owner->last = node;
+        if (cursor == 0) {
+            EventListNode *tailNode = list->last;
+            tailNode->next = insertedNode;
+            insertedNode->prev = list->last;
+            insertedNode->next = 0;
+            list->last = insertedNode;
         }
     }
-    owner->count++;
+    list->count++;
 }
 
-void evtUnlinkListNode(EventList *owner, EventListNode *node) {
-    EventListNode *next = node->next;
-    EventListNode *previous = node->prev;
-    if (previous == 0) {
-        owner->first = next;
+/* Unlink an attached node, clear its links, and decrement the owning list's count. */
+void evtUnlinkListNode(EventList *list, EventListNode *removedNode) {
+    EventListNode *nextNode = removedNode->next;
+    EventListNode *previousNode = removedNode->prev;
+    if (previousNode == 0) {
+        list->first = nextNode;
     } else {
-        previous->next = next;
+        previousNode->next = nextNode;
     }
     {
-        EventListNode *earlier = node->prev;
-        EventListNode *later = node->next;
-        if (later == 0) {
-            owner->last = earlier;
+        EventListNode *previousNeighbor = removedNode->prev;
+        EventListNode *nextNeighbor = removedNode->next;
+        if (nextNeighbor == 0) {
+            list->last = previousNeighbor;
         } else {
-            later->prev = earlier;
+            nextNeighbor->prev = previousNeighbor;
         }
     }
     {
-        s32 count = owner->count;
-        node->prev = 0;
-        node->next = 0;
-        owner->count = count - 1;
+        s32 nodeCount = list->count;
+        removedNode->prev = 0;
+        removedNode->next = 0;
+        list->count = nodeCount - 1;
     }
 }
 
 /* Walk the linked list and reinsert the first out-of-order successor. */
-void evtReorderListNodes(EventList *owner) {
-    if (owner != 0) {
-        EventListNode *current = owner->first;
-        while (current != 0) {
-            EventListNode *next = current->next;
-            EventListNode *scan = next;
-            while (scan != 0) {
-                if (scan->orderKey < current->orderKey) {
-                    evtUnlinkListNode(owner, scan);
-                    func_00245F88(owner, scan);
-                    next = scan->next;
+void evtReorderListNodes(EventList *list) {
+    if (list != 0) {
+        EventListNode *anchorNode = list->first;
+        while (anchorNode != 0) {
+            EventListNode *resumeNode = anchorNode->next;
+            EventListNode *candidateNode = resumeNode;
+            while (candidateNode != 0) {
+                if (candidateNode->orderKey < anchorNode->orderKey) {
+                    evtUnlinkListNode(list, candidateNode);
+                    func_00245F88(list, candidateNode);
+                    /* Resume from the relocated node's new successor, not its old one. */
+                    resumeNode = candidateNode->next;
                     break;
                 }
-                scan = scan->next;
+                candidateNode = candidateNode->next;
             }
-            current = next;
+            anchorNode = resumeNode;
         }
     }
 }
