@@ -1,33 +1,7 @@
 #include "common.h"
 #include "itf.h"
 #include "btl_state.h"
-
-/* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
- * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */
-typedef struct BattleCmdPanelSlot {
-    s8 hidden; /* Nonzero grid entries are omitted by the row renderer. */
-    u8 unk01; /* Initialized to 0/1 by bank; no consumer read established. */
-    s16 fadeValue; /* Signed narrow ramp; rendering uses its low color byte. */
-    u8 pad04[4];
-    s32 x;
-    s32 y;
-} BattleCmdPanelSlot;
-
-typedef struct BattleCmdPanel {
-    s8 state;
-    s8 classIndex;
-    u16 labelEntry;
-    s16 labelFade;
-    s16 classFade;
-    u8 pad08[4];
-    u32 classX;
-    u32 classY;
-    BattleCmdPanelSlot slotsA[5];
-    BattleCmdPanelSlot slotsB[5];
-    s16 cornerFade[4]; /* Four low-byte color levels used by the backdrop. */
-    u32 cornerPhase[4]; /* Advanced by 8 modulo 360 before the sine pulse. */
-} BattleCmdPanel;
-
+#include "btl_ui.h"
 
 extern s32 func_001ABB10(BtlUnit *, s32);
 
@@ -213,7 +187,7 @@ extern s32 D_003B4F70[];
 extern s32 datCommandRecords;
 extern u32 func_0011AA58(s32, s32);
 
-extern s32 btlTrackedTaskHandles;
+extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern s32 btlGetTrackedTaskHandle(s32);
 
@@ -277,7 +251,7 @@ extern s32 fldAreaState[];
 extern u8 D_003B4EC8[];
 extern char D_004159A0[];
 
-extern u32 btlLinkedSelectionTaskBuffer;
+extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
 typedef struct SndMessageNode {
     struct SndMessageNode *previous;
@@ -3528,13 +3502,13 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004159A0);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5688);
 
 s32 btlHasHighPriorityState(void) {
-    u8 *table;
+    BattleSelectionWork *table;
     s32 index;
     if (btlCommandPanelWork->state == 2) {
-        table = (u8 *)btlLinkedSelectionTaskBuffer;
-        index = *(s8 *)table;
-        if (*(s16 *)(table + index * 2) >= 0x80) {
-            if (*(s32 *)(table + index * 8 + 4) >= 0xB) {
+        table = btlLinkedSelectionTaskBuffer;
+        index = table->selectedRow;
+        if (table->rowFade[index - 1] >= 0x80) {
+            if (table->positions[index - 1].x >= 0xB) {
                 return 1;
             }
         }
@@ -3653,10 +3627,10 @@ void func_001B5E98(void) {
         break;
     case 4:
         for (i = 0; i < 5; i++) {
-            btlCommandPanelWork->slotsA[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsA[i].fadeValue -= btlTrackedTaskHandles->status.bytes.fadeStep;
             btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
                 btlCommandPanelWork->slotsA[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsA[i].fadeValue;
-            btlCommandPanelWork->slotsB[i].fadeValue -= *(u16 *)(btlTrackedTaskHandles + 0x3E);
+            btlCommandPanelWork->slotsB[i].fadeValue -= btlTrackedTaskHandles->status.bytes.fadeStep;
             btlCommandPanelWork->slotsB[i].fadeValue = btlCommandPanelWork->slotsB[i].fadeValue <= 0 ? 0 :
                 btlCommandPanelWork->slotsB[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsB[i].fadeValue;
         }
@@ -4040,7 +4014,7 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
 void func_001B82E8(void) {
     btlGetRuntime();
     kwlnTaskGetUserValue(btlGetTrackedTaskHandle(7));
-    *(u8 *)(btlTrackedTaskHandles + 0x48) = 0;
+    btlTrackedTaskHandles->fadeKindsCached = 0;
 }
 
 u32 btlHasRegisteredPsechgPanelTask(void) {
@@ -4141,18 +4115,19 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     return 1;
 }
 
-s32 btlGetTrackedTaskHandle(s32 arg0) {
-    s32 temp_v0;
+/* Query one of the fourteen task slots retained by the command UI. */
+s32 btlGetTrackedTaskHandle(s32 slotIndex) {
+    s32 *handle;
 
-    temp_v0 = btlTrackedTaskHandles + arg0 * 4;
-    return *(s32 *)temp_v0;
+    handle = &btlTrackedTaskHandles->handles[slotIndex];
+    return *handle;
 }
 
-void btlSetTrackedTaskHandle(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+void btlSetTrackedTaskHandle(s32 slotIndex, s32 taskHandle) {
+    s32 *handle;
 
-    temp_v0 = btlTrackedTaskHandles + arg0 * 4;
-    *(s32 *)temp_v0 = arg1;
+    handle = &btlTrackedTaskHandles->handles[slotIndex];
+    *handle = taskHandle;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B88F8);
@@ -4416,11 +4391,11 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(void) {
         return 0;
     }
     func_001BC138(state);
-    if (*(s8 *)(btlTrackedTaskHandles + 0x54) == 0) {
+    if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001BC618(state);
     }
     func_001BC8A8(state);
-    if (*(s8 *)(btlTrackedTaskHandles + 0x54) == 0) {
+    if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001BCFB0(state);
     }
     frame = *state + 1;
@@ -4658,7 +4633,7 @@ void btlReleaseDialogTaskAndMarkBattleState(s32 handle) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     btlSetTrackedTaskHandle(0xD, 0);
     battle->flags |= 0x100000;
-    *(u32 *)(btlTrackedTaskHandles + 0x3C) &= ~0x100;
+    btlTrackedTaskHandles->status.flags &= ~0x100;
     evtFinishMessageWindowAndNotify();
 }
 
@@ -4666,16 +4641,17 @@ extern u8 btlSoundSlotDefaults[];
 
 void btlInitSoundSlotTable(void) {
     u8 initial[0x20];
-    u8 *allocated;
+    BattleSelectionWork *allocated;
     u32 *source;
-    u32 *destination;
+    s32 *destination;
     s16 *state;
     s32 i;
     memcpy(initial, btlSoundSlotDefaults, sizeof(initial));
     allocated = sdfAllocAndClearQuadwords(0x30);
-    btlLinkedSelectionTaskBuffer = (u32)allocated;
-    state = (s16 *)(allocated + 2);
-    destination = (u32 *)(allocated + 0x10);
+    btlLinkedSelectionTaskBuffer = allocated;
+    state = allocated->rowFade;
+    /* Retail copies coordinate pairs with its cursor on each row's Y word. */
+    destination = &allocated->positions[0].y;
     source = (u32 *)initial;
     for (i = 3; i >= 0; i--) {
         *state = 0;
@@ -4721,20 +4697,20 @@ void btlReleaseStwrPanelResource(void) {
 }
 
 s32 btlAreLinkedSceneCountersAtThreshold(void) {
-    s32 base;
+    BattleSelectionWork *base;
     s32 i;
     if (btlGetTrackedTaskHandle(8) == 0) {
         if (btlGetTrackedTaskHandle(2) != 0) {
             base = btlLinkedSelectionTaskBuffer;
             for (i = 0; i < 4; i++) {
-                if (*(s16 *)(base + 2 + i * 2) < 0x80) {
+                if (base->rowFade[i] < 0x80) {
                     return 0;
                 }
-                if (*(s32 *)(base + 0xC + i * 8) < 11) {
+                if (base->positions[i].x < 11) {
                     return 0;
                 }
             }
-            if (*(s32 *)(base + 0x18) == *(s32 *)(base + 0x10) + 23) {
+            if (base->positions[1].y == base->positions[0].y + 23) {
                 return 1;
             }
         }
