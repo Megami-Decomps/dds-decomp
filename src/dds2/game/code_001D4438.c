@@ -3,7 +3,7 @@
 #include "pcp_vu0.h"
 
 extern s32 btlGetRuntime(void);
-extern void btlDispatchStateHandler(s32 *obj, s32 kind);
+extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 extern s32 kwlnTaskGetTaskByName(const char *);
 
@@ -1412,7 +1412,7 @@ void func_001D4FE0(void) {
 }
 
 extern s32 btlCreateEffObjB();
-extern u64 btlStartTask(SoundTask *);
+extern s64 btlStartTask(void *);
 extern s32 sndHasActiveActor(void);
 extern s64 btlAdvanceRuntimeSequenceCounter(void);
 extern SoundTask *btlCreateCommandSoundUpdateTask(void);
@@ -1547,18 +1547,18 @@ void func_001D5368(SceneTask *task) {
     sceneObjectState = fldGetSceneObjectState();
     if (sceneObjectState == 3 || sceneObjectState == 8) {
         if (btlIsSupportedCommandKind(&task->command) != 0) {
-            btlDispatchStateHandler((s32 *)task, 7);
+            btlDispatchStateHandler(task, 7);
         } else {
             fldSetSceneObjectAndGroupStates();
             if (btlAiCheckStatusRollEligibility((BtlTask *)task) != 0) {
-                btlDispatchStateHandler((s32 *)task, 0xB);
+                btlDispatchStateHandler(task, 0xB);
             } else {
-                btlDispatchStateHandler((s32 *)task, 0xC);
+                btlDispatchStateHandler(task, 0xC);
             }
         }
     } else if (work->flags & 0x8000) {
         fldSetSceneObjectAndGroupStates();
-        btlDispatchStateHandler((s32 *)task, 9);
+        btlDispatchStateHandler(task, 9);
     }
 }
 
@@ -1888,9 +1888,9 @@ void func_001DABD8(u8 *task) {
     *(u32 *)(actor + 0x110) = (*(u32 *)(actor + 0x110) | 0x1000) & 0xEFFFFFFF;
     *(u16 *)(actor + 0x120) |= 0x1000;
     if (*(u32 *)(task + 8) & 0x10) {
-        btlDispatchStateHandler((s32 *)task, 0x1C);
+        btlDispatchStateHandler(task, 0x1C);
     } else {
-        btlDispatchStateHandler((s32 *)task, 0x1B);
+        btlDispatchStateHandler(task, 0x1B);
     }
 }
 
@@ -2136,7 +2136,7 @@ void btlUnitTurnEndCommit(BtlUnit *unit) {
     if (unit->link18->flags & 0x20) {
         btlUnitTurnEndStateSelect((u8 *)unit);
     } else {
-        btlDispatchStateHandler((s32 *)unit, 2);
+        btlDispatchStateHandler(unit, 2);
     }
 }
 
@@ -2247,9 +2247,9 @@ void btlAdvanceUnitWhenActionGateClears(u32 unit) {
     }
 }
 
-void btlDispatchStateHandler(s32 *obj, s32 kind) {
-    obj[0] = kind;
-    obj[4] = 0;
+void btlDispatchStateHandler(void *obj, s32 kind) {
+    ((s32 *)obj)[0] = kind;
+    ((s32 *)obj)[4] = 0;
     D_003B69D8[kind].start(obj);
 }
 

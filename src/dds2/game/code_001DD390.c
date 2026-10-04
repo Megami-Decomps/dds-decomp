@@ -871,7 +871,7 @@ extern void func_001DCEC0(void);
 
 extern void btlAdvanceUnitWhenActionGateClears(u32 unit);
 
-extern void btlDispatchStateHandler(s32 *obj, s32 kind);
+extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 extern BtlUnit *btlCreateActionSeq(void);
 
@@ -895,13 +895,13 @@ void func_001DD390(u8 *command, u8 *argument) {
     if (handler != 0) {
         s32 result = handler((s32)command, (s32)argument);
         if (result != -1) {
-            btlDispatchStateHandler((s32 *)command, result);
+            btlDispatchStateHandler(command, result);
             return;
         }
     }
     switch (*(s32 *)argument) {
     case 1:
-        btlDispatchStateHandler((s32 *)command, 0xD);
+        btlDispatchStateHandler(command, 0xD);
         break;
     case 4:
         *(s32 *)(argument + 4) = btlGetLoggedIndexedCommandItem(*(s32 *)(argument + 8));
@@ -911,24 +911,24 @@ void func_001DD390(u8 *command, u8 *argument) {
     case 7:
     case 8:
         if (*(s8 *)(datCommandSelectors + *(s32 *)(argument + 4) * 2 + 1) != 1) {
-            btlDispatchStateHandler((s32 *)command, 0xE);
+            btlDispatchStateHandler(command, 0xE);
         } else {
             if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x200) {
                 scrSetGlobalBitFlag(*(u16 *)(argument + 4));
             }
-            btlDispatchStateHandler((s32 *)command, 0xF);
+            btlDispatchStateHandler(command, 0xF);
         }
         break;
     case 5: {
         u32 flags = *(u32 *)(*(s32 *)(command + 0x18) + 0x110);
         if (flags & 0x200) {
             if (flags & 0x1000) {
-                btlDispatchStateHandler((s32 *)command, 0x10);
+                btlDispatchStateHandler(command, 0x10);
             } else {
-                btlDispatchStateHandler((s32 *)command, 0x11);
+                btlDispatchStateHandler(command, 0x11);
             }
         } else {
-            btlDispatchStateHandler((s32 *)command, 0x13);
+            btlDispatchStateHandler(command, 0x13);
         }
         break;
     }
@@ -936,38 +936,38 @@ void func_001DD390(u8 *command, u8 *argument) {
     case 13:
     case 14:
     case 18:
-        btlDispatchStateHandler((s32 *)command, 0x14);
+        btlDispatchStateHandler(command, 0x14);
         break;
     case 9:
         if (*(u32 *)(*(s32 *)(command + 0x34) + 0x110) & 1) {
-            btlDispatchStateHandler((s32 *)command, 0x17);
+            btlDispatchStateHandler(command, 0x17);
         } else {
-            btlDispatchStateHandler((s32 *)command, 0x16);
+            btlDispatchStateHandler(command, 0x16);
         }
         break;
     case 12:
-        btlDispatchStateHandler((s32 *)command, 0x16);
+        btlDispatchStateHandler(command, 0x16);
         break;
     case 6: {
         u32 flags = *(u32 *)(*(s32 *)(command + 0x18) + 0x110);
         if (flags & 0x200) {
-            btlDispatchStateHandler((s32 *)command, 0x18);
+            btlDispatchStateHandler(command, 0x18);
         } else if (flags & 0x400) {
-            btlDispatchStateHandler((s32 *)command, 0x15);
+            btlDispatchStateHandler(command, 0x15);
         }
         break;
     }
     case 11:
-        btlDispatchStateHandler((s32 *)command, 0x15);
+        btlDispatchStateHandler(command, 0x15);
         break;
     case 15:
-        btlDispatchStateHandler((s32 *)command, 0x19);
+        btlDispatchStateHandler(command, 0x19);
         break;
     case 16:
-        btlDispatchStateHandler((s32 *)command, 0x1A);
+        btlDispatchStateHandler(command, 0x1A);
         break;
     case 17:
-        btlDispatchStateHandler((s32 *)command, 0x20);
+        btlDispatchStateHandler(command, 0x20);
         break;
     }
 }
@@ -1957,9 +1957,10 @@ void btlFreeTask(SoundTask *task) {
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
-u64 btlStartTask(task)
-    SoundTask *task;
+s64 btlStartTask(taskObject)
+    void *taskObject;
 {
+    SoundTask *task = taskObject;
     task->handle = btlAdvanceRuntimeSequenceCounter();
     task->flags |= 8;
     task->pollCount = 0;
