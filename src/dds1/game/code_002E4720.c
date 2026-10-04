@@ -56,7 +56,13 @@ typedef struct DevState {
     s32 callbackContext; /* 0x3C */
 } DevState;
 
+#define SDF_DEV_STATE_OPENING 2
+#define SDF_DEV_STATE_SEEKING 3
+#define SDF_DEV_STATE_READING 4
+#define SDF_DEV_STATE_WRITING 5
+#define SDF_DEV_STATE_CLOSING 6
 #define SDF_DEV_STATE_ACTIVE 7
+#define SDF_DEV_STATE_COMPLETE 8
 #define SDF_DEV_STATE_INACTIVE 9
 
 /* Native 0x18 worker record; semaphore-only addresses point inside this array,
@@ -785,9 +791,356 @@ void sdfDevDeactivate(DevState *state, s32 result) {
     }
 }
 
+extern s32 func_002E5398(void *, s32);
+
+/* Service queued host-file requests for one device worker. */
 INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4578);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", sdfDevWorkerThread);
+void sdfDevWorkerThread(DevWorkerEntry *worker) {
+    DevState *state;
+    void (*callback)(DevState *, s32, s32, s32, s32);
+    s32 openResult;
+    s32 result;
+    s32 position;
+    s32 transferResult;
+    s32 endOffset;
+    void *data;
+    u32 operation;
+
+    for (;;) {
+        WaitSema(worker->semaphore);
+        state = worker->first;
+        if (state == NULL) {
+            continue;
+        }
+
+        operation = state->operation - 1;
+        state->operation = 0;
+        switch (operation) {
+        case 0:
+            state->state = SDF_DEV_STATE_OPENING;
+            openResult = func_0030E8F0(state->resource, 1, 0);
+            if (openResult < 0) {
+                sdfDevDeactivate(state, openResult);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->resourceId = openResult;
+            state->transferred = 0;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 2, 0, 0, state->callbackContext);
+            }
+            continue;
+
+        case 1:
+            state->state = SDF_DEV_STATE_OPENING;
+            openResult = func_0030E8F0(state->resource, 0x202, state->options);
+            if (openResult < 0) {
+                sdfDevDeactivate(state, openResult);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->resourceId = openResult;
+            state->transferred = 0;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 2, 0, 0, state->callbackContext);
+            }
+            continue;
+
+        case 2:
+            state->state = SDF_DEV_STATE_SEEKING;
+            endOffset = func_0030ECF8(state->resourceId, state->operationArg, state->options);
+            if (endOffset < 0) {
+                sdfDevDeactivate(state, endOffset);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->transferred = endOffset;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 3, 0, endOffset, state->callbackContext);
+            }
+            continue;
+
+        case 3:
+            state->state = SDF_DEV_STATE_SEEKING;
+            position = func_0030ECF8(state->resourceId, 0, 1);
+            if (position < 0) {
+                sdfDevDeactivate(state, position);
+                continue;
+            }
+            endOffset = func_0030ECF8(state->resourceId, 0, 2);
+            if (endOffset < 0) {
+                sdfDevDeactivate(state, endOffset);
+                continue;
+            }
+            result = func_0030ECF8(state->resourceId, position, 0);
+            if (result < 0) {
+                sdfDevDeactivate(state, result);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->transferred = endOffset;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 4, 0, endOffset, state->callbackContext);
+            }
+            continue;
+
+        case 4:
+            state->state = SDF_DEV_STATE_READING;
+            result = func_0030EF30(state->resourceId, (s32)state->requestData,
+                           state->requestExtra);
+            if (result < 0) {
+                sdfDevDeactivate(state, result);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->transferred += result;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 5, (s32)state->requestData, result,
+                                state->callbackContext);
+            }
+            continue;
+
+        case 5:
+            state->state = SDF_DEV_STATE_WRITING;
+            result = func_0030F190(state->resourceId, (s32)state->requestData,
+                            state->requestExtra);
+            if (result < 0) {
+                sdfDevDeactivate(state, result);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->transferred += result;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 6, (s32)state->requestData, result,
+                                state->callbackContext);
+            }
+            continue;
+
+        case 6:
+            state->state = SDF_DEV_STATE_CLOSING;
+            result = func_0030EB78(state->resourceId);
+            state->resourceId = -1;
+            if (result < 0) {
+                sdfDevDeactivate(state, result);
+                continue;
+            }
+            sdfDevRecycleCompletedState(state);
+            state->state = SDF_DEV_STATE_COMPLETE;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 7, 0, 0, state->callbackContext);
+            }
+            continue;
+
+        case 7:
+            state->state = SDF_DEV_STATE_OPENING;
+            openResult = func_0030E8F0(state->resource, 1, 0);
+            if (openResult < 0) {
+                sdfDevDeactivate(state, openResult);
+                continue;
+            }
+            state->resourceId = openResult;
+            transferResult = state->requestExtra;
+            if (transferResult < 0) {
+                state->state = SDF_DEV_STATE_SEEKING;
+                transferResult = func_0030ECF8(openResult, 0, 2);
+                if (transferResult < 0) {
+                    sdfDevDeactivate(state, transferResult);
+                    continue;
+                }
+                result = func_0030ECF8(state->resourceId, 0, 0);
+                if (result < 0) {
+                    sdfDevDeactivate(state, result);
+                    continue;
+                }
+            }
+            if (transferResult != 0) {
+                data = state->requestData;
+                if (data == NULL) {
+                    data = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(transferResult));
+                }
+                state->requestData = data;
+                state->state = SDF_DEV_STATE_READING;
+                transferResult = func_0030EF30(state->resourceId, (s32)data, transferResult);
+                if (transferResult < 0) {
+                    sdfDevDeactivate(state, transferResult);
+                    continue;
+                }
+            }
+            state->state = SDF_DEV_STATE_CLOSING;
+            func_0030EB78(state->resourceId);
+            state->resourceId = -1;
+            sdfDevRecycleCompletedState(state);
+            state->state = SDF_DEV_STATE_COMPLETE;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 8, (s32)state->requestData, transferResult,
+                         state->callbackContext);
+            }
+            SignalSema(worker->semaphore);
+            continue;
+
+        case 8:
+            state->state = SDF_DEV_STATE_OPENING;
+            openResult = func_0030E8F0(state->resource, 0x202, state->options);
+            if (openResult < 0) {
+                sdfDevDeactivate(state, openResult);
+                continue;
+            }
+            state->resourceId = openResult;
+            transferResult = state->requestExtra;
+            if (transferResult != 0) {
+                state->state = SDF_DEV_STATE_WRITING;
+                transferResult = func_0030F190(openResult, (s32)state->requestData, transferResult);
+                if (transferResult < 0) {
+                    sdfDevDeactivate(state, transferResult);
+                    continue;
+                }
+            }
+            break;
+
+        default:
+            continue;
+        }
+
+        state->state = SDF_DEV_STATE_CLOSING;
+        func_0030EB78(state->resourceId);
+        state->resourceId = -1;
+        sdfDevRecycleCompletedState(state);
+        state->state = SDF_DEV_STATE_COMPLETE;
+        callback = state->callback;
+        if (callback != NULL) {
+            callback(state, 8, (s32)state->requestData, transferResult,
+                            state->callbackContext);
+        }
+        SignalSema(worker->semaphore);
+    }
+}
+/* Worker slot 3 services disc-backed requests through serialized disc operations. */
+void D_002E6538(DevWorkerEntry *worker) {
+    DevState *state;
+    void (*callback)(DevState *, s32, s32, s32, s32);
+    s32 result;
+    s32 transferResult;
+    void *data;
+    u32 operation;
+
+    for (;;) {
+        WaitSema(worker->semaphore);
+        state = worker->first;
+        if (state == NULL) {
+            continue;
+        }
+
+        operation = state->operation - 1;
+        state->operation = 0;
+        switch (operation) {
+        case 0:
+            state->state = SDF_DEV_STATE_OPENING;
+            result = sdfDevOpenDiscFileAndGetSize(state->resource);
+            if (result < 0) {
+                sdfDevDeactivate(state, 0);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->transferred = 0;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 2, 0, 0, state->callbackContext);
+            }
+            continue;
+
+        case 3:
+            state->state = SDF_DEV_STATE_ACTIVE;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 4, 0, sdfDevGetFileSize(),
+                                state->callbackContext);
+            }
+            continue;
+
+        case 4:
+            state->state = SDF_DEV_STATE_READING;
+            result = func_002E5398(state->requestData, state->requestExtra);
+            if (result < 0) {
+                sdfDevDeactivate(state, result);
+                continue;
+            }
+            state->state = SDF_DEV_STATE_ACTIVE;
+            state->transferred += result;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 5, (s32)state->requestData, result,
+                                state->callbackContext);
+            }
+            continue;
+
+        case 6:
+            state->state = SDF_DEV_STATE_CLOSING;
+            sdfServicePendingOperationUnderSemaphore();
+            sdfDevRecycleCompletedState(state);
+            state->state = SDF_DEV_STATE_COMPLETE;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 7, 0, 0, state->callbackContext);
+            }
+            continue;
+
+        case 7:
+            state->state = SDF_DEV_STATE_OPENING;
+            result = sdfDevOpenDiscFileAndGetSize(state->resource);
+            if (result < 0) {
+                sdfDevDeactivate(state, 0);
+                continue;
+            }
+            transferResult = state->requestExtra;
+            if (transferResult < 0) {
+                transferResult = sdfDevGetFileSize();
+            }
+            if (transferResult != 0) {
+                data = state->requestData;
+                if (data == NULL) {
+                    data = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(transferResult));
+                }
+                state->requestData = data;
+                state->state = SDF_DEV_STATE_READING;
+                transferResult = func_002E5398(data, transferResult);
+                if (transferResult < 0) {
+                    sdfDevDeactivate(state, transferResult);
+                    continue;
+                }
+            }
+            state->state = SDF_DEV_STATE_CLOSING;
+            sdfServicePendingOperationUnderSemaphore();
+            state->resourceId = -1;
+            sdfDevRecycleCompletedState(state);
+            state->state = SDF_DEV_STATE_COMPLETE;
+            callback = state->callback;
+            if (callback != NULL) {
+                callback(state, 8, (s32)state->requestData, transferResult,
+                                state->callbackContext);
+            }
+            continue;
+
+        case 1:
+        case 2:
+        case 5:
+        case 8:
+            sdfDevDeactivate(state, 0);
+            continue;
+
+        default:
+            continue;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E67A8);
 
@@ -1000,9 +1353,6 @@ void sdfTickThreadPriorityOverride(void) {
     }
     sdfRestoreDeviceThreadPriority();
 }
-
-extern void D_002E6538();
-extern void sdfDevWorkerThread();
 
 /* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
 void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
