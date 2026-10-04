@@ -28,6 +28,11 @@ def linked_hi_field(target: int, addend: int) -> int:
     return ((target + addend + 0x8000) >> 16) & 0xFFFF
 
 
+def hi_lo_addend(hi_word: int, lo_word: int) -> int:
+    """Return the full addend carried by a paired MIPS HI16/LO16 sequence."""
+    return ((hi_word & 0xFFFF) << 16) + sext16(lo_word)
+
+
 def linked_gprel_field(target: int, addend: int, gp: int) -> int:
     return (target + addend - gp) & 0xFFFF
 

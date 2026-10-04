@@ -27,6 +27,7 @@ from check_unit import (  # noqa: E402
 from eeas_compat import lit4_range  # noqa: E402
 from pairing import RETAIL, ROOT, load_segments, va_to_off  # noqa: E402
 from resolved_code import (  # noqa: E402
+    hi_lo_addend,
     instruction_shape_matches,
     linked_gprel_field,
     linked_hi_field,
@@ -129,13 +130,16 @@ def linked_function_diffs(
         if rtype == "R_MIPS_26":
             good = want & 0x03FFFFFF == linked_jump_field(target, addend)
         elif rtype == "R_MIPS_HI16":
-            pending_hi[base] = (at, want & 0xFFFF, target, symbol)
+            pending_hi.setdefault(base, []).append((at, mine, want, symbol))
             good = True
         elif rtype == "R_MIPS_LO16":
             good = want & 0xFFFF == linked_lo_field(target, addend)
-            pending = pending_hi.pop(base, None)
-            if pending is not None and pending[1] != linked_hi_field(target, addend):
-                diffs.append(f"+0x{pending[0]:X}: HI16 address differs for {pending[3]}")
+            for hi_at, hi_mine, hi_want, hi_symbol in pending_hi.pop(base, []):
+                combined_addend = hi_lo_addend(hi_mine, mine)
+                if hi_want & 0xFFFF != linked_hi_field(target, combined_addend):
+                    diffs.append(
+                        f"+0x{hi_at:X}: HI16 address differs for {hi_symbol}"
+                    )
         elif rtype == "R_MIPS_GPREL16":
             good = want & 0xFFFF == linked_gprel_field(target, addend, gp)
         else:
@@ -143,8 +147,9 @@ def linked_function_diffs(
         if not good:
             diffs.append(f"+0x{at:X}: linked target differs for {rtype} {symbol}")
 
-    for at, _, _, symbol in pending_hi.values():
-        diffs.append(f"+0x{at:X}: unpaired HI16 {symbol}")
+    for pending in pending_hi.values():
+        for at, _, _, symbol in pending:
+            diffs.append(f"+0x{at:X}: unpaired HI16 {symbol}")
     return diffs
 
 
@@ -164,6 +169,9 @@ def validate_function_mask(
     }
     if actual_fallback != fallback:
         raise ValueError("source-owned/fallback mask changed")
+    for name in fallback:
+        if float(report_functions[name].get("fuzzy_match_percent", 0.0)) != 0.0:
+            raise ValueError(f"{name}: fallback function has nonzero C credit")
     if set(funcs) != report_functions.keys() - fallback.keys():
         raise ValueError("source object and report function sets differ")
     for name, (_, size) in funcs.items():
