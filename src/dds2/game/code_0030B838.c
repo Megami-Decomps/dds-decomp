@@ -643,7 +643,9 @@ void sdfCounterTickPositionTransition(void) {
 void sdfUpdateCounterSelectionFade(void) {
 }
 
-void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
+/* Draw the selected timer icon; the first callback argument is unused.
+ * Fade controls both alpha and a scale shrinking from 2.5 to 0.5. */
+void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
     SdfCounterTimer *timer;
     s32 offset;
     f32 grow;

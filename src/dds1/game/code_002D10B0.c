@@ -141,17 +141,22 @@ extern s32 WakeupThread(s32);
 extern s32 WaitSema(s32);
 extern void sdfGraphSelectDisplayBuffer(s32);
 
+/* GS CSR bit 13 supplies the double-buffer field selector. */
+#define SDF_GS_CSR_FIELD_SHIFT 13
+
+/* Service device requests, select the GS field's buffer, and age packet slots.
+ * Capture state 1 wakes its worker; state 2 precedes the semaphore wait. */
 void func_002D14C8(void) {
     s8 bufferIndex;
-    s32 idleFlag;
+    s32 invertedField;
 
     for (;;) {
         sdfSleepThreadCount(0);
         if ((D_003BD2E1 & 1) == 0) {
             sdfDevSignalPendingSemaphore();
         }
-        idleFlag = (~*(volatile u64 *)0x12001000 >> 13) & 1;
-        D_003BD2E1 = idleFlag ^ 1;
+        invertedField = (~*(volatile u64 *)0x12001000 >> SDF_GS_CSR_FIELD_SHIFT) & 1;
+        D_003BD2E1 = invertedField ^ 1;
         if (D_003BD2F1 == 1) {
             D_003BD2F1 = 2;
             WakeupThread(D_003BD9D8);
