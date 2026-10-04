@@ -118,7 +118,18 @@ typedef struct EvtStateTableContext {
     s32 unkC8;
     u8 advancedSlots;       /* 0xCC */
     s8 followupMode;        /* 0xCD */
-    u8 padCE[0x2BB];
+    s8 rewardMode;
+    u8 padCF;
+    s8 rewardRow;
+    s8 remainingRewards;
+    s8 rewardIndex;
+    s8 announceNextReward;
+    s8 grantPendingReward;
+    s8 rewardDelay;
+    u8 padD6[2];
+    s32 rewardKind;
+    s32 rewardValue;
+    u8 padE0[0x2A9];
     s8 sceneReady;          /* 0x389: selects the follow-up dispatch */
 } EvtStateTableContext;
 
@@ -786,7 +797,91 @@ u32 func_00264848(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00264850);
+extern void ptyAdjustItemQuantity(s32, s32);
+extern void datAddCurrencyClamped(s32);
+extern s32 func_00260DF0(s32);
+extern u8 func_00260FE8(s32, s32);
+extern u8 func_00261018(s32, s32);
+extern s32 mnuCampResolveOwnedItemVariant(s32, s32);
+extern s32 mnuCampGetCompactEntryId(s32, s32);
+extern s32 func_002C54B0(s32);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern char (*D_00435E5C)[25];
+extern u8 D_003CE5E8[];
+extern char D_00437848[];
+extern char D_00437850[];
+
+s32 func_00264850(s32 callbackContext) {
+    char text[64];
+    EvtStateTableContext *state;
+    s32 *dispatchSlot;
+    s32 result;
+    s32 column;
+    s32 sequence;
+
+    state = (EvtStateTableContext *)kwlnTaskGetUserValue();
+    dispatchSlot = &state->dispatchState;
+    result = func_002C4038((s32)state->dispatchWork, dispatchSlot,
+                         EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    if (result == 0) {
+        if (*dispatchSlot == 0 &&
+            (result = evtGetMessageWindowControlState()) == 0) {
+            if (state->grantPendingReward != 0) {
+                if (state->rewardKind == 0) {
+                    ptyAdjustItemQuantity(state->rewardValue, 1);
+                } else {
+                    datAddCurrencyClamped(state->rewardValue);
+                }
+                state->grantPendingReward = 0;
+            }
+            if (state->announceNextReward != 0) {
+                state->announceNextReward = 0;
+                dspStartEntry(0x2F);
+            } else if (state->remainingRewards == 0) {
+                mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5E8);
+            } else if (state->rewardDelay <= 0) {
+                if (state->rewardMode < 0) {
+                    column = func_00260DF0(state->rewardRow);
+                    state->rewardKind = func_00260FE8(state->rewardRow, column);
+                    state->rewardValue = mnuCampResolveOwnedItemVariant(state->rewardRow, column);
+                } else {
+                    state->rewardKind = func_00261018(state->rewardRow, state->rewardIndex);
+                    state->rewardValue = mnuCampGetCompactEntryId(state->rewardRow, state->rewardIndex);
+                }
+                if (state->rewardKind == 0 && func_002C54B0(state->rewardValue) != 0) {
+                    state->rewardDelay = 60;
+                    sequence = 0x300003;
+                } else {
+                    state->rewardDelay = 30;
+                    sequence = 0x300002;
+                }
+                sndSetSequenceVolumePan(sequence, 0x7F, 0x3F);
+            } else {
+                state->rewardDelay--;
+                if (state->rewardDelay > 0) {
+                    return 0;
+                }
+                if (state->rewardKind == 0) {
+                    evtCopyEntryStringToActiveWindow(0, D_00435E5C[state->rewardValue]);
+                    evtCopyEntryStringToActiveWindow(1, D_00437848);
+                    dspStartEntry(0x2D);
+                } else {
+                    func_0035C860(text, D_00437850, state->rewardValue);
+                    evtCopyEntryStringToActiveWindow(0, text);
+                    dspStartEntry(0x2E);
+                }
+                state->remainingRewards--;
+                state->rewardIndex++;
+                if (state->remainingRewards != 0) {
+                    state->announceNextReward = 1;
+                }
+                state->grantPendingReward = 1;
+            }
+        }
+        result = 0;
+    }
+    return result;
+}
 
 s32 func_00264AB8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
