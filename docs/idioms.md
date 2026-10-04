@@ -559,6 +559,21 @@ functions use trampolines and are a different case.
   unprototyped declarations because their matched callers pass both three and
   four arguments; a callee using only three parameters is not evidence for
   deleting the fourth argument or inventing a variadic interface.
+- Share recovered layouts across game twins rather than maintaining duplicate
+  byte-offset views. `btl_action.h` now supplies the native 0x70-byte
+  `BtlRuntimeTask` header and 0x20-byte `BtlActionAnimationRecord` descriptor.
+  Keeping task-constructor conversions at assignment and using native task
+  locals removes repeated access casts without changing statement order;
+  DDS1 `code_001FF030` checks at 196 match, 0 differ and DDS2 `code_002112C8`
+  at 299 match, 0 differ. The descriptor camera-policy constants preserve
+  DDS2's identical fixed-preset branch arms.
+- A shared world-node header need not imply a universal payload type.
+  `NodeA.key` is the lookup key at +0x04; `NodeA.payload` is the kind-dependent
+  pointer at +0x18. The kind-0x11 field probes consume that payload as a
+  position vector, while the shared header retains `void *` for other kinds.
+  Removing both games' casts through `NodeA.pad` checks clean in DDS1
+  `code_00126A30` (189 match), DDS2 `code_00136EF8` (65 match), and both
+  `dds3WorldBasic` units (11 match each), all with 0 differ.
 
 ## Rodata order
 

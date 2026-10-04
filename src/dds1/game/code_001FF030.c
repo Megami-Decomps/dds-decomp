@@ -3,6 +3,7 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "btl_action.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -22,33 +23,6 @@
 #define BTL_LOW_HP_ENEMY_COUNT_LIMIT 2
 #define BTL_TASK_CONDITION_HANDLE_GONE 4
 #define BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE 5
-
-/* Native 0x70-byte scheduler-task header, distinct from a queued command actor.
- * The condition evaluator reads the first byte and +8 query key; task startup
- * assigns handle, while owner lookup uses ownerId. The remaining SDK fields
- * beyond ownerId stay opaque here.
- */
-typedef struct BtlRuntimeTask {
-    u8 conditionKind;
-    u8 pad01[7];
-    u64 conditionHandle;
-    u8 pad10[0x18];
-    s32 startDelay; /* Signed countdown before the task's running phase. */
-    u8 pad2C[0xC];
-    u64 handle;
-    u64 ownerId;
-    u8 pad48[0x28];
-} BtlRuntimeTask;
-
-/* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
-typedef struct BtlActionAnimationRecord {
-    u8 pad00[3];
-    u8 kind;
-    u16 displayCode;
-    u8 pad06[0x16];
-    u16 flags;
-    u8 pad1E[2];
-} BtlActionAnimationRecord;
 
 extern u32 btlGetEffectActor(void);
 
@@ -2521,7 +2495,7 @@ extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
 /* Start the selected actor's finale task group; its scene action carries a 22-tick start delay. */
 s32 btlEffectTaskStartFinale(BtlTask *task) {
     BattleEffectState *effect;
-    u8 *group;
+    BtlRuntimeTask *group;
 
     if ((task->flags & 8) == 0) {
         return -1;
@@ -2534,8 +2508,8 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
     btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateCommandSoundTask(task, 9));
     btlStartTask(btlCreateEffObjB(task->unit, 0xB4));
-    group = fldCreateSceneGroupAction(task, 0x64, 1);
-    ((BtlRuntimeTask *)group)->startDelay = 0x16;
+    group = (BtlRuntimeTask *)fldCreateSceneGroupAction(task, 0x64, 1);
+    group->startDelay = 0x16;
     btlStartTask(group);
     effect->phase = 1;
     return (task->unit->conditionFlags & 0x480) ? 0x18 : 0x1A;
@@ -2975,7 +2949,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle) {
     u8 **slot = (u8 **)((BtlState *)btlGetRuntime())->effect;
     u8 *model = *slot;
-    u8 *entry;
+    BtlRuntimeTask *entry;
     if (model != 0) {
         return btlAdvanceRuntimeSequenceCounter();
     }
@@ -2983,13 +2957,13 @@ u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle) {
     *slot = model;
     func_001A1990(model + 0x120, 0x10a);
     func_00207E68();
-    entry = (u8 *)btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
+    entry = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
     if (prerequisiteHandle != 0) {
-        ((BtlRuntimeTask *)entry)->conditionHandle = prerequisiteHandle;
-        ((BtlRuntimeTask *)entry)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        entry->conditionHandle = prerequisiteHandle;
+        entry->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     btlStartTask(entry);
-    return ((BtlRuntimeTask *)entry)->handle;
+    return entry->handle;
 }
 
 void btlDestroySpecialUnitSlot(void) {
@@ -3263,20 +3237,20 @@ void *btlFindActiveMember(s32 group, s32 type) {
 u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle) {
     u8 **slot = (u8 **)((BtlState *)btlGetRuntime())->effect;
     u8 *model = *slot;
-    u8 *entry;
+    BtlRuntimeTask *entry;
     if (model != 0) {
         return btlAdvanceRuntimeSequenceCounter();
     }
     model = (u8 *)btlCreateUnit();
     *slot = model;
     func_001A1990(model + 0x120, 0x10e);
-    entry = (u8 *)btlCreateModelLoadPollTask(*slot, 1, 0x10e, 0);
+    entry = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x10e, 0);
     if (prerequisiteHandle != 0) {
-        ((BtlRuntimeTask *)entry)->conditionHandle = prerequisiteHandle;
-        ((BtlRuntimeTask *)entry)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        entry->conditionHandle = prerequisiteHandle;
+        entry->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     btlStartTask(entry);
-    return ((BtlRuntimeTask *)entry)->handle;
+    return entry->handle;
 }
 
 void btlDestroyActiveMemberSlot(void) {
@@ -3826,7 +3800,7 @@ s32 btlMapCommandToSkill(u32 command) {
 
 /* Map linked-command responses; response 1 on these boss modes starts a one-tick shake task. */
 s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
-    u8 *task;
+    BtlRuntimeTask *task;
 
     if (!(unit->flags & 0x400)) {
         return arg1;
@@ -3860,8 +3834,8 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
         case 8:
             return 4;
         case 1:
-            task = btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f);
-            ((BtlRuntimeTask *)task)->startDelay = 1;
+            task = (BtlRuntimeTask *)btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f);
+            task->startDelay = 1;
             btlStartTask(task);
             return -1;
         case 4:
@@ -4121,14 +4095,14 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020BE30);
 
 extern void func_0020B190(u8 *, void *);
 
-/* Descriptor flag 0x1000 takes precedence over 0x2000's single-target camera.
+/* Group-camera policy takes precedence over target-camera policy.
  * Return 1 after selecting keys, or 0 when neither camera policy is requested. */
 
 s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
     u16 flags = datActionAnimationRecords[((BtlLinkedCommand *)unit)->actionCode].flags;
-    if (flags & 0x1000) {
+    if (flags & BTL_ANIMATION_GROUP_DEFEAT_CAMERA) {
         btlFlagAllUnitDefeatCandidatesTask();
-        if (!(flags & 0x10)) {
+        if (!(flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA)) {
             btlChooseRandomPresetCameraKeys(unit);
         } else {
             btlSetEffectCameraKeys(unit, 59.2f, -700.6f, -1901.2f,
@@ -4137,7 +4111,7 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
                            0.025f, -0.014f, 0.985f, 45.0f, 30.0f);
         }
         return 1;
-    } else if (flags & 0x2000) {
+    } else if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
         if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->targetList) == 1) {
             void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->targetList, 0);
             btlFlagAllUnitDefeatCandidatesTask();
