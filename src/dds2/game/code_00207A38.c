@@ -4,6 +4,8 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 
+extern s64 btlStartTask();
+
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
     BTL_RESOURCE_NAME_RECORD_BYTES = 0x38,
@@ -358,7 +360,7 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     return 1;
 }
 
-/* Project the vf10 position into four screen-coordinate words with four fractional bits.
+/* vu0 routine: project the vf10 position into four screen-coordinate words with four fractional bits.
    Return zero outside the distance/forward-cone checks, without writing the output. */
 s32 btlProjectForwardPositionToPackedScreen(s32 screenPosition[4]) {
     f32 viewDistance, forwardDot;

@@ -417,7 +417,7 @@ extern void btlRefreshUnitMotionSelection(void *);
 
 extern void fldAppendTaskToGroup(void *);
 
-extern void btlDispatchStateHandler(s32 *, s32);
+extern void btlDispatchStateHandler(void *, s32);
 
 /* Pick a weighted slot in one species row, run its action and release the shared scratch allocation. */
 void btlRunWeightedAiAction(ActionStateLink *task, s32 rowIndex) {
