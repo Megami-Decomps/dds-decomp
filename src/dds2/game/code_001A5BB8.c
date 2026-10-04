@@ -1711,7 +1711,41 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABA40);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABB10);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABCC0);
+/* The persistent party record is 0x1C4 bytes, distinct from a battle actor. */
+typedef struct BtlPartyEntry {
+    u16 flags;
+    u16 pad02;
+    u16 displayId;
+    u16 currentHp;
+    u16 maxHp;
+    u16 pad0A;
+    u32 words[0x6E];
+} BtlPartyEntry;
+
+s32 func_001ABCC0(BtlPartyEntry *base, UiObject *first, UiObject *second,
+                  UiObject *third, s32 command) {
+    BtlPartyEntry snapshot = *base;
+    s32 totalMaxHp = 0;
+    s32 count = 0;
+    s32 average;
+
+    if (first != NULL) {
+        totalMaxHp = first->maximumValue;
+        count = 1;
+    }
+    if (second != NULL) {
+        totalMaxHp += second->maximumValue;
+        count++;
+    }
+    if (third != NULL) {
+        totalMaxHp += third->maximumValue;
+        count++;
+    }
+    average = totalMaxHp / count;
+    snapshot.maxHp = average;
+    snapshot.currentHp = average;
+    return btlApplyCommandAbilityMultiplier((s32)&snapshot, command);
+}
 
 s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
@@ -2400,7 +2434,57 @@ s32 func_001AE678(u8 *actor, s32 attr) {
     return value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE8C0);
+s32 func_001AE8C0(s32 unit, u32 slot) {
+    if (((BattleController *)btlGetRuntime())->flags21C & 0x20000) {
+        return 0;
+    }
+    if (slot < 2 && btlCheckSpecialAbility(unit + 0x120, 0x26F)) {
+        return 1;
+    }
+    if (slot == 8 && btlCheckSpecialAbility(unit + 0x120, 0x271)) {
+        return 1;
+    }
+    if (slot == 9 && btlCheckSpecialAbility(unit + 0x120, 0x272)) {
+        return 1;
+    }
+    if (slot == 10 && btlCheckSpecialAbility(unit + 0x120, 0x264)) {
+        return 1;
+    }
+    if (slot == 11 && btlCheckSpecialAbility(unit + 0x120, 0x265)) {
+        return 1;
+    }
+    if (slot == 12 && btlCheckSpecialAbility(unit + 0x120, 0x266)) {
+        return 1;
+    }
+    if (slot == 13 && btlCheckSpecialAbility(unit + 0x120, 0x267)) {
+        return 1;
+    }
+    if (slot == 14 && btlCheckSpecialAbility(unit + 0x120, 0x268)) {
+        return 1;
+    }
+    if (slot < 15) {
+        if (slot >= 10 && btlCheckSpecialAbility(unit + 0x120, 0x273)) {
+            return 1;
+        }
+    }
+    if (slot < 7) {
+        if (slot >= 2 && btlCheckSpecialAbility(unit + 0x120, 0x277)) {
+            return 1;
+        }
+    }
+    if (slot != 7) {
+        if (btlCheckSpecialAbility(unit + 0x120, 0x269)) {
+            return 1;
+        }
+        if (btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF7)) {
+            return 1;
+        }
+    }
+    if (slot == 3 && btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF2)) {
+        return 1;
+    }
+    return 0;
+}
 
 s32 btlHasSpecialAbility274(s32 unit, u32 slot) {
     if (((BattleController *)btlGetRuntime())->flags21C & 0x20000) {
