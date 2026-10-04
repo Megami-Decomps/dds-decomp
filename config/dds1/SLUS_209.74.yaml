@@ -129,7 +129,6 @@ segments:
       - [0x62AA0, c, effect/effBattleMisc]  # Nocturne __FILE__
       - [0x634D0, c, game/code_001624D0]
       - [0x644A0, c, effect/effPCPThunder]  # Nocturne __FILE__
-      - [0x68178, c, game/code_00167178]
       - [0x6B1A8, c, effect/effPCPFlash]  # Nocturne __FILE__
       - [0x701D0, c, game/code_0016F1D0]
       - [0x71B88, c, effect/effPCPScatter]  # Nocturne __FILE__
@@ -335,7 +334,7 @@ segments:
       - [0x2A1DE0, .rodata, effect/effBattle]
       - [0x2A1E60, .rodata, game/code_00161838]
       - [0x2A1E90, .rodata, effect/effBattleMisc]
-      - [0x2A1ED0, .rodata, game/code_00167178]
+      - [0x2A1ED0, .rodata, effect/effPCPThunder]
       - [0x2A1EF0, .rodata, effect/effPCPMisc]
       - [0x2A1F00, .rodata, effect/effBlur_Filter]
       - [0x2A1F10, .rodata, effect/effMagatuhi]
@@ -445,7 +444,6 @@ segments:
       - [0x2BA0A4, .lit4, effect/effBattleMisc]
       - [0x2BA0B0, .lit4, game/code_001624D0]
       - [0x2BA0B4, .lit4, effect/effPCPThunder]
-      - [0x2BA118, .lit4, game/code_00167178]
       - [0x2BA16C, .lit4, effect/effPCPFlash]
       - [0x2BA1C0, .lit4, game/code_0016F1D0]
       - [0x2BA1C8, .lit4, effect/effPCPScatter]
