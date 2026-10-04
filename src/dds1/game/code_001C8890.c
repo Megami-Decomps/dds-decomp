@@ -483,7 +483,9 @@ void func_001A1960();
 typedef struct BattleActionLinkState {
     u8 pad00[0x18];
     BtlUnit *unit;
-    u8 pad1C[0x44];
+    u8 pad1C[8];
+    u16 cursorKind;
+    u8 pad26[0x3A];
     s32 actorIndices;
     u8 pad64[0x1C];
     struct BtlOperandGroup *groups; /* 0x80 */
@@ -6967,7 +6969,36 @@ void btlAdvancePlayerCursorAnimation(s32 action, s32 state) {
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E6180);
+void func_001E6180(ActionUnit *action) {
+    CURSOR->frame = 0;
+    if (!(action->link->unit->flags & 0x400)) {
+        return;
+    }
+
+    memset(CURSOR, 0, 0x130);
+    switch (action->link->cursorKind) {
+    case 0x1BB:
+        CURSOR->unk_0C = 0x1B;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1BF:
+        CURSOR->unk_0C = 0x16;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1B3:
+        CURSOR->unk_0C = 0x11;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1B7:
+        CURSOR->unk_0C = 0x22;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1C3:
+        CURSOR->unk_0C = 0x23;
+        CURSOR->unk_0E = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E6260);
 
