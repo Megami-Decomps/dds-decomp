@@ -3,6 +3,7 @@
 #include "dds3obj.h"
 
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 #include "fpu.h"
 
 extern s64 mnuGetSoundBufferStateLocked(void);
@@ -65,7 +66,8 @@ struct ActionUnit;
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
     BTL_SOUND_ENTRY_COUNT = 0x31,
-    BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26
+    BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26,
+    BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT = 0x2C
 };
 
 typedef struct BtlWork {
@@ -261,7 +263,8 @@ typedef struct BtlCategoryTableEntry {
     u8 flags09;            /* 0x09 */
     u8 pad0A[0x1A];
     u32 flags24;           /* 0x24 */
-    u8 pad28[8];
+    u8 pad28[6];
+    u16 unk2E;
     s32 categoryType;      /* 0x30 */
     u8 pad34[4];
 } BtlCategoryTableEntry;
@@ -345,7 +348,7 @@ typedef struct FxTask {
 
 typedef struct SoundLink {
     u32 owner;
-    s32 effectHandle;
+    struct BtlEffectHandle *effectHandle;
     u32 *effect;
     u16 flags;
 } SoundLink;
@@ -3745,7 +3748,8 @@ SoundTask *func_001E6428(BtlUnit *actor, s32 option) {
 
 
 typedef struct BtlEffectHandle {
-    u8 pad0[0xC];
+    u8 pad0[8];
+    u32 color;
     u16 flags;
 } BtlEffectHandle;
 
@@ -8271,7 +8275,59 @@ void sndFreeLink(SoundLink *link) {
     sdfReleaseChipBlock(link);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00203890);
+/* Blend the linked command effect through the SDK's packed-color vectors. */
+void func_00203890(SoundLink *link) {
+    BtlWork *work = (BtlWork *)btlGetRuntime();
+    BtlUnit *actor = (BtlUnit *)link->owner;
+    u16 effectId;
+
+    if (actor->unk310 > 0) {
+        effectId = ((BtlCategoryTableEntry *)datCommandRecords)[actor->unk310].unk2E;
+    } else {
+        effectId = 0;
+    }
+    if (effectId != 0 && !(actor->conditionFlags & 0x4000)) {
+        if (link->effectHandle == 0) {
+            link->effect = (u32 *)work->soundResourceSlots[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
+            sndCreateSystemEffect(link->effect);
+            link->effectHandle = func_00168548(link->effect[4], 2, actor, 0);
+            link->effect[1]++;
+            link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
+        }
+        link->flags = effectId;
+    } else if (link->effectHandle != 0) {
+        effReleaseBattleVoiceOwner(link->effectHandle);
+        link->effect[1]--;
+        sndDeleteSystemEffect(link->effect);
+        link->effectHandle = 0;
+        link->effect = 0;
+    }
+    if (link->effectHandle != 0 && (actor->flags & 4) && (work->fadeColor & 0xFF000000)) {
+        s32 actorColor[4];
+        s32 fadeColor[4];
+        s32 propertyColor[4];
+        s32 blended[4];
+        u32 property = btlGetSelectedUnitProperty(actor);
+        u32 unit;
+        u32 packed;
+
+        actorColor[0] = (actor->overlayColor & 0xFF000000) | 0x808080;
+        unit = 0x3C000000;
+        EE_MMI_RGBA_UNPACK(actorColor, unit);
+        VU0_MOVE_VF(vf11, vf10);
+        fadeColor[0] = work->fadeColor;
+        EE_MMI_RGBA_UNPACK(fadeColor, unit);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_MOVE_VF(vf11, vf10);
+        propertyColor[0] = property;
+        EE_MMI_RGBA_UNPACK(propertyColor, unit);
+        VU0_MUL(vf10, vf10, vf11);
+        EE_MMI_RGBA_PACK(packed);
+        blended[0] = packed;
+        link->effectHandle->color = blended[0];
+        func_00168978(link->effectHandle);
+    }
+}
 
 /* Clear the fade gate and report completion; the frame updater may overwrite it. */
 u32 btlDisableBattleFade(void) {
