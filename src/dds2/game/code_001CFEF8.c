@@ -38,7 +38,9 @@ typedef struct {
 
 typedef struct SceneDescriptor {
     s8 unk00;
-    u8 pad01[0x1F];
+    u8 unk01;
+    u8 unk02;
+    u8 pad03[0x1D];
     u16 flags;
     u8 pad22[6];
 } SceneDescriptor;
@@ -248,6 +250,11 @@ extern void kwlnDrawEnableCd0();
 extern void kwlnDrawEnableD30();
 
 extern void btlMarkRuntimeUpdatePending();
+extern s32 btlAreWorkBuffersReady(void);
+extern s32 func_0022E490(void);
+extern s32 func_001B73E8(void);
+extern s32 func_001B3DD8(void);
+extern void func_001AD5B0(u16);
 
 extern void kwlnFadeStartIn();
 
@@ -417,7 +424,31 @@ s32 fldSceneStateRestoreDisplay(BattleSceneWork *scene) {
 
 INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D08A8);
 
-INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D0FE0);
+s32 func_001D0FE0(BattleSceneWork *scene) {
+    u32 i;
+
+    if (scene->subFlags & 0x100000) {
+        if (btlCountTasksForOwner(0x8000000000000004LL) == 0) {
+            btlMarkRuntimeUpdatePending();
+            scene->subFlags &= ~0x100000;
+        }
+    }
+    if (btlCountTasksForOwner(0x8000000000000003LL) == 0 &&
+        btlAreWorkBuffersReady() != 0 &&
+        func_0022E490() != 0) {
+        fldInitializeSceneGroups();
+        func_001B73E8();
+        scene->unk27C = 0;
+        func_001B3DD8();
+        if (datBattleSceneRecords[scene->mode].unk01 != 0) {
+            for (i = 0; i < datBattleSceneRecords[scene->mode].unk02; i++) {
+                func_001AD5B0(datBattleSceneRecords[scene->mode].unk01);
+            }
+        }
+        return 8;
+    }
+    return 0;
+}
 
 void btlConsumeSceneAdvanceFlags(void) {
 }
