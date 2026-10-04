@@ -439,6 +439,19 @@ s32 btlGetActorBedAssetIdFromIndex(s32 arg0);
 
 s32 btlGetEntryFlagsUnlessDisabled(s32 entry);
 
+struct EvtUnit;
+extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
+extern void evtSetUnitAlphaTransition(struct EvtUnit *, s32, u32);
+/* Retail passes the full motion index; only the stored field is a halfword. */
+extern void evtUnitSetStoredParameter(struct EvtUnit *, s32);
+extern void evtSetTransitionMotionScale(struct EvtUnit *, f32);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
+extern s32 btlTestActorStatusPredicate(s32);
+extern void btlApplyUnitModelScaledValue(u8 *);
+extern s32 btlIsActorModeAcceptedByBattleHook(u8 *);
+extern void func_001D5578(u8 *, s32, s32, f32);
+extern void func_001D5990(u8 *);
+
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
@@ -3120,7 +3133,102 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3AD0);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D5578);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D5990);
+void func_001D5990(u8 *unit) {
+    s32 entryFlags;
+    u8 *context;
+    s32 index;
+    s32 selected;
+    s32 mode;
+    u8 *rates;
+    f32 rate;
+    f32 speed;
+    u32 color;
+    s32 (*chooseStatus)(u8 *);
+    s32 (*chooseMotion)(u8 *, s32, s32);
+
+    if ((*(u32 *)(unit + 0x110) & 2) == 0) {
+        return;
+    }
+    entryFlags = btlGetEntryFlagsUnlessDisabled((s32)(unit + 0x120));
+    context = (u8 *)btlGetRuntime();
+    if (*(u32 *)(unit + 0xE8) & 2) {
+        color = (*(u32 *)(unit + 0x84) & 0xFFFFFF) | 0x80000000;
+        evtSetUnitRgbTransition(*(struct EvtUnit **)(unit + 0x320), 0, color);
+        evtSetUnitAlphaTransition(*(struct EvtUnit **)(unit + 0x320), 0, color);
+        *(u32 *)(unit + 0x84) = color;
+        *(u32 *)(unit + 0xE8) &= ~4;
+        *(u32 *)(unit + 0xE8) &= ~2;
+    }
+    index = 0;
+    if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0 &&
+        ((*(u32 *)(unit + 0x110) & 0x200) || (entryFlags & 0x200))) {
+        index = 10;
+    }
+    if (*(s32 *)(unit + 0x2F0) > 0 &&
+        ((*(u32 *)(unit + 0x110) & 0x200) || (entryFlags & 0x200))) {
+        index = 9;
+    }
+    switch (*(u16 *)(unit + 0x12E) & 0x7FFF) {
+    case 1: case 8: case 0x10: case 0x20: case 0x40:
+    case 0x80: case 0x100: case 0x200: case 0x400: case 0x2000:
+        index = 2;
+        break;
+    }
+    if (btlTestActorStatusPredicate((s32)unit) != 0) {
+        if ((*(u32 *)(unit + 0x110) & 0x2000) == 0) {
+            *(u32 *)(unit + 0x110) |= 0x80002000;
+        }
+    } else if (*(u32 *)(unit + 0x110) & 0x2000) {
+        btlApplyUnitModelScaledValue(unit);
+        *(u32 *)(unit + 0x110) &= 0x7FFFFFFF;
+        *(u32 *)(unit + 0x110) &= ~0x2000;
+    }
+    chooseStatus = *(s32 (**)(u8 *))(context + 0x5A4);
+    if (chooseStatus != 0) {
+        selected = chooseStatus(unit);
+        if (selected >= 0) {
+            index = selected;
+        }
+    }
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0 &&
+        ((*(u32 *)(unit + 0x110) & 0x200) || (entryFlags & 0x200)) &&
+        ((*(u32 *)(unit + 0x114) & 0x40) == 0)) {
+        index = 11;
+        btlApplyUnitModelScaledValue(unit);
+        *(u32 *)(unit + 0x110) &= 0x7FFFFFFF;
+        *(u32 *)(unit + 0x110) &= ~0x2000;
+    }
+    rates = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)(unit + 0xC4),
+                                                  *(s32 *)(unit + 0xC8)) + 0x14;
+    rate = *(f32 *)(rates + index * 20 + 0x20);
+    chooseMotion = *(s32 (**)(u8 *, s32, s32))(context + 0x5A0);
+    if (chooseMotion != 0) {
+        selected = chooseMotion(unit, index, 1);
+        if (selected == -1) {
+            return;
+        }
+        if (index != selected) {
+            index = selected;
+            rate = *(f32 *)(rates + index * 20 + 0x20);
+        }
+    }
+    *(f32 *)(unit + 0x104) = rate;
+    speed = rate * (30.0f / *(s8 *)(context + 0x490));
+    speed *= *(f32 *)(context + 0x494);
+    *(s32 *)(unit + 0xFC) = index;
+    evtUnitSetStoredParameter(*(struct EvtUnit **)(unit + 0x320), index);
+    evtSetTransitionMotionScale(*(struct EvtUnit **)(unit + 0x320), speed);
+    mode = 1;
+    if (index == 11) {
+        mode = 2;
+    }
+    *(s32 *)(unit + 0x100) = mode;
+    if (*(s32 *)(unit + 0xEC) != 11 &&
+        (btlIsActorModeAcceptedByBattleHook(unit) != 0 || index == 11) &&
+        *(s32 *)(unit + 0xEC) != index) {
+        func_001D5578(unit, index, mode, rate);
+    }
+}
 
 s32 btlIsActorModeAcceptedByBattleHook(u8 *object) {
     s32 value;
@@ -3405,7 +3513,7 @@ void btlCopyUnitRotationQuaternion(u8 *object, void *position) {
     PCP_COPY_VECTOR(position, object + 0x70);
 }
 
-extern void evtSetUnitRgbTransition(u32, s32, u32);
+extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
 
 void btlSetUnitColor(u8 *unit, u32 color, s32 mode) {
     if (*(u32 *)(unit + 0x110) & 2) {
@@ -4046,7 +4154,7 @@ u8 *btlCreateUnitTask10(u8 *unit, f32 *spawnPosition, s32 value) {
     return task;
 }
 
-extern void evtSetUnitAlphaTransition(u32, s32, u32);
+extern void evtSetUnitAlphaTransition(struct EvtUnit *, s32, u32);
 
 u32 btlUnitFadeInTask(BtlFadeArgs *args) {
     u32 total = args->fadeIn + args->fadeOut;
