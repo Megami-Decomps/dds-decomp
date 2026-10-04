@@ -1,6 +1,20 @@
 #include "mnu.h"
 #include "sdf.h"
 
+typedef struct FrFontGlyph FrFontGlyph;
+extern u32 uiBlendColors(u32, u32, u32);
+extern s32 mnuLookupRangeEntry(u16);
+extern u16 mnuGetAdjustedEntryValue(s32, s32);
+extern u16 mnuGetAdjustedPartyRangeValue(s32);
+extern u8 mnuGetRangeEntryKind(u32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
+extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, u32);
+extern char D_003BC700[];
+
 #define MNU_STAFF_PARTY_SLOT_COUNT 5
 #define MNU_STAFF_PARTY_LAST_SLOT 4
 #define MNU_STAFF_DISPLAY_OVERFLOW 4
@@ -725,8 +739,8 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
     for (i = 0; i < 3; i++, y += 0xa8) {
         handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, D_003BAA7C + ((PartyEntryCopy *)slot)->displayId * 45, i);
         if (handle != 0) {
-            func_001958A0(handle, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(handle);
+            func_001958A0((FrFontGlyph *)handle, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
         }
     }
     itfSetTextDrawLimit(-1);
@@ -755,8 +769,6 @@ extern void frFontSetContextPair(s32, s32, s32);
 extern void frFontStoreShiftedContextValue(s32, s32);
 extern void frFontSetChildColors(s32, u32);
 extern void frFontClearFlagBits(s32);
-extern void func_001958A0(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param) {
     s32 item;
@@ -768,8 +780,8 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontStoreShiftedContextValue(item, scale * 0x10);
     frFontSetChildColors(item, color);
     frFontClearFlagBits(1);
-    func_001958A0(item, 1, param);
-    frFontQueueGlyphInSelectedSlot(item);
+    func_001958A0((FrFontGlyph *)item, 1, param);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
 }
 
 void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 obj, s32 spriteFlags) {
@@ -834,7 +846,49 @@ u32 func_00277638(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00277640);
+void func_00277640(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
+                   s32 actor, u16 rangeId, s32 style, s32 dim,
+                   s32 specialResource, s32 costResource, u32 texture) {
+    char text[16];
+    u32 color;
+    s32 value;
+    u32 glyph;
+    u8 chainFlag;
+
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    if (rangeId >= 0x261) {
+        return;
+    }
+    if (mnuLookupRangeEntry(rangeId) == 3) {
+        func_002BF4E0(x + xOffset - 0x80, y, depth, fade, 1,
+                      specialResource, style + 0xB, texture);
+        return;
+    }
+    if (actor != 0) {
+        value = mnuGetAdjustedEntryValue(rangeId, actor);
+    } else {
+        value = mnuGetAdjustedPartyRangeValue(rangeId);
+    }
+    chainFlag = style != 0 ? 4 : 0;
+    if (dim != 0) {
+        color = uiBlendColors(color, color & 0xFFFFFF00, 0x80);
+    }
+    func_003014F0(text, D_003BC700, value);
+    glyph = func_001978E8(x - 0x90, y, depth, color, text, 0);
+    x += 0x140;
+    frFontSetChainFlag((FrFontGlyph *)glyph, chainFlag);
+    func_001958A0((FrFontGlyph *)glyph, 1, texture);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    switch (mnuGetRangeEntryKind(rangeId)) {
+    case 1:
+    default:
+        func_002BF4E0(x, y, depth, fade, 1, costResource, dim != 0 ? 0xD : 0xC, texture);
+        break;
+    case 2:
+        func_002BF4E0(x, y, depth, fade, 1, costResource, dim != 0 ? 0xF : 0xE, texture);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00277848);
 
