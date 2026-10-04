@@ -596,13 +596,13 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
 
 void itfUpdateBattleDisplayAndFadeIndicator(u32 arg0) {
-    func_001A6160();
+    itfMesUpdatePanelFades();
     func_001A6350(arg0);
     func_001A6528(arg0);
     btlUpdateFadeIndicator(arg0);
 }
 
-void func_001A6160(UiPanel *panel) {
+void itfMesUpdatePanelFades(UiPanel *panel) {
     UiPanelPlacement *place = &panel->place;
     s32 *sprite;
     s32 transition;
@@ -1224,7 +1224,7 @@ extern s32 sdfCreateResetPacketList(void);
 extern void sdfAppendPacket(s32, u64 *);
 extern u64 *func_001A9580(s32, s32, s32, s32, s32, u32, u32);
 
-void func_001A9798(s32 surfaceIndex) {
+void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     u32 color = 0;
     s32 alpha;
     s32 i;
@@ -1330,7 +1330,7 @@ extern s32 btlReleaseRainSoundTransition(void);
 
 extern s32 btlSweepFloorModelLists(void);
 
-extern s32 func_001E7960(void);
+extern s32 btlUpdateActorModelColorAndLinks(void);
 
 extern s32 func_0022AC10(void);
 
@@ -1349,7 +1349,7 @@ s32 btlUpdateBattleFieldPresentation(void) {
         btlTickFieldSwayAndTint();
         btlReleaseRainSoundTransition();
         btlSweepFloorModelLists();
-        func_001E7960();
+        btlUpdateActorModelColorAndLinks();
         func_0022AC10();
         func_0020D110();
         fldInitializeBattleSceneFlow();
@@ -2386,7 +2386,7 @@ s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
-f32 func_001ADE18(UiObject *unit, u32 index, s8 includeCharge) {
+f32 btlGetActorEntryMultiplier(UiObject *unit, u32 index, s8 includeCharge) {
     f32 factor;
     s32 stage;
 
@@ -2764,7 +2764,7 @@ typedef struct BtlTargetResult {
     BtlHitResult hits[32];
 } BtlTargetResult;
 
-s32 func_001B0760(u8 *action) {
+s32 btlSumOtherTargetHitAmounts(u8 *action) {
     BtlTargetResult *result = *(BtlTargetResult **)(action + 0x88);
     u32 count = btlGetIndexListCount(*(s32 *)(action + 0x60));
     u32 i;
@@ -4302,7 +4302,7 @@ extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern void btlSetTrackedTaskHandle(s32, s32);
 
-s32 func_001B8078(s32 arg0, s32 arg1) {
+s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     BattleController *context = (BattleController *)btlGetRuntime();
     BtlGuidePanelWork *data;
     s32 task;
@@ -4567,7 +4567,7 @@ void btlReleaseTaskAndRefreshCursorIfFlagged(s32 handle) {
     *(u32 *)(work + 0x218) |= 0x100000;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B9A90);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlAdvancePanelCornerPhase);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415F80);
 

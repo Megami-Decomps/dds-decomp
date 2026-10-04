@@ -884,7 +884,7 @@ extern f32 effMiscRandUnitFloat(void *stream);
 extern f32 fabsf(f32 value);
 
 /* Advance the two bounded shake offsets and taper finite-duration amplitudes. */
-void func_00105550(void) {
+void kwlnAdvanceShakeOffsets(void) {
     f32 limits[2];
     f32 weights[2];
     s32 axis;

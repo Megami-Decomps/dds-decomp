@@ -14,7 +14,7 @@ extern FieldTransitionStyle *D_0043888C;
 extern void func_0030E390(f32);
 extern void func_0030DE08(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_0030E1A0(s32 opening) {
+void mnuDrawAnimatedTransition(s32 opening) {
     f32 progress;
     f32 glow;
     s32 timer;

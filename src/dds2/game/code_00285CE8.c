@@ -13,7 +13,7 @@ extern s32 mdlFlagTest(s32 flag);
 
 extern void mnuClearCampResourceFlagEntries(void);
 
-extern void func_00290E48(s32 arg);
+extern void mnuSynchronizeMantraModelFlags(s32 arg);
 
 extern void func_00286BA8(void *record);
 
@@ -207,7 +207,7 @@ void func_00286618(void) {
     memset(&record, 0, sizeof(record));
     record.unk4 = 2;
     func_00286BA8(&record);
-    func_00290E48(0);
+    mnuSynchronizeMantraModelFlags(0);
     if (mdlFlagTest(0x9A0)) {
         mdlFlagSet(0x9A1);
     }
@@ -219,7 +219,7 @@ void func_00286670(void) {
     memset(&record, 0, sizeof(record));
     record.unk4 = 1;
     func_00286BA8(&record);
-    func_00290E48(1);
+    mnuSynchronizeMantraModelFlags(1);
     if (mdlFlagTest(0x9A1)) {
         mdlFlagSet(0x9A0);
     }

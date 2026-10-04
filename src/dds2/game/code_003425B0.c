@@ -1178,7 +1178,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
 }
 
 /* Start IPU input from the initial chain or a feed slot; defer an empty ring. */
-void func_00344D60(SdfStreamFrameNode *stream) {
+void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
     if (stream->active == 0) {
         D_00439208 = stream;
         *(vu32 *)SDF_IPU_INPUT_DMA_TAG_ADDRESS = stream->unk4C & SDF_EE_PHYSICAL_MASK;

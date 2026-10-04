@@ -209,7 +209,7 @@ extern void *memset(void *, s32, u32);
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 
-void func_00290E48(s32 mode) {
+void mnuSynchronizeMantraModelFlags(s32 mode) {
     MantraModelFlag flags[112];
     MantraNodePos *node;
     s32 i = 175;

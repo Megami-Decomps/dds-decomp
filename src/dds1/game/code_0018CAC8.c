@@ -484,7 +484,7 @@ void sdfProjectVuVectorToScreen(void) {
 }
 
 /* vu0 routine: project a point and its camera-right offset, returning their rounded screen distance. */
-s32 func_0018DC58(f32 scale) {
+s32 effMeasureCameraRightScreenOffsetVU(f32 scale) {
     f32 scaleVector[4];
     f32 projectedEnd[4];
     f32 projectedStart[4];

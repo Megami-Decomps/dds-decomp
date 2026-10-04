@@ -29,8 +29,8 @@ extern char mnuMantraNumberFormat[]; /* "%d" */
 extern char D_004378B0[]; /* "---" */
 extern s32 mnuGetMantraSourceValue(u16);
 extern f32 sdfSinPoly(f32);
-extern u32 func_00311D00(s32, s32, s32, u32, u8, char *, s32, s32);
-extern u32 func_00311DB0(s32, s32, s32, u32, u8, char *, s32, s32);
+extern u32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
+extern u32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
 extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, s32, s32, s32, s32);
 
@@ -341,7 +341,7 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
                                 TaskDestroy, u32);
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
-extern void func_0026E788(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
 void func_00284508(u32, u32, u32, u32, u32, u32);
 extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
@@ -377,7 +377,7 @@ void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     char text[16];
     u32 flags = fade | 0xA09DC300;
 
-    func_0026E788(x, y, depth, fade, 0x2E, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, fade, 0x2E, 0, drawArg);
     if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
         s32 steps = 20;
 
@@ -391,7 +391,7 @@ void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     } else {
         func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
     }
-    func_00311D00(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
+    frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
 
 /* Draw a label for a nonzero entry, otherwise use the empty-entry panel art. */
@@ -399,14 +399,14 @@ void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, 
     u8 buffer[0x20];
     u32 flags = (fade & 0xFF) | 0xA09DC300;
 
-    func_0026E788(x, y, depth, fade, 0x4C, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, fade, 0x4C, 0, drawArg);
     if (entryId != 0) {
         memset(buffer, 0, 0x20);
         func_00314500(entryId, 1, buffer);
         frFontDrawStyledGlyphChainAndMeasure(x + 0x27, y + 0x146, depth, flags, 4, buffer, 0x101, drawArg);
-        func_0026E788(x, y, depth, fade, 0x50, 0, drawArg);
+        mnuDrawMantraSprite(x, y, depth, fade, 0x50, 0, drawArg);
     } else {
-        func_0026E788(x, y, depth, fade, 0x54, 0, drawArg);
+        mnuDrawMantraSprite(x, y, depth, fade, 0x54, 0, drawArg);
     }
 }
 
@@ -417,11 +417,11 @@ void mnuDrawMantraLabelA(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 draw
     u8 *handle = frFontGetColoredGlyphResource();
     u32 flags = (u32)(fade * 0.6f) | 0xA09D7D00;
 
-    func_0026E788(x, y, depth, fade, 0x4D, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, fade, 0x4D, 0, drawArg);
     if (iconId != 0) {
         frFontQueueTintedGlyphChainAndMeasure(x + 0x2A, y + 0x160, depth, flags, 0, iconId & 0xFFFF, handle, 0, 0, drawArg);
     } else {
-        func_0026E788(x, y, depth, fade, 0x55, 0, drawArg);
+        mnuDrawMantraSprite(x, y, depth, fade, 0x55, 0, drawArg);
     }
 }
 
@@ -434,19 +434,19 @@ void mnuDrawMantraDigitRow(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 d
     u32 count;
     u32 i;
 
-    func_0026E788(x, y, depth, fade, 0x4E, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, fade, 0x4E, 0, drawArg);
     if (entryId != 0) {
         count = func_003151D0(entryId);
         if (count != 0) {
             func_0035C860(text, mnuMantraNumberFormat, count);
-            func_00311DB0(x + 0x82, y + 0x17C, depth, flags, 4, text, 0, drawArg);
+            frFontDrawTextVariantBAndMeasure(x + 0x82, y + 0x17C, depth, flags, 4, text, 0, drawArg);
             for (i = 0; i < count; i++) {
-                func_0026E788(x, y, depth, fade, 0x51, 0, drawArg);
+                mnuDrawMantraSprite(x, y, depth, fade, 0x51, 0, drawArg);
                 x += 0xF;
             }
         }
     } else {
-        func_0026E788(x, y, depth, fade, 0x56, 0, drawArg);
+        mnuDrawMantraSprite(x, y, depth, fade, 0x56, 0, drawArg);
     }
 }
 
@@ -454,18 +454,18 @@ void mnuDrawMantraCostCounter(u32 x, u32 y, u32 depth, s32 fade, u32 entryId, u3
     char text[0x20];
     u32 flags = fade | 0xA09DC300;
 
-    func_0026E788(x, y, depth, fade, 0x4F, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, fade, 0x4F, 0, drawArg);
     if (entryId != 0) {
-        func_0026E788(x, y, depth, fade, 0x53, 0, drawArg);
+        mnuDrawMantraSprite(x, y, depth, fade, 0x53, 0, drawArg);
         if (showCost != 0) {
             func_0035C860(text, mnuMantraNumberFormat, mnuGetMantraSourceValue(entryId));
-            func_00311DB0(x + 0x9A, y + 0x190, depth, flags, 4, text, 0, drawArg);
+            frFontDrawTextVariantBAndMeasure(x + 0x9A, y + 0x190, depth, flags, 4, text, 0, drawArg);
         } else {
             func_0035C860(text, D_004378B0);
             frFontDrawStyledGlyphChainAndMeasure(x + 0xA2, y + 0x18C, depth, (u32)(fade * 0.5f) | 0xA09D7D00, 0, text, 0x80000000, drawArg);
         }
     } else {
-        func_0026E788(x, y, depth, fade, 0x57, 0, drawArg);
+        mnuDrawMantraSprite(x, y, depth, fade, 0x57, 0, drawArg);
     }
 }
 
@@ -597,7 +597,7 @@ typedef struct MnuSpriteResource {
 extern s32 D_003CE9D0[][4];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 
-void func_0026E788(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context) {
     if (flags & 0x10000) {
         ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
@@ -623,7 +623,7 @@ void func_0026E788(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 }
 
 
-void func_0026E998(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawMantraScaledRotatedCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scale, f32 rotation) {
     s32 width;
     s32 height;
@@ -656,7 +656,7 @@ void func_0026E998(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
 }
 
-void func_0026EBA8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scale) {
     s32 width;
     s32 height;
@@ -685,7 +685,7 @@ void func_0026EBA8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
 }
 
-void func_0026EDB0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawMantraRotatedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 rotation) {
     ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
         ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
@@ -703,10 +703,10 @@ s32 mnuDrawMantraSineFade(u32 x, u32 y, u32 depth, s32 frame, s32 amount, u32 dr
     s32 shown;
 
     wave = sdfSinPoly(wave * 3.14159265f);
-    func_0026E788(x, y, depth, amount, 0x25, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, amount, 0x25, 0, drawArg);
     shown = (f32)amount * (wave * 0.5f + 0.5f);
-    func_0026E788(0, 0, depth, shown, 0x26, 0, drawArg);
-    func_0026E788(0, 0, depth, shown, 0x28, 0, drawArg);
+    mnuDrawMantraSprite(0, 0, depth, shown, 0x26, 0, drawArg);
+    mnuDrawMantraSprite(0, 0, depth, shown, 0x28, 0, drawArg);
     if (frame < 60) {
         return 0;
     }
@@ -731,14 +731,14 @@ void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 amount, s32
     char text[MNU_MANTRA_COST_TEXT_BUFFER_BYTES];
     s32 drawFlags = amount | MNU_MANTRA_COST_TEXT_FLAGS;
 
-    func_0026E788(x, y, depth, amount, buttons[((MantraCostRecord *)record)->iconIndex], 0, drawArg);
-    func_0026E788(x, y, depth, amount, MNU_MANTRA_COST_MARKER_CODE, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, amount, buttons[((MantraCostRecord *)record)->iconIndex], 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, amount, MNU_MANTRA_COST_MARKER_CODE, 0, drawArg);
     memset(text, 0, sizeof(text));
     func_0035C860(text, mnuMantraNumberFormat, ((MantraCostRecord *)record)->cost);
     if (strlen(text) > 1) {
-        func_00311DB0(x + MNU_MANTRA_COST_MULTI_DIGIT_X_OFFSET, y + MNU_MANTRA_COST_TEXT_Y_OFFSET, depth, drawFlags, 0, text, 0, drawArg);
+        frFontDrawTextVariantBAndMeasure(x + MNU_MANTRA_COST_MULTI_DIGIT_X_OFFSET, y + MNU_MANTRA_COST_TEXT_Y_OFFSET, depth, drawFlags, 0, text, 0, drawArg);
     } else {
-        func_00311DB0(x + MNU_MANTRA_COST_SINGLE_DIGIT_X_OFFSET, y + MNU_MANTRA_COST_TEXT_Y_OFFSET, depth, drawFlags, 0, text, 0, drawArg);
+        frFontDrawTextVariantBAndMeasure(x + MNU_MANTRA_COST_SINGLE_DIGIT_X_OFFSET, y + MNU_MANTRA_COST_TEXT_Y_OFFSET, depth, drawFlags, 0, text, 0, drawArg);
     }
 }
 
@@ -747,7 +747,7 @@ void mnuDrawMantraCostIcon(u32 unusedX, u32 unusedY, u32 depth, u32 recordAddres
                    u32 amount, u32 drawArg) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
     u16 index = ((MantraCostRecord *)recordAddress)->iconIndex;
-    func_0026E788(0, 0, depth, amount, markers[index], 0, drawArg);
+    mnuDrawMantraSprite(0, 0, depth, amount, markers[index], 0, drawArg);
 }
 
 /* Draw the alternate cost marker, eight codes above the base marker. */
@@ -755,7 +755,7 @@ void mnuDrawMantraCostIconOffset(u32 unusedX, u32 unusedY, u32 depth, u32 record
                    u32 amount, u32 drawArg) {
     char markers[9] = { '\0', '/', '4', '0', '2', '1', '3', '5', '6' };
     u16 index = ((MantraCostRecord *)recordAddress)->iconIndex;
-    func_0026E788(0, 0, depth, amount, markers[index] + 8, 0, drawArg);
+    mnuDrawMantraSprite(0, 0, depth, amount, markers[index] + 8, 0, drawArg);
 }
 
 extern s32 func_0026F1F0(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 index, s32 drawArg);
@@ -1227,16 +1227,16 @@ void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     uiDrawUniformColorRect(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, packet);
     uiDrawActiveSurfaceRegion(packet);
-    func_0026E788(0, -15, 0, amount, 0x60, 0x20, packet);
-    func_0026E788(0, -15, 0, amount, 0x61, 0x20, packet);
-    func_0026E788(0, 0, 0, amount, 0x62, 0x20, packet);
-    func_0026E788(0, 0, 0, amount, 0x63, 0x20, packet);
+    mnuDrawMantraSprite(0, -15, 0, amount, 0x60, 0x20, packet);
+    mnuDrawMantraSprite(0, -15, 0, amount, 0x61, 0x20, packet);
+    mnuDrawMantraSprite(0, 0, 0, amount, 0x62, 0x20, packet);
+    mnuDrawMantraSprite(0, 0, 0, amount, 0x63, 0x20, packet);
     sdfDispatchSurfaceWithPreparedTexturePacket(packet);
     sdfSubmitGsAlphaOneRegisterPacket(0x54, packet);
-    func_0026E788(0, 0, 0, amount, 0x58, 0x60, packet);
+    mnuDrawMantraSprite(0, 0, 0, amount, 0x58, 0x60, packet);
     amount = amount * pulse * 0.5f;
-    func_0026E788(0, 0, 0, amount, 0x5A, 0, packet);
-    func_0026EDB0(0, 0x140, 0, amount, 0x5A, 0, packet, 180.0f);
+    mnuDrawMantraSprite(0, 0, 0, amount, 0x5A, 0, packet);
+    mnuDrawMantraRotatedSprite(0, 0x140, 0, amount, 0x5A, 0, packet, 180.0f);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270568);
@@ -1945,8 +1945,8 @@ s32 mnuDrawMantraGauge(s32 unused, s32 item) {
         wave = (sdfSinPoly(wave * (3.14159265f * 2.0f) + -3.14159265f) + 1.0f) * 0.5f;
         for (i = 0; i < 4; i++) {
             level = gauge->slots[i].level / 10.0f;
-            func_0026E788(0, 0, 0, (s32)((f32)alpha * level), icons[i], 0, 0x53);
-            func_0026E788(0, 0, 0, (s32)((f32)(s32)((f32)alpha * wave * level) * 0.7f), glowIcons[i], 0, 0x53);
+            mnuDrawMantraSprite(0, 0, 0, (s32)((f32)alpha * level), icons[i], 0, 0x53);
+            mnuDrawMantraSprite(0, 0, 0, (s32)((f32)(s32)((f32)alpha * wave * level) * 0.7f), glowIcons[i], 0, 0x53);
         }
         break;
     }
@@ -2197,7 +2197,7 @@ void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     char text[16];
     u32 flags = fade | 0xA09DC300;
 
-    func_0026E788(x, y, depth, fade, 0x2E, 0, drawArg);
+    mnuDrawMantraSprite(x, y, depth, fade, 0x2E, 0, drawArg);
     if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
         s32 steps = 20;
 
@@ -2211,7 +2211,7 @@ void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     } else {
         func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
     }
-    func_00311D00(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
+    frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
 
 extern u32 mnuClaimMantraIconEntry(u32 *, u32);
@@ -2448,10 +2448,10 @@ s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *p
             ratio = 1.0f;
         }
         amount = (f32)amount * ratio;
-        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
+        mnuDrawMantraSprite(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
         break;
     case 2:
-        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
+        mnuDrawMantraSprite(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
         break;
     case 3:
     case 6:
@@ -2463,7 +2463,7 @@ s32 mnuDrawMantraFadeIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *p
         }
         ratio = 1.0f - ratio;
         amount = (f32)amount * ratio;
-        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
+        mnuDrawMantraSprite(x + icon->x, y + icon->y, depth, amount, 0x10B, 0, 0x53);
         break;
     case 4:
     case 7:
@@ -2488,10 +2488,10 @@ s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *
             ratio = 1.0f;
         }
         amount = (f32)amount * ratio;
-        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
+        mnuDrawMantraSprite(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
         break;
     case 2:
-        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
+        mnuDrawMantraSprite(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
         break;
     case 3:
     case 6:
@@ -2503,7 +2503,7 @@ s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *
         }
         ratio = 1.0f - ratio;
         amount = (f32)amount * ratio;
-        func_0026E788(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
+        mnuDrawMantraSprite(x + icon->x, y + icon->y, depth, amount, 0x10C, 0, 0x53);
         break;
     case 4:
     case 7:
@@ -3084,9 +3084,9 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
         }
     }
     t = (sdfSinPoly(t * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
-    func_0026E788(x, y, z, amount, 0x77, 0, packet);
-    func_0026E788(x, y, z, amount, 0x93, 0, packet);
-    func_0026E788(x, y, z, (s32)(amount * (t * 0.25f)), 0x94, 0, packet);
+    mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, z, amount, 0x93, 0, packet);
+    mnuDrawMantraSprite(x, y, z, (s32)(amount * (t * 0.25f)), 0x94, 0, packet);
     return 0;
 }
 
@@ -3135,13 +3135,13 @@ void btlReleasePanelASprite(u32 obj) {
 }
 
 s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
-    func_0026E788(x, y, 0, amount, 0x77, 0, packet);
-    func_0026E788(x, y, 0, amount, 0x89, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, amount, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, amount, 0x89, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     uiDrawActiveSurfaceRegion(packet);
-    func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
+    mnuDrawMantraSprite(x, y, 0, 0x80, 0x91, 0x60, packet);
     sdfDispatchSurfaceWithPreparedTexturePacket(packet);
     return 0;
 }
@@ -3234,13 +3234,13 @@ void btlReleasePanelBSprites(s32 obj) {
 }
 
 s32 btlDrawPanelB(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
-    func_0026E788(x, y, 0, amount, 0x77, 0, packet);
-    func_0026E788(x, y, 0, amount, 0x87, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, amount, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, amount, 0x87, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     uiDrawActiveSurfaceRegion(packet);
-    func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
+    mnuDrawMantraSprite(x, y, 0, 0x80, 0x91, 0x60, packet);
     sdfDispatchSurfaceWithPreparedTexturePacket(packet);
     return 0;
 }
@@ -3257,8 +3257,8 @@ s32 btlDrawPanelC(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
-    func_0026E788(x, y, 0, amount, 0x77, 0, packet);
-    func_0026E788(x, y, 0, amount, 0x9A, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, amount, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, amount, 0x9A, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
@@ -3387,10 +3387,10 @@ void mnuReleaseMantraPanelAccentSprite(u32 obj) {
 
 u32 mnuDrawMantraPanelAccentSprites(u32 ctx, u32 x, u32 y, u32 direction, u32 unused,
                   u32 sprite, u32 animation) {
-    func_0026E788(ctx, x, y, direction, 0x77, 0, animation);
-    func_0026E788(ctx, x, y, direction, 0xf7, 0, animation);
-    func_0026E788(ctx, x, y, direction, 0xf8, 0, animation);
-    func_0026E788(ctx, x, y, direction, 0xf9, 0, animation);
+    mnuDrawMantraSprite(ctx, x, y, direction, 0x77, 0, animation);
+    mnuDrawMantraSprite(ctx, x, y, direction, 0xf7, 0, animation);
+    mnuDrawMantraSprite(ctx, x, y, direction, 0xf8, 0, animation);
+    mnuDrawMantraSprite(ctx, x, y, direction, 0xf9, 0, animation);
     func_00284508(ctx, x, 0, direction, ((MantraPanelSpriteView *)sprite)->spriteHandle, animation);
     return 0;
 }

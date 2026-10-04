@@ -1278,7 +1278,7 @@ extern void sdfAppendPacket(s32, s32);
 extern s32 func_0015FE20(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */
-void func_00169E10(EffFragmentResources *history) {
+void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     s32 start[4];
     s32 length[4];
     s32 list;

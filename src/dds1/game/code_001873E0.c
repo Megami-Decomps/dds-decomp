@@ -125,12 +125,12 @@ extern void sdfAppendDmaPrimary(void *, const void *, void *);
 extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
-extern void func_00187788();
+extern void effBlurBuildSamplingQuad();
 extern void sdfAppendPacket();
 
 INCLUDE_ASM(const s32, "game/code_001873E0", func_00187598);
 
-INCLUDE_ASM(const s32, "game/code_001873E0", func_00187788);
+INCLUDE_ASM(const s32, "game/code_001873E0", effBlurBuildSamplingQuad);
 
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
 void effBlurDrawFramebufferQuad(EffBlurQuad *source)
@@ -186,7 +186,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         clampPacket[5] = 8;
         sdfAppendPacket(list, clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
-        func_00187788(source, billGetWorkTransformMatrix(drawPacket), 0);
+        effBlurBuildSamplingQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
         sdfAppendPacket(list, drawPacket);
         D_003253E8.draw(&D_003253E8, list);
     }

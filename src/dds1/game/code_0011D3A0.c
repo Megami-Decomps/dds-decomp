@@ -532,7 +532,7 @@ extern char D_003BAAF0[];
 extern char D_003BAAF8[];
 extern char D_003BAB00[];
 
-void func_0011E080(void *packetList, s32 x, s32 y, s32 selected,
+void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
                    u32 color, s32 showNormalized) {
     s32 i;
     s32 style;

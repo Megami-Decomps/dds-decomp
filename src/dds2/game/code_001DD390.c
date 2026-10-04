@@ -3595,7 +3595,7 @@ SoundTask *btlCreateUnitFadeOutTask(BtlUnit *unit, u32 value, u32 variant) {
     return task;
 }
 
-s32 func_001E5E40(u32 *arguments) {
+s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     BtlUnit *unit = (BtlUnit *)arguments[0];
     u32 alpha;
 
@@ -3634,7 +3634,7 @@ SoundTask *func_001E5FF8(BtlUnit *actor, s32 option) {
     task->startCondition.kind = 1;
     task->taskId = 0x13;
     task->owner = actor->owner;
-    task->callback = func_001E5E40;
+    task->callback = btlStepUnitDefeatFadeIn;
     task->onStart = 0;
     args = btlGetTaskArguments((s32)task);
     args->actor = actor;
@@ -3643,7 +3643,7 @@ SoundTask *func_001E5FF8(BtlUnit *actor, s32 option) {
     return task;
 }
 
-s32 func_001E6080(u32 *arguments) {
+s32 btlStepUnitDefeatFadeOut(u32 *arguments) {
     BtlUnit *unit = (BtlUnit *)arguments[0];
     u32 alpha;
 
@@ -3670,7 +3670,7 @@ SoundTask *func_001E61A0(BtlUnit *actor, s32 option) {
     task->startCondition.kind = 1;
     task->taskId = 0x14;
     task->owner = actor->owner;
-    task->callback = func_001E6080;
+    task->callback = btlStepUnitDefeatFadeOut;
     task->onStart = 0;
     args = btlGetTaskArguments((s32)task);
     args->actor = actor;
@@ -4227,7 +4227,7 @@ extern void func_002034A8(struct SoundResourceLink *);
 extern void func_00203890(struct SoundLink *);
 extern void func_0020EA18(BtlUnit *);
 
-void func_001E7960(void) {
+void btlUpdateActorModelColorAndLinks(void) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
     BtlUnit *unit = work->actorList;
     s32 color;
@@ -5669,12 +5669,12 @@ void func_001EAA18(void) {
 void func_001EAA20(void) {
 }
 
-extern void func_001F1F20(void *unit, f32 *pose, u8 *out);
+extern void btlPrepareActionCameraPoseWithActorClearance(void *unit, f32 *pose, u8 *out);
 extern void func_001F20B0(void *unit, f32 *pose, u8 *out);
 extern void func_001F20C8(void *unit, f32 *pose, u8 *out);
 
 /* Choose the action's camera pose from active ally and enemy height maxima. */
-void func_001EAA28(ActionUnit *action) {
+void btlChooseCameraPoseByActorHeights(ActionUnit *action) {
     BtlWork *work;
     BtlUnit *unit;
     s32 enemyCount;
@@ -5714,11 +5714,11 @@ void func_001EAA28(ActionUnit *action) {
             if (enemyHeight <= 500.0f) {
                 func_001F20C8(action, action->pos30, action->outputPose);
             } else {
-                func_001F1F20(action, action->pos30, action->outputPose);
+                btlPrepareActionCameraPoseWithActorClearance(action, action->pos30, action->outputPose);
             }
             break;
         case 2:
-            func_001F1F20(action, action->pos30, action->outputPose);
+            btlPrepareActionCameraPoseWithActorClearance(action, action->pos30, action->outputPose);
             break;
         case 3:
             func_001F20B0(action, action->pos30, action->outputPose);
@@ -5727,7 +5727,7 @@ void func_001EAA28(ActionUnit *action) {
     } else {
         switch (effMiscRandMod(0, 2)) {
         case 0:
-            func_001F1F20(action, action->pos30, action->outputPose);
+            btlPrepareActionCameraPoseWithActorClearance(action, action->pos30, action->outputPose);
             break;
         case 1:
             func_001F20B0(action, action->pos30, action->outputPose);
@@ -6336,7 +6336,7 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F17C8);
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1B00);
 
 /* vu0 routine: measure camera clearance from the actor's adjusted muzzle position. */
-void func_001F1F20(void *unit, f32 *pose, u8 *out) {
+void btlPrepareActionCameraPoseWithActorClearance(void *unit, f32 *pose, u8 *out) {
     BtlUnit *actor = ((BtlWork *)btlGetRuntime())->actorList;
     f32 *target = (f32 *)out;
     f32 span;
@@ -6994,7 +6994,7 @@ typedef struct BtlSceneLightParams {
     f32 unk2C;
 } BtlSceneLightParams;
 
-void func_00200290(s32 index, BtlSceneLightParams *light) {
+void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
     BtlActionTableEntry *action;
     f32 *vector;
@@ -7278,7 +7278,7 @@ typedef struct BtlFieldLoadArgs {
 
 extern BtlFieldArchiveRequest *fileQueuePlainDispatchRequest(const char *);
 
-u32 func_00200B30(args)
+u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
 {
     BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
@@ -7340,7 +7340,7 @@ u32 func_00200B30(args)
     return 0;
 }
 
-extern u32 func_00200B30();
+extern u32 btlPollFieldArchiveLoad();
 
 SoundTask *fldCreateSceneTileTask(s32 value, s32 option) {
     SoundTask *task = btlAllocTask(0x28);
@@ -7348,7 +7348,7 @@ SoundTask *fldCreateSceneTileTask(s32 value, s32 option) {
     task->startCondition.kind = 1;
     task->taskId = 1;
     task->flags &= ~1;
-    task->callback = func_00200B30;
+    task->callback = btlPollFieldArchiveLoad;
     task->endCondition.kind = 0;
     args = btlGetTaskArguments((s32)task);
     memset(args, 0, 0x28);
@@ -9041,7 +9041,7 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
 extern void mnuResetSoundBufferLocked(void);
 extern void mnuClearInactiveSoundBufferState(void);
 
-u32 func_00204E50(SoundTaskArgs *args) {
+u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
     SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
     SoundSlotWork *soundWork;
@@ -9110,7 +9110,7 @@ struct SoundTask *btlCreateHookedUnitSoundTask(unit, option)
     task->taskId = 0x59;
     task->owner = unit->owner;
     task->onStart = btlQueueUnitSoundSlotFileLoad;
-    task->callback = func_00204E50;
+    task->callback = sndPollMotionSePlayback;
     work = (BtlWork *)btlGetRuntime();
     if (work->hook710 != 0) {
         option = work->hook710(unit, option);
@@ -9614,7 +9614,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(BattleActionLinkState *link, BtlUni
 extern s32 btlGetBossSceneStateWhenActive(void);
 
 /* vu0 routine: measure the center actor's displacement from its sole target. */
-void func_00206970(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+void btlAlignTripleFormationWithTarget(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
     BtlUnit *slot[3];
     f32 position[4];
     f32 targetPosition[4];

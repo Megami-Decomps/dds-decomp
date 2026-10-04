@@ -125,7 +125,7 @@ extern void sdfAppendDmaPrimary(void *, const void *, void *);
 extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
-extern void func_0018F3C0();
+extern void effBlurBuildSamplingQuad();
 extern void sdfAppendPacket();
 
 INCLUDE_ASM(const s32, "game/code_0018F018", func_0018F1D0);
@@ -149,7 +149,7 @@ typedef struct EffBlurDrawData {
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void func_0018F3C0(source, data, fixedPoint)
+void effBlurBuildSamplingQuad(source, data, fixedPoint)
     EffBlurQuad *source;
     EffBlurDrawData *data;
     u8 fixedPoint;
@@ -262,7 +262,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         clampPacket[5] = 8;
         sdfAppendPacket(list, clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
-        func_0018F3C0(source, billGetWorkTransformMatrix(drawPacket), 0);
+        effBlurBuildSamplingQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
         sdfAppendPacket(list, drawPacket);
         D_003803E8.draw(&D_003803E8, list);
     }

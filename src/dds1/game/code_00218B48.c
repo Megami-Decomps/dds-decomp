@@ -158,7 +158,7 @@ extern void mdlViewerEnd();
 
 s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
-void func_0011E080(s32, s32, s32, s32, s32, s32, s32);
+void fldDrawPackedRgbEditor(s32, s32, s32, s32, s32, s32, s32);
 
 void effApplyNodeScale(s32, float);
 
@@ -2078,7 +2078,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021CF00);
 
 extern MdlRecord *func_0021CF00(void);
 
-void func_0021CFC0(void) {
+void mdlUpdateViewerMarkEditorInput(void) {
     MdlViewState *state = &mdlViewerState;
     s32 count;
     MdlRecord *record;
@@ -2130,7 +2130,7 @@ void func_0021CFC0(void) {
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D198);
 
 u32 mdlRunViewerEffectEditorTask(void) {
-    func_0021CFC0();
+    mdlUpdateViewerMarkEditorInput();
     func_0021D198();
     return 0;
 }
@@ -2428,7 +2428,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E618);
 void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
 
-    func_0011E080(mdlViewerControlState.unk08, first, second,
+    fldDrawPackedRgbEditor(mdlViewerControlState.unk08, first, second,
                   (mdlViewerControlState.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1, packedColor);
 }
 

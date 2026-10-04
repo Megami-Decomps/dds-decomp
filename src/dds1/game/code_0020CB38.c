@@ -105,7 +105,7 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
 }
 
 void func_0020CCA8(void) {
-    func_0020ADA8();
+    btlRestoreHaritiFormation();
 }
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020CCC0);

@@ -53,7 +53,7 @@ extern u8 D_0037B950[];
 extern u8 D_0037B970[];
 
 extern u8 D_0037B980[];
-extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern u8 D_0037C388[];
 
@@ -606,7 +606,7 @@ extern u8 *D_0037B988[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    u32 *sprite = (u32 *)func_00197760(0x2F0, 0x1E0, 0, 0xa09dc35a,
+    u32 *sprite = (u32 *)itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       D_0037B988[imageIndex], 0);
     func_001958A0(sprite, 1, 0x54);
     frFontQueueGlyphInSelectedSlot(sprite);

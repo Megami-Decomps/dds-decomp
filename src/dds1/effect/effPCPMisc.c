@@ -2006,7 +2006,7 @@ typedef struct EffPCPTrailWork {
     EffPCPTrailObj *obj;
 } EffPCPTrailWork;
 
-extern s32 func_0018DC58(f32 value);
+extern s32 effMeasureCameraRightScreenOffsetVU(f32 value);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 extern void effDrawBlurPixelRectWithResource(EffPCPTrailObj *obj);
 
@@ -2037,7 +2037,7 @@ void effPcpUpdateSharedTrail(ref)
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
         VU0_LOAD_VF($vf10, work);
-        obj->size = (s32)((f32)func_0018DC58(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
+        obj->size = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
         VU0_STORE_VF($vf10, pos);
         obj->x = (s32)pos[0] - 0x800;
         obj->y = ((s32)pos[1] - 0x800) << 1;
@@ -2095,7 +2095,7 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
 
     obj = work->obj;
     VU0_LOAD_VF($vf10, work->pos);
-    obj->size = (s32)((f32)func_0018DC58(work->unk1C) * work->scale);
+    obj->size = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->unk1C) * work->scale);
     VU0_STORE_VF($vf10, pos);
     obj->x = (s32)pos[0] - 0x800;
     obj->y = ((s32)pos[1] - 0x800) << 1;

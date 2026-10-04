@@ -1930,7 +1930,7 @@ extern void mdlAddEntryPlain(FldModelResource *, s32, s32);
 extern void mdlAddEntryFlagged(FldModelResource *, s32, s32);
 extern s32 fldTestSceneControlFlags(s32);
 
-void func_00148D78(void) {
+void fldUpdateObjectActivation(void) {
     s32 i;
     FldModelResource *resource;
 

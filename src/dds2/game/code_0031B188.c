@@ -43,6 +43,7 @@ typedef struct MnuModelNode {
 typedef struct MnuNodeList {
     MnuModelNode *nodes; /* 0x00 */
     s32 count;           /* 0x04 */
+    u8 pad08[8];
 } MnuNodeList;
 typedef struct ShortRecord {
     u8 kind;
@@ -569,7 +570,41 @@ u32 mnuResumeEffectQueueFrameAdvance(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BFE0);
+typedef struct MnuModelWork {
+    u32 handle;
+    s32 count;
+    MnuNodeList *lists;
+    u32 unk0C;
+} MnuModelWork;
+
+extern char D_0042DAE8[];
+
+MnuModelWork *func_0031BFE0(s32 listCount, s32 *nodeCounts) {
+    s32 listBytes = listCount * sizeof(MnuNodeList);
+    s32 allocationSize = listBytes + sizeof(MnuModelWork);
+    s32 i;
+    u32 handle;
+    MnuModelWork *work;
+    MnuNodeList *list;
+    u8 *records;
+
+    for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
+    evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
+    handle = sdfAllocGeneralBlock(allocationSize);
+    work = (MnuModelWork *)sdfMemoryGetBlockAddress(handle);
+    memset(work, 0, allocationSize);
+    work->handle = handle;
+    work->count = listCount;
+    work->lists = (MnuNodeList *)(work + 1);
+    list = work->lists;
+    records = (u8 *)list + listBytes;
+    for (i = 0; i < listCount; i++, list++) {
+        list->count = nodeCounts[i];
+        list->nodes = list->count != 0 ? (MnuModelNode *)records : NULL;
+        records += nodeCounts[i] * sizeof(MnuModelNode);
+    }
+    return work;
+}
 
 void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w) {
     u16 index = 0;
@@ -833,6 +868,8 @@ void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
         entry->model->flags |= 1U;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_0031B188", D_0042DAE8);
 
 INCLUDE_SDATA(const s32, "game/code_0031B188", D_00438950);
 

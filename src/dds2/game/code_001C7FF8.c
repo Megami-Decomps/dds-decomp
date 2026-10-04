@@ -6,7 +6,7 @@ extern s32 btlGetRuntime(void);
 extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
-extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
 
@@ -292,7 +292,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u64 first, u64 second) {
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
-    handle = func_0019F460(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
+    handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);
@@ -301,7 +301,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
 void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
-    handle = func_0019F460(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
+    handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);
@@ -466,7 +466,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
         color = btlLinkedSelectionTaskBuffer[1] | 0x89FEFF00;
     }
     itfSetTextDrawLimit(0x13);
-    handle = func_0019F460(0x1A0, 0xA60, 0xFF0010, color, text, 0);
+    handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);
