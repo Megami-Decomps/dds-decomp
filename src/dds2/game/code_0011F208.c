@@ -690,7 +690,52 @@ void fldFormatSecondsText(f32 value, char *text) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_0011FD18);
+extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
+extern void sdfAppendPacket(void *, void *);
+extern u8 D_00386480[];
+extern char *D_00386488[];
+
+/* Draw three RGB value rows and their clamped colour preview. */
+void func_0011FD18(void *packetList, s32 x, s32 y, s32 selected, f32 *values) {
+    char text[16];
+    u32 color = 0x80000000;
+    s32 i;
+    s32 style;
+
+    if (values != NULL) {
+        color = 0;
+        for (i = 0; i != 3; i++) {
+            s32 channel = values[i] * 128.0f;
+            if (channel > 0) {
+                if (channel >= 256) {
+                    channel = 255;
+                }
+                color |= channel << (i * 8);
+            }
+        }
+        color |= 0x80000000;
+    }
+    sdfAppendPacket(packetList, func_0011F250(x + 0x510, y + 0x18,
+                     0xFF0080, 0x240, 0xF0, color, 0x40806020));
+    for (i = 0; i != 3; i++) {
+        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y,
+                        0xFF0080, D_00386480[i], D_00386488[i]));
+        style = selected == i ? 6 : 0;
+        if (values == NULL) {
+            text[0] = '-';
+            text[1] = '-';
+            text[2] = '-';
+            text[3] = '-';
+            text[4] = 0;
+        } else {
+            fldFormatSecondsText(values[i], text);
+        }
+        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x + 0x180,
+                        y, 0xFF0080, style, text));
+        y += 0x60;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_0011FEE8);
 
