@@ -35,6 +35,13 @@ typedef struct {
     u8 pad3[7];
 } EvtTblEntry; /* 0xA bytes */
 
+typedef struct EvtFrameTableEntry {
+    s16 columns;
+    u8 pad02[8];
+} EvtFrameTableEntry;
+
+extern EvtFrameTableEntry D_003C9538[];
+
 extern EvtTblEntry D_003C9730[];
 
 extern s8 D_003C9732[];
@@ -146,7 +153,7 @@ typedef struct EvtRuntime {
     u8 pad22D4[0x20];
     s32 entryCursor; /* 0x22F4 */
     s32 entryFirst; /* 0x22F8 */
-    u8 pad22FC[0x4];
+    s32 frameColumn; /* 0x22FC: horizontal cursor in the selected frame row */
     s32 frameFirst; /* 0x2300 */
     s32 frameCursor; /* 0x2304 */
     EvtRuntimeGroup *frameGroup; /* 0x2308: selected entry from groups */
@@ -198,10 +205,6 @@ typedef struct GsSurface {
     void (*submit)(struct GsSurface *, s32);
 } GsSurface;
 
-/* Header callbacks have three-argument labels and context-aware variants. */
-typedef s32 (*EvtMenuHeaderFn)();
-typedef void (*EvtMenuRowFn)(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
-
 typedef struct EvtPad {
     u8 pad00[0x20];
     s8 syncKey; /* 0x20 */
@@ -217,6 +220,7 @@ typedef struct EvtPad {
     u8 incHun;  /* 0x2A */
     u8 pad2B;
     s8 apply;   /* 0x2C */
+    s8 unk2D;
 } EvtPad;
 
 extern EvtPad D_0037F510;
@@ -230,10 +234,12 @@ extern char D_004374F8[]; /* "%3d" */
 extern char D_00437500[]; /* "   CUT" */
 extern char D_00437508[]; /* "%03d" */
 extern s32 sdfCreateResetPacketList(void);
-extern void func_00250338(s32 list, s32 x, s32 y, s32 col, s32 rows, s32 first, s32 total, EvtRuntime *ctx,
-                          EvtMenuHeaderFn header, EvtMenuRowFn row);
+/* The menu dispatcher accepts legacy callbacks with differing signatures. */
+extern void func_00250338();
 extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
-extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32, s32 *, s32, s32 *);
+extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
+extern s32 func_002521C8();
+extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
 extern void sndEnsureMidiBankResident(s32 sound);
 
@@ -928,7 +934,59 @@ s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00253590);
+s32 func_00253590(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 shown = 20;
+    s32 count;
+    s32 result;
+    s16 columns;
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *node;
+
+    if (ctx->entryCount == 0) {
+        return 0;
+    }
+    group = ctx->frameGroup;
+    if (D_003C9538[group->type].columns == 0) {
+        return -1;
+    }
+    list = sdfCreateResetPacketList();
+    func_00250338(list, x, y, 39, 21, ctx->frameCursor,
+                 group->childCount + 1, ctx, func_002521C8, evtDrawFrameListRow);
+    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    if (ctx->actionMode != 5) {
+        return 0;
+    }
+    columns = D_003C9538[group->type].columns;
+    if (group->childCount + 1 < shown) {
+        shown = group->childCount + 1;
+    }
+    if (evtIsMenuTableEntryEnabled(&group->type) == 1) {
+        if (D_0037F510.decTen < 0) {
+            if (ctx->frameCursor + ctx->frameFirst == 0) {
+                return -4;
+            }
+        } else if (D_0037F510.incTen < 0) {
+            count = 0;
+            for (node = group->children; node != NULL; node = node->next) {
+                count++;
+            }
+            if (ctx->frameCursor + ctx->frameFirst == count) {
+                return -4;
+            }
+        }
+    }
+    result = kwlnStepTwoListCursors(0, columns, group->childCount + 1,
+                                  columns, shown, NULL, &ctx->frameCursor,
+                                  &ctx->frameColumn, &ctx->frameFirst);
+    if (D_0037F510.syncKey < 0) {
+        result = -2;
+    }
+    if (D_0037F510.unk2D < 0) {
+        result = -3;
+    }
+    return result;
+}
 
 
 extern EvtWorldObject *dds3GetWorldObject();
