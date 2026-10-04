@@ -52,14 +52,21 @@ extern u32 itfBackgroundSpriteTexture;
 extern u8 D_00436580[];
 extern u8 D_003B4378[];
 extern u8 D_003B4380[];
-extern u64 func_0019CE78(u64, u64, u64, u64, u64);
+typedef struct FrFontCtx FrFontCtx;
+typedef struct FrFontGlyph FrFontGlyph;
+struct TextStyleNode;
+extern FrFontGlyph *func_0019CE78(void *, s8, s8, s8, FrFontGlyph *);
+extern FrFontCtx *frFontAppendGlyphFromData(void *, s8, s8, s8, s32);
+extern void frFontStoreShiftedContextValue(FrFontCtx *, u32);
+extern void frFontSetContextPair(FrFontCtx *, u32, u32);
+extern void frFontSetChildColors(struct TextStyleNode *, u32);
+extern void frFontSetFlagAndMeasureGlyphs();
+extern FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *, FrFontGlyph *);
 
-extern u64 frFontAppendGlyphFromData(u64, u64, u64, u64, u64);
-
-extern void frFontAddSharedGlyphFlags(u64 value);
+extern void frFontAddSharedGlyphFlags(s32 value);
 extern u8 D_003B4378[];
 extern u8 D_003B4380[];
-extern void frFontClearFlagBits(u64 value);
+extern u8 frFontClearFlagBits(u8 value);
 
 extern u32 D_0043654C;
 
@@ -289,8 +296,8 @@ s32 itfInitTextDrawArgs(u8 *encodedText, TextSub *sub) {
     return func_0019EDC0(&args);
 }
 
-u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
-    u64 glyph;
+FrFontCtx *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, s32 entryFlag, u32 colors, void *source) {
+    FrFontCtx *glyph;
     s32 kind = 4;
 
     if (alt) {
@@ -307,7 +314,7 @@ u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64
     frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
     frFontSetContextPair(glyph, x, y);
     frFontStoreShiftedContextValue(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frFontSetChildColors((TextStyleNode *)glyph, colors);
     frFontSetChainFlag(glyph, 5);
     return glyph;
 }
@@ -357,22 +364,69 @@ void itfConvertText(u8 *output, const char *input) {
 }
 
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
-void itfAttachGlyph16x18(u64 x, u64 y, s32 depth, u64 colors,
-                                    u64 glyphSource, u64 parent) {
-    u64 glyph;
+void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
+                                    void *glyphSource, FrFontGlyph *parent) {
+    FrFontCtx *glyph;
 
     glyph = frFontAppendGlyphFromData(glyphSource, 0, 0, 0, 0);
-    frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
+    frFontSetGlyphChainDimensions((FrFontGlyph *)glyph, 0x10, 0x12);
     frFontSetContextPair(glyph, x, y);
     frFontStoreShiftedContextValue(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
-    frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffc);
-    frFontLinkGlyph(parent, glyph, 0);
+    frFontSetChildColors((TextStyleNode *)glyph, colors);
+    frFontSetFlagAndMeasureGlyphs(glyph, -4);
+    frFontLinkGlyph(parent, (FrFontGlyph *)glyph, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F280);
+FrFontGlyph *func_0019F280(s32 x, s32 y, s32 depth, u32 colors, const char *text,
+                         s8 glyphMode, s8 sharedFlag, FrFontGlyph *previousGlyph) {
+    char glyphData[3];
+    s32 length;
+    s32 position = 0;
+    s32 glyphLength;
+    FrFontGlyph *chain = previousGlyph;
 
-extern s32 func_0019F280();
+    length = strlen(text);
+    if (sharedFlag == 0) {
+        frFontAddSharedGlyphFlags(1);
+    }
+    frFontClearFlagBits(2);
+
+    if (length > 0) {
+        do {
+            const char *character = text + position;
+            TextStyleNode *glyph;
+
+            if (character[0] >= 0) {
+                glyphData[0] = character[0];
+                glyphLength = 1;
+                glyphData[1] = 0;
+            } else {
+                glyphData[0] = character[0];
+                glyphData[1] = character[1];
+                glyphLength = 2;
+                glyphData[2] = 0;
+            }
+            glyph = (TextStyleNode *)frFontAppendGlyphFromData(glyphData, glyphMode, 0, 0, 0);
+            frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
+            frFontSetChildColors(glyph, colors);
+            frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, 3);
+            chain = frFontLinkGlyphAfterPrevious(chain, (FrFontGlyph *)glyph);
+            if (position == 0) {
+                glyph->x = x;
+            }
+            position += glyphLength;
+            glyph->y = y;
+        } while (position < length);
+    }
+
+    frFontAddSharedGlyphFlags(2);
+    if (sharedFlag == 0) {
+        frFontClearFlagBits(1);
+    }
+    return chain;
+}
+
+extern FrFontGlyph *func_0019F280();
 
 
 s32 frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
@@ -383,7 +437,7 @@ s32 frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
     s32 text;
     s32 parent;
 {
-    s32 handle = func_0019F280(x, y, depth, colors, text, 1, 0, parent);
+    s32 handle = (s32)func_0019F280(x, y, depth, colors, (const char *)text, 1, 0, (FrFontGlyph *)parent);
     frFontSetFlagAndMeasureGlyphs(handle, 3);
     return handle;
 }
@@ -395,75 +449,57 @@ void func_0019F448(void) {
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F460);
 
 u32 func_0019F5E8(s32 x, s32 y, s32 depth, u32 colors, char *text, s32 previousGlyph) {
-    u32 glyph;
-    extern u32 appendGlyphForConstruction(void *, s8, s8, s8, s32) __asm__("frFontAppendGlyphFromData");
-    extern u32 createGlyphForConstruction(char *, s32, s32, s32, s32) __asm__("func_0019CE78");
-    extern void addGlyphFlagsForConstruction(s32) __asm__("frFontAddSharedGlyphFlags");
-    extern void setGlyphContextForConstruction(u32, u32, u32) __asm__("frFontSetContextPair");
-    extern void setGlyphShiftForConstruction(u32, u32) __asm__("frFontStoreShiftedContextValue");
-    extern void setGlyphColorsForConstruction(u32, u32) __asm__("frFontSetChildColors");
+    FrFontGlyph *glyph;
 
-    glyph = appendGlyphForConstruction(D_00436580, 0, 0, 0, previousGlyph);
+    glyph = (FrFontGlyph *)frFontAppendGlyphFromData(D_00436580, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
-    glyph = createGlyphForConstruction(text, 2, 0, 0, glyph);
-    frFontSetFlagAndMeasureGlyphs(glyph, -1);
-    addGlyphFlagsForConstruction(2);
-    setGlyphContextForConstruction(glyph, x, y);
-    setGlyphShiftForConstruction(glyph, depth << 4);
-    setGlyphColorsForConstruction(glyph, colors);
-    return glyph;
+    glyph = func_0019CE78(text, 2, 0, 0, glyph);
+    frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, -1);
+    frFontAddSharedGlyphFlags(2);
+    frFontSetContextPair((FrFontCtx *)glyph, x, y);
+    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
+    frFontSetChildColors((TextStyleNode *)glyph, colors);
+    return (u32)glyph;
 }
 
 u32 func_0019F6C8(s32 x, s32 y, s32 depth, u32 colors, char *text, s32 previousGlyph) {
-    u32 glyph;
-    extern u32 appendGlyphForConstruction(void *, s8, s8, s8, s32) __asm__("frFontAppendGlyphFromData");
-    extern u32 createGlyphForConstruction(char *, s32, s32, s32, s32) __asm__("func_0019CE78");
-    extern void addGlyphFlagsForConstruction(s32) __asm__("frFontAddSharedGlyphFlags");
-    extern void setGlyphContextForConstruction(u32, u32, u32) __asm__("frFontSetContextPair");
-    extern void setGlyphShiftForConstruction(u32, u32) __asm__("frFontStoreShiftedContextValue");
-    extern void setGlyphColorsForConstruction(u32, u32) __asm__("frFontSetChildColors");
+    FrFontGlyph *glyph;
 
-    glyph = appendGlyphForConstruction(D_00436580, 0, 0, 0, previousGlyph);
+    glyph = (FrFontGlyph *)frFontAppendGlyphFromData(D_00436580, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
-    glyph = createGlyphForConstruction(text, 3, 0, 0, glyph);
-    addGlyphFlagsForConstruction(2);
-    setGlyphContextForConstruction(glyph, x, y);
-    setGlyphShiftForConstruction(glyph, depth << 4);
-    setGlyphColorsForConstruction(glyph, colors);
-    return glyph;
+    glyph = func_0019CE78(text, 3, 0, 0, glyph);
+    frFontAddSharedGlyphFlags(2);
+    frFontSetContextPair((FrFontCtx *)glyph, x, y);
+    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
+    frFontSetChildColors((TextStyleNode *)glyph, colors);
+    return (u32)glyph;
 }
 
 u32 func_0019F798(s32 x, s32 y, s32 depth, u32 colors, char *text, s32 previousGlyph) {
-    u32 glyph;
-    extern u32 appendGlyphForConstruction(void *, s8, s8, s8, s32) __asm__("frFontAppendGlyphFromData");
-    extern u32 createGlyphForConstruction(char *, s32, s32, s32, s32) __asm__("func_0019CE78");
-    extern void addGlyphFlagsForConstruction(s32) __asm__("frFontAddSharedGlyphFlags");
-    extern void setGlyphContextForConstruction(u32, u32, u32) __asm__("frFontSetContextPair");
-    extern void setGlyphShiftForConstruction(u32, u32) __asm__("frFontStoreShiftedContextValue");
-    extern void setGlyphColorsForConstruction(u32, u32) __asm__("frFontSetChildColors");
+    FrFontGlyph *glyph;
 
-    glyph = appendGlyphForConstruction(D_00436580, 0, 0, 0, previousGlyph);
+    glyph = (FrFontGlyph *)frFontAppendGlyphFromData(D_00436580, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
-    glyph = createGlyphForConstruction(text, 3, 0, 0, glyph);
-    frFontSetFlagAndMeasureGlyphs(glyph, -2);
-    addGlyphFlagsForConstruction(2);
-    setGlyphContextForConstruction(glyph, x, y);
-    setGlyphShiftForConstruction(glyph, depth << 4);
-    setGlyphColorsForConstruction(glyph, colors);
-    return glyph;
+    glyph = func_0019CE78(text, 3, 0, 0, glyph);
+    frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, -2);
+    frFontAddSharedGlyphFlags(2);
+    frFontSetContextPair((FrFontCtx *)glyph, x, y);
+    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
+    frFontSetChildColors((TextStyleNode *)glyph, colors);
+    return (u32)glyph;
 }
 
 /* The sequel uses the negative flag variant on its alternate 12x16 glyph. */
-void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
-                                    u64 glyphSource, u64 parent) {
-    u64 glyph;
+void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
+                                    void *glyphSource, FrFontGlyph *parent) {
+    FrFontGlyph *glyph;
 
     glyph = func_0019CE78(glyphSource, 0, 0, 0, 0);
     frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
-    frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffd);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, -3);
+    frFontSetContextPair((FrFontCtx *)glyph, x, y);
+    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
+    frFontSetChildColors((TextStyleNode *)glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
 
