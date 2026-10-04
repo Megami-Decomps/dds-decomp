@@ -101,6 +101,7 @@ extern u32 btlGetSpecialModeEffectValue(void);
 extern s32 btlGetRuntime(void);
 extern void btlBossDebugPrintf(s32, ...);
 extern s32 btlFindUnitByActor(s32);
+extern void func_001A1990(void *, s32);
 
 extern void func_001D6300(void *, void *);
 
@@ -3736,7 +3737,77 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5D98);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5DB8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00209C90);
+s32 func_00209C90(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlTask *candidates[16];
+    BtlTask *task;
+    BtlUnit *unit;
+    u16 *formCount;
+    u16 *stats;
+    u16 mode;
+    s32 count;
+
+    if (state->mode == 1) {
+        count = 0;
+        for (task = state->tasks; task != 0; task = task->next) {
+            if (task->flags & 8) {
+                unit = task->unit;
+                if (unit->flags & 1) {
+                    if (unit->flags & 0x200) {
+                        if ((unit->conditionFlags & 0x7FFF) == 0x2000) {
+                            candidates[count++] = task;
+                        }
+                    }
+                }
+            }
+        }
+        if (count == 0) {
+            return -1;
+        }
+        task = candidates[effMiscRandMod(0, count)];
+        unit = task->unit;
+        fldAppendSceneGroupHandle(task);
+        task->result = 2;
+        task->arg = 0xD2;
+        btlAppendIndexListEntry(task->targetList, (s32)unit);
+    } else {
+        if (state->battleFlags & 0x800) {
+            return -1;
+        }
+        for (unit = state->units; unit != 0; unit = unit->next) {
+            u32 flags = unit->flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    mode = unit->mode;
+                    if ((u16)(mode - 0x119) < 2) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (unit != 0) {
+            formCount = (u16 *)state->effect;
+            if (mode == 0x11A) {
+                if (*formCount >= 3) {
+                    return -1;
+                }
+            }
+            if (unit->hp >= 2) {
+                return -1;
+            }
+            stats = &unit->statBits;
+            func_001A1990(stats, mode == 0x119 ? 0x11A : 0x119);
+            *stats |= 0x23;
+            (*formCount)++;
+            task = (BtlTask *)btlFindUnitByActor((s32)unit);
+            fldAppendSceneGroupHandle(task);
+            task->result = 0x11;
+            btlAppendIndexListEntry(task->targetList, (s32)task->unit);
+            btlBossDebugPrintf((s32)"btl:HARI1 form = %d\n", *formCount);
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209EB8);
 
