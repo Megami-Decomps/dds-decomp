@@ -7,6 +7,10 @@
 #define EVT_DISPATCH_OPERATION_PRIMARY 1
 #define EVT_DISPATCH_OPERATION_SECONDARY 2
 
+#define MNU_SCENE_FLAG_PAIR_COUNT 4
+#define MNU_PARTY_FLAG_PAIR_COUNT 16
+#define MNU_FLAG_SNAPSHOT_BYTES 0x140
+
 extern void func_0025DF68(s32, s32);
 
 extern void func_00261760(s32);
@@ -110,21 +114,21 @@ extern s16 mnuShopHasPendingFlag();
 
 /* Prepare the active menu state and copy the selection into its window. */
 s32 evtInitializeActiveMenuState(void) {
-    s32 state = kwlnTaskGetUserValue();
-    s32 window;
-    s16 pending;
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 windowAddress;
+    s16 pendingSelection;
 
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 2);
-    if (((EvtDispatchState *)state)->menuLink == 0) {
-        ((EvtDispatchState *)state)->initialSelection = func_00244658(state);
-        func_002444D0(state);
+    if (((EvtDispatchState *)stateAddress)->menuLink == 0) {
+        ((EvtDispatchState *)stateAddress)->initialSelection = func_00244658(stateAddress);
+        func_002444D0(stateAddress);
     }
-    window = ((EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)state)->menuLink)->target)->window;
-    pending = mnuShopHasPendingFlag(state);
-    ((EvtDispatchState *)state)->savedValue = *(s32 *)(datGameState + 0x3C);
-    *(s16 *)(window + 0xE) = pending;
-    ((EvtDispatchState *)state)->pendingSelection = pending;
+    windowAddress = ((EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target)->window;
+    pendingSelection = mnuShopHasPendingFlag(stateAddress);
+    ((EvtDispatchState *)stateAddress)->savedValue = *(s32 *)(datGameState + 0x3C);
+    *(s16 *)(windowAddress + 0xE) = pendingSelection;
+    ((EvtDispatchState *)stateAddress)->pendingSelection = pendingSelection;
     return 1;
 }
 
@@ -162,30 +166,30 @@ void evtInstallStateTableB(EvtDispatchState *state) {
 }
 
 s32 func_00246160(void) {
-    EvtDispatchState *context = (EvtDispatchState *)kwlnTaskGetUserValue();
+    EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
 
-    if (context->action == 1) {
-        func_002453C8(context);
+    if (state->action == 1) {
+        func_002453C8(state);
     }
     return 1;
 }
 
 /* Map actions five and seven to their menu phases, then reset substate. */
 s32 evtSelectStateAction(void) {
-    s32 state = kwlnTaskGetUserValue();
-    s32 action = ((EvtDispatchState *)state)->action;
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 action = ((EvtDispatchState *)stateAddress)->action;
 
     if (action == 5) {
-        mnuSetCommandPhase(state, 3);
+        mnuSetCommandPhase(stateAddress, 3);
     } else if (action == 7) {
-        s32 task;
+        s32 linkedTaskAddress;
 
-        mnuSetCommandPhase(state, 9);
-        task = ((EvtDispatchLink *)((EvtDispatchState *)state)->taskLink)->target;
-        ((EvtDispatchTask *)task)->callback = (s32)func_0025F138;
-        func_00260570(task, 10);
+        mnuSetCommandPhase(stateAddress, 9);
+        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
+        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025F138;
+        func_00260570(linkedTaskAddress, 10);
     }
-    ((EvtDispatchState *)state)->substate = 0;
+    ((EvtDispatchState *)stateAddress)->substate = 0;
     return 1;
 }
 
@@ -213,29 +217,29 @@ void evtInstallStateTableC(EvtDispatchState *state) {
 }
 
 s32 func_00246538(void) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue();
+    s32 *stateWords = (s32 *)kwlnTaskGetUserValue();
 
-    if (state[43] == 1) {
-        func_002457E8(state);
+    if (stateWords[43] == 1) {
+        func_002457E8(stateWords);
     }
     return 1;
 }
 
 s32 evtSelectStateActionB(void) {
-    s32 state = kwlnTaskGetUserValue();
-    s32 action = ((EvtDispatchState *)state)->action;
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 action = ((EvtDispatchState *)stateAddress)->action;
 
     if (action == 5) {
-        mnuSetCommandPhase(state, 3);
+        mnuSetCommandPhase(stateAddress, 3);
     } else if (action == 7) {
-        s32 task;
+        s32 linkedTaskAddress;
 
-        mnuSetCommandPhase(state, 9);
-        task = ((EvtDispatchLink *)((EvtDispatchState *)state)->taskLink)->target;
-        ((EvtDispatchTask *)task)->callback = (s32)func_0025F138;
-        func_00260570(task, 10);
+        mnuSetCommandPhase(stateAddress, 9);
+        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
+        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025F138;
+        func_00260570(linkedTaskAddress, 10);
     }
-    ((EvtDispatchState *)state)->substate = 0;
+    ((EvtDispatchState *)stateAddress)->substate = 0;
     return 1;
 }
 
@@ -263,29 +267,29 @@ void evtInstallStateTableD(EvtDispatchState *state) {
 }
 
 s32 evtEnableStateFlag(void) {
-    s32 state = kwlnTaskGetUserValue();
+    s32 stateAddress = kwlnTaskGetUserValue();
 
-    if ((((EvtDispatchState *)state)->action == 1) && (func_00245A40(state) == 0)) {
-        ((EvtDispatchState *)state)->mode = 2;
+    if ((((EvtDispatchState *)stateAddress)->action == 1) && (func_00245A40(stateAddress) == 0)) {
+        ((EvtDispatchState *)stateAddress)->mode = 2;
     }
     return 1;
 }
 
 s32 evtSelectStateActionC(void) {
-    s32 state = kwlnTaskGetUserValue();
-    s32 action = ((EvtDispatchState *)state)->action;
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 action = ((EvtDispatchState *)stateAddress)->action;
 
     if (action == 5) {
-        mnuSetCommandPhase(state, 3);
+        mnuSetCommandPhase(stateAddress, 3);
     } else if (action == 7) {
-        s32 task;
+        s32 linkedTaskAddress;
 
-        mnuSetCommandPhase(state, 9);
-        task = ((EvtDispatchLink *)((EvtDispatchState *)state)->taskLink)->target;
-        ((EvtDispatchTask *)task)->callback = (s32)func_0025F138;
-        func_00260570(task, 10);
+        mnuSetCommandPhase(stateAddress, 9);
+        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
+        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025F138;
+        func_00260570(linkedTaskAddress, 10);
     }
-    ((EvtDispatchState *)state)->substate = 0;
+    ((EvtDispatchState *)stateAddress)->substate = 0;
     return 1;
 }
 
@@ -366,11 +370,11 @@ s32 evtSetupDispatchSyncD(s32 callbackContext) {
 }
 
 u32 evtResetStateProgressTimer(void) {
-    s32 state;
+    s32 stateAddress;
 
-    state = kwlnTaskGetUserValue();
-    ((EvtDispatchState *)state)->progressTicks = 0;
-    mnuSelectLastListNode(((EvtDispatchLink *)((EvtDispatchState *)state)->menuLink)->target);
+    stateAddress = kwlnTaskGetUserValue();
+    ((EvtDispatchState *)stateAddress)->progressTicks = 0;
+    mnuSelectLastListNode(((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target);
     return 1;
 }
 
@@ -417,16 +421,16 @@ s32 evtApplyBaseRateProgressStep(void) {
 }
 
 s32 evtAdvanceStateStage(void) {
-    s32 state = kwlnTaskGetUserValue();
+    s32 stateAddress = kwlnTaskGetUserValue();
 
-    if (((EvtDispatchState *)state)->action == 0xA) {
-        s32 task;
+    if (((EvtDispatchState *)stateAddress)->action == 0xA) {
+        s32 linkedTaskAddress;
 
-        ((EvtDispatchState *)state)->substate = 0xA;
-        mnuSetCommandPhase(state, 6);
-        task = ((EvtDispatchLink *)((EvtDispatchState *)state)->taskLink)->target;
-        ((EvtDispatchTask *)task)->callback = (s32)func_0025ECD0;
-        mnuStorePendingMenuCommandValue(task, 0);
+        ((EvtDispatchState *)stateAddress)->substate = 0xA;
+        mnuSetCommandPhase(stateAddress, 6);
+        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
+        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025ECD0;
+        mnuStorePendingMenuCommandValue(linkedTaskAddress, 0);
     }
     return 1;
 }
@@ -451,11 +455,11 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002472D8);
 
-void evtAccumulateStateScore(s32 state) {
-    s32 score = *(s32 *)(((EvtDispatchLink *)((EvtDispatchState *)state)->taskLink)->target + 0x1C) + 0x60;
+void evtAccumulateStateScore(s32 stateAddress) {
+    s32 entryValuesAddress = *(s32 *)(((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target + 0x1C) + 0x60;
 
-    if ((u32)(*(s32 *)(score + 4) - 0x60) < 0x20) {
-        *(s32 *)(datGameState + 0xA50) += *(s32 *)score * ((EvtDispatchState *)state)->scoreFactor;
+    if ((u32)(*(s32 *)(entryValuesAddress + 4) - 0x60) < 0x20) {
+        *(s32 *)(datGameState + 0xA50) += *(s32 *)entryValuesAddress * ((EvtDispatchState *)stateAddress)->scoreFactor;
     }
 }
 
@@ -693,41 +697,42 @@ extern FlagPair mnuPartyFlagEventEntries[];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 s32 mnuCreateFlagEntries(void) {
-    s32 handle = sdfAllocGeneralBlock(0x140);
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
-    u32 i;
+    s32 snapshotHandle = sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
+    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress(snapshotHandle);
+    u32 pairIndex;
 
-    for (i = 0; i < 4; i++) {
-        entries[i].firstFlag = mnuSceneFlagEventEntries[i].first;
-        entries[i].firstOn = mdlFlagTest(entries[i].firstFlag);
-        entries[i].secondFlag = mnuSceneFlagEventEntries[i].second;
-        entries[i].secondOn = mdlFlagTest(entries[i].secondFlag);
+    for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_PAIR_COUNT; pairIndex++) {
+        snapshot[pairIndex].firstFlag = mnuSceneFlagEventEntries[pairIndex].first;
+        snapshot[pairIndex].firstOn = mdlFlagTest(snapshot[pairIndex].firstFlag);
+        snapshot[pairIndex].secondFlag = mnuSceneFlagEventEntries[pairIndex].second;
+        snapshot[pairIndex].secondOn = mdlFlagTest(snapshot[pairIndex].secondFlag);
     }
-    for (i = 0; i < 16; i++) {
-        entries[4 + i].firstFlag = mnuPartyFlagEventEntries[i].first;
-        entries[4 + i].firstOn = mdlFlagTest(entries[4 + i].firstFlag);
-        entries[4 + i].secondFlag = mnuPartyFlagEventEntries[i].second;
-        entries[4 + i].secondOn = mdlFlagTest(entries[4 + i].secondFlag);
+    for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_PAIR_COUNT; pairIndex++) {
+        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstFlag = mnuPartyFlagEventEntries[pairIndex].first;
+        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstFlag);
+        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondFlag = mnuPartyFlagEventEntries[pairIndex].second;
+        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondFlag);
     }
-    return handle;
+    return snapshotHandle;
 }
 
 /* Restore only those flags that were enabled in the saved snapshot. */
-void mnuApplyFlagEntries(s32 handle) {
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
-    u32 i;
+void mnuApplyFlagEntries(s32 snapshotHandle) {
+    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress(snapshotHandle);
+    u32 pairIndex;
 
-    for (i = 0; i < 4; i++) {
-        if (entries[i].secondOn != 0) {
-            mdlFlagSet(entries[i].secondFlag);
+    /* Scene pairs restore only their second flag; party pairs restore both. */
+    for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_PAIR_COUNT; pairIndex++) {
+        if (snapshot[pairIndex].secondOn != 0) {
+            mdlFlagSet(snapshot[pairIndex].secondFlag);
         }
     }
-    for (i = 0; i < 16; i++) {
-        if (entries[4 + i].firstOn != 0) {
-            mdlFlagSet(entries[4 + i].firstFlag);
+    for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_PAIR_COUNT; pairIndex++) {
+        if (snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstOn != 0) {
+            mdlFlagSet(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstFlag);
         }
-        if (entries[4 + i].secondOn != 0) {
-            mdlFlagSet(entries[4 + i].secondFlag);
+        if (snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondOn != 0) {
+            mdlFlagSet(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondFlag);
         }
     }
 }
@@ -738,31 +743,33 @@ extern u32 effLoadIndexedResource(char *, s32, s32);
 extern void effResolveAndReleaseResource(u32);
 extern u32 effCreateResourceSlotSet(u32, s32, s32);
 
-void mnuLoadResourceHandles(u32 *work) {
-    s32 i;
+/* Keep the two loaded handles and their derived slot set in the menu work array. */
+void mnuLoadResourceHandles(u32 *menuWork) {
+    s32 resourceIndex;
 
-    for (i = 0; i < 2; i++) {
-        u32 resource = effLoadIndexedResource(D_003AF590, D_0036AC78[i], 1);
+    for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
+        u32 resourceHandle = effLoadIndexedResource(D_003AF590, D_0036AC78[resourceIndex], 1);
 
-        work[0x19 + i] = resource;
-        effResolveAndReleaseResource(resource);
+        menuWork[0x19 + resourceIndex] = resourceHandle;
+        effResolveAndReleaseResource(resourceHandle);
     }
-    work[0x1B] = effCreateResourceSlotSet(work[0x19], 7, 1);
+    menuWork[0x1B] = effCreateResourceSlotSet(menuWork[0x19], 7, 1);
 }
 
 extern void effDestroyResourceSlotSet(u32);
 extern void mnuReleaseEffectResource(u32);
 
-void mnuReleaseResourceHandles(u32 *work) {
-    s32 i;
+/* Destroy the stored slot sets, then release and clear any optional effect handle. */
+void mnuReleaseResourceHandles(u32 *menuWork) {
+    s32 resourceIndex;
 
-    for (i = 0; i < 2; i++) {
-        effDestroyResourceSlotSet(work[0x19 + i]);
+    for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
+        effDestroyResourceSlotSet(menuWork[0x19 + resourceIndex]);
     }
-    effDestroyResourceSlotSet(work[0x1B]);
-    if (work[0x56] != 0) {
-        mnuReleaseEffectResource(work[0x56]);
-        work[0x56] = 0;
+    effDestroyResourceSlotSet(menuWork[0x1B]);
+    if (menuWork[0x56] != 0) {
+        mnuReleaseEffectResource(menuWork[0x56]);
+        menuWork[0x56] = 0;
     }
 }
 
