@@ -3282,7 +3282,65 @@ void btlReleaseCmsleffPanelWork(s64 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B4308);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B47A8);
+typedef struct BtlPanelTransitionWork {
+    u8 pad00[0x10];
+    s32 width;
+    u8 pad14[0xC];
+    s16 fadeLevels[4];
+    BattleSelectionPosition initial[2];
+    s8 phase;
+    u8 pad39[3];
+    BattleSelectionPosition current[2];
+} BtlPanelTransitionWork;
+
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_001B47A8(BtlPanelTransitionWork *work) {
+    s16 *fade;
+    s32 i;
+
+    for (i = 3, fade = work->fadeLevels; i >= 0; i--, fade++) {
+        *fade += 0x20;
+        *fade = *fade <= 0 ? 0 : *fade > 0x80 ? 0x80 : *fade;
+    }
+    switch (work->phase) {
+    case 0:
+        work->current[0].x = work->initial[0].x + 0x10;
+        work->current[0].y = work->initial[0].y;
+        work->current[1].x = work->initial[1].x - 0x10;
+        work->current[1].y = work->initial[1].y;
+        work->phase++;
+        break;
+    case 1:
+        work->current[0].x -= 2;
+        work->current[0].x =
+            work->current[0].x <= work->width - work->width / 2 + 0x105 ? work->width - work->width / 2 + 0x105 :
+            work->width - work->width / 2 + 0x115 <= work->current[0].x ? work->width - work->width / 2 + 0x115 :
+            work->current[0].x;
+        work->current[1].x += 2;
+        work->current[1].x =
+            work->current[1].x <= 0x82 - work->width / 2 ? 0x82 - work->width / 2 :
+            0x92 - work->width / 2 <= work->current[1].x ? 0x92 - work->width / 2 :
+            work->current[1].x;
+        break;
+    }
+    if (work->fadeLevels[1] < 0x80) {
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        evtSubmitDefaultDepthGradientRect(0x100 - work->width / 2,
+            work->current[0].y + 0x1A, work->current[0].x - 0x92, 2,
+            (work->fadeLevels[1] << 23) | 0x808080, 0,
+            (work->fadeLevels[1] << 23) | 0x808080, 0);
+        evtSubmitDefaultDepthGradientRect(work->current[1].x,
+            work->current[1].y + 2, work->width / 2 - work->current[1].x + 0x100, 2,
+            0, (work->fadeLevels[1] << 23) | 0x808080,
+            0, (work->fadeLevels[1] << 23) | 0x808080);
+    }
+}
 
 void btlFreeRegisteredTaskData(s64 task) {
     btlGetRuntime();
