@@ -744,7 +744,7 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
     }
 }
 
-extern void func_001E22D8(u8 *, s32, s32, f32);
+extern void func_001E22D8(u8 *, u32, s32, f32);
 
 /* Refresh each unit's transform/effect state, then invoke the runtime callback. */
 void btlUpdateUnitActors(void) {

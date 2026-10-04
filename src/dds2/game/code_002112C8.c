@@ -4019,7 +4019,7 @@ typedef struct BattleActionByteState {
 
 
 /* Handle returned by btlFindUnitByActor; these fields drive its action task. */
-extern void func_001E22D8(ActionUnit *, s32, s32, f32);
+extern void func_001E22D8(u8 *, u32, s32, f32);
 /* When the action-state byte changes, restore the marked unit's saved motion. */
 void btlRestoreMarkedUnitMotionOnStateChange(void) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
@@ -4044,7 +4044,7 @@ void btlRestoreMarkedUnitMotionOnStateChange(void) {
                 func_001E2758(unit);
                 unit->motionStateA = 0;
                 unit->motionStateB = 0;
-                func_001E22D8(unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
+                func_001E22D8((u8 *)unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
             }
         }
     }
@@ -4275,7 +4275,7 @@ void func_00220368(void) {
                 func_001E2758(unit);
                 unit->motionStateA = 0;
                 unit->motionStateB = 0;
-                func_001E22D8(unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
+                func_001E22D8((u8 *)unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
             }
         }
     }

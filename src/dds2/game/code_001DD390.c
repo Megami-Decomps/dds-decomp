@@ -124,7 +124,8 @@ typedef struct BtlWork {
     u8 pad5C4[0x10];
     s32 (*hook5D4)(BtlUnit *, s32, s32); /* Selects the requested motion. */
     s32 (*hook5D8)(BtlUnit *);
-    u8 pad5DC[0x14];
+    s32 (*hook5DC)(BtlUnit *, s32); /* Keeps the previous motion range. */
+    u8 pad5E0[0x10];
     s32 (*hook5F0)(BtlUnit *, s32);
     u8 pad5F4[0x24];
     s32 (*hook618)(BtlUnit *);
@@ -154,9 +155,9 @@ typedef struct BtlWork {
     s32 (*hook6E4)(BtlUnit *);
     s32 (*hook6E8)(BtlUnit *);
     u8 pad6EC[4];
-    void (*hook6F0)(BtlUnit *, s32, f32, s32, s32, s32);
+    void (*hook6F0)(BtlUnit *, s32, s32, s32, s32, f32);
     void (*hook6F4)(BtlUnit *, s32, f32); /* Replaces the event motion update. */
-    u8 pad6F8[4];
+    void (*hook6F8)(BtlUnit *, s32, s32); /* Replaces the event range update. */
     s32 (*hook6FC)(BtlUnit *, s32, s32); /* Overrides the transition mode. */
     u8 pad700[0x10];
     s32 (*hook710)(BtlUnit *, s32);
@@ -165,18 +166,26 @@ typedef struct BtlWork {
     u8 pad720[4];
     s32 unk724;
 } BtlWork;
-/* Per-model effect node records begin at +0x2C, with a 0x14-byte stride. */
+/* Motion selection and approach tasks share these 0x14-byte resource nodes. */
 typedef struct BtlEffectNode {
     s16 triggerKind;
     u8 pad02[2];
     s16 rateKind;
     u8 pad06[2];
     f32 scale;
-    u8 pad0C[8];
+    f32 reachOffset;
+    u8 pad10[2];
+    u16 frameCount;
 } BtlEffectNode;
 
 typedef struct BtlEffectResource {
-    u8 pad00[0x2C];
+    s128 vec0;
+    f32 f10;
+    f32 f14;
+    f32 f18;
+    f32 f1C;
+    f32 f20;
+    u8 pad24[8];
     BtlEffectNode nodes[1];
 } BtlEffectResource;
 
@@ -317,14 +326,6 @@ typedef struct BtlFxSrcA {
     f32 f14;
 } BtlFxSrcA;
 
-typedef struct BtlFxSrcB {
-    s128 vec0;
-    f32 f10;
-    f32 f14;
-    f32 f18;
-    f32 f1C;
-    f32 f20;
-} BtlFxSrcB;
 
 typedef struct FxTask {
     u8 pad0[0x10];
@@ -776,7 +777,12 @@ extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern void btlApplyUnitModelScaledValue(u8 *);
 extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *);
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
-extern void func_001E22D8(u8 *, s32, s32, f32);
+extern void func_001E22D8(u8 *, u32, s32, f32);
+extern s32 btlGetSlotRateKind(u8 *, s32);
+extern SoundTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
+extern void evtPrepareUnitMotionState(BtlUnitExt *, s32, s32, s32, s32);
+extern void evtStoreUnitMotionShortParameters(BtlUnitExt *, s32, s32);
+extern s32 sdfMotionSampleAtFrame(BtlUnitData *, f32);
 extern void func_001E2758(BtlUnit *);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
@@ -2119,7 +2125,7 @@ extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
 
 void btlInitializeEffectVectorsFromSourceRecords(BtlFx *fx, s32 kind, s32 index) {
     BtlFxSrcA *alt = btlSelectSharedOrIndexedTransformParameters(kind, index);
-    BtlFxSrcB *base = (BtlFxSrcB *)btlGetSideIndexedActorStatusTable(kind, index);
+    BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
     if (alt->fC == 0.0f) {
         PCP_COPY_VECTOR(&fx->vec90, base);
         fx->fB4 = base->f18;
@@ -2268,7 +2274,154 @@ u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417940);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E22D8);
+void func_001E22D8(u8 *object, u32 index, s32 mode, f32 rate) {
+    BtlUnit *unit = (BtlUnit *)object;
+    BtlWork *work;
+    BtlEffectResource *table;
+    SoundTask *task;
+    BtlUnitInfo *model;
+    s32 selected;
+    s32 node;
+    s32 start;
+    s32 end;
+    u16 frameCount;
+    f32 scale;
+    u32 color;
+    s32 (*chooseMotion)(BtlUnit *, s32, s32);
+    s32 (*keepRange)(BtlUnit *, s32);
+    s32 (*chooseMode)(BtlUnit *, s32, s32);
+
+    if ((unit->flags & 2) == 0) {
+        return;
+    }
+    if (unit->updateFlags & 1) {
+        if (unit->flags & 0x2000) {
+            switch (index) {
+            case 1:
+            case 11:
+            case 18:
+                task = btlCreateStiffenDamageShakeTask(unit, 8.0f);
+                task->startDelay = 1;
+                task->owner = 0;
+                btlStartTask(task);
+                break;
+            }
+        }
+        return;
+    }
+    work = (BtlWork *)btlGetRuntime();
+    if (unit->updateFlags & 2) {
+        color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
+        evtSetUnitRgbTransition(unit->ext, 0, color);
+        evtSetUnitAlphaTransition((u32)unit->ext, 0, color);
+        unit->overlayColor = color;
+        unit->updateFlags &= ~4;
+        unit->updateFlags &= ~2;
+    }
+    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind,
+                                                                unit->resourceIndex);
+    if (table->nodes[index].rateKind == 2) {
+        unit->updateFlags |= 6;
+    }
+    chooseMotion = work->hook5D4;
+    if (chooseMotion != 0) {
+        selected = chooseMotion(unit, index, 0);
+        if (selected == -1) {
+            return;
+        }
+        if (index != selected) {
+            scale = 1.0f;
+            if (table->nodes[index].scale > 0.0f) {
+                scale = rate / table->nodes[index].scale;
+            }
+            index = selected;
+            mode = btlGetSlotRateKind(object, index);
+            rate = scale * table->nodes[index].scale;
+        }
+    }
+    if (unit->unkEC == -1) {
+        start = 0;
+        end = 0;
+    } else {
+        switch (index) {
+        case 11:
+            mode = 2;
+        case 0: case 2: case 9: case 10:
+            start = unit->unkF8;
+            end = unit->unkFA;
+            break;
+        case 1: case 18:
+            start = 0;
+            end = 1;
+            break;
+        case 3: case 4: case 5: case 6: case 7: case 8:
+        case 12: case 16: case 17: case 19: case 20: case 21:
+        case 22: case 23: case 24:
+            node = mdlGetNodeField2C((s32)unit->ext->info, 0);
+            switch (node) {
+            case 0: case 2: case 9: case 10: case 11:
+                start = 0;
+                end = 5;
+                break;
+            default:
+                start = 0;
+                end = 0;
+                break;
+            }
+            break;
+        case 15:
+            start = 0;
+            end = 0;
+            break;
+        default:
+            start = 0;
+            end = 5;
+            break;
+        }
+    }
+    keepRange = work->hook5DC;
+    if (keepRange != 0 && keepRange(unit, index) != 0) {
+        start = unit->unkF8;
+        end = unit->unkFA;
+    }
+    if (mode & 0x100) {
+        end = 8;
+        mode &= ~0x100;
+    }
+    chooseMode = work->hook6FC;
+    if (chooseMode != 0) {
+        mode = chooseMode(unit, index, mode);
+    }
+    unit->fF4 = rate;
+    unit->unkEC = index;
+    unit->effectState = mode;
+    rate = rate * (30.0f / work->unk4C4);
+    rate *= work->unk4C8;
+    if (work->hook6F0 != 0) {
+        work->hook6F0(unit, index, start, end, mode, rate);
+    } else {
+        evtPrepareUnitMotionState(unit->ext, index, start, end, mode);
+        model = unit->ext->info;
+        model->data->f20 = rate;
+        if (end == 0) {
+            mdlAddEntryFlagged(model, 0, index);
+            sdfMotionSampleAtFrame(unit->ext->info->data, 0.0f);
+        }
+    }
+    unit->unkF8 = 0;
+    frameCount = table->nodes[index].frameCount;
+    unit->unkFA = frameCount;
+    if (mode != 0 && mode != 3) {
+        return;
+    }
+    if (work->hook6F8 != 0) {
+        work->hook6F8(unit, 0, (s16)frameCount);
+    } else {
+        evtStoreUnitMotionShortParameters(unit->ext, 0, (s16)frameCount);
+    }
+    unit->unkF8 = 0;
+    unit->unkFA = table->nodes[unit->effectIndex].frameCount;
+}
 
 void func_001E2758(BtlUnit *unit) {
     s32 entryFlags;
@@ -2398,7 +2551,7 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern void func_001E22D8(u8 *, s32, s32, f32);
+extern void func_001E22D8(u8 *, u32, s32, f32);
 
 
 void btlApplyScaledUnitEffectParameter(u8 *unit, s32 index, s32 option, f32 scale) {
@@ -2475,9 +2628,9 @@ f32 btlGetUnitModelValue1C(BtlUnit *unit) {
     return value;
 }
 
-void btlAdvanceUnitModelFrame(BtlUnit *unit) {
+void btlAdvanceUnitModelFrame(BtlUnit *unit, f32 frame) {
     if ((unit->flags & 2) != 0) {
-        sdfMotionSampleAtFrame((u32)unit->ext->info->data);
+        sdfMotionSampleAtFrame(unit->ext->info->data, frame);
         return;
     }
 }
@@ -2489,9 +2642,6 @@ u16 btlGetUnitModelFrameCount(BtlUnit *unit) {
     return unit->ext->info->data->s2E;
 }
 
-/* This unit preserves the retail caller's integer view of the final $v0
- * scratch value. The motion routine itself has no semantic return contract. */
-extern s32 sdfMotionSampleAtFrame(BtlUnitData *, f32);
 
 void btlSeekUnitModelFrameZero(BtlUnit *unit) {
     if (unit->flags & 2) {
@@ -2862,9 +3012,9 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
     }
     if (work->hook6F0 != 0) {
         if (unit->effectIndex != 0xB) {
-            work->hook6F0(unit, unit->effectIndex, 1.0f, 0, 0, 1);
+            work->hook6F0(unit, unit->effectIndex, 0, 0, 1, 1.0f);
         } else {
-            work->hook6F0(unit, unit->effectIndex, 1.0f, 0, 0, 2);
+            work->hook6F0(unit, unit->effectIndex, 0, 0, 2, 1.0f);
         }
     } else {
         if (unit->effectIndex != 0xB) {
@@ -2946,18 +3096,6 @@ SoundTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-/* Each resource row is 0x14 bytes; the reach offset sits 0x0C into it. */
-typedef struct BtlApproachRecord {
-    u8 pad00[0xC];
-    f32 reachOffset;
-    u8 pad10[4];
-} BtlApproachRecord;
-
-typedef struct BtlApproachTable {
-    u8 pad00[0x2C];
-    BtlApproachRecord records[1];
-} BtlApproachTable;
-
 typedef struct BtlApproachTaskArgs {
     BtlUnit *unit;
     BtlUnit *target;
@@ -2979,8 +3117,8 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     s128 toPos;
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
-        BtlApproachTable *table = (BtlApproachTable *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
-        args->offset = table->records[unit->unkEC].reachOffset * unit->scale;
+        BtlEffectResource *table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        args->offset = table->nodes[unit->unkEC].reachOffset * unit->scale;
     }
     reach = args->offset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
