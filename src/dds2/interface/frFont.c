@@ -80,6 +80,12 @@ extern FrFontGlyph *D_004528B4[];
 
 extern s32 kwlnGetDrawBufferIndex(void);
 
+extern s32 func_0019BA00(s32 x, s32 y, u8 width, u8 halfHeight, u8 style,
+                         s32 flags, s32 color, s32 enabled, s32 sourceY,
+                         void *table, s32 drawFlags);
+extern u8 D_00452880[];
+extern s32 D_0043656C;
+
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
 
 /* Live font-counter view at frFontWork + 0x144; preserve its word types. */
@@ -828,7 +834,101 @@ void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
     func_0019D550(glyph, mode, frFontSharedRenderFlags);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019D550);
+/* Draw every child glyph, advance each parent chain, and report its measured
+ * width only while all control/fade conditions remain ready. DDS2 additionally
+ * suppresses one result per positive draw-delay count. */
+s32 func_0019D550(FrFontGlyph *glyph, s8 mode, u32 flags) {
+    FrFontGlyph *child;
+    s32 ready = 1;
+    s32 enabled = 1;
+    s32 result = 0;
+    s32 totalAdvance = 0;
+    s32 titleSoundBusy;
+    u8 *table;
+
+    if (glyph != NULL) {
+        glyph = glyph->chainHead;
+        if (glyph != NULL) {
+            do {
+                s32 x = glyph->x;
+                s32 y = glyph->y;
+                s8 spacing = glyph->u0.b.b1;
+
+                child = glyph->firstChild;
+                if (child != NULL) {
+                    table = D_00452880;
+                    do {
+                        s32 xOffset = mode != 0 ? 0 :
+                            func_0019D288(glyph, child, 0x1C, (u8)glyph->u0.b.b0);
+                        u32 glyphState;
+                        if (child->unk20 == NULL) {
+                            if ((u16)child->u0.h < 0x80) {
+                                enabled = 1;
+                            }
+                            func_0019BA00(x + child->x + xOffset, y + child->y,
+                                         child->unk18.b[0], child->unk18.b[1] >> 1,
+                                         child->u14.b[0], child->u10.word,
+                                         glyph->u14.w, enabled,
+                                         child->firstChild->y + 4,
+                                         table, flags);
+                        } else {
+                            func_0019BA00(x + child->x + xOffset, y + child->y,
+                                         child->unk18.b[0], child->unk18.b[1] >> 1,
+                                         child->u14.b[0], child->u10.word,
+                                         glyph->u14.w, enabled,
+                                         child->unk20->y + 4,
+                                         table, flags);
+                        }
+                        glyphState = child->u10.byte[0];
+                        if (glyphState != 0) {
+                            child->unk2++;
+                        }
+                        if (glyphState < 0x80) {
+                            ready = 0;
+                        }
+                        x += (child->advance + spacing) << 4;
+                        child = child->next;
+                    } while (child != NULL);
+                }
+
+                if (glyph->next == NULL && glyph->unk40 == 0) {
+                    switch (glyph->unk30) {
+                    case 0xF214:
+                        if (ready != 0 && glyph->unk3C > 0) {
+                            glyph->unk3C--;
+                            ready = 0;
+                        }
+                        break;
+                    case 0xF215:
+                        if (glyph->unk3C != 0xFFFF) {
+                            if (glyph->unk3C > 0) {
+                                glyph->unk3C--;
+                                ready = 0;
+                            }
+                        } else {
+                            titleSoundBusy = mnuQueryTitleSoundBusy();
+                            if (titleSoundBusy != 0) {
+                                ready = 0;
+                            }
+                        }
+                        break;
+                    }
+                }
+                totalAdvance += glyph->unk18.w;
+                glyph = glyph->next;
+            } while (glyph != NULL);
+        }
+        if (D_0043656C > 0) {
+            D_0043656C--;
+            return 0;
+        }
+        result = totalAdvance;
+        if (ready == 0) {
+            result = 0;
+        }
+    }
+    return result;
+}
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
@@ -1156,4 +1256,3 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_00436570);
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436578);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436580);
-
