@@ -275,7 +275,7 @@ extern s32 D_003BC7F0;
 typedef struct LoadCtx374A0 {
     u8 unk0[4]; /* 0x00 */
     s32 unk4;   /* 0x04 */
-    u8 unk8[4]; /* 0x08 */
+    s32 unk8;   /* 0x08 */
     s32 unkC;   /* 0x0C */
     s8 unk10;   /* 0x10 */
     u8 pad11[3]; /* 0x11 */
@@ -306,6 +306,11 @@ extern void func_002966D8(s32 object);
 
 extern void *fileResetSelection(void);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
+
+extern s32 D_003BC818;
+extern s32 D_003BC820;
+extern void fileSetMenuValueAndInitializeFlags(u32 value);
+extern void fileLoadSetMode(s8 mode);
 
 extern void *fileBeginSlotReset(void);
 
@@ -630,8 +635,8 @@ void fileReloadSaveBuffer(void) {
     *(s32 *)(datGameState + 0x30) = saved;
 }
 
-u8 fileIsLoadedAndConditionTrue(s32 loaded) {
-    return loaded != 0 && D_003BC7FC == 1;
+u8 fileIsLoadedAndConditionTrue(s32 condition) {
+    return condition != 0 && D_003BC7FC == 1;
 }
 
 u8 fileIsLoadedWithActiveFlow(s32 loaded) {
@@ -1171,13 +1176,12 @@ void *fileScanSlotStates(void) {
     return fileSlotBrowserUpdate;
 }
 
-void fileResolveAbortSlotFlow(void) {
+void *fileResolveAbortSlotFlow(void) {
     if (D_003BC848 == 1 && kwlnTaskGetTaskByName(D_003B2658) == NULL) {
-        mcdEnterSelectedFileFlow();
-    } else {
-        fileSetMenuFlowState(0);
-        fileBeginWait(&fileAbortSlotFlow);
+        return (void *)mcdEnterSelectedFileFlow();
     }
+    fileSetMenuFlowState(0);
+    return fileBeginWait(&fileAbortSlotFlow);
 }
 
 void fileLoadIconFileAndResetSelection(void) {
@@ -2025,7 +2029,138 @@ void *mcdHandleSaveSetupDone(void) {
     return fileAbortSlotScanOnInput;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", fileSlotBrowserUpdate);
+void *fileSlotBrowserUpdate(void) {
+    s32 oldSelection = D_003BC844;
+    s32 offset;
+    s32 selection;
+    s32 action;
+    u32 flags;
+
+    if (D_003BC82C == 0) {
+        offset = oldSelection - D_003BC840;
+        fileLoadMenuState.unk8++;
+        fileLoadMenuState.unk8 = fileLoadMenuState.unk8 <= 0 ? 0 : fileLoadMenuState.unk8 > 3 ? 3 : fileLoadMenuState.unk8;
+
+        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x26] >> 1) & 1) != 0 && fileLoadMenuState.unk8 >= 3) {
+            selection = D_003BC840;
+            fileLoadMenuState.unk8 = 0;
+            if (selection > 0) {
+                if (offset == 2) {
+                    offset = 1;
+                } else if (offset == 1) {
+                    D_003BC840 = selection - 1;
+                    fileLoadSetMode(2);
+                    fileSetMenuValueAndInitializeFlags(0x80);
+                }
+            } else {
+                offset -= offset > 0;
+            }
+        }
+
+        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x27] >> 1) & 1) != 0 && fileLoadMenuState.unk8 >= 3) {
+            selection = D_003BC840;
+            fileLoadMenuState.unk8 = 0;
+            if (selection < 7) {
+                if (offset == 0) {
+                    offset = 1;
+                } else if (offset == 1) {
+                    D_003BC840 = selection + 1;
+                    fileLoadSetMode(1);
+                    fileSetMenuValueAndInitializeFlags(0x80);
+                }
+            } else {
+                offset += offset < 2;
+            }
+        }
+
+        D_003BC844 = D_003BC840 + offset;
+        if (oldSelection != D_003BC844) {
+            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+        }
+        if (D_003BC844 < oldSelection) {
+            D_003BC818 = -8;
+        } else if (oldSelection < D_003BC844) {
+            D_003BC818 = 8;
+        }
+        if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) != 0) {
+            D_003BC82C = 1;
+        }
+        if (fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0) != 0) {
+            D_003BC82C = 2;
+        }
+    }
+
+    if (fileReqPoll() != 0) {
+        flags = fileReqGetStatus(fileMemoryCardRequestContext);
+        action = D_003BC82C;
+        if (flags == 0) {
+            return fileBeginSlotMetadataRefresh();
+        }
+
+        if (action == 0) {
+            fileReqBegin(fileMemoryCardRequestContext);
+            return NULL;
+        }
+        if (action == 1) {
+
+            fileSetMenuFlowState(0);
+            if (D_003BC848 == 0) {
+        fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_003BC844);
+        flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_003BC844);
+        if (0xB == (flags & 0xB)) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            if (D_003BC824 != 0) {
+                D_003BC820 = action;
+                D_003BC834 = action;
+                return (void *)fileBeginPromptDialog(fileBeginDirectoryScan, fileScanSlotStates, 1);
+            }
+            D_003BC820 = action;
+            D_003BC834 = action;
+            return (void *)fileBeginPromptDialog(mcPrepareDirectory, fileScanSlotStates, 1);
+        }
+
+        action = flags & 0xA;
+        if (action == 2) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            D_003BC820 = action;
+            return mcPrepareDirectory();
+        }
+
+        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        D_003BC820 = 0;
+        if (fileIsCardSpaceAboveMinimum() != 0) {
+            return mcPrepareDirectory();
+        }
+        fileSetMenuFlowState(0);
+        D_003BC854 = 5;
+        D_003BC858 = 0;
+        fileReqBegin(fileMemoryCardRequestContext);
+        return filePollSlotScanOrReset;
+    }
+
+            fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_003BC844);
+            flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_003BC844);
+            if ((flags & 1) != 0) {
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                D_003BC834 = 3;
+                return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
+            }
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            return fileScanSlotStates();
+        }
+
+        if (action == 2) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            fileResetLoadContextSlide();
+            if (D_003BC824 != 0) {
+                return fileBeginSlotResetPrompt();
+            }
+            return fileResolveAbortSlotFlow();
+        }
+    }
+
+    return NULL;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2658);
 
@@ -4365,4 +4500,3 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC930);
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC938);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC940);
-
