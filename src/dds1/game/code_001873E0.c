@@ -15,6 +15,15 @@ typedef struct {
     s32 bottom; /* 0x24 */
 } EffBlurQuad; /* 0x28 */
 
+typedef struct {
+    u32 color;
+    s32 blendControl;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} EffSolidRectParams;
+
 /* Scale variant: phase controls its size/lifetime, angle drives displacement. */
 typedef struct {
     f32 phase;
@@ -104,6 +113,7 @@ typedef struct {
 } BlurFramePacketRecord;
 
 extern BlurFilterOps D_003253E8;
+extern BlurFilterOps D_003253C8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern void *sdfAllocPacketAligned(s32);
 extern u32 kwlnGetDrawBufferIndex(void);
@@ -113,6 +123,7 @@ extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendDmaPrimary(void *, const void *, void *);
 extern void *effCreateSizedDrawPacket();
+extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
 extern void func_00187788();
 extern void sdfAppendPacket();
@@ -181,6 +192,49 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001873E0", func_00187C08);
+void func_00187C08(EffSolidRectParams *source) {
+    void *list;
+    u64 *blendPacket;
+    u64 *drawPacket;
+    u64 color;
+    u32 topLeft;
+    u32 bottomLeft;
+    u32 topRight;
+    u32 bottomRight;
+    s32 x[4];
+    s32 y[4];
 
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    blendPacket = sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x31001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = source->blendControl;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, blendPacket);
 
+    drawPacket = effBuildDrawPacketWithFlags(0);
+    color = source->color | 0x3F80000000000000ULL;
+    x[0] = (source->left << 4) + 0x7000;
+    x[1] = (source->right << 4) + 0x7000;
+    y[0] = (source->top << 3) + 0x7900;
+    y[1] = (source->bottom << 3) + 0x7900;
+    topLeft = (u16)x[0] | ((u32)(u16)y[0] << 16);
+    bottomLeft = (u16)x[0] | ((u32)(u16)y[1] << 16);
+    topRight = (u16)x[1] | ((u32)(u16)y[0] << 16);
+    bottomRight = (u16)x[1] | ((u32)(u16)y[1] << 16);
+    drawPacket[5] = color;
+    drawPacket[7] = color;
+    drawPacket[9] = color;
+    drawPacket[11] = color;
+    drawPacket[6] = 0xFF000000000000ULL | topLeft;
+    drawPacket[8] = 0xFF000000000000ULL | bottomLeft;
+    drawPacket[10] = 0xFF000000000000ULL | topRight;
+    drawPacket[12] = 0xFF000000000000ULL | bottomRight;
+    sdfAppendPacket(list, drawPacket);
+    D_003253C8.draw(&D_003253C8, list);
+}
