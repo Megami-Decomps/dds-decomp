@@ -121,7 +121,7 @@ extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
 
 extern void func_0019F770(UiSprite *sprite);
 
-extern s32 func_0019EA88();
+extern s32 func_0019EA88(SoundSeq *seq);
 
 extern void itfMesSetRowItemFlag(s32 sequence, s32 index, s32 count, s32 selected);
 
@@ -269,13 +269,15 @@ typedef struct UiWindowResourceBlock {
     u8 pad0C[0x1C];
     u32 unk28;
 } UiWindowResourceBlock;
+void func_0019E048(UiWindowResourceBlock *block, s32 mode, s32 value);
+
 
 void itfResetWindowResourceBlock(u32 *object) {
     UiWindowResourceBlock *block = (UiWindowResourceBlock *)object;
     block->unk00 = 0;
     block->resource = 0;
     block->handle = 0;
-    func_0019E048((s32)object, 0, 0);
+    func_0019E048(block, 0, 0);
 }
 
 void itfClearDrawStateWords(s32 words) {

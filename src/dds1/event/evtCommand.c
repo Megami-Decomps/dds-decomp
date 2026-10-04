@@ -88,7 +88,7 @@ f32 bfWaitReadArgFloat(s32 idx);
 extern void func_002E7F20(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
-void evtScaleSlotByClampedMultiplier(s32 unit, f32 value);
+void evtScaleSlotByClampedMultiplier(void *unit, f32 value);
 
 s32 fldParseRoomNumberFromName(char *name);
 
