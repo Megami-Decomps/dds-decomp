@@ -2090,19 +2090,22 @@ s32 btlAllActiveUnitsReady(void) {
 }
 
 typedef struct BattleAdjustmentEntry {
+    u16 sceneIndex;
+    u16 weight;
     s8 value;
-    u8 pad_01[5];
+    u8 unk05;
 } BattleAdjustmentEntry;
 
 typedef struct BattleAdjustmentGroup {
-    u8 pad_00[0x24];
-    BattleAdjustmentEntry entries[14];
-    u8 pad_78[4];
+    s32 interval;
+    BattleAdjustmentEntry entries[20];
 } BattleAdjustmentGroup;
 
 typedef struct BattleAdjustmentRecord {
+    u8 pad00[8];
+    u32 conditions[3];
+    u8 variantCodes[8];
     BattleAdjustmentGroup groups[3];
-    u8 pad_174[0x1C];
 } BattleAdjustmentRecord;
 
 extern BattleAdjustmentRecord *D_00435E0C;

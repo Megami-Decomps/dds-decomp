@@ -1301,9 +1301,11 @@ void mnuResetPartyPanelFade(s32 menu, s32 index, s32 unused, s32 retainScale) {
 }
 
 typedef struct MenuPageMotion {
-    u8 pad00[0x14];
+    u8 pad00[0xC];
+    s32 unk0C;
+    s32 firstSprite;
     s32 primarySprite;
-    u8 pad18[0x1C];
+    s32 sprites[7];
     s32 overlaySprites[2];
     u8 pad3C[4];
     s32 field40;
@@ -1335,7 +1337,36 @@ void mnuSetPageParams(MenuPageMotion *page, s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027F230);
+void *func_0027F230(s32 value, s32 mainResource, s32 secondaryResource) {
+    MenuPageMotion *page = (MenuPageMotion *)sdfAllocSizeClassBlock(0x50);
+
+    memset(page, 0, 0x50);
+    page->unk0C = value;
+    page->firstSprite = effCreateResourceSlotSet(secondaryResource, 6, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->firstSprite, 0, 0xE60, 0x430, 0, 0);
+    page->sprites[0] = effCreateResourceSlotSet(secondaryResource, 8, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[0], 0, 0xF50, 0x648, 0, 0);
+    page->sprites[1] = effCreateResourceSlotSet(mainResource, 0x3B, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[1], 0, 0x1C20, 0x6D0, 0, 0);
+    page->sprites[2] = effCreateResourceSlotSet(secondaryResource, 9, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[2], 0, 0x1120, 0x708, 0, 0);
+    page->sprites[3] = effCreateResourceSlotSet(secondaryResource, 0xA, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[3], 0, 0x1BB0, 0x708, 0, 0);
+    page->sprites[4] = effCreateResourceSlotSet(secondaryResource, 0xD, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[4], 0, 0x1450, 0x640, 0, 0);
+    page->sprites[5] = effCreateResourceSlotSet(secondaryResource, 0xB, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[5], 0, 0x1540, 0x5E0, 0, 0);
+    page->sprites[6] = effCreateResourceSlotSet(secondaryResource, 0xC, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[6], 0, 0x1980, 0x660, 0, 0);
+    page->primarySprite = effCreateResourceSlotSet(mainResource, 0x3C, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->primarySprite, 0, 0x110, 0x280, 0, 0);
+    page->overlaySprites[0] = effCreateResourceSlotSet(mainResource, 0x35, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[0], 0, 0x8E0, 0x288, 0, 0);
+    page->overlaySprites[1] = effCreateResourceSlotSet(mainResource, 0x36, 1);
+    itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[1], 0, 0xEE0, 0x288, 0, 0);
+    mnuSetPageParams(page, 0);
+    return page;
+}
 
 void mnuFreeIconSprites(u32 *menu) {
     u32 *entry;
