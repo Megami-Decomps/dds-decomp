@@ -27,6 +27,38 @@
 #define MNU_FADING_MUTATION_THRESHOLD 5
 #define MNU_FADING_WORD_STEP 0x40
 
+#define MNU_STAFF_PARTY_SLOT_COUNT 5
+#define MNU_STAFF_PARTY_LAST_SLOT 4
+#define MNU_STAFF_DISPLAY_OVERFLOW 4
+#define MNU_STAFF_DISPLAY_LIMIT 3
+#define MNU_STAFF_PARTY_ENTRY_BYTES 0x1C4
+#define MNU_STAFF_PARTY_HALFWORD_STRIDE 0xE2
+#define MNU_STAFF_PARTY_BASE 0xA60
+#define MNU_STAFF_BACKUP_BYTES 0x8D4
+#define MNU_STAFF_PARTY_ACTIVE_BIT 1
+#define MNU_STAFF_NODE_UNAVAILABLE 1
+#define MNU_STAFF_NODE_SELECTED 2
+#define MNU_STAFF_PARTY_PANEL_BASE 0x284
+#define MNU_STAFF_PARTY_SLOTS_BASE 0xA928
+#define MNU_STAFF_FADE_STEP 0x10
+#define MNU_STAFF_FADE_CLOSE_THRESHOLD 0x50
+#define MNU_STAFF_FADE_OPEN_THRESHOLD 0xB0
+#define MNU_STAFF_INPUT_CONFIRM 1
+#define MNU_STAFF_INPUT_CANCEL 2
+#define MNU_STAFF_POPUP_INPUT_MASK 3
+#define MNU_STAFF_VIEW_INPUT_MASK 0xC2
+#define MNU_STAFF_VIEW_TOGGLE_MASK 0xC0
+#define MNU_STAFF_PAGE_INPUT_MASK 0x300
+#define MNU_STAFF_INPUT_PREV_PAGE 0x100
+#define MNU_STAFF_INPUT_NEXT_PAGE 0x200
+#define MNU_STAFF_INPUT_PREVIOUS 0x10
+#define MNU_STAFF_INPUT_NEXT 0x20
+#define MNU_STAFF_INPUT_NAV_STATE_MASK 0x300000
+#define MNU_STAFF_INPUT_REJECTED 0x8000
+#define MNU_STAFF_SKILL_INPUT_MASK 0x33
+#define MNU_STAFF_REORDER_INPUT_MASK 0x37
+#define MNU_STAFF_REORDER_CANCEL_MASK 6
+
 typedef struct MenuWindowContainer MenuWindowContainer;
 typedef struct MenuList MenuList;
 typedef struct MenuIconSprites MenuIconSprites;
@@ -669,26 +701,26 @@ void mnuDestroyPartySelectionWindow(s32 context) {
 void mnuCopyPartyEntries(context)
 s32 context;
 {
-    PartyMenuData *menu = (PartyMenuData *)((MenuContext *)context)->party;
-    PartyEntryCopy *destination = menu->current;
-    s32 i;
-    s32 flagOffset = 0xA60;
-    s32 copyOffset = 0;
+    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+    PartyEntryCopy *entryCursor = menuWork->current;
+    s32 entryIndex;
+    s32 flagsByteOffset = MNU_STAFF_PARTY_BASE;
+    s32 copyByteOffset = 0;
 
-    menu->activeCount = 0;
-    for (i = 0; i < 5; i++) {
-        *destination = *(PartyEntryCopy *)(copyOffset + datGameState + 0xA60);
-        if (((PartyEntryCopy *)(datGameState + flagOffset))->flags & 1) {
-            menu->activeCount = menu->activeCount + 1;
+    menuWork->activeCount = 0;
+    for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
+        *entryCursor = *(PartyEntryCopy *)(copyByteOffset + datGameState + MNU_STAFF_PARTY_BASE);
+        if (((PartyEntryCopy *)(datGameState + flagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
+            menuWork->activeCount = menuWork->activeCount + 1;
         }
-        flagOffset += 0x1C4;
-        destination++;
-        copyOffset += 0x1C4;
+        flagsByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
+        entryCursor++;
+        copyByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
     }
-    if (menu->activeCount >= 4) {
-        menu->activeCount = 3;
+    if (menuWork->activeCount >= MNU_STAFF_DISPLAY_OVERFLOW) {
+        menuWork->activeCount = MNU_STAFF_DISPLAY_LIMIT;
     }
-    menu->selection = 0;
+    menuWork->selection = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B12B0);
@@ -696,71 +728,77 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B12B0);
 extern void func_002B12B0();
 extern void func_002BCAB0();
 
+/* Notify active snapshot entries, restore the backup, then refresh panel resources.
+ * The second loop counts down while the backup byte offset advances forward. */
 void mnuRestorePartyEntriesAndRefresh(context)
 s32 context;
 {
-    PartyMenuData *menu = (PartyMenuData *)((MenuContext *)context)->party;
-    PartyEntryCopy *entry = menu->current;
-    s32 i;
-    s32 backupOffset;
-    s32 panel;
+    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+    PartyEntryCopy *entryCursor = menuWork->current;
+    s32 entryCounter;
+    s32 backupByteOffset;
+    s32 panelWork;
 
-    for (i = 0; i < 5; i++) {
-        if (entry->flags & 1) {
-            func_002B12B0(i, -3, 1, context);
+    for (entryCounter = 0; entryCounter < MNU_STAFF_PARTY_SLOT_COUNT; entryCounter++) {
+        if (entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
+            func_002B12B0(entryCounter, -3, 1, context);
         }
-        entry++;
+        entryCursor++;
     }
-    backupOffset = 0;
-    for (i = 4; i >= 0; i--) {
-        *(PartyEntryCopy *)(backupOffset + datGameState + 0xA60) = *(PartyEntryCopy *)(backupOffset + (s32)menu + PARTY_BACKUP_OFFSET);
-        backupOffset += 0x1C4;
+    backupByteOffset = 0;
+    for (entryCounter = MNU_STAFF_PARTY_LAST_SLOT; entryCounter >= 0; entryCounter--) {
+        *(PartyEntryCopy *)(backupByteOffset + datGameState + MNU_STAFF_PARTY_BASE) = *(PartyEntryCopy *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
+        backupByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
     }
-    panel = context + 0x284;
-    mnuReleasePartyPanelTextures(panel);
-    mnuInitPartyPanelSlots(context + 0xA928);
-    func_002BCA98(panel);
-    func_002BCAB0(panel);
+    panelWork = context + MNU_STAFF_PARTY_PANEL_BASE;
+    mnuReleasePartyPanelTextures(panelWork);
+    mnuInitPartyPanelSlots(context + MNU_STAFF_PARTY_SLOTS_BASE);
+    func_002BCA98(panelWork);
+    func_002BCAB0(panelWork);
 }
 
+/* Count active entries in the five-slot party array, capped at three. */
 s32 mnuCountActiveSlots(void) {
-    s32 count = 0;
-    s32 i;
-    u16 *slotFlags = (u16 *)(datGameState + 0xa60);
-    for (i = 4; i >= 0; i--) {
-        count += *slotFlags & 1;
-        slotFlags += 0xe2;
+    s32 activeCount = 0;
+    s32 entryCountdown;
+    u16 *entryFlagsCursor = (u16 *)(datGameState + MNU_STAFF_PARTY_BASE);
+    for (entryCountdown = MNU_STAFF_PARTY_LAST_SLOT; entryCountdown >= 0; entryCountdown--) {
+        activeCount += *entryFlagsCursor & MNU_STAFF_PARTY_ACTIVE_BIT;
+        entryFlagsCursor += MNU_STAFF_PARTY_HALFWORD_STRIDE;
     }
-    if (count > 3) {
-        count = 3;
+    if (activeCount > MNU_STAFF_DISPLAY_LIMIT) {
+        activeCount = MNU_STAFF_DISPLAY_LIMIT;
     }
-    return count;
+    return activeCount;
 }
 
+/* Reset selection/backup state, activate all panel slots, and enable list nodes.
+ * Keep the native short-arity snapshot call unchanged. */
 void mnuClearPartySelectionAndActivateSlots(s32 context) {
-    PartyMenuData *menu = (PartyMenuData *)((MenuContext *)context)->party;
-    s32 i;
-    s32 node;
+    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+    s32 entryIndex;
+    s32 nodeAddress;
 
     mnuCopyPartyEntries();
-    menu->selection = 0;
-    memset(menu->backup, 0, 0x8D4);
+    menuWork->selection = 0;
+    memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
     ((MenuContext *)context)->partyPanelActive = 1;
     ((MenuContext *)context)->partyPanelLast = mnuCountActiveSlots() - 1;
-    func_002BCA98(context + 0x284);
-    for (i = 0; i < 5; i++) {
-        *(u32 *)(context + 0x300 + i * 0x2138) |= 0x40;
+    func_002BCA98(context + MNU_STAFF_PARTY_PANEL_BASE);
+    for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
+        *(u32 *)(context + 0x300 + entryIndex * 0x2138) |= 0x40;
     }
-    for (node = (s32)menu->primaryWindow->list->first;
-         node != 0; node = (s32)((MenuListNode *)node)->next) {
-        ((MenuListNode *)node)->flags48 &= ~1;
+    for (nodeAddress = (s32)menuWork->primaryWindow->list->first;
+         nodeAddress != 0; nodeAddress = (s32)((MenuListNode *)nodeAddress)->next) {
+        ((MenuListNode *)nodeAddress)->flags48 &= ~MNU_STAFF_NODE_UNAVAILABLE;
     }
 }
 
+/* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures(context + 0x284);
-    mnuInitPartyPanelSlots(context + 0xA928);
-    func_002BCA98(context + 0x284);
+    mnuReleasePartyPanelTextures(context + MNU_STAFF_PARTY_PANEL_BASE);
+    mnuInitPartyPanelSlots(context + MNU_STAFF_PARTY_SLOTS_BASE);
+    func_002BCA98(context + MNU_STAFF_PARTY_PANEL_BASE);
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B18E8);
@@ -789,36 +827,37 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1C68);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1EA8);
 
-/* Two-stage fade: B rises first when opening, A falls first when closing. */
-void mnuUpdateStaffFade(s32 opening, PartyMenuData *state) {
+/* Two-stage fade: B rises first when opening, A falls first when closing.
+ * The second ramp begins strictly past its threshold; clamps follow each step. */
+void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
     if (opening == 0) {
-        if (state->fadeA > 0) {
-            state->fadeA -= 0x10;
+        if (menuWork->fadeA > 0) {
+            menuWork->fadeA -= MNU_STAFF_FADE_STEP;
         }
-        if (state->fadeA < 0) {
-            state->fadeA = 0;
+        if (menuWork->fadeA < 0) {
+            menuWork->fadeA = 0;
         }
-        if (state->fadeA < 0x50) {
-            if (state->fadeB > 0) {
-                state->fadeB -= 0x10;
+        if (menuWork->fadeA < MNU_STAFF_FADE_CLOSE_THRESHOLD) {
+            if (menuWork->fadeB > 0) {
+                menuWork->fadeB -= MNU_STAFF_FADE_STEP;
             }
-            if (state->fadeB < 0) {
-                state->fadeB = 0;
+            if (menuWork->fadeB < 0) {
+                menuWork->fadeB = 0;
             }
         }
     } else {
-        if (state->fadeB < 0x100) {
-            state->fadeB += 0x10;
+        if (menuWork->fadeB < MNU_FULL_FADE) {
+            menuWork->fadeB += MNU_STAFF_FADE_STEP;
         }
-        if (state->fadeB > 0x100) {
-            state->fadeB = 0x100;
+        if (menuWork->fadeB > MNU_FULL_FADE) {
+            menuWork->fadeB = MNU_FULL_FADE;
         }
-        if (state->fadeB > 0xB0) {
-            if (state->fadeA < 0x100) {
-                state->fadeA += 0x10;
+        if (menuWork->fadeB > MNU_STAFF_FADE_OPEN_THRESHOLD) {
+            if (menuWork->fadeA < MNU_FULL_FADE) {
+                menuWork->fadeA += MNU_STAFF_FADE_STEP;
             }
-            if (state->fadeA > 0x100) {
-                state->fadeA = 0x100;
+            if (menuWork->fadeA > MNU_FULL_FADE) {
+                menuWork->fadeA = MNU_FULL_FADE;
             }
         }
     }
@@ -867,20 +906,22 @@ void func_002B27F0(u32 context) {
 void mnuReleaseMenuWindowHandles(s32 context) {
 }
 
-void mnuReleaseStaffMenuResources(s32 menu) {
-    u32 *handles = (u32 *)(menu + 8);
-    s32 remaining = 1;
+/* Release both staff resource slots; their menu indices differ between games. */
+void mnuReleaseStaffMenuResources(s32 menuWork) {
+    u32 *resourceCursor = (u32 *)(menuWork + 8);
+    s32 resourceCountdown = 1;
     do {
-        effResolveAndReleaseResource(*handles++);
-    } while (--remaining >= 0);
+        effResolveAndReleaseResource(*resourceCursor++);
+    } while (--resourceCountdown >= 0);
 }
 
-void mnuReleaseStaffMenuTextureHandles(s32 menu) {
-    u32 *handles = (u32 *)(menu + 8);
-    s32 remaining = 1;
+/* Reset texture handles for the same two resource slots. */
+void mnuReleaseStaffMenuTextureHandles(s32 menuWork) {
+    u32 *resourceCursor = (u32 *)(menuWork + 8);
+    s32 resourceCountdown = 1;
     do {
-        effReleaseTextureHandlesAndResetSlots(*handles++);
-    } while (--remaining >= 0);
+        effReleaseTextureHandlesAndResetSlots(*resourceCursor++);
+    } while (--resourceCountdown >= 0);
 }
 
 u32 mnuCreateSelectState(u32 unused, s32 flag) {
@@ -929,31 +970,33 @@ void func_002B2A10(void) {
     mnuStaffCloseSelectionState();
 }
 
+/* Update the popup first; accept confirm/cancel only while its state is zero.
+ * Return a nonzero popup-update word unchanged, or zero after handling input. */
 s32 mnuStaffPopupUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    u8 *menu = (u8 *)((MenuContext *)context)->party;
-    s32 *popup = ((MenuContext *)context)->popupState;
-    u32 buttons = mnuMapPadMaskToFlags(3);
-    s32 state;
-    u8 *window;
-    state = func_002C4038(context + 8, popup, 0, callback);
-    if (state != 0) {
-        return state;
+    u8 *menuWork = (u8 *)((MenuContext *)context)->party;
+    s32 *popupState = ((MenuContext *)context)->popupState;
+    u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_POPUP_INPUT_MASK);
+    s32 stateWord;
+    u8 *panelWork;
+    stateWord = func_002C4038(context + 8, popupState, 0, callback);
+    if (stateWord != 0) {
+        return stateWord;
     }
-    if (*popup == 0) {
-        window = (u8 *)(context + 0x284);
-        func_002BD480(4, window);
-        if (buttons & 1) {
-            ((MenuPartyRuntime *)menu)->staffSelection = ((MenuContext *)context)->partyWindow.lists[0]->cursor->index;
-            mnuSetPopupEntry(popup, D_003E75E0);
-            *(s32 *)(menu + 0x24) = 1;
+    if (*popupState == 0) {
+        panelWork = (u8 *)(context + MNU_STAFF_PARTY_PANEL_BASE);
+        func_002BD480(4, panelWork);
+        if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
+            ((MenuPartyRuntime *)menuWork)->staffSelection = ((MenuContext *)context)->partyWindow.lists[0]->cursor->index;
+            mnuSetPopupEntry(popupState, D_003E75E0);
+            *(s32 *)(menuWork + 0x24) = 1;
         }
-        if (buttons & 2) {
-            mnuSetPopupEntryFlagged(popup, D_003E75A8);
+        if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
+            mnuSetPopupEntryFlagged(popupState, D_003E75A8);
             mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayHandle, 0, 1);
-            mnuClearActionFlags(0, window);
+            mnuClearActionFlags(0, panelWork);
         }
-        mnuPlayInputSound(0, buttons, 0);
+        mnuPlayInputSound(0, inputFlags, 0);
     }
     return 0;
 }
@@ -1069,27 +1112,29 @@ void mnuResetSelectedPanelOpacity(s32 context) {
     ((MenuContext *)context)->partyWindow.slots[((MenuContext *)context)->partyWindow.lists[0]->cursor->index].windowSprites->fade = 0x100;
 }
 
-s32 mnuStaffSwitchPartyPage(s32 callback) {
+/* Switch the party page, rebuilding its panels; previous takes priority.
+ * The opaque request argument is forwarded unchanged. Return one if switched. */
+s32 mnuStaffSwitchPartyPage(s32 requestArgument) {
     s32 context = kwlnTaskGetUserValue();
-    MenuPartyRuntime *menu = (MenuPartyRuntime *)((MenuContext *)context)->party;
-    s32 changed = 0;
-    u32 buttons = mnuMapPadMaskToFlags(0x300);
-    if (buttons & 0x100) {
-        mnuDestroyPanels(callback);
+    MenuPartyRuntime *menuWork = (MenuPartyRuntime *)((MenuContext *)context)->party;
+    s32 pageChanged = 0;
+    u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_PAGE_INPUT_MASK);
+    if (inputFlags & MNU_STAFF_INPUT_PREV_PAGE) {
+        mnuDestroyPanels(requestArgument);
         mnuRetreatListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
-        changed = 1;
+        pageChanged = 1;
     }
-    if ((buttons & 0x200) && changed == 0) {
-        mnuDestroyPanels(callback);
+    if ((inputFlags & MNU_STAFF_INPUT_NEXT_PAGE) && pageChanged == 0) {
+        mnuDestroyPanels(requestArgument);
         mnuAdvanceListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
-        changed = 1;
+        pageChanged = 1;
     }
     mnuClearListFlagsOneAndTwo(((MenuContext *)context)->partyWindow.lists[0]);
-    if (changed != 0) {
-        mnuCreatePanels(callback);
+    if (pageChanged != 0) {
+        mnuCreatePanels(requestArgument);
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
-        menu->activeMark = 0;
-        if (menu->staffMode == 1) {
+        menuWork->activeMark = 0;
+        if (menuWork->staffMode == 1) {
             mnuResetSelectedPanelOpacity(context);
         }
         return 1;
@@ -1097,54 +1142,56 @@ s32 mnuStaffSwitchPartyPage(s32 callback) {
     return 0;
 }
 
+/* Update popup state before page navigation, view toggles, and exit requests.
+ * stateWord holds the update result first, then the stored popup state. */
 s32 mnuStaffBrowsePartyUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    u8 *menu = (u8 *)((MenuContext *)context)->party;
-    s32 *popup;
-    u32 buttons;
-    s32 state;
-    if (((MenuPartyRuntime *)menu)->staffView == 0) {
-        buttons = mnuMapPadMaskToFlags(0xC2);
+    u8 *menuWork = (u8 *)((MenuContext *)context)->party;
+    s32 *popupState;
+    u32 inputFlags;
+    s32 stateWord;
+    if (((MenuPartyRuntime *)menuWork)->staffView == 0) {
+        inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_VIEW_INPUT_MASK);
     } else {
-        buttons = mnuMapPadMaskToFlags(2);
+        inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_INPUT_CANCEL);
     }
-    popup = ((MenuContext *)context)->popupState;
-    state = func_002C4038(context + 8, popup, 0, callback);
-    if (state != 0) {
-        return state;
+    popupState = ((MenuContext *)context)->popupState;
+    stateWord = func_002C4038(context + 8, popupState, 0, callback);
+    if (stateWord != 0) {
+        return stateWord;
     }
     if (func_002C6480() != 0) {
         return 0;
     }
-    state = *popup;
-    ((MenuPartyRuntime *)menu)->staffExit = 0;
-    if (state == 0) {
+    stateWord = *popupState;
+    ((MenuPartyRuntime *)menuWork)->staffExit = 0;
+    if (stateWord == 0) {
         if (mnuStaffSwitchPartyPage(callback) != 0) {
             return 0;
         }
-        if (buttons & 0xC0) {
-            if (((MenuPartyRuntime *)menu)->staffMode == 0) {
-                ((MenuPartyRuntime *)menu)->staffMode = 1;
-                func_002B2C88(context + 0x284, 3, ((MenuPartyRuntime *)menu)->staffView, 1);
+        if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
+            if (((MenuPartyRuntime *)menuWork)->staffMode == 0) {
+                ((MenuPartyRuntime *)menuWork)->staffMode = 1;
+                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 3, ((MenuPartyRuntime *)menuWork)->staffView, 1);
                 mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->alternateResource, 0, 0);
             } else {
-                ((MenuPartyRuntime *)menu)->staffMode = 0;
-                func_002B2C88(context + 0x284, 2, ((MenuPartyRuntime *)menu)->staffView, 0);
+                ((MenuPartyRuntime *)menuWork)->staffMode = 0;
+                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 2, ((MenuPartyRuntime *)menuWork)->staffView, 0);
                 mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayResource, 0, 0);
             }
-            ((MenuPartyRuntime *)menu)->activeMark = 0;
+            ((MenuPartyRuntime *)menuWork)->activeMark = 0;
         }
-        if (buttons & 2) {
+        if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             if (func_002C6CE8() != 1) {
                 evtStageTestStop();
-                ((MenuPartyRuntime *)menu)->staffExit = 1;
-                *(s32 *)(menu + 0x24) = 1;
-                mnuSetPopupEntryFlagged(popup, D_003E75C4);
+                ((MenuPartyRuntime *)menuWork)->staffExit = 1;
+                *(s32 *)(menuWork + 0x24) = 1;
+                mnuSetPopupEntryFlagged(popupState, D_003E75C4);
             } else {
-                buttons = 0x8000;
+                inputFlags = MNU_STAFF_INPUT_REJECTED;
             }
         }
-        mnuPlayInputSound(0, buttons, 0);
+        mnuPlayInputSound(0, inputFlags, 0);
     }
     return 0;
 }
@@ -1245,19 +1292,21 @@ u32 mnuDestroySelectedPartyWindow(u32 callback) {
     return 1;
 }
 
+/* Seek the first node with a nonzero sort key and no unavailable flag.
+ * Leave the cursor unchanged if no such node exists. */
 void mnuSeekFirstAvailableStaffListNode(void) {
-    MenuPartyRuntime *party = (MenuPartyRuntime *)((MenuContext *)kwlnTaskGetUserValue())->party;
-    MenuListNode *node = party->selectedWindow->list->first;
+    MenuPartyRuntime *menuWork = (MenuPartyRuntime *)((MenuContext *)kwlnTaskGetUserValue())->party;
+    MenuListNode *listNode = menuWork->selectedWindow->list->first;
 
-    while (node != NULL) {
-        u32 key = node->sortKeyPrimary;
-        if (!(node->flags48 & 1) && key != 0) {
+    while (listNode != NULL) {
+        u32 sortKey = listNode->sortKeyPrimary;
+        if (!(listNode->flags48 & MNU_STAFF_NODE_UNAVAILABLE) && sortKey != 0) {
             break;
         }
-        node = node->next;
+        listNode = listNode->next;
     }
-    if (node != NULL) {
-        mnuSeekListNode(node->index, party->selectedWindow->list);
+    if (listNode != NULL) {
+        mnuSeekListNode(listNode->index, menuWork->selectedWindow->list);
     }
 }
 
@@ -1419,16 +1468,17 @@ u32 mnuHasSelectedListNodeId(s32 callback) {
     return ~((MenuPartyRuntime *)((MenuContext *)context)->party)->selectedIndex >> 0x1f;
 }
 
+/* Set the selected flag only on nodes whose index matches the saved selection. */
 void mnuHighlightSelectedListNode() {
-    u8 *state = (u8 *)((MenuContext *)kwlnTaskGetUserValue())->party;
-    u8 *node = (u8 *)((MenuPartyRuntime *)state)->selectedWindow->list->first;
-    while (node != NULL) {
-        if (((MenuListNode *)node)->index == ((MenuPartyRuntime *)state)->selectedIndex) {
-            ((MenuListNode *)node)->flags48 |= 2;
+    u8 *menuWork = (u8 *)((MenuContext *)kwlnTaskGetUserValue())->party;
+    u8 *listNode = (u8 *)((MenuPartyRuntime *)menuWork)->selectedWindow->list->first;
+    while (listNode != NULL) {
+        if (((MenuListNode *)listNode)->index == ((MenuPartyRuntime *)menuWork)->selectedIndex) {
+            ((MenuListNode *)listNode)->flags48 |= MNU_STAFF_NODE_SELECTED;
         } else {
-            ((MenuListNode *)node)->flags48 &= ~2;
+            ((MenuListNode *)listNode)->flags48 &= ~MNU_STAFF_NODE_SELECTED;
         }
-        node = (u8 *)((MenuListNode *)node)->next;
+        listNode = (u8 *)((MenuListNode *)listNode)->next;
     }
 }
 
@@ -1445,54 +1495,59 @@ u32 mnuClearSkillSelectionImageState(void) {
     return 1;
 }
 
-void mnuAddPartySkillIfMissing(s32 obj, s32 id, s32 slot) {
-    u16 code = id;
+/* Narrow the ID to its native 16-bit skill code before duplicate detection.
+ * Insert only missing skills, then recompute maxima and clear the script flag. */
+void mnuAddPartySkillIfMissing(s32 partyEntry, s32 skillId, s32 skillSlot) {
+    u16 skillCode = skillId;
 
-    if (ptyHasSkill(obj, code) == 0) {
-        *(u16 *)(obj + slot * 2 + 0x22) = code;
-        ptyRecomputeMaxHpMp(obj);
-        scrClearSecondaryScriptFlag(obj, code);
+    if (ptyHasSkill(partyEntry, skillCode) == 0) {
+        *(u16 *)(partyEntry + skillSlot * 2 + 0x22) = skillCode;
+        ptyRecomputeMaxHpMp(partyEntry);
+        scrClearSecondaryScriptFlag(partyEntry, skillCode);
     }
 }
 
-void mnuClearPartySkillSlot(s32 party, s32 slot) {
-    *(u16 *)(slot * 2 + party + 0x22) = 0;
+/* Clear one skill slot, retaining the native short-arity maxima recomputation. */
+void mnuClearPartySkillSlot(s32 partyEntry, s32 skillSlot) {
+    *(u16 *)(skillSlot * 2 + partyEntry + 0x22) = 0;
     ptyRecomputeMaxHpMp();
 }
 
+/* Open the selected skill's popup or cancel, then process list navigation.
+ * Native list reads precede the late window guard; preserve that ordering. */
 void mnuCampMenuHandleInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    s32 menu = ((MenuContext *)context)->party;
-    u32 input = mnuMapPadMaskToFlags(0x33);
-    MenuWindowContainer *window = ((MenuPartyRuntime *)menu)->selectedWindow;
+    s32 menuWork = ((MenuContext *)context)->party;
+    u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
+    MenuWindowContainer *window = ((MenuPartyRuntime *)menuWork)->selectedWindow;
     MenuList *list = window->list;
 
-    list->stateFlags &= ~8;
-    if (input & 1) {
-        MenuListNode *entry = list->cursor;
-        s32 target = entry->sortKeyPrimary;
+    list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
+    if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
+        MenuListNode *selectedNode = list->cursor;
+        s32 sortKey = selectedNode->sortKeyPrimary;
 
-        if (!(entry->flags48 & 1) && target != 0) {
+        if (!(selectedNode->flags48 & MNU_STAFF_NODE_UNAVAILABLE) && sortKey != 0) {
             mnuSetPopupEntry(context + 0x54, D_003E7774);
         } else {
-            input = 0x8000;
+            inputFlags = MNU_STAFF_INPUT_REJECTED;
         }
     }
-    if (input & 2) {
+    if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
         mnuSetPopupEntryFlagged(context + 0x54, D_003E773C);
     }
     if (window != 0) {
-        if (!(input & 0x300000)) {
+        if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
             func_002B9808((s32)window);
         }
-        if (input & 0x10) {
+        if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection((s32)window);
         }
-        if (input & 0x20) {
+        if (inputFlags & MNU_STAFF_INPUT_NEXT) {
             mnuAdvanceWindowListSelection((s32)window);
         }
         mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, input, (s32)window->list);
+        mnuPlayInputSound(0, inputFlags, (s32)window->list);
     }
 }
 
@@ -1509,30 +1564,32 @@ void mnuSwapPartySkillSlots(s32 party, s32 firstSlot, s32 secondSlot) {
     *(u16 *)(entries + secondOffset) = firstValue;
 }
 
+/* First confirm stores a slot; a different second slot swaps and rebuilds.
+ * Cancel clears the saved slot, opening the exit popup only if none was saved. */
 void ptySkillMenuHandleSlotReorder(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    s32 menu = ((MenuContext *)context)->party;
-    u32 input = mnuMapPadMaskToFlags(0x37);
-    MenuWindowContainer *window = ((MenuPartyRuntime *)menu)->selectedWindow;
-    s32 slot = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * 0x1c4 + 0xa60;
+    s32 menuWork = ((MenuContext *)context)->party;
+    u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_REORDER_INPUT_MASK);
+    MenuWindowContainer *window = ((MenuPartyRuntime *)menuWork)->selectedWindow;
+    s32 partyEntry = datGameState + ((MenuContext *)context)->partyWindow.lists[0]->cursor->index * MNU_STAFF_PARTY_ENTRY_BYTES + MNU_STAFF_PARTY_BASE;
     MenuList *list = window->list;
 
-    list->stateFlags &= ~8;
-    if (input & 1) {
-        s32 selected = list->cursor->index;
+    list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
+    if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
+        s32 selectedSlot = list->cursor->index;
 
         if (mnuHasSelectedListNodeId(callback) == 0) {
-            ((MenuPartyRuntime *)menu)->selectedIndex = selected;
-        } else if (selected != ((MenuPartyRuntime *)menu)->selectedIndex) {
-            mnuSwapPartySkillSlots(slot, ((MenuPartyRuntime *)menu)->selectedIndex, selected);
+            ((MenuPartyRuntime *)menuWork)->selectedIndex = selectedSlot;
+        } else if (selectedSlot != ((MenuPartyRuntime *)menuWork)->selectedIndex) {
+            mnuSwapPartySkillSlots(partyEntry, ((MenuPartyRuntime *)menuWork)->selectedIndex, selectedSlot);
             mnuClearSelectedListNodeId(callback);
             window = mnuSeekSelectedWindowCursor(0, callback);
         } else {
-            input = 0x8000;
+            inputFlags = MNU_STAFF_INPUT_REJECTED;
         }
     }
-    if (input & 6) {
-        input = 2;
+    if (inputFlags & MNU_STAFF_REORDER_CANCEL_MASK) {
+        inputFlags = MNU_STAFF_INPUT_CANCEL;
         if (mnuHasSelectedListNodeId(callback) == 0) {
             mnuSetPopupEntryFlagged(context + 0x54, D_003E7790);
         }
@@ -1540,17 +1597,17 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
     }
     mnuHighlightSelectedListNode(callback);
     if (window != 0) {
-        if (!(input & 0x300000)) {
+        if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
             func_002B9808((s32)window);
         }
-        if (input & 0x10) {
+        if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection((s32)window);
         }
-        if (input & 0x20) {
+        if (inputFlags & MNU_STAFF_INPUT_NEXT) {
             mnuAdvanceWindowListSelection((s32)window);
         }
         mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, input, (s32)window->list);
+        mnuPlayInputSound(0, inputFlags, (s32)window->list);
     }
 }
 
