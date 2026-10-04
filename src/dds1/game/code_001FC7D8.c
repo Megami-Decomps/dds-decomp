@@ -223,7 +223,82 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCFB8);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD170);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD3C0);
+typedef struct BtlCommandTargetResult {
+    u8 pad00[8];
+    s32 kind;
+    u8 pad0C[4];
+    u8 skipped;
+    u8 pad11[0xA0B];
+} BtlCommandTargetResult;
+
+typedef struct BtlCommandEffect {
+    s32 command;
+    s16 effect;
+    u8 adjustSide;
+    u8 pad07;
+} BtlCommandEffect;
+
+typedef struct BtlEffectCommandRecord {
+    u8 pad00[0x28];
+    s32 requiredFlags;
+    u8 pad2C[12];
+} BtlEffectCommandRecord;
+
+extern BtlCommandEffect D_00360468[];
+extern BtlEffectCommandRecord *datCommandRecords;
+extern u32 btlGetIndexListCount(s32);
+extern BtlUnit *btlGetIndexListEntry(s32, u32);
+extern s32 btlCheckCommandRequiredEntryMatches(s32, s32);
+extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
+
+s16 func_001FD3C0(BtlTask *task, s32 command) {
+    BtlCommandTargetResult *result = *(BtlCommandTargetResult **)((u8 *)task + 0x80);
+    u32 i;
+    u32 count = btlGetIndexListCount(task->targetList);
+    s8 rejected = 0;
+    s16 effect;
+    u8 adjustSide;
+
+    for (i = 0; i < count; i++, result++) {
+        if (result->skipped || result->kind == 2 || result->kind == 4) {
+            rejected++;
+        }
+    }
+    if (rejected == count) {
+        return -1;
+    }
+    effect = -1;
+    adjustSide = 0;
+    for (i = 0; i < 59; i++) {
+        if (D_00360468[i].command == command) {
+            effect = D_00360468[i].effect;
+            adjustSide = D_00360468[i].adjustSide;
+            break;
+        }
+    }
+    if (btlCheckCommandRequiredEntryMatches(task->targetList, command) != 0) {
+        if (datCommandRecords[command].requiredFlags == 0x800 ||
+            datCommandRecords[command].requiredFlags == 0x1000) {
+            effect = 0x6A;
+        } else {
+            effect = 0x84;
+        }
+    }
+    effect = effOffsetIfOwnerFlagClear(task->unit, effect);
+    if (adjustSide) {
+        s32 ownerSide = task->unit->flags & 0x600;
+        s32 targetSides = 0;
+
+        count = btlGetIndexListCount(task->targetList);
+        for (i = 0; i < count; i++) {
+            targetSides |= btlGetIndexListEntry(task->targetList, i)->flags & 0x600;
+        }
+        if (ownerSide != targetSides && targetSides != 0) {
+            effect = (task->unit->flags & 0x200) ? effect + 1 : effect - 1;
+        }
+    }
+    return effect;
+}
 
 
 /* Adds one to the base unless bit 9 of the owner's flags is set. */
