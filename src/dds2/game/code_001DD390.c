@@ -132,7 +132,8 @@ typedef struct BtlWork {
     u8 pad61C[0x1C];
     void (*hook638)(BtlUnit *);
     s32 (*commandHook)(s32, s32);
-    u8 pad640[0xC];
+    u8 pad640[8];
+    s32 (*hook648)(BtlUnit *);
     s32 (*hook64C)(BtlUnit *);
     s32 (*hook650)(BtlUnit *);
     s32 (*hook654)(BtlUnit *);
@@ -5514,7 +5515,54 @@ void func_001EAC10(u32 action) {
 void func_001EAC28(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001EAC30);
+extern void func_001FFDD0(ActionUnit *, void *);
+extern void btlPrepareUnitPoseWithTiltRotation(void *, f32 *, u8 *);
+extern void btlFlagUserAndTargetDefeat(ActionUnit *, ActionUnit *);
+extern void btlSetupActionCameraPair(ActionUnit *);
+
+/* Select the linked command's initial cursor step and prepare its camera. */
+void func_001EAC30(ActionUnit *action) {
+    s32 (*hook)(BtlUnit *) = ((BtlWork *)btlGetRuntime())->hook648;
+    BattleActionLinkState *link;
+    u32 flags;
+
+    action->stepKind = 0;
+    link = action->link;
+    if (hook != NULL && hook((BtlUnit *)action) != 0) {
+        return;
+    }
+    flags = link->unit->flags;
+    if (flags & 0x200) {
+        if (!(flags & 0x1000) && !(link->unit->statBits & 0x10)) {
+            action->stepKind = 0xB;
+            func_001FF5D8(action, action);
+        } else if (btlHasSingleLinkedResource((s32)action) != 0) {
+            if ((link->unit->statBits & 0x10) && link->resourceNodeIndex == 0x17) {
+                action->stepKind = 0xC;
+                func_001F3C30(action);
+            } else {
+                action->stepKind = 9;
+                btlFlagUserAndTargetDefeat(action, action);
+            }
+        } else {
+            func_001FFDD0(action, action);
+        }
+    } else {
+        if (btlMatchLinkedActorFlags((s32)action) != 0) {
+            func_001F0968(action);
+        } else if (btlHasSingleLinkedResource((s32)action) != 0) {
+            btlPositionActorIndexUnits(action);
+            action->stepKind = 0xA;
+            btlSetupActionCameraPair(action);
+        } else {
+            btlPrepareUnitPoseWithTiltRotation(action, action->pos30, action->outputPose);
+            btlAimLinkedUnitAtMuzzle(action);
+            action->unk154 = 200.0f;
+            action->flags |= 0x41;
+        }
+        btlResetCameraMotion((s32)action);
+    }
+}
 
 void btlDispatchActionCursorStepByKind(ActionUnit *action) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
@@ -6427,7 +6475,48 @@ void btlInitLinkedUnitActionCursor(BattleActionLinkState *linkState) {
     func_001F5320((s32)scene, (s32)scene, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001FFDD0);
+/* vu0 routine: initialize the target cursor and orient flagged actors toward its center. */
+void func_001FFDD0(ActionUnit *action, void *state) {
+    f32 position[4];
+    f32 quaternion[4];
+    f32 aimPosition[4];
+    f32 rotation[4];
+    f32 offset[4];
+    BtlUnit *unit;
+    BtlUnit *target;
+
+    memset(offset, 0, sizeof(offset));
+    offset[2] = 1.0f;
+    memset(D_003BD7D0, 0, 0x130);
+    func_001F5868((s32)action, (s32)state, 2, 3);
+    func_001F5320((s32)action, (s32)state, 0, 0);
+    func_001FB908((s32)action, (s32)state, 0, 1);
+    btlFlagMatchingUnitsDefeatCandidate(0x600);
+    unit = action->link->unit;
+    if (unit->flags & 0x80000) {
+        btlUnitGetPosVU((u32)unit, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quaternion);
+        VU0_LOAD_VF(vf10, quaternion);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, offset);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, aimPosition);
+        target = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+        if (target->flags & 0x400) {
+            func_00208000(0x400, 0, 0);
+        } else {
+            func_00208000(0x200, 0, 0);
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlAimHorizontalDirectionVU((s128 *)aimPosition, (s128 *)position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        btlSetUnitRotation(unit, (s128 *)rotation);
+    }
+}
 
 s32 btlInitCursorAndApplyAction(s32 action, s32 state) {
     s32 result;
@@ -8733,7 +8822,52 @@ void btlMoveOtherUnitsAway(BtlUnit *unit) {
     btlSetUnitPosition(unit->link18, pos);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_002061B0);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
+
+/* Place the three actor slots around the common battle center supplied in vf10. */
+void func_002061B0(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+    BtlUnit *slot[3];
+    f32 center[4];
+    f32 pos[4];
+    f32 rotation[4];
+    f32 radius;
+    f32 angle;
+
+    slot[0] = NULL;
+    slot[1] = NULL;
+    slot[2] = NULL;
+    slot[link->unit->lookupId] = link->unit;
+    slot[first->lookupId] = first;
+    slot[second->lookupId] = second;
+    radius = func_00208000(0x400, 0, 0) + 200.0f;
+    VU0_STORE_VF_UNCLOBBERED(vf10, center);
+    pos[0] = center[0];
+    pos[1] = 0.0f;
+    pos[2] = center[2] - radius;
+    btlSetUnitPosition(slot[1], pos);
+    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        btlSetUnitRotation(slot[1], (s128 *)rotation);
+    }
+    angle = 30.0f * 0.017453293f;
+    pos[0] = center[0] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    pos[1] = 0.0f;
+    pos[2] = center[2] - sdfSinPoly(angle) * radius;
+    btlSetUnitPosition(slot[0], pos);
+    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        btlSetUnitRotation(slot[0], (s128 *)rotation);
+    }
+    pos[0] = center[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    pos[1] = 0.0f;
+    pos[2] = center[2] - sdfSinPoly(angle) * radius;
+    btlSetUnitPosition(slot[2], pos);
+    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        btlSetUnitRotation(slot[2], (s128 *)rotation);
+    }
+}
 
 void btlPlaceTripleFormationAroundTarget(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
     BtlUnit *slot[3];
