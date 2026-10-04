@@ -1,7 +1,6 @@
 #include "common.h"
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD5C8);
-
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD710);
 
 s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *window, s32 arg4) {
@@ -20,6 +19,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *w
 }
 
 extern s32 datGameState;
+
 u8 func_002BDA50(s32 index) {
     if (index == 0) {
         return 0;

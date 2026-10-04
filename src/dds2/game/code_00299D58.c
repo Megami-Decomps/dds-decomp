@@ -269,7 +269,7 @@ s32 mnuRequestContextClearSceneDsp(MenuItemScene *state)
 }
 
 /* Request the weighted-profile message bucket only once. */
-s32 func_0029A2F8(MenuItemScene *scene) {
+s32 mnuRequestWeightedProfileMessage(MenuItemScene *scene) {
     s32 profileIndex;
     u32 value;
     s32 rank;
@@ -296,7 +296,7 @@ s32 func_0029A2F8(MenuItemScene *scene) {
 }
 
 
-s32 func_0029A400(void *task) {
+s32 mnuDispatchProfileSelectionScene(void *task) {
     s32 result;
     MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue(task);
     s32 *dispatchStatus = &scene->dispatchState;
@@ -326,7 +326,7 @@ s32 func_0029A400(void *task) {
             if (mnuRequestContextClearSceneDsp(scene) != 0) {
                 return 0;
             }
-            if (func_0029A2F8(scene) != 0) {
+            if (mnuRequestWeightedProfileMessage(scene) != 0) {
                 return 0;
             }
             if (scene->partyUnitCount == 0) {

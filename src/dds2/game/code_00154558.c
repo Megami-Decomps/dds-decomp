@@ -298,7 +298,7 @@ extern s32 fldIsSceneStateEight(void);
 
 extern void func_00123DE8(s32, s32, s32, s32, s32, s32);
 
-extern s32 effMiscRandMod(s32, s32);
+extern u32 effMiscRandMod(void *stream, u32 modulus);
 
 extern s32 evtGetMirroredSolarPhase(void);
 
@@ -1733,7 +1733,8 @@ s32 fldCommandClearSelectedFlag(void) {
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
     s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
-    if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
+    s32 roll = (s32)effMiscRandMod(0, 100);
+    if (solarPhaseThreshold >= roll) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);

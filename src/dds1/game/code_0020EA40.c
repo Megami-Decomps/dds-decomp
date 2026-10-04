@@ -105,7 +105,7 @@ typedef struct SceneDescriptor {
 extern s32 datBattleSceneRecords;
 
 /* Despite the historical name, test the unit mode against eleven scene entries. */
-s32 btlIsActionIdListed(BtlUnit *unit) {
+s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
     BtlState *battle;
     u16 *listedMode;
     u32 unitMode;

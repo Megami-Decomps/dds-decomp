@@ -56,7 +56,6 @@ void evtInitializeVisualData(s32 object) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00245590);
-
 extern s32 evtGetMirroredSolarPhase(void);
 extern void func_00245590(u32);
 extern void evtDrawFadingSolarOverlayFrame(s32, s32, s32, s32, s32, u32, s32);

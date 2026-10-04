@@ -78,7 +78,7 @@ typedef struct FrFontGlyph {
 
 extern FrFontGlyph *D_004528B4[];
 
-extern s32 kwlnGetDrawBufferIndex(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 
 extern s32 func_0019BA00(s32 x, s32 y, u8 width, u8 halfHeight, u8 style,
                          s32 flags, s32 color, s32 enabled, s32 sourceY,
@@ -1256,3 +1256,4 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_00436570);
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436578);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436580);
+

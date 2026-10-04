@@ -54,7 +54,7 @@ extern void kwlnUnlinkListNode(KwlnTask* task);
 
 extern void sdfReleaseChipBlock(void* ptr);
 
-extern KwlnTask* func_00101740(const char* name);
+extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
 
 void kwlnTaskActivate(KwlnTask* task)
 {
@@ -285,7 +285,7 @@ s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 delayTicks)
 {
     KwlnTask* task;
 
-    task = func_00101740(name);
+    task = kwlnTaskGetTaskByName(name);
     if (task == 0) {
         return 0;
     }
@@ -328,7 +328,7 @@ s32 kwlnTaskGetRegisteredState(KwlnTask* task)
     return (state < 4) ? state : 0;
 }
 
-KwlnTask* func_00101740(const char* name)
+KwlnTask* kwlnTaskGetTaskByName(const char* name)
 {
     s32 nameLength;
     s32 nameSum;

@@ -669,7 +669,7 @@ void func_002294B8(void) {
 }
 
 /* Remap selected actions only for flagged units listed in the current scene. */
-s32 func_002294D0(BtlUnit *unit, s32 action) {
+s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     BtlState *battle;
     u16 *listedMode;
     u32 i;
@@ -704,7 +704,7 @@ s32 func_002294D0(BtlUnit *unit, s32 action) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
 /* Despite the historical name, test the unit mode against eleven scene entries. */
-s32 btlIsActionIdListed(u8 *unit) {
+s32 btlIsSceneUnitModeListed(u8 *unit) {
     BtlState *battle;
     u16 *listedMode;
     u32 unitMode;

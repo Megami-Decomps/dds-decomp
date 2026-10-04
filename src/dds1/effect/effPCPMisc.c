@@ -250,9 +250,9 @@ extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
 extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
 extern void *effCreateThunderCellSystemWork(void *params);
-extern void effPCPThunderFree(void *work);
+extern void effThunderReleaseVectorWork(void *work);
 extern u32 effParamCreateFromTable(void *data, s32 index);
-extern void effPCPThunderFree3(void *work);
+extern void effThunderReleaseFragmentWork(void *work);
 extern void *effThunderFragCreate(void *params);
 extern void effDispatchParameterDataAndFreeWork(u32 handle);
 extern u32 effParamWorkDuplicate(u32 param);
@@ -344,7 +344,7 @@ extern void mdlBroadcastMasked(void *obj, u32 mask);
 extern void *func_00163540(u32 handle);
 extern u32 func_00165638(u32 handle);
 extern void func_00165D80(u32 handle);
-extern void effPCPThunderSetParam58(void *work, u32 value);
+extern void effThunderSetFragmentColor(void *work, u32 value);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
@@ -1182,7 +1182,7 @@ void effPcpReleaseTwelveRadialParticles(EffPCPThunderGroup *work) {
 
     handle = work->handles;
     for (i = 0; i < 12; i++) {
-        effPCPThunderFree3((void *)handle[i]);
+        effThunderReleaseFragmentWork((void *)handle[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1307,7 +1307,7 @@ void effPcpNarrowConeGroupRelease(EffPCPThunderGroup *work) {
 
     handle = work->handles;
     for (i = 0; i < 12; i++) {
-        effPCPThunderFree3((void *)handle[i]);
+        effThunderReleaseFragmentWork((void *)handle[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1405,7 +1405,7 @@ void effPcpWideConeGroupRelease(EffPCPThunderGroup *work) {
 
     handle = work->handles;
     for (i = 0; i < 30; i++) {
-        effPCPThunderFree3((void *)handle[i]);
+        effThunderReleaseFragmentWork((void *)handle[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1504,7 +1504,7 @@ void effPcpReleaseWideConeParticles(EffPCPThunderGroup *work) {
 
     handle = work->handles;
     for (i = 0; i < 12; i++) {
-        effPCPThunderFree3((void *)handle[i]);
+        effThunderReleaseFragmentWork((void *)handle[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1575,7 +1575,7 @@ void effPcpAngledBurstGroupRelease(EffPCPThunderGroup *work) {
 
     handle = work->handles;
     for (i = 0; i < 12; i++) {
-        effPCPThunderFree3((void *)handle[i]);
+        effThunderReleaseFragmentWork((void *)handle[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1653,7 +1653,7 @@ void effPcpSideBurstGroupRelease(EffPCPThunderGroup *work) {
 
     handle = work->handles;
     for (i = 0; i < 8; i++) {
-        effPCPThunderFree3((void *)handle[i]);
+        effThunderReleaseFragmentWork((void *)handle[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1709,7 +1709,7 @@ void *effPcpCreateThunderHandleWork(void) {
 }
 
 void effPcpReleaseThunderHandleWork(EffPCPFadeWork *work) {
-    effPCPThunderFree((void *)work->handle);
+    effThunderReleaseVectorWork((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -1728,7 +1728,7 @@ typedef struct EffPCPFadeTarget {
 } EffPCPFadeTarget;
 
 
-extern void effPCPThunderSetParam50(u32 handle, u32 value);
+extern void effThunderSetVectorTint(u32 handle, u32 value);
 extern void func_00163508(u32 handle, void *work);
 extern void effThunderUpdateVectorCells(u32 handle);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
@@ -1751,7 +1751,7 @@ void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
     } else {
         fadedColor = work->color;
     }
-    effPCPThunderSetParam50(work->handle, fadedColor);
+    effThunderSetVectorTint(work->handle, fadedColor);
     func_00163508(work->handle, work);
     effThunderUpdateVectorCells(work->handle);
     work->frame++;
@@ -1837,7 +1837,7 @@ void effPcpReleaseConeParticleGroup(EffPCPThunderGroup *work) {
 
     handle = work->handles;
     for (i = 0; i < 30; i++) {
-        effPCPThunderFree3((void *)handle[i]);
+        effThunderReleaseFragmentWork((void *)handle[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1883,7 +1883,7 @@ void *effPcpCreateGrowingThunderFadeWork(void) {
 }
 
 void effPcpReleaseGrowingThunderFadeWork(EffPCPFadeWork *work) {
-    effPCPThunderFree((void *)work->handle);
+    effThunderReleaseVectorWork((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -1917,9 +1917,9 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
     if (frame >= 0x39) {
         phase = ((f32)frame - 57.0f) * 0.125f;
         fadedColor = effBlendColor(work->color, 0, phase);
-        effPCPThunderSetParam50(work->handle, fadedColor);
+        effThunderSetVectorTint(work->handle, fadedColor);
     } else {
-        effPCPThunderSetParam50(work->handle, work->color);
+        effThunderSetVectorTint(work->handle, work->color);
     }
     func_00163508(work->handle, work);
     effThunderUpdateVectorCells(work->handle);
@@ -2633,7 +2633,7 @@ void *effPcpCreateShortThunderFadeWork(void) {
 }
 
 void effPcpReleaseShortThunderFadeWork(EffPCPFadeWork *work) {
-    effPCPThunderFree((void *)work->handle);
+    effThunderReleaseVectorWork((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2670,7 +2670,7 @@ void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
     } else {
         fadedColor = work->color;
     }
-    effPCPThunderSetParam50(work->handle, fadedColor);
+    effThunderSetVectorTint(work->handle, fadedColor);
     func_00163508(work->handle, work);
     effThunderUpdateVectorCells(work->handle);
     work->frame++;
@@ -2705,7 +2705,7 @@ void *effPcpCreateScalingThunderFadeWork(void) {
 }
 
 void effPcpReleaseScalingThunderFadeWork(EffPCPFadeWork *work) {
-    effPCPThunderFree((void *)work->handle);
+    effThunderReleaseVectorWork((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2739,7 +2739,7 @@ void effPcpThunderScaleFadeUpdate(EffPCPFadeWork *work) {
     } else {
         fadedColor = work->color;
     }
-    effPCPThunderSetParam50(work->handle, fadedColor);
+    effThunderSetVectorTint(work->handle, fadedColor);
     func_00163508(work->handle, work);
     effThunderUpdateVectorCells(work->handle);
     work->frame++;
@@ -3771,7 +3771,7 @@ void effPcpRecreateOrangeVioletFragmentSingle(void) {
 }
 
 void effPcpThunderBurstRelease(EffPCPBurstWork *work) {
-    effPCPThunderFree3((void *)work->handle);
+    effThunderReleaseFragmentWork((void *)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -3811,7 +3811,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
         point[1] = y + dirY * distance;
         point[2] = z + dirZ * distance;
         PCP_COPY_VECTOR(params + 0x10, point);
-        effPCPThunderSetParam58((void *)work->handle, work->unk10);
+        effThunderSetFragmentColor((void *)work->handle, work->unk10);
         func_00165D80(work->handle);
     }
 }
@@ -3911,12 +3911,12 @@ void effPcpScaledRespawn(EffPCPGrowWork *work) {
 }
 
 void effPcpScaledEffectRelease(EffPCPGrowWork *work) {
-    effPCPThunderFree(work->handle);
+    effThunderReleaseVectorWork(work->handle);
     sdfReleaseChipBlock(work);
 }
 
 
-extern void effPCPThunderScale(u32 handle, f32 scale);
+extern void effThunderScaleVectorDimensions(u32 handle, f32 scale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180080);
 
@@ -4607,7 +4607,7 @@ void effBlockSetRelease(EffPCPGroupSet *work) {
             u32 handle = entry->handle;
             entry++;
             i++;
-            effPCPThunderFree3((void *)handle);
+            effThunderReleaseFragmentWork((void *)handle);
         } while (i < count);
     }
     list = work->duplicates;
@@ -5245,7 +5245,7 @@ void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
         do {
             effEventReleaseNode(entry->eventA);
             effEventReleaseNode(entry->eventB);
-            effPCPThunderFree3((void *)entry->fragment);
+            effThunderReleaseFragmentWork((void *)entry->fragment);
             entry++;
             i++;
         } while (i < count);

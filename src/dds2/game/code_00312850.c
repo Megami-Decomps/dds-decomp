@@ -20,7 +20,7 @@ extern void sdfDestroyCallbackWork();
 
 extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
 
-extern s32 func_00101740(u32);
+extern s32 kwlnTaskGetTaskByName(u32);
 
 
 /* Task item descriptor (0x14): key plus optional handlers, defaults filled in by func_00312A48. */

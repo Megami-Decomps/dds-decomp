@@ -458,6 +458,7 @@ void effSetWorkTextureResource(EffWork *work, u64 textureResource) {
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DA70);
 
+
 void func_0018DB88(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }

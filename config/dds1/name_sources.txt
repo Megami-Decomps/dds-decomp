@@ -32,6 +32,7 @@
 0x00102AB0	dds3AdminReadPreviousUnsignedSample	inferred	Reads unsigned history at ring slot immediately preceding write cursor. [names_reviewed6.tsv]
 0x00102AE0	dds3AdminActivateRequestedMode	inferred	confidence=high; matched-C; src/dds1/kernel/dds3AdminiProcess.c:71:func_00102AE0; Activates a pending administrative mode after its delay, records/restores history, clears request flags, invokes the selected entry callback with data, and returns the next dispatcher.; source=names_P5.tsv:12 [names_qp11.tsv]
 0x00102C58	dds3AdminPollModeDestruction	inferred	src/dds1/kernel/dds3AdminiProcess.c func_00102C58: Waits on negative destroy-callback result; otherwise records result plus one and clears mode. [names_reviewed24.tsv]
+0x00102CD8	dds3AdminPollModeCompletion	inferred	Fam_Tail: cleanup/history restore then completion
 0x00102E58	dds3AdminReleaseTaskWork	inferred	src/dds1/kernel/dds3AdminiProcess.c func_00102E58: Calls mode destroy callback then frees attached data and task user-value block. [names_reviewed24.tsv]
 0x00103160	kwlnFindNamedSlot	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:184:func_00103160; M143; source=names_M143.tsv:1; review=Walks linked named slots, requires an exact NUL-terminated string match and returns slot index or -1. [names_qp11.tsv]
 0x001035F8	kwlnStepListCursor	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:218:func_001035F8; Updates a list cursor and optional scroll offset from caller-selected pad directions, wrapping on initial presses and bounding repeats.; source=names_pending_main.tsv:123 [names_qp11.tsv]
@@ -819,6 +820,7 @@
 0x0012BEC8	fldDrawMapQuad	inferred	untextured variant of func_0012BCC8
 0x0012BFC0	fldDrawMapQuadPacket	inferred	map quad with packet arg
 0x0012C0C8	fldDrawMapQuadScaled	inferred	map quad with float x*16, y*8 offsets
+0x0012C1F0	fldDrawFilledDisc	inferred	Fam_Mid
 0x0012C648	fldGetEncounterRuntimeResult	inferred	Returns runtime result or cached result according to encounter mode. [names_R_FuncNames6.tsv]
 0x0012C688	fldSetEncounterPendingValue	inferred	Stores the value subsequently used by encounter state handling. [names_R_FuncNames6.tsv]
 0x0012C690	fldEncProc	inferred	fld field scene and resources in game/code_00126A30.c
@@ -1378,40 +1380,41 @@
 0x00163290	effParamCreateFromTable	inferred	reads kind id and data block from a packed row, then creates the work
 0x001632E0	effCreateThunderCellSystemWork	inferred	confidence=high; src/dds1/game/code_001624D0.c:func_001632E0; Copies thunder parameters into retained work, allocates its cell system, initializes every cell and sets default color. [names_qp9.tsv]
 0x001634A0	effPCPThunderCreate	inferred	spawn wrapper: param-set block 0 + init func_001632E0
-0x001634D8	effPCPThunderFree	inferred	releases work handles +0x5C/+0x60
-0x00163518	effPCPThunderSetParam50	inferred	stores value at work +0x50
-0x00163520	effPCPThunderScale	inferred	scales work floats +0x1C/+0x20 from +0x54/+0x58 by argument
+0x001634D8	effThunderReleaseVectorWork	inferred	queued
+0x00163518	effThunderSetVectorTint	inferred	queued
+0x00163520	effThunderScaleVectorDimensions	inferred	queued
 0x00163548	effThunderCellRestart	inferred	random counters, two unit vectors, two ranges (twin 0x164078) [names_M61_EffVu.tsv]
 0x00163CD0	effThunderUpdateVectorCells	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:182:func_00163CD0; Peer-matched C proposal; P7; source=names_pending_main.tsv:136 [names_qp12_apply.tsv]
 0x00163E10	effThunderWorkCreate	inferred	0x4C head copy, particle system, cells zeroed [names_M61_EffVu.tsv]
-0x00163FD0	effPCPThunderFree2	inferred	byte-identical Free twin for the second thunder effect
+0x00163FD0	effThunderReleaseIndexedVectorWork	inferred	queued
 0x00164000	effThunderCreateWorkFromPackedParams	inferred	Extracts thunder head parameters from effect table before creating work and cells. [names_reviewed6.tsv]
-0x00164048	effThunderSetVectorCellColor	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:260:func_00164048; Stores the packed color used by the alternate vector-cell thunder work family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x00164050	effPCPThunderScale2	inferred	byte-identical Scale twin for the second thunder effect
+0x00164048	effThunderSetIndexedVectorTint	inferred	queued
+0x00164050	effThunderScaleIndexedVectorDimensions	inferred	queued
 0x00164078	effThunderRestartIndexedCell	inferred	Selects a cell by index and reinitializes its random parameters and direction vectors. [names_reviewed6.tsv]
 0x001646F8	effThunderUpdateIndexedVectorCells	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:311:func_001646F8; Peer-matched C proposal; P7; source=names_pending_main.tsv:137 [names_qp12_apply.tsv]
 0x00164838	effThunderSparkCreate	inferred	0xA4 head copy, one particle system per spark [names_M61_EffVu.tsv]
-0x00164A30	effThunderDestroySubs	inferred	frees each sub-handle in the unkA4 array then releases unkAC
+0x00164A30	effThunderReleaseSparkWork	inferred	queued
 0x00164A98	effThunderCopySparkVector	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:427:func_00164A98; Copies the leading vector for the typed orbiting thunder-spark work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x00164AA8	effPCPThunderSetParamA8	inferred	stores value at work +0xA8
+0x00164AA8	effThunderSetSparkColor	inferred	queued
 0x00164AB0	effThunderSparkInit	inferred	randomizes a 0x20-byte spark [names_M61_EffVu.tsv]
 0x00165418	effThunderFragCreate	inferred	0x54 head copy, fragment array, kind-4 system [names_M61_EffVu.tsv]
-0x001655D0	effPCPThunderFree3	inferred	releases work handles +0x60/+0x64
+0x001655D0	effThunderReleaseFragmentWork	inferred	queued
 0x00165600	effThunderShiftOriginByVectorDelta	inferred	Stores new source vector and adds its delta to the existing origin vector. [names_reviewed6.tsv]
-0x00165630	effPCPThunderSetParam58	inferred	stores value at work +0x58
+0x00165630	effThunderSetFragmentColor	inferred	queued
 0x00165690	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00165690; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001656B8	effThunderRandomizeFrag	inferred	fills a 12-byte fragment with two rand-modulo values and grey 0x80808080
-0x001660C8	effPCPThunderFree4	inferred	releases work handles +0x5C/+0x60/+0x64
+0x001660C8	effThunderReleaseDualFragmentWork	inferred	queued
 0x00166100	effThunderShiftEndpointsWithAnchor	inferred	Moves an effect origin by the same delta as its replacement anchor vector. [names_reviewed14.tsv]
 0x00166130	effThunderSetDualFragmentColor	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:600:func_00166130; Stores the packed color in the dual-fragment thunder work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00166138	effThunderRandomizeFrag2	inferred	byte-identical twin of effThunderRandomizeFrag for the second thunder effect
 0x00166810	effThunderUpdateDualFragments	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00166810; Runs fragment delay/activity/fade/reset transitions and writes identical multiplied colors into both particle systems before queueing their cells.; source=names_P5.tsv:11 [names_qp11.tsv]
 0x00166960	effThunderCellCreate	inferred	0x48 head copy, kind-2 system, cells randomized [names_M61_EffVu.tsv]
-0x00166AF0	effPCPThunderFree5	inferred	releases work handles +0x50/+0x54
+0x00166AF0	effThunderReleaseCellWork	inferred	queued
 0x00166B20	effThunderCopyCellVector	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:708:func_00166B20; Copies the leading vector for the typed three-axis thunder-cell work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x00166B30	effPCPThunderSetParam4C	inferred	stores value at work +0x4C
+0x00166B30	effThunderSetCellWorkValue	inferred	queued
 0x00166B38	effThunderRandomizeCell	inferred	fills a 20-byte cell with three (rand-0.5)*2 floats and two rand-modulo values
 0x00167070	effThunderCellUpdate	inferred	counts down cells, fades color, re-randomizes, flushes system [names_M61_EffVu.tsv]
+0x00167178	effThunderChainGroupCreate	inferred	Fam_Mid: allocates group, creates fragments via effThunderFragCreate
 0x00167350	effThunderGroupRelease	inferred	Releases each thunder handle and the group work. [names_qp9.tsv]
 0x001673C8	effSetResourceBlendColor	inferred	confidence=high; matched-C; src/dds1/game/code_00167178.c:82:func_001673C8; Writes the resource handle blend-color word consumed by the blur resource caller; no per-channel conversion or multiplication occurs.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00167A78	effThunderUpdateChainSegments	inferred	confidence=high; matched-C; src/dds1/game/code_00167178.c:88:func_00167A78; Propagates adjacent parent point pairs into each thunder child segment, seeds later child fragment histories from the preceding segment, multiplies parent/child colors, advances the child counter and queues its particle system.; source=names_P5.tsv:14 [names_qp11.tsv]
@@ -1546,18 +1549,29 @@
 0x00170BF0	effPcpScatterSharedDuplicate	inferred	duplicate of the shared-particle effect: copies the child work, then re-creates the handle array via effParamWorkDuplicate
 0x00170CE0	effPcpScatterReleaseParticleGroup	inferred	releases each particle handle in the scatter work array then frees the array and child work resources
 0x00170D68	effPcpScatterInitRadialParticle	inferred	readability/matching review (QP16)
-0x00171520	effSetScatterDuplicatedHandles	inferred	Assigns the duplicated-handles array on scatter work. [names_reviewed17.tsv]
-0x00171528	effScatterScaleParticleValues	inferred	Multiplies three work float values by the supplied scale. [names_reviewed6.tsv]
-0x00171848	effPcpScatterLinkedDuplicate	inferred	duplicate counterpart of the effect built by func_00171550
+0x00171510	effScatterCopyRadialVector	inferred	queued
+0x00171520	effScatterSetRadialColor	inferred	queued
+0x00171528	effScatterScaleRadialInputs	inferred	queued
+0x00171550	effScatterCreateSpinWork	inferred	queued
+0x001717E0	effScatterCreateSpinFromTable	inferred	queued
+0x00171848	effScatterCloneSpinWork	inferred	queued
 0x00171938	effPcpScatterReleaseSharedParticles	inferred	releases the secondary scatter variant particle array and its resource and child work handles
 0x001719C0	effScatterSpriteSpawn	inferred	VU0 macro rewrite; name from behaviour [names_M58_VuSweep.tsv]
-0x00172138	effScatterScalePair	inferred	Multiplies both particle work float values by the scale. [names_reviewed6.tsv]
-0x00172468	effPcpScatterTableDuplicate	inferred	duplicate counterpart of the effect built by func_00172158
+0x00172120	effScatterCopySpinVector	inferred	queued
+0x00172130	effScatterSetSpinColor	inferred	queued
+0x00172138	effScatterScaleSpinRadii	inferred	queued
+0x00172158	effScatterCreateRibbonWork	inferred	queued
+0x00172400	effScatterCreateRibbonFromTable	inferred	queued
+0x00172468	effScatterCloneRibbonWork	inferred	queued
 0x00172568	effPcpScatterReleaseLinkedParticles	inferred	releases the third scatter variant particle array and its resource and child work handles
+0x001725F0	effScatterInitRibbonParticle	inferred	queued
+0x00172C48	effScatterCopyRibbonVector	inferred	queued
+0x00172C58	effScatterSetRibbonColor	inferred	queued
 0x00172C68	effPcpScatterPoolCreate	inferred	allocates count*0x78+0x34 slot pool with a 0x34-byte control block; clears D_003D6580
 0x00173018	effPcpScatterResCreate	inferred	allocates the shared scatter resource and initializes its refcount to 1
 0x00173068	effPcpScatterResRelease	inferred	decrements the scatter resource refcount, releasing handles and freeing it at zero
 0x001730B8	effPcpScatterResAddRef	inferred	increments the scatter resource refcount and returns it
+0x001732E8	effScatterCreateRingFromTable	inferred	queued
 0x00173330	effScatterCloneWithSharedObject	inferred	Creates a child from particle params and shares the original scatter object. [names_reviewed6.tsv]
 0x00173378	effScatterReleaseObjectAndBuffer	inferred	Releases the scatter object and owned buffer. [names_reviewed6.tsv]
 0x001733A8	effScatterRingInit	inferred	Initializes scatter-ring geometry and parameters. [names_qp9.tsv]
@@ -1567,6 +1581,7 @@
 0x00173AD8	effScatterSetParticleScale	inferred	Writes scale on the scatter particle work instance. [names_reviewed6.tsv]
 0x00173AE0	effScatterSetParticleColor	inferred	Writes packed color on the scatter particle work instance. [names_reviewed6.tsv]
 0x00173AE8	effPcpScatterTransformMatrix	inferred	loads two matrices into VU registers and calls the matrix transform before writing the result
+0x00173B48	effScatterCreateDampedRing	inferred	queued
 0x00173D78	effScatterSpawnFromParameterPair	inferred	Extracts two effect parameter blocks and uses them to create scatter work. [names_reviewed6.tsv]
 0x00173DC0	effScatterCloneWithSharedResource	inferred	Creates a scatter child from particle params and shares the parent's scatter resource. [names_reviewed6.tsv]
 0x00173E08	effScatterReleaseInstanceResources	inferred	Releases scatter object and its owned allocation buffer. [names_reviewed6.tsv]
@@ -1577,6 +1592,7 @@
 0x00174610	effScatterSetInstanceScale	inferred	src/dds1/effect/effPCPScatter.c func_00174610: Stores scalar scale in scatter instance work. [names_reviewed24.tsv]
 0x00174618	effScatterSetInstanceColor	inferred	src/dds1/effect/effPCPScatter.c func_00174618: Stores packed color in scatter instance work. [names_reviewed24.tsv]
 0x00174620	effScatterComposeWorkMatrix	inferred	Loads source and work matrices, multiplies via VU, and stores result on work. [names_reviewed6.tsv]
+0x00174680	effScatterCreateTwoColorRing	inferred	queued
 0x00174880	effScatterCreateFromParameterTable	inferred	confidence=high; src/dds1/effect/effPCPScatter.c:func_00174880; Extracts particle/resource blocks from an effect parameter table and creates its scatter instance. [names_qp9.tsv]
 0x001748C8	effCreateScatterChildSharingParentResource	inferred	Creates a scatter child using parent particle parameters and shares its resource. [names_reviewed16.tsv]
 0x00174910	effReleaseScatterObjectAndOwnedBuffer	inferred	Releases both the scatter object and its separately allocated backing buffer. [names_reviewed17.tsv]
@@ -1588,6 +1604,7 @@
 0x001751C8	effSetScatterWorkColor	inferred	Stores the packed color parameter in the scatter effect work. [names_reviewed17.tsv]
 0x001751D0	effScatterComposeParticleMatrix	inferred	confidence=high; matched-C; src/dds1/effect/effPCPScatter.c:1548:func_001751D0; Multiplies the supplied matrix by work matrix and stores the resulting matrix.; source=revalidated-unapplied-names_R_Names21.tsv:9 [names_qp13.tsv]
 0x00175230	effPcpScatterCreatePlainInstance	inferred	M141; sources=names_pending_main.tsv; twin=0x0017CE88, input-family pairing. [names_qp10.tsv]
+0x00175420	effScatterCreatePlainRingFromTable	inferred	queued
 0x00175468	effCloneScatterWithSharedResource	inferred	src/dds1/effect/effPCPScatter.c func_00175468: Creates child using particle parameters and shares source scatter resource into child. [names_reviewed24.tsv]
 0x001754B0	effReleaseScatterWorkResources	inferred	Releases owned scatter object and separately frees the scatter work buffer. [names_reviewed19.tsv]
 0x00175780	effScatterFlatRingUpdate	inferred	VU0 macro rewrite; name from behaviour [names_M58_VuSweep.tsv]
@@ -3294,7 +3311,7 @@
 0x0020EA40	btlDispatchActionAnimation	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x0020EBA0	btlGetPhaseCommand	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x0020EBE0	btlGetAlternatePhaseCommand	inferred	btl battle control and actor operations in game/code_001FF030.c
-0x0020ECF8	btlIsActionIdListed	inferred	checks u16 id list of the current mode table for the unit id at +0x124 [names_M43_Mid2.tsv]
+0x0020ECF8	btlIsSceneUnitModeListed	inferred	R_Structs54 B56
 0x0020F808	btlRunCleanupAndLog	inferred	Invokes battle cleanup if configured and emits debug text. [names_reviewed8.tsv]
 0x0020F840	btlReleaseBossData	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x0020F8E0	btlFindScriptResource	inferred	btl battle control and actor operations in game/code_001FF030.c
@@ -4135,6 +4152,7 @@
 0x00254288	mnuDrawMantraCostTransition	inferred	confidence=high; src/dds1/game/code_00253E58.c:func_00254288; Draws the Mantra cost and surrounding panel with state-dependent fade or pulse scaling. [names_qp9.tsv]
 0x00254680	mnuDrawDisplaySpriteAndPanelMarks	inferred	Submits a display sprite then draws its aligned panel marks. [names_reviewed16.tsv]
 0x002549F0	mnuDrawDisplayModeSprites	inferred	confidence=high; matched-C; src/dds1/game/code_002549F0.c:17:func_002549F0; Peer-matched C proposal; P7; source=names_pending_main.tsv:139 [names_qp12_apply.tsv]
+0x00254B30	itfDspDrawSelectionStrip	inferred	queued
 0x00254C30	itfDspInitSelectedWindow	inferred	Stores selection value into the display unit and calls mnuCallInitWide with scaled coordinates.
 0x00254E48	itfDspDrawIndexedRecord	inferred	Fetches low-16-bit indexed display record into a temporary buffer and draws it with tagged attributes.
 0x00254EF0	mnuDrawDisplayPlaceholder	inferred	readability/matching review (QP16)
@@ -4150,6 +4168,7 @@
 0x00255818	itfDspSignalE	inferred	itf interface rendering and text in game/code_00254B30.c
 0x00255838	mnuUpdateSparkle	inferred	Updates a display particle countdown and randomizes phase, position and size. [names_reviewed14.tsv]
 0x002559F8	mnuTickMantraSparkParticles	inferred	Mapped DDS2 counterpart already has established name mnuTickMantraSparkParticles; DDS1 body independently shows matching behavior (1.00 match). [names_reviewed19.tsv]
+0x00255A98	mnuDrawMantraSparkParticle	inferred	queued
 0x00255EF8	itfDspDrawMarksA	inferred	itf interface rendering and text in game/code_00254B30.c
 0x00255F78	itfDspDrawMarksB	inferred	itf interface rendering and text in game/code_00254B30.c
 0x00255FF8	mnuGetMantraDisplayFlags	inferred	confidence=high; matched-C; src/dds1/game/code_00254B30.c:270:func_00255FF8; M143; source=names_M143.tsv:14; review=Combines selected-profile, capped-value, state and entry-property bits into display flags. [names_qp11.tsv]
@@ -5163,6 +5182,7 @@
 0x002A4448	effReleaseRingResourceHandle	inferred	Releases ring queue asset then frees its pointer holder. [names_reviewed5.tsv]
 0x002A46E0	billDrawCellBlendA	inferred	twin of func_0029EEC8 that writes list[0] and calls func_002A5640
 0x002A4850	effResetClassFrameAndFlags	inferred	Clears nested class flags and initializes the referenced class frame. [names_reviewed5.tsv]
+0x002A4878	effCreateScaledClassDrawState	inferred	Fam_Tail
 0x002A4AB8	effReleaseClassDrawResources	inferred	Releases effect resource references, destroys class work and frees its backing allocation. [names_reviewed5.tsv]
 0x002A4C40	billDrawClassUpdatedCellBlend	inferred	confidence=high; matched-C; src/dds1/game/code_0029C530.c:3047:func_002A4C40; Multiplies packed cell colors, updates the linked class work when alpha is nonzero, builds its scaled quaternion transform and draws the billboard cell.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002A4DE8	effResetClassRingFrame	inferred	confidence=high; matched-C; src/dds1/game/code_0029C530.c:3098:func_002A4DE8; Clears the linked ring frame counter reached through the class draw state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -5221,6 +5241,7 @@
 0x002A8A20	effFreeIndexedEntries	inferred	Calls func_002AACD0 for each 0x10-byte entry in the pool and then frees the pool through func_002CFF98
 0x002A9340	effResetIndexedInstanceFrames	inferred	Iterates each configured effect instance and resets its dispatch counter. [names_reviewed5.tsv]
 0x002A95C0	effReleaseBillFrameEntries	inferred	Iterates billboard frame entries, releases each effect work and frees their header. [names_reviewed5.tsv]
+0x002A9690	effUpdateRadialClassInstances	inferred	Fam_Tail
 0x002A9860	effSeedBillScaleRange	inferred	Randomizes start and end scale and seeds each billboard frame with negative random start. [names_reviewed5.tsv]
 0x002A9978	effCreateRetainedPointSetColorRows	inferred	confidence=high; matched-C; src/dds1/game/code_0029C530.c:4097:func_002A9978; Allocates and retains a row table, constructs its point sets and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002A9D38	effReleaseBillPointEntries	inferred	Releases each spaced billboard point entry then frees the backing allocation. [names_reviewed5.tsv]
@@ -6288,6 +6309,7 @@
 0x002E86C8	sdfServiceUnblockedWorkerThread	inferred	Sleeps until signaled, then services worker requests while the gate is clear. [names_reviewed10.tsv]
 0x002E8900	sndSendCommandPacket	inferred	confidence=high; src/dds1/game/code_002E87A8.c:func_002E8900; Sends the supplied command/channel packet, waits using the returned request identifier and returns that identifier. CORRECTED: func_002E88F8 is an empty stub (jr/nop), so nothing is waited on; named for what the body does. [names_qp9.tsv]
 0x002E8AB0	sndInitializeChannelAndTrackState	inferred	confidence=high; src/dds1/game/code_002E87A8.c:func_002E8AB0; Initializes sixteen sound channels, allocates channel-zero storage, and resets thirteen track slots to unused ids. [names_qp9.tsv]
+0x002E8B58	sndAllocateAlignedIopBuffers	inferred	queued
 0x002E8D10	sndStartTrackDefault	inferred	Prepares a track ID and sends command 0x20 with setting 0x7f.
 0x002E8D58	sndSendSingleWordControlPacket	inferred	Submits a 16-byte command packet whose first word is the provided value. [names_reviewed21.tsv]
 0x002E8D88	sndStartTrackAlternate	inferred	Prepares the same track ID and sends alternate command 0x130 with setting 0x7f.

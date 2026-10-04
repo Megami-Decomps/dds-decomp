@@ -37,7 +37,7 @@ typedef struct {
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *sdfAllocGeneralBlock(s32 size);
 extern s32 sdfResourceRetainAddress(void *resource);
-extern u32 effGetResourceFirstWord(s32 index);
+extern s32 effGetResourceFirstWord(s32 index);
 extern s32 func_00190E58(s32, s32, f32, s32, f32);
 extern void effMagatuhiFillColorTable(s32, s32, s32);
 extern s16 D_00452110[];

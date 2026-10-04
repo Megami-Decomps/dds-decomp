@@ -8659,7 +8659,7 @@ typedef struct SoundSlotOwner {
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
-u32 func_001F3C38(u32 *sound, u32 slot) {
+u32 sndBuildMotSeResourceKey(u32 *sound, u32 slot) {
     u32 id = ((SoundSlotOwner *)sound)->id;
     u32 category = ((SoundSlotOwner *)sound)->category;
     SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
@@ -8700,7 +8700,7 @@ void sndLoadMotSeFiles(u32 *sound) {
     s32 offset = 0x10;
     u8 *handleTable = (u8 *)sound + 8;
     do {
-        u32 id = func_001F3C38(sound, slot);
+        u32 id = sndBuildMotSeResourceKey(sound, slot);
         if (id != 0) {
             if (slot != 0xB) {
                 func_003014F0(filename, D_003A5158, D_003BB6B0, id >> 16);

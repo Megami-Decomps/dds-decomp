@@ -6,7 +6,7 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern s32 kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(void);
 extern void *evtGetTaskData(s32 eventId);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
 extern void fldSetRelocateOnRelease(u32);

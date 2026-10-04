@@ -2509,7 +2509,7 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
 
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 extern void scrSetCurrentActor(u32, u32);
-extern s32 kwlnTaskGetUserValue(s32);
+extern u32 kwlnTaskGetUserValue(s32);
 extern void func_00101968(s32, s32);
 extern void func_001A45C0(s32, s32, s32, s32);
 

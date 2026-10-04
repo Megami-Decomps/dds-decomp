@@ -479,7 +479,7 @@ typedef struct Cb3714C {
     void (*cb14)(void *arg, void *extra);  /* 0x14 */
     void (*cb18)(void *arg, void *extra);  /* 0x18 */
     void (*cb1C)(void *arg, f32 scale);  /* 0x1C */
-    void (*cb20)(void *arg);  /* 0x20 */
+    void (*cb20)(void *arg, u32 color);  /* 0x20 */
     u32 unk24;                /* 0x24 */
 } Cb3714C;
 
@@ -543,7 +543,7 @@ typedef struct FileJob {
     f32 offset[4];    /* 0x40 */
     f32 quat[4];
     f32 scale;        /* 0x60 */
-    u8 unk64[4];
+    u32 color;              /* 0x64 */
     u32 xformFlags;   /* 0x68 */
     u8 unk6C[0x14];
     s32 unk80;
@@ -2912,11 +2912,10 @@ void fileJobInvokeScaleCallback(FileJob *job, f32 scale) {
     }
 }
 
-void fileDispatchJobTypeCallback(FileJob *job) {
-    u16 idx = ((FileJob *)job)->type;
-    void (*cb)(void *) = D_0037E14C[idx].cb20;
+void fileDispatchJobTypeCallback(FileJob *job, u32 color) {
+    void (*cb)(void *, u32) = D_0037E14C[job->type].cb20;
     if (cb != NULL) {
-        cb(((FileJob *)job)->data);
+        cb(job->data, color);
     }
 }
 

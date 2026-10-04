@@ -183,7 +183,7 @@ void func_00236568(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
-extern s32 func_00101740(void *name);
+extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -684,6 +684,7 @@ u16 func_00233F60(MdlRecord *record) {
 extern char D_00420FF0[], D_00421000[], D_00421010[], D_00421020[], D_00421030[], D_00421040[];
 extern char D_00436FC0[], D_00436FC8[];
 
+/* Append the kind-dependent record summary at the requested text position and style. */
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00420FF0);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421000);
@@ -696,7 +697,6 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421030);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421040);
 
-/* Append the kind-dependent record summary at the requested text position and style. */
 void func_00233F68(s32 packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= 1 && record->kind <= 5) {
         switch (record->kind) {
@@ -1992,7 +1992,7 @@ u32 mdlUpdateViewerNodeCursorTask(void) {
 }
 
 s32 mdlIsDebugTimeGraph(void) {
-    return func_00101740("DebugTimeGrph") != 0;
+    return kwlnTaskGetTaskByName("DebugTimeGrph") != 0;
 }
 
 /* Debug menu: page 0 selects an action, pages 1-4 edit the color channels and value steps. */
@@ -2371,7 +2371,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     kwlnTaskDestroyWithHierarchyByName(D_004214F8, 0);
     def = D_003C8890;
     do {
-        if (func_00101740((void *)def->name) == 0) {
+        if (kwlnTaskGetTaskByName((void *)def->name) == 0) {
             func_00103388(def->name, def->arg, 0, 0);
         }
         i++;

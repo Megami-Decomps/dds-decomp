@@ -3,6 +3,7 @@
 #include "gs_packet.h"
 #include "sdf.h"
 
+extern s32 func_0035C860(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;
 
 typedef struct {
@@ -225,7 +226,6 @@ static inline s32 sprPlaceSlot(SdfSpritePlace *p) { return p->slot; }
 static inline s32 sprPlaceX(SdfSpritePlace *p) { return p->offsetX; }
 static inline s32 sprPlaceY(SdfSpritePlace *p) { return p->offsetY; }
 
-extern void func_0035C860(char *, const char *, ...);
 extern s32 fldLoadMapResource(const char *, MapResource *);
 
 

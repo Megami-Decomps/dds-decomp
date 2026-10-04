@@ -22,6 +22,7 @@ typedef struct TitleMenuWork {
     TitleResultRow rows[1];
 } TitleMenuWork;
 
+
 extern void func_00306C28(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void *memcpy(void *, const void *, u32);
 extern u32 D_004285E0[4];

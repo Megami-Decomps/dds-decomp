@@ -133,9 +133,9 @@ extern u8 kwlnLargeMotorTarget;
 
 extern u8 kwlnPadMotorLevels[2];
 
-extern void *func_00101740(const char *);
+extern void *kwlnTaskGetTaskByName(const char *);
 extern void *sdfAllocSizeClassBlock(s32);
-extern void *func_00102BC8(void *task);
+extern void *dds3AdminPollModeCompletion(void *task);
 extern void dds3AdminReleaseTaskWork(void);
 extern char dds3AdminTaskName[];
 extern s32 sdfCreateResetPacketList(void);
@@ -165,7 +165,7 @@ void kwlnDebugTaskCreate(void) {
     KwlnDebugWork *work;
     s32 i;
 
-    if (func_00101740(dds3AdminTaskName) == NULL) {
+    if (kwlnTaskGetTaskByName(dds3AdminTaskName) == NULL) {
         work = sdfAllocSizeClassBlock(0x24);
         work->unk0 = 0;
         work->unk4 = 0;
@@ -178,7 +178,7 @@ void kwlnDebugTaskCreate(void) {
         }
         work->unk1C = 0;
         work->unk20 = 0;
-        kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, func_00102BC8, dds3AdminReleaseTaskWork, work);
+        kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, work);
     }
 }
 

@@ -6,7 +6,7 @@ extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 extern void *sdfResourceRetainAddress(void *resource);
 extern void sdfReleaseResourceAllocation(void *arg);
 extern s32 bfFindScriptIndexByName(void *, const char *);
-extern KwlnTask *func_00101740(const char *name);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 extern void evtReleaseSceneResource(Scene *);
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
@@ -99,7 +99,7 @@ void evtDestroyNamedTask(void *unusedContext, const char *taskName) {
     KwlnTask *task;
 
     if (taskName != NULL) {
-        task = func_00101740(taskName);
+        task = kwlnTaskGetTaskByName(taskName);
         if (task == NULL) {
             return;
         }

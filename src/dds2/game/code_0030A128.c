@@ -19,7 +19,7 @@ extern u32 D_00439090;
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 func_00101740(u32);
+extern s32 kwlnTaskGetTaskByName(u32);
 
 extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
@@ -79,7 +79,7 @@ extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
 extern void func_00316E70(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
-extern void dspCloseChannel(void);
+extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_004388A4;
@@ -370,7 +370,7 @@ void fldStopLmapTask(void) {
 }
 
 s32 fldLmapTaskExists(void) {
-    return func_00101740((u32)fldLocalMapTaskName) != 0;
+    return kwlnTaskGetTaskByName((u32)fldLocalMapTaskName) != 0;
 }
 
 void func_0030AA68(const char *fmt, ...) {

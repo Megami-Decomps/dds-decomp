@@ -510,6 +510,7 @@ extern s32 sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 i
 extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[], D_003ABAD0[];
 extern char D_003BBB80[], D_003BBB88[];
 
+/* Append the kind-dependent record summary at the requested text position and style. */
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA80);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA90);
@@ -522,7 +523,6 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAC0);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAD0);
 
-/* Append the kind-dependent record summary at the requested text position and style. */
 void func_002193F8(s32 packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= 1 && record->kind <= 5) {
         switch (record->kind) {

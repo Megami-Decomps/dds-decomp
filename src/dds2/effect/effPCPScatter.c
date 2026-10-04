@@ -199,9 +199,9 @@ struct PcpScatterInstanceC {
     u32 allocationHandle;
 };
 
-extern void *effScatterInstanceCreateB();
+extern void *effScatterCreateDampedRing();
 
-extern void *effScatterInstanceCreateC();
+extern void *effScatterCreateTwoColorRing();
 
 extern void *effPcpScatterCreatePlainInstance();
 
@@ -382,8 +382,8 @@ extern void effPcpScatterReleasePoolResources(PcpScatterPool *work);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern u32 effMiscRand(void *state);
 extern u32 effParamWorkCreate(s32 kind, void *params);
-extern PcpScatterSpinWork *func_001791A8();
-extern PcpScatterRibbonWork *func_00179DB0();
+extern PcpScatterSpinWork *effScatterCreateSpinWork();
+extern PcpScatterRibbonWork *effScatterCreateRibbonWork();
 
 extern u32 effParamWorkDuplicate(u32 param);
 
@@ -499,17 +499,17 @@ void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00178B80);
 
 /* Copy one packed four-component vector; no scalar reconstruction of the W lane. */
-void func_00179168(void *destination, void *source) {
+void effScatterCopyRadialVector(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
 /* Store the radial work's packed color; this does not replace duplicated handles. */
-void effSetScatterDuplicatedHandles(PcpScatterRadialWork *work, u32 color) {
+void effScatterSetRadialColor(PcpScatterRadialWork *work, u32 color) {
     work->color = color;
 }
 
 /* Rescale both radius inputs and the still-opaque motion input in place; calls compound. */
-void effScatterScaleParticleValues(float scale, PcpScatterRadialWork *work) {
+void effScatterScaleRadialInputs(float scale, PcpScatterRadialWork *work) {
     work->params.unk3C *= scale;
     work->params.startRadius *= scale;
     work->params.endRadius *= scale;
@@ -517,7 +517,7 @@ void effScatterScaleParticleValues(float scale, PcpScatterRadialWork *work) {
 
 /* Return spin work with trailing particles, a draw pool and optional child groups.
  * Group normalization occurs only when child parameters and duplication are enabled. */
-PcpScatterSpinWork *func_001791A8(params, resource, particleParams)
+PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
     const PcpScatterSpinParams *params;
     u32 resource;
     void *particleParams;
@@ -576,7 +576,7 @@ PcpScatterSpinWork *func_001791A8(params, resource, particleParams)
 }
 
 /* Create spin work from three parameter-table blocks, retaining native local values. */
-void func_00179438(u64 parameterTable) {
+void effScatterCreateSpinFromTable(u64 parameterTable) {
     u64 params;
     u64 resource;
     u64 options;
@@ -584,13 +584,13 @@ void func_00179438(u64 parameterTable) {
     params = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     options = effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK);
-    func_001791A8(params, resource, options);
+    effScatterCreateSpinWork(params, resource, options);
 }
 
 
 /* Return a spin clone sharing the texture owner; each child clones source group zero.
  * The copied group size is used directly, without the constructor's conditional clamp. */
-PcpScatterSpinWork *effPcpScatterLinkedDuplicate(source)
+PcpScatterSpinWork *effScatterCloneSpinWork(source)
     PcpScatterSpinWork *source;
 {
     PcpScatterSpinWork *work;
@@ -599,7 +599,7 @@ PcpScatterSpinWork *effPcpScatterLinkedDuplicate(source)
     u32 *handles;
     u32 i;
 
-    work = func_001791A8(&source->params, 0, 0);
+    work = effScatterCreateSpinWork(&source->params, 0, 0);
     effPcpScatterSharePoolResource(work->childWork, source->childWork);
     if (work->params.duplicateParticles != 0) {
         work->duplicateGroupCount = work->params.particleCount / work->params.particlesPerGroup;
@@ -664,24 +664,24 @@ void effScatterSpriteSpawn(PcpScatterSpinWork *work, s32 index)
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00179780);
 
 /* Copy the spin variant's packed parameter vector, including its existing W lane. */
-void func_00179D78(void *destination, void *source) {
+void effScatterCopySpinVector(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
 /* Replace the spin work's packed color. */
-void func_00179D88(PcpScatterSpinWork *work, u32 color) {
+void effScatterSetSpinColor(PcpScatterSpinWork *work, u32 color) {
     work->color = color;
 }
 
 /* Rescale spin start/end radius inputs in place; repeated calls compound. */
-void effScatterScalePair(float scale, PcpScatterSpinWork *work) {
+void effScatterScaleSpinRadii(float scale, PcpScatterSpinWork *work) {
     work->params.startRadius *= scale;
     work->params.endRadius *= scale;
 }
 
 /* Return ribbon work with trailing particles and optional duplicated child groups.
  * As with spin work, the zero group-size clamp is conditional on child creation. */
-PcpScatterRibbonWork *func_00179DB0(params, resource, particleParams)
+PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParams)
     const PcpScatterRibbonParams *params;
     u32 resource;
     void *particleParams;
@@ -740,7 +740,7 @@ PcpScatterRibbonWork *func_00179DB0(params, resource, particleParams)
 }
 
 /* Create ribbon work from the parameter, resource and child-work blocks. */
-void func_0017A058(u64 parameterTable) {
+void effScatterCreateRibbonFromTable(u64 parameterTable) {
     u64 params;
     u64 resource;
     u64 options;
@@ -748,13 +748,13 @@ void func_0017A058(u64 parameterTable) {
     params = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     options = effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK);
-    func_00179DB0(params, resource, options);
+    effScatterCreateRibbonWork(params, resource, options);
 }
 
 
 /* Return a ribbon clone sharing its texture owner and cloning source group zero.
  * This clone normalizes the copied group size even though radial/spin clones do not. */
-PcpScatterRibbonWork *effPcpScatterTableDuplicate(source)
+PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
     PcpScatterRibbonWork *source;
 {
     PcpScatterRibbonWork *work;
@@ -763,7 +763,7 @@ PcpScatterRibbonWork *effPcpScatterTableDuplicate(source)
     u32 *handles;
     u32 i;
 
-    work = func_00179DB0(&source->params, 0, 0);
+    work = effScatterCreateRibbonWork(&source->params, 0, 0);
     effPcpScatterSharePoolResource(work->childWork, source->childWork);
     if (work->params.duplicateParticles != 0) {
         if (work->params.particlesPerGroup == 0) {
@@ -804,7 +804,7 @@ void effPcpScatterReleaseLinkedParticles(PcpScatterRibbonWork *work) {
 
 /* Seed ribbon index with fixed tilt angles and a normalized random XZ direction.
  * The packed direction W lane and the opaque motion fields retain native setup. */
-void func_0017A248(PcpScatterRibbonWork *work, s32 index)
+void effScatterInitRibbonParticle(PcpScatterRibbonWork *work, s32 index)
 {
     f32 rightAngle = EFF_SCATTER_RIGHT_ANGLE_DEGREES * EFF_SCATTER_DEGREES_TO_RADIANS;
     f32 diagonalAngle = EFF_SCATTER_DIAGONAL_ANGLE_DEGREES * EFF_SCATTER_DEGREES_TO_RADIANS;
@@ -833,12 +833,12 @@ void func_0017A248(PcpScatterRibbonWork *work, s32 index)
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017A340);
 
 /* Copy the ribbon variant's packed parameter vector without rebuilding components. */
-void func_0017A8A0(void *destination, void *source) {
+void effScatterCopyRibbonVector(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
 /* Replace the ribbon work's packed color. */
-void func_0017A8B0(PcpScatterRibbonWork *work, u32 color) {
+void effScatterSetRibbonColor(PcpScatterRibbonWork *work, u32 color) {
     work->color = color;
 }
 
@@ -1058,7 +1058,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
 }
 
 /* Return ring work created from the first two parameter-table blocks. */
-PcpScatterInstance *effScatterBlockDuplicate(u64 parameterTable) {
+PcpScatterInstance *effScatterCreateRingFromTable(u64 parameterTable) {
     u64 particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     u64 resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
 
@@ -1203,7 +1203,7 @@ void effScatterRingUpdate(PcpScatterInstance *work, s32 index)
     }
 }
 
-extern s32 effMultiplyPackedColors(s32 color, s32 param);
+extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
 extern void func_0017DA28(void *draw);
@@ -1286,7 +1286,7 @@ void effPcpScatterTransformMatrix(PcpScatterInstance *work, void *source) {
 
 /* Return the radius-damped ring variant with a shared instance clock.
  * Normalize the copied delay range too, because loop restarts read that stored value. */
-void *effScatterInstanceCreateB(src, resource)
+void *effScatterCreateDampedRing(src, resource)
     PcpScatterParamsB *src;
 
     u32 resource;
@@ -1338,7 +1338,7 @@ void effScatterSpawnFromParameterPair(u64 parameterTable) {
 
     particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
-    effScatterInstanceCreateB(particleParams, resource);
+    effScatterCreateDampedRing(particleParams, resource);
 }
 
 /* Return freshly initialized radius-damped ring work sharing the source resource. */
@@ -1346,7 +1346,7 @@ PcpScatterInstanceB *effScatterCloneWithSharedResource(PcpScatterInstanceB *work
 {
     PcpScatterInstanceB *child;
 
-    child = effScatterInstanceCreateB(&work->params, NULL);
+    child = effScatterCreateDampedRing(&work->params, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }
@@ -1578,7 +1578,7 @@ void effScatterComposeWorkMatrix(PcpScatterInstanceB *work, void *source) {
 
 
 /* Return two-color ring work with an instance clock and normalized stored delay range. */
-void *effScatterInstanceCreateC(src, resource)
+void *effScatterCreateTwoColorRing(src, resource)
     PcpScatterParamsC *src;
 
     u32 resource;
@@ -1630,7 +1630,7 @@ void effScatterCreateFromParameterTable(u64 parameterTable) {
 
     particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
-    effScatterInstanceCreateC(particleParams, resource);
+    effScatterCreateTwoColorRing(particleParams, resource);
 }
 
 /* Return freshly initialized two-color ring work sharing the source resource. */
@@ -1638,7 +1638,7 @@ PcpScatterInstanceC *effCreateScatterChildSharingParentResource(PcpScatterInstan
 {
     PcpScatterInstanceC *child;
 
-    child = effScatterInstanceCreateC(&work->params, NULL);
+    child = effScatterCreateTwoColorRing(&work->params, NULL);
     effShareScatterResource(child->scatterObject, work->scatterObject);
     return child;
 }
@@ -1970,7 +1970,7 @@ void *effPcpScatterCreatePlainInstance(src, resource)
 }
 
 /* Create flat-ring work from its parameter and resource table blocks. */
-void func_0017D078(u64 parameterTable) {
+void effScatterCreatePlainRingFromTable(u64 parameterTable) {
     u64 particleParams;
     u64 resource;
 

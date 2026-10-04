@@ -129,9 +129,9 @@ INCLUDE_ASM(const s32, "game/code_0029CC90", ptyComputeTotalExp);
 
 /* Same party-unit reward header layout as DDS1, including AP status. */
 typedef struct BrsExpUnit {
-    u16 flags;          /* 0x00: bit 1 means active party member */
+    u16 flags;
     u8 pad02[0xC];
-    u16 apStatus;       /* 0x0E */
+    u16 apStatus;
 } BrsExpUnit;
 
 typedef struct BrsProfileApRecord {
@@ -166,7 +166,7 @@ s32 func_0029CF00(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
 }
 
 /* Active party members take full EXP; benched members need the half/full
- * EXP skills (0x23F/0x240 respectively). The third caller arg is unused. */
+ * EXP skills (0x23F/0x240 respectively). */
 s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
     s32 result;
 

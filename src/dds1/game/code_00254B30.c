@@ -86,7 +86,7 @@ extern void func_003014F0(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
 
 /* Draw the selection strip from the last row back to the first. */
-void func_00254B30(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *windowContext, s32 drawContext) {
+void itfDspDrawSelectionStrip(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *windowContext, s32 drawContext) {
     DspUnit *displayUnit = windowContext->unit;
     s32 selectedIndex = *displayUnit->selectedIndex;
     s32 rowIndex;
@@ -363,7 +363,7 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
 extern f32 sdfSinPoly(f32);
 extern void func_0024E1C8(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_00255A98(const DspParticle *particle, s32 sprite, s32 surfaceIndex) {
+void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 surfaceIndex) {
     f32 fraction;
     s32 x;
     s32 y;

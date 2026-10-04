@@ -28,7 +28,7 @@ extern void sdfReleaseResourceAllocation(u32);
 
 extern void *memset(void *, s32, u32);
 
-extern s32 func_002AAF70(s32);
+extern s32 mnuHandleCampFieldSkillInput(s32);
 
 extern void func_002AB0E0();
 
@@ -608,9 +608,14 @@ void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unu
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9BF8);
 
+extern s32 func_002A9BF8(void *, s32, s32, s32, u8 *, void *);
+
+
+
 extern s32 func_002B9FF8(s32, s32, s32);
 
-extern s32 func_002A9BF8(void *, s32, s32, s32, u8 *, void *);
+
+
 
 extern void mnuSetWindowContainerState(s32, s32);
 
@@ -824,7 +829,7 @@ void mnuCreateCampTasks(void) {
     s32 drawTask;
 
     menuAddress = (s32)mnuCreateStaffMenuWork();
-    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_002AAF70, 0, menuAddress);
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
     drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002AB0E0, 0, menuAddress);
     kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, menuAddress);
     func_00101968(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, menuAddress));

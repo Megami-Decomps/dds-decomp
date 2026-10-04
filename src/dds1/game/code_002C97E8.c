@@ -1009,7 +1009,6 @@ void sdfReleaseCurrentTaskOwnedResources(void) {
 void func_002CB9B8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB9C0);
 
 typedef struct SdfGridCell {
     u32 index;
@@ -1034,6 +1033,8 @@ typedef struct SdfGrid {
     u16 rowMargin;         /* 0x2E */
     u32 userData;          /* 0x30 */
 } SdfGrid;
+
+INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB9C0);
 
 /* Set horizontal/vertical cursor margins without changing the viewport itself. */
 void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
@@ -1251,3 +1252,4 @@ INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A0);
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A8);
 
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2B0);
+

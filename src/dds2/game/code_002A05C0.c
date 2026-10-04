@@ -96,7 +96,7 @@ extern u32 D_00437A20[2];
 
 extern u32 D_00437A28;
 
-extern KwlnTask *func_00101740(const char *);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern char D_00428550[]; /* "result2_draw" */
 
 typedef struct BrsResultCounter {
@@ -125,7 +125,7 @@ INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A08D8);
 /* Complete after six successful polls of five counter pairs.
  * Early returns deliberately leave the accumulated settled count unchanged. */
 s32 brsPollResultCounterCompletion(void) {
-    KwlnTask *resultTask = func_00101740(D_00428550);
+    KwlnTask *resultTask = kwlnTaskGetTaskByName(D_00428550);
     BrsResultWork *resultWork;
     s32 counterIndex;
 

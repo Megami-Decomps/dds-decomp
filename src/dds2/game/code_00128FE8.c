@@ -388,38 +388,45 @@ extern s32 D_00435F30;
 
 extern void func_00139950(f32 *);
 
-/* The target position is copied to the current camera position when pending. */
-typedef struct {
-    u8 pad0[0x84];
+/* Retained field-area work: projection, player-position history and facing requests.
+ * DDS2's position/heading tail starts twelve bytes later; its internal offsets agree. */
+typedef struct FldAreaWork {
+    u8 pad0[0x50];
+    s32 mode;
+    u8 pad54[4];
+    s32 rowIdx;
+    u8 pad5C[8];
+    f32 negatedAngle;
+    u8 pad68[4];
+    f32 dist;
+    u8 pad70[0x14];
     s32 positionPending;
     u8 pad88[0xC4];
-    f32 currentX;
-    f32 currentY;
-    f32 currentZ;
-    f32 unk158;
-    f32 unk15C;
-    f32 unk160;
-    f32 targetX;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 previousX; /* Saved XYZ history, also read by the ASM collision probes. */
+    f32 previousY;
+    f32 previousZ;
+    f32 targetX; /* XYZ installed when positionPending is consumed. */
     f32 targetY;
     f32 targetZ;
-    u8 pad170[0x14];
-    s32 unk184;
-} FldCamState;
+    f32 angle;       /* Current player heading in degrees. */
+    f32 targetAngle; /* Desired heading; the ASM updater smooths angle toward it. */
+    f32 unk178;
+    f32 unk17C;
+    f32 unk180; /* Degree-valued reference in the mode-1 ASM position update. */
+    s32 positionMode; /* 1 selects the ASM position update instead of the normal path. */
+    s32 unk188;
+    s32 verticalStepDirection; /* Positive lowers Y by 2; negative raises it by 2. */
+    s32 unk190;
+    u32 pointState; /* 1 queued, 2 heading installed; ASM clears it after turning. */
+    f32 facingPointX;
+    f32 facingPointZ;
+    u32 angleState; /* Same handshake for the explicit angle request. */
+    f32 overrideAngle; /* Queued angle copied to targetAngle by the C consumer. */
+} FldAreaWork;
 
-typedef struct FldCameraOverrides {
-    u8 pad00[0x14C];
-    f32 currentX;            /* 0x14C */
-    u8 pad150[4];
-    f32 currentZ;            /* 0x154 */
-    u8 pad158[0x1C];
-    f32 currentHeading;      /* 0x174 */
-    u8 pad178[0x1C];
-    u32 xyPending;           /* 0x194 */
-    f32 xyValue0;            /* 0x198 */
-    f32 xyValue1;            /* 0x19C */
-    u32 headingPending;      /* 0x1A0 */
-    f32 targetHeading;       /* 0x1A4 */
-} FldCameraOverrides;
 
 typedef struct FldAreaResourceState {
     s32 pad00[30];
@@ -470,20 +477,6 @@ typedef struct {
     f32 unk14;
 } FldCamRow; /* 0x18 bytes */
 
-typedef struct {
-    u8 pad0[0x50];
-    s32 mode;
-    u8 pad54[4];
-    s32 rowIdx;
-    u8 pad5C[8];
-    f32 angle;
-    u8 pad68[4];
-    f32 dist;
-    u8 pad70[0xDC];
-    f32 x;
-    f32 y;
-    f32 z;
-} FldCamWork;
 
 extern FldCamRow fldCameraFollowRows[];
 
@@ -2104,7 +2097,7 @@ void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
     D_00380708.invoke(&D_00380708, quad.packetList);
 }
 
-void func_0012E720(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
+void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     s32 color;
     s32 angle;
     s32 prev;
@@ -2232,14 +2225,14 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012F078);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012F400);
 
 void fldUpdateCameraProjectionEndpoints(void) {
-    FldCamWork *cam = (FldCamWork *)fldAreaState;
+    FldAreaWork *cam = (FldAreaWork *)fldAreaState;
     f32 angle;
 
-    D_0038BAF0[0] = cam->x - sdfSinPoly(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_0038BAF0[0] = cam->x - sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 80.0f;
     D_0038BAF0[1] = cam->y + fldCameraFollowRows[cam->rowIdx].y;
-    D_0038BAF0[2] = cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_0038BAF0[2] = cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 80.0f;
     D_0038BAF0[3] = 1.0f;
-    angle = cam->angle * 3.14f / 180.0f;
+    angle = cam->negatedAngle * 3.14f / 180.0f;
     D_0038BB00[0] = cam->x + sdfSinPoly(angle) * fldCameraFollowRows[cam->rowIdx].dist;
     D_0038BB00[1] = cam->y + fldCameraFollowRows[cam->rowIdx].targetY;
     D_0038BB00[2] = cam->z + sdfEvaluateCosineViaSinePhaseShift(angle) * fldCameraFollowRows[cam->rowIdx].dist;
@@ -2324,9 +2317,9 @@ void fldUpdateCameraProximity(void) {
             fldClearCameraObjectHighlightFlag();
         } else {
             fldMarkPrimaryObjectByPeerPresence();
-            if (((FldCamWork *)fldAreaState)->mode == 1 || ((FldCamWork *)fldAreaState)->mode == 3) {
+            if (((FldAreaWork *)fldAreaState)->mode == 1 || ((FldAreaWork *)fldAreaState)->mode == 3) {
                 fldClearCameraObjectHighlightFlag();
-            } else if (((FldCamWork *)fldAreaState)->dist < 100.0f) {
+            } else if (((FldAreaWork *)fldAreaState)->dist < 100.0f) {
                 fldSetCameraObjectHighlightFlag();
             } else {
                 fldClearCameraObjectHighlightFlag();
@@ -2342,7 +2335,7 @@ extern void func_001302A0(void);
 extern void func_0012F908(void);
 
 s32 fldUpdateCameraFollow(void) {
-    FldCamWork *cam;
+    FldAreaWork *cam;
     s32 *world = fldGetPlayerSceneStateAddress();
     if (*world != 0 && fldPlayerObject != 0) {
         fldRestoreSceneModelColors();
@@ -2353,7 +2346,7 @@ s32 fldUpdateCameraFollow(void) {
             return 0;
         }
         func_0012EDB0();
-        cam = (FldCamWork *)fldAreaState;
+        cam = (FldAreaWork *)fldAreaState;
         dds3SetCameraFieldOfView(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
         switch (cam->mode) {
         case 0:
@@ -2419,24 +2412,25 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131000);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131478);
 
+/* Probe the current player position; consume a pending target into work/object state. */
 void fldUpdateCameraTarget(void) {
     union {
         u128 q;
         f32 f[4];
     } vec;
     f32 cur[3];
-    FldCamState *st;
+    FldAreaWork *st;
     u128 *dst;
 
-    if (fldPlayerObject != 0 && (st = (FldCamState *)fldAreaState, st->unk184 != 1) && D_00435F30 != 0) {
-        cur[0] = st->currentX;
-        cur[1] = st->currentY;
-        cur[2] = st->currentZ;
+    if (fldPlayerObject != 0 && (st = (FldAreaWork *)fldAreaState, st->positionMode != 1) && D_00435F30 != 0) {
+        cur[0] = st->x;
+        cur[1] = st->y;
+        cur[2] = st->z;
         func_00139950(cur);
         if (st->positionPending != 0) {
-            st->currentX = st->targetX;
-            st->currentY = st->targetY;
-            st->currentZ = st->targetZ;
+            st->x = st->targetX;
+            st->y = st->targetY;
+            st->z = st->targetZ;
             vec.f[0] = st->targetX;
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
@@ -2450,8 +2444,10 @@ void fldUpdateCameraTarget(void) {
     }
 }
 
+/* ASM mode-1 path: save previous XYZ, consume positionPending, and wrap degree angles. */
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00131B50);
 
+/* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001321F8);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001322D8);
@@ -2485,7 +2481,7 @@ s32 fldUpdateCameraFrame(void) {
         return 0;
     }
     if (fldTestSceneControlFlags(0x40) == 0) {
-        if (fldAreaState[20] == 1 || fldAreaState[20] == 3) {
+        if (((FldAreaWork *)fldAreaState)->mode == 1 || ((FldAreaWork *)fldAreaState)->mode == 3) {
             fldClearCameraObjectHighlightFlag();
         }
         func_001321F8();
@@ -2511,9 +2507,9 @@ s32 fldUpdateCameraFrame(void) {
 }
 
 u8 fldHasPendingSceneFlags(void) {
-    if (fldAreaState[0x62] == 0) {
-        if (fldAreaState[0x64] == 0) {
-            if (fldAreaState[0x63] == 0) {
+    if (((FldAreaWork *)fldAreaState)->unk188 == 0) {
+        if (((FldAreaWork *)fldAreaState)->unk190 == 0) {
+            if (((FldAreaWork *)fldAreaState)->verticalStepDirection == 0) {
                 return 0;
             }
         }
@@ -2622,48 +2618,49 @@ void func_00133DC8(void) {
 }
 
 void fldQueueCameraXYOverride(f32 first, f32 second) {
-    FldCameraOverrides *camera = (FldCameraOverrides *)fldAreaState;
+    FldAreaWork *camera = (FldAreaWork *)fldAreaState;
 
-    camera->xyValue0 = first;
-    camera->xyValue1 = second;
-    camera->xyPending = 1;
+    camera->facingPointX = first;
+    camera->facingPointZ = second;
+    camera->pointState = 1;
 }
 
 void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
-    FldCameraOverrides *camera;
+    FldAreaWork *camera;
     f32 angle;
 
     angle = sdfAtan2(x, z);
-    camera = (FldCameraOverrides *)fldAreaState;
+    camera = (FldAreaWork *)fldAreaState;
     angle *= 180.0f / 3.14f;
-    camera->headingPending = 1;
-    camera->targetHeading = -angle;
+    camera->angleState = 1;
+    camera->overrideAngle = -angle;
 }
 
 void fldUpdateCameraHeadingFromXY(void) {
     f32 dx;
     f32 dz;
 
-    if (((FldCameraOverrides *)fldAreaState)->xyPending != 0) {
-        dx = ((FldCameraOverrides *)fldAreaState)->currentX - ((FldCameraOverrides *)fldAreaState)->xyValue0;
-        dz = ((FldCameraOverrides *)fldAreaState)->currentZ - ((FldCameraOverrides *)fldAreaState)->xyValue1;
+    if (((FldAreaWork *)fldAreaState)->pointState != 0) {
+        dx = ((FldAreaWork *)fldAreaState)->x - ((FldAreaWork *)fldAreaState)->facingPointX;
+        dz = ((FldAreaWork *)fldAreaState)->z - ((FldAreaWork *)fldAreaState)->facingPointZ;
         if (dx < 0.0001f && dx > -0.0001f && dz < 0.0001f && dz > -0.0001f) {
             return;
         }
-        ((FldCameraOverrides *)fldAreaState)->currentHeading = -(sdfAtan2(dx, dz) * (180.0f / 3.14f));
-        ((FldCameraOverrides *)fldAreaState)->xyPending = 2;
+        ((FldAreaWork *)fldAreaState)->targetAngle = -(sdfAtan2(dx, dz) * (180.0f / 3.14f));
+        ((FldAreaWork *)fldAreaState)->pointState = 2;
     }
 }
 
 void fldApplyPendingCameraHeading(void) {
-    FldCameraOverrides *camera = (FldCameraOverrides *)fldAreaState;
+    FldAreaWork *camera = (FldAreaWork *)fldAreaState;
 
-    if (camera->headingPending != 0) {
-        camera->headingPending = 2;
-        camera->currentHeading = camera->targetHeading;
+    if (camera->angleState != 0) {
+        camera->angleState = 2;
+        camera->targetAngle = camera->overrideAngle;
     }
 }
 
+/* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133F08);
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413280);

@@ -521,7 +521,7 @@ extern s32 datAbilityParameters;
 extern s32 datFlagToElementIndex(u32);
 extern u32 func_00119C78(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
-extern s32 effMiscRandMod(s32, s32);
+extern u32 effMiscRandMod(void *state, u32 modulus);
 extern void func_0035B6E0(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
@@ -534,6 +534,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     s32 ratio = 100;
     u32 kind;
     s32 scaled;
+    s32 roll;
     s32 hit;
     u16 flag;
 
@@ -598,7 +599,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     if (datCommandRecords[index].chance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
         func_0035B6E0(D_00412B08, scaled, ratio, mask);
-        hit = effMiscRandMod(0, 100) < scaled;
+        roll = effMiscRandMod(0, 100);
+        hit = roll < scaled;
     }
     return hit ? mask : 0;
 }

@@ -130,8 +130,8 @@ void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1380);
 
-extern u8 D_003BD2E1;
 extern volatile u8 D_003BD2F1;
+extern u8 D_003BD2E1;
 extern s32 D_003BD9D8;
 extern s32 D_003BD2FC;
 extern volatile u8 sdfPacketSlotIndex;

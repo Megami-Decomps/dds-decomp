@@ -457,7 +457,7 @@ s32 fldSceneStateRestoreDisplay(BattleSceneWork *scene) {
 
 INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D08A8);
 
-s32 func_001D0FE0(BattleSceneWork *scene) {
+s32 btlInitializeSceneAfterTasksAndBuffersReady(BattleSceneWork *scene) {
     u32 i;
 
     if (scene->subFlags & 0x100000) {

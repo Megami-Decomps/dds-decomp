@@ -90,14 +90,14 @@ typedef struct {
     u32 sourceHandle;
 } EffBlurRect;
 
-extern s32 func_001200E0();
+extern u32 func_001200E0(void);
 extern void effDrawBlurSource();
 
 /* Update pixel-coordinate edges and draw only when the eligibility check allows. */
 void effDrawBlurPixelRectWithResource(EffBlurRect *rect) {
     s32 x, y, w;
 
-    if (func_001200E0(rect) == 0) {
+    if (func_001200E0() == 0) {
         x = rect->quad.x + 0x100;
         y = rect->quad.y + 0xE0;
         w = rect->extent;
@@ -113,7 +113,7 @@ void effDrawBlurPixelRectWithResource(EffBlurRect *rect) {
 void effDrawBlurFixedPointRectangle(EffBlurRect *rect) {
     s32 x, y, w;
 
-    if (func_001200E0(rect) == 0) {
+    if (func_001200E0() == 0) {
         x = rect->quad.x + 0x1000;
         y = (rect->quad.y + 0xE00) >> 1;
         w = rect->extent;
