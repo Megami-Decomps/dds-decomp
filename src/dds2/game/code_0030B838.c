@@ -289,7 +289,9 @@ s8 sdfGetMapCameraTransitionFrame(void) {
     return D_004388C0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BCF0);
+void func_0030BCF0(void) {
+    func_0030BD10();
+}
 
 /* Apply the selected camera pose while the map-camera transition is active. */
 s32 func_0030BD10(void) {
