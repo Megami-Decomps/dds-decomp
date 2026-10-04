@@ -177,6 +177,31 @@ typedef s16 MnuSpritePlacement[4];
 /* Packed 12-byte scene row used by the profile-menu placement table. */
 typedef s16 MnuSceneSpriteEntry[6];
 
+typedef struct MnuSceneSelectionNode {
+    u8 pad00[0xC];
+    u16 entryIndex; /* 0x0C */
+} MnuSceneSelectionNode;
+
+typedef struct MnuSceneSelectionSlot {
+    u8 pad00[4];
+    MnuSceneSelectionNode *node; /* 0x04 */
+} MnuSceneSelectionSlot;
+
+typedef struct MnuSceneSelectionGrid {
+    u8 pad00[8];
+    MnuSceneSelectionSlot *slot; /* 0x08 */
+} MnuSceneSelectionGrid;
+
+typedef struct MnuSceneRenderWork {
+    u8 pad000[0x484];
+    MnuSceneSelectionGrid *grid; /* 0x484 */
+    u8 pad488[0x114];
+    s16 cursorX; /* 0x59C */
+    s16 cursorY; /* 0x59E */
+    u8 pad5A0[0xD];
+    u8 cursorMoving; /* 0x5AD */
+} MnuSceneRenderWork;
+
 enum {
     MNU_SCENE_SPRITE_INDEX = 1,
     MNU_SCENE_SPRITE_X_OFFSET,
@@ -406,7 +431,60 @@ void mnuAdvanceDisplayGridAndLoopingFrame(s32 gridOwner, s32 animationContext) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D2F8);
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D628);
+extern f32 func_002C84F0(f32 *);
+extern s32 D_003BC4E0;
+
+/* Ease the live cursor toward the selected scene row and track whether it moved. */
+void func_0025D628(MnuSceneRenderWork *work) {
+    MnuSceneSelectionNode *selectedNode;
+    s32 entryIndex;
+    s32 targetX;
+    s32 targetY;
+    f32 direction[4];
+    s32 moving;
+    s32 current;
+    s32 difference;
+    s32 next;
+
+    moving = 0;
+    selectedNode = work->grid->slot->node;
+    entryIndex = selectedNode->entryIndex;
+    targetX = D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET];
+    targetY = D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET];
+    memset(direction, 0, sizeof(direction));
+    direction[0] = targetX - work->cursorX;
+    direction[1] = targetY - work->cursorY;
+    func_002C84F0(direction);
+
+    current = work->cursorX;
+    difference = targetX - current;
+    if (difference != 0) {
+        moving = 1;
+        next = (s32)((f32)current + direction[0] * 15.0f);
+        work->cursorX = next;
+        if (difference * (targetX - (s16)next) < 0) {
+            work->cursorX = targetX;
+        }
+    }
+
+    current = work->cursorY;
+    difference = targetY - current;
+    if (difference != 0) {
+        moving = 1;
+        next = (s32)((f32)current + direction[1] * 15.0f);
+        work->cursorY = next;
+        if (difference * (targetY - (s16)next) < 0) {
+            work->cursorY = targetY;
+        }
+    }
+
+    if (moving != 0) {
+        D_003BC4E0++;
+    } else {
+        D_003BC4E0 = 0;
+    }
+    work->cursorMoving = moving;
+}
 
 typedef struct Bytes7 {
     s8 b[7];
