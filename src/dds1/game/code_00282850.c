@@ -834,7 +834,7 @@ typedef struct MenuPanelItem {
     s32 value18;
     u32 option;
     s32 selection;
-    u8 pad24[0x38];
+    MenuPoint groupPoints[7]; /* 0x24 */
     MenuPoint points[5]; /* 0x5C */
     u8 pad84[4];
     u32 initialValue; /* 0x88 */
@@ -851,12 +851,27 @@ s32 mnuCreatePanelItem(void) {
     return (s32)panelItem;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002848E0);
+void func_002848E0(s32 itemAddress, s32 gridObject, s32 panelIndex) {
+    s32 entryIndices[5] = {0, 2, 1, 3, 4};
+    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
+
+    itfGridStorePosition(&item->groupPoints[0], gridObject, 3);
+    itfSetGridEntryQuantizedAndRefresh(item->groupPoints[0].x, item->groupPoints[0].y, 0xD30, 0x20, 0, 0);
+    itfGridStorePosition(&item->groupPoints[1], gridObject, 8);
+    itfSetGridEntryQuantizedAndRefresh(item->groupPoints[1].x, item->groupPoints[1].y, 0, 0, 0, 0);
+    itfGridStorePosition(&item->groupPoints[2], gridObject, 10);
+    itfGridStorePosition(&item->groupPoints[3], gridObject, 14);
+    itfSetGridEntryQuantizedAndRefresh(item->groupPoints[3].x, item->groupPoints[3].y, 0x540, 0x58, 0, 0);
+    itfGridStorePosition(&item->groupPoints[4], gridObject, entryIndices[panelIndex] + 0x20);
+    itfSetGridEntryQuantizedAndRefresh(item->groupPoints[4].x, item->groupPoints[4].y, 0x100, -0x48, 0, 0);
+    itfGridStorePosition(&item->groupPoints[5], gridObject, 4);
+    itfSetGridEntryQuantizedAndRefresh(item->groupPoints[5].x, item->groupPoints[5].y, 0x140, 0x10, 0, 0);
+    itfGridStorePosition(&item->groupPoints[6], gridObject, 5);
+    itfSetGridEntryQuantizedAndRefresh(item->groupPoints[6].x, item->groupPoints[6].y, 0x140, 0x10, 0, 0);
+}
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-INCLUDE_RODATA(const s32, "game/code_00282850", D_003B24D0);
-
 void mnuPositionPanelItemPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
     MenuPanelItem *item = (MenuPanelItem *)itemAddress;

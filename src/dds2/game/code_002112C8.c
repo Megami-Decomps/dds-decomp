@@ -1671,7 +1671,51 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002152D8);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00215C70);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00215D78);
+/* Prefer the lowest nonzero HP among element-blocking units; otherwise use the list. */
+s32 func_00215D78(s32 actor, s32 action) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u32 best;
+    u32 bestIndex;
+    u16 found;
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        found = 0;
+        best = 0x7FFF;
+        bestIndex = 0;
+        for (i = 0; i < count; i++) {
+            s32 unit = btlGetIndexListEntry(list, i);
+            if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
+                u16 current = btlReadCurrentUnitHp(&((BtlUnit *)unit)->statBits);
+                if (best >= current && current != 0) {
+                    best = current;
+                    found++;
+                    bestIndex = i;
+                }
+            }
+        }
+        if (found != 0) {
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, btlGetIndexListEntry(list, bestIndex));
+        } else {
+            for (i = 0; i < count; i++) {
+                flags[i] = 1;
+            }
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, func_00215118(list, flags, count));
+        }
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((ActionStateLink *)actor)->targetHandle, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 s32 btlSelectLowestHealthRateTarget(s32 task) {
     u32 matched;
