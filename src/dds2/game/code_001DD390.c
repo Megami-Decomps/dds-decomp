@@ -117,9 +117,9 @@ typedef struct BtlWork {
     struct SoundResourceNode *soundResourceSlots[BTL_SOUND_ENTRY_COUNT];
     void *primaryBuffer;
     void *secondaryBuffer;
-    u8 fadeEnabled;
+    u8 fadeEnabled; /* 0 raises the tint, 1 lowers it; refreshed by the frame updater. */
     u8 pad5B9[3];
-    u32 fadeColor;
+    u32 fadeColor; /* Packed tint; retain the original whole-word arithmetic. */
     s32 soundTransitionTask; /* 0x5C0 */
     u8 pad5C4[0x14];
     s32 (*hook5D8)(s32);
@@ -7296,7 +7296,7 @@ void btlUpdateFadeColor(void) {
     case 0: {
         u32 packedColor = context->fadeColor;
 
-        /* The high byte rises by 0x10 per frame, capped at the opaque gray tint. */
+        /* Test the packed threshold before adding; do not clamp the high byte alone. */
         if (packedColor <= 0x8080807F) {
             context->fadeColor = packedColor + 0x10000000;
         } else {
@@ -7428,11 +7428,12 @@ void sndFreeLink(SoundLink *link) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00203890);
 
+/* Clear the fade gate and report completion; the frame updater may overwrite it. */
 u32 btlDisableBattleFade(void) {
-    s32 work;
+    BtlWork *work;
 
-    work = btlGetRuntime();
-    ((BtlWork *)work)->fadeEnabled = 0;
+    work = (BtlWork *)btlGetRuntime();
+    work->fadeEnabled = 0;
     return 1;
 }
 
@@ -7446,11 +7447,12 @@ SoundTask *sndCreateClearStateTask(void) {
     return task;
 }
 
+/* Set the fade gate and report completion; the frame updater may overwrite it. */
 u32 btlEnableBattleFade(void) {
-    s32 work;
+    BtlWork *work;
 
-    work = btlGetRuntime();
-    ((BtlWork *)work)->fadeEnabled = 1;
+    work = (BtlWork *)btlGetRuntime();
+    work->fadeEnabled = 1;
     return 1;
 }
 
