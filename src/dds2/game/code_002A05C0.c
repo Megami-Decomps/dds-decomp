@@ -677,9 +677,9 @@ void mnuResetTitleStreamLocked(void) {
 
 extern u32 D_00455D98[];
 
+/* Install the default medium-frame buffer and stream under the shared lock. */
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428650);
 
-/* Install the default medium-frame buffer and stream under the shared lock. */
 void mnuInitializeTitleSoundBuffer(void) {
     u32 *streamState = mnuTitleSoundBufferState;
     u32 *decoder = D_00455D98;

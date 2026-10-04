@@ -303,10 +303,10 @@ void mnuSetTitleVoicePrefixIndex(s32 prefixIndex) {
     ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->soundNameIndex = prefixIndex;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFC80);
-
 /* The native char*-typed voice argument is passed to numeric %04d formatting;
  * retain that signature rather than treating it as a filename string. */
+INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFC80);
+
 void mnuPlayTitleVoiceFile(char *voiceArgument) {
     char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
     TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
@@ -650,10 +650,10 @@ s32 mnuPollTitleStreamStateLocked(void) {
 
 extern void fileWaitIdle(void);
 
-INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
-
 /* Wait/copy a pending file while locked, then prepare a commit for controls
  * other than 1. DDS1 also prints its retail BGM banner before unlocking. */
+INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
+
 void mnuTitleStreamUpdateAndLogBgm(void) {
     WaitSema(mnuTitleStreamSemaphore);
     if (mnuUpdateTitleTransition() == MNU_STREAM_LOAD_PENDING) {
