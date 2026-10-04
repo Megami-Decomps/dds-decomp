@@ -3468,7 +3468,7 @@ typedef struct EffectSurfaceNode {
     void *resource;
     u32 *jobs;          // 0x38
     u32 jobBuffer;      // 0x3C
-    u32 resourceHolder; // 0x40, released separately from the grid record
+    RefObj *resourceHolder; // 0x40, released separately from the grid record
     u32 record;         // 0x44: fileAllocateGridRecordSlots result
     u16 count;          // 0x48: initialized to 1; remaining role unknown
 } EffectSurfaceNode;
@@ -3590,7 +3590,57 @@ EffectSurfaceNode *effCreateSurfaceGridWithConfiguration(u8 *work) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A5DE0);
+void func_002A5DE0(EffectSurfaceNode *dst, u8 *work) {
+    EffectSurfaceNode *src = (EffectSurfaceNode *)work;
+    u32 selector = src->kind;
+
+    switch (selector) {
+    case 1:
+    case 2:
+    case 4:
+        if (dst->resource != NULL) {
+            billDispatchByKind(dst->resource);
+        }
+        dst->resource = (void *)billCloneObjectRetainingSharedData((u32)src->resource);
+        billMarkKindOneFlag((u32)dst->resource);
+        if (dst->record != 0) {
+            EffGridRecord *record = (EffGridRecord *)dst->record;
+            billSetBillboardMode((u32)dst->resource, record->bill->mode);
+        }
+        break;
+    case 5: {
+        u32 count = ((EffGridRecord *)src->record)->count;
+        s32 size;
+        u32 i;
+
+        if (dst->jobBuffer != 0) {
+            for (i = 0; i < count; i++) {
+                fileJobDestroy(dst->jobs[i]);
+            }
+            sdfReleaseResourceAllocation(dst->jobBuffer);
+            dst->jobs = 0;
+            dst->jobBuffer = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->jobBuffer = (u32)sdfAllocGeneralBlock(size);
+        dst->jobs = (u32 *)sdfResourceRetainAddress(dst->jobBuffer);
+        for (i = 0; i < count; i++) {
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
+        }
+        break;
+    }
+    case 7:
+        if (dst->resourceHolder != 0) {
+            effReleaseReferenceHolder((u8 *)dst->resourceHolder);
+        }
+        dst->resourceHolder = effReferenceObjectRetain(src->resourceHolder);
+        break;
+    }
+    dst->kind = src->kind;
+}
 
 
 /* Replace the per-cell grid handles from the copied source header. kind is unused here. */
