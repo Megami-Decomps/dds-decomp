@@ -4537,9 +4537,56 @@ u8 *func_001D91E0(u8 *owner, u32 value) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D9268);
+u32 func_001D9268(u32 *arguments) {
+    u8 *unit = (u8 *)arguments[0];
+    s32 finished = 0;
+    u32 alpha;
 
-extern u32 func_001D9268(u32 *);
+    if (arguments[2] == 0) {
+        *(u32 *)(unit + 0x110) |= 0x80;
+        btlFlagUnitDefeatCandidate(unit);
+    }
+
+    switch (arguments[1]) {
+    case 0:
+        if (arguments[2] == 1) {
+            btlFlagUnitDefeatCandidate(unit);
+            evtSetUnitRgbTransition(*(struct EvtUnit **)(unit + 0x320),
+                                    10, 0x80000000);
+        } else if (arguments[2] == 10) {
+            evtSetUnitRgbTransition(*(struct EvtUnit **)(unit + 0x320),
+                                    0, 0x80000000);
+            evtSetUnitAlphaTransition(*(struct EvtUnit **)(unit + 0x320), 6, 0);
+            *(u32 *)(unit + 0x110) |= 0x200000;
+        }
+        if ((*(u32 *)(unit + 0x110) & 0x200000) == 0 &&
+            (s32)arguments[2] >= 16) {
+            finished = 1;
+        }
+        break;
+
+    case 1:
+        if ((s32)arguments[2] >= 8) {
+            *(u32 *)(unit + 0x110) &= ~0x20000;
+            *(u32 *)(unit + 0x84) = *(u32 *)(unit + 0x54) & 0xFFFFFF;
+            finished = 1;
+        } else {
+            *(u32 *)(unit + 0x110) |= 0x20000;
+            alpha = (u32)((1.0f - (f32)(s32)arguments[2] * 0.125f) * 128.0f);
+            alpha <<= 24;
+            *(u32 *)(unit + 0x84) = alpha | (*(u32 *)(unit + 0x54) & 0xFFFFFF);
+        }
+        break;
+    }
+
+    arguments[2]++;
+    if (finished != 0) {
+        *(u32 *)(unit + 0x110) = (*(u32 *)(unit + 0x110) & ~0x80) | 0x40;
+        return 1;
+    }
+    return 0;
+}
+
 
 u8 *func_001D9468(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
