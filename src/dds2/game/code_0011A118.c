@@ -567,10 +567,6 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B328);
-
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B4B0);
-
 extern void ptyAccumulateStatGains(s32 *, s32, u8 *);
 extern s32 ptyComputeTotalExp(u8 *, s32);
 extern void ptyRecomputeMaxHpMp(u32);
@@ -578,6 +574,35 @@ extern void evtCopyRosterTableValue(s32);
 extern void func_00286618(void);
 extern void func_002866C8(void);
 extern void func_003140C8(s32, u8 *);
+extern Entry1A4 *D_00435DD4;
+void ptyAssignRosterItemAndMarkOwned(Entry1A4 *entry);
+
+/* Clone an entry template and raise it to the maximum occupied party level. */
+void func_0011B328(Entry1A4 *entry, s32 templateIndex) {
+    s32 targetLevel = dds3EntryMax();
+    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    u8 *stat;
+    s32 *gain;
+    s32 remaining;
+
+    *entry = D_00435DD4[templateIndex];
+    if (entry->level < targetLevel) {
+        ptyAccumulateStatGains(statGains, targetLevel - entry->level, (u8 *)entry);
+        stat = entry->stats;
+        gain = statGains;
+        for (remaining = PTY_ENTRY_STAT_COUNT - 1; remaining >= 0; remaining--) {
+            *stat++ += *gain++;
+        }
+        entry->level = targetLevel;
+    }
+    entry->totalExp = ptyComputeTotalExp((u8 *)entry, 0);
+    func_003140C8(0, (u8 *)entry);
+    evtCopyRosterTableValue((s32)entry);
+    ptyAssignRosterItemAndMarkOwned(entry);
+}
+
+INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B4B0);
+
 
 /* Clone template 1 into roster 2 and inherit its mantra state, then clear the
  * assigned item. The maximum-party-level flag overrides keep-base-level;

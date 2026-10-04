@@ -113,8 +113,10 @@ typedef struct EventViewerState {
     u8 commandResetC;  /* 0x22D4 */
     u8 pad22D5[0xB];
     u8 commandResetD;  /* 0x22E0 */
-    u8 pad22E1[0x27];
-    struct EvtViewSel *sel; /* 0x2308 */
+    u8 pad22E1[0x1B];
+    s32 commandTableOffset; /* 0x22FC: byte offset into command descriptors */
+    u8 pad2300[8];
+    struct EvtViewTrack *sel; /* 0x2308: selected timeline track */
     u8 pad230C[4];
     u32 commandValue; /* 0x2310: value of the active command */
     u8 pad2314[0x94];
@@ -166,9 +168,6 @@ typedef struct EvtTaskContext {
     s32 taskId;
 } EvtTaskContext;
 
-typedef struct EvtViewSel {
-    s32 fieldSelector; /* 0x00: one-based selector for command parameter field */
-} EvtViewSel;
 
 /* Script-command parameter slots hold a float, word, halfwords or bytes
  * depending on the command; only the accessed prefix is modeled here. */
@@ -235,6 +234,8 @@ typedef struct EvtViewTrack {
     u8 pad5C[0x20];
     struct EvtViewTrack *next; /* 0x7C */
 } EvtViewTrack;
+extern s8 D_003C953A[];
+extern void evtReorderListNodes(EvtViewTrack *track);
 
 extern void func_0025E460(u16 *from, u16 *to, u8 *out, f32 ratio);
 extern void func_0025E980(s32 handle, u8 *out);
@@ -1063,7 +1064,44 @@ INCLUDE_RODATA(const s32, "game/code_00247518", D_00422AC0);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024B6A8);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024C540);
+/* Store the edited timing or selector halfword in the pending timeline key. */
+s32 func_0024C540(s32 unused0, s32 unused1, EventViewerState *viewer) {
+    EvtViewKey *key = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+    EvtViewTrack *track;
+    s32 kind;
+    s8 category;
+
+    if (key != NULL) {
+        track = viewer->sel;
+        kind = track->kind;
+        category = D_003C953A[viewer->commandTableOffset + kind * 10];
+        switch (category) {
+        case 0:
+            key->frame = viewer->commandValue - track->frameOffset;
+            evtReorderListNodes(track);
+            func_00249088(viewer->glyphAdvancePosition, viewer);
+            break;
+        case 9:
+            switch (kind) {
+            case 3:
+            case 20:
+            case 21:
+            case 26:
+                key->enabled = viewer->commandValue;
+                break;
+            case 18:
+                key->selector.unitIndex = viewer->commandValue;
+                break;
+            }
+            break;
+        case 15:
+            key->duration = viewer->commandValue;
+            break;
+        }
+        evtViewerPopHistory(viewer);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024C650);
 
@@ -1093,7 +1131,7 @@ u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EventViewerSt
     value = viewer->commandValue;
     entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
-        slot = viewer->sel->fieldSelector - 1;
+        slot = viewer->sel->kind - 1;
         if ((u32)slot < 0x13u) {
             switch (slot) {
             case 0:

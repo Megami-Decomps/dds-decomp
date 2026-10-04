@@ -34,7 +34,10 @@ extern s8 D_00437859;
 typedef struct MenuSlotState {
     u8 pad00[0x64];
     s32 batch;     /* 0x64 */
-    u8 pad68[0x1C];
+    s32 backdrop;   /* 0x68 */
+    u8 pad6C[4];
+    s32 overlay;    /* 0x70 */
+    u8 pad74[0x10];
     s32 reduced;    /* 0x84 */
     s32 slot;       /* 0x88 */
     u8 pad8C[0x1C];
@@ -43,8 +46,13 @@ typedef struct MenuSlotState {
     u8 padCC[0x14];
     s32 slotCopy;   /* 0xE0 */
     s32 mode;       /* 0xE4 */
-    u8 padE8[0x6C];
+    u8 padE8[0x64];
+    s32 stage;      /* 0x14C */
+    u8 pad150[4];
     s32 bgmHandle;  /* 0x154: encoded bank/track handle */
+    u8 pad158[0x128];
+    u8 campIcons[0x174]; /* 0x280: owned badge-set work buffer */
+    s32 reducedMode;     /* 0x3F4 */
 } MenuSlotState;
 
 extern void evtLoadResourcePair(const char *, u8 *);
@@ -1056,7 +1064,55 @@ void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
     option->statusFlags = retainedStatus;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002686F0);
+typedef struct MenuBackdropSprite {
+    u8 pad00[0x24];
+    f32 rotation;
+    u8 pad28[0x78];
+} MenuBackdropSprite;
+
+typedef struct MenuBackdropBank {
+    u8 pad00[0x18];
+    MenuBackdropSprite *sprites;
+} MenuBackdropBank;
+
+extern void mnuDrawCampIconBackdrop(void *work, s32 priority);
+extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+
+/* Draw and animate the mode-dependent terminal backdrop. */
+void func_002686F0(s32 address) {
+    MenuSlotState *state = (MenuSlotState *)address;
+    MenuBackdropBank *bank;
+    MenuBackdropSprite *sprite;
+    s32 resource;
+
+    if (state->stage == 0 || D_00437859 == 0) {
+        return;
+    }
+    if (state->reducedMode == 0) {
+        switch (state->mode) {
+        case 0:
+            func_00306CD0(0, 0, 0, 0x100, 0, state->backdrop, 0, MNU_TEXT_DRAW_PRIORITY);
+            bank = (MenuBackdropBank *)state->overlay;
+            bank->sprites[0].rotation = 90.0f;
+            func_00306CD0(0x7B0, 0x698, 0, 0x100, 2, state->overlay, 0, MNU_TEXT_DRAW_PRIORITY);
+            break;
+        case 1:
+        case 2:
+            mnuDrawCampIconBackdrop(state->campIcons, MNU_TEXT_DRAW_PRIORITY);
+            break;
+        }
+    } else {
+        func_00306CD0(0, 0, 0, 0x100, 0, state->backdrop, 0, MNU_TEXT_DRAW_PRIORITY);
+        resource = state->backdrop;
+        func_00306CD0(0x60, -0x30, 0, 0x100, 0, resource, 1, MNU_TEXT_DRAW_PRIORITY);
+        bank = (MenuBackdropBank *)resource;
+        sprite = &bank->sprites[1];
+        sprite->rotation += 0.6f;
+        if (sprite->rotation > 360.0f) {
+            sprite->rotation -= 360.0f;
+        }
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268838);
