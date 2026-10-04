@@ -8,8 +8,8 @@
       "expected_corrected_code": 12020,
       "expected_total_functions": 368,
       "expected_total_code": 53336,
-      "expected_source_functions": 357,
-      "expected_source_code": 45248,
+      "expected_source_functions": 358,
+      "expected_source_code": 45676,
       "corrected_functions": [
         "effPcpDrawViewAlignedRing",
         "effTwinEffectRerollSlot",
@@ -60,7 +60,6 @@
         "func_0017BF90": 456,
         "func_0017C300": 492,
         "func_0017D2F8": 432,
-        "func_0017D8A8": 428,
         "func_0017DCF8": 1964,
         "func_00180080": 344,
         "func_001808F8": 552,
