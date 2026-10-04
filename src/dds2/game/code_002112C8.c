@@ -136,7 +136,7 @@ extern s32 btlHasLinkedEffectNodeTrigger(void *);
 extern u32 btlAppendSelfAfterTargetScan();
 
 extern void btlSelectLinkedTargets(s32, s32, s8);
-extern void func_00216988();
+extern s32 func_00216988(s32);
 
 
 extern s32 btlIsActorCategoryMarked(s32);
@@ -1856,7 +1856,58 @@ s32 btlSelectLowestRankTarget(s32 task) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216888);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00216988);
+s32 func_00216988(s32 actor) {
+    void *list = btlAllocateIndexList(13);
+    u32 mode = 0;
+    u32 count;
+    u16 picked[12];
+    u32 i;
+    s32 found;
+
+    if ((((ActionStateLink *)actor)->unit->flags & 0x400) == 0) {
+        switch (((ActionStateLink *)actor)->unit->mode) {
+        case 3:
+        case 5:
+        case 6:
+        case 7:
+            mode = ((((ActionStateLink *)actor)->unit->flags & 0x1000) == 0 &&
+                    (((ActionStateLink *)actor)->unit->statBits & 0x10) == 0) ? 2 : 0;
+            break;
+        default:
+            mode = 0;
+            break;
+        }
+    }
+    func_001AC0F8(actor, list, 1, 2, 0);
+    count = btlGetIndexListCount(list);
+    if (count == 0) {
+        mode = 0;
+    }
+    switch (mode) {
+    case 0:
+        found = 0;
+        memset(picked, 0, sizeof(picked));
+        for (i = 0; i < count; i++) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->owner != ((ActionStateLink *)actor)->unit->owner) {
+                picked[found] = 1;
+                found++;
+            }
+        }
+        if (found == 0) {
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, (s32)((ActionStateLink *)actor)->unit);
+            btlFreeIndexList(list);
+            return 1;
+        }
+        btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, func_00215118((s32)list, picked, count));
+        btlFreeIndexList(list);
+        return 1;
+    case 1:
+    case 2:
+        btlCopyIndexList(((ActionStateLink *)actor)->targetHandle, (s32)list);
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216B40);
 
@@ -3242,7 +3293,35 @@ s32 btlRemapCommandKind(BtlUnit *unit, s32 kind) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00219E38);
+/* Query the special actor's stored action, or its live substate when given. */
+s32 func_00219E38(ActionUnit *unit) {
+    BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
+    ActionUnit *actor;
+
+    if (unit == NULL) {
+        actor = battle->units;
+        while (actor != NULL) {
+            if (actor->flags & 1) {
+                if (actor->flags & 0x400) {
+                    if (actor->mode == 0x136) {
+                        break;
+                    }
+                }
+            }
+            actor = actor->next;
+        }
+        if (actor != NULL) {
+            return actor->actionStatus == 0x13 ? 0x13 : -1;
+        }
+        return -1;
+    }
+    if (unit->flags & 0x400) {
+        if (unit->mode == 0x136) {
+            return ((BattleSub *)battle->state)->controlEnabled != 0 ? 0x13 : 0;
+        }
+    }
+    return -1;
+}
 
 s32 func_00219F28(s32 battler, s32 action) {
     if ((((BtlUnit *)battler)->flags & 0x400) == 0) {

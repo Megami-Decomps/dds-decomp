@@ -1430,11 +1430,69 @@ void effEventInstallBillParticleSet(void) {
     effEventBillSetCreate(D_003B2D20);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00199E88);
+typedef struct EffEventChannelHead {
+    f32 controlPoints[4][4];
+    u8 enabled;
+    u8 pad41[3];
+    u32 count;
+    s32 steps;
+    s32 spread;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 jitter[4];
+    u8 pad68[0x100];
+} EffEventChannelHead;
+
+typedef struct EffEventChannelRecord {
+    s32 delay;
+    void *param;
+} EffEventChannelRecord;
+
+typedef struct EffEventChannelWork {
+    EffEventChannelHead head;
+    EffEventChannelRecord *records;
+    s32 *slots;
+    s32 buffer;
+} EffEventChannelWork;
+
+extern void *effAllocSlotArray(u32);
+extern void *effParamWorkCreate(u16, void *);
+extern void *effParamWorkDuplicate(void *);
+
+void *func_00199E88(void *source, u16 kind, void *params) {
+    EffEventChannelHead *head = source;
+    u32 recordCount = head->count;
+    s32 handle = sdfAllocGeneralBlock(recordCount * sizeof(EffEventChannelRecord) + sizeof(EffEventChannelWork));
+    EffEventChannelWork *work = (EffEventChannelWork *)sdfResourceRetainAddress(handle);
+    EffEventChannelRecord *record = (EffEventChannelRecord *)(work + 1);
+    void *parameterTemplate;
+    s32 delayModulus;
+    u32 recordIndex;
+
+    work->head = *head;
+    work->buffer = handle;
+    work->records = record;
+    if (work->head.spread <= 0) {
+        work->head.spread = 1;
+    }
+    work->slots = effAllocSlotArray(recordCount);
+    if (recordCount != 0) {
+        delayModulus = work->head.spread;
+        parameterTemplate = effParamWorkCreate(kind, params);
+        record->param = parameterTemplate;
+        record->delay = -(effMiscRand(D_003AA868) % delayModulus);
+        record++;
+        for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
+            record->param = effParamWorkDuplicate(parameterTemplate);
+            record->delay = -(effMiscRand(D_003AA868) % delayModulus);
+            record++;
+        }
+    }
+    return work;
+}
 
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern u32 effParamTableGetWord2(void *data, s32 index);
-extern void func_00199E88(void *src, u16 kind, void *params);
 
 /* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */
 void effEventParticleSetCreateFromTable(void *data) {

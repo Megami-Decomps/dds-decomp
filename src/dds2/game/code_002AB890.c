@@ -23,11 +23,7 @@ typedef struct SaveItemCounts {
 typedef struct MenuResourceSet {
     s32 allocation;
     u8 pad04[4];
-    u32 first;
-    u32 second;
-    u32 third;
-    u32 fourth;
-    u32 fifth;
+    u32 windows[5];
     u8 pad1C[0x1C];
     s32 selection;
 } MenuResourceSet;
@@ -53,8 +49,8 @@ void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
     MenuResourceSet *resources;
 
     resources = (MenuResourceSet *)object->menu;
-    mnuDestroyWindowContainer(resources->first);
-    mnuDestroyWindowContainer(resources->second);
+    mnuDestroyWindowContainer(resources->windows[0]);
+    mnuDestroyWindowContainer(resources->windows[1]);
 }
 
 extern void func_002B9720(s32);
@@ -63,15 +59,15 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *owner) {
     MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
 
     if (((SaveItemCounts *)datGameState)->counts[itemId & 0xFFFF] == 0) {
-        func_002B9720(resources->first);
+        func_002B9720(resources->windows[0]);
     }
-    return ((MenuStaffList *)resources->first)->window->panelActive != 0;
+    return ((MenuStaffList *)resources->windows[0])->window->panelActive != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
 
 void func_002ABEB0(MenuStaffContext *object) {
-    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->third);
+    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->windows[2]);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
@@ -81,11 +77,11 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC408);
 
 void func_002AC660(MenuStaffContext *object) {
-    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->fourth);
+    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->windows[3]);
 }
 
 s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, MenuStaffContext *owner) {
-    MenuStaffNode *node = ((MenuStaffList *)((MenuResourceSet *)owner->menu)->fourth)->window->head;
+    MenuStaffNode *node = ((MenuStaffList *)((MenuResourceSet *)owner->menu)->windows[3])->window->head;
     s32 index;
 
     if (node != NULL) {
@@ -158,23 +154,23 @@ void func_002AC8F0(MenuStaffContext *owner) {
         }
     }
     frameResource = owner->spriteArg2;
-    resources->fifth = (u32)window;
+    resources->windows[4] = (u32)window;
     mnuSetWindowContainerLayout(window, frameResource, 0x15, frameResource,
         0x410, 0x16, frameResource, 0x17, 0x3E0);
-    mnuCreateListWithDefaults((MenuStaffList *)resources->fifth, 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults((MenuStaffList *)resources->windows[4], 0, 0, 0, owner->spriteArg0);
 }
 
 void func_002ACA98(MenuStaffContext *object) {
-    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->fifth);
+    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->windows[4]);
 }
 
 s32 func_002ACAC0(s32 itemId, MenuStaffContext *owner) {
     MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
 
     if (((SaveItemCounts *)datGameState)->counts[itemId] == 0) {
-        func_002B9720(resources->fifth);
+        func_002B9720(resources->windows[4]);
     }
-    return ((MenuStaffList *)resources->fifth)->window->panelActive != 0;
+    return ((MenuStaffList *)resources->windows[4])->window->panelActive != 0;
 }
 
 void func_002ACB18(u32 arg0) {
@@ -214,7 +210,86 @@ s32 mnuDestroyWindowOwnerResourceSet(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
+extern s32 mnuMapPadMaskToFlags(s32);
+extern void mnuSetPopupEntry(s32, s32);
+extern void mnuSetPopupEntryFlagged(s32, s32);
+extern void mnuConfigurePanelResource(s32, s32, s32, s32);
+extern void func_002B9808(s32);
+extern void mnuRetreatWindowListSelection(s32);
+extern void mnuAdvanceWindowListSelection(s32);
+extern void mnuClearWindowPanelTransitionFlag(s32);
+extern void mnuPlayInputSound(s32, s32, MenuStaffWindow *);
+extern char D_003E7450[];
+extern char D_003E746C[];
+extern char D_003E7488[];
+extern char D_003E74A4[];
+extern char D_003E74C0[];
+extern char D_003E7418[];
+
+/* Handle staff-item popup selection and idle-window navigation. */
+s32 func_002ACC50(u64 callback) {
+    MenuStaffContext *context;
+    MenuResourceSet *resources;
+    MenuStaffList *window;
+    s32 *popup;
+    u32 itemKind;
+    u32 input;
+    s32 result;
+
+    context = (MenuStaffContext *)kwlnTaskGetUserValue();
+    popup = (s32 *)((u8 *)context + 0x54);
+    resources = (MenuResourceSet *)context->menu;
+    input = mnuMapPadMaskToFlags(0x33);
+    result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
+    if (result != 0) {
+        return result;
+    }
+    if (*popup == 0) {
+        if (input & 1) {
+            itemKind = context->activeWindow->window->selectedNode->label;
+            switch (itemKind) {
+            case 0:
+                resources->selection = 0;
+                mnuSetPopupEntry((s32)popup, (s32)D_003E7450);
+                break;
+            case 1:
+                mnuSetPopupEntry((s32)popup, (s32)D_003E746C);
+                break;
+            case 2:
+                mnuSetPopupEntry((s32)popup, (s32)D_003E7488);
+                break;
+            case 3:
+                mnuSetPopupEntry((s32)popup, (s32)D_003E74A4);
+                break;
+            default:
+                mnuSetPopupEntry((s32)popup, (s32)D_003E74C0);
+                break;
+            }
+            mnuSeekListNode(0, ((MenuStaffList *)resources->windows[0])->window);
+            mnuSeekListNode(0, ((MenuStaffList *)resources->windows[1])->window);
+        }
+        if (input & 2) {
+            mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7418);
+            mnuConfigurePanelResource(*(s32 *)((u8 *)context + 0x118), context->group, 0, 1);
+            func_002BAF50(*(s32 *)((u8 *)context + 0x104), (s32)context->tail);
+        }
+        window = context->activeWindow;
+        if (window != NULL) {
+            if ((input & 0x300000) == 0) {
+                func_002B9808((s32)window);
+            }
+            if (input & 0x10) {
+                mnuRetreatWindowListSelection((s32)window);
+            }
+            if (input & 0x20) {
+                mnuAdvanceWindowListSelection((s32)window);
+            }
+            mnuClearWindowPanelTransitionFlag((s32)window);
+            mnuPlayInputSound(0, input, window->window);
+        }
+    }
+    return 0;
+}
 
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
 extern void mnuUpdateAndDrawWindowTransition(s32, s32, s32, s32, s32);
@@ -286,7 +361,7 @@ void mnuApplyResourceSelection(s32 index, s32 context) {
     resources = (MenuResourceSet *)((MenuStaffContext *)context)->menu;
     consumed = mnuUseStaffItem();
     if (consumed != 0) {
-        ((MenuStaffList *)resources->first)->window->selectedNode->label =
+        ((MenuStaffList *)resources->windows[0])->window->selectedNode->label =
                   (u32)((SaveItemCounts *)datGameState)->counts[index];
         resources->selection = index;
     }
@@ -297,7 +372,7 @@ u32 func_002AD0A8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002BAF50(((MenuResourceSet *)((MenuStaffContext *)context)->menu)->first, context + 0xb10c);
+    func_002BAF50(((MenuResourceSet *)((MenuStaffContext *)context)->menu)->windows[0], context + 0xb10c);
     return 1;
 }
 
@@ -311,4 +386,19 @@ u32 func_002AD0E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AD118);
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AD330);
+extern s32 D_00435E70;
+extern void func_002AAC70(s32, s32, s32, s32, s32, s32, s32);
+
+/* Refresh a staff window's description from the selected item's label. */
+void func_002AD330(MenuStaffContext *context, s32 windowIndex) {
+    MenuResourceSet *resources = (MenuResourceSet *)context->menu;
+    MenuStaffNode *node = ((MenuStaffList *)resources->windows[windowIndex])->window->selectedNode;
+    s32 emptyLabel = 0;
+    s32 selectedLabel = node->entryIndex;
+
+    if (node->label != 0) {
+        func_002AAC70(0, selectedLabel, D_00435E70, (s32)context, 1, 1, 0x53);
+    } else {
+        func_002AAC98(0, emptyLabel, 0, (s32)context, 1, 0x53);
+    }
+}
