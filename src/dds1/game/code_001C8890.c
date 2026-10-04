@@ -5228,13 +5228,37 @@ u32 func_001DB368(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DB370);
+typedef struct XformData {
+    f32 position[4];
+    f32 direction[4];
+    f32 distance;
+    f32 fov;
+} XformData;
+
+void func_001DB370(XformData *dst, XformData *current, XformData *target, f32 blend) {
+    f32 delta;
+    f32 value;
+
+    dst->position[0] = current->position[0] + (target->position[0] - current->position[0]) * blend;
+    dst->position[1] = current->position[1] + (target->position[1] - current->position[1]) * blend;
+    dst->position[2] = current->position[2] + (target->position[2] - current->position[2]) * blend;
+    dst->position[3] = 0.0f;
+    dst->direction[0] = current->direction[0] + (target->direction[0] - current->direction[0]) * blend;
+    dst->direction[1] = current->direction[1] + (target->direction[1] - current->direction[1]) * blend;
+    value = current->direction[2];
+    dst->direction[2] = value + (target->direction[2] - value) * blend;
+    dst->direction[3] = 0.0f;
+    delta = target->distance - current->distance;
+    dst->distance = current->distance + delta * blend;
+    delta = target->fov - current->fov;
+    dst->fov = current->fov + delta * blend;
+}
 
 extern void btlScalarRangeInitQuadratic(u8 *, f32);
 
 extern f32 func_001F7D80(u8 *, f32);
 
-extern void func_001DB370(u8 *, u8 *, u8 *, f32);
+extern void func_001DB370(XformData *, XformData *, XformData *, f32);
 
 s32 btlStepPoseBlendHalf(u8 *object) {
     f32 blend;
@@ -5248,7 +5272,8 @@ s32 btlStepPoseBlendHalf(u8 *object) {
     if (blend > 0.5f) {
         blend = 0.5f;
     }
-    func_001DB370(object, object + 0x30, object + 0xC0, 2.0f * blend);
+    func_001DB370((XformData *)object, (XformData *)(object + 0x30), (XformData *)(object + 0xC0),
+                  2.0f * blend);
     *(f32 *)(object + 0x128) = blend;
     if (blend >= 0.5f) {
         return 1;
@@ -5262,7 +5287,7 @@ extern f32 func_001F7CD8(u8 *);
 
 extern void btlCopyMotionTransform(u8 *, u8 *);
 
-extern void func_001DB370(u8 *, u8 *, u8 *, f32);
+extern void func_001DB370(XformData *, XformData *, XformData *, f32);
 
 s32 btlStepPoseBlend(u8 *actor) {
     u8 *motion = actor + 0x134;
@@ -5273,7 +5298,7 @@ s32 btlStepPoseBlend(u8 *actor) {
         btlCopyMotionTransform(actor, position);
     }
     value = func_001F7CD8(motion);
-    func_001DB370(actor, position, actor + 0xC0, value);
+    func_001DB370((XformData *)actor, (XformData *)position, (XformData *)(actor + 0xC0), value);
     *(f32 *)(actor + 0x128) = value;
     return 0.9999990f <= value;
 }
@@ -5291,7 +5316,7 @@ s32 btlStepPoseBlendFrame(u8 *actor) {
         return 0;
     }
     value = func_001F7D80(actor + 0x13C, 1.0f);
-    func_001DB370(actor, actor + 0x30, actor + 0xC0, value);
+    func_001DB370((XformData *)actor, (XformData *)(actor + 0x30), (XformData *)(actor + 0xC0), value);
     *(f32 *)(actor + 0x128) = value;
     return 0.9999990f <= value;
 }
@@ -5299,7 +5324,7 @@ s32 btlStepPoseBlendFrame(u8 *actor) {
 s32 btlStepPoseBlendRatio(u8 *actor) {
     f32 ratio = (f32)*(s32 *)(actor + 0x110) / (f32)*(s32 *)(actor + 0x12C);
     if (ratio <= 1.0f) {
-        func_001DB370(actor, actor + 0x30, actor + 0xC0, ratio);
+        func_001DB370((XformData *)actor, (XformData *)(actor + 0x30), (XformData *)(actor + 0xC0), ratio);
         return 0;
     }
     btlCopyMotionTransform(actor, actor + 0xC0);
