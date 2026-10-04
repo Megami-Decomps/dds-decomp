@@ -178,7 +178,191 @@ void sdfQueueAndResetPacketWork(SdfAllocWork *work) {
     work->handler = sdfPacReadListAllocationCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00347988);
+enum {
+    SDF_DECODE_READ_COMMAND = 1,
+    SDF_DECODE_READ_COUNT_LOW = 2,
+    SDF_DECODE_READ_COUNT_HIGH = 3,
+    SDF_DECODE_DISPATCH = 4,
+    SDF_DECODE_COPY_LITERAL = 5,
+    SDF_DECODE_FILL_BYTE = 6,
+    SDF_DECODE_COPY_SHORT_BACKREF = 7,
+    SDF_DECODE_READ_BACKREF_LOW = 8,
+    SDF_DECODE_READ_BACKREF_HIGH = 9,
+    SDF_DECODE_EXPAND_BYTES = 10
+};
+
+typedef struct SdfPacDecoder {
+    u8 state;
+    u8 command;
+    u16 pendingBytes;
+    u8 *output;
+    u8 *input;
+    s32 inputBytes;
+    u8 backrefLow;
+    u8 pad11[3];
+} SdfPacDecoder;
+
+extern s32 D_00439220;
+extern u8 *D_0047BC80[16];
+
+/* Incrementally decode the PAC byte stream, preserving partial commands when
+ * the caller's input chunk ends. */
+s32 func_00347988(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
+    s32 count;
+    s32 offset;
+    u8 *output;
+    u32 sourceAddress;
+
+    if (decoder->state == 0) {
+        return 1;
+    }
+
+    D_00439220 = 0;
+    output = decoder->output;
+    if (inputBytes > 0) {
+        do {
+            switch (decoder->state) {
+                case SDF_DECODE_READ_COMMAND: {
+                    u8 command;
+                    s32 commandBytes;
+                    s32 historyIndex = D_00439220;
+
+                    inputBytes--;
+                    D_0047BC80[historyIndex] = input;
+                    D_00439220 = (historyIndex + 1) & 0xF;
+                    command = *input++;
+                    if (command >= 0xE0) {
+                        if (command == 0xFF) {
+                            decoder->output = output;
+                            decoder->input = input;
+                            decoder->inputBytes = inputBytes;
+                            decoder->state = 0;
+                            return 1;
+                        }
+                    } else {
+                        decoder->command = command & 0xE0;
+                        commandBytes = command & 0x1F;
+                        if (commandBytes == 0) {
+                            decoder->state = SDF_DECODE_READ_COUNT_LOW;
+                        } else {
+                            decoder->pendingBytes = commandBytes;
+                            decoder->state = SDF_DECODE_DISPATCH;
+                        }
+                    }
+                    break;
+                }
+                case SDF_DECODE_READ_COUNT_LOW:
+                    decoder->pendingBytes = *input++;
+                    inputBytes--;
+                    decoder->state = SDF_DECODE_READ_COUNT_HIGH;
+                    break;
+                case SDF_DECODE_READ_COUNT_HIGH:
+                    decoder->pendingBytes |= *input++ << 8;
+                    inputBytes--;
+                    decoder->state = SDF_DECODE_DISPATCH;
+                    break;
+                case SDF_DECODE_DISPATCH:
+                    switch (decoder->command) {
+                    case 0:
+                        decoder->state = SDF_DECODE_COPY_LITERAL;
+                        break;
+                    case 0x20:
+                        count = decoder->pendingBytes;
+                        memset(output, 0, count);
+                        output += count;
+                        decoder->state = SDF_DECODE_READ_COMMAND;
+                        break;
+                    case 0x40:
+                        decoder->state = SDF_DECODE_FILL_BYTE;
+                        break;
+                    case 0x60:
+                        decoder->state = SDF_DECODE_COPY_SHORT_BACKREF;
+                        break;
+                    case 0x80:
+                        decoder->state = SDF_DECODE_READ_BACKREF_LOW;
+                        break;
+                    case 0xA0:
+                        decoder->state = SDF_DECODE_EXPAND_BYTES;
+                        break;
+                    }
+                    break;
+                case SDF_DECODE_COPY_LITERAL:
+                    count = decoder->pendingBytes;
+                    if (inputBytes < count) {
+                        count = inputBytes;
+                    }
+                    memcpy(output, input, count);
+                    output += count;
+                    input += count;
+                    inputBytes -= count;
+                    decoder->pendingBytes -= count;
+                    if (decoder->pendingBytes == 0) {
+                        decoder->state = SDF_DECODE_READ_COMMAND;
+                    }
+                    break;
+                case SDF_DECODE_FILL_BYTE:
+                    count = decoder->pendingBytes;
+                    memset(output, *input++, count);
+                    output += count;
+                    inputBytes--;
+                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    break;
+                case SDF_DECODE_COPY_SHORT_BACKREF:
+                    sourceAddress = (u32)(output - *input++);
+                    count = decoder->pendingBytes;
+                    inputBytes--;
+                    do {
+                        *output++ = *(u8 *)sourceAddress++;
+                    } while (--count != 0);
+                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    break;
+                case SDF_DECODE_READ_BACKREF_LOW:
+                    decoder->backrefLow = *input++;
+                    inputBytes--;
+                    if (inputBytes == 0) {
+                        decoder->state = SDF_DECODE_READ_BACKREF_HIGH;
+                        break;
+                    }
+                    /* fallthrough */
+                case SDF_DECODE_READ_BACKREF_HIGH: {
+                    s32 combinedOffset;
+
+                    offset = *input++ << 8;
+                    sourceAddress = decoder->backrefLow;
+                    inputBytes--;
+                    combinedOffset = sourceAddress | offset;
+                    sourceAddress = (u32)(output - combinedOffset);
+                    count = decoder->pendingBytes;
+                    do {
+                        *output++ = *(u8 *)sourceAddress++;
+                    } while (--count != 0);
+                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    break;
+                }
+                case SDF_DECODE_EXPAND_BYTES:
+                    count = decoder->pendingBytes;
+                    if (inputBytes < count) {
+                        count = inputBytes;
+                        inputBytes = 0;
+                        decoder->pendingBytes -= count;
+                    } else {
+                        decoder->pendingBytes = 0;
+                        decoder->state = SDF_DECODE_READ_COMMAND;
+                        inputBytes -= count;
+                    }
+                    do {
+                        *output++ = *input++;
+                        *output++ = 0;
+                    } while (--count != 0);
+                    break;
+            }
+        } while (inputBytes > 0);
+    }
+    decoder->input = input;
+    decoder->inputBytes = inputBytes;
+    decoder->output = output;
+    return 0;
+}
 
 void sdfStoreWordAndSetState(SdfRequest *request, u32 value) {
     request->value = value;
