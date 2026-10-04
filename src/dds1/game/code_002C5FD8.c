@@ -77,7 +77,7 @@ extern MapRequestState *D_003BD988;
 extern MapRequestState *D_003BD98C;
 extern void func_002C7C58(MapRequestState *);
 extern f32 sdfCounterGetScaledValue(void);
-extern const f32 D_0038FE30[][4];
+extern f32 D_0038FE30[][4];
 
 extern u32 D_003DFED0[];
 
@@ -418,7 +418,43 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
     D_003BD984 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7738);
+extern s8 D_003BD281;
+extern void fldAdvanceMapRequest(MapRequestState *, u32, u32, u32);
+extern void func_002C7BB0(MapRequestState *);
+
+void func_002C7738(s32 enabled) {
+    s8 index = sdfCounterGetDisplayValue() - 1;
+
+    if (D_003BD984 != 0 && enabled != 0) {
+        D_003BD281 = 0;
+        if (D_003BD984 == 1) {
+            fldAdvanceMapRequest(D_003BD98C, D_003DFEE0[0], D_003DFEE0[1], D_003DFEE0[2]);
+            fldAdvanceMapRequest(D_003BD98C, (s32)D_0038FE30[index][0],
+                (s32)D_0038FE30[index][1], (s32)D_0038FE30[index][2]);
+        }
+        D_003BD984++;
+        D_003DFED0[0] = (s32)D_0038FE30[index][0];
+        D_003DFED0[1] = (s32)D_0038FE30[index][1];
+        D_003DFED0[2] = (s32)D_0038FE30[index][2];
+        if (D_003BD984 >= 7) {
+            D_003BD984 = 0;
+        }
+        fldAdvanceMapRequest(D_003BD988, D_003DFED0[0], D_003DFED0[1], D_003DFED0[2]);
+    } else {
+        if (++D_003BD281 == 0x1C) {
+            if (enabled != 0) {
+                fldAdvanceMapRequest(D_003BD98C, (s32)D_0038FE30[index][0],
+                    (s32)D_0038FE30[index][1], (s32)D_0038FE30[index][2]);
+            }
+            D_003BD281 = 0;
+        }
+        D_003DFED0[0] = (s32)D_0038FE30[index][0];
+        D_003DFED0[1] = (s32)D_0038FE30[index][1];
+        D_003DFED0[2] = (s32)D_0038FE30[index][2];
+    }
+    func_002C7BB0(D_003BD988);
+    func_002C7BB0(D_003BD98C);
+}
 
 void fldDrawCounterMapMarker(void) {
     s32 x;
