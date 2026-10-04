@@ -288,7 +288,11 @@ functions use trampolines and are a different case.
   dispatcher `func_00102CD8` / `func_00102BC8` needs the mode-request provider
   visible. The provider immediately precedes the first Nocturne-mapped process
   function (which calls it), and the `"Admini"` task-name sdata goes with it.
-  So the unit now starts at `dds3GetAdminTaskWork`.
+  So the unit now starts at `dds3GetAdminTaskWork`. Third case:
+  `effect/effPCPThunder` absorbed the following `game/code_00167178` /
+  `code_0016EDD0`. `effThunderChainGroupCreate` needs `effThunderFragCreate`
+  visible. Its release/update siblings and the Thunder types continue up to
+  the mapped `effPCPFlash`, and the merged unit reproduces `.lit4` exactly.
 
   Stop if pass 28 already differs, the donor or opposite-path liveness differs,
   the controlled visibility test does not change the predicted annul bit, or
