@@ -19,6 +19,24 @@ enum {
     EVT_RESULT_RESET_MASK = 0xFFFE
 };
 
+enum {
+    PTY_ITEM_FLAG_FIRST = 0x80,
+    PTY_ITEM_FLAG_COUNT = 0x20,
+    PTY_ITEM_MODEL_FLAG_BASE = 0x980,
+    PTY_ITEM_MAX_QUANTITY = 99,
+    PTY_ITEM_QUANTITY_LIMIT = 100,
+    PTY_ITEM_SINGLE_MAX = 1,
+    PTY_ITEM_SINGLE_LIMIT = 2
+};
+
+enum {
+    BTL_SCENE_RECORD_BYTES = 0x28,
+    BTL_SCENE_ENEMY_SLOT_COUNT = 11,
+    BTL_ENEMY_RECORD_BYTES = 0x4C,
+    BTL_ENEMY_LEVEL_OFFSET = 5,
+    PTY_ACTIVE_ROSTER_LEVEL_OFFSET = 0xA74
+};
+
 extern s32 datAffinityRecords;
 extern u8 D_0032AF70[];
 extern s32 func_0011B158(s32, s32, u8);
@@ -140,7 +158,7 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s32 scrSetIntegerReturnValue();
 extern void scrSetFloatReturnValue(f32 value);
 extern Entry1A4 *dds3FindEntry(s32 rosterIndex);
-extern void func_00119900(s32 arg0, s32 arg1);
+extern void func_00119900(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(Entry1A4 *unit);
 extern s32 datGetStatWithStatusOverride(s32 arg0, s32 arg1);
 extern u8 btlIsRuntimeAllocated(void);
@@ -154,57 +172,62 @@ extern s32 mdlFlagTest(s32 flagIndex);
 extern void mdlFlagSet(s32 flagIndex);
 extern s32 effMiscRandMod(u32 stream, u32 modulus);
 
-void func_00119900(s32 index, s32 delta) {
-    s32 offset;
-    s32 value;
+/* Flag-range items set their model flag regardless of quantityDelta.
+ * Other items add the delta to their byte quantity and clamp it.
+ * Keep the native range branches and goto layout. */
+void func_00119900(s32 itemId, s32 quantityDelta) {
+    s32 quantityOffset;
+    s32 quantity;
 
-    if ((u32)(index - 0x80) >= 0x20) {
-        goto update_value;
+    if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) >= PTY_ITEM_FLAG_COUNT) {
+        goto update_quantity;
     }
-    mdlFlagSet(index + 0x980);
+    mdlFlagSet(itemId + PTY_ITEM_MODEL_FLAG_BASE);
     return;
 
-update_value:
-    offset = index + 0x12A0;
-    value = *(u8 *)(datGameState + offset);
-    value += delta;
-    if (value < 0) {
-        value = 0;
+update_quantity:
+    quantityOffset = itemId + 0x12A0;
+    quantity = *(u8 *)(datGameState + quantityOffset);
+    quantity += quantityDelta;
+    if (quantity < 0) {
+        quantity = 0;
     }
 
-    if (index >= 0xA0) {
-        goto clamp_99;
+    if (itemId >= 0xA0) {
+        goto clamp_quantity;
     }
-    if (index < 0x80) {
-        goto below_80;
+    if (itemId < PTY_ITEM_FLAG_FIRST) {
+        goto lower_items;
     }
-    if (value >= 2) {
-        value = 1;
+    if (quantity >= PTY_ITEM_SINGLE_LIMIT) {
+        quantity = PTY_ITEM_SINGLE_MAX;
     }
-    goto store_value;
+    goto store_quantity;
 
-below_80:
-    if (index < 0x60) {
-        goto select_99;
+lower_items:
+    if (itemId < 0x60) {
+        goto select_quantity_limit;
     }
-clamp_99:
-    if (value >= 100) {
-        value = 99;
+clamp_quantity:
+    if (quantity >= PTY_ITEM_QUANTITY_LIMIT) {
+        quantity = PTY_ITEM_MAX_QUANTITY;
     }
-    goto store_value;
+    goto store_quantity;
 
-select_99:
-    value = value < 100 ? value : 99;
+select_quantity_limit:
+    quantity = quantity < PTY_ITEM_QUANTITY_LIMIT ? quantity : PTY_ITEM_MAX_QUANTITY;
 
-store_value:
-    *(u8 *)(datGameState + offset) = value;
+store_quantity:
+    *(u8 *)(datGameState + quantityOffset) = quantity;
 }
 
-s32 evtCheckValueThreshold(s32 index, s32 limit) {
-    if ((u32)(index - 0x80) < 0x20) {
-        return mdlFlagTest(index + 0x980) != 0;
+/* Flag-range items test their model flag and ignore minimumQuantity.
+ * Other items require at least the requested byte quantity. */
+s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
+    if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
+        return mdlFlagTest(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0;
     }
-    if (*(u8 *)(index + datGameState + 0x12A0) < limit) {
+    if (*(u8 *)(itemId + datGameState + 0x12A0) < minimumQuantity) {
         return 0;
     }
     return 1;
@@ -236,8 +259,10 @@ s32 dds3FindEntryIndex(s32 rosterIndex) {
     return -1;
 }
 
-s8 func_00119AF8(s32 index) {
-    return *(s8 *)(index + datGameState + 0xa76);
+/* Read a signed byte relative to the first roster entry's stat-byte base;
+ * the caller supplies a byte offset, not a whole-entry index. */
+s8 func_00119AF8(s32 byteOffset) {
+    return *(s8 *)(byteOffset + datGameState + 0xa76);
 }
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119B08);
@@ -359,17 +384,21 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
     return 0;
 }
 
+/* Resolve the command's unmodified integer value for this entry.
+ * Mode one scales max HP and floors the result at one unless the entry is
+ * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
+ * value is intentionally reused: incoming command ID, then resolved result. */
 s32 func_0011A158(Entry1A4 *entry, s32 value) {
-    s32 command = value;
-    CommandValueRecord *records = (CommandValueRecord *)datCommandRecords;
+    s32 commandId = value;
+    CommandValueRecord *commands = (CommandValueRecord *)datCommandRecords;
 
     value = 0;
-    switch (records[command].mode) {
+    switch (commands[commandId].mode) {
     case 1:
         if (entry->flags & 0x20) {
             return 0;
         }
-        value = entry->unk8 * records[command].percentage / 100 + records[command].base;
+        value = entry->unk8 * commands[commandId].percentage / 100 + commands[commandId].base;
         if (value <= 0) {
             value = 1;
         }
@@ -379,7 +408,7 @@ s32 func_0011A158(Entry1A4 *entry, s32 value) {
             (((RosterFlagValue *)datEnemyRecords)[entry->rosterIndex].flags & 0x10)) {
             return 0;
         }
-        value = records[command].percentage;
+        value = commands[commandId].percentage;
         break;
     }
     return value;
@@ -1136,67 +1165,72 @@ s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011C790);
 
+/* Compare truncated averages: enemy average + party average / 4 >= party average.
+ * Requires a nonzero scene, a nonempty enemy list, and party entries carrying
+ * all three flag masks 1/2/4. No eligible entries returns zero.
+ * count and remaining serve both loops; word holds enemy IDs, then entry flags.
+ * partyLevel is accumulated first and divided in place before comparison. */
 s32 func_0011C990(s32 sceneIndex) {
-    s32 result = 0;
-    s32 enemyTotal;
-    s32 levelAddress;
+    s32 meetsThreshold = 0;
+    s32 enemyLevelSum;
+    s32 partyLevelAddress;
     s32 count;
     s32 remaining;
-    s32 cursor;
-    s32 enemyRecordsBase;
-    s32 entryAddress;
-    s32 partyTotal;
-    s32 average;
-    s32 sceneOffset;
-    u16 value;
+    s32 enemyIdAddress;
+    s32 enemyTableBase;
+    s32 partyFlagsAddress;
+    s32 partyLevel;
+    s32 enemyLevelAverage;
+    s32 sceneRecordOffset;
+    u16 word;
 
     if (sceneIndex != 0) {
-        enemyTotal = 0;
-        sceneOffset = sceneIndex * 0x28;
-        cursor = sceneOffset + datBattleSceneRecords + 6;
-        enemyRecordsBase = datEnemyRecords;
+        enemyLevelSum = 0;
+        sceneRecordOffset = sceneIndex * BTL_SCENE_RECORD_BYTES;
+        enemyIdAddress = sceneRecordOffset + datBattleSceneRecords + 6;
+        enemyTableBase = datEnemyRecords;
         count = 0;
-        remaining = 10;
+        remaining = BTL_SCENE_ENEMY_SLOT_COUNT - 1;
         do {
-            value = *(u16 *)cursor;
-            cursor += 2;
-            if (value != 0) {
+            word = *(u16 *)enemyIdAddress;
+            enemyIdAddress += 2;
+            if (word != 0) {
                 count++;
-                enemyTotal += *(u8 *)(enemyRecordsBase + value * 0x4C + 5);
+                enemyLevelSum += *(u8 *)(enemyTableBase + word * BTL_ENEMY_RECORD_BYTES + BTL_ENEMY_LEVEL_OFFSET);
             }
             remaining--;
         } while (remaining >= 0);
-        result = 0;
+        meetsThreshold = 0;
         if (count != 0) {
-            average = enemyTotal / count;
-            partyTotal = 0;
+            enemyLevelAverage = enemyLevelSum / count;
+            partyLevel = 0;
             count = 0;
-            remaining = 4;
-            levelAddress = datGameState + 0xA74;
-            entryAddress = datGameState + 0xA60;
+            remaining = PTY_ACTIVE_ROSTER_COUNT - 1;
+            partyLevelAddress = datGameState + PTY_ACTIVE_ROSTER_LEVEL_OFFSET;
+            partyFlagsAddress = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
             do {
-                value = *(u16 *)entryAddress;
-                entryAddress += 0x1A4;
-                if (value & 1) {
-                    if (value & 4) {
-                        if (value & 2) {
+                word = *(u16 *)partyFlagsAddress;
+                partyFlagsAddress += PTY_ACTIVE_ROSTER_STRIDE;
+                if (word & 1) {
+                    if (word & 4) {
+                        if (word & 2) {
                             count++;
-                            partyTotal += *(u16 *)levelAddress;
+                            partyLevel += *(u16 *)partyLevelAddress;
                         }
                     }
                 }
                 remaining--;
-                levelAddress += 0x1A4;
+                partyLevelAddress += PTY_ACTIVE_ROSTER_STRIDE;
             } while (remaining >= 0);
-            result = 0;
+            meetsThreshold = 0;
             if (count != 0) {
-                partyTotal = partyTotal / count;
-                result = average + partyTotal / 4 < partyTotal;
-                result = result == 0;
+                partyLevel = partyLevel / count;
+                meetsThreshold = enemyLevelAverage + partyLevel / 4 < partyLevel;
+                meetsThreshold = meetsThreshold == 0;
             }
         }
     }
-    return result;
+    return meetsThreshold;
 }
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011CAB0);
@@ -1224,9 +1258,9 @@ void func_0011CE48(void) {
 }
 
 s32 evtPushRequestedRosterPresence(void) {
-    s32 val = scrReadIntParameter(0);
+    s32 rosterIndex = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(ptyIsRosterEntryPresent(val) == 1);
+    scrSetIntegerReturnValue(ptyIsRosterEntryPresent(rosterIndex) == 1);
     return 1;
 }
 

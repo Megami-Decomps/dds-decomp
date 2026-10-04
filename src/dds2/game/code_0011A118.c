@@ -19,6 +19,30 @@ enum {
     EVT_RESULT_RESET_MASK = 0xFFFE
 };
 
+enum {
+    PTY_ITEM_FLAG_FIRST = 0x80,
+    PTY_ITEM_FLAG_COUNT = 0x20,
+    PTY_ITEM_MODEL_FLAG_BASE = 0x980,
+    PTY_ITEM_MAX_QUANTITY = 99,
+    PTY_ITEM_QUANTITY_LIMIT = 100,
+    PTY_ITEM_SINGLE_MAX = 1,
+    PTY_ITEM_SINGLE_LIMIT = 2
+};
+
+enum {
+    BTL_SCENE_RECORD_BYTES = 0x28,
+    BTL_SCENE_ENEMY_SLOT_COUNT = 11,
+    BTL_ENEMY_RECORD_BYTES = 0x4C,
+    BTL_ENEMY_LEVEL_OFFSET = 5,
+    PTY_ACTIVE_ROSTER_LEVEL_OFFSET = 0xA74
+};
+
+enum {
+    PTY_TEMPLATE_KEEP_BASE_LEVEL = 1,
+    PTY_TEMPLATE_USE_PARTY_MAX_LEVEL = 4,
+    PTY_ENTRY_STAT_COUNT = 5
+};
+
 extern s32 datAffinityRecords;
 extern u8 D_00386350[];
 extern s32 func_0011C6A8(s32, s32, u8);
@@ -156,7 +180,7 @@ typedef struct EventModeSlot {
     s8 kind;             /* 0x01 */
 } EventModeSlot;
 
-extern void func_0011A118(s32 arg0, s32 arg1);
+extern void func_0011A118(s32 itemId, s32 quantityDelta);
 
 extern void func_0011CA88(Entry1A4 *entry);
 
@@ -231,55 +255,60 @@ extern s32 scrCreateTaskWithDefaultOption(void);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void mdlFlagSet(s32 flagIndex);
 
-void func_0011A118(s32 index, s32 delta) {
-    s32 value;
+/* Flag-range items set their model flag regardless of quantityDelta.
+ * Other items add the delta to their byte quantity and clamp it; DDS2 also
+ * caps IDs at or above 0xC0 to one. Keep the native branches and goto layout. */
+void func_0011A118(s32 itemId, s32 quantityDelta) {
+    s32 quantity;
 
-    if ((u32)(index - 0x80) < 0x20) {
-        mdlFlagSet(index + 0x980);
+    if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
+        mdlFlagSet(itemId + PTY_ITEM_MODEL_FLAG_BASE);
         return;
     }
-    value = ((SaveItemCounts *)datGameState)->counts[index];
-    value += delta;
-    if (value < 0) {
-        value = 0;
+    quantity = ((SaveItemCounts *)datGameState)->counts[itemId];
+    quantity += quantityDelta;
+    if (quantity < 0) {
+        quantity = 0;
     }
-    if (index >= 0xC0) {
-        if (value >= 2) {
-            value = 1;
+    if (itemId >= 0xC0) {
+        if (quantity >= PTY_ITEM_SINGLE_LIMIT) {
+            quantity = PTY_ITEM_SINGLE_MAX;
         }
-        goto store_value;
+        goto store_quantity;
     }
-    if (index >= 0xA0) {
-        goto clamp_99;
+    if (itemId >= 0xA0) {
+        goto clamp_quantity;
     }
-    if (index < 0x80) {
-        goto below_80;
+    if (itemId < PTY_ITEM_FLAG_FIRST) {
+        goto lower_items;
     }
-    if (value >= 2) {
-        value = 1;
+    if (quantity >= PTY_ITEM_SINGLE_LIMIT) {
+        quantity = PTY_ITEM_SINGLE_MAX;
     }
-    goto store_value;
+    goto store_quantity;
 
-below_80:
-    if (index < 0x60) {
-        goto select_99;
+lower_items:
+    if (itemId < 0x60) {
+        goto select_quantity_limit;
     }
-clamp_99:
-    if (value >= 100) {
-        value = 99;
+clamp_quantity:
+    if (quantity >= PTY_ITEM_QUANTITY_LIMIT) {
+        quantity = PTY_ITEM_MAX_QUANTITY;
     }
-    goto store_value;
-select_99:
-    value = value < 100 ? value : 99;
-store_value:
-    ((SaveItemCounts *)datGameState)->counts[index] = value;
+    goto store_quantity;
+select_quantity_limit:
+    quantity = quantity < PTY_ITEM_QUANTITY_LIMIT ? quantity : PTY_ITEM_MAX_QUANTITY;
+store_quantity:
+    ((SaveItemCounts *)datGameState)->counts[itemId] = quantity;
 }
 
-s32 evtCheckValueThreshold(s32 index, s32 limit) {
-    if ((u32)(index - 0x80) < 0x20) {
-        return mdlFlagTest(index + 0x980) != 0;
+/* Flag-range items test their model flag and ignore minimumQuantity.
+ * Other items require at least the requested byte quantity. */
+s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
+    if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
+        return mdlFlagTest(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0;
     }
-    if (((SaveItemCounts *)datGameState)->counts[index] < limit) {
+    if (((SaveItemCounts *)datGameState)->counts[itemId] < minimumQuantity) {
         return 0;
     }
     return 1;
@@ -311,8 +340,10 @@ s32 dds3FindEntryIndex(rosterIndex)
     return -1;
 }
 
-s8 func_0011A318(s32 index) {
-    return *(s8 *)(index + datGameState + 0xa76);
+/* Read a signed byte relative to the first roster entry's stat-byte base;
+ * the caller supplies a byte offset, not a whole-entry index. */
+s8 func_0011A318(s32 byteOffset) {
+    return *(s8 *)(byteOffset + datGameState + 0xa76);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
@@ -430,17 +461,21 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
     return 0;
 }
 
+/* Resolve the command's unmodified integer value for this entry.
+ * Mode one scales max HP and floors the result at one unless the entry is
+ * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
+ * value is intentionally reused: incoming command ID, then resolved result. */
 s32 func_0011AA58(Entry1A4 *entry, s32 value) {
-    s32 command = value;
-    CommandValueRecord *records = (CommandValueRecord *)datCommandRecords;
+    s32 commandId = value;
+    CommandValueRecord *commands = (CommandValueRecord *)datCommandRecords;
 
     value = 0;
-    switch (records[command].mode) {
+    switch (commands[commandId].mode) {
     case 1:
         if (entry->flags & 0x20) {
             return 0;
         }
-        value = entry->unk8 * records[command].percentage / 100 + records[command].base;
+        value = entry->unk8 * commands[commandId].percentage / 100 + commands[commandId].base;
         if (value <= 0) {
             value = 1;
         }
@@ -450,7 +485,7 @@ s32 func_0011AA58(Entry1A4 *entry, s32 value) {
             (((EventRosterRecord *)datEnemyRecords)[entry->rosterIndex].flags & 0x10)) {
             return 0;
         }
-        value = records[command].percentage;
+        value = commands[commandId].percentage;
         break;
     }
     return value;
@@ -544,71 +579,77 @@ extern void func_00286618(void);
 extern void func_002866C8(void);
 extern void func_003140C8(s32, u8 *);
 
-void func_0011B6F0(Entry1A4 *entry, s32 flags) {
+/* Clone template 1 into roster 2 and inherit its mantra state, then clear the
+ * assigned item. The maximum-party-level flag overrides keep-base-level;
+ * otherwise use the rounded party average only when keep-base-level is clear. */
+void func_0011B6F0(Entry1A4 *entry, s32 initFlags) {
     s32 targetLevel = 0;
-    s32 maximum = dds3EntryMax();
-    s32 average = ptyGetRoundedAveragePartyLevel();
-    s32 gains[5];
-    s32 i;
-    PtyStatePrefix *state;
+    s32 maxPartyLevel = dds3EntryMax();
+    s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
+    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    s32 statIndex;
+    PtyStatePrefix *gameState;
 
     memcpy(entry, &((PtyStatePrefix *)datGameState)->templates[1], sizeof(*entry));
     entry->rosterIndex = 2;
-    if (!(flags & 4)) {
-        if (!(flags & 1)) {
-            targetLevel = average;
+    if (!(initFlags & PTY_TEMPLATE_USE_PARTY_MAX_LEVEL)) {
+        if (!(initFlags & PTY_TEMPLATE_KEEP_BASE_LEVEL)) {
+            targetLevel = averagePartyLevel;
         }
     } else {
-        targetLevel = maximum;
+        targetLevel = maxPartyLevel;
     }
     if (entry->level < targetLevel) {
-        ptyAccumulateStatGains(gains, targetLevel - entry->level, (u8 *)entry);
-        for (i = 0; i < 5; i++) {
-            entry->stats[i] += gains[i];
+        ptyAccumulateStatGains(statGains, targetLevel - entry->level, (u8 *)entry);
+        for (statIndex = 0; statIndex < PTY_ENTRY_STAT_COUNT; statIndex++) {
+            entry->stats[statIndex] += statGains[statIndex];
         }
         entry->level = targetLevel;
         entry->totalExp = ptyComputeTotalExp((u8 *)entry, 0);
         ptyRecomputeMaxHpMp((u32)entry);
     }
     evtCopyRosterTableValue((s32)entry);
-    state = (PtyStatePrefix *)datGameState;
-    memcpy(&state->mantraBits[2], &state->mantraBits[1], sizeof(state->mantraBits[2]));
-    memcpy(state->mantraProgress[2], state->mantraProgress[1], sizeof(state->mantraProgress[2]));
+    gameState = (PtyStatePrefix *)datGameState;
+    memcpy(&gameState->mantraBits[2], &gameState->mantraBits[1], sizeof(gameState->mantraBits[2]));
+    memcpy(gameState->mantraProgress[2], gameState->mantraProgress[1], sizeof(gameState->mantraProgress[2]));
     func_00286618();
     entry->itemId = 0;
 }
 
-void func_0011B9A0(Entry1A4 *entry, s32 flags) {
+/* Clone template 7 into roster 3 and inherit its mantra state. After optional
+ * post-initialization, mark any assigned item owned. Level-flag precedence is
+ * the same as the adjacent initializer; flag mask 2 skips the optional call. */
+void func_0011B9A0(Entry1A4 *entry, s32 initFlags) {
     s32 targetLevel = 0;
-    s32 maximum = dds3EntryMax();
-    s32 average = ptyGetRoundedAveragePartyLevel();
-    s32 gains[5];
-    s32 i;
-    PtyStatePrefix *state;
+    s32 maxPartyLevel = dds3EntryMax();
+    s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
+    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    s32 statIndex;
+    PtyStatePrefix *gameState;
 
     memcpy(entry, &((PtyStatePrefix *)datGameState)->templates[7], sizeof(*entry));
     entry->rosterIndex = 3;
-    if (!(flags & 4)) {
-        if (!(flags & 1)) {
-            targetLevel = average;
+    if (!(initFlags & PTY_TEMPLATE_USE_PARTY_MAX_LEVEL)) {
+        if (!(initFlags & PTY_TEMPLATE_KEEP_BASE_LEVEL)) {
+            targetLevel = averagePartyLevel;
         }
     } else {
-        targetLevel = maximum;
+        targetLevel = maxPartyLevel;
     }
     if (entry->level < targetLevel) {
-        ptyAccumulateStatGains(gains, targetLevel - entry->level, (u8 *)entry);
-        for (i = 0; i < 5; i++) {
-            entry->stats[i] += gains[i];
+        ptyAccumulateStatGains(statGains, targetLevel - entry->level, (u8 *)entry);
+        for (statIndex = 0; statIndex < PTY_ENTRY_STAT_COUNT; statIndex++) {
+            entry->stats[statIndex] += statGains[statIndex];
         }
         entry->level = targetLevel;
         entry->totalExp = ptyComputeTotalExp((u8 *)entry, 0);
         ptyRecomputeMaxHpMp((u32)entry);
     }
-    state = (PtyStatePrefix *)datGameState;
-    memcpy(&state->mantraBits[3], &state->mantraBits[7], sizeof(state->mantraBits[3]));
-    memcpy(state->mantraProgress[3], state->mantraProgress[7], sizeof(state->mantraProgress[3]));
+    gameState = (PtyStatePrefix *)datGameState;
+    memcpy(&gameState->mantraBits[3], &gameState->mantraBits[7], sizeof(gameState->mantraBits[3]));
+    memcpy(gameState->mantraProgress[3], gameState->mantraProgress[7], sizeof(gameState->mantraProgress[3]));
     func_002866C8();
-    if (!(flags & 2)) {
+    if (!(initFlags & 2)) {
         func_003140C8(1, (u8 *)entry);
     }
     if (entry->itemId != 0) {
@@ -1208,17 +1249,19 @@ s32 evtPushAvailableIntegerValue(void) {
 
 extern s32 datBattleParameters;
 
+/* The paired DDS1 readers identify this index as the entry's level.
+ * Keep the native index type, each distinct table offset, and completion value. */
 s32 func_0011DFE0(void) {
-    s32 entry = D_0043E5C8[0];
-    u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)((datBattleParameters - 4) + index * 4));
+    s32 entryAddress = D_0043E5C8[0];
+    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(*(f32 *)((datBattleParameters - 4) + levelIndex * 4));
     return 1;
 }
 
 s32 func_0011E018(void) {
-    s32 entry = D_0043E5C8[0];
-    u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x188));
+    s32 entryAddress = D_0043E5C8[0];
+    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x188));
     return 1;
 }
 
@@ -1254,30 +1297,30 @@ s32 evtSelectStatGrade(void) {
 }
 
 s32 func_0011E128(void) {
-    s32 entry = D_0043E5C8[0];
-    u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x360));
+    s32 entryAddress = D_0043E5C8[0];
+    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x360));
     return 1;
 }
 
 s32 func_0011E160(void) {
-    s32 entry = D_0043E5C8[0];
-    u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x4EC));
+    s32 entryAddress = D_0043E5C8[0];
+    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x4EC));
     return 1;
 }
 
 s32 func_0011E198(void) {
-    s32 entry = D_0043E5C8[0];
-    u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x678));
+    s32 entryAddress = D_0043E5C8[0];
+    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x678));
     return 1;
 }
 
 s32 func_0011E1D0(void) {
-    s32 entry = D_0043E5C8[0];
-    u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x678));
+    s32 entryAddress = D_0043E5C8[0];
+    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x678));
     return 1;
 }
 
@@ -1372,67 +1415,72 @@ s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E528);
 
+/* Compare truncated averages: enemy average + party average / 4 >= party average.
+ * Requires a nonzero scene, a nonempty enemy list, and party entries carrying
+ * all three flag masks 1/2/4. No eligible entries returns zero.
+ * count and remaining serve both loops; word holds enemy IDs, then entry flags.
+ * partyLevel is accumulated first and divided in place before comparison. */
 s32 func_0011E728(s32 sceneIndex) {
-    s32 result = 0;
-    s32 enemyTotal;
-    s32 levelAddress;
+    s32 meetsThreshold = 0;
+    s32 enemyLevelSum;
+    s32 partyLevelAddress;
     s32 count;
     s32 remaining;
-    s32 cursor;
-    s32 enemyRecordsBase;
-    s32 entryAddress;
-    s32 partyTotal;
-    s32 average;
-    s32 sceneOffset;
-    u16 value;
+    s32 enemyIdAddress;
+    s32 enemyTableBase;
+    s32 partyFlagsAddress;
+    s32 partyLevel;
+    s32 enemyLevelAverage;
+    s32 sceneRecordOffset;
+    u16 word;
 
     if (sceneIndex != 0) {
-        enemyTotal = 0;
-        sceneOffset = sceneIndex * 0x28;
-        cursor = sceneOffset + datBattleSceneRecords + 6;
-        enemyRecordsBase = datEnemyRecords;
+        enemyLevelSum = 0;
+        sceneRecordOffset = sceneIndex * BTL_SCENE_RECORD_BYTES;
+        enemyIdAddress = sceneRecordOffset + datBattleSceneRecords + 6;
+        enemyTableBase = datEnemyRecords;
         count = 0;
-        remaining = 10;
+        remaining = BTL_SCENE_ENEMY_SLOT_COUNT - 1;
         do {
-            value = *(u16 *)cursor;
-            cursor += 2;
-            if (value != 0) {
+            word = *(u16 *)enemyIdAddress;
+            enemyIdAddress += 2;
+            if (word != 0) {
                 count++;
-                enemyTotal += *(u8 *)(enemyRecordsBase + value * 0x4C + 5);
+                enemyLevelSum += *(u8 *)(enemyTableBase + word * BTL_ENEMY_RECORD_BYTES + BTL_ENEMY_LEVEL_OFFSET);
             }
             remaining--;
         } while (remaining >= 0);
-        result = 0;
+        meetsThreshold = 0;
         if (count != 0) {
-            average = enemyTotal / count;
-            partyTotal = 0;
+            enemyLevelAverage = enemyLevelSum / count;
+            partyLevel = 0;
             count = 0;
-            remaining = 4;
-            levelAddress = datGameState + 0xA74;
-            entryAddress = datGameState + 0xA60;
+            remaining = PTY_ACTIVE_ROSTER_COUNT - 1;
+            partyLevelAddress = datGameState + PTY_ACTIVE_ROSTER_LEVEL_OFFSET;
+            partyFlagsAddress = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
             do {
-                value = *(u16 *)entryAddress;
-                entryAddress += 0x1C4;
-                if (value & 1) {
-                    if (value & 4) {
-                        if (value & 2) {
+                word = *(u16 *)partyFlagsAddress;
+                partyFlagsAddress += PTY_ACTIVE_ROSTER_STRIDE;
+                if (word & 1) {
+                    if (word & 4) {
+                        if (word & 2) {
                             count++;
-                            partyTotal += *(u16 *)levelAddress;
+                            partyLevel += *(u16 *)partyLevelAddress;
                         }
                     }
                 }
                 remaining--;
-                levelAddress += 0x1C4;
+                partyLevelAddress += PTY_ACTIVE_ROSTER_STRIDE;
             } while (remaining >= 0);
-            result = 0;
+            meetsThreshold = 0;
             if (count != 0) {
-                partyTotal = partyTotal / count;
-                result = average + partyTotal / 4 < partyTotal;
-                result = result == 0;
+                partyLevel = partyLevel / count;
+                meetsThreshold = enemyLevelAverage + partyLevel / 4 < partyLevel;
+                meetsThreshold = meetsThreshold == 0;
             }
         }
     }
-    return result;
+    return meetsThreshold;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E848);
@@ -1459,15 +1507,19 @@ void func_0011EBF0(void) {
 void func_0011EBF8(void) {
 }
 
+/* Mode zero queries presence; nonzero mode selects/moves the entry into the
+ * frontline group. The latter is not a pure presence test: its retail
+ * callee changes flag mask 2 and swaps roster records. Preserve the short-arity
+ * presence call and push whether the operation returned exactly one. */
 s32 func_0011EC00(void) {
-    s32 value = scrReadIntParameter(0);
-    s32 state;
+    s32 rosterIndex = scrReadIntParameter(0);
+    s32 result;
     if (scrReadIntParameter(1) == 0) {
-        state = ptyIsRosterEntryPresent();
+        result = ptyIsRosterEntryPresent();
     } else {
-        state = func_0011AEE0(value);
+        result = func_0011AEE0(rosterIndex);
     }
-    scrSetIntegerReturnValue(state == 1);
+    scrSetIntegerReturnValue(result == 1);
     return 1;
 }
 
