@@ -474,7 +474,24 @@ void sdfCounterTickCountdownAndMapTimers(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C690);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C8E8);
+/* Adjust the selected counter value, then redraw its label and cursor. */
+s32 func_0030C8E8(s32 decrease) {
+    s32 drawScratch[8]; /* never read; gcc keeps the cross-title 0x20-byte frame slot */
+    s32 x = (s32)(((f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value / 10.0f) *
+                    -32.0f);
+
+    if (decrease != 0) {
+        sdfCounterDecrease();
+    } else {
+        sdfCounterIncrease();
+    }
+    sdfDrawCounterChannelInfoLabel(0x146, 0x190);
+    mnuCallInitWide((x + 0x10) << 4,
+                    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y << 3,
+                    0, sdfActiveCounterRuntime, 0x54);
+    sdfUpdateCounterSelectionFade();
+    return 1;
+}
 
 u32 sdfCounterGetDisplayWordPointer(void) {
     return (u32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->word;
