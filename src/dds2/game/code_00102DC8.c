@@ -1130,62 +1130,6 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
 
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
-s32 kwlnFadeIsBackgroundOverlayActive(void) {
-    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
-        return 1;
-    }
-    if (kwlnBackgroundFadeMode == 0) {
-        if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
-            return 0;
-        }
-    } else if (D_00435CFE == KWLN_BGFADE_FIRST_RAMP_MAX) {
-        return 0;
-    }
-    return 1;
-}
-
-/* Store the visibility mode; its stored zero value clears ramps, otherwise
- * maximum alpha is selected. Counter direction and timing are unchanged. */
-void kwlnFadeSetMode(s32 visibilityMode) {
-    kwlnBackgroundFadeMode = visibilityMode;
-    if (kwlnBackgroundFadeMode == 0) {
-        D_00435CFE = 0;
-        D_00435D00 = 0;
-    } else {
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
-    }
-}
-
-/* Step the u16 counter, then derive integer alpha and f32 ramp samples.
- * Completion clears timing/flags after sampling, retaining endpoint values. */
-void kwlnStepBackgroundFade(void) {
-    f32 fadeRatio;
-
-    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
-        if (kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) {
-            kwlnBackgroundFadeCounter--;
-        } else {
-            kwlnBackgroundFadeCounter++;
-        }
-        fadeRatio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
-        D_00435CFE = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
-        D_00435D00 = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
-        if (((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
-            ((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
-            kwlnBackgroundFadeCounter = 0;
-            kwlnBackgroundFadeDuration = 0;
-            kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
-        }
-    }
-}
-
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106288);
-
-void func_001063A8(f32 value) {
-    D_0037F5EC[0] = value;
-}
-
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C20);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C24);
@@ -1286,7 +1230,87 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CF3);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeColor);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CFB);
+s32 kwlnFadeIsBackgroundOverlayActive(void) {
+    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
+        return 1;
+    }
+    if (kwlnBackgroundFadeMode == 0) {
+        if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
+            return 0;
+        }
+    } else if (D_00435CFE == KWLN_BGFADE_FIRST_RAMP_MAX) {
+        return 0;
+    }
+    return 1;
+}
+
+/* Store the visibility mode; its stored zero value clears ramps, otherwise
+ * maximum alpha is selected. Counter direction and timing are unchanged. */
+void kwlnFadeSetMode(s32 visibilityMode) {
+    kwlnBackgroundFadeMode = visibilityMode;
+    if (kwlnBackgroundFadeMode == 0) {
+        D_00435CFE = 0;
+        D_00435D00 = 0;
+    } else {
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+    }
+}
+
+/* Step the u16 counter, then derive integer alpha and f32 ramp samples.
+ * Completion clears timing/flags after sampling, retaining endpoint values. */
+void kwlnStepBackgroundFade(void) {
+    f32 fadeRatio;
+
+    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
+        if (kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) {
+            kwlnBackgroundFadeCounter--;
+        } else {
+            kwlnBackgroundFadeCounter++;
+        }
+        fadeRatio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
+        D_00435CFE = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
+        D_00435D00 = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
+        if (((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
+            ((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
+            kwlnBackgroundFadeCounter = 0;
+            kwlnBackgroundFadeDuration = 0;
+            kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
+        }
+    }
+}
+
+void func_00106288(void) {
+    s16 firstRamp = 0;
+    s16 secondRamp = 0;
+    s32 fade;
+    s32 alpha;
+
+    if (kwlnBackgroundFadeMode == 0) {
+        fade = KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL];
+    } else {
+        firstRamp = D_00435CFE;
+        fade = 0;
+        secondRamp = D_00435D00;
+        if (firstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
+            return;
+        }
+    }
+    if (fade >= KWLN_FADE_MAX_ALPHA) {
+        return;
+    }
+
+    evtSetDrawSurfaceIndex(0x4F);
+    func_00108BD8(0);
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    alpha = (KWLN_FADE_MAX_ALPHA - fade) << 24;
+    func_001094F8(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
+    func_001094F8(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
+}
+
+void func_001063A8(f32 value) {
+    D_0037F5EC[0] = value;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeMode);
 
