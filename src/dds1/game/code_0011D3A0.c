@@ -1641,12 +1641,12 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001233D0);
 
 void fldUnloadPlayerModel(void);
 extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
+/* Load the coordinate/field-selected player variant only when it changes or its
+ * resource is absent; the cached variant is part of native area work. */
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FBC0);
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FBD0);
 
-/* Load the coordinate/field-selected player variant only when it changes or its
- * resource is absent; the cached variant is part of native area work. */
 void fldLoadPlayerModel(void) {
     s32 model;
 
