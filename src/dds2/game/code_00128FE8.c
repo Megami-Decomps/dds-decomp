@@ -3,10 +3,24 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
+#include "evt_unit.h"
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 typedef struct DmaPacketHeader DmaPacketHeader;
 /* Packet addresses are 32-bit handles; GS and GIF payload words remain 64-bit. */
+
+typedef struct FldUnitLightParams {
+    f32 color[4];
+    f32 direction[4];
+} FldUnitLightParams;
+
+extern FldUnitLightParams D_0038BB10;
+extern FldUnitLightParams D_0038BB60;
+struct EvtUnitNode;
+extern s32 evtUnitGetNestedValue(struct EvtUnitNode *);
+extern void evtSetUnitStatusFlags(EvtUnit *);
+extern void func_0023C870(EvtUnit *, s32, u32, u32);
+extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
 
 extern s32 fldCameraModelObject;
 
@@ -2922,7 +2936,59 @@ void fldBeginSelectedValueTransition(u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001355D8);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135840);
+/* vu0 routine: the event direction setter takes its vector in vf10. */
+void func_00135840(s32 duration, f32 redA, f32 greenA, f32 blueA,
+                  f32 redB, f32 greenB, f32 blueB,
+                  f32 x, f32 y, f32 z) {
+    EvtUnit *player;
+    EvtUnit *secondary = 0;
+    u32 colorA;
+    u32 colorB;
+    s32 red, green, blue;
+    f32 direction[4];
+
+    if (fldSecondarySceneObject != 0) {
+        secondary = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldSecondarySceneObject);
+        evtSetUnitStatusFlags(secondary);
+    }
+    player = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldPlayerObject);
+    evtSetUnitStatusFlags(player);
+    red = redA * 128.0f;
+    green = greenA * 128.0f;
+    blue = blueA * 128.0f;
+    colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+    red = redB * 128.0f;
+    green = greenB * 128.0f;
+    blue = blueB * 128.0f;
+    colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+    func_0023C870(player, duration, colorA, colorB);
+    if (fldSecondarySceneObject != 0) {
+        func_0023C870(secondary, duration, colorA, colorB);
+    }
+    direction[0] = x;
+    direction[1] = y;
+    direction[2] = z;
+    direction[3] = 0.0f;
+    VU0_LOAD_VF(vf10, direction);
+    evtSetUnitNormalizedDirection(player, duration);
+    if (fldSecondarySceneObject != 0) {
+        evtSetUnitNormalizedDirection(secondary, duration);
+    }
+    VU0_LOAD_VF(vf10, direction);
+    evtSetUnitNormalizedDirection(player, 0);
+    if (fldSecondarySceneObject != 0) {
+        evtSetUnitNormalizedDirection(secondary, 0);
+    }
+    D_0038BB10.color[0] = redA;
+    D_0038BB10.color[1] = greenA;
+    D_0038BB10.color[2] = blueA;
+    D_0038BB10.direction[0] = x;
+    D_0038BB10.direction[1] = y;
+    D_0038BB10.direction[2] = z;
+    D_0038BB60.color[0] = redB;
+    D_0038BB60.color[1] = greenB;
+    D_0038BB60.color[2] = blueB;
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135A68);
 
