@@ -110,7 +110,7 @@ extern void func_002C7CE8(void *);
 
 extern void sndReleaseSlotOwner(void *);
 
-extern void btlBossDebugPrintf();
+extern void btlBossDebugPrintf(const char *format, ...);
 
 typedef union BtlCommandAttribute {
     u32 bits;
@@ -1062,7 +1062,7 @@ s32 func_0022C308(void *indexList, s32 commandId) {
         }
     }
     if (datCommandRecords[commandId].unk30 == 1) {
-        if (battle->unk21C & 0x10) {
+        if (battle->commandRestrictFlags & 0x10) {
             return 9;
         }
         for (i = 0; i < count; i++) {

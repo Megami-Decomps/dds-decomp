@@ -29,7 +29,7 @@ typedef struct BtlState {
     void *eventAssets; /* 0x1EC */
     u8 pad1F0[4];
     u32 battleFlags; /* 0x1F4 */
-    u8 pad1F8[4];
+    u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk_1FC; /* Bit 0x800 bypasses command-block-reason checks. */
     u8 pad200[0x24];
     BtlTask *tasks; /* 0x224 */
@@ -115,7 +115,7 @@ typedef struct BtlState {
     void *eventAssets; /* 0x210 */
     u8 pad214[4];
     u32 battleFlags; /* 0x218 */
-    u32 unk21C; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
+    u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk220;
     u8 pad224[0x24];
     BtlTask *tasks; /* 0x248 */
