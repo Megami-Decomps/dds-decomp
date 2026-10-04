@@ -211,7 +211,7 @@ typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 /* Allocated after the two record arrays; resource helpers receive this same
    0x34-byte control block, not a separate effect work area. */
 typedef struct PcpScatterPool {
-    u8 pad00[0x10];
+    f32 origin[4];
     u32 unk10;
     u32 color;
     s32 secondWordCount;
@@ -396,7 +396,38 @@ extern void sdfReleaseResourceAllocation(SdfMemoryBlock *block);
 
 extern void *memset(void *dst, s32 value, u32 size);
 
-extern u8 D_00452020[0x2C];
+typedef struct EffPacketParams {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    u32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} EffPacketParams;
+
+typedef struct EffDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct EffDrawSurface *, void *);
+} EffDrawSurface;
+
+extern EffPacketParams D_00452020[];
+extern u32 D_003B13A0[];
+extern u32 D_003B13F0[];
+extern EffDrawSurface *D_003B14B0[];
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern void sdfConsAppendVuPacket(void *, s32);
+extern void sdfConsAppendAssetPacket(void *, u32, s32);
+extern void func_003332E8(u32, u32);
+extern void *func_00167A10(EffPacketParams *);
 
 extern u32 sdfCreateAssetWithDrawEntries(void);
 
@@ -875,7 +906,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->drawAsset = sdfCreateAssetWithDrawEntries();
     func_003332D0(pool->drawAsset, 1.0f);
     memset(D_00452020, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
-    *(u16 *)(D_00452020 + 4) = 0x4000;
+    D_00452020->primitive = 0x4000;
     return pool;
 }
 
@@ -888,7 +919,48 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *pool) {
     sdfReleaseResourceAllocation(pool->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017AA08);
+/* Submit six-vertex scatter groups using the optional shared texture owner. */
+void func_0017AA08(PcpScatterPool *pool) {
+    f32 matrix[16];
+    void *packet = sdfAllocPacketAligned(0x20);
+    s32 remainingVertices;
+    EffDrawSurface *surface;
+
+    sdfInitPacketList(packet);
+    EE_MMI_UNIT_MATRIX(matrix);
+    matrix[12] = pool->origin[0];
+    matrix[13] = pool->origin[1];
+    matrix[14] = pool->origin[2];
+    VU0_LOAD_MATRIX(matrix);
+    sdfConsAppendVuPacket(packet, 0);
+    if (pool->sharedResource != NULL) {
+        func_003332E8(pool->drawAsset, pool->sharedResource->textureHandle);
+        D_00452020->texcoords = D_003B13F0;
+    } else {
+        D_00452020->texcoords = NULL;
+    }
+    sdfConsAppendAssetPacket(packet, pool->drawAsset, 0);
+    remainingVertices = pool->secondWordCount;
+    D_00452020->colors = (u32 *)pool->auxRecordBase;
+    D_00452020->positions = (u128 *)pool->recordBase;
+    D_00452020->color = pool->color;
+    D_00452020->parameterCount = 0x10;
+    D_00452020->vertexCount = 24;
+    D_00452020->parameters = D_003B13A0;
+    while (remainingVertices >= 24) {
+        remainingVertices -= 24;
+        sdfAppendPacket(packet, func_00167A10(D_00452020));
+        D_00452020->positions += 24;
+        D_00452020->colors += 24;
+    }
+    if (remainingVertices >= 6) {
+        D_00452020->parameterCount = remainingVertices / 6 * 4;
+        D_00452020->vertexCount = remainingVertices;
+        sdfAppendPacket(packet, func_00167A10(D_00452020));
+    }
+    surface = D_003B14B0[pool->unk10];
+    surface->submit(surface, packet);
+}
 
 /* Acquire a new texture owner and store it in the pool. */
 void effPcpScatterCreatePoolResource(PcpScatterPool *pool, u32 resId) {

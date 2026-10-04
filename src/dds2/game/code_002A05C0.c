@@ -50,7 +50,16 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern u32 D_00437A2C;
 
-extern s32 mnuMovieMenuState;
+typedef struct MovieMenuState {
+    struct MemBlock *allocation;
+    u8 pad04[0x0C];
+    s32 state;
+    s32 cursor;
+    s32 mode;
+    u8 pad1C[0xFC];
+} MovieMenuState;
+
+extern MovieMenuState *mnuMovieMenuState;
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -860,8 +869,41 @@ void func_002A2AA0(void) {
     func_002A3E38(1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2AC0);
+extern void kwlnFadeBackgroundStartOut(s32);
 extern void mnuStopTitleMovieDraw(void);
+extern void *sdfResourceRetainAddress(MemBlock *);
+extern void *memset(void *, s32, u32);
+extern void mnuRecreateMenuSelectionList(void);
+extern void mnuSelectMenuListCursorByAdvance(s32);
+extern s32 func_002A30C0(KwlnTask *);
+extern u32 D_00435CBC;
+
+KwlnTask *func_002A2AC0(s32 mode) {
+    MemBlock *allocation;
+
+    kwlnFadeBackgroundStartOut(0);
+    mnuStopTitleMovieDraw();
+    allocation = sdfAllocGeneralBlock(sizeof(MovieMenuState));
+    mnuMovieMenuState = sdfResourceRetainAddress(allocation);
+    memset(mnuMovieMenuState, 0, sizeof(MovieMenuState));
+    mnuMovieMenuState->allocation = allocation;
+    mnuRecreateMenuSelectionList();
+    mnuMovieMenuState->state = 0;
+    mnuMovieMenuState->cursor = 0;
+    if (mode == 0) {
+        mnuSelectMenuListCursorByAdvance(0);
+    } else if (mode == 1) {
+        mnuSelectMenuListCursorByAdvance(2);
+    } else if (mode == 2) {
+        mnuSelectMenuListCursorByAdvance(0);
+    } else if (mode == 3) {
+        mnuSelectMenuListCursorByAdvance(1);
+    }
+    mnuMovieMenuState->mode = mode;
+    func_002A2AA0();
+    D_00435CBC = 0x80000000;
+    return kwlnTaskCreate(D_00428680, 0x2B19, 1, 0, func_002A30C0, 0, 0);
+}
 
 extern void func_003458E8(u32);
 
@@ -880,7 +922,7 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
-    sdfReleaseResourceAllocation(*(u32 *)mnuMovieMenuState);
+    sdfReleaseResourceAllocation((u32)mnuMovieMenuState->allocation);
     mnuMovieMenuState = 0;
     D_00435BB0 = 1;
 }
@@ -891,8 +933,8 @@ INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2C28);
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A30C0);
 
-u32 func_002A3A50(void) {
-    func_002A2AC0();
+u32 func_002A3A50(s32 mode) {
+    func_002A2AC0(mode);
     return 0xffffffff;
 }
 

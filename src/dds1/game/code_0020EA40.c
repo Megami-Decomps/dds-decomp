@@ -89,8 +89,6 @@ s32 btlGetAlternatePhaseCommand(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020EC20);
-
 /* Native 0x28-byte scene descriptor; the list stores unit modes, not command IDs. */
 typedef struct SceneDescriptor {
     s8 unk00;
@@ -103,6 +101,37 @@ typedef struct SceneDescriptor {
 } SceneDescriptor;
 
 extern s32 datBattleSceneRecords;
+
+/* Only scene-listed special units use these alternate action codes. */
+s32 func_0020EC20(BtlUnit *unit, s32 action) {
+    BtlState *battle;
+    u16 *listedMode;
+    u32 i;
+
+    if ((unit->flags & 0x400) == 0) {
+        return action;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    i = 0;
+    listedMode = ((SceneDescriptor *)(battle->battleMode * (s32)sizeof(SceneDescriptor) +
+                                     datBattleSceneRecords))->unitModes;
+    while (i < 0xB && listedMode[i] != unit->mode) {
+        i++;
+    }
+    if (i == 0xB) {
+        return action;
+    }
+    switch (action) {
+    case 2:
+        return 0;
+    case 11:
+        return 1;
+    case 13:
+        return -1;
+    default:
+        return action;
+    }
+}
 
 /* Despite the historical name, test the unit mode against eleven scene entries. */
 s32 btlIsSceneUnitModeListed(BtlUnit *unit) {

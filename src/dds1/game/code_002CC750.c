@@ -100,11 +100,18 @@ typedef struct PtyGameCounter {
 
 extern u8 frFontColoredGlyphResource[];
 
-/* 24-byte table entries (full layout unknown; stride inferred from index math). */
+typedef struct PrfItemRequirement {
+    s32 id;
+    s32 minimum;
+} PrfItemRequirement;
+
+/* A24-byte prerequisite entry owns two inventory counts and its result flag. */
 typedef struct Entry24B {
-    u8 v0;            // 0x00
-    u8 pad_0x01[0x17]; // 0x01
-} Entry24B; // 0x18
+    u8 v0;
+    u8 pad01[3];
+    PrfItemRequirement requirement[2];
+    u32 flagId;
+} Entry24B;
 
 typedef struct Entry24W {
     u32 v0;            // 0x00
@@ -896,7 +903,33 @@ s32 prfReqCheckWithFallback(void *operand, u16 requirementId) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", prfReqSelectGroup);
+/* Select the first active, satisfied prerequisite group whose flag is unset. */
+s32 prfReqSelectGroup(u32 start) {
+    u32 i;
+
+    for (i = start; i < PRF_FALLBACK_GROUP_COUNT; i++) {
+        if (D_00393220[i].v0 != 0) {
+            s32 met = 1;
+            u32 j;
+            u32 flagId = D_00393220[i].flagId;
+
+            for (j = 0; j < 2; j++) {
+                s32 id = D_00393220[i].requirement[j].id;
+                s32 minimum = D_00393220[i].requirement[j].minimum;
+
+                if (id != 0) {
+                    if (*(u8 *)(id + datGameState + 0x12A0) < minimum) {
+                        met = 0;
+                    }
+                }
+            }
+            if (met != 0 && mdlFlagTest(flagId) == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
 
 /* Read the byte in an unchecked prerequisite-table entry. */
 u8 prfReq18GetWord3220(s32 entryIndex) {
