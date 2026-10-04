@@ -2,6 +2,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+extern void mdlAddEntryPlain(s32, u32, u32);
+
 extern void func_00200930(f32 *, f32 *, s32);
 
 typedef struct EffPacketParams {
@@ -1871,7 +1873,8 @@ typedef struct EffBillConfig {
     u8 pad_74[4];
     f32 fadeInEnd;      // 0x78, ramp-up length as a fraction of `resourceId`
     f32 fadeOutStart;   // 0x7C, start of the ramp-down
-    u8 pad_80[0xC];
+    u8 pad_80[8];
+    f32 rowOffset;     // 0x88, row spacing or circular radius
     u32 resourceId;     // 0x8C
     u8 pad_90[4];
     u8 meshMode;        // 0x94, copied to the mesh output
@@ -2729,7 +2732,13 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
 
 /* Common header of class-dispatched billboard/resource work (0x40-byte prefix). */
 typedef struct EffClassWork {
-    u8 transform[0x20]; // 0x00, two VU0 vectors
+    union {
+        u8 transform[0x20];
+        struct {
+            f32 position[4];
+            f32 orientation[4];
+        } vectors;
+    };
     f32 scale;           // 0x20
     u32 color;           // 0x24
     u32 frame;           // 0x28
@@ -2738,6 +2747,11 @@ typedef struct EffClassWork {
     void *payload;       // 0x34
     u8 pad_38[8];
 } EffClassWork;
+
+/* Four-byte owner header followed by its class-work pointer array. */
+typedef struct EffClassWorkList {
+    EffClassWork **entries;
+} EffClassWorkList;
 
 u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
@@ -4148,7 +4162,7 @@ typedef struct EffPointSetRow {
     EffPointSet *set; /* 0x00 */
     s32 key;          /* 0x04 */
     u32 pad08;
-    u32 zero;         /* 0x0C */
+    f32 angle;        /* 0x0C: phase of the radial class instance */
 } EffPointSetRow;
 
 typedef struct EffPointSetTable {
@@ -4210,7 +4224,7 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffPointSetTableSource *src) {
             rec += 5;
         }
         row->key = ~(i * 4);
-        row->zero = 0;
+        row->angle = 0.0f;
         row++;
     }
     return table;
@@ -4309,7 +4323,65 @@ void effReleaseTrackEntriesA(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EBC58);
+extern f32 sdfSinPoly(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern void effCopyClassResourcePosition(void *, void *);
+extern void effCopyClassResourceOrientation(void *, void *);
+extern void effSetClassResourceMatrixComponent(EffClassWork *, f32);
+extern void effSetClassResourceColor(s32, u32);
+extern void effDrawClassResourceWork(s32);
+
+/* vu0 routine: packed color blend and SDK vector copies. */
+void func_002EBC58(EffClassWork *work) {
+    EffBillConfig *config = work->payload;
+    s32 frame = work->frame;
+    s32 progress = config->progress;
+    EffClassWork **entries = ((EffClassWorkList *)work->resource)->entries;
+    f32 position[4];
+    f32 orientation[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 unit;
+    u32 second;
+    u32 color;
+    u32 count;
+    u32 i;
+    f32 radius;
+    f32 scale;
+
+    if (progress < frame && progress != 0) {
+        return;
+    }
+    count = config->frames.count;
+    radius = config->rowOffset;
+    second = func_002D7458((u8 *)config, (u8 *)config + 0x24, frame, progress);
+    color1[0] = work->color;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK_F128(blended[0]);
+    color = blended[0];
+    scale = work->scale;
+    PCP_COPY_VECTOR(position, work->vectors.position);
+    PCP_COPY_VECTOR(orientation, work->vectors.orientation);
+    for (i = 0; i < count; i++, entries++) {
+        EffClassWork *entry = *entries;
+        EffPointSetTable *points = (EffPointSetTable *)entry->resource;
+        f32 angle = points->rows->angle;
+
+        position[0] = work->vectors.position[0] - sdfSinPoly(angle) * radius;
+        position[1] = work->vectors.position[1] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        effCopyClassResourcePosition(*entries, position);
+        effCopyClassResourceOrientation(*entries, orientation);
+        effSetClassResourceMatrixComponent(*entries, scale);
+        effSetClassResourceColor((s32)*entries, color);
+        effDrawClassResourceWork((s32)*entries);
+    }
+}
 
 typedef struct EffScaleRange {
     u8 *entries;
@@ -4534,20 +4606,20 @@ void effUpdateAndDrawClassResource(u32 work) {
     effDrawClassResourceWork(work);
 }
 
-void effCopyClassResourcePosition(s128 *dst, s128 *src) {
+void effCopyClassResourcePosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effCopyClassResourceOrientation(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+void effCopyClassResourceOrientation(void *dst, void *src) {
+    PCP_COPY_VECTOR((u8 *)dst + 0x10, src);
 }
 
 void effSetClassResourceColor(s32 work, u32 color) {
     ((EffClassWork *)work)->color = color;
 }
 
-void effSetClassResourceMatrixComponent(Matrix4 *mat, float value) {
-    mat->u.m[2][0] = value;
+void effSetClassResourceMatrixComponent(EffClassWork *work, float value) {
+    work->scale = value;
 }
 
 extern EffPacketParams D_004583A0[];
@@ -6013,35 +6085,49 @@ typedef struct EffSpanEntry {
 
 typedef struct EffSpanRecord {
     EffSpanEntry *entries;
-    u8 pad_04[8];
-    u32 flags;
+    EffPointSet *pointSet;
+    u32 references;
+    u32 pointCount;
 } EffSpanRecord;
 
 typedef struct EffSpanTable {
     EffSpanRecord *records;
     u32 count;
     u16 total;
+    u8 pad0A[2];
+    u32 allocation;
 } EffSpanTable;
 
 typedef struct EffSpanConfig {
-    u8 pad_00[0xA0];
+    u8 pad00[0x28];
+    u32 pointSetType;
+    u8 pad2C[8];
+    u32 progress;
+    u8 drawPoints;
+    u8 pad39[3];
+    u32 middleColor;
+    u32 edgeColor;
+    u8 pad44[4];
+    f32 drawScale;
+    u8 pad4C[0x2C];
+    u32 referenceType;
+    u8 pad7C[0x0C];
+    u8 drawReferences;
+    u8 pad89[0x17];
     f32 firstRand;
     f32 secondBase;
     f32 rangeRand;
-    u8 pad_AC[4];
+    u32 unkAC;
     u32 perSpan;
+    u8 padB4[8];
+    u8 pointSetFlag;
 } EffSpanConfig;
 
-typedef struct EffSpanWork {
-    u8 pad00[0x38];
-    EffSpanTable *table;
-    EffSpanConfig *config;
-} EffSpanWork;
 
 void effSeedParticleSpanParameters(u8 *work) {
     u32 index = 0;
-    EffSpanTable *table = ((EffSpanWork *)work)->table;
-    EffSpanConfig *config = ((EffSpanWork *)work)->config;
+    EffSpanTable *table = (EffSpanTable *)((EffModelResource *)work)->childResource;
+    EffSpanConfig *config = ((EffModelResource *)work)->source;
     u32 total = table->total;
     u32 per = config->perSpan;
     u32 spans = total / per;
@@ -6054,7 +6140,7 @@ void effSeedParticleSpanParameters(u8 *work) {
     }
     if (table->count != 0) {
         do {
-            record->flags = 0;
+            record->pointCount = 0;
             entry = record->entries;
             span = 0;
             if (spans != 0) {
@@ -6076,32 +6162,18 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F46D8);
 
 extern void effReleaseModelPointSetAsset(s32);
 
-typedef struct EffParticleEntry {
-    u32 unk00;
-    s32 pointSet;
-    u32 references;
-    u32 unk0C;
-} EffParticleEntry;
-
-typedef struct EffParticleList {
-    EffParticleEntry *entries;
-    u32 count;
-    u32 unk08;
-    u32 allocation;
-} EffParticleList;
-
 void effReleaseParticleList(u32 *list) {
-    u32 *entry = (u32 *)((EffParticleList *)list)->entries;
+    EffSpanRecord *entry = ((EffSpanTable *)list)->records;
     u32 i;
 
-    for (i = 0; i < ((EffParticleList *)list)->count; i++) {
-        effReleaseModelPointSetAsset(((EffParticleEntry *)entry)->pointSet);
-        if (((EffParticleEntry *)entry)->references != 0) {
-            effReleaseResourceRefs(((EffParticleEntry *)entry)->references);
+    for (i = 0; i < ((EffSpanTable *)list)->count; i++) {
+        effReleaseModelPointSetAsset((s32)entry->pointSet);
+        if (entry->references != 0) {
+            effReleaseResourceRefs(entry->references);
         }
-        entry += 4;
+        entry++;
     }
-    sdfReleaseResourceAllocation(((EffParticleList *)list)->allocation);
+    sdfReleaseResourceAllocation(((EffSpanTable *)list)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F4960);
@@ -7080,7 +7152,6 @@ u32 *effAllocateModelObjectSlot(u32 owner) {
     return work;
 }
 
-extern void mdlAddEntryPlain(s32, u32, u32);
 
 extern void mdlAddEntryFlagged(s32, u32, u32);
 
