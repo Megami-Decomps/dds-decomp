@@ -61,6 +61,12 @@ typedef struct BtlExtModel {
 
 typedef struct BtlUnit BtlUnit;
 
+/* SYSEFF metadata and runtime registrations share these indices. */
+enum {
+    BTL_SOUND_ENTRY_COUNT = 0x31,
+    BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26
+};
+
 typedef struct BtlWork {
     u8 pad0[0x180];
     u32 runtimeFlags;        /* 0x180 */
@@ -107,9 +113,8 @@ typedef struct BtlWork {
     s8 unk4C4;
     u8 pad4C5[3];
     f32 unk4C8;
-    u8 pad4CC[0xB8];
-    struct BtlBattleData *battleData; /* 0x584 */
-    u8 pad588[0x28];
+    u8 pad4CC[0x20];
+    struct SoundResourceNode *soundResourceSlots[BTL_SOUND_ENTRY_COUNT];
     void *primaryBuffer;
     void *secondaryBuffer;
     u8 fadeEnabled;
@@ -520,8 +525,8 @@ typedef struct SoundResourceNode {
     u32 unk_04;
     u32 unk_08;
     s32 fadeCountdown;
-    u32 resourceHandle;
-    u32 unk_14;
+    u32 resourceHandle; /* Owned clone; destruction releases its voices. */
+    u32 sourceHandle;   /* Indexed nodes borrow this archive resource. */
     struct SoundResourceNode *previous;
     struct SoundResourceNode *next;
 } SoundResourceNode;
@@ -3380,10 +3385,6 @@ SoundTask *func_001E6428(BtlUnit *actor, s32 option) {
     return task;
 }
 
-typedef struct BtlBattleData {
-    u8 pad0[0x14];
-    s32 unk14;
-} BtlBattleData;
 
 typedef struct BtlEffectHandle {
     u8 pad0[0xC];
@@ -3403,6 +3404,8 @@ extern BtlEffectHandle *func_00168548(s32, s32, BtlUnit *, s32);
 extern void effBattleUpdateSelectedValue(BtlEffectHandle *, s32);
 extern void func_00168978(BtlEffectHandle *);
 
+/* Start from the selected-unit SYSEFF source, then update through its duration.
+ * Return one for an ineligible unit or expiry, zero while updating. */
 s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
     BtlUnit *unit = args->unit;
     BtlWork *work;
@@ -3411,7 +3414,7 @@ s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
     }
     work = (BtlWork *)btlGetRuntime();
     if (args->effect == 0) {
-        s32 handle = work->battleData->unk14;
+        s32 handle = work->soundResourceSlots[BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT]->sourceHandle;
         unit->flags |= 0x80;
         args->effectId = sndMixerClone(handle);
         args->effect = func_00168548(args->effectId, 2, unit, 0);
@@ -7457,6 +7460,7 @@ SoundTask *sndCreateSetStateTask(void) {
     return task;
 }
 
+/* Consume archive records only for enabled SYSEFF rows; clear unavailable entries. */
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418E58);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418E70);
@@ -7546,27 +7550,29 @@ void sndLoadSysEffLb(void) {
         }
         i++;
     }
-    for (; i < 0x31; i++) {
+    for (; i < BTL_SOUND_ENTRY_COUNT; i++) {
         D_003BDE18[i].unk4 = 0;
         D_003BDE18[i].unk8 = 0;
     }
     func_002C7CE8(archive);
 }
 
+/* Register available SYSEFF handles; unavailable slots are left untouched. */
 void btlRefreshSoundEntries(void) {
     u32 i;
     btlGetRuntime();
-    for (i = 0; i < 0x31; i++) {
+    for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
         if (D_003BDE18[i].unk4 != 0) {
             btlCreateIndexedSoundResourceNode(i, D_003BDE18[i].unk4);
         }
     }
 }
 
+/* Free and clear slots selected by the archive table, without discarding metadata. */
 void sndFreeBattleSoundEntries(void) {
-    SoundResourceNode **slots = (SoundResourceNode **)((u8 *)btlGetRuntime() + 0x4EC);
+    SoundResourceNode **slots = ((BtlWork *)btlGetRuntime())->soundResourceSlots;
     u32 i;
-    for (i = 0; i < 0x31; i++) {
+    for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
         if (D_003BDE18[i].unk4 != 0) {
             sndFreeResourceNode(slots[i]);
             slots[i] = 0;
@@ -7574,17 +7580,18 @@ void sndFreeBattleSoundEntries(void) {
     }
 }
 
+/* Register a borrowed archive source in its SYSEFF slot, without cloning it. */
 void btlCreateIndexedSoundResourceNode(s32 slotIndex, u32 handle) {
     u32 flags;
     s32 work;
-    u32 *node;
+    SoundResourceNode *node;
 
     work = btlGetRuntime();
-    node = (u32 *)sndAllocResourceNode();
-    flags = *node;
-    node[5] = handle;
-    *(u32 **)(slotIndex * 4 + work + 0x4ec) = node;
-    *node = flags | 10;
+    node = sndAllocResourceNode();
+    flags = node->flags;
+    node->sourceHandle = handle;
+    ((BtlWork *)work)->soundResourceSlots[slotIndex] = node;
+    node->flags = flags | 10;
 }
 
 typedef struct SoundHandleNode {
