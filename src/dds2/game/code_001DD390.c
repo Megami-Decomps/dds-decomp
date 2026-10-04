@@ -89,9 +89,9 @@ typedef struct BtlWork {
     BtlUnit *actorList;
     struct SoundTask *taskTail; /* Newest registration; reverse traversal. */
     struct SoundTask *taskHead; /* Oldest registration; forward traversal. */
-    struct SoundResourceNode *resourceList258;
-    struct ActiveSoundNode *soundList;
-    struct SoundSlotOwner *soundSlotOwners;
+    struct SoundResourceNode *soundResourceHead; /* Allocated resource nodes. */
+    struct ActiveSoundNode *soundList;           /* Independent active-node list. */
+    struct SoundSlotOwner *soundSlotOwners;     /* Shared category/id owners. */
     u8 pad264[4];
     u16 unk268;
     u8 pad26A[0xE];
@@ -7228,6 +7228,7 @@ s32 sndHasActiveActor(void) {
     return 0;
 }
 
+/* Allocate a cleared resource node and prepend it to the runtime's resource list. */
 SoundResourceNode *sndAllocResourceNode(void) {
     SoundResourceNode *node = sdfAllocAndClearQuadwords(0x20);
     BtlWork *work;
@@ -7237,13 +7238,13 @@ SoundResourceNode *sndAllocResourceNode(void) {
     node->resourceHandle = 0;
     work = (BtlWork *)btlGetRuntime();
     node->previous = 0;
-    if (work->resourceList258 != 0) {
-        work->resourceList258->previous = node;
-        node->next = work->resourceList258;
+    if (work->soundResourceHead != 0) {
+        work->soundResourceHead->previous = node;
+        node->next = work->soundResourceHead;
     } else {
         node->next = 0;
     }
-    work->resourceList258 = node;
+    work->soundResourceHead = node;
     return node;
 }
 
@@ -7258,6 +7259,7 @@ extern void sndReleaseAllVoices(u32);
 
 extern void sdfReleaseChipBlock(void *);
 
+/* Release owned voices, unlink the resource node, and free its allocation. */
 void sndFreeResourceNode(SoundResourceNode *node) {
     if (node->resourceHandle != 0) {
         sndReleaseAllVoices(node->resourceHandle);
@@ -7268,16 +7270,17 @@ void sndFreeResourceNode(SoundResourceNode *node) {
     if (node->previous != 0) {
         node->previous->next = node->next;
     } else {
-        ((BtlWork *)btlGetRuntime())->resourceList258 = node->next;
+        ((BtlWork *)btlGetRuntime())->soundResourceHead = node->next;
     }
     sdfReleaseChipBlock(node);
 }
 
+/* Advance resource countdowns and battle tint, then tick slot-volume fades. */
 void btlUpdateFadeColor(void) {
     BtlWork *context = (BtlWork *)btlGetRuntime();
     SoundResourceNode *node;
 
-    for (node = context->resourceList258; node != 0; node = node->next) {
+    for (node = context->soundResourceHead; node != 0; node = node->next) {
         if (node->unk_04 == 0) {
             node->fadeCountdown = 0;
         } else if (node->fadeCountdown > 0) {
@@ -7332,10 +7335,11 @@ void btlClearSoundAndModelResources(void) {
     fileResetRenderFlags();
 }
 
+/* Destroy all resource nodes; preserve each next link before freeing its owner. */
 void sndClearResourceNodes(void) {
     SoundResourceNode *node;
     SoundResourceNode *next;
-    for (node = ((BtlWork *)btlGetRuntime())->resourceList258; node != 0; node = next) {
+    for (node = ((BtlWork *)btlGetRuntime())->soundResourceHead; node != 0; node = next) {
         next = node->next;
         sndFreeResourceNode(node);
     }
@@ -7732,6 +7736,7 @@ SoundTask *sndCreateStationedSeTask(u32 value) {
     return task;
 }
 
+/* Return whether the independent active-node list contains a node with flag 8. */
 s32 sndHasFlaggedActiveNode(void) {
     s32 node = (s32)((BtlWork *)btlGetRuntime())->soundList;
     while (node != 0) {
@@ -7930,6 +7935,7 @@ s32 sndResolveResourceId(s32 category, s32 id) {
     return -1;
 }
 
+/* Allocate a cleared active-sound node and prepend it to its independent list. */
 ActiveSoundNode *sndAllocListNode(void) {
     ActiveSoundNode *node = sdfAllocAndClearQuadwords(0x14);
     BtlWork *work = (BtlWork *)btlGetRuntime();
@@ -7944,6 +7950,7 @@ ActiveSoundNode *sndAllocListNode(void) {
     return node;
 }
 
+/* Unlink and free an active-sound node without changing the resource-node list. */
 void sndFreeListNode(ActiveSoundNode *node) {
     if (node->next != 0) {
         node->next->previous = node->previous;
@@ -7956,6 +7963,7 @@ void sndFreeListNode(ActiveSoundNode *node) {
     sdfReleaseChipBlock(node);
 }
 
+/* Clear active-sound nodes, saving next before each allocation is released. */
 void sndClearList(void) {
     ActiveSoundNode *node;
     ActiveSoundNode *next;
@@ -7975,7 +7983,7 @@ typedef struct SoundSlotOwner {
     u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
     s32 category;
     s32 id;
-    s32 refCount;
+    u32 refCount; /* Shared retain count; release frees only on the zero transition. */
     s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
     s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
     s32 fileRequests[0x1D];

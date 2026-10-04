@@ -186,7 +186,10 @@ typedef struct BtlActorWork {
     BtlUnit *actorList;
     struct SoundTask *taskTail; /* Newest registration; reverse traversal. */
     struct SoundTask *taskHead; /* Oldest registration; forward traversal. */
-    u8 pad234[0x284];
+    struct SoundResourceNode *soundResourceHead; /* Allocated resource nodes. */
+    struct ActiveSoundNode *soundList;           /* Independent active-node list. */
+    struct SoundSlotOwner *soundSlotOwners;     /* Shared category/id owners. */
+    u8 pad240[0x278];
     struct SoundResourceNode *soundResourceSlots[BTL_SOUND_ENTRY_COUNT];
 } BtlActorWork;
 
@@ -7873,24 +7876,25 @@ s32 sndHasActiveActor(void) {
     return 0;
 }
 
+/* Allocate a cleared resource node and prepend it to the runtime's resource list. */
 SoundResourceNode *sndAllocResourceNode(void) {
     SoundResourceNode *node = sdfAllocAndClearQuadwords(sizeof(SoundResourceNode));
-    u8 *state;
+    BtlActorWork *state;
     SoundResourceNode *first;
     node->unk_04 = 0;
     node->unk_08 = 0;
     node->fadeCountdown = 0;
     node->resourceHandle = 0;
-    state = (u8 *)btlGetRuntime();
+    state = (BtlActorWork *)btlGetRuntime();
     node->previous = 0;
-    first = *(SoundResourceNode **)(state + 0x234);
+    first = state->soundResourceHead;
     if (first) {
         first->previous = node;
-        node->next = *(SoundResourceNode **)(state + 0x234);
+        node->next = state->soundResourceHead;
     } else {
         node->next = 0;
     }
-    *(SoundResourceNode **)(state + 0x234) = node;
+    state->soundResourceHead = node;
     return node;
 }
 
@@ -7901,6 +7905,7 @@ SoundResourceNode *sndCreateResourceNode(u32 soundId) {
     return node;
 }
 
+/* Release owned voices, unlink the resource node, and free its allocation. */
 void sndFreeResourceNode(SoundResourceNode *node) {
     if (node->resourceHandle) {
         sndReleaseAllVoices(node->resourceHandle);
@@ -7911,16 +7916,17 @@ void sndFreeResourceNode(SoundResourceNode *node) {
     if (node->previous) {
         node->previous->next = node->next;
     } else {
-        *(SoundResourceNode **)(btlGetRuntime() + 0x234) = node->next;
+        ((BtlActorWork *)btlGetRuntime())->soundResourceHead = node->next;
     }
     sdfReleaseChipBlock(node);
 }
 
+/* Advance resource countdowns and battle tint, then tick slot-volume fades. */
 void btlUpdateFadeColor(void) {
     s32 context = btlGetRuntime();
     SoundResourceNode *node;
 
-    for (node = *(SoundResourceNode **)(context + 0x234); node != 0; node = node->next) {
+    for (node = ((BtlActorWork *)context)->soundResourceHead; node != 0; node = node->next) {
         if (node->unk_04 == 0) {
             node->fadeCountdown = 0;
         } else if (node->fadeCountdown > 0) {
@@ -7975,8 +7981,9 @@ void btlClearSoundAndModelResources(void) {
     fileResetRenderFlags();
 }
 
+/* Destroy all resource nodes; preserve each next link before freeing its owner. */
 void sndClearResourceNodes(void) {
-    SoundResourceNode *node = *(SoundResourceNode **)(btlGetRuntime() + 0x234);
+    SoundResourceNode *node = ((BtlActorWork *)btlGetRuntime())->soundResourceHead;
     while (node) {
         SoundResourceNode *next = node->next;
         sndFreeResourceNode(node);
@@ -8368,8 +8375,9 @@ SoundTask *sndCreateStationedSeTask(u32 soundId) {
     return task;
 }
 
+/* Return whether the independent active-node list contains a node with flag 8. */
 s32 sndHasFlaggedActiveNode(void) {
-    ActiveSoundNode *node = *(ActiveSoundNode **)(btlGetRuntime() + 0x238);
+    ActiveSoundNode *node = ((BtlActorWork *)btlGetRuntime())->soundList;
     while (node != 0) {
         if (node->flags & 8) {
             return 1;
@@ -8578,23 +8586,25 @@ s32 sndMapResourceType(s32 sound, s32 index) {
     return -1;
 }
 
+/* Allocate a cleared active-sound node and prepend it to its independent list. */
 ActiveSoundNode *sndAllocListNode(void) {
     ActiveSoundNode *node = sdfAllocAndClearQuadwords(0x14);
-    u8 *state = (u8 *)btlGetRuntime();
+    BtlActorWork *state = (BtlActorWork *)btlGetRuntime();
     ActiveSoundNode *first;
 
     node->previous = 0;
-    first = *(ActiveSoundNode **)(state + 0x238);
+    first = state->soundList;
     if (first != 0) {
         first->previous = node;
-        node->next = *(ActiveSoundNode **)(state + 0x238);
+        node->next = state->soundList;
     } else {
         node->next = 0;
     }
-    *(ActiveSoundNode **)(state + 0x238) = node;
+    state->soundList = node;
     return node;
 }
 
+/* Unlink and free an active-sound node without changing the resource-node list. */
 void sndFreeListNode(ActiveSoundNode *node) {
     if (node->next != 0) {
         node->next->previous = node->previous;
@@ -8602,13 +8612,14 @@ void sndFreeListNode(ActiveSoundNode *node) {
     if (node->previous != 0) {
         node->previous->next = node->next;
     } else {
-        *(ActiveSoundNode **)(btlGetRuntime() + 0x238) = node->next;
+        ((BtlActorWork *)btlGetRuntime())->soundList = node->next;
     }
     sdfReleaseChipBlock(node);
 }
 
+/* Clear active-sound nodes, saving next before each allocation is released. */
 void sndClearList(void) {
-    ActiveSoundNode *node = *(ActiveSoundNode **)(btlGetRuntime() + 0x238);
+    ActiveSoundNode *node = ((BtlActorWork *)btlGetRuntime())->soundList;
     while (node != 0) {
         ActiveSoundNode *next = node->next;
         sndFreeListNode(node);
@@ -8621,11 +8632,26 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
+/* Shared motion-SE owner: queued files become resource handles before playback. */
+typedef struct SoundSlotOwner {
+    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
+    s32 category;
+    s32 id;
+    u32 refCount; /* Shared retain count; release frees only on the zero transition. */
+    s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
+    s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
+    s32 fileRequests[0x1D];
+    s32 resourceHandles[0x1D];
+    struct SoundSlotOwner *prev;
+    struct SoundSlotOwner *next;
+} SoundSlotOwner;
+
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
+/* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
 u32 func_001F3C38(u32 *sound, u32 slot) {
-    u32 id = sound[2];
-    u32 category = sound[1];
+    u32 id = ((SoundSlotOwner *)sound)->id;
+    u32 category = ((SoundSlotOwner *)sound)->category;
     SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
     s32 specialCategory = 1;
     s32 scaledId = id * 0x20;
@@ -8657,6 +8683,7 @@ extern char D_003A5198[];
 
 extern char D_003A51A8[];
 
+/* Queue available motion-SE files into fileRequests, including slot 11's stream. */
 void sndLoadMotSeFiles(u32 *sound) {
     char filename[0x70];
     u32 slot = 0;
@@ -8681,87 +8708,89 @@ void sndLoadMotSeFiles(u32 *sound) {
     sound[0] |= 1;
 }
 
-s32 sndFindListNodeForChannel(s32 soundId, s32 channel) {
+/* Find the shared category/id owner, returning its address or zero. */
+s32 sndFindListNodeForChannel(s32 category, s32 id) {
     s32 context = btlGetRuntime();
-    s32 node = *(s32 *)(context + 0x23C);
+    SoundSlotOwner *node = ((BtlActorWork *)context)->soundSlotOwners;
     while (node != 0) {
-        if (*(s32 *)(node + 4) == soundId && *(s32 *)(node + 8) == channel) {
-            return node;
+        if (node->category == category && node->id == id) {
+            return (s32)node;
         }
-        node = *(s32 *)(node + 0x104);
+        node = node->next;
     }
     return 0;
 }
 
 extern char D_003A51D0[];
 
-u8 *sndAcquireSlotOwner(s32 soundId, s32 channel) {
-    u8 *node = (u8 *)sndFindListNodeForChannel(soundId, channel);
-    u8 *context;
-    u8 *head;
+/* Retain or register an owner; model flag 0xC0F suppresses initial file queuing. */
+u8 *sndAcquireSlotOwner(s32 category, s32 id) {
+    SoundSlotOwner *node = (SoundSlotOwner *)sndFindListNodeForChannel(category, id);
+    BtlActorWork *context;
+    SoundSlotOwner *head;
 
     if (node != 0) {
         btlBossDebugPrintf(D_003A51D0, node);
-        (*(u32 *)(node + 0xC))++;
-        return node;
+        node->refCount++;
+        return (u8 *)node;
     }
     node = sdfAllocAndClearQuadwords(0x108);
-    *(s32 *)(node + 4) = soundId;
-    *(s32 *)(node + 8) = channel;
-    *(u32 *)(node + 0xC) = 1;
-    context = (u8 *)btlGetRuntime();
-    *(u8 **)(node + 0x100) = 0;
-    head = *(u8 **)(context + 0x23C);
+    node->category = category;
+    node->id = id;
+    node->refCount = 1;
+    context = (BtlActorWork *)btlGetRuntime();
+    node->prev = 0;
+    head = context->soundSlotOwners;
     if (head != 0) {
-        *(u8 **)(head + 0x100) = node;
-        *(u8 **)(node + 0x104) = *(u8 **)(context + 0x23C);
+        head->prev = node;
+        node->next = context->soundSlotOwners;
     } else {
-        *(u8 **)(node + 0x104) = 0;
+        node->next = 0;
     }
-    *(u8 **)(context + 0x23C) = node;
+    context->soundSlotOwners = node;
     if (mdlFlagTest(0xC0F) == 0) {
-        sndLoadMotSeFiles(node);
+        sndLoadMotSeFiles((u32 *)node);
     }
-    return node;
+    return (u8 *)node;
 }
 
-void sndReleaseSlotOwner(u8 *node) {
-    u32 count = *(u32 *)(node + 0xC) - 1;
-    *(u32 *)(node + 0xC) = count;
+/* The last reference cleans queued files and resource handles, then unlinks/frees. */
+void sndReleaseSlotOwner(u8 *ownerAddress) {
+    SoundSlotOwner *node = (SoundSlotOwner *)ownerAddress;
+    u32 count = node->refCount - 1;
+    node->refCount = count;
     if (count == 0) {
         u32 i = 0;
-        u32 *resources = (u32 *)(node + 0x8C);
-        u32 *handles = (u32 *)(node + 0x18);
-        for (; i < 0x1D; i++, handles++, resources++) {
-            if (*handles != 0) {
-                filePollEntryCleanup(*handles);
+        u32 *resources = (u32 *)node->resourceHandles;
+        u32 *requests = (u32 *)node->fileRequests;
+        for (; i < 0x1D; i++, requests++, resources++) {
+            if (*requests != 0) {
+                filePollEntryCleanup(*requests);
             }
             if (*resources != 0) {
                 sdfReleaseResourceAllocation(*resources);
             }
         }
-        if (*(u8 **)(node + 0x104) != 0) {
-            *(u8 **)(*(u8 **)(node + 0x104) + 0x100) =
-                *(u8 **)(node + 0x100);
+        if (node->next != 0) {
+            node->next->prev = node->prev;
         }
-        if (*(u8 **)(node + 0x100) != 0) {
-            *(u8 **)(*(u8 **)(node + 0x100) + 0x104) =
-                *(u8 **)(node + 0x104);
+        if (node->prev != 0) {
+            node->prev->next = node->next;
         } else {
-            *(u8 **)(btlGetRuntime() + 0x23C) =
-                *(u8 **)(node + 0x104);
+            ((BtlActorWork *)btlGetRuntime())->soundSlotOwners = node->next;
         }
         sdfReleaseChipBlock(node);
     }
 }
 
+/* Release once per owner; preserve the next link before a final release may free. */
 void sndReleaseAllSlotOwners(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x23C);
+    SoundSlotOwner *node = ((BtlActorWork *)btlGetRuntime())->soundSlotOwners;
 
     while (node != 0) {
-        s32 next = *(s32 *)(node + 0x104);
+        SoundSlotOwner *next = node->next;
 
-        sndReleaseSlotOwner(node);
+        sndReleaseSlotOwner((u8 *)node);
         node = next;
     }
 }
@@ -8771,13 +8800,14 @@ void btlStartMoveOtherUnitsTask(void) {
     btlStartTask(task);
 }
 
+/* Flag 8 denotes packed-track loading, distinct from queued motion-SE files. */
 s32 sndHasActiveFileLoad(void) {
-    u8 *node = *(u8 **)(btlGetRuntime() + 0x23C);
+    SoundSlotOwner *node = ((BtlActorWork *)btlGetRuntime())->soundSlotOwners;
     while (node) {
-        if (*(u32 *)node & 8) {
+        if (node->flags & 8) {
             return 1;
         }
-        node = *(u8 **)(node + 0x104);
+        node = node->next;
     }
     return 0;
 }
@@ -8842,21 +8872,22 @@ u8 sndIsBattleBankLoaded(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F44C0);
 
+/* Return whether a not-yet-file-ready owner still has an outstanding request. */
 s32 sndHasOccupiedNodeSlots(void) {
     s32 context = btlGetRuntime();
-    s32 node = *(s32 *)(context + 0x23C);
+    SoundSlotOwner *node = ((BtlActorWork *)context)->soundSlotOwners;
     while (node != 0) {
-        if ((*(u32 *)node & 2) == 0) {
+        if ((node->flags & 2) == 0) {
             u32 index = 0;
-            u32 *slot = (u32 *)(node + 0x18);
+            u32 *requests = (u32 *)node->fileRequests;
             for (; index < 0x1D; index++) {
-                if (*slot != 0) {
+                if (*requests != 0) {
                     return 1;
                 }
-                slot++;
+                requests++;
             }
         }
-        node = *(s32 *)(node + 0x104);
+        node = node->next;
     }
     return 0;
 }
