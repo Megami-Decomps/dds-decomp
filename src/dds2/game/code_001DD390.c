@@ -201,7 +201,12 @@ extern void btlUnitTurnEndStateSelect(BtlUnit *);
 typedef struct BattleActionLinkState {
     u8 pad00[0x18];
     BtlUnit *unit;          /* 0x18 */
-    u8 pad1C[0x28];
+    u8 pad1C[8];
+    union {
+        u32 cursorKind;     /* 0x24 */
+        u16 cursorKindLow;
+    };
+    u8 pad28[0x1C];
     s32 resourceNodeIndex;   /* 0x44: index into BtlEffectResource.nodes */
     u8 pad48[0x18];
     s32 actorIndices;       /* 0x60 */
@@ -6294,9 +6299,66 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418398);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004183D8);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F4E30);
+void func_001F4E30(ActionUnit *action) {
+    CURSOR->frame = 0;
+    if (!(action->link->unit->flags & 0x400)) {
+        return;
+    }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F4F10);
+    memset(CURSOR, 0, 0x130);
+    switch (action->link->cursorKindLow) {
+    case 0x1BB:
+        CURSOR->unk_0C = 0x1B;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1BF:
+        CURSOR->unk_0C = 0x16;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1B3:
+        CURSOR->unk_0C = 0x11;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1B7:
+        CURSOR->unk_0C = 0x22;
+        CURSOR->unk_0E = 0;
+        break;
+    case 0x1C3:
+        CURSOR->unk_0C = 0x23;
+        CURSOR->unk_0E = 0;
+        break;
+    }
+}
+
+extern s32 D_003BBFC8[];
+
+void func_001F4F10(ActionUnit *action, s32 state) {
+    if (!(action->link->unit->flags & 0x400)) {
+        func_001FA480((s32)action, state, D_003BBFC8[CURSOR->unk_0C]);
+        func_001FBAC0((s32)action, state);
+        func_001FB908((s32)action, state, 0, 0);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 :
+            CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    } else {
+        switch (action->link->cursorKind) {
+        case 0x1B3:
+        case 0x1B7:
+        case 0x1BB:
+        case 0x1BF:
+        case 0x1C3:
+            func_001FA480((s32)action, state, D_003BBFC8[CURSOR->unk_0C]);
+            func_001FBAC0((s32)action, state);
+            func_001FB908((s32)action, state, 0, 0);
+            CURSOR->frame++;
+            CURSOR->frame = CURSOR->frame <= 0 ? 0 :
+                CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+            break;
+        default:
+            return;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F5018);
 
