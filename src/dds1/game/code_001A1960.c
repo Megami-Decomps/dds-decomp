@@ -2369,7 +2369,34 @@ void btlClearSharedBattleStateWords(void) {
     } while (-1 < temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACD30);
+s32 func_001ACD30(s32 id, s32 operation) {
+    s32 selector;
+    s32 offset;
+    u32 word;
+    u32 bit;
+
+    selector = (u16)id;
+    offset = selector - 0x1AB;
+    selector = (s8)operation;
+    if (offset != 0) {
+        word = (u32)offset >> 5;
+        bit = offset & 0x1F;
+    } else {
+        word = 0;
+        bit = 0;
+    }
+    switch (selector) {
+    case 0:
+        ((u32 *)(datGameState + 0x2E9DC))[word] |= 1 << bit;
+        break;
+    case 1:
+        ((u32 *)(datGameState + 0x2E9DC))[word] &= ~(1 << bit);
+        break;
+    default:
+        return ((((u32 *)(datGameState + 0x2E9DC))[word] & (1 << bit)) != 0);
+    }
+    return 1;
+}
 
 void func_001ACDF0(void) {
     s32 *temp_v0;
