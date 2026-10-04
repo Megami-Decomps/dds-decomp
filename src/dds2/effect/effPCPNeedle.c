@@ -198,17 +198,12 @@ void func_0017E080(EffPCPNeedleWork *work) {
 
                 if (age < fadeIn && fadeIn != 0) {
                     t = (f32)age / (f32)fadeIn;
+                } else if (duration == age && fadeOut != 0) {
+                    t = 0.0f;
                 } else {
-                    if (duration == age) {
-                        t = 0.0f;
-                        if (fadeOut != 0) {
-                            goto blend_color;
-                        }
-                    }
                     t = fadeOut < duration - age || fadeOut == 0
                         ? 1.0f : (f32)(duration - age) / (f32)fadeOut;
                 }
-blend_color:
                 color = effBlendColor(baseColor & 0xFFFFFF, baseColor, t);
                 effSetResourceEntryValue((void *)work->resource6C, i, color);
 
