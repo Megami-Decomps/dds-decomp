@@ -1,6 +1,45 @@
 #include "common.h"
 #include "kwln.h"
 
+#define BRS_RESULT_COUNTER_PAIR_COUNT 5
+#define BRS_RESULT_SETTLED_POLL_LIMIT 6
+#define BRS_RESULT_SETTLED_POLL_CLAMP 7
+
+#define SND_TRACK_DEFAULT_VOLUME 0x7f
+#define SND_TRACK_DEFAULT_PAN 0x3f
+#define SND_TRANSFER_WORD_BYTES 4
+#define SND_TRANSFER_WORD_HALFWORDS 2
+#define SND_TRANSFER_PAIR_WORD_BYTES 8
+#define SND_MIX_SAMPLE_COUNT 0x800
+#define SND_MIX_SAMPLE_LIMIT 0x7FFF
+
+#define MNU_TITLE_EFFECT_BYTES 8
+#define MNU_TITLE_VOICE_PREFIX_BYTES 5
+#define MNU_TITLE_VOICE_PATH_BYTES 16
+#define MNU_TITLE_SOUND_PATH_BYTES 32
+
+/* Each compressed-frame size has a corresponding 600-frame allocation. */
+#define MNU_SOUND_FRAME_BYTES_LARGE 0x180
+#define MNU_SOUND_FRAME_BYTES_MEDIUM 0xC0
+#define MNU_SOUND_FRAME_BYTES_SMALL 0x60
+#define MNU_SOUND_BUFFER_BYTES_LARGE 0x38400
+#define MNU_SOUND_BUFFER_BYTES_MEDIUM 0x1C200
+#define MNU_SOUND_BUFFER_BYTES_SMALL 0xE100
+
+/* Shared word positions in the title stream and sound-buffer state arrays. */
+#define MNU_STREAM_FRAME_COUNT_INDEX 0
+#define MNU_STREAM_FRAME_BYTES_INDEX 2
+#define MNU_STREAM_CONTROL_INDEX 4
+#define MNU_STREAM_DATA_ADDRESS_INDEX 5
+#define MNU_STREAM_ALLOCATION_INDEX 8
+#define MNU_STREAM_LOAD_STATE_INDEX 9
+
+#define MNU_STREAM_LOAD_IDLE 0
+#define MNU_STREAM_LOAD_PENDING 1
+#define MNU_STREAM_LOAD_COPIED 2
+#define MNU_STREAM_COMMIT_READY 3
+#define MNU_STREAM_COMMIT_COMPLETE 4
+
 extern u32 mnuTitleStreamSemaphore;
 
 extern u64 scrReadIntParameter(u64);
@@ -83,45 +122,46 @@ typedef struct BrsResultWork {
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A05C0);
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A08D8);
 
-/* Complete the result screen after five counter pairs have settled. */
+/* Complete after six successful polls of five counter pairs.
+ * Early returns deliberately leave the accumulated settled count unchanged. */
 s32 brsPollResultCounterCompletion(void) {
-    KwlnTask *task = func_00101740(D_00428550);
-    BrsResultWork *work;
-    s32 i;
+    KwlnTask *resultTask = func_00101740(D_00428550);
+    BrsResultWork *resultWork;
+    s32 counterIndex;
 
-    if (task == NULL) {
+    if (resultTask == NULL) {
         return 0;
     }
-    work = (BrsResultWork *)kwlnTaskGetUserValue(task);
-    for (i = 0; i < 5; i++) {
-        if (work->levelCounters[i].phase >= 2) {
-            if (work->levelCounters[i].remaining != 0 ||
-                work->levelCounters[i].unk4C != 0 ||
-                work->levelCounters[i].unk60 != 0) {
+    resultWork = (BrsResultWork *)kwlnTaskGetUserValue(resultTask);
+    for (counterIndex = 0; counterIndex < BRS_RESULT_COUNTER_PAIR_COUNT; counterIndex++) {
+        if (resultWork->levelCounters[counterIndex].phase >= 2) {
+            if (resultWork->levelCounters[counterIndex].remaining != 0 ||
+                resultWork->levelCounters[counterIndex].unk4C != 0 ||
+                resultWork->levelCounters[counterIndex].unk60 != 0) {
                 return 0;
             }
-        } else if (work->levelCounters[i].remaining != 0) {
+        } else if (resultWork->levelCounters[counterIndex].remaining != 0) {
             return 0;
         }
-        if (work->profileCounters[i].phase >= 2) {
-            if (work->profileCounters[i].phase == 2) {
-                if (work->profileCounters[i].remaining != 0) {
+        if (resultWork->profileCounters[counterIndex].phase >= 2) {
+            if (resultWork->profileCounters[counterIndex].phase == 2) {
+                if (resultWork->profileCounters[counterIndex].remaining != 0) {
                     return 0;
                 }
             }
         }
     }
-    work->settledFrames++;
-    work->settledFrames = work->settledFrames <= 0 ? 0 :
-        work->settledFrames >= 7 ? 6 : work->settledFrames;
-    if (work->settledFrames < 6) {
+    resultWork->settledFrames++;
+    resultWork->settledFrames = resultWork->settledFrames <= 0 ? 0 :
+        resultWork->settledFrames >= BRS_RESULT_SETTLED_POLL_CLAMP ? BRS_RESULT_SETTLED_POLL_LIMIT : resultWork->settledFrames;
+    if (resultWork->settledFrames < BRS_RESULT_SETTLED_POLL_LIMIT) {
         return 0;
     }
     return 1;
 }
 
-void mnuSetTitleSequenceVolumePan(u32 arg0) {
-    sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
+void mnuSetTitleSequenceVolumePan(u32 sequenceId) {
+    sndSetSequenceVolumePan(sequenceId, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);
 }
 
 void func_002A1020(void) {
@@ -136,14 +176,16 @@ void func_002A1030(void) {
 void func_002A1038(void) {
 }
 
-char *mnuBuildSoundResourcePath(char *dst, char *filename) {
-    *(u64p *)dst = *(u64p *)D_00437A00;
-    return strcat(dst, filename);
+/* Copy the packed eight-byte prefix, then append the caller's filename. */
+char *mnuBuildSoundResourcePath(char *pathBuffer, char *filename) {
+    *(u64p *)pathBuffer = *(u64p *)D_00437A00;
+    return strcat(pathBuffer, filename);
 }
 
-char *mnuBuildVoiceResourcePath(char *dst, char *filename) {
-    *(u64p *)dst = *(u64p *)D_00437A08;
-    return strcat(dst, filename);
+/* Use the voice prefix with the same packed, unbounded append convention. */
+char *mnuBuildVoiceResourcePath(char *pathBuffer, char *filename) {
+    *(u64p *)pathBuffer = *(u64p *)D_00437A08;
+    return strcat(pathBuffer, filename);
 }
 
 extern s8 D_004379FC;
@@ -193,10 +235,10 @@ typedef struct TitleEffectState {
 } TitleEffectState;
 
 u32 mnuIncrementTitleEffectFrameCounter(void) {
-    TitleEffectState *state;
+    TitleEffectState *effectState;
 
-    state = (TitleEffectState *)kwlnTaskGetUserValue();
-    state->frameCounter = state->frameCounter + 1;
+    effectState = (TitleEffectState *)kwlnTaskGetUserValue();
+    effectState->frameCounter = effectState->frameCounter + 1;
     return 0;
 }
 
@@ -207,28 +249,28 @@ void mnuDestroyTitleEffectTask(void) {
 
 extern u8 D_00437A10[];
 
-/* The task owns a two-word title-effect state; its second word counts frames. */
+/* Allocate the two-word effect state and attach it to the frame-counter task. */
 void mnuCreateTitleEffectTask(void) {
-    TitleEffectState *state = (TitleEffectState *)sdfAllocSizeClassBlock(8);
-    u32 task = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
+    TitleEffectState *effectState = (TitleEffectState *)sdfAllocSizeClassBlock(MNU_TITLE_EFFECT_BYTES);
+    u32 effectTask = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
-    mnuTitleSoundTask = task;
-    kwlnTaskSetUserValue(task, state);
-    state->soundNameIndex = 0;
-    state->frameCounter = 0;
+    mnuTitleSoundTask = effectTask;
+    kwlnTaskSetUserValue(effectTask, effectState);
+    effectState->soundNameIndex = 0;
+    effectState->frameCounter = 0;
 }
 
-void mnuResetTitleEffectState(s32 effect) {
-    TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+void mnuResetTitleEffectState(s32 command) {
+    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         sdfSoundStopNamedPlayback();
     }
-    sdfSoundSendNamedCommand(effect, 0x7f);
-    state->frameCounter = 0;
+    sdfSoundSendNamedCommand(command, 0x7f);
+    effectState->frameCounter = 0;
 }
 
-void mnuSetTitleVoicePrefixIndex(s32 value) {
-    ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->soundNameIndex = value;
+void mnuSetTitleVoicePrefixIndex(s32 prefixIndex) {
+    ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->soundNameIndex = prefixIndex;
 }
 
 extern char D_00428610[];
@@ -237,16 +279,18 @@ extern char D_00428628[];
 
 extern char D_003E09F0[];
 
-void mnuPlayTitleVoiceFile(char *filename) {
-    char path[16];
-    TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+/* The native char*-typed voice argument is passed to numeric %04d formatting;
+ * retain that signature rather than treating it as a filename string. */
+void mnuPlayTitleVoiceFile(char *voiceArgument) {
+    char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
+    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         func_0035B6E0(D_00428610);
         sdfSoundStopNamedPlayback();
     }
-    func_0035C860(path, D_00428628, D_003E09F0 + 5 * state->soundNameIndex, filename);
-    sdfSoundSendNamedCommand(path, 0x64);
-    state->frameCounter = 0;
+    func_0035C860(voicePath, D_00428628, D_003E09F0 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
+    sdfSoundSendNamedCommand(voicePath, 0x64);
+    effectState->frameCounter = 0;
 }
 
 void mnuStopTitleVoicePlayback(void) {
@@ -276,7 +320,7 @@ u32 sndOpSetTrackDefaultVolumePan(void) {
     u64 sequence;
 
     sequence = scrReadIntParameter(0);
-    sndSetSequenceVolumePan(sequence, 0x7f, 0x3f);
+    sndSetSequenceVolumePan(sequence, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);
     return 1;
 }
 
@@ -286,12 +330,12 @@ u32 func_002A13C0(void) {
 }
 
 s32 mnuInitializeTitleEffects(void) {
-    s32 value;
-    value = scrReadStringParameter(0);
+    s32 commandName;
+    commandName = scrReadStringParameter(0);
     if (sdfSoundIsCommandBusy() != 0) {
         sdfSoundStopNamedPlayback();
     }
-    sdfSoundSendNamedCommand(value, 0x7f);
+    sdfSoundSendNamedCommand(commandName, 0x7f);
     return 1;
 }
 
@@ -337,55 +381,58 @@ u32 mnuAdvanceTitleStreamFromScript(void) {
 }
 
 u8 mnuIsTitleStreamIdle(void) {
-    s64 soundState;
+    s64 loadState;
 
-    soundState = mnuPollTitleStreamStateLocked();
-    return soundState == 0;
+    loadState = mnuPollTitleStreamStateLocked();
+    return loadState == MNU_STREAM_LOAD_IDLE;
 }
 
-s32 sndCopyWordsToIopSynchronously(u32 source, u32 destination, u32 words) {
+/* Flush EE cache, submit one word-sized transfer to IOP, and busy-wait for DMA.
+ * Return the native request ID; there is no failure retry or timeout here. */
+s32 sndCopyWordsToIopSynchronously(u32 sourceAddress, u32 iopAddress, u32 wordCount) {
     struct {
         u32 source;
         u32 destination;
         u32 size;
         u32 attributes;
     } transfer;
-    s32 request;
-    transfer.source = source;
-    transfer.destination = destination;
-    transfer.size = words * 4;
+    s32 dmaRequest;
+    transfer.source = sourceAddress;
+    transfer.destination = iopAddress;
+    transfer.size = wordCount * SND_TRANSFER_WORD_BYTES;
     transfer.attributes = 0;
     FlushCache(0);
-    request = sceSifSetDma(&transfer, 1);
-    while (sceSifDmaStat(request) >= 0) {
+    dmaRequest = sceSifSetDma(&transfer, 1);
+    while (sceSifDmaStat(dmaRequest) >= 0) {
     }
-    return request;
+    return dmaRequest;
 }
 
-void sndInitializeStreamTransferBuffers(s32 words) {
-    s32 bytes = words * 4;
-    s32 i;
+/* Zero one EE staging buffer, then seed both halves of the IOP allocation. */
+void sndInitializeStreamTransferBuffers(s32 wordCount) {
+    s32 bufferBytes = wordCount * SND_TRANSFER_WORD_BYTES;
+    s32 halfwordIndex;
 
-    D_00437A28 = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(bytes));
-    for (i = 0; i < words * 2; i++) {
-        ((u16 *)D_00437A28)[i] = 0;
+    D_00437A28 = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(bufferBytes));
+    for (halfwordIndex = 0; halfwordIndex < wordCount * SND_TRANSFER_WORD_HALFWORDS; halfwordIndex++) {
+        ((u16 *)D_00437A28)[halfwordIndex] = 0;
     }
     sceSifInitIopHeap();
-    D_00438FD8 = sceSifAllocIopHeap(words * 8);
+    D_00438FD8 = sceSifAllocIopHeap(wordCount * SND_TRANSFER_PAIR_WORD_BYTES);
     if (D_00438FD8 <= 0) {
         Exit(0);
     }
     D_00437A20[0] = D_00438FD8;
-    D_00437A20[1] = D_00438FD8 + bytes;
-    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], words);
-    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], words);
+    D_00437A20[1] = D_00438FD8 + bufferBytes;
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], wordCount);
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A1678);
 
-void mnuInitTitleSoundRemoteRequest(u32 arg0) {
+void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();
-    sndInitializeStreamTransferBuffers(arg0);
+    sndInitializeStreamTransferBuffers(wordCount);
     D_00437A2C = 0;
 }
 
@@ -393,9 +440,10 @@ extern u64 func_0034E820();
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A1790);
 
-void sndUploadStreamToBothIopBuffers(u32 source) {
-    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], source);
-    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], source);
+/* The argument is a word count, not a source address; both use the EE buffer. */
+void sndUploadStreamToBothIopBuffers(u32 wordCount) {
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], wordCount);
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
     func_0034E820(1, 0x8010, 0xf80, 0);
     func_0034E820(1, 0x8010, 0x1080, 0);
     func_0034E820(1, 0x80e0, 0, 2, 0, 0);
@@ -407,24 +455,26 @@ typedef struct MixSource {
     s16 *samples; /* 0x18 */
 } MixSource;
 
-void sndMixSampleBuffers(s16 *dst, MixSource *first, MixSource *second) {
-    s16 *in = second->samples;
-    s16 *out = dst;
-    s32 i;
-    for (i = 0; i < 0x800; i++) {
-        *out++ = *in++;
+/* Copy the second source, add the first, and clamp to [-32767, 32767].
+ * The native lower limit intentionally excludes the s16 value -32768. */
+void sndMixSampleBuffers(s16 *destinationSamples, MixSource *firstSource, MixSource *secondSource) {
+    s16 *sourceCursor = secondSource->samples;
+    s16 *destinationCursor = destinationSamples;
+    s32 sampleIndex;
+    for (sampleIndex = 0; sampleIndex < SND_MIX_SAMPLE_COUNT; sampleIndex++) {
+        *destinationCursor++ = *sourceCursor++;
     }
-    in = first->samples;
-    out -= 0x800;
-    for (i = 0; i < 0x800; i++) {
-        s32 sample = *out + *in++;
-        if (sample > 0x7FFF) {
-            sample = 0x7FFF;
+    sourceCursor = firstSource->samples;
+    destinationCursor -= SND_MIX_SAMPLE_COUNT;
+    for (sampleIndex = 0; sampleIndex < SND_MIX_SAMPLE_COUNT; sampleIndex++) {
+        s32 mixedSample = *destinationCursor + *sourceCursor++;
+        if (mixedSample > SND_MIX_SAMPLE_LIMIT) {
+            mixedSample = SND_MIX_SAMPLE_LIMIT;
         }
-        if (sample < -0x7FFF) {
-            sample = -0x7FFF;
+        if (mixedSample < -SND_MIX_SAMPLE_LIMIT) {
+            mixedSample = -SND_MIX_SAMPLE_LIMIT;
         }
-        *out++ = sample;
+        *destinationCursor++ = mixedSample;
     }
 }
 
@@ -452,32 +502,36 @@ void mnuCreateTitleStreamThread(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A1E58);
 
-void mnuReadTitleStreamStatusLocked(AtracInfo *out) {
+/* Read state words 0, 1 and 3; the frame-byte word 2 is not in this snapshot. */
+void mnuReadTitleStreamStatusLocked(AtracInfo *statusSnapshot) {
     WaitSema(mnuTitleStreamSemaphore);
-    out->unk0 = mnuTitleStreamStatus[0];
-    out->unk4 = mnuTitleStreamStatus[1];
-    out->unk8 = mnuTitleStreamStatus[3];
+    statusSnapshot->unk0 = mnuTitleStreamStatus[MNU_STREAM_FRAME_COUNT_INDEX];
+    statusSnapshot->unk4 = mnuTitleStreamStatus[1];
+    statusSnapshot->unk8 = mnuTitleStreamStatus[3];
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-void mnuWriteTitleStreamStatusLocked(u32 *values) {
+/* Restore the same condensed three-word status mapping under the lock. */
+void mnuWriteTitleStreamStatusLocked(u32 *statusValues) {
     WaitSema(mnuTitleStreamSemaphore);
-    mnuTitleStreamStatus[0] = values[0];
-    mnuTitleStreamStatus[1] = values[1];
-    mnuTitleStreamStatus[3] = values[2];
+    mnuTitleStreamStatus[MNU_STREAM_FRAME_COUNT_INDEX] = statusValues[0];
+    mnuTitleStreamStatus[1] = statusValues[1];
+    mnuTitleStreamStatus[3] = statusValues[2];
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
+/* Copy into the state array's installed buffer, count complete compressed
+ * frames using its frame-byte divisor, then release the loaded resource. */
+void mnuLoadTitleStreamFrameData(char *filePath, u32 *streamState) {
     void *fileData;
-    s32 frames;
-    u32 request = sdfReadNamedResource(filePath, &fileData, 0);
-    s32 bytes = sdfMemoryGetBlockSize(request);
-    memcpy((void *)work[5], fileData, bytes);
-    frames = bytes / (s32)work[2];
-    work[1] = 0;
-    work[0] = frames;
-    sdfQueueNonzeroResourceId(request);
+    s32 frameCount;
+    u32 resourceHandle = sdfReadNamedResource(filePath, &fileData, 0);
+    s32 fileBytes = sdfMemoryGetBlockSize(resourceHandle);
+    memcpy((void *)streamState[MNU_STREAM_DATA_ADDRESS_INDEX], fileData, fileBytes);
+    frameCount = fileBytes / (s32)streamState[MNU_STREAM_FRAME_BYTES_INDEX];
+    streamState[1] = 0;
+    streamState[MNU_STREAM_FRAME_COUNT_INDEX] = frameCount;
+    sdfQueueNonzeroResourceId(resourceHandle);
 }
 
 void mnuStoreTaskResult(char *audioPath) {
@@ -494,27 +548,28 @@ extern void filePollEntryCleanup(u32);
 extern MemBlock *sdfAllocGeneralBlockHigh(s32);
 extern void func_003504A8(u32 *);
 
-/* When the pending title-stream file is ready, copy it into a fresh block,
- * record the entry count (size / entry size) and mark the queue as loaded. */
-s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
+/* Allocate in global status, but use the supplied state's copy destination
+ * and frame counts. Keep those distinct accesses and the cleanup-before-copy
+ * ordering; return 1 after a ready file is copied, otherwise its ready result. */
+s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
     s32 ready = fileIsRequestReadyInCurrentMode(D_00438FEC);
 
     if (ready != 0) {
-        s32 handle = fileGetResourceHandle(D_00438FEC);
-        u32 data = fileGetLoadedDataAddress(D_00438FEC);
-        s32 size = fileGetResourceSize(D_00438FEC);
-        MemBlock *block;
+        s32 resourceHandle = fileGetResourceHandle(D_00438FEC);
+        u32 fileDataAddress = fileGetLoadedDataAddress(D_00438FEC);
+        s32 fileBytes = fileGetResourceSize(D_00438FEC);
+        MemBlock *allocation;
 
         filePollEntryCleanup(D_00438FEC);
-        block = sdfAllocGeneralBlockHigh(size);
-        mnuTitleStreamStatus[5] = sdfMemoryGetBlockAddress(block);
-        mnuTitleStreamStatus[8] = (u32)block;
-        memcpy((void *)queue[5], (void *)data, size);
-        queue[0] = size / (s32)queue[2];
-        queue[1] = 0;
-        sdfQueueNonzeroResourceId(handle);
+        allocation = sdfAllocGeneralBlockHigh(fileBytes);
+        mnuTitleStreamStatus[MNU_STREAM_DATA_ADDRESS_INDEX] = sdfMemoryGetBlockAddress(allocation);
+        mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] = (u32)allocation;
+        memcpy((void *)destinationState[MNU_STREAM_DATA_ADDRESS_INDEX], (void *)fileDataAddress, fileBytes);
+        destinationState[MNU_STREAM_FRAME_COUNT_INDEX] = fileBytes / (s32)destinationState[MNU_STREAM_FRAME_BYTES_INDEX];
+        destinationState[1] = 0;
+        sdfQueueNonzeroResourceId(resourceHandle);
         func_003504A8(D_00454D58);
-        mnuTitleStreamStatus[9] = 2;
+        mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] = MNU_STREAM_LOAD_COPIED;
         ready = 1;
     }
     return ready;
@@ -532,33 +587,37 @@ INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2198);
 
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2200);
+/* Poll a pending file without acquiring the semaphore in this entry point. */
 u32 mnuUpdateTitleTransition(void) {
-    if (mnuTitleStreamStatus[9] == 1) {
+    if (mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] == MNU_STREAM_LOAD_PENDING) {
         mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);
     }
-    return mnuTitleStreamStatus[9];
+    return mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX];
 }
 
+/* Poll under the semaphore, but retain the native load-state read after unlock. */
 s32 mnuPollTitleStreamStateLocked(void) {
     WaitSema(mnuTitleStreamSemaphore);
-    if (mnuTitleStreamStatus[9] == 1) {
+    if (mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] == MNU_STREAM_LOAD_PENDING) {
         mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);
     }
     SignalSema(mnuTitleStreamSemaphore);
-    return mnuTitleStreamStatus[9];
+    return mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX];
 }
 
 extern u32 D_00454D68[];
 
+/* Wait/copy a pending file while locked, then prepare a commit for controls
+ * other than 1. Unlike DDS1, this entry point has no BGM banner output. */
 void mnuResetTitleStreamAfterFileIdle(void) {
     WaitSema(mnuTitleStreamSemaphore);
-    if (mnuUpdateTitleTransition() == 1) {
+    if (mnuUpdateTitleTransition() == MNU_STREAM_LOAD_PENDING) {
         fileWaitIdle();
         mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);
     }
-    if (mnuTitleStreamStatus[4] != 1) {
-        mnuTitleStreamStatus[4] = 0;
-        mnuTitleStreamStatus[9] = 3;
+    if (mnuTitleStreamStatus[MNU_STREAM_CONTROL_INDEX] != 1) {
+        mnuTitleStreamStatus[MNU_STREAM_CONTROL_INDEX] = 0;
+        mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] = MNU_STREAM_COMMIT_READY;
         D_00454D68[0] = 0;
     }
     SignalSema(mnuTitleStreamSemaphore);
@@ -567,27 +626,29 @@ void mnuResetTitleStreamAfterFileIdle(void) {
 void mnuMarkTitleStreamResetPending(void) {
     WaitSema(mnuTitleStreamSemaphore);
     mnuTitleStreamStatus[1] = 0;
-    mnuTitleStreamStatus[4] = 2;
+    mnuTitleStreamStatus[MNU_STREAM_CONTROL_INDEX] = 2;
     SignalSema(mnuTitleStreamSemaphore);
 }
 
 extern u32 D_00437A38;
 
+/* Commit the ready load only for control 1, and select the native value 6. */
 void mnuAdvanceTitleStateUnderSemaphore(void) {
     WaitSema(mnuTitleStreamSemaphore);
-    if (mnuTitleStreamStatus[4] == 1 && mnuTitleStreamStatus[9] == 3) {
-        mnuTitleStreamStatus[9] = 4;
+    if (mnuTitleStreamStatus[MNU_STREAM_CONTROL_INDEX] == 1 && mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] == MNU_STREAM_COMMIT_READY) {
+        mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] = MNU_STREAM_COMMIT_COMPLETE;
         D_00454D68[0] = 0;
         D_00437A38 = 6;
     }
     SignalSema(mnuTitleStreamSemaphore);
 }
 
+/* Save the pre-transition load-state read before marking the commit complete. */
 void mnuCommitTitleStreamReadyState(void) {
     WaitSema(mnuTitleStreamSemaphore);
-    if (mnuTitleStreamStatus[4] == 1 && mnuTitleStreamStatus[9] == 3) {
-        D_00437A38 = mnuTitleStreamStatus[9];
-        mnuTitleStreamStatus[9] = 4;
+    if (mnuTitleStreamStatus[MNU_STREAM_CONTROL_INDEX] == 1 && mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] == MNU_STREAM_COMMIT_READY) {
+        D_00437A38 = mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX];
+        mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] = MNU_STREAM_COMMIT_COMPLETE;
         D_00454D68[0] = 0;
     }
     SignalSema(mnuTitleStreamSemaphore);
@@ -597,12 +658,13 @@ extern u8 D_00455DB0[];
 
 extern void sdfQueueNonzeroResourceId(u32 arg0);
 
+/* Reset load/data slots only when an allocation is present; otherwise do nothing. */
 void mnuResetTitleStream(void) {
-    if (mnuTitleStreamStatus[8] != 0) {
-        sdfQueueNonzeroResourceId(mnuTitleStreamStatus[8]);
-        mnuTitleStreamStatus[9] = 0;
-        mnuTitleStreamStatus[8] = 0;
-        mnuTitleStreamStatus[5] = 0;
+    if (mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] != 0) {
+        sdfQueueNonzeroResourceId(mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX]);
+        mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] = MNU_STREAM_LOAD_IDLE;
+        mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] = 0;
+        mnuTitleStreamStatus[MNU_STREAM_DATA_ADDRESS_INDEX] = 0;
         mnuTitleStreamStatus[6] = (u32)D_00455DB0;
     }
 }
@@ -617,23 +679,24 @@ extern u32 D_00455D98[];
 
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428650);
 
+/* Install the default medium-frame buffer and stream under the shared lock. */
 void mnuInitializeTitleSoundBuffer(void) {
-    u32 *work = mnuTitleSoundBufferState;
+    u32 *streamState = mnuTitleSoundBufferState;
     u32 *decoder = D_00455D98;
     MemBlock *allocation;
-    s32 buffer;
+    s32 bufferAddress;
 
     WaitSema(mnuTitleStreamSemaphore);
-    work[7] = (u32)decoder;
-    allocation = sdfAllocGeneralBlock(0x1C200);
-    buffer = sdfMemoryGetBlockAddress(allocation);
-    work[8] = (u32)allocation;
-    work[4] = 2;
-    ((u32 *)work[7])[2] = 2;
-    work[5] = buffer;
-    work[6] = (u32)D_00455DB0;
-    work[2] = 0xC0;
-    mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", work);
+    streamState[7] = (u32)decoder;
+    allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
+    bufferAddress = sdfMemoryGetBlockAddress(allocation);
+    streamState[MNU_STREAM_ALLOCATION_INDEX] = (u32)allocation;
+    streamState[MNU_STREAM_CONTROL_INDEX] = 2;
+    ((u32 *)streamState[7])[2] = 2;
+    streamState[MNU_STREAM_DATA_ADDRESS_INDEX] = bufferAddress;
+    streamState[6] = (u32)D_00455DB0;
+    streamState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_MEDIUM;
+    mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", streamState);
     func_003504A8(decoder);
     SignalSema(mnuTitleStreamSemaphore);
 }
@@ -649,99 +712,102 @@ extern MnuTitleStreamEntry D_003E0F60[];
 extern char D_00428650[];
 
 /* Each format reserves 600 compressed frames before loading its named stream. */
-void func_002A2628(s32 index) {
+void func_002A2628(s32 soundEntryIndex) {
     MemBlock *allocation = NULL;
-    s32 buffer;
-    char path[32];
+    s32 bufferAddress;
+    char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
     WaitSema(mnuTitleStreamSemaphore);
     mnuTitleSoundBufferState[6] = (u32)D_00455DB0;
-    mnuTitleSoundBufferState[3] = D_003E0F60[index].parameter;
+    mnuTitleSoundBufferState[3] = D_003E0F60[soundEntryIndex].parameter;
     mnuTitleSoundBufferState[7] = (u32)D_00455D98;
-    mnuTitleSoundBufferState[4] = 2;
-    switch (D_003E0F60[index].format) {
+    mnuTitleSoundBufferState[MNU_STREAM_CONTROL_INDEX] = 2;
+    switch (D_003E0F60[soundEntryIndex].format) {
     case 1:
         D_00455D98[2] = 1;
-        mnuTitleSoundBufferState[2] = 0x180;
-        allocation = sdfAllocGeneralBlock(0x38400);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_LARGE;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_LARGE);
         break;
     case 2:
         D_00455D98[2] = 2;
-        mnuTitleSoundBufferState[2] = 0xC0;
-        allocation = sdfAllocGeneralBlock(0x1C200);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_MEDIUM;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 3:
         D_00455D98[2] = 3;
-        mnuTitleSoundBufferState[2] = 0xC0;
-        allocation = sdfAllocGeneralBlock(0x1C200);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_MEDIUM;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 4:
         D_00455D98[2] = 4;
-        mnuTitleSoundBufferState[2] = 0x60;
-        allocation = sdfAllocGeneralBlock(0xE100);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_SMALL;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
     }
-    buffer = sdfMemoryGetBlockAddress(allocation);
-    mnuTitleSoundBufferState[8] = (u32)allocation;
-    mnuTitleSoundBufferState[5] = buffer;
-    func_0035C860(path, D_00428650, D_003E0F60[index].filename);
-    mnuLoadTitleStreamFrameData(path, mnuTitleSoundBufferState);
+    bufferAddress = sdfMemoryGetBlockAddress(allocation);
+    mnuTitleSoundBufferState[MNU_STREAM_ALLOCATION_INDEX] = (u32)allocation;
+    mnuTitleSoundBufferState[MNU_STREAM_DATA_ADDRESS_INDEX] = bufferAddress;
+    func_0035C860(soundPath, D_00428650, D_003E0F60[soundEntryIndex].filename);
+    mnuLoadTitleStreamFrameData(soundPath, mnuTitleSoundBufferState);
     func_003504A8(D_00455D98);
     SignalSema(mnuTitleStreamSemaphore);
 }
 
 /* Install an in-memory ATRAC stream and configure the decoder for its frame
- * format while holding the shared sound-buffer semaphore. */
-void func_002A27A8(void *data, s32 size, s32 format) {
+ * format while holding the shared sound-buffer semaphore. The native code
+ * has no default-format guard or buffer-capacity check. */
+void func_002A27A8(void *compressedData, s32 dataBytes, s32 format) {
     MemBlock *allocation = NULL;
-    s32 buffer;
-    s32 frames;
+    s32 bufferAddress;
+    s32 frameCount;
 
     WaitSema(mnuTitleStreamSemaphore);
     mnuTitleSoundBufferState[6] = (u32)D_00455DB0;
     mnuTitleSoundBufferState[7] = (u32)D_00455D98;
-    mnuTitleSoundBufferState[4] = 2;
+    mnuTitleSoundBufferState[MNU_STREAM_CONTROL_INDEX] = 2;
     mnuTitleSoundBufferState[3] = -1;
     switch (format) {
     case 1:
         D_00455D98[2] = format;
-        mnuTitleSoundBufferState[2] = 0x180;
-        allocation = sdfAllocGeneralBlock(0x38400);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_LARGE;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_LARGE);
         break;
     case 2:
         D_00455D98[2] = format;
-        mnuTitleSoundBufferState[2] = 0xC0;
-        allocation = sdfAllocGeneralBlock(0x1C200);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_MEDIUM;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 3:
         D_00455D98[2] = format;
-        mnuTitleSoundBufferState[2] = 0xC0;
-        allocation = sdfAllocGeneralBlock(0x1C200);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_MEDIUM;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 4:
         D_00455D98[2] = format;
-        mnuTitleSoundBufferState[2] = 0x60;
-        allocation = sdfAllocGeneralBlock(0xE100);
+        mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_SMALL;
+        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
     }
-    buffer = sdfMemoryGetBlockAddress(allocation);
-    mnuTitleSoundBufferState[8] = (u32)allocation;
-    mnuTitleSoundBufferState[5] = buffer;
-    memcpy((void *)buffer, data, size);
-    frames = size / (s32)mnuTitleSoundBufferState[2];
+    bufferAddress = sdfMemoryGetBlockAddress(allocation);
+    mnuTitleSoundBufferState[MNU_STREAM_ALLOCATION_INDEX] = (u32)allocation;
+    mnuTitleSoundBufferState[MNU_STREAM_DATA_ADDRESS_INDEX] = bufferAddress;
+    memcpy((void *)bufferAddress, compressedData, dataBytes);
+    frameCount = dataBytes / (s32)mnuTitleSoundBufferState[MNU_STREAM_FRAME_BYTES_INDEX];
     mnuTitleSoundBufferState[1] = 0;
-    mnuTitleSoundBufferState[0] = frames;
+    mnuTitleSoundBufferState[MNU_STREAM_FRAME_COUNT_INDEX] = frameCount;
     func_003504A8(D_00455D98);
     SignalSema(mnuTitleStreamSemaphore);
 }
 
+/* These return codes are not load-state codes: 0 means no allocation,
+ * 2 means control 2, and 3 covers the remaining allocated states. */
 s32 mnuGetSoundBufferStateLocked(void) {
     WaitSema(mnuTitleStreamSemaphore);
-    if (mnuTitleSoundBufferState[8] == 0) {
+    if (mnuTitleSoundBufferState[MNU_STREAM_ALLOCATION_INDEX] == 0) {
         SignalSema(mnuTitleStreamSemaphore);
         return 0;
     }
-    if (mnuTitleSoundBufferState[4] == 2) {
+    if (mnuTitleSoundBufferState[MNU_STREAM_CONTROL_INDEX] == 2) {
         SignalSema(mnuTitleStreamSemaphore);
         return 2;
     }
@@ -751,8 +817,8 @@ s32 mnuGetSoundBufferStateLocked(void) {
 
 void mnuClearInactiveSoundBufferState(void) {
     WaitSema(mnuTitleStreamSemaphore);
-    if (mnuTitleSoundBufferState[4] != 1) {
-        mnuTitleSoundBufferState[4] = 0;
+    if (mnuTitleSoundBufferState[MNU_STREAM_CONTROL_INDEX] != 1) {
+        mnuTitleSoundBufferState[MNU_STREAM_CONTROL_INDEX] = 0;
     }
     SignalSema(mnuTitleStreamSemaphore);
 }
@@ -761,19 +827,20 @@ void mnuReleaseSoundBuffer(void);
 
 void mnuResetSoundBuffer(void) {
     mnuTitleSoundBufferState[1] = 0;
-    mnuTitleSoundBufferState[4] = 2;
+    mnuTitleSoundBufferState[MNU_STREAM_CONTROL_INDEX] = 2;
     mnuReleaseSoundBuffer();
 }
 
+/* Release the allocation handle, not the data address, then clear its slot. */
 void mnuReleaseSoundBuffer(void) {
-    u32 *state = mnuTitleSoundBufferState;
-    u32 buffer = state[8];
+    u32 *streamState = mnuTitleSoundBufferState;
+    u32 allocationHandle = streamState[MNU_STREAM_ALLOCATION_INDEX];
 
-    if (buffer == 0) {
+    if (allocationHandle == 0) {
         return;
     }
-    sdfQueueNonzeroResourceId(buffer);
-    state[8] = 0;
+    sdfQueueNonzeroResourceId(allocationHandle);
+    streamState[MNU_STREAM_ALLOCATION_INDEX] = 0;
 }
 
 void mnuResetSoundBufferLocked(void) {
