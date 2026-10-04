@@ -21,6 +21,12 @@ extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_002723B0(s32, s32);
 extern void func_00273A30(s32, s32);
+extern void mnuDrawStaffPanelGridBackdrop(s32, s32);
+extern void mnuDrawStaffCampScreen(s32, s32);
+extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
+extern s32 mdlFlagTest(s32);
+extern s32 D_003BAA9C;
+extern s32 datGameState;
 extern s32 mnuMapPadMaskToFlags();
 extern void mnuStepPartyPanelListFromInput();
 extern void mnuClearListFlags();
@@ -44,6 +50,9 @@ typedef struct MenuList {
 
 typedef struct StaffImageNode {
     s32 label;
+    u8 pad04[0x5C];
+    u32 sortKeyPrimary;
+    s32 sortKeySecondary;
 } StaffImageNode;
 
 typedef struct StaffImageWindow {
@@ -426,7 +435,44 @@ s32 mnuHandleStaffValuePageInput(s32 task) {
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274768);
 
-INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274978);
+/* Draw the selected party member's value page and advance its primary dispatch. */
+s32 func_00274978(s32 task) {
+    s32 context = kwlnTaskGetUserValue();
+    StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
+    s32 index = ((StaffImageContext *)context)->selection->cursor->index;
+    s32 partyEntry = datGameState + index * 0x1A4 + 0xA60;
+    StaffImageList *list;
+    StaffImageWindow *window;
+
+    mnuDrawStaffPanelGridBackdrop(1, context + 0x60);
+    mnuDrawStaffCampScreen(1, task);
+    mnuCreateStaffImageSprite(8);
+    func_00283110(0xEB0, 0x518, 0, partyEntry,
+                  (s32)((StaffImageContext *)context)->panelHandle, 0x53);
+    if (mdlFlagTest(0x901) != 0) {
+        func_002833B0(0, 0, 0, partyEntry,
+                      (s32)((StaffImageContext *)context)->spriteHandle, 0x53);
+    }
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->list, 0x53);
+    list = menu->list;
+    window = list->window;
+    if (window->panelActive != 0) {
+        StaffImageNode *node = window->selectedNode;
+        s32 selectedLabel = node->sortKeySecondary;
+
+        if (node->sortKeyPrimary != 0) {
+            func_00272518(1, selectedLabel, D_003BAA9C, context, 1, 1, 0x53);
+        } else {
+            func_00272668(1, 0, 0, context, 1, 0x53);
+        }
+    } else {
+        func_002BF4E0(0x550, 0x5D8, 0, list->spriteAlpha, 1,
+                      ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
+        func_00272668(1, 0, 0, context, 1, 0x53);
+    }
+    func_002723B0(1, ((StaffImageContext *)context)->group);
+    return menuRunPanel(context, 1, task);
+}
 
 /* Request message-window mode one before the value-page teardown phase. */
 s32 func_00274B30(s32 task) {

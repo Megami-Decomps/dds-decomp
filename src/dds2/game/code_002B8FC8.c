@@ -180,7 +180,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern void mnuSetPopupEntryFlagged();
 
-extern void func_002BAF50();
+extern void func_002BAF50(s32, s32);
 
 extern void mnuInitPartyPanelSlots();
 
@@ -1845,7 +1845,7 @@ void mnuUpdateFade(s32 *list) {
 
 struct MenuFadeFields {
     MenuWindowContainer previousWindow;
-    u8 pad98[4];
+    s32 previousVisibleCount;
     MenuIconSprites savedResource;
     u32 hasResourceCopy;
     s32 previousProgress;
@@ -1862,7 +1862,31 @@ void mnuInitializeWindowFadeState(MenuFadeFields *menu) {
     menu->currentProgress = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BAF50);
+/* Snapshot the outgoing window and its resources before starting the next fade. */
+void func_002BAF50(s32 windowAddress, s32 work) {
+    MenuWindowContainer *window = (MenuWindowContainer *)windowAddress;
+    MenuFadeFields *menu = (MenuFadeFields *)work;
+    if (menu->currentWindow != NULL) {
+        menu->previousWindow = *menu->currentWindow;
+        menu->previousVisibleCount = menu->currentWindow->list->visibleCount;
+        if (menu->currentWindow->resource != NULL) {
+            menu->hasResourceCopy = 1;
+            menu->savedResource = *menu->currentWindow->resource;
+            menu->previousProgress = 0;
+        } else {
+            menu->hasResourceCopy = 0;
+            menu->previousProgress = 0;
+        }
+    } else {
+        menu->previousProgress = MNU_PANEL_FADE_LIMIT;
+    }
+    if (window != NULL) {
+        window->panel.fade = MNU_PANEL_FADE_LIMIT;
+        window->flags |= MNU_WINDOW_TRANSITION_FLAG;
+    }
+    menu->currentWindow = window;
+    menu->currentProgress = 0;
+}
 
 void mnuResetWindowFadeParameters(MenuFadeFields *menu) {
     menu->currentWindow = NULL;
