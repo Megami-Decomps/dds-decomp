@@ -834,11 +834,11 @@ s32 func_0013D308(FldProbeActor *actor, NodeA *entry) {
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
-        if (fldRoomRecords[i].unk108 == *(u32 *)(entry->pad + 4)) {
+        if (fldRoomRecords[i].unk108 == entry->key) {
             kind = *((FldProbeKind *)D_0038BC50[i][8])->kind;
             switch (kind) {
             case 0:
-                source = *(f32 **)(entry->pad + 0x18);
+                source = entry->payload;
                 position[0] = source[0];
                 position[1] = source[1];
                 position[2] = source[2];
@@ -900,11 +900,11 @@ s32 func_0013D598(FldProbeActor *actor, NodeA *entry) {
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
-        if (fldRoomRecords[i].unk108 == *(u32 *)(entry->pad + 4)) {
+        if (fldRoomRecords[i].unk108 == entry->key) {
             kind = *((FldProbeKind *)D_0038BC50[i][8])->kind;
             switch (kind) {
             case 0:
-                PCP_COPY_VECTOR(position, *(f32 **)(entry->pad + 0x18));
+                PCP_COPY_VECTOR(position, entry->payload);
                 VU0_LOAD_VF(vf10, actor->target->quaternion);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);

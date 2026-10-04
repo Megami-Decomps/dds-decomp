@@ -2,6 +2,7 @@
 #include "mnu.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
+#include "btl_action.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -22,16 +23,6 @@
 #define BTL_LOW_HP_ENEMY_COUNT_LIMIT 2
 #define BTL_TASK_CONDITION_HANDLE_GONE 4
 #define BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE 5
-
-/* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
-typedef struct BtlActionAnimationRecord {
-    u8 pad00[3];
-    u8 kind;
-    u16 displayCode;
-    u8 pad06[0x16];
-    u16 flags;
-    u8 pad1E[2];
-} BtlActionAnimationRecord;
 
 typedef struct ActionUnit {
     u8 pad0[8];
@@ -249,23 +240,6 @@ typedef struct BtlSelectCtrl {
 
 
 
-
-/* Native 0x70-byte scheduler-task header, distinct from a queued command actor.
- * The condition evaluator reads the first byte and +8 query key; task startup
- * assigns handle, while owner lookup uses ownerId. The remaining SDK fields
- * beyond ownerId stay opaque here.
- */
-typedef struct BtlRuntimeTask {
-    u8 conditionKind;
-    u8 pad01[7];
-    u64 conditionHandle;
-    u8 pad10[0x18];
-    s32 startDelay; /* Signed countdown before the task's running phase. */
-    u8 pad2C[0xC];
-    u64 handle;
-    u64 ownerId;
-    u8 pad48[0x28];
-} BtlRuntimeTask;
 
 typedef struct SoundTask SoundTask;
 extern SoundTask *sndCreateStationedSeTask(u32);
@@ -2765,7 +2739,7 @@ extern u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
 /* Start the selected action's task group; its scene action carries a 22-tick start delay. */
 s32 btlStartActionRecordTasks(ActionStateLink *record) {
-    u8 *task;
+    BtlRuntimeTask *task;
     if (!(record->pendingFlags & 8)) {
         return -1;
     }
@@ -2776,8 +2750,8 @@ s32 btlStartActionRecordTasks(ActionStateLink *record) {
     btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateCommandSoundTask((u8 *)record, 9));
     btlStartTask(btlCreateEffObjB((s32)record->unit, 0xD8));
-    task = fldCreateSceneGroupAction((u8 *)record, 0x64, 1);
-    ((BtlRuntimeTask *)task)->startDelay = 0x16;
+    task = (BtlRuntimeTask *)fldCreateSceneGroupAction((u8 *)record, 0x64, 1);
+    task->startDelay = 0x16;
     btlStartTask(task);
     return 0x1B;
 }
@@ -3533,19 +3507,19 @@ extern u8 *btlCreateModelLoadPollTask(s32, s32, s32, s32);
  */
 s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
     s32 *slot = (s32 *)((BattleWork *)btlGetRuntime())->sub;
-    u8 *task;
+    BtlRuntimeTask *task;
     if (*slot != 0) {
         return btlAdvanceRuntimeSequenceCounter();
     }
     *slot = btlCreateUnit();
     func_001AA898(*slot + 0x120, 0x110);
-    task = btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
+    task = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (prerequisiteHandle != 0) {
-        ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
-        ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        task->conditionHandle = prerequisiteHandle;
+        task->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     btlStartTask(task);
-    return ((BtlRuntimeTask *)task)->handle;
+    return task->handle;
 }
 
 
@@ -4515,17 +4489,17 @@ void btlQueueLoneFreeTeamHandle(void) {
 void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     ActionUnit **slot = (ActionUnit **)scene->state;
-    u8 *task;
-    u8 *sound;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *sound;
 
     if (*slot != 0) {
-        task = (u8 *)btlCreateScriptResourceTask((u32)*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
-        ((BtlRuntimeTask *)task)->ownerId = ((ActionUnit *)unit->parentUnit)->ownerId;
-        ((BtlRuntimeTask *)task)->startDelay = 0xE;
+        task = (BtlRuntimeTask *)btlCreateScriptResourceTask((u32)*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
+        task->ownerId = ((ActionUnit *)unit->parentUnit)->ownerId;
+        task->startDelay = 0xE;
         btlStartTask(task);
-        sound = (u8 *)sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
-        ((BtlRuntimeTask *)sound)->conditionKind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
-        ((BtlRuntimeTask *)sound)->conditionHandle = ((BtlRuntimeTask *)task)->handle;
+        sound = (BtlRuntimeTask *)sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
+        sound->conditionKind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
+        sound->conditionHandle = task->handle;
         btlStartTask(sound);
         *slot = 0;
         unit->actorFlags &= ~8;
@@ -5220,17 +5194,17 @@ s32 func_00223BD8(ActionUnit *unit) {
 s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
     u32 flags = datActionAnimationRecords[unit->action].flags;
 
-    if (flags & 0x1000) {
+    if (flags & BTL_ANIMATION_GROUP_DEFEAT_CAMERA) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
-        if ((flags & 0x10) == 0) {
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
             btlChooseBrahmaGroupCamera((u32)unit);
         } else {
             btlChooseBrahmaGroupCamera((u32)unit);
         }
         return 1;
     }
-    if (flags & 0x2000) {
+    if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
         if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlUnitSetCameraOffset((u32)unit);
@@ -5249,7 +5223,7 @@ s32 func_00223DD8(ActionUnit *unit) {
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
-        if ((flags & 0x10) == 0) {
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
             btlChooseBrahmaGroupCamera((u32)unit);
         } else {
             btlChooseBrahmaGroupCamera((u32)unit);
@@ -5504,17 +5478,17 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002247D0);
 s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
     u32 flags = datActionAnimationRecords[unit->action].flags;
 
-    if (flags & 0x1000) {
+    if (flags & BTL_ANIMATION_GROUP_DEFEAT_CAMERA) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
-        if ((flags & 0x10) == 0) {
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
             func_002240C0((u32)unit);
         } else {
             func_002240C0((u32)unit);
         }
         return 1;
     }
-    if (flags & 0x2000) {
+    if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
         if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseActionCameraPoints((u32)unit);
@@ -5533,7 +5507,7 @@ s32 func_00224DF0(ActionUnit *unit) {
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
-        if ((flags & 0x10) == 0) {
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
             func_002240C0((u32)unit);
         } else {
             func_002240C0((u32)unit);
@@ -5925,17 +5899,17 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00225BF8);
 s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
     u16 flags = datActionAnimationRecords[unit->type].flags;
 
-    if (flags & 0x1000) {
+    if (flags & BTL_ANIMATION_GROUP_DEFEAT_CAMERA) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
-        if ((flags & 0x10) == 0) {
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
             func_00224F88((u32)unit);
         } else {
             func_00224F88((u32)unit);
         }
         return 1;
     }
-    if (flags & 0x2000) {
+    if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
         if (btlGetIndexListCount(unit->actor->targetIndexList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             func_00224EE8((u32)unit);
@@ -5956,7 +5930,7 @@ s32 func_002261A8(BattleActionUnit *unit) {
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
-        if ((flags & 0x10) == 0) {
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
             func_00224F88((u32)unit);
         } else {
             func_00224F88((u32)unit);

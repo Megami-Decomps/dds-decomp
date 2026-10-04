@@ -29,9 +29,14 @@ typedef struct {
     u8 kind; /* Selects a slot in ObjBase. */
 } ObjData;
 
-/* Doubly linked world object node (0x28); DDS1/2 basic/dds3WorldBasic.c. */
+/* Shared world-node prefix through its list links (0x28). Key is compared by
+ * world lookup; kind-0x11 field probes read the position payload at +0x18. */
 typedef struct NodeA {
-    u8 pad[0x20];
+    u8 pad00[4];
+    u32 key; /* +0x04 */
+    u8 pad08[0x10];
+    void *payload; /* +0x18: payload type depends on the node kind. */
+    u8 pad1C[4];
     struct NodeA *next;
     struct NodeA *previous;
 } NodeA;
