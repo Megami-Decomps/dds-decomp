@@ -688,7 +688,7 @@ def main():
             if rtype == "R_MIPS_26":
                 good = (want & 0x3FFFFFF) == linked_jump_field(target, addend)
             elif rtype == "R_MIPS_HI16":
-                pending_hi.setdefault(base, []).append((i, mine, want, rtype, sym))
+                pending_hi.setdefault(base, []).append((i, mine, want, rtype, sym, target))
                 good = True
             elif rtype == "R_MIPS_LO16":
                 good = (want & 0xFFFF) == linked_lo_field(target, addend)
@@ -702,9 +702,13 @@ def main():
                 good = True
             if not good:
                 diffs.append((i, mine, want, f"{rtype} {sym} (retail uses a different address)"))
+        # An HI16 whose LO16 was emitted against another symbol form (e.g. the
+        # section rather than a unit-local rodata label) has no pair here: check
+        # its high field with its own addend alone, as the linker resolves it.
         for pending in pending_hi.values():
             for hi in pending:
-                diffs.append(hi[:3] + (f"{hi[3]} {hi[4]} (unpaired HI16)",))
+                if (hi[2] & 0xFFFF) != linked_hi_field(hi[5], hi_lo_addend(hi[1], 0)):
+                    diffs.append(hi[:3] + (f"{hi[3]} {hi[4]} (unpaired HI16)",))
         if diffs:
             bad += 1
             print(f"DIFF {name} @ 0x{addr:08X}: {len(diffs)} of {size // 4} words differ"
