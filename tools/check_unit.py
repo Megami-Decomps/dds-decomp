@@ -23,6 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pairing import RETAIL, ROOT, load_segments, va_to_off  # noqa: E402
 from resolved_code import (  # noqa: E402
+    hi_lo_addend,
     instruction_shape_matches,
     linked_gprel_field,
     linked_hi_field,
@@ -687,13 +688,13 @@ def main():
             if rtype == "R_MIPS_26":
                 good = (want & 0x3FFFFFF) == linked_jump_field(target, addend)
             elif rtype == "R_MIPS_HI16":
-                pending_hi[base] = (i, mine, want, rtype, sym, want & 0xFFFF)
+                pending_hi.setdefault(base, []).append((i, mine, want, rtype, sym))
                 good = True
             elif rtype == "R_MIPS_LO16":
                 good = (want & 0xFFFF) == linked_lo_field(target, addend)
-                if base in pending_hi:
-                    hi = pending_hi.pop(base)
-                    if hi[5] != linked_hi_field(target, addend):
+                for hi in pending_hi.pop(base, []):
+                    combined_addend = hi_lo_addend(hi[1], mine)
+                    if (hi[2] & 0xFFFF) != linked_hi_field(target, combined_addend):
                         diffs.append(hi[:3] + (f"{hi[3]} {hi[4]}",))
             elif rtype == "R_MIPS_GPREL16":
                 good = (want & 0xFFFF) == linked_gprel_field(target, addend, gp)
@@ -701,6 +702,9 @@ def main():
                 good = True
             if not good:
                 diffs.append((i, mine, want, f"{rtype} {sym} (retail uses a different address)"))
+        for pending in pending_hi.values():
+            for hi in pending:
+                diffs.append(hi[:3] + (f"{hi[3]} {hi[4]} (unpaired HI16)",))
         if diffs:
             bad += 1
             print(f"DIFF {name} @ 0x{addr:08X}: {len(diffs)} of {size // 4} words differ"

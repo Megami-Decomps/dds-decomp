@@ -70,6 +70,34 @@ class LinkedFunctionTests(unittest.TestCase):
         )
         self.assertRegex("; ".join(diffs), "address|target")
 
+    def test_changed_hi16_addend_still_fails(self):
+        mine = words(0x3C040001, 0x24840004)
+        want = words(0x3C041234, 0x24845674)
+        relocs = {
+            0: ("R_MIPS_HI16", "globalTarget"),
+            4: ("R_MIPS_LO16", "globalTarget"),
+        }
+        diffs = self.compare(
+            mine, want, relocs,
+            {"sourceFunction": 0x1000, "globalTarget": 0x12345670},
+        )
+        self.assertRegex("; ".join(diffs), "HI16 address")
+
+    def test_each_pending_hi16_is_checked(self):
+        mine = words(0x3C040001, 0x3C050000, 0x24A50004)
+        want = words(0x3C041234, 0x3C051234, 0x24A55674)
+        relocs = {
+            0: ("R_MIPS_HI16", "globalTarget"),
+            4: ("R_MIPS_HI16", "globalTarget"),
+            8: ("R_MIPS_LO16", "globalTarget"),
+        }
+        diffs = self.compare(
+            mine, want, relocs,
+            {"sourceFunction": 0x1000, "globalTarget": 0x12345670},
+        )
+        self.assertEqual(len(diffs), 1)
+        self.assertRegex(diffs[0], r"\+0x0: HI16 address")
+
 
 class FunctionMaskTests(unittest.TestCase):
     def test_source_object_and_fallback_partition_the_denominator(self):
@@ -91,6 +119,16 @@ class FunctionMaskTests(unittest.TestCase):
             validate_function_mask(
                 report, {"source": (0, 8), "fallback": (8, 16)}, {"fallback": 16}
             )
+
+    def test_fallback_must_have_zero_credit(self):
+        report = {
+            "source": {"name": "source", "size": "8", "fuzzy_match_percent": 99.0},
+            "fallback": {
+                "name": "fallback", "size": "16", "fuzzy_match_percent": 1.0
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "nonzero C credit"):
+            validate_function_mask(report, {"source": (0, 8)}, {"fallback": 16})
 
 
 if __name__ == "__main__":
