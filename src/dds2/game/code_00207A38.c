@@ -801,12 +801,6 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 extern u128 D_003BE0D0;
 
-static inline f32 btlAbsF32(f32 value) {
-    f32 result;
-    __asm__("abs.s %0, %1" : "=f"(result) : "f"(value));
-    return result;
-}
-
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
 s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
     f32 delta[4];
@@ -820,41 +814,7 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
     return 0;
 }
 
-/* Bound horizontal X by abs(tan(angleLimit) * deltaZ), then load the yaw rotation.
-   Return zero for a zero XZ delta; unlike the unbounded variant, vf10 is not reset. */
-s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 angleLimit) {
-    f32 delta[4];
-    f32 absDeltaX;
-    f32 maxAbsX;
-    f32 tanAngle;
-    f32 aimX;
-    f32 zero;
-    f32 radians;
-
-    radians = angleLimit;
-    zero = 0.0f;
-    delta[0] = targetPosition[0];
-    delta[0] -= origin[0];
-    delta[2] = targetPosition[2] - origin[2];
-    if (delta[0] == zero && delta[2] == zero) {
-        return 0;
-    }
-
-    tanAngle = sdfSinPoly(radians);
-    tanAngle /= sdfEvaluateCosineViaSinePhaseShift(radians);
-    absDeltaX = btlAbsF32(delta[0]);
-    aimX = tanAngle * delta[2];
-    maxAbsX = __builtin_fabsf(aimX);
-    if (absDeltaX < maxAbsX) {
-        aimX = delta[0];
-    } else if (delta[0] >= zero) {
-        aimX = maxAbsX;
-    } else {
-        aimX = -maxAbsX;
-    }
-    func_00340DC8(zero, func_003532E8(aimX, delta[2]), zero);
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_00207A38", btlAimHorizontalDirectionClampedVU);
 
 /* vu0 routine: vf10.xyz = normalize(e x (e x f)),
  * e = vertexB - vertexA, f = vertexC - vertexA.
