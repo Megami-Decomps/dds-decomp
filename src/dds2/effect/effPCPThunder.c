@@ -1,5 +1,3 @@
-#undef ASM_ROOT
-#define ASM_ROOT "/home/raikaru/sandbox_Fam_Mid/asm/"
 #include "common.h"
 #include "eff.h"
 #include "pcp_vu0.h"
