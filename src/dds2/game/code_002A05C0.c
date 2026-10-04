@@ -878,7 +878,7 @@ extern void mnuSelectMenuListCursorByAdvance(s32);
 extern s32 func_002A30C0(KwlnTask *);
 extern u32 D_00435CBC;
 
-KwlnTask *func_002A2AC0(s32 mode) {
+KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     MemBlock *allocation;
 
     kwlnFadeBackgroundStartOut(0);
@@ -934,7 +934,7 @@ INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2C28);
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A30C0);
 
 u32 func_002A3A50(s32 mode) {
-    func_002A2AC0(mode);
+    mnuCreateTitleMenuTask(mode);
     return 0xffffffff;
 }
 
@@ -945,7 +945,7 @@ s32 mnuDestroyTitleMenuTask(void) {
 }
 
 u32 func_002A3AA0(void) {
-    func_002A2AC0(0);
+    mnuCreateTitleMenuTask(0);
     return 0;
 }
 

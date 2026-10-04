@@ -904,7 +904,7 @@ s32 prfReqCheckWithFallback(void *operand, u16 requirementId) {
 }
 
 /* Select the first active, satisfied prerequisite group whose flag is unset. */
-s32 prfReqSelectGroup(u32 start) {
+s32 prfSelectSatisfiedUnsetRequirementGroup(u32 start) {
     u32 i;
 
     for (i = start; i < PRF_FALLBACK_GROUP_COUNT; i++) {
@@ -946,7 +946,7 @@ u32 prfReq18GetWord3234(s32 entryIndex) {
 void sdfSetAllFlagsFromTable(void) {
     s32 entryIndex = 0;
     do {
-        entryIndex = prfReqSelectGroup(entryIndex);
+        entryIndex = prfSelectSatisfiedUnsetRequirementGroup(entryIndex);
         if (entryIndex >= 0) {
             u32 flagId = prfReq18GetWord3234(entryIndex);
             if (flagId != 0) {

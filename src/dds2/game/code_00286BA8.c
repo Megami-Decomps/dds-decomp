@@ -450,7 +450,7 @@ extern void mnuClearListFlagsOneAndTwo(MenuList *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 /* Move the mantra selection, rebuild its panel, or report confirm/cancel. */
-s32 func_00288A70(MnuStatusResource *resourceWork) {
+s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     s32 sound = 0;
     s32 action = 0;
     MenuList *list = resourceWork->list;

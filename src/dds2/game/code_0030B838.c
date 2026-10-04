@@ -172,7 +172,7 @@ extern void sdfDrawCounterChannelInfoLabel(s32, s32);
 extern void sdfUpdateCounterSelectionFade(void);
 extern void mnuCallInitWide();
 
-extern void func_001094F8(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
 
 extern s32 frMeasureAndQueueCounterText();
 
@@ -180,8 +180,8 @@ extern void evtPrepareSizedDrawResource();
 
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
 
-extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_00108BD8(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void func_00108EC0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
 
 
@@ -532,8 +532,8 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt,
     if (channel->index == rt->channel->index) {
         base = 0x40;
     }
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_001094F8(x + 1, y + 1, 0x80, 0x16,
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitDefaultDepthGradientRect(x + 1, y + 1, 0x80, 0x16,
                   PACK(base + 0x40, base + 0x40, base + 0x40, (u32)(fade * 32.0f)),
                   PACK(base, base, base, (u32)((f32)(base + 0x10) * fade)),
                   PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
@@ -671,8 +671,8 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
     grow = fade * 0.5f + (1.0f - fade) * 2.5f;
     offset = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->selected->index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3);
     timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108BD8(1);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(1);
     shrink = (1.0f - grow) * 8.5f;
     func_00108EC0((s32)(shrink + 13.0f), (s32)((f32)(x - offset + timer->y + 7) + shrink), (s32)(grow * 17.0f), (s32)(grow * 17.0f),
                   0xB6, 0x151, 0x11, 0x11,
@@ -681,7 +681,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   fldLocalMapTextureResource.image);
-    func_00108BD8(0);
+    evtSubmitPrimaryAlphaBlendMode(0);
 }
 
 s32 frMeasureAndQueueCounterText(u64 arg0) {

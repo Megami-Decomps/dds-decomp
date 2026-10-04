@@ -141,7 +141,7 @@ extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 extern void func_00164C68(void *system, u32 value);
-extern void func_00164AE8(void *system, void *a, void *b, void *c);
+extern void parRiseFallSymmetricCellAlpha(void *system, void *a, void *b, void *c);
 
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
 typedef struct {
@@ -573,7 +573,7 @@ EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
     work->baseSecond = source->scaledSecond;
     work->handle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, EFF_CELL_SYSTEM_KIND);
-    func_00164AE8(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
+    parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     func_00164C68(work->system, work->head.systemParam);
     for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
         work->cells[cellIndex].unk00 = 0;

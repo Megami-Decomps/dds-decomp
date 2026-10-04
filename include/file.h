@@ -13,14 +13,6 @@ struct FileNode;
 struct FileRequest;
 struct FileCbNode;
 
-/* Reentrancy guard and adjacent reserved word retained in the retail GP window. */
-typedef struct FileManGuardState {
-    s32 active;
-    s32 reserved;
-} FileManGuardState;
-
-typedef char FileManGuardState_size_must_be_8[(sizeof(FileManGuardState) == 8) ? 1 : -1];
-
 /* One of the four device-read slots at FileManWork + 0x20. */
 typedef struct FileManSlot {
     u32 value;

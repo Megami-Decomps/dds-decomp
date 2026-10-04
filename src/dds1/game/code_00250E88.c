@@ -158,7 +158,7 @@ extern s32 dspStartEntry(s32);
 extern void *sdfGridSelectFilledCell(MenuGrid *, s32, s32);
 
 /* Display the selected mantra and move the scene grid to its filled cell. */
-s32 func_002517C0(s32 context) {
+s32 mnuDisplayNextPendingMantra(s32 context) {
     s16 mantraIds[8];
     s32 coordinates[8][2];
     DspSelection *selection;

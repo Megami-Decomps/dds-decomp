@@ -266,7 +266,7 @@ s32 func_0029D2D8(BrsLevelUpList *list) {
 }
 
 /* Build rows for active, capped profiles, excluding unit ID 9. */
-s32 func_0029D3D8(BrsLevelUpList *list) {
+s32 brsBuildProfileCapList(BrsLevelUpList *list) {
     PrfSkillList skills;
     s32 *rowData = &list->rows[0].levelUps;
     s32 offset = 0;

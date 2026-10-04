@@ -60,7 +60,7 @@ void effBTLFieldColorGetFixedVector(u32 unused, f32 *color) {
 INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetBaseColor);
 
 /* Variant and kind are narrowed to their stored widths before the lookup. */
-s32 func_00169580(s32 colorId, s16 variant, s16 kind, s32 arg3) {
+s32 effBTLFieldColorLookupNarrowSelectors(s32 colorId, s16 variant, s16 kind, s32 arg3) {
     return effBTLFieldColorGetBaseColor(colorId, variant, kind, arg3);
 }
 

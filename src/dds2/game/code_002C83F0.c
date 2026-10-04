@@ -16,9 +16,7 @@ typedef struct FileReqEntry {
 
 extern FileReqEntry fileRequestEntries[];
 
-extern FileManGuardState D_00437CC0;
-/* Scalar view keeps the original direct GP-relative access. */
-extern s32 fileManGuardActive __asm__("D_00437CC0");
+extern s32 D_00437CC0;
 extern s32 D_00439000;
 
 void fileReqInit(s32 request);
@@ -147,10 +145,10 @@ s32 func_002C83F0(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         } else {
             SignalSema(work->sema);
         }
-        saved = fileManGuardActive;
-        fileManGuardActive = 1;
+        saved = D_00437CC0;
+        D_00437CC0 = 1;
         func_002C8AC0();
-        fileManGuardActive = saved;
+        D_00437CC0 = saved;
         break;
     case 7:
         WaitSema(work->sema);
@@ -232,10 +230,10 @@ s32 func_002C8638(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             filePrependNode(work, job);
             SignalSema(work->sema);
             sdfDevQueueActiveOperation(deviceRequest);
-            saved = fileManGuardActive;
-            fileManGuardActive = 2;
+            saved = D_00437CC0;
+            D_00437CC0 = 2;
             func_002C8AC0();
-            fileManGuardActive = saved;
+            D_00437CC0 = saved;
         } else {
             SignalSema(work->sema);
             fileStartChunkedReadWhenReady(job);
@@ -302,10 +300,10 @@ s32 func_002C8900(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             filePrependNode(work, job);
             SignalSema(work->sema);
             sdfDevQueueActiveOperation(deviceRequest);
-            saved = fileManGuardActive;
-            fileManGuardActive = 3;
+            saved = D_00437CC0;
+            D_00437CC0 = 3;
             func_002C8AC0();
-            fileManGuardActive = saved;
+            D_00437CC0 = saved;
         } else {
             SignalSema(work->sema);
             fileStartChunkedWriteWhenReady(job);
@@ -489,6 +487,6 @@ void func_002C92D0(u32 arg0) {
     func_0034FCE0(arg0, 0);
 }
 
-FileManGuardState D_00437CC0 __attribute__((section(".sdata"))) = { 0 };
+s32 D_00437CC0 __attribute__((section(".sdata"))) = 0;
 
 char D_00437CC8[8] __attribute__((section(".sdata"))) = "fileMan";

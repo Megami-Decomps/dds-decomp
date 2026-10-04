@@ -79,7 +79,7 @@ extern s32 func_002C6480();
 
 extern char D_003E75C4[];
 
-extern void func_002B9CF8(s32, s32, s32, MenuWindowContainer *, s32);
+extern void mnuDrawWindowDecorations(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern s32 func_002B86E8(u32);
 
@@ -89,7 +89,6 @@ extern void mnuReleasePartyIconBundles();
 
 extern void mnuClearEntries();
 
-extern s32 itfDrawUnderscoreTextSegment();
 
 extern s32 D_00435E54;
 
@@ -180,7 +179,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern void mnuSetPopupEntryFlagged();
 
-extern void func_002BAF50(s32, s32);
+extern void mnuBeginWindowFadeTransition(s32, s32);
 
 extern void mnuInitPartyPanelSlots();
 
@@ -1327,7 +1326,7 @@ void mnuDrawVisibleWindowIconRows(u32 x, u32 y, u32 flags, MenuWindowContainer *
 }
 
 /* Draw the three optional decoration sprites at their individual X offsets. */
-void func_002B9CF8(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 option)
+void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 option)
 {
     u32 i;
     u32 state = window->state;
@@ -1383,7 +1382,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     s32 value;
 
     menu->list->scale = fadeScale;
-    func_002B9CF8(x, y, depth, menu, drawArg);
+    mnuDrawWindowDecorations(x, y, depth, menu, drawArg);
     mnuDrawVisibleWindowIconRows(x, y, depth, menu, drawArg);
     if (menu->list->count != 0) {
         mnuDrawWindowSelectionPanel(x, y, depth, menu, drawArg);
@@ -1863,7 +1862,7 @@ void mnuInitializeWindowFadeState(MenuFadeFields *menu) {
 }
 
 /* Snapshot the outgoing window and its resources before starting the next fade. */
-void func_002BAF50(s32 windowAddress, s32 work) {
+void mnuBeginWindowFadeTransition(s32 windowAddress, s32 work) {
     MenuWindowContainer *window = (MenuWindowContainer *)windowAddress;
     MenuFadeFields *menu = (MenuFadeFields *)work;
     if (menu->currentWindow != NULL) {

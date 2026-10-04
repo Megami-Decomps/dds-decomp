@@ -158,7 +158,7 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s32 scrSetIntegerReturnValue();
 extern void scrSetFloatReturnValue(f32 value);
 extern Entry1A4 *dds3FindEntry(s32 rosterIndex);
-extern void func_00119900(s32 itemId, s32 quantityDelta);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(Entry1A4 *unit);
 extern s32 datGetStatWithStatusOverride(s32 arg0, s32 arg1);
 extern u8 btlIsRuntimeAllocated(void);
@@ -175,7 +175,7 @@ extern s32 effMiscRandMod(u32 stream, u32 modulus);
 /* Flag-range items set their model flag regardless of quantityDelta.
  * Other items add the delta to their byte quantity and clamp it.
  * Keep the native range branches and goto layout. */
-void func_00119900(s32 itemId, s32 quantityDelta) {
+void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
     s32 quantityOffset;
     s32 quantity;
 
@@ -261,7 +261,7 @@ s32 dds3FindEntryIndex(s32 rosterIndex) {
 
 /* Read a signed byte relative to the first roster entry's stat-byte base;
  * the caller supplies a byte offset, not a whole-entry index. */
-s8 func_00119AF8(s32 byteOffset) {
+s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
     return *(s8 *)(byteOffset + datGameState + 0xa76);
 }
 
@@ -316,7 +316,7 @@ extern s32 datUnitHasSkill(Entry1A4 *, s32);
 extern s32 datAbilityParameters;
 
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
-void func_00119F08(Entry1A4 *entry, u32 skillId) {
+void ptyApplySkillRecovery(Entry1A4 *entry, u32 skillId) {
     f32 recoveryRate;
     s32 hpRecovery;
     s32 mpRecovery;
@@ -359,8 +359,8 @@ void evtUpdateFlaggedStats(void) {
         entryOffset += PTY_ACTIVE_ROSTER_STRIDE;
         if (entry->flags & 1) {
             if (entry->flags & 2) {
-                func_00119F08(entry, 0x22C);
-                func_00119F08(entry, 0x250);
+                ptyApplySkillRecovery(entry, 0x22C);
+                ptyApplySkillRecovery(entry, 0x250);
             }
         }
         remaining--;
@@ -388,7 +388,7 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
  * value is intentionally reused: incoming command ID, then resolved result. */
-s32 func_0011A158(Entry1A4 *entry, s32 value) {
+s32 datCalculateCommandBaseValue(Entry1A4 *entry, s32 value) {
     s32 commandId = value;
     CommandValueRecord *commands = (CommandValueRecord *)datCommandRecords;
 
@@ -573,7 +573,7 @@ void dds3ForEachEntry(void) {
 
         updates++;
         if (valueIndex != 0) {
-            func_00119900(valueIndex, delta);
+            ptyAdjustItemQuantity(valueIndex, delta);
         }
         updateIndex++;
     } while (updateIndex < 2);
@@ -1170,7 +1170,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011C790);
  * all three flag masks 1/2/4. No eligible entries returns zero.
  * count and remaining serve both loops; word holds enemy IDs, then entry flags.
  * partyLevel is accumulated first and divided in place before comparison. */
-s32 func_0011C990(s32 sceneIndex) {
+s32 btlCheckScenePartyLevelThreshold(s32 sceneIndex) {
     s32 meetsThreshold = 0;
     s32 enemyLevelSum;
     s32 partyLevelAddress;

@@ -962,7 +962,7 @@ INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD570);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230A68);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231840);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerStoreKeyTimingOrSelector);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231950);
 

@@ -8,8 +8,8 @@ extern void effCreateThunderCellSystemWork(void *work);
 
 extern void parReleaseCellSystem(u32 handle);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
-extern void func_0015CCD0(u32 param0, u32 param1, void *cells, u32 param3);
-extern void func_0015CDF0(u32 param0, u32 param1, void *cells, u32 param3);
+extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
+extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern void sdfReleaseResourceAllocation(u32 handle);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
@@ -502,7 +502,7 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00164BA8);
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00165110);
 
-extern void func_0015CEF8(void *system, u32 a, u32 b, u32 c);
+extern void parRiseFallSymmetricCellAlpha(void *system, u32 a, u32 b, u32 c);
 
 /* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
 typedef struct {
@@ -550,7 +550,7 @@ EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameter
     work->fragments = (EffThunderFrag *)(work + 1);
     work->allocationHandle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 4);
-    func_0015CEF8(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
+    parRiseFallSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
     func_0015D078(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
         effThunderRandomizeFrag(work, i);
@@ -590,12 +590,12 @@ u32 func_00165638(u32 value) {
 
 /* Forward the system and its opaque fragment configuration through the native call. */
 void func_00165640(EffThunderFragmentWork *work) {
-    func_0015CCD0((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+    parDecreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
 }
 
 /* Alternate native operation on the same system and opaque fragment configuration. */
 void func_00165668(EffThunderFragmentWork *work) {
-    func_0015CDF0((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+    parIncreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
 }
 
 /* Apply symmetric cell-color bands using the fragment configuration's native arguments. */
@@ -721,7 +721,7 @@ void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
     parPrependCellNode(work->system);
 }
 
-extern void func_0015C7A0(void *system, u32 a, u32 b, u32 c);
+extern void parDecreaseStripCellAlpha(void *system, u32 a, u32 b, u32 c);
 
 /* Parameter head (0x48 bytes) of the cell effect, copied verbatim into the work. */
 typedef struct {
@@ -764,7 +764,7 @@ EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *parameters) {
     work->cells = (EffThunderCell *)(work + 1);
     work->allocationHandle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.cellCount, work->head.halfLife * 2 - 1, 0, 2);
-    func_0015C7A0(work->system, work->head.arg34, work->head.arg3C, work->head.arg44);
+    parDecreaseStripCellAlpha(work->system, work->head.arg34, work->head.arg3C, work->head.arg44);
     func_0015D078(work->system, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {
         effThunderRandomizeCell(work, i);

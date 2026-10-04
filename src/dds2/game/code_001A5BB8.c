@@ -185,7 +185,7 @@ typedef struct BattleEffect {
 extern s32 D_003B4F70[];
 
 extern s32 datCommandRecords;
-extern u32 func_0011AA58(s32, s32);
+extern u32 datCalculateCommandBaseValue(s32, s32);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
@@ -763,7 +763,7 @@ extern u8 D_003B49E8[];
 extern s32 D_003B4A08[];
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void func_001A74F0(SoundUiState *object) {
+void itfDrawSoundSelectorFadeLayers(SoundUiState *object) {
     s32 bounds[4];
     BtlFade *fade = &object->fade;
     s32 packet;
@@ -1676,7 +1676,7 @@ void func_001AB8D8(void) {
 }
 
 s32 btlApplyCommandAbilityMultiplier(s32 battler, s32 command) {
-    u32 value = func_0011AA58(battler, command);
+    u32 value = datCalculateCommandBaseValue(battler, command);
     f32 scale;
 
     if (value == 0) {
@@ -1722,7 +1722,7 @@ typedef struct BtlPartyEntry {
     u32 words[0x6E];
 } BtlPartyEntry;
 
-s32 func_001ABCC0(BtlPartyEntry *base, UiObject *first, UiObject *second,
+s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObject *second,
                   UiObject *third, s32 command) {
     BtlPartyEntry snapshot = *base;
     s32 totalMaxHp = 0;
@@ -2434,7 +2434,7 @@ s32 func_001AE678(u8 *actor, s32 attr) {
     return value;
 }
 
-s32 func_001AE8C0(s32 unit, u32 slot) {
+s32 btlHasMappedSpecialAbilityForSlot(s32 unit, u32 slot) {
     if (((BattleController *)btlGetRuntime())->flags21C & 0x20000) {
         return 0;
     }
@@ -3729,7 +3729,7 @@ void btlPopulateCommandPanelGrid(void) {
 
 
 /* Ramp both five-row banks by panel state; narrow each update before clamping. */
-void func_001B5E98(void) {
+void btlUpdateCommandPanelRowFades(void) {
     s32 i;
 
     switch (btlCommandPanelWork->state) {
@@ -4149,7 +4149,7 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
     }
 }
 
-void func_001B82E8(void) {
+void btlInvalidateSceneFadeCounts(void) {
     btlGetRuntime();
     kwlnTaskGetUserValue(btlGetTrackedTaskHandle(7));
     btlTrackedTaskHandles->fadeKindsCached = 0;
@@ -4777,7 +4777,7 @@ void btlReleaseDialogTaskAndMarkBattleState(s32 handle) {
 
 extern u8 btlSoundSlotDefaults[];
 
-void btlInitSoundSlotTable(void) {
+void btlInitializeSelectionWork(void) {
     u8 initial[0x20];
     BattleSelectionWork *allocated;
     u32 *source;

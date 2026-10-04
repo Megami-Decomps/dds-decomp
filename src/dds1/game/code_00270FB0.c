@@ -53,6 +53,7 @@ extern u8 D_0037B950[];
 extern u8 D_0037B970[];
 
 extern u8 D_0037B980[];
+extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
 
 extern u8 D_0037C388[];
 
@@ -522,7 +523,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     return result;
 }
 
-extern void func_00272798();
+extern void mnuHandleCampFieldSkillInput();
 extern void func_002728F8();
 extern s32 func_002729C8(s32);
 extern void func_00101A80(s32, s32);
@@ -539,7 +540,7 @@ void mnuCreateCampTasks(void) {
     s32 drawTask;
 
     menuAddress = (s32)mnuCreateStaffCampWork();
-    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, func_00272798, 0, menuAddress);
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
     drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002728F8, 0, menuAddress);
     kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, menuAddress);
     func_00101A80(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_00271FC8, 0, menuAddress));
@@ -601,7 +602,7 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-extern u32 D_0037B988[];
+extern u8 *D_0037B988[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {

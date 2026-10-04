@@ -2926,7 +2926,7 @@ void effReleaseRingResourceHandle(u32 handle) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A4478);
 
-extern void func_002A5640(u8 *, void *);
+extern void effDrawFourPointGroups(u8 *, void *);
 
 void billDrawCellBlendA(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -2968,7 +2968,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        func_002A5640(out, mtx);
+        effDrawFourPointGroups(out, mtx);
     }
 }
 
@@ -3256,7 +3256,7 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        func_002A5640(out, mtx);
+        effDrawFourPointGroups(out, mtx);
     }
 }
 
@@ -3364,7 +3364,7 @@ void effAssetQueueRelease(s32 work) {
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
-void func_002A5640(u8 *work, void *matrix) {
+void effDrawFourPointGroups(u8 *work, void *matrix) {
     EffPointSet *set = (EffPointSet *)work;
     void *list;
     void *setup;

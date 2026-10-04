@@ -536,7 +536,7 @@ s32 mnuCreatePanelGroup(s32 parent) {
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         s32 panelItem = mnuCreatePanelItem();
-        func_002848E0(panelItem, parent, panelIndex);
+        mnuPositionPanelGroupPoints(panelItem, parent, panelIndex);
         group->children[panelIndex] = panelItem;
     }
     mnuClearPanelGroupSelection(group);
@@ -851,7 +851,7 @@ s32 mnuCreatePanelItem(void) {
     return (s32)panelItem;
 }
 
-void func_002848E0(s32 itemAddress, s32 gridObject, s32 panelIndex) {
+void mnuPositionPanelGroupPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 2, 1, 3, 4};
     MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
@@ -2031,8 +2031,8 @@ extern u8 D_003B2530[];
 extern u8 D_003B2540[];
 extern u8 D_003B2550[];
 extern void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second);
-extern void func_00107FD8(s32 mode, s32 slot, f32 *color);
-extern void func_001080D8(s32 mode, s32 slot, f32 *color);
+extern void kwlnSetLightColorTarget(s32 mode, s32 slot, f32 *color);
+extern void kwlnSetLightDirectionTarget(s32 mode, s32 slot, f32 *color);
 extern void kwlnSetBackgroundColorTarget(s32 mode, f32 *color);
 extern void kwlnSetDrawColorTarget(s32 mode, f32 *color);
 extern void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w);
@@ -2050,8 +2050,8 @@ void evtStageTestResetViewAndLighting(void)
     memcpy(backgroundColor, D_003B2540, sizeof(backgroundColor));
     memcpy(drawColor, D_003B2550, sizeof(drawColor));
     evtToggleSavedDrawVectors(0, 5.0f, 0.0f);
-    func_00107FD8(0, 0, firstColor);
-    func_001080D8(0, 0, secondColor);
+    kwlnSetLightColorTarget(0, 0, firstColor);
+    kwlnSetLightDirectionTarget(0, 0, secondColor);
     kwlnSetBackgroundColorTarget(0, backgroundColor);
     kwlnSetDrawColorTarget(0, drawColor);
     evtSetDrawVectorTarget(0, 255.0f, 255.0f, 2000.0f, 30000.0f);

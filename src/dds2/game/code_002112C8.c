@@ -136,7 +136,7 @@ extern s32 btlHasLinkedEffectNodeTrigger(void *);
 extern u32 btlAppendSelfAfterTargetScan();
 
 extern void btlSelectLinkedTargets(s32, s32, s8);
-extern s32 func_00216988(s32);
+extern s32 btlSelectTargetsExcludingActorUnit(s32);
 
 
 extern s32 btlIsActorCategoryMarked(s32);
@@ -365,7 +365,7 @@ extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 extern s32 btlElementToBitIndex(s32, s32);
 
 
-extern s32 func_001AE8C0(s32, u32);
+extern s32 btlHasMappedSpecialAbilityForSlot(s32, u32);
 
 extern s32 btlHasSpecialAbility274(void *, s32);
 
@@ -413,7 +413,7 @@ extern s32 btlIsActiveActor();
 
 extern void effObjSetInnerFirstVec();
 
-extern void func_001E2758(void *);
+extern void btlRefreshUnitMotionSelection(void *);
 
 extern void fldAppendTaskToGroup(void *);
 
@@ -1548,7 +1548,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                             continue;
                         }
                         if (btlTestSelectedItemCategoryMask(unit, index) != 0 ||
-                            func_001AE8C0((s32)unit, index) != 0 ||
+                            btlHasMappedSpecialAbilityForSlot((s32)unit, index) != 0 ||
                             btlHasSpecialAbility274(unit, index) != 0 ||
                             btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
                             return 0;
@@ -1557,7 +1557,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                     return 1;
                 }
                 if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
-                    func_001AE8C0((s32)unit, action) != 0 ||
+                    btlHasMappedSpecialAbilityForSlot((s32)unit, action) != 0 ||
                     btlHasSpecialAbility274(unit, action) != 0) {
                     return 0;
                 }
@@ -1672,7 +1672,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002152D8);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00215C70);
 
 /* Prefer the lowest nonzero HP among element-blocking units; otherwise use the list. */
-s32 func_00215D78(s32 actor, s32 action) {
+s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -1856,7 +1856,7 @@ s32 btlSelectLowestRankTarget(s32 task) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216888);
 
-s32 func_00216988(s32 actor) {
+s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     void *list = btlAllocateIndexList(13);
     u32 mode = 0;
     u32 count;
@@ -2742,7 +2742,7 @@ void btlCommitSelectedUnit(void) {
         ((u32 *)&unit->flags64)[1] &= ~0x100;
         ((u32 *)&unit->flags64)[0] |= 0x100;
         ctrl->unit = 0;
-        func_001E2758(unit);
+        btlRefreshUnitMotionSelection(unit);
         ((u32 *)&unit->flags64)[0] |= 8;
         if (ctrl->pending != 0) {
             *(u16 *)unit->pad126 = 1;
@@ -2790,7 +2790,7 @@ void func_00218BA8(BtlUnit *unit, u8 *arg1) {
             actor = actor->nextActor;
         }
         if (actor != 0) {
-            func_001E2758(actor);
+            btlRefreshUnitMotionSelection(actor);
         }
     }
     if ((unit->flags & 0x400) && unit->mode == 0x108) {
@@ -3294,7 +3294,7 @@ s32 btlRemapCommandKind(BtlUnit *unit, s32 kind) {
 }
 
 /* Query the special actor's stored action, or its live substate when given. */
-s32 func_00219E38(ActionUnit *unit) {
+s32 btlGetSpecialEnemyActionStatus(ActionUnit *unit) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
     ActionUnit *actor;
 
@@ -3614,7 +3614,7 @@ void func_0021B4A8(void) {
     func_0021B368();
 }
 
-BtlUnit *func_0021B4C0(s32 mode, u32 species) {
+BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
     BtlUnit *unit;
 
     if (mode != 1) {
@@ -4135,7 +4135,7 @@ typedef struct BattleActionByteState {
 
 
 /* Handle returned by btlFindUnitByActor; these fields drive its action task. */
-extern void func_001E22D8(u8 *, u32, s32, f32);
+extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
 /* When the action-state byte changes, restore the marked unit's saved motion. */
 void btlRestoreMarkedUnitMotionOnStateChange(void) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
@@ -4157,10 +4157,10 @@ void btlRestoreMarkedUnitMotionOnStateChange(void) {
                 unit = unit->next;
             }
             if (unit != 0) {
-                func_001E2758(unit);
+                btlRefreshUnitMotionSelection(unit);
                 unit->motionStateA = 0;
                 unit->motionStateB = 0;
-                func_001E22D8((u8 *)unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
+                btlApplyUnitMotionSelection((u8 *)unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
             }
         }
     }
@@ -4388,10 +4388,10 @@ void func_00220368(void) {
                 unit = unit->next;
             }
             if (unit != 0) {
-                func_001E2758(unit);
+                btlRefreshUnitMotionSelection(unit);
                 unit->motionStateA = 0;
                 unit->motionStateB = 0;
-                func_001E22D8((u8 *)unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
+                btlApplyUnitMotionSelection((u8 *)unit, unit->savedMotionIndex, unit->savedMotionB, unit->savedMotionScale);
             }
         }
     }
@@ -5718,7 +5718,7 @@ extern void btlFlagAllUnitDefeatCandidatesTask(void);
 extern void func_00224EE8(u32);
 
 
-extern void func_001E2758(void *);
+extern void btlRefreshUnitMotionSelection(void *);
 
 typedef struct BattleActionUnit BattleActionUnit;
 
@@ -6379,7 +6379,7 @@ void btlClearSpecialEnemyEntryFlags(void) {
         if (flags & 1) {
             if ((flags & 0x400) && unit->kind == 0x118) {
                 unit->entryFlags &= ~0x2000;
-                func_001E2758(unit);
+                btlRefreshUnitMotionSelection(unit);
             }
         }
         unit = unit->next;
@@ -6438,7 +6438,7 @@ void btlBeginEffectActorFadeOut(void) {
         effect->actor = 0;
         actor->flags = flags;
         actor->stateBits = state;
-        func_001E2758(actor);
+        btlRefreshUnitMotionSelection(actor);
         actor->flags |= 8;
         effect->value10 = -125.0f;
         effect->speed = 20.0f;

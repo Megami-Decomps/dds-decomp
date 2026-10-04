@@ -37,7 +37,7 @@ typedef struct EffectObjectData {
 typedef struct EffectTransformData {
     void *resourceState;
     u32 flags;
-    s32 opacityMode;
+    u32 opacityMode;
     s32 activeId;
     f32 offset[4];
     f32 position[4];
@@ -47,6 +47,8 @@ typedef struct EffectObject {
     u8 pad00[0x18];
     EffectObjectData *data;
     f32 *source; /* 0x1C */
+    u8 pad20[0x14];
+    u32 color; /* 0x34: transform-node draw tint */
 } EffectObject;
 
 extern u32 D_003BA9D0;
@@ -256,7 +258,7 @@ typedef struct EffVec4 {
 
 extern EffVec4 D_0039F720;
 extern EffVec4 D_0039F730;
-extern s32 dds3TestObjectFlags(EffectObject *, s32);
+extern u8 dds3TestObjectFlags(EffectObject *, s32);
 extern s32 effObjTestNodeFlags(f32 *, s32);
 extern void effObjInnerVecInit(EffLocalNode *);
 extern s32 func_00222ED8(EffLocalNode *, EffectObject *);
@@ -655,7 +657,54 @@ INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F730);
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113F28);
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_001141C0);
+extern void fldSelectDisplayBuffer(s32 index);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+extern EffectObject *fldPlayerObject;
+extern u8 D_00325808[];
+
+/* Submit the normal pass and the opacity-mode pass, temporarily neutralizing
+ * the tint while the player is hidden. */
+s32 func_001141C0(EffectObject *obj) {
+    EffectTransformData *data;
+    u32 opacityMode;
+
+    if (D_003BA9D0 == 0) {
+        return 1;
+    }
+    data = (EffectTransformData *)obj->data;
+    if (data->activeId == -1) {
+        fldSelectDisplayBuffer(0x27);
+        fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
+        func_001122F0(D_00325788, obj);
+        fldSelectDisplayBuffer(0x27);
+        fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
+    } else {
+        fldSelectDisplayBuffer(0x22);
+        fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
+        opacityMode = data->opacityMode;
+        if (opacityMode < 5) {
+            if (opacityMode >= 3) {
+                if (obj->color != 0x80808080) {
+                    if (dds3TestObjectFlags(fldPlayerObject, 1)) {
+                        u32 savedColor = obj->color;
+
+                        obj->color = 0x80808080;
+                        func_001122F0(D_00325788 + data->activeId * 0x10, obj);
+                        obj->color = savedColor;
+                    } else {
+                        func_001122F0(D_00325808, obj);
+                    }
+                } else {
+                    func_001122F0(D_00325788 + data->activeId * 0x10, obj);
+                }
+            }
+        }
+        func_001122F0(D_00325788 + data->activeId * 0x10, obj);
+        fldSelectDisplayBuffer(0x22);
+        fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
+    }
+    return 1;
+}
 
 /* Refresh the object's stored xyz from the source vector. */
 void dds3RefreshStoredVec3(WorldObj *obj) {

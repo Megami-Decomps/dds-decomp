@@ -240,7 +240,7 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
 
 /* Project the vf10 position into four screen-coordinate words with four fractional bits.
    Return zero outside the distance/forward-cone checks, without writing the output. */
-s32 func_001F6300(s32 screenPosition[4]) {
+s32 btlProjectForwardPositionToPackedScreen(s32 screenPosition[4]) {
     f32 viewDistance, forwardDot;
     f32 *projectionData;
 
@@ -627,8 +627,8 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
 extern s32 btlIsActorModeAcceptedByBattleHook(s32);
 extern void btlSetUnitPosition(s32, s32);
 extern void btlSetUnitRotation(s32, s32);
-extern void func_001D5990(s32);
-extern void func_001D5578(u8 *, u32, s32, f32);
+extern void btlRefreshUnitMotionSelection(s32);
+extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
 
 /* Refresh each unit's transform/effect state, then invoke the runtime callback. */
 void btlUpdateUnitActors(void) {
@@ -640,10 +640,10 @@ void btlUpdateUnitActors(void) {
         btlSetUnitRotation((s32)unit, (s32)((u8 *)unit + 0x40));
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
-            func_001D5990((s32)unit);
+            btlRefreshUnitMotionSelection((s32)unit);
             unit->effectTimerA = 0;
             unit->effectTimerB = 0;
-            func_001D5578((u8 *)unit, unit->effectArgA, unit->effectArgB,
+            btlApplyUnitMotionSelection((u8 *)unit, unit->effectArgA, unit->effectArgB,
                           unit->effectValue);
         }
         unit->stateFlags &= ~0x8000;
@@ -724,7 +724,7 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
 
 /* Bound horizontal X by abs(tan(angleLimit) * deltaZ), then load the yaw rotation.
    Return zero for a zero XZ delta; unlike the unbounded variant, vf10 is not reset. */
-s32 func_001F7868(f32 *origin, f32 *targetPosition, f32 angleLimit) {
+s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 angleLimit) {
     f32 delta[4];
     f32 absDeltaX;
     f32 maxAbsX;
@@ -899,7 +899,7 @@ void btlScalarRangeSetStartClearEnd(s32 rangeAddress, f32 start) {
 
 /* Advance progress by (1 - progress) / span and return at most one.
    Only the return is capped: stored progress is raw. A nonpositive span is unchanged. */
-f32 func_001F7CD8(s32 rangeAddress) {
+f32 btlScalarRangeStepExponential(s32 rangeAddress) {
     BtlScalarRange *state = (BtlScalarRange *)rangeAddress;
     f32 result = 0.0f;
     f32 span = state->start;
@@ -937,7 +937,7 @@ void btlScalarRangeInitQuadratic(s32 rangeAddress, f32 start) {
 
 /* Integrate the quadratic accumulator, reversing acceleration after the midpoint.
    Completion returns one without updating state; intermediate values are not capped. */
-f32 func_001F7D80(BtlScalarRange *state, f32 timeStep) {
+f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
     f32 accumulatedValue = state->target;
     f32 velocity = state->zero;
     f32 remainingSpan = state->end;
@@ -1323,7 +1323,7 @@ u32 btlCmdStoreBossHealthCheckChoice(void) {
 }
 /* Remember the count limit only when the eligible enemy count is at most that limit.
    Failure clears the selection flag but leaves the previous stored choice intact. */
-u32 func_001F8AD0(void) {
+u32 btlCmdStoreEnemyCountCheckChoice(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | BTL_PACKED_ENEMY_COUNT_LIMIT)) {
         scrSetIntegerReturnValue(1);
@@ -1893,7 +1893,7 @@ u32 btlScriptReturnFirstSpecialEnemySpecies(void) {
 }
 
 /* Remember the choice when an enemy's queued query matches; failure clears only its flag. */
-u32 func_001FA2B0(void) {
+u32 btlCmdRememberUpperQueuedQuery(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | BTL_PACKED_ENEMY_QUEUED_QUERY)) {
         scrSetIntegerReturnValue(1);
@@ -1907,7 +1907,7 @@ u32 func_001FA2B0(void) {
 }
 
 /* Remember the choice when a party unit's queued query matches; failure clears only its flag. */
-u32 func_001FA340(void) {
+u32 btlCmdRememberLowerQueuedQuery(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | BTL_PACKED_PARTY_QUEUED_QUERY)) {
         scrSetIntegerReturnValue(1);
@@ -1921,7 +1921,7 @@ u32 func_001FA340(void) {
 }
 
 /* Remember the choice on a successful party-element block check; failure clears only its flag. */
-u32 func_001FA3D0(void) {
+u32 btlCmdRememberLowerElementBlock(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | BTL_PACKED_PARTY_ELEMENT_BLOCK)) {
         scrSetIntegerReturnValue(1);
@@ -1935,7 +1935,7 @@ u32 func_001FA3D0(void) {
 }
 
 /* Report whether an eligible party unit has zero current MP; the handler tests unit +0x12A. */
-u32 func_001FA460(void) {
+u32 btlCmdReportPartyEmptyMp(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
@@ -2543,7 +2543,7 @@ s32 btlOpenPfsDebugDirectory(s32 directoryName) {
 }
 
 /* Close the scanned directory only in debug filesystem mode; ignore the native result. */
-void func_001FB2F0(void) {
+void btlClosePfsDebugDirectory(void) {
     if (sdfPfsDebugMode == 0) {
         return;
     }

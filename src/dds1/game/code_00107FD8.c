@@ -179,7 +179,7 @@ extern void func_0010AC98(void);
 
 extern void *D_003BD764;
 
-extern void func_00109108();
+extern void evtSubmitGradientRectAtDepth();
 
 typedef struct KwlnResourceNode {
     s32 unk0;
@@ -198,10 +198,10 @@ extern void *D_003BD768;
 extern char D_0039E238[]; /* "DebugTimeGrph" */
 
 /* Set an existing light slot's RGB target immediately or save packed blend endpoints. */
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
+INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnSetLightColorTarget);
 
 /* Normalize the requested light direction; replace it immediately or prepare its blend. */
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_001080D8);
+INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnSetLightDirectionTarget);
 
 extern u16 D_003BD6E6;
 extern u16 D_003BD6E8;
@@ -358,7 +358,7 @@ extern void *sdfFormatSifPacket();
 
 /* Submit primary-context GS TEST settings. Z testing is always enabled;
    unusedZte is a retained native formal, not the source of the ZTE bit. */
-void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
+void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
     void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
@@ -375,7 +375,7 @@ void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
 }
 
 /* Submit the same TEST bit layout for the secondary GS context, with ZTE forced on. */
-void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
+void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
     void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
@@ -392,7 +392,7 @@ void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
 }
 
 /* Select a primary-context ALPHA equation by mode; unknown modes use 0x44. */
-void func_00108CB8(s32 blendMode) {
+void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
     void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
@@ -438,7 +438,7 @@ void func_00108CB8(s32 blendMode) {
 }
 
 /* Submit ALPHA_1 = (Cs - Cd) * FIX / 128 + Cd; retain the native unmasked FIX input. */
-void evtSubmitTexturePacket(s32 fixedAlpha) {
+void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
@@ -493,12 +493,12 @@ void func_00108F00(void) {
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108FA0);
 
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109108);
+INCLUDE_ASM(const s32, "game/code_00107FD8", evtSubmitGradientRectAtDepth);
 
 /* Submit the four-corner gradient rectangle with the native default depth.
    The inserted 0xFFFFFF is depth, not a white color. */
-void func_001093B8(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor) {
-    func_00109108(x, y, width, height, EVT_QUAD_DEFAULT_DEPTH, topLeftColor, topRightColor, bottomRightColor, bottomLeftColor);
+void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor) {
+    evtSubmitGradientRectAtDepth(x, y, width, height, EVT_QUAD_DEFAULT_DEPTH, topLeftColor, topRightColor, bottomRightColor, bottomLeftColor);
 }
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001093F8);
@@ -1007,7 +1007,7 @@ void evtDispatchSelectionCommand(s32 commandSource, s32 *commandParams) {
 }
 
 /* Check battle shutdown; the callee exits only after audio and task work become idle. */
-void func_0010A6E0(void) {
+void evtCheckBattleShutdown(void) {
     btlExitWhenAudioAndTasksIdle();
 }
 
@@ -1027,7 +1027,7 @@ void evtCreateBattleStageTestTask(void) {
 }
 
 /* Stop the battle-stage test task and return the scene callback's native zero status. */
-u32 func_0010A760(void) {
+u32 evtEndBattleStageTest(void) {
     evtBattleStageTestStopTask();
     return 0;
 }
@@ -1344,7 +1344,7 @@ void evtDrawHeapUsageOverlay(void *surfaceAddress) {
 }
 
 /* Draw the overlay only when the control byte is zero; return zero in either case. */
-s32 func_0010B558(void) {
+s32 evtDrawConditionalHeapUsageOverlay(void) {
     if (D_0032453B[0] != 0) {
         return 0;
     }

@@ -61,7 +61,7 @@ typedef struct StaffScreenContext {
 } StaffScreenContext;
 
 
-s32 func_00272798(s32 callback) {
+s32 mnuHandleCampFieldSkillInput(s32 callback) {
     StaffScreenContext *context;
     s32 *popup;
     u32 input;

@@ -1301,11 +1301,11 @@ void func_00106288(void) {
     }
 
     evtSetDrawSurfaceIndex(0x4F);
-    func_00108BD8(0);
-    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     alpha = (KWLN_FADE_MAX_ALPHA - fade) << 24;
-    func_001094F8(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
-    func_001094F8(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
+    evtSubmitDefaultDepthGradientRect(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
+    evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
 }
 
 void func_001063A8(f32 value) {

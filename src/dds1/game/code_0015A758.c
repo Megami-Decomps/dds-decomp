@@ -936,7 +936,7 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
     }
 }
 
-void func_0015C618(ParSystem *system, u32 middleWord, u32 edgeWord) {
+void parFadeTriangleCellAlphaUpDown(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     u32 middleAlpha = middleWord & 0xFF000000;
@@ -1038,7 +1038,7 @@ void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s
 }
 
 /* Fade the three strip colors toward transparent across each cell. */
-void func_0015C7A0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void parDecreaseStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1086,7 +1086,7 @@ void func_0015C7A0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWo
 }
 
 /* Raise then lower the three alphas across the two halves of each strip cell. */
-void func_0015C8C0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void parRiseFallStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1248,7 +1248,7 @@ void parFillSymmetricCellColors(ParSystem *system, s32 centerWord, s32 middleWor
 }
 
 /* Fade the three symmetric colors toward transparent across each cell. */
-void func_0015CCD0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void parDecreaseSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1295,7 +1295,7 @@ void func_0015CCD0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWo
 }
 
 /* Increase each symmetric color's alpha from zero across the cell. */
-void func_0015CDF0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void parIncreaseSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1342,7 +1342,7 @@ void func_0015CDF0(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWo
 }
 
 /* Raise then lower the three alphas across the two halves of each cell. */
-void func_0015CEF8(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void parRiseFallSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;

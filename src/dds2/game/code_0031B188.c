@@ -426,7 +426,7 @@ s32 mnuClaimPositionedEffectRecord(void *listAddress, void *stepAddress, s32 del
     return 0;
 }
 
-MnuEffectRecord *func_0031B960(MnuEffectList *list, s32 delay, f32 x, f32 y, f32 z) {
+MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *list, s32 delay, f32 x, f32 y, f32 z) {
     f32 position[4];
     MnuEffectRecord *record;
     s32 index = 0;
@@ -519,7 +519,7 @@ extern void func_002D49B8(FileQueue *queue, u32 color);
 extern u32 D_0040AE10[];
 
 /* Advance active effect queues, honoring their delay and optional position step. */
-void func_0031BDE8(MnuEffectWork *work, s32 flags) {
+void mnuUpdateEffectQueues(MnuEffectWork *work, s32 flags) {
     f32 position[4];
     MnuEffectList *list = work->lists;
     MnuEffectRecord *record;

@@ -420,9 +420,9 @@ void fldStartSceneBgm(void);
 
 void fldStartSceneBgmAlternate(void);
 
-extern s32 func_0013D308(s32, void *);
+extern s32 fldTestRoomProbeFacingAndRange(s32, void *);
 
-extern s32 func_0013D598(s32, void *);
+extern s32 fldTestRoomProbeFacing(s32, void *);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
@@ -439,7 +439,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    if (func_0013D308(unit, entry) == 0) {
+    if (fldTestRoomProbeFacingAndRange(unit, entry) == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
@@ -473,7 +473,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    if (func_0013D598(unit, entry) == 0) {
+    if (fldTestRoomProbeFacing(unit, entry) == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
@@ -528,7 +528,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    if (func_0013D308(unit, entry) == 0) {
+    if (fldTestRoomProbeFacingAndRange(unit, entry) == 0) {
         scrSetIntegerReturnValue(0);
     } else {
         scrSetIntegerReturnValue(1);
@@ -900,7 +900,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00154558", func_001552E0);
+INCLUDE_ASM(const s32, "game/code_00154558", fldCmdApplyNumericRoomModeGroupZero);
 
 extern char *D_004361D4;
 
@@ -960,7 +960,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00154558", func_00155690);
+INCLUDE_ASM(const s32, "game/code_00154558", fldCmdApplyNumericRoomModeGroupOne);
 
 s32 fldCmdApplyRoomObjectModeZero(void) {
     s32 world;

@@ -3,7 +3,7 @@
 
 extern u64 scrReadIntParameter(u64);
 
-extern u64 func_0011A318(u64);
+extern u64 ptyReadSignedRosterStatByte(u64);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *p);
@@ -69,7 +69,7 @@ u32 func_0010F160(void) {
     u64 id;
 
     id = scrReadIntParameter(0);
-    id = func_0011A318(id);
+    id = ptyReadSignedRosterStatByte(id);
     scrSetIntegerReturnValue(id);
     return 1;
 }

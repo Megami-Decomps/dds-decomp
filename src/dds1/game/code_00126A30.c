@@ -217,7 +217,7 @@ extern u32 D_003BACF8;
 extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfAllocPacketAligned(s32);
 
-extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
+extern u32 func_00197760(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 fldBackgroundBuffer;
 extern s32 sdfAllocateBlockBySizeThreshold(u32);
@@ -1037,7 +1037,7 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129178);
 
-void func_001292E0(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 packetFlags) {
+void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 packetFlags) {
     s32 handle = (s32)sdfConsAllocateColumnPacket(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
     s32 r = color & 0xFF;
@@ -1857,10 +1857,10 @@ void fldSubmitBackgroundDescriptorPacket(void) {
 void func_0012B890(x, y, first, second)
 s32 x;
 s32 y;
-u64 first;
-u64 second;
+u32 first;
+const u8 *second;
 {
-    u64 object;
+    u32 object;
 
     object = func_00197760(x << 4, y << 4, 0, first, second, 0);
     frFontDrawGlyphInDefaultMode(object);
@@ -2863,9 +2863,9 @@ typedef struct {
 } FldLightSet; /* 0xE0 bytes */
 extern void *D_003BAD60;
 extern s32 kwlnSetDrawColorTarget(s32, void *);
-extern s32 func_00107FD8(s32, s32, void *);
+extern s32 kwlnSetLightColorTarget(s32, s32, void *);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
-extern s32 func_001080D8(s32, s32, void *);
+extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
 extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
 
@@ -2904,32 +2904,32 @@ void fldApplySkyLightSetToPlayerVU(void) {
         dir[1] = light->lightDirectionAY;
         dir[2] = light->lightDirectionAZ;
         dir[3] = 0.0f;
-        func_001080D8(0, 0, dir);
+        kwlnSetLightDirectionTarget(0, 0, dir);
         vec[0] = light->lightVectorAX;
         vec[1] = light->lightVectorAY;
         vec[2] = light->lightVectorAZ;
         vec[3] = 0.0f;
-        func_00107FD8(0, 0, vec);
+        kwlnSetLightColorTarget(0, 0, vec);
         dir[0] = light->lightDirectionBX;
         dir[1] = light->lightDirectionBY;
         dir[2] = light->lightDirectionBZ;
         dir[3] = 0.0f;
-        func_001080D8(0, 1, dir);
+        kwlnSetLightDirectionTarget(0, 1, dir);
         vec[0] = light->lightVectorBX;
         vec[1] = light->lightVectorBY;
         vec[2] = light->lightVectorBZ;
         vec[3] = 0.0f;
-        func_00107FD8(0, 1, vec);
+        kwlnSetLightColorTarget(0, 1, vec);
         dir[0] = light->lightDirectionCX;
         dir[1] = light->lightDirectionCY;
         dir[2] = light->lightDirectionCZ;
         dir[3] = 0.0f;
-        func_001080D8(0, 2, dir);
+        kwlnSetLightDirectionTarget(0, 2, dir);
         vec[0] = light->lightVectorCX;
         vec[1] = light->lightVectorCY;
         vec[2] = light->lightVectorCZ;
         vec[3] = 0.0f;
-        func_00107FD8(0, 2, vec);
+        kwlnSetLightColorTarget(0, 2, vec);
         vec[0] = light->finalVectorX;
         vec[1] = light->finalVectorY;
         vec[2] = light->finalVectorZ;
@@ -2983,32 +2983,32 @@ void fldApplyLightSetCurrent(void) {
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
     dir[3] = 0;
-    func_001080D8(0, 0, dir);
+    kwlnSetLightDirectionTarget(0, 0, dir);
     vec[0] = light->lightVectorAX;
     vec[1] = light->lightVectorAY;
     vec[2] = light->lightVectorAZ;
     vec[3] = 0;
-    func_00107FD8(0, 0, vec);
+    kwlnSetLightColorTarget(0, 0, vec);
     dir[0] = light->lightDirectionBX;
     dir[1] = light->lightDirectionBY;
     dir[2] = light->lightDirectionBZ;
     dir[3] = 0;
-    func_001080D8(0, 1, dir);
+    kwlnSetLightDirectionTarget(0, 1, dir);
     vec[0] = light->lightVectorBX;
     vec[1] = light->lightVectorBY;
     vec[2] = light->lightVectorBZ;
     vec[3] = 0;
-    func_00107FD8(0, 1, vec);
+    kwlnSetLightColorTarget(0, 1, vec);
     dir[0] = light->lightDirectionCX;
     dir[1] = light->lightDirectionCY;
     dir[2] = light->lightDirectionCZ;
     dir[3] = 0;
-    func_001080D8(0, 2, dir);
+    kwlnSetLightDirectionTarget(0, 2, dir);
     vec[0] = light->lightVectorCX;
     vec[1] = light->lightVectorCY;
     vec[2] = light->lightVectorCZ;
     vec[3] = 0;
-    func_00107FD8(0, 2, vec);
+    kwlnSetLightColorTarget(0, 2, vec);
     vec[0] = light->finalVectorX;
     vec[1] = light->finalVectorY;
     vec[2] = light->finalVectorZ;
@@ -3042,32 +3042,32 @@ void fldApplyLightSetIndex(s32 index) {
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
     dir[3] = 0;
-    func_001080D8(0, 0, dir);
+    kwlnSetLightDirectionTarget(0, 0, dir);
     vec[0] = light->lightVectorAX;
     vec[1] = light->lightVectorAY;
     vec[2] = light->lightVectorAZ;
     vec[3] = 0;
-    func_00107FD8(0, 0, vec);
+    kwlnSetLightColorTarget(0, 0, vec);
     dir[0] = light->lightDirectionBX;
     dir[1] = light->lightDirectionBY;
     dir[2] = light->lightDirectionBZ;
     dir[3] = 0;
-    func_001080D8(0, 1, dir);
+    kwlnSetLightDirectionTarget(0, 1, dir);
     vec[0] = light->lightVectorBX;
     vec[1] = light->lightVectorBY;
     vec[2] = light->lightVectorBZ;
     vec[3] = 0;
-    func_00107FD8(0, 1, vec);
+    kwlnSetLightColorTarget(0, 1, vec);
     dir[0] = light->lightDirectionCX;
     dir[1] = light->lightDirectionCY;
     dir[2] = light->lightDirectionCZ;
     dir[3] = 0;
-    func_001080D8(0, 2, dir);
+    kwlnSetLightDirectionTarget(0, 2, dir);
     vec[0] = light->lightVectorCX;
     vec[1] = light->lightVectorCY;
     vec[2] = light->lightVectorCZ;
     vec[3] = 0;
-    func_00107FD8(0, 2, vec);
+    kwlnSetLightColorTarget(0, 2, vec);
     vec[0] = light->finalVectorX;
     vec[1] = light->finalVectorY;
     vec[2] = light->finalVectorZ;
@@ -3662,7 +3662,7 @@ typedef struct FldProbeActor {
 
 extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
-s32 func_0013A720(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
     f32 dir[4];
     f32 position[4];
     f32 length;
@@ -3730,7 +3730,7 @@ s32 func_0013A720(FldProbeActor *actor, NodeA *entry) {
 }
 
 /* vu0 routine: the alternate entry probe only constrains facing, not range. */
-s32 func_0013A9B0(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacing(FldProbeActor *actor, NodeA *entry) {
     f32 dir[4];
     f32 position[4];
     f32 dot;
@@ -4729,7 +4729,7 @@ s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
         x = 0xF6 - (width >> 1);
         fldDrawGaugeBar(width);
         fldDrawTitleBanner(x, 0x131);
-        func_0012B890(x + 0x14, 0x98, 0xA09DC380, (u64)(D_0033E900 + ticket[1] * 32));
+        func_0012B890(x + 0x14, 0x98, 0xA09DC380, D_0033E900 + ticket[1] * 32);
         ticket[0] = ticket[0] + 1;
         ticket[2] = 0;
     }

@@ -7,7 +7,7 @@ extern void func_00137888(void);
 extern void func_0030C8E8(s32);
 extern void func_0030DB40(s32, s32, s32, s32, s32, s32, s32);
 extern void func_0030E1A0(s32);
-extern void func_0030ECC0(void);
+extern void fldDrawSelectedMapMarker(void);
 
 extern u32 D_004388AC;
 
@@ -511,12 +511,12 @@ void func_0030B470(void) {
     case 1:
     case 2:
         func_0030C8E8(1);
-        func_0030ECC0();
+        fldDrawSelectedMapMarker();
         func_0030E1A0(0);
         break;
     case 3:
         func_0030C8E8(0);
-        func_0030ECC0();
+        fldDrawSelectedMapMarker();
         func_0030E1A0(1);
         break;
     case 4:

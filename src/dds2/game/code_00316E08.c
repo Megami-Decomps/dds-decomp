@@ -195,7 +195,7 @@ extern MnuShootingWork *D_0043891C;
 
 extern s32 func_00317FE0(MnuShootingWork *);
 extern void func_00318570(MnuShootingWork *);
-extern void func_00317E48(MnuShootingWork *);
+extern void mnuDestroyShootingWork(MnuShootingWork *);
 
 extern u32 D_00438918;
 
@@ -336,7 +336,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
 
 void func_00316FA8(MnuShootingWork *work) {
     if (work != NULL) {
-        func_00317E48(work);
+        mnuDestroyShootingWork(work);
     }
 }
 
@@ -390,7 +390,7 @@ INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
 
 /* Release the shooting task's owned lists, queues, slots and world object. */
-void func_00317E48(MnuShootingWork *work) {
+void mnuDestroyShootingWork(MnuShootingWork *work) {
     s32 i;
     u32 *slot;
 

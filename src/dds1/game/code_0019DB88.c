@@ -545,7 +545,7 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32
 extern void itfSendTablePacket(s32, s32, s32);
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void func_0019F4C8(SoundUiState *object) {
+void itfDrawSoundSelectorFadeLayers(SoundUiState *object) {
     s32 bounds[4];
     BtlFade *fade = &object->fade;
     s32 packet;

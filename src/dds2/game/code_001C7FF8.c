@@ -6,6 +6,7 @@ extern s32 btlGetRuntime(void);
 extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
+extern u32 func_0019F460(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
 
@@ -226,9 +227,9 @@ extern char D_003B5B10[];
 
 extern s32 btlGetEntryFlagsUnlessDisabled(void *);
 
-extern u32 D_00435E64;
+extern u8 *D_00435E64;
 
-extern u32 D_00435E5C;
+extern u8 *D_00435E5C;
 
 extern s32 D_00438F54;
 
@@ -257,15 +258,15 @@ void fldInitializeBattleSceneFlow(void) {
     btlNextScaledRandom(7);
     if ((scene->flags & 0x400) != 0) {
         if (scene->variant == 1) {
-            func_001B82E8(0);
+            btlInvalidateSceneFadeCounts(0);
             btlResetBattleHistoryCounters();
         } else {
-            func_001B82E8(1);
+            btlInvalidateSceneFadeCounts(1);
             btlResetBattleHistoryCounters();
         }
     }
     btlToggleModelFlagOnInput();
-    func_001C7F10();
+    btlUpdateCommandUiTransition();
 }
 
 void btlDebugPrintf(s32 tag, ...) {
@@ -454,7 +455,7 @@ INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436860);
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436868);
 
 void btlDrawRetreatCommandLabel(s32 unused) {
-    char text[8] = "Retreat";
+    u8 text[8] = "Retreat";
     s32 color;
     s32 handle;
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
@@ -465,7 +466,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
         color = btlLinkedSelectionTaskBuffer[1] | 0x89FEFF00;
     }
     itfSetTextDrawLimit(0x13);
-    handle = func_0019F460(0x1A0, 0xA60, 0xFF0010, color, (s32)text, 0);
+    handle = func_0019F460(0x1A0, 0xA60, 0xFF0010, color, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
     itfSetTextDrawLimit(-1);

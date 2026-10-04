@@ -16,7 +16,7 @@ void evtBeginSolarOverlayFadeIn(s32 fadeDuration);
 
 void func_0022AB90(void);
 s32 evtGetMirroredSolarPhase(void);
-void func_0022A8D8(u32 overlayAddress);
+void evtUpdateSolarPhaseTransition(u32 overlayAddress);
 void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha, s32 mirroredPhase, u32 overlayAddress, s32 renderContext);
 
 extern s32 evtSolarOverlayFadeCounter;
@@ -75,14 +75,14 @@ void evtInitializeVisualData(s32 visualAddress) {
     visualValues[7] = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022A248", func_0022A8D8);
+INCLUDE_ASM(const s32, "game/code_0022A248", evtUpdateSolarPhaseTransition);
 
 /* Advance the fade and draw with scaled alpha; renderContext is forwarded unchanged. */
 void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, u32 overlayAddress, s32 renderContext) {
     s32 mirroredPhase;
     /* Preserve signed-byte narrowing before forwarding the mirrored phase. */
     mirroredPhase = (s8)evtGetMirroredSolarPhase();
-    func_0022A8D8(overlayAddress);
+    evtUpdateSolarPhaseTransition(overlayAddress);
     if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
         if ((evtSolarOverlayFadeFlags & SOLAR_FADE_IN) != 0) {
             if (evtSolarOverlayFadeCounter < evtSolarOverlayFadeDuration) {
@@ -150,20 +150,20 @@ u32 func_0022AB60(void) {
 }
 
 /* Return the same update callback installed by evtStartTestTask. */
-void *func_0022AB80(void) {
+void *evtGetTestTaskUpdateCallback(void) {
     return (void *)func_0022AB90;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022AB90);
 
 /* Test-task teardown destroys the named script processes. */
-void func_0022AEB8(void) {
+void evtDestroyTestTaskScripts(void) {
     scrDestroyAllNamedProcesses();
 }
 
 void evtStartTestTask(void) {
     D_003BA8EC = 0x80000000;
-    kwlnTaskCreate(D_003ACD18, 0x2AF9, 1, 1, func_0022AB90, func_0022AEB8, 0);
+    kwlnTaskCreate(D_003ACD18, 0x2AF9, 1, 1, func_0022AB90, evtDestroyTestTaskScripts, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD18);
@@ -191,7 +191,7 @@ void func_0022B618(void) {
 }
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
-void func_0022B620(EventList *list, EventListNode *insertedNode) {
+void evtInsertListNodeByOrderKey(EventList *list, EventListNode *insertedNode) {
     EventListNode *cursor = list->first;
 
     if (cursor == 0) {
@@ -264,7 +264,7 @@ void evtReorderListNodes(EventList *list) {
             while (candidateNode != 0) {
                 if (candidateNode->orderKey < anchorNode->orderKey) {
                     evtUnlinkListNode(list, candidateNode);
-                    func_0022B620(list, candidateNode);
+                    evtInsertListNodeByOrderKey(list, candidateNode);
                     /* Resume from the relocated node's new successor, not its old one. */
                     resumeNode = candidateNode->next;
                     break;
