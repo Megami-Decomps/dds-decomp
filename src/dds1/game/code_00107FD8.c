@@ -4,6 +4,32 @@
 
 #include "kwln.h"
 
+enum {
+    EVT_PACKET_LIST_BYTES = 0x20,
+    EVT_GS_COMMAND_BYTES = 0x30,
+    EVT_GS_TEST_PRIMARY = 0x47,
+    EVT_GS_TEST_SECONDARY = 0x48,
+    EVT_GS_ALPHA_PRIMARY = 0x42,
+    EVT_FIXED_ALPHA_INTERPOLATION = 0x64,
+    EVT_QUAD_DEFAULT_DEPTH = 0xFFFFFF,
+    EVT_FRAME_REFERENCE_PACKET_BYTES = 0x40,
+    EVT_FRAME_DRAW_RECORD_BYTES = 0x1F40,
+    EVT_BACKGROUND_BLEND_FLAG = 0x100,
+    EVT_DRAW_COLOR_BLEND_FLAG = 0x200,
+    EVT_DRAW_VECTOR_BLEND_FLAG = 0x400,
+    EVT_SAVED_VECTOR_BLEND_FLAG = 0x4000,
+    EVT_QUAD_DESCRIPTOR_BYTES = 0x2C,
+    EVT_QUAD_VERTEX_COUNT = 4,
+    EVT_SELECTION_ALLOCATION_BYTES = 0x28,
+    EVT_DEV_CONSOLE_BUFFER_BYTES = 0x200,
+    BF_FLW0_MAGIC = 0x30574C46,
+    BF_FLW0_SECTION_PROCEDURES = 0,
+    BF_FLW0_SECTION_LABELS = 1,
+    BF_FLW0_SECTION_INSTRUCTIONS = 2,
+    BF_FLW0_SECTION_AUXILIARY = 3,
+    BF_FLW0_SECTION_STRINGS = 4
+};
+
 extern s32 evtConsoleFontResourceChain;
 
 extern s32 fldLmapTaskExists(void);
@@ -171,8 +197,10 @@ extern void *D_003BD768;
 
 extern char D_0039E238[]; /* "DebugTimeGrph" */
 
+/* Set an existing light slot's RGB target immediately or save packed blend endpoints. */
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00107FD8);
 
+/* Normalize the requested light direction; replace it immediately or prepare its blend. */
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001080D8);
 
 extern u16 D_003BD6E6;
@@ -181,31 +209,31 @@ extern u32 D_003BD6EC;
 extern u32 D_003BD6F0;
 extern u8 kwlnDefaultColorVector[];
 
-/* vu0 routine: set the background colour target: immediately (mode 0) or blend from the default over `mode` frames. */
-void kwlnSetBackgroundColorTarget(s32 mode, f32 *color) {
-    s32 first[4];
-    s32 second[4];
-    u32 packedFirst;
-    u32 packedSecond;
+/* vu0 routine: replace the background color immediately or blend over blendFrames frames. */
+void kwlnSetBackgroundColorTarget(s32 blendFrames, f32 *color) {
+    s32 startColorWords[4];
+    s32 targetColorWords[4];
+    u32 packedStartColor;
+    u32 packedTargetColor;
 
-    if (mode == 0) {
-        kwlnDrawControlFlags &= ~0x100;
+    if (blendFrames == 0) {
+        kwlnDrawControlFlags &= ~EVT_BACKGROUND_BLEND_FLAG;
         VU0_LOAD_VF(vf10, color);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, kwlnDefaultColorVector);
     } else {
-        kwlnDrawControlFlags |= 0x100;
-        D_003BD6E8 = mode;
+        kwlnDrawControlFlags |= EVT_BACKGROUND_BLEND_FLAG;
+        D_003BD6E8 = blendFrames;
         D_003BD6E6 = 0;
         VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
-        EE_MMI_RGBA_PACK(packedFirst);
-        first[0] = packedFirst;
-        D_003BD6EC = first[0];
+        EE_MMI_RGBA_PACK(packedStartColor);
+        startColorWords[0] = packedStartColor;
+        D_003BD6EC = startColorWords[0];
         VU0_LOAD_VF(vf10, color);
         VU0_SET_W_ONE(vf10);
-        EE_MMI_RGBA_PACK(packedSecond);
-        second[0] = packedSecond;
-        D_003BD6F0 = second[0];
+        EE_MMI_RGBA_PACK(packedTargetColor);
+        targetColorWords[0] = packedTargetColor;
+        D_003BD6F0 = targetColorWords[0];
     }
 }
 
@@ -216,21 +244,21 @@ extern u32 D_003BD6FC;
 extern u32 D_003BD700;
 
 /* vu0 routine: set the draw colour target: immediately (mode 0) or interpolate from the previous colour. */
-void kwlnSetDrawColorTarget(s32 mode, f32 *color) {
-    u32 color32[4];
-    u32 packed;
+void kwlnSetDrawColorTarget(s32 blendFrames, f32 *color) {
+    u32 targetColorWords[4];
+    u32 packedTargetColor;
 
     VU0_LOAD_VF(vf10, color);
     VU0_CLEAR_W(vf10);
-    EE_MMI_RGBA_PACK_F255(packed);
-    color32[0] = packed;
-    if (mode == 0) {
-        kwlnDrawControlFlags &= ~0x200;
-        D_003247A0[0] = color32[0];
+    EE_MMI_RGBA_PACK_F255(packedTargetColor);
+    targetColorWords[0] = packedTargetColor;
+    if (blendFrames == 0) {
+        kwlnDrawControlFlags &= ~EVT_DRAW_COLOR_BLEND_FLAG;
+        D_003247A0[0] = targetColorWords[0];
     } else {
-        kwlnDrawControlFlags |= 0x200;
-        D_003BD6F6 = mode;
-        D_003BD700 = color32[0];
+        kwlnDrawControlFlags |= EVT_DRAW_COLOR_BLEND_FLAG;
+        D_003BD6F6 = blendFrames;
+        D_003BD700 = targetColorWords[0];
         D_003BD6FC = D_003247A0[0];
         D_003BD6F4 = 0;
     }
@@ -238,24 +266,24 @@ void kwlnSetDrawColorTarget(s32 mode, f32 *color) {
 
 
 /* Either replace the draw vector immediately or interpolate from its prior value. */
-void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
-    if (mode == 0) {
-        kwlnDrawControlFlags &= ~0x400;
+void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
+    if (blendFrames == 0) {
+        kwlnDrawControlFlags &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
         kwlnDrawVector.x = x;
         kwlnDrawVector.y = y;
         kwlnDrawVector.z = z;
         kwlnDrawVector.w = w;
     } else {
-        f32 b0 = kwlnDrawVector.x;
-        f32 b1 = kwlnDrawVector.y;
-        f32 b2 = kwlnDrawVector.z;
-        f32 b3 = kwlnDrawVector.w;
-        kwlnDrawControlFlags |= 0x400;
-        D_003BD6FA = mode;
-        D_003C2C20.x = b0;
-        D_003C2C20.y = b1;
-        D_003C2C20.z = b2;
-        D_003C2C20.w = b3;
+        f32 previousX = kwlnDrawVector.x;
+        f32 previousY = kwlnDrawVector.y;
+        f32 previousZ = kwlnDrawVector.z;
+        f32 previousW = kwlnDrawVector.w;
+        kwlnDrawControlFlags |= EVT_DRAW_VECTOR_BLEND_FLAG;
+        D_003BD6FA = blendFrames;
+        D_003C2C20.x = previousX;
+        D_003C2C20.y = previousY;
+        D_003C2C20.z = previousZ;
+        D_003C2C20.w = previousW;
         D_003C2C30.x = x;
         D_003C2C30.y = y;
         D_003C2C30.z = z;
@@ -266,21 +294,22 @@ void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001083F8);
 
-void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second) {
+/* Replace the two scalar targets immediately, or retain start/end values for their blend. */
+void evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget) {
     if (frames == 0) {
-        kwlnDrawControlFlags &= ~0x4000;
-        D_003BD358 = first;
-        D_003BD35C = second;
+        kwlnDrawControlFlags &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
+        D_003BD358 = firstTarget;
+        D_003BD35C = secondTarget;
     }
     else {
         f32 previousFirst = D_003BD358;
         f32 previousSecond = D_003BD35C;
-        kwlnDrawControlFlags |= 0x4000;
+        kwlnDrawControlFlags |= EVT_SAVED_VECTOR_BLEND_FLAG;
         D_003BD706 = frames;
         D_003BD708 = previousFirst;
-        D_003BD70C = first;
+        D_003BD70C = firstTarget;
         D_003BD710 = previousSecond;
-        D_003BD714 = second;
+        D_003BD714 = secondTarget;
         D_003BD704 = 0;
     }
 }
@@ -327,15 +356,17 @@ extern void sdfPktInit(void *, s32, s32, s32, s32);
 
 extern void *sdfFormatSifPacket();
 
+/* Submit primary-context GS TEST settings. Z testing is always enabled;
+   unusedZte is a retained native formal, not the source of the ZTE bit. */
 void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
-    void *list = sdfAllocPacketAligned(0x20);
+    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
+    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
-    command->registerId = 0x47;
+    command->registerId = EVT_GS_TEST_PRIMARY;
     sdfAppendPacket(list, packet);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -343,15 +374,16 @@ void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     }
 }
 
+/* Submit the same TEST bit layout for the secondary GS context, with ZTE forced on. */
 void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
-    void *list = sdfAllocPacketAligned(0x20);
+    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
+    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
-    command->registerId = 0x48;
+    command->registerId = EVT_GS_TEST_SECONDARY;
     sdfAppendPacket(list, packet);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -359,15 +391,16 @@ void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     }
 }
 
-void func_00108CB8(s32 mode) {
-    void *list = sdfAllocPacketAligned(0x20);
+/* Select a primary-context ALPHA equation by mode; unknown modes use 0x44. */
+void func_00108CB8(s32 blendMode) {
+    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
 
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
-    switch (mode) {
+    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
+    switch (blendMode) {
     case 1:
         command->data = 0x48;
         break;
@@ -396,7 +429,7 @@ void func_00108CB8(s32 mode) {
         command->data = 0x44;
         break;
     }
-    command->registerId = 0x42;
+    command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfAppendPacket(list, packet);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -404,15 +437,16 @@ void func_00108CB8(s32 mode) {
     }
 }
 
-void evtSubmitTexturePacket(s32 value) {
-    void *list = sdfAllocPacketAligned(0x20);
+/* Submit ALPHA_1 = (Cs - Cd) * FIX / 128 + Cd; retain the native unmasked FIX input. */
+void evtSubmitTexturePacket(s32 fixedAlpha) {
+    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
-    command->data = ((u64)value << 32) | 0x64;
-    command->registerId = 0x42;
+    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
+    command->data = ((u64)fixedAlpha << 32) | EVT_FIXED_ALPHA_INTERPOLATION;
+    command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfAppendPacket(list, packet);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -429,12 +463,12 @@ extern void func_002D4C80(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
 void func_00108E60(void) {
-    void *list = sdfAllocPacketAligned(0x20);
-    void *texture;
+    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *framePacket;
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
-    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
-    sdfAppendDmaTagToList(list, texture);
+    framePacket = sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
+    sdfAppendDmaTagToList(list, framePacket);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
@@ -444,12 +478,12 @@ void func_00108E60(void) {
 extern void func_002D4CC8(const void *, void *, s32);
 
 void func_00108F00(void) {
-    void *list = sdfAllocPacketAligned(0x20);
-    void *texture;
+    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *framePacket;
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
-    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
-    sdfAppendDmaTagToList(list, texture);
+    framePacket = sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
+    sdfAppendDmaTagToList(list, framePacket);
     {
         EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->submit(surface, list);
@@ -458,10 +492,13 @@ void func_00108F00(void) {
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108FA0);
 
+/* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109108);
 
-void func_001093B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7) {
-    func_00109108(a0, a1, a2, a3, 0xFFFFFF, a4, a5, a6, a7);
+/* Submit the four-corner gradient rectangle with the native default depth.
+   The inserted 0xFFFFFF is depth, not a white color. */
+void func_001093B8(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor) {
+    func_00109108(x, y, width, height, EVT_QUAD_DEFAULT_DEPTH, topLeftColor, topRightColor, bottomRightColor, bottomLeftColor);
 }
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001093F8);
@@ -488,22 +525,23 @@ extern void *func_002E21A0(EvtQuadDesc *);
 extern void func_002DA438(void *, u32);
 extern void sdfQueueAssetRelease(void *);
 
+/* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
 void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
     EvtQuadDesc desc;
-    DrawVec4 verts[4];
-    s32 indices[4];
+    DrawVec4 verts[EVT_QUAD_VERTEX_COUNT];
+    s32 indices[EVT_QUAD_VERTEX_COUNT];
     u64 strip[2];
     void *list;
     EvtDrawSurface *surface;
 
-    list = sdfAllocPacketAligned(0x20);
+    list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
     sdfConsAppendAssetPacket(list, D_003BD6B0, 0);
-    memset(&desc, 0, 0x2C);
+    memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
     desc.kind = 2;
-    desc.count = 4;
+    desc.count = EVT_QUAD_VERTEX_COUNT;
     desc.verts = &verts[0].x;
     desc.indices = indices;
     desc.strip = strip;
@@ -529,10 +567,11 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     surface->submit(surface, list);
 }
 
+/* Submit the same native vertex permutation with rectangular UVs, then queue asset release. */
 void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
     EvtQuadDesc desc;
     f32 verts[16];
-    s32 indices[4];
+    s32 indices[EVT_QUAD_VERTEX_COUNT];
     u64 strip[2];
     f32 uvs[8];
     void *asset;
@@ -541,14 +580,14 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
 
     asset = sdfCreateAssetWithDrawEntries();
     func_002DA438(asset, bits);
-    list = sdfAllocPacketAligned(0x20);
+    list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
     sdfConsAppendAssetPacket(list, asset, 0);
-    memset(&desc, 0, 0x2C);
+    memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
     desc.kind = 2;
-    desc.count = 4;
+    desc.count = EVT_QUAD_VERTEX_COUNT;
     desc.verts = verts;
     desc.indices = indices;
     desc.strip = strip;
@@ -610,7 +649,7 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
 }
 
 void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
-    u8 pkt[16];
+    u8 sifParameters[16];
     void *list;
     void *packet;
     EvtDrawSurface *surface;
@@ -618,8 +657,8 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     packet = sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
     sdfAppendPacket(list, packet);
-    sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
-    sdfAppendPacket(list, sdfFormatSifPacket(pkt, drawArg));
+    sdfPktInit(sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
+    sdfAppendPacket(list, sdfFormatSifPacket(sifParameters, drawArg));
     surface = (EvtDrawSurface *)kwlnPositionedTextSurface;
     surface->submit(surface, list);
 }
@@ -644,23 +683,24 @@ typedef struct EvtSelState {
     s32 count;
 } EvtSelState;
 
-s32 evtSelStateCreate(s32 limit, s16 frames, s32 value08, s32 value0C) {
-    EvtSelState *node;
+/* Zero frames leaves the prior state untouched; zero countLimit selects the -1 sentinel. */
+s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue) {
+    EvtSelState *selectionState;
     if (frames == 0) {
         return 0;
     }
     if (evtSelectionStateActive != 0) {
         evtSelStateDestroy();
     }
-    node = sdfAllocAndClearQuadwords(0x28);
-    evtSelectionState = node;
-    if (limit == 0) {
-        node->limit = -1;
+    selectionState = sdfAllocAndClearQuadwords(EVT_SELECTION_ALLOCATION_BYTES);
+    evtSelectionState = selectionState;
+    if (countLimit == 0) {
+        selectionState->limit = -1;
     } else {
-        node->limit = limit;
+        selectionState->limit = countLimit;
     }
-    ((EvtSelState *)evtSelectionState)->unk_08 = value08;
-    ((EvtSelState *)evtSelectionState)->unk_0C = value0C;
+    ((EvtSelState *)evtSelectionState)->unk_08 = firstValue;
+    ((EvtSelState *)evtSelectionState)->unk_0C = secondValue;
     ((EvtSelState *)evtSelectionState)->unk_10 = frames;
     ((EvtSelState *)evtSelectionState)->unk_12 = frames;
     ((EvtSelState *)evtSelectionState)->unk_14 = frames;
@@ -668,13 +708,14 @@ s32 evtSelStateCreate(s32 limit, s16 frames, s32 value08, s32 value0C) {
     return 1;
 }
 
+/* Return zero only when inactive on entry; updating or destroying active state returns one. */
 u32 evtCheckSelectionState(void) {
-    EvtSelState *sel;
+    EvtSelState *selectionState;
     if (evtSelectionStateActive == 0) {
         return 0;
     }
-    sel = evtSelectionState;
-    if (sel->limit > sel->count || sel->limit == -1) {
+    selectionState = evtSelectionState;
+    if (selectionState->limit > selectionState->count || selectionState->limit == -1) {
         func_00109D20();
     } else {
         evtSelStateDestroy();
@@ -848,23 +889,23 @@ u32 func_0010A4A0(void) {
 }
 
 /* Source zero takes an explicit value; source one uses the pending event mode. */
-void evtDispatchSelectionValue(s32 source, s32 *params) {
-    s32 selection = 0;
+void evtDispatchSelectionValue(s32 valueSource, s32 *selectionParams) {
+    s32 eventSelection = 0;
 
     D_003BA730 = 0;
-    switch (source) {
+    switch (valueSource) {
     case 0:
-        selection = params[0];
+        eventSelection = selectionParams[0];
         break;
     case 1:
-        selection = evtPendingEventSelection;
+        eventSelection = evtPendingEventSelection;
         break;
     }
-    if (selection <= 0) {
+    if (eventSelection <= 0) {
         return;
     }
     evtCreateSkyTask();
-    evtCreateEventScriptProcess(selection);
+    evtCreateEventScriptProcess(eventSelection);
 }
 
 u32 evtCloseSkyEventTask(void) {
@@ -949,13 +990,14 @@ u8 evtWaitConfigTaskDone(void) {
     return taskResult == 0;
 }
 
-void evtDispatchSelectionCommand(s32 source, s32 *params) {
-    if (source == 0) {
-        if (params == NULL) {
+/* Source zero forwards an optional parameter pair; other sources resume deferred field work. */
+void evtDispatchSelectionCommand(s32 commandSource, s32 *commandParams) {
+    if (commandSource == 0) {
+        if (commandParams == NULL) {
             func_001A11F0(1, 0, 0);
         }
         else {
-            func_001A11F0(0, params[0], params[1]);
+            func_001A11F0(0, commandParams[0], commandParams[1]);
         }
     }
     else {
@@ -964,6 +1006,7 @@ void evtDispatchSelectionCommand(s32 source, s32 *params) {
     }
 }
 
+/* Check battle shutdown; the callee exits only after audio and task work become idle. */
 void func_0010A6E0(void) {
     btlExitWhenAudioAndTasksIdle();
 }
@@ -983,6 +1026,7 @@ void evtCreateBattleStageTestTask(void) {
     btlCreateStageTestTask();
 }
 
+/* Stop the battle-stage test task and return the scene callback's native zero status. */
 u32 func_0010A760(void) {
     evtBattleStageTestStopTask();
     return 0;
@@ -1225,14 +1269,14 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA958);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", evtConsoleFontResourceChain);
 
-void evtPrintDeveloperConsoleMessage(const char *fmt, ...) {
-    char buffer[0x200];
-    __builtin_va_list args;
+void evtPrintDeveloperConsoleMessage(const char *format, ...) {
+    char messageBuffer[EVT_DEV_CONSOLE_BUFFER_BYTES];
+    __builtin_va_list formatArgs;
 
-    __builtin_stdarg_start(args, fmt);
+    __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
-        func_00305B08(buffer, fmt, args);
-        sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", buffer);
+        func_00305B08(messageBuffer, format, formatArgs);
+        sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }
 
@@ -1275,28 +1319,31 @@ extern u32 D_003BA97C;
 extern char D_003BA980[];
 extern char D_003BA988[];
 
-void evtDrawHeapUsageOverlay(void *owner) {
-    s32 general[6];
-    SdfChipStats chip;
-    char text[100];
-    void *list;
-    EvtDrawSurface *surface = owner;
+/* Format general/chip free-memory statistics into the supplied draw surface.
+   Keep the native heap-ratio coordinate calculation and title-specific initial packet. */
+void evtDrawHeapUsageOverlay(void *surfaceAddress) {
+    s32 generalHeapStats[6];
+    SdfChipStats chipHeapStats;
+    char statusText[100];
+    void *packetList;
+    EvtDrawSurface *surface = surfaceAddress;
 
-    sdfGetGeneralHeapStats(general);
-    D_003BA97C = general[0];
-    sdfGetChipHeapStats(&chip);
-    list = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    func_0010B1B0(list, 0x86C0, 0x79C0);
-    func_003014F0(text, D_003BA980, general[1]);
-    sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x86C0,
-        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, text));
-    func_003014F0(text, D_003BA988, chip.freeBytes);
-    sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x86C0,
-        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, text));
-    surface->submit(surface, list);
+    sdfGetGeneralHeapStats(generalHeapStats);
+    D_003BA97C = generalHeapStats[0];
+    sdfGetChipHeapStats(&chipHeapStats);
+    packetList = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    sdfInitPacketList(packetList);
+    func_0010B1B0(packetList, 0x86C0, 0x79C0);
+    func_003014F0(statusText, D_003BA980, generalHeapStats[1]);
+    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x86C0,
+        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText));
+    func_003014F0(statusText, D_003BA988, chipHeapStats.freeBytes);
+    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x86C0,
+        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText));
+    surface->submit(surface, packetList);
 }
 
+/* Draw the overlay only when the control byte is zero; return zero in either case. */
 s32 func_0010B558(void) {
     if (D_0032453B[0] != 0) {
         return 0;
@@ -1379,6 +1426,8 @@ typedef struct BfFlw0Header {
 extern s32 bfContextCreate(s32 header, s32 sectionTable, s32 procedures, s32 labels,
                            s32 instructions, s32 auxiliaryData, s32 strings, s32 procedureIndex);
 
+/* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
+   Zero-count auxiliary sections are ignored, and absent sections remain null. */
 s32 bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
     BfFlw0Section *sections;
     s32 procedures = 0;
@@ -1389,26 +1438,26 @@ s32 bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
     s32 i;
 
     sections = header->sections;
-    if (header->magic != 0x30574C46) {
+    if (header->magic != BF_FLW0_MAGIC) {
         return 0;
     }
     for (i = 0; i < header->sectionCount; i++) {
         switch (sections[i].type) {
-            case 0:
+            case BF_FLW0_SECTION_PROCEDURES:
                 procedures = (s32)((u8 *)header + sections[i].offset);
                 break;
-            case 1:
+            case BF_FLW0_SECTION_LABELS:
                 labels = (s32)((u8 *)header + sections[i].offset);
                 break;
-            case 2:
+            case BF_FLW0_SECTION_INSTRUCTIONS:
                 instructions = (s32)((u8 *)header + sections[i].offset);
                 break;
-            case 3:
+            case BF_FLW0_SECTION_AUXILIARY:
                 if (sections[i].count != 0) {
                     auxiliaryData = (s32)((u8 *)header + sections[i].offset);
                 }
                 break;
-            case 4:
+            case BF_FLW0_SECTION_STRINGS:
                 strings = (s32)((u8 *)header + sections[i].offset);
                 break;
             default:
