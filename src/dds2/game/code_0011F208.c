@@ -312,7 +312,75 @@ extern u8 D_003807F8[];
 
 extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-extern s32 fldAreaState[];
+/* Native field-area work prefix, shared with the camera/motion unit.
+ * Position is XYZ followed immediately by saved XYZ history, not a Vec4.
+ * DDS2 inserts twelve bytes before the model variant and position/history tail. */
+typedef struct FldAreaWork {
+    u8 pad00[4];
+    char *fallbackResourceName; /* Last choice after override and saved scene names. */
+    u8 pad08[4];
+    s32 consumedFlags; /* Consumption markers, separate from game-state work flags. */
+    s32 area;
+    s32 floor; /* Zero-based; coordinate lookups use floor + 1. */
+    u8 pad18[8];
+    s32 unk20; /* Sequence initializers set this when reusing the current area. */
+    u8 pad24[0x2C];
+    s32 mode;
+    u8 pad54[4];
+    s32 rowIdx;
+    u8 pad5C[8];
+    f32 negatedAngle;
+    u8 pad68[4];
+    f32 dist;
+    s32 sceneMode;
+    s32 sceneState;
+    u8 pad78[0xC];
+    s32 positionPending;
+    u8 pad88[8];
+    s32 unk90;
+    s32 unk94;
+    u8 pad98[0x28];
+    s32 unkC0;
+    u8 padC4[0x24];
+    s32 unkE8;
+    u8 padEC[4];
+    s32 nextArea;
+    s32 nextFloor; /* Both queued values at -1 mean no request. */
+    u8 padF8[8];
+    s32 unk100; /* Consumed before pending-resource selection. */
+    u8 pad104[0x14];
+    s32 unk118;
+    u8 pad11C[0xC];
+    s16 sceneCommand;
+    u8 pad12A[2];
+    s32 commandEnabled;
+    u8 pad130[0x18];
+    s32 playerModelVariant; /* Cached 0/1 player variant, or 2 for the location override. */
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 previousX; /* History starts here, not a homogeneous position W. */
+    f32 previousY;
+    f32 previousZ;
+    f32 targetX; /* XYZ installed when positionPending is consumed. */
+    f32 targetY;
+    f32 targetZ;
+    f32 angle; /* Current player heading in degrees. */
+    f32 targetAngle; /* Desired heading for the motion-unit updater. */
+    f32 unk178;
+    f32 unk17C;
+    f32 unk180;
+    s32 positionMode;
+    s32 unk188;
+    s32 verticalStepDirection; /* Positive lowers Y; negative raises it. */
+    s32 unk190;
+    u32 pointState;
+    f32 facingPointX;
+    f32 facingPointZ;
+    u32 angleState;
+    f32 overrideAngle;
+} FldAreaWork;
+extern FldAreaWork fldAreaState;
 
 typedef struct FldEncEntry {
     s16 stage;
@@ -1606,10 +1674,12 @@ void fldResetPlayerSceneTransformState(void) {
     *fldGetPlayerSceneStateAddress() = 0;
 }
 
+/* Fill a sequence packet for stage/kind/name, then clear the temporary override.
+ * Unspecified packet bytes deliberately retain their previous contents. */
 void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
-        if (fldAreaState[4] == stage) {
-            fldAreaState[8] = 1;
+        if (fldAreaState.area == stage) {
+            fldAreaState.unk20 = 1;
         } else {
             dds3WorkClear();
         }
@@ -1632,10 +1702,12 @@ void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, 
     D_00387D60[0] = 0;
 }
 
+/* Fill the alternate-mode sequence packet for stage/kind/name.
+ * Reuse a running sequence in the same area; otherwise request a work clear. */
 void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
-        if (fldAreaState[4] == stage) {
-            fldAreaState[8] = 1;
+        if (fldAreaState.area == stage) {
+            fldAreaState.unk20 = 1;
         } else {
             dds3WorkClear();
         }
@@ -1656,11 +1728,13 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
     record->options = 0;
 }
 
+/* Fill a field sequence packet, including its narrowed code, link and detail name.
+ * A running sequence in the same area requests reuse rather than a work clear. */
 void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                    s32 code, s32 link, const char *subname) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
-        if (fldAreaState[4] == stage) {
-            fldAreaState[8] = 1;
+        if (fldAreaState.area == stage) {
+            fldAreaState.unk20 = 1;
         } else {
             dds3WorkClear();
         }
@@ -1682,11 +1756,13 @@ void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s3
 }
 
 
+/* Fill a sequence packet with a narrowed code and note instead of a detail/link.
+ * A running sequence in the same area requests reuse rather than a work clear. */
 void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, const char *subname) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
-        if (fldAreaState[4] == stage) {
-            fldAreaState[8] = 1;
+        if (fldAreaState.area == stage) {
+            fldAreaState.unk20 = 1;
         } else {
             dds3WorkClear();
         }
@@ -1833,6 +1909,8 @@ u32 fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
+/* Raise the scene-state minima, clear pending slots and aim ten units above
+ * the fetched player position. Existing larger mode/state values are retained. */
 void fldPreparePlayerSceneCameraTarget(void) {
     f32 position[4];
 
@@ -1840,15 +1918,15 @@ void fldPreparePlayerSceneCameraTarget(void) {
         fldSetSceneControlFlags(0x40);
         dds3InvokeSlot1Handler(fldPlayerObject, func_001266D8);
     }
-    fldAreaState[0x3A] = 4;
-    if (fldAreaState[0x1C] < 4) {
-        fldAreaState[0x1C] = 4;
+    fldAreaState.unkE8 = 4;
+    if (fldAreaState.sceneMode < 4) {
+        fldAreaState.sceneMode = 4;
     }
-    if (fldAreaState[0x1D] < 5) {
-        fldAreaState[0x1D] = 5;
+    if (fldAreaState.sceneState < 5) {
+        fldAreaState.sceneState = 5;
     }
-    fldAreaState[0x24] = -1;
-    fldAreaState[0x25] = -1;
+    fldAreaState.unk90 = -1;
+    fldAreaState.unk94 = -1;
     fldUpdateCameraTarget();
     effObjFetchInnerFirstVec(fldPlayerObject);
     VU0_STORE_VF(vf10, position);
@@ -1941,7 +2019,7 @@ u32 func_001266E0(void) {
 void fldConsumeSceneCommandFlag(void) {
     if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
         fldClearSceneCommandFlag();
-        fldAreaState[3] |= 1;
+        fldAreaState.consumedFlags |= 1;
     }
 }
 
@@ -1950,7 +2028,7 @@ extern void evtClearSolarOverlayControl(void);
 
 void fldClearSceneCommandFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags &= ~8;
-    fldAreaState[3] &= ~1;
+    fldAreaState.consumedFlags &= ~1;
     mdlFlagClear(0x818);
     evtClearSolarOverlayControl();
 }
@@ -1961,15 +2039,15 @@ extern void func_001360B8(s16, s32);
 
 void fldActivatePendingSceneCommand(void) {
     u32 value;
-    if (fldAreaState[0x4B] != 0) {
+    if (fldAreaState.commandEnabled != 0) {
         if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) == 0) {
             fldPlayMenuSound(0x29);
         }
         mdlFlagSet(0x818);
         value = func_001266E0();
-        ((s16 *)fldAreaState)[0x94] = value;
+        fldAreaState.sceneCommand = value;
         ((FldWorkFlags *)datGameState)->fieldFlags |= 8;
-        fldAreaState[3] &= ~1;
+        fldAreaState.consumedFlags &= ~1;
         func_001360B8(value, 0);
     }
 }
@@ -1985,40 +2063,25 @@ s32 fldGetSceneCommandState(void) {
     return -1;
 }
 
-typedef struct FldSceneState {
-    u8 pad00[0xC];
-    s32 flags;               /* 0x0C */
-    s32 area;
-    s32 floor;
-    u8 pad18[0x58];
-    s32 sceneMode;
-    s32 sceneState;
-    u8 pad78[0x48];
-    s32 unkC0;
-    u8 padC4[0x64];
-    s16 speed;               /* 0x128 */
-    u8 pad12A[2];
-    s32 commandActive;       /* 0x12C */
-    u8 pad130[0x1C];
-    FieldVec4 position;
-} FldSceneState;
 
+/* Latch the scene command while enabled and flagged; stop it when either gate
+ * clears. Disable passes transition parameter 0; flag removal passes 20. */
 void fldUpdateSceneCommandSpeed(void) {
-    FldSceneState *scene = (FldSceneState *)fldAreaState;
+    FldAreaWork *scene = &fldAreaState;
     u32 value;
-    if (scene->commandActive == 0) {
-        if (scene->speed != 0) {
-            scene->speed = 0;
+    if (scene->commandEnabled == 0) {
+        if (scene->sceneCommand != 0) {
+            scene->sceneCommand = 0;
             func_001360B8(0, 0);
         }
     } else if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
-        if (scene->speed == 0) {
+        if (scene->sceneCommand == 0) {
             value = func_001266E0();
-            scene->speed = value;
+            scene->sceneCommand = value;
             func_001360B8(value, 0x14);
         }
-    } else if (scene->speed != 0) {
-        scene->speed = 0;
+    } else if (scene->sceneCommand != 0) {
+        scene->sceneCommand = 0;
         func_001360B8(0, 0x14);
         fldPlayMenuSound(0x2A);
         mdlFlagClear(0x818);
@@ -2041,7 +2104,7 @@ enum {
 void fldConsumeFieldTransitionFlag(void) {
     if ((((FldWorkFlags *)datGameState)->fieldFlags & FIELD_TRANSITION_WORK_FLAG) != 0) {
         fldClearFieldTransitionFlag();
-        fldAreaState[3] |= FIELD_TRANSITION_CONSUMED_FLAG;
+        fldAreaState.consumedFlags |= FIELD_TRANSITION_CONSUMED_FLAG;
     }
 }
 
@@ -2050,7 +2113,7 @@ extern void func_00243320(void);
 /* Clear the transition work flag and its area-state consumption marker. */
 void fldClearFieldTransitionFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags &= ~FIELD_TRANSITION_WORK_FLAG;
-    fldAreaState[3] &= ~FIELD_TRANSITION_CONSUMED_FLAG;
+    fldAreaState.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
     func_00243320();
 }
 
@@ -2058,7 +2121,7 @@ void fldClearFieldTransitionFlag(void) {
 /* Set the transition work flag and reset its area-state consumption marker. */
 void fldSetFieldTransitionFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags |= FIELD_TRANSITION_WORK_FLAG;
-    fldAreaState[3] &= ~FIELD_TRANSITION_CONSUMED_FLAG;
+    fldAreaState.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
 }
 
 /* Return whether the transition work flag is set. */
@@ -2072,20 +2135,20 @@ u8 fldTestFieldTransitionFlag(void) {
 void fldConsumeSecondarySceneFlag(void) {
     if ((((FldWorkFlags *)datGameState)->fieldFlags & FIELD_SECONDARY_SCENE_WORK_FLAG) != 0) {
         fldClearSecondarySceneFlag();
-        fldAreaState[3] |= FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
+        fldAreaState.consumedFlags |= FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
     }
 }
 
 /* Clear the secondary-scene work flag and its consumption marker. */
 void fldClearSecondarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags &= ~FIELD_SECONDARY_SCENE_WORK_FLAG;
-    fldAreaState[3] &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
+    fldAreaState.consumedFlags &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Select secondary rather than primary, resetting secondary's consume marker. */
 void fldSetSecondarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | FIELD_SECONDARY_SCENE_WORK_FLAG) & ~FIELD_PRIMARY_SCENE_WORK_FLAG;
-    fldAreaState[3] &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
+    fldAreaState.consumedFlags &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Return whether the secondary-scene work flag is set. */
@@ -2099,20 +2162,20 @@ u8 fldTestSecondarySceneFlag(void) {
 void fldConsumePrimarySceneFlag(void) {
     if ((((FldWorkFlags *)datGameState)->fieldFlags & FIELD_PRIMARY_SCENE_WORK_FLAG) != 0) {
         fldClearPrimarySceneFlag();
-        fldAreaState[3] |= FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
+        fldAreaState.consumedFlags |= FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
     }
 }
 
 /* Clear the primary-scene work flag and its area-state consumption marker. */
 void fldClearPrimarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags &= ~FIELD_PRIMARY_SCENE_WORK_FLAG;
-    fldAreaState[3] &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
+    fldAreaState.consumedFlags &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Select primary rather than secondary, resetting primary's consume marker. */
 void fldSetPrimarySceneFlag(void) {
     ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | FIELD_PRIMARY_SCENE_WORK_FLAG) & ~FIELD_SECONDARY_SCENE_WORK_FLAG;
-    fldAreaState[3] &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
+    fldAreaState.consumedFlags &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Return whether the primary-scene work flag is set. */
@@ -2140,7 +2203,7 @@ s16 fldRollEncounter(void) {
     s32 eligible;
 
     for (encounterIndex = 0; encounterIndex < FIELD_ENCOUNTER_ROLL_ENTRY_COUNT; encounterIndex++) {
-        if (fldEncounterRollTable[encounterIndex].stage == fldAreaState[4]) {
+        if (fldEncounterRollTable[encounterIndex].stage == fldAreaState.area) {
             eligible = 1;
             if (fldEncounterRollTable[encounterIndex].flag != -1) {
                 eligible = mdlFlagTest(fldEncounterRollTable[encounterIndex].flag) != 0;
@@ -2157,6 +2220,8 @@ s16 fldRollEncounter(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126C80);
 
+/* Queue the current area and next floor, reset the scene lifecycle, and return -1.
+ * The pending pair is consumed later with a 200-entry offset on the area value. */
 s32 fldAdvanceToNextScene(void) {
     u32 scene;
     u32 area;
@@ -2164,10 +2229,10 @@ s32 fldAdvanceToNextScene(void) {
     fldResetEventSceneState();
     D_00435F98[0] = 0;
     D_00435F98[1] = func_00151498();
-    scene = fldAreaState[5];
-    area = fldAreaState[4];
-    fldAreaState[0x3C] = area;
-    fldAreaState[0x3D] = scene + 1;
+    scene = fldAreaState.floor;
+    area = fldAreaState.area;
+    fldAreaState.nextArea = area;
+    fldAreaState.nextFloor = scene + 1;
     fldResetTaskSlots();
     fldSetSceneLifecycleFlags(1);
     fldSetSceneLifecycleFlags(2);
@@ -2222,7 +2287,7 @@ extern void func_00123B88(s32, s32, f32, f32, f32);
  * transition or its delayed fade path. All return paths retain zero. */
 s32 fldUpdateNextFloorTransition(void) {
     s32 transitionInput = 0;
-    FldSceneState *scene;
+    FldAreaWork *scene;
 
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
@@ -2234,7 +2299,7 @@ s32 fldUpdateNextFloorTransition(void) {
     } else if ((s8)D_0037F530[2] < 0) {
         transitionInput = 1;
     }
-    scene = (FldSceneState *)fldAreaState;
+    scene = &fldAreaState;
     if (fldFindLocationCoordinateRecord(scene->area, scene->floor + 1)[2] <= 0) {
         if (scene->sceneMode == 0) {
             if (fldTestSceneControlFlags(0x40) != 0 && transitionInput != 0) {
@@ -2257,7 +2322,7 @@ s32 fldUpdateNextFloorTransition(void) {
         if (fldGetSceneReadyOrPendingState() != 0) {
             return 0;
         }
-        func_00123B88(scene->floor, scene->unkC0, scene->position.x, scene->position.z, 50.0f);
+        func_00123B88(scene->floor, scene->unkC0, scene->x, scene->z, 50.0f);
         if (scene->sceneMode == 0) {
             if (fldHasPendingSceneFlags() != 0) {
                 return 0;
@@ -2282,10 +2347,10 @@ s32 fldDispatchPendingSceneResource(void) {
     FieldPlayerSceneWork *sceneWork = &D_0038A640;
     u32 overrideFlags;
 
-    if (fldAreaState[64] == 1) {
+    if (fldAreaState.unk100 == 1) {
         func_00150800();
     }
-    fldAreaState[64] = 0;
+    fldAreaState.unk100 = 0;
     if ((D_00435F24 & 2) && *(s8 *)D_00387D60 != 0) {
         evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), D_00387D60);
         overrideFlags = D_00435F24;
@@ -2299,8 +2364,8 @@ s32 fldDispatchPendingSceneResource(void) {
         evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), sceneWork->resourceName);
         return 1;
     }
-    if (fldAreaState[1] != 0) {
-        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), (void *)fldAreaState[1]);
+    if (fldAreaState.fallbackResourceName != 0) {
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), fldAreaState.fallbackResourceName);
         return 1;
     }
     return 0;
@@ -2439,13 +2504,13 @@ void fldRunPendingSceneAction(void) {
 /* Consume the pending pair of field-script values. -1 in both slots means
  * no request; the first value is returned with its 200-entry base offset. */
 s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
-    if (fldAreaState[0x3C] == -1 && fldAreaState[0x3D] == fldAreaState[0x3C]) {
+    if (fldAreaState.nextArea == -1 && fldAreaState.nextFloor == fldAreaState.nextArea) {
         return 0;
     }
-    *outCode = fldAreaState[0x3C] + 0xC8;
-    *outParameter = fldAreaState[0x3D];
-    fldAreaState[0x3C] = -1;
-    fldAreaState[0x3D] = -1;
+    *outCode = fldAreaState.nextArea + 0xC8;
+    *outParameter = fldAreaState.nextFloor;
+    fldAreaState.nextArea = -1;
+    fldAreaState.nextFloor = -1;
     return 1;
 }
 
