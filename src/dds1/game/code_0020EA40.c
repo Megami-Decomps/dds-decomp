@@ -6,7 +6,7 @@
 
 extern u32 btlGetIndexListCount();
 
-extern void btlBossDebugPrintf();
+extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 datActionAnimationRecords;
 

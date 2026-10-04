@@ -3,6 +3,8 @@
 #include "btl_ui.h"
 #include "sdf.h"
 
+extern void btlBossDebugPrintf(const char *format, ...);
+
 typedef struct ActorEntrySlot {
     s16 code;
     s16 unk02;
@@ -110,7 +112,11 @@ typedef struct EntryPair {
 extern EntryPair D_003583D0[];
 
 typedef struct BtlSlotRecord {
-    u8 pad_00[0x84];
+    u8 pad00[0xC];
+    s32 unk0C;
+    u8 pad10[0x6C];
+    s32 unk7C;
+    u8 pad80[4];
     u32 word[7];
 } BtlSlotRecord;
 
@@ -2376,9 +2382,9 @@ typedef struct BtlResBlock {
     s32 nameA;
     s32 nameB;
     s32 nameC;
-    s32 resA;
-    s32 resB;
-    s32 resC;
+    BtlSlotOwner *resA;
+    BtlSlotOwner *resB;
+    BtlSlotOwner *resC;
     s32 unk1C;
 } BtlResBlock;
 
@@ -2422,12 +2428,12 @@ void btlPanelResourcesLoad(void) {
 
 typedef struct BtlWorkRes {
     u8 pad[0x4A4];
-    s32 resA;
-    s32 resB;
-    s32 resC;
+    BtlSlotOwner *resA;
+    BtlSlotOwner *resB;
+    BtlSlotOwner *resC;
 } BtlWorkRes;
 
-extern s32 func_002BD9C0();
+extern BtlSlotOwner *func_002BD9C0();
 
 void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
@@ -2845,7 +2851,16 @@ typedef struct MsgQueueTaskData {
     s32 unk08;
     s32 counter;
     s32 value;
+    s16 fade;
 } MsgQueueTaskData;
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+
+extern const BattlePanelColors D_003A2A90;
+extern s32 itfMesMeasureEntryItem(s32, s32, s32);
+extern void itfMesBlk24MoveTo(s32, s32, s32);
 
 extern s32 func_001B4A70(s64);
 
@@ -3070,10 +3085,10 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
 
     for (strip = strips, i = 0; i < 3; i++, strip++) {
         for (j = 0; j < 4; j++) {
-            colors[j] = btlSetSlotLowByteClamped((BtlSlotOwner *)btlResourceBlock->resA, strip->texture, j, delta);
+            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA, strip->texture, j, delta);
         }
         func_002BF438((x + strip->x) << 4, (y + strip->y) << 3,
-                     0, colors, 0, (BtlSlotOwner *)btlResourceBlock->resA, strip->texture, 0x53);
+                     0, colors, 0, btlResourceBlock->resA, strip->texture, 0x53);
     }
 }
 
@@ -3358,7 +3373,48 @@ void btlToggleModelFlagOnInput(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B4A70);
+s32 func_001B4A70(s64 task) {
+    BattlePanelColors colors = D_003A2A90;
+    MsgQueueTaskData *data;
+    s32 expired;
+    s32 width;
+    s32 half;
+    s32 i;
+
+    if (btlGetTrackedTaskHandle(0) == 0) {
+        return 0;
+    }
+    data = (MsgQueueTaskData *)kwlnTaskGetUserValue(task);
+    if (data->counter++ < data->value) {
+        expired = 0;
+    } else {
+        expired = 1;
+    }
+    width = itfMesMeasureEntryItem(data->id, data->unk08, 0);
+    data->fade = 0x80;
+    for (i = 0; i < 4; i++) {
+        colors.values[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x15, i, data->fade);
+    }
+    half = width / 32;
+    func_002BF438(((width >> 4) - half + 0x105) << 4, 0x200, 0,
+                  colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
+    btlResourceBlock->resC->records[0x16].unk0C = (width >> 4) << 4;
+    func_002BF438((0x100 - half) << 4, 0x200, 0,
+                  colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
+    btlResourceBlock->resC->records[0x16].unk0C =
+        btlResourceBlock->resC->records[0x16].unk7C << 4;
+    func_002BF438((0x92 - half) << 4, 0x200, 0,
+                  colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
+    if (expired) {
+        return -1;
+    }
+    itfMesBlk24MoveTo(data->id, (0x100 - (width >> 5)) << 4, 0x220);
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    itfMesStartEntry(data->id, data->unk08, 0);
+    return 0;
+}
 
 void btlReleaseDialogTaskData(s64 task) {
     s32 *entry;
@@ -4212,22 +4268,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001C08B8);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C0DF8);
 
-typedef struct BtlPanelInner {
-    u8 pad00[0xDCC];
-    s32 fDCC;
-    u8 padDD0[0x6C];
-    s32 fE3C;
-} BtlPanelInner;
-
-typedef struct BtlPanelRes {
-    u8 pad00[0x18];
-    BtlPanelInner *inner;
-} BtlPanelRes;
-
-typedef struct BtlPanelBlock {
-    u8 pad00[0x18];
-    BtlPanelRes *res;
-} BtlPanelBlock;
 
 void btlDrawCenteredPanelSegments(s32 width) {
     u8 color[16] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
@@ -4235,14 +4275,14 @@ void btlDrawCenteredPanelSegments(s32 width) {
     s32 half = width / 2;
     s32 x = width - half + 0x105;
     func_002BF438(x * 0x10, 0x200, 0, (u32 *)color, 0,
-                  (BtlSlotOwner *)((BtlPanelBlock *)btlResourceBlock)->res, 0x17, 0x53);
-    ((BtlPanelBlock *)btlResourceBlock)->res->inner->fDCC = width << 4;
+                  btlResourceBlock->resC, 0x17, 0x53);
+    btlResourceBlock->resC->records[0x16].unk0C = width << 4;
     func_002BF438((0x100 - half) * 0x10, 0x200, 0, (u32 *)color, 0,
-                  (BtlSlotOwner *)((BtlPanelBlock *)btlResourceBlock)->res, 0x16, 0x53);
-    ((BtlPanelBlock *)btlResourceBlock)->res->inner->fDCC =
-        ((BtlPanelBlock *)btlResourceBlock)->res->inner->fE3C << 4;
+                  btlResourceBlock->resC, 0x16, 0x53);
+    btlResourceBlock->resC->records[0x16].unk0C =
+        btlResourceBlock->resC->records[0x16].unk7C << 4;
     func_002BF438((0x92 - half) * 0x10, 0x200, 0, (u32 *)color, 0,
-                  (BtlSlotOwner *)((BtlPanelBlock *)btlResourceBlock)->res, 0x15, 0x53);
+                  btlResourceBlock->resC, 0x15, 0x53);
 }
 
 s32 fldStepSceneStateMachine(s64 handle) {

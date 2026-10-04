@@ -109,7 +109,7 @@ extern s32 D_00438F6C;
 
 extern s32 sdfReadNamedResource(s32, u32 *, s32);
 
-extern void btlBossDebugPrintf(s32, ...);
+extern void btlBossDebugPrintf(const char *format, ...);
 
 extern void btlCmdSimpleB(s32, u16);
 
@@ -1086,7 +1086,7 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
 }
 
 void btlOpenButtonIconResource(void) {
-    btlBossDebugPrintf((s32)"btl:[%s]\n", D_00436AF0);
+    btlBossDebugPrintf("btl:[%s]\n", D_00436AF0);
     D_00438F6C = sdfReadNamedResource(D_00436AF0, &btlButtonIconTexture, 0);
 }
 
@@ -2594,7 +2594,8 @@ void func_0020D118(void) {
 void func_0020D120(void) {
 }
 
-void btlBossDebugPrintf(s32 format, ...) {
+/* Retail discards debug output but retains the format-string/varargs ABI. */
+void btlBossDebugPrintf(const char *format, ...) {
 }
 
 void btlBossDebugPrintfN(s32 a, s32 b, s32 c, s32 d, ...) {

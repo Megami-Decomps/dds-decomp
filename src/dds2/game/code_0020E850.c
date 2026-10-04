@@ -269,7 +269,7 @@ extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *unit);
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
-extern void btlBossDebugPrintf(s32 format, ...);
+extern void btlBossDebugPrintf(const char *format, ...);
 
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
@@ -311,7 +311,7 @@ void func_0020EC20(BtlUnit *unit) {
             y = screen[1] >> 3;
             if (visible == 1 && !(unit->stateFlags & 0x400000) &&
                 x >= 12 && x < 501 && y >= 48 && y < 324) {
-                btlBossDebugPrintf((s32)"btl:hpmp clip 1shot\n");
+                btlBossDebugPrintf("btl:hpmp clip 1shot\n");
                 VU0_LOAD_VF(vf10, candidate);
                 return;
             }
@@ -330,7 +330,7 @@ void func_0020EC20(BtlUnit *unit) {
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
-                btlBossDebugPrintf((s32)"btl:hpmp clip height 3/4\n");
+                btlBossDebugPrintf("btl:hpmp clip height 3/4\n");
                 VU0_LOAD_VF(vf10, candidate);
                 return;
             }
@@ -341,7 +341,7 @@ void func_0020EC20(BtlUnit *unit) {
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
-            btlBossDebugPrintf((s32)"btl:hpmp clip cylinder center\n");
+            btlBossDebugPrintf("btl:hpmp clip cylinder center\n");
             VU0_LOAD_VF(vf10, candidate);
             return;
         }
@@ -351,7 +351,7 @@ void func_0020EC20(BtlUnit *unit) {
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
-            btlBossDebugPrintf((s32)"btl:hpmp clip cylinder bottom\n");
+            btlBossDebugPrintf("btl:hpmp clip cylinder bottom\n");
             VU0_LOAD_VF(vf10, candidate);
             return;
         }
@@ -363,7 +363,7 @@ void func_0020EC20(BtlUnit *unit) {
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
-            btlBossDebugPrintf((s32)"btl:hpmp clip cylinder top\n");
+            btlBossDebugPrintf("btl:hpmp clip cylinder top\n");
             VU0_LOAD_VF(vf10, candidate);
             return;
         }
