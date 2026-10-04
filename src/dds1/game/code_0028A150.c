@@ -635,8 +635,8 @@ void fileReloadSaveBuffer(void) {
     *(s32 *)(datGameState + 0x30) = saved;
 }
 
-u8 fileIsLoadedAndConditionTrue(s32 loaded) {
-    return loaded != 0 && D_003BC7FC == 1;
+u8 fileIsLoadedAndConditionTrue(s32 condition) {
+    return condition != 0 && D_003BC7FC == 1;
 }
 
 u8 fileIsLoadedWithActiveFlow(s32 loaded) {
@@ -2090,25 +2090,21 @@ void *fileSlotBrowserUpdate(void) {
         }
     }
 
-    if (fileReqPoll() == 0) {
-        goto return_null;
-    }
-    flags = fileReqGetStatus(fileMemoryCardRequestContext);
-    action = D_003BC82C;
-    if (flags == 0) {
-        return fileBeginSlotMetadataRefresh();
-    }
+    if (fileReqPoll() != 0) {
+        flags = fileReqGetStatus(fileMemoryCardRequestContext);
+        action = D_003BC82C;
+        if (flags == 0) {
+            return fileBeginSlotMetadataRefresh();
+        }
 
-    if (action == 0) {
-        fileReqBegin(fileMemoryCardRequestContext);
-        return NULL;
-    }
-    if (action != 1) {
-        goto handle_other_action;
-    }
+        if (action == 0) {
+            fileReqBegin(fileMemoryCardRequestContext);
+            return NULL;
+        }
+        if (action == 1) {
 
-    fileSetMenuFlowState(0);
-    if (D_003BC848 == 0) {
+            fileSetMenuFlowState(0);
+            if (D_003BC848 == 0) {
         fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_003BC844);
         flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_003BC844);
         if (0xB == (flags & 0xB)) {
@@ -2142,27 +2138,27 @@ void *fileSlotBrowserUpdate(void) {
         return filePollSlotScanOrReset;
     }
 
-    fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_003BC844);
-    flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_003BC844);
-    if ((flags & 1) != 0) {
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-        D_003BC834 = 3;
-        return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
-    }
-    sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
-    return fileScanSlotStates();
-
-handle_other_action:
-    if (action == 2) {
-        sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
-        fileResetLoadContextSlide();
-        if (D_003BC824 != 0) {
-            return fileBeginSlotResetPrompt();
+            fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_003BC844);
+            flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_003BC844);
+            if ((flags & 1) != 0) {
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                D_003BC834 = 3;
+                return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
+            }
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            return fileScanSlotStates();
         }
-        return fileResolveAbortSlotFlow();
+
+        if (action == 2) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            fileResetLoadContextSlide();
+            if (D_003BC824 != 0) {
+                return fileBeginSlotResetPrompt();
+            }
+            return fileResolveAbortSlotFlow();
+        }
     }
 
-return_null:
     return NULL;
 }
 
