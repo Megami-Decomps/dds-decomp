@@ -879,6 +879,8 @@ typedef struct BtlCommandRecord {
     u8 unk_2C[0xC];
 } BtlCommandRecord;
 
+/* Reject expired positive or negative codes according to the command's rule.
+ * A returned code value of zero is not rejected; other expiry rules pass. */
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B768);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B780);
@@ -889,8 +891,6 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7D0);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7E0);
 
-/* Reject expired positive or negative codes according to the command's rule.
- * A returned code value of zero is not rejected; other expiry rules pass. */
 s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
     s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
     s32 entryCount = btlGetIndexListCount(indexList);

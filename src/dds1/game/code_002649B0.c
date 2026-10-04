@@ -2,6 +2,7 @@
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002649B0);
 
+
 extern void mnuDrawItemPanelBackdrop(s32);
 extern void func_00263B78(s32, s32);
 

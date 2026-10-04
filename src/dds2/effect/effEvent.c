@@ -153,7 +153,7 @@ extern EffScreenDrawParams effBlurRectangleParameters;
 
 extern EffBlurTemplate *effBlurPixelWork;
 
-extern u32 effGetResourceFirstWord(s32 arg);
+extern s32 effGetResourceFirstWord(s32 index);
 
 extern EffBlurScatterWork *effFilterBlurWork;
 

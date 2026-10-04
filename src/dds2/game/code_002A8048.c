@@ -236,7 +236,7 @@ void mnuCreateMovieViewerTask(void) {
 }
 
 void mnuDestroyMovieViewerTask(void) {
-    s32 movieTask = func_00101740(mnuMovieViewerTaskName);
+    s32 movieTask = kwlnTaskGetTaskByName(mnuMovieViewerTaskName);
     if (movieTask != 0) {
         kwlnTaskDestroyWithHierarchy(movieTask, 0);
         mnuMovieList.task = 0;

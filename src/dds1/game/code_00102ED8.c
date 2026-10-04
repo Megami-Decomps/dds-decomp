@@ -138,7 +138,7 @@ typedef struct KwlnDebugWork {
 
 extern char dds3AdminTaskName[];
 extern void *kwlnTaskGetTaskByName(const char *);
-extern void *func_00102CD8(void *task);
+extern void *dds3AdminPollModeCompletion(void *task);
 extern void dds3AdminReleaseTaskWork(void);
 extern void *sdfAllocSizeClassBlock(s32);
 
@@ -159,7 +159,7 @@ void kwlnDebugTaskCreate(void) {
         }
         work->unk1C = 0;
         work->unk20 = 0;
-        kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, func_00102CD8, dds3AdminReleaseTaskWork, work);
+        kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, work);
     }
 }
 

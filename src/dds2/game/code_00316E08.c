@@ -242,7 +242,7 @@ typedef struct CfSrc {
 
 extern char D_0042D4D0[];
 
-extern s32 func_00101740(const char *arg0);
+extern s32 kwlnTaskGetTaskByName(const char *arg0);
 
 void func_00316FA8(u32 sprite);
 
@@ -286,7 +286,7 @@ void mdlCreateViewerPackageTask(void) {
 }
 
 u8 func_00316ED0(void) {
-    return func_00101740(D_0042D4D0) != 0;
+    return kwlnTaskGetTaskByName(D_0042D4D0) != 0;
 }
 
 u32 func_00316EF8(void) {

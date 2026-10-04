@@ -853,10 +853,10 @@ s32 mnuCreatePanelItem(void) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002848E0);
 
-INCLUDE_RODATA(const s32, "game/code_00282850", D_003B24D0);
-
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
+INCLUDE_RODATA(const s32, "game/code_00282850", D_003B24D0);
+
 void mnuPositionPanelItemPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
     MenuPanelItem *item = (MenuPanelItem *)itemAddress;

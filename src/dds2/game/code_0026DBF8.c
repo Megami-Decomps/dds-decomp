@@ -534,7 +534,7 @@ s32 mnuHasMantraSpriteTaskFinished(void) {
     if (mnuMantraSpriteSlots[4] != 0) {
         return 1;
     }
-    return func_00101740(mnuMantraSpriteTaskName) == 0;
+    return kwlnTaskGetTaskByName(mnuMantraSpriteTaskName) == 0;
 }
 
 void mnuReleaseMantraSpriteSlots(void) {

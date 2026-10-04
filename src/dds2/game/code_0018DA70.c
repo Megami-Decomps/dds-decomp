@@ -124,7 +124,7 @@ extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_0032DB78(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
-extern s32 func_001200E0();
+extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendDmaPrimary(void *, const void *, void *);
@@ -217,7 +217,7 @@ void effDrawBlurListWithFramePacket(void *list) {
     D_003803E8.draw(&D_003803E8, list);
 }
 
-extern s32 func_001200E0();
+extern u32 func_001200E0(void);
 extern void sdfInitPacketList();
 extern void effAppendBlurRenderState();
 
@@ -225,7 +225,7 @@ extern void effAppendBlurRenderState();
 void effDrawBlurSource(BlurSource *source, s32 resource, u8 fixedPointCoordinates) {
     void *list;
 
-    if (func_001200E0(source) == 0) {
+    if (func_001200E0() == 0) {
         list = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, source->blendControl, resource);
@@ -273,7 +273,7 @@ typedef struct EffBlurTemplate {
 } EffBlurTemplate;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern u32 effGetResourceFirstWord(s32 index);
+extern s32 effGetResourceFirstWord(s32 index);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplate *src) {

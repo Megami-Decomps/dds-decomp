@@ -1635,6 +1635,8 @@ typedef struct FldLbFile {
 } FldLbFile;
 
 
+/* Retains fldmix.LB node values and their memory blocks in field work.
+ * Nodes 10..13 supply the map resources later acquired by the scene camera. */
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0650);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0668);
@@ -1645,8 +1647,6 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0698);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A06B0);
 
-/* Retains fldmix.LB node values and their memory blocks in field work.
- * Nodes 10..13 supply the map resources later acquired by the scene camera. */
 void fldParseMixLb(void) {
     FldLbFile *lb;
     FldLbNode *node;

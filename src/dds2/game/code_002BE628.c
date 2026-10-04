@@ -2580,7 +2580,6 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 
 
-
 extern s32 D_00435DF0;
 extern void mdlStoreTertiaryVectorVU(s32);
 

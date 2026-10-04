@@ -143,7 +143,7 @@ extern char D_003E773C[];
 
 extern void mnuHandlePanelListPageJumpInput();
 
-extern void func_002BD480();
+extern void mnuStepPartyPanelListFromInput();
 extern char D_003E7758[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
@@ -985,7 +985,7 @@ s32 mnuStaffPopupUpdate(s32 callback) {
     }
     if (*popupState == 0) {
         panelWork = (u8 *)(context + MNU_STAFF_PARTY_PANEL_BASE);
-        func_002BD480(4, panelWork);
+        mnuStepPartyPanelListFromInput(4, panelWork);
         if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
             ((MenuPartyRuntime *)menuWork)->staffSelection = ((MenuContext *)context)->partyWindow.lists[0]->cursor->index;
             mnuSetPopupEntry(popupState, D_003E75E0);
@@ -1774,7 +1774,7 @@ s32 ptySkillMenuHandleFieldUse(s32 callback) {
         ((MenuContext *)context)->partyWindow.flags |= 0x20;
     }
     window = (u8 *)(context + 0x284);
-    func_002BD480(8, window);
+    mnuStepPartyPanelListFromInput(8, window);
     if (buttons & 1) {
         buttons = ptySkillMenuApplyFieldUseAndCost(label, context) == 0 ? 0x8000 : 0;
         mnuFlagMatchingEntries(context);
@@ -3278,7 +3278,7 @@ void mnuClearPartyPanelActiveFlags(s32 menu);
 
 void mnuClearActionFlags(s32 kind, u8 *ctx);
 
-void func_002BD480(s32 mode, MenuPageWindow *window);
+void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437BE0);
 

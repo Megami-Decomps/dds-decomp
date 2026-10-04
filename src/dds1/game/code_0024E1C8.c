@@ -707,7 +707,7 @@ extern void func_002546D8(s32, s32);
 extern void func_00254758(s32, s32, s32, s32, s32);
 extern void func_00254778(s32, s32, s32, s32, s32);
 extern void mnuDrawDisplayModeSprites(s32, s32, s32, s32, s32, s32);
-extern void func_00254B30(s32, s32, s32, s32, s32, s32);
+extern void itfDspDrawSelectionStrip(s32, s32, s32, s32, s32, s32);
 extern void itfDspInitSelectedWindow(s32, s32, s32, s32, s32, s32);
 extern void func_00254810(s32, s32, s32, s32, s32, s32);
 
@@ -741,7 +741,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_00254758(0, 0, 1, alpha, 0x53);
         func_00254778(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        func_00254B30(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
         if (fadeRatio < 0.5f) {
             shadeFactor = 0.0f;
         } else {
@@ -762,7 +762,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_00254758(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         func_00254778(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        func_00254B30(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
         if (fadeRatio < 0.5f) {
             shadeFactor = 0.0f;
         } else {
@@ -785,7 +785,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_00254758(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         func_00254778(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        func_00254B30(0, (s32)(fadeRatio * 36.0f), 1, alpha, (s32)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)(fadeRatio * 36.0f), 1, alpha, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, (s32)((1.0f - shadeFactor) * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
         func_00254810(0, 0, 1, alpha, (s32)work, 0x53);
         return 0;
@@ -806,7 +806,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_00254758(0, 0, 1, alpha, 0x53);
         func_00254778(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        func_00254B30(0, (s32)((1.0f - fadeRatio) * 36.0f), 1, alpha, (s32)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)((1.0f - fadeRatio) * 36.0f), 1, alpha, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
         func_00254810(0, 0, 1, alpha, (s32)work, 0x53);
         return 0;
@@ -816,7 +816,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
         func_00254758(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         func_00254778(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
-        func_00254B30(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
+        itfDspDrawSelectionStrip(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
         func_00254810(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
         break;

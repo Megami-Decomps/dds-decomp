@@ -33,7 +33,6 @@ extern u8 D_00439128;
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_00329600);
-
 /* Unlink the successor, not node itself, and reconnect both neighboring links. */
 void sdfSkipNextListNode(SdfListNode *node) {
     SdfListNode *followingNode = node->next->next;

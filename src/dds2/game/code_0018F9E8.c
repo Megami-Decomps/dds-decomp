@@ -25,7 +25,7 @@ typedef struct {
 } EffResourceRectWork; /* 0x28 */
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern u32 effGetResourceFirstWord(s32 index);
+extern s32 effGetResourceFirstWord(s32 index);
 
 /* Clone rectangle parameters and select a fresh source handle. */
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {

@@ -71,7 +71,7 @@ void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
 
 extern f32 sdfSinPoly(f32);
 
-void func_00294C68(EventSpriteObject *object, s32 amplitude, s32 drawArg) {
+void mnuDrawPulsingMenuIcon(EventSpriteObject *object, s32 amplitude, s32 drawArg) {
     s32 texture = D_00438FC8->textures[0];
     s32 alpha;
 

@@ -760,11 +760,11 @@ u32 brsTaskTryDestroy(void) {
 }
 
 s32 func_002998D8(void) {
-    extern s32 func_00101740(const char *);
+    extern s32 kwlnTaskGetTaskByName(const char *);
     s32 task;
     u8 *work;
 
-    task = func_00101740(mnuStaffPrimaryPanelTaskName);
+    task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
     if (task == 0) {
         return task;
     }

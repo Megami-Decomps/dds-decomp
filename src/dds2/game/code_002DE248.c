@@ -3217,7 +3217,7 @@ typedef struct EffRingClassConfig {
 
 extern u8 *effPayloadPointerSet(u16, void *);
 
-EffClassDrawState *func_002E68F0(EffRingClassConfig *source) {
+EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     u32 count = source->ring.segments;
     u32 size;
     void *allocation;
@@ -4386,7 +4386,7 @@ extern void effSetClassResourceColor(s32, u32);
 extern void effDrawClassResourceWork(s32);
 
 /* vu0 routine: packed color blend and SDK vector copies. */
-void func_002EBC58(EffClassWork *work) {
+void effUpdateRadialClassInstances(EffClassWork *work) {
     EffBillConfig *config = work->payload;
     s32 frame = work->frame;
     s32 progress = config->progress;

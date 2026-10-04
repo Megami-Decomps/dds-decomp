@@ -79,7 +79,7 @@ typedef struct AdminDispatch {
 } AdminDispatch;
 
 extern AdminDispatch ddsAdminModeCallbacks[];
-extern void *func_00102CD8(void *task);
+extern void *dds3AdminPollModeCompletion(void *task);
 
 /* Configure administrative state from three caller-supplied parameters. */
 void dds3AdminSubmitMarkedRequest(s32 value, void *data, u32 size)
@@ -168,7 +168,7 @@ void *dds3AdminActivateRequestedMode(void *task) {
             entry(restoring, work->unk1C);
         }
     }
-    return func_00102CD8;
+    return dds3AdminPollModeCompletion;
 }
 
 /* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
@@ -193,7 +193,7 @@ void *dds3AdminPollModeDestruction(void *task) {
     return dds3AdminActivateRequestedMode;
 }
 
-void *func_00102CD8(void *task) {
+void *dds3AdminPollModeCompletion(void *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 (*cleanup)(void);

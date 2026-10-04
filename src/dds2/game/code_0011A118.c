@@ -186,7 +186,7 @@ extern s32 D_0043E5D0[];
 
 extern void scrSetFloatReturnValue(f32 value);
 
-extern s32 effMiscRandMod(u32 stream, u32 modulus);
+extern u32 effMiscRandMod(void *stream, u32 modulus);
 
 extern s32 datAdjustCurrentHp(void *, s32);
 
@@ -763,7 +763,8 @@ s32 evtClearRandomStatusFlags(void) {
     s32 clearedAny = 0;
     s32 remaining;
     s32 entryAddress;
-    if (effMiscRandMod(0, 100) >= 51) {
+    s32 roll = (s32)effMiscRandMod(0, 100);
+    if (roll >= 51) {
         return 0;
     }
     remaining = 4;

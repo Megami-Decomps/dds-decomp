@@ -85,6 +85,7 @@ extern u32 *mnuCreateProfilePanel(s32);
 extern void mnuCacheProfilePanelGridPositions(s32, u32, u32, u32, u32);
 extern void func_00276720(s32, s32, s32, s32);
 
+
 typedef struct SceneFrameTable SceneFrameTable;
 
 typedef struct MenuTerminalWork {
@@ -135,6 +136,10 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 uiBlendColors(u32, u32, s32);
 
+extern void func_00276F70(s32 window, s32 work);
+extern void mnuDrawStaffPanelGridBackdrop(s32 flag, s32 obj);
+extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
+extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
 
 extern char mnuNumberSpriteFormat[];
@@ -667,7 +672,20 @@ void effUpdateAttached(s32 x, s32 y, s32 mode, MenuVisualWork *work) {
     mnuDrawAndAdvanceProfilePanel(x, y, mode, work->effectResource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249998);
+s32 func_00249998(u8 *control, u8 *work, s32 context) {
+    if (*(s32 *)(work + 0x80) != 2) {
+        return 0;
+    }
+
+    func_00276F70((s32)(work + 0x190), (s32)(work + 8));
+    mnuDrawStaffPanelGridBackdrop(0, (s32)(work + 8));
+    *(u32 *)(work + 0x190) |= 0x500;
+    mnuDrawStageTestList(0, 0, 0, ((s8 *)control)[0x55],
+        work + 0x190, context);
+    func_00283838(0, 0, 0, (s32)control, ((s8 *)control)[0x55],
+        *(s32 *)(work + 0x824), context);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249A60);
 /* Only the exact signed-byte value one enables the world/menu flags; all others disable. */
@@ -1172,7 +1190,41 @@ extern void func_002E96D8(s32);
 extern void func_002E9730(void);
 
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024A728);
+extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
+
+void func_0024A728(u32 mode, s32 context) {
+    MenuTerminalWork *work = (MenuTerminalWork *)context;
+    s32 index;
+    s32 *entries;
+    s32 i;
+
+    index = fldGetModeFrameRecordIndex((SceneFrameOwner *)context);
+    switch (mode) {
+    case 1:
+        effConfigureWithDefaultSetting((s32)work->batch, index, work->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting((s32)work->batch, 4, work->effect[6], 0, 0, 14);
+        effConfigureWithDefaultSetting((s32)work->batch, 6, work->effect[0], 0, 0, 2);
+        itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[5], 0, 5, 3);
+        i = 0;
+        entries = (s32 *)(*(s32 *)(*(s32 *)((u8 *)work + 0x6C) + 0x18) + 0x14);
+        for (; i < 4; i++) {
+            entries[i] = 0;
+        }
+        break;
+    case 2:
+        effConfigureWithDefaultSetting((s32)work->batch, index, work->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting((s32)work->batch, 6, work->effect[3], 0, 0xF, 2);
+        itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, 0, 0);
+        effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[3], 0, 0, 2);
+        return;
+    case 3:
+        itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[5], 0, 0, 3);
+        effConfigureWithDefaultSetting(*(s32 *)((u8 *)work + 0x6C), 0, work->effect[5], 0, 0, 2);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024A930);
 
@@ -1199,7 +1251,6 @@ s32 func_0024AB28(MenuSelectorContext *context) {
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB70);
 
 
-extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 extern s32 D_003AF6E0[2][2];
 typedef struct MenuGridPositions {
     EffectPair entries[2];
@@ -1588,7 +1639,7 @@ s32 evtBSetupDispatchSyncB(s32 request) {
 }
 
 extern void mnuSelectFirstListNode(s32);
-extern void func_0024A728(s32, s32);
+extern void func_0024A728(u32, s32);
 extern void func_0024AE18(s32, s32);
 
 

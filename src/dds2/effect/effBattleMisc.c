@@ -1,9 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern s32 effBTLFieldColorGetVariantSelector(void);
+extern u32 effBTLFieldColorGetVariantSelector(void);
 
-extern s32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLFieldColorGetOriginalSelector(void);
 
 /* Flag word read by the two wrappers below. */
 typedef struct {

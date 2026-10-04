@@ -86,7 +86,7 @@ u32 mnuStartCampTitleFadeOut(void) {
 }
 
 /* Handle the selected field skill after both dispatch and resource readiness. */
-s32 func_002AAF70(s32 callback) {
+s32 mnuHandleCampFieldSkillInput(s32 callback) {
     CampVisualWork *context;
     s32 *popup;
     u32 input;

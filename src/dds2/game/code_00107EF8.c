@@ -62,7 +62,7 @@ extern void fldStartSequenceRecord(void);
 
 typedef struct KwlnTask KwlnTask;
 
-extern KwlnTask *func_00101740(const char *name);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 extern KwlnTask *func_00101820(u32 prio);
 
@@ -958,7 +958,7 @@ void func_0010A820(void) {
 }
 
 u32 evtEnsureSelectionTask(void) {
-    if (func_00101740(D_00435D20) != NULL) {
+    if (kwlnTaskGetTaskByName(D_00435D20) != NULL) {
         return 0;
     }
     if (func_00101820(0x3FA) == NULL) {
@@ -1132,7 +1132,7 @@ u32 func_0010AB98(void) {
 }
 
 u32 evtTestFontCheck(void) {
-    return func_00101740(D_00411380) == NULL;
+    return kwlnTaskGetTaskByName(D_00411380) == NULL;
 }
 
 void evtCreateMovieViewerTask(void) {

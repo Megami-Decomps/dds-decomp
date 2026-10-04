@@ -74,6 +74,7 @@ void func_001FC990(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC998);
 
+
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCAC0);
 
 extern u32 btlRollAiBucket(void);

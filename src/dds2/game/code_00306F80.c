@@ -113,7 +113,7 @@ extern s32 effGetSlotWorkOrOverride();
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
-extern s32 kwlnGetDrawBufferIndex(void);
+extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 

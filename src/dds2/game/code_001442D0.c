@@ -311,7 +311,7 @@ extern f32 fldSecondaryQueuedEffectPosition[];
 
 extern char fldTitleTaskName[]; /* "fldTitle" */
 
-extern s32 func_00101740(void *name);
+extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern char D_00413C80[]; /* "fldTitleMini" */
 
@@ -1964,6 +1964,8 @@ typedef struct FldLbFile {
     FldLbNode *nodes; /* 0x60 */
 } FldLbFile;
 
+/* Retains field/automap TMX blocks and field-model resources. Unlike DDS1,
+ * these map blocks come from separate files; fldmix.LB supplies other nodes. */
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413800);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413818);
@@ -1974,8 +1976,6 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
 
-/* Retains field/automap TMX blocks and field-model resources. Unlike DDS1,
- * these map blocks come from separate files; fldmix.LB supplies other nodes. */
 void fldParseMixLb(void) {
     FldLbFile *lb;
     FldLbNode *node;
@@ -2388,7 +2388,7 @@ void func_0014E668(u32 value) {
 }
 
 s32 fldTitleIsActive(void) {
-    return func_00101740(fldTitleTaskName) != 0;
+    return kwlnTaskGetTaskByName(fldTitleTaskName) != 0;
 }
 
 void func_0014E698(void) {
@@ -2450,7 +2450,7 @@ void fldDestroyTitleTask(void) {
 }
 
 s32 fldTitleMiniIsActive(void) {
-    return func_00101740(D_00413C80) != 0;
+    return kwlnTaskGetTaskByName(D_00413C80) != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014EDB8);

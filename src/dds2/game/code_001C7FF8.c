@@ -3,7 +3,7 @@
 
 extern s32 btlGetRuntime(void);
 
-extern s32 func_00101740(const char *);
+extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 
@@ -540,7 +540,7 @@ void fldInitializeSceneObject(u32 *state, u32 owner) {
 }
 
 SceneObject *fldGetSceneObjectTaskUserData(void) {
-    u32 handle = func_00101740(btlCommandPanelTaskNameRef);
+    u32 handle = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (handle == 0) {
         return (SceneObject *)handle;
     }
@@ -548,7 +548,7 @@ SceneObject *fldGetSceneObjectTaskUserData(void) {
 }
 
 s32 fldGetSceneObjectState(void) {
-    s32 handle = func_00101740(btlCommandPanelTaskNameRef);
+    s32 handle = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (handle == 0) {
         return handle;
     }
@@ -820,11 +820,11 @@ s32 btlCreateAiWork(s32 source) {
     s32 count;
     btlGetRuntime();
     work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
-    object = (SceneObject *)kwlnTaskGetUserValue(func_00101740(btlCommandPanelTaskNameRef));
+    object = (SceneObject *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
     work->listA = btlAllocateIndexList(0xD);
     work->listB = btlAllocateIndexList(0xD);
     if (object->state == 8) {
-        other = (SceneAiOther *)kwlnTaskGetUserValue(func_00101740(D_004367CC));
+        other = (SceneAiOther *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (datGameState->entry[other->index].mask & 0x4800)) {
             func_001AC0F8(source, work->listA, 1, 4, -0x4801);
@@ -865,7 +865,7 @@ void fldReleaseSceneSprite(s64 arg) {
 }
 
 u32 fldGetSceneScriptTaskUserData(void) {
-    u32 handle = func_00101740(D_004367B8);
+    u32 handle = kwlnTaskGetTaskByName(D_004367B8);
     if (handle == 0) {
         return handle;
     }
@@ -889,7 +889,7 @@ u32 fldGetSceneScriptValue(void) {
 void fldCreateSceneSpriteTask(s32 sourceTask) {
     BattleSceneWork *scene;
     s32 task;
-    func_00101740(D_004367B8);
+    kwlnTaskGetTaskByName(D_004367B8);
     if (btlIsNamedBattleTaskRegistered() != 0) {
         kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xA), 0);
     }
@@ -1144,7 +1144,7 @@ extern void func_001C16B0(s32);
 void fldCreateSceneCleanupTask(void) {
     BattleSceneWork *scene;
     s32 task;
-    if (func_00101740(D_004368B0) == 0) {
+    if (kwlnTaskGetTaskByName(D_004368B0) == 0) {
         btlGetRuntime();
     }
     scene = (BattleSceneWork *)btlGetRuntime();

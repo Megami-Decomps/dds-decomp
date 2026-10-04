@@ -829,6 +829,7 @@ typedef struct SdfList {
     void (*onRemove)(u32, void *); /* 0x10 */
 } SdfList;
 
+
 SdfListNode *dds3DetachIndexedListNodeAndRenumber(SdfList *list, SdfListNode *node) {
     SdfListNode *it;
 

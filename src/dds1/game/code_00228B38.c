@@ -293,7 +293,6 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229540);
 
-/* Spawn phase-dependent long-lived noise layers and expire active slots. */
 INCLUDE_SDATA(const s32, "game/code_00228B38", D_003BBDD0);
 
 void func_00229750(SolarNoiseState *state) {

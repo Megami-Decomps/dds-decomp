@@ -5,7 +5,7 @@
 extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler(s32 *obj, s32 kind);
 
-extern s32 func_00101740(const char *);
+extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 

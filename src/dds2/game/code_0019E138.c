@@ -29,7 +29,7 @@
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern u64 *sdfConsMeasurePacketWithHeader(void *);
 extern void sdfAppendPacket();
@@ -232,8 +232,8 @@ s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1
     args.unk1D = 1;
     return func_0019E5D8(&args);
 }
-
 extern s8 D_00436550;
+
 
 s32 itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
     s8 saved = D_00436550;
@@ -1205,8 +1205,8 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, packet);
 }
 
-extern void *sdfAllocPacketAligned(s32);
-extern u8 *sdfConsFinalizePacketHeader(void *, s32);
+extern s32 sdfAllocPacketAligned(s32);
+extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern void sdfAppendPacket();
 
 /* The packet builder returns a 0x30-byte command with two trailing qwords. */
@@ -1225,8 +1225,8 @@ void itfSendBlendPacket(void *list, s64 value, s32 flag) {
     sdfAppendPacket(list, packet);
 }
 
-extern void *sdfAllocPacketAligned(s32);
-extern u8 *sdfConsFinalizePacketHeader(void *, s32);
+extern s32 sdfAllocPacketAligned(s32);
+extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern void sdfAppendPacket();
 extern s64 D_003B4390[];
 

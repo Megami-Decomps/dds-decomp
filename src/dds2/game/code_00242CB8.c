@@ -47,7 +47,7 @@ void evtBeginSolarOverlayFadeIn(s32 arg0);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 fileMenuTaskExists(void);
-extern s32 func_001200E0(void);
+extern u32 func_001200E0(void);
 extern void evtAdvanceSolarOverlayFadeAndDraw(s32 a0, s32 a1, s32 a2, s32 a3, u32 overlay, s32 a5);
 void func_0035B6E0(const char *fmt, ...);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);

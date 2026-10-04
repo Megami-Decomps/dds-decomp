@@ -3,7 +3,7 @@
 #include "kwln.h"
 
 extern char dds3AdminTaskName[];
-extern void *func_00101740(char *);
+extern void *kwlnTaskGetTaskByName(char *);
 extern u32 kwlnTaskGetUserValue(KwlnTask *);
 extern void sdfReleaseChipBlock(void *);
 extern void *sdfAllocSizeClassBlock(s32);
@@ -11,7 +11,7 @@ extern void *memcpy(void *, void *, s32);
 
 /* Return the named administration task's user state; the task must exist. */
 AdminWork *dds3GetAdminTaskWork(void) {
-    return (AdminWork *)kwlnTaskGetUserValue(func_00101740(dds3AdminTaskName));
+    return (AdminWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(dds3AdminTaskName));
 }
 
 /* Read the administration state's shared value word, without modifying it. */
@@ -79,7 +79,7 @@ typedef struct AdminDispatch {
 } AdminDispatch;
 
 extern AdminDispatch ddsAdminModeCallbacks[];
-extern void *func_00102BC8(void *task);
+extern void *dds3AdminPollModeCompletion(void *task);
 
 /* Configure administrative state from three caller-supplied parameters. */
 void dds3AdminSubmitMarkedRequest(s32 value, void *data, u32 size)
@@ -168,7 +168,7 @@ void *dds3AdminActivateRequestedMode(void *task) {
             entry(restoring, work->unk1C);
         }
     }
-    return func_00102BC8;
+    return dds3AdminPollModeCompletion;
 }
 
 /* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
@@ -193,7 +193,7 @@ void *dds3AdminPollModeDestruction(void *task) {
     return dds3AdminActivateRequestedMode;
 }
 
-void *func_00102BC8(void *task) {
+void *dds3AdminPollModeCompletion(void *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 (*cleanup)(void);

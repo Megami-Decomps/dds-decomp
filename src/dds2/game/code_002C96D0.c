@@ -188,7 +188,7 @@ extern void *mcHandleDetectionResult(void);
 
 extern char D_0042B720[];
 
-extern KwlnTask *func_00101740(const char *name);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 /* Loader context at D_0037D4A0. */
 typedef struct LoadCtx374A0 {
@@ -987,7 +987,7 @@ void *fileScanSlotStates(void) {
 }
 
 void fileResolveAbortSlotFlow(void) {
-    if (D_00437D30 == 1 && func_00101740(D_0042B698) == NULL) {
+    if (D_00437D30 == 1 && kwlnTaskGetTaskByName(D_0042B698) == NULL) {
         mcdEnterSelectedFileFlow();
     } else {
         fileSetMenuFlowState(0);
@@ -2029,7 +2029,7 @@ u32 func_002CE920(void) {
 }
 
 s32 fileMenuTaskExists(void) {
-    return func_00101740(D_0042B720) != NULL;
+    return kwlnTaskGetTaskByName(D_0042B720) != NULL;
 }
 
 u32 fileGetSelectionPendingFlag(void) {

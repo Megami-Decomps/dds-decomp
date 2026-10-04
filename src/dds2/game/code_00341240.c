@@ -21,7 +21,7 @@ typedef struct EffRandState {
 extern EffRandState D_0040BAE8;
 
 void effMiscSeedRandom(EffRandState *state, u32 seed);
-void func_003413F0(ClockTime *now);
+s32 func_003413F0(ClockTime *now);
 
 extern s8 D_004391E0;
 extern void *sceSifAllocIopHeap(s32);

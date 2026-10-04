@@ -115,3 +115,4 @@ void sdfDrainPendingHandlers(void) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_002CF530", D_003BD2CC);
+

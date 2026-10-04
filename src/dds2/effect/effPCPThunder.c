@@ -118,7 +118,7 @@ void func_0016B118(void *parameters) {
 }
 
 /* Release the cell system before releasing the containing work allocation. */
-void effPCPThunderFree(EffThunderVectorWork *work) {
+void effThunderReleaseVectorWork(EffThunderVectorWork *work) {
     parReleaseCellSystem((u32)work->cellSystem);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
@@ -129,12 +129,12 @@ void func_0016B160(void *destination, void *source) {
 }
 
 /* Set the packed modulation color applied to every vector cell. */
-void effPCPThunderSetParam50(EffThunderVectorWork *work, u32 tintColor) {
+void effThunderSetVectorTint(EffThunderVectorWork *work, u32 tintColor) {
     work->tintColor = tintColor;
 }
 
 /* Absolute radius/height scaling from the retained constructor values. */
-void effPCPThunderScale(f32 factor, EffThunderVectorWork *work) {
+void effThunderScaleVectorDimensions(f32 factor, EffThunderVectorWork *work) {
     work->head.radiusScale = work->baseRadiusScale * factor;
     work->head.heightScale = work->baseHeightScale * factor;
 }
@@ -272,7 +272,7 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
 }
 
 /* Tear down the indexed vector variant: system first, containing allocation last. */
-void effPCPThunderFree2(EffThunderVectorWork *work) {
+void effThunderReleaseIndexedVectorWork(EffThunderVectorWork *work) {
     parReleaseCellSystem((u32)work->cellSystem);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
@@ -296,12 +296,12 @@ void func_0016BC90(void *destination, void *source) {
 }
 
 /* Set the shared packed modulation color, not an individual cell's sampled color. */
-void effThunderSetVectorCellColor(EffThunderVectorWork *work, u32 tintColor) {
+void effThunderSetIndexedVectorTint(EffThunderVectorWork *work, u32 tintColor) {
     work->tintColor = tintColor;
 }
 
 /* Absolute radius/height scaling for the indexed variant; repeated calls do not compound. */
-void effPCPThunderScale2(f32 factor, EffThunderVectorWork *work) {
+void effThunderScaleIndexedVectorDimensions(f32 factor, EffThunderVectorWork *work) {
     work->head.radiusScale = work->baseRadiusScale * factor;
     work->head.heightScale = work->baseHeightScale * factor;
 }
@@ -458,7 +458,7 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
 }
 
 /* Release every spark's system before freeing the owner, using the native signed count. */
-void effThunderDestroySubs(EffThunderSparkWork *work) {
+void effThunderReleaseSparkWork(EffThunderSparkWork *work) {
     s32 sparkCount = (s32)work->head.sparkCount;
     s32 sparkIndex = 0;
 
@@ -477,7 +477,7 @@ void effThunderCopySparkVector(void *destination, void *source) {
 }
 
 /* Set the spark work's packed modulation color, separate from the age fade. */
-void effPCPThunderSetParamA8(EffThunderSparkWork *work, u32 tintColor) {
+void effThunderSetSparkColor(EffThunderSparkWork *work, u32 tintColor) {
     work->tintColor = tintColor;
 }
 
@@ -561,7 +561,7 @@ EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameter
 }
 
 /* Release the single fragment system before its containing work allocation. */
-void effPCPThunderFree3(EffThunderFragmentWork *work) {
+void effThunderReleaseFragmentWork(EffThunderFragmentWork *work) {
     parReleaseCellSystem((u32)work->system);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
@@ -579,7 +579,7 @@ void effThunderShiftOriginByVectorDelta(u8 *endpoints, void *anchor) {
 }
 
 /* Set the fragment work's shared packed color word. */
-void effPCPThunderSetParam58(EffThunderFragmentWork *work, u32 color) {
+void effThunderSetFragmentColor(EffThunderFragmentWork *work, u32 color) {
     work->color = color;
 }
 
@@ -644,7 +644,7 @@ EffThunderFragmentWork *func_0016DB28(EffThunderFragmentParams *parameters) {
 }
 
 /* Release secondary then primary systems before freeing the shared work allocation. */
-void effPCPThunderFree4(EffThunderFragmentWork *work) {
+void effThunderReleaseDualFragmentWork(EffThunderFragmentWork *work) {
     parReleaseCellSystem((u32)work->state.secondarySystem);
     parReleaseCellSystem((u32)work->system);
     sdfReleaseResourceAllocation(work->allocationHandle);
@@ -772,7 +772,7 @@ EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *parameters) {
 }
 
 /* Release the cell system before releasing the containing work allocation. */
-void effPCPThunderFree5(EffThunderCellWork *work) {
+void effThunderReleaseCellWork(EffThunderCellWork *work) {
     parReleaseCellSystem((u32)work->system);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
@@ -783,7 +783,7 @@ void effThunderCopyCellVector(void *destination, void *source) {
 }
 
 /* Store the opaque work word; no C consumer establishes a color/control interpretation. */
-void effPCPThunderSetParam4C(EffThunderCellWork *work, u32 value) {
+void effThunderSetCellWorkValue(EffThunderCellWork *work, u32 value) {
     work->unk4C = value;
 }
 
@@ -863,7 +863,7 @@ typedef struct EffThunderGroup {
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
-EffThunderGroup *func_0016EDD0(EffThunderGroupParams *src) {
+EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
     EffThunderGroup *group = sdfAllocSizeClassBlock(sizeof(EffThunderGroup));
     s32 i;
 
@@ -893,7 +893,7 @@ void effThunderGroupRelease(EffThunderGroup *group) {
     s32 i;
 
     for (i = 0; i < group->head.count - 1; i++) {
-        effPCPThunderFree3(group->handles[i]);
+        effThunderReleaseFragmentWork(group->handles[i]);
     }
     sdfReleaseChipBlock(group);
 }

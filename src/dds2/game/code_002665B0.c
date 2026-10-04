@@ -1196,7 +1196,41 @@ void mnuConfigureSelectedSceneModeEffect(s32 mode, MenuEffHost *host) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268CC0);
+extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
+
+void func_00268CC0(u32 mode, s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    s32 index;
+    s32 *entries;
+    s32 i;
+
+    index = fldGetModeFrameRecordIndex(context);
+    switch (mode) {
+    case 1:
+        effConfigureWithDefaultSetting(state->batch, index, state->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting(state->batch, 4, state->effect[6], 0, 0, 14);
+        effConfigureWithDefaultSetting(state->batch, 6, state->effect[0], 0, 0, 2);
+        itfSetGridEntryQuantizedAndRefresh(state->batch, 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting(state->batch, 7, state->effect[5], 0, 5, 3);
+        i = 0;
+        entries = (s32 *)(*(s32 *)(*(s32 *)((u8 *)state + 0x74) + 0x18) + 0x14);
+        for (; i < 4; i++) {
+            entries[i] = 0;
+        }
+        break;
+    case 2:
+        effConfigureWithDefaultSetting(state->batch, index, state->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting(state->batch, 6, state->effect[3], 0, 0xF, 2);
+        itfSetGridEntryQuantizedAndRefresh(state->batch, 7, 0, 0, 0, 0);
+        effConfigureWithDefaultSetting(state->batch, 7, state->effect[3], 0, 0, 2);
+        return;
+    case 3:
+        itfSetGridEntryQuantizedAndRefresh(state->batch, 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting(state->batch, 7, state->effect[5], 0, 0, 3);
+        effConfigureWithDefaultSetting(*(s32 *)((u8 *)state + 0x74), 0, state->effect[5], 0, 0, 2);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268EC8);
 
@@ -1230,7 +1264,6 @@ typedef struct GridPanelHost {
     s32 settings[1];    /* 0xA8 */
 } GridPanelHost;
 
-extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 /* Reset grid entry 0x1A, then configure it from the panel's setting slot chosen by `kind`. */
 void mnuApplyGridPanelHostSetting(u32 kind, GridPanelHost *host) {
@@ -1320,7 +1353,7 @@ typedef struct EventDispatchState {
     u32 bgmHandle;    /* 0x154: encoded bank/track handle */
 } EventDispatchState;
 
-extern void func_00268CC0(s32, s32);
+extern void func_00268CC0(u32, s32);
 
 
 
@@ -2073,14 +2106,14 @@ u32 func_0026B4A0(void) {
     return 1;
 }
 
-extern KwlnTask *func_00101740(const char *);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern s32 mnuHasMantraSpriteTaskFinished(void);
 extern void func_002665E8(EventDispatchState *);
 extern char D_00425008[];
 extern char D_003CE960[];
 
 /* Wait for the mode's load/fade barrier before binding the terminal exit popup. */
-s32 func_0026B4A8(u64 request) {
+s32 evtWaitForTerminalExitPopup(u64 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     s32 *dispatch = &state->dispatchStatus;
     s32 ready = 0;
@@ -2099,7 +2132,7 @@ s32 func_0026B4A8(u64 request) {
     }
     if (state->dispatchStatus == 0) {
         if (state->menuMode == 0) {
-            ready = func_00101740(D_00425008) == NULL;
+            ready = kwlnTaskGetTaskByName(D_00425008) == NULL;
             if (evtIsActiveFlagSet(0) != 0) {
                 ready = 1;
             }

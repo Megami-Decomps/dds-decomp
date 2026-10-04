@@ -122,7 +122,7 @@ extern u8 D_003A25A8[];
 
 extern s16 D_00387D70[];
 
-extern void *func_00101740(const char *);
+extern void *kwlnTaskGetTaskByName(const char *);
 
 extern void dds3WorkClear(void);
 
@@ -1607,7 +1607,7 @@ void fldResetPlayerSceneTransformState(void) {
 }
 
 void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
-    if (func_00101740(D_00412D50) != NULL) {
+    if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState[4] == stage) {
             fldAreaState[8] = 1;
         } else {
@@ -1633,7 +1633,7 @@ void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, 
 }
 
 void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
-    if (func_00101740(D_00412D50) != NULL) {
+    if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState[4] == stage) {
             fldAreaState[8] = 1;
         } else {
@@ -1658,7 +1658,7 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
 
 void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                    s32 code, s32 link, const char *subname) {
-    if (func_00101740(D_00412D50) != NULL) {
+    if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState[4] == stage) {
             fldAreaState[8] = 1;
         } else {
@@ -1684,7 +1684,7 @@ void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s3
 
 void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, const char *subname) {
-    if (func_00101740(D_00412D50) != NULL) {
+    if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState[4] == stage) {
             fldAreaState[8] = 1;
         } else {

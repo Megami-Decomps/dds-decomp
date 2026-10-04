@@ -50,7 +50,7 @@ extern char D_003E7514[];
 extern char D_003E7530[];
 extern char D_003E7434[];
 extern u32 mnuMapPadMaskToFlags();
-extern void func_002BD480();
+extern void mnuStepPartyPanelListFromInput();
 extern void mnuSetPopupEntryFlagged();
 extern void mnuClearActionFlags();
 extern void mnuPlayInputSound();
@@ -175,7 +175,7 @@ s32 mnuStaffImageInputA(s32 callback) {
         return state;
     }
     window = (u8 *)(context + 0x284);
-    func_002BD480(4, window);
+    mnuStepPartyPanelListFromInput(4, window);
     if (buttons & 1) {
         menu->currentSelection = ((MenuList *)((MenuStaffContext *)context)->selection)->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E74F8);
@@ -227,7 +227,7 @@ s32 mnuPollStaffSlotSelectionConfirmation(s32 callback) {
         return state;
     }
     window = (u8 *)(context + 0x284);
-    func_002BD480(4, window);
+    mnuStepPartyPanelListFromInput(4, window);
     if (buttons & 1) {
         menu->currentSelection = ((MenuList *)((MenuStaffContext *)context)->selection)->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E7514);
@@ -279,7 +279,7 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 callback) {
         return state;
     }
     window = (u8 *)(context + 0x284);
-    func_002BD480(4, window);
+    mnuStepPartyPanelListFromInput(4, window);
     if (buttons & 1) {
         menu->currentSelection = ((MenuList *)((MenuStaffContext *)context)->selection)->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E7530);

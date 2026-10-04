@@ -322,7 +322,7 @@ void evtResetSkyTaskFlags(void) {
 extern char evtSkyTaskName[];
 
 void evtDestroySkyTask(void) {
-    s32 task = func_00101740(evtSkyTaskName);
+    s32 task = kwlnTaskGetTaskByName(evtSkyTaskName);
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 1);
     }
@@ -2396,7 +2396,7 @@ s32 evtFindTaskById(u32 taskId) {
     u8 taskName[32];
 
     evtFormatTaskName(taskId, taskName);
-    return func_00101740(taskName);
+    return kwlnTaskGetTaskByName(taskName);
 }
 
 s32 evtGetTaskValueWord(u32 taskId) {

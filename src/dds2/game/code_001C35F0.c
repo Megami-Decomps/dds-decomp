@@ -23,7 +23,7 @@ extern u32 D_004367CC;
 
 extern u32 kwlnTaskGetUserValue(void *);
 
-extern void *func_00101740(const char *name);
+extern void *kwlnTaskGetTaskByName(const char *name);
 
 extern s32 btlGetRuntime(void);
 
@@ -36,7 +36,7 @@ typedef struct UiSceneNode {
     struct UiSceneNode *next;
 } UiSceneNode;
 
-extern s32 btlHasRequiredActorStatusBits(UiSceneNode *node);
+extern u8 btlHasRequiredActorStatusBits(UiSceneNode *node);
 
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
@@ -59,7 +59,7 @@ void btlUpdateActorSlotPresentationState(UiSceneNode *object, s8 mode, s8 value)
         }
     }
     if (count < 3) {
-        task = func_00101740(D_004367CC);
+        task = kwlnTaskGetTaskByName(D_004367CC);
         if (task != 0) {
             entry = (u8 *)kwlnTaskGetUserValue(task);
             if (mode != 2) {
@@ -91,7 +91,7 @@ void btlResetActorSlotPresentationValue(UiSceneNode *object) {
         }
     }
     if (count < 3) {
-        entry = (u8 *)kwlnTaskGetUserValue(func_00101740(D_004367CC));
+        entry = (u8 *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
         offset = slot * 0x290 + 0x10;
         entry += offset;
         *(u8 *)(entry + 0x10) = 2;
@@ -197,8 +197,8 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
     s64 second;
 
     if (btlTrackedTaskHandles != 0) {
-        first = func_00101740(btlCommandPanelTaskNameRef);
-        second = func_00101740(D_004367CC);
+        first = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+        second = kwlnTaskGetTaskByName(D_004367CC);
         if (first == 0 && second == 0) {
             return -128;
         }
@@ -221,7 +221,7 @@ s32 func_001C7F10(void) {
     s32 counter;
 
     if (btlTrackedTaskHandles != NULL) {
-        task = func_00101740(btlCommandPanelTaskNameRef);
+        task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
         flow = btlTrackedTaskHandles;
         switch (flow->word.status) {
         case 1:

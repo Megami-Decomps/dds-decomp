@@ -176,7 +176,7 @@ extern s32 D_003BEB50[];
 extern s32 D_003BEB58[];
 extern s32 D_003BEB60[];
 extern void *btlGetIndexedUiResource();
-extern u32 btlRollAiBucket(void);
+extern s32 btlRollAiBucket(void);
 extern s32 btlPollCategoryLabelTask();
 extern s32 btlPollActorOrEntryLabelTask();
 extern void func_0020FA98();
@@ -206,8 +206,8 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EA18);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EB40);
 
-/* Accepts a task's unit only when status bit 5 is set and task bit 6 is clear.
- * If bit 5 is the sole low status bit, the final check uses an external value. */
+/* Accepts only when status bit 5 is set and task bit 6 is clear.
+ * For a lone bit-5 status, compare the unsigned AI roll bucket to 70. */
 s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     s32 result = 0;
     BtlUnit *unit = task->unit;
@@ -223,7 +223,7 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     if ((flags & 0x7FFF) != 0x20) {
         return 1;
     }
-    return btlRollAiBucket() < 0x46;
+    return (u32)btlRollAiBucket() < 0x46;
 }
 
 extern s32 btlSetActorEffectParameter(u8 *object, s32 index);

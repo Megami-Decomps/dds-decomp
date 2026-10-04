@@ -1,6 +1,7 @@
 #include "common.h"
+#include "scr.h"
 
-extern s32 kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(void);
 
 typedef struct ScriptContext {
     u8 pad0[0x18];
@@ -32,10 +33,8 @@ u32 scrGetCurrentActor(void) {
 }
 
 void scrReplaceCurrentTask(u32 task) {
-    s64 context;
-
-    context = kwlnTaskGetUserValue();
-    if (context != 0) {
+    ScrProcTask *context = (ScrProcTask *)kwlnTaskGetUserValue();
+    if (context != NULL) {
         scrProcDestroyTask(context);
     }
     kwlnTaskSetUserValue(task, 0);

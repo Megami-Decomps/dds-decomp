@@ -132,7 +132,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
 }
 
 /* Allocate one aligned IOP block and distribute its address among active buffers. */
-void func_002E8B58(s32 *sizes, s32 count) {
+void sndAllocateAlignedIopBuffers(s32 *sizes, s32 count) {
     SndIopBuffer *buffer;
     s32 total, size, i;
     u32 address;
@@ -169,7 +169,7 @@ void func_002E8C30(s32 arg0, s32 arg1, s32 *sizes, s32 count) {
     sndMidiTrackState.unk008 = sndReserveIopWorkMemory(0x4000);
     sndMidiTrackState.unk00C = 0x4000;
     sndInitializeChannelAndTrackState(arg0, arg1);
-    func_002E8B58(sizes, count);
+    sndAllocateAlignedIopBuffers(sizes, count);
     D_003BDA8C = sndReserveIopWorkMemory(0x8D0);
     sndMidiTrackState.unk1F8 = (u32)&sndMidiTrackState;
     sndMidiTrackState.unk1FC = 0x8D0;

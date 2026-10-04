@@ -143,7 +143,7 @@ extern char D_003E773C[];
 
 extern void mnuHandlePanelListPageJumpInput();
 
-extern void func_002BD480();
+extern void mnuStepPartyPanelListFromInput();
 extern char D_003E7758[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
@@ -2572,7 +2572,7 @@ void mnuClearActionFlags(s32 kind, u8 *ctx) {
     }
 }
 
-void func_002BD480(s32 mode, MenuPageWindow *window) {
+void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
     u32 input = mnuMapPadMaskToFlags(0x30);
     u32 flags = window->flags;
     u32 state;

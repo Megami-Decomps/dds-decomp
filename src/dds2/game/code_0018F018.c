@@ -46,7 +46,7 @@ typedef struct {
 } EffBlurScaleWork; /* 0x38 */
 extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *allocation);
-extern u32 effGetResourceFirstWord(s32 index);
+extern s32 effGetResourceFirstWord(s32 index);
 
 
 extern void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
@@ -108,7 +108,7 @@ extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern void *sdfAllocPacketAligned(s32);
 extern u32 kwlnGetDrawBufferIndex(void);
 
-extern s32 func_001200E0();
+extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendDmaPrimary(void *, const void *, void *);
