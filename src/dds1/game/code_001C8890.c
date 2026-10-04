@@ -6872,7 +6872,15 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E5800);
 extern s32 D_0035DA28[];
 extern s32 D_0035DAD0[];
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlAdvancePlayerCursorAnimation);
+void btlAdvancePlayerCursorAnimation(s32 action, s32 state) {
+    if (!(*(u32 *)(*(s32 *)(*(s32 *)(action + 0xF4) + 0x18) + 0x110) & 0x400)) {
+        func_001E9DE0(action, state, D_0035DA28[CURSOR->unk_0A]);
+        func_001EB368(action, state);
+        func_001EB1B0(action, state, 0, 0);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    }
+}
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E6180);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E6260);
@@ -7013,7 +7021,20 @@ void btlClearCommandCursorAndRunAction(s32 actor) {
 
 extern s32 D_0035DAF0[];
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlAdvanceCommandCursorOrAction);
+void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
+    if (CURSOR->unk_00 == 1) {
+        if (((BtlCursorAction *)action)->link->unit->flags & 0x400) {
+            return;
+        }
+        func_001E9DE0(action, state, D_0035DAF0[CURSOR->unk_0C]);
+        func_001EB368(action, state);
+        func_001EB1B0(action, state, 0, 1);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    } else {
+        func_001E2970(action, action);
+    }
+}
 INCLUDE_ASM(const s32, "game/code_001C8890", btlInitCommandCursorForCategory);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001EEED8);
@@ -9526,4 +9547,3 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5410);
-
