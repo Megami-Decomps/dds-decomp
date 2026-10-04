@@ -656,9 +656,47 @@ void func_0026E998(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EBA8);
+void func_0026EBA8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context, f32 scale) {
+    s32 width;
+    s32 height;
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026EDB0);
+    width = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].width =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth) << 4;
+    height = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].height =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
+    func_00306CD0(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
+                  ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
+                  z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
+                  D_003CE9D0[placementIndex][1], context);
+    /* Reload the slot after drawing before restoring its native dimensions. */
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].width =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth << 4;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].height =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
+}
+
+void func_0026EDB0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context, f32 rotation) {
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
+    func_00306CD0((x + D_003CE9D0[placementIndex][2]) << 4,
+                  (y + D_003CE9D0[placementIndex][3]) << 3,
+                  z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
+                  D_003CE9D0[placementIndex][1], context);
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+        ->sprites[D_003CE9D0[placementIndex][1]].rotation = 0.0f;
+}
 
 s32 mnuDrawMantraSineFade(u32 x, u32 y, u32 depth, s32 frame, s32 amount, u32 drawArg) {
     f32 wave = (f32)frame / 60.0f;
@@ -1180,7 +1218,6 @@ s32 mnuUpdateMantraBackgroundFade(s32 unused, s32 item) {
     return 0;
 }
 
-extern void func_0026EDB0(s32, s32, s32, s32, s32, s32, s32, f32);
 
 void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, packet);
