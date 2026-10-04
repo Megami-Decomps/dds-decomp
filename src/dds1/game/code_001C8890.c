@@ -1983,6 +1983,45 @@ typedef struct BtlOperandGroup {
     BtlOperandEntry entries[64];
 } BtlOperandGroup;
 
+typedef struct BtlIndexList {
+    s32 capacity;       /* 0x00: allocated entry count */
+    s32 count;          /* 0x04: live entry count */
+    u32 *entries;       /* 0x08: points just past this header */
+} BtlIndexList;
+
+/* Owns an index list and an SDK allocation containing thirteen operand groups. */
+typedef struct BattleIndexWork {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    u8 unk24[9];
+    u8 unk2D;
+    u8 unk2E;
+    u8 pad2F;
+    u16 unk30;
+    u8 pad32[2];
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    BtlIndexList *indices;
+    u8 pad44[4];
+    u64 unk48;
+    s32 unk50;
+    s32 unk54;
+    s32 unk58;
+    u16 unk5C;
+    u8 unk5E;
+    u8 pad5F;
+    BtlOperandGroup *groups;
+    u32 allocationHandle;
+} BattleIndexWork;
+
 /* Test whether the operand is empty, subject to command-category and slot-kind exclusions. */
 s32 btlActionEntryIsEmpty(s32 index, BtlOperandSlot *slot, BtlOperandEntry *entry) {
     s32 kind;
@@ -2032,49 +2071,26 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandSlot *slot, BtlOperandEntry *entr
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D1218);
+/* Return whether any operand in the live groups has flag bit zero set. */
+s32 func_001D1218(s32 unused, BattleIndexWork *state) {
+    u32 groupIndex;
+    u32 entryIndex;
+    u32 groupCount = btlGetIndexListCount(state->indices);
+    BtlOperandGroup *group = state->groups;
+
+    for (groupIndex = 0; groupIndex < groupCount; groupIndex++, group++) {
+        u32 entryCount = group->count;
+
+        for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+            if (group->entries[entryIndex].flags & 1) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D12A0);
-
-typedef struct BtlIndexList {
-    s32 capacity;       /* 0x00: allocated entry count */
-    s32 count;          /* 0x04: live entry count */
-    u32 *entries;       /* 0x08: points just past this header */
-} BtlIndexList;
-
-
-/* Owns an index list and an SDK allocation containing thirteen operand groups. */
-typedef struct BattleIndexWork {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 unk24[9];
-    u8 unk2D;
-    u8 unk2E;
-    u8 pad2F;
-    u16 unk30;
-    u8 pad32[2];
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    BtlIndexList *indices;
-    u8 pad44[4];
-    u64 unk48;
-    s32 unk50;
-    s32 unk54;
-    s32 unk58;
-    u16 unk5C;
-    u8 unk5E;
-    u8 pad5F;
-    BtlOperandGroup *groups;
-    u32 allocationHandle;
-} BattleIndexWork;
 
 /* Reset work status and group headers, preserving the retained payload and allocation. */
 void btlResetIndexWork(BattleIndexWork *work) {
