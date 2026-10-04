@@ -7086,7 +7086,48 @@ void btlInitLinkedUnitActionCursor(u8 *arg0) {
     func_001E6668(context, context, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001EF1F8);
+/* Initialize the target cursor and orient the linked unit toward its target. */
+void func_001EF1F8(ActionUnit *action, void *state) {
+    f32 position[4];
+    f32 quaternion[4];
+    f32 aimPosition[4];
+    f32 rotation[4];
+    f32 offset[4];
+    BtlUnit *unit;
+    BtlUnit *target;
+
+    memset(offset, 0, sizeof(offset));
+    offset[2] = 1.0f;
+    memset(D_0035F100, 0, 0x130);
+    func_001E6BB0((s32)action, (s32)state, 2, 3);
+    func_001E6668((s32)action, (s32)state, 0, 0);
+    func_001EB1B0((s32)action, (s32)state, 0, 1);
+    btlFlagMatchingUnitsDefeatCandidate(0x600);
+    unit = action->link->unit;
+    if (unit->flags & 0x80000) {
+        btlUnitGetPosVU((u32)unit, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quaternion);
+        VU0_LOAD_VF(vf10, quaternion);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, offset);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, aimPosition);
+        target = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+        if (target->flags & 0x400) {
+            func_001F66D8(0x400, 0, 0);
+        } else {
+            func_001F66D8(0x200, 0, 0);
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlAimHorizontalDirectionVU((s128 *)aimPosition, (s128 *)position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        btlSetUnitRotation((u8 *)unit, (s128 *)rotation);
+    }
+}
 
 extern void func_001E6BB0(s32, s32, s32, s32);
 
