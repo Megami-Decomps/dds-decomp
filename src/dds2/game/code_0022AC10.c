@@ -112,7 +112,36 @@ extern void sndReleaseSlotOwner(void *);
 
 extern void btlBossDebugPrintf();
 
-extern u8 *datCommandRecords;
+typedef union BtlCommandAttribute {
+    u32 bits;
+    struct {
+        u8 kind;
+        u8 unused;
+        u16 flagMask;
+    } parts;
+} BtlCommandAttribute;
+
+typedef struct BtlCommandRecord {
+    u8 flags;
+    u8 unk_01;
+    u8 kind;
+    u8 unk_03[6];
+    u8 options; /* +0x09 */
+    u8 unk_0A[2];
+    u16 restriction;
+    u8 unk_0E[8];
+    u16 primaryLimitKind; /* +0x16: governs the primary counter check */
+    u8 unk_18[2];
+    u16 secondaryLimitKind; /* +0x1A */
+    u8 unk_1C[8];
+    BtlCommandAttribute attribute; /* +0x24 */
+    s32 requirementBits; /* +0x28: selects the action-entry condition */
+    u8 unk_2C[4];
+    s32 unk30;
+    u8 unk_34[4];
+} BtlCommandRecord;
+
+extern BtlCommandRecord *datCommandRecords;
 
 extern void *btlAllocateIndexList(s32);
 
@@ -862,22 +891,6 @@ s32 btlIndexListMatchesEntryCodes(void *indexList, s32 entryCode, u32 allowedCod
     return matchedCount == entryCount;
 }
 
-typedef struct BtlCommandRecord {
-    u8 flags;
-    u8 unk_01[8];
-    u8 options; /* +0x09 */
-    u8 unk_0A[2];
-    u16 restriction;
-    u8 unk_0E[8];
-    u16 primaryLimitKind; /* +0x16: governs the primary counter check */
-    u8 unk_18[2];
-    u16 secondaryLimitKind; /* +0x1A */
-    u8 unk_1C[8];
-    u32 attributeBits;
-    s32 requirementBits; /* +0x28: selects the action-entry condition */
-    u8 unk_2C[0xC];
-} BtlCommandRecord;
-
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B768);
@@ -900,7 +913,7 @@ s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         actorEntry = btlGetIndexListEntry(indexList, entryIndex);
-        requirementBits = ((BtlCommandRecord *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES))->requirementBits;
+        requirementBits = datCommandRecords[commandId].requirementBits;
         switch (requirementBits) {
         case BTL_EXPIRED_POSITIVE_ENTRY_RULE:
             for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
@@ -930,9 +943,9 @@ s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
  * requirementBits == 0 before each check; preserve all three native rereads. */
 u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, s32 unused, s32 commandId) {
     s32 eligibility = BTL_COUNTER_ELIGIBILITY_UNSET;
-    if (((BtlCommandRecord *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES))->options & 1) {
-        if (((BtlCommandRecord *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES))->requirementBits == 0) {
-            switch (((BtlCommandRecord *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES))->primaryLimitKind) {
+    if (datCommandRecords[commandId].options & 1) {
+        if (datCommandRecords[commandId].requirementBits == 0) {
+            switch (datCommandRecords[commandId].primaryLimitKind) {
             case 2:
             case 5:
             case 7:
@@ -944,8 +957,8 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, s32 un
             }
         }
         if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
-            if (((BtlCommandRecord *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES))->requirementBits == 0) {
-                switch (((BtlCommandRecord *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES))->secondaryLimitKind) {
+            if (datCommandRecords[commandId].requirementBits == 0) {
+                switch (datCommandRecords[commandId].secondaryLimitKind) {
                 case 2:
                 case 5:
                 case 7:
@@ -957,9 +970,9 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, s32 un
                 }
             }
             if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
-                if (((BtlCommandRecord *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES))->requirementBits == 0) {
-                    if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES + 0x24] == 2) {
-                        eligibility = btlListHasMatchingFlag(entryList, entryCount, *(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x26)) == 0 ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
+                if (datCommandRecords[commandId].requirementBits == 0) {
+                    if (datCommandRecords[commandId].attribute.parts.kind == 2) {
+                        eligibility = btlListHasMatchingFlag(entryList, entryCount, datCommandRecords[commandId].attribute.parts.flagMask) == 0 ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
                     }
                 }
             }
@@ -984,7 +997,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
         return 0;
     }
     commandRecord = (BtlCommandRecord *)(commandId * BTL_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
-    if ((commandRecord->attributeBits & 0x400000FF) == 0x40000002) {
+    if ((commandRecord->attribute.bits & 0x400000FF) == 0x40000002) {
         if ((~commandRecord->restriction & 0x7FFF) == 0x4000) {
             if (btlHasRestrictedUnit() == 0) {
                 return 2;
@@ -995,7 +1008,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     targetList = btlAllocateIndexList(0xD);
     func_001AC360((s32)actionTask, (s32)targetList, 0);
     targetCount = btlGetIndexListCount(targetList);
-    if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES] & 8) {
+    if (datCommandRecords[commandId].flags & 8) {
         for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
             if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->conditionFlags & 0x800) {
                 flaggedTargetCount++;
@@ -1011,7 +1024,65 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022C308);
+extern s32 btlGetEntryFlagsUnlessDisabled(u8 *);
+extern s32 btlLowestSetPairIndex(u32);
+
+s32 func_0022C308(void *indexList, s32 commandId) {
+    u8 *entryList[26];
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 count;
+    s32 i;
+    u32 flags;
+    s32 requirement;
+    s32 code;
+
+    if (battle->unk220 & 0x40) {
+        return 0;
+    }
+    if (commandId <= 0) {
+        return 0;
+    }
+    count = btlGetIndexListCount(indexList);
+    if (count == 0) {
+        return 0;
+    }
+    for (i = 0; i < count; i++) {
+        entryList[i] = (u8 *)btlGetIndexListEntry(indexList, i) + 0x120;
+    }
+    if (datCommandRecords[commandId].kind == 2 ||
+        (datCommandRecords[commandId].flags & 0x20)) {
+        for (i = 0; i < count; i++) {
+            flags = btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120);
+            if (flags & 0x8000) {
+                return 7;
+            }
+            if (flags & 0x40) {
+                return 5;
+            }
+        }
+    }
+    if (datCommandRecords[commandId].unk30 == 1) {
+        if (battle->unk21C & 0x10) {
+            return 9;
+        }
+        for (i = 0; i < count; i++) {
+            if (btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120) & 0x800) {
+                return 9;
+            }
+        }
+    }
+    requirement = datCommandRecords[commandId].requirementBits;
+    if (requirement == 0x400 || requirement == 0x2000) {
+        code = btlLowestSetPairIndex(requirement);
+        if (code >= 0) {
+            if (btlIndexListMatchesEntryCodes(indexList, code,
+                                             datCommandRecords[commandId].requirementBits)) {
+                return 3;
+            }
+        }
+    }
+    return btlDetermineCommandCounterEligibility(entryList, count, (s32)indexList, commandId);
+}
 
 /* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
 s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
@@ -1024,7 +1095,7 @@ s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
     if (row <= 0) {
         return result;
     }
-    flags = *(u32 *)(datCommandRecords + row * 0x38 + 0x28);
+    flags = datCommandRecords[row].requirementBits;
     if (flags == 0) {
         return result;
     }
