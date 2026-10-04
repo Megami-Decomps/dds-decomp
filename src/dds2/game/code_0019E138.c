@@ -114,6 +114,12 @@ typedef struct MemOut {
     void *third; /* 0x8 */
 } MemOut;
 
+/* Two consecutive entries in the four-byte-stride offset table bound a span. */
+typedef struct ItfBitRange {
+    u32 start;
+    u32 end;
+} ItfBitRange;
+
 
 /* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
 typedef struct MemNode {
@@ -657,7 +663,49 @@ u32 func_001A0098(u32 object) {
     return *(u32 *)(func_001A0060(object) + 0x10);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A00B8);
+/* Decode the option's selected bit span through the resource's six-byte
+ * lookup records, appending the byte carried by each terminal record. */
+s32 func_001A00B8(u8 *dst, s32 option, u32 block, MemOut *segments) {
+    ItfBitRange range;
+    s32 produced;
+    u8 *table = segments->first;
+    u16 *bitWords;
+    u32 wordIndex;
+    u32 start;
+    s32 remaining;
+    u32 state;
+    u16 *root;
+    u16 *node;
+
+    memcpy(&range.start, (u8 *)segments->second + option * 4, 4);
+    memcpy(&range.end, (u8 *)segments->second + option * 4 + 4, 4);
+    produced = 0;
+    func_001A0060(block);
+    start = range.start;
+    bitWords = segments->third;
+    wordIndex = start >> 4;
+    remaining = range.end - start;
+    state = (bitWords[wordIndex] | 0x10000) >> (start & 0xF);
+    root = (u16 *)(table + 2);
+    node = root;
+    do {
+        u16 index = node[state & 1];
+
+        node = (u16 *)(table + index * 6 + 2);
+        if (*node == 0) {
+            dst[produced++] = ((u8 *)node)[2];
+            node = root;
+        }
+        state >>= 1;
+        if (state == 1) {
+            wordIndex++;
+            state = bitWords[wordIndex] | 0x10000;
+        }
+        remaining--;
+    } while (remaining != 0);
+    D_00438F20 = produced;
+    return produced;
+}
 
 extern SdfAllocation *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfAllocation *);
