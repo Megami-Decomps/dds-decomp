@@ -2574,7 +2574,51 @@ u32 func_001AD428(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD468);
+typedef struct BtlGuidePanelWork {
+    s8 state;
+    u8 pad01[0x1B];
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+} BtlGuidePanelWork;
+
+extern s32 func_001B09A8(s64);
+extern void btlReleaseMessageWindowTask(s64);
+extern u32 btlHasRegisteredGuidePanelTask(void);
+extern u32 btlHasRegisteredSkillNamePanelTask(void);
+extern u32 btlHasRegisteredAphNamePanelTask(void);
+extern void btlSetTrackedTaskHandle(s32, s32);
+
+s32 func_001AD468(s32 arg0, s32 arg1) {
+    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlGuidePanelWork *data;
+    s32 task;
+
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+    }
+    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data->state = 0;
+    data->unk1C = 0x18;
+    data->unk20 = 0x60;
+    data->unk24 = arg0;
+    data->unk28 = arg1;
+    task = kwlnTaskCreate(D_003BB3C4, 0x2B0E, 1, 1, func_001B09A8,
+                          btlReleaseMessageWindowTask, (u32)data);
+    func_00101A80(context->taskParent, task);
+    btlSetTrackedTaskHandle(9, task);
+    return 1;
+}
 
 void func_001AD5A0(void) {
     u8 *puVar1;
@@ -2704,8 +2748,6 @@ typedef struct MsgQueueTaskData {
 extern s32 func_001B4A70(s64);
 
 extern void btlReleaseDialogTaskData(s64);
-
-extern void btlSetTrackedTaskHandle(s32, s32);
 
 s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     s32 context = btlGetRuntime();
@@ -3790,7 +3832,45 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DC8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DD8);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD190);
+extern s32 func_001BD0D0(s32, s8);
+extern void func_001BD2C0(s32, s16 *, s32, s32, s32);
+extern void btlBuildEligibleActorList(s32, s16 *);
+extern u8 *func_001BD708(u8 *, u16 *);
+
+u32 func_001BD190(s32 object, s8 mode, s8 unlimited) {
+    s32 kind = func_001BD0D0(object, mode);
+    s16 count;
+
+    switch (kind) {
+    case 0:
+        func_001BD2C0(object, &count, 0, 2, 3);
+        *(u32 *)(D_003BD834 + 0x14) = count + 1;
+        break;
+    case 4:
+        func_001BD708((u8 *)object, (u16 *)&count);
+        *(u32 *)(D_003BD834 + 0x24) = count;
+        break;
+    case 2:
+        btlBuildEligibleActorList(object, &count);
+        *(u32 *)(D_003BD834 + 0x1C) = count;
+        break;
+    case 3:
+        *(u32 *)(D_003BD834 + 0x20) = 3;
+        break;
+    case 6:
+        *(u32 *)(D_003BD834 + 0x2C) = 1;
+        break;
+    default:
+        ((u32 *)(D_003BD834 + 0x14))[kind] = 0;
+        break;
+    }
+    if (unlimited == 0) {
+        if (((u32 *)(D_003BD834 + 0x14))[kind] >= 4) {
+            return 4;
+        }
+    }
+    return ((u32 *)(D_003BD834 + 0x14))[kind];
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD2C0);
 
