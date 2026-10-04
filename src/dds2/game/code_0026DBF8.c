@@ -341,7 +341,7 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
                                 TaskDestroy, u32);
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
-extern void func_0026E788(u32, u32, u32, u32, u32, u32, u32);
+extern void func_0026E788(s32, s32, s32, s32, s32, s32, s32);
 void func_00284508(u32, u32, u32, u32, u32, u32);
 extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
@@ -569,8 +569,6 @@ s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026E788);
-
 typedef struct MnuSpriteWork {
     u8 pad00[0xC];
     s32 width;
@@ -583,13 +581,47 @@ typedef struct MnuSpriteWork {
     u8 pad84[0x1C];
 } MnuSpriteWork;
 
-typedef struct MnuSpriteResource {
+typedef struct MnuSpriteTexture {
     u8 pad00[0x18];
+    u32 flags;
+    u8 pad1C[0x64];
+} MnuSpriteTexture;
+
+typedef struct MnuSpriteResource {
+    u8 pad00[0x10];
+    MnuSpriteTexture *textures;
+    u8 pad14[4];
     MnuSpriteWork *sprites;
 } MnuSpriteResource;
 
 extern s32 D_003CE9D0[][4];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
+
+void func_0026E788(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context) {
+    if (flags & 0x10000) {
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->textures[D_003CE9D0[placementIndex][1]].flags |= 1;
+    }
+    if (flags & 0x20000) {
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->textures[D_003CE9D0[placementIndex][1]].flags |= 2;
+    }
+    func_00306CD0((x + D_003CE9D0[placementIndex][2]) << 4,
+                  (y + D_003CE9D0[placementIndex][3]) << 3,
+                  z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
+                  D_003CE9D0[placementIndex][1], context);
+    if (flags & 0x10000) {
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->textures[D_003CE9D0[placementIndex][1]].flags &= ~1;
+    }
+    if (flags & 0x20000) {
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
+            ->textures[D_003CE9D0[placementIndex][1]].flags &= ~2;
+    }
+}
+
 
 void func_0026E998(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scale, f32 rotation) {
