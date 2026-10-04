@@ -2386,7 +2386,59 @@ s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADE18);
+f32 func_001ADE18(UiObject *unit, u32 index, s8 includeCharge) {
+    f32 factor;
+    s32 stage;
+
+    stage = btlGetActorEntryCode(unit, index);
+    factor = 1.0f;
+    switch (index) {
+    case 3:
+        if (unit->flags & 0x200) {
+            factor = *(f32 *)(datBattleParameters + 0xAEC - stage * 4);
+        } else {
+            factor = *(f32 *)(datBattleParameters + 0xB08 - stage * 4);
+        }
+        break;
+    case 2:
+        if (unit->flags & 0x200) {
+            factor = *(f32 *)(datBattleParameters + 0xB24 - stage * 4);
+        } else {
+            factor = *(f32 *)(datBattleParameters + 0xB40 - stage * 4);
+        }
+        break;
+    case 0:
+    case 1:
+        if (unit->flags & 0x200) {
+            factor = *(f32 *)(datBattleParameters + 0xAEC + stage * 4);
+        } else {
+            factor = *(f32 *)(datBattleParameters + 0xB08 + stage * 4);
+        }
+        break;
+    case 4:
+        if (unit->flags & 0x200) {
+            factor = *(f32 *)(datBattleParameters + 0xB24 + stage * 4);
+        } else {
+            factor = *(f32 *)(datBattleParameters + 0xB40 + stage * 4);
+        }
+        break;
+    }
+    if (index == 0 && includeCharge != 0 &&
+        btlGetActorEntryCode(unit, 5) > 0) {
+        if (btlActorEntryIsExpired(unit, 5) != 0) {
+            factor *= 2.25f;
+            btlBossDebugPrintf("btl:BUTURIx2\n");
+        }
+    }
+    if (index == 1 && includeCharge != 0 &&
+        btlGetActorEntryCode(unit, 6) > 0) {
+        if (btlActorEntryIsExpired(unit, 6) != 0) {
+            factor *= 2.25f;
+            btlBossDebugPrintf("btl:MAGICx2\n");
+        }
+    }
+    return factor;
+}
 
 void func_001ADFE0(UiObject *unit, u32 flags, s16 delta) {
     if (flags == 0) {
