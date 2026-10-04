@@ -187,7 +187,85 @@ u16 mnuGetPanelValueAt(MenuPanelObject *object, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290C20);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290E48);
+typedef struct MantraNodePos {
+    MenuPanelSelector selector;
+    s16 x;
+    s16 y;
+    u8 pad08[0x18];
+} MantraNodePos;
+
+typedef struct MantraModelFlag {
+    u16 panelIndex : 8;
+    u16 kind : 4;
+    u16 state : 1;
+    u16 unused : 3;
+    u16 modelFlag;
+    u8 variant;
+    u8 pad05[3];
+} MantraModelFlag;
+
+extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
+extern void *memset(void *, s32, u32);
+extern s32 mdlFlagTest(s32);
+extern void mdlFlagSet(s32);
+
+void func_00290E48(s32 mode) {
+    MantraModelFlag flags[112];
+    MantraNodePos *node;
+    s32 i = 175;
+    s32 count;
+    s32 variant;
+
+    memset(flags, 0, sizeof(flags));
+    node = mnuGetMantraNodePositionRecord(0);
+    count = 0;
+    for (; i >= 0; i--, node++) {
+        if (node->selector.fields.index != 0) {
+            s32 kind = node->selector.packed & 15;
+
+            if (kind == 2 || kind == 4) {
+                u32 packed;
+
+                flags[count].panelIndex = node->selector.fields.index;
+                packed = node->selector.packed;
+                flags[count].kind = packed & 15;
+                flags[count].state = (packed >> 8) & 1;
+                flags[count].modelFlag = count + 0x923;
+                count++;
+            } else if (kind == 3) {
+                for (variant = 0; variant < 6; variant++) {
+                    u32 packed;
+
+                    flags[count].panelIndex = node->selector.fields.index;
+                    packed = node->selector.packed;
+                    flags[count].kind = packed & 15;
+                    flags[count].state = (packed >> 8) & 1;
+                    flags[count].modelFlag = count + 0x923;
+                    flags[count].variant = variant;
+                    count++;
+                }
+            }
+        }
+    }
+    for (i = 0; i < 112; i++) {
+        if (flags[i].kind == 3) {
+            switch (mode) {
+            case 0:
+                if (mdlFlagTest(flags[i].modelFlag)) {
+                    mdlFlagSet(flags[i].modelFlag + 1);
+                }
+                i += 5;
+                break;
+            case 1:
+                if (mdlFlagTest(flags[i].modelFlag + 1)) {
+                    mdlFlagSet(flags[i].modelFlag);
+                }
+                i += 5;
+                break;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291038);
 
