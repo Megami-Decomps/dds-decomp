@@ -133,7 +133,57 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221A80);
+/* Endpoint render work: the selected slot's two point vectors and its colour. */
+typedef struct EvtSlotEnds {
+    f32 (*points)[4]; /* 0x00 */
+    s32 unk4;         /* 0x04 */
+    s32 unk8;         /* 0x08 */
+} EvtSlotEnds;
+
+extern void func_002E1938(s32, EvtSlotEnds *, f32 *);
+
+/* Rebuild the unit's endpoint render work from its own colour/vector when the
+ * value-change flag is set; otherwise defer to the matching-slot selector. */
+void func_00221A80(EvtUnit *unit) {
+    f32 ends[4][4];
+    f32 color[4];
+    EvtSlotEnds desc = { ends, 0, 0 };
+    u32 packed0[4];
+    u32 packed1[4];
+    f32 scale0;
+    f32 scale1;
+    u32 flags = unit->flags;
+    s32 i;
+
+    if (flags & 0x20000) {
+        return;
+    }
+    unit->value = 0;
+    if (!(flags & 0x40000)) {
+        if (!(flags & 0x700)) {
+            evtApplyMatchingUnitSlotEndpoints(unit);
+            return;
+        }
+    }
+    packed0[0] = unit->color;
+    scale0 = 0.0078125f;
+    EE_MMI_RGBA_UNPACK(packed0, scale0);
+    VU0_STORE_VF(vf10, ends[0]);
+    VU0_LOAD_VF(vf10, unit->vec10);
+    VU0_STORE_VF(vf10, ends[1]);
+    packed1[0] = unit->color50;
+    scale1 = 0.0078125f;
+    EE_MMI_RGBA_UNPACK(packed1, scale1);
+    VU0_STORE_VF(vf10, color);
+    color[3] = 1.0f;
+    for (i = 0; i < 3; i++) {
+        if (color[i] > 1.0f) {
+            color[i] = 1.0f;
+        }
+    }
+    func_002E1938(unit->endpointWorkAddress, &desc, color);
+    unit->value = unit->endpointWorkAddress;
+}
 
 void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
     unit->flags |= 0x40000;
