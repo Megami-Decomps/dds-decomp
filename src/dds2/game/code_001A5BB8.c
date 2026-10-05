@@ -2,6 +2,7 @@
 #include "itf.h"
 #include "btl_state.h"
 #include "btl_ui.h"
+#include "sdf.h"
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x31];
@@ -1922,7 +1923,8 @@ void func_001ABF50(s32 battler) {
     btlResolveUnitValueWithOverride(battler + 0x120);
 }
 
-extern void func_00119C78(s32, s32);
+struct DatUnitStatus;
+extern s32 func_00119C78(struct DatUnitStatus *, s32);
 
 void btlResolveUnitValueWithOverride(s32 arg0, s32 arg1) {
     s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x6B8);
@@ -1931,7 +1933,7 @@ void btlResolveUnitValueWithOverride(s32 arg0, s32 arg1) {
             return;
         }
     }
-    func_00119C78(arg0, arg1);
+    func_00119C78((struct DatUnitStatus *)arg0, arg1);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
@@ -2228,7 +2230,6 @@ typedef struct BattleAdjustmentRecord {
 } BattleAdjustmentRecord;
 
 extern BattleAdjustmentRecord *D_00435E0C;
-extern u8 *datBattleParameters;
 
 f32 func_001AD978(void) {
     BattleController *runtime = (BattleController *)btlGetRuntime();
@@ -2242,7 +2243,7 @@ f32 func_001AD978(void) {
     } else if (adjustment > 3) {
         adjustment = 3;
     }
-    return *(f32 *)(datBattleParameters + 0x8CC + adjustment * 4);
+    return datBattleParameters->adjustmentScale[adjustment + 3];
 }
 
 u32 func_001ADA10(void) {
@@ -2417,31 +2418,31 @@ f32 btlGetActorEntryMultiplier(UiObject *unit, u32 index, s8 includeCharge) {
     switch (index) {
     case 3:
         if (unit->flags & 0x200) {
-            factor = *(f32 *)(datBattleParameters + 0xAEC - stage * 4);
+            factor = (datBattleParameters->partyEntryScaleA + 3)[-stage];
         } else {
-            factor = *(f32 *)(datBattleParameters + 0xB08 - stage * 4);
+            factor = (datBattleParameters->enemyEntryScaleA + 3)[-stage];
         }
         break;
     case 2:
         if (unit->flags & 0x200) {
-            factor = *(f32 *)(datBattleParameters + 0xB24 - stage * 4);
+            factor = (datBattleParameters->partyEntryScaleB + 3)[-stage];
         } else {
-            factor = *(f32 *)(datBattleParameters + 0xB40 - stage * 4);
+            factor = (datBattleParameters->enemyEntryScaleB + 3)[-stage];
         }
         break;
     case 0:
     case 1:
         if (unit->flags & 0x200) {
-            factor = *(f32 *)(datBattleParameters + 0xAEC + stage * 4);
+            factor = (datBattleParameters->partyEntryScaleA + 3)[stage];
         } else {
-            factor = *(f32 *)(datBattleParameters + 0xB08 + stage * 4);
+            factor = (datBattleParameters->enemyEntryScaleA + 3)[stage];
         }
         break;
     case 4:
         if (unit->flags & 0x200) {
-            factor = *(f32 *)(datBattleParameters + 0xB24 + stage * 4);
+            factor = (datBattleParameters->partyEntryScaleB + 3)[stage];
         } else {
-            factor = *(f32 *)(datBattleParameters + 0xB40 + stage * 4);
+            factor = (datBattleParameters->enemyEntryScaleB + 3)[stage];
         }
         break;
     }
@@ -3148,8 +3149,7 @@ f32 func_001B20C8(u8 *acquirer, u8 *enemy, s32 rewardKind) {
     } else if (difference < -15) {
         difference = -15;
     }
-    factor = *(f32 *)(datBattleParameters + 0x974 +
-                     ((15 - difference) * 2 + rewardKind) * sizeof(f32));
+    factor = datBattleParameters->rewardLevelScale[(15 - difference) * 2 + rewardKind];
     btlBossDebugPrintf("btl:ep[lv=%.3f(%d,%d)]\n",
                        factor, difference, rewardKind);
     return factor;

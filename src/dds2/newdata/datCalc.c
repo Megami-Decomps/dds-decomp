@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -147,7 +148,13 @@ extern s32 func_00314C10(s32 unit);
 extern u32 prfGetIndexedProfileByte(u16 id, s32 sub);
 
 typedef struct DatUnitStatus {
-    u8 pad00[0xE];
+    u16 flags;
+    u16 affinityTableIndex;
+    u16 unitId;
+    u16 hp;
+    u16 maxHp;
+    u16 mp;
+    u16 maxMp;
     u16 status; /* 0x0E */
     u8 pad10[6];
     s8 statValues[0x100];
@@ -249,16 +256,95 @@ s32 datRaiseCalculatedValueFloor(DatUnitStatus *unit, s32 packedValue) {
     return packedValue;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_00119C78);
+extern s32 *D_00435DD8;
+extern s32 *D_00435DDC;
+extern s32 *D_00435DFC;
+extern s32 mdlFlagTest(s32 flag);
 
-/* Read the producer's low halfword with the existing no-explicit-argument call. */
-u32 datReadLowHalfOfCalculatedValue(void) {
-    return (u16)func_00119C78();
+s32 func_00119C78(DatUnitStatus *unit, s32 element) {
+    s32 value;
+    u16 unitId;
+    u32 low;
+
+    switch (element) {
+    case -1:
+        return 0;
+    case 16:
+    case 17:
+    case 18:
+        return 100;
+    }
+
+    unitId = unit->unitId;
+    if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
+        if (unit->flags & 0x1000) {
+            value = D_00435DD8[unitId * 19 + element];
+        } else {
+            value = D_00435DDC[unitId * 19 + element];
+        }
+        if (mdlFlagTest(0x80E) && value < 0) {
+            value = (value & DAT_CALC_HIGH_MASK) |
+                    ((u32)(datBattleParameters->specialAffinityScale * 100.0f) & 0xFFFF);
+        }
+    } else {
+        if (unit->affinityTableIndex != 0) {
+            value = D_00435DFC[unit->affinityTableIndex * 19 + element];
+        } else {
+            value = D_00435DFC[unitId * 19 + element];
+        }
+    }
+
+    if (element == 15) {
+        value = datRaiseCalculatedValueFloor(unit, value);
+    }
+    if (unit->flags & 0x2000) {
+        value = D_00435DFC[383 * 19 + element];
+    }
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
+        value = D_00435DFC[382 * 19 + element];
+    }
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
+        value = D_00435DFC[381 * 19 + element];
+    }
+
+    low = value & 0xFFFF;
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 4) {
+        if (element < 2) {
+            if (element >= 0) {
+                if (low < 100) {
+                    value = (value & DAT_CALC_HIGH_MASK) | 100;
+                    low = value & 0xFFFF;
+                }
+            }
+        }
+    }
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x400) {
+        if (element == 9 && low < 300) {
+            value = (value & DAT_CALC_HIGH_MASK) | 300;
+            low = value & 0xFFFF;
+        }
+    }
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x10 && element == 12 && low < 200) {
+        value = (value & DAT_CALC_HIGH_MASK) | 200;
+        low = value & 0xFFFF;
+    }
+
+    if (low == 0) {
+        if (value < 0) {
+            value |= 150;
+        } else if (value & 0x170000) {
+            value |= 100;
+        }
+    }
+    return value;
 }
 
-/* Return the producer's masked upper bits in place, not shifted to bit zero. */
-u32 datReadHighHalfOfCalculatedValue(void) {
-    return func_00119C78() & DAT_CALC_HIGH_MASK;
+u32 datReadLowHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
+    return (u16)func_00119C78(unit, element);
+}
+
+u32 datReadHighHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
+    return func_00119C78(unit, element) & DAT_CALC_HIGH_MASK;
 }
 
 /* Map one exact flag to a stat index. Flag one and unknown/combined flags
