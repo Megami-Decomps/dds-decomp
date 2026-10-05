@@ -33,7 +33,9 @@ typedef struct FldAreaWork {
     s32 unk70;            /* 0x70 */
     u8 unk74[0x4C];
     s32 unkC0;            /* 0xC0 */
-    u8 unkC4[0x40];
+    u8 unkC4[8];
+    s32 unkCC;            /* 0xCC: location-panel mode, zero through seven. */
+    u8 padD0[0x34];
     s16 eventActive;      /* 0x104 */
     u8 pad106[0xE];
     s32 unk114;
@@ -42,7 +44,9 @@ typedef struct FldAreaWork {
     s16 unk12A; /* 0x12A */
     u8 pad12C[0xC];
     s32 unk138;
-    u8 pad13C[0x10];
+    u8 pad13C[8];
+    s32 unk144;           /* 0x144: location-panel fade countdown. */
+    u8 pad148[4];
     f32 x;                /* 0x14C */
     f32 y;
     f32 z;
@@ -2281,7 +2285,58 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DB50);
+extern s32 func_00150F10(void);
+extern s16 *fldFindLocationCoordinateRecord(s32, s32);
+
+void func_0014DB50(void) {
+    u32 color;
+
+    if (func_00150F10() != 0) {
+        return;
+    }
+    if (FLD_WORK->unk118 == 1 || FLD_WORK->unk114 != 0) {
+        return;
+    }
+    if (fldFindLocationCoordinateRecord(FLD_WORK->area, FLD_WORK->room + 1)[2] <= 0) {
+        return;
+    }
+    switch (FLD_WORK->unkCC) {
+    case 0:
+    case 2:
+    case 4:
+    case 6:
+        break;
+    case 1:
+    case 3:
+    case 5:
+    case 7:
+        fldSelectDisplayBuffer(0x53);
+        func_0012BE18(0);
+        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
+        if (FLD_WORK->unk144 > 0) {
+            color = ((u32)((20 - FLD_WORK->unk144) * 128 / 20) << 24) | 0x808080;
+        } else {
+            color = 0x80808080;
+        }
+        fldSubmitSpriteRect(0x191, 0x11C, 0x60, 0x10, 1, 2, 0x60, 0x10,
+                            color, FLD_WORK->fieldTextures[2].texture);
+        fldSubmitSpriteRect(0x191, 0x12C, 0x60, 0x70, 1, 0x11, 0x60, 1,
+                            color, FLD_WORK->fieldTextures[2].texture);
+        fldSubmitSpriteRect(0x191, 0x19C, 0x60, 0x10, 1, 0x14, 0x60, 0x10,
+                            color, FLD_WORK->fieldTextures[2].texture);
+        fldSubmitSpriteRect(0x1A4, 0x113, 0x3A, 0x11, 1, 0x2E, 0x3A, 0x11,
+                            color, FLD_WORK->fieldTextures[3].texture);
+        fldResetCameraAndSceneView();
+        fldSelectDisplayBuffer(0x5B);
+        func_0012BE18(0);
+        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
+        fldSubmitSpriteRect(0x191, 0x11D, 0x1C, 0x16, 0x24, 0x22, 0x1C, 0x16,
+                            color, FLD_WORK->fieldTextures[0].texture);
+        fldSubmitSpriteRect(0x1C6, 0x191, 0x3A, 0x2C, 1, 1, 0x3A, 0x2C,
+                            color, FLD_WORK->fieldTextures[3].texture);
+        break;
+    }
+}
 
 extern s32 fldTestSceneLifecycleFlags(u32);
 
