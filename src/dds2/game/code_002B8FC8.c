@@ -66,6 +66,9 @@ typedef struct MenuIconState MenuIconState;
 typedef struct MenuFadeFields MenuFadeFields;
 
 
+extern void *sdfAllocAndClearQuadwords(s32);
+extern u32 *effCreateResourceSlotSet(u32 *, u32, u32);
+
 extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
 
@@ -428,7 +431,6 @@ typedef struct MenuVoiceState {
     s32 motionSelection; /* -1 enables periodic motion */
 } MenuVoiceState;
 
-extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
 extern void ptyRecomputeMaxHpMp();
 
@@ -1206,9 +1208,9 @@ struct MenuIconSprites {
 
 void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, s32 *idx, s32 unused) {
     obj->value = value;
-    obj->sprite[0] = (void *)effCreateResourceSlotSet(res, idx[0], 1);
-    obj->sprite[1] = (void *)effCreateResourceSlotSet(res, idx[1], 1);
-    obj->sprite[2] = (void *)effCreateResourceSlotSet(res, idx[2], 1);
+    obj->sprite[0] = effCreateResourceSlotSet((u32 *)res, idx[0], 1);
+    obj->sprite[1] = effCreateResourceSlotSet((u32 *)res, idx[1], 1);
+    obj->sprite[2] = effCreateResourceSlotSet((u32 *)res, idx[2], 1);
     itfSetGridEntryQuantizedAndRefresh(obj->sprite[0], 0, w, h, w, h);
     itfSetGridEntryQuantizedAndRefresh(obj->sprite[1], 0, w, h, w, h);
     itfSetGridEntryQuantizedAndRefresh(obj->sprite[2], 0, w, h, w, h);
@@ -1977,12 +1979,12 @@ void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 fi
                                     ) {
     u32 handle;
 
-    handle = effCreateResourceSlotSet(model, firstValue, 1);
+    handle = (u32)effCreateResourceSlotSet((u32 *)model, firstValue, 1);
     slot->handles[0] = handle;
-    handle = effCreateResourceSlotSet(model, secondValue, 1);
+    handle = (u32)effCreateResourceSlotSet((u32 *)model, secondValue, 1);
     slot->handles[1] = handle;
     if (-1 < thirdValue) {
-        handle = effCreateResourceSlotSet(model, thirdValue, 1);
+        handle = (u32)effCreateResourceSlotSet((u32 *)model, thirdValue, 1);
         slot->handles[2] = handle;
     }
 }
@@ -2163,7 +2165,7 @@ u32 mnuCreateIconBundle(u32 resource) {
     u32 i;
     memset(set, 0, 0x20);
     for (i = 0; i < 3; i++) {
-        void *sprite = (void *)effCreateResourceSlotSet(resource, layout.entry[i].id, 1);
+        void *sprite = effCreateResourceSlotSet((u32 *)resource, layout.entry[i].id, 1);
         set->sprite[i] = sprite;
         itfSetGridEntryQuantizedAndRefresh(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
     }
