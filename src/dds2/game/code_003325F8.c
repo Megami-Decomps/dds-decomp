@@ -815,7 +815,61 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333A30);
+extern f32 sdfSinPoly(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+
+/* 3x2 affine transform the asset writeback stores in a draw entry at +0x68:
+ * the two scaled rotation columns followed by the translation, six floats.
+ * The packed view aliases the same six floats as three pairs. */
+typedef union SdfDrawTransform {
+    f32 m[6];
+    u64 words[3];
+} SdfDrawTransform;
+
+/* Build the 3x2 scalar-block transform from the sub-parameter's five floats
+ * and rotation, or the identity layout when the block is absent. */
+void func_00333A30(u8 *out, SdfSubParam *param) {
+    SdfDrawTransform *transform = (SdfDrawTransform *)out;
+    f32 v0;
+    f32 v1;
+    f32 v2;
+    f32 v3;
+    f32 angle;
+    f32 s;
+    f32 c;
+    f32 m0;
+    f32 m1;
+    f32 m2;
+    f32 m3;
+
+    if (param == NULL) {
+        /* Identity {1,0}/{0,1}/{0,0}; the constant 24-byte block is written
+         * through the packed view, the form that emits three 64-bit stores. */
+        transform->words[0] = 0x000000003F800000;
+        transform->words[1] = 0x3F80000000000000;
+        transform->words[2] = 0;
+        return;
+    }
+
+    angle = -param->scalar.values[4];
+    s = sdfSinPoly(angle);
+    c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    v0 = param->scalar.values[0];
+    v1 = param->scalar.values[1];
+    v2 = param->scalar.values[2];
+    v3 = param->scalar.values[3];
+
+    m0 = c * v2;
+    m1 = s * v3;
+    m2 = -s * v2;
+    m3 = c * v3;
+    transform->m[0] = m0;
+    transform->m[1] = m1;
+    transform->m[2] = m2;
+    transform->m[3] = m3;
+    transform->m[4] = 0.5f - m0 * (v0 + 0.5f) - m2 * (0.5f - v1);
+    transform->m[5] = 0.5f - m1 * (v0 + 0.5f) - m3 * (0.5f - v1);
+}
 
 void sdfCopyAssetPrimarySubParameter(s32 assetAddress, s32 entryAddress) {
     func_00333A30(entryAddress + 0x68, ((SdfAsset *)assetAddress)->third);
