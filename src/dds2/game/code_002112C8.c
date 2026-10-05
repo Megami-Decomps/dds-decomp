@@ -156,9 +156,14 @@ typedef struct BattleSub {
             s8 active;
         } b;
     };
-    s32 targetMode;
+    union {
+        s32 targetMode;
+        BtlUnit *targetActor;
+    };
     s8 b8;
-    u8 pad09[3];
+    u8 pad09;
+    s8 alternateFormation;
+    u8 pad0B;
     s8 controlEnabled;
 } BattleSub;
 
@@ -3438,7 +3443,110 @@ void btlClearNamedChunkFlags(s32 name) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A490);
+extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
+
+/* The three formation actors retain a complete vector and their current dimensions. */
+static inline void btlCopyFormationDimensions(BtlUnit *unit) {
+    PCP_COPY_VECTOR(unit->muzzleOffset, unit->bodyOffset);
+    unit->unkBC = unit->reach;
+    unit->unkB8 = unit->height;
+}
+
+/* btlUpdateSpecialActorFormation */
+void func_0021A490(void) {
+    BtlUnit *left = NULL;
+    BtlUnit *right = NULL;
+    BtlUnit *core = NULL;
+    BattleWork *work = (BattleWork *)btlGetRuntime();
+    BtlUnit *unit;
+    BattleSub *sub = work->sub;
+
+    for (unit = work->actorList; unit != NULL; unit = unit->nextActor) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                switch (unit->mode) {
+                case 0x110:
+                    core = unit;
+                    break;
+                case 0x111:
+                    left = unit;
+                    break;
+                case 0x112:
+                    right = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (sub->b8 != 0) {
+        if (core != NULL) {
+            btlInitializeEffectVectorsFromSourceRecords(core, 1, core->mode);
+            core->bodyOffset[2] += 1050.0f;
+            core->reach = 100.0f;
+        }
+        if (sub->alternateFormation != 0) {
+            if (left != NULL) {
+                left->bodyOffset[0] = -385.0f;
+                left->bodyOffset[1] = -390.0f;
+                left->bodyOffset[2] = 2525.0f;
+                left->reach = 320.0f;
+                left->height = 600.0f;
+                left->bodyOffset[3] = 0.0f;
+            }
+            if (right != NULL) {
+                right->bodyOffset[0] = 320.0f;
+                right->bodyOffset[1] = -390.0f;
+                right->bodyOffset[2] = 2165.0f;
+                right->reach = 300.0f;
+                right->height = 520.0f;
+                right->bodyOffset[3] = 0.0f;
+            }
+        } else if (left == sub->targetActor) {
+            if (left != NULL) {
+                left->bodyOffset[0] = -105.0f;
+                left->bodyOffset[1] = -300.0f;
+                left->bodyOffset[2] = 2525.0f;
+                left->reach = 300.0f;
+                left->height = 600.0f;
+                left->bodyOffset[3] = 0.0f;
+            }
+            if (right != NULL) {
+                btlInitializeEffectVectorsFromSourceRecords(right, 1, right->mode);
+            }
+        } else {
+            if (left != NULL) {
+                btlInitializeEffectVectorsFromSourceRecords(left, 1, left->mode);
+            }
+            if (right != NULL) {
+                right->bodyOffset[0] = 10.0f;
+                right->bodyOffset[1] = -390.0f;
+                right->bodyOffset[2] = 2165.0f;
+                right->reach = 300.0f;
+                right->height = 530.0f;
+                right->bodyOffset[3] = 0.0f;
+            }
+        }
+    } else {
+        if (core != NULL) {
+            btlInitializeEffectVectorsFromSourceRecords(core, 1, core->mode);
+        }
+        if (left != NULL) {
+            btlInitializeEffectVectorsFromSourceRecords(left, 1, left->mode);
+        }
+        if (right != NULL) {
+            btlInitializeEffectVectorsFromSourceRecords(right, 1, right->mode);
+        }
+    }
+    if (core != NULL) {
+        btlCopyFormationDimensions(core);
+    }
+    if (left != NULL) {
+        btlCopyFormationDimensions(left);
+    }
+    if (right != NULL) {
+        btlCopyFormationDimensions(right);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A778);
 
