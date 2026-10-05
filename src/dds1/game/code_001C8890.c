@@ -6559,7 +6559,7 @@ void func_001DD4B0(void) {
 
 extern void btlPrepareActionCameraPoseWithActorClearance(void *unit, f32 *pose, u8 *out);
 extern void func_001E4708(void *unit, f32 *pose, u8 *out);
-extern s32 func_001E4720(void *unit, f32 *pose, u8 *out);
+extern void func_001E4720(CameraPoseTransform *, CameraPoseTransform *, CameraPoseTransform *);
 
 /* Choose the action's camera pose from active ally and enemy height maxima. */
 void btlChooseCameraPoseByActorHeights(CameraPoseAction *action) {
@@ -6590,7 +6590,7 @@ void btlChooseCameraPoseByActorHeights(CameraPoseAction *action) {
         case 0:
         case 1:
             if (enemyHeight <= 500.0f) {
-                func_001E4720(action, (f32 *)&action->fromPose, (u8 *)&action->savedPose);
+                func_001E4720(&action->transform, &action->fromPose, &action->savedPose);
             } else {
                 btlPrepareActionCameraPoseWithActorClearance(action, (f32 *)&action->fromPose, (u8 *)&action->savedPose);
             }
@@ -7378,7 +7378,70 @@ void func_001E4708(void *unit, f32 *pose, u8 *out) {
     btlPrepareUnitPoseWithTiltRotation(unit, pose, out);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4720);
+/* vu0 routine: frame the leftmost marked unit in two camera poses. */
+void func_001E4720(CameraPoseTransform *source, CameraPoseTransform *from,
+                   CameraPoseTransform *to) {
+    f32 point[4];
+    f32 center[4];
+    f32 height;
+    f32 fov;
+    f32 minX;
+    f32 length;
+    BattleController *scene;
+    BtlUnit *unit;
+    BtlUnit *selected;
+    s32 first;
+    u32 flags;
+
+    scene = (BattleController *)btlGetRuntime();
+    fov = source->fov;
+    from->fov = fov;
+    to->fov = fov;
+    func_001F66D8(0x400, &height, 0);
+    VU0_STORE_VF(vf10, center);
+    center[1] = -height;
+    first = 1;
+    selected = NULL;
+    minX = 0.0f;
+    for (unit = (BtlUnit *)scene->actors; unit != NULL; unit = unit->nextActor) {
+        flags = unit->flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                btlUnitGetMuzzlePosVU(unit);
+                VU0_STORE_VF(vf10, point);
+                if (first) {
+                    selected = unit;
+                    first = 0;
+                    minX = point[0];
+                } else if (point[0] < minX) {
+                    minX = point[0];
+                    selected = unit;
+                }
+            }
+        }
+    }
+    btlUnitGetMuzzlePosVU(selected);
+    VU0_STORE_VF(vf10, point);
+    point[1] = -btlUnitGetTopY(selected);
+    VU0_LOAD_VF(vf10, center);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_LOAD_VF(vf11, point);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, from->direction);
+    from->distance = length + selected->cameraRadius * selected->scale * 3.5f /
+                              func_002FA148(fov * 0.5f);
+    btlCopyMotionTransform((u8 *)to, (u8 *)from);
+    func_002DD688(-(45.0f * 0.017453293f));
+    VU0_LOAD_VF(vf10, to->direction);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    to->distance = length + selected->cameraRadius * selected->scale * 3.0f /
+                            func_002FA148(fov * 0.5f);
+    func_001DB698(from);
+    func_001DB698(to);
+}
 
 /* vu0 routine: frame the two unit groups using their bounding extents. */
 void func_001E4960(CameraPoseTransform *source, CameraPoseTransform *out) {

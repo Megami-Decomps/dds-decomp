@@ -318,7 +318,7 @@ void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 m
     }
 }
 
-void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal) {
+void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused) {
     state->unk14 = vertical;
     state->unk18 = horizontal;
 }

@@ -144,7 +144,9 @@ typedef struct BtlState {
     void (*bossCleanup)(void); /* 0x5C8 */
     u8 pad5CC[0x58];
     void (*afterUnitUpdate)(void); /* 0x624 */
-    u8 pad628[0xC4];
+    u8 pad628[0x3C];
+    s32 (*actionCameraStepHook)(BtlUnit *); /* 0x664: nonzero handles the camera step. */
+    u8 pad668[0x84];
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
     u8 pad6F0[0x28];
     struct BattleLinkedEffectState *effect; /* 0x718 */
