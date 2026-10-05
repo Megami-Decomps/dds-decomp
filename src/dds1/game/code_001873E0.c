@@ -149,7 +149,49 @@ extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
 extern void sdfAppendPacket();
 
-INCLUDE_ASM(const s32, "game/code_001873E0", func_00187598);
+extern void effAppendBlurRenderState(void *, s32, u32);
+extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
+extern void effDrawBlurListWithFramePacket(void *);
+extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
+
+void func_00187598(EffBlurScaleWork *work) {
+    void *list;
+    EffBlurScaleSlot *slot;
+    s32 count;
+    u32 sourceColor;
+    u32 alpha;
+
+    if (func_0011E278() == 0) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        effAppendBlurRenderState(list, work->params.unk10, work->sourceHandle);
+        slot = work->slots;
+        if (work->params.count > 0) {
+            count = work->params.count;
+            do {
+                if (slot->phase >= 0.0f) {
+                    slot->quad.displacement = work->params.unk18 * sdfSinPoly(slot->angle) *
+                                              (1.0f - slot->phase) + 1.0f;
+                    sourceColor = work->params.color;
+                    alpha = (u32)((f32)(sourceColor >> 24) * (1.0f - slot->phase));
+                    slot->quad.color = (sourceColor & 0xFFFFFF) | (alpha << 24);
+                    effBlurSecondUpdateSlotRect(work, slot);
+                    effAppendBlurRectanglePackets(list, &slot->quad, 1);
+                    slot->angle += work->params.angleStep;
+                    slot->phase += work->params.phaseStep;
+                    if (slot->phase > 1.0f) {
+                        effBlurResetScaleSlot(work, slot);
+                    }
+                } else {
+                    slot->phase += work->params.phaseStep;
+                }
+                count--;
+                slot++;
+            } while (count != 0);
+        }
+        effDrawBlurListWithFramePacket(list);
+    }
+}
 
 void effBlurBuildSamplingQuad(source, data, fixedPoint)
     EffBlurQuad *source;
