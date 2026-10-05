@@ -525,7 +525,7 @@ typedef struct BdWork {
     s32 sourceHeight;    /* 0x80 */
     u32 savedColors[4];  /* 0x84 */
     s32 slotOffset;      /* 0x94 */
-    u8 pad98[4];
+    s32 unk98;          /* 0x98: initialized from the source descriptor's final halfword. */
     union {
         s32 address;
         u32 bits;
@@ -547,7 +547,11 @@ typedef struct EffectSlotDescription {
     s32 width;
     s32 height;
     s32 colors[4];
-    u8 pad64[0x1C];
+    u32 cornerColors[4]; /* 0x64: reordered into the live/saved corner colors. */
+    s32 widthOverride;   /* 0x74: zero selects the source bounds' width. */
+    s32 heightOverride;  /* 0x78: zero selects the source bounds' height. */
+    u16 initialDelay;    /* 0x7C: loaded into each timed state's delay before its +1. */
+    u16 unk7E;
 } EffectSlotDescription;
 
 /* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */
