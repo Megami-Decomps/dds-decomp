@@ -1002,16 +1002,6 @@ typedef struct SdfTexHead {
     s32 format;
 } SdfTexHead;
 
-/* Native graph target: two color buffers followed by the shared depth buffer. */
-typedef struct SdfGraphObj {
-    s16 width;
-    s16 unk2;
-    s16 height;
-    u8 bufferFormat;
-    u8 auxiliaryFormat;
-    SdfTexHead *buffers[3];
-} SdfGraphObj;
-
 typedef struct SdfSceneDrawPacket {
     SdfPacket header;    /* 0x00 */
     u64 draw[8];         /* 0x20 */
@@ -1033,8 +1023,8 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     s32 depthFormat;
 
     sdfInitializeDmaReferenceTag(&packet->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
-    frameAddress = view->buffers[bufferIndex]->address;
-    depthAddress = view->buffers[SDF_GRAPH_DEPTH_BUFFER_INDEX]->address;
+    frameAddress = view->buffers[bufferIndex]->word;
+    depthAddress = view->buffers[SDF_GRAPH_DEPTH_BUFFER_INDEX]->word;
     width = view->width;
     frameFormat = view->bufferFormat;
     height = view->height;
@@ -1434,7 +1424,7 @@ void func_0032EB80(SdfListHead *drawList, SdfListHead *linkedList,
 
     sdfInitializeExtendedDrawPacket(
         drawPacket, destination->address, destination->width,
-        destination->format, destinationX, destinationY, D_0040B290.buffers[0]->address,
+        destination->format, destinationX, destinationY, D_0040B290.buffers[0]->word,
         D_0040B290.width, D_0040B290.bufferFormat, sourceX, sourceY, transferWidth,
         transferHeight, 2);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);

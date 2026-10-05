@@ -112,6 +112,16 @@ typedef struct {
     u32 word;
 } SdfTexResource;
 
+/* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
+typedef struct SdfGraphObj {
+    s16 width;
+    s16 unk2;
+    s16 height;
+    u8 bufferFormat;
+    u8 auxiliaryFormat;
+    SdfTexResource *buffers[3];
+} SdfGraphObj;
+
 /* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
 typedef struct SdfTex {
     struct SdfTex *next;

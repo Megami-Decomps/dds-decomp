@@ -6,15 +6,6 @@
 #define SDF_GRAPH_UNCACHED_ALIAS 0x20000000
 #define SDF_GS_FRAMEBUFFER_PAGE_SHIFT 11
 
-typedef struct SdfGraphObj {
-    s16 width;
-    s16 unk2;
-    s16 height;
-    u8 bufferFormat;
-    u8 auxiliaryFormat;
-    SdfTexResource *buffers[3];
-} SdfGraphObj;
-
 extern SdfGraphObj D_003980E0;
 extern u8 D_003BD2E8;
 extern u8 D_003BD9DC;
