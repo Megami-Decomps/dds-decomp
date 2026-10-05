@@ -198,7 +198,24 @@ void sdfQuaternionNormalize(float *values) {
     values[3] /= length;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00310D28);
+/* Quaternion from an axis and angle. */
+void func_00310D28(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
+    f32 axis[4];
+    f32 a;
+    f32 b;
+
+    axis[0] = x;
+    axis[1] = y;
+    axis[2] = z;
+    axis[3] = 1.0f;
+    a = fsqrtf((1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) * 0.5f);
+    b = fsqrtf((1.0f + sdfEvaluateCosineViaSinePhaseShift(angle)) * 0.5f);
+    func_0030F8D0(axis);
+    out[0] = axis[0] * a;
+    out[1] = axis[1] * a;
+    out[2] = axis[2] * a;
+    out[3] = b;
+}
 
 /* Quaternion rotating direction `from` onto `to`. */
 void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
