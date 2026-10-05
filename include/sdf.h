@@ -50,7 +50,10 @@ typedef struct SdfBattleParameters {
     f32 levelValuesC[99]; /* 0x67C */
     u8 pad808[0xB8];
     f32 adjustmentScale[7]; /* 0x8C0: signed adjustment -3..3 */
-    u8 pad8DC[0x98];
+    u8 rewardLevelAllowance; /* 0x8DC: level gap before reducing defeat experience. */
+    u8 pad8DD[3];
+    f32 rewardDivisor; /* 0x8E0: zero leaves defeat experience unreduced. */
+    u8 pad8E4[0x90];
     f32 rewardLevelScale[31 * 2]; /* 0x974: level difference and reward kind */
 #ifdef VERSION_DDS2
     u8 padA6C[0x74];
@@ -60,7 +63,9 @@ typedef struct SdfBattleParameters {
     f32 enemyEntryScaleB[7]; /* 0xB34 */
     u8 padB50[0x1C];
     f32 specialAffinityScale; /* 0xB6C */
-    u8 padB70[0x34];
+    u8 padB70[0x10];
+    f32 majinRewardScale; /* 0xB80: DDS2 battle-mode-3 experience multiplier. */
+    u8 padB84[0x20];
     f32 partyHpScale[10]; /* 0xBA4 */
     f32 enemyHpScale[10]; /* 0xBCC */
     f32 hekatoRatioScale; /* 0xBF4 */

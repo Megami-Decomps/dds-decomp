@@ -182,7 +182,9 @@ typedef struct BattleController {
     u8 pad_220[0x28];
     SceneTask *taskHead; /* 0x248 */
     UiObject *actors;
-    u8 pad_250[0x20];
+    u8 pad_250[0x1E];
+    u8 mode; /* 0x26E: mode 3 scales defeat experience in DDS2. */
+    u8 pad26F;
     u16 variant; /* 0x270 */
     u8 pad_272[0x22];
     s32 adjustmentRecordIndex; /* 0x294 */
@@ -192,7 +194,13 @@ typedef struct BattleController {
     s32 drawTask;
     u8 pad2C8[0x14];
     BattleItemDrop itemDrops[3];
-    u8 pad2E8[0x3F4];
+    s32 moneyEarned; /* 0x2E8 */
+    u8 pad2EC[4];
+    s32 experienceEarned; /* 0x2F0 */
+    s32 epEarned; /* 0x2F4 */
+    u8 pad2F8[4];
+    u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
+    u8 pad2FE[0x3DE];
     s32 (*commandRangeOverride)(UiObject *, s32);
 } BattleController;
 
@@ -2080,7 +2088,9 @@ typedef struct DatSkillOwner {
 /* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
 typedef struct DatEnemyRecord {
     u32 flags;            /* 0x00 */
-    u8 pad04[0x14];
+    u8 pad04;
+    u8 level;             /* 0x05 */
+    u8 pad06[0x12];
     u16 skills[8];        /* 0x18 */
     s32 money;            /* 0x28 */
     u16 unk2C;
