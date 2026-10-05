@@ -34,7 +34,9 @@ typedef struct ActionUnit {
     u8 pad1C[4];
     f32 verticalOffset; /* 0x20: lifted for special action visual */
     s32 parentAction;  /* 0x24 */
-    u8 pad28[0x28];
+    u8 pad28[8];
+    f32 position[4]; /* 0x30: formation actor position */
+    u8 pad40[0x10];
     f32 cameraPointAHeight; /* 0x50 */
     u8 pad54[0x8C];
     f32 cameraPointBHeight; /* 0xE0 */
@@ -396,7 +398,7 @@ extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
 extern s64 btlStartTask(void *);
 
-extern void func_001E3108(void *, void *);
+extern void func_001E3108(void *, f32 *);
 
 extern void btlSetUnitPosition(void *, void *);
 
@@ -1055,8 +1057,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit) {
     s32 delayPending = func_001B39E8(4) < (u32)(actionTime + BTL_LOW_HP_ACTION_DELAY);
 
     if (context->lowHpActionHold <= 0) {
-        /* The canonical header leaves HP/max-HP in pad126. */
-        if (delayPending == 0 && *(u16 *)unit->pad126 * BTL_HEALTH_RATE_SCALE / *(u16 *)(unit->pad126 + 2) < BTL_LOW_HP_PERCENT_LIMIT && btlIsGroup400CountAtMost(unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
+        if (delayPending == 0 && unit->hp * BTL_HEALTH_RATE_SCALE / unit->maxHp < BTL_LOW_HP_PERCENT_LIMIT && btlIsGroup400CountAtMost(unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
             bucketRoll = btlRollAiBucket();
             conditionMet = bucketRoll < BTL_LOW_HP_BUCKET_LIMIT;
         }
@@ -1425,12 +1426,11 @@ s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
     return 0;
 }
 
-/* The tested stat halfword at +0x12A is still padding in the canonical header. */
 s32 btlAnyGroupUnitHasZeroStat(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
-            *(u16 *)(battler->pad126 + 4) == 0) {
+        if ((battler->flags64 & 0x221) == 0x201 &&
+            battler->unk12A == 0) {
             return 1;
         }
     }
@@ -2700,15 +2700,17 @@ void btlCommitSelectedUnit(void) {
     BtlUnit *unit = ctrl->unit;
 
     if (unit != 0) {
-        /* Direct union-component updates change the retail instruction sequence. */
-        ((u32 *)&unit->flags64)[1] &= ~0x80;
-        ((u32 *)&unit->flags64)[1] &= ~0x100;
-        ((u32 *)&unit->flags64)[0] |= 0x100;
+        u32 state = unit->stateFlags;
+        u32 flags = unit->flags | 0x100;
+        state &= ~0x80;
+        state &= ~0x100;
+        unit->stateFlags = state;
         ctrl->unit = 0;
+        unit->flags = flags;
         btlRefreshUnitMotionSelection(unit);
-        ((u32 *)&unit->flags64)[0] |= 8;
+        unit->flags |= 8;
         if (ctrl->pending != 0) {
-            *(u16 *)unit->pad126 = 1;
+            unit->hp = 1;
             ctrl->pending = 0;
         }
     }
@@ -3317,7 +3319,7 @@ void btlRecenterActorsAroundLead(void) {
         func_001E3108(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR(&lead->positionX, pos);
+        PCP_COPY_VECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
             if (unit->flags & 1) {
@@ -3325,7 +3327,7 @@ void btlRecenterActorsAroundLead(void) {
                     if (unit != lead) {
                         func_001E3108(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR(&unit->positionX, pos);
+                        PCP_COPY_VECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -4197,7 +4199,7 @@ void btlCenterMarkedFormationAroundLead(void) {
         pos[2] = 200.0f;
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR((u8 *)lead + 0x30, pos);
+        PCP_COPY_VECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = scene->units; unit != 0; unit = unit->next) {
             if (unit->flags & 1) {
@@ -4205,7 +4207,7 @@ void btlCenterMarkedFormationAroundLead(void) {
                     if (unit != lead) {
                         func_001E3108(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR((u8 *)unit + 0x30, pos);
+                        PCP_COPY_VECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -6115,7 +6117,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
         return 0;
     }
     battle = (BattleActionContext *)btlGetRuntime();
-    statIndex = (u8 *)&battle->effect->actor;
+    statIndex = &battle->effect->statIndex;
     if (*statIndex >= 5) {
         return 0;
     }
@@ -6180,7 +6182,7 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
     battle = (BattleActionContext *)btlGetRuntime();
     if (battle->battleId == 0x31b) {
         /* Only the low byte at +0x00 changes; other paths use the full word as an actor. */
-        ((u8 *)&battle->effect->actor)[0] = value;
+        battle->effect->statIndex = value;
     }
 }
 
@@ -6331,7 +6333,7 @@ void btlClearSpecialEnemyEntryFlags(void) {
     }
 }
 
-/* This effect path keeps its own view of the unit word at +0x12E. */
+
 typedef struct BattleEffectUnitMask {
     u8 pad00[0x110];
     u32 flags;
@@ -6355,37 +6357,21 @@ void btlBindEffectUnitAndClearStateFlags(BattleActionUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00226AB0);
 
-/* This effect path treats the word normally used as an actor pointer at +0x114
- * as bit flags; keep the view separate from BattleActionUnit. */
-typedef struct BattleEffectUnitView {
-    u8 pad00[0x110];
-    u32 flags;
-    u32 stateBits;
-} BattleEffectUnitView;
-
-/* Here +0x10 is a float, although other effect paths use it as a handle. */
-typedef struct BattleEffectResetView {
-    BattleEffectUnitView *actor;
-    u8 pad04[0xC];
-    f32 value10;
-    f32 speed;
-} BattleEffectResetView;
 
 void btlBeginEffectActorFadeOut(void) {
-    BattleEffectResetView *effect = (BattleEffectResetView *)((BattleActionContext *)btlGetRuntime())->effect;
-    BattleEffectUnitView *actor = effect->actor;
+    BattleEffectState *effect = ((BattleActionContext *)btlGetRuntime())->effect;
+    BtlUnit *actor = effect->actor;
     if (actor != 0) {
-        u32 state = actor->stateBits;
-        u32 flags = actor->flags;
+        u32 state = actor->stateFlags;
+        u32 flags = actor->flags | 0x100;
         state &= ~0x80;
         state &= ~0x100;
-        flags |= 0x100;
         effect->actor = 0;
         actor->flags = flags;
-        actor->stateBits = state;
+        actor->stateFlags = state;
         btlRefreshUnitMotionSelection(actor);
         actor->flags |= 8;
-        effect->value10 = -125.0f;
+        effect->height = -125.0f;
         effect->speed = 20.0f;
     }
 }
@@ -6399,7 +6385,7 @@ void btlResetEffectState(void) {
     state->value = 0;
     state->timer = 0;
     state->effect = 0;
-    state->actor = 0;
+    state->owner = 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041B4D0);

@@ -2168,7 +2168,7 @@ void btlSelectSlotEntries(void) {
     if (readyEntry != NULL) {
         readyEntry->unk_0E = 0;
     }
-    memcpy((u8 *)effectState + 0x14, activeEntry->effectData, 0x30);
+    memcpy(effectState + 5, activeEntry->effectData, 0x30);
     for (i = 0; i < 24; i++) {
         activeEntry->effectData[i] = 0;
     }
@@ -2192,7 +2192,7 @@ void btlRestoreSlotEntriesFromEffect(void) {
             }
         }
     }
-    memcpy(activeEntry->effectData, (u8 *)effectState + 0x14, 0x30);
+    memcpy(activeEntry->effectData, effectState + 5, 0x30);
     activeEntry->unk_06 = activeEntry->unk_08;
 }
 
@@ -2291,7 +2291,6 @@ void btlBeginEffectActorFadeOut(void) {
         actor->stateFlags = state;
         btlRefreshUnitMotionSelection(actor);
         actor->flags |= 8;
-        /* +0x10 is a float in this effect variant, but a u32 in BattleEffectState. */
         *(f32 *)((u8 *)effect + 0x10) = -125.0f;
         effect->speed = 20.0f;
     }
@@ -2307,7 +2306,7 @@ void btlResetEffectState(void) {
     data->value = 0;
     data->timer = 0;
     data->effect = 0;
-    data->actor = 0;
+    data->owner = 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5D50);
@@ -2451,7 +2450,7 @@ s32 btlGetEffectTaskActorMatchCode(u8 *task) {
         return -1;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
-    return effect->actor == (u32)((BtlTask *)task)->unit ? 12 : -1;
+    return effect->owner == (u32)((BtlTask *)task)->unit ? 12 : -1;
 }
 
 extern s32 btlCreateCommandSoundUpdateTask();
@@ -2473,7 +2472,7 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
         return -1;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
-    if (effect->actor != (u32)task->unit) {
+    if (effect->owner != (u32)task->unit) {
         return -1;
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -2492,7 +2491,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002069C0);
 s32 btlIsEffectActor(s32 actor) {
     s32 effectActor;
 
-    effectActor = ((BtlState *)btlGetRuntime())->effect->actor;
+    effectActor = ((BtlState *)btlGetRuntime())->effect->owner;
     if (effectActor == 0) {
         return 0;
     }
@@ -2774,7 +2773,7 @@ u32 btlGetEffectActor(void) {
     s32 battle;
 
     battle = btlGetRuntime();
-    return ((BtlState *)battle)->effect->actor;
+    return ((BtlState *)battle)->effect->owner;
 }
 
 s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
@@ -3544,10 +3543,10 @@ void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task) {
                     if ((*(u16 *)(task + 0x26) & 0x800) == 0) {
                         effect->flags |= 4;
                         PCP_COPY_VECTOR(target->position, unit->position);
-                        btlSetUnitPosition(target, (u8 *)unit + 0x60);
+                        btlSetUnitPosition(target, unit->currentPosition);
                         actor = effect->actor;
                         PCP_COPY_VECTOR(actor->rotation, unit->rotation);
-                        btlSetUnitRotation(actor, (u8 *)unit + 0x70);
+                        btlSetUnitRotation(actor, unit->orientation);
                         btlFlagUnitDefeatCandidate(effect->actor);
                     }
                 }

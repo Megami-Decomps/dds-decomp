@@ -1832,7 +1832,7 @@ void btlAdvanceUnitWhenActionGateClears(u32 arg0) {
 typedef struct BattleActionState {
     void (*start)(void *);
     void (*update)(void *);
-    void (*finish)(void *);
+    const char *name; /* +8: debug label, not a finish callback. */
 } BattleActionState;
 
 extern BattleActionState D_00359B28[];
@@ -10340,7 +10340,65 @@ void btlPlaceTripleFormationAroundTarget(BattleActionLinkState *link, BtlUnit *f
         btlUnitFaceTarget((u8 *)slot[2], (u8 *)target);
     }
 }
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F57D0);
+/* vu0 routine: Place three indexed actors around the middle actor's facing and muzzle. */
+void func_001F57D0(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+    BtlUnit *slot[3];
+    f32 center[4];
+    f32 pos[4];
+    f32 dir[4];
+    f32 rotation[4];
+    f32 radius;
+    u32 i;
+
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(link->unit->flags & 0x600);
+    slot[0] = NULL;
+    slot[1] = NULL;
+    slot[2] = NULL;
+    slot[link->unit->lookupId] = link->unit;
+    slot[first->lookupId] = first;
+    slot[second->lookupId] = second;
+    VU0_LOAD_VF(vf10, &slot[1]->orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_NEGATE_XYZ(vf11);
+    VU0_STORE_VF(vf11, dir);
+    radius = slot[1]->unkBC * slot[1]->scale;
+    radius += 100.0f;
+    VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF_UNCLOBBERED(vf10, center);
+    btlUnitGetMuzzlePosVU(slot[1]);
+    VU0_LOAD_VF(vf11, center);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, center);
+    center[1] = 0.0f;
+    for (i = 0; i < 3; i++) {
+        radius = slot[i]->unkBC * slot[i]->scale;
+        radius += 100.0f;
+        if (i != 1) {
+            if (i == 0) {
+                func_002DD688(2.094395f);
+            } else if (i == 2) {
+                func_002DD688(-2.094395f);
+            }
+            VU0_LOAD_VF(vf10, dir);
+            VU0_ROTATE_VEC(vf10, vf10);
+        } else {
+            VU0_LOAD_VF(vf10, dir);
+        }
+        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, center);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        btlSetUnitPosition((u8 *)slot[i], pos);
+        if (btlAimHorizontalDirectionVU(pos, center) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+            btlSetUnitRotation((u8 *)slot[i], rotation);
+        }
+    }
+}
 
 void btlOrientFrontAndBackUnitsTowardTargets(BattleActionLinkState *link, BtlUnit *a, BtlUnit *b) {
     BtlUnit *front = 0;

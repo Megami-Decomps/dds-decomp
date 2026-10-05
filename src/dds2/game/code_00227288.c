@@ -625,12 +625,11 @@ void btlMarkBattleUnitEntryForActiveKind(BtlUnit *unit) {
     }
 }
 
-/* The +0x126 stat halfword is still padding in the protected canonical header. */
 void btlSetAlternateKindForEnabledSpecialUnit(BtlUnit *unit) {
     if ((unit->flags & 0x400) &&
         unit->mode == 0x144 &&
         mdlFlagTest(0x841)) {
-        *(u16 *)unit->pad126 = 1;
+        unit->hp = 1;
     }
 }
 
