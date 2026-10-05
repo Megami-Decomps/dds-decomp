@@ -3,6 +3,9 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+extern s32 evtIsMenuTableEntryEnabled(s32 *);
+extern void func_00237428();
+
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
 extern void *kwlnTaskGetUserValue();
@@ -165,7 +168,7 @@ typedef struct EvtRuntime {
     u8 pad22D4[0x20];
     s32 entryCursor; /* 0x22F4 */
     s32 entryFirst;  /* 0x22F8 */
-    u8 pad22FC[0x4];
+    s32 frameColumn; /* 0x22FC: column cursor within the selected frame row */
     s32 frameFirst; /* 0x2300 */
     s32 frameCursor; /* 0x2304 */
     EvtRuntimeGroup *frameGroup; /* 0x2308: selected entry from groups */
@@ -203,6 +206,13 @@ typedef struct {
 } EvtTblEntry; /* 0xA bytes */
 extern EvtTblEntry D_00368950[];
 extern s8 D_00368952[];
+
+typedef struct EvtFrameTableEntry {
+    s16 columns;
+    u8 pad02[8];
+} EvtFrameTableEntry;
+
+extern EvtFrameTableEntry D_00368768[];
 
 extern u16 evtSkyTransitionActive;
 extern u16 D_003BBE78;
@@ -850,7 +860,59 @@ s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002386E0);
+s32 func_002386E0(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 shown = 20;
+    s32 count;
+    s32 result;
+    s16 columns;
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *node;
+
+    if (ctx->entryCount == 0) {
+        return 0;
+    }
+    group = ctx->frameGroup;
+    if (D_00368768[group->type].columns == 0) {
+        return -1;
+    }
+    list = sdfCreateResetPacketList();
+    func_00235598(list, x, y, 28, 21, ctx->frameCursor,
+                 group->childCount + 1, (u8 *)ctx, func_00237428, evtDrawFrameListRow);
+    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
+    if (ctx->actionMode != 5) {
+        return 0;
+    }
+    columns = D_00368768[group->type].columns;
+    if (group->childCount + 1 < shown) {
+        shown = group->childCount + 1;
+    }
+    if (evtIsMenuTableEntryEnabled(&group->type) == 1) {
+        if (D_00324510[0x26] < 0) {
+            if (ctx->frameCursor + ctx->frameFirst == 0) {
+                return -4;
+            }
+        } else if (D_00324510[0x27] < 0) {
+            count = 0;
+            for (node = group->children; node != NULL; node = node->next) {
+                count++;
+            }
+            if (ctx->frameCursor + ctx->frameFirst == count) {
+                return -4;
+            }
+        }
+    }
+    result = kwlnStepTwoListCursors(0, columns, group->childCount + 1,
+                                  columns, shown, NULL, &ctx->frameCursor,
+                                  &ctx->frameColumn, &ctx->frameFirst);
+    if (D_00324510[0x20] < 0) {
+        result = -2;
+    }
+    if (D_00324510[0x2D] < 0) {
+        result = -3;
+    }
+    return result;
+}
 
 
 extern EvtWorldObject *dds3GetWorldObject();
