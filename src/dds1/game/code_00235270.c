@@ -108,9 +108,9 @@ typedef struct EvtRuntimeGroup {
     u8 pad0C[4];
     EvtWorldNode *info; /* 0x10 */
     u8 pad14[8];
-    u16 metadataValue; /* 0x1C */
-    u8 metadataByte1;  /* 0x1E */
-    u8 metadataByte2;  /* 0x1F */
+    s16 metadataValue; /* 0x1C */
+    s8 metadataByte1;  /* 0x1E */
+    s8 metadataByte2;  /* 0x1F */
     u8 pad20[0x30];
     s32 childCount; /* 0x50 */
     EvtRuntimeChild *children; /* 0x54 */
@@ -1253,7 +1253,57 @@ s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
     return D_00368952[runtime->tableColumn + runtime->frameGroup->type * 10];
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002397C8);
+extern char *D_00368AA0[];
+extern char *D_00368AB0[];
+extern char D_003BC290[];
+extern char D_003BC298[];
+extern char D_003BC2A0[];
+extern s8 D_003BC268[3];
+
+void func_002397C8(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
+    s32 offset = 0;
+    EvtRuntimeGroup *group = runtime->frameGroup;
+    s32 i;
+    s32 field;
+    s32 style;
+
+    if (hidden != 0) {
+        return;
+    }
+    for (i = 0; i < D_00368950[group->type].enabled; i++) {
+        field = D_00368952[i + group->type * 10];
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + offset * 192, y,
+            0xFEFFFF, 14, D_00368AA0[field]));
+        style = i == runtime->tableColumn && runtime->actionMode == 15 ? 4 : 0;
+        switch (field) {
+        case 0:
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                y + 0x80, 0xFEFFFF, style, D_003BC290, runtime->frameGroup->metadataValue));
+            break;
+        case 1:
+            if (runtime->frameGroup->metadataByte1 < 3) {
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                    y + 0x80, 0xFEFFFF, style, D_003BC088,
+                    D_00368AB0[runtime->frameGroup->metadataByte1]));
+            } else {
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                    y + 0x80, 0xFEFFFF, style, D_003BC088,
+                    runtime->entryName[runtime->frameGroup->metadataByte2]));
+            }
+            break;
+        case 2:
+            if (runtime->frameGroup->metadataByte1 == 0) {
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                    y + 0x80, 0xFEFFFF, style, D_003BC298));
+            } else {
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                    y + 0x80, 0xFEFFFF, style, D_003BC2A0));
+            }
+            break;
+        }
+        offset += D_003BC268[field];
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA70);
 
@@ -2687,6 +2737,8 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC250);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC258);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC260);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC268);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC270);
 
