@@ -4,14 +4,14 @@
 
 extern u32 kwlnDrawControlFlags;
 extern u8 kwlnDrawOverlayEnabled;
-extern u16 kwlnDrawOverlayAlpha;
-extern u16 kwlnDrawOverlayScale;
+extern s16 kwlnDrawOverlayAlpha;
+extern s16 kwlnDrawOverlayScale;
 extern u16 D_003BD6B4;
 extern u16 D_003BD6B6;
-extern u16 D_003BD6B8;
-extern u16 D_003BD6BA;
-extern u16 D_003BD6BC;
-extern u16 D_003BD6BE;
+extern s16 D_003BD6B8;
+extern s16 D_003BD6BA;
+extern s16 D_003BD6BC;
+extern s16 D_003BD6BE;
 
 extern u32 D_00324770[4];
 
@@ -84,6 +84,10 @@ typedef struct {
     u32 size;
 } KwlnScatterBlurParams;
 
+/* Staggered (ripple) blur parameters. The staged block and the interpolated
+ * body are both 8-byte aligned and the compiler copies between them with
+ * aligned 8-byte moves, so the type carries that alignment; a body reached
+ * through a cast pointer is still copied four bytes at a time. */
 typedef struct {
     u32 count;
     f32 phaseStep;
@@ -96,7 +100,7 @@ typedef struct {
     u32 x;
     u32 y;
     u32 size;
-} KwlnScaleBlurParams;
+} KwlnScaleBlurParams __attribute__((aligned(8)));
 
 extern KwlnSolidRectParams kwlnColorRectangleParameters;
 extern KwlnResourceRectParams kwlnTexturedSquareParameters;
@@ -691,7 +695,275 @@ void kwlnDrawEnableD30(s32 duration) {
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_001071E8);
+/* Interpolated parameter bodies of the per-frame update below. The event
+ * polygon-movie blend helpers combine the block saved when the transition
+ * started with the staged block into one of these, and the effCopy* call then
+ * hands the result to the effect. */
+extern KwlnPixelBlurParams D_003C2510;
+extern KwlnScatterBlurParams D_003C2540;
+extern KwlnScaleBlurParams D_003C2570;
+extern KwlnBlurRectParams D_003C25A0;
+extern KwlnSolidRectParams D_003C25D0;
+extern KwlnResourceRectParams D_003C25F0;
+
+/* The blend helpers replace the parameters, which are the leading fields the
+ * staged block shares with their own parameter block. */
+extern void evtBlendParamsA(s32 enable, f32 t, KwlnBlurRectParams *from, KwlnBlurRectParams *to, KwlnBlurRectParams *out);
+extern void evtBlendParamsB(s32 enable, f32 t, KwlnPixelBlurParams *from, KwlnPixelBlurParams *to, KwlnPixelBlurParams *out);
+extern void evtBlendParamsD(s32 enable, f32 t, KwlnResourceRectParams *from, KwlnResourceRectParams *to, KwlnResourceRectParams *out);
+extern void evtBlendParamsE(s32 enable, f32 t, KwlnScatterBlurParams *from, KwlnScatterBlurParams *to, KwlnScatterBlurParams *out);
+extern void evtBlendParamsF(s32 enable, f32 t, KwlnScaleBlurParams *from, KwlnScaleBlurParams *to, KwlnScaleBlurParams *out);
+extern void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, KwlnSolidRectParams *from, KwlnSolidRectParams *to, KwlnSolidRectParams *out);
+
+/* Advance every running kernel-draw fade and transition by one frame. Each arm
+ * keeps its control bit set while its timer runs: it reinterpolates its
+ * parameter block from the effect's saved live copy or its staged copy, hands
+ * that block to the effect, and clears its bit on the final frame. The overlay
+ * arm ramps the vignette alpha and scale before the vignette is drawn. */
+void func_001071E8(void) {
+    s32 alpha;
+
+    if (kwlnDrawControlFlags & KWLN_DRAW_OVERLAY_TRANSITION_BIT) {
+        D_003BD6B4++;
+        kwlnDrawOverlayAlpha = D_003BD6B8 + D_003BD6B4 * (D_003BD6BC - D_003BD6B8) / D_003BD6B6;
+        kwlnDrawOverlayScale = D_003BD6BA + D_003BD6B4 * (D_003BD6BE - D_003BD6BA) / D_003BD6B6;
+        if (kwlnDrawOverlayAlpha == 0 && kwlnDrawOverlayScale == 0) {
+            kwlnDrawOverlayEnabled = 0;
+        }
+        else {
+            kwlnDrawOverlayEnabled = 1;
+        }
+        if (D_003BD6B4 >= D_003BD6B6) {
+            kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_RECT_TRANSITION_BIT) {
+        if (D_003BD744 < D_003BD746) {
+            D_003BD744++;
+        }
+        evtBlendParamsA(1, (f32)D_003BD744 / (f32)D_003BD746, &D_003C2D60,
+                        &kwlnRectangleBlurParameters, &D_003C25A0);
+        kwlnDrawInitRect(&D_003C25A0.bounds);
+        effCopyRectangleBlurParameters(&D_003C25A0);
+        if (D_003C25A0.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+            effEnableRectangleBlur();
+        }
+        else {
+            effDisableRectangleBlur();
+        }
+        if (D_003BD744 >= D_003BD746) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_RECT_FADE_BIT) {
+        if (kwlnRectangleBlurFadeCounter < kwlnRectangleBlurFadeDuration) {
+            kwlnRectangleBlurFadeCounter++;
+        }
+        D_003C25A0 = kwlnRectangleBlurParameters;
+        alpha = kwlnRectangleBlurStartAlpha + kwlnRectangleBlurFadeCounter *
+                (kwlnRectangleBlurTargetAlpha - kwlnRectangleBlurStartAlpha) /
+                kwlnRectangleBlurFadeDuration;
+        D_003C25A0.color.rgba = (D_003C25A0.color.rgba & 0xFFFFFF) | (alpha << 24);
+        kwlnDrawInitRect(&D_003C25A0.bounds);
+        effCopyRectangleBlurParameters(&D_003C25A0);
+        if (alpha == 0) {
+            effDisableRectangleBlur();
+        }
+        else {
+            effEnableRectangleBlur();
+        }
+        if (kwlnRectangleBlurFadeCounter >= kwlnRectangleBlurFadeDuration) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_FADE_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_TEXTURE_TRANSITION_BIT) {
+        if (D_003BD720 < D_003BD722) {
+            D_003BD720++;
+        }
+        evtBlendParamsB(1, (f32)D_003BD720 / (f32)D_003BD722, &D_003C2C40,
+                        &kwlnTexturedBlurParameters, &D_003C2510);
+        effCopyTexturedBlurParameters(&D_003C2510);
+        if (D_003C2510.source.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+            effEnableTexturedBlur();
+        }
+        else {
+            effDisableTexturedBlur();
+        }
+        if (D_003BD720 >= D_003BD722) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_TEXTURE_FADE_BIT) {
+        if (kwlnTexturedBlurFadeCounter < kwlnTexturedBlurFadeDuration) {
+            kwlnTexturedBlurFadeCounter++;
+        }
+        D_003C2510 = kwlnTexturedBlurParameters;
+        alpha = kwlnTexturedBlurStartAlpha + kwlnTexturedBlurFadeCounter *
+                (kwlnTexturedBlurTargetAlpha - kwlnTexturedBlurStartAlpha) /
+                kwlnTexturedBlurFadeDuration;
+        D_003C2510.source.color.rgba = (D_003C2510.source.color.rgba & 0xFFFFFF) | (alpha << 24);
+        effCopyTexturedBlurParameters(&D_003C2510);
+        if (alpha == 0) {
+            effDisableTexturedBlur();
+        }
+        else {
+            effEnableTexturedBlur();
+        }
+        if (kwlnTexturedBlurFadeCounter >= kwlnTexturedBlurFadeDuration) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_FILTER_TRANSITION_BIT) {
+        if (D_003BD72C < D_003BD72E) {
+            D_003BD72C++;
+        }
+        evtBlendParamsE(1, (f32)D_003BD72C / (f32)D_003BD72E, &D_003C2CA0,
+                        &kwlnFilterBlurParameters, &D_003C2540);
+        effCopyFilterBlurParameters(&D_003C2540);
+        if (D_003C2540.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+            effEnableFilterBlur();
+        }
+        else {
+            effDisableFilterBlur();
+        }
+        if (D_003BD72C >= D_003BD72E) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_FILTER_FADE_BIT) {
+        if (kwlnFilterBlurFadeCounter < kwlnFilterBlurFadeDuration) {
+            kwlnFilterBlurFadeCounter++;
+        }
+        D_003C2540 = kwlnFilterBlurParameters;
+        alpha = kwlnFilterBlurStartAlpha + kwlnFilterBlurFadeCounter *
+                (kwlnFilterBlurTargetAlpha - kwlnFilterBlurStartAlpha) /
+                kwlnFilterBlurFadeDuration;
+        D_003C2540.color.rgba = (D_003C2540.color.rgba & 0xFFFFFF) | (alpha << 24);
+        effCopyFilterBlurParameters(&D_003C2540);
+        if (alpha == 0) {
+            effDisableFilterBlur();
+        }
+        else {
+            effEnableFilterBlur();
+        }
+        if (kwlnFilterBlurFadeCounter >= kwlnFilterBlurFadeDuration) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_FADE_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_STAGGERED_TRANSITION_BIT) {
+        if (D_003BD738 < D_003BD73A) {
+            D_003BD738++;
+        }
+        evtBlendParamsF(1, (f32)D_003BD738 / (f32)D_003BD73A, &D_003C2D00,
+                        &kwlnStaggeredBlurParameters, &D_003C2570);
+        effCopyStaggeredBlurParameters(&D_003C2570);
+        if (D_003C2570.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+            effEnableStaggeredBlur();
+        }
+        else {
+            effDisableStaggeredBlur();
+        }
+        if (D_003BD738 >= D_003BD73A) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_STAGGERED_FADE_BIT) {
+        if (kwlnStaggeredBlurFadeCounter < kwlnStaggeredBlurFadeDuration) {
+            kwlnStaggeredBlurFadeCounter++;
+        }
+        D_003C2570 = kwlnStaggeredBlurParameters;
+        alpha = kwlnStaggeredBlurStartAlpha + kwlnStaggeredBlurFadeCounter *
+                (kwlnStaggeredBlurTargetAlpha - kwlnStaggeredBlurStartAlpha) /
+                kwlnStaggeredBlurFadeDuration;
+        D_003C2570.color.rgba = (D_003C2570.color.rgba & 0xFFFFFF) | (alpha << 24);
+        effCopyStaggeredBlurParameters(&D_003C2570);
+        if (alpha == 0) {
+            effDisableStaggeredBlur();
+        }
+        else {
+            effEnableStaggeredBlur();
+        }
+        if (kwlnStaggeredBlurFadeCounter >= kwlnStaggeredBlurFadeDuration) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_COLOR_TRANSITION_BIT) {
+        if (D_003BD750 < D_003BD752) {
+            D_003BD750++;
+        }
+        evtPolygonMovieBlendMatrixParam(1, (f32)D_003BD750 / (f32)D_003BD752, &D_003C2DB0,
+                                        &kwlnColorRectangleParameters, &D_003C25D0);
+        kwlnDrawInitRect(&D_003C25D0.bounds);
+        effCopyColorRectangleParameters(&D_003C25D0);
+        if (D_003C25D0.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+            effEnableColorRectangle();
+        }
+        else {
+            effDisableColorRectangle();
+        }
+        if (D_003BD750 >= D_003BD752) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_COLOR_FADE_BIT) {
+        if (kwlnColorRectangleFadeCounter < kwlnColorRectangleFadeDuration) {
+            kwlnColorRectangleFadeCounter++;
+        }
+        D_003C25D0 = kwlnColorRectangleParameters;
+        alpha = kwlnColorRectangleStartAlpha + kwlnColorRectangleFadeCounter *
+                (kwlnColorRectangleTargetAlpha - kwlnColorRectangleStartAlpha) /
+                kwlnColorRectangleFadeDuration;
+        D_003C25D0.color.rgba = (D_003C25D0.color.rgba & 0xFFFFFF) | (alpha << 24);
+        kwlnDrawInitRect(&D_003C25D0.bounds);
+        effCopyColorRectangleParameters(&D_003C25D0);
+        if (alpha == 0) {
+            effDisableColorRectangle();
+        }
+        else {
+            effEnableColorRectangle();
+        }
+        if (kwlnColorRectangleFadeCounter >= kwlnColorRectangleFadeDuration) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_FADE_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_SQUARE_TRANSITION_BIT) {
+        if (D_003BD75C < D_003BD75E) {
+            D_003BD75C++;
+        }
+        evtBlendParamsD(1, (f32)D_003BD75C / (f32)D_003BD75E, &D_003C2DE0,
+                        &kwlnTexturedSquareParameters, &D_003C25F0);
+        effCopyTexturedSquareParameters(&D_003C25F0);
+        if (D_003C25F0.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+            effEnableTexturedSquare();
+        }
+        else {
+            effDisableTexturedSquare();
+        }
+        if (D_003BD75C >= D_003BD75E) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
+        }
+    }
+    if (kwlnDrawControlFlags & KWLN_DRAW_SQUARE_FADE_BIT) {
+        if (kwlnTexturedSquareFadeCounter < kwlnTexturedSquareFadeDuration) {
+            kwlnTexturedSquareFadeCounter++;
+        }
+        D_003C25F0 = kwlnTexturedSquareParameters;
+        alpha = kwlnTexturedSquareStartAlpha + kwlnTexturedSquareFadeCounter *
+                (kwlnTexturedSquareTargetAlpha - kwlnTexturedSquareStartAlpha) /
+                kwlnTexturedSquareFadeDuration;
+        D_003C25F0.color.rgba = (D_003C25F0.color.rgba & 0xFFFFFF) | (alpha << 24);
+        effCopyTexturedSquareParameters(&D_003C25F0);
+        if (alpha == 0) {
+            effDisableTexturedSquare();
+        }
+        else {
+            effEnableTexturedSquare();
+        }
+        if (kwlnTexturedSquareFadeCounter >= kwlnTexturedSquareFadeDuration) {
+            kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_FADE_BIT;
+        }
+    }
+}
 
 /* vu0 routine: shortest-arc quaternion rotating direction vf10 to vf11. */
 void func_00107DE8(void) {
