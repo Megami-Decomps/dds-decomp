@@ -5610,7 +5610,7 @@ void func_001EAA20(void) {
 
 extern void btlPrepareActionCameraPoseWithActorClearance(void *unit, f32 *pose, u8 *out);
 extern void func_001F20B0(void *unit, f32 *pose, u8 *out);
-extern void func_001F20C8(void *unit, f32 *pose, u8 *out);
+extern void func_001F20C8(BtlCamState *, BtlCamState *, BtlCamState *);
 
 /* Choose the action's camera pose from active ally and enemy height maxima. */
 void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
@@ -5651,7 +5651,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
         case 0:
         case 1:
             if (enemyHeight <= 500.0f) {
-                func_001F20C8(action, action->frontCamera.position, (u8 *)&action->backCamera);
+                func_001F20C8(&action->camera, &action->frontCamera, &action->backCamera);
             } else {
                 btlPrepareActionCameraPoseWithActorClearance(action, action->frontCamera.position, (u8 *)&action->backCamera);
             }
@@ -6484,7 +6484,69 @@ void func_001F20B0(void *unit, f32 *pose, u8 *out) {
     btlPrepareUnitPoseWithTiltRotation(unit, pose, out);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F20C8);
+/* vu0 routine: frame the leftmost marked unit in two camera poses. */
+void func_001F20C8(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
+    f32 point[4];
+    f32 center[4];
+    f32 height;
+    f32 fov;
+    f32 minX;
+    f32 length;
+    BtlWork *work;
+    BtlUnit *unit;
+    BtlUnit *selected;
+    s32 first;
+    u32 flags;
+
+    work = (BtlWork *)btlGetRuntime();
+    fov = source->fov;
+    from->fov = fov;
+    to->fov = fov;
+    func_00208000(0x400, &height, 0);
+    VU0_STORE_VF(vf10, center);
+    center[1] = -height;
+    first = 1;
+    selected = NULL;
+    minX = 0.0f;
+    for (unit = work->actorList; unit != NULL; unit = unit->nextActor) {
+        flags = unit->flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                btlUnitGetMuzzlePosVU(unit);
+                VU0_STORE_VF(vf10, point);
+                if (first) {
+                    selected = unit;
+                    first = 0;
+                    minX = point[0];
+                } else if (point[0] < minX) {
+                    minX = point[0];
+                    selected = unit;
+                }
+            }
+        }
+    }
+    btlUnitGetMuzzlePosVU(selected);
+    VU0_STORE_VF(vf10, point);
+    point[1] = -btlUnitGetTopY(selected);
+    VU0_LOAD_VF(vf10, center);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_LOAD_VF(vf11, point);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, from->direction);
+    from->distance = length + selected->unkC0 * selected->scale * 3.5f /
+                              func_00353228(fov * 0.5f);
+    btlCopyMotionTransform(to, from);
+    func_00336538(-(45.0f * 0.017453293f));
+    VU0_LOAD_VF(vf10, to->direction);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    to->distance = length + selected->unkC0 * selected->scale * 3.0f /
+                            func_00353228(fov * 0.5f);
+    func_001E88A8(from);
+    func_001E88A8(to);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F2308);
 

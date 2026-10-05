@@ -9,7 +9,7 @@
 #define SDF_DRAW_Z_AXIS_VECTOR 4
 #define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
 
-extern void *sdfInitNodeHeaderFromWords(s32 arg0, s32 arg1, s32 arg2);
+extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
 extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
@@ -55,22 +55,18 @@ typedef struct {
 } SdfList;
 
 typedef struct SdfSlotPair {
-    s32 first;
-    s32 second;
+    s32 index;
+    f32 weight;
 } SdfSlotPair;
 
-typedef struct {
-    s32 firstWord;
-    s32 secondWord;
-    s32 thirdWord;
+/* The parsed asset list is separate from the model's two-weight slot buffer. */
+typedef struct SdfAssetPacketTable {
+    u8 pad00[0xC];
     u32 **wordsByIndex;
-} SdfIndexedSlotEntry;
+} SdfAssetPacketTable;
 
 typedef struct SdfSlotEntry {
-    union {
-        SdfSlotPair pair[2];
-        SdfIndexedSlotEntry indexed;
-    } view;
+    SdfSlotPair pair[2];
 } SdfSlotEntry;
 
 typedef struct SdfSlotBuf {
@@ -80,11 +76,11 @@ typedef struct SdfSlotBuf {
     SdfSlotEntry *entries; /* 0x0C */
 } SdfSlotBuf;
 
-typedef struct {
+typedef struct SdfModel {
     SdfList *list;     /* 0x00 */
     u8 pad_0x04[0x04]; /* 0x04 */
     void *assetData;   /* 0x08: retained creation data */
-    void *resources;   /* 0x0C: parsed resource list */
+    SdfAssetPacketTable *resources; /* 0x0C: parsed resource list */
     SdfSlotBuf *slotPairs; /* 0x10: buffer allocated by sdfModelAllocateSlotPairs */
     u8 pad_0x14[0x05]; /* 0x14 */
     u8 flags;          /* 0x19: bit 0 looks up node IDs; bit 2 selects alternate item setup */
@@ -218,9 +214,9 @@ SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
     return packet + 1;
 }
 
-/* Use the indexed view of the first slot entry to initialize a packet header. */
-void *sdfModelWriteIndexedAssetPacket(SdfSlotBuf *slots, s32 index, void *packet, s32 frame) {
-    return sdfInitNodeHeaderFromWords(slots->entries->view.indexed.wordsByIndex[index], packet, frame);
+/* Select an asset packet from the root model's parsed resource table. */
+void *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, void *packet, s32 frame) {
+    return sdfInitNodeHeaderFromWords(model->resources->wordsByIndex[index], packet, frame);
 }
 
 /* A command-list entry: a kind byte followed by per-kind payload words. */
@@ -296,13 +292,13 @@ typedef struct {
     u32 secondVifCode;
 } SdfIndexedPayload;
 
-SdfIndexedPayload *func_002D7F40(SdfModel *model, SdfIndexedCommand *command, void *packet, s32 frame) {
+SdfIndexedPayload *func_002D7F40(SdfDrawNode *node, SdfIndexedCommand *command, void *packet, s32 frame) {
     u32 packed = command->assetIndexAndCount;
     u16 assetIndex = packed >> 16;
     u16 quadwordCount = packed;
     SdfIndexedPayload *payload;
 
-    payload = sdfModelWriteIndexedAssetPacket(model->slotPairs, assetIndex, packet, frame);
+    payload = sdfModelWriteIndexedAssetPacket(node->root, assetIndex, packet, frame);
     payload->control = 0x30;
     payload->quadwordCount = quadwordCount;
     payload->address = command->address & 0x0FFFFFFF;
@@ -385,8 +381,8 @@ void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
         entries = buf->entries;
         for (i = 0; i != count; i++) {
             for (j = 0; j != 2; j++) {
-                entries[i].view.pair[j].first = 0;
-                entries[i].view.pair[j].second = 0;
+                entries[i].pair[j].index = 0;
+                entries[i].pair[j].weight = 0.0f;
             }
         }
         buf->count = count;
