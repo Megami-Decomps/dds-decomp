@@ -2,6 +2,7 @@
 #include "btl.h"
 #include "evt_unit.h"
 #include "pcp_vu0.h"
+#include "sdf_draw.h"
 
 #define EFF_PARAM_WORK_BYTES 8
 #define EFF_PARAM_EXTENDED_WORK_BYTES 0xC
@@ -41,28 +42,13 @@ typedef struct EffParamWorkEx {
 
 /* Model-manager records: initialization and VU scatter use the same context,
  * its inner matrix storage, and its first motion node. */
-typedef struct MdlNode {
-    struct MdlNode *next; /* 0x00 */
-    u8 pad04[4];
-    void *unk08;
-    u8 pad0C[0x10];
-    f32 unk1C;
-    f32 floatValue;       /* 0x20 */
-    u8 pad24[4];
-    s16 searchId;         /* 0x28 */
-    s16 slotIndex;
-    u16 unk2C;
-    u16 unk2E;
-    u8 unk30;
-    u8 pad31[7];
-} MdlNode;
 
 typedef struct MdlInner {
     struct MdlEntryTable *entries; /* 0x00 */
     u8 pad04[4];
     u32 resourceHandle;           /* 0x08 */
     u8 pad0C[8];
-    MdlNode *list;                /* 0x14 */
+    Motion *list;                /* 0x14 */
     u8 unk18;
     u8 flags;                    /* 0x19: bit 0x10 enables anchor dispatch */
     u8 pad1A[2];
@@ -85,8 +71,8 @@ typedef struct MdlCtx {
     } current;                   /* 0x10 */
     u32 *frameList;               /* 0x14 */
     MdlInner *inner;              /* 0x18 */
-    MdlNode *first;               /* 0x1C */
-    MdlNode *slots[4];            /* 0x20 */
+    Motion *first;               /* 0x1C */
+    Motion *slots[4];            /* 0x20 */
     struct MdlDevList *devList;    /* 0x30 */
 } MdlCtx;
 
@@ -306,7 +292,7 @@ void effParamInitWork(MdlCtx *work) {
     mdlBroadcastMasked(work, 0x80808080);
     if (work->first != NULL) {
         mdlAddEntryFlagged(work, 0, 0);
-        work->first->floatValue = 1.0f;
+        work->first->frameStep = 1.0f;
     }
     work->flags &= ~1u;
 }

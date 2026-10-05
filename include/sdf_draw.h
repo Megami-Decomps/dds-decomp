@@ -25,4 +25,48 @@ typedef struct SdfDrawNode {
     u8 worldMatrix[0x40];         /* 0xC0: local transform composed with its parent */
 } SdfDrawNode;
 
+struct SdfMotionManager;
+struct ArrObj;
+
+typedef struct MotionEntry {
+    u16 frameCount;
+    u16 unk02;
+    u32 bindingData[1];
+} MotionEntry;
+
+typedef struct SdfMotionCommand {
+    u32 command;
+    u32 argument;
+} SdfMotionCommand;
+
+/* Resource header followed by the binding commands used to construct a motion. */
+typedef struct MotionTable {
+    u16 unk00;
+    u16 commandCount;
+    MotionEntry **entries;
+    SdfMotionCommand commands[1];
+} MotionTable;
+
+/* SDK motions are allocated as 0x34-byte records; model slots retain these nodes. */
+typedef struct Motion {
+    struct Motion *next;
+    struct SdfMotionManager *owner;
+    MotionTable *motionTable;
+    s32 unkC;
+    struct ArrObj *request;
+    f32 blendDurationFrames;
+    f32 blendStartFrame;
+    f32 currentFrame;
+    f32 frameStep;
+    s32 unk24;
+    s16 searchId;
+    s16 slotIndex;
+    u16 motionIndex;
+    u16 frameCount;
+    u8 state;
+    u8 previousState;
+    u8 loopEnabled;
+    u8 pad33;
+} Motion;
+
 #endif /* SDF_DRAW_H */

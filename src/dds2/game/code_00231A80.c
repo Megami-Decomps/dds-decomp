@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "sdf_draw.h"
 
 extern u8 sdfViewMatrix[];
 
@@ -14,7 +15,7 @@ extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 extern void sdfMultiplyVuMatrixInPlace(void);
 
-extern struct MdlNode *mdlFindNodeById();
+extern Motion *mdlFindNodeById();
 
 /* Sub-record behind MdlCtx.sub (+0x8/+0xA read by func_002183D0/E0). */
 typedef struct MdlSub {
@@ -48,7 +49,7 @@ typedef struct MdlInner {
     u8 unk4[4];  /* 0x4 */
     u32 resourceHandle; /* 0x8: released by mdlReleaseInnerResourceHandle */
     u8 unkC[8];  /* 0xC */
-    struct MdlNode *list; /* 0x14: intrusive node list */
+    Motion *list; /* 0x14: intrusive node list */
     u8 unk18;    /* 0x18 */
     u8 flags19;  /* 0x19: bit 0x10 enables anchor dispatch */
     u8 unk1A[2]; /* 0x1A */
@@ -75,8 +76,8 @@ struct MdlCtx {
     } current;
     u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
     MdlInner *inner;   /* 0x18 */
-    struct MdlNode *first;    /* 0x1C */
-    struct MdlNode *slots[4]; /* 0x20 */
+    Motion *first;    /* 0x1C */
+    Motion *slots[4]; /* 0x20 */
     struct MdlDevList *devList; /* 0x30: device slots released with the model */
 };
 
@@ -89,23 +90,6 @@ typedef struct MdlDevList {
     MdlDevSlot *first; /* 0x0 */
 } MdlDevList;
 
-/* Entry searched by func_00217E10/func_00216BB0 on its s16 id at +0x28.
- * Only the fields read by the matched helpers below are known. */
-typedef struct MdlNode {
-    struct MdlNode *next; /* 0x0 */
-    u8 pad4[4];           /* 0x4 */
-    void *unk8;           /* 0x8: dereferenced by func_00218410 */
-    u8 padC[0x10];        /* 0xC */
-    f32 unk1C;            /* 0x1C: numerically converted to s32 by mdlGetNodeInt1C */
-    f32 floatValue;       /* 0x20: accessed as a float by mdlGet/SetNodeFloat20 */
-    u8 pad24[4];          /* 0x24 */
-    s16 searchId;          /* 0x28: identifies a node in list lookups */
-    s16 slotIndex;         /* 0x2A: slot index used by func_00216B78 */
-    u16 unk2C;            /* 0x2C */
-    u16 unk2E;            /* 0x2E */
-    u8 unk30;             /* 0x30: compared against 5 */
-    u8 pad31[7];          /* 0x31 */
-} MdlNode;
 
 
 typedef struct MdlResourceSelection {
@@ -309,14 +293,14 @@ extern void mdlDispatchViewerAnchorRecord();
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
 void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
-    MdlNode **slot = ctx->slots;
+    Motion **slot = ctx->slots;
     MdlInner *inner;
     u32 *rec;
     s32 i;
 
     for (i = 0; i != 4; i++) {
         if (*slot != NULL) {
-            if ((*slot)->unk30 != 0) {
+            if ((*slot)->state != 0) {
                 sdfMotionUpdate(*slot);
             }
         }
@@ -386,7 +370,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
     }
     for (slotIndex = 0; slotIndex != MDL_MOTION_SLOT_COUNT; slotIndex++) {
         if (ctx->slots[slotIndex] != NULL) {
-            if (ctx->slots[slotIndex]->unk30 != 0) {
+            if (ctx->slots[slotIndex]->state != 0) {
                 sdfMotionUpdate(ctx->slots[slotIndex]);
             }
         }
@@ -447,8 +431,8 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
     }
 }
 
-extern struct MdlNode *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
-extern void sdfMotionInitialize(struct MdlNode *, s32, s32, f32, f32);
+extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
+extern void sdfMotionInitialize(Motion *, s32, s32, f32, f32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
 extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 
@@ -457,7 +441,7 @@ extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
  * also becomes ctx->first; id and motionIndex narrow into the current pair. */
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames) {
-    MdlNode *node;
+    Motion *node;
     s16 slotIndex;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
@@ -504,8 +488,8 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLea
         ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
-MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
-    MdlNode *node;
+Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
+    Motion *node;
     for (node = ctx->inner->list; node != NULL; node = node->next) {
         if (node->searchId == id) {
             return node;
@@ -518,59 +502,59 @@ MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
 #define MDL_NODE_BYTE_CHECK_MISSING 2
 #define MDL_NODE_BYTE_CHECK_MATCH 5
 
-/* Read the node's unknown halfword, widened to s32. Missing nodes return -1,
- * distinct from a present halfword of 0xFFFF. */
+/* Read the motion selector, widened to s32. Missing nodes return -1,
+ * distinct from a present selector of 0xFFFF. */
 s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
-    MdlNode *matchedNode = (MdlNode *)mdlFindNodeById(ctx, searchId);
+    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_FIELD_MISSING;
     }
-    return matchedNode->unk2C;
+    return matchedNode->motionIndex;
 }
 
-/* Read the other unknown halfword; return zero for a missing node. */
+/* Read the selected motion's frame count; return zero for a missing node. */
 u16 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
-    MdlNode *matchedNode = (MdlNode *)mdlFindNodeById(ctx, searchId);
+    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
-    return matchedNode->unk2E;
+    return matchedNode->frameCount;
 }
 
 /* Numerically convert the stored float to s32, not a bit reinterpretation.
  * Return zero when the searched node is absent. */
 s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 searchId) {
-    MdlNode *matchedNode = (MdlNode *)mdlFindNodeById(ctx, searchId);
+    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
-    return (s32)matchedNode->unk1C;
+    return (s32)matchedNode->currentFrame;
 }
 
 /* Three outcomes: 2 for a missing node, otherwise 1/0 for byte equal/not equal
  * to 5. The meaning of that byte value is not established here. */
 s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 searchId) {
-    MdlNode *matchedNode = (MdlNode *)mdlFindNodeById(ctx, searchId);
+    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_BYTE_CHECK_MISSING;
     }
-    return matchedNode->unk30 == MDL_NODE_BYTE_CHECK_MATCH;
+    return matchedNode->state == MDL_NODE_BYTE_CHECK_MATCH;
 }
 
 /* Read the stored float, defaulting to zero when the searched node is absent. */
 f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 searchId) {
-    MdlNode *matchedNode = (MdlNode *)mdlFindNodeById(ctx, searchId);
+    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0.0f;
     }
-    return matchedNode->floatValue;
+    return matchedNode->frameStep;
 }
 
 /* Replace the stored float only when the searched node exists. */
 void mdlSetNodeFloat20(MdlCtx *ctx, s32 searchId, f32 value) {
-    MdlNode *matchedNode = (MdlNode *)mdlFindNodeById(ctx, searchId);
+    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode != NULL) {
-        matchedNode->floatValue = value;
+        matchedNode->frameStep = value;
     }
 }
 
@@ -715,7 +699,7 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4]
 
 /* Suspend every node in the inner motion list, not just the active slots. */
 void mdlSuspendAllContextMotions(MdlCtx *ctx) {
-    MdlNode *motionNode;
+    Motion *motionNode;
 
     for (motionNode = ctx->inner->list; motionNode != NULL; motionNode = motionNode->next) {
         sdfMotionSuspend(motionNode);
@@ -724,7 +708,7 @@ void mdlSuspendAllContextMotions(MdlCtx *ctx) {
 
 /* Resume every node in the inner motion list, not just the active slots. */
 void mdlResumeAllContextMotions(MdlCtx *ctx) {
-    MdlNode *motionNode;
+    Motion *motionNode;
 
     for (motionNode = ctx->inner->list; motionNode != NULL; motionNode = motionNode->next) {
         sdfMotionResume(motionNode);
@@ -759,13 +743,13 @@ u32 mdlGetTableWord(s32 tableIndex) {
 }
 
 /* Read the referenced halfword or return zero for a missing node. A present
- * node's unk8 reference is dereferenced without a separate NULL check. */
+ * node's motion-table reference is dereferenced without a separate NULL check. */
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
-    MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
+    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
-    return *(u16 *)matchedNode->unk8;
+    return matchedNode->motionTable->unk00;
 }
 
 /* Pass the inner resource handle to its release/update routine. ctx is required. */

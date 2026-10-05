@@ -1,30 +1,7 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 
-typedef struct Motion Motion;
-typedef struct SdfMotionManager SdfMotionManager;
-typedef struct MotionTable MotionTable;
-typedef struct ArrObj ArrObj;
-
-struct Motion {
-    Motion *next;
-    SdfMotionManager *owner;
-    MotionTable *motionTable;
-    s32 unkC;
-    ArrObj *request;
-    f32 blendDurationFrames;
-    f32 blendStartFrame;
-    f32 currentFrame;
-    f32 frameStep;
-    s32 unk24;
-    s32 unk28;
-    s16 motionIndex;
-    u16 frameCount;
-    u8 state;
-    u8 previousState;
-    u8 loopEnabled;
-    u8 pad33;
-};
 
 typedef struct MdlCtx {
     u32 flags;
