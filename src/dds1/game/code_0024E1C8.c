@@ -303,7 +303,7 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
 }
 
 void func_0024EA50(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+                   s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
@@ -333,7 +333,7 @@ void func_0024EA50(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 }
 
 void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+                   s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];

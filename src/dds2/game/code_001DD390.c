@@ -649,6 +649,7 @@ extern s32 D_003BC0C8[];
 
 extern void btlBuildApproachCamera(BtlLinkedCommand *, BtlCamState *);
 extern void btlUpdateActionTargetCameraPose(BtlLinkedCommand *);
+extern void func_001F25F8(BtlCamState *, BtlCamState *);
 extern void func_001F3E48(s32);
 extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
 
@@ -822,7 +823,6 @@ extern void btlUpdateActionSeqs(void);
 extern void btlDestroyAllActionSeqs(void);
 
 extern BtlUnit *btlFindUnitByActor(BtlUnit *actor);
-extern s32 func_001DD1A8();
 
 extern s8 *datCommandSelectors;
 extern s32 btlGetLoggedIndexedCommandItem(s32);
@@ -5940,7 +5940,7 @@ void func_001EC6C8(void) {
 
 void btlUpdateLinkedActionEffectVectorByTarget(u32 action) {
     if ((((BtlLinkedCommand *)action)->link->unit->flags & 0x200) != 0) {
-        func_001F25F8(action, action);
+        func_001F25F8(&((BtlLinkedCommand *)action)->camera, &((BtlLinkedCommand *)action)->camera);
         return;
     }
     if (((BtlLinkedCommand *)action)->actionKind != 0x10) {
@@ -6450,7 +6450,39 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F20C8);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F2308);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F25F8);
+/* vu0 routine: frame the two unit groups using their bounding extents. */
+void func_001F25F8(BtlCamState *source, BtlCamState *out) {
+    f32 target[4];
+    f32 height;
+    f32 fov;
+    f32 span;
+
+    btlFlagAllUnitsDefeatCandidate();
+    fov = source->fov;
+    out->fov = fov;
+    span = func_00208000(0x200, &height, 0);
+    VU0_STORE_VF(vf10, out->position);
+    out->position[1] = -height * 1.15f;
+    func_00208000(0x400, &height, 0);
+    VU0_STORE_VF(vf10, target);
+    target[1] = -height * 0.75f;
+    if (target[0] > 100.0f) {
+        target[0] = 100.0f;
+    } else if (target[0] < -100.0f) {
+        target[0] = -100.0f;
+    }
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, out->position);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, out->direction);
+    fov *= 1.3333333f;
+    if (span < 250.0f) {
+        span = 250.0f;
+    }
+    out->distance = span / func_00353228(fov * 0.5f);
+    func_001E88A8(out);
+}
 
 void btlResetUnitEffectVector(u8 *unit, f32 *vec) {
     func_001EC868(unit, vec, 0.0f);

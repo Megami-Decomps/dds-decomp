@@ -15,16 +15,7 @@ extern f32 sdfSinPoly(f32);
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
-typedef union MnuVariantSpritePlacement {
-    struct {
-        u8 pad00[4];
-        s16 x;
-        s16 y;
-        s16 spriteGroups;
-        u16 flags;
-    } fields;
-    s16 values[6];
-} MnuVariantSpritePlacement;
+typedef s16 MnuVariantSpritePlacement[6];
 
 typedef struct DspScene {
     s32 frame;
@@ -77,8 +68,8 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
             scene->frame = 0;
         }
         pulse = sdfSinPoly(pulse);
-        drawX = x + D_0036B7F0[scene->sceneId].values[2];
-        drawY = y + D_0036B7F0[scene->sceneId].values[3];
+        drawX = x + D_0036B7F0[scene->sceneId][2];
+        drawY = y + D_0036B7F0[scene->sceneId][3];
         flags = mnuGetMantraDisplayFlags(scene, profileOwner);
 
         if (flags & 1) {
