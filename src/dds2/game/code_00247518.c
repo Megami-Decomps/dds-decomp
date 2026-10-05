@@ -14,12 +14,11 @@ extern void *dds3GetWorldObject(void);
 extern void dds3SetWorldCameraObject(void *, s32);
 extern f32 dds3GetCameraFieldOfView(s32);
 extern void func_001063A8(f32);
-struct WorldObjectPointer;
 
 extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
 extern void effObjSetInnerSecondVec(EffTransformNode *, u128 *);
 extern void effObjFetchInnerFirstVec(EffTransformNode *);
-extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 *);
+extern u32 *dds3FindObjectChainNodeByName(EvtWorldObject *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(s32);

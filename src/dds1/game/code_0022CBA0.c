@@ -553,11 +553,10 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
     }
 }
 
-struct WorldObjectPointer;
 extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
 extern void effObjSetInnerSecondVec(EffTransformNode *, u128 *);
 extern void effObjFetchInnerFirstVec(EffTransformNode *);
-extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 *);
+extern u32 *dds3FindObjectChainNodeByName(EvtWorldObject *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
