@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "mnu.h"
 
 /* The dispatcher passes its last argument to entry callbacks as opaque data,
  * not as a function address. Modes select polling, primary and secondary actions. */
@@ -52,6 +53,7 @@ extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuTickExtendedCommandPhase(s32);
 extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_00260550(s32, u32);
+extern s32 mnuCampClampSceneCounter();
 extern void func_0027C788(s32);
 extern void mnuRetreatWindowListSelection(s32);
 extern void mnuAdvanceWindowListSelection(s32);
@@ -63,8 +65,16 @@ typedef struct EvtDispatchLink {
     s32 target; /* 0x14 */
 } EvtDispatchLink;
 
+typedef struct EvtEntryRecord {
+    s32 index;
+    u8 pad04[0x5C];
+    CampWindowParams params;
+} EvtEntryRecord;
+
 typedef struct EvtDispatchTask {
-    u8 pad00[0x2C];
+    u8 pad00[0x1C];
+    EvtEntryRecord *entryRecord;
+    u8 pad20[0xC];
     s32 callback; /* 0x2C */
     s32 window;   /* 0x30 */
 } EvtDispatchTask;
@@ -435,7 +445,81 @@ s32 evtAdvanceStateStage(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00246EA0);
+extern s32 mnuTickCommandWaitPhase();
+extern void func_00260590();
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern u8 D_0036AB10[];
+
+s32 func_00246EA0(u64 callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue();
+    s32 *dispatchSlot = &((EvtDispatchState *)stateAddress)->dispatchState;
+    s32 previousQuantity = ((EvtDispatchState *)stateAddress)->scoreFactor;
+    s32 input = mnuMapPadMaskToFlags(0xF000F3);
+    s32 result = func_00285670(stateAddress + 8, dispatchSlot,
+                             EVT_DISPATCH_OPERATION_POLL, callbackContext);
+
+    if (result != 0) {
+        return result;
+    }
+    switch (mnuTickCommandWaitPhase((EvtDispatchState *)stateAddress)) {
+    case -1:
+        break;
+    case 9:
+        mnuSetCommandPhase(stateAddress, 11);
+        break;
+    case 10: {
+        EvtDispatchTask *primaryTask = (EvtDispatchTask *)
+            ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target;
+        mnuSetPopupEntryFlagged((s32)dispatchSlot,
+            (s32)(D_0036AA84 + primaryTask->entryRecord->index * 0x1C));
+        break;
+    }
+    case 12:
+        mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AB10);
+        break;
+    case 11:
+    default:
+        if (((EvtDispatchState *)stateAddress)->dispatchState == 0) {
+            if (input & 1) {
+                mnuSetCommandPhase(stateAddress, 12);
+            } else if (input & 2) {
+                mnuSetCommandPhase(stateAddress, 10);
+                func_00260590((EvtDispatchTask *)
+                    ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target, 10);
+            }
+            if (input & 0x300030) {
+                if (input & 0x10) {
+                    mnuCampClampSceneCounter(1, (EvtDispatchState *)stateAddress);
+                } else if (input & 0x20) {
+                    mnuCampClampSceneCounter(-1, (EvtDispatchState *)stateAddress);
+                }
+                if (previousQuantity == ((EvtDispatchState *)stateAddress)->scoreFactor) {
+                    input &= 3;
+                }
+            } else if (input & 0xC0) {
+                if (input & 0x80) {
+                    mnuCampClampSceneCounter(10, (EvtDispatchState *)stateAddress);
+                } else if (input & 0x40) {
+                    mnuCampClampSceneCounter(-10, (EvtDispatchState *)stateAddress);
+                }
+                if (previousQuantity == ((EvtDispatchState *)stateAddress)->scoreFactor) {
+                    input &= 3;
+                }
+            }
+        }
+        if (input & 0xF0) {
+            sndSetSequenceVolumePan(1, 0x7F, 0x3F);
+        }
+        if (input & 1) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+        if (input & 2) {
+            sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 evtAlignDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
@@ -456,10 +540,11 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002472D8);
 
 void evtAccumulateStateScore(s32 stateAddress) {
-    s32 entryValuesAddress = *(s32 *)(((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target + 0x1C) + 0x60;
+    CampWindowParams *values = &((EvtDispatchTask *)
+        ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target)->entryRecord->params;
 
-    if ((u32)(*(s32 *)(entryValuesAddress + 4) - 0x60) < 0x20) {
-        *(s32 *)(datGameState + 0xA50) += *(s32 *)entryValuesAddress * ((EvtDispatchState *)stateAddress)->scoreFactor;
+    if ((u32)(values->id - 0x60) < 0x20) {
+        *(s32 *)(datGameState + 0xA50) += values->value * ((EvtDispatchState *)stateAddress)->scoreFactor;
     }
 }
 

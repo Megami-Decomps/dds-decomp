@@ -15,7 +15,7 @@ extern void func_0026C900(void);
 
 extern u32 kwlnTaskGetUserValue();
 
-extern void mnuMapPadMaskToFlags(s32);
+extern s32 mnuMapPadMaskToFlags(s32);
 
 extern void mnuTitleRenderFadeAndPanels(s32);
 
@@ -102,7 +102,39 @@ extern s32 btlHasPendingRuntimeActivity(void);
 extern char D_003D64E4[];
 extern char D_003D6458[];
 
-INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
+extern void func_0029C878(void *);
+extern void func_0029C860(s32 *);
+extern s32 brsPollResultCounterCompletion(void);
+extern void mnuSetPopupEntry(s32 *, void *);
+extern u8 D_0037F530[];
+extern u8 D_003D643C[];
+
+s32 brsMessageInputStep(u64 input) {
+    s32 context;
+    s32 *window;
+    s32 buttons;
+    s32 result;
+
+    context = kwlnTaskGetUserValue();
+    window = (s32 *)(context + 0x54);
+    buttons = mnuMapPadMaskToFlags(0x33);
+    if (brsTaskIsUiUpdateAllowed(context) == 0) {
+        return 0;
+    }
+    result = func_002C4038(context + 8, window, 0, input);
+    if (result != 0) {
+        return result;
+    }
+    if (*window == 0) {
+        func_0029C878((void *)context);
+        if (brsPollResultCounterCompletion() != 0 &&
+            ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
+            func_0029C860((s32 *)context);
+            mnuSetPopupEntry(window, D_003D643C);
+        }
+    }
+    return 0;
+}
 
 s32 mnuStaffRunPanel1(s32 input) {
     s32 context = kwlnTaskGetUserValue();

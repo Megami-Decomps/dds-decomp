@@ -115,7 +115,7 @@ void func_0029C860(s32 *work) {
     work[0x2DB8] = 0;
 }
 
-void func_0029C878(void) {
+void func_0029C878(void *work) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C880);

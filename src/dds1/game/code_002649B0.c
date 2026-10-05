@@ -119,7 +119,7 @@ void mnuClearTitleState(TitleFadeWork *work) {
     work->fadeProgress = 0;
 }
 
-void func_002650C0(void) {
+void func_002650C0(void *work) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002650C8);
@@ -129,8 +129,9 @@ extern void func_003014F0(char *, char *, s32);
 extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
 extern s32 frFontMeasureLines(u32);
 extern void frFontSetContextPair(u32, s32, s32);
-extern void func_001958A0(u32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(u32);
+struct FrFontGlyph;
+extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
 void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
     char text[32];
@@ -139,8 +140,8 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
     func_003014F0(text, D_003BC568, *(s32 *)(info + 0x10));
     handle = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
-    func_001958A0(handle, 1, color);
-    frFontQueueGlyphInSelectedSlot(handle);
+    func_001958A0((struct FrFontGlyph *)handle, 1, color);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)handle);
 }
 
 void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
@@ -150,8 +151,8 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, u8 *info,
     func_003014F0(text, D_003BC568, *(s32 *)(info + 0xC));
     handle = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
-    func_001958A0(handle, 1, color);
-    frFontQueueGlyphInSelectedSlot(handle);
+    func_001958A0((struct FrFontGlyph *)handle, 1, color);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)handle);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC560);
