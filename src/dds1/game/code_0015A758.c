@@ -1128,7 +1128,35 @@ void parRiseFallStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", parFillCellVertexQuads);
+/* Fill every quad vertex of each cell with the solid middle/edge colors. */
+void parFillCellVertexQuads(ParSystem *system, s32 middleWord, s32 edgeWord) {
+    s32 perCell = system->vertexWordCount >> 2;
+    s32 count = system->cellCount;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    ((ParQuadVertexColors *)vertex)->middle1 = middleWord;
+                    ((ParQuadVertexColors *)vertex)->middle0 = middleWord;
+                    ((ParQuadVertexColors *)vertex)->edge1 = edgeWord;
+                    ((ParQuadVertexColors *)vertex)->edge0 = edgeWord;
+                    vertex += 0x10;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 void func_0015CAA0(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 perCell = system->vertexWordCount >> 2;
