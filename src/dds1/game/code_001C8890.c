@@ -71,6 +71,8 @@ typedef struct SceneTask {
     UiObject *actor;
 } SceneTask;
 
+struct CameraPoseAction;
+
 typedef struct BattleController {
     u8 pad_000[0x160];
     u32 runtimeFlags;
@@ -103,7 +105,9 @@ typedef struct BattleController {
     SceneTask *groupTertiary[15];
     u8 pad_42C[0x184];
     s32 (*sceneCallback)();
-    u8 pad_5B4[0x78];
+    u8 pad_5B4[0x5C];
+    s32 (*actionCameraInitHook)(struct CameraPoseAction *); /* 0x610 */
+    u8 pad_614[0x18];
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C */
 } BattleController;
 
@@ -571,7 +575,8 @@ typedef struct CameraPoseAction {
     u8 padF8[0xC];
     u32 status;
     s32 actionKind;
-    u8 pad10C[4];
+    u16 cameraKind;
+    u8 pad10E[2];
     s32 state;
     u8 pad114[4];
     struct BtlIndexList *actorIndices;
@@ -6626,7 +6631,49 @@ void func_001DD680(u32 arg0) {
 void func_001DD698(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD6A0);
+extern void btlFlagUserAndTargetDefeat(u8 *, u8 *);
+extern void btlInitTargetCursorAndFacing(CameraPoseAction *, void *);
+extern void func_001EEAE0(CameraPoseAction *, CameraPoseAction *);
+extern void func_001E2FF8(CameraPoseAction *);
+extern void btlSetupActionCameraPair(CameraPoseAction *);
+
+void func_001DD6A0(CameraPoseAction *action) {
+    s32 (*hook)(CameraPoseAction *) = ((BattleController *)btlGetRuntime())->actionCameraInitHook;
+    BattleActionLinkState *link;
+
+    action->cameraKind = 0;
+    link = action->link;
+    if (hook != NULL && hook(action) != 0) {
+        return;
+    }
+    if (link->unit->flags & 0x200) {
+        if (link->unit->flags & 0x1000) {
+            if (btlHasSingleLinkedResource((s32)action)) {
+                action->cameraKind = 9;
+                btlFlagUserAndTargetDefeat((u8 *)action, (u8 *)action);
+            } else {
+                btlInitTargetCursorAndFacing(action, action);
+            }
+        } else {
+            action->cameraKind = 11;
+            func_001EEAE0(action, action);
+        }
+    } else {
+        if (btlMatchLinkedActorFlags((s32)action)) {
+            func_001E2FF8(action);
+        } else if (btlHasSingleLinkedResource((s32)action)) {
+            action->cameraKind = 10;
+            btlSetupActionCameraPair(action);
+        } else {
+            btlPrepareUnitPoseWithTiltRotation(action, (f32 *)&action->fromPose,
+                                              (u8 *)&action->savedPose);
+            btlAimLinkedUnitAtMuzzle((u8 *)action);
+            action->unk130 = 200.0f;
+            action->flags |= 0x41;
+        }
+        btlResetCameraMotion((s32)action);
+    }
+}
 
 extern void btlBuildApproachCamera(CameraPoseAction *, CameraPoseTransform *);
 extern void func_001E2D20(CameraPoseAction *);
