@@ -1259,14 +1259,6 @@ s32 mnuCampHasEligibleOwnedItems(void) {
 
 typedef struct CampWindowContainer CampWindowContainer;
 
-/* The first payload word is list-specific (entry index or displayed value). */
-typedef struct CampWindowParams {
-    s32 value;
-    s32 id;
-    s32 price; /* Base price used for affordability and quantity-dependent discounts. */
-    s32 mode;
-} CampWindowParams;
-
 typedef struct CampWindowNode {
     u8 pad00[0x48];
     u32 flags;

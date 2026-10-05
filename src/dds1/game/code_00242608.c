@@ -922,6 +922,7 @@ void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
     scene->registeredCount = 0;
 }
 
+/* Allocated and cleared as 0xB4 bytes by mnuShopCreateScene. */
 typedef struct ShopScene {
     s32 resourceHandle; /* 0x00 */
     u8 pad04[0x58];
@@ -933,10 +934,14 @@ typedef struct ShopScene {
     s32 window; /* 0x70 */
     u8 *batches[2]; /* 0x74, 0x78 */
     s32 initialSelection; /* 0x7C */
-    u8 pad80[0xC];
+    s32 counter; /* 0x80: selected transaction quantity */
+    u8 pad84[8];
     s32 count8C; /* 0x8C: mnuCountActivePartyEntries */
-    u8 pad90[8];
+    s16 extraOption; /* 0x90: adds the middle transaction option */
+    u8 pad92[6];
     s32 count98; /* 0x98: func_00244848 */
+    u8 pad9C[0x17];
+    u8 atLimit; /* 0xB3: selected quantity has reached its bound */
 } ShopScene;
 
 typedef struct ShopBatchGraphics {
@@ -1036,22 +1041,18 @@ typedef struct ShopWindowBuffer {
     u8 pad0E[2];
 } ShopWindowBuffer;
 
-typedef struct ShopWindowSettings {
-    u8 pad00[0x90];
-    s16 value;
-} ShopWindowSettings;
 
 struct MenuWindowContainer;
 struct MenuListNode;
 extern struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, s32 value);
 extern s32 func_0025E820();
 
-s32 func_002443F8(s32 unused, s32 count, ShopWindowSettings *settings) {
+s32 func_002443F8(const void *unused, s32 count, ShopScene *settings) {
     ShopWindowContainer *window;
     ShopWindowBuffer *buffer;
     s32 i;
 
-    if (settings->value != 0) {
+    if (settings->extraOption != 0) {
         count++;
     }
     window = (ShopWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x15);
@@ -1063,13 +1064,13 @@ s32 func_002443F8(s32 unused, s32 count, ShopWindowSettings *settings) {
     buffer = sdfAllocSizeClassBlock(0x10);
     memset(buffer, 0, 0x10);
     window->list->buffer = buffer;
-    buffer->value = settings->value;
+    buffer->value = settings->extraOption;
     return (s32)window;
 }
 
 
-void func_002444D0(s32 *record) {
-    record[27] = func_002443F8(D_00368C40, 3, record);
+void func_002444D0(ShopScene *scene) {
+    scene->sprite = (u8 *)func_002443F8(D_00368C40, 3, scene);
 }
 
 typedef struct CampFlagRow {
@@ -1404,10 +1405,10 @@ s32 func_00244FA0(ShopScene *context) {
     s32 globalState = datGameState;
     ShopWindowContainer *itemObject = (ShopWindowContainer *)context->window;
     ShopWindowListData *record = itemObject->list;
-    u8 *parameters = record->unk1C + 0x60;
-    s32 itemId = *(s32 *)(parameters + 4);
-    s32 divisor = *(s32 *)(parameters + 8);
-    s32 kind = *(s32 *)(parameters + 0x0C);
+    CampWindowParams *parameters = (CampWindowParams *)(record->unk1C + 0x60);
+    s32 itemId = parameters->id;
+    s32 divisor = parameters->price;
+    s32 kind = parameters->mode;
     s32 limit = *(s32 *)((u8 *)globalState + 0x3C) / divisor;
     s32 quantity = context->count8C;
     s32 available;
@@ -1436,16 +1437,9 @@ s32 func_00244FA0(ShopScene *context) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
 
-extern s32 func_00244E08(void *scene);
+extern s32 func_00244E08(ShopScene *scene);
 
-typedef struct CampCounterState {
-    u8 pad00[0x80];
-    s32 counter; /* 0x80 */
-    u8 pad84[0x2F];
-    u8 atLimit; /* 0xB3 */
-} CampCounterState;
-
-s32 mnuCampClampSceneCounter(s32 delta, CampCounterState *scene) {
+s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
     s32 limit = func_00244E08(scene);
     s32 sum = scene->counter + delta;
     s32 current;

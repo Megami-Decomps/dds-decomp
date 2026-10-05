@@ -43,7 +43,9 @@ typedef struct EvtUnit {
     f32 vec30[4];                  /* 0x30 */
     u8 pad40[0x10];
     u32 color50;                   /* 0x50 */
-    u8 pad54[0x14];
+    u8 pad54[0xC];
+    u32 color60;                   /* 0x60: packed color retained during RGB/alpha transitions */
+    u8 pad64[4];
     s32 endpointWorkAddress;       /* 0x68: owned allocation used for endpoint setup */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */

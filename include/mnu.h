@@ -34,6 +34,17 @@ static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alph
 /* Camp task priority for the menu task family. */
 #define CAMP_TASK_PRIORITY 0x3EC
 
+/* Native 0x10-byte list-node payload. Its first word is an entry index or
+ * displayed value according to the list; price is the preserved base price. */
+typedef struct CampWindowParams {
+    s32 value;
+    s32 id;
+    s32 price;
+    s32 mode;
+} CampWindowParams;
+
+typedef char CampWindowParams_size_must_be_0x10[(sizeof(CampWindowParams) == 0x10) ? 1 : -1];
+
 /* Serialized map arguments and the two four-word rows used by camp effects. */
 typedef struct CampMapArguments {
     u32 values[11];

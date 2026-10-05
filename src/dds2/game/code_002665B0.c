@@ -22,6 +22,7 @@ extern void func_00101968(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(s32);
 extern s32 func_00268550(s32);
 extern s32 func_00268588(s32);
+extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 
 extern void func_00266C08();
@@ -1065,7 +1066,6 @@ typedef struct MenuBackdropBank {
 } MenuBackdropBank;
 
 extern void mnuDrawCampIconBackdrop(void *work, s32 priority);
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw and animate the mode-dependent terminal backdrop. */
 void mnuDrawTerminalBackdrop(s32 address) {

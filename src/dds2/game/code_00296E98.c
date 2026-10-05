@@ -79,6 +79,8 @@ extern char mnuStaffSecondaryPanelTaskName[];
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
+extern s32 kwlnTaskGetTaskByName(const char *);
+
 typedef struct MenuPanelBlock {
     s32 data[0x71];
 } MenuPanelBlock;
@@ -752,7 +754,6 @@ u32 brsTaskTryDestroy(void) {
 }
 
 s32 func_002998D8(void) {
-    extern s32 kwlnTaskGetTaskByName(const char *);
     s32 task;
     u8 *work;
 

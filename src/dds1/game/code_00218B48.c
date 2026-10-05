@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "mdl.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -176,7 +177,6 @@ extern void sdfPktInit(void *, s32, s32, s32, s32);
 
 extern s32 sdfFormatSifPacket();
 
-extern s32 mdlGetNodeRefHalf(MdlResource *, s32);
 
 extern s32 mdlGetNodeField2C(MdlResource *, s32);
 
@@ -1408,7 +1408,7 @@ void func_0021ABB8(void) {
     sdfAppendPacket(mdlViewerState.packetList,
                     sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
 
-    nodeCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], 0);
+    nodeCount = mdlGetNodeRefHalf((MdlCtx *)mdlViewerState.resources[0], 0);
     if (nodeCount == 0) {
         formatted = sdfFormatSifPacket(&packet, D_003BBC28);
     } else {

@@ -60,6 +60,8 @@ void dds3ResetWorldResourceState(void *unit);
 
 void dds3RemoveWorldObjectNode(void *unit);
 
+void dds3RefreshStoredVec3(void *);
+
 void fldStopCurrentBgm(void);
 
 void fldPlayCurrentBgmSound(void);
@@ -800,7 +802,6 @@ s32 func_002272B0(void) {
 extern char D_003AC928[]; /* "re attach...!\n" */
 
 s32 func_002274A0(void) {
-    extern void dds3RefreshStoredVec3(void *);
     void *unit;
     void *target;
     ObjBase *data;

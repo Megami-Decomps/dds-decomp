@@ -3,6 +3,7 @@
 #include "evt_unit.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "mdl.h"
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_004371F0;
@@ -33,7 +34,6 @@ typedef struct EvtLipsNode {
 
 
 extern u32 sdfGetUniqueChunkValue();
-extern s32 mdlGetNodeRefHalf();
 
 
 /* World lookup results carry the address of their vector-bearing data at +0x18. */
@@ -865,7 +865,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         func_0035B6E0("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (motion >= mdlGetNodeRefHalf(model, 2)) {
+    if (motion >= mdlGetNodeRefHalf((MdlCtx *)model, 2)) {
         func_0035B6E0("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
@@ -893,7 +893,7 @@ void evtLipsStopFunction(void) {
         func_0035B6E0("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (mdlGetNodeRefHalf(model, 2) == 0) {
+    if (mdlGetNodeRefHalf((MdlCtx *)model, 2) == 0) {
         func_0035B6E0("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
