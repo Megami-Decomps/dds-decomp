@@ -22,6 +22,22 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void func_0023EF90(s32 arg0, void *arg1);
 
+/* Effect-channel assignments driven by the viewer's timeline tracks. */
+typedef struct EvtCampEntry {
+    u8 pad00[0x24];
+    s32 value; /* 0x24 */
+} EvtCampEntry;
+
+extern void effInitCh71Id(void);
+extern void effInitCh72Id(void);
+extern void effInitCh75Id(void);
+extern void effInitCh76Id(void);
+extern void effSetCh71Id(u32 resourceWord);
+extern void effSetCh72Id(u32 sourceHandle);
+extern void effSetCh75Id(u32 resourceWord);
+extern void effSetCh76Id(u32 sourceHandle);
+extern void *mnuCampFindEntryByName(void *scene, const char *name);
+
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
@@ -111,7 +127,12 @@ typedef struct EventViewerState {
     u8 pad23C4;
     u8 windowActive;
     s16 unk23C6;
-    u8 pad23C8[0x28];
+    u8 pad23C8[8];
+    s32 ch71; /* 0x23D0 */
+    s32 ch72; /* 0x23D4 */
+    s32 ch76; /* 0x23D8 */
+    s32 ch75; /* 0x23DC */
+    u8 pad23E0[0x10];
     s32 glyphTickCount; /* 0x23F0 */
     u8 pad23F4[4];
     s32 framebufferQuadEnabled;
@@ -169,7 +190,9 @@ typedef struct EvtViewKey {
     } channel; /* 0x0C: byte value or signed world-object name-table index. */
     u8 pad0E[2];
     s16 condition; /* 0x10 */
-    u8 pad12[0x1E];
+    u8 pad12[2];
+    s16 unk14; /* 0x14: secondary indexed condition for kind-0x11 tracks. */
+    u8 pad16[0x1A];
     struct EvtViewKey *next; /* 0x30 */
     struct EvtViewKey *previous; /* 0x34 */
 } EvtViewKey;
@@ -719,7 +742,77 @@ void func_0022F418(EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F550);
+/* Applies the effect-channel assignments driven by the viewer's tracks. */
+void func_0022F550(s32 frame, EventViewerState *viewer) {
+    EvtViewTrack *track = viewer->tracks;
+
+    while (track != NULL) {
+        if ((u32)(track->kind - 0xE) < 2 || track->kind == 0x17 || track->kind == 0x11) {
+            EvtViewKey *key = track->keys;
+            s32 value = 0;
+
+            while (key != NULL) {
+                if (track->kind != 0x11 || evtViewerTestIndexedCondition(key->unk14) != 0) {
+                    if (frame < key->frame + track->frameOffset) {
+                        break;
+                    }
+                    if (key->condition != 0) {
+                        value = 0;
+                        if (key->condition != 1) {
+                            value = ((EvtCampEntry *)mnuCampFindEntryByName(
+                                         viewer, (char *)viewer->unitNames[key->condition - 2]))->value;
+                        }
+                    }
+                }
+                key = key->next;
+            }
+
+            switch (track->kind) {
+            case 0xE:
+                if (viewer->ch71 != value) {
+                    viewer->ch71 = value;
+                    if (value == 0) {
+                        effInitCh71Id();
+                    } else {
+                        effSetCh71Id(value);
+                    }
+                }
+                break;
+            case 0xF:
+                if (viewer->ch72 != value) {
+                    viewer->ch72 = value;
+                    if (value == 0) {
+                        effInitCh72Id();
+                    } else {
+                        effSetCh72Id(value);
+                    }
+                }
+                break;
+            case 0x17:
+                if (viewer->ch76 != value) {
+                    viewer->ch76 = value;
+                    if (value == 0) {
+                        effInitCh76Id();
+                    } else {
+                        effSetCh76Id(value);
+                    }
+                }
+                break;
+            case 0x11:
+                if (viewer->ch75 != value) {
+                    viewer->ch75 = value;
+                    if (value == 0) {
+                        effInitCh75Id();
+                    } else {
+                        effSetCh75Id(value);
+                    }
+                }
+                break;
+            }
+        }
+        track = track->next;
+    }
+}
 
 /* Advance or stop the timed viewer action according to the current position. */
 s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {

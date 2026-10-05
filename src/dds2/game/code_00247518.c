@@ -27,6 +27,23 @@ extern u8 D_004372C0[3];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 
+/* Effect-channel assignments driven by the viewer's timeline tracks. */
+typedef struct EvtCampEntry {
+    u8 pad00[0x24];
+    s32 value; /* 0x24 */
+} EvtCampEntry;
+
+extern s32 evtViewerTestIndexedCondition(u32 encodedId);
+extern void effInitCh71Id(void);
+extern void effInitCh72Id(void);
+extern void effInitCh75Id(void);
+extern void effInitCh76Id(void);
+extern void effSetCh71Id(u32 resourceWord);
+extern void effSetCh72Id(u32 sourceHandle);
+extern void effSetCh75Id(u32 resourceWord);
+extern void effSetCh76Id(u32 sourceHandle);
+extern void *mnuCampFindEntryByName(void *scene, const char *name);
+
 extern s32 datGameState;
 
 s32 evtEventViewerGetPendingNode(s32 arg0);
@@ -131,7 +148,12 @@ typedef struct EventViewerState {
     s32 updateCount;
     u8 pad23C4;
     u8 windowActive;
-    u8 pad23C6[0x2A];
+    u8 pad23C6[0xA];
+    s32 ch71; /* 0x23D0 */
+    s32 ch72; /* 0x23D4 */
+    s32 ch76; /* 0x23D8 */
+    s32 ch75; /* 0x23DC */
+    u8 pad23E0[0x10];
     s32 glyphTickCount;
     u8 pad23F4[4];
     s32 framebufferQuadEnabled; /* 0x23F8 */
@@ -216,7 +238,9 @@ typedef struct EvtViewKey {
     } channel; /* 0x0C: byte value or signed world-object name-table index. */
     s16 param;    /* 0x0E */
     s16 condition; /* 0x10 */
-    u8 pad12[0x1E];
+    u8 pad12[2];
+    s16 unk14; /* 0x14: secondary indexed condition for kind-0x11 tracks. */
+    u8 pad16[0x1A];
     struct EvtViewKey *next; /* 0x30 */
     struct EvtViewKey *previous; /* 0x34 */
 } EvtViewKey;
@@ -816,7 +840,77 @@ void func_0024A020(EventViewerState *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024A158);
+/* Applies the effect-channel assignments driven by the viewer's tracks. */
+void func_0024A158(s32 frame, EventViewerState *viewer) {
+    EvtViewTrack *track = viewer->tracks;
+
+    while (track != NULL) {
+        if ((u32)(track->kind - 0xE) < 2 || track->kind == 0x17 || track->kind == 0x11) {
+            EvtViewKey *key = track->keys;
+            s32 value = 0;
+
+            while (key != NULL) {
+                if (track->kind != 0x11 || evtViewerTestIndexedCondition(key->unk14) != 0) {
+                    if (frame < key->frame + track->frameOffset) {
+                        break;
+                    }
+                    if (key->condition != 0) {
+                        value = 0;
+                        if (key->condition != 1) {
+                            value = ((EvtCampEntry *)mnuCampFindEntryByName(
+                                         viewer, (char *)viewer->unitNames[key->condition - 2]))->value;
+                        }
+                    }
+                }
+                key = key->next;
+            }
+
+            switch (track->kind) {
+            case 0xE:
+                if (viewer->ch71 != value) {
+                    viewer->ch71 = value;
+                    if (value == 0) {
+                        effInitCh71Id();
+                    } else {
+                        effSetCh71Id(value);
+                    }
+                }
+                break;
+            case 0xF:
+                if (viewer->ch72 != value) {
+                    viewer->ch72 = value;
+                    if (value == 0) {
+                        effInitCh72Id();
+                    } else {
+                        effSetCh72Id(value);
+                    }
+                }
+                break;
+            case 0x17:
+                if (viewer->ch76 != value) {
+                    viewer->ch76 = value;
+                    if (value == 0) {
+                        effInitCh76Id();
+                    } else {
+                        effSetCh76Id(value);
+                    }
+                }
+                break;
+            case 0x11:
+                if (viewer->ch75 != value) {
+                    viewer->ch75 = value;
+                    if (value == 0) {
+                        effInitCh75Id();
+                    } else {
+                        effSetCh75Id(value);
+                    }
+                }
+                break;
+            }
+        }
+        track = track->next;
+    }
+}
 
 extern void mnuCheckMovieDecoderStatus(void);
 extern void mnuStopMovieDrawTask(void);
