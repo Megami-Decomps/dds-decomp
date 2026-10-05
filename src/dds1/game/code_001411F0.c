@@ -25,7 +25,9 @@ typedef struct FldAreaWork {
     s32 unk70;
     u8 pad74[0x4C];
     s32 unkC0;
-    u8 padC4[0x40];
+    u8 padC4[8];
+    s32 unkCC;
+    u8 padD0[0x34];
     s16 eventActive; /* 0x104 */
     u8 pad106[0xE];
     s32 unk114;
@@ -2072,7 +2074,54 @@ void fldDrawTitleBanner(s32 x, s32 y) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00149810);
+extern s32 func_0014CAF8(void);
+extern s16 *fldFindLocationCoordinateRecord(s32, s32);
+extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
+    u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
+
+void func_00149810(void) {
+    FldAreaWork *work;
+    u32 color;
+
+    if (func_0014CAF8() != 0) {
+        return;
+    }
+    work = FLD_WORK;
+    if (work->unk118 == 1 || work->unk114 != 0) {
+        return;
+    }
+    if (fldFindLocationCoordinateRecord(work->area, work->room + 1)[2] <= 0) {
+        return;
+    }
+    switch (work->unkCC) {
+    case 0:
+    case 2:
+    case 4:
+    case 6:
+        break;
+    case 1:
+    case 3:
+    case 5:
+    case 7:
+        color = 0x80808080;
+        fldSelectDisplayBuffer(0x53);
+        func_00129900(0);
+        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
+        fldSubmitGsGradientQuad(0x194, 0x91, 0x5F, 0x47, 0, 0, 0, 0x26,
+            0, 0, 0, 0x26, 0, 0, 0, 0x26, 0, 0, 0, 0x26);
+        fldSubmitSpriteRect(0x188, 0x117, 0x78, 0x80, 1, 0, 0x78, 0x80, color, D_003BAF34);
+        fldSubmitSpriteRect(0x188, 0x197, 0x78, 0x1C, 1, 0x7F, 0x78, 1, color, D_003BAF34);
+        func_00129900(0);
+        fldSubmitGsGradientQuad(0x190, 0x8F, 0x70, 0x49, 0, 0xD, 0xA2, 0x18,
+            0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0);
+        fldSubmitGsGradientQuad(0x193, 0x90, 0x6D, 0x4E, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x18);
+        fldSubmitSpriteRect(0x1B4, 0x112, 0x1F, 0x10, 1, 1, 0x1F, 0x10, color, D_003BAF38);
+        func_00129900(0);
+        fldResetCameraAndSceneView();
+        break;
+    }
+}
 
 extern s32 fldTestSceneLifecycleFlags(u32);
 
