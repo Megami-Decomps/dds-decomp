@@ -12,7 +12,8 @@ enum {
     FIELD_ROOM_RECORD_COUNT = 64,
     FIELD_ROOM_CORNER_COUNT = 8,
     FIELD_ROOM_PLANE_COUNT = 6,
-    FIELD_ACTOR_SLOT_COUNT = 256
+    FIELD_ACTOR_SLOT_COUNT = 256,
+    FIELD_CAMERA_SETTING_COUNT = 8
 };
 
 typedef struct SdfDrawPacket SdfDrawPacket;
@@ -2678,6 +2679,46 @@ void fldApplyPendingCameraHeading(void) {
 /* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131688);
 
+typedef struct FldColorParams {
+    s32 enabled;
+    s32 slotIndex;  /* 0x04: stored to the effect work at +0x38 */
+    s32 mode;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 vectorY;    /* 0x18: copied to the effect work at +0x24 */
+    s32 vectorZ;    /* 0x1C: copied to the effect work at +0x3C */
+} FldColorParams;
+typedef struct FldCameraSetting {
+    s32 unk0;
+    FldColorParams color;
+    u8 pad24[0x30];
+} FldCameraSetting; /* 0x54 bytes */
+typedef struct FldFadeColor {
+    u8 unk00;
+    u8 pad01[3];
+    s32 colorA;
+    s32 colorB;
+    u8 padC[0x18];
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    f32 unk30;
+    s32 unk34;
+    s32 unk38;
+    f32 unk3C;
+} FldFadeColor;
+extern FldFadeColor fldCameraColorParameters[];
+extern FldCameraSetting *fldCameraSettings;
+
+extern FldCameraSetting D_003306D0;
+extern void *fldSkyLightSetBuffer;
+extern void *D_003BAD60;
+extern s32 *D_003BAD74;
+extern u32 sdfDevCreateCommandState(const char *);
+extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
+extern void sdfDevWaitThenReleaseCommandState(u32);
+
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0048);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0058);
@@ -2686,15 +2727,46 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0068);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A00A8);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00131A88);
+void func_00131A88(void) {
+    s32 i;
+    u32 command;
 
-extern void *fldSkyLightSetBuffer;
+    if (fldSkyLightSetBuffer == 0) {
+        fldSkyLightSetBuffer = sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
+    }
+    if (D_003BAD60 == 0) {
+        D_003BAD60 = sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
+    }
+    if (D_003BAD74 == 0) {
+        D_003BAD74 = sdfResourceRetainAddress(sdfAllocGeneralBlock(0x12400));
+    }
+    if (fldCameraSettings == 0) {
+        fldCameraSettings = sdfResourceRetainAddress(sdfAllocGeneralBlock(
+            sizeof(FldCameraSetting) * FIELD_CAMERA_SETTING_COUNT));
+        for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
+            fldCameraSettings[i] = D_003306D0;
+        }
+        fldCameraColorParameters->unk00 = 0;
+        fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = 0x80808080;
+        fldCameraColorParameters->unk24 = 0x40;
+        fldCameraColorParameters->unk28 = 2;
+        fldCameraColorParameters->unk2C = 0;
+        fldCameraColorParameters->unk30 = 1.0f;
+        fldCameraColorParameters->unk34 = 0;
+        fldCameraColorParameters->unk38 = 0xFF;
+        fldCameraColorParameters->unk3C = 20.0f;
+    }
+    command = sdfDevCreateCommandState("/fld/f/bin/FILTER.FLD");
+    sdfDevQueueReadAndWait(command, D_003BAD74, 0x12400);
+    sdfDevWaitThenReleaseCommandState(command);
+    command = sdfDevCreateCommandState("/fld/f/bin/BATTLEBG.SKY");
+    sdfDevQueueReadAndWait(command, D_003BAD60, 0xE000);
+    sdfDevWaitThenReleaseCommandState(command);
+}
+
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
 extern u32 sdfReadNamedResource(const char *, u32 *, s32);
-extern u32 sdfDevCreateCommandState(const char *);
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 void fldLoadSkyResource(s32 area) {
     char path[64];
@@ -2778,7 +2850,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00132010);
 
 extern s32 D_003BAD58;
 extern s32 D_003BAD88, D_003BAD8C;
-extern s32 *D_003BAD74;
 extern f32 D_003BAD90, D_003BAD94;
 void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
     if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
@@ -2915,7 +2986,6 @@ typedef struct {
     u8 padA4[0x30];
     f32 unitColorB[3];
 } FldLightSet; /* 0xE0 bytes */
-extern void *D_003BAD60;
 extern s32 kwlnSetDrawColorTarget(s32, void *);
 extern s32 kwlnSetLightColorTarget(s32, s32, void *);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
@@ -3129,34 +3199,6 @@ void fldApplyLightSetIndex(s32 index) {
     kwlnSetBackgroundColorTarget(0, vec);
 }
 
-typedef struct FldColorParams {
-    s32 enabled;
-    s32 slotIndex;  /* 0x04: stored to the effect work at +0x38 */
-    s32 mode;
-    s32 red;
-    s32 green;
-    s32 blue;
-    s32 vectorY;    /* 0x18: copied to the effect work at +0x24 */
-    s32 vectorZ;    /* 0x1C: copied to the effect work at +0x3C */
-} FldColorParams;
-typedef struct FldCameraSetting {
-    s32 unk0;
-    FldColorParams color;
-    u8 pad24[0x30];
-} FldCameraSetting; /* 0x54 bytes */
-typedef struct FldFadeColor {
-    u8 pad0[4];
-    s32 colorA;
-    s32 colorB;
-    u8 padC[0x18];
-    s32 unk24;
-    s32 unk28;
-    u8 pad2C[0xC];
-    s32 unk38;
-    f32 unk3C;
-} FldFadeColor;
-extern FldFadeColor fldCameraColorParameters[];
-extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting fldAppliedCameraSettings[];
 extern u32 effCreateSelectionFlagListFromWork(const void *);
 extern void effReleaseSelectionFlagList(s32);
