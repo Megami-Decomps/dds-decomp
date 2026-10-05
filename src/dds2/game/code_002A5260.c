@@ -774,7 +774,7 @@ void mnuFadeSetState(u32 *state, u32 mode) {
     state[0] = mode;
 }
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     u32 sprite = mnuMovieWork->sprite;
