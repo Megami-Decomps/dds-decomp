@@ -1,6 +1,8 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf.h"
+#include "sdf_draw.h"
 
 typedef struct VTab {
     void (*invoke)(void);
@@ -76,6 +78,13 @@ typedef struct SdfMotionKeyBinding {
     Motion *motion;
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
+
+/* Draw bindings retain a four-component snapshot after their key header. */
+typedef struct SdfMotionDrawBinding {
+    SdfMotionKeyBinding keys;
+    SdfDrawNode *node;
+    f32 capturedVector[4];
+} SdfMotionDrawBinding;
 
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *a0);
 void sdfFindMotionKeyInterval(void *a0, void *out, f32 t);
@@ -629,27 +638,27 @@ void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x60 */
-void sdfMotionBlendDrawVector(u8 *motion, f32 t1) {
+void sdfMotionBlendDrawVector(SdfMotionDrawBinding *motion, f32 t1) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x60);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with the vec3 at +0x10 by t2 into sub+0x60 */
-void sdfMotionBlendDrawVectorWithCurrent(u8 *motion, f32 t1, f32 t2) {
+void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *motion, f32 t1, f32 t2) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_COPY(b.weight);
-    VU0_LOAD_VF(vf10, motion + 0x10);
+    VU0_LOAD_VF(vf10, motion->capturedVector);
         VU0_LERP_VF10_W(t2);
-    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x60);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
 }
 
 void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
@@ -673,27 +682,27 @@ void *sdfMotionCreateScaleVectorBinding(void *a0, s32 a1, s32 a2) {
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x70 */
-void sdfMotionBlendScaleVector(u8 *motion, f32 t1) {
+void sdfMotionBlendScaleVector(SdfMotionDrawBinding *motion, f32 t1) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x70);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_SCALE_VECTOR]);
 }
 
 /* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
-void sdfMotionBlendScaleVectorWithCurrent(u8 *motion, f32 t1, f32 t2) {
+void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *motion, f32 t1, f32 t2) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_COPY(b.weight);
-    VU0_LOAD_VF(vf10, motion + 0x10);
+    VU0_LOAD_VF(vf10, motion->capturedVector);
         VU0_LERP_VF10_W(t2);
-    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x70);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_SCALE_VECTOR]);
 }
 
 void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
@@ -705,10 +714,10 @@ void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
 }
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, store quaternion and matrix rows */
-void sdfMotionBlendQuaternionToMatrix(u8 *motion, f32 t1) {
+void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *motion, f32 t1) {
     SdfMotionKeyInterval b;
-    u8 *sub;
-    u8 *matrix;
+    SdfDrawNode *sub;
+    u8 (*matrix)[0x10];
     f32 *key;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
@@ -717,20 +726,20 @@ void sdfMotionBlendQuaternionToMatrix(u8 *motion, f32 t1) {
     key = b.secondKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf11, key);
     effMiscQuaternionNlerpVU(b.weight);
-    sub = *(u8 **)(motion + 0xC);
-    VU0_STORE_VF_UNCLOBBERED(vf10, sub + 0x50);
-    matrix = sub + 0x80;
+    sub = motion->node;
+    VU0_STORE_VF_UNCLOBBERED(vf10, sub->quaternion);
+    matrix = &sub->vectors[SDF_DRAW_X_AXIS_VECTOR];
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF_UNCLOBBERED(vf28, matrix);
-    VU0_STORE_VF_UNCLOBBERED(vf29, matrix + 0x10);
-    VU0_STORE_VF_UNCLOBBERED(vf30, matrix + 0x20);
+    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
+    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
+    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, nlerp that toward the quaternion at +0x10 by t2, store quaternion and matrix rows */
-void sdfMotionBlendKeyQuaternionWithBase(u8 *motion, f32 t1, f32 t2) {
+void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *motion, f32 t1, f32 t2) {
     SdfMotionKeyInterval b;
-    u8 *sub;
-    u8 *matrix;
+    SdfDrawNode *sub;
+    u8 (*matrix)[0x10];
     f32 *key;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
@@ -739,16 +748,16 @@ void sdfMotionBlendKeyQuaternionWithBase(u8 *motion, f32 t1, f32 t2) {
     key = b.secondKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf11, key);
     effMiscQuaternionNlerpVU(b.weight);
-    sub = *(u8 **)(motion + 0xC);
+    sub = motion->node;
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, motion + 0x10);
+    VU0_LOAD_VF(vf10, motion->capturedVector);
     effMiscQuaternionNlerpVU(t2);
-    VU0_STORE_VF_UNCLOBBERED(vf10, sub + 0x50);
-    matrix = sub + 0x80;
+    VU0_STORE_VF_UNCLOBBERED(vf10, sub->quaternion);
+    matrix = &sub->vectors[SDF_DRAW_X_AXIS_VECTOR];
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF_UNCLOBBERED(vf28, matrix);
-    VU0_STORE_VF_UNCLOBBERED(vf29, matrix + 0x10);
-    VU0_STORE_VF_UNCLOBBERED(vf30, matrix + 0x20);
+    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
+    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
+    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
 void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
@@ -790,15 +799,18 @@ void sdfMotionReadKeyFlag(SdfMotionBinding *binding) {
 }
 
 void sdfMotionCaptureDrawVector(void *work) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x60);
+    SdfMotionDrawBinding *binding = work;
+    PCP_COPY_VECTOR(binding->capturedVector, binding->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
 }
 
 void sdfMotionCaptureQuaternion(void *work) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x50);
+    SdfMotionDrawBinding *binding = work;
+    PCP_COPY_VECTOR(binding->capturedVector, binding->node->quaternion);
 }
 
 void sdfMotionCaptureScaleVector(void *work) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x70);
+    SdfMotionDrawBinding *binding = work;
+    PCP_COPY_VECTOR(binding->capturedVector, binding->node->vectors[SDF_DRAW_SCALE_VECTOR]);
 }
 
 s32 sdfDispatchMotionHandler(void *a0, s32 a1) {
