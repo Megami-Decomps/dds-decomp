@@ -59,13 +59,13 @@ typedef struct FldActorEntry {
     s8 flags54;
     char taskName[0xF]; /* 0x55 */
     u8 flags64;
-    u8 unk65;
-    u8 unk66;
+    s8 unk65;
+    s8 unk66;
     s8 value67;
-    u8 unk68;
-    u8 unk69;
-    u8 unk6A;
-    u8 unk6B;
+    s8 unk68;
+    s8 unk69;
+    s8 unk6A;
+    s8 unk6B;
 #endif
 #ifdef VERSION_DDS2
     u8 motionName[0xC]; /* 0x18 */
