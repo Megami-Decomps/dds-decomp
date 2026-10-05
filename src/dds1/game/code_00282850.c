@@ -324,12 +324,11 @@ void func_002828D0(s32 *position, MenuPageWindow *menu, s32 panelIndex) {
              (panelIndex - firstCount) * *(entryIndex + D_0037CD80 + 1))
             << 3;
         position[0] = 0x1060;
-        goto done;
+        break;
     }
     default:
-        goto done;
+        break;
     }
-done:
     return;
 }
 

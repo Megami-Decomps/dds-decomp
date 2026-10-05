@@ -492,7 +492,7 @@ void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f
     *scalarB = 0.0f;
 }
 
-INCLUDE_ASM(s32, "game/code_0025DA20", func_0025E048);
+INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E048);
 
 typedef struct CampDisplayDefaults {
     s32 x;

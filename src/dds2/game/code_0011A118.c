@@ -259,7 +259,7 @@ extern void mdlFlagSet(s32 flagIndex);
 
 /* Flag-range items set their model flag regardless of quantityDelta.
  * Other items add the delta to their byte quantity and clamp it; DDS2 also
- * caps IDs at or above 0xC0 to one. Keep the native branches and goto layout. */
+ * caps IDs at or above 0xC0 to one. */
 void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
     s32 quantity;
 
@@ -276,31 +276,21 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
         if (quantity >= PTY_ITEM_SINGLE_LIMIT) {
             quantity = PTY_ITEM_SINGLE_MAX;
         }
-        goto store_quantity;
+    } else if (itemId >= 0xA0) {
+        if (quantity >= PTY_ITEM_QUANTITY_LIMIT) {
+            quantity = PTY_ITEM_MAX_QUANTITY;
+        }
+    } else if (itemId >= PTY_ITEM_FLAG_FIRST) {
+        if (quantity >= PTY_ITEM_SINGLE_LIMIT) {
+            quantity = PTY_ITEM_SINGLE_MAX;
+        }
+    } else if (itemId >= 0x60) {
+        if (quantity >= PTY_ITEM_QUANTITY_LIMIT) {
+            quantity = PTY_ITEM_MAX_QUANTITY;
+        }
+    } else {
+        quantity = quantity < PTY_ITEM_QUANTITY_LIMIT ? quantity : PTY_ITEM_MAX_QUANTITY;
     }
-    if (itemId >= 0xA0) {
-        goto clamp_quantity;
-    }
-    if (itemId < PTY_ITEM_FLAG_FIRST) {
-        goto lower_items;
-    }
-    if (quantity >= PTY_ITEM_SINGLE_LIMIT) {
-        quantity = PTY_ITEM_SINGLE_MAX;
-    }
-    goto store_quantity;
-
-lower_items:
-    if (itemId < 0x60) {
-        goto select_quantity_limit;
-    }
-clamp_quantity:
-    if (quantity >= PTY_ITEM_QUANTITY_LIMIT) {
-        quantity = PTY_ITEM_MAX_QUANTITY;
-    }
-    goto store_quantity;
-select_quantity_limit:
-    quantity = quantity < PTY_ITEM_QUANTITY_LIMIT ? quantity : PTY_ITEM_MAX_QUANTITY;
-store_quantity:
     ((SaveItemCounts *)datGameState)->counts[itemId] = quantity;
 }
 

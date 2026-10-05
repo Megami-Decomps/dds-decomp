@@ -220,7 +220,7 @@ BillObj *billAllocList(void *resourceData) {
     newobj->unk50 = 1;
     newobj->unk48 = 0;
     newobj->unk4C = 0;
-    newobj->unk3C = 0;
+    newobj->pair.unk8 = 0;
     func_001518D8(newobj, 0);
     return newobj;
 }
@@ -317,34 +317,22 @@ void billReleaseSharedEntryBlock(void *arg) {
     }
 }
 
-typedef struct BillVec4 {
-    f32 v[4];
-} BillVec4;
-
-typedef struct BillSourceRecord {
-    u32 unk00;          /* 0x00 */
-    u8 pad04[8];
-    BillVec4 vector;    /* 0x0C */
-    f32 x;              /* 0x1C */
-    f32 y;              /* 0x20 */
-    f32 z;              /* 0x24 */
-    f32 w;              /* 0x28 */
-} BillSourceRecord;
 
 typedef struct BillSnapshot {
     f32 x;              /* 0x00 */
     f32 y;              /* 0x04 */
-    f32 z;              /* 0x08 */
-    f32 w;              /* 0x0C */
+    f32 halfWidth;      /* 0x08 */
+    f32 halfHeight;     /* 0x0C */
     u32 unk10;          /* 0x10 */
-    BillVec4 vector;    /* 0x14 */
+    BillTextureQuad uv; /* 0x14 */
 } BillSnapshot;
 
-extern BillSourceRecord *func_00151398(BillObj *obj, void *entries);
+extern void *memcpy(void *, const void *, u32);
+extern BillChildPayload *func_00151398(BillObj *obj, void *entries);
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
 void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
-    BillSourceRecord *record;
+    BillChildPayload *record;
 
     if (obj->kind == 1) {
         record = func_00151398(obj, obj->unk60);
@@ -354,11 +342,11 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
         return;
     }
     snapshot->x = record->x;
-    snapshot->unk10 = record->unk00;
+    snapshot->unk10 = record->value;
     snapshot->y = record->y;
-    snapshot->z = record->z;
-    snapshot->w = record->w;
-    snapshot->vector = record->vector;
+    snapshot->halfWidth = record->halfWidth;
+    snapshot->halfHeight = record->halfHeight;
+    memcpy(&snapshot->uv, &record->uv, sizeof(snapshot->uv));
 }
 
 BillObj *billCreateIndexed(s32 index, u32 data) {

@@ -234,37 +234,30 @@ void effCopyPosition(BillObj *effect, const void *position) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", billSetBillboardMode);
 
-typedef struct EffSlot {
-    u8 pad00[4];
-    union {
-        s16 value;   /* 0x04 */
-        u16 variant; /* Same halfword read unsigned */
-    };
-} EffSlot;
 
 typedef struct EffSlotList {
     u8 pad00[0x10];
     s32 count;        /* 0x10 */
     u8 pad14[4];
-    EffSlot **slots;  /* 0x18 */
+    BillChildPayload **slots; /* 0x18 */
 } EffSlotList;
 
 /* Store the signed variant in one child payload or every child of a list. */
 void billSetAllChildVariants(BillObj *effect, s16 variant) {
     switch (effect->kind) {
     case 0:
-        ((EffSlot *)effect->entryList)->value = variant;
+        ((BillChildPayload *)effect->entryList)->signedVariant = variant;
         break;
     case 1: {
         EffSlotList *childList = effect->entryList;
         s32 remainingChildren = childList->count;
-        EffSlot **childEntries = childList->slots;
-        EffSlot **childCursor;
+        BillChildPayload **childEntries = childList->slots;
+        BillChildPayload **childCursor;
 
         if (remainingChildren > 0) {
             childCursor = childEntries;
             do {
-                (*childCursor)->value = variant;
+                (*childCursor)->signedVariant = variant;
                 childCursor++;
             } while (--remainingChildren != 0);
         }
@@ -275,7 +268,7 @@ void billSetAllChildVariants(BillObj *effect, s16 variant) {
 
 s32 billGetChildValue(BillObj *effect) {
     if (effect->kind == 0) {
-        return *(s32 *)effect->entryList;
+        return ((BillChildPayload *)effect->entryList)->value;
     }
     return 0;
 }
@@ -290,10 +283,10 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 
     switch (effect->kind) {
     case 0:
-        ((EffSlot *)effect->entryList)->value = variantValue;
+        ((BillChildPayload *)effect->entryList)->signedVariant = variantValue;
         break;
     case 1:
-        effect->unk3C = variantValue;
+        effect->pair.unk8 = variantValue;
         break;
     }
 }
@@ -301,9 +294,9 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 u16 billGetVariantValue(BillObj *effect) {
     switch (effect->kind) {
     case 0:
-        return ((EffSlot *)effect->entryList)->variant;
+        return ((BillChildPayload *)effect->entryList)->variant;
     case 1:
-        return effect->unk3C;
+        return effect->pair.unk8;
     default:
         return 0;
     }

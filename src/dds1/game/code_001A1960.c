@@ -3,6 +3,8 @@
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl_task.h"
+#include "eff.h"
+#include "btl_action.h"
 
 extern void sdfReleaseChipBlock(void *block);
 
@@ -63,6 +65,12 @@ typedef struct BattleItemDrop {
     u8 pad03;
 } BattleItemDrop;
 
+typedef struct SceneFadingRecord {
+    SceneSlot slot;
+    u8 alpha;
+    s32 target;
+} SceneFadingRecord;
+
 typedef struct BattleController {
     u8 pad_000[0x1F4];
     u32 flags;
@@ -90,7 +98,13 @@ typedef struct BattleController {
     SceneTask *groupPrimary[20];
     SceneTask *groupSecondary[45];
     SceneTask *groupTertiary[15];
-    u8 pad_42C[0x184];
+    u8 pad_42C[0x20];
+    SceneFadingRecord fadingRecords[8]; /* 0x44C */
+    u8 pad_48C[0x18];
+    EffectSlotSet *resA; /* 0x4A4 */
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
+    u8 pad_4B0[0x100];
     s32 (*sceneCallback)();
 } BattleController;
 
@@ -122,19 +136,6 @@ typedef struct EntryPair {
 
 extern EntryPair D_003583D0[];
 
-typedef struct BtlSlotRecord {
-    u8 pad00[0xC];
-    s32 unk0C;
-    u8 pad10[0x6C];
-    s32 unk7C;
-    u8 pad80[4];
-    u32 word[7];
-} BtlSlotRecord;
-
-typedef struct BtlSlotOwner {
-    u8 pad_00[0x18];
-    BtlSlotRecord *records;
-} BtlSlotOwner;
 
 extern s32 datComputeSkillBoostedMaxHp();
 
@@ -435,8 +436,6 @@ u32 func_001A29D0(s32 arg0, s32 arg1) {
     return datGetStatWithStatusOverride(arg0, arg1);
 }
 
-extern u8 *datAbilityParameters;
-
 s32 btlApplyCommandAbilityMultiplier(s32 arg0, s32 arg1) {
     u32 value = datCalculateCommandBaseValue(arg0, arg1);
     f32 scale;
@@ -448,12 +447,12 @@ s32 btlApplyCommandAbilityMultiplier(s32 arg0, s32 arg1) {
     switch (*(u8 *)(datCommandRecords + arg1 * 56 + 3)) {
     case 1:
         if (btlCheckSpecialAbility(arg0, 0x234)) {
-            scale = *(f32 *)(datAbilityParameters + 0x1A0);
+            scale = datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case 2:
         if (btlCheckSpecialAbility(arg0, 0x235)) {
-            scale = *(f32 *)(datAbilityParameters + 0x1A8);
+            scale = datAbilityParameters[0x235 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     }
@@ -1140,50 +1139,48 @@ void btlTickActorEntryCountdowns(u8 *scene) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5030);
 
-extern u8 *datAbilityParameters;
-
 s32 btlGetAbilityAttributeMultiplierPercent(u8 *actor, s32 attr) {
     u32 value = 100;
 
     switch (attr) {
     case 0:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23C)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x1E0) * (f32)value);
+            value = (u32)(datAbilityParameters[0x23C - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 2:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23D)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x1E8) * (f32)value);
+            value = (u32)(datAbilityParameters[0x23D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 3:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23E)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x1F0) * (f32)value);
+            value = (u32)(datAbilityParameters[0x23E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 4:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23F)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x1F8) * (f32)value);
+            value = (u32)(datAbilityParameters[0x23F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 5:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x240)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x200) * (f32)value);
+            value = (u32)(datAbilityParameters[0x240 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 6:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x241)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x208) * (f32)value);
+            value = (u32)(datAbilityParameters[0x241 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 8:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x242)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x210) * (f32)value);
+            value = (u32)(datAbilityParameters[0x242 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 9:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x243)) {
-            value = (u32)(*(f32 *)(datAbilityParameters + 0x218) * (f32)value);
+            value = (u32)(datAbilityParameters[0x243 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     }
@@ -1748,14 +1745,12 @@ u32 func_001A7ED8(void) {
 
 extern char D_003A1C10[]; /* "btl:hunt mp rec[%d]\n" */
 
-extern u8 *datAbilityParameters;
-
 s32 btlCalculateAbilityRecoveryAmount(u8 *actor) {
     s32 recovery = 0;
     if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x24E)) {
-        recovery = (s32)(*(u16 *)(actor + 0x12C) * *(f32 *)(datAbilityParameters + 0x270));
+        recovery = (s32)(*(u16 *)(actor + 0x12C) * datAbilityParameters[0x24E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
     } else if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x229)) {
-        recovery = (s32)(*(u16 *)(actor + 0x12C) * *(f32 *)(datAbilityParameters + 0x148));
+        recovery = (s32)(*(u16 *)(actor + 0x12C) * datAbilityParameters[0x229 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
     }
     btlBossDebugPrintf(D_003A1C10, recovery);
     return recovery;
@@ -2097,8 +2092,6 @@ s32 btlChooseEligibleSkill(s32 object) {
     return choices[effMiscRandMod(0, count)];
 }
 
-extern u8 *datAbilityParameters;
-
 f32 btlGetActionCategoryMultiplier(s32 object, s32 unused, s32 index) {
     s32 category = *(u16 *)(datCommandRecords + index * 56 + 0x16);
     if (category < 14) {
@@ -2107,7 +2100,7 @@ f32 btlGetActionCategoryMultiplier(s32 object, s32 unused, s32 index) {
         }
     }
     if (index == 0 && btlCheckSpecialAbility(object + 0x120, 0x21D) != 0) {
-        return *(f32 *)(datAbilityParameters + 0xE8);
+        return datAbilityParameters[0x21D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     return 0.0f;
 }
@@ -2328,7 +2321,7 @@ s32 btlRollPassiveAbilityAction(u8 *actor) {
     result = 0;
     for (i = 0; i < 3; i++) {
         if (btlCheckSpecialAbility((s32)(actor + 0x120), D_00358690[i * 2])) {
-            threshold = (s32)(*(f32 *)(datAbilityParameters + (D_00358690[i * 2] * 8 - 0x1000)) * 100.0f);
+            threshold = (s32)(datAbilityParameters[D_00358690[i * 2] - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
             if (btlRollAiBucket() < threshold) {
                 result = (D_00358690 + i * 2)[1];
                 break;
@@ -2593,9 +2586,9 @@ typedef struct BtlResBlock {
     s32 nameA;
     s32 nameB;
     s32 nameC;
-    BtlSlotOwner *resA;
-    BtlSlotOwner *resB;
-    BtlSlotOwner *resC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
     s32 unk1C;
 } BtlResBlock;
 
@@ -2637,37 +2630,31 @@ void btlPanelResourcesLoad(void) {
     D_003BB3E4 = 1;
 }
 
-typedef struct BtlWorkRes {
-    u8 pad[0x4A4];
-    BtlSlotOwner *resA;
-    BtlSlotOwner *resB;
-    BtlSlotOwner *resC;
-} BtlWorkRes;
 
-extern BtlSlotOwner *func_002BD9C0();
+extern u32 func_002BD9C0(u32, u32);
 
 void btlLoadResourceBlock(void) {
-    BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
+    BattleController *work = (BattleController *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
-        btlResourceBlock->resA = func_002BD9C0(btlResourceBlock->nameA, 0);
-        btlResourceBlock->resB = func_002BD9C0(btlResourceBlock->nameB, 0);
-        btlResourceBlock->resC = func_002BD9C0(btlResourceBlock->nameC, 0);
+        btlResourceBlock->resA = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameA, 0);
+        btlResourceBlock->resB = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameB, 0);
+        btlResourceBlock->resC = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
     }
 }
 
-extern s32 effDestroyResourceSlotSet();
+extern u32 effDestroyResourceSlotSet(u32);
 
 void btlReleaseResourceBlock(void) {
-    BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
+    BattleController *work = (BattleController *)btlGetRuntime();
     if (btlResourceBlockLoaded != 0) {
-        effDestroyResourceSlotSet(btlResourceBlock->resA);
+        effDestroyResourceSlotSet((u32)btlResourceBlock->resA);
         btlResourceBlock->resA = 0;
-        effDestroyResourceSlotSet(btlResourceBlock->resB);
+        effDestroyResourceSlotSet((u32)btlResourceBlock->resB);
         btlResourceBlock->resB = 0;
-        effDestroyResourceSlotSet(btlResourceBlock->resC);
+        effDestroyResourceSlotSet((u32)btlResourceBlock->resC);
         btlResourceBlock->resC = 0;
         work->resA = 0;
         work->resB = 0;
@@ -3283,8 +3270,8 @@ typedef struct BtlPanelStrip {
     s32 texture;
 } BtlPanelStrip;
 
-extern u32 btlSetSlotLowByteClamped(BtlSlotOwner *, s32, s32, s32);
-extern void func_002BF438(s32, s32, s32, u32 *, s32, BtlSlotOwner *, s32, s32);
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25C0);
 
@@ -3309,8 +3296,8 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A27C8);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B05D0);
 
-u32 btlSetSlotLowByteClamped(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta) {
-    u32 word = owner->records[group].word[slot];
+u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delta) {
+    u32 word = owner->workEntries[group].savedColors[slot];
     u32 limit;
     u32 value;
     if (delta > 0) {
@@ -3433,6 +3420,25 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28C0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B1518);
 
+/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
+ * the later panel updater handles the other five points and their fades. */
+typedef struct BattlePhasePanelWork {
+    s32 frames;
+    s32 mode;
+    s8 phase;
+    u8 pad09[0x2F];
+    BattleSelectionPosition current[8]; /* 0x38 */
+    BattleSelectionPosition saved[8];   /* 0x78 */
+    s32 fade[8][4];                    /* 0xB8 */
+} BattlePhasePanelWork;
+
+typedef char BattlePhasePanelWork_size_must_be_0x138[
+    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+
+extern void fldScaleSceneCoordinateRecord(s32, s32);
+
+extern void func_001B19F8(BattlePhasePanelWork *);
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28F8);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B19F8);
@@ -3450,7 +3456,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2968);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B2390);
 
 s32 btlUpdatePhaseGatedTaskUntilTimeout(s64 task) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue(task);
+    BattlePhasePanelWork *state = (BattlePhasePanelWork *)kwlnTaskGetUserValue(task);
     s32 phase = btlGetNamedTaskPairStatusOrUnavailable();
     if ((u8)(phase - 1) < 2) {
         return 0;
@@ -3463,15 +3469,15 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(s64 task) {
     if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001B2390(state);
     }
-    ++state[0];
-    return state[0] < 50 ? 0 : -1;
+    ++state->frames;
+    return state->frames < 50 ? 0 : -1;
 }
 
 void btlReleasePsechgPanelWork(s64 arg0) {
-    u32 temp_v0;
+    BattlePhasePanelWork *work;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
-    sdfReleaseChipBlock(temp_v0);
+    work = (BattlePhasePanelWork *)kwlnTaskGetUserValue(arg0);
+    sdfReleaseChipBlock(work);
     btlSetTrackedTaskHandle(6, 0);
 }
 
@@ -3609,11 +3615,11 @@ s32 btlDrawTimedDialogTask(s64 task) {
     half = width / 32;
     func_002BF438(((width >> 4) - half + 0x105) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C = (width >> 4) << 4;
+    btlResourceBlock->resC->workEntries[0x16].width = (width >> 4) << 4;
     func_002BF438((0x100 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C =
-        btlResourceBlock->resC->records[0x16].unk7C << 4;
+    btlResourceBlock->resC->workEntries[0x16].width =
+        btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     func_002BF438((0x92 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
     if (expired) {
@@ -4481,18 +4487,17 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001C0DF8);
 
 
 void btlDrawCenteredPanelSegments(s32 width) {
-    u8 color[16] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                    0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 half = width / 2;
     s32 x = width - half + 0x105;
-    func_002BF438(x * 0x10, 0x200, 0, (u32 *)color, 0,
+    func_002BF438(x * 0x10, 0x200, 0, color, 0,
                   btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C = width << 4;
-    func_002BF438((0x100 - half) * 0x10, 0x200, 0, (u32 *)color, 0,
+    btlResourceBlock->resC->workEntries[0x16].width = width << 4;
+    func_002BF438((0x100 - half) * 0x10, 0x200, 0, color, 0,
                   btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C =
-        btlResourceBlock->resC->records[0x16].unk7C << 4;
-    func_002BF438((0x92 - half) * 0x10, 0x200, 0, (u32 *)color, 0,
+    btlResourceBlock->resC->workEntries[0x16].width =
+        btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
+    func_002BF438((0x92 - half) * 0x10, 0x200, 0, color, 0,
                   btlResourceBlock->resC, 0x15, 0x53);
 }
 
@@ -4670,16 +4675,10 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001C32B0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C3B28);
 
-typedef struct SceneFadingRecord {
-    SceneSlot slot;
-    u8 alpha;
-    s32 target;
-} SceneFadingRecord;
-
 void fldInitSceneFadeRecords(void) {
     BattleController *scene = (BattleController *)btlGetRuntime();
-    SceneSlot *slot = (SceneSlot *)((u8 *)scene + 0x2D4);
-    SceneFadingRecord *record = (SceneFadingRecord *)((u8 *)scene + 0x44C);
+    SceneSlot *slot = scene->slots;
+    SceneFadingRecord *record = scene->fadingRecords;
     u32 i = 0;
 
     while (i < 8 && slot->a != 0) {
@@ -4698,39 +4697,39 @@ void fldInitSceneFadeRecords(void) {
     }
 }
 
-s32 btlFindSceneSlotById(u8 *entry) {
-    s32 context = btlGetRuntime();
-    u8 *slot = (u8 *)(context + 0x2D4);
+s32 btlFindSceneSlotById(SceneSlot *entry) {
+    BattleController *context = (BattleController *)btlGetRuntime();
+    SceneSlot *slot = context->slots;
     u32 i;
-    for (i = 0; i < 8; i++, slot += 3) {
-        if (slot[2] == entry[2]) {
+    for (i = 0; i < 8; i++, slot++) {
+        if (slot->id == entry->id) {
             return i;
         }
     }
     return -1;
 }
 
-u8 *fldFindSceneSlotRecord(u8 *entry) {
-    s32 context = btlGetRuntime();
+SceneSlot *fldFindSceneSlotRecord(SceneSlot *entry) {
+    BattleController *context = (BattleController *)btlGetRuntime();
     s32 index = btlFindSceneSlotById(entry);
-    u8 *record = 0;
+    SceneSlot *record = 0;
 
     if (index != -1) {
-        record = (u8 *)(context + index * 3 + 0x2D4);
+        record = &context->slots[index];
     }
     return record;
 }
 
 s32 btlFadeStaleSceneSlots(void) {
-    s32 context = btlGetRuntime();
-    u8 *scene = (u8 *)(context + 0x44C);
-    u8 *slot = (u8 *)(context + 0x2D4);
+    BattleController *context = (BattleController *)btlGetRuntime();
+    SceneFadingRecord *scene = context->fadingRecords;
+    SceneSlot *slot = context->slots;
     u32 i;
     s32 changed = 0;
-    for (i = 0; i < 8; i++, slot += 3, scene += 8) {
-        if (scene[2] != slot[2] && fldFindSceneSlotRecord(scene) == 0) {
-            if (scene[3] != 0) {
-                scene[3] -= 8;
+    for (i = 0; i < 8; i++, slot++, scene++) {
+        if (scene->slot.id != slot->id && fldFindSceneSlotRecord(&scene->slot) == 0) {
+            if (scene->alpha != 0) {
+                scene->alpha -= 8;
                 changed = 1;
             }
         }
@@ -4739,7 +4738,7 @@ s32 btlFadeStaleSceneSlots(void) {
 }
 
 s32 fldCountSceneFadeKinds(BattleController *scene, s32 *outFadeCount) {
-    SceneFadingRecord *record = (SceneFadingRecord *)((u8 *)scene + 0x44C);
+    SceneFadingRecord *record = scene->fadingRecords;
     SceneSlot *slot;
     u32 fadeCount = 0;
     s32 countA = 0;
@@ -4765,7 +4764,7 @@ s32 fldCountSceneFadeKinds(BattleController *scene, s32 *outFadeCount) {
         }
     }
     fadeCount--;
-    slot = (SceneSlot *)((u8 *)scene + 0x2D4);
+    slot = scene->slots;
     slotCount = 0;
     while (slotCount < 8 && slot->a != 0) {
         slotCount++;

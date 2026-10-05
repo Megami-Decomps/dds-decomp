@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fpu.h"
+#include "eff.h"
 
 extern s32 itfFindGridNodeByKey(u32, u32);
 
@@ -15,13 +16,6 @@ typedef struct UiQuadWords {
     u32 unk00[4];
 } UiQuadWords; // 0x10
 
-typedef struct GridWidget {
-    u8 pad0[0x50];
-    s32 x;
-    s32 y;
-    s32 width;
-    s32 height;
-} GridWidget;
 
 typedef struct GridTextListItem GridTextListItem;
 
@@ -65,22 +59,6 @@ struct GridTextListItem {
 
 extern s32 sdfGridSeekSelectedNodeByIndex(s32, void *);
 
-typedef struct GridQuantizedEntry {
-    u8 pad0[0x44];
-    s32 x;
-    s32 y;
-    s32 width;
-    s32 height;
-} GridQuantizedEntry;
-
-typedef struct GridEntryOwner {
-    u8 pad00[0x10];
-    u8 *quantizedEntries; /* 0x10: 0x80-byte entries */
-    u8 pad14[4];
-    u8 *renderEntries;    /* 0x18: 0xA0-byte entries */
-    u8 pad1C[0xC];
-    s32 defaultValue;     /* 0x28 */
-} GridEntryOwner;
 
 typedef struct RenderCallbackEntry {
     u8 reserved[0x10];
@@ -104,7 +82,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
 /* Resolve an entry by key, falling back to the object's stored value. */
 s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
-    s32 entry = effGetSlotWorkOrOverride(object);
+    s32 entry = effGetSlotWorkOrOverride(object, key);
     s32 result;
 
     if (*(s32 *)(entry + 0x30) == 0) {
@@ -112,7 +90,7 @@ s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
     }
     result = effUpdateTimedStates(object, key, entry);
     if (result == 0) {
-        result = ((GridEntryOwner *)object)->defaultValue;
+        result = ((EffectSlotSet *)object)->defaultValue;
     }
     return result;
 }
@@ -120,11 +98,11 @@ s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
 extern void func_002BD3D8(void *, s32, void *);
 
 void itfSetGridEntryQuantizedAndRefresh(u8 *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    GridQuantizedEntry *entry = (GridQuantizedEntry *)(((GridEntryOwner *)object)->quantizedEntries + index * 0x80);
+    EffectSlotDescription *entry = &((EffectSlotSet *)object)->descriptions[index];
     s32 record = effGetSlotWorkOrOverride((s32)object, index);
 
-    entry->x = x >> 4;
-    entry->y = y >> 3;
+    entry->xOffset = x >> 4;
+    entry->yOffset = y >> 3;
     entry->width = width >> 4;
     entry->height = height >> 3;
     func_002BD3D8(object, index, (void *)(s32)record);
@@ -133,37 +111,39 @@ void itfSetGridEntryQuantizedAndRefresh(u8 *object, s32 index, s32 x, s32 y, s32
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
 void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
-    GridQuantizedEntry *entry = (GridQuantizedEntry *)(((GridEntryOwner *)object)->quantizedEntries + index * 0x80);
-    u32 *destination = (u32 *)(((GridEntryOwner *)object)->renderEntries + index * 0xA0 + 0x6C);
+    EffectSlotDescription *entry = &((EffectSlotSet *)object)->descriptions[index];
+    u32 *destination = (u32 *)((EffectSlotSet *)object)->workEntries[index].bounds.grid.quantizedBounds;
     u32 *source;
     s32 remaining = 3;
-    entry->x = x >> 4;
-    entry->y = y >> 3;
+    entry->xOffset = x >> 4;
+    entry->yOffset = y >> 3;
     entry->width = width >> 4;
     entry->height = height >> 3;
-    source = (u32 *)&entry->x;
+    source = (u32 *)&entry->xOffset;
     do {
         *destination++ = *source++;
     } while (--remaining >= 0);
 }
 
 void itfGridSetBounds(s32 object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    GridWidget *widget = (GridWidget *)effGetSlotWorkOrOverride(object, index);
-    widget->x = x;
-    widget->y = y;
-    widget->width = width;
-    widget->height = height;
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
+    widget->parameters[0] = x;
+    widget->parameters[1] = y;
+    widget->parameters[2] = width;
+    widget->parameters[3] = height;
 }
 
+/* Restore four saved palette words in the native packed work-record buffer. */
 void itfGridCopyEntryQuad(s32 owner, s32 index) {
     u32 *destination;
     s32 remaining;
 
     remaining = 3;
-    destination = (u32 *)(index * 0xa0 + (s32)((GridEntryOwner *)owner)->renderEntries + 0x14);
+    destination = (u32 *)(index * sizeof(BdWork)
+                         + (u32)((EffectSlotSet *)owner)->workEntries) + 5;
     do {
         remaining = remaining - 1;
-        *destination = destination[0x1c];
+        *destination = destination[0x1C];
         destination = destination + 1;
     } while (-1 < remaining);
 }
@@ -174,23 +154,6 @@ void itfGridStorePosition(GridPosition *position, s32 x, s32 y) {
     position->y = y;
 }
 
-typedef struct GridAngleRectangle {
-    u8 pad00[0x6C];
-    s32 left;       /* 0x6C */
-    s32 top;        /* 0x70 */
-    s32 right;      /* 0x74 */
-    s32 bottom;     /* 0x78 */
-    s32 ratioWidth;  /* 0x7C */
-    s32 ratioHeight; /* 0x80 */
-    u32 colors[4];  /* 0x84 */
-} GridAngleRectangle;
-
-typedef struct GridAngleAdjustment {
-    u8 pad00[4];
-    s32 dimensions[2]; /* 0x04 */
-    s32 anchors[2];    /* 0x0C */
-    u32 colors[4];     /* 0x14 */
-} GridAngleAdjustment;
 
 typedef struct GridAngleTable {
     s32 divisor;      /* 0x00 */
@@ -203,17 +166,11 @@ typedef struct GridAngleSlot {
     GridAngleTable *table; /* 0x20 */
 } GridAngleSlot;
 
-typedef struct GridAngleOwner {
-    u8 pad00[4];
-    s32 angle; /* 0x04 */
-    u8 pad08[8];
-    GridAngleSlot *slot; /* 0x10 */
-} GridAngleOwner;
 
 INCLUDE_ASM(const s32, "game/code_002BF790", itfGridApplySqrtBoundsAndColorScale);
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
-s32 func_002BFCE0(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+s32 func_002BFCE0(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 squares[2];
     s32 deltas[2];
@@ -228,33 +185,33 @@ s32 func_002BFCE0(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     s32 fractionalMask;
     s32 i;
 
-    table = owner->slot->table;
+    table = ((GridAngleSlot *)owner->source)->table;
     colorMask = -0x100;
     fractionalMask = 0xFFFF;
     deltas[0] = table->divisor << 4;
-    deltas[1] = (((table->mirrored << 12) / 640) * rectangle->ratioHeight) / rectangle->ratioWidth;
-    previous[0] = out->dimensions[0];
-    previous[1] = out->dimensions[1];
-    scaledWidth = (s32)(fsqrtf((f32)deltas[0]) * (f32)owner->angle * (1.0f / 65536.0f));
+    deltas[1] = (((table->mirrored << 12) / 640) * rectangle->sourceHeight) / rectangle->sourceWidth;
+    previous[0] = out->xOffset;
+    previous[1] = out->yOffset;
+    scaledWidth = (s32)(fsqrtf((f32)deltas[0]) * (f32)owner->value * (1.0f / 65536.0f));
     squares[0] = scaledWidth * scaledWidth;
     widthAdjustment = -((deltas[0] - squares[0]) / 2);
-    scaledHeight = (s32)(fsqrtf((f32)deltas[1]) * (f32)owner->angle * (1.0f / 65536.0f));
+    scaledHeight = (s32)(fsqrtf((f32)deltas[1]) * (f32)owner->value * (1.0f / 65536.0f));
     squares[1] = scaledHeight * scaledHeight;
     heightAdjustment = -((deltas[1] - squares[1]) / 2);
 
-    out->dimensions[0] = widthAdjustment;
-    out->anchors[0] += (previous[0] - widthAdjustment) * 2;
-    out->dimensions[1] = heightAdjustment;
-    out->anchors[1] += (previous[1] - heightAdjustment) * 2;
+    out->xOffset = widthAdjustment;
+    out->width += (previous[0] - widthAdjustment) * 2;
+    out->yOffset = heightAdjustment;
+    out->height += (previous[1] - heightAdjustment) * 2;
 
-    sourceColor = rectangle->colors;
-    destColor = out->colors;
+    sourceColor = rectangle->savedColors;
+    destColor = out->cornerColors;
     i = 3;
 
     for (; i >= 0; i--, sourceColor++, destColor++) {
         u32 color = *sourceColor;
         s32 alpha = *(u8 *)sourceColor;
-        s32 product = alpha * owner->angle;
+        s32 product = alpha * owner->value;
         s32 negative = 0;
 
         if (product < 0) {
@@ -269,20 +226,16 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFE78);
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0038);
 
-typedef struct GridAngleOutput {
-    u8 pad00[0x24];
-    f32 angleDegrees; /* 0x24 */
-} GridAngleOutput;
 
-s32 itfUpdateAngleAndGetCycleStep(s32 unused, u8 *out, GridAngleOwner *owner) {
-    GridAngleTable *table = owner->slot->table;
+s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *owner) {
+    GridAngleTable *table = ((GridAngleSlot *)owner->source)->table;
     s32 i = 3;
 
     do {
         if (table->mirrored == 0) {
-            ((GridAngleOutput *)out)->angleDegrees = 360.0f - (f32)owner->angle * 360.0f * (1.0f / 65536.0f);
+            out->angleDegrees = 360.0f - (f32)owner->value * 360.0f * (1.0f / 65536.0f);
         } else {
-            ((GridAngleOutput *)out)->angleDegrees = (f32)owner->angle * 360.0f * (1.0f / 65536.0f);
+            out->angleDegrees = (f32)owner->value * 360.0f * (1.0f / 65536.0f);
         }
     } while (--i >= 0);
     return 0x10000 / table->divisor;
@@ -291,7 +244,7 @@ s32 itfUpdateAngleAndGetCycleStep(s32 unused, u8 *out, GridAngleOwner *owner) {
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0200);
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
-s32 func_002C0340(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+s32 func_002C0340(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 scaled[2];
     s32 deltas[2];
@@ -307,22 +260,22 @@ s32 func_002C0340(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     s32 fractionalMask;
     s32 i;
 
-    table = owner->slot->table;
+    table = ((GridAngleSlot *)owner->source)->table;
     colorMask = -0x100;
     fractionalMask = 0xFFFF;
     deltas[0] = table->divisor << 4;
-    deltas[1] = (((table->mirrored << 12) / 640) * rectangle->ratioHeight) / rectangle->ratioWidth;
-    angle = owner->angle;
-    previous[0] = out->dimensions[0];
-    previous[1] = out->dimensions[1];
+    deltas[1] = (((table->mirrored << 12) / 640) * rectangle->sourceHeight) / rectangle->sourceWidth;
+    angle = owner->value;
+    previous[0] = out->xOffset;
+    previous[1] = out->yOffset;
     scaledWidth = deltas[0] * angle;
     if (scaledWidth < 0) {
         scaledWidth += 0xFFFF;
     }
     scaled[0] = scaledWidth >> 16;
     widthAdjustment = -((deltas[0] - scaled[0]) / 2);
-    out->dimensions[0] = widthAdjustment;
-    out->anchors[0] += (previous[0] - widthAdjustment) * 2;
+    out->xOffset = widthAdjustment;
+    out->width += (previous[0] - widthAdjustment) * 2;
 
     scaledHeight = deltas[1] * angle;
     if (scaledHeight < 0) {
@@ -330,16 +283,16 @@ s32 func_002C0340(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     }
     scaled[1] = scaledHeight >> 16;
     heightAdjustment = -((deltas[1] - scaled[1]) / 2);
-    out->dimensions[1] = heightAdjustment;
-    out->anchors[1] += (previous[1] - heightAdjustment) * 2;
+    out->yOffset = heightAdjustment;
+    out->height += (previous[1] - heightAdjustment) * 2;
 
-    sourceColor = rectangle->colors;
-    destColor = out->colors;
+    sourceColor = rectangle->savedColors;
+    destColor = out->cornerColors;
     i = 3;
     for (; i >= 0; i--, sourceColor++, destColor++) {
         u32 color = *sourceColor;
         s32 alpha = *(u8 *)sourceColor;
-        s32 colorProduct = alpha * owner->angle;
+        s32 colorProduct = alpha * owner->value;
         s32 negative = 0;
 
         if (colorProduct < 0) {
