@@ -999,7 +999,38 @@ s32 func_00201900(s32 mask, s16 actionId, s8 force) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyUnitHasActionInSlots);
+/* Return whether an eligible unit has a queued action in the requested category. */
+s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action) {
+    BtlTask *task;
+    BtlActionSlot *slots;
+    BtlUnit *unit;
+    u32 flags;
+    s32 i;
+
+    for (task = ((BtlState *)btlGetRuntime())->tasks; task != NULL; task = task->next) {
+        unit = task->unit;
+        if (unit == NULL) {
+            continue;
+        }
+        flags = unit->flags;
+        if (!(flags & 1)) {
+            continue;
+        }
+        if (!(flags & mask)) {
+            continue;
+        }
+        if (flags & 0x20) {
+            continue;
+        }
+        slots = ((BtlActionTask *)task)->actions;
+        for (i = 0; i < 8; i++) {
+            if (func_00201900(action, slots[i].actionId, 1) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyGroup200HasAction);
 
