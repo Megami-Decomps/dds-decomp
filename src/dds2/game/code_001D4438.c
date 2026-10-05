@@ -23,12 +23,6 @@ extern s32 btlCreateAiWork(s32);
 extern void btlBossDebugPrintf(const char *, ...);
 extern u32 fldGetSceneScriptTaskUserData(void);
 extern char *D_004367B8;
-typedef struct SceneWorkBuffers {
-    void *first;
-    void *second;
-} SceneWorkBuffers;
-
-extern SceneWorkBuffers D_00438F58;
 
 extern s32 datEnemyRecords;
 
