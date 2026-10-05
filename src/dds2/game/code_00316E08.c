@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 typedef struct Motion Motion;
 typedef struct SdfMotionManager SdfMotionManager;
@@ -111,16 +112,15 @@ typedef struct MnuEffectRecord {
     u8 pad08[0x18];
 } MnuEffectRecord;
 
-typedef struct SdfAllocation SdfAllocation;
 
 typedef struct MnuSectionObjectList {
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
     s32 count;
     u8 *objects;
 } MnuSectionObjectList;
 
 typedef struct MnuSectionModelWork {
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
     s32 count;
     s32 (*groups)[4];
     u32 unkC;
@@ -130,7 +130,7 @@ typedef struct MnuSectionModelWork {
 typedef struct MnuPackageEntry {
     struct MnuPackageEntry *next;
     u8 pad04[4];
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
     s32 unk0C;
     u8 kind;
     u8 pad11;
@@ -141,7 +141,7 @@ typedef struct MnuPackageEntry {
 
 /* Shared work for the shooting task's package requests and state callbacks. */
 typedef struct MnuShootingWork {
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
     MnuSectionObjectList *objects;
     MnuSectionObjectList *playerObjects;
     MnuSectionObjectList *mapObjects;
@@ -174,7 +174,7 @@ typedef struct MnuShootingWork {
 
 extern MenuWorkEntry D_0040ABF8;
 extern void mnuDeactivateWorkEntry(MenuWorkEntry *);
-extern void sdfReleaseResourceAllocation(SdfAllocation *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void mnuDestroyAllModelNodeContexts(s32 *);
 extern u8 *mnuGetResourceProgressParameters(void);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
@@ -216,13 +216,13 @@ extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
 extern void func_00317AD0(MnuShootingWork *handle);
 
-extern void *sdfAllocGeneralBlock(s32 size);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
-extern void *sdfMemoryGetBlockAddress(void *block);
+extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
 extern void func_0031D928(u32 *);
 extern void func_0031DF48(u32 *);
 extern void dds3ReleaseSoundSlotPool(void);
-extern SdfAllocation *D_00438948;
+extern SdfMemBlock *D_00438948;
 extern void mnuDestroyNodeJobQueues(s32 *);
 extern void mnuUpdateHighScoreFlag(void *);
 /* Retail passes the task work to this otherwise empty legacy callback. */
@@ -322,7 +322,7 @@ u32 func_00316EF8(void) {
 
 /* Return cleared 0x1E0-byte task work with its allocation handle and defaults. */
 MnuShootingWork *mdlAllocateViewerPackageWork(void) {
-    void *block = sdfAllocGeneralBlock(0x1E0);
+    SdfMemBlock *block = sdfAllocGeneralBlock(0x1E0);
     MnuShootingWork *work = (MnuShootingWork *)sdfMemoryGetBlockAddress(block);
 
     memset(work, 0, 0x1E0);
@@ -413,7 +413,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
         for (i = 0; i < work->effectWork->count; i++) {
             mnuDestroyNodeJobQueues((s32 *)&work->effectWork->lists[i]);
         }
-        sdfReleaseResourceAllocation((SdfAllocation *)work->effectWork->handle);
+        sdfReleaseResourceAllocation((SdfMemBlock *)work->effectWork->handle);
         work->effectWork = NULL;
     }
     if (work->work24 != NULL) {

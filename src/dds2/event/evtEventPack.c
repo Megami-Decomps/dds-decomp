@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -172,14 +173,13 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     state->loaded = 1;
 }
 
-struct SdfAllocation;
 struct FileRequest;
 struct FileWork;
 struct FileCleanup;
 extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *);
 extern u32 fileGetResourceHandle(struct FileWork *);
 extern s32 filePollEntryCleanup(struct FileCleanup *);
-extern u32 sdfResourceRetainAddress(struct SdfAllocation *);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern char D_004377E8[];
 
 /* Retain a ready pack and select its first entry-point record.
@@ -195,7 +195,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
             state->fileHandle = 0;
             header = (EvtPackScriptHeader *)sdfResourceRetainAddress(
-                (struct SdfAllocation *)state->resourceHandle);
+                (SdfMemBlock *)state->resourceHandle);
             state->data = (u8 *)header;
             state->header = header;
             state->entries = header->entries;
