@@ -73,7 +73,12 @@ typedef struct {
     s32 delaySpread;       /* 0x28 modulus of the particle delay */
     u8 pad2C[8];
     f32 initialRadius;
-    u8 pad38[0x18];
+    f32 baseLiftStep;      /* 0x38 */
+    f32 liftVariation;
+    u8 pad40[4];
+    f32 baseScale;         /* 0x44 */
+    u8 pad48[4];
+    f32 scaleVariation;    /* 0x4C */
     f32 unk50;
     u8 pad54[0xC];
     u32 particleCount;     /* 0x60 */
@@ -263,13 +268,13 @@ void func_00189E98(EffMagatuhiWideFirst *work, s32 index) {
     VU0_LOAD_VF(vf10, particle->driftState);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, particle->driftState);
-    particle->scale = *(f32 *)((u8 *)work + 0x44) *
-        (effMiscRandUnitFloat(D_0034DF38) * *(f32 *)((u8 *)work + 0x4C) +
-         (1.0f - *(f32 *)((u8 *)work + 0x4C)));
+    particle->scale = work->head.baseScale *
+        (effMiscRandUnitFloat(D_0034DF38) * work->head.scaleVariation +
+         (1.0f - work->head.scaleVariation));
     particle->angle = effMiscRandUnitFloat(D_0034DF38) * EFF_MAGATUHI_FULL_TURN;
-    particle->liftStep = *(f32 *)((u8 *)work + 0x38) *
-        (effMiscRandUnitFloat(D_0034DF38) * *(f32 *)((u8 *)work + 0x3C) +
-         (1.0f - *(f32 *)((u8 *)work + 0x3C)));
+    particle->liftStep = work->head.baseLiftStep *
+        (effMiscRandUnitFloat(D_0034DF38) * work->head.liftVariation +
+         (1.0f - work->head.liftVariation));
     slot = effMathGetSlotAt(work->mathResource, index);
     slot->t = 0.0f;
     slot->step = 0.0f;
