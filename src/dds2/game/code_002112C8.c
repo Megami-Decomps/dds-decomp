@@ -3453,7 +3453,7 @@ static inline void btlCopyFormationDimensions(BtlUnit *unit) {
 }
 
 /* btlUpdateSpecialActorFormation */
-void func_0021A490(void) {
+void btlUpdateSpecialActorFormation(void) {
     BtlUnit *left = NULL;
     BtlUnit *right = NULL;
     BtlUnit *core = NULL;

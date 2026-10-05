@@ -195,6 +195,7 @@
 0x0010ABE0	evtDestroyFontResourceChain	inferred	Destroys existing console font resource node and clears global handle. [names_reviewed7.tsv]
 0x0010AC10	evtPrintDeveloperConsoleMessage	inferred	src/dds1/game/code_00107FD8.c func_0010AC10: Formats variadic message into stack buffer and prints it only when developer console node exists. [names_reviewed24.tsv]
 0x0010AEF0	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
+0x0010AF68	sdfDrawHeapSpanOverlay	inferred	U2
 0x0010B428	evtDrawHeapUsageOverlay	inferred	readability/matching review (QP16)
 0x0010B558	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
 0x0010B6B0	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:1192:func_0010B6B0; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
@@ -2549,6 +2550,7 @@
 0x001A8330	btlSelectedEntryHitsElement	inferred	looks up power slot table D_00358518 with element mask
 0x001A8410	btlGetActionRecordLookupValue	inferred	Indexes a secondary value table through the selected battle action record. [names_reviewed17.tsv]
 0x001A8448	btlTestSelectedItemCategoryMask	inferred	Tests the selected item category against a converted mask. [names_reviewed8.tsv]
+0x001A8538	btlCompareSkippedAndActiveTargetCounts	inferred	U2
 0x001A87A0	btlIsSelectedActorStatusAndRecordClear	inferred	Requires clear selected entry, actor status flags and indexed record state. [names_reviewed16.tsv]
 0x001A8818	btlAreUnitStatusAndEntryFlagsClear	inferred	Requires the matching unit status and entry permission bits both to be clear. [names_reviewed14.tsv]
 0x001A8850	btlFindCommandPartnersByAffinity	inferred	L13
@@ -2706,6 +2708,7 @@
 0x001D0498	btlRemoveEligibleActorSceneTask	inferred	Frees actor resources when necessary, then unlinks eligible scene tasks. [names_reviewed10.tsv]
 0x001D0680	btlRunHookAndAdvanceUnitState	inferred	Twin of dds2 0x001DCE70; Invokes unit hook if set then dispatches battle state 0x1B. [names_R_FuncNames3.tsv]
 0x001D0870	btlUpdateActionSeqs	inferred	twin 0x001DD060: Walks BtlWork head list; runs D_003B69D8[state].update and bumps stateTime for flag 1, calls btlDestroyActionSeq for flag 2 (twin of DDS1 func_001D0870).
+0x001D09B8	btlDebugPrintActionOrder	inferred	L13
 0x001D0BA0	btlDispatchCommandViaHookOrDefault	inferred	Uses a battle command hook when available or dispatches according to action arguments. [names_reviewed14.tsv]
 0x001D0DD8	btlIsSupportedCommandKind	inferred	Exact DDS1/DDS2 C twins recognize command kinds 1,2,3,4,7,8,9. [names_reviewed13.tsv]
 0x001D0E18	btlResolveActionOperand	inferred	Dispatches six action operand kinds through a jump table, clamps positive scalar values and reads battle stats.
@@ -2859,6 +2862,8 @@
 0x001DD068	btlHasEligibleLinkedEntryTypeTwo	inferred	DDS2 001EA4D8 twin; scans linked action entries for +8=2 and live unit [names_R_FuncNames2.tsv]
 0x001DD128	btlHasLinkedEffectNodeTrigger	inferred	Tests linked effect resource entry trigger kind two after the single-link guard. [names_reviewed14.tsv]
 0x001DD4B8	btlChooseCameraPoseByActorHeights	inferred	U0
+0x001DD6A0	btlInitializeLinkedActionCamera	inferred	U1
+0x001DDE28	btlDispatchActionCameraStep	inferred	U1
 0x001DE4A8	btlAdvanceTargetCursorUnlessHookHandles	inferred	Invokes an optional battle hook before advancing a qualifying actor cursor. [names_reviewed14.tsv]
 0x001DE508	btlUpdateActionPoseForLinkedTarget	inferred	Selects pose update behavior based on linked target and battle state. [names_reviewed12.tsv]
 0x001DEA70	btlStartLinkedActionPoseBlendIfEligible	inferred	Begins action pose blending when the linked target and participant flags permit it. [names_reviewed12.tsv]
@@ -2872,7 +2877,9 @@
 0x001DFA60	btlAimEffectPoseAtUnit	inferred	Reads linked unit effect position or muzzle and writes it into action pose vector. [names_reviewed5.tsv]
 0x001DFD70	btlRefreshActionPoseBlendSnapshot	inferred	Snapshots action transforms and starts a timed blend when eligible. [names_reviewed12.tsv]
 0x001E2970	btlBuildApproachCamera	inferred	U0
+0x001E2D20	btlUpdateActionTargetCameraPose	inferred	Fam
 0x001E4578	btlPrepareActionCameraPoseWithActorClearance	inferred	U3
+0x001E4960	btlBuildGroupFramingCameraPose	inferred	U2
 0x001E4AA8	btlResetUnitEffectVector	inferred	Twin of dds2 0x001F2740; Calls vector effect update with 0.0f. [names_R_FuncNames3.tsv]
 0x001E5478	btlBuildHeightClampedApproachCamera	inferred	U3
 0x001E5730	btlChooseActionPoseBlendFromActorCount	inferred	Chooses an action pose blend according to indexed actor count and flags. [names_reviewed12.tsv]
@@ -3844,6 +3851,7 @@
 0x0022C560	evtEventViewerFindNameIndex	inferred	linear search of 32-byte name slots, returns index or -1
 0x0022C5E8	evtEventViewerAddName	inferred	returns index of name in the 0x20-byte name table, appending when missing [names_M34_SmallSweep3.tsv]
 0x0022C648	evtEventViewerGetNameObject	inferred	world-object lookup (type 7) of the name record at index [names_M34_SmallSweep3.tsv]
+0x0022C6B0	evtViewerBindNamedOwner	inferred	U1
 0x0022C7F0	evtViewerCreateObjectInFreeSlot	inferred	confidence=high; src/dds1/event/evtEventViewer.c:func_0022C7F0; Finds a free viewer slot, creates/binds the command-selected object, optionally activates it and returns the slot index. [names_qp9.tsv]
 0x0022CA48	evtEventViewerFreeSlot	inferred	frees indexed pointer slot via free-like helper and NULLs it
 0x0022CB68	evtEventViewerFreeBuffer	inferred	frees the +0x2c buffer if non-null and NULLs it
@@ -4088,6 +4096,7 @@
 0x00246D68	evtFetchDispatchStart	inferred	calls func_0025E108 with +0xA4 value then dispatches mode 1
 0x00246DB8	evtSetupDispatchSyncE	inferred	identical body to evtSetupDispatchSync; fifth occurrence in file order
 0x00246E38	evtAdvanceStateStage	inferred	when +0xAC == 0xA stores halfword, applies func_002605B0 mode 6 and func_00260530 setup
+0x00246EA0	evtPollQuantitySelection	inferred	Fam
 0x002470F8	evtAlignDispatchStart	inferred	calls func_00261760 on state then dispatches mode 1
 0x00247148	evtSetupDispatchSyncF	inferred	identical body to evtSetupDispatchSync; sixth occurrence in file order
 0x002473D0	evtAccumulateStateScore	inferred	folds *(base) * arg+0x80 into D_003BAA00+0xA50 when index in range
@@ -4225,6 +4234,7 @@
 0x0024E010	evtDrawListViewportIndicators	inferred	readability/matching review (QP16)
 0x0024E100	evtDrawListViewportPanel	inferred	Computes panel height from list viewport and draws panel with edge detail. [names_reviewed7.tsv]
 0x0024E198	evtDrawPlainPanel	inferred	Draws solid panel rectangle with fixed fill color and depth mode. [names_reviewed7.tsv]
+0x0024EA50	mnuDrawScaledVariantSprite	inferred	Fam
 0x0024F4F0	mnuRequestMantraResources	inferred	mnu requests 14 mantra sprite resources
 0x0024F570	mnuAreResourceSlotsOccupied	inferred	Tests whether all fourteen resource slot handles are present.
 0x0024F5B0	mnuReleaseResourceSlots	inferred	Releases and clears each nonempty resource slot handle.
@@ -4697,6 +4707,7 @@
 0x0027D1E8	mnuReleaseWindowTextures	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027D248	mnuConfigureWindowSpriteSlots	inferred	Applies configuration for six of the seven MenuWindowSpriteGroup sprite slots.
 0x0027D318	mnuDrawWindowSprites	inferred	Draws window sprites selected by two mask bits and updates the six optional sprite resources.
+0x0027D4A0	mnuCreatePanelSpriteHandles	inferred	U3
 0x0027D740	mnuClearEntryFlags	inferred	Clears bit 0 of each entry's descriptor flags and calls func_002BD5A0 on it.
 0x0027D7E0	mnuReleaseResourceList	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027DCE8	mnuDrawIconPanel	inferred	Dispatches icon panel drawing mode according to first word of panel record. [names_reviewed5.tsv]

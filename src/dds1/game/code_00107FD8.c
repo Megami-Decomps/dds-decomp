@@ -1303,7 +1303,7 @@ extern void sdfAppendFillRectanglePacket(SdfListHead *, s32, s32, s32, s32,
                                          s32, s32, s32, s32 (*)(s32));
 
 /* Render an allocation span as partial rows and complete heap-map rows. */
-void func_0010AF68(SdfListHead *packetList, s32 x, s32 y,
+void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
                    u32 heapBase, u32 address, s32 remainingBytes, u8 kind) {
     s32 color;
     u32 byteOffset;

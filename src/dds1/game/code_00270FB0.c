@@ -408,7 +408,7 @@ void func_00271B48(void) {
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271B50);
 
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
-    menu->resourceList = func_0027D4A0(0, menu->unk6C, menu->secondaryImage);
+    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->unk6C, menu->secondaryImage);
     menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->unk74, 0, 0, 0);
     menu->images[1] = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);

@@ -793,7 +793,7 @@ typedef struct BtlWaitTask {
 
 s32 btlWaitEffectTask(BtlWaitTask *task) {
     if (task->ticks == 0) {
-        func_001AD230(task->value, 0);
+        btlCreateAnalysisPanelTask(task->value, 0);
         func_001BCB88(0, 8);
     }
     if (task->ticks >= 0x11) {

@@ -581,7 +581,7 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_003CE594[];
 
 /* Poll command phases, adjust the idle quantity selection, and play UI sounds. */
-s32 func_00263920(s32 callbackContext) {
+s32 evtPollQuantitySelection(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((EvtStateTableContext *)stateAddress)->dispatchState;
     s32 previousQuantity = ((EvtStateTableContext *)stateAddress)->entryMultiplier;

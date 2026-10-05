@@ -568,7 +568,7 @@ void btlUpdateFadeIndicator(u8 *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019EBC8);
+INCLUDE_ASM(const s32, "game/code_0019DB88", itfUpdateSoundSelectorPanel);
 
 void itfMesRenderActivePanelSprites(UiPanel *panel) {
     UiPanelPlacement *place;

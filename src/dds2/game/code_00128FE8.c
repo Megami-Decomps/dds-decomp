@@ -330,7 +330,7 @@ extern s32 func_0022E450(void);
 
 extern s32 fldEncProc(void);
 
-extern void func_0022E0E0(void);
+extern void btlUpdateRuntimeFadeState(void);
 
 extern void mdlSetNodeFloat20(s32, s32, f32);
 
@@ -2223,7 +2223,7 @@ s32 fldEncProc(void) {
 
     if (state < 3) {
         if (state >= 0) {
-            func_0022E0E0();
+            btlUpdateRuntimeFadeState();
         }
     }
     return 0;

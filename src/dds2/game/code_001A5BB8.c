@@ -815,7 +815,7 @@ extern void itfDrawSoundSelectorFadeLayers(UiPanel *);
 extern void func_001A7120(UiPanel *);
 extern void func_001A6E88(UiPanel *);
 
-void func_001A6BF8(UiPanel *panel) {
+void itfUpdateSoundSelectorPanel(UiPanel *panel) {
     u32 flags = panel->flags;
     SndSeqSelect *selection;
     s32 glyph;
@@ -2010,57 +2010,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC360);
 
 
 
-s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1) {
-    u32 count;
-    u32 i;
-    s32 cmd;
-    s32 index;
-
-    if (arg0 == 0) {
-        goto fail;
-    }
-    if (arg1 == 0) {
-        goto fail;
-    }
-    count = btlGetIndexListCount(arg1);
-    if (count < 2) {
-        return 0;
-    }
-    cmd = *(s32 *)(arg0 + 0x20);
-    if (cmd < 2) {
-        goto fail;
-    }
-    if (cmd >= 5) {
-        if (cmd > 8) {
-            goto fail;
-        }
-        if (cmd < 7) {
-            goto fail;
-        }
-    }
-    if (cmd == 4) {
-        index = btlGetLoggedIndexedCommandItem(*(s32 *)(arg0 + 0x28));
-    } else {
-        index = *(s32 *)(arg0 + 0x24);
-    }
-    if (*(u8 *)(datCommandRecords + index * 56 + 8) != 0) {
-        goto fail;
-    }
-    if (*(u8 *)(datCommandRecords + index * 56 + 0x24) != 2) {
-        goto fail;
-    }
-    if (*(u16 *)(datCommandRecords + index * 56 + 0x26) == 0) {
-        goto fail;
-    }
-    for (i = 0; i < count; i++) {
-        if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
-             ((BtlUnit *)btlGetIndexListEntry(arg1, i))->conditionFlags) != 0) {
-            return i;
-        }
-    }
-fail:
-    return 0;
-}
+extern s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlFindEligibleTargetForMultiActorCommand);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC648);
 
@@ -3379,7 +3330,7 @@ s32 btlGetSelectedUnitProperty(UiObject *unit) {
     return D_003B4F74[property * 3];
 }
 
-s32 func_001B29F0(BtlIndexList *targets, BtlTargetResult *results) {
+s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {
     s32 i = 0;
     u32 sides = 0;
     BattleController *controller = (BattleController *)btlGetRuntime();
@@ -4486,7 +4437,7 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 func_001B9158(s32);
 extern void btlReleaseTaskAndRefreshCursorIfFlagged(s32);
 
-s32 func_001B7E40(s32 entry, s32 duration) {
+s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     BattleController *context = (BattleController *)btlGetRuntime();
     BtlAnalysisPanelWork *data;
     s32 task;

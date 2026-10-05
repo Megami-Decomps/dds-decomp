@@ -302,7 +302,7 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
     }
 }
 
-void func_0024EA50(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[

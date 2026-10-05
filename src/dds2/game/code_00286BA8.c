@@ -48,6 +48,9 @@ typedef struct MtrSelectionState {
     s16 state;
     u16 unk02;
     s32 timer;
+    s32 alpha;
+    f32 scale;
+    f32 highlightAlpha;
 } MtrSelectionState;
 
 typedef struct MtrSelectionFlags {
@@ -90,7 +93,8 @@ typedef struct MnuPartySnapshot {
 } MnuPartySnapshot;
 
 struct MenuListNode {
-    u8 pad00[0x70];
+    s32 index;
+    u8 pad04[0x6C];
     u8 *items;
 };
 
@@ -184,7 +188,7 @@ typedef struct MnuStatusResource {
     MtrSelectionFlags flags;
     MtrResourceLoadState resourceLoad; /* 0x21C */
     MtrSelectionState selection; /* 0x22C */
-    u8 pad234[0x560];
+    u8 pad240[0x554];
     MtrPlayerFlags playerFlags; /* 0x794 */
     u8 pad798[0x40C];
     u32 unkBA4;
@@ -435,7 +439,36 @@ s32 func_00288158(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_002882B8);
+extern char D_00437928[];
+extern s32 func_0035C860(char *, const char *, ...);
+extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32, s32);
+
+void func_002882B8(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *list,
+                  MenuListNode *node, s32 depth) {
+    MtrSelectionState *selection = (MtrSelectionState *)list->userData;
+    MnuPartySnapshot *record;
+    s32 selected;
+    s32 highlightAlpha;
+    s8 icons[9] = {0, 6, 16, 8, 12, 10, 14, 18, 20};
+    char text[16];
+
+    selected = list->cursor->index == node->index;
+    highlightAlpha = selection->highlightAlpha;
+    record = (MnuPartySnapshot *)node->items;
+    mnuDrawMantraSprite(0, node->index * 22 + (selection->scale - 1.0f) * 32.0f,
+                        drawPool, selection->alpha, 0x22, 0, depth);
+    mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha,
+                        icons[record->rosterIndex] + selected, 0, depth);
+    mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha,
+                        selected + 0x20, 0, depth);
+    func_0035C860(text, D_00437928, record->level);
+    frFontDrawTextVariantBAndMeasure(0xBB, node->index * 22 + 0x81, drawPool,
+                                    (highlightAlpha & 0xFF) | 0xA09DC300,
+                                    selected * 4, text, 0, depth);
+    if (selected) {
+        mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha, 0x23, 0, depth);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_002884C0);
 
@@ -480,8 +513,6 @@ void mnuReleaseSelectionWorkResources(MnuStatusResource *resourceWork) {
     mnuCloseCurrentProfilePanel(resourceWork->progressHost);
     mnuReleaseMantraMenuDrawResources(resourceWork);
 }
-
-INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426280);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288748);
 

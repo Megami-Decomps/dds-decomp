@@ -98,10 +98,10 @@ extern void btlBossDebugPrintf(const char *format, ...);
 extern s8 D_003D7588[];
 
 typedef struct BattleRuntimeState {
-    u32 flags;
+    s32 counter;
     u16 state;
     u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
-    u8 pending;
+    s8 pending;
     s8 active;
     u8 pad09[3];
     u32 options;
@@ -1396,14 +1396,88 @@ void btlInitializeOverlayGraphics(void) {
     btlRuntimeState.options |= 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00213808);
+extern void func_00132010(void);
+extern void kwlnFadeBackgroundStartOut(s32);
+extern u32 kwlnDrawControlFlags;
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 func_00213370(void);
+void btlResetRuntimeState(void);
+extern char D_003A69C0[];
+extern char D_003A69D8[];
+extern char D_003A69F0[];
+
+s32 func_00213808(void) {
+    s8 mode;
+
+    if (btlRuntimeState.active == 0) {
+        return 0;
+    }
+    switch (btlRuntimeState.state) {
+    case 1:
+        if (btlRuntimeState.fadeMode < 2) {
+            func_00132010();
+            if (btlRuntimeState.counter == 0) {
+                btlBossDebugPrintf(D_003A69C0);
+                break;
+            }
+            btlRuntimeState.state = 2;
+            btlInitializeGraphicsRuntime();
+            btlInitFadeColors();
+        } else {
+            mode = btlRuntimeState.fadeMode;
+            if (mode == 2) {
+                kwlnFadeBackgroundStartOut(0);
+                kwlnDrawControlFlags |= 0x10000000;
+                if (btlRuntimeState.counter < 3) {
+                    func_00132010();
+                    kwlnDrawControlFlags |= 0x02000000;
+                    btlBossDebugPrintf(D_003A69D8);
+                    break;
+                }
+                btlRuntimeState.state = 2;
+                while (sdfCheckPendingWorkWithInterrupts() != 0) {
+                }
+                btlClearOverlayBuffers();
+                btlInitializeOverlayGraphics();
+                btlInitFadeColors();
+            }
+        }
+        /* Fall through after preparing the initial fade. */
+    case 2:
+        if (btlRuntimeState.counter == 2 && (btlRuntimeState.options & 1) == 0) {
+            while (sdfCheckPendingWorkWithInterrupts() != 0) {
+            }
+            btlClearOverlayBuffers();
+            btlSubmitFrameAndQueueRuntimeHandle();
+        }
+        if (btlUpdateFadeIn() != 0) {
+            if (btlRuntimeState.pending != 0) {
+                func_00213368();
+                btlRuntimeState.state = 3;
+            }
+        }
+        break;
+    case 3:
+        if (func_00213370() != 0) {
+            btlRuntimeState.state = 4;
+        }
+        break;
+    case 4:
+        btlReleaseRuntimeResource();
+        btlResetRuntimeState();
+        btlBossDebugPrintf(D_003A69F0);
+        break;
+    }
+    btlRuntimeState.counter++;
+    return 1;
+}
 
 extern void *memset(void *, s32, u32);
 
 void btlClearRuntimeState(void) {
     BattleRuntimeState *state = &btlRuntimeState;
     memset(state, 0, sizeof(*state));
-    state->flags = 0;
+    state->counter = 0;
     state->state = 0;
     state->fadeMode = 0;
     state->pending = 0;
@@ -1413,8 +1487,6 @@ void btlClearRuntimeState(void) {
     state->handle = 0;
     state->request = 0;
 }
-
-void btlResetRuntimeState(void);
 
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
@@ -1429,7 +1501,7 @@ void btlResetAsyncState(void) {
 void btlActivateRuntime(u8 fadeMode) {
     BattleRuntimeState *battle = &btlRuntimeState;
     battle->fadeMode = fadeMode;
-    battle->flags = 0;
+    battle->counter = 0;
     battle->state = 1;
     battle->active = 1;
     battle->pending = 0;
@@ -1480,6 +1552,12 @@ void btlMarkRuntimeUpdatePending(void) {
         btlRuntimeState.pending = 1;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A69C0);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A69D8);
+
+INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A69F0);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6A00);
 

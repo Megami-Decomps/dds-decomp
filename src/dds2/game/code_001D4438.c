@@ -2117,7 +2117,7 @@ extern SoundTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
 extern SoundTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 extern SoundTask *sndCreateStationedSeTask(u32);
 
-void func_001DC9C0(BtlUnit *command) {
+void btlStartActorDefeatTransition(BtlUnit *command) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
     BtlUnit *actor = command->link18;
     u16 *profile = &actor->statBits;
@@ -2383,7 +2383,7 @@ extern char D_00436A10[];
 extern char D_00436A18[];
 
 /* Draw the debug overlay listing each battle slot's group and state name. */
-void func_001DD1A8(s32 x, s32 y) {
+void btlDebugPrintActionOrder(s32 x, s32 y) {
     BattleSceneWork *controller = (BattleSceneWork *)btlGetRuntime();
     SceneTask **primary;
     SceneTask **secondary;

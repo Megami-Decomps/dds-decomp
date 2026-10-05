@@ -450,7 +450,7 @@ extern void func_00260590();
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_0036AB10[];
 
-s32 func_00246EA0(u64 callbackContext) {
+s32 evtPollQuantitySelection(u64 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((EvtDispatchState *)stateAddress)->dispatchState;
     s32 previousQuantity = ((EvtDispatchState *)stateAddress)->scoreFactor;

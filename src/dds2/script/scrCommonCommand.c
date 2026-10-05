@@ -31,11 +31,8 @@ s32 kwlnDrawSetDc8Second(s32 arg0);
 extern char D_004126D0[];
 
 s32 kwlnDrawSetE08Fifth(s32 arg0);
-/* Declared floats-first: gcc 2.96 emits the outgoing register moves in
- * parameter order and schedules the last one into the jal delay slot, so
- * retail moves the kind argument ($16) last, in the delay slot. */
-s32 kwlnDrawSetC70FloatTriple(f32 arg0, f32 arg1, s32 arg2);
-s32 kwlnDrawSetD88FloatTriple(f32 arg0, f32 arg1, s32 arg2);
+void kwlnDrawSetC70FloatTriple(u32 blendControl, f32 rotation, f32 scale);
+void kwlnDrawSetD88FloatTriple(u32 blendControl, f32 rotation, f32 scale);
 
 extern char D_004126F0[];
 extern char D_004126B0[];
@@ -394,32 +391,8 @@ s32 scrCommandSetDrawOffsetTransition(void)
     return 1;
 }
 
-s32 scrCmdSetDrawFloatPairByMode(void)
-{
-    s32 p2;
-    s32 mode;
-    f32 first;
-    f32 second;
-
-    p2 = scrReadIntParameter(2);
-    switch (p2)
-    {
-    case 1:
-        mode = 0x48;
-        break;
-    case 2:
-        mode = 0x42;
-        break;
-    case 0:
-    default:
-        mode = 0x44;
-        break;
-    }
-    first = bfWaitReadArgFloat(0);
-    second = bfWaitReadArgFloat(1);
-    kwlnDrawSetC70FloatTriple(first, second, mode);
-    return 1;
-}
+extern s32 scrCmdSetDrawFloatPairByMode(void);
+INCLUDE_ASM(const s32, "script/scrCommonCommand", scrCmdSetDrawFloatPairByMode);
 
 s32 scrCmdSetPackedDrawComponentBytes(void)
 {
@@ -620,35 +593,8 @@ s32 scrCmdBeginStaggeredBlurDeactivation(void)
     return 1;
 }
 
-s32 scrCmdConfigureRectangleBlur(void)
-{
-    s32 mode;
-    s32 sel;
-    f32 first;
-    f32 second;
-
-    mode = scrReadIntParameter(2);
-    switch (mode)
-    {
-    case 1:
-        sel = 0x48;
-        break;
-    case 2:
-        sel = 0x42;
-        break;
-    case 0:
-        sel = 0x44;
-        break;
-    default:
-        evtPrintDeveloperConsoleMessage(D_004126B0);
-        sel = 0x44;
-        break;
-    }
-    first = bfWaitReadArgFloat(0);
-    second = bfWaitReadArgFloat(1);
-    kwlnDrawSetD88FloatTriple(first, second, sel);
-    return 1;
-}
+extern s32 scrCmdConfigureRectangleBlur(void);
+INCLUDE_ASM(const s32, "script/scrCommonCommand", scrCmdConfigureRectangleBlur);
 
 s32 scrCmdSetRectangleBlurPackedColor(void)
 {
@@ -891,8 +837,6 @@ u32 scrCommand_SCR_EXISTS()
     }
     return 1;
 }
-
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126B0);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126D0);
 

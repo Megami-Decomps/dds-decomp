@@ -307,7 +307,7 @@ float sdfPowFloatByTruncatedExponent(float base, float exponent) {
     return power;
 }
 
-void func_00310648(f32 quaternion[4], f32 matrix[4][4]) {
+void sdfConvertMatrixToQuaternion(f32 quaternion[4], f32 matrix[4][4]) {
     f32 trace;
     f32 scale;
     s32 i;

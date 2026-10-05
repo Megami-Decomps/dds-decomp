@@ -889,7 +889,7 @@ BtlEffectTask *btlCreateEffectWaitTask(BtlEffActor *owner, u16 mode) {
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 s32 btlWaitEffectTask(BtlWaitTask *task) {
     if (task->ticks == 0) {
-        func_001B7E40(task->value, 0);
+        btlCreateAnalysisPanelTask(task->value, 0);
         func_001C7DB8(0, 8);
     }
     if (task->ticks >= 0x11) {

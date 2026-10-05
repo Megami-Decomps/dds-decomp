@@ -458,7 +458,7 @@ extern s32 dds3GetObjectOwnedHandle(struct WorldInnerOwner *);
 extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *, s32, s32, s32);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
-void func_00247028(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer) {
+void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer) {
     ObjData *owner;
     struct PolyMovieObject *movie;
     s32 frame;
@@ -570,9 +570,9 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
             effObjDispatchReadyState(handle);
         }
         if (cmd->plain == 0) {
-            func_00247028(handle, params->u.a.value, params->u.a.type, params->word, viewer);
+            evtViewerBindNamedOwner(handle, params->u.a.value, params->u.a.type, params->word, viewer);
         } else {
-            func_00247028(handle, params->u.a.value, params->u.a.type, 0, viewer);
+            evtViewerBindNamedOwner(handle, params->u.a.value, params->u.a.type, 0, viewer);
         }
         break;
     case 0x14:
@@ -626,7 +626,7 @@ void *func_00247400(void *resource, u32 entryId, s32 value, s32 type, u32 word,
     effect = func_00115500(resource, position, scale);
     effObjSetFlags((s32)effect, 1);
     effObjReplaceActiveEventNode(effect, entryId);
-    func_00247028((s32)effect, value, type, word, viewer);
+    evtViewerBindNamedOwner((s32)effect, value, type, word, viewer);
     return effect;
 }
 

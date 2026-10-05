@@ -144,6 +144,8 @@ extern s32 mdlGetNodeField2C(MdlResource *, s32);
 typedef struct MdlCountNode {
     u8 pad00[4];
     s16 count; /* 0x04 */
+    u8 pad06[6];
+    SdfTex **textures;
 } MdlCountNode;
 
 typedef struct MdlLoadedInfo {
@@ -1975,6 +1977,62 @@ void mdlHandleViewerNodeCursorInput(void) {
     }
 }
 
+extern char D_00421318[];
+extern char D_004370C8[];
+extern void sdfConsCreateDrawPacket(s32, SdfTex *, s32);
+extern void sdfAppendTexturedLinePacket(s32, u32, s32, s32, s32, s32, s32,
+                                      s32, s32, s32, s32, s32, s32);
+
+void func_00237258(void) {
+    s32 index = 0;
+    s32 count = 0;
+    s32 width, height;
+    MdlCountNode *node;
+    s32 packetList;
+    s32 displayWidth, displayHeight;
+    s32 selectedNumber = 0;
+
+    mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0x1060, 0x8F0, 0);
+    node = ((MdlLoadedInfo *)mdlViewerState.resources[0]->chunk)->first;
+    if (node != NULL) {
+        count = node->count;
+        index = mdlViewerState.nodeCursor;
+        selectedNumber = index + (count > 0);
+    }
+    packetList = mdlViewerState.packetList;
+    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7180, 0x7A20,
+        0xFF0080, 0, D_00421318, selectedNumber, count));
+    if (count > 0) {
+        width = node->textures[index]->width;
+        height = node->textures[index]->height;
+        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7780, 0x7A20,
+            0xFF0080, 0, D_004370C8, width, height));
+        sdfConsCreateDrawPacket(packetList, node->textures[index], 0);
+        displayWidth = width << 4;
+        displayHeight = height << 3;
+        if (width < height) {
+            if (height > 256) {
+                displayWidth = ((width << 8) / height) << 4;
+                displayHeight = 0x800;
+            }
+        } else {
+            if (width > 256) {
+                displayWidth = 0x1000;
+                displayHeight = ((height << 8) / width) << 3;
+            }
+        }
+        sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7AE0,
+            0, 0, displayWidth + 0x7180, displayHeight + 0x7AE0,
+            width << 4, height << 4, 0xFF0080, 0);
+    }
+}
+
+u32 mdlUpdateViewerNodeCursorTask(void) {
+    mdlHandleViewerNodeCursorInput();
+    func_00237258();
+    return 0;
+}
+
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004212C8);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004212D8);
@@ -1985,13 +2043,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_004212F8);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421308);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00237258);
-
-u32 mdlUpdateViewerNodeCursorTask(void) {
-    mdlHandleViewerNodeCursorInput();
-    func_00237258();
-    return 0;
-}
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421318);
 
 s32 mdlIsDebugTimeGraph(void) {
     return kwlnTaskGetTaskByName("DebugTimeGrph") != 0;
