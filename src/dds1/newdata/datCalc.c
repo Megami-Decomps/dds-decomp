@@ -138,7 +138,13 @@ extern s8 ptyGetCurrentProfileId(u8 *unit);
 extern s32 func_002CDDB0(u16 profileId, s32 statIndex);
 
 typedef struct DatUnitStatus {
-    u8 pad00[0xE];
+    u16 flags;
+    u16 affinityTableIndex;
+    u16 unitId;
+    u16 hp;
+    u16 maxHp;
+    u16 mp;
+    u16 maxMp;
     u16 status;          /* 0x0E */
     u8 pad10[6];
     s8 statValues[0x100];
@@ -168,7 +174,9 @@ s32 datGetStatWithStatusOverride(DatUnitStatus *unit, s32 statIndex) {
 
 
 typedef struct DatPartyMember {
-    u8 unk0[0x18];
+    u8 pad00[0xE];
+    s16 affinityTableIndex; /* 0x0E: signed affinity-bank row */
+    u8 pad10[8];
     u16 skills[DAT_TABLE_SKILL_COUNT]; /* 0x18 */
     u8 unk28[0x24];
 } DatPartyMember; /* 0x4C */
@@ -226,16 +234,68 @@ s32 datRaiseCalculatedValueFloor(DatUnitStatus *unit, s32 packedValue) {
     return packedValue;
 }
 
-INCLUDE_ASM(s32, "newdata/datCalc", func_00119520);
+extern s32 *D_003BAA08;
+extern s32 *D_003BAA0C;
+extern s32 *D_003BAA2C;
 
-/* Read the producer's low halfword with the existing no-explicit-argument call. */
-u32 datReadLowHalfOfCalculatedValue(void) {
-    return (u16)func_00119520();
+s32 func_00119520(DatUnitStatus *unit, s32 element) {
+    s32 value;
+    u16 unitId;
+
+    switch (element) {
+    case -1:
+        return 0;
+    case 16:
+    case 17:
+    case 18:
+        return 100;
+    }
+
+    unitId = unit->unitId;
+    if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
+        if (unit->flags & 0x1000) {
+            value = D_003BAA08[unitId * 19 + element];
+        } else {
+            value = D_003BAA0C[unitId * 19 + element];
+        }
+    } else {
+        if (unit->affinityTableIndex != 0) {
+            value = D_003BAA2C[unit->affinityTableIndex * 19 + element];
+        } else {
+            value = D_003BAA2C[datEnemyRecords[unitId].affinityTableIndex * 19 + element];
+        }
+    }
+
+    if (element == 15) {
+        value = datRaiseCalculatedValueFloor(unit, value);
+    }
+    if (unit->flags & 0x2000) {
+        value = D_003BAA2C[383 * 19 + element];
+    }
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
+        value = D_003BAA2C[382 * 19 + element];
+    }
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
+        value = D_003BAA2C[381 * 19 + element];
+    }
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 4) {
+        if (element < 2) {
+            if (element >= 0) {
+                if ((u16)value < 100) {
+                    value = (value & DAT_CALC_HIGH_MASK) | 100;
+                }
+            }
+        }
+    }
+    return value;
 }
 
-/* Return the producer's masked upper bits in place, not shifted to bit zero. */
-u32 datReadHighHalfOfCalculatedValue(void) {
-    return func_00119520() & DAT_CALC_HIGH_MASK;
+u32 datReadLowHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
+    return (u16)func_00119520(unit, element);
+}
+
+u32 datReadHighHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
+    return func_00119520(unit, element) & DAT_CALC_HIGH_MASK;
 }
 
 /* Map one exact flag to a stat index. Flag one and unknown/combined flags

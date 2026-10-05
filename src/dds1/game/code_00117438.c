@@ -451,7 +451,8 @@ INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
 extern s32 datAbilityParameters;
 extern s32 datFlagToElementIndex(u32);
-extern u32 func_00119520(SdfPackedValue *, s32);
+struct DatUnitStatus;
+extern s32 func_00119520(struct DatUnitStatus *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
 extern s32 effMiscRandMod(s32, s32);
 extern void func_003003F0(const char *, ...);
@@ -496,7 +497,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     if (mask != 0 && (SDF_BATTLE_SLOT(index)->type == 1 || SDF_BATTLE_SLOT(index)->type == 3)) {
         kind = datFlagToElementIndex(mask);
         if (!(SDF_BATTLE_SLOT(index)->mode == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
-            if (func_00119520(packed, kind) & 0x170000) {
+            if (func_00119520((struct DatUnitStatus *)packed, kind) & 0x170000) {
                 return 0;
             }
         }
