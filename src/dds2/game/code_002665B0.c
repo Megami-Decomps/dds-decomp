@@ -424,9 +424,41 @@ void mnuDestroyThresholdNodePanels(MenuSlotState *host) {
 }
 
 
-extern void mnuBuildTerminalNodeList(MenuSlotState *);
+typedef struct MenuThresholdEntry {
+    s32 entryId;        /* 0x00 */
+    s32 requiredAmount; /* 0x04 */
+} MenuThresholdEntry;
 
-INCLUDE_ASM(const s32, "game/code_002665B0", mnuBuildTerminalNodeList);
+/* Build recovery-cost nodes for active party slots with a nonzero computed cost.
+ * Node values are party indices here, unlike the command-list builder above. */
+void mnuBuildTerminalNodeList(MenuSlotState *host) {
+    MenuProgressList *list;
+    s32 partyIndex;
+
+    list = (MenuProgressList *)mnuCreateListState(0, MNU_PARTY_SLOT_COUNT, 0x24);
+    *(s32 *)&list->userData = (s32)host;
+    *(s32 *)&host->progressList = (s32)list;
+    list->updateCallback = (s32)func_00266C08;
+    list->visible = 0;
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
+        s32 unitAddress = datGameState + partyIndex * MNU_PARTY_RECORD_BYTES + 0xA60;
+
+        if ((u16)(*(u16 *)unitAddress & 1)) {
+            s32 recoveryCost = mnuTerminalScoreBox((BoxRecord *)unitAddress);
+
+            if (recoveryCost != 0) {
+                MenuProgressNode *node =
+                    (MenuProgressNode *)mnuListAppendNode((s32)host->progressList, (s32)D_00437870);
+                MenuThresholdEntry *entry = (MenuThresholdEntry *)&node->entryIndex;
+
+                node->childPanel = 0;
+                entry->requiredAmount = recoveryCost;
+                entry->entryId = partyIndex;
+            }
+        }
+    }
+    mnuRefreshThresholdNodeFlags(host->progressList);
+}
 
 /* Destroy the progress-list allocation retained by the terminal work. */
 void mnuReleaseProgressWorkList(MenuSlotState *host) {
