@@ -24,6 +24,13 @@ typedef struct BattleEffectState {
 typedef struct BtlUnit BtlUnit;
 
 #ifdef VERSION_DDS1
+/* Seven signed status-entry records embedded in a DDS1 battle unit. */
+typedef struct BtlUnitEntrySlot {
+    s16 code;
+    s16 unk02;
+    s16 countdown;
+} BtlUnitEntrySlot;
+
 /* Battle unit, DDS1 (0x348). Retail accessors distinguish world rotation at
  * +0x40 from the orientation quaternion at +0x70; body/muzzle offsets are
  * +0x90/+0xA0 respectively. Effect origin/scene extension are +0x31C/+0x320.
@@ -75,12 +82,15 @@ typedef struct BtlUnit {
     s32 effectArgB; /* 0x100 */
     f32 effectValue; /* 0x104 */
     u64 identity; /* 0x108: copied to effect tasks and compared to command IDs */
-    /* Keep the status pair flat: 32-bit updates and address-based 64-bit scans
-     * coexist in retail. Preserve the original separate-member layout. */
-    u32 flags; /* 0x110 */
-    u32 stateFlags; /* 0x114 */
+    union {
+        u64 flags64; /* 0x110: retail also loads the complete status pair. */
+        struct {
+            u32 flags; /* 0x110 */
+            u32 stateFlags; /* 0x114 */
+        };
+    };
     u32 gunResourceFlags; /* 0x118 */
-    u8 lookupId; /* 0x11C */
+    u8 lookupId; /* 0x11C: retail lookup consumers use unsigned byte loads. */
     u8 pad11D[3];
     u16 statBits; /* 0x120: base of the unit stat accessors */
     u16 unk122; /* 0x122: script-controlled unit parameter */
@@ -94,13 +104,30 @@ typedef struct BtlUnit {
     u16 actionTime; /* 0x134 */
     u8 pad136[0x17A];
     s16 actionSlot; /* 0x2B0 */
-    u8 pad2B2[0x66];
+    u8 pad2B2[0x12];
+    u8 unk2C4; /* 0x2C4: saved party-entry index, read with lbu. */
+    u8 pad2C5;
+    BtlUnitEntrySlot entrySlots[7]; /* 0x2C6 */
+    s32 selectedEntryIndex; /* 0x2F0: -1 denotes no selected entry. */
+    u32 unk2F4;
+    s32 resourceNode;
+    s32 resourceLink;
+    s32 link;
+    s32 listNode;
+    u8 pad308[4];
+    void *gunResource; /* 0x30C */
+    u8 pad310[4];
+    s32 unk314;
     u8 firstCountdown; /* 0x318: linked-effect destruction decrements this */
     u8 secondCountdown; /* 0x319 */
     u8 pad31A[2];
     u32 effectObject; /* 0x31C: supplies the effect's first inner vector */
     BtlUnitModel *ext; /* 0x320: +0x8C points to model flags; also an event handle */
-    u8 pad324[0x1C];
+    u8 pad324[8];
+    s32 unk32C;
+    s32 unk330;
+    u8 pad334[8];
+    u32 handle; /* 0x33C */
     struct BtlUnit *previousActor; /* 0x340 */
     struct BtlUnit *next; /* 0x344: actor-list link, not a task-chain link */
 } BtlUnit;
