@@ -14,12 +14,11 @@ typedef struct BtlFade {
     u32 unk08;
 } BtlFade;
 
-typedef struct SdfAllocation SdfAllocation;
-
 /* Common draw record allocated by the interface object constructors (0x40). */
+/* Allocation fields own general-heap descriptors, not retained payload addresses. */
 typedef struct UiSprite {
-    SdfAllocation *allocation;
-    SdfAllocation *payloadAllocation;
+    SdfMemBlock *allocation;
+    SdfMemBlock *payloadAllocation;
     u32 *payload;
     u8 pad0C[4];
     s32 left;
