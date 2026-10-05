@@ -585,7 +585,7 @@ void sdfMotionBlendDrawVector(SdfMotionDrawBinding *motion, f32 t1) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->translation);
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with the vec3 at +0x10 by t2 into sub+0x60 */
@@ -598,7 +598,7 @@ void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *motion, f32 t1, f
         VU0_LERP_VF10_COPY(b.weight);
     VU0_LOAD_VF(vf10, motion->capturedVector);
         VU0_LERP_VF10_W(t2);
-    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->translation);
 }
 
 void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
@@ -629,7 +629,7 @@ void sdfMotionBlendScaleVector(SdfMotionDrawBinding *motion, f32 t1) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_SCALE_VECTOR]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->scale);
 }
 
 /* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
@@ -642,7 +642,7 @@ void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *motion, f32 t1, 
         VU0_LERP_VF10_COPY(b.weight);
     VU0_LOAD_VF(vf10, motion->capturedVector);
         VU0_LERP_VF10_W(t2);
-    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->vectors[SDF_DRAW_SCALE_VECTOR]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, motion->node->scale);
 }
 
 void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
@@ -657,7 +657,7 @@ void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
 void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *motion, f32 t1) {
     SdfMotionKeyInterval b;
     SdfDrawNode *sub;
-    u8 (*matrix)[0x10];
+    f32 (*matrix)[4];
     f32 *key;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
@@ -668,7 +668,7 @@ void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *motion, f32 t1) {
     effMiscQuaternionNlerpVU(b.weight);
     sub = motion->node;
     VU0_STORE_VF_UNCLOBBERED(vf10, sub->quaternion);
-    matrix = &sub->vectors[SDF_DRAW_X_AXIS_VECTOR];
+    matrix = sub->localMatrix;
     effMiscQuaternionToMatrixVU();
     VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
     VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
@@ -679,7 +679,7 @@ void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *motion, f32 t1) {
 void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *motion, f32 t1, f32 t2) {
     SdfMotionKeyInterval b;
     SdfDrawNode *sub;
-    u8 (*matrix)[0x10];
+    f32 (*matrix)[4];
     f32 *key;
 
     sdfFindMotionKeyInterval(motion, &b, t1);
@@ -693,7 +693,7 @@ void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *motion, f32 t1, f
     VU0_LOAD_VF(vf10, motion->capturedVector);
     effMiscQuaternionNlerpVU(t2);
     VU0_STORE_VF_UNCLOBBERED(vf10, sub->quaternion);
-    matrix = &sub->vectors[SDF_DRAW_X_AXIS_VECTOR];
+    matrix = sub->localMatrix;
     effMiscQuaternionToMatrixVU();
     VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
     VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
@@ -740,7 +740,7 @@ void sdfMotionReadKeyFlag(SdfMotionBinding *binding) {
 
 void sdfMotionCaptureDrawVector(void *work) {
     SdfMotionDrawBinding *binding = work;
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
+    PCP_COPY_VECTOR(binding->capturedVector, binding->node->translation);
 }
 
 void sdfMotionCaptureQuaternion(void *work) {
@@ -750,7 +750,7 @@ void sdfMotionCaptureQuaternion(void *work) {
 
 void sdfMotionCaptureScaleVector(void *work) {
     SdfMotionDrawBinding *binding = work;
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->vectors[SDF_DRAW_SCALE_VECTOR]);
+    PCP_COPY_VECTOR(binding->capturedVector, binding->node->scale);
 }
 
 s32 sdfDispatchMotionHandler(void *a0, s32 a1) {
