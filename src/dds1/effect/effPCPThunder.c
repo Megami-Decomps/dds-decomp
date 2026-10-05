@@ -495,24 +495,6 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00165110);
 
 extern void parRiseFallSymmetricCellAlpha(void *system, u32 a, u32 b, u32 c);
 
-/* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
-typedef struct {
-    f32 start[4];
-    f32 end[4];
-    u16 systemParam;         /* 0x20 */
-    u8 pad22[2];
-    u32 fragmentCount;       /* 0x24 */
-    u8 pad28[8];
-    u32 startDelayRange;     /* 0x30 modulus of delayFrames */
-    u32 activeFrameRange;    /* 0x34 modulus of activeFrames before adding one */
-    u16 halfLife;            /* 0x38 */
-    u8 pad3A[6];
-    u32 arg40;               /* 0x40 */
-    u8 pad44[4];
-    u32 arg48;               /* 0x48 */
-    u8 pad4C[4];
-    u32 arg50;               /* 0x50 */
-} EffThunderFragmentParams;
 
 /* Single- and dual-system variants share this allocation layout, but the
    single-system update counts frames where the dual variant keeps a system. */
