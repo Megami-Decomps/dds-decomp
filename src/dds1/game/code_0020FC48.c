@@ -1161,7 +1161,47 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
                          depth, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211B88);
+extern u8 kwlnFrameDrawPacketRecords[];
+extern void *sdfAllocPacketAligned(s32);
+extern s32 kwlnGetDrawBufferIndex(void);
+extern void sdfAppendDmaPrimary(s32, void *, void *);
+
+void func_00211B88(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 xOffset;
+    s32 yOffset;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 horizontal[4];
+    s32 vertical[4];
+    void *packet;
+    s32 index;
+
+    packet = sdfAllocPacketAligned(0x20);
+    index = kwlnGetDrawBufferIndex();
+    sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + index * 0x1F40, packet);
+    halfWidth = 0x1000;
+    halfHeight = 0x700;
+    xOffset = (s32)((f32)halfWidth * scale);
+    yOffset = (s32)((f32)halfHeight * scale);
+    horizontal[0] = halfWidth - xOffset;
+    horizontal[1] = halfWidth + xOffset;
+    vertical[0] = halfHeight - yOffset;
+    vertical[1] = halfHeight + yOffset;
+    left = horizontal[0] + 0x7000;
+    top = vertical[0] + 0x7900;
+    right = horizontal[1] + 0x7000;
+    bottom = vertical[1] + 0x7900;
+    sdfQueueTexturedQuad(list, color, primitive,
+                         left, top, 0, 0,
+                         right, top, 0x2000, 0,
+                         left, bottom, 0, 0xE00,
+                         right, bottom, 0x2000, 0xE00,
+                         depth, 0);
+}
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
