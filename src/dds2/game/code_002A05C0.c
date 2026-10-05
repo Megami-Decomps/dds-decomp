@@ -595,7 +595,51 @@ INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428628);
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2198);
 
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2200);
+typedef struct MnuTitleStreamEntry {
+    u8 format;
+    u8 pad;
+    s16 parameter;
+    char filename[12];
+} MnuTitleStreamEntry;
+
+extern MnuTitleStreamEntry D_003E0B60[];
+
+extern u8 D_00455DB0[];
+
+extern char D_00428650[];
+
+/* Load the named sound stream for the requested entry format under the lock. */
+void func_002A2200(s32 soundEntryIndex) {
+    char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
+
+    WaitSema(mnuTitleStreamSemaphore);
+    mnuTitleStreamStatus[7] = (u32)D_00454D58;
+    mnuTitleStreamStatus[6] = (u32)D_00455DB0;
+    mnuTitleStreamStatus[3] = D_003E0B60[soundEntryIndex].parameter;
+    mnuTitleStreamStatus[MNU_STREAM_CONTROL_INDEX] = 2;
+    switch (D_003E0B60[soundEntryIndex].format) {
+    case 1:
+        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamStatus[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_LARGE;
+        break;
+    case 2:
+        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamStatus[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_MEDIUM;
+        break;
+    case 3:
+        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamStatus[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_MEDIUM;
+        break;
+    case 4:
+        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamStatus[MNU_STREAM_FRAME_BYTES_INDEX] = MNU_SOUND_FRAME_BYTES_SMALL;
+        break;
+    }
+    func_0035C860(soundPath, D_00428650, D_003E0B60[soundEntryIndex].filename);
+    mnuStoreTaskResult(soundPath);
+    SignalSema(mnuTitleStreamSemaphore);
+}
+
 /* Poll a pending file without acquiring the semaphore in this entry point. */
 u32 mnuUpdateTitleTransition(void) {
     if (mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] == MNU_STREAM_LOAD_PENDING) {
@@ -709,13 +753,6 @@ void mnuInitializeTitleSoundBuffer(void) {
     func_003504A8(decoder);
     SignalSema(mnuTitleStreamSemaphore);
 }
-
-typedef struct MnuTitleStreamEntry {
-    u8 format;
-    u8 pad;
-    s16 parameter;
-    char filename[12];
-} MnuTitleStreamEntry;
 
 extern MnuTitleStreamEntry D_003E0F60[];
 extern char D_00428650[];

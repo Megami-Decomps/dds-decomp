@@ -381,7 +381,18 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexHead *block) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1B28);
+void func_002D1B28(void) {
+    SdfTexHead *node;
+
+    node = sdfTextureListHead;
+    while (node->prev != NULL) {
+        node = node->prev;
+    }
+    node = sdfTextureBlockListHead;
+    while (node->next != NULL) {
+        node = node->next;
+    }
+}
 
 /* Mark a range free and coalesce its neighbors while interrupts are masked. */
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block) {
