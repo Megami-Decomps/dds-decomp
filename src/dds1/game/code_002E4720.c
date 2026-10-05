@@ -43,6 +43,9 @@
 #define SDF_DEV_RPC_THREAD_PRIORITY 0x4C
 #define SDF_DEV_RPC_BIND_POLL_TICKS 4
 #define SDF_DEV_DISC_FILE_WORDS 12
+#define SDF_DEV_DISC_SECTOR_BYTES 0x800
+#define SDF_DEV_DISC_SECTOR_SHIFT 11
+#define SDF_DEV_DISC_ALIGNMENT_MASK 15
 #define SDF_DEV_IOP_BUFFER_BYTES 0x28010
 #define SDF_DEV_IOP_ALIGNMENT_BIAS 15
 #define SDF_DEV_IOP_ALIGNMENT_MASK -16
@@ -218,6 +221,9 @@ extern s32 func_002F4620(void);
 extern s32 D_003BDA4C;
 
 extern s32 D_003BDA54;
+extern u8 *D_003BDA50;
+extern u8 D_003FA000[SDF_DEV_DISC_SECTOR_BYTES];
+extern void sdfServicePendingOperationUnderSemaphore(void);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
 
@@ -469,7 +475,71 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5398);
+s32 func_002E5398(void *buffer, s32 size) {
+    s32 available = D_003BDA4C;
+    u8 *destination = buffer;
+    s32 bytes;
+    s32 transferBytes;
+    s32 t;
+
+    if (available <= 0) {
+        return 0;
+    }
+    if (size > available) {
+        size = available;
+    }
+    if (size == 0) {
+        return 0;
+    }
+
+    bytes = size;
+    transferBytes = D_003BDA54;
+    if (transferBytes > 0) {
+        if (transferBytes > size) {
+            transferBytes = size;
+        }
+        memcpy(destination, D_003BDA50, transferBytes);
+        destination += transferBytes;
+        D_003BDA50 += transferBytes;
+        D_003BDA54 -= transferBytes;
+        bytes -= transferBytes;
+    }
+    if (bytes > 0) {
+        transferBytes = bytes;
+        if (((u32)destination & SDF_DEV_DISC_ALIGNMENT_MASK) == 0) {
+            t = transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT;
+            t = transferBytes - t * SDF_DEV_DISC_SECTOR_BYTES;
+            transferBytes -= t;
+            if (transferBytes > 0) {
+                sdfDevReadDiscUntilComplete(transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT, (s32)destination);
+            }
+            if (t > 0) {
+                sdfDevReadDiscUntilComplete(1, (s32)D_003FA000);
+                memcpy(destination + transferBytes, D_003FA000, t);
+                D_003BDA50 = D_003FA000 + t;
+                D_003BDA54 = SDF_DEV_DISC_SECTOR_BYTES - t;
+            }
+        } else {
+            while (transferBytes >= SDF_DEV_DISC_SECTOR_BYTES) {
+                sdfDevReadDiscUntilComplete(1, (s32)D_003FA000);
+                memcpy(destination, D_003FA000, SDF_DEV_DISC_SECTOR_BYTES);
+                transferBytes -= SDF_DEV_DISC_SECTOR_BYTES;
+                destination += SDF_DEV_DISC_SECTOR_BYTES;
+            }
+            if (transferBytes > 0) {
+                sdfDevReadDiscUntilComplete(1, (s32)D_003FA000);
+                memcpy(destination, D_003FA000, transferBytes);
+                D_003BDA50 = D_003FA000 + transferBytes;
+                D_003BDA54 = SDF_DEV_DISC_SECTOR_BYTES - transferBytes;
+            }
+        }
+    }
+    D_003BDA4C = available - size;
+    if (D_003BDA4C == 0) {
+        sdfServicePendingOperationUnderSemaphore();
+    }
+    return size;
+}
 
 void sdfServicePendingOperationUnderSemaphore(void) {
     if (sdfOpenDiscFileRecord != 0) {
