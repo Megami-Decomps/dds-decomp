@@ -560,6 +560,7 @@ typedef struct FileJob {
     u8 unk9C[0x10];
     struct FileJob *next;
     struct FileJob *prev;
+    u8 padB4[0xC];
 } FileJob;
 
 extern FileJob *fileCreateJob(u16 type);
@@ -592,6 +593,17 @@ typedef struct FileQueue {
     FileJob *last;   /* 0x88: append end */
     FileJob *first;  /* 0x8C: traversal start */
 } FileQueue;
+extern void fileQueueSetPosition(FileQueue *queue, void *vec);
+extern void fileQueueSetRotation(FileQueue *queue, void *rot);
+extern void effMiscQuaternionToMatrixVU(void);
+extern void fileQueueSetScale(FileQueue *queue, f32 scale);
+extern void func_00294938(FileQueue *queue, u32 color);
+extern void fileJobCopyHeader(FileJob *dst, FileJob *src);
+
+extern FileJob *fileQueueFindById(FileQueue *, u32);
+extern FileJob *fileQueueGetAt(FileQueue *, s32);
+extern s32 fileFindQueuedJobIndex(FileQueue *, FileJob *);
+
 
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);
 
@@ -3294,10 +3306,79 @@ void fileDestroyJob(FileJob *job) {
     sdfReleaseChipBlock(job);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_002940D0);
+FileQueue *func_002940D0(FileQueue *source) {
+    FileQueue *queue = fileQueueCreate();
+    FileJob *entry;
+    FileJob *job;
+    s128 vec;
+
+    PCP_COPY_VECTOR(queue->offset, source->offset);
+    PCP_COPY_VECTOR(queue->axis, source->offset);
+    queue->transformValue = source->transformValue;
+    queue->unk68 = source->unk68;
+    if (source->first != NULL) {
+        for (entry = source->first; entry != NULL; entry = entry->next) {
+            job = fileJobCreate();
+
+            if ((entry->flags & 1) == 0) {
+                job->id = (u32)fileJobCreateFromJob((FileJob *)entry->id);
+            } else {
+                FileJob *parent = fileQueueFindById(source, entry->id);
+                s32 index = fileFindQueuedJobIndex(source, parent);
+
+                parent = fileQueueGetAt(queue, index);
+                job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
+            }
+            fileJobCopyHeader(job, entry);
+            strcpy((char *)job->unk9C, (char *)entry->unk9C);
+            fileQueueAppend(queue, job);
+        }
+    } else {
+        FileJob *records;
+
+        entry = (FileJob *)((u8 *)source + (u32)source->last);
+        records = entry;
+        if (source->count > 0) {
+            s32 count = source->count;
+
+            do {
+                job = fileJobCreate();
+
+                if ((entry->flags & 1) == 0) {
+                    FileJob *request = (FileJob *)((u8 *)source + entry->id);
+
+                    if (entry->flags & 2) {
+                        FileJob *secondary = (FileJob *)((u8 *)source + records[entry->sector].id);
+
+                        request->slots[1].size = secondary->slots[1].size;
+                        request->slots[1].offset = (u32)fileResolveSecondaryBuffer(secondary) - (u32)request;
+                        job->id = (u32)fileJobCreateFromJob(request);
+                        request->slots[1].offset = request->slots[1].size = 0;
+                    } else {
+                        job->id = (u32)fileJobCreateFromJob(request);
+                    }
+                } else {
+                    FileJob *parent = fileQueueGetAt(queue, entry->id);
+
+                    job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
+                }
+                fileJobCopyHeader(job, entry);
+                strcpy((char *)job->unk9C, (char *)entry->unk9C);
+                fileQueueAppend(queue, job);
+                entry++;
+            } while (--count != 0);
+        }
+    }
+    VU0_STORE_VF(vf0, &vec);
+    fileQueueSetPosition(queue, &vec);
+    fileQueueSetRotation(queue, &vec);
+    fileQueueSetScale(queue, 1.0f);
+    func_00294938(queue, 0x80808080);
+    return queue;
+}
 
 void func_00294318(u32 unused, u32 handle) {
-    func_002940D0(handle);
+    func_002940D0((FileQueue *)handle);
 }
 
 /* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start time (job+0x80) has been reached. */
@@ -3365,12 +3446,6 @@ void fileQueueDestroy(FileQueue *queue) {
     sdfReleaseChipBlock(queue);
 }
 
-extern void fileQueueSetPosition(FileQueue *queue, void *vec);
-extern void fileQueueSetRotation(FileQueue *queue, void *rot);
-extern void effMiscQuaternionToMatrixVU(void);
-extern void fileQueueSetScale(FileQueue *queue, f32 scale);
-extern void func_00294938(FileQueue *queue, u32 color);
-extern void fileJobCopyHeader(FileJob *dst, FileJob *src);
 
 FileQueue *fileQueueClone(FileQueue *source) {
     FileQueue *queue = fileQueueCreate();
@@ -3532,7 +3607,6 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
 
 extern FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector);
 extern FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id);
-extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
 extern void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref);
 
 /* Makes the first job chained to owner's sector the leader and rechains the rest to it. */
