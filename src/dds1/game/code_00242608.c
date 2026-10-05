@@ -671,7 +671,7 @@ extern void fldUpdateCameraColorEffect(void *);
 void fldApplyCameraColorKeyWords(void *work, const s32 *source) {
     s32 setting[0x54 / 4];
     u8 *destinationA;
-    u8 *sourceA;
+    const u8 *sourceA;
     u8 *destinationB;
     s32 sourceOffset;
     s32 destinationOffset;
@@ -684,16 +684,16 @@ void fldApplyCameraColorKeyWords(void *work, const s32 *source) {
     setting[0x18 / 4] = source[2];
     setting[0x1C / 4] = source[3];
     setting[0x0C / 4] = source[0x14 / 4];
-    destinationA = (u8 *)setting + 8;
-    sourceA = (u8 *)source + 0x0C;
-    destinationB = (u8 *)setting + 0x0C;
+    destinationA = (u8 *)&setting[2];
+    sourceA = (const u8 *)&source[3];
+    destinationB = (u8 *)&setting[3];
     sourceOffset = 0x20;
     destinationOffset = 0x20;
     for (i = 2; i >= 0; i--) {
         *(s32 *)(destinationA + destinationOffset) =
-            *(s32 *)(sourceA + sourceOffset);
+            *(const s32 *)(sourceA + sourceOffset);
         *(s32 *)(destinationB + destinationOffset) =
-            *(s32 *)((u8 *)source + sourceOffset);
+            *(const s32 *)((const u8 *)source + sourceOffset);
         sourceOffset += 4;
         destinationOffset += 0x10;
     }

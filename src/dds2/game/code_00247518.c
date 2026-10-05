@@ -3,6 +3,7 @@
 #include "evt_world.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
+#include "eff_transform.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
@@ -13,7 +14,6 @@ extern void *dds3GetWorldObject(void);
 extern void dds3SetWorldCameraObject(void *, s32);
 extern f32 dds3GetCameraFieldOfView(s32);
 extern void func_001063A8(f32);
-typedef struct EffTransformNode EffTransformNode;
 struct WorldObjectPointer;
 
 extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
@@ -114,7 +114,8 @@ typedef struct EventViewerState {
     u8 commandResetC;  /* 0x22D4 */
     u8 pad22D5[0xB];
     u8 commandResetD;  /* 0x22E0 */
-    u8 pad22E1[0x1B];
+    u8 pad22E1[7];
+    char eventName[0x14];
     s32 commandTableOffset; /* 0x22FC: byte offset into command descriptors */
     u8 pad2300[8];
     struct EvtViewTrack *sel; /* 0x2308: selected timeline track */
@@ -220,7 +221,11 @@ typedef struct EvtViewKey {
 typedef struct EvtViewTrack {
     s32 kind;                 /* 0x00 */
     u8 pad04[0xC];
-    u32 owner;                /* 0x10 */
+    union {
+        EffTransformNode *transform;
+        s32 transitionValue;
+        u32 handle;
+    } owner;                  /* 0x10: payload role is selected by kind */
     u8 pad14[8];
     s16 frameOffset; /* 0x1C: added to relative key frames. */
     u8 pad1E[6];
@@ -435,7 +440,7 @@ void func_00248B80(s32 time, EventViewerState *viewer) {
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
                                     EVT_WORLD_SLOT_UNIT, viewer->unitNames[key->selector.unitIndex])) {
                                 if (selectedTime < key->frame + node->frameOffset) {
-                                    selectedValue = node->owner;
+                                    selectedValue = node->owner.transitionValue;
                                     selectedTime = key->frame + node->frameOffset;
                                     selected = key;
                                 }
@@ -531,7 +536,7 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
                     do {
                         node = viewer->tracks;
                         while (node != NULL) {
-                            if (node->owner != 0 && object == dds3GetSlot(node->owner, 1)) {
+                            if (node->owner.handle != 0 && object == dds3GetSlot(node->owner.handle, 1)) {
                                 if (node->kind == 2) {
                                     time = 0;
                                     if (node->hasKeys != 0) {
@@ -573,7 +578,7 @@ void evtViewerSyncWorldGroups(u32 position, EventViewerState *viewer) {
         while (list != 0) {
             found = 0;
             for (node = viewer->tracks; node != 0; node = node->next) {
-                if (node->owner == (u32)list) {
+                if (node->owner.handle == (u32)list) {
                     found = node;
                     break;
                 }
@@ -612,7 +617,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
                     glyph = glyph->next;
                 } while (glyph != NULL);
             }
-            lod = *(u8 **)(*(s32 *)(*(s32 *)(*(s32 *)(node->owner + 0x18) + 0xC) + 0xC) + 0x18);
+            lod = *(u8 **)(*(s32 *)(*(s32 *)(node->owner.transform->ownerData + 0xC) + 0xC) + 0x18);
             if (best == NULL) {
                 lod[0x98] = 0;
             } else {
@@ -650,31 +655,31 @@ void func_00249C40(s32 position, EventViewerState *viewer) {
             }
             if (best == NULL) {
                 if (node->objectAttached == 1) {
-                    effObjSetInnerFirstVec((EffTransformNode *)node->owner,
+                    effObjSetInnerFirstVec(node->owner.transform,
                                            (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec((EffTransformNode *)node->owner,
+                    effObjSetInnerSecondVec(node->owner.transform,
                                             (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec((EffTransformNode *)node->owner);
-                    VU0_STORE_VF(vf10, (u8 *)*(void **)((u8 *)node->owner + 0x1C) + 0x70);
+                    effObjFetchInnerFirstVec(node->owner.transform);
+                    VU0_STORE_VF(vf10, &node->owner.transform->inner->vec70);
                     node->objectAttached = 0;
                 }
             } else if (best->frame == position) {
                 s16 channel = best->channel.objectIndex;
 
                 if (channel == -1) {
-                    effObjSetInnerFirstVec((EffTransformNode *)node->owner,
+                    effObjSetInnerFirstVec(node->owner.transform,
                                            (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec((EffTransformNode *)node->owner,
+                    effObjSetInnerSecondVec(node->owner.transform,
                                             (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec((EffTransformNode *)node->owner);
-                    VU0_STORE_VF(vf10, (u8 *)*(void **)((u8 *)node->owner + 0x1C) + 0x70);
+                    effObjFetchInnerFirstVec(node->owner.transform);
+                    VU0_STORE_VF(vf10, &node->owner.transform->inner->vec70);
                     node->objectAttached = 0;
                 } else {
                     u32 *object = dds3FindObjectChainNodeByName(
                         dds3GetWorldObject(), viewer->unitNames[channel]);
 
                     mdlAttachWorldObjectToSourceVector(
-                        *(s32 *)((u8 *)node->owner + 4), object[1]);
+                        node->owner.transform->word4, object[1]);
                     node->objectAttached = 1;
                 }
             }
@@ -1242,13 +1247,12 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
 
 /* Apply one of three viewer selection modes to the selected slots. */
 s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    u8 *ctx = (u8 *)viewer;
     s32 handled = 0;
     s32 mode = viewer->selectionMode;
 
     if (mode < 3) {
         if (mode >= 0) {
-            func_0035C860(ctx + 0x22E8, D_00423050, D_004372B0, D_004372B2);
+            func_0035C860(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
             mode = viewer->selectionMode;
             if (mode == 0) {
                 func_00259AE8(0, viewer);
@@ -1359,7 +1363,7 @@ void *evtViewerStartUpdate(void) {
     sceneId = *(u16 *)(context + 0x110);
     D_004372B0 = eventId;
     D_004372B2 = sceneId;
-    func_0035C860((u8 *)viewer + 0x22E8, D_00423050, D_004372B0, D_004372B2);
+    func_0035C860(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
     viewer->flags = 1;
     evtViewerDispatchFlagMode((u32)viewer);
     viewer->objects[127] = NULL;
