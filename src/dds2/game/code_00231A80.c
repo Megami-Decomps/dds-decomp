@@ -107,7 +107,6 @@ typedef struct MdlNode {
     u8 pad31[7];          /* 0x31 */
 } MdlNode;
 
-extern u32 D_003C86B4[][2];
 
 typedef struct MdlResourceSelection {
     u16 pathTable;
@@ -116,9 +115,9 @@ typedef struct MdlResourceSelection {
 } MdlResourceSelection;
 
 typedef struct MdlResourcePath {
-    u32 unk0;
-    char *path;
-    u32 unk8;
+    const char *unk0; /* Optional metadata path. */
+    const char *path;
+    const char *unk8; /* Optional additional payload path. */
 } MdlResourcePath;
 
 typedef struct MdlResourceTable {
@@ -161,12 +160,21 @@ extern void btlDestroyGroupNode();
 
 extern u32 sdfRelocatePackedResourcePayload(u64);
 
+/* The 0x2C request command is shared by metadata, model and extra-load callbacks. */
 typedef struct MdlLoadCmd {
-    u8 unk0[6];    /* 0x0 */
-    u8 deferred;   /* 0x6: non-zero when the caller runs the job itself */
-    u8 unk7[9];    /* 0x7 */
-    u32 size;      /* 0x10 */
-    u32 handle;    /* 0x14 */
+    u16 group;
+    u16 id;
+    u8 metadataPending;
+    u8 modelPending;
+    u8 deferred;
+    u8 pad7;
+    u32 mode;
+    u32 metadataSize;
+    u32 size;
+    u32 handle;
+    u32 extraSize;
+    u32 extraHandle;
+    u8 pad20[0xC];
 } MdlLoadCmd;
 
 extern u32 fileGetResourceHandle(u32);
@@ -187,17 +195,12 @@ void mdlFinishLoadCmd(s32 entryId, MdlLoadCmd *cmd) {
 
 extern u32 sdfRelocatePackedResourceWordsFromHeader(u64);
 
-typedef struct MdlLoadJob {
-    u8 unk0[0x18]; /* 0x0 */
-    u32 sizeWord;  /* 0x18 */
-    u32 handle;    /* 0x1C */
-} MdlLoadJob;
 
 /* Retain the handle and relocated size word, retire the file entry, then run
  * the group job. Unlike mdlFinishLoadCmd, this path has no deferred flag. */
-void mdlFinishLoadJob(s32 entryId, MdlLoadJob *job) {
-    job->handle = fileGetResourceHandle(entryId);
-    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(entryId));
+void mdlFinishLoadJob(s32 entryId, MdlLoadCmd *job) {
+    job->extraHandle = fileGetResourceHandle(entryId);
+    job->extraSize = sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(entryId));
     filePollEntryCleanup(entryId);
     mdlExecuteAndFreeJob(job);
 }
@@ -208,6 +211,8 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     *(Hdr8 *)dst = *(Hdr8 *)D_00436FA0;
     return strcat(dst, src);
 }
+
+extern s32 mdlRequestAsset(u32 group, u32 id, u32 blocking);
 
 INCLUDE_ASM(const s32, "game/code_00231A80", mdlRequestAsset);
 
@@ -748,9 +753,9 @@ u32 func_00232F08(void) {
     return 8;
 }
 
-/* Return the first word of the selected two-word table row, without bounds checks. */
+/* Return the selected resource table's count, without bounds checks. */
 u32 mdlGetTableWord(s32 tableIndex) {
-    return D_003C86B4[tableIndex][0];
+    return D_003C86B0[tableIndex].count;
 }
 
 /* Read the referenced halfword or return zero for a missing node. A present
@@ -1094,7 +1099,7 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     }
 }
 
-extern void *sdfAllocAndClearQuadwords();
+extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void *fileCreatePacLoadWork(const char *path, s32 flags, void *dispatch, s32 onComplete, s32 userData);
 
