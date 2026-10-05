@@ -8321,8 +8321,8 @@ SoundTask *sndCreateClearBattleFlagTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00202EA8);
 
-void sndSetEffectNodeParameter(s32 effect, u16 option) {
-    sndReadSelectedMixerBankValue(((SoundEffectNode *)effect)->handle, option);
+s32 sndSetEffectNodeParameter(s32 effect, u16 option) {
+    return sndReadSelectedMixerBankValue(((SoundEffectNode *)effect)->handle, option);
 }
 
 s32 sndGetEffectNodeParameter(s32 effect, u16 option) {
