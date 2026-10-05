@@ -1520,7 +1520,7 @@ void btlInitializeOverlayGraphics(void) {
 
 void btlResetRuntimeState(void);
 
-INCLUDE_ASM("asm/dds2/nonmatchings", "game/code_0022AC10", func_0022E0E0);
+INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022E0E0);
 
 void btlClearRuntimeState(void) {
     BattleRuntimeState *state = &btlRuntimeState;
