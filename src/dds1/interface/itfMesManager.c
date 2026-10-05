@@ -109,7 +109,7 @@ typedef struct ItfMesState {
     u8 unkA0[4];        /* 0xA0 */
     ItfMesBlkA4 blkA4;  /* 0xA4 */
     ItfMesTextSlots textSlots;
-    u8 pad1D0[0xC];
+    BtlFade fade;       /* 0x1D0 */
     u32 callbackAddress; /* 0x1DC: invoked when glyph command 4 is set */
 } ItfMesState;
 
@@ -617,7 +617,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     itfInitializeCursorResetState(&mes->blk40);
     itfResetWindowResourceBlock(&mes->blkA4);
     itfClearDrawStateWords(&mes->textSlots);
-    itfResetBattleFadeState((u8 *)mes + 0x1D0, 0);
+    itfResetBattleFadeState(&mes->fade, 0);
     itfMesWork.activeWindowCount++;
     return window;
 }

@@ -764,15 +764,6 @@ void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6AB8);
 
-typedef struct BtlFade {
-    u8 kind;
-    u8 pad1;
-    s16 phase;
-    s16 alpha;
-    s16 timer;
-    u32 unk08;
-} BtlFade;
-
 /* Both the sequence selector and fade belong to the same sound UI object. */
 typedef struct SoundUiState {
     u8 pad00[0xC];

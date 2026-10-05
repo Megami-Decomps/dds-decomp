@@ -298,15 +298,6 @@ void itfClearDrawStateWords(s32 words) {
     } while (-1 < remaining);
 }
 
-typedef struct BtlFade {
-    u8 kind;
-    u8 pad1;
-    s16 phase;
-    s16 alpha;
-    s16 timer;
-    u32 unk08;
-} BtlFade;
-
 /* Both the sequence selector and fade belong to the same sound UI object. */
 typedef struct SoundUiState {
     u8 pad00[0xC];

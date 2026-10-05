@@ -3,6 +3,16 @@
 
 #include "common.h"
 
+/* Native 0xC-byte fade record shared by message windows and sound UI state. */
+typedef struct BtlFade {
+    u8 kind;
+    u8 pad1;
+    s16 phase;
+    s16 alpha;
+    s16 timer;
+    u32 unk08;
+} BtlFade;
+
 typedef struct SdfAllocation SdfAllocation;
 
 /* Common draw record allocated by the interface object constructors (0x40). */
