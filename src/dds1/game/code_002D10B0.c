@@ -26,7 +26,7 @@ enum {
 
 typedef struct SdfImageUploadRequest {
     void *pixels;
-    s32 allocation;
+    SdfMemBlock *allocation;
     u8 allocationMode;
     u8 format;
     u16 bufferWidth;
@@ -37,8 +37,8 @@ typedef struct SdfImageUploadRequest {
     u16 height;
 } SdfImageUploadRequest;
 
-extern s32 sdfAllocGeneralBlock(s32);
-extern void *sdfResourceRetainAddress(s32);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void func_002D1D80(SdfImageUploadRequest *);
 
 
@@ -61,7 +61,7 @@ typedef struct SdfTexPacketTail {
 typedef struct SdfTexReleaseEntry {
     struct SdfTexReleaseEntry *next; /* 0x00 */
     s32 address;                     /* 0x04 */
-    s32 handle;                      /* 0x08 */
+    SdfMemBlock *handle;              /* 0x08 */
     u8 mode;                         /* 0x0C: 1 = handle, 2 = chip memory address */
     u8 pad0D[0x93];
 } SdfTexReleaseEntry; /* 0xA0 */
@@ -93,7 +93,7 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *sdfAllocAndClearQuadwords(s32 size);
 
-s32 sdfFindGeneralBlockByAddress(s32 address);
+SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
 
 s32 sdfChipIsInRange(s32 address);
 
@@ -110,7 +110,7 @@ extern volatile u8 D_003BD2F1;
 extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16, s16);
 extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32, s32);
-extern void sdfReleaseResourceAllocation(s32);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 /* Interleave rows from both color buffers into the queued destination. */
 void func_002D10C8(void) {
@@ -120,7 +120,7 @@ void func_002D10C8(void) {
     s32 pixelBytes;
     s32 rowBytes;
     s32 stride;
-    s32 allocation;
+    SdfMemBlock *allocation;
     s32 rows;
     u8 *pixels;
     u8 *source;
@@ -138,7 +138,7 @@ void func_002D10C8(void) {
         stride = rowBytes * 2;
         D_003BD2F1 = 5;
         allocation = sdfAllocGeneralBlock(rowBytes * height);
-        pixels = sdfResourceRetainAddress(allocation);
+        pixels = (u8 *)sdfResourceRetainAddress(allocation);
         sceGsSetDefStoreImage(
             (sceGsStoreImage *)(((u32)&D_003E27B0 & 0x0FFFFFFF) | 0x20000000),
             D_003980E0.buffers[1]->word >> 6,
@@ -596,7 +596,7 @@ void sdfTexQueueResourceRelease(s32 address) {
             entry->mode = 2;
         } else {
             entry->mode = 1;
-            entry->handle = sdfFindGeneralBlockByAddress(address);
+            entry->handle = sdfFindGeneralBlockByAddress((void *)address);
         }
         WaitSema(obj->semaphoreId);
         if (obj->releaseTail != NULL) {
@@ -819,7 +819,7 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
     if (borrowPixels == 0) {
         if (imageBytes > SDF_UPLOAD_CHIP_MAX_BYTES) {
             request.allocation = sdfAllocGeneralBlock(imageBytes);
-            request.pixels = sdfResourceRetainAddress(request.allocation);
+            request.pixels = (void *)sdfResourceRetainAddress(request.allocation);
             request.allocationMode = SDF_UPLOAD_GENERAL_HEAP;
         } else {
             request.pixels = sdfAllocSizeClassBlock(imageBytes);
