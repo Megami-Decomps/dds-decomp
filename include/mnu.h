@@ -73,7 +73,9 @@ typedef struct MenuStaffContext {
     void *spriteHandle;   /* 0xAA38 */
     u8 padAA3C[0xC];
     u8 *menu;             /* 0xAA48 */
-    u8 padAA4C[0x6C0];
+    u8 padAA4C[0x3D4];
+    u16 catalogOrdinals[0x100]; /* 0xAE20: item-ID-indexed list sorting keys */
+    u8 padB020[0xEC];
     u8 tail[4];           /* 0xB10C */
 } MenuStaffContext;
 

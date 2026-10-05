@@ -74,7 +74,94 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC408);
+typedef struct MenuCatalogItem {
+    u16 itemId;
+    u8 pad02[0x1A];
+} MenuCatalogItem;
+
+extern const MenuCatalogItem D_003E7200[18];
+extern char (*D_00435E5C)[25];
+extern char D_00437BC8[];
+extern void func_002AC750();
+extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowContainerState(MenuStaffList *, u32);
+extern void mnuSetWindowPanelBounds(MenuStaffList *, const void *, u32, u32, u32, u32);
+extern void mnuSetWindowEntryParameters(u32, MenuStaffList *, u32, u32, u32);
+extern MenuStaffNode *mnuAppendWindowListNode(MenuStaffList *, s32);
+extern void mnuSetWindowContainerLayout(MenuStaffList *, u32, u32, u32, u32, u32, u32, u32, u32);
+extern void mnuCreateListWithDefaults(MenuStaffList *, u32, u32, u32, u32);
+extern void func_002AC050();
+extern s32 func_002C54B0(s32);
+struct BtlEntry;
+extern struct BtlEntry *mnuFindPartySlotByCurrentId(u32);
+extern struct BtlEntry *mnuFindReserveSlotByCurrentId(u32);
+extern s32 mtrMantraIdIsValid(s32);
+extern s32 mdlFlagTest(s32);
+extern void mnuSortItems(MenuStaffWindow *, s32, s32);
+extern void mnuInitializeBasicWindowLayout(MenuStaffList *, u32, u32);
+
+/* The upper item-ID range shares ordered staff entries with mantra availability. */
+void func_002AC408(MenuStaffContext *owner) {
+    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
+    MenuStaffList *window;
+    MenuStaffNode *node;
+    s32 itemId = 0xC1;
+    u16 *ordinal = &owner->catalogOrdinals[itemId];
+    u16 catalogOrdinal;
+    s32 showUnknown;
+    u32 frameResource;
+
+    window = (MenuStaffList *)mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    window->window->owner = owner;
+    window->window->drawEntry = func_002AC050;
+    node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
+    node->label = 0;
+    node->entryIndex = 0;
+    node->catalogOrdinal = 0;
+    do {
+        if (func_002C54B0(itemId) != 0) {
+            catalogOrdinal = *ordinal;
+            if (catalogOrdinal != 0) {
+                if (((SaveItemCounts *)datGameState)->counts[itemId] != 0) {
+                    node = mnuAppendWindowListNode(window, (s32)D_00435E5C[itemId]);
+                    node->label = ((SaveItemCounts *)datGameState)->counts[itemId];
+                    node->entryIndex = itemId;
+                    node->catalogOrdinal = catalogOrdinal;
+                    if (mnuFindPartySlotByCurrentId(itemId) != NULL ||
+                        mnuFindReserveSlotByCurrentId(itemId) != NULL) {
+                        node->flags |= 1;
+                    } else if (func_002BDA50(itemId) != 0) {
+                        node->flags |= 4;
+                    }
+                } else {
+                    showUnknown = !mtrMantraIdIsValid(itemId);
+                    if (itemId == 0xF7) {
+                        showUnknown = 0;
+                    }
+                    if (!mdlFlagTest(0xBA0) && itemId == 0xF8) {
+                        showUnknown = 0;
+                    }
+                    if (showUnknown) {
+                        node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
+                        node->label = 0;
+                        node->entryIndex = 0;
+                        node->catalogOrdinal = catalogOrdinal;
+                    }
+                }
+            }
+        }
+        itemId++;
+        ordinal++;
+    } while (itemId < 0x100);
+    mnuSortItems(window->window, 2, 1);
+    frameResource = owner->spriteArg2;
+    resources->windows[3] = (u32)window;
+    mnuInitializeBasicWindowLayout(window, frameResource, 0x10);
+    mnuCreateListWithDefaults((MenuStaffList *)resources->windows[3], 0, 0, 0, owner->spriteArg0);
+}
 
 void func_002AC660(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->windows[3]);
@@ -105,22 +192,6 @@ s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, Menu
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
 
-typedef struct MenuCatalogItem {
-    u16 itemId;
-    u8 pad02[0x1A];
-} MenuCatalogItem;
-
-extern const MenuCatalogItem D_003E7200[18];
-extern char (*D_00435E5C)[25];
-extern char D_00437BC8[];
-extern void func_002AC750();
-extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
-extern void mnuSetWindowContainerState(MenuStaffList *, u32);
-extern void mnuSetWindowPanelBounds(MenuStaffList *, const void *, u32, u32, u32, u32);
-extern void mnuSetWindowEntryParameters(u32, MenuStaffList *, u32, u32, u32);
-extern MenuStaffNode *mnuAppendWindowListNode(MenuStaffList *, s32);
-extern void mnuSetWindowContainerLayout(MenuStaffList *, u32, u32, u32, u32, u32, u32, u32, u32);
-extern void mnuCreateListWithDefaults(MenuStaffList *, u32, u32, u32, u32);
 
 /* Build the catalog window from the eighteen item records and owned quantities. */
 void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
