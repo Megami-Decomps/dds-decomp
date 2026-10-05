@@ -4,30 +4,6 @@
 #include "pcp_vu0.h"
 #include "sdf.h"
 
-typedef struct {
-    s32 offset;    /* 0x0 offset added to the table base */
-    u8 pad4[0x10]; /* 0x4 */
-} BillEntry; /* 0x14 bytes */
-
-typedef struct {
-    u8 pad00[0x12];
-    s16 value; /* 0x12 */
-} BillRecord;
-
-typedef struct {
-    u8 pad[4];       /* 0x0 */
-    s32 base;        /* 0x4 base added to the entry offset */
-    BillEntry *entries; /* 0x8 */
-} BillTable;
-
-typedef struct {
-    s32 unk0;       /* 0x0 */
-    u32 unk4;       /* 0x4 cleared on setup */
-    s32 recordValue; /* 0x8 read from the s16 at recordAddress + 0x12 */
-    BillEntry *entry; /* 0xC */
-    s32 recordAddress; /* 0x10 table base + entry offset */
-} BillOut;
-
 extern BillDispatch D_0034E060[];
 extern BillDispatch D_0034E068[];
 
@@ -271,9 +247,9 @@ u32 effBillModulateColors(u32 colorA, u32 colorB) {
 INCLUDE_ASM(const s32, "effect/billManager", func_001515E8);
 
 /* Resolves an indexed billboard record and caches its signed +0x12 value. */
-void billResolveEntry(BillTable *table, s32 index, BillOut *out) {
-    s32 base;
-    BillEntry *entry;
+void billResolveEntry(BillData *table, s32 index, BillOut *out) {
+    u8 *base;
+    BillAnimationEntry *entry;
     s32 offset;
     s16 value;
 
@@ -282,35 +258,27 @@ void billResolveEntry(BillTable *table, s32 index, BillOut *out) {
     offset = entry->offset;
     out->entry = entry;
     base = base + offset;
-    out->unk4 = 0;
+    out->frameIndex = 0;
     value = ((BillRecord *)base)->value;
-    out->recordAddress = base;
-    out->recordValue = value;
+    out->record = (BillRecord *)base;
+    out->framesRemaining = value;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001518D8);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151A88);
 
-/* Shared entry-list block: reference count at +0x14, entry count at +0x10 and entry pointers at +0x18. */
-typedef struct BillEntryBlock {
-    void *allocation; /* 0x00 */
-    u8 pad04[0xC];
-    s32 entryCount;   /* 0x10 */
-    s32 refCount;     /* 0x14 */
-    void **entries;   /* 0x18 */
-} BillEntryBlock;
 
 /* Drop one reference; the last one releases every entry and the block itself. */
 void billReleaseSharedEntryBlock(void *arg) {
-    BillEntryBlock *block = arg;
+    BillData *block = arg;
     s32 i;
 
-    block->refCount--;
-    if (block->refCount == 0) {
+    block->listRefCount--;
+    if (block->listRefCount == 0) {
         i = 0;
-        while (i < block->entryCount) {
-            effReleaseSharedTextureRecord(block->entries[i]);
+        while (i < block->childCount) {
+            effReleaseSharedTextureRecord(block->children[i]);
             i++;
         }
         sdfReleaseResourceAllocation(block->allocation);
@@ -328,7 +296,7 @@ typedef struct BillSnapshot {
 } BillSnapshot;
 
 extern void *memcpy(void *, const void *, u32);
-extern BillChildPayload *func_00151398(BillObj *obj, void *entries);
+extern BillChildPayload *func_00151398(BillObj *obj, BillOut *entries);
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
 void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
@@ -375,7 +343,7 @@ extern void func_00151178(BillObj *obj);
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
 BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
-    BillData *data;
+    BillChildPayload *data;
 
     if (source->kind == 1) {
         copy = billCloneList(source);
@@ -388,7 +356,7 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
         copy->kind = source->kind;
         copy->callback = source->callback;
         data = source->entryList;
-        data->childRefCount = data->childRefCount + 1;
+        data->refCount = data->refCount + 1;
         copy->entryList = data;
     }
     return copy;

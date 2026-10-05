@@ -138,7 +138,7 @@ extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
 extern f32 sdfSinPoly(f32);
 
-void func_0018F1D0(EffBlurScaleWork *work) {
+void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     void *list;
     EffBlurScaleSlot *slot;
     s32 count;

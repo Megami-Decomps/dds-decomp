@@ -467,7 +467,7 @@ s8 func_001A2AE8(s32 arg0) {
     return *(s8 *)(temp_v0 - 0x1aa4);
 }
 
-s32 func_001A2B00(BtlUnit *unit, s32 command) {
+s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
     s32 result = 0;
     u32 cost;
 
@@ -577,7 +577,7 @@ s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
         totalMaxHp += third->maxHp;
     }
     snapshot.maxHp = totalMaxHp / count;
-    return func_001A2B00(&snapshot, command);
+    return btlGetCommandFailureReason(&snapshot, command);
 }
 
 s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
@@ -592,7 +592,7 @@ void func_001A2F50(s32 arg0) {
 }
 
 struct DatUnitStatus;
-extern s32 func_00119520(struct DatUnitStatus *, s32);
+extern s32 datGetEffectiveAffinity(struct DatUnitStatus *, s32);
 
 s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
     s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x670);
@@ -602,7 +602,7 @@ s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
             return result;
         }
     }
-    return func_00119520((struct DatUnitStatus *)object, value);
+    return datGetEffectiveAffinity((struct DatUnitStatus *)object, value);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
@@ -1548,7 +1548,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6BE0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6EC0);
 
-void func_001A6F98(UiObject *unit, BtlIndexList *targets,
+void btlDistributeRandomTargetHits(UiObject *unit, BtlIndexList *targets,
                    BtlTargetResult *results, s32 command) {
     u8 selected[13];
     BtlIndexList *copy;
@@ -1918,7 +1918,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
 
 extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
 
-s32 func_001A8850(UiObject *unit, s32 command, void **first, void **second) {
+s32 btlFindCommandPartnersByAffinity(UiObject *unit, s32 command, void **first, void **second) {
     s32 statAddresses[3];
     u32 requiredCount = 0;
     BattleController *controller = (BattleController *)btlGetRuntime();
@@ -2037,7 +2037,7 @@ s32 func_001A8DD8(s32 object, s32 *choices) {
                 continue;
             }
         }
-        if (func_001A2B00((BtlUnit *)object, id) != 0) {
+        if (btlGetCommandFailureReason((BtlUnit *)object, id) != 0) {
             continue;
         }
         if (choices != NULL) {

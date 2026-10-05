@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 #define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
@@ -39,37 +40,13 @@ extern u8 D_0036C648[];
 
 typedef s16 MnuSpritePlacement[4];
 
-typedef struct MnuSpriteWork {
-    u8 pad00[0xC];
-    s32 width;
-    s32 height;
-    u8 pad14[0x10];
-    f32 rotation;
-    u8 pad28[0x54];
-    s32 nativeWidth;
-    s32 nativeHeight;
-    u8 pad84[0x1C];
-} MnuSpriteWork;
 
-typedef struct MnuSpriteResource {
-    u8 pad00[0x18];
-    MnuSpriteWork *sprites;
-} MnuSpriteResource;
-
-typedef union MnuVariantSpritePlacement {
-    struct {
-        u8 pad00[4];
-        s16 x;
-        s16 y;
-        s16 spriteGroups;
-        u16 flags;
-    } fields;
-    s16 values[6];
-} MnuVariantSpritePlacement;
+typedef s16 MnuVariantSpritePlacement[6];
 
 enum {
     MNU_VARIANT_X_OFFSET = 2,
     MNU_VARIANT_Y_OFFSET,
+    MNU_VARIANT_SPRITE_GROUPS,
 };
 
 enum {
@@ -162,9 +139,9 @@ void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
 
 void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                    s32 context, f32 rotation) {
-    ((MnuSpriteResource *)D_0036C698[
+    ((EffectSlotSet *)D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
-        ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].rotation = rotation;
+        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].angleDegrees = rotation;
     func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
@@ -173,29 +150,29 @@ void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
                   D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036B510[placementIndex][MNU_SPRITE_INDEX],
                   context);
-    ((MnuSpriteResource *)D_0036C698[
+    ((EffectSlotSet *)D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
-        ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].rotation = 0.0f;
+        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].angleDegrees = 0.0f;
 }
 
 void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 context, f32 scaleX, f32 scaleY) {
     {
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
             (s32)(scaleX *
                   (f32)resource
-                      ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                      .nativeWidth)
+                      ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                      .sourceWidth)
             << 4;
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
             (s32)(scaleY *
                   (f32)resource
-                      ->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                      .nativeHeight)
+                      ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                      .sourceHeight)
             << 3;
     }
     func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
@@ -210,17 +187,17 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 
     {
         /* Reload the resource after drawing before restoring native size. */
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
-            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeWidth
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceWidth
             << 4;
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
-            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeHeight
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceHeight
             << 3;
     }
 }
@@ -228,21 +205,21 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
             (s32)(scaleX *
-                  (f32)resource->sprites[D_0036B510[placementIndex]
+                  (f32)resource->workEntries[D_0036B510[placementIndex]
                                             [MNU_SPRITE_INDEX]]
-                      .nativeWidth)
+                      .sourceWidth)
             << 4;
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
             (s32)(scaleY *
-                  (f32)resource->sprites[D_0036B510[placementIndex]
+                  (f32)resource->workEntries[D_0036B510[placementIndex]
                                             [MNU_SPRITE_INDEX]]
-                      .nativeHeight)
+                      .sourceHeight)
             << 3;
     }
     func_002BF4E0((s32)((f32)(x + D_0036B510[placementIndex]
@@ -262,17 +239,17 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                   context);
 
     {
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
-            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeWidth
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceWidth
             << 4;
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
-            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeHeight
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceHeight
             << 3;
     }
 }
@@ -280,21 +257,21 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
 void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
             .width = (s32)(scaleX *
-                           (f32)resource->sprites[D_0036B510[placementIndex]
+                           (f32)resource->workEntries[D_0036B510[placementIndex]
                                                       [MNU_SPRITE_INDEX]]
-                               .nativeWidth)
+                               .sourceWidth)
                     << 4;
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
             .height = (s32)(scaleY *
-                            (f32)resource->sprites[D_0036B510[placementIndex]
+                            (f32)resource->workEntries[D_0036B510[placementIndex]
                                                        [MNU_SPRITE_INDEX]]
-                                .nativeHeight)
+                                .sourceHeight)
                      << 3;
     }
     func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
@@ -308,45 +285,101 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                   context);
 
     {
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
             .width =
-            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeWidth
+            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceWidth
             << 4;
-        resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
             .height =
-            resource->sprites[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeHeight
+            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceHeight
             << 3;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EA50);
+void func_0024EA50(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EC08);
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+            (s32)(scaleX * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+            (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
+    }
+    func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  D_0036B7F0[placementIndex][MNU_SPRITE_INDEX],
+                  context);
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
+    }
+}
+
+void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+            (s32)(scaleX * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+            (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
+    }
+    func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  D_0036B7F0[placementIndex][MNU_SPRITE_INDEX],
+                  context);
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
+    }
+}
 
 void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scaleX, f32 scaleY) {
     {
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
             (s32)(scaleX *
-                  (f32)resource->sprites[D_0036BC68[placementIndex]
+                  (f32)resource->workEntries[D_0036BC68[placementIndex]
                                             [MNU_SPRITE_INDEX]]
-                      .nativeWidth)
+                      .sourceWidth)
             << 4;
-        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
             (s32)(scaleY *
-                  (f32)resource->sprites[D_0036BC68[placementIndex]
+                  (f32)resource->workEntries[D_0036BC68[placementIndex]
                                             [MNU_SPRITE_INDEX]]
-                      .nativeHeight)
+                      .sourceHeight)
             << 3;
     }
     func_002BF4E0((s32)((f32)(x + D_0036BC68[placementIndex]
@@ -367,17 +400,17 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 
     {
         /* Reload the resource after drawing before restoring native size. */
-        MnuSpriteResource *resource =
-            (MnuSpriteResource *)D_0036C698[
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[
                 D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
-            resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeWidth
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
+            resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceWidth
             << 4;
-        resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
-            resource->sprites[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
-                .nativeHeight
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
+            resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
+                .sourceHeight
             << 3;
     }
 }
@@ -395,15 +428,15 @@ void func_0024F210(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
     s32 sprite;
 
     selector += 2;
-    sprite = spriteMap[((groupPlacementIndex + D_0036B7F0)->fields.spriteGroups >>
+    sprite = spriteMap[(D_0036B7F0[groupPlacementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
                         (selector * 4)) & 0xF];
     if (sprite == -1) {
         return;
     }
     func_002BF4E0((s32)((f32)(x + D_0036B7F0[coordinatePlacementIndex]
-                                              .values[MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+                                              [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
                   (s32)((f32)(y + D_0036B7F0[coordinatePlacementIndex]
-                                              .values[MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+                                              [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,

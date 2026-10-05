@@ -73,18 +73,6 @@ extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 
 
-typedef struct MenuPage {
-    u8 pad0[0x58];
-    s32 kind;
-    u32 flags;
-    u8 pad60[0x60];
-    s32 unkC0;
-    s32 unkC4;
-    u8 padC8[0x4C];
-    s32 unk114;
-    s32 unk118;
-    u8 pad11C[0x18];
-} MenuPage;
 
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
@@ -1578,16 +1566,9 @@ void mnuRebuildScrollLists(MenuPageWindow *menu, s32 *counts) {
     mnuFillPanelLists(menu, counts);
 }
 
-void mnuClearPageSelection(MenuPageWindow *window) {
-    if (window->selected >= 0) {
-        MenuPage *pages = (MenuPage *)((u8 *)window + 0x20);
+extern void mnuClearPageSelection(MenuPageWindow *);
 
-        pages[window->selected].unkC0 = 0x100;
-        pages[window->selected].unk114 = 0x100;
-        window->selected = -1;
-    }
-    window->flags &= ~0x400;
-}
+INCLUDE_ASM(const s32, "game/code_0027BF00", mnuClearPageSelection);
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", mnuInitPageWindow);
 

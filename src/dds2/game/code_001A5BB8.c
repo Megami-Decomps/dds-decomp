@@ -1912,7 +1912,7 @@ void func_001ABF50(s32 battler) {
 }
 
 struct DatUnitStatus;
-extern s32 func_00119C78(struct DatUnitStatus *, s32);
+extern s32 datGetEffectiveAffinity(struct DatUnitStatus *, s32);
 
 void btlResolveUnitValueWithOverride(s32 arg0, s32 arg1) {
     s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x6B8);
@@ -1921,7 +1921,7 @@ void btlResolveUnitValueWithOverride(s32 arg0, s32 arg1) {
             return;
         }
     }
-    func_00119C78((struct DatUnitStatus *)arg0, arg1);
+    datGetEffectiveAffinity((struct DatUnitStatus *)arg0, arg1);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
@@ -3008,7 +3008,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0DB0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1090);
 
-void func_001B1168(UiObject *unit, BtlIndexList *targets,
+void btlDistributeRandomTargetHits(UiObject *unit, BtlIndexList *targets,
                    BtlTargetResult *results, s32 command) {
     u8 selected[13];
     BtlIndexList *copy;
@@ -3357,7 +3357,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
 
 extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
 
-s32 func_001B2D70(UiObject *unit, s32 command, void **first, void **second) {
+s32 btlFindCommandPartnersByAffinity(UiObject *unit, s32 command, void **first, void **second) {
     s32 statAddresses[3];
     u32 requiredCount = 0;
     BattleController *controller = (BattleController *)btlGetRuntime();

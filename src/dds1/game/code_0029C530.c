@@ -224,7 +224,7 @@ extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
 extern void func_00187098(void *);
 
-extern void func_00187598(void *);
+extern void effBlurStepScaleSlotsAndDraw(void *);
 
 extern s32 effRequestResourceByMode(u32, u32, u32, void **);
 
@@ -1178,7 +1178,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f;
     out->rateB = func_00297270(&config->rateA, limit, progress) * 0.01f;
     out->param = work->mode;
-    func_00187598(out);
+    effBlurStepScaleSlotsAndDraw(out);
 }
 
 void effReplaceKindLinkedTarget(EffKindWork *work, u32 target) {

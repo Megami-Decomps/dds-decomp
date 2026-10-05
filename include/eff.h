@@ -141,15 +141,63 @@ typedef struct BillObj {
     void *unk60;
 } BillObj;
 
-/* Billboard entry count and payload (0x30); DDS1/2 effect/billManager.c. */
+/* Serialized entry offsets are relative to BillData.base. */
+typedef struct BillAnimationEntry {
+    s32 offset;
+    s32 colorOffset;
+    u32 unk8;
+    u32 frameCount;
+    u32 flags;
+} BillAnimationEntry;
+
+/* Plural entries use the first two halfwords as an entry index and delay. */
+typedef struct BillRecord {
+    union {
+        s16 width;
+        s16 entryIndex;
+    };
+    union {
+        s16 height;
+        s16 delay;
+    };
+    s16 x;
+    s16 y;
+    u16 u0;
+    u16 v0;
+    u16 u1;
+    u16 v1;
+    s16 childIndex;
+    s16 value;
+    f32 scale;
+} BillRecord;
+
+typedef struct BillOut {
+    s32 unk0;
+    s32 frameIndex;
+    s32 framesRemaining;
+    BillAnimationEntry *entry;
+    BillRecord *record;
+} BillOut;
+
+/* Runtime header precedes the copied resource bytes; the child table is indirect. */
 typedef struct BillData {
-    u8 pad[8];
-    s32 childRefCount;
+    void *allocation;
+    u8 *base;
+    BillAnimationEntry *entries;
     s32 entryCount;
-    u8 pad10[4];
+    s32 childCount;
     s32 listRefCount;
-    u8 pad18[24];
+    struct BillChildPayload **children;
 } BillData;
+
+typedef char BillAnimationEntry_size_must_be_0x14[
+    (sizeof(BillAnimationEntry) == 0x14) ? 1 : -1];
+typedef char BillRecord_size_must_be_0x18[
+    (sizeof(BillRecord) == 0x18) ? 1 : -1];
+typedef char BillOut_size_must_be_0x14[
+    (sizeof(BillOut) == 0x14) ? 1 : -1];
+typedef char BillData_size_must_be_0x1C[
+    (sizeof(BillData) == 0x1C) ? 1 : -1];
 
 typedef struct BillTextureCoordinate {
     u16 u;
@@ -171,7 +219,8 @@ typedef struct BillChildPayload {
         s16 signedVariant;
         u16 variant;
     };
-    u8 pad06[6];
+    u8 pad06[2];
+    s32 refCount;      /* 0x08 */
     BillTextureQuad uv; /* 0x0C */
     f32 x;             /* 0x1C */
     f32 y;             /* 0x20 */

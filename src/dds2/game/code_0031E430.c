@@ -301,12 +301,16 @@ void itfDrawFadeGlyphForFrame(FadeEntry *entry) {
         return;
     }
     mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 6, 0x54);
-    if (entry->displayValue != 1) {
-        if (entry->displayValue != 2) goto update;
+    switch (entry->displayValue) {
+    case 2:
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 5, 0x54);
+        /* fall through */
+    case 1:
+        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 4, 0x54);
+        break;
+    default:
+        break;
     }
-    mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 4, 0x54);
-update:
     itfUpdateFade(entry);
 }
 

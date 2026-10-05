@@ -71,7 +71,7 @@ extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
 
-void func_00264EF0(TitleFadeWork *work) {
+void mnuDrawTitleFadeSprites(TitleFadeWork *work) {
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 positions[8][3] = {
         {-5, -5, 0x23},

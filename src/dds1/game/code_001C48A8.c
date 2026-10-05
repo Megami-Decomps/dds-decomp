@@ -1457,24 +1457,19 @@ void btlClearSceneTaskActiveFlag(s32 taskAddress) {
     *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) & 0xfffffffe;
 }
 
-/* Bind the actor, optionally select its secondary-group action number, and mark the task bound.
- * Keep the native range guard, record-address calculation, and shared flag temporary. */
+/* Bind the actor, select a valid secondary-group action, and mark the task bound. */
 void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
     u32 flags;
 
     flags = *(u32 *)(actorAddress + 0x110);
     *(s32 *)(taskAddress + 0x18) = actorAddress;
-    if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0) {
-        if (0x17f < *(u16 *)(actorAddress + 0x124)) {
-            flags = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET);
-            goto store;
-        }
+    if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
+        *(u16 *)(actorAddress + 0x124) <= 0x17F) {
         *(u16 *)(taskAddress + 4) =
                   (u16)*(u8 *)(((u32)*(u16 *)(actorAddress + 0x124) * 0x14 -
                                                       (u32)*(u16 *)(actorAddress + 0x124)) * 4 + datEnemyRecords + 0x15);
     }
     flags = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET);
-store:
     *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = flags | FLD_SCENE_TASK_BOUND_BIT;
 }
 

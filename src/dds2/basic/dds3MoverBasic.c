@@ -47,7 +47,7 @@ typedef struct {
     f32 fieldOfView;
 } MoverScalarData;
 
-extern void func_001171A0(MoverPath *);
+extern void dds3InterpolatePathVectorVU(MoverPath *);
 extern void dds3PreparePathVectorPair(MoverPath *);
 extern f32 sdfSampleActiveLinearCurve(MoverPath *);
 extern void dds3InterpolatePathOutput(MoverPath *, f32 *);
@@ -86,7 +86,7 @@ s32 dds3UpdateMoverTransform(MoverObject *object)
 
     if (work->path != NULL) {
         if (work->path->flags & DDS3_MOVER_POSITION_CHANNEL_BIT) {
-            func_001171A0(work->path);
+            dds3InterpolatePathVectorVU(work->path);
             VU0_STORE_VF(vf10, pathVector);
             effObjSetInnerFirstVec(target, pathVector);
             if (target->kind == DDS3_MOVER_POSITION_COPY_KIND) {

@@ -36,7 +36,7 @@ typedef struct EvtUnitNode {
 
 extern void sdfStepWrappingFloatCounter(s32 path);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void func_001171A0(s32 path);
+extern void dds3InterpolatePathVectorVU(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
 extern void effObjSetInnerFirstVec(void *obj, void *vec);
 extern void effObjSetInnerSecondVec(void *obj, void *vec);
@@ -73,11 +73,11 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
 
     saved = evtGetValueScaleFactor(path);
     evtScaleValueByMultiplier(path, 0.0f);
-    func_001171A0(path);
+    dds3InterpolatePathVectorVU(path);
     do {
         VU0_MOVE_VF(vf11, vf10);
         evtScaleValueByMultiplier(path, t);
-        func_001171A0(path);
+        dds3InterpolatePathVectorVU(path);
         VU0_MOVE_VF(vf12, vf10);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(segment);
@@ -622,7 +622,7 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];
 
     sdfStepWrappingFloatCounter(unit->pathHandle);
-    func_001171A0(unit->pathHandle);
+    dds3InterpolatePathVectorVU(unit->pathHandle);
     VU0_STORE_VF($vf10, v);
     effObjSetInnerFirstVec(unit->effObj, v);
     if (unit->flags & 0x10) {

@@ -442,6 +442,7 @@
 0x00119A78	datGetStatWithStatusOverride	inferred	confidence=high; matched-C; src/dds2/newdata/datCalc.c:134:func_00119A78; Returns one for the exact masked status 0x1000; otherwise adds the profile-adjusted stat and linked record/slot contribution, then clamps the final value to zero through ninety-nine. Uses the DDS1 status-wrapper twin name staged in QP12.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00119AF8	datUnitHasSkill	inferred	src/dds2/newdata/datCalc.c func_00119AF8: Searches local twenty-four-slot skill array or flag-selected party eight-slot skill array. Twin of DDS1 func_001193A0. [names_reviewed24.tsv]
 0x00119BA0	datRaiseCalculatedValueFloor	inferred	readability/matching review (QP16)
+0x00119C78	datGetEffectiveAffinity	inferred	U1
 0x00119F20	datReadLowHalfOfCalculatedValue	inferred	Extracts lower unsigned halfword from calculation result. [names_reviewed6.tsv]
 0x00119F40	datReadHighHalfOfCalculatedValue	inferred	Masks lower halfword from calculation result to return upper bits. [names_reviewed6.tsv]
 0x00119F68	datFlagToElementIndex	inferred	readability/matching review (QP16)
@@ -760,6 +761,7 @@
 0x0014BDE0	fldFreeSceneResources	inferred	releases the four scene handles at D_00389770+0x1F0.. and the four gp handles
 0x0014D7B8	fldPlaceAreaDamageEffect	inferred	Places the area-selected damage effect node at the supplied world coordinates. [names_reviewed5.tsv]
 0x0014D838	fldDrawAnimatedFieldBanner	inferred	Matched sprite drawing, party predicate and animation from DDS1 C and DDS2 assembly. [names_reviewed13.tsv]
+0x0014DB50	fldDrawLocationPanel	inferred	U3
 0x0014DDD8	fldFlushQueuedEffectPositions	inferred	twin of DDS1 func_00149A98: consumes the queued flags D_00436340/D_00436344 and spawns the queued positions (D_003A8E90/D_003A8EA0) through mnuSpawnResourceAtPosition when field state D_00389770[4] < 0xC8 and nothing blocks [names_M63_Mid.tsv]
 0x0014E3A8	fldLoadNpcPalette	inferred	DDS1 0014A060 (named fldLoadNpcPalette) loads %sF%03d.NPL into the NPC palette; DDS2 adds F033/F034/F037 overrides under mdlFlagTest(25)
 0x0014E620	fldGetCurrentSceneSelectionResource	inferred	Returns the selected field entry resource or zero when none is selected. [names_reviewed12.tsv]
@@ -2523,6 +2525,7 @@
 0x001EF948	btlActionAimUserAtTargets	inferred	builds the linked entries' 0x600 flag mask, then aims the user unit (muzzle position, btlAimHorizontalDirectionVU) and sets its rotation [names_M79_BattleLarge2.tsv]
 0x001F01E8	btlFlagUserAndTargetDefeat	inferred	flags user/target defeat candidates, faces target, sets side flag 0x200 from muzzle x [names_M50_BattleTwins.tsv]
 0x001F0508	btlSetupActionCameraPair	inferred	battle action camera setup for user/target muzzle positions (ActionUnit pos30/dir40) [names_M83_Lerp.tsv]
+0x001F0690	btlUpdateActionTargetCameraPose	inferred	U1
 0x001F1F20	btlPrepareActionCameraPoseWithActorClearance	inferred	U3
 0x001F2740	btlResetUnitEffectVector	inferred	Calls vector effect update with 0.0f. [names_R_FuncNames3.tsv]
 0x001F34F8	btlChooseActionPoseBlendFromActorCount	inferred	Chooses an action pose blend according to indexed actor count and flags. [names_reviewed12.tsv]
@@ -3983,6 +3986,7 @@
 0x0028F570	mnuSelectPreferredMantraNode	inferred	U0
 0x0028F770	mnuSelectMatchingNode	inferred	Traverses menu nodes and records the index whose payload ID equals the requested ID.
 0x0028F7B8	mnuSelectMantraLimitLine	inferred	readability/matching review (QP16)
+0x00290410	mnuNavigateMantraSelector	inferred	U0
 0x00290A70	mnuGetDefaultPanelSelector	inferred	Returns the panel object's selector at offset 0x7A0, used when its alternate selector is absent.
 0x00290B28	mnuUpdateSelectedPanelSlot	inferred	Reuses or allocates the slot indexed by the current menu choice and binds the selected node's value.
 0x00290B98	mnuGetSelectedPanelValue	inferred	Returns the selected slot's halfword indexed by alternate or default selector.
@@ -4477,6 +4481,7 @@
 0x002C2128	mnuDrawPanelSequenceByRow	inferred	Chooses one of two panel sprite index sequences based on row value. [names_reviewed5.tsv]
 0x002C21F8	mnuReleaseSpriteTextures	inferred	Destroys panel sprite slots followed by its paired effect batches. [names_reviewed5.tsv]
 0x002C2258	mnuGetPanelRatioColor	inferred	Maps calculated ratio tier to one of three panel colors when default disabled. [names_reviewed5.tsv]
+0x002C24E8	mnuDrawAndAdvanceRatioPanel	inferred	U0
 0x002C2680	mnuCreatePanelItem	inferred	Allocates and initializes a 0xAC-byte panel item with defaults at +0x10,+0x14 and +0xA0; first-game twin 00284888 uses 0x90 bytes.
 0x002C2920	mnuPositionPanelItemPoints	inferred	Fills five item points from fixed parent anchors then places associated graphics; first-game twin 00284A90.
 0x002C2A90	mnuSetGroupPair	inferred	Stores two words at offsets 0x18 and 0x1C of a group entry.
@@ -4484,6 +4489,7 @@
 0x002C2AB0	mnuSetPanelItemSelection	inferred	When selection changes resets selection fade ramp then stores selected value. [names_reviewed5.tsv]
 0x002C2AC8	mnuSetPanelItemOption	inferred	Stores item drawing option consumed by panel rendering. [names_reviewed5.tsv]
 0x002C2AD0	mnuFreePanelItemWork	inferred	confidence=high; matched-C; src/dds2/game/code_002BE628.c:955:func_002C2AD0; Panel-item storage-release entry; the allocation contains cached grid points and selection-ramp state.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x002C3010	mnuDrawAndAdvancePanelItem	inferred	U0
 0x002C32A0	mnuSetProfilePanelValues	inferred	Stores panel value and option used to initialize current profile display. [names_reviewed5.tsv]
 0x002C32B0	mnuCreateProfilePanel	inferred	Allocates profile panel; obtains selected profile cap/value and initializes animated entries. [names_reviewed5.tsv]
 0x002C3390	mnuFreeProfilePanelWork	inferred	confidence=high; matched-C; src/dds2/game/code_002BE628.c:985:func_002C3390; Profile-panel storage-release entry paired with the 0x3C-byte cap/option/grid-origin work constructor.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
@@ -5122,6 +5128,7 @@
 0x002F8590	effCreateDrawableAssetWithDefaultOpacity	inferred	Creates drawable asset work and initializes its draw opacity to one. [names_reviewed14.tsv]
 0x002F8608	effReleaseQueuedDrawableAssetWork	inferred	Queues an owned drawable asset for release and frees its holder. [names_reviewed14.tsv]
 0x002F8C38	effSyncFadeColorToTargets	inferred	walks owner list, merges alpha byte into packed color at +0x84 and forwards it to target [names_M36_SmallSweep5.tsv]
+0x002F8CF0	effUpdateSelectedActorAlpha	inferred	U1
 0x002F8FB8	effCreateMotionResource	inferred	allocates 8-byte resource with func_003335E0 handle, initialises D_004584C0 setup block [names_M36_SmallSweep5.tsv]
 0x002F9048	effBillboardMotionResourceCreate	inferred	body calls effCreateMotionResource, billCreateIndexed [names_R_FuncNames7.tsv]
 0x002F9118	effBillboardMotionResourceInitialize	inferred	body calls effCreateMotionResource, billSetBillboardMode [names_R_FuncNames7.tsv]
@@ -5349,6 +5356,8 @@
 0x0030D938	sdfDrawCounterChannelInfoLabel	inferred	Centers and fades the active counter channel info label at the requested coordinates. [names_reviewed15.tsv]
 0x0030DAA0	sdfInstallNonzeroSpriteSlots	inferred	Installs only nonzero sprite slot handles from a slot set into the active resource table. [names_reviewed15.tsv]
 0x0030DAE8	sdfReleaseAllSpriteSlots	inferred	Destroys each active sprite resource slot and clears every table entry. [names_reviewed15.tsv]
+0x0030DB40	sdfDrawPositionedSlotImage	inferred	Fam
+0x0030DE08	sdfDrawScaledCenteredSlotImage	inferred	Fam
 0x0030E010	sdfDrawUniformlyScaledSlotImage	inferred	medium confidence; src/dds2/game/code_0030B838.c func_0030E010: Supplies equal horizontal and vertical scales to the slot-backed image renderer, which temporarily changes quad dimensions and restores them after submission. [names_reviewed25.tsv]
 0x0030E130	sdfCounterInitializeDisplayAnimation	inferred	Initializes the counter display value and animation count. [names_reviewed10.tsv]
 0x0030E160	sdfCounterAdvanceBoundedAnimationValue	inferred	Increments a bounded counter display animation value. [names_reviewed10.tsv]

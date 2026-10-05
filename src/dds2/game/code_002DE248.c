@@ -985,7 +985,7 @@ extern void effDrawBlurRectangle(void *);
 
 extern void func_0018ECD0(void *);
 
-extern void func_0018F1D0(void *);
+extern void effBlurStepScaleSlotsAndDraw(void *);
 
 extern void effBlurDrawFramebufferQuad(void *);
 
@@ -1369,7 +1369,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
     out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
     out->param = work->mode;
-    func_0018F1D0(out);
+    effBlurStepScaleSlotsAndDraw(out);
 }
 
 void effSetFadeBlendParameter(EffKindWork *work, u32 value) {
@@ -7585,7 +7585,7 @@ typedef struct EffActorAlphaConfig {
     u8 pad13;
 } EffActorAlphaConfig;
 
-void func_002F8CF0(EffActiveResource *work) {
+void effUpdateSelectedActorAlpha(EffActiveResource *work) {
     BtlUnit *actors[16];
     EffActorAlphaConfig *config;
     u32 frame;
@@ -11470,7 +11470,7 @@ extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
-void func_00305C40(s32 x, s32 y, u32 z, s32 width, s32 height,
+void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flip,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
     u32 uv[4];

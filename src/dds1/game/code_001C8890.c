@@ -1919,6 +1919,69 @@ s32 btlFindUnitByActor(s32 target) {
     return 0;
 }
 
+extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
+extern char D_003BB5E0[];
+extern char D_003BB5E8[];
+extern char D_003A37C8[];
+
+/* Display the eight slot entries, retaining each group's last valid task. */
+void func_001D09B8(s32 x, s32 y) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    SceneTask **primary;
+    SceneTask **secondary;
+    SceneTask **tertiary;
+    SceneTask *task;
+    s32 color;
+    u32 i;
+
+    if ((controller->flags & 4) == 0) {
+        return;
+    }
+    btlBossDebugPrintfN(x, y, 0, (s32)D_003A37C8);
+    primary = controller->groupPrimary;
+    secondary = controller->groupSecondary;
+    tertiary = controller->groupTertiary;
+    for (i = 0; i < 8; i++) {
+        switch (controller->slots[i].a) {
+        case 1:
+            color = 0;
+            task = *primary;
+            if (primary[1] != NULL) {
+                primary++;
+            }
+            break;
+        case 2:
+            task = *secondary;
+            color = 5;
+            if (secondary[1] != NULL) {
+                secondary++;
+            }
+            break;
+        case 3:
+            task = *tertiary;
+            color = 6;
+            if (tertiary[1] != NULL) {
+                tertiary++;
+            }
+            break;
+        default:
+            task = NULL;
+            color = 0;
+            break;
+        }
+        if (task == NULL || task->actor == NULL) {
+            continue;
+        }
+        if (controller->slots[i].b == 100) {
+            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, (s32)D_003BB5E0,
+                               D_00359B28[task->state].name);
+        } else {
+            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, (s32)D_003BB5E8,
+                               D_00359B28[task->state].name);
+        }
+    }
+}
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3738);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3748);
@@ -1933,7 +1996,7 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3788);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A37A8);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D09B8);
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A37C8);
 
 void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
     s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x604);
@@ -6274,7 +6337,7 @@ s32 btlCheckActorDistanceLimit(void) {
     return 1;
 }
 
-extern f32 func_001F66D8(s32, s32, s32);
+extern f32 func_001F66D8(s32, f32 *, s32);
 
 s32 btlIsEntryHeightWithinLimit(void) {
     if (func_001F66D8(0x400, 0, 0) > 600.0f) {
@@ -6546,7 +6609,7 @@ void func_001DD698(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD6A0);
 
-extern void func_001E2970(CameraPoseAction *, CameraPoseTransform *);
+extern void btlBuildApproachCamera(CameraPoseAction *, CameraPoseTransform *);
 extern void func_001E2D20(CameraPoseAction *);
 extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
 
@@ -6559,7 +6622,7 @@ void func_001DD7E8(s32 actor) {
 
     switch (*(u16 *)(actor + 0x10C)) {
     case 9:
-        func_001E2970((CameraPoseAction *)actor, &((CameraPoseAction *)actor)->transform);
+        btlBuildApproachCamera((CameraPoseAction *)actor, &((CameraPoseAction *)actor)->transform);
         break;
     case 10:
         func_001E2D20((CameraPoseAction *)actor);
@@ -6751,13 +6814,15 @@ void btlStartLinkedDefeatCandidateAction(u8 *actor) {
 void func_001DEEC0(void) {
 }
 
-void btlUpdateLinkedActionEffectVectorByTarget(u32 arg0) {
-    if ((*(u32 *)(*(s32 *)(*(s32 *)((s32)arg0 + 0xf4) + 0x18) + 0x110) & 0x200) != 0) {
-        func_001E4960(arg0, arg0);
+extern void func_001E4960(CameraPoseTransform *, CameraPoseTransform *);
+
+void btlUpdateLinkedActionEffectVectorByTarget(CameraPoseAction *action) {
+    if ((action->link->unit->flags & 0x200) != 0) {
+        func_001E4960(&action->transform, &action->transform);
         return;
     }
-    if (*(s32 *)((s32)arg0 + 0x108) != 0x10) {
-        btlResetUnitEffectVector(arg0, arg0);
+    if (action->actionKind != 0x10) {
+        btlResetUnitEffectVector((s32)&action->transform, (s32)&action->transform);
         return;
     }
 }
@@ -7039,7 +7104,7 @@ extern f32 func_002FA060(f32);
 #define BTL_APPROACH_PITCH_END 0.6108652f
 
 /* vu0 routine: */
-void func_001E2970(CameraPoseAction *action, CameraPoseTransform *out) {
+void btlBuildApproachCamera(CameraPoseAction *action, CameraPoseTransform *out) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -7192,7 +7257,39 @@ void func_001E4708(void *unit, f32 *pose, u8 *out) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4720);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4960);
+/* vu0 routine: frame the two unit groups using their bounding extents. */
+void func_001E4960(CameraPoseTransform *source, CameraPoseTransform *out) {
+    f32 target[4];
+    f32 height;
+    f32 fov;
+    f32 span;
+
+    btlFlagAllUnitsDefeatCandidate();
+    fov = source->fov;
+    out->fov = fov;
+    span = func_001F66D8(0x200, &height, 0);
+    VU0_STORE_VF(vf10, out->position);
+    out->position[1] = -height * 1.15f;
+    func_001F66D8(0x400, &height, 0);
+    VU0_STORE_VF(vf10, target);
+    target[1] = -height * 0.75f;
+    if (target[0] > 100.0f) {
+        target[0] = 100.0f;
+    } else if (target[0] < -100.0f) {
+        target[0] = -100.0f;
+    }
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, out->position);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, out->direction);
+    fov *= 1.3333333f;
+    if (span < 250.0f) {
+        span = 250.0f;
+    }
+    out->distance = span / func_002FA148(fov * 0.5f);
+    func_001DB698(out);
+}
 
 void btlResetUnitEffectVector(s32 arg0, s32 arg1) {
     func_001DEFE0(arg0, arg1, 0.0f);
@@ -7210,7 +7307,7 @@ void func_001E5460(u32 arg0) {
 
 
 /* vu0 routine: interpolate pull-back and pitch for actor/target framing. */
-void func_001E5478(CameraPoseAction *action, CameraPoseTransform *out) {
+void btlBuildHeightClampedApproachCamera(CameraPoseAction *action, CameraPoseTransform *out) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -7282,7 +7379,7 @@ void func_001E5700(u32 arg0) {
 }
 
 void func_001E5718(CameraPoseAction *action, CameraPoseTransform *out) {
-    func_001E5478(action, out);
+    btlBuildHeightClampedApproachCamera(action, out);
 }
 
 extern void func_001E0718(u8 *action, u8 *pose, u8 *out);
@@ -7606,7 +7703,7 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
-        func_001E2970((CameraPoseAction *)action, &((CameraPoseAction *)action)->transform);
+        btlBuildApproachCamera((CameraPoseAction *)action, &((CameraPoseAction *)action)->transform);
     }
 }
 void btlInitCommandCursorForCategory(s32 action, s32 state) {
@@ -7656,7 +7753,7 @@ void func_001EEED8(s32 action, s32 state) {
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
-        func_001E2970((CameraPoseAction *)action, &((CameraPoseAction *)action)->transform);
+        btlBuildApproachCamera((CameraPoseAction *)action, &((CameraPoseAction *)action)->transform);
     }
 }
 
@@ -10500,7 +10597,7 @@ void btlPlaceTripleFormationAroundTarget(BattleActionLinkState *link, BtlUnit *f
     }
 }
 /* vu0 routine: Place three indexed actors around the middle actor's facing and muzzle. */
-void func_001F57D0(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+void btlPlaceTripleFormationAroundMiddleActor(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
     BtlUnit *slot[3];
     f32 center[4];
     f32 pos[4];

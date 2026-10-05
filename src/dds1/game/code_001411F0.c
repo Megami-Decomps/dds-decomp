@@ -2079,7 +2079,7 @@ extern s16 *fldFindLocationCoordinateRecord(s32, s32);
 extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
     u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
 
-void func_00149810(void) {
+void fldDrawLocationPanel(void) {
     FldAreaWork *work;
     u32 color;
 

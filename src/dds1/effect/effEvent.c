@@ -199,7 +199,7 @@ extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
 extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
 extern void func_00187098(EffBlurScatterWork *arg);
-extern void func_00187598(EffBlurScaleWork *arg);
+extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 extern void func_00187C08(EffSolidRectParams *arg);
 extern void effResourceRectDrawPixels(EffTemplate *arg);
@@ -656,7 +656,7 @@ void effDispatchActive(void) {
         func_00187098(effFilterBlurWork);
     }
     if (effStaggeredBlurEnabled) {
-        func_00187598(effStaggeredBlurWork);
+        effBlurStepScaleSlotsAndDraw(effStaggeredBlurWork);
     }
     if (D_003BB073) {
         effBlurDrawFramebufferQuad(&D_00355908);

@@ -193,44 +193,6 @@ typedef struct BattleWork {
 } BattleWork;
 
 typedef struct BattleNamedResource BattleNamedResource;
-/* Queued action slot: some queries inspect the full word, others its ID. */
-typedef union BattleActionSlot {
-    s32 word;
-    s16 actionId;
-} BattleActionSlot;
-
-
-/* Native 0x180-byte command-actor allocation; its two list links are at
- * 0x174/0x178. */
-typedef struct ActionStateLink {
-    u8 pad00[8];
-    u32 pendingFlags; /* 0x08 */
-    u32 flags; /* 0x0C */
-    u8 pad10[8];
-    BtlUnit *unit; /* 0x18 */
-    u8 pad1C[4];
-    s32 phase; /* 0x20 */
-    s32 skillId; /* 0x24 */
-    u8 pad28[0x1C];
-    s32 slot; /* 0x44: action-kind table/resource-node index */
-    s32 adjustedValue; /* 0x48 */
-    s8 resultKind; /* 0x4C */
-    u8 pad4D[0x13];
-    BtlIndexList *actorIndices; /* 0x60 */
-    u8 pad64[0x24];
-    u8 *entries; /* 0x88: retained index-work buffer */
-    u8 pad8C[4];
-    u16 aiCounter; /* 0x90: wraps as a halfword, then clamps to 0xFF */
-    u8 pad92[0xBC];
-    s8 lowHpActionHold; /* 0x14E: positive suppresses the low-HP action */
-    u8 pad14F;
-    BattleActionSlot actions[8]; /* 0x150 */
-    s32 lastMode; /* 0x170 */
-    struct ActionStateLink *prev;
-    struct ActionStateLink *next;
-    u8 pad17C[4];
-} ActionStateLink;
-
 /* Battle-select controller at work+0x718: the unit being selected and the previous one. */
 typedef struct BtlSelectCtrl {
     BtlUnit *unit;
@@ -1073,7 +1035,7 @@ s32 btlUnitHasFlag1000(s32 unitAddress) {
     return (((s32)((BtlUnit *)unitAddress)->flags & 0x1000) > 0);
 }
 
-u8 func_00213910(void) {
+u8 btlIsCommandAvailable(void) {
     s64 result;
 
     result = func_001ABB10();
@@ -3185,7 +3147,7 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
         return 0;
     case 0x17E:
         btlPrepareRandomizedActionCameraPose((s32)command, (s32)command + 0x30, (s32)command + 0xC0);
-        command->unk12C = 4;
+        command->stepKind = 4;
         return 1;
     }
     return 0;
@@ -5225,7 +5187,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00222F18);
 s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
     if (btlIsActorCategoryMarked((s32)command) == 0) {
         if (command->link->unit->flags & 0x200) {
-            if (command->unk12C == 14) {
+            if (command->stepKind == 14) {
                 func_00217470(command, &command->camera, -1.4f, 0.67f, 25.0f);
                 command->camera.distance += 1250.0f;
                 return 1;
@@ -5490,7 +5452,7 @@ s32 func_00224500(s32 object) {
         state = (s32)((BtlLinkedCommand *)object)->link;
         battler = (s32)((ActionStateLink *)state)->unit;
         if ((((BtlUnit *)battler)->flags & 0x200) != 0) {
-            if (((BtlLinkedCommand *)object)->unk12C == 0xE) {
+            if (((BtlLinkedCommand *)object)->stepKind == 0xE) {
                 func_00217470((BtlLinkedCommand *)object, (BtlCamState *)object, -0.8f, 0.225f, 35.0f);
                 ((BtlLinkedCommand *)object)->camera.distance += 500.0f;
                 func_001E88A8(object);
@@ -6334,26 +6296,11 @@ void btlClearSpecialEnemyEntryFlags(void) {
 }
 
 
-typedef struct BattleEffectUnitMask {
-    u8 pad00[0x110];
-    u32 flags;
-    u8 pad114[0x1A];
-    u16 statusFlags; /* 0x12E */
-} BattleEffectUnitMask;
 
 /* Park this unit in the battle effect slot and drop the 0x100 and 0x8 flags. */
-void btlBindEffectUnitAndClearStateFlags(BattleActionUnit *unit) {
-    BattleEffectUnitMask *view = (BattleEffectUnitMask *)unit;
-    BattleActionContext *battle = (BattleActionContext *)btlGetRuntime();
-    u32 flags = view->flags & ~0x100;
-    u16 status = view->statusFlags;
+extern void btlBindEffectUnitAndClearStateFlags(BtlUnit *);
 
-    flags &= ~8;
-    status &= 0x4000;
-    *(BattleActionUnit **)battle->effect = unit;
-    view->flags = flags;
-    view->statusFlags = status;
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlBindEffectUnitAndClearStateFlags);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00226AB0);
 

@@ -5,7 +5,7 @@ extern s32 func_0030AC10(void);
 extern void func_00134A18(void);
 extern void func_00137888(void);
 extern void func_0030C8E8(s32);
-extern void func_0030DB40(s32, s32, s32, s32, s32, s32, s32);
+extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawAnimatedTransition(s32);
 extern void fldDrawSelectedMapMarker(void);
 
@@ -504,8 +504,8 @@ INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B1E8);
 
 void func_0030B470(void) {
     func_00134A18();
-    func_0030DB40(0, 0, 0, 0x80, 0x21, 0, 0x53);
-    func_0030DB40(0, 0, 0, 0x80, 0x22, 0, 0x53);
+    sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x21, 0, 0x53);
+    sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x22, 0, 0x53);
 
     switch (D_004388AC) {
     case 1:

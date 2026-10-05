@@ -761,8 +761,8 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6480);
 extern s32 func_002A6580(void);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
-INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
+INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6858);
 

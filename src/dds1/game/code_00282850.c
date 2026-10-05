@@ -858,7 +858,7 @@ extern void func_00284C48(s32, s32, s32, u32, s32, MenuPanelItem *, s32);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284C48);
 
-void func_00284EB8(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer) {
+void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer) {
     char buffer[16];
     struct FrFontGlyph *glyph;
     s32 value;

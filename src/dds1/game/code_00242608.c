@@ -1401,7 +1401,7 @@ s32 func_00244D10(s32 index, s32 halfPrice) {
 
 extern const s32 D_003BC3A8[];
 
-s32 func_00244E08(ShopScene *scene) {
+s32 mnuShopGetTransactionLimit(ShopScene *scene) {
     ShopWindowContainer *window = (ShopWindowContainer *)scene->window;
     CampWindowParams *parameters = (CampWindowParams *)(window->list->unk1C + 0x60);
     s16 extraOption = scene->extraOption;
@@ -1496,7 +1496,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
 
 
 s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
-    s32 limit = func_00244E08(scene);
+    s32 limit = mnuShopGetTransactionLimit(scene);
     s32 sum = scene->counter + delta;
     s32 current;
     scene->counter = sum;

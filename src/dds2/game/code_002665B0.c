@@ -202,7 +202,7 @@ typedef struct MenuProgressList {
     s32 busy;
     u8 pad24[8];
     s32 updateCallback;
-    s32 userData; /* 0x30: the owning menu object, not an executable callback */
+    void *userData; /* 0x30: the owning menu object, not an executable callback */
     u8 pad34[8];
     s32 visible;
 } MenuProgressList;
@@ -423,40 +423,10 @@ void mnuDestroyThresholdNodePanels(MenuSlotState *host) {
     }
 }
 
-typedef struct ThresholdEntry {
-    s32 entryId;
-    s32 requiredAmount;
-} ThresholdEntry;
 
-/* Build recovery-cost nodes for active party slots with a nonzero computed cost.
- * Node values are party indices here, unlike the command-list builder below. */
-void mnuBuildTerminalNodeList(MenuSlotState *host) {
-    MenuProgressList *list;
-    s32 partyIndex;
+extern void mnuBuildTerminalNodeList(MenuSlotState *);
 
-    list = (MenuProgressList *)mnuCreateListState(0, MNU_PARTY_SLOT_COUNT, 0x24);
-    list->userData = (s32)host;
-    *(s32 *)&host->progressList = (s32)list;
-    list->updateCallback = (s32)func_00266C08;
-    list->visible = 0;
-    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        BoxRecord *unit = (BoxRecord *)(datGameState + partyIndex * MNU_PARTY_RECORD_BYTES + 0xA60);
-
-        if ((u16)(unit->unitFlags & 1)) {
-            s32 recoveryCost = mnuTerminalScoreBox(unit);
-
-            if (recoveryCost != 0) {
-                MenuProgressNode *node = (MenuProgressNode *)mnuListAppendNode((s32)host->progressList, (s32)D_00437870);
-                ThresholdEntry *entry = (ThresholdEntry *)&node->entryIndex;
-
-                node->childPanel = 0;
-                entry->requiredAmount = recoveryCost;
-                entry->entryId = partyIndex;
-            }
-        }
-    }
-    mnuRefreshThresholdNodeFlags(host->progressList);
-}
+INCLUDE_ASM(const s32, "game/code_002665B0", mnuBuildTerminalNodeList);
 
 /* Destroy the progress-list allocation retained by the terminal work. */
 void mnuReleaseProgressWorkList(MenuSlotState *host) {
@@ -526,7 +496,7 @@ void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuProgressList *li
 s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, void *owner) {
     MenuProgressList *list = (MenuProgressList *)mnuCreateListState(0, count, 0x16, owner);
     s32 entryIndex;
-    list->userData = (s32)owner;
+    list->userData = owner;
     list->updateCallback = (s32)mnuThresholdNodeDrawCallback;
     list->visible = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {

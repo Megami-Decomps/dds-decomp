@@ -261,7 +261,7 @@ extern s32 *D_00435DDC;
 extern s32 *D_00435DFC;
 extern s32 mdlFlagTest(s32 flag);
 
-s32 func_00119C78(DatUnitStatus *unit, s32 element) {
+s32 datGetEffectiveAffinity(DatUnitStatus *unit, s32 element) {
     s32 value;
     u16 unitId;
     u32 low;
@@ -340,11 +340,11 @@ s32 func_00119C78(DatUnitStatus *unit, s32 element) {
 }
 
 u32 datReadLowHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
-    return (u16)func_00119C78(unit, element);
+    return (u16)datGetEffectiveAffinity(unit, element);
 }
 
 u32 datReadHighHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
-    return func_00119C78(unit, element) & DAT_CALC_HIGH_MASK;
+    return datGetEffectiveAffinity(unit, element) & DAT_CALC_HIGH_MASK;
 }
 
 /* Map one exact flag to a stat index. Flag one and unknown/combined flags
