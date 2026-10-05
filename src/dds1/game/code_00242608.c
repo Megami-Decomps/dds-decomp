@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "sdf.h"
+#include "evt_unit.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -73,8 +74,6 @@ extern void evtFormatTaskName(s32 taskId, void *name);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 c, u32 n);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
-extern void evtTickPackLoad(void);
-extern void evtReleaseEventPackResources(void);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
@@ -87,23 +86,18 @@ extern s32 effLoadIndexedResource(const char *, s32, s32);
 
 #define CAMP_TASK_PRIORITY 0x3EC
 
-typedef struct CampTaskData {
-    s32 taskId;
-    s32 unused4;             /* 0x4: zeroed at creation, never read */
-    u8 pad08[0x40];
-} CampTaskData;
 
 /* Schedule the camp task only if no task currently owns this event ID. */
 void mnuCampCreateTask(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
-    CampTaskData *taskData;
+    EvtPackLoadState *taskData;
 
     if (evtFindTaskById() == 0) {
         evtFormatTaskName(taskId, taskName);
         taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
-        taskData->taskId = taskId;
-        taskData->unused4 = 0;
+        taskData->eventId = taskId;
+        taskData->loaded = 0;
         kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, taskData);
     }
 }
