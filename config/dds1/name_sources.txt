@@ -551,6 +551,7 @@
 0x00116CE8	evtSpawnActionObj10	inferred	constructor for type 0x10
 0x00116D38	dds3CreatePathCurveWork	inferred	readability/matching review (QP16)
 0x00116F08	dds3FreePathObject	inferred	Frees the path's associated buffer handle and then frees the path object allocation.
+0x00116F38	dds3InterpolatePathVectorVU	inferred	U0
 0x00117050	dds3PreparePathVectorPair	inferred	When path flag bit one is set, selects adjacent 16-byte vector entries at the current path time and loads VU vf10/vf11 for interpolation.
 0x001170D8	dds3InterpolatePathOutput	inferred	confidence=high; src/dds1/basic/dds3PathBasic.c:func_001170D8; Locates the path segment/fraction for the current time and linearly interpolates three vector groups; clears the output when the path flag is disabled. [names_qp9.tsv]
 0x00117438	sdfSampleActiveLinearCurve	inferred	src/dds1/game/code_00117438.c func_00117438: Samples adjacent curve values using located time fraction; returns zero when inactive. [names_reviewed24.tsv]
@@ -592,6 +593,7 @@
 0x00119368	datGetStatWithStatusOverride	inferred	confidence=high; matched-C; src/dds1/newdata/datCalc.c:127:func_00119368; Returns one for the exact masked status 0x1000; otherwise returns the normal profile-adjusted clamped stat selected by statIndex.; source=revalidated-unapplied-names_R_Names24m.tsv:4 [names_qp12_apply.tsv]
 0x001193A0	datUnitHasSkill	inferred	src/dds1/newdata/datCalc.c func_001193A0: Searches local twenty-four-slot skill array or flag-selected party eight-slot skill array. [names_reviewed24.tsv]
 0x00119448	datRaiseCalculatedValueFloor	inferred	readability/matching review (QP16)
+0x00119520	datGetEffectiveAffinity	inferred	U1
 0x00119708	datReadLowHalfOfCalculatedValue	inferred	Extracts lower unsigned halfword from calculation result. [names_reviewed6.tsv]
 0x00119728	datReadHighHalfOfCalculatedValue	inferred	Masks lower halfword from calculation result to return upper bits. [names_reviewed6.tsv]
 0x00119750	datFlagToElementIndex	inferred	readability/matching review (QP16)
@@ -1011,6 +1013,7 @@
 0x001493D0	fldDrawAnimatedFieldBanner	inferred	Draws field banner sprites and animates a party-flag-dependent highlight; the DDS2 assembly has the same rendering predicate. [names_reviewed13.tsv]
 0x00149610	fldDrawGaugeBar	inferred	draws three GS sprites (left cap, stretched middle of the given width, right cap) at y=0x123
 0x00149748	fldDrawTitleBanner	inferred	sprite draw sequence via func_00129720/001297E8/00129000 when stage < 200
+0x00149810	fldDrawLocationPanel	inferred	U2
 0x00149A98	fldFlushQueuedEffectPositions	inferred	consumes the two pending flags D_003BAF8C/D_003BAF90 set by fldQueuePrimaryEffectPosition/fldQueueSecondaryEffectPosition: when the field is idle it spawns the queued position with mnuSpawnResourceAtPosition (unless the 0x12A event word is set) and clears the flag [names_M63_Mid.tsv]
 0x00149FC0	fldFireRoomEffects	inferred	walks D_003D46A0 entries, calls func_00111908(handle,1) when func_001215F8 flags the room
 0x0014A060	fldLoadNpcPalette	inferred	loads <dir>F%03d.NPL into D_003D44A0 via the sdf command state, field < 100
@@ -2048,6 +2051,7 @@
 0x001873E0	effBlurSecondInitSlots	inferred	inits every slot via func_001873A8 then staggers the phase by -spacing*i [names_M71_ItfBlur.tsv]
 0x00187460	effCloneBlurWorkWithSlots	inferred	Copies blur work into retained storage and initializes its slot phases. [names_reviewed8.tsv]
 0x00187580	effBlurReleaseSecondResource	inferred	Releases the 0x30 resource of the second blur-filter variant.
+0x00187598	effBlurStepScaleSlotsAndDraw	inferred	Fam_Mid3
 0x00187988	effBlurDrawFramebufferQuad	inferred	confidence=high; matched-C; src/dds1/game/code_001873E0.c:125:func_00187988; Builds a frame-buffer texture quad packet list with source DMA, sampling, texture-alpha, blend and overlay-sensitive clamp state, then submits the draw packet.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00187DB0	effResourceQuadDraw	inferred	confidence=high; func_00187DB0 builds colored quad packets from RGBA, GS ALPHA control and four edges, appending the selected resource; its flag chooses already-scaled versus pixel coordinates.; sources=names_R_Structs54b.tsv; twin=0x0018F9E8, input-family pairing. [names_qp10.tsv]
 0x00187FC0	effCloneResourceTemplate	inferred	src/dds1/game/code_00187DB0.c func_00187FC0: Allocates template, copies nine-word body and installs effect resource first word. [names_reviewed24.tsv]
@@ -2500,6 +2504,7 @@
 0x001A1CB8	btlFindPartyEntryIndexForActor	inferred	Maps an actor index to its corresponding party entry index. [names_reviewed14.tsv]
 0x001A2978	btlGetEntryFlagsUnlessDisabled	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001A29E8	btlApplyCommandAbilityMultiplier	inferred	Scales a command value when the actor has its associated ability. [names_reviewed12.tsv]
+0x001A2B00	btlGetCommandFailureReason	inferred	L13
 0x001A2F00	btlGetActorIndexedSignedValue	inferred	Returns an indexed signed value, with an actor-specific lookup when flagged. [names_reviewed9.tsv]
 0x001A2F68	btlResolveUnitValueWithOverride	inferred	Uses a registered callback value unless it declines, then uses the default result. [names_reviewed8.tsv]
 0x001A2FD8	btlGetSideIndexedActorStatusTable	inferred	Selects one of two indexed battle status record tables according to side. [names_reviewed16.tsv]
@@ -2529,6 +2534,7 @@
 0x001A6778	btlRollFearChance	inferred	Checks battle and actor fear exclusions, selects 30 or 40 percent by option bits, logs the fear ratio and compares a random roll.
 0x001A6A50	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001A6B40	btlResolveSkillCategory	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A6F98	btlDistributeRandomTargetHits	inferred	L13
 0x001A73A0	btlQueryUnitChannelFlags	inferred	Returns channel flags for two units, adding a status-dependent bit. [names_reviewed8.tsv]
 0x001A7AD8	btlCalculateEnemyExperienceReward	inferred	Scales enemy experience points by the acquirer ratio and special multiplier. [names_reviewed12.tsv]
 0x001A7D38	btlGetEnemyMoney	inferred	returns the money value (entry+0x28, x100 when entry flag 0x2000) logged as "btl:money=%d"; 0 unless enemy flags & 0x400 and acquirer is alive-ish [names_reviewed2.tsv]
@@ -2545,6 +2551,7 @@
 0x001A8448	btlTestSelectedItemCategoryMask	inferred	Tests the selected item category against a converted mask. [names_reviewed8.tsv]
 0x001A87A0	btlIsSelectedActorStatusAndRecordClear	inferred	Requires clear selected entry, actor status flags and indexed record state. [names_reviewed16.tsv]
 0x001A8818	btlAreUnitStatusAndEntryFlagsClear	inferred	Requires the matching unit status and entry permission bits both to be clear. [names_reviewed14.tsv]
+0x001A8850	btlFindCommandPartnersByAffinity	inferred	L13
 0x001A8C68	btlHasAdjacentActorRecordStatus	inferred	Checks two consecutive status bytes for the indexed actor record; established DDS2 name. [names_reviewed16.tsv]
 0x001A8CC8	btlIsActorHighStateFlagClear	inferred	Returns whether the checked high actor-state bit is clear in both titles. [names_reviewed17.tsv]
 0x001A8EA8	btlHasAvailableOption	inferred	Tests whether collecting selectable battle options yields any choices. [names_reviewed10.tsv]
@@ -2864,8 +2871,10 @@
 0x001DF768	btlPrepareRandomizedActionCameraPose	inferred	Selects a randomized camera pose and transforms it for a battle action. [names_reviewed12.tsv]
 0x001DFA60	btlAimEffectPoseAtUnit	inferred	Reads linked unit effect position or muzzle and writes it into action pose vector. [names_reviewed5.tsv]
 0x001DFD70	btlRefreshActionPoseBlendSnapshot	inferred	Snapshots action transforms and starts a timed blend when eligible. [names_reviewed12.tsv]
+0x001E2970	btlBuildApproachCamera	inferred	U0
 0x001E4578	btlPrepareActionCameraPoseWithActorClearance	inferred	U3
 0x001E4AA8	btlResetUnitEffectVector	inferred	Twin of dds2 0x001F2740; Calls vector effect update with 0.0f. [names_R_FuncNames3.tsv]
+0x001E5478	btlBuildHeightClampedApproachCamera	inferred	U3
 0x001E5730	btlChooseActionPoseBlendFromActorCount	inferred	Chooses an action pose blend according to indexed actor count and flags. [names_reviewed12.tsv]
 0x001E6580	btlAdvanceCommandCursor	inferred	uses D_0035F100 cursor frame/mode/index tables then bumps frame
 0x001E6620	btlFindLinkedActorById	inferred	returns the actor among owner+0xF4->0x18, +0xF8, +0xFC whose byte at +0x11C equals id
@@ -3000,6 +3009,7 @@
 0x001F4C90	btlPlayStationedSe1C	inferred	Twin of dds2 0x00205930; Calls sndLoadAndPlayStationedSe with code 0x1C. [names_R_FuncNames3.tsv]
 0x001F4CF0	btlAdvanceTitleStateAfterSound	inferred	Twin of dds2 0x00205990; Task callback calls btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x001F53C0	btlRepositionPartyAroundBattleCenter	inferred	Passes the battle center vector to the routine spreading party units around it. [names_reviewed14.tsv]
+0x001F57D0	btlPlaceTripleFormationAroundMiddleActor	inferred	L13
 0x001F5A20	btlOrientFrontAndBackUnitsTowardTargets	inferred	Orients front and back battle units to their respective target positions. [names_reviewed12.tsv]
 0x001F5B50	btlAlignTripleFormationWithTarget	inferred	U1
 0x001F6030	btlCreateSoundPlaybackTask	inferred	Allocates a battle task and records sound identifier, channel and flags. [names_reviewed10.tsv]
@@ -3252,6 +3262,7 @@
 0x002010F8	btlAnyIndexedUnitPassesQuery	inferred	Builds an index list and returns whether any indexed unit passes the action query. [names_reviewed5.tsv]
 0x002011C8	btlIsLowHpActionReady	inferred	hp*100/maxHp < 30, 15 ticks since last action, group-400 count <= 2, roll < 30, then func_001A87A0 [names_M89_Battle3.tsv]
 0x002012B0	btlUnitHasFlag1000	inferred	tests word at unit +0x110 against 0x1000 [names_R_FuncNames.tsv]
+0x002012C0	btlIsCommandAvailable	inferred	L13
 0x00201300	btlElementToBitIndex	inferred	bit test of element mask against const table
 0x00201408	btlUnitHasNegativeActionQueryResult	inferred	Queries action entries and accepts a result >=100 in low 16 bits with sign bit set. [names_R_FuncNames3.tsv]
 0x002014E8	btlAnyEnemyHasNegativeActionResult	inferred	confidence=high; matched-C; src/dds1/game/code_001FF030.c:781:func_002014E8; Scans active enemy units and returns true when an action query yields a negative result.; source=revalidated-unapplied-names_R_Names31.tsv:25 [names_qp12_apply.tsv]
@@ -3386,6 +3397,7 @@
 0x0020DA40	btlSelectRandomDefeatCamera	inferred	Marks defeat candidates and chooses one of two camera key presets by random roll. [names_reviewed5.tsv]
 0x0020DB90	btlRaiseLinkedActionPose	inferred	Copies action pose into blended vectors and raises both coordinates before refreshing poses. [names_reviewed5.tsv]
 0x0020DC38	btlSetLinkedDefeatCameraPresetB	inferred	readability/matching review (QP16)
+0x0020E058	btlSelectSpecialActionCameraPose	inferred	L13
 0x0020E868	btlHandleLinkedUnitDefeatAction	inferred	Checks linked unit faction, chooses pose elevation or flags all defeat candidates and clears action flags. [names_reviewed18.tsv]
 0x0020E910	btlApplyActionDefeatCamera	inferred	Tests action table flags to choose random or fixed defeat camera and raises linked pose when needed. [names_reviewed18.tsv]
 0x0020EA40	btlDispatchActionAnimation	inferred	wrong or missing short module prefix [names_audit.tsv]
@@ -4051,6 +4063,7 @@
 0x00244B30	mnuCampRunPanel0	inferred	mnu camp inits panel then runs mode 0
 0x00244B90	mnuCampRunPanel1	inferred	mnu camp runs panel mode 1
 0x00244BC8	mnuCampRunPanel2	inferred	mnu camp runs panel mode 2
+0x00244E08	mnuShopGetTransactionLimit	inferred	U2
 0x00245190	mnuCampClampSceneCounter	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00245C00	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]
 0x00245CC8	evtInstallStateTable	inferred	sets +0x58 to D_0036AA68 and applies +0xC4 entry when +0x84 == 2
@@ -4375,6 +4388,7 @@
 0x00264A60	itfRunPanelMode1	inferred	itf panel wrapper mode 1
 0x00264AB8	itfRunPanelMode2	inferred	itf panel wrapper mode 2
 0x00264E90	itfUpdateFadeColor	inferred	itf updates colour fade
+0x00264EF0	mnuDrawTitleFadeSprites	inferred	U0
 0x00265088	brsStepAnimDecay	inferred	legacy BattleResultUi_StepSharedAnimCounterDecay: decays the shared result animation counter
 0x002650B0	mnuGetTitleState	inferred	Returns the title work state at offset 0x1574.
 0x002650B8	mnuClearTitleState	inferred	Zeros the title work state at offset 0x1574.
@@ -4797,6 +4811,7 @@
 0x00284C10	mnuSetPanelItemSelection	inferred	When selection changes resets selection fade ramp then stores selected value. [names_reviewed5.tsv]
 0x00284C28	mnuSetPanelItemOption	inferred	Stores item drawing option consumed by panel rendering. [names_reviewed5.tsv]
 0x00284C30	mnuFreePanelItemWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:743:func_00284C30; Panel-item storage-release entry; the allocation contains cached grid points and selection-ramp state.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00284EB8	mnuDrawPanelItemValue	inferred	L13
 0x002850C8	mnuSetProfilePanelValues	inferred	Stores panel value and option used to initialize current profile display. [names_reviewed5.tsv]
 0x002850D8	mnuCreateProfilePanel	inferred	Creates a profile panel using the selected operand cap and current profile record, with full initial frame. [names_reviewed5.tsv]
 0x00285160	mnuFreeProfilePanelWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:777:func_00285160; Profile-panel storage-release entry paired with the 0x3C-byte cap/option/grid-origin work constructor.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
@@ -5623,6 +5638,7 @@
 0x002BE378	effConfigureWithDefaultSetting	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BE3A0	effResetRecordRun	inferred	calls func_002BDE50 on consecutive 0xA0-byte entries while entry flag 0x20 is set
 0x002BE448	effSelectPresetByKind	inferred	twin 0x00305BD0: maps mode 0/1/2 to func_002C0A48 argument 0x44/0x48/0x42
+0x002BE4B8	itfDrawTexturedSpriteRect	inferred	Fam_Mid3
 0x002BED28	effSelectPresetAndDispatch	inferred	Selects preset by supplied kind then invokes effect dispatch and restores preset 0x44. [names_R_FuncNames4.tsv]
 0x002BEDC8	sdfCopyCornerWordsWithEdgeByte	inferred	readability/matching review (QP16)
 0x002BF198	effDrawTextureSlot	inferred	L13
@@ -6022,6 +6038,7 @@
 0x002D32B8	sdfTexBuildIntensityMap	inferred	Fam_Mid3
 0x002D3558	sdfFindResourceById	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D3598	sdfRegisterTextureReleaseRequestHandler	inferred	Binds texture release callback to the synchronized request slot rather than merely echoing initialization. [names_reviewed12.tsv]
+0x002D35B8	sdfBuildResourceTransferPacket	inferred	U2
 0x002D37A8	sdfCreateResourcePacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D38B8	sdfCreatePatchableResourcePacket	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:121:func_002D38B8; Allocates a resource packet with a linked callback header, builds its payload from resource entry zero, then appends the header to the fixup list and the payload range to the draw list.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x002D3B28	sdfCreateDescriptorPacket	inferred	Allocates descriptor, initializes it, and queues its packet range.

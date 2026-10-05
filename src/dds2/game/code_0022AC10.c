@@ -2,6 +2,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
+#include "sdf.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -1520,7 +1521,83 @@ void btlInitializeOverlayGraphics(void) {
 
 void btlResetRuntimeState(void);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022E0E0);
+extern u32 kwlnDrawControlFlags;
+extern char D_0041B988[];
+extern char D_0041B9A0[];
+extern char D_0041B9B8[];
+extern void func_00134A18(void);
+extern void kwlnFadeBackgroundStartOut(s32);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
+
+s32 func_0022E0E0(void) {
+    s8 mode;
+
+    if (btlRuntimeState.active == 0) {
+        return 0;
+    }
+    D_0037F980.offsetX = 2048.0f;
+    D_0037F980.offsetY = 2048.0f;
+    switch (btlRuntimeState.state) {
+    case 1:
+        if (btlRuntimeState.fadeMode < 2) {
+            func_00134A18();
+            if (btlRuntimeState.counter == 0) {
+                btlInitLightParams();
+                btlBossDebugPrintf(D_0041B988);
+                break;
+            }
+            btlRuntimeState.state = 2;
+            btlInitializeGraphicsRuntime();
+            btlInitFadeColors();
+        } else {
+            mode = btlRuntimeState.fadeMode;
+            if (mode == 2) {
+                kwlnFadeBackgroundStartOut(0);
+                kwlnDrawControlFlags |= 0x10000000;
+                if (btlRuntimeState.counter < 3) {
+                    func_00134A18();
+                    btlInitLightParams();
+                    kwlnDrawControlFlags |= 0x02000000;
+                    btlBossDebugPrintf(D_0041B9A0);
+                    break;
+                }
+                btlRuntimeState.state = 2;
+                while (sdfCheckPendingWorkWithInterrupts() != 0) {
+                }
+                btlClearOverlayBuffers();
+                btlInitializeOverlayGraphics();
+                btlInitFadeColors();
+            }
+        }
+        /* Fall through after preparing the initial fade. */
+    case 2:
+        if (btlRuntimeState.counter == 2 && (btlRuntimeState.options & 1) == 0) {
+            while (sdfCheckPendingWorkWithInterrupts() != 0) {
+            }
+            btlClearOverlayBuffers();
+            btlSubmitFrameAndQueueRuntimeHandle();
+        }
+        if (btlUpdateFadeIn() != 0) {
+            if (btlRuntimeState.pending != 0) {
+                btlFadeSelectionOverlayAlpha();
+                btlRuntimeState.state = 3;
+            }
+        }
+        break;
+    case 3:
+        if (btlFadeSharedOverlayAlpha() != 0) {
+            btlRuntimeState.state = 4;
+        }
+        break;
+    case 4:
+        btlResetHeldTextureState();
+        btlResetRuntimeState();
+        btlBossDebugPrintf(D_0041B9B8);
+        break;
+    }
+    btlRuntimeState.counter++;
+    return 1;
+}
 
 void btlClearRuntimeState(void) {
     BattleRuntimeState *state = &btlRuntimeState;
@@ -1600,6 +1677,12 @@ void btlMarkRuntimeUpdatePending(void) {
         btlRuntimeState.pending = 1;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B988);
+
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B9A0);
+
+INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B9B8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B9D0);
 

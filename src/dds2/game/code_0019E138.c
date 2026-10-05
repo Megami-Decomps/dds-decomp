@@ -855,7 +855,7 @@ void itfReleaseBackgroundSpriteTexture(void) {
     sdfTexReleaseReference(itfBackgroundSpriteTexture);
 }
 
-extern s32 func_00305C40();
+extern s32 itfDrawTexturedSpriteRect();
 
 typedef struct TextBackgroundSprite {
     u8 pad00[0xC];
@@ -881,7 +881,7 @@ void itfDrawBackgroundSprite(void) {
         color[1] = ITF_NEUTRAL_COLOR;
         color[2] = ITF_NEUTRAL_COLOR;
         color[3] = ITF_NEUTRAL_COLOR;
-        func_00305C40(0, 0, 0, width * 0x10, height * 8, origin, color, 0, 0, 1, itfBackgroundSpriteTexture, 0x52);
+        itfDrawTexturedSpriteRect(0, 0, 0, width * 0x10, height * 8, origin, color, 0, 0, 1, itfBackgroundSpriteTexture, 0x52);
     }
 }
 

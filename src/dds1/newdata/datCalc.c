@@ -238,7 +238,7 @@ extern s32 *D_003BAA08;
 extern s32 *D_003BAA0C;
 extern s32 *D_003BAA2C;
 
-s32 func_00119520(DatUnitStatus *unit, s32 element) {
+s32 datGetEffectiveAffinity(DatUnitStatus *unit, s32 element) {
     s32 value;
     u16 unitId;
 
@@ -291,11 +291,11 @@ s32 func_00119520(DatUnitStatus *unit, s32 element) {
 }
 
 u32 datReadLowHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
-    return (u16)func_00119520(unit, element);
+    return (u16)datGetEffectiveAffinity(unit, element);
 }
 
 u32 datReadHighHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
-    return func_00119520(unit, element) & DAT_CALC_HIGH_MASK;
+    return datGetEffectiveAffinity(unit, element) & DAT_CALC_HIGH_MASK;
 }
 
 /* Map one exact flag to a stat index. Flag one and unknown/combined flags

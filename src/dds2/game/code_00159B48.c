@@ -143,19 +143,6 @@ typedef struct EffScaledRecord {
     u8 pad38[8];
 } EffScaledRecord; /* 0x40 */
 
-typedef struct EffBillFrame {
-    u8 pad00[0x0C];
-    u32 period; /* 0x0C: animation frame modulus */
-    u32 flags; /* 0x10 */
-} EffBillFrame;
-
-typedef struct EffBillEntry {
-    u8 pad00[4];
-    u32 frame; /* 0x04 */
-    s32 mode; /* 0x08 */
-    EffBillFrame *data; /* 0x0C */
-    u8 pad10[4];
-} EffBillEntry; /* 0x14 */
 
 extern s32 effBillResourceOwners[];
 
@@ -235,12 +222,6 @@ void effCopyPosition(BillObj *effect, const void *position) {
 INCLUDE_ASM(const s32, "game/code_00159B48", billSetBillboardMode);
 
 
-typedef struct EffSlotList {
-    u8 pad00[0x10];
-    s32 count;        /* 0x10 */
-    u8 pad14[4];
-    BillChildPayload **slots; /* 0x18 */
-} EffSlotList;
 
 /* Store the signed variant in one child payload or every child of a list. */
 void billSetAllChildVariants(BillObj *effect, s16 variant) {
@@ -249,9 +230,9 @@ void billSetAllChildVariants(BillObj *effect, s16 variant) {
         ((BillChildPayload *)effect->entryList)->signedVariant = variant;
         break;
     case 1: {
-        EffSlotList *childList = effect->entryList;
-        s32 remainingChildren = childList->count;
-        BillChildPayload **childEntries = childList->slots;
+        BillData *childList = effect->entryList;
+        s32 remainingChildren = childList->childCount;
+        BillChildPayload **childEntries = childList->children;
         BillChildPayload **childCursor;
 
         if (remainingChildren > 0) {
@@ -323,14 +304,10 @@ typedef struct BillLinkedValue {
     s32 value;
 } BillLinkedValue;
 
-typedef struct BillValueLink {
-    s32 unk00;
-    BillLinkedValue *target;
-} BillValueLink;
 
 s32 billGetLinkedChildValue(s32 billboard) {
     if (((BillObj *)billboard)->kind == 1) {
-        return ((BillValueLink *)((BillObj *)billboard)->entryList)->target->value;
+        return ((BillLinkedValue *)((BillData *)((BillObj *)billboard)->entryList)->base)->value;
     }
     return 0;
 }
@@ -341,15 +318,15 @@ void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            EffBillEntry *entry = (EffBillEntry *)effect->unk60;
+            BillOut *entry = (BillOut *)effect->unk60;
             s32 remaining = entryCount;
 
             do {
-                EffBillFrame *frameData = entry->data;
-                u32 wrappedFrame = startFrame % frameData->period;
+                BillAnimationEntry *frameData = entry->entry;
+                u32 wrappedFrame = startFrame % frameData->frameCount;
                 remaining -= 1;
-                entry->mode = 0;
-                entry->frame = wrappedFrame;
+                entry->framesRemaining = 0;
+                entry->frameIndex = wrappedFrame;
                 entry++;
             } while (remaining != 0);
         }
@@ -362,15 +339,15 @@ void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            EffBillEntry *entry = (EffBillEntry *)effect->unk60;
+            BillOut *entry = (BillOut *)effect->unk60;
             s32 remaining = entryCount;
 
             do {
-                EffBillFrame *frameData = entry->data;
-                u32 wrappedFrame = startFrame % frameData->period;
+                BillAnimationEntry *frameData = entry->entry;
+                u32 wrappedFrame = startFrame % frameData->frameCount;
                 remaining -= 1;
-                entry->mode = 1;
-                entry->frame = wrappedFrame;
+                entry->framesRemaining = 1;
+                entry->frameIndex = wrappedFrame;
                 entry++;
             } while (remaining != 0);
         }
@@ -380,7 +357,7 @@ void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
 /* Read the animation modulus of the first entry, if this is a list billboard. */
 s32 billGetFirstEntryFramePeriod(BillObj *effect) {
     if (effect->kind == 1) {
-        return ((EffBillEntry *)effect->unk60)->data->period;
+        return ((BillOut *)effect->unk60)->entry->frameCount;
     }
     return 0;
 }
@@ -392,30 +369,23 @@ u16 billGetKindOneParameter(BillObj *effect) {
     return 0;
 }
 
-/* Kind-one flag view and kind-zero dimensions, shared with the DDS1 twin. */
-typedef struct BillKindOneView {
-    u8 pad00[0x2C];
-    u16 kind;
-    u8 pad2E[0x26];
-    u32 flags; /* 0x54 */
-} BillKindOneView;
 
 s32 billGetKindOneFlags(s32 billboard) {
-    if (((BillKindOneView *)billboard)->kind == 1) {
-        return ((BillKindOneView *)billboard)->flags;
+    if (((BillObj *)billboard)->kind == 1) {
+        return ((BillObj *)billboard)->modeFlags;
     }
     return 0;
 }
 
 void billMarkKindOneFlag(s32 billboard) {
-    if (((BillKindOneView *)billboard)->kind == 1) {
-        ((BillKindOneView *)billboard)->flags |= 0x1000000;
+    if (((BillObj *)billboard)->kind == 1) {
+        ((BillObj *)billboard)->modeFlags |= 0x1000000;
     }
 }
 
 /* Kind 0 stores half the supplied width/height; other kinds remain unchanged. */
 void billSetChildHalfExtents(s32 billboard, float width, float height) {
-    if (((BillKindOneView *)billboard)->kind == 0) {
+    if (((BillObj *)billboard)->kind == 0) {
         s32 payloadAddress = (s32)((BillObj *)billboard)->entryList;
         ((BillChildPayload *)payloadAddress)->halfWidth = width * 0.5f;
         ((BillChildPayload *)payloadAddress)->halfHeight = height * 0.5f;

@@ -12,7 +12,7 @@ extern u32 sdfCounterAnimationValue;
 extern u32 D_004390A0;
 extern FieldTransitionStyle *D_0043888C;
 extern void func_0030E390(f32);
-extern void func_0030DE08(f32, f32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawAnimatedTransition(s32 opening) {
     f32 progress;
@@ -54,12 +54,12 @@ void mnuDrawAnimatedTransition(s32 opening) {
     if (D_0043888C != 0) {
         switch (D_0043888C->kind) {
         case 1:
-            func_0030DE08((1.0f - glow) * 10.0f, 1.0f,
+            sdfDrawScaledCenteredSlotImage((1.0f - glow) * 10.0f, 1.0f,
                          385, 303, 0, (s32)(glow * 104.0f), 19, 0, 84);
             return;
         case 2:
         case 3:
-            func_0030DE08((1.0f - glow) * 10.0f, 1.0f,
+            sdfDrawScaledCenteredSlotImage((1.0f - glow) * 10.0f, 1.0f,
                          385, 303, 0, (s32)(glow * 104.0f), 19, 0, 84);
             break;
         }

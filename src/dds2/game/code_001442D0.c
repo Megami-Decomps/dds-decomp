@@ -2288,7 +2288,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
 extern s32 func_00150F10(void);
 extern s16 *fldFindLocationCoordinateRecord(s32, s32);
 
-void func_0014DB50(void) {
+void fldDrawLocationPanel(void) {
     u32 color;
 
     if (func_00150F10() != 0) {

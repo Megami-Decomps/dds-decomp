@@ -70,7 +70,6 @@ typedef struct MapRequestRing {
     MapRequestNode nodes[1]; /* 0x44 */
 } MapRequestRing;
 
-typedef void (*MapRequestCallback)(u32, u32, u32, MapRequestState *, MapRequestNode *, f32);
 
 extern MapRequestState *D_003BD988;
 
@@ -540,98 +539,10 @@ void fldSetMapRequestInterval(MapRequestState *state, u16 interval) {
 }
 
 /* Advance active ring nodes, retiring each node when it reaches the queue limit. */
-void func_002C7BB0(MapRequestState *state) {
-    s32 remaining;
-    s32 pending;
-    u16 limit;
-    MapRequestNode *first;
-    MapRequestNode *node;
-
-    remaining = state->count;
-    first = state->third;
-    if (--remaining == -1) {
-        goto done;
-    }
-    if (first->active == 0) {
-        goto done;
-    }
-    first->active++;
-    pending = first->active < state->arg;
-    limit = state->arg;
-    if (!pending) {
-        node = first->next;
-        first->active = 0;
-        state->third = node;
-        goto loop;
-    }
-    node = first->next;
-    goto loop;
-
-advance:
-    node = node->next;
-loop:
-    if (--remaining == -1) {
-        goto done;
-    }
-    if (node->active == 0) {
-        goto done;
-    }
-    node->active++;
-    if (node->active < (s16)limit) {
-        goto advance;
-    }
-    {
-        MapRequestNode *nextHead = state->third->next;
-        node->active = 0;
-        node = node->next;
-        state->third = nextHead;
-    }
-    goto loop;
-
-done:
-    return;
-}
+INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7BB0);
 
 /* Report normalized progress for each active request in the ring. */
-void func_002C7C58(MapRequestState *state) {
-    MapRequestNode *node;
-    s32 remaining;
-    s32 end;
-    f32 one;
-
-    node = state->third;
-    remaining = state->count;
-    end = -1;
-    one = 1.0f;
-    goto loop;
-
-advance:
-    node = node->next;
-loop:
-    remaining--;
-    if (remaining == end) {
-        goto done;
-    }
-    if (node->active == 0) {
-        goto done;
-    }
-    {
-        f32 progress;
-        MapRequestCallback callback = (MapRequestCallback)state->callback;
-
-        progress = (f32)node->active / (f32)state->arg;
-        progress = one - progress;
-        if (callback == NULL) {
-            goto advance;
-        }
-        callback(node->value, node->argument1, node->argument2, state, node, progress);
-    }
-    node = node->next;
-    goto loop;
-
-done:
-    return;
-}
+INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7C58);
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
     u32 handle = sdfReadNamedResource(name, &record->descriptor, 0);

@@ -154,7 +154,7 @@ extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
-void func_00187598(EffBlurScaleWork *work) {
+void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     void *list;
     EffBlurScaleSlot *slot;
     s32 count;

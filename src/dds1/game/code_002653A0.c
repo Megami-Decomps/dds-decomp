@@ -37,7 +37,7 @@ void mnuTitleDrawFadeMenuEntries(u8 *work) {
 typedef struct TitleFadeWork TitleFadeWork;
 
 extern void itfUpdateFadeColor(TitleFadeWork *);
-extern void func_00264EF0(TitleFadeWork *);
+extern void mnuDrawTitleFadeSprites(TitleFadeWork *);
 extern void brsStepAnimDecay(TitleFadeWork *);
 extern void func_00264B08();
 extern void func_00264D90();
@@ -46,7 +46,7 @@ void mnuRefreshPanelLayer(u8 *work) {
     s32 y = 0x100 - *(s32 *)(work + 0x1574);
 
     itfUpdateFadeColor((TitleFadeWork *)work);
-    func_00264EF0((TitleFadeWork *)work);
+    mnuDrawTitleFadeSprites((TitleFadeWork *)work);
     func_00264B08(work);
     func_00264D90(work);
     func_00266250(0x2C0, 0x3D8, 0, y, work + 0x3E4, 0x53);

@@ -32,7 +32,7 @@ extern u32 func_001A3360(s32, BtlIndexList *, s32);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear();
 
-extern s32 func_001A2B00(BtlUnit *, s32);
+extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
 extern s32 btlHasAvailableOption(void);
 
@@ -791,10 +791,10 @@ s32 btlUnitHasFlag1000(s32 unitAddress) {
     return (((s32)((BtlUnit *)unitAddress)->flags & 0x1000) > 0);
 }
 
-u8 func_002012C0(BtlUnit *unit, s32 command) {
+u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
     s32 result;
 
-    result = func_001A2B00(unit, command);
+    result = btlGetCommandFailureReason(unit, command);
     return result == 0;
 }
 
@@ -2295,37 +2295,15 @@ s32 btlInitializeResources(s32 unused, s32 resource) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", btlInitResourcesWrap);
 
-void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
-    BtlState *battle = (BtlState *)btlGetRuntime();
-    u32 flags = unit->flags & ~0x100;
-    u16 status = unit->conditionFlags;
-    flags &= ~8;
-    status &= 0x4000;
-    *(BtlUnit **)battle->effect = unit;
-    unit->flags = flags;
-    unit->conditionFlags = status;
-}
+extern void btlBindEffectUnitAndClearStateFlags(BtlUnit *);
+
+INCLUDE_ASM(const s32, "game/code_001FF030", btlBindEffectUnitAndClearStateFlags);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205730);
 
-void btlBeginEffectActorFadeOut(void) {
-    BattleEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
-    BtlUnit *actor = *(BtlUnit **)effect;
-    if (actor != 0) {
-        u32 state = actor->stateFlags;
-        u32 flags = actor->flags;
-        state &= ~0x80;
-        state &= ~0x100;
-        flags |= 0x100;
-        *(BtlUnit **)effect = 0;
-        actor->flags = flags;
-        actor->stateFlags = state;
-        btlRefreshUnitMotionSelection(actor);
-        actor->flags |= 8;
-        *(f32 *)((u8 *)effect + 0x10) = -125.0f;
-        effect->speed = 20.0f;
-    }
-}
+extern void btlBeginEffectActorFadeOut(void);
+
+INCLUDE_ASM(const s32, "game/code_001FF030", btlBeginEffectActorFadeOut);
 
 void btlResetEffectState(void) {
     u8 *battle = (u8 *)btlGetRuntime();

@@ -448,7 +448,7 @@ extern void btlSetupCameraPoseAimUnit(CameraPoseAction *, CameraPoseTransform *,
 
 extern void btlPrepareRandomizedActionCameraPose(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
 
-s32 func_0020E058(BtlLinkedCommand *command, s8 a, s8 b) {
+s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
     s32 kind;
 
     if (btlIsActorCategoryMarked((s32)command) != 0) {

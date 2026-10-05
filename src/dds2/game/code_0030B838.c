@@ -23,7 +23,7 @@ extern void effObjSetInnerFirstVec(s32, void *);
 
 extern void effObjSetInnerSecondVec(s32, void *);
 
-extern void func_0030DE08(f32, f32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfCounterDestroyRuntime();
 
@@ -783,7 +783,7 @@ void sdfReleaseAllSpriteSlots(void) {
     } while (--remaining >= 0);
 }
 
-void func_0030DB40(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 flags, s32 context) {
     func_00306CD0((x + D_00400DF0[placementIndex][2]) << 4,
                   (y + D_00400DF0[placementIndex][3]) << 3,
@@ -797,7 +797,7 @@ void func_0030DB40(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DBF0);
 
-void func_0030DE08(f32 scaleX, f32 scaleY, s32 x, s32 y, s32 z, s32 alpha,
+void sdfDrawScaledCenteredSlotImage(f32 scaleX, f32 scaleY, s32 x, s32 y, s32 z, s32 alpha,
                    s32 placementIndex, s32 flags, s32 context) {
     s32 width;
     s32 height;

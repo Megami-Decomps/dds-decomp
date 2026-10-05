@@ -194,7 +194,7 @@ extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 typedef struct LoadCtx374A0 {
     u8 unk0[4]; /* 0x00 */
     s32 unk4;   /* 0x04 */
-    u8 unk8[4]; /* 0x08 */
+    s32 inputRepeatTimer; /* 0x08 */
     s32 unkC;   /* 0x0C */
     s8 unk10;   /* 0x10 */
     u8 pad11[3]; /* 0x11 */
@@ -963,7 +963,7 @@ void fileRestartSlotScan(void) {
 }
 
 extern u32 D_00458080[];
-extern void func_002CCAD0(void);
+extern void *func_002CCAD0(void);
 
 void *fileScanSlotStates(void) {
     s32 i;
@@ -990,13 +990,12 @@ void *fileScanSlotStates(void) {
     return func_002CCAD0;
 }
 
-void fileResolveAbortSlotFlow(void) {
+void *fileResolveAbortSlotFlow(void) {
     if (D_00437D30 == 1 && kwlnTaskGetTaskByName(D_0042B698) == NULL) {
-        mcdEnterSelectedFileFlow();
-    } else {
-        fileSetMenuFlowState(0);
-        fileBeginWait(&fileAbortSlotFlow);
+        return mcdEnterSelectedFileFlow();
     }
+    fileSetMenuFlowState(0);
+    return fileBeginWait(&fileAbortSlotFlow);
 }
 
 extern u32 D_00439030;
@@ -1849,6 +1848,10 @@ void *mcdHandleSaveSetupDone(void) {
     return (void *)fileAbortSlotScanOnInput;
 }
 
+typedef struct {
+    u8 bytes[0x30];
+} __attribute__((packed)) FileRecordHeader;
+
 extern s32 mcdContinueLoadSelection();
 
 void *mcdAdvanceToLoadSelection(void) {
@@ -1856,7 +1859,154 @@ void *mcdAdvanceToLoadSelection(void) {
     return fileSetMenuCallbackAndClearResult((u32)mcdContinueLoadSelection);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CCAD0);
+extern s32 D_00437D00;
+extern s32 D_00437D28;
+extern s32 D_00437D4C;
+extern void fileLoadSetMode(s8);
+extern void fileSetMenuValueAndInitializeFlags(u32);
+extern void fileResetLoadContextSlide(void);
+extern void fileCopyRecordHeader(FileRecordHeader *, const FileRecordHeader *);
+
+void *func_002CCAD0(void) {
+    s32 oldSelection = D_00437D2C;
+    s32 offset;
+    s32 selection;
+    s32 action;
+    u32 flags;
+    u32 slotState;
+
+    D_00437D4C = 0;
+    if (D_00437D14 == 0) {
+        offset = oldSelection - D_00437D28;
+        fileLoadMenuState.inputRepeatTimer++;
+        fileLoadMenuState.inputRepeatTimer =
+            fileLoadMenuState.inputRepeatTimer <= 0 ? 0 :
+            fileLoadMenuState.inputRepeatTimer > 3 ? 3 : fileLoadMenuState.inputRepeatTimer;
+        if (fileIsLoadedWithActiveFlow(((u8)D_0037F510[0x26] >> 1) & 1) != 0 &&
+            fileLoadMenuState.inputRepeatTimer >= 3) {
+            selection = D_00437D28;
+            fileLoadMenuState.inputRepeatTimer = 0;
+            if (selection > 0) {
+                if (offset == 2) {
+                    offset = 1;
+                } else if (offset == 1) {
+                    D_00437D28 = selection - 1;
+                    fileLoadSetMode(2);
+                    fileSetMenuValueAndInitializeFlags(0x80);
+                }
+            } else {
+                offset -= offset > 0;
+            }
+        }
+        if (fileIsLoadedWithActiveFlow(((u8)D_0037F510[0x27] >> 1) & 1) != 0 &&
+            fileLoadMenuState.inputRepeatTimer >= 3) {
+            selection = D_00437D28;
+            fileLoadMenuState.inputRepeatTimer = 0;
+            if (selection < 7) {
+                if (offset == 0) {
+                    offset = 1;
+                } else if (offset == 1) {
+                    D_00437D28 = selection + 1;
+                    fileLoadSetMode(1);
+                    fileSetMenuValueAndInitializeFlags(0x80);
+                }
+            } else {
+                offset += offset < 2;
+            }
+        }
+        D_00437D2C = D_00437D28 + offset;
+        if (oldSelection != D_00437D2C) {
+            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+        }
+        if (D_00437D2C < oldSelection) {
+            D_00437D00 = -8;
+        } else if (oldSelection < D_00437D2C) {
+            D_00437D00 = 8;
+        }
+        if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) != 0) {
+            D_00437D14 = 1;
+        }
+        if (fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0) != 0) {
+            D_00437D14 = 2;
+        }
+    }
+    if (fileReqPoll() != 0) {
+        flags = fileReqGetStatus(fileMemoryCardRequestContext);
+        action = D_00437D14;
+        if (flags == 0) {
+            return fileBeginSlotMetadataRefresh();
+        }
+        if (action == 0) {
+            fileReqBegin(fileMemoryCardRequestContext);
+            return NULL;
+        }
+        if (action == 1) {
+            fileSetMenuFlowState(0);
+            if (D_00437D30 == 0) {
+                fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_00437D2C);
+                flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_00437D2C);
+                if ((flags & 0xB) == 0xB) {
+                    sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                    if (D_00437D0C != 0) {
+                        D_00437D08 = action;
+                        D_00437D1C = action;
+                        return (void *)fileBeginPromptDialog(fileBeginDirectoryScan, fileScanSlotStates, 1);
+                    }
+                    D_00437D08 = action;
+                    D_00437D1C = action;
+                    return (void *)fileBeginPromptDialog(mcPrepareDirectory, fileScanSlotStates, 1);
+                }
+                slotState = flags & 0xA;
+                if (slotState == 2) {
+                    sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                    D_00437D08 = slotState;
+                    return mcPrepareDirectory();
+                }
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                D_00437D08 = 0;
+                if (fileIsCardSpaceAboveMinimum() != 0) {
+                    return mcPrepareDirectory();
+                }
+                fileSetMenuFlowState(0);
+                D_00437D3C = 5;
+                D_00437D40 = 0;
+                fileReqBegin(fileMemoryCardRequestContext);
+                return filePollSlotScanOrReset;
+            }
+            fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_00437D2C);
+            flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_00437D2C);
+            if ((flags & 1) != 0) {
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                if (mcdOriginalTitleFileMode != 0 &&
+                    *(s16 *)(D_004580C0 + D_00437D2C * 0x30 + 0xC) == 0) {
+                    fileSetMenuFlowState(0);
+                    D_00437D3C = 8;
+                    D_00437D40 = 0;
+                    fileReqBegin(fileMemoryCardRequestContext);
+                    return filePollSlotScanOrReset;
+                }
+                D_00437D1C = 3;
+                if (mcdOriginalTitleFileMode == 0) {
+                    return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
+                }
+                fileCopyRecordHeader((FileRecordHeader *)fileLoadSelectionWork,
+                    (const FileRecordHeader *)(D_004580C0 + D_00437D2C * 0x30));
+                return (void *)fileBeginPromptDialog(mcdAdvanceToLoadSelection, fileScanSlotStates, 1);
+            }
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            return fileScanSlotStates();
+        }
+        if (action == 2) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            fileResetLoadContextSlide();
+            if (D_00437D0C != 0) {
+                return fileBeginSlotResetPrompt();
+            }
+            return fileResolveAbortSlotFlow();
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CD028);
 
@@ -1886,7 +2036,6 @@ void *fileRunMenuState(s32 arg) {
     return NULL;
 }
 
-extern s32 D_00437D4C;
 
 s32 fileDrawMenuFrame(s32 task) {
     s32 fade;
@@ -2435,7 +2584,6 @@ s32 mcdContinueLoadSelection(void) {
 extern s32 kwlnFadeIsActive(void);
 extern void kwlnFadeStartIn(s32);
 extern void fileBeginLoadOrAbortDialog(void);
-extern s32 D_00437D28;
 
 void *fileMenuWorkStart(void) {
     D_00437D2C = 0;
@@ -2503,10 +2651,6 @@ void fileCopySaveHeaderNumbers(FileSaveState *source) {
     ((FileSaveState *)state)->header28 = source->header28;
     ((FileSaveState *)state)->header2C = source->header2C;
 }
-
-typedef struct {
-    u8 bytes[0x30];
-} __attribute__((packed)) FileRecordHeader;
 
 void fileCopyRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
     *destination = *source;

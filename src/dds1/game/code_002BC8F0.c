@@ -1014,7 +1014,7 @@ extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
-void func_002BE4B8(s32 x, s32 y, u32 z, s32 width, s32 height,
+void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flip,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
     u32 uv[4];

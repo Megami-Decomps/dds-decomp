@@ -69,7 +69,6 @@ typedef struct SdfRingBlock {
     SdfRingNode nodes[1]; /* 0x44 */
 } SdfRingBlock;
 
-typedef void (*MapRequestCallback)(u32, u32, u32, SdfRing *, SdfRingNode *, f32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 
@@ -277,98 +276,10 @@ void fldSetMapRequestInterval(s32 queue, u16 interval) {
 }
 
 /* Advance active ring nodes, retiring each node when it reaches the queue limit. */
-void func_0030EF90(SdfRing *ring) {
-    s32 remaining;
-    s32 pending;
-    u16 limit;
-    SdfRingNode *first;
-    SdfRingNode *node;
-
-    remaining = ring->count;
-    first = ring->last;
-    if (--remaining == -1) {
-        goto done;
-    }
-    if (first->f0C == 0) {
-        goto done;
-    }
-    first->f0C++;
-    pending = first->f0C < ring->limit;
-    limit = ring->limit;
-    if (!pending) {
-        node = first->next;
-        first->f0C = 0;
-        ring->last = node;
-        goto loop;
-    }
-    node = first->next;
-    goto loop;
-
-advance:
-    node = node->next;
-loop:
-    if (--remaining == -1) {
-        goto done;
-    }
-    if (node->f0C == 0) {
-        goto done;
-    }
-    node->f0C++;
-    if (node->f0C < (s16)limit) {
-        goto advance;
-    }
-    {
-        SdfRingNode *nextHead = ring->last->next;
-        node->f0C = 0;
-        node = node->next;
-        ring->last = nextHead;
-    }
-    goto loop;
-
-done:
-    return;
-}
+INCLUDE_ASM(const s32, "game/code_0030E390", func_0030EF90);
 
 /* Report normalized progress for each active request in the ring. */
-void func_0030F038(SdfRing *ring) {
-    SdfRingNode *node;
-    s32 remaining;
-    s32 end;
-    f32 one;
-
-    node = ring->last;
-    remaining = ring->count;
-    end = -1;
-    one = 1.0f;
-    goto loop;
-
-advance:
-    node = node->next;
-loop:
-    remaining--;
-    if (remaining == end) {
-        goto done;
-    }
-    if (node->f0C == 0) {
-        goto done;
-    }
-    {
-        f32 progress;
-        MapRequestCallback callback = (MapRequestCallback)ring->callback;
-
-        progress = (f32)node->f0C / (f32)ring->limit;
-        progress = one - progress;
-        if (callback == NULL) {
-            goto advance;
-        }
-        callback(node->value, node->argument1, node->argument2, ring, node, progress);
-    }
-    node = node->next;
-    goto loop;
-
-done:
-    return;
-}
+INCLUDE_ASM(const s32, "game/code_0030E390", func_0030F038);
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
     u32 handle = sdfReadNamedResource(name, &record->descriptor, 0);

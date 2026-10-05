@@ -994,25 +994,20 @@ void func_00107DE8(void) {
 
     if (dot <= -0.9999f) {
         VU0_GET_VF10_Y(component);
-        if (!(0.9999f <= fabsf(component))) {
-            goto choose_perpendicular;
+        if (0.9999f <= fabsf(component)) {
+            VU0_MOVE_VF(vf10, vf0);
+            VU0_CLEAR_W(vf10);
+            VU0_SET_VF10_COMPONENT(z, -1.0f);
+        } else {
+            VU0_GET_VF10_Z(component);
+            axis[0] = -component;
+            axis[1] = 0.0f;
+            VU0_GET_VF10_X(axis[2]);
+            axis[3] = 0.0f;
+            VU0_LOAD_VF(vf10, axis);
+            VU0_NORMALIZE_VF10();
         }
 
-        VU0_MOVE_VF(vf10, vf0);
-        VU0_CLEAR_W(vf10);
-        VU0_SET_VF10_COMPONENT(z, -1.0f);
-        goto compose_opposite;
-
-choose_perpendicular:
-        VU0_GET_VF10_Z(component);
-        axis[0] = -component;
-        axis[1] = 0.0f;
-        VU0_GET_VF10_X(axis[2]);
-        axis[3] = 0.0f;
-        VU0_LOAD_VF(vf10, axis);
-        VU0_NORMALIZE_VF10();
-
-compose_opposite:
         VU0_DOT_XYZ(dot, vf10, vf11);
         VU0_CROSS_XYZ(vf10, vf10, vf11);
         VU0_SET_VF10_W(dot);

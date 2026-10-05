@@ -510,7 +510,7 @@ f32 sdfGetHpBracketScale(SdfPartyUnit *unit) {
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
 extern s32 datFlagToElementIndex(u32);
-extern s32 func_00119C78(struct DatUnitStatus *, s32);
+extern s32 datGetEffectiveAffinity(struct DatUnitStatus *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
 extern u32 effMiscRandMod(void *state, u32 modulus);
 extern void func_0035B6E0(const char *fmt, ...);
@@ -543,7 +543,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     if (mask != 0 && (datCommandRecords[index].mode == 1 || datCommandRecords[index].mode == 3)) {
         kind = datFlagToElementIndex(mask);
         if (!(datCommandRecords[index].mode30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
-            if (func_00119C78((struct DatUnitStatus *)packed, kind) & 0x170000) {
+            if (datGetEffectiveAffinity((struct DatUnitStatus *)packed, kind) & 0x170000) {
                 return 0;
             }
         }

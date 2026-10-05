@@ -64,7 +64,7 @@ void dds3FreePathObject(PathObj *path) {
 }
 
 /* vu0 routine: interpolate the path's XYZ keys into vf10. */
-void func_00116F38(PathObj *path) {
+void dds3InterpolatePathVectorVU(PathObj *path) {
     s32 index;
     f32 fraction;
     PathData14 *data;

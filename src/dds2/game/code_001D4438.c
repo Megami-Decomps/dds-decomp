@@ -1050,8 +1050,6 @@ extern s32 D_003BC0C0[];
 
 extern s32 D_003BC0C8[];
 
-extern void func_001F02E0(s32, s32);
-extern void func_001F0690(s32);
 extern void func_001F3E48(s32);
 extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
 

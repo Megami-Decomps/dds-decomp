@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mdl.h"
+#include "eff.h"
 
 extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
@@ -798,6 +799,7 @@ typedef struct MenuEffectNode {
     MenuEffectPosition *position;
 } MenuEffectNode;
 
+/* The native initializer clears the complete 0x50-byte texture/effect owner. */
 typedef struct MenuEffectPair {
     s32 variant;
     u8 pad04[0x0C];
@@ -941,11 +943,49 @@ extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
-extern char D_00437C78[];
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C24E8);
+extern void func_002C22D0(s32, s32, s32, u32, u32, s32, s32, MenuEffectPair *, u32);
+extern void func_002C1E48(s32, s32, s32, u32, MenuEffectPair *, u32);
+
+void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
+                  s32 limit, MenuEffectPair *pair, u32 flags) {
+    s32 fade = pair->fade;
+    s32 barWidth;
+    s32 quantizedWidth;
+    EffectSlotSet *texture;
+    BdWork *work;
+
+    func_002C22D0(x, y, depth, color, fade, value, limit, pair, flags);
+    func_00306CD0(x, y, depth, fade, 1, pair->textures[0], 0, flags);
+    if (value != 0) {
+        texture = (EffectSlotSet *)pair->textures[1];
+        work = texture->workEntries;
+        barWidth = pair->quantizedSpan * 77 / 100;
+        quantizedWidth = barWidth * 16;
+        work->width = quantizedWidth;
+        work->parameters[2] = ~(77 - barWidth);
+        func_00306CD0(x, y, depth, fade, 1, (s32)texture, 0, flags);
+        func_00306CD0(x + quantizedWidth, y, depth, fade, 1, pair->textures[2], 0, flags);
+        func_002C1E48(x, y, depth, fade, pair, flags);
+    }
+    if (pair->fadeOut == 0) {
+        if (pair->fade < 256) {
+            pair->fade += 32;
+        }
+        if (pair->fade > 256) {
+            pair->fade = 256;
+        }
+    } else {
+        if (pair->fade > 0) {
+            pair->fade -= 32;
+        }
+        if (pair->fade < 0) {
+            pair->fade = 0;
+        }
+    }
+}
 
 /* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
 typedef struct MenuPanelItem {
@@ -1033,7 +1073,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 extern void func_002C2AE8(s32, s32, s32, u32, s32, MenuPanelItem *, u32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
-void func_002C3010(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
+void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
                   MenuPanelItem *item, u32 flags) {
     char text[16];
     s32 fontFlags = 0;

@@ -3,7 +3,7 @@
 
 #include "btl.h"
 
-/* Embedded command-camera component (0x28), copied by btlCopyMotionTransform. */
+/* Camera pose payload (0x28); command members occupy SDK-aligned storage. */
 typedef struct BtlCamState {
     f32 position[4];  /* 0x00 */
     f32 direction[4]; /* 0x10 */
@@ -37,6 +37,44 @@ typedef struct BtlLinkedCommand {
 #endif /* VERSION_DDS1 */
 
 #ifdef VERSION_DDS2
+/* Queued action slot: some queries inspect the full word, others its ID. */
+typedef union BattleActionSlot {
+    s32 word;
+    s16 actionId;
+} BattleActionSlot;
+
+
+/* Native 0x180-byte command-actor allocation; its two list links are at
+ * 0x174/0x178. */
+typedef struct ActionStateLink {
+    u8 pad00[8];
+    u32 pendingFlags; /* 0x08 */
+    u32 flags; /* 0x0C */
+    u8 pad10[8];
+    BtlUnit *unit; /* 0x18 */
+    u8 pad1C[4];
+    s32 phase; /* 0x20 */
+    s32 skillId; /* 0x24 */
+    u8 pad28[0x1C];
+    s32 slot; /* 0x44: action-kind table/resource-node index */
+    s32 adjustedValue; /* 0x48 */
+    s8 resultKind; /* 0x4C */
+    u8 pad4D[0x13];
+    BtlIndexList *actorIndices; /* 0x60 */
+    u8 pad64[0x24];
+    struct BtlOperandGroup *groups; /* 0x88: retained groups for actorIndices */
+    u8 pad8C[4];
+    u16 aiCounter; /* 0x90: wraps as a halfword, then clamps to 0xFF */
+    u8 pad92[0xBC];
+    s8 lowHpActionHold; /* 0x14E: positive suppresses the low-HP action */
+    u8 pad14F;
+    BattleActionSlot actions[8]; /* 0x150 */
+    s32 lastMode; /* 0x170 */
+    struct ActionStateLink *prev;
+    struct ActionStateLink *next;
+    u8 pad17C[4];
+} ActionStateLink;
+
 typedef struct BtlLinkedCommand {
     BtlCamState camera;       /* 0x00 */
     u8 pad28[8];
@@ -48,14 +86,23 @@ typedef struct BtlLinkedCommand {
     struct ActionStateLink *link; /* 0x114: fallback actor is link->unit (+0x18) */
     BtlUnit *linkedA;         /* 0x118: also read by func_002172B8 */
     BtlUnit *linkedB;         /* 0x11C */
-    u8 pad120[0xC];
-    u16 unk12C;              /* Motion setup writes 4; reader not identified. */
+    BtlUnit *focus;          /* 0x120 */
+    u32 status;              /* 0x124 */
+    s32 actionKind;          /* 0x128 */
+    u16 stepKind;            /* 0x12C: action-camera dispatch kind */
     u8 pad12E[2];
     s32 state;               /* 0x130 */
     s32 actionCode;          /* 0x134 */
     BtlIndexList *targetList; /* 0x138 */
     s32 motionProgress;      /* 0x13C: timed-action count or one-shot aim latch */
-    u8 pad140[0x14];
+    u8 pad140[4];
+    s32 stageCount;          /* 0x144 */
+    u8 pad148[4];
+    union {
+        s32 progressBits;
+        f32 progress;
+    };                      /* 0x14C: initialized as bits, interpolated as float */
+    s32 durationFrames;      /* 0x150 */
     f32 motionParameter;     /* 0x154: aim setup stores 10 */
 } BtlLinkedCommand;
 #endif /* VERSION_DDS2 */

@@ -104,7 +104,7 @@ extern void *dds3FindWorldObjectNodeByKey(void *arg0, s32 arg1, s32 arg2);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void dds3FreePathObject(s32);
 extern s32 dds3CreatePathCurveWork(void *);
-extern void func_001171A0(s32);
+extern void dds3InterpolatePathVectorVU(s32);
 extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void func_001177D0(s32, s32);
@@ -379,7 +379,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     work->motionState = 1;
     work->transitionSourceKind = 2;
     work->linkedUnit = pathSource;
-    func_001171A0(path);
+    dds3InterpolatePathVectorVU(path);
     VU0_STORE_VF($vf10, work->targetVector);
     work->motionParameter = frames;
     work->directionOffset = valueB6;

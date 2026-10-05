@@ -155,7 +155,7 @@ typedef struct MantraNeighborIds {
 } MantraNeighborIds;
 extern MantraNeighborIds D_003D0130[50];
 
-s32 func_00290410(MenuPanelObject *object, s8 flags) {
+s32 mnuNavigateMantraSelector(MenuPanelObject *object, s8 flags) {
     MenuPanelState *state = &object->state;
     MantraNodePos *node;
     MantraNodePos *neighbor;
@@ -505,16 +505,9 @@ void itfPositionMantraSelectionController(MenuPanelObject *object) {
     func_002790F0((s32)((f32)record->x / 10.0f * 40.0f), (s32)((f32)record->y / 10.0f * 39.0f), object->state.selectionController);
 }
 
-/* Install the panel's default selector and position its selection controller. */
-void itfInstallDefaultMantraSelector(MenuPanelObject *object) {
-    u8 *base = (u8 *)object + 0x240;
-    s16 *record;
+extern void itfInstallDefaultMantraSelector(MenuPanelObject *);
 
-    record = (s16 *)mnuGetMantraPanelPositionRecord(0x71);
-    *(s16 **)(base + 0x560) = record;
-    /* Record coordinates are tenths; the two screen axes use different scales. */
-    mnuSpawnMantraIconAtPosition((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->state.selectionController);
-}
+INCLUDE_ASM(const s32, "game/code_0028FD30", itfInstallDefaultMantraSelector);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292CF0);
 

@@ -211,7 +211,7 @@ typedef struct SdfResourcePacket {
     u64 tail[6];
 } SdfResourcePacket;
 
-void func_002D35B8(SdfResourcePacket *packet, SdfDescriptorSource *source,
+void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfDescriptorSource *source,
     s32 sourceX, s32 sourceY, s32 width, s32 height, u32 arg6, u32 arg7, u32 arg8) {
     s32 quadwordCount;
 
@@ -253,7 +253,7 @@ void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s3
         alloc = sdfAllocPacketAligned;
     }
     buffer = alloc(0xf0);
-    func_002D35B8((SdfResourcePacket *)buffer, (SdfDescriptorSource *)arg1,
+    sdfBuildResourceTransferPacket((SdfResourcePacket *)buffer, (SdfDescriptorSource *)arg1,
         arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0);
     sdfAppendPacketRange(list, buffer, buffer + 0xc0);
 }
@@ -274,7 +274,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList
     }
     packetAddress = allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     ((SdfNode *)packetAddress)->unk4 = (u32)sdfPatchPacketResourceField;
-    func_002D35B8((SdfResourcePacket *)(packetAddress + SDF_QWORD_BYTES),
+    sdfBuildResourceTransferPacket((SdfResourcePacket *)(packetAddress + SDF_QWORD_BYTES),
         sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packetAddress);
     sdfAppendPacketRange(list, packetAddress + SDF_QWORD_BYTES, packetAddress + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
@@ -686,32 +686,9 @@ typedef struct SdfPoolNode {
     u32 unk1C;
 } SdfPoolNode;
 
-void func_002D4240(SdfPoolNode *node, s32 count) {
-    node->append = sdfAppendPacketList;
-    node->prepend = sdfPrependIfMode1;
-    node->first = 0;
-    node->last = 0;
-    node->unkC = 0;
-    node->unk18 = 0;
-    count--;
-    if (count == 0) {
-        node->next = NULL;
-        return;
-    }
-next_node:
-    node->next = node + 1;
-    node++;
-    node->append = sdfAppendPacketList;
-    node->prepend = sdfPrependIfMode1;
-    node->first = 0;
-    node->last = 0;
-    node->unkC = 0;
-    node->unk18 = 0;
-    if (--count != 0) {
-        goto next_node;
-    }
-    node->next = NULL;
-}
+extern void func_002D4240(SdfPoolNode *, s32);
+
+INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4240);
 
 /* Make a REF DMA node for the payload following the source tag. */
 u32 sdfCreateReferenceDmaNode(u32 sourceTagAddress) {

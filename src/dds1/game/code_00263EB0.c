@@ -326,25 +326,24 @@ s32 func_002647D0(MenuSumTable *work) {
     MenuSumBytes *entry = work->state->entry;
     s32 result;
 
-    if (work->rewardMode > 0) {
-        if (work->rewardMode < 4) {
-            goto showItem;
-        }
-        if (work->rewardMode == 4) {
-            s32 rewardIndex = work->rewardIndex;
+    switch (work->rewardMode) {
+    case 4: {
+        s32 rewardIndex = work->rewardIndex;
 
-            work->values[rewardIndex]++;
-            evtCopyEntryStringToActiveWindow(1, D_0036D3A8[rewardIndex]);
-        } else {
-            goto queueMotion;
-        }
-
-showItem:
+        work->values[rewardIndex]++;
+        evtCopyEntryStringToActiveWindow(1, D_0036D3A8[rewardIndex]);
+    }
+    /* fall through */
+    case 1:
+    case 2:
+    case 3:
         evtCopyEntryStringToActiveWindow(0, D_003BAA70 + entry->itemId * 17);
         dspStartEntry(work->rewardMode + 0x18);
+        break;
+    default:
+        break;
     }
 
-queueMotion:
     evtStageTestQueueMotion(2, 1);
     result = work->rewardMode < 4;
     if (result != 0 && work->rewardMode > 0) {

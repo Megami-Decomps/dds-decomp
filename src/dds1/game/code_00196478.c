@@ -875,7 +875,7 @@ void itfDrawBackgroundSprite(void) {
         color[1] = ITF_NEUTRAL_COLOR;
         color[2] = ITF_NEUTRAL_COLOR;
         color[3] = ITF_NEUTRAL_COLOR;
-        func_002BE4B8(0, 0, 0, x << 4, y << 3, origin, color, 0, 0, 1, (u8 *)panel, 0x52);
+        itfDrawTexturedSpriteRect(0, 0, 0, x << 4, y << 3, origin, color, 0, 0, 1, (u8 *)panel, 0x52);
     }
 }
 
