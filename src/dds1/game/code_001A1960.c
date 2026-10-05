@@ -824,7 +824,6 @@ typedef struct BattleAdjustmentRecord {
 
 extern BattleAdjustmentRecord *D_003BAA3C;
 
-extern s32 datBattleParameters;
 
 f32 func_001A4598(void) {
     BattleController *runtime = (BattleController *)btlGetRuntime();
@@ -838,7 +837,7 @@ f32 func_001A4598(void) {
     } else if (adjustment > 3) {
         adjustment = 3;
     }
-    return *(f32 *)(datBattleParameters + 0x8CC + adjustment * 4);
+    return datBattleParameters->adjustmentScale[adjustment + 3];
 }
 
 u32 func_001A4630(void) {
@@ -1693,7 +1692,7 @@ f32 func_001A7C20(u8 *acquirer, u8 *enemy, s32 rewardKind) {
     } else if (difference < -15) {
         difference = -15;
     }
-    factor = *(f32 *)(datBattleParameters + 0x974 + ((15 - difference) * 2 + rewardKind) * 4);
+    factor = datBattleParameters->rewardLevelScale[(15 - difference) * 2 + rewardKind];
     btlBossDebugPrintf(D_003A1BA8, factor, difference, rewardKind);
     return factor;
 }

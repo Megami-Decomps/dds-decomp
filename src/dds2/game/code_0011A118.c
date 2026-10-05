@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 enum {
     PTY_ACTIVE_ROSTER_COUNT = 5,
@@ -1272,21 +1273,20 @@ s32 evtPushAvailableIntegerValue(void) {
     return 1;
 }
 
-extern s32 datBattleParameters;
 
-/* The paired DDS1 readers identify this index as the entry's level.
- * Keep the native index type, each distinct table offset, and completion value. */
+/* The paired DDS1 readers identify the halfword index as the entry's level.
+ * The shared coefficient arrays start at level one. */
 s32 func_0011DFE0(void) {
     s32 entryAddress = D_0043E5C8[0];
-    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
-    scrSetFloatReturnValue(*(f32 *)((datBattleParameters - 4) + levelIndex * 4));
+    u16 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[levelIndex - 1]);
     return 1;
 }
 
 s32 func_0011E018(void) {
     s32 entryAddress = D_0043E5C8[0];
-    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x188));
+    u16 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[levelIndex - 1]);
     return 1;
 }
 
@@ -1317,35 +1317,35 @@ s32 evtSelectStatGrade(void) {
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + gradeIndex * 4 + 0x318));
+    scrSetFloatReturnValue(datBattleParameters->hpGradeValues[gradeIndex]);
     return 1;
 }
 
 s32 func_0011E128(void) {
     s32 entryAddress = D_0043E5C8[0];
-    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x360));
+    u16 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(datBattleParameters->levelValuesA[levelIndex - 1]);
     return 1;
 }
 
 s32 func_0011E160(void) {
     s32 entryAddress = D_0043E5C8[0];
-    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x4EC));
+    u16 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(datBattleParameters->levelValuesB[levelIndex - 1]);
     return 1;
 }
 
 s32 func_0011E198(void) {
     s32 entryAddress = D_0043E5C8[0];
-    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x678));
+    u16 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(datBattleParameters->levelValuesC[levelIndex - 1]);
     return 1;
 }
 
 s32 func_0011E1D0(void) {
     s32 entryAddress = D_0043E5C8[0];
-    u32 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + levelIndex * 4 + 0x678));
+    u16 levelIndex = ((EventScriptEntry *)entryAddress)->index14;
+    scrSetFloatReturnValue(datBattleParameters->levelValuesC[levelIndex - 1]);
     return 1;
 }
 
@@ -1400,7 +1400,7 @@ s32 evtSelectFineStatGrade(void) {
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + gradeIndex * 4 + 0x338));
+    scrSetFloatReturnValue(datBattleParameters->hpFineGradeValues[gradeIndex]);
     return 1;
 }
 

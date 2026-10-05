@@ -3,6 +3,51 @@
 
 #include "common.h"
 
+/* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
+ * Level tables begin at level one; seven-entry scales use index three for zero. */
+typedef struct SdfBattleParameters {
+    f32 maxHpGrowth[99]; /* 0x000 */
+    f32 maxMpGrowth[99]; /* 0x18C */
+    f32 hpGradeValues[8]; /* 0x318 */
+    f32 hpFineGradeValues[11]; /* 0x338 */
+    f32 levelValuesA[99]; /* 0x364 */
+    f32 levelValuesB[99]; /* 0x4F0 */
+    f32 levelValuesC[99]; /* 0x67C */
+    u8 pad808[0xB8];
+    f32 adjustmentScale[7]; /* 0x8C0: signed adjustment -3..3 */
+    u8 pad8DC[0x98];
+    f32 rewardLevelScale[31 * 2]; /* 0x974: level difference and reward kind */
+#ifdef VERSION_DDS2
+    u8 padA6C[0x74];
+    f32 partyEntryScaleA[7]; /* 0xAE0 */
+    f32 enemyEntryScaleA[7]; /* 0xAFC */
+    f32 partyEntryScaleB[7]; /* 0xB18 */
+    f32 enemyEntryScaleB[7]; /* 0xB34 */
+    u8 padB50[0x1C];
+    f32 specialAffinityScale; /* 0xB6C */
+    u8 padB70[0x34];
+    f32 partyHpScale[10]; /* 0xBA4 */
+    f32 enemyHpScale[10]; /* 0xBCC */
+    f32 hekatoRatioScale; /* 0xBF4 */
+    f32 hekatoRatioMax; /* 0xBF8 */
+    u8 padBFC[4];
+    f32 actionScale; /* 0xC00 */
+    f32 brahmaRatioMultiplier; /* 0xC04 */
+    f32 brahmaRatioMaximum; /* 0xC08 */
+    f32 specialActionScale; /* 0xC0C */
+    u8 padC10[4];
+#endif
+} SdfBattleParameters;
+
+#ifdef VERSION_DDS1
+typedef char SdfBattleParameters_size_must_be_0xA6C[(sizeof(SdfBattleParameters) == 0xA6C) ? 1 : -1];
+#endif
+#ifdef VERSION_DDS2
+typedef char SdfBattleParameters_size_must_be_0xC14[(sizeof(SdfBattleParameters) == 0xC14) ? 1 : -1];
+#endif
+
+extern SdfBattleParameters *datBattleParameters;
+
 /* Four integer words used as a camera input record (0x10), not ScrVec4 floats. */
 typedef struct SdfQuad {
     u32 word[4];

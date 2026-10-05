@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "mnu.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
@@ -3658,20 +3659,6 @@ typedef struct BtlEffect {
 } BtlEffect;
 
 
-/* Observed parameter-blob prefix; Hekato and Brahma use distinct neighboring ratios. */
-typedef struct BtlParams {
-    u8 pad0[0xBF4];
-    f32 hekatoRatioScale; /* 0xBF4 */
-    f32 hekatoRatioMax; /* 0xBF8 */
-    u8 padBFC[4];
-    f32 actionScale; /* 0xC00 */
-    f32 brahmaRatioMultiplier; /* 0xC04 */
-    f32 brahmaRatioMaximum; /* 0xC08 */
-    f32 specialActionScale; /* 0xC0C */
-} BtlParams;
-
-
-extern BtlParams *datBattleParameters;
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 extern void btlBossDebugPrintf(const char *format, ...);
 extern BtlRuntimeTask *func_001E5FF8(s32, s32);
@@ -3957,7 +3944,7 @@ void btlResetBossRatioScale(void) {
 /* Hekato multiplies the active ratio and clamps it to its own parameter maximum. */
 s32 btlAccumulateBossRatioScale(ActionStateLink *task) {
     f32 *ratio;
-    BtlParams *params;
+    SdfBattleParameters *params;
     if (task->pendingFlags & 8) {
         if (task->unit->flags & BTL_UNIT_BOSS_FLAG) {
             ratio = &((BattleWork *)btlGetRuntime())->sub->scale;
@@ -4844,7 +4831,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002218C8);
 /* Brahma's action 0x19F updates the second state word, independently of Hekato. */
 s32 btlAdvanceBrahmaRatioOnAction(ActionUnit *unit) {
     f32 *state;
-    BtlParams *table;
+    SdfBattleParameters *table;
 
     if (unit->sequenceFlags & 8) {
         if (((ActionUnit *)unit->parentUnit)->flags & 0x400) {

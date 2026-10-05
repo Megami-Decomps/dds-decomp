@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 
 extern u32 D_00435E80;
@@ -127,15 +128,6 @@ typedef struct SdfPartyUnit {
     u16 mpBonus;        /* 0x1E */
 } SdfPartyUnit;
 
-typedef struct SdfBattleParameters {
-    f32 maxHpGrowth[99]; /* 0x000: one coefficient per level, starting at level 1 */
-    f32 maxMpGrowth[99]; /* 0x18C */
-    u8 pad318[0x88C];
-    f32 partyHpScale[10];
-    f32 enemyHpScale[10];
-} SdfBattleParameters;
-
-extern SdfBattleParameters *datBattleParameters;
 
 struct DatUnitStatus;
 extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32 statIndex);
@@ -519,7 +511,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 extern s32 datAbilityParameters;
 
 extern s32 datFlagToElementIndex(u32);
-extern u32 func_00119C78(SdfPackedValue *, s32);
+extern s32 func_00119C78(struct DatUnitStatus *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
 extern u32 effMiscRandMod(void *state, u32 modulus);
 extern void func_0035B6E0(const char *fmt, ...);
@@ -552,7 +544,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     if (mask != 0 && (datCommandRecords[index].mode == 1 || datCommandRecords[index].mode == 3)) {
         kind = datFlagToElementIndex(mask);
         if (!(datCommandRecords[index].mode30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
-            if (func_00119C78(packed, kind) & 0x170000) {
+            if (func_00119C78((struct DatUnitStatus *)packed, kind) & 0x170000) {
                 return 0;
             }
         }

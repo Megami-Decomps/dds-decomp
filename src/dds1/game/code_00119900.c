@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 enum {
     PTY_ACTIVE_ROSTER_COUNT = 5,
@@ -48,7 +49,6 @@ extern s32 datRosterDetails;
 extern s32 datEnemyRecords;
 extern s32 datCommandRecords;
 extern s32 datItemSkillRecords;
-extern s32 datBattleParameters;
 extern s32 datBattleSceneRecords;
 extern s32 D_003BAAB8;
 
@@ -1034,11 +1034,11 @@ s32 evtPushAvailableIntegerValue(void) {
 }
 
 void func_0011C390(void) {
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + ((Entry1A4 *)D_003C2E78[0])->level * 4 - 4));
+    scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[((Entry1A4 *)D_003C2E78[0])->level - 1]);
 }
 
 void func_0011C3C0(void) {
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x188));
+    scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((Entry1A4 *)D_003C2E78[0])->level - 1]);
 }
 
 extern s32 datComputeSkillBoostedMaxHp(s32);
@@ -1068,23 +1068,23 @@ void evtSelectStatGrade(void) {
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + gradeIndex * 4 + 0x318));
+    scrSetFloatReturnValue(datBattleParameters->hpGradeValues[gradeIndex]);
 }
 
 void func_0011C4C0(void) {
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x360));
+    scrSetFloatReturnValue(datBattleParameters->levelValuesA[((Entry1A4 *)D_003C2E78[0])->level - 1]);
 }
 
 void func_0011C4F0(void) {
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x4ec));
+    scrSetFloatReturnValue(datBattleParameters->levelValuesB[((Entry1A4 *)D_003C2E78[0])->level - 1]);
 }
 
 void func_0011C520(void) {
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
+    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((Entry1A4 *)D_003C2E78[0])->level - 1]);
 }
 
 void func_0011C550(void) {
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
+    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((Entry1A4 *)D_003C2E78[0])->level - 1]);
 }
 
 void evtScriptSelectRandomValue(void) {
@@ -1139,7 +1139,7 @@ void evtSelectFineStatGrade(void) {
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + gradeIndex * 4 + 0x338));
+    scrSetFloatReturnValue(datBattleParameters->hpFineGradeValues[gradeIndex]);
 }
 
 extern s32 evtGetMirroredSolarPhase(void);
