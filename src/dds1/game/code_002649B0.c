@@ -1,5 +1,6 @@
 #include "common.h"
 
+
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002649B0);
 
 
@@ -36,6 +37,7 @@ s32 itfRunPanelMode2(u64 request) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264B08);
+INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264D90);
 
@@ -43,10 +45,11 @@ extern u32 uiBlendColors(u32, u32, s32);
 
 /* The opacity update latches at its threshold. Keep fadeProgress signed:
  * the decay path converts it through a signed float. */
-typedef struct {
+typedef struct TitleFadeWork {
     u8 pad00[0xD3C];
     s8 opacityReady; /* 0xD3C */
-    u8 padD3D[0xB];
+    u8 padD3D[7];
+    s32 spriteResource;
     u32 opacity;      /* 0xD48 */
     u8 padD4C[0x828];
     s32 fadeProgress; /* 0x1574 */
@@ -65,7 +68,35 @@ void itfUpdateFadeColor(TitleFadeWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_00264EF0);
+extern void func_002BF438(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_00264EF0(TitleFadeWork *work) {
+    u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 positions[8][3] = {
+        {-5, -5, 0x23},
+        {0x12, 6, 0x22},
+        {0x5E, 0x3B, 0x21},
+        {0x57, 0x16, 0x20},
+        {0x87, 0x38, 0x19},
+        {0x10B, 0x16, 0x1F},
+        {0xC8, 0x6F, 0x10},
+        {0x157, 0x6F, 0x11}
+    };
+    s32 i;
+
+    if (work->spriteResource) {
+        for (i = 0; i < 8; i++) {
+            u32 color = work->opacity | 0x80808000;
+
+            colors[0] = color;
+            colors[1] = color;
+            colors[2] = color;
+            colors[3] = color;
+            func_002BF438(positions[i][0] << 4, positions[i][1] << 3, 0,
+                         (s32)colors, 0, work->spriteResource, positions[i][2], 0x53);
+        }
+    }
+}
 
 void func_00265078(void) {
 }
@@ -78,17 +109,13 @@ void brsStepAnimDecay(TitleFadeWork *work) {
     work->fadeProgress = (s32)((f32)work->fadeProgress / 1.2f);
 }
 
-typedef struct {
-    u8 pad00[0x1574];
-    u32 state; /* 0x1574 */
-} TitleWork;
 
-u32 mnuGetTitleState(TitleWork *work) {
-    return work->state;
+u32 mnuGetTitleState(TitleFadeWork *work) {
+    return work->fadeProgress;
 }
 
-void mnuClearTitleState(TitleWork *work) {
-    work->state = 0;
+void mnuClearTitleState(TitleFadeWork *work) {
+    work->fadeProgress = 0;
 }
 
 void func_002650C0(void) {
@@ -126,11 +153,6 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, u8 *info,
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
-
-INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB30);
-
-INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB40);
 
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC560);
 
