@@ -157,7 +157,29 @@ typedef struct {
 extern vu8 sdfCurrentBufferIndex;
 
 /* Retail selects by nodeId when flags bit 0 is set, otherwise by array index. */
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelFindDrawNode);
+u8 *sdfModelFindDrawNode(void *chunk, s32 id) {
+    SdfModel *model = (SdfModel *)chunk;
+    SdfList *list = model->list;
+    s16 count;
+    SdfDrawNode **entries;
+    s32 i;
+
+    count = list->count;
+    entries = list->entries;
+    if (model->flags & 1) {
+        for (i = 0; i < count; i++) {
+            SdfDrawNode *node = entries[i];
+            if (node->nodeId == id) {
+                return (u8 *)node;
+            }
+        }
+        return 0;
+    }
+    if ((u32)id >= (u32)count) {
+        return 0;
+    }
+    return (u8 *)entries[id];
+}
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
 SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 index) {
