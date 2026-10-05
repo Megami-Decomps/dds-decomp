@@ -1193,6 +1193,8 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C30);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C31);
 
+INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C38);
+
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C3F);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C40);
@@ -1200,6 +1202,8 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C40);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C41);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C42);
+
+INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C48);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C49);
 
