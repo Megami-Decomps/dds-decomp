@@ -75,9 +75,10 @@ typedef struct BattleController {
     s32 mode;
     u8 pad_280[0x1C];
     s32 taskParent;
-    u8 pad_2A0[0xC];
+    u8 pad_2A0[8];
+    s32 sceneObjectTask;
     s32 spriteObject;
-    u8 pad_2B0[4];
+    s32 cleanupTask;
     BattleItemDrop itemDrops[3];
     u8 pad_2C0[0x14];
     SceneSlot slots[8];
@@ -3465,7 +3466,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2AF0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B4F10);
 
-void btlReleaseRegisteredTaskBuffer(void) {
+void btlReleaseRegisteredTaskBuffer(s64 unused) {
     btlGetRuntime();
     sdfReleaseChipBlock(D_003BB3DC);
     D_003BB3DC = 0;
@@ -4201,12 +4202,12 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF0F8);
 
 void fldClearBattleSceneObject(s64 arg0) {
     u32 temp_v0;
-    s32 temp_v1;
+    BattleController *battle;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
     sdfReleaseChipBlock(temp_v0);
-    temp_v1 = btlGetRuntime();
-    *(u32 *)(temp_v1 + 0x2a8) = 0;
+    battle = (BattleController *)btlGetRuntime();
+    battle->sceneObjectTask = 0;
     btlReleaseBattleScratchBlocks();
 }
 
@@ -4582,10 +4583,10 @@ s32 fldSceneCleanupTask(s64 task) {
 }
 
 void fldResetSceneStatus(void) {
-    s32 temp_v0;
+    BattleController *scene;
 
-    temp_v0 = btlGetRuntime();
-    *(u32 *)(temp_v0 + 0x2b0) = 0;
+    scene = (BattleController *)btlGetRuntime();
+    scene->cleanupTask = 0;
 }
 
 void fldBeginSceneTransition(void) {
@@ -4619,15 +4620,15 @@ extern s32 fldSceneCleanupTask(s64);
 
 void fldCreateSceneCleanupTask(void) {
     s64 oldTask = kwlnTaskGetTaskByName(D_003BB488);
-    u8 *context;
+    BattleController *context;
     u32 task;
     if (oldTask == 0) {
         btlGetRuntime();
     }
-    context = (u8 *)btlGetRuntime();
+    context = (BattleController *)btlGetRuntime();
     task = kwlnTaskCreate(D_003BB488, 0x2B0E, 1, 1, fldSceneCleanupTask, fldResetSceneStatus, 0);
-    func_00101A80(*(u32 *)(context + 0x29C), task);
-    *(u32 *)(context + 0x2B0) = task;
+    func_00101A80(context->taskParent, task);
+    context->cleanupTask = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
     func_001B6308();
@@ -4637,7 +4638,59 @@ void fldCreateSceneCleanupTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C45F0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001C4658);
+static inline void btlDestroyTrackedTaskIfPresent(s32 slot) {
+    if (btlGetTrackedTaskHandle(slot) != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(slot), 0);
+    }
+}
+
+void func_001C4658(void) {
+    BattleController *battle = (BattleController *)btlGetRuntime();
+
+    if (battle->sceneObjectTask != 0) {
+        kwlnTaskDestroyWithHierarchy(battle->sceneObjectTask, 0);
+        battle->sceneObjectTask = 0;
+    }
+    if (battle->spriteObject != 0) {
+        kwlnTaskDestroyWithHierarchy(battle->spriteObject, 0);
+        battle->spriteObject = 0;
+    }
+    if (battle->cleanupTask != 0) {
+        kwlnTaskDestroyWithHierarchy(battle->cleanupTask, 0);
+        battle->cleanupTask = 0;
+    }
+    if (btlHasRegisteredPsechgPanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(6), 0);
+    }
+    btlDestroyTrackedTaskIfPresent(5);
+    btlDestroyTrackedTaskIfPresent(1);
+    btlDestroyTrackedTaskIfPresent(0);
+    btlDestroyTrackedTaskIfPresent(8);
+    btlDestroyTrackedTaskIfPresent(3);
+    btlDestroyTrackedTaskIfPresent(9);
+    btlDestroyTrackedTaskIfPresent(10);
+    if (btlGetTrackedTaskHandle(2) != 0) {
+        btlReleaseSelectionTaskBuffer();
+    }
+    if (btlGetTrackedTaskHandle(12) != 0) {
+        btlDestroyTaskC();
+    }
+    if (btlGetTrackedTaskHandle(13) != 0) {
+        btlDestroyTaskD();
+    }
+    if (btlCommandPanelWork != NULL) {
+        btlReleaseAndClearChipBlock();
+    }
+    if (btlGetTrackedTaskHandle(4) != 0) {
+        btlReleaseRegisteredTaskBuffer(0);
+    }
+    btlDestroyTrackedTaskIfPresent(7);
+    btlReleaseResourceBlock();
+    sdfReleaseChipBlock(D_003BD840[1]);
+    sdfReleaseChipBlock(D_003BD840[0]);
+    sdfReleaseChipBlock((void *)D_003BD83C);
+    sdfReleaseChipBlock(btlTrackedTaskHandles);
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3248);
 
