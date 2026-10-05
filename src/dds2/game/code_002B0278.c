@@ -251,6 +251,16 @@ typedef struct MenuSlot {
     u16 flags;
 } MenuSlot;
 
+typedef struct MenuSprites {
+    u8 unk0[0x10];
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+    s32 fade;
+    u8 pad64[0x10];
+    u8 unk74;
+    u8 unk75;
+} MenuSprites;
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
     u8 pad00[0x54];
@@ -3204,7 +3214,15 @@ void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve);
 
 void func_002BB9C8(u32 *destination, u32 value);
 
-void mnuSetPageParams(MenuSprites *page, s32 mode);
+typedef struct MenuPageParams {
+    u8 unk0[0x64];
+    s32 field64;
+    s32 field68;
+    s32 field6C;
+    s32 field70;
+} MenuPageParams;
+
+void mnuSetPageParams(MenuPageParams *page, s32 mode);
 
 
 
@@ -3240,6 +3258,14 @@ typedef struct MenuIconEntry {
 typedef struct MenuIconLayout {
     MenuIconEntry entry[3];
 } MenuIconLayout;
+
+/* The allocated three-icon bundle also owns its draw fade and fade direction. */
+typedef struct MenuIconBundle {
+    u32 unk0[3];
+    void *sprite[3];
+    s32 fade;
+    s32 fadeOut;
+} MenuIconBundle;
 
 extern MenuIconLayout D_0042AFD8;
 

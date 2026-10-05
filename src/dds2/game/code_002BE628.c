@@ -257,6 +257,17 @@ extern s8 D_0037F510[];
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
 
+typedef struct MenuSprites {
+    u8 pad00[0xC];
+    s32 unkC;
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+    s32 fade;
+    u8 pad64[0x10];
+    u8 unk74;
+    u8 unk75;
+} MenuSprites;
 
 
 typedef struct MenuList MenuList;
