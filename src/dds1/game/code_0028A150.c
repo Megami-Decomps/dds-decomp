@@ -362,7 +362,7 @@ extern void *mcHandleDetectionResult(void);
 
 extern void fileQueueInitTransform(void *queue);
 
-extern void func_00293158(void *src);
+extern void func_00293158(f32 matrix[4][4]);
 
 
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -2926,7 +2926,44 @@ void vuBuildLookAtBasis(void)
     VU0_MOVE_VF(vf29, vf10);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00293158);
+/* The quaternion result is returned in vf10 for the VU transform routines. */
+void func_00293158(f32 matrix[4][4]) {
+    f32 quaternion[4];
+    f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2] + matrix[3][3];
+    f32 scale;
+    s32 i;
+    s32 j;
+    s32 k;
+
+    if (trace >= 1.0f) {
+        scale = 2.0f * fsqrtf(trace);
+        quaternion[3] = -scale * 0.25f;
+        quaternion[0] = (matrix[1][2] - matrix[2][1]) / scale;
+        quaternion[1] = (matrix[2][0] - matrix[0][2]) / scale;
+        quaternion[2] = (matrix[0][1] - matrix[1][0]) / scale;
+    } else {
+        i = matrix[0][0] > matrix[1][1] ? 0 : 1;
+        if (matrix[i][i] < matrix[2][2]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        trace = matrix[i][i] - matrix[j][j] - matrix[k][k] + 1.0f;
+        if (trace != 0.0f) {
+            scale = 2.0f * fsqrtf(trace);
+            quaternion[i] = scale * 0.25f;
+            quaternion[j] = (matrix[j][i] + matrix[i][j]) / scale;
+            quaternion[k] = (matrix[k][i] + matrix[i][k]) / scale;
+            quaternion[3] = -(matrix[j][k] - matrix[k][j]) / scale;
+        } else {
+            quaternion[i] = 1.0f;
+            quaternion[j] = 0.0f;
+            quaternion[k] = 0.0f;
+            quaternion[3] = 0.0f;
+        }
+    }
+    VU0_LOAD_VF(vf10, quaternion);
+}
 
 FileJob *fileCreateJob(u16 type) {
     u16 kind = type;

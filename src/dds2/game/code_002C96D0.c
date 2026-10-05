@@ -230,7 +230,7 @@ typedef struct FileTypeCallbacks {
 
 extern FileTypeCallbacks fileJobTypeOperations[];
 
-extern void func_002D31C0(void *src);
+extern void func_002D31C0(f32 matrix[4][4]);
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
  * entry per table; the handler lives at +0x0. Slots are declared as separate
@@ -428,6 +428,7 @@ typedef struct FileJob {
     u8 unk9C[0x10];
     struct FileJob *next;
     struct FileJob *prev;
+    u8 padB4[0xC];
 } FileJob;
 
 extern void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource);
@@ -569,6 +570,9 @@ extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 extern void func_002D49B8(FileQueue *queue, u32 color);
 
 extern void fileJobCopyHeader(FileJob *dst, FileJob *src);
+extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);
+extern FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
+extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
 
 extern s32 mcPollWithExtendedErrors(void);
 
@@ -2971,7 +2975,44 @@ void vuBuildLookAtBasis(void)
     VU0_MOVE_VF(vf29, vf10);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D31C0);
+/* The quaternion result is returned in vf10 for the VU transform routines. */
+void func_002D31C0(f32 matrix[4][4]) {
+    f32 quaternion[4];
+    f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2] + matrix[3][3];
+    f32 scale;
+    s32 i;
+    s32 j;
+    s32 k;
+
+    if (trace >= 1.0f) {
+        scale = 2.0f * fsqrtf(trace);
+        quaternion[3] = -scale * 0.25f;
+        quaternion[0] = (matrix[1][2] - matrix[2][1]) / scale;
+        quaternion[1] = (matrix[2][0] - matrix[0][2]) / scale;
+        quaternion[2] = (matrix[0][1] - matrix[1][0]) / scale;
+    } else {
+        i = matrix[0][0] > matrix[1][1] ? 0 : 1;
+        if (matrix[i][i] < matrix[2][2]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        trace = matrix[i][i] - matrix[j][j] - matrix[k][k] + 1.0f;
+        if (trace != 0.0f) {
+            scale = 2.0f * fsqrtf(trace);
+            quaternion[i] = scale * 0.25f;
+            quaternion[j] = (matrix[j][i] + matrix[i][j]) / scale;
+            quaternion[k] = (matrix[k][i] + matrix[i][k]) / scale;
+            quaternion[3] = -(matrix[j][k] - matrix[k][j]) / scale;
+        } else {
+            quaternion[i] = 1.0f;
+            quaternion[j] = 0.0f;
+            quaternion[k] = 0.0f;
+            quaternion[3] = 0.0f;
+        }
+    }
+    VU0_LOAD_VF(vf10, quaternion);
+}
 
 FileJob *fileCreateJob(u16 type) {
     u16 kind = type;
@@ -3345,10 +3386,79 @@ void fileDestroyJob(FileJob *job) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D4138);
+FileQueue *func_002D4138(FileQueue *source) {
+    FileQueue *queue = fileQueueCreate();
+    FileJob *entry;
+    FileJob *job;
+    s128 vec;
+
+    PCP_COPY_VECTOR(queue->offset, source->offset);
+    PCP_COPY_VECTOR(queue->axis, source->offset);
+    queue->transformValue = source->transformValue;
+    queue->transformWord = source->transformWord;
+    if (source->first != NULL) {
+        for (entry = source->first; entry != NULL; entry = entry->next) {
+            job = fileJobCreate();
+
+            if ((entry->flags & 1) == 0) {
+                job->id = (u32)fileJobCreateFromJob((FileJob *)entry->id);
+            } else {
+                FileJob *parent = fileQueueFindById(source, entry->id);
+                s32 index = fileFindQueuedJobIndex(source, parent);
+
+                parent = fileQueueGetAt(queue, index);
+                job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
+            }
+            fileJobCopyHeader(job, entry);
+            strcpy((char *)job->unk9C, (char *)entry->unk9C);
+            fileQueueAppend(queue, job);
+        }
+    } else {
+        FileJob *records;
+
+        entry = (FileJob *)((u8 *)source + (u32)source->last);
+        records = entry;
+        if (source->count > 0) {
+            s32 count = source->count;
+
+            do {
+                job = fileJobCreate();
+
+                if ((entry->flags & 1) == 0) {
+                    FileJob *request = (FileJob *)((u8 *)source + entry->id);
+
+                    if (entry->flags & 2) {
+                        FileJob *secondary = (FileJob *)((u8 *)source + records[entry->sector].id);
+
+                        request->slots[1].size = secondary->slots[1].size;
+                        request->slots[1].offset = (u32)fileResolveSecondaryBuffer(secondary) - (u32)request;
+                        job->id = (u32)fileJobCreateFromJob(request);
+                        request->slots[1].offset = request->slots[1].size = 0;
+                    } else {
+                        job->id = (u32)fileJobCreateFromJob(request);
+                    }
+                } else {
+                    FileJob *parent = fileQueueGetAt(queue, entry->id);
+
+                    job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
+                }
+                fileJobCopyHeader(job, entry);
+                strcpy((char *)job->unk9C, (char *)entry->unk9C);
+                fileQueueAppend(queue, job);
+                entry++;
+            } while (--count != 0);
+        }
+    }
+    VU0_STORE_VF(vf0, &vec);
+    fileQueueSetPosition(queue, &vec);
+    fileQueueSetRotation(queue, &vec);
+    fileQueueSetScale(queue, 1.0f);
+    func_002D49B8(queue, 0x80808080);
+    return queue;
+}
 
 void func_002D4380(u32 unused, u32 job) {
-    func_002D4138(job);
+    func_002D4138((FileQueue *)job);
 }
 
 extern void camFollowOffsetVec();
@@ -3603,7 +3713,6 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
 
 extern FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector);
 extern FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id);
-extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
 extern void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref);
 
 /* Makes the first job chained to owner's sector the leader and rechains the rest to it. */
@@ -4142,7 +4251,7 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     if (size != 0) {
         node->queueHandle = sdfAllocGeneralBlock(size);
         node->queues = sdfResourceRetainAddress(node->queueHandle);
-        node->queues[0] = (void *)func_002D4138(job);
+        node->queues[0] = func_002D4138((FileQueue *)job);
         for (i = 1; i < count; i++) {
             node->queues[i] = fileQueueClone(node->queues[0]);
         }
