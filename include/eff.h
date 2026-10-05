@@ -308,6 +308,23 @@ typedef struct PcpScatterRes {
     s32 refCount;
 } PcpScatterRes; /* 0x08 */
 
+struct SdfMemoryBlock;
+
+/* Appended after the two record arrays; resource helpers own this same control block. */
+typedef struct PcpScatterPool {
+    f32 origin[4];
+    u32 unk10;
+    u32 color;
+    s32 secondWordCount;
+    f32 unk1C;
+    s32 recordBase;
+    s32 auxRecordBase;
+    u32 drawAsset;
+    struct SdfMemoryBlock *allocation;
+    PcpScatterRes *sharedResource;
+} PcpScatterPool; /* 0x34 */
+
+
 
 /* Exactly the 0x5C bytes copied into the needle's runtime work. */
 typedef struct EffPCPNeedleParams {

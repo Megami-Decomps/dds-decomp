@@ -750,18 +750,6 @@ void effSetRecordPoolScale(u8 *work, f32 scale) {
     ((EffRecordPool *)work)->scale = scale;
 }
 
-typedef struct PcpScatterPool {
-    u8 pad00[0x10];
-    u32 unk10;
-    u32 color;
-    s32 secondWordCount;
-    f32 unk1C;
-    s32 recordBase;
-    s32 auxRecordBase;
-    u32 resource;
-    SdfMemoryBlock *buffer;
-    PcpScatterRes *sharedResource;
-} PcpScatterPool;
 
 typedef struct {
     f32 origin[4];

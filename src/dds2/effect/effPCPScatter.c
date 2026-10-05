@@ -202,20 +202,6 @@ extern void *effPcpScatterCreatePlainInstance();
 typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 
 
-/* Allocated after the two record arrays; resource helpers receive this same
-   0x34-byte control block, not a separate effect work area. */
-typedef struct PcpScatterPool {
-    f32 origin[4];
-    u32 unk10;
-    u32 color;
-    s32 secondWordCount;
-    f32 unk1C;
-    s32 recordBase;
-    s32 auxRecordBase;
-    u32 drawAsset;
-    SdfMemoryBlock *allocation;
-    PcpScatterRes *sharedResource;
-} PcpScatterPool;
 
 typedef struct PcpScatterRadialWork PcpScatterRadialWork;
 typedef struct PcpScatterSpinWork PcpScatterSpinWork;
