@@ -366,25 +366,38 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00242C30);
 
 extern s32 strcmp(const char *a, const char *b);
 
+typedef struct BufferDescriptor {
+    u8 pad00[0x10];
+    void (*open)(struct BufferDescriptor *, s32);
+} BufferDescriptor;
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(s32 packet);
+extern void itfSendTablePacket(u64 packet, s32 table, s32 mode);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
+extern s32 D_00368BA8[4];
+extern s32 D_00368BB8[4];
+extern s32 D_00368BC8[4];
+extern BufferDescriptor D_003255A8;
+
 typedef struct CampDisplayDefaults {
-    s32 width;
-    s32 height;
-    s8 color[4];
-    f32 scaleX;
+    s32 x;
+    s32 y;
+    u8 color[4];
     f32 scaleY;
+    f32 scaleX;
     s32 enabled;
     s32 variant;
 } CampDisplayDefaults;
 
 void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
-    display->width = 0x100;
-    display->height = 0xE0;
-    display->color[0] = -0x80;
-    display->color[1] = -0x80;
-    display->color[2] = -0x80;
-    display->color[3] = -0x80;
-    display->scaleY = 1.0f;
+    display->x = 0x100;
+    display->y = 0xE0;
+    display->color[0] = 0x80;
+    display->color[1] = 0x80;
+    display->color[2] = 0x80;
+    display->color[3] = 0x80;
     display->scaleX = 1.0f;
+    display->scaleY = 1.0f;
     display->enabled = 1;
     display->variant = 0;
 }
@@ -552,7 +565,40 @@ void campResolvePendingValue(CampScene *scene, CampKeyNode *cue) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243608);
+void func_00243608(SdfTex *texture, CampDisplayDefaults *display) {
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 variant;
+    s32 packet;
+
+    D_00368BB8[2] = texture->width << 4;
+    D_00368BB8[3] = texture->height << 4;
+    halfWidth = (s32)(texture->width * display->scaleX) / 2;
+    halfHeight = (s32)(texture->height * display->scaleY) / 2;
+    D_00368BA8[0] = (display->x - halfWidth) << 4;
+    D_00368BA8[1] = (display->y - halfHeight) << 3;
+    D_00368BA8[2] = (display->x + halfWidth) << 4;
+    D_00368BA8[3] = (display->y + halfHeight) << 3;
+    D_00368BC8[0] = display->color[0];
+    D_00368BC8[1] = display->color[1];
+    D_00368BC8[2] = display->color[2];
+    D_00368BC8[3] = display->color[3];
+    variant = display->variant;
+    if (display->color[3] != 0) {
+        packet = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(packet);
+        if (variant == 0) {
+            itfSendTablePacket(packet, 0, 0);
+        } else if (variant == 1) {
+            itfSendTablePacket(packet, 1, 0);
+        } else if (variant == 2) {
+            itfSendTablePacket(packet, 2, 0);
+        }
+        itfQueueTextureBoundQuadPacket(D_00368BA8, D_00368BB8, D_00368BC8,
+                                      0xFF, (s32)texture, 0, packet);
+        D_003255A8.open(&D_003255A8, packet);
+    }
+}
 
 /* Clear each track's unknown word and the scene state; do not alter links or values. */
 void fldResetCampSceneEntries(CampScene *scene) {
@@ -735,16 +781,11 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
     }
 }
 
-typedef struct BufferDescriptor {
-    u8 pad00[0x10];
-    void (*open)(struct BufferDescriptor *, s32);
-} BufferDescriptor;
 
 extern BufferDescriptor D_00325708;
 extern u8 D_00325860[];
 extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
-extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfClearLinkedPacketList(void *list);
 extern void sdfCreatePatchableResourcePacket(void *list, void *linkedList, s32 arg2, s32 arg3,
                                             s32 width, s32 height, void *resource, s32 arg7,

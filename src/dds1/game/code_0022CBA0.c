@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "evt_world.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
@@ -192,7 +193,8 @@ typedef struct EvtViewTrack {
 extern void evtReorderListNodes(EvtViewTrack *track);
 
 extern void func_00243048(u16 *from, u16 *to, u8 *out, f32 ratio);
-extern void func_00243608(s32 handle, u8 *out);
+typedef struct CampDisplayDefaults CampDisplayDefaults;
+extern void func_00243608(SdfTex *texture, CampDisplayDefaults *display);
 
 /* Interpolates parameter keys at the viewer's current frame, accounting for
  * the track offset. A missing next key leaves the interpolation ratio at zero. */
@@ -211,7 +213,7 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewTrack *n
             }
         }
         func_00243048(from, to, out, ratio);
-        func_00243608(node->unk24, out);
+        func_00243608((SdfTex *)node->unk24, (CampDisplayDefaults *)out);
     }
 }
 
