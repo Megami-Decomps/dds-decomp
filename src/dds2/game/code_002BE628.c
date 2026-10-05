@@ -253,28 +253,6 @@ extern s8 D_0037F510[];
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 
-/* Native page-table shape, shared with the party-window resource handlers. */
-typedef struct MenuPageGauge {
-    s32 resourceIndex;
-    u8 pad4[4];
-    s32 hp;
-    s32 mp;
-    s32 maxHp;
-    s32 maxMp;
-    u8 pad18[0x18];
-} MenuPageGauge;
-
-typedef struct MenuPageEntry {
-    s32 partyIndex;
-    MenuPageGauge gauge;
-} MenuPageEntry;
-
-typedef struct MenuPageRecord {
-    s32 visibleCount;
-    s32 additionalCount;
-    u32 unk8;
-    MenuPageEntry entries[5];
-} MenuPageRecord;
 
 typedef struct MenuSprites {
     u8 pad00[0xC];
@@ -288,53 +266,9 @@ typedef struct MenuSprites {
     u8 unk75;
 } MenuSprites;
 
-typedef struct MenuQueuedCommand {
-    u32 unk0;
-    s32 kind;
-    s32 option;
-    s32 unkC;
-    s32 unk10;
-    s32 initialValue;
-    s32 argument;
-} MenuQueuedCommand; /* 0x1C */
-
-/* Each page owns two 0x1024-byte banks. The command's +0x14 word is
- * the value compared when choosing a bank; +0x100 is a separate word. */
-typedef struct MenuPageSlotContent {
-    u8 pad00[0xD0];
-    MenuSprites *windowSprites;
-    u8 padD4[0x10];
-    MenuQueuedCommand command; /* 0xE4 */
-    s32 unk100;
-    u8 pad104[0xF20];
-} MenuPageSlotContent;
-
-typedef struct MenuPageSlot {
-    s32 kind;
-    u32 flags;
-    u8 pad08[4];
-    MenuPageSlotContent contents[2]; /* 0x0C */
-    u8 pad2054[0xE4];
-} MenuPageSlot; /* 0x2138 */
 
 typedef struct MenuList MenuList;
 
-/* Five page slots start at +0x78; the first content bank is twelve bytes
- * into its page, at +0x84. These are not independent panel arrays. */
-typedef struct MenuPageWindow {
-    u32 flags;
-    s32 transitionValue;
-    MenuPageRecord *records;
-    u8 pad0C[0x18];
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
-    MenuPageSlot slots[5];
-    MenuList *lists[2]; /* 0xA690 */
-    s32 selected;      /* 0xA698 */
-    s32 scrollOffset;  /* 0xA69C */
-    s32 fade;          /* 0xA6A0 */
-} MenuPageWindow;
 
 /* Set the separate +0x100 word in both content banks of every page. */
 void mnuSetPanelSlotValues(MenuPageWindow *menu, s32 value) {
@@ -1265,18 +1199,6 @@ void mnuBindPresentMenuEntry(s32 stateAddress, u32 entrySlotAddress) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4328);
 
-typedef struct PartyPanelSlot {
-    s32 unk0;
-    s32 index;
-    s32 unk8;
-    s32 pad[10];
-} PartyPanelSlot;
-
-typedef struct PartyPanel {
-    s32 unk0;
-    s32 unk4;
-    PartyPanelSlot slots[5];
-} PartyPanel;
 
 extern void func_002C4328(u8 *entry, s32 arg1, u32 index, PartyPanel *panel);
 

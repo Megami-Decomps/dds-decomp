@@ -1,4 +1,4 @@
-#include "common.h"
+#include "evt_world.h"
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0x100
 #define EVT_DISPLAY_VALUE_COUNT 0x10
@@ -48,10 +48,6 @@ extern u32 evtDisplayValues[];
 
 void sdfReleaseResourceAllocation(u32 sprite);
 
-typedef struct EvtResourcePair {
-    u32 handle;
-    u32 unk04; /* Loader output; not read through this local view. */
-} EvtResourcePair;
 
 extern s32 datGameState;
 
