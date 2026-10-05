@@ -3,6 +3,41 @@
 
 #include "common.h"
 
+/* Native 0x90-byte camera/viewport owner shared by both projection builders. */
+typedef struct SdfCamera {
+    u32 flags;       // 0x00: 1 half-height, 2 field-of-view projection
+    f32 aspect;      // 0x04
+    f32 scale;       // 0x08
+    f32 fov;         // 0x0C
+    f32 offsetX;     // 0x10
+    f32 offsetY;     // 0x14
+    f32 width;       // 0x18
+    f32 height;      // 0x1C
+    f32 top;         // 0x20
+    f32 bottom;      // 0x24
+    f32 nearZ;       // 0x28
+    f32 farZ;        // 0x2C
+    u8 matrix[0x40]; // 0x30
+    f32 halfWidth;   // 0x70
+    f32 halfHeight;  // 0x74
+    f32 centerY;     // 0x78
+    f32 one;         // 0x7C
+    f32 originX;     // 0x80
+    f32 originY;     // 0x84
+    f32 bottomY;     // 0x88
+    u32 zero;        // 0x8C
+} SdfCamera;
+
+typedef char SdfCamera_size_must_be_0x90[(sizeof(SdfCamera) == 0x90) ? 1 : -1];
+
+extern SdfCamera sdfSceneProjectionParameters;
+#ifdef VERSION_DDS1
+extern SdfCamera D_00324980;
+#elif defined(VERSION_DDS2)
+extern SdfCamera D_0037F980;
+#endif
+extern void sdfCameraBuildProjection(SdfCamera *);
+
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
  * Level tables begin at level one; seven-entry scales use index three for zero. */
 typedef struct SdfBattleParameters {

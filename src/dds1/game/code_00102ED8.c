@@ -46,9 +46,7 @@ extern s8 D_0032453B[];
 
 extern f32 D_003245EC[];
 
-extern f32 sdfSceneProjectionParameters[];
 
-extern f32 D_00324980[];
 
 extern u8 kwlnPositionedTextSurface[];
 
@@ -120,7 +118,6 @@ typedef struct KwlnGraphicsSink {
 } KwlnGraphicsSink;
 extern KwlnGraphicsSink D_00325708;
 
-extern void sdfCameraBuildProjection(void *arg0);
 
 extern void sdfDevConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
 
