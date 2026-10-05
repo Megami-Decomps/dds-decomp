@@ -143,17 +143,13 @@ typedef struct BtlCommandRecord {
 
 extern BtlCommandRecord *datCommandRecords;
 
-extern void *btlAllocateIndexList(s32);
 
-extern u32 func_001AC360(u64, u64, u64);
+extern u32 func_001AC360(u64, BtlIndexList *, u64);
 
-extern u32 btlGetIndexListCount();
 
-extern void *btlGetIndexListEntry(void *, u32);
 
 extern s32 btlMatchActorEntryCode(void *, s32);
 
-extern void btlFreeIndexList(void *);
 
 extern s8 D_00453068[];
 
@@ -869,7 +865,7 @@ s32 btlListHasMatchingFlag(u8 **entryList, s32 entryCount, u32 requestedFlags) {
 
 /* Every entry must classify as 1 or 2 with a corresponding allowed mask bit.
  * Other classifications fail the all-entry check; an empty list passes. */
-s32 btlIndexListMatchesEntryCodes(void *indexList, s32 entryCode, u32 allowedCodeBits) {
+s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 allowedCodeBits) {
     u32 matchedCount = 0;
     u32 entryIndex;
     u32 entryCount = btlGetIndexListCount(indexList);
@@ -903,7 +899,7 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7D0);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B7E0);
 
-s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
+s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
     s32 entryCount = btlGetIndexListCount(indexList);
     s32 entryIndex;
@@ -941,7 +937,7 @@ s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
 /* Return 3 for met requirements, or 0 for failed/inapplicable requirements.
  * A failed primary check suppresses later checks. Unlike DDS1, DDS2 requires
  * requirementBits == 0 before each check; preserve all three native rereads. */
-u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, s32 unused, s32 commandId) {
+u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlIndexList *indexList, s32 commandId) {
     s32 eligibility = BTL_COUNTER_ELIGIBILITY_UNSET;
     if (datCommandRecords[commandId].options & 1) {
         if (datCommandRecords[commandId].requirementBits == 0) {
@@ -986,7 +982,7 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, s32 un
  * is 10, versus 9 in DDS1. Zero means no block. */
 s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     BtlCommandRecord *commandRecord;
-    void *targetList;
+    BtlIndexList *targetList;
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
@@ -1006,7 +1002,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     }
     flaggedTargetCount = 0;
     targetList = btlAllocateIndexList(0xD);
-    func_001AC360((s32)actionTask, (s32)targetList, 0);
+    func_001AC360((s32)actionTask, targetList, 0);
     targetCount = btlGetIndexListCount(targetList);
     if (datCommandRecords[commandId].flags & 8) {
         for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
@@ -1027,7 +1023,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
 extern s32 btlGetEntryFlagsUnlessDisabled(u8 *);
 extern s32 btlLowestSetPairIndex(u32);
 
-s32 func_0022C308(void *indexList, s32 commandId) {
+s32 func_0022C308(BtlIndexList *indexList, s32 commandId) {
     u8 *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;
@@ -1081,11 +1077,11 @@ s32 func_0022C308(void *indexList, s32 commandId) {
             }
         }
     }
-    return btlDetermineCommandCounterEligibility(entryList, count, (s32)indexList, commandId);
+    return btlDetermineCommandCounterEligibility(entryList, count, indexList, commandId);
 }
 
 /* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
-s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
+s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
     s32 result = 0;
     u32 flags;
     u32 mask;

@@ -97,14 +97,19 @@ extern s32 D_003BC970[2];
 
 extern RefObj *D_003BC978[2];
 
+typedef struct EffectMaterialSlot {
+    u32 flags;
+    u32 color;
+    u8 pad08[0xC];
+} EffectMaterialSlot;
+
 /* Battle/display work object (layout inferred from field accesses). */
 typedef struct BdWork {
     s32 flags;           // 0x00
     s32 phase16_16;      // 0x04: clamped to [0, 0x10000]
     u8 pad_0x08[0x28];  // 0x08
-    u32 materialFlags;  // 0x30
-    u32 materialColor;  // 0x34
-    u8 pad_0x38[0x28];  // 0x38
+    EffectMaterialSlot materials[2]; /* 0x30 */
+    u8 pad58[8];
     void *owner;         // 0x60: passed to the work initializer
     s32 slotIndex;       // 0x64: slot index passed to the work initializer
     u8 pad_0x68[0x34];  // 0x68
@@ -956,10 +961,6 @@ u32 effSetSlotOverrideWork(s32 work, s32 index, void *value) {
     return 1;
 }
 
-typedef struct EffectMaterialSlot {
-    u32 value;
-    u8 unk_04[0x10];
-} EffectMaterialSlot;
 
 u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
     s32 offset = index * 0xA0;
@@ -969,9 +970,9 @@ u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
         effAttachSlotWorkOwner((void *)work, index, asset);
     }
     ((BdWork *)(offset + ((EffectSlotSet *)work)->workEntries))->alternate = (s32)asset;
-    slots = (EffectMaterialSlot *)((u8 *)asset + 0x30);
+    slots = asset->materials;
     for (i = 0; i < 2; i++) {
-        slots[i].value = value;
+        slots[i].flags = value;
     }
     return 1;
 }
@@ -1000,8 +1001,8 @@ u32 effConfigureIndexedSlotMaterial(s32 work, s32 index, s32 data, s32 item,
     s32 effect = ((EffectSlotSet *)work)->workEntries + index * 0xA0;
     effSetSlotResourceAndFlags((u32 *)(effect + 0x28), (u32)&((EffMappedResource *)data)->records[item], option);
     effUpdateTimedStates(work, index, (BdWork *)effect);
-    ((BdWork *)effect)->materialFlags = flags;
-    ((BdWork *)effect)->materialColor = color;
+    ((BdWork *)effect)->materials[0].flags = flags;
+    ((BdWork *)effect)->materials[0].color = color;
     return 1;
 }
 

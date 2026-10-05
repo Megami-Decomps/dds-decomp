@@ -26,11 +26,9 @@
 
 extern u32 btlGetEffectActor(void);
 
-extern u32 func_001A3360(s32, s32, s32);
+extern u32 func_001A3360(s32, BtlIndexList *, s32);
 
-extern void *btlAllocateIndexList(s32);
 
-extern u32 btlGetIndexListCount();
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear();
 
@@ -172,11 +170,10 @@ extern s32 func_001FFE30(BtlTask *, s32, u16 *, s32 *);
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
-extern void btlCopyIndexList(s32, s32);
 
 extern void *memset(void *, s32, u32);
 
-extern s32 func_002024A8(s32, u16 *, u16);
+extern void *func_002024A8(BtlIndexList *, u16 *, u16);
 
 /* Pick a weighted slot in one species row, run its action and release the shared scratch allocation. */
 void btlRunWeightedAiAction(BtlTask *task, s32 rowIndex) {
@@ -737,18 +734,16 @@ u8 func_002010D8(void) {
     return result != 0;
 }
 
-extern void func_001A30F8(s32, void *, s32, s32, s32);
+extern void func_001A30F8(s32, BtlIndexList *, s32, s32, s32);
 
-extern s32 btlGetIndexListEntry(void *, u32);
 
-extern void btlFreeIndexList(void *);
 
 /* Query the context's index list, freeing it on both the first success and exhausted-list paths. */
 s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     u32 entryIndex;
     u32 entryCount;
     s32 contextAddress;
-    void *indexList;
+    BtlIndexList *indexList;
     if (unit->flags & 0x400) {
         return 0;
     }
@@ -1307,9 +1302,9 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002024A8);
 
-s32 btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 *listCount) {
+BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 *listCount) {
     u32 result;
-    s32 list;
+    BtlIndexList *list;
 
     list = btlAllocateIndexList(0xd);
     result = func_001A3360(actor, list, 0);
@@ -1343,7 +1338,7 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u32 best;
     u32 bestIndex;
     u16 found;
@@ -1356,9 +1351,9 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
         best = 0x7FFF;
         bestIndex = 0;
         for (i = 0; i < count; i++) {
-            s32 unit = btlGetIndexListEntry((void *)list, i);
+            BtlUnit *unit = btlGetIndexListEntry(list, i);
             if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
-                u16 current = btlReadCurrentUnitHp(&((BtlUnit *)unit)->statBits);
+                u16 current = btlReadCurrentUnitHp(&unit->statBits);
                 if (best >= current && current != 0) {
                     best = current;
                     found++;
@@ -1367,7 +1362,7 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
             }
         }
         if (found != 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, btlGetIndexListEntry((void *)list, bestIndex));
+            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, btlGetIndexListEntry(list, bestIndex));
         } else {
             u32 n = count;
             for (i = 0; i < n; i++) {
@@ -1381,7 +1376,7 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1389,11 +1384,11 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     s32 best;
     u32 bestIndex;
     u32 i;
-    s32 result;
+    BtlUnit *result;
 
     switch (matching) {
     case 0:
@@ -1401,7 +1396,7 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         memset(flags, 0, sizeof(flags));
         bestIndex = 0x20;
         for (i = 0; i < count; i++) {
-            void *stats = &((BtlUnit *)btlGetIndexListEntry((void *)list, i))->statBits;
+            void *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->statBits;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 percent = current * 100 / btlComputeSkillAdjustedMaxHp(stats);
 
@@ -1411,7 +1406,7 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
             }
         }
         if (bestIndex != 0x20) {
-            result = btlGetIndexListEntry((void *)list, bestIndex);
+            result = btlGetIndexListEntry(list, bestIndex);
         } else {
             result = func_002024A8(list, flags, count);
         }
@@ -1422,7 +1417,7 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1430,14 +1425,14 @@ s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u16 i;
 
     switch (matching) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitHasActionMask(btlGetIndexListEntry((void *)list, i), mask) != 0) {
+            if (btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask) != 0) {
                 flags[i] = 1;
             }
         }
@@ -1448,7 +1443,7 @@ s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1456,14 +1451,14 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u16 i;
 
     switch (matching) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitHasActionMask(btlGetIndexListEntry((void *)list, i), mask) == 0) {
+            if (btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask) == 0) {
                 flags[i] = 1;
             }
         }
@@ -1474,7 +1469,7 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1482,14 +1477,14 @@ s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u16 i;
 
     switch (matching) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (((BtlUnit *)btlGetIndexListEntry((void *)list, i))->mode == mode) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->mode == mode) {
                 flags[i] = 1;
             }
         }
@@ -1500,7 +1495,7 @@ s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1511,7 +1506,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", btlSelectLowestRankTarget);
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00203BA8);
 
 s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
-    void *list = btlAllocateIndexList(13);
+    BtlIndexList *list = btlAllocateIndexList(13);
     u32 mode;
     u32 count;
     u16 picked[12];
@@ -1544,16 +1539,16 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
             }
         }
         if (found == 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, (s32)((BtlTask *)actor)->unit);
+            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, ((BtlTask *)actor)->unit);
             btlFreeIndexList(list);
             return 1;
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8((s32)list, picked, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, picked, count));
         btlFreeIndexList(list);
         return 1;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, (s32)list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     return 1;
@@ -1562,10 +1557,10 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00203E38);
 
 s32 btlAppendSelfAfterTargetScan(s32 actor) {
-    void *list = btlAllocateIndexList(13);
+    BtlIndexList *list = btlAllocateIndexList(13);
     func_001A30F8(actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(((BtlTask *)actor)->targetList, (s32)((BtlTask *)actor)->unit);
+    btlAppendIndexListEntry(((BtlTask *)actor)->targetList, ((BtlTask *)actor)->unit);
     btlFreeIndexList(list);
     return 1;
 }
@@ -1584,7 +1579,7 @@ u32 btlAppendEffectActorToCommandIndices(s32 task) {
     u32 actor;
 
     actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->targetList, actor);
+    btlAppendIndexListEntry(((BtlTask *)task)->targetList, (void *)actor);
     return 1;
 }
 
@@ -1592,14 +1587,14 @@ s32 btlSelectTargetsBlockingElement(s32 actor, s32 mask) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u16 i;
 
     switch (matching) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitBlocksElementQuery(btlGetIndexListEntry((void *)list, i), mask, 0x200) != 0) {
+            if (btlUnitBlocksElementQuery(btlGetIndexListEntry(list, i), mask, 0x200) != 0) {
                 flags[i] = 1;
             }
         }
@@ -1610,7 +1605,7 @@ s32 btlSelectTargetsBlockingElement(s32 actor, s32 mask) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1622,16 +1617,16 @@ s32 btlSelectTargetsPassingCheck(s32 actor, s32 action) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u16 i;
 
     switch (matching) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            s32 unit = btlGetIndexListEntry((void *)list, i);
+            BtlUnit *unit = btlGetIndexListEntry(list, i);
 
-            if (((BtlUnit *)unit)->flags & 0x200) {
+            if (unit->flags & 0x200) {
                 if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
                     flags[i] = 1;
                 }
@@ -1648,7 +1643,7 @@ s32 btlSelectTargetsPassingCheck(s32 actor, s32 action) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
     return 1;
 }
 
@@ -1656,14 +1651,14 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u16 i;
 
     switch (matching) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            BtlUnit *unit = (BtlUnit *)btlGetIndexListEntry((void *)list, i);
+            BtlUnit *unit = (BtlUnit *)btlGetIndexListEntry(list, i);
 
             if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
                 if (invert == 0) {
@@ -1682,7 +1677,7 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
         btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
-    btlFreeIndexList((void *)list);
+    btlFreeIndexList(list);
 }
 
 extern s32 btlCanUseLinkedActor();
@@ -3634,7 +3629,6 @@ void btlArmEventResourceTrigger(void) {
 
 extern void fldAppendSceneGroupHandle();
 
-extern void btlAppendIndexListEntry();
 
 typedef struct BtlMarkState {
     u8 marked;  /* 0 */
@@ -3677,7 +3671,7 @@ s32 btlPickRandomMarkedTask(void) {
     } else {
         task->arg = 0xD2;
     }
-    btlAppendIndexListEntry(task->targetList, (s32)unit);
+    btlAppendIndexListEntry(task->targetList, unit);
     mark->marked = 1;
     return -1;
 }
@@ -3769,7 +3763,7 @@ s32 func_00209C90(void) {
         fldAppendSceneGroupHandle(task);
         task->result = 2;
         task->arg = 0xD2;
-        btlAppendIndexListEntry(task->targetList, (s32)unit);
+        btlAppendIndexListEntry(task->targetList, unit);
     } else {
         if (state->battleFlags & 0x800) {
             return -1;
@@ -3802,7 +3796,7 @@ s32 func_00209C90(void) {
             task = (BtlTask *)btlFindUnitByActor((s32)unit);
             fldAppendSceneGroupHandle(task);
             task->result = 0x11;
-            btlAppendIndexListEntry(task->targetList, (s32)task->unit);
+            btlAppendIndexListEntry(task->targetList, task->unit);
             btlBossDebugPrintf("btl:HARI1 form = %d\n", *formCount);
         }
     }
@@ -4241,7 +4235,7 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
         return 1;
     } else if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
         if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->targetList) == 1) {
-            void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->targetList, 0);
+            void *other = btlGetIndexListEntry(((BtlEventEntry *)unit)->task->targetList, 0);
             btlFlagAllUnitDefeatCandidatesTask();
             func_0020B190(unit, other);
         } else {

@@ -384,9 +384,9 @@ void func_0029A658(MenuItemScene *scene) {
 
     memset(&active, 0, sizeof(active));
     for (i = 0; i < 5; i++) {
-        if (((s32 *)((u8 *)scene + 0x3F4))[i] > 0) {
+        if (scene->slots[i] > 0) {
             active.indices[active.count] = i;
-            active.values[active.count] = ((s32 *)((u8 *)scene + 0x3F4))[i];
+            active.values[active.count] = scene->slots[i];
             active.count++;
         }
     }

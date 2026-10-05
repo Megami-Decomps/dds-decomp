@@ -22,11 +22,10 @@ enum {
     BTL_PACKED_PARTY_EMPTY_MP = 0x10000000
 };
 
-extern void btlClearUnitDefeatCandidate(s32 actor);
+extern void btlClearUnitDefeatCandidate(u8 *unit);
 
-extern u32 btlGetIndexListCount(s32 actor);
-extern s32 btlGetIndexListEntry(s32 actor, u32 index);
-extern void btlFlagUnitDefeatCandidate(s32 actor);
+extern void func_001F6E28(BtlIndexList *list, s32, s32);
+extern void btlFlagUnitDefeatCandidate(u8 *unit);
 
 extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
@@ -522,15 +521,15 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
 /* Select the smallest X for reference flag 0x200, otherwise the largest.
  * An empty indexed list returns NULL but still loads the native scratch vector. */
 /* vu0 routine: returns the selected muzzle position in vf10. */
-BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, s32 actor) {
+BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
     BtlVec4 position, selectedPosition;
     BtlUnit *selected = NULL;
     BtlUnit *unit;
     u32 entryIndex = 0;
-    u32 entryCount = btlGetIndexListCount(actor);
+    u32 entryCount = btlGetIndexListCount(list);
 
     for (; entryIndex < entryCount; entryIndex++) {
-        unit = (BtlUnit *)btlGetIndexListEntry(actor, entryIndex);
+        unit = btlGetIndexListEntry(list, entryIndex);
         btlUnitGetMuzzlePosVU(unit);
         if (selected == NULL) {
             selected = unit;
@@ -558,7 +557,7 @@ void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
 
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->next) {
-        btlFlagUnitDefeatCandidate((s32)unit);
+        btlFlagUnitDefeatCandidate((u8 *)unit);
     }
 }
 
@@ -566,7 +565,7 @@ void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
 
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->next) {
-        btlClearUnitDefeatCandidate((s32)unit);
+        btlClearUnitDefeatCandidate((u8 *)unit);
     }
 }
 
@@ -577,7 +576,7 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
-                btlFlagUnitDefeatCandidate((s32)unit);
+                btlFlagUnitDefeatCandidate((u8 *)unit);
             }
             unit = unit->next;
         } while (unit != NULL);
@@ -591,33 +590,33 @@ void btlClearMatchingUnitDefeatCandidates(s32 mask) {
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
-                btlClearUnitDefeatCandidate((s32)unit);
+                btlClearUnitDefeatCandidate((u8 *)unit);
             }
             unit = unit->next;
         } while (unit != NULL);
     }
 }
 
-/* Mark every unit in the actor's indexed list as a defeat candidate. */
-void btlFlagActorUnitsDefeatCandidate(s32 actor) {
+/* Mark every unit in the indexed list as a defeat candidate. */
+void btlFlagActorUnitsDefeatCandidate(BtlIndexList *list) {
     u32 entryIndex = 0;
-    u32 entryCount = btlGetIndexListCount(actor);
+    u32 entryCount = btlGetIndexListCount(list);
     if (entryCount != 0) {
         do {
-            btlFlagUnitDefeatCandidate(btlGetIndexListEntry(actor, entryIndex));
+            btlFlagUnitDefeatCandidate(btlGetIndexListEntry(list, entryIndex));
             entryIndex++;
         } while (entryIndex < entryCount);
     }
 }
 
 
-/* Clear the defeat-candidate state of every unit in the actor's indexed list. */
-void btlClearActorUnitDefeatCandidates(s32 actor) {
+/* Clear the defeat-candidate state of every unit in the indexed list. */
+void btlClearActorUnitDefeatCandidates(BtlIndexList *list) {
     u32 entryIndex = 0;
-    u32 entryCount = btlGetIndexListCount(actor);
+    u32 entryCount = btlGetIndexListCount(list);
     if (entryCount != 0) {
         do {
-            btlClearUnitDefeatCandidate(btlGetIndexListEntry(actor, entryIndex));
+            btlClearUnitDefeatCandidate(btlGetIndexListEntry(list, entryIndex));
             entryIndex++;
         } while (entryIndex < entryCount);
     }
@@ -635,7 +634,7 @@ void btlUpdateUnitActors(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit = state->units;
     while (unit != NULL) {
-        btlFlagUnitDefeatCandidate((s32)unit);
+        btlFlagUnitDefeatCandidate((u8 *)unit);
         btlSetUnitPosition((s32)unit, (s32)((u8 *)unit + 0x30));
         btlSetUnitRotation((s32)unit, (s32)((u8 *)unit + 0x40));
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||

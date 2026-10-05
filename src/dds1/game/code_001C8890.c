@@ -5,6 +5,9 @@
 #include "ee_mmi.h"
 #include "fpu.h"
 
+extern void sdfReleaseChipBlock(void *block);
+extern s32 btlIsUnitInActiveList(void *unit);
+
 typedef struct SceneAiEntry {
     u8 kind;
     u8 pad01;
@@ -69,7 +72,12 @@ typedef struct SceneTask {
 } SceneTask;
 
 typedef struct BattleController {
-    u8 pad_000[0x1F4];
+    u8 pad_000[0x160];
+    u32 runtimeFlags;
+    void *activeSlot;
+    u8 pad_168[0x20];
+    struct BtlIndexList *pendingSoundList;
+    u8 pad_18C[0x68];
     u32 flags;
     u8 pad_1F8[0x30];
     UiObject *actors;
@@ -521,7 +529,7 @@ typedef struct BattleActionLinkState {
         u16 cursorKindLow;
     };
     u8 pad28[0x38];
-    s32 actorIndices;
+    struct BtlIndexList *actorIndices;
     u8 pad64[0x1C];
     struct BtlOperandGroup *groups; /* 0x80 */
 } BattleActionLinkState;
@@ -537,7 +545,7 @@ typedef struct ActionUnit {
     u32 status;
     s32 actionKind;
     u8 pad10C[0xC];
-    s32 actorIndices;
+    struct BtlIndexList *actorIndices;
     s32 unk11C;
     u8 pad120[0x10];
     f32 unk130;
@@ -927,7 +935,7 @@ s32 fldReleaseIdleSceneActorResources(SceneActor *actor) {
     if (actor->pendingResource != 0) {
         return 0;
     }
-    if (btlIsUnitInActiveList((s32)actor) != 0) {
+    if (btlIsUnitInActiveList(actor) != 0) {
         btlResetActiveUnitList();
         return 0;
     }
@@ -1287,7 +1295,7 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
     if (sndHasActiveActor() != 0) {
         return;
     }
-    model = (u8 *)btlGetIndexListEntry(*(u32 *)(actor + 0x60), 0);
+    model = (u8 *)btlGetIndexListEntry(*(struct BtlIndexList **)(actor + 0x60), 0);
     if (*(u32 *)(actor + 0x20) == 1 &&
         (btlIsActiveActor((s32)model) == 0 ||
          (*(u64 *)(model + 0x110) & 0xE1) != 1)) {
@@ -1358,8 +1366,8 @@ void btlCommandPrintAndFetchOwner(u8 *task) {
             return;
         }
     }
-    if (btlGetIndexListCount(*(s32 *)(task + 0x60)) == 1) {
-        *(s64 *)(task + 0x68) = *(s64 *)((u8 *)btlGetIndexListEntry(*(s32 *)(task + 0x60), 0) + 0x108);
+    if (btlGetIndexListCount(*(struct BtlIndexList **)(task + 0x60)) == 1) {
+        *(s64 *)(task + 0x68) = *(s64 *)((u8 *)btlGetIndexListEntry(*(struct BtlIndexList **)(task + 0x60), 0) + 0x108);
     }
 }
 
@@ -1992,7 +2000,7 @@ INCLUDE_ASM(const s32, "game/code_001C8890", btlResolveActionOperand);
 u32 btlClassifyActionOperand(u8 *actor, u8 *argument) {
     switch (*(s32 *)argument) {
     case 1: {
-        u32 count = btlGetIndexListCount(*(s32 *)(argument + 0x40));
+        u32 count = btlGetIndexListCount(*(struct BtlIndexList **)(argument + 0x40));
         if ((*(u64 *)(actor + 0x110) & 0x1200) == 0x1200 &&
             (*(u16 *)(actor + 0x12E) & 0x1000) == 0 &&
             count == 1) {
@@ -2082,12 +2090,6 @@ typedef struct BtlOperandGroup {
     u8 pad15[7];
     BtlOperandEntry entries[64];
 } BtlOperandGroup;
-
-typedef struct BtlIndexList {
-    s32 capacity;       /* 0x00: allocated entry count */
-    s32 count;          /* 0x04: live entry count */
-    u32 *entries;       /* 0x08: points just past this header */
-} BtlIndexList;
 
 /* Owns an index list and an SDK allocation containing thirteen operand groups. */
 typedef struct BattleIndexWork {
@@ -2244,7 +2246,6 @@ void btlInitBattleIndexWork(BattleIndexWork *object) {
     btlResetIndexWork(object);
 }
 
-extern void btlFreeIndexList();
 
 /* Release each owned buffer once. The cached group address is deliberately not cleared. */
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
@@ -5301,44 +5302,44 @@ s32 btlFindUnitByModeFlagged(s32 arg0) {
     return 0;
 }
 
-/* Allocate a 12-byte native header followed by capacity words. */
-void *btlAllocateIndexList(s32 capacity) {
-    u8 *list = sdfAllocAndClearQuadwords(capacity * 4 + 12);
-    ((BtlIndexList *)list)->capacity = capacity;
-    ((BtlIndexList *)list)->entries = (u32 *)(list + 12);
-    ((BtlIndexList *)list)->count = 0;
+/* Allocate a native header followed by capacity pointer entries. */
+BtlIndexList *btlAllocateIndexList(s32 capacity) {
+    BtlIndexList *list = sdfAllocAndClearQuadwords(capacity * 4 + 12);
+    list->capacity = capacity;
+    list->entries = (void **)(list + 1);
+    list->count = 0;
     return list;
 }
 
-void btlFreeIndexList(u32 ptr) {
-    sdfReleaseChipBlock(ptr);
+void btlFreeIndexList(BtlIndexList *list) {
+    sdfReleaseChipBlock(list);
 }
 
-/* Append one word; the caller must keep the live count within the allocated capacity. */
-void btlAppendIndexListEntry(s32 list, u32 entry) {
+/* The caller keeps the live count within the allocated capacity. */
+void btlAppendIndexListEntry(BtlIndexList *list, void *entry) {
     s32 index;
 
-    index = ((BtlIndexList *)list)->count;
-    ((BtlIndexList *)list)->count = index + 1;
-    ((BtlIndexList *)list)->entries[index] = entry;
+    index = list->count;
+    list->count = index + 1;
+    list->entries[index] = entry;
 }
 
 /* Clear the live count without changing storage or its existing entries. */
-void btlClearIndexList(s32 list) {
-    ((BtlIndexList *)list)->count = 0;
+void btlClearIndexList(BtlIndexList *list) {
+    list->count = 0;
 }
 
 /* Return the number of live entries, not the allocated capacity. */
-u32 btlGetIndexListCount(s32 list) {
-    return ((BtlIndexList *)list)->count;
+u32 btlGetIndexListCount(BtlIndexList *list) {
+    return list->count;
 }
 
-/* Return one stored word; the caller supplies an in-range index. */
-u32 btlGetIndexListEntry(s32 list, s32 index) {
-    return ((BtlIndexList *)list)->entries[index];
+/* The caller supplies an in-range index. */
+void *btlGetIndexListEntry(BtlIndexList *list, s32 index) {
+    return list->entries[index];
 }
 
-void btlCopyIndexList(s32 destination, s32 source) {
+void btlCopyIndexList(BtlIndexList *destination, BtlIndexList *source) {
     u32 count;
     u32 index;
 
@@ -5349,28 +5350,28 @@ void btlCopyIndexList(s32 destination, s32 source) {
     }
 }
 
-/* Swap two stored words without changing the live count. */
-void btlSwapIndexListEntries(s32 list, s32 firstIndex, s32 secondIndex) {
-    s32 *entries;
-    s32 first;
-    s32 second;
+/* Swap two entries without changing the live count. */
+void btlSwapIndexListEntries(BtlIndexList *list, s32 firstIndex, s32 secondIndex) {
+    void **entries;
+    void *first;
+    void *second;
 
     if (firstIndex == secondIndex) {
         return;
     }
-    entries = (s32 *)((BtlIndexList *)list)->entries;
+    entries = list->entries;
     first = entries[firstIndex];
     second = entries[secondIndex];
     entries[firstIndex] = second;
     entries[secondIndex] = first;
 }
 
-u32 btlFindListIndex(s32 arg0, s32 arg1) {
-    u32 count = btlGetIndexListCount(arg0);
+u32 btlFindListIndex(BtlIndexList *list, void *entry) {
+    u32 count = btlGetIndexListCount(list);
     u32 index;
 
     for (index = 0; index < count; index++) {
-        if (arg1 == btlGetIndexListEntry(arg0, index)) {
+        if (entry == btlGetIndexListEntry(list, index)) {
             return index;
         }
     }
@@ -5780,13 +5781,13 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001DBE68);
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DC0E8);
 
 void btlClearPendingSoundList(void) {
-    s32 context = btlGetRuntime();
-    s32 actor = *(s32 *)(context + 0x188);
-    if (actor != 0) {
-        btlFreeIndexList(actor);
-        *(s32 *)(context + 0x188) = 0;
+    BattleController *work = (BattleController *)btlGetRuntime();
+    BtlIndexList *list = work->pendingSoundList;
+    if (list != 0) {
+        btlFreeIndexList(list);
+        work->pendingSoundList = 0;
     }
-    *(u32 *)(context + 0x1F4) &= ~0x10;
+    work->flags &= ~0x10;
 }
 
 void btlCopyMotionTransform(u8 *dst, u8 *src) {
@@ -5861,17 +5862,17 @@ f32 btlGetPoseBlendProgress(s32 arg0) {
     return *(f32 *)(arg0 + 0x128);
 }
 
-s32 btlIsUnitInActiveList(s32 unit) {
-    u8 *work = (u8 *)btlGetRuntime();
-    u8 *slot = *(u8 **)(work + 0x164);
+s32 btlIsUnitInActiveList(void *unit) {
+    BattleController *work = (BattleController *)btlGetRuntime();
+    u8 *slot = work->activeSlot;
     u32 count;
     u32 i;
-    if (slot != 0 && *(s32 *)(slot + 0x18) == unit) {
+    if (slot != 0 && *(void **)(slot + 0x18) == unit) {
         return 1;
     }
-    count = btlGetIndexListCount(*(s32 *)(work + 0x188));
+    count = btlGetIndexListCount(work->pendingSoundList);
     for (i = 0; i < count; i++) {
-        if (btlGetIndexListEntry(*(s32 *)(work + 0x188), i) == unit) {
+        if (btlGetIndexListEntry(work->pendingSoundList, i) == unit) {
             return 1;
         }
     }
@@ -5879,12 +5880,12 @@ s32 btlIsUnitInActiveList(s32 unit) {
 }
 
 void btlResetActiveUnitList(void) {
-    s32 temp_v0;
+    BattleController *work;
 
-    temp_v0 = btlGetRuntime();
-    *(u32 *)(temp_v0 + 0x164) = 0;
-    *(u32 *)(temp_v0 + 0x160) = *(u32 *)(temp_v0 + 0x160) | 0x400;
-    btlClearIndexList(*(u32 *)(temp_v0 + 0x188));
+    work = (BattleController *)btlGetRuntime();
+    work->activeSlot = 0;
+    work->runtimeFlags = work->runtimeFlags | 0x400;
+    btlClearIndexList(work->pendingSoundList);
 }
 
 void btlClearRuntimeFlag2000(void) {
@@ -6014,10 +6015,10 @@ void btlFlagLinkedGroupDefeatCandidatesTask(s32 arg0) {
 
 void btlApplyCombinedActorFlags(u8 *resource) {
     u32 flags = 0;
-    u32 count = btlGetIndexListCount(*(s32 *)(resource + 0x118));
+    u32 count = btlGetIndexListCount(*(struct BtlIndexList **)(resource + 0x118));
     u32 index;
     for (index = 0; index < count; index++) {
-        u8 *actor = (u8 *)btlGetIndexListEntry(*(s32 *)(resource + 0x118), index);
+        u8 *actor = (u8 *)btlGetIndexListEntry(*(struct BtlIndexList **)(resource + 0x118), index);
         flags |= *(u32 *)(actor + 0x110) & 0x600;
     }
     if (flags != 0) {
@@ -6107,7 +6108,7 @@ void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
     }
 }
 
-extern void func_001F6E28(s32, s32, s32);
+extern void func_001F6E28(BtlIndexList *, s32, s32);
 
 void btlFaceActionParticipantsTowardLinkedTarget(ActionUnit *action) {
     s128 vec[3];
@@ -6148,13 +6149,13 @@ void btlAimLinkedUnitAtMuzzle(u8 *action) {
     s128 vec[3];
     s128 *pos;
     u8 *target;
-    u32 count = btlGetIndexListCount(*(s32 *)(action + 0x118));
+    u32 count = btlGetIndexListCount(*(struct BtlIndexList **)(action + 0x118));
     if (count != 0) {
         target = *(u8 **)(*(s32 *)(action + 0xF4) + 0x18);
         if (count == 1) {
-            btlUnitGetMuzzlePosVU((void *)btlGetIndexListEntry(*(s32 *)(action + 0x118), 0));
+            btlUnitGetMuzzlePosVU(btlGetIndexListEntry(*(struct BtlIndexList **)(action + 0x118), 0));
         } else {
-            func_001F6E28(*(s32 *)(action + 0x118), 0, 0);
+            func_001F6E28(*(BtlIndexList **)(action + 0x118), 0, 0);
         }
         pos = &vec[1];
         VU0_STORE_VF(vf10, pos);
@@ -6364,7 +6365,7 @@ s32 btlHasSingleLinkedResource(s32 actor) {
     if (index != 0 && *(u8 *)(datCommandRecords + index * 56 + 8) != 0) {
         return 0;
     }
-    return btlGetIndexListCount(*(s32 *)(actor + 0x118)) == 1;
+    return btlGetIndexListCount(*(struct BtlIndexList **)(actor + 0x118)) == 1;
 }
 
 u32 func_001DD2C0(s32 actor) {
@@ -6403,7 +6404,7 @@ s32 btlHasActorCategoryFlag40(s32 actor) {
 
 s32 btlMatchLinkedActorFlags(s32 actor) {
     s32 linked;
-    s32 entry;
+    u8 *entry;
 
     switch (*(u32 *)(actor + 0x104)) {
     case 4:
@@ -6417,10 +6418,10 @@ s32 btlMatchLinkedActorFlags(s32 actor) {
     if (linked == 0) {
         return 0;
     }
-    if (btlGetIndexListCount(*(s32 *)(linked + 0x60)) >= 2) {
+    if (btlGetIndexListCount(*(struct BtlIndexList **)(linked + 0x60)) >= 2) {
         return 0;
     }
-    entry = btlGetIndexListEntry(*(s32 *)(linked + 0x60), 0);
+    entry = btlGetIndexListEntry(*(struct BtlIndexList **)(linked + 0x60), 0);
     return ((*(u32 *)(*(s32 *)(linked + 0x18) + 0x110) ^ *(u32 *)(entry + 0x110)) & 0x600) == 0;
 }
 
@@ -6429,8 +6430,8 @@ s32 btlHasFirstLinkedCategoryFlag1000(u8 *node) {
     u8 *actor;
     u32 id;
     if (resource == 0) return 0;
-    if (btlGetIndexListCount(*(s32 *)(resource + 0x60)) >= 2) return 0;
-    actor = (u8 *)btlGetIndexListEntry(*(s32 *)(resource + 0x60), 0);
+    if (btlGetIndexListCount(*(struct BtlIndexList **)(resource + 0x60)) >= 2) return 0;
+    actor = (u8 *)btlGetIndexListEntry(*(struct BtlIndexList **)(resource + 0x60), 0);
     if ((*(u32 *)(actor + 0x110) & 0x400) == 0) return 0;
     id = *(u32 *)(actor + 0xC8);
     if (id >= 0x180) return 0;
@@ -6714,7 +6715,7 @@ void func_001DEE38(void) {
 
 void btlStartLinkedDefeatCandidateAction(u8 *actor) {
     u8 *resource = *(u8 **)(actor + 0xF4);
-    btlAppendIndexListEntry(*(s32 *)(actor + 0x118), *(s32 *)(resource + 0x18));
+    btlAppendIndexListEntry(*(struct BtlIndexList **)(actor + 0x118), *(void **)(resource + 0x18));
     func_001E5198(actor, actor + 0x30, actor + 0xC0);
     btlClearAllUnitDefeatCandidates();
     resource = *(u8 **)(actor + 0xF4);
@@ -6960,7 +6961,7 @@ void btlActionAimUserAtTargets(u8 *action, f32 *pose, u8 *out) {
         u8 pad00[0xF4];
         BtlActionAimLink *link;
         u8 padF8[0x20];
-        s32 actorIndices;
+        struct BtlIndexList *actorIndices;
     } BtlActionAim;
     BtlActionAim *command = (BtlActionAim *)action;
     s128 vec[3];
@@ -6995,7 +6996,7 @@ void btlFlagUserAndTargetDefeat(u8 *command, u8 *unused) {
     f32 userPos[4];
     f32 targetPos[4];
     user = *(BtlUnit **)(*(s32 *)(command + 0xF4) + 0x18);
-    target = (BtlUnit *)btlGetIndexListEntry(*(u32 *)(command + 0x118), 0);
+    target = (BtlUnit *)btlGetIndexListEntry(*(struct BtlIndexList **)(command + 0x118), 0);
     if (!(user->flags & target->flags & 0x600)) {
         btlClearAllUnitDefeatCandidates();
         btlFlagUnitDefeatCandidate((u8 *)user);
@@ -7150,7 +7151,7 @@ void btlChooseActionPoseBlendFromActorCount(u8 *action) {
     u32 mask;
     BtlUnit *unit;
 
-    mask = ((BtlUnit *)btlGetIndexListEntry(*(s32 *)(action + 0x118), 0))->flags & 0x600;
+    mask = ((BtlUnit *)btlGetIndexListEntry(*(struct BtlIndexList **)(action + 0x118), 0))->flags & 0x600;
     count = 0;
     for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->flags & 1) {
@@ -7484,7 +7485,7 @@ void func_001EEED8(s32 action, s32 state) {
 
 void btlInitCommandCursorForFirstActor(s32 arg0, s32 arg1) {
     BattleController *work = (BattleController *)btlGetRuntime();
-    s32 first = btlGetIndexListEntry(*(s32 *)(arg0 + 0x118), 0);
+    u8 *first = btlGetIndexListEntry(*(struct BtlIndexList **)(arg0 + 0x118), 0);
     memset(CURSOR, 0, 0x130);
     btlRefreshUnitEffectMotionAndEntry(first);
     if (btlHasFirstLinkedCategoryFlag1000((u8 *)arg0) != 0) {
@@ -9132,13 +9133,14 @@ typedef struct SoundHandleNode {
     void *actor;
 } SoundHandleNode;
 
-extern u32 func_002940D0(s32);
+struct FileQueue;
+extern struct FileQueue *func_002940D0(struct FileQueue *);
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
     SoundBankEntry *entry = &D_0035F748[index];
     node->actor = actor;
-    node->handle = func_002940D0(entry->resource);
+    node->handle = (u32)func_002940D0((struct FileQueue *)entry->resource);
     return node;
 }
 

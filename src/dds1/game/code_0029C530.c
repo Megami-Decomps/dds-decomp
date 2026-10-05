@@ -1595,7 +1595,7 @@ void effCopyBillboardPosition(void *dst, void *src) {
 }
 
 void effCopyBillboardOrientation(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffBillboardWork *)work)->rotation, src);
 }
 
 void effSetBillboardColor(s32 work, u32 color) {
@@ -2677,7 +2677,7 @@ void effCopyActiveInstancePosition(void *dst, void *src) {
 }
 
 void effCopyActiveInstanceOrientation(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffClassWork *)work)->vectors.orientation, src);
 }
 
 void effSetActiveInstanceColor(EffClassWork *work, u32 color) {
@@ -3322,7 +3322,7 @@ void effSetClassWorkPrimaryTransformVector(void *dst, void *src) {
 }
 
 void effSetClassWorkSecondaryTransformVector(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffClassWork *)work)->vectors.orientation, src);
 }
 
 void effSetClassWorkColor(EffClassWork *work, u32 color) {
@@ -4041,7 +4041,7 @@ void effCopyRenderResourcePosition(void *dst, void *src) {
 }
 
 void effCopyRenderResourceOrientation(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffClassWork *)work)->vectors.orientation, src);
 }
 
 void effSetRenderResourceColor(EffClassWork *work, u32 color) {
@@ -4533,7 +4533,7 @@ void effCopyClassResourcePosition(void *dst, void *src) {
 }
 
 void effCopyClassResourceOrientation(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffClassWork *)work)->vectors.orientation, src);
 }
 
 void effSetClassResourceColor(EffClassWork *work, u32 color) {
@@ -4771,7 +4771,7 @@ u8 *effAllocateRingFadeEntries(u8 *config) {
     u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
     u32 count = ((EffBillConfig *)config)->resourceId;
-    u8 *entries = (u8 *)node + 0xC;
+    u8 *entries = (u8 *)(node + 1);
 
     node->entries = entries;
     node->allocation = base;
@@ -4966,7 +4966,7 @@ u8 *effAllocateBillFadeFrameEntries(u8 *config) {
     u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
     u32 count = ((EffBillConfig *)config)->resourceId;
-    u8 *entries = (u8 *)node + 0xC;
+    u8 *entries = (u8 *)(node + 1);
 
     node->entries = entries;
     node->allocation = base;
@@ -5134,7 +5134,7 @@ u8 *effAllocateCompactRingFadeEntries(u8 *config) {
     u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x2C + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
     u32 count = ((EffBillConfig *)config)->resourceId;
-    u8 *entries = (u8 *)node + 0xC;
+    u8 *entries = (u8 *)(node + 1);
 
     node->entries = entries;
     node->allocation = base;
@@ -5358,7 +5358,7 @@ void effCopyBlockResourcePosition(void *dst, void *src) {
 }
 
 void effCopyBlockResourceOrientation(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffClassWork *)work)->vectors.orientation, src);
 }
 
 void effSetBlockResourceColor(EffClassWork *work, u32 color) {
@@ -5933,7 +5933,7 @@ void effCopyModelBlockPosition(void *dst, void *src) {
 }
 
 void effCopyModelBlockOrientation(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffClassWork *)work)->vectors.orientation, src);
 }
 
 void effSetModelBlockColor(EffClassWork *work, u32 color) {
@@ -6158,7 +6158,7 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
     effect->updateCount = 0;
     effect->kind = kind;
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, (u8 *)effect + 0x10);
+    VU0_STORE_VF_UNCLOBBERED($vf0, &effect->transform[0x10]);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
         effect->model = effLoadViewerModelWithVUState((u32)secondary, param);
@@ -6243,7 +6243,7 @@ void effSetModelResourcePrimaryTransformVector(void *dst, void *src) {
 }
 
 void effSetModelResourceSecondaryTransformVector(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(&((EffModelResource *)work)->transform[0x10], src);
 }
 
 void effSetModelResourceColor(s32 work, u32 color) {
@@ -6661,7 +6661,8 @@ extern void btlStartMoveOtherUnitsTask(void *, s32);
 
 /* Header common to the resource-instance constructors and callback dispatchers. */
 typedef struct EffActiveResource {
-    u8 pad_00[0x20];
+    f32 position[4];
+    f32 orientation[4];
     f32 scale;           // 0x20
     u32 color;           // 0x24
     u32 frame;           // 0x28
@@ -7019,7 +7020,7 @@ void effCopyActiveResourceVector(void *dst, void *src) {
 }
 
 void effCopyActiveResourceSecondaryVector(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x10, src);
+    PCP_COPY_VECTOR(((EffActiveResource *)work)->orientation, src);
 }
 
 void effSetActiveResourceColor(EffActiveResource *work, u32 color) {
@@ -7132,7 +7133,9 @@ typedef struct EffBattleCamera {
 
 /* Shared view transform contributes the scale used by camera-relative effects. */
 typedef struct EffViewScale {
-    u8 pad00[0x74];
+    u8 pad00[0x50];
+    f32 quaternion[4]; /* Shared file queue rotation quaternion. */
+    u8 pad60[0x14];
     f32 scale;
 } EffViewScale;
 
@@ -7169,11 +7172,11 @@ void effMultiplyQuatWithFlag(u8 *effect) {
     if ((((EffBattleCamera *)effect)->flags & 0x60) != 0) {
         u128 quaternion;
         camAimRotation(effect, &quaternion);
-        VU0_LOAD_VF($vf10, (u8 *)effFileQueue + 0x50);
+        VU0_LOAD_VF($vf10, ((EffViewScale *)effFileQueue)->quaternion);
         VU0_LOAD_VF($vf11, &quaternion);
         effMiscQuatMultiplyVU();
     } else {
-        VU0_LOAD_VF($vf10, (u8 *)effFileQueue + 0x50);
+        VU0_LOAD_VF($vf10, ((EffViewScale *)effFileQueue)->quaternion);
         VU0_LOAD_VF($vf11, effect + 0x50);
         effMiscQuatMultiplyVU();
     }
@@ -8015,7 +8018,7 @@ u32 effPollPartResource(void) {
         if (effFileQueue != 0) {
             u8 *job = fileAppendJobFromEntry(effFileQueue, record);
             u8 *asset = effFindAssetData(job);
-            strcpy((char *)job + 0x9C, *(char **)asset);
+            strcpy(((EffFileJobEntry *)job)->filename, *(char **)asset);
         }
         result = 0x400002;
     }
@@ -8218,7 +8221,7 @@ void effInitializeResourceQueue(void) {
     btlSetResourceNameHeaderPairAlternate(effFileQueueNameRecord, 0xC2, 0xC8);
     func_001FC7D0(effFileQueueNameRecord, 9);
     record = fileQueueGetAt(effFileQueue, func_002B5990());
-    btlResourceRecordSetName(effFileQueueNameRecord, (u8 *)record + 0x9C);
+    btlResourceRecordSetName(effFileQueueNameRecord, ((EffFileJobEntry *)record)->filename);
 }
 
 extern void func_001FC300(u32);
@@ -8231,7 +8234,7 @@ u32 effPollResourceQueue(void) {
     u32 state;
 
     func_001FC300(effFileQueueNameRecord);
-    btlFormatResourceNameWithoutPrefix(effFileQueueNameRecord, (u8 *)fileQueueGetAt(effFileQueue, func_002B5990()) + 0x9C);
+    btlFormatResourceNameWithoutPrefix(effFileQueueNameRecord, ((EffFileJobEntry *)fileQueueGetAt(effFileQueue, func_002B5990()))->filename);
     state = func_001FC730(effFileQueueNameRecord);
     if ((u32)(state - 1) < 2) {
         func_001FC2E8(effFileQueueNameRecord);

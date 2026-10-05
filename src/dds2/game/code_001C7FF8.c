@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task.h"
 #include "pcp_vu0.h"
 
 extern s32 btlGetRuntime(void);
@@ -113,7 +114,7 @@ typedef struct SceneTask {
     u8 pad52[2];
     s32 effect;               /* 0x54 */
     u8 pad58[8];
-    s32 actorHandle;
+    BtlIndexList *targetList; /* 0x60 */
     u8 pad64[4];
     s64 ownerId;
 } SceneTask;
@@ -123,12 +124,6 @@ typedef struct SceneSlot {
     u8 b;
     u8 id;
 } SceneSlot;
-
-typedef struct SceneSpriteWork {
-    u8 pad00[0xC];
-    u32 firstResource;
-    u32 secondResource;
-} SceneSpriteWork;
 
 typedef struct SceneScriptState {
     u32 state;
@@ -776,16 +771,6 @@ s32 fldStepSceneStateMachine(s32 handle) {
     return 0;
 }
 
-typedef struct SceneAiWork {
-    s32 state;                /* 0x00 */
-    u32 result;               /* 0x04 */
-    s32 entry;                /* 0x08 */
-    void *listA;              /* 0x0C */
-    void *listB;              /* 0x10 */
-    s32 source;               /* 0x14 */
-    u8 pad18[0x8C];
-} SceneAiWork;
-
 typedef struct SceneAiOther {
     u8 pad00[0x7BE];
     s16 index;                /* 0x7BE */
@@ -795,21 +780,16 @@ extern char *D_004367CC;
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void *btlAllocateIndexList();
 
-extern u32 btlGetIndexListCount();
 
-extern u32 btlGetIndexListEntry();
 
-extern void btlAppendIndexListEntry();
 
-extern void btlCopyIndexList();
 
-extern void func_001AC0F8();
+extern void func_001AC0F8(s32 source, BtlIndexList *list, s32, s32, s32);
 
-extern s32 func_001AC360();
+extern s32 func_001AC360(s32 source, BtlIndexList *list, s32);
 
-extern s32 btlFindEligibleTargetForMultiActorCommand();
+extern s32 btlFindEligibleTargetForMultiActorCommand(s32 source, BtlIndexList *list);
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
@@ -854,14 +834,14 @@ s32 btlCreateAiWork(s32 source) {
     return (s32)work;
 }
 
-void fldReleaseSceneSpriteWork(SceneSpriteWork *work) {
-    btlFreeIndexList(work->secondResource);
-    btlFreeIndexList(work->firstResource);
+void fldReleaseSceneSpriteWork(SceneAiWork *work) {
+    btlFreeIndexList(work->listB);
+    btlFreeIndexList(work->listA);
     sdfReleaseChipBlock(work);
 }
 
 void fldReleaseSceneSprite(s64 arg) {
-    fldReleaseSceneSpriteWork((SceneSpriteWork *)kwlnTaskGetUserValue(arg));
+    fldReleaseSceneSpriteWork((SceneAiWork *)kwlnTaskGetUserValue(arg));
     ((BattleSceneWork *)btlGetRuntime())->spriteObject = 0;
 }
 

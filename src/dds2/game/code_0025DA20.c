@@ -196,6 +196,22 @@ extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 extern u8 *effCreateStatusBatch(s32 kind);
+typedef struct BufferDescriptor {
+    u8 pad00[0x10];
+    void (*open)(struct BufferDescriptor *, s32);
+    u8 pad14[0xC];
+} BufferDescriptor;
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(s32 packet);
+extern void itfSendTablePacket(s32 packet, s32 table, s32 mode);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 D_003C9988[4];
+extern s32 D_003C9998[4];
+extern s32 D_003C99A8[4];
+extern BufferDescriptor kwlnDrawSurfaces[];
 extern s32 effDestroyPackedBatch(s32);
 
 typedef struct CampTaskData {
@@ -477,25 +493,25 @@ void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f
 INCLUDE_ASM(s32, "game/code_0025DA20", func_0025E048);
 
 typedef struct CampDisplayDefaults {
-    s32 width;
-    s32 height;
-    s8 color[4];
-    f32 scaleX;
+    s32 x;
+    s32 y;
+    u8 color[4];
     f32 scaleY;
+    f32 scaleX;
     s32 enabled;
     s32 variant;
     s32 unk1C;
 } CampDisplayDefaults;
 
 void mnuCampInitializeDisplayDefaults(CampDisplayDefaults *display) {
-    display->width = 0x100;
-    display->height = 0xE0;
-    display->color[0] = -0x80;
-    display->color[1] = -0x80;
-    display->color[2] = -0x80;
-    display->color[3] = -0x80;
-    display->scaleY = 1.0f;
+    display->x = 0x100;
+    display->y = 0xE0;
+    display->color[0] = 0x80;
+    display->color[1] = 0x80;
+    display->color[2] = 0x80;
+    display->color[3] = 0x80;
     display->scaleX = 1.0f;
+    display->scaleY = 1.0f;
     display->enabled = 1;
     display->variant = 0;
     display->unk1C = 0;
@@ -646,7 +662,52 @@ void campResolvePendingValue(CampScene *scene, CampKeyNode *cue) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E980);
+void func_0025E980(SdfTex *texture, CampDisplayDefaults *display) {
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 variant;
+    s32 packet;
+    s32 surfaceIndex = 0x53;
+    BufferDescriptor *surface;
+
+    D_003C9998[2] = texture->width << 4;
+    D_003C9998[3] = texture->height << 4;
+    halfWidth = (s32)(texture->width * display->scaleX) / 2;
+    halfHeight = (s32)(texture->height * display->scaleY) / 2;
+    D_003C9988[0] = (display->x - halfWidth) << 4;
+    D_003C9988[1] = (display->y - halfHeight) << 3;
+    D_003C9988[2] = (display->x + halfWidth) << 4;
+    D_003C9988[3] = (display->y + halfHeight) << 3;
+    D_003C99A8[0] = display->color[0];
+    D_003C99A8[1] = display->color[1];
+    D_003C99A8[2] = display->color[2];
+    D_003C99A8[3] = display->color[3];
+    variant = display->variant;
+    if (display->color[3] != 0) {
+        packet = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(packet);
+        if (variant == 0) {
+            itfSendTablePacket(packet, 0, 0);
+        } else if (variant == 1) {
+            itfSendTablePacket(packet, 1, 0);
+        } else if (variant == 2) {
+            itfSendTablePacket(packet, 2, 0);
+        }
+        if (display->unk1C != 0) {
+            surfaceIndex = 0x3E;
+            evtSetDrawSurfaceIndex(0x3E);
+            evtSubmitPrimaryAlphaBlendMode(0);
+            evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            itfQueueTextureBoundQuadPacket(D_003C9988, D_003C9998, D_003C99A8,
+                                          0xFF, (s32)texture, 0, packet);
+        } else {
+            itfQueueTextureBoundQuadPacket(D_003C9988, D_003C9998, D_003C99A8,
+                                          0xFF, (s32)texture, 0, packet);
+        }
+        surface = &kwlnDrawSurfaces[surfaceIndex];
+        surface->open(surface, packet);
+    }
+}
 
 /* Clear each track's unknown word and the scene state; do not alter links or values. */
 void fldResetCampSceneEntries(CampScene *scene) {
@@ -827,16 +888,11 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
     }
 }
 
-typedef struct BufferDescriptor {
-    u8 pad00[0x10];
-    void (*open)(struct BufferDescriptor *, s32);
-} BufferDescriptor;
 
 extern BufferDescriptor D_00380708;
 extern u8 D_00380860[];
 extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
-extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfClearLinkedPacketList(void *list);
 extern void sdfCreatePatchableResourcePacket(void *list, void *linkedList, s32 arg2, s32 arg3,
                                             s32 width, s32 height, void *resource, s32 arg7,

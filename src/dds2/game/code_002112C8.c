@@ -67,7 +67,7 @@ typedef struct ActionUnit {
     struct ActionUnit *next;
 } ActionUnit;
 
-/* The state at unit +0x114 links its owner to a selected target handle. */
+/* The state at unit +0x114 links its owner to a selected target list. */
 typedef struct BattleActionScene {
     u8 pad00[0x208];
     s32 soundSequence; /* 0x208: base ID for stationed sound */
@@ -79,7 +79,7 @@ typedef struct BattleActionScene {
     u8 *state;
 } BattleActionScene;
 
-extern u64 func_00219318(void);
+extern BtlUnit *func_00219318(void);
 
 extern s32 btlRollAiBucket(void);
 
@@ -97,7 +97,7 @@ extern s32 btlHasAvailableOption(void);
 
 extern s32 func_001ABB10(void);
 
-extern u32 func_001AC360(u64, u64, u64);
+extern u32 func_001AC360(u64, BtlIndexList *, u64);
 
 extern s8 btlHistoryCounter;
 
@@ -121,7 +121,7 @@ extern void *memset(void *, s32, u32);
 
 extern void func_00216888(s32, s32);
 
-extern s32 func_00215118(s32, u16 *, u16);
+extern void *func_00215118(BtlIndexList *, u16 *, u16);
 
 extern char D_00436CC8[], D_00436CD0[], D_00436CD8[];
 
@@ -198,7 +198,7 @@ typedef union BattleActionSlot {
 
 
 /* Native 0x180-byte command-actor allocation; its two list links are at
- * 0x174/0x178. The public index-list APIs use both signed and unsigned words. */
+ * 0x174/0x178. */
 typedef struct ActionStateLink {
     u8 pad00[8];
     u32 pendingFlags; /* 0x08 */
@@ -213,10 +213,7 @@ typedef struct ActionStateLink {
     s32 adjustedValue; /* 0x48 */
     s8 resultKind; /* 0x4C */
     u8 pad4D[0x13];
-    union {
-        u32 targetHandle;
-        s32 actorIndices;
-    }; /* 0x60: the same index-list address */
+    BtlIndexList *actorIndices; /* 0x60 */
     u8 pad64[0x24];
     u8 *entries; /* 0x88: retained index-work buffer */
     u8 pad8C[4];
@@ -249,7 +246,6 @@ extern s32 btlFindUnitByActor(BtlUnit *);
 
 extern void fldAppendSceneGroupHandle(s32);
 
-extern void btlAppendIndexListEntry();
 
 /* Native 0x10-byte AI selection scratch. Its producer retains the command
  * actor and species/mode; the conditional-action dispatcher uses +8 as a
@@ -327,17 +323,13 @@ extern s32 btlReadCurrentUnitMp(void *);
 
 extern s32 btlComputeSkillAdjustedMaxMp(void *);
 
-extern void *btlAllocateIndexList(s32);
 
-extern u32 btlGetIndexListCount();
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear();
 
-extern void func_001AC0F8(s32, void *, s32, s32, s32);
+extern void func_001AC0F8(s32, BtlIndexList *, s32, s32, s32);
 
-extern s32 btlGetIndexListEntry(void *, u32);
 
-extern void btlFreeIndexList(void *);
 
 extern s32 btlUnitHasNegativeActionQueryResult(void *, s32);
 
@@ -1034,7 +1026,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     u32 entryIndex;
     u32 entryCount;
     s32 contextAddress;
-    void *indexList;
+    BtlIndexList *indexList;
     if (unit->flags & 0x400) {
         return 0;
     }
@@ -1625,9 +1617,9 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00214DF8);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00215118);
 
-s32 btlBuildActorIndexListAndCount(s32 actor, u32 *matched, u32 *count) {
+BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matched, u32 *count) {
     u32 value;
-    s32 indexList;
+    BtlIndexList *indexList;
 
     indexList = btlAllocateIndexList(0xd);
     value = func_001AC360(actor, indexList, 0);
@@ -1676,7 +1668,7 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
     u32 matching;
     u32 count;
     u16 flags[12];
-    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
     u32 best;
     u32 bestIndex;
     u16 found;
@@ -1689,9 +1681,9 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
         best = 0x7FFF;
         bestIndex = 0;
         for (i = 0; i < count; i++) {
-            s32 unit = btlGetIndexListEntry(list, i);
+            BtlUnit *unit = btlGetIndexListEntry(list, i);
             if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
-                u16 current = btlReadCurrentUnitHp(&((BtlUnit *)unit)->statBits);
+                u16 current = btlReadCurrentUnitHp(&unit->statBits);
                 if (best >= current && current != 0) {
                     best = current;
                     found++;
@@ -1700,17 +1692,17 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
             }
         }
         if (found != 0) {
-            btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, btlGetIndexListEntry(list, bestIndex));
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->actorIndices, btlGetIndexListEntry(list, bestIndex));
         } else {
             for (i = 0; i < count; i++) {
                 flags[i] = 1;
             }
-            btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, func_00215118(list, flags, count));
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->actorIndices, func_00215118(list, flags, count));
         }
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)actor)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)actor)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1720,12 +1712,12 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
 s32 btlSelectLowestHealthRateTarget(s32 task) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 picked[12];
     s32 lowestPercent;
     u32 lowestIndex;
     u32 i;
-    s32 target;
+    BtlUnit *target;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
     switch (matched) {
@@ -1748,11 +1740,11 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
         } else {
             target = func_00215118(list, picked, count);
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, target);
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, target);
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1762,7 +1754,7 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
 s32 btlSelectTargetsByActionMask(s32 task, s32 mask) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 i;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
@@ -1775,12 +1767,12 @@ s32 btlSelectTargetsByActionMask(s32 task, s32 mask) {
                 picked[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, func_00215118(list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, func_00215118(list, picked, count));
         break;
     }
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1790,7 +1782,7 @@ s32 btlSelectTargetsByActionMask(s32 task, s32 mask) {
 s32 btlSelectTargetsWithoutActionMask(s32 task, s32 mask) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 i;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
@@ -1803,12 +1795,12 @@ s32 btlSelectTargetsWithoutActionMask(s32 task, s32 mask) {
                 picked[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, func_00215118(list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, func_00215118(list, picked, count));
         break;
     }
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1822,7 +1814,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002163C8);
 s32 btlSelectLowestRankTarget(s32 task) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 i;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
@@ -1842,12 +1834,12 @@ s32 btlSelectLowestRankTarget(s32 task) {
                 bestIndex = i;
             }
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, func_00215118(list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, func_00215118(list, picked, count));
         break;
     }
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1857,7 +1849,7 @@ s32 btlSelectLowestRankTarget(s32 task) {
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216888);
 
 s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
-    void *list = btlAllocateIndexList(13);
+    BtlIndexList *list = btlAllocateIndexList(13);
     u32 mode = 0;
     u32 count;
     u16 picked[12];
@@ -1894,16 +1886,16 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
             }
         }
         if (found == 0) {
-            btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, (s32)((ActionStateLink *)actor)->unit);
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->actorIndices, ((ActionStateLink *)actor)->unit);
             btlFreeIndexList(list);
             return 1;
         }
-        btlAppendIndexListEntry(((ActionStateLink *)actor)->targetHandle, func_00215118((s32)list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)actor)->actorIndices, func_00215118(list, picked, count));
         btlFreeIndexList(list);
         return 1;
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)actor)->targetHandle, (s32)list);
+        btlCopyIndexList(((ActionStateLink *)actor)->actorIndices, list);
         break;
     }
     return 1;
@@ -1912,10 +1904,10 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216B40);
 
 u32 btlAppendSelfAfterTargetScan(s32 battle) {
-    void *list = btlAllocateIndexList(13);
+    BtlIndexList *list = btlAllocateIndexList(13);
     func_001AC0F8(battle, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(((BtlTask *)battle)->targetList, (u32)((BtlTask *)battle)->unit);
+    btlAppendIndexListEntry(((BtlTask *)battle)->targetList, ((BtlTask *)battle)->unit);
     btlFreeIndexList(list);
     return 1;
 }
@@ -1933,7 +1925,7 @@ u32 func_00216D30(u32 task, u32 input) {
 s32 btlSelectTargetsByMode(s32 task, s32 mode) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 i;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
@@ -1953,7 +1945,7 @@ s32 btlSelectTargetsByMode(s32 task, s32 mode) {
             }
         }
         unit = (BtlUnit *)func_00215118(list, picked, count);
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, unit);
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, unit);
         if (mode == 0) {
             ((ActionStateLink *)task)->lastMode = unit->mode;
         }
@@ -1961,7 +1953,7 @@ s32 btlSelectTargetsByMode(s32 task, s32 mode) {
     }
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1972,22 +1964,22 @@ extern u32 btlGetEffectActor(void);
 
 u32 btlAppendEffectActorToCommandIndices(s32 task) {
     u32 actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->targetList, actor);
+    btlAppendIndexListEntry(((BtlTask *)task)->targetList, (void *)actor);
     return 1;
 }
 
 u32 btlAppendCurrentUnitIdToCommandIndices(s32 task) {
-    u64 unitId;
+    BtlUnit *unit;
 
-    unitId = func_00219318();
-    btlAppendIndexListEntry(((BtlTask *)task)->targetList, unitId);
+    unit = func_00219318();
+    btlAppendIndexListEntry(((BtlTask *)task)->targetList, unit);
     return 1;
 }
 
 s32 btlSelectTargetsBlockingElement(s32 task, s32 action) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 i;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
@@ -2000,12 +1992,12 @@ s32 btlSelectTargetsBlockingElement(s32 task, s32 action) {
                 picked[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, func_00215118(list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, func_00215118(list, picked, count));
         break;
     }
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -2019,7 +2011,7 @@ u32 func_00217020(void) {
 s32 btlSelectTargetsPassingCheck(s32 task, s32 action) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 i;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
@@ -2040,12 +2032,12 @@ s32 btlSelectTargetsPassingCheck(s32 task, s32 action) {
                 }
             }
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, func_00215118(list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, func_00215118(list, picked, count));
         break;
     }
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -2055,7 +2047,7 @@ s32 btlSelectTargetsPassingCheck(s32 task, s32 action) {
 void btlSelectLinkedTargets(s32 task, s32 unused, s8 linked) {
     u32 matched;
     u32 count;
-    s32 list;
+    BtlIndexList *list;
     u16 i;
 
     list = btlBuildActorIndexListAndCount(task, &matched, &count);
@@ -2076,12 +2068,12 @@ void btlSelectLinkedTargets(s32 task, s32 unused, s8 linked) {
                 }
             }
         }
-        btlAppendIndexListEntry(((ActionStateLink *)task)->targetHandle, func_00215118(list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)task)->actorIndices, func_00215118(list, picked, count));
         break;
     }
     case 1:
     case 2:
-        btlCopyIndexList(((ActionStateLink *)task)->targetHandle, list);
+        btlCopyIndexList(((ActionStateLink *)task)->actorIndices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -2411,7 +2403,7 @@ void btlStartUnitActionIfPairedSelected(void) {
                     fldAppendSceneGroupHandle(handle);
                     ((ActionStateLink *)handle)->phase = 0x11;
                     ((ActionStateLink *)handle)->flags |= 8;
-                    btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
+                    btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, ((ActionStateLink *)handle)->unit);
                 }
             }
         }
@@ -2597,7 +2589,7 @@ void btlStartReadyUnitAction(void) {
             fldAppendSceneGroupHandle(handle);
             ((ActionStateLink *)handle)->phase = 0x11;
             ((ActionStateLink *)handle)->flags |= 8;
-            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
+            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, ((ActionStateLink *)handle)->unit);
             ctrl->prevUnit = ctrl->unit;
             ctrl->unit = 0;
         }
@@ -2879,8 +2871,8 @@ s32 btlSelectSoleEligibleActor(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BtlUnit *actor;
     s32 count;
-    u64 last;
-    u64 current;
+    BtlUnit *last;
+    BtlUnit *current;
     if (btlHasActiveSubtask() != 0) {
         current = func_00219318();
         last = 0;
@@ -2891,7 +2883,7 @@ s32 btlSelectSoleEligibleActor(void) {
                     if (!(flags & 0xE0)) {
                         if (!(actor->conditionFlags & 0x800)) {
                             count++;
-                            last = (u64)actor;
+                            last = actor;
                         }
                     }
                 }
@@ -3008,13 +3000,13 @@ u32 btlGetSubtaskTargetMode(void) {
     return work->sub->targetMode;
 }
 
-u64 func_00219318(void) {
+BtlUnit *func_00219318(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BtlUnit *selected = (BtlUnit *)work->sub->task;
     BtlUnit *unit;
 
     if (selected != 0) {
-        return (u64)selected;
+        return selected;
     }
     for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
         u32 flags = unit->flags;
@@ -3026,7 +3018,7 @@ u64 func_00219318(void) {
             }
         }
     }
-    return (u64)unit;
+    return unit;
 }
 
 void btlClearSubtaskHandle(void) {
@@ -3094,7 +3086,7 @@ void btlStartReadyUnitActionCopy(void) {
             fldAppendSceneGroupHandle(handle);
             ((ActionStateLink *)handle)->phase = 0x11;
             ((ActionStateLink *)handle)->flags |= 8;
-            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
+            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, ((ActionStateLink *)handle)->unit);
             ctrl->prevUnit = ctrl->unit;
             ctrl->unit = 0;
         }
@@ -3170,8 +3162,8 @@ s32 func_00219950(u8 *unit) {
 s32 btlTriggerLinkedActionMotionAlternate(BtlLinkedCommand *command) {
     ActionStateLink *link = command->link;
     if ((link->unit->flags & 0x200) != 0 &&
-        btlGetIndexListCount(link->targetHandle) == 1) {
-        BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(link->targetHandle, 0);
+        btlGetIndexListCount(link->actorIndices) == 1) {
+        BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(link->actorIndices, 0);
         if ((target->flags & 0x400) != 0) {
             if ((link->unit->flags & 0x1000) == 0) {
                 return 0;
@@ -3191,8 +3183,8 @@ s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command) {
     ActionStateLink *link = command->link;
     BtlUnit *actor = link->unit;
     if ((actor->flags & 0x200) != 0 &&
-        btlGetIndexListCount(link->targetHandle) == 1) {
-        BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(link->targetHandle, 0);
+        btlGetIndexListCount(link->actorIndices) == 1) {
+        BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(link->actorIndices, 0);
         if ((target->flags & 0x400) != 0) {
             if ((link->unit->flags & 0x1000) == 0) {
                 return 0;
@@ -4076,7 +4068,6 @@ extern u32 btlIsMarkedActionSceneStateActive(void);
 
 extern void func_001ECBF8();
 
-extern u32 btlGetIndexListCount(u32);
 
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
@@ -4620,7 +4611,7 @@ void btlQueueLoneFreeTeamHandle(void) {
             fldAppendSceneGroupHandle(handle);
             ((ActionStateLink *)handle)->phase = 0x11;
             ((ActionStateLink *)handle)->flags |= 8;
-            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
+            btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, ((ActionStateLink *)handle)->unit);
         }
     }
 }
@@ -5010,7 +5001,6 @@ u32 btlGetMarkedActionMotionCode(u32 unit, u32 action) {
     return 0;
 }
 
-extern void btlAppendIndexListEntry(s32, u32);
 s32 btlQueueMarkedSpecialActorSceneGroup(void) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     ActionUnit *unit;
@@ -5044,7 +5034,7 @@ s32 btlQueueMarkedSpecialActorSceneGroup(void) {
     fldAppendSceneGroupHandle(handle);
     ((ActionStateLink *)handle)->phase = 0x11;
     ((ActionStateLink *)handle)->flags |= 8;
-    btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, (u32)((ActionStateLink *)handle)->unit);
+    btlAppendIndexListEntry(((ActionStateLink *)handle)->actorIndices, ((ActionStateLink *)handle)->unit);
     return -1;
 }
 
@@ -5216,9 +5206,9 @@ u32 btlApplySingleTargetCameraOffset(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
     u32 owner = (u32)((ActionStateLink *)actor)->unit;
     if (((ActionUnit *)owner)->flags & 0x200) {
-        if (btlGetIndexListCount(((ActionStateLink *)actor)->targetHandle) == 1) {
-            u32 target = btlGetIndexListEntry(((ActionStateLink *)actor)->targetHandle, 0);
-            if ((((ActionUnit *)target)->flags & 0x400) == 0) {
+        if (btlGetIndexListCount(((ActionStateLink *)actor)->actorIndices) == 1) {
+            ActionUnit *target = btlGetIndexListEntry(((ActionStateLink *)actor)->actorIndices, 0);
+            if ((target->flags & 0x400) == 0) {
                 return 0;
             }
             btlFlagAllUnitDefeatCandidatesTask();
@@ -5234,9 +5224,9 @@ s32 btlAimAtLinkedTargetOrGroupCamera(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x200) != 0) {
-        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
-            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+        if (btlGetIndexListCount(((ActionStateLink *)state)->actorIndices) == 1) {
+            ActionUnit *owner = btlGetIndexListEntry(((ActionStateLink *)state)->actorIndices, 0);
+            if ((owner->flags & 0x400) != 0) {
                 if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x1000) == 0) {
                     return 0;
                 }
@@ -5256,9 +5246,9 @@ s32 btlLiftTowardLinkedTarget(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x200) != 0) {
-        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
-            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+        if (btlGetIndexListCount(((ActionStateLink *)state)->actorIndices) == 1) {
+            ActionUnit *owner = btlGetIndexListEntry(((ActionStateLink *)state)->actorIndices, 0);
+            if ((owner->flags & 0x400) != 0) {
                 if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x1000) == 0) {
                     return 0;
                 }
@@ -5347,7 +5337,7 @@ s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
         return 1;
     }
     if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
-        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->actorIndices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlUnitSetCameraOffset((u32)unit);
             return 1;
@@ -5375,7 +5365,7 @@ s32 func_00223DD8(ActionUnit *unit) {
         btlFlagAllUnitDefeatCandidatesTask();
         func_00222450(unit, unit, 0);
     } else if (flags & 0x8) {
-        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->actorIndices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlUnitSetCameraOffset((u32)unit);
             unit->pendingAction = 0;
@@ -5474,9 +5464,9 @@ u32 btlRaiseSingleTargetCameraPoints(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
     u32 owner = (u32)((ActionStateLink *)actor)->unit;
     if (((ActionUnit *)owner)->flags & 0x200) {
-        if (btlGetIndexListCount(((ActionStateLink *)actor)->targetHandle) == 1) {
-            u32 target = btlGetIndexListEntry(((ActionStateLink *)actor)->targetHandle, 0);
-            if ((((ActionUnit *)target)->flags & 0x400) == 0) {
+        if (btlGetIndexListCount(((ActionStateLink *)actor)->actorIndices) == 1) {
+            ActionUnit *target = btlGetIndexListEntry(((ActionStateLink *)actor)->actorIndices, 0);
+            if ((target->flags & 0x400) == 0) {
                 return 0;
             }
             btlFlagAllUnitDefeatCandidatesTask();
@@ -5492,9 +5482,9 @@ s32 btlAimLinkedTargetOrSetCameraTransform(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x200) != 0) {
-        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
-            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+        if (btlGetIndexListCount(((ActionStateLink *)state)->actorIndices) == 1) {
+            ActionUnit *owner = btlGetIndexListEntry(((ActionStateLink *)state)->actorIndices, 0);
+            if ((owner->flags & 0x400) != 0) {
                 if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x1000) == 0) {
                     return 0;
                 }
@@ -5514,9 +5504,9 @@ s32 btlLiftLinkedTargetAndUpdateMotion(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x200) != 0) {
-        if (btlGetIndexListCount(((ActionStateLink *)state)->targetHandle) == 1) {
-            s32 owner = btlGetIndexListEntry(((ActionStateLink *)state)->targetHandle, 0);
-            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+        if (btlGetIndexListCount(((ActionStateLink *)state)->actorIndices) == 1) {
+            ActionUnit *owner = btlGetIndexListEntry(((ActionStateLink *)state)->actorIndices, 0);
+            if ((owner->flags & 0x400) != 0) {
                 if ((((ActionUnit *)(u32)((ActionStateLink *)state)->unit)->flags & 0x1000) == 0) {
                     return 0;
                 }
@@ -5631,7 +5621,7 @@ s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
         return 1;
     }
     if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
-        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->actorIndices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseActionCameraPoints((u32)unit);
             return 1;
@@ -5659,7 +5649,7 @@ s32 func_00224DF0(ActionUnit *unit) {
         btlFlagAllUnitDefeatCandidatesTask();
         btlSetLinkedDefeatCameraPresetB(unit, unit, 0);
     } else if (flags & 0x8) {
-        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->actorIndices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseActionCameraPoints((u32)unit);
             unit->pendingAction = 0;
@@ -5708,7 +5698,6 @@ typedef struct BattleCommandRecord {
 
 extern void btlClearRuntimeFlag2000(void);
 
-extern u32 btlGetIndexListCount(u32);
 
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
@@ -5730,7 +5719,7 @@ typedef struct BattleActor {
     u8 pad1C[8];
     u32 commandId;
     u8 pad28[0x38];
-    u32 targetIndexList; /* 0x60: passed to btlGetIndexListCount/Entry */
+    BtlIndexList *targetIndexList; /* 0x60 */
 } BattleActor;
 
 struct BattleActionUnit {
@@ -5971,8 +5960,8 @@ s32 btlHandleTargetDirectionOrAction(BattleActionUnit *unit) {
     BattleActor *actor = unit->actor;
     if (actor->owner->flags & 0x200) {
         if (btlGetIndexListCount(actor->targetIndexList) == 1) {
-            s32 target = btlGetIndexListEntry(actor->targetIndexList, 0);
-            if (((BattleActionUnit *)target)->flags & 0x400) {
+            BattleActionUnit *target = btlGetIndexListEntry(actor->targetIndexList, 0);
+            if (target->flags & 0x400) {
                 if ((actor->owner->flags & 0x1000) == 0) {
                     return 0;
                 }
@@ -5996,9 +5985,9 @@ s32 btlLiftUnitForLinkedTarget(s32 object) {
     ActionStateLink *actor = (ActionStateLink *)((ActionUnit *)object)->stateFlags;
 
     if ((actor->unit->flags & 0x200) != 0) {
-        if (btlGetIndexListCount(actor->targetHandle) == 1) {
-            s32 owner = btlGetIndexListEntry(actor->targetHandle, 0);
-            if ((((BtlUnit *)owner)->flags & 0x400) != 0) {
+        if (btlGetIndexListCount(actor->actorIndices) == 1) {
+            BtlUnit *owner = btlGetIndexListEntry(actor->actorIndices, 0);
+            if ((owner->flags & 0x400) != 0) {
                 if ((actor->unit->flags & 0x1000) == 0) {
                     return 0;
                 }
@@ -6151,7 +6140,6 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
 
 struct DatUnitStatus;
 extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32);
-extern void btlAppendIndexListEntry(s32, u32);
 
 s32 btlSelectLowestStatTarget(BattleActor *actor) {
     BattleActionContext *battle;
@@ -6199,7 +6187,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
     if (target == NULL) {
         return 0;
     }
-    btlAppendIndexListEntry(actor->targetIndexList, (u32)target);
+    btlAppendIndexListEntry(actor->targetIndexList, target);
     return 1;
 }
 

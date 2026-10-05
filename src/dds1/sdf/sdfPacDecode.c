@@ -21,7 +21,7 @@ typedef struct PacHead {
     s32 payloadSize; /* 0x4 */
     u8 pad8[4]; /* 0x8 */
     s32 decodedSize; /* 0xC */
-    u8 payload[1]; /* 0x10: variable-length packet data */
+    u8 payload[0]; /* 0x10: variable-length packet data */
 } PacHead;
 
 /* Relocation record embedded in the work item's data stream. */
@@ -40,19 +40,21 @@ typedef struct PacWork {
     u8 packet[1]; /* 0x10: copied header and packet data */
 } PacWork;
 
-typedef struct PacAlloc {
-    s32 entryCount; /* 0x0 */
-    s32 entryIndex; /* 0x4 */
-    u8 pad8[24]; /* 0x8 */
-    s32 resource; /* 0x20 */
-} PacAlloc;
-
 typedef struct PacBuf {
     s32 result; /* 0x0 */
     s32 resourceSlot; /* 0x4 */
     u8 *cursor; /* 0x8 */
     s32 remainingBytes; /* 0xC */
 } PacBuf;
+
+typedef struct PacAlloc {
+    s32 entryCount; /* 0x0 */
+    s32 entryIndex; /* 0x4 */
+    u8 pad8[8]; /* 0x8 */
+    PacHead entry; /* 0x10: current serialized entry header */
+    PacBuf buffer; /* 0x20: decoder state; result is the completed resource */
+} PacAlloc;
+
 
 /* Event 0 supplies a payload-size word; event 1 omits it. Keep the
  * packet callback's native short-arity interface unprototyped. */
@@ -403,7 +405,7 @@ void sdfPacStartAllocationList(PacState *state, PacHead *packet) {
 
 /* Start the next allocation entry at its inline descriptor. */
 void sdfPacStartNextAllocationEntry(PacState *state) {
-    func_002EE6F8(state, (u8 *)state->allocation + 0x10, (u8 *)state->allocation + 0x20);
+    func_002EE6F8(state, &state->allocation->entry, &state->allocation->buffer);
     state->onComplete = sdfPacAdvanceAllocationEntry;
 }
 
@@ -411,7 +413,7 @@ void sdfPacStartNextAllocationEntry(PacState *state) {
 /* Reset the output cursor to the current allocation entry and hook the copy
    and completion callbacks. */
 void sdfPacResetOutputToAllocationEntry(PacState *state) {
-    state->outputCursor = (u8 *)state->allocation + 0x10;
+    state->outputCursor = (u8 *)&state->allocation->entry;
     state->pendingBytes = 0x10;
     state->onInput = sdfPacCopyPendingBytes;
     state->onComplete = sdfPacStartNextAllocationEntry;
@@ -420,7 +422,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacAlloc *allocation = state->allocation;
-    sdfAppendResourceListItem(state->queueTail->resourceHandle, allocation->resource);
+    sdfAppendResourceListItem(state->queueTail->resourceHandle, allocation->buffer.result);
     {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;

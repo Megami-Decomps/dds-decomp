@@ -29,7 +29,7 @@ typedef struct BtlLinkedCommand {
     u8 pad100[0x10];
     s32 state;               /* 0x110: aim waits for 0x1E, then resets this */
     s32 actionCode;          /* 0x114 */
-    u32 targetList;          /* 0x118: indexed target-list handle */
+    BtlIndexList *targetList; /* 0x118: indexed target list */
     s32 motionProgress;      /* 0x11C: one-shot aim latch */
     u8 pad120[0x10];
     f32 motionParameter;     /* 0x130: aim setup stores 10 */
@@ -53,7 +53,7 @@ typedef struct BtlLinkedCommand {
     u8 pad12E[2];
     s32 state;               /* 0x130 */
     s32 actionCode;          /* 0x134 */
-    u32 targetList;          /* 0x138 */
+    BtlIndexList *targetList; /* 0x138 */
     s32 motionProgress;      /* 0x13C: timed-action count or one-shot aim latch */
     u8 pad140[0x14];
     f32 motionParameter;     /* 0x154: aim setup stores 10 */

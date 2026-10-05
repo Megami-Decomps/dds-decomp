@@ -84,7 +84,9 @@ typedef struct StaffSelectionList {
 
 /* One staff display work allocation owns the window resources and party target list. */
 typedef struct {
-    u8 pad00[0x6C];
+    u8 pad00[0x54];
+    s32 popupState;
+    u8 pad58[0x14];
     s32 unk6C;
     u8 pad70[4];
     s32 unk74;  /* 0x74 */
@@ -239,7 +241,7 @@ s32 func_002734C0(s32 callback) {
     s32 result;
 
     context = (StaffDisplayContext *)kwlnTaskGetUserValue();
-    popup = (s32 *)((u8 *)context + 0x54);
+    popup = &context->popupState;
     resources = context->resources;
     input = mnuMapPadMaskToFlags(0x33);
     result = menuRunPanel((s32)context, 0, callback);

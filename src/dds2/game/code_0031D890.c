@@ -45,7 +45,7 @@ u32 itfCreateSpriteWorkPool(u32 count) {
     memset(pool, 0, size);
     pool->handle = handle;
     pool->count = count;
-    pool->items = (u8 *)pool + 0xC;
+    pool->items = (u8 *)(pool + 1);
     evtPrintDeveloperConsoleMessage("Sprite Num Work Crate Size[%d]\n", size);
     return (u32)pool;
 }
@@ -104,7 +104,7 @@ u32 func_0031DEB8(u32 count) {
     memset(pool, 0, size);
     pool->handle = handle;
     pool->count = count;
-    pool->items = (u8 *)pool + 0xC;
+    pool->items = (u8 *)(pool + 1);
     evtPrintDeveloperConsoleMessage(D_0042DBA0, size);
     return (u32)pool;
 }

@@ -89,11 +89,9 @@ extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-extern u32 func_001A3360(u64, u64, u64);
+extern u32 func_001A3360(u64, BtlIndexList *, u64);
 
-extern void *btlAllocateIndexList(s32);
 
-extern u32 btlGetIndexListCount();
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -138,11 +136,9 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern s32 btlGetRuntime(void);
 
-extern s32 btlGetIndexListEntry(void *, u32);
 
 extern s32 btlMatchActorEntryCode(void *, s32);
 
-extern void btlFreeIndexList(void *);
 
 extern u8 *datCommandRecords;
 
@@ -560,7 +556,7 @@ s32 btlListHasMatchingFlag(u8 **entryList, s32 entryCount, u32 requestedFlags) {
 
 /* Every entry must classify as 1 or 2 with a corresponding allowed mask bit.
  * Other classifications fail the all-entry check; an empty list passes. */
-s32 btlIndexListMatchesEntryCodes(void *indexList, s32 entryCode, u32 allowedCodeBits) {
+s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 allowedCodeBits) {
     u32 matchedCount = 0;
     u32 entryIndex;
     u32 entryCount = btlGetIndexListCount(indexList);
@@ -606,7 +602,7 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6848);
 
-s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
+s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
     s32 entryCount = btlGetIndexListCount(indexList);
     s32 entryIndex;
@@ -646,7 +642,7 @@ s32 btlIndexListNoExpiredEntryCodes(void *indexList, s32 commandId) {
 /* Return 3 for met requirements, or 0 for failed/inapplicable requirements.
  * A failed primary check suppresses later checks. DDS1 has no requirementBits
  * guard here; do not import DDS2's additional guards or cache table reads. */
-u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, s32 unused, s32 commandId) {
+u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlIndexList *indexList, s32 commandId) {
     s32 eligibility = BTL_COUNTER_ELIGIBILITY_UNSET;
     if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES + 9] & 1) {
         switch (*(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x16)) {
@@ -707,7 +703,7 @@ extern u8 *datCommandRecords;
 s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     BtlUnit *ownerUnit;
     BtlCommandRecord *commandRecord;
-    void *targetList;
+    BtlIndexList *targetList;
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
@@ -737,7 +733,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     }
     flaggedTargetCount = 0;
     targetList = btlAllocateIndexList(0xD);
-    func_001A3360((s32)actionTask, (s32)targetList, 0);
+    func_001A3360((s32)actionTask, targetList, 0);
     targetCount = btlGetIndexListCount(targetList);
     /* Keep this byte-table load separate from commandRecord for the matching address calculation. */
     if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES] & 8) {
@@ -756,7 +752,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
 }
 
-s32 func_00210EB0(void *indexList, s32 commandId) {
+s32 func_00210EB0(BtlIndexList *indexList, s32 commandId) {
     u8 *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;
@@ -807,11 +803,11 @@ s32 func_00210EB0(void *indexList, s32 commandId) {
             }
         }
     }
-    return btlDetermineCommandCounterEligibility(entryList, count, (s32)indexList, commandId);
+    return btlDetermineCommandCounterEligibility(entryList, count, indexList, commandId);
 }
 
 /* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
-s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
+s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
     s32 result = 0;
     u32 flags;
     u32 mask;

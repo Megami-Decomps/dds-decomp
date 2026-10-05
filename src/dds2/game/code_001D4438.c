@@ -2,6 +2,7 @@
 #include "btl.h"
 #include "pcp_vu0.h"
 
+
 extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
 
@@ -140,7 +141,7 @@ typedef struct SceneTask {
     u8 pad52[2];
     s32 effect;               /* 0x54 */
     u8 pad58[8];
-    s32 actorHandle;
+    struct BtlIndexList *targetList; /* 0x60 */
     u8 pad64[4];
     s64 ownerId;
 } SceneTask;
@@ -151,11 +152,6 @@ typedef struct SceneSlot {
     u8 id;
 } SceneSlot;
 
-typedef struct SceneSpriteWork {
-    u8 pad00[0xC];
-    u32 firstResource;
-    u32 secondResource;
-} SceneSpriteWork;
 
 typedef struct SceneScriptState {
     u32 state;
@@ -386,16 +382,6 @@ extern s32 btlGetEffectActive();
 extern void func_001CC020();
 extern void func_001CC438();
 
-typedef struct SceneAiWork {
-    s32 state;                /* 0x00 */
-    u32 result;               /* 0x04 */
-    s32 entry;                /* 0x08 */
-    void *listA;              /* 0x0C */
-    void *listB;              /* 0x10 */
-    s32 source;               /* 0x14 */
-    u8 pad18[0x8C];
-} SceneAiWork;
-
 typedef struct SceneAiOther {
     u8 pad00[0x7BE];
     s16 index;                /* 0x7BE */
@@ -403,14 +389,6 @@ typedef struct SceneAiOther {
 
 extern char *D_004367CC;
 extern void *sdfAllocAndClearQuadwords(s32);
-extern void *btlAllocateIndexList();
-extern u32 btlGetIndexListCount();
-extern u32 btlGetIndexListEntry();
-extern void btlAppendIndexListEntry();
-extern void btlCopyIndexList();
-extern void func_001AC0F8();
-extern s32 func_001AC360();
-extern s32 btlFindEligibleTargetForMultiActorCommand();
 
 typedef struct SceneCoordinateRecord {
     u8 pad00[0xC];
@@ -515,7 +493,7 @@ typedef struct BtlWork {
     u8 pad188[0xC];
     u32 activeUnitId;        /* 0x194 */
     u8 pad198[0x10];
-    s32 pendingSoundList; /* 0x1A8 */
+    struct BtlIndexList *pendingSoundList; /* 0x1A8 */
     u8 pad1AC[0x5C];
     s32 unk208;
     u8 pad20C[0xC];
@@ -611,7 +589,7 @@ typedef struct BattleActionLinkState {
     u8 pad00[0x18];
     BtlUnit *unit;          /* 0x18 */
     u8 pad1C[0x44];
-    s32 actorIndices;       /* 0x60 */
+    struct BtlIndexList *actorIndices;       /* 0x60 */
     u8 pad64[0x24];
     u8 *entries;            /* 0x88 */
 } BattleActionLinkState;
@@ -632,7 +610,7 @@ typedef struct ActionUnit {
     u16 stepKind;           /* 0x12C */
     u8 pad12E[6];
     s32 category;           /* 0x134 */
-    s32 actorIndices;       /* 0x138 */
+    struct BtlIndexList *actorIndices;       /* 0x138 */
     s32 unk13C;
     u8 pad140[4];
     s32 stageCount;         /* 0x144 */
@@ -669,12 +647,6 @@ typedef struct BtlResourceTableEntry {
     u32 flags;
     u8 pad04[72];
 } BtlResourceTableEntry;
-
-typedef struct BtlIndexList {
-    s32 capacity;       /* 0x00: allocated entry count */
-    s32 count;          /* 0x04: live entry count */
-    u32 *entries;       /* 0x08: points just past this header */
-} BtlIndexList;
 
 /* Pose command state: the progress slot is initialized as bits, then used as float. */
 typedef struct BattlePoseBlendState {
@@ -821,7 +793,7 @@ typedef struct BtlCommandArgument {
     s32 command;        /* 0x00 */
     s32 index;          /* 0x04 */
     u8 pad08[0x38];
-    s32 actorIndices;   /* 0x40 */
+    struct BtlIndexList *actorIndices;   /* 0x40 */
     u8 pad44[0x24];
     BtlCommandOption *option; /* 0x68 */
 } BtlCommandArgument;
@@ -1125,7 +1097,6 @@ extern void fldApplyLightSetCurrent(void);
 
 extern s32 sndGetEffectNodeParameter(s32, u16);
 
-extern u32 func_002D4138(u32);
 
 typedef struct BtlCommandTask {
     s32 state;            /* 0x00 */
@@ -1695,8 +1666,6 @@ s32 btlCommandStateSelectB(s32 task) {
 void func_001D5BD8(void) {
 }
 
-extern u32 btlGetIndexListCount(s32);
-extern u32 btlGetIndexListEntry(s32, s32);
 extern void func_001DD390(u8 *command, u8 *argument);
 extern s32 btlIsActiveActor();
 
@@ -1706,7 +1675,7 @@ s32 btlCommandStateSelectC(u8 *task) {
     s32 value;
     SceneActor *actor;
     if ((((SceneTask *)task)->options & 8) || sndHasActiveActor() == 0) {
-        actor = (SceneActor *)btlGetIndexListEntry(((SceneTask *)task)->actorHandle, 0);
+        actor = (SceneActor *)btlGetIndexListEntry(((SceneTask *)task)->targetList, 0);
         command = ((SceneTask *)task)->command;
         ready = 0;
         if (command == 1) {
@@ -1781,14 +1750,14 @@ void btlCommandPrintAndFetchOwner(SceneTask *task) {
         if (command >= 4) {
             if (command < 9) {
                 if (command >= 7) {
-                    if (btlGetIndexListCount(task->actorHandle) == 1) {
-                        task->ownerId = ((SceneActor *)btlGetIndexListEntry(task->actorHandle, 0))->ownerId;
+                    if (btlGetIndexListCount(task->targetList) == 1) {
+                        task->ownerId = ((SceneActor *)btlGetIndexListEntry(task->targetList, 0))->ownerId;
                     }
                 }
             }
         } else {
-            if (btlGetIndexListCount(task->actorHandle) == 1) {
-                task->ownerId = ((SceneActor *)btlGetIndexListEntry(task->actorHandle, 0))->ownerId;
+            if (btlGetIndexListCount(task->targetList) == 1) {
+                task->ownerId = ((SceneActor *)btlGetIndexListEntry(task->targetList, 0))->ownerId;
             }
         }
     }

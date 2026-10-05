@@ -314,7 +314,7 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
     s32 result;
 
     context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    popup = (s32 *)((u8 *)context + 0x54);
+    popup = &context->popupState;
     resources = (MenuResourceSet *)context->menu;
     input = mnuMapPadMaskToFlags(0x33);
     result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
@@ -474,7 +474,7 @@ s32 func_002AD118(u64 callback) {
 
     context = (MenuStaffContext *)kwlnTaskGetUserValue();
     resources = (MenuResourceSet *)context->menu;
-    popup = (s32 *)((u8 *)context + 0x54);
+    popup = &context->popupState;
     input = mnuMapPadMaskToFlags(0xC33);
     result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
     if (result != 0) {

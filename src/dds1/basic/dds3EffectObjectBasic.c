@@ -35,7 +35,9 @@ typedef struct {
 } EffectData; /* 0x30 bytes */
 
 typedef struct {
-    u8 pad0[0x60];
+    u8 pad0[0x40];
+    f32 vector[4];
+    u8 pad50[0x10];
     f32 parameter;
 } EffectParameters;
 
@@ -496,7 +498,7 @@ s32 effObjLoadReadyParameterVector(EffectObj *obj) {
     if (effObjGetReadyData(obj) == NULL) {
         return 0;
     }
-    VU0_LOAD_VF(vf10, (u8 *)obj->params + 0x40);
+    VU0_LOAD_VF(vf10, obj->params->vector);
     return 1;
 }
 
