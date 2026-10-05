@@ -1,28 +1,7 @@
 #include "common.h"
+#include "eff.h"
 
 INCLUDE_ASM(const s32, "game/code_00187DB0", effResourceQuadDraw);
-
-typedef struct {
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} EffResourceRectBounds;
-
-/* Nine copied words; the selected source handle belongs to the owner. */
-typedef struct {
-    s32 extent;
-    s32 centerX;
-    s32 centerY;
-    u8 color[4];
-    s32 blendControl;
-    EffResourceRectBounds bounds;
-} EffResourceRectParams; /* 0x24 */
-
-typedef struct {
-    EffResourceRectParams params;
-    u32 sourceHandle;
-} EffResourceRectWork; /* 0x28 */
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
