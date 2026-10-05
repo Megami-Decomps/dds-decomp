@@ -188,7 +188,9 @@ typedef struct BtlState {
     struct SceneTask *currentTask;
     u8 pad4C4[0x10];
     s32 scriptTarget;
-    u8 pad4D8[0x10];
+    u8 pad4D8[4];
+    struct EffectSlotSet *resB; /* 0x4DC: resource slots used for battle-number glyphs */
+    u8 pad4E0[8];
     u32 buttonTextureHandle; /* 0x4E8 */
     u8 pad4EC[0xDC];
     void (*bossCleanup)(void); /* 0x5C8 */
