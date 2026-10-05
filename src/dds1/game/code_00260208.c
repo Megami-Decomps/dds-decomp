@@ -690,7 +690,7 @@ void brsStaffTaskDestroy(s32 arg0) {
 extern char brsStaffInputTaskName[];
 extern char mnuStaffPrimaryPanelTaskName[];
 extern char mnuStaffSecondaryPanelTaskName[];
-extern void brsMessageInputStep(void);
+extern s32 brsMessageInputStep(u64);
 extern s32 mnuStaffRunPanel1(s32);
 extern s32 mnuStaffRunPanel2(s32);
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);

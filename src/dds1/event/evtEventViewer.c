@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
 typedef struct EvtEvNode {
@@ -49,7 +50,8 @@ typedef struct EvtViewer {
     s32 unk0C;           /* 0xC */
     u8 pad10[4];
     s32 unk14;           /* 0x14 */
-    u8 pad18[8];
+    s32 frame;          /* 0x18: end frame for movie preview */
+    u8 pad1C[4];
     s32 nameCount;       /* 0x20 */
     char names[256][32]; /* 0x24: fixed-width names */
     u8 pad2024[0xC];
@@ -467,7 +469,63 @@ s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer)
     return dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 7, viewer->names[index]);
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C6B0);
+struct EffectObj;
+struct WorldObjectPointer;
+struct WorldInnerOwner;
+struct PolyMovieObject;
+extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 *);
+extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
+extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
+extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
+extern s32 dds3GetObjectOwnedHandle(struct WorldInnerOwner *);
+extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *, s32, s32, s32);
+
+/* Billboard entries and polygon movies use distinct owner attachment paths. */
+void func_0022C6B0(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer) {
+    ObjData *owner;
+    struct PolyMovieObject *movie;
+    s32 frame;
+
+    if (obj == 0) {
+        return;
+    }
+    frame = viewer->frame;
+    if (value < 0) {
+        return;
+    }
+    owner = (ObjData *)dds3FindObjectChainNodeByName(
+        (struct WorldObjectPointer *)dds3GetWorldObject(),
+        (const u8 *)viewer->names[value]);
+    if (owner == NULL) {
+        return;
+    }
+    switch (owner->kind) {
+    case 5:
+        if (type >= 0) {
+            effObjBindOwnerBillEntry((struct EffectObj *)obj,
+                                    (struct EffectObj *)owner, type);
+            break;
+        }
+        /* A negative entry selects the normal owner link instead. */
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 17:
+        effObjBindValidatedOwner((struct EffectObj *)obj, (struct EffectObj *)owner);
+        break;
+    case 16:
+        evtStageRelinkOwnedNodeResource(owner, (void *)obj);
+        movie = ((ObjBase *)dds3GetObjectOwnedHandle((struct WorldInnerOwner *)obj))->slots[1];
+        if (viewer->flags & 1) {
+            evtPolygonMovieScaleByProgress(movie, 0, word, frame);
+        } else {
+            evtPolygonMovieScaleByProgress(movie, 1, word, frame);
+        }
+        break;
+    }
+}
 
 typedef struct EvtViewCmd {
     s32 kind;           /* 0x0 */
@@ -495,14 +553,12 @@ typedef struct EvtViewParams {
 extern void effObjSetFlags(s32 obj, s32 flags);
 extern void *func_00115298(void *resource, void *position, void *scale);
 extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
-struct EffectObj;
 struct EffNodeDescriptor;
 extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, s32 secondVectorAddress);
 extern s32 func_001150B0(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_00115840(s32 mode, s32 arg);
 extern void effObjDispatchReadyState(s32 obj);
 extern s32 effObjCopyMagatuhiSourceParameters(s32 obj, s32 a, s32 b, s32 c, s32 d);
-extern void func_0022C6B0(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
 s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtViewer *viewer) {
