@@ -147,7 +147,7 @@ extern u32 btlGetSelectedBossEffectId(void);
 
 extern u32 btlGetSpecialModeEffectValue(void);
 
-extern u64 func_001ACAE0(void);
+extern s32 func_001ACAE0(void);
 
 extern u16 scrReadIntParameter(u32);
 
@@ -1908,7 +1908,7 @@ u32 btlCmdReportPartyEmptyMp(void) {
 }
 
 u32 btlScriptReturnBattleValue(void) {
-    u64 result;
+    s32 result;
 
     result = func_001ACAE0();
     scrSetIntegerReturnValue(result);

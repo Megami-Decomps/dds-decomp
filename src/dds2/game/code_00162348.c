@@ -467,7 +467,7 @@ void parUpdateTrackPolygonCrossAxes(s32 particle, s32 index, u32 color) {
     effTrackPolySetIndexedColor(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-u32 func_00162E10(void) {
+u32 func_00162E10(u16 pointCapacity) {
     return 0;
 }
 

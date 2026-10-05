@@ -176,13 +176,14 @@ void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
 
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the BillObj entryList is not an emitter. */
-void effRetainResource(s32 index) {
+u32 effRetainResource(s32 index) {
     BillObj *effect = (BillObj *)billCreateIndexed(D_003AA884[index].billboardKind, 0);
     s32 *resource = ((BillObj *)effBillResourceOwners[index])->entryList;
     s32 references = resource[2];
 
     effect->entryList = resource;
     resource[2] = references + 1;
+    return (u32)effect;
 }
 
 u32 func_00159BB0(void) {
