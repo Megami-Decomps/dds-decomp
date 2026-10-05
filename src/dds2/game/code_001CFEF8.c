@@ -610,7 +610,7 @@ extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern u32 kwlnDrawControlFlags;
 
-void func_001D14B0(BattleSceneWork *scene) {
+void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
     scene->scriptState = -1;
     fldClearSceneAdvanceFlag();
     scene->flags |= 0x20;

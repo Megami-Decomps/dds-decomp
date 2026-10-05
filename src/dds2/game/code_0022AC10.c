@@ -1529,7 +1529,7 @@ extern void func_00134A18(void);
 extern void kwlnFadeBackgroundStartOut(s32);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
-s32 func_0022E0E0(void) {
+s32 btlUpdateRuntimeFadeState(void) {
     s8 mode;
 
     if (btlRuntimeState.active == 0) {

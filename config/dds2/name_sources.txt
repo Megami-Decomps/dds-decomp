@@ -140,6 +140,7 @@
 0x0010AE08	evtDestroyFontResourceChain	inferred	Destroys existing console font resource node and clears global handle. [names_reviewed7.tsv]
 0x0010AE38	evtPrintDeveloperConsoleMessage	inferred	src/dds2/game/code_00107EF8.c func_0010AE38: Formats variadic message into stack buffer and prints it only when developer console node exists. Twin of DDS1 func_0010AC10. [names_reviewed24.tsv]
 0x0010B118	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
+0x0010B190	sdfDrawHeapSpanOverlay	inferred	U2
 0x0010B780	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
 0x0010B8D8	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:1228:func_0010B8D8; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0010BD50	scrOpenProcessFromResource	inferred	Obtains a resource handle, constructs script process from its ID, and stores the resource handle on the process.
@@ -1996,6 +1997,7 @@
 0x001A6160	itfMesUpdatePanelFades	inferred	U2
 0x001A67E0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]
 0x001A6B48	btlUpdateFadeIndicator	inferred	BtlFade {kind,dir,alpha,timer} at unit+0x1D0 pulses alpha 0x20/0x40..0xFF
+0x001A6BF8	itfUpdateSoundSelectorPanel	inferred	U1
 0x001A6DA8	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
 0x001A7878	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:783:func_001A7878; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
@@ -2128,6 +2130,7 @@
 0x001B7238	btlPanelResourcesLoad	inferred	loads /battle/panel/batle_01.spr, batle_02.spr, battle_03.spr into the block at D_00436804; DDS1 twin func_001AC628
 0x001B7900	btlClearSharedBattleStateWords	inferred	Clears the consecutive state words in the shared battle work region. [names_reviewed17.tsv]
 0x001B7DC0	btlIsNamedBattleTaskRegistered	inferred	Requires the indexed battle task to be registered and its named task to exist. [names_reviewed17.tsv]
+0x001B7E40	btlCreateAnalysisPanelTask	inferred	U1
 0x001B7FB8	btlHasRegisteredAnalysisPanelTask	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:2949:func_001B7FB8; Requires tracked analysis-panel handle to remain registered and named analysis task to exist.; twin=0x001AD3A8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001B8000	btlGetRegisteredTaskValueOrDefault	inferred	Returns a registered task value or a fixed default when unavailable. [names_reviewed9.tsv]
 0x001B8078	btlCreateGuidePanelTask	inferred	U0
@@ -2223,6 +2226,7 @@
 0x001D1128	fldConsumeSceneInputFlags	inferred	Responds to scene flags 0x800 or 0x400, clears actor effect flag, sets acknowledgement 0x20 and returns 8 or 7.
 0x001D1190	fldAdvanceSceneGroupInitialization	inferred	Applies a scene variant callback, advances the scene step and initializes groups. [names_reviewed13.tsv]
 0x001D1200	btlAdvanceSceneWhenActorTasksReady	inferred	Fam_Mid3
+0x001D14B0	btlChooseAndStartSceneScript	inferred	Fam
 0x001D1700	fldSceneStateWaitScriptRelease	inferred	scene state handler: waits for the current script resource to release, returns 6 (or 9 with flag 0x800) when finished [names_M91_D2Battle.tsv]
 0x001D2798	btlApplyPartyEntryWeightedDelta	inferred	confidence=medium; matched-C; src/dds2/game/code_001CFEF8.c:530:func_001D2798; For eligible active entries, applies a delta proportional to entry weight times 0.05 through the clamped datCalc primitive; does not change the weight field.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001D28D8	fldStepAreaLoad	inferred	confidence=high; matched-C; src/dds2/game/code_001CFEF8.c:575:func_001D28D8; Advances start/poll/done field resource load states while moving linked scene nodes to the waiting state and checking pending background work.; source=reviewed-prior-QP15 [names_qp15.tsv]
@@ -2291,6 +2295,7 @@
 0x001DC888	btlAdvanceLinkedUnitWhenOwnerIdle	inferred	Clears owner flag and changes linked unit state once owner has no tasks. [names_reviewed22.tsv]
 0x001DC8F8	btlFinalizeLinkedActionAndAdvanceHistory	inferred	Runs optional hook, advances history, resets indices and clears owner flag before state transition. [names_reviewed22.tsv]
 0x001DC900	btlUnitTurnEndCommit	inferred	runs BtlWork hook638, clears seqFlags bit0, bumps counter, then state 2 or turn-end select [names_M39_SmallSweep7.tsv]
+0x001DC9C0	btlStartActorDefeatTransition	inferred	U1
 0x001DCC48	btlRemoveEligibleActorSceneTask	inferred	Frees actor resources when necessary, then unlinks eligible scene tasks. [names_reviewed10.tsv]
 0x001DCD88	btlCommandTaskReleaseActor	inferred	restores actor colors/fx defaults/vectors, clears task actor [names_M50_BattleTwins.tsv]
 0x001DCE58	btlFlagLinkedActorActionInProgress	inferred	Sets bit 0x4000 in the linked battle actor flags. [names_reviewed5.tsv]
@@ -2508,6 +2513,7 @@
 0x001EAA28	btlChooseCameraPoseByActorHeights	inferred	U0
 0x001EAC30	btlInitializeLinkedCommandCursor	inferred	U1
 0x001EADC0	btlDispatchActionCursorStepByKind	inferred	Invokes the optional battle hook then chooses action step handling by kind. [names_reviewed13.tsv]
+0x001EB490	btlDispatchActionCameraStep	inferred	Fam twin of dds1 btlDispatchActionCameraStep
 0x001EBB88	btlAdvanceActorStageAndPose	inferred	Advances actor stage counter; on mapped stage sets camera pose or blend, otherwise handles step kind. [names_reviewed5.tsv]
 0x001EBD40	btlUpdateActionPoseForLinkedTarget	inferred	Selects pose update behavior based on linked target and battle state. [names_reviewed12.tsv]
 0x001EC2A8	btlStartLinkedActionPoseBlendIfEligible	inferred	Begins action pose blending when the linked target and participant flags permit it. [names_reviewed12.tsv]
@@ -2957,6 +2963,7 @@
 0x0021A308	btlDispatchNamedChunkNode	inferred	Resolves a named node under the bound actor's nested resource descriptor and dispatches it with the chunk argument.
 0x0021A3A0	btlResetNamedChunkNodeTree	inferred	Recursively resets color and clears flag bit two on each node of a circular sibling/child tree.
 0x0021A408	btlClearNamedChunkFlags	inferred	Finds a named chunk under the bound battler's resource table, then clears matching resource flags recursively using func_0021A3A0.
+0x0021A490	btlUpdateSpecialActorFormation	inferred	U3
 0x0021A8F8	btlReturnUnitToGroup	inferred	if task flag 8 and unit cond&0x4000 clear: fix unit flags, append task to group, dispatch state 2 [names_reviewed2.tsv]
 0x0021B070	btlSetUnitResourceFloatByMode	inferred	unit->mode 0x110/0x111/0x112 selects func_0023CE10/18 or a (s16,f32) store into the named resource at 0xF2/0x13C or 0xF4/0x140 [names_M42_BattleMid.tsv]
 0x0021B168	btlSetUnitResourceHalvesByMode	inferred	same mode dispatch as func_0021B070 with (s16,s16) stores at 0x10A/0x122 or 0x10C/0x124, else func_0023CE20 [names_M42_BattleMid.tsv]
@@ -3120,6 +3127,7 @@
 0x0022DE38	btlClearOverlayBuffers	inferred	fills two overlay buffers with 0x80008000 and sets options bit 2 [names_reviewed2.tsv]
 0x0022DEB8	btlResetHeldTextureState	inferred	confidence=high; matched-C; src/dds2/game/code_00227288.c:1897:func_0022DEB8; confidence=high; matched-C; src/dds2/game/code_00227288.c:1897:func_0022DEB8; Clears the texture-reference flag and releases the held texture reference in the battle graphics runtime.; source=names_R_Names36.tsv:11 [names_qp11.tsv]
 0x0022DF98	btlSubmitFrameAndQueueRuntimeHandle	inferred	Submits the surface packet, queues the nonzero runtime handle for pending processing, then clears it. [names_reviewed10.tsv]
+0x0022E0E0	btlUpdateRuntimeFadeState	inferred	U3
 0x0022E338	btlClearRuntimeState	inferred	Clears the complete battle runtime overlay state structure. [names_reviewed16.tsv]
 0x0022E4C0	btlMarkRuntimeUpdatePending	inferred	Sets the pending update flag on an active battle runtime. [names_reviewed8.tsv]
 0x0022ED38	mnuQueueColoredGlyphAtPosition	inferred	Creates a fixed-color menu glyph at the supplied coordinates; located alongside menu cursor controls. [names_reviewed9.tsv]
@@ -3600,6 +3608,7 @@
 0x002636F8	evtResetStateProgressTimer	inferred	Clears the context's progress timer and submits its primary scene object's child to func_002B8988.
 0x002637E0	evtDispatchProgressCallback	inferred	Passes the context's progress timer to func_00294930 before dispatching the callback through func_002C4038.
 0x00263880	evtApplyBaseRateProgressStep	inferred	Sets the progress multiplier to one and advances the camp counter once. [names_reviewed15.tsv]
+0x00263920	evtPollQuantitySelection	inferred	U3
 0x00263D40	evtUpdateSlotItemCompletionState	inferred	Checks the selected stage and item ownership, then updates the scene completion dispatch mode. [names_reviewed15.tsv]
 0x00263DD0	evtPollStageSelectionAndAdvance	inferred	Polls stage-selection result codes and queues the next scene phase for the advance result. [names_reviewed15.tsv]
 0x00263E60	evtMarkSceneFollowupReadyAndQueueAction	inferred	Switches to the scene follow-up phase, queues an action and marks the scene ready. [names_reviewed15.tsv]
@@ -5376,6 +5385,7 @@
 0x0030FA28	fldNormalizedVectorCross	inferred	confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:389:func_0030FA28; confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:389:func_0030FA28; Field-math routine copies and normalizes both inputs before their three-component cross product; matches DDS1 0x002C8648 and neighboring fldNormalizedVectorDot. Retains sdfCrossNormalizedVectors on SDK duplicate 0x00326B00.; resolution=rename; source=names_qp11_conflicts.tsv:6 [names_qp11.tsv]
 0x00310320	sdfTransformDirectionByMatrix	inferred	Multiplies a direction vector by the rotation portion of a matrix. [names_reviewed10.tsv]
 0x00310608	sdfPowFloatByTruncatedExponent	inferred	Multiplies a base for the whole-number portion of a float exponent. [names_reviewed8.tsv]
+0x00310648	sdfConvertMatrixToQuaternion	inferred	U1
 0x00310888	sdfConvertQuaternionRotationMatrix	inferred	confidence=high; src/dds2/game/code_0030E1A0.c:func_00310888; Computes a homogeneous 4-by-4 rotation matrix from quaternion products. [names_qp9.tsv]
 0x00310B60	sdfSumCrossProductComponents	inferred	Returns the sum of the three components of a vector cross product. [names_reviewed8.tsv]
 0x00310BC8	sdfQuatLengthSquared	inferred	Byte-identical dds1 twin 0x002C97E8; Sums the squares of all four quaternion components. [names_conflicts.tsv]

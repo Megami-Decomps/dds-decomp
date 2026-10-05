@@ -1733,7 +1733,7 @@ void btlUnitTurnEndCommit(s32 task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D0210);
+INCLUDE_ASM(const s32, "game/code_001C8890", btlStartActorDefeatTransition);
 
 extern void btlResetIndexWork();
 
@@ -1931,7 +1931,7 @@ extern char D_003BB5E8[];
 extern char D_003A37C8[];
 
 /* Display the eight slot entries, retaining each group's last valid task. */
-void func_001D09B8(s32 x, s32 y) {
+void btlDebugPrintActionOrder(s32 x, s32 y) {
     BattleController *controller = (BattleController *)btlGetRuntime();
     SceneTask **primary;
     SceneTask **secondary;
@@ -6637,7 +6637,7 @@ extern void func_001EEAE0(CameraPoseAction *, CameraPoseAction *);
 extern void func_001E2FF8(CameraPoseAction *);
 extern void btlSetupActionCameraPair(CameraPoseAction *);
 
-void func_001DD6A0(CameraPoseAction *action) {
+void btlInitializeLinkedActionCamera(CameraPoseAction *action) {
     s32 (*hook)(CameraPoseAction *) = ((BattleController *)btlGetRuntime())->actionCameraInitHook;
     BattleActionLinkState *link;
 
@@ -6676,7 +6676,7 @@ void func_001DD6A0(CameraPoseAction *action) {
 }
 
 extern void btlBuildApproachCamera(CameraPoseAction *, CameraPoseTransform *);
-extern void func_001E2D20(CameraPoseAction *);
+extern void btlUpdateActionTargetCameraPose(CameraPoseAction *);
 extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
 
 void func_001DD7E8(s32 actor) {
@@ -6691,7 +6691,7 @@ void func_001DD7E8(s32 actor) {
         btlBuildApproachCamera((CameraPoseAction *)actor, &((CameraPoseAction *)actor)->transform);
         break;
     case 10:
-        func_001E2D20((CameraPoseAction *)actor);
+        btlUpdateActionTargetCameraPose((CameraPoseAction *)actor);
         break;
     case 11:
         btlAdvanceCursorForUnmarkedUnit(actor, actor);
@@ -6726,7 +6726,7 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DF0);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E08);
 
-void func_001DDE28(u8 *actor) {
+void btlDispatchActionCameraStep(u8 *actor) {
     BattleController *runtime = (BattleController *)btlGetRuntime();
     s32 (*callback)(u8 *) = runtime->actionCameraStepHook;
 
@@ -6914,11 +6914,11 @@ void btlStartLinkedDefeatCandidateAction(u8 *actor) {
 void func_001DEEC0(void) {
 }
 
-extern void func_001E4960(CameraPoseTransform *, CameraPoseTransform *);
+extern void btlBuildGroupFramingCameraPose(CameraPoseTransform *, CameraPoseTransform *);
 
 void btlUpdateLinkedActionEffectVectorByTarget(CameraPoseAction *action) {
     if ((action->link->unit->flags & 0x200) != 0) {
-        func_001E4960(&action->transform, &action->transform);
+        btlBuildGroupFramingCameraPose(&action->transform, &action->transform);
         return;
     }
     if (action->actionKind != 0x10) {
@@ -7302,7 +7302,7 @@ void btlSetupActionCameraPair(CameraPoseAction *command) {
     btlUnitFaceTarget((u8 *)user, (u8 *)target);
 }
 /* vu0 routine: update the action camera's saved target pose. */
-void func_001E2D20(CameraPoseAction *action) {
+void btlUpdateActionTargetCameraPose(CameraPoseAction *action) {
     BtlUnit *user;
     BtlUnit *target;
     CameraPoseTransform *out;
@@ -7491,7 +7491,7 @@ void func_001E4720(CameraPoseTransform *source, CameraPoseTransform *from,
 }
 
 /* vu0 routine: frame the two unit groups using their bounding extents. */
-void func_001E4960(CameraPoseTransform *source, CameraPoseTransform *out) {
+void btlBuildGroupFramingCameraPose(CameraPoseTransform *source, CameraPoseTransform *out) {
     f32 target[4];
     f32 height;
     f32 fov;
@@ -10606,13 +10606,39 @@ void *sndCreateAtracEffectLoadTask(u32 owner) {
     return task;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5328);
+typedef struct BtlDeadLoadArgs {
+    BtlUnit *unit;
+    u32 request;
+    u32 resource;
+} BtlDeadLoadArgs;
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5340);
+extern char D_003A5370[];
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5358);
+void func_001F49D0(BtlDeadLoadArgs *args) {
+    u8 *work = (u8 *)btlGetRuntime();
+    BtlUnit *unit;
+    s32 id;
+    char path[0x70];
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F49D0);
+    if (*(u16 *)(work + 0x260) == 0) {
+        if (mnuGetSoundBufferStateLocked() != 0) {
+            mnuReleaseSoundBufferLocked();
+        }
+        unit = args->unit;
+        if (unit->flags & 0x200) {
+            id = unit->mode;
+            if (unit->flags & 0x1000) {
+                id += 0x10;
+            }
+            func_003014F0(path, D_003A5178, D_003A5188, id);
+        } else {
+            func_003014F0(path, D_003A5198, D_003A5188, unit->mode);
+        }
+        args->request = fileQueueDefaultCallbackRequest(path);
+        btlBossDebugPrintf(D_003A5370, path);
+    }
+    ++*(u16 *)(work + 0x260);
+}
 
 extern char D_003A5390[];
 
@@ -10656,8 +10682,6 @@ void sndFinishEarringPlaybackTask(u32 *sound) {
     }
     --*(u16 *)(state + 0x260);
 }
-
-extern u32 func_001F49D0(u32 *);
 
 void *sndCreateEarringPlaybackTask(u8 *owner) {
     u8 *task = btlAllocTask(12);
@@ -10980,6 +11004,14 @@ void func_001F5D00(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F5D08);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5328);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5340);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5358);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5370);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5390);
 

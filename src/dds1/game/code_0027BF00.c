@@ -103,7 +103,7 @@ extern void mnuReleaseSpriteTextures(s32);
 
 extern void sdfReleaseChipBlock(void *);
 
-extern u32 func_0027D4A0(u32);
+extern u32 mnuCreatePanelSpriteHandles(u32, s32, s32);
 
 extern u32 mnuCreateFadeSpriteResourceSet(u32);
 
@@ -623,7 +623,53 @@ void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *
     itfGridLookupValueOrDefault(group->sprites[6], 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027D4A0);
+typedef struct MenuPanelSlotIndices {
+    s32 slots[6];
+} MenuPanelSlotIndices;
+
+extern MenuPanelSlotIndices D_003B2368;
+extern MenuPanelSprite *effCreateResourceSlotSet(s32, s32, s32);
+extern void effConfigureWithDefaultSetting(MenuPanelSprite *, s32, s32, s32, s32, s32);
+extern void effConfigureIndexedSlotMaterial(MenuPanelSprite *, s32, s32, s32, s32, s32, s32);
+
+/* Panel kind chooses the native sprite-slot layout. */
+u32 mnuCreatePanelSpriteHandles(u32 mode, s32 resource, s32 target) {
+    MenuPanelSlotIndices indices = D_003B2368;
+    MenuPanelHandles *panel = (MenuPanelHandles *)sdfAllocAndClearQuadwords(sizeof(MenuPanelHandles));
+    s32 i;
+
+    panel->mode = mode;
+    switch (mode) {
+    case 0:
+        panel->count = 6;
+        for (i = 0; i < panel->count; i++) {
+            panel->handles[i] = effCreateResourceSlotSet(resource, indices.slots[i], 1);
+        }
+        effConfigureWithDefaultSetting(panel->handles[4], 0, target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[5], 0, target, 0, 0, 12);
+        break;
+    case 1:
+        panel->count = 4;
+        panel->handles[0] = effCreateResourceSlotSet(resource, 23, 1);
+        panel->handles[1] = effCreateResourceSlotSet(resource, 23, 1);
+        panel->handles[2] = effCreateResourceSlotSet(resource, 22, 1);
+        panel->handles[3] = effCreateResourceSlotSet(resource, 22, 1);
+        effConfigureIndexedSlotMaterial(panel->handles[0], 0, target, 1, 10, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[1], 0, target, 1, 0, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[2], 0, target, 1, 0, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[3], 0, target, 1, 10, 10, 12);
+        break;
+    case 2:
+        panel->count = 4;
+        for (i = 0; i < panel->count; i++) {
+            panel->handles[i] = effCreateResourceSlotSet(resource, indices.slots[i + 2], 1);
+        }
+        effConfigureWithDefaultSetting(panel->handles[2], 0, target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[3], 0, target, 0, 0, 12);
+        break;
+    }
+    return (u32)panel;
+}
 
 extern void effInitializeSlotWork(void *, s32);
 

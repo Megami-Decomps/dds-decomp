@@ -644,57 +644,8 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A30F8);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A3360);
 
-s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1) {
-    u32 count;
-    u32 i;
-    s32 cmd;
-    s32 index;
-
-    if (arg0 == 0) {
-        goto fail;
-    }
-    if (arg1 == 0) {
-        goto fail;
-    }
-    count = btlGetIndexListCount(arg1);
-    if (count < 2) {
-        return 0;
-    }
-    cmd = *(s32 *)(arg0 + 0x20);
-    if (cmd < 2) {
-        goto fail;
-    }
-    if (cmd >= 5) {
-        if (cmd > 8) {
-            goto fail;
-        }
-        if (cmd < 7) {
-            goto fail;
-        }
-    }
-    if (cmd == 4) {
-        index = btlGetLoggedIndexedCommandItem(*(s32 *)(arg0 + 0x28));
-    } else {
-        index = *(s32 *)(arg0 + 0x24);
-    }
-    if (*(u8 *)(datCommandRecords + index * 56 + 8) != 0) {
-        goto fail;
-    }
-    if (*(u8 *)(datCommandRecords + index * 56 + 0x24) != 2) {
-        goto fail;
-    }
-    if (*(u16 *)(datCommandRecords + index * 56 + 0x26) == 0) {
-        goto fail;
-    }
-    for (i = 0; i < count; i++) {
-        if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
-             ((UiObject *)btlGetIndexListEntry(arg1, i))->statusFlags) != 0) {
-            return i;
-        }
-    }
-fail:
-    return 0;
-}
+extern s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlFindEligibleTargetForMultiActorCommand);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A3638);
 
@@ -1934,7 +1885,7 @@ s32 btlGetSelectedUnitProperty(s32 object) {
     return D_00358514[*(u16 *)(datCommandRecords + index * 56 + 0x2E) * 3];
 }
 
-s32 func_001A8538(BtlIndexList *targets, BtlTargetResult *results) {
+s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {
     s32 i = 0;
     u32 sides = 0;
     BattleController *controller = (BattleController *)btlGetRuntime();
@@ -2921,7 +2872,7 @@ void func_001AD1F8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD230);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlCreateAnalysisPanelTask);
 
 u32 btlHasRegisteredAnalysisPanelTask(void) {
     s64 temp_v0;

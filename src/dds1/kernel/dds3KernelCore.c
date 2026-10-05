@@ -58,9 +58,14 @@ extern u8 D_003BA830[];
 
 extern u8 D_003BDC48[];
 
-extern u8 D_003244D0[];
+extern u8 D_003244D0[2][2][16];
 
-extern u8 D_00324510[];
+extern u8 D_00324510[2][2][16];
+
+extern u8 D_003BA860[2][2][2];
+extern u8 D_003BA868[2][2];
+extern u8 D_003BA870[2][2][2];
+extern u8 D_003BA878[2][2];
 
 extern u8 D_0039DE88[];
 
@@ -97,7 +102,57 @@ void kwlnTaskAdvanceStartDelays(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100B40);
+s32 func_00100B40(KwlnTask *task) {
+    s32 port;
+    s32 i;
+    s32 nextUpdate;
+
+    if (task->flags & 0x20) {
+        return 1;
+    }
+    D_003BA824 = (s32)task;
+
+    if (task->flags & 0x10) {
+        for (port = 0; port < 2; port++) {
+            for (i = 0; i < 16; i++) {
+                D_00324510[0][port][i] = 0;
+                D_00324510[1][port][i] = 0;
+            }
+            for (i = 0; i < 2; i++) {
+                D_003BA870[port][i][0] = 0;
+                D_003BA878[port][i] = 0;
+                D_003BA870[port][i][1] = 0;
+            }
+        }
+    } else {
+        for (port = 0; port < 2; port++) {
+            for (i = 0; i < 16; i++) {
+                D_00324510[0][port][i] = D_003244D0[0][port][i];
+                D_00324510[1][port][i] = D_003244D0[1][port][i];
+            }
+            for (i = 0; i < 2; i++) {
+                D_003BA870[port][i][0] = D_003BA860[port][i][0];
+                D_003BA870[port][i][1] = D_003BA860[port][i][1];
+                D_003BA878[port][i] = D_003BA868[port][i];
+            }
+        }
+    }
+
+    if (task->update != NULL && task->update != (TaskUpdate)-1) {
+        nextUpdate = task->update(task);
+        if (nextUpdate != 0) {
+            task->update = (TaskUpdate)nextUpdate;
+        }
+        if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == 2) {
+            kwlnTaskRequestDestroy(task);
+            D_003BA824 = 0;
+            return 0;
+        }
+    }
+    task->timer++;
+    D_003BA824 = 0;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100D40);
 

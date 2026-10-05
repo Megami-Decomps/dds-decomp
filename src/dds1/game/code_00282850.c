@@ -179,7 +179,7 @@ extern u32 effCreateStatusBatch(u32);
 
 extern s32 mnuLookupRangeEntry(u16);
 
-extern u32 func_0027D4A0(u32);
+extern u32 mnuCreatePanelSpriteHandles(u32);
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
@@ -455,7 +455,7 @@ void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
 void mnuInitializePanelResource(MenuPanelState *panel) {
     u32 resourceHandle;
 
-    resourceHandle = func_0027D4A0(2);
+    resourceHandle = mnuCreatePanelSpriteHandles(2);
     panel->resourceHandle = resourceHandle;
 }
 

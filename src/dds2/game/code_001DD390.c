@@ -649,7 +649,7 @@ extern s32 D_003BC0C8[];
 
 extern void btlBuildApproachCamera(BtlLinkedCommand *, BtlCamState *);
 extern void btlUpdateActionTargetCameraPose(BtlLinkedCommand *);
-extern void func_001F25F8(BtlCamState *, BtlCamState *);
+extern void btlBuildGroupFramingCameraPose(BtlCamState *, BtlCamState *);
 extern void func_001F3E48(s32);
 extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
 
@@ -793,7 +793,7 @@ extern void func_001DC890(BtlUnit *unit);
 extern void btlFinalizeLinkedActionAndAdvanceHistory(void);
 
 extern void btlUnitTurnEndCommit(BtlUnit *unit);
-extern s32 func_001DC9C0();
+extern s32 btlStartActorDefeatTransition();
 extern s32 btlRemoveEligibleActorSceneTask();
 
 extern void func_001DCD80(void);
@@ -5767,7 +5767,7 @@ extern void func_001F34E0(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState *);
 
 /* Dispatch camera-step work unless a runtime override handles it. */
-void func_001EB490(BtlLinkedCommand *action) {
+void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
 
     if (func_001EAA00(action) != 0) {
@@ -5978,7 +5978,7 @@ void func_001EC6C8(void) {
 
 void btlUpdateLinkedActionEffectVectorByTarget(u32 action) {
     if ((((BtlLinkedCommand *)action)->link->unit->flags & 0x200) != 0) {
-        func_001F25F8(&((BtlLinkedCommand *)action)->camera, &((BtlLinkedCommand *)action)->camera);
+        btlBuildGroupFramingCameraPose(&((BtlLinkedCommand *)action)->camera, &((BtlLinkedCommand *)action)->camera);
         return;
     }
     if (((BtlLinkedCommand *)action)->actionKind != 0x10) {
@@ -6551,7 +6551,7 @@ void func_001F20C8(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F2308);
 
 /* vu0 routine: frame the two unit groups using their bounding extents. */
-void func_001F25F8(BtlCamState *source, BtlCamState *out) {
+void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
     f32 target[4];
     f32 height;
     f32 fov;
