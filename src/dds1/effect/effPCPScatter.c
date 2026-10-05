@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "eff.h"
 
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
@@ -30,18 +31,11 @@
 #define EFF_SCATTER_RESOURCE_BLOCK 1
 #define EFF_SCATTER_CHILD_BLOCK 2
 
-/* Shared resource handed between scatter effects. effPcpScatterResCreate creates it,
-   effPcpScatterResAddRef takes a reference, effPcpScatterResRelease releases it. */
-typedef struct PcpScatterRes PcpScatterRes;
 
 /* Ownership handles refer to SDF allocation nodes, not their retained payloads. */
 typedef struct SdfMemoryBlock SdfMemoryBlock;
 
 
-struct PcpScatterRes {
-    u32 textureHandle;
-    s32 refCount;
-};
 
 extern void *effParamTableGetBlock(void *data, s32 index);
 
