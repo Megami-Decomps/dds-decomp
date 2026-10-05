@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 
@@ -1062,7 +1063,6 @@ void fldReleaseMenuSlots(void) {
 
 extern void fldClearSceneLifecycleFlags(s32);
 
-extern f32 D_00324980[];
 
 extern FldVec4 D_003A05D8[]; /* default camera up vectors (3 copies), the first still read by asm func_00145B18 */
 
@@ -1123,8 +1123,8 @@ void fldEnterSceneCamera(void) {
     D_00324B30.unk4 = 255.0f;
     D_00324B30.unkC = 20000.0f;
     D_00324B30.unk10 = 0x108010;
-    D_00324980[4] = 2244.0f;
-    D_00324980[5] = 2118.0f;
+    D_00324980.offsetX = 2244.0f;
+    D_00324980.offsetY = 2118.0f;
 }
 
 extern s32 sdfModelCreateWithAlternateItems(s32, s32);
@@ -1185,8 +1185,8 @@ void fldLoadSceneModelsAndCamera(void) {
     D_00324B30.unk4 = 255.0f;
     D_00324B30.unkC = 20000.0f;
     D_00324B30.unk10 = 0x108010;
-    D_00324980[4] = 2244.0f;
-    D_00324980[5] = 2118.0f;
+    D_00324980.offsetX = 2244.0f;
+    D_00324980.offsetY = 2118.0f;
 }
 
 void fldReleaseMenuSlotsAfterWait(void) {

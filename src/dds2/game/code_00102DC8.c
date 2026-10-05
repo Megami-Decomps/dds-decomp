@@ -783,19 +783,16 @@ s32 kwlnEnsureDefaultResource(void) {
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105070);
 
 extern void sdfGraphSetDisplayMode(s32);
-extern void sdfCameraBuildProjection(void *);
 extern void func_00105070(s32);
 extern void func_001057B0(void);
-extern u8 sdfSceneProjectionParameters[];
-extern u8 D_0037F980[];
 extern u8 D_00435BC8;
 extern void evtEnsureDrawVectorState(void);
 
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
 void evtResetDisplayProjectionAndVectorState(void) {
     sdfGraphSetDisplayMode(1);
-    sdfCameraBuildProjection(sdfSceneProjectionParameters);
-    sdfCameraBuildProjection(D_0037F980);
+    sdfCameraBuildProjection(&sdfSceneProjectionParameters);
+    sdfCameraBuildProjection(&D_0037F980);
     func_00105070(0);
     func_00105070(1);
     func_001057B0();

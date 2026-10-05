@@ -154,10 +154,10 @@ extern s32 btlMatchActorEntryCode(void *, s32);
 extern s8 D_00453068[];
 
 typedef struct BattleRuntimeState {
-    u32 flags;
+    s32 counter; /* Active encounter updates since initialization. */
     u16 state;
     u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
-    u8 pending;
+    s8 pending;
     s8 active;
     u8 pad09[3];
     u32 options;
@@ -1518,12 +1518,14 @@ void btlInitializeOverlayGraphics(void) {
     btlRuntimeState.options |= 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022E0E0);
+void btlResetRuntimeState(void);
+
+INCLUDE_ASM("asm/dds2/nonmatchings", "game/code_0022AC10", func_0022E0E0);
 
 void btlClearRuntimeState(void) {
     BattleRuntimeState *state = &btlRuntimeState;
     memset(state, 0, sizeof(*state));
-    state->flags = 0;
+    state->counter = 0;
     state->state = 0;
     state->fadeMode = 0;
     state->pending = 0;
@@ -1533,7 +1535,6 @@ void btlClearRuntimeState(void) {
     state->resource = 0;
 }
 
-void btlResetRuntimeState(void);
 
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
@@ -1548,7 +1549,7 @@ void btlResetAsyncState(void) {
 void btlActivateRuntime(u8 condition) {
     BattleRuntimeState *battle = &btlRuntimeState;
     battle->fadeMode = condition;
-    battle->flags = 0;
+    battle->counter = 0;
     battle->state = 1;
     battle->active = 1;
     battle->pending = 0;

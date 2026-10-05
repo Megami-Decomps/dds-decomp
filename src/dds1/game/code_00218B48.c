@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -2260,7 +2261,6 @@ extern char D_003BBCC8[]; /* "fovy=" */
 extern char D_003BBCD0[]; /* "%f" */
 extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
-extern f32 sdfSceneProjectionParameters[];
 extern s32 sdfPathExists(char *path);
 extern s32 fileQueueDefaultCallbackRequest(char *path);
 extern void fileWaitReady(s32 file);
@@ -2326,7 +2326,7 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(lineStart, D_003BBCC8, 5) == 0) {
             if (func_00301588(lineStart + 5, D_003BBCD0, &verticalFov) == 1) {
-                sdfSceneProjectionParameters[3] = verticalFov;
+                sdfSceneProjectionParameters.fov = verticalFov;
             }
         } else if (memcmp(lineStart, D_003BBCD8, 4) == 0) {
             if (func_00301588(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
