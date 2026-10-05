@@ -32,20 +32,34 @@ enum {
     EVT_WORLD_SLOT_UNIT = 5   /* unit/group/lip-sync lists: byte offset 0x40 */
 };
 
-/* Element of the table's indexed slot array; only its list head is identified. */
+struct SdfMemBlock;
+
+/* The object's 18 per-kind intrusive lists. */
 typedef struct EvtWorldSlot {
-    u8 pad00[4];
+    s32 count;
     void *head; /* 0x04: interpreted by the slot-specific node type */
-    u8 pad08[4];
+    void *tail;
 } EvtWorldSlot;
 
 typedef struct EvtWorldTable {
-    u8 pad00[8];
+    s32 unk00;
+    struct SdfMemBlock *resource; /* 0x04: descriptor owning the slot array */
     EvtWorldSlot *slots; /* 0x08; valid index range is a caller contract */
+    u32 cameraObject; /* 0x0C */
+    u32 playerObject; /* 0x10 */
+    u32 indexedHandle; /* 0x14 */
+    u32 unk18;
+    u32 unk1C;
+    s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
+    u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
 } EvtWorldTable;
 
 typedef struct EvtWorldObject {
-    u8 pad00[0x18];
+    s16 headIndex;
+    s16 tailIndex;
+    s16 cursorIndex;
+    u16 entryCount;
+    u8 pad08[0x10];
     EvtWorldTable *table; /* 0x18 */
 } EvtWorldObject;
 
