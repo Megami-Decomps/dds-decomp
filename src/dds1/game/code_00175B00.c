@@ -2,7 +2,6 @@
 #include "pcp_vu0.h"
 #include "eff.h"
 
-typedef struct PcpScatterRes PcpScatterRes;
 
 /* Drawable allocation is 0x80 bytes; its resource and geometry arrays are
  * independent of the effect instance that supplies the transform and scale. */

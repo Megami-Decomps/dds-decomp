@@ -2,7 +2,6 @@
 #include "pcp_vu0.h"
 #include "eff.h"
 
-typedef struct PcpScatterRes PcpScatterRes;
 
 extern PcpScatterRes *effPcpScatterResCreate(u32);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *);

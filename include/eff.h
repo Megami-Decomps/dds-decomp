@@ -302,6 +302,13 @@ typedef struct EffResourceWork {
     u32 resource70;
 } EffResourceWork; /* 0x74 */
 
+/* Shared scatter texture reference, created and released independently of pools. */
+typedef struct PcpScatterRes {
+    u32 textureHandle;
+    s32 refCount;
+} PcpScatterRes; /* 0x08 */
+
+
 /* Exactly the 0x5C bytes copied into the needle's runtime work. */
 typedef struct EffPCPNeedleParams {
     f32 position[4];
