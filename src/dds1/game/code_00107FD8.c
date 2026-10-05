@@ -3,6 +3,7 @@
 #include "common.h"
 
 #include "kwln.h"
+#include "sdf.h"
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
@@ -1297,7 +1298,80 @@ void evtToggleDebugTimeGraphTask(s8 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AF68);
+extern u32 D_003BA97C;
+extern void sdfAppendFillRectanglePacket(SdfListHead *, s32, s32, s32, s32,
+                                         s32, s32, s32, s32 (*)(s32));
+
+/* Render an allocation span as partial rows and complete heap-map rows. */
+void func_0010AF68(SdfListHead *packetList, s32 x, s32 y,
+                   u32 heapBase, u32 address, s32 remainingBytes, u8 kind) {
+    s32 color;
+    u32 byteOffset;
+    s32 rowIndex;
+    s32 columnIndex;
+    s32 leftX;
+    s32 topY;
+    u32 bytesPerRow;
+    u32 bytesPerCell;
+
+    switch (kind) {
+    case 0:
+        color = 0x80000000;
+        break;
+    case 1:
+        color = 0x80008080;
+        break;
+    case 2:
+        color = 0x80000080;
+        break;
+    default:
+        color = 0x80800000;
+        break;
+    }
+    byteOffset = address - heapBase;
+    bytesPerRow = D_003BA97C >> 8;
+    bytesPerCell = D_003BA97C >> 15;
+    rowIndex = byteOffset / bytesPerRow;
+    columnIndex = (byteOffset % bytesPerRow) / bytesPerCell;
+    if (D_003BA97C < remainingBytes || remainingBytes < 0) {
+        return;
+    }
+
+    topY = y + rowIndex * 8;
+    leftX = x + columnIndex * 16;
+    if (columnIndex > 0) {
+        s32 remainingCells = 128 - columnIndex;
+
+        if (remainingBytes >= remainingCells / bytesPerCell) {
+            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+                                         leftX + remainingCells * 16, topY + 8,
+                                         0x0FFFFF80, NULL);
+            remainingBytes -= remainingCells / (D_003BA97C >> 15);
+        } else {
+            s32 cellCount = remainingBytes / bytesPerCell;
+
+            if (cellCount == 0 && remainingBytes > 0) {
+                cellCount = 1;
+            }
+            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+                                         leftX + cellCount * 16, topY + 8,
+                                         0x0FFFFF80, NULL);
+            remainingBytes = 0;
+        }
+        topY += 8;
+    }
+    while (remainingBytes >= (D_003BA97C >> 8)) {
+        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
+                                     x + 0x800, topY + 8, 0x0FFFFF80, NULL);
+        remainingBytes -= D_003BA97C >> 8;
+        topY += 8;
+    }
+    if (remainingBytes > 0) {
+        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
+                                     x + (remainingBytes / (D_003BA97C >> 15)) * 16,
+                                     topY + 8, 0x0FFFFF80, NULL);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B1B0);
 
@@ -1315,7 +1389,6 @@ extern void sdfGetChipHeapStats(SdfChipStats *);
 extern void func_0010B1B0(void *, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern u32 D_003BA97C;
 extern char D_003BA980[];
 extern char D_003BA988[];
 

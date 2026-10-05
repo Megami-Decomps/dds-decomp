@@ -209,10 +209,14 @@ extern void sdfDevWaitThenReleaseCommandState(u32);
 extern s32 fldValueRecordCount;
 
 typedef struct FldRecE4 {
-    u8 pad0[0xCC];
+    u8 pad0[0xB8];
+    f32 previousPosition[3]; /* 0xB8: saved world position of the record's actor. */
+    u8 padC4[8];
     s32 id;
-    s32 value;
-    u8 padD4[0x10];
+    s32 value; /* 0xD0: record API word, also used as an actor address. */
+    u8 padD4[8];
+    s32 sceneFlag; /* 0xDC: passed to fldTestRoomSceneFlag. */
+    u8 padE0[4];
 } FldRecE4; /* 0xE4 bytes */
 
 extern s32 fldAreaState[];
@@ -786,8 +790,8 @@ typedef struct FldProbeKind {
 
 typedef struct FldProbeTarget {
     u8 pad00[0x40];
-    u8 position[0x10]; /* 0x40 */
-    u8 quaternion[0x10]; /* 0x50 */
+    f32 position[4]; /* 0x40 */
+    f32 quaternion[4]; /* 0x50 */
 } FldProbeTarget;
 
 typedef struct FldProbeActor {
