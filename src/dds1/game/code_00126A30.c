@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "sdf.h"
+#include "fld.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -4501,10 +4502,9 @@ void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013EC68);
 
 extern void fldLoadActorWaypointTable(s32);
-struct FieldSequenceRecord;
-extern void fldInitializeLinkedSequence(struct FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
+extern void fldInitializeLinkedSequence(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
 
-void fldInitializeActorLinkedSequence(s32 mode, s32 index, u8 *sequence) {
+void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence) {
     s32 field;
     s32 motion;
     s32 kind;
@@ -4550,9 +4550,9 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, u8 *sequence) {
             kind = entry->sequenceKind;
         }
         if (field != 0 && kind != 0) {
-            fldInitializeLinkedSequence((struct FieldSequenceRecord *)sequence, field, kind, entry->sequenceName,
+            fldInitializeLinkedSequence(sequence, field, kind, entry->sequenceName,
                                         entry->sequenceCode, entry->linkKind, entry->linkName);
-            *(s32 *)(sequence + 0x5C) = 5;
+            sequence->mode = 5;
             if (fldAreaState[0xA] != entry->sequenceCode && entry->sequenceCode != 0) {
                 fldAreaState[0xA] = entry->sequenceCode;
             }
