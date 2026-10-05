@@ -260,8 +260,16 @@ def reconcile_unit(report: dict, unit: dict, spec: dict) -> tuple[int, int, floa
 
 def reconcile(report: dict, scope: str, manifest: dict) -> None:
     changes = []
+    # A combined report may contain only the games passed to configure.py.
+    # Still require every configured correction unit within a present game.
+    report_versions = {unit["name"].split("/", 1)[0] for unit in report["units"]}
+    report_versions.update(category["id"] for category in report["categories"])
+    if scope == "all" and not report_versions.intersection(VERSIONS):
+        raise SystemExit("combined report contains no configured games")
     for spec in manifest["units"]:
         if scope not in ("all", spec["version"]):
+            continue
+        if scope == "all" and spec["version"] not in report_versions:
             continue
         report_name = spec["name"] if scope != "all" else f"{spec['version']}/{spec['name']}"
         unit = next((candidate for candidate in report["units"]
