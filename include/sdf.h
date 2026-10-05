@@ -369,12 +369,6 @@ extern s32 sdfChipPageCount[2];
 extern SdfPendingRequest sdfChipReleaseRequest;
 extern SdfChipClassTable sdfChipClassTable;
 
-/* Draw-node vector slots (SdfDrawNode vectors array indices). */
-#define SDF_DRAW_TRANSLATION_VECTOR 0
-#define SDF_DRAW_SCALE_VECTOR 1
-#define SDF_DRAW_X_AXIS_VECTOR 2
-#define SDF_DRAW_Y_AXIS_VECTOR 3
-#define SDF_DRAW_Z_AXIS_VECTOR 4
 
 /* SDF chunk fourCC values (little-endian byte order). */
 #define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */

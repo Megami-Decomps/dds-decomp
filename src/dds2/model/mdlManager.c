@@ -19,17 +19,13 @@ typedef struct MdlSub {
     u16 unkA;   /* 0xA */
 } MdlSub;
 
-typedef struct MdlEntry {
-    u8 unk0[0x14]; /* 0x0 */
-    s16 enabled;   /* 0x14 */
-} MdlEntry;
 
 /* Entry table pointed to by the first word of MdlInner. */
 typedef struct MdlEntryTable {
     u8 unk0[4];       /* 0x0 */
     s16 count;        /* 0x4 */
     u8 unk6[6];       /* 0x6 */
-    MdlEntry **items; /* 0xC */
+    SdfDrawNode **items; /* 0xC */
 } MdlEntryTable;
 
 /* Record behind MdlCtx.inner. */

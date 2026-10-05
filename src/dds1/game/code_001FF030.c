@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl_state.h"
 #include "btl_command.h"
+#include "sdf_draw.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
@@ -2821,17 +2822,47 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
     return *(u8 **)(effect + 4) == unit;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00207CA0);
-
 extern s8 D_003BD86C;
+
+/* vu0 routine: normalize packed RGBA and fade the named chunk tree. */
+void func_00207CA0(SdfDrawNode *node, s32 color)
+{
+    SdfDrawNode *child;
+    u32 source[4];
+    u32 tint[4];
+    u32 packed[4];
+
+    node->flags |= 2;
+    node->color &= 0xFF000000;
+    if (node->color > 0x1FFFFFF) {
+        node->color -= 0x2000000;
+        D_003BD86C = 0;
+    } else {
+        node->color = 0;
+    }
+    source[0] = color;
+    EE_MMI_RGBA_UNPACK(source, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    tint[0] = node->color | 0x808080;
+    EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(packed[0]);
+    child = node->children;
+    node->color = packed[0];
+    if (child != NULL) {
+        do {
+            func_00207CA0(child, color);
+            child = child->next;
+        } while (child != node->children);
+    }
+}
 
 extern s32 sdfNamedChunkFindId(void *, void *);
 
-extern void func_00207CA0(s32, s32);
 /* Named chunk indirection follows the same +0x18/+0x0C layout as DDS2. */
 typedef struct BtlNamedChunkData {
     u8 pad00[0xC];
-    void **entries; /* 0x0C: indexed chunk node pointers */
+    SdfDrawNode **entries; /* 0x0C: indexed draw-node pointers */
 } BtlNamedChunkData;
 
 typedef struct BtlNamedChunkDescriptor {
@@ -2851,7 +2882,7 @@ s32 btlDispatchNamedChunkNode(void *query) {
     u8 *model;
     u8 *descriptor;
     s32 index;
-    s32 selected;
+    SdfDrawNode *selected;
     if (unit == 0) {
         return 1;
     }
@@ -2864,7 +2895,7 @@ s32 btlDispatchNamedChunkNode(void *query) {
     if (index == -1) {
         return 1;
     }
-    selected = (s32)((BtlNamedChunkDescriptor *)descriptor)->data->entries[index];
+    selected = ((BtlNamedChunkDescriptor *)descriptor)->data->entries[index];
     D_003BD86C = 1;
     func_00207CA0(selected, ((BtlNamedChunkDescriptor *)descriptor)->argument);
     return D_003BD86C;

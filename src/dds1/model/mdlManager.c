@@ -17,24 +17,13 @@ typedef struct MdlSub {
     u16 unkA;   /* 0xA */
 } MdlSub;
 
-/* Entry enabled by mdlEnableAllEntries. */
-typedef struct MdlEntry {
-    u8 unk0[0x14]; /* 0x0 */
-    s16 enabled;   /* 0x14 */
-    u8 pad16[0x6A];
-    f32 row0[3];   /* 0x80: basis rows eased by mdlBlendEntryPitchYawAndUpdate */
-    u8 pad8C[4];
-    f32 row1[3];   /* 0x90 */
-    u8 pad9C[4];
-    f32 row2[3];   /* 0xA0 */
-} MdlEntry;
 
 /* Entry table pointed to by the first word of MdlInner. */
 typedef struct MdlEntryTable {
     u8 unk0[4];        /* 0x0 */
     s16 count;         /* 0x4 */
     u8 unk6[6];        /* 0x6 */
-    MdlEntry **items;  /* 0xC */
+    SdfDrawNode **items; /* 0xC */
 } MdlEntryTable;
 
 
@@ -519,7 +508,7 @@ extern void sdfRotateVuMatrixAboutY(f32 angle);
  * updateArg is forwarded unchanged to the remaining update routines. */
 void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, f32 pitch, f32 yaw) {
     MdlInner *inner;
-    MdlEntry *entry = NULL;
+    SdfDrawNode *entry = NULL;
     f32 targetRows[4][4];
     f32 pitchMagnitude;
     f32 targetWeight;
@@ -552,15 +541,15 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
             targetWeight = pitchMagnitude / MDL_FULL_BLEND_PITCH;
         }
         existingWeight = 1.0f - targetWeight;
-        entry->row0[0] = targetRows[0][0] * targetWeight + entry->row0[0] * existingWeight;
-        entry->row0[1] = targetRows[0][1] * targetWeight + entry->row0[1] * existingWeight;
-        entry->row0[2] = targetRows[0][2] * targetWeight + entry->row0[2] * existingWeight;
-        entry->row1[0] = targetRows[1][0] * targetWeight + entry->row1[0] * existingWeight;
-        entry->row1[1] = targetRows[1][1] * targetWeight + entry->row1[1] * existingWeight;
-        entry->row1[2] = targetRows[1][2] * targetWeight + entry->row1[2] * existingWeight;
-        entry->row2[0] = targetRows[2][0] * targetWeight + entry->row2[0] * existingWeight;
-        entry->row2[1] = targetRows[2][1] * targetWeight + entry->row2[1] * existingWeight;
-        entry->row2[2] = targetRows[2][2] * targetWeight + entry->row2[2] * existingWeight;
+        entry->localMatrix[0][0] = targetRows[0][0] * targetWeight + entry->localMatrix[0][0] * existingWeight;
+        entry->localMatrix[0][1] = targetRows[0][1] * targetWeight + entry->localMatrix[0][1] * existingWeight;
+        entry->localMatrix[0][2] = targetRows[0][2] * targetWeight + entry->localMatrix[0][2] * existingWeight;
+        entry->localMatrix[1][0] = targetRows[1][0] * targetWeight + entry->localMatrix[1][0] * existingWeight;
+        entry->localMatrix[1][1] = targetRows[1][1] * targetWeight + entry->localMatrix[1][1] * existingWeight;
+        entry->localMatrix[1][2] = targetRows[1][2] * targetWeight + entry->localMatrix[1][2] * existingWeight;
+        entry->localMatrix[2][0] = targetRows[2][0] * targetWeight + entry->localMatrix[2][0] * existingWeight;
+        entry->localMatrix[2][1] = targetRows[2][1] * targetWeight + entry->localMatrix[2][1] * existingWeight;
+        entry->localMatrix[2][2] = targetRows[2][2] * targetWeight + entry->localMatrix[2][2] * existingWeight;
     }
     if (ctx->flags & MDL_SKIP_TRANSFORMS) {
         return;
@@ -590,11 +579,11 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
 void mdlEnableAllEntries(MdlCtx *ctx) {
     MdlEntryTable *table = ctx->inner->entries;
     s32 entryCount = table->count;
-    MdlEntry **entries = table->items;
+    SdfDrawNode **entries = table->items;
     s32 entryIndex;
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        entries[entryIndex]->enabled = MDL_ENTRY_ENABLED;
+        entries[entryIndex]->flags = MDL_ENTRY_ENABLED;
     }
 }
 
