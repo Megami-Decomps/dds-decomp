@@ -64,7 +64,9 @@ typedef struct BtlState {
     void (*cleanup)(void); /* 0x5D0 */
     u8 pad5D4[0x1C];
     void (*updateCallback)(void); /* 0x5F0 */
-    u8 pad5F4[0xA0];
+    u8 pad5F4[0x38];
+    s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
+    u8 pad630[0x64];
     BattleEffectState *effect; /* 0x694 */
     u8 pad698[0xC];
     s32 unk_6A4;
