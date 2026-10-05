@@ -34,16 +34,19 @@ void mnuTitleDrawFadeMenuEntries(u8 *work) {
     func_002650C8(D_0036D4B0.v[4], D_0036D4B0.v[5] + rowOffset, 0, color, res, 0x53, work);
 }
 
-extern void itfUpdateFadeColor();
-extern void func_00264EF0();
+typedef struct TitleFadeWork TitleFadeWork;
+
+extern void itfUpdateFadeColor(TitleFadeWork *);
+extern void func_00264EF0(TitleFadeWork *);
+extern void brsStepAnimDecay(TitleFadeWork *);
 extern void func_00264B08();
 extern void func_00264D90();
 
 void mnuRefreshPanelLayer(u8 *work) {
     s32 y = 0x100 - *(s32 *)(work + 0x1574);
 
-    itfUpdateFadeColor(work);
-    func_00264EF0(work);
+    itfUpdateFadeColor((TitleFadeWork *)work);
+    func_00264EF0((TitleFadeWork *)work);
     func_00264B08(work);
     func_00264D90(work);
     func_00266250(0x2C0, 0x3D8, 0, y, work + 0x3E4, 0x53);
@@ -58,7 +61,7 @@ typedef struct {
 } TitleEntry;
 
 void brsDecaySharedAnimCounter(s32 animationState) {
-    brsStepAnimDecay(animationState);
+    brsStepAnimDecay((TitleFadeWork *)animationState);
 }
 
 u8 brsGetLevelStepForValue(s32 value) {
