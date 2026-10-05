@@ -6,6 +6,9 @@ D_00435CF3 = 0x00435CF3; // type:u8
 D_00438A88 = 0x00438A88; // type:u32
 // func_00254678's three-byte table {7,12,5} inside D_004376C8's sdata blob
 D_004376D0 = 0x004376D0; // type:u8
+// func_00100A28's copy sources/destinations inside D_00435C31's/D_00435C42's sdata blobs
+D_00435C38 = 0x00435C38; // type:u8
+D_00435C48 = 0x00435C48; // type:u8
 // Names from tools/names.py (provenance: name_sources.txt)
 kwlnGetDrawBufferIndex = 0x00100400; // type:func
 kwlnTaskRemoveFromStateQueue = 0x001005C8; // type:func
