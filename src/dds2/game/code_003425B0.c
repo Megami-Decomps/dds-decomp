@@ -64,7 +64,13 @@ u32 func_00341650(u32, u32, void *, u32);
 
 u32 sndSendCommandPacket(u32, u32, void *, u32);
 
-extern u32 D_00438B84;
+typedef void *(*SdfSoundReadCallback)(s32);
+typedef union SdfSoundCommand {
+    u32 word;
+    SdfSoundReadCallback read;
+} SdfSoundCommand;
+
+extern SdfSoundCommand D_00438B84;
 
 extern void sdfGetGeneralHeapStats(void *out);
 
@@ -99,9 +105,7 @@ extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 
 extern void sceSifRpcLoop(void *);
 
-extern u8 D_0047B440[];
-
-extern s32 func_00342848();
+extern u32 D_0047B440[16];
 
 typedef struct SdfStreamTextureHead {
     u8 pad00[0xC];
@@ -286,7 +290,7 @@ u32 sdfSoundTryQueueCommand(u32 command) {
     if (sdfSoundCommandStatus != 0) {
         return 0;
     }
-    D_00438B84 = command;
+    D_00438B84.word = command;
     return command;
 }
 
@@ -324,7 +328,149 @@ s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00342848);
+typedef struct DevState {
+    struct DevState *next;
+    struct DevState *previous;
+    struct DevState *workerNext;
+    struct DevState *workerPrev;
+    void *resource;
+    u8 workerIndex;
+    u8 operation;
+    s8 state;
+    u8 pad17;
+    s32 operationArg;
+    s32 requestExtra;
+    void *requestData;
+    s32 options;
+    s32 resourceId;
+    s32 result;
+    s32 transferred;
+    u8 pad34[4];
+    void (*callback)(struct DevState *, s32, s32, s32, s32);
+    s32 callbackContext;
+} DevState;
+
+typedef struct SdfSoundRpcRequest {
+    u8 pad00[8];
+    s32 destination;
+    s32 byteCount;
+} SdfSoundRpcRequest;
+
+typedef struct SdfSoundResidentBuffer {
+    u8 *data;
+    u8 pad04[0x24];
+} SdfSoundResidentBuffer;
+
+extern SdfSoundRpcRequest *D_004391D4;
+extern s32 D_004391D8;
+extern DevState *D_004391DC;
+extern SdfSoundResidentBuffer D_0047B418;
+extern char *mnuBuildVoiceResourcePath(char *, char *);
+extern DevState *sdfDevCreateCallbackState(s32, void *, s32);
+extern s32 sdfDevReactivate(DevState *);
+extern s32 sdfDevQueueRead(DevState *, void *, s32);
+extern s32 sdfDevQueueActiveOperation(DevState *);
+extern s32 sdfDevQueueReleaseState(DevState *);
+extern s32 sdfAllocGeneralBlock(s32);
+extern s32 sdfResourceRetainAddress(s32);
+extern void sdfReleaseResourceAllocation();
+extern void func_003417E0(s32, void *, s32);
+
+u32 *func_00342848(u32 command, SdfSoundRpcRequest *request) {
+    char path[0x100];
+
+    switch (command) {
+    case 0: {
+        DevState *state;
+        if (D_0040BAF8[0] == 0) {
+            D_0047B440[0] = 0;
+            break;
+        }
+        sdfSoundCommandBusy = 1;
+        mnuBuildVoiceResourcePath(path, D_0040BAF8);
+        state = sdfDevCreateCallbackState((s32)path, sdfSoundHandleRpcEvent, 0);
+        D_004391DC = state;
+        if (state != NULL) {
+            WaitSema(sdfSoundRpcSemaphore);
+            state = D_004391DC;
+            if (state->result != 0) {
+                sdfDevReactivate(state);
+                sdfDevQueueReleaseState(D_004391DC);
+                D_004391DC = NULL;
+                state = NULL;
+            }
+        }
+        D_0047B440[0] = (u32)state;
+        break;
+    }
+    case 1: {
+        s32 allocation;
+        void *buffer;
+        D_004391D4 = request;
+        allocation = sdfAllocGeneralBlock(request->byteCount);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        if (buffer != NULL) {
+            sdfDevQueueRead(D_004391DC, buffer, D_004391D4->byteCount);
+            WaitSema(sdfSoundRpcSemaphore);
+            func_003417E0(D_004391D4->destination, buffer, D_004391D4->byteCount);
+            sdfReleaseResourceAllocation(allocation);
+            D_0047B440[0] = D_004391D4->byteCount;
+        } else {
+            D_0047B440[0] = 0;
+        }
+        break;
+    }
+    case 2:
+        sdfDevQueueActiveOperation(D_004391DC);
+        WaitSema(sdfSoundRpcSemaphore);
+        sdfDevQueueReleaseState(D_004391DC);
+        D_004391DC = NULL;
+        sdfSoundCommandBusy = 0;
+        D_0047B440[0] = 0;
+        break;
+    case 3:
+        D_004391D8 = 0;
+        D_0047B440[0] = 0;
+        break;
+    case 4: {
+        s32 bytes;
+        D_004391D4 = request;
+        func_003417E0(request->destination, D_0047B418.data + D_004391D8, request->byteCount);
+        bytes = D_004391D4->byteCount;
+        D_0047B440[0] = bytes;
+        D_004391D8 += bytes;
+        break;
+    }
+    case 5:
+        D_0047B440[0] = 0;
+        break;
+    case 6: {
+        u32 word = D_00438B84.word;
+        if (word != 0) {
+            sdfSoundCommandStatus = 1;
+        }
+        D_0047B440[0] = word;
+        break;
+    }
+    case 7: {
+        void *buffer;
+        D_004391D4 = request;
+        buffer = D_00438B84.read(request->byteCount);
+        if (buffer != NULL) {
+            func_003417E0(D_004391D4->destination, buffer, D_004391D4->byteCount);
+            D_0047B440[0] = D_004391D4->byteCount;
+        } else {
+            D_0047B440[0] = -1;
+        }
+        break;
+    }
+    case 8:
+        sdfSoundCommandStatus = 0;
+        D_0047B440[0] = 0;
+        break;
+    }
+    return D_0047B440;
+}
 
 void sdfSoundStartRpcServer(void) {
     u8 queue[0x20];
@@ -341,7 +487,6 @@ void sdfSoundStartRpcServer(void) {
 }
 
 extern s32 D_004391EC;
-extern void func_003417E0(s32, void *, s32);
 extern u8 sndMidiTrackState[];
 
 void sdfSoundSetTableEntry(u32 kind, u8 *src) {
@@ -728,8 +873,6 @@ extern s32 sdfDevCreateCommandState(u64 name);
 extern s32 sdfDevQueueControlAndWait(s32 state);
 extern void sdfDevQueueReadAndWait(s32 state, s32 buffer, s32 size);
 extern void sdfDevWaitThenReleaseCommandState(s32 state);
-extern s32 sdfAllocGeneralBlock(s32 size);
-extern s32 sdfResourceRetainAddress(s32 handle);
 extern void sdfDecrementAllocationReferenceCount(s32 handle);
 
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
