@@ -238,6 +238,16 @@ typedef struct MenuSlot {
     u16 flags;
 } MenuSlot;
 
+typedef struct MenuSprites {
+    u8 unk0[0x10];
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+    s32 fade;
+    u8 pad64[0x10];
+    u8 unk74;
+    u8 unk75;
+} MenuSprites;
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
@@ -2027,25 +2037,33 @@ void func_002BB9C8(u32 *destination, u32 value) {
     *destination = value;
 }
 
-void mnuSetPageParams(MenuSprites *page, s32 mode) {
+typedef struct MenuPageParams {
+    u8 unk0[0x64];
+    s32 field64;
+    s32 field68;
+    s32 field6C;
+    s32 field70;
+} MenuPageParams;
+
+void mnuSetPageParams(MenuPageParams *page, s32 mode) {
     switch (mode) {
     case 0:
-        page->fadeOut = 0;
-        page->drawAlpha = 0;
-        page->slideOffset = 0x40;
-        page->slideSpeed = 0x100;
+        page->field68 = 0;
+        page->field64 = 0;
+        page->field6C = 0x40;
+        page->field70 = 0x100;
         break;
     case 1:
-        page->fadeOut = 1;
-        page->drawAlpha = 0x100;
-        page->slideOffset = 0;
-        page->slideSpeed = 0x1000;
+        page->field68 = 1;
+        page->field64 = 0x100;
+        page->field6C = 0;
+        page->field70 = 0x1000;
         break;
     default:
-        page->fadeOut = 0;
-        page->drawAlpha = 0x100;
-        page->slideOffset = 0;
-        page->slideSpeed = 0;
+        page->field68 = 0;
+        page->field64 = 0x100;
+        page->field6C = 0;
+        page->field70 = 0;
         break;
     }
 }
@@ -2130,6 +2148,14 @@ typedef struct MenuIconEntry {
 typedef struct MenuIconLayout {
     MenuIconEntry entry[3];
 } MenuIconLayout;
+
+/* The allocated three-icon bundle also owns its draw fade and fade direction. */
+typedef struct MenuIconBundle {
+    u32 unk0[3];
+    void *sprite[3];
+    s32 fade;
+    s32 fadeOut;
+} MenuIconBundle;
 
 extern MenuIconLayout D_0042AFD8;
 

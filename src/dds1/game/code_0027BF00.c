@@ -1284,34 +1284,48 @@ void mnuResetPartyPanelFade(s32 menu, s32 index, s32 unused, s32 retainScale) {
     page->scaleB = 0x100;
 }
 
-void mnuSetPageParams(MenuSprites *page, s32 mode) {
+typedef struct MenuPageMotion {
+    u8 pad00[0xC];
+    s32 unk0C;
+    s32 firstSprite;
+    s32 primarySprite;
+    s32 sprites[7];
+    s32 overlaySprites[2];
+    u8 pad3C[4];
+    s32 field40;
+    s32 field44;
+    s32 field48;
+    s32 field4C;
+} MenuPageMotion;
+
+void mnuSetPageParams(MenuPageMotion *page, s32 mode) {
     switch (mode) {
     case 0:
-        page->fadeOut = 0;
-        page->drawAlpha = 0;
-        page->slideOffset = 0x40;
-        page->slideSpeed = 0x100;
+        page->field44 = 0;
+        page->field40 = 0;
+        page->field48 = 0x40;
+        page->field4C = 0x100;
         break;
     case 1:
-        page->fadeOut = 1;
-        page->drawAlpha = 0x100;
-        page->slideOffset = 0;
-        page->slideSpeed = 0x1000;
+        page->field44 = 1;
+        page->field40 = 0x100;
+        page->field48 = 0;
+        page->field4C = 0x1000;
         break;
     default:
-        page->fadeOut = 0;
-        page->drawAlpha = 0x100;
-        page->slideOffset = 0;
-        page->slideSpeed = 0;
+        page->field44 = 0;
+        page->field40 = 0x100;
+        page->field48 = 0;
+        page->field4C = 0;
         break;
     }
 }
 
 void *func_0027F230(s32 value, s32 mainResource, s32 secondaryResource) {
-    MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(0x50);
+    MenuPageMotion *page = (MenuPageMotion *)sdfAllocSizeClassBlock(0x50);
 
     memset(page, 0, 0x50);
-    page->unkC = value;
+    page->unk0C = value;
     page->firstSprite = effCreateResourceSlotSet(secondaryResource, 6, 1);
     itfSetGridEntryQuantizedAndRefresh(page->firstSprite, 0, 0xE60, 0x430, 0, 0);
     page->sprites[0] = effCreateResourceSlotSet(secondaryResource, 8, 1);
@@ -1393,6 +1407,14 @@ void mnuClearEntries(s32 *menu) {
     }
     *menu &= ~0x100;
 }
+
+/* DDS1 owns four icons here; the corresponding DDS2 bundle owns three. */
+typedef struct MenuIconBundle {
+    u8 pad0[0xC];
+    s32 sprite[4];
+    s32 fade;
+    s32 fadeOut;
+} MenuIconBundle;
 
 u32 mnuCreateFadeSpriteResourceSet(u32 resource) {
     MenuIconBundle *item = (MenuIconBundle *)sdfAllocSizeClassBlock(0x24);
@@ -1842,7 +1864,7 @@ extern char D_003BC720[];
 extern u8 D_003BC730[];
 extern char D_003BC738[];
 
-void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 param) {
+void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuPageMotion *page, s32 param) {
     char text[0x20];
     s32 *sprite = page->overlaySprites;
     u32 i = 0;
@@ -1852,9 +1874,9 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     s32 item;
 
     value = mnuGetPartyEntryMenuValue(datGameState + partyIndex * 0x1A4 + 0xA60);
-    alpha = page->drawAlpha;
+    alpha = page->field40;
     color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
-    x += page->slideOffset * 16;
+    x += page->field48 * 16;
     func_002BF4E0(x, y, z, alpha, 0, page->primarySprite, 0, param);
     do {
         func_002BF4E0(x, y, z, alpha, 0, *sprite++, 0, param);
@@ -1870,30 +1892,30 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     }
     func_001958A0(item, 1, param);
     frFontQueueGlyphInSelectedSlot(item);
-    if (page->fadeOut == 0) {
-        if (page->drawAlpha < 256) {
-            page->drawAlpha += 16;
+    if (page->field44 == 0) {
+        if (page->field40 < 256) {
+            page->field40 += 16;
         }
-        if (page->drawAlpha > 256) {
-            page->drawAlpha = 256;
+        if (page->field40 > 256) {
+            page->field40 = 256;
         }
-        page->slideOffset -= page->slideSpeed / 256;
-        if (page->slideOffset < 0) {
-            page->slideOffset = 0;
+        page->field48 -= page->field4C / 256;
+        if (page->field48 < 0) {
+            page->field48 = 0;
         }
-        if (page->slideOffset != 0) {
-            page->slideSpeed *= 1.5f;
+        if (page->field48 != 0) {
+            page->field4C *= 1.5f;
         }
     } else {
-        if (page->drawAlpha > 0) {
-            page->drawAlpha -= 32;
+        if (page->field40 > 0) {
+            page->field40 -= 32;
         }
-        if (page->drawAlpha < 0) {
-            page->drawAlpha = 0;
+        if (page->field40 < 0) {
+            page->field40 = 0;
         }
-        page->slideOffset += page->slideSpeed / 256;
-        if (page->slideOffset != 0) {
-            page->slideSpeed /= 1.5f;
+        page->field48 += page->field4C / 256;
+        if (page->field48 != 0) {
+            page->field4C /= 1.5f;
         }
     }
 }
