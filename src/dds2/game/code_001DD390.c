@@ -715,7 +715,7 @@ extern s32 D_003BC0C0[];
 
 extern s32 D_003BC0C8[];
 
-extern void func_001F02E0(s32, s32);
+extern void func_001F02E0(ActionUnit *, XformData *);
 extern void func_001F0690(s32);
 extern void func_001F3E48(s32);
 extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
@@ -5811,7 +5811,7 @@ void btlDispatchActionCursorStepByKind(ActionUnit *action) {
     }
     switch (action->stepKind) {
     case 9:
-        func_001F02E0((s32)action, (s32)action);
+        func_001F02E0(action, (XformData *)action);
         break;
     case 0xA:
         func_001F0690((s32)action);
@@ -6284,7 +6284,72 @@ void btlFlagUserAndTargetDefeat(ActionUnit *command, ActionUnit *unused) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F02E0);
+extern s32 func_001E2E58(BtlUnit *, s32);
+extern f32 func_001ADBD0(BattleActionLinkState *);
+extern f32 func_00353140(f32);
+extern f32 func_00353040(f32);
+
+#define BTL_APPROACH_DIST_START 0.55f
+#define BTL_APPROACH_DIST_END 0.6f
+#define BTL_APPROACH_PITCH_START 0.6108652f /* 35 degrees */
+#define BTL_APPROACH_PITCH_END 0.6108652f
+
+/* vu0 routine: */
+void func_001F02E0(ActionUnit *action, XformData *out) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 dir[4];
+    f32 extent;
+    f32 length;
+    f32 span;
+    f32 ratio;
+    f32 factor;
+    f32 angle;
+    f32 width;
+
+    user = action->link->unit;
+    target = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+    extent = user->reach * user->scale;
+    span = func_001E2E58(user, user->unkEC);
+    span /= func_001ADBD0(action->link);
+    ratio = (f32)action->state / span;
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
+    }
+    out->f24 = action->camera.fov;
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF(vf10, userPos);
+    userPos[1] -= user->height * user->scale * 0.25f;
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
+    VU0_LOAD_VF(vf11, userPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    factor = ratio * (BTL_APPROACH_DIST_END - BTL_APPROACH_DIST_START);
+    factor += BTL_APPROACH_DIST_START;
+    length *= factor;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, dir);
+    VU0_SCALE_VF_MFC1(vf10, length);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, out->position);
+    angle = ratio * (BTL_APPROACH_PITCH_END - BTL_APPROACH_PITCH_START);
+    angle += BTL_APPROACH_PITCH_START;
+    width = length * func_00353140(angle);
+    length *= func_00353040(angle);
+    length += (extent + width) / func_00353228(out->f24 * 1.3333333f * 0.5f);
+    out->f20 = length;
+    if (action->flags & 0x200) {
+        angle = -angle;
+    }
+    func_00336538(angle);
+    VU0_LOAD_VF(vf10, dir);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF(vf10, out->direction);
+    func_001E89E0(out, -10.0f);
+}
 
 void btlSetupActionCameraPair(ActionUnit *command) {
     BtlUnit *user;
@@ -6400,15 +6465,6 @@ void func_001F3228(u32 action) {
     btlFlagUserAndTargetDefeat(action, action);
 }
 
-extern s32 func_001E2E58(BtlUnit *, s32);
-extern f32 func_001ADBD0(BattleActionLinkState *);
-extern f32 func_00353140(f32);
-extern f32 func_00353040(f32);
-
-#define BTL_APPROACH_DIST_START 0.55f
-#define BTL_APPROACH_DIST_END 0.6f
-#define BTL_APPROACH_PITCH_START 0.6108652f /* 35 degrees */
-#define BTL_APPROACH_PITCH_END 0.6108652f
 
 /* Interpolate pull-back and pitch while framing an actor approaching its target. */
 void func_001F3240(ActionUnit *action, XformData *out) {
@@ -6829,7 +6885,7 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
-        func_001F02E0(action, action);
+        func_001F02E0((ActionUnit *)action, (XformData *)action);
     }
 }
 
@@ -6879,7 +6935,7 @@ void func_001FFAD8(s32 action, s32 state) {
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
-        func_001F02E0(action, action);
+        func_001F02E0((ActionUnit *)action, (XformData *)action);
     }
 }
 
