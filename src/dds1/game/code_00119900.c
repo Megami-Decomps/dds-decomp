@@ -708,7 +708,8 @@ s32 evtPushSecondRosterMaximumHp(void) {
 }
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
-extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
+struct DatUnitStatus;
+extern u32 datReadLowHalfOfCalculatedValue(struct DatUnitStatus *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
     s8 statIndex = ((EventSelector *)datCommandSelectors)[
@@ -727,7 +728,7 @@ s32 evtPushFirstRosterSelectedStat(void) {
                 ((EvtScriptContext *)D_003C2E70)->first, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                ((EvtScriptContext *)D_003C2E70)->first, statIndex);
+                (struct DatUnitStatus *)((EvtScriptContext *)D_003C2E70)->first, statIndex);
         }
         break;
     }
@@ -753,7 +754,7 @@ s32 evtPushSecondRosterSelectedStat(void) {
                 ((EvtScriptContext *)D_003C2E70)->second, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                ((EvtScriptContext *)D_003C2E70)->second, statIndex);
+                (struct DatUnitStatus *)((EvtScriptContext *)D_003C2E70)->second, statIndex);
         }
         break;
     }
@@ -779,7 +780,7 @@ s32 evtPushFirstRosterOptionStat(void) {
                 ((EvtScriptContext *)D_003C2E70)->first, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                ((EvtScriptContext *)D_003C2E70)->first, statIndex);
+                (struct DatUnitStatus *)((EvtScriptContext *)D_003C2E70)->first, statIndex);
         }
         break;
     }
@@ -803,7 +804,7 @@ s32 evtPushSecondRosterOptionStat(void) {
                 ((EvtScriptContext *)D_003C2E70)->second, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                ((EvtScriptContext *)D_003C2E70)->second, statIndex);
+                (struct DatUnitStatus *)((EvtScriptContext *)D_003C2E70)->second, statIndex);
         }
         break;
     }
