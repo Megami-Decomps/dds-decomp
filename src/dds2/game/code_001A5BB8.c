@@ -4355,7 +4355,37 @@ void func_001B7A00(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7A38);
+/* Set (operation 0), clear (operation 1), or query the state bit selected by
+ * the u16 id relative to the 0x1AB base key. */
+s32 func_001B7A38(s32 id, s32 operation) {
+    u16 key;
+    s32 offset;
+    s8 op;
+    u32 word;
+    u32 bit;
+
+    key = (u16)id;
+    offset = key - 0x1AB;
+    op = (s8)operation;
+    if (offset != 0) {
+        word = (u32)offset >> 5;
+        bit = offset & 0x1F;
+    } else {
+        word = 0;
+        bit = 0;
+    }
+    switch (op) {
+    case 0:
+        ((u32 *)D_003B6928)[word] |= 1 << bit;
+        break;
+    case 1:
+        ((u32 *)D_003B6928)[word] &= ~(1 << bit);
+        break;
+    default:
+        return ((((u32 *)D_003B6928)[word] & (1 << bit)) != 0);
+    }
+    return 1;
+}
 
 extern u32 D_004367B8;
 
