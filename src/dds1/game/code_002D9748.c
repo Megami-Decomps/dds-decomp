@@ -60,15 +60,21 @@ typedef union SdfSubParam {
 } SdfSubParam;
 
 typedef struct SdfTextParam {
-    u8 pad00[6]; /* 0x00 */
+    u32 unk00;
+    u16 unk04;
     u8 dirtyFlags; /* 0x06: dirty flags for the setters below */
     u8 pad07[9]; /* 0x07 */
     u32 unk10; /* 0x10 */
     u32 unk14; /* 0x14 */
-    u8 unk18; /* 0x18: func_002DA5B0 stores a u32 over 0x18-0x1B */
-    u8 overrideFlags; /* 0x19: bit 0x2 selects overrideFirst/overrideSecond over defaults */
-    u8 unk1A; /* 0x1A */
-    u8 unk1B; /* 0x1B */
+    union {
+        u32 packedColor;
+        struct {
+            u8 unk18;
+            u8 overrideFlags; /* bit 0x2 selects scalar overrides */
+            u8 unk1A;
+            u8 unk1B;
+        };
+    };
     f32 unk1C; /* 0x1C */
     u32 unk20; /* 0x20 */
     u8 pad24[4]; /* 0x24 */
@@ -609,7 +615,7 @@ void sdfCopyPrimaryTextScalars(SdfTextParam *param, const f32 *sourceScalars) {
 
 /* Write the full packed secondary-color word and dirty both draw entries. */
 void func_002DA5B0(SdfTextParam *param, u32 packedColor) {
-    *(u32 *)((u8 *)param + 0x18) = packedColor;
+    param->packedColor = packedColor;
     param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
@@ -699,8 +705,8 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, SdfTextParam *resourceLookup, u
     u8 *parameterCursor;
     u32 packedTextureMode;
 
-    *(u32 *)param = *(u32 *)serializedData;
-    *(u16 *)((u8 *)param + 4) = *(u16 *)(serializedData + 4);
+    param->unk00 = *(u32 *)serializedData;
+    param->unk04 = *(u16 *)(serializedData + 4);
     parameterFlags = *(u16 *)(serializedData + 6);
     parameterCursor = serializedData + SDF_PARAM_HEADER_BYTES;
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FIRST_PRESENT) {
@@ -826,11 +832,11 @@ typedef struct SdfDrawPacket {
  * then apply the secondary scalar block to the entry's native location. */
 void sdfApplyAssetSecondaryEntry(SdfAsset *asset, void *drawEntry) {
     u8 *entryBytes = drawEntry;
-    SdfTex *texture = *(SdfTex **)((u8 *)asset + 0x30);
+    SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
     ((SdfDrawPacket *)entryBytes)->color = asset->unk18;
-    packetMode = *(u32 *)((u8 *)asset + 0x34);
+    packetMode = asset->secondaryMode;
     ((SdfDrawPacket *)entryBytes)->mode = packetMode;
     ((SdfDrawPacket *)entryBytes)->paletteValue = D_00398198[packetMode];
     if (texture != NULL) {

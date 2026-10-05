@@ -8192,46 +8192,67 @@ extern void *sdfChunkFindRecordById(SdfTextParam *, s32);
 extern void mdlSetResourceAmount(s32, MdlResourceItem *, f32);
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 
-void func_002FB480(s32 *work) {
+typedef struct EffectBlob {
+    u32 unk00;
+    f32 scale;
+    u16 entryId;
+    u8 flagged;
+    u8 pad0B;
+    u32 frame;
+    u8 pad10[0x10];
+    f32 amounts[0xFF];
+    u8 pad41C[0x30];
+} EffectBlob;
+
+typedef struct EffSharedEffectWork {
+    u8 pad00[0x20];
+    u32 unk20;
+    f32 unk24;
+    u32 unk28;
+    EffectBlob data;       // 0x2C through 0x477
+    u32 resource;          // 0x478, shared resource whose reference count is at +0x10
+    u32 allocation;        // 0x47C
+} EffSharedEffectWork;
+
+void func_002FB480(EffSharedEffectWork *work) {
     f32 *amount;
     f32 scale;
     u32 i;
     void *record;
     u8 *item;
 
-    work[0x28 / 4] = 0;
-    if (*(u32 *)work[0x478 / 4] == 0) {
+    work->unk28 = 0;
+    if (*(u32 *)work->resource == 0) {
         return;
     }
-    if (*(u32 *)(*(u32 *)work[0x478 / 4] + 0x1C) != 0) {
-        if (*(u8 *)((u8 *)work + 0x36) != 0) {
-            mdlAddEntryFlagged(*(s32 *)work[0x478 / 4], 0, *(u16 *)((u8 *)work + 0x34));
+    if (*(u32 *)(*(u32 *)work->resource + 0x1C) != 0) {
+        if (work->data.flagged != 0) {
+            mdlAddEntryFlagged(*(s32 *)work->resource, 0, work->data.entryId);
         } else {
-            mdlAddEntryPlain(*(s32 *)work[0x478 / 4], 0, *(u16 *)((u8 *)work + 0x34));
+            mdlAddEntryPlain(*(s32 *)work->resource, 0, work->data.entryId);
         }
-        *(f32 *)(*(u32 *)(*(u32 *)work[0x478 / 4] + 0x1C) + 0x20) = 1.0f;
+        *(f32 *)(*(u32 *)(*(u32 *)work->resource + 0x1C) + 0x20) = 1.0f;
     }
 
-    scale = *(f32 *)((u8 *)work + 0x30);
+    scale = work->data.scale;
     i = 0;
-    amount = (f32 *)((u8 *)work + 0x4C);
+    amount = work->data.amounts;
     for (; i < 0xFF; i++, amount++) {
         record = sdfChunkFindRecordById(
-            (SdfTextParam *)*(u32 *)(*(u32 *)work[0x478 / 4] + 0x18), i);
-        for (item = (u8 *)*(u32 *)(*(u32 *)work[0x478 / 4] + 0x14); item != NULL;
+            (SdfTextParam *)*(u32 *)(*(u32 *)work->resource + 0x18), i);
+        for (item = (u8 *)*(u32 *)(*(u32 *)work->resource + 0x14); item != NULL;
              item = *(u8 **)item) {
             if (*(u32 *)(item + 0x10) == (u32)record) {
-                mdlSetResourceAmount(*(s32 *)work[0x478 / 4], (MdlResourceItem *)item, *amount * scale);
+                mdlSetResourceAmount(*(s32 *)work->resource, (MdlResourceItem *)item, *amount * scale);
                 break;
             }
         }
     }
-    mdlSetAllResourceFrames((MdlCtx *)*(u32 *)work[0x478 / 4], work[0x38 / 4]);
+    mdlSetAllResourceFrames((MdlCtx *)*(u32 *)work->resource, work->data.frame);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB5C0);
 
-typedef struct { u32 word[0x113]; } EffectBlob;
 
 typedef struct EffSharedEffectResource {
     u32 model;
@@ -8243,15 +8264,6 @@ typedef struct EffSharedEffectResource {
     u32 allocation;
 } EffSharedEffectResource;
 
-typedef struct EffSharedEffectWork {
-    u8 pad00[0x20];
-    u32 unk20;
-    f32 unk24;
-    u8 pad28[4];
-    EffectBlob data;       // 0x2C through 0x477
-    u32 resource;          // 0x478, shared resource whose reference count is at +0x10
-    u32 allocation;        // 0x47C
-} EffSharedEffectWork;
 
 /* Release this work; only the final reference releases the shared backing resources. */
 void effReleaseSharedResourceReference(s32 *work) {
@@ -10974,13 +10986,16 @@ s32 effDestroyPackedBatch(EffMappedResource *batch) {
 
 /* Resource slot set: source records and 0xA0-byte live entries. */
 typedef struct EffSlotSet {
-    u8 pad00[8];
+    u32 sourceAllocation;
+    u32 unk04;
     u32 count;        /* 0x08 */
-    u8 pad0C[4];
+    u32 sourceRecordsAllocation;
     u32 sourceRecords; /* 0x10 */
     u32 allocation;    /* 0x14 */
     u32 entries;       /* 0x18 */
     u32 entryCount;    /* 0x1C */
+    u32 textureAllocation;
+    void **slots;
 } EffSlotSet;
 
 /* The tail slot is either a numeric override or an externally owned material asset. */
@@ -11204,24 +11219,21 @@ u32 func_00305148(u32 allocationHandle, u32 keepAllocation) {
 
     set = (EffSlotSet *)sdfAllocSizeClassBlock(0x30);
     memset(set, 0, 0x30);
-    *(u32 *)((u8 *)set + 4) = 0;
-    *(u32 *)set = keepAllocation != 0 ? allocationHandle : 0;
+    set->unk04 = 0;
+    set->sourceAllocation = keepAllocation != 0 ? allocationHandle : 0;
     resource = (u8 *)sdfResourceRetainAddress(allocationHandle);
-    ((EffResourceSet *)set)->count = *(u16 *)(resource + 0x14);
-    *(u32 *)((u8 *)set + 0x20) = (u32)sdfAllocGeneralBlock(
-        ((EffResourceSet *)set)->count * 4);
-    ((EffResourceSet *)set)->slots = (void **)sdfResourceRetainAddress(
-        *(u32 *)((u8 *)set + 0x20));
-    memset(((EffResourceSet *)set)->slots, 0,
-        ((EffResourceSet *)set)->count * 4);
+    set->entryCount = *(u16 *)(resource + 0x14);
+    set->textureAllocation = (u32)sdfAllocGeneralBlock(
+        set->entryCount * 4);
+    set->slots = (void **)sdfResourceRetainAddress(set->textureAllocation);
+    memset(set->slots, 0, set->entryCount * 4);
     entries = effResolveResourceSlots((EffResourceSet *)set, resource,
         keepAllocation, -1);
 
     set->count = *(u16 *)(resource + 0x16);
-    *(u32 *)((u8 *)set + 0xC) =
+    set->sourceRecordsAllocation =
         (u32)sdfAllocGeneralBlock(set->count * 0x80);
-    set->sourceRecords = sdfResourceRetainAddress(
-        *(u32 *)((u8 *)set + 0xC));
+    set->sourceRecords = sdfResourceRetainAddress(set->sourceRecordsAllocation);
     set->allocation = (u32)sdfAllocGeneralBlock(set->count * 0xA0);
     set->entries = sdfResourceRetainAddress(set->allocation);
     for (index = 0; index < set->count; index++) {

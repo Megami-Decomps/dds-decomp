@@ -1360,7 +1360,7 @@ void *evtViewerStartUpdate(void) {
     func_0035C860((u8 *)viewer + 0x22E8, D_00423050, D_004372B0, D_004372B2);
     viewer->flags = 1;
     evtViewerDispatchFlagMode((u32)viewer);
-    *(s32 *)((u8 *)viewer + 0x2238) = 0;
+    viewer->objects[127] = NULL;
     viewer->flags |= 8;
     kwlnDrawControlFlags |= 0x2000000;
     return evtViewerAdvanceUpdate;

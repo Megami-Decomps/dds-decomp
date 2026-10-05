@@ -190,8 +190,7 @@ u32 mnuInitializeWindowOwnerResourceSet(void) {
     resource->allocation = handle;
     func_002ACB18((u32)context);
     func_002AB8F0((s32)context);
-    /* This input word at +0x118 is not identified in the shared context yet. */
-    mnuConfigurePanelResource(*(s32 *)((u8 *)context + 0x118), context->spriteArg2, 0, 0);
+    mnuConfigurePanelResource(context->unk118, context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition((s32)context->activeWindow, (s32)context->tail);
     mnuSeekListNode(0, context->activeWindow->window);
     return 1;
@@ -277,8 +276,8 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
         }
         if (input & 2) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7418);
-            mnuConfigurePanelResource(*(s32 *)((u8 *)context + 0x118), context->group, 0, 1);
-            mnuBeginWindowFadeTransition(*(s32 *)((u8 *)context + 0x104), (s32)context->tail);
+            mnuConfigurePanelResource(context->unk118, context->group, 0, 1);
+            mnuBeginWindowFadeTransition(context->unk104, (s32)context->tail);
         }
         window = context->activeWindow;
         if (window != NULL) {

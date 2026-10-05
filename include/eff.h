@@ -125,7 +125,8 @@ typedef struct BillObj {
     u32 unk48;
     u32 unk4C;
     u16 unk50;
-    u8 pad52[6];
+    u8 pad52[2];
+    u32 modeFlags; /* 0x54: bits 0x40/0x80 select billboard entry modes */
     u32 unk58;
     s32 entryCount;
     void *unk60;

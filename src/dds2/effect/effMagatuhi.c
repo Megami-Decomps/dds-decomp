@@ -228,6 +228,11 @@ void effMagatuhiReleaseMathOwnerAndBuffer(EffMagatuhiWideFirst *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
+typedef struct {
+    f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
+    f32 t;    /* 0x30 Bezier evaluation parameter, as in effMath's slot */
+    f32 step; /* 0x34 per-frame increment of t */
+} EffMagatuhiSlot;
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
  * The vector scratch w and the raw accesses below retain their native forms. */
 void func_00191AD0(EffMagatuhiWideFirst *work, s32 index) {
@@ -235,7 +240,7 @@ void func_00191AD0(EffMagatuhiWideFirst *work, s32 index) {
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
     f32 random;
-    void *slot;
+    EffMagatuhiSlot *slot;
 
     random = effMiscRandUnitFloat(D_003AA868) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     radius = work->head.initialRadius * (random + random);
@@ -266,8 +271,8 @@ void func_00191AD0(EffMagatuhiWideFirst *work, s32 index) {
         (effMiscRandUnitFloat(D_003AA868) * *(f32 *)((u8 *)work + 0x3C) +
          (1.0f - *(f32 *)((u8 *)work + 0x3C)));
     slot = effMathGetSlotAt(work->mathResource, index);
-    *(s32 *)((u8 *)slot + 0x30) = 0;
-    *(s32 *)((u8 *)slot + 0x34) = 0;
+    slot->t = 0.0f;
+    slot->step = 0.0f;
     func_001918B8(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
@@ -323,11 +328,6 @@ extern s32 effMathStepBezierSlot(void *slots, s32 index, void *out);
 extern void func_00190DE0(void *owner);
 extern void func_00191450(void *valueWork, s32 index, void *out);
 
-typedef struct {
-    f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
-    f32 t;    /* 0x30 Bezier evaluation parameter, as in effMath's slot */
-    f32 step; /* 0x34 per-frame increment of t */
-} EffMagatuhiSlot;
 
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];

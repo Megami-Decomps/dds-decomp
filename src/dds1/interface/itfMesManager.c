@@ -17,7 +17,9 @@ typedef struct ItfMesEntry {
 
 /* Record behind ItfMesState.sub; itfMesGetEntryCount reads word +0x18. */
 typedef struct ItfMesSub {
-    u8 unk0[0x18];      /* 0x0 */
+    u8 unk0[8];
+    u32 magic;
+    u8 unkC[0xC];
     u32 entryCount;        /* 0x18: index of next entry */
     u8 unk1C[4];          /* 0x1C */
     ItfMesEntry entries[1]; /* 0x20 */
@@ -1042,7 +1044,7 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     itfMesRelocate(sub);
     entry = itfMesGetNextEntry(sub);
     temporaryFontEntry = 0;
-    if (*(s32 *)((u8 *)sub + 8) == ITF_MES_MAGIC_MSG1) {
+    if (sub->magic == ITF_MES_MAGIC_MSG1) {
         temporaryFontEntry = *(s32 *)((u8 *)entry + 8);
     }
     mes->temporaryFontEntry = temporaryFontEntry;
@@ -1325,8 +1327,7 @@ void itfMesDestroyWindow(s32 window) {
         sdfReleaseResourceAllocation((SdfResource *)windowRecord->handle);
         windowRecord->mes = NULL;
         itfReleasePoolNode(windowRecord, (u8 *)D_003D6EC0 - 0x10);
-        /* Retain the counter's pool-array-relative access form. */
-        *(s32 *)((u8 *)D_003D6EC0 - 0x20) -= 1;
+        ((ItfMesGlobals *)((u8 *)D_003D6EC0 - 0x20))->activeWindowCount -= 1;
     }
 }
 

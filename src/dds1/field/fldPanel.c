@@ -29,18 +29,18 @@ void fldDestroyPanelTaskIfPresent(void) {
 }
 
 void *func_00141190(s32 value) {
-    void *panelState;
+    u16 *panelState;
 
     panelState = kwlnTaskGetUserValue(fldInputPanelTaskHandle);
-    *(s16 *)((char *)panelState + 4) = value;
+    panelState[2] = value;
     return panelState;
 }
 
 void *func_001411C0(s32 value) {
-    void *panelState;
+    u16 *panelState;
 
     panelState = kwlnTaskGetUserValue(fldInputPanelTaskHandle);
-    *(s16 *)((char *)panelState + 2) = value;
+    panelState[1] = value;
     return panelState;
 }
 

@@ -136,12 +136,16 @@ extern EffectRecordGroup D_0038FD88[];
 
 /* Resource slot header: the 0x80-byte descriptions parallel 0xA0-byte work entries. */
 typedef struct EffectSlotSet {
-    u8 pad_00[8];        // 0x00
+    u32 sourceAllocation; // 0x00
+    u32 unk04;
     u32 count;           // 0x08
-    u8 pad_0C[4];        // 0x0C
+    u32 descriptionAllocation; // 0x0C
     u32 descriptions;    // 0x10
     u32 workAllocation;  // 0x14
     s32 workEntries;     // 0x18
+    u32 textureCount;    // 0x1C
+    u32 textureAllocation; // 0x20
+    void **handles;     // 0x24
 } EffectSlotSet;
 
 /* Per-slot 0x80-byte description; bit 0x20 chains a following slot. */
@@ -762,24 +766,21 @@ u32 func_002BD9C0(u32 allocationHandle, u32 keepAllocation) {
 
     set = sdfAllocSizeClassBlock(0x30);
     memset(set, 0, 0x30);
-    *(u32 *)((u8 *)set + 4) = 0;
-    *(u32 *)set = keepAllocation != 0 ? allocationHandle : 0;
+    set->unk04 = 0;
+    set->sourceAllocation = keepAllocation != 0 ? allocationHandle : 0;
     resource = (u8 *)sdfResourceRetainAddress(allocationHandle);
-    ((TexHandleSet *)set)->count = *(u16 *)(resource + 0x14);
-    *(u32 *)((u8 *)set + 0x20) =
-        (u32)sdfAllocGeneralBlock(((TexHandleSet *)set)->count * 4);
-    ((TexHandleSet *)set)->handles = (void **)sdfResourceRetainAddress(
-        *(u32 *)((u8 *)set + 0x20));
-    memset(((TexHandleSet *)set)->handles, 0,
-        ((TexHandleSet *)set)->count * 4);
+    set->textureCount = *(u16 *)(resource + 0x14);
+    set->textureAllocation =
+        (u32)sdfAllocGeneralBlock(set->textureCount * 4);
+    set->handles = (void **)sdfResourceRetainAddress(set->textureAllocation);
+    memset(set->handles, 0, set->textureCount * 4);
     entries = (u32 *)effResolveResourceSlots((TexHandleSet *)set, resource,
         keepAllocation, -1);
 
     set->count = *(u16 *)(resource + 0x16);
-    *(u32 *)((u8 *)set + 0xC) =
+    set->descriptionAllocation =
         (u32)sdfAllocGeneralBlock(set->count * 0x80);
-    set->descriptions = sdfResourceRetainAddress(
-        *(u32 *)((u8 *)set + 0xC));
+    set->descriptions = sdfResourceRetainAddress(set->descriptionAllocation);
     set->workAllocation = (u32)sdfAllocGeneralBlock(set->count * 0xA0);
     set->workEntries = sdfResourceRetainAddress(set->workAllocation);
     for (index = 0; index < set->count; index++) {

@@ -4,7 +4,18 @@ extern f32 D_003DC1C0[4];
 
 extern f32 D_003DC1D0[4];
 
-extern void *mnuTitleCameraObject;
+typedef struct WorldCallbackTable {
+    u8 pad00[8];
+    s32 (*onFirst)(void *);
+    s32 (*onSecond)(void *);
+} WorldCallbackTable;
+
+typedef struct WorldCallbackHolder {
+    u8 pad00[0x10];
+    WorldCallbackTable *callbacks;
+} WorldCallbackHolder;
+
+extern WorldCallbackHolder *mnuTitleCameraObject;
 
 extern void fldReleaseCameraColorEffect(void);
 
@@ -35,7 +46,7 @@ extern void fldApplyLightSetIndex(s32);
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
     effObjSetInnerFirstVec(mnuTitleCameraObject, D_003DC1C0);
     effObjSetInnerSecondVec(mnuTitleCameraObject, D_003DC1D0);
-    return (*(s32 (**)(void *))(*(s32 *)((u8 *)mnuTitleCameraObject + 0x10) + 8))(mnuTitleCameraObject);
+    return mnuTitleCameraObject->callbacks->onFirst(mnuTitleCameraObject);
 }
 
 void func_0026AF78(void) {

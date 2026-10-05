@@ -977,7 +977,9 @@ s32 mnuShopHasPendingFlag(void) {
 }
 
 typedef struct ShopWindowListData {
-    u8 pad00[0x2C];
+    u8 pad00[0x1C];
+    u8 *unk1C;
+    u8 pad20[0xC];
     s32 (*callback)();
     void *buffer;
 } ShopWindowListData;
@@ -1357,16 +1359,16 @@ s32 func_00244D10(s32 index, s32 halfPrice) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244E08);
 
-s32 func_00244FA0(s32 context) {
+s32 func_00244FA0(ShopScene *context) {
     s32 globalState = datGameState;
-    s32 itemObject = *(s32 *)((u8 *)context + 0x70);
-    s32 record = *(s32 *)((u8 *)itemObject + 0x14);
-    s32 parameters = *(s32 *)((u8 *)record + 0x1C) + 0x60;
-    s32 itemId = *(s32 *)((u8 *)parameters + 4);
-    s32 divisor = *(s32 *)((u8 *)parameters + 8);
-    s32 kind = *(s32 *)((u8 *)parameters + 0x0C);
+    ShopWindowContainer *itemObject = (ShopWindowContainer *)context->window;
+    ShopWindowListData *record = itemObject->list;
+    u8 *parameters = record->unk1C + 0x60;
+    s32 itemId = *(s32 *)(parameters + 4);
+    s32 divisor = *(s32 *)(parameters + 8);
+    s32 kind = *(s32 *)(parameters + 0x0C);
     s32 limit = *(s32 *)((u8 *)globalState + 0x3C) / divisor;
-    s32 quantity = *(s32 *)((u8 *)context + 0x8C);
+    s32 quantity = context->count8C;
     s32 available;
 
     if (kind == 2) {

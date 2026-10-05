@@ -31,13 +31,16 @@ extern void evtClearActiveFlag(s32);
 extern void evtSetBoundedDisplayValue(s32, s32);
 extern s8 D_00437859;
 
+typedef struct SceneFrameTable SceneFrameTable;
+
 typedef struct MenuSlotState {
     u8 pad00[0x64];
     s32 batch;     /* 0x64 */
     s32 backdrop;   /* 0x68 */
     u8 pad6C[4];
     s32 overlay;    /* 0x70 */
-    u8 pad74[0x10];
+    SceneFrameTable *alternateBatch; /* 0x74 */
+    u8 pad78[0xC];
     s32 reduced;    /* 0x84 */
     s32 slot;       /* 0x88 */
     u8 pad8C[0x1C];
@@ -209,7 +212,9 @@ typedef struct MenuProgressHost {
     s32 heapHandle;
     s32 titleEffectHandle;
     s32 resourceHandle;       /* 0x08: menu effect group's resource */
-    u8 pad0C[0x60];
+    u8 pad0C[8];
+    s32 unk14;
+    u8 pad18[0x54];
     s32 loadState;
     u8 pad70[8];
     s32 menuList;
@@ -719,7 +724,7 @@ void mnuEnsureProfilePanelEffect(s32 unused, MenuProgressHost *host) {
     if (host->currentEffect == 0) {
         s32 effect = mnuCreateProfilePanel();
         host->currentEffect = effect;
-        mnuSetGroupProperties(effect, host->resourceHandle, *(s32 *)((u8 *)host + 0x14), 1, 2);
+        mnuSetGroupProperties(effect, host->resourceHandle, host->unk14, 1, 2);
     }
 }
 
@@ -1195,14 +1200,20 @@ void mnuDrawTerminalSelectedSlots(s32 context) {
 
 typedef struct {
     u8 pad00[0x14];
-    u8 unk14;
-    u8 pad15[0x8B];
+    union {
+        s32 values[4];
+        struct {
+            u8 unk14;
+            u8 pad15[0xF];
+        };
+    };
+    u8 pad24[0x7C];
 } SceneFrameRecord;
 
-typedef struct {
+struct SceneFrameTable {
     u8 pad00[0x18];
     SceneFrameRecord *records;
-} SceneFrameTable;
+};
 
 typedef struct {
     u8 pad00[0x64];
@@ -1269,7 +1280,7 @@ void func_00268CC0(u32 mode, s32 context) {
         itfSetGridEntryQuantizedAndRefresh(state->batch, 7, 0, 0, -0x400, 0);
         effConfigureWithDefaultSetting(state->batch, 7, state->effect[5], 0, 5, 3);
         i = 0;
-        entries = (s32 *)(*(s32 *)(*(s32 *)((u8 *)state + 0x74) + 0x18) + 0x14);
+        entries = state->alternateBatch->records[0].values;
         for (; i < 4; i++) {
             entries[i] = 0;
         }
@@ -1283,7 +1294,7 @@ void func_00268CC0(u32 mode, s32 context) {
     case 3:
         itfSetGridEntryQuantizedAndRefresh(state->batch, 7, 0, 0, -0x400, 0);
         effConfigureWithDefaultSetting(state->batch, 7, state->effect[5], 0, 0, 3);
-        effConfigureWithDefaultSetting(*(s32 *)((u8 *)state + 0x74), 0, state->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting((s32)state->alternateBatch, 0, state->effect[5], 0, 0, 2);
         break;
     }
 }

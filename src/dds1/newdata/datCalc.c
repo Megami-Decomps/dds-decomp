@@ -293,10 +293,9 @@ s32 datFlagToElementIndex(s32 flag) {
     return statIndex;
 }
 
-/* Test the truncated integer percentage from the halfwords at +6/+8.
- * Denominator must be nonzero; keep the raw accesses, not UiObject's later fields. */
-s32 datIsValueBelowQuarterMax(UiObject *object) {
-    return *(u16 *)((u8 *)object + 6) * DAT_PERCENT_SCALE / *(u16 *)((u8 *)object + 8) < DAT_QUARTER_PERCENT;
+/* Test the truncated current-HP percentage; maximum HP must be nonzero. */
+s32 datIsValueBelowQuarterMax(DatCalcCursor *object) {
+    return object->hp * DAT_PERCENT_SCALE / object->maxHp < DAT_QUARTER_PERCENT;
 }
 
 extern s32 datGameState;

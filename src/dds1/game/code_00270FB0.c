@@ -210,7 +210,11 @@ typedef struct StaffMenuWork {
     u8 panel[0x4C];
     u8 pad54[8];
     void *valueRecord;
-    u8 pad60[0xB8];
+    u8 pad60[0xC];
+    u32 unk6C;
+    u8 pad70[4];
+    u32 unk74;
+    u8 pad78[0xA0];
     u32 primaryImage;
     u32 resourceList;
     u32 secondaryImage;
@@ -404,9 +408,9 @@ void func_00271B48(void) {
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271B50);
 
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
-    menu->resourceList = func_0027D4A0(0, *(u32 *)((u8 *)menu + 0x6C), menu->secondaryImage);
+    menu->resourceList = func_0027D4A0(0, menu->unk6C, menu->secondaryImage);
     menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
-    mnuForwardDupArg(menu->images[0], *(u32 *)((u8 *)menu + 0x74), 0, 0, 0);
+    mnuForwardDupArg(menu->images[0], menu->unk74, 0, 0, 0);
     menu->images[1] = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
     mnuSetWindowContainerState(menu->images[1], 0x100);
     menu->images[2] = func_00271B50(D_0037B980, 2, 0x200, menu, 0);

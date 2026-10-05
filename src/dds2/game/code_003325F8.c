@@ -68,7 +68,8 @@ typedef union SdfSubParam {
 } SdfSubParam;
 
 typedef struct SdfTextParam {
-    u8 pad00[6]; /* 0x00 */
+    u32 unk00;
+    u16 unk04;
     u8 dirtyFlags; /* 0x06: set by parameter setters below */
     u8 pad07[9]; /* 0x07 */
     u32 unk10; /* 0x10 */
@@ -707,8 +708,8 @@ u8 *sdfParseAssetParameterFlags(SdfTextParam *param, SdfTextParam *resourceLooku
     u8 *parameterCursor;
     u32 packedTextureMode;
 
-    *(u32 *)param = *(u32 *)serializedData;
-    *(u16 *)((u8 *)param + 4) = *(u16 *)(serializedData + 4);
+    param->unk00 = *(u32 *)serializedData;
+    param->unk04 = *(u16 *)(serializedData + 4);
     parameterFlags = *(u16 *)(serializedData + 6);
     parameterCursor = serializedData + SDF_PARAM_HEADER_BYTES;
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FIRST_PRESENT) {
@@ -835,11 +836,11 @@ extern u16 D_0040B348[];
  * then apply the secondary scalar block to the entry's native location. */
 void sdfApplyAssetSecondaryEntry(SdfAsset *asset, void *drawEntry) {
     u8 *entryBytes = drawEntry;
-    SdfTex *texture = *(SdfTex **)((u8 *)asset + 0x30);
+    SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
     ((SdfDrawPacket *)entryBytes)->color = asset->unk18;
-    packetMode = *(u32 *)((u8 *)asset + 0x34);
+    packetMode = asset->secondaryMode;
     ((SdfDrawPacket *)entryBytes)->mode = packetMode;
     ((SdfDrawPacket *)entryBytes)->paletteValue = D_0040B348[packetMode];
     if (texture != NULL) {

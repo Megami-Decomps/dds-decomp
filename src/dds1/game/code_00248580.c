@@ -95,7 +95,7 @@ typedef struct MenuTerminalWork {
     s32 messageResources[2]; /* 0x5C: second handle opens the message window */
     SceneFrameTable *batch;  /* 0x64 */
     u32 secondResource;     /* 0x68 */
-    u8 pad6C[4];
+    SceneFrameTable *alternateBatch; /* 0x6C */
     MenuProgressOwner *listResource; /* 0x70 */
     MenuProgressOwner *list; /* 0x74 */
     MenuProgressOwner *owner;/* 0x78 */
@@ -1124,8 +1124,14 @@ void mnuDrawTerminalSelectedSlots(s32 context) {
 
 typedef struct {
     u8 pad00[0x14];
-    u8 unk14;
-    u8 pad15[0x6F];
+    union {
+        s32 values[4];
+        struct {
+            u8 unk14;
+            u8 pad15[0xF];
+        };
+    };
+    u8 pad24[0x60];
     u8 unk84;
     u8 pad85[0x1B];
 } SceneFrameRecord;
@@ -1207,7 +1213,7 @@ void func_0024A728(u32 mode, s32 context) {
         itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, -0x400, 0);
         effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[5], 0, 5, 3);
         i = 0;
-        entries = (s32 *)(*(s32 *)(*(s32 *)((u8 *)work + 0x6C) + 0x18) + 0x14);
+        entries = work->alternateBatch->records[0].values;
         for (; i < 4; i++) {
             entries[i] = 0;
         }
@@ -1221,7 +1227,7 @@ void func_0024A728(u32 mode, s32 context) {
     case 3:
         itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, -0x400, 0);
         effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[5], 0, 0, 3);
-        effConfigureWithDefaultSetting(*(s32 *)((u8 *)work + 0x6C), 0, work->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting((s32)work->alternateBatch, 0, work->effect[5], 0, 0, 2);
         break;
     }
 }
