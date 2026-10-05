@@ -11491,7 +11491,97 @@ void effSelectPresetByKind(u32 kind, u32 arg) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_00305C40);
+typedef struct SdfTex SdfTex;
+typedef struct SdfDrawPacket SdfDrawPacket;
+
+typedef struct EffSpriteUV {
+    s32 u0;
+    s32 v0;
+    s32 u1;
+    s32 v1;
+} EffSpriteUV;
+
+typedef union EffSpriteColor {
+    u32 rgba;
+    struct {
+        u32 alpha : 8;
+        u32 blue : 8;
+        u32 green : 8;
+        u32 red : 8;
+    } channels;
+} EffSpriteColor;
+
+extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
+extern void effSelectPresetByKind(u32, u32);
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+
+void func_00305C40(s32 x, s32 y, u32 z, s32 width, s32 height,
+                   const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flip,
+                   u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
+    u32 uv[4];
+    void *packet;
+    void *list;
+    u64 *dst;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    s32 temp;
+
+    if (mode == 0) {
+        sdfTexSetPrimaryBufferModeBits(texture, 0, 1);
+    } else {
+        sdfTexSetPrimaryBufferModeBits(texture, 1, 1);
+    }
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    sdfConsInitPacketHeader(packet, 0x156, 5, 0x43431, 1);
+    /* The SDK size helper also skips the packet's two header quadwords. */
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    x0 = x + 0x7000;
+    y0 = y + 0x7900;
+    uv[0] = uvRect->u0 * 16;
+    uv[2] = uvRect->u1 * 16;
+    uv[1] = uvRect->v0 * 16;
+    uv[3] = uvRect->v1 * 16;
+    x1 = x0 + width;
+    y1 = y0 + height;
+    if (flip & 1) {
+        temp = x0;
+        x0 = x1;
+        x1 = temp;
+    }
+    if (flip & 2) {
+        temp = y0;
+        y0 = y1;
+        y1 = temp;
+    }
+    if (color == NULL) {
+        dst[0] = ((u64)0x80 << 32) | 0x80;
+        dst[1] = ((u64)0x80 << 32) | 0x80;
+    } else {
+        u32 rgba = color->rgba;
+
+        dst[0] = color->channels.red | ((u64)color->channels.green << 32);
+        dst[1] = ((rgba >> 8) & 0xFF) | ((u64)(rgba & 0xFF) << 32);
+    }
+    dst[2] = uv[0] | ((u64)uv[1] << 32);
+    dst[4] = (u64)(u32)x0 | ((u64)y0 << 32);
+    dst[6] = uv[2] | ((u64)uv[3] << 32);
+    dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
+    dst[5] = z;
+    dst[9] = z;
+    effSelectPresetByKind(blendKind, surfaceId);
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfConsCreateDrawPacket((s32)list, (s32)texture, 0);
+    sdfAppendPacket(list, packet);
+    effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_00305EB0);
 
