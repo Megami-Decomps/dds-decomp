@@ -103,6 +103,8 @@ typedef struct BattleController {
     SceneTask *groupTertiary[15];
     u8 pad_42C[0x184];
     s32 (*sceneCallback)();
+    u8 pad_5B4[0x78];
+    s32 (*actionCameraStepHook)(u8 *); /* 0x62C */
 } BattleController;
 
 extern u8 D_0035F100[];
@@ -6652,6 +6654,13 @@ void func_001DD7E8(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DD890);
 
+extern void btlRefreshActionPoseBlendSnapshot();
+extern void btlAimEffectPoseAtUnit();
+extern void func_001E0100();
+extern void func_001E5718(CameraPoseAction *, CameraPoseTransform *);
+extern void btlBuildHeightClampedApproachCamera(CameraPoseAction *, CameraPoseTransform *);
+
+/* Let the runtime hook handle the actor before dispatching its camera step. */
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D38);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3D50);
@@ -6670,15 +6679,9 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DF0);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E08);
 
-extern void btlRefreshActionPoseBlendSnapshot();
-extern void btlAimEffectPoseAtUnit();
-extern void func_001E0100();
-extern void func_001E5718(CameraPoseAction *, CameraPoseTransform *);
-extern void btlBuildHeightClampedApproachCamera(CameraPoseAction *, CameraPoseTransform *);
-
-/* Let the runtime hook handle the actor before dispatching its camera step. */
 void func_001DDE28(u8 *actor) {
-    s32 (*callback)(u8 *) = *(s32 (**)(u8 *))(btlGetRuntime() + 0x62C);
+    BattleController *runtime = (BattleController *)btlGetRuntime();
+    s32 (*callback)(u8 *) = runtime->actionCameraStepHook;
 
     if (callback != 0 && callback(actor) != 0) {
         return;
