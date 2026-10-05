@@ -1882,7 +1882,7 @@ s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
         if ((first->conditionFlags & 0x2A0E) != 0) {
             return 3;
         }
-        totalMaxHp = *(u16 *)&first->pad126[2];
+        totalMaxHp = first->maxHp;
         count = 1;
     }
     if (second != NULL) {
@@ -1893,7 +1893,7 @@ s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
             return 3;
         }
         count++;
-        totalMaxHp += *(u16 *)&second->pad126[2];
+        totalMaxHp += second->maxHp;
     }
     if (third != NULL) {
         if ((third->flags & 0x100) == 0) {
@@ -1903,10 +1903,9 @@ s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
             return 3;
         }
         count++;
-        totalMaxHp += *(u16 *)&third->pad126[2];
+        totalMaxHp += third->maxHp;
     }
-    /* The shared DDS2 layout leaves max HP at +0x128 in pad126. */
-    *(u16 *)&snapshot.pad126[2] = totalMaxHp / count;
+    snapshot.maxHp = totalMaxHp / count;
     return func_001ABB10(&snapshot, command);
 }
 

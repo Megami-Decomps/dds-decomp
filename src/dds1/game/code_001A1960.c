@@ -592,6 +592,9 @@ void func_001A2F50(s32 arg0) {
     btlResolveUnitValueWithOverride(arg0 + 0x120);
 }
 
+struct DatUnitStatus;
+extern s32 func_00119520(struct DatUnitStatus *, s32);
+
 s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
     s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x670);
     if (handler != 0) {
@@ -600,7 +603,7 @@ s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
             return result;
         }
     }
-    return func_00119520(object, value);
+    return func_00119520((struct DatUnitStatus *)object, value);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {

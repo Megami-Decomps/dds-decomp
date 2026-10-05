@@ -643,11 +643,11 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
 
     for (; entryIndex < entryCount; entryIndex++) {
         unit = btlGetIndexListEntry(list, entryIndex);
-        PCP_COPY_VECTOR(&position, &unit->positionX);
+        PCP_COPY_VECTOR(&position, unit->position);
         position.f[2] += unit->positionZOffset;
         /* The indexed DDS2 path uses the vector at 0x40 and scale at 0x50,
          * unlike the ordinary muzzle accessor's 0x70/0x80 fields. */
-        VU0_LOAD_VF(vf10, (u8 *)unit + 0x40);
+        VU0_LOAD_VF(vf10, unit->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, unit->bodyOffset);
         VU0_SET_VF2X(unit->unk50);
@@ -746,6 +746,8 @@ void btlClearActorUnitDefeatCandidates(BtlIndexList *list) {
 }
 
 extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
+extern void btlSetUnitPosition(BtlUnit *, f32 *);
+extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 /* Refresh each unit's transform/effect state, then invoke the runtime callback. */
 void btlUpdateUnitActors(void) {
@@ -754,8 +756,8 @@ void btlUpdateUnitActors(void) {
 
     while (unit != NULL) {
         btlFlagUnitDefeatCandidate(unit);
-        btlSetUnitPosition((s32)unit, (s32)((u8 *)unit + 0x30));
-        btlSetUnitRotation((s32)unit, (s32)((u8 *)unit + 0x40));
+        btlSetUnitPosition(unit, unit->position);
+        btlSetUnitRotation(unit, (s128 *)unit->rotation);
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
             btlRefreshUnitMotionSelection((s32)unit);
@@ -768,7 +770,7 @@ void btlUpdateUnitActors(void) {
         unit = unit->nextActor;
     }
     {
-        void (*callback)(void) = *(void (**)(void))((u8 *)state + 0x624);
+        void (*callback)(void) = state->afterUnitUpdate;
         if (callback != 0) {
             callback();
         }

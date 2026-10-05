@@ -636,8 +636,8 @@ void btlUpdateUnitActors(void) {
     BtlUnit *unit = state->units;
     while (unit != NULL) {
         btlFlagUnitDefeatCandidate((u8 *)unit);
-        btlSetUnitPosition((s32)unit, (s32)((u8 *)unit + 0x30));
-        btlSetUnitRotation((s32)unit, (s32)((u8 *)unit + 0x40));
+        btlSetUnitPosition((s32)unit, (s32)unit->position);
+        btlSetUnitRotation((s32)unit, (s32)unit->rotation);
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
             btlRefreshUnitMotionSelection((s32)unit);

@@ -1,8 +1,14 @@
 #include "common.h"
 #include "kwln.h"
+#include "sdf.h"
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern void sdfQueueNonzeroResourceId(s32);
+extern u32 effLoadIndexedResource(const char *, const char *, s32);
+extern u32 effDestroyResourceSlotSet(u32);
 
 /* Sliding menu bar: direction flag and 0..max position */
 typedef struct { s32 active; s32 pos; } SlideBar;
@@ -34,7 +40,18 @@ extern s32 mnuMovieMenuState;
 
 extern u16 mnuMovieTaskState;
 
-extern u32 *mnuMovieWork;
+typedef struct {
+    SdfMemBlock *handle;
+    u32 sprite;
+    s32 state;
+    s32 frame;
+    u8 pad10[0xAC];
+    s32 scrollPaused; /* 0xBC: suppresses staff text and frame advancement. */
+    u8 padC0[0x14];
+    s32 streamPhase;
+} StaffTaskState;
+
+extern StaffTaskState *mnuMovieWork;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -48,7 +65,7 @@ extern u8 D_003803C8[];
 
 extern KwlnTask *mnuMovieDrawTask;
 
-extern u8 D_00437AC0[];
+extern char D_00437AC0[];
 
 extern void mnuStopTitleMovieDraw(void);
 
@@ -724,7 +741,7 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_004298D8);
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_004298E8);
 
 void mnuLoadMovieRollSprite(void) {
-    mnuMovieWork[1] = effLoadIndexedResource(D_00437AC0, "staff_01.spr", 0);
+    mnuMovieWork->sprite = effLoadIndexedResource(D_00437AC0, "staff_01.spr", 0);
 }
 
 void func_002A6000(void) {
@@ -741,9 +758,11 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6180);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6480);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
+extern s32 func_002A6580(void);
 
+INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
+
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6858);
 
@@ -758,7 +777,7 @@ void mnuFadeSetState(u32 *state, u32 mode) {
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
-    u32 sprite = mnuMovieWork[1];
+    u32 sprite = mnuMovieWork->sprite;
 
     if (bar->active == 0 && bar->pos == 0) {
         return;
@@ -831,12 +850,12 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    sdfQueueNonzeroResourceId(*mnuMovieWork);
-    mnuMovieWork = (u32 *)0x0;
+    sdfQueueNonzeroResourceId((s32)mnuMovieWork->handle);
+    mnuMovieWork = NULL;
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet(mnuMovieWork[1]);
+    effDestroyResourceSlotSet(mnuMovieWork->sprite);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_003458E8(0);
@@ -855,25 +874,17 @@ void mnuInitializeMovieRollViewport(void) {
 
 extern u32 D_00435CBC;
 
-extern void func_002A6580();
-
-typedef struct {
-    u32 handle;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-} StaffTaskState;
 
 void mnuCreateStaffTask(void) {
-    u32 handle;
+    SdfMemBlock *handle;
 
     D_00435CBC = 0x80000000;
     handle = sdfAllocGeneralBlock(0xD8);
-    mnuMovieWork = sdfResourceRetainAddress(handle);
+    mnuMovieWork = (StaffTaskState *)sdfResourceRetainAddress(handle);
     memset(mnuMovieWork, 0, 0xD8);
-    ((StaffTaskState *)mnuMovieWork)->handle = handle;
-    ((StaffTaskState *)mnuMovieWork)->unk8 = 0;
-    ((StaffTaskState *)mnuMovieWork)->unkC = 0;
+    mnuMovieWork->handle = handle;
+    mnuMovieWork->state = 0;
+    mnuMovieWork->frame = 0;
     mnuMovieTaskState = 1;
     frFontUploadClearedTexture();
     kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, mnuFinishStaffMovieAndFreeState, 0);

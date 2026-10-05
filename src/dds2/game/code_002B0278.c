@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "fpu.h"
+#include "sdf.h"
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -270,7 +271,8 @@ typedef struct MenuContext {
     s32 alternateResource; /* 0x6C: used when swapping the staff panel view */
     u8 pad70[0x58];
     s32 labelHandle;       /* 0xC8 */
-    u8 padCC[0x30];
+    u32 panelModel;       /* 0xCC: model used by the panel resource slots */
+    u8 padD0[0x2C];
     const void *equippedSkillLayout; /* 0xFC */
     u8 pad100[4];
     s32 imageHandle;       /* 0x104 */
@@ -296,7 +298,7 @@ extern MenuSlot *datAffinityRecords;
 
 extern void mnuReleaseSpriteTextures(s32);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
@@ -480,7 +482,7 @@ extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern s32 *sdfResourceRetainAddress(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 
 extern void func_0026C900(void);
 
@@ -916,7 +918,7 @@ void mnuReleaseStaffMenuTextureHandles(s32 menuWork) {
 u32 mnuCreateSelectState(u32 unused, s32 flag) {
     s32 context = kwlnTaskGetUserValue();
     u32 handle = sdfAllocGeneralBlock(0x30);
-    u32 *state = (u32 *)sdfResourceRetainAddress(handle);
+    u32 *state = (u32 *)sdfResourceRetainAddress((SdfMemBlock *)handle);
     *(u32 **)(context + 0xaa48) = state;
     memset(state, 0, 0x30);
     state[0] = handle;
@@ -1489,7 +1491,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
 u32 mnuCreateItemState(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     u32 handle = sdfAllocGeneralBlock(0x3c);
-    u32 *state = (u32 *)sdfResourceRetainAddress(handle);
+    u32 *state = (u32 *)sdfResourceRetainAddress((SdfMemBlock *)handle);
     *(u32 **)(context + 0xaa48) = state;
     memset(state, 0, 0x3c);
     state[0] = handle;

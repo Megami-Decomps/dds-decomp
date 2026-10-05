@@ -6,10 +6,18 @@
 
 /* Battle effect actor, flags and timing (0x18); DDS1/2 identical views. */
 typedef struct BattleEffectState {
-    u32 actor, flags, value; /* +0x00/+0x04/+0x08 */
+    union {
+        u32 owner;
+        struct BtlUnit *actor;
+        u8 statIndex;
+    };
+    u32 flags, value;        /* +0x04/+0x08 */
     u16 timer;               /* +0x0C */
     u8 active, phase;        /* +0x0E/+0x0F */
-    u32 effect;              /* +0x10 */
+    union {
+        u32 effect;
+        f32 height;          /* +0x10: effect position's Y component */
+    };
     f32 speed;               /* +0x14 */
 } BattleEffectState;
 
@@ -27,7 +35,8 @@ typedef struct BtlUnit {
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
     u8 pad50[4];
     u32 baseColor; /* 0x54: RGB restored after temporary battle effects */
-    u8 pad58[0x18];
+    u8 pad58[8];
+    f32 currentPosition[4]; /* 0x60: position retained by the unit setter */
     f32 orientation[4]; /* 0x70: quaternion converted to a VU matrix */
     f32 scale; /* 0x80 */
     u8 pad84[4];
@@ -107,7 +116,9 @@ typedef struct BtlUnit {
  * and the actor-list link at 0x364, so all five are the same object).
  * Fields no unit could name stay unkNN/padNN. */
 typedef struct BtlUnitExt {
-    u8 pad0[0x68];
+    u8 pad0[0x60];
+    u32 color60; /* Packed event-unit color, consumed by RGB/alpha transitions. */
+    u8 pad64[4];
     s32 unk68;
     u8 pad6C[0x18];
     struct BtlExtModel *model;
@@ -127,13 +138,12 @@ typedef struct BtlUnit {
     s32 unk14;
     struct BtlUnit *link18;
     u8 pad1C[0x14];
-    f32 positionX;   /* 0x30: current unit position */
-    f32 positionY;   /* 0x34 */
-    f32 positionZ; /* 0x38 */
-    u8 pad3C[0x14];
+    f32 position[4]; /* 0x30: world position */
+    f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
     f32 unk50;
     u32 baseColor;
-    u8 pad58[0x18];
+    u8 pad58[8];
+    f32 currentPosition[4]; /* 0x60: position retained by the unit setter */
     f32 orientation[4]; /* 0x70: quaternion converted to a rotation matrix */
     f32 scale;      /* 0x80 */
     u32 overlayColor;
@@ -175,7 +185,10 @@ typedef struct BtlUnit {
     u16 statBits; /* 0x120: queried for bit 0x2000; base of the stat accessors */
     u16 unk122;   /* 0x122: script-controlled unit parameter */
     u16 mode;     /* 0x124 */
-    u8 pad126[8];
+    u16 hp;      /* 0x126 */
+    u16 maxHp;   /* 0x128 */
+    u16 unk12A;
+    u16 unk12C;
     u16 conditionFlags; /* 0x12E */
     u8 pad130a[4];
     u16 actionTime; /* 0x134: action timestamp used by the low-HP delay check */

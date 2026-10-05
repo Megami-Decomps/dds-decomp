@@ -146,10 +146,12 @@ typedef struct EffModelAssetHeader {
     EffModelAssetData *data; // pointer to the model data block
 } EffModelAssetHeader;
 
-typedef struct EffLinkedActorChild {
+typedef struct EffModelRef {
     u8 pad00[0x60];
-    s32 effectValue;
-} EffLinkedActorChild;
+    u32 color; /* 0x60: packed color synchronized with the owning actor */
+    u8 pad64[0x28];
+    s32 nodeReference; /* 0x8C */
+} EffModelRef;
 
 typedef struct EffSurfaceEndpoints {
     u8 pad00[0x140];
@@ -6712,7 +6714,9 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
 typedef struct EffActor {
     u8 pad000[0x54];
     u32 effectValue; /* 0x54: forwarded to the linked effect */
-    u8 pad058[0xB8];
+    u8 pad058[0x2C];
+    u32 packedColor; /* 0x84: currently rendered actor color */
+    u8 pad088[0x88];
     u32 flags;
     u8 unk114[0x21C];
     u16 animFlags;
@@ -6803,21 +6807,21 @@ extern void evtSetUnitRgbTransition(s32, s32, s32);
 
 void effSyncLinkedActorChildParameter(void) {
     s32 owner = btlGetRuntime();
-    s32 *entry;
+    EffActor *entry;
 
     if ((((EffBattleState *)owner)->statusFlags & 0x6000000) != 0x6000000) {
         return;
     }
-    entry = (s32 *)((EffBattleState *)owner)->units;
+    entry = ((EffBattleState *)owner)->units;
     while (entry != NULL) {
-        if (entry[0x110 / 4] & 2) {
-            s32 child = entry[0x340 / 4];
+        if (entry->flags & 2) {
+            EffModelRef *child = entry->model;
             if (child != 0) {
-                ((EffLinkedActorChild *)child)->effectValue = entry[0x54 / 4];
-                evtSetUnitRgbTransition(child, 0, entry[0x54 / 4]);
+                child->color = entry->effectValue;
+                evtSetUnitRgbTransition((s32)child, 0, entry->effectValue);
             }
         }
-        entry = (s32 *)entry[0x364 / 4];
+        entry = entry->next;
     }
 }
 
@@ -6948,10 +6952,6 @@ void effReleaseTargetSlots(u32 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F6D00);
 
-typedef struct EffModelRef {
-    u8 pad00[0x8C];
-    s32 nodeReference;
-} EffModelRef;
 
 typedef struct EffAnimInfo {
     u16 id;
@@ -7596,23 +7596,6 @@ void func_002F8640(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F8648);
 
-typedef struct EffFadeTarget {
-    u8 pad_00[0x60];
-    u32 color;              // 0x60
-} EffFadeTarget;
-
-typedef struct EffFadeNode {
-    u8 pad_00[0x54];
-    u32 color;              // 0x54
-    u8 pad_58[0x2C];
-    u32 packedColor;        // 0x84
-    u8 pad_88[0x88];
-    u32 flags;              // 0x110
-    u8 pad_114[0x22C];
-    EffFadeTarget *target;  // 0x340
-    u8 pad_344[0x20];
-    struct EffFadeNode *next; // 0x364
-} EffFadeNode;
 
 extern void evtSetUnitAlphaTransition(void *, u32, u32);
 
@@ -7620,16 +7603,16 @@ void effSyncFadeColorToTargets(void) {
     s32 owner = btlGetRuntime();
 
     if ((((EffBattleState *)owner)->statusFlags & 0x6000000) == 0x6000000) {
-        EffFadeNode *node = (EffFadeNode *)((EffBattleState *)owner)->units;
+        EffActor *node = ((EffBattleState *)owner)->units;
 
         while (node != 0) {
             if (node->flags & 2) {
-                EffFadeTarget *target = node->target;
+                EffModelRef *target = node->model;
 
                 if (target != 0) {
-                    node->packedColor = (node->packedColor & 0xFFFFFF) | (node->color & 0xFF000000);
-                    target->color = node->color;
-                    evtSetUnitAlphaTransition(target, 0, node->color);
+                    node->packedColor = (node->packedColor & 0xFFFFFF) | (node->effectValue & 0xFF000000);
+                    target->color = node->effectValue;
+                    evtSetUnitAlphaTransition(target, 0, node->effectValue);
                 }
             }
             node = node->next;
@@ -7637,7 +7620,69 @@ void effSyncFadeColorToTargets(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F8CF0);
+typedef struct EffActorAlphaConfig {
+    u32 duration;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 color;
+    u8 actorSelection;
+    u8 transition;
+    u8 updatePackedAlpha;
+    u8 pad13;
+} EffActorAlphaConfig;
+
+void func_002F8CF0(EffActiveResource *work) {
+    EffActor *actors[16];
+    EffActorAlphaConfig *config;
+    u32 frame;
+    u32 color;
+    u32 count;
+    u32 i;
+    u32 alpha;
+    f32 blend;
+
+    config = work->payload;
+    frame = work->frame;
+    color = config->color;
+    count = effCollectModelEffectActors(actors, config->actorSelection);
+    if (frame > config->duration) {
+        frame = config->duration;
+    }
+    if (config->updatePackedAlpha) {
+        if (frame < config->fadeIn) {
+            blend = (f32)frame / (f32)config->fadeIn;
+        } else if (frame > config->duration - config->fadeOut) {
+            blend = (f32)(config->duration - frame) / (f32)config->fadeOut;
+        } else {
+            blend = 0.0f;
+            if (frame < config->duration) {
+                blend = 1.0f;
+            }
+        }
+        alpha = 0x80 - (u32)((f32)(0x80 - (color >> 24)) * blend);
+        for (i = 0; i < count; i++) {
+            if (actors[i]->flags & 2) {
+                actors[i]->packedColor = (actors[i]->packedColor & 0xFFFFFF) | (alpha << 24);
+            }
+        }
+    }
+    if (config->transition) {
+        if (frame == 0) {
+            for (i = 0; i < count; i++) {
+                if (actors[i]->flags & 2) {
+                    evtSetUnitAlphaTransition(actors[i]->model, config->fadeIn, color);
+                }
+            }
+        }
+        if (config->duration != 0 && frame == config->duration - config->fadeOut) {
+            for (i = 0; i < count; i++) {
+                if (actors[i]->flags & 2) {
+                    evtSetUnitAlphaTransition(actors[i]->model, config->fadeOut, actors[i]->effectValue);
+                }
+            }
+        }
+    }
+}
 
 extern u8 D_003E9FF0[];
 

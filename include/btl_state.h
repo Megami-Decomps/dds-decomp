@@ -140,7 +140,9 @@ typedef struct BtlState {
     u32 buttonTextureHandle; /* 0x4E8 */
     u8 pad4EC[0xDC];
     void (*bossCleanup)(void); /* 0x5C8 */
-    u8 pad5CC[0x120];
+    u8 pad5CC[0x58];
+    void (*afterUnitUpdate)(void); /* 0x624 */
+    u8 pad628[0xC4];
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
     u8 pad6F0[0x28];
     struct BattleLinkedEffectState *effect; /* 0x718 */
