@@ -463,7 +463,41 @@ s8 func_001A2AE8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2B00);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlGetCombinedPartyCommandPower);
+/* Persistent party data is 0x1A4 bytes in DDS1, distinct from a battle actor. */
+typedef struct BtlPartyEntry {
+    u16 flags;
+    u16 pad02;
+    u16 displayId;
+    u16 currentHp;
+    u16 maxHp;
+    u16 pad0A;
+    u32 words[0x66];
+} BtlPartyEntry;
+
+s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObject *second,
+                  UiObject *third, s32 command) {
+    BtlPartyEntry snapshot = *base;
+    s32 totalMaxHp = 0;
+    s32 count = 0;
+    s32 average;
+
+    if (first != NULL) {
+        totalMaxHp = first->maximumValue;
+        count = 1;
+    }
+    if (second != NULL) {
+        totalMaxHp += second->maximumValue;
+        count++;
+    }
+    if (third != NULL) {
+        totalMaxHp += third->maximumValue;
+        count++;
+    }
+    average = totalMaxHp / count;
+    snapshot.maxHp = average;
+    snapshot.currentHp = average;
+    return btlApplyCommandAbilityMultiplier((s32)&snapshot, command);
+}
 
 extern s32 func_001A2B00(s32, s32);
 
