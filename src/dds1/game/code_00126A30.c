@@ -4179,41 +4179,6 @@ extern u8 D_00336A30[];
 extern u8 D_00336A40[];
 extern u8 D_00336A50[];
 extern s32 D_003BAE6C;
-/* Packed 0x6C-byte field actor row. Offsets come from the parallel actor
- * searches, motion lookups, and sound dispatch below. */
-typedef struct FldActorEntry {
-    s8 kind;               /* 0x00 */
-    u8 pad01;
-    s16 requiredFlag;      /* 0x02: zero or a model-flag ID */
-    s16 floor;             /* 0x04: current floor plus one */
-    char name[0x0C];       /* 0x06 */
-    s16 motion;            /* 0x12 */
-    s16 secondaryMotion;   /* 0x14 */
-    s16 sound;             /* 0x16 */
-    char motionName[0x0C]; /* 0x18 */
-    char otherName[0x0C];  /* 0x24 */
-    s8 variantMode;        /* 0x30 */
-    s8 flags31;            /* 0x31 */
-    s16 variant;           /* 0x32 */
-    s16 sequenceKind;      /* 0x34: zero uses the default kind */
-    u8 pad36[2];
-    char sequenceName[0x0C]; /* 0x38 */
-    s8 linkKind;           /* 0x44 */
-    s8 rowIndex;           /* 0x45 */
-    char linkName[0x0C];   /* 0x46 */
-    s8 sequenceCode;       /* 0x52 */
-    s8 selectedRoom;       /* 0x53: one-based optional room */
-    s8 flags54;            /* 0x54 */
-    char taskName[0x0F];   /* 0x55 */
-    u8 flags64;            /* 0x64 */
-    u8 unk65;
-    u8 unk66;
-    s8 value67;            /* 0x67 */
-    u8 unk68;
-    u8 unk69;
-    u8 unk6A;
-    u8 unk6B;
-} FldActorEntry;
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
 

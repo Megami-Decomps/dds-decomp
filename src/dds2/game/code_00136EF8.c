@@ -2,6 +2,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "fld.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -344,41 +345,6 @@ typedef struct FldAreaState {
     s16 unk104;
 } FldAreaState;
 
-/* Field actor table entries are 0x6C bytes; the area index stored by the
- * field state is zero-based, whereas entry->floor is one-based. */
-typedef struct FldActorEntry {
-    /* 0x00 */ s8 kind;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ s16 requiredFlag;
-    /* 0x04 */ s16 floor;
-    /* 0x06 */ char name[0xC];
-    /* 0x12 */ s16 motion;
-    /* 0x14 */ s16 secondaryMotion;
-    /* 0x16 */ s16 sound;
-    /* 0x18 */ u8 motionName[0xC];
-    /* 0x24 */ u8 otherName[0xC];
-    /* 0x30 */ s8 variantMode;
-    /* 0x31 */ u8 flags31;
-    /* 0x32 */ s16 variant;
-    /* 0x34 */ s16 warpEntry;
-    /* 0x36 */ s16 warpEntry2;
-    /* 0x38 */ char warpName[0xC];
-    /* 0x44 */ s8 linkKind;
-    /* 0x45 */ s8 unk45;
-    /* 0x46 */ char linkName[0xC];
-    /* 0x52 */ s8 unk52;
-    /* 0x53 */ s8 unk53;
-    /* 0x54 */ s8 flags54;
-    /* 0x55 */ char pad55[0xF];
-    /* 0x64 */ u8 flags64;
-    /* 0x65 */ s8 unk65;
-    /* 0x66 */ s8 unk66;
-    /* 0x67 */ s8 value67;
-    /* 0x68 */ s8 unk68;
-    /* 0x69 */ s8 unk69;
-    /* 0x6A */ s8 unk6A;
-    /* 0x6B */ s8 unk6B;
-} FldActorEntry; /* 0x6C bytes */
 
 /* Axis-aligned trigger zone: up to four bounding planes plus a 2D extent. */
 typedef struct FldZone {
