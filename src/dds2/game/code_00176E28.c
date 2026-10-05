@@ -46,21 +46,6 @@ typedef struct EffVectorWork {
     EffVectorPart *parts;
 } EffVectorWork;
 
-/* Position and color arrays precede this 0x70-byte pool header. Constructors
- * below clear their entire allocation, including both arrays and the header. */
-typedef struct EffRecordPool {
-    f32 matrix[EFF_MATRIX_WORD_COUNT];
-    f32 origin[3];
-    u8 pad4C[4];
-    u32 drawMode;  /* 0x50: selects the packet submission surface */
-    u32 color;     /* 0x54: packed color passed to the packet builder */
-    s32 vertexCount; /* 0x58: positions and color words, not group count */
-    f32 scale;     /* 0x5C */
-    s32 recordBase;    /* 0x60: address of stride-dependent records */
-    s32 auxRecordBase; /* 0x64: address of stride-dependent auxiliary records */
-    u32 resource;   /* 0x68: released by sdfQueueAssetRelease */
-    u32 buffer;     /* 0x6C: freed by sdfReleaseResourceAllocation */
-} EffRecordPool;
 
 typedef struct EffPacketParams {
     s16 parameterCount;

@@ -2,6 +2,7 @@
 #define EFF_H
 
 #include "common.h"
+#include "sdf.h"
 
 typedef struct {
     s32 left;
@@ -302,6 +303,21 @@ typedef struct EffResourceWork {
     u32 resource70;
 } EffResourceWork; /* 0x74 */
 
+/* Position/color arrays precede this render pool; constructors clear the full allocation. */
+typedef struct EffRecordPool {
+    f32 matrix[16];
+    f32 origin[3];
+    u8 pad4C[4];
+    u32 drawMode; /* 0x50: packet submission surface */
+    u32 color;
+    s32 vertexCount; /* Positions/color words, not group count. */
+    f32 scale;
+    s32 recordBase;
+    s32 auxRecordBase;
+    u32 resource;
+    u32 buffer;
+} EffRecordPool; /* 0x70 */
+
 /* Shared scatter texture reference, created and released independently of pools. */
 typedef struct PcpScatterRes {
     u32 textureHandle;
@@ -365,7 +381,7 @@ typedef struct EffPCPNeedleWork {
     u32 count;
     u32 system;
     EffResourceWork *resource;
-    u32 allocationHandle;
+    SdfMemBlock *allocationHandle; /* Descriptor, not the retained data address. */
 } EffPCPNeedleWork; /* 0x74, followed by count slots */
 
 typedef char EffResourceEntrySizeCheck[sizeof(EffResourceEntry) == 0x14 ? 1 : -1];
