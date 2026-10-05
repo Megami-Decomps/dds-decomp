@@ -331,15 +331,20 @@ typedef struct GridAngleRectangle {
 
 typedef struct GridAngleAdjustment {
     u8 pad00[4];
-    s32 dimensions[2]; /* 0x04 */
-    s32 anchors[2];    /* 0x0C */
-    u32 colors[4];     /* 0x14 */
+    union {
+        struct {
+            s32 dimensions[2]; /* 0x04 */
+            s32 anchors[2];    /* 0x0C */
+            u32 colors[4];     /* 0x14 */
+        };
+        s32 fields[8];         /* 0x04: dimensions, anchors and colors */
+    };
 } GridAngleAdjustment;
 
 s32 itfGridApplySqrtBoundsAndColorScale(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 deltas[2];
-    s32 *dimensionOut = out->dimensions;
+    s32 *dimensionOut = out->fields;
     u32 *sourceColor;
     u32 *destColor;
     s32 colorFactor;
@@ -365,7 +370,7 @@ s32 itfGridApplySqrtBoundsAndColorScale(GridAngleRectangle *rectangle, GridAngle
     }
     sourceColor = rectangle->colors;
     /* The color block follows the dimension and anchor words. */
-    destColor = (u32 *)dimensionOut + 4;
+    destColor = (u32 *)&dimensionOut[4];
     {
         s32 colorMask = -0x100;
         s32 fractionalMask = 0xFFFF;
@@ -460,7 +465,7 @@ s32 func_003078A8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     totalDuration += table->holdDuration;
     deltas[0] = (rectangle->right - rectangle->left) << 4;
     deltas[1] = (rectangle->bottom - rectangle->top) << 3;
-    dimensionOut = out->dimensions;
+    dimensionOut = out->fields;
     {
         s32 fractionalMask = 0xFFFF;
 
@@ -492,7 +497,7 @@ s32 func_003078A8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
         numerator = phases[0] - (owner->angle - (phases[1] + phases[2]));
         denominator = phases[0];
     } else if (phases[2] < owner->angle) {
-        destColor = (u32 *)dimensionOut + 4;
+        destColor = (u32 *)&dimensionOut[4];
         sourceColor = rectangle->colors;
         for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
             *destColor = *sourceColor;
@@ -503,7 +508,7 @@ s32 func_003078A8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
         denominator = phases[2];
     }
 
-    destColor = (u32 *)dimensionOut + 4;
+    destColor = (u32 *)&dimensionOut[4];
     sourceColor = rectangle->colors;
     {
         s32 colorMask = -0x100;
@@ -522,7 +527,7 @@ s32 func_003078A8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
 s32 func_00307A68(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 deltas[2];
-    s32 *dimensionOut = out->dimensions;
+    s32 *dimensionOut = out->fields;
     s32 factor;
     u32 *sourceColor;
     u32 *destColor;
@@ -554,7 +559,7 @@ s32 func_00307A68(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     }
 
     /* The color block follows the dimension and anchor words. */
-    destColor = (u32 *)dimensionOut + 4;
+    destColor = (u32 *)&dimensionOut[4];
     factor = ((100 - table->mirrored) << 16) / 100;
     sourceColor = rectangle->colors;
     {
@@ -655,7 +660,7 @@ s32 func_00307D70(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
 s32 func_00307EF8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 deltas[2];
-    s32 *dimensionOut = out->dimensions;
+    s32 *dimensionOut = out->fields;
     s32 colorFactor;
     u32 *sourceColor;
     u32 *destColor;
@@ -692,7 +697,7 @@ s32 func_00307EF8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     }
     sourceColor = rectangle->colors;
     /* The color block follows the dimension and anchor words. */
-    destColor = (u32 *)dimensionOut + 4;
+    destColor = (u32 *)&dimensionOut[4];
     {
         s32 colorMask = -0x100;
         s32 fractionalMask = 0xFFFF;
