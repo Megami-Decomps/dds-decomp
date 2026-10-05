@@ -203,7 +203,7 @@ typedef struct BufferDescriptor {
 } BufferDescriptor;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(s32 packet);
-extern void itfSendTablePacket(s32 packet, s32 table, s32 mode);
+extern void itfSendTablePacket(void *packet, s32 table, s32 mode);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
@@ -687,11 +687,11 @@ void func_0025E980(SdfTex *texture, CampDisplayDefaults *display) {
         packet = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(packet);
         if (variant == 0) {
-            itfSendTablePacket(packet, 0, 0);
+            itfSendTablePacket((void *)packet, 0, 0);
         } else if (variant == 1) {
-            itfSendTablePacket(packet, 1, 0);
+            itfSendTablePacket((void *)packet, 1, 0);
         } else if (variant == 2) {
-            itfSendTablePacket(packet, 2, 0);
+            itfSendTablePacket((void *)packet, 2, 0);
         }
         if (display->unk1C != 0) {
             surfaceIndex = 0x3E;
