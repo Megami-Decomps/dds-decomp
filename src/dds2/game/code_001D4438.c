@@ -547,7 +547,8 @@ typedef struct BtlWork {
     s32 (*hook5F0)(BtlUnit *, s32);
     u8 pad5F4[0x24];
     s32 (*hook618)(BtlUnit *);
-    u8 pad61C[0x1C];
+    s32 (*hook61C)(BtlUnit *);
+    u8 pad620[0x18];
     void (*hook638)(BtlUnit *);
     u8 pad63C[0x10];
     s32 (*hook64C)(BtlUnit *);
@@ -866,7 +867,8 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 
 typedef struct SoundTask {
     u8 enabled;
-    u8 unk_01[0xF];
+    u8 unk_01[7];
+    u64 conditionHandle;
     u8 status;
     u8 unk_11[0xF];
     u16 taskId;
@@ -2109,7 +2111,85 @@ void btlUnitTurnEndCommit(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001DC9C0);
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern void func_001AD698(BtlUnit *);
+extern SoundTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
+extern SoundTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
+extern SoundTask *sndCreateStationedSeTask(u32);
+
+void func_001DC9C0(BtlUnit *command) {
+    BtlWork *work = (BtlWork *)btlGetRuntime();
+    BtlUnit *actor = command->link18;
+    u16 *profile = &actor->statBits;
+    SoundTask *soundTask;
+    SoundTask *object;
+    s64 sequence;
+    s32 entryFlags;
+    s32 result;
+
+    actor->unk310 = -1;
+    func_001AA850(profile, 0x4000);
+    btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
+    if (!(command->seqFlags & 0x100)) {
+        soundTask = btlCreateHookedUnitSoundTask(actor, 11);
+        btlStartTask(soundTask);
+        sequence = soundTask->unk_38;
+    } else {
+        sequence = btlAdvanceRuntimeSequenceCounter();
+    }
+    if (actor->flags & 0x200) {
+        if (!(command->seqFlags & 0x100)) {
+            if (!(actor->flags & 0x8000000) && actor->unkEC != 11) {
+                object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
+                object->enabled = 4;
+                object->conditionHandle = sequence;
+                btlStartTask(object);
+            }
+            btlRefreshUnitMotionSelection(actor);
+        }
+    } else if (actor->flags & 0x400) {
+        func_001AD698(actor);
+        if (actor->flags & 0x8000000) {
+            object = btlCreateSelectedEffectUpdateTask(actor);
+            object->enabled = 4;
+            object->conditionHandle = sequence;
+            btlStartTask(object);
+            object = sndCreateStationedSeTask(0x1000E);
+            object->enabled = 4;
+            object->conditionHandle = sequence;
+            btlStartTask(object);
+            actor->flags &= ~1;
+        } else {
+            entryFlags = btlGetEntryFlagsUnlessDisabled(profile);
+            result = 0;
+            if (work->hook618 != NULL) {
+                result = work->hook618(actor);
+            }
+            if ((entryFlags & 0x200) && result == 0) {
+                result = 1;
+                if (work->hook61C != NULL) {
+                    result = work->hook61C(actor);
+                }
+                if (result != 0) {
+                    if (actor->unkEC != 11) {
+                        object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
+                        object->enabled = 4;
+                        object->conditionHandle = sequence;
+                        btlStartTask(object);
+                    }
+                    btlRefreshUnitMotionSelection(actor);
+                }
+            } else {
+                object = (SoundTask *)func_001E6428((s32)actor, 0);
+                object->enabled = 4;
+                object->conditionHandle = sequence;
+                btlStartTask(object);
+                actor->flags &= ~1;
+            }
+        }
+        actor->statBits &= ~2;
+    }
+}
 
 void btlRemoveEligibleActorSceneTask(BtlUnit *task) {
     BtlUnit *unit = task->link18;
