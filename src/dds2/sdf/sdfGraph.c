@@ -13,15 +13,6 @@ extern u8 D_0043913C;
 
 void func_00329CE0(void *arg0, s32 arg1, s32 arg2);
 
-typedef struct SdfGraphObj {
-    s16 width;
-    s16 unk2;
-    s16 height;
-    u8 bufferFormat;
-    u8 auxiliaryFormat;
-    SdfTexResource *buffers[3];
-} SdfGraphObj;
-
 extern SdfGraphObj D_0040B290;
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
