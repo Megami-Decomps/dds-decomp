@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itf.h"
+#include "sdf.h"
 
 #define ITF_BYTE_MASK 0xFF
 #define ITF_NODE_HEADER_BYTES 8
@@ -857,11 +858,6 @@ void itfReleaseBackgroundSpriteTexture(void) {
 
 extern s32 itfDrawTexturedSpriteRect();
 
-typedef struct TextBackgroundSprite {
-    u8 pad00[0xC];
-    s16 width;
-    s16 height;
-} TextBackgroundSprite;
 
 /* Draw only when a texture is present; native X/Y extent scaling differs. */
 void itfDrawBackgroundSprite(void) {
@@ -869,7 +865,7 @@ void itfDrawBackgroundSprite(void) {
     s32 color[ITF_RGBA_COMPONENT_COUNT];
     s16 width;
     s16 height;
-    TextBackgroundSprite *panel = (TextBackgroundSprite *)itfBackgroundSpriteTexture;
+    SdfTex *panel = (SdfTex *)itfBackgroundSpriteTexture;
     if (panel != NULL) {
         width = panel->width;
         height = panel->height;
