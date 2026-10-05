@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -171,7 +171,63 @@ void func_0025AD68(s32 frame, s32 size, s32 param) {
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025AE80);
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025B0F0);
+typedef struct MnuSpritePlacement {
+    s16 resourceIndex;
+    s16 spriteIndex;
+    s16 x;
+    s16 y;
+} MnuSpritePlacement;
+
+typedef struct DatGameCounters {
+    u8 pad00[0x3C];
+    s32 currency;
+} DatGameCounters;
+
+extern MnuSpritePlacement D_0036B510[];
+extern s32 D_0036C698[];
+extern DatGameCounters *datGameState;
+extern char D_003BC4C8[];
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
+
+/* Interpolate currency changes over twenty draws, with the native ticking sound. */
+void func_0025B0F0(s32 x, s32 y, s32 depth, s32 alpha,
+                  MenuSceneMetadata *scene, s32 context) {
+    char currencyText[16];
+    u32 color = alpha | 0xA09DC300;
+    s32 resource;
+
+    resource = D_0036C698[D_0036B510[19].resourceIndex];
+    func_002BF4E0((x + D_0036B510[19].x) << 4,
+                  (y + D_0036B510[19].y) << 3, depth,
+                  (u32)((f32)(alpha << 8) * 0.0078125f), 0,
+                  resource,
+                  D_0036B510[19].spriteIndex, context);
+    resource = D_0036C698[D_0036B510[34].resourceIndex];
+    func_002BF4E0((x + D_0036B510[34].x) << 4,
+                  (y + D_0036B510[34].y) << 3, depth,
+                  (u32)((f32)(alpha << 8) * 0.0078125f), 0,
+                  resource,
+                  D_0036B510[34].spriteIndex, context);
+    if (datGameState->currency != scene->displayedCurrency) {
+        sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
+        scene->currencyFrame++;
+        func_003014F0(currencyText, D_003BC4C8,
+                      scene->displayedCurrency +
+                      (datGameState->currency - scene->displayedCurrency) *
+                          scene->currencyFrame / 20);
+        if (scene->currencyFrame == 20) {
+            scene->displayedCurrency = datGameState->currency;
+            scene->currencyFrame = 0;
+        }
+    } else {
+        func_003014F0(currencyText, D_003BC4C8, datGameState->currency);
+    }
+    itfDrawGlyphChainWithWidthQuery(x + 0x191, y + 0x39, depth, color,
+                                    0, (u32)currencyText, 0, context);
+}
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025B350);
 

@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -48,23 +48,6 @@ typedef struct MenuSceneWork {
     s32 coordinateB;      /* 0x544 */
 } MenuSceneWork;
 
-typedef struct MenuSceneMetadata {
-    u8 pad00[0x0C];
-    s32 messageWindowResource;
-    u8 pad10[8];
-    s32 state;
-    u8 pad1C[4];
-    s32 messageShadeFrames;
-    s32 attachedEffect;
-    u32 attachedEffectControl;
-    u16 entryId;
-    u8 pad02E[0x20E];
-    s32 displayedCurrency;
-    u8 pad240[4];
-    u16 pendingProfileId;
-    s8 stageFinished;
-    s8 stageStarted;
-} MenuSceneMetadata;
 
 typedef struct ScrVmOperand ScrVmOperand;
 
