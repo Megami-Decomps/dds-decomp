@@ -655,7 +655,39 @@ INCLUDE_ASM(const s32, "game/code_00227288", btlRemapListedUnitAction);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
-INCLUDE_ASM(const s32, "game/code_00227288", btlIsSceneUnitModeListed);
+/* Native 0x28-byte scene descriptor; the list stores unit modes, not command IDs. */
+typedef struct SceneDescriptor {
+    s8 unk00;
+    u8 pad01[5];
+    u16 unitModes[11]; /* 0x06 */
+    u8 pad1C[4];
+    u16 flags;        /* 0x20: also read by scene entry */
+    u8 pad22[4];
+    u16 eventId;      /* 0x26: zero disables; event loading then converts to s16 */
+} SceneDescriptor;
+
+extern s32 datBattleSceneRecords;
+
+/* Whether the unit's mode appears in its battle scene's listed unit modes. */
+s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
+    BtlState *battle;
+    u16 *listedMode;
+    u32 i;
+
+    if ((unit->flags & 0x400) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    i = 0;
+    listedMode = ((SceneDescriptor *)(battle->battleMode * (s32)sizeof(SceneDescriptor) +
+                                      datBattleSceneRecords))->unitModes;
+    for (; i < 0xB; i++) {
+        if (listedMode[i] == unit->mode) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00229728);
 

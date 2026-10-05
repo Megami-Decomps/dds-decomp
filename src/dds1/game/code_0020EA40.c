@@ -132,7 +132,26 @@ s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", btlIsSceneUnitModeListed);
+/* Whether the unit's mode appears in its battle scene's listed unit modes. */
+s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
+    BtlState *battle;
+    u16 *listedMode;
+    u32 i;
+
+    if ((unit->flags & 0x400) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    i = 0;
+    listedMode = ((SceneDescriptor *)(battle->battleMode * (s32)sizeof(SceneDescriptor) +
+                                      datBattleSceneRecords))->unitModes;
+    for (; i < 0xB; i++) {
+        if (listedMode[i] == unit->mode) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020ED90);
 
