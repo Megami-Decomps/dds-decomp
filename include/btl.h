@@ -153,7 +153,7 @@ typedef struct BtlUnit {
     f32 muzzleOffset[4]; /* 0xA0 */
     f32 height;     /* 0xB0 */
     f32 reach;      /* 0xB4 */
-    u8 padB8[4];
+    f32 unkB8; /* 0xB8: formation setup copies height here, alongside reach at +0xBC. */
     f32 unkBC;
     f32 unkC0;
     s32 resourceKind; /* 0xC4 */
