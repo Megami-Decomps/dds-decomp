@@ -336,6 +336,16 @@ typedef struct UiPanelPlacement {
 typedef struct UiTexRef { u8 pad0[4]; s32 unk4; s32 unk8; s32 unkC; } UiTexRef;
 typedef struct UiPos { s32 x; s32 y; s32 unk8; UiTexRef *chain; } UiPos;
 typedef struct UiPanelOrigin { s32 x; s32 y; UiTexRef *tex; } UiPanelOrigin;
+typedef struct SndSeqSelect {
+    u8 pad0[8];
+    s32 seq;
+    u8 padC[6];
+    s16 current;
+    s16 saved;
+    s16 count;
+    u8 pad18[0xA];
+    s16 entryCount;
+} SndSeqSelect;
 typedef struct UiPanel {
     u32 flags;
     u8 pad4[8];
@@ -345,8 +355,12 @@ typedef struct UiPanel {
     UiPanelOrigin origin;
     s32 pad20;
     UiPos pos;
-    u8 pad34[0x70];
+    u8 pad34[0xC];
+    SndSeqSelect selection;
+    u8 pad64[0x40];
     UiPanelPlacement place;
+    u8 padD0[0x100];
+    BtlFade fade;
 } UiPanel;
 extern s32 func_0019DBA8();
 extern UiSprite *func_001A1858(s32, u32);
@@ -372,16 +386,6 @@ typedef struct UiCursor {
 extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
 extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
 
-typedef struct SndSeqSelect {
-    u8 pad0[8];
-    s32 seq;
-    u8 padC[6];
-    s16 current;
-    s16 saved;
-    s16 count;
-    u8 pad18[0xA];
-    s16 entryCount;
-} SndSeqSelect;
 
 extern void itfMesSetRowItemFlag();
 extern void sndSetSequenceVolumePan();
@@ -775,16 +779,6 @@ void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6AB8);
 
-/* Both the sequence selector and fade belong to the same sound UI object. */
-typedef struct SoundUiState {
-    u8 pad00[0xC];
-    s32 depth;
-    s16 surfaceIndex;
-    u8 pad12[0x2E];
-    SndSeqSelect selection;
-    u8 pad64[0x16C];
-    BtlFade fade;
-} SoundUiState;
 
 void btlUpdateFadeIndicator(u8 *obj) {
     BtlFade *fade = (BtlFade *)(obj + 0x1D0);
@@ -814,7 +808,60 @@ void btlUpdateFadeIndicator(u8 *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6BF8);
+extern void itfMesRenderActivePanelSprites(UiPanel *);
+extern s32 frFontDrawGlyphInDefaultMode(s32);
+extern s32 frFontDrawGlyphWithSharedFlags(s32, s32);
+extern void itfDrawSoundSelectorFadeLayers(UiPanel *);
+extern void func_001A7120(UiPanel *);
+extern void func_001A6E88(UiPanel *);
+
+void func_001A6BF8(UiPanel *panel) {
+    u32 flags = panel->flags;
+    SndSeqSelect *selection;
+    s32 glyph;
+
+    itfMesWork.drawFlags &= ~2;
+    itfMesRenderActivePanelSprites(panel);
+    glyph = (s32)panel->origin.tex;
+    if (!(flags & 0x10000) && glyph != 0) {
+        frFontDrawGlyphInDefaultMode(glyph);
+    }
+    glyph = (s32)panel->pos.chain;
+    if (!(flags & 0x20000) && (flags & 7) >= 3) {
+        if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
+            if ((panel->flags & 7) != 4) {
+                panel->fade.unk08 = 0;
+                panel->flags = (panel->flags & ~7) | 4;
+            }
+        }
+    }
+    glyph = panel->selection.seq;
+    if (!(flags & 0x40000)) {
+        flags &= 0x38;
+        if (flags >= 0x18 && frFontDrawGlyphWithSharedFlags(glyph, 1) > 0) {
+            if (flags == 0x18) {
+                selection = &panel->selection;
+                if (selection->current == -1) {
+                    selection->current = 0;
+                    selection->saved = 0;
+                }
+                itfMesSetRowItemFlag(selection->seq, selection->current, selection->count, 1);
+                panel->flags = (panel->flags & ~0x38) | 0x20;
+                panel->fade.kind = 2;
+            }
+        }
+    }
+    if (panel->fade.kind & 1) {
+        itfDrawSoundSelectorFadeLayers(panel);
+    }
+    if (panel->fade.kind & 2) {
+        if (panel->state == 3) {
+            func_001A7120(panel);
+        } else {
+            func_001A6E88(panel);
+        }
+    }
+}
 
 void itfMesRenderActivePanelSprites(UiPanel *panel) {
     UiPanelPlacement *place;
@@ -845,7 +892,7 @@ extern u8 D_003B49E8[];
 extern s32 D_003B4A08[];
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void itfDrawSoundSelectorFadeLayers(SoundUiState *object) {
+void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
     s32 bounds[4];
     BtlFade *fade = &object->fade;
     s32 packet;
@@ -859,10 +906,10 @@ void itfDrawSoundSelectorFadeLayers(SoundUiState *object) {
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     D_003B4A08[3] = 0xFF;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->depth,
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->unkC,
                                   itfMesWork.allocation, 0, packet);
     D_003B4A08[3] = fade->alpha;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->depth,
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->unkC,
                                   itfMesWork.allocation, 0, packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
@@ -872,11 +919,11 @@ void itfDrawSoundSelectorFadeLayers(SoundUiState *object) {
         bounds[3] += expansion;
         D_003B4A08[3] = fade->timer;
         itfSendTablePacket(packet, 1, 0);
-        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->depth,
+        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->unkC,
                                       itfMesWork.allocation, 0, packet);
         itfSendTablePacket(packet, 0, 0);
     }
-    surface = &kwlnDrawSurfaces[object->surfaceIndex];
+    surface = &kwlnDrawSurfaces[object->index];
     surface->submit(surface, packet);
 }
 
@@ -4418,7 +4465,62 @@ void func_001B7E08(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7E40);
+typedef struct BtlAnalysisPanelWork {
+    s8 state;
+    u8 pad01[3];
+    s32 unk04;
+    s32 duration;
+    s32 frame;
+    u8 pad10[0x18];
+    s32 x;
+    s32 y;
+    s8 page;
+    u8 pad31[0x6F];
+} BtlAnalysisPanelWork;
+
+extern u32 btlHasRegisteredAnalysisPanelTask(void);
+extern u32 btlHasRegisteredGuidePanelTask(void);
+extern u32 btlHasRegisteredSkillNamePanelTask(void);
+extern u32 btlHasRegisteredAphNamePanelTask(void);
+extern void btlSetTrackedTaskHandle(s32, s32);
+extern s32 func_001B9158(s32);
+extern void btlReleaseTaskAndRefreshCursorIfFlagged(s32);
+
+s32 func_001B7E40(s32 entry, s32 duration) {
+    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlAnalysisPanelWork *data;
+    s32 task;
+
+    if (btlHasRegisteredAnalysisPanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(11), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+    }
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+    }
+    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data->state = 0;
+    data->page = 0;
+    data->x = -20;
+    data->y = 133;
+    data->duration = duration;
+    data->unk04 = entry;
+    data->frame = 0;
+    task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001B9158,
+                          btlReleaseTaskAndRefreshCursorIfFlagged, data);
+    func_00101968(context->drawTask, task);
+    btlSetTrackedTaskHandle(11, task);
+    context->flags &= ~0x100000;
+    return 1;
+}
 
 u32 btlHasRegisteredAnalysisPanelTask(void) {
     s64 temp_v0;
