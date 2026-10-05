@@ -2046,7 +2046,52 @@ void effReleaseScatterWorkResources(PcpScatterPlainInstance *work) {
     sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D138);
+/* Seed a flat-ring particle and its paired UVs with independent samples. */
+void func_0017D138(PcpScatterPlainInstance *work, s32 index) {
+    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    PcpScatterPlainParticle *ring;
+    f32 angle;
+    f32 angleStep;
+    f32 radius;
+    f32 height;
+    f32 u;
+    f32 du;
+    f32 v;
+    f32 jitter;
+    u32 count;
+    u32 i;
+
+    ring = &work->particles[index];
+    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    angle = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RADIAL_TURN;
+    jitter = work->params.angleStepJitter;
+    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    jitter = work->params.radiusJitter;
+    radius = work->params.radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->params.heightJitter;
+    height = work->params.heightBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    /* Euler samples use the retail constant's lower-rounded full turn. */
+    ring->rot[0] = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[1] = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[2] = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RIBBON_TURN;
+    ring->angle = angle;
+    ring->radius = radius;
+    ring->height = height;
+    ring->angleStep = angleStep;
+    ring->angularSpeed = work->params.angularSpeed;
+    ring->radialSpeed = work->params.radialSpeed;
+    v = (f32)work->params.vSpan;
+    u = 0.0f;
+    du = (f32)work->params.uSpan / (f32)count;
+    for (i = 0; i < count; i++) {
+        uv[0] = u;
+        uv[2] = u;
+        uv[1] = 0;
+        uv[3] = v;
+        uv += 4;
+        u += du;
+    }
+}
 
 
 /* Advance flat-ring index and rebuild paired vertices around its own angles.
@@ -2096,7 +2141,6 @@ void effScatterFlatRingUpdate(PcpScatterPlainInstance *work, s32 index)
     }
 }
 
-extern void func_0017D138(PcpScatterPlainInstance *work, s32 index);
 
 /* Advance delayed flat rings with per-particle lifetime/fading, then submit.
  * Age zero seeds geometry but not color; expired particles clear color and stop aging.
