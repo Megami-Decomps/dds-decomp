@@ -441,12 +441,11 @@ extern s32 btlHasLinkedEffectNodeTrigger(u8 *);
 extern void func_0020DE70(BtlLinkedCommand *);
 extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-typedef struct ActionUnit ActionUnit;
-typedef struct BtlCameraPose BtlCameraPose;
-extern void btlSetupCameraPoseAimUnit(ActionUnit *, BtlCameraPose *, BtlCameraPose *);
-
+/* Opaque pose parameters use the native owners defined in code_001C8890. */
 typedef struct CameraPoseAction CameraPoseAction;
 typedef struct CameraPoseTransform CameraPoseTransform;
+extern void btlSetupCameraPoseAimUnit(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+
 extern void btlPrepareRandomizedActionCameraPose(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
 
 s32 func_0020E058(BtlLinkedCommand *command, s8 a, s8 b) {
@@ -467,8 +466,8 @@ s32 func_0020E058(BtlLinkedCommand *command, s8 a, s8 b) {
         kind = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].pad00[0];
         if (kind < 8) {
             if (kind >= 6) {
-                btlSetupCameraPoseAimUnit((ActionUnit *)command, (BtlCameraPose *)&command->frontCamera,
-                                          (BtlCameraPose *)&command->backCamera);
+                btlSetupCameraPoseAimUnit((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
+                                          (CameraPoseTransform *)&command->backCamera);
                 return 1;
             }
         }
