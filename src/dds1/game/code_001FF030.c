@@ -2303,7 +2303,23 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00205730);
 
 extern void btlBeginEffectActorFadeOut(void);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", btlBeginEffectActorFadeOut);
+void btlBeginEffectActorFadeOut(void) {
+    BattleEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
+    BtlUnit *actor = effect->actor;
+    if (actor != 0) {
+        u32 state = actor->stateFlags;
+        u32 flags = actor->flags | 0x100;
+        state &= ~0x80;
+        state &= ~0x100;
+        effect->actor = 0;
+        actor->flags = flags;
+        actor->stateFlags = state;
+        btlRefreshUnitMotionSelection(actor);
+        actor->flags |= 8;
+        effect->height = -125.0f;
+        effect->speed = 20.0f;
+    }
+}
 
 void btlResetEffectState(void) {
     u8 *battle = (u8 *)btlGetRuntime();
