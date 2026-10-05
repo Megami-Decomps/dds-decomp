@@ -710,7 +710,33 @@ void parFadeAlphaCell(s32 particle, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BCE8);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", parFillVertexPairs);
+/* Fill every vertex pair of each cell with the same two words. */
+void parFillVertexPairs(ParSystem *system, s32 arg1, s32 arg2) {
+    s32 perCell = system->vertexWordCount >> 1;
+    s32 count = system->cellCount;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    ((s32 *)vertex)[0] = arg1;
+                    ((s32 *)vertex)[1] = arg2;
+                    vertex += 8;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 void parFadeAlphaAllCells(ParSystem *system, u32 color) {
     u32 perCell = system->vertexWordCount >> 1;
