@@ -658,6 +658,8 @@ typedef struct {
         };
     };
     u32 unk_1C;
+    u32 unk_20;
+    u32 unk_24;
 } SoundTaskArgs;
 
 extern SoundTask *btlAllocTask(s32);
@@ -1242,9 +1244,6 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001DDB60);
 /* Reset work status and group headers, preserving the retained payload and allocation. */
 void btlResetIndexWork(BattleIndexWork *work) {
     u32 i;
-    s32 offset;
-    BtlOperandGroup *entry;
-    BtlOperandGroup *group;
     work->unk00 = -1;
     work->unk04 = -1;
     work->unk08 = -1;
@@ -1266,15 +1265,11 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->unk5C = 0;
     work->unk64 = 0;
     work->unk60 = 0;
-    /* SDK addresses are words; offset-first arithmetic is required for matching. */
-    for (i = 0, offset = 0; i < 13; i++) {
-        ((BtlOperandGroup *)(offset + (u32)work->groups))->count = 0;
-        entry = (BtlOperandGroup *)(offset + (u32)work->groups);
-        entry->unk08 = 0;
-        entry->unk14 = 0;
-        group = (BtlOperandGroup *)(offset + (u32)work->groups);
-        offset += sizeof(BtlOperandGroup);
-        group->unk10 = 0;
+    for (i = 0; i < 13; i++) {
+        work->groups[i].count = 0;
+        work->groups[i].unk08 = 0;
+        work->groups[i].unk14 = 0;
+        work->groups[i].unk10 = 0;
     }
     btlClearIndexList(work->indices);
 }
@@ -7363,7 +7358,7 @@ SoundTask *fldCreateSceneTileTask(s32 value, s32 option) {
     memset(args, 0, 0x28);
     args->value = value;
     args->option = option;
-    *(s32 *)((u8 *)args + 0x24) = 0;
+    args->unk_24 = 0;
     return task;
 }
 
@@ -8743,12 +8738,12 @@ u32 sndPollMotSeFileAndSpu(FileLoadArgs *request) {
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_003422F8(data, size);
                 node->flags |= 8;
-                btlBossDebugPrintf("btl:sound SPU load start[%X][size:%d]\n", *(u16 *)((u8 *)node + 0xA), size);
+                btlBossDebugPrintf("btl:sound SPU load start[%X][size:%d]\n", (u16)(node->position >> 16), size);
             }
             node->flags = (node->flags & ~1) | 2;
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
-        btlBossDebugPrintf("btl:sound SPU load end[%X]\n", *(u16 *)((u8 *)node + 0xA));
+        btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->position >> 16));
         sdfReleaseResourceAllocation(request->resourceHandle);
         filePollEntryCleanup((s32)request->loadHandle);
         node->flags = (node->flags & ~8) | 0x10;
