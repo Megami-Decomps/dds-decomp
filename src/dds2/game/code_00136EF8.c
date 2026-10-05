@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "fld.h"
+#include "evt_world.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -243,12 +244,11 @@ typedef struct FldTaskInfo {
     s32 slot;
 } FldTaskInfo;
 
-typedef struct WorldObject WorldObject;
 typedef struct ActionObj ActionObj;
 
 typedef struct WorldListNode WorldListNode;
 
-extern WorldListNode *dds3FindWorldObjectNodeByKey(WorldObject *object, u32 key, s32 kind);
+extern WorldListNode *dds3FindWorldObjectNodeByKey(EvtWorldObject *object, u32 key, s32 kind);
 
 extern u32 dds3GetPathState(s32 path);
 
@@ -714,7 +714,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
     s32 slotIndex;
-    WorldObject *world;
+    EvtWorldObject *world;
     u32 task;
     FldTaskInfo *taskInfo;
 

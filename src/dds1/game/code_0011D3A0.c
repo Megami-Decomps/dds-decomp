@@ -3,6 +3,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "fld.h"
+#include "evt_world.h"
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -2204,8 +2205,7 @@ u8 fldGetSceneReadyOrPendingState(void) {
 }
 
 extern void *dds3GetWorldObject(void);
-typedef struct WorldObject WorldObject;
-extern void dds3SetWorldObjectDataValue(WorldObject *, s8);
+extern void dds3SetWorldObjectDataValue(EvtWorldObject *, s8);
 extern void kwlnFadeStartIn(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00145B18(void);
