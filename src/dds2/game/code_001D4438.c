@@ -1,5 +1,6 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_command.h"
+#include "btl_state.h"
 #include "pcp_vu0.h"
 
 
@@ -112,11 +113,6 @@ typedef struct SceneTask {
     s64 ownerId;
 } SceneTask;
 
-typedef struct SceneSlot {
-    u8 a;
-    u8 b;
-    u8 id;
-} SceneSlot;
 
 
 typedef struct SceneScriptState {
@@ -125,17 +121,7 @@ typedef struct SceneScriptState {
     u32 value10;
 } SceneScriptState;
 
-typedef struct SceneFadingRecord {
-    SceneSlot slot;
-    u8 alpha;
-    s32 target;
-} SceneFadingRecord;
 
-typedef struct SceneLinkedNode {
-    s32 state;
-    u8 pad04[0x174];
-    struct SceneLinkedNode *next; /* 0x178: scene-linked chain */
-} SceneLinkedNode;
 
 typedef struct BattleSceneWork {
     u8 pad00[0x218];
@@ -150,7 +136,7 @@ typedef struct BattleSceneWork {
     u8 pad23C[4];
     s32 scriptState;          /* 0x240 */
     s32 scriptArg;            /* 0x244 */
-    SceneLinkedNode *linkedNodes;
+    ActionStateLink *linkedNodes;
     BtlUnit *actors;
     u8 pad250[0x1E];
     u8 phaseFlag;
@@ -178,7 +164,7 @@ typedef struct BattleSceneWork {
     u8 pad2DC[0x1C];
     s32 unk2F8;
     u8 pad2FC[2];
-    SceneSlot slots[8];
+    BtlSceneSlot slots[8];
     u8 pad316[2];
     SceneTask *groupPrimary[20];    /* 0x318 */
     SceneTask *groupSecondary[45];  /* 0x368 */
@@ -187,7 +173,7 @@ typedef struct BattleSceneWork {
     u16 groupHandleCount;
     u8 pad47A[2];
     s32 activeGroupCount;
-    SceneFadingRecord fading[8];
+    BtlSceneFadingRecord fading[8];
     SceneTask *currentTask;
     u8 pad4C4[0x10];
     s32 scriptTarget;         /* 0x4D4 */
@@ -2331,7 +2317,7 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
     secondary = controller->groupSecondary;
     tertiary = controller->groupTertiary;
     for (i = 0; i < 8; i++) {
-        switch (controller->slots[i].a) {
+        switch (controller->slots[i].group) {
         case 1:
             color = 0;
             task = *primary;
@@ -2361,7 +2347,7 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
         if (task == NULL || task->actor == NULL) {
             continue;
         }
-        if (controller->slots[i].b == 100) {
+        if (controller->slots[i].remaining == 100) {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_00436A10,
                                D_003B69D8[task->state].name);
         } else {

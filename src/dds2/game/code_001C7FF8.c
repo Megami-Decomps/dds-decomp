@@ -1,5 +1,6 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_command.h"
+#include "btl_state.h"
 #include "pcp_vu0.h"
 
 extern s32 btlGetRuntime(void);
@@ -85,11 +86,6 @@ typedef struct SceneTask {
     s64 ownerId;
 } SceneTask;
 
-typedef struct SceneSlot {
-    u8 a;
-    u8 b;
-    u8 id;
-} SceneSlot;
 
 typedef struct SceneScriptState {
     u32 state;
@@ -97,17 +93,7 @@ typedef struct SceneScriptState {
     u32 value10;
 } SceneScriptState;
 
-typedef struct SceneFadingRecord {
-    SceneSlot slot;
-    u8 alpha;
-    s32 target;
-} SceneFadingRecord;
 
-typedef struct SceneLinkedNode {
-    s32 state;
-    u8 pad04[0x174];
-    struct SceneLinkedNode *next; /* 0x178: scene-linked chain */
-} SceneLinkedNode;
 
 typedef struct BattleSceneWork {
     u8 pad00[0x218];
@@ -122,7 +108,7 @@ typedef struct BattleSceneWork {
     u8 pad23C[4];
     s32 scriptState;          /* 0x240 */
     s32 scriptArg;            /* 0x244 */
-    SceneLinkedNode *linkedNodes;
+    ActionStateLink *linkedNodes;
     BtlUnit *actors;
     u8 pad250[0x1E];
     u8 phaseFlag;
@@ -150,7 +136,7 @@ typedef struct BattleSceneWork {
     u8 pad2DC[0x1C];
     s32 unk2F8;
     u8 pad2FC[2];
-    SceneSlot slots[8];
+    BtlSceneSlot slots[8];
     u8 pad316[2];
     SceneTask *groupPrimary[20];    /* 0x318 */
     SceneTask *groupSecondary[45];  /* 0x368 */
@@ -159,7 +145,7 @@ typedef struct BattleSceneWork {
     u16 groupHandleCount;
     u8 pad47A[2];
     s32 activeGroupCount;
-    SceneFadingRecord fading[8];
+    BtlSceneFadingRecord fading[8];
     SceneTask *currentTask;
     u8 pad4C4[0x10];
     s32 scriptTarget;         /* 0x4D4 */
@@ -934,11 +920,11 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF0B0);
 
 void fldInitSceneFadeRecords(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
-    SceneSlot *slot = scene->slots;
-    SceneFadingRecord *rec = scene->fading;
+    BtlSceneSlot *slot = scene->slots;
+    BtlSceneFadingRecord *rec = scene->fading;
     u32 i = 0;
-    while (i < 8 && slot->a != 0) {
-        memcpy(&rec->slot, slot, sizeof(SceneSlot));
+    while (i < 8 && slot->group != 0) {
+        memcpy(&rec->slot, slot, sizeof(BtlSceneSlot));
         rec->alpha = 0x80;
         rec->target = -1;
         i++;
@@ -953,8 +939,8 @@ void fldInitSceneFadeRecords(void) {
     }
 }
 
-s32 btlFindSceneSlotById(SceneSlot *request) {
-    SceneSlot *slot = ((BattleSceneWork *)btlGetRuntime())->slots;
+s32 btlFindSceneSlotById(BtlSceneSlot *request) {
+    BtlSceneSlot *slot = ((BattleSceneWork *)btlGetRuntime())->slots;
     u8 id = request->id;
     u32 i;
     for (i = 0; i < 8; i++) {
@@ -968,7 +954,7 @@ s32 btlFindSceneSlotById(SceneSlot *request) {
 
 u8 *fldFindSceneSlotRecord(s32 index) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
-    s32 slot = btlFindSceneSlotById((SceneSlot *)index);
+    s32 slot = btlFindSceneSlotById((BtlSceneSlot *)index);
     u8 *entry = 0;
     if (slot != -1) {
         entry = (u8 *)&scene->slots[slot];
@@ -980,8 +966,8 @@ s32 btlFadeStaleSceneSlots(void) {
     u32 i = 0;
     s32 changed = 0;
     BattleSceneWork *work = (BattleSceneWork *)btlGetRuntime();
-    SceneFadingRecord *record = work->fading;
-    SceneSlot *slot = work->slots;
+    BtlSceneFadingRecord *record = work->fading;
+    BtlSceneSlot *slot = work->slots;
     for (; i < 8; i++, slot++, record++) {
         if (record->slot.id != slot->id) {
             if (fldFindSceneSlotRecord((s32)record) == 0) {
@@ -997,17 +983,17 @@ s32 btlFadeStaleSceneSlots(void) {
 
 s32 fldCountSceneFadeKinds(BattleSceneWork *scene, s32 *outFadeCount) {
     SceneGlobalState *global;
-    SceneFadingRecord *rec = scene->fading;
-    SceneSlot *slot;
+    BtlSceneFadingRecord *rec = scene->fading;
+    BtlSceneSlot *slot;
     u32 fadeCount = 0;
     s32 countA = 0;
     s32 countB = 0;
     u32 slotCount;
-    while (fadeCount < 8 && rec[fadeCount].slot.a != 0) {
-        if (rec[fadeCount].slot.a == 1) {
+    while (fadeCount < 8 && rec[fadeCount].slot.group != 0) {
+        if (rec[fadeCount].slot.group == 1) {
             countA++;
         }
-        if (rec[fadeCount].slot.a == 2) {
+        if (rec[fadeCount].slot.group == 2) {
             countB++;
         }
         fadeCount++;
@@ -1023,7 +1009,7 @@ s32 fldCountSceneFadeKinds(BattleSceneWork *scene, s32 *outFadeCount) {
     fadeCount--;
     slot = scene->slots;
     slotCount = 0;
-    while (slotCount < 8 && slot->a != 0) {
+    while (slotCount < 8 && slot->group != 0) {
         slotCount++;
         slot++;
     }
