@@ -61,17 +61,11 @@ extern s32 datEnemyRecords;
 
 extern s32 datGameState;
 
-/* Item quantities occupy byte slots in the save-state block. */
-typedef struct SaveItemCounts {
-    u8 pad00[0x1340];
-    u8 counts[0x100];
-} SaveItemCounts;
-
 typedef struct Entry1A4 {
     u16 flags; /* 0x0 */
     u8 pad2[2]; /* 0x2 */
     u16 rosterIndex; /* 0x4 */
-    u16 unk6; /* 0x6 */
+    u16 currentHp; /* 0x6 */
     u16 unk8; /* 0x8 */
     u8 padA[2]; /* 0xA */
     u16 unkC; /* 0xC */
@@ -86,6 +80,14 @@ typedef struct Entry1A4 {
     u8 pad1B4[0x10]; /* DDS2 entry stride is 0x1C4. */
 } Entry1A4;
 
+/* The five active entries precede the save-state item quantity slots. */
+typedef struct PartyInventory {
+    u8 pad00[0xA60];
+    Entry1A4 roster[PTY_ACTIVE_ROSTER_COUNT];
+    u8 pad1334[0xC];
+    u8 counts[0x100];
+} PartyInventory;
+
 /* Native bulk backups assume eight-aligned mantra table storage. */
 typedef struct PtyMantraBitmap {
     u32 words[12];
@@ -97,7 +99,7 @@ typedef struct PtyMantraProgress {
 } PtyMantraProgress;
 
 typedef struct PtyStatePrefix {
-    SaveItemCounts inventory;
+    PartyInventory inventory;
     u8 pad1440[0x15AD0];
     PtyMantraBitmap mantraBits[16];
     PtyMantraProgress mantraProgress[16][0xB0] __attribute__((aligned(8)));
@@ -267,7 +269,7 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
         mdlFlagSet(itemId + PTY_ITEM_MODEL_FLAG_BASE);
         return;
     }
-    quantity = ((SaveItemCounts *)datGameState)->counts[itemId];
+    quantity = ((PartyInventory *)datGameState)->counts[itemId];
     quantity += quantityDelta;
     if (quantity < 0) {
         quantity = 0;
@@ -291,7 +293,7 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
     } else {
         quantity = quantity < PTY_ITEM_QUANTITY_LIMIT ? quantity : PTY_ITEM_MAX_QUANTITY;
     }
-    ((SaveItemCounts *)datGameState)->counts[itemId] = quantity;
+    ((PartyInventory *)datGameState)->counts[itemId] = quantity;
 }
 
 /* Flag-range items test their model flag and ignore minimumQuantity.
@@ -300,7 +302,7 @@ s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
         return mdlFlagTest(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0;
     }
-    if (((SaveItemCounts *)datGameState)->counts[itemId] < minimumQuantity) {
+    if (((PartyInventory *)datGameState)->counts[itemId] < minimumQuantity) {
         return 0;
     }
     return 1;
@@ -364,7 +366,7 @@ s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode) {
     s32 entry = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
         if (((Entry1A4 *)entry)->flags & 1) {
-            if (((Entry1A4 *)entry)->unk6 != 0) {
+            if (((Entry1A4 *)entry)->currentHp != 0) {
                 if (flagMode != 1 || (((Entry1A4 *)entry)->flags & 2)) {
                     if (((Entry1A4 *)entry)->unkE & statusMask) {
                         return 1;
@@ -826,7 +828,7 @@ s32 evtClearRandomStatusFlags(void) {
     remaining = 4;
     entryAddress = datGameState + PTY_ACTIVE_ROSTER_OFFSET;
     do {
-        if ((((Entry1A4 *)entryAddress)->flags & 1) != 0 && ((Entry1A4 *)entryAddress)->unk6 != 0) {
+        if ((((Entry1A4 *)entryAddress)->flags & 1) != 0 && ((Entry1A4 *)entryAddress)->currentHp != 0) {
             u16 statusFlags = ((Entry1A4 *)entryAddress)->unkE;
             if ((statusFlags & 0x5D0) != 0) {
                 ((Entry1A4 *)entryAddress)->unkE = statusFlags & ~0x5D0;
@@ -866,7 +868,7 @@ void ptyAssignRosterItemAndMarkOwned(Entry1A4 *entry) {
     s32 value = D_00386288[entry->rosterIndex];
     mnuSetPartyEntryCurrentId(entry, value);
     if (value != 0) {
-        ((SaveItemCounts *)datGameState)->counts[value] = 1;
+        ((PartyInventory *)datGameState)->counts[value] = 1;
     }
 }
 
@@ -1284,7 +1286,7 @@ extern s32 datComputeSkillBoostedMaxHp(s32);
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectStatGrade(void) {
     s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
-    s32 currentHp = ((Entry1A4 *)D_0043E5C0[3])->unk6;
+    s32 currentHp = ((Entry1A4 *)D_0043E5C0[3])->currentHp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 
@@ -1358,7 +1360,7 @@ s32 evtPushRosterBaseValue(void) {
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectFineStatGrade(void) {
     s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0[3]);
-    s32 currentHp = ((Entry1A4 *)D_0043E5C0[3])->unk6;
+    s32 currentHp = ((Entry1A4 *)D_0043E5C0[3])->currentHp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 
