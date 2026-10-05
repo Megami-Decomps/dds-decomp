@@ -663,12 +663,14 @@
 0x00133DF8	fldQueueCameraHeadingFromVector	inferred	Computes a degree heading from the X/Z vector and marks the camera heading override pending.
 0x00133E38	fldUpdateCameraHeadingFromXY	inferred	When xyPending is set, derives a heading from the (x,z) distance to the target
 0x00133EE0	fldApplyPendingCameraHeading	inferred	Copies the pending target heading to the current heading and advances the pending state.
+0x001343E8	fldLoadBattleSkyAndFilter	inferred	U3
 0x00134620	fldLoadSkyResource	inferred	Loads F%03d.SKY into the sky buffer; twin of D1 0x00131CC0 [names_M53_Field.tsv]
 0x00134790	fldReleaseSkyResources	inferred	Releases retained sky texture and resource handles and resets sky resource state. [names_reviewed5.tsv]
 0x00135568	fldSetSwayMode	inferred	Selects the mode switched on by fldUpdateSwayOffset and resets its two accumulated offsets.
 0x00135578	fldSetSkyDrawState	inferred	Stores the sky draw-state word also initialized while loading sky resources. [names_reviewed5.tsv]
 0x00135580	fldGetSkyDrawState	inferred	Returns the sky draw-state word also initialized while loading sky resources. [names_reviewed5.tsv]
 0x001355A8	fldBeginSelectedValueTransition	inferred	Stores the new value, clears transition state and applies the selected value. [names_reviewed13.tsv]
+0x00135840	fldSetPlayerAndPeerLighting	inferred	U2
 0x00135D18	fldApplyPendingSceneValueWithSpeed	inferred	Applies a queued field value when different from current with gated update speed. [names_reviewed11.tsv]
 0x00136388	fldInitializeDisplayPointerTable	inferred	Clears the field display table and installs its first two buffer pointers.
 0x001363D8	fldApplySkyLightSetToPlayerVU	inferred	confidence=high; matched-C; src/dds2/game/code_001360B8.c:141:func_001363D8; Chooses the current or override sky-light set, applies scene fade/sway and ambient/directional/background light vectors, packs the player colors, and supplies its normalized VU light direction. DDS1 counterpart is not yet matched C.; source=names_P6.tsv:6 [names_qp12_apply.tsv]
@@ -2148,8 +2150,10 @@
 0x001BD6B8	btlReleasePsechgPanelWork	inferred	confidence=medium; src/dds2/game/code_001A5BB8.c:func_001BD6B8; Frees task user data and clears tracked slot six, whose retail task label is bpnl_psechg_nm. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
 0x001BD978	btlReleaseBattleScratchBlocks	inferred	Releases both temporary battle blocks held by the shared battle work. [names_reviewed16.tsv]
 0x001BEEF8	btlReleaseCmsleffPanelWork	inferred	confidence=medium; src/dds2/game/code_001A5BB8.c:func_001BEEF8; Frees task user data and clears tracked slot five; its retail task label bpnl_cmsleff__nm supports the cmsleff-panel role. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
+0x001BF3C8	btlUpdatePanelTransitionGradients	inferred	U3
 0x001BF600	btlFreeRegisteredTaskData	inferred	Frees task user data and clears its battle registration. [names_reviewed8.tsv]
 0x001BF640	btlToggleModelFlagOnInput	inferred	Toggles a model flag when its mapped input is active. [names_reviewed8.tsv]
+0x001BF690	btlDrawTimedDialogTask	inferred	U2
 0x001BF8B8	btlReleaseDialogTaskData	inferred	Cleans the task message window, frees its data and clears registration. [names_reviewed8.tsv]
 0x001BFFD8	btlReleaseRegisteredTaskBuffer	inferred	Frees retained battle task data, resets its pointer and clears its registration. [names_reviewed10.tsv]
 0x001C05D0	btlFinishTrackedBattleTaskAndCloseWindow	inferred	Frees task user data and closes its tracked message window. [names_reviewed11.tsv]
@@ -2593,6 +2597,7 @@
 0x00203270	btlResetFieldColorAndSweepFlags	inferred	Resets field-color flags and clears global bit 0x20000000. [names_R_FuncNames3.tsv]
 0x002032A8	btlClearSoundAndModelResources	inferred	Clears sound resource nodes and processes model nodes during effect reset. [names_R_FuncNames3.tsv]
 0x002037F0	btlMarkTaskReady	inferred	Sets task byte at offset 0x10 to one; precise task semantics unknown. [names_R_FuncNames3.tsv]
+0x00203890	btlUpdateUnitCommandEffect	inferred	U2
 0x00203AB0	btlDisableBattleFade	inferred	Sets battle-work fadeEnabled byte to zero. [names_R_FuncNames3.tsv]
 0x00203B20	btlEnableBattleFade	inferred	Sets battle-work fadeEnabled byte to one. [names_R_FuncNames3.tsv]
 0x00203B90	sndLoadSysEffLb	inferred	loads /battle/SYSEFF.LB and fills D_003BDE18 resource entries [names_M50_BattleTwins.tsv]
@@ -2933,6 +2938,7 @@
 0x00219210	btlResetActionEffectOnUnit	inferred	reset counterpart of func_00218A78 for the slot unit [names_reviewed2.tsv]
 0x00219290	btlHasActiveSubtask	inferred	For battle mode 0x306 checks that a subtask exists and its task slot is nonzero.
 0x002192D8	btlGetSubtaskTargetMode	inferred	For battle mode 0x306 returns the subtask target-mode word when available.
+0x00219318	btlGetSelectedOrCurrentActor	inferred	Fam_Mid3
 0x002193B8	btlClearSubtaskHandle	inferred	Clears the active battle subtask's task slot.
 0x002193E0	btlClaimCommandSlotAndTarget	inferred	same as btlClaimCommandSlot but also writes slot[2] [names_reviewed2.tsv]
 0x00219488	btlSetSubtaskControlEnabled	inferred	Dispatch actions 0x129 and 0x12A set or clear the subtask control byte.
@@ -3097,6 +3103,7 @@
 0x0022BEB0	btlIndexListNoExpiredEntryCodes	inferred	unified with DDS1 twin (was btlListCheckExpiredEntryCodes)
 0x0022C040	btlDetermineCommandCounterEligibility	inferred	Checks primary and secondary counter limits and required flags for a command. [names_reviewed11.tsv]
 0x0022C1B0	btlGetCommandBlockReason	inferred	Builds a command target list and checks flagged target restrictions. [names_reviewed16.tsv]
+0x0022C308	btlGetCommandTargetEligibility	inferred	U3
 0x0022C948	btlIsModelPackEntryReady	inferred	Reports whether model request and optional file resource are ready. [names_reviewed8.tsv]
 0x0022CA60	btlLoadModelPack	inferred	unified with DDS1 twin (was btlStartModelPackLoad)
 0x0022CB68	btlReleaseFoundModelEntry	inferred	Releases the model entry found by the battle lookup. [names_reviewed8.tsv]
@@ -3479,6 +3486,7 @@
 0x00251DE8	evtDrawSelectedEntryLabel	inferred	Draws selection indicator and optional entry label; viewer identity is not established. [names_reviewed12.tsv]
 0x002520E8	evtUpdateEntrySelectionDialog	inferred	Draws scrollable entries and handles cursor input in selection mode. [names_reviewed7.tsv]
 0x002534B0	evtDrawFrameListRow	inferred	DDS1 twin 0x00238600 [names_M95_Event.tsv]
+0x00253590	evtUpdateFrameListDialog	inferred	U1
 0x00253D80	evtDrawMessageDataRow	inferred	readability/matching review (QP16)
 0x00253FF8	evtUpdateMessageValueDialog	inferred	readability/matching review (QP16)
 0x00254250	evtDrawComparisonValueRow	inferred	readability/matching review (QP16)
@@ -3538,6 +3546,7 @@
 0x0025E7B8	mnuUnpackNibbleFields	inferred	splits u16 at +8 into low 12 bits and high 4 bits [names_reviewed2.tsv]
 0x0025E7D8	mnuCampFindMatchingEntryIndex	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campFindMatchingEntryIndex behavior.
 0x0025E8D0	campResolvePendingValue	inferred	unified with DDS1 twin (was mnuCampResolvePendingValue)
+0x0025E980	mnuDrawCampScaledTexture	inferred	U1
 0x0025EBC8	fldResetCampSceneEntries	inferred	Clears status of every linked camp scene entry and the scene's state at +0x240C.
 0x0025EE40	mnuCampInitFontResource	inferred	Byte-identical DDS1 counterpart: Creates and configures the camp scene font resource at offset 0x2410.
 0x0025EE90	mnuCampLinkFontGlyph	inferred	Byte-identical dds1 twin 0x00243AA8; Passes the camp scene font resource to frFontGlyph list-linking and clears its slot. [names_conflicts.tsv]
@@ -3971,6 +3980,7 @@
 0x0028CCA8	mnuStartMantraPanelEntryTransition	inferred	Resets menu transition timer and selects state one, which advances to state three after six frames. [names_reviewed18.tsv]
 0x0028CCB8	mnuStartMantraPanelExitTransition	inferred	Resets menu transition timer and selects state two, which returns to idle after six frames. [names_reviewed18.tsv]
 0x0028CCC8	mnuAdvanceMantraPanelTransitionTimer	inferred	Ticks entry or exit panel transition for six frames and changes menu transition state. [names_reviewed18.tsv]
+0x0028F570	mnuSelectPreferredMantraNode	inferred	U0
 0x0028F770	mnuSelectMatchingNode	inferred	Traverses menu nodes and records the index whose payload ID equals the requested ID.
 0x0028F7B8	mnuSelectMantraLimitLine	inferred	readability/matching review (QP16)
 0x00290A70	mnuGetDefaultPanelSelector	inferred	Returns the panel object's selector at offset 0x7A0, used when its alternate selector is absent.
@@ -4195,6 +4205,7 @@
 0x002AB650	mtrMantraFindIndex	inferred	Scans the 0x12 entries of 0x1C bytes at 0x003E7200 for a matching u16 id at +0 and returns index+1, 0 when absent [names_L1_LiteSweep.tsv]
 0x002ABCD0	mnuDestroyResourceOwnerWindowContainers	inferred	Destroys both window containers held in a menu resource set. [names_reviewed17.tsv]
 0x002ABD08	mnuIsStaffWindowReadyForItem	inferred	L69; sources=names_pending_main.tsv [names_qp10.tsv]
+0x002AC408	mnuCreateOrderedStaffItemWindow	inferred	U3
 0x002AC688	mnuUpdateStaffEntrySelectionFlags	inferred	confidence=high; matched-C; src/dds2/game/code_002AB890.c:86:func_002AC688; Peer-matched C proposal: M143; source=names_pending_main.tsv:145 [names_qp13.tsv]
 0x002AC8F0	mnuCreateOwnedCatalogItemWindow	inferred	U0
 0x002ACB40	mnuInitializeWindowOwnerResourceSet	inferred	confidence=high; src/dds2/game/code_002AB890.c:func_002ACB40; Allocates and clears retained resource-set work, configures the panel and seeks the initial window list node. [names_qp9.tsv]
@@ -4277,6 +4288,8 @@
 0x002B3720	mnuDrawProfilePanelAndSprite	inferred	Draws a sprite and the matching profile panel with supplied groups. [names_reviewed8.tsv]
 0x002B3940	mnuIdleVoiceTimer	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuIdleVoiceTimer behavior.
 0x002B39F0	mnuStaffIdlePartyUpdate	inferred	Advances idle voice timer when party menu mode is zero then switches handler. [names_reviewed5.tsv]
+0x002B3A60	mnuDrawRangeCostAndIcon	inferred	U3
+0x002B3E80	ptySkillMenuBuildEquippedSlots	inferred	U2
 0x002B40B8	mnuDestroySelectedPartyWindow	inferred	Destroys active party selected window and clears its pointer. [names_reviewed5.tsv]
 0x002B40F8	mnuSeekFirstAvailableStaffListNode	inferred	DDS2 assembly likewise skips disabled or zero-key list nodes before seeking. [names_reviewed13.tsv]
 0x002B4180	mnuSeekSelectedWindowCursor	inferred	seeks selected window list to the cursor's index, resets scale50/54, returns party->selectedWindow [names_M76_MenuLarge.tsv]
@@ -4690,6 +4703,7 @@
 0x002D2EB8	mnuMeasureProjectedPerpendicularDistance	inferred	Offsets current view point perpendicular to camera axis, projects both points and returns screen-space distance. [names_reviewed7.tsv]
 0x002D2FB0	vuCatmullRomPoint	inferred	DDS1 twin 0x00292F48 [names_M58_VuSweep.tsv]
 0x002D3128	vuBuildLookAtBasis	inferred	DDS1 twin 0x002930C0 [names_M58_VuSweep.tsv]
+0x002D31C0	sdfVuMatrixToQuaternion	inferred	U1
 0x002D34B8	fileJobCreateFromJob	inferred	DDS1 0x00293450 twin
 0x002D3710	fileJobInvokeTypeCallback	inferred	Looks up callback by job type and invokes it with job data. [names_reviewed7.tsv]
 0x002D3748	fileJobInvokePositionCallback	inferred	Invokes type-indexed callback at callback slot fourteen with job data and extra position. [names_reviewed7.tsv]
@@ -4704,6 +4718,7 @@
 0x002D3E98	fileJobSerializedSize	inferred	DDS1 0x00293E30 twin
 0x002D3F08	fileQueueInitTransform	inferred	DDS1 twin func_00293EA0 [names_M68_VuRest.tsv]
 0x002D3F80	fileJobResetAndInitTransform	inferred	Zeroes job record, initializes scale flags and transform. [names_reviewed7.tsv]
+0x002D4138	fileCloneQueueEntries	inferred	U1
 0x002D4398	fileQueueUpdate	inferred	DDS1 twin func_00294330; frame counter only advances when D_00437E08 bit 1 is clear [names_M68_VuRest.tsv]
 0x002D4548	fileQueueDestroy	inferred	destroys child jobs, jobs, then the queue
 0x002D46A0	fileQueueNotifyAllJobsComplete	inferred	Visits every queued job and notifies completion for each child id. [names_reviewed7.tsv]
@@ -5340,6 +5355,7 @@
 0x0030E180	sdfCounterStepDownAnimationValue	inferred	Subtracts two while the animation value is positive, otherwise clears it. [names_reviewed10.tsv]
 0x0030E1A0	mnuDrawAnimatedTransition	inferred	U1
 0x0030EA70	sdfCommitPendingVectorAndMarkChanged	inferred	Copies a pending vector into the active vector and sets its change flag. [names_reviewed17.tsv]
+0x0030EAA8	fldUpdateMapRequestQueues	inferred	U2
 0x0030ECC0	fldDrawSelectedMapMarker	inferred	U3
 0x0030EE40	sdfCreateLinkedRequestRing	inferred	confidence=medium; src/dds2/game/code_0030E1A0.c:func_0030EE40; Allocates and clears request-ring storage, connects nodes into a circular doubly linked list, and initializes ring metadata. [names_qp9.tsv]
 0x0030F1A0	fldProjectPointToGridCell	inferred	confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:225:func_0030F1A0; M141; source=names_pending_main.tsv:104; review=Transforms a world point by view/projection, perspective-divides and converts screen coordinates to GS grid coordinates. [names_qp11.tsv]
@@ -5500,6 +5516,7 @@
 0x0031D520	itfSetModelInstanceValuePair	inferred	Sets both neighboring sixteen-bit values at offsets 0x24 and 0x26 to the supplied value.
 0x0031D530	itfSetModelInstanceSecondaryVector	inferred	Assigns all three components of the model instance vector at offset 0x10 without changing other fields; medium confidence.
 0x0031D540	itfSetModelInstancePrimaryVector	inferred	Assigns all three components at offset zero and clears accompanying 0x0C word; medium confidence.
+0x0031D680	itfDrawModelInstanceImage	inferred	U1
 0x0031D890	itfCreateSpriteWorkPool	inferred	confidence=high; src/dds2/game/code_0031D890.c:func_0031D890; Allocates and zeroes sprite work slots, stores handle/count/item address and prints the allocation-size diagnostic. [names_qp9.tsv]
 0x0031D948	itfClaimFreeWideSlot	inferred	Scans twenty-byte entries for a clear active bit and sets that bit before returning the entry.
 0x0031D998	itfClaimWideSlotWithTaggedPayload	inferred	Claims a wide pool slot, stores its three payloads and inserts its tag bits. [names_reviewed17.tsv]

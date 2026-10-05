@@ -76,7 +76,7 @@ extern void mnuResetListNodeFadeCounters();
 extern void sndSetSequenceVolumePan();
 extern void mnuSelectPage(u32 *, s32);
 extern void func_002ABD60(void *);
-extern void func_002AC408(void *);
+extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
 extern s32 mdlFlagTest();
 extern void func_002BB9C8(s32, s32);
@@ -582,7 +582,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
 
     mnuSelectPage(window, index);
-    func_002AC408(context);
+    mnuCreateOrderedStaffItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
                          context->spriteArg2);

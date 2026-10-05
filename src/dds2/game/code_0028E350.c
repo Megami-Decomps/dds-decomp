@@ -108,7 +108,7 @@ INCLUDE_RODATA(const s32, "game/code_0028E350", D_00427380);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028F380);
 
-s32 func_0028F570(MenuSearchObject *object, MenuSearchState *state) {
+s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *state) {
     MantraMenuWork *work = &object->work;
     MantraMenuSlot *slot;
     MantraNodePos *record;

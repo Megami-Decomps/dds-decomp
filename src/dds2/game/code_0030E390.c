@@ -153,7 +153,7 @@ extern s8 D_004388D1;
 extern void fldAdvanceMapRequest(s32, u32, u32, u32);
 extern void func_0030EF90(SdfRing *);
 
-void func_0030EAA8(s32 enabled) {
+void fldUpdateMapRequestQueues(s32 enabled) {
     s8 index = sdfCounterGetDisplayValue() - 1;
 
     if (D_004390A4 != 0 && enabled != 0) {

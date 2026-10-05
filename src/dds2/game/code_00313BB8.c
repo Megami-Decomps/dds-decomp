@@ -639,17 +639,7 @@ u32 scrCountSlots(u8 *unit) {
     return occupiedCount;
 }
 
-/* Replace an unchecked skill-slot index and return its previous identifier. */
-u16 scrSetSlot(s32 unit, s32 slotIndex, u16 skillId) {
-    u16 previousSkillId;
-    u16 *skillSlot;
-
-    /* Required to match: offset-first address calculation for slotIds[slotIndex]. */
-    skillSlot = (u16 *)(slotIndex * 2 + unit + 0x22);
-    previousSkillId = *skillSlot;
-    *skillSlot = skillId;
-    return previousSkillId;
-}
+INCLUDE_ASM(const s32, "game/code_00313BB8", scrSetSlot);
 
 /* Clear the first exact-ID match and report whether a slot was found. */
 s32 scrRemoveSlot(u8 *unit, u16 skillId) {

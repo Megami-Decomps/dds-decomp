@@ -70,7 +70,7 @@ extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
 extern s32 sdfHandleMapCounterSelectionInput(void);
 extern void sdfCounterTickCountdownAndMapTimers(void);
-extern void func_002C7738(s32);
+extern void fldUpdateMapRequestQueues(s32);
 extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
 extern s32 sdfStepSelectedMapCameraTransition(void);
@@ -535,7 +535,7 @@ s32 func_002C3220(void) {
     case 1:
         result = sdfHandleMapCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
-        func_002C7738(1);
+        fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
         if (result == -2) {
             D_003BD25C = 3;
@@ -552,7 +552,7 @@ s32 func_002C3220(void) {
     case 2:
         result = sdfHandleMapCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
-        func_002C7738(1);
+        fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
         if (result == -2) {
             D_003BD25C = 3;
@@ -567,7 +567,7 @@ s32 func_002C3220(void) {
         break;
     case 3:
         sdfCounterTickCountdownAndMapTimers();
-        func_002C7738(0);
+        fldUpdateMapRequestQueues(0);
         sdfCounterAdvanceBoundedAnimationValue();
         if (fldLmapToggleOverlay() != 0) {
             if (D_003BD970 == 0) {

@@ -1548,7 +1548,7 @@ extern void fldResetPlayerSceneTransformState(void);
 extern void fldResetPendingSounds(void);
 extern void effMiscSeedRandom(void *, s32);
 extern void fldParseMixLb(void);
-extern void func_00131A88(void);
+extern void fldLoadBattleSkyAndFilter(void);
 extern void func_001426E0(void);
 
 void fldInitializeDisplayAndTables(void) {
@@ -1563,7 +1563,7 @@ void fldInitializeDisplayAndTables(void) {
     func_003003F0(D_003BAB90);
     fldParseMixLb();
     func_003003F0(D_003BAB98);
-    func_00131A88();
+    fldLoadBattleSkyAndFilter();
     func_003003F0(D_003BABA0);
     func_001426E0();
     func_003003F0(D_003BABA8);

@@ -193,7 +193,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
 
 /* Interpolate currency changes over twenty draws, with the native ticking sound. */
-void func_0025B0F0(s32 x, s32 y, s32 depth, s32 alpha,
+void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
                   MenuSceneMetadata *scene, s32 context) {
     char currencyText[16];
     u32 color = alpha | 0xA09DC300;

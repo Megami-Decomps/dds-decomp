@@ -13,7 +13,6 @@ extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 
 #define BILL_ENTRY_BYTES 0x14
-#define BILL_FRAME_MODE_BITS 6
 #define BILL_VARIANT_MASK 0xFFFF
 #define EFF_INSTANCE_BYTES 0x88
 #define EFF_MATRIX_BYTES 0x40
@@ -233,38 +232,7 @@ void effCopyPosition(BillObj *effect, const void *position) {
     }
 }
 
-/* Narrow mode to s16; kinds 0/3 store it, while kind 1 replaces only frame bits 1..2. */
-void billSetBillboardMode(BillObj *effect, s32 mode) {
-    s32 entryCount;
-    s32 remaining;
-    s32 frameSlotAddress;
-    mode = (s16)mode;
-    switch (effect->kind) {
-    case 0:
-    case 3:
-        effect->unk2E = mode;
-        break;
-    case 1:
-        entryCount = effect->entryCount;
-        if (entryCount > 0) {
-            remaining = entryCount;
-            /* Required to match: induction points to each entry's frame slot at +0x0C. */
-            frameSlotAddress = (s32)effect->unk60 + 0xc;
-            do {
-                EffBillFrame *frameData = (EffBillFrame *)*(s32 *)frameSlotAddress;
-                u32 frameFlags = frameData->flags & ~BILL_FRAME_MODE_BITS;
-                frameData->flags = frameFlags;
-                if (mode == 2) {
-                    frameData->flags = frameFlags | 2;
-                } else if (mode == 3) {
-                    frameData->flags = frameFlags | 4;
-                }
-                frameSlotAddress += BILL_ENTRY_BYTES;
-            } while (--remaining != 0);
-        }
-        break;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_00159B48", billSetBillboardMode);
 
 typedef struct EffSlot {
     u8 pad00[4];
@@ -2182,19 +2150,7 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
     effect->z = effect->z * scale;
 }
 
-/* Clone the prefix without tail bytes; the zero-length copy is retained for matching. */
-void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
-    EffTemplatePacketList *clone = sdfAllocSizeClassBlock(0x150);
-    s32 tailBytes = 0;
-
-    memset(clone, 0, 0x150);
-    memcpy(clone, source, source->templateSize);
-    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
-    clone->packetCount = 1;
-    clone->packetTag = 0;
-    func_0015B330((s32)clone);
-    return clone;
-}
+INCLUDE_ASM(const s32, "game/code_00159B48", effCloneSingleParticleTemplate);
 
 void effFreeSingleParticleTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);

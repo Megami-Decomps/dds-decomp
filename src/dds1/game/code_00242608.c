@@ -565,7 +565,7 @@ void campResolvePendingValue(CampScene *scene, CampKeyNode *cue) {
     }
 }
 
-void func_00243608(SdfTex *texture, CampDisplayDefaults *display) {
+void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     s32 halfWidth;
     s32 halfHeight;
     s32 variant;

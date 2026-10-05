@@ -101,7 +101,7 @@ extern void mnuSortItems(MenuStaffWindow *, s32, s32);
 extern void mnuInitializeBasicWindowLayout(MenuStaffList *, u32, u32);
 
 /* The upper item-ID range shares ordered staff entries with mantra availability. */
-void func_002AC408(MenuStaffContext *owner) {
+void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
     MenuStaffList *window;
     MenuStaffNode *node;

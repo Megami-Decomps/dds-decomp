@@ -1743,7 +1743,7 @@ extern void fldInitDisplayObjects();
 extern void fldResetPendingSounds();
 extern void effMiscSeedRandom();
 extern void fldParseMixLb();
-extern void func_001343E8();
+extern void fldLoadBattleSkyAndFilter();
 extern void func_00145818();
 extern void fldLoadFieldTablesAndIndexStages();
 extern u8 D_0038A6E0[];
@@ -1754,7 +1754,7 @@ void fldInitializeDisplayAndSceneSound(void) {
     fldResetPendingSounds();
     effMiscSeedRandom(D_0038A6E0, 0x1E240);
     fldParseMixLb();
-    func_001343E8();
+    fldLoadBattleSkyAndFilter();
     func_00145818();
     fldLoadFieldTablesAndIndexStages();
 }

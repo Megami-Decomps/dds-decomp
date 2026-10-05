@@ -2831,7 +2831,7 @@ INCLUDE_RODATA(const s32, "game/code_00128FE8", D_004132A0);
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_004132E0);
 
-void func_001343E8(void) {
+void fldLoadBattleSkyAndFilter(void) {
     s32 i;
     u32 command;
 
@@ -3013,7 +3013,7 @@ void fldBeginSelectedValueTransition(u32 value) {
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001355D8);
 
 /* vu0 routine: the event direction setter takes its vector in vf10. */
-void func_00135840(s32 duration, f32 redA, f32 greenA, f32 blueA,
+void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                   f32 redB, f32 greenB, f32 blueB,
                   f32 x, f32 y, f32 z) {
     EvtUnit *player;

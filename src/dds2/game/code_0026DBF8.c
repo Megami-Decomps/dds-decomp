@@ -1782,19 +1782,19 @@ typedef struct MantraGaugeSlot {
     u8 level;
 } MantraGaugeSlot;
 
+/* Slot 3 and the control bits occupy the low and high halves of the word at +8. */
 typedef struct MantraGaugeState {
     /* 0x00 */ u16 state;
-    /* 0x02 */ MantraGaugeSlot slots[4]; /* slot 3 shares its bytes with bits */
-    /* 0x0A */ u16 pad0A;
+    /* 0x02 */ MantraGaugeSlot slots[4];
+    u32 reverse : 1;
+    u32 countdown : 8;
+    u32 : 7;
     /* 0x0C */ u16 timer;
     /* 0x0E */ u16 pulseClock;
     /* 0x10 */ u32 pad10;
     /* 0x14 */ f32 value;
 } MantraGaugeState;
 
-/* The low half of the word at +8 is slot 3; the upper half packs reverse
- * (bit 16) and countdown (bits 17..24). Preserve the full-word updates. */
-#define GAUGE_BITS(g) (*(u32 *)((u8 *)(g) + 8))
 
 void mnuBeginMantraScrollCursorExit(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 8);
@@ -1807,8 +1807,8 @@ void mnuHideMantraScrollCursor(u32 ctx) {
         MantraGaugeState *data = (MantraGaugeState *)item->data;
         u16 state = data->state;
         if (state == 6) {
-            GAUGE_BITS(data) =
-                ((GAUGE_BITS(data) | 0x10000) & 0xfe01ffff) | 0xa0000;
+            data->reverse = 1;
+            data->countdown = 5;
         } else if (state != 4) {
             data->state = 5;
         }
@@ -1822,8 +1822,8 @@ void mnuShowMantraScrollCursor(u32 ctx) {
         MantraGaugeState *data = (MantraGaugeState *)item->data;
         u16 state = data->state;
         if (state == 5) {
-            GAUGE_BITS(data) =
-                ((GAUGE_BITS(data) | 0x10000) & 0xfe01ffff) | 0xa0000;
+            data->reverse = 1;
+            data->countdown = 5;
         } else if (state != 2) {
             data->state = 6;
         }
@@ -1860,66 +1860,7 @@ void mnuReleaseMantraGaugeData(u32 obj) {
 }
 
 
-s32 mnuUpdateMantraGaugeFade(s32 unused, s32 item) {
-    MantraGaugeState *gauge = (MantraGaugeState *)((MantraDrawItem *)item)->data;
-    s32 i;
-
-    if (GAUGE_BITS(gauge) & 0x1FE0000) {
-        GAUGE_BITS(gauge) = (GAUGE_BITS(gauge) & ~0x1FE0000) | ((((GAUGE_BITS(gauge) >> 17) - 1) & 0xFF) << 17);
-    }
-    for (i = 0; i < 4; i++) {
-        if (gauge->slots[i].active != 0) {
-            if (gauge->slots[i].level < 10) {
-                gauge->slots[i].level += 1;
-            }
-        } else if (gauge->slots[i].level != 0) {
-            gauge->slots[i].level -= 1;
-        }
-    }
-    switch (gauge->state) {
-    case 1:
-    case 6:
-        gauge->value = (f32)gauge->timer / 10.0f;
-        gauge->timer += 1;
-        if (gauge->timer >= 10) {
-            if (GAUGE_BITS(gauge) & 0x10000) {
-                gauge->state = 4;
-            } else {
-                gauge->state = 2;
-            }
-            gauge->timer = 0;
-            gauge->value = 1.0f;
-            GAUGE_BITS(gauge) &= ~0x10000;
-        }
-        break;
-    case 2:
-        gauge->value = 1.0f;
-        break;
-    case 3:
-    case 5:
-        gauge->value = 1.0f - (f32)gauge->timer / 10.0f;
-        gauge->timer += 1;
-        if (gauge->timer >= 10) {
-            gauge->timer = 0;
-            gauge->value = 0.0f;
-            if (gauge->state == 5) {
-                if (GAUGE_BITS(gauge) & 0x10000) {
-                    gauge->state = 2;
-                } else {
-                    gauge->state = 4;
-                }
-                GAUGE_BITS(gauge) &= ~0x10000;
-            } else {
-                return 1;
-            }
-        }
-        break;
-    case 4:
-        gauge->value = 0.0f;
-        break;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuUpdateMantraGaugeFade);
 
 s32 mnuDrawMantraGauge(s32 unused, s32 item) {
     s32 icons[4] = {0x3F, 0x40, 0x41, 0x42};

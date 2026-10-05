@@ -322,7 +322,7 @@ typedef struct SoundLink {
     u16 unk_0E;
 } SoundLink;
 
-extern void func_001F2C00(SoundLink *);
+extern void btlUpdateUnitCommandEffect(SoundLink *);
 
 typedef struct SoundResourceLink {
     void *owner;
@@ -4338,13 +4338,13 @@ void *btlScheduleRefreshTask(u8 *owner) {
     return task;
 }
 
+/* Task-start callbacks do not return a status to the scheduler. */
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BC8);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BE8);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3C08);
 
-/* Task-start callbacks do not return a status to the scheduler. */
 void btlBeginModelChange(u32 argumentsAddress) {
     u32 *arguments = (u32 *)argumentsAddress;
     s32 owner = arguments[0];
@@ -5154,7 +5154,7 @@ void btlUpdateActorModelColorAndLinks(void) {
                 }
             }
             func_001F2818(unit->resourceLink);
-            func_001F2C00((SoundLink *)unit->link);
+            btlUpdateUnitCommandEffect((SoundLink *)unit->link);
             func_001FC998(unit);
         }
     }
@@ -8978,7 +8978,7 @@ void sndFreeLink(SoundLink *node) {
 }
 
 /* Blend the linked command effect through the SDK's packed-color vectors. */
-void func_001F2C00(SoundLink *link) {
+void btlUpdateUnitCommandEffect(SoundLink *link) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
     BtlUnit *actor = link->owner;
     u16 effectId;
@@ -9153,13 +9153,13 @@ typedef struct SoundHandleNode {
 } SoundHandleNode;
 
 struct FileQueue;
-extern struct FileQueue *func_002940D0(struct FileQueue *);
+extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
     SoundBankEntry *entry = &D_0035F748[index];
     node->actor = actor;
-    node->handle = (u32)func_002940D0((struct FileQueue *)entry->resource);
+    node->handle = (u32)fileCloneQueueEntries((struct FileQueue *)entry->resource);
     return node;
 }
 

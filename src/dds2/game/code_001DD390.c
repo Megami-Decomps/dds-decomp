@@ -767,7 +767,7 @@ extern f32 *D_0037F770[];
 extern s32 sndGetEffectNodeParameter(s32, u16);
 
 struct FileQueue;
-extern struct FileQueue *func_002D4138(struct FileQueue *);
+extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 typedef struct BtlCommandTask {
     s32 state;            /* 0x00 */
@@ -3381,13 +3381,13 @@ SoundTask *btlScheduleRefreshTask(BtlUnit *unit) {
     return task;
 }
 
+/* Task-start callbacks do not return a status to the scheduler. */
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417AF0);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B30);
 
-/* Task-start callbacks do not return a status to the scheduler. */
 void btlBeginModelChange(u32 argumentsAddress) {
     u32 *arguments = (u32 *)argumentsAddress;
     s32 owner = arguments[0];
@@ -4221,7 +4221,7 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E7648);
 extern s32 mdlGetBroadcastValue(void *);
 extern void func_001E3E20(BtlUnit *);
 extern void func_002034A8(struct SoundResourceLink *);
-extern void func_00203890(struct SoundLink *);
+extern void btlUpdateUnitCommandEffect(struct SoundLink *);
 extern void func_0020EA18(BtlUnit *);
 
 void btlUpdateActorModelColorAndLinks(void) {
@@ -4260,7 +4260,7 @@ void btlUpdateActorModelColorAndLinks(void) {
                 }
             }
             func_002034A8(unit->link31C);
-            func_00203890(unit->link320);
+            btlUpdateUnitCommandEffect(unit->link320);
             if (!(work->flags21C & 0x10000)) {
                 func_0020EA18(unit);
             }
@@ -8276,7 +8276,7 @@ void sndFreeLink(SoundLink *link) {
 }
 
 /* Blend the linked command effect through the SDK's packed-color vectors. */
-void func_00203890(SoundLink *link) {
+void btlUpdateUnitCommandEffect(SoundLink *link) {
     BtlWork *work = (BtlWork *)btlGetRuntime();
     BtlUnit *actor = (BtlUnit *)link->owner;
     u16 effectId;
@@ -8510,7 +8510,7 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
     SoundEntry *entry = &D_003BDE18[index];
     node->actor = actor;
-    node->handle = (u32)func_002D4138((struct FileQueue *)entry->unk4);
+    node->handle = (u32)fileCloneQueueEntries((struct FileQueue *)entry->unk4);
     return node;
 }
 

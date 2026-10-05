@@ -142,8 +142,6 @@ extern void btlDebugPrintf(const char *, ...);
 
 extern s32 btlSetLinkedDefeatCameraPresetA();
 
-extern s32 btlAnyUnitHasActionInSlots();
-
 extern s32 func_001A8CE0(s32);
 
 extern u32 func_001A9488(s32);
@@ -1001,29 +999,7 @@ s32 func_00201900(s32 mask, s16 actionId, s8 force) {
     return 0;
 }
 
-s32 btlAnyUnitHasActionInSlots(mask, action)
-u32 mask;
-s32 action;
-{
-    u8 *node = (u8 *)((BtlState *)btlGetRuntime())->tasks;
-    while (node != 0) {
-        u8 *owner = (u8 *)((BtlTask *)node)->unit;
-        if (owner != 0) {
-            u32 flags = ((BtlUnit *)owner)->flags;
-            if ((flags & 1) && (flags & mask) && !(flags & 0x20)) {
-                s32 i;
-                for (i = 0; i < 8; i++) {
-                    /* Required to match: byte-offset indexing keeps the original induction register. */
-                    if (func_00201900(action, *(s16 *)(node + 0x148 + i * 4), 1) != 0) {
-                        return 1;
-                    }
-                }
-            }
-        }
-        node = (u8 *)((BtlTask *)node)->next;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyUnitHasActionInSlots);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyGroup200HasAction);
 
@@ -3731,7 +3707,7 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5D98);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5DB8);
 
-s32 func_00209C90(void) {
+s32 btlQueueHariFormChangeOrPartyCommand(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlTask *candidates[16];
     BtlTask *task;

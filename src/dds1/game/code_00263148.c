@@ -1,5 +1,8 @@
 #include "mnu.h"
 
+struct PtyProfileUnit;
+extern void ptyRecomputeMaxVitals(struct PtyProfileUnit *, const s32 *);
+
 extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
 extern s32 mdlFlagTest(u32);
@@ -545,7 +548,7 @@ void mnuClearItemSelectionSlots(MenuItemScene *scene) {
 }
 
 void mnuRefreshPartyUnitVitalsPanels(u32 unit, u32 menu) {
-    ptyRecomputeMaxVitals(unit, (s32)menu + 0x3d0);
+    ptyRecomputeMaxVitals((struct PtyProfileUnit *)unit, (const s32 *)(menu + 0x3D0));
     mnuRefreshSelectedUnitPanels(unit, menu);
 }
 

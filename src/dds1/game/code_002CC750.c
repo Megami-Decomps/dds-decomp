@@ -206,6 +206,8 @@ typedef struct PtyProfileUnit {
     u16 skills[24];     /* 0x22 */
 } PtyProfileUnit;
 
+extern void ptyRecomputeMaxVitals(PtyProfileUnit *, const s32 *);
+
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
     s32 file = func_002FE950("debug.log", sdfDebugLogAppendMode);
     if (file != 0) {
@@ -284,7 +286,7 @@ void ptyRebuildAllProfiles(void) {
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyRecomputeMaxVitals);
 
 void ptyRecomputeMaxHpMp(u32 unit) {
-    ptyRecomputeMaxVitals(unit, 0);
+    ptyRecomputeMaxVitals((PtyProfileUnit *)unit, NULL);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD0D8);
