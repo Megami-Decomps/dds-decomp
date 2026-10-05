@@ -342,12 +342,13 @@ def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
             "tools/check_unit.py",
             "config/report_reconciliations.json",
         ]
-        if scope in ("all", "dds1"):
-            dependencies.extend([
-                "build/dds1/base/src/dds1/effect/effPCPMisc.o",
-                "config/dds1/symbol_addrs.txt",
-                f"orig/dds1/{VERSIONS['dds1']['serial']}",
-            ])
+        for version in units:
+            if scope in ("all", version):
+                dependencies.extend([
+                    f"build/{version}/base/src/{version}/effect/effPCPMisc.o",
+                    f"config/{version}/symbol_addrs.txt",
+                    f"orig/{version}/{VERSIONS[version]['serial']}",
+                ])
         n.build(out, "reconcile_report", raw, implicit=dependencies,
                 variables={"scope": scope})
 
