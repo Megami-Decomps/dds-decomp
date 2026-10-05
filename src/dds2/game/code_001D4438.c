@@ -2235,7 +2235,7 @@ INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417548);
 BtlUnit *btlCreateActionSeq(void) {
     BtlUnit *seq = sdfAllocAndClearQuadwords(0x180);
     BtlWork *work;
-    *(u16 *)((u8 *)seq + 4) = 1;
+    seq->unk4 = 1;
     btlInitBattleIndexWork((u8 *)seq + 0x20);
     work = (BtlWork *)btlGetRuntime();
     seq->prev = 0;

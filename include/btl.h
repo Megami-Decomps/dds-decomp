@@ -119,7 +119,8 @@ typedef struct BtlUnitExt {
 
 typedef struct BtlUnit {
     s32 state;
-    u8 pad4[4];
+    u16 unk4; /* Written as 1 by the action-sequence constructor. */
+    u8 pad6[2];
     u32 seqFlags;
     u32 unkC;
     s32 stateTime;
@@ -148,7 +149,9 @@ typedef struct BtlUnit {
     s32 resourceKind; /* 0xC4 */
     s32 resourceIndex; /* 0xC8 */
     u8 unkCC;
-    u8 padCD[0x1B];
+    u8 padCD[0x13];
+    s32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
+    u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
     s32 unkEC;
     s32 effectState; /* 0xF0: same actor effect state as DDS1 */
@@ -180,7 +183,9 @@ typedef struct BtlUnit {
     u16 unk172; /* Index into datItemSkillRecords for the default action operand. */
     struct BtlUnit *prev; /* 0x174 */
     struct BtlUnit *next; /* 0x178 */
-    u8 pad17C[0x168];
+    u8 pad17C[0x154];
+    s16 actionSlot; /* 0x2D0: same per-unit queued action operand as DDS1 */
+    u8 pad2D2[0x12];
     u8 unk2E4;
     u8 pad2E5[0x2B];
     s32 unk310;

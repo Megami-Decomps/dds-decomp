@@ -1300,12 +1300,11 @@ INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup200HasAction);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup400HasAction);
 
-/* The signed action-slot halfword at +0x2D0 is absent from the canonical header. */
 s32 func_002141A8(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
-            func_00213F58(action, *(s16 *)((u8 *)battler + 0x2D0), 0)) {
+            func_00213F58(action, battler->actionSlot, 0)) {
             return 1;
         }
     }
@@ -6229,8 +6228,8 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
 
 extern u8 *btlGetSideIndexedActorStatusTable(s32, s32);
 
-s32 func_00226598(BattleActionUnit *command) {
-    BattleActionUnit *unit = btlGetTargetUnitForLink(command);
+s32 func_00226598(BtlLinkedCommand *command) {
+    BtlUnit *unit = btlGetTargetUnitForLink(command);
     u8 *table;
     s32 kind;
     f32 pos[4];
@@ -6238,11 +6237,11 @@ s32 func_00226598(BattleActionUnit *command) {
     if ((unit->flags & 0x400) == 0) {
         return 0;
     }
-    if (unit->kind == 0x113) {
+    if (unit->mode == 0x113) {
         table = btlGetSideIndexedActorStatusTable(
-            *(s32 *)((u8 *)unit + 0xC4), *(s32 *)((u8 *)unit + 0xC8));
+            unit->resourceKind, unit->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
-            s32 slot = *(s32 *)((u8 *)command->actor + 0x44);
+            s32 slot = command->link->slot;
             kind = *(s16 *)(table + slot * 0x14 + 0x2C);
             if (kind == 2 || kind == 7) {
                 func_001E3108(unit, pos);

@@ -183,8 +183,7 @@ BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
     return 0;
 }
 
-/* Collapse three special unit modes to one display code. +0xE0 remains unnamed
- * in the canonical header, so retain this bounded read rather than a unit view. */
+/* Collapse three special unit modes to one display code. */
 s32 btlGetCanonicalCombatantKind(BtlUnit *unit) {
     switch (unit->mode) {
     case 0x119:
@@ -192,7 +191,7 @@ s32 btlGetCanonicalCombatantKind(BtlUnit *unit) {
     case 0x12F:
         return 0x119;
     }
-    return *(s32 *)((u8 *)unit + 0xE0);
+    return unit->combatantKind;
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227820);

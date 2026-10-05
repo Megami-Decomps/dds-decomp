@@ -56,6 +56,7 @@ typedef struct SdfResourceRecord {
     SdfResourceInfo *info;
 } SdfResourceRecord;
 
+/* Serialized 0x1C-byte header; its vector-pointer word is at byte 0x18. */
 typedef struct SdfResourceVectorRecord1C {
     u8 data[0x1C];
 } SdfResourceVectorRecord1C;
@@ -162,8 +163,8 @@ u32 *func_00325AB8(const SdfResourceVectorRecord1C *source, s32 count) {
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
         *copy = *source;
         vector = (SdfVec4 *)(copy + 1);
-        *(SdfVec4 **)((u8 *)copy + 0x18) = vector;
-        *vector = **(SdfVec4 **)((u8 *)source + 0x18);
+        *(SdfVec4 **)&copy->data[0x18] = vector;
+        *vector = **(SdfVec4 * const *)&source->data[0x18];
         func_00324DF8(owner, (u32)copy);
         source++;
         count--;

@@ -220,7 +220,7 @@ typedef struct GridAngleOwner {
 s32 itfGridApplySqrtBoundsAndColorScale(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 deltas[2];
-    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 *dimensionOut = out->dimensions;
     u32 *sourceColor;
     u32 *destColor;
     s32 colorFactor;
@@ -325,7 +325,7 @@ s32 func_002BFE78(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     GridFlushTable *table;
     s32 phases[3];
     s32 deltas[2];
-    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 *dimensionOut = out->dimensions;
     s32 totalDuration;
     s32 numerator;
     s32 denominator;
@@ -399,7 +399,7 @@ s32 func_002BFE78(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
 s32 func_002C0038(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 deltas[2];
-    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 *dimensionOut = out->dimensions;
     s32 factor;
     u32 *sourceColor;
     u32 *destColor;
@@ -535,7 +535,7 @@ s32 func_002C0340(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
 s32 func_002C04C8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 deltas[2];
-    s32 *dimensionOut = (s32 *)((u8 *)out + 4);
+    s32 *dimensionOut = out->dimensions;
     s32 colorFactor;
     u32 *sourceColor;
     u32 *destColor;

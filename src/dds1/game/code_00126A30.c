@@ -256,7 +256,7 @@ extern u32 D_003BACEC;
 extern u32 fldMarkerTexture;
 extern u32 D_003BD7C0;
 extern u8 D_0032F260[];
-extern void *sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern u32 sdfTexAcquireResourceTexture(void *);
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
@@ -973,11 +973,11 @@ void fldSetRelocateOnRelease(u32 relocateOnRelease) {
 
 void fldInitDisplayObjects(void) {
     if (D_003BACD4 == 0) {
-        void *object;
+        SdfAsset *object;
         D_003BACD4 = 1;
         object = sdfCreateAssetWithDrawEntries();
         D_003BACEC = (u32)object;
-        *(f32 *)((u8 *)object + 0x1C) = 1.0f;
+        object->unk1C = 1.0f;
         D_003BD7C0 = (u32)sdfCreateAssetWithDrawEntries();
         fldMarkerTexture = sdfTexAcquireResourceTexture(D_0032F260);
     }
