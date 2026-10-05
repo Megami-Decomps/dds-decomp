@@ -3,6 +3,7 @@
 #include "gs_packet.h"
 #include "sdf.h"
 #include "eff.h"
+#include "evt_world.h"
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;
@@ -323,12 +324,11 @@ s32 sdfStepSelectedMapCameraTransition(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 
-typedef struct WorldObjectPointer WorldObjectPointer;
 typedef struct WorldChainNode WorldChainNode;
 typedef struct EffectObject EffectObject;
 
 extern void *dds3GetWorldSecondaryObject(void);
-extern WorldChainNode *dds3FindIndexedObjectChainNodeByName(WorldObjectPointer *world, s32 type, const u8 *name);
+extern WorldChainNode *dds3FindIndexedObjectChainNodeByName(EvtWorldObject *world, s32 type, const u8 *name);
 extern void evtSetObjectTransitionWork(EffectObject *object, u32 value);
 
 /* Fixed-width names identify the corresponding local-map model chain. */
