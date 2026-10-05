@@ -912,8 +912,6 @@ void sdfDevDeactivate(DevState *state, s32 result) {
     }
 }
 
-extern s32 func_002E5398(void *, s32);
-
 /* Service queued host-file requests for one device worker. */
 INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4578);
 
