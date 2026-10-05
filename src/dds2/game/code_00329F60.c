@@ -403,7 +403,18 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexHead *block) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A9D8);
+void func_0032A9D8(void) {
+    SdfTexHead *node;
+
+    node = sdfTextureListHead;
+    while (node->prev != NULL) {
+        node = node->prev;
+    }
+    node = sdfTextureBlockListHead;
+    while (node->next != NULL) {
+        node = node->next;
+    }
+}
 
 
 
