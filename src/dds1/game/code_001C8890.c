@@ -7609,7 +7609,40 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
         func_001E2970((CameraPoseAction *)action, &((CameraPoseAction *)action)->transform);
     }
 }
-INCLUDE_ASM(const s32, "game/code_001C8890", btlInitCommandCursorForCategory);
+void btlInitCommandCursorForCategory(s32 action, s32 state) {
+    memset(D_0035F100, 0, 0x130);
+    switch (((CameraPoseAction *)action)->link->unit->mode) {
+    case 1:
+        func_001E6BB0(action, state, 4, 0);
+        CURSOR->unk_0C = 0;
+        func_001E6668(action, state, 4, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 2:
+        return;
+    case 3:
+        func_001E6BB0(action, state, 4, 0);
+        CURSOR->unk_0C = 0;
+        func_001E6668(action, state, 4, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 4:
+        func_001E6BB0(action, state, 4, 0);
+        CURSOR->unk_0C = 0;
+        func_001E6668(action, state, 4, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 5:
+        func_001E6BB0(action, state, 4, 0);
+        CURSOR->unk_0C = 0;
+        func_001E6668(action, state, 4, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 6:
+        btlFlagUserAndTargetDefeat(action, action);
+        break;
+    }
+}
 
 /* Advance the command cursor with the neighboring animation-entry table. */
 void func_001EEED8(s32 action, s32 state) {
