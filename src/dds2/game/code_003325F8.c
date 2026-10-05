@@ -815,7 +815,50 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00333A30);
+extern f32 sdfSinPoly(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+
+/* Build the 3x2 scalar-block transform from the sub-parameter's five floats
+ * and rotation, or the identity layout when the block is absent. */
+void func_00333A30(u8 *out, SdfSubParam *param) {
+    f32 v0;
+    f32 v1;
+    f32 v2;
+    f32 v3;
+    f32 angle;
+    f32 s;
+    f32 c;
+    f32 m0;
+    f32 m1;
+    f32 m2;
+    f32 m3;
+
+    if (param == NULL) {
+        ((u64 *)out)[0] = 0x000000003F800000;
+        ((u64 *)out)[1] = 0x3F80000000000000;
+        ((u64 *)out)[2] = 0;
+        return;
+    }
+
+    angle = -param->scalar.values[4];
+    s = sdfSinPoly(angle);
+    c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    v0 = param->scalar.values[0];
+    v1 = param->scalar.values[1];
+    v2 = param->scalar.values[2];
+    v3 = param->scalar.values[3];
+
+    m0 = c * v2;
+    m1 = s * v3;
+    m2 = -s * v2;
+    m3 = c * v3;
+    ((f32 *)out)[0] = m0;
+    ((f32 *)out)[1] = m1;
+    ((f32 *)out)[2] = m2;
+    ((f32 *)out)[3] = m3;
+    ((f32 *)out)[4] = 0.5f - m0 * (v0 + 0.5f) - m2 * (0.5f - v1);
+    ((f32 *)out)[5] = 0.5f - m1 * (v0 + 0.5f) - m3 * (0.5f - v1);
+}
 
 void sdfCopyAssetPrimarySubParameter(s32 assetAddress, s32 entryAddress) {
     func_00333A30(entryAddress + 0x68, ((SdfAsset *)assetAddress)->third);
