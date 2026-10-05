@@ -219,7 +219,9 @@ typedef struct BtlUnit {
     u16 conditionFlags; /* 0x12E */
     u8 pad130a[4];
     u16 actionTime; /* 0x134: action timestamp used by the low-HP delay check */
-    u8 pad130[0x3C];
+    u8 pad136[0xC];
+    u16 cards[8]; /* 0x142: eight skill IDs searched for the active card range. */
+    u8 pad152[0x20];
     u16 unk172; /* Index into datItemSkillRecords for the default action operand. */
     struct BtlUnit *prev; /* 0x174 */
     struct BtlUnit *next; /* 0x178 */
