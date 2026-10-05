@@ -336,7 +336,56 @@ typedef struct GridAngleAdjustment {
     u32 colors[4];     /* 0x14 */
 } GridAngleAdjustment;
 
-INCLUDE_ASM(const s32, "game/code_00306F80", itfGridApplySqrtBoundsAndColorScale);
+s32 itfGridApplySqrtBoundsAndColorScale(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 deltas[2];
+    s32 *dimensionOut = out->dimensions;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 colorFactor;
+    s32 i = 0;
+
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    for (; i < 2; i++) {
+        s32 delta = deltas[i];
+        s32 scaled = (s32)(fsqrtf((f32)delta) * (f32)owner->angle * (1.0f / 65536.0f));
+
+        if (delta > 0) {
+            dimensionOut[i] = delta - scaled * scaled;
+        } else {
+            dimensionOut[i] = scaled * scaled + delta;
+        }
+    }
+
+    if (table->mirrored != 0) {
+        colorFactor = 0x10000 - owner->angle;
+    } else {
+        colorFactor = owner->angle;
+    }
+    sourceColor = rectangle->colors;
+    /* The color block follows the dimension and anchor words. */
+    destColor = (u32 *)dimensionOut + 4;
+    {
+        s32 colorMask = -0x100;
+        s32 fractionalMask = 0xFFFF;
+
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            u32 color = *sourceColor;
+            s32 lowByte = *(u8 *)sourceColor;
+            s32 product = lowByte * colorFactor;
+            s32 negative = 0;
+
+            /* Signed fixed-point division rounds toward zero. */
+            if (product < 0) {
+                negative++;
+            }
+            *destColor = (color & colorMask) |
+                         ((product + negative * fractionalMask) >> 16);
+        }
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
 s32 func_00307710(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
@@ -469,7 +518,61 @@ s32 func_003078A8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     return 0x10000 / totalDuration;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307A68);
+/* Contract the grid bounds and fade each packed color low byte as the angle advances. */
+s32 func_00307A68(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 deltas[2];
+    s32 *dimensionOut = out->dimensions;
+    s32 factor;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 i = 0;
+
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    {
+        s32 fractionalMask = 0xFFFF;
+        for (; i < 2; i++) {
+            s32 delta = deltas[i];
+            s32 magnitude = delta < 0 ? -delta : delta;
+            s32 product = magnitude * owner->angle;
+            s32 negative = 0;
+            s32 scaled;
+
+            /* Signed fixed-point division rounds toward zero. */
+            if (product < 0) {
+                negative++;
+            }
+            scaled = (product + negative * fractionalMask) >> 16;
+
+            if (delta > 0) {
+                dimensionOut[i] = delta - scaled;
+            } else {
+                dimensionOut[i] = delta + scaled;
+            }
+        }
+    }
+
+    /* The color block follows the dimension and anchor words. */
+    destColor = (u32 *)dimensionOut + 4;
+    factor = ((100 - table->mirrored) << 16) / 100;
+    sourceColor = rectangle->colors;
+    {
+        s32 colorMask = -0x100;
+
+        for (i = 3; i >= 0; i--, destColor++, sourceColor++) {
+            if (owner->angle < factor) {
+                u32 color = *sourceColor;
+                s32 lowByte = *(u8 *)sourceColor;
+
+                *destColor = (color & colorMask) | (lowByte * owner->angle / factor);
+            } else {
+                *destColor = *sourceColor;
+            }
+        }
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Convert the owner's fixed-point angle to degrees and return its angular step. */
 s32 itfUpdateAngleAndGetCycleStep(s32 unused, u8 *out, GridAngleOwner *owner) {
@@ -548,7 +651,67 @@ s32 func_00307D70(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridA
     return 0x10000 / table->cycleDivisor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307EF8);
+/* Apply the angle-driven grid contraction and mirrored packed-color fade. */
+s32 func_00307EF8(GridAngleRectangle *rectangle, GridAngleAdjustment *out, GridAngleOwner *owner) {
+    GridAngleTable *table = owner->slot->table;
+    s32 deltas[2];
+    s32 *dimensionOut = out->dimensions;
+    s32 colorFactor;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 i = 0;
+
+    deltas[0] = (rectangle->right - rectangle->left) << 4;
+    deltas[1] = (rectangle->bottom - rectangle->top) << 3;
+    {
+        s32 fractionalMask = 0xFFFF;
+
+        for (; i < 2; i++) {
+            s32 delta = deltas[i];
+            s32 magnitude = delta < 0 ? -delta : delta;
+            s32 product = magnitude * owner->angle;
+            s32 negative = 0;
+            s32 scaled;
+
+            if (product < 0) {
+                negative++;
+            }
+            scaled = (product + negative * fractionalMask) >> 16;
+            if (delta > 0) {
+                dimensionOut[i] = delta - scaled;
+            } else {
+                dimensionOut[i] = delta + scaled;
+            }
+        }
+    }
+
+    if (table->mirrored != 0) {
+        colorFactor = 0x10000 - owner->angle;
+    } else {
+        colorFactor = owner->angle;
+    }
+    sourceColor = rectangle->colors;
+    /* The color block follows the dimension and anchor words. */
+    destColor = (u32 *)dimensionOut + 4;
+    {
+        s32 colorMask = -0x100;
+        s32 fractionalMask = 0xFFFF;
+
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            u32 color = *sourceColor;
+            s32 alpha = *(u8 *)sourceColor;
+            s32 product = alpha * colorFactor;
+            s32 negative = 0;
+
+            if (product < 0) {
+                negative++;
+            }
+            *destColor = (color & colorMask) |
+                         ((product + negative * fractionalMask) >> 16);
+        }
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Unpack engine RGBA order into GS packed R/G and B/A word pairs. */
 void itfGridUnpackColorChannels(u64 *channels, u32 color) {
