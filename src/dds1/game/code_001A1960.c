@@ -52,7 +52,11 @@ typedef struct BattleController {
     s32 spriteObject;
     s32 cleanupTask;
     BattleItemDrop itemDrops[3];
-    u8 pad_2C0[0x14];
+    s32 moneyEarned; /* 0x2C0 */
+    u8 pad2C4[4];
+    s32 experienceEarned; /* 0x2C8 */
+    s32 epEarned; /* 0x2CC */
+    u8 pad2D0[4];
     SceneSlot slots[8];
     BtlTask *groupPrimary[20];
     BtlTask *groupSecondary[45];
@@ -657,6 +661,20 @@ void func_001A4240(u16 item) {
         }
     }
 }
+
+/* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
+typedef struct DatEnemyRecord {
+    u32 flags;            /* 0x00 */
+    u8 pad04;
+    u8 level;             /* 0x05 */
+    u8 pad06[0x12];
+    u16 skills[8];        /* 0x18 */
+    s32 money;            /* 0x28 */
+    u16 unk2C;
+    u16 experience;       /* 0x2E */
+    u16 huntExperience;   /* 0x30 */
+    u8 pad32[0x1A];
+} DatEnemyRecord;
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4328);
 
@@ -1541,18 +1559,6 @@ void func_001A7AD0(void) {
 }
 
 extern f32 func_001A7C20(u8 *, u8 *, s32);
-
-/* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
-typedef struct DatEnemyRecord {
-    u32 flags;            /* 0x00 */
-    u8 pad04[0x14];
-    u16 skills[8];        /* 0x18 */
-    s32 money;            /* 0x28 */
-    u16 unk2C;
-    u16 experience;       /* 0x2E */
-    u16 huntExperience;   /* 0x30 */
-    u8 pad32[0x1A];
-} DatEnemyRecord;
 
 /* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
 s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {

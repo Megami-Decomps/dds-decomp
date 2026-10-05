@@ -254,13 +254,6 @@ extern void btlStopStage(void);
 extern void *evtBattleStageTestScreen(void);
 
 
-/* Only this sprite object's prefix is accessed here. */
-typedef struct MenuSprites {
-    u8 pad00[0xC];
-    s32 unkC;
-} MenuSprites;
-
-
 typedef struct MenuList MenuList;
 
 
