@@ -82,8 +82,21 @@ typedef struct PartyEntryCopy {
     u16 flags;
     u16 pad02;
     u16 displayId; /* 0x04: used to select a party display asset */
-    u16 pad06;
-    u32 word[0x67];
+    u16 hp;        /* 0x06 */
+    u16 maxHp;     /* 0x08 */
+    u16 mp;        /* 0x0A */
+    u16 maxMp;     /* 0x0C */
+    u16 status;    /* 0x0E */
+    u32 unk10;     /* 0x10 */
+    u16 level;     /* 0x14: drives the equipped-skill slot count */
+    s8 baseStats[5]; /* 0x16 */
+    u8 pad1B;
+    u16 hpBonus;   /* 0x1C */
+    u16 mpBonus;   /* 0x1E */
+    u8 pad20[2];
+    u16 skills[8]; /* 0x22: equipped skill ids */
+    u8 pad32[2];
+    u32 word[0x5C]; /* 0x34 */
 } PartyEntryCopy; /* 0x1A4 bytes */
 
 /* One allocated party-selection work area: original/current/backup entries,
@@ -119,7 +132,10 @@ typedef struct CampMenuContext {
     s32 staffParam;           /* 0x80 */
     u8 pad84[0x5C];
     s32 variant;              /* 0xE0 */
-    u8 padE4[0x40];
+    s32 unkE4;                /* 0xE4 */
+    u8 padE8[0x34];
+    const void *panelLayout;  /* 0x11C */
+    u8 pad120[4];
     s32 panel;                /* 0x124 */
     u8 pad128[4];
     s32 panelList;            /* 0x12C */
@@ -892,25 +908,108 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00277848);
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2208);
+typedef struct MenuListNode MenuListNode;
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2260);
+/* Window list node: sort keys mirror the DDS2 staff list layout. */
+struct MenuListNode {
+    s32 index;
+    u8 pad04[0x44];
+    u32 flags;            /* 0x48: low bit marks an unavailable entry */
+    u8 pad4C[0xC];
+    MenuListNode *next;   /* 0x58 */
+    u8 pad5C[4];
+    u32 sortKeyPrimary;   /* 0x60 */
+    u32 sortKeySecondary; /* 0x64 */
+};
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2270);
+typedef struct MenuList MenuList;
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2280);
+struct MenuList {
+    u8 pad00[0x2C];
+    void (*drawEntry)(); /* 0x2C */
+    void *owner;         /* 0x30 */
+};
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2290);
+typedef struct MenuWindowContainer MenuWindowContainer;
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22A0);
+struct MenuWindowContainer {
+    u8 pad00[0x14];
+    MenuList *list; /* 0x14 */
+};
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22B0);
+typedef struct MenuListDefaults {
+    s32 indices[3];
+} MenuListDefaults;
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22C0);
+typedef struct MenuGameState {
+    u8 pad00[MNU_STAFF_PARTY_BASE];
+    PartyEntryCopy party[MNU_STAFF_PARTY_SLOT_COUNT];
+} MenuGameState;
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22D0);
+extern MenuListDefaults D_003B22E0;
+extern u8 *D_003BAA8C;
+extern char D_003BC708[];
+extern u8 brsGetLevelStepForValue(s32);
+extern s32 mnuGetEntryUseStatus(s32, u16);
+extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
+extern MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
+extern void func_00277848();
 
-INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuBuildEquippedSlots);
+/* Build the equipped-skill window for the selected party member. The slot count
+ * follows the member's level step; each equipped skill becomes a list node, and
+ * unaffordable skills are flagged when the menu is opened for use. */
+s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, s32 callback) {
+    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(callback);
+    MenuSelectionList *selectionList = (MenuSelectionList *)context->selectionList;
+    MenuListDefaults defaults = D_003B22E0;
+    s32 selected = *selectionList->selectedSlot;
+    StaffMenuWork *menu = (StaffMenuWork *)context->menu;
+    PartyEntryCopy *entry = (PartyEntryCopy *)(datGameState + selected * MNU_STAFF_PARTY_ENTRY_BYTES + MNU_STAFF_PARTY_BASE);
+    s32 skillCount = brsGetLevelStepForValue(entry->level);
+    s32 placement;
+    MenuWindowContainer *window;
+    s32 i;
+
+    switch (skillCount) {
+    case 4:
+        placement = defaults.indices[0];
+        break;
+    case 6:
+        placement = defaults.indices[1];
+        break;
+    default:
+        placement = defaults.indices[2];
+        break;
+    }
+    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x160, 0x10, skillCount, 0x15);
+    mnuSetWindowContainerState(window, MNU_FULL_FADE);
+    mnuForwardDupArg((s32)window, context->option, 0, context->unkE4, 0x14);
+    mnuSetWindowPanelBounds(window, context->panelLayout, 0x130, 0x630, -0x90, 0xC20);
+    mnuInitializeWindowEntryPlacement(0, window, context->option, 0x14, placement);
+    window->list->owner = context;
+    window->list->drawEntry = func_00277848;
+    for (i = 0; i < skillCount; i++) {
+        u16 skill = ((MenuGameState *)datGameState)->party[selected].skills[i];
+        MenuListNode *node;
+
+        if (skill != 0) {
+            node = mnuAppendWindowListNode(window, (s32)(D_003BAA8C + skill * 17));
+            node->sortKeySecondary = i;
+            node->sortKeyPrimary = skill;
+            if (selectionMode != 0 && mnuGetEntryUseStatus((s32)entry, skill) != 0) {
+                node->flags |= MNU_STAFF_NODE_UNAVAILABLE;
+            }
+        } else {
+            node = mnuAppendWindowListNode(window, (s32)D_003BC708);
+            node->sortKeySecondary = node->sortKeyPrimary = 0;
+        }
+    }
+    menu->selectedList = (s32)window;
+    return 1;
+}
 
 u32 mnuDestroySelectedPartyWindow() {
     s32 context = kwlnTaskGetUserValue();
@@ -1238,6 +1337,26 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
         mnuPlayInputSound(0, inputFlags, (s32)window->list);
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2208);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2260);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2270);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2280);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2290);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22A0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22B0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22C0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22D0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22E0);
 
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22F0);
 
