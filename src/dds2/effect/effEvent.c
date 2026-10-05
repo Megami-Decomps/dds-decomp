@@ -1,6 +1,5 @@
 #include "common.h"
 #include "eff.h"
-#include "evt_unit.h"
 #include "pcp_vu0.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
@@ -983,7 +982,7 @@ typedef struct EffEventInit {
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
 typedef struct EffEventWork {
     EffEventInit init;
-    EvtUnit *actor;
+    void *actor;          /* Linked model/event owner; concrete identity is unknown. */
     void *effect;
 } EffEventWork;
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -1038,7 +1037,7 @@ void effEventSetScale(EffEventWork *work, f32 scale) {
     func_00169168(work->effect, scale);
 }
 
-void effEventSetState(EffEventWork *work, EvtUnit *actor) {
+void effEventSetState(EffEventWork *work, void *actor) {
     work->actor = actor;
 }
 
