@@ -177,7 +177,29 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
 /* Retail selects by nodeId when flags bit 0 is set, otherwise by array index. */
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelFindDrawNode);
+u8 *sdfModelFindDrawNode(void *chunk, s32 id) {
+    SdfModel *model = (SdfModel *)chunk;
+    SdfList *list = model->list;
+    s16 count;
+    SdfDrawNode **entries;
+    s32 i;
+
+    count = list->count;
+    entries = list->entries;
+    if (model->flags & 1) {
+        for (i = 0; i < count; i++) {
+            SdfDrawNode *node = entries[i];
+            if (node->nodeId == id) {
+                return (u8 *)node;
+            }
+        }
+        return 0;
+    }
+    if ((u32)id >= (u32)count) {
+        return 0;
+    }
+    return (u8 *)entries[id];
+}
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
 SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 index) {
@@ -201,7 +223,62 @@ void *sdfModelWriteIndexedAssetPacket(SdfSlotBuf *slots, s32 index, void *packet
     return sdfInitNodeHeaderFromWords(slots->entries->view.indexed.wordsByIndex[index], packet, frame);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfCommandListMeasure);
+/* A command-list entry: a kind byte followed by per-kind payload words. */
+typedef struct SdfMeasureCommand {
+    u8 kind;
+    u8 pad01[0xB];
+    u16 quadwordCount; /* 0x0C */
+} SdfMeasureCommand;
+
+/* Walk a command list and report its total packet byte size, the number of
+ * kind-3 entries, and the kind 4-8 quadword total. */
+s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
+    s32 count;
+    SdfMeasureCommand *command;
+    s32 bytes;
+    s32 count3;
+    s32 quadwords;
+
+    if (list == 0) {
+        *outCount = 0;
+        *outQuadwords = 0;
+        return 0;
+    }
+    count = list[0];
+    list++;
+    bytes = 0;
+    count3 = 0;
+    count &= 0xFFFF;
+    quadwords = 0;
+    if (count != 0) {
+        do {
+            command = (SdfMeasureCommand *)*list;
+            list++;
+            switch (command->kind) {
+            case 1:
+                bytes += 0x20;
+                break;
+            case 2:
+                bytes += (command->quadwordCount << 4) + 0x40;
+                break;
+            case 3:
+                count3++;
+                break;
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                quadwords += 0x10;
+                break;
+            }
+            count--;
+        } while (count != 0);
+    }
+    *outCount += count3;
+    *outQuadwords = quadwords;
+    return bytes != 0 ? bytes + 0x20 : 0;
+}
 
 typedef struct {
     u8 kind;
