@@ -34,6 +34,19 @@ typedef struct UiPos { s32 x; s32 y; s32 unk8; UiTexRef *chain; } UiPos;
 
 typedef struct UiPanelOrigin { s32 x; s32 y; UiTexRef *tex; } UiPanelOrigin;
 
+typedef struct SoundSeq {
+    s32 unk00;
+    s32 unk04;
+    s32 seq;
+    s32 unk0C;
+    s16 unk10;
+    s16 current;
+    s16 saved;
+    s16 count;
+    u8 unk18[0xA];
+    s16 entryCount;
+} SoundSeq;
+
 typedef struct UiPanel {
     u32 flags;
     u8 pad4[8];
@@ -43,8 +56,12 @@ typedef struct UiPanel {
     UiPanelOrigin origin;
     s32 pad20;
     UiPos pos;
-    u8 pad34[0x70];
-    UiPanelPlacement place;
+    u8 pad34[0xC];
+    SoundSeq selection;     /* 0x40 */
+    u8 pad64[0x40];
+    UiPanelPlacement place; /* 0xA4 */
+    u8 padD0[0x100];
+    BtlFade fade;           /* 0x1D0 */
 } UiPanel;
 
 typedef struct UiCursor {
@@ -70,19 +87,6 @@ extern UiSprite *func_00199828(s32, u32);
 extern void itfSetPanelLayoutAndNotify();
 
 extern void itfPanelUpdateValuesAndNotify();
-
-typedef struct SoundSeq {
-    s32 unk00;
-    s32 unk04;
-    s32 seq;
-    s32 unk0C;
-    s16 unk10;
-    s16 current;
-    s16 saved;
-    s16 count;
-    u8 unk18[0xA];
-    s16 entryCount;
-} SoundSeq;
 
 typedef struct SndPad {
     u8 pad00[0x21];
@@ -568,7 +572,61 @@ void btlUpdateFadeIndicator(u8 *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", itfUpdateSoundSelectorPanel);
+extern s32 frFontDrawGlyphInDefaultMode(s32);
+extern s32 frFontDrawGlyphWithSharedFlags(s32, s32);
+extern void itfMesRenderActivePanelSprites(UiPanel *);
+extern void itfDrawSoundSelectorFadeLayers(SoundUiState *);
+extern void func_0019EE58(UiPanel *);
+extern void func_0019F0F8(UiPanel *);
+
+/* Draw the panel's glyph layers, advance its selection state and fade. */
+void itfUpdateSoundSelectorPanel(UiPanel *panel) {
+    u32 flags = panel->flags;
+    SoundSeq *selection;
+    s32 glyph;
+
+    itfMesWork.drawFlags &= ~2;
+    itfMesRenderActivePanelSprites(panel);
+    glyph = (s32)panel->origin.tex;
+    if (!(flags & 0x10000) && glyph != 0) {
+        frFontDrawGlyphInDefaultMode(glyph);
+    }
+    glyph = (s32)panel->pos.chain;
+    if (!(flags & 0x20000) && (flags & 7) >= 3) {
+        if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
+            if ((panel->flags & 7) != 4) {
+                panel->fade.unk08 = 0;
+                panel->flags = (panel->flags & ~7) | 4;
+            }
+        }
+    }
+    glyph = panel->selection.seq;
+    if (!(flags & 0x40000)) {
+        flags &= 0x38;
+        if (flags >= 0x18 && frFontDrawGlyphWithSharedFlags(glyph, 1) > 0) {
+            if (flags == 0x18) {
+                selection = &panel->selection;
+                if (selection->current == -1) {
+                    selection->current = 0;
+                    selection->saved = 0;
+                }
+                itfMesSetRowItemFlag(selection->seq, selection->current, selection->count, 1);
+                panel->flags = (panel->flags & ~0x38) | 0x20;
+                panel->fade.kind = 2;
+            }
+        }
+    }
+    if (panel->fade.kind & 1) {
+        itfDrawSoundSelectorFadeLayers((SoundUiState *)panel);
+    }
+    if (panel->fade.kind & 2) {
+        if (panel->state == 3) {
+            func_0019F0F8(panel);
+        } else {
+            func_0019EE58(panel);
+        }
+    }
+}
 
 void itfMesRenderActivePanelSprites(UiPanel *panel) {
     UiPanelPlacement *place;
