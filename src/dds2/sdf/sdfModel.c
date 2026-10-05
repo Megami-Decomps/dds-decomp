@@ -276,21 +276,15 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331590);
 
 /* Reset the node lists and initialize both per-model slots. */
 void sdfModelResetAndInitNodes(SdfModel *model, s32 commandList, s32 packetSelector) {
-    s32 i = 0;
-    s32 j = 0;
+    s32 i;
 
     model->commandList = commandList;
     sdfFreeNodeLists();
     sdfEnsureFreeRootWorkspace(model);
     sdfDrawNodeBuildMatrix((SdfDrawNode *)model);
-    /* Required to match: reinitialize both loop counters after setting up the model. */
-    i = 0;
-    j = 0;
-    do {
-        i++;
-        func_003312A8(model, commandList, packetSelector, 0, j);
-        j = i;
-    } while (i != 2);
+    for (i = 0; i != 2; i++) {
+        func_003312A8(model, commandList, packetSelector, 0, i);
+    }
 }
 
 extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);

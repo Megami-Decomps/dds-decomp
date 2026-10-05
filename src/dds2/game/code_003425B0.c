@@ -1,6 +1,5 @@
 #include "common.h"
 
-#define SDF_RELOC_HEADER_BYTES 0x20
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_FRAME_HEADER_BYTES 0x10
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -178,6 +177,7 @@ typedef struct SdfRelocResource {
     u8 pad00[0x10];
     s32 relocationOffset;
     u32 relocationBytes;
+    u8 pad18[8];
     u8 payload[1];
 } SdfRelocResource;
 
@@ -798,12 +798,11 @@ u64 sndLoadNamedOffsetResourceList(u64 source) {
     return result;
 }
 
-/* Relocate words in the payload and return its address, retaining integer address arithmetic. */
+/* Relocate words in the payload and return its address. */
 s32 sdfRelocatePackedResourcePayload(SdfRelocResource *resource) {
     s32 payload;
 
-    /* Required to match: integer address arithmetic, not &resource->payload. */
-    payload = (s32)resource + SDF_RELOC_HEADER_BYTES;
+    payload = (s32)resource->payload;
     sdfRelocatePackedResourceWords(payload, payload, payload + resource->relocationOffset, resource->relocationBytes);
     return payload;
 }
@@ -820,8 +819,7 @@ u64 sdfLoadPackedResourceWithRelocatedPayload(u64 name, s32 *outPayload) {
 s32 sdfRelocatePackedResourceWordsFromHeader(SdfRelocResource *resource) {
     s32 payload;
 
-    /* Required to match: the typed member address changes one instruction. */
-    payload = (s32)resource + SDF_RELOC_HEADER_BYTES;
+    payload = (s32)resource->payload;
     sdfRelocatePackedResourceWords(payload, payload, payload + resource->relocationOffset, resource->relocationBytes);
     return payload;
 }

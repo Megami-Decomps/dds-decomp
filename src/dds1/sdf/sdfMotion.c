@@ -622,7 +622,7 @@ void sdfFindMotionKeyInterval(void *arg, void *outArg, f32 frame) {
     out->weight = (frame - currentFrame) / duration;
 }
 
-/* Blend two sampled scalar keys; preserve this expression order for matching. */
+/* Linear blend of two sampled scalar keys: first + second*t - first*t. */
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *a0) {
     f32 t;
     f32 a;

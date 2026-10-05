@@ -1079,7 +1079,7 @@ s32 mdlClaimViewerObjectPart(MdlResource *owner, MdlEntryRec *entryRecord, s32 s
                 u8 *attributes;
                 object->inUse = 1;
                 resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, subtype);
-                /* Required to match: store object/data before binding the owner. */
+                /* Fill the object and resource data before attaching the owner. */
                 resourceItem->payload.object.objectAddress = (s32)object;
                 attributes = resourceItem->payload.object.attributes;
                 resourceItem->payload.object.data = resourceData;

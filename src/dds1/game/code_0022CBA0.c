@@ -51,7 +51,7 @@ typedef struct EvtWindowContext {
 
 typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
-    u32 flags;
+    s32 flags;
     s32 windowContext;  /* 0x08: owns the message-window handle at +0x104 */
     u8 padC[4];
     s32 glyphAdvanceStart;    /* 0x10 */
@@ -676,9 +676,9 @@ void func_0022F2E0(EventViewerState *viewer) {
     evtViewerCleanupMessageWindow((s32)viewer);
 }
 
-/* Required to match: the signed raw load generates the original flag test. */
+/* Test the viewer's update flag. */
 s32 evtViewerHasUpdateFlag(s32 viewerAddr) {
-    return (*(s32 *)(viewerAddr + 4) & 0x10) > 0;
+    return (((EventViewerState *)viewerAddr)->flags & 0x10) > 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F418);

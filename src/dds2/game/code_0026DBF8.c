@@ -772,8 +772,7 @@ u32 mnuReleaseDisplayListNodeAndGetNext(MantraDisplayNode *node) {
     u32 next;
 
     next = (u32)node->next;
-    // Required to match: the node remains in $a0 for the allocator's release call.
-    sdfReleaseChipBlock();
+    sdfReleaseChipBlock(node);
     return next;
 }
 
