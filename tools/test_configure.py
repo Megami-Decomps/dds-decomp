@@ -276,6 +276,28 @@ class ObjdiffProgressTests(unittest.TestCase):
             description="objdiff report $out"
         )
 
+    def test_reconciliation_dependencies_follow_report_versions(self) -> None:
+        for versions in (("dds1",), ("dds2",), ("dds1", "dds2")):
+            with self.subTest(versions=versions):
+                writer = Mock()
+                configure.write_objdiff_reports(
+                    writer, {version: self.units[version] for version in versions}
+                )
+                for call in writer.build.call_args_list:
+                    if call.args[1] != "reconcile_report":
+                        continue
+                    scope = call.kwargs["variables"]["scope"]
+                    expected_versions = versions if scope == "all" else (scope,)
+                    dependencies = call.kwargs["implicit"]
+                    for version in ("dds1", "dds2"):
+                        for dependency in (
+                            f"build/{version}/base/src/{version}/effect/effPCPMisc.o",
+                            f"config/{version}/symbol_addrs.txt",
+                            f"orig/{version}/{configure.VERSIONS[version]['serial']}",
+                        ):
+                            self.assertEqual(dependency in dependencies,
+                                             version in expected_versions)
+
 
 class ProgressLabelTests(unittest.TestCase):
     def test_text_labels_source_coverage(self) -> None:
