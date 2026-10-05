@@ -730,8 +730,10 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     return mask;
 }
 
-void func_001A4060(void) {
-    datFlagToElementIndex();
+extern s32 datFlagToElementIndex(s32);
+
+s32 func_001A4060(s32 flag) {
+    return datFlagToElementIndex(flag);
 }
 
 s32 btlCheckSpecialAbility(s32 object, s32 flag) {
