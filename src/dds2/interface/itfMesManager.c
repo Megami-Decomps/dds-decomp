@@ -1305,15 +1305,14 @@ void itfMesDestroyWindow(s32 window) {
 }
 
 /* Relocate packed payload words once, then set the resource's relocated marker. */
-/* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
+/* Semantic reference: Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c). */
 void itfMesRelocate(ItfMesRelocResource *resource)
 {
     u8 *payload;
     u8 *fixupTable;
     s32 fixupSize;
     if (resource->relocated == 0) {
-        // Keep the source's pointer-add expression: direct payload access changes ee-gcc codegen.
-        payload = (u8 *)resource + 0x20;
+        payload = resource->payload;
         fixupTable = (u8 *)resource + resource->fixupOffset;
         fixupSize = resource->fixupCount;
         sdfRelocatePackedResourceWords((int *)payload, (int)payload, fixupTable, fixupSize);

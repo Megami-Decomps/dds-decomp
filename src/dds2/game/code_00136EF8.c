@@ -243,6 +243,7 @@ typedef struct FldTaskInfo {
 } FldTaskInfo;
 
 typedef struct WorldObject WorldObject;
+typedef struct ActionObj ActionObj;
 
 typedef struct WorldListNode WorldListNode;
 
@@ -794,7 +795,7 @@ void fldResetTaskSlots(void) {
 }
 
 /* Append a display value and return its index; no capacity check is performed. */
-s32 fldPushDisplayValue(u32 value) {
+s32 fldPushDisplayValue(u32 value, ActionObj *unusedObject) {
     s32 index = D_004361B8;
     D_00444A30[index] = value;
     D_004361B8 = index + 1;

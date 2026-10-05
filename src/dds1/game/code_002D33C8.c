@@ -1347,7 +1347,7 @@ void func_002D5CD0(SdfListHead *drawList, SdfListHead *linkedList,
     packet = (SdfNode *)allocPacket(0x70);
     packet->unk8 = resourceIndexXor;
     packet->unk4 = (u32)sdfPatchPacketResourceReference;
-    drawPacket = (SdfPacket *)((u8 *)packet + 0x10);
+    drawPacket = (SdfPacket *)(packet + 1);
 
     sdfInitializeExtendedDrawPacket(
         drawPacket, destination->address, destination->width,

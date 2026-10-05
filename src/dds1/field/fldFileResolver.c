@@ -27,8 +27,8 @@ extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern void *dds3GetWorldSecondaryObject(void);
 extern void *dds3FindIndexedObjectChainNodeByName(void *world, s32 index, const char *name);
-extern void *dds3AdvanceWorldCounter(void);
-extern void *dds3SpawnInnerVecObj6(void *, u32 *, u32 *);
+extern u32 dds3AdvanceWorldCounter(void);
+extern void *dds3SpawnInnerVecObj6(s32, u32 *, u32 *);
 extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
 extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
 extern s32 fldGetRecordValueById(s32 id);

@@ -103,7 +103,7 @@ typedef struct MovPacStream {
     u8 pad00[0x18];
     s32 packetBytes;
     s32 blockBytes;
-    u8 pad20[0x20];
+    u8 scratchBuffer[0x20];
     MemBlock *payloadAllocation;
     u8 *blockMask;
     s32 blockIndex;
@@ -259,7 +259,7 @@ void func_002ED8D0(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
         pacWork->ringBuffer = (u8 *)(resource + 0x14000);
     }
     pacWork->scratchSize = 0x20;
-    pacWork->scratch = (u8 *)work + 0x20;
+    pacWork->scratch = pacWork->scratchBuffer;
     owner->state = 0;
     owner->deviceState = sdfDevCreateCallbackState((s32)name,
                                                     (void *)func_002ED230, (s32)owner);

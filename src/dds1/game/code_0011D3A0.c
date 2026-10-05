@@ -186,7 +186,7 @@ extern FieldPlayerSceneWork D_0032F1A0;
 extern s16 D_0032DDB0[];
 extern u8 D_0033F068[];
 extern u8 D_00342868[];
-extern void *dds3AdvanceWorldCounter(void);
+extern u32 dds3AdvanceWorldCounter(void);
 extern void *kwlnTaskGetTaskByName(const char *);
 extern void dds3WorkClear(void);
 extern char D_0039FBC0[]; /* "fldProcSequence" */
@@ -1877,7 +1877,7 @@ void fldResetPlayerSceneObjectState(void) {
 extern void dds3ClearObjectFlags(u32, s32);
 extern void dds3SetWorldPlayerObject(u64, u32);
 extern void func_00111E30(u32, s32, s32);
-extern u32 dds3SpawnCameraSlotObj5(void *, f32 *, f32 *);
+extern u32 dds3SpawnCameraSlotObj5(s32, f32 *, f32 *);
 extern s32 D_0032F1DC[];
 extern char D_0039FC50[]; /* "PLAYER_UNIT" */
 extern s32 D_003BAB50;
@@ -1914,7 +1914,7 @@ typedef struct FieldVec4 {
 extern FieldVec4 D_0039FC80;
 extern FieldVec4 D_0039FC90;
 extern char D_003BABC0[];
-extern u32 dds3CreateConfiguredCameraObject(void *, FieldVec4 *, FieldVec4 *, FieldVec4 *);
+extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, FieldVec4 *);
 extern void dds3SetCameraVector(u32, FieldVec4 *);
 extern void effObjSetInnerFloat(u32, f32);
 extern void dds3SetWorldCameraObject(u64, u32);

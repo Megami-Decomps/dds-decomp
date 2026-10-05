@@ -8,7 +8,7 @@ extern SdfQuad fldLocalMapFirstCameraVector;
 
 extern SdfQuad fldLocalMapSecondCameraVector;
 
-extern s32 dds3AdvanceWorldCounter(void);
+extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 

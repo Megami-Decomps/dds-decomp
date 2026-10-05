@@ -111,9 +111,10 @@ s32 dds3InvokeWorldCallbackSecond(WorldCallbackHolder *holder) {
     return result;
 }
 
-/* The stored sequence wraps at 16 bits even though its backing word is 32 bits. */
-void dds3AdvanceWorldCounter(void) {
+/* Advance and return the 16-bit sequence stored in a 32-bit backing word. */
+u32 dds3AdvanceWorldCounter(void) {
     dds3WorldCounter = (dds3WorldCounter + 1) & 0xffff;
+    return dds3WorldCounter;
 }
 
 void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, void *callbackTarget) {
