@@ -1580,7 +1580,76 @@ void func_001A9B80(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlExitWhenAudioAndTasksIdle);
+extern char D_00414F48[];
+extern char D_00414F68[];
+extern char D_00414F80[];
+extern char D_00414F98[];
+extern char D_00414FB0[];
+extern f32 D_0037F60C[];
+
+extern void itfMesDestroyWindowIfPresent(s32);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F48);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F68);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F80);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F98);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414FB0);
+
+s32 btlExitWhenAudioAndTasksIdle(void) {
+    if (btlRuntime == 0) {
+        btlBossDebugPrintf(D_00414F48);
+        return 0;
+    }
+    if (sndHasOccupiedNodeSlots() != 0) {
+        btlBossDebugPrintf(D_00414F68);
+        return -1;
+    }
+    if (btlCountRegisteredTasks() != 0) {
+        btlBossDebugPrintf(D_00414F80);
+        btlFlagTasksForUpdate();
+        return -1;
+    }
+    btlReleaseBossData();
+    btlClearTaskLists();
+    btlDestroyAllActionSeqs();
+    btlDestroyAllUnits();
+    btlClearPendingSoundList();
+    btlReleaseEventAssets();
+    btlGetCurrentSceneRecordValue();
+    btlFreeFieldBlocks();
+    btlStopRainSoundTransition();
+    btlClearTintAndEnableCamera();
+    fldDestroySceneTasksAndBuffers();
+    btlReleaseButtonTexture();
+    sndFreeBattleSoundEntries();
+    sndClearList();
+    brsTaskTryDestroy();
+    btlClearSoundAndModelResources();
+    btlDestroyDrawTaskAtPriorityWhenPresent();
+    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x4D4));
+    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x4D0));
+    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x4CC));
+    btlAdvanceTitleStateWithAudioCleanup();
+    kwlnCancelConfiguredFadeFrames();
+    evtDestroySelectionState();
+    effResetSlots();
+    evtSetSolarOverlayFullyTransparent();
+    itfMesClearFlags(1);
+    if ((*(u32 *)(btlRuntime + 0x21C) & 0x8000) != 0) {
+        *(u32 *)(btlRuntime + 0x21C) &= ~0x8000;
+        D_0037F60C[0] = 65536.0f;
+        btlBossDebugPrintf(D_00414F98);
+    }
+    sdfReleaseResourceAllocation(D_004366E0);
+    D_004366E0 = 0;
+    btlRuntime = 0;
+    btlBossDebugPrintf(D_00414FB0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9F30);
 
