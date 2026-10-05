@@ -639,7 +639,13 @@ u32 scrCountSlots(u8 *unit) {
     return occupiedCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", scrSetSlot);
+/* Store a new skill ID at the requested index and return the previous ID. */
+u16 scrSetSlot(u8 *unit, s32 slotIndex, u16 skillId) {
+    u16 previousSkillId = ((ScriptFlagWork *)unit)->slotIds[slotIndex];
+
+    ((ScriptFlagWork *)unit)->slotIds[slotIndex] = skillId;
+    return previousSkillId;
+}
 
 /* Clear the first exact-ID match and report whether a slot was found. */
 s32 scrRemoveSlot(u8 *unit, u16 skillId) {
