@@ -12,7 +12,9 @@ typedef struct SceneItem {
 typedef struct {
     u8 pad00[0x98];
     SceneItem **itemSlot; /* 0x98 */
-    u8 pad9C[0x14EC];
+    u8 pad9C[0x334];
+    s32 statGains[5];
+    u8 pad3E4[0x11A4];
     s32 displayState; /* 0x1588 */
 } TitleItemScene;
 
@@ -24,7 +26,7 @@ void kwlnItemUpdateDisplay(TitleItemScene *scene) {
     SceneItem *item = *scene->itemSlot;
     switch (scene->displayState) {
     case 4:
-        btlAddBaseStats((u8 *)scene + 0x3D0, item);
+        btlAddBaseStats(scene->statGains, item);
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 1:

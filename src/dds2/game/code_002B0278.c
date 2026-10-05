@@ -559,7 +559,7 @@ typedef struct MenuListDefaults {
 extern MenuListDefaults D_0042AF00;
 extern const MenuListDefaults D_0042AE18;
 extern u8 (*D_00435E64)[17];
-extern u8 D_00437C00[];
+extern char D_00437C00[];
 extern u8 brsGetLevelStepForValue(s32);
 extern s32 mnuGetEntryUseStatus(s32, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);

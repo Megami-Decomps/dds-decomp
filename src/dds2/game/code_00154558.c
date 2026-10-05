@@ -14,7 +14,8 @@ typedef struct FldWorkView {
     s32 stage;            /* 0x14 */
     u8 unk18[0x18];
     f32 focusPos[3];      /* 0x30 */
-    u8 unk3C[0x14];
+    u8 unk3C[4];
+    char requestedSceneName[0x10];
     s32 focusActive;      /* 0x50 */
     u8 unk54[0x10];
     f32 negatedAngle;     /* 0x64 */
@@ -725,7 +726,7 @@ s32 fldCmdSetRequestedSceneName(void) {
 
     name = scrReadStringParameter(0);
     fldAreaState[0x14] = 5;
-    strcpy((char *)fldAreaState + 0x40, name);
+    strcpy(((FldWorkView *)fldAreaState)->requestedSceneName, name);
     return 1;
 }
 

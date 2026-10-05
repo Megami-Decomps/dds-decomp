@@ -4,7 +4,6 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-extern u32 btlGetIndexListCount();
 
 extern char D_003BB8A0[];
 
@@ -30,7 +29,6 @@ extern s32 btlSetLinkedDefeatCameraPresetB();
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
-extern s32 btlGetIndexListEntry(void *, u32);
 
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
@@ -89,7 +87,7 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
         btlSetLinkedDefeatCameraPresetA((void *)command, (void *)command, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(command->task->targetList) == 1) {
-            void *target = (void *)btlGetIndexListEntry((void *)command->task->targetList, 0);
+            void *target = btlGetIndexListEntry(command->task->targetList, 0);
             btlFlagAllUnitDefeatCandidatesTask();
             func_0020B190((u8 *)command, target);
             command->state = 0;
@@ -491,8 +489,8 @@ s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command) {
     BtlTask *entry = command->task;
     BtlUnit *other;
     if (entry->unit->flags & 0x200) {
-        if (btlGetIndexListCount((void *)entry->targetList) == 1) {
-            other = (BtlUnit *)btlGetIndexListEntry((void *)entry->targetList, 0);
+        if (btlGetIndexListCount(entry->targetList) == 1) {
+            other = (BtlUnit *)btlGetIndexListEntry(entry->targetList, 0);
             if ((other->flags & 0x400) == 0) {
                 return 0;
             }
@@ -522,7 +520,7 @@ s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (btlGetIndexListCount((void *)command->task->targetList) == 1) {
+        if (btlGetIndexListCount(command->task->targetList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseLinkedActionPose(command);
         } else {

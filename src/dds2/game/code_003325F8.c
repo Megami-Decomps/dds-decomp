@@ -489,7 +489,7 @@ void sdfUpdateActiveResourceListScalars(SdfResourceList *list, s32 arg, f32 valu
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
         SdfAsset *asset = (SdfAsset *)list->items[itemIndex];
 
-        if (*((u8 *)asset + 0x18) != 0) {
+        if ((u8)asset->unk18 != 0) {
             func_0032C278((u32)asset, arg, value);
         }
     }

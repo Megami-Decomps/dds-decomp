@@ -297,7 +297,9 @@ typedef struct BrsUnitExperience {
 
 typedef struct BrsPartyUnit {
     u16 flags;              /* 0x00: bit 0 indicates an occupied party slot */
-    u8 pad02[0xC];
+    u8 pad02[2];
+    u16 unitId;             /* 0x04 */
+    u8 pad06[8];
     u16 statusFlags;        /* 0x0E: bit 0x4000 enables battle rewards */
     u32 totalExp;           /* 0x10 */
     u16 level;              /* 0x14 */
@@ -475,15 +477,6 @@ typedef struct BrsSkillPackageWork {
     u8 pad1578[0x18];
 } BrsSkillPackageWork;
 
-typedef struct BrsSelectedRow {
-    s32 unit;                 /* 0x00: pointer to a party unit */
-    u8 pad04[0x14];
-} BrsSelectedRow;            /* 0x18 */
-
-typedef struct BrsRowUnit {
-    u8 pad00[4];
-    u16 unitId;              /* 0x04 */
-} BrsRowUnit;
 
 /* Create the group and sprite backing the skill-package panel for the
  * selected reward row, then forward its unit's ID to the menu. */
@@ -501,8 +494,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
                              work->spriteArg0,
                              work->panelGroup);
     evtStageTestInit(0);
-    mnuForwardTableByte(((BrsRowUnit *)
-        (((BrsSelectedRow *)((u8 *)work + 0x2CC))[work->selectedRow].unit))->unitId);
+    mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
 
 void brsCloseSkillPackagePanel(s32 work) {
@@ -879,7 +871,6 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         s32 selectedRow = work->selectedRow;
         s32 window = (s32)work + 0x680;
         s32 page = work->primaryRewards.rows[selectedRow].values.experienceGain;
-        u8 *panelState = (u8 *)work + 0xC;
         s32 *selectedIndex = &work->selectedRow;
 
         mnuClearEntries((s32 *)window);
@@ -898,13 +889,12 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         brsSelectLevelBonusMode((s32)work->selectedRewardRow->unit,
                                 (s32)work);
         evtStageTestSelectEntryWithoutInitialValue(
-            ((BrsRowUnit *)work->selectedRewardRow->unit)->unitId, 0);
+            work->selectedRewardRow->unit->unitId, 0);
         evtStageTestQueueMotion(1, 0);
 
         if (*selectedIndex < work->primaryRewards.count) {
-            mnuForwardTableByte(((BrsRowUnit *)
-                ((BrsRewardRow *)(panelState + 0x2C0) + *selectedIndex)->unit)
-                    ->unitId);
+            mnuForwardTableByte(
+                work->primaryRewards.rows[*selectedIndex].unit->unitId);
         }
         func_002E8DD0(0x50001);
         sndStartTrackDefault(0x50001);

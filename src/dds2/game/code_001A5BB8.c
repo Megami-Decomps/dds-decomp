@@ -1961,10 +1961,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC0F8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC360);
 
 
-extern u32 btlGetIndexListCount(s32);
-extern u32 btlGetIndexListEntry(s32, s32);
 
-s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, s32 arg1) {
+s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1) {
     u32 count;
     u32 i;
     s32 cmd;
@@ -2008,7 +2006,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, s32 arg1) {
     }
     for (i = 0; i < count; i++) {
         if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
-             *(u16 *)(btlGetIndexListEntry(arg1, i) + 0x12E)) != 0) {
+             ((BtlUnit *)btlGetIndexListEntry(arg1, i))->conditionFlags) != 0) {
             return i;
         }
     }
@@ -2779,7 +2777,7 @@ typedef struct BtlTargetResult {
 
 s32 btlSumOtherTargetHitAmounts(u8 *action) {
     BtlTargetResult *result = *(BtlTargetResult **)(action + 0x88);
-    u32 count = btlGetIndexListCount(*(s32 *)(action + 0x60));
+    u32 count = btlGetIndexListCount(*(BtlIndexList **)(action + 0x60));
     u32 i;
     u32 j;
     s32 total = 0;
@@ -2796,8 +2794,8 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
         case 0x40000:
             break;
         default:
-            if (*(s32 *)(action + 0x18) !=
-                btlGetIndexListEntry(*(s32 *)(action + 0x60), i)) {
+            if (*(BtlUnit **)(action + 0x18) !=
+                btlGetIndexListEntry(*(BtlIndexList **)(action + 0x60), i)) {
                 for (j = 0; j < result->hitCount; j++) {
                     total += result->hits[j].amount;
                 }

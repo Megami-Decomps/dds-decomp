@@ -209,7 +209,7 @@ typedef struct PartyPanelSlot {
 
 typedef struct PartySkillSlots {
     u8 pad00[0x22];
-    u16 code[8]; /* 0x22: indexed equipped skill codes */
+    u16 code[8];
 } PartySkillSlots;
 
 typedef struct MenuItemCount {

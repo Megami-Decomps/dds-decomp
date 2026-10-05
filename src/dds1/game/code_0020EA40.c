@@ -4,7 +4,6 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 
-extern u32 btlGetIndexListCount();
 
 extern void btlBossDebugPrintf(const char *format, ...);
 

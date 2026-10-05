@@ -71,7 +71,9 @@ typedef struct MenuStaffNode MenuStaffNode;
 typedef struct MenuStaffList MenuStaffList;
 
 typedef struct MenuStaffContext {
-    u8 pad00[0x60];
+    u8 pad00[0x54];
+    s32 popupState;       /* 0x54 */
+    u8 pad58[8];
     s32 group;            /* 0x60 */
     s32 spriteArg0;       /* 0x64 */
     s32 spriteArg1;       /* 0x68 */

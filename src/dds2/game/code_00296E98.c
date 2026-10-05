@@ -85,7 +85,9 @@ typedef struct MenuPanelBlock {
 
 typedef struct BrsPartyUnit {
     u16 flags;              /* 0x00: bit 0 indicates an occupied party slot */
-    u8 pad02[0xC];
+    u8 pad02[2];
+    u16 unitId;             /* 0x04 */
+    u8 pad06[8];
     u16 statusFlags;        /* 0x0E: bit 0x4000 enables battle rewards */
     u32 totalExp;           /* 0x10 */
     u16 level;              /* 0x14 */
@@ -487,15 +489,6 @@ typedef struct BrsSkillPackageWork {
     u8 padB6E4[0x20];
 } BrsSkillPackageWork;
 
-typedef struct BrsSelectedRow {
-    s32 unit;                /* 0x00 */
-    u8 pad04[0x14];
-} BrsSelectedRow;            /* 0x18 */
-
-typedef struct BrsRowUnit {
-    u8 pad00[4];
-    u16 unitId;              /* 0x04 */
-} BrsRowUnit;
 
 /* Build the selected reward row's skill-package group and sprite, then
  * forward the selected unit ID to the menu. */
@@ -511,8 +504,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     work->spriteHandle =
         mnuCreateSpriteState(work->spriteArg0, work->spriteArg1, work->panelGroup);
     evtStageTestInit(0);
-    mnuForwardTableByte(((BrsRowUnit *)
-        (((BrsSelectedRow *)((u8 *)work + 0x2F0))[work->selectedRow].unit))->unitId);
+    mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
 
 extern void effDestroyResourceSlotSet(s32);

@@ -668,7 +668,7 @@ u8 func_003151D0(u16 profileId) {
 
 /* Read the threshold used by the profile-level check. */
 u16 prfGetRequiredProfileLevel(u16 profileId) {
-    return *(u16 *)((u8 *)D_00401326 + profileId * PRF_PROFILE_PARAM_BYTES);
+    return D_00401326[profileId * (PRF_PROFILE_PARAM_BYTES / sizeof(D_00401326[0]))];
 }
 
 /* Read a byte parameter from the unchecked profile row. */

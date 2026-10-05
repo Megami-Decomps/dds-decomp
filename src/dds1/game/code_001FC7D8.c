@@ -246,9 +246,7 @@ typedef struct BtlEffectCommandRecord {
 
 extern BtlCommandEffect D_00360468[];
 extern BtlEffectCommandRecord *datCommandRecords;
-extern u32 btlGetIndexListCount(s32);
-extern BtlUnit *btlGetIndexListEntry(s32, u32);
-extern s32 btlCheckCommandRequiredEntryMatches(s32, s32);
+extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
 s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
@@ -291,7 +289,7 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
 
         count = btlGetIndexListCount(task->targetList);
         for (i = 0; i < count; i++) {
-            targetSides |= btlGetIndexListEntry(task->targetList, i)->flags & 0x600;
+            targetSides |= ((BtlUnit *)btlGetIndexListEntry(task->targetList, i))->flags & 0x600;
         }
         if (ownerSide != targetSides && targetSides != 0) {
             effect = (task->unit->flags & 0x200) ? effect + 1 : effect - 1;

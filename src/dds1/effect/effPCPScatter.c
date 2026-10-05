@@ -1087,7 +1087,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     PcpScatterDraw *object;
     u32 drawWord;
 
-    particle = (PcpScatterParticle *)((u8 *)inst + 0x18C);
+    particle = (PcpScatterParticle *)(inst + 1);
     inst->params = *src;
     inst->color = EFF_SCATTER_NEUTRAL_COLOR;
     inst->scale = 1.0f;
@@ -1357,7 +1357,7 @@ void *effScatterCreateDampedRing(src, resource)
     u32 drawWord;
     s32 delayLimit;
 
-    particle = (PcpScatterParticle *)((u8 *)inst + 0x194);
+    particle = (PcpScatterParticle *)(inst + 1);
     inst->params = *src;
     inst->color = EFF_SCATTER_NEUTRAL_COLOR;
     inst->scale = 1.0f;
@@ -1646,7 +1646,7 @@ void *effScatterCreateTwoColorRing(src, resource)
     u32 drawWord;
     s32 delayLimit;
 
-    particle = (PcpScatterParticle *)((u8 *)inst + 0x19C);
+    particle = (PcpScatterParticle *)(inst + 1);
     inst->params = *src;
     inst->color = EFF_SCATTER_NEUTRAL_COLOR;
     inst->scale = 1.0f;
@@ -1994,7 +1994,7 @@ void *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterDraw *object;
     u32 drawWord;
 
-    particle = (PcpScatterPlainParticle *)((u8 *)inst + 0x13C);
+    particle = (PcpScatterPlainParticle *)(inst + 1);
     inst->params = *src;
     inst->color = EFF_SCATTER_NEUTRAL_COLOR;
     inst->scale = 1.0f;

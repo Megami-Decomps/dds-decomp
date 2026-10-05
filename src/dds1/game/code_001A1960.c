@@ -2,6 +2,9 @@
 #include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "sdf.h"
+#include "btl_task.h"
+
+extern void sdfReleaseChipBlock(void *block);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -564,7 +567,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A30F8);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A3360);
 
-s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, s32 arg1) {
+s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1) {
     u32 count;
     u32 i;
     s32 cmd;
@@ -608,7 +611,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, s32 arg1) {
     }
     for (i = 0; i < count; i++) {
         if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
-             *(u16 *)(btlGetIndexListEntry(arg1, i) + 0x12E)) != 0) {
+             ((UiObject *)btlGetIndexListEntry(arg1, i))->statusFlags) != 0) {
             return i;
         }
     }
@@ -1220,7 +1223,7 @@ typedef struct BtlTargetResult {
 
 s32 btlSumOtherTargetHitAmounts(u8 *action) {
     BtlTargetResult *result = *(BtlTargetResult **)(action + 0x80);
-    u32 count = btlGetIndexListCount(*(s32 *)(action + 0x60));
+    u32 count = btlGetIndexListCount(*(BtlIndexList **)(action + 0x60));
     u32 i;
     u32 j;
     s32 total = 0;
@@ -1237,8 +1240,8 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
         case 0x40000:
             break;
         default:
-            if (*(s32 *)(action + 0x18) !=
-                btlGetIndexListEntry(*(s32 *)(action + 0x60), i)) {
+            if (*(UiObject **)(action + 0x18) !=
+                btlGetIndexListEntry(*(BtlIndexList **)(action + 0x60), i)) {
                 for (j = 0; j < result->hitCount; j++) {
                     total += result->hits[j].amount;
                 }
@@ -4287,21 +4290,21 @@ void btlDrawCenteredPanelSegments(s32 width) {
 
 s32 fldStepSceneStateMachine(s64 handle) {
     BattleController *work = (BattleController *)btlGetRuntime();
-    s32 *state;
+    SceneAiWork *state;
     s32 mode;
     s32 i;
     s32 count;
-    s32 owner;
+    BtlIndexList *owner;
     if (work->flags & 0x04000000) {
         return 0;
     }
-    state = (s32 *)kwlnTaskGetUserValue(handle);
-    switch (*state) {
+    state = (SceneAiWork *)kwlnTaskGetUserValue(handle);
+    switch (state->state) {
     case 1:
-        *state = 2;
+        state->state = 2;
         break;
     case 2:
-        owner = state[3];
+        owner = state->listA;
         mode = 1;
         switch (work->mode) {
         case 0x108:
@@ -4312,7 +4315,7 @@ s32 fldStepSceneStateMachine(s64 handle) {
         case 0x10E:
             count = btlGetIndexListCount(owner);
             for (i = 0; i < count; i++) {
-                if (*(u32 *)((u8 *)btlGetIndexListEntry(state[3], i) + 0x110) & 0x200) {
+                if (((UiObject *)btlGetIndexListEntry(state->listA, i))->flags & 0x200) {
                     break;
                 }
             }
@@ -4336,17 +4339,17 @@ s32 fldStepSceneStateMachine(s64 handle) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C13E8);
 
-void fldReleaseSceneSpriteWork(u32 arg0) {
-    btlFreeIndexList(*(u32 *)((s32)arg0 + 0x10));
-    btlFreeIndexList(*(u32 *)((s32)arg0 + 0xc));
-    sdfReleaseChipBlock(arg0);
+void fldReleaseSceneSpriteWork(SceneAiWork *work) {
+    btlFreeIndexList(work->listB);
+    btlFreeIndexList(work->listA);
+    sdfReleaseChipBlock(work);
 }
 
 void fldReleaseSceneSprite(s64 arg0) {
-    u32 temp_v0;
+    SceneAiWork *temp_v0;
     s32 temp_v1;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = (SceneAiWork *)kwlnTaskGetUserValue(arg0);
     fldReleaseSceneSpriteWork(temp_v0);
     temp_v1 = btlGetRuntime();
     *(u32 *)(temp_v1 + 0x2ac) = 0;

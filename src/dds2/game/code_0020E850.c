@@ -413,7 +413,7 @@ typedef struct BattleActionLinkState {
     u8 pad28[0x1C];
     s32 resourceNodeIndex;
     u8 pad48[0x18];
-    s32 actorIndices;
+    BtlIndexList *actorIndices;
     u8 pad64[0x24];
     BtlOperandGroup *groups;
 } BattleActionLinkState;
@@ -433,9 +433,7 @@ typedef struct BtlEffectCommandRecord {
 
 extern BtlCommandEffect D_003BEB68[];
 extern BtlEffectCommandRecord *datCommandRecords;
-extern u32 btlGetIndexListCount(s32);
-extern BtlUnit *btlGetIndexListEntry(s32, u32);
-extern s32 btlCheckCommandRequiredEntryMatches(s32, s32);
+extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
 extern s32 effOffsetIfOwnerFlagClear(BtlEffActor *, s32);
 
 s16 btlGetCommandEffectId(BattleActionLinkState *link, s32 command) {
@@ -492,7 +490,7 @@ s16 btlGetCommandEffectId(BattleActionLinkState *link, s32 command) {
 
         count = btlGetIndexListCount(link->actorIndices);
         for (i = 0; i < count; i++) {
-            targetSides |= btlGetIndexListEntry(link->actorIndices, i)->flags & 0x600;
+            targetSides |= ((BtlUnit *)btlGetIndexListEntry(link->actorIndices, i))->flags & 0x600;
         }
         if (ownerSide != targetSides && targetSides != 0) {
             effect = (link->unit->flags & 0x200) ? effect + 1 : effect - 1;

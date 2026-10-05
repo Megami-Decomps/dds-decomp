@@ -83,7 +83,9 @@ typedef struct StaffImageChoices {
 } StaffImageChoices;
 
 typedef struct StaffImageContext {
-    u8 pad00[0x68];
+    u8 pad00[0x54];
+    s32 popupState;
+    u8 pad58[0x10];
     s32 spriteArg1; /* 0x68 */
     u8 pad6C[8];
     s32 spriteArg0; /* 0x74 */
@@ -204,7 +206,7 @@ s32 mnuExitStaffImageAndSelectionLabel(s32 task) {
 
 s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue((KwlnTask *)task);
-    s32 *popup = (s32 *)((u8 *)context + 0x54);
+    s32 *popup = &context->popupState;
     StaffImageChoices *menu = context->menu;
     s32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 state;
