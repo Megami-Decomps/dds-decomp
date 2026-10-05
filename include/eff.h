@@ -315,16 +315,91 @@ typedef struct EffRecordPool {
     s32 recordBase;
     s32 auxRecordBase;
     u32 resource;
-    u32 buffer;
+    SdfMemBlock *buffer;
 } EffRecordPool; /* 0x70 */
+
+typedef struct EffRingParticle {
+    u32 color;
+    s32 age;
+    f32 angle;
+    f32 basisFactor;
+} EffRingParticle;
+
+/* The ring allocator copies 0x58 bytes of parameters into this 0x80-byte
+ * owner. Its update passes this same work to the phase, color and fan helpers. */
+typedef struct EffRingWork {
+    f32 origin[4];
+    u32 count;
+    u8 respawn;
+    u8 pad15[3];
+    s32 duration;
+    s32 spread;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 firstColor;
+    u32 secondColor;
+    f32 param30;
+    f32 param34;
+    f32 param38;
+    f32 param3C;
+    f32 param40;
+    f32 param44;
+    f32 param48;
+    f32 param4C;
+    f32 increment;
+    u32 drawMode;
+    EffRingParticle *vertices;
+    u32 updateCount;
+    u32 color;
+    f32 scale;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    SdfMemBlock *allocationHandle;
+    EffRecordPool *recordPool;
+} EffRingWork;
+
+typedef char EffRingParticleSizeCheck[sizeof(EffRingParticle) == 0x10 ? 1 : -1];
+typedef char EffRingWorkSizeCheck[sizeof(EffRingWork) == 0x80 ? 1 : -1];
+
+typedef struct PcpFlashPulseParticle {
+    u32 color;
+    s32 age;
+    f32 scale;
+    u8 pad0C[4];
+} PcpFlashPulseParticle;
+
+/* effFlashRecordCreate copies the 0x30-byte parameter prefix, then places
+ * these 0x10-byte particles immediately after the 0x48-byte work. */
+typedef struct PcpFlashTrianglePulseWork {
+    f32 origin[3];
+    u8 pad0C[4];
+    s32 particleCount;
+    u8 restartRandomly;
+    u8 pad15[3];
+    s32 lifetime;
+    s32 scaleRampTime;
+    u32 colorA;
+    u32 colorB;
+    f32 maxScale;
+    u32 drawMode;
+    PcpFlashPulseParticle *parts;
+    s32 updateCount;
+    u32 tintColor;
+    f32 renderScale;
+    SdfMemBlock *allocationHandle;
+    EffRecordPool *resourceHandle;
+} PcpFlashTrianglePulseWork;
+
+typedef char PcpFlashPulseParticleSizeCheck[sizeof(PcpFlashPulseParticle) == 0x10 ? 1 : -1];
+typedef char PcpFlashTrianglePulseWorkSizeCheck[sizeof(PcpFlashTrianglePulseWork) == 0x48 ? 1 : -1];
 
 /* Shared scatter texture reference, created and released independently of pools. */
 typedef struct PcpScatterRes {
     u32 textureHandle;
     s32 refCount;
 } PcpScatterRes; /* 0x08 */
-
-struct SdfMemoryBlock;
 
 /* Appended after the two record arrays; resource helpers own this same control block. */
 typedef struct PcpScatterPool {
@@ -336,7 +411,7 @@ typedef struct PcpScatterPool {
     s32 recordBase;
     s32 auxRecordBase;
     u32 drawAsset;
-    struct SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     PcpScatterRes *sharedResource;
 } PcpScatterPool; /* 0x34 */
 

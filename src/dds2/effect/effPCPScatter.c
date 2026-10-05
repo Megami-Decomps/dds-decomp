@@ -34,7 +34,7 @@
 
 extern void sdfComposeVuMatrixFromRegisters(void);
 
-extern u64 effParamTableGetBlock(u64, u64);
+extern void *effParamTableGetBlock(void *, s32);
 
 extern u32 effPcpScatterResAddRef(u32);
 
@@ -51,7 +51,6 @@ extern s32 effGetScatterNarrowBlock(u32 object, s32 index);
 
 
 /* Ownership handles refer to SDF allocation nodes, not their retained payloads. */
-typedef struct SdfMemoryBlock SdfMemoryBlock;
 
 
 
@@ -88,7 +87,7 @@ struct PcpScatterDraw {
     u32 *vertexColors;
     u32 *colors;
     u32 asset;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     PcpScatterRes *sharedResource;
 }; /* 0x80 */
 
@@ -253,10 +252,10 @@ struct PcpScatterRadialWork {
     f32 scale;
     u32 color;
     PcpScatterPool *childWork;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 duplicateGroupCount;
     u32 *duplicatedHandles;
-    SdfMemoryBlock *duplicateAllocation;
+    SdfMemBlock *duplicateAllocation;
 };
 
 typedef struct {
@@ -304,10 +303,10 @@ struct PcpScatterSpinWork {
     f32 scale;
     u32 color;
     PcpScatterPool *childWork;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 duplicateGroupCount;
     u32 *duplicatedHandles;
-    SdfMemoryBlock *duplicateAllocation;
+    SdfMemBlock *duplicateAllocation;
 };
 
 typedef struct {
@@ -350,10 +349,10 @@ struct PcpScatterRibbonWork {
     f32 scale;
     u32 color;
     PcpScatterPool *childWork;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 duplicateGroupCount;
     u32 *duplicatedHandles;
-    SdfMemoryBlock *duplicateAllocation;
+    SdfMemBlock *duplicateAllocation;
 };
 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
@@ -369,10 +368,10 @@ extern u32 effParamWorkDuplicate(u32 param);
 
 extern void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *src);
 
-extern SdfMemoryBlock *sdfAllocGeneralBlock(u32 size);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
-extern void *sdfResourceRetainAddress(SdfMemoryBlock *block);
-extern void sdfReleaseResourceAllocation(SdfMemoryBlock *block);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *block);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *block);
 
 extern void *memset(void *dst, s32 value, u32 size);
 
@@ -388,7 +387,7 @@ typedef struct EffPacketParams {
     u32 *texcoords;
     u32 *extraTexcoords;
     u32 *colors;
-    void *(*allocate)(s32);
+    s32 (*allocate)(s32);
     f32 depth;
 } EffPacketParams;
 
@@ -401,7 +400,7 @@ extern EffPacketParams D_00452020[];
 extern u32 D_003B13A0[];
 extern u32 D_003B13F0[];
 extern EffDrawSurface *D_003B14B0[];
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
 extern void sdfConsAppendVuPacket(void *, s32);
@@ -423,13 +422,13 @@ extern PcpScatterRadialWork *func_001784F8();
 
 
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
-void effScatterCreateFromParameterTriplet(u64 parameterTable) {
-    u64 params;
-    u64 resource;
-    u64 options;
+void effScatterCreateFromParameterTriplet(void *parameterTable) {
+    void *params;
+    u32 resource;
+    void *options;
 
     params = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
-    resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
+    resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     options = effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK);
     func_001784F8(params, resource, options);
 }
@@ -441,7 +440,7 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
 {
     PcpScatterRadialWork *work;
     u32 count;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 *handles;
     u32 i;
 
@@ -454,7 +453,7 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = sdfResourceRetainAddress(allocation);
+        handles = (u32 *)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -535,14 +534,14 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
 {
     PcpScatterSpinWork *work;
     PcpScatterSpinParticle *particle;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 *handles;
     u32 count;
     u32 i;
     s32 delaySpread;
 
     allocation = sdfAllocGeneralBlock(sizeof(PcpScatterSpinWork) + params->particleCount * sizeof(PcpScatterSpinParticle));
-    work = sdfResourceRetainAddress(allocation);
+    work = (PcpScatterSpinWork *)sdfResourceRetainAddress(allocation);
     work->particles = (PcpScatterSpinParticle *)(work + 1);
     work->params = *params;
     work->color = EFF_SCATTER_NEUTRAL_COLOR;
@@ -565,7 +564,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = sdfResourceRetainAddress(allocation);
+        handles = (u32 *)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -587,13 +586,13 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
 }
 
 /* Create spin work from three parameter-table blocks, retaining native local values. */
-void effScatterCreateSpinFromTable(u64 parameterTable) {
-    u64 params;
-    u64 resource;
-    u64 options;
+void effScatterCreateSpinFromTable(void *parameterTable) {
+    void *params;
+    u32 resource;
+    void *options;
 
     params = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
-    resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
+    resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     options = effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK);
     effScatterCreateSpinWork(params, resource, options);
 }
@@ -606,7 +605,7 @@ PcpScatterSpinWork *effScatterCloneSpinWork(source)
 {
     PcpScatterSpinWork *work;
     u32 count;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 *handles;
     u32 i;
 
@@ -619,7 +618,7 @@ PcpScatterSpinWork *effScatterCloneSpinWork(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = sdfResourceRetainAddress(allocation);
+        handles = (u32 *)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -699,14 +698,14 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
 {
     PcpScatterRibbonWork *work;
     PcpScatterRibbonParticle *particle;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 *handles;
     u32 count;
     u32 i;
     s32 delaySpread;
 
     allocation = sdfAllocGeneralBlock(sizeof(PcpScatterRibbonWork) + params->particleCount * sizeof(PcpScatterRibbonParticle));
-    work = sdfResourceRetainAddress(allocation);
+    work = (PcpScatterRibbonWork *)sdfResourceRetainAddress(allocation);
     work->particles = (PcpScatterRibbonParticle *)(work + 1);
     work->params = *params;
     work->color = EFF_SCATTER_NEUTRAL_COLOR;
@@ -729,7 +728,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = sdfResourceRetainAddress(allocation);
+        handles = (u32 *)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -751,13 +750,13 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
 }
 
 /* Create ribbon work from the parameter, resource and child-work blocks. */
-void effScatterCreateRibbonFromTable(u64 parameterTable) {
-    u64 params;
-    u64 resource;
-    u64 options;
+void effScatterCreateRibbonFromTable(void *parameterTable) {
+    void *params;
+    u32 resource;
+    void *options;
 
     params = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
-    resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
+    resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     options = effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK);
     effScatterCreateRibbonWork(params, resource, options);
 }
@@ -770,7 +769,7 @@ PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
 {
     PcpScatterRibbonWork *work;
     u32 count;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 *handles;
     u32 i;
 
@@ -786,7 +785,7 @@ PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = sdfResourceRetainAddress(allocation);
+        handles = (u32 *)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -860,7 +859,7 @@ void func_0017A8B8(void) {
  * Signed group arithmetic and allocation sizes are deliberately not validated here. */
 PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     PcpScatterPool *pool;
-    SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     u32 *recordBlock;
     s32 slotCount;
     s32 recordWords;
@@ -872,7 +871,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     auxWords = slotCount * EFF_SCATTER_POOL_AUX_WORDS_PER_SLOT;
     allocationBytes = (recordWords + auxWords) * EFF_SCATTER_WORD_BYTES + EFF_SCATTER_POOL_CONTROL_BYTES;
     allocation = sdfAllocGeneralBlock(allocationBytes);
-    recordBlock = sdfResourceRetainAddress(allocation);
+    recordBlock = (u32 *)sdfResourceRetainAddress(allocation);
     memset(recordBlock, 0, allocationBytes);
     pool = (PcpScatterPool *)(recordBlock + (recordWords + auxWords));
     pool->recordBase = (s32)recordBlock;
@@ -902,7 +901,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *pool) {
 /* Submit six-vertex scatter groups using the optional shared texture owner. */
 void effPcpScatterDrawPool(PcpScatterPool *pool) {
     f32 matrix[16];
-    void *packet = sdfAllocPacketAligned(0x20);
+    void *packet = (void *)sdfAllocPacketAligned(0x20);
     s32 remainingVertices;
     EffDrawSurface *surface;
 
@@ -1074,7 +1073,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     u32 resource;
 
 {
-    SdfMemoryBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x18C);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x18C);
     PcpScatterInstance *inst = (PcpScatterInstance *)sdfResourceRetainAddress(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
@@ -1110,9 +1109,9 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
 }
 
 /* Return ring work created from the first two parameter-table blocks. */
-PcpScatterInstance *effScatterCreateRingFromTable(u64 parameterTable) {
-    u64 particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
-    u64 resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
+PcpScatterInstance *effScatterCreateRingFromTable(void *parameterTable) {
+    void *particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
+    u32 resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
 
     return effPcpScatterCreateParticleInstance(particleParams, resource);
 }
@@ -1129,7 +1128,7 @@ PcpScatterInstance *effScatterCloneWithSharedObject(PcpScatterInstance *work) {
 /* Release the drawable before the raw-word SDF allocation handle. */
 void effScatterReleaseObjectAndBuffer(PcpScatterInstance *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemoryBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
 }
 
 
@@ -1344,7 +1343,7 @@ void *effScatterCreateDampedRing(src, resource)
     u32 resource;
 
 {
-    SdfMemoryBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x194);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x194);
     PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfResourceRetainAddress(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
@@ -1384,12 +1383,12 @@ void *effScatterCreateDampedRing(src, resource)
 }
 
 /* Create radius-damped ring work from its parameter and resource table blocks. */
-void effScatterSpawnFromParameterPair(u64 parameterTable) {
-    u64 particleParams;
-    u64 resource;
+void effScatterSpawnFromParameterPair(void *parameterTable) {
+    void *particleParams;
+    u32 resource;
 
     particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
-    resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
+    resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     effScatterCreateDampedRing(particleParams, resource);
 }
 
@@ -1406,7 +1405,7 @@ PcpScatterInstanceB *effScatterCloneWithSharedResource(PcpScatterInstanceB *work
 /* Release the radius-damped drawable before its owning allocation node. */
 void effScatterReleaseInstanceResources(PcpScatterInstanceB *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemoryBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
 }
 
 
@@ -1636,7 +1635,7 @@ void *effScatterCreateTwoColorRing(src, resource)
     u32 resource;
 
 {
-    SdfMemoryBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x19C);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x19C);
     PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
@@ -1676,12 +1675,12 @@ void *effScatterCreateTwoColorRing(src, resource)
 }
 
 /* Create two-color ring work from its parameter and resource table blocks. */
-void effScatterCreateFromParameterTable(u64 parameterTable) {
-    u64 particleParams;
-    u64 resource;
+void effScatterCreateFromParameterTable(void *parameterTable) {
+    void *particleParams;
+    u32 resource;
 
     particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
-    resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
+    resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     effScatterCreateTwoColorRing(particleParams, resource);
 }
 
@@ -1698,7 +1697,7 @@ PcpScatterInstanceC *effCreateScatterChildSharingParentResource(PcpScatterInstan
 /* Release the two-color drawable before its owning allocation node. */
 void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemoryBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
 }
 
 
@@ -1986,7 +1985,7 @@ void *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
-    SdfMemoryBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x13C);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x13C);
     PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfResourceRetainAddress(allocation);
     PcpScatterPlainParticle *particle;
     u32 delayModulus;
@@ -2022,12 +2021,12 @@ void *effPcpScatterCreatePlainInstance(src, resource)
 }
 
 /* Create flat-ring work from its parameter and resource table blocks. */
-void effScatterCreatePlainRingFromTable(u64 parameterTable) {
-    u64 particleParams;
-    u64 resource;
+void effScatterCreatePlainRingFromTable(void *parameterTable) {
+    void *particleParams;
+    u32 resource;
 
     particleParams = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
-    resource = effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
+    resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     effPcpScatterCreatePlainInstance(particleParams, resource);
 }
 
@@ -2044,7 +2043,7 @@ PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstan
 /* Release the flat-ring drawable before its owning allocation node. */
 void effReleaseScatterWorkResources(PcpScatterPlainInstance *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemoryBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017D138);

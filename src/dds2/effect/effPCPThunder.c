@@ -4,13 +4,13 @@
 
 /* Packed effect parameter-set accessor shared with the effect constructors. */
 extern void *effParamTableGetBlock(void *data, s32 index);
-extern void effCreateThunderCellSystemWork(void *work);
+extern void *effCreateThunderCellSystemWork(void *work);
 
 extern void parReleaseCellSystem(u32 handle);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
-extern void sdfReleaseResourceAllocation(u32 handle);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
@@ -71,7 +71,7 @@ typedef struct {
     f32 baseRadiusScale; /* 0x54 retained for absolute scale callbacks */
     f32 baseHeightScale; /* 0x58 retained for absolute scale callbacks */
     void *cellSystem;   /* 0x5C */
-    u32 allocationHandle; /* 0x60 */
+    SdfMemBlock *allocationHandle; /* 0x60: allocation descriptor */
 } EffThunderVectorWork; /* 0x64 */
 
 /* Delay and active countdowns, followed by an alpha fade of the sampled color. */
@@ -144,8 +144,9 @@ u32 func_0016B198(u32 value) {
     return value;
 }
 
-extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
+/* The descriptor owns the allocation; retention returns its 32-bit address. */
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_00164C68(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
@@ -154,20 +155,11 @@ extern void parCellInit(void *system, s32 index);
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 
-/* Particle system as far as the cell colors are concerned. */
-typedef struct {
-    u128 *history;      /* 0x00 first vertex quadword */
-    void *vertices;
-    s32 vertexCount;
-    s32 unk0C;
-    u32 color;          /* 0x10 */
-} EffThunderParCell; /* 0x14 */
-
 typedef struct {
     u8 pad00[8];
     s32 vertexCount;    /* 0x08 five vertices per group */
     u8 pad0C[8];
-    EffThunderParCell *cells; /* 0x14 */
+    ParCell *cells; /* 0x14 */
 } EffThunderParSystem;
 
 /* Resample timing, normalize X/Z before assigning Y, then sample the axis.
@@ -217,7 +209,7 @@ void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
     s32 cellCount = work->head.cellCount;
     u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
-    EffThunderParCell *renderCells = renderSystem->cells;
+    ParCell *renderCells = renderSystem->cells;
     u32 *renderColor;
 
     if (cellCount > 0) {
@@ -241,7 +233,7 @@ void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
             *renderColor = effMultiplyPackedColors(cell->color, tintColor);
             i++;
             cell++;
-            renderColor = (u32 *)((u8 *)renderColor + sizeof(EffThunderParCell));
+            renderColor = (u32 *)((u8 *)renderColor + sizeof(ParCell));
         } while (i < cellCount);
     }
     parPrependCellNode(work->cellSystem);
@@ -250,7 +242,7 @@ void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
 /* Allocate one work followed by its vector cells and retain unscaled dimensions.
    Only cell countdowns/color are initialized; geometry is sampled on the first restart. */
 EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
-    u32 allocationHandle = sdfAllocGeneralBlock(parameters->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(parameters->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
     EffThunderVectorWork *work = (EffThunderVectorWork *)sdfResourceRetainAddress(allocationHandle);
     u32 i;
 
@@ -358,7 +350,7 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
     s32 cellCount = work->head.cellCount;
     u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
-    EffThunderParCell *renderCells = renderSystem->cells;
+    ParCell *renderCells = renderSystem->cells;
     u32 *renderColor;
 
     if (cellCount > 0) {
@@ -382,7 +374,7 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
             *renderColor = effMultiplyPackedColors(cell->color, tintColor);
             i++;
             cell++;
-            renderColor = (u32 *)((u8 *)renderColor + sizeof(EffThunderParCell));
+            renderColor = (u32 *)((u8 *)renderColor + sizeof(ParCell));
         } while (i < cellCount);
     }
     parPrependCellNode(work->cellSystem);
@@ -426,7 +418,7 @@ typedef struct {
     EffThunderSparkParams head;
     EffThunderSpark *sparks; /* 0xA4 */
     u32 tintColor;      /* 0xA8 multiplies the faded spark color */
-    u32 allocationHandle; /* 0xAC */
+    SdfMemBlock *allocationHandle; /* 0xAC */
 } EffThunderSparkWork; /* 0xB0 */
 
 extern void effThunderSparkInit(EffThunderSparkWork *work, s32 index);
@@ -434,7 +426,7 @@ extern void effThunderSparkInit(EffThunderSparkWork *work, s32 index);
 /* Allocate spark state after the work and a separate one-cell system per spark.
    Clamp delay spread only in the copied head; sample motion before initial age. */
 EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
-    u32 allocationHandle = sdfAllocGeneralBlock(parameters->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(parameters->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
     EffThunderSparkWork *work = (EffThunderSparkWork *)sdfResourceRetainAddress(allocationHandle);
     s32 delaySpread;
     u32 sparkIndex;
@@ -534,7 +526,7 @@ typedef struct {
         void *secondarySystem; /* dual-system variant */
     } state;                 /* 0x5C */
     void *system;            /* 0x60 */
-    u32 allocationHandle;    /* 0x64 */
+    SdfMemBlock *allocationHandle;    /* 0x64 */
 } EffThunderFragmentWork; /* 0x68 */
 
 extern void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index);
@@ -542,7 +534,7 @@ extern void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index);
 /* Create the single-system fragment work and seed every fragment's timing/color.
    The native history-count expression and unchecked ranges are retained. */
 EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameters) {
-    u32 allocationHandle = sdfAllocGeneralBlock(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfResourceRetainAddress(allocationHandle);
     u32 i;
 
@@ -623,7 +615,7 @@ extern void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index);
 /* Allocate dual-system fragment work, creating the secondary system before the primary.
    Both systems share one fragment-state array; keep native dispatch/allocation order. */
 EffThunderFragmentWork *func_0016DB28(EffThunderFragmentParams *parameters) {
-    u32 allocationHandle = sdfAllocGeneralBlock(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfResourceRetainAddress(allocationHandle);
     u32 i;
 
@@ -687,10 +679,10 @@ void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
     EffThunderParSystem *secondarySystem = work->state.secondarySystem;
     s32 fragmentCount = work->head.fragmentCount;
     EffThunderParSystem *primarySystem = work->system;
-    EffThunderParCell *primaryCells = primarySystem->cells;
+    ParCell *primaryCells = primarySystem->cells;
     u32 tintColor = work->color;
     EffThunderFrag *fragment = work->fragments;
-    EffThunderParCell *secondaryCells = secondarySystem->cells;
+    ParCell *secondaryCells = secondarySystem->cells;
     s32 packedColor;
 
     if (fragmentCount > 0) {
@@ -747,7 +739,7 @@ typedef struct {
     EffThunderCell *cells;   /* 0x48 */
     u32 unk4C;               /* 0x4C: settable, otherwise unobserved */
     void *system;            /* 0x50 */
-    u32 allocationHandle;    /* 0x54 */
+    SdfMemBlock *allocationHandle;    /* 0x54 */
 } EffThunderCellWork; /* 0x58 */
 
 extern void effThunderRandomizeCell(EffThunderCellWork *work, s32 index);
@@ -755,7 +747,7 @@ extern void effThunderRandomizeCell(EffThunderCellWork *work, s32 index);
 /* Allocate cell states after the work, configure its system and sample directions/timing.
    The opaque settable word is not initialized here; no new default or range checks are added. */
 EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *parameters) {
-    u32 allocationHandle = sdfAllocGeneralBlock(parameters->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderCellWork));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(parameters->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderCellWork));
     EffThunderCellWork *work = (EffThunderCellWork *)sdfResourceRetainAddress(allocationHandle);
     u32 i;
 
@@ -813,7 +805,7 @@ void effThunderCellUpdate(EffThunderCellWork *work) {
     s32 i = 0;
     s32 cellCount = work->head.cellCount;
     EffThunderCell *cell = work->cells;
-    EffThunderParCell *renderCells = ((EffThunderParSystem *)work->system)->cells;
+    ParCell *renderCells = ((EffThunderParSystem *)work->system)->cells;
 
     if (cellCount > 0) {
         do {
@@ -917,7 +909,7 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
     f32 (*points)[4] = group->head.points;
     EffThunderFragmentWork *work;
     EffThunderFragmentWork *previous;
-    EffThunderParCell *cell;
+    ParCell *cell;
 
     for (; i < segmentCount; i++) {
         work = group->handles[i];
@@ -953,7 +945,7 @@ typedef struct EffFragmentResources {
     u128 *points;
     u32 *colors;
     u32 resourceHandle;
-    u32 allocation;
+    SdfMemBlock *allocation;
     u128 *endPoints;
     u32 *endColors;
 } EffFragmentResources;
@@ -1001,11 +993,9 @@ typedef struct EffGroup {
     EffPCPEventOwner *owner;
     u8 hasHandle58;
     u8 pad5D[3];
-    u32 allocation;
+    SdfMemBlock *allocation;
 } EffGroup;
 
-extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
 extern u32 func_00197D38();
 extern EffFragmentResources *func_00171598(s32, s32);
 extern void func_001717E8(EffFragmentResources *, u32 *);
@@ -1016,7 +1006,7 @@ EffGroup *src;
 void *eventParams;
 {
     u32 count = src->params.count;
-    u32 allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
     EffGroup *work = (EffGroup *)sdfResourceRetainAddress(allocation);
     EffGroupSlot *slot = (EffGroupSlot *)(work + 1);
     EffPCPEventPlace place;
@@ -1084,7 +1074,7 @@ void effApplyParamBlockPair(void *table) {
 
 EffGroup *func_0016FB18(EffGroup *src) {
     u32 count = src->params.count;
-    u32 allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
     EffGroup *work = (EffGroup *)sdfResourceRetainAddress(allocation);
     EffGroupSlot *slot = (EffGroupSlot *)(work + 1);
     EffPCPEventPlace place;
@@ -1144,7 +1134,6 @@ EffGroup *func_0016FB18(EffGroup *src) {
 extern void effReleaseEffectResources(EffFragmentResources *work);
 extern void effEventReleaseNode(void *node);
 extern void func_00197D50(u32 handle);
-extern void sdfReleaseResourceAllocation(u32 allocation);
 
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
 void effReleaseGroupSlotsAndResources(EffGroup *group) {
@@ -1343,51 +1332,27 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     surface->submit(surface, list);
 }
 
-typedef struct EffFlashRecordPart {
-    u32 unk00;
-    s32 age; /* 0x04 */
-    u8 pad08[8];
-} EffFlashRecordPart; /* 0x10 */
-
-typedef struct EffFlashRecordHandle {
-    u8 pad00[0x50];
-    u32 unk50;
-} EffFlashRecordHandle;
-
-typedef struct EffFlashRecordWork {
-    u8 pad00[0x10];
-    u32 particleCount;    /* 0x10 */
-    u8 pad14[0x18];
-    u32 unk2C;            /* 0x2C */
-    EffFlashRecordPart *parts; /* 0x30 */
-    u32 updateCount;      /* 0x34 */
-    u32 colorParam;       /* 0x38 */
-    f32 renderScale;      /* 0x3C */
-    u32 ownedBuffer;      /* 0x40 */
-    u32 resourceHandle;   /* 0x44 */
-} EffFlashRecordWork; /* 0x48 */
-
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern struct EffRecordPool *effRecordPoolCreateTriple(s32 count);
+extern EffRecordPool *effRecordPoolCreateTriple(s32 count);
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
-EffFlashRecordWork *effFlashRecordCreate(src)
-    EffFlashRecordWork *src;
+PcpFlashTrianglePulseWork *effFlashRecordCreate(src)
+    PcpFlashTrianglePulseWork *src;
 {
-    u32 handle = sdfAllocGeneralBlock(src->particleCount * sizeof(EffFlashRecordPart) + sizeof(EffFlashRecordWork));
-    EffFlashRecordWork *work = (EffFlashRecordWork *)sdfResourceRetainAddress(handle);
-    EffFlashRecordHandle *record;
+    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashPulseParticle) + sizeof(PcpFlashTrianglePulseWork));
+    PcpFlashTrianglePulseWork *work = (PcpFlashTrianglePulseWork *)sdfResourceRetainAddress(handle);
+    EffRecordPool *record;
     u32 i;
 
     memcpy(work, src, 0x30);
-    work->parts = (EffFlashRecordPart *)(work + 1);
-    work->colorParam = 0x80808080;
-    work->ownedBuffer = handle;
+    work->parts = (PcpFlashPulseParticle *)(work + 1);
+    work->tintColor = 0x80808080;
+    work->allocationHandle = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = (EffFlashRecordHandle *)effRecordPoolCreateTriple(work->particleCount);
-    work->resourceHandle = (u32)record;
-    record->unk50 = work->unk2C;
+    record = effRecordPoolCreateTriple(work->particleCount);
+    work->resourceHandle = record;
+    record->drawMode = work->drawMode;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = 0;
     }
