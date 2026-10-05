@@ -581,9 +581,70 @@ u32 func_0011E278(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E280);
+extern f32 sdfSinPoly(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern void func_00129900(s32);
+extern void fldSelectDisplayBuffer(s32);
+extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern s32 fldGetEncounterRuntimeResult(void);
+/* Filled disc in the field; radius shrinks in the close-up areas. */
+void func_0011E280(s32 fade, f32 x, f32 y, f32 z, f32 radius) {
+    s32 color;
+    s32 angle;
+    s32 prev;
+    s32 i;
+    f32 a;
+    f32 b;
+    f32 sinA;
+    f32 cosA;
+    f32 sinB;
+    f32 cosB;
+
+    if ((u32)(fldAreaState.area - 0xC9) < 0x12B) {
+        y = 0.0f;
+    } else {
+        radius *= 0.7f;
+    }
+    if (fade == 0) {
+        return;
+    }
+    if ((u32)(fldAreaState.area - 0xC9) < 0x12B) {
+        fldSelectDisplayBuffer(0x20);
+    } else {
+        fldSelectDisplayBuffer(0x39);
+    }
+    func_00129900(5);
+    fade = fade / 2;
+    color = (fade * 7 * 16 / 128) & 0xFF;
+    if (color > 0x70) {
+        color = 0x70;
+    }
+    color = 0x80 - color;
+    if (color >= 0x80) {
+        color = 0x7F;
+    }
+    if (color < 0x10) {
+        color = 0x10;
+    }
+    color = (color << 24) | 0x10101;
+    for (i = 0; i < 360; i += 10) {
+        angle = (i + 360) % 360;
+        prev = (i + 350) % 360;
+        a = (f32)angle * 3.14f / 180.0f;
+        sinA = sdfSinPoly(a) * radius;
+        cosA = sdfEvaluateCosineViaSinePhaseShift(a) * radius;
+        b = (f32)prev * 3.14f / 180.0f;
+        sinB = sdfSinPoly(b) * radius;
+        cosB = sdfEvaluateCosineViaSinePhaseShift(b) * radius;
+        fldSubmitGsTriangle(color, 0x80101010, 0x80101010,
+                            x + 0.0f, y - 2.0f, z + 0.0f,
+                            x + sinA, y - 2.0f, z + cosA,
+                            x + sinB, y - 2.0f, z + cosB);
+    }
+    func_00129900(0);
+}
+
+
 extern u8 fldGetCampSceneControlMode(void);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00129900(s32);
