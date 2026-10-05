@@ -860,7 +860,7 @@ s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-s32 func_002386E0(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 shown = 20;
     s32 count;

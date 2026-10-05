@@ -710,33 +710,7 @@ void parFadeAlphaCell(s32 particle, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BCE8);
 
-void parFillVertexPairs(ParSystem *system, s32 firstWord, s32 secondWord) {
-    s32 count = system->cellCount;
-    s32 perCell = system->vertexWordCount >> 1;
-    s32 i;
-    s32 j;
-    u8 *cell;
-    s32 *vertex;
-    if (count > 0) {
-        i = count;
-        /* Required to match: advance a byte cursor based at ParCell.vertices. */
-        cell = (u8 *)system->cells + 4;
-        do {
-            vertex = *(s32 **)cell;
-            if (perCell > 0) {
-                j = perCell;
-                do {
-                    j--;
-                    vertex[0] = firstWord;
-                    vertex[1] = secondWord;
-                    vertex += 2;
-                } while (j != 0);
-            }
-            i--;
-            cell += 0x14;
-        } while (i != 0);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0015A758", parFillVertexPairs);
 
 void parFadeAlphaAllCells(ParSystem *system, u32 color) {
     u32 perCell = system->vertexWordCount >> 1;
@@ -1154,35 +1128,7 @@ void parRiseFallStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord
     }
 }
 
-void parFillCellVertexQuads(ParSystem *system, s32 middleWord, s32 edgeWord) {
-    s32 count = system->cellCount;
-    s32 perCell = system->vertexWordCount >> 2;
-    s32 i;
-    s32 j;
-    u8 *cell;
-    u8 *vertex;
-    if (count > 0) {
-        i = count;
-        /* Required to match: use the same offset-four cell cursor as the paired fill. */
-        cell = (u8 *)system->cells + 4;
-        do {
-            vertex = *(u8 **)cell;
-            if (perCell > 0) {
-                j = perCell;
-                do {
-                    j--;
-                    ((ParQuadVertexColors *)vertex)->middle1 = middleWord;
-                    ((ParQuadVertexColors *)vertex)->middle0 = middleWord;
-                    ((ParQuadVertexColors *)vertex)->edge1 = edgeWord;
-                    ((ParQuadVertexColors *)vertex)->edge0 = edgeWord;
-                    vertex += 0x10;
-                } while (j != 0);
-            }
-            i--;
-            cell += 0x14;
-        } while (i != 0);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0015A758", parFillCellVertexQuads);
 
 void func_0015CAA0(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 perCell = system->vertexWordCount >> 2;

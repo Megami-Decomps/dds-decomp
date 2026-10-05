@@ -846,7 +846,7 @@ u32 func_00277638(void) {
     return 1;
 }
 
-void func_00277640(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
+void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
                    s32 actor, u16 rangeId, s32 style, s32 dim,
                    s32 specialResource, s32 costResource, u32 texture) {
     char text[16];

@@ -2949,7 +2949,7 @@ extern const BattlePanelColors D_003A2A90;
 extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
 
-extern s32 func_001B4A70(s64);
+extern s32 btlDrawTimedDialogTask(s64);
 
 extern void btlReleaseDialogTaskData(s64);
 
@@ -2974,7 +2974,7 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     data->id = arg0;
     data->unk08 = arg1;
     data->value = 0x2D;
-    task = kwlnTaskCreate(D_003BB3A8, 0x2B0E, 1, 1, func_001B4A70, btlReleaseDialogTaskData, (u32)data);
+    task = kwlnTaskCreate(D_003BB3A8, 0x2B0E, 1, 1, btlDrawTimedDialogTask, btlReleaseDialogTaskData, (u32)data);
     func_00101A80(*(u32 *)(context + 0x29C), task);
     data->task = task;
     btlSetTrackedTaskHandle(0, task);
@@ -3400,7 +3400,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_001B47A8(BtlPanelTransitionWork *work) {
+void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *work) {
     s16 *fade;
     s32 i;
 
@@ -3460,7 +3460,7 @@ void btlToggleModelFlagOnInput(void) {
     }
 }
 
-s32 func_001B4A70(s64 task) {
+s32 btlDrawTimedDialogTask(s64 task) {
     BattlePanelColors colors = D_003A2A90;
     MsgQueueTaskData *data;
     s32 expired;
@@ -4727,7 +4727,7 @@ static inline void btlDestroyTrackedTaskIfPresent(s32 slot) {
     }
 }
 
-void func_001C4658(void) {
+void fldDestroySceneTasksAndBuffers(void) {
     BattleController *battle = (BattleController *)btlGetRuntime();
 
     if (battle->sceneObjectTask != 0) {

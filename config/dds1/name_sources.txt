@@ -871,6 +871,7 @@
 0x001315C0	fldQueueCameraHeadingFromVector	inferred	Byte-identical dds2 twin 0x00133DF8; Computes a degree heading from the X/Z vector and marks the camera heading override pending. [names_conflicts.tsv]
 0x00131600	fldApplyCameraFacingPoint	inferred	Converts X/Z target difference to an angle and advances faceState to two.
 0x00131660	fldApplyPendingCameraHeading	inferred	Byte-identical dds2 twin 0x00133EE0; Copies the pending target heading to the current heading and advances the pending state. [names_conflicts.tsv]
+0x00131A88	fldLoadBattleSkyAndFilter	inferred	U3
 0x00131CC0	fldLoadSkyResource	inferred	loads <dir>F%03d.SKY, and rain.tmx for areas 2..99
 0x00131D88	fldReleaseSkyResources	inferred	Releases retained sky texture and resource handles and resets sky resource state. [names_reviewed5.tsv]
 0x00131DE8	fldUploadSkyBuffer	inferred	copies 0xE000 bytes into the sky buffer D_003BAD5C, then loads /fld/f/bin/rain.tmx (twin of func_00131CC0)
@@ -2606,8 +2607,10 @@
 0x001B2A98	btlReleasePsechgPanelWork	inferred	confidence=medium; src/dds1/game/code_001A1960.c:func_001B2A98; Frees task user data and clears tracked slot six, whose retail task label is bpnl_psechg_nm. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
 0x001B2D58	btlReleaseBattleScratchBlocks	inferred	Releases both temporary battle blocks held by the shared battle work. [names_reviewed16.tsv]
 0x001B42D8	btlReleaseCmsleffPanelWork	inferred	confidence=medium; src/dds1/game/code_001A1960.c:func_001B42D8; Frees task user data and clears tracked slot five; its retail task label bpnl_cmsleff__nm supports the cmsleff-panel role. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
+0x001B47A8	btlUpdatePanelTransitionGradients	inferred	U3
 0x001B49E0	btlFreeRegisteredTaskData	inferred	Frees task user data and clears its battle registration. [names_reviewed8.tsv]
 0x001B4A20	btlToggleModelFlagOnInput	inferred	Toggles a model flag when its mapped input is active. [names_reviewed8.tsv]
+0x001B4A70	btlDrawTimedDialogTask	inferred	U2
 0x001B4C98	btlReleaseDialogTaskData	inferred	Cleans the task message window, frees its data and clears registration. [names_reviewed8.tsv]
 0x001B4CE8	btlCreateMessageWindow	inferred	allocates 0x40-byte window block D_003BB3DC with fixed colours and size 0xBB x 0x196
 0x001B5370	btlReleaseRegisteredTaskBuffer	inferred	Frees retained battle task data, resets its pointer and clears its registration. [names_reviewed10.tsv]
@@ -2652,6 +2655,7 @@
 0x001C4470	fldResetSceneStatus	inferred	Sets battle scene work sceneStatus to zero. [names_reviewed5.tsv]
 0x001C4490	fldBeginSceneTransition	inferred	func_001BCB88(1,8) and sets scene flag 0x200
 0x001C44D0	fldClearSceneTransition	inferred	Clears the transition mode by passing zero to scene transition setter. [names_reviewed5.tsv]
+0x001C4658	fldDestroySceneTasksAndBuffers	inferred	U2
 0x001C48B8	fldBattleSceneEnterInit	inferred	Established DDS2 counterpart and source-level behavior agree (0.72 match). [names_reviewed19.tsv]
 0x001C4968	btlLoadBankWhenTasksIdle	inferred	Loads the battle sound bank only once the checked stream and tasks are ready. [names_reviewed8.tsv]
 0x001C4A18	btlStartOwnerTaskIfClear	inferred	Checks whether a particular battle task owner is idle, then initializes state and attaches task using actor identifiers.
@@ -2946,6 +2950,7 @@
 0x001F2B60	btlMarkTaskReady	inferred	Twin of dds2 0x002037F0; Sets task byte at offset 0x10 to one; precise task semantics unknown. [names_R_FuncNames3.tsv]
 0x001F2B70	sndAllocLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2BB0	sndFreeLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2C00	btlUpdateUnitCommandEffect	inferred	U2
 0x001F2E20	btlDisableBattleFade	inferred	Twin of dds2 0x00203AB0; Sets battle-work fadeEnabled byte to zero. [names_R_FuncNames3.tsv]
 0x001F2E48	sndCreateClearStateTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F2E90	btlEnableBattleFade	inferred	Twin of dds2 0x00203B20; Sets battle-work fadeEnabled byte to one. [names_R_FuncNames3.tsv]
@@ -3352,6 +3357,7 @@
 0x00209B70	btlConsumeReadyEventScriptResource	inferred	Consumes a pending ready event script resource and clears its ready flag. [names_reviewed10.tsv]
 0x00209BC8	btlClearEventEffectValue	inferred	Zeros leading halfword in current battle effect payload. [names_reviewed5.tsv]
 0x00209BF0	btlRemapBossAction	inferred	Remaps requested actions for flagged boss units with modes 0x119 or 0x11A.
+0x00209C90	btlQueueHariFormChangeOrPartyCommand	inferred	U3
 0x0020A3F0	btlGetEventEffectValue	inferred	Returns leading halfword from current battle effect payload. [names_reviewed5.tsv]
 0x0020A418	btlHasFirstSpecialEnemySpecies	inferred	Finds active group 0x400 species mode 0x119 or 0x11a and tests which. [names_reviewed5.tsv]
 0x0020A4C0	btlDispatchSpecialEnemyActionWhenPhaseAllows	inferred	Dispatches actions only for eligible special-enemy modes and phases. [names_reviewed14.tsv]
@@ -3410,6 +3416,7 @@
 0x00210A18	btlIndexListNoExpiredEntryCodes	inferred	for command flags 0x800/0x1000 returns 0 when an expired actor entry has a positive/negative code (DDS2 twin func_0022BEB0) [names_M69_Battle3.tsv]
 0x00210BA8	btlDetermineCommandCounterEligibility	inferred	Checks primary and secondary counter limits and required flags for a command. [names_reviewed11.tsv]
 0x00210D00	btlGetCommandBlockReason	inferred	Checks global battle state, the command record and eligible target units; returns 0 when allowed or a specific nonzero block reason.
+0x00210EB0	btlGetCommandTargetEligibility	inferred	U0
 0x002110B8	btlCheckCommandRequiredEntryMatches	inferred	Tests command required-entry flags against indexed actor list, returning three when all flagged pairs match. [names_reviewed18.tsv]
 0x00211328	btlCreateModelEntry	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00211390	btlReleaseModelEntry	inferred	btl battle control and actor operations in game/code_001FF030.c
@@ -3922,6 +3929,7 @@
 0x00237048	evtDrawSelectedEntryLabel	inferred	Draws selection indicator and optional entry label; viewer identity is not established. [names_reviewed12.tsv]
 0x00237348	evtUpdateEntrySelectionDialog	inferred	Draws scrollable entries and handles cursor input in selection mode. [names_reviewed7.tsv]
 0x00238600	evtDrawFrameListRow	evidence	draws one frame row; "----- NEW FRAME -----" placeholder for the empty end row; cursor colour 4/5 [names_M95_Event.tsv]
+0x002386E0	evtUpdateFrameListDialog	inferred	L13
 0x002388F8	evtViewerDrawWorldNodeRow	evidence	DDS2 twin func_002537A8; lists dds3GetWorldObject slot nodes (skips slot 3) with " %s" [names_M74_BattleLarge.tsv]
 0x00238BE8	evtViewerDrawPendingNodeRow	evidence	DDS2 twin func_00253A98; "P%d:" plus resolved node name or dashes [names_M74_BattleLarge.tsv]
 0x00238D58	mnuDrawInfoWindowB	inferred	Same window builder, row count selected by the kind word at work+0x2308 (20 -> 2, 21 -> 4)
@@ -4007,6 +4015,7 @@
 0x00243460	mnuCampFindMatchingEntryIndex	inferred	Byte-identical dds2 twin 0x0025E7D8; DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campFindMatchingEntryIndex behavior. [names_conflicts.tsv]
 0x002434E0	mnuCampFindEntryByName	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00243558	campResolvePendingValue	inferred	DDS1 twin of DDS2 func_0025E8D0. [names_M44_Mid3.tsv]
+0x00243608	mnuDrawCampScaledTexture	inferred	U1
 0x002437E0	fldResetCampSceneEntries	inferred	Byte-identical dds2 twin 0x0025EBC8; Clears status of every linked camp scene entry and the scene's state at +0x240C. [names_conflicts.tsv]
 0x00243928	fldApplyCameraColorKeyWords	inferred	confidence=high; matched-C; src/dds1/game/code_00242608.c:561:func_00243928; Copies the current camera settings, replaces the observed scalar/interleaved fields with supplied key words, applies the camera color effect, and sets the owner control flag from four nonzero key words. DDS2 native counterpart remains claimed/ASM and is not queued here.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00243A58	mnuCampInitFontResource	inferred	Creates and configures the camp scene font resource at offset 0x2410.
@@ -4273,6 +4282,7 @@
 0x00257C10	mnuDrawMantraPulseFrame	inferred	Emits multiple fixed-point Mantra draw stages around the pulsing frame sprite; established DDS2 twin agrees. [names_reviewed19.tsv]
 0x00257E78	mnuCopySceneCoordinates	inferred	Copies the signed scene-entry X/Y metadata into ten coordinate pairs.
 0x00257EB0	mnuAdvanceWrappingFrame	inferred	Increments a frame counter and wraps it to zero after frame 60.
+0x0025B0F0	mnuDrawAnimatedCurrencyCounter	inferred	U3
 0x0025B7B0	mnuReleaseOptionalDrawAllocation	inferred	Releases a nonnull owned allocation passed to the menu work callback. [names_reviewed17.tsv]
 0x0025B7D8	mnuCreateSpriteResource	inferred	Allocates a 0x48-byte sprite record with owner, sprite, variant and randomized lifetime.
 0x0025BC38	mnuDestroyMantraDrawPool	inferred	Mapped DDS2 counterpart already has established name mnuDestroyMantraDrawPool; DDS1 body independently shows matching behavior (0.93 match). [names_reviewed19.tsv]
@@ -4466,6 +4476,7 @@
 0x0026E5A0	mnuReleaseMovieResourceGroup	inferred	Destroys ten owned movie tasks and releases their owning allocation.
 0x0026E720	mnuDrawIconAlphaSprite	inferred	confidence=high; src/dds1/game/code_0026E160.c:func_0026E720; Single sprite draw: scales alpha by 1/255 into the packed colour word and forwards to the shared sprite submit call. [names_qp9.tsv]
 0x0026E8A0	mnuLoadMovieRollSprite	inferred	mnu menu, title, shop, or movie UI in game/code_0026E160.c
+0x0026EA70	mnuUpdateMovieRollEntry	inferred	U2
 0x0026FCD8	mnuStaffImageProc	inferred	mnu menu, title, shop, or movie UI in game/code_0026EC90.c
 0x0026FD88	mnuFinishStaffMovieAndFreeState	inferred	Waits for pending movie work, tears down fonts, and frees movie state. [names_reviewed8.tsv]
 0x0026FDD8	mnuReleaseMovieResourceAfterPendingWork	inferred	Destroys movie resources, drains pending work and clears movie mode. [names_reviewed8.tsv]
@@ -4573,6 +4584,7 @@
 0x00277220	mnuDrawPartySkillAndStatusPanel	inferred	Draws profile group sprites, the entry display text and footer icons. [names_reviewed13.tsv]
 0x00277328	mnuDrawProfilePanelAndSprite	inferred	Draws a sprite and the matching profile panel with supplied groups. [names_reviewed8.tsv]
 0x002775D8	mnuStaffIdlePartyUpdate	inferred	Advances the idle-voice timer in the matching staff mode, then runs the panel. [names_reviewed13.tsv]
+0x00277640	mnuDrawRangeCostAndIcon	inferred	U1
 0x00277A50	ptySkillMenuBuildEquippedSlots	inferred	legacy PartySkillMenu_BuildEquippedSlotList: builds the equipped-skill page for the selected unit, marking rows by current slot membership
 0x00277C80	mnuDestroySelectedPartyWindow	inferred	Destroys the selected party window and clears its held pointer. [names_reviewed13.tsv]
 0x00277CB8	mnuSeekFirstAvailableStaffListNode	inferred	Skips disabled or zero-key list nodes and seeks the first eligible index. [names_reviewed13.tsv]
@@ -5047,6 +5059,7 @@
 0x00292E50	mnuMeasureProjectedPerpendicularDistance	inferred	Offsets current view point perpendicular to camera axis, projects both points and returns screen-space distance. [names_reviewed7.tsv]
 0x00292F48	vuCatmullRomPoint	inferred	VU0 macro rewrite; name from behaviour [names_M58_VuSweep.tsv]
 0x002930C0	vuBuildLookAtBasis	inferred	VU0 macro rewrite; name from behaviour [names_M58_VuSweep.tsv]
+0x00293158	sdfVuMatrixToQuaternion	inferred	U1
 0x002933A8	fileCreateJob	inferred	file file requests and records in game/code_0028A0E0.c
 0x00293400	fileResolvePrimaryBuffer	inferred	file file requests and records in game/code_0028A0E0.c
 0x00293428	fileResolveSecondaryBuffer	inferred	file file requests and records in game/code_0028A0E0.c
@@ -5078,6 +5091,7 @@
 0x00294020	fileQueueCreate	inferred	allocates 0x90-byte queue and initializes it
 0x00294070	fileJobCreate	inferred	allocates 0xC0-byte job and initializes it
 0x002940B8	fileDestroyJob	inferred	Releases the heap allocation belonging to one FileJob object. [names_reviewed18.tsv]
+0x002940D0	fileCloneQueueEntries	inferred	U1
 0x00294330	fileQueueUpdate	inferred	per-frame: aim refresh (flag 0x60), reposition jobs whose start frame (job+0x80) <= queue+0x84, then ++frame [names_M68_VuRest.tsv]
 0x002944D8	fileQueueDestroy	inferred	Walks queued jobs, destroys unflagged child records and frees queue. [names_reviewed7.tsv]
 0x00294548	fileQueueClone	inferred	Creates a queue, copies header vectors, clones every job and reapplies transform/scale/color.

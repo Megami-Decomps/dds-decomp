@@ -4492,7 +4492,7 @@ extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
 
 extern void *sdfAllocAndClearQuadwords(s32);
-extern s32 func_001BF690(s64);
+extern s32 btlDrawTimedDialogTask(s64);
 extern void btlReleaseDialogTaskData(s32);
 extern s32 btlGetTrackedTaskHandle(s32);
 
@@ -4517,7 +4517,7 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     data->id = arg0;
     data->unk08 = arg1;
     data->value = 0x2D;
-    task = kwlnTaskCreate((s32)D_004367C4, 0x2B0E, 1, 1, func_001BF690,
+    task = kwlnTaskCreate((s32)D_004367C4, 0x2B0E, 1, 1, btlDrawTimedDialogTask,
                           btlReleaseDialogTaskData, data);
     func_00101968(*(s32 *)(context + 0x2C4), task);
     data->task = task;
@@ -4915,7 +4915,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_001BF3C8(BtlPanelTransitionWork *work) {
+void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *work) {
     s16 *fade;
     s32 i;
 
@@ -4977,7 +4977,7 @@ void btlToggleModelFlagOnInput(void) {
     }
 }
 
-s32 func_001BF690(s64 task) {
+s32 btlDrawTimedDialogTask(s64 task) {
     BattlePanelColors colors = D_004165C0;
     MsgQueueTaskData *data;
     s32 expired;

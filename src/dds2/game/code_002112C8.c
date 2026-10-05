@@ -79,7 +79,7 @@ typedef struct BattleActionScene {
     u8 *state;
 } BattleActionScene;
 
-extern BtlUnit *func_00219318(void);
+extern BtlUnit *btlGetSelectedOrCurrentActor(void);
 
 extern s32 btlRollAiBucket(void);
 
@@ -1384,25 +1384,7 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
     return 0;
 }
 
-/* Required to match: preserve the original wide flag read beside the state-word test. */
-s32 btlHasUnitWithStatusBit(s32 battler, s32 scanAll) {
-    if (scanAll != 0) {
-        battler = (s32)((BattleWork *)btlGetRuntime())->actorList;
-        while (battler != 0) {
-            if ((*(u64 *)&((BtlUnit *)battler)->flags & 0x421) == 0x401 &&
-                (((BtlUnit *)battler)->stateFlags & 0x800000) != 0) {
-                return 1;
-            }
-            battler = (s32)((BtlUnit *)battler)->nextActor;
-        }
-        return 0;
-    }
-    if ((*(u64 *)&((BtlUnit *)battler)->flags & 0x21) == 1 &&
-        (((BtlUnit *)battler)->stateFlags & 0x800000) != 0) {
-        return 1;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlHasUnitWithStatusBit);
 
 s32 btlAreUnitsMissingStatusFlag(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
@@ -1970,7 +1952,7 @@ u32 btlAppendEffectActorToCommandIndices(s32 task) {
 u32 btlAppendCurrentUnitIdToCommandIndices(s32 task) {
     BtlUnit *unit;
 
-    unit = func_00219318();
+    unit = btlGetSelectedOrCurrentActor();
     btlAppendIndexListEntry(((BtlTask *)task)->targetList, unit);
     return 1;
 }
@@ -2709,19 +2691,8 @@ s32 btlIsUnitListReady(void) {
     return unit == 0;
 }
 
-void btlAttachActionEffectToUnit(BtlUnit *unit) {
-    f32 vec[3];
-    ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit = unit;
-    /* Required to match: update flags/stateFlags as words 0/1 of flags64. */
-    ((u32 *)&unit->flags64)[0] &= ~0x100;
-    ((u32 *)&unit->flags64)[0] &= ~8;
-    ((u32 *)&unit->flags64)[1] |= 0x180;
-    unit->conditionFlags = 0;
-    vec[0] = 0.0f;
-    vec[1] = 10000.0f;
-    vec[2] = -10000.0f;
-    effObjSetInnerFirstVec(unit->effectObject, vec);
-}
+extern void btlAttachActionEffectToUnit(BtlUnit *unit);
+INCLUDE_ASM(const s32, "game/code_002112C8", btlAttachActionEffectToUnit);
 
 void btlCommitSelectedUnit(void) {
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub;
@@ -2873,7 +2844,7 @@ s32 btlSelectSoleEligibleActor(void) {
     BtlUnit *last;
     BtlUnit *current;
     if (btlHasActiveSubtask() != 0) {
-        current = func_00219318();
+        current = btlGetSelectedOrCurrentActor();
         last = 0;
         for (actor = work->actorList, count = 0; actor != 0; actor = actor->nextActor) {
             u32 flags = actor->flags;
@@ -2999,7 +2970,7 @@ u32 btlGetSubtaskTargetMode(void) {
     return work->sub->targetMode;
 }
 
-BtlUnit *func_00219318(void) {
+BtlUnit *btlGetSelectedOrCurrentActor(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BtlUnit *selected = (BtlUnit *)work->sub->task;
     BtlUnit *unit;

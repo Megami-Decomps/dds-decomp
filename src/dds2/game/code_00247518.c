@@ -240,7 +240,7 @@ extern void evtReorderListNodes(EvtViewTrack *track);
 
 extern void func_0025E460(u16 *from, u16 *to, u8 *out, f32 ratio);
 typedef struct CampDisplayDefaults CampDisplayDefaults;
-extern void func_0025E980(SdfTex *texture, CampDisplayDefaults *display);
+extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
 
 /* Interpolates parameter keys at the viewer's current frame, accounting for
  * the track offset. DDS2 subtracts 35 from the second output word before applying it. */
@@ -260,7 +260,7 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewTrack *n
         }
         func_0025E460(from, to, out, ratio);
         *(s32 *)(out + 4) -= 35;
-        func_0025E980((SdfTex *)node->unk24, (CampDisplayDefaults *)out);
+        mnuDrawCampScaledTexture((SdfTex *)node->unk24, (CampDisplayDefaults *)out);
     }
 }
 

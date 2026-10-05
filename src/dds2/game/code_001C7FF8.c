@@ -1141,7 +1141,7 @@ void fldCreateSceneCleanupTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CFC40);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CFCA8);
+INCLUDE_ASM(const s32, "game/code_001C7FF8", fldDestroySceneTasksAndBuffers);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416EF8);
 

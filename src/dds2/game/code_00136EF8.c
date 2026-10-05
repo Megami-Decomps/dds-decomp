@@ -215,10 +215,6 @@ typedef struct FldRecE4 {
     u8 padD4[0x10];
 } FldRecE4; /* 0xE4 bytes */
 
-extern s32 D_00436188;
-
-extern s32 D_0043617C;
-
 extern s32 fldAreaState[];
 
 extern u32 D_00444A30[];
@@ -557,28 +553,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-/* Clear populated values before discarding the count and releasing storage. */
-void fldResetRecordState(void) {
-    s32 remaining = fldValueRecordCount;
-    if (remaining > 0) {
-        /* Required to match: advance a pointer to the value field, not the record base. */
-        u8 *valueCursor = (u8 *)fldValueRecords + 0xd0;
-        do {
-            remaining--;
-            *(s32 *)valueCursor = 0;
-            valueCursor += 0xe4;
-        } while (remaining != 0);
-    }
-    fldValueRecordCount = 0;
-    fldAreaState[0x28] = -1;
-    fldAreaState[0x29] = -1;
-    fldAreaState[0x2b] = -1;
-    D_00436188 = 0;
-    D_0043617C = 0;
-    if (fldValueRecords != 0) {
-        fldReleaseRecordStorage();
-    }
-}
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldResetRecordState);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137F10);
 

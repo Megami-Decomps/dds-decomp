@@ -201,7 +201,7 @@ typedef struct MnuMovieRollEntry {
 
 extern s32 effMiscRandMod(s32, s32);
 
-void func_0026EA70(MnuMovieRollEntry *entry) {
+void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
     entry->y += entry->velocity;
     entry->timer--;
     if (entry->active && entry->y < -256.0f) {

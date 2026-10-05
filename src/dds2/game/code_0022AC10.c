@@ -1023,7 +1023,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
 extern s32 btlGetEntryFlagsUnlessDisabled(u8 *);
 extern s32 btlLowestSetPairIndex(u32);
 
-s32 func_0022C308(BtlIndexList *indexList, s32 commandId) {
+s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     u8 *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;

@@ -230,7 +230,7 @@ typedef struct FileTypeCallbacks {
 
 extern FileTypeCallbacks fileJobTypeOperations[];
 
-extern void func_002D31C0(f32 matrix[4][4]);
+extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
  * entry per table; the handler lives at +0x0. Slots are declared as separate
@@ -2976,7 +2976,7 @@ void vuBuildLookAtBasis(void)
 }
 
 /* The quaternion result is returned in vf10 for the VU transform routines. */
-void func_002D31C0(f32 matrix[4][4]) {
+void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
     f32 quaternion[4];
     f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2] + matrix[3][3];
     f32 scale;
@@ -3375,7 +3375,7 @@ void fileDestroyJob(FileJob *job) {
     sdfReleaseChipBlock();
 }
 
-FileQueue *func_002D4138(FileQueue *source) {
+FileQueue *fileCloneQueueEntries(FileQueue *source) {
     FileQueue *queue = fileQueueCreate();
     FileJob *entry;
     FileJob *job;
@@ -3447,7 +3447,7 @@ FileQueue *func_002D4138(FileQueue *source) {
 }
 
 void func_002D4380(u32 unused, u32 job) {
-    func_002D4138((FileQueue *)job);
+    fileCloneQueueEntries((FileQueue *)job);
 }
 
 extern void camFollowOffsetVec();
@@ -3662,7 +3662,7 @@ u32 fileGetQueueColor(FileQueue *queue) {
 
 void fileQueueCopyRotationFromSource(void *dst, void *src) {
     s128 vec;
-    func_002D31C0(src);
+    sdfVuMatrixToQuaternion(src);
     VU0_STORE_VF(vf10, &vec);
     fileQueueSetRotation(dst, &vec);
 }
@@ -4240,7 +4240,7 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     if (size != 0) {
         node->queueHandle = sdfAllocGeneralBlock(size);
         node->queues = sdfResourceRetainAddress(node->queueHandle);
-        node->queues[0] = func_002D4138((FileQueue *)job);
+        node->queues[0] = fileCloneQueueEntries((FileQueue *)job);
         for (i = 1; i < count; i++) {
             node->queues[i] = fileQueueClone(node->queues[0]);
         }

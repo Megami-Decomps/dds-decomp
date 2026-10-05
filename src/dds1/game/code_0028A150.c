@@ -362,7 +362,7 @@ extern void *mcHandleDetectionResult(void);
 
 extern void fileQueueInitTransform(void *queue);
 
-extern void func_00293158(f32 matrix[4][4]);
+extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
 
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -2927,7 +2927,7 @@ void vuBuildLookAtBasis(void)
 }
 
 /* The quaternion result is returned in vf10 for the VU transform routines. */
-void func_00293158(f32 matrix[4][4]) {
+void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
     f32 quaternion[4];
     f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2] + matrix[3][3];
     f32 scale;
@@ -3332,7 +3332,7 @@ void fileDestroyJob(FileJob *job) {
     sdfReleaseChipBlock(job);
 }
 
-FileQueue *func_002940D0(FileQueue *source) {
+FileQueue *fileCloneQueueEntries(FileQueue *source) {
     FileQueue *queue = fileQueueCreate();
     FileJob *entry;
     FileJob *job;
@@ -3404,7 +3404,7 @@ FileQueue *func_002940D0(FileQueue *source) {
 }
 
 void func_00294318(u32 unused, u32 handle) {
-    func_002940D0((FileQueue *)handle);
+    fileCloneQueueEntries((FileQueue *)handle);
 }
 
 /* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start time (job+0x80) has been reached. */
@@ -3598,7 +3598,7 @@ INCLUDE_ASM(const s32, "game/code_0028A150", func_00294938);
 
 void fileQueueCopyRotationFromSource(void *dst, void *src) {
     s128 vec;
-    func_00293158(src);
+    sdfVuMatrixToQuaternion(src);
     VU0_STORE_VF(vf10, &vec);
     fileQueueSetRotation(dst, &vec);
 }

@@ -443,7 +443,7 @@ s32 func_00253830(void) {
 extern u32 mnuGetSelectedNodeValue(void);
 extern void func_0024DD78(void);
 extern void func_00255E08(MenuSceneMetadata *, s32, s32);
-extern void func_0025B0F0(s32, s32, s32, s32, MenuSceneMetadata *, s32);
+extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
 extern s32 func_00249998(void *, s32, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, s32);
 extern void effUpdateAttached(s32, s32, s32, s32, s32);
@@ -462,7 +462,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
     fldGetSceneMetadataNode();
     func_0024DD78();
     func_00255E08(sceneMetadata, 0x80, 0x4A);
-    func_0025B0F0(0, -27, 0, 0x80, sceneMetadata, MNU_SCENE_DRAW_CONTEXT);
+    mnuDrawAnimatedCurrencyCounter(0, -27, 0, 0x80, sceneMetadata, MNU_SCENE_DRAW_CONTEXT);
     if (func_00249998(&sceneMetadata->attachedEffectControl, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT) != 0) {
         if (sceneMetadata->stageStarted == 0) {
             evtStageTestSelectEntryWithoutInitialValue(sceneMetadata->entryId, 0);

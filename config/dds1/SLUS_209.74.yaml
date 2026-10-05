@@ -603,7 +603,7 @@ segments:
       - [0x2BE238, .sdata, game/code_002C2620]
       - [0x2BE264, .sdata, game/code_002C3800]
       - [0x2BE268, .sdata, game/code_002C3868]
-      - [0x2BE281, .sdata, game/code_002C5FD8]
+      - [0x2BE280, .sdata, game/code_002C5FD8]
       - [0x2BE288, .sdata, game/code_002C97E8]
       - [0x2BE2B8, .sdata, game/code_002CC750]
       - [0x2BE2CC, .sdata, game/code_002CF530]

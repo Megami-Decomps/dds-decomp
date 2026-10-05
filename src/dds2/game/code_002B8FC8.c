@@ -199,8 +199,6 @@ extern s32 effHasFirstTextureHandle();
 
 extern void effReleaseTextureHandlesAndResetSlots();
 
-extern void mnuSelectPage();
-
 extern void func_002AAC98();
 
 extern char D_003E69B0[];
@@ -308,6 +306,9 @@ typedef struct MenuPageWindow {
     u32 unkA69C;
     s32 fade;
 } MenuPageWindow;
+
+extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
+
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
     u8 pad00[0x54];
@@ -2526,32 +2527,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
 }
 
 
-extern s32 mnuGetSelectionFromFlags(s32);
-
-void mnuSelectPage(MenuPageWindow *window, s32 selected) {
-    s32 *resource = window->handlesC;
-    u32 i;
-    /* Required to match: retain the header-relative handle walk below. */
-    u8 *handles = window->pad4;
-    MenuPageEntry *record;
-    s32 active;
-
-    for (i = 0; i < 5; i++) {
-        effReleaseTextureHandlesAndResetSlots(*resource++);
-    }
-    record = &window->records->entries[selected];
-    active = mnuGetSelectionFromFlags(datGameState + record->partyIndex * 0x1C4 + 0xA60);
-    for (i = 0; i < 5; i++) {
-        if (i == active) {
-            effResolveAndReleaseResource(*(s32 *)(handles + 0x60 + i * 4));
-        }
-    }
-    if (window->selected >= 0) {
-        mnuResolveUnselectedPageHandles(window);
-    }
-    window->selected = selected;
-    mnuRefreshPageHandles(window);
-}
+INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuSelectPage);
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window) {
     s32 *resource = window->handlesC;

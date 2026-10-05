@@ -34,8 +34,6 @@ extern void func_0027CA90();
 
 extern void mnuReleasePageHandlesAndClearSelection();
 
-extern s32 mnuGetSelectionFromFlags(s32);
-
 extern void effReleaseTextureHandlesAndResetSlots(s32);
 
 extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
@@ -130,6 +128,8 @@ typedef struct MenuPageWindow {
     s32 pad688;
     s32 fade;
 } MenuPageWindow;
+
+extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 typedef struct ScrollParams {
     s32 a;
@@ -1742,30 +1742,7 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
     }
 }
 
-void mnuSelectPage(MenuPageWindow *window, s32 selected) {
-    s32 *resource = window->handlesC;
-    u32 i;
-    /* Required to match: retain the header-relative handle walk below. */
-    u8 *handles = window->pad4;
-    MenuPageEntry *record;
-    s32 active;
-
-    for (i = 0; i < 5; i++) {
-        effReleaseTextureHandlesAndResetSlots(*resource++);
-    }
-    record = &window->records->entries[selected];
-    active = mnuGetSelectionFromFlags(datGameState + record->partyIndex * 0x1A4 + 0xA60);
-    for (i = 0; i < 5; i++) {
-        if (i == active) {
-            effResolveAndReleaseResource(*(s32 *)(handles + 0x60 + i * 4));
-        }
-    }
-    if (window->selected >= 0) {
-        mnuResolveUnselectedPageHandles(window);
-    }
-    window->selected = selected;
-    mnuReleasePageTexturesAndSelectedResources(window);
-}
+INCLUDE_ASM(const s32, "game/code_0027BF00", mnuSelectPage);
 
 void mnuReleasePageHandlesAndClearSelection(window)
     MenuPageWindow *window;

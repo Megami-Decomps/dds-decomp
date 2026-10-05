@@ -1326,7 +1326,7 @@ u32 func_002B3A58(void) {
     return 1;
 }
 
-void func_002B3A60(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
+void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
                    s32 actor, u16 rangeId, s32 style, s32 dim,
                    s32 costResource, u32 texture) {
     char text[16];
@@ -1386,7 +1386,7 @@ void func_002B3A60(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3CA0);
 
-s32 func_002B3E80(s32 selectionMode, s32 callback) {
+s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, s32 callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
     MenuListDefaults defaults = D_0042AE18;
     s32 selected = context->partyWindow.lists[0]->cursor->index;
@@ -1471,7 +1471,7 @@ MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback
     MenuWindowContainer *selected;
     id = party->selectedWindow->list->cursor->index;
     mnuDestroySelectedPartyWindow(callback);
-    func_002B3E80(selectionMode, callback);
+    ptySkillMenuBuildEquippedSlots(selectionMode, callback);
     mnuSeekListNode(id, party->selectedWindow->list);
     selected = party->selectedWindow;
     selected->scale50 = 0x200;
@@ -1964,7 +1964,7 @@ s32 ptySkillMenuOpenPartyPage(s32 callback) {
 
     mnuSelectPage(&((MenuContext *)context)->partyWindow, ((MenuContext *)context)->partyWindow.lists[0]->cursor->index);
     ((MenuContext *)context)->partyWindow.flags |= 0x200;
-    func_002B3E80(0, callback);
+    ptySkillMenuBuildEquippedSlots(0, callback);
     func_002B4848(context);
     window = ((MenuPartyRuntime *)party)->selectedWindow;
     window->list->stateFlags |= 8;

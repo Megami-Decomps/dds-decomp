@@ -355,7 +355,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     btlFreeFieldBlocks();
     btlStopRainSoundTransition();
     btlClearTintAndEnableCamera();
-    func_001C4658();
+    fldDestroySceneTasksAndBuffers();
     btlReleaseButtonTexture();
     sndFreeBattleSoundEntries();
     sndClearList();

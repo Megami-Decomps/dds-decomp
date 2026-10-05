@@ -20,10 +20,6 @@ extern u64 mnuFindPanelSlotById(u32, u64, u64);
 typedef struct MenuContainer MenuContainer;
 extern u32 func_002890A8(MenuContainer *);
 
-extern void func_0026D168(s32, s32, s32);
-
-extern s32 evtAllocateMantraSelectionWork(s32, s32);
-
 typedef struct MenuPanelNode {
     s32 index;
     u8 pad04[0x54];
@@ -156,18 +152,7 @@ u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
 
-s32 mnuUpdateSelectedPanelSlot(MenuPanelObject *object) {
-    s32 index = func_002890A8((MenuContainer *)object);
-    /* Required to match: typed &object->slots[index] changes two instructions. */
-    MenuPanelSlot **slot = (MenuPanelSlot **)(index * 4 + (s32)object + 0x7ac);
-    s32 source = object->list->selected->value;
-    if (*slot != 0) {
-        func_0026D168((s32)*slot, source, 0);
-    } else {
-        *slot = (MenuPanelSlot *)evtAllocateMantraSelectionWork(source, 0);
-    }
-    return 1;
-}
+INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateSelectedPanelSlot);
 
 u16 mnuGetSelectedPanelValue(MenuPanelObject *object) {
     s32 values;
@@ -576,7 +561,7 @@ void mnuInitPanelSoundEntries(void) {
         mnuPanelSoundEntryPool = sdfMemoryGetBlockAddress(handle);
         memset(mnuPanelSoundEntryPool, 0, 0xAC);
         pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
-        pool->entries = (MenuPanelEntry *)((u8 *)pool + 0xC);
+        pool->entries = (MenuPanelEntry *)(pool + 1);
         pool->count = 0x14;
         pool->allocation = handle;
     }

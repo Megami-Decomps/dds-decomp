@@ -7,7 +7,7 @@ extern void mdlAddEntryPlain(s32, u32, u32);
 
 extern void func_00200930(f32 *, f32 *, s32);
 typedef struct FileQueue FileQueue;
-extern FileQueue *func_002D4138(FileQueue *);
+extern FileQueue *fileCloneQueueEntries(FileQueue *);
 
 typedef struct EffPacketParams {
     s16 parameterCount;
@@ -370,7 +370,7 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 extern void func_002DB288(s32, void *);
 
-extern void func_002D31C0(f32 matrix[4][4]);
+extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
 extern u8 D_003E9140[];
 
@@ -4066,7 +4066,7 @@ void effSurfaceNodeCreateQueues(EffectSlotNode54 *node, void *source) {
     if (size != 0) {
         node->queueBuffer = (u32)sdfAllocGeneralBlock(size);
         node->queues = (u32 *)sdfResourceRetainAddress(node->queueBuffer);
-        node->queues[0] = (u32)func_002D4138((FileQueue *)source);
+        node->queues[0] = (u32)fileCloneQueueEntries((FileQueue *)source);
         for (i = 1; i < count; i++) {
             node->queues[i] = (u32)fileQueueClone((void *)node->queues[0]);
         }
@@ -7286,7 +7286,7 @@ void func_002F7AC8(u8 *work) {
     VU0_LOAD_VF(vf31, D_003E9110);
     VU0_SET_W_ONE(vf31);
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
-    func_002D31C0((f32 (*)[4])mtx);
+    sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle[0], (s128 *)look);
     effAdvanceClassResourceFrame(handle[0]);
@@ -7531,7 +7531,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     VU0_LOAD_VF(vf31, D_003E9110);
     VU0_SET_W_ONE(vf31);
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
-    func_002D31C0((f32 (*)[4])mtx);
+    sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle[0], (s128 *)look);
     effAdvanceClassResourceFrame(handle[0]);
@@ -8140,7 +8140,7 @@ void effRebuildResourceEntryClones(EffectSlotNode80 *obj, s32 secondary) {
     if (size != 0) {
         obj->entryAllocation = (u32)sdfAllocGeneralBlock(size);
         obj->resourceEntries = sdfResourceRetainAddress(obj->entryAllocation);
-        ((void **)obj->resourceEntries)[0] = func_002D4138((FileQueue *)secondary);
+        ((void **)obj->resourceEntries)[0] = fileCloneQueueEntries((FileQueue *)secondary);
         for (i = 1; i < count; i++) {
             ((void **)obj->resourceEntries)[i] = fileQueueClone(((void **)obj->resourceEntries)[0]);
         }

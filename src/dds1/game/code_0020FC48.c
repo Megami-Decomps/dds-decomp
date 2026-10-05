@@ -752,7 +752,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
 }
 
-s32 func_00210EB0(BtlIndexList *indexList, s32 commandId) {
+s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     u8 *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;

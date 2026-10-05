@@ -577,15 +577,7 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
-/* Update the indexed item's selection and option without changing the group selection. */
-void mnuSetGroupSelection(MenuPanelGroup *group, s32 panelIndex, s32 selection, s32 option) {
-    /* Required to match: retain byte-offset indexing for the child slot. */
-    s32 slotOffset = panelIndex * 4;
-    s32 slotBaseAddress = (s32)group + 0xC;
-    s32 *itemSlot = (s32 *)(slotBaseAddress + slotOffset);
-    mnuSetPanelItemSelection(*itemSlot, selection);
-    mnuSetPanelItemOption(*itemSlot, option);
-}
+INCLUDE_ASM(const s32, "game/code_00282850", mnuSetGroupSelection);
 
 typedef struct MenuSpriteState {
     u8 pad00[0x10];

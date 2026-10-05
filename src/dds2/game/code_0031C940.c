@@ -22,7 +22,7 @@ typedef struct ModelInstance {
 } ModelInstance;
 
 void itfDeactivateModelInstance(ModelInstance *item);
-void func_0031D680(ModelInstance *item);
+void itfDrawModelInstanceImage(ModelInstance *item);
 extern s32 itfDrawUniformlyScaledIndexedImage(s32, s32, s32, s32, s32, s32, s32, f32);
 
 typedef struct ModelInstanceList {
@@ -213,7 +213,7 @@ void func_0031D558(ModelInstanceWork *work, u32 flags) {
         item = list->items;
         for (instanceIndex = 0; instanceIndex < list->count; instanceIndex++, item++) {
             if (item->flags & 1) {
-                func_0031D680(item);
+                itfDrawModelInstanceImage(item);
                 if ((flags & 1) == 0) {
                     item->animationFrame++;
                 }
@@ -230,7 +230,7 @@ void func_0031D558(ModelInstanceWork *work, u32 flags) {
     }
 }
 
-void func_0031D680(ModelInstance *item) {
+void itfDrawModelInstanceImage(ModelInstance *item) {
     f32 alpha = 1.0f;
     s32 kind;
 

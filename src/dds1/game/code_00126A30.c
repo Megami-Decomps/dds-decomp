@@ -182,8 +182,6 @@ extern u32 fldValueRecords;
 extern u32 fldAuxRecordResource;
 extern u32 fldValueRecordResource;
 
-extern s32 D_003BADF8;
-extern s32 D_003BADEC;
 extern u32 fldSkyDrawState;
 
 extern u32 fldSwayMode;
@@ -257,6 +255,7 @@ extern u32 fldMarkerTexture;
 extern u32 D_003BD7C0;
 extern u8 D_0032F260[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern void fldResetRecordState(void);
 extern u32 sdfTexAcquireResourceTexture(void *);
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
@@ -2727,7 +2726,7 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0068);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A00A8);
 
-void func_00131A88(void) {
+void fldLoadBattleSkyAndFilter(void) {
     s32 i;
     u32 command;
 
@@ -3432,28 +3431,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-/* Clear populated values before discarding the count and releasing storage. */
-void fldResetRecordState(void) {
-    s32 remaining = fldValueRecordCount;
-    if (remaining > 0) {
-        /* Required to match: advance a pointer to the value field, not the record base. */
-        u8 *valueCursor = (u8 *)fldValueRecords + 0xd0;
-        do {
-            remaining--;
-            *(s32 *)valueCursor = 0;
-            valueCursor += 0xe4;
-        } while (remaining != 0);
-    }
-    fldValueRecordCount = 0;
-    fldAreaState[0x28] = -1;
-    fldAreaState[0x29] = -1;
-    fldAreaState[0x2b] = -1;
-    D_003BADF8 = 0;
-    D_003BADEC = 0;
-    if (fldValueRecords != 0) {
-        fldReleaseRecordStorage();
-    }
-}
+INCLUDE_ASM(const s32, "game/code_00126A30", fldResetRecordState);
 
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135360);
