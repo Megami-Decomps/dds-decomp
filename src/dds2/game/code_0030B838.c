@@ -2,6 +2,7 @@
 #include "fpu.h"
 #include "gs_packet.h"
 #include "sdf.h"
+#include "eff.h"
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;
@@ -22,7 +23,7 @@ extern void effObjSetInnerFirstVec(s32, void *);
 
 extern void effObjSetInnerSecondVec(s32, void *);
 
-extern s32 func_0030DE08(f32, f32);
+extern void func_0030DE08(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfCounterDestroyRuntime();
 
@@ -185,46 +186,14 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void func_00108EC0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
 
 
-typedef struct SdfSpriteEntry {
-    u8 pad00[0xC];
-    s32 outX;      /* 0x0C */
-    s32 outY;      /* 0x10 */
-    s32 f14;       /* 0x14 */
-    s32 f18;       /* 0x18 */
-    s32 f1C;       /* 0x1C */
-    s32 f20;       /* 0x20 */
-    u8 pad24[0x58];
-    s32 f7C;       /* 0x7C */
-    s32 f80;       /* 0x80 */
-    s32 f84;       /* 0x84 */
-    s32 f88;       /* 0x88 */
-    s32 f8C;       /* 0x8C */
-    s32 f90;       /* 0x90 */
-    u8 pad94[0xC];
-} SdfSpriteEntry;
 
-typedef struct SdfSpriteSet {
-    u8 pad00[0x18];
-    SdfSpriteEntry *entries; /* 0x18 */
-} SdfSpriteSet;
-
-typedef struct SdfSpritePlace {
-    s32 bank;      /* 0x00 */
-    s32 slot;      /* 0x04 */
-    s32 offsetX;   /* 0x08 */
-    s32 offsetY;   /* 0x0C */
-} SdfSpritePlace;
-
-extern SdfSpritePlace D_00400DF0[];
+/* Resource bank, entry index, X offset, Y offset. */
+extern s32 D_00400DF0[][4];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, u32, s32, s32, s32);
 
-#define SDF_SPRITE(index) (((SdfSpriteSet *)sdfInstalledSpriteSlots[D_00400DF0[index].bank])->entries + D_00400DF0[index].slot)
+#define SDF_SPRITE(index) (((EffectSlotSet *)sdfInstalledSpriteSlots[D_00400DF0[index][0]])->workEntries + D_00400DF0[index][1])
 
-static inline s32 sprPlaceBank(SdfSpritePlace *p) { return p->bank; }
-static inline s32 sprPlaceSlot(SdfSpritePlace *p) { return p->slot; }
-static inline s32 sprPlaceX(SdfSpritePlace *p) { return p->offsetX; }
-static inline s32 sprPlaceY(SdfSpritePlace *p) { return p->offsetY; }
 
 extern s32 fldLoadMapResource(const char *, MapResource *);
 
@@ -814,11 +783,39 @@ void sdfReleaseAllSpriteSlots(void) {
     } while (--remaining >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DB40);
+void func_0030DB40(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                  s32 flags, s32 context) {
+    func_00306CD0((x + D_00400DF0[placementIndex][2]) << 4,
+                  (y + D_00400DF0[placementIndex][3]) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
+                  D_00400DF0[placementIndex][1],
+                  context);
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DBF0);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DE08);
+void func_0030DE08(f32 scaleX, f32 scaleY, s32 x, s32 y, s32 z, s32 alpha,
+                   s32 placementIndex, s32 flags, s32 context) {
+    s32 width;
+    s32 height;
+
+    width = SDF_SPRITE(placementIndex)->width =
+        (s32)(scaleX * (f32)SDF_SPRITE(placementIndex)->sourceWidth) << 4;
+    height = SDF_SPRITE(placementIndex)->height =
+        (s32)(scaleY * (f32)SDF_SPRITE(placementIndex)->sourceHeight) << 3;
+    func_00306CD0(((x + D_00400DF0[placementIndex][2]) << 4) - (width >> 1),
+                  ((y + D_00400DF0[placementIndex][3]) << 3) - (height >> 1),
+                  z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+                  sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
+                  D_00400DF0[placementIndex][1], context);
+    SDF_SPRITE(placementIndex)->width =
+        SDF_SPRITE(placementIndex)->sourceWidth << 4;
+    SDF_SPRITE(placementIndex)->height =
+        SDF_SPRITE(placementIndex)->sourceHeight << 3;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030B838", sdfDrawUniformlyScaledSlotImage);
 

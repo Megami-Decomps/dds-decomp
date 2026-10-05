@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002649B0);
@@ -66,7 +67,7 @@ void itfUpdateFadeColor(TitleFadeWork *work) {
     }
 }
 
-extern void func_002BF438(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
 
@@ -93,7 +94,7 @@ void func_00264EF0(TitleFadeWork *work) {
             colors[2] = color;
             colors[3] = color;
             func_002BF438(positions[i][0] << 4, positions[i][1] << 3, 0,
-                         (s32)colors, 0, work->spriteResource, positions[i][2], 0x53);
+                         colors, 0, (EffectSlotSet *)work->spriteResource, positions[i][2], 0x53);
         }
     }
 }

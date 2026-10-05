@@ -7,27 +7,45 @@
 /* The entry offset is relative to the table's record base. */
 typedef struct {
     s32 offset;
-    u8 pad4[0x10];
+    s32 colorOffset;
+    u32 unk8;
+    u32 frameCount;
+    u32 flags;
 } BillEntry; /* 0x14 bytes */
 
+/* Each 0x18-byte animation frame supplies dimensions, placement, UVs and hold time. */
 typedef struct {
-    u8 pad00[0x12];
+    s16 width;
+    s16 height;
+    s16 x;
+    s16 y;
+    u16 u0;
+    u16 v0;
+    u16 u1;
+    u16 v1;
+    s16 childIndex;
     s16 value;
+    f32 scale;
 } BillRecord;
 
 typedef struct {
     u8 pad[4];
-    s32 base;
+    u8 *base;
     BillEntry *entries;
 } BillTable;
 
 typedef struct {
     s32 unk0;
-    u32 unk4;
-    s32 recordValue;
+    s32 frameIndex;
+    s32 framesRemaining;
     BillEntry *entry;
-    s32 recordAddress;
+    BillRecord *record;
 } BillOut;
+
+extern void *memcpy(void *, const void *, u32);
+extern BillChildPayload *func_00158F88(BillObj *, void *);
+extern void func_00157EA0(BillObj *, BillChildPayload *);
+extern void func_00158430(BillObj *, BillRenderPair *);
 
 extern BillObj *billCreateIndexed(s32 index, u32 data);
 
@@ -224,7 +242,7 @@ BillObj *billAllocList(void *resourceData) {
     newobj->unk50 = 1;
     newobj->unk48 = 0;
     newobj->unk4C = 0;
-    newobj->unk3C = 0;
+    newobj->pair.unk8 = 0;
     func_001594C8(newobj, 0);
     return newobj;
 }
@@ -272,24 +290,25 @@ u32 effBillModulateColors(u32 colorA, u32 colorB) {
     return blended[0];
 }
 
+
 INCLUDE_ASM(const s32, "effect/billManager", func_001591D8);
 
-/* Resolves an indexed billboard record and caches its signed +0x12 value. */
+/* Resolve a frame list and initialize its signed hold-time counter. */
 void billResolveEntry(BillTable *table, s32 index, BillOut *out) {
-    s16 kind;
+    s16 framesRemaining;
     s32 offset;
     BillEntry *entry;
-    s32 base;
+    u8 *base;
 
     base = table->base;
     entry = table->entries + index;
     offset = entry->offset;
     out->entry = entry;
     base = base + offset;
-    out->unk4 = 0;
-    kind = ((BillRecord *)base)->value;
-    out->recordAddress = base;
-    out->recordValue = (s32)kind;
+    out->frameIndex = 0;
+    framesRemaining = ((BillRecord *)base)->value;
+    out->record = (BillRecord *)base;
+    out->framesRemaining = (s32)framesRemaining;
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001594C8);
@@ -323,34 +342,20 @@ void billReleaseSharedEntryBlock(void *arg) {
     }
 }
 
-typedef struct BillVec4 {
-    f32 v[4];
-} BillVec4;
-
-typedef struct BillSourceRecord {
-    u32 unk00;          /* 0x00 */
-    u8 pad04[8];
-    BillVec4 vector;    /* 0x0C */
-    f32 x;              /* 0x1C */
-    f32 y;              /* 0x20 */
-    f32 z;              /* 0x24 */
-    f32 w;              /* 0x28 */
-} BillSourceRecord;
-extern BillSourceRecord *func_00158F88(BillObj *obj, void *entries);
 
 typedef struct BillSnapshot {
     f32 x;              /* 0x00 */
     f32 y;              /* 0x04 */
-    f32 z;              /* 0x08 */
-    f32 w;              /* 0x0C */
+    f32 halfWidth;      /* 0x08 */
+    f32 halfHeight;     /* 0x0C */
     u32 unk10;          /* 0x10 */
-    BillVec4 vector;    /* 0x14 */
+    BillTextureQuad uv; /* 0x14 */
 } BillSnapshot;
 
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
 void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
-    BillSourceRecord *record;
+    BillChildPayload *record;
 
     if (obj->kind == 1) {
         record = func_00158F88(obj, obj->unk60);
@@ -360,11 +365,11 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
         return;
     }
     snapshot->x = record->x;
-    snapshot->unk10 = record->unk00;
+    snapshot->unk10 = record->value;
     snapshot->y = record->y;
-    snapshot->z = record->z;
-    snapshot->w = record->w;
-    snapshot->vector = record->vector;
+    snapshot->halfWidth = record->halfWidth;
+    snapshot->halfHeight = record->halfHeight;
+    memcpy(&snapshot->uv, &record->uv, sizeof(snapshot->uv));
 }
 
 extern BillDispatch D_003AA990[];

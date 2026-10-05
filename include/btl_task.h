@@ -27,7 +27,10 @@ typedef struct SceneAiWork {
     BtlIndexList *listA;     /* 0x0C */
     BtlIndexList *listB;     /* 0x10 */
     s32 source;             /* 0x14 */
-    u8 pad18[0x8C];
+    /* The selection helper indexes a 3-by-3 target-mask table with this cursor. */
+    u16 cursorRow;          /* 0x18 */
+    u16 cursorColumn;       /* 0x1A */
+    u8 pad1C[0x88];
 } SceneAiWork;
 
 typedef struct BtlUnit BtlUnit;

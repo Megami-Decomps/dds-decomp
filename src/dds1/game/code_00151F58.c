@@ -306,7 +306,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
         ((BillChildPayload *)effect->entryList)->signedVariant = variantValue;
         break;
     case 1:
-        effect->unk3C = variantValue;
+        effect->pair.unk8 = variantValue;
         break;
     }
 }
@@ -316,7 +316,7 @@ u16 billGetVariantValue(BillObj *effect) {
     case 0:
         return ((BillChildPayload *)effect->entryList)->variant;
     case 1:
-        return effect->unk3C;
+        return effect->pair.unk8;
     default:
         return 0;
     }

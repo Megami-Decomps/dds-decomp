@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 extern s32 effGetSlotWorkOrOverride(s32, s32);
 
@@ -35,46 +36,6 @@ void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValue
 
 INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BEEA0);
 
-typedef struct EffectSlotDescription {
-    u8 pad00[0x14];
-    u32 textureIndex;
-    s32 flags;
-    u8 pad1C[0x10];
-    s32 presetMode;
-    u8 pad30[4];
-    u32 rect[4];
-    s32 xOffset;
-    s32 yOffset;
-    u8 pad4C[8];
-    s32 colors[4];
-    u8 pad64[0x1C];
-} EffectSlotDescription;
-
-typedef struct BdWork {
-    s32 flags;
-    s32 unk04;
-    s32 unk08;
-    s32 width;
-    s32 height;
-    u8 pad14[0x10];
-    f32 alpha;
-    u8 pad28[0x28];
-    s32 colors[4];
-    u8 pad60[8];
-    u32 rect[4];
-    u8 pad78[0x1C];
-    s32 slotOffset;
-    u8 pad98[8];
-} BdWork;
-
-typedef struct EffectSlotSet {
-    u8 pad00[0x10];
-    EffectSlotDescription *descriptions;
-    u32 workAllocation;
-    BdWork *workEntries;
-    u8 pad1C[8];
-    u32 *textures;
-} EffectSlotSet;
 
 extern void sdfSubmitGsTestOneRegisterPacket();
 extern void effSelectPresetAndDispatch(u32, u32, u32, u32, u32, u32, u32, u32);
@@ -89,7 +50,7 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
     s32 colors[4];
     EffectSlotDescription *description = &set->descriptions[slotIndex];
     BdWork *work;
-    u32 texture = set->textures[description->textureIndex];
+    u32 texture = (u32)set->handles[description->textureIndex];
     s32 flip;
     s32 kind;
     s32 mode;
@@ -109,11 +70,11 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
         y += description->yOffset * 8;
     }
     if (flags & 0x10) {
-        x -= draw->unk04;
-        y -= draw->unk08;
+        x -= draw->xOffset;
+        y -= draw->yOffset;
     } else {
-        x += draw->unk04;
-        y += draw->unk08;
+        x += draw->xOffset;
+        y += draw->yOffset;
     }
     if (description->flags & 4) {
         flip = 1;
@@ -130,23 +91,23 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
                                    color, mode, buffer);
     } else {
         for (i = 0; i < 4; i++) {
-            colors[i] = description->colors[i] + draw->colors[i];
+            colors[i] = description->colors[i] + draw->parameters[i];
         }
         func_002BEEA0(x, y, z, draw->width, draw->height, description->rect,
-                     draw->rect, colors, color, kind, mode, flip, texture, buffer);
+                     draw->bounds.texture.rect, colors, color, kind, mode, flip, texture, buffer);
         func_002BE8A8(x, y, z, draw->width, draw->height, colors, color,
-                     kind, draw->alpha, mode, flip, texture, buffer);
+                     kind, draw->angleDegrees, mode, flip, texture, buffer);
     }
     if (flags & 0x80) {
         effUpdateTimedStates((u8 *)set, slotIndex, (u8 *)draw);
     }
 }
-void func_002BF400(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8) {
-    effDrawTextureSlot(a0, a1, a2, a6 + 0x14, a3, (EffectSlotSet *)a4, a5, (BdWork *)a6, a7);
+void func_002BF400(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer) {
+    effDrawTextureSlot(x, y, z, (s32)entry->cornerColors, flags, set, slot, entry, layer);
 }
-void func_002BF438(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7) {
-    effDrawTextureSlot(a0, a1, a2, a3, a4, (EffectSlotSet *)a5, a6,
-                  (BdWork *)effGetSlotWorkOrOverride(a5, a6), a7);
+void func_002BF438(s32 x, s32 y, s32 z, u32 *palette, s32 flags, EffectSlotSet *set, s32 slot, s32 layer) {
+    effDrawTextureSlot(x, y, z, (s32)palette, flags, set, slot,
+                  (BdWork *)effGetSlotWorkOrOverride((s32)set, slot), layer);
 }
 
 

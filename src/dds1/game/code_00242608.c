@@ -1399,7 +1399,64 @@ s32 func_00244D10(s32 index, s32 halfPrice) {
     return price;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244E08);
+extern const s32 D_003BC3A8[];
+
+s32 func_00244E08(ShopScene *scene) {
+    ShopWindowContainer *window = (ShopWindowContainer *)scene->window;
+    CampWindowParams *parameters = (CampWindowParams *)(window->list->unk1C + 0x60);
+    s16 extraOption = scene->extraOption;
+    s32 itemId = parameters->id;
+    s32 price = parameters->price;
+    s32 kind = parameters->mode;
+    s32 operations[2];
+    s32 operation;
+    s32 limit = 0;
+    s32 capacity;
+    s32 available;
+    s32 affordable;
+
+    memcpy(operations, D_003BC3A8, sizeof(operations));
+    if (extraOption != 0) {
+        operation = *(s32 *)((ShopWindowContainer *)scene->sprite)->list->unk1C + 1;
+    } else {
+        operation = operations[*(s32 *)((ShopWindowContainer *)scene->sprite)->list->unk1C];
+    }
+    capacity = scene->count8C;
+    switch (operation) {
+    case 1:
+    case 2: {
+        s32 globalState = datGameState;
+
+        affordable = *(s32 *)(globalState + 0x3C) / price;
+        limit = affordable;
+        if (kind == 2) {
+            available = capacity - ptyCountBulletItem(itemId);
+        } else if (kind == 3) {
+            available = 1 - *(u8 *)(itemId + globalState + 0x12A0);
+        } else {
+            available = 99 - *(u8 *)(itemId + globalState + 0x12A0);
+        }
+        if (available < 0) {
+            available = 0;
+        }
+        if (available < affordable) {
+            limit = available;
+        }
+        break;
+    }
+    case 3: {
+        s32 quantity = *(u8 *)(itemId + datGameState + 0x12A0);
+
+        if (quantity * price > 9999999) {
+            limit = (s32)(9999999.0f / (f32)price);
+        } else {
+            limit = quantity;
+        }
+        break;
+    }
+    }
+    return limit;
+}
 
 s32 func_00244FA0(ShopScene *context) {
     s32 globalState = datGameState;
@@ -1437,7 +1494,6 @@ s32 func_00244FA0(ShopScene *context) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
 
-extern s32 func_00244E08(ShopScene *scene);
 
 s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
     s32 limit = func_00244E08(scene);

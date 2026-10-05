@@ -245,7 +245,7 @@ s32 func_00290410(MenuPanelObject *object, s8 flags) {
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427668);
 
-INCLUDE_ASM(const MantraNodePos *, "game/code_0028FD30", func_002906E0);
+INCLUDE_ASM(const s32, "game/code_0028FD30", func_002906E0);
 
 u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
     return (u32)object->state.defaultSelector;
@@ -422,7 +422,7 @@ typedef struct MenuPanelPositionRecord {
     s8 flags;
 } MenuPanelPositionRecord;
 
-INCLUDE_ASM(const MenuPanelPositionRecord *, "game/code_0028FD30", func_00291400);
+INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
 extern const MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
 
 

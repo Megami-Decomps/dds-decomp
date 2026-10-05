@@ -799,23 +799,25 @@ typedef struct MenuEffectNode {
 } MenuEffectNode;
 
 typedef struct MenuEffectPair {
-    u8 pad00[0x10];
+    s32 variant;
+    u8 pad04[0x0C];
     s32 quantizedSpan; /* 0x10 */
     s32 *settings; /* 0x14: four selectable effect settings */
     u8 settingIndex; /* 0x18 */
     s8 positionY; /* 0x19 */
-    u8 pad1A[0x0E];
-    s32 configurationHandle; /* 0x28 */
-    s32 secondaryHandle; /* 0x2C */
-    u8 pad30[8];
-    MenuEffectNode *first;  /* 0x38 */
-    MenuEffectNode *second; /* 0x3C */
+    u8 pad1A[2];
+    s32 textures[7]; /* 0x1C */
+    MenuEffectNode *effects[2]; /* 0x38 */
+    s32 activeEffect;
+    s32 fade;
+    s32 fadeOut;
+    s32 holdEffectUpdate;
 } MenuEffectPair;
 
 /* Set both effect positions; only the first Y comes from the active menu entry. */
 void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
-    MenuEffectNode *first = pair->first;
-    MenuEffectNode *second = pair->second;
+    MenuEffectNode *first = pair->effects[0];
+    MenuEffectNode *second = pair->effects[1];
     MenuEffectPosition *firstPosition = first->position;
     MenuEffectPosition *secondPosition = second->position;
     s32 *coordinates = firstPosition->coordinates;
@@ -838,11 +840,11 @@ void func_002C1D10(MenuEffectPair *pair) {
 
     bounds[0] = 0;
     bounds[1] = end;
-    itfGridSetQuantizedBounds(pair->configurationHandle, 0,
+    itfGridSetQuantizedBounds(pair->textures[3], 0,
                               start + offset, bounds[0],
                               bounds[1] - start + offset, bounds[0]);
     end += offset;
-    itfGridSetQuantizedBounds(pair->secondaryHandle, 0, end, 0, end, 0);
+    itfGridSetQuantizedBounds(pair->textures[4], 0, end, 0, end, 0);
 }
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
@@ -857,7 +859,7 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting(pair->configurationHandle, 0, (s32)pair->first, 0, setting, 0);
+    effConfigureWithDefaultSetting(pair->textures[3], 0, (s32)pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
@@ -870,17 +872,18 @@ void mnuCreatePairedEffects(MenuEffectPair *pair) {
     u32 effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
-    pair->first = (MenuEffectNode *)effectHandle;
+    pair->effects[0] = (MenuEffectNode *)effectHandle;
     effectHandle = effCreateStatusBatch(3);
-    pair->second = (MenuEffectNode *)effectHandle;
+    pair->effects[1] = (MenuEffectNode *)effectHandle;
 }
 
-/* Release the two effect-batch handles in the native object-word layout. */
+/* The public word-pointer boundary refers to the same complete panel owner. */
 void mnuReleasePairedEffectBatches(s32 *objectWords) {
+    MenuEffectPair *pair = (MenuEffectPair *)objectWords;
     u32 effectIndex;
 
     for (effectIndex = 0; effectIndex < 2; effectIndex++) {
-        effDestroyPackedBatch(objectWords[effectIndex + 14]);
+        effDestroyPackedBatch((s32)pair->effects[effectIndex]);
     }
 }
 
@@ -907,13 +910,13 @@ void mnuDrawPanelSequenceByRow(s32 x, s32 y, s32 depth, s32 color, s32 variant, 
 
 /* Release the seven sprite texture handles, then the paired effect batches. */
 void mnuReleaseSpriteTextures(u32 *objectWords) {
-    u32 *textureCursor = objectWords + 7;
+    s32 *textureCursor = ((MenuEffectPair *)objectWords)->textures;
     u32 textureIndex = 0;
     do {
         effDestroyResourceSlotSet(*textureCursor++);
         textureIndex++;
     } while (textureIndex < MNU_PANEL_TEXTURE_COUNT);
-    mnuReleasePairedEffectBatches(objectWords);
+    mnuReleasePairedEffectBatches((s32 *)objectWords);
 }
 
 /* Select the packed ratio color; a zero divisor retains the default color. */
@@ -931,6 +934,14 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
     }
     return color;
 }
+
+typedef struct FrFontGlyph FrFontGlyph;
+extern char D_00437C88[];
+extern s32 func_0035C860(char *, const char *, ...);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
+extern char D_00437C78[];
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
@@ -1019,14 +1030,8 @@ void mnuFreePanelItemWork(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
-typedef struct FrFontGlyph FrFontGlyph;
-extern char D_00437C88[];
-extern s32 func_0035C860(char *, const char *, ...);
 extern void func_002C2AE8(s32, s32, s32, u32, s32, MenuPanelItem *, u32);
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
 void func_002C3010(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
                   MenuPanelItem *item, u32 flags) {

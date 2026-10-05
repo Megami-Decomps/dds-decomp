@@ -102,6 +102,17 @@ typedef struct EffArrHdr {
     void *allocation; /* Allocation handle. */
 } EffArrHdr;
 
+/* Two-child draw descriptor embedded in the billboard instance at +0x34. */
+typedef struct BillRenderPair {
+    struct BillChildPayload *children[2];
+    u16 unk8;
+    u16 kind;
+    u32 colors[2];
+} BillRenderPair;
+
+typedef char BillRenderPair_size_must_be_0x14[
+    (sizeof(BillRenderPair) == 0x14) ? 1 : -1];
+
 /* Billboard instance and kind-specific payload (0x64); DDS1/2 effect/billManager.c and game billboard units. */
 typedef struct BillObj {
     f32 unk0;
@@ -119,9 +130,7 @@ typedef struct BillObj {
     u16 kind;         /* 0x2C: Kind: child (0) or entry list (1). */
     u16 unk2E;
     void *entryList;  /* 0x30 */
-    u8 pad34[8];
-    u16 unk3C;
-    u8 pad3E[10];
+    BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
     u32 unk48;
     u32 unk4C;
     u16 unk50;
@@ -142,6 +151,19 @@ typedef struct BillData {
     u8 pad18[24];
 } BillData;
 
+typedef struct BillTextureCoordinate {
+    u16 u;
+    u16 v;
+} BillTextureCoordinate;
+
+/* Native billboard UVs are four ordered U/V corners, not a float vector. */
+typedef struct BillTextureQuad {
+    BillTextureCoordinate corners[4];
+} BillTextureQuad;
+
+typedef char BillTextureQuad_size_must_be_0x10[
+    (sizeof(BillTextureQuad) == 0x10) ? 1 : -1];
+
 /* Kind-zero billboard payload shared by the resource initializer and accessors. */
 typedef struct BillChildPayload {
     s32 value;
@@ -149,10 +171,16 @@ typedef struct BillChildPayload {
         s16 signedVariant;
         u16 variant;
     };
-    u8 pad06[0x1E];
+    u8 pad06[6];
+    BillTextureQuad uv; /* 0x0C */
+    f32 x;             /* 0x1C */
+    f32 y;             /* 0x20 */
     f32 halfWidth;  /* 0x24 */
     f32 halfHeight; /* 0x28 */
 } BillChildPayload;
+
+typedef char BillChildPayload_size_must_be_0x2C[
+    (sizeof(BillChildPayload) == 0x2C) ? 1 : -1];
 
 /* Billboard callbacks and metadata (0xC); DDS1/2 effect/billManager.c and game billboard units. */
 typedef struct {
@@ -266,6 +294,95 @@ extern void effGetResourceEntryPosition(EffResourceWork *, s32, f32 *);
 extern void effSetResourceEntryValue(EffResourceWork *, s32, u32);
 extern void effDrawInstancedResourceTrianglesVU(EffResourceWork *);
 extern void effBuildRadialFanStreams(EffResourceWork *, u32, u32, u32, f32, f32);
+
+/* Native 0x14-byte timed state embedded in a slot's kind-specific payload. */
+typedef struct EffTimedState {
+    u32 flags;
+    s32 value;
+    union {
+        s32 delay;
+        u32 materialFlags;
+    };
+    union {
+        s32 delayMax;
+        u32 materialValue;
+    };
+    u8 *source;
+} EffTimedState;
+
+/* Native 0xA0-byte slot work. Material, grid and textured-surface operations
+ * use overlapping payload fields in the same slot, not separate allocations. */
+typedef struct BdWork {
+    s32 flags;           /* 0x00 */
+    s32 xOffset;         /* 0x04 */
+    s32 yOffset;         /* 0x08 */
+    s32 width;           /* 0x0C */
+    s32 height;          /* 0x10 */
+    u32 cornerColors[4]; /* 0x14 */
+    f32 angleDegrees;    /* 0x24 */
+    EffTimedState states[2]; /* 0x28 */
+    /* Per-mode words: corner-color offsets, grid x/y/width/height, or bar crop. */
+    s32 parameters[4];   /* 0x50: bar crop width uses word 2 */
+    void *owner;         /* 0x60 */
+    s32 slotIndex;       /* 0x64 */
+    union {
+        struct {
+            u32 rect[4]; /* 0x68 */
+            u8 pad78[4];
+        } texture;
+        struct {
+            u8 pad68[4];
+            s32 quantizedBounds[4]; /* 0x6C */
+        } grid;
+    } bounds;
+    s32 sourceWidth;     /* 0x7C */
+    s32 sourceHeight;    /* 0x80 */
+    u32 savedColors[4];  /* 0x84 */
+    s32 slotOffset;      /* 0x94 */
+    u8 pad98[4];
+    union {
+        s32 address;
+        u32 bits;
+        struct BdWork *asset;
+    } alternate;        /* 0x9C */
+} BdWork;
+
+/* Native 0x80-byte source descriptor; its bounds feed both grid and slot drawing. */
+typedef struct EffectSlotDescription {
+    u8 pad00[0x14];
+    u32 textureIndex;
+    s32 flags;
+    u8 pad1C[0x10];
+    s32 presetMode;
+    u8 pad30[4];
+    u32 rect[4];
+    s32 xOffset;
+    s32 yOffset;
+    s32 width;
+    s32 height;
+    s32 colors[4];
+    u8 pad64[0x1C];
+} EffectSlotDescription;
+
+/* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */
+typedef struct EffectSlotSet {
+    u32 sourceAllocation;
+    u32 unk04;
+    u32 count;
+    u32 descriptionAllocation;
+    EffectSlotDescription *descriptions;
+    u32 workAllocation;
+    BdWork *workEntries;
+    u32 textureCount;
+    u32 textureAllocation;
+    void **handles;
+    s32 defaultValue;
+    u8 pad2C[4];
+} EffectSlotSet;
+
+typedef char BdWorkSizeCheck[sizeof(BdWork) == 0xA0 ? 1 : -1];
+typedef char EffectSlotDescriptionSizeCheck[sizeof(EffectSlotDescription) == 0x80 ? 1 : -1];
+typedef char EffectSlotSetSizeCheck[sizeof(EffectSlotSet) == 0x30 ? 1 : -1];
 
 /* Particle cell shared by the DDS1/2 particle subroutines (0x14 bytes). */
 typedef struct ParCell {
