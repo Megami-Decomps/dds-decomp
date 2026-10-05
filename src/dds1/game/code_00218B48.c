@@ -2596,7 +2596,7 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
 
-extern s32 dds3AdvanceWorldCounter(void);
+extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 

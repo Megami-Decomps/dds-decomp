@@ -172,7 +172,7 @@ extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
 extern void *memset(void *dst, s32 value, u32 size);
 
-extern s32 dds3AdvanceWorldCounter();
+extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 

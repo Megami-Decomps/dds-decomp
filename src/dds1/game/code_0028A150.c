@@ -3246,30 +3246,19 @@ u32 fileJobSerializedSize(FileJob *job) {
     return size;
 }
 
-/* View block initialised by fileQueueInitTransform: (0,0,0,1) vectors, grey colour. */
-typedef struct FileViewBlock {
-    u8 pad00[0x44];
-    f32 unk44;
-    u8 pad48[0x18];
-    f32 unk60;
-    u32 color;
-    u32 unk68;
-    u8 pad6C[8];
-    f32 unk74;
-} FileViewBlock;
-
+/* Initialize the shared transform prefix, leaving queue/job links untouched. */
 void fileQueueInitTransform(void *queue)
 {
-    FileViewBlock *view = queue;
+    FileQueue *view = queue;
 
     memset(view, 0, 0x80);
     VU0_STORE_VF_UNCLOBBERED(vf0, view);
-    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x10);
-    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x40);
-    view->unk44 = -5.0f;
-    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x50);
-    view->unk60 = 1.0f;
-    view->unk74 = 1.0f;
+    VU0_STORE_VF_UNCLOBBERED(vf0, view->axis);
+    VU0_STORE_VF_UNCLOBBERED(vf0, view->position);
+    view->position[1] = -5.0f;
+    VU0_STORE_VF_UNCLOBBERED(vf0, view->quat);
+    view->scale = 1.0f;
+    view->transformValue = 1.0f;
     view->color = 0x80808080;
     view->unk68 = 0x80;
 }
@@ -3475,7 +3464,7 @@ void fileQueueDestroy(FileQueue *queue) {
     while (job != NULL) {
         FileJob *next = job->next;
         if ((job->flags & 1) == 0) {
-            fileJobDestroy(*(FileJob **)((u8 *)job + 0x90));
+            fileJobDestroy((FileJob *)job->id);
         }
         fileDestroyJob(job);
         job = next;
@@ -3490,7 +3479,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
     s128 vec;
 
     PCP_COPY_VECTOR(queue, source);
-    PCP_COPY_VECTOR((u8 *)queue + 0x10, (u8 *)source + 0x10);
+    PCP_COPY_VECTOR(queue->axis, source->axis);
     queue->transformValue = source->transformValue;
     queue->unk68 = source->unk68;
     for (src = source->first; src != NULL; src = src->next) {
@@ -4454,19 +4443,19 @@ void fileAcquireRecord(FileRecordSlots *record) {
 }
 
 void fileReadVectorPtr20(void *record, u128 *out) {
-    PCP_COPY_VECTOR(out, *(u128 **)((u8 *)record + 0x20));
+    PCP_COPY_VECTOR(out, ((FileRecordSlots *)record)->data0);
 }
 
 void mnuRecordSetVector(void *record, const u128 *value) {
-    PCP_COPY_VECTOR(*(u128 **)((u8 *)record + 0x20), value);
+    PCP_COPY_VECTOR(((FileRecordSlots *)record)->data0, value);
 }
 
 void fileReadRecordSecondVector(void *record, u128 *out) {
-    PCP_COPY_VECTOR(out, *(u128 **)((u8 *)record + 0x20) + 1);
+    PCP_COPY_VECTOR(out, (u128 *)((FileRecordSlots *)record)->data0 + 1);
 }
 
 void fileSetRecordSecondVector(void *record, const u128 *value) {
-    PCP_COPY_VECTOR(*(u128 **)((u8 *)record + 0x20) + 1, value);
+    PCP_COPY_VECTOR((u128 *)((FileRecordSlots *)record)->data0 + 1, value);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileMemoryCardRequestContext);

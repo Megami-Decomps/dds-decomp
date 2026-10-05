@@ -106,14 +106,14 @@ EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
        by this new work rather than reading a live-work tail from src. */
     memcpy(work, src, 0x2C);
     work->allocation = allocation;
-    work->slots = (EffBlurScaleSlot *)((u8 *)work + 0x38);
+    work->slots = (EffBlurScaleSlot *)(work + 1);
     work->sourceHandle = effGetResourceFirstWord(3);
     slot = work->slots;
     while (i < count) {
         effBlurResetScaleSlot(work, slot);
         slot->phase = -(work->params.spacing * (f32)i);
         i++;
-        slot = (EffBlurScaleSlot *)((u8 *)slot + 0x30);
+        slot++;
     }
     return work;
 }

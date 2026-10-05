@@ -145,19 +145,26 @@ extern void *memcpy(void *dst, void *src, u32 n);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void func_00165600(void *);
 
+/* The serialized cell-state block is copied after the variable emitter header. */
+typedef struct ParEmitCellState {
+    u8 pad00[8];
+    u16 verticesPerCell; /* 0x08 */
+    u8 pad0A[0xA];
+    s32 unk14;
+    s32 unk18;
+    s32 cellSystem;      /* 0x1C: allocated cell system */
+    u32 *cellWords;      /* 0x20: one inline word per cell */
+    u8 pad24[0xC];
+} ParEmitCellState; /* 0x30 */
+
 /* Emitter descriptor copied into a fresh allocation by parCloneEmitterAndInitCells. */
 typedef struct ParEmitDesc {
     u8 pad00[0x10];
     s32 count;          /* 0x10 */
     u8 pad14[0x04];
     s32 headerSize;     /* 0x18 */
-    u8 pad1C[0xAC];
-    u16 verticesPerCell; /* 0xC8: perCell input to parAllocateCellSystem */
-    u8 padCA[0x0A];
-    s32 unkD4;          /* 0xD4 */
-    s32 unkD8;          /* 0xD8 */
-    s32 cellSystem;     /* 0xDC: allocated cell system */
-    void *unkE0;        /* 0xE0 */
+    u8 pad1C[0xA4];
+    ParEmitCellState cells; /* 0xC0 */
 } ParEmitDesc;
 
 extern void parClearSlotFlag(s32);
@@ -1499,14 +1506,14 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
 
     memset(desc, 0, 0xF0);
     memcpy(desc, src, src->headerSize);
-    memcpy((u8 *)desc + 0xC0, (u8 *)src + src->headerSize, 0x30);
+    memcpy(&desc->cells, (u8 *)src + src->headerSize, sizeof(desc->cells));
     desc->headerSize = 0xC0;
-    desc->unkE0 = (u8 *)desc + 0xF0;
-    if (desc->verticesPerCell < 3) {
-        desc->verticesPerCell = 3;
+    desc->cells.cellWords = (u32 *)(desc + 1);
+    if (desc->cells.verticesPerCell < 3) {
+        desc->cells.verticesPerCell = 3;
     }
-    desc->cellSystem = parAllocateCellSystem(desc->count, desc->verticesPerCell, 1, 0);
-    parDispatchSub(desc->cellSystem, 0, desc->unkD4, desc->unkD8);
+    desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, 0);
+    parDispatchSub(desc->cells.cellSystem, 0, desc->cells.unk14, desc->cells.unk18);
     func_00165600(desc);
     return desc;
 }

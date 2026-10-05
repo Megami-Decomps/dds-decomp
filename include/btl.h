@@ -50,7 +50,8 @@ typedef struct BtlUnit {
     f32 reach; /* 0xB4 */
     f32 unkB8; /* Setup stores mirror height/reach; meaning otherwise unknown. */
     f32 unkBC;
-    u8 padC0[8];
+    u8 padC0[4];
+    s32 resourceKind; /* 0xC4: selects the actor resource table, as in DDS2 */
     u32 species; /* 0xC8 */
     u8 padCC[0x14];
     s32 displaySpecies; /* 0xE0 */
@@ -78,7 +79,7 @@ typedef struct BtlUnit {
     u16 hp; /* 0x126 */
     u16 maxHp; /* 0x128 */
     u16 unk_12A;
-    u8 pad12C[2];
+    u16 unk12C; /* 0x12C: reset value for the unit parameter at 0x12A */
     u16 conditionFlags; /* 0x12E */
     u8 pad130[4];
     u16 actionTime; /* 0x134 */

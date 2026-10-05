@@ -3289,32 +3289,21 @@ u32 fileJobSerializedSize(FileJob *job) {
     return size;
 }
 
-/* View block initialised by fileQueueInitTransform: (0,0,0,1) vectors, grey colour. */
-typedef struct FileViewBlock {
-    u8 pad00[0x44];
-    f32 unk44;
-    u8 pad48[0x18];
-    f32 unk60;
-    u32 color;
-    u32 unk68;
-    u8 pad6C[8];
-    f32 unk74;
-} FileViewBlock;
-
+/* Initialize the shared transform prefix, leaving queue/job links untouched. */
 void fileQueueInitTransform(void *queue)
 {
-    FileViewBlock *view = queue;
+    FileQueue *view = queue;
 
     memset(view, 0, 0x80);
     VU0_STORE_VF_UNCLOBBERED(vf0, view);
-    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x10);
-    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x40);
-    view->unk44 = -5.0f;
-    VU0_STORE_VF_UNCLOBBERED(vf0, (u8 *)view + 0x50);
-    view->unk60 = 1.0f;
-    view->unk74 = 1.0f;
+    VU0_STORE_VF_UNCLOBBERED(vf0, view->axis);
+    VU0_STORE_VF_UNCLOBBERED(vf0, view->position);
+    view->position[1] = -5.0f;
+    VU0_STORE_VF_UNCLOBBERED(vf0, view->quat);
+    view->scale = 1.0f;
+    view->transformValue = 1.0f;
     view->color = 0x80808080;
-    view->unk68 = 0x80;
+    view->transformWord = 0x80;
 }
 
 void fileJobResetAndInitTransform(FileJob *job) {
@@ -3539,7 +3528,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
     s128 vec;
 
     PCP_COPY_VECTOR(queue, source);
-    PCP_COPY_VECTOR((u8 *)queue + 0x10, (u8 *)source + 0x10);
+    PCP_COPY_VECTOR(queue->axis, source->axis);
     queue->transformValue = source->transformValue;
     queue->transformWord = source->transformWord;
     for (src = source->first; src != NULL; src = src->next) {
@@ -3656,11 +3645,11 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D49B8);
 
 void fileReadVector40(void *work, void *dst) {
-    PCP_COPY_VECTOR(dst, (u8 *)work + 0x40);
+    PCP_COPY_VECTOR(dst, ((FileQueue *)work)->position);
 }
 
 void fileReadStoredQuaternion(void *work, void *dst) {
-    PCP_COPY_VECTOR(dst, (u8 *)work + 0x50);
+    PCP_COPY_VECTOR(dst, ((FileQueue *)work)->quat);
 }
 
 f32 fileGetQueueScale(FileQueue *queue) {

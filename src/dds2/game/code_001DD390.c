@@ -455,9 +455,9 @@ extern struct SoundTask *btlCreateHookedUnitSoundTask();
 
 extern u32 D_00436AD4;
 
-extern u64 dds3AdvanceWorldCounter(void);
+extern u32 dds3AdvanceWorldCounter(void);
 
-extern u32 evtSpawnActionObj9(u64);
+extern struct ActionObj *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
@@ -6904,13 +6904,13 @@ s32 btlInitCursorAndApplyAction(s32 action, s32 state) {
 }
 
 void btlSpawnBattleWorldAction(void) {
-    u64 worldCounter;
+    u32 worldCounter;
     s32 work;
     u32 action;
 
     work = btlGetRuntime();
     worldCounter = dds3AdvanceWorldCounter();
-    action = evtSpawnActionObj9(worldCounter);
+    action = (u32)evtSpawnActionObj9(worldCounter);
     ((BtlWork *)work)->unk228 = action;
     D_00436AD4 = 0;
 }

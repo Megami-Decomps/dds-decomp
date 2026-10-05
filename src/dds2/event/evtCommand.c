@@ -591,7 +591,7 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00241AF8);
 INCLUDE_ASM(const s32, "event/evtCommand", func_00241B98);
 
 extern void *memset(void *dst, s32 value, u32 size);
-extern s32 dds3AdvanceWorldCounter();
+extern u32 dds3AdvanceWorldCounter(void);
 extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 extern void effObjSetInnerFloat(s32 obj, f32 value);
 

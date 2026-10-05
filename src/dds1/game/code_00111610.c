@@ -27,7 +27,7 @@ typedef struct ObjectWithResource {
 extern u32 dds3CreatePathCurveWork(u32);
 
 extern ObjectWithResource *dds3AppendWorldObjectNode();
-extern u32 dds3AdvanceWorldCounter();
+extern u32 dds3AdvanceWorldCounter(void);
 extern SlotEntry dds3SlotRingEntries[];
 extern s32 dds3SlotRingCursor;
 

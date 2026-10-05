@@ -191,7 +191,7 @@ extern void fldFreeDisplayObjects(void);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
-extern void *dds3AdvanceWorldCounter(void);
+extern u32 dds3AdvanceWorldCounter(void);
 
 extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
 
@@ -298,7 +298,7 @@ extern void dds3SetWorldPlayerObject(void *object, u32 value);
 
 extern void func_00112058(u32, s32, s32);
 
-extern u32 dds3SpawnCameraSlotObj5(void *, f32 *, f32 *);
+extern u32 dds3SpawnCameraSlotObj5(s32, f32 *, f32 *);
 
 extern s32 D_0038A67C[];
 
@@ -2078,7 +2078,7 @@ typedef struct FieldVec4 {
 extern FieldVec4 D_00412F10;
 extern FieldVec4 D_00412F20;
 extern char D_00435F58[];
-extern u32 dds3CreateConfiguredCameraObject(void *, FieldVec4 *, FieldVec4 *, FieldVec4 *);
+extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, FieldVec4 *);
 extern void dds3SetCameraVector(u32, FieldVec4 *);
 extern void effObjSetInnerFloat(u32, f32);
 extern void dds3SetWorldCameraObject(u64, u32);

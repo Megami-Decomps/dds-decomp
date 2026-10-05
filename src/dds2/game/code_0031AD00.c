@@ -1,5 +1,5 @@
 #include "common.h"
-extern s32 dds3AdvanceWorldCounter(void);
+extern u32 dds3AdvanceWorldCounter(void);
 extern s32 dds3CreateConfiguredCameraObject(s32 arg0, void *arg1, void *arg2, void *arg3);
 extern void dds3SetWorldEntryCallbackTarget(s32 arg0, void *arg1);
 extern void dds3SetCameraVector(s32 arg0, void *arg1);

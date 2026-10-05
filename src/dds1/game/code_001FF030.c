@@ -3411,7 +3411,7 @@ s32 btlSwapRandomBossSelection(void) {
         newUnit->conditionFlags = oldUnit->conditionFlags;
         oldUnit->conditionFlags = 0;
         oldUnit->hp = oldUnit->maxHp;
-        oldUnit->unk_12A = *(u16 *)((u8 *)oldUnit + 0x12C);
+        oldUnit->unk_12A = oldUnit->unk12C;
         entry = btlFindUnitByActor((s32)newUnit);
         *(u16 *)(entry + 4) = 1;
         entry = btlFindUnitByActor((s32)oldUnit);
