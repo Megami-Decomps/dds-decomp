@@ -1,11 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} PathEntry12;
+typedef f32 PathEntry12[3];
 
 typedef struct {
     u8 data[0x10];
@@ -65,7 +61,32 @@ void dds3FreePathObject(PathObj *path) {
     sdfReleaseChipBlock(path);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_001171A0);
+/* vu0 routine: interpolate the path's XYZ keys into vf10. */
+void func_001171A0(PathObj *path) {
+    s32 index;
+    f32 fraction;
+    PathData14 *data;
+    PathEntry12 *entries;
+
+    if (path->flags & 1) {
+        data = path->unk14;
+        func_00116DE8(&index, &fraction, data, path->time);
+        entries = data->unk4;
+        VU0_SET_VF10_COMPONENT(x, entries[index + 1][0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index + 1][1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index + 1][2]);
+        VU0_SCALAR_OP(fraction, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_SET_VF10_COMPONENT(x, entries[index][0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index][1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index][2]);
+        VU0_SCALAR_OP(1.0f - fraction, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_CLEAR_W(vf10);
+    } else {
+        VU0_MOVE_VF(vf10, vf0);
+    }
+}
 
 void dds3PreparePathVectorPair(PathObj *arg) {
     s32 idx;

@@ -52,7 +52,7 @@ typedef struct MantraNodePos {
     MenuPanelSelector selector;
     s16 x;
     s16 y;
-    u8 pad08[0x18];
+    struct MantraNodePos *neighbors[6];
 } MantraNodePos;
 
 typedef struct MenuPanelEntry {
@@ -77,7 +77,9 @@ typedef struct MenuPanelState {
     s32 collectedCount;
     u8 pad5DC[4];
     s8 selectionIndex;
-    u8 pad5E1[0x3CB];
+    u8 pad5E1[0x3C3];
+    s32 navigationState;
+    u8 pad9A8[4];
     u32 resource;
     union {
         u32 flags;
@@ -110,12 +112,8 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290240);
 
-typedef struct MenuPanelSelectorList {
-    u8 pad00[8];
-    MantraNodePos *entries[0];
-} MenuPanelSelectorList;
 
-s32 func_00290328(MenuPanelObject *object, MenuPanelSelectorList *list, s8 position) {
+s32 func_00290328(MenuPanelObject *object, MantraNodePos *list, s8 position) {
     u16 selected;
     MantraNodePos *entry;
     u16 value;
@@ -125,7 +123,7 @@ s32 func_00290328(MenuPanelObject *object, MenuPanelSelectorList *list, s8 posit
         return -1;
     }
     selected = func_002890A8((MenuContainer *)object);
-    entry = list->entries[position];
+    entry = list->neighbors[position];
     result = 0;
     if (entry == NULL) {
         result = 1;
@@ -148,11 +146,106 @@ s32 func_00290328(MenuPanelObject *object, MenuPanelSelectorList *list, s8 posit
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290410);
+extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
+extern s32 func_00290240(MenuPanelObject *, s8);
+extern MantraNodePos *func_002906E0(MenuPanelObject *, u16, s8);
+typedef struct MantraNeighborIds {
+    u16 id;
+    u16 neighbors[6];
+} MantraNeighborIds;
+extern MantraNeighborIds D_003D0130[50];
+
+s32 func_00290410(MenuPanelObject *object, s8 flags) {
+    MenuPanelState *state = &object->state;
+    MantraNodePos *node;
+    MantraNodePos *neighbor;
+    s32 selected;
+    s8 position;
+    s8 attempts = 0;
+    s8 result;
+    u16 i;
+    u16 id;
+
+    selected = (u16)func_002890A8((MenuContainer *)object);
+    if (state->navigationState == 0 || state->navigationState == 7) {
+        node = state->defaultSelector;
+        position = func_00290240(object, flags);
+        for (;;) {
+            result = func_00290328(object, node, position);
+            switch (result) {
+                case -1:
+                    return 0;
+                case 0:
+                    state->defaultSelector = node->neighbors[position];
+                    if (state->navigationState == 0) {
+                        state->navigationState = 4;
+                    }
+                    return 1;
+                case 1:
+                    if ((flags & 0xa) != 0 || attempts == 2) {
+                        for (i = 0; i < 50; i++) {
+                            if (D_003D0130[i].id == node->selector.fields.index) {
+                                id = D_003D0130[i].neighbors[position];
+                                if (id != 0) {
+                                    neighbor = mnuGetMantraNodePositionRecord(id);
+                                    if ((state->slots[selected]->values[neighbor->selector.fields.index] & 15) != 3) {
+                                        state->defaultSelector = neighbor;
+                                        if (state->navigationState == 0) {
+                                            state->navigationState = 4;
+                                        }
+                                        return 1;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    if (attempts == 2) {
+                        return 0;
+                    }
+                    /* Try the opposite direction when this neighbor is unavailable. */
+                case 2:
+                    if (position == 1 || position == 4) {
+                        return 0;
+                    }
+                    if (position == 0) {
+                        position = 5;
+                    } else if (position == 5) {
+                        position = 0;
+                    } else if (position == 2) {
+                        position = 3;
+                    } else if (position == 3) {
+                        position = 2;
+                    }
+                    attempts++;
+                    if (attempts == 2) {
+                        neighbor = func_002906E0(object, state->defaultSelector->selector.fields.index, position);
+                        if (neighbor != NULL) {
+                            state->defaultSelector = neighbor;
+                            if (state->navigationState == 0) {
+                                state->navigationState = 4;
+                            }
+                            return 1;
+                        }
+                    } else if (attempts >= 3) {
+                        return 0;
+                    }
+                    break;
+                case 3:
+                    state->defaultSelector = node->neighbors[position]->neighbors[position];
+                    if (state->navigationState == 0) {
+                        state->navigationState = 4;
+                    }
+                    return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427668);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_002906E0);
+INCLUDE_ASM(const MantraNodePos *, "game/code_0028FD30", func_002906E0);
 
 u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
     return (u32)object->state.defaultSelector;
@@ -191,7 +284,6 @@ typedef struct MantraModelFlag {
     u8 pad05[3];
 } MantraModelFlag;
 
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern void *memset(void *, s32, u32);
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);

@@ -3,6 +3,7 @@
 #include "btl_state.h"
 #include "btl_ui.h"
 #include "sdf.h"
+#include "btl_action.h"
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x31];
@@ -247,17 +248,6 @@ extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 
 extern char D_00415638[]; /* "btl:hunt mp rec[%d]\n" */
-
-typedef struct BtlRates {
-    u8 pad0[0xE8];
-    f32 unkE8;
-    u8 padEC[0x5C];
-    f32 hpRate;
-    u8 pad4[0x124];
-    f32 mpRate;
-} BtlRates;
-
-extern BtlRates *datAbilityParameters;
 
 extern u8 *datBattleSceneRecords;
 
@@ -1569,9 +1559,19 @@ s32 btlHasPendingRuntimeActivity(void) {
     return *(u32 *)(state + 0x718) != 0;
 }
 
+/* The persistent party record is 0x1C4 bytes, distinct from a battle actor. */
+typedef struct BtlPartyEntry {
+    u32 header; /* 0x00: the reset path clears the full packed state word. */
+    u16 displayId;
+    u16 currentHp;
+    u16 maxHp;
+    u16 pad0A;
+    u32 words[0x6E];
+} BtlPartyEntry;
+
 void btlResetActorEntryState(void) {
     s32 context = btlRuntime;
-    s32 *entries = (s32 *)(datGameState + 0xC18);
+    BtlPartyEntry *entries = (BtlPartyEntry *)(datGameState + 0xC18);
     u32 i;
     *(s32 *)(context + 0x2E8) = 0;
     *(s32 *)(context + 0x2EC) = 0;
@@ -1580,8 +1580,8 @@ void btlResetActorEntryState(void) {
     *(s32 *)(context + 0x2F8) = 0;
     *(u16 *)(context + 0x2FC) = 0;
     for (i = 0; i < 5; i++) {
-        *entries = 0;
-        entries = (s32 *)((u8 *)entries + 0x1C4);
+        entries->header = 0;
+        entries++;
     }
     memset((void *)(btlRuntime + 0x2DC), 0, 12);
 }
@@ -1808,12 +1808,12 @@ s32 btlApplyCommandAbilityMultiplier(s32 battler, s32 command) {
     switch (*(u8 *)(datCommandRecords + command * 56 + 3)) {
     case 1:
         if (btlCheckSpecialAbility(battler, 0x254)) {
-            scale = *(f32 *)((u8 *)datAbilityParameters + 0x1A0);
+            scale = datAbilityParameters[0x254 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case 2:
         if (btlCheckSpecialAbility(battler, 0x255)) {
-            scale = *(f32 *)((u8 *)datAbilityParameters + 0x1A8);
+            scale = datAbilityParameters[0x255 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     }
@@ -1832,17 +1832,6 @@ s32 btlGetSlotValueAdjustedForSpecialAbility(s32 battler, s32 slot) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABA40);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABB10);
-
-/* The persistent party record is 0x1C4 bytes, distinct from a battle actor. */
-typedef struct BtlPartyEntry {
-    u16 flags;
-    u16 pad02;
-    u16 displayId;
-    u16 currentHp;
-    u16 maxHp;
-    u16 pad0A;
-    u32 words[0x6E];
-} BtlPartyEntry;
 
 s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObject *second,
                   UiObject *third, s32 command) {
@@ -2566,42 +2555,42 @@ s32 func_001AE678(u8 *actor, s32 attr) {
     case 0:
     case 1:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25C)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1E0) * (f32)value);
+            value = (u32)(datAbilityParameters[0x25C - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 2:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25D)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1E8) * (f32)value);
+            value = (u32)(datAbilityParameters[0x25D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 3:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25E)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1F0) * (f32)value);
+            value = (u32)(datAbilityParameters[0x25E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 4:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x25F)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x1F8) * (f32)value);
+            value = (u32)(datAbilityParameters[0x25F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 5:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x260)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x200) * (f32)value);
+            value = (u32)(datAbilityParameters[0x260 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 6:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x261)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x208) * (f32)value);
+            value = (u32)(datAbilityParameters[0x261 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 8:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x262)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x210) * (f32)value);
+            value = (u32)(datAbilityParameters[0x262 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 9:
         if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x263)) {
-            value = (u32)(*(f32 *)((u8 *)datAbilityParameters + 0x218) * (f32)value);
+            value = (u32)(datAbilityParameters[0x263 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     }
@@ -3197,9 +3186,9 @@ u32 func_001B2380(void) {
 s32 btlCalculateAbilityRecoveryAmount(u8 *unit) {
     s32 recovery = 0;
     if (btlCheckSpecialAbility((s32)unit + 0x120, 0x26E) != 0) {
-        recovery = (s32)(*(u16 *)(unit + 0x12C) * datAbilityParameters->mpRate);
+        recovery = (s32)(*(u16 *)(unit + 0x12C) * datAbilityParameters[0x26E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
     } else if (btlCheckSpecialAbility((s32)unit + 0x120, 0x249) != 0) {
-        recovery = (s32)(*(u16 *)(unit + 0x12C) * datAbilityParameters->hpRate);
+        recovery = (s32)(*(u16 *)(unit + 0x12C) * datAbilityParameters[0x249 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
     }
     btlBossDebugPrintf(D_00415638, recovery);
     return recovery;
@@ -3552,7 +3541,7 @@ f32 btlGetActionCategoryMultiplier(s32 unit, s32 unused, s32 index) {
         }
     }
     if (index == 0 && btlCheckSpecialAbility(unit + 0x120, 0x23D) != 0) {
-        rate = datAbilityParameters->unkE8;
+        rate = datAbilityParameters[0x23D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     } else {
         rate = 0.0f;
     }
@@ -3863,8 +3852,8 @@ s32 func_001B4918(UiObject *unit, UiObject *target) {
                 continue;
             }
         }
-        threshold = (s32)(*(f32 *)((u8 *)datAbilityParameters +
-                                   D_003B5100[i].abilityId * 8 - 0x1100) *
+        threshold = (s32)(datAbilityParameters[D_003B5100[i].abilityId -
+                                             BTL_ABILITY_PARAMETER_FIRST_SKILL].value *
                           100.0f);
         if (btlRollAiBucket() < threshold) {
             result = D_003B5100[i].actionCode;

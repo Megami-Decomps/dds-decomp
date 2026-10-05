@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "btl_action.h"
 
 extern s64 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
@@ -449,7 +450,6 @@ void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
-extern s32 datAbilityParameters;
 extern s32 datFlagToElementIndex(u32);
 struct DatUnitStatus;
 extern s32 func_00119520(struct DatUnitStatus *, s32);
@@ -504,17 +504,17 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         switch (kind) {
         case 3:
             if (datUnitHasSkill(packed, 0x23E)) {
-                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F0) * (f32)ratio);
+                ratio = (u32)(datAbilityParameters[0x23E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)ratio);
             }
             break;
         case 4:
             if (datUnitHasSkill(packed, 0x23F)) {
-                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F8) * (f32)ratio);
+                ratio = (u32)(datAbilityParameters[0x23F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)ratio);
             }
             break;
         case 9:
             if (datUnitHasSkill(packed, 0x243)) {
-                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x218) * (f32)ratio);
+                ratio = (u32)(datAbilityParameters[0x243 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)ratio);
             }
             break;
         }

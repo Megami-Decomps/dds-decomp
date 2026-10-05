@@ -74,6 +74,8 @@ extern u32 kwlnDrawControlFlags;
 
 void dds3RemoveWorldObjectNode(void *unit);
 
+void dds3RefreshStoredVec3(void *);
+
 void *func_001287B8(u32 id);
 
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
@@ -769,7 +771,6 @@ s32 func_00241F10(void) {
 extern char D_00421E98[]; /* "re attach...!\n" */
 
 s32 func_00242100(void) {
-    extern void dds3RefreshStoredVec3(void *);
     void *unit;
     void *target;
     ObjBase *data;

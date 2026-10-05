@@ -3,6 +3,7 @@
 #include "evt_unit.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "mdl.h"
 
 
 /* Effect slot: three vec4 at +0x08/+0x18/+0x28 (the last carries w = 1.0f),
@@ -73,7 +74,6 @@ typedef struct EvtLipsNode {
 
 
 extern u32 sdfGetUniqueChunkValue();
-extern s32 mdlGetNodeRefHalf();
 
 extern s32 scrReadIntParameter(s32 idx);
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
@@ -805,7 +805,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         func_003003F0("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (motion >= mdlGetNodeRefHalf(model, 2)) {
+    if (motion >= mdlGetNodeRefHalf((MdlCtx *)model, 2)) {
         func_003003F0("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
@@ -833,7 +833,7 @@ void evtLipsStopFunction(void) {
         func_003003F0("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (mdlGetNodeRefHalf(model, 2) == 0) {
+    if (mdlGetNodeRefHalf((MdlCtx *)model, 2) == 0) {
         func_003003F0("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }

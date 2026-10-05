@@ -2,6 +2,9 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mdl.h"
+
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 #define MNU_PANEL_ITEM_COUNT 5
 #define MNU_PANEL_STATE_BYTES 0x8C
@@ -161,7 +164,6 @@ extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 
 extern void evtStageTestAdvanceMotionQueue(void);
 
-extern s32 mdlGetNodeRefHalf(u32 node, s32 index);
 
 typedef struct StageCameraTarget {
     u8 pad[8];
@@ -944,12 +946,12 @@ typedef struct MenuPanelItem {
     s32 selection;
     u32 value24;
     u32 value28;
-    u8 pad2C[0x48];
+    MenuPoint sprites[9]; /* 0x2C: grid object/entry reference pairs. */
     MenuPoint points[5]; /* 0x74 */
     u8 pad9C[4];
     u32 initialValue; /* 0xA0 */
     u32 selectionRamp; /* 0xA4 */
-    u8 padA8[4];
+    s32 phase;
 } MenuPanelItem;
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
@@ -1017,29 +1019,96 @@ void mnuFreePanelItemWork(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C3010);
+typedef struct FrFontGlyph FrFontGlyph;
+extern char D_00437C88[];
+extern s32 func_0035C860(char *, const char *, ...);
+extern void func_002C2AE8(s32, s32, s32, u32, s32, MenuPanelItem *, u32);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
-void mnuSetProfilePanelValues(MenuPanelItem *item, s32 value, s32 option) {
-    item->value10 = value;
-    item->value14 = option;
+void func_002C3010(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
+                  MenuPanelItem *item, u32 flags) {
+    char text[16];
+    s32 fontFlags = 0;
+    s32 value;
+    u32 fade = item->initialValue;
+    u32 color;
+    FrFontGlyph *glyph;
+
+    func_00306CD0(x, y, depth, fade, 0, item->sprites[0].x, item->sprites[0].y, flags);
+    func_00306CD0(x, y, depth, fade, 0, item->sprites[1].x, item->sprites[1].y, flags);
+    func_002C2AE8(x, y, depth, fade, mode, item, flags);
+    func_00306CD0(x, y, depth, fade, 0, item->sprites[8].x, item->sprites[8].y, flags);
+    if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
+        func_00306CD0(x, y, depth, fade, 0, item->points[0].x, item->points[0].y, flags);
+        func_00306CD0(x, y, depth, fade, 0, item->points[4].x, item->points[4].y, flags);
+    }
+    value = item->value18;
+    value += item->option;
+    if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
+        fontFlags = 3;
+    }
+    switch (textMode) {
+    case 1:
+        fontFlags = 1;
+        break;
+    case 3:
+        fontFlags = 4;
+        break;
+    case 4:
+        fontFlags = 3;
+        break;
+    }
+    value += item->value24;
+    if (value > item->value14) {
+        value = item->value14;
+    }
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    func_0035C860(text, D_00437C88, value);
+    glyph = (FrFontGlyph *)func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
+    frFontSetChainFlag(glyph, fontFlags);
+    func_0019D550(glyph, 1, flags);
+    frFontQueueGlyphInSelectedSlot(glyph);
+    item->phase += 24;
+    if (item->phase > 512) {
+        item->phase -= 512;
+    }
+}
+
+/* The profile allocation is a separate 0x48-byte owner, not a panel item. */
+typedef struct MenuProfilePanel {
+    u8 pad00[0x10];
+    u32 unk10;
+    s32 unk14;
+    u8 pad18[0x14];
+    u32 unk2C[5];
+    s32 phase;
+    u32 unk44;
+} MenuProfilePanel;
+
+void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
+    panel->unk10 = value;
+    panel->unk14 = option;
 }
 
 /* Create a profile panel and initialize its five native random words. */
 u32 *mnuCreateProfilePanel(s32 selectionState) {
-    u32 *panelWords = (u32 *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
+    MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
     s32 profileId;
     u32 profileRecordAddress;
     u32 randomWordIndex;
 
-    memset(panelWords, 0, MNU_PROFILE_PANEL_BYTES);
+    memset(panel, 0, MNU_PROFILE_PANEL_BYTES);
     profileId = scrGetSelectedScriptEntryId(selectionState);
     profileRecordAddress = ptyGetCurrentProfileRecord(selectionState);
-    mnuSetProfilePanelValues(panelWords, ptyGetProfileRecordCap((u16)profileId), *(u32 *)profileRecordAddress);
+    mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), *(u32 *)profileRecordAddress);
     for (randomWordIndex = 0; randomWordIndex < 5; randomWordIndex++) {
-        panelWords[11 + randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;
+        panel->unk2C[randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;
     }
-    panelWords[17] = 0x100;
-    return panelWords;
+    panel->unk44 = 0x100;
+    return (u32 *)panel;
 }
 
 void mnuFreeProfilePanelWork(void) {
@@ -1057,20 +1126,21 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33C0);
 
 /* Draw first, then advance the native phase by one with a single period subtraction. */
 void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *panelWords, s32 option) {
+    MenuProfilePanel *panel = (MenuProfilePanel *)panelWords;
     s32 phase;
     s32 nextPhase;
 
     func_002C33C0(x, y, z, panelWords, option);
-    phase = panelWords[16];
+    phase = panel->phase;
     nextPhase = phase + MNU_PROFILE_PHASE_STEP;
     if (phase < MNU_PROFILE_PHASE_PERIOD) {
-        panelWords[16] = nextPhase;
+        panel->phase = nextPhase;
         if (nextPhase < MNU_PROFILE_PHASE_PERIOD) {
             return;
         }
         phase = nextPhase;
     }
-    panelWords[16] = phase - MNU_PROFILE_PHASE_PERIOD;
+    panel->phase = phase - MNU_PROFILE_PHASE_PERIOD;
 }
 
 typedef u32 (*MenuPopupCallback)();
@@ -2257,8 +2327,8 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
     if (motionIndex < 0) {
         motionIndex = 0;
     }
-    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
-        motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
+    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0)) {
+        motionIndex = mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
     func_002C6E20(-1);
@@ -2739,14 +2809,14 @@ void evtStageTestAdvanceMotionQueue(void) {
         if (activeSlot->state == EVT_STAGE_MOTION_QUEUED) {
             motionIndex = activeSlot->motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
                 mdlAddEntryPlainEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_PLAYING;
             }
         } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (*(u8 *)(*(s32 *)(model + 0x1C) + 0x30) == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
             motionIndex = evtStageTestState.entries[activeSlot->entryIndex].motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
                 mdlAddEntryFlaggedEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_FALLBACK_STARTED;
             }

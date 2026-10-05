@@ -581,6 +581,8 @@ typedef struct BtlWork {
     s32 unk724;
 } BtlWork;
 
+/* Action-sequence +0x20 is the SDK BattleIndexWork payload. Its parent
+ * allocation is 0x180 bytes, distinct from the world-actor BtlUnit. */
 extern void btlResetIndexWork();
 extern void btlAdvanceHistoryCounter(BtlUnit *);
 
@@ -2171,8 +2173,8 @@ void btlCommandTaskReleaseActor(BtlCommandTask *task) {
             }
             {
                 BtlUnit *model = task->actor;
-                PCP_COPY_VECTOR((u8 *)model + 0x60, (u8 *)model + 0x30);
-                PCP_COPY_VECTOR((u8 *)model + 0x70, (u8 *)model + 0x40);
+                PCP_COPY_VECTOR(model->currentPosition, model->position);
+                PCP_COPY_VECTOR(model->orientation, model->rotation);
                 model->unk310 = -1;
             }
             task->actor = 0;

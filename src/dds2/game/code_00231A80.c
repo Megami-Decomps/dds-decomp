@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "mdl.h"
 
 extern u8 sdfViewMatrix[];
 
@@ -61,7 +62,7 @@ typedef struct MdlInner {
 } MdlInner;
 
 /* Context shared by the matched mdlManager helpers. */
-typedef struct MdlCtx {
+struct MdlCtx {
     u32 flags;         /* 0x0: 1 = skip update, 2 = skip anchors, 4 = needs inner flag 0x10 */
     u8 unk4[8];        /* 0x4 */
     MdlSub *sub;       /* 0xC */
@@ -77,7 +78,7 @@ typedef struct MdlCtx {
     struct MdlNode *first;    /* 0x1C */
     struct MdlNode *slots[4]; /* 0x20 */
     struct MdlDevList *devList; /* 0x30: device slots released with the model */
-} MdlCtx;
+};
 
 typedef struct MdlDevSlot {
     struct MdlDevSlot *next; /* 0x0 */
@@ -754,7 +755,7 @@ u32 mdlGetTableWord(s32 tableIndex) {
 
 /* Read the referenced halfword or return zero for a missing node. A present
  * node's unk8 reference is dereferenced without a separate NULL check. */
-u16 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
     MdlNode *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;

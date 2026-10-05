@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "btl_action.h"
 
 enum {
     PTY_ACTIVE_ROSTER_COUNT = 5,
@@ -391,8 +392,6 @@ void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
     *(s32 *)(counterAddress + 0x10) = *(s32 *)(counterAddress + 0x10) + increment;
 }
 
-extern s32 datAbilityParameters;
-
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
 void ptyApplySkillRecovery(Entry1A4 *entry, u32 skillId) {
     f32 recoveryRate;
@@ -404,7 +403,7 @@ void ptyApplySkillRecovery(Entry1A4 *entry, u32 skillId) {
     }
     hpRecovery = 0;
     mpRecovery = 0;
-    recoveryRate = *(f32 *)(datAbilityParameters + skillId * 8 - 0x1100);
+    recoveryRate = datAbilityParameters[skillId - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     switch (skillId) {
     case 0x24B:
         if (recoveryRate > 0.0f) {

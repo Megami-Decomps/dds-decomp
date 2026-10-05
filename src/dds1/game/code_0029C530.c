@@ -2,6 +2,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff_queue.h"
+#include "mdl.h"
 
 
 typedef struct EffPacketParams {
@@ -6653,7 +6654,6 @@ void effReleaseTargetSlots(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B3698);
 
-extern s32 mdlGetNodeRefHalf(u32, s32);
 
 extern void btlApplyScaledUnitEffectParameter(void *, s32, u32, f32);
 
@@ -6705,7 +6705,7 @@ void effApplyOverlaySpecs(u8 *work) {
         if (flags & 2) {
             if ((flags & 0x20) == 0) {
                 if ((((EffBattleUnit *)objects[i])->overlayFlags & 0x10) == 0) {
-                    if (mdlGetNodeRefHalf(((EffModelRef *)((EffBattleUnit *)objects[i])->model)->nodeReference, 0) > ((EffAnimInfo *)spec)->id) {
+                    if (mdlGetNodeRefHalf((MdlCtx *)((EffModelRef *)((EffBattleUnit *)objects[i])->model)->nodeReference, 0) > ((EffAnimInfo *)spec)->id) {
                         btlApplyScaledUnitEffectParameter(objects[i], ((EffAnimInfo *)spec)->id, ((EffAnimInfo *)spec)->flags | 0x100, 1.0f);
                         if (((EffAnimInfo *)spec)->loop == 0) {
                             btlStartMoveOtherUnitsTask(objects[i], ((EffAnimInfo *)spec)->id);

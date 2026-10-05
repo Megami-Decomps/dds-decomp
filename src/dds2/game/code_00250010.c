@@ -2,6 +2,7 @@
 #include "evt_world.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "mdl.h"
 
 extern u32 evtSkyOverlayEnabled;
 
@@ -1384,7 +1385,6 @@ typedef struct EvtMotionNode {
 } EvtMotionNode;
 
 extern EvtMotionNode *mdlFindNodeById(s32 model, s32 index);
-extern s32 mdlGetNodeRefHalf(s32 model, s32 index);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254CE0);
 
@@ -1418,7 +1418,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     packed.word = ctx->value;
-    count = mdlGetNodeRefHalf(model, packed.bits.group);
+    count = mdlGetNodeRefHalf((MdlCtx *)model, packed.bits.group);
     switch (ctx->fieldIndex) {
     case 0:
         if (D_0037F510.incOne & 2) {
@@ -1438,7 +1438,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                 }
             } while (mdlFindNodeById(model, packed.bits.group) == NULL);
         }
-        if (packed.bits.motion >= mdlGetNodeRefHalf(model, packed.bits.group)) {
+        if (packed.bits.motion >= mdlGetNodeRefHalf((MdlCtx *)model, packed.bits.group)) {
             packed.bits.motion = 0;
         }
         break;

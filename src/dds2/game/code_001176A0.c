@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
+#include "btl_action.h"
 
 extern u32 D_00435E80;
 
@@ -508,8 +509,6 @@ f32 sdfGetHpBracketScale(SdfPartyUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
-extern s32 datAbilityParameters;
-
 extern s32 datFlagToElementIndex(u32);
 extern s32 func_00119C78(struct DatUnitStatus *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
@@ -551,17 +550,17 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         switch (kind) {
         case 3:
             if (datUnitHasSkill(packed, 0x25E)) {
-                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F0) * (f32)ratio);
+                ratio = (u32)(datAbilityParameters[0x25E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)ratio);
             }
             break;
         case 4:
             if (datUnitHasSkill(packed, 0x25F)) {
-                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F8) * (f32)ratio);
+                ratio = (u32)(datAbilityParameters[0x25F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)ratio);
             }
             break;
         case 9:
             if (datUnitHasSkill(packed, 0x263)) {
-                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x218) * (f32)ratio);
+                ratio = (u32)(datAbilityParameters[0x263 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)ratio);
             }
             break;
         }

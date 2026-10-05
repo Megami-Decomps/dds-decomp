@@ -2,6 +2,7 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mdl.h"
 
 struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
@@ -165,7 +166,6 @@ typedef struct StageCameraTarget {
 extern StageCameraTarget *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern u8 D_003BC7C8[];
 
-extern s32 mdlGetNodeRefHalf(u32 node, s32 index);
 
 extern void func_002878D8(s32 arg0);
 
@@ -1934,8 +1934,8 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
     if (motionIndex < 0) {
         motionIndex = 0;
     }
-    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
-        motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
+    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0)) {
+        motionIndex = mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
     func_002878D8(-1);
@@ -2383,14 +2383,14 @@ void evtStageTestAdvanceMotionQueue(void) {
         if (activeSlot->state == EVT_STAGE_MOTION_QUEUED) {
             motionIndex = activeSlot->motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
                 mdlAddEntryPlainEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_PLAYING;
             }
         } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (*(u8 *)(*(s32 *)(model + 0x1C) + 0x30) == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
             motionIndex = evtStageTestState.entries[activeSlot->entryIndex].motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
                 mdlAddEntryFlaggedEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_FALLBACK_STARTED;
             }

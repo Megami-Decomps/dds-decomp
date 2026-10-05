@@ -249,6 +249,8 @@ extern BtlEffectCommandRecord *datCommandRecords;
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
+/* The +0x80 pointer retains SDK operand groups, outside BtlTask's named
+ * fields; the command/index-work parent has a different native layout. */
 s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
     BtlCommandTargetResult *result = *(BtlCommandTargetResult **)((u8 *)task + 0x80);
     u32 i;

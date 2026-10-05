@@ -20,6 +20,20 @@ typedef struct BtlRuntimeTask {
     u8 pad48[0x28];
 } BtlRuntimeTask;
 
+/* Eight-byte ability parameter rows; only the leading coefficient is decoded. */
+typedef struct BtlAbilityParameter {
+    f32 value;
+    u8 unk04[4];
+} BtlAbilityParameter;
+
+#ifdef VERSION_DDS2
+enum { BTL_ABILITY_PARAMETER_FIRST_SKILL = 0x220 };
+#else
+enum { BTL_ABILITY_PARAMETER_FIRST_SKILL = 0x200 };
+#endif
+
+extern BtlAbilityParameter *datAbilityParameters;
+
 /* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
 typedef struct BtlActionAnimationRecord {
     u8 pad00[3];
