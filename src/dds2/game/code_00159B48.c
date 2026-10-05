@@ -13,6 +13,7 @@ extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 
 #define BILL_ENTRY_BYTES 0x14
+#define BILL_FRAME_MODE_BITS 6
 #define BILL_VARIANT_MASK 0xFFFF
 #define EFF_INSTANCE_BYTES 0x88
 #define EFF_MATRIX_BYTES 0x40
@@ -232,7 +233,38 @@ void effCopyPosition(BillObj *effect, const void *position) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", billSetBillboardMode);
+/* Narrow mode to s16; kinds 0/3 store it, while kind 1 replaces only frame bits 1..2. */
+void billSetBillboardMode(BillObj *effect, s32 mode) {
+    s32 entryCount;
+    s32 remaining;
+    EffBillFrame **frameSlot; /* Cursor on each EffBillEntry's data member. */
+
+    mode = (s16)mode;
+    switch (effect->kind) {
+    case 0:
+    case 3:
+        effect->unk2E = mode;
+        break;
+    case 1:
+        entryCount = effect->entryCount;
+        if (entryCount > 0) {
+            remaining = entryCount;
+            frameSlot = &((EffBillEntry *)effect->unk60)->data;
+            do {
+                EffBillFrame *frameData = *frameSlot;
+                u32 frameFlags = frameData->flags & ~BILL_FRAME_MODE_BITS;
+                frameData->flags = frameFlags;
+                if (mode == 2) {
+                    frameData->flags = frameFlags | 2;
+                } else if (mode == 3) {
+                    frameData->flags = frameFlags | 4;
+                }
+                frameSlot = (EffBillFrame **)((u8 *)frameSlot + sizeof(EffBillEntry));
+            } while (--remaining != 0);
+        }
+        break;
+    }
+}
 
 typedef struct EffSlot {
     u8 pad00[4];
