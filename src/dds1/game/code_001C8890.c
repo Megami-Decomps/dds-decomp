@@ -10233,8 +10233,32 @@ extern char D_003A5328[];
 extern char D_003A5340[];
 extern char D_003A5358[];
 
-INCLUDE_ASM(const s32, "game/code_001C8890", sndPollAtrac3SELoadTask);
-extern s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *);
+s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
+    char path[0x80];
+    s32 resource;
+    u32 data;
+    u32 size;
+
+    if (args->state == 0) {
+        func_003014F0(path, D_003A5328, D_00377650[args->index].fileName);
+        args->request = fileQueueDefaultCallbackRequest(path);
+        btlBossDebugPrintf(D_003A5340, path);
+    } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
+        if (mnuGetSoundBufferStateLocked() != 0) {
+            mnuReleaseSoundBufferLocked();
+        }
+        resource = fileGetResourceHandle(args->request);
+        data = (u32)sdfResourceRetainAddress(resource);
+        size = fileGetResourceSize(args->request);
+        filePollEntryCleanup(args->request);
+        func_0026ABA8(data, size, D_00377650[args->index].volume);
+        sdfReleaseResourceAllocation(resource);
+        btlBossDebugPrintf(D_003A5358);
+        return 1;
+    }
+    args->state++;
+    return 0;
+}
 
 void *sndCreateAtracEffectLoadTask(u32 owner) {
     u8 *task = btlAllocTask(12);
@@ -10251,6 +10275,12 @@ void *sndCreateAtracEffectLoadTask(u32 owner) {
     arguments[2] = owner;
     return task;
 }
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5328);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5340);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5358);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F49D0);
 
