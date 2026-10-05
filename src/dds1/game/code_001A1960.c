@@ -2797,7 +2797,62 @@ void func_001AD1F8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlCreateAnalysisPanelTask);
+typedef struct BtlAnalysisPanelWork {
+    s8 state;
+    u8 pad01[3];
+    s32 unk04;
+    s32 duration;
+    s32 frame;
+    u8 pad10[0x18];
+    s32 x;
+    s32 y;
+    s8 page;
+    u8 pad31[0x6F];
+} BtlAnalysisPanelWork;
+
+extern u32 btlHasRegisteredAnalysisPanelTask(void);
+extern u32 btlHasRegisteredGuidePanelTask(void);
+extern u32 btlHasRegisteredSkillNamePanelTask(void);
+extern u32 btlHasRegisteredAphNamePanelTask(void);
+extern void btlSetTrackedTaskHandle(s32, s32);
+extern s32 func_001AE540(s32);
+extern void btlReleaseTaskAndRefreshCursorIfFlagged(s32);
+
+s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
+    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlAnalysisPanelWork *data;
+    s32 task;
+
+    if (btlHasRegisteredAnalysisPanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(11), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+    }
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+    }
+    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data->state = 0;
+    data->page = 0;
+    data->x = -20;
+    data->y = 133;
+    data->duration = duration;
+    data->unk04 = entry;
+    data->frame = 0;
+    task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001AE540,
+                          btlReleaseTaskAndRefreshCursorIfFlagged, data);
+    func_00101A80(context->taskParent, task);
+    btlSetTrackedTaskHandle(11, task);
+    context->flags &= ~0x100000;
+    return 1;
+}
 
 u32 btlHasRegisteredAnalysisPanelTask(void) {
     s64 temp_v0;
