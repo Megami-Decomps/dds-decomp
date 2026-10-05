@@ -535,7 +535,7 @@ void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
     BillObj *billboard = (BillObj *)instance->billboard;
 
     if (billboard->kind == 1) {
-        u32 modeFlags = *(u32 *)((u8 *)billboard + 0x54);
+        u32 modeFlags = billboard->modeFlags;
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;

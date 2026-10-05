@@ -151,6 +151,8 @@ typedef struct DatUnitStatus {
     u16 status; /* 0x0E */
     u8 pad10[6];
     s8 statValues[0x100];
+    u8 pad116[0x9C];
+    u16 recordSlotId; /* 0x1B2: ID used by the record/slot adjustment */
 } DatUnitStatus;
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
@@ -177,7 +179,7 @@ s32 datGetStatWithStatusOverride(DatUnitStatus *unit, s32 statIndex) {
     }
     adjustedStat = datGetClampedProfileAdjustedStat(unit, statIndex);
     adjustedStat += ptyGetCombinedRecordAndSlotValue(
-        *(u16 *)((u8 *)unit + 0x1B2), statIndex);
+        unit->recordSlotId, statIndex);
     if (adjustedStat < 0) {
         adjustedStat = 0;
     }
@@ -314,10 +316,9 @@ s32 datFlagToElementIndex(s32 flag) {
     return statIndex;
 }
 
-/* Test the truncated integer percentage from the halfwords at +6/+8.
- * Denominator must be nonzero; keep the raw accesses, not UiObject's later fields. */
-s32 datIsValueBelowQuarterMax(UiObject *object) {
-    return *(u16 *)((u8 *)object + 6) * DAT_PERCENT_SCALE / *(u16 *)((u8 *)object + 8) < DAT_QUARTER_PERCENT;
+/* Test the truncated current-HP percentage; maximum HP must be nonzero. */
+s32 datIsValueBelowQuarterMax(DatCalcCursor *object) {
+    return object->hp * DAT_PERCENT_SCALE / object->maxHp < DAT_QUARTER_PERCENT;
 }
 
 /* Add delta using the existing s32 addition, then clamp the currency balance

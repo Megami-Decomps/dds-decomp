@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "dds3obj.h"
 
 #define EFF_OBJ_KIND 7
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -217,10 +218,10 @@ EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
     data->entryId = 0;
     data->ownerKind = 0;
     handle = effObjGetObjectHandle(obj);
-    *(s32 *)((u8 *)handle + 8) = 2;
+    ((ObjBase *)handle)->unk8 = 2;
     id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
-        *(void **)((u8 *)handle + 0x24) = id;
+        ((ObjBase *)handle)->slots[5] = id;
         dds3EnsureWorldNodeInSlot(id, obj);
     }
     return obj;
@@ -280,10 +281,10 @@ EffectObj *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVectorA
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle(obj);
-    *(s32 *)((u8 *)objectHandle + 8) = 2;
+    ((ObjBase *)objectHandle)->unk8 = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        *(void **)((u8 *)objectHandle + 0x24) = worldNode;
+        ((ObjBase *)objectHandle)->slots[5] = worldNode;
         dds3EnsureWorldNodeInSlot(worldNode, obj);
     }
     return obj;
@@ -338,10 +339,10 @@ EffectObj *effObjCreateWithBoundBill(void *bill, void *firstVector, s32 secondVe
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle(obj);
-    *(s32 *)((u8 *)objectHandle + 8) = 2;
+    ((ObjBase *)objectHandle)->unk8 = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        *(void **)((u8 *)objectHandle + 0x24) = worldNode;
+        ((ObjBase *)objectHandle)->slots[5] = worldNode;
         dds3EnsureWorldNodeInSlot(worldNode, obj);
     }
     return obj;
@@ -387,10 +388,10 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secon
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle(obj);
-    *(s32 *)((u8 *)objectHandle + 8) = 2;
+    ((ObjBase *)objectHandle)->unk8 = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        *(void **)((u8 *)objectHandle + 0x24) = worldNode;
+        ((ObjBase *)objectHandle)->slots[5] = worldNode;
         dds3EnsureWorldNodeInSlot(worldNode, obj);
     }
     return obj;

@@ -84,7 +84,9 @@ typedef struct StaffSelectionList {
 
 /* One staff display work allocation owns the window resources and party target list. */
 typedef struct {
-    u8 pad00[0x74];
+    u8 pad00[0x6C];
+    s32 unk6C;
+    u8 pad70[4];
     s32 unk74;  /* 0x74 */
     s32 group; /* 0x78: staff image group */
     u8 pad7C[0x5C];
@@ -265,7 +267,7 @@ s32 func_002734C0(s32 callback) {
         if (input & 2) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_0037C990);
             mnuActivatePanelAndConfigureGridResources((s32)context->unk138,
-                                                      *(s32 *)((u8 *)context + 0x6C), 0, 1);
+                                                      context->unk6C, 0, 1);
         }
         window = context->activeWindow;
         if (window != NULL) {

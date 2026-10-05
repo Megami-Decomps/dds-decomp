@@ -1300,8 +1300,7 @@ void itfMesDestroyWindow(s32 window) {
         sdfReleaseResourceAllocation((SdfAllocation *)windowRecord->handle);
         windowRecord->mes = NULL;
         itfReleasePoolNode(windowRecord, (u8 *)D_00452960 - 0x10);
-        /* Retain the counter's pool-array-relative access form. */
-        *(s32 *)((u8 *)D_00452960 - 0x20) -= 1;
+        ((ItfMesGlobals *)((u8 *)D_00452960 - 0x20))->activeWindowCount -= 1;
     }
 }
 

@@ -98,6 +98,8 @@ typedef struct SceneTask {
     u32 flags;
     u8 pad0C[0xC];
     UiObject *actor;
+    u8 pad1C[0x24];
+    u64 owner; /* 0x40: identifier used by task-owner queries */
 } SceneTask;
 
 /* Primary scene controller; loading and group scheduling share this record. */
@@ -225,8 +227,8 @@ s32 btlLoadBankWhenTasksIdle(void) {
 }
 
 void fldMarkGridTiles(u8 *context) {
-    s32 *node = (s32 *)fldCreateSceneTileTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A));
-    *(u64 *)((u8 *)node + 0x40) = 0x8000000000000001ULL;
+    SceneTask *node = (SceneTask *)fldCreateSceneTileTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A));
+    node->owner = 0x8000000000000001ULL;
     btlStartTask(node);
     btlStartTask(btlCreateFloorLoadTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A)));
 }

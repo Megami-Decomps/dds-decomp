@@ -159,7 +159,8 @@ typedef struct SdfAsset {
     u32 unk24;
     u32 unk28;
     SdfTex *texture;
-    u8 pad30[8];
+    SdfTex *secondaryTexture; /* 0x30 */
+    u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
     void *third;
     void *fourth;
     f32 unk40;

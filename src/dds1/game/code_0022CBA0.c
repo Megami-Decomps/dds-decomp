@@ -64,7 +64,8 @@ typedef struct EventViewerState {
     s32 fallbackEntry;
     u8 pad2030[4];
     struct EvtViewTrack *tracks; /* 0x2034 */
-    u8 pad2038[0x204];
+    u8 pad2038[0x200];
+    s32 unk2238;
     struct {
         u16 id;
         u16 a;
@@ -1243,7 +1244,7 @@ void *evtViewerStartUpdate(void) {
     func_003014F0((u8 *)viewer + 0x22E8, D_003ADA98, D_003BBE78, D_003BBE7A);
     viewer->flags = 1;
     evtViewerDispatchFlagMode((u32)viewer);
-    *(s32 *)((u8 *)viewer + 0x2238) = 0;
+    viewer->unk2238 = 0;
     viewer->flags |= 8;
     kwlnDrawControlFlags |= 0x2000000;
     return evtViewerAdvanceUpdate;
