@@ -23,6 +23,9 @@ extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
+extern u8 D_004372C0[3];
+extern u32 kwlnGetDrawBufferIndex(void);
+extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 
 extern s32 datGameState;
 
@@ -145,7 +148,9 @@ typedef struct EventViewerState {
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0x10];
     s32 titleStreamWaitFrames; /* 0x2440 */
-    u8 pad2444[0x78]; /* allocated as 0x24BC bytes */
+    u8 pad2444[0x5C]; /* allocated as 0x24BC bytes */
+    s32 unk24A0;
+    u8 pad24A4[0x18];
 } EventViewerState;
 
 /* Handles retained by the viewer and by its owning task context. */
@@ -782,7 +787,34 @@ s32 evtViewerHasUpdateFlag(s32 viewer) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024A020);
+/* Fades the viewer's background colour over its update countdown. */
+void func_0024A020(EventViewerState *viewer) {
+    s32 fade = 0;
+
+    kwlnGetDrawBufferIndex();
+    if (viewer->updateCount != 0x19) {
+        fade = (s32)(128.0f - ((f32)viewer->unk24A0 +
+                               ((128.0f - (f32)viewer->unk24A0) / 25.0f) * (f32)viewer->updateCount));
+    }
+    if (fade < 0) {
+        fade = 0;
+    }
+    if (fade < 0x80 && evtViewerHasUpdateFlag((s32)viewer) != 0) {
+        s32 option = (s32)mnuCampGetSecondaryOption(viewer);
+
+        switch (option) {
+        case 0:
+            D_004372C0[0] = D_004372C0[1] = D_004372C0[2] = 0;
+            break;
+        case 1:
+            D_004372C0[0] = D_004372C0[1] = D_004372C0[2] = 0xFF;
+            break;
+        case 2:
+            return;
+        }
+        kwlnFadeSetColor(D_004372C0[0], D_004372C0[1], D_004372C0[2], 0x80 - fade);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A158);
 

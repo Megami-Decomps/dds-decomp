@@ -24,6 +24,9 @@ extern void func_0023EF90(s32 arg0, void *arg1);
 
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
+extern u8 D_003BBE88[3];
+extern u32 kwlnGetDrawBufferIndex(void);
+extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 s32 evtEventViewerGetPendingNode(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -687,7 +690,34 @@ s32 evtViewerHasUpdateFlag(s32 viewerAddr) {
     return (((EventViewerState *)viewerAddr)->flags & 0x10) > 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F418);
+/* Fades the viewer's background colour over its update countdown. */
+void func_0022F418(EventViewerState *viewer) {
+    s32 fade = 0;
+
+    kwlnGetDrawBufferIndex();
+    if (viewer->updateCount != 0x19) {
+        fade = (s32)(128.0f - ((f32)viewer->unk2478 +
+                               ((128.0f - (f32)viewer->unk2478) / 25.0f) * (f32)viewer->updateCount));
+    }
+    if (fade < 0) {
+        fade = 0;
+    }
+    if (fade < 0x80 && evtViewerHasUpdateFlag((s32)viewer) != 0) {
+        s32 option = (s32)mnuCampGetSecondaryOption(viewer);
+
+        switch (option) {
+        case 0:
+            D_003BBE88[0] = D_003BBE88[1] = D_003BBE88[2] = 0;
+            break;
+        case 1:
+            D_003BBE88[0] = D_003BBE88[1] = D_003BBE88[2] = 0xFF;
+            break;
+        case 2:
+            return;
+        }
+        kwlnFadeSetColor(D_003BBE88[0], D_003BBE88[1], D_003BBE88[2], 0x80 - fade);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F550);
 
