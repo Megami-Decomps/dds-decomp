@@ -1,6 +1,5 @@
 #include "common.h"
 
-extern s32 func_0031CF88(f32, f32);
 
 extern f32 func_00353228(f32);
 extern f32 D_0037F5EC[];
@@ -16,12 +15,15 @@ typedef struct ModelInstance {
     u32 flags;
     u16 remainingLifetime; /* decremented by each unpaused timed update */
     u16 initialLifetime; /* retained as the draw ratio denominator; zero disables timed motion */
-    u16 animationFrame;
-    u16 animationLength;
-    u8 pad2C[8];
+    s16 animationFrame;
+    s16 animationLength;
+    u8 pad2C[4];
+    f32 scale;
 } ModelInstance;
 
 void itfDeactivateModelInstance(ModelInstance *item);
+void func_0031D680(ModelInstance *item);
+extern s32 itfDrawUniformlyScaledIndexedImage(s32, s32, s32, s32, s32, s32, s32, f32);
 
 typedef struct ModelInstanceList {
     ModelInstance *items;
@@ -228,4 +230,37 @@ void func_0031D558(ModelInstanceWork *work, u32 flags) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D680);
+void func_0031D680(ModelInstance *item) {
+    f32 alpha = 1.0f;
+    s32 kind;
+
+    if (item->initialLifetime != 0) {
+        alpha = (f32)item->remainingLifetime / (f32)item->initialLifetime;
+    }
+    kind = (item->flags >> 3) & 0xFF;
+    switch (kind) {
+    case 17:
+        itfDrawUniformlyScaledIndexedImage((s32)item->position[0], (s32)item->position[1],
+            0, (s32)(alpha * 128.0f), 0, 0, 0x53, item->scale);
+        return;
+    case 18:
+        if (item->animationLength <= item->animationFrame) {
+            item->animationFrame = 0;
+        }
+        itfDrawUniformlyScaledIndexedImage((s32)item->position[0], (s32)item->position[1],
+            0, (s32)(alpha * 128.0f), 0, item->animationFrame + 31, 0x53, item->scale);
+        return;
+    case 19:
+        item->animationFrame = 0;
+        itfDrawUniformlyScaledIndexedImage((s32)item->position[0], (s32)item->position[1],
+            0, (s32)(alpha * 128.0f), 0, 29, 0x53, item->scale);
+        break;
+    case 20:
+        if (item->animationLength <= item->animationFrame) {
+            item->animationFrame = 0;
+        }
+        itfDrawUniformlyScaledIndexedImage((s32)item->position[0], (s32)item->position[1],
+            0, (s32)(alpha * 128.0f), 0, item->animationFrame + 9, 0x53, item->scale);
+        break;
+    }
+}
