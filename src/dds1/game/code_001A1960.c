@@ -44,13 +44,17 @@ typedef struct SceneSlot {
     u8 id;
 } SceneSlot;
 
-/* Actor-task prefix; the separate unit-data list uses UiObject. */
+/* Actor-task record; the separate unit-data list uses UiObject. */
 typedef struct SceneTask {
     s32 state;
     u8 pad04[4];
     u32 flags;
     u8 pad0C[0xC];
     UiObject *actor;
+    u8 pad1C[0x12C];
+    u32 actions[8]; /* 0x148: opaque queued action slots */
+    u8 pad168[4];
+    struct SceneTask *next; /* 0x16C */
 } SceneTask;
 
 typedef struct BattleItemDrop {
@@ -62,7 +66,8 @@ typedef struct BattleItemDrop {
 typedef struct BattleController {
     u8 pad_000[0x1F4];
     u32 flags;
-    u8 pad_1F8[0x30];
+    u8 pad_1F8[0x2C];
+    SceneTask *taskHead; /* 0x224 */
     UiObject *actors;
     u8 pad_22C[0x20];
     u16 variant;
@@ -856,8 +861,8 @@ u32 func_001A4630(void) {
 s32 btlChooseAvailableUnit(void) {
     s32 candidates[16];
     s32 count = 0;
-    SceneTask *node = (SceneTask *)*(s32 *)(btlGetRuntime() + 0x224);
-    for (; node != 0; node = (SceneTask *)*(s32 *)((u8 *)node + 0x16C)) {
+    SceneTask *node = ((BattleController *)btlGetRuntime())->taskHead;
+    for (; node != 0; node = node->next) {
         if ((node->flags & 8) != 0) {
             UiObject *actor = node->actor;
             u32 flags = actor->flags;
@@ -2552,7 +2557,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC7D8);
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {
     BattleController *context = (BattleController *)btlGetRuntime();
-    SceneTask *node = (SceneTask *)*(s32 *)((u8 *)context + 0x224);
+    SceneTask *node = context->taskHead;
     while (node != 0) {
         s32 i;
         UiObject *actor = node->actor;
@@ -2561,7 +2566,7 @@ void btlClearTaskActorSlots(void) {
                 if (actor->flags & 0x200) {
                     u32 *entries;
                     i = 0;
-                    entries = (u32 *)((u8 *)node + 0x148);
+                    entries = &node->actions[0];
                     for (; i < 8; i++) {
                         *entries++ = 0;
                     }
@@ -2569,13 +2574,13 @@ void btlClearTaskActorSlots(void) {
             } else if (actor->flags & 0x400) {
                 u32 *entries;
                 i = 7;
-                entries = (u32 *)((u8 *)node + 0x164);
+                entries = &node->actions[7];
                 for (; i >= 0; i--) {
                     *entries-- = 0;
                 }
             }
         }
-        node = (SceneTask *)*(s32 *)((u8 *)node + 0x16C);
+        node = node->next;
     }
 }
 
@@ -3811,7 +3816,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     s32 offset;
     for (; node != 0; node = node->nextActor) {
         if (btlHasRequiredActorStatusBits((s32)node) != 0) {
-            slot = *(u8 *)((u8 *)node + 0x11C);
+            slot = node->lookupId;
             if (object->owner == node->owner) {
                 break;
             }

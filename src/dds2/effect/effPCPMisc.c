@@ -13,15 +13,13 @@ extern u32 effEventCreate(void *owner, s32 kind, void *place);
 
 
 
-/* Large charge-style effect work (allocation 0x1354). Three fields at
- * 0xAF0 are cleared on construction; resource handles occupy the tail.
- */
+/* Large charge-style effect work (allocation 0x1354). The vector at 0xAF0
+ * is copied as a quadword; construction clears its first three words.
+ * Resource handles occupy the tail. */
 typedef struct {
     u8 pad000[0xAF0];
-    u32 unkAF0;
-    u32 unkAF4;
-    u32 unkAF8;
-    u8 padAFC[0x838];
+    u32 vectorWords[4];
+    u8 padB00[0x834];
     u32 color;         /* 0x1334: configurable colour */
     f32 scale;         /* 0x1338: configurable scale */
     u32 unk133C;       /* 0x133C cleared on init */
@@ -1277,9 +1275,9 @@ EffPCPChargeWork *effCreateChargeWork(void *source) {
     work->primaryHandle = effParamCreateFromTable(source, 0);
     work->secondaryHandle = effParamCreateFromTable(source, 1);
     effPcpChargeInitTail(work);
-    work->unkAF0 = 0;
-    work->unkAF4 = 0;
-    work->unkAF8 = 0;
+    work->vectorWords[0] = 0;
+    work->vectorWords[1] = 0;
+    work->vectorWords[2] = 0;
     work->color = 0x80808080;
     work->scale = 1.0f;
     return work;
@@ -1299,9 +1297,9 @@ EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
     work->primaryHandle = effParamWorkDuplicate(firstHandle);
     work->secondaryHandle = effParamWorkDuplicate(source->secondaryHandle);
     effPcpChargeInitTail(work);
-    work->unkAF0 = 0;
-    work->unkAF4 = 0;
-    work->unkAF8 = 0;
+    work->vectorWords[0] = 0;
+    work->vectorWords[1] = 0;
+    work->vectorWords[2] = 0;
     work->color = 0x80808080;
     work->scale = 1.0f;
     return work;
@@ -1310,7 +1308,7 @@ EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001803E8);
 
 void effPcpCopyVectorAF0(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0xaf0, src);
+    PCP_COPY_VECTOR(((EffPCPChargeWork *)work)->vectorWords, src);
 }
 
 void effPcpChargeSetScale(EffPCPChargeWork *work, f32 val) {
@@ -3158,7 +3156,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
 }
 
 void effPcpSpanSetHeadVector(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x40, src);
+    PCP_COPY_VECTOR(((EffPCPSpanWork *)work)->params.anchor, src);
 }
 
 void effPcpSpanSetColor(EffPCPSpanWork *work, u32 value) {
@@ -3418,7 +3416,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185950);
 
 void effPcpCopyVector60(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x60, src);
+    PCP_COPY_VECTOR(((EffPCPBlockSetWork *)work)->params.unk00, src);
 }
 
 void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 value) {
@@ -4664,7 +4662,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
     copy->color = 0x80808080;
     copy->workHandle = resource;
     copy->unk16C = first->unk94;
-    entry = (EffPCPGroupEntry *)((u8 *)copy + 0x180);
+    entry = (EffPCPGroupEntry *)(copy + 1);
     copy->entries = entry;
     copy->duplicates = 0;
     if (blocks != NULL) {
@@ -5057,7 +5055,7 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPDriftEvent *)((u8 *)work + 0x11C);
+    entry = (EffPCPDriftEvent *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk10C = 1;
@@ -5108,7 +5106,7 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPDriftEvent *)((u8 *)work + 0x11C);
+    entry = (EffPCPDriftEvent *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk10C = 0;
@@ -5292,7 +5290,7 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPPairedEvent *)((u8 *)work + 0xA4);
+    entry = (EffPCPPairedEvent *)(work + 1);
     work->handle = handle;
     work->entries = entry;
     work->color = 0x80808080;
@@ -5346,7 +5344,7 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPPairedEvent *)((u8 *)work + 0xA4);
+    entry = (EffPCPPairedEvent *)(work + 1);
     work->handle = handle;
     work->entries = entry;
     work->color = 0x80808080;
@@ -5471,7 +5469,7 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPSpawnRangeEvent *)((u8 *)work + 0xAC);
+    entry = (EffPCPSpawnRangeEvent *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 1;
@@ -5522,7 +5520,7 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPSpawnRangeEvent *)((u8 *)work + 0xAC);
+    entry = (EffPCPSpawnRangeEvent *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 0;

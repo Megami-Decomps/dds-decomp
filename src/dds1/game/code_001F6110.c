@@ -3,6 +3,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
+#include "scr.h"
 
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
@@ -2192,7 +2193,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     s32 slot = scrCreateTaskForProcessId((s32)state->scriptOwner->priority - 1, D_003BAAA8, taskArg);
     s32 handle;
     scrSetCurrentActor(slot, actor);
-    handle = *(s32 *)((u8 *)kwlnTaskGetUserValue(slot) + 0xCC);
+    handle = ((ScrProcTask *)kwlnTaskGetUserValue(slot))->resourceIndex;
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
         func_0019C590(handle, 0, unit->mode, (unit->statBits & 0x20) ? 1 : 2);

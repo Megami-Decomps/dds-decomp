@@ -608,7 +608,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     if (work->actionMode != 2) {
         return 0;
     }
-    return kwlnStepTwoListCursors(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, (s32 *)((u8 *)work + 0x22BC));
+    return kwlnStepTwoListCursors(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, &work->cursor);
 }
 
 s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {

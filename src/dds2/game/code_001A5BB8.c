@@ -153,13 +153,17 @@ typedef struct BtlSlotOwner {
     BtlSlotRecord *records;
 } BtlSlotOwner;
 
-/* Actor-task prefix; the separate unit-data list uses UiObject. */
+/* Actor-task record; the separate unit-data list uses UiObject. */
 typedef struct SceneTask {
     s32 state;
     u8 pad04[4];
     u32 flags;
     u8 pad0C[0xC];
     UiObject *actor;
+    u8 pad1C[0x134];
+    s32 actions[8]; /* 0x150 */
+    u8 pad170[8];
+    struct SceneTask *next; /* 0x178 */
 } SceneTask;
 
 typedef struct BattleItemDrop {
@@ -173,7 +177,8 @@ typedef struct BattleController {
     s32 frame;
     u32 flags;
     u32 flags21C;
-    u8 pad_220[0x2C];
+    u8 pad_220[0x28];
+    SceneTask *taskHead; /* 0x248 */
     UiObject *actors;
     u8 pad_250[0x20];
     u16 variant; /* 0x270 */
@@ -255,7 +260,22 @@ extern BtlRates *datAbilityParameters;
 
 extern u8 *datBattleSceneRecords;
 
-extern u8 *datEnemyAiRecords;
+/* Native per-species AI record, shared layout with the action evaluator. */
+typedef struct AiSlot {
+    u8 weight;
+    u8 pad1;
+    u16 actionId;
+    u32 actionArg;
+} AiSlot;
+
+typedef struct AiSpecies {
+    u8 unk00;
+    u8 pad01[0x3F];
+    AiSlot slot[25];
+    u8 pad108[0x54];
+} AiSpecies;
+
+extern AiSpecies *datEnemyAiRecords;
 
 extern s32 func_001B32F8(s32, s32 *);
 
@@ -2241,7 +2261,7 @@ s32 btlChooseAvailableUnit(void) {
     SceneTask *node;
     UiObject *unit;
     u32 flags;
-    for (node = (SceneTask *)*(s32 *)(btlGetRuntime() + 0x248); node != 0; node = (SceneTask *)*(s32 *)((u8 *)node + 0x178)) {
+    for (node = ((BattleController *)btlGetRuntime())->taskHead; node != 0; node = node->next) {
         if (!(node->flags & 8)) {
             continue;
         }
@@ -3285,7 +3305,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(u8 *unit) {
     if (((UiObject *)unit)->statusFlags & 0x2A0F) {
         return 0;
     }
-    return *(u8 *)((u8 *)datEnemyAiRecords + ((UiObject *)unit)->index * 0x15C) == 0;
+    return datEnemyAiRecords[((UiObject *)unit)->index].unk00 == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
@@ -4117,18 +4137,18 @@ void btlClearTaskActorSlots(void) {
     s32 *slot;
     s32 *reverse;
     s32 i;
-    for (node = (SceneTask *)*(s32 *)((u8 *)work + 0x248); node != 0; node = (SceneTask *)*(s32 *)((u8 *)node + 0x178)) {
+    for (node = work->taskHead; node != 0; node = node->next) {
         owner = node->actor;
         if (owner != 0) {
             if (work->variant == 1) {
                 if (owner->flags & 0x200) {
-                    for (i = 0, slot = (s32 *)((u8 *)node + 0x150); i < 8; i++) {
+                    for (i = 0, slot = &node->actions[0]; i < 8; i++) {
                         *slot = 0;
                         slot++;
                     }
                 }
             } else if (owner->flags & 0x400) {
-                for (i = 7, reverse = (s32 *)((u8 *)node + 0x16C); i >= 0; i--) {
+                for (i = 7, reverse = &node->actions[7]; i >= 0; i--) {
                     *reverse = 0;
                     reverse--;
                 }
