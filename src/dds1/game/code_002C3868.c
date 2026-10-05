@@ -37,11 +37,12 @@ typedef struct {
     s32 frames;        /* 0x20 */
 } SdfCounterTimer;
 
-typedef struct {
+typedef struct SdfCounterChannel {
     s32 index;                     /* 0x00 */
     u8 pad04[0x54];
     struct SdfCounterChannel *next;    /* 0x58 */
-    u8 pad5C[0x14];
+    struct SdfCounterChannel *prev;    /* 0x5C */
+    u8 pad60[0x10];
     SdfCounterDisplay *display;        /* 0x70 */
 } SdfCounterChannel;
 
@@ -484,7 +485,38 @@ float sdfCounterGetScaledValue(void) {
     return (float)timer->value / 10.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4A58);
+/* Draw the counter's three label plates and submit the frame gradient. */
+void func_002C4A58(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
+    SdfCounterChannel *channel;
+    f32 fade;
+    s32 i;
+    s32 drawX;
+    s32 drawY;
+
+    fade = (f32)rt->timer->value / 10.0f;
+    channel = rt->channel;
+    if (channel->prev != NULL) {
+        channel = channel->prev;
+    } else {
+        channel = rt->last;
+    }
+    drawY = y - 11;
+    drawX = x - 240;
+    for (i = 2; i != -1; i--) {
+        rt->draw(drawX, drawY, arg2, rt, channel, arg4);
+        drawX += 160;
+        if (channel->next != NULL) {
+            channel = channel->next;
+        } else {
+            channel = rt->first;
+        }
+    }
+    evtSubmitDefaultDepthGradientRect(0, 384, 512, 32,
+        PACK(0x60, 0x60, 0x60, (u32)(fade * 64.0f)),
+        PACK(0x10, 0x10, 0x10, (u32)(fade * 16.0f)),
+        PACK(0x30, 0x30, 0x30, (u32)(fade * 64.0f)),
+        PACK(0x40, 0x40, 0x40, (u32)(fade * 64.0f)));
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4C88);
 
