@@ -95,6 +95,8 @@ typedef struct FileQueue {
     FileJob *first;
 } FileQueue;
 
+extern FileQueue *func_002D4138(FileQueue *queue);
+
 typedef struct MnuEffectPositionStep {
     f32 x;
     f32 y;
@@ -472,7 +474,7 @@ u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
     u32 data = sdfReadNamedResource(resource, &handle, &other);
-    *owner = func_002D4138(handle);
+    *owner = (u32)func_002D4138((FileQueue *)handle);
     fileQueueNotifyAllJobsComplete(*owner);
     sdfReleaseResourceAllocation(data);
     return *owner;

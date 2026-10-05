@@ -370,7 +370,7 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 extern void func_002DB288(s32, void *);
 
-extern void func_002D31C0(void *);
+extern void func_002D31C0(f32 matrix[4][4]);
 
 extern u8 D_003E9140[];
 
@@ -7286,7 +7286,7 @@ void func_002F7AC8(u8 *work) {
     VU0_LOAD_VF(vf31, D_003E9110);
     VU0_SET_W_ONE(vf31);
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
-    func_002D31C0(mtx);
+    func_002D31C0((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle[0], (s128 *)look);
     effAdvanceClassResourceFrame(handle[0]);
@@ -7531,7 +7531,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     VU0_LOAD_VF(vf31, D_003E9110);
     VU0_SET_W_ONE(vf31);
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
-    func_002D31C0(mtx);
+    func_002D31C0((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle[0], (s128 *)look);
     effAdvanceClassResourceFrame(handle[0]);
