@@ -8205,11 +8205,99 @@ extern char D_003A4BE8[]; /* "btl:load 1[%s]\n" */
 extern char D_003A4BF8[]; /* "btl:floor load end 0\n" */
 extern char D_003A4C10[]; /* "btl:floor load end 1\n" */
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B40);
+typedef struct BtlFieldArchiveNode {
+    struct BtlFieldArchiveNode *next;
+    u32 unk04;
+    s32 handle;
+    void *data;
+} BtlFieldArchiveNode;
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlPollFieldArchiveLoad);
+typedef struct BtlFieldArchiveRequest {
+    u8 pad00[0x60];
+    BtlFieldArchiveNode *resources;
+} BtlFieldArchiveRequest;
 
-extern u32 btlPollFieldArchiveLoad(u32 *);
+typedef struct BtlFieldLoadArgs {
+    s32 stage;
+    s32 variant;
+    BtlFieldArchiveRequest *request;
+    u8 pad0C[0xC];
+    void *fieldF1;
+    void *fieldF2;
+    void *fieldTB;
+    s32 frame;
+} BtlFieldLoadArgs;
+
+extern void fldFormatAreaDirectory(char *, s32, s32);
+extern s32 fileQueuePlainDispatchRequest(const char *);
+extern u32 fileRequestIsReady(u32);
+extern void func_00288788(s32);
+extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
+
+extern char D_003A4B50[]; /* "%sf%03d_%03d.LB" */
+extern char D_003A4B60[]; /* "btl:field load[%s]\n" */
+extern char D_003A4B78[]; /* "btl:field load end[f%03d_%03d]\n" */
+
+u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
+    BattleController *blocks = (BattleController *)btlGetRuntime();
+    char directory[0x80];
+    char path[0x80];
+    BtlFieldArchiveNode *node;
+    u32 i;
+
+    if (args->frame == 0) {
+        btlFreeFieldBlocks();
+        fldFormatAreaDirectory(directory, args->stage, 1);
+        func_003014F0(path, D_003A4B50, directory, args->stage, args->variant);
+        btlBossDebugPrintf(D_003A4B60, path);
+        args->request = (BtlFieldArchiveRequest *)fileQueuePlainDispatchRequest(path);
+        args->fieldF1 = NULL;
+        args->fieldF2 = NULL;
+        args->fieldTB = NULL;
+    } else {
+        if (args->request != NULL && fileRequestIsReady((u32)args->request)) {
+            BtlFieldArchiveRequest *request = args->request;
+            node = request->resources;
+            i = 0;
+            while (node != NULL) {
+                switch (i) {
+                case 0:
+                    blocks->fieldF3 = node->handle;
+                    args->fieldTB = node->data;
+                    break;
+                case 1:
+                    blocks->fieldF2 = node->handle;
+                    args->fieldF2 = node->data;
+                    break;
+                case 2:
+                    blocks->fieldF1 = node->handle;
+                    args->fieldF1 = node->data;
+                    break;
+                }
+                node = node->next;
+                i++;
+            }
+            func_00288788((s32)request);
+            args->request = NULL;
+        }
+        if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
+            evtCreateWorldObjectFromResource(args->stage, args->variant,
+                                             (s32)args->fieldF1, (s32)args->fieldF2,
+                                             (s32)args->fieldTB, 0);
+            btlInitializeSceneLightingAndTint();
+            if (blocks->fieldF3 != 0) {
+                sdfQueueNonzeroResourceId(blocks->fieldF3);
+                blocks->fieldF3 = 0;
+                btlBossDebugPrintf(D_003A4AD8);
+            }
+            blocks->flags |= 2;
+            btlBossDebugPrintf(D_003A4B78, args->stage, args->variant);
+            return 1;
+        }
+    }
+    args->frame++;
+    return 0;
+}
 
 s32 fldCreateSceneTileTask(u32 soundId, u32 variant) {
     u8 *task = btlAllocTask(40);
@@ -8459,6 +8547,14 @@ s32 sndLookupResourceType(s32 sound, s32 index) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F0CA0);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B40);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B50);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B60);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B78);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B98);
 
