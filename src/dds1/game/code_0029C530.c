@@ -2354,12 +2354,13 @@ u8 *billCreateTrailNode(u8 *config, u32 resource) {
     u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x2C + headerSize);
     u8 *cursor = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *header = cursor;
+    /* Read the configured count before writing the retained header. */
+    u32 frameCount = ((EffBillConfig *)config)->frames.count;
 
     cursor += headerSize;
     *(u8 **)(header + 8) = base;
     *(u8 **)header = cursor;
-    /* Required to match: this later count load retains byte-pointer arithmetic. */
-    ((EffFrameState *)header)->asset = (u8 *)effCreateTrackSetWithSharedReferences(*(u32 *)(config + 0x38), 0, resource);
+    ((EffFrameState *)header)->asset = (u8 *)effCreateTrackSetWithSharedReferences(frameCount, 0, resource);
     return header;
 }
 
@@ -2640,10 +2641,14 @@ u8 *effCreateActiveResource(EffClassWork *work) {
     if (D_0037E8A0[work->kind].cloneResource == NULL) {
         effect = effCreateResourceInstanceA(work->kind, work->payload, 0);
     } else {
+        u32 clonedResource;
+        s32 kind;
         effect = effAllocateActiveInstanceWork(work->kind, work->payload);
-        /* Required to match: typed resource/kind fields change this store's codegen. */
-        *(void **)(effect + 0x30) = (void *)D_0037E8A0[work->kind].cloneResource(work);
-        D_0037E8A0[work->kind].initialize(effect);
+        clonedResource = D_0037E8A0[work->kind].cloneResource(work);
+        /* Capture the clone's class before publishing its resource. */
+        kind = work->kind;
+        ((EffClassWork *)effect)->resource = clonedResource;
+        D_0037E8A0[kind].initialize(effect);
     }
     return effect;
 }

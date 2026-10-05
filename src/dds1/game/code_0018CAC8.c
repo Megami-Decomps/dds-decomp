@@ -206,8 +206,7 @@ void effAllocSubWork(EffWork *work) {
     default:
         break;
     }
-    /* Required to match: the effect type is passed in the handler's pointer-shaped slot. */
-    effAllocDispatch((EffWork *)type, handlerArg);
+    effAllocDispatch(type, handlerArg);
 }
 
 void func_0018CDA0(void) {

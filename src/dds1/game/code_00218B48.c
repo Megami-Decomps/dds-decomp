@@ -61,9 +61,8 @@ typedef struct MdlViewState {
     s16 unk1E;
     s16 unk20;
     s16 activeEntryId;    /* 0x22: assigned from selectedEntryId when adding */
-    s16 selectedEntryId;  /* 0x24: key passed to the mdlAddEntry* family. DDS2
-                           declares this u16; kept s16 here to match retail's
-                           sign-extension into mdlAddEntryFlaggedEx. */
+    s16 selectedEntryId;  /* 0x24: key passed to the mdlAddEntry* family;
+                           signed in DDS1, unsigned in DDS2. */
     s16 selectedNodeId;   /* 0x26: checked by mdlHasNode before adding */
     s16 unk28;
     s16 unk2A;
@@ -995,7 +994,7 @@ void mdlClaimViewerObjectPart(MdlResource *owner, MdlEntryRec *entryRecord, s32 
                 u8 *attributes;
                 object->inUse = 1;
                 resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, subtype);
-                /* Required to match: store object/data before binding the owner. */
+                /* Fill the object and resource data before attaching the owner. */
                 resourceItem->payload.object.objectAddress = (s32)object;
                 attributes = resourceItem->payload.object.attributes;
                 resourceItem->payload.object.data = resourceData;
