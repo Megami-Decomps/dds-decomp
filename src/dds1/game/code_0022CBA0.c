@@ -38,6 +38,13 @@ extern void effSetCh75Id(u32 resourceWord);
 extern void effSetCh76Id(u32 sourceHandle);
 extern void *mnuCampFindEntryByName(void *scene, const char *name);
 
+extern u32 mnuCampGetPrimaryOption(void *scene);
+extern const char *D_00368410[];
+extern const char *D_00368418[];
+extern const char *D_00368420[];
+extern const char *D_00368430[];
+extern s32 D_003BBE94;
+
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
@@ -74,7 +81,7 @@ typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
     s32 flags;
     s32 windowContext;  /* 0x08: owns the message-window handle at +0x104 */
-    u8 padC[4];
+    s32 frameCount; /* 0x0C */
     s32 glyphAdvanceStart;    /* 0x10 */
     s32 glyphAdvanceLimit;    /* 0x14 */
     s32 glyphAdvancePosition; /* 0x18 */
@@ -95,7 +102,8 @@ typedef struct EventViewerState {
     } history[8];
     s32 historyCount;
     u32 currentId;
-    u8 pad2284[0xC];
+    s32 commandResetId; /* 0x2284 */
+    u8 pad2288[8];
     s32 blurRectangleEnabled;
     s32 texturedBlurEnabled;
     s32 filterBlurEnabled;
@@ -106,7 +114,11 @@ typedef struct EventViewerState {
     s32 unk22AC;
     u8 pad22B0[4];
     s32 unk22B4;
-    u8 pad22B8[0x14];
+    u8 pad22B8[4];
+    s32 optionSelection; /* 0x22BC */
+    s32 optionCount; /* 0x22C0 */
+    const char *optionTitle; /* 0x22C4 */
+    const char **optionNames; /* 0x22C8 */
     s32 commandResetA; /* 0x22CC: cleared on command mode three */
     s32 commandResetB; /* 0x22D0 */
     u8 commandResetC;  /* 0x22D4 */
@@ -119,7 +131,9 @@ typedef struct EventViewerState {
     struct EvtViewTrack *sel; /* 0x2308: selected timeline track */
     u8 pad230C[4];
     u32 commandValue; /* 0x2310: value of the active command */
-    u8 pad2314[0x94];
+    s32 commandMinimum; /* 0x2314 */
+    s32 commandMaximum; /* 0x2318 */
+    u8 pad231C[0x8C];
     f32 commandX; /* 0x23A8 */
     f32 commandY; /* 0x23AC */
     u8 pad23B0[0x10];
@@ -151,7 +165,9 @@ typedef struct EventViewerState {
     s32 titleStreamWaitFrames; /* 0x2440 */
     u8 pad2444[0x34];
     s32 unk2478;
-    u8 pad247C[0x14]; /* allocated as 0x2490 bytes */
+    u8 pad247C[0xC];
+    s32 commandStart; /* 0x2488 */
+    u8 pad248C[4]; /* allocated as 0x2490 bytes */
 } EventViewerState;
 
 /* Script-command parameter slots have byte, halfword, word and float views. */
@@ -1050,7 +1066,69 @@ INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD2D0);
 
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD2E0);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230478);
+s32 func_00230478(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    switch ((u32)viewer->selectionMode) {
+    case 0:
+    case 1:
+    case 2:
+        viewer->commandResetA = 0;
+        viewer->commandResetB = 0;
+        evtViewerPushCommandHistory(9, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 5:
+        viewer->commandValue = viewer->frameCount - 1;
+        viewer->commandMinimum = viewer->glyphAdvanceLimit;
+        viewer->commandMaximum = 10000;
+        evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
+        break;
+    case 3:
+    case 4:
+        viewer->optionSelection = 0;
+        viewer->optionCount = 2;
+        viewer->optionTitle = "FRAME SET.OK? ";
+        viewer->optionNames = D_00368410;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 6:
+        viewer->commandStart = 1;
+        viewer->flags |= 1;
+        evtViewerDispatchFlagMode((u32)viewer);
+        viewer->currentId = 0;
+        viewer->historyCount = 0;
+        viewer->commandResetId = 0;
+        D_003BBE94 = 0;
+        return 1;
+    case 7:
+        viewer->optionSelection = mnuCampGetPrimaryOption(viewer);
+        viewer->optionCount = 2;
+        viewer->optionTitle = "START FRAME SELECT";
+        viewer->optionNames = D_00368430;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 8:
+        viewer->commandValue = 0;
+        viewer->commandMinimum = -5000;
+        viewer->commandMaximum = 5000;
+        evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
+        break;
+    case 9:
+        viewer->optionSelection = mnuCampGetPrimaryOption(viewer);
+        viewer->optionCount = 2;
+        viewer->optionTitle = "SET BISTAMODE";
+        viewer->optionNames = D_00368418;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 10:
+        viewer->optionSelection = mnuCampGetSecondaryOption(viewer);
+        viewer->optionCount = 3;
+        viewer->optionTitle = "SET SKIPMODE";
+        viewer->optionNames = D_00368420;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    }
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230660);
 
