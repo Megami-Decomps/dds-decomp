@@ -2256,27 +2256,13 @@ void fldSetCameraMoveMode(u32 value) {
     D_003BAD20 = 0;
 }
 
-/* The camera object's inner node carries its look-at target at +0x40. */
-typedef struct FldCameraTransformNode {
-    u8 pad00[0x40];
-    f32 position[4];
-    f32 rotation[4];
-} FldCameraTransformNode;
-
-typedef struct FldWorldCamera {
-    u8 pad00[4];
-    s32 key;
-    u8 pad08[0x10];
-    void *data;
-    FldCameraTransformNode *inner;
-} FldWorldCamera;
 
 extern void effObjSetNodeFlags(void *, s32);
 
 void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
     f32 phase = D_003BAD20;
-    FldWorldCamera *camera;
+    CameraObject *camera;
 
     if (D_003BAD1C != 0) {
         if (D_003BAD1C == 1) {
@@ -2291,7 +2277,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_003BAD1C == -2) {
             direction = -1.0f;
         }
-        camera = (FldWorldCamera *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = (CameraObject *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
         if (D_003BAD1C == 1 || D_003BAD1C == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;
