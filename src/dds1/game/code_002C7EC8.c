@@ -314,7 +314,44 @@ float sdfPowFloatByTruncatedExponent(float base, float exponent) {
     return power;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C7EC8", func_002C9268);
+void func_002C9268(f32 quaternion[4], f32 matrix[4][4]) {
+    f32 trace;
+    f32 scale;
+    s32 i;
+    u8 j;
+    u8 k;
+    f32 xx = matrix[0][0];
+    f32 yy = matrix[1][1];
+    f32 zz = matrix[2][2];
+
+    trace = xx + yy + zz + 1.0f;
+    if (trace >= 1.0f) {
+        scale = fsqrtf(trace) * 2.0f;
+        quaternion[3] = scale * 0.25f;
+        quaternion[0] = (matrix[1][2] - matrix[2][1]) / scale;
+        quaternion[1] = (matrix[2][0] - matrix[0][2]) / scale;
+        quaternion[2] = (matrix[0][1] - matrix[1][0]) / scale;
+    } else {
+        i = xx > yy ? 0 : 1;
+        if (zz > matrix[i][i]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        scale = fsqrtf(matrix[i][i] - matrix[j][j] - matrix[k][k] + 1.0f) * 2.0f;
+        if (scale != 0.0f) {
+            quaternion[i] = scale * 0.25f;
+            quaternion[j] = (matrix[i][j] + matrix[j][i]) / scale;
+            quaternion[k] = (matrix[i][k] + matrix[k][i]) / scale;
+            quaternion[3] = (matrix[j][k] - matrix[k][j]) / scale;
+        } else {
+            quaternion[i] = 1.0f;
+            quaternion[j] = 0.0f;
+            quaternion[k] = 0.0f;
+            quaternion[3] = 0.0f;
+        }
+    }
+}
 
 typedef struct QuatF {
     f32 x;
