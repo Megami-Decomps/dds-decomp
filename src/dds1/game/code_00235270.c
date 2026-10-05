@@ -207,13 +207,6 @@ typedef struct {
 extern EvtTblEntry D_00368950[];
 extern s8 D_00368952[];
 
-typedef struct EvtFrameTableEntry {
-    s16 columns;
-    u8 pad02[8];
-} EvtFrameTableEntry;
-
-extern EvtFrameTableEntry D_00368768[];
-
 extern u16 evtSkyTransitionActive;
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
