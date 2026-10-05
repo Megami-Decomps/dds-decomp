@@ -331,7 +331,9 @@ typedef struct MenuContext {
     s32 alternateResource; /* 0x6C: used when swapping the staff panel view */
     u8 pad70[0x58];
     s32 labelHandle;       /* 0xC8 */
-    u8 padCC[0x38];
+    u8 padCC[0x30];
+    const void *equippedSkillLayout; /* 0xFC */
+    u8 pad100[4];
     s32 imageHandle;       /* 0x104 */
     u8 pad108[4];
     s32 listHandle;        /* 0x10C */
@@ -397,7 +399,9 @@ struct MenuList {
     s32 count;
     s32 windowOffset;
     s32 rowHeight;
-    u8 pad2C[0x10];
+    void (*drawEntry)(); /* 0x2C */
+    void *owner;         /* 0x30 */
+    u8 pad34[8];
     s32 scale; /* 0x3C: 8.8 fixed-point list scale */
 };
 
@@ -459,9 +463,27 @@ typedef struct PartyEntryCopy {
     u16 flags;
     u16 pad02;
     u16 displayId; /* 0x04: used to select a party display asset */
-    u16 pad06;
-    u32 word[0x6F];
+    u16 hp;
+    u16 maxHp;
+    u16 mp;
+    u16 maxMp;
+    u16 status;
+    u32 unk10;
+    u16 level; /* 0x14 */
+    s8 baseStats[5];
+    u8 pad1B;
+    u16 hpBonus;
+    u16 mpBonus;
+    u8 pad20[2];
+    u16 skills[8]; /* 0x22 */
+    u8 pad32[2];
+    u32 word[0x64];
 } PartyEntryCopy; /* 0x1C4 bytes, versus 0x1A4 in DDS1 */
+
+typedef struct MenuGameState {
+    u8 pad00[MNU_STAFF_PARTY_BASE];
+    PartyEntryCopy party[MNU_STAFF_PARTY_SLOT_COUNT];
+} MenuGameState;
 
 /* One allocated party-selection work area: original/current/backup entries,
  * saved panel payloads, and fade state all belong to this same allocation. */
@@ -535,6 +557,22 @@ typedef struct MenuListDefaults {
 } MenuListDefaults;
 
 extern MenuListDefaults D_0042AF00;
+extern const MenuListDefaults D_0042AE18;
+extern u8 (*D_00435E64)[17];
+extern u8 D_00437C00[];
+extern u8 brsGetLevelStepForValue(s32);
+extern s32 mnuGetEntryUseStatus(s32, u16);
+extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
+
+/* Allocate a zeroed window and its list; the last two arguments configure list rows. */
+s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
+void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state);
+void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second);
+void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
+/* Copy the native panel layout, override its bounds, and mark its transition flag. */
+void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
+                   u32 right, u32 bottom);
+MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value);
 
 
 extern void func_002B0278(s32);
@@ -1348,7 +1386,54 @@ void func_002B3A60(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3CA0);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3E80);
+s32 func_002B3E80(s32 selectionMode, s32 callback) {
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
+    MenuListDefaults defaults = D_0042AE18;
+    s32 selected = context->partyWindow.lists[0]->cursor->index;
+    MenuPartyRuntime *party = (MenuPartyRuntime *)context->party;
+    PartyEntryCopy *entry = &((MenuGameState *)datGameState)->party[selected];
+    s32 skillCount = brsGetLevelStepForValue(entry->level);
+    s32 placement;
+    MenuWindowContainer *window;
+    s32 i;
+
+    switch (skillCount) {
+    case 4:
+        placement = defaults.indices[0];
+        break;
+    case 6:
+        placement = defaults.indices[1];
+        break;
+    default:
+        placement = defaults.indices[2];
+        break;
+    }
+    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
+    mnuSetWindowContainerState(window, MNU_FULL_FADE);
+    mnuInitializeBasicWindowLayout(window, context->labelHandle, 0x1A);
+    mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
+    mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, placement);
+    window->list->owner = context;
+    window->list->drawEntry = func_002B3CA0;
+    for (i = 0; i < skillCount; i++) {
+        u16 skill = ((MenuGameState *)datGameState)->party[selected].skills[i];
+        MenuListNode *node;
+
+        if (skill != 0) {
+            node = mnuAppendWindowListNode(window, (s32)D_00435E64[skill]);
+            node->sortKeySecondary = i;
+            node->sortKeyPrimary = skill;
+            if (selectionMode != 0 && mnuGetEntryUseStatus((s32)entry, skill) != 0) {
+                node->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
+            }
+        } else {
+            node = mnuAppendWindowListNode(window, (s32)D_00437C00);
+            node->sortKeySecondary = node->sortKeyPrimary = 0;
+        }
+    }
+    party->selectedWindow = window;
+    return 1;
+}
 
 u32 mnuDestroySelectedPartyWindow(u32 callback) {
     s32 party;
@@ -1569,7 +1654,7 @@ void mnuAddPartySkillIfMissing(s32 partyEntry, s32 skillId, s32 skillSlot) {
     u16 skillCode = skillId;
 
     if (ptyHasSkill(partyEntry, skillCode) == 0) {
-        *(u16 *)(partyEntry + skillSlot * 2 + 0x22) = skillCode;
+        ((PartyEntryCopy *)partyEntry)->skills[skillSlot] = skillCode;
         ptyRecomputeMaxHpMp(partyEntry);
         scrClearSecondaryScriptFlag(partyEntry, skillCode);
     }
@@ -1577,7 +1662,7 @@ void mnuAddPartySkillIfMissing(s32 partyEntry, s32 skillId, s32 skillSlot) {
 
 /* Clear one skill slot, retaining the native short-arity maxima recomputation. */
 void mnuClearPartySkillSlot(s32 partyEntry, s32 skillSlot) {
-    *(u16 *)(skillSlot * 2 + partyEntry + 0x22) = 0;
+    ((PartyEntryCopy *)partyEntry)->skills[skillSlot] = 0;
     ptyRecomputeMaxHpMp();
 }
 
@@ -2052,10 +2137,6 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6898);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6B00);
 
-typedef struct PtyFrontlineSlot {
-    u16 flags;          /* 0x00: bit 0 present, bit 1 frontline */
-} PtyFrontlineSlot;
-
 /* Collect up to max pointers to occupied, frontline party slots. */
 void mnuCollectFrontlinePartySlots(s32 **out, s32 max) {
     s32 count = 0;
@@ -2066,7 +2147,7 @@ void mnuCollectFrontlinePartySlots(s32 **out, s32 max) {
     }
     i = 0;
     while (count < max) {
-        PtyFrontlineSlot *entry = (PtyFrontlineSlot *)(datGameState + i * 0x1C4 + 0xA60);
+        PartyEntryCopy *entry = &((MenuGameState *)datGameState)->party[i];
 
         if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
             out[count] = (s32 *)entry;
@@ -2883,35 +2964,26 @@ void mnuDispatchEntryWords(MenuSlotSet *menu, s32 index, u8 *entry);
 /* Invoke the native window renderer at full fade with its size/flag arguments zeroed. */
 void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
 
-/* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
 void mnuDestroyWindowContainer(MenuWindowContainer *menu);
 
 void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout);
 
-void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state);
 
 void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
                                     u32 layout48, u32 layout38, u32 layout3C, u32 layout40,
                                     u32 layout4C);
 
-void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second);
-
-void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
 
 
-/* Copy the native panel layout, override its bounds, and mark its transition flag. */
-void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
-                   u32 right, u32 bottom);
+
 
 void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second, u32 third, u32 fourth);
 
 /* Clear only the window's panel-transition bit. */
 void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window);
 
-MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value);
 
 void func_002B9708(MenuWindowContainer *menu);
 
