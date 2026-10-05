@@ -7164,8 +7164,8 @@ void func_001E5700(u32 arg0) {
     func_001E5460(arg0);
 }
 
-void func_001E5718(void) {
-    func_001E5478();
+void func_001E5718(ActionUnit *action, CameraPoseTransform *out) {
+    func_001E5478(action, out);
 }
 
 extern void func_001E0718(u8 *action, u8 *pose, u8 *out);
