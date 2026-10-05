@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "eff_transform.h"
 
 extern u64 scrReadIntParameter(u64);
 
@@ -8,45 +9,6 @@ extern u64 ptyReadSignedRosterStatByte(u64);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *p);
 
-typedef struct EffTransformNode EffTransformNode;
-
-typedef struct {
-    s32 (*create)(EffTransformNode *);  /* 0x00 called to initialise a new node of this kind */
-    void (*notify)(EffTransformNode *); /* 0x04 called with the node being destroyed */
-} EffTransformOwner;
-
-/* Transform node (0xD0 bytes). The links at 0x10/0x20/0x24 tie a node into
- * its owner's list; inner points at a child node whose vectors live in VU
- * registers between calls (loaded with lqc2, stored with sqc2).
- */
-struct EffTransformNode {
-    u32 word0;        /* 0x00 */
-    u32 word4;        /* 0x04 */
-    u32 word8;        /* 0x08 */
-    u32 kindTag;      /* 0x0C: node kind in the top byte */
-    EffTransformOwner *owner; /* 0x10 */
-    u32 word14;       /* 0x14 */
-    u32 ownerData;    /* 0x18: owner-specific payload; camera nodes use CameraData */
-    EffTransformNode *inner;  /* 0x1C */
-    EffTransformNode *prev;   /* 0x20 */
-    EffTransformNode *next;   /* 0x24 */
-    u32 word28;       /* 0x28 */
-    u32 word2C;       /* 0x2C */
-    u32 word30;       /* 0x30 */
-    u32 color;        /* 0x34 */
-    u8 pad38[0x8];    /* 0x38 */
-    u128 vec40;       /* 0x40 */
-    u128 vec50;       /* 0x50 */
-    u128 vec60;       /* 0x60 */
-    u8 pad70[0x10];   /* 0x70 */
-    u128 vec80;       /* 0x80 copy of vec40 */
-    u128 vec90;       /* 0x90 copy of vec50 */
-    u128 vecA0;       /* 0xA0 copy of vec60 */
-    u8 vecB0[0x10];   /* 0xB0 cleared on alloc */
-    u32 flags;        /* 0xC0 bit0 set, bit1 cleared on vector write */
-    f32 scalar;       /* 0xC4 */
-    u32 unkC8;        /* 0xC8 */
-};
 
 extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);

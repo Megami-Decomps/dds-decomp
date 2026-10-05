@@ -108,9 +108,8 @@ typedef struct MenuTerminalWork {
     u8 padC4[0x14];
     s32 selectedSlot;        /* 0xD8 */
     s32 reduced;             /* 0xDC */
-    u8 padE0[4];
-    s32 unkE4;               /* 0xE4 */
-    u8 padE8[0x78];
+    u32 imageHandles[7];     /* 0xE0: copied by mnuResolveStaffImageHandles */
+    u8 padFC[0x64];
     u32 bgmHandle;           /* 0x160: encoded bank/track handle */
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
 
@@ -480,7 +479,7 @@ void mnuHighlightProgressNodeByMode(s32 object) {
     }
 }
 
-extern void mnuResolveStaffImageHandles(u8 *);
+extern void mnuResolveStaffImageHandles(u32 *);
 
 extern s32 mnuTerminalMenuTemplate[];
 
@@ -517,7 +516,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     }
     host->listResource = (MenuProgressOwner *)mnuBuildThresholdNodeList(table + row * 5, count, excluded, (s32)host);
     mnuBuildTerminalNodeList(host);
-    mnuResolveStaffImageHandles((u8 *)host + 0xE0);
+    mnuResolveStaffImageHandles(host->imageHandles);
     mnuUpdateGroupResources((u8 *)host);
     func_00249058(host);
     mnuHighlightProgressNodeFromOwnerSelection(host);
@@ -526,7 +525,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
 
 extern void mnuDestroyListState(u32);
 
-extern void mnuReleaseStaffImageHandles(u8 *);
+extern void mnuReleaseStaffImageHandles(u32 *);
 
 /* Release command/progress lists, child percentage panels and staff image handles.
  * Preserve their existing order and the single-iteration list loop. */
@@ -537,7 +536,7 @@ void mnuReleaseWorkResources(u8 *work) {
         mnuDestroyListState(*(u32 *)(work + 0x70 + i * 4));
     }
     mnuDestroyThresholdNodePanels((s32)work);
-    mnuReleaseStaffImageHandles(work + 0xE0);
+    mnuReleaseStaffImageHandles(((MenuTerminalWork *)work)->imageHandles);
     mnuReleaseProgressWorkList((s32)work);
     mnuDestroyListState((u32)((MenuTerminalWork *)work)->owner);
 }
@@ -1846,7 +1845,7 @@ s32 evtBSetupDispatchSyncE(s32 request) {
 u32 evtBReleaseImagesAndQueueMenuTransition(void) {
     s32 context = kwlnTaskGetUserValue();
 
-    mnuReleaseStaffImageHandles(context + 0xE0);
+    mnuReleaseStaffImageHandles(((MenuTerminalWork *)context)->imageHandles);
     func_0024A728(2, context);
     mnuTerminalSelectSlot(2, -1, context);
     func_0024AB70(2, context);
@@ -1862,7 +1861,7 @@ u32 evtBReleaseImagesAndQueueMenuTransition(void) {
 s32 mnuOpenTerminalSelectionMessageWindow(void) {
     s32 context = kwlnTaskGetUserValue();
 
-    mnuResolveStaffImageHandles((u8 *)context + 0xE0);
+    mnuResolveStaffImageHandles(((MenuTerminalWork *)context)->imageHandles);
     func_0024A728(1, context);
     mnuTerminalSelectSlot(1, 0, (MenuTerminalWork *)context);
     func_0024AB70(1, context);

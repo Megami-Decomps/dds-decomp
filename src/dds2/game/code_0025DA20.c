@@ -780,7 +780,7 @@ extern void fldUpdateCameraColorEffect(void *setting);
 void fldApplyCameraColorKeyWords(CampScene *scene, const s32 *colorSettings) {
     s32 cameraSettings[0x54 / sizeof(s32)];
     u8 *cameraColorA;
-    u8 *sourceColorA;
+    const u8 *sourceColorA;
     u8 *cameraColorB;
     s32 sourceOffset;
     s32 cameraOffset;
@@ -793,17 +793,17 @@ void fldApplyCameraColorKeyWords(CampScene *scene, const s32 *colorSettings) {
     cameraSettings[0x18 / sizeof(s32)] = colorSettings[2];
     cameraSettings[0x1C / sizeof(s32)] = colorSettings[3];
     cameraSettings[0x0C / sizeof(s32)] = colorSettings[0x14 / sizeof(s32)];
-    cameraColorA = (u8 *)cameraSettings + 8;
-    sourceColorA = (u8 *)colorSettings + 0x0C;
-    cameraColorB = (u8 *)cameraSettings + 0x0C;
+    cameraColorA = (u8 *)&cameraSettings[2];
+    sourceColorA = (const u8 *)&colorSettings[3];
+    cameraColorB = (u8 *)&cameraSettings[3];
     sourceOffset = 0x20;
     cameraOffset = 0x20;
     /* Copy the three color rows into the camera setting's 0x10-byte slots. */
     for (i = 2; i >= 0; i--) {
         *(s32 *)(cameraColorA + cameraOffset) =
-            *(s32 *)(sourceColorA + sourceOffset);
+            *(const s32 *)(sourceColorA + sourceOffset);
         *(s32 *)(cameraColorB + cameraOffset) =
-            *(s32 *)((u8 *)colorSettings + sourceOffset);
+            *(const s32 *)((const u8 *)colorSettings + sourceOffset);
         sourceOffset += 4;
         cameraOffset += 0x10;
     }
