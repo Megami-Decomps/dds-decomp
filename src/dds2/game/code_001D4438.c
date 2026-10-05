@@ -668,7 +668,7 @@ typedef struct BattlePoseBlendState {
 typedef struct BtlStateHandler {
     void (*start)(void *);
     void (*update)(void *);
-    void (*finish)(void *);
+    const char *name; /* debug label, never called */
 } BtlStateHandler;
 
 extern BtlStateHandler D_003B69D8[];
@@ -2298,7 +2298,69 @@ BtlUnit *btlFindUnitByActor(BtlUnit *actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001DD1A8);
+extern char D_00417598[];
+extern char D_00436A10[];
+extern char D_00436A18[];
+
+/* Draw the debug overlay listing each battle slot's group and state name. */
+void func_001DD1A8(s32 x, s32 y) {
+    BattleSceneWork *controller = (BattleSceneWork *)btlGetRuntime();
+    SceneTask **primary;
+    SceneTask **secondary;
+    SceneTask **tertiary;
+    SceneTask *task;
+    s32 color;
+    u32 i;
+
+    if ((controller->flags & 4) == 0) {
+        return;
+    }
+    btlBossDebugPrintfN(x, y, 0, D_00417598);
+    primary = controller->groupPrimary;
+    secondary = controller->groupSecondary;
+    tertiary = controller->groupTertiary;
+    for (i = 0; i < 8; i++) {
+        switch (controller->slots[i].a) {
+        case 1:
+            color = 0;
+            task = *primary;
+            if (primary[1] != NULL) {
+                primary++;
+            }
+            break;
+        case 2:
+            task = *secondary;
+            color = 5;
+            if (secondary[1] != NULL) {
+                secondary++;
+            }
+            break;
+        case 3:
+            task = *tertiary;
+            color = 6;
+            if (tertiary[1] != NULL) {
+                tertiary++;
+            }
+            break;
+        default:
+            task = NULL;
+            color = 0;
+            break;
+        }
+        if (task == NULL || task->actor == NULL) {
+            continue;
+        }
+        if (controller->slots[i].b == 100) {
+            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_00436A10,
+                               D_003B69D8[task->state].name);
+        } else {
+            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_00436A18,
+                               D_003B69D8[task->state].name);
+        }
+    }
+}
+
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417598);
 
 INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436920);
 
