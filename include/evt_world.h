@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+/* Native resource handle and the loader's corresponding data address. */
+typedef struct EvtResourcePair {
+    u32 handle;
+    u32 unk04;
+} EvtResourcePair;
+
 /* The primary object returned by dds3GetWorldObject, not the World/WorldInfo
  * handle that owns it. Event lookup, lip-sync and viewer code share this chain:
  * object +0x18 -> table +0x08 -> 0x0C-byte slot entries, each with head +0x04.

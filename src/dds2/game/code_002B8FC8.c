@@ -245,67 +245,6 @@ typedef struct MenuSprites {
     u8 unk74;
     u8 unk75;
 } MenuSprites;
-typedef struct MenuPageGauge {
-    s32 resourceIndex; /* Negative values have no entry in the window's resource banks. */
-    u8 pad4[4];
-    s32 hp;
-    s32 mp;
-    s32 maxHp;
-    s32 maxMp;
-    u8 pad18[0x18];
-} MenuPageGauge;
-
-typedef struct MenuPageEntry {
-    s32 partyIndex;
-    MenuPageGauge gauge;
-} MenuPageEntry; /* 0x34-byte party row */
-
-/* Counts belong to the table header, not to every party row. */
-typedef struct MenuPageRecord {
-    s32 visibleCount;
-    s32 additionalCount;
-    u32 unk8;
-    MenuPageEntry entries[5];
-} MenuPageRecord;
-
-/* HP/MP display record; the trailing reset values have no named read here. */
-typedef struct MenuPageBar {
-    u8 pad00[0x10];
-    s32 percentage;
-    u8 pad14[0x30];
-    u32 unk44;
-    u32 unk48;
-    u8 pad4C[4];
-} MenuPageBar;
-
-/* A DDS2 party slot contains both stat displays and its owned sprite sets. */
-typedef struct MenuPageSlot {
-    s32 kind;
-    u32 flags;
-    u8 pad08[8];
-    u32 icon[3];
-    MenuPageBar hp;
-    MenuPageBar mp;
-    u32 frame[8];
-    MenuSprites *windowSprites;
-    u32 iconBundle;
-    u8 padE4[0x2138 - 0xE4];
-} MenuPageSlot;
-
-typedef struct MenuPageWindow {
-    u32 flags;
-    u8 pad4[4];
-    MenuPageRecord *records;
-    u8 padC[0x18];
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
-    MenuPageSlot slots[5];
-    MenuList *lists[2];
-    s32 selected;
-    u32 unkA69C;
-    s32 fade;
-} MenuPageWindow;
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
@@ -2084,11 +2023,11 @@ void mnuReleasePartyPanelTextures(s32 menu) {
 
 void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve) {
     MenuPageSlot *entry = &((MenuPageWindow *)menu)->slots[index];
-    entry->hp.unk48 = 0;
-    entry->mp.unk48 = 0;
+    entry->contents[0].hp.unk48 = 0;
+    entry->contents[0].mp.unk48 = 0;
     if (preserve == 0) {
-        entry->hp.unk44 = 0x100;
-        entry->mp.unk44 = 0x100;
+        entry->contents[0].hp.unk44 = 0x100;
+        entry->contents[0].mp.unk44 = 0x100;
     }
 }
 
@@ -2169,12 +2108,12 @@ extern void *func_002BBA38();
 
 void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
     mnuSelectPage((MenuPageWindow *)menu, index);
-    ((MenuPageWindow *)menu)->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
+    ((MenuPageWindow *)menu)->slots[index].contents[0].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
     ((MenuPageWindow *)menu)->flags |= 0x80;
 }
 
 void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 second) {
-    MenuSprites **slot = &((MenuPageWindow *)menu)->slots[index].windowSprites;
+    MenuSprites **slot = &((MenuPageWindow *)menu)->slots[index].contents[0].windowSprites;
     if (*slot != NULL) {
         (*slot)->unk74 = first;
         (*slot)->unk75 = second;
@@ -2182,7 +2121,7 @@ void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 seco
 }
 
 void mnuClearEntries(u8 *menu) {
-    MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].windowSprites;
+    MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].contents[0].windowSprites;
     u32 i = 0;
     mnuClearPageSelectionHandles(menu);
     do {
@@ -2266,11 +2205,11 @@ void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource) {
     u32 bundle;
 
     bundle = mnuCreateIconBundle(resource);
-    ((MenuPageWindow *)menu)->slots[index].iconBundle = bundle;
+    ((MenuPageWindow *)menu)->slots[index].contents[0].iconBundle = bundle;
 }
 
 void mnuReleasePartyIconBundles(u8 *menu) {
-    u32 *bundle = &((MenuPageWindow *)menu)->slots[0].iconBundle;
+    u32 *bundle = &((MenuPageWindow *)menu)->slots[0].contents[0].iconBundle;
     u32 i = 0;
     do {
         u32 resource = *bundle;
@@ -2440,33 +2379,33 @@ INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BCD90);
 void mnuFreeWindowSprites(MenuPageSlot *win) {
     u32 i;
     for (i = 0; i < 3; i++) {
-        if (win->icon[i] != 0) {
-            effDestroyResourceSlotSet(win->icon[i]);
+        if (win->contents[0].icon[i] != 0) {
+            effDestroyResourceSlotSet(win->contents[0].icon[i]);
         }
     }
-    if (win->frame[0] != 0) {
-        effDestroyResourceSlotSet(win->frame[0]);
+    if (win->contents[0].frame[0] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[0]);
     }
-    if (win->frame[1] != 0) {
-        effDestroyResourceSlotSet(win->frame[1]);
+    if (win->contents[0].frame[1] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[1]);
     }
-    if (win->frame[2] != 0) {
-        effDestroyResourceSlotSet(win->frame[2]);
+    if (win->contents[0].frame[2] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[2]);
     }
-    if (win->frame[3] != 0) {
-        effDestroyResourceSlotSet(win->frame[3]);
+    if (win->contents[0].frame[3] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[3]);
     }
-    if (win->frame[4] != 0) {
-        effDestroyResourceSlotSet(win->frame[4]);
+    if (win->contents[0].frame[4] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[4]);
     }
-    if (win->frame[5] != 0) {
-        effDestroyResourceSlotSet(win->frame[5]);
+    if (win->contents[0].frame[5] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[5]);
     }
-    if (win->frame[6] != 0) {
-        effDestroyResourceSlotSet(win->frame[6]);
+    if (win->contents[0].frame[6] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[6]);
     }
-    if (win->frame[7] != 0) {
-        effDestroyResourceSlotSet(win->frame[7]);
+    if (win->contents[0].frame[7] != 0) {
+        effDestroyResourceSlotSet(win->contents[0].frame[7]);
     }
 }
 

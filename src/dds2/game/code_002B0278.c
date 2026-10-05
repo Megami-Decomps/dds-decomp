@@ -260,67 +260,6 @@ typedef struct MenuSprites {
     u8 unk74;
     u8 unk75;
 } MenuSprites;
-typedef struct MenuPageGauge {
-    s32 resourceIndex; /* Negative values have no entry in the window's resource banks. */
-    u8 pad4[4];
-    s32 hp;
-    s32 mp;
-    s32 maxHp;
-    s32 maxMp;
-    u8 pad18[0x18];
-} MenuPageGauge;
-
-typedef struct MenuPageEntry {
-    s32 partyIndex;
-    MenuPageGauge gauge;
-} MenuPageEntry; /* 0x34-byte party row */
-
-/* Counts belong to the table header, not to every party row. */
-typedef struct MenuPageRecord {
-    s32 visibleCount;
-    s32 additionalCount;
-    u32 unk8;
-    MenuPageEntry entries[5];
-} MenuPageRecord;
-
-/* HP/MP display record; the trailing reset values have no named read here. */
-typedef struct MenuPageBar {
-    u8 pad00[0x10];
-    s32 percentage;
-    u8 pad14[0x30];
-    u32 unk44;
-    u32 unk48;
-    u8 pad4C[4];
-} MenuPageBar;
-
-/* A DDS2 party slot contains both stat displays and its owned sprite sets. */
-typedef struct MenuPageSlot {
-    s32 kind;
-    u32 flags;
-    u8 pad08[8];
-    u32 icon[3];
-    MenuPageBar hp;
-    MenuPageBar mp;
-    u32 frame[8];
-    MenuSprites *windowSprites;
-    u32 iconBundle;
-    u8 padE4[0x2138 - 0xE4];
-} MenuPageSlot;
-
-typedef struct MenuPageWindow {
-    u32 flags;
-    u8 pad4[4];
-    MenuPageRecord *records;
-    u8 padC[0x18];
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
-    MenuPageSlot slots[5];
-    MenuList *lists[2];
-    s32 selected;
-    u32 unkA69C;
-    s32 fade;
-} MenuPageWindow;
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
     u8 pad00[0x54];
@@ -1159,7 +1098,7 @@ s32 mnuDestroyPanels(s32 callback) {
 }
 
 void mnuResetSelectedPanelOpacity(s32 context) {
-    ((MenuContext *)context)->partyWindow.slots[((MenuContext *)context)->partyWindow.lists[0]->cursor->index].windowSprites->fade = 0x100;
+    ((MenuContext *)context)->partyWindow.slots[((MenuContext *)context)->partyWindow.lists[0]->cursor->index].contents[0].windowSprites->fade = 0x100;
 }
 
 /* Switch the party page, rebuilding its panels; previous takes priority.
@@ -1263,7 +1202,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
 void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles) {
     s32 alpha;
 
-    alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].windowSprites->fade;
+    alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].contents[0].windowSprites->fade;
     func_00306CD0(0xa0, 0xa30, 0, alpha, 1, handles[1], 0x55, 0x53);
     func_00306CD0(0x30, 0xaf8, 0, alpha, 1, *handles, 0x1a, 0x53);
 }

@@ -43,6 +43,146 @@ typedef struct CampEffectRows {
     u32 values[2][4];
 } CampEffectRows;
 
+/* The occupied-party display and its five native 0x34-byte entries. */
+typedef struct PartyPanelEntry {
+    s32 unk0;
+    s32 index;
+    s32 unk8;
+    s32 pad[10];
+} PartyPanelEntry;
+
+typedef struct PartyPanel {
+    s32 unk0;
+    s32 unk4;
+    PartyPanelEntry slots[5];
+} PartyPanel;
+
+typedef struct MenuPageGauge {
+    s32 resourceIndex;
+    u8 pad4[4];
+    s32 hp;
+    s32 mp;
+    s32 maxHp;
+    s32 maxMp;
+    u8 pad18[0x18];
+} MenuPageGauge;
+
+typedef struct MenuPageEntry {
+    s32 partyIndex;
+    MenuPageGauge gauge;
+} MenuPageEntry;
+
+typedef struct MenuPageRecord {
+    s32 visibleCount;
+    s32 additionalCount;
+    u32 unk8;
+    MenuPageEntry entries[5];
+} MenuPageRecord;
+
+#ifdef VERSION_DDS2
+typedef struct MenuPageBar {
+    u8 pad00[0x10];
+    s32 percentage;
+    u8 pad14[0x30];
+    u32 unk44;
+    u32 unk48;
+    u8 pad4C[4];
+} MenuPageBar;
+
+typedef struct MenuQueuedCommand {
+    u32 unk0;
+    s32 kind;
+    s32 option;
+    s32 unkC;
+    s32 unk10;
+    s32 initialValue;
+    s32 argument;
+} MenuQueuedCommand;
+
+/* A page owns two content banks; sprite/stat fields belong to each bank. */
+typedef struct MenuPageSlotContent {
+    u8 pad00[4];
+    u32 icon[3];
+    MenuPageBar hp;
+    MenuPageBar mp;
+    u32 frame[8];
+    struct MenuSprites *windowSprites;
+    u32 iconBundle;
+    u8 padD8[0xC];
+    MenuQueuedCommand command;
+    s32 unk100;
+    u8 pad104[0xF20];
+} MenuPageSlotContent;
+
+typedef struct MenuPageSlot {
+    s32 kind;
+    u32 flags;
+    u8 pad08[4];
+    MenuPageSlotContent contents[2];
+    u8 pad2054[0xE4];
+} MenuPageSlot;
+#else
+typedef struct MenuPageSlot {
+    s32 kind;
+    u32 flags;
+    u8 pad08[8];
+    s32 icon[3];
+    u8 pad1C[0x4C];
+    s32 scaleA;
+    s32 offsetA;
+    u8 pad70[0x4C];
+    s32 scaleB;
+    s32 offsetB;
+    s32 frame[6];
+    struct MenuPageResources *resources;
+    struct MenuSprites *windowSprites;
+    u32 iconBundle;
+    u8 padE8[0x4C];
+} MenuPageSlot;
+#endif
+
+typedef struct MenuPageWindow {
+    u32 flags;
+    s32 transitionValue;
+    MenuPageRecord *records;
+#ifdef VERSION_DDS2
+    u8 pad0C[0x18];
+#else
+    s32 source;
+    s32 slot;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+#endif
+    s32 handlesA[8];
+    s32 handlesB[8];
+    s32 handlesC[5];
+    MenuPageSlot slots[5];
+    struct MenuList *lists[2];
+    s32 selected;
+    s32 scrollOffset;
+    s32 fade;
+} MenuPageWindow;
+
+#ifdef VERSION_DDS2
+/* The large progress display is distinct from the 0x3F8 terminal scene. */
+typedef struct MenuProgressHost {
+    s32 heapHandle;
+    s32 titleEffectHandle;
+    s32 resourceHandle;
+    u8 pad0C[8];
+    s32 unk14;
+    u8 pad18[0x54];
+    s32 loadState;
+    PartyPanel partyPanel;
+    MenuPageWindow partyWindow;
+    u8 padA820[4];
+    s32 effectResource;
+    s32 currentEffect;
+} MenuProgressHost;
+#endif
+
 #ifndef VERSION_DDS2
 /* Mantra-scene state shared by its controller and animated currency display. */
 typedef struct MenuSceneMetadata {

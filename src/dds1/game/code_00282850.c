@@ -140,18 +140,6 @@ extern void fldSetPrimarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
 extern s32 mdlRequestAsset(s32, s32, s32);
 
-typedef struct PartyPanelSlot {
-    s32 unk0;
-    s32 index;
-    s32 unk8;
-    s32 pad[10];
-} PartyPanelSlot;
-
-typedef struct PartyPanel {
-    s32 unk0;
-    s32 unk4;
-    PartyPanelSlot slots[5];
-} PartyPanel;
 extern s32 datGameState;
 extern void func_00285960(u8 *entry, s32 arg1, u32 index, PartyPanel *panel);
 
@@ -258,28 +246,6 @@ extern void btlStopStage(void);
 
 extern void *evtBattleStageTestScreen(void);
 
-/* Native page-table shape, shared with the party-window resource handlers. */
-typedef struct MenuPageGauge {
-    s32 resourceIndex;
-    u8 pad4[4];
-    s32 hp;
-    s32 mp;
-    s32 maxHp;
-    s32 maxMp;
-    u8 pad18[0x18];
-} MenuPageGauge;
-
-typedef struct MenuPageEntry {
-    s32 partyIndex;
-    MenuPageGauge gauge;
-} MenuPageEntry;
-
-typedef struct MenuPageRecord {
-    s32 visibleCount;
-    s32 additionalCount;
-    u32 unk8;
-    MenuPageEntry entries[5];
-} MenuPageRecord;
 
 /* Only this sprite object's prefix is accessed here. */
 typedef struct MenuSprites {
@@ -287,31 +253,9 @@ typedef struct MenuSprites {
     s32 unkC;
 } MenuSprites;
 
-typedef struct MenuPageSlot {
-    s32 kind;
-    u32 flags;
-    u8 pad08[0xD8];
-    MenuSprites *windowSprites; /* 0xE0 */
-    u8 padE4[0x50];
-} MenuPageSlot; /* 0x134 */
 
 typedef struct MenuList MenuList;
 
-/* Five page slots begin at +0x78, followed by the two owned list pointers. */
-typedef struct MenuPageWindow {
-    u32 flags;
-    s32 transitionValue;
-    MenuPageRecord *records;
-    u8 pad0C[0x18];
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
-    MenuPageSlot slots[5];
-    MenuList *lists[2]; /* 0x67C */
-    s32 selected;      /* 0x684 */
-    s32 scrollOffset;  /* 0x688 */
-    s32 fade;          /* 0x68C */
-} MenuPageWindow;
 
 extern void func_00281D40(s32, s32, s32, MenuPageWindow *, s32, s32);
 extern void func_00282360(s32, s32, s32, MenuPageWindow *, s32, s32);
