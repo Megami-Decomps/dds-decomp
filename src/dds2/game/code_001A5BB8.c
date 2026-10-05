@@ -228,6 +228,9 @@ extern s32 datCommandSelectors;
 extern char D_00415158[];
 
 extern void btlBossDebugPrintf(const char *, ...);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern s8 effSharedRandomState[];
 
@@ -547,7 +550,7 @@ void itfResetWindowResourceBlock(s32 *object) {
 /* Paired arrays: a nonzero slot marker owns the handle at the same index. */
 typedef struct UiResourceSlots {
     s32 markers[32];
-    s32 handles[32];
+    SdfMemBlock *handles[32];
 } UiResourceSlots;
 
 /* Clear 32 words, from the end back toward the beginning of the buffer. */
@@ -605,7 +608,7 @@ void itfReleaseUiResourceSlotHandles(UiResourceSlots *slots) {
     remaining = 0x1f;
     do {
         if (*entries != 0) {
-            sdfReleaseResourceAllocation(entries[0x20]);
+            sdfReleaseResourceAllocation(slots->handles[entries - slots->markers]);
             *entries = 0;
         }
         remaining = remaining - 1;
@@ -1497,14 +1500,13 @@ typedef struct BattleInitState {
     u32 unk5BC;
 } BattleInitState;
 
-extern s32 D_004366E0;
+extern SdfMemBlock *D_004366E0;
 extern ItfMesSub *D_00435E78;
 extern ItfMesSub D_003858D8;
 extern ItfMesSub D_00385228;
 extern u16 mnuMovieTaskState;
 extern u32 func_001003F8(void);
 extern u32 func_001B5600(void);
-extern void *sdfResourceRetainAddress(s32);
 extern void effMiscSeedRandom(void *, u32);
 extern s32 itfMesCreateWindow(ItfMesSub *);
 extern void btlResetActorEntryState(void);
@@ -1514,7 +1516,7 @@ extern s32 D_003B4D90[];
 extern s32 D_003B4DA8[];
 
 void func_001A9B80(void) {
-    s32 allocation;
+    SdfMemBlock *allocation;
     u32 seed;
     u8 *runtime;
 
@@ -4180,7 +4182,7 @@ void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, 
 }
 
 typedef struct BtlResBlock {
-    s32 unk0;
+    SdfMemBlock *unk0;
     s32 nameA;
     s32 nameB;
     s32 nameC;
@@ -4195,10 +4197,6 @@ extern u8 D_00436800;
 extern u8 btlResourceBlockLoaded;
 
 extern BtlResBlock *btlResourceBlock;
-
-extern s32 sdfAllocGeneralBlock(s32);
-
-extern void *sdfResourceRetainAddress(s32);
 
 extern s32 sdfReadNamedResource(const char *, void *, s32);
 
@@ -4226,11 +4224,11 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CE8);
 
 void btlPanelResourcesLoad(void) {
     u8 params[16];
-    s32 handle;
+    SdfMemBlock *handle;
     BtlResBlock *block;
     if (D_00436800 == 0) {
         handle = sdfAllocGeneralBlock(0x28);
-        block = sdfResourceRetainAddress(handle);
+        block = (BtlResBlock *)sdfResourceRetainAddress(handle);
         btlResourceBlock = block;
         block->unk0 = handle;
         block->resA = 0;
@@ -5463,7 +5461,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1A68);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
 void btlReleaseStwrPanelResource(void) {
-    sdfReleaseResourceAllocation(*(u32 *)kwlnTaskGetUserValue());
+    sdfReleaseResourceAllocation(*(SdfMemBlock **)kwlnTaskGetUserValue());
     btlSetTrackedTaskHandle(3, 0);
 }
 
@@ -5524,7 +5522,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2EA8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C3168);
 
 void btlReleaseTrackedTaskResource(void) {
-    sdfReleaseResourceAllocation(*(u32 *)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
+    sdfReleaseResourceAllocation(*(SdfMemBlock **)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
     btlSetTrackedTaskHandle(8, 0);
 }
 
