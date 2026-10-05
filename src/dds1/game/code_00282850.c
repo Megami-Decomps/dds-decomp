@@ -3,6 +3,14 @@
 #include "pcp_vu0.h"
 #include "mnu.h"
 
+struct FrFontGlyph;
+extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
+extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern char D_003BC7A0[];
+
 #define MNU_PANEL_ITEM_COUNT 5
 #define MNU_PANEL_STATE_BYTES 0x64
 #define MNU_PANEL_GROUP_BYTES 0x28
@@ -847,9 +855,44 @@ void mnuFreePanelItemWork(void) {
     sdfReleaseChipBlock();
 }
 
+extern void func_00284C48(s32, s32, s32, u32, s32, MenuPanelItem *, s32);
+
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284C48);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00284EB8);
+void func_00284EB8(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer) {
+    char buffer[16];
+    struct FrFontGlyph *glyph;
+    s32 value;
+    u32 opacity = item->initialValue;
+    u32 color;
+
+    func_002BF4E0(x, y, depth, opacity, 0,
+                 item->groupPoints[0].x, item->groupPoints[0].y, layer);
+    func_00284C48(x, y, depth, opacity, mode, item, layer);
+    func_002BF4E0(x, y, depth, opacity, 0,
+                 item->groupPoints[1].x, item->groupPoints[1].y, layer);
+    func_002BF4E0(x, y, depth, opacity, 0,
+                 item->groupPoints[4].x, item->groupPoints[4].y, layer);
+    if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
+        func_002BF4E0(x, y, depth, opacity, 0,
+                     item->points[0].x, item->points[0].y, layer);
+        func_002BF4E0(x, y, depth, opacity, 0,
+                     item->points[4].x, item->points[4].y, layer);
+    }
+
+    value = item->value18;
+    value += item->option;
+    if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
+        color = 0xC0907080;
+    } else {
+        color = 0xA09DC380;
+    }
+    color = uiBlendColors(color, color & ~0xFF, opacity);
+    func_003014F0(buffer, D_003BC7A0, value);
+    glyph = (struct FrFontGlyph *)func_001978E8(x + 0x340, y + 0x28, depth, color, buffer, 0);
+    func_001958A0(glyph, 1, layer);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
 
 /* The compact 0x3C-byte profile panel stores a cap, option and initial grid point. */
 typedef struct MenuProfilePanel {

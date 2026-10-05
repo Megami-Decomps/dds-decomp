@@ -131,7 +131,16 @@ extern u32 sdfAllocSizeClassBlock(u32);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
-extern SdfResEntry *sdfPacketResourceEntries[];
+typedef struct SdfDescriptorSource {
+    u8 pad00[0xC];
+    u32 baseAddress;
+    u8 pad10[4];
+    s16 bufferWidth;
+    u8 pad16[2];
+    s32 pixelFormat;
+} SdfDescriptorSource;
+
+extern SdfDescriptorSource *sdfPacketResourceEntries[];
 
 extern volatile s8 sdfPacketSlotIndex;
 
@@ -157,8 +166,6 @@ typedef struct SdfSynchronizedRequest {
     u32 value;
     u32 state;
 } SdfSynchronizedRequest;
-
-void func_0032C468();
 
 s32 sdfAllocPacketAligned(s32 size);
 
@@ -249,7 +256,50 @@ void sdfRegisterTextureReleaseRequestHandler(void) {
     sdfInitializeSynchronizedRequest(&sdfTextureReleaseQueue, (u32)sdfTexRelease);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C468);
+/* Transfer setup, deferred image metadata, and its linked primitive-reset tail. */
+typedef struct SdfResourcePacket {
+    u64 header[14];
+    SdfPacket transfer[2];
+    s32 quadwordCount;
+    u32 unkB4;
+    u32 unkB8;
+    u32 unkBC;
+    u64 tail[6];
+} SdfResourcePacket;
+
+void func_0032C468(SdfResourcePacket *packet, SdfDescriptorSource *source,
+    s32 sourceX, s32 sourceY, s32 width, s32 height, u32 arg6, u32 arg7, u32 arg8) {
+    s32 quadwordCount;
+
+    packet->header[0] = 0x90000001ULL;
+    packet->header[1] = 0x10000000ULL;
+    packet->header[2] = 0;
+    packet->header[3] = 0;
+    packet->header[4] = 0x90000002ULL;
+    packet->header[5] = 0x5000000206008000ULL;
+    packet->header[6] = 0x1000000000000001ULL;
+    packet->header[7] = 0xE;
+    packet->header[8] = 0;
+    packet->header[9] = 0x61;
+    packet->header[10] = ((u64)((u32)packet->tail & SDF_DMA_ADDRESS_MASK) << 32) | 0xA0000005ULL;
+    packet->header[11] = 0x5000000500000000ULL;
+    packet->header[12] = 0x1000000000000004ULL;
+    packet->header[13] = 0xE;
+    sdfWriteImageTransferRegisters(packet->transfer, 0, 0, 0, 0, 0,
+        source->baseAddress, source->bufferWidth, source->pixelFormat,
+        sourceX, sourceY, width, height, 1);
+    quadwordCount = (sdfFormatBitsPerPixelB(source->pixelFormat) * width * height) >> 7;
+    packet->quadwordCount = quadwordCount;
+    packet->unkB4 = arg6;
+    packet->unkB8 = arg7;
+    packet->unkBC = arg8;
+    packet->tail[0] = 0x20000002ULL;
+    packet->tail[1] = 0x5000000206000000ULL;
+    packet->tail[2] = 0x1000000000008001ULL;
+    packet->tail[3] = 0xE;
+    packet->tail[4] = 0x46;
+    packet->tail[5] = 0;
+}
 
 /* Allocate a resource packet; append only its initialized 0xC0-byte payload. */
 void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
@@ -260,7 +310,8 @@ void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s3
         allocate = sdfAllocPacketAligned;
     }
     packet = allocate(0xf0);
-    func_0032C468(packet, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0);
+    func_0032C468((SdfResourcePacket *)packet, (SdfDescriptorSource *)arg1,
+        arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0);
     sdfAppendPacketRange(list, packet, packet + 0xc0);
 }
 
@@ -280,19 +331,11 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList
     }
     packetAddress = allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     ((SdfNode *)packetAddress)->unk4 = (u32)sdfPatchPacketResourceField;
-    func_0032C468(packetAddress + SDF_QWORD_BYTES, sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    func_0032C468((SdfResourcePacket *)(packetAddress + SDF_QWORD_BYTES),
+        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packetAddress);
     sdfAppendPacketRange(list, packetAddress + SDF_QWORD_BYTES, packetAddress + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
-
-typedef struct SdfDescriptorSource {
-    u8 pad00[0xC];
-    u32 baseAddress;
-    u8 pad10[4];
-    s16 bufferWidth;
-    u8 pad16[2];
-    s32 pixelFormat;
-} SdfDescriptorSource;
 
 typedef struct SdfDescriptorPacket {
     u64 header[4];
