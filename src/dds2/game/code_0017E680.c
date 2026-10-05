@@ -1,27 +1,8 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "eff.h"
 
-typedef struct EffResourceEntry {
-    f32 position[3];
-    u8 pad0C[4];
-    u32 value;
-} EffResourceEntry;
-
-typedef struct EffResourceWork {
-    f32 matrix[16];
-    EffResourceEntry *entries;
-    s32 entryCount;
-    s32 mode;
-    f32 scale[3];
-    u32 vertexCount;
-    f32 (*positions)[4];
-    f32 (*normals)[4];
-    u32 *colors;
-    u32 resource68;
-    u32 graphics6C;
-    u32 resource70;
-} EffResourceWork;
 
 /* Billboard set allocated by effCreateBillboardResourceWork. */
 typedef struct EffBillboardWork {
@@ -42,7 +23,6 @@ extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
 extern s32 sdfAllocGeneralBlock(s32 size);
 extern s32 sdfResourceRetainAddress(s32 handle);
-extern void effReleaseOptionalResource(s32 work);
 extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(u32 asset, f32 value);
 typedef struct {
@@ -115,10 +95,9 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
     return work;
 }
 
-void effReleaseAttachedResources(u32 address) {
-    EffResourceWork *effect = (EffResourceWork *)address;
+void effReleaseAttachedResources(EffResourceWork *effect) {
     sdfQueueAssetRelease(effect->graphics6C);
-    effReleaseOptionalResource(address);
+    effReleaseOptionalResource(effect);
     sdfReleaseResourceAllocation(effect->resource70);
 }
 
@@ -208,7 +187,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
         count = 3;
     }
     if (oldResource != 0) {
-        effReleaseOptionalResource((s32)work);
+        effReleaseOptionalResource(work);
     }
     angle = 0.0f;
     recordCount = count * 3;
@@ -262,8 +241,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     }
 }
 
-void effReleaseOptionalResource(s32 address) {
-    EffResourceWork *effect = (EffResourceWork *)address;
+void effReleaseOptionalResource(EffResourceWork *effect) {
     if (effect->resource68 != 0) {
         sdfReleaseResourceAllocation(effect->resource68);
         return;
@@ -271,14 +249,14 @@ void effReleaseOptionalResource(s32 address) {
 }
 
 void effSetResourceEntryPosition(EffResourceWork *effect, s32 index, f32 *vec) {
-    f32 *dst = (f32 *)(index * 0x14 + (s32)effect->entries);
+    f32 *dst = (f32 *)(index * sizeof(EffResourceEntry) + (s32)effect->entries);
     dst[0] = vec[0];
     dst[1] = vec[1];
     dst[2] = vec[2];
 }
 
 void effGetResourceEntryPosition(EffResourceWork *effect, s32 index, f32 *vec) {
-    f32 *src = (f32 *)(index * 0x14 + (s32)effect->entries);
+    f32 *src = (f32 *)(index * sizeof(EffResourceEntry) + (s32)effect->entries);
     vec[0] = src[0];
     vec[1] = src[1];
     vec[2] = src[2];

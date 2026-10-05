@@ -1,9 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "eff.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
-extern void func_001760F8(void *work);
 
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
@@ -14,74 +14,36 @@ extern void sdfBuildVuRotationFromAxisAngle(f32 *axis, f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 blend);
-extern void effSetResourceEntryPosition(void *resource, s32 index, f32 *position);
-extern void effGetResourceEntryPosition(void *resource, s32 index, f32 *position);
-extern void effSetResourceEntryValue(void *resource, s32 index, u32 value);
 extern void parUpdateCellVertexPair(u32 system, s32 index, f32 vertices[2][4]);
 extern void parFadeAlphaCell(u32 system, s32 index);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
 extern void parCellInit(u32 system, s32 index);
 extern void parPrependCellNode(u32 system);
-extern void effDrawInstancedResourceTrianglesVU(void *resource);
 
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 D_00354C00[4];
 
 extern void parReleaseCellSystem(u32 handle);
-extern void effReleaseAttachedResources(u32 handle);
-extern void func_001770F8(u32 handle);
+extern void func_001770F8(void *dst, void *src);
 extern void sdfReleaseResourceAllocation(u32 handle);
 
-typedef struct {
-    f32 direction[4];
-    u8 pad10[0x10];
-    s32 age;
-    f32 radius;
-    f32 angle;
-} EffPCPNeedleSlot; /* 0x2C */
-
-/* Needle effect work: motion parameters followed by three owned resources. */
-typedef struct {
-    f32 position[4]; /* 0x00 */
-    u8 pad10[4];
-    s32 duration;   /* 0x14 */
-    u8 pad18[4];
-    s32 fadeIn;     /* 0x1C */
-    s32 fadeOut;    /* 0x20 */
-    u8 pad24[4];
-    f32 speed;      /* 0x28 */
-    f32 acceleration; /* 0x2C */
-    u8 pad30[8];
-    f32 angleStep;  /* 0x38 */
-    u8 pad3C[8];
-    f32 viewOffset; /* 0x44 */
-    u8 pad48[8];
-    f32 width;      /* 0x50 */
-    u8 pad54[8];
-    EffPCPNeedleSlot *slots; /* 0x5C */
-    u32 color;      /* 0x60 */
-    u32 count;      /* 0x64 */
-    u32 resource68; /* 0x68 released by parReleaseCellSystem */
-    u32 resource6C; /* 0x6C released by effReleaseAttachedResources/func_001770F8 */
-    u32 resource70; /* 0x70 released by sdfReleaseResourceAllocation */
-} EffPCPNeedleWork;
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
-    parReleaseCellSystem(work->resource68);
-    effReleaseAttachedResources(work->resource6C);
-    sdfReleaseResourceAllocation(work->resource70);
+    parReleaseCellSystem(work->system);
+    effReleaseAttachedResources(work->resource);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 /* The first parameter block supplies the effect's runtime work. */
 void effPCPNeedleCreate(void *data) {
-    void *work;
+    EffPCPNeedleParams *work;
 
     work = effParamTableGetBlock(data, 0);
     func_001760F8(work);
 }
 
-void func_00176410(void *work) {
+void func_00176410(EffPCPNeedleParams *work) {
     func_001760F8(work);
 }
 
@@ -110,7 +72,7 @@ void func_00176428(EffPCPNeedleWork *work) {
     s32 duration;
     s32 fadeOut;
 
-    value = work->width;
+    value = work->params.width;
     width[0] = value;
     width[1] = value;
     width[2] = value;
@@ -118,7 +80,7 @@ void func_00176428(EffPCPNeedleWork *work) {
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, viewDirection);
-    value = -work->viewOffset * 0.75f;
+    value = -work->params.viewOffset * 0.75f;
     viewOffset[0] = value;
     viewOffset[1] = value;
     viewOffset[2] = value;
@@ -126,11 +88,11 @@ void func_00176428(EffPCPNeedleWork *work) {
     if (func_001619E8() != 0) {
         btlUnitGetMuzzlePosVU(effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
-        sdfVuBuildLookAtBasis(work->position, position, D_00354C00);
+        sdfVuBuildLookAtBasis(work->params.position, position, D_00354C00);
         sdfInvertRigidVuTransform();
-        VU0_STORE_MATRIX_UNCLOBBERED((void *)work->resource6C);
+        VU0_STORE_MATRIX_UNCLOBBERED(work->resource->matrix);
     } else {
-        VU0_LOAD_MATRIX((void *)work->resource6C);
+        VU0_LOAD_MATRIX(work->resource->matrix);
     }
 
     axis[0] = 0.0f;
@@ -146,18 +108,18 @@ void func_00176428(EffPCPNeedleWork *work) {
     count = work->count;
     i = 0;
     slot = work->slots;
-    speed = work->speed;
-    acceleration = work->acceleration;
-    duration = work->duration;
-    fadeIn = work->fadeIn;
-    fadeOut = work->fadeOut;
-    angleStep = work->angleStep;
+    speed = work->params.speed;
+    acceleration = work->params.acceleration;
+    duration = work->params.duration;
+    fadeIn = work->params.fadeIn;
+    fadeOut = work->params.fadeOut;
+    angleStep = work->params.angleStep;
     baseColor = work->color;
     if (count != 0) {
         do {
             age = slot->age;
             if (age == 0) {
-                VU0_LOAD_MATRIX((void *)work->resource6C);
+                VU0_LOAD_MATRIX(work->resource->matrix);
                 radius = (u32)slot->radius;
                 position[0] = sdfEvaluateCosineViaSinePhaseShift(slot->angle) * radius;
                 position[1] = sdfSinPoly(slot->angle) * radius;
@@ -168,11 +130,11 @@ void func_00176428(EffPCPNeedleWork *work) {
                 slot->direction[0] = position[0];
                 slot->direction[1] = position[1];
                 slot->direction[2] = position[2];
-                effSetResourceEntryPosition((void *)work->resource6C, i, position);
+                effSetResourceEntryPosition(work->resource, i, position);
             }
 
             if (age >= 0 && age <= duration) {
-                effGetResourceEntryPosition((void *)work->resource6C, i, resourcePosition);
+                effGetResourceEntryPosition(work->resource, i, resourcePosition);
                 VU0_LOAD_VF(vf10, viewOffset);
                 VU0_LOAD_VF(vf11, resourcePosition);
                 VU0_ADD(vf10, vf10, vf11);
@@ -199,10 +161,10 @@ void func_00176428(EffPCPNeedleWork *work) {
                     position[2] += axis[2] * distance;
                 }
                 VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, work->position);
+                VU0_LOAD_VF(vf11, work->params.position);
                 VU0_ADD(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
-                effSetResourceEntryPosition((void *)work->resource6C, i, position);
+                effSetResourceEntryPosition(work->resource, i, position);
 
                 if (age < fadeIn && fadeIn != 0) {
                     t = (f32)age / (f32)fadeIn;
@@ -213,7 +175,7 @@ void func_00176428(EffPCPNeedleWork *work) {
                         ? 1.0f : (f32)(duration - age) / (f32)fadeOut;
                 }
                 color = effBlendColor(baseColor & 0xFFFFFF, baseColor, t);
-                effSetResourceEntryValue((void *)work->resource6C, i, color);
+                effSetResourceEntryValue(work->resource, i, color);
 
                 if (age > 0) {
                     VU0_LOAD_VF(vf10, viewOffset);
@@ -237,28 +199,28 @@ void func_00176428(EffPCPNeedleWork *work) {
                     VU0_MOVE_VF(vf10, vf12);
                     VU0_SUB(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, vertices[1]);
-                    parUpdateCellVertexPair(work->resource68, i, vertices);
-                    parFadeAlphaCell(work->resource68, i);
-                    effBillSetEntryValue(work->resource68, i, (color & 0xFF000000) | 0x808080);
+                    parUpdateCellVertexPair(work->system, i, vertices);
+                    parFadeAlphaCell(work->system, i);
+                    effBillSetEntryValue(work->system, i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
-                effSetResourceEntryValue((void *)work->resource6C, i, 0);
-                effBillSetEntryValue(work->resource68, i, 0);
-                parCellInit(work->resource68, i);
+                effSetResourceEntryValue(work->resource, i, 0);
+                effBillSetEntryValue(work->system, i, 0);
+                parCellInit(work->system, i);
             }
             slot->age++;
             i++;
             slot++;
         } while (i < count);
     }
-    parPrependCellNode(work->resource68);
-    effDrawInstancedResourceTrianglesVU((void *)work->resource6C);
+    parPrependCellNode(work->system);
+    effDrawInstancedResourceTrianglesVU(work->resource);
 }
 
 void effPCPNeedleCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00176A10(EffPCPNeedleWork *work) {
-    func_001770F8(work->resource6C);
+void func_00176A10(EffPCPNeedleWork *work, void *matrix) {
+    func_001770F8(work->resource->matrix, matrix);
 }

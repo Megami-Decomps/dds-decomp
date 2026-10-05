@@ -1,28 +1,8 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "eff.h"
 
-typedef struct {
-    f32 position[3];
-    u8 pad0C[4];
-    u32 value;
-} EffResourceEntry;
-
-/* Nested resource group released when its effect work is destroyed. */
-typedef struct {
-    f32 matrix[16];
-    EffResourceEntry *entries;
-    u32 entryCount;
-    u32 mode;
-    f32 scale[3];
-    u32 vertexCount;
-    f32 (*positions)[4];
-    f32 (*normals)[4];
-    u32 *colors;
-    u32 resource68;
-    u32 resource6C;
-    u32 resource70;
-} EffResourceWork;
 
 /* Billboard set allocated by effCreateBillboardResourceWork. */
 typedef struct EffBillboardWork {
@@ -41,7 +21,6 @@ typedef struct EffBillboardParams {
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
-extern void effReleaseOptionalResource(s32 work);
 
 typedef struct {
     u16 parameterCount;
@@ -100,8 +79,8 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     work->scale[2] = 1.0f;
     work->resource68 = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->resource6C = sdfCreateAssetWithDrawEntries();
-    func_002DA420(work->resource6C, 1.0f);
+    work->graphics6C = sdfCreateAssetWithDrawEntries();
+    func_002DA420(work->graphics6C, 1.0f);
     entry = work->entries;
     for (i = 0; i < count; i++, entry++) {
         entry->value = 0x80808080;
@@ -111,10 +90,10 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     return work;
 }
 
-void effReleaseAttachedResources(u32 work) {
-    sdfQueueAssetRelease(((EffResourceWork *)work)->resource6C);
+void effReleaseAttachedResources(EffResourceWork *work) {
+    sdfQueueAssetRelease(work->graphics6C);
     effReleaseOptionalResource(work);
-    sdfReleaseResourceAllocation(((EffResourceWork *)work)->resource70);
+    sdfReleaseResourceAllocation(work->resource70);
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
@@ -128,7 +107,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
 
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
-    sdfConsAppendAssetPacket(packet, work->resource6C, 0);
+    sdfConsAppendAssetPacket(packet, work->graphics6C, 0);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale[0];
     matrix[5] = work->scale[1];
@@ -203,7 +182,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
         count = 3;
     }
     if (oldResource != 0) {
-        effReleaseOptionalResource((s32)work);
+        effReleaseOptionalResource(work);
     }
     angle = 0.0f;
     recordCount = count * 3;
@@ -257,29 +236,29 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     }
 }
 
-void effReleaseOptionalResource(s32 work) {
-    if (((EffResourceWork *)work)->resource68 != 0) {
-        sdfReleaseResourceAllocation(((EffResourceWork *)work)->resource68);
+void effReleaseOptionalResource(EffResourceWork *work) {
+    if (work->resource68 != 0) {
+        sdfReleaseResourceAllocation(work->resource68);
         return;
     }
 }
 
-void effSetResourceEntryPosition(u8 *obj, s32 index, f32 *vec) {
-    f32 *dst = (f32 *)(index * 0x14 + *(s32 *)(obj + 0x40));
+void effSetResourceEntryPosition(EffResourceWork *work, s32 index, f32 *vec) {
+    f32 *dst = (f32 *)(index * sizeof(EffResourceEntry) + (s32)work->entries);
     dst[0] = vec[0];
     dst[1] = vec[1];
     dst[2] = vec[2];
 }
 
-void effGetResourceEntryPosition(u8 *obj, s32 index, f32 *vec) {
-    f32 *src = (f32 *)(index * 0x14 + *(s32 *)(obj + 0x40));
+void effGetResourceEntryPosition(EffResourceWork *work, s32 index, f32 *vec) {
+    f32 *src = (f32 *)(index * sizeof(EffResourceEntry) + (s32)work->entries);
     vec[0] = src[0];
     vec[1] = src[1];
     vec[2] = src[2];
 }
 
-void effSetResourceEntryValue(s32 work, s32 index, u32 value) {
-    ((EffResourceWork *)work)->entries[index].value = value;
+void effSetResourceEntryValue(EffResourceWork *work, s32 index, u32 value) {
+    work->entries[index].value = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */

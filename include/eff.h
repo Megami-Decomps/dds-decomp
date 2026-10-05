@@ -181,6 +181,92 @@ typedef struct EffectBufferTail {
     EffectBufferRecord *records;
 } EffectBufferTail;
 
+/* Resource-entry work shared by the needle constructor and its renderer. */
+typedef struct EffResourceEntry {
+    f32 position[3];
+    u8 pad0C[4];
+    u32 value;
+} EffResourceEntry; /* 0x14 */
+
+typedef struct EffResourceWork {
+    f32 matrix[16];
+    EffResourceEntry *entries;
+    u32 entryCount;
+    u32 mode;
+    f32 scale[3];
+    u32 vertexCount;
+    f32 (*positions)[4];
+    f32 (*normals)[4];
+    u32 *colors;
+    u32 resource68;
+    u32 graphics6C;
+    u32 resource70;
+} EffResourceWork; /* 0x74 */
+
+/* Exactly the 0x5C bytes copied into the needle's runtime work. */
+typedef struct EffPCPNeedleParams {
+    f32 position[4];
+    u32 count;
+    s32 duration;
+    u32 mode;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 randomDelayRange;
+    f32 speed;
+    f32 acceleration;
+    f32 radiusBase;
+    f32 radiusJitter;
+    f32 angleStep;
+    u32 fanSegments;
+    f32 radiusScale;
+    f32 viewOffset;
+    u32 centerColor;
+    u32 outerColor;
+    f32 width;
+    s32 unk54;
+    s32 unk58;
+} EffPCPNeedleParams;
+
+typedef struct EffPCPNeedleSlot {
+    f32 direction[4];
+    u8 pad10[0x10];
+    s32 age;
+    f32 radius;
+    f32 angle;
+} EffPCPNeedleSlot; /* 0x2C */
+
+typedef struct EffPCPNeedleWork {
+    EffPCPNeedleParams params;
+    EffPCPNeedleSlot *slots;
+    u32 color;
+    u32 count;
+    u32 system;
+    EffResourceWork *resource;
+    u32 allocationHandle;
+} EffPCPNeedleWork; /* 0x74, followed by count slots */
+
+typedef char EffResourceEntrySizeCheck[sizeof(EffResourceEntry) == 0x14 ? 1 : -1];
+typedef char EffResourceWorkSizeCheck[sizeof(EffResourceWork) == 0x74 ? 1 : -1];
+typedef char EffPCPNeedleParamsSizeCheck[sizeof(EffPCPNeedleParams) == 0x5C ? 1 : -1];
+typedef char EffPCPNeedleSlotSizeCheck[sizeof(EffPCPNeedleSlot) == 0x2C ? 1 : -1];
+typedef char EffPCPNeedleWorkSizeCheck[sizeof(EffPCPNeedleWork) == 0x74 ? 1 : -1];
+
+#ifdef VERSION_DDS2
+extern EffPCPNeedleWork *func_0017DD50(EffPCPNeedleParams *);
+extern EffResourceWork *effCreateResourceEntryWork(s32);
+#else
+extern EffPCPNeedleWork *func_001760F8(EffPCPNeedleParams *);
+extern EffResourceWork *effCreateResourceEntryWork(u32);
+#endif
+
+extern void effReleaseOptionalResource(EffResourceWork *);
+extern void effReleaseAttachedResources(EffResourceWork *);
+extern void effSetResourceEntryPosition(EffResourceWork *, s32, f32 *);
+extern void effGetResourceEntryPosition(EffResourceWork *, s32, f32 *);
+extern void effSetResourceEntryValue(EffResourceWork *, s32, u32);
+extern void effDrawInstancedResourceTrianglesVU(EffResourceWork *);
+extern void effBuildRadialFanStreams(EffResourceWork *, u32, u32, u32, f32, f32);
+
 /* Particle cell shared by the DDS1/2 particle subroutines (0x14 bytes). */
 typedef struct ParCell {
     u128 *history;   /* 0x00 */

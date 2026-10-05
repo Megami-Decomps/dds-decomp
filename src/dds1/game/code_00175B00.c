@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "eff.h"
 
 typedef struct PcpScatterRes PcpScatterRes;
 
