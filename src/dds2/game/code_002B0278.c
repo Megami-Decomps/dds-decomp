@@ -64,6 +64,18 @@ typedef struct MenuList MenuList;
 typedef struct MenuIconSprites MenuIconSprites;
 typedef struct MenuIconState MenuIconState;
 typedef struct MenuFadeFields MenuFadeFields;
+typedef struct FrFontGlyph FrFontGlyph;
+
+extern u32 uiBlendColors(u32, u32, u32);
+extern s32 mnuLookupRangeEntry(u16);
+extern u16 mnuGetAdjustedEntryValue(s32, s32);
+extern s32 mnuGetRangeEntryFlatValue(s32);
+extern u8 mnuGetRangeEntryKind(u32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, s32, s32, s32);
+extern char D_00437BF8[];
 
 
 extern s32 dspStartEntry(s32 entry);
@@ -499,9 +511,9 @@ extern void ptyRecomputeMaxHpMp();
 
 extern void scrClearSecondaryScriptFlag();
 
-extern void func_0019D550(s32, s32, s32);
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 
-extern void frFontQueueGlyphInSelectedSlot(s32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
@@ -1204,8 +1216,8 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
     for (i = 0; i < 2; i++, y += 0xb8) {
         handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, D_00435E54 + *(u16 *)(slot + 4) * 45, i);
         if (handle != 0) {
-            func_0019D550(handle, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(handle);
+            func_0019D550((FrFontGlyph *)handle, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
         }
     }
 }
@@ -1227,8 +1239,8 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     frFontStoreShiftedContextValue(handle, width << 4);
     frFontSetChildColors(handle, color);
     frFontClearFlagBits(1);
-    func_0019D550(handle, 1, flags);
-    frFontQueueGlyphInSelectedSlot(handle);
+    func_0019D550((FrFontGlyph *)handle, 1, flags);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
 }
 
 void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 unused, s32 spriteFlags) {
@@ -1276,7 +1288,63 @@ u32 func_002B3A58(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3A60);
+void func_002B3A60(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
+                   s32 actor, u16 rangeId, s32 style, s32 dim,
+                   s32 costResource, u32 texture) {
+    char text[16];
+    u32 color;
+    s32 value;
+    u32 glyph;
+    u8 chainFlag;
+    s32 kind;
+    s32 hpOffset = 0;
+
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    if (rangeId >= 0x2A1) {
+        return;
+    }
+    if (mnuLookupRangeEntry(rangeId) == 3) {
+        mnuDrawRepeatedPanelSprites(x, y, depth, 0x100, 3, costResource, 0x1B, texture);
+        return;
+    }
+    if (actor != 0) {
+        value = mnuGetAdjustedEntryValue(rangeId, actor);
+    } else {
+        value = mnuGetRangeEntryFlatValue(rangeId);
+    }
+    kind = mnuGetRangeEntryKind(rangeId);
+    if (actor == 0) {
+        hpOffset = -0xD0;
+        if (kind != 1) {
+            hpOffset = 0;
+        }
+    }
+    if (value != 0) {
+        chainFlag = style != 0 ? 4 : 0;
+        if (dim != 0) {
+            color = uiBlendColors(color, color & 0xFFFFFF00, 0x80);
+        }
+        func_0035C860(text, D_00437BF8, value);
+        glyph = func_0019F5E8(x + hpOffset, y - 8, depth, color, text, 0);
+        frFontSetChainFlag((FrFontGlyph *)glyph, chainFlag);
+        func_0019D550((FrFontGlyph *)glyph, 1, texture);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    } else {
+        mnuDrawRepeatedPanelSprites(x, y, depth, 0x100, 3, costResource, 0x1B, texture);
+        return;
+    }
+    x += xOffset;
+    switch (kind) {
+    case 1:
+    default:
+        func_00306CD0(x + hpOffset, y, depth, fade, 1, costResource,
+                      actor != 0 ? 0x18 : 0x1A, texture);
+        break;
+    case 2:
+        func_00306CD0(x, y, depth, fade, 1, costResource, 0x19, texture);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3CA0);
 
@@ -1976,8 +2044,8 @@ void mnuDrawSelectionLabel(u16 id) {
     s32 label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
 
     frFontSetChildColors(label, 0xA09DC35A);
-    func_0019D550(label, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(label);
+    func_0019D550((FrFontGlyph *)label, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)label);
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6898);
@@ -2791,8 +2859,6 @@ void mnuDecreaseListNodeFadeCounters(u8 *menu);
 
 /* Draw one four-sprite bank; the cursor entry selects the second bank. */
 void mnuDrawFourEntries(s32 x, s32 y, s32 depth, s32 menu, s32 panel, s32 drawArg);
-
-extern u32 uiBlendColors(u32 color, u32 previous, s32 blend);
 
 /* Blend the flag-selected packed color with the caller's previous color.
  * Flag one takes precedence over DDS2's additional flag-four color choice. */
