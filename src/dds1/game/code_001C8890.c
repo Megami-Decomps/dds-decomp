@@ -187,7 +187,9 @@ typedef struct BtlUnit {
     u16 mode; /* Species/actor entry identifier used by the AI table. */
     u8 pad_126[8];
     u16 conditionFlags;
-    u8 pad_130[0x194];
+    u8 pad_130[0x42];
+    u16 bedAssetIndex;
+    u8 pad_174[0x150];
     s8 unk2C4;
     u8 pad_2C5[0x2B];
     s32 unk2F0;
@@ -1193,46 +1195,43 @@ void btlCommandResultEffectSelect(u8 *task) {
 
     *(u32 *)(task + 8) &= ~4;
     state = *(s32 *)(task + 0x20);
-    if (state <= 0) {
-        goto spawn;
-    }
-    if (state >= 5) {
-        if (state > 8) {
-            goto spawn;
-        }
-        if (state < 7) {
-            goto spawn;
-        }
-    }
-    if (state == 4) {
-        sel = btlGetLoggedIndexedCommandItem(*(s32 *)(task + 0x28));
-    } else {
-        sel = *(s32 *)(task + 0x24);
-    }
-    reason = btlGetCommandBlockReason(task, sel);
-    switch (reason) {
+    switch (state) {
+    case 1:
     case 2:
-        btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0x82));
-        sndSetStationedSeVolume(0xD);
-        btlDispatchStateHandler(task, 6);
-        return;
-    case 6:
-        btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB0));
-        sndSetStationedSeVolume(0xD);
-        btlDispatchStateHandler(task, 6);
-        return;
+    case 3:
+    case 4:
     case 7:
-        btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB2));
-        sndSetStationedSeVolume(0xD);
-        btlDispatchStateHandler(task, 6);
-        return;
-    case 9:
-        btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xD0));
-        sndSetStationedSeVolume(0xD);
-        btlDispatchStateHandler(task, 6);
-        return;
+    case 8:
+        if (state == 4) {
+            sel = btlGetLoggedIndexedCommandItem(*(s32 *)(task + 0x28));
+        } else {
+            sel = *(s32 *)(task + 0x24);
+        }
+        reason = btlGetCommandBlockReason(task, sel);
+        switch (reason) {
+        case 2:
+            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0x82));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        case 6:
+            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB0));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        case 7:
+            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB2));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        case 9:
+            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xD0));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        }
+        break;
     }
-spawn:
     fldCreateSceneSpriteTask((s32)task);
 }
 
@@ -2089,7 +2088,27 @@ s32 btlIsSupportedCommandKind(s32 *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlResolveActionOperand);
+s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
+    switch (argument[0]) {
+    case 1:
+        if ((unit->flags64 & 0x1200) == 0x200) {
+            return btlGetActorBedAssetIdFromIndex(unit->bedAssetIndex);
+        }
+        if (argument[1] > 0) {
+            return argument[1];
+        }
+        return 0;
+    case 4:
+        return btlGetLoggedIndexedCommandItem(argument[2]);
+    case 2:
+    case 3:
+    case 7:
+    case 8:
+        return argument[1];
+    default:
+        return -1;
+    }
+}
 
 u32 btlClassifyActionOperand(u8 *actor, u8 *argument) {
     switch (*(s32 *)argument) {
@@ -3681,7 +3700,6 @@ s32 btlGetUnitModelFrameCount(s32 arg0) {
 }
 
 void btlSeekUnitModelFrameZero(s32 arg0) {
-    extern void sdfMotionSampleAtFrame(void *, f32);
 
     if ((*(u32 *)(arg0 + 0x110) & 2) == 0) {
         return;
@@ -3694,7 +3712,6 @@ void btlSeekRandomModelFrame(u8 *object) {
     u32 randomFrame;
     f32 frame;
     u8 *resource;
-    extern void sdfMotionSampleAtFrame(void *, f32);
 
     if ((*(u32 *)(object + 0x110) & 2) == 0) {
         return;
@@ -4030,7 +4047,7 @@ s32 btlFormatUnitBedName(u8 *actor, char *filename) {
                       *(u16 *)(actor + 0x124));
     } else {
         func_003014F0(filename, D_003A3BA8, D_003BB5F8,
-                      btlGetActorBedAssetIdFromIndex(*(u16 *)(actor + 0x172)),
+                      btlGetActorBedAssetIdFromIndex(((BtlUnit *)actor)->bedAssetIndex),
                       *(u16 *)(actor + 0x124));
     }
     return 1;
@@ -6653,7 +6670,40 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DF0);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E08);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DDE28);
+extern void btlRefreshActionPoseBlendSnapshot();
+extern void btlAimEffectPoseAtUnit();
+extern void func_001E0100();
+extern void func_001E5718(CameraPoseAction *, CameraPoseTransform *);
+extern void btlBuildHeightClampedApproachCamera(CameraPoseAction *, CameraPoseTransform *);
+
+/* Let the runtime hook handle the actor before dispatching its camera step. */
+void func_001DDE28(u8 *actor) {
+    s32 (*callback)(u8 *) = *(s32 (**)(u8 *))(btlGetRuntime() + 0x62C);
+
+    if (callback != 0 && callback(actor) != 0) {
+        return;
+    }
+    switch (*(u16 *)(actor + 0x10C)) {
+    case 2:
+        btlRefreshActionPoseBlendSnapshot(actor, actor);
+        break;
+    case 9:
+        btlBuildApproachCamera((CameraPoseAction *)actor, &((CameraPoseAction *)actor)->transform);
+        break;
+    case 4:
+        btlAimEffectPoseAtUnit(actor, actor);
+        break;
+    case 5:
+        func_001E0100(actor, actor);
+        break;
+    case 7:
+        func_001E5718((CameraPoseAction *)actor, &((CameraPoseAction *)actor)->transform);
+        break;
+    case 8:
+        btlBuildHeightClampedApproachCamera((CameraPoseAction *)actor, &((CameraPoseAction *)actor)->transform);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DDF20);
 
@@ -7201,7 +7251,77 @@ void btlSetupActionCameraPair(CameraPoseAction *command) {
     VU0_STORE_VF(vf10, command->fromPose.direction);
     btlUnitFaceTarget((u8 *)user, (u8 *)target);
 }
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E2D20);
+/* vu0 routine: update the action camera's saved target pose. */
+void func_001E2D20(CameraPoseAction *action) {
+    BtlUnit *user;
+    BtlUnit *target;
+    CameraPoseTransform *out;
+    f32 targetPos[4];
+    f32 userPos[4];
+    f32 dir[4];
+    f32 length;
+    f32 extent;
+    f32 angle;
+    s32 frames;
+    s32 idle;
+    s32 eligible;
+
+    out = &action->savedPose;
+    user = action->link->unit;
+    target = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+    if (target->flags & user->flags & 0x600) {
+        return;
+    }
+    if (action->unk11C != 0) {
+        return;
+    }
+    frames = func_001D6050(user, user->unkEC);
+    frames = (s32)((f32)frames / func_001A47F0(action->link));
+    if (action->state == frames && (target->flags & 0x200)) {
+        idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
+        eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
+        if (idle == 0 && eligible == 0) {
+            return;
+        }
+        btlCopyMotionTransform((u8 *)&action->fromPose, (u8 *)&action->transform);
+        btlCopyMotionTransform((u8 *)out, (u8 *)&action->transform);
+        action->savedPose.distance += idle != 0 ? 500.0f : 300.0f;
+        action->flags = (action->flags & ~0x14) | 0x41;
+        action->unk11C = 1;
+        action->unk130 = 10.0f;
+        action->state = 0;
+        func_001DB698(out);
+    } else {
+        extent = target->reach * target->scale * 2.25f;
+        out->fov = action->transform.fov;
+        btlUnitGetMuzzlePosVU(target);
+        VU0_STORE_VF(vf10, targetPos);
+        targetPos[1] -= target->height * target->scale * 0.2f;
+        btlUnitGetMuzzlePosVU(user);
+        VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
+        VU0_LOAD_VF(vf11, targetPos);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(length);
+        length *= 0.6f;
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, dir);
+        VU0_SCALE_VF_MFC1(vf10, length);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out->position);
+        angle = 0.34906585f;
+        extent += length * func_002FA060(angle);
+        length *= func_002F9F60(angle);
+        out->distance = length + extent / func_002FA148(out->fov * 1.3333333f * 0.5f);
+        if (!(action->flags & 0x200)) {
+            angle = -0.34906585f;
+        }
+        func_002DD688(angle);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, out->direction);
+        func_001DB698(out);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E2FF8);
 

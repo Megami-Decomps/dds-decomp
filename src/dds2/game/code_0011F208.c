@@ -926,7 +926,8 @@ extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
 
-/* Load every field table from FLDALL.TBL, then build D_003899F0: for each stage id (1..0x1E) the running total of the coordinate rows that precede its first record. Reads the coordinate table through the array each time: a pointer local assigned from D_00389170 would share its address with the argument use in a saved register across the calls. */
+/* Load the field tables and index each stage by the coordinate-row count
+ * preceding its first record. */
 void fldLoadFieldTablesAndIndexStages(void) {
     u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
     s32 sum;

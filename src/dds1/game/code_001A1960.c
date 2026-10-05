@@ -2758,12 +2758,14 @@ void func_001AC9E8(s32 selector, s32 count) {
     }
 }
 
-void func_001ACAE0(void) {
-    s32 temp_v0;
-    s32 buf[4];
+extern s32 fldCountSceneFadeKinds(BattleController *, s32 *);
 
-    temp_v0 = btlGetRuntime();
-    fldCountSceneFadeKinds(temp_v0, buf);
+s32 func_001ACAE0(void) {
+    BattleController *scene;
+    s32 fadeCounts[4];
+
+    scene = (BattleController *)btlGetRuntime();
+    return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACB08);
