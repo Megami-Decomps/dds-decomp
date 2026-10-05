@@ -9,6 +9,8 @@ D_003BD280 = 0x003BD280; // type:s8 size:0x1
 // func_00100B40 reads two sdata bytes split out of game/code_00102ED8's D_003BA861/D_003BA872 blobs
 D_003BA868 = 0x003BA868; // type:u8
 D_003BA878 = 0x003BA878; // type:u8
+// func_002397C8's three-byte table {7,12,5} inside D_003BC260's sdata blob
+D_003BC268 = 0x003BC268; // type:u8
 // Names ported from Persona 4: P4's matched C recompiles byte-identical here (docs/p4-transfer.md)
 kwlnTaskGetTimer = 0x00101A60; // type:func size:0x8
 scrCommand_SCR_GET_TIMER = 0x0010DD38; // type:func size:0x5C
