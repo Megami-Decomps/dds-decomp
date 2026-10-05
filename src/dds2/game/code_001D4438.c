@@ -556,7 +556,7 @@ typedef struct BtlWork {
     s32 (*hook658)(BtlUnit *);
     u8 pad65C[4];
     s32 (*hook660)(BtlUnit *, s32, s32);
-    u8 pad664[4];
+    s32 (*actionCameraStepHook)(BtlUnit *);
     s32 (*hook668)(BtlUnit *);
     s32 (*hook66C)(BtlUnit *);
     u8 pad670[0x14];

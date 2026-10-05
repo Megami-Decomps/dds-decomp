@@ -3,13 +3,16 @@
 
 #include "common.h"
 
+struct SdfModel;
+
 /* Each model draw node owns a circular list of child draw nodes. */
 typedef struct SdfDrawNode {
     u8 pad00[4];
     struct SdfDrawNode *next;     /* 0x04 */
     u8 pad08[4];
     struct SdfDrawNode *children; /* 0x0C */
-    u8 pad10[8];
+    struct SdfModel *root;        /* 0x10: backlink installed by sdfAppendBufferedRouteNode */
+    u8 pad14[4];
     s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
     u8 pad1C[0x14];
     u32 address;                  /* 0x30 */

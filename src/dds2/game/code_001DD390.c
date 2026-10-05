@@ -148,7 +148,7 @@ typedef struct BtlWork {
     s32 (*hook658)(BtlUnit *);
     u8 pad65C[4];
     s32 (*hook660)(BtlUnit *, s32, s32);
-    u8 pad664[4];
+    s32 (*actionCameraStepHook)(BtlUnit *);
     s32 (*hook668)(BtlUnit *);
     s32 (*hook66C)(BtlUnit *);
     s32 (*hook670)(BtlLinkedCommand *);
@@ -5594,7 +5594,7 @@ s32 btlIsSpecialActorCategory(s32 actor) {
     }
 }
 
-u32 func_001EAA00(void) {
+u32 func_001EAA00(BtlLinkedCommand *action) {
     return 0;
 }
 
@@ -5759,7 +5759,45 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001EAE88);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001EB490);
+extern void btlAdvanceUnblockedPlayerCursorAnimation(u32);
+extern void btlRefreshActionPoseBlendSnapshot();
+extern void btlAimEffectPoseAtUnit();
+extern void func_001ED9A0();
+extern void func_001F34E0(BtlLinkedCommand *, BtlCamState *);
+extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState *);
+
+/* Dispatch camera-step work unless a runtime override handles it. */
+void func_001EB490(BtlLinkedCommand *action) {
+    BtlWork *work = (BtlWork *)btlGetRuntime();
+
+    if (func_001EAA00(action) != 0) {
+        btlAdvanceUnblockedPlayerCursorAnimation((u32)action);
+        return;
+    }
+    if (work->actionCameraStepHook != 0 && work->actionCameraStepHook((BtlUnit *)action) != 0) {
+        return;
+    }
+    switch (action->stepKind) {
+    case 2:
+        btlRefreshActionPoseBlendSnapshot(action, &action->camera);
+        break;
+    case 9:
+        btlBuildApproachCamera(action, &action->camera);
+        break;
+    case 4:
+        btlAimEffectPoseAtUnit((u8 *)action, (u8 *)&action->camera);
+        break;
+    case 5:
+        func_001ED9A0(action, &action->camera);
+        break;
+    case 7:
+        func_001F34E0(action, &action->camera);
+        break;
+    case 8:
+        btlBuildHeightClampedApproachCamera(action, &action->camera);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001EB5B0);
 
@@ -5767,7 +5805,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
     BtlWork *work;
     s32 category;
     u8 *out;
-    if (func_001EAA00() != 0) {
+    if (func_001EAA00(action) != 0) {
         func_001EC5F0((u32)action);
         return;
     }

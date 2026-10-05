@@ -1137,7 +1137,53 @@ void btlTickActorEntryCountdowns(u8 *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5030);
+f32 func_001A5030(u8 *actor, s32 attr) {
+    f32 scale = 1.0f;
+
+    switch (attr) {
+    case 2:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x20D)) {
+            scale *= datAbilityParameters[0x20D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x212)) {
+            scale *= datAbilityParameters[0x212 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        break;
+    case 3:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x20E)) {
+            scale *= datAbilityParameters[0x20E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x213)) {
+            scale *= datAbilityParameters[0x213 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        break;
+    case 4:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x20F)) {
+            scale *= datAbilityParameters[0x20F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x214)) {
+            scale *= datAbilityParameters[0x214 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        break;
+    case 5:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x210)) {
+            scale *= datAbilityParameters[0x210 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x215)) {
+            scale *= datAbilityParameters[0x215 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        break;
+    case 6:
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x211)) {
+            scale *= datAbilityParameters[0x211 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x216)) {
+            scale *= datAbilityParameters[0x216 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        break;
+    }
+    return scale;
+}
 
 s32 btlGetAbilityAttributeMultiplierPercent(u8 *actor, s32 attr) {
     u32 value = 100;
