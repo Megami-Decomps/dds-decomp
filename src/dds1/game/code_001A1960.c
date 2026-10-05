@@ -461,7 +461,52 @@ s8 func_001A2AE8(s32 arg0) {
     return *(s8 *)(temp_v0 - 0x1aa4);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2B00);
+s32 func_001A2B00(BtlUnit *unit, s32 command) {
+    s32 result = 0;
+    u32 cost;
+
+    if (command == 0) {
+        return 0;
+    }
+    if (*(u8 *)(datCommandRecords + command * 56 + 2) == 1 ||
+        *(u8 *)(datCommandRecords + command * 56 + 3) == 2) {
+        if ((unit->conditionFlags & 0x7FFF) == 0x10) {
+            return 3;
+        }
+    }
+    if (*(s8 *)(datCommandSelectors + command * 2 + 1) == 2 &&
+        (unit->conditionFlags & 0x7FFF) == 0x40) {
+        return 5;
+    }
+    if (*(s8 *)(datCommandSelectors + command * 2 + 1) == 1) {
+        if ((unit->conditionFlags & 0x7FFF) == 0x1000) {
+            return 4;
+        }
+        if (fldCountSceneSlots() < (u32)func_001A2AE8(command)) {
+            return 6;
+        }
+    }
+    if (*(u8 *)(datCommandRecords + command * 56) & 4) {
+        return 0;
+    }
+
+    cost = btlApplyCommandAbilityMultiplier((s32)&unit->statBits, command);
+    switch (*(u8 *)(datCommandRecords + command * 56 + 3)) {
+    case 1:
+        if ((*(u8 *)(datCommandRecords + command * 56) & 8) == 0) {
+            if (cost >= unit->hp) {
+                result = 1;
+            }
+        } else if (unit->hp < cost) {
+            result = 1;
+        }
+        break;
+    case 2:
+        result = unit->unk12A < cost ? 2 : 0;
+        break;
+    }
+    return result;
+}
 
 /* Persistent party data is 0x1A4 bytes in DDS1, distinct from a battle actor. */
 typedef struct BtlPartyEntry {
@@ -499,7 +544,6 @@ s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObje
     return btlApplyCommandAbilityMultiplier((s32)&snapshot, command);
 }
 
-extern s32 func_001A2B00(s32, s32);
 
 s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
@@ -538,7 +582,7 @@ s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
         totalMaxHp += third->maxHp;
     }
     snapshot.maxHp = totalMaxHp / count;
-    return func_001A2B00((s32)&snapshot, command);
+    return func_001A2B00(&snapshot, command);
 }
 
 s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
@@ -1869,7 +1913,7 @@ s32 func_001A8DD8(s32 object, s32 *choices) {
                 continue;
             }
         }
-        if (func_001A2B00(object, id) != 0) {
+        if (func_001A2B00((BtlUnit *)object, id) != 0) {
             continue;
         }
         if (choices != NULL) {

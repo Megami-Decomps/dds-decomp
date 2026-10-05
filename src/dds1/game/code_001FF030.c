@@ -32,7 +32,7 @@ extern u32 func_001A3360(s32, BtlIndexList *, s32);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear();
 
-extern s32 func_001A2B00(void);
+extern s32 func_001A2B00(BtlUnit *, s32);
 
 extern s32 btlHasAvailableOption(void);
 
@@ -793,10 +793,10 @@ s32 btlUnitHasFlag1000(s32 unitAddress) {
     return (((s32)((BtlUnit *)unitAddress)->flags & 0x1000) > 0);
 }
 
-u8 func_002012C0(void) {
+u8 func_002012C0(BtlUnit *unit, s32 command) {
     s32 result;
 
-    result = func_001A2B00();
+    result = func_001A2B00(unit, command);
     return result == 0;
 }
 
