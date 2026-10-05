@@ -37,8 +37,6 @@ s32 itfRunPanelMode2(u64 request) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264B08);
-INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
-
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264D90);
 
 extern u32 uiBlendColors(u32, u32, s32);
@@ -69,6 +67,8 @@ void itfUpdateFadeColor(TitleFadeWork *work) {
 }
 
 extern void func_002BF438(s32, s32, s32, s32, s32, s32, s32, s32);
+
+INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
 
 void func_00264EF0(TitleFadeWork *work) {
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
@@ -152,7 +152,6 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, u8 *info,
     func_001958A0(handle, 1, color);
     frFontQueueGlyphInSelectedSlot(handle);
 }
-
 
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC560);
 
