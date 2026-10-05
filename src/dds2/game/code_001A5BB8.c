@@ -3332,7 +3332,36 @@ s32 btlGetSelectedUnitProperty(UiObject *unit) {
     return D_003B4F74[property * 3];
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B29F0);
+s32 func_001B29F0(BtlIndexList *targets, BtlTargetResult *results) {
+    s32 i = 0;
+    u32 sides = 0;
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    u32 count = btlGetIndexListCount(targets);
+    s32 skipped;
+    UiObject *actor;
+
+    for (; i < count; i++) {
+        sides |= ((UiObject *)btlGetIndexListEntry(targets, i))->flags & 0x600;
+    }
+    skipped = 0;
+    for (i = 0; i < count; i++, results++) {
+        if (results->skipped != 0) {
+            skipped++;
+        }
+    }
+    count = 0;
+    for (actor = controller->actors; actor != NULL; actor = actor->next) {
+        if (actor->flags & 1) {
+            if (actor->flags & 0xE0) {
+                continue;
+            }
+            if (actor->flags & sides) {
+                count++;
+            }
+        }
+    }
+    return skipped == count;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2AF8);
 
