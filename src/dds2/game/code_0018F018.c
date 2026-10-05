@@ -3,7 +3,10 @@
 /* Draw payload shared with effBlur_Filter. Angle/displacement offset texture
    sampling around the rectangle; blendControl is the GS ALPHA_1 word. */
 typedef struct {
-    u8 color[4];
+    union {
+        u32 color;
+        u8 colorChannels[4];
+    };
     s32 blendControl;
     f32 angle;
     f32 displacement;
@@ -128,7 +131,51 @@ extern void *billGetWorkTransformMatrix();
 extern void effBlurBuildSamplingQuad();
 extern void sdfAppendPacket();
 
-INCLUDE_ASM(const s32, "game/code_0018F018", func_0018F1D0);
+extern void effAppendBlurRenderState(void *, s32, u32);
+extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
+extern void effDrawBlurListWithFramePacket(void *);
+extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
+
+extern f32 sdfSinPoly(f32);
+
+void func_0018F1D0(EffBlurScaleWork *work) {
+    void *list;
+    EffBlurScaleSlot *slot;
+    s32 count;
+    u32 sourceColor;
+    u32 alpha;
+
+    if (func_001200E0() == 0) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        effAppendBlurRenderState(list, work->params.unk10, work->sourceHandle);
+        slot = work->slots;
+        if (work->params.count > 0) {
+            count = work->params.count;
+            do {
+                if (slot->phase >= 0.0f) {
+                    slot->quad.displacement = work->params.unk18 * sdfSinPoly(slot->angle) *
+                                              (1.0f - slot->phase) + 1.0f;
+                    sourceColor = work->params.color;
+                    alpha = (u32)((f32)(sourceColor >> 24) * (1.0f - slot->phase));
+                    slot->quad.color = (sourceColor & 0xFFFFFF) | (alpha << 24);
+                    effBlurSecondUpdateSlotRect(work, slot);
+                    effAppendBlurRectanglePackets(list, &slot->quad, 1);
+                    slot->angle += work->params.angleStep;
+                    slot->phase += work->params.phaseStep;
+                    if (slot->phase > 1.0f) {
+                        effBlurResetScaleSlot(work, slot);
+                    }
+                } else {
+                    slot->phase += work->params.phaseStep;
+                }
+                count--;
+                slot++;
+            } while (count != 0);
+        }
+        effDrawBlurListWithFramePacket(list);
+    }
+}
 
 typedef struct EffBlurDrawVertex {
     f32 u;
@@ -159,10 +206,10 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
     f32 dx = sdfSinPoly(phase) * amplitude;
     f32 dy = sdfEvaluateCosineViaSinePhaseShift(phase) * amplitude;
 
-    data->color[0] = source->color[0];
-    data->color[1] = source->color[1];
-    data->color[2] = source->color[2];
-    data->color[3] = source->color[3];
+    data->color[0] = source->colorChannels[0];
+    data->color[1] = source->colorChannels[1];
+    data->color[2] = source->colorChannels[2];
+    data->color[3] = source->colorChannels[3];
     if (fixedPoint == 0) {
         data->vertices[0].x = (source->left << 4) + 0x7000;
         data->vertices[0].y = (source->top << 3) + 0x7900;

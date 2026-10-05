@@ -94,21 +94,23 @@ typedef struct BattleController {
     s32 (*sceneCallback)();
 } BattleController;
 
+/* The saved party profile is 0x1A4 bytes; battle units embed its stat data. */
 typedef struct BtlEntry {
     u16 flags;
     u8 pad2[4];
     u16 hp;
-    u8 pad8[2];
+    u16 maxHp;
     u16 mp;
     u8 padC[2];
     u16 status;
-    u8 pad10[4];
+    u32 totalExp;
     u16 unk14;
     u8 unk16[5];
     u8 pad1B[0x171];
     u16 unk18C;
     u16 unk18E;
     u16 unk190;
+    u8 pad192[0x12];
 } BtlEntry;
 
 typedef struct EntryPair {
@@ -513,20 +515,9 @@ s32 func_001A2B00(BtlUnit *unit, s32 command) {
     return result;
 }
 
-/* Persistent party data is 0x1A4 bytes in DDS1, distinct from a battle actor. */
-typedef struct BtlPartyEntry {
-    u16 flags;
-    u16 pad02;
-    u16 displayId;
-    u16 currentHp;
-    u16 maxHp;
-    u16 pad0A;
-    u32 words[0x66];
-} BtlPartyEntry;
-
-s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObject *second,
+s32 btlGetCombinedPartyCommandPower(BtlEntry *base, UiObject *first, UiObject *second,
                   UiObject *third, s32 command) {
-    BtlPartyEntry snapshot = *base;
+    BtlEntry snapshot = *base;
     s32 totalMaxHp = 0;
     s32 count = 0;
     s32 average;
@@ -545,7 +536,7 @@ s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObje
     }
     average = totalMaxHp / count;
     snapshot.maxHp = average;
-    snapshot.currentHp = average;
+    snapshot.hp = average;
     return btlApplyCommandAbilityMultiplier((s32)&snapshot, command);
 }
 
@@ -1558,7 +1549,58 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6BE0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6EC0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6F98);
+void func_001A6F98(UiObject *unit, BtlIndexList *targets,
+                   BtlTargetResult *results, s32 command) {
+    u8 selected[13];
+    BtlIndexList *copy;
+    void *previous;
+    void *entry;
+    u32 targetCount;
+    u32 maximumHits;
+    u32 hitCount;
+    u32 i;
+    u32 index;
+    u32 resultIndex;
+    s32 allowConsecutiveHits;
+
+    targetCount = btlGetIndexListCount(targets);
+    allowConsecutiveHits = targetCount < 2;
+    maximumHits = targetCount + effMiscRandMod(0, 2);
+    if (allowConsecutiveHits) {
+        results[0].hitCount = maximumHits;
+        return;
+    }
+
+    previous = NULL;
+    copy = btlAllocateIndexList(ARRAY_COUNT(selected));
+    i = 0;
+    btlCopyIndexList(copy, targets);
+    btlClearIndexList(targets);
+    hitCount = func_001A6968(unit, command);
+    memset(selected, 0, sizeof(selected));
+    while (i < hitCount) {
+        index = effMiscRandMod(0, targetCount);
+        entry = btlGetIndexListEntry(copy, index);
+        if (!allowConsecutiveHits && entry == previous) {
+            index = (index + effMiscRandMod(0, targetCount - 1) + 1) % targetCount;
+            entry = btlGetIndexListEntry(copy, index);
+        }
+        previous = entry;
+        if (!selected[index]) {
+            btlAppendIndexListEntry(targets, entry);
+            resultIndex = btlFindListIndex(targets, entry);
+            selected[index] = 1;
+            results[resultIndex].hitCount = 1;
+        } else {
+            resultIndex = btlFindListIndex(targets, entry);
+            if (results[resultIndex].hitCount < maximumHits) {
+                results[resultIndex].hitCount++;
+            }
+        }
+        i++;
+    }
+    btlFreeIndexList(copy);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A7180);
 
@@ -1877,7 +1919,87 @@ s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
     return (btlGetEntryFlagsUnlessDisabled(actor + 0x120) & 0x40) < 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8850);
+extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
+
+s32 func_001A8850(UiObject *unit, s32 command, void **first, void **second) {
+    s32 statAddresses[3];
+    u32 requiredCount = 0;
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    s32 *requirementCursor;
+    UiObject *candidate;
+    UiObject *partner;
+    u32 i;
+
+    requirementCursor = (s32 *)(datAffinityRecords + command * 16 - 0x1AB0);
+    for (i = 0; i < 3; i++) {
+        if (*requirementCursor++ != -1) {
+            requiredCount++;
+        }
+    }
+    if (requiredCount < 2) {
+        return 0;
+    }
+
+    statAddresses[0] = (s32)&unit->entryMask;
+    for (candidate = controller->actors; candidate != NULL; candidate = candidate->next) {
+        u32 flags = candidate->flags;
+
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0x400) == 0) {
+            continue;
+        }
+        if ((candidate->statusFlags & 0x2A0E) != 0) {
+            continue;
+        }
+        if (unit == candidate) {
+            continue;
+        }
+        statAddresses[1] = (s32)&candidate->entryMask;
+        if (requiredCount == 3) {
+            for (partner = controller->actors; partner != NULL; partner = partner->next) {
+                u32 partnerFlags = partner->flags;
+
+                if ((partnerFlags & 1) == 0) {
+                    continue;
+                }
+                if ((partnerFlags & 0x400) == 0) {
+                    continue;
+                }
+                if ((partner->statusFlags & 0x2A0E) != 0) {
+                    continue;
+                }
+                if (unit == partner || candidate == partner) {
+                    continue;
+                }
+                statAddresses[2] = (s32)&partner->entryMask;
+                if (ptyMatchAffinityPermutation(statAddresses, command) == 0) {
+                    continue;
+                }
+                if (first != NULL) {
+                    *first = candidate;
+                }
+                if (second != NULL) {
+                    *second = partner;
+                }
+                return 1;
+            }
+        } else {
+            statAddresses[2] = 0;
+            if (ptyMatchAffinityPermutation(statAddresses, command) != 0) {
+                if (first != NULL) {
+                    *first = candidate;
+                }
+                if (second != NULL) {
+                    *second = NULL;
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8A30);
 
