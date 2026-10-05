@@ -2,6 +2,7 @@
 #include "mnu.h"
 #include "sdf.h"
 #include "kwln.h"
+#include "evt_world.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -268,7 +269,8 @@ typedef struct EvtBlendH {
 /* Timeline keys carry type-dependent payloads as well as their common links. */
 typedef struct CampKeyNode {
     u16 frame;                 /* 0x00 */
-    u8 pad02[6];
+    u16 duration;              /* 0x02: temporal columns 1 and 15 */
+    u8 pad04[4];
     union {
         s16 offset;
         u16 packed;

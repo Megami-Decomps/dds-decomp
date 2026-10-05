@@ -35,13 +35,6 @@ typedef struct {
     u8 pad3[7];
 } EvtTblEntry; /* 0xA bytes */
 
-typedef struct EvtFrameTableEntry {
-    s16 columns;
-    u8 pad02[8];
-} EvtFrameTableEntry;
-
-extern EvtFrameTableEntry D_003C9538[];
-
 extern EvtTblEntry D_003C9730[];
 
 extern s8 D_003C9732[];

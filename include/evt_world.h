@@ -3,6 +3,20 @@
 
 #include "common.h"
 
+/* Native 0x0A-byte frame editor row: count followed by eight signed column kinds. */
+typedef struct EvtFrameTableEntry {
+    s16 columns;
+    s8 columnTypes[8];
+} EvtFrameTableEntry;
+
+typedef char EvtFrameTableEntry_size_must_be_0x0A[(sizeof(EvtFrameTableEntry) == 0x0A) ? 1 : -1];
+
+#ifdef VERSION_DDS1
+extern EvtFrameTableEntry D_00368768[];
+#elif VERSION_DDS2
+extern EvtFrameTableEntry D_003C9538[];
+#endif
+
 /* Native resource handle and the loader's corresponding data address. */
 typedef struct EvtResourcePair {
     u32 handle;
