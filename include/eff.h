@@ -3,6 +3,28 @@
 
 #include "common.h"
 
+typedef struct {
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} EffResourceRectBounds;
+
+/* Nine copied words; the selected source handle belongs to the owner. */
+typedef struct {
+    s32 extent;
+    s32 centerX;
+    s32 centerY;
+    u8 color[4];
+    s32 blendControl;
+    EffResourceRectBounds bounds;
+} EffResourceRectParams; /* 0x24 */
+
+typedef struct {
+    EffResourceRectParams params;
+    u32 sourceHandle;
+} EffResourceRectWork; /* 0x28 */
+
 /* Random slot index and associated release id (0x8); DDS1/2 effect and panel views. */
 typedef struct EffCntRec {
     s32 randomIndex; /* +0x00: advanced while filling random records */
