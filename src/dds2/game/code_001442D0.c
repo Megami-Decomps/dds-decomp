@@ -2,6 +2,15 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
+#include "mdl_context.h"
+
+typedef struct EffNode EffNode;
+typedef struct EffNodeDescriptor EffNodeDescriptor;
+
+extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
+extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
+extern u8 fldTestSceneControlFlags(u32);
+extern void effDestroyNode(EffNode *);
 
 extern f32 fldAngleDifference(f32, f32);
 
@@ -75,15 +84,15 @@ extern u32 D_004362D8;
 
 extern s32 D_004362E0;
 
-extern s32 D_004362E4;
+extern EffNodeDescriptor *D_004362E4;
 
 extern s32 D_004362EC;
 
-extern s32 D_004362F0;
+extern EffNodeDescriptor *D_004362F0;
 
 extern s32 D_004362F8;
 
-extern s32 D_004362FC;
+extern EffNodeDescriptor *D_004362FC;
 
 extern s32 D_00436304;
 
@@ -129,7 +138,7 @@ extern s32 fldRoomEffectEntryCount;
 
 extern u32 D_00436330[];
 
-extern s32 effCreateNodeFromDescriptor(u32);
+extern EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *);
 
 extern s32 fldObjectSlotCount;
 
@@ -459,7 +468,8 @@ typedef struct {
     s32 id;
     s32 unk8;
     s32 activationRequested;
-    u8 pad10[0x14];
+    u8 pad10[0x10];
+    s32 effectVariant;
     s32 effectNode;
     u8 pad28[8];
 } FldObj30; /* 0x30 bytes */
@@ -474,7 +484,7 @@ extern s32 fldTestMapSlotAuxiliaryFlag();
 
 extern void dds3SetObjectFlags();
 
-extern void effRestartNodeInstance(s32 handle);
+extern void effRestartNodeInstance(EffNode *node);
 
 extern void effCopyVectorToNodeInstance(s32 handle, f32 *pos);
 
@@ -2047,7 +2057,7 @@ extern s32 D_00438EF0;
 
 extern u32 D_004362D8;
 
-extern u32 D_004362DC;
+extern EffNode *D_004362DC;
 
 extern u32 fldAreaDamageEffect;
 
@@ -2075,11 +2085,11 @@ void fldInitializeMenuResources(void) {
     }
 }
 
-extern u32 D_004362DC;
+extern EffNode *D_004362DC;
 
-extern u32 D_004362E8;
+extern EffNode *D_004362E8;
 
-extern u32 D_004362F4;
+extern EffNode *D_004362F4;
 
 extern u32 fldAreaDamageEffect;
 
@@ -2199,7 +2209,75 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D0E8);
+void func_0014D0E8(void) {
+    s32 i;
+    MdlCtx *resource;
+
+    for (i = 0; i < fldObjectSlotCount; i++) {
+        switch (fldObjectSlots[i].unk8) {
+        case 0:
+            if (fldObjectSlots[i].activationRequested == 1) {
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                mdlAddEntryPlain(resource, 0, 1);
+                fldObjectSlots[i].unk8 = fldObjectSlots[i].activationRequested;
+                switch (fldObjectSlots[i].effectVariant) {
+                case 0:
+                case 3:
+                    if (D_004362E8 != 0) {
+                        effDestroyNode(D_004362E8);
+                        D_004362E8 = 0;
+                    }
+                    if (FLD_WORK->area == 29 || FLD_WORK->area == 30) {
+                        D_004362E8 = effCreateNodeFromDescriptor(D_004362FC);
+                        effRestartNodeInstance(D_004362DC);
+                    } else {
+                        D_004362E8 = effCreateNodeFromDescriptor(D_004362E4);
+                        effRestartNodeInstance(D_004362DC);
+                    }
+                    break;
+                case 1:
+                    if (D_004362F4 != 0) {
+                        effDestroyNode(D_004362F4);
+                        D_004362F4 = 0;
+                    }
+                    D_004362F4 = effCreateNodeFromDescriptor(D_004362F0);
+                    effRestartNodeInstance(D_004362DC);
+                    break;
+                }
+            } else {
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                if (resource->first->unk30 == 5) {
+                    mdlAddEntryPlain(resource, 0, 0);
+                }
+            }
+            break;
+        case 1:
+            resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+            if (resource->first->unk30 == 5) {
+                mdlAddEntryFlagged(resource, 0, 2);
+                fldObjectSlots[i].activationRequested = 2;
+                fldObjectSlots[i].unk8 = 2;
+            }
+            break;
+        case 2:
+            if (fldTestSceneControlFlags(0x40)) {
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                mdlAddEntryFlagged(resource, 0, 3);
+                fldObjectSlots[i].activationRequested = 3;
+                fldObjectSlots[i].unk8 = 3;
+                if (D_004362E8 != 0) {
+                    effDestroyNode(D_004362E8);
+                    D_004362E8 = 0;
+                }
+                if (D_004362F4 != 0) {
+                    effDestroyNode(D_004362F4);
+                    D_004362F4 = 0;
+                }
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B68);
 
