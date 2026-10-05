@@ -1,6 +1,27 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+typedef struct UiQuadColor {
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
+} UiQuadColor;
+
+typedef struct UiSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct UiSurface *, s32);
+    u8 pad14[0xC];
+} UiSurface;
+
+extern UiSurface kwlnDrawSurfaces[];
+extern s32 D_003BD824;
+extern UiQuadColor D_00358390;
+extern f32 sdfSinPoly(f32);
+extern s32 sdfCreateResetPacketList(void);
+extern void sdfAppendPacket(s32, u64 *);
+extern u64 *func_001A0910(s32, s32, s32, s32, s32, u32, u32);
+
 extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 datComputeSkillBoostedMaxHp();
@@ -45,7 +66,30 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", itfDrawPulsingTestOverlay);
+void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
+    u32 color = 0;
+    s32 alpha;
+    s32 i;
+    u8 *component;
+    s32 list;
+    UiSurface *surface;
+    f32 phase;
+
+    phase = (f32)(D_003BD824 % 4096) * (1.0f / 4096.0f);
+    phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
+    alpha = (s32)((sdfSinPoly(phase) + 1.0f) * 0.5f * D_00358390.alpha);
+    component = (u8 *)&D_00358390;
+    for (i = 0; i != 3; i++, component += 4) {
+        color |= *component << (i * 8);
+    }
+    color |= (u32)alpha << 24;
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list, btlCreateGsTestRegisterPacket(0x33001, 0));
+    sdfAppendPacket(list, btlCreateGsAlphaRegisterPacket(6, 0));
+    sdfAppendPacket(list, func_001A0910(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->submit(surface, list);
+}
 
 void btlResetRuntimeSequenceCounter(void) {
     D_003BB2E8 = 1;
