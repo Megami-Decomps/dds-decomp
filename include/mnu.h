@@ -68,6 +68,45 @@ typedef struct PartyPanel {
     PartyPanelEntry slots[5];
 } PartyPanel;
 
+/* Page sprites and their fade/slide state; DDS2 expanded the sprite banks. */
+typedef struct MenuSprites {
+    u8 pad00[0xC];
+    s32 unkC;
+#ifdef VERSION_DDS2
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+    s32 fade;
+#else
+    s32 firstSprite;
+    s32 primarySprite;
+    s32 sprites[7];
+    s32 overlaySprites[2];
+    u8 pad3C[4];
+#endif
+    s32 drawAlpha;
+    s32 fadeOut;
+    s32 slideOffset;
+    s32 slideSpeed;
+#ifdef VERSION_DDS2
+    u8 unk74;
+    u8 unk75;
+#endif
+} MenuSprites;
+
+/* The allocated icon bundle owns its draw fade and fade direction. */
+typedef struct MenuIconBundle {
+#ifdef VERSION_DDS2
+    u32 unk0[3];
+    void *sprite[3];
+#else
+    u8 pad0[0xC];
+    s32 sprite[4];
+#endif
+    s32 fade;
+    s32 fadeOut;
+} MenuIconBundle;
+
 typedef struct MenuPageGauge {
     s32 resourceIndex;
     u8 pad4[4];
