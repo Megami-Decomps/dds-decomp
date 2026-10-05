@@ -1,6 +1,5 @@
 #include "common.h"
 #include "sdf.h"
-#include "mnu.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"

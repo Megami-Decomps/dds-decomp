@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 typedef struct MenuActionOwner MenuActionOwner;
 
@@ -468,9 +469,13 @@ typedef struct BrsSkillPackageWork {
     MenuIconBatch rewards;
     u8 pad6C[0x28];
     s32 unitHandle;          /* 0x094 */
-    u8 pad98[0x1CC];
+    u8 pad98[4];
+    BrsRewardRow *selectedRewardRow; /* 0x09C */
+    u8 padA0[0x1C4];
     s32 selectedRow;         /* 0x264 */
-    u8 pad268[0xC];
+    u8 pad268[4];
+    s32 selectionMode;       /* 0x26C */
+    u8 pad270[4];
     BrsRewardBatch secondaryRewards;
     BrsRewardBatch primaryRewards;
     u8 rewardState[0x9C];
@@ -479,9 +484,11 @@ typedef struct BrsSkillPackageWork {
     s32 panelGroup;          /* 0x51C: start of the group passed to setup */
     s32 spriteArg0;          /* 0x520 */
     s32 spriteArg1;          /* 0x524 */
-    u8 pad528[0x58];
+    s32 spriteArg2;          /* 0x528 */
+    u8 pad52C[0x54];
     s32 setupState;          /* 0x580 */
-    u8 pad584[0xA7B0];
+    u8 pad584[0x10C];
+    MenuPageWindow partyWindow; /* 0x690 */
     s32 panelHandle;         /* 0xAD34 */
     s32 spriteHandle;        /* 0xAD38 */
     u8 padAD3C[0x174];
@@ -492,6 +499,8 @@ typedef struct BrsSkillPackageWork {
 } BrsSkillPackageWork;
 
 
+extern void mnuForwardTableByte(s32);
+
 /* Build the selected reward row's skill-package group and sprite, then
  * forward the selected unit ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
@@ -499,7 +508,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     s32 panel;
 
     mnuReleaseStaffMenuResources((s32)group);
-    mnuInitializeCampPanelResources((s32)work + 0x690, (s32)group, 0, (s32)work + 0x584);
+    mnuInitializeCampPanelResources((s32)&work->partyWindow, (s32)group, 0, (s32)work + 0x584);
     panel = mnuCreatePanelGroup(work->spriteArg0, work->spriteArg1, 0);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
@@ -522,7 +531,7 @@ extern void mnuResetWorkFloats(void);
 
 void brsCloseSkillPackagePanel(s32 work) {
     BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
-    s32 panelContext = work + 0x690;
+    s32 panelContext = (s32)&ctx->partyWindow;
 
     effDestroyResourceSlotSet(ctx->unitHandle);
     mnuClearEntries(panelContext);
