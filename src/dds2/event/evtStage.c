@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "evt_world.h"
 
 
 extern void dds3SetSlotKey(void *, void *);
@@ -19,32 +20,19 @@ void evtDestroySecondaryWorldNode(void) {
     }
 }
 
-typedef struct StageNodeChild {
-    u8 pad00[0x40];
-    s32 node; /* 0x40: first world node still attached */
-} StageNodeChild;
 
-typedef struct StageNodeParent {
-    u8 pad00[8];
-    StageNodeChild *child; /* 0x8 */
-} StageNodeParent;
+struct WorldListNode;
+extern void dds3RemoveWorldObjectNode(struct WorldListNode *node);
 
-typedef struct StageSecondaryObject {
-    u8 pad00[0x18];
-    StageNodeParent *parent; /* 0x18 */
-} StageSecondaryObject;
-
-extern void dds3RemoveWorldObjectNode(s32 node);
-
-/* Detach every world node from the secondary object's chain. */
+/* Detach every unit node from the secondary object's per-kind list. */
 void evtDrainSecondaryWorldNodes(void) {
-    StageSecondaryObject *object = (StageSecondaryObject *)dds3GetWorldSecondaryObject();
-    StageNodeParent *parent;
+    EvtWorldObject *object = (EvtWorldObject *)dds3GetWorldSecondaryObject();
+    EvtWorldTable *table;
 
     if (object != NULL) {
-        parent = object->parent;
-        while (parent->child->node != 0) {
-            dds3RemoveWorldObjectNode(parent->child->node);
+        table = object->table;
+        while (table->slots[EVT_WORLD_SLOT_UNIT].head != NULL) {
+            dds3RemoveWorldObjectNode(table->slots[EVT_WORLD_SLOT_UNIT].head);
         }
     }
 }
