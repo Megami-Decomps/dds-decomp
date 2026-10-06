@@ -278,9 +278,32 @@ and its [register-weight calculation](https://github.com/gcc-mirror/gcc/blob/2f9
 Exact bytes support this source form without uniquely proving its historical
 spelling. Existing timing and geometry preconditions remain unchanged.
 
+## Five-vector history rotation
+
+`func_00163AF8` (DDS1) and `func_0016B750` (DDS2) each match 468 bytes.
+They sample one angle, rotate the cell's X/Z placement direction while keeping
+its separate height, then rotate each complete five-vector history row around
+the effect origin. They do not fill the color buffer. The existing kind-4
+capacity supplies exactly p+1 rows; active generation initializes that history
+before the update/fade paths rotate it.
+
+The entry model binds the source state, render cell and history before
+converting capacity to rows. A read-only quantity observer showed how the
+compiler's implicit integer-division trap changes the available scheduling
+boundary. The resulting base-load lifetimes let the cell-address quantity
+and earlier capacity reuse one register while the divisor remains live across
+that interval. The observed allocation predicted the final register homes;
+no new operation or synthetic lifetime was added.
+
+Both scratch arrays are complete aligned quadwords. The actual X/Z scalar
+readbacks occur after the VU store; row reads and writes stay within the
+allocated history. Axis normalization, 3x3 rotation and the established packet
+consumers use XYZ, so the unspecified scratch W lane does not affect geometry.
+The legacy SDK-store warning remains specific to these audited paths.
+
 ## Verification
 
-Canonical whole-unit checks report 71 matches and zero differences for each
+Canonical whole-unit checks report 72 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
