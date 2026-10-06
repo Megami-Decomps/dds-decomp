@@ -5,6 +5,7 @@
 #include "btl_ui.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
+#include "kwln.h"
 
 extern SceneSlotFadeWork *D_00438F54;
 extern ActorSlotOrder *D_00438F58[2];
@@ -612,8 +613,8 @@ extern void func_001CA490(void);
 extern void func_001C0630(void);
 extern void func_001C0828(void);
 extern void func_001C0240(void);
-extern void btlReleaseDialogTaskAndMarkBattleState(void);
-extern void btlFinishTrackedBattleTaskAndCloseWindow(void);
+extern void btlReleaseDialogTaskAndMarkBattleState(KwlnTask *);
+extern void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *);
 extern char *D_004367F0;
 extern char *D_004367EC;
 extern u8 D_003B52D0[];
