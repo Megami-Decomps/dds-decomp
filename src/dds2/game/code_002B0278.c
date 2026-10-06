@@ -1,4 +1,7 @@
 #include "mnu.h"
+struct MenuListNode;
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #include "fpu.h"
 #include "sdf.h"
 
@@ -2817,12 +2820,12 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
     return cursor;
 }
 
-void mnuAdvanceListCursorDefault(u32 list) {
-    mnuListAdvanceCursor(list, 0, 0);
+MenuListNode *mnuAdvanceListCursorDefault(u32 list) {
+    return mnuListAdvanceCursor((MenuList *)list, 0, 0);
 }
 
-void mnuRetreatListCursorDefault(u32 list) {
-    mnuListRetreatCursor(list, 0, 0);
+MenuListNode *mnuRetreatListCursorDefault(u32 list) {
+    return mnuListRetreatCursor((MenuList *)list, 0, 0);
 }
 
 s32 mnuScrollListToEnd(MenuList *list) {
@@ -3366,4 +3369,5 @@ INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C20);
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C28);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C30);
+
 
