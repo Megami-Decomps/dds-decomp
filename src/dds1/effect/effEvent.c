@@ -42,21 +42,9 @@
 
 /* Packet-source layouts and concrete blur owners mirror their constructors.
  * Equal-sized parameter prefixes do not make the blur variants interchangeable. */
-typedef struct BlurSource {
-    u8 color[4];
-    s32 blendControl;
-    f32 rotation;
-    f32 scale;
-    s32 centerX;
-    s32 centerY;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} BlurSource;
 
 typedef struct EffScreenDrawParams {
-    BlurSource source;
+    EffBlurQuad source;
     u8 pad28[8];
 } EffScreenDrawParams;
 
@@ -71,7 +59,7 @@ typedef struct EffSolidRectParams {
 
 typedef struct EffBlurTemplateBody {
     s32 extent;
-    BlurSource source;
+    EffBlurQuad source;
 } EffBlurTemplateBody;
 
 typedef struct EffBlurTemplate {
