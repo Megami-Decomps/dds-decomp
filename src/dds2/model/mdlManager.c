@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "sdf_draw.h"
 
 extern u64 fileGetResourceHandle(u64);
 
@@ -18,17 +19,13 @@ typedef struct MdlSub {
     u16 unkA;   /* 0xA */
 } MdlSub;
 
-typedef struct MdlEntry {
-    u8 unk0[0x14]; /* 0x0 */
-    s16 enabled;   /* 0x14 */
-} MdlEntry;
 
 /* Entry table pointed to by the first word of MdlInner. */
 typedef struct MdlEntryTable {
     u8 unk0[4];       /* 0x0 */
     s16 count;        /* 0x4 */
     u8 unk6[6];       /* 0x6 */
-    MdlEntry **items; /* 0xC */
+    SdfDrawNode **items; /* 0xC */
 } MdlEntryTable;
 
 /* Record behind MdlCtx.inner. */
@@ -37,7 +34,7 @@ typedef struct MdlInner {
     u8 unk4[4];  /* 0x4 */
     u32 resourceHandle; /* 0x8: released by mdlReleaseInnerResourceHandle */
     u8 unkC[8];  /* 0xC */
-    struct MdlNode *list; /* 0x14: intrusive node list */
+    Motion *list; /* 0x14: intrusive node list */
     u8 unk18[4]; /* 0x18 */
     u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
     u128 vector20; /* 0x20: matrix row 0 (vf28) */
@@ -70,31 +67,14 @@ typedef struct MdlDevList {
     MdlDevSlot *first; /* 0x0 */
 } MdlDevList;
 
-/* Entry searched by func_00217E10/func_00216BB0 on its s16 id at +0x28.
- * Only the fields read by the matched helpers below are known. */
-typedef struct MdlNode {
-    struct MdlNode *next; /* 0x0 */
-    u8 pad4[4];           /* 0x4 */
-    void *unk8;           /* 0x8: dereferenced by func_00218410 */
-    u8 padC[0x10];        /* 0xC */
-    f32 unk1C;            /* 0x1C: read as int by func_00217EB0 */
-    f32 floatValue;       /* 0x20: float slot of mdlGet/SetNodeFloat20 */
-    u8 pad24[4];          /* 0x24 */
-    s16 searchId;          /* 0x28: identifies a node in list lookups */
-    s16 slotIndex;         /* 0x2A: slot index used by func_00216B78 */
-    u16 unk2C;            /* 0x2C */
-    u16 unk2E;            /* 0x2E */
-    u8 unk30;             /* 0x30: compared against 5 */
-    u8 pad31[7];          /* 0x31 */
-} MdlNode;
 
-extern void sdfDestroyMotion(void *arg);
+extern void sdfDestroyMotion(Motion *arg);
 
 extern s32 btlGroupContainsId(s32 group, s32 id);
 
 extern s32 fileManUpdate(void);
 
-void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
+void mdlClearSlotAndRelease(void *ctx, Motion *node) {
     s32 offset = node->slotIndex * 4 + 0x20;
     void **slot = (void **)((u8 *)ctx + offset);
 
@@ -105,7 +85,7 @@ void mdlClearSlotAndRelease(void *ctx, MdlNode *node) {
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
-    MdlNode *node = ctx->inner->list;
+    Motion *node = ctx->inner->list;
 
     while (node != NULL) {
         if (node->searchId == id) {

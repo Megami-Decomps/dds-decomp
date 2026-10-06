@@ -129,14 +129,38 @@ typedef struct MenuPageRecord {
     MenuPageEntry entries[5];
 } MenuPageRecord;
 
+typedef struct MenuPoint {
+    s32 x;
+    s32 y;
+} MenuPoint;
+
+/* Profile helpers expose the game's native panel allocation as a word buffer. */
+typedef struct MenuProfilePanel {
+    u8 pad00[0x10];
+#ifdef VERSION_DDS2
+    u32 unk10;
+    s32 unk14;
+    u8 pad18[0x14];
+    u32 unk2C[5];
+    s32 phase;
+    u32 unk44;
+#else
+    s32 capValue;
+    s32 option;
+    MenuPoint gridOrigin;
+    u8 pad20[0x1C];
+#endif
+} MenuProfilePanel;
+
 #ifdef VERSION_DDS2
 typedef struct MenuPageBar {
     u8 pad00[0x10];
     s32 percentage;
-    u8 pad14[0x30];
+    u8 pad14[0x2C];
+    s32 unk40;
     u32 unk44;
     u32 unk48;
-    u8 pad4C[4];
+    u32 unk4C;
 } MenuPageBar;
 
 typedef struct MenuQueuedCommand {

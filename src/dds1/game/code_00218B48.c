@@ -1967,7 +1967,7 @@ extern void sdfConsCreateDrawPacket(s32, SdfTex *, s32);
 extern void sdfAppendTexturedLinePacket(s32, u32, s32, s32, s32, s32, s32,
                                         s32, s32, s32, s32, s32, s32);
 
-void func_0021C6E8(void) {
+void mdlDrawViewerTexturePreview(void) {
     s32 index = 0;
     s32 count = 0;
     s32 width, height;
@@ -2013,7 +2013,7 @@ void func_0021C6E8(void) {
 
 u32 mdlUpdateViewerNodeCursorTask(void) {
     mdlHandleViewerNodeCursorInput();
-    func_0021C6E8();
+    mdlDrawViewerTexturePreview();
     return 0;
 }
 

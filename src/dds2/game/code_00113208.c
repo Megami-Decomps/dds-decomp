@@ -1,16 +1,6 @@
 #include "common.h"
+#include "dds3obj.h"
 
-typedef struct ObjectSubstate {
-    u8 pad0[0xC];
-    u32 valueC;
-    u8 pad10[0x74];
-    s32 cameraMode;
-} ObjectSubstate;
-
-typedef struct ObjectWithSubstate {
-    u8 pad0[0x18];
-    ObjectSubstate *substate;
-} ObjectWithSubstate;
 
 typedef struct CameraSlotState {
     s32 unk0;   /* 0x0 */
@@ -41,18 +31,18 @@ extern void dds3ExchangeSlot();
 
 extern void dds3RegisterObjectInHandlerIndex();
 
-u32 dds3GetCameraMode(ObjectWithSubstate *object) {
-    return object->substate->cameraMode;
+u32 dds3GetCameraMode(CameraObject *object) {
+    return object->data->eyeIsRelative;
 }
 
-void dds3SetCameraMode(ObjectWithSubstate *object, s32 value) {
-    if (object->substate->cameraMode != value) {
-        object->substate->cameraMode = value;
+void dds3SetCameraMode(CameraObject *object, s32 value) {
+    if (object->data->eyeIsRelative != value) {
+        object->data->eyeIsRelative = value;
     }
 }
 
-u32 func_00113230(ObjectWithSubstate *object) {
-    return object->substate->valueC;
+u32 func_00113230(CameraObject *object) {
+    return object->data->matrix[0][3];
 }
 
 ActionObj *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVector) {

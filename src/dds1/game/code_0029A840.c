@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_draw.h"
 
 extern u32 sdfResourceRetainAddress(u32);
 
@@ -114,12 +115,7 @@ extern void mdlStorePrimaryVectorVU(void *);
 
 extern void mdlUpdateContextRotationBasisFromQuaternion(void *);
 
-/* Model-manager prefixes plus the effect owner's lighting attachment.
- * Unrelated node fields and inner matrices remain opaque. */
-typedef struct MdlNode {
-    u8 pad00[0x20];
-    f32 floatValue;
-} MdlNode;
+/* Model context prefix and the effect owner's lighting attachment. */
 
 typedef struct MdlInner {
     u8 pad00[8];
@@ -132,7 +128,7 @@ typedef struct MdlCtx {
     u32 flags;
     u8 pad04[0x14];
     MdlInner *inner;
-    MdlNode *first;
+    Motion *first;
 } MdlCtx;
 
 /* Initialize the VU transforms and the first node's float slot, if present. */
@@ -146,7 +142,7 @@ void effInitModelVUState(void *model) {
     mdlBroadcastMasked(model, 0x80808080);
     if (((MdlCtx *)model)->first != NULL) {
         mdlAddEntryPlain(model, 0, 0);
-        ((MdlCtx *)model)->first->floatValue = 1.0f;
+        ((MdlCtx *)model)->first->frameStep = 1.0f;
     }
     ((MdlCtx *)model)->flags &= ~1;
 }

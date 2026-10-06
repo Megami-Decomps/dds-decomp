@@ -26,7 +26,7 @@ extern f32 D_00354C00[4];
 
 extern void parReleaseCellSystem(u32 handle);
 extern void func_001770F8(void *dst, void *src);
-extern void sdfReleaseResourceAllocation(u32 handle);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
@@ -40,11 +40,11 @@ void effPCPNeedleCreate(void *data) {
     EffPCPNeedleParams *work;
 
     work = effParamTableGetBlock(data, 0);
-    func_001760F8(work);
+    effNeedleCreateWork(work);
 }
 
 void func_00176410(EffPCPNeedleParams *work) {
-    func_001760F8(work);
+    effNeedleCreateWork(work);
 }
 
 /* Advance the orbiting needle entries and rebuild their camera-facing trails. */

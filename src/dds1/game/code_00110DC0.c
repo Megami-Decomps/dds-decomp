@@ -1,12 +1,13 @@
 #include "common.h"
+#include "evt_world.h"
 
-/* The object owns a pointer to its current world value, not the value itself. */
+/* Scalar and paired-index payloads are separate from the world's list table. */
 typedef struct WorldObjectPointer {
     u8 pad00[0x18];
     u32 *value;
 } WorldObjectPointer;
 
-/* One entry of the chain table value[2] points at; the walk follows next. */
+/* Caption and next-link prefix shared by the slot-specific nodes. */
 typedef struct WorldChainNode {
     u8 pad00[8];
     u8 *name; /* 0x08 */
@@ -14,11 +15,6 @@ typedef struct WorldChainNode {
     struct WorldChainNode *next; /* 0x20 */
 } WorldChainNode;
 
-typedef struct WorldChainEntry {
-    u8 pad00[4];
-    WorldChainNode *node; /* 0x04 */
-    u8 pad08[4];
-} WorldChainEntry; /* 0x0C */
 
 s32 dds3VisitWorldObjectValues(s32 object, s32 (*callback)(void *));
 
@@ -30,15 +26,15 @@ void dds3DestroyWorldIndexNode(u32 node);
 
 void sdfReleaseChipBlock(void *arg);
 
-const s32 dds3ContainsNodeInObjectChain(WorldObjectPointer *object, s32 index, s32 value) {
+const s32 dds3ContainsNodeInObjectChain(EvtWorldObject *object, s32 index, s32 value) {
     WorldChainNode *node;
 
     if (object == NULL || value == 0) {
         return 0;
     }
-    node = ((WorldChainEntry *)object->value[2])[index].node;
+    node = object->table->slots[index].head;
     while (node != NULL) {
-        if ((u32 *)node == (u32 *)value) {
+        if (node == (WorldChainNode *)value) {
             return 1;
         }
         node = node->next;
@@ -46,22 +42,22 @@ const s32 dds3ContainsNodeInObjectChain(WorldObjectPointer *object, s32 index, s
     return 0;
 }
 
-const s32 dds3ContainsNodeInAnyObjectChain(WorldObjectPointer *object, s32 value) {
-    u8 *p;
+const s32 dds3ContainsNodeInAnyObjectChain(EvtWorldObject *object, s32 value) {
+    EvtWorldSlot *slots;
     s32 i;
 
     if (object == NULL || value == 0) {
         return 0;
     }
-    p = (u8 *)object->value[2] + 4;
-    for (i = 0; i < 0x12; i++, p += 0xC) {
-        WorldChainNode *node = *(WorldChainNode **)p;
+    slots = object->table->slots;
+    for (i = 0; i < 0x12; i++) {
+        WorldChainNode *node = slots[i].head;
 
         if (node == NULL) {
             continue;
         }
         do {
-            if ((u32 *)node == (u32 *)value) {
+            if (node == (WorldChainNode *)value) {
                 return 1;
             }
             node = node->next;
@@ -83,7 +79,7 @@ s32 dds3GetWorldObjectValue(WorldObjectPointer *object) {
     return *object->value;
 }
 
-WorldChainNode *dds3FindIndexedObjectChainNodeByName(WorldObjectPointer *object, s32 index, const u8 *name) {
+WorldChainNode *dds3FindIndexedObjectChainNodeByName(EvtWorldObject *object, s32 index, const u8 *name) {
     WorldChainNode *node;
     u8 *s;
     s32 i;
@@ -91,7 +87,7 @@ WorldChainNode *dds3FindIndexedObjectChainNodeByName(WorldObjectPointer *object,
     if (object == NULL || name == NULL) {
         return NULL;
     }
-    node = ((WorldChainEntry *)object->value[2])[index].node;
+    node = object->table->slots[index].head;
     while (node != NULL) {
         s = node->name;
         if (s == NULL) {
@@ -116,7 +112,7 @@ WorldChainNode *dds3FindIndexedObjectChainNodeByName(WorldObjectPointer *object,
     return NULL;
 }
 
-u32 *dds3FindObjectChainNodeByName(WorldObjectPointer *object, const u8 *name) {
+u32 *dds3FindObjectChainNodeByName(EvtWorldObject *object, const u8 *name) {
     u32 *node;
     s32 i;
 

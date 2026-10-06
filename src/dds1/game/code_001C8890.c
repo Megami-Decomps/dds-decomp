@@ -10614,7 +10614,7 @@ typedef struct BtlDeadLoadArgs {
 
 extern char D_003A5370[];
 
-void func_001F49D0(BtlDeadLoadArgs *args) {
+void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
     u8 *work = (u8 *)btlGetRuntime();
     BtlUnit *unit;
     s32 id;
@@ -10692,7 +10692,7 @@ void *sndCreateEarringPlaybackTask(u8 *owner) {
     *(u16 *)(task + 0x20) = 0x59;
     *(u16 *)(task + 0x24) &= ~1;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(void **)(task + 0x48) = func_001F49D0;
+    *(void **)(task + 0x48) = sndStartDeadAtracLoad;
     *(void **)(task + 0x4C) = sndUpdateEarringDeadPlayback;
     *(void **)(task + 0x50) = sndFinishEarringPlaybackTask;
     arguments = (u32 *)btlGetTaskArguments((s32)task);

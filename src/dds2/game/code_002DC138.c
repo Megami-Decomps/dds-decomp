@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_draw.h"
 
 typedef struct EffModelOwner {
     f32 scale;
@@ -96,12 +97,7 @@ extern s32 mdlGetContextResourceId(void *model);
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 extern void *sdfAllocGeneralBlock(u32);
 
-/* Model-manager prefixes plus the effect owner's lighting attachment.
- * Unrelated node fields and inner matrices remain opaque. */
-typedef struct MdlNode {
-    u8 pad00[0x20];
-    f32 floatValue;
-} MdlNode;
+/* Model context prefix and the effect owner's lighting attachment. */
 
 typedef struct MdlInner {
     u8 pad00[8];
@@ -114,7 +110,7 @@ typedef struct MdlCtx {
     u32 flags;
     u8 pad04[0x14];
     MdlInner *inner;
-    MdlNode *first;
+    Motion *first;
 } MdlCtx;
 
 /* Initialize the VU transforms and the first node's float slot, if present. */
@@ -128,7 +124,7 @@ VU0_MOVE_VF(vf10, vf0);
     mdlBroadcastMasked(model, 0x80808080);
     if (((MdlCtx *)model)->first != NULL) {
         mdlAddEntryPlain(model, 0, 0);
-        ((MdlCtx *)model)->first->floatValue = 1.0f;
+        ((MdlCtx *)model)->first->frameStep = 1.0f;
     }
     ((MdlCtx *)model)->flags &= ~1;
 }

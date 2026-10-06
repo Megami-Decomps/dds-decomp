@@ -297,6 +297,8 @@ extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 fldValueRecordCount;
+extern s32 D_003BADF8;
+extern s32 D_003BADEC;
 extern u8 D_003BA734;
 extern s32 scrFindNamedProcessNode(u32 arg0);
 extern s32 evtDestroyNamedTask(u64 arg0, u32 arg1);
@@ -2256,27 +2258,13 @@ void fldSetCameraMoveMode(u32 value) {
     D_003BAD20 = 0;
 }
 
-/* The camera object's inner node carries its look-at target at +0x40. */
-typedef struct FldCameraTransformNode {
-    u8 pad00[0x40];
-    f32 position[4];
-    f32 rotation[4];
-} FldCameraTransformNode;
-
-typedef struct FldWorldCamera {
-    u8 pad00[4];
-    s32 key;
-    u8 pad08[0x10];
-    void *data;
-    FldCameraTransformNode *inner;
-} FldWorldCamera;
 
 extern void effObjSetNodeFlags(void *, s32);
 
 void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
     f32 phase = D_003BAD20;
-    FldWorldCamera *camera;
+    CameraObject *camera;
 
     if (D_003BAD1C != 0) {
         if (D_003BAD1C == 1) {
@@ -2291,7 +2279,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_003BAD1C == -2) {
             direction = -1.0f;
         }
-        camera = (FldWorldCamera *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = (CameraObject *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
         if (D_003BAD1C == 1 || D_003BAD1C == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;
@@ -3432,7 +3420,21 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldResetRecordState);
+void fldResetRecordState(void) {
+    s32 index;
+    for (index = 0; index < fldValueRecordCount; index++) {
+        ((FldRecE4 *)fldValueRecords)[index].value = 0;
+    }
+    fldValueRecordCount = 0;
+    fldAreaState[40] = -1;
+    fldAreaState[41] = -1;
+    fldAreaState[43] = -1;
+    D_003BADF8 = 0;
+    D_003BADEC = 0;
+    if (fldValueRecords != 0) {
+        fldReleaseRecordStorage();
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135360);
