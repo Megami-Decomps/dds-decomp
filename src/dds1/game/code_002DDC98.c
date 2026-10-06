@@ -110,13 +110,14 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern u8 D_003F98A0[];
 extern u8 D_003F9860[];
 extern u128 *D_003EB860[][3];
-extern void *D_003BD37C;
-extern void *D_003BD380;
-extern void *D_003BD390;
-extern void *sdfTexAcquireResourceTexture(void *);
-extern void *sdfTexAcquireAlternateResourceTexture(void *);
+extern SdfTex *D_003BD37C;
+extern SdfTex *D_003BD380;
+extern SdfTex *D_003BD390;
+extern SdfTex *sdfTexAcquireResourceTexture(void *);
+extern SdfTex *sdfTexAcquireAlternateResourceTexture(void *);
 extern void *sdfEnsureFreeRootWorkspace(void *object);
 extern void *sdfAllocPacketAligned(s32);
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
 extern s32 sdfGetPacketCursor(void);
 extern u16 D_003BDA24;
@@ -777,8 +778,8 @@ void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     D_003BDA20 = sdfResourceRetainAddress(D_003BD350);
 }
 
-/* Fixed allocation size; the texture address is deliberately unused. */
-u32 sdfConsGetTextureDrawPacketSize(s32 unusedTextureAddress) {
+/* Fixed allocation size; the texture is deliberately unused. */
+u32 sdfConsGetTextureDrawPacketSize(SdfTex *texture) {
     return SDF_TEXTURE_DRAW_PACKET_BYTES;
 }
 
@@ -799,12 +800,12 @@ typedef struct SdfDrawPacket {
     u64 registerAddressC;
 } SdfDrawPacket;
 
-extern u64 sdfTexGetPrimaryTextureState(void *);
-extern u64 sdfTexGetPrimarySamplingState(void *);
-extern u64 sdfTexGetPrimaryClampState(void *);
+extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
+extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
+extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 /* Fill TEX1, TEX0 and CLAMP A+D writes; contextOffset 0/1 selects GS context. */
-SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, void *texture, s32 contextOffset) {
+SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
     drawPacket->quadwords = 4;
     drawPacket->gifTag = 0x1000000000008003ULL;
     drawPacket->command = 0x50000004;
@@ -820,10 +821,10 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, void *tex
 }
 
 /* Allocate and append texture state; return its packet address. */
-s32 sdfConsCreateDrawPacket(s32 packetList, s32 textureAddress, s32 contextOffset) {
-    s32 packetBytes = sdfConsGetTextureDrawPacketSize(textureAddress);
-    void *packet = (void *)sdfAllocPacketAligned(packetBytes);
-    s32 packetAddress = sdfConsInitTextureDrawPacket(packet, textureAddress, contextOffset);
+s32 sdfConsCreateDrawPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
+    s32 packetBytes = sdfConsGetTextureDrawPacketSize(texture);
+    SdfDrawPacket *packet = sdfAllocPacketAligned(packetBytes);
+    s32 packetAddress = (s32)sdfConsInitTextureDrawPacket(packet, texture, contextOffset);
     sdfAppendPacket(packetList, packetAddress);
     return packetAddress;
 }
@@ -1098,16 +1099,12 @@ extern void sdfInitializeObjectListRequest(void);
 extern void sdfRegisterResourceQueueCallbacks(void);
 
 extern void func_002E1D60(void);
-extern void *D_003BD37C;
-extern void *D_003BD380;
 extern u64 D_003BD388;
-extern void *D_003BD390;
 extern s32 D_003241D8[];
 extern s32 D_00324290[];
 extern s32 D_00324214[];
 extern u8 D_00317C20[];
 extern u8 D_0031BC60[];
-extern void *sdfTexAcquireAlternateResourceTexture(void *);
 extern void sdfInitializeObjectListRequest(void);
 extern void sdfRegisterResourceQueueCallbacks(void);
 
@@ -1173,7 +1170,7 @@ void sdfConsAppendVuPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
     dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
     dmaPacket[1] = 0x6C07C000ULL << 32;
     sdfWriteVuLightingPacket((VuLightingPacket *)(dmaPacket + 2));
-    sdfAppendPacket(packetList, (u32)dmaPacket);
+    sdfAppendPacket((SdfListHead *)packetList, (u32)dmaPacket);
 }
 
 extern vu8 sdfCurrentBufferIndex;
