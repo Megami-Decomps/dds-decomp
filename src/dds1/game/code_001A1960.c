@@ -4780,23 +4780,13 @@ void fldDispatchSceneKindHandler(s32 arg0) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E50);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E60);
-
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BDF60);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E70);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E80);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BE590);
 
 extern const BattlePanelColors D_003A2E90;
 extern char D_003BB478[];
 extern s32 func_003014F0(char *, const char *, ...);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E90);
 
 void func_001BE8A0(BattleSceneObject *object) {
     char text[16];
@@ -4850,11 +4840,21 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     itfSetTextDrawLimit(-1);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
-
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BEB58);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF040);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E50);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E60);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E70);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E80);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E90);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF0F8);
 
