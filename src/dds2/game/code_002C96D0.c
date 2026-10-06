@@ -1,6 +1,48 @@
 #include "common.h"
 #include "file.h"
 #include "pcp_vu0.h"
+/* Compact metadata copied from the beginning of each save blob. */
+typedef struct FileRecordHeader {
+    char signature[3];
+    s8 version;
+    s8 mapGroup;
+    s8 mapIndex;
+    u8 pad06[2];
+    s32 playTicks;
+    s16 status;
+    s16 newCycle;
+    s8 party[8];
+    s8 levels[8];
+    u32 money;
+    u32 header24;
+    u32 header28;
+    u32 header2C;
+} FileRecordHeader;
+
+typedef struct FileScrollArrowState {
+    s32 angle;
+    s32 upAlpha;
+    s32 unk08;
+    s32 downAlpha;
+} FileScrollArrowState;
+
+extern FileScrollArrowState D_003E7FF8;
+extern f32 D_00437D24;
+extern u8 D_003E8658[];
+extern u8 D_003A41A8[][32];
+extern u8 D_003A47E8[][32];
+extern char D_00437D98[];
+extern char D_00437DA0[];
+extern char D_00437DA8[];
+extern u32 func_002CF978(u32, s32, s8);
+extern void fileDrawSlotIcon(s32, s32, s32, s32);
+extern void fileCursorStepUp(void);
+extern void fileFadeStepDown(void);
+extern void fileLoadCtxSlideUpdate(void);
+
+extern u8 D_003E8B98[];
+extern u8 D_003E8BB0[];
+extern u8 D_003E8BD0[];
 typedef struct EffectSurfaceNode {
     u32 capacity;
     u32 color;
@@ -82,7 +124,7 @@ extern u32 D_00437D44;
 
 extern u32 D_00437D3C;
 
-extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 D_00439004;
 extern u32 D_00439008;
@@ -101,14 +143,14 @@ extern s32 D_00437D68;
 extern s32 D_00437D64;
 extern s32 D_00437D60;
 extern s32 D_00437D5C;
-extern s32 D_00437D54;
-extern s32 D_00437D58;
+extern u8 (*D_00437D54)[32];
+extern u8 (*D_00437D58)[32];
 extern s32 sdfTexReleaseReferenceViaHandler(s32);
 extern s32 dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(s32, s32);
 extern void fileWaitReady(u32);
 extern void sdfReleaseMemorySlot(void *);
-extern void sdfFreeMemoryFromEitherHeap(s32);
+extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 D_00437D38;
 
@@ -137,7 +179,7 @@ extern u32 func_002DDF48(u32);
 extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
 extern s32 D_00437D88;
-extern void func_0035C860(void *dst, const char *fmt, ...);
+extern s32 func_0035C860(char *dst, const char *fmt, ...);
 
 extern s32 fileSlotSelectPoll(void);
 
@@ -413,11 +455,7 @@ extern void fileJobFreeSecondaryBuffer(FileJob *job);
 
 /* Only fields needed by the save copy are exposed; the remaining state is opaque. */
 typedef struct FileSaveState {
-    u8 pad00[0x20];
-    u32 money;          /* 0x20 */
-    u32 header24;       /* 0x24 */
-    u32 header28;       /* 0x28 */
-    u32 header2C;       /* 0x2C */
+    FileRecordHeader header; /* 0x00 */
     u8 pad30[0xA24];
     u32 slotFlags;      /* 0xA54 */
     u8 padA58[0x1DBF8];
@@ -649,10 +687,10 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontSetSharedRenderFlags(0x54);
 }
 
-void fileDrawMenuImageAtPoint(s32 x, s32 y, u64 width, u64 height) {
-    u64 handle;
+void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
+    u32 handle;
 
-    handle = func_0019F5E8(x << 4, y << 3, 0, width, height, 0);
+    handle = func_0019F5E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
 }
@@ -778,7 +816,7 @@ void *fileReadSlotPreviewWait(void) {
 }
 
 extern s32 mcPollZeroCommandResult(void);
-extern u8 D_004580C0[];
+extern FileRecordHeader D_004580C0[];
 
 void *fileStoreSlotHeader(void) {
     s32 status = mcPollZeroCommandResult();
@@ -787,7 +825,7 @@ void *fileStoreSlotHeader(void) {
         return NULL;
     }
     if (status == 1) {
-        memcpy(D_004580C0 + fileSlotScanIndex * 0x30, (void *)fileSaveReadBuffer, 0x30);
+        memcpy(&D_004580C0[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
         sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return func_002CBA90();
     }
@@ -1815,9 +1853,7 @@ void *mcdHandleSaveSetupDone(void) {
     return (void *)fileAbortSlotScanOnInput;
 }
 
-typedef struct {
-    u8 bytes[0x30];
-} __attribute__((packed)) FileRecordHeader;
+
 
 extern s32 mcdContinueLoadSelection();
 
@@ -1945,7 +1981,7 @@ void *func_002CCAD0(void) {
             if ((flags & 1) != 0) {
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
                 if (mcdOriginalTitleFileMode != 0 &&
-                    *(s16 *)(D_004580C0 + D_00437D2C * 0x30 + 0xC) == 0) {
+                    D_004580C0[D_00437D2C].status == 0) {
                     fileSetMenuFlowState(0);
                     D_00437D3C = 8;
                     D_00437D40 = 0;
@@ -1957,7 +1993,7 @@ void *func_002CCAD0(void) {
                     return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
                 }
                 fileCopyRecordHeader((FileRecordHeader *)fileLoadSelectionWork,
-                    (const FileRecordHeader *)(D_004580C0 + D_00437D2C * 0x30));
+                    (const FileRecordHeader *)(&D_004580C0[D_00437D2C]));
                 return (void *)fileBeginPromptDialog(mcdAdvanceToLoadSelection, fileScanSlotStates, 1);
             }
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
@@ -1975,7 +2011,272 @@ void *func_002CCAD0(void) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CD028);
+s32 func_002CD028(s32 work) {
+    char text[64];
+    s32 row;
+    s32 rowBase;
+    s32 rowCount;
+    s32 slotBase;
+    s32 slot;
+    s32 y;
+    u32 titleColor;
+    u32 detailColor;
+    u32 alpha;
+    u32 baseColor;
+    u32 partyColor;
+    s32 trail;
+    s32 trailAlpha;
+    s32 partyIndex;
+    s32 portrait;
+    s32 ticks;
+    s32 hours;
+    s32 minutes;
+    s32 seconds;
+    FileRecordHeader *preview;
+    f32 targetY;
+    f32 delta;
+    f32 wave;
+
+    if (D_00437CEC == 1) {
+        return 0;
+    }
+    if (D_00437D00 > 0) {
+        D_00437D00--;
+    }
+    if (D_00437D00 < 0) {
+        D_00437D00++;
+    }
+    if (D_00437D30 == 0) {
+        func_00108EC0(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D74);
+    } else {
+        func_00108EC0(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D74);
+    }
+    evtSetDrawSurfaceIndex(0x55);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 2, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitDefaultDepthGradientRect(0, 0, 0x200, 0x1C0, 0, 0, 0, 0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    /* Retail computes the clamped slide delta but snaps to the target. */
+    targetY = D_00437D28 * -110 + 104;
+    delta = targetY - D_00437D24;
+    delta /= 3.0f;
+    if (delta < 0.0f && delta > -16.0f) {
+        delta = -16.0f;
+    }
+    if (delta > 0.0f && delta < 16.0f) {
+        delta = 16.0f;
+    }
+    D_00437D24 = targetY;
+    fileCursorStepUp();
+    fileFadeStepDown();
+    if (D_00437D38 == 0) {
+        fileCursorPulseUpdate();
+        func_002CFF38(0x25, 0x1F, 0x53);
+    }
+    fileLoadCtxSlideUpdate();
+    if (fileLoadMenuState.unk10 == 0) {
+        rowCount = 3;
+        rowBase = D_00437D28;
+        slotBase = D_00437D28;
+    } else if (fileLoadMenuState.unk10 == 1) {
+        rowCount = 4;
+        rowBase = D_00437D28;
+        slotBase = D_00437D28 - 1;
+        if (slotBase < 0) {
+            slotBase = 0;
+        }
+    } else {
+        rowCount = 4;
+        rowBase = D_00437D28 - 1;
+        slotBase = D_00437D28;
+    }
+    for (row = 0; row < rowCount; row++) {
+        slot = slotBase + row;
+        y = (s32)D_00437D24 + (rowBase + row) * 110 + fileLoadMenuState.unk14;
+        if (D_00437D2C == slot) {
+            titleColor = 0xA09DC380;
+            detailColor = 0xA09DC380;
+        } else {
+            titleColor = 0x605D8340;
+            detailColor = 0x605D8340;
+        }
+        if (mcdOriginalTitleFileMode != 0) {
+            if (D_004580C0[slot].status == 0) {
+                titleColor = 0x605D8340;
+                detailColor = 0x605D8340;
+            } else {
+                titleColor = 0xA09DC380;
+                detailColor = 0xA09DC380;
+            }
+        }
+        if (fileLoadMenuState.unk10 != 0) {
+            if (row == 0) {
+                alpha = fileLoadMenuState.unk18;
+                titleColor = func_002CF978(titleColor, alpha, 0);
+                detailColor = func_002CF978(detailColor, fileLoadMenuState.unk18, 0);
+            } else if (row == 3) {
+                alpha = fileLoadMenuState.unk1C;
+                titleColor = func_002CF978(titleColor, alpha, 0);
+                detailColor = func_002CF978(detailColor, fileLoadMenuState.unk1C, 0);
+            } else {
+                alpha = fileLoadMenuState.unkC;
+                titleColor = func_002CF978(titleColor, alpha, 0);
+                detailColor = func_002CF978(detailColor, fileLoadMenuState.unkC, 0);
+            }
+        } else {
+            alpha = fileLoadMenuState.unkC;
+            titleColor = func_002CF978(titleColor, alpha, 0);
+            detailColor = func_002CF978(detailColor, fileLoadMenuState.unkC, 0);
+        }
+        baseColor = (alpha << 24) | 0x808080;
+        func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, D_00437D5C);
+        if (D_00458080[slot] == 0) {
+            func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_00437D64);
+        } else if (D_00458080[slot] == 2) {
+            func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_00437D6C);
+        } else if (D_004580C0[slot].status > 0) {
+            func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_00437D68);
+        } else if (mcdOriginalTitleFileMode != 0 && D_004580C0[slot].status == 0) {
+            mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, D_003E8BD0);
+        }
+        if (slot != 10) {
+            fileDrawSlotIcon(slot + 1, 0x5A, y + 4, alpha);
+            if (D_00437D2C == slot) {
+                trailAlpha = 16;
+                if (D_00437D00 > 0) {
+                    for (trail = 0; trail < D_00437D00; trail++, trailAlpha -= 2) {
+                        func_00108EC0(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, D_00437D60);
+                    }
+                } else if (D_00437D00 < 0) {
+                    trailAlpha = 32;
+                    for (trail = 0; trail < -D_00437D00; trail++, trailAlpha -= 4) {
+                        func_00108EC0(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, D_00437D60);
+                    }
+                }
+            }
+            if (D_00458080[slot] != 1) {
+                if (D_00437D2C == slot) {
+                    u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
+                    func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_00437D60);
+                }
+            } else {
+                u32 bannerColor;
+
+                if (mcdOriginalTitleFileMode != 0) {
+                    if (D_004580C0[slot].newCycle != 0) {
+                        mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, D_003E8BB0);
+                    } else if (D_004580C0[slot].status != 0) {
+                        mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, D_003E8B98);
+                    }
+                } else if (D_004580C0[slot].newCycle != 0) {
+                    mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, D_003E8658);
+                }
+                bannerColor = (alpha << 24) | 0x808080;
+                func_00108EC0(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, D_00437D78);
+                preview = &D_004580C0[slot];
+                if (preview->newCycle == 0) {
+                    if (mcdOriginalTitleFileMode == 0) {
+                        if (preview->mapGroup == 0) {
+                            mcdCreateConfiguredDrawHandle(0xF0, y, detailColor, D_003A41A8[preview->mapIndex]);
+                        } else {
+                            mcdCreateConfiguredDrawHandle(0xF0, y, detailColor, D_003A47E8[preview->mapIndex]);
+                        }
+                    } else {
+                        if (preview->mapGroup == 0) {
+                            mcdCreateConfiguredDrawHandle(0xF0, y, detailColor, D_00437D54[preview->mapIndex]);
+                        } else {
+                            mcdCreateConfiguredDrawHandle(0xF0, y, detailColor, D_00437D58[preview->mapIndex]);
+                        }
+                    }
+                }
+                ticks = D_004580C0[slot].playTicks;
+                if (ticks > 0x066FEBF8) {
+                    ticks = 0x066FEBF8;
+                }
+                hours = ticks / 108000;
+                minutes = (ticks % 108000) / 1800;
+                seconds = (ticks % 1800) / 30;
+                func_0035C860(text, D_00437D98, hours);
+                fileDrawMenuImageAtPoint(0x187, y + 0x15, titleColor, text);
+                func_0035C860(text, D_00437DA0, minutes);
+                fileDrawMenuImageAtPoint(0x1A7, y + 0x15, titleColor, text);
+                func_0035C860(text, D_00437DA0, seconds);
+                fileDrawMenuImageAtPoint(0x1BD, y + 0x15, titleColor, text);
+                if (D_00437D2C == slot) {
+                    u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
+                    func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_00437D60);
+                }
+                if (D_004580C0[slot].newCycle == 0) {
+                    if (mcdOriginalTitleFileMode != 0) {
+                        if (D_004580C0[slot].status != 0) {
+                            partyColor = (alpha << 24) | 0x808080;
+                        } else {
+                            partyColor = (((alpha >> 1) + (alpha >> 2)) << 24) | 0x282828;
+                        }
+                    } else {
+                        if (D_00437D2C == slot) {
+                            partyColor = (alpha << 24) | 0x808080;
+                        } else {
+                            partyColor = (((alpha >> 1) + (alpha >> 2)) << 24) | 0x282828;
+                        }
+                    }
+                    for (partyIndex = 0; partyIndex < 5; partyIndex++) {
+                        if (D_004580C0[slot].party[partyIndex] != 0) {
+                            portrait = 0;
+                            switch (D_004580C0[slot].party[partyIndex]) {
+                            case 1: portrait = 0; break;
+                            case 3: portrait = 1; break;
+                            case 4: portrait = 2; break;
+                            case 5: portrait = 3; break;
+                            case 6: portrait = 4; break;
+                            case 7: portrait = 5; break;
+                            case 2: portrait = 6; break;
+                            case 8: portrait = 7; break;
+                            }
+                            func_00108EC0(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, D_003E7FA8[portrait]);
+                            func_0035C860(text, D_00437DA8, D_004580C0[slot].levels[partyIndex]);
+                            fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
+                        }
+                    }
+                }
+                if (D_004580C0[slot].header2C & 0x80000000) {
+                    u32 badgeColor = (alpha << 24) | 0x808080;
+                    func_00108EC0(0x1B, y + 0x4C, 0x57, 0x23, 2, 0x5D, 0x57, 0x23, badgeColor, badgeColor, badgeColor, badgeColor, D_00437D70);
+                }
+            }
+        }
+    }
+    evtSubmitPrimaryAlphaBlendMode(1);
+    D_003E7FF8.angle = (D_003E7FF8.angle + 10) % 360;
+    if (D_00437D28 > 0) {
+        u32 arrowColor;
+
+        func_00108EC0(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D70);
+        wave = sdfSinPoly((f32)((D_003E7FF8.angle + 90) % 360) / 180.0f * 3.1415899f);
+        D_003E7FF8.upAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
+        arrowColor = (D_003E7FF8.upAlpha << 24) | 0x808080;
+        func_00108EC0(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, D_00437D70);
+    }
+    if (D_00437D28 < 7) {
+        u32 arrowColor;
+
+        func_00108EC0(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D70);
+        wave = sdfSinPoly((f32)((D_003E7FF8.angle + 90) % 360) / 180.0f * 3.1415899f);
+        D_003E7FF8.downAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
+        arrowColor = (D_003E7FF8.downAlpha << 24) | 0x808080;
+        func_00108EC0(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, D_00437D70);
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 1);
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    return 0;
+}
+
 
 void *fileRunMenuState(s32 arg) {
     void *next;
@@ -2428,7 +2729,7 @@ void *fileBeginFadeAndConfirmSound(void) {
 }
 
 typedef struct MenuWork {
-    u8 pad0[0x30];
+    FileRecordHeader header;
     u8 unk30;
     u8 unk31;
     u16 unk32;
@@ -2598,7 +2899,7 @@ extern char D_0042B938[];
 
 void fileSaveAndDisplayCurrentMoney(void) {
     FileSaveState *state = (FileSaveState *)datGameState;
-    u32 money = state->money;
+    u32 money = state->header.money;
     state->savedMoney = money;
     func_0035B6E0(D_0042B938, money);
 }
@@ -2609,14 +2910,14 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D0B08);
 
-void fileCopySaveHeaderNumbers(FileSaveState *source) {
+void fileCopySaveHeaderNumbers(FileRecordHeader *source) {
     s32 state;
 
     state = datGameState;
-    ((FileSaveState *)datGameState)->money = source->money;
-    ((FileSaveState *)state)->header24 = source->header24;
-    ((FileSaveState *)state)->header28 = source->header28;
-    ((FileSaveState *)state)->header2C = source->header2C;
+    ((FileSaveState *)datGameState)->header.money = source->money;
+    ((FileSaveState *)state)->header.header24 = source->header24;
+    ((FileSaveState *)state)->header.header28 = source->header28;
+    ((FileSaveState *)state)->header.header2C = source->header2C;
 }
 
 void fileCopyRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
