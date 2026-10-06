@@ -94,10 +94,6 @@ typedef struct BillDrawNode {
 INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
 
 
-typedef struct BillDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct BillDrawSurface *, SdfListHead *);
-} BillDrawSurface;
 
 typedef struct BillStatePacket {
     u64 dmaTag;
@@ -111,7 +107,7 @@ typedef struct BillStatePacket {
 } BillStatePacket;
 
 extern BillDrawNode *D_003BD7F8;
-extern BillDrawSurface D_00325228;
+extern SdfPoolNode D_00325228;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern s32 sdfAllocPacketAligned(s32);
@@ -132,7 +128,7 @@ void func_00151010(void) {
             if (work->count != 0) {
                 func_00150EB0(node);
             }
-            D_00325228.submit(&D_00325228, node->packetList);
+            D_00325228.append((SdfListHead *)&D_00325228, node->packetList);
             node->packetList = NULL;
             node = node->next;
         } while (node != NULL);
@@ -152,7 +148,7 @@ void func_00151010(void) {
     packet->alpha = 0x48;
     packet->alphaRegister = 0x42;
     sdfAppendPacket(list, (u32)packet);
-    D_00325228.submit(&D_00325228, list);
+    D_00325228.append((SdfListHead *)&D_00325228, list);
     D_003BD7F8 = NULL;
 }
 
