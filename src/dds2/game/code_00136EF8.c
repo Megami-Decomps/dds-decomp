@@ -341,9 +341,15 @@ typedef struct {
 extern FldActorRow fldActorSlots[];
 
 typedef struct FldAreaState {
-    u8 pad0[0x14];
-    s32 areaIndex;
-    u8 pad18[0xEC];
+    u8 pad0[0x10];
+    s32 area;
+    s32 floor;
+    u8 pad18[0x40];
+    s32 unk58;
+    u8 pad5C[0x2C];
+    s32 unk88;
+    u8 pad8C[0x74];
+    s32 unk100;
     s16 unk104;
 } FldAreaState;
 
@@ -1210,7 +1216,7 @@ u8 *fldPickActorTemplateByName(const char *name) {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1
+            && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
@@ -1273,7 +1279,7 @@ u8 *fldFindActorEntryByName(const char *name) {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1
+            && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
@@ -1439,7 +1445,7 @@ void func_00140A58(const char *name) {
             continue;
         }
         entryName = entry->name;
-        if (entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1) {
+        if (entry->floor == ((FldAreaState *)fldAreaState)->floor + 1) {
             if (strcmp(name, entryName) == 0) {
                 if (entry->variantMode == 2) {
                     return;
@@ -1459,11 +1465,11 @@ u8 fldIsSceneStateEight(void) {
     return D_004361F8 == 8;
 }
 
-void fldApplySceneRoomSelection(s8 *actorEntry) {
-    if (actorEntry[0x53] != 0) {
-        fldAreaState[0x22] = actorEntry[0x53] - 1;
+void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
+    if (actorEntry->unk53 != 0) {
+        ((FldAreaState *)fldAreaState)->unk88 = actorEntry->unk53 - 1;
     }
-    fldAreaState[0x16] = actorEntry[0x45];
+    ((FldAreaState *)fldAreaState)->unk58 = actorEntry->unk45;
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140BC8);
@@ -1778,10 +1784,10 @@ void fldApplyCurrentAreaActorEntries(void) {
 
     for (i = 0; i < 256; i++) {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
-        if (entry->kind == 1 && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->motion != 0) {
+        if (entry->kind == 1 && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1 && entry->motion != 0) {
             fldApplyRoomObjectModeOne(0, 0, entry->motionName, 0);
         }
-        if (entry->kind == 11 && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->motion == 3) {
+        if (entry->kind == 11 && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1 && entry->motion == 3) {
             fldApplyRoomObjectModeOne(0, 0, entry->otherName, 0);
         }
     }
