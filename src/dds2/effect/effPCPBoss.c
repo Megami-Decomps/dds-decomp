@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -112,7 +113,7 @@ typedef struct {
 typedef struct {
     EffBossHead head;
     EffBossGroup *groups; /* 0x8C */
-    u32 groupsHandle; /* 0x90 */
+    SdfMemBlock *groupsHandle; /* 0x90 */
     u32 groupCount;   /* 0x94 */
     u16 cellCount;    /* 0x98 */
     u8 pad9A[2];
@@ -146,9 +147,9 @@ extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
 extern u32 sdfCountMapPositionRecords(void *chunk);
 extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_00164C68(u32 system, u32 value);
-extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
-extern EffBossDrawPool *func_00177760(u32 cellCount);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
+extern EffBossDrawPool *func_00177760(s32 cellCount);
 extern u32 effGetIndexedEffectGroupRecord(EffBossDrawPool *pool, s32 index);
 extern EffBossColorSlot *effGetIndexedEffectGroupIndexEntry(EffBossDrawPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffBossDrawPool *pool, u32 bits);
@@ -159,7 +160,7 @@ extern f32 D_004334C4;
 extern void func_0018C288(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
 extern void effReleaseRecordGroupAssetAndHandle(EffBossDrawPool *pool);
-extern void sdfReleaseResourceAllocation(u32 handle);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
 extern void parReleaseCellSystem(u32 system);
 
 /* Randomize geometry and initial age; the two extents remain proportional. */
