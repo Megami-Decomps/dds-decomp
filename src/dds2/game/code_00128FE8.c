@@ -78,7 +78,7 @@ extern u32 D_004360D0;
 
 extern u32 fldPlayerObject;
 
-extern s32 fldCameraColorEffect;
+extern SdfFlagListWork *fldCameraColorEffect;
 
 extern u32 fldCameraColorEnabled;
 
@@ -2864,22 +2864,8 @@ extern FldSkyBuffer *fldSkyLightSetBuffer;
 
 
 
-typedef struct FldFadeColor {
-    u8 unk00;
-    u8 pad01[3];
-    s32 colorA;
-    s32 colorB;
-    u8 padC[0x18];
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    f32 unk30;
-    s32 unk34;
-    s32 unk38;
-    f32 unk3C;
-} FldFadeColor;
 
-extern FldFadeColor fldCameraColorParameters[];
+extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting D_0038BB70;
 extern void *D_004360F0;
@@ -2914,15 +2900,15 @@ void fldLoadBattleSkyAndFilter(void) {
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_0038BB70;
         }
-        fldCameraColorParameters->unk00 = 0;
-        fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = 0x80808080;
-        fldCameraColorParameters->unk24 = 0x40;
-        fldCameraColorParameters->unk28 = 2;
-        fldCameraColorParameters->unk2C = 0;
-        fldCameraColorParameters->unk30 = 1.0f;
-        fldCameraColorParameters->unk34 = 0;
-        fldCameraColorParameters->unk38 = 0xFF;
-        fldCameraColorParameters->unk3C = 20.0f;
+        fldCameraColorParameters->color.mode = 0;
+        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = 0x80808080;
+        fldCameraColorParameters->alpha.alpha = 0x40;
+        fldCameraColorParameters->alpha.surfaceIndex = 2;
+        fldCameraColorParameters->alpha.fadeIn = 0.0f;
+        fldCameraColorParameters->alpha.fadeOut = 1.0f;
+        fldCameraColorParameters->maxFrames = 0;
+        fldCameraColorParameters->count = 0xFF;
+        fldCameraColorParameters->speed = 20.0f;
     }
     command = sdfDevCreateCommandState("/fld/f/bin/FILTER.FLD");
     sdfDevQueueReadAndWait(command, D_00436104, 0x12400);

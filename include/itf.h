@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "eff.h"
+#include "sdf.h"
 
 /* Native 0xC-byte fade record shared by message windows and sound UI state. */
 typedef struct BtlFade {
@@ -67,26 +68,6 @@ typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(ItfMesPoolNode) == 0x14) ?
 typedef char ItfMesPool_size_must_be_0x10[(sizeof(ItfMesPool) == 0x10) ? 1 : -1];
 typedef char ItfMesGlobals_size_must_be_0x520[(sizeof(ItfMesGlobals) == 0x520) ? 1 : -1];
 
-/* Camera color effects use the same float and packed-color fields in both games. */
-typedef struct RgbAlpha {
-    u8 pad00[0x18];
-    u32 rgb;
-    u8 pad1C[0x1C];
-    u32 alpha;
-    u32 x3C;
-    u8 pad40[0x10];
-    f32 f50;
-} RgbAlpha;
-
-typedef struct CfSrc {
-    u8 pad00[4];
-    u32 rgb;
-    u8 pad08[0x1C];
-    u32 alpha;
-    u32 x28;
-    u8 pad2C[0x10];
-    f32 f3C;
-} CfSrc;
 
 
 #endif /* ITF_H */

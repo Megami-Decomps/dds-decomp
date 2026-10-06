@@ -315,7 +315,7 @@ typedef struct BillCellDrawWork {
     u8 *config;
 } BillCellDrawWork;
 
-extern u32 func_002D7458(u8 *, u8 *, u32, u32);
+extern u32 func_002D7458(const void *, const void *, s32, s32);
 
 extern void effMiscQuaternionToMatrixVU(void);
 
@@ -819,74 +819,64 @@ void effSetFadeVectorColor(s32 work, u32 value) {
     ((EffFadeVectorWork *)work)->color = value;
 }
 
-/* Selection effect stores paired 8-byte entries and their reset buffer. */
-typedef struct EffSelectionWork {
-    u32 frame;
-    u32 value04;
-    u32 *entries;
-    u8 pad_0C[4];
-    u32 buffer;
-    u8 pad_14[0x38];
-    u32 count;
-} EffSelectionWork;
 
-void effResetSelectionEntryBuffers(s32 work) {
+void effResetSelectionEntryBuffers(SdfFlagListWork *work) {
     u32 count;
-    u32 *entries;
+    SdfFlagListMark *entries;
     u32 index;
 
     index = 0;
-    count = ((EffSelectionWork *)work)->count;
-    entries = ((EffSelectionWork *)work)->entries;
+    count = work->params.count;
+    entries = work->marks;
     if (count != 0) {
         do {
             index = index + 1;
-            *entries = 0xffffffff;
-            entries = entries + 2;
+            entries->timer = -1;
+            entries++;
         } while (index < count);
     }
-    memset(((EffSelectionWork *)work)->buffer, 0, count << 3);
+    memset(work->colors, 0, count << 3);
 }
 
-void effCreateSelectionFlagListFromWork() {
-    func_00316528();
+SdfFlagListWork *effCreateSelectionFlagListFromWork(const SdfFlagListParams *work) {
+    return func_00316528(work);
 }
 
-void effCreateSelectionFlagListFromFile(void) {
-    sdfInitializeFlagListFromResource();
+SdfFlagListWork *effCreateSelectionFlagListFromFile(void *file) {
+    return sdfInitializeFlagListFromResource(file);
 }
 
-void effReleaseSelectionFlagList(void) {
-    sdfReleaseFlagListResource();
+void effReleaseSelectionFlagList(SdfFlagListWork *work) {
+    sdfReleaseFlagListResource(work);
 }
 
-void effCreateEmbeddedSelectionFlagList(s32 p) {
-    effCreateSelectionFlagListFromWork(p + 0x14);
+SdfFlagListWork *effCreateEmbeddedSelectionFlagList(SdfFlagListWork *p) {
+    return effCreateSelectionFlagListFromWork(&p->params);
 }
 
-void effResetSelectionEntriesAndState(s32 *p) {
-    effResetSelectionEntryBuffers((s32)p);
-    *p = 0;
+void effResetSelectionEntriesAndState(SdfFlagListWork *p) {
+    effResetSelectionEntryBuffers(p);
+    p->frame = 0;
 }
 
-void func_002DEC08() {
+void func_002DEC08(SdfFlagListWork *work) {
     if ((effModelUpdateControlFlags & 2) == 0) {
-        func_00316680();
+        func_00316680(work);
         return;
     }
 }
 
-void effDrawSelectionEntryVectors() {
-    func_00316C88();
+void effDrawSelectionEntryVectors(SdfFlagListWork *work) {
+    func_00316C88(work);
 }
 
-void effUpdateAndDrawSelectionEntries(s32 p) {
+void effUpdateAndDrawSelectionEntries(SdfFlagListWork *p) {
     func_002DEC08(p);
     effDrawSelectionEntryVectors(p);
 }
 
-void func_002DEC78(s32 work, u32 value) {
-    ((EffSelectionWork *)work)->value04 = value;
+void func_002DEC78(SdfFlagListWork *work, u32 value) {
+    work->unk04 = value;
 }
 
 u32 *effDuplicatePayloadHeader(src)
@@ -951,34 +941,13 @@ typedef struct EffFadeOut {
     s32 unk14;    // 0x14
 } EffFadeOut;
 
-/* Curve entry the blend helper (func_00296F58 / func_002D7458) reads; 0x24 bytes. */
-typedef struct EffFadeCurve {
-    u8 mode;          /* 0x00: 0 = ramp from the limit, 1 = hold, 2 = step */
-    u8 pad01[3];
-    f32 span;         /* 0x04: divisor when mode is 0 */
-    f32 rate;         /* 0x08 */
-    u8 pad0C[8];
-    f32 value2;       /* 0x14 */
-    f32 threshold;    /* 0x18: compared against progress in modes 1 and 2 */
-    f32 value3;       /* 0x1C */
-    f32 value4;       /* 0x20 */
-} EffFadeCurve; /* 0x24 */
-
-/* Second curve the blend helper takes; 0x10 bytes at 0x24. */
-typedef struct EffFadeCurve2 {
-    u8 mode;       /* 0x00 */
-    u8 pad01[3];
-    f32 span;      /* 0x04 */
-    f32 rate;      /* 0x08 */
-    f32 value2;    /* 0x0C */
-} EffFadeCurve2; /* 0x10 */
 
 
 typedef struct EffFadeConfig {
     /* Color and alpha tracks at 0x00/0x24, followed by three scalar
      * tracks at 0x34, 0x60 and 0x8C. The scalar extents differ. */
-    EffFadeCurve blendA;   /* 0x00 */
-    EffFadeCurve2 blendB2; /* 0x24 */
+    SdfColorTrack blendA;   /* 0x00 */
+    SdfAlphaTrack blendB2;  /* 0x24 */
     EffScalarCurve blendB;   /* 0x34 */
     u8 pad58[8];
     EffScalarTrack rateA;   /* 0x60 */
@@ -1033,8 +1002,8 @@ typedef struct EffRateOut {
 typedef struct EffRateConfig {
     /* Color and alpha tracks at 0x00/0x24, followed by three scalar
      * tracks at 0x34, 0x60 and 0x8C. The scalar extents differ. */
-    EffFadeCurve blendA;   /* 0x00 */
-    EffFadeCurve2 blendB2; /* 0x24 */
+    SdfColorTrack blendA;   /* 0x00 */
+    SdfAlphaTrack blendB2;  /* 0x24 */
     EffScalarCurve blendB;   /* 0x34 */
     u8 pad58[8];
     EffScalarTrack rateA;   /* 0x60 */

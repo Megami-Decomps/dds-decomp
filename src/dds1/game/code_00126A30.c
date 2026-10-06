@@ -192,7 +192,7 @@ extern u32 fldSwayMode;
 extern f32 fldSwayPhase;
 extern s32 fldSwayOffset;
 
-extern s32 fldCameraColorEffect;
+extern SdfFlagListWork *fldCameraColorEffect;
 extern u32 fldCameraColorEnabled;
 extern s32 fldRainTextureReference;
 extern s32 fldRainTextureResource;
@@ -2772,21 +2772,7 @@ void fldApplyPendingCameraHeading(void) {
 /* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131688);
 
-typedef struct FldFadeColor {
-    u8 unk00;
-    u8 pad01[3];
-    s32 colorA;
-    s32 colorB;
-    u8 padC[0x18];
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    f32 unk30;
-    s32 unk34;
-    s32 unk38;
-    f32 unk3C;
-} FldFadeColor;
-extern FldFadeColor fldCameraColorParameters[];
+extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
 
 extern FldCameraSetting D_003306D0;
@@ -2824,15 +2810,15 @@ void fldLoadBattleSkyAndFilter(void) {
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_003306D0;
         }
-        fldCameraColorParameters->unk00 = 0;
-        fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = 0x80808080;
-        fldCameraColorParameters->unk24 = 0x40;
-        fldCameraColorParameters->unk28 = 2;
-        fldCameraColorParameters->unk2C = 0;
-        fldCameraColorParameters->unk30 = 1.0f;
-        fldCameraColorParameters->unk34 = 0;
-        fldCameraColorParameters->unk38 = 0xFF;
-        fldCameraColorParameters->unk3C = 20.0f;
+        fldCameraColorParameters->color.mode = 0;
+        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = 0x80808080;
+        fldCameraColorParameters->alpha.alpha = 0x40;
+        fldCameraColorParameters->alpha.surfaceIndex = 2;
+        fldCameraColorParameters->alpha.fadeIn = 0.0f;
+        fldCameraColorParameters->alpha.fadeOut = 1.0f;
+        fldCameraColorParameters->maxFrames = 0;
+        fldCameraColorParameters->count = 0xFF;
+        fldCameraColorParameters->speed = 20.0f;
     }
     command = sdfDevCreateCommandState("/fld/f/bin/FILTER.FLD");
     sdfDevQueueReadAndWait(command, D_003BAD74, 0x12400);
@@ -3278,8 +3264,6 @@ void fldApplyLightSetIndex(s32 index) {
 }
 
 extern FldCameraSetting fldAppliedCameraSettings[];
-extern u32 effCreateSelectionFlagListFromWork(const void *);
-extern void effReleaseSelectionFlagList(s32);
 void fldActivateCameraColorSetting(s32 enable) {
     FldCameraSetting *setting;
     FldColorParams *color;
@@ -3292,21 +3276,21 @@ void fldActivateCameraColorSetting(s32 enable) {
         fldCameraColorEffect = 0;
         color = &setting->color;
         if (color->enabled != 0) {
-            fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-            fldCameraColorParameters->unk24 = color->vectorY;
+            fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            fldCameraColorParameters->alpha.alpha = color->vectorY;
             switch (color->mode) {
             case 0:
-                fldCameraColorParameters->unk28 = 1;
+                fldCameraColorParameters->alpha.surfaceIndex = 1;
                 break;
             case 1:
-                fldCameraColorParameters->unk28 = 2;
+                fldCameraColorParameters->alpha.surfaceIndex = 2;
                 break;
             default:
-                fldCameraColorParameters->unk28 = 3;
+                fldCameraColorParameters->alpha.surfaceIndex = 3;
                 break;
             }
-            fldCameraColorParameters->unk38 = color->slotIndex;
-            fldCameraColorParameters->unk3C = color->vectorZ;
+            fldCameraColorParameters->count = color->slotIndex;
+            fldCameraColorParameters->speed = color->vectorZ;
             fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
             setting = fldCameraSettings;
         }
@@ -3376,26 +3360,25 @@ void fldCopyCameraSetting(FldCameraSetting *destination) {
     *destination = *fldAppliedCameraSettings;
 }
 
-extern void itfCopyColorFields(s32, void *);
 void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
-        fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-        fldCameraColorParameters->unk24 = color->vectorY;
+        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+        fldCameraColorParameters->alpha.alpha = color->vectorY;
         switch (color->mode) {
         case 0:
-            fldCameraColorParameters->unk28 = 1;
+            fldCameraColorParameters->alpha.surfaceIndex = 1;
             break;
         case 1:
-            fldCameraColorParameters->unk28 = 2;
+            fldCameraColorParameters->alpha.surfaceIndex = 2;
             break;
         default:
-            fldCameraColorParameters->unk28 = 3;
+            fldCameraColorParameters->alpha.surfaceIndex = 3;
             break;
         }
-        fldCameraColorParameters->unk38 = color->slotIndex;
-        fldCameraColorParameters->unk3C = color->vectorZ;
+        fldCameraColorParameters->count = color->slotIndex;
+        fldCameraColorParameters->speed = color->vectorZ;
         itfCopyColorFields(fldCameraColorEffect, fldCameraColorParameters);
     }
     *fldAppliedCameraSettings = *setting;

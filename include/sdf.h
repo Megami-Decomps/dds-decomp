@@ -406,6 +406,85 @@ extern s32 sdfChipPageCount[2];
 extern SdfPendingRequest sdfChipReleaseRequest;
 extern SdfChipClassTable sdfChipClassTable;
 
+/* The flag-list factory appends this owner after its vertex, color and mark
+ * arrays. Its parameter record is copied whole into the owner. */
+typedef struct SdfColorTrack {
+    u8 mode;
+    u8 pad01[3];
+    u32 colorA;
+    u32 colorB;
+    u32 colorC;
+    f32 fractionA;
+    u32 colorD;
+    f32 fractionB;
+    u8 pad1C[8];
+} SdfColorTrack;
+
+typedef struct SdfAlphaTrack {
+    u32 alpha;
+    s32 surfaceIndex;
+    f32 fadeIn;
+    f32 fadeOut;
+} SdfAlphaTrack;
+
+typedef struct SdfFlagListParams {
+    SdfColorTrack color;
+    SdfAlphaTrack alpha;
+    s32 maxFrames;
+    u32 count;
+    f32 speed;
+} SdfFlagListParams;
+
+typedef struct SdfFlagListMark {
+    s32 timer;
+    u8 alpha;
+    u8 pad05[3];
+} SdfFlagListMark;
+
+typedef struct SdfFlagListWork {
+    s32 frame;
+    u32 unk04;
+    SdfFlagListMark *marks;
+    f32 (*vertices)[4];
+    u32 *colors;
+    SdfFlagListParams params;
+    u32 resource;
+} SdfFlagListWork;
+
+typedef char SdfColorTrack_size_must_be_0x24[(sizeof(SdfColorTrack) == 0x24) ? 1 : -1];
+typedef char SdfAlphaTrack_size_must_be_0x10[(sizeof(SdfAlphaTrack) == 0x10) ? 1 : -1];
+typedef char SdfFlagListParams_size_must_be_0x40[(sizeof(SdfFlagListParams) == 0x40) ? 1 : -1];
+typedef char SdfFlagListMark_size_must_be_0x08[(sizeof(SdfFlagListMark) == 0x08) ? 1 : -1];
+typedef char SdfFlagListWork_size_must_be_0x58[(sizeof(SdfFlagListWork) == 0x58) ? 1 : -1];
+
+void sdfResetFlagListEntries(SdfFlagListWork *);
+void sdfReleaseFlagListResource(SdfFlagListWork *);
+SdfFlagListWork *sdfInitializeFlagListFromResource(void *);
+SdfFlagListWork *effCreateSelectionFlagListFromWork(const SdfFlagListParams *);
+SdfFlagListWork *effCreateSelectionFlagListFromFile(void *);
+SdfFlagListWork *effCreateEmbeddedSelectionFlagList(SdfFlagListWork *);
+void effReleaseSelectionFlagList(SdfFlagListWork *);
+void effResetSelectionEntryBuffers(SdfFlagListWork *);
+void effResetSelectionEntriesAndState(SdfFlagListWork *);
+void effDrawSelectionEntryVectors(SdfFlagListWork *);
+void effUpdateAndDrawSelectionEntries(SdfFlagListWork *);
+float scrGetOperandFloatValue(SdfFlagListWork *);
+void scrSetOperandFloatValue(SdfFlagListWork *, float);
+void itfSetPackedRgbAlpha(SdfFlagListWork *, u32);
+void itfCopyColorFields(SdfFlagListWork *, const SdfFlagListParams *);
+
+#ifdef VERSION_DDS1
+SdfFlagListWork *func_002CEAE8(const SdfFlagListParams *);
+void func_002CEC40(SdfFlagListWork *);
+void func_002CF248(SdfFlagListWork *);
+void effUpdateSelectionEntryState(SdfFlagListWork *);
+#elif defined(VERSION_DDS2)
+SdfFlagListWork *func_00316528(const SdfFlagListParams *);
+void func_00316680(SdfFlagListWork *);
+void func_00316C88(SdfFlagListWork *);
+void func_002DEC08(SdfFlagListWork *);
+#endif
+
 
 /* SDF chunk fourCC values (little-endian byte order). */
 #define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */

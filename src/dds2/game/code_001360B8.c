@@ -2,6 +2,7 @@
 #include "evt_unit.h"
 #include "pcp_vu0.h"
 #include "fld.h"
+#include "sdf.h"
 
 extern u32 D_0038BBD8[];
 
@@ -73,33 +74,20 @@ extern void fldSetSwayMode(u32);
 
 extern void *fldSkyLightSetBuffer;
 
-extern s32 fldCameraColorEffect;
+extern SdfFlagListWork *fldCameraColorEffect;
 
 extern u32 fldCameraColorEnabled;
 
 
 
-typedef struct FldFadeColor {
-    u8 pad0[4];
-    s32 colorA;
-    s32 colorB;
-    u8 padC[0x18];
-    s32 unk24;
-    s32 unk28;
-    u8 pad2C[0xC];
-    s32 unk38;
-    f32 unk3C;
-} FldFadeColor;
 
-extern FldFadeColor fldCameraColorParameters[];
+extern SdfFlagListParams fldCameraColorParameters[];
 
 extern FldCameraSetting *fldCameraSettings;
 
 extern FldCameraSetting fldAppliedCameraSettings[];
 
-extern u32 effCreateSelectionFlagListFromWork(const void *);
 
-extern void effReleaseSelectionFlagList(s32);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 
@@ -339,21 +327,21 @@ void fldActivateCameraColorSetting(s32 enable) {
         fldCameraColorEffect = 0;
         color = &setting->color;
         if (color->enabled != 0) {
-            fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-            fldCameraColorParameters->unk24 = color->vectorY;
+            fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            fldCameraColorParameters->alpha.alpha = color->vectorY;
             switch (color->mode) {
             case 0:
-                fldCameraColorParameters->unk28 = 1;
+                fldCameraColorParameters->alpha.surfaceIndex = 1;
                 break;
             case 1:
-                fldCameraColorParameters->unk28 = 2;
+                fldCameraColorParameters->alpha.surfaceIndex = 2;
                 break;
             default:
-                fldCameraColorParameters->unk28 = 3;
+                fldCameraColorParameters->alpha.surfaceIndex = 3;
                 break;
             }
-            fldCameraColorParameters->unk38 = color->slotIndex;
-            fldCameraColorParameters->unk3C = color->vectorZ;
+            fldCameraColorParameters->count = color->slotIndex;
+            fldCameraColorParameters->speed = color->vectorZ;
             fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
             setting = fldCameraSettings;
         }

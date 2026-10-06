@@ -160,8 +160,7 @@ extern u32 itfDrawBankTextWithLayoutFlags(s32, s32, u32, u16, u32, u32);
 extern void frFontSetChildColors(u32, u32);
 extern void func_001958A0(u32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(u32);
-extern u32 fileResolvePrimaryBuffer(void);
-extern void effCreateSelectionFlagListFromWork(u32);
+extern void *fileResolvePrimaryBuffer(void *);
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 extern u16 D_003907BC[];
 DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
@@ -943,38 +942,16 @@ u8 *frFontGetColoredGlyphResource(void) {
     return frFontColoredGlyphResource;
 }
 
-/* Per-entry state: frame counter (-1 = free) and the alpha chosen at spawn. */
-typedef struct SdfFlagListMark {
-    s32 timer;
-    u8 alpha;
-    u8 pad05[3];
-} SdfFlagListMark;
-
-typedef struct SdfFlagListWork {
-    s32 frame;
-    u8 pad04[4];
-    SdfFlagListMark *marks;   /* 0x08 */
-    f32 (*vertices)[4];
-    u32 *colors;
-    u8 unk14[0x24];           /* 0x14: colour curve read by func_00296F58 */
-    u8 unk38[4];
-    s32 surfaceIndex;
-    u8 pad40[8];
-    s32 maxFrames;
-    u32 count;                /* 0x4C */
-    f32 speed;                /* 0x50 */
-    u32 resource;             /* 0x54 */
-} SdfFlagListWork;
 
 /* Reset each entry's timer to free, then clear both colour words per entry. */
-void sdfResetFlagListEntries(s32 workAddress) {
+void sdfResetFlagListEntries(SdfFlagListWork *work) {
     u32 entryCount;
     SdfFlagListMark *markCursor;
     u32 entryIndex;
 
     entryIndex = 0;
-    entryCount = ((SdfFlagListWork *)workAddress)->count;
-    markCursor = ((SdfFlagListWork *)workAddress)->marks;
+    entryCount = work->params.count;
+    markCursor = work->marks;
     if (entryCount != 0) {
         do {
             entryIndex = entryIndex + 1;
@@ -982,22 +959,48 @@ void sdfResetFlagListEntries(s32 workAddress) {
             markCursor++;
         } while (entryIndex < entryCount);
     }
-    memset(((SdfFlagListWork *)workAddress)->colors, 0, entryCount << SDF_FLAG_LIST_VALUE_SHIFT);
+    memset(work->colors, 0, entryCount << SDF_FLAG_LIST_VALUE_SHIFT);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEAE8);
+extern s32 sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(u32);
 
-void sdfInitializeFlagListFromResource(void) {
-    effCreateSelectionFlagListFromWork(fileResolvePrimaryBuffer());
+SdfFlagListWork *func_002CEAE8(const SdfFlagListParams *source) {
+    u32 count;
+    u32 arrayBytes;
+    u32 resource;
+    u8 *buffer;
+    SdfFlagListWork *work;
+
+    count = source->count;
+    arrayBytes = count * (sizeof(f32[2][4]) + sizeof(u32[2]) + sizeof(SdfFlagListMark));
+    resource = sdfAllocGeneralBlock(arrayBytes + sizeof(SdfFlagListWork));
+    buffer = (u8 *)sdfResourceRetainAddress(resource);
+    work = (SdfFlagListWork *)(buffer + arrayBytes);
+    work->vertices = (f32 (*)[4])buffer;
+    buffer += count * sizeof(f32[2][4]);
+    work->colors = (u32 *)buffer;
+    buffer += count * sizeof(u32[2]);
+    work->marks = (SdfFlagListMark *)buffer;
+    work->unk04 = 0x80808080;
+    work->resource = resource;
+    work->frame = 0;
+    memcpy(&work->params, source, sizeof(work->params));
+    sdfResetFlagListEntries(work);
+    return work;
 }
 
-void sdfReleaseFlagListResource(s32 context) {
-    sdfReleaseResourceAllocation(((SdfFlagListWork *)context)->resource);
+SdfFlagListWork *sdfInitializeFlagListFromResource(void *file) {
+    return effCreateSelectionFlagListFromWork(fileResolvePrimaryBuffer(file));
+}
+
+void sdfReleaseFlagListResource(SdfFlagListWork *work) {
+    sdfReleaseResourceAllocation(work->resource);
 }
 
 extern f32 sdfViewTargetVector[4];
 extern void vuBuildLookAtBasis(void);
-extern u32 func_00296F58(u8 *, u8 *, s32, s32);
+extern u32 func_00296F58(const void *, const void *, s32, s32);
 extern f32 sdfAtan2Poly(f32 ratio);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
@@ -1029,16 +1032,16 @@ void func_002CEC40(SdfFlagListWork *work) {
     s32 timer;
     u32 packed;
 
-    maxFrames = work->maxFrames;
-    speed = work->speed;
+    maxFrames = work->params.maxFrames;
+    speed = work->params.speed;
     frame = work->frame;
     if (maxFrames > 0 && frame >= maxFrames) {
         return;
     }
     spawn = 1;
     vuBuildLookAtBasis();
-    color = func_00296F58(work->unk14, work->unk38, frame, maxFrames);
-    count = work->count;
+    color = func_00296F58(&work->params.color, &work->params.alpha, frame, maxFrames);
+    count = work->params.count;
     spawnRange = count >> 4;
     halfFov = sdfSceneProjectionParameters.fov * 0.5f;
     mark = work->marks;
@@ -1144,7 +1147,6 @@ void func_002CEC40(SdfFlagListWork *work) {
 
 
 extern SdfPoolNode *D_00398098[];
-extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
@@ -1162,10 +1164,10 @@ void func_002CF248(SdfFlagListWork *work) {
     SdfListHead *packetList;
     SdfPoolNode *surface;
 
-    if (work->maxFrames != 0 && work->frame >= work->maxFrames) {
+    if (work->params.maxFrames != 0 && work->frame >= work->params.maxFrames) {
         return;
     }
-    count = work->count;
+    count = work->params.count;
     sourceVertices = work->vertices;
     vertexAllocation = sdfAllocGeneralBlock(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
     count *= SDF_FLAG_LIST_VERTICES_PER_ENTRY;
@@ -1180,44 +1182,44 @@ void func_002CF248(SdfFlagListWork *work) {
     }
     packetList = (SdfListHead *)sdfAllocPacketAligned(SDF_FLAG_LIST_PACKET_BYTES);
     sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)func_002EF2B0(copiedVertices, work->colors, work->count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
-    surface = D_00398098[work->surfaceIndex];
+    sdfAppendPacket(packetList, (u32)func_002EF2B0(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
+    surface = D_00398098[work->params.alpha.surfaceIndex];
     surface->append((SdfListHead *)surface, packetList);
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 
 /* Read the camera color effect's stored float. */
-float scrGetOperandFloatValue(RgbAlpha *operand) {
-    return operand->f50;
+float scrGetOperandFloatValue(SdfFlagListWork *work) {
+    return work->params.speed;
 }
 
 /* Replace the camera color effect's stored float without validation. */
-void scrSetOperandFloatValue(RgbAlpha *operand, float value) {
-    operand->f50 = value;
+void scrSetOperandFloatValue(SdfFlagListWork *work, float value) {
+    work->params.speed = value;
 }
 
 void func_002CF3A0(SdfFlagListWork *work) {
-    func_00296F58(work->unk14, work->unk38, 0, 0);
+    func_00296F58(&work->params.color, &work->params.alpha, 0, 0);
 }
 
-void itfSetPackedRgbAlpha(RgbAlpha *p, u32 color) {
-    p->rgb = color & 0xFFFFFF;
-    p->alpha = color >> 24;
+void itfSetPackedRgbAlpha(SdfFlagListWork *p, u32 color) {
+    p->params.color.colorA = color & 0xFFFFFF;
+    p->params.alpha.alpha = color >> 24;
 }
 
-u32 func_002CF3E8(s32 arg0) {
-    return *(u32 *)(arg0 + 0x3c);
+u32 func_002CF3E8(SdfFlagListWork *work) {
+    return work->params.alpha.surfaceIndex;
 }
 
-void func_002CF3F0(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x3c) = arg1;
+void func_002CF3F0(SdfFlagListWork *work, u32 value) {
+    work->params.alpha.surfaceIndex = value;
 }
 
-void itfCopyColorFields(RgbAlpha *dst, CfSrc *src) {
-    dst->rgb = src->rgb;
-    dst->f50 = src->f3C;
-    dst->alpha = src->alpha;
-    dst->x3C = src->x28;
+void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
+    dst->params.color.colorA = src->color.colorA;
+    dst->params.speed = src->speed;
+    dst->params.alpha.alpha = src->alpha.alpha;
+    dst->params.alpha.surfaceIndex = src->alpha.surfaceIndex;
 }
 
 void func_002CF420(void) {
