@@ -1,22 +1,7 @@
 #include "common.h"
+#include "eff_blur.h"
 
-/* Draw payload shared with effBlur_Filter. Angle/displacement offset texture
-   sampling around the rectangle; blendControl is the GS ALPHA_1 word. */
-typedef struct {
-    union {
-        u32 color;
-        u8 colorChannels[4];
-    };
-    s32 blendControl;
-    f32 angle;
-    f32 displacement;
-    s32 x;      /* 0x10 */
-    s32 y;      /* 0x14 */
-    s32 left;   /* 0x18 */
-    s32 top;    /* 0x1C */
-    s32 right;  /* 0x20 */
-    s32 bottom; /* 0x24 */
-} EffBlurQuad; /* 0x28 */
+
 
 typedef struct {
     u32 color;
@@ -206,10 +191,10 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
     f32 dx = sdfSinPoly(phase) * amplitude;
     f32 dy = sdfEvaluateCosineViaSinePhaseShift(phase) * amplitude;
 
-    data->color[0] = source->colorChannels[0];
-    data->color[1] = source->colorChannels[1];
-    data->color[2] = source->colorChannels[2];
-    data->color[3] = source->colorChannels[3];
+    data->color[0] = ((u8 *)&source->color)[0];
+    data->color[1] = ((u8 *)&source->color)[1];
+    data->color[2] = ((u8 *)&source->color)[2];
+    data->color[3] = ((u8 *)&source->color)[3];
     if (fixedPoint == 0) {
         data->vertices[0].x = (source->left << 4) + 0x7000;
         data->vertices[0].y = (source->top << 3) + 0x7900;
@@ -361,3 +346,4 @@ void func_0018F840(EffSolidRectParams *source) {
     sdfAppendPacket(list, drawPacket);
     D_003803C8.draw(&D_003803C8, list);
 }
+

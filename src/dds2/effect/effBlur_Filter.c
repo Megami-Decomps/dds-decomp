@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 
 extern s32 effGetResourceFirstWord(s32 index);
 extern u32 effMiscRand(void *);
@@ -6,20 +7,7 @@ extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
 
 
-/* Draw payload shared by both slot families: two words, two floats,
- * the centre position and four rectangle edges. */
-typedef struct {
-    u32 color;  /* 0x00 packed color; alpha is updated before drawing */
-    s32 unk4;   /* 0x04 */
-    f32 unk8;   /* 0x08 */
-    f32 unkC;   /* 0x0C */
-    s32 x;      /* 0x10 */
-    s32 y;      /* 0x14 */
-    s32 left;   /* 0x18 */
-    s32 top;    /* 0x1C */
-    s32 right;  /* 0x20 */
-    s32 bottom; /* 0x24 */
-} EffBlurQuad; /* 0x28 */
+
 
 /* Random-position variant parameters copied into its work (0x2C). */
 typedef struct {
@@ -91,7 +79,6 @@ typedef struct {
 } EffBlurRect;
 
 extern u32 func_001200E0(void);
-extern void effDrawBlurSource();
 
 /* Update pixel-coordinate edges and draw only when the eligibility check allows. */
 void effDrawBlurPixelRectWithResource(EffBlurRect *rect) {
@@ -149,9 +136,9 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     s32 centerY;
     slot->delay = effMiscRand(D_003AA868) % (work->params.delaySpread + 1);
     slot->angle = -3.14159265f;
-    quad->unk8 = work->params.unk14;
+    quad->angle = work->params.unk14;
     quad->color = work->params.color;
-    quad->unk4 = work->params.unk10;
+    quad->blendControl = work->params.unk10;
     spread = work->params.positionSpread;
     halfSize = work->params.size;
     quad->x = work->params.x +
@@ -216,8 +203,8 @@ void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     slot->phase = 0.0f;
     slot->angle = 0.0f;
     quad->color = work->params.color;
-    quad->unk4 = work->params.unk10;
-    quad->unk8 = work->params.unk14;
+    quad->blendControl = work->params.unk10;
+    quad->angle = work->params.unk14;
     quad->x = work->params.x;
     quad->y = work->params.y;
 }
@@ -225,4 +212,5 @@ void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
 INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414620);
 
 INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414628);
+
 

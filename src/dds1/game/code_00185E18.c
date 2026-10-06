@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 
@@ -91,19 +92,7 @@ void effSetPairedResourceColor(PairedEffectResources *pair, u32 colorWithAlpha) 
     pair->colorWithAlpha = colorWithAlpha;
 }
 
-/* Packet builders read RGBA, a blend control word, and a rotated/scaled rectangle. */
-typedef struct {
-    u8 color[4];      /* 0x00: individual RGBA channels */
-    s32 blendControl; /* 0x04: forwarded to GS ALPHA packet setup */
-    f32 rotation;     /* 0x08: sine/cosine input */
-    f32 scale;        /* 0x0C: applied about the rectangle center */
-    s32 centerX;      /* 0x10 */
-    s32 centerY;      /* 0x14 */
-    s32 left;         /* 0x18 */
-    s32 top;          /* 0x1C */
-    s32 right;        /* 0x20 */
-    s32 bottom;       /* 0x24 */
-} BlurSource;
+typedef EffBlurQuad BlurSource;
 
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 extern s32 billGetWorkTransformMatrix(s32 packet);
@@ -161,10 +150,10 @@ void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
 
     /* Scratch coordinates first normalize the center, then rotate each sample. */
 
-    quad->color[0] = source->color[0];
-    quad->color[1] = source->color[1];
-    quad->color[2] = source->color[2];
-    quad->color[3] = source->color[3];
+    quad->color[0] = ((u8 *)&source->color)[0];
+    quad->color[1] = ((u8 *)&source->color)[1];
+    quad->color[2] = ((u8 *)&source->color)[2];
+    quad->color[3] = ((u8 *)&source->color)[3];
     if (fixedPointCoordinates == 0) {
         quad->vertices[0].x = (source->left << 4) + 0x7000;
         quad->vertices[0].y = (source->top << 3) + 0x7900;
@@ -209,19 +198,19 @@ void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
     quad->vertices[3].depth = 0;
     quad->vertices[3].xyzControl = 0;
     if (fixedPointCoordinates == 0) {
-        u = source->centerX + 256.0f;
-        v = source->centerY + 224.0f;
+        u = source->x + 256.0f;
+        v = source->y + 224.0f;
         centerX = u * (1.0f / 512.0f);
         centerY = v * (1.0f / 448.0f);
     } else {
-        u = source->centerX + 4096.0f;
-        v = source->centerY + 1792.0f;
+        u = source->x + 4096.0f;
+        v = source->y + 1792.0f;
         centerX = u * (1.0f / 8192.0f);
         centerY = v * (1.0f / 3584.0f);
     }
-    scale = source->scale;
-    cosine = sdfEvaluateCosineViaSinePhaseShift(source->rotation);
-    sine = sdfSinPoly(source->rotation);
+    scale = source->displacement;
+    cosine = sdfEvaluateCosineViaSinePhaseShift(source->angle);
+    sine = sdfSinPoly(source->angle);
     scaledU = (quad->vertices[0].s - centerX) * scale;
     scaledV = (quad->vertices[0].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
@@ -254,7 +243,7 @@ void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
     quad->color[0] = 0x80;
     quad->color[1] = 0x80;
     quad->color[2] = 0x80;
-    quad->color[3] = source->color[3];
+    quad->color[3] = ((u8 *)&source->color)[3];
     if (fixedPointCoordinates == 0) {
         quad->vertices[0].x = (source->left << 4) + 0x7000;
         quad->vertices[0].y = (source->top << 3) + 0x7900;
@@ -533,8 +522,8 @@ void effDrawBlurPixelRectWithResource(BlurRect *rect) {
     s32 centerX, centerY, halfExtent;
 
     if (func_0011E278(rect) == 0) {
-        centerX = rect->source.centerX + 0x100;
-        centerY = rect->source.centerY + 0xE0;
+        centerX = rect->source.x + 0x100;
+        centerY = rect->source.y + 0xE0;
         halfExtent = rect->extent;
         rect->source.left = centerX - halfExtent;
         rect->source.top = centerY - halfExtent;
@@ -549,8 +538,8 @@ void effDrawBlurFixedPointRectangle(BlurRect *rect) {
     s32 centerX, centerY, halfExtent;
 
     if (func_0011E278(rect) == 0) {
-        centerX = rect->source.centerX + 0x1000;
-        centerY = (rect->source.centerY + 0xE00) >> 1;
+        centerX = rect->source.x + 0x1000;
+        centerY = (rect->source.y + 0xE00) >> 1;
         halfExtent = rect->extent;
         rect->source.left = centerX - halfExtent;
         rect->source.right = centerX + halfExtent;
