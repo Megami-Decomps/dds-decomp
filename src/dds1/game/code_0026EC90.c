@@ -1,11 +1,12 @@
 #include "common.h"
 #include "mnu.h"
+#include "sdf.h"
 
 extern u8 D_0037B8BC[];
 
 extern u8 mnuMovieDrawContext[];
 
-extern u8 D_003253C8[];
+extern SdfPoolNode D_003253C8;
 
 extern char D_003B1140[]; /* "mnuStaffImageProc" */
 
@@ -35,6 +36,7 @@ extern void mnuLoadMovieRollSprite(void);
 extern void func_0026E8D8(void);
 extern void func_002ECA40(s32);
 extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
+extern void func_002ECCF8(void *, SdfPoolNode *);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026EC90);
 
@@ -189,7 +191,7 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(void) {
-    func_002ECCF8(mnuMovieDrawContext, D_003253C8);
+    func_002ECCF8(mnuMovieDrawContext, &D_003253C8);
     return 0;
 }
 

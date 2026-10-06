@@ -25,10 +25,6 @@ extern BillDispatch D_003AA998[];
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00157EA0);
 
-typedef struct BillDeferredDescriptor {
-    u8 pad00[0x10];
-    void (*dispatch)(void *descriptor, u32 value);
-} BillDeferredDescriptor;
 
 typedef struct BillManagerNode BillManagerNode;
 
@@ -47,7 +43,7 @@ typedef struct BillPacketWork {
 } BillPacketWork;
 
 extern BillManagerNode *D_00438EFC;
-extern BillDeferredDescriptor *D_003AA960[5];
+extern SdfPoolNode *D_003AA960[5];
 extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 extern u32 sdfBuildCompactVertexVifPacket(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
 
@@ -72,7 +68,7 @@ void func_00158340(void) {
                 SdfListHead *value = node->pendingLists[i];
 
                 if (value != NULL) {
-                    D_003AA960[i]->dispatch(D_003AA960[i], (u32)value);
+                    D_003AA960[i]->append((SdfListHead *)D_003AA960[i], value);
                     node->pendingLists[i] = 0;
                 }
             }

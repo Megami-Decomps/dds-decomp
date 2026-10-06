@@ -43,21 +43,17 @@ extern EffResourceRenderState D_00452080;
 void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfConsAppendAssetPacket(void *, u32, s32);
-extern void sdfConsAppendVuPacket(void *, s32);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
+extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfAppendPacket(void *, void *);
-extern void *func_00167A10(EffResourceRenderState *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern s32 func_00167A10(EffResourceRenderState *);
 extern f32 D_003B1540[][4];
 extern u32 D_003B1600[];
 
-typedef struct EffResourceDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct EffResourceDrawSurface *, void *);
-} EffResourceDrawSurface;
-extern EffResourceDrawSurface *D_003B1630[];
+extern SdfPoolNode *D_003B1630[];
 
 /* Create an effect resource work with index entries, its entry list inline at +0x74. */
 EffResourceWork *effCreateResourceEntryWork(s32 index) {
@@ -104,15 +100,15 @@ void effReleaseAttachedResources(EffResourceWork *effect) {
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
 void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     f32 matrix[16] __attribute__((aligned(16)));
-    void *packet;
+    SdfListHead *packet;
     EffResourceEntry *entry;
     u32 i;
     u32 remaining;
     u32 triangleSize;
 
-    packet = sdfAllocPacketAligned(0x20);
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
-    sdfConsAppendAssetPacket(packet, work->graphics6C, 0);
+    sdfConsAppendAssetPacket((s32)packet, (void *)work->graphics6C, 0);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale[0];
     matrix[5] = work->scale[1];
@@ -129,7 +125,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         matrix[13] = entry->position[1];
         matrix[14] = entry->position[2];
         VU0_LOAD_MATRIX(matrix);
-        sdfConsAppendVuPacket(packet, 0);
+        sdfConsAppendVuPacket((s32)packet, 0);
         if (work->resource68 == 0) {
             remaining = 12;
             D_00452080.colors = D_003B1600;
@@ -162,7 +158,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
             sdfAppendPacket(packet, func_00167A10(&D_00452080));
         }
     }
-    D_003B1630[work->mode]->submit(D_003B1630[work->mode], packet);
+    D_003B1630[work->mode]->append((SdfListHead *)D_003B1630[work->mode], packet);
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);

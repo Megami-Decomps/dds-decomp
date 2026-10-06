@@ -1171,22 +1171,18 @@ typedef struct EffPacketParams {
     f32 depth;
 } EffPacketParams;
 
-typedef struct EffDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct EffDrawSurface *, void *);
-} EffDrawSurface;
 
 extern EffPacketParams D_003D6580[];
 extern u32 D_00354A70[];
 extern u32 D_00354AC0[];
-extern EffDrawSurface *D_00354B80[];
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
-extern void sdfConsAppendVuPacket(void *, s32);
-extern void sdfConsAppendAssetPacket(void *, u32, s32);
+extern SdfPoolNode *D_00354B80[];
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
+extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern void func_002DA438(u32, u32);
-extern void *func_0015FE20(EffPacketParams *);
+extern s32 func_0015FE20(EffPacketParams *);
 
 /* Return the trailing control block after zeroing two record arrays.
  * Signed group arithmetic and allocation sizes are deliberately not validated here. */
@@ -1235,9 +1231,9 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *work)
 /* Submit six-vertex scatter groups using the optional shared texture owner. */
 void effPcpScatterDrawPool(PcpScatterPool *pool) {
     f32 matrix[16];
-    void *packet = sdfAllocPacketAligned(0x20);
+    SdfListHead *packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 remainingVertices;
-    EffDrawSurface *surface;
+    SdfPoolNode *surface;
 
     sdfInitPacketList(packet);
     EE_MMI_UNIT_MATRIX(matrix);
@@ -1245,14 +1241,14 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     matrix[13] = pool->origin[1];
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket(packet, 0);
+    sdfConsAppendVuPacket((s32)packet, 0);
     if (pool->sharedResource != NULL) {
         func_002DA438(pool->drawAsset, pool->sharedResource->textureHandle);
         D_003D6580->texcoords = D_00354AC0;
     } else {
         D_003D6580->texcoords = NULL;
     }
-    sdfConsAppendAssetPacket(packet, pool->drawAsset, 0);
+    sdfConsAppendAssetPacket((s32)packet, (void *)pool->drawAsset, 0);
     remainingVertices = pool->secondWordCount;
     D_003D6580->colors = (u32 *)pool->auxRecordBase;
     D_003D6580->positions = (u128 *)pool->recordBase;
@@ -1272,7 +1268,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
         sdfAppendPacket(packet, func_0015FE20(D_003D6580));
     }
     surface = D_00354B80[pool->unk10];
-    surface->submit(surface, packet);
+    surface->append((SdfListHead *)surface, packet);
 }
 
 /* Acquire a new texture owner and store it in the pool. */

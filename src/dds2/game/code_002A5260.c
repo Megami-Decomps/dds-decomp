@@ -59,7 +59,7 @@ extern char D_00429968[]; /* "staffProc" */
 
 extern u8 mnuMovieDrawContext[];
 
-extern u8 D_003803C8[];
+extern SdfPoolNode D_003803C8;
 
 extern KwlnTask *mnuMovieDrawTask;
 
@@ -84,6 +84,8 @@ extern void func_002A50E8(s32, s32, u8);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 extern void *memset(void *, s32, u32);
+extern void func_00345BA0(void *, SdfPoolNode *);
+extern void func_002A7B28(void *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
@@ -904,7 +906,7 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(void) {
-    func_00345BA0(mnuMovieDrawContext, D_003803C8);
+    func_00345BA0(mnuMovieDrawContext, &D_003803C8);
     return 0;
 }
 
@@ -942,7 +944,7 @@ s32 mnuMovieDrawNextProc(s32 procedure) {
         func_0035B6E0(D_0042A348);
         return -1;
     }
-    func_002A7B28(mnuMovieDrawContext, D_003803C8);
+    func_002A7B28(mnuMovieDrawContext, &D_003803C8);
     D_00437AD0++;
     if (D_00437AD0 == 0x1E) {
         func_0035B6E0(D_0042A380, procedure);
