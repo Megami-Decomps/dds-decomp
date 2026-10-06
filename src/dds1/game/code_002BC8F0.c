@@ -465,13 +465,6 @@ typedef struct EffMappedHeader {
     u8 pad_18[8];
 } EffMappedHeader;    // 0x20
 
-typedef struct EffMappedRecord {
-    u8 pad00[0x14];
-    u32 category;     // 0x14, dispatches the status-size calculation
-    u32 statusBytes;  // 0x18, expanded to the required capacity when loaded
-    u8 pad1C[4];
-    u8 *status;       // 0x20
-} EffMappedRecord;    // 0x24
 
 /* Copy packed headers and status data into live records, zero-filling extra status capacity.
  * The required-size calculation uses the first record, not the current row.
@@ -511,11 +504,6 @@ u32 effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
     return allocation;
 }
 
-typedef struct EffMappedResource {
-    s32 count;                // 0x00
-    u32 allocation;           // 0x04, owns the record array
-    EffMappedRecord *records; // 0x08, retained address of that allocation
-} EffMappedResource;          // 0x0C
 
 /* Build the live batch header from the serialized count and owned record array. */
 u32 effCreateMappedResource(u32 sourceAddress) {

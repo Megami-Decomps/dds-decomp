@@ -29,6 +29,24 @@ typedef struct EffectList {
 typedef char EffectListNode_size_must_be_0x18[(sizeof(EffectListNode) == 0x18) ? 1 : -1];
 typedef char EffectList_size_must_be_0x14[(sizeof(EffectList) == 0x14) ? 1 : -1];
 
+/* Each mapped record owns status storage expanded while its resource is loaded. */
+typedef struct EffMappedRecord {
+    u8 pad00[0x14];
+    u32 category;
+    u32 statusBytes;
+    u8 pad1C[4];
+    u8 *status;
+} EffMappedRecord;
+
+typedef struct EffMappedResource {
+    s32 count;
+    u32 allocation;
+    EffMappedRecord *records;
+} EffMappedResource;
+
+typedef char EffMappedRecord_size_must_be_0x24[(sizeof(EffMappedRecord) == 0x24) ? 1 : -1];
+typedef char EffMappedResource_size_must_be_0x0C[(sizeof(EffMappedResource) == 0x0C) ? 1 : -1];
+
 void effCopyVectorToNodeInstance(struct EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(struct EffNode *node, const void *matrix);
 
