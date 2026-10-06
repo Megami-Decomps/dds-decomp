@@ -55,28 +55,8 @@ void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
     effResourceQuadDraw(&work->params.draw, work->sourceHandle, 1);
 }
 
-typedef struct EffTrackPolyModel EffTrackPolyModel;
 typedef struct EffTrackPolyData EffTrackPolyData;
 
-/* Same parameter/owner layout as effect/effModelTrackPoly. */
-typedef struct {
-    EffTrackPolyModel *model;
-    s32 idA;
-    s32 idB;
-    f32 unk0C;
-    f32 unk10;
-    s32 sampleInterval;
-    s32 historyLength;
-    u32 unk1C;
-    u32 kind;
-    u32 gradientColors[4];
-} EffTrackPolyParams; /* 0x34 */
-
-typedef struct {
-    EffTrackPolyParams params;
-    u32 updateCount;
-    EffTrackPolyData *data;
-} EffTrackPolyWork; /* 0x3C */
 
 extern EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 step);
 extern void effTrackPolyFillGradientColors(EffTrackPolyData *data, u32 *colors);

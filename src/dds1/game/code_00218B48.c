@@ -845,44 +845,27 @@ typedef struct MdlEffectRec {
     s32 value24;     /* 0x24 */
 } MdlEffectRec;
 
-typedef struct MdlEffectParams {
-    MdlCtx *owner; /* 0x00 */
-    s32 effectId;            /* 0x04 */
-    s32 param0C;             /* 0x08 */
-    f32 scaleX;              /* 0x0C */
-    f32 scaleY;              /* 0x10 */
-    s32 value14;             /* 0x14 */
-    s32 value16;             /* 0x18 */
-    s32 mode;                /* 0x1C */
-    s32 value17;             /* 0x20 */
-    s32 value18;             /* 0x24 */
-    s32 value1C;             /* 0x28 */
-    s32 value20;             /* 0x2C */
-    s32 value24;             /* 0x30 */
-} MdlEffectParams;
 
-extern s32 effTrackPolyCreateWork(MdlEffectParams *params);
-
-/* Convert the effect record to native creation parameters and retain the resulting handle in a list item. */
+/* Convert the effect record to native track parameters and retain its work pointer. */
 void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 subtype) {
-    MdlEffectParams effectParams;
+    EffTrackPolyParams effectParams;
     MdlResourceItem *resourceItem;
 
-    effectParams.owner = owner;
-    effectParams.effectId = effectRecord->effectId;
-    effectParams.param0C = effectRecord->param0C;
-    effectParams.scaleX = effectRecord->scaleX;
-    effectParams.scaleY = effectRecord->scaleY;
-    effectParams.value14 = effectRecord->value14;
-    effectParams.value16 = effectRecord->value16;
-    effectParams.mode = 3;
-    effectParams.value17 = effectRecord->value17;
-    effectParams.value18 = effectRecord->value18;
-    effectParams.value1C = effectRecord->value1C;
-    effectParams.value20 = effectRecord->value20;
-    effectParams.value24 = effectRecord->value24;
+    effectParams.model = owner;
+    effectParams.idA = effectRecord->effectId;
+    effectParams.idB = effectRecord->param0C;
+    effectParams.unk0C = effectRecord->scaleX;
+    effectParams.unk10 = effectRecord->scaleY;
+    effectParams.sampleInterval = effectRecord->value14;
+    effectParams.historyLength = effectRecord->value16;
+    effectParams.unk1C = 3;
+    effectParams.kind = effectRecord->value17;
+    effectParams.gradientColors[0] = effectRecord->value18;
+    effectParams.gradientColors[1] = effectRecord->value1C;
+    effectParams.gradientColors[2] = effectRecord->value20;
+    effectParams.gradientColors[3] = effectRecord->value24;
     resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_TRACK_POLY, subtype);
-    resourceItem->payload.part.handle = effTrackPolyCreateWork(&effectParams);
+    resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
 /* Kind-four model record: two selectors and two 32-bit stream parameters. */
@@ -1002,7 +985,7 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
         effDestroyNode(item->payload.part.handle);
         break;
     case MDL_RESOURCE_TRACK_POLY:
-        effTrackPolyRelease(item->payload.part.handle);
+        effTrackPolyRelease(item->payload.part.track);
         break;
     }
     sdfReleaseChipBlock((void *)item);
@@ -1062,7 +1045,6 @@ extern void billInvokeCallback(s32 handle);
 
 extern void effUpdateNode(s32 handle);
 
-extern void effTrackPolyUpdate(s32 handle);
 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
 void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord) {
@@ -1084,7 +1066,7 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
         effUpdateNode(resourceHandle);
         break;
     case 2:
-        effTrackPolyUpdate(anchorRecord->payload.part.handle);
+        effTrackPolyUpdate(anchorRecord->payload.part.track);
         break;
     case 3:
         mdlCondInitEntry((s32)anchorRecord);

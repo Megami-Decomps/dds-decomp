@@ -85,6 +85,36 @@ void func_001891C0(EffMagatuhiValueWork *work, s32 index);
 void func_00189818(EffMagatuhiValueWork *work, s32 index, void *vector);
 #endif
 
+struct MdlCtx;
+struct EffTrackPolyData;
+
+/* Thirteen copied words, followed by an update counter and owned history. */
+typedef struct {
+    struct MdlCtx *model;
+    s32 idA;
+    s32 idB;
+    f32 unk0C;
+    f32 unk10;
+    u32 sampleInterval;
+    s32 historyLength;
+    u32 unk1C;
+    u32 kind;
+    u32 gradientColors[4];
+} EffTrackPolyParams;
+
+typedef struct EffTrackPolyWork {
+    EffTrackPolyParams params;
+    u32 updateCount;
+    struct EffTrackPolyData *data;
+} EffTrackPolyWork;
+
+typedef char EffTrackPolyParams_size_must_be_0x34[(sizeof(EffTrackPolyParams) == 0x34) ? 1 : -1];
+typedef char EffTrackPolyWork_size_must_be_0x3C[(sizeof(EffTrackPolyWork) == 0x3C) ? 1 : -1];
+
+EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src);
+void effTrackPolyRelease(EffTrackPolyWork *work);
+void effTrackPolyUpdate(EffTrackPolyWork *work);
+
 /* Each mapped record owns status storage expanded while its resource is loaded. */
 typedef struct EffMappedRecord {
     u8 pad00[0x14];
