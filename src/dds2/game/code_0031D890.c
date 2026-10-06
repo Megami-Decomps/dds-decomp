@@ -35,7 +35,6 @@ typedef struct CompactSlotPool {
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *allocation);
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
-extern char D_0042DBA0[];
 
 typedef char WideSlotLayoutAssert[
     (sizeof(WideSlot) == 0x14 &&
@@ -208,7 +207,7 @@ CompactSlotPool *func_0031DEB8(u32 count) {
     pool->allocation = allocation;
     pool->count = count;
     pool->slots = (CompactSlot *)(pool + 1);
-    evtPrintDeveloperConsoleMessage(D_0042DBA0, size);
+    evtPrintDeveloperConsoleMessage("Sprite HitEffect Work Crate Size[%d]\n", size);
     return pool;
 }
 
@@ -381,4 +380,3 @@ extern u8 D_0040B088[];
 u8 mnuGetIndexedFadeTexture(s32 index) {
     return D_0040B088[index * 12];
 }
-

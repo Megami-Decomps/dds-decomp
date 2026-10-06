@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_inf.h"
 #include "sdf_primitive.h"
 #include "dds3obj.h"
 #include "fld.h"
@@ -956,7 +957,7 @@ typedef struct FldPackedArchive {
 
 extern void func_002C81D0(u32);
 
-extern void fldCopyInfoTable(u32);
+extern void fldCopyInfoTable(FldInfTable *);
 
 extern void fldSetNpcPalette(u32);
 
@@ -985,7 +986,7 @@ void fldLoadAreaPackedResources(void) {
              entry = entry->next) {
             switch (entry->kind) {
             case 1:
-                fldCopyInfoTable(entry->payload);
+                fldCopyInfoTable((FldInfTable *)entry->payload);
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 2:

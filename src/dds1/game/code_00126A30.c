@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fld_inf.h"
+extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
 #include "evt_unit.h"
 #include "fpu.h"
@@ -862,7 +864,7 @@ extern void func_00288C50(u32);
 extern void fldSetNpcPalette();
 extern void fldUploadSkyBuffer();
 extern void fldCopyActorWaypointTable();
-extern void fldCopyInfoTable();
+extern void fldCopyInfoTable(const void *);
 extern u32 sdfMemoryGetBlockSize(u32);
 extern u32 sdfMemoryGetBlockAddress(u32);
 extern void fldSetSceneRecordChunk(u32, u32);
@@ -895,7 +897,7 @@ void fldLoadAreaPackedResources(void) {
              entry = entry->next) {
             switch (entry->kind) {
             case 1:
-                fldCopyInfoTable(entry->payload);
+                fldCopyInfoTable((const void *)entry->payload);
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 2:
@@ -4189,11 +4191,103 @@ s32 fldGetCurrentSceneSelectionId(void) {
     return D_003C9518[slot * 160];
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C600);
+typedef struct FldAreaState {
+    u8 pad0[0x14];
+    s32 floor;
+    u8 pad18[0xEC];
+    s16 unk104;
+} FldAreaState;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C7F8);
+extern s32 D_003BAE38;
+extern const char D_00332DF0[];
+extern s32 strcmp(const char *, const char *);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C9E0);
+const char *func_0013C600(const char *eventName) {
+    s32 i;
+    s32 j;
+    if (eventName == 0) return 0;
+    for (i = 0; i < 8; i++) {
+        if (D_00332E30.packs[i].setIndex != 0) {
+            for (j = 0; j < 5; j++) {
+                if (D_00332E30.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                    strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
+                    s32 candidateSet = D_00332E30.packs[i].setIndex;
+                    if (D_00332E30.sets[D_003BAE38].kindArea.packed == 1) {
+                        D_003BAE38 = candidateSet;
+                        return D_00332DF0;
+                    }
+                }
+            }
+        }
+    }
+    for (i = 0; i < 40; i++) {
+        if (D_00332E30.sets[i].kindArea.packed == 1 &&
+            D_00332E30.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
+            D_003BAE38 = i;
+            return D_00332DF0;
+        }
+    }
+    return 0;
+}
+
+
+const char *func_0013C7F8(const char *eventName) {
+    s32 i;
+    s32 j;
+    if (eventName == 0) return 0;
+    for (i = 0; i < 8; i++) {
+        if (D_00332E30.packs[i].setIndex != 0) {
+            for (j = 0; j < 5; j++) {
+                if (D_00332E30.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                    strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
+                    s32 candidateSet = D_00332E30.packs[i].setIndex;
+                    if (D_00332E30.sets[D_003BAE38].kindArea.packed == 0) {
+                        D_003BAE38 = candidateSet;
+                        return D_00332DF0;
+                    }
+                }
+            }
+        }
+    }
+    for (i = 0; i < 40; i++) {
+        if (D_00332E30.sets[i].kindArea.packed == 0 &&
+            D_00332E30.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
+            D_003BAE38 = i;
+            return D_00332DF0;
+        }
+    }
+    return 0;
+}
+
+
+const char *func_0013C9E0(const char *eventName) {
+    s32 i;
+    s32 j;
+    if (eventName == 0) return 0;
+    for (i = 0; i < 8; i++) {
+        if (D_00332E30.packs[i].setIndex != 0) {
+            for (j = 0; j < 5; j++) {
+                if (D_00332E30.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                    strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
+                    D_003BAE38 = D_00332E30.packs[i].setIndex;
+                    return D_00332DF0;
+                }
+            }
+        }
+    }
+    for (i = 0; i < 40; i++) {
+        if ((u16)D_00332E30.sets[i].kindArea.packed < 2 &&
+            D_00332E30.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
+            D_003BAE38 = i;
+            return D_00332DF0;
+        }
+    }
+    return 0;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0150);
 
@@ -4207,14 +4301,14 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
-extern u8 D_00332E30[];
+
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
-extern u8 D_00332E30[];
+
 extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 void fldLoadInfoTable(s32 field) {
     char path[64];
@@ -4224,13 +4318,13 @@ void fldLoadInfoTable(s32 field) {
         fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, D_003A01F8, directory, field);
         command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, D_00332E30, 0x3B80);
+        sdfDevQueueReadAndWait(command, &D_00332E30, sizeof(D_00332E30));
         sdfDevWaitThenReleaseCommandState(command);
     }
 }
 
 void fldCopyInfoTable(const void *source) {
-    memcpy(D_00332E30, source, 0x3B80);
+    memcpy(&D_00332E30, source, sizeof(D_00332E30));
 }
 
 extern s32 D_003BAE40;
@@ -4239,12 +4333,6 @@ extern u8 *fldFindActorEntryByName(const char *);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D650);
 
 extern s32 mdlFlagTest(s32);
-typedef struct FldAreaState {
-    u8 pad0[0x14];
-    s32 floor;
-    u8 pad18[0xEC];
-    s16 unk104;
-} FldAreaState;
 extern u8 D_003369B0[];
 extern u8 D_003369C0[];
 extern u8 D_003369D0[];

@@ -52,6 +52,7 @@ typedef struct {
 
 extern void *effGetHandlerArg(void *arg);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 /* Four control points and their jitter scales; copy xyz but preserve each w. */
 typedef struct {
@@ -857,10 +858,12 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
 /* Orbit parameters have an independent height step (0xE0). */
 typedef struct {
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u8 pad10[4];
+    u8 respawn;
+    u8 pad11[3];
     s32 lifetimeFrames;
     s32 delaySpread;
-    u8 pad1C[8];
+    s32 fadeIn;
+    s32 fadeOut;
     f32 angleStep;
     f32 angleJitter;
     f32 heightStep;
