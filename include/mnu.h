@@ -328,6 +328,69 @@ typedef char MenuGradientFade_size_must_be_0x0C[(sizeof(MenuGradientFade) == 0x0
 
 #ifdef VERSION_DDS2
 struct EffectSlotSet;
+struct EffMappedResource;
+
+/* Per-list storage allocated and cleared as 0x14 bytes by the terminal window builder. */
+typedef struct MenuTerminalWindowState {
+    u8 pad00[0xC];
+    u16 unk0C;
+    u16 unk0E;
+    u16 unk10;
+    u16 selectedSlot;
+} MenuTerminalWindowState;
+
+typedef char MenuTerminalWindowState_size_must_be_0x14[(sizeof(MenuTerminalWindowState) == 0x14) ? 1 : -1];
+
+/* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
+typedef struct MenuTerminalContext {
+    s32 resourceHandle;
+    u8 pad04[4];
+    s32 type;
+    u8 transitionWork[0x4C];
+    s32 popupState;
+    u8 pad5C[4];
+    s32 messageResources[2];
+    struct EffectSlotSet *effectSlots[4];
+    s32 state;
+    MenuWindowContainer *ownedWindows[1];
+    MenuWindowContainer *window;
+    struct EffMappedResource *objects[2];
+    s32 shopRow;
+    s32 multiplier;
+    u8 pad94[8];
+    s32 availableCount;
+    u16 unkA0;
+    u16 unkA2;
+    u16 unkA4;
+    u16 selectedSlot;
+    u32 rewardCursor;
+    u32 options;
+    s32 previousValue;
+    s32 elapsedFrames;
+    s32 retryFrames;
+    u8 padBC[4];
+    u32 phase;
+    u8 padC4[2];
+    s8 pulseFrame;
+    s8 unkC7;
+    u8 padC8[5];
+    s8 unkCD;
+    u8 padCE[0x12];
+    s32 prepared;
+    s32 delayFrames;
+    u8 panelWork[2][0x94];
+    MenuEffectResources effectResources;
+    u8 pad270[0x108];
+    u32 windowResource;
+    MenuGradientFade gradientFade;
+    u8 rewardGranted;
+    u8 pad389[3];
+} MenuTerminalContext;
+
+typedef char MenuTerminalContext_size_must_be_0x38C[(sizeof(MenuTerminalContext) == 0x38C) ? 1 : -1];
+
+extern MenuTerminalContext *D_00438FC8;
+
 
 typedef struct MenuIconSprites {
     u32 handle;

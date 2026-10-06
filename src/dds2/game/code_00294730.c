@@ -14,48 +14,8 @@ extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
 
 
 
-/* The camp constructor clears 0x38C bytes, including both panel work areas. */
-typedef struct CampMenuContext {
-    s32 resourceHandle;
-    u8 pad04[4];
-    s32 type;
-    u8 transitionWork[0x4C];
-    s32 popupState;
-    u8 pad5C[4];
-    u8 resourcePair[4];
-    s32 messageHandle;
-    s32 effectHandles[4];
-    s32 state;
-    u8 pad7C[4];
-    MenuWindowContainer *window;
-    void *objects[2];
-    u8 pad8C[4];
-    s32 multiplier;
-    u8 pad94[8];
-    s32 availableCount;
-    u16 unkA0;
-    u16 unkA2;
-    u16 unkA4;
-    u8 padA6[2];
-    u32 rewardCursor;
-    u32 options;
-    s32 previousValue;
-    s32 elapsedFrames;
-    s32 retryFrames;
-    u8 padBC[4];
-    u32 phase;
-    u8 padC4[2];
-    s8 pulseFrame;
-    s8 unkC7;
-    u8 padC8[0x18];
-    s32 prepared;
-    s32 delayFrames;
-    u8 panelWork[2][0x94];
-    u8 pad210[0x16C];
-    u8 gradientFade[0x10];
-} CampMenuContext;
 
-u32 evtSelectGraphicSlotBySpriteType(CampMenuContext *object) {
+u32 evtSelectGraphicSlotBySpriteType(MenuTerminalContext *object) {
     u32 result;
 
     result = 0;
@@ -79,40 +39,33 @@ enum {
 };
 
 extern MenuIconPlacement D_003D03F0[];
-typedef struct MenuDrawResources {
-    u8 pad00[0x68];
-    s32 textures[0];
-} MenuDrawResources;
-
-extern MenuDrawResources *D_00438FC8;
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
-struct BlendDispatchWork;
-extern void func_00294680(struct BlendDispatchWork *, s32, s32);
+extern void func_00294680(MenuTerminalContext *, s32, s32);
 
 
 
 
 
-void func_00294B40(s32 x, s32 y, s32 depth, CampMenuContext *object,
+void func_00294B40(s32 x, s32 y, s32 depth, MenuTerminalContext *object,
                    s32 scale, s32 option) {
     u32 index;
 
     func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
-                  0, scale, 0, D_00438FC8->textures[D_003D03F0[32][MENU_ICON_TEXTURE]],
+                  0, scale, 0, (s32)D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], option);
     func_0026BEC0(0, 0, 0, scale, object->panelWork[0], option);
     func_0026BEC0(0, 0xCF8, 0, scale, object->panelWork[1], option);
-    func_00294680((struct BlendDispatchWork *)object, scale, option);
+    func_00294680(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
     func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
-                  0, scale, 0, D_00438FC8->textures[D_003D03F0[index][MENU_ICON_TEXTURE]],
+                  0, scale, 0, (s32)D_00438FC8->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
                   D_003D03F0[index][MENU_ICON_FRAME], option);
 }
 
 extern f32 sdfSinPoly(f32);
 
-void mnuDrawPulsingMenuIcon(CampMenuContext *object, s32 amplitude, s32 drawArg) {
-    s32 texture = D_00438FC8->textures[0];
+void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 drawArg) {
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
     s32 alpha;
 
     alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
@@ -175,7 +128,7 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
 void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
     MenuWindowContainer *object = (MenuWindowContainer *)objectData;
     struct MenuList *inner = object->list;
-    s32 texture = D_00438FC8->textures[0];
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
     s32 *delay = inner->context;
     s32 mode = delay[1];
     s32 flags = inner->flags;
@@ -208,8 +161,8 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_00296298);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296430);
 
-void func_002967A0(s32 x, s32 y, s32 z, CampMenuContext *panel, s32 option) {
-    s32 texture = D_00438FC8->textures[0];
+void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
@@ -225,8 +178,8 @@ void func_002967A0(s32 x, s32 y, s32 z, CampMenuContext *panel, s32 option) {
     }
 }
 
-void func_002968B8(s32 x, s32 y, s32 z, CampMenuContext *panel, s32 scale, s32 option) {
-    s32 texture = D_00438FC8->textures[0];
+void func_002968B8(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s32 option) {
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
@@ -249,9 +202,9 @@ extern void func_0019D550(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 extern char D_00437980[];
 
-void func_002969D8(s32 x, s32 y, s32 depth, CampMenuContext *panel, s32 option) {
+void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
-    s32 texture = D_00438FC8->textures[0];
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
     s32 glyph;
@@ -274,7 +227,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
     func_00306CD0(
         x + D_003D03F0[26][MENU_ICON_X] * 16,
         y + D_003D03F0[26][MENU_ICON_Y] * 8,
-        z, scale, 0, D_00438FC8->textures[0],
+        z, scale, 0, (s32)D_00438FC8->effectSlots[0],
         D_003D03F0[26][MENU_ICON_FRAME], option
     );
 }
@@ -290,7 +243,7 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     func_00306CD0(
         x + D_003D03F0[25][MENU_ICON_X] * 16,
         y + D_003D03F0[25][MENU_ICON_Y] * 8,
-        z, scale, 0, D_00438FC8->textures[0],
+        z, scale, 0, (s32)D_00438FC8->effectSlots[0],
         D_003D03F0[25][MENU_ICON_FRAME], option
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
@@ -301,9 +254,9 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-void func_00296C58(s32 x, s32 y, s32 depth, CampMenuContext *panel, s32 option) {
+void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
-    s32 texture = D_00438FC8->textures[0];
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
     s32 glyph;
@@ -323,7 +276,7 @@ void func_00296C58(s32 x, s32 y, s32 depth, CampMenuContext *panel, s32 option) 
 }
 
 
-void func_00296D90(CampMenuContext *state, s32 style) {
+void func_00296D90(MenuTerminalContext *state, s32 style) {
     char text[16];
 
     if (datGameState->header.currency != state->previousValue) {

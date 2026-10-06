@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "dat_state.h"
+#include "mnu_list.h"
 
 extern s32 mdlFlagTest(u32);
 
@@ -32,11 +33,11 @@ extern char (*D_00435E5C)[25];
 extern char D_00437850[];
 extern s32 func_00265038();
 extern s32 evtGetCapturedWindowPanelValue();
-extern void mnuShopReleaseWindowSprites();
+extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);
 extern void func_00260020();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuAdvanceListCursorDefault();
-extern void mnuShopLoadMessageResource();
+extern void mnuShopLoadMessageResource(MenuTerminalContext *);
 extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess();
 extern void kwlnFadeOutStart();
@@ -59,45 +60,9 @@ extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 struct KwlnTask;
 
-/* Selection chain used by the event UI. Only accessed offsets are described. */
-typedef struct EvtSelectionNode {
-    u8 pad00[0x58];
-    struct EvtSelectionNode *next; /* 0x58 */
-    u8 pad5C[4];
-    s32 id;                       /* 0x60 */
-} EvtSelectionNode;
-
-typedef struct EvtSelectionList {
-    u8 pad00[0x10];
-    EvtSelectionNode *first;      /* 0x10 */
-    u8 pad14[8];
-    EvtSelectionNode *selected;   /* 0x1C */
-    u8 pad20[0x10];
-    u8 *record;                   /* 0x30 */
-} EvtSelectionList;
-
-typedef struct EvtSelectionOwner {
-    u8 pad00[0x18];
-    EvtSelectionList *list;       /* 0x18 */
-} EvtSelectionOwner;
-
-typedef struct EvtMenuContext {
-    u8 pad00[8];
-    s32 mode;                     /* 0x08 */
-    u8 pad0C[0x4C];
-    s32 window;                   /* 0x58 */
-    u8 pad5C[0x20];
-    EvtSelectionOwner *selection; /* 0x7C */
-    u8 pad80[0x26];
-    u16 selectedSlot;             /* 0xA6 */
-    u8 padA8[0x25];
-    s8 unkCD;
-    u8 padCE[0x2BA];
-    u8 rewardGranted;             /* 0x388: set once the slot's reward was handed out */
-} EvtMenuContext;
 
 s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
-    EvtMenuContext *context = (EvtMenuContext *)kwlnTaskGetUserValue(task);
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 slotIndex = func_00265038();
     s32 i;
     EvtSlotReward *reward;
@@ -135,9 +100,9 @@ u32 func_002652D8(void) {
 
 /* Poll the event window; when it closes, install the default window if needed. */
 s32 evtMenuPollWindow(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 *window = &((EvtMenuContext *)context)->window;
-    s32 state = func_002C4038(context + 0xc, window, 0, callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+    s32 *window = &context->popupState;
+    s32 state = func_002C4038((s32)context->transitionWork, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -165,7 +130,7 @@ s32 evtFinishPopupAfterMenuConfiguration(s32 callback) {
 /* Hand out the captured slot's reward: an item (named in the window) or a currency amount. */
 s32 func_00265408(void) {
     char text[0x40];
-    EvtMenuContext *context = (EvtMenuContext *)kwlnTaskGetUserValue();
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
     s32 slotIndex = func_00265038();
     s32 choice;
     s32 rewardId;
@@ -190,21 +155,21 @@ s32 func_00265408(void) {
 
 /* Walk the list until its selected id is found, then persist the slot choice. */
 s32 evtMenuPersistSelectedSlot(void) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 selectedId = ((EvtMenuContext *)context)->selection->list->selected->id;
-    EvtSelectionNode *node;
-    u8 *record;
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+    s32 selectedId = context->ownedWindows[0]->list->cursor->camp.value;
+    struct MenuListNode *node;
+    MenuTerminalWindowState *record;
     s32 slot;
     mnuShopReleaseWindowSprites(1, context);
     func_00260020(context);
-    for (node = ((EvtMenuContext *)context)->selection->list->first;
-         node != 0 && node->id != selectedId; node = node->next) {
-        mnuAdvanceListCursorDefault((s32)((EvtMenuContext *)context)->selection->list);
+    for (node = context->ownedWindows[0]->list->first;
+         node != 0 && node->camp.value != selectedId; node = node->next) {
+        mnuAdvanceListCursorDefault(context->ownedWindows[0]->list);
     }
-    record = ((EvtMenuContext *)context)->selection->list->record;
+    record = context->ownedWindows[0]->list->context;
     slot = mnuCampHasEligibleOwnedItems(context);
-    *(u16 *)(record + 0x12) = slot;
-    ((EvtMenuContext *)context)->selectedSlot = slot;
+    record->selectedSlot = slot;
+    context->selectedSlot = slot;
     return 1;
 }
 
@@ -225,9 +190,9 @@ s32 func_00265850(s32 callback) {
 
 /* Fade out according to the event mode, with a separate flag-dependent case 2. */
 s32 evtStartFadeByState(void) {
-    s32 context = kwlnTaskGetUserValue();
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
     mnuShopLoadMessageResource(context);
-    switch (((EvtMenuContext *)context)->mode) {
+    switch (context->type) {
     case 2:
         if (mdlFlagTest(0x42a) == 0 && mnuFirstPresentMainCharacterIndex() == 0) {
             evtCreateEventScriptProcess(0x323);
@@ -251,11 +216,11 @@ u32 func_00265980(void) {
     return 1;
 }
 
-u32 evtMenuSetProgressFlag(s32 context) {
+u32 evtMenuSetProgressFlag(MenuTerminalContext *context) {
     u32 changed;
     s64 flagSet;
 
-    if (((((EvtMenuContext *)context)->mode == 2) && (flagSet = mdlFlagTest(4), flagSet != 0)) &&
+    if (((context->type == 2) && (flagSet = mdlFlagTest(4), flagSet != 0)) &&
           (flagSet = mdlFlagTest(0x290), flagSet == 0)) {
         mdlFlagSet(0x290);
         changed = 1;
@@ -279,8 +244,8 @@ void mnuAwardCampProgressCurrency(void) {
 }
 
 /* One-shot menu flag: set the object's flag the first time it is not yet set, returning 1 only then. */
-s32 func_00265A60(s32 object) {
-    u32 flag = D_003CE460[*(s32 *)(object + 8)];
+s32 func_00265A60(MenuTerminalContext *object) {
+    u32 flag = D_003CE460[object->type];
     if (flag == 0) {
         return 0;
     }

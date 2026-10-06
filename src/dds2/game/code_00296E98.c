@@ -84,7 +84,6 @@ enum {
 };
 
 extern BrsIconRecord D_003D03F0[];
-extern u8 *D_00438FC8;
 extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 /* Draw the selected result icon, then the fixed companion at the same alpha. */
@@ -92,7 +91,7 @@ void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     f32 strength;
     s32 layer;
 
-    layer = *(s32 *)(D_00438FC8 + 0x68);
+    layer = (s32)D_00438FC8->effectSlots[0];
     strength = (f32)alpha * 0.00390625f;
     iconIndex += 3;
     func_00306CD0(D_003D03F0[iconIndex][BRS_ICON_X] << 4,
@@ -112,7 +111,7 @@ void func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
     s32 companionX;
     s32 selectedIndex;
 
-    layer = *(s32 *)(D_00438FC8 + 0x68);
+    layer = (s32)D_00438FC8->effectSlots[0];
     normalized = (f32)value * 0.00390625f;
     selectedIndex = entryIndex + 3;
     func_00306CD0(D_003D03F0[selectedIndex][BRS_ICON_X] << 4,
