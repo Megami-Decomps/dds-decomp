@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "eff_blur.h"
 #include "eff.h"
 #include "pcp_vu0.h"
@@ -102,10 +103,6 @@ struct SdfListHead;
 struct SdfDmaNode;
 extern void sdfAppendPacket(struct SdfListHead *list, u32 packet);
 
-typedef struct BlurFilterOps {
-    u8 pad00[0x10];
-    void (*draw)(struct BlurFilterOps *self, void *list); /* 0x10 */
-} BlurFilterOps;
 
 /* Per-frame draw state; DMA builders select packet ranges within each record. */
 typedef struct {
@@ -113,7 +110,7 @@ typedef struct {
     u8 pad40[0x1F00];
 } BlurFramePacketRecord;
 
-extern BlurFilterOps D_003253E8;
+extern SdfPoolNode D_003253E8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 kwlnGetDrawBufferIndex(void);
@@ -284,13 +281,13 @@ void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
 
 void effDrawBlurRectangle(BlurSource *source)
 {
-    void *list;
+    SdfListHead *list;
     void *tag;
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     void *drawPacket;
 
     if (func_0011E278() == 0) {
-        list = (void *)sdfAllocPacketAligned(0x20);
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
         sdfAppendDmaPrimary((s32)list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
@@ -337,12 +334,12 @@ void effDrawBlurRectangle(BlurSource *source)
         drawPacket = effCreateSizedDrawPacket(1, 0);
         effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((s32)drawPacket), 0);
         sdfAppendPacket(list, (u32)drawPacket);
-        D_003253E8.draw(&D_003253E8, list);
+        D_003253E8.append((SdfListHead *)&D_003253E8, list);
     }
 }
 
 extern void func_002D4C80(s32 source, u32 packet, s32 variant);
-extern s32 sdfConsCreateDrawPacket(s32 list, s32 textureAddress, s32 context);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
 
 void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
 {
@@ -365,7 +362,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
     blendPacket[6] = 0x44;
     blendPacket[7] = 0x43;
     sdfAppendPacket(list, (u32)blendPacket);
-    sdfConsCreateDrawPacket((s32)list, resource, 1);
+    sdfConsCreateDrawPacket(list, (SdfTex *)resource, 1);
 
     blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
     blendPacket[0] = 3;
@@ -436,7 +433,7 @@ void effDrawBlurListWithFramePacket(void *list) {
 
     func_002D4CC8(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, (u32)packet);
-    D_003253E8.draw(&D_003253E8, list);
+    D_003253E8.append((SdfListHead *)&D_003253E8, list);
 }
 
 extern s32 func_0011E278();

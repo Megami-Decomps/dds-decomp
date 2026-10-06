@@ -254,15 +254,11 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7020);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7760);
 
-typedef struct UiDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct UiDrawSurface *, void *);
-} UiDrawSurface;
 
-extern UiDrawSurface D_003805A8;
+extern SdfPoolNode D_003805A8;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
-extern s32 sdfConsCreateDrawPacket(s32 list, s32 texture, s32 context);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
 extern void sdfQueueGouraudTexturedQuad(
     s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
     s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
@@ -283,7 +279,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
 
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsCreateDrawPacket((s32)list, texture, 0);
+    sdfConsCreateDrawPacket(list, (SdfTex *)texture, 0);
     uFixed = u * 0x10;
     vFixed = v * 0x10;
     uRight = uFixed + width * 0x10;
@@ -294,7 +290,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
         x3 * 0x10 + 0x7000, y3 * 8 + 0x7900, uRight, vBottom, colors[3],
         0xFEFFD0, NULL);
-    D_003805A8.submit(&D_003805A8, list);
+    D_003805A8.append((SdfListHead *)&D_003805A8, list);
     return 1;
 }
 

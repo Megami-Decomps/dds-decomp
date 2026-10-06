@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "eff_blur.h"
 
 
@@ -108,10 +109,6 @@ void effBlurReleaseSecondResource(EffBlurScaleWork *work) {
     sdfReleaseResourceAllocation(work->allocation);
 }
 
-typedef struct BlurFilterOps {
-    u8 pad00[0x10];
-    void (*draw)(struct BlurFilterOps *self, void *list); /* 0x10 */
-} BlurFilterOps;
 
 /* Per-frame packet storage; only its leading 0x40-byte DMA packet is copied here. */
 typedef struct {
@@ -119,8 +116,8 @@ typedef struct {
     u8 pad40[0x1F00];
 } BlurFramePacketRecord;
 
-extern BlurFilterOps D_003253E8;
-extern BlurFilterOps D_003253C8;
+extern SdfPoolNode D_003253E8;
+extern SdfPoolNode D_003253C8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern void *sdfAllocPacketAligned(s32);
 extern u32 kwlnGetDrawBufferIndex(void);
@@ -240,7 +237,7 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
 void effBlurDrawFramebufferQuad(EffBlurQuad *source)
 {
-    void *list;
+    SdfListHead *list;
     void *tag;
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     void *drawPacket;
@@ -293,12 +290,12 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         drawPacket = effCreateSizedDrawPacket(1, 0);
         effBlurBuildSamplingQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
         sdfAppendPacket(list, drawPacket);
-        D_003253E8.draw(&D_003253E8, list);
+        D_003253E8.append((SdfListHead *)&D_003253E8, list);
     }
 }
 
 void func_00187C08(EffSolidRectParams *source) {
-    void *list;
+    SdfListHead *list;
     u64 *blendPacket;
     u64 *drawPacket;
     u64 color;
@@ -341,6 +338,6 @@ void func_00187C08(EffSolidRectParams *source) {
     drawPacket[10] = 0xFF000000000000ULL | topRight;
     drawPacket[12] = 0xFF000000000000ULL | bottomRight;
     sdfAppendPacket(list, drawPacket);
-    D_003253C8.draw(&D_003253C8, list);
+    D_003253C8.append((SdfListHead *)&D_003253C8, list);
 }
 
