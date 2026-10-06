@@ -2476,8 +2476,6 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 
 extern SndPad D_00324510;
 
-
-
 extern u8 D_00359160[];
 
 extern void func_001B83D8(s32, s32, s32);
@@ -2578,7 +2576,66 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC398);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC4A8);
+typedef struct BtlResBlock {
+    s32 unk0;
+    s32 nameA;
+    s32 nameB;
+    s32 nameC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
+    s32 unk1C;
+} BtlResBlock;
+extern BtlResBlock *btlResourceBlock;
+extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+extern const BattlePanelColors D_003A21B8;
+
+/* 0x2C-byte action record shared by the initializer, updater and renderer. */
+typedef struct BattleMirroredSpriteRecord {
+    s8 active;
+    u8 pad01;
+    s16 slot;
+    f32 scale;
+    s32 restoredWidth;
+    s32 restoredHeight;
+    s32 width;
+    s32 height;
+    s32 x;
+    s32 y;
+    s32 secondX;
+    s32 frame;
+    s8 alpha;
+    u8 pad29[3];
+} BattleMirroredSpriteRecord;
+
+void func_001AC4A8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    BattlePanelColors colors = D_003A21B8;
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            if (record->active != 0) {
+                u32 color;
+                btlResourceBlock->resA->workEntries[record->slot].width = record->width;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->height;
+                color = record->alpha | 0x80808000;
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_002BF438(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                func_002BF438(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                btlResourceBlock->resA->workEntries[record->slot].width = record->restoredWidth << 4;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->restoredHeight << 3;
+            }
+            record++;
+        } while (--remaining != 0);
+    }
+}
 
 void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
     *(u8 *)(arg0 + 0) = 1;
@@ -2590,22 +2647,9 @@ void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, 
     *(u32 *)(arg0 + 0x24) = 0;
 }
 
-typedef struct BtlResBlock {
-    s32 unk0;
-    s32 nameA;
-    s32 nameB;
-    s32 nameC;
-    EffectSlotSet *resA;
-    EffectSlotSet *resB;
-    EffectSlotSet *resC;
-    s32 unk1C;
-} BtlResBlock;
-
 extern u8 D_003BB3E4;
 
 extern u8 btlResourceBlockLoaded;
-
-extern BtlResBlock *btlResourceBlock;
 
 extern char D_003A21C8[]; /* "/battle/panel/batle_01.spr" */
 
@@ -3114,10 +3158,6 @@ typedef struct MsgQueueTaskData {
     s16 fade;
 } MsgQueueTaskData;
 
-typedef struct BattlePanelColors {
-    u32 values[4];
-} BattlePanelColors;
-
 extern const BattlePanelColors D_003A2A90;
 extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
@@ -3212,7 +3252,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2168);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21A8);
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21B8);
+const BattlePanelColors D_003A21B8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21C8);
 
@@ -3333,7 +3373,6 @@ typedef struct BtlPanelStrip {
 } BtlPanelStrip;
 
 extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
-extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25C0);
 
