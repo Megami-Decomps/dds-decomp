@@ -688,7 +688,47 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
     ptyAssignRosterItemAndMarkOwned(entry);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011B4B0);
+extern void func_00286BA8(void *record);
+
+/* Consume a saved template, optionally raise its level, then mark its item owned. */
+void func_0011B4B0(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
+    s32 targetLevel = 0;
+    s32 maxPartyLevel = dds3EntryMax();
+    s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
+    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    s8 *stat;
+    s32 *gain;
+    s32 remaining;
+
+    memcpy(entry, &datGameState->templates[templateIndex], sizeof(*entry));
+    memset(&datGameState->templates[templateIndex], 0, sizeof(*entry));
+    if (!(initFlags & PTY_TEMPLATE_USE_PARTY_MAX_LEVEL)) {
+        if (!(initFlags & PTY_TEMPLATE_KEEP_BASE_LEVEL)) {
+            targetLevel = averagePartyLevel;
+        }
+    } else {
+        targetLevel = maxPartyLevel;
+    }
+    if (entry->level < targetLevel) {
+        ptyAccumulateStatGains(statGains, targetLevel - entry->level, entry);
+        stat = entry->baseStats;
+        gain = statGains;
+        for (remaining = PTY_ENTRY_STAT_COUNT - 1; remaining >= 0; remaining--) {
+            *stat++ += *gain++;
+        }
+        entry->level = targetLevel;
+        entry->totalExp = ptyComputeTotalExp(entry, 0);
+        ptyRecomputeMaxHpMp(entry);
+    }
+    if (!(initFlags & 2)) {
+        func_003140C8(1, entry);
+    }
+    func_00286BA8(entry);
+    if (entry->itemId != 0) {
+        datGameState->inventory.counts[entry->itemId] = 1;
+    }
+}
+
 
 
 /* Clone template 1 into roster 2 and inherit its mantra state, then clear the

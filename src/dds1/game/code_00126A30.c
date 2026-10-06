@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_primitive.h"
 #include "evt_unit.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -1795,22 +1796,11 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     descriptor->open(descriptor, resource);
 }
 
-typedef struct FldPrimDesc {
-    s16 kind;
-    s16 count;
-    u8 pad4[4];
-    s32 color;
-    u8 padC[4];
-    f32 *verts;
-    u8 pad14[0xC];
-    s32 *indices;
-    u8 pad24[8];
-} FldPrimDesc; /* 0x2C bytes */
 extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
 extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
-extern void *func_002E21A0(FldPrimDesc *);
+extern void *func_002E21A0(SdfPrimitiveRequest *);
 void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
-    FldPrimDesc desc;
+    SdfPrimitiveRequest desc;
     f32 verts[12];
     s32 indices[3];
     s32 command;
@@ -1822,10 +1812,10 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     sdfConsAppendAssetPacket(command, (void *)D_003BACEC, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
-    desc.kind = 1;
-    desc.count = 3;
-    desc.verts = verts;
-    desc.indices = indices;
+    desc.stripWordCount = 1;
+    desc.vertexCount = 3;
+    desc.positions = verts;
+    desc.vertexColors = indices;
     verts[0] = f0;
     verts[1] = f1;
     verts[2] = f2;

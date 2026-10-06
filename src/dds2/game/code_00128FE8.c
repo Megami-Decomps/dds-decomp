@@ -1,5 +1,7 @@
 #include "common.h"
+#include "sdf_primitive.h"
 #include "dds3obj.h"
+#include "fld.h"
 
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -256,23 +258,12 @@ extern void *func_00348158(const void *, const void *, s32, s32);
 
 extern void *memset(void *s, s32 c, u32 n);
 
-typedef struct FldPrimDesc {
-    s16 kind;
-    s16 count;
-    u8 pad4[4];
-    s32 color;
-    u8 padC[4];
-    f32 *verts;
-    u8 pad14[0xC];
-    s32 *indices;
-    u8 pad24[8];
-} FldPrimDesc; /* 0x2C bytes */
 
 extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
 
 extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 
-extern void *func_0033B050(FldPrimDesc *);
+extern void *func_0033B050(SdfPrimitiveRequest *);
 
 typedef struct {
     u32 unk0[4];
@@ -547,7 +538,132 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129660);
+typedef struct FldScriptResource {
+    u8 pad00[0x10];
+    u8 parameters[0x10];
+    s32 unk20;
+} FldScriptResource;
+
+typedef struct FldResourceName {
+    u32 unk00;
+    const char *name;
+} FldResourceName;
+
+extern FldFileResource *D_00438EB8;
+extern u32 D_00438EBC;
+extern FldFileResource *D_00438EC0;
+extern u32 D_00438EC4;
+extern s32 D_00435FA4;
+extern s32 evtCreateScriptObjectWithResource(s32, s32, s32, s32, s32);
+struct WorldObj;
+struct EffectObject;
+struct WorldEntry;
+struct WorldListNode;
+struct WorldChainNode;
+struct EvtWorldObject;
+extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern void dds3SetWorldEntryCallbackTarget(struct WorldEntry *, void *);
+extern void effObjSetModelHolder(struct EffectObject *, u32);
+extern s32 fldParseRoomNumberFromName(char *);
+extern void func_00113FF8(struct EffectObject *, u32);
+extern struct WorldListNode *dds3FindWorldObjectNodeByKey(struct EvtWorldObject *, u32, s32);
+extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
+extern void func_00112168(void *);
+extern void fldSetRecordValueById(s32, s32);
+extern struct WorldChainNode *dds3FindIndexedObjectChainNodeByName(struct EvtWorldObject *, s32, const u8 *);
+extern s32 dds3RegisterObjectInHandlerIndex(void *);
+
+void func_00129660(void) {
+    f32 position[4];
+    f32 rotation[4];
+    FldFileResource *resource = D_00438EB8;
+    u32 count = D_00438EBC;
+    void *world;
+    void *object;
+    FldFileResource *binding;
+    FldFileNameEntry *name;
+    FldScriptResource *script;
+    FldResourceName *linkedName;
+    s32 i;
+    s32 j;
+    u32 k;
+
+    if (resource == NULL) {
+        return;
+    }
+    world = dds3GetWorldSecondaryObject();
+    for (i = 0; i < count; i++, resource++) {
+        script = resource->data;
+        evtCreateScriptObjectWithResource(resource->id, (s32)script->parameters,
+                                         script->unk20, D_00435FA4, (s32)resource->name);
+        /* Retail fills both 16-byte stack vectors before creating the object. */
+        if (resource->transform != NULL) {
+            position[0] = resource->transform[0];
+            position[1] = resource->transform[1];
+            position[2] = resource->transform[2];
+            position[3] = 0.0f;
+            rotation[0] = resource->transform[4];
+            rotation[1] = resource->transform[5];
+            rotation[2] = resource->transform[6];
+            rotation[3] = resource->transform[7];
+        } else {
+            position[0] = 0.0f;
+            position[1] = 0.0f;
+            position[2] = 0.0f;
+            position[3] = 0.0f;
+            rotation[0] = 0.0f;
+            rotation[1] = 0.0f;
+            rotation[2] = 0.0f;
+            rotation[3] = 0.0f;
+        }
+        object = dds3SpawnInnerVecObj6(resource->id, position, rotation);
+        dds3SetWorldEntryCallbackTarget(object, (void *)resource->name);
+        if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
+            if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
+                effObjSetModelHolder(object, 6);
+            } else {
+                switch (i) {
+                    case 0:
+                        effObjSetModelHolder(object, 2);
+                        break;
+                    case 1:
+                        effObjSetModelHolder(object, 3);
+                        break;
+                    case 2:
+                        effObjSetModelHolder(object, 4);
+                        break;
+                    default:
+                        effObjSetModelHolder(object, 5);
+                        break;
+                }
+            }
+        } else {
+            effObjSetModelHolder(object, 7);
+        }
+        func_00113FF8(object, fldParseRoomNumberFromName((char *)resource->name));
+        dds3SetSlotByKind(object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
+        func_00112168(object);
+        binding = D_00438EC0;
+        for (j = 0; j < D_00438EC4; j++, binding++) {
+            if (binding->names != NULL) {
+                name = binding->names->entries;
+                k = 0;
+                for (; k < binding->names->count; k++, name++) {
+                    if (strcmp(resource->name, name->name) == 0) {
+                        fldSetRecordValueById(binding->id, (s32)object);
+                        break;
+                    }
+                }
+            }
+        }
+        /* Retail fetches the link descriptor even when the object is NULL. */
+        linkedName = (FldResourceName *)resource->word14;
+        if (object != NULL) {
+            dds3SetSlotByKind(object, (ObjData *)dds3FindIndexedObjectChainNodeByName(world, 2, (const u8 *)linkedName->name));
+            dds3RegisterObjectInHandlerIndex(object);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129940);
 
@@ -1799,7 +1915,7 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
 }
 
 void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
-    FldPrimDesc desc;
+    SdfPrimitiveRequest desc;
     f32 verts[12];
     s32 indices[3];
     s32 command;
@@ -1811,10 +1927,10 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     sdfConsAppendAssetPacket(command, (void *)D_0043607C, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
-    desc.kind = 1;
-    desc.count = 3;
-    desc.verts = verts;
-    desc.indices = indices;
+    desc.stripWordCount = 1;
+    desc.vertexCount = 3;
+    desc.positions = verts;
+    desc.vertexColors = indices;
     verts[0] = f0;
     verts[1] = f1;
     verts[2] = f2;
