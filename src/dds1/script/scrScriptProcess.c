@@ -1,26 +1,27 @@
 #include "common.h"
 #include "scr.h"
+#include "sdf.h"
 extern ScrProcGlobals *datGameState;
 
-void *sdfReadNamedResource(s32 arg0, u32 *arg1, s32 arg2);
+SdfMemBlock *sdfReadNamedResource(const char *path, u32 *outAddress, u32 *outSize);
 KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay,
                          s32 destroyDelay, TaskUpdate update, TaskDestroy destroy,
                          u32 userValue);
 ScrData *bfParseFLW0(void *header, s32 procedureIndex);
 /* Load a script resource, create its VM process and retain its resource handle. */
-ScrData *scrOpenProcessFromResource(s32 scriptId, s32 option)
+ScrData *scrOpenProcessFromResource(const char *path, s32 option)
 {
     u32 resourceInfo[4];
-    void *handle;
-    s32 processId;
+    SdfMemBlock *handle;
+    u32 resourceAddress;
     ScrData *task;
-    handle = sdfReadNamedResource(scriptId, resourceInfo, 0);
-    processId = resourceInfo[0];
-    if (processId == 0)
+    handle = sdfReadNamedResource(path, resourceInfo, 0);
+    resourceAddress = resourceInfo[0];
+    if (resourceAddress == 0)
     {
         return 0;
     }
-    task = bfParseFLW0((void *)processId, option);
+    task = bfParseFLW0((void *)resourceAddress, option);
     if (task != NULL)
     {
         task->scriptHandle = handle;
@@ -49,14 +50,14 @@ void scrClearProcessGlobals(void)
     }
 }
 
-s32 scrCreateProcessTaskFromResource(s32 priority, s32 scriptId, s32 option)
+s32 scrCreateProcessTaskFromResource(s32 priority, const char *path, s32 option)
 {
-    return (s32)scrProcCreateTask(priority, scrOpenProcessFromResource(scriptId, option));
+    return (s32)scrProcCreateTask(priority, scrOpenProcessFromResource(path, option));
 }
 
-ScrData *scrCreateProcessWithDefaultOption(s32 scriptId)
+ScrData *scrCreateProcessWithDefaultOption(const char *path)
 {
-    return scrOpenProcessFromResource(scriptId, 0);
+    return scrOpenProcessFromResource(path, 0);
 }
 
 s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option)
@@ -86,7 +87,7 @@ ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSec
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
-extern void sdfReleaseResourceAllocation(void *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void evtUnlinkWorkNode(ScrData *process);
 
 /* Log the process name, release its VM buffers and resource, then unlink and free it. */
