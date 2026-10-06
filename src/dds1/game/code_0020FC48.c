@@ -34,8 +34,6 @@
 
 #define BTL_EVENT_TASK_NONE (-1)
 #define BTL_EVENT_ACTION_NONE (-1)
-#define BTL_SCENE_RECORD_BYTES 0x28
-#define BTL_SCENE_EVENT_ID_OFFSET 0x26
 #define BTL_EVENT_SCENE_MODE_LIMIT 0x400
 #define BTL_EVENT_SOUND_RESOURCE_COUNT 15
 #define BTL_EVENT_SOUND_KEY_FIRST 0x32
@@ -56,7 +54,7 @@ typedef struct BattleGroupIdEntry {
 extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 
-extern u8 D_003BBB0D;
+extern s8 D_003BBB0D; /* func_00215FF8 tests it with lb */
 
 extern s32 btlFindModelEntry();
 
@@ -141,7 +139,18 @@ extern char D_003A66F0[];
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_0020FC48);
 
-extern u8 *datBattleSceneRecords;
+/* One 0x28-byte record per battle scene. */
+typedef struct BattleSceneRecord {
+    u8 pad00[6];
+    u16 enemy[8];     /* 0x06: enemy IDs, zero for an empty slot */
+    u8 pad16[6];
+    u16 unk1C;        /* 0x1C: copied to BtlState.encounterParamA when both are nonzero */
+    u16 unk1E;        /* 0x1E */
+    u8 pad20[6];
+    u16 eventId;      /* 0x26: signed event number; zero means none */
+} BattleSceneRecord;
+
+extern BattleSceneRecord *datBattleSceneRecords;
 extern char D_003A6738[]; /* "/event/e%03d/e%03d/scr/e%03d.bf" */
 extern char D_003A6758[]; /* "btl:event[%s]\n" */
 extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
@@ -173,7 +182,7 @@ void func_0020FF50(void) {
     if (battleMode >= BTL_EVENT_SCENE_MODE_LIMIT) {
         return;
     }
-    rawEventId = *(u16 *)(datBattleSceneRecords + battleMode * BTL_SCENE_RECORD_BYTES + BTL_SCENE_EVENT_ID_OFFSET);
+    rawEventId = datBattleSceneRecords[battleMode].eventId;
     if (rawEventId == 0) {
         return;
     }
@@ -1671,7 +1680,8 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawUnitAffinityDebug);
 typedef struct PadButtons {
     s8 unk_0;
     s8 stick;
-    u8 unk_2[2];
+    s8 b2;
+    s8 b3;
     u8 b4, b5, b6, b7;
 } PadButtons;
 
