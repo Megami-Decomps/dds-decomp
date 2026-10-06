@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
 
@@ -399,7 +400,7 @@ extern void kwlnFadeResetBackground(void);
 
 extern void fldDestroyPanelTaskIfPresent(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
 
-extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
+extern void mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
 
 extern void fldReleaseMenuSlotsAfterWait(void);
 
@@ -2339,7 +2340,7 @@ void fldReleaseCampSceneTasks(void) {
     evtSetSolarOverlayFullyTransparent();
     fldDestroyTask();
     if (D_00435F74 != 0) {
-        effBlurReleaseFirstResource(D_00435F74);
+        effBlurReleaseFirstResource((EffBlurScatterWork *)D_00435F74);
         D_00435F74 = 0;
     }
     mnuDestroyCampTasks();

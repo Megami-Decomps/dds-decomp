@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 #include "eff_curve.h"
 #include "file.h"
 #include "pcp_vu0.h"
@@ -941,7 +942,6 @@ extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
 extern void effDrawBlurRectangle(void *);
 
-extern void func_0018ECD0(void *);
 
 extern void effBlurStepScaleSlotsAndDraw(void *);
 
@@ -1179,12 +1179,12 @@ void effSetFadeMapParameter(EffKindWork *work, u32 value) {
     ((EffMapOutWide *)work->handle)->target = value;
 }
 
-void effCreateFixedSlotBlurWorkFromFadeOutput(s32 work) {
-    func_0018EBC8(work + 0xc0);
+u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
+    return (u32)func_0018EBC8((u8 *)source + 0xC0);
 }
 
-void effReleaseFixedSlotBlurWork(void) {
-    effBlurReleaseFirstResource();
+void effReleaseFixedSlotBlurWork(s32 handle) {
+    effBlurReleaseFirstResource((EffBlurScatterWork *)handle);
 }
 
 /* Draw the pixel-unit fade using the handle's output record and payload's curves.
@@ -1242,7 +1242,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
     out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
-    func_0018ECD0(out);
+    func_0018ECD0((EffBlurScatterWork *)out);
 }
 
 void effSetWideFadeMapParameter(EffKindWork *work, u32 value) {
