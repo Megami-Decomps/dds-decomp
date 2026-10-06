@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 
 extern u32 dds3CreatePathCurveWork(u32);
 
@@ -24,7 +25,6 @@ typedef struct ObjectWithResource {
 } ObjectWithResource;
 
 #define DDS3_SLOT_RING_ENTRY_COUNT 10
-#define DDS3_SLOT_STATE_CAPACITY 24
 
 extern ObjectWithResource *dds3AppendWorldObjectNode();
 
@@ -34,17 +34,6 @@ extern SlotEntry dds3SlotRingEntries[];
 
 extern s32 dds3SlotRingCursor;
 
-typedef struct DdsSlotResourceState {
-    u32 unk00;
-    u32 indexNode;
-    s32 kind;
-    u32 unk0C;
-    s32 unk10;
-    u8 pad14[0x38];
-    s32 slots[DDS3_SLOT_STATE_CAPACITY];
-    u32 unkAC;
-    s32 currentSlot;
-} DdsSlotResourceState;
 
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
@@ -149,18 +138,18 @@ s32 dds3SelectSlotForObjectKind(u32 kind)
 
 /* Initialize a kind-3 slot state and its index node.
  * Every slot and currentSlot start unused (-1). */
-DdsSlotResourceState *dds3CreateSlotResourceState(s32 value) {
-    DdsSlotResourceState *state = sdfAllocSizeClassBlock(sizeof(DdsSlotResourceState));
+ObjBase *dds3CreateSlotResourceState(void *owner) {
+    ObjBase *state = sdfAllocSizeClassBlock(sizeof(ObjBase));
     s32 i;
     u32 node;
 
-    memset(state, 0, sizeof(DdsSlotResourceState));
-    state->kind = 3;
+    memset(state, 0, sizeof(ObjBase));
+    state->resourceState = 3;
     node = dds3AppendWorldIndexNode(0);
-    state->indexNode = node;
-    state->unk10 = value;
-    for (i = 0; i < DDS3_SLOT_STATE_CAPACITY; i++) {
-        state->slots[i] = -1;
+    state->worldIndexNode = node;
+    state->slots[0] = owner;
+    for (i = 0; i < DDS3_OBJECT_RESOURCE_SLOT_COUNT; i++) {
+        state->resourceSlots[i] = -1;
     }
     state->currentSlot = -1;
     return state;

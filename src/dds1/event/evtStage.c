@@ -1,13 +1,7 @@
 #include "common.h"
+#include "dds3obj.h"
 
-/* Object record reached through an owned-handle lookup; the linked node sits
-   at +0x14. */
-typedef struct StageNodeRef {
-    u8 pad00[0x14];
-    void *node; /* 0x14 */
-} StageNodeRef;
 
-extern void *dds3GetObjectOwnedHandle(void *);
 extern void dds3SetSlotKey(void *, void *);
 extern void dds3ReplaceObjectResource(void *);
 
@@ -193,17 +187,17 @@ void evtSetWorldSlotValue(s32 unused, void *data) {
 
 /* Attach object to the node referenced by owner's owned handle. */
 s32 evtStageRelinkOwnedNodeResource(void *object, void *owner) {
-    StageNodeRef *ref;
+    ObjBase *ref;
     void *node;
 
     if (object == NULL) {
         return 0;
     }
-    ref = (StageNodeRef *)dds3GetObjectOwnedHandle(owner);
+    ref = dds3GetObjectOwnedHandle(owner);
     if (ref == NULL) {
         return 0;
     }
-    node = ref->node;
+    node = ref->slots[1];
     if (node == NULL) {
         return 0;
     }

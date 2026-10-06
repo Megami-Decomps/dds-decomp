@@ -101,7 +101,6 @@ extern void func_0012D3D8(void);
 extern void func_0012DD70(void);
 extern void fldUpdateCameraMoveOscillation(void);
 extern s32 fldTestSceneControlFlags(s32);
-extern u8 *dds3GetObjectOwnedHandle(s32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
 extern void fldClearCameraModelColor(void);
 extern void func_00131290(void);
@@ -2329,7 +2328,7 @@ void fldUpdateCameraProximity(void) {
             return;
         }
     }
-    slot = *(s32 *)(dds3GetObjectOwnedHandle(fldPlayerObject) + 0x5C);
+    slot = dds3GetObjectOwnedHandle(fldPlayerObject)->resourceSlots[4];
     modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
     if (slot >= 0) {
         model = *modelRef;

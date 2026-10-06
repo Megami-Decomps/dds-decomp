@@ -989,7 +989,6 @@ extern void sdfMotionSuspend(Motion *motion);
 extern void sdfMotionResume(Motion *motion);
 extern void sdfFreezeFloatCounter(void *counter);
 extern void sdfUnfreezeFloatCounter(void *counter);
-extern ObjBase *dds3GetObjectOwnedHandle(void *object);
 extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 end);
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
@@ -1027,7 +1026,7 @@ void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
     }
     object = table->slots[6].head;
     while (object != NULL) {
-        motion = ((EvtViewerPlaybackData *)object->data)->object->unk38;
+        motion = ((EvtViewerPlaybackData *)object->data)->object->motion;
         if (motion != NULL) {
             if (mode == 0) {
                 sdfMotionSampleAtFrame(motion, (f32)frame);
