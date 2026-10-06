@@ -990,7 +990,72 @@ EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00178790);
+extern u16 D_00354D10[8];
+extern f32 D_00354D20[8];
+extern void billSetEntryFrameMode0(BillObj *effect, u32 startFrame);
+
+/* vu0 routine: capture staggered model points, then draw their growing history. */
+void func_00178790(EffPCPChargeWork *work) {
+    f32 position[4] __attribute__((aligned(16)));
+    u32 i;
+    u32 color;
+    BillObj *bill;
+    MdlCtx *model;
+    f32 scale;
+    u32 count;
+    u32 captureRow;
+    u32 point;
+
+    if (work->updateCount > 50) {
+        if ((work->baseColor & 0xFF000000) >= 0x08000000) {
+            work->baseColor -= 0x08000000;
+        }
+    }
+    work->updateCount++;
+    color = effMultiplyPackedColors(work->color, work->baseColor);
+    bill = effParamWorkGetData(work->primaryHandle);
+    model = effParamWorkGetData(work->secondaryHandle);
+    scale = work->scale * 1.5f;
+    effParamWorkCallback1(work->secondaryHandle, scale);
+    effParamWorkCallback0(work->secondaryHandle, work->vectorWords);
+    mdlProcessContextNodesAndTransforms(model, (s32)D_00325828);
+    captureRow = work->historyCount;
+    if (captureRow < 25) {
+        for (point = 0; point < 7; point++) {
+            if (captureRow % D_00354D10[point] == 0) {
+                sdfLoadMapRecordPositionVector((struct SdfTextParam *)model->inner, point + 1);
+                VU0_STORE_VF(vf10, position);
+                PCP_COPY_VECTOR(work->samplePositions[captureRow][point], position);
+                work->animationFrames[captureRow][point] = effMiscRand(D_0034DF38);
+                work->sampleScales[captureRow][point] = 0;
+                work->sampleAges[captureRow][point] = 0;
+            }
+        }
+        work->historyCount++;
+    }
+    count = work->historyCount;
+    billSetChildParameter(bill, color);
+    for (i = 0; i < count; i++) {
+        for (point = 0; point < 7; point++) {
+            if (i % D_00354D10[point] == 0) {
+                f32 growth = (f32)work->sampleAges[i][point] / 12.0f;
+                f32 size;
+
+                if (growth > 1.0f) {
+                    growth = 1.0f;
+                }
+                size = D_00354D20[point] * growth * scale;
+                work->sampleAges[i][point]++;
+                work->sampleScales[i][point] = size;
+                billSetChildScaleComponents(bill, size, size);
+                effCopyVector(bill, work->samplePositions[i][point]);
+                billInvokeCallback(bill);
+                billSetEntryFrameMode0(bill, work->animationFrames[i][point]);
+                work->animationFrames[i][point]++;
+            }
+        }
+    }
+}
 
 void effPcpCopyVectorAF0(void *work, void *src) {
     PCP_COPY_VECTOR(((EffPCPChargeWork *)work)->vectorWords, src);
