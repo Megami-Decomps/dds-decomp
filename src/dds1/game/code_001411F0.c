@@ -2,6 +2,7 @@
 #include "sdf.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
+#include "dat_state.h"
 
 /* Retained field-area work, not a camera-only object. Unknown regions remain
  * opaque; this prefix covers the camera, event state and fldmix map resources. */
@@ -90,7 +91,6 @@ extern u32 D_003BAFA8;
 
 extern u32 D_003BAFB0;
 
-extern s32 datGameState;
 
 extern u32 fldSceneReady;
 
@@ -1252,11 +1252,6 @@ void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
     fldAreaFlagIndex = area % 100;
 }
 
-/* DDS1 floor flags start at +0x13F70; DDS2 stores them elsewhere. */
-typedef struct FldAreaFlagsView {
-    u8 pad00[0x13F70];
-    u64 areaFlags[13][64];
-} FldAreaFlagsView;
 
 extern s32 D_0032C900[];
 
@@ -1264,7 +1259,7 @@ extern s32 D_0032C900[];
 s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 areaIndex = D_0032C900[area % 100];
     if (areaIndex == -1) return 0;
-    return (((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][floor] >> bit) & 1;
+    return (datGameState->areaFlags[areaIndex][floor] >> bit) & 1;
 }
 
 /* Set a one-based flag on the current floor, and retain the associated record. */
@@ -1278,7 +1273,7 @@ void fldSetFlagAndFindRecord(s32 flagNumber) {
             bit = flagNumber - 1;
             fldAreaState[6] = bit;
             fldAreaState[0x2F] = flagNumber;
-            ((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][fldAreaState[5]] |= 1ULL << bit;
+            datGameState->areaFlags[areaIndex][fldAreaState[5]] |= 1ULL << bit;
             fldAreaState[0x30] = fldFindRecordItem(fldAreaState[5], bit);
         }
     }
@@ -1292,7 +1287,7 @@ void fldSetFlagBit(s32 area, s32 floor, s32 bit) {
     bit--;
     areaIndex = D_0032C900[area % 100];
     if (areaIndex != -1) {
-        ((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][floor] |= 1ULL << bit;
+        datGameState->areaFlags[areaIndex][floor] |= 1ULL << bit;
     }
 }
 
@@ -1303,7 +1298,7 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     bit--;
     areaIndex = D_0032C900[area % 100];
     if (areaIndex != -1) {
-        ((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
+        datGameState->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
     }
 }
 
@@ -1470,13 +1465,13 @@ void fldResetCameraAndSceneView(void) {
 void fldClearAllAreaFloorFlags(void) {
     u64 *words;
     s32 remaining;
-    s32 block;
+    DatGameState *block;
     s32 index;
 
     index = 0;
     block = datGameState;
     do {
-        words = (u64 *)(block + 0x13f70);
+        words = block->areaFlags[index];
         remaining = 0x3f;
         do {
             remaining = remaining - 1;
@@ -1484,7 +1479,7 @@ void fldClearAllAreaFloorFlags(void) {
             words = words + 1;
         } while (-1 < remaining);
         index = index + 1;
-        block = block + 0x200;
+
     } while (index < 0xd);
 }
 

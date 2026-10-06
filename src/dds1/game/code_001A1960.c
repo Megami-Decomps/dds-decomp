@@ -676,7 +676,55 @@ typedef struct DatEnemyRecord {
     u8 pad32[0x1A];
 } DatEnemyRecord;
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4328);
+extern s32 func_001A9488(u32);
+extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
+extern s32 btlGetEnemyMoney(u8 *, u8 *);
+extern char D_003A17F8[];
+extern char D_003A1818[];
+extern char D_003A1830[];
+extern char D_003A1848[];
+
+void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    DatEnemyRecord *record = &((DatEnemyRecord *)datEnemyRecords)[enemy->mode];
+    s32 level = func_001A9488(4);
+    s32 enemyLevel = record->level;
+    s32 allowance = datBattleParameters->rewardLevelAllowance;
+    s32 reward;
+    s32 amount;
+    s32 item;
+
+    if (level > 60) {
+        level = 60;
+    }
+    if (level >= enemyLevel + allowance && datBattleParameters->rewardDivisor != 0.0f) {
+        reward = (s32)(record->unk2C / datBattleParameters->rewardDivisor);
+        btlBossDebugPrintf(D_003A17F8, reward, level, enemyLevel, allowance,
+                          datBattleParameters->rewardDivisor);
+    } else {
+        reward = record->unk2C;
+    }
+    if (record->flags & 0x2000) {
+        reward *= 100;
+    }
+    controller->experienceEarned += reward;
+    if ((enemy->flags64 & 0x200800000ULL) == 0) {
+        amount = btlCalculateEnemyExperienceReward(NULL, (u8 *)enemy);
+        controller->epEarned += amount;
+        btlBossDebugPrintf(D_003A1818, controller->epEarned, amount);
+    }
+    if ((enemy->stateFlags & 0x400) == 0) {
+        amount = btlGetEnemyMoney(NULL, (u8 *)enemy);
+        controller->moneyEarned += amount;
+        btlBossDebugPrintf(D_003A1830, controller->moneyEarned, amount);
+    }
+    item = func_001A4130((s32)enemy, 0);
+    if (item != 0) {
+        func_001A4240(item);
+    }
+    enemy->stateFlags |= 1;
+    btlBossDebugPrintf(D_003A1848, enemy);
+}
 
 s32 btlAllActiveUnitsReady(void) {
     s32 node = *(s32 *)(btlGetRuntime() + 0x228);
@@ -877,6 +925,14 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
 s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A17F8);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1818);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1830);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1848);
 
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
     f32 factor;
@@ -2420,8 +2476,6 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 
 extern SndPad D_00324510;
 
-
-
 extern u8 D_00359160[];
 
 extern void func_001B83D8(s32, s32, s32);
@@ -2509,29 +2563,82 @@ void btlUpdateCommandPanelRowFades(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB558);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB810);
+extern f32 sdfSinPoly(f32);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001ABDF8);
+typedef struct BattleCornerFadeDefaults {
+    s16 values[20];
+} BattleCornerFadeDefaults;
+typedef struct BattleCornerPhaseDefaults {
+    u32 values[12];
+} BattleCornerPhaseDefaults;
+extern const BattleCornerFadeDefaults D_003A2100;
+extern const BattleCornerPhaseDefaults D_003A2128;
 
-void btlReleaseAndClearChipBlock(void) {
-    sdfReleaseChipBlock(btlCommandPanelWork);
-    btlCommandPanelWork = 0;
-}
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC398);
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC4A8);
-
-void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
-    *(u8 *)(arg0 + 0) = 1;
-    *(u8 *)(arg0 + 0x28) = arg4 * 8 + 0x18;
-    *(u16 *)(arg0 + 2) = arg1;
-    *(f32 *)(arg0 + 4) = arg5;
-    *(u32 *)(arg0 + 0x18) = arg2;
-    *(u32 *)(arg0 + 0x1c) = arg3;
-    *(u32 *)(arg0 + 0x24) = 0;
+void func_001AB810(void) {
+    BattleCornerFadeDefaults limits = D_003A2100;
+    BattleCornerPhaseDefaults phases = D_003A2128;
+    s32 i;
+    switch (btlCommandPanelWork->state) {
+    case 1:
+        btlCommandPanelWork->labelFade += 0x10;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade += 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] += 0x10;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] >= limits.values[i] ? limits.values[i] : btlCommandPanelWork->cornerFade[i];
+            btlCommandPanelWork->cornerPhase[i] = phases.values[i];
+        }
+        if (btlCommandPanelWork->labelFade >= 0x80 && btlCommandPanelWork->slotsB[0].fadeValue >= 0xF0)
+            btlCommandPanelWork->state = 2;
+        break;
+    case 2: {
+        btlCommandPanelWork->labelFade -= 8;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0x80 ? 0x80 :
+            btlCommandPanelWork->labelFade >= 0x100 ? 0xFF : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0x80 ? 0x80 :
+            btlCommandPanelWork->classFade >= 0x100 ? 0xFF : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerPhase[i] = (btlCommandPanelWork->cornerPhase[i] + 8) % 360;
+            btlCommandPanelWork->cornerFade[i] =
+                (u32)((sdfSinPoly((f32)((btlCommandPanelWork->cornerPhase[i] + 90) % 360) /
+                                  180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 128.0f);
+        }
+        break;
+    }
+    case 3:
+        btlCommandPanelWork->labelFade -= 0x10;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] -= 0x10;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
+        }
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        break;
+    case 4:
+        btlCommandPanelWork->labelFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] -= btlTrackedTaskHandles->status.bytes.fadeStep;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
+        }
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        break;
+    }
 }
 
 typedef struct BtlResBlock {
@@ -2544,12 +2651,166 @@ typedef struct BtlResBlock {
     EffectSlotSet *resC;
     s32 unk1C;
 } BtlResBlock;
+extern BtlResBlock *btlResourceBlock;
+extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+extern const BattlePanelColors D_003A21B8;
+
+typedef struct BattleClassLabelOffsets {
+    s32 values[8][2];
+} BattleClassLabelOffsets;
+extern const BattlePanelColors D_003A2158;
+extern const BattleClassLabelOffsets D_003A2168;
+extern void func_001AB558(void);
+
+void func_001ABDF8(void) {
+    BattlePanelColors colors = D_003A2158;
+    BattleClassLabelOffsets offsets = D_003A2168;
+    if (btlCommandPanelWork->state < 5) {
+        if (btlCommandPanelWork->state > 0) {
+            colors.values[0] = btlCommandPanelWork->cornerFade[0] | 0x80808000;
+            colors.values[1] = btlCommandPanelWork->cornerFade[1] | 0x80808000;
+            colors.values[2] = btlCommandPanelWork->cornerFade[2] | 0x80808000;
+            colors.values[3] = btlCommandPanelWork->cornerFade[3] | 0x80808000;
+            func_002BF438(0x50, 0x968, 0, colors.values, 0, btlResourceBlock->resA, 0x1E, 0x53);
+            func_001AB558();
+            colors.values[0] = btlCommandPanelWork->classFade | 0x80808000;
+            colors.values[1] = colors.values[0];
+            colors.values[2] = colors.values[0];
+            colors.values[3] = colors.values[0];
+            func_002BF438((btlCommandPanelWork->classX + 5) << 4,
+                         (btlCommandPanelWork->classY + 0x12D) << 3,
+                         0, colors.values, 0, btlResourceBlock->resA, 0x1A, 0x53);
+            func_002BF438((btlCommandPanelWork->classX + 0x37) << 4,
+                         (btlCommandPanelWork->classY + 0x12D) << 3,
+                         0, colors.values, 0, btlResourceBlock->resA, 0x1B, 0x53);
+            colors.values[0] = btlCommandPanelWork->labelFade | 0x80808000;
+            colors.values[1] = colors.values[0];
+            colors.values[2] = colors.values[0];
+            colors.values[3] = colors.values[0];
+            {
+                s32 x = btlCommandPanelWork->classX + 5;
+                s32 y = btlCommandPanelWork->classY + 0x12D;
+                func_002BF438((x + offsets.values[btlCommandPanelWork->classIndex][0]) << 4,
+                             (y + offsets.values[btlCommandPanelWork->classIndex][1]) << 3,
+                             0, colors.values, 0, btlResourceBlock->resA, (s16)btlCommandPanelWork->labelEntry, 0x53);
+            }
+        }
+    }
+}
+
+void btlReleaseAndClearChipBlock(void) {
+    sdfReleaseChipBlock(btlCommandPanelWork);
+    btlCommandPanelWork = 0;
+}
+
+INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
+
+
+
+
+
+/* 0x2C-byte action record shared by the initializer, updater and renderer. */
+typedef struct BattleMirroredSpriteRecord {
+    s8 active;
+    u8 pad01;
+    s16 slot;
+    f32 scale;
+    s32 restoredWidth;
+    s32 restoredHeight;
+    s32 width;
+    s32 height;
+    s32 x;
+    s32 y;
+    s32 secondX;
+    s32 frame;
+    s8 alpha;
+    u8 pad29[3];
+} BattleMirroredSpriteRecord;
+
+void func_001AC398(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            switch (record->active) {
+            case 1: {
+                s32 scale = (s32)record->scale;
+                s32 x = record->x;
+                s32 y = record->y;
+                s32 width = btlResourceBlock->resA->workEntries[record->slot].sourceWidth;
+                s32 height;
+                s32 scaledWidth;
+                s32 scaledHeight;
+                record->restoredWidth = width;
+                scale = scale / 2;
+                height = btlResourceBlock->resA->workEntries[record->slot].sourceHeight;
+                scaledWidth = width * scale;
+                scaledHeight = height * scale;
+                record->active = 2;
+                record->restoredHeight = height;
+                x -= (scaledWidth - width) / 2;
+                y -= (scaledHeight - height) / 2;
+                record->secondX = x;
+                record->y = y;
+                record->width = scaledWidth << 4;
+                record->height = scaledHeight << 3;
+                break;
+            }
+            case 2:
+                record->width -= 0x800;
+                record->height -= 0x800;
+                if (record->width <= 0x1000) record->active = 0;
+                break;
+            }
+            remaining--;
+            record++;
+        } while (remaining != 0);
+    }
+}
+
+
+void func_001AC4A8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    BattlePanelColors colors = D_003A21B8;
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            if (record->active != 0) {
+                u32 color;
+                btlResourceBlock->resA->workEntries[record->slot].width = record->width;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->height;
+                color = record->alpha | 0x80808000;
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_002BF438(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                func_002BF438(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                btlResourceBlock->resA->workEntries[record->slot].width = record->restoredWidth << 4;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->restoredHeight << 3;
+            }
+            record++;
+        } while (--remaining != 0);
+    }
+}
+
+void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
+    *(u8 *)(arg0 + 0) = 1;
+    *(u8 *)(arg0 + 0x28) = arg4 * 8 + 0x18;
+    *(u16 *)(arg0 + 2) = arg1;
+    *(f32 *)(arg0 + 4) = arg5;
+    *(u32 *)(arg0 + 0x18) = arg2;
+    *(u32 *)(arg0 + 0x1c) = arg3;
+    *(u32 *)(arg0 + 0x24) = 0;
+}
 
 extern u8 D_003BB3E4;
 
 extern u8 btlResourceBlockLoaded;
-
-extern BtlResBlock *btlResourceBlock;
 
 extern char D_003A21C8[]; /* "/battle/panel/batle_01.spr" */
 
@@ -2797,7 +3058,58 @@ void func_001AD1F8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlCreateAnalysisPanelTask);
+typedef struct BtlAnalysisPanelWork {
+    s8 state;
+    u8 pad01[3];
+    s32 entry;
+    s32 duration;
+    s32 frame;
+    u8 pad10[0x18];
+    s32 x;
+    s32 y;
+    s8 page;
+    u8 pad31[0x6F];
+} BtlAnalysisPanelWork;
+
+extern s32 func_001AE540(s64);
+extern void btlReleaseTaskAndRefreshCursorIfFlagged(s32);
+
+/* Create the analysis panel, replacing any panel task already registered. */
+s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
+    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlAnalysisPanelWork *data;
+    s32 task;
+
+    if (btlHasRegisteredAnalysisPanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(11), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+    }
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+    }
+    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data->state = 0;
+    data->page = 0;
+    data->x = -20;
+    data->y = 133;
+    data->duration = duration;
+    data->entry = entry;
+    data->frame = 0;
+    task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001AE540,
+                          btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
+    func_00101A80(context->taskParent, task);
+    btlSetTrackedTaskHandle(11, task);
+    context->flags &= ~0x100000;
+    return 1;
+}
 
 u32 btlHasRegisteredAnalysisPanelTask(void) {
     s64 temp_v0;
@@ -3007,10 +3319,6 @@ typedef struct MsgQueueTaskData {
     s16 fade;
 } MsgQueueTaskData;
 
-typedef struct BattlePanelColors {
-    u32 values[4];
-} BattlePanelColors;
-
 extern const BattlePanelColors D_003A2A90;
 extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
@@ -3105,7 +3413,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2168);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21A8);
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21B8);
+const BattlePanelColors D_003A21B8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21C8);
 
@@ -3226,7 +3534,6 @@ typedef struct BtlPanelStrip {
 } BtlPanelStrip;
 
 extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
-extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25C0);
 
@@ -4420,7 +4727,40 @@ void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF8B0);
+void func_001BF8B0(SceneAiWork *work) {
+    s32 i;
+    switch (work->animationPhase) {
+    case 0:
+        for (i = 0; i < 3; i++) {
+            work->rowFade[i] = 128;
+            work->rowScale[i] = 80.0f;
+            work->rowPhase[i] = 0;
+            fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, 0);
+        }
+        break;
+    case 4:
+        break;
+    case 5:
+        for (i = 0; i < 3; i++) {
+            switch (work->rowPhase[i]) {
+            case 0:
+                work->rowStep[i]++;
+                work->rowStep[i] = work->rowStep[i] <= 0 ? 0 : work->rowStep[i] > 5 ? 5 : work->rowStep[i];
+                fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, work->rowStep[i]);
+                if (work->rowStep[i] >= 5) work->rowPhase[i]++;
+                break;
+            case 1:
+                work->rowStep[i]--;
+                work->rowStep[i] = work->rowStep[i] <= 0 ? 0 : work->rowStep[i] > 5 ? 5 : work->rowStep[i];
+                if (work->rowStep[i] <= 0) work->rowPhase[i]++;
+                break;
+            case 2:
+                break;
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BFAD0);
 

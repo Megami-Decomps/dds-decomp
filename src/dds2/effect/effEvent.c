@@ -3,7 +3,6 @@
 #include "pcp_vu0.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
-#define EFF_EVENT_BEZIER_POINT_COUNT 7
 #define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
 #define EFF_EVENT_BEZIER_SLOT_BYTES 0x60
 #define EFF_EVENT_SLOT_HEADER_BYTES 0xC
@@ -41,19 +40,6 @@
 
 extern void *memcpy(void *, const void *, u32);
 
-typedef struct EffBezierPoint {
-    f32 x;
-    f32 y;
-    f32 z;
-} EffBezierPoint;
-
-/* A 0x60-byte slot: seven control points, the first point's index, t and its step. */
-typedef struct EffBezierSlot {
-    EffBezierPoint controlPoints[EFF_EVENT_BEZIER_POINT_COUNT];
-    u32 pointIndex; /* 0x54: first control point, not a segment ordinal */
-    f32 t;       /* 0x58 */
-    f32 parameterStep; /* 0x5C */
-} EffBezierSlot;
 
 
 /* Packet-source layouts and concrete blur owners mirror their constructors.
@@ -234,7 +220,7 @@ extern u8 *sdfResourceRetainAddress(s32);
 EffArrHdr *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
     s32 handle = sdfAllocGeneralBlock(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
-    EffBezierSlot *slot = (EffBezierSlot *)sdfResourceRetainAddress(handle);
+    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfResourceRetainAddress(handle);
     EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
     table->allocation = (void *)handle;
@@ -260,7 +246,7 @@ void effReleaseSlotArrayAllocation(EffArrHdr *header) {
 /* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
  * clamps to 1 and advances the index by three; there is no general bounds check. */
 s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
-    EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
+    EffSegmentedBezierSlot *slot = &((EffSegmentedBezierSlot *)table->slots)[index];
     u32 pointIndex = slot->pointIndex;
     f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
     f32 t;
@@ -293,7 +279,7 @@ s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
 
 /* Evaluate at the entry t before advancing. The first segment carries excess t;
  * the second stores t = 1 and returns 0 after producing output at the entry t. */
-s32 effStepBezierSlotSegment(EffBezierSlot *slot, f32 *out) {
+s32 effStepBezierSlotSegment(EffSegmentedBezierSlot *slot, f32 *out) {
     f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
     u32 pointIndex = slot->pointIndex;
     f32 t = slot->t;
@@ -325,25 +311,26 @@ s32 effStepBezierSlotSegment(EffBezierSlot *slot, f32 *out) {
 
 /* Evaluate four control points starting at pointIndex into xyz with w = 1;
  * unlike the stepping paths, this does not update t or the point index. */
-void effEvaluateSlotBezierPosition(EffBezierSlot *slot, f32 *out) {
+void effEvaluateSlotBezierPosition(EffSegmentedBezierSlot *slot, f32 *out) {
     EffBezierPoint *controlPoints = &slot->controlPoints[slot->pointIndex];
     f32 t = slot->t;
     f32 u = 1.0f - t;
-    f32 w[EFF_EVENT_BEZIER_WEIGHT_COUNT]; /* never read; gcc drops the stores but keeps the frame slot */
-    f32 w0 = u * u * u;
-    f32 w1 = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    f32 w2 = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    f32 w3 = t * t * t;
+    f32 w[EFF_EVENT_BEZIER_WEIGHT_COUNT];
 
-    out[0] = controlPoints[0].x * w0 + controlPoints[1].x * w1 + controlPoints[2].x * w2 + controlPoints[3].x * w3;
-    out[1] = controlPoints[0].y * w0 + controlPoints[1].y * w1 + controlPoints[2].y * w2 + controlPoints[3].y * w3;
-    out[2] = controlPoints[0].z * w0 + controlPoints[1].z * w1 + controlPoints[2].z * w2 + controlPoints[3].z * w3;
+    w[0] = u * u * u;
+    w[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    w[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    w[3] = t * t * t;
+
+    out[0] = controlPoints[0].x * w[0] + controlPoints[1].x * w[1] + controlPoints[2].x * w[2] + controlPoints[3].x * w[3];
+    out[1] = controlPoints[0].y * w[0] + controlPoints[1].y * w[1] + controlPoints[2].y * w[2] + controlPoints[3].y * w[3];
+    out[2] = controlPoints[0].z * w[0] + controlPoints[1].z * w[1] + controlPoints[2].z * w[2] + controlPoints[3].z * w[3];
     out[3] = 1.0f;
 }
 
 /* Reset only curve progress and its default step; retain all control points. */
 void effInitSlotTail(EffArrHdr *table, s32 index) {
-    EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
+    EffSegmentedBezierSlot *slot = &((EffSegmentedBezierSlot *)table->slots)[index];
 
     slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
     slot->pointIndex = slot->t = 0;
@@ -351,7 +338,7 @@ void effInitSlotTail(EffArrHdr *table, s32 index) {
 
 /* Return the selected slot address through the native signed-word interface. */
 s32 effGetSlotAt(EffArrHdr *table, s32 index) {
-    return (s32)&((EffBezierSlot *)table->slots)[index];
+    return (s32)&((EffSegmentedBezierSlot *)table->slots)[index];
 }
 
 typedef struct GsSurface {
@@ -969,41 +956,32 @@ u32 func_00197D38() {
 void func_00197D50() {
     sndReleaseAllVoices();
 }
-/* Event work shared by resource setup, teardown and state updates. */
+/* Copied event parameters: position, quaternion and aim dimensions (0x30). */
+typedef struct EffEventInit {
+    f32 position[4];       /* 0x00 */
+    f32 orientation[4];    /* 0x10 */
+    f32 range;             /* 0x20 */
+    f32 height;            /* 0x24 */
+    f32 param;             /* 0x28 */
+    u32 color;             /* 0x2C */
+} EffEventInit;
+
+/* Compact event owner: the allocator reserves exactly 0x38 bytes. */
 typedef struct EffEventWork {
-    u8 pad00[4];
-    u32 owner;              /* 0x04 */
-    u8 initBlock[0x28];    /* 0x08: file-record header source */
-    u32 state;              /* 0x30 */
-    u32 effect;             /* 0x34 */
-    u8 pad38[0x48];
-    u8 flag;                /* 0x80 */
-    u8 pad81[3];
-    u32 resource;           /* 0x84 */
+    EffEventInit init;
+    void *actor;          /* Linked model/event owner; concrete identity is unknown. */
+    void *effect;
 } EffEventWork;
-/* Init block of the event holder (0x30 bytes, copied to the event's owner record). */
-typedef struct {
-    f32 pos[3];           /* 0x00 */
-    f32 unk0C;            /* 0x0C */
-    u32 unk10;            /* 0x10 */
-    u32 unk14;            /* 0x14 */
-    u32 unk18;            /* 0x18 */
-    f32 scale;            /* 0x1C */
-    f32 rangeNear;        /* 0x20 */
-    f32 rangeFar;         /* 0x24 */
-    f32 param;            /* 0x28 */
-    u32 color;            /* 0x2C */
-} EffEventInit; /* 0x30 */
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern u32 func_00168548(u32, u16, s32, s32);
-extern void func_00169168(u32, f32);
+extern void *func_00168548(u32, u16, s32, s32);
+extern void func_00169168(void *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(u32 owner, u16 kind, const EffEventInit *params) {
     EffEventWork *work = sdfAllocSizeClassBlock(EFF_EVENT_COMPACT_WORK_BYTES);
 
     memcpy(work, params, sizeof(*params));
-    work->state = 0;
+    work->actor = NULL;
     work->effect = func_00168548(owner, kind, 0, 0);
     func_00169168(work->effect, params->param);
     return work;
@@ -1046,9 +1024,11 @@ void effEventSetScale(EffEventWork *work, f32 scale) {
     func_00169168(work->effect, scale);
 }
 
-void effEventSetState(EffEventWork *work, u32 state) {
-    work->state = state;
+void effEventSetState(EffEventWork *work, void *actor) {
+    work->actor = actor;
 }
+
+extern void func_00197F60(EffEventWork *work);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00197F60);
 
@@ -1056,7 +1036,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00197F60);
 /* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
 typedef struct EffEventLight {
     u32 handle;           /* 0x00 */
-    struct EffEventWork *owner; /* 0x04 */
+    EffEventWork *owner;   /* 0x04 */
     EffEventInit init;    /* 0x08 */
     u8 active;            /* 0x38 */
 } EffEventLight; /* 0x3C */
@@ -1065,18 +1045,18 @@ typedef struct EffEventLight {
 EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
-    work->init.scale = 1.0f;
-    work->init.rangeNear = 50.0f;
-    work->init.rangeFar = 180.0f;
-    work->init.pos[1] = -90.0f;
+    work->init.orientation[3] = 1.0f;
+    work->init.range = 50.0f;
+    work->init.height = 180.0f;
+    work->init.position[1] = -90.0f;
     work->init.param = param;
     work->init.color = EFF_EVENT_NEUTRAL_COLOR;
-    work->init.unk10 = 0;
-    work->init.unk14 = 0;
-    work->init.unk18 = 0;
-    work->init.pos[0] = 0;
-    work->init.pos[2] = 0;
-    work->init.unk0C = 0;
+    work->init.orientation[0] = 0;
+    work->init.orientation[1] = 0;
+    work->init.orientation[2] = 0;
+    work->init.position[0] = 0;
+    work->init.position[2] = 0;
+    work->init.position[3] = 0;
     work->handle = func_00197D38(arg);
     work->owner = effEventCreate(work->handle, 0, &work->init);
     work->active = 1;
@@ -1105,31 +1085,25 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
 }
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
-void func_00198448(EffEventWork *work) {
+void func_00198448(EffEventLight *work) {
     func_00197F60(work->owner);
 }
 
-/* Copy xyz with y lowered by half rangeFar; clear the next scalar and publish the record. */
+/* Copy xyz, lower y by half the aim height, clear w and publish the record. */
 void effEventLightSetPosition(EffEventLight *work, f32 *position) {
-    work->init.pos[0] = position[0];
-    work->init.pos[1] = position[1] - work->init.rangeFar * 0.5f;
-    work->init.pos[2] = position[2];
-    work->init.unk0C = 0;
+    work->init.position[0] = position[0];
+    work->init.position[1] = position[1] - work->init.height * 0.5f;
+    work->init.position[2] = position[2];
+    work->init.position[3] = 0;
     effEventCopyFileRecordHeader((FileRecordHeader *)work->owner, (FileRecordHeader *)&work->init);
 }
 
-/* Attach the effect and copy the initial file-record header to its owner. */
-void effEventBindEffect(EffEventWork *work, u32 effect) {
-    work->effect = effect;
-    effEventCopyFileRecordHeader(work->owner, work->initBlock);
+/* Copy the holder's updated packed tint to its event record. */
+void effEventBindEffect(EffEventLight *work, u32 color) {
+    work->init.color = color;
+    effEventCopyFileRecordHeader((FileRecordHeader *)work->owner, (FileRecordHeader *)&work->init);
 }
 
-typedef struct EffAimSource {
-    f32 position[EFF_EVENT_VECTOR_COMPONENTS];    /* 0x00 */
-    f32 orientation[EFF_EVENT_VECTOR_COMPONENTS]; /* 0x10: quaternion input */
-    f32 range;            /* 0x20 */
-    f32 height;           /* 0x24 */
-} EffAimSource;
 
 typedef struct EffAimParams {
     u8 pad0;
@@ -1151,7 +1125,7 @@ extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
-void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
+void effEventLoadSelectedAimPositionVu(EffEventInit *src, EffAimParams *param) {
     f32 out[EFF_EVENT_VECTOR_COMPONENTS];
     f32 dir[EFF_EVENT_VECTOR_COMPONENTS];
     f32 pos[EFF_EVENT_VECTOR_COMPONENTS];
@@ -1329,13 +1303,13 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
 
 /* Drop the shared texture reference count; zero dispatches both resource handles.
  * The retained allocation is released afterwards, regardless of that count. */
-void effEventReleaseSharedResources(EffEventWork *work) {
+void effEventReleaseSharedResources(EffEventBillSet *work) {
     D_00436530 = D_00436530 - 1;
     if (D_00436530 == 0) {
         billDispatchByKind(D_00436534);
         billDispatchByKind(D_00436538);
     }
-    sdfReleaseResourceAllocation(work->resource);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 extern u32 effMiscRand(void *state);
@@ -1401,7 +1375,7 @@ void effEventCopyParameterVector(void *dst, void *src) {
 }
 
 /* Set the native byte flag without normalizing it to a boolean. */
-void effEventSetWorkFlag(EffEventWork *work, u8 flag) {
+void effEventSetWorkFlag(EffEventBillSet *work, u8 flag) {
     work->flag = flag;
 }
 

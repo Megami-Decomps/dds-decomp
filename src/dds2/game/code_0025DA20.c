@@ -3,6 +3,8 @@
 #include "sdf.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "evt_unit.h"
+#include "dat_state.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -35,8 +37,6 @@
 #define CAMP_SLOT_LAST_ROW_OFFSET 0x1450
 #define CAMP_SLOT_ROW_STRIDE 0x104
 #define CAMP_PARTY_SCAN_LAST 4
-#define CAMP_PARTY_FLAGS_OFFSET 0xa60
-#define CAMP_PARTY_HALFWORD_STRIDE 0xe2
 #define CAMP_PARTY_ACTIVE_FLAG 1
 #define CAMP_HEAP_STATS_WORD_COUNT 8
 
@@ -78,15 +78,6 @@ extern u8 D_003CE658[];
 
 extern s32 kwlnHeldTextureReference;
 
-/* Camp reads the currency word, byte-sized inventory counts and a tier input. */
-typedef struct CampSaveState {
-    u8 pad00[0x3C];
-    s32 money;
-    u8 pad40[0x1300];
-    u8 counts[0x100]; /* 0x1340 */
-    u8 pad1440[0x1D210];
-    u32 unk1E650; /* Compared against the camp tier thresholds. */
-} CampSaveState;
 
 extern s32 sdfAllocatePacketList();
 
@@ -110,7 +101,6 @@ extern s64 evtFindTaskById(void);
 
 extern s32 func_00101820(u32);
 
-extern s32 datGameState;
 
 extern s32 func_00261B98(s32);
 
@@ -176,7 +166,6 @@ extern void *memset(void *dst, s32 c, u32 n);
 
 extern KwlnTask *kwlnTaskCreate();
 
-extern void evtTickPackLoad(void);
 
 extern s32 func_002C54B0(s32);
 extern s32 mnuIsBulletItemId(s32);
@@ -191,7 +180,6 @@ extern void frFontSetChildColors(s32, u32);
 
 extern s32 func_0019D550(s32, s32, u32);
 
-extern void evtReleaseEventPackResources(void);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
@@ -215,25 +203,20 @@ extern s32 D_003C99A8[4];
 extern BufferDescriptor kwlnDrawSurfaces[];
 extern s32 effDestroyPackedBatch(s32);
 
-typedef struct CampTaskData {
-    s32 taskId;
-    s32 unk4;
-    u8 pad08[0x40];
-} CampTaskData;
 
 extern u8 D_003CBB70[];
 
 /* Schedule the camp task only if no task currently owns this event ID. */
 void mnuCampCreateTask(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
-    CampTaskData *taskData;
+    EvtPackLoadState *taskData;
 
     if (evtFindTaskById() == 0) {
         evtFormatTaskName(taskId, taskName);
         taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
-        taskData->taskId = taskId;
-        taskData->unk4 = 0;
+        taskData->eventId = taskId;
+        taskData->loaded = 0;
         kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, taskData);
     }
 }
@@ -1242,7 +1225,7 @@ s32 mnuCampHasEligibleOwnedItems(void) {
         if (func_002C54B0(i) != 0) {
             continue;
         }
-        if (((CampSaveState *)datGameState)->counts[i] == 0) {
+        if (datGameState->inventory.counts[i] == 0) {
             continue;
         }
         if ((datItemSkillRecords[i * 8] & 3) != 0) {
@@ -1399,16 +1382,16 @@ u32 func_00260460(void) {
 /* Sum the active low bit across five entries using the native halfword stride. */
 s32 mnuCountActivePartyEntries(void) {
     u16 entryFlags;
-    u16 *entryFlagsCursor;
+    DatPartyRecord *entryFlagsCursor;
     s32 entryCountdown;
     s32 enabledCount;
 
     enabledCount = 0;
     entryCountdown = CAMP_PARTY_SCAN_LAST;
-    entryFlagsCursor = (u16 *)(datGameState + CAMP_PARTY_FLAGS_OFFSET);
+    entryFlagsCursor = datGameState->party;
     do {
-        entryFlags = *entryFlagsCursor;
-        entryFlagsCursor = entryFlagsCursor + CAMP_PARTY_HALFWORD_STRIDE;
+        entryFlags = entryFlagsCursor->flags;
+        entryFlagsCursor++;
         entryCountdown = entryCountdown - 1;
         enabledCount = enabledCount + (entryFlags & CAMP_PARTY_ACTIVE_FLAG);
     } while (-1 < entryCountdown);
@@ -1427,10 +1410,10 @@ s32 mnuCampResolveProgressTierValue(void) {
 
     for (i = 0; i < 3; i++) {
         if (i + 1 < 3) {
-            if (D_003CE408[i].threshold > ((CampSaveState *)datGameState)->unk1E650) {
+            if (D_003CE408[i].threshold > datGameState->savedCurrency) {
                 break;
             }
-        } else if (D_003CE408[i].threshold <= ((CampSaveState *)datGameState)->unk1E650) {
+        } else if (D_003CE408[i].threshold <= datGameState->savedCurrency) {
             break;
         }
     }
@@ -1448,7 +1431,7 @@ void mnuCampClearListedItemCounts(void) {
         entryId = *(u16 *)entry;
         entry = (s8 *)((s32)entry + 8);
         index = index + 1;
-        ((CampSaveState *)datGameState)->counts[(u32)entryId] = 0;
+        datGameState->inventory.counts[(u32)entryId] = 0;
     } while (index < 3);
 }
 
@@ -1747,7 +1730,7 @@ s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
     u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
     s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
 
-    if (entry[1] == 0 && func_002C54B0(id) != 0 && ((CampSaveState *)datGameState)->counts[id] != 0) {
+    if (entry[1] == 0 && func_002C54B0(id) != 0 && datGameState->inventory.counts[id] != 0) {
         id = *(u16 *)(entry + 8);
     }
     return id;
@@ -1763,15 +1746,15 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
     if (mode == 1) {
         value -= ptyCountBulletItem(id);
     } else if (mode == 3) {
-        value = 1 - ((CampSaveState *)datGameState)->counts[id];
+        value = 1 - datGameState->inventory.counts[id];
     } else if (mode == 2) {
-        value = 1 - ((CampSaveState *)datGameState)->counts[id];
+        value = 1 - datGameState->inventory.counts[id];
     } else {
-        value = 99 - ((CampSaveState *)datGameState)->counts[id];
+        value = 99 - datGameState->inventory.counts[id];
     }
     if (mnuCampFindListedItemIndex(id) >= 0) {
         if (value >= 2) {
-            value = ((CampSaveState *)datGameState)->counts[id] == 0;
+            value = datGameState->inventory.counts[id] == 0;
         }
     }
     return value < 0 ? 0 : value;
@@ -1793,7 +1776,7 @@ void mnuCampDisableUnavailableItemEntries(u8 *scene) {
     for (i = 0; i < ((ShopScene *)scene)->extra->list->count; i++) {
         item = &node->params;
         /* Keep the unchecked division: retail traps when the row price is zero. */
-        count = ((CampSaveState *)datGameState)->money / item->price;
+        count = datGameState->header.currency / item->price;
         remaining = mnuCampCountRemainingUses(item->mode, item->id, (s32)scene);
         if (remaining < count) {
             count = remaining;
@@ -1833,7 +1816,7 @@ s32 func_002613C8(s32 level, s32 price) {
             }
         }
     } else {
-        price = price * D_003CE150[*(s32 *)(datGameState + 0x1E658)].percent / 100;
+        price = price * D_003CE150[datGameState->progressSlot].percent / 100;
     }
     return price;
 }

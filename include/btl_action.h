@@ -13,9 +13,12 @@ typedef struct BtlRuntimeTask {
     u8 pad01[7];
     u64 conditionHandle;
     u8 status; /* 0x10 */
-    u8 pad11[0xF];
+    u8 pad11[7];
+    u64 secondaryConditionHandle; /* 0x18: the second dependency checked with +0x10 */
     u16 taskId; /* 0x20 */
-    u8 pad22[6];
+    u8 pad22[2];
+    u16 flags; /* 0x24: command tasks set bit 1 before starting */
+    u8 pad26[2];
     s32 startDelay; /* Signed countdown before the task's running phase. */
     u8 pad2C[0xC];
     u64 handle;
@@ -41,7 +44,8 @@ extern BtlAbilityParameter *datAbilityParameters;
 
 /* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
 typedef struct BtlActionAnimationRecord {
-    u8 pad00[3];
+    u8 cameraKind; /* 0x00: values 6 and 7 select an aim pose. */
+    u8 pad01[2];
     u8 kind;
     u16 displayCode;
     u8 pad06[0x16];

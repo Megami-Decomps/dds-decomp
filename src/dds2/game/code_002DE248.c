@@ -1,4 +1,6 @@
 #include "common.h"
+#include "eff_curve.h"
+#include "file.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff_queue.h"
@@ -124,15 +126,6 @@ typedef struct EffectVectorRequest {
     u32 unk04;
 } EffectVectorRequest;
 
-typedef struct EffBattleCamera {
-    u8 pad_00[0x40];
-    f32 position[3];
-    u8 pad4C[0x14];
-    f32 scale;
-    u32 mode;
-    u32 flags; // 0x68, camera-relative positioning and rotation flags
-    u8 pad6C[0x14];
-} EffBattleCamera;
 
 typedef struct EffViewScale {
     u8 pad00[0x74];
@@ -325,17 +318,6 @@ typedef struct EffKindSource {
     s32 modeKind;
 } EffKindSource;
 
-/* File-job request fields consumed when instantiating an effect. */
-typedef struct EffFileRequest {
-    u8 pad_00[0xC];
-    u16 kind;
-    u8 pad_0E[6];
-    u32 primarySize; // 0x14, byte count returned for the primary file buffer
-    u8 pad_18[4];
-    u16 secondaryMode;
-    u8 pad_1E[6];
-    u32 resourceParam;
-} EffFileRequest;
 
 extern EffKindDesc D_003E9810[];
 
@@ -674,7 +656,8 @@ extern s32 mdlGetContextResourceId(void *model);
 
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
-extern void *sdfAllocGeneralBlock(u32);
+struct SdfMemBlock;
+extern struct SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 extern u8 *effCreatePointSet4(u32);
 
@@ -977,7 +960,7 @@ void effSelectionFrameAdvance(s32 *counter) {
     *counter = frame + 1;
 }
 
-extern f32 func_002D7770(u8 *, s32, s32);
+extern f32 func_002D7770(EffScalarCurve *, s32, s32);
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
@@ -1022,30 +1005,16 @@ typedef struct EffFadeCurve2 {
     f32 value2;    /* 0x0C */
 } EffFadeCurve2; /* 0x10 */
 
-/* Curve entry the rate helper (func_00297270) reads; 0x2C bytes. */
-typedef struct EffRateCurve {
-    u8 mode;          /* 0x00 */
-    u8 pad01[3];
-    f32 span;         /* 0x04: divisor when mode is 0 */
-    f32 rate;         /* 0x08 */
-    u8 pad0C[8];
-    f32 value2;       /* 0x14 */
-    f32 threshold;    /* 0x18 */
-    f32 value3;       /* 0x1C */
-    f32 value4;       /* 0x20 */
-    u8 pad24[8];
-} EffRateCurve; /* 0x2C */
 
 typedef struct EffFadeConfig {
-    /* Individually placed curves, not a regular array. The two the blend
-     * helper takes sit at 0x00 and 0x34; the two the rate helper takes sit at
-     * 0x60 and 0x8C. Strides are irregular, so they are named, not indexed. */
+    /* Color and alpha tracks at 0x00/0x24, followed by three scalar
+     * tracks at 0x34, 0x60 and 0x8C. The scalar extents differ. */
     EffFadeCurve blendA;   /* 0x00 */
     EffFadeCurve2 blendB2; /* 0x24 */
-    EffFadeCurve blendB;   /* 0x34 */
+    EffScalarCurve blendB;   /* 0x34 */
     u8 pad58[8];
-    EffRateCurve rateA;   /* 0x60 */
-    EffRateCurve rateB;   /* 0x8C */
+    EffScalarTrack rateA;   /* 0x60 */
+    EffScalarTrack rateB;   /* 0x8C */
     s32 progress;         /* 0xB8 */
     u8 padBC[4];
     EffFadeOut out;       /* 0xC0 */
@@ -1094,15 +1063,14 @@ typedef struct EffRateOut {
 } EffRateOut;
 
 typedef struct EffRateConfig {
-    /* Individually placed curves, not a regular array. The two the blend
-     * helper takes sit at 0x00 and 0x34; the two the rate helper takes sit at
-     * 0x60 and 0x8C. Strides are irregular, so they are named, not indexed. */
+    /* Color and alpha tracks at 0x00/0x24, followed by three scalar
+     * tracks at 0x34, 0x60 and 0x8C. The scalar extents differ. */
     EffFadeCurve blendA;   /* 0x00 */
     EffFadeCurve2 blendB2; /* 0x24 */
-    EffFadeCurve blendB;   /* 0x34 */
+    EffScalarCurve blendB;   /* 0x34 */
     u8 pad58[8];
-    EffRateCurve rateA;   /* 0x60 */
-    EffRateCurve rateB;   /* 0x8C */
+    EffScalarTrack rateA;   /* 0x60 */
+    EffScalarTrack rateB;   /* 0x8C */
     s32 progress;         /* 0xB8 */
     u8 fixedMode;         /* 0xBC */
     u8 padBD[3];
@@ -1147,7 +1115,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effDrawBlurRectangle(out);
 }
@@ -1192,7 +1160,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB, limit, progress);
+    rate = func_002D7770(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->posX = 0;
         out->posY = 0;
@@ -1227,7 +1195,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
@@ -1266,7 +1234,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB, limit, progress);
+    rate = func_002D7770(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1297,7 +1265,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     func_0018ECD0(out);
 }
@@ -1336,7 +1304,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB, limit, progress);
+    rate = func_002D7770(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1367,7 +1335,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effBlurStepScaleSlotsAndDraw(out);
 }
@@ -1414,7 +1382,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) + 1.0f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress);
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress);
     out->param = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
@@ -1511,14 +1479,14 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
 
 extern s32 *effCreateResourceHolderFromSelectedKind(s32 *, u16);
 
-EffKindWork *func_002DFDB8(EffFileRequest *work) {
+EffKindWork *func_002DFDB8(FileJob *work) {
     void *source = fileResolvePrimaryBuffer(work);
-    EffKindWork *effect = effAllocateKindWork(work->kind, source);
+    EffKindWork *effect = effAllocateKindWork(work->option, source);
     s32 *secondary = (s32 *)fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
         if (D_003E9810[effect->kind].initialize != NULL) {
-            s32 *child = effCreateResourceHolderFromSelectedKind(secondary, work->secondaryMode);
+            s32 *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
             effect->target = child;
             D_003E9810[effect->kind].initialize((s32)effect, child[2]);
         }
@@ -1609,14 +1577,14 @@ EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
 }
 
 /* Create alternate-kind work from a primary file payload and a supported secondary asset. */
-EffKindWork *effCreateAlternateKindWorkFromFile(EffFileRequest *work) {
+EffKindWork *effCreateAlternateKindWorkFromFile(FileJob *work) {
     void *source = fileResolvePrimaryBuffer(work);
-    EffKindWork *effect = effAllocateAlternateKindWork(work->kind, source);
+    EffKindWork *effect = effAllocateAlternateKindWork(work->option, source);
     s32 *secondary = (s32 *)fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
         if (D_003E98A0[effect->kind].initialize != NULL) {
-            s32 *child = effCreateResourceHolderFromSelectedKind(secondary, work->secondaryMode);
+            s32 *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
             effect->target = child;
             D_003E98A0[effect->kind].initialize((s32)effect, child[2]);
         }
@@ -1745,7 +1713,7 @@ u8 *effCreateBillboardWork(u8 *source) {
         return work;
     }
     memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
-           ((EffFileRequest *)source)->primarySize);
+           ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
         billCreateIndexed(1, fileResolveSecondaryBuffer(source));
     return work;
@@ -1859,15 +1827,23 @@ typedef struct EffBillConfig {
     u8 pad_00[0x28];
     u32 textureId;      // 0x28, copied into the output record
     u8 pad_2C[8];
-    u32 progress;       // 0x34
     union {
-        u32 count;      // 0x38
-        s32 signedCount;
-    } frames;
-    u8 outputMode;      // 0x3C, copied to the blend output
-    u8 pad_3D[0x19];
-    u8 mode;            // 0x56
-    u8 pad_57[0x19];
+        struct {
+            u32 progress; /* 0x34, frame-animation variant */
+            union {
+                u32 count;
+                s32 signedCount;
+            } frames; /* 0x38 */
+            u8 outputMode; /* 0x3C */
+            u8 pad_3D[0x19];
+            u8 mode; /* 0x56 */
+            u8 pad_57;
+        };
+        /* The quantized-mesh resource copies a 0x98-byte configuration;
+         * its draw callback samples this scalar track at 0x34. */
+        EffScalarCurve scaleCurve;
+    };
+    u8 pad_58[0x18];
     u32 drawProgress;    // 0x70, progress of the mesh-draw variant
     u8 pad_74[4];
     f32 fadeInEnd;      // 0x78, ramp-up length as a fraction of `resourceId`
@@ -2782,7 +2758,7 @@ u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
 u8 *effCreateFileResourceInstance(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
     void *source;
-    switch (((EffFileRequest *)work)->secondaryMode) {
+    switch (((FileJob *)work)->slots[0].selector) {
     case 1:
         break;
     case 4:
@@ -2790,7 +2766,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceA(((EffFileRequest *)work)->kind, source, (u32)secondary);
+    return effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
 }
 
 
@@ -3501,7 +3477,7 @@ void effCreateClassWorkFromFile(s32 request) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effPayloadPointerSet(((EffFileRequest *)request)->kind, source);
+    effPayloadPointerSet(((FileJob *)request)->option, source);
 }
 
 void effDestroyClassWork(u32 *obj) {
@@ -3719,8 +3695,8 @@ s32 effResourceReferenceReplaceFromFile(u8 *source) {
     s32 next = primary + 0x1C;
     s32 object = effCreateSurfaceNodeForGrid(next);
 
-    effRebuildSurfaceHandles(object, ((EffFileRequest *)source)->kind, primary);
-    effReplaceResourceRef(object, ((EffFileRequest *)source)->kind, next);
+    effRebuildSurfaceHandles(object, ((FileJob *)source)->option, primary);
+    effReplaceResourceRef(object, ((FileJob *)source)->option, next);
     return object;
 }
 
@@ -3779,7 +3755,7 @@ s32 effCreateSurfaceNodeFromFile(s32 *source) {
     s32 *object = (s32 *)effResourceReferenceReplaceFromFile((u8 *)source);
     s32 *data = (s32 *)fileResolveSecondaryBuffer(source);
     if (data != NULL) {
-        effConfigureSurfaceNodeByKind(object, ((EffFileRequest *)source)->secondaryMode, data);
+        effConfigureSurfaceNodeByKind(object, ((FileJob *)source)->slots[0].selector, data);
     }
     return (s32)object;
 }
@@ -4743,7 +4719,85 @@ void effSeedBillboardFrameCounters(s32 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002ECF78);
+typedef struct EffAlternatingPointSetRow {
+    EffPointSet *set;
+    s32 key;
+    u32 unk08;
+} EffAlternatingPointSetRow;
+
+typedef struct EffAlternatingPointSetTable {
+    EffAlternatingPointSetRow *rows;
+} EffAlternatingPointSetTable;
+
+EffAlternatingPointSetTable *func_002ECF78(EffPointSetTableSource *src) {
+    u32 count = src->count;
+    EffAlternatingPointSetTable *table;
+    EffAlternatingPointSetRow *row;
+    u32 i;
+    u32 alphaA;
+    u32 alphaB;
+    u32 alphaC;
+    u32 lowA;
+    u32 lowB;
+    u32 lowC;
+    s32 rampIn;
+    s32 rampOut;
+    f32 previousRatio;
+
+    table = (EffAlternatingPointSetTable *)sdfAllocSizeClassBlock(count * sizeof(EffAlternatingPointSetRow) + 4);
+    table->rows = (EffAlternatingPointSetRow *)(table + 1);
+    if ((u32)src->layers < 3) {
+        src->layers = 3;
+    }
+    if (!(src->layers & 1)) {
+        src->layers++;
+    }
+    lowA = src->colorA & 0xFFFFFF;
+    lowB = src->colorB & 0xFFFFFF;
+    lowC = src->colorC & 0xFFFFFF;
+    alphaA = src->colorA >> 24;
+    alphaB = src->colorB >> 24;
+    alphaC = src->colorC >> 24;
+    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
+    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    previousRatio = 0.0f;
+    row = table->rows;
+    for (i = 0; i < count; i++) {
+        EffPointSet *set = effCreatePointSet5(src->layers);
+        u32 n;
+        u32 *rec;
+        u32 j;
+
+        row->set = set;
+        n = set->rows / 5;
+        rec = (u32 *)set->tail;
+        for (j = 0; j < n; j++) {
+            f32 ratio;
+
+            if ((j & 1) || j == 0) {
+                if (j < rampIn) {
+                    ratio = (f32)j / (f32)rampIn;
+                } else if (j <= rampOut) {
+                    ratio = 1.0f;
+                } else {
+                    ratio = (f32)(n - j - 1) / (f32)(n - rampOut);
+                }
+                previousRatio = ratio;
+            } else {
+                ratio = previousRatio;
+            }
+            rec[0] = lowC | ((u32)((f32)alphaC * ratio) << 24);
+            rec[1] = lowB | ((u32)((f32)alphaB * ratio) << 24);
+            rec[2] = lowA | ((u32)((f32)alphaA * ratio) << 24);
+            rec[3] = rec[1];
+            rec[4] = rec[0];
+            rec += 5;
+        }
+        row->key = ~(i * 4);
+        row++;
+    }
+    return table;
+}
 
 void effReleaseBillboardFramePointSets(s32 *work) {
     u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
@@ -4781,7 +4835,7 @@ void effCreateClassResourceFromFile(s32 request) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effCreateClassResourceWork(((EffFileRequest *)request)->kind, source);
+    effCreateClassResourceWork(((FileJob *)request)->option, source);
 }
 
 void effDestroyClassResourceWork(s32 work) {
@@ -4949,7 +5003,7 @@ u8 *effFileResourceReferenceReplace(u8 *work) {
     u8 *node = (u8 *)effCreateStripNodeFromGrid(source);
 
     memcpy(node + 0xC, primary, 0x20);
-    effReplaceFileResourceRef((s32)node, ((EffFileRequest *)work)->kind, (s32)source);
+    effReplaceFileResourceRef((s32)node, ((FileJob *)work)->option, (s32)source);
     return node;
 }
 
@@ -5566,7 +5620,7 @@ extern u8 *effCreateResourceInstanceB(u16, void *, u32);
 u8 *effCreateFileResourceInstanceB(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
     void *source;
-    switch (((EffFileRequest *)work)->secondaryMode) {
+    switch (((FileJob *)work)->slots[0].selector) {
     case 1:
         break;
     case 4:
@@ -5574,7 +5628,7 @@ u8 *effCreateFileResourceInstanceB(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceB(((EffFileRequest *)work)->kind, source, (u32)secondary);
+    return effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
 }
 
 void effDestroyBlockResourceWork(u32 *obj) {
@@ -6108,7 +6162,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     ((EffMeshOutput *)out)->color = blended[0];
     ((EffMeshOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
     ((EffMeshOutput *)out)->mode = ((EffBillConfig *)config)->meshMode;
-    scale = func_002D7770(config + 0x34, limit, progress) * work->scale;
+    scale = func_002D7770(&((EffBillConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -6147,7 +6201,7 @@ void effResourceInstanceCreateFromFile(s32 work) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effCreateResourceInstanceC(((EffFileRequest *)work)->kind, source);
+    effCreateResourceInstanceC(((FileJob *)work)->option, source);
 }
 
 void effDispatchCleanupOp(u8 *work) {
@@ -6418,7 +6472,7 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
 u32 effCreateModelResourceFromFile(u8 *work) {
     void *first = fileResolvePrimaryBuffer();
     void *second = fileResolveSecondaryBuffer(work);
-    return effCreateModelResourceWithInlineData(((EffFileRequest *)work)->kind, first, second, ((EffFileRequest *)work)->resourceParam);
+    return effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
 
 void effDestroyModelResource(EffModelResource *effect) {
@@ -7730,8 +7784,8 @@ u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, s32 secondary, u32 
 void effCreateActiveResourceFromFile(s32 *source) {
     void *primary = fileResolvePrimaryBuffer();
     s32 secondary = fileResolveSecondaryBuffer(source);
-    func_002F9608(((EffFileRequest *)source)->kind, primary,
-                  ((EffFileRequest *)source)->secondaryMode, secondary, ((EffFileRequest *)source)->resourceParam);
+    func_002F9608(((FileJob *)source)->option, primary,
+                  ((FileJob *)source)->slots[0].selector, secondary, ((FileJob *)source)->slots[1].size);
 }
 
 void effDestroyResourceInstance(u32 *obj) {
@@ -7970,18 +8024,18 @@ s32 *func_002FA5F0(u8 *request) {
     u32 kind;
 
     memcpy(&((EffectSlotNode80 *)work)->randomDirection, buffer, 0x50);
-    effRebuildResourceEntries((u8 *)work, ((EffFileRequest *)request)->kind, size);
+    effRebuildResourceEntries((u8 *)work, ((FileJob *)request)->option, size);
     secondary = fileResolveSecondaryBuffer(request);
     if (secondary != 0) {
-        kind = ((EffFileRequest *)request)->secondaryMode;
+        kind = ((FileJob *)request)->slots[0].selector;
         switch (kind) {
         case 3:
-            effReplaceEffectSlotModelAndDeviceResources((EffectSlotNode80 *)work, secondary, ((EffFileRequest *)request)->resourceParam);
-            kind = ((EffFileRequest *)request)->secondaryMode;
+            effReplaceEffectSlotModelAndDeviceResources((EffectSlotNode80 *)work, secondary, ((FileJob *)request)->slots[1].size);
+            kind = ((FileJob *)request)->slots[0].selector;
             break;
         case 6:
             effRebuildResourceEntryClones(work, secondary);
-            kind = ((EffFileRequest *)request)->secondaryMode;
+            kind = ((FileJob *)request)->slots[0].selector;
             break;
         }
         ((EffectSlotNode80 *)work)->resourceKind = kind;
@@ -8369,14 +8423,14 @@ void effSetBattleOffset(void *src) {
 
 void effComputeBattleCameraPositionVU(u8 *effect) {
     u128 direction;
-    u32 flags = ((EffBattleCamera *)effect)->flags;
+    u32 flags = ((FileJob *)effect)->xformFlags;
 
     if ((flags & 0x18) != 0) {
         camFollowOffsetVec(effect, &direction);
         VU0_LOAD_VF(vf10, &direction);
-        flags = ((EffBattleCamera *)effect)->flags;
+        flags = ((FileJob *)effect)->xformFlags;
     } else {
-        VU0_LOAD_VF(vf10, effect + 0x40);
+        VU0_LOAD_VF(vf10, ((FileJob *)effect)->offset);
     }
     if ((flags & 0x80) != 0) {
         VU0_SCALAR_OP_CLOBBER(((EffViewScale *)effFileQueue)->scale, "vmulx.xyzw vf10, vf10, vf2x");
@@ -8397,14 +8451,14 @@ extern void camAimRotation();
 void effMultiplyQuatWithFlag(u8 *work) {
     s128 rotation;
 
-    if (((EffBattleCamera *)work)->flags & 0x60) {
+    if (((FileJob *)work)->xformFlags & 0x60) {
         camAimRotation(work, &rotation);
         VU0_LOAD_VF_MEMORY(vf10, effFileQueue + 0x50);
         VU0_LOAD_VF_MEMORY(vf11, &rotation);
         effMiscQuatMultiplyVU();
     } else {
     VU0_LOAD_VF_MEMORY(vf10, effFileQueue + 0x50);
-    VU0_LOAD_VF_MEMORY(vf11, work + 0x50);
+    VU0_LOAD_VF_MEMORY(vf11, ((FileJob *)work)->quat);
         effMiscQuatMultiplyVU();
     }
 }
@@ -8420,12 +8474,13 @@ void effApplyBattleCameraToObject(work)
     effMultiplyQuatWithFlag(D_0045C270);
     VU0_STORE_VF_UNCLOBBERED(vf10, &rotation[1]);
     fileJobInvokeRotationCallback(work, &rotation[1]);
-    fileJobInvokeScaleCallback(work, ((EffBattleCamera *)D_0045C270)->scale * ((EffViewScale *)effFileQueue)->scale);
-    fileDispatchJobTypeCallback(work, ((EffBattleCamera *)D_0045C270)->mode);
+    fileJobInvokeScaleCallback(work, ((FileJob *)D_0045C270)->scale * ((EffViewScale *)effFileQueue)->scale);
+    fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", effQueueEffectFileJob);
 
+/* Effect asset/creation descriptor (0x20), separate from the runtime FileJob. */
 typedef struct EffFileJobRequest {
     char *name;
     u16 fileKind;
@@ -8434,7 +8489,7 @@ typedef struct EffFileJobRequest {
     u8 padA[2];
     void *output;
     u32 size;
-    u8 pad14[4];
+    u32 allocationHandle;
     u16 resourceMode;
     u8 pad1A[2];
     u32 relatedResource;
@@ -8502,20 +8557,7 @@ extern void func_002D50D8(u32, char *);
 
 extern void func_002D55B0(u32, char *);
 
-/* Asset selection request and table entry use different ID offsets. */
-typedef struct EffAssetRequest {
-    u8 pad_00[4];
-    u16 type;       // 0x04
-    u8 pad_06[6];
-    u16 id;         // 0x0C
-} EffAssetRequest;
 
-typedef struct EffAssetIdentifier {
-    u8 pad_00[4];
-    u16 type;       // 0x04
-    u8 pad_06[2];
-    u16 id;         // 0x08
-} EffAssetIdentifier;
 
 s32 effPollPrimaryFile(void) {
     EffQueueRecord request;
@@ -8583,20 +8625,17 @@ s32 effPollAttachedFile(void) {
     return result;
 }
 
-typedef struct EffAssetQuery {
-    u8 pad00[0x90];
-    u8 *request;
-} EffAssetQuery;
 
 typedef struct EffQueuedFileObject {
     u8 pad00[0x34];
     u8 *linkedState;
 } EffQueuedFileObject;
 
+/* Runtime option (+0x0C) selects the descriptor transfer mode (+0x08). */
 u8 *effFindAssetData(u8 *work) {
-    u8 *requested = ((EffAssetQuery *)work)->request;
-    u16 type = ((EffAssetRequest *)requested)->type;
-    u16 id = ((EffAssetRequest *)requested)->id;
+    FileJob *requested = (FileJob *)((FileJob *)work)->id;
+    u16 type = requested->type;
+    u16 id = requested->option;
     u16 i;
     for (i = 0; i < 24; i++) {
         EffectAssetLink *links = D_003FF128[i];
@@ -8605,12 +8644,12 @@ u8 *effFindAssetData(u8 *work) {
             if (current->asset != NULL) {
                 do {
                     u8 *asset = current->asset;
-                    if (((EffAssetIdentifier *)asset)->type != 6) {
-                        if (((EffAssetIdentifier *)asset)->type == type && ((EffAssetIdentifier *)asset)->id == id) {
+                    if (((EffFileJobRequest *)asset)->fileKind != 6) {
+                        if (((EffFileJobRequest *)asset)->fileKind == type && ((EffFileJobRequest *)asset)->transferMode == id) {
                             return asset;
                         }
                     } else if (type == 6) {
-                        s32 index = ((EffAssetIdentifier *)asset)->id;
+                        s32 index = ((EffFileJobRequest *)asset)->transferMode;
                         if (index < 2) {
                             if (index >= 0) {
                                 return asset;
@@ -8626,9 +8665,9 @@ u8 *effFindAssetData(u8 *work) {
 }
 
 u32 effFindAssetObject(u8 *work) {
-    u8 *requested = ((EffAssetQuery *)work)->request;
-    u16 type = ((EffAssetRequest *)requested)->type;
-    u16 id = ((EffAssetRequest *)requested)->id;
+    FileJob *requested = (FileJob *)((FileJob *)work)->id;
+    u16 type = requested->type;
+    u16 id = requested->option;
     u16 i;
     for (i = 0; i < 24; i++) {
         EffectAssetLink *links = D_003FF128[i];
@@ -8637,7 +8676,7 @@ u32 effFindAssetObject(u8 *work) {
             if (current->asset != NULL) {
                 do {
                     u8 *asset = current->asset;
-                    if (((EffAssetIdentifier *)asset)->type == type && ((EffAssetIdentifier *)asset)->id == id) {
+                    if (((EffFileJobRequest *)asset)->fileKind == type && ((EffFileJobRequest *)asset)->transferMode == id) {
                         return current->object;
                     }
                     current++;
@@ -8996,17 +9035,6 @@ INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042CF90);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FCA58);
 
-typedef struct EffFileJobEntry {
-    EffBattleCamera camera;
-    u8 pad80[8];
-    u8 unk88;
-    u8 unk89;
-    u8 unk8A;
-    u8 pad8B[5];
-    u32 fileHandle;
-    u8 pad94[8];
-    char filename[1];
-} EffFileJobEntry;
 
 typedef struct EffCameraCreateRequest {
     EffFileJobRequest *resource;
@@ -9015,28 +9043,27 @@ typedef struct EffCameraCreateRequest {
     f32 position[3];
 } EffCameraCreateRequest;
 
-typedef struct FileJob FileJob;
 extern void fileQueueInitTransform(void *);
 extern FileJob *fileAppendJob(FileQueue *, u32);
 extern s32 fileQueueCountLinkedJobs(FileQueue *);
 extern u32 effCurrentFileQueueEntry;
 
 u32 effAppendPositionedCameraFileJob(EffCameraCreateRequest *request) {
-    EffFileJobEntry *entry;
+    FileJob *entry;
     u32 count;
 
     fileQueueInitTransform(D_0045C270);
-    entry = (EffFileJobEntry *)fileAppendJob((FileQueue *)effFileQueue, effLoadFileJobPayload(request->resource, request->existingJob));
+    entry = fileAppendJob((FileQueue *)effFileQueue, effLoadFileJobPayload(request->resource, request->existingJob));
     effCurrentFileQueueEntry = (u32)entry;
-    strcpy(entry->filename, request->resource->name);
-    entry->camera.position[0] = request->position[0];
-    entry->camera.position[1] = request->position[1];
-    entry->camera.position[2] = request->position[2];
-    entry->unk88 = 8;
-    entry->unk89 = 0;
-    entry->unk8A = 0;
+    strcpy(entry->name, request->resource->name);
+    entry->offset[0] = request->position[0];
+    entry->offset[1] = request->position[1];
+    entry->offset[2] = request->position[2];
+    entry->unk88[0] = 8;
+    entry->unk88[1] = 0;
+    entry->unk88[2] = 0;
     memcpy(D_0045C270, entry, 0x80);
-    effQueuedFileHandle = entry->fileHandle;
+    effQueuedFileHandle = entry->id;
     D_004386BC = effQueueEffectFileJob((u8 *)request->resource);
     effQueuedFileObject = (s32)request->object;
     count = fileQueueCountLinkedJobs((FileQueue *)effFileQueue);
@@ -10164,27 +10191,11 @@ void func_00302F28(void) {
     effPollFileRecord(D_0042D140, 4);
 }
 
-typedef struct EffectFileHeader {
-    u8 unk_00[8];
-    u16 mode;
-    u8 unk_0A[2];
-    u32 start;
-    u32 length;
-} EffectFileHeader;
 
-extern EffectFileHeader D_003FB948;
+extern EffFileJobRequest D_003FB948;
 
-extern EffectFileHeader D_003F01D0;
+extern EffFileJobRequest D_003F01D0;
 
-typedef struct EffFileResourceRecord {
-    char *name;
-    u8 pad4[4];
-    u16 mode;
-    u8 padA[2];
-    u8 *buffer;
-    u32 size;
-    u32 allocationHandle;
-} EffFileResourceRecord;
 
 
 u32 fileLoadEffectSlotA(void) {
@@ -10203,18 +10214,18 @@ u32 fileLoadEffectSlotA(void) {
         result = 0x400000;
     } else if (status == 1) {
         job = (u8 *)fileCreateJob(3);
-        fileJobSetPrimaryData(job, D_003F01D0.start, D_003F01D0.length,
-                      D_003F01D0.mode);
+        fileJobSetPrimaryData(job, D_003F01D0.output, D_003F01D0.size,
+                      D_003F01D0.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, fileInfo, effClassifyResourceMask(((EffResourceBankSlot *)fileInfo)->type));
         entry = (u8 *)fileAppendJob(effFileQueue, job);
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        effQueuedFileHandle = ((EffFileJobEntry *)entry)->fileHandle;
+        effQueuedFileHandle = ((FileJob *)entry)->id;
         resource = (u8 *)effFindAssetData(entry);
-        strcpy(((EffFileJobEntry *)entry)->filename, ((EffFileResourceRecord *)resource)->name);
+        strcpy(((FileJob *)entry)->name, ((EffFileJobRequest *)resource)->name);
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
-        memcpy(((EffFileResourceRecord *)resource)->buffer, fileData,
-               ((EffFileResourceRecord *)resource)->size);
+        memcpy(((EffFileJobRequest *)resource)->output, fileData,
+               ((EffFileJobRequest *)resource)->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_003FFA78;
@@ -10250,8 +10261,8 @@ u32 effQueueGeneratedFileJob(void) {
     u32 result;
     s32 status;
     u8 *job;
-    EffFileJobEntry *entry;
-    EffFileResourceRecord *resource;
+    FileJob *entry;
+    EffFileJobRequest *resource;
     u8 *buffer;
     u32 command;
     u32 totalLength;
@@ -10277,21 +10288,21 @@ u32 effQueueGeneratedFileJob(void) {
         sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetPrimaryData(job, buffer, totalLength, 1);
-        entry = (EffFileJobEntry *)fileAppendJob(effFileQueue, job);
+        entry = fileAppendJob(effFileQueue, job);
         effCurrentFileQueueEntry = (u32)entry;
-        resource = (EffFileResourceRecord *)effFindAssetData(entry);
-        strcpy(entry->filename, resource->name);
+        resource = (EffFileJobRequest *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
         memcpy(D_0045C270, entry, 0x80);
-        queuedFile = entry->fileHandle;
+        queuedFile = entry->id;
         oldAllocation = resource->allocationHandle;
         effQueuedFileHandle = queuedFile;
         if (oldAllocation != 0) {
             sdfReleaseResourceAllocation(oldAllocation);
         }
         resource->allocationHandle = allocation;
-        resource->buffer = buffer;
+        resource->output = buffer;
         resource->size = dataLength + headerBytes;
-        resource->mode = 1;
+        resource->transferMode = 1;
         memcpy(D_00459E30, D_003F0DA8, 0x74);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
@@ -10306,13 +10317,13 @@ u32 effQueueGeneratedFileJob(void) {
     return result;
 }
 
-extern EffectFileHeader D_003F9060;
+extern EffFileJobRequest D_003F9060;
 
 u32 effPollAndQueueCopiedFileResource(void) {
     EffFileQueryInfo fileInfo;
     u8 *job;
-    EffFileJobEntry *entry;
-    EffFileResourceRecord *resource;
+    FileJob *entry;
+    EffFileJobRequest *resource;
     void *fileData;
     s32 status;
     u32 result;
@@ -10324,17 +10335,17 @@ u32 effPollAndQueueCopiedFileResource(void) {
         result = 0x400000;
     } else if (status == 1) {
         job = (u8 *)fileCreateJob(0x12);
-        fileJobSetPrimaryData(job, D_003F9060.start, D_003F9060.length,
-                      D_003F9060.mode);
+        fileJobSetPrimaryData(job, D_003F9060.output, D_003F9060.size,
+                      D_003F9060.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
-        entry = (EffFileJobEntry *)fileAppendJob(effFileQueue, job);
+        entry = fileAppendJob(effFileQueue, job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        effQueuedFileHandle = entry->fileHandle;
-        resource = (EffFileResourceRecord *)effFindAssetData(entry);
-        strcpy(entry->filename, resource->name);
+        effQueuedFileHandle = entry->id;
+        resource = (EffFileJobRequest *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
-        memcpy(resource->buffer, fileData, resource->size);
+        memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
@@ -10369,8 +10380,8 @@ INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D140);
 u32 effLoadFileSlotF2(void) {
     EffFileQueryInfo fileInfo;
     u8 *job;
-    EffFileJobEntry *entry;
-    EffFileResourceRecord *resource;
+    FileJob *entry;
+    EffFileJobRequest *resource;
     void *fileData;
     s32 status;
     u32 result;
@@ -10382,17 +10393,17 @@ u32 effLoadFileSlotF2(void) {
         result = 0x400000;
     } else if (status == 1) {
         job = (u8 *)fileCreateJob(0x14);
-        fileJobSetPrimaryData(job, D_003FB948.start, D_003FB948.length,
-                      D_003FB948.mode);
+        fileJobSetPrimaryData(job, D_003FB948.output, D_003FB948.size,
+                      D_003FB948.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
-        entry = (EffFileJobEntry *)fileAppendJob(effFileQueue, job);
+        entry = fileAppendJob(effFileQueue, job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        effQueuedFileHandle = entry->fileHandle;
-        resource = (EffFileResourceRecord *)effFindAssetData(entry);
-        strcpy(entry->filename, resource->name);
+        effQueuedFileHandle = entry->id;
+        resource = (EffFileJobRequest *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
-        memcpy(resource->buffer, fileData, resource->size);
+        memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
@@ -10406,13 +10417,13 @@ u32 effLoadFileSlotF2(void) {
     return result;
 }
 
-extern EffectFileHeader D_003FD988;
+extern EffFileJobRequest D_003FD988;
 
 u32 effLoadMaterialFile(void) {
     EffFileQueryInfo fileInfo;
     u8 *job;
-    EffFileJobEntry *entry;
-    EffFileResourceRecord *resource;
+    FileJob *entry;
+    EffFileJobRequest *resource;
     void *fileData;
     s32 status;
     u32 result;
@@ -10424,17 +10435,17 @@ u32 effLoadMaterialFile(void) {
         result = 0x400000;
     } else if (status == 1) {
         job = (u8 *)fileCreateJob(0x16);
-        fileJobSetPrimaryData(job, D_003FD988.start, D_003FD988.length,
-                      D_003FD988.mode);
+        fileJobSetPrimaryData(job, D_003FD988.output, D_003FD988.size,
+                      D_003FD988.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
-        entry = (EffFileJobEntry *)fileAppendJob(effFileQueue, job);
+        entry = fileAppendJob(effFileQueue, job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        effQueuedFileHandle = entry->fileHandle;
-        resource = (EffFileResourceRecord *)effFindAssetData(entry);
-        strcpy(entry->filename, resource->name);
+        effQueuedFileHandle = entry->id;
+        resource = (EffFileJobRequest *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
-        memcpy(resource->buffer, fileData, resource->size);
+        memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
@@ -10448,13 +10459,13 @@ u32 effLoadMaterialFile(void) {
     return result;
 }
 
-extern EffectFileHeader D_003FE040;
+extern EffFileJobRequest D_003FE040;
 
 u32 effPollAndQueueFileResourceWithUnitFloats(void) {
     EffFileQueryInfo fileInfo;
     u8 *job;
-    EffFileJobEntry *entry;
-    EffFileResourceRecord *resource;
+    FileJob *entry;
+    EffFileJobRequest *resource;
     void *fileData;
     s32 status;
     u32 result;
@@ -10468,21 +10479,21 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         result = 0x400000;
     } else if (status == 1) {
         job = (u8 *)fileCreateJob(0x19);
-        coordinates = (f32 *)(D_003FE040.start + 0x20);
+        coordinates = (f32 *)((u8 *)D_003FE040.output + 0x20);
         for (index = 0; index < 0xFF; index++) {
             *coordinates++ = 1.0f;
         }
-        fileJobSetPrimaryData(job, D_003FE040.start, D_003FE040.length,
-                      D_003FE040.mode);
+        fileJobSetPrimaryData(job, D_003FE040.output, D_003FE040.size,
+                      D_003FE040.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
-        entry = (EffFileJobEntry *)fileAppendJob(effFileQueue, job);
+        entry = fileAppendJob(effFileQueue, job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        effQueuedFileHandle = entry->fileHandle;
-        resource = (EffFileResourceRecord *)effFindAssetData(entry);
-        strcpy(entry->filename, resource->name);
+        effQueuedFileHandle = entry->id;
+        resource = (EffFileJobRequest *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
-        memcpy(resource->buffer, fileData, resource->size);
+        memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;

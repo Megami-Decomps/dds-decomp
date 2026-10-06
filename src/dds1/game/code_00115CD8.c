@@ -1,6 +1,6 @@
 #include "common.h"
+#include "dds3obj.h"
 
-extern u32 dds3CreateSlotResourceState(u32);
 extern u32 sdfAllocSizeClassBlock(u32);
 
 /* Object resource storage is polymorphic: reset expects the kind-7 effect
@@ -23,7 +23,7 @@ typedef struct WorldResource {
 /* The initializer allocates 16 bytes and writes only the slot-state handle.
  * The remaining bytes and subsequent uses of this word are unknown here. */
 typedef struct DdsSlotResourceBlock {
-    u32 unk00;
+    ObjBase *unk00;
     u8 pad04[0xC];
 } DdsSlotResourceBlock;
 
@@ -115,12 +115,12 @@ INCLUDE_ASM(const s32, "game/code_00115CD8", func_00115E10);
  * The block is attached before the state constructor sees the object. Returns 1. */
 u32 dds3InitializeResourceOwner(WorldResourceOwner *object) {
     DdsSlotResourceBlock *resource;
-    u32 handle;
+    ObjBase *handle;
 
     effObjInnerCreate();
     resource = (DdsSlotResourceBlock *)sdfAllocSizeClassBlock(0x10);
     object->resource = resource;
-    handle = dds3CreateSlotResourceState((u32)object);
+    handle = dds3CreateSlotResourceState(object);
     resource->unk00 = handle;
     return 1;
 }

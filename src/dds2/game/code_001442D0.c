@@ -2246,14 +2246,14 @@ void func_0014D0E8(void) {
                 }
             } else {
                 resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
-                if (resource->first->unk30 == 5) {
+                if (resource->first->state == 5) {
                     mdlAddEntryPlain(resource, 0, 0);
                 }
             }
             break;
         case 1:
             resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
-            if (resource->first->unk30 == 5) {
+            if (resource->first->state == 5) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
                 fldObjectSlots[i].unk8 = 2;
@@ -3829,4 +3829,3 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363DC);
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E4);
-

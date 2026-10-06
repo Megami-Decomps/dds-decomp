@@ -94,4 +94,45 @@ typedef struct FldActorEntry {
 #endif
 } FldActorEntry;
 
+/* Collision faces are 0x24-byte wire records in the field resource.
+ * The room-record builders retain the face and stop-table addresses. */
+typedef struct FldCollisionFace {
+    u32 attributes;
+    u8 moveFloor;
+    u8 sound;
+    u16 stop;
+    u16 place;
+    u8 automap[2];
+    u32 vertexIndices[4];
+    s16 encounterType;
+    s16 encounter;
+    s16 special[2];
+} FldCollisionFace;
+
+/* Both room-record builders construct this complete 0xE4-byte owner.
+ * Zone classifiers use the bounding-plane prefix of the same record. */
+typedef struct FldValueRecord {
+    s16 mode;
+    s16 count;
+    f32 normal[4];
+    f32 planeConstant;
+    f32 plane[4][4]; /* 0x18 */
+    f32 limit[4]; /* 0x58 */
+    f32 bound[4]; /* 0x68: min0, min1, max0, max1 */
+    f32 vertices[4][4]; /* 0x78 */
+    f32 previousPosition[3]; /* 0xB8: saved actor world position */
+    u32 unkC4;
+    u16 unkC8;
+    u16 unkCA;
+    s32 id;
+    s32 value; /* Record API word; some callers store an actor address. */
+    FldCollisionFace *face;
+    void *stopData;
+    s32 sceneFlag;
+    s32 unkE0;
+} FldValueRecord;
+
+typedef char FldCollisionFaceSizeCheck[(sizeof(FldCollisionFace) == 0x24) ? 1 : -1];
+typedef char FldValueRecordSizeCheck[(sizeof(FldValueRecord) == 0xE4) ? 1 : -1];
+
 #endif /* FLD_H */

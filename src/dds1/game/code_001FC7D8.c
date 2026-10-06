@@ -221,7 +221,62 @@ void func_001FCBA0(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCFB8);
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD170);
+extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
+s32 func_001FD170(BtlTask *task) {
+    BtlUnit *unit = task->unit;
+    s32 status = unit->conditionFlags & 0x7FFF;
+
+    switch (status) {
+    case 0x2000:
+        switch (task->result) {
+        case 1:
+            return effOffsetIfOwnerFlagClear(unit, 0x78);
+        case 2:
+        case 3:
+        case 7:
+        case 8:
+            if (task->arg == 0xE0) {
+                effOffsetIfOwnerFlagClear(unit, 0x6E);
+            }
+            /* Retail discards the auxiliary ID before resolving the common ID. */
+        default:
+            return effOffsetIfOwnerFlagClear(unit, 2);
+        }
+    case 0x200:
+        if (task->result != 1) {
+            return effOffsetIfOwnerFlagClear(unit, 0x7A);
+        }
+        return effOffsetIfOwnerFlagClear(unit, 0x78);
+    case 0x40:
+        return effOffsetIfOwnerFlagClear(unit, 6);
+    case 0x20:
+        switch (task->result) {
+        case 13:
+            return effOffsetIfOwnerFlagClear(unit, 0x72);
+        case 14:
+            return effOffsetIfOwnerFlagClear(unit, 0x70);
+        case 2:
+        case 3:
+        case 7:
+        case 8:
+            if (task->arg == 0xE0) {
+                return effOffsetIfOwnerFlagClear(unit, 0x6E);
+            }
+            break;
+        case 11:
+            return effOffsetIfOwnerFlagClear(unit, 0x76);
+        }
+        return effOffsetIfOwnerFlagClear(unit, 0x6C);
+    case 8:
+        return effOffsetIfOwnerFlagClear(unit, 8);
+    case 0x800:
+        return effOffsetIfOwnerFlagClear(unit, 0x7C);
+    case 1:
+        return effOffsetIfOwnerFlagClear(unit, 0xC4);
+    default:
+        return -1;
+    }
+}
 
 typedef struct BtlCommandTargetResult {
     u8 pad00[8];
@@ -247,7 +302,6 @@ typedef struct BtlEffectCommandRecord {
 extern BtlCommandEffect D_00360468[];
 extern BtlEffectCommandRecord *datCommandRecords;
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
-extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
 /* The +0x80 pointer retains SDK operand groups, outside BtlTask's named
  * fields; the command/index-work parent has a different native layout. */

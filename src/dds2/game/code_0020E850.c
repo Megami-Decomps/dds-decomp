@@ -373,7 +373,50 @@ void func_0020EC20(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F048);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F200);
+extern s32 effOffsetIfOwnerFlagClear(BtlEffActor *, s32);
+
+/* Select the owner's effect variant for its current condition and task action. */
+s32 func_0020F200(BtlTask *task) {
+    BtlUnit *unit = task->unit;
+    switch (unit->conditionFlags & 0x7FFF) {
+    case 0x2000:
+        return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0xD2);
+    case 0x200:
+        if (task->result != 1) {
+            return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x7A);
+        }
+        return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x78);
+    case 0x40:
+        return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 6);
+    case 0x20:
+        switch (task->result) {
+        case 13:
+            return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x72);
+        case 14:
+            return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x70);
+        case 2:
+        case 3:
+        case 7:
+        case 8:
+            if (task->arg == 0xE0) {
+                return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x6E);
+            }
+            break;
+        case 11:
+            return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x76);
+        }
+        return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x6C);
+    case 8:
+        return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 8);
+    case 0x800:
+        return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0x7C);
+    case 1:
+        return effOffsetIfOwnerFlagClear((BtlEffActor *)unit, 0xC4);
+    default:
+        return -1;
+    }
+}
+
 
 typedef struct BtlOperandEntry {
     s32 unk00;
@@ -434,7 +477,6 @@ typedef struct BtlEffectCommandRecord {
 extern BtlCommandEffect D_003BEB68[];
 extern BtlEffectCommandRecord *datCommandRecords;
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
-extern s32 effOffsetIfOwnerFlagClear(BtlEffActor *, s32);
 
 s16 btlGetCommandEffectId(BattleActionLinkState *link, s32 command) {
     BtlOperandGroup *result = link->groups;

@@ -287,11 +287,9 @@ extern void func_001A76C8(void);
 
 extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
-typedef struct MemBlock MemBlock;
-typedef struct SdfAllocation SdfAllocation;
-extern MemBlock *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfAllocation *);
-extern void sdfReleaseResourceAllocation(SdfAllocation *);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
@@ -594,7 +592,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
 
     handle = (u32)sdfAllocGeneralBlock(0x1E0);
     node->resourceHandle = handle;
-    mes = (ItfMesState *)sdfResourceRetainAddress((SdfAllocation *)handle);
+    mes = (ItfMesState *)sdfResourceRetainAddress((SdfMemBlock *)handle);
     node->stateAddress = (s32)mes;
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
@@ -1297,7 +1295,7 @@ void itfMesDestroyWindow(s32 window) {
         btlReleaseEffectResourceHandles(mes);
         itfReleaseUiResourceSlotHandles(&mes->textSlots);
         mes->flags = 0;
-        sdfReleaseResourceAllocation((SdfAllocation *)windowRecord->handle);
+        sdfReleaseResourceAllocation((SdfMemBlock *)windowRecord->handle);
         windowRecord->mes = NULL;
         itfReleasePoolNode(windowRecord, (u8 *)D_00452960 - 0x10);
         ((ItfMesGlobals *)((u8 *)D_00452960 - 0x20))->activeWindowCount -= 1;
@@ -1440,13 +1438,13 @@ void func_001A5480(mes, slotIndex, source, byteCount)
     s32 allocationBytes;
 
     if (*textAddress != 0) {
-        sdfReleaseResourceAllocation((SdfAllocation *)slots->handles[slotIndex]);
+        sdfReleaseResourceAllocation((SdfMemBlock *)slots->handles[slotIndex]);
         *textAddress = 0;
     }
     if (byteCount <= 0) {
         allocationBytes = (strlen(source) + ITF_MES_STRING_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
         slots->handles[slotIndex] = (u32)sdfAllocGeneralBlock(allocationBytes);
-        *textAddress = sdfResourceRetainAddress((SdfAllocation *)slots->handles[slotIndex]);
+        *textAddress = sdfResourceRetainAddress((SdfMemBlock *)slots->handles[slotIndex]);
         memset((void *)*textAddress, 0, allocationBytes);
         /* String mode copies the padded span, rather than only strlen + 1. */
         memcpy((void *)*textAddress, source, allocationBytes);
@@ -1454,7 +1452,7 @@ void func_001A5480(mes, slotIndex, source, byteCount)
     }
     allocationBytes = (byteCount + ITF_MES_BINARY_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
     slots->handles[slotIndex] = (u32)sdfAllocGeneralBlock(allocationBytes);
-    *textAddress = sdfResourceRetainAddress((SdfAllocation *)slots->handles[slotIndex]);
+    *textAddress = sdfResourceRetainAddress((SdfMemBlock *)slots->handles[slotIndex]);
     memset((void *)*textAddress, 0, allocationBytes);
     memcpy((void *)*textAddress, source, byteCount);
 }

@@ -1,4 +1,6 @@
+#include "dsp_name.h"
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
@@ -45,7 +47,6 @@
 #define PRF_REQUIREMENT_EXCLUSION_BIT 1
 #define SCR_PAIRED_OUTPUT_BYTES 8
 #define SDF_FLAG_LIST_VALUE_SHIFT 3
-#define SDF_FLAG_LIST_MARK_WORDS 2
 #define SDF_FLAG_LIST_RESET_MARK 0xFFFFFFFF
 #define SDF_FLAG_LIST_ENTRY_VERTEX_BYTES 32
 #define SDF_FLAG_LIST_VERTICES_PER_ENTRY 2
@@ -54,8 +55,22 @@
 #define SDF_FLAG_SLOT_COUNT 16
 
 extern void memset();
-extern u16 ptyPresetSkillSlots[][96];
-extern u16 ptyPresetPoolSkills[][96];
+/* DDS1 preset rows are 0xC0 bytes; the skill lists at +0x60/+0x70 belong
+ * to the same row as its four script choices and four profile sets. */
+typedef struct PtyPresetScriptChoice {
+    u16 scriptId;
+    u16 initialValue;
+    u16 requiredProfiles[4];
+} PtyPresetScriptChoice;
+
+typedef struct PtyPresetRecord {
+    PtyPresetScriptChoice scriptChoices[4];
+    u8 profileIds[4][12];
+    u16 skillSlots[8];
+    u16 poolSkills[40];
+} PtyPresetRecord;
+
+extern PtyPresetRecord D_00393A80[];
 extern void ptyMergeStockSkills(u8 *);
 
 extern void (*sdfTickCallback)(void);
@@ -141,7 +156,7 @@ typedef struct Entry84W {
     u8 pad_0x04[0x50]; // 0x04
 } Entry84W; // 0x54
 
-extern void ptySetProfileFlag1(void *, s32);
+extern void ptySetProfileFlag1(void *, u16);
 
 extern Entry84W D_00391230[];
 
@@ -221,13 +236,15 @@ void ptyClearProfileRecords(void) {
     memset(datGameState + PTY_PROFILE_RECORD_TABLE_OFFSET, 0, PTY_PROFILE_RECORD_TABLE_BYTES);
 }
 
+extern void ptySelectProfileStage(PtyProfileUnit *);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
 
+extern void ptyApplyProfilePreset(s32, PtyProfileUnit *);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
 
 /* Load nonzero preset IDs into their original slots; zero IDs leave slots unchanged. */
 void ptyLoadPresetSkillSlots(u8 *unit) {
-    u16 *presetSkills = ptyPresetSkillSlots[((PtyProfileUnit *)unit)->unitId];
+    u16 *presetSkills = D_00393A80[((PtyProfileUnit *)unit)->unitId].skillSlots;
     u16 *skillCursor = ((PtyProfileUnit *)unit)->skills;
     u32 presetIndex;
     presetIndex = 0;
@@ -244,7 +261,7 @@ void ptyLoadPresetSkillSlots(u8 *unit) {
 
 /* Mark nonzero IDs in the preset pool, then perform the native flag-gated extra call. */
 void ptyMarkPresetSkillPool(u8 *unit) {
-    u16 *presetSkills = ptyPresetPoolSkills[((PtyProfileUnit *)unit)->unitId];
+    u16 *presetSkills = D_00393A80[((PtyProfileUnit *)unit)->unitId].poolSkills;
     u32 presetIndex = 0;
     do {
         u16 skillId = *presetSkills++;
@@ -289,7 +306,39 @@ void ptyRecomputeMaxHpMp(u32 unit) {
     ptyRecomputeMaxVitals((PtyProfileUnit *)unit, NULL);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD0D8);
+extern DspMantraName *D_003BAA78;
+extern u32 strlen(const char *text);
+extern char *strcpy(char *destination, const char *source);
+extern void *memcpy(void *destination, const void *source, u32 size);
+
+void func_002CD0D8(u16 scriptId, s32 mode, char *destination) {
+    u8 *name = D_003BAA78[scriptId].encodedText;
+    s32 split = 0;
+    s32 offset = 0;
+
+    for (; offset < strlen((char *)name); offset += 2) {
+        if (name[offset] == 0x82 && name[offset + 1] == 0x8A) {
+            split = offset;
+        }
+    }
+    switch (mode) {
+    case 1:
+        if (split >= 4) {
+            strcpy(destination, (char *)&name[split + 2]);
+        } else {
+            strcpy(destination, (char *)name);
+        }
+        return;
+    case 2:
+        memcpy(destination, name, split);
+        destination[split] = 0;
+        break;
+    default:
+        strcpy(destination, (char *)name);
+        break;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD240);
 
@@ -363,6 +412,7 @@ u32 sdfSetFlagBySlotId(u8 *unit, u32 slotId) {
     return 0;
 }
 
+extern void ptyApplyProfile(PtyProfileUnit *, u16);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfile);
 
 s32 ptyTestProfileFlag0(s32 work, u16 id) {
@@ -973,26 +1023,33 @@ u8 *frFontGetColoredGlyphResource(void) {
     return frFontColoredGlyphResource;
 }
 
-/* Interleaved mark words and an eight-byte-per-entry value block. */
+/* Per-entry state: frame counter (-1 = free) and the alpha chosen at spawn. */
+typedef struct SdfFlagListMark {
+    s32 timer;
+    u8 alpha;
+    u8 pad05[3];
+} SdfFlagListMark;
+
 typedef struct SdfFlagListWork {
     s32 frame;
     u8 pad04[4];
-    u32 *marks;               /* 0x08: first word of each pair */
+    SdfFlagListMark *marks;   /* 0x08 */
     f32 (*vertices)[4];
     u32 *colors;
-    u8 pad14[0x28];
+    u8 unk14[0x24];           /* 0x14: colour curve read by func_00296F58 */
+    u8 unk38[4];
     s32 surfaceIndex;
     u8 pad40[8];
     s32 maxFrames;
     u32 count;                /* 0x4C */
-    u8 pad50[4];
+    f32 speed;                /* 0x50 */
     u32 resource;             /* 0x54 */
 } SdfFlagListWork;
 
-/* Reset only the first mark word of each pair, then clear both value words per entry. */
+/* Reset each entry's timer to free, then clear both colour words per entry. */
 void sdfResetFlagListEntries(s32 workAddress) {
     u32 entryCount;
-    u32 *markCursor;
+    SdfFlagListMark *markCursor;
     u32 entryIndex;
 
     entryIndex = 0;
@@ -1001,8 +1058,8 @@ void sdfResetFlagListEntries(s32 workAddress) {
     if (entryCount != 0) {
         do {
             entryIndex = entryIndex + 1;
-            *markCursor = SDF_FLAG_LIST_RESET_MARK;
-            markCursor = markCursor + SDF_FLAG_LIST_MARK_WORDS;
+            markCursor->timer = SDF_FLAG_LIST_RESET_MARK;
+            markCursor++;
         } while (entryIndex < entryCount);
     }
     memset(((SdfFlagListWork *)workAddress)->colors, 0, entryCount << SDF_FLAG_LIST_VALUE_SHIFT);
@@ -1018,7 +1075,152 @@ void sdfReleaseFlagListResource(s32 context) {
     sdfReleaseResourceAllocation(((SdfFlagListWork *)context)->resource);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEC40);
+extern f32 sdfViewTargetVector[4];
+extern void vuBuildLookAtBasis(void);
+extern u32 func_00296F58(u8 *, u8 *, s32, s32);
+extern f32 sdfAtan2Poly(f32 ratio);
+extern f32 effMiscRandUnitFloat(void *state);
+extern u32 effMiscRand(void *state);
+extern u8 effSharedRandomState[];
+
+/* Advance the drop list: respawn a random number of free drops around the camera, move live drops along their
+ * own direction, and fade them over their last ten frames. */
+void func_002CEC40(SdfFlagListWork *work) {
+    f32 pos[4];
+    u32 count;
+    u32 i;
+    u32 color;
+    SdfFlagListMark *mark;
+    f32 (*vertices)[4];
+    u32 *colors;
+    u32 spawn;
+    u32 spawnRange;
+    s32 frame;
+    s32 maxFrames;
+    f32 speed;
+    f32 halfFov;
+    f32 spreadX;
+    f32 spreadY;
+    f32 depth;
+    f32 near;
+    f32 lateral;
+    f32 step;
+    u32 alpha;
+    s32 timer;
+    u32 packed;
+
+    maxFrames = work->maxFrames;
+    speed = work->speed;
+    frame = work->frame;
+    if (maxFrames > 0 && frame >= maxFrames) {
+        return;
+    }
+    spawn = 1;
+    vuBuildLookAtBasis();
+    color = func_00296F58(work->unk14, work->unk38, frame, maxFrames);
+    count = work->count;
+    spawnRange = count >> 4;
+    halfFov = sdfSceneProjectionParameters.fov * 0.5f;
+    mark = work->marks;
+    vertices = work->vertices;
+    colors = work->colors;
+    spreadX = sdfAtan2Poly(halfFov * 1.5f * 512.0f / 448.0f);
+    spreadY = sdfAtan2Poly(halfFov);
+    /* Retail evaluates these two as well and never uses the results. */
+    sdfAtan2Poly(sdfSceneProjectionParameters.fov);
+    sdfAtan2Poly(3.14159265f / 4.0f);
+    if (spawnRange != 0) {
+        spawn = effMiscRand(effSharedRandomState) % spawnRange + 1;
+    }
+    for (i = 0; i < count; i++, mark++, vertices += 2, colors += 2) {
+        timer = mark->timer;
+        if (timer == -1) {
+            if (spawn != 0) {
+                spawn--;
+                near = effMiscRandUnitFloat(effSharedRandomState);
+                lateral = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+                if (effMiscRandUnitFloat(effSharedRandomState) > 0.5f) {
+                    depth = near * 2000.0f + 1000.0f;
+                    pos[0] = depth * spreadX * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
+                    pos[1] = depth * spreadY * lateral;
+                    pos[2] = depth;
+                    VU0_LOAD_VF(vf10, pos);
+                    VU0_TRANSFORM_POINT(vf10, vf10);
+                    VU0_STORE_VF(vf10, vertices[0]);
+                    vertices[0][1] -= depth * spreadY * 1.7f;
+                    if (sdfViewTargetVector[1] + 500.0f < vertices[0][1]) {
+                        vertices[0][1] -= vertices[0][1] - sdfViewTargetVector[1];
+                    }
+                    if (D_003BD2C8 != 0) {
+                        VU0_LOAD_VF(vf10, vertices[0]);
+                        VU0_LOAD_VF(vf11, sdfViewTargetVector);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, vertices[0]);
+                    }
+                } else {
+                    depth = 0.0f;
+                    pos[0] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
+                    pos[2] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
+                    pos[1] = lateral * 100.0f + -200.0f;
+                    VU0_LOAD_VF(vf10, pos);
+                    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+                    VU0_ADD(vf10, vf10, vf11);
+                    if (D_003BD2C8 != 0) {
+                        VU0_LOAD_VF(vf11, sdfViewTargetVector);
+                        VU0_SUB(vf10, vf10, vf11);
+                    }
+                    VU0_STORE_VF(vf10, vertices[0]);
+                }
+                vertices[1][0] = vertices[0][0];
+                vertices[1][2] = vertices[0][2];
+                vertices[1][1] = vertices[0][1] - 100.0f;
+                alpha = 0x80;
+                if (!(depth < 1.0f)) {
+                    alpha = (1.0f - near) * 64.0f + 64.0f;
+                }
+                alpha = (f32)alpha * ((f32)(color >> 24) * (1.0f / 128.0f));
+                mark->alpha = alpha;
+                packed = (color & 0xFFFFFF) | (alpha << 24);
+                colors[0] = packed;
+                colors[1] = packed & 0xFFFFFF;
+                mark->timer = 0;
+            }
+        } else {
+            step = speed + (speed * 0.2f + (f32)timer / 30.0f);
+            VU0_LOAD_VF(vf10, vertices[0]);
+            VU0_LOAD_VF(vf11, vertices[1]);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_SET_ONES_XYZ(vf10);
+            VU0_SCALAR_OP_R3(step, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_MOVE_VF(vf12, vf10);
+            VU0_LOAD_VF(vf10, vertices[0]);
+            VU0_ADD(vf10, vf10, vf12);
+            VU0_LOAD_VF(vf11, vertices[1]);
+            VU0_ADD(vf11, vf11, vf12);
+            VU0_STORE_VF(vf10, vertices[0]);
+            VU0_STORE_VF(vf11, vertices[1]);
+            if (timer < 20) {
+                alpha = mark->alpha;
+            } else {
+                alpha = (u8)(u32)(mark->alpha * (1.0f - (f32)(timer - 20) / 10.0f));
+            }
+            packed = (color & 0xFFFFFF) | (alpha << 24);
+            colors[0] = packed;
+            colors[1] = packed & 0xFFFFFF;
+            if (timer == 30) {
+                colors[0] = 0;
+                colors[1] = 0;
+                mark->timer = -1;
+            } else {
+                mark->timer = timer + 1;
+            }
+        }
+    }
+    work->frame++;
+}
 
 typedef struct GsSurface {
     u8 pad00[0x10];
@@ -1026,8 +1228,6 @@ typedef struct GsSurface {
 } GsSurface;
 
 extern GsSurface *D_00398098[];
-extern f32 sdfViewTargetVector[4];
-extern u32 D_003BD2C8;
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern void *sdfAllocPacketAligned(s32);
@@ -1080,8 +1280,8 @@ void scrSetOperandFloatValue(ScrVmOperand *operand, float value) {
     operand->f50 = value;
 }
 
-void func_002CF3A0(s32 arg0) {
-    func_00296F58(arg0 + 0x14, arg0 + 0x38, 0, 0);
+void func_002CF3A0(SdfFlagListWork *work) {
+    func_00296F58(work->unk14, work->unk38, 0, 0);
 }
 
 void itfSetPackedRgbAlpha(RgbAlpha *p, u32 color) {

@@ -18,6 +18,11 @@ typedef struct MantraPulseGrid {
     void (*drawEntry)(s32, s32, s32, struct MantraPulseGrid *, MantraPulseEntry *, s32);
 } MantraPulseGrid;
 
+typedef struct DspProfileSelection {
+    u32 unit;
+    s32 profileId;
+} DspProfileSelection;
+
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void mnuDrawSelectedMantraEntry();
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(s32, s32, s32);
@@ -117,22 +122,68 @@ void mnuAdvanceMantraPulseGridEntries(s32 argument, MantraPulseGrid *grid) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257718);
-
-
-
 extern void *func_002CB3B8(s32, s32);
 extern void func_0024EDC0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-extern void func_00259890(s32, s32, s32, s32, s32, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
-extern void func_00259B40(s32, s32, s32, s32, s32, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
+extern void func_00259498(s32, s32, s32, s32, DspProfileSelection *, MantraPulseGrid *, MantraPulseEntry *, s32);
+extern void func_00259890(s32, s32, s32, s32, DspProfileSelection *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
+extern void func_00259B40(s32, s32, s32, s32, DspProfileSelection *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
+extern void func_00257ED0(s32, s32, s32, s32, MantraPulseDisplayWork *, s32);
+extern void func_00258B90(s32, s32, s32, s32, void *, s32);
 extern s32 mnuSceneResourceContext;
+
+/* Draw the mantra pulse band and both entry passes at unit scale, placing the
+ * selected entry with its offsets from the display table. */
+void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+                   DspProfileSelection *selection, MantraPulseGrid *grid,
+                   s32 arg6) {
+    MantraPulseDisplayWork *display;
+    MantraPulseEntry *entry;
+    s32 row;
+    s32 n;
+
+    display = func_002CB3B8(mnuSceneResourceContext, 1);
+    for (row = 0; row < 0xD; row++) {
+        func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, 1.0f, 1.0f, arg6);
+    }
+    for (row = 0; row < 0x11; row++) {
+        entry = grid->entries + row * grid->stride;
+        n = 0xE;
+        do {
+            if (entry->active != 0) {
+                func_00259498(arg0, arg1, arg2, arg3, selection, grid, entry, arg6);
+            }
+            entry++;
+            n--;
+        } while (n >= 0);
+    }
+    n = (display->flags & 1) != 0 ? 0x1E : 0x1A;
+    for (row = 0; row <= n; row++) {
+        func_0024EDC0(arg0, arg1, arg2, arg3, row, 0x20, 1.0f, 1.0f, arg6);
+    }
+    func_00257ED0(0, 0, arg2, arg3, display, arg6);
+    func_00258B90(arg0 + D_0036B7F0[selection->profileId][2],
+                  arg1 + D_0036B7F0[selection->profileId][3],
+                  arg2, arg3, (u8 *)display + 0x488, arg6);
+    for (row = 0; row < 0x11; row++) {
+        entry = grid->entries + row * grid->stride;
+        n = 0xE;
+        do {
+            if (entry->active != 0) {
+                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, 1.0f, 1.0f, entry, arg6);
+            }
+            entry++;
+            n--;
+        } while (n >= 0);
+    }
+}
 
 /* One local `n` serves as both the per-row column countdown in the two entry
  * loops and the final-row bound in the band loop: one declared type, one
  * neutral name, as a C89 programmer with all declarations at the top would
  * write. That reuse is what retail's bytes require. */
-void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
-                   MantraPulseGrid *grid, s32 arg6, f32 scaleX, f32 scaleY) {
+void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+                   DspProfileSelection *selection, MantraPulseGrid *grid, s32 arg6,
+                   f32 scaleX, f32 scaleY) {
     MantraPulseDisplayWork *display;
     MantraPulseEntry *entry;
     s32 row;
@@ -147,7 +198,7 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
         n = 0xE;
         do {
             if (entry->active != 0) {
-                func_00259890(arg0, arg1, arg2, arg3, arg4, grid, scaleX, scaleY, entry, arg6);
+                func_00259890(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, entry, arg6);
             }
             entry++;
             n--;
@@ -162,7 +213,7 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
         n = 0xE;
         do {
             if (entry->active != 0) {
-                func_00259B40(arg0, arg1, arg2, arg3, arg4, grid, scaleX, scaleY, entry, arg6);
+                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, entry, arg6);
             }
             entry++;
             n--;

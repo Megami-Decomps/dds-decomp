@@ -2,11 +2,6 @@
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
-#define SDF_DRAW_TRANSLATION_VECTOR 0
-#define SDF_DRAW_SCALE_VECTOR 1
-#define SDF_DRAW_X_AXIS_VECTOR 2
-#define SDF_DRAW_Y_AXIS_VECTOR 3
-#define SDF_DRAW_Z_AXIS_VECTOR 4
 #define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
 
 extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
@@ -330,8 +325,8 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D83F8);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
     VU0_LOAD_VF(vf10, node->quaternion);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf31, node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
-    VU0_STORE_MATRIX(node->vectors[SDF_DRAW_X_AXIS_VECTOR]);
+    VU0_LOAD_VF(vf31, node->translation);
+    VU0_STORE_MATRIX(node->localMatrix);
 }
 
 /* Copy item identity, Euler rotation, translation, scale and optional clipping bounds. */
@@ -340,9 +335,9 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->nodeId = item->nodeId;
     func_002E7F20(item->rotationX, item->rotationY, item->rotationZ);
     VU0_STORE_VF(vf10, node->quaternion);
-    PCP_COPY_VECTOR(node->vectors[SDF_DRAW_TRANSLATION_VECTOR], &item->translation);
-    PCP_COPY_VECTOR(node->vectors[SDF_DRAW_SCALE_VECTOR], &item->scale);
-    ((f32 *)node->vectors[SDF_DRAW_TRANSLATION_VECTOR])[3] = 1.0f;
+    PCP_COPY_VECTOR(node->translation, &item->translation);
+    PCP_COPY_VECTOR(node->scale, &item->scale);
+    node->translation[3] = 1.0f;
     sdfDrawNodeBuildMatrix(node);
     node->boundsAddress = item->boundsAddress;
 }
@@ -433,24 +428,24 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
 
 /* Compose each draw node's VU transform and visit its circular child list. */
 void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix, s32 frame) {
-    u8 *xAxis = drawNode->vectors[SDF_DRAW_X_AXIS_VECTOR];
-    u8 *yAxis;
-    u8 *zAxis;
-    u8 *scale;
-    u8 *translation;
-    u8 *transformed;
+    f32 *xAxis = drawNode->localMatrix[0];
+    f32 *yAxis;
+    f32 *zAxis;
+    f32 *scale;
+    f32 *translation;
+    f32 (*transformed)[4];
     u32 address;
     SdfDrawNode *child;
 
         VU0_LOAD_VF_MEMORY(vf28, xAxis);
-    yAxis = drawNode->vectors[SDF_DRAW_Y_AXIS_VECTOR];
+    yAxis = drawNode->localMatrix[1];
         VU0_LOAD_VF_MEMORY(vf29, yAxis);
-    zAxis = drawNode->vectors[SDF_DRAW_Z_AXIS_VECTOR];
+    zAxis = drawNode->localMatrix[2];
         VU0_LOAD_VF_MEMORY(vf30, zAxis);
-    scale = drawNode->vectors[SDF_DRAW_SCALE_VECTOR];
+    scale = drawNode->scale;
         VU0_LOAD_VF_MEMORY(vf10, scale);
     VU0_SCALE_MATRIX_ROWS(vf10);
-    translation = drawNode->vectors[SDF_DRAW_TRANSLATION_VECTOR];
+    translation = drawNode->translation;
     VU0_LOAD_VF_MEMORY(vf31, translation);
     VU0_LOAD_MATRIX_B(parentMatrix);
     sdfMultiplyVuMatrixInPlace();

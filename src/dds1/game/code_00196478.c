@@ -30,8 +30,8 @@
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
 
-extern SdfAllocation *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfAllocation *);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 
 extern s32 sdfTexAcquireResourceTexture(u32);
 extern s32 dds3AdminGetActiveMode(void);
@@ -96,7 +96,7 @@ typedef struct MemNode {
 
 /* Allocation handle precedes the first queue node by four bytes. */
 typedef struct MemRingHeader {
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
     MemNode first;
 } MemRingHeader;
 
@@ -782,7 +782,7 @@ s32 func_00198088(u8 *dst, s32 option, u32 block, MemOut *segments) {
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.
  * The allocation handle is stored four bytes before the returned ring base. */
 u32 itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
-    SdfAllocation *buffer;
+    SdfMemBlock *buffer;
     u8 *list;
     MemNode *cursor;
     MemNode *next;
@@ -1381,7 +1381,7 @@ void mnuReportCampProcessHalted(void) {
 extern s32 D_00357AB8[];
 
 UiSprite *func_00199828(s32 kind, u32 value) {
-    SdfAllocation *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
     UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
 
     work->kind = kind;

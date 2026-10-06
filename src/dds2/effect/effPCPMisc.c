@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
@@ -4606,14 +4607,15 @@ void effPcpCopyLinkedBeamMatrix(EffPCPBeamLargeWork *work, void *src) {
 
 /* Block-set parameter head (0x164 bytes, copied whole into each new work). */
 typedef struct EffPCPGroupHead {
-    u8 pad00[0x50];
+    f32 origin[4];
+    u8 pad10[0x40];
     u8 unk50;            /* 0x50 */
     u8 pad51[3];
     s32 framesPerEntry;   /* 0x54: interpolation duration */
     u32 count;           /* 0x58: handles per group */
     s32 delaySpread;      /* 0x5C: random initial delay */
-    u32 unk60;           /* 0x60 */
-    u32 unk64;           /* 0x64 */
+    s32 fadeIn;           /* 0x60 */
+    s32 fadeOut;          /* 0x64 */
     f32 startPosition;    /* 0x68: interpolated position at frame zero */
     f32 endPosition;      /* 0x6C: interpolated position at final frame */
     f32 startJitter;      /* 0x70: fractional random variation */
@@ -4624,9 +4626,8 @@ typedef struct EffPCPGroupHead {
     f32 unk84;           /* 0x84 */
     f32 unk88;           /* 0x88 */
     u8 activeGroups[4];  /* 0x8C */
-    u8 spawnParams[4];    /* 0x90: beginning of the particle spawn template */
-    f32 unk94;           /* 0x94 */
-    u8 pad98[0xCC];
+    EffThunderFragmentParams spawnParams; /* 0x90 */
+    u8 padE4[0x80];
 } EffPCPGroupHead;
 
 typedef struct EffPCPGroupEntry {
@@ -4661,7 +4662,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
     copy->scale = 1.0f;
     copy->color = 0x80808080;
     copy->workHandle = resource;
-    copy->unk16C = first->unk94;
+    copy->unk16C = first->spawnParams.start[1];
     entry = (EffPCPGroupEntry *)(copy + 1);
     copy->entries = entry;
     copy->duplicates = 0;
@@ -4702,7 +4703,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
         }
     }
     for (g = 0; g < count; g++) {
-        entry->handle = (u32)effThunderFragCreate(first->spawnParams);
+        entry->handle = (u32)effThunderFragCreate(&first->spawnParams);
         entry->frame = 0;
         entry++;
     }
@@ -4925,7 +4926,8 @@ typedef struct EffPCPPulseBattle {
     u32 flags;              /* 0x110 */
 } EffPCPPulseBattle;
 
-extern u8 D_00414610[];
+/* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
+extern const f32 D_00414610[4] __attribute__((aligned(16)));
 extern void func_00340DC8(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
 extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
@@ -5865,7 +5867,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
     }
 }
 
-INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00414610);
+const f32 D_00414610[4] __attribute__((aligned(16))) = {0.0f, 1.0f, 0.0f, 0.0f};
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 

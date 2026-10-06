@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "dat_state.h"
 
 #define MNU_MANTRA_DRAW_ITEM_BYTES 0x24
 #define MNU_MANTRA_DRAW_POOL_HEADER_BYTES 0xC
@@ -59,13 +60,16 @@ typedef struct MantraNodePos {
     s16 panelIndex; /* Used to look up the corresponding panel-position record. */
     s16 x;
     s16 y;
-    u8 pad08[0x18]; /* Position-table records have a 0x20-byte stride. */
+    struct MantraNodePos *neighbors[6];
 } MantraNodePos;
 
+typedef struct MenuPanelObject MenuPanelObject;
 /* Menu selection work starts at +0x240 in the menu object. */
 typedef struct MantraMenuWork {
     u8 pad00[0x560];
     MantraNodePos *selectedNode;
+    u8 pad564[0x2610];
+    MenuPanelObject *panelObject;
 } MantraMenuWork;
 
 typedef struct MantraMenu {
@@ -132,23 +136,29 @@ extern void func_00274FF8();
 extern u32 mnuCreateTypeOneRecord(void);
 extern void mnuReleaseMantraRecordPanelData();
 extern u32 mnuMantraSpriteSlots[12];
-extern u8 *datGameState;
 
-typedef struct MantraMenuValues {
-    u8 pad00[0x3C];
-    s32 panelValue; /* 0x3C: value animated by both numeric counters */
-} MantraMenuValues;
 
-typedef struct MantraPanelSpriteView {
-    u8 pad00[0x1E];
-    s16 animationStep; /* 0x1E: signed step of panel opacity/size transition */
-    u8 stateA;         /* 0x20 */
-    u8 stateB;         /* 0x21 */
-    u8 stateC;         /* 0x22 */
+/* The panel pool allocates 48-byte records shared by animation and sprite controls. */
+typedef struct MantraPanelAnimation {
+    u32 flags;
+    u16 unk4;
+    u16 unk6;
+    u32 unk8;
+    u16 x;
+    u16 y;
+    u32 visualParameters[3];
+    u8 byte1C;
+    u8 byte1D;
+    s16 frame;
+    u8 stateA;
+    u8 stateB;
+    u8 stateC;
     u8 pad23;
-    u32 spriteHandle;  /* 0x24 */
-    u32 burstPool;     /* 0x28: paired with spriteHandle in panel B */
-} MantraPanelSpriteView;
+    u32 spriteHandle;
+    u32 burstPool;
+    s16 id;
+    s16 transitionDelay;
+} MantraPanelAnimation;
 
 /* Full allocation used by both the record-panel controls and its fade update. */
 typedef struct MantraRecordPanelState {
@@ -378,18 +388,18 @@ void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     u32 flags = fade | 0xA09DC300;
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x2E, 0, drawArg);
-    if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
+    if (datGameState->header.currency != state->shown) {
         s32 steps = 20;
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, mnuMantraValueFormat, state->shown + (((MantraMenuValues *)datGameState)->panelValue - state->shown) * state->step / steps);
+        func_0035C860(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
-            state->shown = ((MantraMenuValues *)datGameState)->panelValue;
+            state->shown = datGameState->header.currency;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
+        func_0035C860(text, mnuMantraValueFormat, datGameState->header.currency);
     }
     frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
@@ -2078,7 +2088,7 @@ u32 mnuCreateTypeOneRecord(void) {
     memset(record, 0, sizeof(MantraRecordPanelState));
     record->state = 1;
     record->flags = 0;
-    record->unk10 = ((MantraMenuValues *)datGameState)->panelValue;
+    record->unk10 = datGameState->header.currency;
     return (u32)record;
 }
 
@@ -2138,18 +2148,18 @@ void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     u32 flags = fade | 0xA09DC300;
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x2E, 0, drawArg);
-    if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
+    if (datGameState->header.currency != state->shown) {
         s32 steps = 20;
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, mnuMantraValueFormat, state->shown + (((MantraMenuValues *)datGameState)->panelValue - state->shown) * state->step / steps);
+        func_0035C860(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
-            state->shown = ((MantraMenuValues *)datGameState)->panelValue;
+            state->shown = datGameState->header.currency;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
+        func_0035C860(text, mnuMantraValueFormat, datGameState->header.currency);
     }
     frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
@@ -2751,21 +2761,6 @@ void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
     }
 }
 
-typedef struct MantraPanelAnimation {
-    u32 flags;
-    u16 unk4;
-    u16 unk6;
-    u32 unk8;
-    u16 x;
-    u16 y;
-    u32 visualParameters[3];
-    u8 byte1C;
-    u8 byte1D;
-    u16 frame;
-    u8 pad20[0xC];
-    s16 id;
-    s16 transitionDelay;
-} MantraPanelAnimation;
 
 typedef struct MantraPanelPool {
     u32 handle;
@@ -2892,27 +2887,27 @@ s32 mnuAdvanceMantraPanelAnim(s32 unused, MantraPanelAnimation *panel) {
         break;
     case 6:
         panel->frame += 1;
-        if ((s16)panel->frame >= 4) {
+        if (panel->frame >= 4) {
             panel->frame = 0;
             panel->flags = panel->flags & 0xFF87FFFF;
         }
         break;
     case 8:
         panel->frame += 1;
-        if ((s16)panel->frame >= 10) {
+        if (panel->frame >= 10) {
             panel->frame = 0;
             panel->flags = panel->flags & 0xFF87FFFF;
         }
         break;
     case 7:
         panel->frame += 1;
-        if ((s16)panel->frame >= 4) {
+        if (panel->frame >= 4) {
             result = 1;
         }
         break;
     case 9:
         panel->frame += 1;
-        result = (s16)panel->frame > 9;
+        result = panel->frame > 9;
         break;
     }
     return result;
@@ -3033,25 +3028,25 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
 s32 mnuDrawMantraPulseIconWithFadeState(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
-    switch ((*(u32 *)object >> 19) & 0xF) {
+    switch ((((MantraPanelAnimation *)object)->flags >> 19) & 0xF) {
     case 6:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
@@ -3067,11 +3062,11 @@ void btlInitPanelASprite(u32 unused, s32 view) {
     u32 spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(1);
-    ((MantraPanelSpriteView *)view)->spriteHandle = spriteHandle;
+    ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
 }
 
 void btlReleasePanelASprite(u32 obj) {
-    mnuFreeMantraSparkleEmitter(((MantraPanelSpriteView *)obj)->spriteHandle);
+    mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
 }
 
 s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
@@ -3092,13 +3087,13 @@ void mnuInitMantraPanelSpriteView(u32 unused, s32 view) {
     u32 spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(2);
-    ((MantraPanelSpriteView *)view)->spriteHandle = spriteHandle;
-    ((MantraPanelSpriteView *)view)->stateA = 0;
-    ((MantraPanelSpriteView *)view)->stateB = 0;
+    ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
+    ((MantraPanelAnimation *)view)->stateA = 0;
+    ((MantraPanelAnimation *)view)->stateB = 0;
 }
 
 void mnuReleaseMantraPanelSpriteView(u32 obj) {
-    mnuFreeMantraSparkleEmitter(((MantraPanelSpriteView *)obj)->spriteHandle);
+    mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027CDD0);
@@ -3117,43 +3112,92 @@ void func_0027DE30(void) {
 void func_0027DE38(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027DE40);
+extern u16 mnuGetPanelValueAt(MenuPanelObject *, s32);
 
-extern s32 func_0027DE40(s32, s32, s32, s32, s32, u8 *, s32);
+s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, s32 menuAddress,
+                  u8 *object, s32 packet) {
+    s8 offsets[6][2] = {
+        {49, 22}, {69, 32}, {69, 62},
+        {49, 72}, {29, 62}, {29, 32}
+    };
+    MantraPanelAnimation *panel = (MantraPanelAnimation *)object;
+    MenuPanelObject *panelObject = ((MantraMenu *)menuAddress)->work.panelObject;
+    MantraNodePos **neighbor;
+    s32 mask;
+    s32 i;
+    f32 weight;
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425BC8);
+    panel->stateA++;
+    if (panel->stateA >= 131) {
+        panel->stateA = 0;
+    }
+    if (panel->stateA < 30) {
+        weight = 0.0f;
+    } else if (panel->stateA < 90) {
+        weight = (f32)(panel->stateA - 30) / 60.0f * 0.5f;
+    } else {
+        weight = (f32)(panel->stateA - 90) / 40.0f * 0.5f + 0.5f;
+    }
+    mask = 0;
+    i = 0;
+    weight = (sdfSinPoly(weight * -(3.14159265f * 2.0f)) + 1.0f) * 0.5f;
+    mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, z, alpha, 0x93, 0, packet);
+    neighbor = mnuGetMantraNodePositionRecord(panel->id)->neighbors;
+    do {
+        MantraNodePos *node = *neighbor++;
+        u32 value = mnuGetPanelValueAt(panelObject, node->panelIndex);
+        if ((value >> 8) & 1) {
+            mask |= 3 << i;
+        }
+        i++;
+    } while (i < 6);
+    if (mask & 0x40) {
+        mask |= 1;
+    }
+    for (i = 0; i < 6; i++) {
+        if ((mask >> i) & 1) {
+            mnuDrawMantraScaledCenteredSprite(
+                x + offsets[i][0], y + offsets[i][1], 0,
+                alpha * (weight * 0.1f + 0.3f), 0x92, 0, packet,
+                weight * 0.3f + 1.0f);
+        }
+    }
+    return 0;
+}
+
 
 s32 mnuDrawMantraPanelSpriteTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
-    switch ((*(u32 *)object >> 19) & 0xF) {
+    switch ((((MantraPanelAnimation *)object)->flags >> 19) & 0xF) {
     case 6:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         amount = amount * scale;
-        func_0027DE40(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         amount = amount * scale;
-        func_0027DE40(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
-        func_0027DE40(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
-        func_0027DE40(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
         break;
     case 0:
-        func_0027DE40(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
         break;
     case 1:
-        func_0027DE40(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
         break;
     }
     return 0;
@@ -3163,14 +3207,14 @@ void btlInitPanelBSprites(u32 unused, s32 view) {
     u32 resource;
 
     resource = mnuAllocateMantraSparkleEmitter(0);
-    ((MantraPanelSpriteView *)view)->spriteHandle = resource;
+    ((MantraPanelAnimation *)view)->spriteHandle = resource;
     resource = mnuAllocateMantraPanelBurstPool();
-    ((MantraPanelSpriteView *)view)->burstPool = resource;
+    ((MantraPanelAnimation *)view)->burstPool = resource;
 }
 
 void btlReleasePanelBSprites(s32 obj) {
-    mnuFreeMantraSparkleEmitter(((MantraPanelSpriteView *)obj)->spriteHandle);
-    mnuReleaseMantraPanelBurstPool((u32 *)((MantraPanelSpriteView *)obj)->burstPool);
+    mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
+    mnuReleaseMantraPanelBurstPool((u32 *)((MantraPanelAnimation *)obj)->burstPool);
 }
 
 s32 btlDrawPanelB(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
@@ -3208,25 +3252,25 @@ s32 btlDrawPanelC(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
 s32 mnuDrawMantraPanelBackdropTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
-    switch ((*(u32 *)object >> 19) & 0xF) {
+    switch ((((MantraPanelAnimation *)object)->flags >> 19) & 0xF) {
     case 6:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
         break;
     case 8:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
         break;
     case 7:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
         break;
     case 9:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
@@ -3250,9 +3294,9 @@ void func_0027FDC0(void) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027FDC8);
 
 void mnuResetMantraPanelAnimationStates(u32 unused, s32 view) {
-    ((MantraPanelSpriteView *)view)->stateA = 0;
-    ((MantraPanelSpriteView *)view)->stateB = 0;
-    ((MantraPanelSpriteView *)view)->stateC = 0;
+    ((MantraPanelAnimation *)view)->stateA = 0;
+    ((MantraPanelAnimation *)view)->stateB = 0;
+    ((MantraPanelAnimation *)view)->stateC = 0;
 }
 
 void func_002803A0(void) {
@@ -3269,7 +3313,7 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425CB8);
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002805E0);
 
 void func_002817B8(u32 unused, s32 view) {
-    ((MantraPanelSpriteView *)view)->stateA = 0;
+    ((MantraPanelAnimation *)view)->stateA = 0;
 }
 
 void func_002817C0(void) {
@@ -3284,25 +3328,25 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425CF8);
 s32 mnuDrawFadedMantraSingleCyclePanel(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
-    switch ((*(u32 *)object >> 19) & 0xF) {
+    switch ((((MantraPanelAnimation *)object)->flags >> 19) & 0xF) {
     case 6:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
@@ -3318,11 +3362,11 @@ void mnuInitMantraPanelAccentSprite(u32 unused, s32 view) {
     u32 spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(1);
-    ((MantraPanelSpriteView *)view)->spriteHandle = spriteHandle;
+    ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
 }
 
 void mnuReleaseMantraPanelAccentSprite(u32 obj) {
-    mnuFreeMantraSparkleEmitter(((MantraPanelSpriteView *)obj)->spriteHandle);
+    mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
 }
 
 u32 mnuDrawMantraPanelAccentSprites(u32 ctx, u32 x, u32 y, u32 direction, u32 unused,
@@ -3331,15 +3375,15 @@ u32 mnuDrawMantraPanelAccentSprites(u32 ctx, u32 x, u32 y, u32 direction, u32 un
     mnuDrawMantraSprite(ctx, x, y, direction, 0xf7, 0, animation);
     mnuDrawMantraSprite(ctx, x, y, direction, 0xf8, 0, animation);
     mnuDrawMantraSprite(ctx, x, y, direction, 0xf9, 0, animation);
-    func_00284508(ctx, x, 0, direction, ((MantraPanelSpriteView *)sprite)->spriteHandle, animation);
+    func_00284508(ctx, x, 0, direction, ((MantraPanelAnimation *)sprite)->spriteHandle, animation);
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00281DC0);
 
 void func_00282B50(u32 unused, s32 view) {
-    ((MantraPanelSpriteView *)view)->stateA = 0;
-    ((MantraPanelSpriteView *)view)->stateB = 0;
+    ((MantraPanelAnimation *)view)->stateA = 0;
+    ((MantraPanelAnimation *)view)->stateB = 0;
 }
 
 void func_00282B60(void) {
@@ -3352,8 +3396,8 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425D68);
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00283090);
 
 void func_00283F90(u32 unused, s32 view) {
-    ((MantraPanelSpriteView *)view)->stateA = 0;
-    ((MantraPanelSpriteView *)view)->stateB = 0;
+    ((MantraPanelAnimation *)view)->stateA = 0;
+    ((MantraPanelAnimation *)view)->stateB = 0;
 }
 
 void func_00283FA0(void) {
@@ -3366,25 +3410,25 @@ extern s32 func_00283FA8(s32, s32, s32, s32, s32, u8 *, s32);
 s32 mnuDrawFadedMantraDualCyclePanel(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
-    switch ((*(u32 *)object >> 19) & 0xF) {
+    switch ((((MantraPanelAnimation *)object)->flags >> 19) & 0xF) {
     case 6:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
+        scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
+        scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);

@@ -19,13 +19,13 @@ extern FileReqEntry fileRequestEntries[];
 extern u32 fileRequestSlotFlags[];
 extern s32 D_003BD8E8;
 
-/* Async job handled by func_00288E70 and friends. */
-typedef struct FileJob {
+/* A 0x6C-byte async device transfer, distinct from an effect/file-queue FileJob. */
+typedef struct FileTransferJob {
     u8 kind;      /* 0x00 */
     u8 state;     /* 0x01 */
     u8 retryCount; /* 0x02 */
     u8 allocationMode; /* 0x03 */
-    struct FileJob *next; /* 0x04 */
+    struct FileTransferJob *next; /* 0x04 */
     char *name;   /* 0x08 */
     void *deviceRequest; /* 0x0C: transfer backend dereferences mode at +0x16 */
     s32 transferBytes; /* 0x10: capped at 0x8000 for each device operation */
@@ -35,11 +35,11 @@ typedef struct FileJob {
     s32 allocationHandle; /* 0x20 */
     u32 retainedAddress; /* 0x24 */
     u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
-    struct FileJob *completionNext; /* 0x2C */
+    struct FileTransferJob *completionNext; /* 0x2C */
     u8 pad30[0x38];
     u16 stateRequired; /* 0x68 */
     u16 slot; /* 0x6A */
-} FileJob;
+} FileTransferJob;
 
 /* The open device state retains the resolved path at +0x10. */
 typedef struct DevStatePathView {
@@ -80,18 +80,18 @@ void fileReqInit(s32 arg0);
 extern s32 sdfDevQueueControlRequest(void *);
 extern s32 sdfDevQueueActiveOperation(void *);
 extern s32 sdfDevQueueReleaseState(void *);
-extern void fileQueuePendingRequestInFreeSlot(FileJob *);
+extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);
 extern void func_00289540(void);
 extern void *sdfDevCreateCallbackState(s32 path,
-                        s32 (*callback)(void *, s32, s32, s32, FileJob *), FileJob *job);
+                        s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
 extern void *sdfDevCreateModeState(s32 path,
-                        s32 (*callback)(void *, s32, s32, s32, FileJob *), FileJob *job,
+                        s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
                         s32 options);
 extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
 
-s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileJob *job) {
+s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -149,7 +149,7 @@ s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
     return 0;
 }
 
-void fileStartChunkedReadWhenReady(FileJob *job) {
+void fileStartChunkedReadWhenReady(FileTransferJob *job) {
     WaitSema(fileManagerWork.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(fileManagerWork.sema);
@@ -161,7 +161,7 @@ void fileStartChunkedReadWhenReady(FileJob *job) {
 }
 
 /* Drive allocation, chunked reads, close, and completion-list handoff. */
-s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileJob *job) {
+s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -233,8 +233,8 @@ s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         WaitSema(work->sema);
         fileUnlinkNode(work, job);
         if (job->completionCallback != NULL) {
-            FileJob **link = (FileJob **)&work->done;
-            FileJob *next;
+            FileTransferJob **link = (FileTransferJob **)&work->done;
+            FileTransferJob *next;
 
             while ((next = *link) != NULL) {
                 link = &next->completionNext;
@@ -247,7 +247,7 @@ s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
     return 0;
 }
 
-void fileStartChunkedWriteWhenReady(FileJob *job) {
+void fileStartChunkedWriteWhenReady(FileTransferJob *job) {
     WaitSema(fileManagerWork.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(fileManagerWork.sema);
@@ -259,7 +259,7 @@ void fileStartChunkedWriteWhenReady(FileJob *job) {
 }
 
 /* Advance a chunked write, then close and queue its completion callback. */
-s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileJob *job) {
+s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -303,8 +303,8 @@ s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         WaitSema(work->sema);
         fileUnlinkNode(work, job);
         if (job->completionCallback != NULL) {
-            FileJob **link = (FileJob **)&work->done;
-            FileJob *next;
+            FileTransferJob **link = (FileTransferJob **)&work->done;
+            FileTransferJob *next;
 
             while ((next = *link) != NULL) {
                 link = &next->completionNext;
@@ -320,11 +320,11 @@ s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
 /* Start or resume the read, PAC, or write job at the head of the queue. */
 void func_00289540(void) {
     FileManWork *work = &fileManagerWork;
-    FileJob *job;
+    FileTransferJob *job;
     s32 locked;
 
     WaitSema(work->sema);
-    job = (FileJob *)work->head;
+    job = (FileTransferJob *)work->head;
     if (job == NULL) {
         SignalSema(work->sema);
         return;
