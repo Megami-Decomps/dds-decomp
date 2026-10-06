@@ -1,19 +1,7 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "pcp_vu0.h"
 
-/* Separately allocated 0xD0-byte inner transform, referenced by the object at +0x1C.
- * dds3BuildVuTransformFromComponents consumes scale, quaternion rotation and position. */
-typedef struct ObjectTransform {
-    u128 matrix[4];
-    u128 position;
-    u128 rotation;
-    u128 scale;
-    u8 pad70[0x50];
-    u32 flags;
-    f32 radius; /* Used by the strict sphere-overlap test. */
-    u32 unkC8;
-    u8 padCC[4];
-} ObjectTransform;
 
 typedef struct {
     void *worldNodes; /* 0x00 */

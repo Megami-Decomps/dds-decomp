@@ -1,13 +1,12 @@
 #include "common.h"
+#include "sdf_draw.h"
 
-typedef struct Motion Motion;
 typedef struct SdfMotionManager SdfMotionManager;
-typedef struct SdfMotionCommandTable SdfMotionCommandTable;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 dds3AppendWorldObjectNode(s32 kind);
 extern void *sdfModelCreateWithItems(void *data, void *listRef);
-extern Motion *func_003340E0(SdfMotionManager *, SdfMotionCommandTable *);
+extern Motion *func_003340E0(SdfMotionManager *, MotionTable *);
 extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
 typedef struct ObjWithWork {

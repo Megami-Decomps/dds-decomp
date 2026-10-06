@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itf.h"
+#include "sdf.h"
 
 #define ITF_BYTE_MASK 0xFF
 #define ITF_NODE_HEADER_BYTES 8
@@ -137,7 +138,7 @@ typedef struct MemNode {
 
 /* Allocation handle precedes the first queue node by four bytes. */
 typedef struct MemRingHeader {
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
     MemNode first;
 } MemRingHeader;
 
@@ -779,14 +780,14 @@ s32 func_001A00B8(u8 *dst, s32 option, u32 block, MemOut *segments) {
     return produced;
 }
 
-extern SdfAllocation *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfAllocation *);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void *memcpy(void *, const void *, u32);
 
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.
  * The allocation handle is stored four bytes before the returned ring base. */
 u8 *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
-    SdfAllocation *handle = sdfAllocGeneralBlock((payloadBytes + ITF_NODE_HEADER_BYTES) * (count + 1) + ITF_ALLOCATION_HANDLE_BYTES);
+    SdfMemBlock *handle = sdfAllocGeneralBlock((payloadBytes + ITF_NODE_HEADER_BYTES) * (count + 1) + ITF_ALLOCATION_HANDLE_BYTES);
     u8 *list = (u8 *)sdfResourceRetainAddress(handle);
     MemNode *node;
     MemNode *next;
@@ -857,11 +858,6 @@ void itfReleaseBackgroundSpriteTexture(void) {
 
 extern s32 itfDrawTexturedSpriteRect();
 
-typedef struct TextBackgroundSprite {
-    u8 pad00[0xC];
-    s16 width;
-    s16 height;
-} TextBackgroundSprite;
 
 /* Draw only when a texture is present; native X/Y extent scaling differs. */
 void itfDrawBackgroundSprite(void) {
@@ -869,7 +865,7 @@ void itfDrawBackgroundSprite(void) {
     s32 color[ITF_RGBA_COMPONENT_COUNT];
     s16 width;
     s16 height;
-    TextBackgroundSprite *panel = (TextBackgroundSprite *)itfBackgroundSpriteTexture;
+    SdfTex *panel = (SdfTex *)itfBackgroundSpriteTexture;
     if (panel != NULL) {
         width = panel->width;
         height = panel->height;
@@ -1384,7 +1380,7 @@ void mnuReportCampProcessHalted(void) {
 extern s32 D_003B44B0[];
 
 UiSprite *func_001A1858(s32 kind, u32 value) {
-    SdfAllocation *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
     UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
 
     work->kind = kind;

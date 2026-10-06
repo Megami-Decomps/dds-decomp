@@ -47,7 +47,8 @@ typedef union BattleActionSlot {
 /* Native 0x180-byte command-actor allocation; its two list links are at
  * 0x174/0x178. */
 typedef struct ActionStateLink {
-    u8 pad00[8];
+    u32 state; /* 0x00: scene readiness compares this state as an unsigned word. */
+    u8 pad04[4];
     u32 pendingFlags; /* 0x08 */
     u32 flags; /* 0x0C */
     u8 pad10[8];

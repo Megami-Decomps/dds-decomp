@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "dat_state.h"
 
 /* The dispatcher passes its last argument to entry callbacks as opaque data,
  * not as a function address. Modes select polling, primary and secondary actions. */
@@ -27,13 +28,8 @@ extern void func_002619A8(s32, s32);
 extern void func_0025FD78(s32);
 extern void func_00297320(s32);
 extern void func_00297970(s32);
-extern s32 datGameState;
 
 /* Shared save-state item quantities, also used by the camp menu. */
-typedef struct SaveItemCounts {
-    u8 pad00[0x1340];
-    u8 counts[0x100];
-} SaveItemCounts;
 
 extern s32 D_003CE148[];
 extern u8 D_003CE4EC[];
@@ -142,11 +138,6 @@ typedef struct EvtFlagGate {
 } EvtFlagGate;
 
 /* Persistent thresholds and completed-slot cursor in the shared game state. */
-typedef struct EvtProgressState {
-    u8 pad00[0x1E654];
-    s32 total;     /* 0x1E654: accumulated progress against slot thresholds */
-    s32 slotIndex; /* 0x1E658: last completed slot */
-} EvtProgressState;
 
 extern s32 func_002C5498();
 extern u8 D_003CE604[];
@@ -207,7 +198,7 @@ s32 evtInitializeSelectedSlot(void) {
     }
     selectionRecordAddress = ((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->primaryObject->node)->selectionRecord;
     selectedSlot = mnuCampHasEligibleOwnedItems(stateAddress);
-    ((EvtStateTableContext *)stateAddress)->cachedSelection = *(s32 *)(datGameState + 0x3c);
+    ((EvtStateTableContext *)stateAddress)->cachedSelection = datGameState->header.currency;
     ((EvtSelectionRecord *)selectionRecordAddress)->slot = selectedSlot;
     ((EvtStateTableContext *)stateAddress)->selectedSlot = selectedSlot;
     return 1;
@@ -427,7 +418,7 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
     if (threshold == 0) {
         return -1;
     }
-    remaining = threshold - ((EvtProgressState *)datGameState)->total;
+    remaining = threshold - datGameState->progressTotal;
     if (remaining > 0) {
         return remaining;
     }
@@ -437,13 +428,13 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 s32 evtShowResultText(void) {
     char formattedText[0x40];
     evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
-    func_0035C860(formattedText, D_00437840, ((EvtProgressState *)datGameState)->total);
+    func_0035C860(formattedText, D_00437840, datGameState->progressTotal);
     evtCopyEntryStringToActiveWindow(1, formattedText);
-    evtCopyEntryStringToActiveWindow(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
-    func_0035C860(formattedText, D_00437840, evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1));
+    evtCopyEntryStringToActiveWindow(2, D_003C9A20[datGameState->progressSlot]);
+    func_0035C860(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
     evtCopyEntryStringToActiveWindow(3, formattedText);
-    if (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1) >= 0) {
-        dspStartEntry(((EvtProgressState *)datGameState)->slotIndex + 0x1a);
+    if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
+        dspStartEntry(datGameState->progressSlot + 0x1a);
     } else {
         dspStartEntry(0x21);
     }
@@ -675,7 +666,7 @@ s32 evtUpdateSlotItemCompletionState(void) {
     s32 nextStage = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->primaryObject->node)->entryRecord)->params.value + 1;
     s32 itemId = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->secondaryObject->node)->entryRecord)->params.id;
     if (nextStage == 4) {
-        if (((SaveItemCounts *)datGameState)->counts[itemId] == 0) {
+        if (datGameState->inventory.counts[itemId] == 0) {
             func_002B86E8(((EvtStateTableContext *)stateAddress)->secondaryObject->node);
         }
         if (((EvtSceneNode *)((EvtStateTableContext *)stateAddress)->secondaryObject->node)->completionState == 0) {
@@ -721,7 +712,7 @@ void evtMarkSceneFollowupReadyAndQueueAction(s32 taskAddress) {
 void evtAccumulateEligibleStageMultiplierValue(EvtStateTableContext *state) {
     CampWindowParams *entryValues = &((EvtEntryRecord *)((EvtSceneNode *)state->secondaryObject->node)->entryRecord)->params;
     if (func_002C5498(entryValues->id)) {
-        *(s32 *)(datGameState + 0xa50) += entryValues->value * state->entryMultiplier;
+        datGameState->world.score += entryValues->value * state->entryMultiplier;
     }
 }
 
@@ -740,11 +731,11 @@ s32 func_00263F50(s32 progressDelta) {
     if (progressDelta == 0) {
         progressDelta = 1;
     }
-    ((EvtProgressState *)datGameState)->total += progressDelta;
-    if ((u32)((EvtProgressState *)datGameState)->total > EVT_PROGRESS_UNSIGNED_LIMIT) {
-        ((EvtProgressState *)datGameState)->total = 999999;
+    datGameState->progressTotal += progressDelta;
+    if ((u32)datGameState->progressTotal > EVT_PROGRESS_UNSIGNED_LIMIT) {
+        datGameState->progressTotal = 999999;
     }
-    return ((EvtProgressState *)datGameState)->total;
+    return datGameState->progressTotal;
 }
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263FB0);
@@ -977,11 +968,11 @@ s32 func_00264B10(s32 callbackContext) {
 /* Mark each newly completed slot and advance the persistent slot index. */
 s32 evtAdvanceSlotFlags(void) {
     s32 advancedSlots = 0;
-    while (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + advancedSlots + 1) == 0) {
-        mdlFlagSet(D_003CE14C[(((EvtProgressState *)datGameState)->slotIndex + advancedSlots) * EVT_PROGRESS_RECORD_WORDS + EVT_PROGRESS_RECORD_WORDS]);
+    while (evtGetRemainingSlotThreshold(datGameState->progressSlot + advancedSlots + 1) == 0) {
+        mdlFlagSet(D_003CE14C[(datGameState->progressSlot + advancedSlots) * EVT_PROGRESS_RECORD_WORDS + EVT_PROGRESS_RECORD_WORDS]);
         advancedSlots++;
     }
-    ((EvtProgressState *)datGameState)->slotIndex += advancedSlots;
+    datGameState->progressSlot += advancedSlots;
     return advancedSlots;
 }
 
@@ -1035,7 +1026,7 @@ s32 evtTriggerProgressFlagGate(s32 unusedContext) {
     EvtFlagGate *gateEntry = (EvtFlagGate *)D_003CE400;
     u32 gateIndex;
     for (gateIndex = 0; gateIndex < EVT_PROGRESS_FLAG_GATE_COUNT; gateIndex++, gateEntry++) {
-        if ((u32)(((EvtProgressState *)datGameState)->slotIndex + 1) >= (u32)gateEntry->threshold) {
+        if ((u32)(datGameState->progressSlot + 1) >= (u32)gateEntry->threshold) {
             u32 progressFlag = gateEntry->flag;
             if (mdlFlagTest(progressFlag) == 0) {
                 mdlFlagSet(progressFlag);
@@ -1051,10 +1042,10 @@ s32 evtShowSlotText(void) {
     char formattedText[0x40];
     if (*(s8 *)(kwlnTaskGetUserValue() + 0xcc) > 0) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
-        func_0035C860(formattedText, D_00437840, D_003CE148[((EvtProgressState *)datGameState)->slotIndex * EVT_PROGRESS_RECORD_WORDS]);
+        func_0035C860(formattedText, D_00437840, D_003CE148[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
         evtCopyEntryStringToActiveWindow(1, formattedText);
-        evtCopyEntryStringToActiveWindow(2, D_003C9A20[((EvtProgressState *)datGameState)->slotIndex]);
-        if (evtGetRemainingSlotThreshold(((EvtProgressState *)datGameState)->slotIndex + 1) >= 0) {
+        evtCopyEntryStringToActiveWindow(2, D_003C9A20[datGameState->progressSlot]);
+        if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
             dspStartEntry(0x24);
         } else {
             dspStartEntry(0x25);

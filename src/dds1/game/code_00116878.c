@@ -1,11 +1,10 @@
 #include "common.h"
+#include "sdf_draw.h"
 
 extern s32 dds3AppendWorldObjectNode(s32 kind);
-typedef struct Motion Motion;
 typedef struct SdfMotionManager SdfMotionManager;
-typedef struct SdfMotionCommandTable SdfMotionCommandTable;
 
-extern Motion *func_002DB230(SdfMotionManager *, SdfMotionCommandTable *);
+extern Motion *func_002DB230(SdfMotionManager *, MotionTable *);
 extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
 /* Script object header (0x1C). */

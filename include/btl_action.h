@@ -5,19 +5,24 @@
 
 /* Native 0x70-byte scheduler-task header, distinct from a queued command actor.
  * The condition evaluator reads the first byte and +8 query key; task startup
- * assigns handle, while owner lookup uses ownerId. The remaining SDK fields
- * beyond ownerId stay opaque here.
+ * assigns handle, while owner lookup uses ownerId. Scene request constructors
+ * share its task-ID/status prefix and native start/update callback slots.
  */
 typedef struct BtlRuntimeTask {
     u8 conditionKind;
     u8 pad01[7];
     u64 conditionHandle;
-    u8 pad10[0x18];
+    u8 status; /* 0x10 */
+    u8 pad11[0xF];
+    u16 taskId; /* 0x20 */
+    u8 pad22[6];
     s32 startDelay; /* Signed countdown before the task's running phase. */
     u8 pad2C[0xC];
     u64 handle;
     u64 ownerId;
-    u8 pad48[0x28];
+    void (*onStart)(); /* 0x48: native start callback, with unspecified arguments. */
+    s32 (*callback)(); /* 0x4C: returns nonzero when the task has completed. */
+    u8 pad50[0x20];
 } BtlRuntimeTask;
 
 /* Eight-byte ability parameter rows; only the leading coefficient is decoded. */

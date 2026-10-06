@@ -7,7 +7,7 @@ extern void func_003332A0(void *, u32);
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern void func_003332D0(void *, f32);
-extern void func_001594C8();
+extern void billSetAnimationEntry();
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
@@ -287,7 +287,7 @@ u16 billGetVariantValue(BillObj *effect) {
 /* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
     if (effect->kind == 1 && effect->unk58 != entryIndex) {
-        func_001594C8(effect, entryIndex);
+        billSetAnimationEntry(effect, entryIndex);
     }
 }
 

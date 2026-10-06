@@ -28,39 +28,8 @@
 #define EFF_RGB_MASK 0xFFFFFF
 #define EFF_DIRECT_SURFACE_COUNT 4
 
-typedef struct SdfMemoryBlock SdfMemoryBlock;
+extern void *effParamTableGetBlock(void *table, s32 index);
 
-
-extern u64 effParamTableGetBlock(u64, u64);
-
-typedef struct EffVectorPart {
-    u8 pad0[8];
-    f32 accumulated;
-    u8 padC[4];
-} EffVectorPart;
-
-typedef struct EffVectorWork {
-    u8 pad0[0x50];
-    f32 increment;
-    u8 pad54[4];
-    EffVectorPart *parts;
-} EffVectorWork;
-
-/* Position and color arrays precede this 0x70-byte pool header. Constructors
- * below clear their entire allocation, including both arrays and the header. */
-typedef struct EffRecordPool {
-    f32 matrix[EFF_MATRIX_WORD_COUNT];
-    f32 origin[3];
-    u8 pad4C[4];
-    u32 drawMode;  /* 0x50: selects the packet submission surface */
-    u32 color;     /* 0x54: packed color passed to the packet builder */
-    s32 vertexCount; /* 0x58: positions and color words, not group count */
-    f32 scale;     /* 0x5C */
-    s32 recordBase;    /* 0x60: address of stride-dependent records */
-    s32 auxRecordBase; /* 0x64: address of stride-dependent auxiliary records */
-    u32 resource;   /* 0x68: released by sdfQueueAssetRelease */
-    u32 buffer;     /* 0x6C: freed by sdfReleaseResourceAllocation */
-} EffRecordPool;
 
 typedef struct EffPacketParams {
     s16 parameterCount;
@@ -74,7 +43,7 @@ typedef struct EffPacketParams {
     u32 *texcoords;
     u32 *extraTexcoords;
     u32 *colors;
-    void *(*allocate)(s32);
+    s32 (*allocate)(s32);
     f32 depth;
 } EffPacketParams;
 
@@ -91,60 +60,30 @@ extern EffDrawSurface *D_003B1318[];
 extern EffDrawSurface *D_003B1378[];
 extern u32 D_003B1330[];
 extern EffDrawSurface D_00380248;
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
 extern void sdfConsAppendVuPacket(void *, s32);
 extern void sdfConsAppendAssetPacket(void *, u32, s32);
 extern void *func_00167A10(EffPacketParams *);
+extern EffRecordPool *func_00177760(u32 count);
+extern void func_001781F8(EffRecordPool *pool);
+extern s32 effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
 
 
-/* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
- * `count` evenly spaced angular records; each expands to a five-vertex fan. */
-typedef struct EffectRingVertex {
-    s32 pad0;
-    s32 offset;
-    f32 angle;
-    s32 padC;
-} EffectRingVertex;
-
-typedef struct EffectRing {
-    u8 pad00[0x10];
-    u32 count;
-    u8 pad14[8];
-    s32 spread;
-    u8 pad20[8];
-    u32 firstColor;
-    u32 secondColor;
-    f32 param30;
-    f32 param34;
-    f32 param38;
-    u8 pad3C[0x14];
-    u32 unk50;
-    u32 drawMode;
-    EffectRingVertex *vertices;
-    s32 unk5C;
-    u32 color;
-    f32 scale;
-    f32 unk68;
-    u8 pad6C[4];
-    f32 unk70;
-    f32 unk74;
-    u32 handle;
-    u8 *matrix;
-} EffectRing;
 
 /* The vertex array starts immediately after the 0x80-byte header in this block. */
-typedef struct EffectRingBlock {
-    EffectRing header;              /* 0x00, 0x80 bytes */
-    EffectRingVertex vertices[1];   /* 0x80 */
-} EffectRingBlock;
+typedef struct EffRingBlock {
+    EffRingWork header;
+    EffRingParticle vertices[1];
+} EffRingBlock;
 
-extern SdfMemoryBlock *sdfAllocGeneralBlock(u32 size);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
-extern void *sdfResourceRetainAddress(SdfMemoryBlock *block);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
-extern u8 *effAllocateIdentityMatrixWork(u32);
+extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 
 extern u32 effMiscRand(void *state);
 
@@ -155,44 +94,43 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
-/* K&R: effCreateRingFanFromParams passes the table block as the raw 64-bit value. */
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
-EffectRing *effCreateRingFan(source)
-EffectRing *source;
+EffRingWork *effCreateRingFan(source)
+EffRingWork *source;
 
 {
-    u32 handle;
-    EffectRingBlock *block;
-    EffectRing *ring;
+    SdfMemBlock *handle;
+    EffRingBlock *block;
+    EffRingWork *ring;
     f32 angle;
     f32 step;
     u32 spread;
     u32 i;
 
-    handle = (u32)sdfAllocGeneralBlock(source->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
-    block = (EffectRingBlock *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
+    handle = sdfAllocGeneralBlock(source->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
+    block = (EffRingBlock *)sdfResourceRetainAddress(handle);
     ring = &block->header;
     memcpy(ring, source, EFF_RING_PARAM_BYTES);
     ring->vertices = block->vertices;
-    ring->handle = handle;
+    ring->allocationHandle = handle;
     ring->color = EFF_NEUTRAL_COLOR;
     ring->unk68 = ring->param38;
     ring->unk70 = ring->param30;
     ring->unk74 = ring->param34;
-    ring->unk5C = 0;
+    ring->updateCount = 0;
     ring->scale = 1.0f;
     if (ring->spread == 0) {
         ring->spread = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    ring->matrix = effAllocateIdentityMatrixWork(ring->count);
-    ((EffRecordPool *)ring->matrix)->scale = 1.0f;
-    ((EffRecordPool *)ring->matrix)->drawMode = ring->drawMode;
+    ring->recordPool = effAllocateIdentityMatrixWork(ring->count);
+    ring->recordPool->scale = 1.0f;
+    ring->recordPool->drawMode = ring->drawMode;
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
-        ring->vertices[i].offset = -(effMiscRand(D_003AA868) % spread);
+        ring->vertices[i].age = -(effMiscRand(D_003AA868) % spread);
         ring->vertices[i].angle = angle;
         angle += step;
     }
@@ -200,8 +138,8 @@ EffectRing *source;
 }
 
 /* Create a ring from the first parameter-table block. */
-void effCreateRingFanFromParams(u64 table) {
-    u64 parameterBlock;
+void effCreateRingFanFromParams(void *table) {
+    void *parameterBlock;
 
     parameterBlock = effParamTableGetBlock(table, 0);
     effCreateRingFan(parameterBlock);
@@ -212,9 +150,9 @@ void func_00177098(void) {
 }
 
 /* Release the matrix pool's resources before the ring's backing allocation. */
-void effReleaseRingResources(EffectRing *ring) {
-    func_001781F8(ring->matrix);
-    sdfReleaseResourceAllocation(ring->handle);
+void effReleaseRingResources(EffRingWork *ring) {
+    func_001781F8(ring->recordPool);
+    sdfReleaseResourceAllocation(ring->allocationHandle);
 }
 
 /* Copy one quadword; the fourth component is copied along with XYZ. */
@@ -223,19 +161,19 @@ void effCopyRingVector(void *destination, void *source) {
 }
 
 /* Replace the ring's packed modulation color without touching vertex colors. */
-void effSetRingColor(EffectRing *ring, u32 color) {
+void effSetRingColor(EffRingWork *ring, u32 color) {
     ring->color = color;
 }
 
-/* Set the ring scale without changing the native typed-pointer interface. */
-void effSetRingScale(EffectRing *ring, f32 scale) {
+/* Set the ring's scale factor. */
+void effSetRingScale(EffRingWork *ring, f32 scale) {
     ring->scale = scale;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effCopyRingTransformMatrix(EffectRing *ring, void *matrixSource) {
+void effCopyRingTransformMatrix(EffRingWork *ring, void *matrixSource) {
     VU0_LOAD_MATRIX(matrixSource);
-    VU0_STORE_MATRIX(ring->matrix);
+    VU0_STORE_MATRIX(ring->recordPool->matrix);
 }
 
 /* Each five-vertex fan group has one packed color word per vertex. */
@@ -244,14 +182,14 @@ typedef struct EffRingColorSlot {
 } EffRingColorSlot;
 
 /* Fill five fan-vertex colors; odd and even groups use different alpha values. */
-void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 modulationColor) {
+void effFlashWriteRingColorSlots(EffRingWork *work, s32 index, s32 modulationColor) {
     EffRingColorSlot *slot;
     s32 firstRgb;
     s32 secondRgb;
 
-    slot = (EffRingColorSlot *)effGetExtendedGroupAuxEntry(((EffectRing *)work)->matrix, index);
-    firstRgb = ((EffectRing *)work)->firstColor & EFF_RGB_MASK;
-    secondRgb = ((EffectRing *)work)->secondColor & EFF_RGB_MASK;
+    slot = (EffRingColorSlot *)effGetExtendedGroupAuxEntry(work->recordPool, index);
+    firstRgb = work->firstColor & EFF_RGB_MASK;
+    secondRgb = work->secondColor & EFF_RGB_MASK;
     slot->colors[0] = effMultiplyPackedColors(secondRgb, modulationColor);
     slot->colors[1] = effMultiplyPackedColors(secondRgb, modulationColor);
     if (index & 1) {
@@ -265,28 +203,10 @@ void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 modulationColor) {
     }
 }
 
-typedef struct {
-    u8 pad00[8];
-    f32 phase;
-    f32 unk0C;
-} EffectArcQuadPart;
-
-typedef struct {
-    u8 pad00[0x58];
-    EffectArcQuadPart *parts;
-    u8 pad5C[0x0C];
-    f32 orbitRadius;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    u8 pad78[4];
-    EffRecordPool *recordPool;
-} EffectArcQuadWork;
-
 /* vu0 routine: build five orbiting fan positions from a phase-derived basis.
  * No camera matrix is read. Quadword loads retain the native scratch W values. */
-void effBuildOrbitingArcQuadPoints(EffectArcQuadWork *work, s32 index) {
-    EffectArcQuadPart *part = &work->parts[index];
+void effBuildOrbitingArcQuadPoints(EffRingWork *work, s32 index) {
+    EffRingParticle *part = &work->vertices[index];
     f32 *positions = (f32 *)effGetExtendedGroupElement(work->recordPool, index);
     f32 orbitOffset[4];
     f32 radialDirection[4];
@@ -299,14 +219,14 @@ void effBuildOrbitingArcQuadPoints(EffectArcQuadWork *work, s32 index) {
     VEC3_SPLAT(axisOffset, work->unk6C);
     VEC3_SPLAT(sideOffsetA, work->unk74);
     VEC3_SPLAT(sideOffsetB, work->unk70);
-    radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(part->phase);
+    radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(part->angle);
     radialDirection[1] = 0;
-    sine = sdfSinPoly(part->phase);
+    sine = sdfSinPoly(part->angle);
     radialDirection[2] = sine;
-    orbitOffset[0] = radialDirection[0] * work->orbitRadius;
+    orbitOffset[0] = radialDirection[0] * work->unk68;
     orbitOffset[1] = 0;
-    orbitOffset[2] = sine * work->orbitRadius;
-    basisFactor = part->unk0C;
+    orbitOffset[2] = sine * work->unk68;
+    basisFactor = part->basisFactor;
     D_003B12B0[0] = radialDirection[0] * basisFactor;
     D_003B12B0[1] = basisFactor + -1.0f;
     D_003B12B0[2] = sine * basisFactor;
@@ -347,11 +267,11 @@ void effBuildOrbitingArcQuadPoints(EffectArcQuadWork *work, s32 index) {
 }
 
 /* Add the group's increment to one accumulated scalar; index is unchecked. */
-void effAdvanceVectorRecord(EffVectorWork *work, s32 index) {
-    EffVectorPart *part;
+void effAdvanceVectorRecord(EffRingWork *work, s32 index) {
+    EffRingParticle *part;
 
-    part = &work->parts[index];
-    part->accumulated = part->accumulated + work->increment;
+    part = &work->vertices[index];
+    part->angle = part->angle + work->increment;
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177408);
@@ -375,7 +295,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     u64 *packet;
     void *stateList;
 
-    list = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    list = (void *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale;
@@ -409,9 +329,9 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         D_003B1308[work->drawMode]->submit(D_003B1308[work->drawMode], list);
     } else {
-        stateList = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+        stateList = (void *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
-        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -420,7 +340,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         packet[5] = 0x42;
         sdfAppendPacket(stateList, packet);
         D_00380248.submit(&D_00380248, stateList);
-        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -465,7 +385,7 @@ extern void func_003332D0(u32 asset, f32 value);
  * The complete block and shared packet-parameter record are cleared. */
 EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     EffRecordPool *pool;
-    u32 handle;
+    SdfMemBlock *handle;
     u32 *block;
     s32 vertexCount;
     s32 positionWordCount;
@@ -476,8 +396,8 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     positionWordCount = vertexCount * 4;
     colorWordCount = vertexCount;
     size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
-    handle = (u32)sdfAllocGeneralBlock(size);
-    block = (u32 *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
+    handle = sdfAllocGeneralBlock(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
     pool->recordBase = (s32)block;
@@ -504,7 +424,7 @@ void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
 void effDrawTriangleRecordPool(EffRecordPool *pool)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT];
-    void *packet = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    void *packet = (void *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
     s32 remainingVertices;
     EffDrawSurface *surface;
 
@@ -555,7 +475,7 @@ s32 effGetGroupIndexRecord(EffRecordPool *pool, s32 groupIndex) {
  * Both allocation and shared packet parameters are cleared before defaults. */
 EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     EffRecordPool *pool;
-    u32 handle;
+    SdfMemBlock *handle;
     u32 *block;
     s32 positionWordCount;
     s32 colorWordCount;
@@ -564,8 +484,8 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     positionWordCount = quadCount * 16;
     colorWordCount = quadCount * EFF_QUAD_VERTEX_COUNT;
     size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
-    handle = (u32)sdfAllocGeneralBlock(size);
-    block = (u32 *)sdfResourceRetainAddress((SdfMemoryBlock *)handle);
+    handle = sdfAllocGeneralBlock(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
     pool->recordBase = (s32)block;
@@ -592,7 +512,7 @@ void effReleaseRecordGroupResources(EffRecordPool *pool) {
 void effDrawQuadRecordPool(EffRecordPool *pool)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT];
-    void *packet = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    void *packet = (void *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
     s32 remainingVertices;
     EffDrawSurface *surface;
 
@@ -640,15 +560,15 @@ s32 effGetRecordGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
 }
 
 /* Allocate five-vertex fan groups, then set the returned header's matrix. */
-u8 *effAllocateIdentityMatrixWork(u32 fanCount) {
-    u8 *matrix;
+EffRecordPool *effAllocateIdentityMatrixWork(u32 fanCount) {
+    EffRecordPool *pool;
 
-    matrix = (u8 *)func_00177760(fanCount);
-    EE_MMI_UNIT_MATRIX(matrix);
-    return matrix;
+    pool = func_00177760(fanCount);
+    EE_MMI_UNIT_MATRIX(pool->matrix);
+    return pool;
 }
 
-void func_001781F8(void *work) {
+void func_001781F8(EffRecordPool *work) {
     effReleaseRecordGroupAssetAndHandle(work);
 }
 
@@ -663,7 +583,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     u64 *packet;
     void *stateList;
 
-    list = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    list = (void *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     VU0_COPY_MATRIX(matrix, work->matrix);
     matrix[12] = work->origin[0];
@@ -694,9 +614,9 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         D_003B1388[work->drawMode]->submit(D_003B1388[work->drawMode], list);
     } else {
-        stateList = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+        stateList = (void *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
-        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -705,7 +625,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         packet[5] = 0x42;
         sdfAppendPacket(stateList, packet);
         D_00380248.submit(&D_00380248, stateList);
-        packet = sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -738,23 +658,10 @@ void effSetRecordPoolColor(EffRecordPool *pool, u32 color) {
 }
 
 /* Set the scalar used by the scale/origin rendering path. */
-void effSetRecordPoolScale(u8 *work, f32 scale) {
-    ((EffRecordPool *)work)->scale = scale;
+void effSetRecordPoolScale(EffRecordPool *work, f32 scale) {
+    work->scale = scale;
 }
 
-typedef struct PcpScatterRes PcpScatterRes;
-typedef struct PcpScatterPool {
-    u8 pad00[0x10];
-    u32 unk10;
-    u32 color;
-    s32 secondWordCount;
-    f32 unk1C;
-    s32 recordBase;
-    s32 auxRecordBase;
-    u32 resource;
-    SdfMemoryBlock *buffer;
-    PcpScatterRes *sharedResource;
-} PcpScatterPool;
 
 typedef struct {
     f32 origin[4];
@@ -804,10 +711,10 @@ struct PcpScatterRadialWork {
     f32 scale;
     u32 color;
     PcpScatterPool *childWork;
-    SdfMemoryBlock *ownedResource;
+    SdfMemBlock *ownedResource;
     u32 duplicatedCount;
     u32 *duplicatedHandles;
-    SdfMemoryBlock *duplicateAllocation;
+    SdfMemBlock *duplicateAllocation;
 };
 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
@@ -822,7 +729,7 @@ PcpScatterRadialWork *func_001784F8(params, resource, particleParams)
 {
     PcpScatterRadialWork *work;
     PcpScatterRadialParticle *particle;
-    SdfMemoryBlock *handle;
+    SdfMemBlock *handle;
     u32 *handles;
     u32 count;
     u32 i;
@@ -831,7 +738,7 @@ PcpScatterRadialWork *func_001784F8(params, resource, particleParams)
     u32 segments;
 
     handle = sdfAllocGeneralBlock(sizeof(PcpScatterRadialWork) + params->particleCount * sizeof(PcpScatterRadialParticle));
-    work = sdfResourceRetainAddress(handle);
+    work = (PcpScatterRadialWork *)sdfResourceRetainAddress(handle);
     work->particles = (PcpScatterRadialParticle *)(work + 1);
     work->params = *params;
     work->color = 0x80808080;
@@ -854,7 +761,7 @@ PcpScatterRadialWork *func_001784F8(params, resource, particleParams)
         }
         count = work->duplicatedCount;
         handle = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = sdfResourceRetainAddress(handle);
+        handles = (u32 *)sdfResourceRetainAddress(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = handles;
         work->duplicatedHandles[0] = effParamWorkCreate(6, particleParams);

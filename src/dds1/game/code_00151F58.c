@@ -294,7 +294,7 @@ u16 billGetVariantValue(BillObj *effect) {
 /* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
     if (effect->kind == 1 && effect->unk58 != entryIndex) {
-        func_001518D8(effect, entryIndex);
+        billSetAnimationEntry(effect, entryIndex);
     }
 }
 

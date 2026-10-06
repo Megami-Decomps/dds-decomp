@@ -57,6 +57,31 @@
     ".set reorder" \
     : : "r"(unit), "r"(src) : "$2", "memory")
 
+/* Read-only variant of the same unpack, with the actual four-byte load as
+ * an input instead of a global memory-write clobber. Event-unit transitions
+ * retain unrelated flags and timers across this load.
+ *
+ * src must be side-effect-free and point to one initialized, aligned u32 in
+ * ordinary memory (it occurs in both the address and memory operands). Only
+ * this word is read; no memory is written. unit supplies binary32 scale bits,
+ * either as f32 or an explicit u32 bit pattern, not an integer numeric scale.
+ * $2 is scratch, vf10 is the result and vf2 is overwritten, under the same
+ * implicit VU-register convention as EE_MMI_RGBA_UNPACK. This is not a memory
+ * barrier or an MMIO primitive. Preserve the broad-clobber variant for callers
+ * with additional unmodeled asm effects; do not replace it globally.
+ */
+#define EE_MMI_RGBA_UNPACK_READONLY(src, unit) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "lw $2, 0(%1)\n" \
+    "pextlb $2, $0, $2\n" \
+    "pextlh $2, $0, $2\n" \
+    "qmtc2.ni $2, vf10\n" \
+    "vitof0.xyzw vf10, vf10\n" \
+    "qmtc2.ni %0, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    ".set reorder" \
+    : : "r"(unit), "r"(src), "m"(*(const u32 *)(src)) : "$2")
+
 /*
  * vf10 (floats, 0..1) -> RGBA8888 word: scale by 128.0 through vf2x, then
  *     vftoi0 vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out

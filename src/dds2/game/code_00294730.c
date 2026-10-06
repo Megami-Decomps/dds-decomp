@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 
 extern void func_00295D38();
 
@@ -283,7 +284,6 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
     );
 }
 
-extern s32 datGameState;
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 
@@ -336,22 +336,22 @@ typedef struct MenuValueTransitionState {
 void func_00296D90(MenuValueTransitionState *state, s32 style) {
     char text[16];
 
-    if (*(s32 *)(datGameState + 0x3C) != state->previousValue) {
+    if (datGameState->header.currency != state->previousValue) {
         s32 transitionFrames = 20;
         s32 displayedValue;
 
         sndSetSequenceVolumePan(19, 127, 63);
         state->elapsedFrames++;
         displayedValue = state->previousValue +
-                         ((*(s32 *)(datGameState + 0x3C) - state->previousValue) * state->elapsedFrames) /
+                         ((datGameState->header.currency - state->previousValue) * state->elapsedFrames) /
                              transitionFrames;
         func_0035C860(text, D_00437980, displayedValue);
         if (state->elapsedFrames == transitionFrames) {
-            state->previousValue = *(s32 *)(datGameState + 0x3C);
+            state->previousValue = datGameState->header.currency;
             state->elapsedFrames = 0;
         }
     } else {
-        func_0035C860(text, D_00437980, *(s32 *)(datGameState + 0x3C));
+        func_0035C860(text, D_00437980, datGameState->header.currency);
     }
 
     {
