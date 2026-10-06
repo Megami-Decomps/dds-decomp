@@ -270,7 +270,7 @@ typedef struct EffectObjectNode {
 
 extern EffectObjectNode *effFloorModelListHead;
 
-extern s64 btlIsRuntimeAllocated(void);
+extern u8 btlIsRuntimeAllocated(void);
 
 /* 4x4 float matrix with 128-bit row access for VU0/DMA transfers. */
 typedef struct Matrix4 {
@@ -557,11 +557,13 @@ extern void func_002B0B70(u8 *, void *);
 
 extern u16 D_003BC944;
 
-extern void *func_00217680(u32, u32);
+extern MdlCtx *func_00217680(s32, s32);
+extern u16 mdlGetContextResourceGroup(MdlCtx *);
+extern u16 mdlGetContextResourceId(MdlCtx *);
 
-extern void effInitModelVUState(void *);
+extern void effInitModelVUState(MdlCtx *);
 
-extern s64 effComputeLightDirectionVU(void *, void *);
+extern s32 effComputeLightDirectionVU(MdlCtx *, void *);
 
 extern void *sdfAllocAndClearQuadwords(u32);
 
@@ -569,11 +571,10 @@ extern char D_003B2AA0[];
 
 extern void fileQueueDestroy(u32);
 
-extern u8 *D_003BC958;
 
-void effDestroyModelContext(s32 model);
+void effDestroyModelContext(MdlCtx *model);
 
-void *effLoadViewerModelWithVUState(u32 first, u32 second);
+MdlCtx *effLoadViewerModelWithVUState(void *first, u32 second);
 
 RefObj *effReferenceObjectRetain(RefObj *obj);
 
@@ -6030,7 +6031,7 @@ typedef struct EffModelResource {
     u32 color;
     s32 updateCount;
     s32 kind;
-    void *model;
+    MdlCtx *model;
     u32 attributes;
     u32 childResource;
     void *source;
@@ -6146,7 +6147,7 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
     VU0_STORE_VF_UNCLOBBERED($vf0, &effect->transform[0x10]);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
-        effect->model = effLoadViewerModelWithVUState((u32)secondary, param);
+        effect->model = effLoadViewerModelWithVUState(secondary, param);
         effect->attributes = param;
         effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
@@ -6155,7 +6156,7 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
 }
 
 u32 effCreateModelResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer();
+    void *first = fileResolvePrimaryBuffer(work);
     void *second = fileResolveSecondaryBuffer(work);
     return effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
@@ -6164,7 +6165,7 @@ typedef struct EffModelCreateRequest {
     u8 pad0[0x2C];
     u16 kind;
     u8 pad2E[2];
-    u32 assetId;
+    MdlCtx *assetId;
     u32 attributes;
     u8 pad38[4];
     void *source;
@@ -6186,15 +6187,15 @@ typedef struct EffBattleUnit {
 
 void effDestroyModelResource(EffModelResource *effect) {
     effModelResourceOperations[effect->kind].destroyResource((void *)effect->childResource);
-    effDestroyModelContext((s32)effect->model);
+    effDestroyModelContext(effect->model);
     sdfReleaseChipBlock(effect);
 }
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = (EffModelResource *)effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
-    u32 x = mdlGetContextResourceGroup(work->assetId);
-    u32 y = mdlGetContextResourceId(work->assetId);
-    void *model = func_00217680(x, y);
+    s32 x = mdlGetContextResourceGroup(work->assetId);
+    s32 y = mdlGetContextResourceId(work->assetId);
+    MdlCtx *model = func_00217680(x, y);
 
     effect->model = model;
     effInitModelVUState(model);
@@ -6205,7 +6206,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
 }
 
 void effResetModelResourceUpdateCount(EffModelResource *effect) {
-    effModelResourceOperations[effect->kind].initialize();
+    effModelResourceOperations[effect->kind].initialize(effect);
     effect->updateCount = 0;
 }
 
@@ -6492,7 +6493,7 @@ void effSyncLinkedActorChildParameter(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2F20);
 
-extern void mdlLoadPrimaryVectorVU(void *);
+extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
 extern u128 D_003DCBD0[];
 
@@ -6506,21 +6507,21 @@ extern u8 D_0037EE80[];
 
 extern void func_002E1938(void *, void *, void *);
 
-s64 effComputeLightDirectionVU(void *vector, void *target) {
-    s64 result = btlIsRuntimeAllocated();
+s32 effComputeLightDirectionVU(MdlCtx *vector, void *target) {
+    s32 result = btlIsRuntimeAllocated();
 
     if (result != 0) {
         if (D_003BC9AC == 0) {
             return 0;
         }
-    mdlLoadPrimaryVectorVU(vector);
-    VU0_LOAD_VF($vf11, D_003DCBE0);
-    VU0_SUB($vf10, $vf10, $vf11);
-    VU0_CLEAR_W(vf10);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF($vf10, D_003DCBA0);
-    func_002E1938(target, D_0037EE80, D_003DCBD0);
-    return 1;
+        mdlLoadPrimaryVectorVU(vector);
+        VU0_LOAD_VF($vf11, D_003DCBE0);
+        VU0_SUB($vf10, $vf10, $vf11);
+        VU0_CLEAR_W(vf10);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF($vf10, D_003DCBA0);
+        func_002E1938(target, D_0037EE80, D_003DCBD0);
+        return 1;
     }
     return result;
 }
@@ -6662,7 +6663,7 @@ typedef struct EffActiveResource {
 
 typedef struct EffModelRef {
     u8 pad00[0x8C];
-    u32 nodeReference;
+    MdlCtx *nodeReference;
 } EffModelRef;
 
 typedef struct EffAnimInfo {
@@ -6689,7 +6690,7 @@ void effApplyOverlaySpecs(u8 *work) {
         if (flags & 2) {
             if ((flags & 0x20) == 0) {
                 if ((((EffBattleUnit *)objects[i])->overlayFlags & 0x10) == 0) {
-                    if (mdlGetNodeRefHalf((MdlCtx *)((EffModelRef *)((EffBattleUnit *)objects[i])->model)->nodeReference, 0) > ((EffAnimInfo *)spec)->id) {
+                    if (mdlGetNodeRefHalf(((EffModelRef *)((EffBattleUnit *)objects[i])->model)->nodeReference, 0) > ((EffAnimInfo *)spec)->id) {
                         btlApplyScaledUnitEffectParameter(objects[i], ((EffAnimInfo *)spec)->id, ((EffAnimInfo *)spec)->flags | 0x100, 1.0f);
                         if (((EffAnimInfo *)spec)->loop == 0) {
                             btlStartMoveOtherUnitsTask(objects[i], ((EffAnimInfo *)spec)->id);
@@ -6928,7 +6929,7 @@ u32 effCreateResourceInstance(u16 kind, void *source, void *secondary, u32 param
 }
 
 u32 effCreateActiveResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer();
+    void *first = fileResolvePrimaryBuffer(work);
     void *second = fileResolveSecondaryBuffer(work);
     return effCreateResourceInstance(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
@@ -6973,9 +6974,7 @@ void effClearCallbackFrame(u8 *work) {
     }
 }
 
-void effDispatchIndexedCallback(work)
-    u8 *work;
-{
+void effDispatchIndexedCallback(u8 *work) {
     if (btlIsRuntimeAllocated() != 0) {
         void (*callback)(void *) = D_0037EEE0[((EffActiveResource *)work)->kind.signedIndex].update;
         if (callback != NULL) {
@@ -6994,8 +6993,8 @@ void effDispatchEnabledCallback(u8 *work) {
     }
 }
 
-void effAdvanceActiveResourceCallbacks(u32 work) {
-    effDispatchIndexedCallback();
+void effAdvanceActiveResourceCallbacks(u8 *work) {
+    effDispatchIndexedCallback(work);
     effDispatchEnabledCallback(work);
 }
 
