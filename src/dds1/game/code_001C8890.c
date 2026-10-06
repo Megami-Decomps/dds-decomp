@@ -533,7 +533,8 @@ typedef struct CameraPoseAction {
     u8 pad114[4];
     struct BtlIndexList *actorIndices;
     s32 unk11C;
-    u8 pad120[0x10];
+    u8 pad120[0xC];
+    s32 unk12C;
     f32 unk130;
 } CameraPoseAction;
 
@@ -7120,7 +7121,75 @@ void btlAimEffectPoseAtUnit(CameraPoseAction *actor) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DFAE0);
+extern void func_001E1288(CameraPoseAction *, CameraPoseTransform *, u8);
+extern void func_001E16C0(CameraPoseAction *, CameraPoseTransform *);
+extern s32 func_001D6050(BtlUnit *, s32);
+
+/* One aim pose: quaternion, distance multiplier, height scale and two words this aim leaves unused. */
+typedef struct CameraAimPose {
+    f32 quat[4];
+    f32 distanceScale;
+    f32 heightScale;
+    f32 unk18;
+    f32 unk1C;
+} CameraAimPose;
+
+/* Build the from pose, then aim the to pose at the unit's muzzle using the pose row
+ * for the side of the from view the muzzle lies on. */
+void func_001DFAE0(CameraPoseAction *action, CameraPoseTransform *to, CameraPoseTransform *from) {
+    f32 muzzle[4];
+    f32 quat[4];
+    CameraAimPose poses[2] = {
+        {{0x1.70a3d6p-3f, -0x1.999998p-2f, -0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
+        {{0x1.70a3d6p-3f, 0x1.999998p-2f, 0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
+    };
+    BtlUnit *unit = action->link->unit;
+    s32 pose;
+    f32 distance;
+    f32 fov;
+
+    if (unit->flags & 2) {
+        btlClearAllUnitDefeatCandidates();
+        btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
+        if (btlHasSingleLinkedResource((s32)action) == 0) {
+            func_001E16C0(action, from);
+        } else {
+            func_001E1288(action, from, 1);
+        }
+        btlCopyUnitRotationQuaternion((u8 *)unit, quat);
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF(vf10, muzzle);
+        VU0_LOAD_VF(vf10, muzzle);
+        VU0_LOAD_VF(vf11, from->position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        if (muzzle[0] < from->direction[0] * -distance + from->position[0]) {
+            pose = 0;
+        } else {
+            pose = 1;
+        }
+        fov = action->transform.fov;
+        to->fov = fov;
+        if (func_001D6428((u8 *)unit, 1) == 0) {
+            btlUnitGetMuzzlePosVU(unit);
+        }
+        VU0_STORE_VF(vf10, to->position);
+        to->position[1] *= poses[pose].heightScale;
+        distance = unit->cameraRadius * unit->scale / func_002FA148(fov * 0.5f);
+        to->distance = distance * poses[pose].distanceScale;
+        VU0_LOAD_VF(vf10, poses[pose].quat);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_0037E110);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, to->direction);
+        func_001DB698(to);
+        action->unk12C = func_001D6050(unit, unit->unkEC);
+        action->flags |= 0x815;
+        action->unk11C = 0;
+    }
+}
 
 void btlRefreshActionPoseBlendSnapshot(CameraPoseAction *action) {
     CameraPoseTransform *saved;
@@ -7252,7 +7321,6 @@ void btlFlagUserAndTargetDefeat(u8 *command, u8 *unused) {
     }
 }
 
-extern s32 func_001D6050(BtlUnit *, s32);
 extern f32 func_001A47F0(BattleActionLinkState *);
 extern f32 func_002F9F60(f32);
 extern f32 func_002FA060(f32);
@@ -7703,8 +7771,6 @@ void btlChooseActionPoseBlendFromActorCount(u8 *action) {
 }
 void func_001E57F8(void) {
 }
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3FC0);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4000);
 
