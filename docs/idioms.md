@@ -567,6 +567,12 @@ functions use trampolines and are a different case.
   `xor` operand order at +0xE8. The complete unit checked at 255 match, 0 differ.
   Its text helper also now follows the matched font provider's real `u32`
   glyph/color and `char *` text contract, rather than old `u64` placeholders.
+  DDS2's corresponding helper now follows matched `func_0019F5E8`'s same
+  contract. Reusing the existing `BtlResBlock` and `EffectSlotSet` owners also
+  replaces that unit's partial panel views: `resC->workEntries[0x16].width`
+  and `.sourceWidth` are the old inner offsets 0xDCC and 0xE3C.
+  Do not assume the DDS1 renderer transfers unchanged: DDS2's three honest
+  forms still exceeded its 476-byte body and remain parked, not enabled.
 - A packed table can have a pointer-typed header but numeric `u32` work handles
   in its payload. Check the consumer before choosing an array-of-pointers
   representation. DDS2 `func_002EB968` returns such a table:
