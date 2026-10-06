@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "fpu.h"
+#include "sdf.h"
 
 extern s8 D_0037F510[];
 
@@ -14,7 +15,6 @@ extern s32 sdfReleaseResourceAllocation(u32);
 
 extern void sdfReleaseChipBlock();
 
-extern void sdfClearTaskList();
 
 extern void sdfDestroyCallbackWork();
 
@@ -51,23 +51,6 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern void func_00313A58(u8 *);
 
-typedef struct SdfListNode {
-    u32 index;                 /* 0x00 */
-    s32 key;                   /* 0x04 */
-    struct SdfListNode *next;  /* 0x08 */
-    struct SdfListNode *prev;  /* 0x0C */
-    void *value;               /* 0x10 */
-} SdfListNode;
-
-typedef struct SdfList {
-    u32 allocation;            /* 0x00 */
-    u32 count;                 /* 0x04 */
-    SdfListNode *head;         /* 0x08 */
-    SdfListNode *tail;         /* 0x0C */
-    u32 userData;              /* 0x10 */
-    void (*onRemove)();        /* 0x14: ordinal/payload hook, installed through the word-address API */
-    void (*onDestroy)(s32, s32); /* 0x18: two-word callback ABI */
-} SdfList;                     /* 0x1C, allocated by sdfCreateTaskHeader */
 
 typedef struct TaskWork {
     u32 allocation;
@@ -154,14 +137,13 @@ extern void sdfCallbackWorkOnRemove();
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void kwlnTaskCreate();
-extern TaskWork *sdfCreateNamedTaskWork();
+extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
 extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern void kwlnTaskCreate();
-extern TaskWork *sdfCreateNamedTaskWork();
 
 extern void func_00312E20(void);
 
@@ -189,15 +171,15 @@ void sdfSetTaskItemMode(void *list, s32 key, u32 mode) {
     }
 }
 
-TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) {
+TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
     s32 allocation = sdfAllocGeneralBlock(0x14);
     TaskWork *work = sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
     work->allocation = allocation;
     work->list = sdfCreateTaskHeader(userData);
-    sdfSetTaskDestroyCallback((s32)work->list, destroyCallback);
-    sdfSetTaskSecondaryCallback((s32)work->list, (s32)sdfCallbackWorkOnRemove);
+    sdfSetTaskDestroyCallback(work->list, destroyCallback);
+    sdfSetTaskSecondaryCallback(work->list, sdfCallbackWorkOnRemove);
     work->primaryTaskName = sdfAllocSizeClassBlock(strlen(name));
     work->secondaryTaskName = sdfAllocSizeClassBlock(strlen(name) + 5);
     func_0035C860(work->primaryTaskName, D_004388D8, name);

@@ -525,7 +525,7 @@ void func_0024F6F0(s32 unused, MnuResourceTaskWork *resourceWork) {
 /* The task handle is shared by the existence probe and explicit stop;
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
-    s32 resourceWork = (s32)func_0024F608();
+    MnuResourceTaskWork *resourceWork = func_0024F608();
     mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_0036C648, func_0024F6F0, resourceWork);
 }
 

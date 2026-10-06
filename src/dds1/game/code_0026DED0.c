@@ -1,15 +1,6 @@
 #include "common.h"
+#include "sdf.h"
 
-typedef struct {
-    s32 allocation;
-    u8 pad04[0x2C];
-    s32 lifetime;
-    s32 owner;
-    u8 pad38[0x0C];
-    u8 variant;
-    u8 sprite;
-    u8 pad46[2];
-} MovieSpriteResource;
 
 typedef struct {
     s32 x;
@@ -22,32 +13,13 @@ typedef struct {
     u8 variant;
 } SpriteSpawnNode;
 
-typedef struct SdfListNode {
-    u32 index;
-    s32 key;
-    struct SdfListNode *next;
-    struct SdfListNode *prev;
-    void *value;
-} SdfListNode;
 
-typedef struct SdfList {
-    u32 pad00;
-    u32 count;
-    SdfListNode *head;
-    SdfListNode *tail;
-    u32 pad10;
-    void (*onRemove)(u32, void *);
-} SdfList;
-
-extern SpriteSpawnNode *func_0026DD30(MovieSpriteResource *, SpriteSpawnNode *, s8);
-extern SdfListNode *sdfListAppend(SdfList *, s32, void *);
+extern SpriteSpawnNode *func_0026DD30(void *, SpriteSpawnNode *, s8);
 extern f32 effMiscRandUnitFloat(void *);
 extern u32 effMiscRandMod(void *, u32);
 
-void func_0026DED0(s32 resourceAddress, s32 listAddress, u8 *parentData, s8 mode) {
-    MovieSpriteResource *resource = (MovieSpriteResource *)resourceAddress;
-    SdfList *list = (SdfList *)listAddress;
-    SpriteSpawnNode *parent = (SpriteSpawnNode *)parentData;
+void func_0026DED0(void *resource, SdfList *list, void *parentData, s8 mode) {
+    SpriteSpawnNode *parent = parentData;
     SpriteSpawnNode *node;
     f32 chance;
     s32 i;

@@ -23,10 +23,6 @@ extern void sdfReleaseChipBlock(void *block);
 extern s32 func_0036DE70(void);
 extern void EIntr(void);
 
-typedef struct SdfListNode {
-    struct SdfListNode *previous;
-    struct SdfListNode *next;
-} SdfListNode;
 
 extern u8 D_00439128;
 
@@ -34,9 +30,9 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_00329600", func_00329600);
 /* Unlink the successor, not node itself, and reconnect both neighboring links. */
-void sdfSkipNextListNode(SdfListNode *node) {
-    SdfListNode *followingNode = node->next->next;
-    followingNode->previous = node;
+void sdfSkipNextListNode(SdfMemBlock *node) {
+    SdfMemBlock *followingNode = node->next->next;
+    followingNode->prev = node;
     node->next = followingNode;
 }
 
@@ -51,11 +47,11 @@ void sdfReleaseResourceAllocation(SdfMemBlock *allocation) {
     interruptsDisabled = func_0036DE70();
     nextBlock = allocation->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
-        sdfSkipNextListNode((SdfListNode *)allocation);
+        sdfSkipNextListNode(allocation);
         sdfReleaseChipBlock(nextBlock);
     }
     if (allocation->prev->state == SDF_HEAP_BLOCK_FREE) {
-        sdfSkipNextListNode((SdfListNode *)allocation->prev);
+        sdfSkipNextListNode(allocation->prev);
         sdfReleaseChipBlock(allocation);
     } else {
         allocation->state = SDF_HEAP_BLOCK_FREE;

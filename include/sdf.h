@@ -211,6 +211,42 @@ typedef struct SdfPoolNode {
 
 typedef char SdfPoolNode_size_must_be_0x20[(sizeof(SdfPoolNode) == 0x20) ? 1 : -1];
 
+/* Callback-list hooks also accept the shared task-entry no-op. */
+typedef void (*SdfListCallback)();
+
+typedef struct SdfListNode {
+    u32 index;
+    s32 key;
+    struct SdfListNode *next;
+    struct SdfListNode *prev;
+    void *value;
+} SdfListNode;
+
+typedef struct SdfList {
+    u32 allocation;
+    u32 count;
+    SdfListNode *head;
+    SdfListNode *tail;
+    void *userData;
+    SdfListCallback onRemove;
+    SdfListCallback onDestroy;
+} SdfList;
+
+typedef char SdfListNode_size_must_be_0x14[(sizeof(SdfListNode) == 0x14) ? 1 : -1];
+typedef char SdfList_size_must_be_0x1C[(sizeof(SdfList) == 0x1C) ? 1 : -1];
+
+SdfList *sdfCreateTaskHeader(void *);
+void sdfDestroyTaskWork(SdfList *);
+void sdfSetTaskDestroyCallback(SdfList *, SdfListCallback);
+void sdfSetTaskSecondaryCallback(SdfList *, SdfListCallback);
+SdfListNode *sdfListAppend(SdfList *, s32, void *);
+SdfListNode *sdfListInsertAfter(SdfList *, SdfListNode *, s32, void *);
+SdfListNode *sdfRemoveAndReindexListNode(SdfList *, SdfListNode *);
+SdfListNode *sdfListRemoveNode(SdfList *, SdfListNode *);
+void sdfClearTaskList(SdfList *);
+void sdfSwapLinkedListNodes(SdfList *, SdfListNode *, SdfListNode *);
+SdfListNode *sdfFindTaskListNodeByKey(SdfList *, s32);
+
 /* Four-doubleword DMA packet payload (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfPacket {
     u64 unk0;

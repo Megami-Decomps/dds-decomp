@@ -29,10 +29,10 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0750);
 
 /* Unlink the successor, not node itself, and reconnect both neighboring links. */
-void sdfSkipNextListNode(u8 *node) {
-    u8 *followingNode = *(u8 **)(*(u8 **)(node + 4) + 4);
-    *(u8 **)followingNode = node;
-    *(u8 **)(node + 4) = followingNode;
+void sdfSkipNextListNode(SdfMemBlock *node) {
+    SdfMemBlock *followingNode = node->next->next;
+    followingNode->prev = node;
+    node->next = followingNode;
 }
 
 /* Coalesce adjacent free records, then recycle this record or mark it free. */
@@ -46,11 +46,11 @@ void sdfReleaseResourceAllocation(SdfMemBlock *allocation) {
     interruptsDisabled = func_00312C08();
     nextBlock = allocation->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
-        sdfSkipNextListNode((u8 *)allocation);
+        sdfSkipNextListNode(allocation);
         sdfReleaseChipBlock(nextBlock);
     }
     if (allocation->prev->state == SDF_HEAP_BLOCK_FREE) {
-        sdfSkipNextListNode((u8 *)allocation->prev);
+        sdfSkipNextListNode(allocation->prev);
         sdfReleaseChipBlock(allocation);
     } else {
         allocation->state = SDF_HEAP_BLOCK_FREE;
