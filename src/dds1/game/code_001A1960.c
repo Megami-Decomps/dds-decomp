@@ -3684,15 +3684,15 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2890);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28C0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B1518);
-
 /* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
  * the later panel updater handles the other five points and their fades. */
 typedef struct BattlePhasePanelWork {
     s32 frames;
     s32 mode;
     s8 phase;
-    u8 pad09[0x2F];
+    u8 pad09[0xF];
+    s32 waitCounter; /* 0x18: delay before the first slide */
+    u8 pad1C[0x1C];
     BattleSelectionPosition current[8]; /* 0x38 */
     BattleSelectionPosition saved[8];   /* 0x78 */
     s32 fade[8][4];                    /* 0xB8 */
@@ -3700,6 +3700,106 @@ typedef struct BattlePhasePanelWork {
 
 typedef char BattlePhasePanelWork_size_must_be_0x138[
     (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+typedef char BattlePhasePanelWork_waitCounter_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
+typedef char BattlePhasePanelWork_current_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
+typedef char BattlePhasePanelWork_saved_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
+typedef char BattlePhasePanelWork_fade_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
+
+typedef struct BattlePhaseSlotIds { s32 values[3]; } BattlePhaseSlotIds;
+typedef struct BattlePhaseFadeLimits { s32 values[3][4]; } BattlePhaseFadeLimits;
+typedef struct BattlePhaseXBounds { s32 values[3][2]; } BattlePhaseXBounds;
+extern const BattlePhaseSlotIds D_003A2880;
+extern const BattlePhaseFadeLimits D_003A2890;
+extern const BattlePhaseXBounds D_003A28C0;
+
+void func_001B1518(BattlePhasePanelWork *work) {
+    BattlePhaseSlotIds slots = D_003A2880;
+    BattlePhaseFadeLimits limits = D_003A2890;
+    BattlePhaseXBounds bounds = D_003A28C0;
+    s32 i, j;
+    switch (work->phase) {
+    case 0:
+        work->waitCounter++;
+        work->waitCounter = work->waitCounter <= 0 ? 0 : work->waitCounter > 10 ? 10 : work->waitCounter;
+        if (work->waitCounter >= 3) {
+            for (i = 0; i < 3; i++) {
+                work->current[i].x -= 10;
+                work->current[i].x = work->current[i].x <= bounds.values[i][0] ? bounds.values[i][0] :
+                    work->current[i].x < bounds.values[i][1] ? work->current[i].x : bounds.values[i][1];
+                for (j = 0; j < 4; j++) {
+                    work->fade[i][j] += 0x20;
+                    work->fade[i][j] = work->fade[i][j] <= 0 ? 0 : work->fade[i][j] < limits.values[i][j] ? work->fade[i][j] : limits.values[i][j];
+                }
+            }
+            if (work->fade[0][0] >= 0x80) work->phase++;
+        }
+        break;
+    case 1:
+        work->fade[0][0] = 0xFF;
+        work->current[0].x -= 2;
+        if (work->current[0].x <= 300) work->phase++;
+        break;
+    case 2:
+        work->current[0].x -= 20;
+        work->current[1].x -= 16;
+        work->fade[0][0] -= 16;
+        work->fade[0][0] = work->fade[0][0] <= 0 ? 0 : work->fade[0][0] > 0xFF ? 0xFF : work->fade[0][0];
+        if (work->current[0].x <= 128) work->phase++;
+        break;
+    case 3:
+        work->current[0].x -= 18;
+        work->current[1].x -= 18;
+        work->current[2].x -= 18;
+        if (work->current[0].x <= 96) {
+            work->phase++;
+            work->fade[0][0] = 0;
+            work->fade[0][2] = 0;
+        }
+        break;
+    case 4:
+        work->current[0].x -= 20;
+        work->current[1].x -= 20;
+        work->current[2].x -= 20;
+        work->fade[0][1] -= 0x20;
+        work->fade[0][1] = work->fade[0][1] <= 0 ? 0 : work->fade[0][1] > 0x80 ? 0x80 : work->fade[0][1];
+        work->fade[0][3] -= 0x20;
+        work->fade[0][3] = work->fade[0][3] <= 0 ? 0 : work->fade[0][3] > 0x80 ? 0x80 : work->fade[0][3];
+        work->fade[1][2] = work->fade[0][3];
+        work->fade[1][0] = work->fade[0][1];
+        if (work->fade[0][1] <= 64) {
+            work->fade[1][1] -= 0x20;
+            work->fade[1][1] = work->fade[1][1] <= 0 ? 0 : work->fade[1][1] > 0x80 ? 0x80 : work->fade[1][1];
+            work->fade[2][0] = work->fade[1][1];
+            work->fade[2][2] = work->fade[1][3];
+        }
+        if (work->fade[2][0] <= 64) {
+            work->fade[2][1] -= 0x20;
+            work->fade[2][1] = work->fade[2][1] <= 0 ? 0 : work->fade[2][1] > 0x80 ? 0x80 : work->fade[2][1];
+            work->fade[2][3] -= 0x20;
+            work->fade[2][3] = work->fade[2][3] <= 0 ? 0 : work->fade[2][3] > 0x80 ? 0x80 : work->fade[2][3];
+        }
+        break;
+    }
+    if (work->phase >= 3) {
+        for (i = 0; i < 3; i++) {
+            s32 height = btlResourceBlock->resC->workEntries[slots.values[i]].sourceHeight;
+            work->saved[i].y += 3;
+            work->saved[i].y = work->saved[i].y <= 0 ? 0 : work->saved[i].y < height ? work->saved[i].y : height;
+        }
+    }
+    work->fade[1][3] = 0;
+    work->fade[2][0] = 0;
+    work->fade[2][1] = 0;
+    work->fade[2][2] = 0;
+    work->fade[2][3] = 0;
+}
+
+
+
 
 extern void fldScaleSceneCoordinateRecord(s32, s32);
 
