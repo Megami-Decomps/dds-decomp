@@ -187,12 +187,6 @@ void func_00150750(void) {
     D_003BD7F4 = NULL;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00150840);
-
-INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
-
-
-
 typedef struct BillStatePacket {
     u64 dmaTag;
     u64 vifCommands;
@@ -204,13 +198,23 @@ typedef struct BillStatePacket {
     u64 alphaRegister;
 } BillStatePacket;
 
-extern BillRenderPair *D_003BD7F8;
-extern SdfPoolNode D_00325228;
-extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
+extern u8 kwlnFrameDrawPacketRecords[];
+extern void sdfAppendDmaTagToList(SdfListHead *list, u32 packet);
+extern void func_002D4C80(s32 source, u32 packet, s32 variant);
+extern s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture);
+extern s32 sdfTexGetSecondaryBufferSize(SdfTex *texture);
+extern f32 D_0034E040[4];
+extern f32 D_0034E050[4];
+extern BillRenderPair *D_003BD7F8;
+extern void func_00150EB0(BillRenderPair *node);
+
+INCLUDE_ASM(const s32, "effect/billManager", func_00150840);
+
+INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
+
+extern SdfPoolNode D_00325228;
 extern void func_002D4CC8(const void *, void *, s32);
-extern void func_00150EB0(BillRenderPair *);
 
 void func_00151010(void) {
     BillRenderPair *node = D_003BD7F8;
