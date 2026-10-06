@@ -26,7 +26,7 @@ extern void sndEnsureMidiBankResident(s32);
 
 extern void mnuInitPartyPanelSlots(PartyPanel *);
 
-extern void mnuAppendCampSpriteRequests(s32, s32);
+extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
 
 extern void effRequestResourceByMode(char *, char *, s32, s32);
 
@@ -351,7 +351,6 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
 }
 
 extern void mnuReleaseStaffMenuResources(s32);
-extern void mnuInitializeCampPanelResources(s32, s32, s32, s32);
 extern s32 mnuCreatePanelGroup(s32, s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void evtStageTestInit(s32);
@@ -363,16 +362,16 @@ extern void mnuForwardTableByte(s32);
 /* Build the selected reward row's skill-package group and sprite, then
  * forward the selected unit ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
-    s32 *group = &work->panelGroup;
+    u32 *group = work->staffSlots.baseResources;
     s32 panel;
 
     mnuReleaseStaffMenuResources((s32)group);
-    mnuInitializeCampPanelResources((s32)&work->partyWindow, (s32)group, 0, (s32)&work->partyPanel);
-    panel = mnuCreatePanelGroup(work->spriteArg0, work->spriteArg1, 0);
+    mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
+    panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
-        mnuCreateSpriteState(work->spriteArg0, work->spriteArg1, work->panelGroup);
+        mnuCreateSpriteState(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], work->staffSlots.baseResources[0]);
     evtStageTestInit(0);
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
@@ -385,7 +384,7 @@ extern void mnuDestroyPanelGroup(s32);
 extern void mnuFreeSpriteStateWork(s32);
 extern void mnuDestroyEffectResources(MenuEffectResources *);
 extern void mnuReleaseStaffMenuTextureHandles();
-extern void mnuReleaseTitleEffectSprites();
+extern void mnuReleaseTitleEffectSprites(StaffSlots *);
 extern void mnuResetWorkFloats(void);
 
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
@@ -398,8 +397,8 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuDestroyEffectResources(&ctx->campEffect.resources);
-    mnuReleaseStaffMenuTextureHandles((s32)&ctx->panelGroup);
-    mnuReleaseTitleEffectSprites((s32)&ctx->panelGroup);
+    mnuReleaseStaffMenuTextureHandles((s32)&ctx->staffSlots);
+    mnuReleaseTitleEffectSprites(&ctx->staffSlots);
     mnuResetWorkFloats();
 }
 
@@ -409,7 +408,7 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     }
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
-    mnuAppendCampSpriteRequests(work->fadeTarget, (s32)&work->panelGroup);
+    mnuAppendCampSpriteRequests(work->fadeTarget, &work->staffSlots);
     effRequestResourceByMode(D_00428358, D_00428368, 0, (s32)&work->unitHandle);
     mnuRequestEffectResources(&work->campEffect.resources);
     work->setupState = 1;
@@ -418,7 +417,7 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     return 1;
 }
 
-extern s32 movAreTitleEffectsReady(s32, s32);
+extern s32 movAreTitleEffectsReady(s32, StaffSlots *);
 extern s32 mnuBindCampEffectWhenLoaded(MenuCampEffect *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
@@ -430,7 +429,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (ctx->setupState == 2) {
         return 0;
     }
-    if (movAreTitleEffectsReady(ctx->fadeTarget, (s32)&ctx->panelGroup) == 0) {
+    if (movAreTitleEffectsReady(ctx->fadeTarget, &ctx->staffSlots) == 0) {
         return 1;
     }
     if (func_002C6CE8() == 1) {

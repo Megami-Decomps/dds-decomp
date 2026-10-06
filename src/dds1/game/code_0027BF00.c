@@ -2,6 +2,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
+#include "dat_state.h"
 struct MenuListNode;
 
 #define MNU_ENTRY_SPRITE_COUNT 4
@@ -54,7 +55,7 @@ extern void mnuHideWindowHandles(MenuPanelHandles *);
 
 extern void mnuDrawWindowSprites();
 
-extern s32 ptyGetCurrentProfileId(s32);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 extern s32 func_002CD240(s32, s32 *);
 
@@ -66,7 +67,6 @@ extern void func_001958A0(s32, s32, s32);
 
 extern s32 frFontQueueGlyphInSelectedSlot(s32);
 
-extern s32 datGameState;
 
 typedef struct MenuListNode MenuListNode;
 
@@ -1111,7 +1111,7 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027ECD8);
 void mnuCreatePartyPageResources(MenuPageWindow *menu, s32 x, s32 y, s32 style, s32 color) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        s32 entry = menu->records->entries[i].gauge.resourceIndex;
+        s32 entry = menu->records->slots[i].unk8;
         if (entry >= 0) {
             menu->slots[i].resources = mnuCreatePartyPageSpriteBundle(x, y, style, 0, color, entry);
         }
@@ -1121,7 +1121,7 @@ void mnuCreatePartyPageResources(MenuPageWindow *menu, s32 x, s32 y, s32 style, 
 void mnuReleaseSlotResources(MenuPageWindow *context) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        s32 node = context->records->entries[i].gauge.resourceIndex;
+        s32 node = context->records->slots[i].unk8;
         if (node >= 0 && context->slots[i].resources != 0) {
             mnuDestroyResources((s32 *)context->slots[i].resources);
             context->slots[i].resources = 0;
@@ -1454,7 +1454,6 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027FCA0);
 void mnuUpdateHandleStates(MenuPageWindow *obj) {
     s32 *handle = obj->handlesA;
     s32 i;
-    s32 offset;
 
     for (i = 0; i < 8U; i++, handle++) {
         if (effHasFirstTextureHandle(*handle) != 0) {
@@ -1462,12 +1461,11 @@ void mnuUpdateHandleStates(MenuPageWindow *obj) {
             effReleaseTextureHandlesAndResetSlots(handle[8]);
         }
     }
-    for (i = 0, offset = 0; i < 5U; i++) {
-        MenuPageEntry *entry = (MenuPageEntry *)((u8 *)obj->records->entries + offset);
+    for (i = 0; i < 5U; i++) {
+        PartyPanelEntry *entry = &obj->records->slots[i];
 
-        offset += 0x34;
-        if (entry->gauge.resourceIndex >= 0) {
-            if (i < obj->records->visibleCount) {
+        if (entry->unk8 >= 0) {
+            if (i < obj->records->unk0) {
                 func_0027FCA0(obj, i, 1);
             } else {
                 func_0027FCA0(obj, i, 2);
@@ -1553,12 +1551,11 @@ void mnuShutdownContext(s32 context) {
 
 void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
     s32 selected = window->selected;
-    s32 offset = 0;
     u32 i;
 
-    for (i = 0; i < 5; i++, offset += sizeof(MenuPageEntry)) {
+    for (i = 0; i < 5; i++) {
         if (i != selected) {
-            s32 id = ((MenuPageEntry *)((u8 *)window->records->entries + offset))->gauge.resourceIndex;
+            s32 id = window->records->slots[i].unk8;
 
             if (id >= 0) {
                 if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -1574,11 +1571,11 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
     s32 selected = window->selected;
     u32 i;
     s32 id;
-    MenuPageEntry *record;
+    PartyPanelEntry *record;
 
     for (i = 0; i < 5; i++) {
-        record = &window->records->entries[i];
-        id = record->gauge.resourceIndex;
+        record = &window->records->slots[i];
+        id = record->unk8;
         if (id >= 0) {
             if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
                 effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
@@ -1586,8 +1583,8 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
             }
         }
     }
-    record = &window->records->entries[selected];
-    id = record->gauge.resourceIndex;
+    record = &window->records->slots[selected];
+    id = record->unk8;
     if (id >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
             effResolveAndReleaseResource(window->handlesA[id]);
@@ -1711,8 +1708,7 @@ extern void uiDrawSurfaceAtNearDepth(s32);
 void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 index, s32 force, s32 context) {
     s32 alpha = menu->fade / 2 + 0x80;
-    u16 *partyFlags = (u16 *)(datGameState
-        + menu->records->entries[index].partyIndex * 0x1A4 + 0xA60);
+    u16 *partyFlags = &datGameState->party[menu->records->slots[index].index].flags;
 
     if (func_00280A90(menu, index) == 1 || force != 0) {
         if (*partyFlags & 2) {
@@ -1745,7 +1741,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
     }
 }
 
-extern s32 mnuGetPartyEntryMenuValue(s32);
+extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 evtGetIndexedEventRecordId(s32);
 extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
@@ -1764,7 +1760,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     s32 color;
     s32 item;
 
-    value = mnuGetPartyEntryMenuValue(datGameState + partyIndex * 0x1A4 + 0xA60);
+    value = mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex]);
     alpha = page->drawAlpha;
     color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
     x += page->slideOffset * 16;
@@ -1836,7 +1832,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                      s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = ptyGetCurrentProfileId(datGameState + partyIndex * 0x1A4 + 0xA60);
+    s32 cost = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
     s32 texture;
     s32 item;

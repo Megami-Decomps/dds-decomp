@@ -473,8 +473,11 @@ void movReleaseTitleEffects(u32 *resourceSlots) {
     }
 }
 
-void mnuInitializeCampPanelResources(u32 container, StaffSlots *resources, u32 unused, u32 mode) {
-    func_002BCD90(container, mode, resources->baseResources[0], 1, resources->baseResources[1], 0x2d, resources->baseResources[1], 0x1d);
+void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *resources,
+                                     u32 unused, PartyPanel *records) {
+    /* The SDK returns u32 handles; this bank snapshots their resolved instances. */
+    func_002BCD90(container, records, (struct EffectSlotSet *)resources->baseResources[0],
+                 1, resources->baseResources[1], 0x2d, resources->baseResources[1], 0x1d);
     func_002BC498(container, resources->baseResources[1]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
