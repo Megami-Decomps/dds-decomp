@@ -53,7 +53,7 @@ typedef struct NodeA {
     u32 key; /* +0x04 */
     u8 pad08[0x10];
     void *payload; /* +0x18: payload type depends on the node kind. */
-    u8 pad1C[4];
+    struct ObjectTransform *inner; /* +0x1C: separately allocated transform. */
     struct NodeA *next;
     struct NodeA *previous;
 } NodeA;

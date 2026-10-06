@@ -31,7 +31,12 @@ typedef struct SceneAiWork {
     u16 cursorRow;          /* 0x18 */
     u16 cursorColumn;       /* 0x1A */
     s8 animationPhase;       /* 0x1C */
-    u8 pad1D[0x43];
+    u8 pad1D[3];
+    s32 panelFade[4];        /* 0x20: signed panel fades. */
+    u8 pad30[0x10];
+    s32 animationCounter;   /* 0x40 */
+    u8 pad44[0xC];
+    f32 panelScale[4];      /* 0x50: sprite size percentages, not XY positions. */
     s8 rowPhase[3];          /* 0x60: three independent row-animation states */
     u8 pad63[5];
     f32 rowScale[3];        /* 0x68: row size in percent, initialized to 80 */

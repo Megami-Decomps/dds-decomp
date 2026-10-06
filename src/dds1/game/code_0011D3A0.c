@@ -4,6 +4,7 @@
 #include "fpu.h"
 #include "fld.h"
 #include "evt_world.h"
+#include "dat_state.h"
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -45,7 +46,6 @@ extern s64 dds3AdvanceObjectValueCursor(u64);
 extern u64 dds3CopyWorldListToValueChain(u64, u64);
 extern s64 evtGetObjectTransitionWork(u64);
 
-extern s32 datGameState;
 
 extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 fldDeferredCommandParameter;
@@ -817,12 +817,6 @@ extern void func_00131590(void);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120EC8);
 
-/* A 30-byte map slot: bank 3 contains the map-target flags. */
-typedef struct FieldMapSlot {
-    u16 flagBanks[5];
-    u8 values[0x10];
-    u16 trailingFlagBanks[2];
-} FieldMapSlot;
 
 /* Map IDs select 1920-byte banks of 30-byte slots; flag banks are halfwords.
  * The guards check only the upper map-ID bound: negative IDs and slot/bit
@@ -830,182 +824,34 @@ typedef struct FieldMapSlot {
 enum {
     FIELD_MAP_ID_LIMIT = 40,
     FIELD_MAP_ID_MODULUS = 100,
-    FIELD_MAP_BANK_BYTES = 1920,
-    FIELD_MAP_SLOT_BYTES = 30,
     FIELD_MAP_EMPTY_VALUE = 0xff,
-    FIELD_ROOM_MODE_BANK = 0,
-    FIELD_ROOM_OBJECT_BANK = 1,
-    FIELD_ROOM_SCENE_BANK = 2,
-    FIELD_MAP_TARGET_BANK = 3,
-    FIELD_MAP_ALTERNATE_TARGET_BANK = 4,
-    FIELD_MAP_AUXILIARY_BANK = 0,
-    FIELD_MAP_VALUE_BANK = 1
 };
 
-#define FIELD_MAP_SLOT_OFFSET 0x1370
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetRoomModeFlag);
 
-/* Five adjacent halfword flag banks per 30-byte map slot; the bank
- * offsets are data-layout offsets, not independent map indices. */
-/* Set or clear a room-mode bit in the selected map slot. */
-void fldSetRoomModeFlag(s32 mapId, s32 slotIndex, s32 bitIndex, s32 enabled) {
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        if (enabled != 0) {
-            s32 byteOffset = slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + FIELD_MAP_SLOT_OFFSET;
-            u16 *flagBank = &((FieldMapSlot *)(datGameState + byteOffset))->flagBanks[FIELD_ROOM_MODE_BANK];
-            *flagBank |= 1 << bitIndex;
-        } else {
-            s32 byteOffset = slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + FIELD_MAP_SLOT_OFFSET;
-            u16 *flagBank = &((FieldMapSlot *)(datGameState + byteOffset))->flagBanks[FIELD_ROOM_MODE_BANK];
-            *flagBank &= ~(1 << bitIndex);
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestRoomModeFlag);
 
-/* Return the selected room-mode bit, or zero when mapId reaches the limit. */
-u8 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, u32 bitIndex) {
-    s32 mapIndex;
-    u8 *slotBase;
-    u32 flagBits;
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetRoomObjectModeFlag);
 
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        slotBase = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES);
-        slotBase += datGameState;
-        flagBits = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_ROOM_MODE_BANK];
-        return (flagBits >> bitIndex) & 1;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestRoomObjectModeFlag);
 
-/* Set or clear a room-object-mode bit in the selected map slot. */
-void fldSetRoomObjectModeFlag(s32 mapId, s32 slotIndex, s32 bitIndex, s32 enabled) {
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        if (enabled != 0) {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_ROOM_OBJECT_BANK];
-            *flagBank |= 1 << bitIndex;
-        } else {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_ROOM_OBJECT_BANK];
-            *flagBank &= ~(1 << bitIndex);
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetRoomSceneFlag);
 
-/* Return the selected room-object-mode bit as a boolean. */
-u8 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, u32 bitIndex) {
-    s32 mapIndex;
-    u8 *slotBase;
-    u32 flagBits;
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestRoomSceneFlag);
 
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        slotBase = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES);
-        slotBase += datGameState;
-        flagBits = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_ROOM_OBJECT_BANK];
-        return (flagBits >> bitIndex) & 1;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetMapTargetFlag);
 
-/* Set or clear a room-scene bit in the selected map slot. */
-void fldSetRoomSceneFlag(s32 mapId, s32 slotIndex, s32 bitIndex, s32 enabled) {
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        if (enabled != 0) {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_ROOM_SCENE_BANK];
-            *flagBank |= 1 << bitIndex;
-        } else {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_ROOM_SCENE_BANK];
-            *flagBank &= ~(1 << bitIndex);
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestMapTargetFlag);
 
-/* Return the selected room-scene bit as a boolean. */
-u8 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, u32 bitIndex) {
-    s32 mapIndex;
-    u8 *slotBase;
-    u32 flagBits;
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetAlternateMapTargetFlag);
 
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        slotBase = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES);
-        slotBase += datGameState;
-        flagBits = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_ROOM_SCENE_BANK];
-        return (flagBits >> bitIndex) & 1;
-    }
-    return 0;
-}
-
-/* Set or clear a map-target bit in the selected map slot. */
-void fldSetMapTargetFlag(s32 mapId, s32 slotIndex, s32 bitIndex, s32 enabled) {
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        if (enabled != 0) {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_MAP_TARGET_BANK];
-            *flagBank |= 1 << bitIndex;
-        } else {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_MAP_TARGET_BANK];
-            *flagBank &= ~(1 << bitIndex);
-        }
-    }
-}
-
-/* Return the selected map-target bit as a boolean. */
-u8 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, u32 bitIndex) {
-    s32 mapIndex;
-    u8 *slotBase;
-    u32 flagBits;
-
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        slotBase = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES);
-        slotBase += datGameState;
-        flagBits = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_MAP_TARGET_BANK];
-        return (flagBits >> bitIndex) & 1;
-    }
-    return 0;
-}
-
-/* Set or clear an alternate-map-target bit in the selected map slot. */
-void fldSetAlternateMapTargetFlag(s32 mapId, s32 slotIndex, s32 bitIndex, s32 enabled) {
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        if (enabled != 0) {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_MAP_ALTERNATE_TARGET_BANK];
-            *flagBank |= 1 << bitIndex;
-        } else {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_MAP_ALTERNATE_TARGET_BANK];
-            *flagBank &= ~(1 << bitIndex);
-        }
-    }
-}
-
-/* Return the selected alternate-map-target bit as a boolean. */
-u8 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, u32 bitIndex) {
-    s32 mapIndex;
-    u8 *slotBase;
-    u32 flagBits;
-
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        slotBase = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES);
-        slotBase += datGameState;
-        flagBits = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->flagBanks[FIELD_MAP_ALTERNATE_TARGET_BANK];
-        return (flagBits >> bitIndex) & 1;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestAlternateMapTargetFlag);
 
 /* Store a byte at valueOffset within the selected slot's values area. */
 void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset, s32 value) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        s32 byteDisplacement = valueOffset + mapIndex * FIELD_MAP_BANK_BYTES;
-        u8 *slotCursor = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + byteDisplacement);
-        slotCursor += datGameState;
-        ((FieldMapSlot *)(slotCursor + FIELD_MAP_SLOT_OFFSET))->values[0] = value;
+        datGameState->maps[mapIndex].slots[slotIndex].values[valueOffset] = value;
     }
 }
 
@@ -1014,99 +860,24 @@ s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset) {
     u8 value = 0;
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        s32 byteDisplacement = valueOffset + mapIndex * FIELD_MAP_BANK_BYTES;
-        u8 *slotCursor = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + byteDisplacement);
-        slotCursor += datGameState;
-        value = ((FieldMapSlot *)(slotCursor + FIELD_MAP_SLOT_OFFSET))->values[0];
+        value = datGameState->maps[mapIndex].slots[slotIndex].values[valueOffset];
     }
     return value == FIELD_MAP_EMPTY_VALUE ? -1 : value;
 }
 
-/* Set or clear an auxiliary bit in the first trailing halfword bank. */
-void fldSetMapSlotAuxiliaryFlag(s32 mapId, s32 slotIndex, s32 bitIndex, s32 enabled) {
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        if (enabled != 0) {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[FIELD_MAP_AUXILIARY_BANK];
-            *flagBank |= 1 << bitIndex;
-        } else {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[FIELD_MAP_AUXILIARY_BANK];
-            *flagBank &= ~(1 << bitIndex);
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetMapSlotAuxiliaryFlag);
 
-/* Return the selected auxiliary bit as a boolean. */
-u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, u32 bitIndex) {
-    s32 mapIndex;
-    u8 *slotBase;
-    u32 flagBits;
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestMapSlotAuxiliaryFlag);
 
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        slotBase = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES);
-        slotBase += datGameState;
-        flagBits = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[FIELD_MAP_AUXILIARY_BANK];
-        return (flagBits >> bitIndex) & 1;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetMapSlotValueFlag);
 
-/* Set or clear a value flag in the second trailing halfword bank. */
-void fldSetMapSlotValueFlag(s32 mapId, s32 slotIndex, s32 bitIndex, s32 enabled) {
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        if (enabled != 0) {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[FIELD_MAP_VALUE_BANK];
-            *flagBank |= 1 << bitIndex;
-        } else {
-            u16 *flagBank = &((FieldMapSlot *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES + datGameState + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[FIELD_MAP_VALUE_BANK];
-            *flagBank &= ~(1 << bitIndex);
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestMapSlotValueFlag);
 
-/* Return the selected value flag as a boolean. */
-u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, u32 bitIndex) {
-    s32 mapIndex;
-    u8 *slotBase;
-    u32 flagBits;
 
-    if (mapId < FIELD_MAP_ID_LIMIT) {
-        mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        slotBase = (u8 *)(slotIndex * FIELD_MAP_SLOT_BYTES + mapIndex * FIELD_MAP_BANK_BYTES);
-        slotBase += datGameState;
-        flagBits = ((FieldMapSlot *)(slotBase + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[FIELD_MAP_VALUE_BANK];
-        return (flagBits >> bitIndex) & 1;
-    }
-    return 0;
-}
-
-typedef struct FieldActivationRecord {
-    s32 kind;
-    s16 parameter;
-    u8 pad06[10];
-} FieldActivationRecord;
-
-#define FIELD_ACTIVATION_FLAGS_OFFSET 0x15970
-
-void fldActivateFlaggedObject(s32 flagIndex) {
-    s32 byteOffset = (flagIndex >> 3) + FIELD_ACTIVATION_FLAGS_OFFSET;
-    u8 *byte = (u8 *)(datGameState + byteOffset);
-    FieldActivationRecord *entry;
-    *byte |= 1 << (flagIndex & 7);
-    fldActivateObjectById(flagIndex);
-    if ((u32)(flagIndex - 0xF0) < 16) {
-        mdlFlagSet(flagIndex + 0x610);
-    }
-    entry = (FieldActivationRecord *)(flagIndex * 16 + (s32)D_0034C8F0);
-    if (entry->kind == 2) {
-        func_0011B150(entry->parameter);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldActivateFlaggedObject);
 
 u8 fldTestObjectActivationFlag(u32 flagIndex) {
-    return (*(u8 *)(((s32)flagIndex >> 3) + datGameState + FIELD_ACTIVATION_FLAGS_OFFSET) >> (flagIndex & 7)) & 1;
+    return (datGameState->activationFlags[(s32)flagIndex >> 3] >> (flagIndex & 7)) & 1;
 }
 
 /* Search records 1..511 of the 28-byte coordinate table; return zero on miss. */
@@ -1534,7 +1305,7 @@ void fldSetDeferredFieldCommand(u32, u32);
 extern void dds3AdminSubmitModeRequest(s32, void *, s32, s32);
 
 void fldPrepareDeferredSceneTransition(void) {
-    if (*(s16 *)(datGameState + 0xe) != 0) {
+    if (datGameState->header.transition != 0) {
         sdfResetGameRuntime(1);
     } else {
         sdfResetGameRuntime(0);
@@ -1566,7 +1337,7 @@ void fldStartSequenceRecord(void) {
     if (fileGetSelectionPendingFlag() == 1) {
         return;
     }
-    if (*(s16 *)(datGameState + 0xE) != 0) {
+    if (datGameState->header.transition != 0) {
         fldPrepareDeferredSceneTransition();
         return;
     }
@@ -2012,14 +1783,14 @@ s32 fldSelectSceneCommand(void) {
 }
 
 void fldConsumeSceneCommandFlag(void) {
-    if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
+    if ((datGameState->world.fieldFlags & 8) != 0) {
         fldClearSceneCommandFlag();
         fldAreaState.consumedFlags |= 1;
     }
 }
 
 void fldClearSceneCommandFlag(void) {
-    ((FldWorkFlags *)datGameState)->fieldFlags &= ~8;
+    datGameState->world.fieldFlags &= ~8;
     fldAreaState.consumedFlags &= ~1;
 }
 
@@ -2032,18 +1803,18 @@ void fldEnterSceneCommand(void) {
     if (fldAreaState.commandEnabled == 0) {
         return;
     }
-    if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) == 0) {
+    if ((datGameState->world.fieldFlags & 8) == 0) {
         fldPlayFieldSeVolumePan(0x29);
     }
     code = fldSelectSceneCommand();
     fldAreaState.sceneCommand = code;
-    ((FldWorkFlags *)datGameState)->fieldFlags |= 8;
+    datGameState->world.fieldFlags |= 8;
     fldAreaState.consumedFlags &= ~1;
     func_00133640(code, 0);
 }
 
 s32 fldGetSceneCommandState(void) {
-    if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
+    if ((datGameState->world.fieldFlags & 8) != 0) {
         return 1;
     }
     if (D_0032E4DC[0] != 0) {
@@ -2064,7 +1835,7 @@ void fldUpdateSceneCommand(void) {
             state->sceneCommand = 0;
             func_00133640(0, 0);
         }
-    } else if ((((FldWorkFlags *)datGameState)->fieldFlags & 8) != 0) {
+    } else if ((datGameState->world.fieldFlags & 8) != 0) {
         if (state->sceneCommand == 0) {
             code = fldSelectSceneCommand();
             state->sceneCommand = code;
@@ -2089,7 +1860,7 @@ enum {
 
 /* Clear a set transition flag and mark its consumption in area state. */
 void fldConsumeFieldTransitionFlag(void) {
-    if ((((FldWorkFlags *)datGameState)->fieldFlags & FIELD_TRANSITION_WORK_FLAG) != 0) {
+    if ((datGameState->world.fieldFlags & FIELD_TRANSITION_WORK_FLAG) != 0) {
         fldClearFieldTransitionFlag();
         fldAreaState.consumedFlags |= FIELD_TRANSITION_CONSUMED_FLAG;
     }
@@ -2097,26 +1868,26 @@ void fldConsumeFieldTransitionFlag(void) {
 
 /* Clear the transition work flag and its area-state consumption marker. */
 void fldClearFieldTransitionFlag(void) {
-    ((FldWorkFlags *)datGameState)->fieldFlags &= ~FIELD_TRANSITION_WORK_FLAG;
+    datGameState->world.fieldFlags &= ~FIELD_TRANSITION_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
 }
 
 /* Set the transition work flag and reset its area-state consumption marker. */
 void fldSetFieldTransitionFlag(void) {
-    ((FldWorkFlags *)datGameState)->fieldFlags |= FIELD_TRANSITION_WORK_FLAG;
+    datGameState->world.fieldFlags |= FIELD_TRANSITION_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
 }
 
 /* Return whether the transition work flag is set. */
 u8 fldTestFieldTransitionFlag(void) {
-    s32 fieldFlags = ((FldWorkFlags *)datGameState)->fieldFlags;
+    s32 fieldFlags = datGameState->world.fieldFlags;
     fieldFlags &= FIELD_TRANSITION_WORK_FLAG;
     return fieldFlags != 0;
 }
 
 /* Clear a set secondary-scene flag and mark its consumption in area state. */
 void fldConsumeSecondarySceneFlag(void) {
-    if ((((FldWorkFlags *)datGameState)->fieldFlags & FIELD_SECONDARY_SCENE_WORK_FLAG) != 0) {
+    if ((datGameState->world.fieldFlags & FIELD_SECONDARY_SCENE_WORK_FLAG) != 0) {
         fldClearSecondarySceneFlag();
         fldAreaState.consumedFlags |= FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
     }
@@ -2124,26 +1895,26 @@ void fldConsumeSecondarySceneFlag(void) {
 
 /* Clear the secondary-scene work flag and its consumption marker. */
 void fldClearSecondarySceneFlag(void) {
-    ((FldWorkFlags *)datGameState)->fieldFlags &= ~FIELD_SECONDARY_SCENE_WORK_FLAG;
+    datGameState->world.fieldFlags &= ~FIELD_SECONDARY_SCENE_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Select secondary rather than primary, resetting secondary's consume marker. */
 void fldSetSecondarySceneFlag(void) {
-    ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | FIELD_SECONDARY_SCENE_WORK_FLAG) & ~FIELD_PRIMARY_SCENE_WORK_FLAG;
+    datGameState->world.fieldFlags = (datGameState->world.fieldFlags | FIELD_SECONDARY_SCENE_WORK_FLAG) & ~FIELD_PRIMARY_SCENE_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Return whether the secondary-scene work flag is set. */
 u8 fldTestSecondarySceneFlag(void) {
-    s32 fieldFlags = ((FldWorkFlags *)datGameState)->fieldFlags;
+    s32 fieldFlags = datGameState->world.fieldFlags;
     fieldFlags &= FIELD_SECONDARY_SCENE_WORK_FLAG;
     return fieldFlags != 0;
 }
 
 /* Clear a set primary-scene flag and mark its consumption in area state. */
 void fldConsumePrimarySceneFlag(void) {
-    if ((((FldWorkFlags *)datGameState)->fieldFlags & FIELD_PRIMARY_SCENE_WORK_FLAG) != 0) {
+    if ((datGameState->world.fieldFlags & FIELD_PRIMARY_SCENE_WORK_FLAG) != 0) {
         fldClearPrimarySceneFlag();
         fldAreaState.consumedFlags |= FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
     }
@@ -2151,19 +1922,19 @@ void fldConsumePrimarySceneFlag(void) {
 
 /* Clear the primary-scene work flag and its area-state consumption marker. */
 void fldClearPrimarySceneFlag(void) {
-    ((FldWorkFlags *)datGameState)->fieldFlags &= ~FIELD_PRIMARY_SCENE_WORK_FLAG;
+    datGameState->world.fieldFlags &= ~FIELD_PRIMARY_SCENE_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Select primary rather than secondary, resetting primary's consume marker. */
 void fldSetPrimarySceneFlag(void) {
-    ((FldWorkFlags *)datGameState)->fieldFlags = (((FldWorkFlags *)datGameState)->fieldFlags | FIELD_PRIMARY_SCENE_WORK_FLAG) & ~FIELD_SECONDARY_SCENE_WORK_FLAG;
+    datGameState->world.fieldFlags = (datGameState->world.fieldFlags | FIELD_PRIMARY_SCENE_WORK_FLAG) & ~FIELD_SECONDARY_SCENE_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Return whether the primary-scene work flag is set. */
 u8 fldIsFlagActive(void) {
-    s32 fieldFlags = ((FldWorkFlags *)datGameState)->fieldFlags;
+    s32 fieldFlags = datGameState->world.fieldFlags;
     fieldFlags &= FIELD_PRIMARY_SCENE_WORK_FLAG;
     if (fieldFlags == 0) return 0;
     return 1;

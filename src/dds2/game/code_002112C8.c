@@ -6,6 +6,7 @@
 #include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_state.h"
+#include "dat_state.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -260,15 +261,6 @@ extern void evtSetTransitionMotionScale(void *, f32);
 
 extern void evtStoreUnitMotionShortParameters(void *, s32, s32);
 
-/* One of five per-side records (0x1C4 bytes each) at datGameState + 0xA60. */
-typedef struct BattleSlotRecord {
-    u16 flags;
-    u16 pad02;
-    u16 group;
-    u8 pad06[8];
-    u16 actionMask;
-    u8 pad10[0x1C4 - 0x10];
-} BattleSlotRecord;
 
 extern s32 btlReadUnitStatusMask();
 
@@ -284,7 +276,6 @@ extern u32 btlAppendEffectActorToCommandIndices(s32);
 
 extern s32 mdlFlagTest(s32);
 
-extern s32 datGameState;
 
 extern s32 btlReadCurrentUnitHp(void *);
 
@@ -570,7 +561,7 @@ s32 btlIsModelGateActiveForEligibleUnit(BtlUnit *unit) {
         return 0;
     }
     if (unit->flags & 0x200) {
-        if (*(s32 *)(datGameState + 0x3c) < 2) {
+        if (datGameState->header.currency < 2) {
             return 0;
         }
     }
@@ -611,7 +602,7 @@ s32 btlAnyGroup400HasActionMask(s32 unused, s32 actionMask) {
 
 s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
     BtlUnit *unit;
-    BattleSlotRecord *record;
+    DatPartyRecord *record;
     s32 i;
 
     for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->nextActor) {
@@ -623,15 +614,15 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
             }
         }
     }
-    record = (BattleSlotRecord *)(datGameState + 0xA60);
+    record = datGameState->party;
     for (i = 0; i < 5; i++, record++) {
         if (record->flags & 1) {
             if (!(record->flags & 2)) {
-                if (record->group == ((query >> 16) & 0x3F)) {
+                if (record->unitId == ((query >> 16) & 0x3F)) {
                     if ((query & 0xFFFF) == 0x7FFF) {
                         return ((btlReadUnitStatusMask() & query) & 0xFFFF) != 0;
                     }
-                    if ((record->actionMask & 0x7FFF & query) != 0) {
+                    if ((record->status & 0x7FFF & query) != 0) {
                         return 1;
                     }
                 }

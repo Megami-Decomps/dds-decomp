@@ -2,7 +2,8 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
-#include "mdl_context.h"
+#include "mdl.h"
+#include "dat_state.h"
 
 typedef struct EffNode EffNode;
 typedef struct EffNodeDescriptor EffNodeDescriptor;
@@ -122,11 +123,6 @@ extern s32 D_00438EEC;
 
 extern s32 D_00438EF0;
 
-/* DDS2 saves store the area flag table earlier than the DDS1 save layout. */
-typedef struct FldAreaFlagsView {
-    u8 pad00[0xFCD0];
-    u64 areaFlags[13][64];
-} FldAreaFlagsView;
 
 extern s32 D_004363C4;
 
@@ -210,7 +206,6 @@ extern u32 fldIndexedResourceData;
 
 extern s32 fldIndexedResourceEffect;
 
-extern s32 datGameState;
 
 extern u32 D_0043623C;
 
@@ -1589,58 +1584,46 @@ s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     if (areaIndex == -1) {
         return 0;
     }
-    return (((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][floor] >> bit) & 1;
+    return (datGameState->areaFlags[areaIndex][floor] >> bit) & 1;
 }
 
 /* Set a one-based flag on the current floor, and retain the associated record. */
 void fldSetCurrentFloorFlag(s32 flagNumber) {
     s32 areaIndex;
-    s32 floor;
-    s32 bitIndex;
+    s32 bit;
 
-    if (flagNumber <= 0) {
-        return;
+    if (flagNumber > 0) {
+        areaIndex = D_00387CE0[fldAreaFlagIndex % 100];
+        if (areaIndex != -1) {
+            bit = flagNumber - 1;
+            fldAreaState[6] = bit;
+            fldAreaState[47] = flagNumber;
+            datGameState->areaFlags[areaIndex][fldAreaState[5]] |= 1ULL << bit;
+            fldAreaState[48] = fldFindRecordItem(fldAreaState[5], bit);
+        }
     }
-    areaIndex = D_00387CE0[fldAreaFlagIndex % 100];
-    if (areaIndex == -1) {
-        return;
-    }
-    floor = fldAreaState[5];
-    bitIndex = flagNumber - 1;
-    {
-        /* Keep byte-offset arithmetic: direct array indexing changes ee-gcc's codegen. */
-        s32 byteOffset = 0xFCD0 + (areaIndex * 64 + floor) * 8;
-        u64 mask = (u64)1 << bitIndex;
-        u64 *flags = (u64 *)(datGameState + byteOffset);
-        fldAreaState[6] = bitIndex;
-        fldAreaState[47] = flagNumber;
-        *flags |= mask;
-    }
-    fldAreaState[48] = fldFindRecordItem(floor, bitIndex);
 }
 
 /* The public setters take one-based floor and flag numbers. */
 void fldSetFloorFlag(s32 area, s32 floor, s32 bit) {
-    s32 areaIndex = D_00387CE0[area % 100];
+    s32 areaIndex;
+
     floor--;
     bit--;
+    areaIndex = D_00387CE0[area % 100];
     if (areaIndex != -1) {
-        s32 byteOffset = 0xFCD0 + ((areaIndex * 64 + floor) * 8);
-        u64 mask = (u64)1 << bit;
-        u64 *flags = (u64 *)(datGameState + byteOffset);
-        *flags |= mask;
+        datGameState->areaFlags[areaIndex][floor] |= 1ULL << bit;
     }
 }
 
 void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
-    s32 areaIndex = D_00387CE0[area % 100];
+    s32 areaIndex;
+
     floor--;
     bit--;
+    areaIndex = D_00387CE0[area % 100];
     if (areaIndex != -1) {
-        s32 byteOffset = 0xFCD0 + ((areaIndex * 64 + floor) * 8);
-        u64 mask = (u64)1 << bit;
-        u64 *flags = (u64 *)(datGameState + byteOffset);
-        *flags &= ~mask;
+        datGameState->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
     }
 }
 
@@ -1807,13 +1790,13 @@ void fldResetCameraAndSceneView(void) {
 void fldClearAllAreaFloorFlags(void) {
     u64 *words;
     s32 remaining;
-    s32 block;
+    DatGameState *block;
     s32 blockIndex;
 
     blockIndex = 0;
     block = datGameState;
     do {
-        words = (u64 *)(block + 0xfcd0);
+        words = block->areaFlags[blockIndex];
         remaining = 0x3f;
         do {
             remaining = remaining - 1;
@@ -1821,7 +1804,6 @@ void fldClearAllAreaFloorFlags(void) {
             words = words + 1;
         } while (-1 < remaining);
         blockIndex = blockIndex + 1;
-        block = block + 0x200;
     } while (blockIndex < 10);
 }
 

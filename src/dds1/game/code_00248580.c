@@ -1,9 +1,9 @@
 #include "common.h"
 #include "mnu.h"
 #include "kwln.h"
+#include "dat_state.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
-#define MNU_PARTY_RECORD_BYTES 0x1A4
 #define MNU_PERCENT_PAIR_BYTES 0xA8
 #define MNU_PERCENT_PANEL_BYTES 0x54
 #define MNU_TERMINAL_SCENE_BYTES 0x164
@@ -27,7 +27,6 @@ extern s32 dds3GetWorldObject(void);
 extern s32 mdlFlagTest(u32);
 
 
-extern s32 datGameState;
 
 typedef struct MenuProgressNode {
     s32 index;
@@ -113,7 +112,7 @@ typedef struct MenuTerminalWork {
     u32 bgmHandle;           /* 0x160: encoded bank/track handle */
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
 
-extern s32 mnuCreateDualPercentPanel(s32, s32);
+extern s32 mnuCreateDualPercentPanel(DatPartyRecord *, s32);
 
 extern s32 sdfAllocSizeClassBlock(s32);
 
@@ -210,37 +209,27 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-/* Party vitals and status word, not a screen rectangle. Full stride is 0x1A4. */
-typedef struct BoxRecord {
-    u16 unitFlags; /* 0x00: bit 0 set when the party slot is active */
-    u8 pad02[4];
-    u16 hp;        /* 0x06 */
-    u16 maxHp;     /* 0x08 */
-    u16 mp;        /* 0x0A */
-    u16 maxMp;     /* 0x0C */
-    u16 statusFlags; /* 0x0E */
-} BoxRecord;
 
 /* Price recovery from missing HP/MP plus the five charged status bits.
  * Preserve DDS1's arithmetic and separate truncations; deficits are not clamped. */
-s32 mnuTerminalScoreBox(BoxRecord *unit) {
+s32 mnuTerminalScoreBox(DatPartyRecord *unit) {
     f32 missingMp = unit->maxMp - unit->mp;
     f32 missingHp = unit->maxHp - unit->hp;
     s32 statusCost = 0;
 
-    if (unit->statusFlags & 0x400) {
+    if (unit->status & 0x400) {
         statusCost = 100;
     }
-    if (unit->statusFlags & 0x100) {
+    if (unit->status & 0x100) {
         statusCost += 50;
     }
-    if (unit->statusFlags & 0x80) {
+    if (unit->status & 0x80) {
         statusCost += 100;
     }
-    if (unit->statusFlags & 0x40) {
+    if (unit->status & 0x40) {
         statusCost += 100;
     }
-    if (unit->statusFlags & 0x10) {
+    if (unit->status & 0x10) {
         statusCost += 100;
     }
     return (s32)missingHp + (s32)(missingMp * (missingMp / 200.0f + 3.0f)) + statusCost;
@@ -250,9 +239,9 @@ s32 mnuTerminalScoreBox(BoxRecord *unit) {
 void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
     MenuProgressNode *node = owner->firstProgressNode;
     if (node != 0) {
-        s32 base = datGameState;
+        DatGameState *state = datGameState;
         do {
-            u32 currency = *(u32 *)(base + 0x3c);
+            u32 currency = state->header.currency;
             if (currency < node->requiredAmount) {
                 node->flags |= 1;
             } else {
@@ -284,13 +273,13 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x54 stride.
  * The source is a party-vitals record; the context supplies the panel style. */
-s32 mnuCreateDualPercentPanel(s32 unitAddress, s32 workAddress) {
+s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, s32 workAddress) {
     s32 panel = sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
-        mnuPercentOrHundred(*(u16 *)(unitAddress + 6), *(u16 *)(unitAddress + 8)),
+        mnuPercentOrHundred(unit->hp, unit->maxHp),
         *(s32 *)(workAddress + 0xe0));
     mnuDrawPanelSequenceByRow(panel + MNU_PERCENT_PANEL_BYTES, 1, 0, 0x1e,
-        mnuPercentOrHundred(*(u16 *)(unitAddress + 0xa), *(u16 *)(unitAddress + 0xc)),
+        mnuPercentOrHundred(unit->mp, unit->maxMp),
         *(s32 *)(workAddress + 0xe0));
     return panel;
 }
@@ -311,7 +300,7 @@ void mnuUpdateGroupResources(u8 *scene) {
     MenuProgressNode *node = *(MenuProgressNode **)(*(u8 **)(scene + 0x74) + 0x10);
 
     while (node != NULL) {
-        node->panel = mnuCreateDualPercentPanel(datGameState + node->entryIndex * MNU_PARTY_RECORD_BYTES + 0xA60, (s32)scene);
+        node->panel = mnuCreateDualPercentPanel(&datGameState->party[node->entryIndex], (s32)scene);
         node = node->next;
     }
 }
@@ -338,7 +327,7 @@ typedef struct MenuThresholdEntry {
     s32 requiredAmount; /* 0x04 */
 } MenuThresholdEntry;
 
-extern s32 mnuTerminalScoreBox(BoxRecord *box);
+extern s32 mnuTerminalScoreBox(DatPartyRecord *unit);
 
 extern s32 func_00248810(s32);
 
@@ -354,10 +343,10 @@ void mnuBuildTerminalNodeList(MenuTerminalWork *host) {
     list->updateCallback = (s32)func_00248810;
     list->visible = 0;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        s32 unitAddress = datGameState + partyIndex * MNU_PARTY_RECORD_BYTES + 0xA60;
+        DatPartyRecord *unit = &datGameState->party[partyIndex];
 
-        if ((u16)(*(u16 *)unitAddress & 1)) {
-            s32 recoveryCost = mnuTerminalScoreBox(unitAddress);
+        if ((u16)(unit->flags & 1)) {
+            s32 recoveryCost = mnuTerminalScoreBox(unit);
 
             if (recoveryCost != 0) {
                 MenuProgressNode *node =
@@ -1770,7 +1759,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     u32 sprite;
 
     index = fldGetModeFrameRecordIndex(scene);
-    func_003014F0(text, D_003BC3F0, *(s32 *)(datGameState + 0x3C));
+    func_003014F0(text, D_003BC3F0, datGameState->header.currency);
     if (fading == 0) {
         color = scene->frameTable->records[index].unk14 | 0xA09DC300;
     } else {

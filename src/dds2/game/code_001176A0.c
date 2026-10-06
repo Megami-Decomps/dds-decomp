@@ -309,7 +309,77 @@ void evtResetWorldAndProfileRuntime(void) {
 void func_00117A80(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117A88);
+extern u8 D_0043E5B0[16];
+extern u32 D_00385218[3];
+extern s8 D_00435DB5;
+extern s8 D_00435DB6;
+extern u16 D_00435DB8;
+extern s32 D_00435DBC;
+extern s32 D_00435DC0;
+extern s8 D_00435DC4;
+extern s8 D_00435DC5;
+extern s32 D_00438E90;
+extern void *D_00438E94;
+extern void *D_00438E98;
+extern void *D_00438E9C;
+extern void *D_00438EA0;
+extern void *D_00438EA4;
+extern s32 D_00438EA8;
+extern u32 D_00438EAC;
+extern s32 mdlFlagTest(s32 flag);
+extern s32 mnuCreateFlagEntries(void);
+extern void *sdfMemoryGetBlockAddress(void *handle);
+extern void func_0011D130(void);
+extern s32 mtrMantraEventBitPush(void);
+
+/* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
+ * mantra bitmaps, profile records, party templates, high item counts and blocked-item flags. */
+void func_00117A88(void) {
+    void *copy;
+
+    D_00435DB5 = 0;
+    D_00435DB6 = 0;
+    D_00435DC4 = 0;
+    D_00435DC5 = 0;
+    memset(D_0043E5B0, 0, sizeof(D_0043E5B0));
+    D_00435DB8 = 0;
+    D_00435DBC = 0;
+    if (mdlFlagTest(0xB8F)) {
+        D_00435DB5 = 1;
+    }
+    if (mdlFlagTest(0xBA0)) {
+        D_00435DB6 = 1;
+    }
+    if (mdlFlagTest(0xC0E)) {
+        D_00435DC4 = 1;
+    }
+    memcpy(D_0043E5B0, datGameState->battleFlags, sizeof(datGameState->battleFlags));
+    D_00435DB8 = datGameState->header.unk0C;
+    D_00435DBC = datGameState->header.secondTick;
+    D_00435DC0 = datGameState->header.unk20;
+    D_00385218[0] = datGameState->header.unk24;
+    D_00385218[1] = datGameState->header.unk28;
+    D_00385218[2] = datGameState->header.unk2C;
+    D_00438E90 = mnuCreateFlagEntries();
+    D_00438E94 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
+    copy = sdfMemoryGetBlockAddress(D_00438E94);
+    memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
+    D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileRecords));
+    copy = sdfMemoryGetBlockAddress(D_00438E98);
+    memcpy(copy, datGameState->profileRecords, sizeof(datGameState->profileRecords));
+    func_0011D130();
+    D_00438E9C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
+    copy = sdfMemoryGetBlockAddress(D_00438E9C);
+    memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
+    D_00438EA0 = sdfAllocGeneralBlock(0x40);
+    copy = sdfMemoryGetBlockAddress(D_00438EA0);
+    memcpy(copy, &datGameState->inventory.counts[0xC0], 0x40);
+    D_00438EA4 = sdfAllocGeneralBlock(sizeof(datGameState->itemBlockedFlags));
+    copy = sdfMemoryGetBlockAddress(D_00438EA4);
+    memcpy(copy, datGameState->itemBlockedFlags, sizeof(datGameState->itemBlockedFlags));
+    D_00438EA8 = mtrMantraEventBitPush();
+    D_00438EAC = datGameState->world.slotFlags;
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118008);
 
