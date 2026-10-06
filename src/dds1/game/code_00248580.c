@@ -52,38 +52,16 @@ typedef struct {
     s32 scale; /* 0x3C */
 } MenuProgressOwner;
 
-typedef struct MenuVisualWork {
-    u8 pad00[8];
-    u32 color;           /* 0x08 */
-    u8 pad0C[4];
-    u32 y;               /* 0x10 */
-    u32 z;               /* 0x14 */
-    u8 pad18[4];
-    u32 x;               /* 0x1C */
-    u8 pad20[4];
-    u32 texture;         /* 0x24 */
-    u32 grid;            /* 0x28 */
-    u8 pad2C[0x38];
-    u32 firstResource;   /* 0x64 */
-    u32 secondResource;  /* 0x68 */
-    u8 pad6C[0x124];
-    u8 window[0x67C];    /* 0x190: window prefix before its list pointers */
-    MenuProgressOwner *windowList; /* 0x80C */
-    u8 pad810[0x10];
-    u32 panelGroup;      /* 0x820 */
-    u32 displayResource; /* 0x824 */
-    u32 effectResource;  /* 0x828 */
-} MenuVisualWork;
 
 extern s32 mnuFindMatchingPartyEntryIndex(s32);
-extern s32 mnuSeekListNode(s32, MenuProgressOwner *);
-extern void mnuSetWindowResource(s32, s32, s32, s32);
-extern void mnuAttachPartyIconBundle(s32, s32, u32);
+extern s32 mnuSeekListNode(s32, struct MenuList *);
+extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
+extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern s32 mnuCreatePanelGroup(s32);
 extern u32 *mnuAllocateSimpleSprite(u32, u32, u32, u32, u32);
 extern u32 *mnuCreateProfilePanel(s32);
 extern void mnuCacheProfilePanelGridPositions(s32, u32, u32, u32, u32);
-extern void func_00276720(s32, s32, s32, s32);
+extern void func_00276720(MenuPageWindow *, s32, s32, s32);
 
 
 typedef struct SceneFrameTable SceneFrameTable;
@@ -135,8 +113,8 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 uiBlendColors(u32, u32, s32);
 
-extern void func_00276F70(s32 window, s32 work);
-extern void mnuDrawStaffPanelGridBackdrop(s32 flag, s32 obj);
+extern void func_00276F70(MenuPageWindow *window, StaffSlots *work);
+extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
@@ -173,14 +151,14 @@ extern EffectObject *effCreateStatusBatch(s32);
 extern s32 effDestroyPackedBatch(s32);
 
 /* Release both visual resources in order; the work object itself is retained. */
-void mnuReleaseVisualResources(MenuVisualWork *work) {
-    effResolveAndReleaseResource(work->firstResource);
+void mnuReleaseVisualResources(MenuTerminalWork *work) {
+    effResolveAndReleaseResource(work->batch);
     effResolveAndReleaseResource(work->secondResource);
 }
 
 /* Release/reset the two resources' texture slots without freeing the work object. */
-void mnuReleaseBothVisualResourceTextures(MenuVisualWork *work) {
-    effReleaseTextureHandlesAndResetSlots(work->firstResource);
+void mnuReleaseBothVisualResourceTextures(MenuTerminalWork *work) {
+    effReleaseTextureHandlesAndResetSlots(work->batch);
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
 
@@ -574,46 +552,50 @@ extern s32 sdfResourceRetainAddress(s32);
 
 extern void *memset(void *, s32, u32);
 
-extern s32 mnuAllocateValueRecord(s32);
-
-extern void mnuInitPartyPanelSlots(s32);
-
-extern void mnuAppendCampSpriteRequests(s32, s32);
+extern struct EffectList *mnuAllocateValueRecord(u32);
+extern void func_002BC618(struct EffectList *);
+extern void mnuInitPartyPanelSlots(PartyPanel *);
+extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
+extern void mnuReleaseStaffMenuTextureHandles(u32 *);
+extern void mnuReleaseStaffResourceGroups(StaffSlots *);
+extern void mnuShutdownContext(MenuPageWindow *);
+extern void mnuClearEntries(MenuPageWindow *);
+extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 /* Allocate/zero the visual host, retain its allocation, and begin resource setup. */
-u8 *mnuCreateWorkBlock(void) {
+MenuProgressHost *mnuCreateWorkBlock(void) {
     s32 handle = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
-    u8 *work = (u8 *)sdfResourceRetainAddress(handle);
+    MenuProgressHost *work = (MenuProgressHost *)sdfResourceRetainAddress(handle);
 
     memset(work, 0, MNU_MENU_HOST_BYTES);
-    *(s32 *)work = handle;
-    ((MenuTerminalWork *)work)->groupResource = mnuAllocateValueRecord(1);
-    mnuInitPartyPanelSlots((s32)(work + 0x84));
-    mnuAppendCampSpriteRequests(((MenuTerminalWork *)work)->groupResource, (s32)(work + 8));
-    ((MenuTerminalWork *)work)->initState = 1;
+    work->heapHandle = handle;
+    work->titleEffectHandle = mnuAllocateValueRecord(1);
+    mnuInitPartyPanelSlots(&work->partyPanel);
+    mnuAppendCampSpriteRequests(work->titleEffectHandle, &work->staffSlots);
+    work->loadState = 1;
     return work;
 }
 
 /* Release staff window/texture/resource work before the value record and allocation. */
-void mnuReleaseStaffMenuContextAndResources(u32 *workWords) {
-    mnuShutdownContext(workWords + 100);
-    mnuReleaseStaffMenuTextureHandles(workWords + 2);
-    mnuReleaseStaffResourceGroups(workWords + 2);
-    func_002BC618(workWords[1]);
-    sdfReleaseResourceAllocation(*workWords);
+void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
+    mnuShutdownContext(&work->partyWindow);
+    mnuReleaseStaffMenuTextureHandles(work->staffSlots.baseResources);
+    mnuReleaseStaffResourceGroups(&work->staffSlots);
+    func_002BC618(work->titleEffectHandle);
+    sdfReleaseResourceAllocation(work->heapHandle);
 }
 
-extern s32 mnuStaffSlotsAllFilled(s32, s32 *);
+extern s32 mnuStaffSlotsAllFilled(struct EffectList *, StaffSlots *);
 
 extern void mnuReleaseStaffMenuResources(s32 *);
 
-extern void mnuInitializeStaffPageWindows(s32, s32 *, s32, s32);
+extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 
 /* Return one while initialization is pending (including state zero), zero when ready.
  * On resource readiness, release loading resources, initialize windows, and store state two. */
-s32 mnuTickInitState(u8 *work) {
-    s32 state = ((MenuTerminalWork *)work)->initState;
-    s32 *group;
+s32 mnuTickInitState(MenuProgressHost *work) {
+    s32 state = work->loadState;
+    StaffSlots *group;
 
     if (state == 0) {
         return 1;
@@ -621,58 +603,58 @@ s32 mnuTickInitState(u8 *work) {
     if (state == 2) {
         return 0;
     }
-    group = (s32 *)(work + 8);
-    if (mnuStaffSlotsAllFilled(((MenuTerminalWork *)work)->groupResource, group) == 0) {
+    group = &work->staffSlots;
+    if (mnuStaffSlotsAllFilled(work->titleEffectHandle, group) == 0) {
         return 1;
     }
-    mnuReleaseStaffMenuResources(group);
-    mnuInitializeStaffPageWindows((s32)(work + 0x190), group, 0, (s32)(work + 0x84));
-    ((MenuTerminalWork *)work)->initState = 2;
+    mnuReleaseStaffMenuResources(group->baseResources);
+    mnuInitializeStaffPageWindows(&work->partyWindow, group, 0, &work->partyPanel);
+    work->loadState = 2;
     return 0;
 }
 
 /* Bind the party selection's textures/grid, then create its panel and profile visuals. */
-void mnuSetupStaffMenuProfilePage(s32 source, MenuVisualWork *work) {
-    s32 window = (s32)work->window;
+void mnuSetupStaffMenuProfilePage(s32 source, MenuProgressHost *work) {
+    MenuPageWindow *window = &work->partyWindow;
     s32 index;
 
-    mnuSeekListNode(mnuFindMatchingPartyEntryIndex(source), work->windowList);
-    index = work->windowList->selectedNode->index;
-    mnuSetWindowResource(index, window, work->texture, work->grid);
-    mnuAttachPartyIconBundle(index, window, work->texture);
-    work->panelGroup = mnuCreatePanelGroup(work->texture);
-    work->displayResource = (u32)mnuAllocateSimpleSprite(work->x, work->y, work->z, work->color, work->texture);
-    work->effectResource = (u32)mnuCreateProfilePanel(source);
-    mnuCacheProfilePanelGridPositions(work->effectResource, work->grid, 5, 14, 15);
+    mnuSeekListNode(mnuFindMatchingPartyEntryIndex(source), work->partyWindow.lists[0]);
+    index = work->partyWindow.lists[0]->cursor->index;
+    mnuSetWindowResource(index, window, work->staffSlots.pairResources[0], work->staffSlots.pairResources[1]);
+    mnuAttachPartyIconBundle(index, window, work->staffSlots.pairResources[0]);
+    work->panelGroup = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
+    work->effectResource = (s32)mnuAllocateSimpleSprite(work->staffSlots.baseResources[5], work->staffSlots.baseResources[2], work->staffSlots.baseResources[3], work->staffSlots.baseResources[0], work->staffSlots.pairResources[0]);
+    work->currentEffect = (s32)mnuCreateProfilePanel(source);
+    mnuCacheProfilePanelGridPositions(work->currentEffect, work->staffSlots.pairResources[1], 5, 14, 15);
     func_00276720(window, 1, 1, 1);
 }
 
 /* Release the window's entries/icons before its panel, sprite and profile allocations. */
-void mnuReleaseMenuVisualWorkResources(MenuVisualWork *work) {
-    mnuClearEntries((s32)work + 400);
-    mnuReleasePartyIconBundles((s32)work + 400);
+void mnuReleaseMenuVisualWorkResources(MenuProgressHost *work) {
+    mnuClearEntries(&work->partyWindow);
+    mnuReleasePartyIconBundles(&work->partyWindow);
     mnuDestroyPanelGroup(work->panelGroup);
-    mnuFreeSimpleSpriteWork(work->displayResource);
-    mnuFreeProfilePanelWork(work->effectResource);
+    mnuFreeSimpleSpriteWork(work->effectResource);
+    mnuFreeProfilePanelWork(work->currentEffect);
 }
 
 /* Forward coordinates/mode to the retained profile panel; do not advance other visuals. */
-void effUpdateAttached(s32 x, s32 y, s32 mode, MenuVisualWork *work) {
-    mnuDrawAndAdvanceProfilePanel(x, y, mode, work->effectResource);
+void effUpdateAttached(s32 x, s32 y, s32 mode, MenuProgressHost *work) {
+    mnuDrawAndAdvanceProfilePanel(x, y, mode, work->currentEffect);
 }
 
-s32 func_00249998(u8 *control, u8 *work, s32 context) {
-    if (*(s32 *)(work + 0x80) != 2) {
+s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {
+    if (work->loadState != 2) {
         return 0;
     }
 
-    func_00276F70((s32)(work + 0x190), (s32)(work + 8));
-    mnuDrawStaffPanelGridBackdrop(0, (s32)(work + 8));
-    *(u32 *)(work + 0x190) |= 0x500;
+    func_00276F70(&work->partyWindow, &work->staffSlots);
+    mnuDrawStaffPanelGridBackdrop(0, &work->staffSlots);
+    work->partyWindow.flags |= 0x500;
     mnuDrawStageTestList(0, 0, 0, ((s8 *)control)[0x55],
-        work + 0x190, context);
+        &work->partyWindow, context);
     func_00283838(0, 0, 0, (s32)control, ((s8 *)control)[0x55],
-        *(s32 *)(work + 0x824), context);
+        work->effectResource, context);
     return 1;
 }
 
@@ -1569,7 +1551,7 @@ u32 evtBeginSelectionExitFade(void) {
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     mnuTerminalSelectSlot(0, -2, context);
     mnuSetWorldObjectAndMenuEnabled(1);
-    mnuReleaseVisualResources(context);
+    mnuReleaseVisualResources((MenuTerminalWork *)context);
     kwlnFadeOutStart(0, 0, 0, 15);
     return 1;
 }
@@ -1592,7 +1574,7 @@ s32 func_0024B868(s32 request) {
     }
     if (*(s32 *)(context + 0x94) == 0 &&
         sdfCheckPendingWorkWithInterrupts() == 0) {
-        mnuReleaseBothVisualResourceTextures((MenuVisualWork *)context);
+        mnuReleaseBothVisualResourceTextures((MenuTerminalWork *)context);
         fileSetPreviewLocation(*(s32 *)(context + 0x7C),
             *(s32 *)(context + 0x80));
         fileEnterMcPackScene(0);
