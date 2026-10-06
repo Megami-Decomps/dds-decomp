@@ -68,7 +68,9 @@ typedef struct ShortRecordList {
 } ShortRecordList;
 
 typedef struct MenuRegistryRecord {
-    u8 pad00[8];
+    u8 pad00[4];
+    u16 listCount; /* 0x04: short lists in this record */
+    u8 pad06[2];
     ShortRecordList *lists;
     u8 pad0C[4];
 } MenuRegistryRecord;
@@ -111,7 +113,8 @@ typedef struct MenuRegistry {
 
 struct MenuRegistryTable {
     u32 flags;
-    u8 pad04[0xC];
+    u8 pad04[0xA];
+    u16 recordCount; /* 0x0E */
     MenuRegistryRecord *recordBase; /* 0x10 */
 };
 
