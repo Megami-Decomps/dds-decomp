@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mnu_list.h"
 #include "mnu_shop.h"
 
 struct FrFontCtx;
