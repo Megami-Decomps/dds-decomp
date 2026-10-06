@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
+#include "sdf.h"
 
 extern s32 scrReadIntParameter(s32);
 
@@ -60,19 +61,15 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
     return 1;
 }
 
-typedef struct DrawOps {
-    u8 pad00[0x10];
-    void (*draw)(struct DrawOps *self, void *list); /* 0x10 */
-} DrawOps;
 
 extern void *dds3GetWorldObject(void);
 extern void *kwlnTaskGetUserValue();
 extern s32 dds3ContainsNodeInAnyObjectChain();
-extern void *sdfAllocPacketAligned();
+extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList();
 extern s32 func_0010F190();
 extern void kwlnDrawSpriteCell();
-extern DrawOps D_00380708;
+extern SdfPoolNode D_00380708;
 extern s8 D_0037F543[];
 extern void func_002458B8();
 
@@ -80,8 +77,8 @@ extern void func_002458B8();
 s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     s32 width;
     u8 *node;
-    void *list;
-    void *spriteList;
+    SdfListHead *list;
+    SdfListHead *spriteList;
 
     if (dds3GetWorldObject() == NULL) {
         return -1;
@@ -90,7 +87,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     if (dds3ContainsNodeInAnyObjectChain(dds3GetWorldObject(), node) == 0) {
         return (s32)func_002458B8;
     }
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     width = func_0010F190(node, 3, 0xA, list) + 0xB;
     if (node[0xF] < 0xA) {
@@ -98,11 +95,11 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
             width += dds3DrawObjectFlagDiagnostic(node, 3, width, list);
         }
     }
-    spriteList = sdfAllocPacketAligned(0x20);
+    spriteList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(spriteList);
     kwlnDrawSpriteCell(spriteList, 0x24, 0x72, 0x23, width - 9);
-    D_00380708.draw(&D_00380708, spriteList);
-    D_00380708.draw(&D_00380708, list);
+    D_00380708.append((SdfListHead *)&D_00380708, spriteList);
+    D_00380708.append((SdfListHead *)&D_00380708, list);
     if (D_0037F543[0] < 0) {
         return (s32)func_002458B8;
     }
