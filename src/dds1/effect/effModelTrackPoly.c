@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 
 /* Polygon-track data: its ring position wraps against the entry count. */
@@ -464,24 +465,20 @@ void func_00188A78(EffTrackPolyData *data, u128 *src) {
 }
 
 
-typedef struct EffTrackPolyFinish {
-    u8 pad00[0x10];
-    void (*finish)(void *, s32); /* 0x10 */
-} EffTrackPolyFinish;
 
-extern EffTrackPolyFinish *D_00355710[];
-extern EffTrackPolyFinish D_00325248;
+extern SdfPoolNode *D_00355710[];
+extern SdfPoolNode D_00325248;
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(s32);
-extern void sdfConsAppendClearPacket(s32, s32);
-extern void sdfConsAppendAssetPacket(s32, s32, s32);
-extern void sdfAppendPacket(s32, s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
+extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0015FE20(EffTrackPolyDraw *);
 
 /* Walk at most two ring runs. Each full strip consumes 16 vertices, with
  * two additional vertices overlapping the next strip (18 inputs total). */
 void effTrackPolyDrawStrips(EffTrackPolyData *data) {
-    s32 list = sdfAllocPacketAligned(0x20);
+    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 start[4];
     s32 len[2];
     EffTrackPolyDraw *draw;
@@ -489,12 +486,12 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
     s32 remaining;
     s32 wrapped;
     s32 recent;
-    s32 list2;
+    SdfListHead *list2;
     u64 *packet;
 
     sdfInitPacketList(list);
-    sdfConsAppendClearPacket(list, 0);
-    sdfConsAppendAssetPacket(list, (s32)data->nodeHandle, 0);
+    sdfConsAppendClearPacket((s32)list, 0);
+    sdfConsAppendAssetPacket((s32)list, data->nodeHandle, 0);
     recent = data->activePointCount;
     start[0] = data->position - recent;
     if (start[0] < 2) {
@@ -529,9 +526,9 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         }
     }
     if (data->kind < 4) {
-        D_00355710[data->kind]->finish(D_00355710[data->kind], list);
+        D_00355710[data->kind]->append((SdfListHead *)D_00355710[data->kind], list);
     } else {
-        list2 = sdfAllocPacketAligned(0x20);
+        list2 = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list2);
         packet = (u64 *)sdfAllocPacketAligned(0x30);
         packet[0] = 2;
@@ -540,8 +537,8 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         packet[3] = 0xE;
         packet[4] = 6;
         packet[5] = 0x42;
-        sdfAppendPacket(list2, (s32)packet);
-        D_00325248.finish(&D_00325248, list2);
+        sdfAppendPacket(list2, (u32)packet);
+        D_00325248.append((SdfListHead *)&D_00325248, list2);
         packet = (u64 *)sdfAllocPacketAligned(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -549,7 +546,7 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         packet[3] = 0xE;
         packet[4] = 0x42;
         packet[5] = 0x42;
-        sdfAppendPacket(list, (s32)packet);
-        D_00325248.finish(&D_00325248, list);
+        sdfAppendPacket(list, (u32)packet);
+        D_00325248.append((SdfListHead *)&D_00325248, list);
     }
 }
