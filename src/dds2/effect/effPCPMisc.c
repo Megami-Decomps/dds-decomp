@@ -581,9 +581,15 @@ typedef struct EffPCPBeamNode {
 } EffPCPBeamNode;
 
 typedef struct EffPCPBeamParams {
-    u8 pad00[0x28];
+    f32 position[4];
+    s32 fadeInFrames;
+    s32 fadeOutFrames;
+    s32 holdFrames;
+    s32 vertexGrowthFrames;
+    u8 pad20[4];
+    s32 radiusGrowthFrames;
     f32 unk28;
-    u8 pad2C[4];
+    f32 endRadius;
     u32 segments;          /* 0x30 */
     u32 drawKind;          /* 0x34 */
     f32 firstWidth;
@@ -596,11 +602,13 @@ typedef struct EffPCPBeamParams {
 
 typedef struct EffPCPBeamWork {
     EffPCPBeamParams params;
-    u32 unk50;
+    s32 frame;
     u32 color;                 /* 0x54 */
     u32 vertexCount;       /* 0x58 */
     EffPCPBeamNode *node;   /* 0x5C */
 } EffPCPBeamWork;
+typedef char EffPCPBeamParams_size_0x50[(sizeof(EffPCPBeamParams) == 0x50) ? 1 : -1];
+typedef char EffPCPBeamWork_size_0x60[(sizeof(EffPCPBeamWork) == 0x60) ? 1 : -1];
 
 /* The ring geometry, angle preparation and timeline operate on the same
    0x80-byte clone. Radius and rotation each have independent decay inputs. */
@@ -4334,7 +4342,7 @@ void effPcpBuildConcentricBeamVertices(f32 radius, EffPCPBeamWork *work) {
 
 void effResetChild(EffPCPBeamWork *work) {
     effPcpBuildConcentricBeamVertices(work->params.unk28, work);
-    work->unk50 = 0;
+    work->frame = 0;
 }
 
 u8 *effBeamEffectClone(src)
@@ -4349,7 +4357,7 @@ u8 *effBeamEffectClone(src)
 
     work->params = *src;
     work->color = 0x80808080;
-    work->unk50 = 0;
+    work->frame = 0;
     segments = src->segments;
     if (segments < 3) {
         src->segments = 3;
