@@ -1,5 +1,5 @@
 #include "common.h"
-#include "sdf.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -9,7 +9,8 @@ typedef struct EffParamWork EffParamWork;
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_0018C820(void *work);
 extern void effBossSetPosition();
-extern void func_0018D830(void *work);
+extern PairedEffectResources *func_0018D830(PairedEffectParams *src);
+extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -607,13 +608,13 @@ void effBossApplyGroupTint(u8 *work, s32 value) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D830);
 
-void func_0018DA38(void *data) {
+PairedEffectResources *func_0018DA38(void *data) {
     void *work;
 
     work = effParamTableGetBlock(data, 0);
-    func_0018D830(work);
+    return func_0018D830(work);
 }
 
-void func_0018DA58(void *work) {
-    func_0018D830(work);
+PairedEffectResources *func_0018DA58(void *work) {
+    return func_0018D830(work);
 }
