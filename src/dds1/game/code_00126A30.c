@@ -432,7 +432,7 @@ extern void fldSetRecordValueById(s32, s32);
 extern void *dds3FindIndexedObjectChainNodeByName(void *, s32, const u8 *);
 extern void dds3RegisterObjectInHandlerIndex(void *);
 
-void func_001270A8(void) {
+void fldCreateResourceScriptObjects(void) {
     f32 position[4];
     f32 rotation[4];
     FldFileResource *resource = D_003BD7B0;
@@ -4287,7 +4287,6 @@ const char *func_0013C9E0(const char *eventName) {
     }
     return 0;
 }
-
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0150);
 

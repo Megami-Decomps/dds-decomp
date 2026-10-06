@@ -452,7 +452,7 @@ void func_001156C8(void) {
 extern const f32 D_00412980[10];
 extern const f32 D_004129A8[20];
 
-EffectObj *func_001156E0(kind, descriptor)
+EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     s32 kind;
     struct EffNodeDescriptor *descriptor;
 {
@@ -513,7 +513,7 @@ EffectObj *func_001156E0(kind, descriptor)
 }
 
 void func_00115AA8(void) {
-    func_001156E0();
+    effObjCreateMagatuhiForKind();
 }
 
 /* Resolve a named resource for the kind/value constructor, then release that resource. */
@@ -524,7 +524,7 @@ void *effObjCreateKindFromResource(s32 kind, void *resource) {
 
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    created = func_001156E0(kind, resolvedId);
+    created = effObjCreateMagatuhiForKind(kind, resolvedId);
     sdfReleaseResourceAllocation(resourceHandle);
     return created;
 }

@@ -144,7 +144,7 @@ extern void func_0031EE28(void *entry, u32 displayValue);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern s8 D_0037F510[];
 
-s32 func_0031AA10(MnuShootingWork *work) {
+s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     switch (work->phase) {
     case 0:
         work->phaseTicks = 0;

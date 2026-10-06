@@ -969,7 +969,7 @@ typedef struct MnuSceneContext {
 extern MnuSceneGridWork *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
 extern void sdfSetShortPairValues(MnuSceneGridWork *, s32, s32);
 extern void mnuFreeTaskData(s32, void *);
-extern void func_0025A680(void);
+extern void mnuDrawMantraEntryStatus(void);
 extern void func_002CC0D0(MnuSceneGridWork *);
 extern void func_00253208(s32, s32, s32 *, s32 *);
 extern void *sdfGridSelectFilledCell(MnuSceneGridWork *, s32, s32);
@@ -986,7 +986,7 @@ void mnuInitializeMantraSelectionGrid(s32 sceneAddress) {
                                 (u8 *)sceneWork + 4, 0);
     sdfSetShortPairValues(sceneWork->grid, 1, 1);
     sceneWork->grid->freeTaskData = mnuFreeTaskData;
-    sceneWork->grid->callback = func_0025A680;
+    sceneWork->grid->callback = mnuDrawMantraEntryStatus;
     resourceTaskAddress = func_002CB3B8(mnuSceneResourceContext, 0);
     fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
     func_00253208(sceneAddress, *(s32 *)(fieldAddress + 0x70),

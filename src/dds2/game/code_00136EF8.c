@@ -1244,7 +1244,6 @@ const char *func_0013F5C8(const char *eventName) {
     return 0;
 }
 
-
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004133A0);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F790);

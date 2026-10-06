@@ -1927,7 +1927,7 @@ extern u32 btlComputeSkillAdjustedMaxHp(s32);
 extern u32 btlComputeSkillAdjustedMaxMp(s32);
 extern void mdlFlagSet(u32);
 
-void func_002162E0(void) {
+void btlApplyPartySetupOverride(void) {
     u32 i;
     u32 n;
 

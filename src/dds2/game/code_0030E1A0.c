@@ -11,7 +11,7 @@ typedef struct FieldTransitionStyle {
 extern u32 sdfCounterAnimationValue;
 extern u32 D_004390A0;
 extern FieldTransitionStyle *D_0043888C;
-extern void func_0030E390(f32);
+extern void fldDrawTransitionBackdrop(f32);
 extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawAnimatedTransition(s32 opening) {
@@ -50,7 +50,7 @@ void mnuDrawAnimatedTransition(s32 opening) {
         }
         glow = 0.0f;
     }
-    func_0030E390(progress);
+    fldDrawTransitionBackdrop(progress);
     if (D_0043888C != 0) {
         switch (D_0043888C->kind) {
         case 1:

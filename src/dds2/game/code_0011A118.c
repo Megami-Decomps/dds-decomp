@@ -548,7 +548,7 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
     return value;
 }
 
-void func_0011AB38(void) {
+void ptyInitRuntime(void) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
