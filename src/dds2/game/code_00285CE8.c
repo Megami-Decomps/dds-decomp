@@ -23,27 +23,45 @@ extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
 
 
-/* Sprite grid geometry: cell counts at +0x1C/+0x1E. */
-typedef struct {
-    u8 pad0[0x1C]; /* 0x0 */
-    s16 unk1C;     /* 0x1C */
-    s16 unk1E;     /* 0x1E */
-} MtrGrid;
-
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285D78);
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
-
 typedef struct MtrCell {
     s16 x;
     s16 y;
     s16 unk04;
     s16 unk06;
     s8 direction;
-    u8 state;
+    s8 state;
     s8 remainingDepth;
     u8 unk0B;
 } MtrCell;
+
+/* Native cell storage and callback; geometry is shared with the draw callback. */
+typedef struct MtrGrid {
+    u8 pad00[4];
+    MtrCell *cells;
+    s32 count;
+    u8 pad0C[0x10];
+    s16 unk1C;
+    s16 unk1E;
+    u8 pad20[4];
+    void (*draw)(s32, s32, s32, s32, struct MtrGrid *, s32, s32);
+} MtrGrid;
+
+INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
+extern f32 sdfSinPoly(f32);
+
+void func_00285D78(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
+    MtrCell *cell = grid->cells;
+    s32 i;
+
+    for (i = 0; i < grid->count; i++, cell++) {
+        if (cell->state != 0) {
+            f32 fade = sdfSinPoly((f32)cell->unk04 / (f32)cell->unk06 * 3.141592503f);
+            grid->draw(x + cell->x, y + cell->y, z, (s32)((f32)alpha * fade), grid, flags, context);
+        }
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
 
 extern MtrCell *func_00285E98(MtrGrid *, MtrCell *, s8);
 extern f32 effMiscRandUnitFloat(void *);
