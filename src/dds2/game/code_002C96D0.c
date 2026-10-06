@@ -4863,24 +4863,26 @@ void camAimRotation(CamAim *obj, void *dst)
 extern void *sdfAllocAndClearQuadwords(s32);
 
 typedef struct FileSlot {
-    u8 pad0[0x10];
-    u32 state;
-    u8 pad14[0xC];
-} FileSlot;
+    f32 pos[4];       /* 0x00 */
+    s32 state;        /* 0x10: frame, -1 available, -2 disabled */
+    u32 color;        /* 0x14 */
+    f32 scale;        /* 0x18 */
+    f32 angle;        /* 0x1C */
+} FileSlot;      /* 0x20, ordinary 4-byte field alignment */
 
 typedef struct FileSlotTable {
     u16 type;
     u8 pad02[2];
-    u32 instances;
-    u32 count;
-    u32 flags;
-    u32 references;
-    u32 unk14;
-    FileSlot *slots;
-    u8 *unk1C;
-    u8 *data0;
-    u8 *data1;
-    u32 handle;
+    u32 instances;         /* 0x04: target's primary-slot count */
+    u32 count;             /* 0x08: primary + trailing group cells */
+    u32 flags;             /* 0x0C */
+    u32 references;        /* 0x10: acquisition/frame counter */
+    f32 spawnRemainder;    /* 0x14 */
+    FileSlot *slots; /* 0x18 */
+    u8 *unk1C;             /* 0x1C: per-type instance work */
+    u8 *data0;             /* 0x20 */
+    u8 *data1;             /* 0x24 */
+    u32 handle;            /* 0x28 */
 } FileSlotTable;
 
 /* The record's signed +0x54 mode is consumed by every billboard opener. */
@@ -5308,23 +5310,50 @@ f32 func_002D7770(EffScalarCurve *curve, s32 frame, s32 length) {
 
 
 /* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
-typedef struct FileKeyOut {
-    f32 pos[4];
-    s32 frame;
-    s32 color;
-    f32 scale;
-    f32 angle;
-} FileKeyOut;
+typedef FileSlot FileKeyOut;
+
+/* One emitter track uses +0x0C as its random multiplier; the curve sampler
+ * treats the same word as reserved. */
+typedef union FileKeyScalarTrack {
+    EffScalarTrack track;
+    struct {
+        u8 mode;
+        u8 reserved01[3];
+        f32 initialValue;
+        f32 finalValue;
+        f32 randomness;
+        u8 headingMode;
+        u8 reserved11[3];
+        f32 firstValue;
+        f32 firstFraction;
+        f32 secondValue;
+        f32 secondFraction;
+        u8 reserved24[8];
+    } emitter;
+} FileKeyScalarTrack;
 
 /* Keyframe tracks of a view block (scale, heading and colour curves). */
 typedef struct FileKeyBlock {
-    u8 pad00[0x2C];
-    u8 unk2C[0x24];
-    u8 unk50[0x10];
-    EffScalarTrack scale; /* 0x60 */
-    EffScalarTrack heading; /* 0x8C */
-    s32 length;
-} FileKeyBlock;
+    f32 pos[4];             /* 0x00 */
+    u8 pad10[0x10];         /* second source vector, not used here */
+    s32 emissionDuration;   /* 0x20 */
+    u32 spawnRate;          /* 0x24 */
+    f32 spawnVariance;      /* 0x28 */
+    u8 unk2C[0x24];         /* 0x2C: color track */
+    u8 unk50[0x10];         /* 0x50: color data */
+    FileKeyScalarTrack scale;   /* 0x60 */
+    FileKeyScalarTrack heading; /* 0x8C */
+    s32 length;            /* 0xB8 */
+    u8 padBC;              /* 0xBC: allocator's relative-position flag */
+    u8 prewarm;            /* 0xBD */
+    u8 padBE[0x0A];         /* includes grid columns/rows at C0/C4 */
+    f32 radius;            /* 0xC8 */
+    f32 radiusRandomness;  /* 0xCC */
+    f32 speed;             /* 0xD0 */
+    f32 speedRandomness;   /* 0xD4 */
+    f32 acceleration;      /* 0xD8 */
+    f32 gravity;           /* 0xDC */
+} FileKeyBlock;             /* observed prefix 0xE0, not full allocation size */
 
 extern s32 func_002D7458(void *, void *, s32, s32);
 extern f32 func_002D7770(EffScalarCurve *, s32, s32);
@@ -5335,9 +5364,9 @@ void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *t
     f32 delta[4];
 
     out->color = func_002D7458(block->unk2C, block->unk50, frame, block->length);
-    out->scale = func_002D7770(&block->scale.curve, frame, block->length);
-    if (block->heading.curve.headingMode != 2) {
-        out->angle = func_002D7770(&block->heading.curve, frame, block->length);
+    out->scale = func_002D7770(&block->scale.track.curve, frame, block->length);
+    if (block->heading.track.curve.headingMode != 2) {
+        out->angle = func_002D7770(&block->heading.track.curve, frame, block->length);
         return;
     }
     VU0_MOVE_VF(vf20, vf28);
@@ -5422,7 +5451,199 @@ void effScaleParameterSet(ScaleOwner *owner, f32 scale) {
     dst->unkE0 = src->unkE0 * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D8AD0);
+typedef struct FileSlotMotion {
+    f32 direction[4];     /* 0x00; this callback initializes xyz only */
+    f32 speed;            /* 0x10 */
+    f32 scaleMultiplier;  /* 0x14 */
+    f32 angle;            /* 0x18 */
+    f32 angleMultiplier;  /* 0x1C */
+} FileSlotMotion;
+
+struct EffRandState;
+extern struct EffRandState effSharedRandomState;
+extern u32 effMiscRand(struct EffRandState *state);
+extern f32 effMiscRandUnitFloat(void *state);
+extern f32 fabsf(f32);
+extern void func_002D7B58(FileSlotTable *, FileSlot *);
+
+/* vu0 routine: emits and advances randomized radial slots, then samples their key tracks. */
+void func_002D8AD0(FileSlotTable *record) {
+    f32 delta[4];
+    f32 radiusVector[4];
+    f32 previousPosition[4];
+    FileKeyBlock *keys;
+    u32 i;
+    u32 count;
+    u32 flags;
+    FileSlot *slot;
+    FileSlotMotion *motion;
+    s32 duration;
+    s32 prewarm;
+    s32 mode;
+    f32 gravity;
+    f32 acceleration;
+    s32 toSpawn;
+    s32 prewarmLength;
+    s32 frame;
+    f32 distance;
+    s32 length;
+
+    keys = (FileKeyBlock *)record->data0;
+    count = record->instances;
+    length = keys->length;
+    flags = record->flags;
+    slot = record->slots;
+    motion = (FileSlotMotion *)record->unk1C;
+
+    if (length != 0) {
+        duration = keys->emissionDuration;
+        prewarmLength = keys->length;
+        mode = keys->heading.track.curve.headingMode;
+        gravity = keys->gravity;
+        acceleration = keys->acceleration;
+        delta[3] = 0.0f;
+        if (duration != 0 && (s32)record->references >= duration) {
+            toSpawn = 0;
+            prewarm = 0;
+        } else {
+            if (record->references == 0 && keys->prewarm != 0) {
+                prewarm = 1;
+                toSpawn = count;
+                if (keys->spawnVariance > 0.0f) {
+                    toSpawn = (s32)((f32)record->instances *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                }
+            } else {
+                prewarm = 0;
+                if (keys->spawnVariance > 0.0f) {
+                    record->spawnRemainder += (f32)keys->spawnRate *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                } else {
+                    record->spawnRemainder += (f32)keys->spawnRate;
+                }
+                toSpawn = (s32)fabsf(record->spawnRemainder);
+                record->spawnRemainder -= (f32)toSpawn;
+            }
+        }
+        i = 0;
+        if (count != 0) {
+            do {
+                if (slot->state >= length) {
+                    slot->state = duration != 0 ? -2 : -1;
+                    fileInvalidateSlotGroup(record, (u32)slot);
+                }
+                frame = slot->state;
+                if (frame != -2) {
+                    if (frame == -1) {
+                        if (toSpawn != 0) {
+                            delta[0] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[1] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[2] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            VU0_LOAD_VF(vf10, delta);
+                            VU0_NORMALIZE_VF10();
+                            VU0_STORE_VF(vf10, delta);
+                            motion->direction[0] = delta[0];
+                            motion->direction[1] = delta[1];
+                            motion->direction[2] = delta[2];
+                            motion->speed = fabsf(keys->speed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->speedRandomness + (1.0f - keys->speedRandomness)));
+                            {
+                                f32 radius = keys->radius *
+                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->radiusRandomness + (1.0f - keys->radiusRandomness));
+                                VEC3_SPLAT(radiusVector, radius);
+                            }
+                            /* Retail initializes only XYZ of this radius vector; W is left untouched. */
+                            VU0_LOAD_VF(vf10, delta);
+                            if (keys->speed < 0.0f) {
+                                VU0_NEGATE_XYZ(vf10);
+                            }
+                            if (flags & 1) {
+                                VU0_LOAD_VF(vf11, radiusVector);
+                                VU0_MUL(vf10, vf10, vf11);
+                            } else {
+                                VU0_LOAD_VF(vf11, radiusVector);
+                                VU0_MUL(vf10, vf10, vf11);
+                                VU0_LOAD_VF(vf11, keys->pos);
+                                VU0_ADD(vf10, vf10, vf11);
+                            }
+                            VU0_STORE_VF(vf10, slot->pos);
+                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                                (1.0f - keys->scale.emitter.randomness);
+                            if (mode != 2) {
+                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                    (1.0f - keys->heading.emitter.randomness);
+                                if (mode == 1) {
+                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                        motion->angleMultiplier = -motion->angleMultiplier;
+                                    }
+                                } else {
+                                    motion->angle = 0.0f;
+                                }
+                            } else {
+                                motion->angleMultiplier = 1.0f;
+                                motion->angle = 0.0f;
+                            }
+                            slot->state = 0;
+                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            if (prewarm != 0) {
+                                f32 age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                VU0_LOAD_VF(vf11, slot->pos);
+                                distance = motion->speed * age;
+                                distance += acceleration * age * age * 0.5f;
+                                if (distance < 0.0f) {
+                                    distance = 0.0f;
+                                }
+                                delta[0] = distance * motion->direction[0];
+                                delta[1] = distance * motion->direction[1];
+                                delta[2] = distance * motion->direction[2];
+                                delta[1] += gravity * age * age * 0.5f;
+                                VU0_LOAD_VF(vf10, delta);
+                                VU0_ADD(vf10, vf10, vf11);
+                                VU0_STORE_VF(vf10, slot->pos);
+                                slot->state = (s32)age;
+                            }
+                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            slot->scale *= motion->scaleMultiplier;
+                            slot->angle *= motion->angleMultiplier;
+                            slot->angle += motion->angle;
+                            if (prewarm != 0) {
+                                fileCopyAndInvalidateSlotGroup(record, slot);
+                                slot->state++;
+                            }
+                            toSpawn--;
+                        }
+                    } else {
+                        f32 age;
+                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        VU0_LOAD_VF(vf11, slot->pos);
+                        age = (f32)frame;
+                        distance = motion->speed + acceleration * age;
+                        if (distance < 0.0f) {
+                            distance = 0.0f;
+                        }
+                        delta[0] = distance * motion->direction[0];
+                        delta[1] = distance * motion->direction[1];
+                        delta[2] = distance * motion->direction[2];
+                        delta[1] += gravity * age;
+                        VU0_LOAD_VF(vf10, delta);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, slot->pos);
+                        fileSampleKeyTracks(slot, keys, frame, previousPosition);
+                        slot->scale *= motion->scaleMultiplier;
+                        slot->angle *= motion->angleMultiplier;
+                        slot->angle += motion->angle;
+                        func_002D7B58(record, slot);
+                        slot->state = frame + 1;
+                    }
+                }
+                motion++;
+                slot++;
+                i++;
+            } while (i < count);
+        }
+    }
+}
 
 void effLoadObjScaleParamsA(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
@@ -5604,7 +5825,7 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     rec->handle = handle;
     rec->flags = 0;
     rec->references = 0;
-    rec->unk14 = 0;
+    rec->spawnRemainder = 0.0f;
     memcpy(rec->data0, src, dataBytes);
     memcpy(rec->data1, src, dataBytes);
     vec = rec->data0;
@@ -5665,4 +5886,3 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E18);
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E20);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E28);
-

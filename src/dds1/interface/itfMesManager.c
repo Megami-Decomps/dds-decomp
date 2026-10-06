@@ -28,13 +28,6 @@ typedef struct ItfMesSub {
 typedef struct FrFontGlyph FrFontGlyph;
 typedef struct ItfMesWindowRec ItfMesWindowRec;
 
-typedef struct ItfMesPanelPosition {
-    u8 pad0[0x10];
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} ItfMesPanelPosition;
 
 /* Block at ItfMesState +0x14. */
 typedef struct ItfMesBlk14 {
@@ -79,7 +72,7 @@ typedef struct ItfMesBlk40 {
 /* Block at ItfMesState +0xA4. */
 typedef struct ItfMesBlkA4 {
     u8 unk0[4];          /* +0x0 */
-    ItfMesPanelPosition *unk4; /* +0x4: released by itfMesSetWindowPageAndRefresh */
+    UiSprite *unk4; /* +0x4: placement initializer stores the constructed sprite here. */
     u32 panelHandle;       /* +0x8: panel handle */
     s32 offsetLeft;      /* +0xC */
     s32 offsetTop;       /* +0x10 */
@@ -1187,7 +1180,7 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A14B0);
 
 s32 func_0019CCD8(void) {
     ItfMesBlkA4 *panel;
-    ItfMesPanelPosition *panelPosition;
+    UiSprite *panelSprite;
     s32 *position;
     s32 packetList;
     s32 item;
@@ -1270,8 +1263,8 @@ s32 func_0019CCD8(void) {
     }
 
     positionFormat = "( %3d,%3d )";
-    panelPosition = panel->unk4;
-    position = &panelPosition->left;
+    panelSprite = panel->unk4;
+    position = &panelSprite->left;
     sdfAppendPacket(packetList,
                     sdfCreateFormattedSifCommand(0x7E00, 0x7A00, 0xFFFFF0, 0,
                                                  positionFormat, position[0] >> 4,

@@ -3,6 +3,18 @@
 
 #include "common.h"
 
+struct BtlTask;
+
+/* Both fldInitializeSceneObject constructors clear one 0x30-byte allocation.
+ * Its final two pointers refer to the owning task's command work and task;
+ * the state word alone is not a complete scene-object allocation. */
+typedef struct BattleSceneObject {
+    s32 state;
+    u8 pad04[0x24];
+    s32 *commandData; /* +0x28: points to the owning task's +0x20 result/work. */
+    struct BtlTask *owner; /* +0x2C */
+} BattleSceneObject;
+
 /* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
  * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */
 typedef struct BattleCmdPanelSlot {
