@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 
 typedef struct WorldResourceOwner {
     u8 pad00[0x18];
@@ -58,7 +59,7 @@ typedef struct InnerVecObj {
     u8 pad60[4];
     u32 unk64;
     u8 pad68[0xC];
-    u32 handle74;
+    ObjBase *unk74;
     void *extra78;
 } InnerVecObj;
 
@@ -69,7 +70,7 @@ u32 dds3InitializeInnerVectorEffectObject(WorldResourceOwner *object) {
     effObjInnerCreate();
     obj = (InnerVecObj *)sdfAllocSizeClassBlock(0x7C);
     object->resource = (u32 *)obj;
-    obj->handle74 = dds3CreateSlotResourceState(object);
+    obj->unk74 = dds3CreateSlotResourceState(object);
     dds3SetObjectFlags(object, 0x62);
     obj->unk64 = 0;
     obj->pos00 = 0.7f;

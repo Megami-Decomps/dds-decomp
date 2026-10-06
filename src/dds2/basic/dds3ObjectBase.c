@@ -22,7 +22,6 @@ void dds3SetSlotKey(void *arg0, void *arg1);
 
 void dds3ReplaceObjectResource(void *arg0);
 
-extern AdminWork *dds3GetObjectOwnedHandle();
 
 void mdlDestroyContext(s32 arg0);
 void evtReleaseUnitTransitionWork(void *arg0);
@@ -34,19 +33,6 @@ void dds3DestroyWorldIndexNode(u32 node);
 void sdfReleaseChipBlock(void *block);
 void dds3ReleaseObjectBaseResources(World *world);
 
-typedef struct ObjBaseFull {
-    u32 flags;
-    u32 worldIndexNode;
-    u32 resourceState;
-    u32 resourceHandle;
-    void *slots[8];
-    void *extData;
-    s32 devSlot; /* 0x34: released by sdfReleaseDevSlot */
-    void *motion; /* 0x38: released by sdfDestroyMotion */
-    s32 mode;    /* 0x3C */
-    f32 weight;  /* 0x40 */
-    u32 unk44;
-} ObjBaseFull;
 
 #define DDS3_OBJECT_SLOT_COUNT 8
 #define DDS3_OBJECT_WORLD_SLOT_LIMIT 3
@@ -59,7 +45,7 @@ typedef struct ObjBaseFull {
 
 /* Process the owner's entry in the auxiliary handler index, destroy world nodes
  * in slots 1/2, release owned resources/devices, then free the index and base. */
-void dds3DestroyObjectBase(ObjBaseFull *base) {
+void dds3DestroyObjectBase(ObjBase *base) {
     void *owner;
     void *handler;
     s32 slotIndex;
@@ -90,7 +76,7 @@ void dds3DestroyObjectBase(ObjBaseFull *base) {
 void dds3SetObjectFlags(u32 unused, u32 mask) {
     ObjBase *base;
 
-    base = (ObjBase *)dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle();
     base->flags = base->flags | mask;
 }
 
@@ -98,7 +84,7 @@ void dds3SetObjectFlags(u32 unused, u32 mask) {
 void dds3ClearObjectFlags(u32 unused, u32 mask) {
     ObjBase *base;
 
-    base = (ObjBase *)dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle();
     base->flags = base->flags & ~mask;
 }
 
@@ -106,7 +92,7 @@ void dds3ClearObjectFlags(u32 unused, u32 mask) {
 u8 dds3TestObjectFlags(u32 unused, u32 mask) {
     ObjBase *base;
 
-    base = (ObjBase *)dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle();
     return (base->flags & mask) != 0;
 }
 
@@ -115,14 +101,14 @@ u8 dds3TestObjectFlags(u32 unused, u32 mask) {
 void dds3SetExtData(void *object, void *extensionData) {
     ObjBase *base;
 
-    base = (ObjBase *)dds3GetObjectOwnedHandle(object);
+    base = dds3GetObjectOwnedHandle(object);
     dds3GetExtData(object);
     base->extData = extensionData;
 }
 
 /* Return the stored extension pointer; no copy or ownership change. */
 void *dds3GetExtData(void) {
-    return ((ObjBase *)dds3GetObjectOwnedHandle())->extData;
+    return dds3GetObjectOwnedHandle()->extData;
 }
 
 /* Exchange the slot selected by the data kind; NULL data leaves every slot alone. */
@@ -138,36 +124,36 @@ void *dds3ExchangeSlot(void *object, void *slotData, s32 slotIndex) {
     void *previousData;
 
     previousData = dds3GetSlot(object, slotIndex);
-    ((ObjBase *)dds3GetObjectOwnedHandle(object))->slots[slotIndex] = slotData;
+    dds3GetObjectOwnedHandle(object)->slots[slotIndex] = slotData;
     return previousData;
 }
 
 /* Read an indexed slot; the caller supplies a valid index. */
 void *dds3GetSlot(void *object, s32 slotIndex) {
-    return ((ObjBase *)dds3GetObjectOwnedHandle(object))->slots[slotIndex];
+    return dds3GetObjectOwnedHandle(object)->slots[slotIndex];
 }
 
 /* Return the world-index node word also used when destroying the full base. */
 u32 dds3GetObjectIndexNode(void) {
     ObjBase *base;
 
-    base = (ObjBase *)dds3GetObjectOwnedHandle();
-    return base->unk4;
+    base = dds3GetObjectOwnedHandle();
+    return base->worldIndexNode;
 }
 
 /* Return the primary resource-handle word, whose interpretation depends on state. */
 u32 dds3GetObjectBaseResourceHandle(void) {
-    return ((ObjBase *)dds3GetObjectOwnedHandle())->unkC;
+    return dds3GetObjectOwnedHandle()->resourceHandle;
 }
 
 /* A nonzero handle releases model/context state (0) or device/motion state (1),
  * then clears the handle and marks state 3. Other states skip backend release;
  * an absent handle leaves state untouched, and the stored motion pointer remains. */
 void dds3ReleaseObjectBaseResources(World *world) {
-    ObjBaseFull *base;
+    ObjBase *base;
     WorldInfo *info;
 
-    base = (ObjBaseFull *)dds3GetObjectOwnedHandle(world);
+    base = dds3GetObjectOwnedHandle(world);
     if (base->resourceHandle != 0) {
         if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
             if (base->resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
@@ -197,12 +183,12 @@ extern void dds3LoadOrBuildObjectMatrix(u8 *object);
 extern void sdfModelUpdateRootTransforms(void *model, s32 frame);
 
 void func_00112168(void *object) {
-    ObjBaseFull *base;
+    ObjBase *base;
     void *slot;
     void *motion;
     void *model;
 
-    base = (ObjBaseFull *)dds3GetObjectOwnedHandle(object);
+    base = dds3GetObjectOwnedHandle(object);
     slot = dds3GetSlot(object, 3);
     model = (void *)evtCreateModelFromObject(slot);
     motion = (void *)evtAttachScriptToObject(slot, model);
@@ -218,17 +204,11 @@ void func_00112168(void *object) {
     base->unk44 = 0;
 }
 
-/* Mode word and blend weight at the end of ObjBase (0x3C / 0x40). */
-typedef struct ObjMode {
-    u8 pad00[0x3C];
-    s32 mode;    /* 0x3C */
-    f32 weight;  /* 0x40 */
-} ObjMode;
 
 /* Modes 0, 4 and 5 use weight 1; the other valid modes use 0.
  * Values outside 0..6 leave both the current mode and weight unchanged. */
 void dds3SetObjectModeAndDefaultWeight(void *object, u32 requestedMode) {
-    ObjMode *base = (ObjMode *)dds3GetObjectOwnedHandle(object);
+    ObjBase *base = dds3GetObjectOwnedHandle(object);
 
     switch (requestedMode) {
     case 0:
@@ -299,7 +279,7 @@ void func_00112328(void *object) {
     ObjRenderContext *context;
     ObjRenderContextInner *inner;
 
-    base = (ObjBase *)dds3GetObjectOwnedHandle(object);
+    base = dds3GetObjectOwnedHandle(object);
     evtSetDrawSurfaceIndex(0x4A);
     evtSubmitPrimaryAlphaBlendMode(0);
     func_00108D80();
@@ -313,7 +293,7 @@ void func_00112328(void *object) {
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     func_00108D80();
 
-    context = (ObjRenderContext *)base->unkC;
+    context = (ObjRenderContext *)base->resourceHandle;
     inner = context->inner;
     inner->flags19 |= 0x20;
     mdlProcessContextNodesAndTransforms(context, D_00380818);

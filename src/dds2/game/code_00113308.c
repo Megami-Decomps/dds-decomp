@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "dds3obj.h"
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
@@ -16,16 +17,12 @@ typedef struct EffFollowRec {
     s16 kind;    /* 0xAC */
 } EffFollowRec;
 
-typedef struct EffModelHolder {
-    u8 pad00[0xC];
-    void *model; /* 0x0C */
-} EffModelHolder;
 
 typedef struct EffectObjectData {
-    u32 handle;
+    ObjBase *handle;
     u32 word04;
     EffFollowRec *transitionWork; /* 0x08: object transition work */
-    EffModelHolder *modelHolder; /* 0x0C: effect model holder */
+    ObjBase *modelHolder; /* 0x0C: owned base retains the model resource. */
     s32 activeId;
     u32 word14;
     u32 word18;
@@ -41,7 +38,7 @@ typedef struct EffectObjectData {
 } EffectObjectData;
 
 typedef struct EffectTransformData {
-    void *resourceState;
+    ObjBase *resourceState;
     u32 flags;
     u32 opacityMode;
     s32 activeId;
@@ -74,11 +71,10 @@ extern void effObjInnerCreate();
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void *dds3CreateSlotResourceState();
 extern void dds3SetObjectFlags(EffectObject *, s32);
 
 u32 dds3GetEffectDataHandle(EffectObject *object) {
-    return object->data->handle;
+    return (u32)object->data->handle;
 }
 
 u32 effObjGetTransitionWork(EffectObject *object) {
@@ -226,7 +222,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
     object->data = work;
     memset(work, 0, sizeof(EffectObjectData));
     data = object->data;
-    data->modelHolder = (EffModelHolder *)dds3CreateSlotResourceState(object);
+    data->modelHolder = dds3CreateSlotResourceState(object);
     data->transitionWork = NULL;
     data->activeId = -1;
     data->word14 = -1;
@@ -313,7 +309,7 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
             effObjAddInnerFirstVec(obj, &node.vec40);
         }
     }
-    model = data->modelHolder->model;
+    model = (void *)data->modelHolder->resourceHandle;
     if (model != NULL && effObjTestNodeFlags(obj->source, 1) == 1) {
         effObjClearNodeFlags(obj->source, 1);
         if (data->transitionWork != 0) {
@@ -597,7 +593,7 @@ void func_00113FD0(void) {
 }
 
 void effObjSetModelHolder(EffectObject *object, u32 value) {
-    object->data->modelHolder = (EffModelHolder *)value;
+    object->data->modelHolder = (ObjBase *)value;
 }
 
 void func_00113FF8(EffectObject *object, u32 value) {
@@ -732,7 +728,7 @@ s32 evtInitializeEffectObjectData(EffectObject *obj) {
     obj->data = sdfAllocSizeClassBlock(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
-    data->handle = (u32)dds3CreateSlotResourceState(obj);
+    data->handle = dds3CreateSlotResourceState(obj);
     dds3SetObjectFlags(obj, 0x60);
     return 1;
 }
