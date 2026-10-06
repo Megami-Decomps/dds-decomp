@@ -33,7 +33,7 @@ extern s32 kwlnTaskIsRegistered(s32);
 extern void btlDebugPrintf(const char *, ...);
 extern void btlBossDebugPrintf(const char *format, ...);
 extern u32 effMiscRandMod(void *state, u32 modulus);
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 extern void btlDispatchStateHandler(void *, s32);
 
 
@@ -674,10 +674,6 @@ typedef struct BtlCursorAction {
     BtlCursorActionLink *link;
 } BtlCursorAction;
 
-typedef struct BtlRainWork {
-    u8 pad00[0x58C];
-    u32 soundTransitionTask;
-} BtlRainWork;
 
 typedef struct BattleVoiceEntry {
     u8 volume;
@@ -3216,7 +3212,7 @@ void btlFreeTask(s32 taskAddress) {
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
-s64 btlStartTask(void *taskObject) {
+u64 btlStartTask(void *taskObject) {
     u64 value = btlAdvanceRuntimeSequenceCounter();
     SoundTask *task = taskObject;
     void (*callback)(u32) = task->onStart;
@@ -8779,8 +8775,7 @@ void func_001EFD58(f32 *position, f32 *scale, s32 value) {
     evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->listener, value);
 }
 
-extern s32 effCreateSelectionFlagListFromWork(void *work);
-extern u8 D_0035F5F8[];
+extern SdfFlagListParams D_0035F5F8;
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4AD8);
 
@@ -8789,7 +8784,7 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4AF0);
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4B08);
 
 void btlCreateRainEffect(u32 kind, u32 arg) {
-    BtlRainWork *work = (BtlRainWork *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
 
     switch (kind) {
     case 0xDF:
@@ -8799,18 +8794,18 @@ void btlCreateRainEffect(u32 kind, u32 arg) {
         case 1:
         case 3:
         case 4:
-            work->soundTransitionTask = effCreateSelectionFlagListFromWork(D_0035F5F8);
+            work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_0035F5F8);
             break;
         }
         break;
     case 0xE0:
         if (arg == 5) {
-            work->soundTransitionTask = effCreateSelectionFlagListFromWork(D_0035F5F8);
+            work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_0035F5F8);
         }
         break;
     case 0xE1:
         if (arg == 5) {
-            work->soundTransitionTask = effCreateSelectionFlagListFromWork(D_0035F5F8);
+            work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_0035F5F8);
         }
         break;
     }
@@ -8824,12 +8819,12 @@ void btlDispatchLinkedEffectWhenBattleGatesClear(void) {
         return;
     }
     {
-        s32 context = btlGetRuntime();
-        if (*(u32 *)(context + 0x1F8) & 0x20) {
+        BtlState *context = (BtlState *)btlGetRuntime();
+        if (context->commandRestrictFlags & 0x20) {
             return;
         }
-        if (*(u32 *)(context + 0x58C) != 0) {
-            effUpdateAndDrawSelectionEntries(*(u32 *)(context + 0x58C));
+        if (context->soundTransitionTask != 0) {
+            effUpdateAndDrawSelectionEntries(context->soundTransitionTask);
         }
     }
 }
@@ -8837,11 +8832,11 @@ void btlDispatchLinkedEffectWhenBattleGatesClear(void) {
 extern char D_003A4B40[]; /* "btl:rain exit\n" */
 
 void btlStopRainSoundTransition(void) {
-    s32 context = btlGetRuntime();
-    if (*(u32 *)(context + 0x58C) != 0) {
+    BtlState *context = (BtlState *)btlGetRuntime();
+    if (context->soundTransitionTask != 0) {
         btlBossDebugPrintf(D_003A4B40);
-        effReleaseSelectionFlagList(*(u32 *)(context + 0x58C));
-        *(u32 *)(context + 0x58C) = 0;
+        effReleaseSelectionFlagList(context->soundTransitionTask);
+        context->soundTransitionTask = 0;
     }
 }
 
