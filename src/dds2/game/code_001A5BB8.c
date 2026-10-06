@@ -1991,23 +1991,23 @@ s8 btlGetActorIndexedSignedValue(UiObject *object, s32 index) {
     return *(s8 *)(datCommandSelectors + index * 2);
 }
 
-extern void btlResolveUnitValueWithOverride();
+extern s32 btlResolveUnitValueWithOverride(s32, s32);
 
-void func_001ABF50(s32 battler) {
-    btlResolveUnitValueWithOverride(battler + 0x120);
+s32 func_001ABF50(BtlUnit *battler, s32 element) {
+    return btlResolveUnitValueWithOverride((s32)&battler->statBits, element);
 }
 
-struct DatUnitStatus;
-extern s32 datGetEffectiveAffinity(struct DatUnitStatus *, s32);
+extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 
-void btlResolveUnitValueWithOverride(s32 arg0, s32 arg1) {
+s32 btlResolveUnitValueWithOverride(s32 statusAddress, s32 element) {
     s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x6B8);
     if (hook != 0) {
-        if (hook(arg0, arg1) != -1) {
-            return;
+        s32 value = hook(statusAddress, element);
+        if (value != -1) {
+            return value;
         }
     }
-    datGetEffectiveAffinity((struct DatUnitStatus *)arg0, arg1);
+    return datGetEffectiveAffinity((DatPartyRecord *)statusAddress, element);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
@@ -2086,8 +2086,10 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     return mask;
 }
 
-void func_001AD090(void) {
-    datFlagToElementIndex();
+extern s32 datFlagToElementIndex(s32);
+
+s32 func_001AD090(s32 flag) {
+    return datFlagToElementIndex(flag);
 }
 
 extern s32 datUnitHasSkill();

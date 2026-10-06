@@ -1600,7 +1600,7 @@ extern s32 *D_00435DDC;
 extern s32 *D_00435DFC;
 extern char D_00436EE8[];
 extern char D_00436EF0[];
-extern s32 func_001ABF50();
+extern s32 func_001ABF50(BtlUnit *, s32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern void evtSetDrawSurfaceIndex(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);

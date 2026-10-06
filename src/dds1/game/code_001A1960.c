@@ -476,12 +476,13 @@ s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
     return *(s8 *)(datCommandSelectors + index * 2);
 }
 
-void func_001A2F50(s32 arg0) {
-    btlResolveUnitValueWithOverride(arg0 + 0x120);
+extern s32 btlResolveUnitValueWithOverride(s32, s32);
+
+s32 func_001A2F50(BtlUnit *battler, s32 element) {
+    return btlResolveUnitValueWithOverride((s32)&battler->statBits, element);
 }
 
-struct DatUnitStatus;
-extern s32 datGetEffectiveAffinity(struct DatUnitStatus *, s32);
+extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 
 s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
     s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x670);
@@ -491,7 +492,7 @@ s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
             return result;
         }
     }
-    return datGetEffectiveAffinity((struct DatUnitStatus *)object, value);
+    return datGetEffectiveAffinity((DatPartyRecord *)object, value);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
