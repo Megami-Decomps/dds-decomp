@@ -1404,7 +1404,33 @@ s32 btlCheckScenePartyLevelThreshold(s32 sceneIndex) {
     return meetsThreshold;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011CAB0);
+/* Reuse an active interval, or seed one for a nonempty encounter group. */
+s32 func_0011CAB0(s32 index) {
+    s32 variant;
+    s32 total;
+    s32 i;
+    s32 interval;
+    if (index == 0) {
+        return 0;
+    }
+    variant = func_0011C790(index);
+    total = 0;
+    for (i = 0; i < 20; i++) {
+        total += D_003BAA3C[index].groups[variant].entries[i].weight;
+    }
+    if (total == 0) {
+        return 0;
+    }
+    if (D_003BAAB8 > 0) {
+        return D_003BAAB8;
+    }
+    interval = D_003BAA3C[index].groups[variant].interval;
+    if (interval <= 0) {
+        return 0;
+    }
+    D_003BAAB8 = effMiscRandMod(0, interval * 2 - 32) + 16;
+    return D_003BAAB8;
+}
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011CB90);
 
