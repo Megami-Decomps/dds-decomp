@@ -34,6 +34,9 @@ extern u32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32,
 extern u32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
 extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, s32, s32, s32, s32);
+/* The SDK definition and its declarations use legacy K&R parameters. */
+extern void sdfSubmitGsTestOneRegisterPacket();
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 
 extern u32 mnuAllocateMantraPanelBurstPool(void);
 
@@ -140,10 +143,16 @@ extern u32 mnuMantraSpriteSlots[12];
 
 /* The panel pool allocates 48-byte records shared by animation and sprite controls. */
 typedef struct MantraPanelAnimation {
-    u32 flags;
-    u16 unk4;
-    u16 unk6;
-    u32 unk8;
+    union {
+        u32 flags;
+        struct {
+            u8 kind;
+            u8 control[3];
+        } tag;
+    };
+    s16 startDelay;
+    s16 endDelay;
+    s32 animationTicks;
     u16 x;
     u16 y;
     u32 visualParameters[3];
@@ -2762,11 +2771,22 @@ void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
 }
 
 
-typedef struct MantraPanelPool {
+typedef struct MantraPanelPool MantraPanelPool;
+typedef s32 (*MantraPanelDraw)(s32, s32, u32, s32,
+    MantraPanelPool *, MantraPanelAnimation *, u32);
+typedef void (*MantraPanelInit)(MantraPanelPool *, MantraPanelAnimation *);
+typedef void (*MantraPanelRelease)(MantraPanelAnimation *);
+
+/* Native creator reserves 974 entries per callback table before the slot array. */
+struct MantraPanelPool {
     u32 handle;
     MantraPanelAnimation *items;
     s32 count;
-} MantraPanelPool;
+    MantraPanelDraw draw[974];
+    MantraPanelInit init[974];
+    MantraPanelRelease release[974];
+    s32 unk2DB4;
+};
 
 MantraPanelAnimation *mnuFindFreePanelSlot(MantraPanelPool *, s8);
 
@@ -2781,10 +2801,10 @@ MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *pool, s32 id, s8 kind,
         return 0;
     }
     panel->flags = ((panel->flags | 0x08000100) & 0xFF87FFFF) | 0x300000;
-    *(s8 *)panel = kind;
-    panel->unk4 = x;
-    panel->unk6 = y;
-    panel->unk8 = w;
+    panel->tag.kind = kind;
+    panel->startDelay = x;
+    panel->endDelay = y;
+    panel->animationTicks = w;
     panel->flags = ((panel->flags & 0xFFFC03FF) | 0x400) & 0xEFFFFFFF;
     panel->transitionDelay = 0;
     panel->id = id;
@@ -2806,10 +2826,10 @@ MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *pool, s32 id, s8 kind,
         return 0;
     }
     panel->flags = ((panel->flags | 0x08000100) & 0xFF87FFFF) | 0x300000;
-    *(s8 *)panel = kind;
-    panel->unk4 = x;
-    panel->unk6 = y;
-    panel->unk8 = w;
+    panel->tag.kind = kind;
+    panel->startDelay = x;
+    panel->endDelay = y;
+    panel->animationTicks = w;
     panel->flags = (panel->flags & 0xFFFC03FF) | 0x10000400;
     panel->transitionDelay = 0;
     panel->id = id;
@@ -2913,7 +2933,71 @@ s32 mnuAdvanceMantraPanelAnim(s32 unused, MantraPanelAnimation *panel) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A198);
+/* Update slot lifetimes, then draw the active animations at the caller's alpha. */
+s32 func_0027A198(s16 x, s16 y, u32 flags, s32 alpha, MantraPanelPool *pool, u32 packet) {
+    MantraPanelAnimation *panel;
+    f32 opacity;
+    s32 i;
+
+    panel = pool->items;
+    for (i = 0; i < pool->count; i++, panel++) {
+        if ((panel->flags >> 8) & 1) {
+            switch ((panel->flags >> 10) & 0xFF) {
+            case 1:
+                if (panel->startDelay > 0) {
+                    panel->startDelay--;
+                }
+                if (panel->startDelay == 0) {
+                    pool->init[panel->tag.kind](pool, panel);
+                    panel->flags = ((panel->flags & 0xFFFC03FF) | 0x1800) & 0xF7FFFFFF;
+                }
+                break;
+            case 2:
+                if (panel->endDelay > 0) {
+                    panel->endDelay--;
+                } else if (panel->endDelay == 0) {
+                    pool->release[panel->tag.kind](panel);
+                    panel->flags &= ~0x100;
+                }
+                break;
+            }
+        }
+    }
+    opacity = alpha * 0.0078125f;
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, packet);
+    panel = pool->items;
+    for (i = 0; i < pool->count; i++, panel++) {
+        if (((panel->flags >> 27) & 1) == 0 && ((panel->flags >> 8) & 1)) {
+            if (((panel->flags >> 10) & 0xFF) != 5) {
+                if (((panel->flags >> 10) & 0xFF) == 6) {
+                    s16 drawX;
+                    s16 drawY;
+
+                    if (panel->animationTicks > 0) {
+                        panel->animationTicks--;
+                        if (panel->animationTicks == 0) {
+                            panel->flags = (panel->flags & 0xFFFC03FF) | 0x800;
+                        }
+                    }
+                    if (mnuAdvanceMantraPanelAnim((s32)pool, panel) != 0) {
+                        panel->flags = (panel->flags & 0xFFFC03FF) | 0x800;
+                    }
+                    /* Stored positions wrap as u16; rendering applies signed screen offsets. */
+                    drawX = panel->x;
+                    drawY = panel->y;
+                    if (pool->draw[panel->tag.kind](drawX + x, drawY + y, flags,
+                        panel->visualParameters[1] * opacity, pool, panel, packet) != 0) {
+                        panel->flags = (panel->flags & 0xFFFC03FF) | 0x800;
+                    }
+                }
+            } else {
+                panel->flags &= ~0x100;
+            }
+        }
+    }
+    return 0;
+}
 
 MantraPanelAnimation *mnuFindFreePanelSlot(MantraPanelPool *pool, s8 kind) {
     s32 start[14] = {0, 0xB0, 0x160, 0x210, 0x238, 0x260, 0x288, 0x2B0, 0x2C4, 0x2E2, 0x300, 0x30A, 0x314, 0x31E};
