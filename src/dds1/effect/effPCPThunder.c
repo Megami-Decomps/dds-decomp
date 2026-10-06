@@ -926,31 +926,44 @@ typedef struct EffFragmentResources {
     u32 *endColors;
 } EffFragmentResources;
 
-/* The native Bezier update advances the two floating states at +0x74/+0x78. */
+typedef struct EffBezierPoint { f32 x, y, z; } EffBezierPoint;
+typedef struct EffBezierSlot {
+    EffBezierPoint controlPoints[7];
+    u32 pointIndex;
+    f32 t;
+    f32 parameterStep;
+} EffBezierSlot;
+
+/* Two joined cubic segments followed by their stepping state. */
 typedef struct EffGroupSlot {
-    u8 pad00[0x10];
+    f32 position[4];
     s32 age;
     f32 scale;
     EffFragmentResources *resources;
-    u8 pad1C[0x54];
-    u32 unk70;
-    f32 unk74;
-    f32 unk78;
+    EffBezierSlot curve;
     void *node;
 } EffGroupSlot;
 
 typedef struct EffGroupParams {
-    u8 pad00[0x20];
+    f32 origin[4];
+    u32 mode;
+    f32 spreadX, spreadZ, height;
     u32 count;
-    u8 pad24[4];
+    s32 curveFrames;
     s32 unk28;
-    u8 pad2C[0xC];
+    u32 unk2C;
+    s32 fadeFrames;
+    f32 width;
     s32 unk38;
     s32 unk3C;
     u32 palette[4];
 } EffGroupParams;
 
 /* Kind-two placement is 0x30 bytes; its four palette colors are separate. */
+typedef char EffBezierSlotSizeCheck[sizeof(EffBezierSlot) == 0x60 ? 1 : -1];
+typedef char EffGroupSlotSizeCheck[sizeof(EffGroupSlot) == 0x80 ? 1 : -1];
+typedef char EffGroupParamsSizeCheck[sizeof(EffGroupParams) == 0x50 ? 1 : -1];
+
 typedef struct EffPCPEventPlace {
     f32 unk00[7];
     f32 unk1C;
@@ -1030,9 +1043,9 @@ void *eventParams;
         func_00169B90(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
-        slot->unk70 = 0;
-        slot->unk74 = 0;
-        slot->unk78 = 0;
+        slot->curve.pointIndex = 0;
+        slot->curve.t = 0;
+        slot->curve.parameterStep = 0;
         slot->node = effEventCreate((u32)work->owner, 2, &place);
     }
     return work;
@@ -1098,9 +1111,9 @@ EffGroup *func_00167EC0(EffGroup *src) {
         func_00169B90(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
-        slot->unk70 = 0;
-        slot->unk74 = 0;
-        slot->unk78 = 0;
+        slot->curve.pointIndex = 0;
+        slot->curve.t = 0;
+        slot->curve.parameterStep = 0;
         slot->node = effEventCreate((u32)work->owner, 2, &place);
     }
     return work;
@@ -1131,7 +1144,460 @@ void effReleaseGroupSlotsAndResources(EffGroup *group) {
     sdfReleaseResourceAllocation(group->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001681C0);
+struct BtlUnit;
+struct RwV3d;
+struct EffectColorState;
+/* The event holder consumes the same packed 0x30-byte record as effEvent.c. */
+typedef struct {
+    u8 bytes[0x30];
+} __attribute__((packed)) FileRecordHeader;
+
+extern u32 func_001619E8(void);
+extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLFieldColorGetVariantSelector(void);
+extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
+extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
+extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
+extern s32 effStepBezierSlotSegment(EffBezierSlot *, f32 *);
+extern void effInitializeColorState(struct EffectColorState *);
+extern void func_00169D78(EffFragmentResources *, u128 *);
+extern f32 sdfAtan2(f32, f32);
+extern void func_002E7F20(f32, f32, f32);
+extern void effEventCopyFileRecordHeader(FileRecordHeader *, const FileRecordHeader *);
+extern void func_00190328(void *);
+void effThunderDrawHistoryAndEndCap(EffFragmentResources *);
+
+/* Each slot owns two joined cubic segments, a ribbon history and an end cap.
+ * VU helpers use the SDF vf10/vf11/vf12 register convention; callees returning
+ * a vector leave it in vf10. Keep the SDK-form stores paired with their
+ * checked C readback; see docs/thunder-bezier-matching.md for the limits.
+ */
+typedef f32 EffThunderVector[4] __attribute__((aligned(16)));
+
+void func_001681C0(EffGroup *group) {
+    EffPCPEventPlace place __attribute__((aligned(16)));
+    EffThunderVector start;
+    EffThunderVector direction;
+    EffThunderVector offset;
+    EffThunderVector end;
+    EffThunderVector point;
+    EffThunderVector origin;
+    EffThunderVector previous;
+    EffThunderVector cameraDirection;
+    EffThunderVector width;
+    EffThunderVector delta;
+    EffThunderVector ribbon[3];
+    EffThunderVector side;
+    EffThunderVector oppositeSide;
+    EffThunderVector tangent;
+    f32 distance, yOffset, zOffset, xOffset;
+    f32 along;
+    f32 spread;
+    f32 pullback;
+    u32 delayRange;
+    u32 i, j;
+    u32 count;
+    f32 curveFrames;
+    u32 subdivisions;
+    f32 fadeStep;
+    u32 mode;
+    u32 color;
+    EffGroupSlot *slot;
+    f32 (*cap)[4];
+
+    count = group->params.count;
+    curveFrames = group->params.curveFrames;
+    subdivisions = group->params.unk3C - 1;
+    fadeStep = 1.0f / group->params.fadeFrames;
+    delayRange = group->params.unk28;
+    mode = group->params.mode;
+    color = group->color;
+    slot = group->slots;
+    PCP_COPY_VECTOR(origin, group->params.origin);
+    place.unk00[4] = 0.0f;
+    place.unk00[5] = 0.0f;
+    place.unk00[6] = 0.0f;
+    place.unk1C = 1.0f;
+    place.unk20 = 100.0f;
+    place.unk24 = 100.0f;
+    place.unk28 = 1.0f;
+    if (func_001619E8()) {
+        u32 actor;
+        if (mode == 3) actor = effBTLFieldColorGetVariantSelector();
+        else actor = effBTLFieldColorGetOriginalSelector();
+        btlUnitGetMuzzlePosVU((struct BtlUnit *)actor);
+        VU0_STORE_VF_UNCLOBBERED(vf10, start);
+    } else {
+        start[0] = 0.0f;
+        start[1] = -80.0f;
+        start[2] = -400.0f;
+    }
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB_EXTENDED(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
+    VEC3_SPLAT(width, group->params.width * 0.5f);
+    for (i = 0; i < count; i++, slot++) {
+        if (slot->curve.parameterStep == 0.0f) {
+            yOffset = -group->params.height * effMiscRandUnitFloat(D_0034DF38);
+            zOffset = group->params.spreadZ * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
+            xOffset = group->params.spreadX * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
+            end[0] = origin[0] + xOffset;
+            end[1] = origin[1] - yOffset;
+            end[2] = origin[2] + zOffset;
+            VU0_LOAD_VF(vf10, end);
+            VU0_LOAD_VF(vf11, start);
+            VU0_SUB_EXTENDED(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(distance);
+            VU0_NORMALIZE_VF10_EXTENDED();
+            VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+            switch (mode) {
+            case 0:
+                offset[0] = ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
+                offset[1] = -effMiscRandUnitFloat(D_0034DF38);
+                offset[2] = 0.0f;
+                VU0_LOAD_VF(vf10, offset);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)direction, ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f) * 0.5235987f);
+                spread = 50.0f;
+                slot->curve.controlPoints[0].x = offset[0] * spread + start[0];
+                slot->curve.controlPoints[0].y = offset[1] * spread + start[1];
+                slot->curve.controlPoints[0].z = offset[2] * spread + start[2];
+                if (slot->curve.controlPoints[0].y > -50.0f) slot->curve.controlPoints[0].y = -50.0f;
+                spread = 200.0f;
+                pullback = 150.0f;
+                slot->curve.controlPoints[1].x = (offset[0] * spread - direction[0] * pullback) + start[0];
+                slot->curve.controlPoints[1].y = (offset[1] * spread - direction[1] * pullback) + start[1];
+                slot->curve.controlPoints[1].z = (offset[2] * spread - direction[2] * pullback) + start[2];
+                if (slot->curve.controlPoints[1].y > -30.0f) slot->curve.controlPoints[1].y = -30.0f;
+                spread = 300.0f;
+                slot->curve.controlPoints[2].x = offset[0] * spread + start[0];
+                slot->curve.controlPoints[2].y = offset[1] * spread + start[1];
+                slot->curve.controlPoints[2].z = offset[2] * spread + start[2];
+                if (slot->curve.controlPoints[2].y > -20.0f) slot->curve.controlPoints[2].y = -20.0f;
+                along = distance * 0.25f;
+                spread = 200.0f;
+                VU0_LOAD_VF(vf10, offset);
+                VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+                slot->curve.controlPoints[3].x = spread * offset[0] + along * direction[0] + start[0];
+                slot->curve.controlPoints[3].y = spread * offset[1] + along * direction[1] + start[1];
+                slot->curve.controlPoints[3].z = spread * offset[2] + along * direction[2] + start[2];
+                if (slot->curve.controlPoints[3].y > -10.0f) slot->curve.controlPoints[3].y = -10.0f;
+                along = distance * 0.5f;
+                spread = 150.0f;
+                VU0_LOAD_VF(vf10, offset);
+                VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+                slot->curve.controlPoints[4].x = spread * offset[0] + along * direction[0] + start[0];
+                slot->curve.controlPoints[4].y = spread * offset[1] + along * direction[1] + start[1];
+                slot->curve.controlPoints[4].z = spread * offset[2] + along * direction[2] + start[2];
+                if (slot->curve.controlPoints[4].y > -10.0f) slot->curve.controlPoints[4].y = -10.0f;
+                along = distance * 0.75f;
+                spread = 65.0f;
+                VU0_LOAD_VF(vf10, offset);
+                VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+                slot->curve.controlPoints[5].x = spread * offset[0] + along * direction[0] + start[0];
+                slot->curve.controlPoints[5].y = spread * offset[1] + along * direction[1] + start[1];
+                slot->curve.controlPoints[5].z = spread * offset[2] + along * direction[2] + start[2];
+                if (slot->curve.controlPoints[5].y > -10.0f) slot->curve.controlPoints[5].y = -10.0f;
+                along = distance;
+                slot->curve.controlPoints[6].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[6].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[6].z = along * direction[2] + start[2];
+                if (slot->curve.controlPoints[6].y > -10.0f) slot->curve.controlPoints[6].y = -10.0f;
+                break;
+            case 1:
+                offset[0] = ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f) * 0.5f;
+                offset[1] = -effMiscRandUnitFloat(D_0034DF38);
+                offset[2] = 0.0f;
+                VU0_LOAD_VF(vf10, offset);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+                spread = 25.0f;
+                slot->curve.controlPoints[0].x = offset[0] * spread + start[0];
+                slot->curve.controlPoints[0].y = offset[1] * spread + start[1];
+                slot->curve.controlPoints[0].z = offset[2] * spread + start[2];
+                spread = 100.0f;
+                pullback = 150.0f;
+                slot->curve.controlPoints[1].x = (offset[0] * spread - direction[0] * pullback) + start[0];
+                slot->curve.controlPoints[1].y = (offset[1] * spread - direction[1] * pullback) + start[1];
+                slot->curve.controlPoints[1].z = (offset[2] * spread - direction[2] * pullback) + start[2];
+                spread = 400.0f;
+                slot->curve.controlPoints[2].x = offset[0] * spread + start[0];
+                slot->curve.controlPoints[2].y = offset[1] * spread + start[1];
+                slot->curve.controlPoints[2].z = offset[2] * spread + start[2];
+                along = distance * 0.25f;
+                spread = 450.0f;
+                slot->curve.controlPoints[3].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[3].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[3].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.5f;
+                spread = 500.0f;
+                slot->curve.controlPoints[4].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[4].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[4].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.75f;
+                spread = 300.0f;
+                slot->curve.controlPoints[5].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[5].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[5].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance;
+                slot->curve.controlPoints[6].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[6].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[6].z = along * direction[2] + start[2];
+                break;
+            case 2:
+                offset[0] = ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
+                offset[1] = -effMiscRandUnitFloat(D_0034DF38);
+                offset[2] = 0.0f;
+                VU0_LOAD_VF(vf10, offset);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+                spread = 20.0f;
+                slot->curve.controlPoints[0].x = offset[0] * spread + start[0];
+                slot->curve.controlPoints[0].y = offset[1] * spread + start[1];
+                slot->curve.controlPoints[0].z = offset[2] * spread + start[2];
+                along = distance * 0.15f;
+                spread = 50.0f;
+                slot->curve.controlPoints[1].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[1].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[1].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.3f;
+                spread = 80.0f;
+                slot->curve.controlPoints[2].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[2].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[2].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.45f;
+                spread = 60.0f;
+                slot->curve.controlPoints[3].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[3].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[3].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.6f;
+                spread = 40.0f;
+                slot->curve.controlPoints[4].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[4].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[4].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.75f;
+                spread = 20.0f;
+                slot->curve.controlPoints[5].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[5].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[5].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance;
+                slot->curve.controlPoints[6].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[6].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[6].z = along * direction[2] + start[2];
+                break;
+            case 3:
+                offset[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+                offset[1] = -(effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f);
+                offset[2] = 0.0f;
+                VU0_LOAD_VF(vf10, offset);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+                spread = 25.0f;
+                slot->curve.controlPoints[0].x = offset[0] * spread + start[0];
+                slot->curve.controlPoints[0].y = offset[1] * spread + start[1];
+                slot->curve.controlPoints[0].z = offset[2] * spread + start[2];
+                spread = 100.0f;
+                pullback = 150.0f;
+                slot->curve.controlPoints[1].x = (offset[0] * spread - direction[0] * pullback) + start[0];
+                slot->curve.controlPoints[1].y = (offset[1] * spread - direction[1] * pullback) + start[1];
+                slot->curve.controlPoints[1].z = (offset[2] * spread - direction[2] * pullback) + start[2];
+                spread = 400.0f;
+                slot->curve.controlPoints[2].x = offset[0] * spread + start[0];
+                slot->curve.controlPoints[2].y = offset[1] * spread + start[1];
+                slot->curve.controlPoints[2].z = offset[2] * spread + start[2];
+                along = distance * 0.25f;
+                spread = 450.0f;
+                slot->curve.controlPoints[3].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[3].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[3].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.5f;
+                spread = 500.0f;
+                slot->curve.controlPoints[4].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[4].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[4].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance * 0.75f;
+                spread = 300.0f;
+                slot->curve.controlPoints[5].x = offset[0] * spread + along * direction[0] + start[0];
+                slot->curve.controlPoints[5].y = offset[1] * spread + along * direction[1] + start[1];
+                slot->curve.controlPoints[5].z = offset[2] * spread + along * direction[2] + start[2];
+                along = distance;
+                slot->curve.controlPoints[6].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[6].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[6].z = along * direction[2] + start[2];
+                break;
+            case 4:
+                along = distance * 0.14f;
+                slot->curve.controlPoints[0].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[0].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[0].z = along * direction[2] + start[2];
+                along = distance * 0.28f;
+                slot->curve.controlPoints[1].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[1].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[1].z = along * direction[2] + start[2];
+                along = distance * 0.42f;
+                slot->curve.controlPoints[2].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[2].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[2].z = along * direction[2] + start[2];
+                along = distance * 0.56f;
+                slot->curve.controlPoints[3].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[3].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[3].z = along * direction[2] + start[2];
+                along = distance * 0.7f;
+                slot->curve.controlPoints[4].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[4].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[4].z = along * direction[2] + start[2];
+                along = distance * 0.84f;
+                slot->curve.controlPoints[5].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[5].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[5].z = along * direction[2] + start[2];
+                along = distance;
+                slot->curve.controlPoints[6].x = along * direction[0] + start[0];
+                slot->curve.controlPoints[6].y = along * direction[1] + start[1];
+                slot->curve.controlPoints[6].z = along * direction[2] + start[2];
+                break;
+            }
+            slot->curve.pointIndex = 0;
+            slot->curve.t = 0.0f;
+            slot->curve.parameterStep = 3.0f / (curveFrames * (subdivisions + 1));
+            effStepBezierSlotSegment(&slot->curve, point);
+            slot->position[0] = point[0];
+            slot->position[1] = point[1];
+            slot->position[2] = point[2];
+            slot->age = -(effMiscRand(D_0034DF38) % delayRange);
+            effInitializeColorState((struct EffectColorState *)slot->resources);
+        } else if (slot->age++ >= 0) {
+            if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
+                if (slot->scale > fadeStep) {
+                    slot->scale -= fadeStep;
+                    slot->resources->color = ((u32)(slot->scale * 128.0f) << 24) | 0x808080;
+                    slot->resources->color = effMultiplyPackedColors(color, slot->resources->color);
+                } else {
+                    effInitializeColorState((struct EffectColorState *)slot->resources);
+                }
+            } else {
+                previous[0] = slot->position[0];
+                previous[1] = slot->position[1];
+                previous[2] = slot->position[2];
+                for (j = 0; j < subdivisions; j++) {
+                    effStepBezierSlotSegment(&slot->curve, point);
+                    VU0_LOAD_VF(vf10, point);
+                    VU0_MOVE_VF_EXTENDED(vf12, vf10);
+                    VU0_LOAD_VF(vf11, previous);
+                    VU0_SUB_EXTENDED(vf10, vf10, vf11);
+                    VU0_LOAD_VF(vf11, cameraDirection);
+                    VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+                    VU0_NORMALIZE_VF10_EXTENDED();
+                    VU0_LOAD_VF(vf11, width);
+                    VU0_MUL_EXTENDED(vf10, vf10, vf11);
+                    VU0_MOVE_VF_EXTENDED(vf2, vf10);
+                    VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                    VU0_MOVE_VF_EXTENDED(vf12, vf2);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, ribbon[1]);
+                    VU0_MOVE_VF_EXTENDED(vf11, vf10);
+                    VU0_ADD_EXTENDED(vf10, vf10, vf12);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, ribbon[0]);
+                    VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                    VU0_SUB_EXTENDED(vf11, vf11, vf10);
+                    VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
+                    PCP_COPY_VECTOR(previous, point);
+                    func_00169D78(slot->resources, (u128 *)ribbon);
+                }
+                effStepBezierSlotSegment(&slot->curve, point);
+                VU0_LOAD_VF(vf10, point);
+                VU0_MOVE_VF_EXTENDED(vf12, vf10);
+                VU0_LOAD_VF(vf11, previous);
+                VU0_SUB_EXTENDED(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_STORE_VF_UNCLOBBERED(vf10, tangent);
+                VU0_LOAD_VF(vf11, cameraDirection);
+                VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_STORE_VF_UNCLOBBERED(vf10, side);
+                VU0_LOAD_VF(vf11, width);
+                VU0_MUL_EXTENDED(vf10, vf10, vf11);
+                VU0_MOVE_VF_EXTENDED(vf2, vf10);
+                VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                VU0_MOVE_VF_EXTENDED(vf12, vf2);
+                VU0_STORE_VF_UNCLOBBERED(vf10, ribbon[1]);
+                VU0_MOVE_VF_EXTENDED(vf11, vf10);
+                VU0_ADD_EXTENDED(vf10, vf10, vf12);
+                VU0_STORE_VF_UNCLOBBERED(vf10, ribbon[0]);
+                VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                VU0_SUB_EXTENDED(vf11, vf11, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
+                func_00169D78(slot->resources, (u128 *)ribbon);
+                cap = (f32 (*)[4])slot->resources->endPoints;
+                slot->position[0] = point[0];
+                slot->position[1] = point[1];
+                slot->position[2] = point[2];
+                PCP_COPY_VECTOR(cap[0], ribbon[1]);
+                PCP_COPY_VECTOR(cap[1], ribbon[0]);
+                PCP_COPY_VECTOR(cap[7], ribbon[2]);
+                oppositeSide[0] = -side[0];
+                oppositeSide[1] = -side[1];
+                oppositeSide[2] = -side[2];
+                oppositeSide[3] = -side[3];
+                VU0_LOAD_VF(vf12, ribbon[1]);
+                VU0_LOAD_VF(vf10, side);
+                VU0_LOAD_VF(vf11, tangent);
+                VU0_LERP_VF10(0.3333333333f);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_LOAD_VF(vf11, width);
+                VU0_MUL_EXTENDED(vf10, vf10, vf11);
+                VU0_ADD_EXTENDED(vf10, vf10, vf12);
+                VU0_STORE_VF_UNCLOBBERED(vf10, cap[2]);
+                VU0_LOAD_VF(vf10, side);
+                VU0_LOAD_VF(vf11, tangent);
+                VU0_LERP_VF10(0.6666666667f);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_LOAD_VF(vf11, width);
+                VU0_MUL_EXTENDED(vf10, vf10, vf11);
+                VU0_ADD_EXTENDED(vf10, vf10, vf12);
+                VU0_STORE_VF_UNCLOBBERED(vf10, cap[3]);
+                VU0_LOAD_VF(vf10, tangent);
+                VU0_MUL_EXTENDED(vf10, vf10, vf11);
+                VU0_ADD_EXTENDED(vf10, vf10, vf12);
+                VU0_STORE_VF_UNCLOBBERED(vf10, cap[4]);
+                VU0_LOAD_VF(vf10, oppositeSide);
+                VU0_LOAD_VF(vf11, tangent);
+                VU0_LERP_VF10(0.6666666667f);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_LOAD_VF(vf11, width);
+                VU0_MUL_EXTENDED(vf10, vf10, vf11);
+                VU0_ADD_EXTENDED(vf10, vf10, vf12);
+                VU0_STORE_VF_UNCLOBBERED(vf10, cap[5]);
+                VU0_LOAD_VF(vf10, oppositeSide);
+                VU0_LOAD_VF(vf11, tangent);
+                VU0_LERP_VF10(0.3333333333f);
+                VU0_NORMALIZE_VF10_EXTENDED();
+                VU0_LOAD_VF(vf11, width);
+                VU0_MUL_EXTENDED(vf10, vf10, vf11);
+                VU0_ADD_EXTENDED(vf10, vf10, vf12);
+                VU0_STORE_VF_UNCLOBBERED(vf10, cap[6]);
+            }
+            if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
+                place.unk00[0] = slot->position[0];
+                place.unk00[1] = slot->position[1];
+                place.unk00[2] = slot->position[2];
+                place.unk00[3] = 0.0f;
+                place.color = color;
+                delta[0] = start[0] - place.unk00[0];
+                delta[2] = start[2] - place.unk00[2];
+                func_002E7F20(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
+                VU0_STORE_VF_UNCLOBBERED(vf10, &place.unk00[4]);
+                effEventCopyFileRecordHeader((FileRecordHeader *)slot->node, (const FileRecordHeader *)&place);
+                func_00190328(slot->node);
+            }
+            effThunderDrawHistoryAndEndCap(slot->resources);
+        }
+    }
+}
+
 
 void func_00169928(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
