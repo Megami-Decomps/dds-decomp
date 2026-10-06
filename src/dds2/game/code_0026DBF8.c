@@ -184,10 +184,10 @@ typedef struct MantraRecordPanelState {
 } MantraRecordPanelState;
 
 typedef struct MantraDisplayNode {
-    u8 pad00[4];
+    s32 frame;
     u32 fromValue;
     u32 toValue;
-    u16 transitionKind;
+    s16 transitionKind;
     u8 pad0E[2];
     struct MantraDisplayNode *next;
 } MantraDisplayNode;
