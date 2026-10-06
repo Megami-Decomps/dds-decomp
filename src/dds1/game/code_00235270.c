@@ -9,7 +9,7 @@
 #include "evt_unit.h"
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
-extern void func_00237428();
+extern s32 func_00237428();
 
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
@@ -319,7 +319,51 @@ void evtCreateFrameVariableTask(void) {
     kwlnTaskCreate("FrameVar", 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00235598);
+typedef s32 (*EvtMenuHeaderFn)();
+typedef void (*EvtMenuRowFn)();
+extern u32 D_003BC040;
+extern char D_003BC048[];
+extern char D_003BC050[];
+
+/* Draw a framed debug menu: the optional header returns how many rows it used, the row callback fills the rest,
+ * and blinking scroll markers appear above/below when entries precede `first` or follow the last drawn one. */
+void func_00235598(u32 list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, u8 *data,
+                   EvtMenuHeaderFn header, EvtMenuRowFn row) {
+    s32 i = 0;
+    s32 textX;
+    s32 textY;
+    s32 index;
+
+    kwlnDrawSpriteCell(list, x, y, width, rows);
+    textX = (x << 4) + 0x7000;
+    textY = (y << 3) + 0x7900;
+    if (header != NULL) {
+        s32 headerRows = header(list, textX, textY, data);
+
+        textY += headerRows * 96;
+        i = headerRows;
+    }
+    index = first;
+    for (; i < rows; i++) {
+        if (row != NULL) {
+            row(list, textX, textY, index, data);
+            textY += 96;
+            index++;
+        }
+    }
+    if (D_003BC040 & 0x10) {
+        textY = ((y - 10) << 3) + 0x7900;
+        textX = ((x + 5 * width + 6) << 4) + 0x7000;
+        if (first > 0) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC048));
+        }
+        textY = ((y + 12 * rows - 2) << 3) + 0x7900;
+        if (index < total) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC050));
+        }
+    }
+    D_003BC040++;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADDE0);
 
@@ -332,7 +376,6 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_002357B8);
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
-extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, void *, void *);
 extern s8 D_00324510[];
 extern void func_002357B8();
 
