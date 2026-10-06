@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dat_state.h"
 #include "mnu_list.h"
+#include "mnu_shop.h"
 
 extern void func_00295D38();
 
@@ -10,44 +11,8 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
 extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
 
-struct MenuSprite;
-struct MenuIconSprites;
 
-typedef struct MenuIconState {
-    u32 kind;
-    u32 unk4;
-    s32 count;
-    struct MenuSprite *sprite[6];
-    u32 left;
-    u32 top;
-    u32 right;
-    u32 bottom;
-    s32 fade;
-} MenuIconState;
 
-typedef struct MenuWindowContainer {
-    s32 id;
-    u32 flags;
-    s32 originX;
-    s32 originY;
-    s32 width;
-    s32 height;
-    struct MenuList *list;
-    s32 field1C;
-    s32 sprite20;
-    s32 param24;
-    s32 param28;
-    struct {
-        u32 sprite;
-        u32 parameter;
-    } decorations[3];
-    u32 decorationX[3];
-    s32 scale50;
-    s32 scale54;
-    MenuIconState panel;
-    struct MenuIconSprites *resource;
-    u32 state;
-} MenuWindowContainer;
 
 /* The camp constructor clears 0x38C bytes, including both panel work areas. */
 typedef struct CampMenuContext {

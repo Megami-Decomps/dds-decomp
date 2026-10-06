@@ -1,4 +1,6 @@
 #include "mnu.h"
+#include "mnu_list.h"
+#include "mnu_shop.h"
 #include "dat_state.h"
 
 extern s32 kwlnTaskGetUserValue();
@@ -17,32 +19,13 @@ extern s32 mnuUseFieldSkillOnParty(s32, s32, s32);
 extern u32 mnuMapPadMaskToFlags(s32);
 extern s32 func_002A9AB8(s32);
 extern void mnuSetPopupEntry(s32, s32);
-extern void func_002B9808(s32);
-extern void mnuRetreatWindowListSelection(s32);
-extern void mnuAdvanceWindowListSelection(s32);
-extern void mnuClearWindowPanelTransitionFlag(s32);
-extern void mnuPlayInputSound(s32, u32, s32);
+extern void func_002B9808(MenuWindowContainer *);
+extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
+extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_003E6F38[];
 
-/* Sub-object reached through the context's +0x104 chain. */
-typedef struct {
-    u8 pad0[0x48]; /* 0x0 */
-    u32 flags;     /* 0x48 */
-    u8 pad4C[0x14];
-    u32 commandIndex;
-} MtrSub;
-
-typedef struct {
-    u8 pad0[0x14]; /* 0x0 */
-    MtrSub *sub;   /* 0x14 */
-    u8 pad18[4];
-    MtrSub *entry;
-} MtrMid;
-
-typedef struct {
-    u8 pad0[0x18]; /* 0x0 */
-    MtrMid *mid;   /* 0x18 */
-} MtrRoot;
 
 /* A focused view of the staff menu's CampVisualWork (code_002A9068). */
 typedef struct CampVisualWork {
@@ -54,7 +37,7 @@ typedef struct CampVisualWork {
     u8 pad64[0x8C];
     u32 panelResource;      /* 0xF0 */
     u8 padF4[0x10];
-    MtrRoot *skillFlagRoot; /* 0x104 */
+    MenuWindowContainer *skillFlagRoot; /* 0x104 */
     u8 pad108[0x10];
     u32 modelHandle;        /* 0x118 */
     u8 pad11C[0xB0B4];
@@ -68,9 +51,9 @@ u32 mnuPrepareCampFieldSkillDisplay(void) {
 
     context = kwlnTaskGetUserValue();
     if (mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 0) == 0) {
-        ((CampVisualWork *)context)->skillFlagRoot->mid->sub->flags |= 1;
+        ((CampVisualWork *)context)->skillFlagRoot->list->last->flags48 |= 1;
     } else {
-        ((CampVisualWork *)context)->skillFlagRoot->mid->sub->flags &= ~1;
+        ((CampVisualWork *)context)->skillFlagRoot->list->last->flags48 &= ~1;
     }
     ((CampVisualWork *)context)->titleOpacity = 0;
     ((CampVisualWork *)context)->titleFadingOut = 0;
@@ -106,10 +89,10 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
     }
     if (*popup == 0) {
         if (input & 1) {
-            MtrSub *entry = context->skillFlagRoot->mid->entry;
+            struct MenuListNode *entry = context->skillFlagRoot->list->cursor;
 
-            if ((entry->flags & 1) == 0) {
-                u32 index = entry->commandIndex + 1;
+            if ((entry->flags48 & 1) == 0) {
+                u32 index = entry->sortKeyPrimary + 1;
 
                 mnuSetPopupEntry((s32)popup, (s32)(D_003E6F38 + index * 0x1C));
                 context->titleFadingOut = 1;
@@ -122,16 +105,16 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
         }
     }
     if ((input & 0x300000) == 0) {
-        func_002B9808((s32)context->skillFlagRoot);
+        func_002B9808(context->skillFlagRoot);
     }
     if (input & 0x10) {
-        mnuRetreatWindowListSelection((s32)context->skillFlagRoot);
+        mnuRetreatWindowListSelection(context->skillFlagRoot);
     }
     if (input & 0x20) {
-        mnuAdvanceWindowListSelection((s32)context->skillFlagRoot);
+        mnuAdvanceWindowListSelection(context->skillFlagRoot);
     }
-    mnuClearWindowPanelTransitionFlag((s32)context->skillFlagRoot);
-    mnuPlayInputSound(0, input, (s32)context->skillFlagRoot->mid);
+    mnuClearWindowPanelTransitionFlag(context->skillFlagRoot);
+    mnuPlayInputSound(0, input, &context->skillFlagRoot->list->stateFlags);
     return 0;
 }
 

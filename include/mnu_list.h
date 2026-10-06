@@ -7,7 +7,10 @@
 struct MenuListNode {
     s32 index;
     s32 value;
-    u8 pad8[0x40];
+    struct {
+        u32 sprite;
+        u32 effect;
+    } sprites[8];       /* 0x08: four normal and four selected-row sprites */
     u32 flags48;        /* 0x48 */
     u8 pad4C[4];
     s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
