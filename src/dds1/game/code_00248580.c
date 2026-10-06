@@ -1423,7 +1423,7 @@ typedef struct EvtBContext {
     u32 dispatchTable; /* 0x58 */
     u8 pad5C[0x14];
     struct MenuList *visualList; /* 0x70 */
-    s32 thresholdList; /* 0x74 */
+    struct MenuList *thresholdList; /* 0x74 */
     struct MenuList *selectionList; /* 0x78 */
     s32 state7C;       /* 0x7C: nonzero also re-requests the effect resource */
     u8 pad80[0x8];
@@ -1454,9 +1454,9 @@ extern s32 mnuMapPadMaskToFlags(s32 mask);
 extern s32 func_0024A1D8(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void mnuSetPopupEntryFlagged(s32 *state, void *entry);
-extern void mnuClearListFlagsOneAndTwo(u32 list);
-extern void mnuRetreatListCursorDefault(u32 list);
-extern void mnuAdvanceListCursorDefault(u32 list);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_0036AC80[];
 extern u8 D_0036ACF8[];
@@ -1515,13 +1515,13 @@ s32 evtBHandleSelectionPanelInput(u64 input) {
             mnuSetPopupEntryFlagged(state, D_0036AD68);
         }
         if (!(buttons & 0x300000)) {
-            mnuClearListFlagsOneAndTwo(context->visualList);
+            mnuClearListFlagsOneAndTwo(&context->visualList->stateFlags);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault(context->visualList);
+            mnuRetreatListCursorDefault((u32)context->visualList);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault(context->visualList);
+            mnuAdvanceListCursorDefault((u32)context->visualList);
         }
         mnuPlayInputSound(0, buttons, &context->visualList->stateFlags);
     }
@@ -1619,7 +1619,8 @@ s32 evtBSetupDispatchSyncB(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
-extern void mnuSelectFirstListNode(s32);
+extern void mnuSelectFirstListNode(struct MenuList *);
+extern void mnuSelectLastListNode(struct MenuList *);
 extern void func_0024A728(u32, s32);
 extern void func_0024AE18(s32, s32);
 
@@ -1679,13 +1680,13 @@ s32 func_0024BB00(u64 input) {
             mnuSetPopupEntryFlagged(state, D_0036ACF8);
         }
         if (!(buttons & 0x300000)) {
-            mnuClearListFlagsOneAndTwo(context->selectionList);
+            mnuClearListFlagsOneAndTwo(&context->selectionList->stateFlags);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault(context->selectionList);
+            mnuRetreatListCursorDefault((u32)context->selectionList);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault(context->selectionList);
+            mnuAdvanceListCursorDefault((u32)context->selectionList);
         }
         mnuPlayInputSound(0, buttons, &context->selectionList->stateFlags);
     }
