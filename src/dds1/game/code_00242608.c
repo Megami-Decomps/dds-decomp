@@ -2,6 +2,7 @@
 #include "mnu_list.h"
 #include "sdf.h"
 #include "evt_unit.h"
+#include "dat_state.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -34,8 +35,6 @@
 #define CAMP_SLOT_LAST_ROW_OFFSET 0x410
 #define CAMP_SLOT_ROW_STRIDE 0x104
 #define CAMP_PARTY_SCAN_LAST 4
-#define CAMP_PARTY_FLAGS_OFFSET 0xa60
-#define CAMP_PARTY_HALFWORD_STRIDE 0xd2
 #define CAMP_PARTY_ACTIVE_FLAG 1
 #define CAMP_HEAP_STATS_WORD_COUNT 8
 
@@ -52,7 +51,6 @@ extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];
 
-extern s32 datGameState;
 extern s32 ptyCountBulletItem(s32);
 
 extern s8 D_003BC39C;
@@ -992,11 +990,10 @@ void mnuShopLoadSpriteAssets(ShopScene *scene) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", mnuReleaseShopSceneSpriteResources);
 
-extern s32 datGameState;
 extern u8 *datItemSkillRecords;
 
 s32 mnuShopHasPendingFlag(void) {
-    u8 *flags = (u8 *)(datGameState + 0x12A0);
+    u8 *flags = datGameState->inventory.counts;
     u8 *entry = datItemSkillRecords;
     s32 found = 0;
     s32 i;
@@ -1168,7 +1165,7 @@ s32 func_00244848(void) {
     u32 stage = mnuCampGetProgressStage();
 
     if (stage < 5) {
-        if (*(u32 *)(datGameState + 0xA50) >= D_0036A234[stage].threshold) {
+        if (datGameState->world.score >= D_0036A234[stage].threshold) {
             stage++;
         } else {
             stage = 0;
@@ -1179,19 +1176,19 @@ s32 func_00244848(void) {
     return stage;
 }
 
-/* Sum the active low bit across five entries using the native halfword stride. */
+/* Sum the active low bit across the five party entries. */
 s32 mnuCountActivePartyEntries(void) {
     u16 entryFlags;
-    u16 *entryFlagsCursor;
+    DatPartyRecord *entryCursor;
     s32 entryCountdown;
     s32 enabledCount;
 
     enabledCount = 0;
     entryCountdown = CAMP_PARTY_SCAN_LAST;
-    entryFlagsCursor = (u16 *)(datGameState + CAMP_PARTY_FLAGS_OFFSET);
+    entryCursor = datGameState->party;
     do {
-        entryFlags = *entryFlagsCursor;
-        entryFlagsCursor += CAMP_PARTY_HALFWORD_STRIDE;
+        entryFlags = entryCursor->flags;
+        entryCursor++;
         entryCountdown--;
         enabledCount += entryFlags & CAMP_PARTY_ACTIVE_FLAG;
     } while (entryCountdown >= 0);
@@ -1420,16 +1417,16 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
     switch (operation) {
     case 1:
     case 2: {
-        s32 globalState = datGameState;
+        DatGameState *globalState = datGameState;
 
-        affordable = *(s32 *)(globalState + 0x3C) / price;
+        affordable = globalState->header.currency / price;
         limit = affordable;
         if (kind == 2) {
             available = capacity - ptyCountBulletItem(itemId);
         } else if (kind == 3) {
-            available = 1 - *(u8 *)(itemId + globalState + 0x12A0);
+            available = 1 - globalState->inventory.counts[itemId];
         } else {
-            available = 99 - *(u8 *)(itemId + globalState + 0x12A0);
+            available = 99 - globalState->inventory.counts[itemId];
         }
         if (available < 0) {
             available = 0;
@@ -1440,7 +1437,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
         break;
     }
     case 3: {
-        s32 quantity = *(u8 *)(itemId + datGameState + 0x12A0);
+        s32 quantity = datGameState->inventory.counts[itemId];
 
         if (quantity * price > 9999999) {
             limit = (s32)(9999999.0f / (f32)price);
@@ -1454,23 +1451,23 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
 }
 
 s32 func_00244FA0(ShopScene *context) {
-    s32 globalState = datGameState;
+    DatGameState *globalState = datGameState;
     ShopWindowContainer *itemObject = (ShopWindowContainer *)context->window;
     ShopWindowListData *record = itemObject->list;
     CampWindowParams *parameters = (CampWindowParams *)(record->unk1C + 0x60);
     s32 itemId = parameters->id;
     s32 divisor = parameters->price;
     s32 kind = parameters->mode;
-    s32 limit = *(s32 *)((u8 *)globalState + 0x3C) / divisor;
+    s32 limit = globalState->header.currency / divisor;
     s32 quantity = context->count8C;
     s32 available;
 
     if (kind == 2) {
         available = quantity - ptyCountBulletItem(itemId);
     } else if (kind == 3) {
-        available = 1 - *((u8 *)(itemId + globalState) + 0x12A0);
+        available = 1 - globalState->inventory.counts[itemId];
     } else {
-        available = 0x63 - *((u8 *)(itemId + globalState) + 0x12A0);
+        available = 0x63 - globalState->inventory.counts[itemId];
     }
     if (available < 0) {
         available = 0;
@@ -1493,19 +1490,19 @@ void func_00245068(ShopScene *scene) {
     struct MenuListNode *node = ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->first;
     for (; index < ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->count; index++) {
         CampWindowParams *parameters = &node->camp;
-        s32 globalState = datGameState;
+        DatGameState *globalState = datGameState;
         s32 itemId = parameters->id;
         s32 divisor = parameters->price;
         s32 kind = parameters->mode;
-        s32 affordable = *(s32 *)(globalState + 0x3C) / divisor;
+        s32 affordable = globalState->header.currency / divisor;
         s32 available;
         s32 limit;
         if (kind == 2) {
             available = capacity - ptyCountBulletItem(itemId);
         } else if (kind == 3) {
-            available = 1 - *(u8 *)(itemId + globalState + 0x12A0);
+            available = 1 - globalState->inventory.counts[itemId];
         } else {
-            available = 99 - *(u8 *)(itemId + globalState + 0x12A0);
+            available = 99 - globalState->inventory.counts[itemId];
         }
         if (available < 0) {
             available = 0;

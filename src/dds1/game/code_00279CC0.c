@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "dat_state.h"
 struct MenuListNode;
 extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
@@ -15,7 +16,6 @@ extern void func_001958A0(s32, s32, s32);
 
 extern void frFontQueueGlyphInSelectedSlot(s32);
 
-extern s32 datGameState;
 
 typedef struct MenuListNode MenuListNode;
 
@@ -151,22 +151,19 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A140);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A300);
 
-typedef struct PtyFrontlineSlot {
-    u16 flags;          /* 0x00: bit 0 present, bit 1 frontline */
-} PtyFrontlineSlot;
 
 /* Collect up to max pointers to occupied, frontline party slots. */
-void mnuCollectFrontlinePartySlots(s32 **out, s32 max) {
+void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max) {
     s32 count = 0;
     s32 i = 0;
 
     while (count < max) {
-        s32 entry = datGameState + i * 0x1A4 + 0xA60;
+        DatPartyRecord *entry = &datGameState->party[i];
 
         *out = 0;
-        if ((((PtyFrontlineSlot *)entry)->flags & 1) != 0 &&
-            (((PtyFrontlineSlot *)entry)->flags & 2) != 0) {
-            *out = (s32 *)entry;
+        if ((entry->flags & 1) != 0 &&
+            (entry->flags & 2) != 0) {
+            *out = entry;
             out++;
             count++;
         }

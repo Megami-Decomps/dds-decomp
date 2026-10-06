@@ -3,16 +3,19 @@
 
 #include "common.h"
 
-/* GBWK allocates this state, retaining its scene handle at +0x30. */
+/* The first 0x30 bytes also form compact save metadata; GBWK retains the
+ * runtime scene handle at +0x30. */
 typedef struct DatStateHeader {
     u8 magic[3];
     u8 version;
-    u8 pad04[4];
-    u32 unk08;
+    s8 mapGroup;
+    s8 mapIndex;
+    u8 pad06[2];
+    s32 playTicks;
     s16 unk0C;
     s16 transition;
-    u8 name10[8];
-    u8 name18[8];
+    s8 partyIds[8];
+    s8 partyLevels[8];
     u32 unk20;
     u32 unk24;
     u32 unk28;
@@ -48,7 +51,7 @@ typedef struct DatWorldState {
     u32 updateMode;
 } DatWorldState;
 
-/* Five active records; the same record type is used by the eight templates. */
+/* The active roster and saved template bank share this complete record type. */
 typedef struct DatPartyRecord {
     u16 flags;
     u16 affinityTableIndex;
@@ -70,16 +73,20 @@ typedef struct DatPartyRecord {
     u8 pad54;
 #ifdef VERSION_DDS1
     s8 profileId;
-    u8 pad56[0x13E];
+    u8 pad56[2];
+    u32 skillFlags[76];                    /* 0x058: eight four-bit skill states per word. */
+    u8 pad188[0xC];
     s32 randomizedValue;
     s32 link;
     u8 pad19C[8];
 #endif
 #ifdef VERSION_DDS2
     u8 profileId;
-    u8 pad56[0x15C];
+    u8 pad56[2];
+    u32 skillFlags[85];                    /* 0x058: scrClearFlagsTable clears all 0x154 bytes. */
+    u8 pad1AC[6];
     u16 itemId;
-    u8 pad1B4[4];
+    s32 randomizedValue;                  /* 0x1B4: initialized to 0x12 minus a four-way roll. */
     s32 link;
     u8 pad1BC[8];
 #endif
@@ -151,8 +158,8 @@ typedef struct DatGameState {
     u8 pad2E9E8[8];
     DatMantraBitmap mantraBits[16];        /* 0x2E9F0 */
     DatProfileRecord profileRecords[16][96]; /* 0x2EBB0 */
-    DatPartyRecord templates[8];           /* 0x31BB0 */
-    u8 pad328D0[0xD30];
+    DatPartyRecord templates[16];          /* 0x31BB0: the snapshot copies sixteen records. */
+    u8 pad335F0[0x10];
 #endif
 #ifdef VERSION_DDS2
     u8 pad1334[8];
@@ -170,8 +177,7 @@ typedef struct DatGameState {
     u32 battleFlags[4];                    /* 0x16F00 */
     DatMantraBitmap mantraBits[16];        /* 0x16F10 */
     DatProfileRecord profileRecords[16][176]; /* 0x17210 */
-    DatPartyRecord templates[8];           /* 0x1CA10 */
-    u8 pad1D830[0xE20];
+    DatPartyRecord templates[16];          /* 0x1CA10: the initializer clears sixteen records. */
     u32 savedCurrency;                    /* 0x1E650 */
     s32 progressTotal;                    /* 0x1E654 */
     s32 progressSlot;                     /* 0x1E658 */
