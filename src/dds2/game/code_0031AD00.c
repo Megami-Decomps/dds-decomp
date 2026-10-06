@@ -15,13 +15,6 @@ extern u8 D_00438938[];
 extern s32 D_00438944;
 extern f32 D_00435A7C;
 
-extern void itfSetFadeMode(void *, s32, s32);
-extern void itfQueueFadeMode(void *, u32, u32, u32);
-extern void func_0031EEE8(void *, u32);
-extern void mnuDrawFadeSequenceOffset(void *);
-extern void itfDrawFadeGlyphTriplet(void *);
-extern void mnuDrawFadeSequenceTwo(void *);
-
 
 extern void mnuOverrideActiveNodeModelDepth(MnuNodeList *list, f32 depth);
 extern void mnuRestoreActiveNodeModelDepth(MnuNodeList *list);
@@ -29,20 +22,20 @@ extern void mnuRestoreActiveNodeModelDepth(MnuNodeList *list);
 void itfDispatchObjectFadeSequenceMode(MnuShootingWork *object) {
     switch (object->phase) {
     case 0:
-        itfSetFadeMode(object->roundFade, 1, 8);
-        itfQueueFadeMode(object->roundFade, 0, 8, 0x78);
-        func_0031EEE8(object->roundFade, object->round + 1);
+        itfSetFadeMode(&object->roundFade.fade, 1, 8);
+        itfQueueFadeMode(&object->roundFade.fade, 0, 8, 0x78);
+        func_0031EEE8(&object->roundFade, object->round + 1);
         return;
     case 1:
-        mnuDrawFadeSequenceOffset(object->roundFade);
+        mnuDrawFadeSequenceOffset(&object->roundFade);
         return;
     case 5:
-        itfDrawFadeGlyphTriplet(object->scoreFade);
+        itfDrawFadeGlyphTriplet(&object->scoreFade);
         return;
     case 10:
     case 11:
     case 12:
-        mnuDrawFadeSequenceTwo(object->choiceFade);
+        mnuDrawFadeSequenceTwo(&object->choiceFade);
         break;
     }
 }

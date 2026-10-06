@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_shooting.h"
 #include "sdf.h"
 
 void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
@@ -280,103 +281,65 @@ void func_0031E020(CompactSlotPool *pool, u32 flags) {
     }
 }
 
-typedef struct FadeEntry FadeEntry;
-
-typedef struct ItfFadeWork {
-    u8 unk00[0x34];
-    u32 tint;
-    u8 unk38[0x3C];
-    u32 lowerValue;
-    u32 upperValue;
-    u32 unk7C;
-    u32 gaugeValue;
-    u32 unk84;
-    s16 unk88;
-    u8 unk8A[0x26];
-    u32 frameValue;
-    u8 strip[0x18];
-    u8 lowerNumber[0x1C];
-    u8 upperNumber[0x1C];
-    u8 gauge[0x48];
-    u8 unk14C[0x1C];
-    u8 unk168[0x1C];
-    u8 unk184[0x18];
-    u8 unk19C[0x1C];
-    u8 frame[0x1C];
-} ItfFadeWork;
-
-extern void itfFadeSetTint(u32 tint);
 
 void itfApplyWorkTintAndClearBuffers(u8 *work) {
-    ItfFadeWork *state = (ItfFadeWork *)work;
+    MnuShootingWork *state = (MnuShootingWork *)work;
 
-    itfFadeSetTint(state->tint);
-    memset(state->strip, 0, sizeof(state->strip));
-    memset(state->lowerNumber, 0, sizeof(state->lowerNumber));
-    memset(state->upperNumber, 0, sizeof(state->upperNumber));
-    memset(state->gauge, 0, sizeof(state->gauge));
-    memset(state->unk14C, 0, sizeof(state->unk14C));
-    memset(state->unk168, 0, sizeof(state->unk168));
-    memset(state->unk184, 0, sizeof(state->unk184));
-    memset(state->frame, 0, sizeof(state->frame));
+    itfFadeSetTint(state->fadeResources.fadeSprites);
+    memset(&state->strip, 0, sizeof(state->strip));
+    memset(&state->lowerNumber, 0, sizeof(state->lowerNumber));
+    memset(&state->upperNumber, 0, sizeof(state->upperNumber));
+    memset(&state->gauge, 0, sizeof(state->gauge));
+    memset(state->pad14C, 0, sizeof(state->pad14C));
+    memset(&state->roundFade, 0, sizeof(state->roundFade));
+    memset(&state->scoreFade, 0, sizeof(state->scoreFade));
+    memset(&state->frame, 0, sizeof(state->frame));
 }
 
 extern void itfFadeClearTint(void);
 
 void itfClearTintAndWorkBuffers(u8 *work) {
-    ItfFadeWork *state = (ItfFadeWork *)work;
+    MnuShootingWork *state = (MnuShootingWork *)work;
 
     itfFadeClearTint();
-    memset(state->strip, 0, sizeof(state->strip));
-    memset(state->lowerNumber, 0, sizeof(state->lowerNumber));
-    memset(state->upperNumber, 0, sizeof(state->upperNumber));
-    memset(state->gauge, 0, sizeof(state->gauge));
-    memset(state->unk14C, 0, sizeof(state->unk14C));
-    memset(state->unk168, 0, sizeof(state->unk168));
-    memset(state->unk184, 0, sizeof(state->unk184));
-    memset(state->frame, 0, sizeof(state->frame));
+    memset(&state->strip, 0, sizeof(state->strip));
+    memset(&state->lowerNumber, 0, sizeof(state->lowerNumber));
+    memset(&state->upperNumber, 0, sizeof(state->upperNumber));
+    memset(&state->gauge, 0, sizeof(state->gauge));
+    memset(state->pad14C, 0, sizeof(state->pad14C));
+    memset(&state->roundFade, 0, sizeof(state->roundFade));
+    memset(&state->scoreFade, 0, sizeof(state->scoreFade));
+    memset(&state->frame, 0, sizeof(state->frame));
 }
 
-extern void itfSetFadeMode(FadeEntry *entry, s32 mode, s32 step);
-extern void itfDrawFadeGlyphStrip(FadeEntry *entry);
-extern void itfDrawLowerFadeGlyphPair(FadeEntry *entry);
-extern void func_0031E7C8(FadeEntry *entry, u32 displayValue);
-extern void itfDrawUpperFadeGlyphPair(FadeEntry *entry);
-extern void func_0031E850(FadeEntry *entry, u32 displayValue);
-extern void itfSetFadeParameter(FadeEntry *entry, u32 parameter);
-extern void itfSetFadeSecondaryParameter(FadeEntry *entry, u32 parameter);
-extern void func_0031E8E8(FadeEntry *entry, u32 displayValue);
-extern void func_0031E8F0(FadeEntry *entry);
-extern void func_0031F040(FadeEntry *entry, u32 displayValue);
-extern void itfDrawFadeGlyphForFrame(FadeEntry *entry);
 
 /* Fade blocks have a common state prefix and callback-specific trailing data. */
-void itfDrawFullExtentWorkPanels(ItfFadeWork *work) {
-    itfSetFadeMode((FadeEntry *)work->strip, 1, 0x80);
-    itfDrawFadeGlyphStrip((FadeEntry *)work->strip);
-    itfSetFadeMode((FadeEntry *)work->lowerNumber, 1, 0x80);
-    itfDrawLowerFadeGlyphPair((FadeEntry *)work->lowerNumber);
-    func_0031E7C8((FadeEntry *)work->lowerNumber, work->lowerValue);
-    itfSetFadeMode((FadeEntry *)work->upperNumber, 1, 0x80);
-    itfDrawUpperFadeGlyphPair((FadeEntry *)work->upperNumber);
-    func_0031E850((FadeEntry *)work->upperNumber, work->upperValue);
-    itfSetFadeMode((FadeEntry *)work->gauge, 1, 0x80);
-    itfSetFadeParameter((FadeEntry *)work->gauge, 100);
-    itfSetFadeSecondaryParameter((FadeEntry *)work->gauge, work->gaugeValue);
-    if (work->unk88 > 0) {
-        func_0031E8E8((FadeEntry *)work->gauge, 1);
+void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
+    itfSetFadeMode(&work->strip, 1, 0x80);
+    itfDrawFadeGlyphStrip(&work->strip);
+    itfSetFadeMode(&work->lowerNumber.fade, 1, 0x80);
+    itfDrawLowerFadeGlyphPair(&work->lowerNumber);
+    func_0031E7C8(&work->lowerNumber, work->currentScore);
+    itfSetFadeMode(&work->upperNumber.fade, 1, 0x80);
+    itfDrawUpperFadeGlyphPair(&work->upperNumber);
+    func_0031E850(&work->upperNumber, work->peakScore);
+    itfSetFadeMode(&work->gauge.fade, 1, 0x80);
+    itfSetFadeParameter(&work->gauge, 100);
+    itfSetFadeSecondaryParameter(&work->gauge, work->progress);
+    if (work->completed > 0) {
+        func_0031E8E8(&work->gauge, 1);
     } else {
-        func_0031E8E8((FadeEntry *)work->gauge, 0);
+        func_0031E8E8(&work->gauge, 0);
     }
-    func_0031E8F0((FadeEntry *)work->gauge);
-    itfSetFadeMode((FadeEntry *)work->frame, 1, 0x80);
-    func_0031F040((FadeEntry *)work->frame, work->frameValue);
-    itfDrawFadeGlyphForFrame((FadeEntry *)work->frame);
+    func_0031E8F0(&work->gauge);
+    itfSetFadeMode(&work->frame.fade, 1, 0x80);
+    func_0031F040(&work->frame, work->unkB0);
+    itfDrawFadeGlyphForFrame(&work->frame);
 }
 
 /* Per-glyph texture byte, one 12-byte entry per glyph. */
-extern u8 D_0040B088[];
+
 
 u8 mnuGetIndexedFadeTexture(s32 index) {
-    return D_0040B088[index * 12];
+    return D_0040B088[index].glyph;
 }
