@@ -4660,6 +4660,16 @@ s32 btlIsSpecialMotion(ActionUnit *actor) {
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041AAC8);
 
+typedef struct BattleCommandRecord {
+    u8 pad00;
+    u8 flags;
+    u8 pad02[6];
+    u8 enabled;
+    u8 pad09[0xD];
+    u16 kind;
+    u8 pad18[0x20];
+} BattleCommandRecord;
+
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021F3E8);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021F698);
@@ -5978,13 +5988,7 @@ void func_00224F88(u32 unit) {
 
 extern s32 btlGetRuntime(void);
 
-typedef struct BattleCommandRecord {
-    u8 pad00[8];
-    u8 enabled;
-    u8 pad09[0xD];
-    u16 kind;
-    u8 pad18[0x20];
-} BattleCommandRecord;
+
 
 
 
