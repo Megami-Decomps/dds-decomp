@@ -114,7 +114,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32
     return 1;
 }
 
-extern void scrCreateProcessTaskFromResource(s32, void *, s32);
+extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern char evtScriptResourcePathBuffer[];
 
 INCLUDE_RODATA(const s32, "event/evtStage", D_003AC008);
