@@ -40,6 +40,14 @@ extern void sdfCameraBuildProjection(SdfCamera *);
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
  * Level tables begin at level one; seven-entry scales use index three for zero. */
+typedef struct SdfBattleMoneyRewardBand {
+    s8 levelThreshold;
+    u8 pad01[3];
+    f32 moneyScale;
+} SdfBattleMoneyRewardBand;
+
+typedef char SdfBattleMoneyRewardBand_size_must_be_8[(sizeof(SdfBattleMoneyRewardBand) == 8) ? 1 : -1];
+
 typedef struct SdfBattleParameters {
     f32 maxHpGrowth[99]; /* 0x000 */
     f32 maxMpGrowth[99]; /* 0x18C */
@@ -53,7 +61,8 @@ typedef struct SdfBattleParameters {
     u8 rewardLevelAllowance; /* 0x8DC: level gap before reducing defeat experience. */
     u8 pad8DD[3];
     f32 rewardDivisor; /* 0x8E0: zero leaves defeat experience unreduced. */
-    u8 pad8E4[0x90];
+    f32 moneyTurnScales[16]; /* 0x8E4 */
+    SdfBattleMoneyRewardBand moneyRewardBands[10]; /* 0x924 */
     f32 rewardLevelScale[31 * 2]; /* 0x974: level difference and reward kind */
 #ifdef VERSION_DDS2
     u8 padA6C[0x74];
