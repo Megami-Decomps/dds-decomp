@@ -98,6 +98,20 @@ def place(version):
         # ... unless an asm function still needs the retail copy (check_unit SHARED).
         for f in INCLUDE_ASM.findall(text):
             compiled -= retail_refs.get(f, set())
+        # A string that only a compiled initializer table points at (`.word` entries of
+        # a table the C now writes as `{"..", ..}`) is compiled with that table: no
+        # function names it and no other rodata or data word holds it.
+        asm_named = set().union(*retail_refs.values()) if retail_refs else set()
+        holders = word_holders(version)
+        grown = True
+        while grown:
+            grown = False
+            for sym in unit_rodata - compiled - set(defined_at):
+                held = holders.get(sym)
+                if held and held <= compiled and sym not in asm_named \
+                        and not re.search(rf"\b{sym}\b", text):
+                    compiled.add(sym)
+                    grown = True
         # The compiler emits each such literal with the first function using it.
         compiled_at = {}
         for m in DEF.finditer(text):
@@ -175,6 +189,28 @@ def align_file(path):
     cap = 4 if m.group(1).startswith("jtbl_") else 3
     k = next(k for k in range(cap, -1, -1) if addr % (1 << k) == 0)
     path.write_text(re.sub(r"^nonmatching", f".align {k}\nnonmatching", text, count=1, flags=re.M))
+
+
+_WORD_HOLDERS = {}
+
+
+def word_holders(version):
+    """Map each symbol named by a `.word` entry anywhere in the version's data to
+    the set of data symbols whose block holds that entry."""
+    if version not in _WORD_HOLDERS:
+        holders = {}
+        for path in (ROOT / "asm" / version / "data").rglob("*.s"):
+            current = None
+            for line in path.read_text().splitlines():
+                m = re.match(r"\s*dlabel (\w+)", line)
+                if m:
+                    current = m.group(1)
+                    continue
+                m = re.search(r"\.word (\w+)\s*$", line)
+                if m and current and not m.group(1).startswith("0x"):
+                    holders.setdefault(m.group(1), set()).add(current)
+        _WORD_HOLDERS[version] = holders
+    return _WORD_HOLDERS[version]
 
 
 def function_text(text, start):

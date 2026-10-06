@@ -1839,9 +1839,86 @@ void fldBeginNpcInteractionById(s32 id) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004135D0);
+extern s32 func_0035B6E0(const char *, ...);
+extern void evtSetObjectTransitionWork(void *, u32);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00143910);
+s32 func_00143910(u32 key, f32 *x, f32 *y, f32 *z) {
+    f32 weights[50] = {
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f
+    };
+    s32 i;
+    FldActorRow *row;
+    WorldListNode *node;
+
+    if (D_00389780[0] >= 200) {
+        return 0;
+    }
+    for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
+        row = &fldActorSlots[i];
+        if (row->firstKey == key) {
+            if (row->kind != 2) {
+                continue;
+            }
+            if (row->firstFrame < row->frameCount) {
+                if (row->frameCount == 40) {
+                    row->firstValues[0] += row->firstStep[0] * weights[row->firstFrame];
+                    row->firstValues[1] += row->firstStep[1] * weights[row->firstFrame];
+                    row->firstValues[2] += row->firstStep[2] * weights[row->firstFrame];
+                } else {
+                    row->firstValues[0] += row->firstStep[0];
+                    row->firstValues[1] += row->firstStep[1];
+                    row->firstValues[2] += row->firstStep[2];
+                }
+                row->firstFrame++;
+            }
+            *x = row->firstValues[0];
+            *y = row->firstValues[1];
+            *z = row->firstValues[2];
+            return 1;
+        } else if (row->secondKey == key) {
+            if (row->kind != 2) {
+                continue;
+            }
+            if (row->secondFrame < row->frameCount) {
+                if (row->frameCount == 40) {
+                    row->secondValues[0] += row->secondStep[0] * weights[row->secondFrame];
+                    row->secondValues[1] += row->secondStep[1] * weights[row->secondFrame];
+                    row->secondValues[2] += row->secondStep[2] * weights[row->secondFrame];
+                } else {
+                    row->secondValues[0] += row->secondStep[0];
+                    row->secondValues[1] += row->secondStep[1];
+                    row->secondValues[2] += row->secondStep[2];
+                }
+                row->secondFrame++;
+            }
+            *x = row->secondValues[0];
+            *y = row->secondValues[1];
+            *z = row->secondValues[2];
+            return 1;
+        } else if (row->transitionKey == key) {
+            if (row->kind != 2) {
+                continue;
+            }
+            if (row->transitionFrame == 0) {
+                node = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), key, 6);
+                if (node != NULL) {
+                    func_0035B6E0("DOOR SISETU FADE 6\n");
+                    evtSetObjectTransitionWork(node, 9);
+                }
+            }
+            row->transitionFrame++;
+            *x = 0.0f;
+            *y = 0.0f;
+            *z = 0.0f;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void func_00143C90(void) {
 }

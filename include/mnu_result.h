@@ -121,7 +121,9 @@ typedef struct BrsSkillPackageWork {
     u8 padAEA9[7];
     s32 teardownHandle;
     u32 opacity;
-    u8 padAEB8[0x828];
+    s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
+    s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
+    u8 padAEBA[0x826];
 #endif
     s32 fadeProgress;
     u32 selectionInitialized;

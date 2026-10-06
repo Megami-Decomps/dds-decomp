@@ -316,7 +316,117 @@ void sdfCounterStepDownAnimationValue(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6448);
+extern void func_002C6948(f32 progress);
+
+/* Draw the three local-map frame pieces: the side panels slide in from x 427 / 353. */
+static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 alpha3) {
+    s16 rects[4][8] = {
+        {0x5F, 0x50, 0xE, 0xF, 0xB5, 0x164, 0xE, 0xF},
+        {0x129, 0x133, 0xE, 0xF, 0xB5, 0x174, 0xE, 0xF},
+        {0x1AB, 0x133, 0xE, 0xF, 0xB5, 0x174, 0xE, 0xF},
+        {0xDF, 0x133, 0x60, 0xF, 0xC7, 0x166, 0x20, 0xF},
+    };
+
+    evtSubmitPrimaryAlphaBlendMode(1);
+    func_00108FA0((s32)(slide * 427.0f + rects[1][0] * (1.0f - slide)), rects[1][1], rects[1][2], rects[1][3],
+                  rects[1][4], rects[1][5], rects[1][6], rects[1][7], ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
+                  ((s32)(alpha1 * 128.0f) << 24) | 0x808080, ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
+                  ((s32)(alpha1 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.image);
+    func_00108FA0(rects[2][0], rects[2][1], rects[2][2], rects[2][3], rects[2][4], rects[2][5], rects[2][6],
+                  rects[2][7], ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
+                  ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
+                  fldLocalMapTextureResource.image);
+    func_00108FA0((s32)(slide * 353.0f + rects[3][0] * (1.0f - slide)), rects[3][1], rects[3][2], rects[3][3],
+                  rects[3][4], rects[3][5], rects[3][6], rects[3][7], ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
+                  ((s32)(alpha3 * 128.0f) << 24) | 0x808080, ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
+                  ((s32)(alpha3 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.image);
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
+
+/* Local-map open/close transition: fades the backdrop (func_002C6948), slides the side panels in, and fades the
+ * frame pieces (each panel row is x, y, w, h, u, v, uw, vh). */
+void func_002C6448(s32 opening) {
+    f32 progress;
+    f32 slide = 0.0f;
+    f32 alpha1 = 0.0f;
+    f32 alpha2 = 0.0f;
+    f32 alpha3 = 0.0f;
+    s32 timer;
+
+    if (opening != 0) {
+        timer = sdfCounterAnimationValue;
+        if (timer < 20) {
+            progress = timer / 20.0f;
+        } else {
+            progress = 1.0f;
+        }
+        if (timer >= 26) {
+            if (timer < 33) {
+                slide = (timer - 25) * 0.125f;
+            } else {
+                slide = 1.0f;
+            }
+        }
+        slide = (slide + slide * slide) * 0.5f;
+        if (timer >= 26) {
+            alpha1 = 0.1f;
+            if (timer >= 30) {
+                if (timer < 33) {
+                    alpha1 = (timer - 30) / 3.0f;
+                } else if (timer < 48) {
+                    alpha1 = 1.0f - (timer - 33) / 15.0f;
+                } else {
+                    alpha1 = 0.0f;
+                }
+            }
+        }
+        if (timer >= 29) {
+            alpha2 = (timer - 28) / 7.0f;
+        }
+        if (alpha2 > 1.0f) {
+            alpha2 = 1.0f - (timer - 35) / 15.0f;
+            if (timer >= 51) {
+                alpha2 = 0.0f;
+            }
+        }
+        if (timer >= 26) {
+            if (timer < 33) {
+                alpha3 = (timer - 25) * 0.125f * 0.4f;
+            } else if (timer < 48) {
+                alpha3 = (1.0f - (timer - 33) / 15.0f) * 0.2f + 0.2f;
+            } else {
+                alpha3 = 0.2f;
+            }
+        }
+        D_003BD980 = 0;
+    } else {
+        if (D_003BD980 == 0) {
+            D_003BD980 = sdfCounterAnimationValue;
+        }
+        timer = D_003BD980 - sdfCounterAnimationValue;
+        if (timer < 20) {
+            progress = timer / 20.0f;
+        } else {
+            progress = 1.0f;
+        }
+        progress = 1.0f - progress;
+        if (progress == 0.0f) {
+            return;
+        }
+        if ((s32)D_003BD980 >= 26) {
+            if ((s32)D_003BD980 < 33) {
+                slide = ((s32)D_003BD980 - 25) * 0.125f;
+            } else {
+                slide = 1.0f;
+            }
+        }
+        alpha3 = progress * 0.2f;
+        alpha2 = 0.0f;
+        alpha1 = alpha2;
+    }
+    func_002C6948(progress);
+    fldDrawLocalMapFrame(slide, alpha1, alpha2, alpha3);
+}
 
 INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6948);
 
@@ -598,8 +708,6 @@ void fldProjectPointToGridCell(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     *gridX = ((s32)(screen[0] * 16.0f) - 0x7000) >> 4;
     *gridY = ((s32)(screen[1] * 16.0f) - 0x7900) >> 3;
 }
-
-INCLUDE_RODATA(const s32, "game/code_002C5FD8", D_003B3DC0);
 
 INCLUDE_RODATA(const s32, "game/code_002C5FD8", D_003B3E00);
 
