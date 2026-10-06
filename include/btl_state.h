@@ -54,7 +54,9 @@ typedef struct BtlState {
     struct KwlnTask *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
-    u8 pad2A8[0x20C];
+    u8 pad2A8[0x200];
+    struct EffectSlotSet *resB; /* 0x4A8: resource slots used for battle-number glyphs */
+    u8 pad4AC[8];
     u32 buttonTextureHandle; /* 0x4B4 */
     u8 pad4B8[0xDC];
     void (*bossCleanup)(void); /* 0x594 */
