@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dat_state.h"
 #include "scr.h"
+#include "kwln.h"
 
 
 /* The first word is the solarnoise.spr handle; the work allocation is 0x104 bytes. */
@@ -52,7 +53,11 @@ u32 kwlnTaskGetUserValue(s32 task);
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
 
-extern s64 kwlnTaskIsRegistered(u64);
+extern s32 kwlnTaskIsRegistered(KwlnTask *);
+extern void evtSetContextFlag(KwlnTask *);
+extern void evtClearContextFlag(KwlnTask *);
+extern void fldSetFadeTarget(s32, s32, s32);
+extern void evtBeginSkyParameterTransition(s32, s32);
 
 s32 scrReadIntParameter(s32 idx);
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
@@ -109,35 +114,35 @@ u32 evtOpcodeCreateWorldChildTask(void) {
 }
 
 u32 evtOpcodeSetTaskContextFlag(void) {
-    u64 task;
-    s64 registered;
+    u32 task;
+    s32 registered;
 
     task = scrReadIntParameter(0);
-    registered = kwlnTaskIsRegistered(task);
+    registered = kwlnTaskIsRegistered((KwlnTask *)task);
     if (registered != 0) {
-        evtSetContextFlag(task);
+        evtSetContextFlag((KwlnTask *)task);
     }
     return 1;
 }
 
 u32 evtOpcodeClearTaskContextFlag(void) {
-    u64 task;
-    s64 registered;
+    u32 task;
+    s32 registered;
 
     task = scrReadIntParameter(0);
-    registered = kwlnTaskIsRegistered(task);
+    registered = kwlnTaskIsRegistered((KwlnTask *)task);
     if (registered != 0) {
-        evtClearContextFlag(task);
+        evtClearContextFlag((KwlnTask *)task);
     }
     return 1;
 }
 
 u32 evtOpcodeDestroyTask(void) {
-    u64 task;
-    s64 registered;
+    u32 task;
+    s32 registered;
 
     task = scrReadIntParameter(0);
-    registered = kwlnTaskIsRegistered(task);
+    registered = kwlnTaskIsRegistered((KwlnTask *)task);
     if (registered != 0) {
         evtDestroyTaskHierarchy(task);
     }
@@ -145,9 +150,9 @@ u32 evtOpcodeDestroyTask(void) {
 }
 
 u32 evtOpcodeSetFadeTarget(void) {
-    u64 area;
-    u64 target;
-    u64 duration;
+    s32 area;
+    s32 target;
+    s32 duration;
 
     fldSetSwayMode(0);
     fldSetSkyDrawState(0x80);
@@ -161,7 +166,7 @@ u32 evtOpcodeSetFadeTarget(void) {
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACAE0);
 
 u32 evtSetSkyAlpha(void) {
-    s64 alpha;
+    s32 alpha;
 
     alpha = scrReadIntParameter(1);
     if (alpha < -255) {

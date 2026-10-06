@@ -1,8 +1,9 @@
 #include "common.h"
+#include "kwln.h"
 
 extern u32 itfLoadTextureFromAsset(u32);
 
-extern u32 kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
 extern u32 sdfAllocSizeClassBlock(u32);
 
@@ -112,17 +113,18 @@ typedef struct {
     u32 value; /* 0x04 */
 } EventContext;
 
-void evtSetContextFlag(void) {
+/* Flag operations act on the scheduler task's user-value context. */
+void evtSetContextFlag(KwlnTask *task) {
     EventContext *context;
 
-    context = (EventContext *)kwlnTaskGetUserValue();
+    context = (EventContext *)kwlnTaskGetUserValue(task);
     context->flags = context->flags | 1;
 }
 
-void evtClearContextFlag(void) {
+void evtClearContextFlag(KwlnTask *task) {
     EventContext *context;
 
-    context = (EventContext *)kwlnTaskGetUserValue();
+    context = (EventContext *)kwlnTaskGetUserValue(task);
     context->flags = context->flags & 0xfffffffe;
 }
 
