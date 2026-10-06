@@ -471,13 +471,11 @@ s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer)
 }
 
 struct EffectObj;
-struct WorldInnerOwner;
 struct PolyMovieObject;
 extern u32 *dds3FindObjectChainNodeByName(EvtWorldObject *, const u8 *);
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
-extern s32 dds3GetObjectOwnedHandle(struct WorldInnerOwner *);
 extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *, s32, s32, s32);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
@@ -517,7 +515,7 @@ void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtViewer *
         break;
     case 16:
         evtStageRelinkOwnedNodeResource(owner, (void *)obj);
-        movie = ((ObjBase *)dds3GetObjectOwnedHandle((struct WorldInnerOwner *)obj))->slots[1];
+        movie = dds3GetObjectOwnedHandle(obj)->slots[1];
         if (viewer->flags & 1) {
             evtPolygonMovieScaleByProgress(movie, 0, word, frame);
         } else {

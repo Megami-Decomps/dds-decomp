@@ -16,13 +16,18 @@ function's asm file, and each C function brings what the compiler emits for it
 - rodata several functions share, or that only .data tables point at; splat
   writes it to asm/<v>/nonmatchings/<unit>/<sym>.s. It goes where its address
   falls: before the first function whose rodata comes after it, or at the end.
+- named rodata defined by the C unit (including aligned vectors) stays at its
+  definition. The compiler provides that symbol even if an asm function still
+  references it, so no INCLUDE_RODATA may duplicate it.
 
-Both get per-symbol files in asm/<v>/nonmatchings/<unit>/ and an INCLUDE_RODATA
-line. Lines already present are replaced: the placement is recomputed on every run.
+The first two kinds get per-symbol files in asm/<v>/nonmatchings/<unit>/ and an
+INCLUDE_RODATA line. Placement is recomputed on every run.
 """
 import re
 import sys
 from pathlib import Path
+
+from include_sdata import DATA_DEF
 
 ROOT = Path(__file__).resolve().parent.parent
 INCLUDE = re.compile(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);$', re.M)
@@ -65,6 +70,10 @@ def place(version):
         # Placed from scratch every time: once a function compiles its own
         # literal, the lines around it must move with it.
         text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
+        defined_at = {
+            m.group(1): m.start() for m in DATA_DEF.finditer(text)
+            if m.group(1) in unit_rodata
+        }
         # Rodata a C function no longer names is compiled by that function itself
         # (a string literal): nothing to include.
         # The retail references come from the unit's full disassembly, which
@@ -85,6 +94,7 @@ def place(version):
         # Only this unit's own rodata can be compiled here: other names a C
         # function writes differently (D_X[9] for retail's D_Y) are other data.
         compiled &= unit_rodata
+        compiled -= defined_at.keys()
         # ... unless an asm function still needs the retail copy (check_unit SHARED).
         for f in INCLUDE_ASM.findall(text):
             compiled -= retail_refs.get(f, set())
@@ -95,8 +105,11 @@ def place(version):
                 if sym in compiled:
                     compiled_at.setdefault(sym, m.start())
         owned -= compiled
+        owned -= defined_at.keys()
         have = set(INCLUDE.findall(text))
         anchors = []   # (address, position in text or None, symbol, needs a line)
+        for sym, pos in defined_at.items():
+            anchors.append((int(labels[sym], 16), pos, None, False))
         for m in INCLUDE_ASM.finditer(text):
             for _, addr in LABEL.findall(rodata_part(nonmatchings / f"{m.group(1)}.s")):
                 anchors.append((int(addr, 16), m.start(), None, False))
@@ -105,6 +118,8 @@ def place(version):
             for block in SYMBOL_BLOCK.finditer(rodata):
                 sym = block.group(1)
                 addr = int(LABEL.search(block.group(0)).group(2), 16)
+                if sym in defined_at:
+                    continue  # the named C definition is the address anchor
                 if sym.startswith("jtbl_") or sym in compiled:
                     anchors.append((addr, m.start(), None, False))  # the C emits it
                     continue

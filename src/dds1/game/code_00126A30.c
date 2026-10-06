@@ -101,7 +101,6 @@ extern void func_0012D3D8(void);
 extern void func_0012DD70(void);
 extern void fldUpdateCameraMoveOscillation(void);
 extern s32 fldTestSceneControlFlags(s32);
-extern u8 *dds3GetObjectOwnedHandle(s32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
 extern void fldClearCameraModelColor(void);
 extern void func_00131290(void);
@@ -2329,7 +2328,7 @@ void fldUpdateCameraProximity(void) {
             return;
         }
     }
-    slot = *(s32 *)(dds3GetObjectOwnedHandle(fldPlayerObject) + 0x5C);
+    slot = dds3GetObjectOwnedHandle(fldPlayerObject)->resourceSlots[4];
     modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
     if (slot >= 0) {
         model = *modelRef;
@@ -3386,18 +3385,12 @@ void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normal
     *planeConstant = -(*normalX * thirdPoint[0] + *normalY * thirdPoint[1] + *normalZ * thirdPoint[2]);
 }
 
-typedef struct FldRecE4 {
-    u8 pad0[0xCC];
-    s32 id;
-    s32 value;
-    u8 padD4[0x10];
-} FldRecE4; /* 0xE4 bytes */
 /* Return the first matching record's value; zero also denotes a missing ID. */
 s32 fldGetRecordValueById(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
-        FldRecE4 *record = (FldRecE4 *)fldValueRecords;
+        FldValueRecord *record = (FldValueRecord *)fldValueRecords;
         do {
             if (record->id == id) {
                 return record->value;
@@ -3414,8 +3407,8 @@ void fldSetRecordValueById(s32 id, s32 value) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (((FldRecE4 *)fldValueRecords)[index].id == id) {
-            ((FldRecE4 *)fldValueRecords)[index].value = value;
+        if (((FldValueRecord *)fldValueRecords)[index].id == id) {
+            ((FldValueRecord *)fldValueRecords)[index].value = value;
         }
     }
 }
@@ -3423,7 +3416,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
 void fldResetRecordState(void) {
     s32 index;
     for (index = 0; index < fldValueRecordCount; index++) {
-        ((FldRecE4 *)fldValueRecords)[index].value = 0;
+        ((FldValueRecord *)fldValueRecords)[index].value = 0;
     }
     fldValueRecordCount = 0;
     fldAreaState[40] = -1;
@@ -3439,17 +3432,8 @@ void fldResetRecordState(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135360);
 
-/* Axis-aligned trigger zone: up to four bounding planes plus a 2D extent. */
-typedef struct FldZone {
-    s16 mode;
-    s16 count;
-    u8 pad4[0x14];
-    f32 plane[4][4]; /* 0x18 */
-    f32 limit[4];    /* 0x58 */
-    f32 bound[4];    /* 0x68: min0, min1, max0, max1 */
-} FldZone;
 
-s32 fldClassifyPositionInZoneWithMargin(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldZone *zone) {
+s32 fldClassifyPositionInZoneWithMargin(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldValueRecord *zone) {
     f32 probe[3];
     f32 planar[2];
     f32 best = margin;
@@ -3525,7 +3509,7 @@ void func_00137EA0(void) {
 /* Project away the selected axis and reject points outside expanded bounds.
  * Return the last negative plane's margin-adjusted distance, not a minimum;
  * no negative plane leaves margin unchanged. Reject results below 0.001. */
-f32 fldGetPositionZoneClearance(f32 margin, s32 axisMode, s32 planeCount, f32 *position, FldZone *zone) {
+f32 fldGetPositionZoneClearance(f32 margin, s32 axisMode, s32 planeCount, f32 *position, FldValueRecord *zone) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
     f32 clearance = margin;

@@ -1708,14 +1708,28 @@ does not prove its original return width or distinguish zero parameters
 from an unused parameter. Recover independent API evidence rather than
 choosing the declaration with the prettier score.
 
-DDS2 `func_0014D0E8` supplies a related source-shape warning. Correcting the
-old draft to the actual `MdlCtx.first->MdlNode.unk30` access and the effect
-manager's opaque pointer APIs retains three differing words out of 165:
-`+0x124` annulment and `+0x138/+0x140` publication/argument ordering.
-Its diagnostic branch UID 150 receives target donor UID 173, the default
-descriptor load into `a0`. Putting the default-area arm first changes
-the condition and descriptor-load order, not just annulment. Selecting
-one genuine descriptor before one constructor call instead produces
-`movn` and an eight-byte-short function. A cleaner-looking selector is not
-evidence that the retail source used it; keep the honest miss and promote
-the real shared model primaries before any production cutover.
+DDS2 `func_0014D0E8` (660 bytes) is an exact example of branch-local
+complete actions. Its stage-29/30 and default branches select different
+effect descriptors, but each creates the node, publishes it, and restarts
+the base instance. Keeping that complete action in each branch lets GCC
+schedule the restart argument load before the new-node store; reorg then
+uses the store in the restart call's delay slot and merges the common tails.
+Factoring only the restart after the branch instead left the store and
+argument load in different scheduling blocks, producing three differing
+words out of 165: `+0x124` annulment and `+0x138/+0x140` store/load order.
+
+The controlled probes keep the same stage condition and pass-28
+`REG_BR_PROB 5000`. They differ from pass 00 because the real call sequence
+belongs to each branch. The exact form's pass-29 default-descriptor donor
+executes on both paths, instead of only the taken path. This is an earlier
+CFG and scheduling change, not a same-TU nothrow fix or an inferred change
+of branch probability. Correct effect pointer APIs and the producer's
+`u8 fldTestSceneControlFlags(u32)` contract retain the match. The model
+context and node primaries are shared with their existing owner through
+`mdl_context.h`, rather than duplicated as private prefixes.
+
+Treat this as a source-shape lead when each arm performs a real complete
+action and the mismatch involves its common tail. Do not duplicate calls
+that would execute twice, invent work or dependencies, or generalize it to
+every branch-likely residual. Selecting one descriptor before one call was
+a distinct failed shape here: it produced `movn` and a shorter function.

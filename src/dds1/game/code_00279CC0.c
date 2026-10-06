@@ -51,42 +51,6 @@ typedef struct MenuSlot {
 
 extern MenuSlot *datAffinityRecords;
 
-typedef struct MenuGauge {
-    s32 id;
-    u8 pad4[4];
-    s32 hp;
-    s32 mp;
-    s32 maxHp;
-    s32 maxMp;
-    u8 pad18[0xC];
-} MenuGauge;
-
-typedef struct MenuRecord {
-    s32 visibleCount; /* 0x00: threshold for highlighted slots */
-    u8 pad4[8];
-    s32 partyIndex;
-    MenuGauge gauge;
-} MenuRecord;
-
-typedef struct MenuWindow {
-    u32 flags;
-    u8 pad4[4];
-    MenuRecord *records;
-    s32 source;
-    s32 slot;
-    s32 field14;
-    s32 field18;
-    s32 field1C;
-    s32 field20;
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
-    u8 pad78[0x604];
-    MenuList *lists[2]; /* 0x67C: parallel party-panel lists */
-    s32 selected;
-    s32 pad688;
-    s32 fade;
-} MenuWindow;
 
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
@@ -107,7 +71,7 @@ struct MenuWindowContainer {
     s32 width;
     s32 height;
     u8 pad10[4];
-    MenuList *list;
+    MenuList *list; /* Its initial stateFlags word controls navigation sounds. */
 };
 
 /* Selected child window and page of the party skill-menu runtime. */
@@ -283,7 +247,7 @@ s32 mnuUpdateSkillListInput(s32 callback) {
             mnuAdvanceWindowListSelection(list[8 + menu[11]]);
         }
         mnuClearWindowPanelTransitionFlag(list[8 + menu[11]]);
-        mnuPlayInputSound(0, buttons, ((MenuWindow *)list[8 + menu[11]])->field14);
+        mnuPlayInputSound(0, buttons, (s32)((MenuWindowContainer *)list[8 + menu[11]])->list);
         if (buttons & 2) {
             mnuSetPopupEntryFlagged(popup, D_0037CC20);
             mnuActivatePanelAndConfigureGridResources(*(u32 **)(context + 0x138), *(s32 *)(context + 0x6C), 0, 1);
