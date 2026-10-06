@@ -27,15 +27,16 @@ typedef struct {
     u16 systemParam;         /* 0x20 */
     u8 pad22[2];
     u32 fragmentCount;       /* 0x24 */
-    u8 pad28[8];
+    u8 pad28[4];
+    f32 waveAmplitude;      /* 0x2C: sinusoidal displacement */
     u32 startDelayRange;     /* 0x30 modulus of delayFrames */
     u32 activeFrameRange;    /* 0x34 modulus of activeFrames before adding one */
     u16 halfLife;            /* 0x38 */
     u8 pad3A[6];
     u32 arg40;               /* 0x40 */
-    u8 pad44[4];
+    f32 bandWidth;          /* 0x44: width of the continued strip */
     u32 arg48;               /* 0x48 */
-    u8 pad4C[4];
+    f32 edgeWidth;          /* 0x4C: added outer margin */
     u32 arg50;               /* 0x50 */
 } EffThunderFragmentParams;
 
