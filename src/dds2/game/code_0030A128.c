@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 extern s32 func_0030AC10(void);
 
@@ -82,7 +83,7 @@ extern void evtSetSolarOverlayFullyTransparent(void);
 extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
-extern s32 D_004388A4;
+extern SdfMemBlock *D_004388A4;
 extern s32 sdfCounterGetDisplayWordPointer(void);
 extern void func_0035C860(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
@@ -103,7 +104,7 @@ extern s32 sdfCreateMaskedCounterChannels(s32, s32);
 extern s32 func_0030B880(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern void func_0030E880(void);
-extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
@@ -443,7 +444,7 @@ void fldShutdownLmapResources(void) {
     func_00316E70();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
-    sdfQueueNonzeroResourceId(D_004388A4);
+    sdfQueueNonzeroResourceId((s32)D_004388A4);
     evtDestroySecondaryWorldNode();
 }
 
