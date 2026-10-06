@@ -20,7 +20,6 @@ extern char D_003BC7A0[];
 #define MNU_SPRITE_STATE_BYTES 0x20
 #define MNU_SIMPLE_SPRITE_BYTES 0x28
 #define MNU_PANEL_ITEM_BYTES 0x90
-#define MNU_PROFILE_PANEL_BYTES 0x3c
 #define MNU_TRANSITION_LIMIT 0x100
 #define MNU_TRANSITION_STEP 8
 #define MNU_GRADIENT_FADE_STEP 0x20
@@ -850,53 +849,54 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
 }
 
 
-void mnuSetProfilePanelValues(s32 item, s32 value, s32 option) {
-    ((MenuProfilePanel *)item)->capValue = value;
-    ((MenuProfilePanel *)item)->option = option;
+void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
+    panel->capValue = value;
+    panel->option = option;
 }
 
 /* Create a profile panel from the selection state's current profile ID and record. */
-u32 *mnuCreateProfilePanel(s32 selectionState) {
-    u32 *panelWords = (u32 *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
+MenuProfilePanel *mnuCreateProfilePanel(s32 selectionState) {
+    MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(sizeof(MenuProfilePanel));
     s32 profileId;
     u32 profileRecordAddress;
-    memset(panelWords, 0, MNU_PROFILE_PANEL_BYTES);
+    memset(panel, 0, sizeof(MenuProfilePanel));
     profileId = scrGetSelectedOperandIndex(selectionState);
     profileRecordAddress = ptyGetCurrentProfileRecord(selectionState);
-    mnuSetProfilePanelValues(panelWords, prfGetCapValue((u16)profileId), *(u32 *)profileRecordAddress);
-    panelWords[14] = 0x100;
-    return panelWords;
+    mnuSetProfilePanelValues(panel, prfGetCapValue((u16)profileId), *(u32 *)profileRecordAddress);
+    panel->opacity = 0x100;
+    return panel;
 }
 
-void mnuFreeProfilePanelWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeProfilePanelWork(MenuProfilePanel *panel) {
+    sdfReleaseChipBlock(panel);
 }
 
-void mnuCacheProfilePanelGridPositions(s32 item, u32 grid, u32 unused, u32 firstIndex,
-                                    u32 secondIndex) {
-    itfGridStorePosition((u32 *)(item + 0x18));
-    itfSetGridEntryQuantizedAndRefresh(((MenuProfilePanel *)item)->gridOrigin.x, ((MenuProfilePanel *)item)->gridOrigin.y, 0, 0, 0, 0);
-    itfGridStorePosition(item + 0x20, grid, firstIndex);
-    itfGridStorePosition(item + 0x28, grid, secondIndex);
+void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fillIndex,
+                                     u32 backgroundIndex, u32 completedIndex) {
+    itfGridStorePosition(&panel->fill, grid, fillIndex);
+    itfSetGridEntryQuantizedAndRefresh((s32)panel->fill.set, panel->fill.index, 0, 0, 0, 0);
+    itfGridStorePosition(&panel->background, grid, backgroundIndex);
+    itfGridStorePosition(&panel->completed, grid, completedIndex);
 }
 
+extern void func_00285208(s32, s32, s32, MenuProfilePanel *, s32);
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285208);
 
 /* Draw first, then advance the native phase by twelve with a single period subtraction. */
-void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *panelWords, s32 option) {
+void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option) {
     s32 phase;
     s32 nextPhase;
-    func_00285208(x, y, z, panelWords, option);
-    phase = panelWords[13];
+    func_00285208(x, y, z, panel, option);
+    phase = panel->phase;
     nextPhase = phase + MNU_PROFILE_PHASE_STEP;
     if (phase < MNU_PROFILE_PHASE_PERIOD) {
-        panelWords[13] = nextPhase;
+        panel->phase = nextPhase;
         if (nextPhase < MNU_PROFILE_PHASE_PERIOD) {
             return;
         }
         phase = nextPhase;
     }
-    panelWords[13] = phase - MNU_PROFILE_PHASE_PERIOD;
+    panel->phase = phase - MNU_PROFILE_PHASE_PERIOD;
 }
 
 /* Clear the complete native popup-transition state, including saved entry addresses. */

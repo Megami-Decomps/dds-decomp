@@ -188,7 +188,18 @@ typedef struct MenuPoint {
     s32 y;
 } MenuPoint;
 
-/* Profile helpers expose the game's native panel allocation as a word buffer. */
+#ifndef VERSION_DDS2
+struct EffectSlotSet;
+
+typedef struct MenuProfileSlot {
+    struct EffectSlotSet *set;
+    s32 index;
+} MenuProfileSlot;
+
+typedef char MenuProfileSlot_size_must_be_8[(sizeof(MenuProfileSlot) == 8) ? 1 : -1];
+#endif
+
+/* Native profile-progress panel, including its cached sprite-slot pairs. */
 typedef struct MenuProfilePanel {
     u8 pad00[0x10];
 #ifdef VERSION_DDS2
@@ -205,10 +216,18 @@ typedef struct MenuProfilePanel {
 #else
     s32 capValue;
     s32 option;
-    MenuPoint gridOrigin;
-    u8 pad20[0x1C];
+    MenuProfileSlot fill;
+    MenuProfileSlot background;
+    MenuProfileSlot completed;
+    s32 unk30;
+    s32 phase;
+    u32 opacity;
 #endif
 } MenuProfilePanel;
+
+#ifndef VERSION_DDS2
+typedef char MenuProfilePanel_size_must_be_0x3C[(sizeof(MenuProfilePanel) == 0x3C) ? 1 : -1];
+#endif
 
 #ifdef VERSION_DDS2
 typedef struct MenuPageBar {
@@ -352,9 +371,15 @@ extern MnuProgressEntry D_003CE1A8[8];
 struct EffectSlotSet;
 struct EffMappedResource;
 
+typedef struct MenuAction {
+    u32 value;
+    u32 mode;
+} MenuAction;
+
 /* Per-list storage allocated and cleared as 0x14 bytes by the terminal window builder. */
 typedef struct MenuTerminalWindowState {
-    u8 pad00[0xC];
+    MenuAction command;
+    u8 pad08[4];
     u16 unk0C;
     u16 unk0E;
     u16 unk10;
@@ -363,6 +388,7 @@ typedef struct MenuTerminalWindowState {
 
 typedef char MenuTerminalWindowState_size_must_be_0x14[(sizeof(MenuTerminalWindowState) == 0x14) ? 1 : -1];
 
+
 /* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
 typedef struct MenuTerminalContext {
     s32 resourceHandle;
@@ -370,7 +396,7 @@ typedef struct MenuTerminalContext {
     s32 type;
     u8 transitionWork[0x4C];
     s32 popupState;
-    u8 pad5C[4];
+    s32 stateTable;
     s32 messageResources[2];
     struct EffectSlotSet *effectSlots[4];
     s32 state;
@@ -379,7 +405,8 @@ typedef struct MenuTerminalContext {
     struct EffMappedResource *objects[2];
     s32 shopRow;
     s32 multiplier;
-    u8 pad94[8];
+    s32 dispatchMode;
+    u8 pad98[4];
     s32 availableCount;
     u16 unkA0;
     u16 unkA2;
@@ -390,14 +417,25 @@ typedef struct MenuTerminalContext {
     s32 previousValue;
     s32 elapsedFrames;
     s32 retryFrames;
-    u8 padBC[4];
-    u32 phase;
-    u8 padC4[2];
+    s32 commandFrames; /* 0xBC */
+    s32 phase;
+    u16 stateStep;
     s8 pulseFrame;
     s8 unkC7;
-    u8 padC8[5];
+    s32 unkC8;
+    s8 advancedSlots;
     s8 unkCD;
-    u8 padCE[0x12];
+    s8 rewardMode;
+    u8 padCF;
+    s8 rewardRow;
+    s8 remainingRewards;
+    s8 rewardIndex;
+    s8 announceNextReward;
+    s8 grantPendingReward;
+    s8 rewardDelay;
+    u8 padD6[2];
+    s32 rewardKind;
+    s32 rewardValue;
     s32 prepared;
     s32 delayFrames;
     u8 panelWork[2][0x94];
@@ -406,7 +444,8 @@ typedef struct MenuTerminalContext {
     u32 windowResource;
     MenuGradientFade gradientFade;
     u8 rewardGranted;
-    u8 pad389[3];
+    s8 sceneReady;
+    u8 pad38A[2];
 } MenuTerminalContext;
 
 typedef char MenuTerminalContext_size_must_be_0x38C[(sizeof(MenuTerminalContext) == 0x38C) ? 1 : -1];
@@ -447,7 +486,11 @@ typedef struct MenuProgressHost {
     MenuPageWindow partyWindow;
     u32 panelGroup;
     s32 effectResource;
+#ifdef VERSION_DDS2
     s32 currentEffect;
+#else
+    MenuProfilePanel *currentEffect;
+#endif
 } MenuProgressHost;
 
 #ifdef VERSION_DDS2

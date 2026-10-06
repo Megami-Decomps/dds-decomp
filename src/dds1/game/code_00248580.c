@@ -59,8 +59,10 @@ extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern s32 mnuCreatePanelGroup(s32);
 extern u32 *mnuAllocateSimpleSprite(u32, u32, u32, u32, u32);
-extern u32 *mnuCreateProfilePanel(s32);
-extern void mnuCacheProfilePanelGridPositions(s32, u32, u32, u32, u32);
+extern MenuProfilePanel *mnuCreateProfilePanel(s32);
+extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
+extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
+extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void func_00276720(MenuPageWindow *, s32, s32, s32);
 
 
@@ -624,7 +626,7 @@ void mnuSetupStaffMenuProfilePage(s32 source, MenuProgressHost *work) {
     mnuAttachPartyIconBundle(index, window, work->staffSlots.pairResources[0]);
     work->panelGroup = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
     work->effectResource = (s32)mnuAllocateSimpleSprite(work->staffSlots.baseResources[5], work->staffSlots.baseResources[2], work->staffSlots.baseResources[3], work->staffSlots.baseResources[0], work->staffSlots.pairResources[0]);
-    work->currentEffect = (s32)mnuCreateProfilePanel(source);
+    work->currentEffect = mnuCreateProfilePanel(source);
     mnuCacheProfilePanelGridPositions(work->currentEffect, work->staffSlots.pairResources[1], 5, 14, 15);
     func_00276720(window, 1, 1, 1);
 }
@@ -639,8 +641,8 @@ void mnuReleaseMenuVisualWorkResources(MenuProgressHost *work) {
 }
 
 /* Forward coordinates/mode to the retained profile panel; do not advance other visuals. */
-void effUpdateAttached(s32 x, s32 y, s32 mode, MenuProgressHost *work) {
-    mnuDrawAndAdvanceProfilePanel(x, y, mode, work->currentEffect);
+void effUpdateAttached(s32 x, s32 y, s32 mode, MenuProgressHost *work, s32 layer) {
+    mnuDrawAndAdvanceProfilePanel(x, y, mode, work->currentEffect, layer);
 }
 
 s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {

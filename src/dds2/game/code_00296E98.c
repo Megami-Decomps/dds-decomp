@@ -1,7 +1,7 @@
 #include "common.h"
 #include "mnu_result.h"
+#include "mnu_list.h"
 
-typedef struct MenuActionOwner MenuActionOwner;
 
 extern u8 brsUiUpdateAllowed;
 
@@ -10,11 +10,11 @@ extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_002C6CE8(void);
 
-extern void mnuSetCommandPhase(MenuActionOwner *, u32);
+extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
-extern void func_00297200(MenuActionOwner *, u32);
+extern void func_00297200(struct MenuList *, u32);
 
-extern void mnuStorePendingMenuCommandValue(MenuActionOwner *, u32);
+extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
 extern s8 brsUpdateBlocked;
 
@@ -38,18 +38,6 @@ extern char D_00428358[];
 
 extern char D_00428368[];
 
-typedef struct MenuAction {
-    u32 value;
-    u32 mode;
-} MenuAction;
-
-struct MenuActionOwner {
-    u8 pad00[0x30];
-    MenuAction *action;
-    u8 pad34[0x88];
-    s32 frames;           /* 0xBC */
-    s32 mode;             /* 0xC0: command phase */
-};
 
 
 extern void ptyAdjustItemQuantity(s32, s32);
@@ -134,71 +122,71 @@ void func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
                          D_003D03F0[8][BRS_ICON_ID], drawArg);
 }
 
-void mnuStorePendingMenuCommandValue(MenuActionOwner *owner, u32 value) {
-    MenuAction *action;
+void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {
+    MenuTerminalWindowState *window;
 
-    action = owner->action;
-    if (action != (MenuAction *)0x0) {
-        action->value = value;
-        action->mode = 1;
+    window = list->context;
+    if (window != NULL) {
+        window->command.value = value;
+        window->command.mode = 1;
     }
 }
 
-void func_002971E0(MenuActionOwner *owner, u32 value) {
-    MenuAction *action;
+void func_002971E0(struct MenuList *list, u32 value) {
+    MenuTerminalWindowState *window;
 
-    action = owner->action;
-    if (action != (MenuAction *)0x0) {
-        action->value = value;
-        action->mode = 2;
+    window = list->context;
+    if (window != NULL) {
+        window->command.value = value;
+        window->command.mode = 2;
     }
 }
 
-void func_00297200(MenuActionOwner *owner, u32 value) {
-    MenuAction *action;
+void func_00297200(struct MenuList *list, u32 value) {
+    MenuTerminalWindowState *window;
 
-    action = owner->action;
-    if (action != (MenuAction *)0x0) {
-        action->value = value;
-        action->mode = 1;
+    window = list->context;
+    if (window != NULL) {
+        window->command.value = value;
+        window->command.mode = 1;
     }
 }
 
-void func_00297220(MenuActionOwner *owner, u32 value) {
-    MenuAction *action;
+void func_00297220(struct MenuList *list, u32 value) {
+    MenuTerminalWindowState *window;
 
-    action = owner->action;
-    if (action != (MenuAction *)0x0) {
-        action->value = value;
-        action->mode = 2;
+    window = list->context;
+    if (window != NULL) {
+        window->command.value = value;
+        window->command.mode = 2;
     }
 }
 
-void mnuSetCommandPhase(MenuActionOwner *owner, u32 value) {
-    owner->mode = value;
-    owner->frames = 0;
+void mnuSetCommandPhase(MenuTerminalContext *owner, u32 value) {
+    owner->phase = value;
+    owner->commandFrames = 0;
 }
 
-s32 func_00297250(MenuActionOwner *owner) {
-    switch (owner->mode) {
+s32 func_00297250(MenuTerminalContext *owner) {
+    switch (owner->phase) {
     case 0:
     case 14:
-        owner->frames = owner->frames + 1;
-        if ((f32)owner->frames > 10.0f) {
+        owner->commandFrames = owner->commandFrames + 1;
+        if ((f32)owner->commandFrames > 10.0f) {
             return 0;
         }
         return -1;
     case 15:
-        owner->frames = owner->frames + 1;
-        if ((f32)owner->frames > 10.0f) {
+        owner->commandFrames = owner->commandFrames + 1;
+        if ((f32)owner->commandFrames > 10.0f) {
             return 1;
         }
         return -1;
     case 1:
         return 1;
     case 2:
-        owner->frames = owner->frames + 1;
-        if ((f32)owner->frames > 10.0f) {
+        owner->commandFrames = owner->commandFrames + 1;
+        if ((f32)owner->commandFrames > 10.0f) {
             return 2;
         }
         return -1;
@@ -215,25 +203,25 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00297320);
  * The counter is compared as a float because retail loads 10.0f into $f1 and
  * converts the counter with cvt.s.w (lui at,0x4120 / mtc1 / cvt.s.w / c.lt.s).
  * Phase 8 uses c.le.s, so it fires one frame earlier than 4 and 5. */
-s32 mnuTickExtendedCommandPhase(MenuActionOwner *work) {
-    switch (work->mode) {
+s32 mnuTickExtendedCommandPhase(MenuTerminalContext *work) {
+    switch (work->phase) {
     case 4:
-        work->frames = work->frames + 1;
-        if ((f32)work->frames > 10.0f) {
+        work->commandFrames = work->commandFrames + 1;
+        if ((f32)work->commandFrames > 10.0f) {
             return 4;
         }
         break;
     case 5:
-        work->frames = work->frames + 1;
-        if ((f32)work->frames > 10.0f) {
+        work->commandFrames = work->commandFrames + 1;
+        if ((f32)work->commandFrames > 10.0f) {
             return 5;
         }
         break;
     case 7:
         return 7;
     case 8:
-        work->frames = work->frames + 1;
-        if ((f32)work->frames >= 10.0f) {
+        work->commandFrames = work->commandFrames + 1;
+        if ((f32)work->commandFrames >= 10.0f) {
             return 8;
         }
         break;
@@ -246,25 +234,25 @@ s32 mnuTickExtendedCommandPhase(MenuActionOwner *work) {
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297970);
 
 /* Phase machine for phases 9-12: 9 waits for the frame counter to pass 10.0f, 10 and 12 for it to reach 10.0f, 11 reports at once. */
-s32 mnuTickCommandWaitPhase(MenuActionOwner *work) {
-    switch (work->mode) {
+s32 mnuTickCommandWaitPhase(MenuTerminalContext *work) {
+    switch (work->phase) {
     case 9:
-        work->frames = work->frames + 1;
-        if ((f32)work->frames > 10.0f) {
+        work->commandFrames = work->commandFrames + 1;
+        if ((f32)work->commandFrames > 10.0f) {
             return 9;
         }
         break;
     case 11:
         return 11;
     case 10:
-        work->frames = work->frames + 1;
-        if ((f32)work->frames >= 10.0f) {
+        work->commandFrames = work->commandFrames + 1;
+        if ((f32)work->commandFrames >= 10.0f) {
             return 10;
         }
         break;
     case 12:
-        work->frames = work->frames + 1;
-        if ((f32)work->frames >= 10.0f) {
+        work->commandFrames = work->commandFrames + 1;
+        if ((f32)work->commandFrames >= 10.0f) {
             return 12;
         }
         break;
