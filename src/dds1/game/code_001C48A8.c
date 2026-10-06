@@ -511,7 +511,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
         if (!(scene->subFlags & 0x40)) {
             if (datGameState->party[i].flags & 2) {
                 if (scene->unk258 == 1) {
-                    if (datGameState->party[i].link != 0 || scene->unk2D0 != 0) {
+                    if (datGameState->party[i].huntExp != 0 || scene->unk2D0 != 0) {
                         if (!(datGameState->party[i].status & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
                                 datAdjustCurrentHp(&datGameState->party[i],

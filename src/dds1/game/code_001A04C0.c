@@ -418,7 +418,7 @@ void btlResetActorEntryState(void) {
     *(s32 *)(context + 0x2CC) = 0;
     *(s32 *)(context + 0x2D0) = 0;
     for (i = 0; i < 5; i++) {
-        entries[i].link = 0;
+        entries[i].huntExp = 0;
 
     }
     memset((void *)(btlRuntime + 0x2B4), 0, 12);
