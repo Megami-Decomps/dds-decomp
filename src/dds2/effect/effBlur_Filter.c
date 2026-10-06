@@ -9,34 +9,8 @@ extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
 
-/* Second blur variant: one 0x30-byte slot per step, led by a float phase. */
-typedef struct {
-    f32 phase;
-    f32 angle;
-    EffBlurQuad quad;
-} EffBlurScaleSlot; /* 0x30 */
 
-typedef struct {
-    s32 count;           /* 0x00: number of slots */
-    f32 phaseStep;        /* 0x04: advances the size factor toward 1 */
-    f32 spacing;         /* 0x08: phase step between slots */
-    u32 color;           /* 0x0C */
-    s32 unk10;           /* 0x10 */
-    f32 unk14;           /* 0x14 */
-    f32 unk18;           /* 0x18 */
-    f32 angleStep;       /* 0x1C */
-    s32 x;               /* 0x20 */
-    s32 y;               /* 0x24 */
-    s32 size;            /* 0x28 */
-} EffBlurScaleParams; /* 0x2C */
 
-/* The second factory allocates this header followed by count scale slots. */
-typedef struct {
-    EffBlurScaleParams params;
-    u32 sourceHandle;
-    u32 allocation;
-    EffBlurScaleSlot *slots;
-} EffBlurScaleWork; /* 0x38 */
 
 void effReleaseBlurTemplate(void) {
     sdfReleaseChipBlock();

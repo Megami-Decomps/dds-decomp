@@ -56,6 +56,40 @@ typedef char EffBlurScatterWorkSizeCheck[sizeof(EffBlurScatterWork) == 0x38 ? 1 
 typedef char EffBlurScatterAllocationOffsetCheck[((u32)&((EffBlurScatterWork *)0)->allocation == 0x30) ? 1 : -1];
 typedef char EffBlurScatterSlotsOffsetCheck[((u32)&((EffBlurScatterWork *)0)->slots == 0x34) ? 1 : -1];
 
+/* Phase-driven blur parameters and the scale-slot allocation they own. */
+typedef struct EffBlurScaleParams {
+    s32 count;
+    f32 phaseStep;
+    f32 spacing;
+    u32 color;
+    s32 unk10; /* Copied to the slot quad blend control. */
+    f32 unk14; /* Copied to the slot quad angle. */
+    f32 unk18; /* Displacement amplitude used by the native update. */
+    f32 angleStep;
+    s32 x;
+    s32 y;
+    s32 size;
+} EffBlurScaleParams;
+
+typedef struct EffBlurScaleSlot {
+    f32 phase;
+    f32 angle;
+    EffBlurQuad quad;
+} EffBlurScaleSlot;
+
+typedef struct EffBlurScaleWork {
+    EffBlurScaleParams params;
+    u32 sourceHandle;
+    struct SdfMemBlock *allocation;
+    EffBlurScaleSlot *slots;
+} EffBlurScaleWork;
+
+typedef char EffBlurScaleParamsSizeCheck[sizeof(EffBlurScaleParams) == 0x2C ? 1 : -1];
+typedef char EffBlurScaleSlotSizeCheck[sizeof(EffBlurScaleSlot) == 0x30 ? 1 : -1];
+typedef char EffBlurScaleWorkSizeCheck[sizeof(EffBlurScaleWork) == 0x38 ? 1 : -1];
+typedef char EffBlurScaleAllocationOffsetCheck[((u32)&((EffBlurScaleWork *)0)->allocation == 0x30) ? 1 : -1];
+typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots == 0x34) ? 1 : -1];
+
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 EffBlurScatterWork *func_00186F90(void *params);
 EffBlurScatterWork *func_0018EBC8(void *params);
