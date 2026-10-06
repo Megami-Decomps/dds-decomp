@@ -58,7 +58,8 @@ typedef struct BtlState {
     struct EffectSlotSet *resB; /* 0x4A8: resource slots used for battle-number glyphs */
     u8 pad4AC[8];
     u32 buttonTextureHandle; /* 0x4B4 */
-    u8 pad4B8[0xDC];
+    struct SoundResourceNode *resources[0x31]; /* 0x4B8: SYSEFF resource slots, indexed like DDS2's */
+    u8 pad57C[0x18];
     void (*bossCleanup)(void); /* 0x594 */
     u8 pad598[0x20];
     s32 unk_5B8;

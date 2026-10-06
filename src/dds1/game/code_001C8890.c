@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "btl_state.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -1291,7 +1292,133 @@ void btlMarkLinkedActorStatusFlag(s32 arg0) {
     ;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001CE0D8);
+/* State-handler table entry (0x359BEC); the table holds s32 handlers (btlCommandStateSelectB) and this one
+ * returns without a value, as retail's missing sibling calls show (DDS1 twin of dds2 func_001DA210).
+ * Gun-change command (slot 0x11): once no blocking tasks remain, swap the unit to its gun model, refresh linked
+ * allies and reload their models, start the gun effects, and continue to state 0x18/0x1A; a unit already
+ * holding the gun only restores its motion, swaps back and continues to 0x1B/0x1A. */
+s32 func_001CE0D8(BtlTask *task) {
+    BtlUnit *unit;
+    BtlState *state;
+    BtlUnit *other;
+    SoundTask *sound;
+    SoundTask *change;
+    SoundTask *spawned;
+    SoundTask *load;
+    u16 *status;
+    s32 motion;
+
+    if (btlCountTasksByKind(0x1A) != 0 || btlCountTasksByKind(0x18) != 0 || btlCountTasksByKind(0x23) != 0) {
+        return;
+    }
+    state = (BtlState *)btlGetRuntime();
+    unit = task->unit;
+    status = (u16 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+    if (!(unit->flags & 0x20)) {
+        motion = func_001D6050(unit, 0x11) + 0x14;
+    } else {
+        motion = status[0x15];
+    }
+    if (!(unit->flags & 0x400020)) {
+        unit->flags &= ~0x1000;
+        unit->statBits &= ~0x1000;
+        sound = (SoundTask *)btlCreateMoveOtherUnitsTask(unit, 0x11);
+        btlStartTask(sound);
+        for (other = state->units; other != NULL; other = other->next) {
+            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+                spawned = (SoundTask *)btlScheduleRefreshTask((u8 *)other);
+                spawned->startCondition.kind = 4;
+                spawned->startDelay = 1;
+                spawned->startCondition.value.handle = sound->handle;
+                spawned->owner = unit->identity;
+                btlStartTask(spawned);
+            }
+        }
+        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x18,
+                                                       0);
+        change->startCondition.kind = 4;
+        change->startCondition.value.handle = sound->handle;
+        btlStartTask(change);
+        for (other = state->units; other != NULL; other = other->next) {
+            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+                load = (SoundTask *)btlCreateModelLoadPollTask((u8 *)other, other->resourceKind, other->species, 0);
+                load->startCondition.kind = 4;
+                load->startCondition.value.handle = change->handle;
+                load->owner = unit->identity;
+                btlStartTask(load);
+                spawned = (SoundTask *)btlCreateUnitFadeInTask((u8 *)other, 0, 0);
+                spawned->startCondition.kind = 4;
+                spawned->startCondition.value.handle = load->handle;
+                spawned->owner = unit->identity;
+                btlStartTask(spawned);
+            }
+        }
+        btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+        btlStartTask(sndCreateEffectSourceTask((u32)state->resources[45], (u8 *)unit, change->handle));
+        btlStartTask(sndCreateStationedSeTask(0x1000F));
+        spawned = (SoundTask *)btlCreateEffObjA(unit, task->result);
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
+        btlStartTask(spawned);
+        spawned = btlCreateCommandSoundUpdateTask();
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
+        btlStartTask(spawned);
+        spawned = (SoundTask *)btlCreateSecondaryCommandSoundTask();
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
+        btlStartTask(spawned);
+        spawned = (SoundTask *)btlCreateCommandSoundTask((s32)task, 0xE);
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
+        btlStartTask(spawned);
+        spawned = (SoundTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
+                                                                btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
+        btlStartTask(spawned);
+        spawned = (SoundTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
+        spawned->owner = unit->identity;
+        btlStartTask(spawned);
+        if (task->unit->conditionFlags & 0x480) {
+            btlDispatchStateHandler(task, 0x18);
+        } else {
+            btlDispatchStateHandler(task, 0x1A);
+        }
+    } else {
+        if ((unit->conditionFlags & 0x7FFF) != 0x4000) {
+            unit->flags &= ~0x20;
+            if (unit->hp == 0) {
+                unit->hp = 1;
+                btlRefreshUnitMotionSelection((u8 *)unit);
+            }
+        }
+        if (task->actionStage == 4) {
+            if (!btlCheckSpecialAbility((s32)&unit->statBits, 0x231)) {
+                btlStartTask(btlCreateEffObjB(unit, task->effect));
+                task->actionStage = 0;
+            } else {
+                btlStartTask(btlCreateEffObjD(unit, 0x231));
+            }
+        }
+        unit->flags &= ~0x1000;
+        unit->statBits &= ~0x1000;
+        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x12,
+                                                       3);
+        btlStartTask(change);
+        btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+        btlStartTask(sndCreateEffectSourceTask((u32)state->resources[47], (u8 *)unit, change->handle));
+        btlStartTask(sndCreateStationedSeTask(0x1000F));
+        unit->flags &= ~0x400000;
+        if (task->flags & 0x10) {
+            btlDispatchStateHandler(task, 0x1B);
+        } else {
+            btlDispatchStateHandler(task, 0x1A);
+        }
+    }
+}
 
 void func_001CE5D8(s32 arg0) {
     *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x110) = *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x110) | 0x4000

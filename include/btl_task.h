@@ -66,7 +66,11 @@ typedef struct BtlTask {
 #ifdef VERSION_DDS1
     u8 unk_28[0x10];
     s32 value38; /* 0x38: count retained by the HARI2 command (0xD5). */
-    u8 pad3C[0x24];
+    u8 pad3C[0x14];
+    u16 actionStage; /* 0x50: 4 while the gun-change command still owes its effect */
+    u8 pad52[2];
+    s32 effect; /* 0x54 */
+    u8 pad58[8];
 #else
     u8 unk_28[0x38];
 #endif
