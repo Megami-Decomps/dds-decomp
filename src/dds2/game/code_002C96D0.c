@@ -783,7 +783,134 @@ s32 func_002C9BD0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002C9CF8);
+extern s32 D_00437D28;
+extern void fileResetLoadContextSlide(void);
+
+extern char D_003E8058[];
+extern char D_003E8088[];
+extern char D_003E80A8[];
+extern char D_003E80B8[];
+extern char D_003E80E0[];
+extern char D_003E8158[];
+extern char D_003E8188[];
+extern char D_003E81A0[];
+extern char D_003E81C8[];
+extern char D_003E81E0[];
+extern char D_003E82C0[];
+extern char D_003E82D0[];
+extern char D_003E82E0[];
+extern char D_003E8358[];
+extern char D_003E8380[];
+extern char D_003E83A0[];
+extern char D_003E83B8[];
+extern char D_003E83D8[];
+extern char D_003E8668[];
+extern char D_003E8698[];
+extern char D_003E86C8[];
+extern char D_003E8990[];
+extern char D_003E89B8[];
+extern char D_003E8BF0[];
+extern char D_003E8C08[];
+extern char D_003E8C30[];
+extern char D_003E8C58[];
+extern char D_003E8C70[];
+extern char D_003E8C98[];
+extern char D_003E8CC0[];
+
+void func_002C9CF8(void) {
+    if (D_00437D3C == 0) {
+        return;
+    }
+    if (D_00437D3C == 1) {
+        D_00437D2C = 0;
+        D_00437D28 = 0;
+        fileResetLoadContextSlide();
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8058);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8088);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E80A8);
+            mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)D_003E80B8);
+            mcdCreateFontDrawHandle(86, 210, 0x89FEFF80U, (u32)D_003E80E0);
+            fileDrawPulsingSaveHighlight();
+            D_00437CF8 = 0;
+        }
+    }
+    if (D_00437D3C == 2) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8158);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8188);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E81A0);
+            mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)D_003E81C8);
+            mcdCreateFontDrawHandle(86, 210, 0x89FEFF80U, (u32)D_003E81E0);
+            fileDrawPulsingSaveHighlight();
+            D_00437CF8 = 0;
+        }
+    }
+    if (D_00437D3C == 3) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82C0);
+            fileDrawPulsingSaveHighlight();
+            D_00437CF8 = 0;
+        }
+    }
+    if (D_00437D3C == 4) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82D0);
+            fileDrawPulsingSaveHighlight();
+            D_00437CF8 = 0;
+        }
+    }
+    if (D_00437D3C == 5) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8358);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8380);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E83A0);
+            mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)D_003E83B8);
+            mcdCreateFontDrawHandle(86, 210, 0x89FEFF80U, (u32)D_003E83D8);
+            fileDrawPulsingSaveHighlight();
+            D_00437CF8 = 0;
+        }
+    }
+    if (D_00437D3C == 6) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82E0);
+            fileDrawPulsingSaveHighlight();
+            D_00437CF8 = 0;
+        }
+    }
+    if (D_00437D3C == 7) {
+        if (func_002C9BD0() != 0) {
+            if (mcdOriginalTitleFileMode == 0) {
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8668);
+                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8698);
+                mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E86C8);
+            } else {
+                mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8BF0);
+            }
+            fileDrawPulsingSaveHighlight();
+            D_00437CF8 = 0;
+        }
+    }
+    if (D_00437D3C == 8) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C08);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8990);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E89B8);
+            mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)D_003E8C30);
+            mcdCreateFontDrawHandle(86, 210, 0x89FEFF80U, (u32)D_003E8C58);
+            fileDrawPulsingSaveHighlight();
+        }
+    }
+    if (D_00437D3C == 9) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C70);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8C98);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8CC0);
+            fileDrawPulsingSaveHighlight();
+        }
+    }
+}
+
 
 void fileSetMenuFlowState(u32 value) {
     s32 previous;
@@ -1914,10 +2041,8 @@ void *mcdAdvanceToLoadSelection(void) {
 }
 
 extern s32 D_00437D00;
-extern s32 D_00437D28;
 extern void fileLoadSetMode(s8);
 extern void fileSetMenuValueAndInitializeFlags(u32);
-extern void fileResetLoadContextSlide(void);
 extern void fileCopyRecordHeader(FileRecordHeader *, const FileRecordHeader *);
 
 void *func_002CCAD0(void) {
