@@ -27,7 +27,7 @@ typedef struct UiSprite {
     s32 bottom;
     s32 unk20;
     s32 screenY;
-    u8 pad28[4];
+    s32 scrollSpan; /* Panel edge-fade divisor; both games read it as a signed word. */
     /* The secondary panel notification copies these four opaque values. */
     s32 unk2C;
     s32 unk30;

@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "itf.h"
 
 #define ITF_PANEL_COLUMN_COUNT 4
 #define ITF_PANEL_ROW_COUNT 2
@@ -38,17 +39,6 @@ typedef struct PanelRect {
     s32 y1; /* 0xC */
 } PanelRect;
 
-/* Work object holding the packet buffer pointer. */
-typedef struct PanelObj {
-    u8 unk0[8];     /* 0x0 */
-    PktRec *buf;    /* 0x8: packet buffer */
-    s32 tail;    /* 0xC: tail arg of itfDrawQuadFlat4 */
-    PanelRect rect; /* 0x10 */
-    u8 unk20[0x18]; /* 0x20 */
-    s32 alpha;   /* 0x38: copied to a colour record's alpha */
-    u8 handlerIndex; /* 0x3C: index into the panel handler table */
-} PanelObj;
-
 /* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
 typedef struct PanelRecSub {
     u8 unk0[0x10]; /* 0x0 */
@@ -86,7 +76,7 @@ typedef struct PanelEntry {
 } PanelEntry;
 
 extern PanelEntry itfWindowSlots[];
-extern void (*itfPanelHandlers[])(PanelObj *);
+extern void (*itfPanelHandlers[])(UiSprite *);
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern u32 scrGetWindow(void);
 extern void scrSetIntegerReturnValue(s32);
@@ -146,9 +136,9 @@ typedef struct PanelPt {
     s32 y;
 } PanelPt;
 
-/* Invoke the indexed panel handler; panel and handlerIndex are trusted. */
-void itfPanelDispatchHandler(PanelObj *panel) {
-    itfPanelHandlers[panel->handlerIndex](panel);
+/* Invoke the indexed panel handler; panel and kind are trusted. */
+void itfPanelDispatchHandler(UiSprite *panel) {
+    itfPanelHandlers[panel->kind](panel);
 }
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
@@ -309,23 +299,23 @@ extern u8 D_00357BD0[];
 extern u8 D_00357BE0[];
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
-void itfDrawIndexedPanelFlatQuads(PanelObj *panel, u64 command) {
-    PktRec *drawBuffer = panel->buf;
+void itfDrawIndexedPanelFlatQuads(UiSprite *panel, u64 command) {
+    PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 4;
     s32 quadIndex;
 
-    colors[1].unkC = panel->alpha;
+    colors[1].unkC = panel->unk38;
     for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
-        itfDrawQuadFlat4(drawBuffer, colors, &D_00357BD0[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_00357BE0[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->tail, command);
+        itfDrawQuadFlat4(drawBuffer, colors, &D_00357BD0[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_00357BE0[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->unk0C, command);
     }
 }
 
 /* Update seven alpha words, then emit three wide and six side strips.
    The first color row is deliberately excluded from the alpha update. */
-void itfDrawSevenColorPanelQuads(PanelObj *panel, u64 command) {
-    PktRec *drawBuffer = panel->buf;
+void itfDrawSevenColorPanelQuads(UiSprite *panel, u64 command) {
+    PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 21;
-    s32 alpha = panel->alpha;
+    s32 alpha = panel->unk38;
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_COLOR_COUNT; rowIndex++, colors++) {
@@ -333,19 +323,19 @@ void itfDrawSevenColorPanelQuads(PanelObj *panel, u64 command) {
     }
     colors = drawBuffer + 20;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListWide(drawBuffer, colors, &D_00357BF0[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00357C08[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->tail, command);
+        itfEmitQuadListWide(drawBuffer, colors, &D_00357BF0[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00357C08[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->unk0C, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_003BB1A8, &D_00357C20[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->tail, command);
+        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_003BB1A8, &D_00357C20[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->unk0C, command);
     }
 }
 
 /* Update five alpha words, then emit three wide and two side strips.
    The first color row is deliberately excluded from the alpha update. */
-void itfDrawFiveColorPanelQuads(PanelObj *panel, u64 command) {
-    PktRec *drawBuffer = panel->buf;
+void itfDrawFiveColorPanelQuads(UiSprite *panel, u64 command) {
+    PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 17;
-    s32 alpha = panel->alpha;
+    s32 alpha = panel->unk38;
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_COLOR_COUNT; rowIndex++, colors++) {
@@ -353,16 +343,16 @@ void itfDrawFiveColorPanelQuads(PanelObj *panel, u64 command) {
     }
     colors = drawBuffer + 16;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListWide(drawBuffer, colors, &D_00357C38[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00357C50[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->tail, command);
+        itfEmitQuadListWide(drawBuffer, colors, &D_00357C38[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00357C50[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->unk0C, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_003BB1B0, &D_00357C68[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->tail, command);
+        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_003BB1B0, &D_00357C68[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->unk0C, command);
     }
 }
 
-void func_0019A420(PanelObj *panel, u64 command) {
+void func_0019A420(UiSprite *panel, u64 command) {
     PanelPt vertices[12];
-    PktRec *buf = panel->buf;
+    PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
     PanelPt *input = (PanelPt *)buf;
     s32 i;
@@ -382,28 +372,28 @@ void func_0019A420(PanelObj *panel, u64 command) {
         out[3].y = input[3].y - yOffset;
     }
 
-    itfDrawQuadFlat4(buf, colors, D_003BB1B8, D_003BB1C0, panel->tail, command);
+    itfDrawQuadFlat4(buf, colors, D_003BB1B8, D_003BB1C0, panel->unk0C, command);
     for (i = 0; i < 3; i++) {
-        itfEmitQuadListA(vertices, colors, &D_00357C78[i * 5], &D_00357C88[i * 5], 5, panel->tail, command);
+        itfEmitQuadListA(vertices, colors, &D_00357C78[i * 5], &D_00357C88[i * 5], 5, panel->unk0C, command);
     }
 }
 
 /* Update the first color row's alpha and emit one indexed quad. */
-void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
-    PktRec *colors = panel->buf + 2;
+void itfDrawPanelQuadWithCommand(UiSprite *panel, u64 command) {
+    PktRec *colors = (PktRec *)panel->payload + 2;
 
-    colors->unkC = panel->alpha;
-    itfDrawQuadFlat4(panel->buf, colors, D_003BB1C8, D_003BB1D0, panel->tail, command);
+    colors->unkC = panel->unk38;
+    itfDrawQuadFlat4(panel->payload, colors, D_003BB1C8, D_003BB1D0, panel->unk0C, command);
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
-void itfEmitPanelQuadPacket(PanelObj *panel, u64 command) {
-    PktRec *drawBuffer = panel->buf;
+void itfEmitPanelQuadPacket(UiSprite *panel, u64 command) {
+    PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 3;
 
-    colors[1].unkC = panel->alpha;
+    colors[1].unkC = panel->unk38;
     itfSendTablePacket(command, 2, 0);
-    itfEmitQuadListWide(drawBuffer, colors, D_003BB1D8, D_003BB1E0, 6, panel->tail, command);
+    itfEmitQuadListWide(drawBuffer, colors, D_003BB1D8, D_003BB1E0, 6, panel->unk0C, command);
     itfSendTablePacket(command, 0, 0);
 }
 
@@ -414,15 +404,15 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A9A8);
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AAC0);
 
 /* Copy bounds and draw the tinted border; alpha uses the native signed 103/128 scale. */
-void itfDrawTintedPanelRect(PanelObj *panel, u64 command) {
+void itfDrawTintedPanelRect(UiSprite *panel, u64 command) {
     PanelRect rect;
 
-    D_00357D68[3] = panel->alpha * ITF_PANEL_TINT_ALPHA_NUMERATOR / ITF_PANEL_TINT_ALPHA_DENOMINATOR;
-    rect.x0 = panel->rect.x0;
-    rect.y0 = panel->rect.y0;
-    rect.x1 = panel->rect.x1;
-    rect.y1 = panel->rect.y1;
-    func_00198990(&rect, D_00357D68, panel->tail, ITF_PANEL_TINT_BORDER_WIDTH, command);
+    D_00357D68[3] = panel->unk38 * ITF_PANEL_TINT_ALPHA_NUMERATOR / ITF_PANEL_TINT_ALPHA_DENOMINATOR;
+    rect.x0 = panel->left;
+    rect.y0 = panel->top;
+    rect.x1 = panel->right;
+    rect.y1 = panel->bottom;
+    func_00198990(&rect, D_00357D68, panel->unk0C, ITF_PANEL_TINT_BORDER_WIDTH, command);
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
