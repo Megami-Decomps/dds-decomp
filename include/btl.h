@@ -91,7 +91,8 @@ typedef struct BtlUnit {
     u8 padCD[3];
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
-    u8 padD8[8];
+    u8 padD8[4];
+    s32 unkDC; /* 0xDC: model for the slot-0x10 model-change command, with displaySpecies */
     s32 displaySpecies; /* 0xE0 */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
