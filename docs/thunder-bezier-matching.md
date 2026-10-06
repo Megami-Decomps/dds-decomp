@@ -9,7 +9,7 @@ color, and update the attached endpoint event.
 
 - `EffGroupParams` remains 0x50 bytes. The recovered scalar fields occupy the
   previously opaque parameter prefix; all existing constructor offsets remain.
-- `EffBezierSlot` agrees with `effEvent.c`: seven xyz control points, a first
+- `EffSegmentedBezierSlot` is shared with `effEvent.c`: seven xyz control points, a first
   control-point index at 0x54, parameter at 0x58 and increment at 0x5C.
 - The curve begins at 0x1C in the 0x80-byte `EffGroupSlot`. Its stepping state
   therefore retains offsets 0x70/0x74/0x78, followed by the event node at 0x7C.
@@ -83,9 +83,42 @@ both the hardware load contract and the retail addresses of subsequent data;
 it does not add a padding array or alter either consumer body. A plain array
 still gets only eight-byte alignment from this compiler.
 
+## Chain-fragment continuation
+
+`func_001673D0` (DDS1) and `func_0016F028` (DDS2) each contribute another
+1,700 bytes. Their caller passes the preceding segment's last five-vector
+row. The continuation copies that row, advances a randomized sinusoidal
+path, builds strip rows and selects each join edge from the new direction's
+dot product with the preceding side vector. The observed anchor is seed[3],
+not the middle vertex.
+
+The shared fragment parameter owner exposes three previously opaque floats:
+wave amplitude at 0x2C, band width at 0x44 and added edge width at 0x4C.
+Its size remains 0x54. The base width vector is filled from the owner; the
+outer and negative-outer vectors are then derived from it. Keeping this
+actual producer/consumer flow, rather than separate scalar caches, preserves
+the native initial XYZ stores without a statement-order search.
+
+For positive halfLife h, the constructor requests kind 4 with 2h-1 segments.
+The real allocator expands that to 5(2h-1)+5 = 10h quadwords. Each of h
+iterations writes two five-vector rows, filling exactly that allocation.
+The seed belongs to the preceding separately allocated segment, which the
+outer caller updates first. Both vertices-5 and vertices-1 select within
+the last completed row. Valid constructed groups, h >= 1 and a valid fragment
+index remain prerequisites.
+
+This pair has its own scoped SDK-store/readback review. Scalar distance and
+facing use XYZ reductions, normalization and rotation do not mix input W into
+XYZ, and kind-4 drawing reaches the same XYZ-only packet builder. No new
+fourth-lane initialization or general store-safety claim is warranted.
+
+The Thunder declarations use the existing shared EffSegmentedBezierSlot
+owner, replacing the superseded local curve types after that owner was
+promoted on main. The old Bezier update bytes are unchanged.
+
 ## Verification
 
-Canonical whole-unit checks report 63 matches and zero differences for each
+Canonical whole-unit checks report 64 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks

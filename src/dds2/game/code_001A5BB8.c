@@ -4299,8 +4299,6 @@ void btlReleaseAndClearChipBlock(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6CA8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6FC0);
-
 typedef struct BtlResBlock {
     SdfMemBlock *unk0;
     s32 nameA;
@@ -4312,12 +4310,6 @@ typedef struct BtlResBlock {
     s32 unk1C;
 } BtlResBlock;
 extern BtlResBlock *btlResourceBlock;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
-
-typedef struct BattlePanelColors {
-    u32 values[4];
-} BattlePanelColors;
-extern const BattlePanelColors D_00415CE8;
 
 /* 0x2C-byte action record shared by the initializer, updater and renderer. */
 typedef struct BattleMirroredSpriteRecord {
@@ -4336,6 +4328,54 @@ typedef struct BattleMirroredSpriteRecord {
     s8 alpha;
     u8 pad29[3];
 } BattleMirroredSpriteRecord;
+
+void func_001B6FC0(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            switch (record->active) {
+            case 1: {
+                s32 scale = (s32)record->scale;
+                s32 x = record->x;
+                s32 y = record->y;
+                s32 width = btlResourceBlock->resA->workEntries[record->slot].sourceWidth;
+                s32 height;
+                s32 scaledWidth;
+                s32 scaledHeight;
+                record->restoredWidth = width;
+                scale = scale >> 1;
+                height = btlResourceBlock->resA->workEntries[record->slot].sourceHeight;
+                scaledWidth = width * scale;
+                scaledHeight = height * scale;
+                record->active = 2;
+                record->restoredHeight = height;
+                x -= (scaledWidth - width) >> 1;
+                y -= (scaledHeight - height) >> 1;
+                record->secondX = x;
+                record->y = y;
+                record->width = scaledWidth << 4;
+                record->height = scaledHeight << 3;
+                break;
+            }
+            case 2:
+                record->width -= 0x800;
+                record->height -= 0x800;
+                if (record->width <= 0x1000) record->active = 0;
+                break;
+            }
+            remaining--;
+            record++;
+        } while (remaining != 0);
+    }
+}
+
+extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+extern const BattlePanelColors D_00415CE8;
 
 void func_001B70B8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
     BattlePanelColors colors = D_00415CE8;
@@ -4375,7 +4415,6 @@ void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, 
 extern u8 D_00436800;
 
 extern u8 btlResourceBlockLoaded;
-
 
 extern s32 sdfReadNamedResource(const char *, void *, s32);
 
@@ -5906,4 +5945,3 @@ INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436840);
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436848);
 
 INCLUDE_SDATA(const s32, "game/code_001A5BB8", D_00436850);
-
