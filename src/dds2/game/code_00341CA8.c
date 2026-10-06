@@ -61,4 +61,35 @@ void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
     func_00341650(0x90, 0, &packet, 0xC);
 }
 
-INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341E80);
+/* Map a wrapped listener-relative angle and distance onto sequence volume/pan. */
+void func_00341E80(s32 trackId, f32 angle, f32 distance) {
+    s32 degrees = (s32)angle % 360;
+    s32 side = 1;
+    s32 pan;
+    f32 volume;
+
+    if (degrees > 180) {
+        degrees -= 360;
+    }
+    if (degrees < -180) {
+        degrees += 360;
+    }
+    if (degrees < 0) {
+        degrees = -degrees;
+        side = -1;
+    }
+    volume = 1.0f;
+    if (degrees < 45) {
+        pan = 63 - (s32)(degrees * 0.71111f) * side;
+    } else if (degrees <= 90) {
+        pan = 63 - (s32)(degrees * 0.7f) * side;
+        volume = 1.0f - (degrees - 45) * 0.004444f;
+    } else {
+        volume = 0.75f - (degrees - 90) * 0.005556f;
+        pan = 63 - (s32)((180 - degrees) * 0.7f) * side;
+    }
+    if (distance > 1.0f) {
+        volume /= distance * 0.333f + 1.0f;
+    }
+    sndSetSequenceVolumePan(trackId, (s32)(volume * 127.0f), pan);
+}
