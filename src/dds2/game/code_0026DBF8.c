@@ -1,3 +1,4 @@
+#include "prf_requirement.h"
 #include "common.h"
 #include "kwln.h"
 #include "dat_state.h"
@@ -308,30 +309,6 @@ typedef struct MantraBackgroundState {
     MantraBurstPool *burstPool; /* 0x18 */
 } MantraBackgroundState;
 
-typedef struct MantraSourceEntry {
-    u32 unk0;
-    u32 flags;
-    u32 unk8;
-    s32 value;
-    u32 unk10;
-} MantraSourceEntry;
-
-/* One of the two 0x14-byte slots of a mantra source entry. */
-typedef struct {
-    s32 value;      /* 0x00 */
-    u8 pad04[8];
-    u32 slotFlags;      /* 0x0C: bit 5 marks this mantra source slot active */
-    u8 pad10[4];
-} MnuSourceSlot;
-
-/* Slot view of a mantra source entry (0x34 bytes). */
-typedef struct {
-    u8 pad00[4];
-    u32 flags;             /* 0x04 */
-    u8 pad08[4];
-    MnuSourceSlot slot[2]; /* 0x0C */
-} MnuSourceEntrySlots;
-
 typedef struct MantraListState {
     u32 unk0;
     MantraDisplayNode *head;
@@ -490,22 +467,22 @@ void mnuDrawMantraCostCounter(u32 x, u32 y, u32 depth, s32 fade, u32 entryId, u3
     }
 }
 
-extern MantraSourceEntry *scrGetEntryDescriptor(u16);
+
 
 /* Pick the value of the first active slot, preferring slot 0. */
 s32 mnuGetMantraSourceValue(u16 index) {
     s32 result = 0;
-    MnuSourceEntrySlots *entry = (MnuSourceEntrySlots *)scrGetEntryDescriptor(index);
+    PrfRequirementRecord *entry = scrGetEntryDescriptor(index);
     s32 slot = 0;
 
-    if (entry->flags & 0x20) {
+    if (entry->rules[0].operation & 0x20) {
         slot = 0;
-    } else if (entry->slot[0].slotFlags & 0x20) {
+    } else if (entry->rules[1].operation & 0x20) {
         slot = 1;
     } else {
         return result;
     }
-    return entry->slot[slot].value;
+    return entry->rules[slot].minimum;
 }
 
 void mnuMergeMantraSpriteSlots(u32 *values) {
