@@ -7,7 +7,7 @@
 #include "scr.h"
 #include "sdf.h"
 
-extern s64 btlStartTask();
+extern u64 btlStartTask();
 
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
@@ -3019,8 +3019,8 @@ s32 btlCreateResourceNameRecord(s32 nameAddress) {
     return recordAddress;
 }
 
-void func_0020E368(void) {
-    sdfReleaseChipBlock();
+void func_0020E368(void *allocation) {
+    sdfReleaseChipBlock(allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
