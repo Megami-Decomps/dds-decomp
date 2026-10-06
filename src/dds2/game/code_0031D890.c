@@ -110,7 +110,93 @@ void itfReleaseWideSlot(WideSlot *slot) {
     slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DA38);
+extern void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
+extern s32 func_0035C860(char *destination, const char *format, ...);
+
+void func_0031DA38(WideSlotPool *pool, u32 flags) {
+    WideSlot *slot = pool->slots;
+    s32 slotIndex;
+    char text[32];
+    s8 length;
+    s32 width;
+    s32 offset;
+    s32 x;
+    s32 y;
+    s32 digit;
+    f32 opacity;
+    f32 rise;
+
+    for (slotIndex = 0; slotIndex < pool->count; slotIndex++, slot++) {
+        if ((slot->flags & SLOT_IN_USE) != 0) {
+            if ((flags & 1) == 0) {
+                slot->age++;
+            }
+            if (slot->age < 20) {
+                opacity = (f32)slot->age / 20.0f;
+            } else if (slot->age < 70) {
+                opacity = 1.0f;
+            } else {
+                opacity = (f32)(90 - slot->age) / 20.0f;
+            }
+            if (slot->age < 20) {
+                rise = (f32)slot->age / 20.0f;
+            } else {
+                rise = 1.0f;
+            }
+            memset(text, 0, sizeof(text));
+            length = 0;
+            func_0035C860(text, "%d", slot->value);
+            x = slot->x;
+            y = slot->y;
+            width = 0;
+            while (text[length] != 0) {
+                length++;
+                width += 10;
+            }
+            if (((slot->flags >> 1) & 0xFF) != 0) {
+                width += 41;
+            }
+            offset = (s32)((f32)-width * 0.5f);
+            for (digit = 0; digit < length; digit++, offset += 10) {
+                if (((slot->flags >> 1) & 0xFF) == 20) {
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, text[digit] - 7, 0x53);
+                } else {
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, text[digit] + 3, 0x53);
+                }
+            }
+            if (((slot->flags >> 1) & 0xFF) != 0) {
+                offset += 13;
+                switch ((slot->flags >> 1) & 0xFF) {
+                case 1:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 61, 0x53);
+                    break;
+                case 2:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 62, 0x53);
+                    break;
+                case 4:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 63, 0x53);
+                    break;
+                case 8:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 64, 0x53);
+                    break;
+                case 20:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 75, 0x53);
+                    break;
+                }
+            }
+            if (slot->age >= 91) {
+                itfReleaseWideSlot(slot);
+            }
+        }
+    }
+}
 
 /* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
 CompactSlotPool *func_0031DEB8(u32 count) {
@@ -271,6 +357,3 @@ u8 mnuGetIndexedFadeTexture(s32 index) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0031D890", D_0042DBA0);
-
-INCLUDE_SDATA(const s32, "game/code_0031D890", D_00438958);
-
