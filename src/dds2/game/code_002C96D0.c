@@ -5378,6 +5378,19 @@ typedef struct FileKeyBlock {
             f32 phaseStep;
             f32 phaseStepRandomness;
         } wave;
+        struct {
+            f32 initialAxialExtent;
+            f32 initialRadius;
+            f32 initialRadiusRandomness;
+            f32 finalRadius;
+            f32 finalRadiusRandomness;
+            f32 angularSpeed;
+            f32 angularSpeedRandomness;
+            f32 axialSpeed;
+            f32 axialSpeedRandomness;
+            f32 angularAcceleration;
+            f32 gravity;
+        } circular;
     } emitter;
 } FileKeyBlock;             /* record-type-dependent parameter extent */
 
