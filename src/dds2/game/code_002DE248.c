@@ -10506,8 +10506,8 @@ EffectList *mnuAllocateValueRecord(u32 mode) {
     return list;
 }
 
-void func_00303D58(void) {
-    sdfReleaseChipBlock();
+void func_00303D58(EffectList *list) {
+    sdfReleaseChipBlock(list);
 }
 
 u32 mnuGetValueRecordOwner(const EffectList *list) {
