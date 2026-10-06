@@ -212,16 +212,6 @@ extern s32 fldValueRecordCount;
 extern s32 D_00436188;
 extern s32 D_0043617C;
 
-typedef struct FldRecE4 {
-    u8 pad0[0xB8];
-    f32 previousPosition[3]; /* 0xB8: saved world position of the record's actor. */
-    u8 padC4[8];
-    s32 id;
-    s32 value; /* 0xD0: record API word, also used as an actor address. */
-    u8 padD4[8];
-    s32 sceneFlag; /* 0xDC: passed to fldTestRoomSceneFlag. */
-    u8 padE0[4];
-} FldRecE4; /* 0xE4 bytes */
 
 extern s32 fldAreaState[];
 
@@ -354,15 +344,6 @@ typedef struct FldAreaState {
 } FldAreaState;
 
 
-/* Axis-aligned trigger zone: up to four bounding planes plus a 2D extent. */
-typedef struct FldZone {
-    s16 mode;
-    s16 count;
-    u8 pad4[0x14];
-    f32 plane[4][4]; /* 0x18 */
-    f32 limit[4];    /* 0x58 */
-    f32 bound[4];    /* 0x68: min0, min1, max0, max1 */
-} FldZone;
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
@@ -508,7 +489,7 @@ s32 fldGetRecordValueById(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
-        FldRecE4 *record = (FldRecE4 *)fldValueRecords;
+        FldValueRecord *record = (FldValueRecord *)fldValueRecords;
         do {
             if (record->id == id) {
                 return record->value;
@@ -525,8 +506,8 @@ void fldSetRecordValueById(s32 id, s32 value) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (((FldRecE4 *)fldValueRecords)[index].id == id) {
-            ((FldRecE4 *)fldValueRecords)[index].value = value;
+        if (((FldValueRecord *)fldValueRecords)[index].id == id) {
+            ((FldValueRecord *)fldValueRecords)[index].value = value;
         }
     }
 }
@@ -534,7 +515,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
 void fldResetRecordState(void) {
     s32 index;
     for (index = 0; index < fldValueRecordCount; index++) {
-        ((FldRecE4 *)fldValueRecords)[index].value = 0;
+        ((FldValueRecord *)fldValueRecords)[index].value = 0;
     }
     fldValueRecordCount = 0;
     fldAreaState[40] = -1;
@@ -549,7 +530,7 @@ void fldResetRecordState(void) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137F10);
 
-s32 fldClassifyPositionInZoneWithMargin(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldZone *zone) {
+s32 fldClassifyPositionInZoneWithMargin(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldValueRecord *zone) {
     f32 probe[3];
     f32 planar[2];
     f32 best = margin;
@@ -627,7 +608,7 @@ void func_0013AA88(void) {
 /* Project away the selected axis and reject points outside expanded bounds.
  * Return the last negative plane's margin-adjusted distance, not a minimum;
  * no negative plane leaves margin unchanged. Reject results below 0.001. */
-f32 fldGetPositionZoneClearance(f32 margin, s32 axisMode, s32 planeCount, f32 *position, FldZone *zone) {
+f32 fldGetPositionZoneClearance(f32 margin, s32 axisMode, s32 planeCount, f32 *position, FldValueRecord *zone) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
     f32 clearance = margin;
