@@ -6,6 +6,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "dat_state.h"
+#include "sdf_draw.h"
 
 extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 
@@ -560,12 +561,6 @@ typedef struct MdlPartEntry {
     u8 pad0C[4];
 } MdlPartEntry;
 
-typedef struct MdlPartList {
-    u8 pad00[4];
-    s16 count;    /* 0x04 */
-    u8 pad06[6];
-    MdlPartEntry *entries; /* 0x0C */
-} MdlPartList;
 
 #define MDL_PART_BILLBOARD 0
 
@@ -831,28 +826,28 @@ void mdlEditMarkParametersWithPad(EffMarkParams *params, s16 *fieldCursor) {
 }
 
 /* Append a newly created billboard to the next part-list slot. */
-void mdlAddBillboardPart(MdlPartList *partList, s32 descriptorIndex) {
-    MdlPartEntry *partEntry = &partList->entries[partList->count];
+void mdlAddBillboardPart(DevRequest *partList, s32 descriptorIndex) {
+    MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->state = 0;
     partEntry->kind = MDL_PART_BILLBOARD;
     partEntry->object = billCreateIndexed(1, descriptorIndex);
-    partList->count += 1;
+    partList->usedCount += 1;
 }
 
 /* Append a newly created effect to the next part-list slot. */
-void mdlAddEffectPart(MdlPartList *partList, s32 descriptorIndex) {
-    MdlPartEntry *partEntry = &partList->entries[partList->count];
+void mdlAddEffectPart(DevRequest *partList, s32 descriptorIndex) {
+    MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->kind = MDL_PART_EFFECT;
     partEntry->state = 0;
     partEntry->object = effCreateNodeFromDescriptor(descriptorIndex);
-    partList->count += 1;
+    partList->usedCount += 1;
 }
 
-void mdlAppendObjectPart(MdlPartList *list, s32 a, void *b, s32 c) {
+void mdlAppendObjectPart(DevRequest *list, s32 a, void *b, s32 c) {
     MdlHandlerNode *node = sdfAllocAndClearQuadwords(0xAC);
-    MdlPartEntry *entry = &list->entries[list->count];
+    MdlPartEntry *entry = &((MdlPartEntry *)list->buffer)[list->usedCount];
 
     node->c = c;
     node->a = a;
@@ -860,7 +855,7 @@ void mdlAppendObjectPart(MdlPartList *list, s32 a, void *b, s32 c) {
     entry->kind = MDL_PART_OBJECT;
     entry->state = 0;
     entry->object = (s32)node;
-    list->count += 1;
+    list->usedCount += 1;
 }
 
 void mdlObjDestroy(MdlObj *obj) {
@@ -878,20 +873,19 @@ void mdlObjInit(MdlObj *obj, s32 data, s32 attributes) {
     }
 }
 
-typedef struct DevRequest DevRequest;
-extern DevRequest *sdfDevCreateBufferedRequest(s32, s32, s32);
+extern void sdfDestroyDevRequest(DevRequest *request);
 
-MdlPartList *mdlCreateBufferedPartRequest(u32 request) {
-    return (MdlPartList *)sdfDevCreateBufferedRequest(request, 0x10, 4);
+DevRequest *mdlCreateBufferedPartRequest(u32 request) {
+    return sdfDevCreateBufferedRequest(request, 0x10, 4);
 }
 
 /* Destroy each part according to its stored kind, then release the owning request. */
-void mdlDestroyPartList(MdlPartList *partList) {
+void mdlDestroyPartList(DevRequest *partList) {
     s32 partIndex;
 
     if (partList != NULL) {
-        for (partIndex = 0; partIndex < partList->count; partIndex++) {
-            MdlPartEntry *partEntry = &partList->entries[partIndex];
+        for (partIndex = 0; partIndex < partList->usedCount; partIndex++) {
+            MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partIndex];
 
             switch (partEntry->kind) {
             case MDL_PART_BILLBOARD:

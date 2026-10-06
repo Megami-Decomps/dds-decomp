@@ -23,11 +23,6 @@ typedef struct {
 
 void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch);
 
-typedef struct {
-    u8 pad[0x30];
-    u8 state;
-    u8 previousState;
-} MotionState;
 
 typedef struct SdfMotionTrack {
     u8 pad00[0x10];
@@ -65,12 +60,6 @@ typedef struct SdfMotionKeyTrack {
     u16 keyFrames[1];
 } SdfMotionKeyTrack;
 
-typedef struct SdfMotionManager SdfMotionManager;
-
-struct SdfMotionManager {
-    u8 pad00[0x14];
-    Motion *head;
-};
 
 typedef struct SdfMotionKeyBinding {
     void *dispatch;
@@ -149,13 +138,6 @@ extern void *D_0040B4E0[];
 
 extern void *D_0040B4F8[];
 
-typedef struct ArrObj {
-    s32 u0;
-    s16 objectCount; /* 0x04: number of allocated binding objects */
-    s16 pad6;
-    s32 u8;
-    void **objects; /* 0x0C: binding objects, each beginning with a callback table */
-} ArrObj;
 
 
 void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
@@ -239,29 +221,28 @@ void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch) {
 
 
 void *sdfAllocAndClearQuadwords(s32 size);
-ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 
-Motion *func_003340E0(SdfMotionManager *manager, MotionTable *table) {
+Motion *func_003340E0(SdfModel *model, MotionTable *table) {
     Motion *motion;
-    ArrObj *request;
+    DevRequest *request;
     SdfMotionCommand *command;
     s32 i;
     u16 count;
 
     motion = sdfAllocAndClearQuadwords(0x34);
-    motion->next = manager->head;
+    motion->next = model->motionList;
     count = table->commandCount;
-    manager->head = motion;
-    motion->owner = manager;
+    model->motionList = motion;
+    motion->owner = model;
     motion->motionTable = table;
     request = sdfDevCreateBufferedRequest(count, 4, 8);
     motion->request = request;
-    request->objectCount = count;
+    request->usedCount = count;
     for (i = 0, command = motion->motionTable->commands;
          i < count;
          i++, command++) {
-        motion->request->objects[i] =
+        ((void **)motion->request->buffer)[i] =
             (void *)sdfDispatchAssetCommandWord(motion, command->command, command->argument);
     }
     motion->state = 0;
@@ -278,7 +259,7 @@ void sdfDestroyMotion(Motion *node)
 {
     Motion **prev;
     Motion *cur;
-    ArrObj *request;
+    DevRequest *request;
     void **objects;
     s32 objectCount;
     s32 i;
@@ -287,7 +268,7 @@ void sdfDestroyMotion(Motion *node)
         return;
     }
     if (node->owner != NULL) {
-        prev = &node->owner->head;
+        prev = &node->owner->motionList;
         while ((cur = *prev) != NULL) {
             if (cur == node) {
                 *prev = node->next;
@@ -297,8 +278,8 @@ void sdfDestroyMotion(Motion *node)
         }
     }
     request = node->request;
-    objectCount = request->objectCount;
-    objects = request->objects;
+    objectCount = request->usedCount;
+    objects = request->buffer;
     for (i = 0; i < objectCount; i++) {
         sdfInvokeMotionObjectCallback(objects[i]);
     }
@@ -318,8 +299,8 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     if (blendDurationFrames > 0.0f) {
         motion->blendDurationFrames = blendDurationFrames;
         motion->blendStartFrame = -blendLeadFrames;
-        for (i = 0; i < motion->request->objectCount; i++) {
-            object = motion->request->objects[i];
+        for (i = 0; i < motion->request->usedCount; i++) {
+            object = ((void **)motion->request->buffer)[i];
             object->vtable->callback0C(object);
         }
     } else {
@@ -339,8 +320,8 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
 
     motion->frameCount = entry->frameCount;
     bindingData = (u8 *)entry->bindingData;
-    for (i = 0; i < motion->request->objectCount; i++) {
-        object = motion->request->objects[i];
+    for (i = 0; i < motion->request->usedCount; i++) {
+        object = ((void **)motion->request->buffer)[i];
         object->vtable->callback04(object, bindingData);
         bindingData += *(u32 *)bindingData;
     }
@@ -372,14 +353,14 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
         if (frame < 0.0f) {
             frame = 0.0f;
         }
-        for (i = 0; i < motion->request->objectCount; i++) {
-            object = motion->request->objects[i];
+        for (i = 0; i < motion->request->usedCount; i++) {
+            object = ((void **)motion->request->buffer)[i];
             object->vtable->blend(object, frame, weight);
         }
     } else {
-        count = motion->request->objectCount;
+        count = motion->request->usedCount;
         for (i = 0; i < count; i++) {
-            object = motion->request->objects[i];
+            object = ((void **)motion->request->buffer)[i];
             object->vtable->sample(object, frame);
         }
     }
@@ -429,7 +410,7 @@ s32 sdfMotionUpdate(Motion *motion) {
 }
 
 /* State 6 parks motion processing, retaining the previous state to resume. */
-void sdfMotionSuspend(MotionState *state) {
+void sdfMotionSuspend(Motion *state) {
     u8 previousState;
 
     previousState = state->state;
@@ -440,7 +421,7 @@ void sdfMotionSuspend(MotionState *state) {
 }
 
 /* Resume only a suspended motion, restoring the state saved by suspend. */
-void sdfMotionResume(MotionState *state) {
+void sdfMotionResume(Motion *state) {
     if (state->state == 6) {
         state->state = state->previousState;
     }

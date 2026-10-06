@@ -4,7 +4,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "ee_mmi.h"
-#include "sdf_draw.h"
+#include "mdl.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -51,34 +51,8 @@ typedef struct BattleGroupIdEntry {
     s32 id;
 } BattleGroupIdEntry;
 
-typedef struct BattleGroupSlot {
-    s32 unk_0;
-    s32 unk_4;
-    s32 unk_8;
-    s32 resourceHandle; /* released when the owning group is destroyed */
-} BattleGroupSlot;
 
-/* 0xB4-byte group owner, with eight 0x10-byte resource slots. */
-typedef struct BattleGroupNode {
-    struct BattleGroupNode *next;
-    struct BattleGroupNode *prev;
-    u16 group;
-    u16 type;
-    u8 ownsResources;
-    u8 pad0D[3];
-    s32 modelContext;
-    s32 resourceList;
-    s32 unk_18;
-    s32 requestHandle;
-    BattleGroupSlot slots[8];
-    s32 resourceHandle;
-    s32 unk_A4;
-    s32 partList;
-    f32 unk_AC;
-    f32 unk_B0;
-} BattleGroupNode;
-
-extern s32 *btlFindGroupedEntity();
+extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 
 extern u8 D_003BBB0D;
@@ -2081,13 +2055,8 @@ void btlInitializeCommandSemaphoreSlots(void) {
     }
 }
 
-/* Return the first node of this type in group, or NULL (legacy word-pointer API). */
-s32 *btlFindGroupedEntity(group, type)
-    s32 group;
-
-    s32 type;
-
-{
+/* Return the first node of this type in group, or NULL. */
+BattleGroupNode *btlFindGroupedEntity(s32 group, s32 type) {
     BattleGroupNode *entry = btlGroupNodeHeads[group];
     while (entry != 0) {
         if (entry->type == type) {
@@ -2095,7 +2064,7 @@ s32 *btlFindGroupedEntity(group, type)
         }
         entry = entry->next;
     }
-    return (s32 *)entry;
+    return entry;
 }
 
 /* Return whether this group's separate ID list contains id. */
@@ -2146,7 +2115,7 @@ void btlRemoveGroupId(s32 groupIndex, s32 wantedId) {
 
 
 /* Replace the group/type node; only flags bit 0 selects resource ownership. */
-void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, s32 resourceList, s32 unknownValue, s32 requestHandle) {
+void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, void *itemList, s32 requestHandle) {
     BattleGroupNode *groupNode;
     BattleGroupNode *previousHead;
     s32 slotIndex;
@@ -2161,30 +2130,30 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, s32 
     groupNode->group = groupIndex;
     groupNode->type = entityType;
     groupNode->resourceList = resourceList;
-    groupNode->unk_18 = unknownValue;
+    groupNode->itemList = itemList;
     groupNode->requestHandle = requestHandle;
     groupNode->prev = NULL;
-    groupNode->modelContext = 0;
+    groupNode->modelContext = NULL;
     for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
-        groupNode->slots[slotIndex].unk_0 = 0;
-        groupNode->slots[slotIndex].unk_8 = 0;
+        groupNode->slots[slotIndex].flags = 0;
+        groupNode->slots[slotIndex].data = NULL;
         groupNode->slots[slotIndex].resourceHandle = 0;
     }
     groupNode->ownsResources = ownershipFlags & BTL_GROUP_OWNS_RESOURCES_FLAG;
     groupNode->resourceHandle = 0;
-    groupNode->unk_A4 = 0;
-    groupNode->partList = 0;
+    groupNode->partInfo = NULL;
+    groupNode->partList = NULL;
     groupNode->unk_AC = 1.0f;
     groupNode->unk_B0 = 100.0f;
 }
 
-extern void mdlDestroyContext(s32);
+extern void mdlDestroyContext(MdlCtx *);
 
-extern void mdlDestroyPartList(s32);
+extern void mdlDestroyPartList(DevRequest *);
 
 extern void sdfReleaseResourceAllocation(s32);
 
-extern void sdfResourceListRelease(void *, s32);
+extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Capture ownership before clearing it for callbacks; keep the context-release
  * loop and resource-release order intact. NULL is allowed. */
@@ -2208,13 +2177,13 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
     }
     ownsResources = groupNode->ownsResources;
     groupNode->ownsResources = 0;
-    if (groupNode->modelContext != 0) {
+    if (groupNode->modelContext != NULL) {
         do {
             mdlDestroyContext(groupNode->modelContext);
-        } while (groupNode->modelContext != 0);
+        } while (groupNode->modelContext != NULL);
     }
     if (ownsResources != 0) {
-        sdfResourceListRelease((void *)groupNode->resourceList, 1);
+        sdfResourceListRelease(groupNode->resourceList, 1);
         sdfQueueNonzeroResourceId((void *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
@@ -2231,7 +2200,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
 void btlRemoveCurrentGroupedEntity(s32 groupIndex, s32 entityType) {
     BattleGroupNode *groupNode;
 
-    groupNode = (BattleGroupNode *)btlFindGroupedEntity(groupIndex, entityType);
+    groupNode = btlFindGroupedEntity(groupIndex, entityType);
     btlDestroyGroupNode(groupNode);
 }
 
@@ -2251,37 +2220,14 @@ void btlReleaseAllEntities(void) {
     } while (groupIndex < BTL_GROUP_COUNT);
 }
 
-/* Record table owned by a motion container: 0x20-byte header, then 0x10-byte records. */
-typedef struct MotionRecord {
-    u8 pad00[4];
-    s16 slot;       /* 0x04: index into the owner's object slots */
-    u8 pad06[2];
-    void *resource; /* 0x08 */
-    u8 pad0C[4];
-} MotionRecord;
 
-typedef struct MotionRecordTable {
-    u8 header[0x20];
-    MotionRecord entries[1];
-} MotionRecordTable;
-
-
-typedef struct MotionOwner {
-    u8 pad00[0xC];
-    MotionRecordTable *records; /* 0x0C */
-    u8 pad10[8];
-    void *heap;                 /* 0x18 */
-    Motion *first;        /* 0x1C: motion created for slot 0 */
-    Motion *slots[1];     /* 0x20 */
-} MotionOwner;
-
-extern Motion *func_002DB230();
+extern Motion *func_002DB230(SdfModel *, MotionTable *);
 
 /* Create and attach the motion for the selected resource record. */
-Motion *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
-    void *resource = owner->records->entries[index].resource;
-    s16 slot = owner->records->entries[index].slot;
-    Motion *object = func_002DB230(owner->heap, resource);
+Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
+    MotionTable *resource = owner->sub->slots[index].data;
+    s16 slot = owner->sub->slots[index].slot;
+    Motion *object = func_002DB230(owner->inner, resource);
 
     object->searchId = index;
     owner->slots[slot] = object;

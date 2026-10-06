@@ -2,7 +2,7 @@
 #include "btl.h"
 #include "evt_unit.h"
 #include "pcp_vu0.h"
-#include "sdf_draw.h"
+#include "mdl.h"
 
 #define EFF_PARAM_WORK_BYTES 8
 #define EFF_PARAM_EXTENDED_WORK_BYTES 0xC
@@ -37,41 +37,6 @@ extern EffDispatchEntry effParamWorkFactories[];
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-/* Model-manager records: initialization and VU scatter use the same context,
- * its inner matrix storage, and its first motion node. */
-
-typedef struct MdlInner {
-    struct MdlEntryTable *entries; /* 0x00 */
-    u8 pad04[4];
-    u32 resourceHandle;           /* 0x08 */
-    u8 pad0C[8];
-    Motion *list;                /* 0x14 */
-    u8 unk18;
-    u8 flags;                    /* 0x19: bit 0x10 enables anchor dispatch */
-    u8 pad1A[2];
-    u32 broadcastValue;           /* 0x1C */
-    u128 basisRows[3];            /* 0x20: vf28, vf29, vf30 */
-    u128 unk50[3];
-} MdlInner;
-
-typedef struct MdlCtx {
-    u32 flags;                   /* 0x00 */
-    struct MdlCtx *next;
-    u8 pad08[4];
-    struct MdlSub *sub;           /* 0x0C */
-    union {
-        u32 word;
-        struct {
-            s16 id;
-            s16 arg;
-        } h;
-    } current;                   /* 0x10 */
-    u32 *frameList;               /* 0x14 */
-    MdlInner *inner;              /* 0x18 */
-    Motion *first;               /* 0x1C */
-    Motion *slots[4];            /* 0x20 */
-    struct MdlDevList *devList;    /* 0x30 */
-} MdlCtx;
 
 extern u8 D_003B0180[];
 
@@ -79,21 +44,22 @@ extern u8 D_003B0190[];
 
 extern u8 D_003B01A0[];
 
-extern void mdlBroadcastMasked();
+extern void mdlBroadcastMasked(MdlCtx *, u32);
 
-extern void mdlStorePrimaryVectorVU(void *work);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
-extern void mdlStoreTertiaryVectorVU(void *work);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
-extern void mdlAddEntryFlagged(void *work, s32 arg1, s32 arg2);
+extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
+extern void mdlDestroyContext(MdlCtx *);
 
-extern void *func_00232198(void *arg0, void *arg1);
+extern MdlCtx *func_00232198(s32, s32);
 
-extern void *mdlGetContextResourceGroup(void *arg);
+extern u16 mdlGetContextResourceGroup(MdlCtx *);
 
-extern void *mdlGetContextResourceId(void *arg);
+extern u16 mdlGetContextResourceId(MdlCtx *);
 
 /* Extended work: a full-word kind, fallback-table index, and payload. */
 typedef struct EffParamWorkEx {
@@ -118,7 +84,7 @@ extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
 extern u8 D_00380828[];
 
-extern void mdlProcessContextNodesAndTransforms(void *arg0, void *arg1);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
 extern void sdfReleaseChipBlock(void *p);
 
@@ -338,19 +304,19 @@ void effParamInitWork(MdlCtx *work) {
 }
 
 extern u16 D_00436434;
-extern s32 btlFindGroupedEntity();
-extern void mdlLoadViewerPackage();
+extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
+extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
 /* Create and initialize a viewer-package context in the fixed effect group.
  * DDS2 skips occupied halfword ids before loading; DDS1 does not scan them. */
 void *effParamCreateViewerWork(s32 *package) {
-    void *work;
+    MdlCtx *work;
 
     while (btlFindGroupedEntity(EFF_VIEWER_RESOURCE_GROUP, D_00436434) != 0) {
         D_00436434++;
     }
     mdlLoadViewerPackage(EFF_VIEWER_RESOURCE_GROUP, D_00436434, EFF_VIEWER_LOAD_FLAGS, package + 4, package[0]);
-    work = func_00232198((void *)EFF_VIEWER_RESOURCE_GROUP, (void *)D_00436434);
+    work = func_00232198(EFF_VIEWER_RESOURCE_GROUP, D_00436434);
     effParamInitWork(work);
     D_00436434++;
     return work;
@@ -358,18 +324,18 @@ void *effParamCreateViewerWork(s32 *package) {
 
 /* Run the context/node update with this game's fixed global argument. */
 void effParamInitFromGlobal(void *work) {
-    mdlProcessContextNodesAndTransforms(work, &D_00380828);
+    mdlProcessContextNodesAndTransforms(work, (s32)D_00380828);
 }
 
-void func_0016AA38(void) {
-    mdlDestroyContext();
+void func_0016AA38(void *work) {
+    mdlDestroyContext(work);
 }
 
 /* Resolve the source's resource group/id, obtain its context, and initialize it. */
 void *effParamAssembleWork(void *source) {
-    void *resourceGroup;
-    void *resourceId;
-    void *work;
+    s32 resourceGroup;
+    s32 resourceId;
+    MdlCtx *work;
 
     resourceGroup = mdlGetContextResourceGroup(source);
     resourceId = mdlGetContextResourceId(source);
@@ -396,21 +362,21 @@ void effParamBuildVector(void *work, f32 scalar) {
 
 /* Load four source quadwords, then scatter only vf28-vf30 to the destination block. */
 void effParamScatterVectors(MdlCtx *work, void *matrix) {
-    u128 *firstVector;
-    u128 *secondVector;
-    u128 *thirdVector;
+    void *firstVector;
+    void *secondVector;
+    void *thirdVector;
 
     VU0_LOAD_MATRIX(matrix);
-    firstVector = &work->inner->basisRows[0];
+    firstVector = work->inner->matrix[0];
     VU0_STORE_VF(vf28, firstVector);
-    secondVector = &work->inner->basisRows[1];
+    secondVector = work->inner->matrix[1];
     VU0_STORE_VF(vf29, secondVector);
-    thirdVector = &work->inner->basisRows[2];
+    thirdVector = work->inner->matrix[2];
     VU0_STORE_VF(vf30, thirdVector);
 }
 
-void func_0016AB30(void) {
-    mdlBroadcastMasked();
+void func_0016AB30(void *work, u32 color) {
+    mdlBroadcastMasked(work, color);
 }
 
 extern EffDispatchEntry effParameterWorkOperations[];
