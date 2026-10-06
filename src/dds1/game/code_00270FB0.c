@@ -208,7 +208,9 @@ typedef struct StaffMenuWork {
     u8 panel[0x4C];
     u8 pad54[8];
     void *valueRecord;
-    u8 pad60[0xC];
+    u8 pad60[4];
+    u32 baseImage1; /* +0x64: second base image in the +0x60 resource array */
+    u8 pad68[4];
     u32 unk6C;
     u8 pad70[4];
     u32 unk74;
@@ -224,6 +226,8 @@ typedef struct StaffMenuWork {
     s32 displayMode;
     u8 timer[0x10];
 } StaffMenuWork;
+typedef char StaffMenuWork_baseImage1_offset_check[
+    ((u32)&((StaffMenuWork *)0)->baseImage1 == 0x64) ? 1 : -1];
 
 /* On a category change, release old textures and resolve the new model entries. */
 void mnuSetStaffDisplayMode(s32 nextCategory, u8 *menuBytes) {
@@ -585,8 +589,9 @@ u8 mnuIsFadeIdle(void) {
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, s32);
 extern s32 func_00197A98(s32, s32, s32, u32, u32, s32);
-extern void func_001958A0(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
+typedef struct FrFontGlyph FrFontGlyph;
+extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern char D_003BC6C0[];
 
 
@@ -599,15 +604,15 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, secondSlot, 3, drawFlags);
     func_003014F0(text, D_003BC6C0, datGameState->header.currency);
     glyph = func_00197A98(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
-    func_001958A0(glyph, 1, drawFlags);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    func_001958A0((FrFontGlyph *)glyph, 1, drawFlags);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
 }
 
 extern u8 *D_0037B988[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    u32 *sprite = (u32 *)itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
+    FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       D_0037B988[imageIndex], 0);
     func_001958A0(sprite, 1, 0x54);
     frFontQueueGlyphInSelectedSlot(sprite);
