@@ -327,7 +327,7 @@ struct MenuStaffWindow {
     u8 pad04[0x0C];
     MenuStaffNode *head; /* 0x10 */
     u8 pad14[4];
-    s32 *cursor;
+    MenuStaffNode *cursor; /* 0x18 */
     MenuStaffNode *selectedNode; /* 0x1C */
     s32 panelActive; /* 0x20: selects the alternate panel drawing path */
     s32 rowCount; /* 0x24 */
@@ -339,7 +339,9 @@ struct MenuStaffWindow {
 };
 
 struct MenuStaffNode {
-    u8 pad00[0x48];
+    s32 index; /* List position, saved when switching staff pages. */
+    s32 value; /* Entry payload supplied to mnuAppendWindowListNode. */
+    u8 pad08[0x40];
     u32 flags; /* 0x48 */
     u8 pad4C[0x0C];
     MenuStaffNode *next; /* 0x58 */
