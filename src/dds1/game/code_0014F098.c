@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 
 extern char *scrReadStringParameter(s32 idx);
 
@@ -44,18 +45,12 @@ extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
 extern s32 evtGetWorldUnitNestedValue(s32 param);
 
-/* Script command context: +0xE4 is the task-record lookup key. */
-typedef struct {
-    u8 pad00[0xE4];
-    u32 key;
-} FldCommandWork;
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
 extern s32 scrReadIntParameter(s32);
 
 extern s32 D_0032E48C[];
 
-extern s32 scrGetCurrentContext(void);
 
 extern s32 fldIsSceneStateEight(void);
 
@@ -71,7 +66,7 @@ u32 fldCmdUpdateTaskRecordScene(void) {
     if (fldIsSceneStateEight()) {
         scene = 0;
     } else {
-        scene = fldFindTaskRecordId(((FldCommandWork *)scrGetCurrentContext())->key);
+        scene = fldFindTaskRecordId((u32)scrGetCurrentContext()->task);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
@@ -181,8 +176,8 @@ s32 fldCmdSetDefaultEncounterId(void) {
 
 /* Look up the command's task record before applying its associated entry. */
 s32 fldCmdApplyTaskRecordEntry(void) {
-    FldCommandWork *command = scrGetCurrentContext();
-    void *record = fldGetTaskRecordValue(command->key);
+    ScrData *command = scrGetCurrentContext();
+    void *record = fldGetTaskRecordValue((u32)command->task);
 
     if (record != NULL) {
         func_0013DDF0(record);

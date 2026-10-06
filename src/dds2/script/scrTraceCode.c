@@ -1,12 +1,6 @@
 #include "common.h"
 #include "scr.h"
 
-extern u32 bfStackPopInt();
-void scrPushInteger(ScrData *scr, s32 val);
-void bfStackPushFloat(ScrData *scr, f32 val);
-f32 bfStackPopFloat();
-
-extern ScrData *scrCurrentContext;
 
 extern ScrVM *datGameState;
 extern u32 (*D_00384948[])(ScrData *scr);
@@ -65,7 +59,7 @@ u32 scrPushReturnValue(ScrData *scr) {
 }
 
 u32 scrStoreGlobalInteger(ScrData *scr) {
-    datGameState->ints[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt();
+    datGameState->ints[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt(scr);
     scr->pc++;
     return 1;
 }
@@ -73,7 +67,7 @@ u32 scrStoreGlobalInteger(ScrData *scr) {
 u32 scrStoreGlobalFloat(ScrData *scr) {
     f32 value;
 
-    value = bfStackPopFloat();
+    value = bfStackPopFloat(scr);
     datGameState->floats[scr->instructions[scr->pc].parts.sOperand] = value;
     scr->pc++;
     return 1;
@@ -82,14 +76,14 @@ u32 scrStoreGlobalFloat(ScrData *scr) {
 u32 scrStoreLocalInteger(ScrData *scr) {
     u32 value;
 
-    value = bfStackPopInt();
+    value = bfStackPopInt(scr);
     scr->localInt[scr->instructions[scr->pc].parts.sOperand] = value;
     scr->pc++;
     return 1;
 }
 
 u32 scrStoreLocalFloat(ScrData *scr) {
-    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = bfStackPopFloat();
+    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = bfStackPopFloat(scr);
     scr->pc++;
     return 1;
 }
@@ -130,13 +124,8 @@ u32 scrJumpProcedure(ScrData *scr) {
 }
 
 /* Save the return PC before transferring control to a procedure. */
-u32 scrCallProcedure(u32 scriptAddress) {
-    s32 address;
-    ScrData *scr;
-
-    address = (s32)scriptAddress;
-    scr = (ScrData *)address;
-    scrPushTypeFourValue(scriptAddress, scr->pc);
+u32 scrCallProcedure(ScrData *scr) {
+    scrPushTypeFourValue(scr, scr->pc);
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
@@ -464,7 +453,7 @@ u32 bfOpJumpIfFalse(ScrData *scr)
 
 /* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
  * 1 when a handler returns 2 (yield for one tick). */
-u32 bfContextStep(ScrData *scr) {
+s32 bfContextStep(ScrData *scr) {
     u32 result;
 
     while (1) {

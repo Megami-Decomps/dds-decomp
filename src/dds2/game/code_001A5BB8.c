@@ -5,6 +5,7 @@
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl_action.h"
+#include "scr.h"
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x31];
@@ -1133,7 +1134,7 @@ extern void itfMesSetWindowCallbackAddress();
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(*(s32 *)(kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)) + 0xCC), itfPrintTestMessageCallback);
+    itfMesSetWindowCallbackAddress(((ScrData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)))->resourceIndex, itfPrintTestMessageCallback);
     kwlnTaskCreate((s32)"TestMsgMngC", 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
     kwlnTaskCreate((s32)"TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }

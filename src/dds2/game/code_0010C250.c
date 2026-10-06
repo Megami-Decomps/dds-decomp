@@ -2,51 +2,38 @@
 #include "scr.h"
 #include "dat_state.h"
 
-extern u32 kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
-typedef struct ScriptContext {
-    u8 pad0[0x18];
-    s32 pc; /* 0x18 */
-    s32 stackDepth; /* 0x1C: number of stack values */
-    s8 stackTypes[28]; /* 0x20 */
-    union {
-        s32 stackValues[28];
-        f32 stackFloats[28];
-    } stack; /* 0x3C */
-    u8 padAC[0x10];
-    u32 *instructions; /* 0xBC */
-    u8 padC0[0x30];
-    void *actor; /* 0xF0: battle actor bound to the active script */
-} ScriptContext;
 
-void scrSetCurrentActor(u32 unused, u32 actor) {
-    ScriptContext *context;
+void scrSetCurrentActor(KwlnTask *task, void *actor) {
+    ScrData *context;
 
-    context = (ScriptContext *)kwlnTaskGetUserValue();
-    context->actor = (void *)actor;
+    context = (ScrData *)kwlnTaskGetUserValue(task);
+    context->actor = actor;
 }
 
-u32 scrGetCurrentActor(void) {
-    ScriptContext *context;
+void *scrGetCurrentActor(KwlnTask *task) {
+    ScrData *context;
 
-    context = (ScriptContext *)kwlnTaskGetUserValue();
-    return (u32)context->actor;
+    context = (ScrData *)kwlnTaskGetUserValue(task);
+    return context->actor;
 }
 
-void scrReplaceCurrentTask(u32 task) {
-    ScrProcTask *context = (ScrProcTask *)kwlnTaskGetUserValue();
+void scrReplaceCurrentTask(KwlnTask *task) {
+    ScrData *context = (ScrData *)kwlnTaskGetUserValue(task);
     if (context != NULL) {
         scrProcDestroyTask(context);
     }
     kwlnTaskSetUserValue(task, 0);
 }
 
-void bfStepContext(void) {
-    bfContextStep();
+void bfStepContext(ScrData *context) {
+    bfContextStep(context);
 }
 
-s32 bfTaskUpdate(void) {
-    switch (bfContextStep(kwlnTaskGetUserValue())) {
+s32 bfTaskUpdate(KwlnTask *task) {
+    switch (bfContextStep((ScrData *)kwlnTaskGetUserValue(task))) {
     case 0:
         return -1;
     case 2:
@@ -57,78 +44,76 @@ s32 bfTaskUpdate(void) {
     }
 }
 
-void scrPushInteger(ScriptContext *script, u32 value) {
-    script->stackTypes[script->stackDepth] = 0;
-    script->stack.stackValues[script->stackDepth] = value;
-    script->stackDepth = script->stackDepth + 1;
+void scrPushInteger(ScrData *script, s32 value) {
+    script->stackTypes[script->sp] = 0;
+    script->stackValues[script->sp].i = value;
+    script->sp = script->sp + 1;
 }
 
-void bfStackPushFloat(ScriptContext *script, f32 value) {
-    script->stackTypes[script->stackDepth] = 1;
-    script->stack.stackFloats[script->stackDepth] = value;
-    script->stackDepth = script->stackDepth + 1;
-}
-
-
-void scrPushString(ScriptContext *script, u32 value) {
-    script->stackTypes[script->stackDepth] = 5;
-    script->stack.stackValues[script->stackDepth] = value;
-    script->stackDepth = script->stackDepth + 1;
-}
-
-void scrPushTypeFourValue(ScriptContext *script, u32 value) {
-    script->stackTypes[script->stackDepth] = 4;
-    script->stack.stackValues[script->stackDepth] = value;
-    script->stackDepth = script->stackDepth + 1;
+void bfStackPushFloat(ScrData *script, f32 value) {
+    script->stackTypes[script->sp] = 1;
+    script->stackValues[script->sp].f = value;
+    script->sp = script->sp + 1;
 }
 
 
-s32 bfStackPopInt(ScriptContext *script) {
-    s32 stackIndex = script->stackDepth;
+void scrPushString(ScrData *script, char *value) {
+    script->stackTypes[script->sp] = 5;
+    script->stackValues[script->sp].s = value;
+    script->sp = script->sp + 1;
+}
 
-    script->stackDepth = stackIndex - 1;
+void scrPushTypeFourValue(ScrData *script, s32 value) {
+    script->stackTypes[script->sp] = 4;
+    script->stackValues[script->sp].i = value;
+    script->sp = script->sp + 1;
+}
+
+
+s32 bfStackPopInt(ScrData *script) {
+    s32 stackIndex = script->sp;
+
+    script->sp = stackIndex - 1;
     switch (script->stackTypes[stackIndex - 1]) {
     case 0:
     case 4:
-        return script->stack.stackValues[script->stackDepth];
+        return script->stackValues[script->sp].i;
     case 1:
-        return script->stack.stackFloats[script->stackDepth];
+        return script->stackValues[script->sp].f;
     case 2:
-        return datGameState->script.ints[script->stack.stackValues[script->stackDepth]];
+        return datGameState->script.ints[script->stackValues[script->sp].i];
     case 3:
-        return datGameState->script.floats[script->stack.stackValues[script->stackDepth]];
+        return datGameState->script.floats[script->stackValues[script->sp].i];
     }
     return 0;
 }
 
-f32 bfStackPopFloat(ScriptContext *script) {
-    s32 stackIndex = script->stackDepth;
+f32 bfStackPopFloat(ScrData *script) {
+    s32 stackIndex = script->sp;
 
-    script->stackDepth = stackIndex - 1;
+    script->sp = stackIndex - 1;
     switch (script->stackTypes[stackIndex - 1]) {
     case 0:
-        return (f32)script->stack.stackValues[script->stackDepth];
+        return (f32)script->stackValues[script->sp].i;
     case 4:
         return 0.0f;
     case 1:
-        return script->stack.stackFloats[script->stackDepth];
+        return script->stackValues[script->sp].f;
     case 2:
-        return (f32)datGameState->script.ints[script->stack.stackValues[script->stackDepth]];
+        return (f32)datGameState->script.ints[script->stackValues[script->sp].i];
     case 3:
-        return datGameState->script.floats[script->stack.stackValues[script->stackDepth]];
+        return datGameState->script.floats[script->stackValues[script->sp].i];
     }
     return 0.0f;
 }
 
 /* Push the word following the opcode, then advance past its operand. */
-u32 scrPushNextInstructionValue(ScriptContext *script) {
+u32 scrPushNextInstructionValue(ScrData *script) {
     s32 operandPc;
-    ScriptContext *context;
 
-    context = script;
-    operandPc = context->pc + 1;
-    context->pc = operandPc;
-    scrPushInteger(script, context->instructions[operandPc]);
-    context->pc = context->pc + 1;
+    operandPc = script->pc + 1;
+    script->pc = operandPc;
+    scrPushInteger(script, script->instructions[operandPc].iOperand);
+    script->pc = script->pc + 1;
     return 1;
 }

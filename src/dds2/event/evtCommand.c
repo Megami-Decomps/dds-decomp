@@ -2,6 +2,7 @@
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
+#include "scr.h"
 
 /* Fixed dispatch payload sizes and the native six-kind world-object scan. */
 enum {
@@ -99,7 +100,6 @@ f32 bfWaitReadArgFloat(s32 idx);
 extern void func_00340DC8(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
-s32 scrGetCurrentContext(void);
 
 s32 evtFindTaskById(s32 id);
 
@@ -113,11 +113,6 @@ extern char D_00421F08[];
 
 
 
-/* VM work links its owning scheduler task, not the task's pack user value. */
-typedef struct EvtCommandWork {
-    u8 pad00[0xE4];
-    KwlnTask *task;
-} EvtCommandWork;
 
 /* Same room-name and inner-status offsets as the DDS1 event unit. */
 typedef struct EvtWorldUnitInner {
@@ -864,7 +859,7 @@ u32 evtCommandSetSolarPhase(void) {
  * No VM context completes immediately; a pending task returns zero. */
 s32 evtCommandWaitForCampTask(void) {
     s32 taskId = scrReadIntParameter(0);
-    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
+    ScrData *commandWork = scrGetCurrentContext();
     char *message;
 
     if (commandWork == NULL) {
@@ -892,7 +887,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
 s32 evtCommandStartCampTaskIfAbsent(void) {
     s32 taskId = scrReadIntParameter(0);
-    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
+    ScrData *commandWork = scrGetCurrentContext();
 
     if (commandWork == NULL) {
         return 1;
@@ -942,7 +937,7 @@ s32 evtCommandDestroyCampTask(void) {
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
 s32 evtCommandStartPolygonMovie(void) {
-    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
+    ScrData *commandWork = scrGetCurrentContext();
     s32 eventId;
     s32 sceneId;
     s32 movieTask;
@@ -978,7 +973,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
 /* Create and return an event/scene movie task without setting bit 0.
  * The owning scheduler task supplies the viewer task's priority. */
 s32 evtCommandCreatePolygonMovie(void) {
-    EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
+    ScrData *commandWork = scrGetCurrentContext();
     s32 eventId;
     s32 sceneId;
     s32 movieTask;

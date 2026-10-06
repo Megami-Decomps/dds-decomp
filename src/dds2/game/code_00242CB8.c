@@ -1,15 +1,11 @@
 #include "common.h"
 #include "dat_state.h"
+#include "scr.h"
 
 extern s64 kwlnTaskIsRegistered(u64);
 
 extern s32 scrReadIntParameter(s32 idx);
 
-/* Event-command work prefix; the +0xE4 key selects the parent field task. */
-typedef struct {
-    u8 pad00[0xE4];
-    u32 taskKey;
-} EvtCommandWork;
 
 
 extern f32 evtSolarOverlayAlpha;
@@ -28,7 +24,6 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 
 void func_00101968(s32 arg0, s32 arg1);
 
-s32 scrGetCurrentContext(void);
 
 char *scrReadStringParameter(s32 idx);
 
@@ -62,16 +57,16 @@ s32 evtIsBgmLoaded(s32 id);
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242CB8);
 
 u32 evtCreateTextureEntryChildTask(void) {
-    EvtCommandWork *work;
+    ScrData *work;
     s32 id;
     s32 entry;
     s32 task;
 
-    work = (EvtCommandWork *)scrGetCurrentContext();
+    work = scrGetCurrentContext();
     if (work == NULL) {
         return 1;
     }
-    if (work->taskKey == 0) {
+    if (work->task == NULL) {
         func_0035B6E0(D_00421FE8);
         return 1;
     }
@@ -82,25 +77,25 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     task = evtCreateTaskWithValue(0x2AFE, entry);
-    func_00101968(work->taskKey, task);
+    func_00101968((s32)work->task, task);
     scrSetIntegerReturnValue(task);
     return 1;
 }
 
 u32 evtOpcodeCreateWorldChildTask(void) {
-    EvtCommandWork *work;
+    ScrData *work;
     s32 childTask;
 
-    work = (EvtCommandWork *)scrGetCurrentContext();
+    work = scrGetCurrentContext();
     if (work == NULL) {
         return 1;
     }
-    if (work->taskKey == 0) {
+    if (work->task == NULL) {
         func_0035B6E0(D_00422050);
         return 1;
     }
     childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));
-    func_00101968(work->taskKey, childTask);
+    func_00101968((s32)work->task, childTask);
     scrSetIntegerReturnValue(childTask);
     return 1;
 }

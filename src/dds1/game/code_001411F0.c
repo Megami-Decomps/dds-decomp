@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
@@ -877,30 +878,14 @@ s32 fldFindRecordItem(s32 scene, u32 index) {
     return result;
 }
 
-typedef struct FldModelNodeView {
-    u8 pad0[4];
-    struct FldModelNodeView *next;
-    struct FldModelNodeView *owner;
-    struct FldModelNodeView *children;
-    u8 pad10[4];
-    u16 flags;
-} FldModelNodeView;
 
-typedef struct {
-    u8 pad0[0xC];
-    FldModelNodeView **entries;
-} FldModelNodeListView;
-
-typedef struct {
-    FldModelNodeListView *list;
-} FldModelView;
-
-void func_00142C78(FldModelView *model, s32 index, s32 clearFlag) {
-    FldModelNodeView *parent = model->list->entries[index + 1];
-    FldModelNodeView *first;
-    FldModelNodeView *node;
-    FldModelNodeView *next;
-    FldModelNodeView *headNext;
+/* Model request buffers contain the root followed by indexed draw nodes. */
+void func_00142C78(SdfModel *model, s32 index, s32 clearFlag) {
+    SdfDrawNode *parent = ((SdfDrawNode **)model->list->buffer)[index + 1];
+    SdfDrawNode *first;
+    SdfDrawNode *node;
+    SdfDrawNode *next;
+    SdfDrawNode *headNext;
     u16 flags;
 
     if (parent->children == NULL) {
@@ -917,7 +902,7 @@ void func_00142C78(FldModelView *model, s32 index, s32 clearFlag) {
         return;
     }
     node = headNext;
-    if (parent != node->owner || first == node) {
+    if (parent != node->parent || first == node) {
         return;
     }
     for (;;) {
@@ -931,7 +916,7 @@ void func_00142C78(FldModelView *model, s32 index, s32 clearFlag) {
             return;
         }
         node = next;
-        if (parent != node->owner) {
+        if (parent != node->parent) {
             return;
         }
         if (first != node) {
@@ -2749,11 +2734,6 @@ void fldTickWeatherEffectNodes(void) {
     fldUpdateWeatherEffectNodes();
 }
 
-/* Script execution state retains the task id used by the room lookup. */
-typedef struct FldScriptTask {
-    u8 pad00[0xE4];
-    s32 taskId; /* 0xE4 */
-} FldScriptTask;
 
 s32 func_0014D100(void) {
     return *(s16 *)((u8 *)D_003D62A4[0] + 0xC);

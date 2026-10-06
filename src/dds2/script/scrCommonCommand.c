@@ -5,7 +5,6 @@
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
 
-typedef struct KwlnTask KwlnTask;
 s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
@@ -196,48 +195,30 @@ s32 scrCommandSetCameraFov(void)
     return 1;
 }
 
-typedef struct BfSectionTable {
-    u8 unk0[8];
-    s32 count; /* 0x8 */
-} BfSectionTable;
-
-typedef struct BfTaskRecord {
-    u8 unk0[0x20];
-    s32 basePriority; /* 0x20 */
-} BfTaskRecord;
-
-/* BF wait context: the shared ScrData plus the owning task record at +0xE4. */
-typedef struct BfWaitContext {
-    ScrData base;         /* 0x00 */
-    BfTaskRecord *record; /* 0xE4 */
-} BfWaitContext;
-
-s32 scrGetCurrentContext(void);
-s32 scrCreateTaskFromContextParameters(s32 a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7, s32 a8);
 
 s32 bfWaitCbCreateTask(void)
 {
     s32 index;
-    BfWaitContext *ctx;
+    ScrData *ctx;
 
     index = scrReadIntParameter(0);
-    ctx = (BfWaitContext *)scrGetCurrentContext();
+    ctx = scrGetCurrentContext();
     if (ctx == NULL)
     {
         return 1;
     }
-    if (ctx->record == NULL)
+    if (ctx->task == NULL)
     {
         return 1;
     }
-    if (index < 0 || index >= ((BfSectionTable *)ctx->base.unkB0)->count)
+    if (index < 0 || index >= ctx->sections->count)
     {
         return 1;
     }
-    scrSetIntegerReturnValue(scrCreateTaskFromContextParameters(
-        ctx->record->basePriority + scrReadIntParameter(1), ctx->base.unkAC,
-        ctx->base.unkB0, ctx->base.procedures, ctx->base.labels,
-        ctx->base.instructions, ctx->base.unkC0, ctx->base.strings, index));
+    scrSetIntegerReturnValue((s32)scrCreateTaskFromContextParameters(
+        ctx->task->priority + scrReadIntParameter(1), ctx->scriptHeader,
+        ctx->sections, ctx->procedures, ctx->labels,
+        ctx->instructions, ctx->auxiliaryData, ctx->strings, index));
     return 1;
 }
 

@@ -4,6 +4,7 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 #include "kwln.h"
+#include "scr.h"
 
 extern void func_003014F0(char *, const char *, const char *, s32);
 
@@ -31,7 +32,7 @@ void btlStartSkillEventTask(s32 skill) {
     }
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, skill);
-    scrSetCurrentActor(taskId, 0);
+    scrSetCurrentActor((KwlnTask *)taskId, NULL);
     func_00101A80(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
 }
@@ -80,7 +81,7 @@ void btlStartPrimaryScriptTask(void) {
     }
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
-    scrSetCurrentActor(taskId, 0);
+    scrSetCurrentActor((KwlnTask *)taskId, NULL);
     func_00101A80(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 1;
@@ -121,7 +122,7 @@ void btlStartSecondaryScriptTask(void) {
     }
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
-    scrSetCurrentActor(taskId, 0);
+    scrSetCurrentActor((KwlnTask *)taskId, NULL);
     func_00101A80(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 2;

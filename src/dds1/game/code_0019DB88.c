@@ -1,6 +1,7 @@
 #include "common.h"
 #include "itf.h"
 #include "pcp_vu0.h"
+#include "scr.h"
 
 extern void btlUpdateFadeIndicator(u8 *);
 
@@ -881,16 +882,11 @@ extern void itfPrintTestMessageCallback(void);
 
 extern s32 sndUpdateTestMsgTask(void);
 
-/* The process task stores its message-window handle at offset 0xCC. */
-typedef struct TestMessageTaskData {
-    u8 pad00[0xCC];
-    s32 window;
-} TestMessageTaskData;
 
 void sndCreateTestMsgTasks(void) {
     D_003BA8EC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(((TestMessageTaskData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->window, itfPrintTestMessageCallback);
+    itfMesSetWindowCallbackAddress(((ScrData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->resourceIndex, itfPrintTestMessageCallback);
     kwlnTaskCreate((u32)D_003A14F0, 0x3EF, 0, 0, (s32 (*)(s64))itfUpdateTestMessageResourceInput, 0, 0);
     kwlnTaskCreate((u32)D_003A1500, 0x2AFE, 0, 0, (s32 (*)(s64))sndUpdateTestMsgTask, 0, 0);
 }

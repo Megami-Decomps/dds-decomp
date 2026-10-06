@@ -4,6 +4,7 @@
 #include "dds3obj.h"
 #include "fld.h"
 #include "evt_world.h"
+#include "scr.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -118,7 +119,6 @@ extern s32 D_004361A0;
 extern void fldResetActorSlots(void);
 
 extern u8 *fldFindActorEntryByName(const char *);
-extern s32 scrGetCurrentContext(void);
 extern void fldPlayMenuSound(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
@@ -1345,11 +1345,6 @@ s32 fldQuerySelectedActorMotionState(s32 mode) {
     return 0;
 }
 
-typedef struct FldTaskRecordWork {
-    u8 pad00[0xE4];
-    u32 key;
-} FldTaskRecordWork;
-
 void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     s32 index;
     s32 kind;
@@ -1357,7 +1352,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     FldActorEntry *entry;
 
     if (useTaskRecord != 0) {
-        record = fldGetTaskRecordValue(((FldTaskRecordWork *)scrGetCurrentContext())->key);
+        record = fldGetTaskRecordValue((u32)scrGetCurrentContext()->task);
         if (record == 0) {
             return;
         }

@@ -2,16 +2,9 @@
 #include "scr.h"
 
 extern ScrVM *datGameState;
-extern ScrData *scrCurrentContext;
 extern const ScrCommand D_0039E288[];
 extern u32 (*D_00329930[])(ScrData *scr);
 
-void scrPushInteger(ScrData *scr, s32 val);
-void bfStackPushFloat(ScrData *scr, f32 val);
-void scrPushString(ScrData *scr, char *str);
-void scrPushTypeFourValue(ScrData *scr, s32 val);
-s32 bfStackPopInt(ScrData *scr);
-f32 bfStackPopFloat(ScrData *scr);
 void bfOpBinaryEval(ScrData *scr, s32 op);
 
 u32 scrPushImmediateInteger(ScrData *scr)
@@ -488,7 +481,7 @@ u32 bfOpJumpIfFalse(ScrData *scr)
 
 /* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
  * 1 when a handler returns 2 (yield for one tick). */
-u32 bfContextStep(ScrData *scr)
+s32 bfContextStep(ScrData *scr)
 {
     u32 result;
 
