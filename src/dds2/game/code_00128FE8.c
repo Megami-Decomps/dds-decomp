@@ -134,7 +134,7 @@ extern u32 D_00436064;
 
 extern u32 D_0043607C;
 
-extern u32 fldMarkerTexture;
+extern SdfTex *fldMarkerTexture;
 
 extern u32 D_00438EC8;
 
@@ -142,7 +142,7 @@ extern u8 D_0038A700[];
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
-extern u32 sdfTexAcquireResourceTexture(void *);
+extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
 extern f32 D_004360B0;
 
@@ -227,7 +227,7 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void *sdfConsAllocateColumnPacket(s32);
 
-extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
@@ -364,9 +364,9 @@ extern u8 D_0037FA00[];
 
 extern u8 D_00384790[];
 
-extern s32 sdfTexGetPrimaryBuffer(s32);
+extern u32 sdfTexGetPrimaryBuffer(SdfTex *);
 
-extern s32 sdfTexGetPrimaryBufferSize(s32);
+extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 
@@ -1256,14 +1256,14 @@ typedef struct FldSpriteVertex {
     FldSpriteCorner corner[2];
 } FldSpriteVertex;
 
-void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 drawMode) {
+void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
     s32 handle = (s32)sdfConsAllocateColumnPacket(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
     s32 ubase = u * 16;
     s32 xl = x * 16 + 0x7000;
     s32 vbase = v * 16;
     s32 yt = y * 8 + 0x7900;
-    s32 command;
+    SdfListHead *command;
     SdfPoolNode *descriptor;
 
     vtx->r = color & 0xFF;
@@ -1282,17 +1282,17 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     vtx->corner[1].y = yt + h * 8;
     vtx->corner[1].mask = -1;
     vtx->corner[1].flag = 0;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    sdfConsCreateDrawPacket(command, drawMode, 0);
-    sdfAppendPacket((SdfListHead *)command, handle);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    sdfConsCreateDrawPacket(command, texture, 0);
+    sdfAppendPacket(command, handle);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
+    descriptor->append((SdfListHead *)descriptor, command);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B690);
 
-void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 drawMode) {
+void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
     s32 handle = (s32)sdfConsAllocateColumnPacket(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
     s32 r = color & 0xFF;
@@ -1303,7 +1303,7 @@ void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, 
     s32 vbase = v * 16;
     s32 xl = (s32)(x * 16.0f) + 0x7000;
     s32 yt = (s32)(y * 8.0f) + 0x7900;
-    s32 command;
+    SdfListHead *command;
     SdfPoolNode *descriptor;
 
     vtx->r = r;
@@ -1322,12 +1322,12 @@ void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, 
     vtx->corner[1].y = yt + (s32)(h * 8.0f);
     vtx->corner[1].mask = -1;
     vtx->corner[1].flag = 0;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    sdfConsCreateDrawPacket(command, drawMode, 0);
-    sdfAppendPacket((SdfListHead *)command, handle);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    sdfConsCreateDrawPacket(command, texture, 0);
+    sdfAppendPacket(command, handle);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
+    descriptor->append((SdfListHead *)descriptor, command);
 }
 
 void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
@@ -1824,7 +1824,7 @@ typedef struct FldModelPacketInput {
     f32 angle;         /* 0x44 */
 } FldModelPacketInput;
 
-void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
+void fldSubmitModelPacket(SdfTex *texture, u8 *modelData) {
     s32 command = sdfAllocPacketAligned(0x20);
     s32 header;
     s32 packet;
@@ -1833,7 +1833,7 @@ void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
 
     sdfInitPacketList((SdfListHead *)command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, sdfTexGetPrimaryBuffer(textureId), sdfTexGetPrimaryBufferSize(textureId));
+    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
     sdfAppendReferencePacket((SdfListHead *)command, header);
     func_003365B8(((FldModelPacketInput *)modelData)->angle);
     VU0_STORE_MATRIX(mat);
