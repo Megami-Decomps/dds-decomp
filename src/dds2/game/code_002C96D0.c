@@ -1,5 +1,47 @@
 #include "common.h"
 #include "pcp_vu0.h"
+/* Compact metadata copied from the beginning of each save blob. */
+typedef struct FileRecordHeader {
+    char signature[3];
+    s8 version;
+    s8 mapGroup;
+    s8 mapIndex;
+    u8 pad06[2];
+    s32 playTicks;
+    s16 status;
+    s16 newCycle;
+    s8 party[8];
+    s8 levels[8];
+    u32 money;
+    u32 header24;
+    u32 header28;
+    u32 header2C;
+} FileRecordHeader;
+
+typedef struct FileScrollArrowState {
+    s32 angle;
+    s32 upAlpha;
+    s32 unk08;
+    s32 downAlpha;
+} FileScrollArrowState;
+
+extern FileScrollArrowState D_003E7FF8;
+extern f32 D_00437D24;
+extern u8 D_003E8658[];
+extern u8 D_003A41A8[][32];
+extern u8 D_003A47E8[][32];
+extern char D_00437D98[];
+extern char D_00437DA0[];
+extern char D_00437DA8[];
+extern u32 func_002CF978(u32, s32, s8);
+extern void fileDrawSlotIcon(s32, s32, s32, s32);
+extern void fileCursorStepUp(void);
+extern void fileFadeStepDown(void);
+extern void fileLoadCtxSlideUpdate(void);
+
+extern u8 D_003E8B98[];
+extern u8 D_003E8BB0[];
+extern u8 D_003E8BD0[];
 typedef struct EffectSurfaceNode {
     u32 capacity;
     u32 color;
@@ -81,7 +123,7 @@ extern u32 D_00437D44;
 
 extern u32 D_00437D3C;
 
-extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 D_00439004;
 extern u32 D_00439008;
@@ -100,14 +142,14 @@ extern s32 D_00437D68;
 extern s32 D_00437D64;
 extern s32 D_00437D60;
 extern s32 D_00437D5C;
-extern s32 D_00437D54;
-extern s32 D_00437D58;
+extern u8 (*D_00437D54)[32];
+extern u8 (*D_00437D58)[32];
 extern s32 sdfTexReleaseReferenceViaHandler(s32);
 extern s32 dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(s32, s32);
 extern void fileWaitReady(u32);
 extern void sdfReleaseMemorySlot(void *);
-extern void sdfFreeMemoryFromEitherHeap(s32);
+extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 D_00437D38;
 
@@ -136,7 +178,7 @@ extern u32 func_002DDF48(u32);
 extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
 extern s32 D_00437D88;
-extern void func_0035C860(void *dst, const char *fmt, ...);
+extern s32 func_0035C860(char *dst, const char *fmt, ...);
 
 extern s32 fileSlotSelectPoll(void);
 
@@ -446,11 +488,7 @@ extern void fileJobFreeSecondaryBuffer(FileJob *job);
 
 /* Only fields needed by the save copy are exposed; the remaining state is opaque. */
 typedef struct FileSaveState {
-    u8 pad00[0x20];
-    u32 money;          /* 0x20 */
-    u32 header24;       /* 0x24 */
-    u32 header28;       /* 0x28 */
-    u32 header2C;       /* 0x2C */
+    FileRecordHeader header; /* 0x00 */
     u8 pad30[0xA24];
     u32 slotFlags;      /* 0xA54 */
     u8 padA58[0x1DBF8];
@@ -682,10 +720,10 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontSetSharedRenderFlags(0x54);
 }
 
-void fileDrawMenuImageAtPoint(s32 x, s32 y, u64 width, u64 height) {
-    u64 handle;
+void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
+    u32 handle;
 
-    handle = func_0019F5E8(x << 4, y << 3, 0, width, height, 0);
+    handle = func_0019F5E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
 }
@@ -811,7 +849,7 @@ void *fileReadSlotPreviewWait(void) {
 }
 
 extern s32 mcPollZeroCommandResult(void);
-extern u8 D_004580C0[];
+extern FileRecordHeader D_004580C0[];
 
 void *fileStoreSlotHeader(void) {
     s32 status = mcPollZeroCommandResult();
@@ -820,7 +858,7 @@ void *fileStoreSlotHeader(void) {
         return NULL;
     }
     if (status == 1) {
-        memcpy(D_004580C0 + fileSlotScanIndex * 0x30, (void *)fileSaveReadBuffer, 0x30);
+        memcpy(&D_004580C0[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
         sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return func_002CBA90();
     }
@@ -1848,9 +1886,7 @@ void *mcdHandleSaveSetupDone(void) {
     return (void *)fileAbortSlotScanOnInput;
 }
 
-typedef struct {
-    u8 bytes[0x30];
-} __attribute__((packed)) FileRecordHeader;
+
 
 extern s32 mcdContinueLoadSelection();
 
@@ -1978,7 +2014,7 @@ void *func_002CCAD0(void) {
             if ((flags & 1) != 0) {
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
                 if (mcdOriginalTitleFileMode != 0 &&
-                    *(s16 *)(D_004580C0 + D_00437D2C * 0x30 + 0xC) == 0) {
+                    D_004580C0[D_00437D2C].status == 0) {
                     fileSetMenuFlowState(0);
                     D_00437D3C = 8;
                     D_00437D40 = 0;
@@ -1990,7 +2026,7 @@ void *func_002CCAD0(void) {
                     return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
                 }
                 fileCopyRecordHeader((FileRecordHeader *)fileLoadSelectionWork,
-                    (const FileRecordHeader *)(D_004580C0 + D_00437D2C * 0x30));
+                    (const FileRecordHeader *)(&D_004580C0[D_00437D2C]));
                 return (void *)fileBeginPromptDialog(mcdAdvanceToLoadSelection, fileScanSlotStates, 1);
             }
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
@@ -2009,6 +2045,7 @@ void *func_002CCAD0(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CD028);
+
 
 void *fileRunMenuState(s32 arg) {
     void *next;
@@ -2461,7 +2498,7 @@ void *fileBeginFadeAndConfirmSound(void) {
 }
 
 typedef struct MenuWork {
-    u8 pad0[0x30];
+    FileRecordHeader header;
     u8 unk30;
     u8 unk31;
     u16 unk32;
@@ -2631,7 +2668,7 @@ extern char D_0042B938[];
 
 void fileSaveAndDisplayCurrentMoney(void) {
     FileSaveState *state = (FileSaveState *)datGameState;
-    u32 money = state->money;
+    u32 money = state->header.money;
     state->savedMoney = money;
     func_0035B6E0(D_0042B938, money);
 }
@@ -2642,14 +2679,14 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D0B08);
 
-void fileCopySaveHeaderNumbers(FileSaveState *source) {
+void fileCopySaveHeaderNumbers(FileRecordHeader *source) {
     s32 state;
 
     state = datGameState;
-    ((FileSaveState *)datGameState)->money = source->money;
-    ((FileSaveState *)state)->header24 = source->header24;
-    ((FileSaveState *)state)->header28 = source->header28;
-    ((FileSaveState *)state)->header2C = source->header2C;
+    ((FileSaveState *)datGameState)->header.money = source->money;
+    ((FileSaveState *)state)->header.header24 = source->header24;
+    ((FileSaveState *)state)->header.header28 = source->header28;
+    ((FileSaveState *)state)->header.header2C = source->header2C;
 }
 
 void fileCopyRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
