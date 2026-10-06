@@ -81,7 +81,7 @@ typedef struct MantraMenu {
 } MantraMenu;
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
-extern s32 scrGetSelectedScriptEntryId(s32);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern u32 mnuGetSelectedNodeValue(u8 *);
 extern u32 mnuAllocateMantraIconPool(u32);
 extern u32 mnuCreateMantraIconListA();
@@ -2598,7 +2598,7 @@ u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
     ((MantraFadeData *)data)->iconPool = (MantraIconPool *)mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
     slot = &((MantraMenu *)menu)->work;
-    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
+    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(menu)));
     mnuSpawnMantraIcon(first->x / 10.0f * 40.0f, first->y / 10.0f * 39.0f, ((MantraFadeData *)data)->iconPool, 0x20);
     second = slot->selectedNode;
     mnuSpawnMantraIcon(second->x / 10.0f * 40.0f, second->y / 10.0f * 39.0f, ((MantraFadeData *)data)->iconPool, 0x10);
@@ -2669,7 +2669,7 @@ u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
     ((MantraFadeData *)data)->iconPool = (MantraIconPool *)mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
     slot = &((MantraMenu *)menu)->work;
-    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
+    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(menu)));
     mnuSpawnMantraIcon(first->x * 20 / 10.0f, first->y * 20 / 10.0f, ((MantraFadeData *)data)->iconPool, 0x60);
     second = slot->selectedNode;
     mnuSpawnMantraIcon(second->x * 20 / 10.0f, second->y * 20 / 10.0f, ((MantraFadeData *)data)->iconPool, 0x50);
@@ -3044,7 +3044,127 @@ void func_0027A7F0(void) {
 void func_0027A7F8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A800);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern void func_0027AFE0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet);
+
+/* Mantra panel C transition / appear draw: kinds 6..9 fade the panel in or out over its frame counter, kind 0
+ * draws it steady, and kind 1 plays the 60-frame appear (panel fade-in, pulsing inner glow, wave flash and three
+ * orbiting sparks) and reports completion. */
+s32 func_0027A800(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    MantraPanelAnimation *panel = (MantraPanelAnimation *)object;
+    f32 scale;
+    f32 wave;
+    f32 spark;
+    f32 spin;
+    f32 pulse;
+    f32 angle;
+    f32 phase;  /* retail keeps the spark start angle apart from spin ($f21) */
+    f32 radius; /* retail loads 15.0f into $f24 before the loop's other constants */
+    s32 alpha;
+    s32 i;
+
+    switch ((panel->flags >> 19) & 0xF) {
+    case 6:
+        scale = panel->frame * 0.25f;
+        alpha = amount * scale;
+        mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, alpha, 0x95, 0, packet);
+        break;
+    case 8:
+        scale = panel->frame / 10.0f;
+        alpha = amount * scale;
+        mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, alpha, 0x95, 0, packet);
+        break;
+    case 7:
+        scale = panel->frame * 0.25f;
+        scale = 1.0f - scale;
+        alpha = amount * scale;
+        mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, alpha, 0x95, 0, packet);
+        break;
+    case 9:
+        scale = panel->frame / 10.0f;
+        scale = 1.0f - scale;
+        alpha = amount * scale;
+        mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, alpha, 0x95, 0, packet);
+        break;
+    case 0:
+        mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, amount, 0x95, 0, packet);
+        break;
+    case 1:
+        panel->frame++;
+        scale = 0.0f;
+        if (panel->frame >= 30) {
+            if (panel->frame < 40) {
+                scale = (panel->frame - 30) / 10.0f;
+            } else {
+                scale = 1.0f;
+            }
+        }
+        scale = 1.0f - scale;
+        if (panel->frame < 40) {
+            wave = panel->frame / 40.0f;
+        } else if (panel->frame < 50) {
+            wave = (50 - panel->frame) / 20.0f;
+        } else {
+            wave = 0.0f;
+        }
+        wave = sdfSinPoly(wave * 1.5707963f);
+        if (panel->frame >= 10) {
+            if (panel->frame < 40) {
+                spark = (panel->frame - 10) / 30.0f;
+            } else if (panel->frame < 50) {
+                spark = (50 - panel->frame) / 10.0f;
+            } else {
+                spark = 0.0f;
+            }
+        } else {
+            spark = 0.0f;
+        }
+        if (panel->frame < 60) {
+            spin = panel->frame / 60.0f;
+        } else {
+            spin = 1.0f;
+        }
+        pulse = 0.0f;
+        if (panel->frame >= 30) {
+            pulse = (panel->frame - 30) / 30.0f;
+        }
+        pulse = (sdfSinPoly(pulse * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+        alpha = (f32)amount * scale;
+        mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, alpha, 0x95, 0, packet);
+        alpha = (f32)amount * pulse;
+        func_0027AFE0(x, y, z, alpha, unused, object, packet);
+        mnuDrawMantraSprite(x, y, z, alpha, 0x99, 0, packet);
+        mnuDrawMantraSprite(x, y, z, (f32)amount * wave * 0.7f, 0x99, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+        uiDrawActiveSurfaceRegion(packet);
+        mnuDrawMantraSprite(x, y, 0, amount, 0x7C, 0x60, packet);
+        sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+        radius = 15.0f;
+        phase = spin * -6.2831853f * 0.25f;
+        for (i = 0; i < 3; i++) {
+            angle = phase + i * 2.0943951f;
+            mnuDrawMantraSprite((f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * radius,
+                                (f32)y + -sdfSinPoly(angle) * radius, 1, (f32)amount * 0.6f * spark, 0x7D, 0,
+                                packet);
+        }
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
+        if (panel->frame >= 60) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 extern f32 effMiscRandUnitFloat(void *state);
 
@@ -3608,8 +3728,6 @@ void mnuReleaseMantraPanelBurstPool(u32 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284B70);
 
-
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side) {
     s32 base = 0x7A;
