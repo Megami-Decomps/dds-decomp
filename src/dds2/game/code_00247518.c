@@ -1695,9 +1695,9 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, u32 viewer
     }
 }
 
+/* Restore default effect parameters for the selected timeline key. */
 INCLUDE_RODATA(const s32, "game/code_00247518", D_00423050);
 
-/* Restore default effect parameters for the selected timeline key. */
 s32 func_0024D148(s32 unused0, s32 unused1, EventViewerState *viewer) {
     EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
     u128 *destination;

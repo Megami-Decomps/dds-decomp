@@ -819,3 +819,4 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
 INCLUDE_SDATA(const s32, "game/code_00231A80", D_00436FA0);
 
 INCLUDE_SDATA(const s32, "game/code_00231A80", D_00436FA8);
+

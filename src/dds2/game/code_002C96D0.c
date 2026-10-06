@@ -2950,10 +2950,6 @@ void fileFadeStepDown(void) {
     D_003E8008[0] = D_003E8008[0] <= 0 ? 0 : D_003E8008[0] > 0x80 ? 0x80 : D_003E8008[0];
 }
 
-
-
-
-
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B770);
 
 void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
@@ -7703,3 +7699,4 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E18);
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E20);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E28);
+

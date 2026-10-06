@@ -1045,7 +1045,6 @@ void func_001CCD80(s32 index, s8 operation) {
     }
 }
 
-
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416D58);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416D88);
