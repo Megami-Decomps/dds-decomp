@@ -358,48 +358,8 @@ void mnuRequestBaseAssets(MenuAssets *assets) {
     effRequestMappedResource(D_003B2348, D_0037CD20[0], &assets->material);
 }
 
-typedef struct MenuColorEntry {
-    u8 pad0[0x84];
-    u32 color[4];
-    u8 pad94[0xC];
-} MenuColorEntry;
-
-typedef struct MenuColorSet {
-    u8 pad0[0x18];
-    MenuColorEntry *entries;
-} MenuColorSet;
-
-typedef struct MenuColorHost {
-    u32 resource;      /* 0x00 */
-    u32 sprite[3];     /* 0x04 */
-    MenuColorSet *set; /* 0x10 */
-    s32 ready;         /* 0x14 */
-} MenuColorHost;
-
-s32 mnuInitializeCampAssetSprites(MenuColorHost *obj) {
-    s32 i;
-    s32 j;
-
-    if (obj->resource == 0) {
-        return 0;
-    }
-    if (obj->set == NULL) {
-        return 0;
-    }
-    if (obj->ready == 0) {
-        return 0;
-    }
-    obj->sprite[0] = effCreateResourceSlotSet(obj->resource, 0, 1);
-    obj->sprite[1] = effCreateResourceSlotSet(obj->resource, 0, 1);
-    obj->sprite[2] = effCreateResourceSlotSet(obj->resource, 0, 1);
-    mnuBindAssetEffectPayloads(obj);
-    for (i = 0; i < 5; i++) {
-        for (j = 0; j < 4; j++) {
-            obj->set->entries[i].color[j] = 0x8080805A;
-        }
-    }
-    return 1;
-}
+extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
+INCLUDE_ASM(const s32, "game/code_00279CC0", mnuInitializeCampAssetSprites);
 
 void mnuReleaseAssets(MenuAssets *assets) {
     u32 i;
@@ -656,19 +616,11 @@ MenuListNode *func_0027B540(MenuList *list, MenuListNode *anchor,
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B888);
 
-typedef struct MenuSpriteRef {
-    s32 sprite;
-    s32 effect;
-} MenuSpriteRef;
 
-typedef struct MenuSpriteGrid {
-    s32 pad0[2];
-    MenuSpriteRef slots[8];
-} MenuSpriteGrid;
 
-void mnuSetGridSpriteSlot(MenuSpriteGrid *grid, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
-    grid->slots[row * 4 + col].sprite = sprite;
-    grid->slots[row * 4 + col].effect = effect;
+void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
+    node->sprites[row * 4 + col].sprite = sprite;
+    node->sprites[row * 4 + col].effect = effect;
     itfSetGridEntryQuantizedAndRefresh(sprite, effect, x, y, x, y);
 }
 
