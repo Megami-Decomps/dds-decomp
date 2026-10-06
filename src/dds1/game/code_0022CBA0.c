@@ -356,19 +356,6 @@ typedef struct EffBlurTemplateBody {
 } EffBlurTemplateBody;
 
 
-typedef struct EffBlurScaleParams {
-    s32 count;
-    f32 phaseStep;
-    f32 spacing;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 angleStep;
-    s32 x;
-    s32 y;
-    s32 size;
-} EffBlurScaleParams;
 
 extern EffScreenDrawParams *effGetLoadDescA(void);
 

@@ -214,19 +214,6 @@ typedef struct {
 } EffPCPTexturedBlurParams;
 
 
-typedef struct {
-    s32 count;
-    f32 phaseStep;
-    f32 spacing;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 angleStep;
-    s32 x;
-    s32 y;
-    s32 size;
-} EffBlurScaleParams;
 
 typedef struct {
     EffPCPCompactTimelineParams timeline;
@@ -286,7 +273,10 @@ typedef struct {
 } EffPCPCompactWork;
 
 
-extern u32 effCloneBlurWorkWithSlots(void *params);
+extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
+extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
+extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
+extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 
 /* Shared 0x24-byte thunder ray work. The renderer places its first point
    startDistance along the muzzle direction, then advances by length. */
@@ -2927,7 +2917,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactScaleParams *par
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = (void *)effCloneBlurWorkWithSlots(&params->res);
+    work->resource = effCloneBlurWorkWithSlots(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2961,7 +2951,7 @@ void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
 }
 
 void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseSecondResource((u32)work->resource);
+    effBlurReleaseSecondResource((EffBlurScaleWork *)work->resource);
     sdfReleaseChipBlock(work);
 }
 
