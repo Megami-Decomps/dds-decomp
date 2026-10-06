@@ -1,42 +1,13 @@
 #include "common.h"
 #include "eff_blur.h"
 
-extern u32 effGetResourceFirstWord(u32);
+extern s32 effGetResourceFirstWord(s32);
+extern struct SdfMemBlock *sdfAllocGeneralBlock(s32 bytes);
+extern u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
+extern void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_0034DF38[];
-
-
-
-
-/* Random-position variant parameters copied into its work (0x2C). */
-typedef struct {
-    s32 count;
-    s32 delaySpread;
-    f32 angleStep;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s32 x;
-    s32 y;
-    s32 positionSpread;
-    s32 size;
-} EffBlurScatterParams;
-
-typedef struct {
-    s32 delay;
-    f32 angle;
-    EffBlurQuad quad;
-} EffBlurScatterSlot; /* 0x30 */
-
-/* The first factory allocates this header followed by 100 scatter slots. */
-typedef struct {
-    EffBlurScatterParams params;
-    u32 sourceHandle;
-    u32 allocation;
-    EffBlurScatterSlot *slots;
-} EffBlurScatterWork; /* 0x38 */
 
 /* Second blur variant: one 0x30-byte slot per step, led by a float phase. */
 typedef struct {

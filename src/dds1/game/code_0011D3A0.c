@@ -1,6 +1,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "eff_blur.h"
 #include "fpu.h"
 #include "fld.h"
 #include "evt_world.h"
@@ -2192,7 +2193,7 @@ extern s32 D_003BABF4, D_003BABE4;
 extern char D_0039FD30[], D_0039FD40[];
 extern void kwlnFadeResetBackground(void);
 extern void fldDestroyPanelTaskIfPresent(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
-extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
+extern void mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
 extern void fldReleaseMenuSlotsAfterWait(void);
 
 void fldReleaseCampSceneTasks(void) {
@@ -2209,7 +2210,7 @@ void fldReleaseCampSceneTasks(void) {
     evtSetSolarOverlayFullyTransparent();
     fldDestroyTask();
     if (D_003BABE4 != 0) {
-        effBlurReleaseFirstResource(D_003BABE4);
+        effBlurReleaseFirstResource((EffBlurScatterWork *)D_003BABE4);
         D_003BABE4 = 0;
     }
     mnuDestroyCampTasks();
