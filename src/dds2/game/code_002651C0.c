@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "dat_state.h"
 
 extern s32 mdlFlagTest(u32);
 
@@ -42,7 +43,6 @@ extern void kwlnFadeOutStart();
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];
-extern s32 datGameState;
 extern char D_00437840[];
 extern void mdlFlagSet();
 extern void mdlFlagClear();
@@ -248,7 +248,7 @@ void mnuAwardCampProgressCurrency(void) {
     evtCopyEntryStringToActiveWindow(0, (s32)text);
     dspStartEntry(0x19);
     datAddCurrencyClamped(index);
-    ptyAdjustItemQuantity(0x81, -*(u8 *)(datGameState + 0x13c1));
+    ptyAdjustItemQuantity(0x81, -datGameState->inventory.counts[0x81]);
     mdlFlagClear(0xa01);
 }
 
