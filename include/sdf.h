@@ -111,11 +111,21 @@ typedef struct SdfTexBuf {
     u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
 } SdfTexBuf;
 
-/* Texture resource word at +0xC (0x10); DDS1/2 game/code_002D10B0/00329F60.c via SdfTex. */
-typedef struct {
-    u8 pad00[0xC];
-    u32 word;
+/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams.
+ * Allocation mode is an unsigned classification: zero is a free range. */
+typedef struct SdfTexResource {
+    struct SdfTexResource *next; /* 0x00 */
+    struct SdfTexResource *prev; /* 0x04 */
+    u32 allocationMode;         /* 0x08 */
+    u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
+    s32 size;                   /* 0x10: range length in 32-bit words */
+    s16 width;                  /* 0x14 */
+    s16 height;                 /* 0x16 */
+    s32 format;                 /* 0x18: GS pixel-storage mode */
 } SdfTexResource;
+
+typedef char SdfTexResource_size_must_be_0x1C[
+    (sizeof(SdfTexResource) == 0x1C) ? 1 : -1];
 
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
 typedef struct SdfGraphObj {

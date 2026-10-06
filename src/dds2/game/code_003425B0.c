@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_FRAME_HEADER_BYTES 0x10
@@ -107,10 +108,6 @@ extern void sceSifRpcLoop(void *);
 
 extern u32 D_0047B440[16];
 
-typedef struct SdfStreamTextureHead {
-    u8 pad00[0xC];
-    s32 resourceWord;
-} SdfStreamTextureHead;
 
 /* Opaque IPU DMA environment saved at the end of the native stream node. */
 typedef struct IpuDmaState {
@@ -144,7 +141,7 @@ typedef struct SdfStreamFrameNode {
     s32 textureResources[2];
     u8 pad30[4];
     s32 resourceWord; /* 0x34: retained resource handle */
-    SdfStreamTextureHead *textureHead; /* 0x38 */
+    SdfTexResource *textureHead; /* 0x38 */
     u16 width;        /* 0x3C */
     u16 height;       /* 0x3E */
     u32 cycleLength; /* Header word counted against completed IPU transfers. */
@@ -221,13 +218,6 @@ extern s32 func_0036DE70(void);
 extern void func_003450D8(s32);
 extern s32 func_00344F08(void *);
 
-typedef struct GsMemBlock {
-    struct GsMemBlock *link0; /* 0x00 */
-    struct GsMemBlock *link4; /* 0x04 */
-    u32 type;                 /* 0x08 */
-    u32 unkC;                 /* 0x0C */
-    u32 unk10;                /* 0x10 */
-} GsMemBlock;
 
 extern char sdfGsMemoryDumpHeader[]; /* " <<< GS memory information >>>..." */
 
@@ -237,11 +227,11 @@ extern char sdfGsMemoryTypeFormat[]; /* "%d" */
 
 extern char *D_0040BBD8[];
 
-extern GsMemBlock *sdfGetTextureListHead(void);
+extern SdfTexResource *sdfGetTextureListHead(void);
 
 extern char *D_0040BBE8[];
 
-extern GsMemBlock *sdfGetTextureBlockListHead(void);
+extern SdfTexResource *sdfGetTextureBlockListHead(void);
 
 void func_003425B0(void) {
     func_00341650(0x180, 0, 0, 0);
@@ -774,53 +764,53 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00343468);
 
 void sdfDumpGsMemoryForward(void) {
     char buf[8];
-    GsMemBlock *head;
-    GsMemBlock *node;
-    GsMemBlock *walk;
+    SdfTexResource *head;
+    SdfTexResource *node;
+    SdfTexResource *walk;
     char *name;
 
     sdfPrintFormattedDevMessage(sdfGsMemoryDumpHeader);
     head = sdfGetTextureListHead();
     node = head;
     while (node != 0) {
-        if (node->type < 4) {
-            name = D_0040BBD8[node->type];
+        if (node->allocationMode < 4) {
+            name = D_0040BBD8[node->allocationMode];
         } else {
-            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->type);
+            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
             name = buf;
         }
-        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->next, node->prev, name, node->word, node->size);
         walk = head;
         while (walk != node) {
-            walk = walk->link4;
+            walk = walk->prev;
         }
-        node = node->link4;
+        node = node->prev;
     }
 }
 
 void sdfDumpGsMemoryBackward(void) {
     char buf[8];
-    GsMemBlock *head;
-    GsMemBlock *node;
-    GsMemBlock *walk;
+    SdfTexResource *head;
+    SdfTexResource *node;
+    SdfTexResource *walk;
     char *name;
 
     sdfPrintFormattedDevMessage(sdfGsMemoryDumpHeader);
     head = sdfGetTextureBlockListHead();
     node = head;
     while (node != 0) {
-        if (node->type < 4) {
-            name = D_0040BBE8[node->type];
+        if (node->allocationMode < 4) {
+            name = D_0040BBE8[node->allocationMode];
         } else {
-            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->type);
+            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
             name = buf;
         }
-        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->next, node->prev, name, node->word, node->size);
         walk = head;
         while (walk != node) {
-            walk = walk->link0;
+            walk = walk->next;
         }
-        node = node->link0;
+        node = node->next;
     }
 }
 
@@ -1166,7 +1156,7 @@ void sdfSoundInitFormattedNode(u8 *nodeBytes, s32 format, SdfStreamRead readSour
     ((SdfStreamFrameNode *)nodeBytes)->scratchBuffer = sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
 
-extern SdfStreamTextureHead *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
+extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
 
 /* Query for a complete header before reading it. Texture dimensions are rounded
  * only when larger than one GS page; smaller dimensions remain unchanged.
@@ -1191,7 +1181,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
         s32 textureWidth = node->width;
         s32 textureHeight = node->height;
         s32 pixelFormat;
-        SdfStreamTextureHead *texture;
+        SdfTexResource *texture;
 
         if (textureWidth > SDF_STREAM_PAGE_WIDTH) {
             textureWidth = (textureWidth + SDF_STREAM_PAGE_WIDTH_MASK) & ~SDF_STREAM_PAGE_WIDTH_MASK;
@@ -1209,7 +1199,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
         }
         texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, 2, 0);
         node->textureHead = texture;
-        node->resourceWord = texture->resourceWord;
+        node->resourceWord = texture->word;
     }
     sdfAllocateStreamFrameBuffers(node);
     interruptsEnabled = func_0036DE70();
