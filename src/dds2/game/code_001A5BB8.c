@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 #include "itf.h"
 #include "btl_state.h"
 #include "btl_ui.h"
@@ -140,20 +141,6 @@ typedef struct UiObject {
     u8 pad_318[0x4C];
     struct UiObject *next;
 } UiObject;
-
-typedef struct BtlSlotRecord {
-    u8 pad00[0xC];
-    s32 unk0C;
-    u8 pad10[0x6C];
-    s32 unk7C;
-    u8 pad80[4];
-    u32 word[7];
-} BtlSlotRecord;
-
-typedef struct BtlSlotOwner {
-    u8 pad_00[0x18];
-    BtlSlotRecord *records;
-} BtlSlotOwner;
 
 /* Actor-task record; the separate unit-data list uses UiObject. */
 typedef struct SceneTask {
@@ -4314,7 +4301,66 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6CA8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6FC0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B70B8);
+typedef struct BtlResBlock {
+    SdfMemBlock *unk0;
+    s32 nameA;
+    s32 nameB;
+    s32 nameC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
+    s32 unk1C;
+} BtlResBlock;
+extern BtlResBlock *btlResourceBlock;
+extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+extern const BattlePanelColors D_00415CE8;
+
+/* 0x2C-byte action record shared by the initializer, updater and renderer. */
+typedef struct BattleMirroredSpriteRecord {
+    s8 active;
+    u8 pad01;
+    s16 slot;
+    f32 scale;
+    s32 restoredWidth;
+    s32 restoredHeight;
+    s32 width;
+    s32 height;
+    s32 x;
+    s32 y;
+    s32 secondX;
+    s32 frame;
+    s8 alpha;
+    u8 pad29[3];
+} BattleMirroredSpriteRecord;
+
+void func_001B70B8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    BattlePanelColors colors = D_00415CE8;
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            if (record->active != 0) {
+                u32 color;
+                btlResourceBlock->resA->workEntries[record->slot].width = record->width;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->height;
+                color = record->alpha | 0x80808000;
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_00306C28(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                func_00306C28(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                btlResourceBlock->resA->workEntries[record->slot].width = record->restoredWidth << 4;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->restoredHeight << 3;
+            }
+            record++;
+        } while (--remaining != 0);
+    }
+}
 
 void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
     *(u8 *)(arg0 + 0) = 1;
@@ -4326,22 +4372,10 @@ void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, 
     *(u32 *)(arg0 + 0x24) = 0;
 }
 
-typedef struct BtlResBlock {
-    SdfMemBlock *unk0;
-    s32 nameA;
-    s32 nameB;
-    s32 nameC;
-    BtlSlotOwner *resA;
-    BtlSlotOwner *resB;
-    BtlSlotOwner *resC;
-    s32 unk1C;
-} BtlResBlock;
-
 extern u8 D_00436800;
 
 extern u8 btlResourceBlockLoaded;
 
-extern BtlResBlock *btlResourceBlock;
 
 extern s32 sdfReadNamedResource(const char *, void *, s32);
 
@@ -4365,7 +4399,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415C98);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CD8);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CE8);
+const BattlePanelColors D_00415CE8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
 
 void btlPanelResourcesLoad(void) {
     u8 params[16];
@@ -4389,12 +4423,12 @@ void btlPanelResourcesLoad(void) {
 
 typedef struct BtlWorkRes {
     u8 pad[0x4D8];
-    BtlSlotOwner *resA;
-    BtlSlotOwner *resB;
-    BtlSlotOwner *resC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
 } BtlWorkRes;
 
-extern BtlSlotOwner *func_00305148();
+extern EffectSlotSet *func_00305148();
 
 void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
@@ -4408,7 +4442,7 @@ void btlLoadResourceBlock(void) {
     }
 }
 
-extern s32 effDestroyResourceSlotSet(BtlSlotOwner *);
+extern s32 effDestroyResourceSlotSet(EffectSlotSet *);
 
 void btlReleaseResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
@@ -4515,7 +4549,40 @@ void btlClearSharedBattleStateWords(void) {
     } while (-1 < temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7940);
+/* The reset routine clears all four words of the shared battle flag bank. */
+typedef struct BattleFlagSaveState {
+    u8 pad00000[0x16F00];
+    u32 sharedBattleFlags[4];
+} BattleFlagSaveState;
+
+s32 func_001B7940(s32 id, s32 operation) {
+    s32 selector;
+    s32 offset;
+    u32 word;
+    u32 bit;
+
+    id = (u16)id;
+    offset = id - 0x1AB;
+    selector = (s8)operation;
+    if (offset != 0) {
+        word = (u32)offset >> 5;
+        bit = offset & 0x1F;
+    } else {
+        word = 0;
+        bit = 0;
+    }
+    switch (selector) {
+    case 0:
+        ((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] |= 1 << bit;
+        break;
+    case 1:
+        ((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] &= ~(1 << bit);
+        break;
+    default:
+        return ((((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] & (1 << bit)) != 0);
+    }
+    return 1;
+}
 
 void func_001B7A00(void) {
     s32 i;
@@ -4837,10 +4904,6 @@ typedef struct MsgQueueTaskData {
     s16 fade;
 } MsgQueueTaskData;
 
-typedef struct BattlePanelColors {
-    u32 values[4];
-} BattlePanelColors;
-
 extern const BattlePanelColors D_004165C0;
 extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
@@ -5030,8 +5093,7 @@ typedef struct BtlPanelStrip {
     s32 texture;
 } BtlPanelStrip;
 
-extern u32 btlSetSlotLowByteClamped(BtlSlotOwner *, s32, s32, s32);
-extern void func_00306C28(s32, s32, s32, u32 *, s32, BtlSlotOwner *, s32, s32);
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004160F0);
 
@@ -5056,8 +5118,8 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004162F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB1E8);
 
-u32 btlSetSlotLowByteClamped(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta) {
-    u32 word = owner->records[group].word[slot];
+u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delta) {
+    u32 word = owner->workEntries[group].savedColors[slot];
     u32 limit;
     u32 value;
     if (delta > 0) {
@@ -5355,11 +5417,11 @@ s32 btlDrawTimedDialogTask(s64 task) {
     half = width / 32;
     func_00306C28(((width >> 4) - half + 0x105) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C = (width >> 4) << 4;
+    btlResourceBlock->resC->workEntries[0x16].width = (width >> 4) << 4;
     func_00306C28((0x100 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C =
-        btlResourceBlock->resC->records[0x16].unk7C << 4;
+    btlResourceBlock->resC->workEntries[0x16].width =
+        btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     func_00306C28((0x92 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
     if (expired) {

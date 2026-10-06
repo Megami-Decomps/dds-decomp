@@ -128,7 +128,42 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_003251C0);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325398);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_003255A0);
+typedef struct SdfFilterRecord {
+    u8 enabled;
+    u8 data[7];
+} SdfFilterRecord;
+
+typedef struct SdfFilteredRecords {
+    u32 count;
+    SdfFilterRecord *records;
+} SdfFilteredRecords;
+
+SdfFilteredRecords *func_003255A0(s32 owner, SdfFilterRecord *records, u32 count) {
+    u32 enabled = 0;
+    u32 i;
+    s32 size;
+    SdfFilteredRecords *result;
+    SdfFilterRecord *out;
+
+    for (i = 0; i < count; i++) {
+        if (records[i].enabled != 0) {
+            enabled++;
+        }
+    }
+    size = sizeof(*result) + enabled * sizeof(*records);
+    result = func_00324F50(owner, size);
+    memset(result, 0, size);
+    out = (SdfFilterRecord *)(result + 1);
+    result->count = enabled;
+    result->records = out;
+    for (i = 0; i < count; i++) {
+        if (records[i].enabled != 0) {
+            *out++ = records[i];
+        }
+    }
+    return result;
+}
+
 
 u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
     u32 *owner = func_00324D50();
