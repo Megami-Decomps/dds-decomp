@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD5C8);
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD710);
@@ -18,13 +19,12 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *w
     }
 }
 
-extern s32 datGameState;
 
 u8 func_002BDA50(s32 index) {
     if (index == 0) {
         return 0;
     }
-    return *(u8 *)(index + datGameState + 0x20000 - 0x1910);
+    return datGameState->itemRequirementCounts[index - 0xC0];
 }
 
 extern s32 D_00435E3C;
@@ -61,7 +61,7 @@ void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     frFontQueueGlyphInSelectedSlot(item);
 }
 
-extern s32 func_00314C10(s32);
+extern s32 func_00314C10(DatPartyRecord *);
 extern s32 uiBlendColors();
 extern s32 scrGetIndexedRecordAddress(s32, s32 *);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
@@ -71,7 +71,7 @@ extern void frFontQueueGlyphInSelectedSlot(s32);
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                                       s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = func_00314C10(datGameState + partyIndex * 0x1C4 + 0xA60);
+    s32 cost = func_00314C10(&datGameState->party[partyIndex]);
     s32 code;
     s32 texture;
     s32 item;

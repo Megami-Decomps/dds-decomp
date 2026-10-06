@@ -125,6 +125,13 @@ typedef struct DatProfileRecord {
     u32 flags;
 } DatProfileRecord;
 
+/* Eight-skill output shared by profile builders and reward renderers. */
+typedef struct PrfSkillList {
+    u32 flags[8];
+    s32 count;
+    u16 skills[8];
+} PrfSkillList;
+
 /* Global flag APIs use 32-bit words in each unit's bitmap. */
 typedef struct DatMantraBitmap {
 #ifdef VERSION_DDS1
