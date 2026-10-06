@@ -438,7 +438,88 @@ void effThunderRestartIndexedCell(EffThunderVectorWork *work, s32 index) {
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016BF08);
+/* Generate the indexed variant as two-vector rows in its kind-0 history.
+ * It samples wider axis perturbations and refreshes the cell angle per row.
+ */
+void func_0016BF08(EffThunderVectorWork *work, s32 index) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 placement[4] __attribute__((aligned(16)));
+    f32 axis[4] __attribute__((aligned(16)));
+    f32 originalAxis[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 origin[4] __attribute__((aligned(16)));
+    f32 width[4] __attribute__((aligned(16)));
+    f32 rotation[4] __attribute__((aligned(16)));
+    EffThunderParSystem *system = work->cellSystem;
+    ParCell *cell = &system->cells[index];
+    EffThunderVectorCell *source;
+    u128 *vertices;
+    s32 count;
+    s32 i;
+    f32 widthScale;
+    f32 rotationScale;
+    f32 angleJitter;
+    f32 radius;
+
+    count = system->vertexCount >> 1;
+    cell->vertexCount = system->vertexCount;
+    source = &work->cells[index];
+    vertices = cell->history;
+    widthScale = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.3f + 1.0f;
+    VEC3_SPLAT(width, work->head.bandWidth * widthScale);
+    originalAxis[0] = source->rotationAxis[0];
+    originalAxis[1] = source->rotationAxis[1];
+    originalAxis[2] = source->rotationAxis[2];
+    originalAxis[3] = 0.0f;
+    radius = source->radius;
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB_EXTENDED(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
+    placement[0] = source->placementVector[0];
+    placement[1] = 0.0f;
+    placement[2] = source->placementVector[2];
+    PCP_COPY_VECTOR(origin, work->head.origin);
+    origin[1] += source->placementVector[1];
+
+    for (i = 0; i < count; i++) {
+        position[0] = origin[0] + placement[0] * radius;
+        position[1] = origin[1] + placement[1] * radius;
+        position[2] = origin[2] + placement[2] * radius;
+        PCP_COPY_VECTOR(axis, originalAxis);
+        rotation[0] = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 0.5f);
+        rotation[1] = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 0.5f);
+        rotation[2] = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 0.5f);
+        vu0RotMatrixXYZFromVec3((const struct RwV3d *)rotation);
+        VU0_LOAD_VF(vf10, axis);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+        angleJitter = effMiscRandUnitFloat(D_003AA868);
+        rotationScale = -source->rotationScale;
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis,
+            ((angleJitter - 0.5f) * 2.0f * 0.8f) * rotationScale + rotationScale);
+        VU0_LOAD_VF(vf10, placement);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, placement);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, cameraDirection);
+        VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10_EXTENDED();
+        VU0_LOAD_VF(vf11, width);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 1);
+        vertices += 2;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C1F8);
 
