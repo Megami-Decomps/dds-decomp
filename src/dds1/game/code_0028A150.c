@@ -5313,6 +5313,16 @@ typedef struct FileKeyBlock {
             f32 angularAcceleration;
             f32 gravity;
         } circular;
+        struct {
+            f32 initialRadius;
+            f32 initialRadiusRandomness;
+            f32 finalRadius;
+            f32 finalRadiusRandomness;
+            f32 angularSpeed;
+            f32 angularSpeedRandomness;
+            f32 angularAcceleration;
+            f32 gravity;
+        } orientedRing;
     } emitter;
 } FileKeyBlock;             /* record-type-dependent parameter extent */
 
