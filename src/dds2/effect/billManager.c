@@ -316,7 +316,52 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
     obj->unk50 = 1;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00159678);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
+extern s32 func_0035B6E0(const char *format, ...);
+
+void *func_00159678(void *resource) {
+    u8 *source = resource;
+    s32 *header = resource;
+    s32 *childOffsets = (s32 *)(source + header[0]);
+    s32 childCount = *childOffsets++;
+    SdfMemBlock *allocation;
+    BillData *data;
+    u8 *base;
+    s32 count;
+    s32 i;
+
+    allocation = sdfAllocGeneralBlock(header[0] + childCount * 0x50 + sizeof(*data));
+    data = (BillData *)sdfResourceRetainAddress(allocation);
+    base = (u8 *)(data + 1);
+    data->allocation = allocation;
+    memcpy(base, source, header[0]);
+    data->base = base;
+    data->childCount = childCount;
+    data->entries = (BillAnimationEntry *)(base + 8);
+    data->children = (BillChildPayload **)(base + *(s32 *)base + 8);
+    for (i = 0; i < childCount; i++) {
+        data->children[i] = func_00157D38(source + *childOffsets++);
+    }
+    data->entryCount = data->listRefCount = 1;
+    count = ((s32 *)data->base)[1];
+    for (i = 0; i < count; i++) {
+        BillAnimationEntry *entry = &data->entries[i];
+        if (entry->flags & 0x10000000) {
+            data->entryCount = entry->frameCount;
+            func_0035B6E0("billAnim no[%d][%d]...PLURAL\n", i, data->entryCount);
+        } else {
+            if (entry->unk8 & 0x40) {
+                data->entryCount = 2;
+                func_0035B6E0("billAnim no[%d][%d]...MTEX\n", i, 2);
+            } else if (entry->unk8 & 0x80) {
+                data->entryCount = 2;
+                func_0035B6E0("billAnim no[%d][%d]...AMTEX\n", i, 2);
+            }
+        }
+    }
+    return data;
+}
 
 
 extern void effReleaseSharedTextureRecord(void *arg);

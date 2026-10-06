@@ -1,3 +1,4 @@
+#include "eff.h"
 #include "common.h"
 
 
@@ -83,13 +84,26 @@ void func_0031CDE8(u32 *source, s32 count) {
     }
 }
 
+/* Resource bank, work-entry index, X offset, Y offset. */
+extern s16 D_0040AE28[][4];
+extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
+
+#define INDEXED_SPRITE(index) (((EffectSlotSet *)D_0045C840[D_0040AE28[index][0]])->workEntries + D_0040AE28[index][1])
+
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CE60);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", itfDrawUniformlyScaledIndexedImage);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CF88);
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031D120);
+void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {
+    INDEXED_SPRITE(index)->angleDegrees = angle * 57.29577637f;
+    func_00306CD0((x + D_0040AE28[index][2]) << 4,
+                  (y + D_0040AE28[index][3]) << 3,
+                  z, (u32)((f32)alpha * 256.0f * 0.0078125f), flags,
+                  D_0045C840[D_0040AE28[index][0]], D_0040AE28[index][1], context);
+    INDEXED_SPRITE(index)->angleDegrees = 0.0f;
+}
 
 /* Allocate list headers and all instance records in one contiguous work block. */
 ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts) {

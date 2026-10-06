@@ -174,7 +174,7 @@ typedef struct CampOwner {
 } CampOwner;
 
 /* Event-viewer timeline data and the camp/shop state that owns those tracks. */
-typedef struct {
+typedef struct CampScene {
     u8 pad00[8];
     CampOwner *owner; /* 0x08 */
     union {

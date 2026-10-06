@@ -42,16 +42,6 @@ extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void func_002D1D80(SdfImageUploadRequest *);
 
 
-typedef struct SdfTexHead {
-    struct SdfTexHead *next; /* 0x00 */
-    struct SdfTexHead *prev; /* 0x04 */
-    s32 allocationMode;     /* 0x08: zero marks a free range */
-    u32 address;            /* 0x0C: VRAM offset in 32-bit words */
-    s32 size;               /* 0x10: range length in 32-bit words */
-    s16 width;              /* 0x14 */
-    s16 height;             /* 0x16 */
-    s32 format;             /* 0x18 */
-} SdfTexHead;
 
 typedef struct SdfTexPacketTail {
     u64 tag;      /* 0x00 */
@@ -66,8 +56,8 @@ typedef struct SdfTexReleaseEntry {
     u8 pad0D[0x93];
 } SdfTexReleaseEntry; /* 0xA0 */
 
-extern SdfTexHead *sdfTextureBlockListHead;
-extern SdfTexHead *sdfTextureListHead;
+extern SdfTexResource *sdfTextureBlockListHead;
+extern SdfTexResource *sdfTextureListHead;
 extern s8 sdfBufferSlotIndices[2];
 
 /* Busy-buffer index is published by the slot setters and polled below;
@@ -85,7 +75,7 @@ extern s32 func_00312C08(void);
 extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-struct SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 arg1);
+struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 arg1);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
 void sdfTexCreateSecondPacket(void);
 void sdfTexRefreshResourcePackets(void);
@@ -310,7 +300,7 @@ s32 sdfFormatBitsPerPixelB(u32 format) {
 }
 
 s32 sdfTexListContains(SdfTex *target) {
-    SdfTexHead *node = sdfTextureListHead;
+    SdfTexResource *node = sdfTextureListHead;
 
     if (node == NULL) {
         return 0;
@@ -324,9 +314,9 @@ s32 sdfTexListContains(SdfTex *target) {
     return 0;
 }
 
-SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
-    SdfTexHead *block;
-    SdfTexHead *allocated;
+SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
+    SdfTexResource *block;
+    SdfTexResource *allocated;
     s32 interruptsEnabled;
 
     interruptsEnabled = func_00312C08();
@@ -358,10 +348,10 @@ SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
         }
         allocated->allocationMode = allocationMode;
         block->next = allocated;
-        allocated->address = block->address;
+        allocated->word = block->word;
         allocated->size = size;
         allocated->prev = block;
-        block->address += size;
+        block->word += size;
         block->size -= size;
         if (interruptsEnabled != 0) {
             EIntr();
@@ -370,9 +360,9 @@ SdfTexHead *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
     }
 }
 
-SdfTexHead *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
-    SdfTexHead *block;
-    SdfTexHead *allocated;
+SdfTexResource *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
+    SdfTexResource *block;
+    SdfTexResource *allocated;
     s32 interruptsEnabled;
 
     interruptsEnabled = func_00312C08();
@@ -404,7 +394,7 @@ SdfTexHead *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
         }
         allocated->allocationMode = allocationMode;
         block->prev = allocated;
-        allocated->address = block->address + (block->size - size);
+        allocated->word = block->word + (block->size - size);
         allocated->size = size;
         allocated->next = block;
         block->size -= size;
@@ -417,10 +407,10 @@ SdfTexHead *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
 
 
 /* Convert storage bits to 32-bit VRAM words before selecting an allocation direction. */
-SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s32 allocationMode, s32 useFirstAllocator) {
+SdfTexResource *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s32 allocationMode, s32 useFirstAllocator) {
     s32 storageBitsPerPixel = sdfFormatBitsPerPixelA(format);
     s32 sizeWords = (width * height * storageBitsPerPixel) >> 5;
-    SdfTexHead *textureBlock;
+    SdfTexResource *textureBlock;
 
     if (useFirstAllocator != 0) {
         textureBlock = sdfTexAllocHeadLow(sizeWords, allocationMode);
@@ -434,8 +424,8 @@ SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s
 }
 
 /* Merge the previous free range into block; return one only when a record was recycled. */
-s32 sdfCoalesceUnusedTextureBlocks(SdfTexHead *block) {
-    SdfTexHead *previousBlock = block->prev;
+s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block) {
+    SdfTexResource *previousBlock = block->prev;
 
     if (previousBlock == NULL || previousBlock->allocationMode != 0) {
         return 0;
@@ -451,7 +441,7 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexHead *block) {
 }
 
 void func_002D1B28(void) {
-    SdfTexHead *node;
+    SdfTexResource *node;
 
     node = sdfTextureListHead;
     while (node->prev != NULL) {
@@ -465,7 +455,7 @@ void func_002D1B28(void) {
 
 /* Mark a range free and coalesce its neighbors while interrupts are masked. */
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block) {
-    SdfTexHead *textureBlock = (SdfTexHead *)block;
+    SdfTexResource *textureBlock = block;
     s32 restoreInterrupts;
 
     if (textureBlock == NULL) {
@@ -489,24 +479,24 @@ void sdfTexQueuePendingWork(s32 value) {
 }
 
 void sdfTexInitializeLists(void) {
-    SdfTexHead *head;
+    SdfTexResource *head;
 
     head = sdfAllocSizeClassBlock(0x1C);
     head->size = 0x100000;
     head->next = NULL;
     head->prev = NULL;
     head->allocationMode = 0;
-    head->address = 0;
+    head->word = 0;
     sdfTextureListHead = head;
     sdfTextureBlockListHead = head;
     sdfInitializeSynchronizedRequest(&sdfTextureUpdateQueue, sdfUpdateTextureHeadsWithInterruptsMasked);
 }
 
 /* Align the storage rows, pack 16-bit formats two pixels per word, then allocate whole GS pages. */
-SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
+SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
     s32 rowWidth = (width + 0x3F) & -0x40;
     s32 rowCount = (height + 0x1F) & -0x20;
-    SdfTexHead *textureBlock;
+    SdfTexResource *textureBlock;
 
     switch (format) {
     case SDF_PSMCT16:
@@ -528,11 +518,11 @@ SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
     return textureBlock;
 }
 
-SdfTexHead *sdfGetTextureListHead(void) {
+SdfTexResource *sdfGetTextureListHead(void) {
     return sdfTextureListHead;
 }
 
-SdfTexHead *sdfGetTextureBlockListHead(void) {
+SdfTexResource *sdfGetTextureBlockListHead(void) {
     return sdfTextureBlockListHead;
 }
 
@@ -894,7 +884,7 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     return tex;
 }
 
-extern SdfTexHead *sdfTexAllocHead(s32, s32, s32);
+extern SdfTexResource *sdfTexAllocHead(s32, s32, s32);
 extern void func_002D2A58(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
@@ -920,7 +910,7 @@ SdfTex *func_002D2800(SdfTex *source) {
     texture->auxiliaryAllocation = NULL;
     sdfTexListInsert(texture);
     if (texture->secondaryResource != NULL) {
-        texture->secondaryResource = (SdfTexResource *)sdfTexAllocHead(
+        texture->secondaryResource = sdfTexAllocHead(
             texture->pixelFormat, texture->clutFormat, texture->unk18);
         func_002D2A58(texture);
         sdfTexCopyImageData(texture, original->data);
@@ -932,8 +922,8 @@ SdfTex *func_002D2800(SdfTex *source) {
 }
 
 /* Allocate a texture head for a 0x20-byte (kind 0) or 0x10-byte (kind 2/10) unit; types 19/27 use unit*8 bytes and 0x20 rows, 20/36/44 use 0x40 bytes and 8 rows. */
-SdfTexHead *sdfTexAllocHead(s32 type, s32 kind, s32 unused) {
-    SdfTexHead *head = NULL;
+SdfTexResource *sdfTexAllocHead(s32 type, s32 kind, s32 unused) {
+    SdfTexResource *head = NULL;
     s32 unit;
     s32 size;
     s16 height;

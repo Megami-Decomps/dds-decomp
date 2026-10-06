@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_curve.h"
 #include "file.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -5173,10 +5174,85 @@ void fileResetSlotStates(FileRecordSlots *record) {
 
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00296F58);
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00297270);
+f32 func_00297270(EffScalarCurve *curve, s32 frame, s32 length) {
+    f32 from, to, factor, duration;
+    s32 firstFrame, secondFrame;
+    if (length == 0) {
+        return curve->initialValue;
+    }
+    duration = length;
+    switch (curve->mode) {
+    case 0:
+        factor = (f32)frame / duration;
+        from = curve->initialValue;
+        to = curve->finalValue;
+        break;
+    case 1:
+        firstFrame = (s32)(curve->firstFraction * duration);
+        if (frame < firstFrame) {
+            factor = (f32)frame / firstFrame;
+            from = curve->initialValue;
+            to = curve->firstValue;
+        } else {
+            f32 span = length - firstFrame;
+            factor = (f32)(frame - firstFrame) / span;
+            from = curve->firstValue;
+            to = curve->finalValue;
+        }
+        break;
+    case 2:
+        firstFrame = (s32)(curve->firstFraction * duration);
+        if (frame < firstFrame) {
+            factor = (f32)frame / firstFrame;
+            from = curve->initialValue;
+            to = curve->firstValue;
+        } else {
+            secondFrame = (s32)(curve->secondFraction * duration);
+            if (frame < secondFrame) {
+                f32 span = secondFrame - firstFrame;
+                factor = (f32)(frame - firstFrame) / span;
+                from = curve->firstValue;
+                to = curve->secondValue;
+            } else {
+                f32 span = length - secondFrame;
+                factor = (f32)(frame - secondFrame) / span;
+                from = curve->secondValue;
+                to = curve->finalValue;
+            }
+        }
+        break;
+    default:
+        from = curve->initialValue;
+        to = curve->finalValue;
+        factor = 0.0f;
+        break;
+    }
+    return from + (to - from) * factor;
+}
+
 
 /* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
 typedef FileRecordSlot FileKeyOut;
+
+/* One emitter track uses +0x0C as its random multiplier; the curve sampler
+ * treats the same word as reserved. */
+typedef union FileKeyScalarTrack {
+    EffScalarTrack track;
+    struct {
+        u8 mode;
+        u8 reserved01[3];
+        f32 initialValue;
+        f32 finalValue;
+        f32 randomness;
+        u8 headingMode;
+        u8 reserved11[3];
+        f32 firstValue;
+        f32 firstFraction;
+        f32 secondValue;
+        f32 secondFraction;
+        u8 reserved24[8];
+    } emitter;
+} FileKeyScalarTrack;
 
 /* Keyframe tracks of a view block (scale, heading and colour curves). */
 typedef struct FileKeyBlock {
@@ -5187,13 +5263,8 @@ typedef struct FileKeyBlock {
     f32 spawnVariance;      /* 0x28 */
     u8 unk2C[0x24];         /* 0x2C: color track */
     u8 unk50[0x10];         /* 0x50: color data */
-    u8 unk60[0x0C];         /* 0x60: scalar-track prefix */
-    f32 scaleRandomness;    /* 0x6C */
-    u8 pad70[0x1C];         /* rest of scale track */
-    u8 unk8C[0x0C];         /* 0x8C: scalar-track prefix */
-    f32 angleRandomness;    /* 0x98 */
-    u8 mode;               /* 0x9C: heading track +0x10 */
-    u8 pad9D[0x1B];         /* rest of heading track */
+    FileKeyScalarTrack scale;   /* 0x60 */
+    FileKeyScalarTrack heading; /* 0x8C */
     s32 length;            /* 0xB8 */
     u8 padBC;              /* 0xBC: allocator's relative-position flag */
     u8 prewarm;            /* 0xBD */
@@ -5219,7 +5290,7 @@ typedef struct FileKeyBlock {
 } FileKeyBlock;             /* observed prefix through 0xE8, not full allocation size */
 
 extern s32 func_00296F58(void *, void *, s32, s32);
-extern f32 func_00297270(void *, s32, s32);
+extern f32 func_00297270(EffScalarCurve *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target */
 void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
@@ -5227,9 +5298,9 @@ void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *t
     f32 delta[4];
 
     out->color = func_00296F58(block->unk2C, block->unk50, frame, block->length);
-    out->scale = func_00297270(block->unk60, frame, block->length);
-    if (block->mode != 2) {
-        out->angle = func_00297270(block->unk8C, frame, block->length);
+    out->scale = func_00297270(&block->scale.track.curve, frame, block->length);
+    if (block->heading.track.curve.headingMode != 2) {
+        out->angle = func_00297270(&block->heading.track.curve, frame, block->length);
         return;
     }
     VU0_MOVE_VF(vf20, vf28);
@@ -5404,7 +5475,7 @@ void func_002985D0(FileRecordSlots *record) {
     if (length != 0) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
-        mode = keys->mode;
+        mode = keys->heading.track.curve.headingMode;
         gravity = keys->motion.radial.gravity;
         acceleration = keys->motion.radial.acceleration;
         delta[3] = 0.0f;
@@ -5473,11 +5544,11 @@ void func_002985D0(FileRecordSlots *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scaleRandomness +
-                                (1.0f - keys->scaleRandomness);
+                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                                (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->angleRandomness +
-                                    (1.0f - keys->angleRandomness);
+                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                    (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
                                     motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
                                     if (effMiscRand(&effSharedRandomState) & 1) {
@@ -5636,7 +5707,7 @@ void func_00299E58(FileRecordSlots *record) {
     if (length != 0) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
-        mode = keys->mode;
+        mode = keys->heading.track.curve.headingMode;
         gravity = keys->motion.directed.gravity;
         acceleration = keys->motion.directed.acceleration;
         delta[3] = 0.0f;
@@ -5718,11 +5789,11 @@ void func_00299E58(FileRecordSlots *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scaleRandomness +
-                                (1.0f - keys->scaleRandomness);
+                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                                (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->angleRandomness +
-                                    (1.0f - keys->angleRandomness);
+                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                    (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
                                     motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
                                     if (effMiscRand(&effSharedRandomState) & 1) {
@@ -5908,4 +5979,3 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC930);
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC938);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC940);
-

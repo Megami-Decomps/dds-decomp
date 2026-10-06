@@ -6,6 +6,10 @@
 #include "eff.h"
 #include "btl_action.h"
 
+extern void mdlFlagSet(s32 flag);
+extern void dspCloseChannel(void);
+extern s32 dspStartEntry(s32 entry);
+extern void evtCreateMessageWindowIfMissing(void *text);
 extern void sdfReleaseChipBlock(void *block);
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -2476,8 +2480,6 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 
 extern SndPad D_00324510;
 
-
-
 extern u8 D_00359160[];
 
 extern void func_001B83D8(s32, s32, s32);
@@ -2565,29 +2567,82 @@ void btlUpdateCommandPanelRowFades(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB558);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB810);
+extern f32 sdfSinPoly(f32);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001ABDF8);
+typedef struct BattleCornerFadeDefaults {
+    s16 values[20];
+} BattleCornerFadeDefaults;
+typedef struct BattleCornerPhaseDefaults {
+    u32 values[12];
+} BattleCornerPhaseDefaults;
+extern const BattleCornerFadeDefaults D_003A2100;
+extern const BattleCornerPhaseDefaults D_003A2128;
 
-void btlReleaseAndClearChipBlock(void) {
-    sdfReleaseChipBlock(btlCommandPanelWork);
-    btlCommandPanelWork = 0;
-}
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC398);
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC4A8);
-
-void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
-    *(u8 *)(arg0 + 0) = 1;
-    *(u8 *)(arg0 + 0x28) = arg4 * 8 + 0x18;
-    *(u16 *)(arg0 + 2) = arg1;
-    *(f32 *)(arg0 + 4) = arg5;
-    *(u32 *)(arg0 + 0x18) = arg2;
-    *(u32 *)(arg0 + 0x1c) = arg3;
-    *(u32 *)(arg0 + 0x24) = 0;
+void func_001AB810(void) {
+    BattleCornerFadeDefaults limits = D_003A2100;
+    BattleCornerPhaseDefaults phases = D_003A2128;
+    s32 i;
+    switch (btlCommandPanelWork->state) {
+    case 1:
+        btlCommandPanelWork->labelFade += 0x10;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade += 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] += 0x10;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] >= limits.values[i] ? limits.values[i] : btlCommandPanelWork->cornerFade[i];
+            btlCommandPanelWork->cornerPhase[i] = phases.values[i];
+        }
+        if (btlCommandPanelWork->labelFade >= 0x80 && btlCommandPanelWork->slotsB[0].fadeValue >= 0xF0)
+            btlCommandPanelWork->state = 2;
+        break;
+    case 2: {
+        btlCommandPanelWork->labelFade -= 8;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0x80 ? 0x80 :
+            btlCommandPanelWork->labelFade >= 0x100 ? 0xFF : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0x80 ? 0x80 :
+            btlCommandPanelWork->classFade >= 0x100 ? 0xFF : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerPhase[i] = (btlCommandPanelWork->cornerPhase[i] + 8) % 360;
+            btlCommandPanelWork->cornerFade[i] =
+                (u32)((sdfSinPoly((f32)((btlCommandPanelWork->cornerPhase[i] + 90) % 360) /
+                                  180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 128.0f);
+        }
+        break;
+    }
+    case 3:
+        btlCommandPanelWork->labelFade -= 0x10;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] -= 0x10;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
+        }
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        break;
+    case 4:
+        btlCommandPanelWork->labelFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] -= btlTrackedTaskHandles->status.bytes.fadeStep;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
+        }
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        break;
+    }
 }
 
 typedef struct BtlResBlock {
@@ -2600,12 +2655,166 @@ typedef struct BtlResBlock {
     EffectSlotSet *resC;
     s32 unk1C;
 } BtlResBlock;
+extern BtlResBlock *btlResourceBlock;
+extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+extern const BattlePanelColors D_003A21B8;
+
+typedef struct BattleClassLabelOffsets {
+    s32 values[8][2];
+} BattleClassLabelOffsets;
+extern const BattlePanelColors D_003A2158;
+extern const BattleClassLabelOffsets D_003A2168;
+extern void func_001AB558(void);
+
+void func_001ABDF8(void) {
+    BattlePanelColors colors = D_003A2158;
+    BattleClassLabelOffsets offsets = D_003A2168;
+    if (btlCommandPanelWork->state < 5) {
+        if (btlCommandPanelWork->state > 0) {
+            colors.values[0] = btlCommandPanelWork->cornerFade[0] | 0x80808000;
+            colors.values[1] = btlCommandPanelWork->cornerFade[1] | 0x80808000;
+            colors.values[2] = btlCommandPanelWork->cornerFade[2] | 0x80808000;
+            colors.values[3] = btlCommandPanelWork->cornerFade[3] | 0x80808000;
+            func_002BF438(0x50, 0x968, 0, colors.values, 0, btlResourceBlock->resA, 0x1E, 0x53);
+            func_001AB558();
+            colors.values[0] = btlCommandPanelWork->classFade | 0x80808000;
+            colors.values[1] = colors.values[0];
+            colors.values[2] = colors.values[0];
+            colors.values[3] = colors.values[0];
+            func_002BF438((btlCommandPanelWork->classX + 5) << 4,
+                         (btlCommandPanelWork->classY + 0x12D) << 3,
+                         0, colors.values, 0, btlResourceBlock->resA, 0x1A, 0x53);
+            func_002BF438((btlCommandPanelWork->classX + 0x37) << 4,
+                         (btlCommandPanelWork->classY + 0x12D) << 3,
+                         0, colors.values, 0, btlResourceBlock->resA, 0x1B, 0x53);
+            colors.values[0] = btlCommandPanelWork->labelFade | 0x80808000;
+            colors.values[1] = colors.values[0];
+            colors.values[2] = colors.values[0];
+            colors.values[3] = colors.values[0];
+            {
+                s32 x = btlCommandPanelWork->classX + 5;
+                s32 y = btlCommandPanelWork->classY + 0x12D;
+                func_002BF438((x + offsets.values[btlCommandPanelWork->classIndex][0]) << 4,
+                             (y + offsets.values[btlCommandPanelWork->classIndex][1]) << 3,
+                             0, colors.values, 0, btlResourceBlock->resA, (s16)btlCommandPanelWork->labelEntry, 0x53);
+            }
+        }
+    }
+}
+
+void btlReleaseAndClearChipBlock(void) {
+    sdfReleaseChipBlock(btlCommandPanelWork);
+    btlCommandPanelWork = 0;
+}
+
+INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
+
+
+
+
+
+/* 0x2C-byte action record shared by the initializer, updater and renderer. */
+typedef struct BattleMirroredSpriteRecord {
+    s8 active;
+    u8 pad01;
+    s16 slot;
+    f32 scale;
+    s32 restoredWidth;
+    s32 restoredHeight;
+    s32 width;
+    s32 height;
+    s32 x;
+    s32 y;
+    s32 secondX;
+    s32 frame;
+    s8 alpha;
+    u8 pad29[3];
+} BattleMirroredSpriteRecord;
+
+void func_001AC398(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            switch (record->active) {
+            case 1: {
+                s32 scale = (s32)record->scale;
+                s32 x = record->x;
+                s32 y = record->y;
+                s32 width = btlResourceBlock->resA->workEntries[record->slot].sourceWidth;
+                s32 height;
+                s32 scaledWidth;
+                s32 scaledHeight;
+                record->restoredWidth = width;
+                scale = scale / 2;
+                height = btlResourceBlock->resA->workEntries[record->slot].sourceHeight;
+                scaledWidth = width * scale;
+                scaledHeight = height * scale;
+                record->active = 2;
+                record->restoredHeight = height;
+                x -= (scaledWidth - width) / 2;
+                y -= (scaledHeight - height) / 2;
+                record->secondX = x;
+                record->y = y;
+                record->width = scaledWidth << 4;
+                record->height = scaledHeight << 3;
+                break;
+            }
+            case 2:
+                record->width -= 0x800;
+                record->height -= 0x800;
+                if (record->width <= 0x1000) record->active = 0;
+                break;
+            }
+            remaining--;
+            record++;
+        } while (remaining != 0);
+    }
+}
+
+
+void func_001AC4A8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    BattlePanelColors colors = D_003A21B8;
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            if (record->active != 0) {
+                u32 color;
+                btlResourceBlock->resA->workEntries[record->slot].width = record->width;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->height;
+                color = record->alpha | 0x80808000;
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_002BF438(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                func_002BF438(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                btlResourceBlock->resA->workEntries[record->slot].width = record->restoredWidth << 4;
+                btlResourceBlock->resA->workEntries[record->slot].height = record->restoredHeight << 3;
+            }
+            record++;
+        } while (--remaining != 0);
+    }
+}
+
+void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
+    *(u8 *)(arg0 + 0) = 1;
+    *(u8 *)(arg0 + 0x28) = arg4 * 8 + 0x18;
+    *(u16 *)(arg0 + 2) = arg1;
+    *(f32 *)(arg0 + 4) = arg5;
+    *(u32 *)(arg0 + 0x18) = arg2;
+    *(u32 *)(arg0 + 0x1c) = arg3;
+    *(u32 *)(arg0 + 0x24) = 0;
+}
 
 extern u8 D_003BB3E4;
 
 extern u8 btlResourceBlockLoaded;
-
-extern BtlResBlock *btlResourceBlock;
 
 extern char D_003A21C8[]; /* "/battle/panel/batle_01.spr" */
 
@@ -3114,10 +3323,6 @@ typedef struct MsgQueueTaskData {
     s16 fade;
 } MsgQueueTaskData;
 
-typedef struct BattlePanelColors {
-    u32 values[4];
-} BattlePanelColors;
-
 extern const BattlePanelColors D_003A2A90;
 extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
@@ -3212,7 +3417,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2168);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21A8);
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21B8);
+const BattlePanelColors D_003A21B8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21C8);
 
@@ -3333,7 +3538,6 @@ typedef struct BtlPanelStrip {
 } BtlPanelStrip;
 
 extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
-extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25C0);
 
@@ -3472,6 +3676,38 @@ void btlReleaseRegisteredChildTaskWork(s64 arg0) {
     btlSetTrackedTaskHandle(7, 0);
 }
 
+/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
+ * the later panel updater handles the other five points and their fades. */
+typedef struct BattlePhasePanelWork {
+    s32 frames;
+    s32 mode;
+    s8 phase;
+    u8 pad09[0xF];
+    s32 waitCounter; /* 0x18: delay before the first slide */
+    u8 pad1C[0x1C];
+    BattleSelectionPosition current[8]; /* 0x38 */
+    BattleSelectionPosition saved[8];   /* 0x78 */
+    s32 fade[8][4];                    /* 0xB8 */
+} BattlePhasePanelWork;
+
+typedef char BattlePhasePanelWork_size_must_be_0x138[
+    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+typedef char BattlePhasePanelWork_waitCounter_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
+typedef char BattlePhasePanelWork_current_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
+typedef char BattlePhasePanelWork_saved_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
+typedef char BattlePhasePanelWork_fade_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
+
+typedef struct BattlePhaseSlotIds { s32 values[3]; } BattlePhaseSlotIds;
+typedef struct BattlePhaseFadeLimits { s32 values[3][4]; } BattlePhaseFadeLimits;
+typedef struct BattlePhaseXBounds { s32 values[3][2]; } BattlePhaseXBounds;
+extern const BattlePhaseSlotIds D_003A2880;
+extern const BattlePhaseFadeLimits D_003A2890;
+extern const BattlePhaseXBounds D_003A28C0;
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2870);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2880);
@@ -3480,22 +3716,90 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2890);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28C0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B1518);
+void func_001B1518(BattlePhasePanelWork *work) {
+    BattlePhaseSlotIds slots = D_003A2880;
+    BattlePhaseFadeLimits limits = D_003A2890;
+    BattlePhaseXBounds bounds = D_003A28C0;
+    s32 i, j;
+    switch (work->phase) {
+    case 0:
+        work->waitCounter++;
+        work->waitCounter = work->waitCounter <= 0 ? 0 : work->waitCounter > 10 ? 10 : work->waitCounter;
+        if (work->waitCounter >= 3) {
+            for (i = 0; i < 3; i++) {
+                work->current[i].x -= 10;
+                work->current[i].x = work->current[i].x <= bounds.values[i][0] ? bounds.values[i][0] :
+                    work->current[i].x < bounds.values[i][1] ? work->current[i].x : bounds.values[i][1];
+                for (j = 0; j < 4; j++) {
+                    work->fade[i][j] += 0x20;
+                    work->fade[i][j] = work->fade[i][j] <= 0 ? 0 : work->fade[i][j] < limits.values[i][j] ? work->fade[i][j] : limits.values[i][j];
+                }
+            }
+            if (work->fade[0][0] >= 0x80) work->phase++;
+        }
+        break;
+    case 1:
+        work->fade[0][0] = 0xFF;
+        work->current[0].x -= 2;
+        if (work->current[0].x <= 300) work->phase++;
+        break;
+    case 2:
+        work->current[0].x -= 20;
+        work->current[1].x -= 16;
+        work->fade[0][0] -= 16;
+        work->fade[0][0] = work->fade[0][0] <= 0 ? 0 : work->fade[0][0] > 0xFF ? 0xFF : work->fade[0][0];
+        if (work->current[0].x <= 128) work->phase++;
+        break;
+    case 3:
+        work->current[0].x -= 18;
+        work->current[1].x -= 18;
+        work->current[2].x -= 18;
+        if (work->current[0].x <= 96) {
+            work->phase++;
+            work->fade[0][0] = 0;
+            work->fade[0][2] = 0;
+        }
+        break;
+    case 4:
+        work->current[0].x -= 20;
+        work->current[1].x -= 20;
+        work->current[2].x -= 20;
+        work->fade[0][1] -= 0x20;
+        work->fade[0][1] = work->fade[0][1] <= 0 ? 0 : work->fade[0][1] > 0x80 ? 0x80 : work->fade[0][1];
+        work->fade[0][3] -= 0x20;
+        work->fade[0][3] = work->fade[0][3] <= 0 ? 0 : work->fade[0][3] > 0x80 ? 0x80 : work->fade[0][3];
+        work->fade[1][2] = work->fade[0][3];
+        work->fade[1][0] = work->fade[0][1];
+        if (work->fade[0][1] <= 64) {
+            work->fade[1][1] -= 0x20;
+            work->fade[1][1] = work->fade[1][1] <= 0 ? 0 : work->fade[1][1] > 0x80 ? 0x80 : work->fade[1][1];
+            work->fade[2][0] = work->fade[1][1];
+            work->fade[2][2] = work->fade[1][3];
+        }
+        if (work->fade[2][0] <= 64) {
+            work->fade[2][1] -= 0x20;
+            work->fade[2][1] = work->fade[2][1] <= 0 ? 0 : work->fade[2][1] > 0x80 ? 0x80 : work->fade[2][1];
+            work->fade[2][3] -= 0x20;
+            work->fade[2][3] = work->fade[2][3] <= 0 ? 0 : work->fade[2][3] > 0x80 ? 0x80 : work->fade[2][3];
+        }
+        break;
+    }
+    if (work->phase >= 3) {
+        for (i = 0; i < 3; i++) {
+            s32 height = btlResourceBlock->resC->workEntries[slots.values[i]].sourceHeight;
+            work->saved[i].y += 3;
+            work->saved[i].y = work->saved[i].y <= 0 ? 0 : work->saved[i].y < height ? work->saved[i].y : height;
+        }
+    }
+    work->fade[1][3] = 0;
+    work->fade[2][0] = 0;
+    work->fade[2][1] = 0;
+    work->fade[2][2] = 0;
+    work->fade[2][3] = 0;
+}
 
-/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
- * the later panel updater handles the other five points and their fades. */
-typedef struct BattlePhasePanelWork {
-    s32 frames;
-    s32 mode;
-    s8 phase;
-    u8 pad09[0x2F];
-    BattleSelectionPosition current[8]; /* 0x38 */
-    BattleSelectionPosition saved[8];   /* 0x78 */
-    s32 fade[8][4];                    /* 0xB8 */
-} BattlePhasePanelWork;
 
-typedef char BattlePhasePanelWork_size_must_be_0x138[
-    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+
 
 extern void fldScaleSceneCoordinateRecord(s32, s32);
 
@@ -4486,11 +4790,18 @@ void fldClearBattleSceneObject(s64 arg0) {
     btlReleaseBattleScratchBlocks();
 }
 
-void fldInitializeSceneObject(s32 object, s32 owner) {
-    memset((void *)object, 0, 0x30);
-    *(s32 *)object = 1;
-    *(s32 *)(object + 0x28) = owner + 0x20;
-    *(s32 *)(object + 0x2C) = owner;
+extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
+extern s32 func_001BF0F8(s64 task);
+extern s32 func_001B5970(s64 task);
+extern s32 func_001B55A8(s64 task);
+extern void func_001B2AC8(BattleSceneObject *object);
+extern u8 D_00358828[];
+
+void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
+    memset(object, 0, sizeof(*object));
+    object->state = 1;
+    object->commandData = &owner->result;
+    object->owner = owner;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneObjectTaskUserData);
@@ -4502,16 +4813,76 @@ s64 fldGetSceneObjectState(void) {
     if (temp_v0 == 0) {
         return temp_v0;
     }
-    return *(s32 *)fldGetSceneObjectTaskUserData();
+    return fldGetSceneObjectTaskUserData()->state;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF4C0);
+void func_001BF4C0(BtlTask *task) {
+    BattleController *scene;
+    BattleSceneObject *object;
+    u32 handle;
+
+    if (kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef) == 0) {
+        scene = (BattleController *)btlGetRuntime();
+        object = sdfAllocAndClearQuadwords(sizeof(*object));
+        fldInitializeSceneObject(object, task);
+        handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
+                               func_001BF0F8, fldClearBattleSceneObject, (u32)object);
+        func_00101A80(scene->taskParent, handle);
+        scene->sceneObjectTask = handle;
+        func_001B83D8((s32)task, 0, 0);
+        btlInitializeSelectionWork();
+        btlInitializeCommandPanelSlotTables();
+        btlCreateMessageWindow();
+        func_001B2AC8(object);
+        if ((task->unit->flags & 0x200) && !(scene->flags & 0x1000000)) {
+            if (mdlFlagTest(0x81B) == 0) {
+                mdlFlagSet(0x81B);
+                btlTrackedTaskHandles->status.bytes.blocked = 1;
+                scene->flags &= ~0x100000;
+                handle = kwlnTaskCreate(D_003BB3D4, 0x2B0E, 1, 1,
+                                       func_001B5970, btlReleaseWindowTask,
+                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                func_00101A80(scene->taskParent, handle);
+                btlSetTrackedTaskHandle(0xD, handle);
+                dspCloseChannel();
+                evtCreateMessageWindowIfMissing(D_00358828);
+                dspStartEntry(2);
+                func_001BCB88(0, 8);
+            } else if (btlGetTaskState6() != 0) {
+                scene->flags &= ~0x100000;
+                handle = kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
+                                       func_001B55A8, btlFinishTrackedBattleTaskAndCloseWindow,
+                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                func_00101A80(scene->taskParent, handle);
+                btlSetTrackedTaskHandle(0xC, handle);
+                dspCloseChannel();
+                evtCreateMessageWindowIfMissing(D_00358828);
+                func_001BCB88(0, 8);
+            } else {
+                scene->flags |= 0x100000;
+            }
+        }
+    }
+    object = fldGetSceneObjectTaskUserData();
+    if (object->state == 3) {
+        btlCommandPanelWork->state = 2;
+        object->state = 1;
+    } else if (object->state == 8) {
+        object->state = 6;
+        btlCommandPanelWork->state = 2;
+    } else if (object->state != 11) {
+        btlCommandPanelWork->state = 1;
+        object->state = 1;
+    }
+    btlLinkedSelectionTaskBuffer->selectedRow =
+        btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+}
 
 void fldSetSceneObjectAndGroupStates(void) {
-    s32 *task = (s32 *)fldGetSceneObjectTaskUserData();
-    if (task != 0) {
+    BattleSceneObject *object = fldGetSceneObjectTaskUserData();
+    if (object != 0) {
         BattleCmdPanel *panel = btlCommandPanelWork;
-        *task = 5;
+        object->state = 5;
         panel->state = 3;
     }
 }
@@ -4527,7 +4898,40 @@ void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF8B0);
+void func_001BF8B0(SceneAiWork *work) {
+    s32 i;
+    switch (work->animationPhase) {
+    case 0:
+        for (i = 0; i < 3; i++) {
+            work->rowFade[i] = 128;
+            work->rowScale[i] = 80.0f;
+            work->rowPhase[i] = 0;
+            fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, 0);
+        }
+        break;
+    case 4:
+        break;
+    case 5:
+        for (i = 0; i < 3; i++) {
+            switch (work->rowPhase[i]) {
+            case 0:
+                work->rowStep[i]++;
+                work->rowStep[i] = work->rowStep[i] <= 0 ? 0 : work->rowStep[i] > 5 ? 5 : work->rowStep[i];
+                fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, work->rowStep[i]);
+                if (work->rowStep[i] >= 5) work->rowPhase[i]++;
+                break;
+            case 1:
+                work->rowStep[i]--;
+                work->rowStep[i] = work->rowStep[i] <= 0 ? 0 : work->rowStep[i] > 5 ? 5 : work->rowStep[i];
+                if (work->rowStep[i] <= 0) work->rowPhase[i]++;
+                break;
+            case 2:
+                break;
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BFAD0);
 

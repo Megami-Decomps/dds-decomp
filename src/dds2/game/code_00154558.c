@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
+#include "dds3obj.h"
 
 extern s32 fldGetSceneStatusCode(void);
 
@@ -578,21 +579,13 @@ u32 fldCmdClearSceneControlFlag(void) {
     return 1;
 }
 
-typedef struct FldObjModel {
-    u8 unk00[0x40];
-    f32 pos[3]; /* 0x40 */
-} FldObjModel;
-
-typedef struct FldObj {
-    u8 unk00[0x1C];
-    FldObjModel *model; /* 0x1C */
-} FldObj;
 
 extern void func_001300A0(void);
 
+/* The kind-4 lookup returns a camera with a separately owned world transform. */
 s32 fldCmdFocusCameraOnObject(void) {
     FldWorkView *work;
-    FldObj *obj;
+    CameraObject *obj;
     u64 world = dds3GetWorldSecondaryObject();
 
     obj = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 4);
@@ -601,9 +594,9 @@ s32 fldCmdFocusCameraOnObject(void) {
     }
     work = (FldWorkView *)fldAreaState;
     work->focusActive = 1;
-    work->focusPos[0] = obj->model->pos[0];
-    work->focusPos[1] = obj->model->pos[1];
-    work->focusPos[2] = obj->model->pos[2];
+    work->focusPos[0] = obj->inner->position[0];
+    work->focusPos[1] = obj->inner->position[1];
+    work->focusPos[2] = obj->inner->position[2];
     func_001300A0();
     return 1;
 }

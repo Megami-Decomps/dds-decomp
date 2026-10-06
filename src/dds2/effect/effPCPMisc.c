@@ -4926,6 +4926,7 @@ typedef struct EffPCPPulseBattle {
     u32 flags;              /* 0x110 */
 } EffPCPPulseBattle;
 
+/* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
 extern void func_00340DC8(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
@@ -5866,7 +5867,6 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
     }
 }
 
-/* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 const f32 D_00414610[4] __attribute__((aligned(16))) = {0.0f, 1.0f, 0.0f, 0.0f};
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
@@ -5874,5 +5874,4 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
-
 
