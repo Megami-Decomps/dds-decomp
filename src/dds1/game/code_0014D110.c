@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
@@ -71,13 +72,13 @@ extern u32 fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
-extern s32 fldWeatherLimitTexture;
+extern SdfTex *fldWeatherLimitTexture;
 
 extern s32 D_003BAFBC;
 
-extern s32 D_003BAFC4;
+extern SdfTex *D_003BAFC4;
 
-extern s32 D_003BAFB4;
+extern SdfTex *D_003BAFB4;
 
 extern u32 D_003BAFA0;
 
@@ -189,13 +190,7 @@ extern s32 D_003BAF74, D_003BAF78, D_003BAF5C, D_003BAF60, D_003BAF84, D_003BAF8
 
 extern s32 D_003BAF48, D_003BAF4C, D_003BAF40, D_003BAF3C;
 
-extern s32 D_003BAF30, D_003BAF34, D_003BAF38;
-
-extern s32 D_003BAF30;
-
-extern s32 D_003BAF34;
-
-extern s32 D_003BAF38;
+extern SdfTex *D_003BAF30, *D_003BAF34, *D_003BAF38;
 
 extern s32 D_003BAF3C;
 
