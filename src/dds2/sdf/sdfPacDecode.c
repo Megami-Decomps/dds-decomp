@@ -52,7 +52,7 @@ typedef struct PacAlloc {
 /* Event 0 supplies a payload-size word; event 1 omits it. Keep the
  * packet callback's native short-arity interface unprototyped. */
 typedef struct PacState {
-    u8 phase; /* 0x0 */
+    s8 phase; /* 0x0: -1 complete, 0 boundary, 1 skip, 2 input handler */
     u8 flags; /* 0x1 */
     u16 packetCounter; /* 0x2: wraps from the initial 0xFFFF */
     s32 (*packetCallback)(); /* 0x4 */
@@ -141,7 +141,37 @@ void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 si
 
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_00346CF0);
+/* Feed one input span through packet-boundary, skip, and decoder phases. */
+s32 func_00346CF0(PacState *state, void *input, s32 available) {
+    s32 consumeBytes;
+
+    state->inputCursor = input;
+    state->inputAvailable = available;
+    while (state->inputAvailable > 0) {
+        switch (state->phase) {
+        case -1:
+            return -1;
+        case 0:
+            sdfPacAdvanceCallbackBoundary(state);
+            break;
+        case 1:
+            consumeBytes = state->pendingBytes;
+            if (state->inputAvailable < consumeBytes) {
+                consumeBytes = state->inputAvailable;
+            }
+            sdfPacAdvanceInput(state, consumeBytes);
+            state->pendingBytes -= consumeBytes;
+            if (state->pendingBytes == 0) {
+                state->phase = 0;
+            }
+            break;
+        case 2:
+            state->onInput(state);
+            break;
+        }
+    }
+    return state->phase;
+}
 
 /* Queue a private copy of the packet header and any extension bytes. */
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
