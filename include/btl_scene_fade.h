@@ -41,12 +41,18 @@ typedef struct ActorSlotOrder {
     s8 state[8];
 #endif
     s32 entries[8];
-    u8 unk2C[0x1C8];
+    u8 unk2C[0x80];
+    s8 secondaryState[8]; /* Independent color cycle, states 0 through 8. */
+    s32 colorAdjustments[8][4]; /* Signed values clamped to 0..127. */
+    u8 unk134[0xC0];
     s32 slotValues[8][2];
     f32 scalePercent[8][2];
 } ActorSlotOrder;
 typedef char ActorSlotOrder_size[(sizeof(ActorSlotOrder) == 0x274) ? 1 : -1];
 typedef char ActorSlotOrder_slotValues_offset[((unsigned long)&((ActorSlotOrder *)0)->slotValues == 0x1F4) ? 1 : -1];
 typedef char ActorSlotOrder_scalePercent_offset[((unsigned long)&((ActorSlotOrder *)0)->scalePercent == 0x234) ? 1 : -1];
+
+typedef char ActorSlotOrder_secondaryState_offset[((unsigned long)&((ActorSlotOrder *)0)->secondaryState == 0xAC) ? 1 : -1];
+typedef char ActorSlotOrder_colorAdjustments_offset[((unsigned long)&((ActorSlotOrder *)0)->colorAdjustments == 0xB4) ? 1 : -1];
 
 #endif
