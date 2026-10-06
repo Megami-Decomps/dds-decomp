@@ -2870,7 +2870,50 @@ void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183BE8);
+/* vu0 routine: grow the scatter region and project its optional world center. */
+void func_00183BE8(EffPCPCompactWork *work) {
+    f32 projected[4] __attribute__((aligned(16)));
+    s32 frame = work->frame;
+    s32 duration = work->duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 opacity;
+    f32 displacement;
+    u32 color;
+
+    if (duration < frame) {
+        return;
+    }
+    fadeIn = work->fadeIn;
+    fadeOut = work->fadeOut;
+    displacement = (f32)(work->endExtent - work->startExtent) *
+                   (f32)frame / (f32)duration;
+    displacement = (s32)displacement;
+    ((EffBlurScatterWork *)work->resource)->params.positionSpread =
+        (f32)work->startExtent + displacement;
+    if (work->flags == 0) {
+        VU0_LOAD_VF(vf10, work->position);
+        sdfProjectVuVectorToScreen();
+        VU0_STORE_VF(vf10, projected);
+        ((EffBlurScatterWork *)work->resource)->params.x = (s32)projected[0] - 2048;
+        ((EffBlurScatterWork *)work->resource)->params.y = (u32)((s32)projected[1] - 2048) << 1;
+    } else {
+        ((EffBlurScatterWork *)work->resource)->params.x = 0;
+        ((EffBlurScatterWork *)work->resource)->params.y = 0;
+    }
+    if (frame < fadeIn && fadeIn != 0) {
+        opacity = (f32)frame / (f32)fadeIn;
+    } else if (duration - frame <= fadeOut && fadeOut != 0) {
+        opacity = (f32)(duration - frame) / (f32)fadeOut;
+    } else {
+        opacity = 1.0f;
+    }
+    color = work->color;
+    ((EffBlurScatterWork *)work->resource)->params.color = effMultiplyPackedColors(
+        effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
+    func_0018ECD0((EffBlurScatterWork *)work->resource);
+    work->frame++;
+}
 
 void effPcpCopyCompactBlurVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
