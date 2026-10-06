@@ -5269,16 +5269,18 @@ typedef struct FileKeyBlock {
     u8 padBC;              /* 0xBC: allocator's relative-position flag */
     u8 prewarm;            /* 0xBD */
     u8 padBE[0x0A];         /* includes grid columns/rows at C0/C4 */
-    f32 radius;            /* 0xC8 */
-    f32 radiusRandomness;  /* 0xCC */
-    union {               /* 0xD0: parameter tail selected by record type */
+    union {                /* 0xC8: record-type-specific emitter parameters */
         struct {
+            f32 radius;
+            f32 radiusRandomness;
             f32 speed;
             f32 speedRandomness;
             f32 acceleration;
             f32 gravity;
         } radial;
         struct {
+            f32 radius;
+            f32 radiusRandomness;
             f32 spread;
             f32 spreadRandomness;
             f32 speed;
@@ -5286,8 +5288,20 @@ typedef struct FileKeyBlock {
             f32 acceleration;
             f32 gravity;
         } directed;
-    } motion;
-} FileKeyBlock;             /* observed prefix through 0xE8, not full allocation size */
+        struct {
+            f32 initialRadius;
+            f32 axialSpeed;
+            f32 axialSpeedRandomness;
+            f32 axialDeceleration;
+            f32 initialAmplitude;
+            f32 initialAmplitudeRandomness;
+            f32 finalAmplitude;
+            f32 finalAmplitudeRandomness;
+            f32 phaseStep;
+            f32 phaseStepRandomness;
+        } wave;
+    } emitter;
+} FileKeyBlock;             /* record-type-dependent parameter extent */
 
 extern s32 func_00296F58(void *, void *, s32, s32);
 extern f32 func_00297270(EffScalarCurve *, s32, s32);
@@ -5379,6 +5393,13 @@ void fileCopyAndInvalidateSlotGroup(FileSlotGroup *group, u8 *slot) {
 
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00297658);
 
+struct EffRandState;
+extern struct EffRandState effSharedRandomState;
+extern u32 effMiscRand(struct EffRandState *state);
+extern f32 effMiscRandUnitFloat(void *state);
+extern f32 fabsf(f32);
+extern void func_00297658(FileRecordSlots *, FileRecordSlot *);
+
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00297CB0);
 
 typedef struct ScaleEntry {
@@ -5436,13 +5457,6 @@ typedef struct FileSlotMotion {
     f32 angleMultiplier;  /* 0x1C */
 } FileSlotMotion;
 
-struct EffRandState;
-extern struct EffRandState effSharedRandomState;
-extern u32 effMiscRand(struct EffRandState *state);
-extern f32 effMiscRandUnitFloat(void *state);
-extern f32 fabsf(f32);
-extern void func_00297658(FileRecordSlots *, FileRecordSlot *);
-
 /* vu0 routine: emits and advances randomized radial slots, then samples their key tracks. */
 void func_002985D0(FileRecordSlots *record) {
     f32 delta[4];
@@ -5476,8 +5490,8 @@ void func_002985D0(FileRecordSlots *record) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
         mode = keys->heading.track.curve.headingMode;
-        gravity = keys->motion.radial.gravity;
-        acceleration = keys->motion.radial.acceleration;
+        gravity = keys->emitter.radial.gravity;
+        acceleration = keys->emitter.radial.acceleration;
         delta[3] = 0.0f;
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
@@ -5522,16 +5536,16 @@ void func_002985D0(FileRecordSlots *record) {
                             motion->direction[0] = delta[0];
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
-                            motion->speed = fabsf(keys->motion.radial.speed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->motion.radial.speedRandomness + (1.0f - keys->motion.radial.speedRandomness)));
+                            motion->speed = fabsf(keys->emitter.radial.speed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.radial.speedRandomness + (1.0f - keys->emitter.radial.speedRandomness)));
                             {
-                                f32 radius = keys->radius *
-                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->radiusRandomness + (1.0f - keys->radiusRandomness));
+                                f32 radius = keys->emitter.radial.radius *
+                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.radial.radiusRandomness + (1.0f - keys->emitter.radial.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
                             VU0_LOAD_VF(vf10, delta);
-                            if (keys->motion.radial.speed < 0.0f) {
+                            if (keys->emitter.radial.speed < 0.0f) {
                                 VU0_NEGATE_XYZ(vf10);
                             }
                             if (flags & 1) {
@@ -5708,8 +5722,8 @@ void func_00299E58(FileRecordSlots *record) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
         mode = keys->heading.track.curve.headingMode;
-        gravity = keys->motion.directed.gravity;
-        acceleration = keys->motion.directed.acceleration;
+        gravity = keys->emitter.directed.gravity;
+        acceleration = keys->emitter.directed.acceleration;
         delta[3] = 0.0f;
         VU0_LOAD_VF(vf10, keys->orientation);
         effMiscQuaternionToMatrixVU();
@@ -5751,9 +5765,9 @@ void func_00299E58(FileRecordSlots *record) {
                             f32 spread;
                             s32 localSpace;
 
-                            spread = keys->motion.directed.spread *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->motion.directed.spreadRandomness +
-                                 (1.0f - keys->motion.directed.spreadRandomness));
+                            spread = keys->emitter.directed.spread *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.directed.spreadRandomness +
+                                 (1.0f - keys->emitter.directed.spreadRandomness));
                             delta[0] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
                             delta[1] = -(1.0f - spread);
                             delta[2] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
@@ -5767,16 +5781,16 @@ void func_00299E58(FileRecordSlots *record) {
                             motion->direction[0] = delta[0];
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
-                            motion->speed = fabsf(keys->motion.directed.speed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->motion.directed.speedRandomness + (1.0f - keys->motion.directed.speedRandomness)));
+                            motion->speed = fabsf(keys->emitter.directed.speed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.directed.speedRandomness + (1.0f - keys->emitter.directed.speedRandomness)));
                             {
-                                f32 radius = keys->radius *
-                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->radiusRandomness + (1.0f - keys->radiusRandomness));
+                                f32 radius = keys->emitter.directed.radius *
+                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.directed.radiusRandomness + (1.0f - keys->emitter.directed.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
                             VU0_LOAD_VF(vf10, delta);
-                            if (keys->motion.directed.speed < 0.0f) {
+                            if (keys->emitter.directed.speed < 0.0f) {
                                 VU0_NEGATE_XYZ(vf10);
                             }
                             if (localSpace != 0) {
