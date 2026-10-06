@@ -239,11 +239,23 @@ typedef struct AiSlot {
     u32 actionArg;
 } AiSlot;
 
+/* AICALC.TBL: each decision tier tests three packed predicates, then
+ * selects a route in most-specific-first order; route 8 makes no selection. */
+typedef struct AiDecisionRow {
+    u32 predicates[3];
+    u8 routes[8];
+} AiDecisionRow;
+
 typedef struct AiSpecies {
-    u8 pad00[0x40];
+    u8 pad00[4];
+    AiDecisionRow decisions[3];
     AiSlot slot[25];
     u8 pad108[0x54];
 } AiSpecies;
+
+typedef char AiDecisionRow_size_check[sizeof(AiDecisionRow) == 0x14 ? 1 : -1];
+typedef char AiSpecies_size_check[sizeof(AiSpecies) == 0x15C ? 1 : -1];
+typedef char AiSpecies_slot_offset_check[((u32)&((AiSpecies *)0)->slot == 0x40) ? 1 : -1];
 
 extern AiSpecies *datEnemyAiRecords;
 
@@ -393,9 +405,202 @@ u32 func_002115B0(void) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002115B8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00211658);
+extern u32 func_002115B8(u32 route);
+extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002119E0);
+s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+    s8 matches[3][3];
+    u32 predicates[3];
+    u32 firstTier, endTier;
+    u32 tier, predicateIndex;
+    if (requestedRow == 0) {
+        firstTier = 0;
+        endTier = 3;
+    } else {
+        firstTier = requestedRow - 1;
+        endTier = requestedRow;
+    }
+    for (tier = 0; tier < 3; tier++) {
+        for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
+            matches[tier][predicateIndex] = 0;
+        }
+    }
+    for (tier = firstTier; tier < endTier; tier++) {
+        predicates[0] = datEnemyAiRecords[species].decisions[tier].predicates[0];
+        predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
+        predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
+        for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
+            matches[tier][predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+        }
+    }
+    for (tier = 0; tier < 3; tier++) {
+        if (matches[tier][0] && matches[tier][1] && matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[0];
+                *selected = func_002115B8(*selected);
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 0;
+                return 1;
+            }
+        }
+        if (matches[tier][0] && matches[tier][1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[1] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[1];
+                *selected = func_002115B8(*selected);
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 1;
+                return 1;
+            }
+        }
+        if (matches[tier][0] && matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[2] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[2];
+                *selected = func_002115B8(*selected);
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 2;
+                return 1;
+            }
+        }
+        if (matches[tier][1] && matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[3] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[3];
+                *selected = func_002115B8(*selected);
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 3;
+                return 1;
+            }
+        }
+        if (matches[tier][0]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[4] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[4];
+                *selected = func_002115B8(*selected);
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 4;
+                return 1;
+            }
+        }
+        if (matches[tier][1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[5] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[5];
+                *selected = func_002115B8(*selected);
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 5;
+                return 1;
+            }
+        }
+        if (matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[6] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[6];
+                *selected = func_002115B8(*selected);
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 6;
+                return 1;
+            }
+        }
+        if (datEnemyAiRecords[species].decisions[tier].routes[7] != 8) {
+            *selected = datEnemyAiRecords[species].decisions[tier].routes[7];
+            *selected = func_002115B8(*selected);
+            btlActionScratchWork->rowIndex = tier;
+            btlActionScratchWork->conditionKind = 7;
+            return 1;
+        }
+    }
+    *selected = 0;
+    btlActionScratchWork->rowIndex = 0;
+    btlActionScratchWork->conditionKind = 8;
+    return 1;
+}
+
+extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
+
+s32 func_002119E0(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+    s8 matches[3];
+    u32 predicates[3];
+    u32 firstTier, endTier;
+    u32 tier, predicateIndex;
+    if (requestedRow == 0) {
+        firstTier = 0;
+        endTier = 3;
+    } else {
+        firstTier = requestedRow - 1;
+        endTier = requestedRow;
+    }
+    for (tier = firstTier; tier < endTier; tier++) {
+        predicates[0] = datEnemyAiRecords[species].decisions[tier].predicates[0];
+        predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
+        predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
+        for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
+            matches[predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+        }
+        if (matches[0] && matches[1] && matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[0];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 0;
+                return 1;
+            }
+        }
+        if (matches[0] && matches[1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[1] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[1];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 1;
+                return 1;
+            }
+        }
+        if (matches[0] && matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[2] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[2];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 2;
+                return 1;
+            }
+        }
+        if (matches[1] && matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[3] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[3];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 3;
+                return 1;
+            }
+        }
+        if (matches[0]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[4] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[4];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 4;
+                return 1;
+            }
+        }
+        if (matches[1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[5] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[5];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 5;
+                return 1;
+            }
+        }
+        if (matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[6] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[6];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 6;
+                return 1;
+            }
+        }
+        if (datEnemyAiRecords[species].decisions[tier].routes[7] != 8) {
+            *selected = datEnemyAiRecords[species].decisions[tier].routes[7];
+            btlActionScratchWork->rowIndex = tier;
+            btlActionScratchWork->conditionKind = 7;
+            return 1;
+        }
+    }
+    *selected = 0;
+    btlActionScratchWork->rowIndex = 0;
+    btlActionScratchWork->conditionKind = 8;
+    return 1;
+}
+
 
 /* Pick the first nonzero-weight slot whose 16-bit cumulative weight reaches the roll.
  * The unit argument is unused; preserve the runtime lookup, debug failure path and zero fallback. */
