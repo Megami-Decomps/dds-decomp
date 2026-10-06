@@ -6,6 +6,7 @@
 #include "mnu.h"
 #include "mdl.h"
 #include "eff.h"
+#include "dat_state.h"
 
 extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
@@ -27,8 +28,6 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 #define MNU_POPUP_INSERT_BEFORE_TOP 0x20000
 #define MNU_POPUP_ENTRY_MARK_BITS 0x60000
 #define MNU_PARTY_SLOT_COUNT 5
-#define MNU_PARTY_ENTRY_BYTES 0x1C4
-#define MNU_PARTY_ENTRY_BASE 0xA60
 #define MNU_INPUT_PRIORITY_BIT 1
 #define MNU_PAD_TRIGGER_BIT 2
 #define MNU_COMMAND_RECORD_BYTES 0x38
@@ -110,29 +109,6 @@ extern void mnuPositionPanelItemPoints(s32, s32, s32);
 extern s8 D_003E7928[];
 extern s32 mdlRequestAsset(s32, s32, s32);
 
-/* Party/enemy entry shared by cost checks, status selection and stat items.
- * Party-array stride is 0x1C4 in DDS2 (0x1A4 in DDS1). */
-typedef struct BtlEntry {
-    u16 flags;
-    u8 pad02[2];
-    u16 tableIndex; /* 0x04 */
-    u16 hp;        /* 0x06 */
-    u16 maxHp;     /* 0x08 */
-    u16 mp;        /* 0x0A */
-    u16 maxMp;     /* 0x0C */
-    u16 status;    /* 0x0E */
-    u8 pad10[4];
-    u16 unk14;
-    s8 baseStats[5];
-    u8 pad1B;
-    u16 hpBonus;   /* 0x1C */
-    u16 mpBonus;   /* 0x1E */
-    u8 pad20[0x32];
-    u16 menuValue; /* 0x52 */
-    u8 pad54[0x15E];
-    u16 currentId; /* 0x1B2 */
-    u8 pad1B4[0x10];
-} BtlEntry;
 
 extern u16 D_003E7900[];
 
@@ -179,7 +155,6 @@ extern void sdfReleaseChipBlock();
 
 extern u32 effMiscRand(s32);
 
-extern u8 *datGameState;
 
 extern u16 D_003E78D8[];
 
@@ -298,7 +273,7 @@ s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) 
             bestIndex = i;
         }
     }
-    flags = ((BtlEntry *)(datGameState + window * 0x1C4 + 0xA60))->flags;
+    flags = datGameState->party[window].flags;
     entry = &panel->contents[bestIndex].command;
     entry->initialValue = 0x200;
     entry->argument = argument;
@@ -1321,17 +1296,15 @@ extern void func_002C4328(u8 *entry, s32 arg1, u32 index, PartyPanel *panel);
 /* Populate occupied party slots; empty slots retain the native unknown-field sentinel. */
 void mnuInitPartyPanelSlots(PartyPanel *panel) {
     u32 partyIndex;
-    u8 *partyEntry;
-    s32 entryOffset = 0;
+    DatPartyRecord *partyEntry;
 
     memset(panel, 0, 0x10C);
     panel->unk0 = 0;
     panel->unk4 = 0;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        partyEntry = datGameState + entryOffset + MNU_PARTY_ENTRY_BASE;
-        entryOffset += MNU_PARTY_ENTRY_BYTES;
-        if (*(u16 *)partyEntry & 1) {
-            func_002C4328(partyEntry, 0, partyIndex, panel);
+        partyEntry = &datGameState->party[partyIndex];
+        if (partyEntry->flags & 1) {
+            func_002C4328((u8 *)partyEntry, 0, partyIndex, panel);
             panel->slots[partyIndex].index = partyIndex;
         } else {
             panel->slots[partyIndex].unk8 = -1;
@@ -1590,10 +1563,10 @@ void mnuPlayDefaultInputSounds(u32 inputFlags) {
 /* Find the first occupied slot with the same table ID; zero also serves as no-match. */
 s32 mnuFindMatchingPartyEntryIndex(s32 targetEntryAddress) {
     s32 partyIndex;
-    u8 *partyEntry = datGameState + MNU_PARTY_ENTRY_BASE;
-    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry += MNU_PARTY_ENTRY_BYTES) {
-        if ((((BtlEntry *)partyEntry)->flags & 1) &&
-            ((BtlEntry *)targetEntryAddress)->tableIndex == ((BtlEntry *)partyEntry)->tableIndex) {
+    DatPartyRecord *partyEntry = datGameState->party;
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
+        if ((partyEntry->flags & 1) &&
+            ((DatPartyRecord *)targetEntryAddress)->unitId == partyEntry->unitId) {
             return partyIndex;
         }
     }
@@ -1680,7 +1653,7 @@ u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
     u16 entryValue = command->value;
     u16 flatAddition = command->addition;
     if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == MNU_COST_KIND_HP) {
-        entryValue = flatAddition + ((BtlEntry *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
+        entryValue = flatAddition + ((DatPartyRecord *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
     }
     return entryValue;
 }
@@ -1704,12 +1677,12 @@ s32 mnuCanAffordEntryCost(u16 commandId, s32 actorAddress) {
 
     switch (costKind) {
     case MNU_COST_KIND_HP:
-        if (((BtlEntry *)actorAddress)->hp < cost) {
+        if (((DatPartyRecord *)actorAddress)->hp < cost) {
             return 0;
         }
         break;
     case MNU_COST_KIND_MP:
-        if (((BtlEntry *)actorAddress)->mp < cost) {
+        if (((DatPartyRecord *)actorAddress)->mp < cost) {
             return 0;
         }
         break;
@@ -1734,12 +1707,12 @@ s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
 
     switch (costKind) {
     case MNU_COST_KIND_HP:
-        if (((BtlEntry *)actorAddress)->hp < cost) {
+        if (((DatPartyRecord *)actorAddress)->hp < cost) {
             return 1;
         }
         break;
     case MNU_COST_KIND_MP:
-        if (((BtlEntry *)actorAddress)->mp < cost) {
+        if (((DatPartyRecord *)actorAddress)->mp < cost) {
             return 1;
         }
         break;
@@ -1754,13 +1727,13 @@ s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
 
     switch (command->kind) {
     case MNU_COST_KIND_HP:
-        if (((BtlEntry *)actorEntry)->hp < cost) {
+        if (((DatPartyRecord *)actorEntry)->hp < cost) {
             return 0;
         }
         datAdjustCurrentHp(actorEntry, -cost);
         return 1;
     case MNU_COST_KIND_MP:
-        if (((BtlEntry *)actorEntry)->mp < cost) {
+        if (((DatPartyRecord *)actorEntry)->mp < cost) {
             return 0;
         }
         datAdjustCurrentMp(actorEntry, -cost);
@@ -1788,16 +1761,16 @@ s32 mnuGetAbilityByteCategory(u16 commandId) {
     return 0;
 }
 
-void func_002C5128(u16 ability, s32 target, BtlEntry *entry) {
+void func_002C5128(u16 ability, s32 target, DatPartyRecord *entry) {
     sdfApplyCommandResults(ability);
 }
 
-u32 func_002C5140(s32 context, s32 ability, s32 target, BtlEntry *entry) {
+u32 func_002C5140(s32 context, s32 ability, s32 target, DatPartyRecord *entry) {
     return 0;
 }
 
 s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 selectedEntry) {
-    BtlEntry *entry = (BtlEntry *)selectedEntry;
+    DatPartyRecord *entry = (DatPartyRecord *)selectedEntry;
     s32 multiTarget = 0;
     s32 applied = 0;
     s32 mask;
@@ -1816,14 +1789,10 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         mnuQueueListEntry((MenuPageWindow *)context,
                           mnuFindMatchingPartyEntryIndex((s32)entry), 0, 0);
     } else {
-        s32 remaining;
-        s32 entryOffset = 0;
+        s32 i;
 
-        remaining = MNU_PARTY_SLOT_COUNT - 1;
-
-        do {
-            entry = (BtlEntry *)(datGameState + MNU_PARTY_ENTRY_BASE + entryOffset);
-            entryOffset += MNU_PARTY_ENTRY_BYTES;
+        for (i = 0; i < MNU_PARTY_SLOT_COUNT; i++) {
+            entry = &datGameState->party[i];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
                 mask = mnuGetMatchingPartyEntryMask((s32)entry);
 
@@ -1832,27 +1801,18 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
                     applied = 1;
                 }
             }
-        } while (--remaining >= 0);
+        }
 
         if (applied == 0) {
             return 0;
         }
 
-        {
-            s32 queueArgument = 0;
-            s32 queueOffset = 0;
-
-            remaining = MNU_PARTY_SLOT_COUNT - 1;
-            do {
-                entry = (BtlEntry *)(datGameState + MNU_PARTY_ENTRY_BASE + queueOffset);
-                queueOffset += MNU_PARTY_ENTRY_BYTES;
-                if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
-                    mnuQueueListEntry((MenuPageWindow *)context,
-                                      mnuFindMatchingPartyEntryIndex((s32)entry), 0,
-                                      queueArgument);
-                }
-                queueArgument += 3;
-            } while (--remaining >= 0);
+        for (i = 0; i < MNU_PARTY_SLOT_COUNT; i++) {
+            entry = &datGameState->party[i];
+            if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
+                mnuQueueListEntry((MenuPageWindow *)context,
+                                  mnuFindMatchingPartyEntryIndex((s32)entry), 0, i * 3);
+            }
         }
         multiTarget = 1;
     }
@@ -1954,9 +1914,9 @@ u32 ptyCountBulletItem(s32 bulletId) {
     s32 partyIndex;
     if (bulletId < 0xA0) return 0;
     if (bulletId >= 0xBF) return 0;
-    totalCount = *(u8 *)(bulletId + (s32)datGameState + 0x1340);
+    totalCount = datGameState->inventory.counts[bulletId];
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        BtlEntry *partyEntry = (BtlEntry *)(datGameState + MNU_PARTY_ENTRY_BASE) + partyIndex;
+        DatPartyRecord *partyEntry = &datGameState->party[partyIndex];
         if (bulletId == mnuGetPartyEntryMenuValue((s32)partyEntry)) {
             totalCount++;
         }
@@ -1965,41 +1925,41 @@ u32 ptyCountBulletItem(s32 bulletId) {
 }
 
 u32 mnuSetPartyEntryMenuValue(s32 entry, u16 value) {
-    ((BtlEntry *)entry)->menuValue = value;
+    ((DatPartyRecord *)entry)->menuValue = value;
     return 1;
 }
 
 u16 mnuGetPartyEntryMenuValue(s32 entry) {
-    return ((BtlEntry *)entry)->menuValue;
+    return ((DatPartyRecord *)entry)->menuValue;
 }
 
 u32 mnuSetPartyEntryCurrentId(u32 entry, u32 id) {
-    ((BtlEntry *)entry)->currentId = (s16)id;
+    ((DatPartyRecord *)entry)->itemId = id;
     mnuMarkEntryBlocked(id);
     ptyRecomputeMaxHpMp(entry);
     return 1;
 }
 
 u16 mnuGetPartyEntryCurrentId(s32 entry) {
-    return ((BtlEntry *)entry)->currentId;
+    return ((DatPartyRecord *)entry)->itemId;
 }
 
-BtlEntry *mnuFindPartySlotByCurrentId(u32 id) {
+DatPartyRecord *mnuFindPartySlotByCurrentId(u32 id) {
     s32 index;
-    BtlEntry *entry = (BtlEntry *)(datGameState + 0xA60);
+    DatPartyRecord *entry = datGameState->party;
     for (index = 0; index < 5; index++, entry++) {
-        if ((entry->flags & 1) && id == entry->currentId) {
+        if ((entry->flags & 1) && id == entry->itemId) {
             return entry;
         }
     }
     return 0;
 }
 
-BtlEntry *mnuFindReserveSlotByCurrentId(u32 id) {
+DatPartyRecord *mnuFindReserveSlotByCurrentId(u32 id) {
     s32 index;
-    BtlEntry *entry = (BtlEntry *)(datGameState + 0x1CA10);
+    DatPartyRecord *entry = datGameState->templates;
     for (index = 0; index < 16; index++, entry++) {
-        if (entry->unk14 != 0 && (entry->flags & 1) && id == entry->currentId) {
+        if (entry->level != 0 && (entry->flags & 1) && id == entry->itemId) {
             return entry;
         }
     }
@@ -2007,16 +1967,14 @@ BtlEntry *mnuFindReserveSlotByCurrentId(u32 id) {
 }
 
 void mnuMarkEntryBlocked(s32 index) {
-    s32 offset = 0x1E730 + index;
     if (index != 0) {
-        datGameState[offset] |= 1;
+        datGameState->itemBlockedFlags[index - 0xC0] |= 1;
     }
 }
 
 void mnuClearEntryBlocked(s32 index) {
-    s32 offset = 0x1E730 + index;
     if (index != 0) {
-        datGameState[offset] &= ~1;
+        datGameState->itemBlockedFlags[index - 0xC0] &= ~1;
     }
 }
 
@@ -2024,13 +1982,13 @@ s32 mnuIsEntryBlocked(s32 index) {
     if (index == 0) {
         return 1;
     }
-    return *(u8 *)(index + (s32)datGameState + 0x1E730) & 1;
+    return datGameState->itemBlockedFlags[index - 0xC0] & 1;
 }
 
 s32 mnuHasOwnedUnblockedItem(void) {
     s32 index;
     for (index = 0xC0; index < 0x100; index++) {
-        if (!mnuIsEntryBlocked(index) && *(u8 *)(index + (s32)datGameState + 0x1340) != 0) {
+        if (!mnuIsEntryBlocked(index) && datGameState->inventory.counts[index] != 0) {
             return 1;
         }
     }
@@ -2066,8 +2024,8 @@ s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
 }
 
 
-extern s32 datComputeSkillBoostedMaxHp(BtlEntry *);
-extern s32 datComputeSkillBoostedMaxMp(BtlEntry *);
+extern s32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern s32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
@@ -2083,7 +2041,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
-s32 btlItemApplyPermanentBonus(u16 itemId, BtlEntry *unit) {
+s32 btlItemApplyPermanentBonus(u16 itemId, DatPartyRecord *unit) {
     s32 statIndex = -1;
     s32 accepted = 0;
 
@@ -2168,7 +2126,7 @@ s32 ptyChooseFirstAvailableRosterId(void) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5A28);
 
 /* Return the first matching status index in native priority order, or -1. */
-s32 mnuGetSelectionFromFlags(BtlEntry *actorEntry) {
+s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry) {
     u16 statusFlags = actorEntry->status;
     if (statusFlags & 0x400) return 0;
     if (statusFlags & 0x100) return 1;
@@ -2181,10 +2139,10 @@ s32 mnuGetSelectionFromFlags(BtlEntry *actorEntry) {
 /* Return one bit for the first occupied matching table ID, or zero when absent. */
 s32 mnuGetMatchingPartyEntryMask(s32 targetEntryAddress) {
     s32 partyIndex;
-    u8 *partyEntry = datGameState + MNU_PARTY_ENTRY_BASE;
-    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry += MNU_PARTY_ENTRY_BYTES) {
-        if ((((BtlEntry *)partyEntry)->flags & 1) &&
-            ((BtlEntry *)partyEntry)->tableIndex == ((BtlEntry *)targetEntryAddress)->tableIndex) {
+    DatPartyRecord *partyEntry = datGameState->party;
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
+        if ((partyEntry->flags & 1) &&
+            partyEntry->unitId == ((DatPartyRecord *)targetEntryAddress)->unitId) {
             return 1 << partyIndex;
         }
     }
@@ -2208,18 +2166,18 @@ s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
     return 0;
 }
 
-BtlEntry *mnuPickBestPartyEntry(u32 *table) {
-    BtlEntry *best = NULL;
-    BtlEntry *entry;
+DatPartyRecord *mnuPickBestPartyEntry(u32 *table) {
+    DatPartyRecord *best = NULL;
+    DatPartyRecord *entry;
     s32 pass;
     s32 bestMp;
     s32 i;
 
     for (pass = 0; pass < 2; pass++) {
         bestMp = 0;
-        entry = (BtlEntry *)(datGameState + 0xA60);
+        entry = datGameState->party;
         for (i = 0; i < 5; i++, entry++) {
-            if ((entry->flags & 1) && table[entry->tableIndex] == 0) {
+            if ((entry->flags & 1) && table[entry->unitId] == 0) {
                 s32 usable = 0;
 
                 if (!(entry->status & 0x10)) {
@@ -2245,15 +2203,15 @@ BtlEntry *mnuPickBestPartyEntry(u32 *table) {
     return 0;
 }
 
-BtlEntry *mnuFindPartyEntryBySelection(s32 *out) {
+DatPartyRecord *mnuFindPartyEntryBySelection(s32 *out) {
     u16 table[5][2] = {{0x400, 0xD4}, {0x100, 0xCF}, {0x80, 0xA9}, {0x40, 0xCE}, {0x10, 0xA8}};
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        BtlEntry *entry;
+        DatPartyRecord *entry;
         s32 j;
 
-        for (j = 0, entry = (BtlEntry *)(datGameState + 0xA60); j < 5; j++, entry++) {
+        for (j = 0, entry = datGameState->party; j < 5; j++, entry++) {
             if ((entry->flags & 1) && entry->status == table[i][0]) {
                 *out = table[i][1];
                 return entry;
@@ -2265,7 +2223,7 @@ BtlEntry *mnuFindPartyEntryBySelection(s32 *out) {
 
 s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
     s32 id;
-    BtlEntry *entry = mnuFindPartyEntryBySelection(&id);
+    DatPartyRecord *entry = mnuFindPartyEntryBySelection(&id);
 
     if (entry == 0) {
         return 3;
@@ -2289,8 +2247,8 @@ s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
 /* Give flag-bit-1 entries precedence, then compare their 10-bit fixed-point
  * HP/max-HP ratios without converting to floating point. */
 s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
-    BtlEntry *a = (BtlEntry *)*left;
-    BtlEntry *b = (BtlEntry *)*right;
+    DatPartyRecord *a = (DatPartyRecord *)*left;
+    DatPartyRecord *b = (DatPartyRecord *)*right;
     s32 leftRatio = (a->hp << 10) / a->maxHp;
     s32 rightRatio = (b->hp << 10) / b->maxHp;
     if (a->flags & 2) {
@@ -2309,7 +2267,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6008);
 
 s32 mnuUseFieldSkillOnParty(s32 partyPanel, s32 skill, s32 commit) {
     u32 used[32];
-    BtlEntry *entry;
+    DatPartyRecord *entry;
     s32 pass;
     s32 more;
     s32 result;
@@ -2329,10 +2287,10 @@ s32 mnuUseFieldSkillOnParty(s32 partyPanel, s32 skill, s32 commit) {
             }
             switch (result) {
             case 0:
-                used[entry->tableIndex] = 1;
+                used[entry->unitId] = 1;
                 break;
             case 1:
-                used[entry->tableIndex] = result;
+                used[entry->unitId] = result;
                 break;
             case 2:
                 return pass + 1;
