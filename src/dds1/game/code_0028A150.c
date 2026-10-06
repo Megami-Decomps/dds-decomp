@@ -3,6 +3,27 @@
 #include "kwln.h"
 #include "fpu.h"
 
+typedef struct FileScrollArrowState {
+    s32 angle;
+    s32 upAlpha;
+    s32 unk08;
+    s32 downAlpha;
+} FileScrollArrowState;
+
+extern FileScrollArrowState D_0037D4C0;
+extern f32 D_003BC83C;
+extern u8 D_0037DB20[];
+extern u8 D_00347C68[][32];
+extern u8 D_003482A8[][32];
+extern char D_003BC898[];
+extern char D_003BC8A0[];
+extern char D_003BC8A8[];
+extern u32 func_002904C8(u32, s32, s8);
+extern void fileDrawSlotIcon(s32, s32, s32, s32);
+extern void fileCursorStepUp(void);
+extern void fileFadeStepDown(void);
+extern void fileLoadCtxSlideUpdate(void);
+
 
 
 extern void kwlnPadStartMotor(s32, u8, s32);
@@ -43,7 +64,25 @@ extern s32 mnuSelectFileBranch(void);
 
 
 
-extern u8 D_003DC800[];
+/* Compact metadata copied from the beginning of each save blob. */
+typedef struct FileSlotPreview {
+    char signature[3];
+    s8 version;
+    s8 mapGroup;
+    s8 mapIndex;
+    u8 pad06[2];
+    s32 playTicks;
+    s16 status;
+    s16 newCycle;
+    s8 party[8];
+    s8 levels[8];
+    u32 money;
+    u32 header24;
+    u32 header28;
+    u32 header2C;
+} FileSlotPreview;
+
+extern FileSlotPreview D_003DC800[];
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003BC880;
@@ -259,7 +298,7 @@ extern u32 D_003BD910;
 
 extern u32 fileSaveIconRequest;
 
-extern u64 func_001978E8(s32, s32, u64, u64, u64, u64);
+extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
 extern u32 D_003BD8F0;
 
@@ -673,10 +712,10 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontSetSharedRenderFlags(0x54);
 }
 
-void fileDrawMenuImageAtPoint(s32 x, s32 y, u64 first, u64 second) {
-    u64 imageHandle;
+void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
+    u32 imageHandle;
 
-    imageHandle = func_001978E8(x << 4, y << 3, 0, first, second, 0);
+    imageHandle = func_001978E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(imageHandle, 1);
     frFontQueueGlyphInSelectedSlot(imageHandle);
 }
@@ -1028,7 +1067,7 @@ void *fileStoreSlotHeader(void) {
         return NULL;
     }
     if (status == 1) {
-        memcpy(D_003DC800 + fileSlotScanIndex * 0x30, (void *)fileSaveReadBuffer, 0x30);
+        memcpy(&D_003DC800[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
         sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return fileAdvanceSlotScan();
     }
@@ -2182,7 +2221,232 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2678);
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2688);
 
-INCLUDE_ASM(const s32, "game/code_0028A150", fileDrawSlotListAndPreview);
+s32 fileDrawSlotListAndPreview(s32 work) {
+    char text[64];
+    s32 row;
+    s32 rowBase;
+    s32 rowCount;
+    s32 slotBase;
+    s32 slot;
+    s32 y;
+    u32 titleColor;
+    u32 detailColor;
+    u32 alpha;
+    u32 baseColor;
+    u32 partyColor;
+    s32 trail;
+    s32 trailAlpha;
+    s32 partyIndex;
+    s32 portrait;
+    s32 ticks;
+    s32 hours;
+    s32 minutes;
+    s32 seconds;
+    FileSlotPreview *preview;
+    f32 targetY;
+    f32 delta;
+    f32 wave;
+
+    if (D_003BC804 == 1) {
+        return 0;
+    }
+    if (D_003BC818 > 0) {
+        D_003BC818--;
+    }
+    if (D_003BC818 < 0) {
+        D_003BC818++;
+    }
+    if (D_003BC848 == 0) {
+        func_00108FA0(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC880);
+    } else {
+        func_00108FA0(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC880);
+    }
+    evtSetDrawSurfaceIndex(0x55);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 2, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitDefaultDepthGradientRect(0, 0, 0x200, 0x1C0, 0, 0, 0, 0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    /* Retail computes the clamped slide delta but snaps to the target. */
+    targetY = D_003BC840 * -110 + 104;
+    delta = targetY - D_003BC83C;
+    delta /= 3.0f;
+    if (delta < 0.0f && delta > -16.0f) {
+        delta = -16.0f;
+    }
+    if (delta > 0.0f && delta < 16.0f) {
+        delta = 16.0f;
+    }
+    D_003BC83C = targetY;
+    fileCursorStepUp();
+    fileFadeStepDown();
+    if (D_003BC850 == 0) {
+        fileCursorPulseUpdate();
+        func_00290A88(0x25, 0x1F, 0x53);
+    }
+    fileLoadCtxSlideUpdate();
+    if (fileLoadMenuState.unk10 == 0) {
+        rowCount = 3;
+        rowBase = D_003BC840;
+        slotBase = D_003BC840;
+    } else if (fileLoadMenuState.unk10 == 1) {
+        rowCount = 4;
+        rowBase = D_003BC840;
+        slotBase = D_003BC840 - 1;
+        if (slotBase < 0) {
+            slotBase = 0;
+        }
+    } else {
+        rowCount = 4;
+        rowBase = D_003BC840 - 1;
+        slotBase = D_003BC840;
+    }
+    for (row = 0; row < rowCount; row++) {
+        slot = slotBase + row;
+        y = (s32)D_003BC83C + (rowBase + row) * 110 + fileLoadMenuState.unk14;
+        if (D_003BC844 == slot) {
+            titleColor = 0xA09DC380;
+            detailColor = 0x89FEFF80;
+        } else {
+            titleColor = 0x805D8340;
+            detailColor = 0x69BEBF40;
+        }
+        if (fileLoadMenuState.unk10 != 0) {
+            if (row == 0) {
+                alpha = fileLoadMenuState.unk18;
+                titleColor = func_002904C8(titleColor, alpha, 0);
+                detailColor = func_002904C8(detailColor, fileLoadMenuState.unk18, 0);
+            } else if (row == 3) {
+                alpha = fileLoadMenuState.unk1C;
+                titleColor = func_002904C8(titleColor, alpha, 0);
+                detailColor = func_002904C8(detailColor, fileLoadMenuState.unk1C, 0);
+            } else {
+                alpha = fileLoadMenuState.unkC;
+                titleColor = func_002904C8(titleColor, alpha, 0);
+                detailColor = func_002904C8(detailColor, fileLoadMenuState.unkC, 0);
+            }
+        } else {
+            alpha = fileLoadMenuState.unkC;
+            titleColor = func_002904C8(titleColor, alpha, 0);
+            detailColor = func_002904C8(detailColor, fileLoadMenuState.unkC, 0);
+        }
+        baseColor = (alpha << 24) | 0x808080;
+        func_00108FA0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, D_003BC868);
+        if (D_003DC7C0[slot] == 0) {
+            func_00108FA0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_003BC870);
+        } else if (D_003DC7C0[slot] == 2) {
+            func_00108FA0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_003BC878);
+        } else if (D_003DC800[slot].status > 0) {
+            func_00108FA0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_003BC874);
+        }
+        if (slot != 10) {
+            fileDrawSlotIcon(slot + 1, 0x5A, y + 4, alpha);
+            if (D_003BC844 == slot) {
+                trailAlpha = 16;
+                if (D_003BC818 > 0) {
+                    for (trail = 0; trail < D_003BC818; trail++, trailAlpha -= 2) {
+                        func_00108FA0(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, D_003BC86C);
+                    }
+                } else if (D_003BC818 < 0) {
+                    trailAlpha = 32;
+                    for (trail = 0; trail < -D_003BC818; trail++, trailAlpha -= 4) {
+                        func_00108FA0(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, D_003BC86C);
+                    }
+                }
+            }
+            if (D_003DC7C0[slot] != 1) {
+                if (D_003BC844 == slot) {
+                    u32 highlightColor = ((D_0037D4D0[0] + 0x80) << 24) | 0x808080;
+                    func_00108FA0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_003BC86C);
+                }
+            } else {
+                u32 bannerColor;
+
+                preview = &D_003DC800[slot];
+                if (preview->newCycle != 0) {
+                    mnuDrawAndStoreTextGlyphHandle(0x40, y + 0x20, detailColor, D_0037DB20);
+                }
+                bannerColor = (alpha << 24) | 0x808080;
+                func_00108FA0(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, D_003BC884);
+                if (preview->newCycle == 0) {
+                    if (preview->mapGroup == 0) {
+                        mnuDrawAndStoreTextGlyphHandle(0xF0, y, detailColor, D_00347C68[preview->mapIndex]);
+                    } else {
+                        mnuDrawAndStoreTextGlyphHandle(0xF0, y, detailColor, D_003482A8[preview->mapIndex]);
+                    }
+                }
+                ticks = D_003DC800[slot].playTicks;
+                if (ticks > 0x066FEBF8) {
+                    ticks = 0x066FEBF8;
+                }
+                hours = ticks / 108000;
+                minutes = (ticks % 108000) / 1800;
+                seconds = (ticks % 1800) / 30;
+                func_003014F0(text, D_003BC898, hours);
+                fileDrawMenuImageAtPoint(0x187, y + 0x15, titleColor, text);
+                func_003014F0(text, D_003BC8A0, minutes);
+                fileDrawMenuImageAtPoint(0x1A7, y + 0x15, titleColor, text);
+                func_003014F0(text, D_003BC8A0, seconds);
+                fileDrawMenuImageAtPoint(0x1BD, y + 0x15, titleColor, text);
+                if (D_003BC844 == slot) {
+                    u32 highlightColor = ((D_0037D4D0[0] + 0x80) << 24) | 0x808080;
+                    func_00108FA0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_003BC86C);
+                }
+                if (D_003DC800[slot].newCycle == 0) {
+                    if (D_003BC844 == slot) {
+                        partyColor = (alpha << 24) | 0x808080;
+                    } else {
+                        partyColor = (((alpha >> 1) + (alpha >> 2)) << 24) | 0x282828;
+                    }
+                    for (partyIndex = 0; partyIndex < 5; partyIndex++) {
+                        if (D_003DC800[slot].party[partyIndex] != 0) {
+                            portrait = 0;
+                            switch (D_003DC800[slot].party[partyIndex]) {
+                            case 1: portrait = 0; break;
+                            case 3: portrait = 1; break;
+                            case 4: portrait = 2; break;
+                            case 5: portrait = 3; break;
+                            case 6: portrait = 4; break;
+                            }
+                            func_00108FA0(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, D_0037D488[portrait]);
+                            func_003014F0(text, D_003BC8A8, D_003DC800[slot].levels[partyIndex]);
+                            fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    evtSubmitPrimaryAlphaBlendMode(1);
+    D_0037D4C0.angle = (D_0037D4C0.angle + 10) % 360;
+    if (D_003BC840 > 0) {
+        u32 arrowColor;
+
+        func_00108FA0(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC87C);
+        wave = sdfSinPoly((f32)((D_0037D4C0.angle + 90) % 360) / 180.0f * 3.1415899f);
+        D_0037D4C0.upAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
+        arrowColor = (D_0037D4C0.upAlpha << 24) | 0x808080;
+        func_00108FA0(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, D_003BC87C);
+    }
+    if (D_003BC840 < 7) {
+        u32 arrowColor;
+
+        func_00108FA0(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC87C);
+        wave = sdfSinPoly((f32)((D_0037D4C0.angle + 90) % 360) / 180.0f * 3.1415899f);
+        D_0037D4C0.downAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
+        arrowColor = (D_0037D4C0.downAlpha << 24) | 0x808080;
+        func_00108FA0(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, D_003BC87C);
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 1);
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    return 0;
+}
+
 
 void *fileRunMenuState(s32 arg) {
     void *next;
