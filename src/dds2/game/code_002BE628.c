@@ -236,20 +236,16 @@ extern void func_00340DC8(f32, f32, f32);
 
 extern char D_0042B610[];
 
-typedef struct StageGraphicsCallback {
-    u8 unknown[0x10];
-    void (*invoke)(void *, void *);
-} StageGraphicsCallback;
 
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, s32);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern s32 sdfCreateFormattedSifCommand();
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern s32 D_00437CB8;
 extern s32 D_00437CBC;
-extern StageGraphicsCallback D_00380708;
+extern SdfPoolNode D_00380708;
 extern s8 D_0037F510[];
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
@@ -2910,7 +2906,7 @@ void *evtCreateBattleStageTestCamera(void) {
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */
 void *evtBattleStageTestScreen(void) {
-    void *packetList = sdfAllocPacketAligned(EVT_STAGE_SCREEN_WORK_BYTES);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(EVT_STAGE_SCREEN_WORK_BYTES);
 
     sdfInitPacketList(packetList);
     kwlnDrawSpriteCell(packetList, 0x84, 0x46, 0x14, 9);
@@ -2918,7 +2914,7 @@ void *evtBattleStageTestScreen(void) {
     sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
     sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
-    D_00380708.invoke(&D_00380708, packetList);
+    D_00380708.append((SdfListHead *)&D_00380708, packetList);
     if (D_0037F510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_00437CB8, D_00437CBC);
         return evtCreateBattleStageTestCamera;
