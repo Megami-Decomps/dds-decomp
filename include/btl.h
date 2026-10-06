@@ -138,7 +138,7 @@ typedef struct BtlUnit {
     u32 effectObject; /* 0x31C: supplies the effect's first inner vector */
     struct EvtUnit *ext; /* 0x320: the event manager's complete 0x170-byte work. */
     s32 transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
-    u8 pad328[4];
+    struct BtlUnit *mirror; /* 0x328: unit drawn from this unit's transparency packet buffer */
     s32 unk32C;
     s32 unk330;
     u8 pad334[8];

@@ -8,6 +8,7 @@
 #include "dat_state.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "sdf.h"
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
@@ -4082,7 +4083,49 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
         }
     }
 }
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D6FB0);
+
+extern SdfGraphObj D_003980E0;
+extern SdfPoolNode *D_00359D20[];
+extern SdfPoolNode *D_00359D30[];
+extern s32 sdfAllocPacketAligned(s32 size);
+extern u32 sdfAllocatePacketList(s32);
+extern void sdfCreateResourcePacket(u32, SdfTexResource *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfCreateDescriptorPacket(u32, SdfTexResource *, s32, s32, s32, s32, s32, s32);
+
+/* Draw the unit's transparency model into its mirror's packet buffer, then draw the mirror from it. Either
+ * model is created (and the update ends) on the first frame it is missing. */
+void func_001D6FB0(BtlUnit *unit) {
+    MdlCtx *info;
+    u32 packet;
+
+    if ((unit->flags & 2) == 0) {
+        return;
+    }
+    if (unit->unkCC != 0) {
+        return;
+    }
+    unit->mirror->unk32C = sdfAllocPacketAligned(0x70000);
+    packet = sdfAllocatePacketList(0);
+    sdfCreateResourcePacket(packet, D_003980E0.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
+    D_00359D20[0]->append((SdfListHead *)D_00359D20[0], (SdfListHead *)packet);
+    info = unit->ext->owner;
+    if (unit->transparencyModel == 0) {
+        unit->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        dds3SetObjectFlags(unit->effectObject, 1);
+        return;
+    }
+    func_001D6A80(unit, info, unit->transparencyModel, (s32)D_00359D20, unit->overlayColor);
+    info = unit->mirror->ext->owner;
+    if (unit->mirror->transparencyModel == 0) {
+        unit->mirror->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        dds3SetObjectFlags(unit->mirror->effectObject, 1);
+        return;
+    }
+    packet = sdfAllocatePacketList(0);
+    sdfCreateDescriptorPacket(packet, D_003980E0.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
+    D_00359D30[0]->append((SdfListHead *)D_00359D30[0], (SdfListHead *)packet);
+    func_001D6A80(unit->mirror, info, unit->mirror->transparencyModel, (s32)D_00359D30, unit->mirror->overlayColor);
+}
 
 extern char D_003A3BA8[];
 
