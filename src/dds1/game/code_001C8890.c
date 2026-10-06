@@ -1298,7 +1298,7 @@ void btlMarkLinkedActorStatusFlag(s32 arg0) {
  * Gun-change command (slot 0x11): once no blocking tasks remain, swap the unit to its gun model, refresh linked
  * allies and reload their models, start the gun effects, and continue to state 0x18/0x1A; a unit already
  * holding the gun only restores its motion, swaps back and continues to 0x1B/0x1A. */
-s32 func_001CE0D8(BtlTask *task) {
+s32 btlCommandGunChangeStart(BtlTask *task) {
     BtlUnit *unit;
     BtlState *state;
     BtlUnit *other;

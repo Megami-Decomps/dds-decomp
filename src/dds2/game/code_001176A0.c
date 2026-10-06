@@ -31,7 +31,7 @@ extern void dds3ForEachEntry(void);
 extern void ptyAssignPartyRosterItemsAndMarkOwned(void);
 extern void mdlFlagClear(s32 flag);
 extern void mdlFlagSet(s32 flag);
-extern void func_00117A88(void);
+extern void sdfSaveResetSnapshot(void);
 extern void func_00118008(void);
 
 s32 sdfBumpTickCounters(void);
@@ -295,7 +295,7 @@ void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
     datGameState->world.updateMode = 8;
-    func_0011AB38();
+    ptyInitRuntime();
     func_00122B58(0);
     ptyClearProfileRecords();
     func_0026CE90();
@@ -334,7 +334,7 @@ extern s32 mtrMantraEventBitPush(void);
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
  * mantra bitmaps, profile records, party templates, high item counts and blocked-item flags. */
-void func_00117A88(void) {
+void sdfSaveResetSnapshot(void) {
     void *copy;
 
     D_00435DB5 = 0;
@@ -388,7 +388,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     s32 backingAllocation;
 
     if (fullReset == 1) {
-        func_00117A88();
+        sdfSaveResetSnapshot();
         backingAllocation = datGameState->header.backingAllocation;
         memset(datGameState, 0, 0x1E840);
         datGameState->header.backingAllocation = backingAllocation;
@@ -398,7 +398,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
     datGameState->world.updateMode = 8;
-    func_0011AB38();
+    ptyInitRuntime();
     mdlFlagClear(0xC0E);
     mdlFlagSet(0x801);
     func_00122B58(0);

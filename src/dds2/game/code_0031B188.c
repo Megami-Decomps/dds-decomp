@@ -120,7 +120,7 @@ extern void func_00326BC8(SdfMat4 *, f32);
 extern void func_003270C8(SdfMat4 *, f32);
 extern void func_003275C8(SdfMat4 *, f32);
 extern void sdfMat4Transpose(SdfMat4 *, SdfMat4 *);
-extern void func_00327C80(f32 *, SdfMat4 *);
+extern void sdfMatrixToQuaternion(f32 *, SdfMat4 *);
 extern void fileReadVector40(void *, void *);
 extern void fileQueueSetRotation(FileQueue *, void *);
 
@@ -516,7 +516,7 @@ void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) 
     func_003270C8(&basis, yAngle);
     func_003275C8(&basis, zAngle);
     sdfMat4Transpose(&basis, &basis);
-    func_00327C80(quaternion, &basis);
+    sdfMatrixToQuaternion(quaternion, &basis);
     vector[0] = quaternion[0];
     vector[1] = quaternion[1];
     vector[2] = quaternion[2];
@@ -827,7 +827,7 @@ void func_0031C688(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
     func_003270C8(&basis, yAngle);
     func_003275C8(&basis, zAngle);
     sdfMat4Transpose(&basis, &basis);
-    func_00327C80(quaternion, &basis);
+    sdfMatrixToQuaternion(quaternion, &basis);
     vector[0] = quaternion[0];
     vector[1] = quaternion[1];
     vector[2] = quaternion[2];

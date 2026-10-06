@@ -66,7 +66,7 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
 void *func_001150F0();
 void func_00115398(void);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
-EffectObj *func_00115478();
+EffectObj *effObjCreateMagatuhiForKind();
 extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -458,7 +458,7 @@ void func_00115460(void) {
     func_00115398();
 }
 
-EffectObj *func_00115478(kind, descriptor)
+EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     s32 kind;
     struct EffNodeDescriptor *descriptor;
 {
@@ -518,7 +518,7 @@ EffectObj *func_00115478(kind, descriptor)
 }
 
 void func_00115840(void) {
-    func_00115478();
+    effObjCreateMagatuhiForKind();
 }
 
 /* Resolve a named resource for the kind/value constructor, then release that resource. */
@@ -529,7 +529,7 @@ void *effObjCreateKindFromResource(s32 kind, void *resource) {
 
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    created = func_00115478(kind, resolvedId);
+    created = effObjCreateMagatuhiForKind(kind, resolvedId);
     sdfReleaseResourceAllocation(resourceHandle);
     return created;
 }

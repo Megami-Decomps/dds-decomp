@@ -8248,7 +8248,7 @@ typedef struct EffSharedEffectWork {
     u32 allocation;        // 0x47C
 } EffSharedEffectWork;
 
-void func_002FB480(EffSharedEffectWork *work) {
+void effApplySharedModelParameters(EffSharedEffectWork *work) {
     f32 *amount;
     f32 scale;
     u32 i;

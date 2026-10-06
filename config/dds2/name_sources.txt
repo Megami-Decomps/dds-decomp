@@ -378,6 +378,7 @@
 0x00115208	effObjSpawnLoadedResourceEffect	inferred	confidence=high; matched-C; src/dds2/basic/dds3EffectObjectBasic.c:289:func_00115208; Obtains a loaded resource node and registers its bill as a world effect object using the supplied vector/context; contrasts with the descriptor-constructor entry path.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00115518	effObjCreateFromResolvedResource	inferred	resolves resource identifier before invoking effect constructor [names_reviewed5.tsv]
 0x00115580	effObjReplaceActiveEventNode	inferred	releases previous event node and creates new one in active state [names_reviewed5.tsv]
+0x001156E0	effObjCreateMagatuhiForKind	inferred	Fam
 0x00115AC0	effObjCreateKindFromResource	inferred	resolves resource and creates effect of requested kind [names_reviewed5.tsv]
 0x00115B20	effObjGetReadyData	inferred	returns effect data only for kind seven in state six [names_reviewed5.tsv]
 0x00115B58	effObjLoadReadyParameterVector	inferred	loads parameter vector into VU register only when effect is ready [names_reviewed5.tsv]
@@ -423,6 +424,7 @@
 0x00117848	sdfDisableFloatCounterWrap	inferred	src/dds2/game/code_001176A0.c func_00117848: Clears flag 0x20 used by counter step routine for endpoint wrapping. Twin of DDS1 func_001175E0. [names_reviewed24.tsv]
 0x001178C0	evtLoadValueVectorIntoVu	inferred	Loads the event value pointer vector directly into VU0 VF10; no scaling occurs. [names_reviewed16.tsv]
 0x00117A10	evtResetWorldAndProfileRuntime	inferred	Clears script state and reinitializes world and profile runtime records. [names_reviewed9.tsv]
+0x00117A88	sdfSaveResetSnapshot	inferred	TaskPurist
 0x00118598	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:290:func_00118598; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:24 [names_qp13.tsv]
 0x001186C8	scrIsCurrentWorkTask	inferred	Compares the current script work-task handle against the expected handle. [names_reviewed10.tsv]
 0x001188F0	ptyComputeMaxHp	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:391:func_001188F0; Returns enemy-record maximum HP or party level/stat growth plus HP bonus, capped at 999.; source=reviewed-prior-QP15 [names_qp15.tsv]
@@ -455,6 +457,7 @@
 0x0011A318	ptyReadSignedRosterStatByte	inferred	R_Names31 B92
 0x0011A808	ptyApplySkillRecovery	inferred	R_Names31 B92
 0x0011AA58	datCalculateCommandBaseValue	inferred	R_Names31 B92
+0x0011AB38	ptyInitRuntime	inferred	U1
 0x0011AE60	evtGetIndexedEventRecordId	inferred	Returns index field from selected EventIndexRecord. [names_reviewed7.tsv]
 0x0011B260	ptyIsRosterEntryPresent	inferred	Returns whether the specified roster entry exists. [names_reviewed10.tsv]
 0x0011B2C0	ptyGetRoundedAveragePartyLevel	inferred	Averages levels of occupied party entries, rounding fractional results up and returning zero if empty. [names_reviewed15.tsv]
@@ -2288,6 +2291,7 @@
 0x001D5D20	btlCommandStartSoundTasks	inferred	starts effect tasks for the command (btlCreateCommandSoundTask 9/3), optionally state 0xC, marks task flag 0x200
 0x001D5E50	btlCommandPrintAndFetchOwner	inferred	prints "btl:command=%d" and copies the actor ownerId into the task for commands 1-3/7-8
 0x001D5EE8	btlProcessEligibleCommandTaskEffects	inferred	Spawns staged effects and runs hooks for an eligible command task. [names_reviewed13.tsv]
+0x001DA210	btlCommandGunChangeStart	inferred	TaskPurist
 0x001DB050	btlCommandTaskStartEffects	inferred	switch on task kind (10/13/14/18), spawns effect obj + scene-group action, dispatches state 0x19/0x1B [names_M50_BattleTwins.tsv]
 0x001DB258	btlCommandTaskReturnStart	inferred	debug print "return:player/enemy", spawns return sounds/effects, clears stateFlags 0x40000 [names_M50_BattleTwins.tsv]
 0x001DB440	btlCommandTaskReturnUpdate	inferred	waits for task kinds 0x3F/0x45 to finish, releases scene actor, dispatches state 0x1F [names_M50_BattleTwins.tsv]
@@ -3925,9 +3929,11 @@
 0x00279F70	mnuResetPanelAnimationFlags	inferred	Clears the panel animation transition flag range and sets bit 0x800.
 0x00279F90	mnuTransitionActivePanelAnimations	inferred	Walks 0x30-byte panel entries and queues their next state according to current state and requested mode.
 0x0027A080	mnuAdvanceMantraPanelAnim	inferred	animation state 6-9 frame counter with bitfield state at +0x0 bits 19-22
+0x0027A198	mnuStepAndDrawTimedMantraPanels	inferred	U1
 0x0027A4C0	mnuFindFreePanelSlot	inferred	Scans the kind's slot range in the panel pool for a slot with bit 8 clear
 0x0027A628	mnuFindPanelSlotById	inferred	Scans the kind's slot range for an active slot with a matching id
 0x0027A798	mnuQueuePanelAnimationTransition	inferred	Stores the next panel animation state with an optional delay, applying it immediately when the delay is zero.
+0x0027A800	mnuDrawMantraPanelCTransition	inferred	TaskPurist
 0x0027AF40	mnuResetMantraPulsePhase	inferred	Clears pulse counters and randomly selects an initial phase from the four phase slots. [names_reviewed21.tsv]
 0x0027C078	mnuRandomizeMantraPulseIconPhase	inferred	Initializes the pulse-icon animation phase from a short randomized phase table. [names_reviewed15.tsv]
 0x0027C108	mnuDrawOscillatingMantraOverlay	inferred	Advances phase with wraparound and uses a sine-derived fade to draw the overlay. [names_reviewed22.tsv]
@@ -4125,6 +4131,7 @@
 0x002A2A70	mnuReleaseSoundBufferLocked	inferred	Releases sound buffer while holding sound semaphore. [names_reviewed8.tsv]
 0x002A2AC0	mnuCreateTitleMenuTask	inferred	L13
 0x002A2BD0	mnuReleaseTitleMenuAssetsAndMarkClosed	inferred	Releases title menu resources and sprite handles, then marks the title menu closed. [names_reviewed15.tsv]
+0x002A2C28	mnuHandleTitleMenuEvent	inferred	TaskPurist
 0x002A3A70	mnuDestroyTitleMenuTask	inferred	Performs title menu cleanup and destroys the task literally named titleProc. [names_reviewed15.tsv]
 0x002A3AC0	mnuRestartRuntimeAfterViewer	inferred	Destroys secondary viewer world then restarts runtime task. [names_reviewed8.tsv]
 0x002A3AE8	mnuSpriteGraphicHandle	inferred	returns work->gfx[D_003E3790[index].gfx]: graphic handle of sprite table entry (8-byte entries {gfx,unk2,x,y})
@@ -5178,6 +5185,7 @@
 0x002FAD60	effAcquireSlotRecordWhenRuntimeFlagClear	inferred	Acquires the effect slot record only when a global runtime flag permits it. [names_reviewed16.tsv]
 0x002FB458	effSetActiveSlotColor	inferred	High: writes the packed color of the active EffectSlotNode80 used by the slot lifecycle and particle configuration paths. [names_qp9.tsv]
 0x002FB460	effSetActiveSlotOpacity	inferred	High: writes the slot opacity and forwards it to the retained record's indexed float callback. [names_qp9.tsv]
+0x002FB480	effApplySharedModelParameters	inferred	U3
 0x002FB790	effReleaseSharedResourceReference	inferred	Decrements resource reference count at +0x10, releases owned data at zero, then releases owner's handle at +0x47C.
 0x002FB840	effCloneEffectRequest	inferred	copies 0x44C-byte blob from source request into new work from func_002FB5C0 then bumps shared resource refcount
 0x002FB948	effShareReferenceCountedEffectObject	inferred	Copies an effect object pointer and increments its reference counter. [names_reviewed14.tsv]
@@ -5386,6 +5394,7 @@
 0x0030E160	sdfCounterAdvanceBoundedAnimationValue	inferred	Increments a bounded counter display animation value. [names_reviewed10.tsv]
 0x0030E180	sdfCounterStepDownAnimationValue	inferred	Subtracts two while the animation value is positive, otherwise clears it. [names_reviewed10.tsv]
 0x0030E1A0	mnuDrawAnimatedTransition	inferred	U1
+0x0030E390	fldDrawTransitionBackdrop	inferred	TaskPurist
 0x0030EA70	sdfCommitPendingVectorAndMarkChanged	inferred	Copies a pending vector into the active vector and sets its change flag. [names_reviewed17.tsv]
 0x0030EAA8	fldUpdateMapRequestQueues	inferred	U2
 0x0030ECC0	fldDrawSelectedMapMarker	inferred	U3
@@ -5501,6 +5510,7 @@
 0x0031A690	mnuInitializeHighScoreState	inferred	confidence=high; src/dds2/game/code_0031A638.c:22:func_0031A690; Ensures flag-selected high-score minimum and initializes work score fields.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A770	mnuUpdateHighScoreFlag	inferred	confidence=high; src/dds2/game/code_0031A638.c:47:func_0031A770; Commits improved work score to global high score and sets/clears new-high-score flag.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A920	mnuTickScoreProgressState	inferred	readability/matching review (QP16)
+0x0031AA10	mnuAdvanceShootingRoundPhase	inferred	U1
 0x0031AD00	itfDispatchObjectFadeSequenceMode	inferred	confidence=high; src/dds2/game/code_0031AD00.c:func_0031AD00; Chooses initial fade setup, sequence-offset drawing, glyph-triplet drawing or a paired sequence from object mode. [names_qp9.tsv]
 0x0031B1F8	dds3InitSoundSlotPool	inferred	Releases an existing pool, allocates and zeros 100 timed sound-sequence slots.
 0x0031B268	dds3ReleaseSoundSlotPool	inferred	Releases the global sound slot pool handle and clears its pointer.
@@ -5665,6 +5675,7 @@
 0x00326B00	sdfCrossNormalizedVectors	inferred	confidence=high; src/dds2/game/code_00324DF8.c:func_00326B00; Normalizes copied input vectors and computes their three-component cross product. [names_qp9.tsv]
 0x00327AC8	sdfMat4Transpose	inferred	Copies all sixteen matrix entries with row/column indices exchanged using an alias-safe temporary.
 0x00327BD8	sdfVectorTransformByMatrix	inferred	vec times the 3x3 part of a 4x4 matrix
+0x00327C80	sdfMatrixToQuaternion	inferred	U2
 0x003282E8	sdfCreateSemaphoreFromOptions	inferred	Populates semaphore initial count, option and maximum before calling the SDK CreateSema. [names_reviewed22.tsv]
 0x00328318	sdfCreateThread	inferred	fills sceThreadParam and calls CreateThread
 0x00328390	sdfCreateThreadWithAllocatedWorkspace	inferred	Allocates the encoded workspace before creating a thread. [names_reviewed11.tsv]

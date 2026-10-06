@@ -145,7 +145,7 @@ extern u32 mnuMantraSpriteSlots[12];
 /* The panel pool allocates 48-byte records shared by animation and sprite controls. */
 typedef struct MantraPanelAnimation {
     /* Packed control word: mnuSpawnPanelSlotA uses LW/SW at 0x279CAC/0x279CE8
-     * and SB at 0x279CF0; func_0027A198 dispatches the kind with LBU at 0x27A254. */
+     * and SB at 0x279CF0; mnuStepAndDrawTimedMantraPanels dispatches the kind with LBU at 0x27A254. */
     union {
         u32 flags;
         struct {
@@ -2913,7 +2913,7 @@ s32 mnuAdvanceMantraPanelAnim(s32 unused, MantraPanelAnimation *panel) {
 }
 
 /* Update slot lifetimes, then draw the active animations at the caller's alpha. */
-s32 func_0027A198(s16 x, s16 y, u32 flags, s32 alpha, MantraPanelPool *pool, u32 packet) {
+s32 mnuStepAndDrawTimedMantraPanels(s16 x, s16 y, u32 flags, s32 alpha, MantraPanelPool *pool, u32 packet) {
     MantraPanelAnimation *panel;
     f32 opacity;
     s32 i;
@@ -3029,7 +3029,7 @@ extern void func_0027AFE0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *objec
 /* Mantra panel C transition / appear draw: kinds 6..9 fade the panel in or out over its frame counter, kind 0
  * draws it steady, and kind 1 plays the 60-frame appear (panel fade-in, pulsing inner glow, wave flash and three
  * orbiting sparks) and reports completion. */
-s32 func_0027A800(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     MantraPanelAnimation *panel = (MantraPanelAnimation *)object;
     f32 scale;
     f32 wave;

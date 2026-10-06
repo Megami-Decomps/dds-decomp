@@ -513,6 +513,7 @@
 0x00114FE0	effObjCreateBillboardInWorld	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:294:func_00114FE0; Creates an effect object, configures supplied billboard/vector, initializes ownership and links it to current world node.; source=revalidated-unapplied-names_R_Names31.tsv:5 [names_qp12_apply.tsv]
 0x001152B0	effObjCreateFromResolvedResource	inferred	resolves resource identifier before invoking effect constructor [names_reviewed5.tsv]
 0x00115318	effObjReplaceActiveEventNode	inferred	releases previous event node and creates new one in active state [names_reviewed5.tsv]
+0x00115478	effObjCreateMagatuhiForKind	inferred	Lite3
 0x00115858	effObjCreateKindFromResource	inferred	resolves resource and creates effect of requested kind [names_reviewed5.tsv]
 0x001158B8	effObjGetReadyData	inferred	returns effect data only for kind seven in state six [names_reviewed5.tsv]
 0x001158F0	effObjLoadReadyParameterVector	inferred	loads parameter vector into VU register only when effect is ready [names_reviewed5.tsv]
@@ -789,6 +790,7 @@
 0x00126110	fldRunPendingSceneAction	inferred	Invokes the stored scene action when nonzero and resets it afterwards. [names_reviewed5.tsv]
 0x00126140	fldConsumeNextSceneRequest	inferred	Copies pending scene identifiers to outputs with the world base applied and clears both source slots. [names_reviewed5.tsv]
 0x00126198	fldCreateDummyMatter	inferred	fld field scene and resources in game/code_0011D3A0.c
+0x001270A8	fldCreateResourceScriptObjects	inferred	L13
 0x00127588	fldLoadSceneRequestFiles	inferred	copies four file-name pointers from the request record, then formats area directory + name and loads each file (func_002EB028) when scene state < 500 [names_M72_FieldLarge.tsv]
 0x00127708	fldProcessFieldRequest	inferred	Uses request words to invoke the field setup routine and creates the player for non-special scene states; DDS2 twin 00129CC0.
 0x00127788	fldProcessFieldRequestAlternate	inferred	Passes field request entries to func_00126A30 with mode 1; normal path passes mode 0. [names_R_FuncNames6.tsv]
@@ -2703,6 +2705,7 @@
 0x001C9F58	btlResetCommandIndexWork	inferred	Resets command index work and clears the actor selected index. [names_reviewed8.tsv]
 0x001CA158	btlDispatchEffectCommandWhenActorReady	inferred	Starts the matching effect object and dispatches the command when its actor is ready. [names_reviewed14.tsv]
 0x001CE0C0	btlMarkLinkedActorStatusFlag	inferred	Sets the actor state bit reached through the linked actor pointer. [names_reviewed17.tsv]
+0x001CE0D8	btlCommandGunChangeStart	inferred	TaskPurist
 0x001CEB80	btlCommandTaskStartEffects	inferred	Mapped DDS2 counterpart already has established name btlCommandTaskStartEffects; DDS1 body independently shows matching behavior (0.85 match). [names_reviewed19.tsv]
 0x001CED58	btlCommandTaskReturnStart	inferred	Mapped DDS2 counterpart already has established name btlCommandTaskReturnStart; DDS1 body independently shows matching behavior (1.00 match). [names_reviewed19.tsv]
 0x001CEFA8	btlStartLinkedActorEffectTask	inferred	Mapped DDS2 counterpart already has established name btlStartLinkedActorEffectTask; DDS1 body independently shows matching behavior (0.84 match). [names_reviewed19.tsv]
@@ -3477,6 +3480,7 @@
 0x00214588	mnuDrawMenuFrameSizedToRows	inferred	Draws a menu frame sized by row count; DDS2 uses a generic MenuList rather than a battle-only type. [names_reviewed10.tsv]
 0x00214618	mnuDrawSelectableMenuRows	inferred	Draws a menu frame and selectable rows; DDS2 uses a generic MenuList rather than a battle-only type. [names_reviewed10.tsv]
 0x00214768	btlInitDrawTables	inferred	fills three id tables in battle state
+0x002162E0	btlApplyPartySetupOverride	inferred	Fam
 0x002166A8	btlInitializeCommandSemaphoreSlots	inferred	Creates a semaphore and clears both command slot arrays. [names_reviewed8.tsv]
 0x00216708	btlFindGroupedEntity	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00216738	btlGroupContainsId	inferred	btl battle control and actor operations in game/code_001FF030.c
@@ -4312,6 +4316,7 @@
 0x00257C10	mnuDrawMantraPulseFrame	inferred	Emits multiple fixed-point Mantra draw stages around the pulsing frame sprite; established DDS2 twin agrees. [names_reviewed19.tsv]
 0x00257E78	mnuCopySceneCoordinates	inferred	Copies the signed scene-entry X/Y metadata into ten coordinate pairs.
 0x00257EB0	mnuAdvanceWrappingFrame	inferred	Increments a frame counter and wraps it to zero after frame 60.
+0x0025A680	mnuDrawMantraEntryStatus	inferred	U2
 0x0025B0F0	mnuDrawAnimatedCurrencyCounter	inferred	U3
 0x0025B7B0	mnuReleaseOptionalDrawAllocation	inferred	Releases a nonnull owned allocation passed to the menu work callback. [names_reviewed17.tsv]
 0x0025B7D8	mnuCreateSpriteResource	inferred	Allocates a 0x48-byte sprite record with owner, sprite, variant and randomized lifetime.

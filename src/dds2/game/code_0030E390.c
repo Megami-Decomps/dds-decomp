@@ -100,7 +100,7 @@ extern void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 image
 
 /* Field transition backdrop at `progress` (0..1): a corner-faded panel, the style's caption, the frame and the
  * sliding banner. */
-void func_0030E390(f32 progress) {
+void fldDrawTransitionBackdrop(f32 progress) {
     f32 alpha;
     f32 fade;
     s32 depth = 0x54; /* retail keeps the shared draw depth in s0 across every call */

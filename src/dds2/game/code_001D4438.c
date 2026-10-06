@@ -1467,7 +1467,7 @@ extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *unit, s32 ability);
  * Gun-change command (slot 0x11): once no blocking tasks remain, swap the unit to its gun model with the hooked
  * sound, refresh linked allies and reload their models, start the gun effects, and continue to state 0x19/0x1B;
  * a unit already holding the gun only restores its motion, swaps back and continues to 0x1C/0x1B. */
-s32 func_001DA210(SceneTask *task) {
+s32 btlCommandGunChangeStart(SceneTask *task) {
     BtlUnit *unit;
     BtlState *state;
     BtlUnit *other;

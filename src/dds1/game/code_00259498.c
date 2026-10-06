@@ -155,7 +155,7 @@ extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 /* Retail clears four prerequisite flag words at +0x84, then stores results
  * at +0xE4 without reading them; preserve this original write-only work. */
-void func_0025A680(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
+void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
                    MantraPulseEntry *entry, s32 context) {
     u32 prerequisiteFlags[4];
     DspScene *scene;

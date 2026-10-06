@@ -468,7 +468,7 @@ extern f64 func_003532A0(f64);
 
 /* Convert a rotation basis to quaternion components, choosing the largest
  * diagonal when the trace branch is ill-conditioned. */
-void func_00327C80(f32 *out, SdfMat4 *matrix) {
+void sdfMatrixToQuaternion(f32 *out, SdfMat4 *matrix) {
     SdfMat4 copy;
     f32 quaternion[4];
     f32 trace;
