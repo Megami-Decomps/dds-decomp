@@ -112,6 +112,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32
 extern void func_0035C860(char *, char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern char D_00421588[];
+extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
 void evtCreateEventScriptProcess(s32 eventId) {
