@@ -264,7 +264,112 @@ void effAdvanceVectorRecord(EffRingWork *work, s32 index) {
     particle->angle = particle->angle + work->increment;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F7B0);
+extern u32 effBlendColor(u32, u32, f32);
+extern void effDrawTransformedRecordPool(EffRecordPool *);
+
+void func_0016F7B0(EffRingWork *work)
+{
+    s32 index;
+    s32 count;
+    EffRingParticle *part;
+    s32 lifetime;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 randomRange;
+    s32 restart;
+    s32 tintColor;
+    EffRecordPool *handle;
+    f32 heightDelta;
+    f32 delta;
+    f32 progress;
+    f32 factor;
+    f32 start;
+    f32 radiusEnd;
+    f32 upStart;
+    f32 acrossStart;
+    f32 upEnd;
+    f32 acrossEnd;
+    f32 normalEnd;
+
+    part = work->vertices;
+    count = work->count;
+    lifetime = work->duration;
+    fadeIn = work->fadeIn;
+    fadeOut = work->fadeOut;
+    restart = work->respawn;
+    randomRange = work->spread;
+    tintColor = work->color;
+    heightDelta = work->param4C - work->param48;
+    progress = 1.0f;
+    if (lifetime > 0) {
+        progress = (f32)work->updateCount / (f32)lifetime;
+    }
+    start = work->param38;
+    radiusEnd = work->param3C;
+    delta = radiusEnd - start;
+    work->unk68 = start + delta * progress;
+    if (start > 0.0f) {
+        factor = radiusEnd / start;
+    } else {
+        factor = radiusEnd;
+    }
+    upStart = work->param30;
+    acrossStart = work->param34;
+    upEnd = upStart * factor;
+    acrossEnd = acrossStart * factor;
+    start = work->param40;
+    normalEnd = work->param44;
+    delta = upEnd - upStart;
+    work->unk70 = upStart + delta * progress;
+    delta = acrossEnd - acrossStart;
+    work->unk74 = acrossStart + delta * progress;
+    delta = normalEnd - start;
+    work->unk6C = start + delta * progress;
+
+    for (index = 0; index < count; index++, part++) {
+        s32 age = part->age;
+        s32 color;
+
+        if (age == 0) {
+            part->basisFactor = work->param48;
+            effBuildOrbitingArcQuadPoints(work, index);
+            effFlashWriteRingColorSlots(work, index, 0);
+            part->color = 0x80808080;
+        } else if (age >= lifetime) {
+            if (restart != 0) {
+                part->age = ~(effMiscRand(D_0034DF38) % randomRange);
+            }
+            color = 0;
+            effFlashWriteRingColorSlots(work, index, color);
+        } else if (age > 0) {
+            progress = (f32)age / (f32)lifetime;
+            part->basisFactor = heightDelta * progress + work->param48;
+            effAdvanceVectorRecord(work, index);
+            effBuildOrbitingArcQuadPoints(work, index);
+            if (part->age < fadeIn && fadeIn != 0) {
+                factor = (f32)part->age / (f32)fadeIn;
+            } else if (fadeOut >= lifetime - part->age && fadeOut != 0) {
+                factor = (f32)(lifetime - part->age) / (f32)fadeOut;
+            } else {
+                factor = 1.0f;
+            }
+            color = effMultiplyPackedColors(effBlendColor(0, part->color, factor), tintColor);
+            effFlashWriteRingColorSlots(work, index, color);
+        }
+        part->age = part->age + 1;
+    }
+    if (work->updateCount == lifetime) {
+        work->updateCount = 0;
+    } else {
+        work->updateCount++;
+    }
+    handle = work->recordPool;
+    handle->origin[0] = work->origin[0];
+    handle->origin[1] = work->origin[1];
+    handle->origin[2] = work->origin[2];
+    handle->scale = work->scale;
+    effDrawTransformedRecordPool(handle);
+}
 
 extern EffRecordPool *func_0016FB08(u32 count);
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FB08);
