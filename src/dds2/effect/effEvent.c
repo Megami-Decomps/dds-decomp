@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 
@@ -81,27 +82,7 @@ typedef struct EffBlurTemplate {
     u32 resourceWord;
 } EffBlurTemplate;
 
-typedef struct EffBlurScatterParams {
-    s32 count;
-    s32 delaySpread;
-    f32 angleStep;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s32 x;
-    s32 y;
-    s32 positionSpread;
-    s32 size;
-} EffBlurScatterParams;
 
-typedef struct EffBlurScatterSlot EffBlurScatterSlot;
-typedef struct EffBlurScatterWork {
-    EffBlurScatterParams params;
-    u32 sourceHandle;
-    u32 allocation;
-    EffBlurScatterSlot *slots;
-} EffBlurScatterWork;
 
 typedef struct EffBlurScaleParams {
     s32 count;
@@ -163,7 +144,6 @@ extern u8 D_003B22A0[];
 
 extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
 
-extern EffBlurScatterWork *func_0018EBC8(void *arg);
 
 extern EffTemplate *effCloneResourceTemplate(void *arg);
 
@@ -203,7 +183,6 @@ extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 
 extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
 
-extern void func_0018ECD0(EffBlurScatterWork *arg);
 
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 
