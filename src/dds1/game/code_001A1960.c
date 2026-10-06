@@ -5174,7 +5174,69 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001C27B0);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3220);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001C2938);
+void func_001C2938(s32 bank, s32 index) {
+    if (D_003BD840[bank]->secondaryState[index] == 8) {
+        D_003BD840[bank]->colorAdjustments[index][0] -= 8;
+        D_003BD840[bank]->colorAdjustments[index][0] = D_003BD840[bank]->colorAdjustments[index][0] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][0] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][0];
+        D_003BD840[bank]->colorAdjustments[index][1] -= 8;
+        D_003BD840[bank]->colorAdjustments[index][1] = D_003BD840[bank]->colorAdjustments[index][1] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][1] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][1];
+        D_003BD840[bank]->colorAdjustments[index][2] -= 8;
+        D_003BD840[bank]->colorAdjustments[index][2] = D_003BD840[bank]->colorAdjustments[index][2] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][2] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][2];
+        D_003BD840[bank]->colorAdjustments[index][3] -= 8;
+        D_003BD840[bank]->colorAdjustments[index][3] = D_003BD840[bank]->colorAdjustments[index][3] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][3] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][3];
+        if (D_003BD840[bank]->colorAdjustments[index][0] <= 0) D_003BD840[bank]->secondaryState[index] = 0;
+    }
+    if (D_003BD840[bank]->secondaryState[index] == 7) {
+        D_003BD840[bank]->colorAdjustments[index][0] -= 24;
+        D_003BD840[bank]->colorAdjustments[index][0] = D_003BD840[bank]->colorAdjustments[index][0] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][0] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][0];
+        if (D_003BD840[bank]->colorAdjustments[index][0] <= 0) D_003BD840[bank]->secondaryState[index]++;
+    }
+    if ((u8)(D_003BD840[bank]->secondaryState[index] - 6) < 2) {
+        D_003BD840[bank]->colorAdjustments[index][1] -= 27;
+        D_003BD840[bank]->colorAdjustments[index][1] = D_003BD840[bank]->colorAdjustments[index][1] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][1] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][1];
+    }
+    if ((u8)(D_003BD840[bank]->secondaryState[index] - 5) < 3) {
+        D_003BD840[bank]->colorAdjustments[index][3] -= 29;
+        D_003BD840[bank]->colorAdjustments[index][3] = D_003BD840[bank]->colorAdjustments[index][3] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][3] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][3];
+    }
+    if ((u8)(D_003BD840[bank]->secondaryState[index] - 4) < 4) {
+        D_003BD840[bank]->colorAdjustments[index][2] -= 32;
+        D_003BD840[bank]->colorAdjustments[index][2] = D_003BD840[bank]->colorAdjustments[index][2] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][2] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][2];
+    }
+    switch (D_003BD840[bank]->secondaryState[index]) {
+    case 3:
+        D_003BD840[bank]->colorAdjustments[index][2] += 64;
+        D_003BD840[bank]->colorAdjustments[index][2] = D_003BD840[bank]->colorAdjustments[index][2] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][2] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][2];
+        if (D_003BD840[bank]->colorAdjustments[index][2] >= 127) D_003BD840[bank]->secondaryState[index]++;
+        break;
+    case 4:
+        D_003BD840[bank]->colorAdjustments[index][3] += 64;
+        D_003BD840[bank]->colorAdjustments[index][3] = D_003BD840[bank]->colorAdjustments[index][3] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][3] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][3];
+        if (D_003BD840[bank]->colorAdjustments[index][3] >= 127) D_003BD840[bank]->secondaryState[index]++;
+        break;
+    case 5:
+        D_003BD840[bank]->colorAdjustments[index][1] += 64;
+        D_003BD840[bank]->colorAdjustments[index][1] = D_003BD840[bank]->colorAdjustments[index][1] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][1] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][1];
+        if (D_003BD840[bank]->colorAdjustments[index][1] >= 127) D_003BD840[bank]->secondaryState[index]++;
+        break;
+    case 6:
+        D_003BD840[bank]->colorAdjustments[index][0] += 64;
+        D_003BD840[bank]->colorAdjustments[index][0] = D_003BD840[bank]->colorAdjustments[index][0] <= 0 ? 0 : D_003BD840[bank]->colorAdjustments[index][0] > 127 ? 127 : D_003BD840[bank]->colorAdjustments[index][0];
+        if (D_003BD840[bank]->colorAdjustments[index][0] >= 127) D_003BD840[bank]->secondaryState[index]++;
+        break;
+    case 2:
+        D_003BD840[bank]->secondaryState[index]++;
+        break;
+    case 1:
+        D_003BD840[bank]->colorAdjustments[index][0] = 127;
+        D_003BD840[bank]->colorAdjustments[index][1] = 127;
+        D_003BD840[bank]->colorAdjustments[index][2] = 127;
+        D_003BD840[bank]->colorAdjustments[index][3] = 127;
+        D_003BD840[bank]->secondaryState[index]++;
+        break;
+    }
+}
+
 
 void fldScaleSceneCoordinateRecord(s32 arg0, s32 arg1) {
     s32 temp_v0;
