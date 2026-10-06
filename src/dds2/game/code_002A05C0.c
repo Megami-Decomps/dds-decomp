@@ -43,9 +43,9 @@
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern u64 scrReadIntParameter(u64);
+extern s32 scrReadIntParameter(s32);
 
-extern u64 sdfSoundIsCommandBusy(void);
+extern u32 sdfSoundIsCommandBusy(void);
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 
@@ -342,7 +342,7 @@ s32 mnuGetTitleEffectFrameCounter(void) {
 }
 
 u32 sndOpStartTrackFromScript(void) {
-    u64 sequence;
+    s32 sequence;
 
     sequence = scrReadIntParameter(0);
     sndStartTrackDefault(sequence);
@@ -350,7 +350,7 @@ u32 sndOpStartTrackFromScript(void) {
 }
 
 u32 sndOpSetTrackDefaultVolumePan(void) {
-    u64 sequence;
+    s32 sequence;
 
     sequence = scrReadIntParameter(0);
     sndSetSequenceVolumePan(sequence, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);
@@ -378,7 +378,7 @@ u32 sndOpStopNamedPlayback(void) {
 }
 
 u32 sndOpPushCommandBusyState(void) {
-    u64 soundBusy;
+    u32 soundBusy;
 
     soundBusy = sdfSoundIsCommandBusy();
     scrSetIntegerReturnValue(soundBusy);

@@ -105,13 +105,13 @@ extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
 
-extern u64 scrReadIntParameter(u64);
+extern s32 scrReadIntParameter(s32);
+extern u32 sdfSoundIsCommandBusy(void);
 
 extern u32 D_003BC5B0[2];
 
 extern u32 D_003BC5B8;
 
-extern u64 func_002F5990();
 
 typedef struct MemBlock MemBlock;
 
@@ -337,7 +337,7 @@ s32 mnuGetTitleEffectFrameCounter(void) {
 }
 
 u32 sndOpStartTrackFromScript(void) {
-    u64 sequence;
+    s32 sequence;
 
     sequence = scrReadIntParameter(0);
     sndStartTrackDefault(sequence);
@@ -345,7 +345,7 @@ u32 sndOpStartTrackFromScript(void) {
 }
 
 u32 sndOpSetTrackDefaultVolumePan(void) {
-    u64 sequence;
+    s32 sequence;
 
     sequence = scrReadIntParameter(0);
     sndSetSequenceVolumePan(sequence, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);

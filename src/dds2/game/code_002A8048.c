@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u64 scrReadIntParameter(u64);
+extern s32 scrReadIntParameter(s32);
 
 extern u16 mnuMovieTaskState;
 
@@ -74,7 +74,7 @@ extern void sdfCreatePacketA(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern s32 mnuMovieViewer();
 
-void mnuRequestIndexedMovieResource();
+void mnuRequestIndexedMovieResource(s32 index);
 
 void mnuStopMovieDrawTask(void);
 
@@ -91,10 +91,10 @@ void mnuCreateMovieManagerTask(void) {
 }
 
 u32 mnuScriptRequestMovieByIndex(void) {
-    u64 value;
+    s32 movieIndex;
 
-    value = scrReadIntParameter(0);
-    mnuRequestIndexedMovieResource(value);
+    movieIndex = scrReadIntParameter(0);
+    mnuRequestIndexedMovieResource(movieIndex);
     mnuMovieShutdownCounter = 0;
     return 1;
 }
