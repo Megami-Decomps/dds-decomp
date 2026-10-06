@@ -16,7 +16,8 @@
 #define EFF_SLOT_BYTES 0x38
 #define EFF_SLOT_HEADER_BYTES 0xC
 
-/* Directory entry filled by the effect data directory iterator. */
+/* The SDK directory completion copies 0x140 bytes and one trailing word.
+ * Names begin at 0x40; this transmitted record has ordinary word alignment. */
 typedef struct EffDirEnt {
     u32 flags;      /* 0x00: bit 12 cleared */
     u8 pad04[0x3C]; /* 0x04 */
@@ -340,10 +341,67 @@ typedef struct EffResourceList {
 typedef char EffResourceList_size_must_be_12[(sizeof(EffResourceList) == 12) ? 1 : -1];
 typedef char EffResourceListNode_size_must_be_60[(sizeof(EffResourceListNode) == 60) ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
+EffResourceList *func_0018CF98(char *path, s32 flags) {
+    EffDirEnt entry;
+    s32 directory;
+    EffResourceList *list;
+    EffResourceListNode *node;
+    EffResourceListNode *tail;
+    s32 length;
+    s32 type;
+    directory = effOpenDataDir(path);
+    list = sdfAllocSizeClassBlock(sizeof(*list));
+    if (sdfPfsDebugMode != 0) {
+        list->directoryPath = sdfAllocSizeClassBlock(strlen(path) + 1);
+        strcpy(list->directoryPath, path);
+    } else {
+        list->directoryPath = sdfAllocSizeClassBlock(strlen(path) + 1);
+        strcpy(list->directoryPath, path);
+    }
+    tail = NULL;
+    list->head = NULL;
+    list->resourceCount = 0;
+    while ((length = effNextDataDirEntry(directory, &entry)) > 0) {
+        if ((entry.flags & 0xF000) == 0x1000) continue;
+        if (length < 5) continue;
+        if (length >= 0x2F) continue;
+        if ((flags & 0x10 ? entry.name[length - 3] : entry.name[length - 4]) != '.') continue;
+        type = 0;
+        if ((flags & 1) &&
+            ((entry.name[length-3]=='t' && entry.name[length-2]=='m' && entry.name[length-1]=='x') ||
+             (entry.name[length-3]=='T' && entry.name[length-2]=='M' && entry.name[length-1]=='X'))) type = 1;
+        else if ((flags & 2) &&
+            ((entry.name[length-3]=='p' && entry.name[length-2]=='2' && entry.name[length-1]=='a') ||
+             (entry.name[length-3]=='P' && entry.name[length-2]=='2' && entry.name[length-1]=='A'))) type = 2;
+        else if ((flags & 4) &&
+            ((entry.name[length-3]=='d' && entry.name[length-2]=='3' && entry.name[length-1]=='p') ||
+             (entry.name[length-3]=='D' && entry.name[length-2]=='3' && entry.name[length-1]=='P'))) type = 4;
+        else if ((flags & 8) &&
+            ((entry.name[length-3]=='b' && entry.name[length-2]=='e' && entry.name[length-1]=='d') ||
+             (entry.name[length-3]=='B' && entry.name[length-2]=='E' && entry.name[length-1]=='D'))) type = 8;
+        else if ((flags & 0x10) &&
+            ((entry.name[length-2]=='p' && entry.name[length-1]=='b') ||
+             (entry.name[length-2]=='P' && entry.name[length-1]=='B'))) type = 0x10;
+        else if ((flags & 0x20) &&
+            ((entry.name[length-3]=='p' && entry.name[length-2]=='c' && entry.name[length-1]=='f') ||
+             (entry.name[length-3]=='P' && entry.name[length-2]=='C' && entry.name[length-1]=='F'))) type = 0x20;
+        if (type == 0) continue;
+        node = sdfAllocSizeClassBlock(sizeof(*node));
+        node->type = type;
+        strcpy(node->name, entry.name);
+        if (tail != NULL) tail->next = node;
+        else list->head = node;
+        node->next = NULL;
+        node->previous = tail;
+        list->resourceCount++;
+        tail = node;
+    }
+    effRunIfEnabled(directory);
+    return list;
+}
 
-/* Free linked nodes, then the root's separate payload and the root itself.
-   Save each successor before freeing; node payloads are not separately released here. */
+/* Free filename nodes, the copied directory path, then the list root.
+   Each filename is inline; save the next link before releasing its node. */
 void effFreeWorkList(EffResourceList *root) {
     EffResourceListNode *node = root->head;
 
