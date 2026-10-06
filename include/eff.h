@@ -102,7 +102,8 @@ typedef struct EffWork {
     u8 unk18[8];
     u32 unk20;
     u32 unk24;
-    u8 unk28[0x10];
+    u8 unk28[0xC];
+    struct EffWork *prev; /* Previous node in the file-resource chain (+0x34). */
     void *next;
     u32 textureHandle; /* Retained texture reference. */
 } EffWork;
