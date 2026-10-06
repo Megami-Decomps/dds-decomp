@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fld_inf.h"
+extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
 #include "evt_unit.h"
 #include "fpu.h"
@@ -874,7 +876,7 @@ extern void func_00288C50(u32);
 extern void fldSetNpcPalette();
 extern void fldUploadSkyBuffer();
 extern void fldCopyActorWaypointTable();
-extern void fldCopyInfoTable();
+extern void fldCopyInfoTable(const void *);
 extern u32 sdfMemoryGetBlockSize(u32);
 extern u32 sdfMemoryGetBlockAddress(u32);
 extern void fldSetSceneRecordChunk(u32, u32);
@@ -907,7 +909,7 @@ void fldLoadAreaPackedResources(void) {
              entry = entry->next) {
             switch (entry->kind) {
             case 1:
-                fldCopyInfoTable(entry->payload);
+                fldCopyInfoTable((const void *)entry->payload);
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 2:
@@ -4205,6 +4207,17 @@ s32 fldGetCurrentSceneSelectionId(void) {
     return D_003C9518[slot * 160];
 }
 
+typedef struct FldAreaState {
+    u8 pad0[0x14];
+    s32 floor;
+    u8 pad18[0xEC];
+    s16 unk104;
+} FldAreaState;
+
+extern s32 D_003BAE38;
+extern const char D_00332DF0[];
+extern s32 strcmp(const char *, const char *);
+
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C600);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C7F8);
@@ -4223,14 +4236,14 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
-extern u8 D_00332E30[];
+
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
-extern u8 D_00332E30[];
+
 extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 void fldLoadInfoTable(s32 field) {
     char path[64];
@@ -4240,13 +4253,13 @@ void fldLoadInfoTable(s32 field) {
         fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, D_003A01F8, directory, field);
         command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, D_00332E30, 0x3B80);
+        sdfDevQueueReadAndWait(command, &D_00332E30, sizeof(D_00332E30));
         sdfDevWaitThenReleaseCommandState(command);
     }
 }
 
 void fldCopyInfoTable(const void *source) {
-    memcpy(D_00332E30, source, 0x3B80);
+    memcpy(&D_00332E30, source, sizeof(D_00332E30));
 }
 
 extern s32 D_003BAE40;
@@ -4255,12 +4268,6 @@ extern u8 *fldFindActorEntryByName(const char *);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D650);
 
 extern s32 mdlFlagTest(s32);
-typedef struct FldAreaState {
-    u8 pad0[0x14];
-    s32 floor;
-    u8 pad18[0xEC];
-    s16 unk104;
-} FldAreaState;
 extern u8 D_003369B0[];
 extern u8 D_003369C0[];
 extern u8 D_003369D0[];
