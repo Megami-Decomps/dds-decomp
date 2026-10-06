@@ -8,6 +8,17 @@ struct EffNode;
 
 struct EffRequest;
 
+/* Packed position/basis query; the final word is a signed extent override. */
+typedef struct EffectVectorRequest {
+    u8 kind;
+    u8 count;
+    u8 size;
+    u8 pad_03;
+    s32 unk04;
+} EffectVectorRequest;
+
+typedef char EffectVectorRequest_size_must_be_8[(sizeof(EffectVectorRequest) == 8) ? 1 : -1];
+
 /* Resource jobs retain a destination slot until their request completes. */
 typedef struct EffectListNode {
     u32 state;
