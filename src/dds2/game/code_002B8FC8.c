@@ -386,9 +386,9 @@ s32 mnuStartPanelDispatch(s32 callback);
 
 s32 mnuStartPanelExit(s32 callback);
 
-/* Clear a selected party record's five-byte stat group and companion flag,
- * then recalculate the party's maximum HP and MP. */
-void mnuClearPartySelectionValues(u32 context, s32 selection);
+/* Clear the selected item's five stat bonuses and its requirement count,
+ * then recalculate the party record's maximum HP and MP. */
+void mnuClearPartySelectionValues(DatPartyRecord *entry, s32 selection);
 
 u32 mnuEnterSlotLabel(void);
 
@@ -524,9 +524,9 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
 
-void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 unused, s32 spriteFlags);
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, s32 packedGroup, s32 group, s32 unused, s32 spriteFlags);
 
-void mnuDrawProfilePanelAndSprite(u32 entry, u32 unused1, u32 group, u32 resource,
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, u32 group, u32 resource,
                                     u32 unused4, u32 spriteFlags);
 
 
@@ -600,10 +600,10 @@ u32 mnuClearSkillSelectionImageState(void);
 
 /* Narrow the ID to its native 16-bit skill code before duplicate detection.
  * Insert only missing skills, then recompute maxima and clear the script flag. */
-void mnuAddPartySkillIfMissing(s32 partyEntry, s32 skillId, s32 skillSlot);
+void mnuAddPartySkillIfMissing(DatPartyRecord *partyEntry, s32 skillId, s32 skillSlot);
 
 /* Clear one skill slot, retaining the native short-arity maxima recomputation. */
-void mnuClearPartySkillSlot(s32 partyEntry, s32 skillSlot);
+void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot);
 
 /* Open the selected skill's popup or cancel, then process list navigation.
  * Native list reads precede the late window guard; preserve that ordering. */
@@ -611,7 +611,7 @@ void mnuCampMenuHandleInput(s32 callback);
 
 
 
-void mnuSwapPartySkillSlots(s32 party, s32 firstSlot, s32 secondSlot);
+void mnuSwapPartySkillSlots(DatPartyRecord *party, s32 firstSlot, s32 secondSlot);
 
 /* First confirm stores a slot; a different second slot swaps and rebuilds.
  * Cancel clears the saved slot, opening the exit popup only if none was saved. */
@@ -676,12 +676,9 @@ void mnuDrawSelectionLabel(u16 id);
 
 
 
-typedef struct PtyFrontlineSlot {
-    u16 flags;          /* 0x00: bit 0 present, bit 1 frontline */
-} PtyFrontlineSlot;
 
 /* Collect up to max pointers to occupied, frontline party slots. */
-void mnuCollectFrontlinePartySlots(s32 **out, s32 max);
+void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max);
 
 s32 mnuHasAvailableSlotResource(s32 id);
 
