@@ -348,9 +348,14 @@ void evtCreateSkyTask(void) {
     kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", evtUpdateFrameVariableTask);
+/* Frame-variable task update: polls the parent task's user value each frame. */
+s32 evtUpdateFrameVariableTask(KwlnTask *task) {
+    u8 unused[16]; /* retail frame 0x20: unused local storage */
 
-extern s32 evtUpdateFrameVariableTask();
+    kwlnTaskGetUserValue(task->parent);
+    return 0;
+}
+
 extern char D_00423380[]; /* "FrameVar" */
 
 void evtCreateFrameVariableTask(void) {
