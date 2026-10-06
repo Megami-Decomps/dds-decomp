@@ -1,7 +1,8 @@
 #include "common.h"
 #include "kwln.h"
+#include "sdf.h"
 
-extern u32 itfLoadTextureFromAsset(u32);
+extern SdfTex *itfLoadTextureFromAsset(const char *);
 
 extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
@@ -108,9 +109,9 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     return task;
 }
 
-typedef struct {
+typedef struct EventContext {
     u32 flags; /* 0x00: bit 0 toggled without disturbing the other bits */
-    u32 value; /* 0x04 */
+    SdfTex *texture;
 } EventContext;
 
 /* Flag operations act on the scheduler task's user-value context. */
@@ -137,15 +138,12 @@ void evtDestroyTaskHierarchy(u32 task) {
 EventContext *evtAllocateContext(s32 *owner) {
     EventContext *context = (EventContext *)sdfAllocSizeClassBlock(8);
     context->flags = 0;
-    context->value = 0;
+    context->texture = NULL;
     return context;
 }
 
-void evtSetConvertedContextValue(EventContext *context, u32 value) {
-    u32 result;
-
-    result = itfLoadTextureFromAsset(value);
-    context->value = result;
+void evtSetConvertedContextValue(EventContext *context, const char *path) {
+    context->texture = itfLoadTextureFromAsset(path);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00234C18", D_003ADDB0);
