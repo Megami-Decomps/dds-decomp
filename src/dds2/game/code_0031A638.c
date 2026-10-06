@@ -138,9 +138,8 @@ void mnuTickScoreProgressState(MnuShootingWork *work) {
 
 extern void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration);
 extern void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration);
-extern void itfSetFadeMode(void *entry, s32 mode, s32 step);
-extern void itfQueueFadeMode(void *entry, u32 mode, u32 step, u32 delay);
-extern void func_0031EE28(void *entry, u32 displayValue);
+
+
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern s8 D_0037F510[];
 
@@ -160,8 +159,8 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     case 3:
         work->phase = 4;
         work->phaseTicks = 0;
-        itfSetFadeMode(work->scoreFade, 1, 8);
-        itfQueueFadeMode(work->scoreFade, 0, 8, 120);
+        itfSetFadeMode(&work->scoreFade, 1, 8);
+        itfQueueFadeMode(&work->scoreFade, 0, 8, 120);
         break;
     case 4:
         if (++work->phaseTicks > 200) {
@@ -197,7 +196,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
             work->phaseTicks = 0;
             work->phase = 10;
             work->choiceIndex = 0;
-            itfSetFadeMode(work->choiceFade, 1, 8);
+            itfSetFadeMode(&work->choiceFade.fade, 1, 8);
         }
         break;
     case 10:
@@ -213,7 +212,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
         if (work->choiceIndex > 1) {
             work->choiceIndex = 1;
         }
-        func_0031EE28(work->choiceFade, work->choiceIndex);
+        func_0031EE28(&work->choiceFade, work->choiceIndex);
         if (D_0037F510[0x21] < 0) {
             work->phase = 11;
             work->result = work->choiceIndex;
@@ -222,7 +221,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     case 11:
         work->phaseTicks = 0;
         work->phase = 12;
-        itfSetFadeMode(work->choiceFade, 0, 8);
+        itfSetFadeMode(&work->choiceFade.fade, 0, 8);
         kwlnFadeInStart(0, 0, 0, 120);
         mnuAdvanceTitleStateUnderSemaphore();
         break;
