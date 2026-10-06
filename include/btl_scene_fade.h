@@ -26,4 +26,27 @@ typedef char SceneSlotFadeWork_size[(sizeof(SceneSlotFadeWork) == 0xD8) ? 1 : -1
 typedef char SceneSlotFadeWork_phase_offset[((unsigned long)&((SceneSlotFadeWork *)0)->phase == 0x22) ? 1 : -1];
 typedef char SceneSlotFadeWork_fade_offset[((unsigned long)&((SceneSlotFadeWork *)0)->fade == 0x38) ? 1 : -1];
 
+/* Both bank buffers are allocated and cleared as 0x274 bytes. Existing
+ * order-copy providers write at most eight entries; the independent
+ * word range at +0x2C is not part of that destination. Phase-transition
+ * consumers index eight state bytes and the final integer slot-value
+ * and float percentage pairs. */
+typedef struct ActorSlotOrder {
+#ifdef VERSION_DDS1
+    u8 unk00[2];
+    s8 state[8];
+    u8 unk0A[2];
+#else
+    u8 unk00[4];
+    s8 state[8];
+#endif
+    s32 entries[8];
+    u8 unk2C[0x1C8];
+    s32 slotValues[8][2];
+    f32 scalePercent[8][2];
+} ActorSlotOrder;
+typedef char ActorSlotOrder_size[(sizeof(ActorSlotOrder) == 0x274) ? 1 : -1];
+typedef char ActorSlotOrder_slotValues_offset[((unsigned long)&((ActorSlotOrder *)0)->slotValues == 0x1F4) ? 1 : -1];
+typedef char ActorSlotOrder_scalePercent_offset[((unsigned long)&((ActorSlotOrder *)0)->scalePercent == 0x234) ? 1 : -1];
+
 #endif

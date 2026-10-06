@@ -6,6 +6,9 @@
 #include "pcp_vu0.h"
 #include "dat_state.h"
 
+extern SceneSlotFadeWork *D_00438F54;
+extern ActorSlotOrder *D_00438F58[2];
+
 extern s32 btlGetRuntime(void);
 
 extern s32 kwlnTaskGetTaskByName(const char *);
@@ -178,7 +181,7 @@ extern u8 *D_00435E64;
 
 extern u8 *D_00435E5C;
 
-extern SceneSlotFadeWork *D_00438F54;
+
 
 
 
@@ -1024,7 +1027,33 @@ void fldMarkActiveSceneScriptState(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CCD80);
+void func_001CCD80(s32 index, s8 operation) {
+    s32 bank = D_00438F54->bank;
+    s32 count;
+    s32 i;
+    if (D_00438F54->enabled[bank] == 0) return;
+    switch (operation) {
+    case 0:
+        if (D_00438F58[bank]->state[index] >= 3) return;
+        D_00438F58[bank]->state[index] = 3;
+        count = D_00438F54->currentIndex;
+        for (i = 0; i < count; i++) {
+            if ((u8)(D_00438F58[bank]->state[i] - 4) < 3) {
+                D_00438F58[bank]->state[i] = 6;
+                D_00438F58[bank]->scalePercent[i][0] = 132.0f;
+                D_00438F58[bank]->slotValues[i][0] = 16;
+                D_00438F58[bank]->scalePercent[i][1] = 105.0f;
+                D_00438F58[bank]->slotValues[i][1] = 24;
+            }
+        }
+        break;
+    case 1:
+        D_00438F58[bank]->state[index] = 7;
+        D_00438F54->phase[index + 1][bank] = 4;
+        break;
+    }
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416D58);
 

@@ -1970,17 +1970,11 @@ typedef struct EffectColorState {
 
 
 
-typedef struct EffThunderGroupParams {
-    f32 points[10][4];
-    s32 count;
-    EffThunderFragmentParams params;
-} EffThunderGroupParams;
-
-typedef struct EffThunderGroup {
+struct EffThunderGroup {
     EffThunderGroupParams head;
     EffThunderFragmentWork *handles[10];
     u32 color;
-} EffThunderGroup;
+};
 
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
