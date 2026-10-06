@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -112,7 +113,7 @@ typedef struct {
 typedef struct {
     EffBossHead head;
     EffBossGroup *groups; /* 0x8C */
-    u32 groupsHandle; /* 0x90 */
+    SdfMemBlock *groupsHandle; /* 0x90 */
     u32 groupCount;   /* 0x94 */
     u16 cellCount;    /* 0x98 */
     u8 pad9A[2];
@@ -146,9 +147,9 @@ extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
 extern u32 sdfCountMapPositionRecords(void *chunk);
 extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(u32 system, u32 value);
-extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
-extern EffBossDrawPool *func_0016FB08(u32 cellCount);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
+extern EffBossDrawPool *func_0016FB08(s32 cellCount);
 extern u32 effGetIndexedEffectGroupRecord(EffBossDrawPool *pool, s32 index);
 extern EffBossColorSlot *effGetIndexedEffectGroupIndexEntry(EffBossDrawPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffBossDrawPool *pool, u32 bits);
@@ -159,7 +160,7 @@ extern f32 D_003B9308;
 extern void func_00184630(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
 extern void effReleaseRecordGroupAssetAndHandle(EffBossDrawPool *pool);
-extern void sdfReleaseResourceAllocation(u32 handle);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
 extern void parReleaseCellSystem(u32 system);
 
 /* Randomize geometry and initial age; the two extents remain proportional. */
@@ -177,7 +178,71 @@ void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
     cell->age = -(effMiscRand(D_0034DF38) % work->head.delaySpread);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184630);
+/* Create a draw pool and delayed cells for each model map-position group. */
+void func_00184630(EffBossWork *work)
+{
+    EffBossModelContext *model = effParamWorkGetData(work->paramWork);
+    EffBossGroup *group;
+    EffBossCell *nextCells;
+    u32 i;
+    u32 j;
+
+    if ((s32)work->head.delaySpread <= 0) {
+        work->head.delaySpread = 1;
+    }
+    model->motion->unk20 = work->head.unk14;
+    mdlAddEntryPlain(model, 0, 0);
+    work->cellCount = model->motion->frameCount;
+    work->groupCount = sdfCountMapPositionRecords(model->inner);
+    work->system = parAllocateCellSystem(work->groupCount, work->cellCount, 1, 1);
+    func_0015D078(work->system, work->head.systemParam);
+    work->groupsHandle = NULL;
+    if (work->head.hasCells) {
+        work->groupsHandle = sdfAllocGeneralBlock(work->groupCount * sizeof(EffBossGroup)
+            + work->cellCount * work->groupCount * sizeof(EffBossCell));
+        nextCells = (EffBossCell *)sdfResourceRetainAddress(work->groupsHandle);
+        work->groups = (EffBossGroup *)nextCells;
+        nextCells = (EffBossCell *)((u8 *)nextCells + work->groupCount * sizeof(EffBossGroup));
+        for (i = 0, group = work->groups; i < work->groupCount; i++, group++) {
+            EffBossCell *cell;
+
+            group->drawPool = func_0016FB08(work->cellCount);
+            if (work->head.directionMode == 0) {
+                group->direction[0] = 0.0f;
+                group->direction[1] = -1.0f;
+                group->direction[2] = 0.0f;
+            } else {
+                group->direction[0] = 0.0f;
+                group->direction[1] = 1.0f;
+                group->direction[2] = 0.0f;
+            }
+            group->angularSpeed = (0.1f * (3.14159265f / 180.0f));
+            group->rotationAngle = 0.0f;
+            for (j = 0; j < work->cellCount; j++) {
+                f32 *vertices = (f32 *)effGetIndexedEffectGroupRecord(group->drawPool, j);
+                EffBossColorSlot *colors = effGetIndexedEffectGroupIndexEntry(group->drawPool, j);
+
+                colors->color[0] = 0;
+                colors->color[1] = 0;
+                colors->color[2] = 0;
+                colors->color[3] = 0;
+                colors->color[4] = 0;
+                VU0_MOVE_VF(vf10, vf0);
+                VU0_STORE_VF(vf10, vertices);
+                VU0_STORE_VF(vf10, vertices + 4);
+                VU0_STORE_VF(vf10, vertices + 8);
+                VU0_STORE_VF(vf10, vertices + 12);
+                VU0_STORE_VF(vf10, vertices + 16);
+            }
+            effSetVectorIncrementBits(group->drawPool, work->head.incrementBits);
+            group->cells = nextCells;
+            nextCells += work->cellCount;
+            for (j = 0, cell = group->cells; j < work->cellCount; j++, cell++) {
+                effBossCellRandomize(work, cell);
+            }
+        }
+    }
+}
 
 /* Copy the trail head and create its model, cell system and per-map groups. */
 EffBossWork *effBossCreate(EffBossParams *src, void *param1) {
