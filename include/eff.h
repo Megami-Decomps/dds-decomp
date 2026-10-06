@@ -27,7 +27,7 @@ typedef struct {
     u16 systemParam;         /* 0x20 */
     u8 pad22[2];
     u32 fragmentCount;       /* 0x24 */
-    u8 pad28[4];
+    u32 restartFrameLimit;  /* 0x28: zero permits unlimited restarts */
     f32 waveAmplitude;      /* 0x2C: sinusoidal displacement */
     u32 startDelayRange;     /* 0x30 modulus of delayFrames */
     u32 activeFrameRange;    /* 0x34 modulus of activeFrames before adding one */
