@@ -117,7 +117,7 @@ typedef struct EventViewerState {
     s32 commandTableOffset; /* 0x22FC: byte offset into command descriptors */
     u8 pad2300[8];
     struct EvtViewTrack *sel; /* 0x2308: selected timeline track */
-    u8 pad230C[4];
+    s32 commandCategory; /* 0x230C: selected parameter category. */
     u32 commandValue; /* 0x2310: value of the active command */
     u8 pad2314[0x94];
     f32 commandX; /* 0x23A8 */
@@ -168,6 +168,8 @@ typedef struct EvtViewEntry {
     EvtViewParam p0C;
     EvtViewParam p10;
     EvtViewParam p14;
+    u8 pad18[0x14];
+    void *payload; /* 0x2C: effect-specific parameter block. */
 } EvtViewEntry;
 
 
@@ -279,8 +281,89 @@ void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
     }
 }
 
-typedef struct EffScreenDrawParams EffScreenDrawParams;
+typedef struct BlurSource {
+    u8 color[4];
+    s32 blendControl;
+    f32 rotation;
+    f32 scale;
+    s32 centerX;
+    s32 centerY;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} BlurSource;
+
+typedef struct EffScreenDrawParams {
+    BlurSource source;
+    u8 pad28[8];
+} EffScreenDrawParams;
+
+typedef struct EffSolidRectParams {
+    u32 color;
+    s32 blendControl;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} EffSolidRectParams;
+
+typedef struct EffBlurTemplateBody {
+    s32 extent;
+    BlurSource source;
+} EffBlurTemplateBody;
+
+typedef struct EffBlurScatterParams {
+    s32 count;
+    s32 delaySpread;
+    f32 angleStep;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s32 x;
+    s32 y;
+    s32 positionSpread;
+    s32 size;
+} EffBlurScatterParams;
+
+typedef struct EffBlurScaleParams {
+    s32 count;
+    f32 phaseStep;
+    f32 spacing;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 angleStep;
+    s32 x;
+    s32 y;
+    s32 size;
+} EffBlurScaleParams;
+
+typedef struct EffTemplateBody {
+    u32 words[9];
+} EffTemplateBody;
 extern EffScreenDrawParams *effGetLoadDescA(void);
+
+/* Native five-word draw-vector parameters; the timeline swaps x and y. */
+typedef struct EvtViewerDrawVector {
+    f32 x, y, z, w;
+    s32 mode;
+} EvtViewerDrawVector;
+extern EvtViewerDrawVector kwlnDrawVector;
+extern u128 *D_00324770[];
+extern u128 kwlnDefaultColorVector[];
+extern f32 D_003BD358;
+extern f32 D_003BD35C;
+extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
+extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
+extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
+extern EffSolidRectParams *effEventGetSolidRectangleSetupParams(void);
+extern EffTemplateBody *effEventGetResourceTemplateSetupParams(void);
+extern EffScreenDrawParams *effGetLoadDescD(void);
+extern void *memcpy(void *destination, const void *source, u32 size);
+
 extern void effDrawBlurRectangle(EffScreenDrawParams *);
 extern void effEnableTexturedBlur(void);
 extern void effDisableTexturedBlur(void);
@@ -1297,7 +1380,64 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, u32 viewer
 
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADA98);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232438);
+/* Restore default effect parameters for the selected timeline key. */
+s32 func_00232438(s32 unused0, s32 unused1, EventViewerState *viewer) {
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    u128 *destination;
+    u128 *source;
+    EvtViewerDrawVector *draw;
+
+    switch (viewer->sel->kind) {
+    case 10:
+        switch (viewer->commandCategory) {
+        case 13:
+            destination = entry->payload;
+            source = D_00324770[0];
+            PCP_COPY_VECTOR(destination, source);
+            PCP_COPY_VECTOR(destination + 1, source + 1);
+            PCP_COPY_VECTOR(destination + 2, kwlnDefaultColorVector);
+            break;
+        case 14:
+            entry->p08.f = D_003BD358;
+            entry->p0C.f = D_003BD35C;
+            break;
+        }
+        break;
+    case 11:
+        draw = entry->payload;
+        draw->x = kwlnDrawVector.y;
+        draw->mode = kwlnDrawVector.mode;
+        draw->y = kwlnDrawVector.x;
+        draw->z = kwlnDrawVector.z;
+        draw->w = kwlnDrawVector.w;
+        break;
+    case 13:
+        memcpy(entry->payload, effGetLoadDescA(), 0x28);
+        break;
+    case 14:
+        memcpy(entry->payload, effEventGetBlurTemplateSetupParams(), 0x2C);
+        break;
+    case 15:
+        memcpy(entry->payload, effEventGetScatterBlurSetupParams(), 0x2C);
+        break;
+    case 23:
+        memcpy(entry->payload, effEventGetScaleBlurSetupParams(), 0x2C);
+        break;
+    case 27:
+        memcpy(entry->payload, effGetLoadDescD(), 0x28);
+        break;
+    case 16:
+        memcpy(entry->payload, effEventGetSolidRectangleSetupParams(), 0x18);
+        break;
+    case 17:
+        memcpy(entry->payload, effEventGetResourceTemplateSetupParams(), 0x24);
+        break;
+    }
+    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerPickNextHandler);
 
