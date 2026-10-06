@@ -69,9 +69,11 @@ typedef struct PartyPanel {
 } PartyPanel;
 
 /* Native result-menu row shared by the level and profile progress bars. */
+struct DatPartyRecord;
+
 typedef struct BrsProgressRow {
     u8 pad00[8];
-    u32 unit; /* DatPartyRecord address, retained as the native address word. */
+    struct DatPartyRecord *unit; /* 0x08: profile record for the row. */
     u32 levelProgress[4];
     u32 profileProgress[4];
 } BrsProgressRow;
@@ -150,7 +152,11 @@ typedef struct MenuProfilePanel {
 #ifdef VERSION_DDS2
     u32 unk10;
     s32 unk14;
-    u8 pad18[0x14];
+    u32 resourceHandle; /* 0x18: set from the owning progress host */
+    u32 unk1C;
+    u32 unk20;
+    u32 unk24;
+    u32 unk28;
     u32 unk2C[5];
     s32 phase;
     u32 unk44;
@@ -268,6 +274,35 @@ typedef struct MenuProgressHost {
 #endif
 
 #ifndef VERSION_DDS2
+/* DDS1 staff movie task work allocated by mnuMovieCreateTask (0x20 bytes). */
+typedef struct MnuStaffMovieWork {
+    u32 allocation;      /* 0x00 */
+    u32 spriteSet;       /* 0x04: resource passed to mnuDrawIconAlphaSprite */
+    s32 phase;           /* 0x08 */
+    s32 scrollTicks;     /* 0x0C */
+    u32 unk10;           /* 0x10 */
+    u32 imageIndex;      /* 0x14 */
+    u8 pad18[8];
+} MnuStaffMovieWork;
+
+typedef char MnuStaffMovieWork_size_must_be_0x20[(sizeof(MnuStaffMovieWork) == 0x20) ? 1 : -1];
+
+/* DDS1 title-movie menu allocation (0x40 bytes). */
+typedef struct MovieMenuState {
+    s32 allocation;      /* 0x00 */
+    u8 pad04[0x0C];
+    s32 state;           /* 0x10 */
+    s32 cursor;          /* 0x14 */
+    s32 mode;            /* 0x18 */
+    s32 unk1C;           /* 0x1C */
+    u8 pad20[0x10];
+    void *resources;     /* 0x30 */
+    s32 unk34;           /* 0x34 */
+    u8 pad38[8];
+} MovieMenuState;
+
+typedef char MovieMenuState_size_must_be_0x40[(sizeof(MovieMenuState) == 0x40) ? 1 : -1];
+
 /* Mantra-scene state shared by its controller and animated currency display. */
 typedef struct MenuSceneMetadata {
     u8 pad00[0x0C];
@@ -293,6 +328,8 @@ typedef struct MenuSceneMetadata {
 typedef struct MenuStaffWindow MenuStaffWindow;
 typedef struct MenuStaffNode MenuStaffNode;
 typedef struct MenuStaffList MenuStaffList;
+struct MenuIconState;
+
 
 typedef struct MenuStaffContext {
     u8 pad00[0x54];
@@ -305,8 +342,10 @@ typedef struct MenuStaffContext {
     u8 pad70[0x54];
     s32 spriteArg2;       /* 0xC4 */
     u8 padC8[0x2C];
-    void *panelLayout;    /* 0xF4: layout used by staff panel construction */
-    u8 padF8[0xC];
+    struct MenuIconState *panelLayout; /* 0xF4: layout used by staff panel construction */
+    struct MenuIconState *unkF8; /* 0xF8: second panel layout */
+    struct MenuIconState *unkFC; /* 0xFC: third panel layout */
+    u8 pad100[4];
     s32 unk104;
     MenuStaffList *activeWindow; /* 0x108: window used by staff image states */
     u8 pad10C[0xC];

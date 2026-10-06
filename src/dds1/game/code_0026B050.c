@@ -1,16 +1,7 @@
 #include "common.h"
 #include "kwln.h"
+#include "mnu.h"
 
-typedef struct MovieMenuState {
-    s32 allocation;   /* 0x00 */
-    u8 pad04[0x0C];
-    s32 state;         /* 0x10 */
-    s32 cursor;        /* 0x14 */
-    s32 mode;          /* 0x18 */
-    u8 pad1C[0x14];
-    void *resources;   /* 0x30 */
-    u8 pad34[0x0C];
-} MovieMenuState;
 
 extern void kwlnFadeBackgroundStartOut(s32);
 extern void mnuStopMovieDrawTask(void);

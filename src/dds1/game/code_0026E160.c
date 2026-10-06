@@ -1,8 +1,9 @@
 #include "common.h"
+#include "mnu.h"
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-extern u32 *mnuMovieWork;
+extern MnuStaffMovieWork *mnuMovieWork;
 
 extern s32 sdfAllocGeneralBlock(s32);
 
@@ -136,17 +137,6 @@ void mnuReleaseMovieResourceGroup(MovieResourceGroup *resources) {
 }
 
 
-typedef struct MovieMenuState {
-    s32 allocation;
-    u8 pad04[0x0C];
-    s32 state;
-    s32 cursor;
-    s32 mode;
-    u8 pad1C[0x14];
-    void *resources;
-    u8 pad34[0x0C];
-} MovieMenuState;
-
 extern MovieMenuState *mnuMovieMenuState;
 extern void func_0026E240(MovieResourceGroup *);
 extern void func_0026E388(s32, s32, s32, s32, void *, s32);
@@ -182,7 +172,7 @@ void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 mode
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E798);
 
 void mnuLoadMovieRollSprite(void) {
-    mnuMovieWork[1] = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
+    mnuMovieWork->spriteSet = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E8D8);
@@ -211,7 +201,7 @@ void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
     } else if (entry->timer < 0) {
         if (entry->active) {
             entry->active = 0;
-        } else if ((s32)mnuMovieWork[3] < 17000) {
+        } else if (mnuMovieWork->scrollTicks < 17000) {
             entry->active = 1;
             switch (effMiscRandMod(0, 8)) {
             case 0:
