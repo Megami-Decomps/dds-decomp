@@ -4862,24 +4862,26 @@ void camAimRotation(CamAim *obj, void *dst)
 extern void *sdfAllocAndClearQuadwords(s32);
 
 typedef struct FileSlot {
-    u8 pad0[0x10];
-    u32 state;
-    u8 pad14[0xC];
-} FileSlot;
+    f32 pos[4];       /* 0x00 */
+    s32 state;        /* 0x10: frame, -1 available, -2 disabled */
+    u32 color;        /* 0x14 */
+    f32 scale;        /* 0x18 */
+    f32 angle;        /* 0x1C */
+} FileSlot;      /* 0x20, ordinary 4-byte field alignment */
 
 typedef struct FileSlotTable {
     u16 type;
     u8 pad02[2];
-    u32 instances;
-    u32 count;
-    u32 flags;
-    u32 references;
-    u32 unk14;
-    FileSlot *slots;
-    u8 *unk1C;
-    u8 *data0;
-    u8 *data1;
-    u32 handle;
+    u32 instances;         /* 0x04: target's primary-slot count */
+    u32 count;             /* 0x08: primary + trailing group cells */
+    u32 flags;             /* 0x0C */
+    u32 references;        /* 0x10: acquisition/frame counter */
+    f32 spawnRemainder;    /* 0x14 */
+    FileSlot *slots; /* 0x18 */
+    u8 *unk1C;             /* 0x1C: per-type instance work */
+    u8 *data0;             /* 0x20 */
+    u8 *data1;             /* 0x24 */
+    u32 handle;            /* 0x28 */
 } FileSlotTable;
 
 /* The record's signed +0x54 mode is consumed by every billboard opener. */
@@ -5252,25 +5254,35 @@ INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D7458);
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D7770);
 
 /* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
-typedef struct FileKeyOut {
-    f32 pos[4];
-    s32 frame;
-    s32 color;
-    f32 scale;
-    f32 angle;
-} FileKeyOut;
+typedef FileSlot FileKeyOut;
 
 /* Keyframe tracks of a view block (scale, heading and colour curves). */
 typedef struct FileKeyBlock {
-    u8 pad00[0x2C];
-    u8 unk2C[0x24];
-    u8 unk50[0x10];
-    u8 unk60[0x2C];
-    u8 unk8C[0x10];
-    u8 mode;
-    u8 pad9D[0x1B];
-    s32 length;
-} FileKeyBlock;
+    f32 pos[4];             /* 0x00 */
+    u8 pad10[0x10];         /* second source vector, not used here */
+    s32 emissionDuration;   /* 0x20 */
+    u32 spawnRate;          /* 0x24 */
+    f32 spawnVariance;      /* 0x28 */
+    u8 unk2C[0x24];         /* 0x2C: color track */
+    u8 unk50[0x10];         /* 0x50: color data */
+    u8 unk60[0x0C];         /* 0x60: scalar-track prefix */
+    f32 scaleRandomness;    /* 0x6C */
+    u8 pad70[0x1C];         /* rest of scale track */
+    u8 unk8C[0x0C];         /* 0x8C: scalar-track prefix */
+    f32 angleRandomness;    /* 0x98 */
+    u8 mode;               /* 0x9C: heading track +0x10 */
+    u8 pad9D[0x1B];         /* rest of heading track */
+    s32 length;            /* 0xB8 */
+    u8 padBC;              /* 0xBC: allocator's relative-position flag */
+    u8 prewarm;            /* 0xBD */
+    u8 padBE[0x0A];         /* includes grid columns/rows at C0/C4 */
+    f32 radius;            /* 0xC8 */
+    f32 radiusRandomness;  /* 0xCC */
+    f32 speed;             /* 0xD0 */
+    f32 speedRandomness;   /* 0xD4 */
+    f32 acceleration;      /* 0xD8 */
+    f32 gravity;           /* 0xDC */
+} FileKeyBlock;             /* observed prefix 0xE0, not full allocation size */
 
 extern s32 func_002D7458(void *, void *, s32, s32);
 extern f32 func_002D7770(void *, s32, s32);
@@ -5367,6 +5379,14 @@ void effScaleParameterSet(ScaleOwner *owner, f32 scale) {
     dst->unkD8 = src->unkD8 * scale;
     dst->unkE0 = src->unkE0 * scale;
 }
+
+typedef struct FileSlotMotion {
+    f32 direction[4];     /* 0x00; this callback initializes xyz only */
+    f32 speed;            /* 0x10 */
+    f32 scaleMultiplier;  /* 0x14 */
+    f32 angle;            /* 0x18 */
+    f32 angleMultiplier;  /* 0x1C */
+} FileSlotMotion;
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D8AD0);
 
@@ -5550,7 +5570,7 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     rec->handle = handle;
     rec->flags = 0;
     rec->references = 0;
-    rec->unk14 = 0;
+    rec->spawnRemainder = 0.0f;
     memcpy(rec->data0, src, dataBytes);
     memcpy(rec->data1, src, dataBytes);
     vec = rec->data0;
