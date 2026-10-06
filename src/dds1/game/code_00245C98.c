@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
 
