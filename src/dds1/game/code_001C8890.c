@@ -531,7 +531,7 @@ typedef struct CameraPoseAction {
     u16 cameraKind;
     u8 pad10E[2];
     s32 state;
-    u8 pad114[4];
+    s32 actionId; /* 0x114: command record and action-animation index */
     struct BtlIndexList *actorIndices;
     s32 unk11C;
     u8 pad120[0xC];
@@ -7375,7 +7375,81 @@ void btlActionAimUserAtTargets(u8 *action, f32 *pose, u8 *out) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E20C0);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E2578);
+extern void func_001E20C0(CameraPoseAction *, CameraPoseTransform *, s32, f32 *, f32, f32);
+extern f32 D_003A4310[4];
+
+/* Camera framing preset: from and to quaternions, their distance multipliers,
+ * the camera parameter copied to the action, and padding. */
+typedef struct CameraFramePose {
+    f32 fromQuat[4];
+    f32 toQuat[4];
+    f32 fromDistance;
+    f32 toDistance;
+    f32 parameter;
+    f32 pad2C;
+} CameraFramePose;
+
+extern CameraFramePose D_003A4320[4];
+
+/* Frame the from and to poses around the action's targets from a random preset row
+ * (rows 2-3 for animations with flag 0x200); targets in group 0x400 mirror the presets. */
+void func_001E2578(CameraPoseAction *action, CameraPoseTransform *from, CameraPoseTransform *to) {
+    f32 direction[4];
+    CameraFramePose poses[4];
+    u16 animationFlags;
+    f32 scale;
+    f32 distance;
+    s32 pose;
+    u32 count;
+    u32 i;
+    u32 groups;
+
+    memcpy(poses, D_003A4320, sizeof(poses));
+    if ((u32)(action->actionId - 1) < 0x1FF) {
+        animationFlags = ((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionId].flags;
+    } else {
+        animationFlags = 0;
+    }
+    scale = (animationFlags & 0x200) ? 320.0f : 300.0f;
+    if (animationFlags & 0x200) {
+        pose = effMiscRandMod(0, 2) + 2;
+    } else {
+        pose = effMiscRandMod(0, 2);
+    }
+    groups = 0;
+    count = btlGetIndexListCount(action->actorIndices);
+    for (i = 0; i < count; i++) {
+        groups |= ((BtlUnit *)btlGetIndexListEntry(action->actorIndices, i))->flags & 0x600;
+    }
+    VU0_LOAD_VF(vf10, poses[pose].fromQuat);
+    if (groups & 0x400) {
+        VU0_LOAD_VF(vf11, D_003A4310);
+        effMiscQuatMultiplyVU();
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, direction);
+    distance = scale * poses[pose].fromDistance;
+    func_001E20C0(action, from, groups, direction, distance, 0.0f);
+    VU0_LOAD_VF(vf10, poses[pose].toQuat);
+    if (groups & 0x400) {
+        VU0_LOAD_VF(vf11, D_003A4310);
+        effMiscQuatMultiplyVU();
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, direction);
+    distance = scale * poses[pose].toDistance;
+    if (animationFlags & 0x200) {
+        func_001E20C0(action, to, groups, direction, distance, 0.0f);
+    } else {
+        func_001E20C0(action, to, groups, direction, distance, -0x1.333332p-3f);
+    }
+    action->flags |= 0x41;
+    action->unk130 = poses[pose].parameter;
+}
 
 void btlFlagUserAndTargetDefeat(u8 *command, u8 *unused) {
     BtlUnit *user;

@@ -3174,7 +3174,30 @@ u8 btlGetActorDisplayByteWithDefault(UiObject *object, s32 index) {
     return 12;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0C68);
+extern s32 datActionAnimationRecords;
+extern s32 D_003B4EF0[];
+
+/* Delay before an action: 9 for a 0x200-group unit in mode 6 with stat bit 0x10 clear on a
+ * kind-5 or empty command, 1 for no command, else the animation's delay-table row. */
+s32 func_001B0C68(UiObject *unit, s32 actionId) {
+    s32 *delayTable;
+    s32 *delay;
+
+    if (actionId == 0 || ((EventModeSlot *)datCommandSelectors)[actionId].kind == 5) {
+        if ((*(u64 *)&unit->flags & 0x1200) == 0x200 &&
+            (*(u64 *)&unit->entryMask & 0xFFFF00000010ULL) == 0x600000000ULL) {
+            return 9;
+        }
+    }
+    if (actionId == 0) {
+        return 1;
+    }
+    delayTable = D_003B4EF0;
+    delayTable++;
+    delay = delayTable + ((BtlActionAnimationRecord *)datActionAnimationRecords)[actionId].delayIndex * 2;
+    btlBossDebugPrintf("btl:delay=%d\n", *delay);
+    return *delay;
+}
 
 s32 btlMapActionCode(s32 unused, u32 id) {
     switch (id) {
