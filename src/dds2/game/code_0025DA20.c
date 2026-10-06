@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "sdf.h"
 #include "kwln.h"
 #include "evt_world.h"
@@ -196,20 +197,6 @@ extern s32 D_003C99A8[4];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 effDestroyPackedBatch(s32);
 
-
-/* Shop stock by progress row: unlock flag, row price percent, then 32 stock entries. */
-typedef struct ShopRankPriceEntry {
-    u16 itemId;
-    u8 mode;
-    u8 pricePercent; /* 0: use the row's percent */
-    u32 flags;
-} ShopRankPriceEntry;
-
-typedef struct ShopRankPriceRow {
-    s16 unlockFlag;
-    u16 pricePercent;
-    ShopRankPriceEntry entries[0x20];
-} ShopRankPriceRow;
 
 extern ShopRankPriceRow D_003CBB70[];
 

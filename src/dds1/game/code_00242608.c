@@ -1292,19 +1292,6 @@ s32 func_00244C00(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-typedef struct ShopRankPriceEntry {
-    u16 itemId;
-    u8 type;
-    u8 pricePercent;
-    u32 flags;
-} ShopRankPriceEntry;
-
-typedef struct ShopRankPriceRow {
-    s16 unlockFlag;
-    u16 pricePercent;
-    ShopRankPriceEntry entries[0x20];
-} ShopRankPriceRow;
-
 s32 func_00244D10(s32 index, s32 halfPrice) {
     u32 rowOffset;
     u8 *row;
