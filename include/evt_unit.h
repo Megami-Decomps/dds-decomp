@@ -36,16 +36,38 @@ typedef struct EvtEffObj {
  * No stronger alignment than the manager's original float layout is implied. */
 typedef struct EvtUnit {
     u32 color;                     /* 0x00 */
-    s32 objectId;                  /* 0x04: returned to scripts */
-    u8 pad08[8];
+    union {
+        s32 objectId;               /* Legacy script-facing view at +0x04 */
+        u32 firstCurrent;           /* Packed first-colour transition state */
+    };
+    union {
+        u8 pad08[8];
+        struct {
+            u32 color08;            /* First-colour transition target */
+            u32 color0C;            /* First-colour state before target influence */
+        };
+    };
     f32 vec10[4];                  /* 0x10 */
     f32 vec20[4];                  /* 0x20 */
     f32 vec30[4];                  /* 0x30 */
-    u8 pad40[0x10];
+    union {
+        u8 pad40[0x10];
+        f32 vec40[4];               /* Direction before target influence */
+    };
     u32 color50;                   /* 0x50 */
-    u8 pad54[0xC];
+    union {
+        u8 pad54[0xC];
+        struct {
+            u32 color54;            /* Second-colour transition state */
+            u32 color58;            /* Second-colour transition target */
+            u32 color5C;            /* Second-colour state before target influence */
+        };
+    };
     u32 color60;                   /* 0x60: packed color retained during RGB/alpha transitions */
-    u8 pad64[4];
+    union {
+        u8 pad64[4];
+        u32 color64;                /* Destination packed RGB/alpha word */
+    };
     s32 endpointWorkAddress;       /* 0x68: owned allocation used for endpoint setup */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
@@ -86,11 +108,28 @@ typedef struct EvtUnit {
     s16 slotA[12];                 /* 0x108: opaque per-slot parameters */
     s16 slotB[12];                 /* 0x120 */
     s16 slotC[12];                 /* 0x138 */
-    s16 unused150;                 /* 0x150 */
-    s16 directionMode;             /* 0x152 */
-    u8 pad154[8];
+    union {
+        s16 unused150;               /* Legacy signed view */
+        u16 colorFramesRemaining;  /* 0x150: colour interpolation countdown */
+    };
+    union {
+        s16 directionMode;         /* Legacy signed view */
+        u16 directionFramesRemaining; /* 0x152: direction interpolation countdown */
+    };
+    union {
+        u8 pad154[8];
+        struct {
+            u16 rgbElapsed;
+            u16 rgbDuration;
+            u16 alphaElapsed;
+            u16 alphaDuration;
+        };
+    };
     s16 transitionElapsed;         /* 0x15C */
-    s16 transitionDuration;        /* 0x15E */
+    union {
+        s16 transitionDuration;    /* Legacy setter view, retaining the stored bits */
+        u16 transitionFrameCount;  /* 0x15E: duration consumed as unsigned frames */
+    };
     f32 speedY;                    /* 0x160 */
     s16 stepCount;                 /* 0x164 */
     u8 pad166[10];
@@ -103,11 +142,28 @@ typedef struct EvtUnit {
     s16 slotA[12];                 /* 0x168: opaque per-slot parameters */
     s16 slotB[12];                 /* 0x180 */
     s16 slotC[12];                 /* 0x198 */
-    s16 unused1B0;                 /* 0x1B0 */
-    s16 directionMode;             /* 0x1B2 */
-    u8 pad1B4[8];
+    union {
+        s16 unused1B0;               /* Legacy signed view */
+        u16 colorFramesRemaining;  /* 0x1B0: colour interpolation countdown */
+    };
+    union {
+        s16 directionMode;         /* Legacy signed view */
+        u16 directionFramesRemaining; /* 0x1B2: direction interpolation countdown */
+    };
+    union {
+        u8 pad1B4[8];
+        struct {
+            u16 rgbElapsed;
+            u16 rgbDuration;
+            u16 alphaElapsed;
+            u16 alphaDuration;
+        };
+    };
     s16 transitionElapsed;         /* 0x1BC */
-    s16 transitionDuration;        /* 0x1BE */
+    union {
+        s16 transitionDuration;    /* Legacy setter view, retaining the stored bits */
+        u16 transitionFrameCount;  /* 0x1BE: duration consumed as unsigned frames */
+    };
     f32 speedY;                    /* 0x1C0 */
     s16 stepCount;                 /* 0x1C4 */
     u8 pad1C6[10];
