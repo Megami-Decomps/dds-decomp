@@ -670,15 +670,15 @@ void sdfPathPrefixCat(char *destination, char *path) {
     strcat(destination, path);
 }
 
-u32 func_002E5958(void) {
+u32 func_002E5958(char *path) {
     return 0;
 }
 
-u32 func_002E5960(void) {
+u32 func_002E5960(char *path) {
     return 0;
 }
 
-u32 func_002E5968(void) {
+u32 func_002E5968(char *path) {
     return 0;
 }
 
