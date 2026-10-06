@@ -26,7 +26,8 @@ typedef struct BtlLinkedCommand {
     BtlTask *task;            /* 0xF4: fallback actor is task->unit */
     BtlUnit *linkedA;         /* 0xF8 */
     BtlUnit *linkedB;         /* 0xFC */
-    u8 pad100[0x10];
+    BtlUnit *selectedUnit;    /* 0x100: actor selected for camera setup. */
+    u8 pad104[0xC];
     s32 state;               /* 0x110: aim waits for 0x1E, then resets this */
     s32 actionCode;          /* 0x114 */
     BtlIndexList *targetList; /* 0x118: indexed target list */
