@@ -2448,8 +2448,11 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     }
 }
 
-void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value) {
-    mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xFFFFFF) | 0x80000000);
+extern void mdlReleaseInnerResourceHandle(MdlCtx *, s32, f32);
+
+/* Forward the packed model-color word and its scalar to the inner resource list. */
+void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value, f32 scalar) {
+    mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xFFFFFF) | 0x80000000, scalar);
 }
 
 extern void effObjFetchInnerFirstVec(s32);
