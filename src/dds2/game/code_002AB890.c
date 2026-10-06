@@ -1,6 +1,7 @@
 #include "mnu.h"
+#include "mnu_list.h"
+#include "dat_state.h"
 
-extern s32 datGameState;
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -13,20 +14,6 @@ extern void func_002AAE80(s32);
 extern void mnuCreateStaffImageSprite(s32);
 
 
-/* Inventory quantities are byte entries indexed by each caller's original item ID. */
-typedef struct SaveItemCounts {
-    u8 pad00[0x1340];
-    u8 counts[0x100];
-} SaveItemCounts;
-
-/* The menu buffer carries its allocation ID and five owned window handles. */
-typedef struct MenuResourceSet {
-    s32 allocation;
-    u8 pad04[4];
-    u32 windows[5];
-    u8 pad1C[0x1C];
-    s32 selection;
-} MenuResourceSet;
 
 extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
 extern void func_002AB8F0(s32);
@@ -46,28 +33,28 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8F0);
 
 void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
-    MenuResourceSet *resources;
+    MenuStaffChoices *resources;
 
-    resources = (MenuResourceSet *)object->menu;
+    resources = (MenuStaffChoices *)object->menu;
     mnuDestroyWindowContainer(resources->windows[0]);
     mnuDestroyWindowContainer(resources->windows[1]);
 }
 
-extern void func_002B9720(s32);
+extern void func_002B9720(MenuWindowContainer *);
 
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *owner) {
-    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
+    MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
 
-    if (((SaveItemCounts *)datGameState)->counts[itemId & 0xFFFF] == 0) {
+    if (datGameState->inventory.counts[itemId & 0xFFFF] == 0) {
         func_002B9720(resources->windows[0]);
     }
-    return ((MenuStaffList *)resources->windows[0])->window->panelActive != 0;
+    return resources->windows[0]->list->count != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
 
 void func_002ABEB0(MenuStaffContext *object) {
-    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->windows[2]);
+    mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[2]);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
@@ -83,58 +70,57 @@ extern const MenuCatalogItem D_003E7200[18];
 extern char (*D_00435E5C)[25];
 extern char D_00437BC8[];
 extern void func_002AC750();
-extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
-extern void mnuSetWindowContainerState(MenuStaffList *, u32);
-extern void mnuSetWindowPanelBounds(MenuStaffList *, const void *, u32, u32, u32, u32);
-extern void mnuSetWindowEntryParameters(u32, MenuStaffList *, u32, u32, u32);
-extern MenuStaffNode *mnuAppendWindowListNode(MenuStaffList *, s32);
-extern void mnuSetWindowContainerLayout(MenuStaffList *, u32, u32, u32, u32, u32, u32, u32, u32);
-extern void mnuCreateListWithDefaults(MenuStaffList *, u32, u32, u32, u32);
+extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
+extern struct MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
+extern void mnuSetWindowContainerLayout(MenuWindowContainer *, u32, u32, u32, u32, u32, u32, u32, u32);
+extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern void func_002AC050();
 extern s32 func_002C54B0(s32);
-struct BtlEntry;
-extern struct BtlEntry *mnuFindPartySlotByCurrentId(u32);
-extern struct BtlEntry *mnuFindReserveSlotByCurrentId(u32);
+extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
+extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
 extern s32 mtrMantraIdIsValid(s32);
 extern s32 mdlFlagTest(s32);
-extern void mnuSortItems(MenuStaffWindow *, s32, s32);
-extern void mnuInitializeBasicWindowLayout(MenuStaffList *, u32, u32);
+extern void mnuSortItems(struct MenuList *, s32, s32);
+extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
 
 /* The upper item-ID range shares ordered staff entries with mantra availability. */
 void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
-    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
-    MenuStaffList *window;
-    MenuStaffNode *node;
+    MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
     s32 itemId = 0xC1;
     u16 *ordinal = &owner->catalogOrdinals[itemId];
     u16 catalogOrdinal;
     s32 showUnknown;
     u32 frameResource;
 
-    window = (MenuStaffList *)mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
+    window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowContainerState(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
-    window->window->owner = owner;
-    window->window->drawEntry = func_002AC050;
+    window->list->context = owner;
+    window->list->drawCallback = func_002AC050;
     node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
-    node->label = 0;
-    node->entryIndex = 0;
-    node->catalogOrdinal = 0;
+    node->sortKeyPrimary = 0;
+    node->sortKeySecondary = 0;
+    node->sortKeyTertiary = 0;
     do {
         if (func_002C54B0(itemId) != 0) {
             catalogOrdinal = *ordinal;
             if (catalogOrdinal != 0) {
-                if (((SaveItemCounts *)datGameState)->counts[itemId] != 0) {
+                if (datGameState->inventory.counts[itemId] != 0) {
                     node = mnuAppendWindowListNode(window, (s32)D_00435E5C[itemId]);
-                    node->label = ((SaveItemCounts *)datGameState)->counts[itemId];
-                    node->entryIndex = itemId;
-                    node->catalogOrdinal = catalogOrdinal;
+                    node->sortKeyPrimary = datGameState->inventory.counts[itemId];
+                    node->sortKeySecondary = itemId;
+                    node->sortKeyTertiary = catalogOrdinal;
                     if (mnuFindPartySlotByCurrentId(itemId) != NULL ||
                         mnuFindReserveSlotByCurrentId(itemId) != NULL) {
-                        node->flags |= 1;
+                        node->flags48 |= 1;
                     } else if (func_002BDA50(itemId) != 0) {
-                        node->flags |= 4;
+                        node->flags48 |= 4;
                     }
                 } else {
                     showUnknown = !mtrMantraIdIsValid(itemId);
@@ -146,9 +132,9 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
                     }
                     if (showUnknown) {
                         node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
-                        node->label = 0;
-                        node->entryIndex = 0;
-                        node->catalogOrdinal = catalogOrdinal;
+                        node->sortKeyPrimary = 0;
+                        node->sortKeySecondary = 0;
+                        node->sortKeyTertiary = catalogOrdinal;
                     }
                 }
             }
@@ -156,33 +142,33 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
         itemId++;
         ordinal++;
     } while (itemId < 0x100);
-    mnuSortItems(window->window, 2, 1);
+    mnuSortItems(window->list, 2, 1);
     frameResource = owner->spriteArg2;
-    resources->windows[3] = (u32)window;
+    resources->windows[3] = window;
     mnuInitializeBasicWindowLayout(window, frameResource, 0x10);
-    mnuCreateListWithDefaults((MenuStaffList *)resources->windows[3], 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, owner->spriteArg0);
 }
 
 void func_002AC660(MenuStaffContext *object) {
-    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->windows[3]);
+    mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[3]);
 }
 
 s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, MenuStaffContext *owner) {
-    MenuStaffNode *node = ((MenuStaffList *)((MenuResourceSet *)owner->menu)->windows[3])->window->head;
+    struct MenuListNode *node = ((MenuStaffChoices *)owner->menu)->windows[3]->list->first;
     s32 index;
 
     if (node != NULL) {
         do {
-            index = node->entryIndex;
+            index = node->sortKeySecondary;
             if (index == previousIndex) {
-                node->flags &= ~1;
+                node->flags48 &= ~1;
                 if (func_002BDA50(index) != 0) {
-                    node->flags |= 4;
+                    node->flags48 |= 4;
                 }
             }
             if (index == selectedIndex) {
-                node->flags |= 1;
-                node->flags &= ~4;
+                node->flags48 |= 1;
+                node->flags48 &= ~4;
             }
             node = node->next;
         } while (node != NULL);
@@ -195,53 +181,53 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
 
 /* Build the catalog window from the eighteen item records and owned quantities. */
 void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
-    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
-    MenuStaffList *window;
-    MenuStaffNode *node;
+    MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
     const MenuCatalogItem *catalog;
     u32 ordinal = 0;
     u32 itemId;
     u32 frameResource;
 
-    window = (MenuStaffList *)mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
+    window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
     mnuSetWindowContainerState(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
-    window->window->owner = owner;
-    window->window->drawEntry = func_002AC750;
+    window->list->context = owner;
+    window->list->drawCallback = func_002AC750;
     node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
-    node->label = 0;
-    node->entryIndex = 0;
-    node->catalogOrdinal = 0;
+    node->sortKeyPrimary = 0;
+    node->sortKeySecondary = 0;
+    node->sortKeyTertiary = 0;
     catalog = D_003E7200;
     for (; ordinal < ARRAY_COUNT(D_003E7200); ordinal++) {
         itemId = catalog->itemId;
         catalog++;
-        if (((SaveItemCounts *)datGameState)->counts[itemId] != 0) {
+        if (datGameState->inventory.counts[itemId] != 0) {
             node = mnuAppendWindowListNode(window, (s32)D_00435E5C[itemId]);
-            node->label = ((SaveItemCounts *)datGameState)->counts[itemId];
-            node->entryIndex = itemId;
-            node->catalogOrdinal = ordinal;
+            node->sortKeyPrimary = datGameState->inventory.counts[itemId];
+            node->sortKeySecondary = itemId;
+            node->sortKeyTertiary = ordinal;
         }
     }
     frameResource = owner->spriteArg2;
-    resources->windows[4] = (u32)window;
+    resources->windows[4] = window;
     mnuSetWindowContainerLayout(window, frameResource, 0x15, frameResource,
         0x410, 0x16, frameResource, 0x17, 0x3E0);
-    mnuCreateListWithDefaults((MenuStaffList *)resources->windows[4], 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[4], 0, 0, 0, owner->spriteArg0);
 }
 
 void func_002ACA98(MenuStaffContext *object) {
-    mnuDestroyWindowContainer(((MenuResourceSet *)object->menu)->windows[4]);
+    mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[4]);
 }
 
 s32 func_002ACAC0(s32 itemId, MenuStaffContext *owner) {
-    MenuResourceSet *resources = (MenuResourceSet *)owner->menu;
+    MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
 
-    if (((SaveItemCounts *)datGameState)->counts[itemId] == 0) {
+    if (datGameState->inventory.counts[itemId] == 0) {
         func_002B9720(resources->windows[4]);
     }
-    return ((MenuStaffList *)resources->windows[4])->window->panelActive != 0;
+    return resources->windows[4]->list->count != 0;
 }
 
 void func_002ACB18(u32 arg0) {
@@ -254,16 +240,16 @@ void func_002ACB38(s32 object) {
 u32 mnuInitializeWindowOwnerResourceSet(void) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     s32 handle = sdfAllocGeneralBlock(0x54);
-    MenuResourceSet *resource = sdfResourceRetainAddress(handle);
+    MenuStaffChoices *resource = sdfResourceRetainAddress(handle);
 
-    context->menu = (u8 *)resource;
+    context->menu = resource;
     memset(resource, 0, 0x54);
     resource->allocation = handle;
     func_002ACB18((u32)context);
     func_002AB8F0((s32)context);
     mnuConfigurePanelResource(context->unk118, context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition((s32)context->activeWindow, (s32)context->tail);
-    mnuSeekListNode(0, context->activeWindow->window);
+    mnuSeekListNode(0, context->activeWindow->list);
     return 1;
 }
 
@@ -272,7 +258,7 @@ u32 mnuInitializeWindowOwnerResourceSet(void) {
 s32 mnuDestroyWindowOwnerResourceSet(void) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffContext *owner = (MenuStaffContext *)context;
-    MenuResourceSet *party = (MenuResourceSet *)owner->menu;
+    MenuStaffChoices *party = (MenuStaffChoices *)owner->menu;
 
     mnuDestroyResourceOwnerWindowContainers(owner);
     func_002ACB38(context);
@@ -306,8 +292,8 @@ extern char D_003E74DC[];
 /* Handle staff-item popup selection and idle-window navigation. */
 s32 mnuHandleStaffPopupSelection(u64 callback) {
     MenuStaffContext *context;
-    MenuResourceSet *resources;
-    MenuStaffList *window;
+    MenuStaffChoices *resources;
+    MenuWindowContainer *window;
     s32 *popup;
     u32 itemKind;
     u32 input;
@@ -315,7 +301,7 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
 
     context = (MenuStaffContext *)kwlnTaskGetUserValue();
     popup = &context->popupState;
-    resources = (MenuResourceSet *)context->menu;
+    resources = (MenuStaffChoices *)context->menu;
     input = mnuMapPadMaskToFlags(0x33);
     result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
     if (result != 0) {
@@ -323,10 +309,10 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
     }
     if (*popup == 0) {
         if (input & 1) {
-            itemKind = context->activeWindow->window->selectedNode->label;
+            itemKind = context->activeWindow->list->cursor->sortKeyPrimary;
             switch (itemKind) {
             case 0:
-                resources->selection = 0;
+                resources->secondListState = 0;
                 mnuSetPopupEntry((s32)popup, (s32)D_003E7450);
                 break;
             case 1:
@@ -342,8 +328,8 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
                 mnuSetPopupEntry((s32)popup, (s32)D_003E74C0);
                 break;
             }
-            mnuSeekListNode(0, ((MenuStaffList *)resources->windows[0])->window);
-            mnuSeekListNode(0, ((MenuStaffList *)resources->windows[1])->window);
+            mnuSeekListNode(0, resources->windows[0]->list);
+            mnuSeekListNode(0, resources->windows[1]->list);
         }
         if (input & 2) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7418);
@@ -362,7 +348,7 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
                 mnuAdvanceWindowListSelection((s32)window);
             }
             mnuClearWindowPanelTransitionFlag((s32)window);
-            mnuPlayInputSound(0, input, &window->window->flags);
+            mnuPlayInputSound(0, input, &window->list->stateFlags);
         }
     }
     return 0;
@@ -378,7 +364,7 @@ s32 func_002ACE58(s32 callback) {
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(4);
     func_002AAC98(0,
-        ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
+        ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
@@ -397,22 +383,13 @@ extern void mnuInitPartyPanelSlots(s32);
 extern void func_002BCA98(s32);
 extern void func_002BCAB0(s32);
 
-typedef struct StaffUseSelectionList {
-    u8 pad00[0x1C];
-    s32 *selectedIndex; /* 0x1C */
-} StaffUseSelectionList;
-
-typedef struct StaffUseContext {
-    u8 pad00[0xA914];
-    StaffUseSelectionList *list; /* 0xA914 */
-} StaffUseContext;
 
 s32 mnuUseStaffItem(itemId, context)
 s32 itemId;
 s32 context;
 {
     s32 partyPanel = context + 0x284;
-    s32 targetUnit = datGameState + *(((StaffUseContext *)context)->list->selectedIndex) * 0x1C4 + 0xA60;
+    s32 targetUnit = (s32)&datGameState->party[((MenuStaffContext *)context)->selection->cursor->index];
     s32 result = func_002C5A28(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
@@ -432,15 +409,15 @@ s32 context;
 
 /* On successful item use, publish the remaining count and record the selected item. */
 void mnuApplyResourceSelection(s32 index, s32 context) {
-    MenuResourceSet *resources;
+    MenuStaffChoices *resources;
     s32 consumed;
 
-    resources = (MenuResourceSet *)((MenuStaffContext *)context)->menu;
+    resources = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     consumed = mnuUseStaffItem();
     if (consumed != 0) {
-        ((MenuStaffList *)resources->windows[0])->window->selectedNode->label =
-                  (u32)((SaveItemCounts *)datGameState)->counts[index];
-        resources->selection = index;
+        resources->windows[0]->list->cursor->sortKeyPrimary =
+                  datGameState->inventory.counts[index];
+        resources->secondListState = index;
     }
     func_002C1B68(context + 0xaa50, 1);
 }
@@ -449,7 +426,7 @@ u32 func_002AD0A8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    mnuBeginWindowFadeTransition(((MenuResourceSet *)((MenuStaffContext *)context)->menu)->windows[0], context + 0xb10c);
+    mnuBeginWindowFadeTransition((s32)((MenuStaffChoices *)((MenuStaffContext *)context)->menu)->windows[0], context + 0xb10c);
     return 1;
 }
 
@@ -463,17 +440,17 @@ u32 func_002AD0E8(void) {
 
 s32 func_002AD118(u64 callback) {
     MenuStaffContext *context;
-    MenuResourceSet *resources;
-    MenuStaffList *window;
-    MenuStaffWindow *panel;
-    MenuStaffNode *node;
+    MenuStaffChoices *resources;
+    MenuWindowContainer *window;
+    struct MenuList *panel;
+    struct MenuListNode *node;
     s32 *popup;
     s32 itemId;
     u32 input;
     s32 result;
 
     context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    resources = (MenuResourceSet *)context->menu;
+    resources = (MenuStaffChoices *)context->menu;
     popup = &context->popupState;
     input = mnuMapPadMaskToFlags(0xC33);
     result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
@@ -484,13 +461,13 @@ s32 func_002AD118(u64 callback) {
         return 0;
     }
     func_002C1B68((s32)((u8 *)context + 0xAA50), 0);
-    if (resources->selection == 0) {
+    if (resources->secondListState == 0) {
         if (input & 1) {
-            panel = ((MenuStaffList *)resources->windows[0])->window;
-            if (panel->panelActive != 0) {
-                node = panel->selectedNode;
-                if (node->flags == 0) {
-                    itemId = node->entryIndex;
+            panel = resources->windows[0]->list;
+            if (panel->count != 0) {
+                node = panel->cursor;
+                if (node->flags48 == 0) {
+                    itemId = node->sortKeySecondary;
                     if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(itemId)) == 0) {
                         mnuApplyResourceSelection(itemId, (s32)context);
                     } else {
@@ -507,15 +484,15 @@ s32 func_002AD118(u64 callback) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7434);
         }
     } else {
-        if (mnuIsStaffWindowReadyForItem(resources->selection & 0xFFFF, context) == 0) {
+        if (mnuIsStaffWindowReadyForItem(resources->secondListState & 0xFFFF, context) == 0) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7434);
             mnuClearActionFlags(0, (u8 *)&context->windowFlags);
             mnuBeginWindowFadeTransition(0, (s32)context->tail);
         } else {
-            resources->selection = 0;
+            resources->secondListState = 0;
         }
     }
-    window = (MenuStaffList *)resources->windows[0];
+    window = resources->windows[0];
     if (window != NULL) {
         if ((input & 0x300000) == 0) {
             func_002B9808((s32)window);
@@ -528,7 +505,7 @@ s32 func_002AD118(u64 callback) {
         }
         mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
         mnuClearWindowPanelTransitionFlag((s32)window);
-        mnuPlayInputSound(0, input, &window->window->flags);
+        mnuPlayInputSound(0, input, &window->list->stateFlags);
     }
     return 0;
 }
@@ -538,12 +515,12 @@ extern void func_002AAC70(s32, s32, s32, s32, s32, s32, s32);
 
 /* Refresh a staff window's description from the selected item's label. */
 void mnuRefreshStaffWindowDescription(MenuStaffContext *context, s32 windowIndex) {
-    MenuResourceSet *resources = (MenuResourceSet *)context->menu;
-    MenuStaffNode *node = ((MenuStaffList *)resources->windows[windowIndex])->window->selectedNode;
+    MenuStaffChoices *resources = (MenuStaffChoices *)context->menu;
+    struct MenuListNode *node = resources->windows[windowIndex]->list->cursor;
     s32 emptyLabel = 0;
-    s32 selectedLabel = node->entryIndex;
+    s32 selectedLabel = node->sortKeySecondary;
 
-    if (node->label != 0) {
+    if (node->sortKeyPrimary != 0) {
         func_002AAC70(0, selectedLabel, D_00435E70, (s32)context, 1, 1, 0x53);
     } else {
         func_002AAC98(0, emptyLabel, 0, (s32)context, 1, 0x53);

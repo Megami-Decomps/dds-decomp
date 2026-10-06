@@ -423,9 +423,6 @@ typedef struct MenuSceneMetadata {
 
 #ifdef VERSION_DDS2
 /* Staff menu task context (DDS2 layout). */
-typedef struct MenuStaffWindow MenuStaffWindow;
-typedef struct MenuStaffNode MenuStaffNode;
-typedef struct MenuStaffList MenuStaffList;
 struct MenuIconState;
 
 
@@ -445,58 +442,46 @@ typedef struct MenuStaffContext {
     struct MenuIconState *unkFC; /* 0xFC: third panel layout */
     u8 pad100[4];
     s32 unk104;
-    MenuStaffList *activeWindow; /* 0x108: window used by staff image states */
+    MenuWindowContainer *activeWindow; /* 0x108 */
     u8 pad10C[0xC];
     s32 unk118;
     u8 pad11C[0x168];
     u32 windowFlags;      /* 0x284 */
     u8 pad288[0xA68C];
-    s32 selection;        /* 0xA914 */
+    struct MenuList *selection; /* 0xA914: retained party-selection list */
     u8 padA918[0x11C];
     void *panelHandle;    /* 0xAA34 */
     void *spriteHandle;   /* 0xAA38 */
     u8 padAA3C[0xC];
-    u8 *menu;             /* 0xAA48 */
+    void *menu;           /* 0xAA48: menu-mode-specific child allocation */
     u8 padAA4C[0x3D4];
     u16 catalogOrdinals[0x100]; /* 0xAE20: item-ID-indexed list sorting keys */
     u8 padB020[0xEC];
     u8 tail[4];           /* 0xB10C */
 } MenuStaffContext;
 
-/* Each staff list owns a cursor-bearing window at +0x18. */
-struct MenuStaffList {
-    u8 pad00[0x18];
-    MenuStaffWindow *window;
-};
+/* Five owned windows and their selection/transition state share one 0x54 allocation. */
+typedef struct MenuStaffChoices {
+    s32 allocation;
+    u8 pad04[4];
+    MenuWindowContainer *windows[5];
+    s32 currentSelection;
+    s32 thirdListEnabled;
+    s32 previous;
+    s32 requested;
+    s32 alternatePrevious;
+    s32 alternateRequested;
+    s32 firstListState;
+    s32 secondListState;
+    s32 secondListReset;
+    s32 thirdListState;
+    s32 thirdListIndex;
+    s32 thirdListValue;
+    s32 thirdListReset;
+    u8 pad50[4];
+} MenuStaffChoices;
 
-struct MenuStaffWindow {
-    u32 flags; /* Selection-control bits, including mask 0x8. */
-    u8 pad04[0x0C];
-    MenuStaffNode *head; /* 0x10 */
-    u8 pad14[4];
-    MenuStaffNode *cursor; /* 0x18 */
-    MenuStaffNode *selectedNode; /* 0x1C */
-    s32 panelActive; /* 0x20: selects the alternate panel drawing path */
-    s32 rowCount; /* 0x24 */
-    u8 pad28[4];
-    void (*drawEntry)(); /* +0x2C: caller supplies the list and current node. */
-    MenuStaffContext *owner; /* +0x30 */
-    u8 pad34[8];
-    s32 drawAlpha; /* +0x3C: 8.8 fixed-point drawing level. */
-};
-
-struct MenuStaffNode {
-    s32 index; /* List position, saved when switching staff pages. */
-    s32 value; /* Entry payload supplied to mnuAppendWindowListNode. */
-    u8 pad08[0x40];
-    u32 flags; /* 0x48 */
-    u8 pad4C[0x0C];
-    MenuStaffNode *next; /* 0x58 */
-    u8 pad5C[4];
-    s32 label;
-    s32 entryIndex; /* 0x64 */
-    u32 catalogOrdinal; /* +0x68: stable index in the source catalog. */
-};
+typedef char MenuStaffChoices_size_must_be_0x54[(sizeof(MenuStaffChoices) == 0x54) ? 1 : -1];
 
 /* Title movie menu bars (producer: code_002A3AE8). Sliding bar: direction flag and 0..max position. */
 typedef struct SlideBar {
