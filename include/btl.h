@@ -37,16 +37,19 @@ typedef struct BtlUnitEntrySlot {
  * The actor chain ends at +0x344. Command state/action words are a different
  * object and must not be interpreted through this unit layout. */
 typedef struct BtlUnit {
-    u8 pad00[0x30];
+    u8 pad00[0x10];
+    f32 colorStart[4]; /* 0x10: first source color used by the effect blend callback. */
+    f32 colorEnd[4]; /* 0x20: second source color used by the effect blend callback. */
     f32 position[4]; /* 0x30: world position */
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
-    u8 pad50[4];
+    f32 effectScale; /* 0x50: scales the SDK-provided actor effect vectors. */
     u32 baseColor; /* 0x54: RGB restored after temporary battle effects */
-    u8 pad58[8];
+    f32 unk58;
+    u8 pad5C[4];
     f32 currentPosition[4]; /* 0x60: position retained by the unit setter */
     f32 orientation[4]; /* 0x70: quaternion converted to a VU matrix */
     f32 scale; /* 0x80 */
-    u8 pad84[4];
+    u32 overlayColor; /* 0x84: packed transient actor color. */
     f32 zOffset; /* 0x88: added before rotating a local offset */
     u8 pad8C[4];
     union {
@@ -66,10 +69,11 @@ typedef struct BtlUnit {
     f32 reach; /* 0xB4 */
     f32 unkB8; /* Setup stores mirror height/reach; meaning otherwise unknown. */
     f32 unkBC;
-    u8 padC0[4];
+    f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
     s32 resourceKind; /* 0xC4: selects the actor resource table, as in DDS2 */
     u32 species; /* 0xC8 */
-    u8 padCC[0x14];
+    u8 unkCC;
+    u8 padCD[0x13];
     s32 displaySpecies; /* 0xE0 */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
@@ -85,7 +89,7 @@ typedef struct BtlUnit {
     union {
         u64 flags64; /* 0x110: retail also loads the complete status pair. */
         struct {
-            u32 flags; /* 0x110 */
+            s32 flags; /* 0x110: arithmetic-shift accessors use the signed low word. */
             u32 stateFlags; /* 0x114 */
         };
     };
@@ -102,7 +106,11 @@ typedef struct BtlUnit {
     u16 conditionFlags; /* 0x12E */
     u8 pad130[4];
     u16 actionTime; /* 0x134 */
-    u8 pad136[0x17A];
+    u8 pad136[3];
+    s8 agility; /* 0x139: signed HARI2 agility adjustment, also passed to diagnostics. */
+    u8 pad13A[0x38];
+    u16 bedAssetIndex; /* 0x172: SDK operand resolution selects the BED asset. */
+    u8 pad174[0x13C];
     s16 actionSlot; /* 0x2B0 */
     u8 pad2B2[0x12];
     u8 unk2C4; /* 0x2C4: saved party-entry index, read with lbu. */
@@ -114,7 +122,7 @@ typedef struct BtlUnit {
     s32 resourceLink;
     s32 link;
     s32 listNode;
-    u8 pad308[4];
+    struct SoundSlotOwner *soundSlotOwner; /* 0x308: shared category/id motion-SE owner. */
     void *gunResource; /* 0x30C */
     u8 pad310[4];
     s32 unk314;
@@ -123,7 +131,8 @@ typedef struct BtlUnit {
     u8 pad31A[2];
     u32 effectObject; /* 0x31C: supplies the effect's first inner vector */
     BtlUnitModel *ext; /* 0x320: +0x8C points to model flags; also an event handle */
-    u8 pad324[8];
+    s32 transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
+    u8 pad328[4];
     s32 unk32C;
     s32 unk330;
     u8 pad334[8];
@@ -202,7 +211,7 @@ typedef struct BtlUnit {
     union {
         u64 flags64; /* 0x110 */
         struct {
-            u32 flags; /* 0x110 */
+            s32 flags; /* 0x110: same signed status word as DDS1. */
             u32 stateFlags; /* 0x114 */
         };
     };

@@ -245,6 +245,8 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
+struct PolyMovieObject;
+
 /* Timeline key shared by several track kinds, not a rendered font glyph.
  * The selector/channel widths depend on the enclosing track and key kind. */
 typedef struct EvtViewKey {
@@ -259,12 +261,16 @@ typedef struct EvtViewKey {
     union {
         s8 value;
         s16 objectIndex;
+        u8 bytes[2];
     } channel; /* 0x0C: byte value or signed world-object name-table index. */
     s16 param;    /* 0x0E */
     s16 condition; /* 0x10 */
     u8 pad12[2];
-    s16 unk14; /* 0x14: secondary indexed condition for kind-0x11 tracks. */
-    u8 pad16[0x1A];
+    union {
+        s16 condition; /* Secondary indexed condition for kind-0x11 tracks. */
+        f32 value;
+    } parameter14;
+    u8 pad18[0x18];
     struct EvtViewKey *next; /* 0x30 */
     struct EvtViewKey *previous; /* 0x34 */
 } EvtViewKey;
@@ -278,6 +284,7 @@ typedef struct EvtViewTrack {
         EffTransformNode *transform;
         s32 transitionValue;
         u32 handle;
+        struct PolyMovieObject *movie;
     } owner;                  /* 0x10: payload role is selected by kind */
     u8 pad14[8];
     s16 frameOffset; /* 0x1C: added to relative key frames. */
@@ -957,7 +964,7 @@ void func_0024A158(s32 frame, EventViewerState *viewer) {
             s32 value = 0;
 
             while (key != NULL) {
-                if (track->kind != 0x11 || evtViewerTestIndexedCondition(key->unk14) != 0) {
+                if (track->kind != 0x11 || evtViewerTestIndexedCondition(key->parameter14.condition) != 0) {
                     if (frame < key->frame + track->frameOffset) {
                         break;
                     }
@@ -1091,7 +1098,6 @@ extern void sdfMotionSuspend(Motion *motion);
 extern void sdfMotionResume(Motion *motion);
 extern void sdfFreezeFloatCounter(void *counter);
 extern void sdfUnfreezeFloatCounter(void *counter);
-extern ObjBase *dds3GetObjectOwnedHandle(void *object);
 extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 end);
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
@@ -1129,7 +1135,7 @@ void func_0024A738(s32 mode, u32 frame, s32 viewerAddr) {
     }
     object = table->slots[6].head;
     while (object != NULL) {
-        motion = ((EvtViewerPlaybackData *)object->data)->object->unk38;
+        motion = ((EvtViewerPlaybackData *)object->data)->object->motion;
         if (motion != NULL) {
             if (mode == 0) {
                 sdfMotionSampleAtFrame(motion, (f32)frame);

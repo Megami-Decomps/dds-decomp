@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "dat_state.h"
 
 #define MNU_MANTRA_DRAW_ITEM_BYTES 0x24
 #define MNU_MANTRA_DRAW_POOL_HEADER_BYTES 0xC
@@ -135,12 +136,7 @@ extern void func_00274FF8();
 extern u32 mnuCreateTypeOneRecord(void);
 extern void mnuReleaseMantraRecordPanelData();
 extern u32 mnuMantraSpriteSlots[12];
-extern u8 *datGameState;
 
-typedef struct MantraMenuValues {
-    u8 pad00[0x3C];
-    s32 panelValue; /* 0x3C: value animated by both numeric counters */
-} MantraMenuValues;
 
 /* The panel pool allocates 48-byte records shared by animation and sprite controls. */
 typedef struct MantraPanelAnimation {
@@ -392,18 +388,18 @@ void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     u32 flags = fade | 0xA09DC300;
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x2E, 0, drawArg);
-    if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
+    if (datGameState->header.currency != state->shown) {
         s32 steps = 20;
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, mnuMantraValueFormat, state->shown + (((MantraMenuValues *)datGameState)->panelValue - state->shown) * state->step / steps);
+        func_0035C860(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
-            state->shown = ((MantraMenuValues *)datGameState)->panelValue;
+            state->shown = datGameState->header.currency;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
+        func_0035C860(text, mnuMantraValueFormat, datGameState->header.currency);
     }
     frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
@@ -2092,7 +2088,7 @@ u32 mnuCreateTypeOneRecord(void) {
     memset(record, 0, sizeof(MantraRecordPanelState));
     record->state = 1;
     record->flags = 0;
-    record->unk10 = ((MantraMenuValues *)datGameState)->panelValue;
+    record->unk10 = datGameState->header.currency;
     return (u32)record;
 }
 
@@ -2152,18 +2148,18 @@ void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     u32 flags = fade | 0xA09DC300;
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x2E, 0, drawArg);
-    if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
+    if (datGameState->header.currency != state->shown) {
         s32 steps = 20;
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, mnuMantraValueFormat, state->shown + (((MantraMenuValues *)datGameState)->panelValue - state->shown) * state->step / steps);
+        func_0035C860(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
-            state->shown = ((MantraMenuValues *)datGameState)->panelValue;
+            state->shown = datGameState->header.currency;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
+        func_0035C860(text, mnuMantraValueFormat, datGameState->header.currency);
     }
     frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }

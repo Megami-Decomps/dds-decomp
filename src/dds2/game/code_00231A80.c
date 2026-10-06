@@ -1,7 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
-#include "mdl.h"
-#include "sdf_draw.h"
+#include "mdl_context.h"
 
 extern u8 sdfViewMatrix[];
 
@@ -62,25 +61,6 @@ typedef struct MdlInner {
     u128 vector70; /* 0x70 */
 } MdlInner;
 
-/* Context shared by the matched mdlManager helpers. */
-struct MdlCtx {
-    u32 flags;         /* 0x0: 1 = skip update, 2 = skip anchors, 4 = needs inner flag 0x10 */
-    u8 unk4[8];        /* 0x4 */
-    MdlSub *sub;       /* 0xC */
-    union {
-        u32 word;      /* 0x10: low byte read by mdlIsInnerSentinel */
-        struct {
-            s16 id;    /* 0x10 */
-            s16 arg;   /* 0x12 */
-        } h;
-    } current;
-    u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
-    MdlInner *inner;   /* 0x18 */
-    Motion *first;    /* 0x1C */
-    Motion *slots[4]; /* 0x20 */
-    struct MdlDevList *devList; /* 0x30: device slots released with the model */
-};
-
 typedef struct MdlDevSlot {
     struct MdlDevSlot *next; /* 0x0 */
     void *slot;              /* 0x4 */
@@ -89,8 +69,6 @@ typedef struct MdlDevSlot {
 typedef struct MdlDevList {
     MdlDevSlot *first; /* 0x0 */
 } MdlDevList;
-
-
 
 typedef struct MdlResourceSelection {
     u16 pathTable;
@@ -1118,4 +1096,3 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
 INCLUDE_SDATA(const s32, "game/code_00231A80", D_00436FA0);
 
 INCLUDE_SDATA(const s32, "game/code_00231A80", D_00436FA8);
-

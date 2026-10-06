@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "eff_transform.h"
+#include "dds3obj.h"
 
 extern u64 scrReadIntParameter(u64);
 
@@ -38,22 +39,21 @@ u32 func_0010F160(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F190);
 
-extern s32 dds3GetObjectOwnedHandle(void *object);
 extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, const char *format, ...);
 extern void sdfAppendPacket(void *list, void *packet);
 extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
 
 u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
-    void *handle;
+    ObjBase *handle;
     void *command;
 
-    handle = (void *)dds3GetObjectOwnedHandle(object);
+    handle = dds3GetObjectOwnedHandle(object);
     command = sdfCreateFormattedSifCommand((x * 3 << 6) + 0x7000,
                                            (y * 3 << 5) + 0x7900,
                                            0xFEFFFF,
                                            0,
                                            D_00412778,
-                                           *(u32 *)handle);
+                                           handle->flags);
     sdfAppendPacket(list, command);
     return 1;
 }

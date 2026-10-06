@@ -110,7 +110,28 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275B0);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290240);
+s32 func_00290240(MenuPanelObject *object, s8 direction) {
+    MantraNodePos *position = object->state.defaultSelector;
+    s32 grid[2];
+    s32 neighbor;
+
+    grid[0] = position->x / 10 + (position->x & 1);
+    grid[1] = position->y / 10;
+    switch (direction) {
+    /* Vertical moves depend on the staggered row; horizontal moves do not. */
+    case 1: neighbor = (grid[1] & 1) ? 5 : 0; break;
+    case 4: neighbor = (grid[1] & 1) ? 3 : 2; break;
+    case 2: neighbor = 1; break;
+    case 8: neighbor = 4; break;
+    /* Upper diagonals, then lower diagonals. */
+    case 9: neighbor = 5; break;
+    case 3: neighbor = 0; break;
+    case 12: neighbor = 3; break;
+    case 6: neighbor = 2; break;
+    default: return -1;
+    }
+    return neighbor;
+}
 
 
 s32 func_00290328(MenuPanelObject *object, MantraNodePos *list, s8 position) {

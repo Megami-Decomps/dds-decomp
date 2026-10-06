@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "btl_state.h"
 #include "pcp_vu0.h"
 
 
@@ -358,7 +359,7 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
 /* Adds one to the base unless bit 9 of the owner's flags is set. */
 
 s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
-    return base + ((((s32)owner->flags >> 9) ^ 1U) & 1);
+    return base + (((owner->flags >> 9) ^ 1U) & 1);
 }
 
 /* Number display: initializes both anchor vectors, then adds the offset before projection. */
@@ -486,10 +487,6 @@ BtlEffectTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
     return task;
 }
 
-typedef struct BtlEffectSlots {
-    u8 pad00[0x1F8];
-    u32 flags; /* 0x1F8 */
-} BtlEffectSlots;
 
 extern void func_001AD970(s32);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
@@ -499,15 +496,15 @@ extern s32 D_00360458[];
 extern s32 D_00360460[];
 
 s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
-    s32 battleState = btlGetRuntime();
+    BtlState *battleState = (BtlState *)btlGetRuntime();
     BtlUnit *owner = link->owner;
 
     if (link->elapsedTicks == 0) {
         s32 resourceIndex = link->arg;
 
         if (resourceIndex == 0) {
-            if ((*(u64 *)&owner->flags & 0x1400) != 0) {
-                if (((BtlEffectSlots *)battleState)->flags & 0x400) {
+            if ((owner->flags64 & 0x1400) != 0) {
+                if (battleState->commandRestrictFlags & 0x400) {
                     if (owner->flags & 0x400) {
                         func_001AD970(D_00360460[0]);
                     } else {

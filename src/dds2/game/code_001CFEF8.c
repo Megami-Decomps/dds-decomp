@@ -249,10 +249,10 @@ s32 btlLoadBankWhenTasksIdle(void) {
 }
 
 void fldMarkGridTiles(BtlState *scene) {
-    BtlRuntimeTask *tile = (BtlRuntimeTask *)fldCreateSceneTileTask(scene->tileX, scene->tileY);
+    BtlRuntimeTask *tile = (BtlRuntimeTask *)fldCreateSceneTileTask(scene->background.ids.major, scene->background.ids.minor);
     tile->ownerId = 0x8000000000000001ULL;
     btlStartTask(tile);
-    tile = (BtlRuntimeTask *)btlCreateFloorLoadTask(scene->tileX, scene->tileY);
+    tile = (BtlRuntimeTask *)btlCreateFloorLoadTask(scene->background.ids.major, scene->background.ids.minor);
     btlStartTask(tile);
 }
 
@@ -263,7 +263,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
         btlResetTitleStreamOnBattleFlag();
         func_001E9410();
         btlSpawnBattleWorldAction();
-        btlCreateRainEffect(scene->tileX, scene->tileY);
+        btlCreateRainEffect(scene->background.ids.major, scene->background.ids.minor);
         if (scene->commandRestrictFlags & 0x40000) {
             params.rotation[0] = 0.19607843f;
             params.rotation[1] = 0.19607843f;
@@ -405,95 +405,8 @@ extern void btlRefreshUnitMotionSelection(u8 *);
 extern SceneEffectRequest *btlCreateEffObjC(BtlUnit *, s32);
 
 /* Advance the scene after its bound actor tasks finish their preparation. */
-s32 btlAdvanceSceneWhenActorTasksReady(BtlState *scene) {
-    s32 ready = 1;
-    u32 group = scene->mode == 1 ? FLD_SCENE_ACTOR_PRIMARY_BIT : FLD_SCENE_ACTOR_SECONDARY_BIT;
-    ActionStateLink *head = scene->tasks;
-    ActionStateLink *node;
-    BtlUnit *actor;
-
-    for (node = head; node != NULL; node = node->next) {
-        if ((node->pendingFlags & FLD_SCENE_TASK_BOUND_BIT) &&
-            (node->unit->flags & FLD_SCENE_TASK_ACTIVE_BIT) &&
-            node->state >= 3) {
-            ready = 0;
-            break;
-        }
-    }
-    for (node = head; node != NULL; node = node->next) {
-        if (node->pendingFlags & FLD_SCENE_TASK_BOUND_BIT) {
-            actor = node->unit;
-            if ((actor->flags & group) &&
-                (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) &&
-                !(actor->flags & 0xE0)) {
-                if (node->state != 2) {
-                    ready = 0;
-                }
-            }
-        }
-    }
-    if (ready && scene->frame > 16) {
-        for (node = head; node != NULL; node = node->next) {
-            if (node->pendingFlags & FLD_SCENE_TASK_BOUND_BIT) {
-                actor = node->unit;
-                if (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) {
-                    if (!(actor->flags & 0xE0)) {
-                        actor->flags &= ~0x10U;
-                        btlTickActorEntryCountdowns((u8 *)actor);
-                        if (actor->conditionFlags & 0x322F) {
-                            btlDispatchStateHandler(node, 4);
-                        }
-                        node->flags &= ~4U;
-                        if (!(actor->flags & group)) {
-                            actor->stateFlags &= ~0x800000U;
-                        } else {
-                            btlResetBattleHistoryCounters();
-                            btlClearActorSelectedEntryIndex(actor);
-                            btlRefreshUnitMotionSelection((u8 *)actor);
-                        }
-                    }
-                }
-            }
-        }
-        if (scene->commandRestrictFlags & FLD_SCENE_COUNTERS_ENABLED_BIT) {
-            s32 affected = 0;
-            s32 total = 0;
-            BtlUnit *selected = NULL;
-            s32 message;
-            SceneEffectRequest *request;
-            u16 status;
-
-            for (actor = scene->units; actor != NULL; actor = actor->nextActor) {
-                if (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) {
-                    if (actor->flags & FLD_SCENE_ACTOR_SECONDARY_BIT) {
-                        total++;
-                        status = actor->conditionFlags & 1;
-                        if (status != 0) {
-                            affected++;
-                            selected = actor;
-                        }
-                    }
-                }
-            }
-            if (affected == 1) {
-                message = 0;
-            } else if (affected == total) {
-                message = 1;
-            } else {
-                message = 2;
-            }
-            if (affected != 0) {
-                request = btlCreateEffObjC(selected, message);
-                request->startKind = 0xA;
-                request->taskId = 0x2E;
-                btlStartTask(request);
-            }
-            scene->commandRestrictFlags &= ~FLD_SCENE_COUNTERS_ENABLED_BIT;
-        }
-        return 8;
-    }
-    return 0;
-}
+extern s32 btlAdvanceSceneWhenActorTasksReady(BtlState *);
+INCLUDE_ASM(const s32, "game/code_001CFEF8", btlAdvanceSceneWhenActorTasksReady);
 
 extern void fldClearSceneAdvanceFlag(void);
 extern s32 btlCanStartPrimaryScriptTask(void);

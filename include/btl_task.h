@@ -30,7 +30,14 @@ typedef struct SceneAiWork {
     /* The selection helper indexes a 3-by-3 target-mask table with this cursor. */
     u16 cursorRow;          /* 0x18 */
     u16 cursorColumn;       /* 0x1A */
-    u8 pad1C[0x88];
+    s8 animationPhase;       /* 0x1C */
+    u8 pad1D[0x43];
+    s8 rowPhase[3];          /* 0x60: three independent row-animation states */
+    u8 pad63[5];
+    f32 rowScale[3];        /* 0x68: row size in percent, initialized to 80 */
+    s32 rowPosition[3][2];   /* 0x74: XY outputs from the direction-step table */
+    s32 rowStep[3];          /* 0x8C: bounded to 0..5 during row animation */
+    s32 rowFade[3];          /* 0x98: initialized to 128 for each row */
 } SceneAiWork;
 
 typedef struct BtlUnit BtlUnit;
@@ -51,7 +58,13 @@ typedef struct BtlTask {
     u8 unk_1C[4];
     s32 result;              /* +0x20 */
     s32 arg;                 /* +0x24 */
+#ifdef VERSION_DDS1
+    u8 unk_28[0x10];
+    s32 value38; /* 0x38: count retained by the HARI2 command (0xD5). */
+    u8 pad3C[0x24];
+#else
     u8 unk_28[0x38];
+#endif
     BtlIndexList *targetList; /* Selected unit/ID index list consumed by battle commands. */
     u8 unk_64[0xE4];
     u32 actions[8];         /* +0x148: opaque queued action slots */

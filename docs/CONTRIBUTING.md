@@ -200,6 +200,20 @@ games (edit the local struct copy's padding), a constant `--fix-immediates`
 cannot find as a hex literal, and retail's jal-versus-j tails (docs/idioms.md,
 s64 wrappers).
 
+### Shared allocated work
+
+Recover an allocation's primary type from its constructor, not just the fields
+read by one consumer. For example, both `fldInitializeSceneObject` constructors
+clear `0x30` bytes; the shared `BattleSceneObject` in `include/btl_ui.h` includes
+the state at `0x00`, the command-work pointer at `0x28`, and the owning task at
+`0x2C`. The command-work pointer refers to the task's inline work at `0x20`.
+A four-byte state-only struct is not the complete allocated object.
+
+When promoting such a type, remove private copies and migrate the constructors,
+getters, and callers together. Discover every header consumer with the normal
+CPP dependency recipe, then check both games' complete affected units; checking
+only the newly decompiled callback cannot establish shared-type closure.
+
 ## Build details
 
 `configure.py` automates all of these:
