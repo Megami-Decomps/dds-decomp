@@ -3096,24 +3096,20 @@ void func_00169D78(EffFragmentResources *history, u128 *source) {
 }
 
 
-typedef struct EffThunderSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct EffThunderSurface *, s32);
-} EffThunderSurface;
 
-extern EffThunderSurface *D_003548E0[];
+extern SdfPoolNode *D_003548E0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(s32);
-extern void sdfConsAppendClearPacket(s32, s32);
-extern void sdfConsAppendAssetPacket(s32, u32, s32);
-extern void sdfAppendPacket(s32, s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
+extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0015FE20(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */
 void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     s32 start[4];
     s32 length[4];
-    s32 list;
+    SdfListHead *list;
     s32 recent;
     s32 wrapped;
     s32 i;
@@ -3122,15 +3118,15 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     u32 *colors;
     u32 edgeColor;
     u32 centerColor;
-    EffThunderSurface *surface;
+    SdfPoolNode *surface;
 
     if (history->activePointCount == 0) {
         return;
     }
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsAppendClearPacket(list, 0);
-    sdfConsAppendAssetPacket(list, history->resourceHandle, 0);
+    sdfConsAppendClearPacket((s32)list, 0);
+    sdfConsAppendAssetPacket((s32)list, (void *)history->resourceHandle, 0);
     recent = history->activePointCount;
     start[0] = history->position - recent;
     if (start[0] < 3) {
@@ -3175,7 +3171,7 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     D_003D6520.color = history->color;
     sdfAppendPacket(list, func_0015FE20(&D_003D6520));
     surface = D_003548E0[history->surfaceIndex];
-    surface->submit(surface, list);
+    surface->append((SdfListHead *)surface, list);
 }
 
 

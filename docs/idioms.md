@@ -992,6 +992,31 @@ member (`f(&work->dma)`); `lw $a0, 0x68($base)` loads a pointer member
 (`f(work->dma)`). An embedded array behind a header is a struct with the
 array as its last member (`EffectRingBlock`, `MapRequestRing`).
 
+## Battle records and saved-party ownership
+
+The DDS1 battle getters return the canonical `DatPartyRecord` entries in
+`datGameState->party`. The current-entry getter forwards its roster ID to
+`dds3FindEntryIndex`; it does not load that ID through a pointer argument.
+Use the shared record for party scans and command-power snapshots, and the
+shared game-state inventory, battle-flag bank and 40-byte scene records
+rather than local byte-offset views.
+
+An actor's stat data is not established as a full embedded party record.
+`btlSyncPlayerWork` retains the actor's `+0x120` stat base separately from
+the original actor pointer, but DDS2's native actor links at `+0x174` and
+`+0x178` conflict with the saved record's profile and skill-flag storage.
+The shared stat-prefix owner remains an open question. Do not restore a
+private party-shaped actor view, add a union or fabricate a cached pointer
+merely to reproduce this function's register allocation; its honest
+canonical-field candidate remains parked and retail assembly stays active.
+
+DDS1's camera-selection command stores its selected actor in
+`BtlLinkedCommand.selectedUnit` at `+0x100`, then reads the native `u16`
+`BtlState.cameraPresetMode` at `+0x244`. Keep these fields on their existing
+complete owners; the adjacent store/load is not evidence for a new command
+or state-prefix view. DDS2's corresponding command uses its existing
+selected-actor field at `+0x120` and mode field at `+0x268`.
+
 ## SDK packet words versus GS payload words
 
 SDF's packet allocator and cursor helpers transport EE addresses as 32-bit
@@ -1044,6 +1069,15 @@ Keep this genuine native word transport as an explicit residual: do not
 force the pool callbacks through draw signatures, add an owner union, or
 introduce a second structure view. The model aliases `D_00325048` /
 `D_00380048` select this same work entry.
+The thirteen-row packet-group submission bridge reads the same four-word
+groups; row seven can contain these work callbacks. Its generic owner
+interface is therefore a separate boundary, not a draw-only owner array.
+Do not force `sdfSubmitDrawPacketGroups` through draw append/prepend types.
+
+The flag-list geometry packet wrappers `func_002EF2B0` / `func_00348158`
+still have legacy caller/provider declarations. Recover their renderer
+return and argument-forwarding ABI independently; canonical draw owners
+do not establish that wrapper ABI.
 
 `sdfAllocatePacketList` and its optional allocation callback return native
 `s32` allocation words. Decode each newly allocated list once into

@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
+#include "sdf.h"
 
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
@@ -925,10 +926,6 @@ typedef struct BtnUv {
     s32 v;
 } BtnUv;
 
-typedef struct BtnSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct BtnSurface *, void *);
-} BtnSurface;
 
 extern BtnUv D_0035FA30[];
 extern BtnUv D_0035FA38[];
@@ -945,17 +942,20 @@ extern BtnUv D_0035FA88[];
 extern BtnUv D_0035FA90[];
 extern BtnUv D_0035FA98[];
 extern BtnUv D_0035FAA0[];
-extern s32 func_0029C048();
-extern void sdfQueueGouraudTexturedQuad();
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfConsCreateDrawPacket();
+struct RefObj;
+extern SdfTex *func_0029C048(void *, struct RefObj *);
+extern void sdfQueueGouraudTexturedQuad(s32, s32, s32, s32, s32, s32,
+    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+    s32, s32, s32, s32, s32, s32 (*)(s32));
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
-void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
+void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
     BtnUv *uv;
-    s32 texture;
-    void *packet;
+    SdfTex *texture;
+    SdfListHead *packet;
     s32 xFixed;
     s32 yFixed;
 
@@ -979,19 +979,19 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
         case 0x4000: uv = D_0035FAA0; break;
         default: uv = 0; break;
         }
-        texture = func_0029C048(surface, ((BtlState *)btlGetRuntime())->buttonTextureHandle);
-        packet = sdfAllocPacketAligned(0x20);
+        texture = func_0029C048(surface, (struct RefObj *)((BtlState *)btlGetRuntime())->buttonTextureHandle);
+        packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(packet);
         sdfConsCreateDrawPacket(packet, texture, 0);
         xFixed = x * 0x10;
         yFixed = y * 8;
-        sdfQueueGouraudTexturedQuad(packet, 0x40,
+        sdfQueueGouraudTexturedQuad((s32)packet, 0x40,
                       xFixed + 0x7000, yFixed + 0x7900, uv->u * 0x10, uv->v * 0x10, topLeftColor,
                       xFixed + 0x7200, yFixed + 0x7900, uv->u * 0x10 + 0x200, uv->v * 0x10, topRightColor,
                       xFixed + 0x7000, yFixed + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, bottomLeftColor,
                       xFixed + 0x7200, yFixed + 0x7A00, uv->u * 0x10 + 0x200, uv->v * 0x10 + 0x200, bottomRightColor,
                       0xFF0000, 0);
-        surface->submit(surface, packet);
+        surface->append((SdfListHead *)surface, packet);
     }
 }
 

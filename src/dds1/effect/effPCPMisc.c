@@ -4041,32 +4041,28 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
     sdfReleaseChipBlock(work);
 }
 
-typedef struct EffPCPBeamDrawEntry {
-    u8 pad00[0x10];
-    void (*draw)(void *, s32);
-} EffPCPBeamDrawEntry;
 
 extern u8 D_00355640[];
-extern EffPCPBeamDrawEntry *D_00355688[];
+extern SdfPoolNode *D_00355688[];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(s32 list);
+extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32));
 extern void sdfConsAppendAssetPacket(s32 list, void *asset, s32 (*alloc)(s32));
 extern s32 func_0015FE20(EffPCPBeamDrawParams *params);
-extern void sdfAppendPacket(s32 list, s32 packet);
+extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     f32 scaleMatrix[4][4];
-    s32 list;
+    SdfListHead *list;
     s32 count;
-    EffPCPBeamDrawEntry *entry;
+    SdfPoolNode *entry;
 
     if (node->vertexCount == 0) {
         return;
     }
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     EE_MMI_UNIT_MATRIX(scaleMatrix);
     scaleMatrix[2][2] = scaleMatrix[1][1] = scaleMatrix[0][0] = node->scale;
@@ -4077,8 +4073,8 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     VU0_ADD_XYZ(vf31, vf31, vf10);
     VU0_LOAD_MATRIX_B(scaleMatrix);
     sdfComposeVuMatrixFromRegisters();
-    sdfConsAppendVuPacket(list, 0);
-    sdfConsAppendAssetPacket(list, (void *)node->assetHandle, 0);
+    sdfConsAppendVuPacket((s32)list, 0);
+    sdfConsAppendAssetPacket((s32)list, (void *)node->assetHandle, 0);
     count = node->vertexCount;
     D_003D6610.colors = node->colors;
     D_003D6610.points = node->points;
@@ -4097,7 +4093,7 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
         sdfAppendPacket(list, func_0015FE20(&D_003D6610));
     }
     entry = D_00355688[node->drawKind];
-    entry->draw(entry, list);
+    entry->append((SdfListHead *)entry, list);
 }
 
 void effPcpBuildConcentricBeamVertices(f32 radius, EffPCPBeamWork *work) {

@@ -1142,17 +1142,13 @@ void func_002CEC40(SdfFlagListWork *work) {
     work->frame++;
 }
 
-typedef struct GsSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct GsSurface *, void *);
-} GsSurface;
 
-extern GsSurface *D_00398098[];
+extern SdfPoolNode *D_00398098[];
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *func_002EF2B0(f32 (*)[4], u32 *, u32, s32);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.
@@ -1163,8 +1159,8 @@ void func_002CF248(SdfFlagListWork *work) {
     u32 count;
     u32 vertexIndex;
     s32 vertexAllocation;
-    void *packetList;
-    GsSurface *surface;
+    SdfListHead *packetList;
+    SdfPoolNode *surface;
 
     if (work->maxFrames != 0 && work->frame >= work->maxFrames) {
         return;
@@ -1182,11 +1178,11 @@ void func_002CF248(SdfFlagListWork *work) {
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, &copiedVertices[vertexIndex]);
     }
-    packetList = sdfAllocPacketAligned(SDF_FLAG_LIST_PACKET_BYTES);
+    packetList = (SdfListHead *)sdfAllocPacketAligned(SDF_FLAG_LIST_PACKET_BYTES);
     sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, func_002EF2B0(copiedVertices, work->colors, work->count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
+    sdfAppendPacket(packetList, (u32)func_002EF2B0(copiedVertices, work->colors, work->count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_00398098[work->surfaceIndex];
-    surface->submit(surface, packetList);
+    surface->append((SdfListHead *)surface, packetList);
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 
