@@ -48,10 +48,15 @@ typedef struct BtlState {
     u8 pad259[3];
     u16 phase; /* 0x25C */
     u8 requestMode; /* 0x25E: script sets this to 4 with requestArgument */
-    u8 pad25F[0x1D];
+    u8 pad25F[0x11];
+    s32 encounterPack; /* 0x270: ENC PACK test selection (func_00215FF8) */
+    u8 pad274[8];
     s32 battleMode; /* 0x27C */
     s32 requestArgument; /* 0x280: sign-extended script halfword */
-    u8 pad284[0x18];
+    u8 pad284[4];
+    u16 encounterParamA; /* 0x288: scene record +0x1C, else the test-menu default */
+    u16 encounterParamB; /* 0x28A: scene record +0x1E, else the test-menu default */
+    u8 pad28C[0x10];
     struct KwlnTask *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
