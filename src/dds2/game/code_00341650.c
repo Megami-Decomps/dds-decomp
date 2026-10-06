@@ -1,3 +1,4 @@
+#include "snd_ring.h"
 #include "common.h"
 
 typedef struct CmdPacket {
@@ -8,7 +9,7 @@ typedef struct CmdPacket {
     /* 0xC */ u32 unkC;
 } CmdPacket;
 
-u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
+u32 func_00341650(u32 command, u32 channel, void *packet, s32 size);
 
 void sndEnsureMidiBankResident(s32 trackId);
 
