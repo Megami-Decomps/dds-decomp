@@ -922,7 +922,118 @@ void fileSetMenuFlowState(u32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CA1F0);
+extern char D_003E8200[];
+extern char D_003E8220[];
+extern char D_003E8238[];
+extern char D_003E8290[];
+extern char D_003E82A0[];
+extern char D_003E82B0[];
+extern char D_003E82F0[];
+extern char D_003E8338[];
+extern char D_003E8468[];
+extern char D_003E8480[];
+extern char D_003E8498[];
+extern char D_003E8A48[];
+extern char D_003E8A70[];
+extern char D_003E8A90[];
+extern char D_003E8AA8[];
+extern char D_003E8AB8[];
+extern char D_003E8AD0[];
+extern char D_003E8AE0[];
+extern char D_003E8B00[];
+extern char D_003E8B18[];
+extern char D_003E8B60[];
+
+void func_002CA1F0(void) {
+    if (D_00437D38 == 0) {
+        return;
+    }
+
+    if (D_00437D38 == 1) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8200);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8220);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8238);
+            fileDrawSaveWindow();
+        }
+    }
+    if (D_00437D38 == 2) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82A0);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
+            fileDrawSaveWindow();
+        }
+    }
+    if (D_00437D38 == 3) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8290);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
+            fileDrawSaveWindow();
+        }
+    }
+    if (D_00437D38 == 4) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8480);
+            fileDrawPulsingSaveHighlight();
+        }
+        D_00437D04 = 1;
+    }
+    if (D_00437D38 == 5) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82B0);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
+            fileDrawSaveWindow();
+        }
+    }
+    if (D_00437D38 == 6) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8498);
+            fileDrawPulsingSaveHighlight();
+        }
+    }
+    if (D_00437D38 == 13) {
+        if (func_002C9BD0() != 0) {
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8468);
+            fileDrawPulsingSaveHighlight();
+        }
+        D_00437D04 = 2;
+    }
+    if (D_00437D38 >= 20) {
+        if (func_002C9BD0() != 0) {
+            switch (D_00437D38) {
+            case 20:
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8A48);
+                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8A70);
+                mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8A90);
+                mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)D_003E8AA8);
+                fileDrawPulsingSaveHighlight();
+                break;
+            case 21:
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8AB8);
+                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8AD0);
+                fileDrawPulsingSaveHighlight();
+                break;
+            case 22:
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8AE0);
+                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8B00);
+                fileDrawPulsingSaveHighlight();
+                break;
+            case 23:
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8B18);
+                fileDrawPulsingSaveHighlight();
+                break;
+            case 24:
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8B60);
+                fileDrawPulsingSaveHighlight();
+                break;
+            }
+        }
+    }
+}
+
 
 void fileClearAllSlotFlags(void) {
     fileReqMarkSlotMetadataDirty(fileMemoryCardRequestContext);
