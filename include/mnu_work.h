@@ -35,7 +35,7 @@ typedef struct MenuWorkEntry {
     s16 frameCounter; /* 0x30: frames shown of the current short record (func_003230A0) */
     s16 repeatCount;
     u16 unk34;
-    u16 remaining;
+    s16 remaining;
     u16 unk38;
     u16 elapsed;
     u32 callback; /* Callback-list node address, not a direct function pointer. */
@@ -140,7 +140,7 @@ void mnuCopyResourceProgressParameters(MenuProgressParameters *);
 void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
 MenuRegistry *mnuGetMenuRecordRegistryEntry(u32);
 void func_00322540(MenuRegistryParameters *, u32);
-MenuRegistryParameters *func_00322550(u8);
+MenuRegistryParameters *func_00322550(u32);
 
 void func_00323918(MenuWorkCallback);
 void func_00323920(MenuWorkCallback);
