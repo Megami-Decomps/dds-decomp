@@ -73,6 +73,12 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s8 D_003D7588[];
 
+/* Wind texture clone kept by the overlay; +8 is its 256-entry palette. */
+typedef struct BtlWindTexture {
+    u8 pad00[8];
+    s32 *palette;
+} BtlWindTexture;
+
 typedef struct BattleRuntimeState {
     s32 counter;
     u16 state;
@@ -85,15 +91,15 @@ typedef struct BattleRuntimeState {
     u32 color14;
     u32 color18;
     u32 color1C;
-    u32 color20;
-    f32 unk_24;
+    f32 phase;      /* 0x20: overlay sweep, advanced each frame by phaseSpeed */
+    f32 phaseSpeed; /* 0x24: decays toward -0.02 */
     s32 gridWidth;
     s32 gridHeight;
     s32 cellWidth;
     s32 cellHeight;
     void *ownedData;
     u8 unk_3C[4];
-    void *resource;
+    BtlWindTexture *resource;
     void *request;
     void *handle;
 } BattleRuntimeState;
@@ -1093,7 +1099,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern s32 kwlnGetDrawBufferIndex(void);
 extern void sdfAppendDmaPrimary(s32, void *, void *);
 
-void func_00211B88(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
+void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1139,7 +1145,64 @@ void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_002121E8);
+extern u32 effGetWindTextureHandle(void);
+extern void *func_0029BD90(void *);
+extern void func_002D4C80(const void *, void *, s32);
+extern void func_002D4CC8(const void *, void *, s32);
+extern void sdfAppendDmaTagToList(s32, void *);
+extern void sdfAppendPacket(void *, s32);
+extern u32 btlMulColor(u32, u32);
+extern void func_00211D40(s32, s32, u32, s32, f32, f32, f32);
+
+/* Draw the wind overlay: three tinted sweeps over the grey quad, then advance the sweep phase. */
+void func_002121E8(s32 list, u32 color, s32 depth) {
+    SdfPacket *tag;
+    SdfPacket *registers;
+    u32 tint;
+
+    if (btlRuntimeState.resource == NULL) {
+        btlRuntimeState.resource = func_0029BD90((void *)effGetWindTextureHandle());
+        btlCopyPaletteLowByteToAlpha(btlRuntimeState.resource->palette);
+    }
+    tag = sdfAllocPacketAligned(0x40);
+    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
+    sdfAppendDmaTagToList(list, tag);
+    registers = sdfAllocPacketAligned(0x40);
+    registers[0].unk0 = 3;
+    registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    registers[0].unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    registers[0].unk18 = 0xE;
+    registers[1].unk0 = 0x50003;
+    registers[1].unk8 = 0x48;
+    registers[1].unk10 = 0x44;
+    registers[1].unk18 = 0x43;
+    sdfAppendPacket((void *)list, (s32)registers);
+    registers = sdfAllocPacketAligned(0x40);
+    registers[0].unk0 = 3;
+    registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    registers[0].unk10 = (((u64)0x10000000 << 32) | 0x8002);
+    registers[0].unk18 = 0xE;
+    registers[1].unk0 = 0x50003;
+    registers[1].unk8 = 0x47;
+    registers[1].unk10 = 0x54;
+    registers[1].unk18 = 0x42;
+    sdfAppendPacket((void *)list, (s32)registers);
+    tint = btlMulColor(0x3C808080, color);
+    func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 5.0f, 2.0f);
+    func_00211B88(list, 0x40, 0x98989898, 1.01f, depth);
+    func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.5f);
+    func_00211B88(list, 0x40, 0x98989898, 1.01f, depth);
+    func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.0f);
+    func_00211B88(list, 0x40, 0x98989898, 1.01f, depth);
+    btlRuntimeState.phase += btlRuntimeState.phaseSpeed;
+    btlRuntimeState.phaseSpeed *= 0x1.f851eap-1f;
+    if (btlRuntimeState.phaseSpeed > -0.02f) {
+        btlRuntimeState.phaseSpeed = -0.02f;
+    }
+    tag = sdfAllocPacketAligned(0x40);
+    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
+    sdfAppendDmaTagToList(list, tag);
+}
 
 extern f32 func_002F9F60(f32);
 
@@ -1232,9 +1295,9 @@ void btlInitFadeColors(void) {
         btlRuntimeState.color1C = 0x00FFFFFF;
         btlRuntimeState.color14 = 0x08FFFFFF;
     }
-    btlRuntimeState.unk_24 = -0.045f;
+    btlRuntimeState.phaseSpeed = -0.045f;
     btlRuntimeState.color18 = 0x00808080;
-    btlRuntimeState.color20 = 0;
+    btlRuntimeState.phase = 0.0f;
 }
 
 extern SdfPoolNode D_00325708;
@@ -1776,8 +1839,6 @@ s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 
 }
 
 extern void sdfInitPacketList(void *);
-
-extern void sdfAppendPacket(void *, s32);
 
 extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, void *, u32);
 
