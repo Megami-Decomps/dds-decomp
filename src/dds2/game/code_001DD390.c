@@ -6567,8 +6567,6 @@ void btlAdvancePlayerCursorAnimation(s32 action, s32 state) {
     }
 }
 
-
-
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417F30);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180B0);
