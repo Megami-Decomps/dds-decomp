@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "pcp_vu0.h"
 #include "btl_ui.h"
@@ -5177,24 +5178,63 @@ void fldScaleSceneCoordinateRecord(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C2E90);
 
-extern s32 D_003BD83C;
+extern SceneSlotFadeWork *D_003BD83C;
 
 void fldSetSceneSlotRange(s32 index) {
-    u8 *scene = (u8 *)D_003BD83C;
-    if (*(s8 *)(scene + 0x20) < index) {
+    SceneSlotFadeWork *scene = D_003BD83C;
+    if (scene->currentIndex < index) {
         s32 i;
         for (i = 0; i <= index; i++) {
-            s32 offset = i * 2;
-            scene = (u8 *)D_003BD83C;
-            *(s32 *)(scene + (offset + *(s32 *)(scene + 4)) * 4 + 0x38) = 0x80;
-            *(u8 *)((*(s32 *)(scene + 4) + offset) + (s32)scene + 0x22) = 3;
+            scene = D_003BD83C;
+            scene->fade[i][scene->bank] = 0x80;
+            scene->phase[i][scene->bank] = 3;
         }
-        ((u8 *)D_003BD83C)[0x21] = index;
+        D_003BD83C->lastIndex = index;
     }
-    ((u8 *)D_003BD83C)[0x20] = index;
+    D_003BD83C->currentIndex = index;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001C3040);
+extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
+
+void func_001C3040(void) {
+    s32 bank = D_003BD83C->bank;
+    s32 last = D_003BD83C->lastIndex;
+    s32 status = btlGetNamedTaskPairStatusOrUnavailable();
+    s32 i;
+    if (D_003BD83C->enabled[bank] == 0) return;
+    if (status != 0 && status != 3) return;
+    for (i = 0; i <= last; i++) {
+        switch (D_003BD83C->phase[i][bank]) {
+        case 1:
+            D_003BD83C->timer++;
+            D_003BD83C->timer = D_003BD83C->timer <= 0 ? 0 : D_003BD83C->timer > 34 ? 34 : D_003BD83C->timer;
+            if (D_003BD83C->timer >= 34) {
+                D_003BD83C->fade[i][bank] += 64;
+                D_003BD83C->fade[i][bank] = D_003BD83C->fade[i][bank] <= 0 ? 0 : D_003BD83C->fade[i][bank] > 255 ? 255 : D_003BD83C->fade[i][bank];
+                if (D_003BD83C->fade[i][bank] >= 255) {
+                    D_003BD83C->phase[i][bank]++;
+                    D_003BD83C->phase[i + 1][bank] = 1;
+                }
+            }
+            break;
+        case 2:
+            D_003BD83C->fade[i][bank] -= 16;
+            D_003BD83C->fade[i][bank] = D_003BD83C->fade[i][bank] <= 128 ? 128 : D_003BD83C->fade[i][bank] > 255 ? 255 : D_003BD83C->fade[i][bank];
+            if (D_003BD83C->fade[i][bank] <= 128) {
+                D_003BD83C->phase[i][bank]++;
+                if (i == last) D_003BD83C->completed = 1;
+            }
+            break;
+        case 3:
+            break;
+        case 4:
+            D_003BD83C->fade[i][bank] -= 64;
+            D_003BD83C->fade[i][bank] = D_003BD83C->fade[i][bank] <= 0 ? 0 : D_003BD83C->fade[i][bank] > 128 ? 128 : D_003BD83C->fade[i][bank];
+            break;
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C32B0);
 
@@ -5419,7 +5459,7 @@ void fldDestroySceneTasksAndBuffers(void) {
     btlReleaseResourceBlock();
     sdfReleaseChipBlock(D_003BD840[1]);
     sdfReleaseChipBlock(D_003BD840[0]);
-    sdfReleaseChipBlock((void *)D_003BD83C);
+    sdfReleaseChipBlock(D_003BD83C);
     sdfReleaseChipBlock(btlTrackedTaskHandles);
 }
 
