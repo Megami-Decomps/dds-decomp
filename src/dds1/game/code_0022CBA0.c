@@ -1,5 +1,7 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_draw.h"
+#include "dds3obj.h"
 #include "evt_world.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
@@ -11,7 +13,7 @@ extern s32 datGameState;
 extern char evtViewerTaskName[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(s32 viewerAddr);
-void func_00232720(void);
+void evtViewerUpdateFrame(void);
 void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
@@ -37,6 +39,13 @@ extern void effSetCh72Id(u32 sourceHandle);
 extern void effSetCh75Id(u32 resourceWord);
 extern void effSetCh76Id(u32 sourceHandle);
 extern void *mnuCampFindEntryByName(void *scene, const char *name);
+
+extern u32 mnuCampGetPrimaryOption(void *scene);
+extern const char *D_00368410[];
+extern const char *D_00368418[];
+extern const char *D_00368420[];
+extern const char *D_00368430[];
+extern s32 D_003BBE94;
 
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
@@ -74,7 +83,7 @@ typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
     s32 flags;
     s32 windowContext;  /* 0x08: owns the message-window handle at +0x104 */
-    u8 padC[4];
+    s32 frameCount; /* 0x0C */
     s32 glyphAdvanceStart;    /* 0x10 */
     s32 glyphAdvanceLimit;    /* 0x14 */
     s32 glyphAdvancePosition; /* 0x18 */
@@ -85,7 +94,8 @@ typedef struct EventViewerState {
     s32 fallbackEntry;
     u8 pad2030[4];
     struct EvtViewTrack *tracks; /* 0x2034 */
-    u8 pad2038[0x200];
+    u8 pad2038[4];
+    struct EvtWorldLink *objects[127];
     s32 unk2238;
     struct {
         u16 id;
@@ -95,7 +105,8 @@ typedef struct EventViewerState {
     } history[8];
     s32 historyCount;
     u32 currentId;
-    u8 pad2284[0xC];
+    s32 commandResetId; /* 0x2284 */
+    u8 pad2288[8];
     s32 blurRectangleEnabled;
     s32 texturedBlurEnabled;
     s32 filterBlurEnabled;
@@ -106,7 +117,11 @@ typedef struct EventViewerState {
     s32 unk22AC;
     u8 pad22B0[4];
     s32 unk22B4;
-    u8 pad22B8[0x14];
+    u8 pad22B8[4];
+    s32 optionSelection; /* 0x22BC */
+    s32 optionCount; /* 0x22C0 */
+    const char *optionTitle; /* 0x22C4 */
+    const char **optionNames; /* 0x22C8 */
     s32 commandResetA; /* 0x22CC: cleared on command mode three */
     s32 commandResetB; /* 0x22D0 */
     u8 commandResetC;  /* 0x22D4 */
@@ -117,9 +132,11 @@ typedef struct EventViewerState {
     s32 commandTableOffset; /* 0x22FC: byte offset into command descriptors */
     u8 pad2300[8];
     struct EvtViewTrack *sel; /* 0x2308: selected timeline track */
-    u8 pad230C[4];
+    s32 commandCategory; /* 0x230C: selected parameter category. */
     u32 commandValue; /* 0x2310: value of the active command */
-    u8 pad2314[0x94];
+    s32 commandMinimum; /* 0x2314 */
+    s32 commandMaximum; /* 0x2318 */
+    u8 pad231C[0x8C];
     f32 commandX; /* 0x23A8 */
     f32 commandY; /* 0x23AC */
     u8 pad23B0[0x10];
@@ -151,7 +168,9 @@ typedef struct EventViewerState {
     s32 titleStreamWaitFrames; /* 0x2440 */
     u8 pad2444[0x34];
     s32 unk2478;
-    u8 pad247C[0x14]; /* allocated as 0x2490 bytes */
+    u8 pad247C[0xC];
+    s32 commandStart; /* 0x2488 */
+    u8 pad248C[4]; /* allocated as 0x2490 bytes */
 } EventViewerState;
 
 /* Script-command parameter slots have byte, halfword, word and float views. */
@@ -168,6 +187,8 @@ typedef struct EvtViewEntry {
     EvtViewParam p0C;
     EvtViewParam p10;
     EvtViewParam p14;
+    u8 pad18[0x14];
+    void *payload; /* 0x2C: effect-specific parameter block. */
 } EvtViewEntry;
 
 
@@ -209,7 +230,8 @@ typedef struct EvtViewTrack {
     } owner;                  /* 0x10: payload role is selected by kind */
     u8 pad14[8];
     s16 frameOffset; /* 0x1C: added to relative key frames. */
-    u8 pad1E[6];
+    s8 playbackTimeMode; /* 0x1E */
+    u8 pad1F[5];
     s32 unk24;
     s32 keyMode;              /* 0x28: mode 1 uses the viewer's pending key */
     f32 savedFirstVector[4]; /* 0x2C: restored when detaching a world object. */
@@ -279,8 +301,89 @@ void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
     }
 }
 
-typedef struct EffScreenDrawParams EffScreenDrawParams;
+typedef struct BlurSource {
+    u8 color[4];
+    s32 blendControl;
+    f32 rotation;
+    f32 scale;
+    s32 centerX;
+    s32 centerY;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} BlurSource;
+
+typedef struct EffScreenDrawParams {
+    BlurSource source;
+    u8 pad28[8];
+} EffScreenDrawParams;
+
+typedef struct EffSolidRectParams {
+    u32 color;
+    s32 blendControl;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+} EffSolidRectParams;
+
+typedef struct EffBlurTemplateBody {
+    s32 extent;
+    BlurSource source;
+} EffBlurTemplateBody;
+
+typedef struct EffBlurScatterParams {
+    s32 count;
+    s32 delaySpread;
+    f32 angleStep;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s32 x;
+    s32 y;
+    s32 positionSpread;
+    s32 size;
+} EffBlurScatterParams;
+
+typedef struct EffBlurScaleParams {
+    s32 count;
+    f32 phaseStep;
+    f32 spacing;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 angleStep;
+    s32 x;
+    s32 y;
+    s32 size;
+} EffBlurScaleParams;
+
+typedef struct EffTemplateBody {
+    u32 words[9];
+} EffTemplateBody;
 extern EffScreenDrawParams *effGetLoadDescA(void);
+
+/* Native five-word draw-vector parameters; the timeline swaps x and y. */
+typedef struct EvtViewerDrawVector {
+    f32 x, y, z, w;
+    s32 mode;
+} EvtViewerDrawVector;
+extern EvtViewerDrawVector kwlnDrawVector;
+extern u128 *D_00324770[];
+extern u128 kwlnDefaultColorVector[];
+extern f32 D_003BD358;
+extern f32 D_003BD35C;
+extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
+extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
+extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
+extern EffSolidRectParams *effEventGetSolidRectangleSetupParams(void);
+extern EffTemplateBody *effEventGetResourceTemplateSetupParams(void);
+extern EffScreenDrawParams *effGetLoadDescD(void);
+extern void *memcpy(void *destination, const void *source, u32 size);
+
 extern void effDrawBlurRectangle(EffScreenDrawParams *);
 extern void effEnableTexturedBlur(void);
 extern void effDisableTexturedBlur(void);
@@ -553,11 +656,10 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
     }
 }
 
-struct WorldObjectPointer;
 extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
 extern void effObjSetInnerSecondVec(EffTransformNode *, u128 *);
 extern void effObjFetchInnerFirstVec(EffTransformNode *);
-extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 *);
+extern u32 *dds3FindObjectChainNodeByName(EvtWorldObject *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
@@ -878,7 +980,117 @@ EvtViewKey *evtViewerFindLatestMatchingGlyph(EvtViewTrack *group, s32 position, 
     return best;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FB30);
+typedef struct EvtViewerPlaybackData {
+    ObjBase *object;
+    void *counter;
+} EvtViewerPlaybackData;
+extern void sdfMotionSampleAtFrame(Motion *motion, f32 frame);
+extern void sdfMotionSuspend(Motion *motion);
+extern void sdfMotionResume(Motion *motion);
+extern void sdfFreezeFloatCounter(void *counter);
+extern void sdfUnfreezeFloatCounter(void *counter);
+extern ObjBase *dds3GetObjectOwnedHandle(void *object);
+extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 end);
+
+/* Apply the viewer playback mode to unit, motion and movie-object tracks. */
+void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
+    EventViewerState *viewer = (EventViewerState *)viewerAddr;
+    EvtWorldTable *table;
+    EvtWorldLink *object;
+    EvtViewTrack *track;
+    EvtViewTrack *found;
+    EvtViewKey *key;
+    Motion *motion;
+    void *counter;
+    void *movie;
+    s32 useTrackTime;
+
+    if (dds3GetWorldObject() == NULL) {
+        return;
+    }
+    table = ((EvtWorldObject *)dds3GetWorldObject())->table;
+    object = table->slots[5].head;
+    while (object != NULL) {
+        track = viewer->tracks;
+        found = NULL;
+        while (track != NULL) {
+            if (track->owner.handle == (u32)object) {
+                found = track;
+                break;
+            }
+            track = track->next;
+        }
+        if (found != NULL) {
+            func_0022EB10(frame, object, track, viewer, 1);
+        }
+        object = object->next;
+    }
+    object = table->slots[6].head;
+    while (object != NULL) {
+        motion = ((EvtViewerPlaybackData *)object->data)->object->unk38;
+        if (motion != NULL) {
+            if (mode == 0) {
+                sdfMotionSampleAtFrame(motion, (f32)frame);
+                sdfMotionSuspend(motion);
+            } else {
+                sdfMotionResume(motion);
+            }
+        }
+        object = object->next;
+    }
+    object = table->slots[3].head;
+    while (object != NULL) {
+        counter = ((EvtViewerPlaybackData *)object->data)->counter;
+        if (counter != NULL) {
+            if (mode == 0) {
+                sdfFreezeFloatCounter(counter);
+            } else {
+                sdfUnfreezeFloatCounter(counter);
+            }
+        }
+        object = object->next;
+    }
+    track = viewer->tracks;
+    while (track != NULL) {
+        switch (track->kind) {
+        case 3: case 18: case 20: case 21: case 26:
+            key = track->keys;
+            useTrackTime = 0;
+            while (key != NULL) {
+                switch (track->kind) {
+                case 3: case 26:
+                    useTrackTime = track->playbackTimeMode;
+                    /* These track kinds use the same indexed movie lookup. */
+                case 20: case 21:
+                    if (key->selector.kind < 0) {
+                        break;
+                    }
+                    object = viewer->objects[key->selector.kind];
+                    goto updateMovie;
+                case 18:
+                    object = ((EvtViewEntry *)key)->payload;
+                    useTrackTime = track->playbackTimeMode;
+updateMovie:
+                    if (object != NULL) {
+                        movie = dds3GetObjectOwnedHandle(object)->slots[1];
+                        if (movie != NULL) {
+                            if (useTrackTime == 0) {
+                                evtPolygonMovieScaleByProgress(movie, mode, key->frame, frame);
+                            } else {
+                                evtPolygonMovieScaleByProgress(movie, mode, 0, frame);
+                            }
+                        }
+                    }
+                    break;
+                }
+                key = key->next;
+            }
+            break;
+        }
+        track = track->next;
+    }
+}
+
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
 void evtViewerDispatchFlagMode(u32 viewerAddr) {
@@ -1051,7 +1263,69 @@ INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD2D0);
 
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD2E0);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230478);
+s32 func_00230478(s32 arg0, s32 arg1, EventViewerState *viewer) {
+    switch ((u32)viewer->selectionMode) {
+    case 0:
+    case 1:
+    case 2:
+        viewer->commandResetA = 0;
+        viewer->commandResetB = 0;
+        evtViewerPushCommandHistory(9, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 5:
+        viewer->commandValue = viewer->frameCount - 1;
+        viewer->commandMinimum = viewer->glyphAdvanceLimit;
+        viewer->commandMaximum = 10000;
+        evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
+        break;
+    case 3:
+    case 4:
+        viewer->optionSelection = 0;
+        viewer->optionCount = 2;
+        viewer->optionTitle = "FRAME SET.OK? ";
+        viewer->optionNames = D_00368410;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 6:
+        viewer->commandStart = 1;
+        viewer->flags |= 1;
+        evtViewerDispatchFlagMode((u32)viewer);
+        viewer->currentId = 0;
+        viewer->historyCount = 0;
+        viewer->commandResetId = 0;
+        D_003BBE94 = 0;
+        return 1;
+    case 7:
+        viewer->optionSelection = mnuCampGetPrimaryOption(viewer);
+        viewer->optionCount = 2;
+        viewer->optionTitle = "START FRAME SELECT";
+        viewer->optionNames = D_00368430;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 8:
+        viewer->commandValue = 0;
+        viewer->commandMinimum = -5000;
+        viewer->commandMaximum = 5000;
+        evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
+        break;
+    case 9:
+        viewer->optionSelection = mnuCampGetPrimaryOption(viewer);
+        viewer->optionCount = 2;
+        viewer->optionTitle = "SET BISTAMODE";
+        viewer->optionNames = D_00368418;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    case 10:
+        viewer->optionSelection = mnuCampGetSecondaryOption(viewer);
+        viewer->optionCount = 3;
+        viewer->optionTitle = "SET SKIPMODE";
+        viewer->optionNames = D_00368420;
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        break;
+    }
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230660);
 
@@ -1298,11 +1572,68 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, u32 viewer
 
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADA98);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232438);
+/* Restore default effect parameters for the selected timeline key. */
+s32 func_00232438(s32 unused0, s32 unused1, EventViewerState *viewer) {
+    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    u128 *destination;
+    u128 *source;
+    EvtViewerDrawVector *draw;
+
+    switch (viewer->sel->kind) {
+    case 10:
+        switch (viewer->commandCategory) {
+        case 13:
+            destination = entry->payload;
+            source = D_00324770[0];
+            PCP_COPY_VECTOR(destination, source);
+            PCP_COPY_VECTOR(destination + 1, source + 1);
+            PCP_COPY_VECTOR(destination + 2, kwlnDefaultColorVector);
+            break;
+        case 14:
+            entry->p08.f = D_003BD358;
+            entry->p0C.f = D_003BD35C;
+            break;
+        }
+        break;
+    case 11:
+        draw = entry->payload;
+        draw->x = kwlnDrawVector.y;
+        draw->mode = kwlnDrawVector.mode;
+        draw->y = kwlnDrawVector.x;
+        draw->z = kwlnDrawVector.z;
+        draw->w = kwlnDrawVector.w;
+        break;
+    case 13:
+        memcpy(entry->payload, effGetLoadDescA(), 0x28);
+        break;
+    case 14:
+        memcpy(entry->payload, effEventGetBlurTemplateSetupParams(), 0x2C);
+        break;
+    case 15:
+        memcpy(entry->payload, effEventGetScatterBlurSetupParams(), 0x2C);
+        break;
+    case 23:
+        memcpy(entry->payload, effEventGetScaleBlurSetupParams(), 0x2C);
+        break;
+    case 27:
+        memcpy(entry->payload, effGetLoadDescD(), 0x28);
+        break;
+    case 16:
+        memcpy(entry->payload, effEventGetSolidRectangleSetupParams(), 0x18);
+        break;
+    case 17:
+        memcpy(entry->payload, effEventGetResourceTemplateSetupParams(), 0x24);
+        break;
+    }
+    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerPickNextHandler);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232720);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerUpdateFrame);
 
 /* Update the active viewer, then switch to its frame-variable task. */
 void *evtViewerScheduleFrameVariableTask(s32 task) {
@@ -1312,7 +1643,7 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
     func_0022E5A0(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
-    return (void *)func_00232720;
+    return (void *)evtViewerUpdateFrame;
 }
 
 /* Initialize the active viewer and schedule its next update callback. */

@@ -137,7 +137,6 @@ typedef struct SdfMotionKeyTrack {
     u16 keyFrames[1];
 } SdfMotionKeyTrack;
 
-typedef struct Motion Motion;
 typedef struct SdfMotionManager SdfMotionManager;
 
 struct SdfMotionManager {
@@ -205,7 +204,7 @@ typedef struct {
     void *sub;
     Blk capturedParams; /* 0x10: saved primary/secondary text scalars */
 } DstBlk;
-typedef struct {
+typedef struct ArrObj {
     s32 u0;
     s16 objectCount; /* 0x04: number of allocated binding objects */
     s16 pad6;
@@ -213,38 +212,6 @@ typedef struct {
     void **objects; /* 0x0C: binding objects, each beginning with a callback table */
 } ArrObj;
 
-typedef struct MotionEntry {
-    u16 frameCount;
-    u16 unk02;
-    u32 bindingData[1];
-} MotionEntry;
-
-typedef struct MotionTable {
-    s32 unk00;
-    MotionEntry **entries;
-} MotionTable;
-
-/* Native motion constructor/tick layout. A blend lead starts the frame clock
- * below zero; blend callbacks normalize nonnegative elapsed frames by duration. */
-struct Motion {
-    Motion *next;      /* 0x00: next node in the owner's intrusive motion list */
-    SdfMotionManager *owner; /* 0x04: owner whose list head is at +0x14 */
-    MotionTable *motionTable; /* 0x08: motion entries and binding-command data */
-    s32 unkC;
-    ArrObj *request;        /* 0x10 */
-    f32 blendDurationFrames; /* 0x14 */
-    f32 blendStartFrame;    /* 0x18: negative lead when a blend is requested */
-    f32 currentFrame;       /* 0x1C: advanced by frameStep on each tick */
-    f32 frameStep;          /* 0x20: initialized to 1.0 */
-    s32 unk24;
-    s32 unk28;        /* 0x28: model code treats this as s16 searchId/slotIndex */
-    s16 motionIndex;  /* 0x2C: selects an entry in motionTable */
-    u16 frameCount;   /* 0x2E: selected entry's duration */
-    u8 state;
-    u8 previousState;
-    u8 loopEnabled;   /* 0x32: wraps the frame clock instead of finishing */
-    u8 pad33;
-};
 
 typedef struct {
     void *unk0;
@@ -329,19 +296,8 @@ void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch) {
     binding->source = source;
 }
 
-typedef struct SdfMotionCommand {
-    u32 command;
-    u32 argument;
-} SdfMotionCommand;
 
-typedef struct SdfMotionCommandTable {
-    u16 unk00;
-    u16 commandCount;
-    u8 pad04[4];
-    SdfMotionCommand commands[1];
-} SdfMotionCommandTable;
-
-Motion *func_002DB230(SdfMotionManager *manager, SdfMotionCommandTable *table) {
+Motion *func_002DB230(SdfMotionManager *manager, MotionTable *table) {
     Motion *motion;
     ArrObj *request;
     SdfMotionCommand *command;
@@ -357,7 +313,7 @@ Motion *func_002DB230(SdfMotionManager *manager, SdfMotionCommandTable *table) {
     request = sdfDevCreateBufferedRequest(count, 4, 8);
     motion->request = request;
     request->objectCount = count;
-    for (i = 0, command = (SdfMotionCommand *)((u8 *)motion->motionTable + 8);
+    for (i = 0, command = motion->motionTable->commands;
          i < count;
          i++, command++) {
         motion->request->objects[i] =
@@ -368,28 +324,12 @@ Motion *func_002DB230(SdfMotionManager *manager, SdfMotionCommandTable *table) {
     return motion;
 }
 
-typedef struct Link {
-    struct Link *next;
-} Link;
-
-typedef struct LinkOwner {
-    u8 pad[0x14];
-    Link head;
-} LinkOwner;
-
-typedef struct MotionNode {
-    Link link;
-    LinkOwner *owner;
-    s32 motionTable; /* 0x08: motion-table address */
-    s32 uC;
-    ArrObj *request;
-} MotionNode;
 
 /* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */
-void sdfDestroyMotion(MotionNode *node)
+void sdfDestroyMotion(Motion *node)
 {
-    Link *prev;
-    Link *cur;
+    Motion **prev;
+    Motion *cur;
     ArrObj *request;
     void **objects;
     s32 objectCount;
@@ -400,12 +340,12 @@ void sdfDestroyMotion(MotionNode *node)
     }
     if (node->owner != NULL) {
         prev = &node->owner->head;
-        while ((cur = prev->next) != NULL) {
-            if (cur == &node->link) {
-                prev->next = node->link.next;
+        while ((cur = *prev) != NULL) {
+            if (cur == node) {
+                *prev = node->next;
                 break;
             }
-            prev = cur;
+            prev = &cur->next;
         }
     }
     request = node->request;
@@ -696,7 +636,7 @@ void sdfMotionBlendDrawVector(SdfMotionDrawBinding *a0, f32 t) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, a0->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, a0->node->translation);
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with sub->vec by t2 into sub+0x60 */
@@ -709,7 +649,7 @@ void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *a0, f32 t1, f32 t
         VU0_LERP_VF10_COPY(b.weight);
     VU0_LOAD_VF(vf10, a0->capturedVector);
         VU0_LERP_VF10_W(t2);
-    VU0_STORE_VF_UNCLOBBERED(vf10, a0->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, a0->node->translation);
 }
 
 void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
@@ -740,7 +680,7 @@ void sdfMotionBlendScaleVector(SdfMotionDrawBinding *a0, f32 t) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
-    VU0_STORE_VF(vf10, a0->node->vectors[SDF_DRAW_SCALE_VECTOR]);
+    VU0_STORE_VF(vf10, a0->node->scale);
 }
 
 /* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
@@ -753,7 +693,7 @@ void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *a0, f32 t1, f32 
         VU0_LERP_VF10_COPY(b.weight);
     VU0_LOAD_VF(vf10, a0->capturedVector);
         VU0_LERP_VF10_W(t2);
-    VU0_STORE_VF(vf10, a0->node->vectors[SDF_DRAW_SCALE_VECTOR]);
+    VU0_STORE_VF(vf10, a0->node->scale);
 }
 
 void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
@@ -768,7 +708,7 @@ void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
 void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
     SdfDrawNode *sub;
-    u8 (*matrix)[0x10];
+    f32 (*matrix)[4];
     f32 *key;
 
     sdfFindMotionKeyInterval(a0, &b, t);
@@ -779,7 +719,7 @@ void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *a0, f32 t) {
     effMiscQuaternionNlerpVU(b.weight);
     sub = a0->node;
     VU0_STORE_VF_UNCLOBBERED(vf10, sub->quaternion);
-    matrix = &sub->vectors[SDF_DRAW_X_AXIS_VECTOR];
+    matrix = sub->localMatrix;
     effMiscQuaternionToMatrixVU();
     VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
     VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
@@ -790,7 +730,7 @@ void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *a0, f32 t) {
 void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *a0, f32 t1, f32 t2) {
     SdfMotionKeyInterval b;
     SdfDrawNode *sub;
-    u8 (*matrix)[0x10];
+    f32 (*matrix)[4];
     f32 *key;
 
     sdfFindMotionKeyInterval(a0, &b, t1);
@@ -804,7 +744,7 @@ void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *a0, f32 t1, f32 t
     VU0_LOAD_VF(vf10, a0->capturedVector);
     effMiscQuaternionNlerpVU(t2);
     VU0_STORE_VF_UNCLOBBERED(vf10, sub->quaternion);
-    matrix = &sub->vectors[SDF_DRAW_X_AXIS_VECTOR];
+    matrix = sub->localMatrix;
     effMiscQuaternionToMatrixVU();
     VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
     VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
@@ -851,7 +791,7 @@ void sdfMotionReadKeyFlag(CmdB *a0) {
 
 void sdfMotionCaptureDrawVector(void *work) {
     SdfMotionDrawBinding *binding = work;
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
+    PCP_COPY_VECTOR(binding->capturedVector, binding->node->translation);
 }
 
 void sdfMotionCaptureQuaternion(void *work) {
@@ -861,7 +801,7 @@ void sdfMotionCaptureQuaternion(void *work) {
 
 void sdfMotionCaptureScaleVector(void *work) {
     SdfMotionDrawBinding *binding = work;
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->vectors[SDF_DRAW_SCALE_VECTOR]);
+    PCP_COPY_VECTOR(binding->capturedVector, binding->node->scale);
 }
 
 s32 sdfDispatchMotionHandler(void *a0, s32 a1) {

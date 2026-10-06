@@ -182,7 +182,9 @@ typedef struct BattleController {
     u8 pad_220[0x28];
     SceneTask *taskHead; /* 0x248 */
     UiObject *actors;
-    u8 pad_250[0x20];
+    u8 pad_250[0x1E];
+    u8 mode; /* 0x26E: mode 3 scales defeat experience in DDS2. */
+    u8 pad26F;
     u16 variant; /* 0x270 */
     u8 pad_272[0x22];
     s32 adjustmentRecordIndex; /* 0x294 */
@@ -192,7 +194,13 @@ typedef struct BattleController {
     s32 drawTask;
     u8 pad2C8[0x14];
     BattleItemDrop itemDrops[3];
-    u8 pad2E8[0x3F4];
+    s32 moneyEarned; /* 0x2E8 */
+    u8 pad2EC[4];
+    s32 experienceEarned; /* 0x2F0 */
+    s32 epEarned; /* 0x2F4 */
+    u8 pad2F8[4];
+    u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
+    u8 pad2FE[0x3DE];
     s32 (*commandRangeOverride)(UiObject *, s32);
 } BattleController;
 
@@ -220,6 +228,9 @@ extern s32 datCommandSelectors;
 extern char D_00415158[];
 
 extern void btlBossDebugPrintf(const char *, ...);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern s8 effSharedRandomState[];
 
@@ -539,7 +550,7 @@ void itfResetWindowResourceBlock(s32 *object) {
 /* Paired arrays: a nonzero slot marker owns the handle at the same index. */
 typedef struct UiResourceSlots {
     s32 markers[32];
-    s32 handles[32];
+    SdfMemBlock *handles[32];
 } UiResourceSlots;
 
 /* Clear 32 words, from the end back toward the beginning of the buffer. */
@@ -597,7 +608,7 @@ void itfReleaseUiResourceSlotHandles(UiResourceSlots *slots) {
     remaining = 0x1f;
     do {
         if (*entries != 0) {
-            sdfReleaseResourceAllocation(entries[0x20]);
+            sdfReleaseResourceAllocation(slots->handles[entries - slots->markers]);
             *entries = 0;
         }
         remaining = remaining - 1;
@@ -1467,7 +1478,9 @@ typedef struct ItfMesSub {
 typedef struct BattleInitState {
     u8 pad000[0x214];
     u32 tick;
-    u8 pad218[0x0C];
+    u8 pad218[4];
+    u32 commandRestrictFlags;
+    u8 pad220[4];
     u32 unk224;
     u8 pad228[0x20];
     u32 listHeads[6];
@@ -1489,14 +1502,13 @@ typedef struct BattleInitState {
     u32 unk5BC;
 } BattleInitState;
 
-extern s32 D_004366E0;
+extern SdfMemBlock *D_004366E0;
 extern ItfMesSub *D_00435E78;
 extern ItfMesSub D_003858D8;
 extern ItfMesSub D_00385228;
 extern u16 mnuMovieTaskState;
 extern u32 func_001003F8(void);
 extern u32 func_001B5600(void);
-extern void *sdfResourceRetainAddress(s32);
 extern void effMiscSeedRandom(void *, u32);
 extern s32 itfMesCreateWindow(ItfMesSub *);
 extern void btlResetActorEntryState(void);
@@ -1506,7 +1518,7 @@ extern s32 D_003B4D90[];
 extern s32 D_003B4DA8[];
 
 void func_001A9B80(void) {
-    s32 allocation;
+    SdfMemBlock *allocation;
     u32 seed;
     u8 *runtime;
 
@@ -1570,7 +1582,81 @@ void func_001A9B80(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlExitWhenAudioAndTasksIdle);
+extern void itfMesDestroyWindowIfPresent(s32);
+extern char D_00414F48[];
+extern char D_00414F68[];
+extern char D_00414F80[];
+extern char D_00414F98[];
+extern char D_00414FB0[];
+extern s32 sndHasOccupiedNodeSlots(void);
+extern s32 btlCountRegisteredTasks(void);
+
+s32 btlExitWhenAudioAndTasksIdle(void) {
+    BattleInitState *state;
+
+    if (btlRuntime == 0) {
+        btlBossDebugPrintf(D_00414F48);
+        return 0;
+    }
+    if (sndHasOccupiedNodeSlots() != 0) {
+        btlBossDebugPrintf(D_00414F68);
+        return -1;
+    }
+    if (btlCountRegisteredTasks() != 0) {
+        btlBossDebugPrintf(D_00414F80);
+        btlFlagTasksForUpdate();
+        return -1;
+    }
+    btlReleaseBossData();
+    btlClearTaskLists();
+    btlDestroyAllActionSeqs();
+    btlDestroyAllUnits();
+    btlClearPendingSoundList();
+    btlReleaseEventAssets();
+    btlGetCurrentSceneRecordValue();
+    btlFreeFieldBlocks();
+    btlStopRainSoundTransition();
+    btlClearTintAndEnableCamera();
+    fldDestroySceneTasksAndBuffers();
+    btlReleaseButtonTexture();
+    sndFreeBattleSoundEntries();
+    sndClearList();
+    brsTaskTryDestroy();
+    btlClearSoundAndModelResources();
+    btlDestroyDrawTaskAtPriorityWhenPresent();
+    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[2]);
+    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[1]);
+    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[0]);
+    btlAdvanceTitleStateWithAudioCleanup();
+    kwlnCancelConfiguredFadeFrames();
+    evtDestroySelectionState();
+    effResetSlots();
+    evtSetSolarOverlayFullyTransparent();
+    itfMesClearFlags(1);
+
+    state = (BattleInitState *)btlRuntime;
+    if (state->commandRestrictFlags & 0x8000) {
+        state->commandRestrictFlags &= ~0x8000;
+        sdfSceneProjectionParameters.farZ = 65536.0f;
+        btlBossDebugPrintf(D_00414F98);
+    }
+
+    sdfReleaseResourceAllocation(D_004366E0);
+    D_004366E0 = 0;
+    btlRuntime = 0;
+    btlBossDebugPrintf(D_00414FB0);
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F48);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F68);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F80);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F98);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414FB0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9F30);
 
@@ -2080,7 +2166,9 @@ typedef struct DatSkillOwner {
 /* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
 typedef struct DatEnemyRecord {
     u32 flags;            /* 0x00 */
-    u8 pad04[0x14];
+    u8 pad04;
+    u8 level;             /* 0x05 */
+    u8 pad06[0x12];
     u16 skills[8];        /* 0x18 */
     s32 money;            /* 0x28 */
     u16 unk2C;
@@ -2172,7 +2260,67 @@ void func_001AD5B0(u16 item) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD698);
+extern s32 func_001B39E8(u32);
+extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
+extern s32 btlGetEnemyMoney(u8 *, u8 *);
+extern char D_004151E8[];
+extern char D_00415208[];
+extern char D_00415220[];
+extern char D_00415238[];
+extern char D_00415250[];
+
+void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    DatEnemyRecord *record = &((DatEnemyRecord *)datEnemyRecords)[enemy->mode];
+    s32 level = func_001B39E8(4);
+    s32 enemyLevel = record->level;
+    s32 allowance = datBattleParameters->rewardLevelAllowance;
+    s32 reward;
+    s32 amount;
+    s32 item;
+    s32 kind;
+
+    if (level > 62) {
+        level = 62;
+    }
+    if (level >= enemyLevel + allowance && datBattleParameters->rewardDivisor != 0.0f) {
+        reward = (s32)(record->unk2C / datBattleParameters->rewardDivisor);
+        btlBossDebugPrintf(D_004151E8, reward, level, enemyLevel, allowance,
+                          datBattleParameters->rewardDivisor);
+    } else {
+        reward = record->unk2C;
+    }
+    if (record->flags & 0x2000) {
+        reward *= 100;
+    }
+    if (controller->mode == 3) {
+        reward = (s32)(reward * datBattleParameters->majinRewardScale);
+        btlBossDebugPrintf(D_00415208, reward, datBattleParameters->majinRewardScale);
+    }
+    controller->experienceEarned += reward;
+    if ((enemy->flags64 & 0x200800000ULL) == 0) {
+        amount = btlCalculateEnemyExperienceReward(NULL, (u8 *)enemy);
+        controller->epEarned += amount;
+        btlBossDebugPrintf(D_00415220, controller->epEarned, amount);
+    }
+    if ((enemy->stateFlags & 0x400) == 0) {
+        amount = btlGetEnemyMoney(NULL, (u8 *)enemy);
+        controller->moneyEarned += amount;
+        btlBossDebugPrintf(D_00415238, controller->moneyEarned, amount);
+    }
+    item = func_001AD310((s32)enemy, 0);
+    if (item != 0) {
+        func_001AD5B0(item);
+    }
+    kind = enemy->mode;
+    if (kind < 104) {
+        if (kind >= 100) {
+            controller->specialEnemyDefeats++;
+        }
+    }
+    enemy->stateFlags |= 1;
+    btlBossDebugPrintf(D_00415250, enemy);
+}
 
 /* Readiness requires each active actor to have cleared transient action flags. */
 s32 btlAllActiveUnitsReady(void) {
@@ -2394,6 +2542,16 @@ void btlClearActorEntrySlot(UiObject *unit, s32 index) {
 s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004151E8);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415208);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415220);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415238);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415250);
 
 f32 btlGetActorEntryMultiplier(UiObject *unit, u32 index, s8 includeCharge) {
     f32 factor;
@@ -3082,7 +3240,6 @@ void func_001B1F78(void) {
 
 
 extern f32 func_001B20C8(u8 *, u8 *, s32);
-extern s32 func_001B39E8(u32);
 
 /* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
 s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
@@ -4170,7 +4327,7 @@ void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, 
 }
 
 typedef struct BtlResBlock {
-    s32 unk0;
+    SdfMemBlock *unk0;
     s32 nameA;
     s32 nameB;
     s32 nameC;
@@ -4185,10 +4342,6 @@ extern u8 D_00436800;
 extern u8 btlResourceBlockLoaded;
 
 extern BtlResBlock *btlResourceBlock;
-
-extern s32 sdfAllocGeneralBlock(s32);
-
-extern void *sdfResourceRetainAddress(s32);
 
 extern s32 sdfReadNamedResource(const char *, void *, s32);
 
@@ -4216,11 +4369,11 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CE8);
 
 void btlPanelResourcesLoad(void) {
     u8 params[16];
-    s32 handle;
+    SdfMemBlock *handle;
     BtlResBlock *block;
     if (D_00436800 == 0) {
         handle = sdfAllocGeneralBlock(0x28);
-        block = sdfResourceRetainAddress(handle);
+        block = (BtlResBlock *)sdfResourceRetainAddress(handle);
         btlResourceBlock = block;
         block->unk0 = handle;
         block->resA = 0;
@@ -4747,7 +4900,6 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8A80);
 
 
 extern void itfMesCleanupWindow(s32, s32);
-extern void itfMesDestroyWindowIfPresent(s32);
 
 typedef struct MesWindowSet {
     u32 unk0;
@@ -5453,7 +5605,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1A68);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
 void btlReleaseStwrPanelResource(void) {
-    sdfReleaseResourceAllocation(*(u32 *)kwlnTaskGetUserValue());
+    sdfReleaseResourceAllocation(*(SdfMemBlock **)kwlnTaskGetUserValue());
     btlSetTrackedTaskHandle(3, 0);
 }
 
@@ -5514,7 +5666,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2EA8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C3168);
 
 void btlReleaseTrackedTaskResource(void) {
-    sdfReleaseResourceAllocation(*(u32 *)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
+    sdfReleaseResourceAllocation(*(SdfMemBlock **)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
     btlSetTrackedTaskHandle(8, 0);
 }
 

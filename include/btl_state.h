@@ -95,6 +95,22 @@ typedef struct BtlState {
 #endif /* VERSION_DDS1 */
 
 #ifdef VERSION_DDS2
+struct ActionStateLink;
+struct SceneTask;
+
+/* Three-byte scene scheduling slot; IDs move with their group/countdown. */
+typedef struct BtlSceneSlot {
+    u8 group;
+    u8 remaining;
+    u8 id;
+} BtlSceneSlot;
+
+typedef struct BtlSceneFadingRecord {
+    BtlSceneSlot slot;
+    u8 alpha;
+    s32 target;
+} BtlSceneFadingRecord;
+
 
 /* Same singleton battle work as DDS1, returned by func_001AA6F8. In particular
  * the script-owner/task pair is +0x2C4/+0x2C8, not DDS1's offsets plus 0x24.
@@ -119,10 +135,19 @@ typedef struct BtlState {
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk220;
-    u8 pad224[0x24];
-    BtlTask *tasks; /* 0x248 */
+    u8 pad224[8];
+    s32 currentScene; /* 0x22C */
+    s32 queuedScene;
+    s32 frame;
+    s32 sceneState;
+    u8 pad23C[4];
+    s32 scriptState; /* 0x240 */
+    s32 scriptArg;
+    struct ActionStateLink *tasks; /* 0x248: 0x180-byte sequence list, next at +0x178 */
     BtlUnit *units; /* 0x24C */
-    u8 pad250[0x20];
+    u8 pad250[0x1E];
+    u8 encounterKind; /* 0x26E: scene setup selects 0, 2 or 3. */
+    u8 pad26F;
     u16 mode; /* 0x270 */
     u8 pad272[2];
     s32 turnCount; /* 0x274 */
@@ -131,24 +156,58 @@ typedef struct BtlState {
     u8 pad27D[3];
     u16 phase; /* 0x280 */
     u8 requestMode; /* 0x282 */
-    u8 pad283[0x1D];
+    u8 pad283[0x11];
+    s32 effectLayer; /* 0x294 */
+    u8 pad298[8];
     s32 battleMode; /* 0x2A0 */
     s32 requestArgument; /* 0x2A4 */
-    u8 pad2A8[0x1C];
+    u8 pad2A8[4];
+    s16 tileX; /* 0x2AC */
+    s16 tileY;
+    s32 loadStep;
+    u8 pad2B4[0x10];
     struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetCurrentActor */
     s32 boundTask; /* 0x2CC */
-    u8 pad2D0[0x218];
+    u32 sceneObject; /* 0x2D0 */
+    u32 spriteObject;
+    u32 sceneStatus;
+    u8 pad2DC[0x1C];
+    s32 unk2F8;
+    u8 pad2FC[2];
+    BtlSceneSlot slots[8]; /* 0x2FE */
+    u8 pad316[2];
+    struct SceneTask *groupPrimary[20]; /* 0x318 */
+    struct SceneTask *groupSecondary[45]; /* 0x368 */
+    struct SceneTask *groupTertiary[15]; /* 0x41C */
+    struct SceneTask *groupHandles[8]; /* 0x458 */
+    u16 groupHandleCount;
+    u8 pad47A[2];
+    s32 activeGroupCount;
+    BtlSceneFadingRecord fading[8]; /* 0x480 */
+    struct SceneTask *currentTask;
+    u8 pad4C4[0x10];
+    s32 scriptTarget;
+    u8 pad4D8[4];
+    struct EffectSlotSet *resB; /* 0x4DC: resource slots used for battle-number glyphs */
+    u8 pad4E0[8];
     u32 buttonTextureHandle; /* 0x4E8 */
     u8 pad4EC[0xDC];
     void (*bossCleanup)(void); /* 0x5C8 */
-    u8 pad5CC[0x58];
+    s32 (*selectScriptArg)(void); /* 0x5CC */
+    u8 pad5D0[0x14];
+    s32 (*sceneCallback)(); /* 0x5E4 */
+    u8 pad5E8[0x3C];
     void (*afterUnitUpdate)(void); /* 0x624 */
-    u8 pad628[0x3C];
+    s32 (*selectScriptState)(void); /* 0x628 */
+    void (*completionHook)(); /* 0x62C */
+    u8 pad630[0x34];
     s32 (*actionCameraStepHook)(BtlUnit *); /* 0x664: nonzero handles the camera step. */
     u8 pad668[0x84];
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
-    u8 pad6F0[0x28];
+    u8 pad6F0[0x10];
+    void (*unitReturnHook)(struct SceneTask *); /* 0x700: custom return-to-group handling */
+    u8 pad704[0x14];
     struct BattleLinkedEffectState *effect; /* 0x718 */
     u8 pad71C[0xC];
     s32 unk_728;

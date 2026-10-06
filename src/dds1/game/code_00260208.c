@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 extern s32 kwlnTaskGetTaskByName(char *);
 extern s32 kwlnTaskGetUserValue();
@@ -325,23 +326,6 @@ typedef struct BrsRewardBatch {
     s32 count;               /* 0x78 */
 } BrsRewardBatch;
 
-typedef struct BrsPanelMotion {
-    u8 pad00[0x40];
-    s32 values[4];
-} BrsPanelMotion;
-
-typedef struct BrsPanelPage {
-    u8 pad00[8];
-    BrsPanelMotion *motion;
-    struct BrsPanelPageContext *context;
-    u8 pad10[0x124];
-} BrsPanelPage;
-
-typedef struct BrsPanelPageContext {
-    u8 pad00[0x1C];
-    s32 value;
-} BrsPanelPageContext;
-
 extern s32 datGameState;
 extern s32 *ptyGetCurrentProfileRecord(BrsPartyUnit *unit);
 extern u32 ptyAddProfilePoints(BrsPartyUnit *unit, s32 increment);
@@ -463,9 +447,8 @@ typedef struct BrsSkillPackageWork {
     s32 panelOption;         /* 0x518 */
     u8 pad51C[0x54];
     s32 setupState;          /* 0x570 */
-    u8 pad574[0x25C];
-    BrsPanelPage panelPages[4]; /* 0x7D0 */
-    u8 padCA0[0x70];
+    u8 pad574[0x10C];
+    MenuPageWindow partyWindow; /* 0x680 */
     s32 panelHandle;         /* 0xD10 */
     s32 spriteHandle;        /* 0xD14 */
     u8 padD18[4];
@@ -485,7 +468,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     s32 panel;
 
     mnuReleaseStaffMenuResources(group);
-    mnuInitializeStaffPageWindows((s32)work + 0x680, group, 0, (s32)work + 0x574);
+    mnuInitializeStaffPageWindows((s32)&work->partyWindow, group, 0, (s32)work + 0x574);
     panel = mnuCreatePanelGroup(work->panelGroup);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
@@ -499,7 +482,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
 void brsCloseSkillPackagePanel(s32 work) {
     BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
-    s32 panelContext = work + 0x680;
+    s32 panelContext = (s32)&ctx->partyWindow;
 
     effDestroyResourceSlotSet(ctx->unitHandle);
     mnuClearEntries(panelContext);
@@ -848,12 +831,12 @@ void brsSelectLevelBonusMode(BrsLevelBonusSource *source, BrsLevelBonusWork *wor
 
 extern void mnuClearEntries(s32 *window);
 extern void mnuReleasePartyIconBundles(s32 window);
-extern void mnuSelectPage(void *window, s32 index);
+extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(s32 window, s32 index, s32 unused,
                                    s32 retainScale);
 extern void mnuSetWindowResource(s32 index, s32 window, s32 resource,
                                  s32 option);
-extern void mnuSetPageParams(BrsPanelMotion *motion, s32 mode);
+extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
@@ -869,22 +852,21 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         work->selectedRewardRow = row;
     } else {
         s32 selectedRow = work->selectedRow;
-        s32 window = (s32)work + 0x680;
+        MenuPageWindow *window = &work->partyWindow;
         s32 page = work->primaryRewards.rows[selectedRow].values.experienceGain;
         s32 *selectedIndex = &work->selectedRow;
 
         mnuClearEntries((s32 *)window);
-        mnuReleasePartyIconBundles(window);
-        mnuSelectPage((void *)window, page);
-        mnuResetPartyPanelFade(window, page, 0, 0);
-        mnuSetWindowResource(page, window, work->panelGroup,
+        mnuReleasePartyIconBundles((s32)window);
+        mnuSelectPage(window, page);
+        mnuResetPartyPanelFade((s32)window, page, 0, 0);
+        mnuSetWindowResource(page, (s32)window, work->panelGroup,
                              work->panelOption);
-        mnuSetPageParams(work->panelPages[page].motion, 2);
-        mnuAttachPartyIconBundle(page, window, work->panelGroup);
+        mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
+        mnuAttachPartyIconBundle(page, (s32)window, work->panelGroup);
 
-        work->panelPages[page].context->value = 0x100;
-        *(s32 *)window |= 0x400;
-
+        ((MenuIconBundle *)work->partyWindow.slots[page].iconBundle)->fade = 0x100;
+        window->flags |= 0x400;
         work->selectedRewardRow = &work->primaryRewards.rows[(*selectedIndex)++];
         brsSelectLevelBonusMode((s32)work->selectedRewardRow->unit,
                                 (s32)work);

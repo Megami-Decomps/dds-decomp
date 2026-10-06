@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "evt_world.h"
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
 typedef struct EvtEvNode {
@@ -470,10 +471,9 @@ s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer)
 }
 
 struct EffectObj;
-struct WorldObjectPointer;
 struct WorldInnerOwner;
 struct PolyMovieObject;
-extern u32 *dds3FindObjectChainNodeByName(struct WorldObjectPointer *, const u8 *);
+extern u32 *dds3FindObjectChainNodeByName(EvtWorldObject *, const u8 *);
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
@@ -494,7 +494,7 @@ void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtViewer *
         return;
     }
     owner = (ObjData *)dds3FindObjectChainNodeByName(
-        (struct WorldObjectPointer *)dds3GetWorldObject(),
+        (EvtWorldObject *)dds3GetWorldObject(),
         (const u8 *)viewer->names[value]);
     if (owner == NULL) {
         return;

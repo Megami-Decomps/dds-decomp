@@ -3,6 +3,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "ee_mmi.h"
+#include "sdf_draw.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -1161,7 +1162,47 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
                          depth, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211B88);
+extern u8 kwlnFrameDrawPacketRecords[];
+extern void *sdfAllocPacketAligned(s32);
+extern s32 kwlnGetDrawBufferIndex(void);
+extern void sdfAppendDmaPrimary(s32, void *, void *);
+
+void func_00211B88(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 xOffset;
+    s32 yOffset;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 horizontal[4];
+    s32 vertical[4];
+    void *packet;
+    s32 index;
+
+    packet = sdfAllocPacketAligned(0x20);
+    index = kwlnGetDrawBufferIndex();
+    sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + index * 0x1F40, packet);
+    halfWidth = 0x1000;
+    halfHeight = 0x700;
+    xOffset = (s32)((f32)halfWidth * scale);
+    yOffset = (s32)((f32)halfHeight * scale);
+    horizontal[0] = halfWidth - xOffset;
+    horizontal[1] = halfWidth + xOffset;
+    vertical[0] = halfHeight - yOffset;
+    vertical[1] = halfHeight + yOffset;
+    left = horizontal[0] + 0x7000;
+    top = vertical[0] + 0x7900;
+    right = horizontal[1] + 0x7000;
+    bottom = vertical[1] + 0x7900;
+    sdfQueueTexturedQuad(list, color, primitive,
+                         left, top, 0, 0,
+                         right, top, 0x2000, 0,
+                         left, bottom, 0, 0xE00,
+                         right, bottom, 0x2000, 0xE00,
+                         depth, 0);
+}
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -1697,7 +1738,7 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EC0);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EF8);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00213BE0);
+INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawUnitAffinityDebug);
 
 typedef struct PadButtons {
     s8 unk_0;
@@ -2157,33 +2198,27 @@ typedef struct MotionRecordTable {
     MotionRecord entries[1];
 } MotionRecordTable;
 
-typedef struct MotionObject {
-    u8 pad00[0x28];
-    s16 recordIndex; /* 0x28 */
-    s16 slot;        /* 0x2A */
-} MotionObject;
 
 typedef struct MotionOwner {
     u8 pad00[0xC];
     MotionRecordTable *records; /* 0x0C */
     u8 pad10[8];
     void *heap;                 /* 0x18 */
-    MotionObject *first;        /* 0x1C: object created for slot 0 */
-    MotionObject *slots[1];     /* 0x20 */
+    Motion *first;        /* 0x1C: motion created for slot 0 */
+    Motion *slots[1];     /* 0x20 */
 } MotionOwner;
 
-extern MotionObject *func_002DB230();
+extern Motion *func_002DB230();
 
-/* Creates the object for record `index`; the record is reached as table->entries[index]
-   at each use (the repeated array address is what keeps two address registers live). */
-MotionObject *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
+/* Create and attach the motion for the selected resource record. */
+Motion *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
     void *resource = owner->records->entries[index].resource;
     s16 slot = owner->records->entries[index].slot;
-    MotionObject *object = func_002DB230(owner->heap, resource);
+    Motion *object = func_002DB230(owner->heap, resource);
 
-    object->recordIndex = index;
+    object->searchId = index;
     owner->slots[slot] = object;
-    object->slot = slot;
+    object->slotIndex = slot;
     if (slot == 0) {
         owner->first = object;
     }

@@ -15,7 +15,7 @@ void effReleaseSharedTextureRecord(void *arg);
 void func_001502B0(void *arg0, void *arg1);
 void billReleaseSharedEntryBlock(void *arg);
 void *func_00150148(void *arg);
-void func_001518D8(BillObj *arg0, s32 arg1);
+void billSetAnimationEntry(BillObj *arg0, s32 arg1);
 void *func_00151A88(void *arg);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001502B0);
@@ -197,7 +197,7 @@ BillObj *billAllocList(void *resourceData) {
     newobj->unk48 = 0;
     newobj->unk4C = 0;
     newobj->pair.unk8 = 0;
-    func_001518D8(newobj, 0);
+    billSetAnimationEntry(newobj, 0);
     return newobj;
 }
 
@@ -215,7 +215,7 @@ BillObj *billCloneList(BillObj *obj) {
     newobj->unk50 = 1;
     newobj->unk48 = 0;
     newobj->unk4C = 0;
-    func_001518D8(newobj, 0);
+    billSetAnimationEntry(newobj, 0);
     return newobj;
 }
 
@@ -264,7 +264,48 @@ void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     out->framesRemaining = value;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_001518D8);
+extern s32 func_003003F0(const char *, ...);
+
+/* Select an animation and initialize the plural records' signed start delays. */
+void billSetAnimationEntry(BillObj *obj, s32 index) {
+    BillData *data = obj->entryList;
+    BillAnimationEntry *entry = data->entries + index;
+
+    if (entry->frameCount == 0) {
+        obj->unk50 = 0;
+        return;
+    }
+    if (entry->flags & 0x10000000) {
+        BillRecord *records;
+        u32 i = 0;
+
+        func_003003F0("billAnim..PLURAL SET\n");
+        obj->modeFlags = 0x10000000;
+        obj->unk58 = index;
+        obj->entryCount = entry->frameCount;
+        records = (BillRecord *)(data->base + entry->offset);
+        for (; i < entry->frameCount; i++) {
+            billResolveEntry(data, records[i].entryIndex, (BillOut *)obj->unk60 + i);
+            ((BillOut *)obj->unk60)[i].frameIndex = -records[i].delay;
+        }
+    } else if (entry->unk8 & 0xC0) {
+        func_003003F0("billAnim..(A)MTEX SET\n");
+        obj->modeFlags = entry->unk8;
+        obj->unk58 = index;
+        obj->entryCount = 2;
+        billResolveEntry(data, index, obj->unk60);
+        billResolveEntry(data, index + 1, (BillOut *)obj->unk60 + 1);
+    } else {
+        obj->modeFlags = 0;
+        obj->entryCount = 1;
+        obj->unk58 = index;
+        billResolveEntry(data, index, obj->unk60);
+    }
+    if (entry->unk8 & 0x100) {
+        func_003003F0("billAnim..P2A POLYGON\n");
+    }
+    obj->unk50 = 1;
+}
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151A88);
 

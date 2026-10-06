@@ -68,6 +68,45 @@ typedef struct PartyPanel {
     PartyPanelEntry slots[5];
 } PartyPanel;
 
+/* Page sprites and their fade/slide state; DDS2 expanded the sprite banks. */
+typedef struct MenuSprites {
+    u8 pad00[0xC];
+    s32 unkC;
+#ifdef VERSION_DDS2
+    void *icon[5];
+    void *item[11];
+    void *cursor[4];
+    s32 fade;
+#else
+    s32 firstSprite;
+    s32 primarySprite;
+    s32 sprites[7];
+    s32 overlaySprites[2];
+    u8 pad3C[4];
+#endif
+    s32 drawAlpha;
+    s32 fadeOut;
+    s32 slideOffset;
+    s32 slideSpeed;
+#ifdef VERSION_DDS2
+    u8 unk74;
+    u8 unk75;
+#endif
+} MenuSprites;
+
+/* The allocated icon bundle owns its draw fade and fade direction. */
+typedef struct MenuIconBundle {
+#ifdef VERSION_DDS2
+    u32 unk0[3];
+    void *sprite[3];
+#else
+    u8 pad0[0xC];
+    s32 sprite[4];
+#endif
+    s32 fade;
+    s32 fadeOut;
+} MenuIconBundle;
+
 typedef struct MenuPageGauge {
     s32 resourceIndex;
     u8 pad4[4];
@@ -90,14 +129,38 @@ typedef struct MenuPageRecord {
     MenuPageEntry entries[5];
 } MenuPageRecord;
 
+typedef struct MenuPoint {
+    s32 x;
+    s32 y;
+} MenuPoint;
+
+/* Profile helpers expose the game's native panel allocation as a word buffer. */
+typedef struct MenuProfilePanel {
+    u8 pad00[0x10];
+#ifdef VERSION_DDS2
+    u32 unk10;
+    s32 unk14;
+    u8 pad18[0x14];
+    u32 unk2C[5];
+    s32 phase;
+    u32 unk44;
+#else
+    s32 capValue;
+    s32 option;
+    MenuPoint gridOrigin;
+    u8 pad20[0x1C];
+#endif
+} MenuProfilePanel;
+
 #ifdef VERSION_DDS2
 typedef struct MenuPageBar {
     u8 pad00[0x10];
     s32 percentage;
-    u8 pad14[0x30];
+    u8 pad14[0x2C];
+    s32 unk40;
     u32 unk44;
     u32 unk48;
-    u8 pad4C[4];
+    u32 unk4C;
 } MenuPageBar;
 
 typedef struct MenuQueuedCommand {
@@ -260,11 +323,11 @@ struct MenuStaffList {
 };
 
 struct MenuStaffWindow {
-    s32 flags; /* Selection-control bits, including mask 0x8. */
+    u32 flags; /* Selection-control bits, including mask 0x8. */
     u8 pad04[0x0C];
     MenuStaffNode *head; /* 0x10 */
     u8 pad14[4];
-    s32 *cursor;
+    MenuStaffNode *cursor; /* 0x18 */
     MenuStaffNode *selectedNode; /* 0x1C */
     s32 panelActive; /* 0x20: selects the alternate panel drawing path */
     s32 rowCount; /* 0x24 */
@@ -276,7 +339,9 @@ struct MenuStaffWindow {
 };
 
 struct MenuStaffNode {
-    u8 pad00[0x48];
+    s32 index; /* List position, saved when switching staff pages. */
+    s32 value; /* Entry payload supplied to mnuAppendWindowListNode. */
+    u8 pad08[0x40];
     u32 flags; /* 0x48 */
     u8 pad4C[0x0C];
     MenuStaffNode *next; /* 0x58 */

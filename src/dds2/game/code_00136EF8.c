@@ -2,6 +2,8 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "fld.h"
+#include "evt_world.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -207,6 +209,8 @@ extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
 
 extern s32 fldValueRecordCount;
+extern s32 D_00436188;
+extern s32 D_0043617C;
 
 typedef struct FldRecE4 {
     u8 pad0[0xB8];
@@ -242,12 +246,11 @@ typedef struct FldTaskInfo {
     s32 slot;
 } FldTaskInfo;
 
-typedef struct WorldObject WorldObject;
 typedef struct ActionObj ActionObj;
 
 typedef struct WorldListNode WorldListNode;
 
-extern WorldListNode *dds3FindWorldObjectNodeByKey(WorldObject *object, u32 key, s32 kind);
+extern WorldListNode *dds3FindWorldObjectNodeByKey(EvtWorldObject *object, u32 key, s32 kind);
 
 extern u32 dds3GetPathState(s32 path);
 
@@ -344,41 +347,6 @@ typedef struct FldAreaState {
     s16 unk104;
 } FldAreaState;
 
-/* Field actor table entries are 0x6C bytes; the area index stored by the
- * field state is zero-based, whereas entry->floor is one-based. */
-typedef struct FldActorEntry {
-    /* 0x00 */ s8 kind;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ s16 requiredFlag;
-    /* 0x04 */ s16 floor;
-    /* 0x06 */ char name[0xC];
-    /* 0x12 */ s16 motion;
-    /* 0x14 */ s16 secondaryMotion;
-    /* 0x16 */ s16 sound;
-    /* 0x18 */ u8 motionName[0xC];
-    /* 0x24 */ u8 otherName[0xC];
-    /* 0x30 */ s8 variantMode;
-    /* 0x31 */ u8 flags31;
-    /* 0x32 */ s16 variant;
-    /* 0x34 */ s16 warpEntry;
-    /* 0x36 */ s16 warpEntry2;
-    /* 0x38 */ char warpName[0xC];
-    /* 0x44 */ s8 linkKind;
-    /* 0x45 */ s8 unk45;
-    /* 0x46 */ char linkName[0xC];
-    /* 0x52 */ s8 unk52;
-    /* 0x53 */ s8 unk53;
-    /* 0x54 */ s8 flags54;
-    /* 0x55 */ char pad55[0xF];
-    /* 0x64 */ u8 flags64;
-    /* 0x65 */ s8 unk65;
-    /* 0x66 */ s8 unk66;
-    /* 0x67 */ s8 value67;
-    /* 0x68 */ s8 unk68;
-    /* 0x69 */ s8 unk69;
-    /* 0x6A */ s8 unk6A;
-    /* 0x6B */ s8 unk6B;
-} FldActorEntry; /* 0x6C bytes */
 
 /* Axis-aligned trigger zone: up to four bounding planes plus a 2D extent. */
 typedef struct FldZone {
@@ -557,7 +525,21 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldResetRecordState);
+void fldResetRecordState(void) {
+    s32 index;
+    for (index = 0; index < fldValueRecordCount; index++) {
+        ((FldRecE4 *)fldValueRecords)[index].value = 0;
+    }
+    fldValueRecordCount = 0;
+    fldAreaState[40] = -1;
+    fldAreaState[41] = -1;
+    fldAreaState[43] = -1;
+    D_00436188 = 0;
+    D_0043617C = 0;
+    if (fldValueRecords != 0) {
+        fldReleaseRecordStorage();
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137F10);
 
@@ -748,7 +730,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
     s32 slotIndex;
-    WorldObject *world;
+    EvtWorldObject *world;
     u32 task;
     FldTaskInfo *taskInfo;
 

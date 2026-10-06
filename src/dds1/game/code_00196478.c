@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itf.h"
+#include "sdf.h"
 
 #define ITF_BYTE_MASK 0xFF
 #define ITF_NODE_HEADER_BYTES 8
@@ -29,8 +30,8 @@
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
 
-extern SdfAllocation *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfAllocation *);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 
 extern s32 sdfTexAcquireResourceTexture(u32);
 extern s32 dds3AdminGetActiveMode(void);
@@ -95,7 +96,7 @@ typedef struct MemNode {
 
 /* Allocation handle precedes the first queue node by four bytes. */
 typedef struct MemRingHeader {
-    SdfAllocation *allocation;
+    SdfMemBlock *allocation;
     MemNode first;
 } MemRingHeader;
 
@@ -781,7 +782,7 @@ s32 func_00198088(u8 *dst, s32 option, u32 block, MemOut *segments) {
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.
  * The allocation handle is stored four bytes before the returned ring base. */
 u32 itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
-    SdfAllocation *buffer;
+    SdfMemBlock *buffer;
     u8 *list;
     MemNode *cursor;
     MemNode *next;
@@ -851,17 +852,12 @@ void itfReleaseBackgroundSpriteTexture(void) {
     sdfTexReleaseReference(itfBackgroundSpriteTexture);
 }
 
-typedef struct TextBackgroundSprite {
-    u8 pad00[0xC];
-    s16 width;
-    s16 height;
-} TextBackgroundSprite;
 
 /* Draw only when a texture is present; native X/Y extent scaling differs. */
 void itfDrawBackgroundSprite(void) {
     s32 origin[ITF_VECTOR_WORD_COUNT];
     s32 color[ITF_RGBA_COMPONENT_COUNT];
-    TextBackgroundSprite *panel = (TextBackgroundSprite *)itfBackgroundSpriteTexture;
+    SdfTex *panel = (SdfTex *)itfBackgroundSpriteTexture;
 
     if (panel != NULL) {
         s32 x = panel->width;
@@ -1385,7 +1381,7 @@ void mnuReportCampProcessHalted(void) {
 extern s32 D_00357AB8[];
 
 UiSprite *func_00199828(s32 kind, u32 value) {
-    SdfAllocation *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
     UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
 
     work->kind = kind;

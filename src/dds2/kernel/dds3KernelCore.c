@@ -83,7 +83,65 @@ void kwlnTaskAdvanceStartDelays(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100A28);
+extern u8 D_0037F4D0[2][2][16];
+extern u8 D_0037F510[2][2][16];
+extern u8 D_00435C30[2][2][2];
+extern u8 D_00435C38[2][2];
+extern u8 D_00435C40[2][2][2];
+extern u8 D_00435C48[2][2];
+extern s32 D_00435BF4;
+
+s32 func_00100A28(KwlnTask *task) {
+    s32 port;
+    s32 i;
+    s32 nextUpdate;
+
+    if (task->flags & 0x20) {
+        return 1;
+    }
+    D_00435BF4 = (s32)task;
+
+    if (task->flags & 0x10) {
+        for (port = 0; port < 2; port++) {
+            for (i = 0; i < 16; i++) {
+                D_0037F510[0][port][i] = 0;
+                D_0037F510[1][port][i] = 0;
+            }
+            for (i = 0; i < 2; i++) {
+                D_00435C40[port][i][0] = 0;
+                D_00435C48[port][i] = 0;
+                D_00435C40[port][i][1] = 0;
+            }
+        }
+    } else {
+        for (port = 0; port < 2; port++) {
+            for (i = 0; i < 16; i++) {
+                D_0037F510[0][port][i] = D_0037F4D0[0][port][i];
+                D_0037F510[1][port][i] = D_0037F4D0[1][port][i];
+            }
+            for (i = 0; i < 2; i++) {
+                D_00435C40[port][i][0] = D_00435C30[port][i][0];
+                D_00435C40[port][i][1] = D_00435C30[port][i][1];
+                D_00435C48[port][i] = D_00435C38[port][i];
+            }
+        }
+    }
+
+    if (task->update != NULL && task->update != (TaskUpdate)-1) {
+        nextUpdate = task->update(task);
+        if (nextUpdate != 0) {
+            task->update = (TaskUpdate)nextUpdate;
+        }
+        if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == 2) {
+            kwlnTaskRequestDestroy(task);
+            D_00435BF4 = 0;
+            return 0;
+        }
+    }
+    task->timer++;
+    D_00435BF4 = 0;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100C28);
 

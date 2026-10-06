@@ -41,11 +41,10 @@ typedef struct BtlUnitModel {
     u32 *flags; /* 0x8C */
 } BtlUnitModel;
 
-/* Battle task link to a unit and task chain (0x170); four identical DDS1/2 views.
- * Declared before the DDS2 BtlUnit block so a unit that keeps its own
- * struct BtlUnit can still include this header for BtlTask. */
+/* Battle task link to a unit and task chain (0x170), shared by DDS1/2. */
 typedef struct BtlTask {
-    u8 unk_00[8];
+    s32 state;              /* +0x00 */
+    u8 pad04[4];
     u32 flags;               /* +0x08 */
     u8 unk_0C[0xC];
     BtlUnit *unit;           /* +0x18 */
@@ -54,7 +53,9 @@ typedef struct BtlTask {
     s32 arg;                 /* +0x24 */
     u8 unk_28[0x38];
     BtlIndexList *targetList; /* Selected unit/ID index list consumed by battle commands. */
-    u8 unk_64[0x108];
+    u8 unk_64[0xE4];
+    u32 actions[8];         /* +0x148: opaque queued action slots */
+    u8 pad168[4];
     struct BtlTask *next;   /* +0x16C */
 } BtlTask;
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_unit.h"
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -15,32 +16,10 @@ extern u32 kwlnDrawControlFlags;
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_00241E18);
 
-typedef struct EvtFieldBeEntry {
-    s32 type;
-    u8 pad04[8];
-    s32 offset;
-    s32 secondaryResourceId;
-    s32 resourceId;
-    u8 pad18[8];
-} EvtFieldBeEntry;
-
-typedef struct EvtFieldBeHeader {
-    u8 pad00[0x10];
-    s32 count;
-} EvtFieldBeHeader;
-
-typedef struct EvtFieldBeTaskData {
-    u8 pad00[0x10];
-    u8 *payload;
-    EvtFieldBeHeader *header;
-    EvtFieldBeEntry *entries;
-} EvtFieldBeTaskData;
-
-
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 func_00241F78(s32 eventId, s32 resourceId) {
-    EvtFieldBeTaskData *data;
-    EvtFieldBeEntry *entry;
+    EvtPackLoadState *data;
+    EvtPackEntry *entry;
     s32 count;
     s32 remaining;
     s32 *baseData;
@@ -53,26 +32,26 @@ s32 func_00241F78(s32 eventId, s32 resourceId) {
     type3Data = NULL;
     type2Data = NULL;
     type4Data = NULL;
-    count = data->header->count;
+    count = data->header->entryCount;
     if (count > 0) {
         entry = data->entries;
         remaining = count;
         do {
             if (entry->resourceId == resourceId) {
-                switch (entry->type) {
+                switch (entry->kind) {
                 case 2:
-                    type2Data = (s32 *)(data->payload + entry->offset);
+                    type2Data = (s32 *)(data->data + entry->dataOffset);
                     break;
                 case 3:
-                    type3Data = (s32 *)(data->payload + entry->offset);
+                    type3Data = (s32 *)(data->data + entry->dataOffset);
                     break;
                 case 4:
-                    type4Data = (s32 *)(data->payload + entry->offset);
+                    type4Data = (s32 *)(data->data + entry->dataOffset);
                     break;
                 }
             }
-            if (entry->secondaryResourceId == resourceId && entry->type == 1) {
-                baseData = (s32 *)(data->payload + entry->offset);
+            if (entry->secondaryResourceId == resourceId && entry->kind == 1) {
+                baseData = (s32 *)(data->data + entry->dataOffset);
             }
             entry++;
         } while (--remaining != 0);
@@ -115,40 +94,6 @@ void evtCreateMotionSeTask(s32 taskArg, s32 namePart1, s32 namePart2) {
     kwlnTaskCreate(taskName, 0x3EC, 0, 0, func_002420B8, evtFreeEventPackState, params);
 }
 
-typedef struct EvtPackScriptEntry {
-    s32 kind;
-    u8 pad04[8];
-    u32 dataOffset;
-    u8 pad10[0x10];
-} EvtPackScriptEntry;
-
-typedef struct EvtPackScriptHeader {
-    u8 pad00[0x10];
-    s32 entryCount;
-    u8 pad14[0xC];
-    EvtPackScriptEntry entries[0];
-} EvtPackScriptHeader;
-
-typedef struct EvtPackLoadState {
-    s32 eventId;
-    s32 loaded;
-    s32 fileHandle;
-    s32 resourceHandle;
-    u8 *data;
-    EvtPackScriptHeader *header;
-    EvtPackScriptEntry *entries;
-    u8 *entryPoint;
-    u8 pad20[4];
-    s32 sceneAllocation1;
-    u8 pad28[8];
-    s32 sceneAllocation2;
-    u8 pad34[4];
-    s32 effect72;
-    s32 effect71;
-    s32 effect76;
-    s32 effect75;
-} EvtPackLoadState;
-
 extern char D_003AF270[];
 extern char D_003BC370[];
 extern s32 func_003003F0();
@@ -184,7 +129,7 @@ extern char D_003BC378[];
  * Clearing the request handle and marking completion occur on separate calls;
  * no entry-point record leaves the existing entryPoint value untouched. */
 void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
-    EvtPackScriptHeader *header;
+    EvtPackHeader *header;
     s32 entryIndex;
 
     if (state->fileHandle != 0) {
@@ -192,7 +137,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             state->resourceHandle = fileGetResourceHandle((struct FileWork *)state->fileHandle);
             filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
             state->fileHandle = 0;
-            header = (EvtPackScriptHeader *)sdfResourceRetainAddress(
+            header = (EvtPackHeader *)sdfResourceRetainAddress(
                 (struct SdfResource *)state->resourceHandle);
             state->data = (u8 *)header;
             state->header = header;

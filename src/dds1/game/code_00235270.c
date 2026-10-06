@@ -202,11 +202,9 @@ typedef struct EvtRuntime {
 
 typedef struct {
     s16 enabled;
-    s8 tableValue; /* D_00368952 aliases this byte for indexed menu lookups. */
-    u8 pad3[7];
+    s8 fields[8]; /* Per-row signed lookup values at +0x2. */
 } EvtTblEntry; /* 0xA bytes */
 extern EvtTblEntry D_00368950[];
-extern s8 D_00368952[];
 
 extern u16 evtSkyTransitionActive;
 extern u16 D_003BBE78;
@@ -1250,7 +1248,7 @@ s32 evtIsMenuTableEntryEnabled(s32 *index) {
 
 /* Return the table value selected by this group's type and editor column. */
 s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
-    return D_00368952[runtime->tableColumn + runtime->frameGroup->type * 10];
+    return D_00368950[runtime->frameGroup->type].fields[runtime->tableColumn];
 }
 
 extern char *D_00368AA0[];
@@ -1260,7 +1258,7 @@ extern char D_003BC298[];
 extern char D_003BC2A0[];
 extern s8 D_003BC268[3];
 
-void func_002397C8(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
+void evtDrawGroupPropertyTable(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
     s32 offset = 0;
     EvtRuntimeGroup *group = runtime->frameGroup;
     s32 i;
@@ -1271,7 +1269,7 @@ void func_002397C8(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
         return;
     }
     for (i = 0; i < D_00368950[group->type].enabled; i++) {
-        field = D_00368952[i + group->type * 10];
+        field = D_00368950[group->type].fields[i];
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + offset * 192, y,
             0xFEFFFF, 14, D_00368AA0[field]));
         style = i == runtime->tableColumn && runtime->actionMode == 15 ? 4 : 0;
@@ -1304,7 +1302,6 @@ void func_002397C8(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
         offset += D_003BC268[field];
     }
 }
-
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA70);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA80);
@@ -2801,4 +2798,3 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC358);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC360);
-

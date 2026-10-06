@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
@@ -159,12 +160,8 @@ typedef struct AffinityRow {
 extern void func_002E7F20(f32, f32, f32);
 extern void mdlUpdateContextRotationBasisFromQuaternion(s32);
 
-typedef struct StageCameraTarget {
-    u8 pad[8];
-    void *unk8;
-} StageCameraTarget;
-extern StageCameraTarget *evtCreateWorldObjectAtTransform(f32 *, f32 *);
-extern u8 D_003BC7C8[];
+extern CameraObject *evtCreateWorldObjectAtTransform(f32 *, f32 *);
+extern char D_003BC7C8[];
 
 
 extern void func_002878D8(s32 arg0);
@@ -193,6 +190,10 @@ typedef struct MenuPanelGroup {
 } MenuPanelGroup;
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
+
+struct MenuPanelItem;
+extern void mnuSetPanelItemSelection(struct MenuPanelItem *, s32);
+extern void mnuSetPanelItemOption(struct MenuPanelItem *, u32);
 
 extern char D_003B2608[]; /* "battle stage test" */
 
@@ -252,13 +253,6 @@ extern StageTestState evtStageTestState;
 extern void btlStopStage(void);
 
 extern void *evtBattleStageTestScreen(void);
-
-
-/* Only this sprite object's prefix is accessed here. */
-typedef struct MenuSprites {
-    u8 pad00[0xC];
-    s32 unkC;
-} MenuSprites;
 
 
 typedef struct MenuList MenuList;
@@ -392,10 +386,6 @@ void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 para
     mnuDrawStageTestList(x, y, z, 0, menu, param);
 }
 
-typedef struct MenuPoint {
-    s32 x;
-    s32 y;
-} MenuPoint;
 
 typedef struct MenuPanelState {
     u8 pad00[0xC];
@@ -527,7 +517,10 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuSetGroupSelection);
+void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
+    mnuSetPanelItemSelection((struct MenuPanelItem *)group->children[index], selection);
+    mnuSetPanelItemOption((struct MenuPanelItem *)group->children[index], option);
+}
 
 typedef struct MenuSpriteState {
     u8 pad00[0x10];
@@ -893,14 +886,6 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-/* The compact 0x3C-byte profile panel stores a cap, option and initial grid point. */
-typedef struct MenuProfilePanel {
-    u8 pad00[0x10];
-    s32 capValue;
-    s32 option;
-    MenuPoint gridOrigin;
-    u8 pad20[0x1C];
-} MenuProfilePanel;
 
 void mnuSetProfilePanelValues(s32 item, s32 value, s32 option) {
     ((MenuProfilePanel *)item)->capValue = value;
@@ -2449,9 +2434,9 @@ u32 func_00288458(void) {
 void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
-    StageCameraTarget *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
+    CameraObject *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
 
-    cameraTarget->unk8 = D_003BC7C8;
+    cameraTarget->caption = D_003BC7C8;
     return func_00288458;
 }
 

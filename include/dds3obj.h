@@ -115,4 +115,43 @@ typedef struct WorldTransformSetup {
     WorldTransformParams transform;
 } WorldTransformSetup;
 
+/* Separately allocated 0xD0-byte world-node transform. Its matrix, position,
+ * quaternion and scale are consumed by the generic and camera VU0 routines. */
+typedef struct ObjectTransform {
+    u128 matrix[4];
+    f32 position[4];
+    f32 rotation[4];
+    u128 scale;
+    u8 pad70[0x50];
+    u32 flags;
+    f32 radius;
+    u32 unkC8;
+    u8 padCC[4];
+} ObjectTransform;
+
+/* Kind-4 world-node data: cached look-at matrix and eye/up vectors (0x90). */
+typedef struct CameraData {
+    u32 matrix[4][4]; /* Raw VU matrix words; the SDK also exposes word [0][3]. */
+    u128 localEyeOffset;
+    u128 localUp;
+    u128 worldEye;
+    u128 worldUp;
+    u32 handle;
+    s32 eyeIsRelative;
+    u32 fovUpdatePending; /* Bit 0 requests a field-of-view update. */
+    f32 fieldOfView;      /* Radians. */
+} CameraData;
+
+/* Kind-4 specialization of the world node; its caption is shown by camera debug. */
+typedef struct CameraObject {
+    u8 unk0[4];
+    s32 unk4;
+    char *caption;
+    u8 pad0C[0x0C];
+    CameraData *data;
+    ObjectTransform *inner;
+    struct CameraObject *next;
+    struct CameraObject *previous;
+} CameraObject;
+
 #endif /* DDS3OBJ_H */

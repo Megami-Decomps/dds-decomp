@@ -297,6 +297,8 @@ extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 fldValueRecordCount;
+extern s32 D_003BADF8;
+extern s32 D_003BADEC;
 extern u8 D_003BA734;
 extern s32 scrFindNamedProcessNode(u32 arg0);
 extern s32 evtDestroyNamedTask(u64 arg0, u32 arg1);
@@ -2256,27 +2258,13 @@ void fldSetCameraMoveMode(u32 value) {
     D_003BAD20 = 0;
 }
 
-/* The camera object's inner node carries its look-at target at +0x40. */
-typedef struct FldCameraTransformNode {
-    u8 pad00[0x40];
-    f32 position[4];
-    f32 rotation[4];
-} FldCameraTransformNode;
-
-typedef struct FldWorldCamera {
-    u8 pad00[4];
-    s32 key;
-    u8 pad08[0x10];
-    void *data;
-    FldCameraTransformNode *inner;
-} FldWorldCamera;
 
 extern void effObjSetNodeFlags(void *, s32);
 
 void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
     f32 phase = D_003BAD20;
-    FldWorldCamera *camera;
+    CameraObject *camera;
 
     if (D_003BAD1C != 0) {
         if (D_003BAD1C == 1) {
@@ -2291,7 +2279,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_003BAD1C == -2) {
             direction = -1.0f;
         }
-        camera = (FldWorldCamera *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = (CameraObject *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
         if (D_003BAD1C == 1 || D_003BAD1C == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;
@@ -3432,7 +3420,21 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldResetRecordState);
+void fldResetRecordState(void) {
+    s32 index;
+    for (index = 0; index < fldValueRecordCount; index++) {
+        ((FldRecE4 *)fldValueRecords)[index].value = 0;
+    }
+    fldValueRecordCount = 0;
+    fldAreaState[40] = -1;
+    fldAreaState[41] = -1;
+    fldAreaState[43] = -1;
+    D_003BADF8 = 0;
+    D_003BADEC = 0;
+    if (fldValueRecords != 0) {
+        fldReleaseRecordStorage();
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135360);
@@ -4179,41 +4181,6 @@ extern u8 D_00336A30[];
 extern u8 D_00336A40[];
 extern u8 D_00336A50[];
 extern s32 D_003BAE6C;
-/* Packed 0x6C-byte field actor row. Offsets come from the parallel actor
- * searches, motion lookups, and sound dispatch below. */
-typedef struct FldActorEntry {
-    s8 kind;               /* 0x00 */
-    u8 pad01;
-    s16 requiredFlag;      /* 0x02: zero or a model-flag ID */
-    s16 floor;             /* 0x04: current floor plus one */
-    char name[0x0C];       /* 0x06 */
-    s16 motion;            /* 0x12 */
-    s16 secondaryMotion;   /* 0x14 */
-    s16 sound;             /* 0x16 */
-    char motionName[0x0C]; /* 0x18 */
-    char otherName[0x0C];  /* 0x24 */
-    s8 variantMode;        /* 0x30 */
-    s8 flags31;            /* 0x31 */
-    s16 variant;           /* 0x32 */
-    s16 sequenceKind;      /* 0x34: zero uses the default kind */
-    u8 pad36[2];
-    char sequenceName[0x0C]; /* 0x38 */
-    s8 linkKind;           /* 0x44 */
-    s8 rowIndex;           /* 0x45 */
-    char linkName[0x0C];   /* 0x46 */
-    s8 sequenceCode;       /* 0x52 */
-    s8 selectedRoom;       /* 0x53: one-based optional room */
-    s8 flags54;            /* 0x54 */
-    char taskName[0x0F];   /* 0x55 */
-    u8 flags64;            /* 0x64 */
-    u8 unk65;
-    u8 unk66;
-    s8 value67;            /* 0x67 */
-    u8 unk68;
-    u8 unk69;
-    u8 unk6A;
-    u8 unk6B;
-} FldActorEntry;
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
 
