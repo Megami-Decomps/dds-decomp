@@ -82,7 +82,49 @@ typedef struct BattleController {
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C */
 } BattleController;
 
-extern u8 D_0035F100[];
+/* Battle camera cursor (0x130 bytes at D_0035F100): script cursor fields, then the camera path state
+ * read by func_001EB368 (retail offsets noted). */
+typedef struct BtlCameraCursor {
+    u16 unk_00;
+    s16 frame;              /* 0x02 */
+    s16 mode;
+    s16 index;
+    union {
+        u16 unk_08;
+        s8 category;
+    };
+    s16 unk_0A;
+    s16 unk_0C;
+    u16 unk_0E;
+    u16 kind;               /* 0x10: path kind (jump table 0..8) */
+    s8 phase;               /* 0x12 */
+    s8 counter;             /* 0x13 */
+    s8 busy;                /* 0x14: nonzero suspends the path step */
+    u8 pad15[0xB];
+    f32 pathEnd[4];         /* 0x20 */
+    f32 pathStart[4];       /* 0x30 */
+    f32 eyeFrom[4];         /* 0x40 */
+    f32 eyeTo[4];           /* 0x50 */
+    f32 focusFrom[4];       /* 0x60 */
+    f32 focusTo[4];         /* 0x70 */
+    u8 pad80[0x10];
+    f32 distance;           /* 0x90 */
+    u8 pad94[0xC];
+    f32 fov;                /* 0xA0 */
+    u8 padA4[0xC];
+    f32 startFrame;         /* 0xB0 */
+    u8 padB4[0xC];
+    f32 duration;           /* 0xC0 */
+    u8 padC4[0x2C];
+    f32 blendRate;          /* 0xF0 */
+    u8 padF4[0xC];
+    f32 rangeStart;         /* 0x100 */
+    u8 pad104[0xC];
+    f32 rangeEnd;           /* 0x110 */
+    u8 pad114[0x1C];
+} BtlCameraCursor;
+
+extern BtlCameraCursor D_0035F100;
 
 extern s32 D_0035D9F0[];
 
@@ -618,12 +660,6 @@ typedef struct BtlAction {
     BtlActionLink *link;
 } BtlAction;
 
-typedef struct BtlAdvanceCursor {
-    u16 unk_00;
-    s16 frame;
-    u8 pad_04[8];
-    s16 index;
-} BtlAdvanceCursor;
 
 typedef struct BtlCursorActionLink {
     u8 pad_00[0x18];
@@ -646,21 +682,8 @@ typedef struct BattleVoiceEntry {
     char fileName[0xC];
 } BattleVoiceEntry;
 
-typedef struct SoundCursor {
-    u16 unk_00;
-    s16 frame;
-    s16 mode;
-    s16 index;
-    union {
-        u16 unk_08;
-        s8 category;
-    };
-    s16 unk_0A;
-    s16 unk_0C;
-    u16 unk_0E;
-} SoundCursor;
 
-#define CURSOR ((SoundCursor *)D_0035F100)
+#define CURSOR (&D_0035F100)
 
 void btlActionSeqStateSelect(u8 *task) {
     u8 *work = (u8 *)btlGetRuntime();
@@ -7884,11 +7907,11 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001EEAE0);
 extern s32 D_0035DAE0[];
 
 void btlAdvanceCursorForUnmarkedUnit(s32 action, s32 state) {
-    BtlAdvanceCursor *cursor = (BtlAdvanceCursor *)D_0035F100;
+    BtlCameraCursor *cursor = &D_0035F100;
 
     if (cursor->unk_00 == 1) {
         if (!(((BtlAction *)action)->link->unit->flags & 0x400)) {
-            func_001E9DE0(action, state, D_0035DAE0[cursor->index]);
+            func_001E9DE0(action, state, D_0035DAE0[cursor->unk_0C]);
             func_001EB368(action, state);
             func_001EB1B0(action, state, 0, 1);
             cursor->frame++;
@@ -7897,10 +7920,9 @@ void btlAdvanceCursorForUnmarkedUnit(s32 action, s32 state) {
         }
     }
 }
-extern u8 D_0035F100[];
 
 void btlClearCommandCursorAndRunAction(s32 actor) {
-    memset(D_0035F100, 0, 0x130);
+    memset(&D_0035F100, 0, sizeof(D_0035F100));
     btlFlagUserAndTargetDefeat(actor, actor);
 }
 
@@ -7922,7 +7944,7 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
     }
 }
 void btlInitCommandCursorForCategory(s32 action, s32 state) {
-    memset(D_0035F100, 0, 0x130);
+    memset(&D_0035F100, 0, sizeof(D_0035F100));
     switch (((CameraPoseAction *)action)->link->unit->mode) {
     case 1:
         func_001E6BB0(action, state, 4, 0);
@@ -8031,7 +8053,7 @@ void btlInitTargetCursorAndFacing(CameraPoseAction *action, void *state) {
 
     memset(offset, 0, sizeof(offset));
     offset[2] = 1.0f;
-    memset(D_0035F100, 0, 0x130);
+    memset(&D_0035F100, 0, sizeof(D_0035F100));
     func_001E6BB0((s32)action, (s32)state, 2, 3);
     func_001E6668((s32)action, (s32)state, 0, 0);
     func_001EB1B0((s32)action, (s32)state, 0, 1);
@@ -8069,11 +8091,11 @@ extern void func_001E6668(s32, s32, s32, s32);
 extern s32 func_001EB1B0(s32, s32, s32, s32);
 
 void btlInitCursorAndApplyAction(s32 actor, s32 target) {
-    memset(D_0035F100, 0, 0x130);
+    memset(&D_0035F100, 0, sizeof(D_0035F100));
     func_001E6BB0(actor, target, 2, 6);
     func_001E6668(actor, target, 0, 0);
     func_001EB1B0(actor, target, 0, 1);
-    *(u16 *)(D_0035F100 + 0xC) = 2;
+    D_0035F100.unk_0C = 2;
 }
 
 void btlAdvanceWorldCounterAndSpawnActionObject(void) {
