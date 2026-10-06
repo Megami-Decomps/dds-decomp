@@ -101,14 +101,16 @@ struct EffectDispatchState;
 extern s32 billGetWorkTransformMatrix(struct EffectDispatchState *packet);
 
 
-extern void sdfAppendPacket();
+struct SdfListHead;
+struct SdfDmaNode;
+extern void sdfAppendPacket(struct SdfListHead *list, u32 packet);
 
 typedef struct BlurFilterOps {
     u8 pad00[0x10];
     void (*draw)(struct BlurFilterOps *self, void *list); /* 0x10 */
 } BlurFilterOps;
 
-/* Per-frame packet storage; only its leading 0x40-byte DMA packet is copied here. */
+/* Per-frame draw state; DMA builders select packet ranges within each record. */
 typedef struct {
     u8 dmaPacket[0x40];
     u8 pad40[0x1F00];
@@ -116,15 +118,15 @@ typedef struct {
 
 extern BlurFilterOps D_003803E8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_0032DB78(const void *, void *, s32);
-extern void sdfAppendDmaTagToList(void *, void *);
+extern void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packet);
 
 extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
-extern void sdfAppendDmaPrimary(void *, const void *, void *);
+extern void sdfAppendDmaPrimary(s32 list, u32 source, struct SdfDmaNode *node);
 
 /* One ST/XYZ2 pair in the packed draw payload. */
 typedef struct BlurPacketVertex {
@@ -291,19 +293,19 @@ void effDrawBlurRectangle(BlurSource *source)
     void *drawPacket;
 
     if (func_001200E0() == 0) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        tag = sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
-        samplingPacket = sdfAllocPacketAligned(0x30);
+        tag = (void *)sdfAllocPacketAligned(0x20);
+        sdfAppendDmaPrimary((s32)list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
+        samplingPacket = (void *)sdfAllocPacketAligned(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
         samplingPacket[2] = 0x1000000000008001ULL;
         samplingPacket[3] = 0xE;
         samplingPacket[4] = 0x61;
         samplingPacket[5] = 0x14;
-        sdfAppendPacket(list, samplingPacket);
-        textureAlphaPacket = sdfAllocPacketAligned(0x40);
+        sdfAppendPacket(list, (u32)samplingPacket);
+        textureAlphaPacket = (void *)sdfAllocPacketAligned(0x40);
         textureAlphaPacket[0] = 3;
         textureAlphaPacket[1] = 0x5000000310000000ULL;
         textureAlphaPacket[2] = 0x1000000000008002ULL;
@@ -312,8 +314,8 @@ void effDrawBlurRectangle(BlurSource *source)
         textureAlphaPacket[5] = 0x3B;
         textureAlphaPacket[6] = 0;
         textureAlphaPacket[7] = 0x3F;
-        sdfAppendPacket(list, textureAlphaPacket);
-        blendPacket = sdfAllocPacketAligned(0x40);
+        sdfAppendPacket(list, (u32)textureAlphaPacket);
+        blendPacket = (void *)sdfAllocPacketAligned(0x40);
         blendPacket[0] = 3;
         blendPacket[1] = 0x5000000310000000ULL;
         blendPacket[2] = 0x1000000000008002ULL;
@@ -322,8 +324,8 @@ void effDrawBlurRectangle(BlurSource *source)
         blendPacket[5] = 0x47;
         blendPacket[6] = source->blendControl;
         blendPacket[7] = 0x42;
-        sdfAppendPacket(list, blendPacket);
-        clampPacket = sdfAllocPacketAligned(0x30);
+        sdfAppendPacket(list, (u32)blendPacket);
+        clampPacket = (void *)sdfAllocPacketAligned(0x30);
         clampPacket[0] = 2;
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
@@ -334,10 +336,10 @@ void effDrawBlurRectangle(BlurSource *source)
             clampPacket[4] = 0x37C00000009ULL;
         }
         clampPacket[5] = 8;
-        sdfAppendPacket(list, clampPacket);
+        sdfAppendPacket(list, (u32)clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
         effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((struct EffectDispatchState *)drawPacket), 0);
-        sdfAppendPacket(list, drawPacket);
+        sdfAppendPacket(list, (u32)drawPacket);
         D_003803E8.draw(&D_003803E8, list);
     }
 }
@@ -351,19 +353,19 @@ void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPoint
 
     packet = effCreateSizedDrawPacket(1, 0x200);
     effBuildBlurUnitTextureQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((struct EffectDispatchState *)packet), fixedPointCoordinates);
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)packet);
     packet = effCreateSizedDrawPacket(1, 0);
     effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((struct EffectDispatchState *)packet), fixedPointCoordinates);
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)packet);
 }
 
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
 void effDrawBlurListWithFramePacket(void *list) {
-    void *packet = sdfAllocPacketAligned(0x40);
+    void *packet = (void *)sdfAllocPacketAligned(0x40);
 
     func_0032DB78(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
-    sdfAppendDmaTagToList(list, packet);
+    sdfAppendDmaTagToList(list, (u32)packet);
     D_003803E8.draw(&D_003803E8, list);
 }
 
@@ -376,7 +378,7 @@ void effDrawBlurSource(BlurSource *source, s32 resource, u8 fixedPointCoordinate
     void *list;
 
     if (func_001200E0() == 0) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, source->blendControl, resource);
         effAppendBlurRectanglePackets(list, source, fixedPointCoordinates);
