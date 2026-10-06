@@ -2,8 +2,6 @@
 #include "mnu_work.h"
 
 #define MNU_WORK_ACTIVE   1
-#define MNU_WORK_UPDATED  2
-#define MNU_WORK_FINISHED 4
 
 #define MNU_STATE_COMPLETED    1
 #define MNU_STATE_VALUE_GATED  2
@@ -582,11 +580,11 @@ void func_00323938(MenuRuntimePairCallback records) {
 u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
     if (entry->remaining - elapsed < 1) {
         entry->remaining = 0;
-        entry->flags = entry->flags | MNU_WORK_FINISHED;
+        entry->flagsBits.finished = 1;
         return 1;
     }
     entry->remaining = entry->remaining - (s16)elapsed;
-    entry->flags = entry->flags | MNU_WORK_UPDATED;
+    entry->flagsBits.updated = 1;
     return 0;
 }
 

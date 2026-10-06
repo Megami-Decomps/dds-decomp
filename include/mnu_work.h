@@ -39,7 +39,23 @@ typedef struct MenuWorkEntry {
     u16 unk38;
     u16 elapsed;
     u32 callback; /* Callback-list node address, not a direct function pointer. */
-    u32 flags;
+    /* Retail 0x00323960 ORs the whole word with MNU_WORK_FINISHED (4).
+     * 0x00323610..0x00323658 extracts bit 5 and increments/masks bits 6..13;
+     * 0x0031A3F8..0x0031A404 extracts bit 5 and compares it with one. */
+    union {
+        u32 flags;
+        struct {
+            u32 active : 1;
+            u32 updated : 1;
+            u32 finished : 1;
+            u32 unk3 : 2;
+            u32 unk5 : 1;
+            u32 unk6 : 8;
+            u32 unk14 : 5;
+            u32 modelMotionStarted : 1;
+            u32 unk20 : 12;
+        } flagsBits;
+    };
     u8 pad44[4];
 } MenuWorkEntry;
 
