@@ -439,25 +439,19 @@ void kwlnDebugGraphSetEnabled(s8 mode) {
     }
 }
 
-typedef struct KwlnImageSize {
-    u8 pad00[0xC];
-    s16 width;  /* 0x0C */
-    s16 height; /* 0x0E */
-} KwlnImageSize;
-
-extern s32 sdfConsCreateDrawPacket(s32, void *, s32);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1,
                                         s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32));
 
 /* Scale the longer preview side to at most 256 texels, preserving division
  * before coordinate scaling; UV endpoints at 1024 texels are reduced by one. */
-void kwlnDrawImageOutline(s32 packetList, KwlnImageSize *image) {
+void kwlnDrawImageOutline(s32 packetList, SdfTex *image) {
     s32 width = image->width;
     s32 height = image->height;
     s32 drawWidth;
     s32 drawHeight;
 
-    sdfConsCreateDrawPacket(packetList, image, 0);
+    sdfConsCreateDrawPacket((SdfListHead *)packetList, image, 0);
     drawWidth = width * 0x10;
     drawHeight = height * 8;
     if (width < height) {
