@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 
 /* Event-command work prefix; the +0xE4 key is also used by field task lookup. */
 typedef struct EvtCommandWork {
@@ -55,8 +56,6 @@ u32 kwlnTaskGetUserValue(s32 task);
 
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
-typedef struct SolarWorldState SolarWorldState;
-extern SolarWorldState *datGameState;
 
 extern s64 kwlnTaskIsRegistered(u64);
 
@@ -296,14 +295,6 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
     return 1;
 }
 
-struct SolarWorldState {
-    u8 pad00[0xA40];
-    u8 flags;          /* 0xA40 */
-    u8 phase;          /* 0xA41 */
-    u8 secondaryPhase; /* 0xA42 */
-    u8 padA43;
-    f32 phaseTimer;    /* 0xA44: elapsed phase time, advanced as float in func_00228930 */
-};
 
 #define SOLAR_PHASE_ADVANCE_FLAG 1
 #define SOLAR_ALPHA_ENABLED_FLAG 2
@@ -312,7 +303,7 @@ struct SolarWorldState {
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
-    phase = datGameState->phase;
+    phase = datGameState->world.phase;
     if (phase >= 9) {
         phase = 8 - (phase & 7);
     }
@@ -320,43 +311,43 @@ s32 evtGetMirroredSolarPhase(void) {
 }
 
 u8 evtGetSolarPhase(void) {
-    return datGameState->phase;
+    return datGameState->world.phase;
 }
 
 void evtSetSolarPhase(u8 phase) {
-    datGameState->phase = phase & 0xf;
-    datGameState->phaseTimer = 0.0f;
+    datGameState->world.phase = phase & 0xf;
+    datGameState->world.phaseTimer = 0.0f;
 }
 
 void evtEnableSolarPhaseAdvance(void) {
-    datGameState->flags = datGameState->flags | SOLAR_PHASE_ADVANCE_FLAG;
+    datGameState->world.flags = datGameState->world.flags | SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void evtDisableSolarPhaseAdvance(void) {
-    datGameState->flags = datGameState->flags & ~SOLAR_PHASE_ADVANCE_FLAG;
+    datGameState->world.flags = datGameState->world.flags & ~SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void evtSetSolarOverlayFullyVisible(void) {
-    datGameState->flags = datGameState->flags | SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->world.flags = datGameState->world.flags | SOLAR_ALPHA_ENABLED_FLAG;
     evtSolarOverlayAlpha = 1.0f;
     evtBeginSolarOverlayFadeIn(0);
 }
 
 void evtSetSolarOverlayFullyTransparent(void) {
-    datGameState->flags = datGameState->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->world.flags = datGameState->world.flags & ~SOLAR_ALPHA_ENABLED_FLAG;
     evtSolarOverlayAlpha = 0.0f;
 }
 
 void evtEnableSolarOverlayAlpha(void) {
-    datGameState->flags = datGameState->flags | SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->world.flags = datGameState->world.flags | SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 void evtDisableSolarOverlayAlpha(void) {
-    datGameState->flags = datGameState->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->world.flags = datGameState->world.flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 u32 evtUpdateSolarOverlayFade(s32 task) {
-    SolarWorldState *state;
+    DatWorldState *state;
     u32 overlay;
     f32 alpha;
     f32 f;
@@ -366,7 +357,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
         return 0;
     }
     overlay = kwlnTaskGetUserValue(task);
-    state = datGameState;
+    state = &datGameState->world;
     alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
@@ -385,7 +376,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
             evtSolarOverlayAlpha = alpha;
         }
     }
-    if ((datGameState->flags & 2) != 0) {
+    if ((datGameState->world.flags & 2) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
         fldSelectDisplayBuffer(0x53);
         func_00129900(0);
@@ -426,7 +417,7 @@ void evtStartSolarOverlay(void) {
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
-    datGameState->secondaryPhase = 0;
+    datGameState->world.secondaryPhase = 0;
 }
 
 void evtStopSolarOverlay(void) {
