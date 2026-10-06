@@ -57,7 +57,7 @@ typedef struct BattleController {
     s32 adjustmentEntryIndex;
     s32 mode;
     u8 pad_280[0x1C];
-    s32 taskParent;
+    KwlnTask *taskParent;
     u8 pad_2A0[8];
     s32 sceneObjectTask;
     s32 spriteObject;
@@ -3094,7 +3094,7 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->frame = 0;
     task = (s32)kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001AE540,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
-    func_00101A80((KwlnTask *)context->taskParent, (KwlnTask *)task);
+    func_00101A80(context->taskParent, (KwlnTask *)task);
     btlSetTrackedTaskHandle(11, task);
     context->flags &= ~0x100000;
     return 1;
@@ -3175,7 +3175,7 @@ s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     data->unk28 = arg1;
     task = (s32)kwlnTaskCreate(D_003BB3C4, 0x2B0E, 1, 1, func_001B09A8,
                           btlReleaseMessageWindowTask, (u32)data);
-    func_00101A80((KwlnTask *)context->taskParent, (KwlnTask *)task);
+    func_00101A80(context->taskParent, (KwlnTask *)task);
     btlSetTrackedTaskHandle(9, task);
     return 1;
 }
@@ -3272,7 +3272,64 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD970);
+typedef struct BtlPanelTransitionWork {
+    KwlnTask *task;
+    const u8 *text;
+    u8 pad08[4];
+    s32 frames;
+    s32 width;
+    u8 pad14[0xA];
+    s16 unk1E;
+    s16 fadeLevels[4];
+    BattleSelectionPosition initial[2];
+    s8 phase;
+    u8 pad39[3];
+    BattleSelectionPosition current[2];
+} BtlPanelTransitionWork;
+
+extern s32 func_001B4308(KwlnTask *);
+extern void btlFreeRegisteredTaskData(KwlnTask *);
+extern u32 frFontMeasureLines(u32);
+extern s32 frFontQueueGlyphInSelectedSlot(u32);
+
+s32 func_001AD970(const u8 *text) {
+    BattleController *battle = (BattleController *)btlGetRuntime();
+    KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(1);
+    BtlPanelTransitionWork *work;
+    u32 glyph;
+
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
+    }
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
+    }
+    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work->text = text;
+    work->frames = 30;
+    work->unk1E = 0;
+    work->fadeLevels[2] = work->fadeLevels[0] = 0x40;
+    work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
+    glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
+    work->width = frFontMeasureLines(glyph);
+    frFontQueueGlyphInSelectedSlot(glyph);
+    work->initial[0].x = work->width - work->width / 2 + 0x105;
+    work->initial[0].y = 0x40;
+    work->initial[1].x = 0x92 - work->width / 2;
+    work->initial[1].y = 0x40;
+    task = kwlnTaskCreate(D_003BB3AC, 0x2B0E, 1, 1,
+                          func_001B4308, btlFreeRegisteredTaskData, (u32)work);
+    func_00101A80(battle->taskParent, task);
+    work->task = task;
+    btlSetTrackedTaskHandle(1, (s32)task);
+    return 1;
+}
 
 u32 btlHasRegisteredAphNamePanelTask(void) {
     KwlnTask *task;
@@ -3848,17 +3905,6 @@ void btlReleaseCmsleffPanelWork(KwlnTask *arg0) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B4308);
-
-typedef struct BtlPanelTransitionWork {
-    u8 pad00[0x10];
-    s32 width;
-    u8 pad14[0xC];
-    s16 fadeLevels[4];
-    BattleSelectionPosition initial[2];
-    s8 phase;
-    u8 pad39[3];
-    BattleSelectionPosition current[2];
-} BtlPanelTransitionWork;
 
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -4887,7 +4933,7 @@ void func_001BF4C0(BtlTask *task) {
         fldInitializeSceneObject(object, task);
         handle = (u32)kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
                                func_001BF0F8, fldClearBattleSceneObject, (u32)object);
-        func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)handle);
+        func_00101A80(scene->taskParent, (KwlnTask *)handle);
         scene->sceneObjectTask = handle;
         func_001B83D8((s32)task, 0, 0);
         btlInitializeSelectionWork();
@@ -4902,7 +4948,7 @@ void func_001BF4C0(BtlTask *task) {
                 handle = (u32)kwlnTaskCreate(D_003BB3D4, 0x2B0E, 1, 1,
                                        func_001B5970, btlReleaseWindowTask,
                                        (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)handle);
+                func_00101A80(scene->taskParent, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xD, handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00358828);
@@ -4913,7 +4959,7 @@ void func_001BF4C0(BtlTask *task) {
                 handle = (u32)kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
                                        func_001B55A8, btlFinishTrackedBattleTaskAndCloseWindow,
                                        (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)handle);
+                func_00101A80(scene->taskParent, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xC, handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00358828);
@@ -5133,7 +5179,7 @@ void fldCreateSceneSpriteTask(s32 arg0) {
     scene = (BattleController *)btlGetRuntime();
     task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, fldStepSceneStateMachine, fldReleaseSceneSprite,
                           func_001C13E8(arg0));
-    func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)task);
+    func_00101A80(scene->taskParent, (KwlnTask *)task);
     scene->spriteObject = task;
 }
 
@@ -5482,7 +5528,7 @@ void fldCreateSceneCleanupTask(void) {
     }
     context = (BattleController *)btlGetRuntime();
     task = (u32)kwlnTaskCreate(D_003BB488, 0x2B0E, 1, 1, fldSceneCleanupTask, fldResetSceneStatus, 0);
-    func_00101A80((KwlnTask *)context->taskParent, (KwlnTask *)task);
+    func_00101A80(context->taskParent, (KwlnTask *)task);
     context->cleanupTask = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
