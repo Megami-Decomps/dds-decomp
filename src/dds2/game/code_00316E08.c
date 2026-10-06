@@ -107,24 +107,24 @@ extern s32 kwlnTaskGetTaskByName(const char *arg0);
 
 void func_00316FA8(MnuShootingWork *work);
 
-void itfSetPackedRgbAlpha(RgbAlpha *entry, u32 color) {
-    entry->rgb = color & 0xFFFFFF;
-    entry->alpha = color >> 24;
+void itfSetPackedRgbAlpha(SdfFlagListWork *entry, u32 color) {
+    entry->params.color.colorA = color & 0xFFFFFF;
+    entry->params.alpha.alpha = color >> 24;
 }
 
-u32 func_00316E28(RgbAlpha *entry) {
-    return entry->x3C;
+u32 func_00316E28(SdfFlagListWork *entry) {
+    return entry->params.alpha.surfaceIndex;
 }
 
-void func_00316E30(RgbAlpha *entry, u32 value) {
-    entry->x3C = value;
+void func_00316E30(SdfFlagListWork *entry, u32 value) {
+    entry->params.alpha.surfaceIndex = value;
 }
 
-void itfCopyColorFields(RgbAlpha *dst, CfSrc *src) {
-    dst->rgb = src->rgb;
-    dst->f50 = src->f3C;
-    dst->alpha = src->alpha;
-    dst->x3C = src->x28;
+void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
+    dst->params.color.colorA = src->color.colorA;
+    dst->params.speed = src->speed;
+    dst->params.alpha.alpha = src->alpha.alpha;
+    dst->params.alpha.surfaceIndex = src->alpha.surfaceIndex;
 }
 
 void func_00316E60(void) {

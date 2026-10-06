@@ -5819,7 +5819,7 @@ typedef struct FileKeyBlock {
     } emitter;
 } FileKeyBlock;             /* record-type-dependent parameter extent */
 
-extern s32 func_002D7458(void *, void *, s32, s32);
+extern u32 func_002D7458(const void *, const void *, s32, s32);
 extern f32 func_002D7770(EffScalarCurve *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target (0 when they coincide) */

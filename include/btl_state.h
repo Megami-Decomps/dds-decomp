@@ -6,6 +6,7 @@
 
 struct KwlnTask;
 struct BtlRuntimeTask;
+struct SdfFlagListWork;
 
 /* Full battle-work layout for state users; unit/task-only users include btl.h. */
 #ifdef VERSION_DDS1
@@ -77,7 +78,9 @@ typedef struct BtlState {
     u8 pad4AC[8];
     u32 buttonTextureHandle; /* 0x4B4 */
     struct SoundResourceNode *resources[0x31]; /* 0x4B8: SYSEFF resource slots, indexed like DDS2's */
-    u8 pad57C[0x18];
+    u8 pad57C[0x10];
+    struct SdfFlagListWork *soundTransitionTask; /* 0x58C */
+    u8 pad590[4];
     void (*bossCleanup)(void); /* 0x594 */
     u8 pad598[0x20];
     s32 unk_5B8;
@@ -272,7 +275,7 @@ typedef struct BtlState {
     u8 fadeEnabled;
     u8 pad5B9[3];
     u32 fadeColor;
-    s32 soundTransitionTask;
+    struct SdfFlagListWork *soundTransitionTask; /* 0x5C0 */
     u8 pad5C4[4];
     void (*bossCleanup)(void); /* 0x5C8 */
     s32 (*selectScriptArg)(void); /* 0x5CC */

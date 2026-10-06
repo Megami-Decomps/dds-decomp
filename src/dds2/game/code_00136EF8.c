@@ -7,6 +7,7 @@ extern FldInfTable D_0038E2D0;
 #include "fld.h"
 #include "evt_world.h"
 #include "scr.h"
+#include "sdf.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -27,19 +28,7 @@ static inline f32 fldNormalizeProbeVector(void) {
     return length;
 }
 
-typedef struct FldFadeColor {
-    u8 pad0[4];
-    s32 colorA;
-    s32 colorB;
-    u8 padC[0x18];
-    s32 unk24;
-    s32 unk28;
-    u8 pad2C[0xC];
-    s32 unk38;
-    f32 unk3C;
-} FldFadeColor;
 
-extern void itfCopyColorFields(s32, void *);
 
 extern void *dds3GetWorldObject(void);
 extern u32 *dds3FindIndexedObjectChainNodeByName();
@@ -53,7 +42,7 @@ extern void evtSubmitPrimaryGsTest();
 extern void evtSubmitPrimaryAlphaBlendMode();
 extern void func_00108EC0();
 
-extern s32 fldCameraColorEffect;
+extern SdfFlagListWork *fldCameraColorEffect;
 
 extern u32 fldCameraColorEnabled;
 
@@ -175,11 +164,10 @@ extern u32 fldRainTextureData;
 
 extern FldCameraSetting *fldCameraSettings;
 
-extern FldFadeColor fldCameraColorParameters[];
+extern SdfFlagListParams fldCameraColorParameters[];
 
 extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 
-extern u32 effCreateSelectionFlagListFromWork(const void *);
 
 
 
@@ -384,22 +372,22 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
-        fldCameraColorParameters->colorB = fldCameraColorParameters->colorA =
+        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA =
             (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-        fldCameraColorParameters->unk24 = color->vectorY;
+        fldCameraColorParameters->alpha.alpha = color->vectorY;
         switch (color->mode) {
         case 0:
-            fldCameraColorParameters->unk28 = 1;
+            fldCameraColorParameters->alpha.surfaceIndex = 1;
             break;
         case 1:
-            fldCameraColorParameters->unk28 = 2;
+            fldCameraColorParameters->alpha.surfaceIndex = 2;
             break;
         default:
-            fldCameraColorParameters->unk28 = 3;
+            fldCameraColorParameters->alpha.surfaceIndex = 3;
             break;
         }
-        fldCameraColorParameters->unk38 = color->slotIndex;
-        fldCameraColorParameters->unk3C = color->vectorZ;
+        fldCameraColorParameters->count = color->slotIndex;
+        fldCameraColorParameters->speed = color->vectorZ;
         itfCopyColorFields(fldCameraColorEffect, fldCameraColorParameters);
     }
     *fldAppliedCameraSettings = *setting;
