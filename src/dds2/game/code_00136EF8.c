@@ -209,6 +209,8 @@ extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
 
 extern s32 fldValueRecordCount;
+extern s32 D_00436188;
+extern s32 D_0043617C;
 
 typedef struct FldRecE4 {
     u8 pad0[0xB8];
@@ -523,7 +525,21 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldResetRecordState);
+void fldResetRecordState(void) {
+    s32 index;
+    for (index = 0; index < fldValueRecordCount; index++) {
+        ((FldRecE4 *)fldValueRecords)[index].value = 0;
+    }
+    fldValueRecordCount = 0;
+    fldAreaState[40] = -1;
+    fldAreaState[41] = -1;
+    fldAreaState[43] = -1;
+    D_00436188 = 0;
+    D_0043617C = 0;
+    if (fldValueRecords != 0) {
+        fldReleaseRecordStorage();
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137F10);
 
