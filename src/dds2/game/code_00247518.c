@@ -7,6 +7,7 @@
 #include "pcp_vu0.h"
 #include "evt_unit.h"
 #include "eff_transform.h"
+#include "dat_state.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
@@ -46,7 +47,6 @@ extern void effSetCh75Id(u32 resourceWord);
 extern void effSetCh76Id(u32 sourceHandle);
 extern void *mnuCampFindEntryByName(void *scene, const char *name);
 
-extern s32 datGameState;
 
 s32 evtEventViewerGetPendingNode(s32 arg0);
 
@@ -1350,7 +1350,7 @@ s32 evtViewerTestIndexedCondition(u32 encodedId) {
     if (idx == 0) {
         return 1;
     }
-    return (*(s32 *)(datGameState + idx * 4 + 0x35c) ^ lo) == 0;
+    return (datGameState->script.ints[199 + idx] ^ lo) == 0;
 }
 
 u32 func_0024B078(void) {
