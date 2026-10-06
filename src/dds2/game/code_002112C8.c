@@ -3278,7 +3278,78 @@ void btlStartReadyUnitActionCopy(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002195E0);
+extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
+
+/* Once the previous selected unit is active, queue its mode's script resource and
+ * stationed sound, then an immediate task that waits for the resource task to go.
+ */
+void func_002195E0(ActionStateLink *record) {
+    BattleWork *work = (BattleWork *)btlGetRuntime();
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)work->sub;
+    s32 resource;
+    s32 variant;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *follow;
+
+    if (ctrl->prevUnit == 0) {
+        return;
+    }
+    if (btlIsActiveActor(ctrl->prevUnit) == 0) {
+        return;
+    }
+    if (!(record->pendingFlags & 8)) {
+        return;
+    }
+    switch (ctrl->prevUnit->mode) {
+    case 0x109:
+    case 0x131:
+    case 0x134:
+        resource = 0x64;
+        break;
+    case 0x10A:
+    case 0x132:
+    case 0x135:
+        resource = 0x63;
+        break;
+    case 0x133:
+    case 0x136:
+        resource = 0x62;
+        break;
+    default:
+        return;
+    }
+    switch (ctrl->prevUnit->mode) {
+    case 0x109:
+    case 0x10A:
+    case 0x134:
+        variant = 0;
+        break;
+    case 0x131:
+    case 0x132:
+    case 0x133:
+    case 0x135:
+        variant = 1;
+        break;
+    case 0x136:
+        variant = 2;
+        break;
+    default:
+        return;
+    }
+    task = (BtlRuntimeTask *)btlCreateScriptResourceTask((u32)ctrl->prevUnit, resource);
+    task->startDelay = 0xE;
+    btlStartTask(task);
+    follow = (BtlRuntimeTask *)sndCreateStationedSeTask(work->soundTaskBase + variant);
+    follow->startDelay = 0xE;
+    btlStartTask(follow);
+    follow = btlCreateImmediateCompletionTask();
+    follow->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    follow->startCondition.value.handle = task->handle;
+    follow->ownerId = record->unit->owner;
+    btlStartTask(follow);
+    record->flags &= ~8;
+    ctrl->prevUnit = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00219760);
 
