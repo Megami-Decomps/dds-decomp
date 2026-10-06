@@ -1396,9 +1396,49 @@ struct PcpScatterInstance {
 extern void *func_00175B50();
 extern void effCreateScatterResource(void *object, u32 resource);
 
+extern void *memcpy(void *, const void *, u32);
+
 /* Return ring work with trailing particles and randomized negative initial ages.
  * The delay clamp changes only the local modulus, not the copied parameter head. */
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterCreateParticleInstance);
+PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
+    PcpScatterParams *src;
+    u32 resource;
+{
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstance));
+    PcpScatterInstance *inst = (PcpScatterInstance *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 delayModulus;
+    u32 count;
+    u32 i;
+    PcpScatterDraw *object;
+    u32 drawWord;
+
+    particle = (PcpScatterParticle *)(inst + 1);
+    /* Preserve the complete serialized parameter block, including padding. */
+    memcpy(&inst->params, src, sizeof(inst->params));
+    inst->color = EFF_SCATTER_NEUTRAL_COLOR;
+    inst->scale = 1.0f;
+    inst->allocationHandle = allocation;
+    inst->particles = particle;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_00175B50(src->particleCount, src->unk60);
+    drawWord = src->unk50;
+    inst->scatterObject = (u32)object;
+    object->unk50 = drawWord;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    delayModulus = inst->params.randomDelayRange;
+    count = inst->params.particleCount;
+    if ((s32)delayModulus <= 0) {
+        delayModulus = 1;
+    }
+    for (i = 0; i < count; i++) {
+        particle->age = -(effMiscRand(D_0034DF38) % delayModulus);
+        particle++;
+    }
+    return inst;
+}
 
 /* Create ring work from the first two table blocks; this dispatch discards the result. */
 void effScatterCreateRingFromTable(void *parameterTable)
@@ -1630,8 +1670,6 @@ void effPcpScatterTransformMatrix(PcpScatterInstance *work, void *source)
 
 /* Return the radius-damped ring variant with a shared instance clock.
  * Normalize the copied delay range too, because loop restarts read that stored value. */
-extern void *memcpy(void *, const void *, u32);
-
 /* Return the radius-damped ring variant with a shared instance clock.
  * Normalize the copied delay range too, because loop restarts read that stored value. */
 void *effScatterCreateDampedRing(src, resource)
