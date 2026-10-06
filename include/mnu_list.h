@@ -48,7 +48,7 @@ struct MenuList {
      * pointer, 2443F8 stores a buffer, and 272D50 stores staff draw context. */
     void *context;
     s32 categoryIndex; /* 0x34: selects one of the skill-window category layouts. */
-    u8 pad38[4];
+    u32 categoryMarkerEnabled; /* 0x38: draw the active category marker. */
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
 
