@@ -161,7 +161,52 @@ void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
     sdfReleaseResourceAllocation(work->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECD0);
+
+extern s32 sdfAllocPacketAligned(s32 size);
+struct SdfListHead;
+extern void sdfInitPacketList(struct SdfListHead *list);
+extern void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource);
+extern void effAppendBlurRectanglePackets(void *list, EffBlurQuad *quad, u8 fixedPoint);
+extern void effDrawBlurListWithFramePacket(void *list);
+extern f32 sdfSinPoly(f32 angle);
+extern f64 fabs(f64 value);
+
+void func_0018ECD0(EffBlurScatterWork *work)
+{
+    void *list;
+    EffBlurScatterSlot *slot;
+    s32 count;
+    u32 alpha;
+
+    if (func_001200E0() == 0) {
+        list = (void *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        effAppendBlurRenderState(list, work->params.unk10, work->sourceHandle);
+        slot = work->slots;
+        if (work->params.count > 0) {
+            count = work->params.count;
+            do {
+                if (slot->delay == 0) {
+                    if (slot->angle > 3.14159265f) {
+                        effBlurInitializeScatterSlot(work, slot);
+                    }
+                    slot->quad.displacement = work->params.unk18 * sdfSinPoly(slot->angle) + 1.0f;
+                    alpha = (u32)((f32)(work->params.color >> 24) *
+                                  (3.14159265f - fabs(slot->angle)) * (1.0f / 3.14159265f));
+                    slot->quad.color = (slot->quad.color & 0xFFFFFF) | (alpha << 24);
+                    effAppendBlurRectanglePackets(list, &slot->quad, 0);
+                    slot->angle += work->params.angleStep;
+                } else {
+                    slot->delay--;
+                }
+                count--;
+                slot++;
+            } while (count != 0);
+        }
+        effDrawBlurListWithFramePacket(list);
+    }
+}
+
 
 /* Update scale parameters but preserve the allocated destination slot count. */
 void effBlurCopyParamsKeepHeader(EffBlurScaleWork *dst, EffBlurScaleParams *src) {
@@ -209,8 +254,8 @@ void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     quad->y = work->params.y;
 }
 
-INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414620);
 
-INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414628);
+
+
 
 
