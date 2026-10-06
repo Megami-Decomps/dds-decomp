@@ -1,3 +1,4 @@
+#include "prf_requirement.h"
 #include "dsp_name.h"
 #include "common.h"
 #include "sdf.h"
@@ -153,21 +154,6 @@ typedef struct MantraNodePos {
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
 extern u8 D_00401320[][36];
-
-/* A 20-byte prerequisite operand: operation, thresholds and up to eight IDs. */
-typedef struct PrfRequirementOperand {
-    u32 operation;
-    u8 pad04[4];
-    u32 minimumCount; /* 0x08 */
-    u8 profileIds[8]; /* 0x0C */
-} PrfRequirementOperand;
-
-typedef struct ScriptEntry44 {
-    u32 state;
-    PrfRequirementOperand rules[2];
-} ScriptEntry44;
-
-extern ScriptEntry44 D_00402BE0[];
 
 extern u8 D_0040132C[];
 
@@ -802,8 +788,8 @@ PrfSkillList *output;
 
 
 /* Count leading profile IDs up to the first zero or the eight-entry bound. */
-u32 prfCountProfileList(u8 *operand) {
-    u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+u32 prfCountProfileList(PrfRequirementOperand *operand) {
+    u8 *profileIds = operand->profileIds;
     u32 profileIndex = 0;
     while (profileIndex < PRF_REQUIRED_PROFILE_COUNT) {
         if (profileIds[profileIndex] == 0) return profileIndex;
@@ -813,11 +799,11 @@ u32 prfCountProfileList(u8 *operand) {
 }
 
 /* Require each listed profile's primary flag; an empty list succeeds. */
-s32 ptyHasAllReqProfiles(DatPartyRecord *unit, u8 *operand) {
+s32 ptyHasAllReqProfiles(DatPartyRecord *unit, PrfRequirementOperand *operand) {
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
     if (profileCount > 0) {
-        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+        u8 *profileIds = operand->profileIds;
         do {
             if (func_00314990(unit, profileIds[profileIndex++]) == 0) {
                 return 0;
@@ -828,48 +814,48 @@ s32 ptyHasAllReqProfiles(DatPartyRecord *unit, u8 *operand) {
 }
 
 /* Compare the number of flagged IDs in the list with its minimum count. */
-s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
+s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, PrfRequirementOperand *operand) {
     u32 matchedCount = 0;
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
     if (profileCount > 0) {
-        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+        u8 *profileIds = operand->profileIds;
         do {
             if (func_00314990(unit, profileIds[profileIndex++]) != 0) {
                 matchedCount++;
             }
         } while (profileIndex < profileCount);
     }
-    if (matchedCount < ((PrfRequirementOperand *)operand)->minimumCount) {
+    if (matchedCount < operand->minimum) {
         return 0;
     }
     return 1;
 }
 
 /* Count flagged profile rows whose byte-five value reaches the operand's threshold. */
-s32 ptyProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
+s32 ptyProfileCountAtLeast(DatPartyRecord *unit, PrfRequirementOperand *operand) {
     u32 profileIndex;
     u32 matchedCount = 0;
 
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
         if (func_00314990(unit, (u16)profileIndex)) {
-            if (D_00401320[profileIndex][5] >= operand[5]) {
+            if (D_00401320[profileIndex][5] >= operand->profileThreshold) {
                 matchedCount++;
             }
         }
     }
-    if (matchedCount < ((PrfRequirementOperand *)operand)->minimumCount) {
+    if (matchedCount < operand->minimum) {
         return 0;
     }
     return 1;
 }
 
 /* Each listed profile must be flagged in at least one occupied party slot. */
-s32 ptyAreReqProfilesInParty(u8 *operand) {
+s32 ptyAreReqProfilesInParty(PrfRequirementOperand *operand) {
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
     if (profileCount > 0) {
-        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+        u8 *profileIds = operand->profileIds;
         do {
             s32 profilePresent = 0;
             s32 profileId = profileIds[profileIndex];
@@ -892,16 +878,16 @@ s32 ptyAreReqProfilesInParty(u8 *operand) {
 }
 
 /* Compare the unit's level byte with the prerequisite's byte threshold. */
-s32 prfReqCheckUnitLevel(DatPartyRecord *unit, u8 *operand) {
-    if (unit->level < operand[4]) {
+s32 prfReqCheckUnitLevel(DatPartyRecord *unit, PrfRequirementOperand *operand) {
+    if (unit->level < operand->levelThreshold) {
         return 0;
     }
     return 1;
 }
 
 /* Test the global counter against the prerequisite's minimum. */
-s32 prfReqCheckGlobalCounter(u8 *operand) {
-    if (datGameState->header.currency < ((PrfRequirementOperand *)operand)->minimumCount) {
+s32 prfReqCheckGlobalCounter(PrfRequirementOperand *operand) {
+    if (datGameState->header.currency < operand->minimum) {
         return 0;
     }
     return 1;
@@ -963,11 +949,11 @@ s32 func_00315C40(u32 index) {
 }
 
 /* The evaluator masks its incoming requirement ID to the lower sixteen bits. */
-extern s32 func_00315C68(u32, u32, DatPartyRecord *, u32, u32 *);
+
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315C68);
 
-void func_00315FA0(u32 mode, DatPartyRecord *unit, u16 id) {
-    func_00315C68(mode, 0, unit, id, 0);
+s32 func_00315FA0(u32 mode, DatPartyRecord *unit, u16 id) {
+    return func_00315C68(mode, 0, unit, id, 0);
 }
 
 /* Read requirement flags for an unchecked profile ID. */
@@ -1071,7 +1057,7 @@ void sdfSetAllFlagsFromTable(void) {
     } while (entryIndex++ >= 0);
 }
 
-ScriptEntry44 *scrGetEntryDescriptor(u16 id) {
+PrfRequirementRecord *scrGetEntryDescriptor(u16 id) {
     return &D_00402BE0[id];
 }
 
