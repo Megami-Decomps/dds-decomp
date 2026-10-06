@@ -1,3 +1,4 @@
+#include "prf_requirement.h"
 #include "common.h"
 #include "mnu_list.h"
 #include "dat_state.h"
@@ -411,7 +412,7 @@ typedef struct MantraFlagResource {
 } MantraFlagResource;
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern s32 func_00315C68(s32, s32, DatPartyRecord *, u16, s32);
+
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D070);
 
@@ -501,7 +502,7 @@ void func_0028DFA0(s32 object) {
                     if (record->kind == 2) {
                         *flag = (*flag & 0xFFF0) | 2;
                     } else {
-                        if (func_00315C68(1, 2, unit, record->id, 0)) {
+                        if (func_00315C68(1, 2, unit, (u16)record->id, 0)) {
                             *flag = (*flag & 0xFFF0) | 1;
                         } else {
                             *flag = (*flag & 0xFFF0) | 2;

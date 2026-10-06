@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_ui.h"
@@ -177,7 +178,7 @@ extern u8 *D_00435E64;
 
 extern u8 *D_00435E5C;
 
-extern s32 D_00438F54;
+extern SceneSlotFadeWork *D_00438F54;
 
 
 
@@ -1070,21 +1071,60 @@ void fldScaleSceneCoordinateRecord(SceneCoordinateWork *work, s32 index) {
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE418);
 
 void fldSetSceneSlotRange(s32 index) {
-    u8 *scene = (u8 *)D_00438F54;
-    if (*(s8 *)(scene + 0x20) < index) {
+    SceneSlotFadeWork *scene = D_00438F54;
+    if (scene->currentIndex < index) {
         s32 i;
         for (i = 0; i <= index; i++) {
-            s32 offset = i * 2;
-            scene = (u8 *)D_00438F54;
-            *(s32 *)(scene + (offset + *(s32 *)(scene + 4)) * 4 + 0x38) = 0x80;
-            *(u8 *)((*(s32 *)(scene + 4) + offset) + (s32)scene + 0x22) = 3;
+            scene = D_00438F54;
+            scene->fade[i][scene->bank] = 0x80;
+            scene->phase[i][scene->bank] = 3;
         }
-        ((u8 *)D_00438F54)[0x21] = index;
+        D_00438F54->lastIndex = index;
     }
-    ((u8 *)D_00438F54)[0x20] = index;
+    D_00438F54->currentIndex = index;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE5C8);
+extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
+
+void func_001CE5C8(void) {
+    s32 bank = D_00438F54->bank;
+    s32 last = D_00438F54->lastIndex;
+    s32 status = btlGetNamedTaskPairStatusOrUnavailable();
+    s32 i;
+    if (D_00438F54->enabled[bank] == 0) return;
+    if (status != 0 && status != 3) return;
+    for (i = 0; i <= last; i++) {
+        switch (D_00438F54->phase[i][bank]) {
+        case 1:
+            D_00438F54->timer++;
+            D_00438F54->timer = D_00438F54->timer <= 0 ? 0 : D_00438F54->timer > 34 ? 34 : D_00438F54->timer;
+            if (D_00438F54->timer >= 34) {
+                D_00438F54->fade[i][bank] += 64;
+                D_00438F54->fade[i][bank] = D_00438F54->fade[i][bank] <= 0 ? 0 : D_00438F54->fade[i][bank] > 255 ? 255 : D_00438F54->fade[i][bank];
+                if (D_00438F54->fade[i][bank] >= 255) {
+                    D_00438F54->phase[i][bank]++;
+                    D_00438F54->phase[i + 1][bank] = 1;
+                }
+            }
+            break;
+        case 2:
+            D_00438F54->fade[i][bank] -= 16;
+            D_00438F54->fade[i][bank] = D_00438F54->fade[i][bank] <= 128 ? 128 : D_00438F54->fade[i][bank] > 255 ? 255 : D_00438F54->fade[i][bank];
+            if (D_00438F54->fade[i][bank] <= 128) {
+                D_00438F54->phase[i][bank]++;
+                if (i == last) D_00438F54->completed = 1;
+            }
+            break;
+        case 3:
+            break;
+        case 4:
+            D_00438F54->fade[i][bank] -= 64;
+            D_00438F54->fade[i][bank] = D_00438F54->fade[i][bank] <= 0 ? 0 : D_00438F54->fade[i][bank] > 128 ? 128 : D_00438F54->fade[i][bank];
+            break;
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE838);
 
