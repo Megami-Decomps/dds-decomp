@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 extern void fldShutdownLmapResources(void);
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
@@ -36,7 +37,7 @@ extern void evtSetSolarOverlayFullyTransparent(void);
 extern void dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
-extern s32 D_003BD254;
+extern SdfMemBlock *D_003BD254;
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 fldLocalMapTrackSlotFromMode();
 extern s32 fldLmapTaskUpdate(void);
@@ -61,7 +62,7 @@ extern s32 func_002C38B0(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern s32 fldLoadLocalMapResources();
 extern void fldCreateMapRequestQueues(void);
-extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void func_002CF420(void);
@@ -467,7 +468,7 @@ void fldShutdownLmapResources(void) {
     func_002CF430();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
-    sdfQueueNonzeroResourceId(D_003BD254);
+    sdfQueueNonzeroResourceId((s32)D_003BD254);
     evtDestroySecondaryWorldNode();
 }
 
