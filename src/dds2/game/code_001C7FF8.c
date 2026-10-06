@@ -1241,26 +1241,10 @@ void func_001CDEC0(s32 bank, s32 index) {
 }
 
 
-typedef struct SceneCoordinateRecord {
-    u8 pad00[0xC];
-    s32 scaledX;
-    s32 scaledY;
-    u8 pad14[0x68];
-    s32 sourceX;
-    s32 sourceY;
-    u8 pad84[0x1C];
-} SceneCoordinateRecord;
 
-typedef struct SceneCoordinateWork {
-    u8 pad00[0x18];
-    SceneCoordinateRecord *records;
-} SceneCoordinateWork;
-
-void fldScaleSceneCoordinateRecord(SceneCoordinateWork *work, s32 index) {
-    s32 address = index * 0xA0 + (s32)work->records;
-    SceneCoordinateRecord *record = (SceneCoordinateRecord *)address;
-    record->scaledX = record->sourceX << 4;
-    record->scaledY = record->sourceY << 3;
+void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
+    work->workEntries[index].width = work->workEntries[index].sourceWidth << 4;
+    work->workEntries[index].height = work->workEntries[index].sourceHeight << 3;
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE418);

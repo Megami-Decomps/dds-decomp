@@ -3770,7 +3770,7 @@ void func_001B1518(BattlePhasePanelWork *work) {
 
 
 
-extern void fldScaleSceneCoordinateRecord(s32, s32);
+extern void fldScaleSceneCoordinateRecord(EffectSlotSet *, s32);
 
 extern void func_001B19F8(BattlePhasePanelWork *);
 
@@ -5255,12 +5255,9 @@ void func_001C2938(s32 bank, s32 index) {
 }
 
 
-void fldScaleSceneCoordinateRecord(s32 arg0, s32 arg1) {
-    s32 temp_v0;
-
-    temp_v0 = arg1 * 0xa0 + *(s32 *)(arg0 + 0x18);
-    *(s32 *)(temp_v0 + 0xc) = *(s32 *)(temp_v0 + 0x7c) << 4;
-    *(s32 *)(temp_v0 + 0x10) = *(s32 *)(temp_v0 + 0x80) << 3;
+void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
+    work->workEntries[index].width = work->workEntries[index].sourceWidth << 4;
+    work->workEntries[index].height = work->workEntries[index].sourceHeight << 3;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C2E90);
