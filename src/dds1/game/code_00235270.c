@@ -1253,7 +1253,7 @@ s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
     return D_00368952[runtime->tableColumn + runtime->frameGroup->type * 10];
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002397C8);
+INCLUDE_ASM(const s32, "game/code_00235270", evtDrawGroupPropertyTable);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA70);
 

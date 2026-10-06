@@ -1823,7 +1823,7 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE90);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BEC8);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022E4E0);
+INCLUDE_ASM(const s32, "game/code_0022AC10", btlDrawUnitAffinityDebug);
 
 typedef struct MenuList {
     u32 count;
