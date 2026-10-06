@@ -219,7 +219,7 @@ void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode);
 
 extern s32 func_0019D550(FrFontGlyph *glyph, s8 mode, u32 flags);
 
-extern void frFontEnsureSlotLoaded();
+extern void frFontEnsureSlotLoaded(s32, const char *);
 
 #define FR_FONT_ENTRY_CAPACITY 9
 #define FR_FONT_IMAGE_WORD_COUNT 16
