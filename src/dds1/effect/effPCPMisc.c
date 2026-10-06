@@ -112,18 +112,18 @@ typedef struct {
 } EffPCPCompactScaleParams;
 
 typedef struct {
-    u8 pad00[0x10];
+    f32 position[4];
     u8 flags;
     u8 pad11[3];
-    u32 duration;
-    u32 fadeIn;
-    u32 fadeOut;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
     u32 color;
     u32 baseColor;
-    u32 startExtent;
-    u32 endExtent;
-    u32 frame;
-    u32 resource;
+    s32 startExtent;
+    s32 endExtent;
+    s32 frame;
+    void *resource;
 } EffPCPCompactWork;
 
 /* The two compact fade variants share their 0x3C work; only the SDK
@@ -2572,7 +2572,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactScatterParams 
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = (u32)func_00186F90(&params->res);
+    work->resource = func_00186F90(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2625,7 +2625,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactScaleParams *par
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = effCloneBlurWorkWithSlots(&params->res);
+    work->resource = (void *)effCloneBlurWorkWithSlots(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2660,7 +2660,7 @@ void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
 }
 
 void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseSecondResource(work->resource);
+    effBlurReleaseSecondResource((u32)work->resource);
     sdfReleaseChipBlock(work);
 }
 
