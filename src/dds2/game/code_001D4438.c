@@ -149,23 +149,8 @@ extern u32 D_00435E64;
 extern u32 D_00435E5C;
 
 extern s32 D_00438F54;
-typedef struct SceneEntry {
-    u16 flags;                /* 0x000 */
-    u8 pad02[6];
-    u16 weight;               /* 0x008 */
-    u8 pad0A[4];
-    u16 mask;                 /* 0x00E */
-    u8 pad10[0x1A8];
-    s32 link;                 /* 0x1B8 */
-    u8 pad1BC[8];
-} SceneEntry;
 
-typedef struct SceneParty {
-    u8 pad00[0xA60];
-    SceneEntry entry[5];
-} SceneParty;
 
-extern SceneParty *datGameState;
 extern s32 datItemSkillRecords;
 
 extern s32 func_00206090();
