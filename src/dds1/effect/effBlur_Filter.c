@@ -79,7 +79,26 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     quad->bottom = centerY + halfSize;
 }
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186F90);
+EffBlurScatterWork *func_00186F90(void *params)
+{
+    struct SdfMemBlock *allocation;
+    EffBlurScatterWork *work;
+    EffBlurScatterSlot *slot;
+    s32 i;
+
+    allocation = sdfAllocGeneralBlock(sizeof(EffBlurScatterWork) + 100 * sizeof(EffBlurScatterSlot));
+    work = (EffBlurScatterWork *)sdfResourceRetainAddress(allocation);
+    work->params = *(EffBlurScatterParams *)params;
+    work->allocation = allocation;
+    work->slots = (EffBlurScatterSlot *)(work + 1);
+    work->sourceHandle = effGetResourceFirstWord(2);
+    slot = work->slots;
+    for (i = 0; i < 100; i++, slot++) {
+        effBlurInitializeScatterSlot(work, slot);
+        slot->angle = 3.14159265f + 1.0f;
+    }
+    return work;
+}
 
 /* Release the first variant's owned effect resource. */
 void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
