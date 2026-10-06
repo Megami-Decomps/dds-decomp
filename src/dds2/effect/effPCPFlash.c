@@ -1415,17 +1415,17 @@ void effFlashOrbitArcSetRenderScale(PcpFlashOrbitArcWork *work, f32 value)
     work->renderScale = value;
 }
 
-void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 flag, s32 param) {
+void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 index, s32 param) {
     PcpFlashQuadColorSlot *slot;
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
     slot->color[1] = effMultiplyPackedColors(colorB, param);
-    if (flag & 1) {
+    if (index & 1) {
         slot->color[2] = effMultiplyPackedColors(0x80000000, param);
         slot->color[3] = effMultiplyPackedColors(colorA | 0xFF000000, param);
         slot->color[4] = effMultiplyPackedColors(0x80000000, param);
@@ -1505,7 +1505,109 @@ void effFlashOrbitArcAdvanceAngle(PcpFlashOrbitArcWork *work, s32 index) {
     part->accumulator += work->angularStep;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001742F0);
+void func_001742F0(PcpFlashOrbitArcWork *work)
+{
+    s32 index;
+    s32 count;
+    PcpFlashMotionParticle *part;
+    s32 lifetime;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 randomRange;
+    s32 restart;
+    s32 tintColor;
+    EffRecordPool *handle;
+    f32 heightDelta;
+    f32 delta;
+    f32 progress;
+    f32 factor;
+    f32 start;
+    f32 radiusEnd;
+    f32 upStart;
+    f32 acrossStart;
+    f32 upEnd;
+    f32 acrossEnd;
+    f32 normalEnd;
+
+    part = work->parts;
+    count = work->particleCount;
+    lifetime = work->lifetime;
+    fadeIn = work->fadeInTime;
+    fadeOut = work->fadeOutTime;
+    restart = work->restartRandomly;
+    randomRange = work->randomRange;
+    tintColor = work->tintColor;
+    heightDelta = work->unk4C - work->unk48;
+    progress = 1.0f;
+    if (lifetime > 0) {
+        progress = (f32)work->unk5C / (f32)lifetime;
+    }
+    start = work->unk38;
+    radiusEnd = work->unk3C;
+    delta = radiusEnd - start;
+    work->orbitRadius = start + delta * progress;
+    if (start > 0.0f) {
+        factor = radiusEnd / start;
+    } else {
+        factor = radiusEnd;
+    }
+    upStart = work->unk30;
+    acrossStart = work->unk34;
+    upEnd = upStart * factor;
+    acrossEnd = acrossStart * factor;
+    start = work->unk40;
+    normalEnd = work->unk44;
+    delta = upEnd - upStart;
+    work->upSpan = upStart + delta * progress;
+    delta = acrossEnd - acrossStart;
+    work->acrossSpan = acrossStart + delta * progress;
+    delta = normalEnd - start;
+    work->normalSpan = start + delta * progress;
+
+    for (index = 0; index < count; index++, part++) {
+        s32 age = part->age;
+        s32 color;
+
+        if (age == 0) {
+            part->stepSpeed = work->unk48;
+            effFlashArcQuad(work, index);
+            effFlashOrbitArcSetParticleColors(work, index, 0);
+            part->color = 0x80808080;
+        } else if (age >= lifetime) {
+            if (restart != 0) {
+                part->age = ~(effMiscRand(D_003AA868) % randomRange);
+            }
+            color = 0;
+            effFlashOrbitArcSetParticleColors(work, index, color);
+        } else if (age > 0) {
+            progress = (f32)age / (f32)lifetime;
+            part->stepSpeed = heightDelta * progress + work->unk48;
+            effFlashOrbitArcAdvanceAngle(work, index);
+            effFlashArcQuad(work, index);
+            if (part->age < fadeIn && fadeIn != 0) {
+                factor = (f32)part->age / (f32)fadeIn;
+            } else if (fadeOut >= lifetime - part->age && fadeOut != 0) {
+                factor = (f32)(lifetime - part->age) / (f32)fadeOut;
+            } else {
+                factor = 1.0f;
+            }
+            color = effMultiplyPackedColors(effBlendColor(0, part->color, factor), tintColor);
+            effFlashOrbitArcSetParticleColors(work, index, color);
+        }
+        part->age = part->age + 1;
+    }
+    if (work->unk5C == lifetime) {
+        work->unk5C = 0;
+    } else {
+        work->unk5C++;
+    }
+    handle = work->resourceHandle;
+    handle->origin[0] = work->origin[0];
+    handle->origin[1] = work->origin[1];
+    handle->origin[2] = work->origin[2];
+    handle->scale = work->renderScale;
+    effDrawScaledRecordPool(handle);
+}
 
 PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(src)
     PcpFlashRotatingQuadWork *src;
