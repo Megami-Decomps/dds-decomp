@@ -1087,6 +1087,18 @@ member (`f(&work->dma)`); `lw $a0, 0x68($base)` loads a pointer member
 (`f(work->dma)`). An embedded array behind a header is a struct with the
 array as its last member (`EffectRingBlock`, `MapRequestRing`).
 
+## Event-unit vector-slot storage
+
+`evtResetUnitVectorSlots` and the vector setters share the canonical
+`EvtUnitVectorSlot` in `evt_unit.h`. Each native 0x40-byte record contains the
+state and bound-unit ID, three vec4 at +0x08/+0x18/+0x28, and the two auxiliary
+coordinates at +0x38/+0x3C. DDS1's static pool has seven entries; DDS2's has ten.
+This is neither the event unit's motion object nor its world-list node.
+
+The DDS2 progress-reward table also used the private name `EvtSlot`, but its
+records are 0x48 bytes and have a different table base and meaning. A repeated
+private name is not evidence that those tables share an owner.
+
 ## Battle records and saved-party ownership
 
 The DDS1 battle getters return the canonical `DatPartyRecord` entries in
@@ -1095,6 +1107,13 @@ The DDS1 battle getters return the canonical `DatPartyRecord` entries in
 Use the shared record for party scans and command-power snapshots, and the
 shared game-state inventory, battle-flag bank and 40-byte scene records
 rather than local byte-offset views.
+
+DDS2's `ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot)` returns an
+`s32` sum of the item's base value and saved stat bonus. Its menu consumer
+`mnuApplyPackedGroupValues` now passes a word-sized item ID and keeps the
+result in `s32`; the old `u64` declarations were not evidence of packed
+values or a wide return. The draw controller reads the canonical party
+record's `itemId` at +0x1B2, not an alternate record view.
 
 An actor's stat data is not established as a full embedded party record.
 `btlSyncPlayerWork` retains the actor's `+0x120` stat base separately from
