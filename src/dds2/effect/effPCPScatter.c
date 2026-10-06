@@ -2327,7 +2327,45 @@ struct PcpScatterPlainInstance {
 
 /* Return flat-ring work with an identity source matrix and randomized negative ages.
  * Like the first ring variant, only the local delay modulus is normalized. */
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterCreatePlainInstance);
+void *effPcpScatterCreatePlainInstance(src, resource)
+    PcpScatterPlainParams *src;
+    u32 resource;
+{
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpScatterPlainParticle) + sizeof(PcpScatterPlainInstance));
+    PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfResourceRetainAddress(allocation);
+    PcpScatterPlainParticle *particle;
+    u32 delayModulus;
+    u32 count;
+    u32 i;
+    PcpScatterDraw *object;
+    u32 drawWord;
+
+    particle = (PcpScatterPlainParticle *)(inst + 1);
+    /* Preserve the complete serialized parameter block, including padding. */
+    memcpy(&inst->params, src, sizeof(inst->params));
+    inst->color = EFF_SCATTER_NEUTRAL_COLOR;
+    inst->scale = 1.0f;
+    inst->allocationHandle = allocation;
+    inst->particles = particle;
+    EE_MMI_UNIT_MATRIX(inst->matrix);
+    object = func_0017D7A8(src->particleCount, src->unk20);
+    drawWord = src->unk10;
+    inst->scatterObject = (u32)object;
+    object->unk50 = drawWord;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    delayModulus = inst->params.randomDelayRange;
+    count = inst->params.particleCount;
+    if ((s32)delayModulus <= 0) {
+        delayModulus = 1;
+    }
+    for (i = 0; i < count; i++) {
+        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
+        particle++;
+    }
+    return inst;
+}
 
 /* Create flat-ring work from its parameter and resource table blocks. */
 void effScatterCreatePlainRingFromTable(void *parameterTable) {
