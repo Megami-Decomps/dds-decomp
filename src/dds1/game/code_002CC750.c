@@ -54,8 +54,22 @@
 #define SDF_FLAG_SLOT_COUNT 16
 
 extern void memset();
-extern u16 ptyPresetSkillSlots[][96];
-extern u16 ptyPresetPoolSkills[][96];
+/* DDS1 preset rows are 0xC0 bytes; the skill lists at +0x60/+0x70 belong
+ * to the same row as its four script choices and four profile sets. */
+typedef struct PtyPresetScriptChoice {
+    u16 scriptId;
+    u16 initialValue;
+    u16 requiredProfiles[4];
+} PtyPresetScriptChoice;
+
+typedef struct PtyPresetRecord {
+    PtyPresetScriptChoice scriptChoices[4];
+    u8 profileIds[4][12];
+    u16 skillSlots[8];
+    u16 poolSkills[40];
+} PtyPresetRecord;
+
+extern PtyPresetRecord D_00393A80[];
 extern void ptyMergeStockSkills(u8 *);
 
 extern void (*sdfTickCallback)(void);
@@ -141,7 +155,7 @@ typedef struct Entry84W {
     u8 pad_0x04[0x50]; // 0x04
 } Entry84W; // 0x54
 
-extern void ptySetProfileFlag1(void *, s32);
+extern void ptySetProfileFlag1(void *, u16);
 
 extern Entry84W D_00391230[];
 
@@ -221,13 +235,15 @@ void ptyClearProfileRecords(void) {
     memset(datGameState + PTY_PROFILE_RECORD_TABLE_OFFSET, 0, PTY_PROFILE_RECORD_TABLE_BYTES);
 }
 
+extern void ptySelectProfileStage(PtyProfileUnit *);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
 
+extern void ptyApplyProfilePreset(s32, PtyProfileUnit *);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
 
 /* Load nonzero preset IDs into their original slots; zero IDs leave slots unchanged. */
 void ptyLoadPresetSkillSlots(u8 *unit) {
-    u16 *presetSkills = ptyPresetSkillSlots[((PtyProfileUnit *)unit)->unitId];
+    u16 *presetSkills = D_00393A80[((PtyProfileUnit *)unit)->unitId].skillSlots;
     u16 *skillCursor = ((PtyProfileUnit *)unit)->skills;
     u32 presetIndex;
     presetIndex = 0;
@@ -244,7 +260,7 @@ void ptyLoadPresetSkillSlots(u8 *unit) {
 
 /* Mark nonzero IDs in the preset pool, then perform the native flag-gated extra call. */
 void ptyMarkPresetSkillPool(u8 *unit) {
-    u16 *presetSkills = ptyPresetPoolSkills[((PtyProfileUnit *)unit)->unitId];
+    u16 *presetSkills = D_00393A80[((PtyProfileUnit *)unit)->unitId].poolSkills;
     u32 presetIndex = 0;
     do {
         u16 skillId = *presetSkills++;
@@ -363,6 +379,7 @@ u32 sdfSetFlagBySlotId(u8 *unit, u32 slotId) {
     return 0;
 }
 
+extern void ptyApplyProfile(PtyProfileUnit *, u16);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfile);
 
 s32 ptyTestProfileFlag0(s32 work, u16 id) {

@@ -2,6 +2,26 @@
 #define EFF_H
 
 #include "common.h"
+#include "sdf.h"
+
+/* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
+typedef struct {
+    f32 start[4];
+    f32 end[4];
+    u16 systemParam;         /* 0x20 */
+    u8 pad22[2];
+    u32 fragmentCount;       /* 0x24 */
+    u8 pad28[8];
+    u32 startDelayRange;     /* 0x30 modulus of delayFrames */
+    u32 activeFrameRange;    /* 0x34 modulus of activeFrames before adding one */
+    u16 halfLife;            /* 0x38 */
+    u8 pad3A[6];
+    u32 arg40;               /* 0x40 */
+    u8 pad44[4];
+    u32 arg48;               /* 0x48 */
+    u8 pad4C[4];
+    u32 arg50;               /* 0x50 */
+} EffThunderFragmentParams;
 
 typedef struct {
     s32 left;
@@ -302,13 +322,103 @@ typedef struct EffResourceWork {
     u32 resource70;
 } EffResourceWork; /* 0x74 */
 
+/* Position/color arrays precede this render pool; constructors clear the full allocation. */
+typedef struct EffRecordPool {
+    f32 matrix[16];
+    f32 origin[3];
+    u8 pad4C[4];
+    u32 drawMode; /* 0x50: packet submission surface */
+    u32 color;
+    s32 vertexCount; /* Positions/color words, not group count. */
+    f32 scale;
+    s32 recordBase;
+    s32 auxRecordBase;
+    u32 resource;
+    SdfMemBlock *buffer;
+} EffRecordPool; /* 0x70 */
+
+typedef struct EffRingParticle {
+    u32 color;
+    s32 age;
+    f32 angle;
+    f32 basisFactor;
+} EffRingParticle;
+
+/* The ring allocator copies 0x58 bytes of parameters into this 0x80-byte
+ * owner. Its update passes this same work to the phase, color and fan helpers. */
+typedef struct EffRingWork {
+    f32 origin[4];
+    u32 count;
+    u8 respawn;
+    u8 pad15[3];
+    s32 duration;
+    s32 spread;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 firstColor;
+    u32 secondColor;
+    f32 param30;
+    f32 param34;
+    f32 param38;
+    f32 param3C;
+    f32 param40;
+    f32 param44;
+    f32 param48;
+    f32 param4C;
+    f32 increment;
+    u32 drawMode;
+    EffRingParticle *vertices;
+    u32 updateCount;
+    u32 color;
+    f32 scale;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    SdfMemBlock *allocationHandle;
+    EffRecordPool *recordPool;
+} EffRingWork;
+
+typedef char EffRingParticleSizeCheck[sizeof(EffRingParticle) == 0x10 ? 1 : -1];
+typedef char EffRingWorkSizeCheck[sizeof(EffRingWork) == 0x80 ? 1 : -1];
+
+typedef struct PcpFlashPulseParticle {
+    u32 color;
+    s32 age;
+    f32 scale;
+    u8 pad0C[4];
+} PcpFlashPulseParticle;
+
+/* effFlashRecordCreate copies the 0x30-byte parameter prefix, then places
+ * these 0x10-byte particles immediately after the 0x48-byte work. */
+typedef struct PcpFlashTrianglePulseWork {
+    f32 origin[3];
+    u8 pad0C[4];
+    s32 particleCount;
+    u8 restartRandomly;
+    u8 pad15[3];
+    s32 lifetime;
+    s32 scaleRampTime;
+    u32 colorA;
+    u32 colorB;
+    f32 maxScale;
+    u32 drawMode;
+    PcpFlashPulseParticle *parts;
+    s32 updateCount;
+    u32 tintColor;
+    f32 renderScale;
+    SdfMemBlock *allocationHandle;
+    EffRecordPool *resourceHandle;
+} PcpFlashTrianglePulseWork;
+
+typedef char PcpFlashPulseParticleSizeCheck[sizeof(PcpFlashPulseParticle) == 0x10 ? 1 : -1];
+typedef char PcpFlashTrianglePulseWorkSizeCheck[sizeof(PcpFlashTrianglePulseWork) == 0x48 ? 1 : -1];
+
 /* Shared scatter texture reference, created and released independently of pools. */
 typedef struct PcpScatterRes {
     u32 textureHandle;
     s32 refCount;
 } PcpScatterRes; /* 0x08 */
-
-struct SdfMemoryBlock;
 
 /* Appended after the two record arrays; resource helpers own this same control block. */
 typedef struct PcpScatterPool {
@@ -320,7 +430,7 @@ typedef struct PcpScatterPool {
     s32 recordBase;
     s32 auxRecordBase;
     u32 drawAsset;
-    struct SdfMemoryBlock *allocation;
+    SdfMemBlock *allocation;
     PcpScatterRes *sharedResource;
 } PcpScatterPool; /* 0x34 */
 
@@ -365,7 +475,7 @@ typedef struct EffPCPNeedleWork {
     u32 count;
     u32 system;
     EffResourceWork *resource;
-    u32 allocationHandle;
+    SdfMemBlock *allocationHandle; /* Descriptor, not the retained data address. */
 } EffPCPNeedleWork; /* 0x74, followed by count slots */
 
 typedef char EffResourceEntrySizeCheck[sizeof(EffResourceEntry) == 0x14 ? 1 : -1];
@@ -434,7 +544,7 @@ typedef struct BdWork {
     s32 sourceHeight;    /* 0x80 */
     u32 savedColors[4];  /* 0x84 */
     s32 slotOffset;      /* 0x94 */
-    u8 pad98[4];
+    s32 unk98;          /* 0x98: initialized from the source descriptor's final halfword. */
     union {
         s32 address;
         u32 bits;
@@ -456,7 +566,11 @@ typedef struct EffectSlotDescription {
     s32 width;
     s32 height;
     s32 colors[4];
-    u8 pad64[0x1C];
+    u32 cornerColors[4]; /* 0x64: reordered into the live/saved corner colors. */
+    s32 widthOverride;   /* 0x74: zero selects the source bounds' width. */
+    s32 heightOverride;  /* 0x78: zero selects the source bounds' height. */
+    u16 initialDelay;    /* 0x7C: loaded into each timed state's delay before its +1. */
+    u16 unk7E;
 } EffectSlotDescription;
 
 /* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */

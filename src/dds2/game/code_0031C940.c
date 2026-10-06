@@ -57,7 +57,19 @@ void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
     position[2] = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CAE8);
+/* Variant of the screen-point projection with a fixed -300 eye depth and Z. */
+void func_0031CAE8(f32 *position, s32 screenX, s32 screenY) {
+    f32 halfViewAngle;
+    f32 depth;
+
+    halfViewAngle = D_0037F5EC[0] * 0.5f;
+    depth = -300.0f - sdfViewTargetVector[2];
+    position[0] = depth * func_00353228(halfViewAngle * 1.3f) *
+        ((f32)(screenX - 256) * 0.00390625f);
+    position[1] = depth * func_00353228(halfViewAngle) *
+        ((f32)(screenY - 224) / 224.0f);
+    position[2] = -300.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CBC8);
 

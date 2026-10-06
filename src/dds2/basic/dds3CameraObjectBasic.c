@@ -1,34 +1,7 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "pcp_vu0.h"
 
-typedef struct {
-    u128 matrix[4];       /* 0x00: four look-at basis quadwords stored by VU0 */
-    u128 localEyeOffset; /* 0x40 */
-    u128 localUp;        /* 0x50 */
-    u128 worldEye;       /* 0x60 */
-    u128 worldUp;        /* 0x70 */
-    u32 handle;       /* 0x80 */
-    s32 eyeIsRelative;     /* 0x84: transform the eye offset relative to the target node */
-    u32 fovUpdatePending;  /* 0x88: bit 0 requests a field-of-view update */
-    f32 fieldOfView;       /* 0x8C: radians */
-} CameraData;
-
-/* Inner-node prefix consumed by camera code. Generic node routines retain
- * responsibility for the allocation, links, flags, and vector backups. */
-typedef struct CameraTransformNode {
-    u8 pad00[0x40];
-    u128 position; /* 0x40: world-space look-at target */
-    u128 rotation; /* 0x50: quaternion applied to local eye/up vectors */
-} CameraTransformNode;
-
-/* Camera-specific world-object prefix; shared by construction and accessors. */
-typedef struct CameraObject {
-    u8 unk0[4];
-    s32 unk4;
-    u8 unk8[0x10];
-    CameraData *data;            /* 0x18 */
-    CameraTransformNode *inner;  /* 0x1C */
-} CameraObject;
 
 /* Release the camera's inner node, base handle, and owned data block. */
 void dds3DestroyCameraData(CameraObject *camera) {
@@ -54,7 +27,7 @@ extern u8 sdfViewUpVector[];
 /* Rebuild dirty vectors and publish only the active world's camera; return 1.
  * A pending field-of-view update is consumed only while this camera is active. */
 s32 dds3UpdateCameraObject(CameraObject *camera) {
-    CameraTransformNode *inner;
+    ObjectTransform *inner;
     CameraData *data;
 
     inner = camera->inner;
@@ -87,7 +60,7 @@ extern void sdfVuBuildLookAtBasis(void *eye, void *target, void *up);
  * world-space look-at basis. */
 void dds3RebuildCameraBasis(CameraObject *obj) {
     CameraData *data = obj->data;
-    CameraTransformNode *inner = obj->inner;
+    ObjectTransform *inner = obj->inner;
 
     VU0_LOAD_VF(vf10, &inner->rotation);
     effMiscQuaternionToMatrixVU();
@@ -230,7 +203,7 @@ extern void effMiscQuaternionToMatrixVU(void);
  * target position into the four-component output buffers. */
 void dds3TransformCameraVectorsByInnerRotation(CameraObject *obj, f32 *worldEyeOut, f32 *targetPositionOut) {
     CameraData *data = obj->data;
-    CameraTransformNode *inner = obj->inner;
+    ObjectTransform *inner = obj->inner;
 
     VU0_LOAD_VF(vf10, &inner->rotation);
     effMiscQuaternionToMatrixVU();
@@ -250,10 +223,10 @@ void dds3TransformCameraVectorsByInnerRotation(CameraObject *obj, f32 *worldEyeO
     worldEyeOut[1] = ((f32 *)&data->worldEye)[1];
     worldEyeOut[2] = ((f32 *)&data->worldEye)[2];
     worldEyeOut[3] = ((f32 *)&data->worldEye)[3];
-    targetPositionOut[0] = ((f32 *)&inner->position)[0];
-    targetPositionOut[1] = ((f32 *)&inner->position)[1];
-    targetPositionOut[2] = ((f32 *)&inner->position)[2];
-    targetPositionOut[3] = ((f32 *)&inner->position)[3];
+    targetPositionOut[0] = inner->position[0];
+    targetPositionOut[1] = inner->position[1];
+    targetPositionOut[2] = inner->position[2];
+    targetPositionOut[3] = inner->position[3];
 }
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00412878);

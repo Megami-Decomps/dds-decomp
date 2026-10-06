@@ -676,7 +676,55 @@ typedef struct DatEnemyRecord {
     u8 pad32[0x1A];
 } DatEnemyRecord;
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4328);
+extern s32 func_001A9488(u32);
+extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
+extern s32 btlGetEnemyMoney(u8 *, u8 *);
+extern char D_003A17F8[];
+extern char D_003A1818[];
+extern char D_003A1830[];
+extern char D_003A1848[];
+
+void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    DatEnemyRecord *record = &((DatEnemyRecord *)datEnemyRecords)[enemy->mode];
+    s32 level = func_001A9488(4);
+    s32 enemyLevel = record->level;
+    s32 allowance = datBattleParameters->rewardLevelAllowance;
+    s32 reward;
+    s32 amount;
+    s32 item;
+
+    if (level > 60) {
+        level = 60;
+    }
+    if (level >= enemyLevel + allowance && datBattleParameters->rewardDivisor != 0.0f) {
+        reward = (s32)(record->unk2C / datBattleParameters->rewardDivisor);
+        btlBossDebugPrintf(D_003A17F8, reward, level, enemyLevel, allowance,
+                          datBattleParameters->rewardDivisor);
+    } else {
+        reward = record->unk2C;
+    }
+    if (record->flags & 0x2000) {
+        reward *= 100;
+    }
+    controller->experienceEarned += reward;
+    if ((enemy->flags64 & 0x200800000ULL) == 0) {
+        amount = btlCalculateEnemyExperienceReward(NULL, (u8 *)enemy);
+        controller->epEarned += amount;
+        btlBossDebugPrintf(D_003A1818, controller->epEarned, amount);
+    }
+    if ((enemy->stateFlags & 0x400) == 0) {
+        amount = btlGetEnemyMoney(NULL, (u8 *)enemy);
+        controller->moneyEarned += amount;
+        btlBossDebugPrintf(D_003A1830, controller->moneyEarned, amount);
+    }
+    item = func_001A4130((s32)enemy, 0);
+    if (item != 0) {
+        func_001A4240(item);
+    }
+    enemy->stateFlags |= 1;
+    btlBossDebugPrintf(D_003A1848, enemy);
+}
 
 s32 btlAllActiveUnitsReady(void) {
     s32 node = *(s32 *)(btlGetRuntime() + 0x228);
@@ -877,6 +925,14 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
 s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A17F8);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1818);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1830);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1848);
 
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
     f32 factor;

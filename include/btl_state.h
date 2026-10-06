@@ -205,7 +205,9 @@ typedef struct BtlState {
     s32 (*actionCameraStepHook)(BtlUnit *); /* 0x664: nonzero handles the camera step. */
     u8 pad668[0x84];
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
-    u8 pad6F0[0x28];
+    u8 pad6F0[0x10];
+    void (*unitReturnHook)(struct SceneTask *); /* 0x700: custom return-to-group handling */
+    u8 pad704[0x14];
     struct BattleLinkedEffectState *effect; /* 0x718 */
     u8 pad71C[0xC];
     s32 unk_728;

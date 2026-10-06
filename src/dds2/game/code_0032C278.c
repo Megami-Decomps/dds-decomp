@@ -9,6 +9,7 @@ extern s32 sdfReleaseResourceAllocation(s32);
 extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 #include "sdf.h"
+#include "sdf_draw.h"
 
 typedef struct SdfPacketChain {
     SdfListHead *head;
@@ -1804,32 +1805,19 @@ void sdfInitializeObjectListRequest(void) {
     sdfInitializeSynchronizedRequest(&sdfObjectListReleaseQueue, (u32)sdfDestroyObjectList);
 }
 
-typedef struct SdfModelNodeDefaults {
-    void *next;
-    void *previous;
-    u8 pad08[0x0E];
-    s16 index;
-    u8 pad18[4];
-    u32 color;
-    u8 pad20[0x30];
-    u128 zeroRotation;
-    u128 zeroPosition;
-    u128 unitScale;
-    u128 unitMatrix[4];
-} SdfModelNodeDefaults;
 
-SdfModelNodeDefaults *func_003306E0(void) {
-    SdfModelNodeDefaults *node = sdfAllocAndClearQuadwords(0x100);
+SdfDrawNode *func_003306E0(void) {
+    SdfDrawNode *node = sdfAllocAndClearQuadwords(0x100);
 
     node->color = 0x80808080;
-    node->index = -1;
-    node->next = node;
+    node->unk16 = -1;
     node->previous = node;
-    VU0_STORE_VF($vf0, &node->zeroRotation);
-    VU0_STORE_VF($vf0, &node->zeroPosition);
+    node->next = node;
+    VU0_STORE_VF($vf0, node->quaternion);
+    VU0_STORE_VF($vf0, node->translation);
     VU0_SET_ONES_XYZ($vf10);
-    VU0_STORE_VF($vf10, &node->unitScale);
-    EE_MMI_UNIT_MATRIX(node->unitMatrix);
+    VU0_STORE_VF($vf10, node->scale);
+    EE_MMI_UNIT_MATRIX(node->localMatrix);
     return node;
 }
 

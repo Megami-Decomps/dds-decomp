@@ -232,6 +232,8 @@ void mnuUpdateTitlePageByMode(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5A78);
 
+extern s32 func_002A5B08(void);
+
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5B08);
 
 void mnuTitleResetSequenceTimers(void) {
@@ -239,6 +241,8 @@ void mnuTitleResetSequenceTimers(void) {
     title->phase = 1;
     title->sequenceTimer = title->selectedPage = 0;
 }
+
+extern s32 func_002A5C58(void);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5C58);
 
@@ -774,7 +778,7 @@ void mnuFadeSetState(u32 *state, u32 mode) {
     state[0] = mode;
 }
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     u32 sprite = mnuMovieWork->sprite;

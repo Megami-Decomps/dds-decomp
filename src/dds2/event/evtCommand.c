@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
+#include "kwln.h"
 
 /* Fixed dispatch payload sizes and the native six-kind world-object scan. */
 enum {
@@ -111,14 +112,11 @@ extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
 extern char D_00421F08[];
 
 
-typedef struct EvtCampTask {
-    u8 pad00[0x20];
-    s32 resource;
-} EvtCampTask;
 
+/* VM work links its owning scheduler task, not the task's pack user value. */
 typedef struct EvtCommandWork {
     u8 pad00[0xE4];
-    EvtCampTask *campTask;
+    KwlnTask *task;
 } EvtCommandWork;
 
 /* Same room-name and inner-status offsets as the DDS1 event unit. */
@@ -879,7 +877,7 @@ s32 evtCommandWaitForCampTask(void) {
         message = "load BE (%d)..\n";
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
-        func_00101968((s32)commandWork->campTask, mnuCampCreateTask(taskId));
+        func_00101968((s32)commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
     if (evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
@@ -906,7 +904,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage("read BE (%d)..\n", taskId);
-    func_00101968((s32)commandWork->campTask, mnuCampCreateTask(taskId));
+    func_00101968((s32)commandWork->task, mnuCampCreateTask(taskId));
     return 1;
 }
 
@@ -955,15 +953,15 @@ s32 evtCommandStartPolygonMovie(void) {
     if (commandWork == NULL) {
         return 1;
     }
-    if (commandWork->campTask == 0) {
+    if (commandWork->task == 0) {
         func_0035B6E0(D_00421F08);
         return 1;
     }
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
-    movieTask = evtViewerCreateTask(commandWork->campTask->resource, eventId, sceneId);
+    movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
-    func_00101968((s32)commandWork->campTask, movieTask);
+    func_00101968((s32)commandWork->task, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
     scrSetIntegerReturnValue(movieTask);
     return 1;
@@ -981,7 +979,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
 }
 
 /* Create and return an event/scene movie task without setting bit 0.
- * The active camp resource supplies the viewer task's first argument. */
+ * The owning scheduler task supplies the viewer task's priority. */
 s32 evtCommandCreatePolygonMovie(void) {
     EvtCommandWork *commandWork = (EvtCommandWork *)scrGetCurrentContext();
     s32 eventId;
@@ -991,14 +989,14 @@ s32 evtCommandCreatePolygonMovie(void) {
     if (commandWork == NULL) {
         return 1;
     }
-    if (commandWork->campTask == 0) {
+    if (commandWork->task == 0) {
         func_0035B6E0(D_00421F68);
         return 1;
     }
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
-    movieTask = evtViewerCreateTask(commandWork->campTask->resource, eventId, sceneId);
-    func_00101968((s32)commandWork->campTask, movieTask);
+    movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
+    func_00101968((s32)commandWork->task, movieTask);
     scrSetIntegerReturnValue(movieTask);
     return 1;
 }

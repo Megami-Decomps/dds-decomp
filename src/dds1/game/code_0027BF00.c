@@ -121,38 +121,7 @@ extern char D_003B2348[];
 
 extern void itfGridLookupValueOrDefault(s32, s32);
 
-struct MenuList {
-    u32 stateFlags;     /* 0x00: cursor and selection-control bits */
-    u32 flags;
-    s32 id;             /* 0x08: owner/list identifier */
-    s32 visibleCount;
-    MenuListNode *first;
-    MenuListNode *last;
-    MenuListNode *head;
-    MenuListNode *cursor;
-    s32 count;
-    s32 windowOffset;
-    s32 rowStep;        /* 0x28: constructor argument scaled by eight */
-    u8 pad2C[0x10];
-    s32 scale;          /* 0x3C: 8.8 fixed-point default */
-};
-
-struct MenuListNode {
-    s32 index;
-    s32 value;
-    u8 pad8[0x40];
-    u32 flags48;        /* 0x48 */
-    u8 pad4C[4];
-    s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
-    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
-    u8 pad55[3];
-    struct MenuListNode *next;
-    struct MenuListNode *prev;
-    u32 sortKeyPrimary;   /* 0x60 */
-    u32 sortKeySecondary; /* 0x64 */
-    u32 sortKeyTertiary;  /* 0x68 */
-    u8 pad6C[8];
-};
+#include "mnu_list.h"
 
 extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 

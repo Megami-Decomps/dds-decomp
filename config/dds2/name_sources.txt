@@ -882,6 +882,7 @@
 0x00158E38	billProcessChild	inferred	Passes the billboard and its child at offset 0x30 to its processing routine.
 0x00158F58	billReleaseList	inferred	Releases a billboard list's shared data and then frees the list object.
 0x00159158	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
+0x001594C8	billSetAnimationEntry	inferred	LeverAudit
 0x00159848	billReleaseSharedEntryBlock	inferred	Decrements billboard block reference count; on zero releases entries and block. [names_reviewed21.tsv]
 0x001598D8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x00151CE8, input-family pairing. [names_qp10.tsv]
 0x001599F8	billCreateFromResource	inferred	Opens a billboard resource to read its header, creates the indexed billboard, and releases the temporary allocation.
@@ -1332,6 +1333,7 @@
 0x0017D078	effScatterCreatePlainRingFromTable	inferred	queued
 0x0017D0C0	effCloneScatterWithSharedResource	inferred	src/dds2/effect/effPCPScatter.c func_0017D0C0: Creates child using particle parameters and shares source scatter resource into child. Twin of DDS1 func_00175468. [names_reviewed24.tsv]
 0x0017D108	effReleaseScatterWorkResources	inferred	Releases owned scatter object and separately frees the scatter work buffer. [names_reviewed19.tsv]
+0x0017D138	effScatterCreateFlatRing	inferred	L13
 0x0017D3D8	effScatterFlatRingUpdate	inferred	DDS1 twin 0x00175780 [names_M58_VuSweep.tsv]
 0x0017D560	effScatterUpdatePlainParticleRing	inferred	confidence=high; matched-C; src/dds2/effect/effPCPScatter.c:1730:func_0017D560; Updates the plain/flat particle ring with age-based fading and optional looping, then submits its origin and transform.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x0017D758	effScatterCopyFlatParameterVector	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B00, input-family pairing. [names_qp10.tsv]
@@ -1340,6 +1342,7 @@
 0x0017D780	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B28, input-family pairing. [names_qp10.tsv]
 0x0017DD08	effGetScatterEntry	inferred	Returns the indexed word from a scatter object's entry table.
 0x0017DD20	effScatterStoreSourceTransformMatrix	inferred	Copies a source transform matrix into scatter effect work using VU registers. [names_reviewed14.tsv]
+0x0017DD50	effNeedleCreateWork	inferred	U3
 0x0017E680	effSetResourceNormalStream	inferred	confidence=high; matched-C; src/dds2/game/code_0017E680.c:62:func_0017E680; Binds the external vector-normal array consumed by resource triangle drawing; the setter neither copies nor allocates the array.; source=names_P6.tsv:5 [names_qp12_apply.tsv]
 0x0017E688	effCreateResourceEntryWork	inferred	confidence=high; matched-C; src/dds2/game/code_0017E680.c:82:func_0017E688; Allocates resource work plus its entry array, initializes the matrix and scale, creates a draw-entry asset, initializes entry values and clears shared render-state work.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0017E7A8	effReleaseAttachedResources	inferred	Releases the object's graphics handle and two attached resource handles without freeing the outer object.
@@ -2057,6 +2060,7 @@
 0x001AD1C0	btlDoesEnabledStatusMatchCurrentId	inferred	Rejects suppressed status before comparing its current ID with the requested value. [names_reviewed16.tsv]
 0x001AD200	btlSelectActorAction	inferred	Uses current actor's selected action, falling back to randomly selecting action 2 or 9.
 0x001AD248	btlIsEventThresholdSatisfiedForEntry	inferred	Tests a selected event entry and its counterpart threshold values. [names_reviewed14.tsv]
+0x001AD698	btlAccumulateEnemyDefeatRewards	inferred	U1
 0x001ADC48	btlClearAllActorEntrySlots	inferred	Clears every actor entry slot in the battle record. [names_reviewed10.tsv]
 0x001ADC98	btlActorEntryIsExpired	inferred	Byte-identical dds1 twin 0x001A48B0; slot code non-zero and countdown < 1 [names_conflicts.tsv]
 0x001ADCD0	btlMatchActorEntryCode	inferred	Compares the selected actor slot's code against the matching table's two codes and returns which comparison matched.
@@ -2960,6 +2964,7 @@
 0x00219D40	btlRemapCommandKind	inferred	sibling of func_00218630 style kind remap in the battle-select state [names_M86_BattleAct.tsv]
 0x00219E38	btlGetSpecialEnemyActionStatus	inferred	L13
 0x00219F58	btlRecenterActorsAroundLead	inferred	mode 0x10D lead is placed at x=0 and every other live actor is shifted by the lead's -x through btlSetUnitPosition [names_M69_Battle3.tsv]
+0x0021A1D8	btlFadeAndTintNamedChunkTree	inferred	U0
 0x0021A308	btlDispatchNamedChunkNode	inferred	Resolves a named node under the bound actor's nested resource descriptor and dispatches it with the chunk argument.
 0x0021A3A0	btlResetNamedChunkNodeTree	inferred	Recursively resets color and clears flag bit two on each node of a circular sibling/child tree.
 0x0021A408	btlClearNamedChunkFlags	inferred	Finds a named chunk under the bound battler's resource table, then clears matching resource flags recursively using func_0021A3A0.
@@ -3130,6 +3135,7 @@
 0x0022E0E0	btlUpdateRuntimeFadeState	inferred	U3
 0x0022E338	btlClearRuntimeState	inferred	Clears the complete battle runtime overlay state structure. [names_reviewed16.tsv]
 0x0022E4C0	btlMarkRuntimeUpdatePending	inferred	Sets the pending update flag on an active battle runtime. [names_reviewed8.tsv]
+0x0022E4E0	btlDrawUnitAffinityDebug	inferred	TaskPurist
 0x0022ED38	mnuQueueColoredGlyphAtPosition	inferred	Creates a fixed-color menu glyph at the supplied coordinates; located alongside menu cursor controls. [names_reviewed9.tsv]
 0x0022ED90	btlDrawSelectableListRows	inferred	confidence=high; src/dds2/game/code_00227288.c:func_0022ED90; Draws visible list rows with selection-dependent color and regular vertical spacing. CORRECTED: same body as the dds1 twin; 'Item' was an unsupported specialization. [names_qp9.tsv]
 0x0022EE88	mnuDrawMenuFrameSizedToRows	inferred	Draws a menu frame sized by row count; DDS2 uses a generic MenuList rather than a battle-only type. [names_reviewed10.tsv]
@@ -3210,6 +3216,7 @@
 0x00236E80	mdlApplyViewerResourceMenuAction	inferred	confidence=high; src/dds2/game/code_00233660.c:func_00236E80; Handles viewer resource add/remove/rotation or motion restart and synchronizes active file/frame selection. [names_qp9.tsv]
 0x002371E8	mdlRunViewerResourceMenuTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1557:func_002371E8; Applies resource-menu action, draws associated menu and returns zero.; twin=0x0021C678, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00237210	mdlHandleViewerNodeCursorInput	inferred	Reads loaded first-node count and advances bounded node cursor. [names_reviewed7.tsv]
+0x00237258	mdlDrawViewerTexturePreview	inferred	U3
 0x00237440	mdlUpdateViewerNodeCursorTask	inferred	Viewer task processes loaded node cursor before drawing its overlay as in DDS1. [names_reviewed18.tsv]
 0x00237490	mdlUpdateViewerSettingsInput	inferred	confidence=high; src/dds2/game/code_00233660.c:func_00237490; Handles viewer option navigation, debug-graph toggles, background-color editing, numeric settings, and camera reset input. [names_qp9.tsv]
 0x002379E0	mdlRunViewerSettingsTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1677:func_002379E0; Updates settings input, draws associated viewer settings UI and returns zero.; twin=0x0021CE70, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -3441,6 +3448,7 @@
 0x0024CD58	evtViewCmdSelectMode	inferred	switch on ctx+0x22A8 mode 0..2 dispatching to the two menu handlers, returns -1 when handled
 0x0024D0F8	evtViewerClearPendingNodeAndPushHistory	inferred	Clears pending event viewer values and records a history command. [names_reviewed8.tsv]
 0x0024D408	evtViewerPickNextHandler	inferred	calls func_00101958 then returns func_0024D430; parked (3 words: $31 restore emitted before the %hi/%lo pair) [names_L18_Units.tsv]
+0x0024D430	evtViewerUpdateFrame	inferred	U2
 0x0024D6B0	evtViewerScheduleFrameVariableTask	inferred	Refreshes glyph position, links frame-variable task and returns next update callback. [names_reviewed7.tsv]
 0x0024D710	evtViewerInitializeUpdateSequence	inferred	Resets viewer, sets update flag and returns viewer update callback. [names_reviewed7.tsv]
 0x0024D788	evtViewerAdvanceUpdate	inferred	viewer update step: reads the message window flags, ticks EventViewerState.unk2440 or hands over to func_0024D6B0; matched [names_L18_Units.tsv]
@@ -3503,6 +3511,7 @@
 0x00254250	evtDrawComparisonValueRow	inferred	readability/matching review (QP16)
 0x00254458	evtUpdateComparisonValueDialog	inferred	readability/matching review (QP16)
 0x00254620	evtIsMenuTableEntryEnabled	inferred	Tests the selected entry enabled flag in the event viewer table. [names_reviewed8.tsv]
+0x00254678	evtDrawGroupPropertyTable	inferred	U3
 0x00254F80	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state; DDS1 twin. [names_qp9.tsv]
 0x00255360	evtDrawGroupListRow	inferred	DDS1 twin 0x0023A4B0 [names_M95_Event.tsv]
 0x002566F8	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
@@ -3929,6 +3938,7 @@
 0x0027C468	btlDrawPanelA	inferred	calls func_0026E788 with id 0x89 then draw sequence
 0x0027CD78	mnuInitMantraPanelSpriteView	inferred	Allocates sparkle emitter kind two, stores handle and clears two panel view state bytes. [names_reviewed7.tsv]
 0x0027CDB0	mnuReleaseMantraPanelSpriteView	inferred	Releases sprite handle held by panel view. [names_reviewed7.tsv]
+0x0027DE40	mnuDrawMantraNeighborMarkers	inferred	U0
 0x0027E0E0	mnuDrawMantraPanelSpriteTransition	inferred	Scales panel-sprite draw amount according to fade transition phase and elapsed animation step. [names_reviewed18.tsv]
 0x0027E208	btlInitPanelBSprites	inferred	Creates kind 0 emitter and burst pool for btlDrawPanelB. [names_R_FuncNames5.tsv]
 0x0027E240	btlReleasePanelBSprites	inferred	Releases emitter and burst pool paired with btlDrawPanelB. [names_R_FuncNames5.tsv]
@@ -3972,6 +3982,7 @@
 0x00287798	mtrMantraSelectInit	evidence	Prints its own debug string "mtrMantraSelectInit\n" via func_0010AE38; calls func_00267F68(0) then func_00289DC8 [names_L2_LiteSweep.tsv]
 0x002877E8	mtrMantraSelectRelease	evidence	Prints its own debug string "mtrMantraSelectRelease\n" via func_0010AE38; clears bit 1 of the selected record's +0x218 word and calls func_00267F68(1) [names_L2_LiteSweep.tsv]
 0x00287930	mtrMantraEquipInit	inferred	U1
+0x002882B8	mtrDrawUnitSelectionRow	inferred	LeverAudit
 0x002885E8	mtrInitUnitSelectionWork	inferred	readability/matching review (QP16)
 0x00288710	mnuReleaseSelectionWorkResources	inferred	high confidence; src/dds2/game/code_00286BA8.c func_00288710: Destroys the selection list, releases the auxiliary object and invokes the work cleanup path. [names_reviewed25.tsv]
 0x00288A70	mnuHandleMantraSelectionInput	inferred	U3
@@ -4130,6 +4141,7 @@
 0x002A40C8	mnuSlideBarSetStateB	inferred	identical to func_002A3F98 (separate copy in retail)
 0x002A4110	mnuAdvanceSlideBarValue	inferred	readability/matching review (QP16)
 0x002A41C0	mnuSlideBarSetStateSmall	inferred	like SetState but the position field is state[2], open value 0x80
+0x002A4380	mnuClearMovieMenuPickList	inferred	LeverAudit
 0x002A4388	mnuTitlePickRandomSlot	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002A4670	mnuPairedSlideBarSetState	inferred	sets pos/state[0x1b]/state[0x1c] for the paired bars (open value 0x80)
 0x002A46C8	mnuGetSlidePathSegmentWeight	inferred	Computes square root of horizontal delta squared plus twice vertical delta as segment interpolation weight. [names_reviewed19.tsv]
@@ -4138,6 +4150,8 @@
 0x002A47E8	mnuFindSlidePathSegmentAtPosition	inferred	Returns the first slide-path segment whose normalized endpoint exceeds the supplied position. [names_reviewed19.tsv]
 0x002A4870	mnuGetSlidePathSegmentEnd	inferred	Sums weights through a segment and converts to fixed-point fraction of total. [names_reviewed19.tsv]
 0x002A48F0	mnuSlidePathPoint	inferred	interpolates between two points of the D_003E38A0 path (segment from func_002A47E8, lengths via func_002A4770/func_002A4870)
+0x002A49C0	mnuStartRandomMovieMenuPulse	inferred	LeverAudit
+0x002A4A68	mnuDrawMovieMenuPulses	inferred	LeverAudit
 0x002A4D28	mnuAdvanceSlideBar	inferred	Draws and advances the position of a single active slide bar, clamping its travel.
 0x002A4DF0	mnuTimedSlideBarSetState	inferred	timer>0 stores the request id; otherwise mode 2/3 reset/open like SetState (pos 0x200)
 0x002A4E48	mnuAdvanceTimedSlideBar	inferred	Counts down a slide bar timer, then draws and advances its position.
@@ -5694,6 +5708,7 @@
 0x00329DB8	sdfGraphRecreateBuffers	inferred	Byte-identical dds1 twin 0x002D0F08; Releases existing graph buffers and allocates three using dimensions and modes from the graph. [names_conflicts.tsv]
 0x00329E40	sdfGraphSelectDisplayBuffer	inferred	M143; sources=names_M143.tsv; twin=0x002D0F90, input-family pairing. [names_qp10.tsv]
 0x00329F60	sdfRequestDeferredGsImageCapture	inferred	Stores capture parameters and marks a GS image capture request pending. [names_reviewed19.tsv]
+0x00329F78	sdfCaptureDeferredGsImage	inferred	U0
 0x0032A378	sdfServiceGraphicsBuffers	inferred	R_Names32
 0x0032A688	sdfTexAllocHeadLow	inferred	readability/matching review (QP16)
 0x0032A7A8	sdfTexAllocHeadHigh	inferred	readability/matching review (QP16)
