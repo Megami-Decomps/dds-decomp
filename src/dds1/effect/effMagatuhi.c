@@ -669,10 +669,12 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
 /* Drift parameters are not ring parameters despite their equal size (0xDC). */
 typedef struct {
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u8 pad10[4];
+    u8 respawn;
+    u8 pad11[3];
     s32 lifetimeFrames;
     s32 delaySpread;
-    u8 pad1C[8];
+    s32 fadeIn;
+    s32 fadeOut;
     f32 initialRadius;
     f32 initialLift;
     f32 initialLiftRandomness;
@@ -1193,7 +1195,75 @@ void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018C4C8);
+/* Accumulate lift, transform the drift sample, then advance scale and angle.
+ * Keep the cached age across initialization and preserve fade-in priority. */
+void func_0018C4C8(EffMagatuhiDriftWork *work) {
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    EffMagatuhiValueWork *valueWork;
+    EffMagatuhiDriftParticle *particle;
+    u8 respawn;
+    u32 count;
+    s32 life;
+    s32 spread;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 tintColor;
+    f32 radial, fade;
+    f32 angleStep, scaleStep;
+    s32 age;
+    u32 i;
+
+    particle = work->particles;
+    tintColor = work->tintColor;
+    count = work->head.particleCount;
+    respawn = work->head.respawn;
+    life = work->head.lifetimeFrames;
+    spread = work->head.delaySpread;
+    angleStep = work->head.angleStep;
+    scaleStep = work->head.scaleStep;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    valueWork = work->managedResource->valueWork;
+    PCP_COPY_VECTOR_F32(origin, work->head.origin);
+    VU0_LOAD_MATRIX(work->matrix);
+    for (i = 0; i < count; i++, particle++) {
+        age = particle->age;
+        if (age == 0) {
+            effMagatuhiInitializeDriftParticle(work, i);
+        }
+        if (age > 0 && age <= life) {
+            radial = particle->scale * sdfSinPoly(particle->angle);
+            particle->driftState[1] += particle->liftStep;
+            out[0] = particle->position[0] + particle->driftState[0] * radial;
+            out[1] = particle->position[1] + particle->driftState[1];
+            out[2] = particle->position[2] + particle->driftState[2] * radial;
+            VU0_LOAD_VF(vf11, origin);
+            VU0_LOAD_VF(vf10, out);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, out);
+            particle->scale += scaleStep;
+            particle->angle += angleStep;
+            if (age < fadeIn) {
+                fade = (f32)age / (f32)fadeIn;
+            } else if (life - age <= fadeOut) {
+                fade = (f32)(life - age) / (f32)fadeOut;
+            } else {
+                fade = 1.0f;
+            }
+            effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
+                ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
+            func_00189818(valueWork, i, out);
+        }
+        if (age >= life && respawn) {
+            particle->age = -(effMiscRand(D_0034DF38) % spread);
+        } else {
+            particle->age++;
+        }
+    }
+    func_001891A8(work->managedResource);
+}
 
 /* Copy the drift origin as one quadword, preserving the source w. */
 void effMagatuhiSetDriftOrigin(EffMagatuhiDriftWork *work, void *origin) {
