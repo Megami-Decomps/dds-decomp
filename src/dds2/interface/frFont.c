@@ -21,6 +21,11 @@ typedef struct FntNode {
 typedef struct FrFontValueRecord {
     u8 unk0[0xE];
     u16 glyphCount;
+    u16 cellWidth;
+    u16 cellHeight;
+    u8 unk14[2];
+    u8 useGlyphMetrics;
+    u8 pad17;
 } FrFontValueRecord;
 
 typedef struct FrFontEntry {
@@ -28,7 +33,7 @@ typedef struct FrFontEntry {
     FrFontValueRecord *valueRecord; /* 0x04 */
     s32 count;         /* 0x08 */
     u8 unk0C[4];
-    void *table;       /* 0x10 */
+    s8 *table;       /* 0x10: paired signed glyph start/end metrics */
     u8 unk14[4];
     s32 *slots;        /* 0x18 */
     void *first;       /* 0x1C */
@@ -161,19 +166,6 @@ typedef struct FrFontSys {
 
 extern FrFontSys frFontWork;
 
-/* Value record reached through frFontResourceRecords entries. */
-typedef struct FrFontRecVal {
-    u8 unk0[0x10];
-    u16 cellWidth;  /* 0x10: returned by frFontGetGlyphCellWidth */
-    u16 cellHeight; /* 0x12: returned by frFontGetGlyphCellHeight */
-} FrFontRecVal;
-
-typedef struct FrFontRec {
-    FrFontRecVal *val; /* 0x0 */
-    u8 unk4[0x20];
-} FrFontRec;
-
-extern FrFontRec frFontResourceRecords[];
 
 extern s32 frFontDefaultGlyphCellSize;
 
@@ -1093,7 +1085,7 @@ u32 frFontGetGlyphCellWidth(u8 fontIndex) {
             return frFontDefaultGlyphCellSize;
         }
     }
-    return frFontResourceRecords[entryIndex].val->cellWidth;
+    return frFontWork.entries[entryIndex].valueRecord->cellWidth;
 }
 
 /* Slots 0/1 use the shared default size; later slots read their resource height.
@@ -1106,7 +1098,7 @@ u32 frFontGetGlyphCellHeight(u8 fontIndex) {
             return frFontDefaultGlyphCellSize;
         }
     }
-    return frFontResourceRecords[entryIndex].val->cellHeight;
+    return frFontWork.entries[entryIndex].valueRecord->cellHeight;
 }
 
 /* Restore this game's cursor spacing (DDS1: 21, DDS2: 25). */
