@@ -1255,7 +1255,64 @@ void D_002E6538(DevWorkerEntry *worker) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E67A8);
+extern char D_003BD438[]; /* cdrom0: */
+extern char D_003BD440[]; /* host0: */
+extern char D_003BD448[]; /* pfs0: */
+
+char *func_002E67A8(char *path, s32 worker) {
+    s32 length = strlen(path);
+    char *result;
+    s32 index;
+    s32 character;
+    char *base;
+    s32 baseLength;
+    switch (worker) {
+    case 0:
+        result = sdfAllocSizeClassBlock(length + 10);
+        memcpy(result, D_003BD438, 7);
+        index = 0;
+        character = path[index];
+        while (character != 0) {
+            if (character == '/') character = '\\';
+            else if (character >= 'a' && character <= 'z') character -= 0x20;
+            result[index + 7] = character;
+            index++;
+            character = path[index];
+        }
+        result[index + 7] = ';';
+        result[index + 8] = '1';
+        result[index + 9] = 0;
+        break;
+    case 1:
+        if (path[0] != '/') {
+            result = sdfAllocSizeClassBlock(length + 7);
+            memcpy(result, D_003BD440, 6);
+            memcpy(result + 6, path, length);
+            result[length + 6] = 0;
+        } else {
+            base = sdfDevGetPathBuffer();
+            baseLength = strlen(base);
+            result = sdfAllocSizeClassBlock(length + baseLength);
+            memcpy(result, base, baseLength);
+            memcpy(result + baseLength, path + 1, length);
+        }
+        break;
+    case 2:
+        result = sdfAllocSizeClassBlock(length + 6);
+        memcpy(result, D_003BD448, 5);
+        memcpy(result + 5, path, length);
+        result[length + 5] = 0;
+        break;
+    case 3:
+        result = sdfAllocSizeClassBlock(length + 1);
+        strcpy(result, path);
+        break;
+    default:
+        return NULL;
+    }
+    return result;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E69F0);
 

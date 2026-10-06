@@ -460,14 +460,14 @@ extern void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void
 extern void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId);
-extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJob *job);
+extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job);
 extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job);
 extern void fileReplaceReferenceHolder(EffectSurfaceNode *node, u32 resource);
 
-extern FileJob *fileCreateJob(u16 type);
+extern FileJobPayload *fileCreateJob(u16 type);
 
-extern void fileJobFreePrimaryBuffer(FileJob *job);
-extern void fileJobFreeSecondaryBuffer(FileJob *job);
+extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
+extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 
 /* Only fields needed by the save copy are exposed; the remaining state is opaque. */
 typedef struct FileSaveState {
@@ -619,11 +619,11 @@ extern char *sdfDevGetPathBuffer(void);
 
 extern s32 func_00369B70(const char *path, s32 flags, ...);
 
-extern void func_002D3B48(s32 fd, s32 arg1);
+extern void func_002D3B48(s32 fd, FileJobPayload *payload);
 
-extern void func_00369DF8(s32 fd);
+extern s32 func_00369DF8(s32 fd);
 
-extern void func_0036BCD0(const char *path, s32 arg1);
+extern s32 func_0036BCD0(const char *path, s32 arg1);
 
 void fileDestroyMenuTask(void) {
     if (D_00437CD8 != 0) {
@@ -3928,44 +3928,44 @@ void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
     VU0_LOAD_VF(vf10, quaternion);
 }
 
-FileJob *fileCreateJob(u16 type) {
+FileJobPayload *fileCreateJob(u16 type) {
     u16 kind = type;
-    FileJob *job = sdfAllocSizeClassBlock(0x2C);
+    FileJobPayload *job = sdfAllocSizeClassBlock(0x2C);
     memset(job, 0, 0x2C);
     job->unk0 = 200;
     job->type = kind;
     return job;
 }
 
-void *fileResolvePrimaryBuffer(FileJob *job) {
-    if (job->slots[0].allocation != NULL) {
-        return (void *)job->slots[0].offset;
+void *fileResolvePrimaryBuffer(FileJobPayload *job) {
+    if (job->primary.allocation != NULL) {
+        return (void *)job->primary.offset;
     }
-    if (job->slots[0].offset != 0) {
-        return (u8 *)job + job->slots[0].offset;
-    }
-    return NULL;
-}
-
-void *fileResolveSecondaryBuffer(FileJob *job) {
-    if (job->slots[1].allocation != NULL) {
-        return (void *)job->slots[1].offset;
-    }
-    if (job->slots[1].offset != 0) {
-        return (u8 *)job + job->slots[1].offset;
+    if (job->primary.offset != 0) {
+        return (u8 *)job + job->primary.offset;
     }
     return NULL;
 }
 
-FileJob *fileJobCreateFromJob(FileJob *request) {
-    FileJob *job = fileCreateJob(request->type);
+void *fileResolveSecondaryBuffer(FileJobPayload *job) {
+    if (job->secondary.allocation != NULL) {
+        return (void *)job->secondary.offset;
+    }
+    if (job->secondary.offset != 0) {
+        return (u8 *)job + job->secondary.offset;
+    }
+    return NULL;
+}
+
+FileJobPayload *fileJobCreateFromJob(FileJobPayload *request) {
+    FileJobPayload *job = fileCreateJob(request->type);
     job->option = request->option;
-    job->slots[0].selector = request->slots[0].selector;
+    job->primary.selector = request->primary.selector;
     job->data = fileJobTypeOperations[job->type].create(request);
     return job;
 }
 
-void fileJobDestroy(FileJob *job) {
+void fileJobDestroy(FileJobPayload *job) {
     void *data = job->data;
     if (data != NULL) {
         fileJobTypeOperations[job->type].destroy(data);
@@ -3975,37 +3975,37 @@ void fileJobDestroy(FileJob *job) {
     sdfReleaseChipBlock(job);
 }
 
-void fileJobFreePrimaryBuffer(FileJob *job) {
-    void *buffer = job->slots[0].allocation;
+void fileJobFreePrimaryBuffer(FileJobPayload *job) {
+    void *buffer = job->primary.allocation;
     if (buffer != NULL) {
         sdfReleaseResourceAllocation(buffer);
-        job->slots[0].offset = 0;
-        job->slots[0].size = 0;
-        job->slots[0].allocation = NULL;
+        job->primary.offset = 0;
+        job->primary.size = 0;
+        job->primary.allocation = NULL;
     }
 }
 
-void fileJobFreeSecondaryBuffer(FileJob *job) {
-    void *buffer = job->slots[1].allocation;
+void fileJobFreeSecondaryBuffer(FileJobPayload *job) {
+    void *buffer = job->secondary.allocation;
     if (buffer != NULL) {
         sdfReleaseResourceAllocation(buffer);
-        job->slots[1].offset = 0;
-        job->slots[1].size = 0;
-        job->slots[1].allocation = NULL;
+        job->secondary.offset = 0;
+        job->secondary.size = 0;
+        job->secondary.allocation = NULL;
     }
 }
 
-FileJob *fileJobCreateChild(FileJob *request) {
-    FileJob *job = fileCreateJob(request->type);
+FileJobPayload *fileJobCreateChild(FileJobPayload *request) {
+    FileJobPayload *job = fileCreateJob(request->type);
     FileTypeCallbacks *cb = &fileJobTypeOperations[job->type];
 
     job->option = request->option;
-    job->slots[0].selector = request->slots[0].selector;
+    job->primary.selector = request->primary.selector;
     job->data = cb->createChild(request->data, job->type);
     return job;
 }
 
-void fileJobNotifyPair(FileJob *left, FileJob *right) {
+void fileJobNotifyPair(FileJobPayload *left, FileJobPayload *right) {
     void (*cb)(void *, void *) = D_003E916C[right->type].cbC;
 
     if (cb != NULL) {
@@ -4014,14 +4014,14 @@ void fileJobNotifyPair(FileJob *left, FileJob *right) {
 }
 
 void fileJobNotifyComplete(void *work) {
-    u16 id = ((FileJob *)work)->type;
+    u16 id = ((FileJobPayload *)work)->type;
 
     if (D_003E917C[id].func != NULL) {
-        D_003E917C[id].func(((FileJob *)work)->data);
+        D_003E917C[id].func(((FileJobPayload *)work)->data);
     }
 }
 
-void fileJobInvokeTypeCallback(FileJob *work) {
+void fileJobInvokeTypeCallback(FileJobPayload *work) {
     u16 idx = work->type;
     void *data = work->data;
 
@@ -4029,54 +4029,54 @@ void fileJobInvokeTypeCallback(FileJob *work) {
 }
 
 void fileJobInvokePositionCallback(void *work, void *extra) {
-    u16 id = ((FileJob *)work)->type;
+    u16 id = ((FileJobPayload *)work)->type;
 
     if (D_003E9180[id].func != NULL) {
-        D_003E9180[id].func(((FileJob *)work)->data, extra);
+        D_003E9180[id].func(((FileJobPayload *)work)->data, extra);
     }
 }
 
 void fileJobInvokeRotationCallback(void *work, void *extra) {
-    u16 id = ((FileJob *)work)->type;
+    u16 id = ((FileJobPayload *)work)->type;
 
     if (D_003E9184[id].func != NULL) {
-        D_003E9184[id].func(((FileJob *)work)->data, extra);
+        D_003E9184[id].func(((FileJobPayload *)work)->data, extra);
     }
 }
 
 void fileJobInvokeScaleCallback(void *work, f32 scale) {
-    u16 id = ((FileJob *)work)->type;
+    u16 id = ((FileJobPayload *)work)->type;
 
     if (D_003E9188[id].func != NULL) {
-        D_003E9188[id].func(((FileJob *)work)->data, scale);
+        D_003E9188[id].func(((FileJobPayload *)work)->data, scale);
     }
 }
 
 void fileDispatchJobTypeCallback(void *work, u32 color) {
-    u16 id = ((FileJob *)work)->type;
+    u16 id = ((FileJobPayload *)work)->type;
 
     if (D_003E918C[id].func != NULL) {
-        D_003E918C[id].func(((FileJob *)work)->data, color);
+        D_003E918C[id].func(((FileJobPayload *)work)->data, color);
     }
 }
 
 void fileJobSetPrimaryData(job, src, size, option)
-    FileJob *job;
+    FileJobPayload *job;
     void *src;
     s32 size;
     u16 option;
 {
     fileJobFreePrimaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->slots[0].allocation = (void *)sdfAllocGeneralBlock(size);
-        job->slots[0].offset = sdfResourceRetainAddress(job->slots[0].allocation);
-        job->slots[0].size = size;
+        job->primary.allocation = (void *)sdfAllocGeneralBlock(size);
+        job->primary.offset = sdfResourceRetainAddress(job->primary.allocation);
+        job->primary.size = size;
         job->option = option;
-        memcpy((void *)job->slots[0].offset, src, size);
+        memcpy((void *)job->primary.offset, src, size);
     }
 }
 
-void fileJobCopyCommandIntoPrimaryData(FileJob *job, s32 commandId, u16 option) {
+void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 commandId, u16 option) {
     DevState *command;
     s32 size;
     s32 handle;
@@ -4096,22 +4096,22 @@ void fileJobCopyCommandIntoPrimaryData(FileJob *job, s32 commandId, u16 option) 
 }
 
 void fileJobSetSecondaryData(job, src, size, selector)
-    FileJob *job;
+    FileJobPayload *job;
     void *src;
     s32 size;
     u16 selector;
 {
     fileJobFreeSecondaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->slots[1].allocation = (void *)sdfAllocGeneralBlock(size);
-        job->slots[1].offset = sdfResourceRetainAddress(job->slots[1].allocation);
-        job->slots[1].size = size;
-        job->slots[0].selector = selector;
-        memcpy((void *)job->slots[1].offset, src, size);
+        job->secondary.allocation = (void *)sdfAllocGeneralBlock(size);
+        job->secondary.offset = sdfResourceRetainAddress(job->secondary.allocation);
+        job->secondary.size = size;
+        job->primary.selector = selector;
+        memcpy((void *)job->secondary.offset, src, size);
     }
 }
 
-void fileJobCopyCommandIntoSecondaryData(FileJob *job, s32 commandId, u16 selector) {
+void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 commandId, u16 selector) {
     DevState *command;
     s32 size;
     s32 handle;
@@ -4143,20 +4143,20 @@ void fileWriteToPfs(s32 data, s32 slotIndex) {
         func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), slotIndex);
         fd = func_00369B70(path, 0x602);
     }
-    func_002D3B48(fd, data);
+    func_002D3B48(fd, (FileJobPayload *)data);
     func_00369DF8(fd);
     func_0036BCD0(D_00437E20, 0);
 }
 
 void *fileDuplicateJob(void *source) {
-    FileJob *request = source;
-    FileJob *job = fileCreateJob(request->type);
+    FileJobPayload *request = source;
+    FileJobPayload *job = fileCreateJob(request->type);
 
-    if (request->slots[0].size != 0) {
-        fileJobSetPrimaryData(job, fileResolvePrimaryBuffer(request), request->slots[0].size, request->option);
+    if (request->primary.size != 0) {
+        fileJobSetPrimaryData(job, fileResolvePrimaryBuffer(request), request->primary.size, request->option);
     }
-    if (request->slots[1].size != 0) {
-        fileJobSetSecondaryData(job, fileResolveSecondaryBuffer(request), request->slots[1].size, request->slots[0].selector);
+    if (request->secondary.size != 0) {
+        fileJobSetSecondaryData(job, fileResolveSecondaryBuffer(request), request->secondary.size, request->primary.selector);
     }
     return job;
 }
@@ -4185,11 +4185,11 @@ void *fileJobCreateFromCommandState(entry)
     }
 }
 
-u32 fileJobSerializedSize(FileJob *job) {
+u32 fileJobSerializedSize(FileJobPayload *job) {
     u32 size = 0x2C;
 
     if (fileResolvePrimaryBuffer(job) != NULL) {
-        size = job->slots[0].size + 0x2C;
+        size = job->primary.size + 0x2C;
     }
     if (fileResolveSecondaryBuffer(job) != NULL) {
         u32 aligned = size >> 4;
@@ -4198,7 +4198,7 @@ u32 fileJobSerializedSize(FileJob *job) {
         } else {
             aligned = aligned << 4;
         }
-        size = aligned + job->slots[1].size;
+        size = aligned + job->secondary.size;
     }
     return size;
 }
@@ -4304,13 +4304,13 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
             job = fileJobCreate();
 
             if ((entry->flags & 1) == 0) {
-                job->id = (u32)fileJobCreateFromJob((FileJob *)entry->id);
+                job->id = (u32)fileJobCreateFromJob((FileJobPayload *)entry->id);
             } else {
                 FileJob *parent = fileQueueFindById(source, entry->id);
                 s32 index = fileFindQueuedJobIndex(source, parent);
 
                 parent = fileQueueGetAt(queue, index);
-                job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
+                job->id = (u32)fileJobCreateChild((FileJobPayload *)parent->id);
             }
             fileJobCopyHeader(job, entry);
             strcpy(job->name, entry->name);
@@ -4328,22 +4328,22 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
                 job = fileJobCreate();
 
                 if ((entry->flags & 1) == 0) {
-                    FileJob *request = (FileJob *)((u8 *)source + entry->id);
+                    FileJobPayload *request = (FileJobPayload *)((u8 *)source + entry->id);
 
                     if (entry->flags & 2) {
-                        FileJob *secondary = (FileJob *)((u8 *)source + records[entry->sector].id);
+                        FileJobPayload *secondary = (FileJobPayload *)((u8 *)source + records[entry->sector].id);
 
-                        request->slots[1].size = secondary->slots[1].size;
-                        request->slots[1].offset = (u32)fileResolveSecondaryBuffer(secondary) - (u32)request;
+                        request->secondary.size = secondary->secondary.size;
+                        request->secondary.offset = (u32)fileResolveSecondaryBuffer(secondary) - (u32)request;
                         job->id = (u32)fileJobCreateFromJob(request);
-                        request->slots[1].offset = request->slots[1].size = 0;
+                        request->secondary.offset = request->secondary.size = 0;
                     } else {
                         job->id = (u32)fileJobCreateFromJob(request);
                     }
                 } else {
                     FileJob *parent = fileQueueGetAt(queue, entry->id);
 
-                    job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
+                    job->id = (u32)fileJobCreateChild((FileJobPayload *)parent->id);
                 }
                 fileJobCopyHeader(job, entry);
                 strcpy(job->name, entry->name);
@@ -4408,13 +4408,13 @@ void fileQueueUpdate(FileQueue *queue)
             }
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-            fileJobInvokePositionCallback((FileJob *)job->id, pos);
+            fileJobInvokePositionCallback((FileJobPayload *)job->id, pos);
         }
         if (job->xformFlags & 0x60) {
             camAimRotation(job, aimQuat);
-            fileJobInvokeRotationCallback((FileJob *)job->id, aimQuat);
+            fileJobInvokeRotationCallback((FileJobPayload *)job->id, aimQuat);
         }
-        fileJobInvokeTypeCallback((FileJob *)job->id);
+        fileJobInvokeTypeCallback((FileJobPayload *)job->id);
     }
     if ((effModelUpdateControlFlags & 2) == 0) {
         queue->unk84++;
@@ -4428,7 +4428,7 @@ void fileQueueDestroy(FileQueue *queue) {
     while (job != NULL) {
         FileJob *next = job->next;
         if ((job->flags & 1) == 0) {
-            fileJobDestroy((FileJob *)job->id);
+            fileJobDestroy((FileJobPayload *)job->id);
         }
         fileDestroyJob(job);
         job = next;
@@ -4447,7 +4447,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
     queue->transformWord = source->transformWord;
     for (src = source->first; src != NULL; src = src->next) {
         FileJob *job = fileJobCreate();
-        job->id = (u32)fileJobCreateChild((FileJob *)src->id);
+        job->id = (u32)fileJobCreateChild((FileJobPayload *)src->id);
         fileJobCopyHeader(job, src);
         fileQueueAppend(queue, job);
     }
@@ -4498,7 +4498,7 @@ void fileQueueSetPosition(FileQueue *queue, void *vec)
         VU0_ROTATE_VEC(vf11, vf11);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-        fileJobInvokePositionCallback((FileJob *)job->id, pos);
+        fileJobInvokePositionCallback((FileJobPayload *)job->id, pos);
     }
 }
 
@@ -4520,7 +4520,7 @@ void fileQueueSetRotation(FileQueue *queue, void *rot)
         VU0_LOAD_VF(vf11, quat);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-        fileJobInvokeRotationCallback((FileJob *)job->id, pos);
+        fileJobInvokeRotationCallback((FileJobPayload *)job->id, pos);
     }
     fileQueueSetPosition(queue, queue->position);
 }
@@ -4539,7 +4539,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
         if (job->scaleFlags & 1) {
             jobScale = jobScale * total;
         }
-        fileJobInvokeScaleCallback((FileJob *)job->id, jobScale);
+        fileJobInvokeScaleCallback((FileJobPayload *)job->id, jobScale);
         if (job->xformFlags & 0x80) {
             VU0_LOAD_VF(vf10, queue->position);
             VU0_LOAD_VF(vf11, queue->offset);
@@ -4551,7 +4551,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
             VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
-            fileJobInvokePositionCallback((FileJob *)job->id, &pos);
+            fileJobInvokePositionCallback((FileJobPayload *)job->id, &pos);
         }
     }
 }
@@ -4635,7 +4635,7 @@ static inline void fileQueueRechainSectorFollowers(FileQueue *queue, FileJob *ow
 void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref) {
     FileJob *node;
     FileJob *found;
-    FileJob *source;
+    FileJobPayload *source;
     u32 refIndex;
     u32 flags;
 
@@ -4651,10 +4651,10 @@ void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref
     }
     flags = job->flags;
     if (!(flags & 1)) {
-        fileJobFreeSecondaryBuffer((FileJob *)job->id);
-        source = (FileJob *)ref->id;
-        fileJobSetSecondaryData((FileJob *)job->id, (void *)source->slots[1].offset, source->slots[1].size,
-                                source->slots[0].selector);
+        fileJobFreeSecondaryBuffer((FileJobPayload *)job->id);
+        source = (FileJobPayload *)ref->id;
+        fileJobSetSecondaryData((FileJobPayload *)job->id, (void *)source->secondary.offset, source->secondary.size,
+                                source->primary.selector);
         flags = job->flags;
     }
     job->flags = flags | 2;
@@ -4700,7 +4700,7 @@ void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job) {
             }
         }
         if (!(job->flags & 1)) {
-            fileJobDestroy((FileJob *)job->id);
+            fileJobDestroy((FileJobPayload *)job->id);
         }
     }
     fileDestroyJob(job);
@@ -4925,7 +4925,7 @@ EffectSurfaceNode *fileCreateGridLoaderRecord(FileGridHeader *hdr) {
 
 
 
-EffectSurfaceNode *fileCreateEffectSurfaceFromJob(FileJob *job) {
+EffectSurfaceNode *fileCreateEffectSurfaceFromJob(FileJobPayload *job) {
     void *primary = fileResolvePrimaryBuffer(job);
     EffectSurfaceNode *node = fileCreateGridLoaderRecord(primary);
     void *secondary;
@@ -4933,7 +4933,7 @@ EffectSurfaceNode *fileCreateEffectSurfaceFromJob(FileJob *job) {
     fileLoadObjectSetResource(node, job->option, primary);
     secondary = fileResolveSecondaryBuffer(job);
     if (secondary != NULL) {
-        switch (job->slots[0].selector) {
+        switch (job->primary.selector) {
         case 1:
             fileLoadObjectOpenDevice(node, (u32)secondary);
             break;
@@ -4953,7 +4953,7 @@ EffectSurfaceNode *fileCreateEffectSurfaceFromJob(FileJob *job) {
             fileReplaceReferenceHolder(node, (u32)secondary);
             break;
         }
-        node->kind = job->slots[0].selector;
+        node->kind = job->primary.selector;
     }
     return node;
 }
@@ -5115,7 +5115,7 @@ void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     }
 }
 
-void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJob *job) {
+void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) {
     u32 count = ((FileSlotTable *)node->active)->count;
     u32 i;
     s32 size;
