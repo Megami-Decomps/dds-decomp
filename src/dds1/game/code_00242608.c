@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_list.h"
 #include "sdf.h"
 #include "evt_unit.h"
 
@@ -1486,7 +1487,39 @@ s32 func_00244FA0(ShopScene *context) {
     return limit;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
+void func_00245068(ShopScene *scene) {
+    s32 index = 0;
+    s32 capacity = scene->count8C;
+    struct MenuListNode *node = ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->first;
+    for (; index < ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->count; index++) {
+        CampWindowParams *parameters = &node->camp;
+        s32 globalState = datGameState;
+        s32 itemId = parameters->id;
+        s32 divisor = parameters->price;
+        s32 kind = parameters->mode;
+        s32 affordable = *(s32 *)(globalState + 0x3C) / divisor;
+        s32 available;
+        s32 limit;
+        if (kind == 2) {
+            available = capacity - ptyCountBulletItem(itemId);
+        } else if (kind == 3) {
+            available = 1 - *(u8 *)(itemId + globalState + 0x12A0);
+        } else {
+            available = 99 - *(u8 *)(itemId + globalState + 0x12A0);
+        }
+        if (available < 0) {
+            available = 0;
+        }
+        limit = available < affordable ? available : affordable;
+        if (limit == 0) {
+            node->flags48 = 1;
+        }
+        node = node->next;
+        if (node == NULL) {
+            break;
+        }
+    }
+}
 
 
 s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
