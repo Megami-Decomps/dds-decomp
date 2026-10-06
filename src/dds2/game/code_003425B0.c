@@ -357,7 +357,7 @@ extern s32 D_004391D8;
 extern DevState *D_004391DC;
 extern SdfSoundResidentBuffer D_0047B418;
 extern char *mnuBuildVoiceResourcePath(char *, char *);
-extern DevState *sdfDevCreateCallbackState(s32, void *, s32);
+extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
 extern s32 sdfDevReactivate(DevState *);
 extern s32 sdfDevQueueRead(DevState *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
@@ -379,7 +379,7 @@ u32 *func_00342848(u32 command, SdfSoundRpcRequest *request) {
         }
         sdfSoundCommandBusy = 1;
         mnuBuildVoiceResourcePath(path, D_0040BAF8);
-        state = sdfDevCreateCallbackState((s32)path, sdfSoundHandleRpcEvent, 0);
+        state = sdfDevCreateCallbackState(path, sdfSoundHandleRpcEvent, 0);
         D_004391DC = state;
         if (state != NULL) {
             WaitSema(sdfSoundRpcSemaphore);
