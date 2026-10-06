@@ -736,8 +736,6 @@ extern void btlInitUnitFxDefaults(BtlFx *);
 extern s32 btlCheckSpecialAbility(s32, s32);
 extern void func_001F5868(s32, s32, s32, s32);
 extern void func_001F5320(s32, s32, s32, s32);
-extern s32 effCreateSelectionFlagListFromWork(void *);
-extern char D_003BDCC8[];
 extern void mnuReleaseSoundBufferLocked(void);
 extern void evtSetUnitAlphaTransition(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
@@ -993,7 +991,7 @@ void func_001D4C98(void) {
 }
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 extern s32 sndHasActiveActor(void);
 extern s64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);

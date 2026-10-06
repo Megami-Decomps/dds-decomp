@@ -33,7 +33,7 @@ extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 
 extern void func_001DB698();
 

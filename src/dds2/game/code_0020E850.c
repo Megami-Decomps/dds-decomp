@@ -909,7 +909,7 @@ extern s32 scrReadIntParameter(s32 index);
 extern BtlUnit *btlFindUnitByModeClear(s32 id);
 extern BtlUnit *btlFindUnitByModeFlagged(s32 id);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *actor, s32 arg);
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 extern s64 btlAdvanceRuntimeSequenceCounter();
 
 s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {

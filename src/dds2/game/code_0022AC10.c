@@ -294,7 +294,7 @@ extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 
 extern s32 scrReadIntParameter(s32);
 

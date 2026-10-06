@@ -368,7 +368,7 @@ extern BtlUnit *btlGetTargetUnitForLink();
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 
 extern void func_001E3108(void *, f32 *);
 

@@ -128,7 +128,7 @@ extern s32 btlGetEntryFlagsUnlessDisabled(u8 *);
 
 extern s32 btlLowestSetPairIndex(u32);
 
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 
 extern void effReleaseSharedReference(void *);
 
