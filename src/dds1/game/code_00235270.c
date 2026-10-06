@@ -4,6 +4,9 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "sdf.h"
+#include "kwln.h"
+#include "evt_unit.h"
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 extern void func_00237428();
@@ -15,14 +18,14 @@ extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(s32 *task);
-extern s32 evtAllocateContext(void);
-extern void evtSetConvertedContextValue(s32 context, s32 value);
+extern EvtPictureWork *evtAllocateContext(void);
+extern void evtSetConvertedContextValue(EvtPictureWork *, const char *);
 extern void evtUpdatePictureWhenFlagged(void);
 extern void evtPictureReleaseTaskTextureAndState(void);
 extern s32 evtFindTaskById();
 extern s32 func_003014F0(char *, char *, ...);
 extern void evtFormatTaskName(s32 taskId, void *buffer);
-extern void kwlnTaskCreate(void *name, s32 taskId, s32, s32, void *update, void *destroy, void *data);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, void *, void *, u32);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115298(void *obj, void *vecA, void *vecB);
@@ -49,8 +52,8 @@ extern s32 sdfCreateFormattedSifCommand();
 extern u32 itfMesGetEntryCount(s32 window);
 extern void evtViewerDispatchFlagMode();
 extern void func_0022E5A0();
-extern u8 evtPictureTaskName[];
-extern u8 evtSkyTaskName[];
+extern char evtPictureTaskName[];
+extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
 extern char D_003BC0A8[]; /* " EVENT" */
@@ -218,27 +221,21 @@ extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
 extern char D_003BC0C8[]; /* "NAME:" */
 
 /* Create a task with an initialized event payload. */
-void evtCreateTask(s32 taskId, s32 value) {
-    s32 data;
+KwlnTask *evtCreateTask(s32 taskId, const char *path) {
+    EvtPictureWork *data;
 
     data = evtAllocateContext();
-    evtSetConvertedContextValue(data, value);
-    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (void *)data);
+    evtSetConvertedContextValue(data, path);
+    return kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
 }
 
-typedef struct EvtTaskData {
-    u32 pad00;
-    s32 value; /* 0x04 */
-    u8 pad08[0x30];
-    s32 effectHandle; /* 0x38: released before an updated effect is installed */
-} EvtTaskData;
 
-void evtCreateTaskWithValue(s32 taskId, s32 value) {
-    EvtTaskData *data;
+KwlnTask *evtCreateTaskWithValue(s32 taskId, SdfTex *texture) {
+    EvtPictureWork *data;
 
-    data = (EvtTaskData *)evtAllocateContext();
-    data->value = value;
-    kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, data);
+    data = evtAllocateContext();
+    data->texture = texture;
+    return kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
 }
 
 void evtSetSkyOverlayEnabled(u32 enabled) {
@@ -2654,63 +2651,44 @@ s32 evtFindTaskById(u32 taskId) {
     return kwlnTaskGetTaskByName(taskName);
 }
 
+/* The script-visible second payload word has a task-kind-specific meaning. */
 s32 evtGetTaskValueWord(u32 taskId) {
     s32 task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        return ((EvtTaskData *)kwlnTaskGetUserValue(task))->value;
+        s32 *words = kwlnTaskGetUserValue(task);
+        return words[1];
     } else {
         return -1;
     }
 }
 
-EvtTaskData *evtGetTaskData(u32 taskId) {
+void *evtGetTaskData(u32 taskId) {
     s32 task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
         return kwlnTaskGetUserValue(task);
     }
-    return (EvtTaskData *)task;
+    return (void *)task;
 }
 
-/* Task data of a resource-list task: entries[] are 0x20 bytes, keyed at +0x10. */
-typedef struct EvtResourceEntry {
-    u8 pad00[0xC];
-    s32 offset;
-    s32 key;
-    u8 pad14[0xC];
-} EvtResourceEntry;
-
-typedef struct EvtResourceHeader {
-    u8 pad00[0x10];
-    s32 count;
-} EvtResourceHeader;
-
-typedef struct EvtResourceTask {
-    u32 pad00;
-    s32 kind;
-    u8 pad08[8];
-    s32 base;
-    EvtResourceHeader *header;
-    EvtResourceEntry *entries;
-} EvtResourceTask;
 
 s32 evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
     s32 i;
-    EvtResourceTask *data;
+    EvtPackLoadState *data;
     s32 task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
         data = kwlnTaskGetUserValue(task);
-        if (data->kind != 2) {
+        if (data->loaded != 2) {
             return 0;
         }
-        for (i = 0; i < data->header->count; i++) {
-            if (data->entries[i].key == key) {
-                return data->base + data->entries[i].offset;
+        for (i = 0; i < data->header->entryCount; i++) {
+            if (data->entries[i].secondaryResourceId == key) {
+                return (s32)(data->data + data->entries[i].dataOffset);
             }
         }
         return 0;
@@ -2718,22 +2696,22 @@ s32 evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
     return task;
 }
 
-extern void sdfTexReleaseReferenceViaHandler(s32 handle);
-extern s32 sdfTexAcquireResourceTexture(s32 resource);
-extern void effSetCh72Id(s32 id);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
+extern SdfTex *sdfTexAcquireResourceTexture(void *);
+extern void effSetCh72Id(u32);
 
 void evtRefreshTaskData(s32 taskId, s32 key) {
-    EvtTaskData *data = evtGetTaskData(taskId);
-    s32 resource = evtFindTaskResourceEntryByKey(taskId, key);
-    if (resource != 0) {
-        s32 old = data->effectHandle;
+    EvtPackLoadState *data = evtGetTaskData(taskId);
+    s32 address = evtFindTaskResourceEntryByKey(taskId, key);
+    if (address != 0) {
+        s32 old = data->effect72;
         if (old != 0) {
-            sdfTexReleaseReferenceViaHandler(old);
-            data->effectHandle = 0;
+            sdfTexReleaseReferenceViaHandler((SdfTex *)old);
+            data->effect72 = 0;
         }
-        resource = sdfTexAcquireResourceTexture(resource);
-        effSetCh72Id(resource);
-        data->effectHandle = resource;
+        address = (s32)sdfTexAcquireResourceTexture((void *)address);
+        effSetCh72Id(address);
+        data->effect72 = address;
     }
 }
 

@@ -2,6 +2,7 @@
 #include "dat_state.h"
 #include "scr.h"
 #include "kwln.h"
+#include "evt_world.h"
 
 
 /* The first word is the solarnoise.spr handle; the work allocation is 0x104 bytes. */
@@ -19,7 +20,7 @@ void evtLoadSolarNoiseSprite(u32 *sprite);
 
 void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
-void func_00101A80(s32 arg0, s32 arg1);
+void func_00101A80(KwlnTask *parent, KwlnTask *child);
 
 
 char *scrReadStringParameter(s32 idx);
@@ -64,7 +65,8 @@ INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
 extern char D_003ACA78[];
 extern s32 evtFindTaskResourceEntryByKey(u32 id, s32 key);
-extern s32 evtCreateTaskWithValue(s32 taskId, s32 value);
+extern KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
+extern KwlnTask *evtCreateTask(s32, const char *);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
@@ -73,7 +75,7 @@ u32 evtCreateTextureEntryChildTask(void) {
     ScrData *work;
     s32 id;
     s32 entry;
-    s32 task;
+    KwlnTask *task;
 
     work = scrGetCurrentContext();
     if (work == NULL) {
@@ -89,15 +91,15 @@ u32 evtCreateTextureEntryChildTask(void) {
         evtPrintDeveloperConsoleMessage("TEX_BE not fount RID = %d\n", scrReadIntParameter(1));
         return 1;
     }
-    task = evtCreateTaskWithValue(0x2AFE, entry);
-    func_00101A80((s32)work->task, task);
-    scrSetIntegerReturnValue(task);
+    task = evtCreateTaskWithValue(0x2AFE, (struct SdfTex *)entry);
+    func_00101A80(work->task, task);
+    scrSetIntegerReturnValue((s32)task);
     return 1;
 }
 
 u32 evtOpcodeCreateWorldChildTask(void) {
     ScrData *work;
-    s32 task;
+    KwlnTask *task;
 
     work = scrGetCurrentContext();
     if (work == NULL) {
@@ -108,8 +110,8 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     task = evtCreateTask(0x2afe, scrReadStringParameter(0));
-    func_00101A80((s32)work->task, task);
-    scrSetIntegerReturnValue(task);
+    func_00101A80(work->task, task);
+    scrSetIntegerReturnValue((s32)task);
     return 1;
 }
 

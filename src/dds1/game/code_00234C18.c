@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "sdf.h"
+#include "evt_world.h"
 
 extern SdfTex *itfLoadTextureFromAsset(const char *);
 
@@ -109,23 +110,19 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     return task;
 }
 
-typedef struct EventContext {
-    u32 flags; /* 0x00: bit 0 toggled without disturbing the other bits */
-    SdfTex *texture;
-} EventContext;
 
 /* Flag operations act on the scheduler task's user-value context. */
 void evtSetContextFlag(KwlnTask *task) {
-    EventContext *context;
+    EvtPictureWork *context;
 
-    context = (EventContext *)kwlnTaskGetUserValue(task);
+    context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
     context->flags = context->flags | 1;
 }
 
 void evtClearContextFlag(KwlnTask *task) {
-    EventContext *context;
+    EvtPictureWork *context;
 
-    context = (EventContext *)kwlnTaskGetUserValue(task);
+    context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
     context->flags = context->flags & 0xfffffffe;
 }
 
@@ -134,14 +131,14 @@ void evtDestroyTaskHierarchy(u32 task) {
 }
 
 /* Allocate the picture task's flag and texture state. */
-EventContext *evtAllocateContext(void) {
-    EventContext *context = (EventContext *)sdfAllocSizeClassBlock(8);
+EvtPictureWork *evtAllocateContext(void) {
+    EvtPictureWork *context = (EvtPictureWork *)sdfAllocSizeClassBlock(8);
     context->flags = 0;
     context->texture = NULL;
     return context;
 }
 
-void evtSetConvertedContextValue(EventContext *context, const char *path) {
+void evtSetConvertedContextValue(EvtPictureWork *context, const char *path) {
     context->texture = itfLoadTextureFromAsset(path);
 }
 
