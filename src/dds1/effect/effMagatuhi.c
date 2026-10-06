@@ -69,18 +69,24 @@ typedef struct {
     f32 unk00, unk04, unk08;
     u8 pad0C[4];
     f32 unk10, unk14, unk18;
-    u8 pad1C[0xC];
+    u8 pad1C[4];
+    u8 respawn;            /* 0x20 */
+    u8 pad21[3];
+    s32 lifetimeFrames;    /* 0x24 */
     s32 delaySpread;       /* 0x28 modulus of the particle delay */
-    u8 pad2C[8];
+    s32 fadeInFrames;      /* 0x2C */
+    s32 fadeOutFrames;     /* 0x30 */
     f32 initialRadius;
     f32 baseLiftStep;      /* 0x38 */
     f32 liftVariation;
-    u8 pad40[4];
+    f32 angleStep;         /* 0x40 */
     f32 baseScale;         /* 0x44 */
-    u8 pad48[4];
+    f32 scaleStep;         /* 0x48 */
     f32 scaleVariation;    /* 0x4C */
-    f32 unk50;
-    u8 pad54[0xC];
+    f32 captureDistance;   /* 0x50: transition from drift to the path */
+    f32 pathJitter;        /* 0x54 */
+    f32 pathStep;          /* 0x58 */
+    f32 pathAcceleration;  /* 0x5C: multiplier applied to the path step */
     u32 particleCount;     /* 0x60 */
     u8 pad64[0x118];
 } EffMagatuhiHeadFirst; /* 0x17C */
@@ -169,7 +175,14 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
 
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
-extern void *effMathGetSlotAt(void *slots, s32 index);
+extern s32 effMathStepBezierSlot(void *slots, s32 index, f32 *out);
+extern void func_001891A8(void *owner);
+extern void func_00189818(void *valueWork, s32 index, void *out);
+extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+extern f32 sdfSinPoly(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern s32 effMathGetSlotAt(void *slots, s32 index);
 
 /* Owner of the value table an effect variant's particles write through. */
 struct EffMagatuhiOwner {
@@ -275,7 +288,7 @@ void func_00189E98(EffMagatuhiWideFirst *work, s32 index) {
     particle->liftStep = work->head.baseLiftStep *
         (effMiscRandUnitFloat(D_0034DF38) * work->head.liftVariation +
          (1.0f - work->head.liftVariation));
-    slot = effMathGetSlotAt(work->mathResource, index);
+    slot = (EffMagatuhiSlot *)effMathGetSlotAt(work->mathResource, index);
     slot->t = 0.0f;
     slot->step = 0.0f;
     func_00189C80(work->managedResource->valueWork, index);
@@ -295,7 +308,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams
     dst->head.unk10 = src->unk10;
     dst->head.unk14 = src->unk14;
     dst->head.unk18 = src->unk18;
-    dst->head.unk50 = src->unk24;
+    dst->head.captureDistance = src->unk24;
 }
 
 /* Clone history parameters; signed delays follow the returned work block. */
@@ -329,13 +342,8 @@ void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-extern s32 effMathStepBezierSlot(void *slots, s32 index, void *out);
-extern void func_001891A8(void *owner);
-extern void func_00189818(void *valueWork, s32 index, void *out);
 
 
-extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 /* Jitter control points perpendicular to the path and camera viewing direction. */
 void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 index) {
@@ -352,7 +360,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDirection);
     step = 1.0f / (f32)work->head.lifetimeFrames;
-    slot = effMathGetSlotAt(work->mathResource, index);
+    slot = (EffMagatuhiSlot *)effMathGetSlotAt(work->mathResource, index);
     slot->t = 0;
     slot->step = step;
 
@@ -513,7 +521,7 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
     for (i = 0; i < count; i += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
         effMagatuhiBuildBezierControlPointsVU(work, i);
         *ages = effMiscRand(D_0034DF38) % lifetimeFrames;
-        slot = effMathGetSlotAt(work->mathResource, i);
+        slot = (EffMagatuhiSlot *)effMathGetSlotAt(work->mathResource, i);
         if (historyFrames < *ages) {
             slot->t = slot->step * (f32)(*ages - historyFrames);
             sampleSpan = historyFrames;
@@ -658,8 +666,6 @@ void effMagatuhiCopyRingMatrix(EffMagatuhiRingWork *work, void *matrix) {
 
 
 extern u32 func_0018CBC0(void *block);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 /* Replay the first slot of each three-slot group from a random age. */
 void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
@@ -844,8 +850,6 @@ void effMagatuhiCopyOrbitMatrix(EffMagatuhiOrbitWork *work, void *matrix) {
 
 
 extern u32 func_0018CBC0(void *block);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
 void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
