@@ -3,6 +3,7 @@
 #include "dds3obj.h"
 #include "dds3Admin.h"
 #include "pcp_vu0.h"
+#include "mdl.h"
 
 extern void *dds3GetSlot(void *arg0, s32 index);
 
@@ -23,7 +24,7 @@ void dds3SetSlotKey(void *arg0, void *arg1);
 void dds3ReplaceObjectResource(void *arg0);
 
 
-void mdlDestroyContext(s32 arg0);
+void mdlDestroyContext(MdlCtx *model);
 void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void sdfDestroyMotion(void *arg);
@@ -157,7 +158,7 @@ void dds3ReleaseObjectBaseResources(World *world) {
     if (base->resourceHandle != 0) {
         if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
             if (base->resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
-                mdlDestroyContext(base->resourceHandle);
+                mdlDestroyContext((MdlCtx *)base->resourceHandle);
                 info = world->info;
                 if (info->primaryObject != NULL) {
                     evtReleaseUnitTransitionWork(info->primaryObject);
@@ -177,23 +178,23 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111E00);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112058);
 
-extern u32 evtCreateModelFromObject(void *object);
-extern s32 evtAttachScriptToObject(void *object, void *model);
+extern SdfModel *evtCreateModelFromObject(void *object);
+extern Motion *evtAttachScriptToObject(void *object, SdfModel *model);
 extern void dds3LoadOrBuildObjectMatrix(u8 *object);
-extern void sdfModelUpdateRootTransforms(void *model, s32 frame);
+extern void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame);
 
 void func_00112168(void *object) {
     ObjBase *base;
     void *slot;
-    void *motion;
-    void *model;
+    Motion *motion;
+    SdfModel *model;
 
     base = dds3GetObjectOwnedHandle(object);
     slot = dds3GetSlot(object, 3);
-    model = (void *)evtCreateModelFromObject(slot);
-    motion = (void *)evtAttachScriptToObject(slot, model);
+    model = evtCreateModelFromObject(slot);
+    motion = evtAttachScriptToObject(slot, model);
     dds3LoadOrBuildObjectMatrix((u8 *)object);
-    VU0_STORE_MATRIX((u8 *)model + 0x20);
+    VU0_STORE_MATRIX(model->matrix);
     sdfModelUpdateRootTransforms(model, 0);
     sdfModelUpdateRootTransforms(model, 1);
     base->resourceState = 1;
