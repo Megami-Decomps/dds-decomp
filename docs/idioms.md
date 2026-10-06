@@ -2151,3 +2151,78 @@ bytes, with 94 of 139 emitted words differing. The live draw function stays
 assembly. Main intentionally retains the protected PR547 integer-word draw
 bridge; do not widen or reshape it as part of this cleanup.
 
+## Terminal commands belong to the list's window state
+
+DDS2's four command setters at `0x002971C0`–`0x00297220` all receive a
+`MenuList *`, not the enclosing terminal scene. The dispatch caller at
+`0x00261F48` passes the wrapper's `+0x18` list to the first pair, and the
+window constructors allocate the same `0x14`-byte context for that list.
+Its first two words are the embedded `MenuAction` command value and mode;
+its selected slot is the halfword at `+0x12`. Use
+`((MenuTerminalWindowState *)list->context)->command` through a typed local,
+without a second action-owner projection.
+
+The separate `0x38C` `MenuTerminalContext` owns the terminal's phase at
+`+0xC0` and frame counter at `+0xBC`. The phase is signed: the wait helper
+uses `slti`, not `sltiu`. Its slot-advance count at `+0xCC` is also signed
+byte storage, as the text consumer uses `lb`. Scene consumers borrow the
+real `MenuWindowContainer`, `MenuList`, `MenuListNode.camp` and window-state
+owners rather than shadow prefix records. Existing SDK address-word and
+byte-pointer interfaces remain explicit boundaries; member addresses do
+not require integer offset arithmetic.
+
+The provider unit is clean at 38 matching functions, and the complete
+event consumer unit at 75, with zero differences and no checker flags.
+
+
+## Camera-color keys borrow the complete camera setting
+
+The polygon-movie interpolators and camp timeline's `blendData` share the
+`0x38`-byte `EvtBlendKey` in `fld.h`. Its two three-value banks are separate
+from the camera setting's destination rows; pass the key itself, not an
+integer-word projection of its stack address.
+
+`fldLoadBattleSkyAndFilter` allocates complete `0x54`-byte
+`FldCameraSetting` records and copies the complete default into each slot.
+The first word precedes the embedded `0x20`-byte `FldColorParams`; the tail
+is three four-word rows starting at `+0x24`. The native key writer updates
+columns 1 and 2, at `+0x28/+0x2C`, then advances by `0x10` for each row.
+Do not collapse that tail to three two-word pairs or declare all of it
+padding. The other columns retain their previous values through the
+complete setting copy.
+
+The copy/update APIs borrow this primary setting directly. DDS2's former
+`FldSaveHeader` word array was a second view of the same storage, not a
+separate save-file allocation.
+
+The two key-application helpers remain assembly, with honest typed candidates
+parked in `build/parked`. The best measured DDS1 form emits `0xE0` bytes
+against `0xF0` retail and differs in 43 of 56 emitted words, beginning at
+`+0x20`; the paired DDS2 baseline differs in 44 of 56. Do not restore the
+old stack-word casts and byte-offset copies merely to recover a C match.
+This is a complete ownership/API cutover, not a claim that either helper
+has been decompiled.
+
+## Staff description state is a word, not an address-valued SDK handle
+
+DDS2's `func_002C1B68` is an ordinary game function with the real
+`void (u32 *out, u32 value)` contract: its body is `*out = value`.
+The staff callbacks pass the word at `MenuStaffContext +0xAA50`.
+Expose that single `u32` in the primary owner and pass its address;
+the neighboring padding does not establish a larger workspace allocation.
+Eight existing staff-page callers now use the correct pointer prototype;
+their complete units are clean at 43 and 24 matches. The terminal's two
+gradient-control callers borrow `&state->active` under the same contract
+(83 matches). `MenuGradientFade.active` is a `u32` word: both games only
+store zero or test it for zero/nonzero, with no sign-dependent use.
+The PR534/547 word-setter callers remain intentionally protected residuals,
+as does the separately deferred dispatcher ABI.
+ 
+The staff-value callback at `0x002AFE18` matches all 856 native bytes using
+the primary staff, window, list and party-record owners. Its final item-use
+arm is a normal nested `if (operation == 0) { failure } else { reset }`,
+not an inverted `else if` chain. Keep the actual `u16` current-ID getter
+return type and its existing integer-address parameter contract; the two
+older label callers and the new callback all preserve their native code.
+
+

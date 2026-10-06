@@ -8,6 +8,7 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "eff.h"
+#include "fld.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -143,7 +144,7 @@ extern void sdfReleaseResourceAllocation();
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
-extern void func_002C1B68(MenuGradientFade *, s32);
+extern void func_002C1B68(u32 *, u32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
@@ -236,14 +237,6 @@ void mnuCampDestroyAllTasks(void) {
     }
 }
 
-typedef struct EvtBlendH {
-    s32 w[4];
-    s32 x;
-    u32 flagWord;
-    u8 pad[8];
-    s32 y[3];
-    s32 z[3];
-} EvtBlendH;
 
 /* Timeline keys carry type-dependent payloads as well as their common links. */
 typedef struct CampKeyNode {
@@ -259,7 +252,7 @@ typedef struct CampKeyNode {
     u8 pad0E[2];
     s16 entryCode;             /* 0x10: 0 follows alt, 1 clears, >=2 names an entry */
     u8 pad12[0x1A];
-    EvtBlendH *blendData;      /* 0x2C */
+    EvtBlendKey *blendData;   /* 0x2C */
     struct CampKeyNode *next;  /* 0x30 */
     struct CampKeyNode *alt;   /* 0x34 */
 } CampKeyNode;
@@ -328,8 +321,7 @@ typedef struct {
     s32 registeredIds[20]; /* 0x2448 */
 } CampScene;
 
-extern void evtBlendParamsH(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *out);
-extern void fldApplyCameraColorKeyWords(CampScene *scene, const s32 *colorSettings);
+extern void fldApplyCameraColorKeyWords(CampScene *scene, const EvtBlendKey *source);
 
 /* Shift the selected track's frames; values exactly at the upper limit are kept. */
 void mnuShopScrollList(CampScene *scene, s32 delta) {
@@ -711,9 +703,9 @@ void func_0025EC00(CampScene *scene) {
     CampKeyTrack *track;
     CampKeyNode *selectedKey;
     CampKeyNode *futureKey;
-    EvtBlendH fallbackBlend;
-    EvtBlendH blendedParameters;
-    EvtBlendH *futureBlend;
+    EvtBlendKey fallbackBlend;
+    EvtBlendKey blendedParameters;
+    EvtBlendKey *futureBlend;
     s32 frameValue;
     u16 selectedFrame;
     u16 futureFrame;
@@ -752,52 +744,12 @@ void func_0025EC00(CampScene *scene) {
         futureBlend = futureKey->blendData;
     }
     evtBlendParamsH(selectedKey->condition, blendFraction, selectedKey->blendData, futureBlend, &blendedParameters);
-    fldApplyCameraColorKeyWords(scene, (const s32 *)&blendedParameters);
+    fldApplyCameraColorKeyWords(scene, &blendedParameters);
 }
 
-extern void fldCopyCameraSetting(void *setting);
-extern void fldUpdateCameraColorEffect(void *setting);
 
-void fldApplyCameraColorKeyWords(CampScene *scene, const s32 *colorSettings) {
-    s32 cameraSettings[0x54 / sizeof(s32)];
-    u8 *cameraColorA;
-    const u8 *sourceColorA;
-    u8 *cameraColorB;
-    s32 sourceOffset;
-    s32 cameraOffset;
-    s32 i;
-
-    fldCopyCameraSetting(cameraSettings);
-    cameraSettings[0x20 / sizeof(s32)] = colorSettings[0x10 / sizeof(s32)];
-    cameraSettings[0x10 / sizeof(s32)] = colorSettings[0];
-    cameraSettings[0x14 / sizeof(s32)] = colorSettings[1];
-    cameraSettings[0x18 / sizeof(s32)] = colorSettings[2];
-    cameraSettings[0x1C / sizeof(s32)] = colorSettings[3];
-    cameraSettings[0x0C / sizeof(s32)] = colorSettings[0x14 / sizeof(s32)];
-    cameraColorA = (u8 *)&cameraSettings[2];
-    sourceColorA = (const u8 *)&colorSettings[3];
-    cameraColorB = (u8 *)&cameraSettings[3];
-    sourceOffset = 0x20;
-    cameraOffset = 0x20;
-    /* Copy the three color rows into the camera setting's 0x10-byte slots. */
-    for (i = 2; i >= 0; i--) {
-        *(s32 *)(cameraColorA + cameraOffset) =
-            *(const s32 *)(sourceColorA + sourceOffset);
-        *(s32 *)(cameraColorB + cameraOffset) =
-            *(const s32 *)((const u8 *)colorSettings + sourceOffset);
-        sourceOffset += 4;
-        cameraOffset += 0x10;
-    }
-    fldUpdateCameraColorEffect(cameraSettings);
-    if (colorSettings[0x0C / sizeof(s32)] == 0 &&
-        colorSettings[0x2C / sizeof(s32)] == 0 &&
-        colorSettings[0x30 / sizeof(s32)] == 0 &&
-        colorSettings[0x34 / sizeof(s32)] == 0) {
-        scene->sceneMode = 0;
-    } else {
-        scene->sceneMode = 1;
-    }
-}
+/* The genuine three-row typed candidate remains non-matching. */
+INCLUDE_ASM(const s32, "../matchings/game/code_0025DA20", fldApplyCameraColorKeyWords);
 
 void func_0025EE00(CampScene *scene) {
     func_0025EC00(scene);
@@ -1371,9 +1323,9 @@ s32 mnuTerminalSyncMessageWindowControl(void) {
     MenuGradientFade *state = &((MenuTerminalContext *)kwlnTaskGetUserValue())->gradientFade;
     mnuDrawAndStepGradientFade(state, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
-        func_002C1B68(state, 1);
+        func_002C1B68(&state->active, 1);
     } else {
-        func_002C1B68(state, 0);
+        func_002C1B68(&state->active, 0);
     }
     return 0;
 }

@@ -164,4 +164,41 @@ typedef struct FldFileResource {
 typedef char FldFileNameEntrySizeCheck[(sizeof(FldFileNameEntry) == 0x0C) ? 1 : -1];
 typedef char FldFileResourceSizeCheck[(sizeof(FldFileResource) == 0x24) ? 1 : -1];
 
+/* Camera-color timeline keys interpolate two banks of three values. */
+typedef struct EvtBlendKey {
+    s32 w[4];
+    s32 x;
+    u32 flagWord;
+    u8 pad18[8];
+    s32 y[3];
+    s32 z[3];
+} EvtBlendKey;
+
+typedef struct FldColorParams {
+    s32 enabled;
+    s32 slotIndex;
+    s32 mode;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 vectorY;
+    s32 vectorZ;
+} FldColorParams;
+
+/* The allocator and default-record copies own all 0x54 bytes. Camera keys
+ * update columns 1 and 2 of the three native 0x10-byte rows. */
+typedef struct FldCameraSetting {
+    s32 unk0;
+    FldColorParams color;
+    s32 values[3][4];
+} FldCameraSetting;
+
+typedef char EvtBlendKeySizeCheck[(sizeof(EvtBlendKey) == 0x38) ? 1 : -1];
+typedef char FldColorParamsSizeCheck[(sizeof(FldColorParams) == 0x20) ? 1 : -1];
+typedef char FldCameraSettingSizeCheck[(sizeof(FldCameraSetting) == 0x54) ? 1 : -1];
+
+void evtBlendParamsH(s32 enable, f32 t, EvtBlendKey *a, EvtBlendKey *b, EvtBlendKey *out);
+void fldCopyCameraSetting(FldCameraSetting *destination);
+void fldUpdateCameraColorEffect(FldCameraSetting *setting);
+
 #endif /* FLD_H */

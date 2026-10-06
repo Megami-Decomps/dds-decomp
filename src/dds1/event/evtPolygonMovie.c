@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "fld.h"
 
 /* Global event state behind kwlnTaskGetUserValue; the polygon-movie word at 0x0 and
  * the pointer to the shared flag word at 0x8. */
@@ -91,14 +92,6 @@ typedef struct EvtBlendG {
     s32 m[2][2];  /* 0x08 */
 } EvtBlendG;
 
-typedef struct EvtBlendH {
-    s32 w[4];     /* 0x00 */
-    s32 x;        /* 0x10 */
-    u32 flagWord; /* 0x14 */
-    u8 pad[8];    /* 0x18 */
-    s32 y[3];     /* 0x20 */
-    s32 z[3];     /* 0x2C */
-} EvtBlendH;
 
 s32 kwlnTaskGetUserValue(void);
 u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
@@ -528,7 +521,7 @@ void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *o
     }
 }
 
-void evtBlendParamsH(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *out)
+void evtBlendParamsH(s32 enable, f32 t, EvtBlendKey *a, EvtBlendKey *b, EvtBlendKey *out)
 {
     s32 i;
 

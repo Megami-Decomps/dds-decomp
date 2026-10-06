@@ -32,7 +32,7 @@ extern void mnuClearPageSelectionHandles(s32);
 extern void mnuClearEntries(s32);
 extern void mnuDestroyPanelGroup(s32);
 extern void mnuFreeSpriteStateWork(s32);
-extern void func_002C1B68(s32, s32);
+extern void func_002C1B68(u32 *, u32);
 extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(s32, s32);
 extern char D_00437BD0[];
@@ -51,7 +51,7 @@ extern s32 datCommandRecords;
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
 extern s32 mnuGetPartyEntryMenuValue();
-extern s32 mnuGetPartyEntryCurrentId();
+extern u16 mnuGetPartyEntryCurrentId(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
 extern void ptyAdjustItemQuantity();
@@ -432,7 +432,7 @@ s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
         mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
-    func_002C1B68(context + 0xaa50, 0);
+    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
     mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
@@ -441,7 +441,7 @@ void mnuPrepareStaffSelectionChangeDialog(s32 context, u8 *entry, s32 target) {
     u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 current = mnuGetPartyEntryMenuValue(entry);
 
-    func_002C1B68(context + 0xaa50, 1);
+    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
     if (current != target) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
@@ -584,16 +584,16 @@ s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
         mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
-    func_002C1B68(context + 0xaa50, 0);
+    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
     mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
 
 void mnuStaffEntrySwapLabels(s32 context, u8 *entry, s32 target) {
     u8 *menu = ((MenuStaffContext *)context)->menu;
-    s32 current = mnuGetPartyEntryCurrentId(entry);
+    s32 current = mnuGetPartyEntryCurrentId((s32)entry);
 
-    func_002C1B68(context + 0xaa50, 1);
+    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
     if (target == 0) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
@@ -733,7 +733,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
         mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
-    func_002C1B68(context + 0xaa50, 0);
+    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
     mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
@@ -744,8 +744,8 @@ void mnuPrepareStaffValueChangeDialog(s32 context, u8 *entry, s32 unused, s32 fl
     s32 current;
     s32 base;
 
-    func_002C1B68(context + 0xaa50, 1);
-    current = mnuGetPartyEntryCurrentId(entry);
+    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
+    current = mnuGetPartyEntryCurrentId((s32)entry);
     evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
     evtCopyEntryStringToActiveWindow(1, D_003E7400[menu->thirdListIndex]);
     func_0035C860(valueText, D_00437BD8, menu->thirdListValue);
@@ -828,7 +828,103 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
     return availableCount < ((MenuRequirementRecord *)D_00435E3C)[requirementIndex].requiredCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AFE18);
+extern s32 evtGetMessageWindowControlState(void);
+extern s32 func_002ACAC0(s32, MenuStaffContext *);
+extern void mnuSetPopupEntry(s32, s32);
+extern char D_003E74A4[];
+extern char D_003E754C[];
+extern char D_003E7568[];
+
+s32 func_002AFE18(s32 task) {
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
+    MenuStaffChoices *menu = context->menu;
+    MenuWindowContainer *window;
+    DatPartyRecord *party;
+    u32 input = mnuMapPadMaskToFlags(0xCF3);
+    s32 result;
+    s32 current;
+
+    party = &datGameState->party[context->selection->cursor->index];
+    result = menuSetHandler((s32)context, 0, task);
+    if (result != 0) {
+        return result;
+    }
+    menu->thirdListEnabled = 0;
+    if (evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    func_002C1B68(&context->unkAA50, 0);
+    if (menu->thirdListState == 0) {
+        window = menu->windows[4];
+        if (mnuHandleStaffValuePageInput(task) != 0) {
+            return 0;
+        }
+        if (window->list->cursor != window->list->first) {
+            if (input & 0xC0) {
+                menu->thirdListReset ^= 1;
+            }
+            if (input & 0xC31) {
+                menu->thirdListReset = 0;
+            }
+        } else {
+            input &= ~0x40;
+            input &= ~0x80;
+        }
+        if (!(input & 0x300000)) {
+            func_002B9808(window);
+        }
+        if (input & 0x10) {
+            mnuRetreatWindowListSelection(window);
+        }
+        if (input & 0x20) {
+            mnuAdvanceWindowListSelection(window);
+        }
+        mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
+        mnuClearWindowPanelTransitionFlag(window);
+        if (input & 1) {
+            current = mnuGetPartyEntryCurrentId((s32)party);
+            if (current != 0) {
+                if (menu->windows[4]->list->cursor->index == 0) {
+                    if (func_002BDA50(current) != 0) {
+                        mnuSetPopupEntry((s32)&context->popupState, (s32)D_003E7568);
+                    } else {
+                        func_002C1B68(&context->unkAA50, 1);
+                        evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
+                        dspStartEntry(0xB);
+                    }
+                } else if (menu->windows[4]->list->count != 0) {
+                    if (mnuIsStaffRequirementUnmet(current) != 0) {
+                        mnuSetPopupEntry((s32)&context->popupState, (s32)D_003E754C);
+                    } else {
+                        func_002C1B68(&context->unkAA50, 1);
+                        dspStartEntry(7);
+                    }
+                } else {
+                    input = 0;
+                }
+            } else if (menu->windows[4]->list->cursor->index == 0) {
+                func_002C1B68(&context->unkAA50, 1);
+                dspStartEntry(0xC);
+            } else {
+                input = 0x8000;
+            }
+        }
+        if (input & 2) {
+            menu->thirdListEnabled = 1;
+            mnuSetPopupEntryFlagged((s32)&context->popupState, (s32)D_003E74A4);
+        }
+        mnuPlayInputSound(0, input, &window->list->stateFlags);
+    } else {
+        if (func_002ACAC0(menu->thirdListState, context) == 0) {
+            mnuSetPopupEntryFlagged((s32)&context->popupState, (s32)D_003E7434);
+            mnuClearActionFlags(0, (u8 *)&context->windowFlags);
+            mnuBeginWindowFadeTransition(0, (s32)context->tail);
+        } else {
+            menu->thirdListState = 0;
+        }
+    }
+    return 0;
+}
 
 void mnuSetPanelItemsFromRow(MenuSceneConfig *config, s32 rowIndex) {
     char *activeSlots = D_003E7207 + rowIndex * 0x1C;
