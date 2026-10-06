@@ -1,61 +1,78 @@
 #include "common.h"
+#include "sdf.h"
 
-void sdfReleaseResourceAllocation(u32 sprite);
+void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 enum { SLOT_IN_USE = 1 };
 
 typedef struct WideSlot {
     u32 flags;
-    u8 pad04[0x10];
+    s32 x;
+    s32 y;
+    s32 value;
+    s32 age;
 } WideSlot;
 
 typedef struct CompactSlot {
     u32 flags;
-    u8 pad04[0xC];
+    u32 firstPayload;
+    u32 secondPayload;
+    s32 age;
 } CompactSlot;
 
 typedef struct WideSlotPool {
-    u32 pad00;
+    SdfMemBlock *allocation;
     WideSlot *slots;
     s32 count;
 } WideSlotPool;
 
 typedef struct CompactSlotPool {
-    u32 pad00;
+    SdfMemBlock *allocation;
     CompactSlot *slots;
     s32 count;
 } CompactSlotPool;
 
-extern u32 sdfAllocGeneralBlock(s32 size);
-extern void *sdfMemoryGetBlockAddress(u32 handle);
-extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *allocation);
+extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 extern char D_0042DBA0[];
 
-typedef struct SpriteWorkPool {
-    u32 handle;
-    u8 *items;
-    s32 count;
-} SpriteWorkPool;
+typedef char WideSlotLayoutAssert[
+    (sizeof(WideSlot) == 0x14 &&
+     (unsigned long)&((WideSlot *)0)->x == 4 &&
+     (unsigned long)&((WideSlot *)0)->y == 8 &&
+     (unsigned long)&((WideSlot *)0)->value == 0xC &&
+     (unsigned long)&((WideSlot *)0)->age == 0x10) ? 1 : -1];
+typedef char CompactSlotLayoutAssert[
+    (sizeof(CompactSlot) == 0x10 &&
+     (unsigned long)&((CompactSlot *)0)->age == 0xC) ? 1 : -1];
+typedef char PoolLayoutAssert[
+    (sizeof(WideSlotPool) == 0xC &&
+     sizeof(CompactSlotPool) == 0xC &&
+     (unsigned long)&((WideSlotPool *)0)->slots == 4 &&
+     (unsigned long)&((WideSlotPool *)0)->count == 8 &&
+     (unsigned long)&((CompactSlotPool *)0)->slots == 4 &&
+     (unsigned long)&((CompactSlotPool *)0)->count == 8) ? 1 : -1];
 
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
-u32 itfCreateSpriteWorkPool(u32 count) {
+WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
-    u32 handle = sdfAllocGeneralBlock(size);
-    SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    WideSlotPool *pool = (WideSlotPool *)sdfMemoryGetBlockAddress(allocation);
     memset(pool, 0, size);
-    pool->handle = handle;
+    pool->allocation = allocation;
     pool->count = count;
-    pool->items = (u8 *)(pool + 1);
+    pool->slots = (WideSlot *)(pool + 1);
     evtPrintDeveloperConsoleMessage("Sprite Num Work Crate Size[%d]\n", size);
-    return (u32)pool;
+    return pool;
 }
 
-void func_0031D928(u32 *sprite) {
-    sdfReleaseResourceAllocation(*sprite);
+void func_0031D928(WideSlotPool *pool) {
+    sdfReleaseResourceAllocation(pool->allocation);
 }
 
 /* Reserve the first unclaimed 0x14-byte slot in the wide pool. */
-u32 *itfClaimFreeWideSlot(WideSlotPool *pool) {
+WideSlot *itfClaimFreeWideSlot(WideSlotPool *pool) {
     WideSlot *entry;
     s32 index;
 
@@ -65,56 +82,142 @@ u32 *itfClaimFreeWideSlot(WideSlotPool *pool) {
         do {
             if ((entry->flags & SLOT_IN_USE) == 0) {
                 entry->flags = entry->flags | SLOT_IN_USE;
-                return (u32 *)entry;
+                return entry;
             }
             index = index + 1;
             entry = entry + 1;
         } while (index < pool->count);
     }
-    return (u32 *)0x0;
+    return NULL;
 }
 
-u32 *itfClaimWideSlotWithTaggedPayload(u32 a, u32 b, u32 c, s8 tag, WideSlotPool *pool) {
-    u32 *slot = itfClaimFreeWideSlot(pool);
+WideSlot *itfClaimWideSlotWithTaggedPayload(u32 a, u32 b, u32 c, s8 tag, WideSlotPool *pool) {
+    WideSlot *slot = itfClaimFreeWideSlot(pool);
     u32 bits = (tag & 0xFF) << 1;
 
     if (slot != NULL) {
-        slot[1] = a;
-        slot[2] = b;
-        slot[3] = c;
-        slot[4] = 0;
-        slot[0] = (slot[0] & ~0x1FE) | bits;
+        slot->x = a;
+        slot->y = b;
+        slot->value = c;
+        slot->age = 0;
+        slot->flags = (slot->flags & ~0x1FE) | bits;
     }
     return slot;
 }
 
 /* Return a wide slot to the pool without disturbing its other flags. */
-void itfReleaseWideSlot(u32 *flags) {
-    *flags = *flags & ~SLOT_IN_USE;
+void itfReleaseWideSlot(WideSlot *slot) {
+    slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DA38);
+extern void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
+extern s32 func_0035C860(char *destination, const char *format, ...);
+
+void func_0031DA38(WideSlotPool *pool, u32 flags) {
+    WideSlot *slot = pool->slots;
+    s32 slotIndex;
+    char text[32];
+    s8 length;
+    s32 width;
+    s32 offset;
+    s32 x;
+    s32 y;
+    s32 digit;
+    f32 opacity;
+    f32 rise;
+
+    for (slotIndex = 0; slotIndex < pool->count; slotIndex++, slot++) {
+        if ((slot->flags & SLOT_IN_USE) != 0) {
+            if ((flags & 1) == 0) {
+                slot->age++;
+            }
+            if (slot->age < 20) {
+                opacity = (f32)slot->age / 20.0f;
+            } else if (slot->age < 70) {
+                opacity = 1.0f;
+            } else {
+                opacity = (f32)(90 - slot->age) / 20.0f;
+            }
+            if (slot->age < 20) {
+                rise = (f32)slot->age / 20.0f;
+            } else {
+                rise = 1.0f;
+            }
+            memset(text, 0, sizeof(text));
+            length = 0;
+            func_0035C860(text, "%d", slot->value);
+            x = slot->x;
+            y = slot->y;
+            width = 0;
+            while (text[length] != 0) {
+                length++;
+                width += 10;
+            }
+            if (((slot->flags >> 1) & 0xFF) != 0) {
+                width += 41;
+            }
+            offset = (s32)((f32)-width * 0.5f);
+            for (digit = 0; digit < length; digit++, offset += 10) {
+                if (((slot->flags >> 1) & 0xFF) == 20) {
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, text[digit] - 7, 0x53);
+                } else {
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, text[digit] + 3, 0x53);
+                }
+            }
+            if (((slot->flags >> 1) & 0xFF) != 0) {
+                offset += 13;
+                switch ((slot->flags >> 1) & 0xFF) {
+                case 1:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 61, 0x53);
+                    break;
+                case 2:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 62, 0x53);
+                    break;
+                case 4:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 63, 0x53);
+                    break;
+                case 8:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 64, 0x53);
+                    break;
+                case 20:
+                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                        (s32)(opacity * 128.0f), 0, 75, 0x53);
+                    break;
+                }
+            }
+            if (slot->age >= 91) {
+                itfReleaseWideSlot(slot);
+            }
+        }
+    }
+}
 
 /* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
-u32 func_0031DEB8(u32 count) {
+CompactSlotPool *func_0031DEB8(u32 count) {
     u32 size = count * 0x10 + 0xC;
-    u32 handle = sdfAllocGeneralBlock(size);
-    SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    CompactSlotPool *pool = (CompactSlotPool *)sdfMemoryGetBlockAddress(allocation);
 
     memset(pool, 0, size);
-    pool->handle = handle;
+    pool->allocation = allocation;
     pool->count = count;
-    pool->items = (u8 *)(pool + 1);
+    pool->slots = (CompactSlot *)(pool + 1);
     evtPrintDeveloperConsoleMessage(D_0042DBA0, size);
-    return (u32)pool;
+    return pool;
 }
 
-void func_0031DF48(u32 *sprite) {
-    sdfReleaseResourceAllocation(*sprite);
+void func_0031DF48(CompactSlotPool *pool) {
+    sdfReleaseResourceAllocation(pool->allocation);
 }
 
 /* Reserve the first unclaimed 0x10-byte slot in the compact pool. */
-u32 *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
+CompactSlot *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
     CompactSlot *entry;
     s32 index;
 
@@ -124,33 +227,59 @@ u32 *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
         do {
             if ((entry->flags & SLOT_IN_USE) == 0) {
                 entry->flags = entry->flags | SLOT_IN_USE;
-                return (u32 *)entry;
+                return entry;
             }
             index = index + 1;
             entry = entry + 1;
         } while (index < pool->count);
     }
-    return (u32 *)0x0;
+    return NULL;
 }
 
 /* Claim a compact slot and fill its two payload words; returns the slot (NULL if the pool is full). */
-u32 *itfClaimCompactSlotWithPayload(u32 first, u32 second, CompactSlotPool *pool) {
-    u32 *slot = itfClaimFreeCompactSlot(pool);
+CompactSlot *itfClaimCompactSlotWithPayload(u32 first, u32 second, CompactSlotPool *pool) {
+    CompactSlot *slot = itfClaimFreeCompactSlot(pool);
 
     if (slot != NULL) {
-        slot[1] = first;
-        slot[2] = second;
-        slot[3] = 0;
+        slot->firstPayload = first;
+        slot->secondPayload = second;
+        slot->age = 0;
     }
     return slot;
 }
 
 /* Return a compact slot to the pool without disturbing its other flags. */
-void itfReleaseCompactSlot(u32 *flags) {
-    *flags = *flags & ~SLOT_IN_USE;
+void itfReleaseCompactSlot(CompactSlot *slot) {
+    slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E020);
+extern void sdfSubmitGsTestOneRegisterPacket(u32 data, u32 kind);
+extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
+extern s32 itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 scale);
+
+void func_0031E020(CompactSlotPool *pool, u32 flags) {
+    CompactSlot *slot;
+    s32 i;
+    f32 phase;
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000, 0x54);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x54);
+    sdfSubmitGsTestOneRegisterPacket(0x5100D, 0x54);
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->flags & SLOT_IN_USE) != 0) {
+            if ((flags & 1) == 0) {
+                slot->age++;
+            }
+            phase = (f32)slot->age / 10.0f;
+            itfDrawUniformlyScaledIndexedImage(slot->firstPayload, slot->secondPayload, 0,
+                (s32)((1.0f - phase) * 128.0f * 0.8f), 0, 8, 0x54, phase * 2.0f + 0.5f);
+            if (slot->age >= 11) {
+                itfReleaseCompactSlot(slot);
+            }
+        }
+    }
+}
 
 typedef struct FadeEntry FadeEntry;
 
@@ -254,6 +383,3 @@ u8 mnuGetIndexedFadeTexture(s32 index) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0031D890", D_0042DBA0);
-
-INCLUDE_SDATA(const s32, "game/code_0031D890", D_00438958);
-
