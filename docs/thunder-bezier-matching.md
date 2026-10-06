@@ -248,9 +248,39 @@ computes a floating reciprocal with a zero denominator before filling the sole
 center row. The renderer emits no geometry with fewer than four vertices.
 These native setup and edge-case behaviors remain unchanged.
 
+## Spark motion, fades and restart
+
+`func_00165110` (DDS1) and `func_0016CD68` (DDS2) each match 772 bytes.
+The update retains frame-entry timing and damping values, and caches each
+spark's entry age for its state decisions. The increment path still reloads
+the live age after callbacks. Age zero initializes motion and resets the
+one-cell system without submitting geometry that frame. Active ages include
+the duration endpoint; fade-in takes precedence when the fade intervals overlap.
+The unsigned alpha conversion and restart remainder retain their native forms.
+
+The scratch position is an XYZ point; the origin is a complete aligned
+quadword. Only endpoint XYZ is rewritten, preserving both parameter W lanes.
+The saved render-cell pointer receives the color after geometry, while system
+submission reloads the spark's current system handle.
+
+The final five-word scheduling difference came from ordinary endpoint-group
+lifetimes. Building lowered XYZ before upper XYZ moves the pre-scheduling
+final X/Z uses to
+the upper group. GCC's pre-allocation register-pressure ranking prefers those
+stores because of their REG_DEAD notes; the resulting machine order is upper
+XYZ, lower Y, then lower X/Z. This is a source construction order with identical
+observable endpoint values, not a new memory barrier or required publication
+ordering. Both verbose scheduler traces and before/after death notes were
+checked; no individual-store permutation search or artificial operation was
+used. The comparator and weight calculation are documented in upstream
+[haifa-sched.c](https://github.com/gcc-mirror/gcc/blob/2f93c5c3551b6b3c11a774ae6d42220eff1f4502/gcc/haifa-sched.c#L3995)
+and its [register-weight calculation](https://github.com/gcc-mirror/gcc/blob/2f93c5c3551b6b3c11a774ae6d42220eff1f4502/gcc/haifa-sched.c#L4595).
+Exact bytes support this source form without uniquely proving its historical
+spelling. Existing timing and geometry preconditions remain unchanged.
+
 ## Verification
 
-Canonical whole-unit checks report 70 matches and zero differences for each
+Canonical whole-unit checks report 71 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
