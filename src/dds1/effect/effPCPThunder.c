@@ -156,7 +156,7 @@ extern s32 effMultiplyPackedColors(s32 color, s32 param);
 
 typedef struct {
     u8 pad00[8];
-    s32 vertexCount;    /* 0x08 five vertices per group */
+    s32 vertexCount;    /* 0x08 quadword vector capacity per cell */
     u8 pad0C[8];
     ParCell *cells; /* 0x14 */
 } EffThunderParSystem;
@@ -1287,21 +1287,24 @@ extern void parDecreaseStripCellAlpha(void *system, u32 a, u32 b, u32 c);
 
 /* Parameter head (0x48 bytes) of the cell effect, copied verbatim into the work. */
 typedef struct {
-    u8 pad00[0x10];
+    f32 origin[4];          /* 0x00: complete origin quadword */
     u16 systemParam;         /* 0x10 */
-    u8 pad12[6];
+    u8 pad12[2];
+    f32 length;             /* 0x14: travel distance scale */
     u32 cellCount;           /* 0x18 */
     u8 pad1C[8];
     u32 startDelayRange;     /* 0x24 modulus of delayFrames */
     u32 activeFrameRange;    /* 0x28 modulus of activeFrames before adding one */
     u16 halfLife;            /* 0x2C */
-    u8 pad2E[6];
+    u8 pad2E[2];
+    f32 coreWidth;          /* 0x30 */
     u32 arg34;               /* 0x34 */
-    u8 pad38[4];
+    f32 bandWidth;          /* 0x38 */
     u32 arg3C;               /* 0x3C */
-    u8 pad40[4];
+    f32 edgeWidth;          /* 0x40 */
     u32 arg44;               /* 0x44 */
 } EffThunderCellParams;
+typedef char EffThunderCellParamsSizeCheck[sizeof(EffThunderCellParams) == 0x48 ? 1 : -1];
 
 /* The counted-down cell effect has its own 0x58-byte work and 0x14-byte
    particles, not the fragment or vector variants' resource offsets. */
@@ -1366,7 +1369,160 @@ void effThunderRandomizeCell(EffThunderCellWork *work, s32 index) {
     cell->activeFrames = effMiscRand(&D_0034DF38) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00166C18);
+/* Build a kind-2 cell with three nested width bands. Each randomized step
+ * emits two six-vector rows and then turns the direction around the view axis.
+ */
+void func_00166C18(EffThunderCellWork *work, s32 index) {
+    f32 width[4] __attribute__((aligned(16)));
+    f32 bandWidth[4] __attribute__((aligned(16)));
+    f32 outerWidth[4] __attribute__((aligned(16)));
+    f32 negativeOuterWidth[4] __attribute__((aligned(16)));
+    f32 stepScale[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    f32 basis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    EffThunderParSystem *system = work->system;
+    EffThunderCell *source = &work->cells[index];
+    ParCell *cell = &system->cells[index];
+    u128 *vertices;
+    u128 *join;
+    s32 i;
+    s32 segments;
+    f32 distance;
+    f32 facing;
+    f32 stepLength;
+
+    VEC3_SPLAT(width, work->head.coreWidth);
+    VEC3_SPLAT(bandWidth, width[0] + work->head.bandWidth);
+    VEC3_SPLAT(outerWidth, bandWidth[0] + work->head.edgeWidth);
+    VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
+    cell->vertexCount = system->vertexCount;
+    vertices = cell->history;
+    segments = work->head.halfLife;
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB_EXTENDED(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
+    direction[0] = source->directionX;
+    direction[1] = source->directionY;
+    direction[2] = source->directionZ;
+    VU0_LOAD_VF(vf11, direction);
+    VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10_EXTENDED();
+    VU0_STORE_VF_UNCLOBBERED(vf10, side);
+    distance = work->head.length / work->head.halfLife;
+    PCP_COPY_VECTOR(position, work->head.origin);
+
+    for (i = 0; i < segments; i++) {
+        VU0_LOAD_VF(vf10, direction);
+        VU0_LOAD_VF(vf11, cameraDirection);
+        VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10_EXTENDED();
+        VU0_STORE_VF_UNCLOBBERED(vf10, basis);
+        VU0_LOAD_VF(vf11, width);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 3);
+        VU0_LOAD_VF(vf10, basis);
+        VU0_LOAD_VF(vf11, bandWidth);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 4);
+        VU0_LOAD_VF(vf10, basis);
+        VU0_LOAD_VF(vf11, outerWidth);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 5);
+        vertices += 6;
+        stepLength = distance * (1.0f - effMiscRandUnitFloat(D_0034DF38) * 0.9f);
+        VEC3_SPLAT(stepScale, stepLength);
+        VU0_LOAD_VF(vf10, direction);
+        VU0_LOAD_VF(vf11, stepScale);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        VU0_LOAD_VF(vf10, basis);
+        VU0_LOAD_VF(vf11, width);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 3);
+        VU0_LOAD_VF(vf10, basis);
+        VU0_LOAD_VF(vf11, bandWidth);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 4);
+        VU0_LOAD_VF(vf10, basis);
+        VU0_LOAD_VF(vf11, outerWidth);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 5);
+        vertices += 6;
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
+            ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f) * (70.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+        VU0_LOAD_VF(vf10, direction);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+        VU0_LOAD_VF(vf11, basis);
+        VU0_DOT_XYZ(facing, vf10, vf11);
+        if (facing < 0.0f) {
+            join = vertices - 1;
+            VU0_LOAD_VF(vf12, outerWidth);
+        } else {
+            join = vertices - 6;
+            VU0_LOAD_VF(vf12, negativeOuterWidth);
+        }
+        VU0_LOAD_VF(vf10, direction);
+        VU0_LOAD_VF(vf11, cameraDirection);
+        VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10_EXTENDED();
+        VU0_STORE_VF_UNCLOBBERED(vf10, basis);
+        VU0_MOVE_VF_EXTENDED(vf11, vf12);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, join);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    }
+}
+
 
 extern void func_00166C18(EffThunderCellWork *work, s32 index);
 

@@ -165,9 +165,36 @@ indexed spark's system field after preparing the width vectors; it does not
 keep an unnecessary alias for the full spark record. That natural entry
 boundary reproduces the remaining address and scheduling details.
 
+## Randomized multi-band cells
+
+`func_00166C18` (DDS1) and `func_0016E870` (DDS2) each match 1,108 bytes.
+The kind-2 constructor allocates 6(2h-1)+6 = 12h quadwords per cell. Each
+iteration emits two six-vector rows ordered from positive outer width through
+the inner pair to negative outer width. The vertices-6/vertices-1 join choices
+remain within the last completed row.
+
+The local 0x48-byte CellParams owner now exposes its complete origin quadword,
+travel distance scale at 0x14, and width increments at 0x30/0x38/0x40. Direction comes
+from the cell's existing independent random XYZ components and is not
+normalized. The per-step distance sample is evaluated once before copying it
+to XYZ. The randomized turn uses the existing view axis and 70-degree range.
+
+The initial camera-cross-direction normalization and side store are retained
+as real VU operations, even though this variant does not subsequently read
+that scratch vector. No artificial read is added. Setup and length/h remain
+before the zero-count guard, as in retail. The constructor requires h >= 1 and nonzero timing ranges; it does not clamp
+those inputs. Length is a scale, not guaranteed total travel, because both the
+unnormalized direction magnitude and randomized steps affect distance.
+
+Both kind-2 render dispatchers pass history to the XYZ-only packet builder.
+Scratch values written by VU are read back by actual VU loads, without cached
+C scalar substitutions. The inherited legacy SDK-store restriction continues
+to apply only to these reviewed bodies and their observed readbacks; changed
+loops or branches require another audit.
+
 ## Verification
 
-Canonical whole-unit checks report 67 matches and zero differences for each
+Canonical whole-unit checks report 68 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
