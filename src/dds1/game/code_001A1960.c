@@ -3676,14 +3676,6 @@ void btlReleaseRegisteredChildTaskWork(s64 arg0) {
     btlSetTrackedTaskHandle(7, 0);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2870);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2880);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2890);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28C0);
-
 /* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
  * the later panel updater handles the other five points and their fades. */
 typedef struct BattlePhasePanelWork {
@@ -3715,6 +3707,14 @@ typedef struct BattlePhaseXBounds { s32 values[3][2]; } BattlePhaseXBounds;
 extern const BattlePhaseSlotIds D_003A2880;
 extern const BattlePhaseFadeLimits D_003A2890;
 extern const BattlePhaseXBounds D_003A28C0;
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2870);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2880);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2890);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28C0);
 
 void func_001B1518(BattlePhasePanelWork *work) {
     BattlePhaseSlotIds slots = D_003A2880;
