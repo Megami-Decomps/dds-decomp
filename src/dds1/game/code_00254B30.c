@@ -1,3 +1,4 @@
+#include "dsp_name.h"
 #include "common.h"
 
 #define MNU_DISPLAY_TEXT_RGB 0xA09DC300
@@ -219,9 +220,6 @@ typedef struct DspUnitName {
     u8 encodedText[17];
 } DspUnitName;
 
-typedef struct DspMantraName {
-    u8 encodedText[19];
-} DspMantraName;
 
 extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
