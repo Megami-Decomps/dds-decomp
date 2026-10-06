@@ -99,10 +99,6 @@ typedef struct BillDrawNode {
     struct BillDrawNode *next;
 } BillDrawNode;
 
-typedef struct BillDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct BillDrawSurface *, SdfListHead *);
-} BillDrawSurface;
 
 typedef struct BillStatePacket {
     u64 dmaTag;
@@ -116,7 +112,7 @@ typedef struct BillStatePacket {
 } BillStatePacket;
 
 extern BillDrawNode *D_00438F00;
-extern BillDrawSurface D_00380228;
+extern SdfPoolNode D_00380228;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void *sdfAllocPacketAligned(s32);
@@ -137,7 +133,7 @@ void func_00158C00(void) {
             if (work->count != 0) {
                 func_00158AA0(node);
             }
-            D_00380228.submit(&D_00380228, node->packetList);
+            D_00380228.append((SdfListHead *)&D_00380228, node->packetList);
             node->packetList = NULL;
             node = node->next;
         } while (node != NULL);
@@ -157,7 +153,7 @@ void func_00158C00(void) {
     packet->alpha = 0x48;
     packet->alphaRegister = 0x42;
     sdfAppendPacket(list, (u32)packet);
-    D_00380228.submit(&D_00380228, list);
+    D_00380228.append((SdfListHead *)&D_00380228, list);
     D_00438F00 = NULL;
 }
 
