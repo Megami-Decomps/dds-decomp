@@ -813,7 +813,76 @@ s32 fldGetSceneGroupIndexByActorFlags(BtlTask *task) {
     return groupId;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C7690);
+/* Retail fills thirteen task pointers at sp+0..0x30, then repeats each action number into scene slots. */
+void func_001C7690(void) {
+    BtlTask *selected[13];
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlTask *task;
+    u32 count;
+    u32 i;
+    u32 repeat;
+    s32 group;
+    s32 flags;
+
+    /* The retail switch initializes the table only for the three scene variants. */
+    switch (scene->variant) {
+    case 0:
+    case 1:
+        count = 0;
+        for (i = 0; scene->groupPrimary[i] != NULL; i++) {
+            task = scene->groupPrimary[i];
+            if ((task->flags & 8) != 0) {
+                flags = task->unit->flags;
+                if ((flags & 0x200) != 0) {
+                    if ((flags & 0xE0) == 0) {
+                        if ((flags & 1) != 0) {
+                            selected[count++] = task;
+                        }
+                    }
+                }
+            }
+        }
+        for (i = count; i < 13; i++) {
+            selected[i] = NULL;
+        }
+        break;
+    case 2:
+        count = 0;
+        for (i = 0; scene->groupSecondary[i] != NULL; i++) {
+            task = scene->groupSecondary[i];
+            if ((task->flags & 8) != 0) {
+                flags = task->unit->flags;
+                if ((flags & 0x400) != 0) {
+                    if ((flags & 0xE0) == 0) {
+                        if ((flags & 1) != 0) {
+                            selected[count++] = task;
+                        }
+                    }
+                }
+            }
+        }
+        for (i = count; i < 13; i++) {
+            selected[i] = NULL;
+        }
+        break;
+    }
+    count = 0;
+    for (i = 0; i < 13 && selected[i] != NULL; i++) {
+        group = fldGetSceneGroupIndexByActorFlags(selected[i]);
+        for (repeat = 0; repeat < selected[i]->actionNumber; repeat++) {
+            scene->slots[count].group = group;
+            scene->slots[count].remaining = 100;
+            scene->slots[count].id = count + 1;
+            count++;
+        }
+    }
+    for (i = count; i < 8; i++) {
+        scene->slots[i].group = 0;
+        scene->slots[i].remaining = 0;
+        scene->slots[i].id = 0;
+    }
+    fldInitSceneFadeRecords();
+}
 
 /* Pop the front slot only when its remaining counter is zero. */
 void fldCompactSceneSlots(void) {
