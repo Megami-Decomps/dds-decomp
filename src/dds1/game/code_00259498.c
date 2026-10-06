@@ -106,7 +106,116 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_00259B40);
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025A680);
+typedef struct MantraPrerequisiteState {
+    u32 unk00;
+    u32 unk04;
+    s32 state;
+} MantraPrerequisiteState;
+
+struct MantraPulseGrid {
+    u8 pad00[4];
+    MantraPulseEntry *entries;
+    u8 pad08[0xC];
+    s32 stride;
+    void (*drawEntry)(s32, s32, s32, MantraPulseGrid *, MantraPulseEntry *, s32);
+    u8 pad1C[0x14];
+    MantraPrerequisiteState *prerequisites;
+};
+
+typedef struct MantraPrerequisiteRecord {
+    u32 unk00;
+    u32 unk04;
+    s8 ids[4];
+    u8 flags[4];
+} MantraPrerequisiteRecord;
+
+/* Same display-work owner as the grid callback producer. */
+typedef struct MantraPulseDisplayWork {
+    u8 pad00[0x484];
+    MantraPulseGrid *grid;
+    u8 pad488[0xD8];
+    s32 alpha;
+    u8 pad564[0x3C];
+    s16 scrollX;
+    s16 scrollY;
+    u8 pad5A4[8];
+    u8 flags;
+} MantraPulseDisplayWork;
+
+extern MantraPrerequisiteRecord D_0036AE80[];
+extern char D_003BC458[];
+extern char D_003BC488[];
+extern char D_003BC490[];
+extern char D_003BC498[];
+extern u32 mnuGetSelectedNodeValue(void);
+extern u32 func_00258508(s8, DspScene *, MantraPrerequisiteState *, MnuProfileOwner *);
+extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
+extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
+
+/* Retail clears four prerequisite flag words at +0x84, then stores results
+ * at +0xE4 without reading them; preserve this original write-only work. */
+void func_0025A680(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
+                   MantraPulseEntry *entry, s32 context) {
+    u32 prerequisiteFlags[4];
+    DspScene *scene;
+    MnuProfileOwner *selection;
+    MantraPrerequisiteState *states;
+    MantraPrerequisiteRecord *record;
+    MantraPulseDisplayWork *display;
+    s8 i;
+    s32 alpha;
+    u32 flags;
+    u32 color;
+
+    scene = entry->scene;
+    if (scene == NULL) {
+        return;
+    }
+    selection = (MnuProfileOwner *)mnuGetSelectedNodeValue();
+    states = grid->prerequisites;
+    display = func_002CB3B8(mnuSceneResourceContext, 1);
+    record = &D_0036AE80[scene->sceneId];
+    alpha = display->alpha;
+    memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
+    if (record->unk00 == 0) {
+        for (i = 0; i < 4 && record->ids[i] != 0; i++) {
+            if (states[record->ids[i]].state != 0) {
+                prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
+            }
+        }
+    }
+    mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
+                               1.0f, 1.0f, context);
+    flags = mnuGetMantraDisplayFlags(scene, selection);
+    if (flags & 1) {
+        color = (s32)((f32)((alpha * 5) << 4) * 0.0078125f) | 0x60501000;
+        uiDrawUniformColorRect((x - 4) << 4, (y - 4) << 3, 0, 0x1C0, 0xE0,
+                               color, context);
+    }
+    if (flags & 2) {
+        color = (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x80802000;
+        frFontMeasureAndQueueGlyph(x + 4, y, depth, color,
+                                   (const u8 *)D_003BC458, context);
+        frFontMeasureAndQueueGlyph(x, y, depth, color,
+                                   (const u8 *)D_003BC488, context);
+    } else if (flags & 4) {
+        frFontMeasureAndQueueGlyph(x, y, depth,
+            (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x10808000,
+            (const u8 *)D_003BC488, context);
+    } else if (flags & 8) {
+        frFontMeasureAndQueueGlyph(x + 4, y, depth,
+            (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x40404000,
+            (const u8 *)D_003BC488, context);
+    } else if (flags & 0x20) {
+        frFontMeasureAndQueueGlyph(x, y, depth,
+            (s32)((f32)(alpha << 7) * 0.0078125f) | 0x40404000,
+            (const u8 *)D_003BC490, context);
+    } else {
+        frFontMeasureAndQueueGlyph(x, y, depth,
+            (s32)((f32)(alpha << 7) * 0.0078125f) | 0x40404000,
+            (const u8 *)D_003BC498, context);
+    }
+}
 
 void func_0025AA20(s32 frame, s32 size, s32 param) {
     f32 x = frame;
