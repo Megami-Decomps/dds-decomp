@@ -301,9 +301,23 @@ allocated history. Axis normalization, 3x3 rotation and the established packet
 consumers use XYZ, so the unspecified scratch W lane does not affect geometry.
 The legacy SDK-store warning remains specific to these audited paths.
 
+## Two-vector history rotation
+
+`func_001645A0` (DDS1) and `func_0016C1F8` (DDS2) each match 344 bytes.
+The first reconstructed drafts match using the five-vector sibling's reviewed
+angle-before-vector setup. This variant uses capacity >> 1, rotates two
+quadwords per row, and advances by two. The local kind-0 constructor provides
+exactly 2(p+1) quadwords, initialized by the corresponding indexed generator.
+
+The same actual X/Z readbacks preserve the source placement height, and the
+same axis/origin operations stay within their complete aligned vector objects.
+Count <= 0 skips only the row loop, retaining the direction update and setup.
+Kind-0 color and rendering behavior applies; the distinct kind-4 odd-p color
+restriction does not carry over. No new field, helper or primitive is added.
+
 ## Verification
 
-Canonical whole-unit checks report 72 matches and zero differences for each
+Canonical whole-unit checks report 73 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
