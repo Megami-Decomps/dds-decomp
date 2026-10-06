@@ -1301,9 +1301,9 @@ u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode)
     u8 counterModeByte = counterMode;
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_COUNTER_REQUEST_BYTES);
     u8 *requestData;
-    actionTask->conditionKind = 1;
+    actionTask->startCondition.kind = 1;
     actionTask->taskId = FLD_SCENE_COUNTER_ACTION_ID;
-    actionTask->status = 0;
+    actionTask->endCondition.kind = 0;
     if (actorTask != 0) {
         actionTask->ownerId = ((SceneTask *)actorTask)->actor->owner;
     }
@@ -1341,9 +1341,9 @@ s32 fldActivateRequestedSceneActor(u32 *request) {
 u8 *fldCreateSceneActorAction(u8 *actorTask, u32 slotCount) {
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_INSERT_REQUEST_BYTES);
     u32 *requestData;
-    actionTask->conditionKind = 1;
+    actionTask->startCondition.kind = 1;
     actionTask->taskId = FLD_SCENE_INSERT_ACTION_ID;
-    actionTask->status = 0;
+    actionTask->endCondition.kind = 0;
     if (actorTask != 0) {
         actionTask->ownerId = ((SceneTask *)actorTask)->actor->owner;
     }
@@ -1364,10 +1364,10 @@ s32 fldApplySceneSlotSwapRequest(u32 *request) {
 /* Allocate a one-word counter-spend/swap request, without an actor-owner link. */
 u8 *fldCreateActorAction(s32 counterAmount) {
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_SWAP_REQUEST_BYTES);
-    actionTask->conditionKind = 1;
+    actionTask->startCondition.kind = 1;
     actionTask->taskId = FLD_SCENE_SWAP_ACTION_ID;
     actionTask->callback = fldApplySceneSlotSwapRequest;
-    actionTask->status = 0;
+    actionTask->endCondition.kind = 0;
     actionTask->onStart = 0;
     *(u32 *)btlGetTaskArguments((s32)actionTask) = counterAmount;
     return (u8 *)actionTask;

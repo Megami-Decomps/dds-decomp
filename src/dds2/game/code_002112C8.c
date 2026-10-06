@@ -7,6 +7,8 @@
 #include "btl_action.h"
 #include "btl_state.h"
 #include "dat_state.h"
+#include "evt_unit.h"
+#include "mdl.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -200,7 +202,6 @@ typedef struct BattleWork {
     struct BattleSub *sub; /* 0x718: reused as BtlSelectCtrl in unit-selection modes. */
 } BattleWork;
 
-typedef struct BattleNamedResource BattleNamedResource;
 /* Battle-select controller at work+0x718: the unit being selected and the previous one. */
 typedef struct BtlSelectCtrl {
     BtlUnit *unit;
@@ -343,7 +344,7 @@ extern s32 func_001B2F50(void *, s32);
 
 extern s8 D_00438F84;
 
-extern s32 sdfNamedChunkFindId(void *, void *);
+extern s32 sdfNamedChunkFindId(void *, const char *);
 
 extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
 
@@ -2607,8 +2608,8 @@ void func_00217EB8(ActionStateLink *action) {
                     task->startDelay = 0xE;
                     btlStartTask(task);
                     sound = (BtlRuntimeTask *)sndCreateStationedSeTask(scene->soundSequence);
-                    sound->conditionKind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
-                    sound->conditionHandle = task->handle;
+                    sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
+                    sound->startCondition.value.handle = task->handle;
                     btlStartTask(sound);
                     action->flags &= ~8;
                     *state = 1;
@@ -3177,8 +3178,8 @@ void btlStartActionRecordSoundTask(ActionStateLink *record, u64 prerequisiteHand
         if (unit->flags & 0x400) {
             if (unit->mode == 0x108) {
                 task = (u8 *)sndCreateStationedSeTask(((BattleWork *)btlGetRuntime())->soundTaskBase + 6);
-                ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
-                ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+                ((BtlRuntimeTask *)task)->startCondition.value.handle = prerequisiteHandle;
+                ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
                 ((BtlRuntimeTask *)task)->startDelay = delayBase + 0x28;
                 btlStartTask(task);
             }
@@ -3661,46 +3662,13 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color) {
 
 
 
-typedef struct NamedChunkData {
-    u8 pad0[0xC];
-    SdfDrawNode **entries;
-} NamedChunkData;
-
-typedef struct NamedChunkDescriptor {
-    NamedChunkData *data;
-    u8 pad4[0x18];
-    s32 argument;
-} NamedChunkDescriptor;
-
-typedef struct NamedChunkHolder {
-    u8 pad0[0x18];
-    NamedChunkDescriptor *chunk;
-} NamedChunkHolder;
-
-/* Mode 0x111/0x112 select adjacent resource channels. */
-struct BattleNamedResource {
-    u8 pad0[0x8C];
-    NamedChunkHolder *holder; /* 0x8C */
-    u8 pad90[0x62];
-    s16 group111;   /* 0xF2 */
-    s16 group112;   /* 0xF4 */
-    u8 padF6[0x14];
-    s16 first111;   /* 0x10A */
-    s16 first112;   /* 0x10C */
-    u8 pad10E[0x14];
-    s16 second111;  /* 0x122 */
-    s16 second112;  /* 0x124 */
-    u8 pad126[0x16];
-    f32 value111;   /* 0x13C */
-    f32 value112;   /* 0x140 */
-};
 
 s8 btlDispatchNamedChunkNode(s32 name) {
     BtlUnit *battler = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
-    BattleNamedResource *resource;
-    NamedChunkDescriptor *chunk;
+    EvtUnit *resource;
+    SdfModel *chunk;
     s32 index;
-    NamedChunkData *data;
+    DevRequest *data;
     SdfDrawNode **entries;
     SdfDrawNode *node;
     if (battler == 0) {
@@ -3709,17 +3677,17 @@ s8 btlDispatchNamedChunkNode(s32 name) {
     if (!(battler->flags & 2)) {
         return 1;
     }
-    resource = (BattleNamedResource *)battler->ext;
-    chunk = resource->holder->chunk;
-    index = sdfNamedChunkFindId(chunk, (void *)name);
+    resource = battler->ext;
+    chunk = resource->owner->inner;
+    index = sdfNamedChunkFindId(chunk, (const char *)name);
     if (index == -1) {
         return 1;
     }
-    data = chunk->data;
-    entries = data->entries;
+    data = chunk->list;
+    entries = data->buffer;
     node = entries[index];
     D_00438F84 = 1;
-    btlFadeAndTintNamedChunkTree(node, chunk->argument);
+    btlFadeAndTintNamedChunkTree(node, chunk->color);
     return D_00438F84;
 }
 
@@ -3740,12 +3708,12 @@ void btlResetNamedChunkNodeTree(SdfDrawNode *node) {
 void btlClearNamedChunkFlags(s32 name) {
     BtlUnit *battler = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
     if (battler != 0 && (battler->flags & 2) != 0) {
-        BattleNamedResource *resource = (BattleNamedResource *)battler->ext;
-        NamedChunkDescriptor *chunk = resource->holder->chunk;
-        s32 index = sdfNamedChunkFindId(chunk, (void *)name);
+        EvtUnit *resource = battler->ext;
+        SdfModel *chunk = resource->owner->inner;
+        s32 index = sdfNamedChunkFindId(chunk, (const char *)name);
         if (index != -1) {
-            NamedChunkData *data = chunk->data;
-            SdfDrawNode **entries = data->entries;
+            DevRequest *data = chunk->list;
+            SdfDrawNode **entries = data->buffer;
             btlResetNamedChunkNodeTree(entries[index]);
         }
     }
@@ -3875,12 +3843,12 @@ void btlSetUnitResourceFloatByMode(BtlUnit *unit, s32 group, f32 value) {
             evtSetTransitionMotionScale(unit->ext, value);
             break;
         case 0x111:
-            ((BattleNamedResource *)unit->ext)->group111 = group;
-            ((BattleNamedResource *)unit->ext)->value111 = value;
+            unit->ext->tableValues[1] = group;
+            unit->ext->unk138[1] = value;
             break;
         case 0x112:
-            ((BattleNamedResource *)unit->ext)->group112 = group;
-            ((BattleNamedResource *)unit->ext)->value112 = value;
+            unit->ext->tableValues[2] = group;
+            unit->ext->unk138[2] = value;
             break;
         }
     }
@@ -3897,12 +3865,12 @@ void btlSetUnitResourceHalvesByMode(BtlUnit *unit, s32 first, s32 second) {
             evtStoreUnitMotionShortParameters(unit->ext, first, second);
             break;
         case 0x111:
-            ((BattleNamedResource *)unit->ext)->first111 = first;
-            ((BattleNamedResource *)unit->ext)->second111 = second;
+            unit->ext->unk108[1] = first;
+            unit->ext->unk120[1] = second;
             break;
         case 0x112:
-            ((BattleNamedResource *)unit->ext)->first112 = first;
-            ((BattleNamedResource *)unit->ext)->second112 = second;
+            unit->ext->unk108[2] = first;
+            unit->ext->unk120[2] = second;
             break;
         }
     }
@@ -4000,8 +3968,8 @@ s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
     func_001AA898(*slot + 0x120, 0x110);
     task = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (prerequisiteHandle != 0) {
-        task->conditionHandle = prerequisiteHandle;
-        task->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        task->startCondition.value.handle = prerequisiteHandle;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     btlStartTask(task);
     return task->handle;
@@ -4070,8 +4038,8 @@ void btlCancelCurrentSubtask(void) {
 u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     BtlRuntimeTask *task = func_001E5FF8(((BattleWork *)btlGetRuntime())->sub->task, 0xC);
     if (prerequisiteHandle != 0) {
-        task->conditionHandle = prerequisiteHandle;
-        task->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        task->startCondition.value.handle = prerequisiteHandle;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     task->ownerId = 0x8000000000000003;
     btlStartTask(task);
@@ -4081,7 +4049,7 @@ u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
 void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit) {
     if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (unit->flags & 2) {
-            unit->ext->flagsA8 |= 0x1000000;
+            unit->ext->flags |= 0x1000000;
             unit->stateFlags |= 0x20000;
             unit->stateFlags |= 0x400000;
         }
@@ -5004,8 +4972,8 @@ void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
         task->startDelay = 0xE;
         btlStartTask(task);
         sound = (BtlRuntimeTask *)sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
-        sound->conditionKind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
-        sound->conditionHandle = task->handle;
+        sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
+        sound->startCondition.value.handle = task->handle;
         btlStartTask(sound);
         *slot = 0;
         unit->actorFlags &= ~8;
@@ -5776,13 +5744,13 @@ void btlSpawnBrahmaActionEffectTasks(ActionUnit *unit, u32 action, u32 unused, u
             break;
         }
         task = btlCreateEffObjB(unit->parentUnit, kind);
-        ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
-        ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
+        ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        ((BtlRuntimeTask *)task)->startCondition.value.handle = prerequisiteHandle;
         ((BtlRuntimeTask *)task)->ownerId = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(task);
         task = btlCreateEffObjD(unit->parentUnit, 0x19F);
-        ((BtlRuntimeTask *)task)->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
-        ((BtlRuntimeTask *)task)->conditionHandle = prerequisiteHandle;
+        ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        ((BtlRuntimeTask *)task)->startCondition.value.handle = prerequisiteHandle;
         value = btlAdvanceRuntimeSequenceCounter();
         ((BtlRuntimeTask *)task)->startDelay = 0x26;
         ((BtlRuntimeTask *)task)->ownerId = value;

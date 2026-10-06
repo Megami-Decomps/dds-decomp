@@ -262,33 +262,15 @@ extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 struct PolyMovieObject;
 
-/* Linked timeline keys share their parameter words across track kinds. */
+/* Each timeline parameter word's scalar format is selected by the track kind. */
 typedef struct EvtViewKey {
     u16 frame;
     u16 duration;
     s32 interpolationMode;
-    union {
-        EvtViewParam p08;
-        struct {
-            union { s8 kind; s16 unitIndex; } selector;
-            s16 enabled;
-        };
-    };
-    union {
-        EvtViewParam p0C;
-        struct {
-            union { s8 value; s16 objectIndex; u8 bytes[2]; } channel;
-            s16 param;
-        };
-    };
-    union {
-        EvtViewParam p10;
-        struct { s16 condition; u8 pad12[2]; };
-    };
-    union {
-        EvtViewParam p14;
-        union { s16 condition; f32 value; } parameter14;
-    };
+    EvtViewParam p08;
+    EvtViewParam p0C;
+    EvtViewParam p10;
+    EvtViewParam p14;
     EvtViewParam p18;
     EvtViewParam p1C;
     u8 pad20[0xC];
@@ -558,12 +540,12 @@ void func_00247DE0(EvtViewTrack *group, EvtViewKey *key, s32 unused2, s32 unused
     default:
         return;
     }
-    if (key->selector.kind < 0 || (s8)key->condition == 0) {
+    if (key->p08.sb[0] < 0 || key->p10.sb[0] == 0) {
         return;
     }
     elapsed = viewer->glyphAdvancePosition - key->frame;
     if (key->duration >= elapsed) {
-        node = ((EvtViewerObjectData *)viewer->objects[key->selector.kind]->data)->parameterNode;
+        node = ((EvtViewerObjectData *)viewer->objects[key->p08.sb[0]]->data)->parameterNode;
         alpha = (s32)((128.0f / key->duration) * elapsed);
         func_0035B6E0("alpha=%d\n", alpha);
         color = ((u32)alpha << 24) | 0x808080;
@@ -602,9 +584,9 @@ void func_00248B80(s32 time, EventViewerState *viewer) {
                     if (node->kind == 9) {
                         key = node->keys;
                         while (key != NULL) {
-                            if (time >= key->frame + node->frameOffset && key->selector.unitIndex >= 0 &&
+                            if (time >= key->frame + node->frameOffset && key->p08.sh[0] >= 0 &&
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
-                                    EVT_WORLD_SLOT_UNIT, viewer->unitNames[key->selector.unitIndex])) {
+                                    EVT_WORLD_SLOT_UNIT, viewer->unitNames[key->p08.sh[0]])) {
                                 if (selectedTime < key->frame + node->frameOffset) {
                                     selectedValue = node->owner.transitionValue;
                                     selectedTime = key->frame + node->frameOffset;
@@ -618,7 +600,7 @@ void func_00248B80(s32 time, EventViewerState *viewer) {
                 }
                 unit = (EvtUnit *)evtUnitGetNestedValue((u8 *)object);
                 if (selected != NULL) {
-                    if (selected->enabled != 0) {
+                    if (selected->p08.sh[1] != 0) {
                         if (unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {
                             evtSetUnitValueTransition(unit, selectedValue, selected->duration);
                         }
@@ -711,7 +693,7 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
                                     glyph = (EvtViewKey *)evtViewFindGlyphAtOrBefore(viewer);
                                     extra = 0;
                                     if (glyph != NULL) {
-                                        extra = glyph->param;
+                                        extra = glyph->p0C.sh[1];
                                     }
                                 } else {
                                     time = node->frameOffset;
@@ -776,7 +758,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
             best = NULL;
             if (glyph != NULL) {
                 do {
-                    if (position >= glyph->frame && bestFrame < glyph->frame && glyph->selector.kind == 6) {
+                    if (position >= glyph->frame && bestFrame < glyph->frame && glyph->p08.sb[0] == 6) {
                         bestFrame = glyph->frame;
                         best = glyph;
                     }
@@ -787,9 +769,9 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
             if (best == NULL) {
                 lod[0x98] = 0;
             } else {
-                level = best->channel.value;
+                level = best->p0C.sb[0];
                 if (sdfGetLodChunkValue(lod) >= level) {
-                    lod[0x98] = best->channel.value;
+                    lod[0x98] = best->p0C.sb[0];
                 }
             }
         }
@@ -811,7 +793,7 @@ void func_00249C40(s32 position, EventViewerState *viewer) {
 
             if (glyph != NULL) {
                 do {
-                    if (glyph->selector.kind == 7 && position >= glyph->frame &&
+                    if (glyph->p08.sb[0] == 7 && position >= glyph->frame &&
                         bestFrame < glyph->frame) {
                         bestFrame = glyph->frame;
                         best = glyph;
@@ -830,7 +812,7 @@ void func_00249C40(s32 position, EventViewerState *viewer) {
                     node->objectAttached = 0;
                 }
             } else if (best->frame == position) {
-                s16 channel = best->channel.objectIndex;
+                s16 channel = best->p0C.sh[0];
 
                 if (channel == -1) {
                     effObjSetInnerFirstVec(node->owner.transform,
@@ -987,15 +969,15 @@ void func_0024A158(s32 frame, EventViewerState *viewer) {
             s32 value = 0;
 
             while (key != NULL) {
-                if (track->kind != 0x11 || evtViewerTestIndexedCondition(key->parameter14.condition) != 0) {
+                if (track->kind != 0x11 || evtViewerTestIndexedCondition(key->p14.sh[0]) != 0) {
                     if (frame < key->frame + track->frameOffset) {
                         break;
                     }
-                    if (key->condition != 0) {
+                    if (key->p10.sh[0] != 0) {
                         value = 0;
-                        if (key->condition != 1) {
+                        if (key->p10.sh[0] != 1) {
                             value = ((EvtCampEntry *)mnuCampFindEntryByName(
-                                         viewer, (char *)viewer->unitNames[key->condition - 2]))->value;
+                                         viewer, (char *)viewer->unitNames[key->p10.sh[0] - 2]))->value;
                         }
                     }
                 }
@@ -1101,8 +1083,8 @@ EvtViewKey *evtViewerFindLatestMatchingGlyph(EvtViewTrack *group, s32 position, 
 
     if (glyph != NULL) {
         do {
-            if (position >= glyph->frame && bestFrame < glyph->frame && glyph->selector.kind == 5 &&
-                glyph->channel.value == channel && evtViewerTestIndexedCondition(glyph->condition) == 1) {
+            if (position >= glyph->frame && bestFrame < glyph->frame && glyph->p08.sb[0] == 5 &&
+                glyph->p0C.sb[0] == channel && evtViewerTestIndexedCondition(glyph->p10.sh[0]) == 1) {
                 bestFrame = glyph->frame;
                 best = glyph;
             }
@@ -1193,10 +1175,10 @@ void func_0024A738(s32 mode, u32 frame, s32 viewerAddr) {
                     useTrackTime = track->playbackTimeMode;
                     /* These track kinds use the same indexed movie lookup. */
                 case 20: case 21:
-                    if (key->selector.kind < 0) {
+                    if (key->p08.sb[0] < 0) {
                         break;
                     }
-                    object = viewer->objects[key->selector.kind];
+                    object = viewer->objects[key->p08.sb[0]];
                     goto updateMovie;
                 case 18:
                     object = key->payload;
@@ -1528,10 +1510,10 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EventViewerState
             case 20:
             case 21:
             case 26:
-                key->enabled = viewer->commandValue;
+                key->p08.sh[1] = viewer->commandValue;
                 break;
             case 18:
-                key->selector.unitIndex = viewer->commandValue;
+                key->p08.sh[0] = viewer->commandValue;
                 break;
             }
             break;

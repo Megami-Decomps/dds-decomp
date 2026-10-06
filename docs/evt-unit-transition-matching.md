@@ -12,11 +12,52 @@ a default. The final source uses ordinary C around the shared VU/MMI primitives.
 
 ## Storage and the unpack read contract
 
-`EvtUnit` retains every legacy member name, type, offset and size. Union views
+`EvtUnit` keeps its physical offsets and complete allocation extent: 0x170
+bytes in DDS1 and 0x1D0 bytes in DDS2, with four-byte alignment. Union views
 expose the decoded colour words, direction vector and unsigned frame counters.
-The complete object remains 0x170 bytes in DDS1 and 0x1D0 bytes in DDS2, with
-four-byte alignment. The extra DDS2 slot storage moves the trailing counters
-by 0x60; it does not change the common colour/vector prefix.
+The extra DDS2 slot storage moves the trailing counters by 0x60; it does not
+change the common colour/vector prefix.
+
+Battle units hold this same complete `EvtUnit` through `BtlUnit.ext` (+0x320
+in DDS1, +0x340 in DDS2), not a separate battle extension prefix. Its +0x8C
+`owner` is the SDK's 0x38-byte `MdlCtx`: model data is `owner->inner`
+(`SdfModel`, +0x18), and the active motion is `owner->first` (`Motion`, +0x1C).
+Motion sampling uses `currentFrame`, `frameStep`, `frameCount` and `state`;
+lighting belongs to `SdfModel.lighting`. Shared SDK structs replace the old
+owner/data prefix overlays without changing either event-unit allocation.
+
+The SDK motion sampler returns `void`, and the random modulo helper returns
+`u32`. The DDS2 random-frame wrapper and the paired eligibility getters remain
+ASM after the canonical-owner cutover: honest candidates are parked under
+`build/parked`, with the exact remaining differences recorded in `qp_todo`.
+The getters differ only in a native byte load versus the real owner's word
+flag load; no byte alias or false return width is used to force a match.
+
+## Battle scheduler ownership
+
+The scheduler allocation has a 0x70-byte `BtlRuntimeTask` header, separate
+from the queued actor's 0x170-byte `BtlTask`. Its two 0x10-byte
+`BtlTaskCondition` subobjects start at +0x00 and +0x10. The evaluator receives
+the appropriate subobject directly; it does not treat the end condition as
+another complete task. The condition kind selects a signed count, a native
+64-bit task handle or owner ID, or a 16-bit task kind.
+
+Arguments begin immediately after the scheduler header when the requested
+payload size is positive. The argument getter returns the opaque allocation
+address, not a sound-specific packet view. Startup and finish slots use C89
+unprototyped callbacks because the task kinds have different packet types,
+including callbacks that need no arguments; no function-pointer casts are
+needed. Poll callbacks return a 32-bit completion status.
+
+The DDS2 camera constructors must retain their native task IDs 0x2B and
+0x2C (DDS1 uses 0x28 and 0x29). Recovering these missing stores restores the
+retail code without scheduling or register-allocation tricks. Their optional
+actor input is a queued `BtlTask`, whose +0x18 unit supplies the +0x108 owner
+ID. Scheduler registration and optional prerequisites retain real 64-bit
+generation handles; they are not pointer-valued booleans to narrow.
+
+
+## Packed-colour conversion read contract
 
 The additive `EE_MMI_RGBA_UNPACK_READONLY` has the same instruction template
 and fixed scratch register as `EE_MMI_RGBA_UNPACK`. Its only memory operation

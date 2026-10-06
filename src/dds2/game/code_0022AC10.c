@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "sdf.h"
 #include "mdl.h"
+#include "evt_unit.h"
 #include "scr.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
@@ -593,7 +594,7 @@ s32 btlCommandPlayUnitMotion(void) {
         if (index < 0x1D) {
             btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
         } else {
-            mdlAddEntryPlainEx((s32)unit->ext->info, 0, index, 0.0f, 0.0f);
+            mdlAddEntryPlainEx((s32)unit->ext->owner, 0, index, 0.0f, 0.0f);
         }
     }
     return 1;

@@ -23,6 +23,8 @@ typedef struct BattleEffectState {
 
 typedef struct BtlUnit BtlUnit;
 
+struct EvtUnit;
+
 #ifdef VERSION_DDS1
 /* Seven signed status-entry records embedded in a DDS1 battle unit. */
 typedef struct BtlUnitEntrySlot {
@@ -82,7 +84,7 @@ typedef struct BtlUnit {
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
     s32 unkEC;
     s32 effectState; /* 0xF0 */
-    u8 padF4[4];
+    f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
     s16 effectTimerA; /* 0xF8 */
     s16 effectTimerB; /* 0xFA */
     s32 effectArgA; /* 0xFC */
@@ -133,7 +135,7 @@ typedef struct BtlUnit {
     u8 secondCountdown; /* 0x319 */
     u8 pad31A[2];
     u32 effectObject; /* 0x31C: supplies the effect's first inner vector */
-    BtlUnitModel *ext; /* 0x320: +0x8C points to model flags; also an event handle */
+    struct EvtUnit *ext; /* 0x320: the event manager's complete 0x170-byte work. */
     s32 transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
     u8 pad328[4];
     s32 unk32C;
@@ -154,19 +156,6 @@ typedef struct BtlUnit {
  * flags pair at 0x110/0x114, statBits at 0x120, the extension pointer at 0x340
  * and the actor-list link at 0x364, so all five are the same object).
  * Fields no unit could name stay unkNN/padNN. */
-typedef struct BtlUnitExt {
-    u8 pad0[0x60];
-    u32 color60; /* Packed event-unit color, consumed by RGB/alpha transitions. */
-    u8 pad64[4];
-    s32 unk68;
-    u8 pad6C[0x18];
-    struct BtlExtModel *model;
-    u8 pad88[4];
-    struct BtlUnitInfo *info;
-    u8 pad90[0x18];
-    u32 flagsA8;
-} BtlUnitExt;
-
 typedef struct BtlUnit {
     s32 state;
     u16 unk4; /* Written as 1 by the action-sequence constructor. */
@@ -258,7 +247,7 @@ typedef struct BtlUnit {
     s32 unk334;
     u8 pad338[4];
     s32 effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
-    BtlUnitExt *ext; /* 0x340 */
+    struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
     s32 unk344; /* Alternate SDF model used by the transparency path. */
     u8 pad348[4];
     s32 unk34C;

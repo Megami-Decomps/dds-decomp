@@ -2,6 +2,8 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "sdf_draw.h"
+#include "evt_unit.h"
+#include "mdl.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
@@ -2570,16 +2572,16 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            *other->ext->flags &= ~1;
+            other->ext->owner->flags &= ~1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            *other->ext->flags &= ~1;
+            other->ext->owner->flags &= ~1;
         } else {
-            *other->ext->flags |= 1;
+            other->ext->owner->flags |= 1;
         }
         return 0;
     }
@@ -2609,16 +2611,16 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            *other->ext->flags |= 1;
+            other->ext->owner->flags |= 1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            *other->ext->flags &= ~1;
+            other->ext->owner->flags &= ~1;
         } else {
-            *other->ext->flags |= 1;
+            other->ext->owner->flags |= 1;
         }
         return 0;
     }
@@ -2843,28 +2845,11 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color)
 
 extern s32 sdfNamedChunkFindId(void *, void *);
 
-/* Named chunk indirection follows the same +0x18/+0x0C layout as DDS2. */
-typedef struct BtlNamedChunkData {
-    u8 pad00[0xC];
-    SdfDrawNode **entries; /* 0x0C: indexed draw-node pointers */
-} BtlNamedChunkData;
-
-typedef struct BtlNamedChunkDescriptor {
-    BtlNamedChunkData *data;
-    u8 pad04[0x18];
-    s32 argument; /* 0x1C */
-} BtlNamedChunkDescriptor;
-
-typedef struct BtlNamedChunkHolder {
-    u8 pad00[0x18];
-    BtlNamedChunkDescriptor *chunk;
-} BtlNamedChunkHolder;
-
 s32 btlDispatchNamedChunkNode(void *query) {
     u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
     u8 *unit = *(u8 **)effect;
-    u8 *model;
-    u8 *descriptor;
+    MdlCtx *model;
+    SdfModel *descriptor;
     s32 index;
     SdfDrawNode *selected;
     if (unit == 0) {
@@ -2873,15 +2858,15 @@ s32 btlDispatchNamedChunkNode(void *query) {
     if ((((BtlUnit *)unit)->flags & 2) == 0) {
         return 1;
     }
-    model = (u8 *)((BtlUnit *)unit)->ext->flags;
-    descriptor = (u8 *)((BtlNamedChunkHolder *)model)->chunk;
+    model = ((BtlUnit *)unit)->ext->owner;
+    descriptor = model->inner;
     index = sdfNamedChunkFindId(descriptor, query);
     if (index == -1) {
         return 1;
     }
-    selected = ((BtlNamedChunkDescriptor *)descriptor)->data->entries[index];
+    selected = ((SdfDrawNode **)descriptor->list->buffer)[index];
     D_003BD86C = 1;
-    btlFadeAndTintNamedChunkTree(selected, ((BtlNamedChunkDescriptor *)descriptor)->argument);
+    btlFadeAndTintNamedChunkTree(selected, descriptor->color);
     return D_003BD86C;
 }
 
@@ -2970,8 +2955,8 @@ u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle) {
     func_00207E68();
     entry = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
     if (prerequisiteHandle != 0) {
-        entry->conditionHandle = prerequisiteHandle;
-        entry->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        entry->startCondition.value.handle = prerequisiteHandle;
+        entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     btlStartTask(entry);
     return entry->handle;
@@ -2998,8 +2983,8 @@ u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     u8 *subtaskSlot = (u8 *)((BtlState *)btlGetRuntime())->effect;
     BtlRuntimeTask *task = (BtlRuntimeTask *)func_001D9038(*(void **)subtaskSlot, 12);
     if (prerequisiteHandle != 0) {
-        task->conditionHandle = prerequisiteHandle;
-        task->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        task->startCondition.value.handle = prerequisiteHandle;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     task->ownerId = 0x8000000000000003ULL;
     btlStartTask(task);
@@ -3257,8 +3242,8 @@ u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle) {
     func_001A1990(model + 0x120, 0x10e);
     entry = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x10e, 0);
     if (prerequisiteHandle != 0) {
-        entry->conditionHandle = prerequisiteHandle;
-        entry->conditionKind = BTL_TASK_CONDITION_HANDLE_GONE;
+        entry->startCondition.value.handle = prerequisiteHandle;
+        entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
     }
     btlStartTask(entry);
     return entry->handle;
@@ -3277,9 +3262,9 @@ void btlDestroyActiveMemberSlot(void) {
     }
 }
 
-extern s32 mdlGetNodeField2C(s32, s32);
+extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 
-extern void evtSetUnitAlphaTransition(void *, s32, s32);
+extern void evtSetUnitAlphaTransition(EvtUnit *, s32, s32);
 
 void btlStepFocusAngle(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -3309,7 +3294,7 @@ void btlStepFocusAngle(void) {
     if (unit == NULL) {
         return;
     }
-    mdlGetNodeField2C((s32)player->ext->flags, 0);
+    mdlGetNodeField2C(player->ext->owner, 0);
     if (slot[2] & 4) {
         if ((slot[1] & 0xFF000000) != 0x80000000) {
             slot[1] += 0x10000000;

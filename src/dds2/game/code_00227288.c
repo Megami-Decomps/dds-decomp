@@ -2,6 +2,8 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
+#include "evt_unit.h"
+#include "mdl.h"
 
 extern void btlSetActorEffectParameterOrMuzzlePosition();
 
@@ -284,16 +286,16 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            other->ext->info->flags &= ~1;
+            other->ext->owner->flags &= ~1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            other->ext->info->flags &= ~1;
+            other->ext->owner->flags &= ~1;
         } else {
-            other->ext->info->flags |= 1;
+            other->ext->owner->flags |= 1;
         }
         return 0;
     }
@@ -321,16 +323,16 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            other->ext->info->flags |= 1;
+            other->ext->owner->flags |= 1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            other->ext->info->flags &= ~1;
+            other->ext->owner->flags &= ~1;
         } else {
-            other->ext->info->flags |= 1;
+            other->ext->owner->flags |= 1;
         }
         return 0;
     }

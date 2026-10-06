@@ -47,12 +47,6 @@ typedef struct SceneAiWork {
 
 typedef struct BtlUnit BtlUnit;
 
-/* Battle unit model flags pointer at +0x8C (0x90); DDS1/2 battle units. */
-typedef struct BtlUnitModel {
-    u8 unk_00[0x8C];
-    u32 *flags; /* 0x8C */
-} BtlUnitModel;
-
 /* Battle task link to a unit and task chain (0x170), shared by DDS1/2. */
 typedef struct BtlTask {
     s32 state;              /* +0x00 */
@@ -80,5 +74,6 @@ typedef struct BtlTask {
     u8 pad168[4];
     struct BtlTask *next;   /* +0x16C */
 } BtlTask;
+
 
 #endif /* BTL_TASK_H */

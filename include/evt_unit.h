@@ -3,16 +3,7 @@
 
 #include "common.h"
 
-struct EvtUnitMotion;
-
-/* Owner tested by motion-idle and model-status commands. Its data record keeps
- * the transition-work backlink at +0x80; the motion record is separate. */
-typedef struct EvtUnitOwner {
-    u32 flags;                    /* 0x00: script commands toggle bit 0 */
-    u8 pad04[0x14];
-    void *data;                   /* 0x18 */
-    struct EvtUnitMotion *motion; /* 0x1C */
-} EvtUnitOwner;
+struct MdlCtx;
 
 /* Effect-vector data saved/restored during the motion dry run. Planar aim
  * passes orientation to the quaternion-to-matrix VU routine. */
@@ -74,7 +65,7 @@ typedef struct EvtUnit {
     EvtEffObj *effObj;             /* 0x80 */
     s32 currentTransitionValue;    /* 0x84 */
     s32 previousTransitionValue;   /* 0x88 */
-    EvtUnitOwner *owner;           /* 0x8C */
+    struct MdlCtx *owner;          /* 0x8C: model context and its SDK motion slots */
     void *linkedUnit;              /* 0x90: retained source of a transition */
     s32 unk94;                     /* 0x94 */
     s32 unk98;                     /* 0x98 */

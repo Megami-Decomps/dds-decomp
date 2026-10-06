@@ -6808,10 +6808,10 @@ void effSyncLinkedActorChildParameter(void) {
     entry = ((BtlState *)owner)->units;
     while (entry != NULL) {
         if (entry->flags & 2) {
-            BtlUnitExt *child = entry->ext;
+            EvtUnit *child = entry->ext;
             if (child != 0) {
                 child->color60 = entry->baseColor;
-                evtSetUnitRgbTransition((EvtUnit *)child, 0, entry->baseColor);
+                evtSetUnitRgbTransition(child, 0, entry->baseColor);
             }
         }
         entry = entry->nextActor;
@@ -6994,7 +6994,7 @@ void effApplySelectedActorEffects(EffActiveResource *owner) {
                             continue;
                         }
                     }
-                    if (mdlGetNodeRefHalf((MdlCtx *)actor[i]->ext->info, 0) > info->id) {
+                    if (mdlGetNodeRefHalf(actor[i]->ext->owner, 0) > info->id) {
                         btlApplyScaledUnitEffectParameter(actor[i], info->id, info->flags | 0x100, 1.0f);
                         if (info->loop == 0) {
                             btlStartMoveOtherUnitsTask(actor[i], info->id);
@@ -7593,12 +7593,12 @@ void effSyncFadeColorToTargets(void) {
 
         while (node != 0) {
             if (node->flags & 2) {
-                BtlUnitExt *target = node->ext;
+                EvtUnit *target = node->ext;
 
                 if (target != 0) {
                     node->overlayColor = (node->overlayColor & 0xFFFFFF) | (node->baseColor & 0xFF000000);
                     target->color60 = node->baseColor;
-                    evtSetUnitAlphaTransition((EvtUnit *)target, 0, node->baseColor);
+                    evtSetUnitAlphaTransition(target, 0, node->baseColor);
                 }
             }
             node = node->nextActor;
@@ -7656,14 +7656,14 @@ void effUpdateSelectedActorAlpha(EffActiveResource *work) {
         if (frame == 0) {
             for (i = 0; i < count; i++) {
                 if (actors[i]->flags & 2) {
-                    evtSetUnitAlphaTransition((EvtUnit *)actors[i]->ext, config->fadeIn, color);
+                    evtSetUnitAlphaTransition(actors[i]->ext, config->fadeIn, color);
                 }
             }
         }
         if (config->duration != 0 && frame == config->duration - config->fadeOut) {
             for (i = 0; i < count; i++) {
                 if (actors[i]->flags & 2) {
-                    evtSetUnitAlphaTransition((EvtUnit *)actors[i]->ext, config->fadeOut, actors[i]->baseColor);
+                    evtSetUnitAlphaTransition(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
                 }
             }
         }
@@ -8217,10 +8217,9 @@ void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
     dds3DispatchIndexedCallback(work[0x70 / 4], opacity);
 }
 
-typedef struct SdfTextParam SdfTextParam;
 
-extern void *sdfChunkFindRecordById(SdfTextParam *, s32);
-extern void mdlSetResourceAmount(s32, MdlResourceItem *, f32);
+extern void *sdfChunkFindRecordById(void *, s32);
+extern void mdlSetResourceAmount(MdlCtx *, MdlResourceItem *, f32);
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 
 typedef struct EffectBlob {
@@ -8235,56 +8234,6 @@ typedef struct EffectBlob {
     u8 pad41C[0x30];
 } EffectBlob;
 
-typedef struct EffSharedEffectWork {
-    u8 pad00[0x20];
-    u32 unk20;
-    f32 unk24;
-    u32 unk28;
-    EffectBlob data;       // 0x2C through 0x477
-    u32 resource;          // 0x478, shared resource whose reference count is at +0x10
-    u32 allocation;        // 0x47C
-} EffSharedEffectWork;
-
-void func_002FB480(EffSharedEffectWork *work) {
-    f32 *amount;
-    f32 scale;
-    u32 i;
-    void *record;
-    u8 *item;
-
-    work->unk28 = 0;
-    if (*(u32 *)work->resource == 0) {
-        return;
-    }
-    if (*(u32 *)(*(u32 *)work->resource + 0x1C) != 0) {
-        if (work->data.flagged != 0) {
-            mdlAddEntryFlagged(*(s32 *)work->resource, 0, work->data.entryId);
-        } else {
-            mdlAddEntryPlain(*(s32 *)work->resource, 0, work->data.entryId);
-        }
-        *(f32 *)(*(u32 *)(*(u32 *)work->resource + 0x1C) + 0x20) = 1.0f;
-    }
-
-    scale = work->data.scale;
-    i = 0;
-    amount = work->data.amounts;
-    for (; i < 0xFF; i++, amount++) {
-        record = sdfChunkFindRecordById(
-            (SdfTextParam *)*(u32 *)(*(u32 *)work->resource + 0x18), i);
-        for (item = (u8 *)*(u32 *)(*(u32 *)work->resource + 0x14); item != NULL;
-             item = *(u8 **)item) {
-            if (*(u32 *)(item + 0x10) == (u32)record) {
-                mdlSetResourceAmount(*(s32 *)work->resource, (MdlResourceItem *)item, *amount * scale);
-                break;
-            }
-        }
-    }
-    mdlSetAllResourceFrames((MdlCtx *)*(u32 *)work->resource, work->data.frame);
-}
-
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB5C0);
-
-
 typedef struct EffSharedEffectResource {
     MdlCtx *model;
     u32 deviceSlot;
@@ -8294,33 +8243,81 @@ typedef struct EffSharedEffectResource {
     u8 pad12[0xA];
     u32 allocation;
 } EffSharedEffectResource;
+typedef struct EffSharedEffectWork {
+    u8 pad00[0x20];
+    u32 unk20;
+    f32 unk24;
+    u32 unk28;
+    EffectBlob data;       // 0x2C through 0x477
+    EffSharedEffectResource *resource; // 0x478, shared resource whose reference count is at +0x10
+    u32 allocation;        // 0x47C
+} EffSharedEffectWork;
+
+void func_002FB480(EffSharedEffectWork *work) {
+    f32 *amount;
+    f32 scale;
+    u32 i;
+    void *record;
+    MdlResourceItem *item;
+
+    work->unk28 = 0;
+    if (work->resource->model == NULL) {
+        return;
+    }
+    if (work->resource->model->first != NULL) {
+        if (work->data.flagged != 0) {
+            mdlAddEntryFlagged(work->resource->model, 0, work->data.entryId);
+        } else {
+            mdlAddEntryPlain(work->resource->model, 0, work->data.entryId);
+        }
+        work->resource->model->first->frameStep = 1.0f;
+    }
+
+    scale = work->data.scale;
+    i = 0;
+    amount = work->data.amounts;
+    for (; i < 0xFF; i++, amount++) {
+        record = sdfChunkFindRecordById(work->resource->model->inner, i);
+        for (item = work->resource->model->resourceItems; item != NULL; item = item->next) {
+            if (item->payload.part.record == record) {
+                mdlSetResourceAmount(work->resource->model, item, *amount * scale);
+                break;
+            }
+        }
+    }
+    mdlSetAllResourceFrames(work->resource->model, work->data.frame);
+}
+
+INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB5C0);
+
+
 
 
 /* Release this work; only the final reference releases the shared backing resources. */
-void effReleaseSharedResourceReference(s32 *work) {
-    s32 *resource = (s32 *)((EffSharedEffectWork *)work)->resource;
-    u32 references = ((EffSharedEffectResource *)resource)->references + 0xFFFF;
-    ((EffSharedEffectResource *)resource)->references = references;
-    if ((u16)references == 0) {
-        s32 data = ((EffSharedEffectResource *)resource)->data;
+void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
+    EffSharedEffectResource *resource = work->resource;
+
+    resource->references--;
+    if (resource->references == 0) {
+        s32 data = resource->data;
         if (data != 0) {
             sdfReleaseChipBlock(data);
         }
-        resource = (s32 *)((EffSharedEffectWork *)work)->resource;
-        if (((EffSharedEffectResource *)resource)->model != 0) {
-            effDestroyModelContext(((EffSharedEffectResource *)resource)->model);
+        resource = work->resource;
+        if (resource->model != NULL) {
+            effDestroyModelContext(resource->model);
         }
-        resource = (s32 *)((EffSharedEffectWork *)work)->resource;
-        if (((EffSharedEffectResource *)resource)->deviceSlot != 0) {
-            sdfReleaseDevSlot(((EffSharedEffectResource *)resource)->deviceSlot, 1, 1);
+        resource = work->resource;
+        if (resource->deviceSlot != 0) {
+            sdfReleaseDevSlot(resource->deviceSlot, 1, 1);
         }
-        resource = (s32 *)((EffSharedEffectWork *)work)->resource;
-        if (((EffSharedEffectResource *)resource)->allocation != 0) {
-            sdfReleaseResourceAllocation(((EffSharedEffectResource *)resource)->allocation);
+        resource = work->resource;
+        if (resource->allocation != 0) {
+            sdfReleaseResourceAllocation(resource->allocation);
         }
-        sdfReleaseChipBlock(((EffSharedEffectWork *)work)->resource);
+        sdfReleaseChipBlock(work->resource);
     }
-    sdfReleaseResourceAllocation(((EffSharedEffectWork *)work)->allocation);
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 
@@ -8336,12 +8333,11 @@ s32 effCloneEffectRequest(u8 *src) {
 
 void effShareReferenceCountedEffectObject(s32 target, s32 source) {
     ((EffSharedEffectWork *)target)->resource = ((EffSharedEffectWork *)source)->resource;
-    ((EffSharedEffectResource *)((EffSharedEffectWork *)source)->resource)->references =
-        (s16)((EffSharedEffectResource *)((EffSharedEffectWork *)source)->resource)->references + 1;
+    ((EffSharedEffectWork *)source)->resource->references++;
 }
 
-void func_002FB968(s32 *work) {
-    MdlCtx *context = *(MdlCtx **)work[0x478 / 4];
+void func_002FB968(EffSharedEffectWork *work) {
+    MdlCtx *context = work->resource->model;
     if (context != NULL) {
         sdfMotionSampleAtFrame(context->first, 0.0f);
     }
