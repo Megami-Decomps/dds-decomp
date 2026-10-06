@@ -25,7 +25,13 @@ extern u32 *func_00325790(const void *, s32);
 extern void (*sdfTickCallback)(void);
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
-extern u32 func_0035A828(s32 bytes);
+typedef struct SdkFileStream SdkFileStream;
+extern void *func_0035A828(u32 bytes);
+extern void func_0035A880(void *memory);
+extern SdkFileStream *func_00359A98(const char *name, const char *mode);
+extern u32 func_00359B18(void *data, u32 size, u32 count, SdkFileStream *stream);
+extern u32 func_0035A648(const void *data, u32 size, u32 count, SdkFileStream *stream);
+extern s32 func_003594A8(SdkFileStream *stream);
 extern void func_003211F0(void);
 
 #define DDS_NAMED_RECORD_NAME_BYTES 0x40
@@ -155,23 +161,23 @@ DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
     u32 buffer;
 
     memset(block, 0, 8);
-    buffer = func_0035A828(0x10000);
+    buffer = (u32)func_0035A828(0x10000);
     block->used = 0;
     block->buffer = buffer;
     return block;
 }
 
 void dds3ReleasePackedValueBuffer(u32 node) {
-    func_0035A880(*(u32 *)(node + 4));
-    func_0035A880(node);
+    func_0035A880((void *)((DdsAllocBlock *)node)->buffer);
+    func_0035A880((void *)node);
 }
 
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F168);
 
 void func_0031F1B8(u32 node) {
-    func_0035A880(*(u32 *)node);
-    func_0035A880(node);
+    func_0035A880((void *)*(u32 *)node);
+    func_0035A880((void *)node);
 }
 
 
@@ -203,7 +209,7 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
     dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[0]);
     dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[1]);
     dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[2]);
-    func_0035A880(node);
+    func_0035A880((void *)node);
 }
 
 
@@ -330,26 +336,23 @@ u32 dds3WritePendingNamedReferenceValues(u32 object) {
     return destination;
 }
 
-u32 dds3RegisterPendingNamedReferences(u32 *object, u32 extra) {
+u32 dds3RegisterPendingNamedReferences(u32 *object, SdkFileStream *stream) {
     DdsNamedNode *node = ((DdsNamedList *)object[1])->first;
     while (node) {
-        DdsNamedRecord *record = node->record;
-        func_0035A648(record->value, (u32)record->name, 1, extra);
+        DdsAllocBlock *record = node->record;
+        func_0035A648((const void *)record->buffer, record->used, 1, stream);
         node = node->next;
     }
     return object[0];
 }
 
-extern s32 func_00359A98(const char *name, const char *path);
-extern void func_0035A648(u32 *data, s32 size, s32 flag, s32 handle);
-extern void func_003594A8(s32 handle);
 extern const char D_00438968[];
 extern const char D_00438970[];
 
 s32 dds3WritePackedReferenceFile(u32 *object, s32 arg1, s32 arg2) {
     char buffer[0x100];
     u32 record[2];
-    s32 handle;
+    SdkFileStream *handle;
     u32 *pending;
 
     func_0035C860(buffer, D_00438968, arg1, arg2);
@@ -601,7 +604,7 @@ s32 func_00320388(const char *directory, const char *name, u32 **source) {
     char path[128];
     u32 *packed = func_0031F878(source);
     u32 *references;
-    s32 file;
+    SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
     references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
@@ -646,7 +649,7 @@ s32 func_00320560(const char *directory, const char *name, u32 **source) {
     char path[128];
     u32 *packed = func_0031FA60(source);
     u32 *references;
-    s32 file;
+    SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
     references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
@@ -691,7 +694,7 @@ s32 func_00320738(const char *directory, const char *name, u32 **source) {
     char path[128];
     u32 *packed = func_00320020(source);
     u32 *references;
-    s32 file;
+    SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
     references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
@@ -736,7 +739,7 @@ s32 func_00320910(const char *directory, const char *name, u32 **source) {
     char path[128];
     u32 *packed = func_003201A0(source);
     u32 *references;
-    s32 file;
+    SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
     references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
@@ -775,7 +778,48 @@ u32 *func_00320A98(const char *source, const char *request) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320AE8);
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438960);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438968);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438970);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438978);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438980);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438988);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438990);
+
+void *func_00320AE8(const char *directory, const char *name, u32 *countOut) {
+    DdsSpriteFileHeader header;
+    u32 info[5];
+    char path[128];
+    SdkFileStream *file;
+    u8 *data;
+    u32 *offsets;
+
+    memset(path, 0, sizeof(path));
+    func_0035C860(path, D_00438988, directory, name);
+    file = func_00359A98(path, "rb");
+    if (file != NULL) {
+        func_00359B18(&header, sizeof(header), 1, file);
+        func_00359B18(info, sizeof(info), 1, file);
+        data = func_0035A828(info[0]);
+        memset(data, 0, info[0]);
+        func_00359B18(data, info[0], 1, file);
+        offsets = func_0035A828(info[3]);
+        memset(offsets, 0, info[3]);
+        func_00359B18(offsets, info[3], 1, file);
+        func_003594A8(file);
+        dds3ApplyRelocationOffsets(data, (u32)data, offsets, info[3]);
+        func_0035A880(offsets);
+        *countOut = info[1];
+        return data;
+    }
+    return NULL;
+}
 
 u32 mnuCreateCallbackNode(u32 userData) {
     u32 *node = (u32 *)func_0035A828(0x18);
@@ -867,22 +911,6 @@ u32 dds3RemoveListNodeAndNotify(u32 list, u32 node) {
     }
     remaining = dds3DetachIndexedListNodeAndRenumber(list, node);
     (*(void (**)(u32, u32))(list + 0x10))(*(u32 *)node, *(u32 *)(node + 0x10));
-    func_0035A880(node);
+    func_0035A880((void *)node);
     return remaining;
 }
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438960);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438968);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438970);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438978);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438980);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438988);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438990);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438998);
-
