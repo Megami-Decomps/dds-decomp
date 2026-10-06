@@ -2450,7 +2450,51 @@ extern char D_004214E8[];
 
 extern char D_004214F8[];
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00238D38);
+extern s32 mdlViewer(KwlnTask *);
+extern s32 mdlViewerEnd(KwlnTask *);
+extern void func_00233938(void);
+extern s32 func_00103108(const char *);
+extern MdlEyeVec D_003C8A80;
+extern MdlEyeVec D_0037F6C0;
+
+void func_00238D38(void) {
+    MdlTaskDef *task;
+    s32 i;
+
+    mdlLoadViewerPresentationConfig();
+    mdlViewerState.viewerScale = 1.0f;
+    mdlViewerState.unk0F = mdlViewerState.unk0B = mdlViewerState.taskPhase = 1;
+    mdlViewerState.unk4E = mdlViewerState.unk4C = mdlViewerState.unk4A = mdlViewerState.unk1C = mdlViewerState.resourceGroup = 2;
+    mdlViewerState.resourceId = 0;
+    mdlViewerState.unk1E = 0;
+    mdlViewerState.unk08 = 0;
+    mdlViewerState.unk09 = 0;
+    mdlViewerState.unk20 = 0;
+    mdlViewerState.entryHeight = 0;
+    mdlViewerState.entryWidth = 0;
+    mdlViewerState.labelIndexB = 0;
+    mdlViewerState.scrollPage = 0;
+    mdlViewerState.unitStepMode = 0;
+    mdlViewerState.unk0E = 0;
+    mdlViewerState.unk48 = 0;
+    mdlResetViewerBasisVectors();
+    sdfSceneProjectionParameters.fov = 0.4363323f;
+    PCP_COPY_VECTOR(&D_0037F6C0, &D_003C8A80);
+    for (i = 0; i != 12; i++) {
+        mdlViewerState.resources[i] = NULL;
+    }
+    mdlLoadViewerResourceAndResetCursors();
+    mdlViewerState.resourceCount = 1;
+    func_00233938();
+    for (i = 0, task = D_003C8890; i != 3; i++, task++) {
+        func_00103108(task->name);
+    }
+    mdlViewerState.unk00 = (s32)kwlnTaskCreate(D_004214E8, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
+    kwlnTaskCreate(D_004214F8, 0x2B01, 1, 0, mdlViewerEnd, NULL, 0);
+    mdlViewerState.viewerTask = 0;
+    mdlRestartViewerPhaseTask();
+}
+
 
 /* Clear each occupied resource slot before destroying its context; retain the native scan form. */
 void mdlFreeViewResources(void) {
