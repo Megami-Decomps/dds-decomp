@@ -1,4 +1,6 @@
 #include "mnu.h"
+#include "mnu_list.h"
+#include "mnu_shop.h"
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -18,29 +20,15 @@ extern void func_002723B0(s32, u32);
 extern u32 mnuMapPadMaskToFlags(s32);
 extern s32 func_002719F0(s32);
 extern void mnuSetPopupEntry(s32, s32);
-extern void func_0027C788(s32);
-extern void mnuRetreatWindowListSelection(s32);
-extern void mnuAdvanceWindowListSelection(s32);
-extern void mnuClearWindowPanelTransitionFlag(s32);
-extern void mnuPlayInputSound(s32, u32, s32);
+extern void func_0027C788(MenuWindowContainer *);
+extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
+extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_0037C748[];
 
-typedef struct CampSkillEntry {
-    u8 pad00[0x48];
-    u32 flags;
-    u8 pad4C[0x14];
-    u32 commandIndex;
-} CampSkillEntry;
 
-typedef struct CampSkillList {
-    u8 pad00[0x1C];
-    CampSkillEntry *entry;
-} CampSkillList;
 
-typedef struct CampSkillPanel {
-    u8 pad00[0x14];
-    CampSkillList *list;
-} CampSkillPanel;
 
 
 /* Staff-display fields of CampMenuContext (code_00274B80). */
@@ -55,7 +43,7 @@ typedef struct StaffScreenContext {
     u8 pad7C[0x98];
     u32 staffResource;  /* 0x114 */
     u8 pad118[0xC];
-    CampSkillPanel *skillPanel;
+    MenuWindowContainer *skillPanel;
     u8 pad128[0x10];
     u32 display;        /* 0x138 */
 } StaffScreenContext;
@@ -80,10 +68,10 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
     }
     if (*popup == 0) {
         if (input & 1) {
-            CampSkillEntry *entry = context->skillPanel->list->entry;
+            struct MenuListNode *entry = context->skillPanel->list->cursor;
 
-            if ((entry->flags & 1) == 0) {
-                u32 index = entry->commandIndex + 1;
+            if ((entry->flags48 & 1) == 0) {
+                u32 index = entry->sortKeyPrimary + 1;
 
                 mnuSetPopupEntry((s32)popup, (s32)(D_0037C748 + index * 0x1C));
             } else {
@@ -95,16 +83,16 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
         }
     }
     if ((input & 0x300000) == 0) {
-        func_0027C788((s32)context->skillPanel);
+        func_0027C788(context->skillPanel);
     }
     if (input & 0x10) {
-        mnuRetreatWindowListSelection((s32)context->skillPanel);
+        mnuRetreatWindowListSelection(context->skillPanel);
     }
     if (input & 0x20) {
-        mnuAdvanceWindowListSelection((s32)context->skillPanel);
+        mnuAdvanceWindowListSelection(context->skillPanel);
     }
-    mnuClearWindowPanelTransitionFlag((s32)context->skillPanel);
-    mnuPlayInputSound(0, input, (s32)context->skillPanel->list);
+    mnuClearWindowPanelTransitionFlag(context->skillPanel);
+    mnuPlayInputSound(0, input, &context->skillPanel->list->stateFlags);
     return 0;
 }
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
