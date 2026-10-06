@@ -5,6 +5,7 @@
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl.h"
+#include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
 #include "kwln.h"
@@ -4913,7 +4914,85 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E90);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF0F8);
+extern void func_001B5CD8(void);
+extern void func_001B60E8(void);
+extern void func_001AADF8(BattleSceneObject *);
+extern s32 func_001B4F10(KwlnTask *);
+extern s32 func_001BD750(BattleSceneObject *);
+extern void func_001B2D80(BattleSceneObject *, s32);
+extern s32 btlHasHighPriorityState(void);
+extern s32 btlAreLinkedSceneCountersAtThreshold(void);
+static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
+    fldDispatchSceneKindHandler((s32)object);
+    func_001B2D80(object, func_001BD0D0((s32)object, btlCommandPanelWork->classIndex));
+}
+
+s32 func_001BF0F8(KwlnTask *task) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleSceneObject *object = (BattleSceneObject *)kwlnTaskGetUserValue(task);
+    BattleActorPanelWork *panel;
+    u8 slot;
+
+    if (!(battle->battleFlags & 0x200)) {
+        return 0;
+    }
+    func_001B5CD8();
+    func_001B60E8();
+    func_001AADF8(object);
+    func_001B4F10(task);
+    switch (object->state) {
+    case 5:
+        return -1;
+    case 1:
+        func_001BD750(object);
+        btlUpdateSceneCommandSelection(object);
+        if (btlHasHighPriorityState() && object->state == 1) {
+            object->state = 2;
+        }
+        break;
+    case 2:
+        func_001BD750(object);
+    case 3:
+    case 6:
+    case 8:
+    case 10:
+    case 11:
+        btlUpdateSceneCommandSelection(object);
+        break;
+    case 7:
+        if (func_001BD750(object)) {
+            btlUpdateSceneCommandSelection(object);
+        } else {
+            btlUpdateSceneCommandSelection(object);
+            if (btlAreLinkedSceneCountersAtThreshold()) {
+                object->state = 2;
+            }
+        }
+        break;
+    case 9:
+        btlUpdateSceneCommandSelection(object);
+        if (btlAreLinkedSceneCountersAtThreshold()) {
+            object->commandData->phase = 9;
+            panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3B0));
+            object->commandData->unk18 = panel->partyRecordIndex;
+            object->state = 3;
+            ((SceneAiWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3A0)))->state = 3;
+            slot = object->commandData->linkedUnit->lookupId;
+            panel->activeEntries[slot].unk100 = 0;
+            panel->activeEntries[slot].pendingSceneState = 5;
+            panel->activeEntries[slot].unk1C4 = 3;
+            panel->activeEntries[slot].hpLevel = datGameState->party[panel->partyRecordIndex].hp;
+            panel->activeEntries[slot].hpTarget = panel->activeEntries[slot].hpLevel;
+            panel->activeEntries[slot].unk1C5 = 3;
+            panel->activeEntries[slot].mpLevel = datGameState->party[panel->partyRecordIndex].mp;
+            panel->activeEntries[slot].mpTarget = panel->activeEntries[slot].mpLevel;
+            panel->activeEntries[slot].presentationState = 2;
+            panel->activeEntries[slot].presentationValue = 0;
+        }
+        break;
+    }
+    return 0;
+}
 
 void fldClearBattleSceneObject(KwlnTask *arg0) {
     u32 temp_v0;
