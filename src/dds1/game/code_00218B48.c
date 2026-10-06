@@ -2595,7 +2595,6 @@ void mdlResetViewerFlagsAndSolarOverlay(void) {
     evtDisableSolarPhaseAdvance();
 }
 
-/* Model flag words are stored directly in the global work area at +0x840. */
 
 void mdlFlagClearAll(void) {
     s32 i = 0x7f;

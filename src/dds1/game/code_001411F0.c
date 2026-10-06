@@ -1252,7 +1252,6 @@ void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
     fldAreaFlagIndex = area % 100;
 }
 
-/* DDS1 floor flags start at +0x13F70; DDS2 stores them elsewhere. */
 
 extern s32 D_0032C900[];
 

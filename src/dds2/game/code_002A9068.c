@@ -16,7 +16,6 @@ extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 extern s8 mnuCampTaskState;
 
 
-/* Item quantities are byte-indexed in the shared save-state block. */
 
 extern s8 D_00437B73;
 
@@ -56,8 +55,6 @@ extern void mnuResetGradientFadeColor(u8 *, s32);
 
 extern void func_003425B0(void);
 
-/* One of five 0x1C4-byte party records at datGameState + 0xA60. */
-/* Global scene's spendable currency is clamped by datAddCurrencyClamped. */
 
 
 extern void scrClearPackedScriptFlags(void *);
@@ -147,8 +144,6 @@ extern u32 effLoadIndexedResource(char *, u32, u32);
 #define MNU_STAFF_STATUS_BATCH_COUNT 2
 #define MNU_STAFF_PANEL_COUNT 3
 #define MNU_STAFF_PARTY_COUNT 5
-#define MNU_STAFF_PARTY_RECORD_BYTES 0x1C4
-#define MNU_STAFF_PARTY_RECORD_BASE 0xA60
 #define MNU_STAFF_PARTY_PRESENT_BIT 1
 #define MNU_STAFF_PARTY_CATEGORY 4
 #define MNU_STAFF_RETAIN_RESOURCE 1
