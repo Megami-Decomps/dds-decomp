@@ -27,5 +27,7 @@ typedef struct EffAnimSample {
 } EffAnimSample;
 
 void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out);
+struct SdfTex;
+struct SdfTex *effAssignSampledSegmentReference(EffAnimSet *set, void *target, const EffAnimSample *sample);
 
 #endif /* EFF_ANIM_H */
