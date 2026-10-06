@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_command.h"
+#include "btl_action.h"
 #include "btl_state.h"
 #include "btl_ui.h"
 #include "pcp_vu0.h"
@@ -324,40 +325,6 @@ extern u8 D_003B6BD0[];
 
 extern void func_001EC868(void *, f32 *, f32);
 
-typedef struct BtlUnitData {
-    u8 pad0[0x1C];
-    f32 f1C;
-    union {
-        s32 unk20;
-        f32 f20;
-    };
-    u8 pad24[10];
-    u16 s2E;
-    u8 b30;
-} BtlUnitData;
-
-typedef struct BtlUnitInfo {
-    union {
-        u8 b0;
-        u32 flags;
-    };
-    u8 pad1[0x14];
-    s32 unk18;
-    BtlUnitData *data;
-} BtlUnitInfo;
-
-typedef struct BtlLightSource {
-    s128 vec0;
-    s128 vec10;
-    u8 pad20[0x20];
-    s128 vec40;
-} BtlLightSource;
-
-typedef struct BtlExtModel {
-    u8 pad0[0x18];
-    BtlLightSource *light;
-} BtlExtModel;
-
 typedef struct BtlUnit BtlUnit;
 
 
@@ -482,7 +449,7 @@ extern s128 D_003B6B80;
 
 extern u8 D_003BD7D0[];
 
-extern void evtSetUnitNormalizedDirection(BtlUnitExt *, s32);
+extern void evtSetUnitNormalizedDirection(struct EvtUnit *, s32);
 
 typedef struct XformData {
     s128 vec0;
@@ -532,12 +499,6 @@ typedef struct BtlCommandArgument {
     BtlCommandOption *option; /* 0x68 */
 } BtlCommandArgument;
 
-typedef struct BtlShapeResource {
-    u8 pad00[0x14];
-    s32 itemKind;       /* 0x14 */
-    s32 itemIndex;      /* 0x18 */
-} BtlShapeResource;
-
 typedef struct BtlActiveSlot {
     u8 pad00[0x18];
     s32 unit;           /* 0x18 */
@@ -550,7 +511,7 @@ typedef struct BtlDeferredStats {
     s32 secondary;     /* 0x24 */
 } BtlDeferredStats;
 
-extern struct SoundTask *btlCreateHookedUnitSoundTask();
+extern BtlRuntimeTask *btlCreateHookedUnitSoundTask();
 
 extern u32 D_00436AD4;
 
@@ -572,9 +533,9 @@ extern f32 func_001F5780(u32, u8, f32, f32);
 
 extern f32 func_001FDD20(f32 *, f32, f32, s32);
 
-extern struct SoundTask *btlDeferredTaskTail;
+extern BtlRuntimeTask *btlDeferredTaskTail;
 
-extern struct SoundTask *btlDeferredTaskHead;
+extern BtlRuntimeTask *btlDeferredTaskHead;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -596,31 +557,6 @@ typedef struct SoundSceneEntry {
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
-typedef struct SoundTask {
-    u8 enabled;
-    u8 unk_01[7];
-    u64 conditionHandle;
-    u8 status;
-    u8 unk_11[0xF];
-    u16 taskId;
-    u16 unk_22;
-    u16 flags;
-    u8 unk_26[2];
-    s32 startDelay;
-    s32 endDelay;
-    u32 unk_30;
-    u32 unk_34;
-    u64 unk_38;
-    u64 owner;
-    void (*onStart)(u32);
-    s32 (*callback)();
-    void (*onFinish)(u32 *);
-    void *args;
-    struct SoundTask *next;
-    struct SoundTask *nextActive;
-    struct SoundTask *deferNext;
-    struct SoundTask *deferPrev;
-} SoundTask;
 
 extern s64 func_00201520(void);
 
@@ -654,7 +590,7 @@ typedef struct ActiveSoundNode {
     struct ActiveSoundNode *next;
 } ActiveSoundNode;
 
-extern void btlRunTask(SoundTask *);
+extern void btlRunTask(BtlRuntimeTask *);
 
 extern s32 mdlGetContextResourceGroup(s32);
 
@@ -733,9 +669,9 @@ typedef struct {
     u32 unk_1C;
 } SoundTaskArgs;
 
-extern SoundTask *btlAllocTask(s32);
+extern BtlRuntimeTask *btlAllocTask(s32);
 
-extern SoundTaskArgs *btlGetTaskArguments(s32);
+extern void *btlGetTaskArguments(s32);
 
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
@@ -853,7 +789,7 @@ extern void fldAppendTaskToGroup(SceneTask *task);
 
 extern void fldUpdateSceneGroupTask(SceneTask *task);
 
-extern u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex);
+extern BtlRuntimeTask *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex);
 
 extern void btlClearSceneTaskActiveFlag(s32 task);
 
@@ -1019,7 +955,7 @@ void func_001D48F0(s32 task) {
 extern void func_001AA850();
 extern void btlFlagUnitDefeatCandidate();
 extern void btlRefreshUnitMotionSelection();
-extern s32 btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 INCLUDE_ASM(const s32, "game/code_001D4438", btlReleaseIdleUnitSoundAndAdvanceTask);
 
@@ -1096,13 +1032,13 @@ INCLUDE_ASM(const s32, "game/code_001D4438", func_001D4CA0);
 void func_001D4FE0(void) {
 }
 
-extern s32 btlCreateEffObjB();
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s64 btlStartTask(void *);
 extern s32 sndHasActiveActor(void);
 extern s64 btlAdvanceRuntimeSequenceCounter(void);
-extern SoundTask *btlCreateCommandSoundUpdateTask(void);
-extern SoundTask *btlCreateSecondaryCommandSoundTask(void);
-extern SoundTask *btlCreateCommandSoundTask(s32, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
+extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern void func_00211360();
 extern s32 func_0020F200();
 
@@ -1110,17 +1046,17 @@ typedef struct TaskBlock {
     u32 word[11];
 } TaskBlock;
 
-extern u8 *btlCreateActorParameterDeltaTask(BtlUnit *, TaskBlock *);
-extern u8 *btlCreateLinkedEffectTask(BtlUnit *, u32, s32);
+extern BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *, TaskBlock *);
+extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
 /* Starts the command sound tasks and the follow-up action for the acting
  * unit, chosen by its selection flags. */
 void btlStartCommandAudioAndSelectedAction(u8 *task) {
     BtlUnit *unit;
     s64 ownerId;
-    u8 *effectTask;
-    u8 *sceneTask;
-    u8 *object;
+    BtlRuntimeTask *effectTask;
+    BtlRuntimeTask *sceneTask;
+    BtlRuntimeTask *object;
     s32 effect;
     TaskBlock block;
     u32 hp, mp;
@@ -1158,9 +1094,9 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
             break;
         case 8:
             sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
-            *sceneTask = 7;
-            *(s64 *)(sceneTask + 8) = ownerId;
-            ((SceneTask *)sceneTask)->linkedOwnerId = unit->owner;
+            sceneTask->startCondition.kind = 7;
+            sceneTask->startCondition.value.owner = ownerId;
+            sceneTask->ownerId = unit->owner;
             btlStartTask(sceneTask);
             memset(&block, 0, 0x2C);
             hp = unit->maxHp;
@@ -1168,36 +1104,36 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
             mp = unit->unk12C;
             block.word[1] = mp / 10;
             effectTask = btlCreateActorParameterDeltaTask(unit, &block);
-            *effectTask = 7;
-            *(s64 *)(effectTask + 8) = ownerId;
+            effectTask->startCondition.kind = 7;
+            effectTask->startCondition.value.owner = ownerId;
             btlStartTask(effectTask);
             if ((s32)block.word[0] > 0) {
                 object = btlCreateLinkedEffectTask(unit, block.word[0], 0);
-                *object = 4;
-                *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
+                object->startCondition.kind = 4;
+                object->startCondition.value.handle = effectTask->handle;
                 btlStartTask(object);
             }
             if ((s32)block.word[1] > 0) {
                 object = btlCreateLinkedEffectTask(unit, block.word[1], 1);
-                *object = 4;
-                *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
+                object->startCondition.kind = 4;
+                object->startCondition.value.handle = effectTask->handle;
                 btlStartTask(object);
             }
             btlDispatchStateHandler(task, 0x1B);
             break;
         case 0x800:
             sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
-            *sceneTask = 7;
-            *(s64 *)(sceneTask + 8) = ownerId;
-            ((SceneTask *)sceneTask)->linkedOwnerId = unit->owner;
+            sceneTask->startCondition.kind = 7;
+            sceneTask->startCondition.value.owner = ownerId;
+            sceneTask->ownerId = unit->owner;
             btlStartTask(sceneTask);
             btlDispatchStateHandler(task, 0x1B);
             break;
         }
         effect = func_0020F200(task);
         if (effect > 0) {
-            object = (u8 *)btlCreateEffObjB(unit, effect);
-            ((SceneTask *)object)->linkedOwnerId = ownerId;
+            object = btlCreateEffObjB(unit, effect);
+            object->ownerId = ownerId;
             btlStartTask(object);
         }
         ((SceneTask *)task)->flags |= 0x200;
@@ -1524,14 +1460,14 @@ void func_001DA1F8(ActionStateLink *task) {
 
 extern u16 *btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
 extern s32 func_001E2E58(BtlUnit *, s32);
-extern SoundTask *btlScheduleRefreshTask(BtlUnit *unit);
-extern SoundTask *btlCreateModelChangeTask(BtlUnit *unit, s32 model, s32 variant, s32 motion, s32 frames, u8 mode);
-extern SoundTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode);
-extern SoundTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
-extern SoundTask *btlCreateGunLoadPollTask(BtlUnit *unit);
-extern SoundTask *sndCreateEffectSourceTask(struct SoundResourceNode *resource, BtlUnit *unit, u64 wait);
-extern SoundTask *btlCreateEffObjA(BtlUnit *unit, s32 effect);
-extern SoundTask *btlCreateEffObjD(BtlUnit *unit, s32 ability);
+extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
+extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 model, s32 variant, s32 motion, s32 frames, u8 mode);
+extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode);
+extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit);
+extern BtlRuntimeTask *sndCreateEffectSourceTask(struct SoundResourceNode *resource, BtlUnit *unit, u64 wait);
+extern BtlRuntimeTask *btlCreateEffObjA(BtlUnit *unit, s32 effect);
+extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *unit, s32 ability);
 
 /* State-handler table entry (0x3B6A9C); the table holds s32 handlers (btlCommandStateSelectB) and this one
  * returns without a value, as retail's missing sibling calls show.
@@ -1542,10 +1478,10 @@ s32 func_001DA210(SceneTask *task) {
     BtlUnit *unit;
     BtlState *state;
     BtlUnit *other;
-    SoundTask *sound;
-    SoundTask *change;
-    SoundTask *spawned;
-    SoundTask *load;
+    BtlRuntimeTask *sound;
+    BtlRuntimeTask *change;
+    BtlRuntimeTask *spawned;
+    BtlRuntimeTask *load;
     u16 *status;
     s32 motion;
 
@@ -1568,60 +1504,60 @@ s32 func_001DA210(SceneTask *task) {
         for (other = state->units; other != NULL; other = other->nextActor) {
             if (other != unit && (other->flags64 & 0x202) == 0x202) {
                 spawned = btlScheduleRefreshTask(other);
-                spawned->enabled = 4;
+                spawned->startCondition.kind = 4;
                 spawned->startDelay = 1;
-                spawned->conditionHandle = sound->unk_38;
-                spawned->owner = unit->owner;
+                spawned->startCondition.value.handle = sound->handle;
+                spawned->ownerId = unit->owner;
                 btlStartTask(spawned);
             }
         }
         change = btlCreateModelChangeTask(unit, unit->modelId, unit->modelVariant, motion, 0x18, 0);
-        change->enabled = 4;
-        change->conditionHandle = sound->unk_38;
+        change->startCondition.kind = 4;
+        change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
         for (other = state->units; other != NULL; other = other->nextActor) {
             if (other != unit && (other->flags64 & 0x202) == 0x202) {
                 load = btlCreateModelLoadPollTask(other, other->resourceKind, other->resourceIndex, 0);
-                load->enabled = 4;
-                load->conditionHandle = change->unk_38;
-                load->owner = unit->owner;
+                load->startCondition.kind = 4;
+                load->startCondition.value.handle = change->handle;
+                load->ownerId = unit->owner;
                 btlStartTask(load);
                 spawned = btlCreateUnitFadeInTask(other, 0, 0);
-                spawned->enabled = 4;
-                spawned->conditionHandle = load->unk_38;
-                spawned->owner = unit->owner;
+                spawned->startCondition.kind = 4;
+                spawned->startCondition.value.handle = load->handle;
+                spawned->ownerId = unit->owner;
                 btlStartTask(spawned);
             }
         }
         btlStartTask(btlCreateGunLoadPollTask(unit));
-        btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->unk_38));
+        btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         spawned = btlCreateEffObjA(unit, task->command);
-        spawned->enabled = 4;
-        spawned->conditionHandle = sound->unk_38;
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateCommandSoundUpdateTask();
-        spawned->enabled = 4;
-        spawned->conditionHandle = sound->unk_38;
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateSecondaryCommandSoundTask();
-        spawned->enabled = 4;
-        spawned->conditionHandle = sound->unk_38;
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateCommandSoundTask((s32)task, 0xE);
-        spawned->enabled = 4;
-        spawned->conditionHandle = sound->unk_38;
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
+        spawned = btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
                                                                 btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
-        spawned->enabled = 4;
-        spawned->conditionHandle = sound->unk_38;
+        spawned->startCondition.kind = 4;
+        spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         if (!btlDoesEnabledStatusMatchCurrentId(&task->actor->statBits, 0xE0)) {
-            spawned = (SoundTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
-            spawned->enabled = 4;
-            spawned->conditionHandle = sound->unk_38;
-            spawned->owner = unit->owner;
+            spawned = fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
+            spawned->startCondition.kind = 4;
+            spawned->startCondition.value.handle = sound->handle;
+            spawned->ownerId = unit->owner;
             btlStartTask(spawned);
         }
         if (task->actor->conditionFlags & 0x480) {
@@ -1650,7 +1586,7 @@ s32 func_001DA210(SceneTask *task) {
         change = btlCreateModelChangeTask(unit, unit->modelId, unit->modelVariant, motion, 0x12, 3);
         btlStartTask(change);
         btlStartTask(btlCreateGunLoadPollTask(unit));
-        btlStartTask(sndCreateEffectSourceTask(state->resources[47], unit, change->unk_38));
+        btlStartTask(sndCreateEffectSourceTask(state->resources[47], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         unit->flags &= ~0x400000;
         if (task->flags & 0x10) {
@@ -1674,7 +1610,7 @@ void func_001DABC0(ActionStateLink *task) {
 void func_001DABD8(u8 *task) {
     u8 *actor;
     u8 *effectTask;
-    SoundTask *modelTask;
+    BtlRuntimeTask *modelTask;
     u8 *statusTable;
     s32 model;
 
@@ -1950,16 +1886,16 @@ void btlUnitTurnEndCommit(ActionStateLink *unit) {
 }
 
 extern void btlAccumulateEnemyDefeatRewards(BtlUnit *);
-extern SoundTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
-extern SoundTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
-extern SoundTask *sndCreateStationedSeTask(u32);
+extern BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
+extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 void btlStartActorDefeatTransition(ActionStateLink *command) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *actor = command->unit;
     u16 *profile = &actor->statBits;
-    SoundTask *soundTask;
-    SoundTask *object;
+    BtlRuntimeTask *soundTask;
+    BtlRuntimeTask *object;
     s64 sequence;
     s32 entryFlags;
     s32 result;
@@ -1970,7 +1906,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
     if (!(command->pendingFlags & 0x100)) {
         soundTask = btlCreateHookedUnitSoundTask(actor, 11);
         btlStartTask(soundTask);
-        sequence = soundTask->unk_38;
+        sequence = soundTask->handle;
     } else {
         sequence = btlAdvanceRuntimeSequenceCounter();
     }
@@ -1978,8 +1914,8 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
         if (!(command->pendingFlags & 0x100)) {
             if (!(actor->flags & 0x8000000) && actor->unkEC != 11) {
                 object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
-                object->enabled = 4;
-                object->conditionHandle = sequence;
+                object->startCondition.kind = 4;
+                object->startCondition.value.handle = sequence;
                 btlStartTask(object);
             }
             btlRefreshUnitMotionSelection(actor);
@@ -1988,12 +1924,12 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
         btlAccumulateEnemyDefeatRewards(actor);
         if (actor->flags & 0x8000000) {
             object = btlCreateSelectedEffectUpdateTask(actor);
-            object->enabled = 4;
-            object->conditionHandle = sequence;
+            object->startCondition.kind = 4;
+            object->startCondition.value.handle = sequence;
             btlStartTask(object);
             object = sndCreateStationedSeTask(0x1000E);
-            object->enabled = 4;
-            object->conditionHandle = sequence;
+            object->startCondition.kind = 4;
+            object->startCondition.value.handle = sequence;
             btlStartTask(object);
             actor->flags &= ~1;
         } else {
@@ -2010,16 +1946,16 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
                 if (result != 0) {
                     if (actor->unkEC != 11) {
                         object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
-                        object->enabled = 4;
-                        object->conditionHandle = sequence;
+                        object->startCondition.kind = 4;
+                        object->startCondition.value.handle = sequence;
                         btlStartTask(object);
                     }
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = (SoundTask *)func_001E6428((s32)actor, 0);
-                object->enabled = 4;
-                object->conditionHandle = sequence;
+                object = (BtlRuntimeTask *)func_001E6428((s32)actor, 0);
+                object->startCondition.kind = 4;
+                object->startCondition.value.handle = sequence;
                 btlStartTask(object);
                 actor->flags &= ~1;
             }

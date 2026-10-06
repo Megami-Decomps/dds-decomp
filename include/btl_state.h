@@ -4,6 +4,7 @@
 #include "btl.h"
 
 struct KwlnTask;
+struct BtlRuntimeTask;
 
 /* Full battle-work layout for state users; unit/task-only users include btl.h. */
 #ifdef VERSION_DDS1
@@ -69,7 +70,10 @@ typedef struct BtlState {
     void (*updateCallback)(void); /* 0x5F0 */
     u8 pad5F4[0x38];
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
-    u8 pad630[0x64];
+    u8 pad630[0x24];
+    s32 (*hook654)(BtlUnit *);
+    s32 (*hook658)(BtlUnit *);
+    u8 pad65C[0x38];
     BattleEffectState *effect; /* 0x694 */
     u8 pad698[0xC];
     s32 unk_6A4;
@@ -162,13 +166,14 @@ typedef struct BtlState {
     s32 queuedScene;
     s32 frame;
     s32 sceneState;
-    u8 pad23C[4];
+    u16 unk23C;
+    u16 unk23E;
     s32 scriptState; /* 0x240 */
     s32 scriptArg;
     struct ActionStateLink *tasks; /* 0x248: 0x180-byte sequence list, next at +0x178 */
     BtlUnit *units; /* 0x24C */
-    struct SoundTask *taskTail; /* 0x250: newest scheduler registration */
-    struct SoundTask *taskHead; /* 0x254: oldest scheduler registration */
+    struct BtlRuntimeTask *taskTail; /* 0x250: newest scheduler registration */
+    struct BtlRuntimeTask *taskHead; /* 0x254: oldest scheduler registration */
     struct SoundResourceNode *soundResourceHead;
     struct ActiveSoundNode *soundList;
     struct SoundSlotOwner *soundSlotOwners;
@@ -191,7 +196,8 @@ typedef struct BtlState {
     u8 pad286[2];
     u32 unk288;
     u32 unk28C;
-    u8 pad290[4];
+    u16 unk290;
+    u16 unk292;
     s32 effectLayer; /* 0x294 */
     s32 adjustmentGroupIndex; /* 0x298: encounter pack's group selector */
     s32 adjustmentEntryIndex; /* 0x29C: entry selector within the group */
@@ -209,7 +215,8 @@ typedef struct BtlState {
     u32 sceneStatus;
     u8 pad2DC[0xC];
     s32 moneyEarned;
-    u8 pad2EC[8];
+    s32 moneyTotal;
+    u8 pad2F0[4];
     s32 experienceEarned;
     s32 unk2F8;
     u8 pad2FC[2];

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_unit.h"
+#include "mdl.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -7,11 +8,6 @@ typedef struct EventUnitData {
     u8 pad00[8];
     s32 value08;
 } EventUnitData;
-
-typedef struct EvtUnitMotion {
-    u8 pad0[0x30];
-    u8 mode;           /* 0x30 */
-} EvtUnitMotion;
 
 
 typedef struct EvtTargetInfo {
@@ -96,14 +92,13 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
     return length;
 }
 
-typedef struct MdlCtx MdlCtx;
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_00438A48, D_00438A4C;
 extern s32 dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(s32, s32, s32);
 extern s32 sdfLoadMapRecordPositionVector(void *, s32);
-extern void mdlLoadPrimaryVectorVU(EvtUnitOwner *);
+extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void func_00107D08(void);
 extern void effMiscQuaternionNlerpVU(f32);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
@@ -216,7 +211,7 @@ void func_0023B480(EvtUnit *unit) {
             if (unit->previousTransitionValue) {
                 previous = ((EvtTarget *)unit->previousTransitionValue)->info;
             }
-            if (!sdfLoadMapRecordPositionVector(unit->owner->data, 0)) {
+            if (!sdfLoadMapRecordPositionVector(unit->owner->inner, 0)) {
                 mdlLoadPrimaryVectorVU(unit->owner);
             }
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
@@ -526,9 +521,9 @@ void func_0023B480(EvtUnit *unit) {
         overrideAux = 1;
     }
     if (overrideAux) {
-        sdfSetTextFloatPairOverride(unit->owner->data, auxFirst, auxSecond);
+        sdfSetTextFloatPairOverride(unit->owner->inner, auxFirst, auxSecond);
     } else {
-        sdfClearTextFloatPairOverride(unit->owner->data);
+        sdfClearTextFloatPairOverride(unit->owner->inner);
     }
 }
 
@@ -819,7 +814,7 @@ s32 evtUnitGetNestedValue(EvtUnitNode *unit) {
 
 extern f32 D_004215D0[];
 
-EvtUnit *func_0023CC60(EvtEffObj *effObj, EvtUnitOwner *owner) {
+EvtUnit *func_0023CC60(EvtEffObj *effObj, MdlCtx *owner) {
     EvtUnit *work;
     void *endpoint;
     f32 defaultVector[4];
@@ -872,7 +867,7 @@ s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
         return 1;
     }
     handle = work->endpointWorkAddress;
-    *(s32 *)((u8 *)work->owner->data + 0x80) = 0;
+    work->owner->inner->lighting = 0;
     if (handle != 0) {
         sdfReleaseChipBlock(handle);
         work->endpointWorkAddress = 0;
@@ -909,7 +904,7 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
     if (state == 0) {
         return 1;
     }
-    if (state == 2 && unit->motionTicks > 0 && unit->owner->motion->mode == 5) {
+    if (state == 2 && unit->motionTicks > 0 && unit->owner->first->state == 5) {
         return 1;
     }
     return 0;

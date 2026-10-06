@@ -8,24 +8,39 @@
  * assigns handle, while owner lookup uses ownerId. Scene request constructors
  * share its task-ID/status prefix and native start/update callback slots.
  */
-typedef struct BtlRuntimeTask {
-    u8 conditionKind;
+typedef struct BtlTaskCondition {
+    u8 kind;
     u8 pad01[7];
-    u64 conditionHandle;
-    u8 status; /* 0x10 */
-    u8 pad11[7];
-    u64 secondaryConditionHandle; /* 0x18: the second dependency checked with +0x10 */
+    union {
+        s32 count;
+        u64 handle;
+        u64 owner;
+        u16 taskKind;
+    } value;
+} BtlTaskCondition;
+
+typedef struct BtlRuntimeTask {
+    BtlTaskCondition startCondition; /* 0x00 */
+    BtlTaskCondition endCondition; /* 0x10 */
     u16 taskId; /* 0x20 */
-    u8 pad22[2];
+    u16 state; /* 0x22 */
     u16 flags; /* 0x24: command tasks set bit 1 before starting */
     u8 pad26[2];
     s32 startDelay; /* Signed countdown before the task's running phase. */
-    u8 pad2C[0xC];
-    u64 handle;
-    u64 ownerId;
-    void (*onStart)(); /* 0x48: native start callback, with unspecified arguments. */
-    s32 (*callback)(); /* 0x4C: returns nonzero when the task has completed. */
-    u8 pad50[0x20];
+    s32 endDelay;
+    u32 pollCount;
+    u32 runCount;
+    u64 handle; /* 0x38 */
+    u64 ownerId; /* 0x40 */
+    void (*onStart)(); /* 0x48: each task kind owns its argument packet type. */
+    s32 (*callback)(); /* 0x4C */
+    void (*onFinish)(); /* 0x50 */
+    void *args; /* 0x54 */
+    struct BtlRuntimeTask *next; /* 0x58 */
+    struct BtlRuntimeTask *prev; /* 0x5C */
+    struct BtlRuntimeTask *deferNext; /* 0x60 */
+    struct BtlRuntimeTask *deferPrev; /* 0x64 */
+    u8 pad68[8];
 } BtlRuntimeTask;
 
 /* Eight-byte ability parameter rows; only the leading coefficient is decoded. */

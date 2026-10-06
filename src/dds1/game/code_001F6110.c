@@ -23,10 +23,10 @@ enum {
     BTL_PACKED_PARTY_EMPTY_MP = 0x10000000
 };
 
-extern void btlClearUnitDefeatCandidate(u8 *unit);
+extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 extern void func_001F6E28(BtlIndexList *list, s32, s32);
-extern void btlFlagUnitDefeatCandidate(u8 *unit);
+extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
@@ -557,7 +557,7 @@ void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
 
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->next) {
-        btlFlagUnitDefeatCandidate((u8 *)unit);
+        btlFlagUnitDefeatCandidate(unit);
     }
 }
 
@@ -565,7 +565,7 @@ void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
 
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->next) {
-        btlClearUnitDefeatCandidate((u8 *)unit);
+        btlClearUnitDefeatCandidate(unit);
     }
 }
 
@@ -576,7 +576,7 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
-                btlFlagUnitDefeatCandidate((u8 *)unit);
+                btlFlagUnitDefeatCandidate(unit);
             }
             unit = unit->next;
         } while (unit != NULL);
@@ -590,7 +590,7 @@ void btlClearMatchingUnitDefeatCandidates(s32 mask) {
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
-                btlClearUnitDefeatCandidate((u8 *)unit);
+                btlClearUnitDefeatCandidate(unit);
             }
             unit = unit->next;
         } while (unit != NULL);
@@ -627,14 +627,14 @@ extern s32 btlIsActorModeAcceptedByBattleHook(s32);
 extern void btlSetUnitPosition(s32, s32);
 extern void btlSetUnitRotation(s32, s32);
 extern void btlRefreshUnitMotionSelection(s32);
-extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
+extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
 /* Refresh each unit's transform/effect state, then invoke the runtime callback. */
 void btlUpdateUnitActors(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit = state->units;
     while (unit != NULL) {
-        btlFlagUnitDefeatCandidate((u8 *)unit);
+        btlFlagUnitDefeatCandidate(unit);
         btlSetUnitPosition((s32)unit, (s32)unit->position);
         btlSetUnitRotation((s32)unit, (s32)unit->rotation);
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
@@ -642,7 +642,7 @@ void btlUpdateUnitActors(void) {
             btlRefreshUnitMotionSelection((s32)unit);
             unit->effectTimerA = 0;
             unit->effectTimerB = 0;
-            btlApplyUnitMotionSelection((u8 *)unit, unit->effectArgA, unit->effectArgB,
+            btlApplyUnitMotionSelection(unit, unit->effectArgA, unit->effectArgB,
                           unit->effectValue);
         }
         unit->stateFlags &= ~0x8000;
