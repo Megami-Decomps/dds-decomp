@@ -253,7 +253,33 @@ void itfReleaseCompactSlot(CompactSlot *slot) {
     slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E020);
+extern void sdfSubmitGsTestOneRegisterPacket(u32 data, u32 kind);
+extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
+extern s32 itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 scale);
+
+void func_0031E020(CompactSlotPool *pool, u32 flags) {
+    CompactSlot *slot;
+    s32 i;
+    f32 phase;
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000, 0x54);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x54);
+    sdfSubmitGsTestOneRegisterPacket(0x5100D, 0x54);
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->flags & SLOT_IN_USE) != 0) {
+            if ((flags & 1) == 0) {
+                slot->age++;
+            }
+            phase = (f32)slot->age / 10.0f;
+            itfDrawUniformlyScaledIndexedImage(slot->firstPayload, slot->secondPayload, 0,
+                (s32)((1.0f - phase) * 128.0f * 0.8f), 0, 8, 0x54, phase * 2.0f + 0.5f);
+            if (slot->age >= 11) {
+                itfReleaseCompactSlot(slot);
+            }
+        }
+    }
+}
 
 typedef struct FadeEntry FadeEntry;
 
