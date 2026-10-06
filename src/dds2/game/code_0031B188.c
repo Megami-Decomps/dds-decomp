@@ -385,7 +385,27 @@ void mnuDestroyNodeJobQueues(s32 *listAddress) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B748);
+extern FileQueue *fileQueueClone(FileQueue *source);
+extern char D_0040AD50[][64];
+extern const char D_00438950[]; /* "%d:%s\n"; shared sdata in current build. */
+
+/* Give the first record the source queue and clone it for subsequent records. */
+void func_0031B748(MnuEffectList *list, s32 resourceIndex, FileQueue **sources) {
+    FileQueue *source = NULL;
+    MnuEffectRecord *record = list->records;
+    s32 i;
+
+    for (i = 0; i < list->count; i++, record++) {
+        if (source == NULL) {
+            source = sources[resourceIndex];
+            record->queue = source;
+            evtPrintDeveloperConsoleMessage(D_00438950, resourceIndex, D_0040AD50[resourceIndex]);
+        } else {
+            record->queue = fileQueueClone(source);
+        }
+        record->flags = (record->flags & ~0x1FE) | ((u8)resourceIndex << 1);
+    }
+}
 
 extern void fileQueueSetPosition(FileQueue *queue, void *vector);
 extern void fileQueueSetScale(FileQueue *queue, f32 scale);
