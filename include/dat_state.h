@@ -176,7 +176,11 @@ typedef struct DatGameState {
     s32 progressSlot;                     /* 0x1E658 */
     u8 pad1E65C[4];
     u32 highScore;                        /* 0x1E660 */
-    u8 pad1E664[0x1DC];
+    u8 pad1E664[0xC];
+    u8 itemStatBonuses[64][5];             /* 0x1E670; item IDs 0xC0..0xFF */
+    u8 itemRequirementCounts[64];          /* 0x1E7B0 */
+    u8 itemBlockedFlags[64];               /* 0x1E7F0 */
+    u8 pad1E830[0x10];
 #endif
 } DatGameState;
 
