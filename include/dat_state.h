@@ -81,7 +81,7 @@ typedef struct DatPartyRecord {
     u16 unk190;
     u8 pad192[2];
     s32 randomizedValue;
-    s32 link;
+    s32 huntExp; /* 0x198: hunt EP accumulated this battle (shared by ability 0x24C) */
     u8 pad19C[8];
 #endif
 #ifdef VERSION_DDS2
@@ -91,7 +91,7 @@ typedef struct DatPartyRecord {
     u8 pad1AC[6];
     u16 itemId;
     s32 randomizedValue;                  /* 0x1B4: initialized to 0x12 minus a four-way roll. */
-    s32 link;
+    s32 huntExp; /* 0x1B8: hunt EP accumulated this battle */
     u8 pad1BC[8];
 #endif
 } DatPartyRecord;
