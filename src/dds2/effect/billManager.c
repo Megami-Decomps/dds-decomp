@@ -151,14 +151,10 @@ void func_00157EA0(BillObj *obj, BillChildPayload *child) {
 
 
 
-typedef struct BillDeferredDescriptor {
-    u8 pad00[0x10];
-    void (*dispatch)(void *descriptor, u32 value);
-} BillDeferredDescriptor;
 
 
 extern BillChildPayload *D_00438EFC;
-extern BillDeferredDescriptor *D_003AA960[5];
+extern SdfPoolNode *D_003AA960[5];
 
 void func_00158340(void) {
     BillChildPayload *node;
@@ -181,7 +177,7 @@ void func_00158340(void) {
                 SdfListHead *value = node->pendingLists[i];
 
                 if (value != NULL) {
-                    D_003AA960[i]->dispatch(D_003AA960[i], (u32)value);
+                    D_003AA960[i]->append((SdfListHead *)D_003AA960[i], value);
                     node->pendingLists[i] = 0;
                 }
             }
