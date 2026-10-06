@@ -584,19 +584,17 @@ void effReleaseSharedReference(RefObj *obj);
 
 RefObj *effRetainSharedReference(RefObj *obj);
 
-u32 effDuplicateSmallHeader(source)
-    u32 source;
-{
+u32 effDuplicateSmallHeader(const void *source) {
     u32 *buffer = (u32 *)sdfAllocSizeClassBlock(12);
     *buffer = 0;
-    memcpy(buffer + 1, (const void *)source, 8);
+    memcpy(buffer + 1, source, 8);
     return (u32)buffer;
 }
 
-void effCreateSmallHeaderFromFile(void) {
-    u64 resource;
+void effCreateSmallHeaderFromFile(void *work) {
+    void *resource;
 
-    resource = fileResolvePrimaryBuffer();
+    resource = fileResolvePrimaryBuffer(work);
     effDuplicateSmallHeader(resource);
 }
 
@@ -606,7 +604,7 @@ void effReleaseFadeHeaderAllocation(u32 allocation) {
 }
 
 void effCloneSmallHeaderFromWork(s32 work) {
-    effDuplicateSmallHeader(work + 4);
+    effDuplicateSmallHeader((const void *)(work + 4));
 }
 
 void effFadeFrameReset(u32 *counter) {
@@ -642,10 +640,10 @@ const u8 *source;
     return effect;
 }
 
-void effCreateFadeVectorFromFile(void) {
-    u64 resource;
+void effCreateFadeVectorFromFile(void *work) {
+    const u8 *resource;
 
-    resource = fileResolvePrimaryBuffer();
+    resource = fileResolvePrimaryBuffer(work);
     effCreateFadeVectorWork(resource);
 }
 
@@ -738,19 +736,17 @@ void func_0029CF30(s32 work, u32 value) {
     ((EffSelectionWork *)work)->value04 = value;
 }
 
-u32 effDuplicatePayloadHeader(source)
-    u32 source;
-{
+u32 effDuplicatePayloadHeader(const void *source) {
     u32 *buffer = (u32 *)sdfAllocSizeClassBlock(0x14);
     *buffer = 0;
-    memcpy(buffer + 1, (const void *)source, 16);
+    memcpy(buffer + 1, source, 16);
     return (u32)buffer;
 }
 
-void effCreateSelectionHeaderFromFile(void) {
-    u64 resource;
+void effCreateSelectionHeaderFromFile(void *work) {
+    void *resource;
 
-    resource = fileResolvePrimaryBuffer();
+    resource = fileResolvePrimaryBuffer(work);
     effDuplicatePayloadHeader(resource);
 }
 
@@ -760,7 +756,7 @@ void effReleaseSelectionHeaderAllocation(u32 allocation) {
 }
 
 void effCloneSelectionHeaderFromWork(s32 work) {
-    effDuplicatePayloadHeader(work + 4);
+    effDuplicatePayloadHeader((const void *)(work + 4));
 }
 
 void effSelectionFrameReset(u32 *counter) {
