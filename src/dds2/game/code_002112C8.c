@@ -4192,7 +4192,156 @@ s32 rotate;
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021C7F8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021C818);
+extern void func_00336798(f32);
+extern void sdfMultiplyVuMatrixInPlace(void);
+extern void btlClearAllUnitDefeatCandidatesTask(void);
+extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
+
+/* VURI boss action camera: when this actor is the defeat target, pick a randomized camera key pair (or a
+ * randomized action pose) by boss form (unit mode 0x110/0x111/0x112) and action code; otherwise frame the
+ * actor from a fixed pose turned 50 degrees toward its facing side. */
+s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
+    ActionStateLink *link = command->link;
+
+    if (btlIsActorCategoryMarked((s32)command) || (link->unit->flags & 0x200)) {
+        return 0;
+    }
+    if (side != 1 || targetSide == side) {
+        func_001EC868((s32)command, (s32)&command->frontCamera, 25.0f);
+        btlCopyMotionTransform(&command->backCamera, command->frontCamera.position);
+        if (command->frontCamera.direction[0] > 0.0f) {
+            func_00336538(-0.87266463f);
+        } else {
+            func_00336538(0.87266463f);
+        }
+        func_00336798(-0.34906585f);
+        sdfMultiplyVuMatrixInPlace();
+        VU0_STORE_VF(vf10, command->frontCamera.direction);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, command->backCamera.direction);
+        command->motionParameter = 45.0f;
+        command->flags |= 0x841;
+        return 1;
+    }
+    btlClearAllUnitDefeatCandidatesTask();
+    btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+    switch (link->unit->mode) {
+    case 0x110:
+        switch (command->actionCode) {
+        case 0x198:
+            btlBossDebugPrintf("VURI:I-G ++++\n");
+            btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+            btlFlagAllUnitDefeatCandidatesTask();
+            command->stepKind = 4;
+            return 1;
+        case 0x197:
+            btlFlagAllUnitDefeatCandidatesTask();
+            switch (effMiscRandMod(0, 2)) {
+            case 0:
+                btlBossDebugPrintf("VURI:I-Z_G-0 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    45.6f, -377.9f, -2539.6f, 0.041f, 0.009f, -0.012f, 0.99f, -7.0f,
+                    -508.3f, -1566.6f, 0.087f, 0.008f, -0.011f, 0.987f, 40.0f, 10.0f);
+                return 1;
+            case 1:
+                btlBossDebugPrintf("VURI:I-Z_G-1 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    8.1f, -1095.9f, -2087.1f, 0.173f, 0.007f, -0.01f, 0.976f, 25.3f,
+                    -912.4f, -1436.5f, 0.175f, 0.007f, -0.01f, 0.975f, 40.0f, 15.0f);
+                return 1;
+            }
+            /* retail keeps the out-of-range roll falling into the generic picks (b to the mod-3 roll) */
+        default:
+            switch (effMiscRandMod(0, 3)) {
+            case 0:
+                btlBossDebugPrintf("VURI:I-0 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    772.4f, -794.7f, -1209.8f, 0.082f, 0.152f, 0.006f, 0.975f, -1562.8f,
+                    -2553.1f, -1132.5f, 0.257f, -0.26f, -0.08f, 0.917f, 40.0f, 30.0f);
+                return 1;
+            case 1:
+                btlBossDebugPrintf("VURI:I-1 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    -61.2f, -75.7f, -877.3f, -0.179f, -0.018f, -0.003f, 0.974f, 938.7f,
+                    -281.4f, -649.2f, -0.175f, 0.186f, -0.04f, 0.956f, 40.0f, 25.0f);
+                return 1;
+            case 2:
+                btlBossDebugPrintf("VURI:I-2 ++++\n");
+                btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+                btlFlagAllUnitDefeatCandidatesTask();
+                command->stepKind = 4;
+                return 1;
+            }
+            break;
+        }
+        break;
+    case 0x111:
+        switch (command->actionCode) {
+        case 0x10D:
+        case 0x10E:
+            btlBossDebugPrintf("VURI_A:N_A ++++\n");
+            btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+            btlFlagAllUnitDefeatCandidatesTask();
+            command->stepKind = 4;
+            return 1;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        switch (effMiscRandMod(0, 3)) {
+        case 0:
+            btlBossDebugPrintf("VURI_A:I-0 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                -20.1f, -1268.7f, -1612.9f, 0.16f, 0.152f, 0.014f, 0.966f, 1220.2f,
+                -1216.5f, -1519.4f, 0.162f, 0.242f, 0.03f, 0.947f, 40.0f, 25.0f);
+            return 1;
+        case 1:
+            btlBossDebugPrintf("VURI_A:I-1 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                -2784.2f, -1846.4f, -636.1f, -0.175f, 0.452f, 0.103f, -0.857f, -326.1f,
+                -1724.4f, -1809.0f, -0.25f, 0.019f, 0.014f, -0.958f, 40.0f, 30.0f);
+            return 1;
+        case 2:
+            btlBossDebugPrintf("VURI_A:I-2 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                -2936.0f, -1966.4f, 834.8f, -0.206f, 0.685f, 0.229f, -0.646f, -2221.2f,
+                -1778.1f, 395.6f, -0.206f, 0.685f, 0.229f, -0.646f, 40.0f, 25.0f);
+            return 1;
+        }
+        break;
+    case 0x112:
+        switch (command->actionCode) {
+        case 0x10D:
+        case 0x10E:
+            btlBossDebugPrintf("VURI_A:N_B ++++\n");
+            btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+            btlFlagAllUnitDefeatCandidatesTask();
+            command->stepKind = 4;
+            return 1;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        switch (effMiscRandMod(0, 3)) {
+        case 0:
+            btlBossDebugPrintf("VURI_B:I-0 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                -1653.6f, -1414.0f, -776.2f, -0.164f, 0.419f, 0.087f, -0.878f, -347.6f,
+                -1306.9f, -1321.1f, -0.182f, 0.17f, 0.04f, -0.958f, 40.0f, 30.0f);
+            return 1;
+        case 1:
+            btlBossDebugPrintf("VURI_B:I-1 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                1988.7f, -555.7f, -1275.0f, -0.077f, -0.28f, -0.015f, -0.946f, 644.4f,
+                -1129.4f, -1643.7f, -0.158f, -0.1f, -0.008f, -0.972f, 40.0f, 20.0f);
+            return 1;
+        case 2:
+            btlBossDebugPrintf("VURI_B:I-2 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                3048.7f, -568.1f, 238.9f, -0.007f, -0.685f, 0.0f, -0.715f, 1432.3f,
+                -1044.6f, -1558.1f, -0.133f, -0.219f, -0.022f, -0.956f, 40.0f, 25.0f);
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041A5E0);
 
