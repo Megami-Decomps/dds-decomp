@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "eff.h"
 #include "itf.h"
@@ -4642,10 +4643,6 @@ void btlClearTaskActorSlots(void) {
     }
 }
 
-typedef struct ActorSlotOrder {
-    u8 pad00[0xC];
-    s32 entries[12];
-} ActorSlotOrder;
 
 typedef struct ActorOrder12 {
     s32 entries[12];

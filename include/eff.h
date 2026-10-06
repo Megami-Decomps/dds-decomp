@@ -633,4 +633,41 @@ typedef struct ParCell {
 /* Mid-grey fragment colour (0x80 in each channel). */
 #define EFF_THUNDER_FRAGMENT_GREY 0x80808080
 
+/* Shared paired-chain parameter and resource owners. Points are filled before rendering. */
+typedef struct EffThunderGroupParams {
+    f32 points[10][4];
+    s32 count;
+    EffThunderFragmentParams params;
+} EffThunderGroupParams;
+typedef struct EffThunderGroup EffThunderGroup;
+
+typedef struct PairedEffectParams {
+    f32 startVec[4];
+    EffThunderFragmentParams fragment;
+    s32 total;
+    s32 fadeIn;
+    s32 fadeOut;
+} PairedEffectParams;
+
+typedef struct PairedEffectResources {
+    f32 startVec[4];
+    EffThunderFragmentParams fragment;
+    s32 total;
+    s32 fadeIn;
+    s32 fadeOut;
+    EffThunderGroup *resource[2];
+    s32 frame;
+    u32 colorWithAlpha;
+} PairedEffectResources;
+
+typedef char EffThunderGroupParamsSizeCheck[sizeof(EffThunderGroupParams) == 0xF8 ? 1 : -1];
+typedef char EffThunderGroupParamsCountOffsetCheck[((u32)&((EffThunderGroupParams *)0)->count == 0xA0) ? 1 : -1];
+typedef char EffThunderGroupParamsFragmentOffsetCheck[((u32)&((EffThunderGroupParams *)0)->params == 0xA4) ? 1 : -1];
+typedef char PairedEffectParamsSizeCheck[sizeof(PairedEffectParams) == 0x70 ? 1 : -1];
+typedef char PairedEffectResourcesSizeCheck[sizeof(PairedEffectResources) == 0x80 ? 1 : -1];
+typedef char PairedEffectFragmentOffsetCheck[((u32)&((PairedEffectResources *)0)->fragment == 0x10) ? 1 : -1];
+typedef char PairedEffectResourcesOffsetCheck[((u32)&((PairedEffectResources *)0)->resource == 0x70) ? 1 : -1];
+typedef char PairedEffectFrameOffsetCheck[((u32)&((PairedEffectResources *)0)->frame == 0x78) ? 1 : -1];
+typedef char PairedEffectColorOffsetCheck[((u32)&((PairedEffectResources *)0)->colorWithAlpha == 0x7C) ? 1 : -1];
+
 #endif /* EFF_H */

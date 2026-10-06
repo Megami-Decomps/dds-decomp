@@ -1,16 +1,7 @@
 #include "common.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 
-typedef struct PairedEffectResources {
-    f32 startVec[4];
-    u8 pad10[0x54];
-    s32 total;       /* 0x64 */
-    s32 fadeIn;      /* 0x68 */
-    s32 fadeOut;     /* 0x6C */
-    u32 resource[2]; /* 0x70 */
-    s32 frame;       /* 0x78 */
-    u32 colorWithAlpha; /* 0x7C: blend starts with the top byte masked off */
-} PairedEffectResources;
 
 /* The four interpolated VU0 vectors written into each effect resource. */
 typedef struct {
@@ -21,10 +12,15 @@ typedef struct {
 } BlurVectorRecord;
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
-extern void effThunderUpdateChainSegments(u32 handle);
+extern void effThunderUpdateChainSegments(EffThunderGroup *group);
+extern void effThunderGroupRelease(EffThunderGroup *group);
+extern void effSetResourceBlendColor(s32 handle, u32 color);
+extern u32 func_0016F018(u32 address);
 extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(PairedEffectResources *pair) {
+    extern void sdfReleaseChipBlock(void *work);
+
     effThunderGroupRelease(pair->resource[1]);
     effThunderGroupRelease(pair->resource[0]);
     sdfReleaseChipBlock(pair);
@@ -57,7 +53,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
             do {
                 btlSetActorEffectParameterOrMuzzlePosition(actor, 0xB);
                 VU0_STORE_VF(vf10, actorPosition);
-                record = func_0016F018(work->resource[resourceIndex]);
+                record = (BlurVectorRecord *)func_0016F018((u32)work->resource[resourceIndex]);
                 VU0_LOAD_VF(vf10, actorPosition);
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_STORE_VF(vf10, record->start);
@@ -68,7 +64,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 VU0_LERP_VF10(0.66f);
                 VU0_STORE_VF(vf10, record->twoThirds);
                 VU0_STORE_VF(vf11, record->end);
-                effSetResourceBlendColor(work->resource[resourceIndex], blendColor);
+                effSetResourceBlendColor((s32)work->resource[resourceIndex], blendColor);
                 effThunderUpdateChainSegments(work->resource[resourceIndex]);
                 resourceIndex++;
             } while (resourceIndex < 2);
