@@ -10,13 +10,20 @@ typedef struct EvtUnitMotion {
 
 
 typedef struct EvtTargetInfo {
-    u8 pad0[0x64];
+    f32 firstColor[4];
+    f32 direction[4];
+    u8 pad20[0x20];
+    f32 secondColor[4];
+    f32 nearDistance, farDistance;
+    f32 auxFirst, auxSecond;
+    u32 unk60;
     u32 flags;         /* 0x64: bit 3 selects the unit's own vector */
 } EvtTargetInfo;
 
 typedef struct EvtTarget {
     u8 pad0[0x18];
     EvtTargetInfo *info; /* 0x18 */
+    EvtEffData *data;
 } EvtTarget;
 
 extern f32 *D_00324770[];
@@ -65,7 +72,442 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
     return length;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00220910);
+typedef struct MdlCtx MdlCtx;
+extern u32 mdlGetBroadcastValue(MdlCtx *);
+extern void mdlBroadcastMasked(MdlCtx *, u32);
+extern f32 D_003BD358, D_003BD35C;
+extern s32 dds3GetWorldObject(void);
+extern s32 dds3ContainsNodeInObjectChain(s32, s32, s32);
+extern s32 sdfLoadMapRecordPositionVector(void *, s32);
+extern void mdlLoadPrimaryVectorVU(EvtUnitOwner *);
+extern void func_00107DE8(void);
+extern void effMiscQuaternionNlerpVU(f32);
+extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
+extern void sdfSetTextFloatPairOverride(void *, f32, f32);
+extern void sdfClearTextFloatPairOverride(void *);
+
+/* Advance the model, light-colour and directional transitions for one event unit. */
+void func_00220910(EvtUnit *unit) {
+    f32 identity[4];
+    f32 targetDirection[4];
+    f32 previousDirection[4];
+    f32 position[4];
+    f32 blendedDirection[4];
+    f32 oldDirection[4];
+    u32 rgbTarget[4], rgbSource[4], rgbResult[4];
+    u32 alphaTarget[4], alphaSource[4], alphaResult[4];
+    u32 firstSource[4], firstTarget[4], firstResult[4];
+    u32 secondSource[4], secondTarget[4], secondResult[4];
+    u32 defaultFirst[4], defaultSecond[4];
+    u32 currentFirst[4], previousFirst[4], finalFirst[4];
+    u32 currentSecond[4], previousSecond[4], finalSecond[4];
+    f32 auxFirst, auxSecond;
+    f32 factor;
+    f32 transition;
+    f32 currentWeight;
+    f32 previousWeight;
+    EvtTargetInfo *target;
+    EvtTargetInfo *previous;
+    s32 ownVector;
+    s32 overrideAux = 0;
+    u32 flags;
+    u32 originalFlags;
+    u32 oldColor;
+
+    memset(identity, 0, sizeof(identity));
+    identity[3] = 1.0f;
+    auxFirst = D_003BD358;
+    auxSecond = D_003BD35C;
+    previousWeight = 0.0f;
+    /* The model RGB and alpha tracks preserve the other packed channel. */
+    flags = unit->flags;
+    if (flags & 0x8000) {
+        u32 packed;
+        factor = unit->rgbDuration ? (f32)unit->rgbElapsed / unit->rgbDuration : 1.0f;
+        rgbTarget[0] = unit->color64;
+        EE_MMI_RGBA_UNPACK_READONLY(rgbTarget, 0.0078125f);
+        VU0_MOVE_VF(vf11, vf10);
+        rgbSource[0] = unit->color60;
+        EE_MMI_RGBA_UNPACK_READONLY(rgbSource, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - factor);
+        VU0_SCALE_VF(vf11, factor);
+        VU0_ADD(vf10, vf10, vf11);
+        oldColor = mdlGetBroadcastValue((MdlCtx *)unit->owner);
+        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        rgbResult[0] = packed;
+        mdlBroadcastMasked((MdlCtx *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
+        if (unit->rgbElapsed >= unit->rgbDuration) {
+            flags = unit->flags &= ~0x8000;
+        } else {
+            flags = unit->flags;
+            unit->rgbElapsed++;
+        }
+    }
+    if (flags & 0x10000) {
+        u32 packed;
+        factor = unit->alphaDuration ? (f32)unit->alphaElapsed / unit->alphaDuration : 1.0f;
+        alphaTarget[0] = unit->color64;
+        EE_MMI_RGBA_UNPACK_READONLY(alphaTarget, 0.0078125f);
+        VU0_MOVE_VF(vf11, vf10);
+        alphaSource[0] = unit->color60;
+        EE_MMI_RGBA_UNPACK_READONLY(alphaSource, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - factor);
+        VU0_SCALE_VF(vf11, factor);
+        VU0_ADD(vf10, vf10, vf11);
+        oldColor = mdlGetBroadcastValue((MdlCtx *)unit->owner);
+        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        alphaResult[0] = packed;
+        mdlBroadcastMasked((MdlCtx *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
+        if (unit->alphaElapsed >= unit->alphaDuration) {
+            flags = unit->flags &= ~0x10000;
+        } else {
+            flags = unit->flags;
+            unit->alphaElapsed++;
+        }
+    }
+    /* Stale world-node references must not reach the target-vector reads. */
+    if (flags & 0x40000) {
+        if (unit->currentTransitionValue == 0) {
+            unit->flags = flags & ~0x40000;
+        } else if (!dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9, unit->currentTransitionValue)) {
+            unit->currentTransitionValue = 0;
+            unit->previousTransitionValue = 0;
+            unit->flags &= ~0x40000;
+        }
+    }
+    if (unit->previousTransitionValue &&
+        !dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9, unit->previousTransitionValue)) {
+        unit->previousTransitionValue = 0;
+    }
+    transition = 0.0f;
+    target = 0;
+    previous = 0;
+    ownVector = 0;
+    currentWeight = 0.0f;
+    if (unit->currentTransitionValue) {
+        flags = unit->flags;
+        if (flags & 0x40000) {
+            f32 distance;
+            target = ((EvtTarget *)unit->currentTransitionValue)->info;
+            if (unit->previousTransitionValue) {
+                previous = ((EvtTarget *)unit->previousTransitionValue)->info;
+            }
+            if (!sdfLoadMapRecordPositionVector(unit->owner->data, 0)) {
+                mdlLoadPrimaryVectorVU(unit->owner);
+            }
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            VU0_LOAD_VF(vf11, ((EvtTarget *)unit->currentTransitionValue)->data->position);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, targetDirection);
+            VU0_LENGTH_VF10(distance);
+            if (distance <= target->nearDistance) {
+                currentWeight = 1.0f;
+            } else if (distance >= target->farDistance) {
+                currentWeight = 0.0f;
+            } else {
+                currentWeight = 1.0f - (distance - target->nearDistance) /
+                    (target->farDistance - target->nearDistance);
+            }
+            if (previous) {
+                f32 previousDistance;
+                VU0_LOAD_VF(vf10, position);
+                VU0_LOAD_VF(vf11, ((EvtTarget *)unit->previousTransitionValue)->data->position);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, previousDirection);
+                VU0_LENGTH_VF10(previousDistance);
+                if (previousDistance <= previous->nearDistance) {
+                    previousWeight = 1.0f;
+                } else if (previousDistance >= previous->farDistance) {
+                    previousWeight = 0.0f;
+                } else {
+                    previousWeight = 1.0f - (previousDistance - previous->nearDistance) /
+                        (previous->farDistance - previous->nearDistance);
+                }
+            }
+            VU0_LOAD_VF(vf10, targetDirection);
+            if (target->flags & 8) {
+                VU0_STORE_VF_UNCLOBBERED(vf10, target->direction);
+                flags = unit->flags;
+                ownVector = 1;
+            } else {
+                if (unit->flags & 0x180000) {
+                    if ((u16)unit->transitionFrameCount) {
+                        transition = (f32)(u16)unit->transitionElapsed / (u16)unit->transitionFrameCount;
+                    } else {
+                        transition = 1.0f;
+                    }
+                    if (unit->flags & 0x100000) {
+                        transition = 1.0f - transition;
+                    }
+                    if ((u16)unit->transitionFrameCount) {
+                        if ((u16)unit->transitionFrameCount <= (u16)++unit->transitionElapsed) {
+                            if (unit->flags & 0x100000) {
+                                unit->currentTransitionValue = 0;
+                                unit->flags &= ~0x40000;
+                            }
+                            unit->previousTransitionValue = 0;
+                            unit->flags &= ~0x180000;
+                        }
+                    }
+                } else {
+                    transition = 1.0f;
+                }
+                flags = unit->flags;
+            }
+        }
+    } else {
+        flags = unit->flags;
+    }
+    /* Direction consumes the snapshot after the target transition updates. */
+    if (flags & 0x6000) {
+        if (unit->directionFramesRemaining) {
+            factor = 1.0f / unit->directionFramesRemaining;
+        } else {
+            factor = 1.0f;
+        }
+        VU0_LOAD_VF(vf10, unit->vec20);
+        if (flags & 0x2000) {
+            VU0_LOAD_VF(vf11, unit->vec30);
+        } else if (ownVector) {
+            VU0_LOAD_VF(vf11, target->direction);
+        } else {
+            VU0_LOAD_VF(vf11, D_00324770[0] + 4);
+        }
+        func_00107DE8();
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, identity);
+        effMiscQuaternionNlerpVU(factor);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, unit->vec20);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec40);
+        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec20);
+        if (unit->directionFramesRemaining == 0) {
+            flags = unit->flags;
+            if (flags & 0x4000) {
+                unit->flags &= ~0x400;
+                flags = unit->flags;
+            }
+            unit->flags = flags & ~0x6000;
+        } else {
+            unit->directionFramesRemaining--;
+        }
+    } else if (!(flags & 0x400)) {
+        if (ownVector) {
+            VU0_LOAD_VF(vf10, target->direction);
+        } else {
+            VU0_LOAD_VF(vf10, D_00324770[0] + 4);
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec40);
+    }
+    if (target && !ownVector) {
+        factor = transition;
+        VU0_LOAD_VF(vf10, unit->vec40);
+        VU0_LOAD_VF(vf11, targetDirection);
+        func_00107DE8();
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, identity);
+        effMiscQuaternionNlerpVU(factor);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, unit->vec40);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, blendedDirection);
+        if (previous) {
+            factor = 1.0f;
+            VU0_LOAD_VF(vf10, unit->vec40);
+            VU0_LOAD_VF(vf11, previousDirection);
+            func_00107DE8();
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, identity);
+            effMiscQuaternionNlerpVU(factor);
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf10, unit->vec40);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, oldDirection);
+            VU0_LOAD_VF(vf11, blendedDirection);
+            func_00107DE8();
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, identity);
+            effMiscQuaternionNlerpVU(transition);
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf10, oldDirection);
+            VU0_APPLY_MATRIX(vf10, vf10);
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec10);
+    } else {
+        PCP_COPY_VECTOR(unit->vec10, unit->vec40);
+    }
+    /* Advance the two local colour tracks before applying target influence. */
+    originalFlags = unit->flags;
+    flags = originalFlags;
+    if (originalFlags & 0x1800) {
+        u32 firstPacked;
+        u32 secondPacked;
+
+        if (unit->colorFramesRemaining) {
+            factor = 1.0f / unit->colorFramesRemaining;
+        } else {
+            factor = 1.0f;
+        }
+        firstSource[0] = unit->firstCurrent;
+        EE_MMI_RGBA_UNPACK_READONLY(firstSource, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - factor);
+        VU0_MOVE_VF(vf11, vf10);
+        if (unit->flags & 0x800) {
+            firstTarget[0] = unit->color08;
+            EE_MMI_RGBA_UNPACK_READONLY(firstTarget, 0.0078125f);
+        } else if (ownVector) {
+            VU0_LOAD_VF(vf10, target);
+        } else {
+            VU0_LOAD_VF(vf10, D_00324770[0]);
+        }
+        VU0_SCALE_VF(vf10, factor);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_CLEAR_W(vf10);
+        EE_MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
+        firstResult[0] = firstPacked;
+        unit->firstCurrent = firstResult[0];
+        unit->color0C = unit->firstCurrent;
+        secondSource[0] = unit->color54;
+        EE_MMI_RGBA_UNPACK_READONLY(secondSource, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - factor);
+        VU0_MOVE_VF(vf11, vf10);
+        if (unit->flags & 0x800) {
+            secondTarget[0] = unit->color58;
+            EE_MMI_RGBA_UNPACK_READONLY(secondTarget, 0.0078125f);
+        } else if (ownVector) {
+            VU0_LOAD_VF(vf10, target->secondColor);
+        } else {
+            VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+        }
+        VU0_SCALE_VF(vf10, factor);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_SET_W_ONE(vf10);
+        EE_MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
+        secondResult[0] = secondPacked;
+        unit->color54 = secondResult[0];
+        unit->color5C = unit->color54;
+        if (unit->colorFramesRemaining == 0) {
+            if (originalFlags & 0x1000) {
+                flags = unit->flags = originalFlags & ~0x300;
+            }
+            unit->flags = flags & ~0x1800;
+        } else {
+            unit->colorFramesRemaining--;
+        }
+    } else {
+        u32 firstPacked;
+        u32 secondPacked;
+        if (!(originalFlags & 0x100)) {
+            if (ownVector) {
+                VU0_LOAD_VF(vf10, target);
+            } else {
+                VU0_LOAD_VF(vf10, D_00324770[0]);
+            }
+            EE_MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
+            defaultFirst[0] = firstPacked;
+            unit->color0C = defaultFirst[0];
+        }
+        if (!(originalFlags & 0x200)) {
+            if (ownVector) {
+                VU0_LOAD_VF(vf10, target->secondColor);
+            } else {
+                VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+            }
+            EE_MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
+            defaultSecond[0] = secondPacked;
+            unit->color5C = defaultSecond[0];
+        }
+    }
+    if (target && !ownVector) {
+        u32 packed;
+        f32 weightedTransition;
+        factor = currentWeight * transition;
+        weightedTransition = factor;
+        currentFirst[0] = unit->color0C;
+        EE_MMI_RGBA_UNPACK_READONLY(currentFirst, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - factor);
+        VU0_LOAD_VF(vf11, target);
+        VU0_SCALE_VF(vf11, factor);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, blendedDirection);
+        if (previous) {
+            factor = previousWeight;
+            previousFirst[0] = unit->color0C;
+            EE_MMI_RGBA_UNPACK_READONLY(previousFirst, 0.0078125f);
+            VU0_SCALE_VF(vf10, 1.0f - factor);
+            VU0_LOAD_VF(vf11, previous);
+            VU0_SCALE_VF(vf11, factor);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_SCALE_VF(vf10, 1.0f - transition);
+            VU0_LOAD_VF(vf11, blendedDirection);
+            VU0_SCALE_VF(vf11, transition);
+            VU0_ADD(vf10, vf10, vf11);
+        }
+        VU0_CLEAR_W(vf10);
+        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        finalFirst[0] = packed;
+        unit->color = finalFirst[0];
+        factor = weightedTransition;
+        currentSecond[0] = unit->color5C;
+        EE_MMI_RGBA_UNPACK_READONLY(currentSecond, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - factor);
+        VU0_LOAD_VF(vf11, target->secondColor);
+        VU0_SCALE_VF(vf11, factor);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, blendedDirection);
+        if (previous) {
+            factor = previousWeight;
+            previousSecond[0] = unit->color5C;
+            EE_MMI_RGBA_UNPACK_READONLY(previousSecond, 0.0078125f);
+            VU0_SCALE_VF(vf10, 1.0f - factor);
+            VU0_LOAD_VF(vf11, previous->secondColor);
+            VU0_SCALE_VF(vf11, factor);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_SCALE_VF(vf10, 1.0f - transition);
+            VU0_LOAD_VF(vf11, blendedDirection);
+            VU0_SCALE_VF(vf11, transition);
+            VU0_ADD(vf10, vf10, vf11);
+        }
+        VU0_CLEAR_W(vf10);
+        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        finalSecond[0] = packed;
+        unit->color50 = finalSecond[0];
+    } else {
+        unit->color = unit->color0C;
+        unit->color50 = unit->color5C;
+    }
+    if (target && !ownVector) {
+        auxFirst = target->auxFirst;
+        auxSecond = target->auxSecond;
+        if (auxFirst >= 1.0f) {
+            factor = currentWeight * transition;
+            auxFirst = D_003BD358 * (1.0f - factor) + auxFirst * factor;
+            auxSecond = D_003BD35C * (1.0f - factor) + auxSecond * factor;
+        }
+        if (previous) {
+            f32 oldFirst = previous->auxFirst;
+            f32 oldSecond = previous->auxSecond;
+            if (oldFirst >= 1.0f) {
+                factor = previousWeight;
+                oldFirst = D_003BD358 * (1.0f - factor) + oldFirst * factor;
+                oldSecond = D_003BD35C * (1.0f - factor) + oldSecond * factor;
+                auxFirst = auxFirst * transition + oldFirst * (1.0f - transition);
+                auxSecond = auxSecond * transition + oldSecond * (1.0f - transition);
+            }
+        }
+        overrideAux = 1;
+    }
+    if (!target && evtFindUnitSlotAuxCoordinates(unit, &auxFirst, &auxSecond)) {
+        overrideAux = 1;
+    }
+    if (overrideAux) {
+        sdfSetTextFloatPairOverride(unit->owner->data, auxFirst, auxSecond);
+    } else {
+        sdfClearTextFloatPairOverride(unit->owner->data);
+    }
+}
+
 
 /* vu0 routine: load vf10 with the unit's colour (flag 0x100), its target's vector, or the default */
 void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
@@ -273,9 +715,7 @@ void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
 
-typedef struct MdlCtx MdlCtx;
-extern u32 mdlGetBroadcastValue(MdlCtx *);
-extern void mdlBroadcastMasked(MdlCtx *, u32);
+
 
 void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
     u8 *work = (u8 *)unit;
