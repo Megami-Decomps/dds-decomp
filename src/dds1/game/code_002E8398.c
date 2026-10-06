@@ -1,3 +1,4 @@
+#include "snd_ring.h"
 #include "common.h"
 
 extern s8 D_003BDA80;
@@ -71,7 +72,28 @@ u32 sndReserveIopWorkMemory(s32 size) {
     return (u32)sceSifAllocIopHeap(size);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8640);
+extern SndRingPacket D_003FB080[32];
+/* Shared with the producer and its worker-thread wakeups. */
+extern vu16 D_003BDA82;
+extern vu16 D_003BDA84;
+extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
+
+s32 func_002E8640(void) {
+    s32 readIndex = (s16)D_003BDA82;
+    SndRingPacket *packet;
+
+    if (readIndex == (s16)D_003BDA84) {
+        return 1;
+    }
+    packet = &D_003FB080[readIndex];
+    if (sceSifSendCmd(0, packet, (packet->command >> 24) & 0xf0, 0, 0, 0) == 0) {
+        return 1;
+    }
+    readIndex = (readIndex + 1) & 31;
+    D_003BDA82 = readIndex;
+    return 0;
+}
+
 
 void sdfServiceUnblockedWorkerThread(void) {
     for (;;) {
