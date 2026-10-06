@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "sdf.h"
+#include "mnu.h"
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
@@ -9,9 +10,6 @@ extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void sdfQueueNonzeroResourceId(s32);
 extern u32 effLoadIndexedResource(const char *, const char *, s32);
 extern u32 effDestroyResourceSlotSet(u32);
-
-/* Sliding menu bar: direction flag and 0..max position */
-typedef struct { s32 active; s32 pos; } SlideBar;
 
 /* Title menu's selected page, sequence timers and draw-task state. */
 typedef struct MenuTitleState {

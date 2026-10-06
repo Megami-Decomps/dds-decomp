@@ -361,6 +361,42 @@ struct MenuStaffNode {
     u32 catalogOrdinal; /* +0x68: stable index in the source catalog. */
 };
 
+/* Title movie menu bars (producer: code_002A3AE8). Sliding bar: direction flag and 0..max position. */
+typedef struct SlideBar {
+    s32 active;
+    s32 pos;
+} SlideBar;
+
+/* Sliding bar that switches to a queued mode after a countdown. */
+typedef struct SlideBarTimed {
+    s32 active;
+    s32 pos;
+    s32 id;
+    s32 timer;
+} SlideBarTimed;
+
+typedef struct MovieMenuEffectSlot {
+    s32 active;
+    s32 counter;
+} MovieMenuEffectSlot;
+
+typedef struct PickEntry {
+    s8 id;
+    u8 unk1;
+    u8 unk2;
+} PickEntry;
+
+/* Paired bar with the randomly picked title-movie slots (0x94 bytes). */
+typedef struct PickList {
+    SlideBar control;
+    u8 count;
+    PickEntry entry[32];
+    u8 pad69[3];
+    s32 pathProgress; /* 0x6C: normalized 0..4096 path position */
+    s32 unk70;
+    MovieMenuEffectSlot effectSlots[4]; /* 0x74 */
+} PickList;
+
 #endif /* VERSION_DDS2 */
 
 #endif /* MNU_H */

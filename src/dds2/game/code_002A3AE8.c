@@ -1,8 +1,6 @@
 #include "common.h"
 #include "fpu.h"
-
-/* Sliding menu bar: direction flag and 0..max position */
-typedef struct { s32 active; s32 pos; } SlideBar;
+#include "mnu.h"
 
 extern s32 mnuGetSlidePathSegmentWeight(s32);
 extern s32 D_003E38A0[];
@@ -269,28 +267,6 @@ void mnuSlideBarSetStateSmall(u32 *state, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4208);
 
-
-typedef struct MovieMenuEffectSlot {
-    s32 active;
-    s32 counter;
-} MovieMenuEffectSlot;
-
-typedef struct PickEntry {
-    s8 id;
-    u8 unk1;
-    u8 unk2;
-} PickEntry;
-
-typedef struct PickList {
-    SlideBar control;
-    u8 count;
-    PickEntry entry[32];
-    u8 pad69[3];
-    s32 pathProgress; /* 0x6C: normalized 0..4096 path position */
-    s32 unk70;
-    MovieMenuEffectSlot effectSlots[4]; /* 0x74 */
-} PickList;
-
 void mnuClearMovieMenuPickList(PickList *bar) {
     bar->count = 0;
 }
@@ -499,8 +475,6 @@ void mnuAdvanceSlideBar(PickList *bar, s32 drawContext) {
         }
     }
 }
-
-typedef struct { s32 active; s32 pos; s32 id; s32 timer; } SlideBarTimed;
 
 void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer) {
     bar->timer = timer;
