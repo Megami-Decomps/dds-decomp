@@ -230,20 +230,6 @@ extern void func_001CC438();
 extern char *D_004367CC;
 extern void *sdfAllocAndClearQuadwords(s32);
 
-typedef struct SceneCoordinateRecord {
-    u8 pad00[0xC];
-    s32 scaledX;
-    s32 scaledY;
-    u8 pad14[0x68];
-    s32 sourceX;
-    s32 sourceY;
-    u8 pad84[0x1C];
-} SceneCoordinateRecord;
-
-typedef struct SceneCoordinateWork {
-    u8 pad00[0x18];
-    SceneCoordinateRecord *records;
-} SceneCoordinateWork;
 
 extern char *D_004368B0;
 extern void btlLoadResourceBlock(void);
