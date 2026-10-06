@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fld_inf.h"
+extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
@@ -278,9 +280,9 @@ typedef struct FldRoomState {
 
 extern FldRoomState fldRoomRecords[];
 
-extern u8 D_0038E2D0[];
 
-extern u8 D_0038E2D0[];
+
+
 
 extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 
@@ -1152,6 +1154,10 @@ s32 fldGetCurrentSceneSelectionId(void) {
     return D_00444C68[index * 160];
 }
 
+extern s32 D_004361C8;
+extern const char D_0038E290[];
+extern s32 strcmp(const char *, const char *);
+
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F1E8);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F3E0);
@@ -1176,17 +1182,14 @@ void fldLoadInfoTable(s32 field) {
         fldFormatAreaDirectory(directory, field, 1);
         func_0035C860(path, D_00413448, directory, field);
         command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, D_0038E2D0, 0x3B80);
+        sdfDevQueueReadAndWait(command, &D_0038E2D0, sizeof(D_0038E2D0));
         sdfDevWaitThenReleaseCommandState(command);
     }
 }
 
-typedef struct FldSaveBlock {
-    u32 word[0xEE0]; /* 0x3B80 bytes */
-} FldSaveBlock;
 
-void fldCopyInfoTable(FldSaveBlock *src) {
-    *(FldSaveBlock *)D_0038E2D0 = *src;
+void fldCopyInfoTable(FldInfTable *src) {
+    D_0038E2D0 = *src;
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
