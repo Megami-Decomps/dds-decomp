@@ -102,7 +102,8 @@ typedef struct EvtUnit {
     u8 padD2;
     u8 unkD3;                     /* 0xD3: byte parameter written by timeline keys */
     f32 unkD4;                    /* 0xD4: float parameter written by timeline keys */
-    u8 padD8[8];
+    u32 unkD8Flags;                 /* 0xD8: tested and set at bit 0 */
+    f32 unkDC;                      /* 0xDC: stored angle/state value */
     u8 slotFlags[12];              /* 0xE0 */
     u8 padEC[4];
 #ifdef VERSION_DDS1
