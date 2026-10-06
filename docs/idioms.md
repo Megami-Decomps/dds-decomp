@@ -559,6 +559,14 @@ functions use trampolines and are a different case.
   DDS2 `func_001B32F8` (input and output indexed), `func_0029D790`,
   `func_002294D0`. Don't apply blindly: indexed motor, particle-replay and
   memory-map loops did not match.
+- DDS1 `func_001BE8A0` (item command rows) likewise indexes its existing byte
+  table with `index * 2` and `index * 2 + 1`; gcc derives the saved-register
+  pointer walk. A separately advanced source pointer changed allocation and
+  loop setup. The indexed form plus the natural `selected == index` comparison
+  matches all 476 retail bytes; the reverse comparison differed only in the
+  `xor` operand order at +0xE8. The complete unit checked at 255 match, 0 differ.
+  Its text helper also now follows the matched font provider's real `u32`
+  glyph/color and `char *` text contract, rather than old `u64` placeholders.
 - A packed table can have a pointer-typed header but numeric `u32` work handles
   in its payload. Check the consumer before choosing an array-of-pointers
   representation. DDS2 `func_002EB968` returns such a table:
@@ -793,6 +801,19 @@ landed or saved as a decompilation candidate. Three matching sites do not
 justify inventing an abstraction solely to inhibit sibling calls. Recover a
 real shared callback helper/API from headers, source, or independent callers
 before applying this explanation to a retail function.
+
+The independent-evidence follow-up remains **unresolved**. DDS2 IDA references
+to `scrClearEntryFlag` are exactly the three direct calls above; the setter
+has no references and the tester has three direct jumps plus one direct call.
+No aligned literal pointer to any of these three operation addresses occurs
+in the ELF's loaded regions, so no operation-pointer table was identified.
+Searches of checked-in callback declarations and flag-dispatch strings did
+not establish the `void (*)(DatPartyRecord *, u16, u32)` abstraction.
+The clear operation's six-instruction core, also searched with register
+operands masked, had no counterpart in DDS1 or either Nocturne ELF. These are
+bounded negative findings, not proof that an original header-only helper
+never existed; the retail wrappers must remain asm until independent
+evidence supplies that missing abstraction.
 
 A local function pointer initialized to a known callee also reproduced `jal`
 in a diagnostic: its target remained indirect through `rtl.13.life` and
