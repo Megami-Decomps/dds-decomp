@@ -4,19 +4,15 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "sdf_draw.h"
 #include "scr.h"
 
 
 
 extern EvtUnitVectorSlot D_003D7BD8[7];
 
-typedef struct EvtSlotEnds {
-    f32 (*points)[4];
-    s32 unk4;
-    s32 unk8;
-} EvtSlotEnds;
 
-extern void func_002E1938(s32, EvtSlotEnds *, f32 *);
+extern void func_002E1938(s32, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
@@ -401,7 +397,7 @@ s32 func_00223718(s32 id, f32 *out) {
 void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     f32 ends[4][4];
     f32 color[4];
-    EvtSlotEnds desc = { ends, 0, 0 };
+    SdfLightSources desc = { ends, 0, 0 };
     s32 found = -1;
     s32 i;
 
@@ -439,7 +435,7 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_002E1938(unit->endpointWorkAddress, &desc, color);
+    func_002E1938(unit->endpointWorkAddress, desc, color);
     unit->value = unit->endpointWorkAddress;
 }
 

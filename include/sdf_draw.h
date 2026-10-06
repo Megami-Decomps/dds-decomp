@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+/* Three optional SDK light sources; each points to color and direction vec4.
+ * The callee advances through three pointer words, not scalar slot metadata. */
+typedef f32 (*SdfLightSources[3])[4];
+
+typedef char SdfLightSources_size_must_be_0xC[(sizeof(SdfLightSources) == 0xC) ? 1 : -1];
+
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
 typedef struct DevRequest {
     s32 handle;

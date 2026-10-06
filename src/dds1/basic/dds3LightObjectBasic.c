@@ -21,16 +21,10 @@ typedef struct {
     LightData *data;
 } LightObject;
 
-typedef struct LightSlotDesc {
-    void *points;
-    s32 unk4;
-    s32 unk8;
-} LightSlotDesc;
 
 void effObjFreeInner(void *arg);
 void dds3DestroyObjectBase(s32 arg);
 void sdfReleaseChipBlock(void *arg);
-void func_002E1938(void *arg0, LightSlotDesc *desc, f32 *color);
 void *memset(void *s, s32 c, u32 n);
 extern void *D_00324770[];
 extern void *kwlnDefaultColorVector[];

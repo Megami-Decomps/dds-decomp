@@ -1,6 +1,7 @@
 #include "common.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "sdf_draw.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -570,21 +571,15 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
     }
 }
 
-/* Endpoint render work: the selected slot's two point vectors and its colour. */
-typedef struct EvtSlotEnds {
-    f32 (*points)[4]; /* 0x00 */
-    s32 unk4;         /* 0x04 */
-    s32 unk8;         /* 0x08 */
-} EvtSlotEnds;
 
-extern void func_002E1938(s32, EvtSlotEnds *, f32 *);
+extern void func_002E1938(s32, SdfLightSources, f32 *);
 
 /* Rebuild the unit's endpoint render work from its own colour/vector when the
  * value-change flag is set; otherwise defer to the matching-slot selector. */
 void func_00221A80(EvtUnit *unit) {
     f32 ends[4][4];
     f32 color[4];
-    EvtSlotEnds desc = { ends, 0, 0 };
+    SdfLightSources desc = { ends, 0, 0 };
     u32 packed0[4];
     u32 packed1[4];
     f32 scale0;
@@ -618,7 +613,7 @@ void func_00221A80(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_002E1938(unit->endpointWorkAddress, &desc, color);
+    func_002E1938(unit->endpointWorkAddress, desc, color);
     unit->value = unit->endpointWorkAddress;
 }
 
