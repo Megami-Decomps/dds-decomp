@@ -1962,7 +1962,49 @@ void effScatterComposeWorkMatrix(PcpScatterInstanceB *work, void *source)
 
 
 /* Return two-color ring work with an instance clock and normalized stored delay range. */
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effScatterCreateTwoColorRing);
+void *effScatterCreateTwoColorRing(src, resource)
+    PcpScatterParamsC *src;
+    u32 resource;
+{
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceC));
+    PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);
+    PcpScatterParticle *particle;
+    u32 delayModulus;
+    u32 count;
+    u32 i;
+    PcpScatterDraw *object;
+    u32 drawWord;
+    s32 delayLimit;
+
+    particle = (PcpScatterParticle *)(inst + 1);
+    /* Copy the complete serialized parameter block, including padding. */
+    memcpy(&inst->params, src, sizeof(inst->params));
+    inst->color = EFF_SCATTER_NEUTRAL_COLOR;
+    inst->scale = 1.0f;
+    inst->allocationHandle = allocation;
+    inst->particles = particle;
+    inst->age = 0;
+    VU0_COPY_MATRIX(inst->matrix, src->matrix);
+    object = func_00175B50(src->particleCount, src->unk60);
+    drawWord = src->unk50;
+    inst->scatterObject = (u32)object;
+    object->unk50 = drawWord;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    delayLimit = inst->params.randomDelayRange;
+    if (delayLimit <= 0) {
+        inst->params.randomDelayRange = 1;
+        delayLimit = 1;
+    }
+    delayModulus = delayLimit;
+    count = inst->params.particleCount;
+    for (i = 0; i < count; i++) {
+        particle->age = -(effMiscRand(D_0034DF38) % delayModulus);
+        particle++;
+    }
+    return inst;
+}
 
 /* Create two-color ring work from its parameter and resource table blocks. */
 void effScatterCreateFromParameterTable(void *parameterTable)
