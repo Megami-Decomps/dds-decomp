@@ -2,6 +2,7 @@
 #include "btl.h"
 #include "btl_command.h"
 #include "btl_state.h"
+#include "sdf.h"
 #include "btl_action.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
@@ -533,8 +534,7 @@ extern void btlRepositionPartyAroundBattleCenter(void);
 extern s32 func_001AC648(void);
 extern void func_001F5868(s32, s32, s32, s32);
 extern void func_001F5320(s32, s32, s32, s32);
-extern s32 effCreateSelectionFlagListFromWork(void *);
-extern char D_003BDCC8[];
+extern SdfFlagListParams D_003BDCC8;
 extern void mnuReleaseSoundBufferLocked(void);
 extern void evtSetUnitAlphaTransition(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
@@ -1604,7 +1604,7 @@ void btlFreeTask(BtlRuntimeTask *task) {
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
-s64 btlStartTask(taskObject)
+u64 btlStartTask(taskObject)
     void *taskObject;
 {
     BtlRuntimeTask *task = taskObject;
@@ -7225,18 +7225,18 @@ void btlCreateRainEffect(u32 kind, u32 arg) {
         case 1:
         case 3:
         case 4:
-            work->soundTransitionTask = effCreateSelectionFlagListFromWork(D_003BDCC8);
+            work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_003BDCC8);
             break;
         }
         break;
     case 0xE0:
         if (arg == 5) {
-            work->soundTransitionTask = effCreateSelectionFlagListFromWork(D_003BDCC8);
+            work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_003BDCC8);
         }
         break;
     case 0xE1:
         if (arg == 5) {
-            work->soundTransitionTask = effCreateSelectionFlagListFromWork(D_003BDCC8);
+            work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_003BDCC8);
         }
         break;
     }
@@ -7249,11 +7249,11 @@ void btlReleaseRainSoundTransition(void) {
 }
 
 void btlStopRainSoundTransition(void) {
-    u8 *work = (u8 *)btlGetRuntime();
-    if (((BtlState *)work)->soundTransitionTask != 0) {
+    BtlState *work = (BtlState *)btlGetRuntime();
+    if (work->soundTransitionTask != 0) {
         btlBossDebugPrintf("btl:rain exit\n");
-        effReleaseSelectionFlagList(((BtlState *)work)->soundTransitionTask);
-        ((BtlState *)work)->soundTransitionTask = 0;
+        effReleaseSelectionFlagList(work->soundTransitionTask);
+        work->soundTransitionTask = 0;
     }
 }
 
