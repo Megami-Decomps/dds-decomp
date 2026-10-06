@@ -1218,7 +1218,32 @@ const char *func_0013F3E0(const char *eventName) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F5C8);
+const char *func_0013F5C8(const char *eventName) {
+    s32 i;
+    s32 j;
+    if (eventName == 0) return 0;
+    for (i = 0; i < 8; i++) {
+        if (D_0038E2D0.packs[i].setIndex != 0) {
+            for (j = 0; j < 5; j++) {
+                if (D_0038E2D0.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                    strcmp(eventName, D_0038E2D0.packs[i].hits[j].eventName) == 0) {
+                    D_004361C8 = D_0038E2D0.packs[i].setIndex;
+                    return D_0038E290;
+                }
+            }
+        }
+    }
+    for (i = 0; i < 40; i++) {
+        if ((u16)D_0038E2D0.sets[i].kindArea.packed < 2 &&
+            D_0038E2D0.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            strcmp(eventName, D_0038E2D0.sets[i].eventName) == 0) {
+            D_004361C8 = i;
+            return D_0038E290;
+        }
+    }
+    return 0;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004133A0);
 
