@@ -5,12 +5,18 @@
 
 struct BtlTask;
 
+typedef struct BattleSceneSelection {
+    u16 cursor;
+    u16 entry;
+} BattleSceneSelection;
+
 /* Both fldInitializeSceneObject constructors clear one 0x30-byte allocation.
  * Its final two pointers refer to the owning task's command work and task;
  * the state word alone is not a complete scene-object allocation. */
 typedef struct BattleSceneObject {
     s32 state;
-    u8 pad04[0x24];
+    BattleSceneSelection selections[7]; /* +0x04: indexed by scene kind 0..6. */
+    u8 pad20[8];
     s32 *commandData; /* +0x28: points to the owning task's +0x20 result/work. */
     struct BtlTask *owner; /* +0x2C */
 } BattleSceneObject;
