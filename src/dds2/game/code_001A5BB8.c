@@ -2094,6 +2094,7 @@ extern s32 datUnitHasSkill();
 
 extern s32 evtGetMirroredSolarPhase(void);
 
+/* Retail calls datUnitHasSkill without an explicit ability argument. */
 s32 btlCheckSpecialAbility(s32 arg0, s32 ability) {
     if (datUnitHasSkill(arg0) == 0) {
         return 0;
@@ -2116,19 +2117,6 @@ typedef struct DatSkillOwner {
     u16 skills[0x18];
 } DatSkillOwner;
 
-/* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
-typedef struct DatEnemyRecord {
-    u32 flags;            /* 0x00 */
-    u8 pad04;
-    u8 level;             /* 0x05 */
-    u8 pad06[0x12];
-    u16 skills[8];        /* 0x18 */
-    s32 money;            /* 0x28 */
-    u16 unk2C;
-    u16 experience;       /* 0x2E */
-    u16 huntExperience;   /* 0x30 */
-    u8 pad32[0x1A];
-} DatEnemyRecord;
 
 
 s32 func_001AD118(DatSkillOwner *unit, s32 skill) {
