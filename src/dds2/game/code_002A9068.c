@@ -1,11 +1,17 @@
 #include "common.h"
 #include "dat_state.h"
 
+extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
+
 extern u32 mnuMovieShutdownCounter;
 
 extern s32 kwlnFadeIsActive(void);
 
 extern u32 kwlnTaskGetUserValue();
+
+typedef struct FrFontGlyph FrFontGlyph;
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
 extern char mnuCampInputTaskName[]; /* "camp" */
 
@@ -84,7 +90,7 @@ extern void mnuDrawPanelListDefault(s32, s32, s32, u8 *, s32);
 
 extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, s32, u8 *, s32);
 
-extern s32 mdlFlagTest(u32);
+extern s32 mdlFlagTest(s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
@@ -866,8 +872,8 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
-    func_0019D550(object, 1, layer);
-    frFontQueueGlyphInSelectedSlot(object);
+    func_0019D550((FrFontGlyph *)object, 1, layer);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)object);
     offset = visual->titleSlide;
     magnitude = offset;
     if (offset < 0) {
@@ -900,17 +906,108 @@ extern u8 *D_003E5710[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    u32 *sprite = (u32 *)itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
+    FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
                                       D_003E5710[imageIndex], 0);
     func_0019D550(sprite, 1, 0x54);
     frFontQueueGlyphInSelectedSlot(sprite);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA7A0);
+typedef struct StaffGridLabelRow {
+    s32 count;
+    s32 x[10];
+    s8 gridIds[10];
+    u8 pad36[2];
+} StaffGridLabelRow;
+typedef char StaffGridLabelRow_size_check[sizeof(StaffGridLabelRow) == 0x38 ? 1 : -1];
+typedef char StaffGridLabelRow_gridIds_offset_check[
+    ((u32)&((StaffGridLabelRow *)0)->gridIds == 0x2C) ? 1 : -1];
+extern const StaffGridLabelRow D_0042AA48[];
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA9D8);
+void func_002AA7A0(s32 kind, u32 slot) {
+    StaffGridLabelRow rows[9];
+    s32 i;
+    s32 y = 0x1A1;
+    memcpy(rows, D_0042AA48, sizeof(rows));
+    for (i = 0; i < rows[kind].count; i++) {
+        if (rows[kind].x[i] != 0) {
+            if (rows[kind].gridIds[i] == 0x1F) {
+                itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y - 2) << 3, 0, 1,
+                                           slot, 0x1F, 0x53);
+            } else if (rows[kind].gridIds[i] == 8) {
+                itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y + 2) << 3, 0, 1,
+                                           slot, 8, 0x53);
+            } else {
+                itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, y << 3, 0, 1,
+                                           slot, rows[kind].gridIds[i], 0x53);
+            }
+        }
+    }
+}
 
-extern void func_002AA9D8(u32, u32, u32, u32, u32, u32, u32, u32, u32);
+
+typedef struct TextStyleNode TextStyleNode;
+extern void frFontSetChildColors(TextStyleNode *, u32);
+extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+
+typedef struct StaffFramePiece {
+    s32 gridId;
+    s32 x;
+    s32 y;
+} StaffFramePiece;
+typedef char StaffFramePiece_size_check[sizeof(StaffFramePiece) == 0xC ? 1 : -1];
+extern const StaffFramePiece D_0042AC40[], D_0042AC70[];
+
+void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
+                   u32 drawOption, u32 textOption, u32 conditionTable,
+                   u32 labelOffset, u32 layer) {
+    StaffFramePiece primary[4];
+    StaffFramePiece alternate[4];
+    s32 textPosition[2];
+    StaffFramePiece *pieces;
+    CampVisualWork *menu = (CampVisualWork *)context;
+    s32 i;
+    s32 glyph;
+    memcpy(primary, D_0042AC40, sizeof(primary));
+    memcpy(alternate, D_0042AC70, sizeof(alternate));
+    switch (kind) {
+    case 1:
+        textPosition[0] = 0x2B0;
+        textPosition[1] = 0x1B8;
+        pieces = alternate;
+        break;
+    case 2:
+        textPosition[0] = 0x2B0;
+        textPosition[1] = 0xF8;
+        pieces = alternate;
+        break;
+    case 3:
+        textPosition[0] = 0x3D0;
+        textPosition[1] = 0x268;
+        pieces = alternate;
+        break;
+    default:
+        textPosition[0] = 0x2B0;
+        textPosition[1] = 0xF8;
+        pieces = primary;
+        break;
+    }
+    for (i = 0; i < 4; i++) {
+        itfDrawGridWithResolvedSlot(pieces[i].x, pieces[i].y + 0x918, 0,
+                                   drawOption, menu->titleContext, pieces[i].gridId, layer);
+    }
+    if (textTable != 0) {
+        if (conditionTable != 0 && ((s32 *)conditionTable)[labelIndex] != 0) {
+            if (mdlFlagTest(((s32 *)conditionTable)[labelIndex]) != 0) labelIndex += labelOffset;
+        }
+        glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
+                                             0, labelIndex, textTable, textOption);
+        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC35A);
+        func_0019D550((FrFontGlyph *)glyph, 1, layer);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    }
+}
+
+extern void func_002AA9D8(s32, u32, u32, u32, u32, u32, u32, u32, u32);
 
 void func_002AAC70(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 textOption, u32 layer) {
     func_002AA9D8(kind, labelIndex, textTable, context, drawOption, textOption, 0, 0, layer);

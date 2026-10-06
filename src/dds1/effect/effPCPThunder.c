@@ -1333,7 +1333,48 @@ void func_00165758(EffThunderFragmentWork *work, s32 index) {
 }
 
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00165D80);
+/* Update each fragment through delay, active geometry and alpha fade. The
+ * optional frame limit stops new restarts; active geometry and fades continue.
+ */
+void func_00165D80(EffThunderFragmentWork *work) {
+    s32 i = 0;
+    EffThunderParSystem *system = work->system;
+    s32 count = work->head.fragmentCount;
+    u32 restartLimit = work->head.restartFrameLimit;
+    u32 tintColor = work->color;
+    u32 updateCount = work->state.updateCount;
+    EffThunderFrag *fragment = work->fragments;
+    ParCell *renderCells = system->cells;
+    s32 canRestart;
+
+    if (count > 0) {
+        canRestart = updateCount < restartLimit;
+        do {
+            if (fragment->delayFrames == 0) {
+                if (fragment->activeFrames != 0) {
+                    func_00165758(work, i);
+                    fragment->activeFrames--;
+                } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
+                    fragment->color += EFF_THUNDER_ALPHA_WRAP_ADD;
+                } else if (restartLimit == 0 || canRestart) {
+                    effThunderRandomizeFrag(work, i);
+                    parCellInit(work->system, i);
+                } else {
+                    renderCells[i].vertexCount = 0;
+                }
+            } else {
+                fragment->delayFrames--;
+            }
+            renderCells[i].color = effMultiplyPackedColors(fragment->color, tintColor);
+            i++;
+            fragment++;
+        } while (i < count);
+        updateCount = work->state.updateCount;
+    }
+    work->state.updateCount = updateCount + 1;
+    parPrependCellNode(work->system);
+}
+
 
 
 extern void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index);
