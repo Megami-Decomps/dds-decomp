@@ -7,6 +7,7 @@
 #include "btl.h"
 #include "eff.h"
 #include "btl_action.h"
+#include "kwln.h"
 
 extern SceneSlotFadeWork *D_003BD83C;
 extern ActorSlotOrder *D_003BD840[2];
@@ -169,27 +170,29 @@ extern u32 D_003BD838;
 
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
-extern u32 D_003BB3A8;
+extern const char *D_003BB3A8;
 
-extern u32 btlCommandPanelTaskNameRef;
+extern const char *btlCommandPanelTaskNameRef;
 
-extern u32 D_003BB3B0;
+extern const char *D_003BB3B0;
 
-extern u32 D_003BB3AC;
+extern const char *D_003BB3AC;
 
-extern u32 D_003BB3BC;
+extern const char *D_003BB3BC;
 
-extern u32 D_003BB3C4;
+extern const char *D_003BB3C4;
 
-extern u32 btlAnalyzPanelTaskNameRef;
+extern const char *btlAnalyzPanelTaskNameRef;
 
-extern u32 kwlnTaskGetUserValue(s64);
+extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
-extern u32 btlMahenPanelTaskNameRef;
+extern const char *btlMahenPanelTaskNameRef;
 
-extern s64 kwlnTaskGetTaskByName(u32);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 
-extern s64 kwlnTaskIsRegistered(s64);
+extern s32 kwlnTaskIsRegistered(KwlnTask *);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *, s32);
+extern void func_00101A80(KwlnTask *, KwlnTask *);
 
 extern s32 btlGetTrackedTaskHandle(s32);
 
@@ -246,9 +249,8 @@ extern s32 dds3FindEntryIndex();
 
 extern s32 btlGetIndexedPartyEntryRecord(s32);
 
-extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
 extern s8 effSharedRandomState[];
 
@@ -3010,15 +3012,15 @@ void func_001ACDF0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACE28);
 
-extern u32 D_003BB3A0;
+extern const char *D_003BB3A0;
 
-s64 btlSetTaskPhase2(void) {
-    s64 task = kwlnTaskGetTaskByName(D_003BB3A0);
+s32 btlSetTaskPhase2(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3A0);
     if (task != 0) {
         *(s32 *)kwlnTaskGetUserValue(task) = 2;
         return 1;
     }
-    return task;
+    return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACF10);
@@ -3026,17 +3028,15 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACF10);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACFE0);
 
 u32 btlIsNamedBattleTaskRegistered(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(10);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(10);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -3044,7 +3044,7 @@ u32 btlIsNamedBattleTaskRegistered(void) {
 
 void func_001AD1F8(void) {
     u8 *puVar1;
-    s64 temp_v0;
+    KwlnTask *temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
     if (temp_v0 != 0) {
@@ -3066,8 +3066,8 @@ typedef struct BtlAnalysisPanelWork {
     u8 pad31[0x6F];
 } BtlAnalysisPanelWork;
 
-extern s32 func_001AE540(s64);
-extern void btlReleaseTaskAndRefreshCursorIfFlagged(s32);
+extern s32 func_001AE540(KwlnTask *);
+extern void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *);
 
 /* Create the analysis panel, replacing any panel task already registered. */
 s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
@@ -3076,19 +3076,19 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     s32 task;
 
     if (btlHasRegisteredAnalysisPanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(11), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(11), 0);
     }
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredAphNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
     data = sdfAllocAndClearQuadwords(sizeof(*data));
     data->state = 0;
@@ -3098,26 +3098,24 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->duration = duration;
     data->entry = entry;
     data->frame = 0;
-    task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001AE540,
+    task = (s32)kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001AE540,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
-    func_00101A80(context->taskParent, task);
+    func_00101A80((KwlnTask *)context->taskParent, (KwlnTask *)task);
     btlSetTrackedTaskHandle(11, task);
     context->flags &= ~0x100000;
     return 1;
 }
 
 u32 btlHasRegisteredAnalysisPanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(0xb);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(0xb);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -3132,7 +3130,7 @@ s32 btlGetRegisteredTaskValueOrDefault(void) {
 
 u32 func_001AD428(void) {
     u8 *puVar1;
-    s64 temp_v0;
+    KwlnTask *temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
     if (temp_v0 != 0) {
@@ -3151,8 +3149,8 @@ typedef struct BtlGuidePanelWork {
     s32 unk28;
 } BtlGuidePanelWork;
 
-extern s32 func_001B09A8(s64);
-extern void btlReleaseMessageWindowTask(s64);
+extern s32 func_001B09A8(KwlnTask *);
+extern void btlReleaseMessageWindowTask(KwlnTask *);
 extern u32 btlHasRegisteredGuidePanelTask(void);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
@@ -3164,16 +3162,16 @@ s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     s32 task;
 
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredAphNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
     data = sdfAllocAndClearQuadwords(sizeof(*data));
     data->state = 0;
@@ -3181,16 +3179,16 @@ s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     data->unk20 = 0x60;
     data->unk24 = arg0;
     data->unk28 = arg1;
-    task = kwlnTaskCreate(D_003BB3C4, 0x2B0E, 1, 1, func_001B09A8,
+    task = (s32)kwlnTaskCreate(D_003BB3C4, 0x2B0E, 1, 1, func_001B09A8,
                           btlReleaseMessageWindowTask, (u32)data);
-    func_00101A80(context->taskParent, task);
+    func_00101A80((KwlnTask *)context->taskParent, (KwlnTask *)task);
     btlSetTrackedTaskHandle(9, task);
     return 1;
 }
 
 void func_001AD5A0(void) {
     u8 *puVar1;
-    s64 temp_v0;
+    KwlnTask *temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(D_003BB3C4);
     if (temp_v0 != 0) {
@@ -3200,17 +3198,15 @@ void func_001AD5A0(void) {
 }
 
 u32 btlHasRegisteredGuidePanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(9);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_003BB3C4);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(9);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_003BB3C4);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -3221,7 +3217,7 @@ typedef struct BtlPhaseTask {
 } BtlPhaseTask;
 
 void btlSetTaskPhase5(void) {
-    s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (task != 0) {
         ((BtlPhaseTask *)kwlnTaskGetUserValue(task))->phase = 5;
         btlCommandPanelWork->state = 3;
@@ -3231,7 +3227,7 @@ void btlSetTaskPhase5(void) {
 void btlSetTrackedTaskDisplayMode(s32 mode) {
     s32 task = btlGetTrackedTaskHandle(7);
     if (task != 0) {
-        s32 *data = (s32 *)kwlnTaskGetUserValue(task);
+        s32 *data = (s32 *)kwlnTaskGetUserValue((KwlnTask *)task);
         data[2] = mode;
         if (mode == 0) {
             data[1] = 1;
@@ -3246,22 +3242,20 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
 
 void btlInvalidateSceneFadeCounts(s32 unused) {
     btlGetRuntime();
-    kwlnTaskGetUserValue(btlGetTrackedTaskHandle(7));
+    kwlnTaskGetUserValue((KwlnTask *)btlGetTrackedTaskHandle(7));
     btlTrackedTaskHandles->fadeKindsCached = 0;
 }
 
 u32 btlHasRegisteredPsechgPanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(6);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_003BB3BC);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(6);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_003BB3BC);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -3270,17 +3264,15 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD758);
 
 u32 btlHasRegisteredSkillNamePanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(1);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_003BB3AC);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(1);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_003BB3AC);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -3289,17 +3281,15 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AD970);
 
 u32 btlHasRegisteredAphNamePanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(0);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_003BB3A8);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(0);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_003BB3A8);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -3318,9 +3308,9 @@ extern const BattlePanelColors D_003A2A90;
 extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
 
-extern s32 btlDrawTimedDialogTask(s64);
+extern s32 btlDrawTimedDialogTask(KwlnTask *);
 
-extern void btlReleaseDialogTaskData(s64);
+extern void btlReleaseDialogTaskData(KwlnTask *);
 
 s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     s32 context = btlGetRuntime();
@@ -3328,23 +3318,23 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     MsgQueueTaskData *data;
 
     if (btlHasRegisteredAphNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(task, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 0);
     }
     data = (MsgQueueTaskData *)sdfAllocAndClearQuadwords(0x40);
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
     data->id = arg0;
     data->unk08 = arg1;
     data->value = 0x2D;
-    task = kwlnTaskCreate(D_003BB3A8, 0x2B0E, 1, 1, btlDrawTimedDialogTask, btlReleaseDialogTaskData, (u32)data);
-    func_00101A80(*(u32 *)(context + 0x29C), task);
+    task = (s32)kwlnTaskCreate(D_003BB3A8, 0x2B0E, 1, 1, btlDrawTimedDialogTask, btlReleaseDialogTaskData, (u32)data);
+    func_00101A80((KwlnTask *)*(u32 *)(context + 0x29C), (KwlnTask *)task);
     data->task = task;
     btlSetTrackedTaskHandle(0, task);
     return 1;
@@ -3373,7 +3363,7 @@ typedef struct { u16 flag; u16 unk_02; } MesWindowState;
 
 typedef struct { u32 unk_00; s32 window[9]; u8 unk_28[0x20]; MesWindowState state[9]; } MesWindowList;
 
-void itfMesCloseAllWindows(s32 handle) {
+void itfMesCloseAllWindows(KwlnTask *handle) {
     MesWindowList *list;
     s32 i;
     btlGetRuntime();
@@ -3430,7 +3420,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001AE250);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AE540);
 
-void btlReleaseTaskAndRefreshCursorIfFlagged(s32 handle) {
+void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *handle) {
     u8 *context = (u8 *)btlGetRuntime();
     u8 *data = (u8 *)kwlnTaskGetUserValue(handle);
     sdfReleaseChipBlock(data);
@@ -3577,7 +3567,7 @@ u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delt
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B09A8);
 
-void btlReleaseMessageWindowTask(s64 task) {
+void btlReleaseMessageWindowTask(KwlnTask *task) {
     s32 *entry = (s32 *)kwlnTaskGetUserValue(task);
     itfMesCleanupWindow(entry[9], 0);
     sdfReleaseChipBlock(entry);
@@ -3632,21 +3622,19 @@ s32 btlCountEligibleLinkedActors(s32 context) {
     return count;
 }
 
-extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
-extern void func_00101A80(u32, u32);
 
-extern u32 D_003BB3C0;
+extern const char *D_003BB3C0;
 
-extern s32 func_001B0E68(s64);
+extern s32 func_001B0E68(KwlnTask *);
 
-extern void btlReleaseRegisteredChildTaskWork(s64);
+extern void btlReleaseRegisteredChildTaskWork(KwlnTask *);
 
 void btlStartRegisteredChildTask(void) {
     s32 context = btlGetRuntime();
     u32 data = (u32)sdfAllocAndClearQuadwords(0x20);
-    u32 task = kwlnTaskCreate(D_003BB3C0, 0x2B0E, 1, 1, func_001B0E68, btlReleaseRegisteredChildTaskWork, data);
-    func_00101A80(*(u32 *)(context + 0x29C), task);
+    u32 task = (u32)kwlnTaskCreate(D_003BB3C0, 0x2B0E, 1, 1, func_001B0E68, btlReleaseRegisteredChildTaskWork, data);
+    func_00101A80((KwlnTask *)*(u32 *)(context + 0x29C), (KwlnTask *)task);
     btlSetTrackedTaskHandle(7, task);
 }
 
@@ -3659,7 +3647,7 @@ void func_001B0E48(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B0E68);
 
-void btlReleaseRegisteredChildTaskWork(s64 arg0) {
+void btlReleaseRegisteredChildTaskWork(KwlnTask *arg0) {
     u32 temp_v0;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
@@ -3812,7 +3800,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2968);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B2390);
 
-s32 btlUpdatePhaseGatedTaskUntilTimeout(s64 task) {
+s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
     BattlePhasePanelWork *state = (BattlePhasePanelWork *)kwlnTaskGetUserValue(task);
     s32 phase = btlGetNamedTaskPairStatusOrUnavailable();
     if ((u8)(phase - 1) < 2) {
@@ -3830,7 +3818,7 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(s64 task) {
     return state->frames < 50 ? 0 : -1;
 }
 
-void btlReleasePsechgPanelWork(s64 arg0) {
+void btlReleasePsechgPanelWork(KwlnTask *arg0) {
     BattlePhasePanelWork *work;
 
     work = (BattlePhasePanelWork *)kwlnTaskGetUserValue(arg0);
@@ -3861,7 +3849,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B3DC8);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B3FB0);
 
-void btlReleaseCmsleffPanelWork(s64 arg0) {
+void btlReleaseCmsleffPanelWork(KwlnTask *arg0) {
     u32 temp_v0;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
@@ -3931,7 +3919,7 @@ void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *work) {
     }
 }
 
-void btlFreeRegisteredTaskData(s64 task) {
+void btlFreeRegisteredTaskData(KwlnTask *task) {
     btlGetRuntime();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(1, 0);
@@ -3947,7 +3935,7 @@ void btlToggleModelFlagOnInput(void) {
     }
 }
 
-s32 btlDrawTimedDialogTask(s64 task) {
+s32 btlDrawTimedDialogTask(KwlnTask *task) {
     BattlePanelColors colors = D_003A2A90;
     MsgQueueTaskData *data;
     s32 expired;
@@ -3990,7 +3978,7 @@ s32 btlDrawTimedDialogTask(s64 task) {
     return 0;
 }
 
-void btlReleaseDialogTaskData(s64 task) {
+void btlReleaseDialogTaskData(KwlnTask *task) {
     s32 *entry;
     btlGetRuntime();
     entry = (s32 *)kwlnTaskGetUserValue(task);
@@ -4073,14 +4061,9 @@ s32 func_001B53E8(s32 arg0) {
     return count;
 }
 
-s64 btlGetTaskState6(void) {
-    s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-    if (task != 0) {
-        s32 *state = *(s32 **)(kwlnTaskGetUserValue(task) + 0x2C);
-        return func_001B53E8(state[6]);
-    }
-    return task;
-}
+extern s32 btlGetTaskState6(void);
+
+INCLUDE_ASM(const s32, "game/code_001A1960", btlGetTaskState6);
 
 typedef struct FlagEntry {
     u32 unk0;
@@ -4090,9 +4073,9 @@ typedef struct FlagEntry {
 
 extern u8 *func_001BD708(u8 *, u16 *);
 
-s64 btlClearFlagEntries(void) {
+s32 btlClearFlagEntries(void) {
     u16 count;
-    s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     FlagEntry *entries;
     s32 i;
     if (task != 0) {
@@ -4102,30 +4085,30 @@ s64 btlClearFlagEntries(void) {
         }
         return 1;
     }
-    return task;
+    return 0;
 }
 
-extern u32 D_003BB3D0;
+extern const char *D_003BB3D0;
 
-extern u32 D_003BB3D4;
+extern const char *D_003BB3D4;
 
-s64 btlDestroyTaskC(void) {
-    s64 result = kwlnTaskGetTaskByName(D_003BB3D0);
-    if (result != 0) {
+s32 btlDestroyTaskC(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3D0);
+    if (task != 0) {
         dspCloseChannel();
         if (btlGetTrackedTaskHandle(0xC) != 0) {
-            kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xC), 0);
+            kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0xC), 0);
         }
-        result = 1;
+        return 1;
     }
-    return result;
+    return 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2B20);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B55A8);
 
-void btlFinishTrackedBattleTaskAndCloseWindow(s64 task) {
+void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *task) {
     s32 context = btlGetRuntime();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(12, 0);
@@ -4137,19 +4120,19 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2B50);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B5970);
 
-s64 btlDestroyTaskD(void) {
-    s64 result = kwlnTaskGetTaskByName(D_003BB3D4);
-    if (result != 0) {
+s32 btlDestroyTaskD(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3D4);
+    if (task != 0) {
         dspCloseChannel();
         if (btlGetTrackedTaskHandle(0xD) != 0) {
-            kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xD), 0);
+            kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0xD), 0);
         }
-        result = 1;
+        return 1;
     }
-    return result;
+    return 0;
 }
 
-void btlReleaseWindowTask(s64 task) {
+void btlReleaseWindowTask(KwlnTask *task) {
     BattleController *battle = (BattleController *)btlGetRuntime();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(13, 0);
@@ -4212,7 +4195,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B6850);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B6CF8);
 
-void btlReleaseStwrPanelResource(s64 arg0) {
+void btlReleaseStwrPanelResource(KwlnTask *arg0) {
     u32 temp_v0;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
@@ -4277,7 +4260,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B7C90);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B7F50);
 
 void btlReleaseTrackedTaskResource(void) {
-    s64 temp_v0;
+    KwlnTask *temp_v0;
     u32 temp_v1;
 
     temp_v0 = kwlnTaskGetTaskByName(D_003BB3B0);
@@ -4311,7 +4294,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
         }
     }
     if (count < 3) {
-        s64 task = kwlnTaskGetTaskByName(D_003BB3B0);
+        KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3B0);
         if (task != 0) {
             entry = (u8 *)kwlnTaskGetUserValue(task);
             if (mode != 2) {
@@ -4556,8 +4539,8 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
 }
 
 s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
-    s64 first;
-    s64 second;
+    KwlnTask *first;
+    KwlnTask *second;
     if (btlTrackedTaskHandles != 0) {
         first = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
         second = kwlnTaskGetTaskByName(D_003BB3B0);
@@ -4577,7 +4560,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BCB88);
 
 s32 btlUpdateCommandUiTransition(void) {
     BattleTrackedTaskWork *flow;
-    s64 task;
+    KwlnTask *task;
     s32 counter;
 
     if (btlTrackedTaskHandles != 0) {
@@ -4838,7 +4821,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF0F8);
 
-void fldClearBattleSceneObject(s64 arg0) {
+void fldClearBattleSceneObject(KwlnTask *arg0) {
     u32 temp_v0;
     BattleController *battle;
 
@@ -4850,9 +4833,9 @@ void fldClearBattleSceneObject(s64 arg0) {
 }
 
 extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
-extern s32 func_001BF0F8(s64 task);
-extern s32 func_001B5970(s64 task);
-extern s32 func_001B55A8(s64 task);
+extern s32 func_001BF0F8(KwlnTask *task);
+extern s32 func_001B5970(KwlnTask *task);
+extern s32 func_001B55A8(KwlnTask *task);
 extern void func_001B2AC8(BattleSceneObject *object);
 extern u8 D_00358828[];
 
@@ -4865,12 +4848,12 @@ void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneObjectTaskUserData);
 
-s64 fldGetSceneObjectState(void) {
-    s64 temp_v0;
+s32 fldGetSceneObjectState(void) {
+    KwlnTask *temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (temp_v0 == 0) {
-        return temp_v0;
+        return 0;
     }
     return fldGetSceneObjectTaskUserData()->state;
 }
@@ -4884,9 +4867,9 @@ void func_001BF4C0(BtlTask *task) {
         scene = (BattleController *)btlGetRuntime();
         object = sdfAllocAndClearQuadwords(sizeof(*object));
         fldInitializeSceneObject(object, task);
-        handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
+        handle = (u32)kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
                                func_001BF0F8, fldClearBattleSceneObject, (u32)object);
-        func_00101A80(scene->taskParent, handle);
+        func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)handle);
         scene->sceneObjectTask = handle;
         func_001B83D8((s32)task, 0, 0);
         btlInitializeSelectionWork();
@@ -4898,10 +4881,10 @@ void func_001BF4C0(BtlTask *task) {
                 mdlFlagSet(0x81B);
                 btlTrackedTaskHandles->status.bytes.blocked = 1;
                 scene->flags &= ~0x100000;
-                handle = kwlnTaskCreate(D_003BB3D4, 0x2B0E, 1, 1,
+                handle = (u32)kwlnTaskCreate(D_003BB3D4, 0x2B0E, 1, 1,
                                        func_001B5970, btlReleaseWindowTask,
                                        (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101A80(scene->taskParent, handle);
+                func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xD, handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00358828);
@@ -4909,10 +4892,10 @@ void func_001BF4C0(BtlTask *task) {
                 func_001BCB88(0, 8);
             } else if (btlGetTaskState6() != 0) {
                 scene->flags &= ~0x100000;
-                handle = kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
+                handle = (u32)kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
                                        func_001B55A8, btlFinishTrackedBattleTaskAndCloseWindow,
                                        (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101A80(scene->taskParent, handle);
+                func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xC, handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00358828);
@@ -5026,7 +5009,7 @@ void btlDrawCenteredPanelSegments(s32 width) {
                   btlResourceBlock->resC, 0x15, 0x53);
 }
 
-s32 fldStepSceneStateMachine(s64 handle) {
+s32 fldStepSceneStateMachine(KwlnTask *handle) {
     BattleController *work = (BattleController *)btlGetRuntime();
     SceneAiWork *state;
     s32 mode;
@@ -5083,7 +5066,7 @@ void fldReleaseSceneSpriteWork(SceneAiWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void fldReleaseSceneSprite(s64 arg0) {
+void fldReleaseSceneSprite(KwlnTask *arg0) {
     SceneAiWork *temp_v0;
     s32 temp_v1;
 
@@ -5109,7 +5092,7 @@ u32 fldGetSceneScriptValue(void) {
     return *puVar1;
 }
 
-extern s32 fldStepSceneStateMachine(s64);
+extern s32 fldStepSceneStateMachine(KwlnTask *);
 
 extern u32 func_001C13E8(s32);
 
@@ -5118,21 +5101,21 @@ void fldCreateSceneSpriteTask(s32 arg0) {
     s32 task;
     kwlnTaskGetTaskByName(D_003BB3A0);
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xA), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0xA), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredAphNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
     scene = (BattleController *)btlGetRuntime();
-    task = kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, fldStepSceneStateMachine, fldReleaseSceneSprite,
+    task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, fldStepSceneStateMachine, fldReleaseSceneSprite,
                           func_001C13E8(arg0));
-    func_00101A80(scene->taskParent, task);
+    func_00101A80((KwlnTask *)scene->taskParent, (KwlnTask *)task);
     scene->spriteObject = task;
 }
 
@@ -5366,7 +5349,7 @@ s32 fldCountSceneFadeKinds(BattleController *scene, s32 *outFadeCount) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C4278);
 
-s32 fldSceneCleanupTask(s64 task) {
+s32 fldSceneCleanupTask(KwlnTask *task) {
     BattleController *scene = (BattleController *)btlGetRuntime();
     if ((scene->flags & 0x200) == 0) {
         return 0;
@@ -5378,7 +5361,7 @@ s32 fldSceneCleanupTask(s64 task) {
     return 0;
 }
 
-void fldResetSceneStatus(void) {
+void fldResetSceneStatus(KwlnTask *task) {
     BattleController *scene;
 
     scene = (BattleController *)btlGetRuntime();
@@ -5410,20 +5393,20 @@ u32 fldGetSceneIndexedValue(s32 arg0) {
 void func_001C4540(void) {
 }
 
-extern u32 D_003BB488;
+extern const char *D_003BB488;
 
-extern s32 fldSceneCleanupTask(s64);
+extern s32 fldSceneCleanupTask(KwlnTask *);
 
 void fldCreateSceneCleanupTask(void) {
-    s64 oldTask = kwlnTaskGetTaskByName(D_003BB488);
+    KwlnTask *oldTask = kwlnTaskGetTaskByName(D_003BB488);
     BattleController *context;
     u32 task;
     if (oldTask == 0) {
         btlGetRuntime();
     }
     context = (BattleController *)btlGetRuntime();
-    task = kwlnTaskCreate(D_003BB488, 0x2B0E, 1, 1, fldSceneCleanupTask, fldResetSceneStatus, 0);
-    func_00101A80(context->taskParent, task);
+    task = (u32)kwlnTaskCreate(D_003BB488, 0x2B0E, 1, 1, fldSceneCleanupTask, fldResetSceneStatus, 0);
+    func_00101A80((KwlnTask *)context->taskParent, (KwlnTask *)task);
     context->cleanupTask = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
@@ -5436,7 +5419,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001C45F0);
 
 static inline void btlDestroyTrackedTaskIfPresent(s32 slot) {
     if (btlGetTrackedTaskHandle(slot) != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(slot), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(slot), 0);
     }
 }
 
@@ -5444,19 +5427,19 @@ void fldDestroySceneTasksAndBuffers(void) {
     BattleController *battle = (BattleController *)btlGetRuntime();
 
     if (battle->sceneObjectTask != 0) {
-        kwlnTaskDestroyWithHierarchy(battle->sceneObjectTask, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)battle->sceneObjectTask, 0);
         battle->sceneObjectTask = 0;
     }
     if (battle->spriteObject != 0) {
-        kwlnTaskDestroyWithHierarchy(battle->spriteObject, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)battle->spriteObject, 0);
         battle->spriteObject = 0;
     }
     if (battle->cleanupTask != 0) {
-        kwlnTaskDestroyWithHierarchy(battle->cleanupTask, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)battle->cleanupTask, 0);
         battle->cleanupTask = 0;
     }
     if (btlHasRegisteredPsechgPanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(6), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(6), 0);
     }
     btlDestroyTrackedTaskIfPresent(5);
     btlDestroyTrackedTaskIfPresent(1);
