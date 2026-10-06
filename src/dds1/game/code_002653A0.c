@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
@@ -359,12 +360,6 @@ typedef struct BrsUnitExp {
     s32 totalExp;        /* 0x10 */
 } BrsUnitExp;
 
-typedef struct BrsProgressRow {
-    u8 pad00[8];
-    u32 unit;            /* 0x08 */
-    u32 levelProgress[4]; /* 0x0C */
-    u32 profileProgress[4]; /* 0x1C */
-} BrsProgressRow;
 
 /* Set up the level and profile progress bars for one party member. */
 void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
