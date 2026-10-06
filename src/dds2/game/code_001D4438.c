@@ -226,10 +226,6 @@ extern s32 btlGetEffectActive();
 extern void func_001CC020();
 extern void func_001CC438();
 
-typedef struct SceneAiOther {
-    u8 pad00[0x7BE];
-    s16 index;                /* 0x7BE */
-} SceneAiOther;
 
 extern char *D_004367CC;
 extern void *sdfAllocAndClearQuadwords(s32);
