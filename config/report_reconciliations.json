@@ -71,8 +71,8 @@
       "expected_corrected_code": 12020,
       "expected_total_functions": 368,
       "expected_total_code": 53336,
-      "expected_source_functions": 362,
-      "expected_source_code": 48696,
+      "expected_source_functions": 363,
+      "expected_source_code": 49152,
       "corrected_functions": [
         "effPcpDrawViewAlignedRing",
         "effTwinEffectRerollSlot",
@@ -119,7 +119,6 @@
         "effPcpRandomizeSpawnSlot"
       ],
       "fallback_functions": {
-        "func_00183BE8": 456,
         "func_00183F58": 492,
         "func_00184F50": 432,
         "func_00185950": 1964,
