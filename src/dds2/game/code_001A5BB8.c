@@ -240,8 +240,6 @@ extern s32 mdlFlagTest(s32);
 
 extern u32 mnuGetPartyEntryCurrentId(s32);
 
-extern s8 *datAffinityRecords;
-
 extern s32 btlDoesEnabledStatusMatchCurrentId(s32, u32);
 
 extern s32 evtCheckValueThreshold(s32, s32);
@@ -1908,7 +1906,7 @@ s32 btlApplyCommandAbilityMultiplier(s32 battler, s32 command) {
 }
 
 s32 btlGetSlotValueAdjustedForSpecialAbility(s32 battler, s32 slot) {
-    s32 value = datAffinityRecords[slot * 16 - 0x1aa4];
+    s32 value = datAffinityRecords[slot - DAT_AFFINITY_FIRST_COMMAND].slotCost;
     if (btlDoesEnabledStatusMatchCurrentId(battler + 0x120, 0xe4) && (u32)value >= 2) {
         value--;
     }
@@ -3604,7 +3602,7 @@ s32 btlFindCommandPartnersByAffinity(UiObject *unit, s32 command, void **first, 
     UiObject *partner;
     u32 i;
 
-    requirementCursor = (s32 *)(datAffinityRecords + command * 16 - 0x1AB0);
+    requirementCursor = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
     for (i = 0; i < 3; i++) {
         if (*requirementCursor++ != -1) {
             requiredCount++;

@@ -44,7 +44,6 @@ extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #define MNU_STAFF_NODE_UNAVAILABLE 1
 #define MNU_STAFF_NODE_SELECTED 2
 #define MNU_STAFF_PARTY_PANEL_BASE 0x284
-#define MNU_STAFF_PARTY_SLOTS_BASE 0xA928
 #define MNU_STAFF_FADE_STEP 0x10
 #define MNU_STAFF_FADE_CLOSE_THRESHOLD 0x50
 #define MNU_STAFF_FADE_OPEN_THRESHOLD 0xB0
@@ -196,7 +195,7 @@ extern void mnuSetPopupEntryFlagged();
 
 extern void mnuBeginWindowFadeTransition();
 
-extern void mnuInitPartyPanelSlots();
+extern void mnuInitPartyPanelSlots(PartyPanel *);
 
 extern s32 func_002B06A8();
 
@@ -244,14 +243,6 @@ extern char D_003E75A8[];
 
 extern void sndSetSequenceVolumePan();
 
-typedef struct MenuSlot {
-    s32 resources[3];
-    u16 unused;
-    u16 flags;
-} MenuSlot;
-
-
-
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
     u8 pad00[0x54];
@@ -276,9 +267,7 @@ typedef struct MenuContext {
     s32 panelHandle;       /* 0x118 */
     u8 pad11C[0x168];
     MenuPageWindow partyWindow; /* 0x284: lists, page slots and selection */
-    s32 partyPanelActive;  /* 0xA928 */
-    s32 partyPanelLast;    /* 0xA92C */
-    u8 padA930[0x104];
+    PartyPanel partyPanel; /* 0xA928: counters and five native 0x34-byte entries */
     s32 panelGroup;        /* 0xAA34 */
     s32 panelRequest;      /* 0xAA38 */
     s32 panelEffects;      /* 0xAA3C */
@@ -296,8 +285,6 @@ typedef struct MenuContext {
     s32 titleSlide;
     s32 highlightOpacity;
 } MenuContext;
-
-extern MenuSlot *datAffinityRecords;
 
 extern void mnuReleaseSpriteTextures(s32);
 
@@ -470,7 +457,7 @@ s32 mnuUpdatePartySlotAssignmentPopup(s32 callback) {
     if (evtGetCapturedWindowPanelValue() == 0) {
         label = ((MenuWindowContainer *)*(s32 *)(menu + 0x18))->list->cursor->sortKeySecondary;
         mnuPrepareStaffValueChangeDialog(context, slot, label, func_002B06A8(menu, slot, label));
-        mnuInitPartyPanelSlots(context + 0xA928);
+        mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         func_002BCAB0(context + 0x284);
         *(s32 *)(menu + 0x40) = label;
     }
@@ -539,7 +526,7 @@ s32 mnuPartySlotConfirmClearUpdate(s32 callback) {
         mnuClearPartySelectionValues(slot, selectedEntry);
         evtCopyEntryStringToActiveWindow(0, D_00435E5C + selectedEntry * 0x19);
         dspStartEntry(0xE);
-        mnuInitPartyPanelSlots(context + 0xA928);
+        mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         func_002BCAB0(context + 0x284);
     }
     mnuSetPopupEntryFlagged(popup, D_003E7530);
@@ -591,10 +578,47 @@ void mnuDestroyPartySelectionWindow(s32 context) {
 extern void mnuCopyPartyEntries();
 INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyPartyEntries);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B12B0);
-
-extern void func_002B12B0();
+/* Move a current party entry into the selected backup slot and refresh its panel. */
+extern void *memcpy(void *, const void *, u32);
+extern void func_002C4328(u8 *, s32, u32, PartyPanel *);
+extern void mnuRefreshWindowSlots(MenuPageWindow *, s32);
 extern void func_002BCAB0();
+
+void func_002B12B0(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
+    PartyMenuData *menuWork = (PartyMenuData *)context->party;
+    s32 activeCount = context->partyPanel.unk0;
+    s32 lastSlot = context->partyPanel.unk4;
+    s32 i;
+
+    memcpy(&menuWork->backup[menuWork->selection], &menuWork->current[entryIndex],
+           sizeof(DatPartyRecord));
+    memset(&menuWork->current[entryIndex], 0, sizeof(DatPartyRecord));
+    if (mode == 2) {
+        s32 selection = menuWork->selection;
+        context->partyWindow.slots[selection].flags &= ~0x40;
+        menuWork->backup[selection].flags |= 2;
+        func_002C4328((u8 *)&menuWork->backup[menuWork->selection], 0, menuWork->selection,
+                      &context->partyPanel);
+    } else {
+        menuWork->backup[menuWork->selection].flags &= ~2;
+        func_002C4328((u8 *)&menuWork->backup[menuWork->selection], 0, menuWork->selection,
+                      &context->partyPanel);
+    }
+    context->partyPanel.slots[menuWork->selection].index = entryIndex;
+    context->partyPanel.unk0 = activeCount;
+    context->partyPanel.unk4 = lastSlot;
+    if (skipRefresh == 0) {
+        mnuRefreshWindowSlots(&context->partyWindow, 1);
+    }
+    for (i = context->partyPanel.unk0; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
+        context->partyWindow.slots[i].flags |= 0x40;
+    }
+    func_002BCAB0(&context->partyWindow);
+    context->partyPanel.unk0++;
+    context->partyPanel.unk4--;
+    menuWork->selection++;
+}
+
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources. */
 extern void mnuRestorePartyEntriesAndRefresh();
@@ -625,11 +649,11 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     mnuCopyPartyEntries();
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
-    ((MenuContext *)context)->partyPanelActive = 1;
-    ((MenuContext *)context)->partyPanelLast = mnuCountActiveSlots() - 1;
+    ((MenuContext *)context)->partyPanel.unk0 = 1;
+    ((MenuContext *)context)->partyPanel.unk4 = mnuCountActiveSlots() - 1;
     func_002BCA98(context + MNU_STAFF_PARTY_PANEL_BASE);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
-        *(u32 *)(context + 0x300 + entryIndex * 0x2138) |= 0x40;
+        ((MenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x40;
     }
     for (nodeAddress = (s32)menuWork->primaryWindow->list->first;
          nodeAddress != 0; nodeAddress = (s32)((MenuListNode *)nodeAddress)->next) {
@@ -640,7 +664,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
     mnuReleasePartyPanelTextures(context + MNU_STAFF_PARTY_PANEL_BASE);
-    mnuInitPartyPanelSlots(context + MNU_STAFF_PARTY_SLOTS_BASE);
+    mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
     func_002BCA98(context + MNU_STAFF_PARTY_PANEL_BASE);
 }
 
@@ -1677,7 +1701,7 @@ s32 ptySkillMenuApplyFieldUseAndCost(id, context)
     }
     if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
         mnuConsumeEntryCost(id, slotA);
-        mnuInitPartyPanelSlots(context + 0xA928);
+        mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         func_002BCA98(window);
         func_002BCAB0(window);
         return 1;
@@ -1956,15 +1980,13 @@ void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max) {
 }
 
 s32 mnuHasAvailableSlotResource(s32 id) {
-    MenuSlot *entry;
     s32 i;
-    id -= 0x1ab;
-    entry = (MenuSlot *)((id << 4) + (s32)datAffinityRecords);
-    if ((entry->flags & 2) != 0) {
+    id -= DAT_AFFINITY_FIRST_COMMAND;
+    if ((datAffinityRecords[id].flags & 2) != 0) {
         return 0;
     }
     for (i = 0; i < 3; i++) {
-        if (entry->resources[i] != -1) {
+        if (datAffinityRecords[id].requirements[i] != -1) {
             return 1;
         }
     }
@@ -3153,7 +3175,6 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, s32 *source);
 
 
 
-void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag);
 
 void func_002BCA98(MenuPageWindow *menu);
 

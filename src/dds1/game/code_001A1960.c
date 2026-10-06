@@ -223,9 +223,6 @@ typedef struct BattleFearState {
     u32 flags;
 } BattleFearState;
 
-
-extern s32 datAffinityRecords;
-
 extern s32 dds3FindEntryIndex(s32);
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
@@ -349,11 +346,8 @@ s32 btlApplyCommandAbilityMultiplier(s32 arg0, s32 arg1) {
     return value == 0 ? 1 : value;
 }
 
-s8 func_001A2AE8(s32 arg0) {
-    s32 temp_v0;
-
-    temp_v0 = datAffinityRecords + arg0 * 0x10;
-    return *(s8 *)(temp_v0 - 0x1aa4);
+s8 func_001A2AE8(s32 command) {
+    return datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].slotCost;
 }
 
 s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
@@ -1900,7 +1894,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
     BtlUnit *partner;
     u32 i;
 
-    requirementCursor = (s32 *)(datAffinityRecords + command * 16 - 0x1AB0);
+    requirementCursor = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
     for (i = 0; i < 3; i++) {
         if (*requirementCursor++ != -1) {
             requiredCount++;

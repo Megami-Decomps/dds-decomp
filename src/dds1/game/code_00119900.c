@@ -37,7 +37,6 @@ enum {
     BTL_ENEMY_LEVEL_OFFSET = 5
 };
 
-extern s32 datAffinityRecords;
 extern u8 D_0032AF70[];
 extern s32 func_0011B158(s32, s32, u8);
 
@@ -532,7 +531,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011B158);
 
 /* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
 s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
-    s32 *requirementCursor = (s32 *)(datAffinityRecords + affinity * 16 - 0x1AB0);
+    s32 *requirementCursor = datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND].requirements;
     u32 i;
     s32 requiredCount = 0;
     u32 orderIndex;

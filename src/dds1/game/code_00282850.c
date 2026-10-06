@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mdl.h"
+#include "dat_affinity.h"
 
 struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
@@ -152,10 +153,6 @@ extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern s32 datGameState;
 extern void func_00285960(u8 *entry, s32 arg1, u32 index, PartyPanel *panel);
-
-typedef struct AffinityRow {
-    s32 affinity[4];
-} AffinityRow;
 
 extern void func_002E7F20(f32, f32, f32);
 extern void mdlUpdateContextRotationBasisFromQuaternion(s32);
@@ -1606,10 +1603,8 @@ u8 mnuIsAbilityValueMarked(u32 commandId) {
     return *(s8 *)((commandId & MNU_COMMAND_ID_MASK) * 2 + datCommandSelectors) == '\x01';
 }
 
-extern u32 datAffinityRecords;
-
 s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
-    s32 flags = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 flags = datAffinityRecords[(affinityId - DAT_AFFINITY_FIRST_COMMAND) & 0xFFFF].requirements[index];
 
     if (flags == -1) {
         return -1;
@@ -1642,7 +1637,7 @@ s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
 }
 
 s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index) {
-    s32 value = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 value = datAffinityRecords[(affinityId - DAT_AFFINITY_FIRST_COMMAND) & 0xFFFF].requirements[index];
     if (value == -1) {
         return 0;
     }

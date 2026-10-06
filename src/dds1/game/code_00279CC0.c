@@ -50,16 +50,6 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_0037CC20[];
 
-typedef struct MenuSlot {
-    s32 resources[3];
-    u16 unused;
-    u16 flags;
-} MenuSlot;
-
-extern MenuSlot *datAffinityRecords;
-
-
-
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern void sdfReleaseChipBlock(void *);
@@ -172,15 +162,13 @@ void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max) {
 }
 
 s32 mnuHasAvailableSlotResource(s32 id) {
-    MenuSlot *entry;
     s32 i;
-    id -= 0x1ab;
-    entry = (MenuSlot *)((id << 4) + (s32)datAffinityRecords);
-    if ((entry->flags & 2) != 0) {
+    id -= DAT_AFFINITY_FIRST_COMMAND;
+    if ((datAffinityRecords[id].flags & 2) != 0) {
         return 0;
     }
     for (i = 0; i < 3; i++) {
-        if (entry->resources[i] != -1) {
+        if (datAffinityRecords[id].requirements[i] != -1) {
             return 1;
         }
     }
