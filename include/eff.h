@@ -29,6 +29,62 @@ typedef struct EffectList {
 typedef char EffectListNode_size_must_be_0x18[(sizeof(EffectListNode) == 0x18) ? 1 : -1];
 typedef char EffectList_size_must_be_0x14[(sizeof(EffectList) == 0x14) ? 1 : -1];
 
+/* History arrays precede this 0x38-byte owner in one retained allocation. */
+typedef struct EffMagatuhiValueWork {
+    s32 count;
+    u16 historyCount;
+    u8 pad06[2];
+    f32 unk08;
+    f32 unk0C;
+    u32 unk10;
+    f32 (*positions)[4];
+    u32 *colorTable;
+    f32 *unk1C;
+    u32 *slotColors;
+    u16 *writeIndices;
+    u16 *validCounts;
+    f32 (*angleRows)[4];
+    u32 texture;
+    void *allocationHandle;
+} EffMagatuhiValueWork;
+
+/* Seven copied words; the parent appends its independently allocated history. */
+typedef struct EffMagatuhiHistoryParams {
+    s32 count;
+    s32 historyCount;
+    f32 unk08;
+    u32 colorA;
+    u32 colorB;
+    s32 unk14;
+    f32 unk18;
+} EffMagatuhiHistoryParams;
+
+typedef struct EffMagatuhiOwner {
+    EffMagatuhiHistoryParams params;
+    EffMagatuhiValueWork *valueWork;
+} EffMagatuhiOwner;
+
+typedef char EffMagatuhiValueWork_size_must_be_0x38[(sizeof(EffMagatuhiValueWork) == 0x38) ? 1 : -1];
+typedef char EffMagatuhiHistoryParams_size_must_be_0x1C[(sizeof(EffMagatuhiHistoryParams) == 0x1C) ? 1 : -1];
+typedef char EffMagatuhiOwner_size_must_be_0x20[(sizeof(EffMagatuhiOwner) == 0x20) ? 1 : -1];
+
+EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source);
+void effReleaseMagatuhiOwner(EffMagatuhiOwner *owner);
+void effMagatuhiReleaseResource(EffMagatuhiValueWork *work);
+void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color);
+void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
+#ifdef VERSION_DDS2
+EffMagatuhiValueWork *func_00190E58(s32, s32, f32, s32, f32);
+void func_00190DE0(EffMagatuhiOwner *owner);
+void func_00190DF8(EffMagatuhiValueWork *work, s32 index);
+void func_00191450(EffMagatuhiValueWork *work, s32 index, void *vector);
+#else
+EffMagatuhiValueWork *func_00189220(s32, s32, f32, s32, f32);
+void func_001891A8(EffMagatuhiOwner *owner);
+void func_001891C0(EffMagatuhiValueWork *work, s32 index);
+void func_00189818(EffMagatuhiValueWork *work, s32 index, void *vector);
+#endif
+
 /* Each mapped record owns status storage expanded while its resource is loaded. */
 typedef struct EffMappedRecord {
     u8 pad00[0x14];
@@ -94,20 +150,30 @@ typedef struct {
     s32 bottom;
 } EffResourceRectBounds;
 
+/* Passed directly to the quad renderer, independently of the extent/center. */
+typedef struct {
+    u8 color[4];
+    s32 blendControl;
+    EffResourceRectBounds bounds;
+} EffResourceRectDrawParams;
+
 /* Nine copied words; the selected source handle belongs to the owner. */
 typedef struct {
     s32 extent;
     s32 centerX;
     s32 centerY;
-    u8 color[4];
-    s32 blendControl;
-    EffResourceRectBounds bounds;
+    EffResourceRectDrawParams draw;
 } EffResourceRectParams; /* 0x24 */
 
 typedef struct {
     EffResourceRectParams params;
     u32 sourceHandle;
 } EffResourceRectWork; /* 0x28 */
+
+typedef char EffResourceRectDrawParams_size_must_be_0x18[(sizeof(EffResourceRectDrawParams) == 0x18) ? 1 : -1];
+typedef char EffResourceRectParams_size_must_be_0x24[(sizeof(EffResourceRectParams) == 0x24) ? 1 : -1];
+typedef char EffResourceRectWork_size_must_be_0x28[(sizeof(EffResourceRectWork) == 0x28) ? 1 : -1];
+typedef char EffResourceRectDrawParams_layout[((u32)&((EffResourceRectParams *)0)->draw == 0xC && (u32)&((EffResourceRectDrawParams *)0)->blendControl == 4 && (u32)&((EffResourceRectDrawParams *)0)->bounds == 8) ? 1 : -1];
 
 /* Random slot index and associated release id (0x8); DDS1/2 effect and panel views. */
 typedef struct EffCntRec {

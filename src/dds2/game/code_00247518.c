@@ -9,6 +9,7 @@
 #include "eff_transform.h"
 #include "eff_blur.h"
 #include "dat_state.h"
+#include "eff.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
@@ -401,9 +402,6 @@ typedef struct EffBlurScaleParams {
     s32 size;
 } EffBlurScaleParams;
 
-typedef struct EffTemplateBody {
-    u32 words[9];
-} EffTemplateBody;
 extern EffScreenDrawParams *effGetLoadDescA(void);
 
 /* Native five-word draw-vector parameters; the timeline swaps x and y. */
@@ -420,7 +418,7 @@ extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffSolidRectParams *effEventGetSolidRectangleSetupParams(void);
-extern EffTemplateBody *effEventGetResourceTemplateSetupParams(void);
+extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern EffScreenDrawParams *effGetLoadDescD(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 

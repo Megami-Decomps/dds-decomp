@@ -1,4 +1,4 @@
-#include "common.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -23,25 +23,6 @@
 #define EFF_MAGATUHI_REPLAY_ORBIT 3
 #define EFF_MAGATUHI_REPLAY_DRIFT 4
 
-/* Render/history buffer, created by the Magatuhi owner factory (0x38).
- * This is not the callback input: its +8 word is a float, not an effect pointer. */
-typedef struct {
-    s32 count;
-    u16 historyCount;
-    u8 pad06[2];
-    f32 unk08;
-    f32 unk0C;
-    u32 unk10;
-    f32 (*positions)[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u32 *colorTable;
-    f32 *unk1C;
-    u32 *slotColors;
-    u16 *writeIndices;
-    u16 *validCounts;
-    f32 (*unk2C)[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u32 texture;
-    void *allocationHandle;
-} EffMagatuhiValueWork;
 
 /* Callback input prefix; type 3 contains an effect-dispatch object at +8. */
 typedef struct {
@@ -63,7 +44,6 @@ typedef struct {
 
 
 
-typedef struct EffMagatuhiOwner EffMagatuhiOwner;
 
 /* Parameter head of the first family: particles of 0x30 bytes precede the work. */
 typedef struct {
@@ -177,21 +157,14 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 extern s32 effMathStepBezierSlot(void *slots, s32 index, f32 *out);
-extern void func_001891A8(void *owner);
-extern void func_00189818(void *valueWork, s32 index, void *out);
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern s32 effMathGetSlotAt(void *slots, s32 index);
 
-/* Owner of the value table an effect variant's particles write through. */
-struct EffMagatuhiOwner {
-    u8 pad00[0x1C];
-    EffMagatuhiValueWork *valueWork; /* 0x1C */
-};
 
-void func_00189C80(void *valueWork, s32 index) {
+void func_00189C80(EffMagatuhiValueWork *valueWork, s32 index) {
     func_001891C0(valueWork, index);
 }
 
@@ -208,7 +181,6 @@ typedef struct {
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
-extern void *effCloneMagatuhiWithColorResource(void *block);
 extern void *effAllocSlotArray(s32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];

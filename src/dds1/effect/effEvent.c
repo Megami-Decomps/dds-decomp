@@ -91,14 +91,6 @@ typedef struct EffBlurScaleWork {
     EffBlurScaleSlot *slots;
 } EffBlurScaleWork;
 
-typedef struct EffTemplateBody {
-    u32 words[9];
-} EffTemplateBody;
-
-typedef struct EffTemplate {
-    EffTemplateBody body;
-    u32 resourceWord;
-} EffTemplate;
 
 
 
@@ -111,11 +103,11 @@ extern EffBlurTemplateBody D_00355AF8;
 extern EffBlurScatterParams D_00355C70;
 extern EffScreenDrawParams D_00355E48;
 extern EffSolidRectParams D_00355F88;
-extern EffTemplateBody D_00356088;
+extern EffResourceRectParams D_00356088;
 extern EffBlurScaleParams D_003561C8;
 extern void *memcpy(void *, const void *, u32);
 
-extern EffTemplate *effTexturedSquareWork;
+extern EffResourceRectWork *effTexturedSquareWork;
 
 extern s8 effTexturedSquareEnabled;
 
@@ -148,14 +140,14 @@ extern void sdfAppendPacket();
 extern s32 sdfCreateFormattedSifCommand();
 
 extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
-extern EffTemplate *effCloneResourceTemplate(void *arg);
+extern EffResourceRectWork *effCloneResourceTemplate(void *arg);
 extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
 extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 extern void func_00187C08(EffSolidRectParams *arg);
-extern void effResourceRectDrawPixels(EffTemplate *arg);
+extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 
@@ -571,22 +563,22 @@ void effDisableTexturedSquare(void) {
 }
 
 /* Copy the resource template body while preserving its selected resource. */
-void effCopyTexturedSquareParameters(EffTemplateBody *parameters) {
-    effTexturedSquareWork->body = *parameters;
+void effCopyTexturedSquareParameters(EffResourceRectParams *parameters) {
+    effTexturedSquareWork->params = *parameters;
 }
 
 /* Return the current textured-square work without retaining it. */
-EffTemplate *effGetCh75Work(void) {
+EffResourceRectWork *effGetCh75Work(void) {
     return effTexturedSquareWork;
 }
 
 void effSetCh75Id(u32 resourceWord) {
-    effTexturedSquareWork->resourceWord = resourceWord;
+    effTexturedSquareWork->sourceHandle = resourceWord;
 }
 
 /* Install the textured-square resource-table word while retaining its body. */
 void effInitCh75Id(void) {
-    effTexturedSquareWork->resourceWord = effGetResourceFirstWord(EFF_EVENT_SQUARE_RESOURCE_INDEX);
+    effTexturedSquareWork->sourceHandle = effGetResourceFirstWord(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
@@ -892,12 +884,12 @@ s32 effEventAdvanceResourceTemplateSetup(void) {
 }
 
 /* Expose the resource-template setup body by address. */
-EffTemplateBody *effEventGetResourceTemplateSetupParams(void) {
+EffResourceRectParams *effEventGetResourceTemplateSetupParams(void) {
     return &D_00356088;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
-void effEventSetResourceTemplateParameters(EffTemplateBody *parameters) {
+void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters) {
     D_00356088 = *parameters;
 }
 
