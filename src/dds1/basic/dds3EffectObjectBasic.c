@@ -65,7 +65,10 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
 void *func_001150F0();
 void func_00115398(void);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
-void *func_00115478();
+EffectObj *func_00115478();
+extern const f32 D_0039F800[10];
+extern const f32 D_0039F828[20];
+extern void *sdfAllocSizeClassBlock(s32 size);
 EffectData *effObjGetReadyData(EffectObj *obj);
 void *sdfReleaseResourceAllocation(void *arg);
 void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
@@ -455,7 +458,64 @@ void func_00115460(void) {
     func_00115398();
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115478);
+EffectObj *func_00115478(kind, descriptor)
+    s32 kind;
+    struct EffNodeDescriptor *descriptor;
+{
+    f32 firstVector[4];
+    f32 secondVector[4];
+    f32 twoRows[10];
+    f32 fourRows[20];
+    struct EffNode *bill;
+    EffectObj *obj;
+    EffectData *data;
+    void *objectHandle;
+    void *worldNode;
+
+    memset(firstVector, 0, sizeof(firstVector));
+    memset(secondVector, 0, sizeof(secondVector));
+    secondVector[3] = 1.0f;
+    memcpy(twoRows, D_0039F800, sizeof(twoRows));
+    memcpy(fourRows, D_0039F828, sizeof(fourRows));
+    bill = effCreateNodeFromDescriptor(descriptor);
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
+    if (obj == NULL) {
+        return NULL;
+    }
+    data = obj->data;
+    data->flags = 0;
+    if (kind == 1) {
+        data->state = EFF_OBJ_STATE_MAGATUHI_TWO_ROWS;
+    } else {
+        data->state = EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS;
+    }
+    data->bill = bill;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    data->node = sdfAllocSizeClassBlock(0x10);
+    memset(data->node, 0, 0x10);
+    switch (kind) {
+    case 1:
+        data->vector = sdfAllocSizeClassBlock(sizeof(twoRows));
+        memcpy(data->vector, twoRows, sizeof(twoRows));
+        effMagatuhiCopyFloatBlock(bill, data->vector);
+        break;
+    case 2:
+        data->vector = sdfAllocSizeClassBlock(sizeof(fourRows));
+        memcpy(data->vector, fourRows, sizeof(fourRows));
+        effMagatuhiSetControlPointParams(bill, data->vector);
+        break;
+    }
+    objectHandle = effObjGetObjectHandle(obj);
+    ((ObjBase *)objectHandle)->resourceState = 2;
+    worldNode = dds3GetFirstWorldObjectNodeOfKind2();
+    if (worldNode != NULL) {
+        ((ObjBase *)objectHandle)->slots[5] = worldNode;
+        dds3EnsureWorldNodeInSlot(worldNode, obj);
+    }
+    return obj;
+}
 
 void func_00115840(void) {
     func_00115478();
