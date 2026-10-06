@@ -2772,21 +2772,6 @@ void fldApplyPendingCameraHeading(void) {
 /* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00131688);
 
-typedef struct FldColorParams {
-    s32 enabled;
-    s32 slotIndex;  /* 0x04: stored to the effect work at +0x38 */
-    s32 mode;
-    s32 red;
-    s32 green;
-    s32 blue;
-    s32 vectorY;    /* 0x18: copied to the effect work at +0x24 */
-    s32 vectorZ;    /* 0x1C: copied to the effect work at +0x3C */
-} FldColorParams;
-typedef struct FldCameraSetting {
-    s32 unk0;
-    FldColorParams color;
-    u8 pad24[0x30];
-} FldCameraSetting; /* 0x54 bytes */
 typedef struct FldFadeColor {
     u8 unk00;
     u8 pad01[3];
@@ -3358,7 +3343,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00134348);
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
 extern u32 sdfReadNamedResource(const char *, u32 *, s32);
-extern void fldUpdateCameraColorEffect(FldCameraSetting *);
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);

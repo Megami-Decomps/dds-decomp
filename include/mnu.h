@@ -343,7 +343,7 @@ void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyP
 #endif
 
 typedef struct MenuGradientFade {
-    s32 active;
+    u32 active;
     s32 color;
     s32 blend;
 } MenuGradientFade;
@@ -582,7 +582,9 @@ typedef struct MenuStaffContext {
     void *spriteHandle;   /* 0xAA38 */
     u8 padAA3C[0xC];
     void *menu;           /* 0xAA48: menu-mode-specific child allocation */
-    u8 padAA4C[0x3D4];
+    u8 padAA4C[4];
+    u32 unkAA50;
+    u8 padAA54[0x3CC];
     u16 catalogOrdinals[0x100]; /* 0xAE20: item-ID-indexed list sorting keys */
     u8 padB020[0xEC];
     u8 tail[4];           /* 0xB10C */

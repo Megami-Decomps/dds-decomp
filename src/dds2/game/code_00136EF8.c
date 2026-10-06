@@ -27,21 +27,6 @@ static inline f32 fldNormalizeProbeVector(void) {
     return length;
 }
 
-typedef struct FldColorParams {
-    s32 enabled;
-    s32 slotIndex;  /* 0x04: stored to the effect work at +0x38 */
-    s32 mode;
-    s32 red;
-    s32 green;
-    s32 blue;
-    s32 vectorY;    /* 0x18: copied to the effect work at +0x24 */
-    s32 vectorZ;    /* 0x1C: copied to the effect work at +0x3C */
-} FldColorParams;
-typedef struct FldCameraSetting {
-    s32 unk0;
-    FldColorParams color;
-    u8 pad24[0x30];
-} FldCameraSetting; /* 0x54 bytes */
 typedef struct FldFadeColor {
     u8 pad0[4];
     s32 colorA;
@@ -188,7 +173,7 @@ extern char D_00413350[];
 
 extern u32 fldRainTextureData;
 
-extern u32 fldCameraSettings;
+extern FldCameraSetting *fldCameraSettings;
 
 extern FldFadeColor fldCameraColorParameters[];
 
@@ -197,7 +182,6 @@ extern u32 sdfReadNamedResource(const char *, u32 *, s32);
 extern u32 effCreateSelectionFlagListFromWork(const void *);
 
 
-extern void fldUpdateCameraColorEffect(FldCameraSetting *setting);
 
 
 extern s32 func_0035C860(char *, const char *, ...);
@@ -388,14 +372,11 @@ void fldReleaseCameraColorEffect(void) {
     }
 }
 
-typedef struct FldSaveHeader {
-    u32 word[0x15]; /* 0x54 bytes */
-} FldSaveHeader;
 
 extern FldCameraSetting fldAppliedCameraSettings[];
 
-void fldCopyCameraSetting(FldSaveHeader *dst) {
-    *dst = *(FldSaveHeader *)fldAppliedCameraSettings;
+void fldCopyCameraSetting(FldCameraSetting *destination) {
+    *destination = *fldAppliedCameraSettings;
 }
 
 

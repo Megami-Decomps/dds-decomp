@@ -1,6 +1,7 @@
 #include "common.h"
 #include "evt_unit.h"
 #include "pcp_vu0.h"
+#include "fld.h"
 
 extern u32 D_0038BBD8[];
 
@@ -76,22 +77,7 @@ extern s32 fldCameraColorEffect;
 
 extern u32 fldCameraColorEnabled;
 
-typedef struct FldColorParams {
-    s32 enabled;
-    s32 slotIndex;   /* 0x04: stored to the effect work at +0x38 */
-    s32 mode;
-    s32 red;
-    s32 green;
-    s32 blue;
-    s32 vectorY;     /* 0x18: copied to the effect work at +0x24 */
-    s32 vectorZ;     /* 0x1C: copied to the effect work at +0x3C */
-} FldColorParams;
 
-typedef struct FldCameraSetting {
-    s32 unk0;
-    FldColorParams color;
-    u8 pad24[0x30];
-} FldCameraSetting; /* 0x54 bytes */
 
 typedef struct FldFadeColor {
     u8 pad0[4];

@@ -2862,22 +2862,7 @@ typedef struct FldSkyBuffer {
 
 extern FldSkyBuffer *fldSkyLightSetBuffer;
 
-typedef struct FldColorParams {
-    s32 enabled;
-    s32 slotIndex;
-    s32 mode;
-    s32 red;
-    s32 green;
-    s32 blue;
-    s32 vectorY;
-    s32 vectorZ;
-} FldColorParams;
 
-typedef struct FldCameraSetting {
-    s32 unk0;
-    FldColorParams color;
-    u8 pad24[0x30];
-} FldCameraSetting;
 
 typedef struct FldFadeColor {
     u8 unk00;

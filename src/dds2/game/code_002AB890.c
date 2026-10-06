@@ -282,7 +282,7 @@ extern char D_003E74A4[];
 extern char D_003E74C0[];
 extern char D_003E7418[];
 extern s32 evtGetMessageWindowControlState(void);
-extern void func_002C1B68(s32, s32);
+extern void func_002C1B68(u32 *, u32);
 extern s32 mnuGetAbilityByteCategory(u16);
 extern void mnuClearActionFlags(s32, u8 *);
 extern void mnuHandlePanelListPageJumpInput(u32, u32);
@@ -419,7 +419,7 @@ void mnuApplyResourceSelection(s32 index, s32 context) {
                   datGameState->inventory.counts[index];
         resources->secondListState = index;
     }
-    func_002C1B68(context + 0xaa50, 1);
+    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
 }
 
 u32 func_002AD0A8(void) {
@@ -460,7 +460,7 @@ s32 func_002AD118(u64 callback) {
     if (evtGetMessageWindowControlState() != 0) {
         return 0;
     }
-    func_002C1B68((s32)((u8 *)context + 0xAA50), 0);
+    func_002C1B68(&context->unkAA50, 0);
     if (resources->secondListState == 0) {
         if (input & 1) {
             panel = resources->windows[0]->list;
