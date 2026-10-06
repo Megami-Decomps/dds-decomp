@@ -297,6 +297,8 @@ extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 fldValueRecordCount;
+extern s32 D_003BADF8;
+extern s32 D_003BADEC;
 extern u8 D_003BA734;
 extern s32 scrFindNamedProcessNode(u32 arg0);
 extern s32 evtDestroyNamedTask(u64 arg0, u32 arg1);
@@ -3418,7 +3420,21 @@ void fldSetRecordValueById(s32 id, s32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldResetRecordState);
+void fldResetRecordState(void) {
+    s32 index;
+    for (index = 0; index < fldValueRecordCount; index++) {
+        ((FldRecE4 *)fldValueRecords)[index].value = 0;
+    }
+    fldValueRecordCount = 0;
+    fldAreaState[40] = -1;
+    fldAreaState[41] = -1;
+    fldAreaState[43] = -1;
+    D_003BADF8 = 0;
+    D_003BADEC = 0;
+    if (fldValueRecords != 0) {
+        fldReleaseRecordStorage();
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135360);

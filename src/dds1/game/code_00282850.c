@@ -191,6 +191,10 @@ typedef struct MenuPanelGroup {
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
+struct MenuPanelItem;
+extern void mnuSetPanelItemSelection(struct MenuPanelItem *, s32);
+extern void mnuSetPanelItemOption(struct MenuPanelItem *, u32);
+
 extern char D_003B2608[]; /* "battle stage test" */
 
 extern u8 D_0037CE60[];
@@ -513,7 +517,10 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuSetGroupSelection);
+void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
+    mnuSetPanelItemSelection((struct MenuPanelItem *)group->children[index], selection);
+    mnuSetPanelItemOption((struct MenuPanelItem *)group->children[index], option);
+}
 
 typedef struct MenuSpriteState {
     u8 pad00[0x10];
