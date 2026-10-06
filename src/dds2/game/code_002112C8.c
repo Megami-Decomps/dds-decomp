@@ -238,11 +238,23 @@ typedef struct AiSlot {
     u32 actionArg;
 } AiSlot;
 
+/* AICALC.TBL: each decision tier tests three packed predicates, then
+ * selects a route in most-specific-first order; route 8 makes no selection. */
+typedef struct AiDecisionRow {
+    u32 predicates[3];
+    u8 routes[8];
+} AiDecisionRow;
+
 typedef struct AiSpecies {
-    u8 pad00[0x40];
+    u8 pad00[4];
+    AiDecisionRow decisions[3];
     AiSlot slot[25];
     u8 pad108[0x54];
 } AiSpecies;
+
+typedef char AiDecisionRow_size_check[sizeof(AiDecisionRow) == 0x14 ? 1 : -1];
+typedef char AiSpecies_size_check[sizeof(AiSpecies) == 0x15C ? 1 : -1];
+typedef char AiSpecies_slot_offset_check[((u32)&((AiSpecies *)0)->slot == 0x40) ? 1 : -1];
 
 extern AiSpecies *datEnemyAiRecords;
 
