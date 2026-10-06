@@ -398,8 +398,10 @@ MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *window, s32 value) {
     return mnuListAppendNode(window->list, value);
 }
 
-void func_0027C688(MenuWindowContainer *window) {
-    func_0027B540(window->list);
+extern MenuListNode *func_0027B540(MenuList *list, MenuListNode *anchor, s32 value, s32 mode, u32 options);
+
+MenuListNode *func_0027C688(MenuWindowContainer *window, MenuListNode *anchor, s32 value, s32 mode, u32 options) {
+    return func_0027B540(window->list, anchor, value, mode, options);
 }
 
 void func_0027C6A0(MenuWindowContainer *window) {
