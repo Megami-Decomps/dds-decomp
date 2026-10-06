@@ -3,6 +3,27 @@
 #include "kwln.h"
 #include "fpu.h"
 
+typedef struct FileScrollArrowState {
+    s32 angle;
+    s32 upAlpha;
+    s32 unk08;
+    s32 downAlpha;
+} FileScrollArrowState;
+
+extern FileScrollArrowState D_0037D4C0;
+extern f32 D_003BC83C;
+extern u8 D_0037DB20[];
+extern u8 D_00347C68[][32];
+extern u8 D_003482A8[][32];
+extern char D_003BC898[];
+extern char D_003BC8A0[];
+extern char D_003BC8A8[];
+extern u32 func_002904C8(u32, s32, s8);
+extern void fileDrawSlotIcon(s32, s32, s32, s32);
+extern void fileCursorStepUp(void);
+extern void fileFadeStepDown(void);
+extern void fileLoadCtxSlideUpdate(void);
+
 
 
 extern void kwlnPadStartMotor(s32, u8, s32);
@@ -43,7 +64,25 @@ extern s32 mnuSelectFileBranch(void);
 
 
 
-extern u8 D_003DC800[];
+/* Compact metadata copied from the beginning of each save blob. */
+typedef struct FileSlotPreview {
+    char signature[3];
+    s8 version;
+    s8 mapGroup;
+    s8 mapIndex;
+    u8 pad06[2];
+    s32 playTicks;
+    s16 status;
+    s16 newCycle;
+    s8 party[8];
+    s8 levels[8];
+    u32 money;
+    u32 header24;
+    u32 header28;
+    u32 header2C;
+} FileSlotPreview;
+
+extern FileSlotPreview D_003DC800[];
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003BC880;
@@ -259,7 +298,7 @@ extern u32 D_003BD910;
 
 extern u32 fileSaveIconRequest;
 
-extern u64 func_001978E8(s32, s32, u64, u64, u64, u64);
+extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
 extern u32 D_003BD8F0;
 
@@ -673,10 +712,10 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontSetSharedRenderFlags(0x54);
 }
 
-void fileDrawMenuImageAtPoint(s32 x, s32 y, u64 first, u64 second) {
-    u64 imageHandle;
+void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
+    u32 imageHandle;
 
-    imageHandle = func_001978E8(x << 4, y << 3, 0, first, second, 0);
+    imageHandle = func_001978E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(imageHandle, 1);
     frFontQueueGlyphInSelectedSlot(imageHandle);
 }
@@ -1028,7 +1067,7 @@ void *fileStoreSlotHeader(void) {
         return NULL;
     }
     if (status == 1) {
-        memcpy(D_003DC800 + fileSlotScanIndex * 0x30, (void *)fileSaveReadBuffer, 0x30);
+        memcpy(&D_003DC800[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
         sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return fileAdvanceSlotScan();
     }
@@ -2183,6 +2222,7 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2678);
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2688);
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileDrawSlotListAndPreview);
+
 
 void *fileRunMenuState(s32 arg) {
     void *next;
