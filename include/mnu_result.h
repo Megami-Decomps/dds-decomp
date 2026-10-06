@@ -134,7 +134,8 @@ typedef struct BrsSkillPackageWork {
     s32 rewardIndex;
 #ifdef VERSION_DDS2
     u32 thresholdMessageShown;
-    u8 padB700[4];
+    u16 earnedItem;
+    u8 padB702[2];
 #endif
 } BrsSkillPackageWork;
 
@@ -147,6 +148,8 @@ typedef char BrsSkillPackageWork_size_must_be_0x1590[(sizeof(BrsSkillPackageWork
 #else
 typedef char BrsRewardSummary_size_must_be_0x30[(sizeof(BrsRewardSummary) == 0x30) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0xB704[(sizeof(BrsSkillPackageWork) == 0xB704) ? 1 : -1];
+typedef char BrsSkillPackageWork_earnedItem_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->earnedItem == 0xB700) ? 1 : -1];
 #endif
 
 #endif
