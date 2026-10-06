@@ -11442,7 +11442,7 @@ extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
@@ -11451,7 +11451,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
     u32 uv[4];
     void *packet;
-    void *list;
+    SdfListHead *list;
     u64 *dst;
     s32 x0;
     s32 y0;
@@ -11504,7 +11504,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
     effSelectPresetByKind(blendKind, surfaceId);
     list = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsCreateDrawPacket((s32)list, (s32)texture, 0);
+    sdfConsCreateDrawPacket(list, texture, 0);
     sdfAppendPacket(list, packet);
     effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
