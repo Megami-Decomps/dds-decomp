@@ -342,7 +342,7 @@ extern s8 D_00438F84;
 
 extern s32 sdfNamedChunkFindId(void *, void *);
 
-extern void func_0021A1D8(SdfDrawNode *, s32);
+extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
 
 extern s32 btlHasAdjacentActorRecordStatus(void);
 
@@ -3340,7 +3340,7 @@ s32 func_0021A098(void) {
 }
 
 /* vu0 routine: normalize packed RGBA and fade the named chunk tree. */
-void func_0021A1D8(SdfDrawNode *node, s32 color) {
+void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color) {
     SdfDrawNode *child;
     u32 source[4];
     u32 tint[4];
@@ -3365,7 +3365,7 @@ void func_0021A1D8(SdfDrawNode *node, s32 color) {
     node->color = packed[0];
     if (child != NULL) {
         do {
-            func_0021A1D8(child, color);
+            btlFadeAndTintNamedChunkTree(child, color);
             child = child->next;
         } while (child != node->children);
     }
@@ -3432,7 +3432,7 @@ s8 btlDispatchNamedChunkNode(s32 name) {
     entries = data->entries;
     node = entries[index];
     D_00438F84 = 1;
-    func_0021A1D8(node, chunk->argument);
+    btlFadeAndTintNamedChunkTree(node, chunk->argument);
     return D_00438F84;
 }
 

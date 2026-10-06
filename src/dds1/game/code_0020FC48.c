@@ -1738,7 +1738,7 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EC0);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EF8);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00213BE0);
+INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawUnitAffinityDebug);
 
 typedef struct PadButtons {
     s8 unk_0;

@@ -2023,7 +2023,7 @@ void btlUnitTurnEndCommit(BtlUnit *unit) {
 }
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
-extern void func_001AD698(BtlUnit *);
+extern void btlAccumulateEnemyDefeatRewards(BtlUnit *);
 extern SoundTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
 extern SoundTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 extern SoundTask *sndCreateStationedSeTask(u32);
@@ -2059,7 +2059,7 @@ void btlStartActorDefeatTransition(BtlUnit *command) {
             btlRefreshUnitMotionSelection(actor);
         }
     } else if (actor->flags & 0x400) {
-        func_001AD698(actor);
+        btlAccumulateEnemyDefeatRewards(actor);
         if (actor->flags & 0x8000000) {
             object = btlCreateSelectedEffectUpdateTask(actor);
             object->enabled = 4;

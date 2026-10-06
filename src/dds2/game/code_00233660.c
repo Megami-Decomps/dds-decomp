@@ -249,7 +249,10 @@ extern u128 D_003C87E0;
 extern s16 D_00453584[];
 
 typedef struct MdlPadState {
-    u8 pad00[4];
+    u8 pad00;
+    s8 confirm;
+    u8 pad02;
+    s8 cancel;
     s8 stepDownA;  /* 0x04 */
     s8 stepUpA;    /* 0x05 */
     s8 stepDownB;  /* 0x06 */
@@ -258,9 +261,10 @@ typedef struct MdlPadState {
 
 typedef struct MdlCtrlState {
     MdlPadState *pad;
-    u8 unk04;
-    u8 pad05[3];
-    s32 unk08;
+    u8 editing;
+    u8 blinkTick;
+    s16 selection;
+    s32 packetList;
 } MdlCtrlState;
 
 extern MdlCtrlState mdlViewerControlState;
@@ -1983,7 +1987,7 @@ extern void sdfConsCreateDrawPacket(s32, SdfTex *, s32);
 extern void sdfAppendTexturedLinePacket(s32, u32, s32, s32, s32, s32, s32,
                                       s32, s32, s32, s32, s32, s32);
 
-void func_00237258(void) {
+void mdlDrawViewerTexturePreview(void) {
     s32 index = 0;
     s32 count = 0;
     s32 width, height;
@@ -2029,7 +2033,7 @@ void func_00237258(void) {
 
 u32 mdlUpdateViewerNodeCursorTask(void) {
     mdlHandleViewerNodeCursorInput();
-    func_00237258();
+    mdlDrawViewerTexturePreview();
     return 0;
 }
 
@@ -2533,16 +2537,17 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00239188);
 void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
 
-    fldDrawPackedRgbEditor(mdlViewerControlState.unk08, first, second,
-                  (mdlViewerControlState.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1, packedColor);
+    fldDrawPackedRgbEditor(mdlViewerControlState.packetList, first, second,
+                  (mdlViewerControlState.editing == 0) ? -1 : variant, packedColor | 0x80000000, 1, packedColor);
 }
 
 typedef struct MdlValueEdit {
-    u8 pad00[4];
+    s32 y;
     f32 *target;   /* 0x04 */
     s32 min;       /* 0x08 */
     s32 max;       /* 0x0C */
-    u8 pad10[8];
+    const char *label;
+    const char *format;
 } MdlValueEdit;
 
 extern MdlValueEdit D_003C8B08[];
@@ -2634,6 +2639,8 @@ void mdlViewerStepEditedNumericValue(s32 index) {
     *target = value;
 }
 
+struct KwlnTask;
+extern s32 func_00239860(struct KwlnTask *);
 INCLUDE_ASM(const s32, "game/code_00233660", func_00239860);
 INCLUDE_ASM(const s32, "game/code_00233660", func_00239C08);
 

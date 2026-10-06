@@ -113,7 +113,7 @@ extern s32 sceGsSyncPath(s32, s32);
 extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 /* Interleave rows from both color buffers into the queued destination. */
-void func_002D10C8(void) {
+void sdfCaptureDeferredGsImage(void) {
     s32 width;
     s32 height;
     s32 format;
