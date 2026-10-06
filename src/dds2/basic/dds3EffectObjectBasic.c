@@ -407,8 +407,6 @@ void func_00115318(u64 unused, u64 firstVectorAddress, u64 secondVectorAddress) 
     effObjCreateBillboardInWorld(bill, firstVectorAddress, secondVectorAddress);
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412950);
-
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115358);
 
 void func_00115500(void) {
@@ -459,10 +457,6 @@ void func_001156C8(void) {
 
 extern const f32 D_00412980[10];
 extern const f32 D_004129A8[20];
-
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412980);
-
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_004129A8);
 
 EffectObj *func_001156E0(kind, descriptor)
     s32 kind;
@@ -727,6 +721,12 @@ s32 effObjBindOwnerBillEntry(EffectObj *obj, EffectObj *owner, s32 entryId) {
     data->flags |= EFF_OBJ_FLAG_OWNER_BILL_ENTRY;
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412950);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412980);
+
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_004129A8);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_004129F8);
 
