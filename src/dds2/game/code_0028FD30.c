@@ -507,7 +507,15 @@ void itfPositionMantraSelectionController(MenuPanelObject *object) {
 
 extern void itfInstallDefaultMantraSelector(MenuPanelObject *);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", itfInstallDefaultMantraSelector);
+void itfInstallDefaultMantraSelector(MenuPanelObject *object) {
+    MantraNodePos *record;
+    MenuPanelState *state = &object->state;
+
+    record = mnuGetMantraPanelPositionRecord(0x71);
+    state->defaultSelector = record;
+    mnuSpawnMantraIconAtPosition((s32)((f32)record->x / 10.0f * 40.0f),
+        (s32)((f32)record->y / 10.0f * 39.0f), object->state.selectionController);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292CF0);
 
