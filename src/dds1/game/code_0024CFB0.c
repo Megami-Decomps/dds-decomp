@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "kwln.h"
+#include "dat_state.h"
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0xC0
 #define EVT_DISPLAY_VALUE_COUNT 0x10
@@ -38,7 +39,6 @@ extern s8 evtMessageWindowOption;
 
 extern s8 dspCapturedSoundMode;
 
-extern s32 datGameState;
 
 typedef struct EvtActiveFlagTable {
     s32 unk0;
@@ -99,11 +99,6 @@ typedef struct PartyFlagPair {
     s32 handledFlag;
 } PartyFlagPair;
 
-typedef struct PartySlotHeader {
-    u16 flags;
-    u16 pad02;
-    u16 unitId;
-} PartySlotHeader;
 
 extern SceneFlagEntry mnuSceneFlagEventEntries[4];
 extern PartyFlagPair mnuPartyFlagEventEntries[];
@@ -121,7 +116,7 @@ void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
 s32 dspStartFlagEvent(s32 context) {
     s32 panelKind = *(s32 *)(context + 0x7C);
     s32 index;
-    PartySlotHeader *slot;
+    DatPartyRecord *slot;
 
     if (panelKind < 2) {
         if (panelKind >= 0) {
@@ -144,7 +139,7 @@ s32 dspStartFlagEvent(s32 context) {
                 }
             }
             for (index = 0; index < EVT_PARTY_SLOT_COUNT; index++) {
-                slot = (PartySlotHeader *)(datGameState + index * DSP_PARTY_RECORD_BYTES + 0xA60);
+                slot = &datGameState->party[index];
                 if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
                     && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
@@ -404,7 +399,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     s32 index;
     list->entryCount = 0;
     for (index = 1; index < EVT_ACTIVE_ENTRY_LIMIT; index++) {
-        if (*(u8 *)(index + datGameState + 0x12A0) != 0) {
+        if (datGameState->inventory.counts[index] != 0) {
             s32 outputIndex = list->entryCount++;
             list->entryIndices[outputIndex] = index;
         }

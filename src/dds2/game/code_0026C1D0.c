@@ -1,4 +1,5 @@
 #include "evt_world.h"
+#include "dat_state.h"
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0x100
 #define EVT_DISPLAY_VALUE_COUNT 0x10
@@ -49,12 +50,7 @@ extern u32 evtDisplayValues[];
 void sdfReleaseResourceAllocation(u32 sprite);
 
 
-extern s32 datGameState;
 
-typedef struct {
-    u8 pad0[0x1340];
-    u8 active[0x100]; /* Active game-entry flags indexed from 1 to 255. */
-} EvtGameEntries;
 
 typedef struct {
     u8 entryCount;
@@ -137,7 +133,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     s32 index;
     list->entryCount = 0;
     for (index = 1; index < EVT_ACTIVE_ENTRY_LIMIT; index++) {
-        if (((EvtGameEntries *)datGameState)->active[index] != 0) {
+        if (datGameState->inventory.counts[index] != 0) {
             s32 outputIndex = list->entryCount++;
             list->entryIndices[outputIndex] = index;
         }
@@ -625,17 +621,7 @@ s32 evtReleaseMantraSelectionWork(EvtMantraWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
 
-typedef struct PartySlotHeader {
-    u16 flags;
-    u16 pad02;
-    u16 unitId;
-    u8 pad06[0x1BE];
-} PartySlotHeader;
 
-typedef struct PartyGameState {
-    u8 pad00[0xA60];
-    PartySlotHeader party[5];
-} PartyGameState;
 
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
 extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
@@ -645,10 +631,10 @@ s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
     s32 i;
 
     for (i = 0; i < EVT_PARTY_SLOT_COUNT; i++) {
-        PartySlotHeader *slot;
+        DatPartyRecord *slot;
 
-        if (((PartyGameState *)datGameState)->party[i].flags & 1) {
-            slot = &((PartyGameState *)datGameState)->party[i];
+        if (datGameState->party[i].flags & 1) {
+            slot = &datGameState->party[i];
             if (slot->unitId != skipId) {
                 if (ptyGetProfileRecordCap(scriptId) == ptyGetProfileRecordValue((u32)slot, scriptId)) {
                     return 1;
