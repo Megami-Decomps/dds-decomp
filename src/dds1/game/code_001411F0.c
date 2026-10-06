@@ -75,17 +75,17 @@ extern u32 fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
-extern s32 fldWeatherLimitTexture;
+extern SdfTex *fldWeatherLimitTexture;
 
 extern s32 D_003BAFBC;
 
-extern s32 D_003BAFC4;
+extern SdfTex *D_003BAFC4;
 
 extern s32 D_003BAFB8;
 
 extern s32 D_003BAFC0;
 
-extern s32 D_003BAFB4;
+extern SdfTex *D_003BAFB4;
 
 extern u32 D_003BAFA0;
 
@@ -240,7 +240,7 @@ extern void func_00129900(u32);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
+extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, s32, SdfTex *);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001411F0);
 
@@ -819,7 +819,7 @@ typedef struct {
 } FldProjectedSprite;
 
 extern FldProjectedSprite D_0033EBA0[];
-extern u32 D_003D40A0[];
+extern SdfTex *D_003D40A0[];
 
 void func_00142800(s32 index, u32 color, f32 x, f32 y) {
     FldProjectedSprite *sprite = &D_0033EBA0[index];
@@ -987,7 +987,7 @@ extern s32 D_003BAED4;
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00145B18);
 
-extern void sdfTexReleaseReferenceViaHandler();
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -1117,7 +1117,7 @@ void fldEnterSceneCamera(void) {
 
 extern s32 sdfModelCreateWithAlternateItems(s32, s32);
 
-extern s32 sdfTexAcquireResourceTexture();
+extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
 /* Loads the scene's models into the menu slots, then centers the camera on the
  * scene's entry point. */
@@ -1142,8 +1142,8 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_003D40B0)[i].z = rec->pos->z;
     }
     cam = (FldAreaWork *)fldAreaState;
-    D_003D40A0[0] = sdfTexAcquireResourceTexture(cam->mapResources[0].block);
-    D_003D40A0[1] = sdfTexAcquireResourceTexture(cam->mapResources[1].block);
+    D_003D40A0[0] = sdfTexAcquireResourceTexture((void *)cam->mapResources[0].block);
+    D_003D40A0[1] = sdfTexAcquireResourceTexture((void *)cam->mapResources[1].block);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->room;
     D_003BAEB8 = cam->unkC0;
@@ -1717,32 +1717,22 @@ void fldParseMixLb(void) {
 
 extern s32 D_003BAF48, D_003BAF4C, D_003BAF40, D_003BAF3C;
 
-extern s32 D_003BAF30, D_003BAF34, D_003BAF38;
+extern SdfTex *D_003BAF30, *D_003BAF34, *D_003BAF38;
 
 extern s32 D_003BD7F0, D_003BD7D8, D_003BD7E0, D_003BD7E8;
 
 extern s32 effCreateNodeFromDescriptor(s32);
-
-extern s32 sdfTexAcquireResourceTexture(s32);
 
 void fldInitializeMenuResources(void) {
     if (D_0032E3C0[0] < 200) {
         D_003BAF4C = effCreateNodeFromDescriptor(D_003BAF48);
         D_003BAF3C = effCreateNodeFromDescriptor(D_003BD7F0);
         D_003BAF40 = 0;
-        D_003BAF30 = sdfTexAcquireResourceTexture(D_003BD7D8);
-        D_003BAF34 = sdfTexAcquireResourceTexture(D_003BD7E0);
-        D_003BAF38 = sdfTexAcquireResourceTexture(D_003BD7E8);
+        D_003BAF30 = sdfTexAcquireResourceTexture((void *)D_003BD7D8);
+        D_003BAF34 = sdfTexAcquireResourceTexture((void *)D_003BD7E0);
+        D_003BAF38 = sdfTexAcquireResourceTexture((void *)D_003BD7E8);
     }
 }
-
-extern void sdfTexReleaseReferenceViaHandler();
-
-extern s32 D_003BAF30;
-
-extern s32 D_003BAF34;
-
-extern s32 D_003BAF38;
 
 extern s32 D_003BAF3C;
 
@@ -1992,7 +1982,7 @@ extern s32 ptyAnyUnitFlagMatch(s32, s32);
 
 extern f32 sdfSinPoly(f32);
 
-extern void func_00129178(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
+extern void func_00129178(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
 
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
@@ -2042,8 +2032,6 @@ extern void fldSelectDisplayBuffer(u32);
 extern void func_00129900(u32);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
-
-extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
 
 void fldDrawTitleBanner(s32 x, s32 y) {
     if (D_0032E3C0[0] < 200) {
@@ -2243,7 +2231,7 @@ extern char D_003A0810[]; /* "/fld/f/pnl/df%03d.tmx" */
 
 void fldStartTitle(s32 field, s32 mode, s32 option) {
     char path[32];
-    s32 size;
+    s32 resourceAddress;
     s32 handle;
 
     D_003BAFA8 = mode;
@@ -2253,8 +2241,8 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAFA0 = 0;
     D_003BAFB0 = 0;
     func_003014F0(path, D_003A0810, field);
-    handle = sdfReadNamedResource(path, &size, 0);
-    D_003BAFB4 = sdfTexAcquireResourceTexture(size);
+    handle = sdfReadNamedResource(path, &resourceAddress, 0);
+    D_003BAFB4 = sdfTexAcquireResourceTexture((void *)resourceAddress);
     sdfReleaseResourceAllocation(handle);
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
@@ -2379,7 +2367,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_003BAFBC = 0;
     func_003014F0(path, "/fld/f/pnl/ds%03d.tmx", id);
     handle = sdfReadNamedResource(path, &data, 0);
-    D_003BAFC4 = sdfTexAcquireResourceTexture(data);
+    D_003BAFC4 = sdfTexAcquireResourceTexture((void *)data);
     sdfReleaseResourceAllocation(handle);
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
@@ -2396,16 +2384,14 @@ void fldRequestMiniTitleDismiss(void) {
 
 extern s32 sdfReadNamedResource();
 
-extern s32 sdfTexAcquireResourceTexture();
-
 extern s32 func_0014FE28();
 
 void fldLoadWeatherEffects(void) {
     s32 handle;
-    s32 size;
+    s32 resourceAddress;
 
-    handle = sdfReadNamedResource(s_fieldWeatherLimitPath, &size, 0);
-    fldWeatherLimitTexture = sdfTexAcquireResourceTexture(size);
+    handle = sdfReadNamedResource(s_fieldWeatherLimitPath, &resourceAddress, 0);
+    fldWeatherLimitTexture = sdfTexAcquireResourceTexture((void *)resourceAddress);
     sdfQueueNonzeroResourceId(handle);
     fldDamEffectResource = sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
     fldDamEffectNode = func_0014FE28(fldDamEffectData);
