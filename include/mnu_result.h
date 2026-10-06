@@ -109,26 +109,9 @@ typedef struct BrsSkillPackageWork {
     s32 statGains[5];
     BrsActiveProgressList partyProgress;
     PrfSkillList skillList;
-#ifdef VERSION_DDS1
-    s32 group[2];
-    s32 spriteArg0;
-    u8 pad504[8];
-    s32 spriteArg1;
-    u8 pad510[4];
-    s32 panelGroup;
-    s32 panelOption;
-    u8 pad51C[0x54];
+    StaffSlots staffSlots;
     s32 setupState;
     PartyPanel partyPanel;
-#else
-    s32 panelGroup;
-    s32 spriteArg0;
-    s32 spriteArg1;
-    s32 spriteArg2;
-    u8 pad52C[0x54];
-    s32 setupState;
-    PartyPanel partyPanel;
-#endif
     MenuPageWindow partyWindow;
     s32 panelHandle;
     s32 spriteHandle;
@@ -180,6 +163,8 @@ typedef char BrsActiveProgressList_size_must_be_0xE0[(sizeof(BrsActiveProgressLi
 #ifdef VERSION_DDS1
 typedef char BrsRewardSummary_size_must_be_0x2C[(sizeof(BrsRewardSummary) == 0x2C) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0x1590[(sizeof(BrsSkillPackageWork) == 0x1590) ? 1 : -1];
+typedef char BrsSkillPackageWork_staffSlots_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->staffSlots == 0x4F8) ? 1 : -1];
 typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
 typedef char BrsSkillPackageWork_levelAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xEE0) ? 1 : -1];
@@ -188,6 +173,8 @@ typedef char BrsSkillPackageWork_profileAnimation_offset_check[
 #else
 typedef char BrsRewardSummary_size_must_be_0x30[(sizeof(BrsRewardSummary) == 0x30) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0xB704[(sizeof(BrsSkillPackageWork) == 0xB704) ? 1 : -1];
+typedef char BrsSkillPackageWork_staffSlots_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->staffSlots == 0x51C) ? 1 : -1];
 typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
 typedef char BrsSkillPackageWork_levelAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xB060) ? 1 : -1];

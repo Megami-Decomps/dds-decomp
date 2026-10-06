@@ -182,27 +182,6 @@ typedef struct MenuIconBundle {
     s32 fadeOut;
 } MenuIconBundle;
 
-typedef struct MenuPageGauge {
-    s32 resourceIndex;
-    u8 pad4[4];
-    s32 hp;
-    s32 mp;
-    s32 maxHp;
-    s32 maxMp;
-    u8 pad18[0x18];
-} MenuPageGauge;
-
-typedef struct MenuPageEntry {
-    s32 partyIndex;
-    MenuPageGauge gauge;
-} MenuPageEntry;
-
-typedef struct MenuPageRecord {
-    s32 visibleCount;
-    s32 additionalCount;
-    u32 unk8;
-    MenuPageEntry entries[5];
-} MenuPageRecord;
 
 typedef struct MenuPoint {
     s32 x;
@@ -297,9 +276,14 @@ typedef struct MenuPageSlot {
 typedef struct MenuPageWindow {
     u32 flags;
     s32 transitionValue;
-    MenuPageRecord *records;
+    PartyPanel *records;
 #ifdef VERSION_DDS2
-    u8 pad0C[0x18];
+    struct EffectSlotSet *resources; /* 0x0C: resolved base-resource handle */
+    s32 slot;
+    u32 secondaryResource;
+    s32 secondarySlot;
+    u32 alternateResource;
+    s32 alternateSlot;
 #else
     s32 source;
     s32 slot;
@@ -317,6 +301,27 @@ typedef struct MenuPageWindow {
     s32 scrollOffset;
     s32 fade;
 } MenuPageWindow;
+
+#ifdef VERSION_DDS2
+typedef char MenuPageWindow_size_must_be_0xA6A4[
+    sizeof(MenuPageWindow) == 0xA6A4 ? 1 : -1];
+typedef char MenuPageWindow_resources_offset_check[
+    ((u32)&((MenuPageWindow *)0)->resources == 0x0C) ? 1 : -1];
+typedef char MenuPageWindow_slot_offset_check[
+    ((u32)&((MenuPageWindow *)0)->slot == 0x10) ? 1 : -1];
+typedef char MenuPageWindow_secondaryResource_offset_check[
+    ((u32)&((MenuPageWindow *)0)->secondaryResource == 0x14) ? 1 : -1];
+typedef char MenuPageWindow_secondarySlot_offset_check[
+    ((u32)&((MenuPageWindow *)0)->secondarySlot == 0x18) ? 1 : -1];
+typedef char MenuPageWindow_alternateResource_offset_check[
+    ((u32)&((MenuPageWindow *)0)->alternateResource == 0x1C) ? 1 : -1];
+typedef char MenuPageWindow_alternateSlot_offset_check[
+    ((u32)&((MenuPageWindow *)0)->alternateSlot == 0x20) ? 1 : -1];
+
+void func_002BCD90(MenuPageWindow *, PartyPanel *, struct EffectSlotSet *,
+                   s32, u32, s32, u32, s32);
+void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
+#endif
 
 typedef struct MenuGradientFade {
     s32 active;

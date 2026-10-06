@@ -256,11 +256,11 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
 
 void func_002828D0(s32 *position, MenuPageWindow *menu, s32 panelIndex) {
     MenuPageSlot *panel = &menu->slots[panelIndex];
-    MenuPageRecord *layout = menu->records;
+    PartyPanel *layout = menu->records;
     u32 panelFlags = panel->flags;
-    s32 secondCount = layout->additionalCount;
+    s32 secondCount = layout->unk4;
     s32 totalCount;
-    s32 firstCount = layout->visibleCount;
+    s32 firstCount = layout->unk0;
     s32 group;
 
     totalCount = firstCount + secondCount;
@@ -332,12 +332,12 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
 /* Draw the selected panel or all visible/additional panels, then advance the transition. */
 void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
     s32 positionOffset[2];
-    MenuPageRecord *layout = menu->records;
+    PartyPanel *layout = menu->records;
     s32 panelCount;
     s32 panelIndex;
 
-    panelCount = layout->visibleCount;
-    panelCount += layout->additionalCount;
+    panelCount = layout->unk0;
+    panelCount += layout->unk4;
     if (menu->selected >= 0) {
         mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
     } else {
@@ -1618,7 +1618,7 @@ s32 func_00286A00(s32 id) {
     return id < 0x7f;
 }
 
-u16 mnuGetPartyEntryMenuValue(s32 arg0);
+u16 mnuGetPartyEntryMenuValue(DatPartyRecord *entry);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
  * This counter accepts only IDs 0xA0..0xBE. */
@@ -1634,7 +1634,7 @@ s32 ptyCountBulletItem(s32 bulletId) {
     }
     totalCount = datGameState->inventory.counts[bulletId];
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        if (bulletId == mnuGetPartyEntryMenuValue((s32)&datGameState->party[partyIndex])) {
+        if (bulletId == mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex])) {
             totalCount++;
         }
     }
@@ -1646,8 +1646,8 @@ u32 mnuSetPartyEntryMenuValue(s32 entry, u16 value) {
     return 1;
 }
 
-u16 mnuGetPartyEntryMenuValue(s32 entry) {
-    return ((DatPartyRecord *)entry)->menuValue;
+u16 mnuGetPartyEntryMenuValue(DatPartyRecord *entry) {
+    return entry->menuValue;
 }
 
 extern u16 D_0037CE00[];

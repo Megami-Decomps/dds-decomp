@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "kwln.h"
+#include "dat_state.h"
 
 /* Staff callbacks receive a task handle as an integer word. Preserve the
  * native parameter widths and the short-arity task-user-value calls. */
@@ -26,7 +27,6 @@ extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
-extern s32 datGameState;
 extern s32 mnuMapPadMaskToFlags();
 extern void mnuStepPartyPanelListFromInput();
 extern void mnuClearListFlags();
@@ -336,7 +336,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
     return 1;
 }
 
-extern u16 mnuGetPartyEntryMenuValue(s32);
+extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern void dspStartEntry(s32);
 extern void func_00283BF0(s32, s32);
@@ -344,10 +344,6 @@ extern void ptyAdjustItemQuantity(s32, s32);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA84;
 
-typedef struct MnuEquipUnit {
-    u8 pad00[4];
-    u16 unitId;              /* 0x04 */
-} MnuEquipUnit;
 
 typedef struct MnuEquipContext {
     u8 pad00[0x1C];
@@ -362,14 +358,14 @@ typedef struct MnuEquipScene {
 
 /* Swap the equipped bullet item: update the actor/old/new message tokens,
  * adjust inventory counts, and latch the old/new IDs in the menu context. */
-void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
+void mnuSwapEquippedBullet(s32 scene, DatPartyRecord *unit, s32 itemId) {
     MnuEquipContext *equipContext = ((MnuEquipScene *)scene)->context;
-    s32 equipped = mnuGetPartyEntryMenuValue((s32)unit);
+    s32 equipped = mnuGetPartyEntryMenuValue(unit);
 
     func_00283BF0(scene + 0x914, 1);
     if (equipped != itemId) {
         /* Actor names use 17-byte records; item names use 25-byte records. */
-        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + ((MnuEquipUnit *)unit)->unitId * 17);
+        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + unit->unitId * 17);
         evtCopyEntryStringToActiveWindow(1, D_003BAA84 + equipped * 25);
         evtCopyEntryStringToActiveWindow(2, D_003BAA84 + itemId * 25);
         dspStartEntry(0);
@@ -442,7 +438,7 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->selection->cursor->index;
-    s32 partyEntry = datGameState + index * 0x1A4 + 0xA60;
+    s32 partyEntry = (s32)&datGameState->party[index];
     StaffImageList *list;
     StaffImageWindow *window;
 

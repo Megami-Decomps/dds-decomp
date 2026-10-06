@@ -308,30 +308,31 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
 }
 
 extern void mnuReleaseStaffMenuResources(s32 *);
-extern void mnuInitializeStaffPageWindows(s32, s32 *, s32, s32);
+extern void mnuInitializeStaffPageWindows(s32, StaffSlots *, s32, s32);
 extern s32 mnuCreatePanelGroup(s32);
 extern void mnuUpdateFiveListEntries(s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void evtStageTestInit(s32);
 extern void mnuForwardTableByte(s32);
+extern void mnuReleaseStaffResourceGroups(StaffSlots *);
 
 
 
 /* Create the group and sprite backing the skill-package panel for the
  * selected reward row, then forward its unit's ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
-    s32 *group = work->group;
+    u32 *group = work->staffSlots.baseResources;
     s32 panel;
 
     mnuReleaseStaffMenuResources(group);
-    mnuInitializeStaffPageWindows((s32)&work->partyWindow, group, 0, (s32)&work->partyPanel);
-    panel = mnuCreatePanelGroup(work->panelGroup);
+    mnuInitializeStaffPageWindows((s32)&work->partyWindow, &work->staffSlots, 0, (s32)&work->partyPanel);
+    panel = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
-        mnuCreateSpriteState(work->spriteArg1,
-                             work->spriteArg0,
-                             work->panelGroup);
+        mnuCreateSpriteState(work->staffSlots.baseResources[5],
+                             work->staffSlots.baseResources[2],
+                             work->staffSlots.pairResources[0]);
     evtStageTestInit(0);
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
@@ -346,8 +347,8 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuReleaseAssets(&ctx->assets);
-    mnuReleaseStaffMenuTextureHandles(ctx->group);
-    mnuReleaseStaffResourceGroups(ctx->group);
+    mnuReleaseStaffMenuTextureHandles(ctx->staffSlots.baseResources);
+    mnuReleaseStaffResourceGroups(&ctx->staffSlots);
     mnuResetWorkFloats();
 }
 
@@ -355,7 +356,7 @@ extern char D_003AFA88[];
 extern char D_003AFA98[];
 extern void sndEnsureMidiBankResident(s32);
 extern void mnuInitPartyPanelSlots(s32);
-extern void mnuAppendCampSpriteRequests(s32, s32);
+extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
 extern void effRequestResourceByMode(char *, char *, s32, s32);
 extern void mnuRequestBaseAssets(MenuAssets *);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
@@ -366,7 +367,7 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     }
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots((s32)&work->partyPanel);
-    mnuAppendCampSpriteRequests(work->fadeTarget, (s32)work->group);
+    mnuAppendCampSpriteRequests(work->fadeTarget, &work->staffSlots);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0, (s32)&work->unitHandle);
     mnuRequestBaseAssets(&work->assets);
     work->setupState = 1;
@@ -375,7 +376,7 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     return 1;
 }
 
-extern s32 mnuStaffSlotsAllFilled(s32, s32);
+extern s32 mnuStaffSlotsAllFilled(s32, StaffSlots *);
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
 extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -388,7 +389,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (ctx->setupState == 2) {
         return 0;
     }
-    if (mnuStaffSlotsAllFilled(ctx->fadeTarget, (s32)ctx->group) == 0) {
+    if (mnuStaffSlotsAllFilled(ctx->fadeTarget, &ctx->staffSlots) == 0) {
         return 1;
     }
     if (func_002877A8() == 1) {
@@ -694,10 +695,10 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuReleasePartyIconBundles((s32)window);
         mnuSelectPage(window, page);
         mnuResetPartyPanelFade((s32)window, page, 0, 0);
-        mnuSetWindowResource(page, (s32)window, work->panelGroup,
-                             work->panelOption);
+        mnuSetWindowResource(page, (s32)window, work->staffSlots.pairResources[0],
+                             work->staffSlots.pairResources[1]);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
-        mnuAttachPartyIconBundle(page, (s32)window, work->panelGroup);
+        mnuAttachPartyIconBundle(page, (s32)window, work->staffSlots.pairResources[0]);
 
         ((MenuIconBundle *)work->partyWindow.slots[page].iconBundle)->fade = 0x100;
         window->flags |= 0x400;

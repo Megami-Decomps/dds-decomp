@@ -367,7 +367,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
 
 void mnuCalcListEntryOffset(s32 *out, MenuPageWindow *menu, s32 index) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
-    s32 count = menu->records->visibleCount;
+    s32 count = menu->records->unk0;
     s32 mode;
 
     if (!(menu->slots[index].flags & 0x40)) {
@@ -431,12 +431,12 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
 /* Draw the selected panel or all visible/additional panels, then advance the transition. */
 void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
     s32 positionOffset[2];
-    MenuPageRecord *layout = menu->records;
+    PartyPanel *layout = menu->records;
     s32 panelCount;
     s32 panelIndex;
 
-    panelCount = layout->visibleCount;
-    panelCount += layout->additionalCount;
+    panelCount = layout->unk0;
+    panelCount += layout->unk4;
     if (menu->selected >= 0) {
         mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
     } else {

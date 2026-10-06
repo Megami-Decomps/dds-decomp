@@ -2107,7 +2107,6 @@ INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BC690);
 
 void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     u32 i;
-    s32 offset;
     s32 *res;
     if (flag == 0) {
         for (i = 0, res = menu->handlesA; i < 8; i++, res++) {
@@ -2117,10 +2116,10 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
             }
         }
     }
-    for (i = 0, offset = 0; i < 5; i++, offset += 0x34) {
-        MenuPageRecord *entries = menu->records;
-        if (((MenuPageEntry *)((u8 *)entries->entries + offset))->gauge.resourceIndex >= 0) {
-            if ((s32)i < entries->visibleCount) {
+    for (i = 0; i < 5; i++) {
+        PartyPanel *entries = menu->records;
+        if (entries->slots[i].unk8 >= 0) {
+            if ((s32)i < entries->unk0) {
                 func_002BC690(menu, i, 1);
             } else {
                 func_002BC690(menu, i, 2);
@@ -2140,16 +2139,16 @@ INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BCAB0);
 extern char D_00437C30[];
 
 /* Create both party-panel lists and append their shared row labels. */
-void mnuInitScrollLists(MenuPageWindow *menu, s32 *counts) {
+void mnuInitScrollLists(MenuPageWindow *menu, PartyPanel *records) {
     s32 i = 0;
     menu->lists[0] = mnuCreateListState(0, 1, 1);
     menu->lists[1] = mnuCreateListState(0, 1, 1);
-    if (counts[0] + counts[1] > 0) {
+    if (records->unk0 + records->unk4 > 0) {
         do {
             mnuListAppendNode(menu->lists[0], D_00437C30);
             i++;
             mnuListAppendNode(menu->lists[1], D_00437C30);
-        } while (i < counts[0] + counts[1]);
+        } while (i < records->unk0 + records->unk4);
     }
 }
 
@@ -2160,35 +2159,19 @@ void mnuDestroyWindowOwnedLists(context)
     mnuDestroyListState(context->lists[1]);
 }
 
-void mnuRebuildScrollLists(u32 context, u32 counts) {
-    mnuDestroyWindowOwnedLists();
-    mnuInitScrollLists(context, counts);
+void mnuRebuildScrollLists(MenuPageWindow *context, PartyPanel *records) {
+    mnuDestroyWindowOwnedLists(context);
+    mnuInitScrollLists(context, records);
 }
 
-typedef struct MenuSlotWindow {
-    u8 unk0[0xC0];
-    u32 unkC0;
-    u8 unkC4[0x110 - 0xC4];
-    u32 unk110;
-    u8 unk114[0x2138 - 0x114];
-} MenuSlotWindow;
 
-typedef struct MenuWindowSet {
-    u32 flags;
-    u8 unk4[0x14];
-    MenuSlotWindow slots[5];
-    u8 unkA630[0xA698 - 0xA630];
-    s32 selected;
-} MenuWindowSet;
-
-void mnuClearPageSelection(MenuWindowSet *set) {
-    if (set->selected >= 0) {
-        MenuSlotWindow *slots = set->slots;
-        slots[set->selected].unkC0 = 0x100;
-        slots[set->selected].unk110 = 0x100;
-        set->selected = -1;
+void mnuClearPageSelection(MenuPageWindow *menu) {
+    if (menu->selected >= 0) {
+        menu->slots[menu->selected].contents[0].hp.unk44 = 0x100;
+        menu->slots[menu->selected].contents[0].mp.unk44 = 0x100;
+        menu->selected = -1;
     }
-    set->flags &= ~0x200;
+    menu->flags &= ~0x200;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BCD90);
@@ -2240,12 +2223,11 @@ void mnuShutdownContext(u8 *ctx) {
 
 void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
     s32 selected = window->selected;
-    s32 offset = 0;
     u32 i;
 
-    for (i = 0; i < 5; i++, offset += sizeof(MenuPageEntry)) {
+    for (i = 0; i < 5; i++) {
         if (i != selected) {
-            s32 id = ((MenuPageEntry *)((u8 *)window->records->entries + offset))->gauge.resourceIndex;
+            s32 id = window->records->slots[i].unk8;
 
             if (id >= 0) {
                 if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -2261,11 +2243,11 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
     s32 selected = window->selected;
     u32 i;
     s32 id;
-    MenuPageEntry *record;
+    PartyPanelEntry *record;
 
     for (i = 0; i < 5; i++) {
-        record = &window->records->entries[i];
-        id = record->gauge.resourceIndex;
+        record = &window->records->slots[i];
+        id = record->unk8;
         if (id >= 0) {
             if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
                 effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
@@ -2273,8 +2255,8 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
             }
         }
     }
-    record = &window->records->entries[selected];
-    id = record->gauge.resourceIndex;
+    record = &window->records->slots[selected];
+    id = record->unk8;
     if (id >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
             effResolveAndReleaseResource(window->handlesA[id]);
@@ -2296,7 +2278,7 @@ void mnuClearPageSelectionHandles(MenuPageWindow *window) {
     if (window->selected >= 0) {
         mnuResolveUnselectedPageHandles(window);
     }
-    mnuClearPageSelection((MenuWindowSet *)window);
+    mnuClearPageSelection(window);
 }
 
 void mnuFlagActiveWindows(u8 *menu) {
@@ -2376,7 +2358,7 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
 
         window->fade = fade < 0 ? 0 : fade;
     }
-    mnuClearPageSelection((MenuWindowSet *)window);
+    mnuClearPageSelection(window);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFB8);
