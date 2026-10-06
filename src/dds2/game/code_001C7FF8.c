@@ -640,7 +640,7 @@ void func_001CB278(SceneAiWork *work) {
     case 0:
         for (i = 0; i < 3; i++) {
             work->rowFade[i] = 128;
-            work->rowOffset[i] = 80.0f;
+            work->rowScale[i] = 80.0f;
             work->rowPhase[i] = 0;
             fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, 0);
         }
