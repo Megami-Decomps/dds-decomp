@@ -10820,13 +10820,6 @@ u32 effDestroyOwnerRecordList(u32 buckets) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", effConvertParamValue);
 
-typedef struct EffMappedRecord {
-    u8 pad00[0x14];
-    u32 category;     // 0x14, dispatches the status-size calculation
-    u32 statusBytes;  // 0x18, expanded to the required capacity when loaded
-    u8 pad1C[4];
-    u8 *status;       // 0x20
-} EffMappedRecord;    // 0x24
 
 /* Sum the status-storage byte requirements for the selected record category. */
 u32 effSumRecordStatuses(u8 *recordBytes) {
@@ -10885,11 +10878,6 @@ u32 effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
     return allocation;
 }
 
-typedef struct EffMappedResource {
-    s32 count;                // 0x00
-    u32 allocation;           // 0x04, owns the record array
-    EffMappedRecord *records; // 0x08, retained address of that allocation
-} EffMappedResource;          // 0x0C
 
 /* Build the live batch header from the serialized count and owned record array. */
 u32 effCreateMappedResource(u32 sourceAddress) {
