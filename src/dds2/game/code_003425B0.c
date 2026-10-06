@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_FRAME_HEADER_BYTES 0x10
@@ -43,11 +44,11 @@ extern u32 sdfSoundCommandBusy;
 
 extern u32 sdfSoundCommandStatus;
 
-extern u64 sdfTexAcquireResourceTexture(u32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
-extern u64 sdfReadNamedResource(u64, u32 *, u32 *);
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
-extern u64 sndBuildResourceHandleListFromOffsets(u32);
+extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 
 extern u32 D_00438D0C;
 
@@ -361,9 +362,9 @@ extern s32 sdfDevReactivate(DevState *);
 extern s32 sdfDevQueueRead(DevState *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern s32 sdfDevQueueReleaseState(DevState *);
-extern s32 sdfAllocGeneralBlock(s32);
-extern s32 sdfResourceRetainAddress(s32);
-extern void sdfReleaseResourceAllocation();
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void func_003417E0(s32, void *, s32);
 
 u32 *func_00342848(u32 command, SdfSoundRpcRequest *request) {
@@ -394,7 +395,7 @@ u32 *func_00342848(u32 command, SdfSoundRpcRequest *request) {
         break;
     }
     case 1: {
-        s32 allocation;
+        SdfMemBlock *allocation;
         void *buffer;
         D_004391D4 = request;
         allocation = sdfAllocGeneralBlock(request->byteCount);
@@ -859,19 +860,19 @@ void sdfPrintChipHeapInfo(void) {
     sdfPrintFormattedDevMessage(D_00438C08, first);
 }
 
-extern s32 sdfDevCreateCommandState(u64 name);
-extern s32 sdfDevQueueControlAndWait(s32 state);
-extern void sdfDevQueueReadAndWait(s32 state, s32 buffer, s32 size);
-extern void sdfDevWaitThenReleaseCommandState(s32 state);
-extern void sdfDecrementAllocationReferenceCount(s32 handle);
+extern DevState *sdfDevCreateCommandState(const char *name);
+extern s32 sdfDevQueueControlAndWait(DevState *state);
+extern void sdfDevQueueReadAndWait(DevState *state, s32 buffer, s32 size);
+extern void sdfDevWaitThenReleaseCommandState(DevState *state);
+extern void sdfDecrementAllocationReferenceCount(SdfMemBlock *handle);
 
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
  * outData receives the block address, outSize the file size; without outData the block is released. */
-u64 sdfDevReadResourceWithExtraSpace(u64 name, u32 *outData, u32 *outSize, s32 extra) {
-    s32 state = sdfDevCreateCommandState(name);
+SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *name, u32 *outData, u32 *outSize, s32 extra) {
+    DevState *state = sdfDevCreateCommandState(name);
     s32 size = sdfDevQueueControlAndWait(state);
-    s32 handle = sdfAllocGeneralBlock(size + extra);
-    s32 address = sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfAllocGeneralBlock(size + extra);
+    u32 address = sdfResourceRetainAddress(handle);
 
     sdfDevQueueReadAndWait(state, address, size);
     sdfDevWaitThenReleaseCommandState(state);
@@ -886,47 +887,48 @@ u64 sdfDevReadResourceWithExtraSpace(u64 name, u32 *outData, u32 *outSize, s32 e
     return handle;
 }
 
-u64 sdfReadNamedResource(u64 source, u32 *info, u32 *options) {
-    return sdfDevReadResourceWithExtraSpace(source, info, options, 0);
+SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize) {
+    return sdfDevReadResourceWithExtraSpace(name, outAddress, outSize, 0);
 }
 
-u64 sdfLoadNamedResourceAndReleaseLookupHandle(u64 source) {
-    u64 buffer;
-    u64 result;
+SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
+    SdfMemBlock *buffer;
+    SdfTex *result;
     u32 info[4];
 
-    buffer = sdfReadNamedResource(source, info, 0);
-    result = sdfTexAcquireResourceTexture(info[0]);
+    buffer = sdfReadNamedResource(name, info, 0);
+    result = sdfTexAcquireResourceTexture((void *)info[0]);
     sdfReleaseResourceAllocation(buffer);
     return result;
 }
 
-extern s32 sdfCreateConfiguredBufferedResourceList(s32);
-extern void sdfAppendResourceListItem(s32, u64);
+extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32);
+extern void sdfAppendResourceListItem(DevRequest *, u32);
 
-u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
+DevRequest *sndBuildResourceHandleListFromOffsets(const void *resource) {
+    const SdfResourceList *list = resource;
     s32 i = 0;
-    s32 count = ((SdfResourceList *)resource)->count;
-    s32 handle = sdfCreateConfiguredBufferedResourceList(count);
-    s32 *entry;
+    s32 count = list->count;
+    DevRequest *handle = sdfCreateConfiguredBufferedResourceList(count);
+    const s32 *entry;
     if (count != i) {
-        entry = (s32 *)(resource + 0x14);
+        entry = list->offsets;
         do {
             i++;
-            sdfAppendResourceListItem(handle, sdfTexAcquireResourceTexture(resource + *entry));
+            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture((u8 *)resource + *entry));
             entry++;
         } while (i != count);
     }
     return handle;
 }
 
-u64 sndLoadNamedOffsetResourceList(u64 source) {
-    u64 buffer;
-    u64 result;
+DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
+    SdfMemBlock *buffer;
+    DevRequest *result;
     u32 info[4];
 
-    buffer = sdfReadNamedResource(source, info, 0);
-    result = sndBuildResourceHandleListFromOffsets(info[0]);
+    buffer = sdfReadNamedResource(name, info, 0);
+    result = sndBuildResourceHandleListFromOffsets((const void *)info[0]);
     sdfReleaseResourceAllocation(buffer);
     return result;
 }
@@ -941,10 +943,10 @@ s32 sdfRelocatePackedResourcePayload(SdfRelocResource *resource) {
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-u64 sdfLoadPackedResourceWithRelocatedPayload(u64 name, s32 *outPayload) {
+SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, s32 *outPayload) {
     u32 info[4];
-    u64 buffer = sdfReadNamedResource(name, info, 0);
-    *outPayload = sdfRelocatePackedResourcePayload(info[0]);
+    SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
+    *outPayload = sdfRelocatePackedResourcePayload((SdfRelocResource *)info[0]);
     return buffer;
 }
 
@@ -958,10 +960,10 @@ s32 sdfRelocatePackedResourceWordsFromHeader(SdfRelocResource *resource) {
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-u64 sdfReadPackedResourceAndRelocateHeader(u64 name, s32 *outPayload) {
+SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, s32 *outPayload) {
     u32 info[4];
-    u64 buffer = sdfReadNamedResource(name, info, 0);
-    *outPayload = sdfRelocatePackedResourceWordsFromHeader(info[0]);
+    SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
+    *outPayload = sdfRelocatePackedResourceWordsFromHeader((SdfRelocResource *)info[0]);
     return buffer;
 }
 
