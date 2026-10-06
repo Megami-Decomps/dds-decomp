@@ -7,7 +7,7 @@ extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 
-typedef struct {
+typedef struct WorldEntry {
     void *worldNodes;
     u32 unk04;
     void *callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
