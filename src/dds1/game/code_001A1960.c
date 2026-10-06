@@ -5151,7 +5151,6 @@ void func_001C1850(s32 index, s8 operation) {
     }
 }
 
-
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A30A8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A30D8);
