@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_world.h"
+#include "eff_object.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
@@ -1414,41 +1415,283 @@ typedef union EvtMotionValue {
     EvtMotionBits bits;
 } EvtMotionValue;
 
-typedef struct EvtModelRef {
-    u8 pad00[0xC];
-    s32 handle; /* 0xC */
-} EvtModelRef;
+extern Motion *mdlFindNodeById(MdlCtx *model, s32 index);
 
-typedef struct EvtModelSlot {
-    u8 pad00[0xC];
-    EvtModelRef *ref; /* 0xC */
-} EvtModelSlot;
+extern char D_00437710[];
+extern char D_00437438[];
 
-typedef struct EvtMotionData {
-    u8 pad00[4];
-    s32 **frames; /* 0x4 */
-} EvtMotionData;
+INCLUDE_SDATA(const s32, "game/code_00250010", evtPictureTaskName);
 
-typedef struct EvtMotionNode {
-    u8 pad00[8];
-    EvtMotionData *data; /* 0x8 */
-} EvtMotionNode;
+INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTransitionActive);
 
-extern EvtMotionNode *mdlFindNodeById(s32 model, s32 index);
+INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyOverlayEnabled);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00254CE0);
+INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTaskName);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004373E0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004373E8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004373F0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004373F8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437400);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437408);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437410);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437418);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437420);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437428);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437430);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437438);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437440);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437448);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437450);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437458);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437460);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437468);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437470);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437478);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437480);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437488);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437490);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437498);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374A0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374A8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374B0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374B8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374C0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374C8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374D0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374D8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374E0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374E8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374F0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004374F8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437500);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437508);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437510);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437518);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437520);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437528);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437530);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437538);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437540);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437548);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437550);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437558);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437560);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437568);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437570);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437578);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437580);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437588);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437590);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437598);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375A0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375A8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375B0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375B8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375C0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375C8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375D0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375D8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375E0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375E8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375F0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004375F8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437600);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437608);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437610);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437618);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437620);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437628);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437630);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437638);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437640);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437648);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437650);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437658);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437660);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437668);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437670);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437678);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437680);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437688);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437690);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437698);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376A0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376A8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376B0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376B8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376C0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376C8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376D0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376D8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376E0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376E8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376F0);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_004376F8);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437700);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437708);
+
+INCLUDE_SDATA(const s32, "game/code_00250010", D_00437710);
+
+void func_00254CE0(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
+    s32 i;
+    s32 count = 0;
+    s32 style = 0;
+    MdlCtx *model;
+    EvtMotionValue packed;
+    char *loopNames[] = {D_00437710, D_00437438};
+
+    model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
+    if (ctx->fieldIndex == row) {
+        style = 4;
+    }
+    packed.word = ctx->value;
+    for (i = 0; i < 4; i++) {
+        if (mdlFindNodeById(model, i) != NULL) {
+            count++;
+        }
+    }
+    switch (row) {
+    case 0:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            "GROUP   %d  (MAX %d)", packed.bits.group, count));
+        break;
+    case 1:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            "MOTNO   %d  (MAX %d)", packed.bits.motion, mdlGetNodeRefHalf(model, packed.bits.group)));
+        break;
+    case 2:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            "LOOP    %s", loopNames[packed.bits.loop]));
+        break;
+    case 3:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            "HOKAN   %d", packed.bits.hokan));
+        break;
+    case 6:
+        if (mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+                "MAXFRAME (%d)", mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion]->packedHeader));
+        } else {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "(DUMMY)"));
+        }
+        break;
+    }
+}
+
 
 extern void func_00254CE0();
 
 /* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
 s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
-    s32 model;
+    MdlCtx *model;
     s32 count;
     EvtMotionValue packed;
 
     list = sdfCreateResetPacketList();
-    model = ((EvtModelSlot *)ctx->frameGroup->info->data)->ref->handle;
+    model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     func_00250338(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, func_00254CE0);
     kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x10) {
@@ -1530,7 +1773,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     }
     ctx->value = packed.word;
-    if (D_0037F510.confirm < 0 && mdlFindNodeById(model, packed.bits.group)->data->frames[packed.bits.motion] != NULL) {
+    if (D_0037F510.confirm < 0 && mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
         return 1;
     }
     return D_0037F510.cancel >= 0 ? 0 : -1;
@@ -2651,224 +2894,6 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     }
     return found;
 }
-
-INCLUDE_SDATA(const s32, "game/code_00250010", evtPictureTaskName);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTransitionActive);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyOverlayEnabled);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTaskName);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373E0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373E8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373F0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373F8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437400);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437408);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437410);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437418);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437420);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437428);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437430);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437438);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437440);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437448);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437450);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437458);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437460);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437468);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437470);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437478);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437480);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437488);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437490);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437498);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374A0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374A8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374B0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374B8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374C0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374C8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374D0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374D8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374E0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374E8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374F0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374F8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437500);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437508);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437510);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437518);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437520);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437528);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437530);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437538);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437540);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437548);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437550);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437558);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437560);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437568);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437570);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437578);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437580);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437588);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437590);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437598);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375A0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375A8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375B0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375B8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375C0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375C8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375D0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375D8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375E0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375E8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375F0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375F8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437600);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437608);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437610);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437618);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437620);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437628);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437630);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437638);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437640);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437648);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437650);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437658);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437660);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437668);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437670);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437678);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437680);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437688);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437690);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437698);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376A0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376A8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376B0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376B8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376C0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376C8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376D0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376D8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376E0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376E8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376F0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376F8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437700);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437708);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437710);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437718);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437720);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_00437728);
 

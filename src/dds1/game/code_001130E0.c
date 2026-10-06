@@ -1,6 +1,7 @@
+#include "mdl.h"
 #include "common.h"
 #include "pcp_vu0.h"
-#include "dds3obj.h"
+#include "eff_object.h"
 
 /* Follow record the object tracks (angle, flags and kind at the end of a longer record). */
 typedef struct EffFollowRec {
@@ -12,24 +13,7 @@ typedef struct EffFollowRec {
 } EffFollowRec;
 
 
-typedef struct EffectObjectData {
-    ObjBase *handle;
-    u32 word04;
-    EffFollowRec *transitionWork; /* 0x08: object transition work */
-    ObjBase *modelHolder; /* 0x0C: owned base retains the model resource. */
-    s32 activeId;
-    u32 word14;
-    u32 word18;
-    s32 pendingValue;
-    s32 timer;
-    u32 word24;
-    f32 angle;
-    f32 limitMin2C;
-    f32 limitMax30;
-    u32 word34;
-    f32 limitMin38;
-    f32 limitMax3C;
-} EffectObjectData;
+
 
 typedef struct EffectTransformData {
     ObjBase *resourceState;
@@ -367,24 +351,10 @@ typedef struct FollowTarget {
     f32 offsetY;     /* 0xD4 */
 } FollowTarget;
 
-typedef struct FollowLevel {
-    u8 pad00[0x1F];
-    u8 value;        /* 0x1F */
-} FollowLevel;
 
-typedef struct FollowConfig {
-    u8 pad00[0x18];
-    FollowLevel *level; /* 0x18 */
-} FollowConfig;
-
-typedef struct FollowTransition {
-    u8 pad00[0xC];
-    FollowConfig *config; /* 0x0C */
-} FollowTransition;
 
 extern void func_001122F0(void *, EffectObject *);
 extern void func_0011ECC8(EffectObject *);
-extern FollowTransition *func_00113008(EffectObject *);
 extern s32 sdfLoadMapRecordPositionVector(s32, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 extern u8 D_00325788[];
@@ -392,7 +362,7 @@ extern u8 D_00325788[];
 s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     f32 vec[4];
     FollowTarget *target;
-    FollowConfig *config;
+    MdlCtx *config;
     s32 level;
     s32 pickMode;
 
@@ -419,11 +389,11 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     if (target == NULL) {
         return 1;
     }
-    config = func_00113008(obj)->config;
+    config = (MdlCtx *)func_00113008((NodeA *)obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
         level = target->height;
     } else {
-        level = config->level->value;
+        level = config->inner->color >> 24;
     }
     pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
     if (sdfLoadMapRecordPositionVector(target->info->mapRecord, 0)) {
