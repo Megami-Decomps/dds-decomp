@@ -38,7 +38,113 @@ extern f32 sdfSinPoly(f32 angle);
 extern f64 fabs(f64 value);
 extern BillChildPayload *D_003BD7F4;
 
-INCLUDE_ASM(const s32, "effect/billManager", func_001502B0);
+/* Keep each child's pending list synchronized with the instance's draw mode,
+ * then append one quad to its fifteen-record streams. */
+void func_001502B0(BillObj *obj, BillChildPayload *child) {
+    f32 matrix[16];
+    f32 direction[4];
+    f32 dot;
+    BillPacketWork *work;
+    s32 selected;
+    u32 packet;
+    u8 *geometry;
+    s32 index;
+    f32 x, y, halfWidth, halfHeight;
+    f32 cosine, sine;
+    f32 cornerX, cornerY;
+
+    selected = child->packetListIndex;
+    if (selected != obj->unk2E) {
+        work = child->work;
+        if (work->count > 0) {
+            packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+                work->uv, work->offsets, work->count, 0);
+            sdfAppendPacket(child->pendingLists[selected], packet);
+            work->count = 0;
+        }
+        selected = obj->unk2E;
+        child->packetListIndex = selected;
+    }
+    if (child->pendingLists[selected] == NULL) {
+        child->pendingLists[selected] = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(child->pendingLists[selected]);
+        packet = sdfAllocPacketAligned(0x20);
+        sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
+            sdfTexGetPrimaryBuffer((SdfTex *)child->value),
+            sdfTexGetPrimaryBufferSize((SdfTex *)child->value));
+        sdfAppendReferencePacket(child->pendingLists[selected], packet);
+        if ((u16)(child->variant & 1) != 0) {
+            VU0_LOAD_VF(vf10, sdfViewEyeVector);
+            VU0_LOAD_VF(vf11, sdfViewTargetVector);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF(vf11, D_0034E010);
+            VU0_DOT_XYZ(dot, vf10, vf11);
+            D_0034E020[1] = 1.0 - fabs(dot);
+            VU0_STORE_VF(vf10, direction);
+            VU0_MOVE_VF_EXTENDED(vf11, vf10);
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+            VU0_LOAD_VF_MEMORY(vf10, D_0034E020);
+            VU0_SCALE_MATRIX_ROWS(vf10);
+            VU0_STORE_MATRIX(matrix);
+        } else {
+            EE_MMI_UNIT_MATRIX(matrix);
+        }
+        geometry = (u8 *)sdfAllocPacketAligned(0x38);
+        sdfInitGeometryDmaPacket(geometry, matrix);
+        sdfAppendPacket(child->pendingLists[selected], (u32)geometry);
+        if (child->next == child) {
+            child->next = D_003BD7F4;
+            D_003BD7F4 = child;
+        }
+    }
+    work = child->work;
+    index = work->count;
+    PCP_COPY_VECTOR(work->positions[index], &obj->unk0);
+    work->colors[index] = obj->childParam;
+    memcpy(&work->uv[index], &child->uv, sizeof(child->uv));
+    x = child->x * obj->childScaleX;
+    y = child->y * obj->childScaleY;
+    halfWidth = child->halfWidth * obj->childScaleX;
+    halfHeight = child->halfHeight * obj->childScaleY;
+    if (obj->lengthScale == 0.0f) {
+        work->offsets[index][0] = x - halfWidth;
+        work->offsets[index][1] = y - halfHeight;
+        work->offsets[index][2] = x + halfWidth;
+        work->offsets[index][3] = y - halfHeight;
+        work->offsets[index][4] = x + halfWidth;
+        work->offsets[index][5] = y + halfHeight;
+        work->offsets[index][6] = x - halfWidth;
+        work->offsets[index][7] = y + halfHeight;
+    } else {
+        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->lengthScale);
+        sine = sdfSinPoly(obj->lengthScale);
+        cornerX = x - halfWidth;
+        cornerY = y - halfHeight;
+        work->offsets[index][0] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][1] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y - halfHeight;
+        work->offsets[index][2] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][3] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y + halfHeight;
+        work->offsets[index][4] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][5] = cornerX * sine + cornerY * cosine;
+        cornerX = x - halfWidth;
+        cornerY = y + halfHeight;
+        work->offsets[index][6] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][7] = cornerX * sine + cornerY * cosine;
+    }
+    work->count++;
+    if (work->count == 15) {
+        packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+            work->uv, work->offsets, 15, 0);
+        sdfAppendPacket(child->pendingLists[selected], packet);
+        work->count = 0;
+    }
+}
+
 
 typedef struct BillDeferredDescriptor {
     u8 pad00[0x10];
