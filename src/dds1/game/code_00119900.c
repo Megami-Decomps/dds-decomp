@@ -47,7 +47,6 @@ extern s32 datRosterDetails;
 extern s32 datEnemyRecords;
 extern s32 datCommandRecords;
 extern s32 datItemSkillRecords;
-extern s32 datBattleSceneRecords;
 extern s32 D_003BAAB8;
 extern DatPartyRecord *D_003BAA04;
 

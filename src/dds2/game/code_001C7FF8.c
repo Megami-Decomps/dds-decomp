@@ -54,13 +54,6 @@ typedef struct SceneControl {
     s8 kind;
 } SceneControl;
 
-typedef struct SceneDescriptor {
-    s8 unk00;
-    u8 pad01[0x1F];
-    u16 flags;
-    u8 pad22[6];
-} SceneDescriptor;
-
 
 extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
 
@@ -160,8 +153,6 @@ typedef struct BattleSceneWork {
 extern SceneControl *btlCommandPanelWork;
 
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
-
-extern SceneDescriptor *datBattleSceneRecords;
 
 extern u32 func_001C82D8(s32, s8);
 

@@ -30,13 +30,6 @@ enum {
 };
 
 enum {
-    BTL_SCENE_RECORD_BYTES = 0x28,
-    BTL_SCENE_ENEMY_SLOT_COUNT = 11,
-    BTL_ENEMY_RECORD_BYTES = 0x4C,
-    BTL_ENEMY_LEVEL_OFFSET = 5
-};
-
-enum {
     PTY_TEMPLATE_KEEP_BASE_LEVEL = 1,
     PTY_TEMPLATE_USE_PARTY_MAX_LEVEL = 4,
     PTY_ENTRY_STAT_COUNT = 5
@@ -48,7 +41,6 @@ extern s32 func_0011C6A8(s32, s32, u8);
 
 
 extern s32 datItemSkillRecords;
-extern s32 datBattleSceneRecords;
 
 extern DatPartyRecord *dds3FindEntry();
 
@@ -1626,65 +1618,7 @@ u8 func_0011E528(s32 index) {
     return code == 8 ? 0 : code;
 }
 
-/* Compare truncated averages: enemy average + party average / 4 >= party average.
- * Requires a nonzero scene, a nonempty enemy list, and party entries carrying
- * all three flag masks 1/2/4. No eligible entries returns zero.
- * count serves both loops; word holds enemy IDs, then entry flags.
- * partyLevel is accumulated first and divided in place before comparison. */
-s32 btlCheckScenePartyLevelThreshold(s32 sceneIndex) {
-    s32 meetsThreshold = 0;
-    s32 enemyLevelSum;
-    s32 count;
-    s32 i;
-    s32 enemyIdAddress;
-    s32 enemyTableBase;
-    s32 partyLevel;
-    s32 enemyLevelAverage;
-    s32 sceneRecordOffset;
-    u16 word;
-
-    if (sceneIndex != 0) {
-        enemyLevelSum = 0;
-        sceneRecordOffset = sceneIndex * BTL_SCENE_RECORD_BYTES;
-        enemyIdAddress = sceneRecordOffset + datBattleSceneRecords + 6;
-        enemyTableBase = datEnemyRecords;
-        count = 0;
-        i = BTL_SCENE_ENEMY_SLOT_COUNT - 1;
-        do {
-            word = *(u16 *)enemyIdAddress;
-            enemyIdAddress += 2;
-            if (word != 0) {
-                count++;
-                enemyLevelSum += *(u8 *)(enemyTableBase + word * BTL_ENEMY_RECORD_BYTES + BTL_ENEMY_LEVEL_OFFSET);
-            }
-            i--;
-        } while (i >= 0);
-        meetsThreshold = 0;
-        if (count != 0) {
-            enemyLevelAverage = enemyLevelSum / count;
-            partyLevel = 0;
-            count = 0;
-            for (i = 0; i < PTY_ACTIVE_ROSTER_COUNT; i++) {
-                word = datGameState->party[i].flags;
-                if (word & 1) {
-                    if (word & 4) {
-                        if (word & 2) {
-                            count++;
-                            partyLevel += datGameState->party[i].level;
-                        }
-                    }
-                }
-            }
-            meetsThreshold = 0;
-            if (count != 0) {
-                partyLevel = partyLevel / count;
-                meetsThreshold = enemyLevelAverage + partyLevel / 4 < partyLevel;
-                meetsThreshold = meetsThreshold == 0;
-            }
-        }
-    }
-    return meetsThreshold;
-}
+INCLUDE_ASM(const s32, "game/code_0011A118", btlCheckScenePartyLevelThreshold);
 
 /* Reuse an active interval, or seed one for a nonempty encounter group. */
 s32 func_0011E848(s32 index) {

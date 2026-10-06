@@ -7,6 +7,7 @@
 #include "pcp_vu0.h"
 #include "sdf.h"
 #include "evt_unit.h"
+#include "dat_state.h"
 
 enum {
     FIELD_CAMERA_SETTING_COUNT = 8
@@ -37,7 +38,6 @@ extern s32 fldSecondarySceneModelHandle;
 
 extern s32 fldSecondarySceneObject;
 
-extern s32 datBattleSceneRecords;
 
 extern s32 sdfCreateResetPacketList(void);
 
@@ -444,13 +444,6 @@ typedef struct FldAreaResourceState {
     s32 area;             /* 0x7C */
     s32 room;             /* 0x80 */
 } FldAreaResourceState;
-/* The 0x28-byte scene table checks its status halfword at +0x20. */
-typedef struct FldSceneFlagRecord {
-    u8 pad00[0x20];
-    u16 status;
-    u8 pad22[6];
-} FldSceneFlagRecord;
-
 /* Model's color state and node index, observed in the paired color setters. */
 typedef struct FldModelColorState {
     u8 pad00[0x1C];
@@ -2347,7 +2340,7 @@ s32 fldEncProc(void) {
 }
 
 void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
-    if ((recordIndex < 0x400) && ((((FldSceneFlagRecord *)datBattleSceneRecords)[recordIndex].status & 0x8000) != 0))
+    if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
         fldSetEncounterMode(3);

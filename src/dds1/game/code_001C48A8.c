@@ -145,19 +145,9 @@ extern s32 datEnemyRecords;
 
 extern s32 btlGetRuntime(void);
 
-extern u8 *datBattleSceneRecords;
-
 extern void btlResetToInitialScene(void);
 
 extern void fldClearSceneSlotsAndGroups(void);
-
-extern u8 *datBattleSceneRecords;
-
-extern u8 *datBattleSceneRecords;
-
-extern u8 *datBattleSceneRecords;
-
-extern u8 *datBattleSceneRecords;
 
 u32 btlHasRegisteredGuidePanelTask(void);
 
@@ -174,7 +164,7 @@ u32 func_001C48B0(void) {
 
 void fldBattleSceneEnterInit(u8 *arg0) {
     u32 id = *(u32 *)(arg0 + 0x27C);
-    if (id < 0x400 && (*(u16 *)(datBattleSceneRecords + id * 40 + 0x20) & 0x8000) != 0) {
+    if (id < 0x400 && (datBattleSceneRecords[id].flags & 0x8000) != 0) {
         *(u32 *)(arg0 + 0x1F8) |= 8;
         kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
     }
@@ -323,9 +313,9 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         func_001AC7D8();
         *(u8 *)(arg0 + 0x258) = 0;
         func_001A9780();
-        if (*(u8 *)(datBattleSceneRecords + *(s32 *)(arg0 + 0x27C) * 40 + 1) != 0) {
-            for (i = 0; i < *(u8 *)(datBattleSceneRecords + *(s32 *)(arg0 + 0x27C) * 40 + 2); i++) {
-                func_001A4240(*(u8 *)(datBattleSceneRecords + *(s32 *)(arg0 + 0x27C) * 40 + 1));
+        if (datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01 != 0) {
+            for (i = 0; i < datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk02; i++) {
+                func_001A4240(datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01);
             }
         }
         return 8;

@@ -209,6 +209,25 @@ typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1C4 ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
 #endif
 
+/* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
+typedef struct DatBattleSceneRecord {
+    s8 unk00;            /* 0x00: tested for nonzero (scene color/mode selection) */
+    u8 unk01;            /* 0x01: id handed to the scene-entry loader, unk02 times */
+    u8 unk02;            /* 0x02 */
+    u8 pad03[3];
+    u16 unitModes[11];   /* 0x06: enemy unit modes; zero marks an empty slot */
+    u16 unk1C;           /* 0x1C: copied into the battle state with unk1E when both are set */
+    u16 unk1E;           /* 0x1E */
+    u16 flags;           /* 0x20: 0x8000, 0x800 and 0x400 are tested */
+    u8 pad22[2];
+    u16 unk24;           /* 0x24: overrides the scene's sound selection when nonzero */
+    u16 eventId;         /* 0x26: signed event number; zero disables */
+} DatBattleSceneRecord;
+
+typedef char DatBattleSceneRecordSizeCheck[sizeof(DatBattleSceneRecord) == 0x28 ? 1 : -1];
+
+extern DatBattleSceneRecord *datBattleSceneRecords;
+
 extern DatGameState *datGameState;
 
 #endif /* DAT_STATE_H */

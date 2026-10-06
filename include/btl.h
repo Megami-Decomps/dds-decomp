@@ -170,7 +170,8 @@ typedef struct BtlUnit {
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
     f32 unk50;
     u32 baseColor;
-    u8 pad58[8];
+    f32 unk58;
+    u8 pad5C[4];
     f32 currentPosition[4]; /* 0x60: position retained by the unit setter */
     f32 orientation[4]; /* 0x70: quaternion converted to a rotation matrix */
     f32 scale;      /* 0x80 */

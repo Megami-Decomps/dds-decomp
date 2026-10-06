@@ -66,13 +66,6 @@ typedef struct SceneControl {
     s8 kind;
 } SceneControl;
 
-typedef struct SceneDescriptor {
-    s8 unk00;
-    u8 pad01[0x1F];
-    u16 flags;
-    u8 pad22[6];
-} SceneDescriptor;
-
 typedef struct BattleEffectParams {
     f32 position[4];
     f32 rotation[4];
@@ -122,7 +115,6 @@ typedef struct SceneScriptState {
 
 extern SceneControl *btlCommandPanelWork;
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
-extern SceneDescriptor *datBattleSceneRecords;
 extern f32 D_00433724;
 extern f32 *D_0037F770[];
 extern u32 func_001C82D8(s32, s8);

@@ -77,15 +77,6 @@ typedef struct {
     s32 flags;
 } SceneInitializer;
 
-typedef struct SceneDescriptor {
-    s8 unk00;
-    u8 unk01;
-    u8 unk02;
-    u8 pad03[0x1D];
-    u16 flags;
-    u8 pad22[6];
-} SceneDescriptor;
-
 typedef struct BattleEffectParams {
     f32 position[4];
     f32 rotation[4];
@@ -115,8 +106,6 @@ typedef struct SceneTask {
 } SceneTask;
 
 
-
-extern SceneDescriptor *datBattleSceneRecords;
 
 extern f32 *D_0037F770[];
 
