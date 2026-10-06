@@ -4278,7 +4278,32 @@ const char *func_0013C7F8(const char *eventName) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013C9E0);
+const char *func_0013C9E0(const char *eventName) {
+    s32 i;
+    s32 j;
+    if (eventName == 0) return 0;
+    for (i = 0; i < 8; i++) {
+        if (D_00332E30.packs[i].setIndex != 0) {
+            for (j = 0; j < 5; j++) {
+                if (D_00332E30.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                    strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
+                    D_003BAE38 = D_00332E30.packs[i].setIndex;
+                    return D_00332DF0;
+                }
+            }
+        }
+    }
+    for (i = 0; i < 40; i++) {
+        if ((u16)D_00332E30.sets[i].kindArea.packed < 2 &&
+            D_00332E30.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
+            D_003BAE38 = i;
+            return D_00332DF0;
+        }
+    }
+    return 0;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0150);
 
