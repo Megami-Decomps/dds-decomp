@@ -23,32 +23,141 @@ void *func_00159678(void *arg);
 
 extern BillDispatch D_003AA998[];
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00157EA0);
-
-
-typedef struct BillManagerNode BillManagerNode;
-
-struct BillManagerNode {
-    u8 pad00[0x2C];
-    SdfListHead *pendingLists[5];
-    u16 packetListIndex;
-    u8 pad42[6];
-    void *work;
-    BillManagerNode *next;
-};
-
-typedef struct BillPacketWork {
-    u8 pad00[0x3FC];
-    s32 count;
-} BillPacketWork;
-
-extern BillManagerNode *D_00438EFC;
-extern SdfPoolNode *D_003AA960[5];
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfAppendPacket(SdfListHead *list, u32 packet);
-extern u32 sdfBuildCompactVertexVifPacket(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
+extern void sdfAppendReferencePacket(SdfListHead *list, u32 packet);
+typedef struct DmaPacketHeader DmaPacketHeader;
+extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
+extern u32 sdfTexGetPrimaryBuffer(SdfTex *texture);
+extern s32 sdfTexGetPrimaryBufferSize(SdfTex *texture);
+extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
+extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 D_003AA940[4];
+extern f32 D_003AA950[4];
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+extern f64 fabs(f64 value);
+extern BillChildPayload *D_00438EFC;
+
+/* Keep each child's pending list synchronized with the instance's draw mode,
+ * then append one quad to its fifteen-record streams. */
+void func_00157EA0(BillObj *obj, BillChildPayload *child) {
+    f32 matrix[16];
+    f32 direction[4];
+    f32 dot;
+    BillPacketWork *work;
+    s32 selected;
+    u32 packet;
+    u8 *geometry;
+    s32 index;
+    f32 x, y, halfWidth, halfHeight;
+    f32 cosine, sine;
+    f32 cornerX, cornerY;
+
+    selected = child->packetListIndex;
+    if (selected != obj->unk2E) {
+        work = child->work;
+        if (work->count > 0) {
+            packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+                work->uv, work->offsets, work->count, 0);
+            sdfAppendPacket(child->pendingLists[selected], packet);
+            work->count = 0;
+        }
+        selected = obj->unk2E;
+        child->packetListIndex = selected;
+    }
+    if (child->pendingLists[selected] == NULL) {
+        child->pendingLists[selected] = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(child->pendingLists[selected]);
+        packet = sdfAllocPacketAligned(0x20);
+        sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
+            sdfTexGetPrimaryBuffer((SdfTex *)child->value),
+            sdfTexGetPrimaryBufferSize((SdfTex *)child->value));
+        sdfAppendReferencePacket(child->pendingLists[selected], packet);
+        if ((u16)(child->variant & 1) != 0) {
+            VU0_LOAD_VF(vf10, sdfViewEyeVector);
+            VU0_LOAD_VF(vf11, sdfViewTargetVector);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF(vf11, D_003AA940);
+            VU0_DOT_XYZ(dot, vf10, vf11);
+            D_003AA950[1] = 1.0 - fabs(dot);
+            VU0_STORE_VF(vf10, direction);
+            VU0_MOVE_VF_EXTENDED(vf11, vf10);
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+            VU0_LOAD_VF_MEMORY(vf10, D_003AA950);
+            VU0_SCALE_MATRIX_ROWS(vf10);
+            VU0_STORE_MATRIX(matrix);
+        } else {
+            EE_MMI_UNIT_MATRIX(matrix);
+        }
+        geometry = (u8 *)sdfAllocPacketAligned(0x38);
+        sdfInitGeometryDmaPacket(geometry, matrix);
+        sdfAppendPacket(child->pendingLists[selected], (u32)geometry);
+        if (child->next == child) {
+            child->next = D_00438EFC;
+            D_00438EFC = child;
+        }
+    }
+    work = child->work;
+    index = work->count;
+    PCP_COPY_VECTOR(work->positions[index], &obj->unk0);
+    work->colors[index] = obj->childParam;
+    memcpy(&work->uv[index], &child->uv, sizeof(child->uv));
+    x = child->x * obj->childScaleX;
+    y = child->y * obj->childScaleY;
+    halfWidth = child->halfWidth * obj->childScaleX;
+    halfHeight = child->halfHeight * obj->childScaleY;
+    if (obj->lengthScale == 0.0f) {
+        work->offsets[index][0] = x - halfWidth;
+        work->offsets[index][1] = y - halfHeight;
+        work->offsets[index][2] = x + halfWidth;
+        work->offsets[index][3] = y - halfHeight;
+        work->offsets[index][4] = x + halfWidth;
+        work->offsets[index][5] = y + halfHeight;
+        work->offsets[index][6] = x - halfWidth;
+        work->offsets[index][7] = y + halfHeight;
+    } else {
+        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->lengthScale);
+        sine = sdfSinPoly(obj->lengthScale);
+        cornerX = x - halfWidth;
+        cornerY = y - halfHeight;
+        work->offsets[index][0] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][1] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y - halfHeight;
+        work->offsets[index][2] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][3] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y + halfHeight;
+        work->offsets[index][4] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][5] = cornerX * sine + cornerY * cosine;
+        cornerX = x - halfWidth;
+        cornerY = y + halfHeight;
+        work->offsets[index][6] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][7] = cornerX * sine + cornerY * cosine;
+    }
+    work->count++;
+    if (work->count == 15) {
+        packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+            work->uv, work->offsets, 15, 0);
+        sdfAppendPacket(child->pendingLists[selected], packet);
+        work->count = 0;
+    }
+}
+
+
+
+
+
+extern BillChildPayload *D_00438EFC;
+extern SdfPoolNode *D_003AA960[5];
 
 void func_00158340(void) {
-    BillManagerNode *node;
+    BillChildPayload *node;
 
     node = D_00438EFC;
     if (node != NULL) {
@@ -58,8 +167,8 @@ void func_00158340(void) {
             s32 i;
 
             if (count > 0) {
-                u32 packet = sdfBuildCompactVertexVifPacket(work, (u8 *)work + 0xF0, (u8 *)work + 0x12C,
-                                           (u8 *)work + 0x21C, count, 0);
+                u32 packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors, work->uv,
+                                           work->offsets, count, 0);
                 sdfAppendPacket(node->pendingLists[node->packetListIndex], packet);
                 work->count = 0;
             }
@@ -74,7 +183,7 @@ void func_00158340(void) {
             }
 
             {
-                BillManagerNode *next = node->next;
+                BillChildPayload *next = node->next;
                 node->next = node;
                 node = next;
             }
@@ -87,13 +196,6 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00158430);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158AA0);
 
-typedef struct BillDrawNode {
-    BillManagerNode *first;
-    BillManagerNode *second;
-    u8 pad08[0xC];
-    SdfListHead *packetList;
-    struct BillDrawNode *next;
-} BillDrawNode;
 
 
 typedef struct BillStatePacket {
@@ -107,25 +209,23 @@ typedef struct BillStatePacket {
     u64 alphaRegister;
 } BillStatePacket;
 
-extern BillDrawNode *D_00438F00;
+extern BillRenderPair *D_00438F00;
 extern SdfPoolNode D_00380228;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 extern void func_0032DB78(const void *, void *, s32);
-extern void func_00158AA0(BillDrawNode *);
+extern void func_00158AA0(BillRenderPair *);
 
 void func_00158C00(void) {
-    BillDrawNode *node = D_00438F00;
+    BillRenderPair *node = D_00438F00;
     SdfListHead *list;
     void *texture;
     BillStatePacket *packet;
 
     if (node != NULL) {
         do {
-            BillPacketWork *work = node->second->work;
+            BillPacketWork *work = node->children[1]->work;
             if (work->count != 0) {
                 func_00158AA0(node);
             }
@@ -134,12 +234,12 @@ void func_00158C00(void) {
             node = node->next;
         } while (node != NULL);
     }
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
+    texture = (void *)sdfAllocPacketAligned(0x40);
     func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
-    packet = sdfAllocPacketAligned(0x40);
+    packet = (BillStatePacket *)sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;
     packet->vifCommands = 0x5000000310000000ULL;
     packet->gifTag = 0x1000000000008002ULL;
@@ -194,8 +294,8 @@ BillObj *billAllocList(void *resourceData) {
     newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
-    newobj->unk48 = 0;
-    newobj->unk4C = 0;
+    newobj->pair.packetList = 0;
+    newobj->pair.next = 0;
     newobj->pair.unk8 = 0;
     billSetAnimationEntry(newobj, 0);
     return newobj;
@@ -213,8 +313,8 @@ BillObj *billCloneList(BillObj *obj) {
     newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
-    newobj->unk48 = 0;
-    newobj->unk4C = 0;
+    newobj->pair.packetList = 0;
+    newobj->pair.next = 0;
     billSetAnimationEntry(newobj, 0);
     return newobj;
 }
