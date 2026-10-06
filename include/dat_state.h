@@ -68,14 +68,15 @@ typedef struct DatPartyRecord {
     u16 effectData[24];
     u16 menuValue;
     u8 pad54;
-    u8 profileId;
 #ifdef VERSION_DDS1
+    s8 profileId;
     u8 pad56[0x13E];
     s32 randomizedValue;
     s32 link;
     u8 pad19C[8];
 #endif
 #ifdef VERSION_DDS2
+    u8 profileId;
     u8 pad56[0x15C];
     u16 itemId;
     u8 pad1B4[4];
