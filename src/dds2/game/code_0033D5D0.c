@@ -705,15 +705,15 @@ void sdfPathPrefixCat(char *dst, char *src) {
     strcat(dst, src);
 }
 
-u32 func_0033E800(void) {
+u32 func_0033E800(char *path) {
     return 0;
 }
 
-u32 func_0033E808(void) {
+u32 func_0033E808(char *path) {
     return 0;
 }
 
-u32 func_0033E810(void) {
+u32 func_0033E810(char *path) {
     return 0;
 }
 
@@ -795,7 +795,7 @@ char *sdfDevGetPathBuffer(void) {
     return D_0040B9D0;
 }
 
-extern s8 D_00438AE0;
+extern u8 D_00438AE0;
 
 void func_0033EC28(s8 value) {
     D_00438AE0 = value;
