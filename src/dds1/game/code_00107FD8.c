@@ -1,6 +1,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_primitive.h"
 
 #include "kwln.h"
 #include "sdf.h"
@@ -498,30 +499,17 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_001093F8);
 
 
-typedef struct EvtQuadDesc {
-    s16 kind;
-    s16 count;
-    u8 pad4[4];
-    s32 color;
-    u64 *strip;
-    f32 *verts;
-    u8 pad14[4];
-    f32 *uvs;
-    u8 pad1C[4];
-    s32 *indices;
-    u8 pad24[8];
-} EvtQuadDesc; /* 0x2C bytes */
 
 extern u64 D_003245A0[]; /* index table; only the first 8 bytes are used */
 extern void sdfConsAppendClearPacket(void *, s32);
 extern void sdfConsAppendAssetPacket(void *, void *, s32);
-extern void *func_002E21A0(EvtQuadDesc *);
+extern void *func_002E21A0(SdfPrimitiveRequest *);
 extern void func_002DA438(void *, u32);
 extern void sdfQueueAssetRelease(void *);
 
 /* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
 void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
-    EvtQuadDesc desc;
+    SdfPrimitiveRequest desc;
     DrawVec4 verts[EVT_QUAD_VERTEX_COUNT];
     s32 indices[EVT_QUAD_VERTEX_COUNT];
     u64 strip[2];
@@ -534,10 +522,10 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     sdfConsAppendAssetPacket(list, D_003BD6B0, 0);
     memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
-    desc.kind = 2;
-    desc.count = EVT_QUAD_VERTEX_COUNT;
-    desc.verts = &verts[0].x;
-    desc.indices = indices;
+    desc.stripWordCount = 2;
+    desc.vertexCount = EVT_QUAD_VERTEX_COUNT;
+    desc.positions = &verts[0].x;
+    desc.vertexColors = indices;
     desc.strip = strip;
     verts[0].x = x0;
     verts[0].y = y0;
@@ -563,7 +551,7 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
 
 /* Submit the same native vertex permutation with rectangular UVs, then queue asset release. */
 void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
-    EvtQuadDesc desc;
+    SdfPrimitiveRequest desc;
     f32 verts[16];
     s32 indices[EVT_QUAD_VERTEX_COUNT];
     u64 strip[2];
@@ -580,12 +568,12 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     sdfConsAppendAssetPacket(list, asset, 0);
     memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
-    desc.kind = 2;
-    desc.count = EVT_QUAD_VERTEX_COUNT;
-    desc.verts = verts;
-    desc.indices = indices;
+    desc.stripWordCount = 2;
+    desc.vertexCount = EVT_QUAD_VERTEX_COUNT;
+    desc.positions = verts;
+    desc.vertexColors = indices;
     desc.strip = strip;
-    desc.uvs = uvs;
+    desc.coordinates = uvs;
     verts[0] = x0;
     verts[1] = y0;
     verts[2] = z0;
