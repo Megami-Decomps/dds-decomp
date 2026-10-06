@@ -142,10 +142,12 @@ typedef struct SoundLink {
 } SoundLink;
 
 typedef struct SoundResourceLink {
-    u32 owner;
-    s32 effectHandle;
-    u32 *effect;
+    BtlUnit *owner;
+    struct BtlEffectHandle *effectHandle;
+    struct SoundResourceNode *effect;
     u32 flags;
+    u8 refreshRequested;
+    u8 pad11[3];
 } SoundResourceLink;
 
 typedef struct SoundEntry {
@@ -8232,8 +8234,8 @@ s32 btlButtonMaskToIndex(u32 mask) {
     }
 }
 
-SoundResourceLink *sndAllocResourceLink(u32 owner) {
-    SoundResourceLink *link = sdfAllocAndClearQuadwords(0x14);
+SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
+    SoundResourceLink *link = sdfAllocAndClearQuadwords(sizeof(SoundResourceLink));
     link->owner = owner;
     link->effectHandle = 0;
     link->flags = 0;
@@ -8244,8 +8246,8 @@ SoundResourceLink *sndAllocResourceLink(u32 owner) {
 void sndFreeResourceLink(SoundResourceLink *link) {
     if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
-        link->effect[1] = link->effect[1] - 1;
-        sndDeleteSystemEffect(link->effect);
+        link->effect->unk_04--;
+        sndDeleteSystemEffect((u32 *)link->effect);
     }
     sdfReleaseChipBlock(link);
 }
@@ -8253,7 +8255,8 @@ void sndFreeResourceLink(SoundResourceLink *link) {
 INCLUDE_ASM(const s32, "game/code_001DD390", func_002034A8);
 
 void btlMarkTaskReady(s32 link) {
-    *(u8 *)(link + 0x10) = 1;
+    SoundResourceLink *resource = (SoundResourceLink *)link;
+    resource->refreshRequested = 1;
 }
 
 SoundLink *sndAllocLink(u32 owner) {
