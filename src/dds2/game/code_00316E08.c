@@ -6,29 +6,6 @@
 #include "mnu_shooting.h"
 
 
-typedef struct MnuModelNode {
-    f32 primary[4];
-    f32 rotationQuaternion[4];
-    f32 tertiary[4];
-    f32 x;
-    f32 y;
-    f32 z;
-    u32 positionFlag;
-    MdlCtx *model;
-    u32 flags;
-    u16 value48;
-    u16 value4A;
-    f32 savedModelValue;
-} MnuModelNode;
-
-
-typedef struct MenuProgressParameters {
-    u16 width;
-    u16 height;
-    u32 word04;
-    s32 x;
-    s32 y;
-} MenuProgressParameters;
 
 /* Same effect-list layout produced by mnuCreateEffectWork in code_0031B188. */
 typedef struct MnuEffectList {
@@ -78,7 +55,6 @@ extern MenuWorkEntry D_0040ABF8;
 extern void mnuDeactivateWorkEntry(MenuWorkEntry *);
 extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void mnuDestroyAllModelNodeContexts(MnuNodeList *);
-extern u8 *mnuGetResourceProgressParameters(void);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
 extern s32 mnuClaimPositionedEffectRecord(void *, void *, s32, f32, f32, f32, f32);
@@ -428,7 +404,7 @@ void func_00319F48(void) {
     f32 position[4];
     MnuEffectList *lists;
 
-    origin = (MenuProgressParameters *)mnuGetResourceProgressParameters();
+    origin = mnuGetResourceProgressParameters();
     x = origin->x;
     y = origin->y;
     value = mnuEvaluateTimedValue(&D_0040ABF8);
