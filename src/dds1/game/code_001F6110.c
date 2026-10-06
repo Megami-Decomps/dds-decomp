@@ -2756,8 +2756,8 @@ s32 btlCreateResourceNameRecord(s32 nameAddress) {
     return recordAddress;
 }
 
-void func_001FC2E8(void) {
-    sdfReleaseChipBlock();
+void func_001FC2E8(void *allocation) {
+    sdfReleaseChipBlock(allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC300);
