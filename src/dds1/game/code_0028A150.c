@@ -155,7 +155,7 @@ extern s32 fileConfigTaskWork;
 
 extern u32 D_003BC888;
 
-extern void func_003014F0(void *dst, const char *fmt, ...);
+extern s32 func_003014F0(char *dst, const char *fmt, ...);
 
 extern u32 fileSaveReadBuffer;
 
