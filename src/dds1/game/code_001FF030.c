@@ -2718,7 +2718,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_002072F0);
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 
 s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
     u8 *battle = (u8 *)btlGetRuntime();

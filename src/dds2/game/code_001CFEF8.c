@@ -42,7 +42,7 @@ extern s32 btlGetRuntime(void);
 extern s32 btlDoesEnabledStatusMatchCurrentId(s32, u32);
 
 extern void btlDispatchStateHandler(void *, s32);
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 extern BtlRuntimeTask *btlAllocTask(s32);
 extern void *btlGetTaskArguments(s32);
 
