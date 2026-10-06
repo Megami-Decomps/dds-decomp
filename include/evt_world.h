@@ -17,6 +17,16 @@ extern EvtFrameTableEntry D_00368768[];
 extern EvtFrameTableEntry D_003C9538[];
 #endif
 
+struct SdfTex;
+
+/* The picture-task allocator creates this complete 0x08-byte state. */
+typedef struct EvtPictureWork {
+    u32 flags;
+    struct SdfTex *texture;
+} EvtPictureWork;
+
+typedef char EvtPictureWork_size_must_be_0x08[(sizeof(EvtPictureWork) == 0x08) ? 1 : -1];
+
 /* Native resource handle and the loader's corresponding data address. */
 typedef struct EvtResourcePair {
     u32 handle;

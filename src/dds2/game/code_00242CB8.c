@@ -2,6 +2,7 @@
 #include "dat_state.h"
 #include "scr.h"
 #include "kwln.h"
+#include "evt_world.h"
 
 extern s32 kwlnTaskIsRegistered(KwlnTask *);
 extern void evtSetContextFlag(KwlnTask *);
@@ -27,7 +28,7 @@ extern char D_00437208[];
 
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-void func_00101968(s32 arg0, s32 arg1);
+void func_00101968(KwlnTask *parent, KwlnTask *child);
 
 
 char *scrReadStringParameter(s32 idx);
@@ -55,7 +56,8 @@ void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
 s32 evtFindTaskResourceEntryByKey(u32 id, s32 key);
-s32 evtCreateTaskWithValue(s32 taskId, s32 value);
+KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
+KwlnTask *evtCreateTask(s32, const char *);
 s32 evtPreloadBgm(s32 id);
 s32 evtIsBgmLoaded(s32 id);
 
@@ -65,7 +67,7 @@ u32 evtCreateTextureEntryChildTask(void) {
     ScrData *work;
     s32 id;
     s32 entry;
-    s32 task;
+    KwlnTask *task;
 
     work = scrGetCurrentContext();
     if (work == NULL) {
@@ -81,15 +83,15 @@ u32 evtCreateTextureEntryChildTask(void) {
         evtPrintDeveloperConsoleMessage(D_00422030, scrReadIntParameter(1));
         return 1;
     }
-    task = evtCreateTaskWithValue(0x2AFE, entry);
-    func_00101968((s32)work->task, task);
-    scrSetIntegerReturnValue(task);
+    task = evtCreateTaskWithValue(0x2AFE, (struct SdfTex *)entry);
+    func_00101968(work->task, task);
+    scrSetIntegerReturnValue((s32)task);
     return 1;
 }
 
 u32 evtOpcodeCreateWorldChildTask(void) {
     ScrData *work;
-    s32 childTask;
+    KwlnTask *childTask;
 
     work = scrGetCurrentContext();
     if (work == NULL) {
@@ -100,8 +102,8 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));
-    func_00101968((s32)work->task, childTask);
-    scrSetIntegerReturnValue(childTask);
+    func_00101968(work->task, childTask);
+    scrSetIntegerReturnValue((s32)childTask);
     return 1;
 }
 
