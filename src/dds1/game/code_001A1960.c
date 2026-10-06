@@ -8,6 +8,7 @@
 #include "eff.h"
 #include "btl_action.h"
 #include "kwln.h"
+#include "dat_state.h"
 
 extern SceneSlotFadeWork *D_003BD83C;
 extern ActorSlotOrder *D_003BD840[2];
@@ -81,24 +82,6 @@ typedef struct BattleController {
     s32 (*sceneCallback)();
 } BattleController;
 
-/* The saved party profile is 0x1A4 bytes; battle units embed its stat data. */
-typedef struct BtlEntry {
-    u16 flags;
-    u8 pad2[4];
-    u16 hp;
-    u16 maxHp;
-    u16 mp;
-    u8 padC[2];
-    u16 status;
-    u32 totalExp;
-    u16 unk14;
-    u8 unk16[5];
-    u8 pad1B[0x171];
-    u16 unk18C;
-    u16 unk18E;
-    u16 unk190;
-    u8 pad192[0x12];
-} BtlEntry;
 
 typedef struct EntryPair {
     s16 first;
@@ -110,11 +93,11 @@ typedef struct EntryPair {
 extern EntryPair D_003583D0[];
 
 
-extern s32 datComputeSkillBoostedMaxHp();
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 extern s32 btlGetEffectActive(void);
 
-extern s32 datComputeSkillBoostedMaxMp();
+extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 extern void func_001BCB88(s32, s32);
 
@@ -206,7 +189,6 @@ extern void func_001B83D8(s32, s32, s32);
 
 extern s32 btlGetRuntime(void);
 
-extern u8 *datBattleSceneRecords;
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
@@ -241,13 +223,12 @@ typedef struct BattleFearState {
     u32 flags;
 } BattleFearState;
 
-extern s32 datGameState;
 
 extern s32 datAffinityRecords;
 
-extern s32 dds3FindEntryIndex();
+extern s32 dds3FindEntryIndex(s32);
 
-extern s32 btlGetIndexedPartyEntryRecord(s32);
+extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
@@ -278,54 +259,28 @@ void btlClearActorSelectedEntryIndex(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A1990);
 
-s32 btlGetActorEntryData(s32 arg0) {
-    s32 temp_v0;
+void *btlGetActorEntryData(BtlUnit *actor) {
+    DatPartyRecord *entry;
 
-    if ((*(u32 *)(arg0 + 0x110) & 0x400) == 0) {
-        temp_v0 = btlGetIndexedPartyEntryRecord(*(u8 *)(arg0 + 0x2c4));
-        return temp_v0;
+    if ((actor->flags & 0x400) == 0) {
+        entry = btlGetIndexedPartyEntryRecord(actor->unk2C4);
+        return entry;
     }
-    return arg0 + 0x120;
+    return &actor->statBits;
 }
 
-s32 btlGetCurrentPartyEntryRecord(void) {
-    s32 temp_v0;
+DatPartyRecord *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
+    s32 index;
 
-    temp_v0 = dds3FindEntryIndex();
-    return datGameState + temp_v0 * 0x1a4 + 0xa60;
+    index = dds3FindEntryIndex(rosterIndex);
+    return &datGameState->party[index];
 }
 
-s32 btlGetIndexedPartyEntryRecord(s32 arg0) {
-    return datGameState + arg0 * 0x1a4 + 0xa60;
+DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
+    return &datGameState->party[index];
 }
 
-void btlSyncPlayerWork(BtlUnit *actor) {
-    BtlEntry *src = (BtlEntry *)&actor->statBits;
-    BtlEntry *dst = (BtlEntry *)btlGetIndexedPartyEntryRecord(actor->unk2C4);
-    s32 maxHp;
-    s32 maxMp;
-    if (src->flags & 0x1000) {
-        dst->flags |= 0x1000;
-    } else {
-        dst->flags &= ~0x1000;
-    }
-    if (src->flags & 0x4000) {
-        dst->flags |= 0x4000;
-    } else {
-        dst->flags &= ~0x4000;
-    }
-    dst->unk14 = src->unk14;
-    maxHp = datComputeSkillBoostedMaxHp(dst);
-    maxMp = datComputeSkillBoostedMaxMp(dst);
-    dst->hp = src->hp < maxHp ? src->hp : maxHp;
-    dst->mp = src->mp < maxMp ? src->mp : maxMp;
-    memcpy(dst->unk16, src->unk16, 5);
-    dst->status = src->status & 0x7FFF;
-    dst->unk18C = src->unk18C;
-    dst->unk18E = src->unk18E;
-    dst->unk190 = src->unk190;
-    btlBossDebugPrintf("btl:player work set[%p]\n", actor);
-}
+INCLUDE_ASM(const s32, "game/code_001A1960", btlSyncPlayerWork);
 
 s32 btlFindPartyEntryIndexForActor(s32 arg0) {
     return dds3FindEntryIndex(*(u16 *)(arg0 + 0x124));
@@ -448,9 +403,9 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
     return result;
 }
 
-s32 btlGetCombinedPartyCommandPower(BtlEntry *base, BtlUnit *first, BtlUnit *second,
+s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
-    BtlEntry snapshot = *base;
+    DatPartyRecord snapshot = *base;
     s32 totalMaxHp = 0;
     s32 count = 0;
     s32 average;
@@ -854,13 +809,13 @@ s32 btlCountAvailableParticipants(void) {
         }
     }
     {
-        u8 *entry = (u8 *)(datGameState + 0xA60);
+        DatPartyRecord *entry = datGameState->party;
         s32 i;
-        for (i = 4; i >= 0; i--, entry += 0x1A4) {
-            u16 flags = ((BtlEntry *)entry)->flags;
+        for (i = 4; i >= 0; i--, entry++) {
+            u16 flags = entry->flags;
             if ((flags & 1) != 0) {
                 if ((flags & 2) == 0) {
-                    if ((((BtlEntry *)entry)->status & 0x4000) == 0) {
+                    if ((entry->status & 0x4000) == 0) {
                         count++;
                     }
                 }
@@ -1654,7 +1609,6 @@ s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
     return ep;
 }
 
-extern u8 *datBattleSceneRecords;
 
 extern char D_003A1B90[];
 
@@ -1665,7 +1619,7 @@ f32 func_001A7C20(u8 *acquirer, u8 *enemy, s32 rewardKind) {
     s32 difference;
     f32 factor;
 
-    if (*(u16 *)(datBattleSceneRecords + ((BattleController *)btlGetRuntime())->mode * 40 + 0x20) & 0x400) {
+    if (datBattleSceneRecords[((BattleController *)btlGetRuntime())->mode].flags & 0x400) {
         btlBossDebugPrintf(D_003A1B90);
         return 1.0f;
     }
@@ -1908,18 +1862,16 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResul
     return skipped == count;
 }
 
-extern u8 *datBattleSceneRecords;
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8640);
 
-extern u8 *datBattleSceneRecords;
 
 extern u8 *datEnemyAiRecords;
 
 s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     s32 context = btlGetRuntime();
     s32 index = *(s32 *)(context + 0x27C);
-    if (*(s8 *)(datBattleSceneRecords + index * 40) != 0) {
+    if (datBattleSceneRecords[index].unk00 != 0) {
         return 0;
     }
     if ((((BtlUnit *)object)->conditionFlags & 0x2A0F) != 0) {
@@ -2959,7 +2911,7 @@ void btlClearSharedBattleStateWords(void) {
     s32 temp_v0;
 
     temp_v0 = 2;
-    puVar1 = (u32 *)(datGameState + 0x2e9dc);
+    puVar1 = datGameState->battleFlags;
     do {
         temp_v0 = temp_v0 - 1;
         *puVar1 = 0;
@@ -2985,13 +2937,13 @@ s32 func_001ACD30(s32 id, s32 operation) {
     }
     switch (selector) {
     case 0:
-        ((u32 *)(datGameState + 0x2E9DC))[word] |= 1 << bit;
+        datGameState->battleFlags[word] |= 1 << bit;
         break;
     case 1:
-        ((u32 *)(datGameState + 0x2E9DC))[word] &= ~(1 << bit);
+        datGameState->battleFlags[word] &= ~(1 << bit);
         break;
     default:
-        return ((((u32 *)(datGameState + 0x2E9DC))[word] & (1 << bit)) != 0);
+        return ((datGameState->battleFlags[word] & (1 << bit)) != 0);
     }
     return 1;
 }
@@ -4088,7 +4040,7 @@ void btlReleaseRegisteredTaskBuffer(s64 unused) {
 }
 
 s32 sndAreSlotsEmpty(void) {
-    s32 *slot = (s32 *)(datGameState + 0x2E9DC);
+    u32 *slot = datGameState->battleFlags;
     s32 i;
     for (i = 0; i < 3; i++) {
         if (slot[i] != 0) {
@@ -4703,12 +4655,11 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(-1);
 }
 
-extern u8 *datBattleSceneRecords;
 
 s32 btlIsSceneActorLimitSatisfied(s32 unused, u32 limit) {
     s32 context = btlGetRuntime();
     s32 index = *(s32 *)(context + 0x27C);
-    if (*(u16 *)(datBattleSceneRecords + index * 40 + 0x20) & 0x800) {
+    if (datBattleSceneRecords[index].flags & 0x800) {
         return 1;
     }
     if (limit < (u32)btlCountFlaggedSceneActors()) {
@@ -4779,8 +4730,8 @@ void btlBuildEligibleActorList(s32 unused, s16 *count) {
     s32 context = btlGetRuntime();
     s32 index = *(s32 *)(context + 0x27C);
     s32 total = 0;
-    if ((*(u16 *)(datBattleSceneRecords + index * 40 + 0x20) & 0x800) == 0) {
-        u8 *selected = (u8 *)(datGameState + 0x12A0);
+    if ((datBattleSceneRecords[index].flags & 0x800) == 0) {
+        u8 *selected = datGameState->inventory.counts;
         u8 *flags = (u8 *)datItemSkillRecords;
         u8 *out = D_00358FE0;
         s32 i;
@@ -4836,14 +4787,12 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BE8A0);
 void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8];
     BattleController *battle;
-    s8 *modeFlags;
     s32 color;
     s32 handle;
 
     memcpy(text, D_003BB450, sizeof(text));
     battle = (BattleController *)btlGetRuntime();
-    modeFlags = (s8 *)datBattleSceneRecords;
-    if (modeFlags[battle->mode * 0x28] != 0) {
+    if (datBattleSceneRecords[battle->mode].unk00 != 0) {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x504F6100;
     } else {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x89FEFF00;

@@ -1020,9 +1020,9 @@ passing that word. The sprite's allocation descriptors remain genuine
 reinterpret an allocation descriptor as a texture or impose a second
 structure view merely because kinds 6--9 initialize the first payload word.
 
-The kernel's 98 draw surfaces are complete `SdfPoolNode` owners of size
-`0x20`, not unrelated module-specific callback prefixes. Both SDF providers
-initialize the next link, transported first/last packet-list words, and the
+The kernel's 98-entry draw pool uses complete `SdfPoolNode` owners of size
+`0x20` for its draw protocol, not module-specific callback prefixes.
+The SDF providers initialize the next link, transported first/last words, and
 native `void append(SdfListHead *, SdfListHead *)` / three-argument
 `s32 prepend` callbacks. The SDK itself accepts the owner through its common
 packet-list prefix at the call boundary; keep the full owner for array
@@ -1030,8 +1030,27 @@ indexing and callback access. `D_003255A8` / `D_003805A8` are surface 83,
 `D_00325708` / `D_00380708` are surface 94, and
 `kwlnPositionedTextSurface` is surface 96. Submission has no status result:
 `itfBuildAndSubmitPanelPacket` returns `void`.
-The SDK's separate 16-byte float-key-pool node is `SdfKeyPoolNode`; its kind
-at `+0x0C` and allocation/free-chain logic are unrelated to draw surfaces.
+The SDK's float-key-pool payload is the separate 16-byte `SdfKeyPoolNode`;
+do not conflate its kind at `+0x0C` with the 32-byte callback owner.
+
+The message initializer is a distinct native SDK protocol boundary.
+`sdfStoreMessageWordsAndNotifyConsumer` transports four 32-bit words;
+field setup passes physical entries 34, 40, 42 and 41. Its work word selects
+entry 40, where `sdfInstallPoolNodeReleaseCallbacks` installs
+`sdfReleasePoolNode(SdfPool *, SdfKeyPoolNode *)` and
+`sdfUpdatePoolFreeListByMode(SdfPool *, s32, SdfKeyPoolNode *)` in slots
+`+0x10` / `+0x14`. These are not the draw append/prepend prototypes.
+Keep this genuine native word transport as an explicit residual: do not
+force the pool callbacks through draw signatures, add an owner union, or
+introduce a second structure view. The model aliases `D_00325048` /
+`D_00380048` select this same work entry.
+
+`sdfAllocatePacketList` and its optional allocation callback return native
+`s32` allocation words. Decode each newly allocated list once into
+`SdfListHead *`; keep the full `SdfPoolNode` owner and typed list thereafter.
+The diagnostic draw leaves similarly decode each 20-byte
+`sdfAllocAligned` result once at the SDK boundary. These are allocation
+transport conversions, not permission to reinterpret a game-owned record.
 
 
 ## Calls with fewer arguments than the callee reads
