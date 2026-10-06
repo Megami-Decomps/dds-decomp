@@ -346,7 +346,38 @@ void ptyRecomputeMaxHpMp(u32 unit) {
     func_00314298(unit, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314500);
+extern u32 strlen(const char *text);
+extern char *strcpy(char *destination, const char *source);
+extern void *memcpy(void *destination, const void *source, u32 size);
+
+void func_00314500(u16 scriptId, s32 mode, char *destination) {
+    u8 *name = D_00435E50[scriptId].encodedText;
+    s32 split = 0;
+    s32 offset = 0;
+
+    for (; offset < strlen((char *)name); offset += 2) {
+        if (name[offset] == 0x82 && name[offset + 1] == 0x8A) {
+            split = offset;
+        }
+    }
+    switch (mode) {
+    case 1:
+        if (split >= 4) {
+            strcpy(destination, (char *)&name[split + 2]);
+        } else {
+            strcpy(destination, (char *)name);
+        }
+        return;
+    case 2:
+        memcpy(destination, name, split);
+        destination[split] = 0;
+        break;
+    default:
+        strcpy(destination, (char *)name);
+        break;
+    }
+}
+
 
 u32 scrGetIndexedRecordAddress(u32 scriptId, s32 *record) {
     *record = (s32)&D_00435E50[scriptId & 0xffff];
