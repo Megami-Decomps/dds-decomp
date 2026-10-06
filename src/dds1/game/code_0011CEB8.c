@@ -1,9 +1,10 @@
 #include "common.h"
 
-extern u64 scrReadIntParameter(u64);
-extern u64 func_0011B140(u64, u64);
-extern u32 func_0011B148(u64, u64);
-extern u32 func_0011B150(u64);
+extern s32 scrReadIntParameter(s32);
+/* The native VM commands pass operands to these parameterless party stubs. */
+extern u32 func_0011B140();
+extern u32 func_0011B148();
+extern u32 func_0011B150();
 
 extern u32 dds3OwnedNodeListHead;
 
@@ -37,8 +38,8 @@ u32 ptyScriptRemoveUnitAndReturnResult(void) {
 
 /* Evaluate a two-operand VM expression and publish its result. */
 u32 func_0011CEF0(void) {
-    u64 firstOperand;
-    u64 secondOperand;
+    s32 firstOperand;
+    s32 secondOperand;
 
     firstOperand = scrReadIntParameter(0);
     secondOperand = scrReadIntParameter(1);
@@ -48,8 +49,8 @@ u32 func_0011CEF0(void) {
 }
 
 u32 func_0011CF38(void) {
-    u64 firstOperand;
-    u64 secondOperand;
+    s32 firstOperand;
+    s32 secondOperand;
 
     firstOperand = scrReadIntParameter(0);
     secondOperand = scrReadIntParameter(1);
