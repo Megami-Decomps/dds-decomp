@@ -1002,7 +1002,37 @@ s32 mnuCreatePanelItem(void) {
     return (s32)panelItem;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C26D8);
+/* Bind the panel item's nine sprite cells to their grid entries (the extra pair only when an extra grid
+ * exists) and pick the panel's label entry. */
+void func_002C26D8(s32 itemAddress, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
+    s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
+    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
+
+    itfGridStorePosition(&item->sprites[0], secondaryGrid, 4);
+    itfGridStorePosition(&item->sprites[1], secondaryGrid, 5);
+    itfSetGridEntryQuantizedAndRefresh(item->sprites[1].x, item->sprites[1].y, 0xD40, 0x40, 0, 0);
+    itfGridStorePosition(&item->sprites[2], primaryGrid, 0x51);
+    itfSetGridEntryQuantizedAndRefresh(item->sprites[2].x, item->sprites[2].y, 0x4B0, 0x48, 0, 0);
+    itfGridStorePosition(&item->sprites[3], primaryGrid, 0x53);
+    itfSetGridEntryQuantizedAndRefresh(item->sprites[3].x, item->sprites[3].y, 0x4B0, 0x48, 0, 0);
+    itfGridStorePosition(&item->sprites[4], primaryGrid, 0x52);
+    itfSetGridEntryQuantizedAndRefresh(item->sprites[4].x, item->sprites[4].y, 0x460, 0x20, 0, 0);
+    itfGridStorePosition(&item->sprites[5], primaryGrid, 0x54);
+    itfSetGridEntryQuantizedAndRefresh(item->sprites[5].x, item->sprites[5].y, 0x460, 0x20, 0, 0);
+    if (extraGrid != 0) {
+        itfGridStorePosition(&item->sprites[6], primaryGrid, 0x56);
+        itfSetGridEntryQuantizedAndRefresh(item->sprites[6].x, item->sprites[6].y, 0x4B0, 0x48, 0, 0);
+        itfGridStorePosition(&item->sprites[7], extraGrid, 0x19);
+        itfSetGridEntryQuantizedAndRefresh(item->sprites[7].x, item->sprites[7].y, 0x460, 0x20, 0, 0);
+    } else {
+        item->sprites[6].x = 0;
+        item->sprites[6].y = 0;
+        item->sprites[7].x = 0;
+        item->sprites[7].y = 0;
+    }
+    itfGridStorePosition(&item->sprites[8], primaryGrid, panelEntryIds[panelIndex]);
+    itfSetGridEntryQuantizedAndRefresh(item->sprites[8].x, item->sprites[8].y, 0x130, -0x30, 0, 0);
+}
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
