@@ -806,7 +806,27 @@ void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D0D8);
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D130);
+/* Save occupied active entries to stock; clear the absent special-character slots. */
+void func_0011D130(void) {
+    s32 index;
+    for (index = 0; index < PTY_ACTIVE_ROSTER_COUNT; index++) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState +
+            index * sizeof(Entry1A4) + PTY_ACTIVE_ROSTER_OFFSET);
+        u16 active = entry->flags & 1;
+        if (active != 0) {
+            Entry1A4 *stock = (Entry1A4 *)(entry->rosterIndex *
+                sizeof(Entry1A4) + datGameState + 0x1CA10);
+            *stock = *entry;
+        }
+    }
+    if (dds3FindEntryIndex(3) < 0) {
+        memset((void *)(datGameState + 0x1CA10 + 3 * sizeof(Entry1A4)), 0, sizeof(Entry1A4));
+    }
+    if (dds3FindEntryIndex(7) < 0) {
+        memset((void *)(datGameState + 0x1CA10 + 7 * sizeof(Entry1A4)), 0, sizeof(Entry1A4));
+    }
+}
+
 
 void evtRandomizeEntryValue(s32 unit) {
     s32 randomOffset;
