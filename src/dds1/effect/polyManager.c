@@ -36,15 +36,18 @@ typedef struct PolyStrip {
 
 /* Basic node: +0xDC is a cell-system pointer, not the band's float step. */
 typedef struct {
-    u8 pad00[0x10];
+    f32 origin[4];
     u16 entryCount;                /* 0x10 */
     u8 pad12[2];
     s32 duration;                  /* 0x14 */
-    u8 pad18[0x9A];
+    u8 pad18[8];
+    f32 matrix[16];                /* 0x20: radial-vector transform */
+    u8 pad60[0x52];
     u16 active;                    /* 0xB2: cleared when every entry finishes */
     u8 padB4[0xC];
     u8 loop;                       /* 0xC0: restart finished entries */
-    u8 padC1[7];
+    u8 padC1[3];
+    s32 spawnDelayStep;            /* 0xC4: stagger inactive entry ages */
     u16 segments;
     u8 padCA[2];
     f32 radius;
@@ -128,16 +131,6 @@ typedef struct {
     f32 rotationYRadians;
 } PolyRotatingBandRecord; /* 0x14 */
 
-/* Fields used from parCloneEmitterAndInitCells' copied descriptor. */
-typedef struct {
-    u8 pad00[0x10];
-    u16 count; /* The initializer consumes the low halfword. */
-    u8 pad12[0xB2];
-    u32 colorStep; /* 0xC4 */
-    u8 padC8[0x14];
-    PolyStrip *cellSystem; /* 0xDC */
-    u32 *colors; /* 0xE0 */
-} PolyCellInitDesc;
 
 typedef struct {
     PolyRingHead head;
@@ -176,28 +169,29 @@ void effPolyDestroyWork(PolyNode *obj) {
     sdfReleaseChipBlock(obj);
 }
 
-void func_0015DA10(PolyCellInitDesc *desc) {
+/* The cell initializer writes the same ages that the basic-ring update reads. */
+void func_0015DA10(PolyNode *node) {
     u16 count;
-    u32 color;
-    u32 *colors;
+    s32 age;
+    s32 *ages;
     u16 i;
     PolyStrip *system;
     PolyStripEntry *cells;
 
-    count = desc->count;
-    color = 0xFF000001;
-    colors = desc->colors;
-    system = desc->cellSystem;
+    count = node->entryCount;
+    age = POLY_INACTIVE_ENTRY_AGE;
+    ages = node->ages;
+    system = node->strip;
     i = 0;
-    if (desc->count != 0) {
+    if (node->entryCount != 0) {
         cells = system->entries;
         do {
             cells[i].unk0C = 0;
             cells[i].count = 0;
             cells[i].color = 0x00808080;
-            *colors = color;
-            colors++;
-            color -= desc->colorStep;
+            *ages = age;
+            ages++;
+            age -= node->spawnDelayStep;
             i++;
         } while (i < count);
     }
