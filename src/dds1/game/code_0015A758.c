@@ -5,9 +5,9 @@
 #include "ee_mmi.h"
 
 typedef struct ParListNode ParListNode;
-typedef struct ParCellNode ParCellNode;
+typedef struct ParSystem ParSystem;
 
-extern ParCellNode *D_003BB014;
+extern ParSystem *D_003BB014;
 
 extern ParListNode *parRecordListHead;
 
@@ -60,13 +60,13 @@ typedef struct ParDrawState {
     u16 height;     /* 0x02 */
     u16 flags;      /* 0x04 */
     u8 pad06[2];
-    s32 unk08;      /* 0x08 */
-    u8 pad0C[4];
-    s32 unk10;      /* 0x10 */
+    u32 color;      /* 0x08: packed vertex color */
+    const u32 *indices; /* 0x0C: topology index stream */
+    u128 *positions; /* 0x10: current vertex cursor */
     s32 unk14;      /* 0x14 */
     s32 unk18;      /* 0x18 */
     u8 pad1C[4];
-    s32 unk20;      /* 0x20 */
+    u32 *colors;     /* 0x20: current color cursor */
     u8 pad24[8];
 } ParDrawState; /* 0x2C */
 
@@ -76,16 +76,21 @@ struct ParListNode {
     ParListNode *next;
 };
 
+typedef struct ParDrawCmd {
+    s32 count;      /* 0x00 */
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    void (*finish)(void *, s32); /* 0x10 */
+} ParDrawCmd;
+
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(s32);
-extern void sdfConsAppendClearPacket(s32, s32);
-extern void sdfAppendPacket(s32, s32);
+struct SdfListHead;
+extern void sdfInitPacketList(struct SdfListHead *);
+extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
+extern void sdfAppendPacket(struct SdfListHead *, u32);
 extern s32 func_0015FE20(ParDrawState *);
 
-struct ParCellNode {
-    u8 pad00[0x24];
-    ParCellNode *next;
-};
 
 extern ParDispatch parKindConstructorEntries[];
 
@@ -134,15 +139,15 @@ extern void effMiscSeedRandomFromClock(void *arg);
 
 extern u8 D_003D64B0[];
 
-extern u8 parDrawControl[];
+extern ParDrawState parDrawControl;
 
 extern u16 parGetRestartFlag(ParObj *obj);
 
 extern void parCellInit();
 
-typedef struct ParSystem {
-    s16 kind;            /* 0x00 */
-    s16 unk2;            /* 0x02 */
+struct ParSystem {
+    u16 kind;            /* 0x00: topology selector */
+    u16 bucket;          /* 0x02: packet submission bucket */
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
@@ -151,9 +156,9 @@ typedef struct ParSystem {
     void *vertices;      /* 0x18 */
     void *colors;        /* 0x1C */
     s32 object;          /* 0x20 */
-    s32 unk24;           /* 0x24 */
+    ParSystem *next;     /* 0x24: pending cell-system list */
     s32 unk28;           /* 0x28 */
-} ParSystem;
+};
 
 extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
 extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
@@ -502,8 +507,8 @@ void func_0015B648(ParReleaseRecord *record) {
 }
 
 void parControlInit(void) {
-    memset(parDrawControl, 0, 0x2C);
-    *(u16 *)(parDrawControl + 4) = 0x4000;
+    memset(&parDrawControl, 0, 0x2C);
+    parDrawControl.flags = 0x4000;
 }
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -556,11 +561,11 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     func_002DA420(system->object, 1.0f);
     system->kind = kind;
     system->cellCount = count;
-    system->unk2 = 2;
+    system->bucket = 2;
     system->vertexWordCount = perCell;
     system->groupDivisor = groupDivisor;
     system->handle = handle;
-    system->unk24 = 0;
+    system->next = 0;
     system->unk28 = 0;
     return system;
 }
@@ -578,7 +583,7 @@ void parCellInit(ParSystem *system, s32 index) {
     cell->vertexCount = 0;
 }
 
-void parPrependCellNode(ParCellNode *node) {
+void parPrependCellNode(ParSystem *node) {
     node->next = D_003BB014;
     D_003BB014 = node;
 }
@@ -1369,8 +1374,8 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D0C0);
 typedef struct ParBlock {
     s32 count;       /* 0x00 */
     u32 color;       /* 0x04 */
-    s32 base;        /* 0x08 */
-    u8 *vertices;    /* 0x0C */
+    u128 *positions; /* 0x08: vertex quadword buffer */
+    u32 *colors;     /* 0x0C: one color per vertex */
     s32 object;      /* 0x10 */
     s32 handle;      /* 0x14 */
 } ParBlock;
@@ -1384,9 +1389,9 @@ ParBlock *parAllocateDrawBlock(s32 count) {
     ParBlock *block = (ParBlock *)(vertices + colorBytes);
     block->color = 0x80808080;
     block->count = count;
-    block->vertices = vertices;
+    block->colors = (u32 *)vertices;
     block->handle = handle;
-    block->base = base;
+    block->positions = (u128 *)base;
     block->object = sdfCreateAssetWithDrawEntries();
     func_002DA420(block->object, 1.0f);
     return block;
@@ -1397,15 +1402,9 @@ void parReleaseDrawBlock(ParBlock *block) {
     sdfReleaseResourceAllocation(block->handle);
 }
 
-typedef struct ParDrawCmd {
-    s32 count;      /* 0x00 */
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    void (*finish)(void *, s32); /* 0x10 */
-} ParDrawCmd;
 
-void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
+
+void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParBlock *cmd) {
     s32 list = sdfAllocPacketAligned(0x20);
     ParDrawState state;
     s32 remaining;
@@ -1416,15 +1415,15 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     state.width = 0x10;
     state.height = 0x30;
     state.flags = 0x4000;
-    state.unk10 = cmd->unk8;
-    state.unk20 = cmd->unkC;
-    state.unk08 = cmd->unk4;
+    state.positions = cmd->positions;
+    state.colors = cmd->colors;
+    state.color = cmd->color;
     while (remaining >= 0x30) {
         remaining -= 0x30;
         sdfAppendPacket(list, func_0015FE20(&state));
     }
     if (remaining > 0) {
-        u16 *counts = (u16 *)parDrawControl;
+        u16 *counts = (u16 *)&parDrawControl;
         counts[0] = remaining / 3;
         counts[1] = remaining;
         sdfAppendPacket(list, func_0015FE20(&state));
