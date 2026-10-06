@@ -135,4 +135,33 @@ typedef struct FldValueRecord {
 typedef char FldCollisionFaceSizeCheck[(sizeof(FldCollisionFace) == 0x24) ? 1 : -1];
 typedef char FldValueRecordSizeCheck[(sizeof(FldValueRecord) == 0xE4) ? 1 : -1];
 
+/* fldFileResolver::func_001263F0 publishes file rows; func_00126A30 walks them
+ * at stride 0x24. Both game resolvers walk counted names at stride 0x0C.
+ * Name tables have variable extent; entries[1] is the native struct-hack head. */
+typedef struct FldFileNameEntry {
+    u32 word00;
+    const char *name;
+    u32 word08;
+} FldFileNameEntry;
+
+typedef struct FldFileNameTable {
+    u32 count;
+    FldFileNameEntry entries[1];
+} FldFileNameTable;
+
+typedef struct FldFileResource {
+    u32 id;
+    u32 word04;
+    const char *name;
+    u32 word0C;
+    f32 *transform;
+    u32 word14;
+    FldFileNameTable *names;
+    u32 word1C;
+    void *data;
+} FldFileResource;
+
+typedef char FldFileNameEntrySizeCheck[(sizeof(FldFileNameEntry) == 0x0C) ? 1 : -1];
+typedef char FldFileResourceSizeCheck[(sizeof(FldFileResource) == 0x24) ? 1 : -1];
+
 #endif /* FLD_H */
