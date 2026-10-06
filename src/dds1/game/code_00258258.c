@@ -77,7 +77,33 @@ void func_00258AF0(u32 *state, u32 value) {
 void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_00258B00);
+/* Step the voice's notification counter (wraps at 31); mode 1 plays the cue once at count 0 and then
+ * drops back to mode 0. Implicit int: retail keeps jal + epilogue for the trailing void call. */
+func_00258B00(SoundVoice *voice) {
+    s32 notify;
+
+    notify = 0;
+    switch (voice->mode) {
+    case 0:
+        voice->count = voice->count + 1;
+        if (voice->count >= 0x1F) {
+            voice->count = 0;
+        }
+        break;
+    case 1:
+        notify = voice->count == 0;
+        voice->count = voice->count + 1;
+        if (voice->count >= 0x1F) {
+            voice->count = 0;
+            voice->mode = 0;
+        }
+        break;
+    }
+    if (notify == 1) {
+        sndSetSequenceVolumePan(0x15, 0x7F, 0x3F);
+    }
+}
+
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258B90);
 
 
@@ -101,7 +127,6 @@ typedef struct MantraPulseEntry {
 
 extern void *func_002CB3B8(s32 arg0, s32 arg1);
 extern u32 mnuGetMantraDisplayFlags(DspScene *scene, DspProfileSelection *target);
-extern void func_00258B00(void *sceneState);
 extern void func_00258EB8(DspScene *entry);
 
 void func_002593E0(DspProfileSelection *target, MantraPulseGrid *grid, MantraPulseEntry *entry) {
