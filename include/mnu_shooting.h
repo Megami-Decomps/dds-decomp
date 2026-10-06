@@ -65,7 +65,9 @@ typedef struct MnuShootingWork {
     s16 phase;
     s16 result;
     s32 phaseTicks;
-    u8 padA0[0xC8];
+    u8 padA0[0x10];
+    s32 unkB0;
+    u8 padB4[0xB4];
     /* SDK fade payloads: round number, score triplet, and choice renderers. */
     u8 roundFade[0x1C];             /* 0x168 */
     u8 scoreFade[0x18];             /* 0x184 */
