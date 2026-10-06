@@ -167,9 +167,9 @@ extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
 
 extern void scrSetIntegerReturnValue();
 
-extern u8 *btlAllocTask(s32);
+extern BtlRuntimeTask *btlAllocTask(s32);
 
-extern void btlCommandRecenterParty(void);
+extern s32 btlCommandRecenterParty(void);
 
 extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
@@ -283,25 +283,15 @@ extern s32 btlComputeSkillAdjustedMaxHp(void *);
 
 extern s32 D_00435E7C;
 
-typedef struct BattleScriptTask {
-    u8 active;
-    u8 pad01[0xF];
-    u8 startFlag;
-    u8 pad11[0xF];
-    u16 kind;
-    u8 pad22[0x26];
-    s32 work;
-    void (*callback)(void);
-} BattleScriptTask;
 
-BattleScriptTask *btlCreateControlObject(void) {
-    BattleScriptTask *task;
-    task = (BattleScriptTask *)btlAllocTask(0);
-    task->active = 1;
+BtlRuntimeTask *btlCreateControlObject(void) {
+    BtlRuntimeTask *task;
+    task = btlAllocTask(0);
+    task->startCondition.kind = 1;
     task->callback = btlCommandRecenterParty;
-    task->kind = 0x66;
-    task->work = 0;
-    task->startFlag = 0;
+    task->taskId = 0x66;
+    task->onStart = NULL;
+    task->endCondition.kind = 0;
     return task;
 }
 
