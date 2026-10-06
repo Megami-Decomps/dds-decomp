@@ -7,6 +7,8 @@ struct SdfMemBlock;
 struct MnuSectionObjectList;
 struct MnuModelNode;
 struct MnuEffectWork;
+struct WideSlotPool;
+struct CompactSlotPool;
 
 /* A model group is a complete 0x10-byte list descriptor. */
 typedef struct MnuNodeList {
@@ -39,8 +41,8 @@ typedef struct MnuShootingWork {
     struct MnuSectionModelWork *modelWork;
     struct MnuEffectWork *effectWork;
     struct MnuSectionObjectList *work24;
-    u32 *spriteWork;
-    u32 *tintWork;
+    struct WideSlotPool *spriteWork;
+    struct CompactSlotPool *tintWork;
     u32 resourceSlots[7];
     u8 pad4C[0xC];
     s32 state;
@@ -81,4 +83,7 @@ typedef struct MnuShootingWork {
 typedef char MnuShootingWork_size_must_be_0x1E0[
     (sizeof(MnuShootingWork) == 0x1E0) ? 1 : -1];
 
+typedef char ShootingPoolOffsetsAssert[
+    ((unsigned long)&((MnuShootingWork *)0)->spriteWork == 0x28 &&
+     (unsigned long)&((MnuShootingWork *)0)->tintWork == 0x2C) ? 1 : -1];
 #endif /* MNU_SHOOTING_H */
