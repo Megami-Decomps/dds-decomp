@@ -3490,8 +3490,8 @@ s32 btlGetActionRecordLookupValue(s32 arg0) {
     return D_003B4F70[temp_v0 * 3];
 }
 
-s32 btlTestSelectedItemCategoryMask(UiObject *unit, s32 arg) {
-    s32 index = unit->selectedEntryIndex;
+s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 arg) {
+    s32 index = unit->unk310;
     u16 kind;
     if (index == -1) {
         return 0;

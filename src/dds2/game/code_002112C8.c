@@ -327,7 +327,7 @@ extern s32 datCommandRecords;
 
 extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
-extern s32 btlTestSelectedItemCategoryMask(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlElementToBitIndex(s32, s32);
 
@@ -1676,7 +1676,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                         }
                         value = func_001ABF50((BtlUnit *)unit, index);
                         if (btlHasEnabledSpecialAbilityForSlot((void *)unit, index) != 0 || (value & 0x20000) ||
-                            (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, index) != 0)) {
+                            (stat == 0x20000 && btlTestSelectedItemCategoryMask((BtlUnit *)unit, index) != 0)) {
                             return 1;
                         }
                     }
@@ -1684,7 +1684,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                 }
                 value = func_001ABF50((BtlUnit *)unit, action);
                 if (btlHasEnabledSpecialAbilityForSlot((void *)unit, action) != 0 || (value & 0x20000) ||
-                    (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, action) != 0)) {
+                    (stat == 0x20000 && btlTestSelectedItemCategoryMask((BtlUnit *)unit, action) != 0)) {
                     return 1;
                 }
             }
@@ -1707,7 +1707,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                         if (index == 0x80) {
                             continue;
                         }
-                        if (btlTestSelectedItemCategoryMask(unit, index) != 0 ||
+                        if (btlTestSelectedItemCategoryMask((BtlUnit *)unit, index) != 0 ||
                             btlHasMappedSpecialAbilityForSlot((s32)unit, index) != 0 ||
                             btlHasSpecialAbility274(unit, index) != 0 ||
                             btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
@@ -1716,7 +1716,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                     }
                     return 1;
                 }
-                if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
+                if (btlTestSelectedItemCategoryMask((BtlUnit *)unit, action) != 0 ||
                     btlHasMappedSpecialAbilityForSlot((s32)unit, action) != 0 ||
                     btlHasSpecialAbility274(unit, action) != 0) {
                     return 0;
