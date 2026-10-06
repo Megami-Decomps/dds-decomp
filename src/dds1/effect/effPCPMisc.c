@@ -1089,7 +1089,8 @@ extern EffSpawnParams D_00354D40[];
 extern u8 D_00354D50[];
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern void sdfBuildVuRotationFromAxisAngle(f32 *axis, f32 angle);
+struct RwV3d;
+extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *axis, f32 angle);
 
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
  * (60 degrees). Direction is normalised on the VU, scaled per axis and offset
@@ -1255,7 +1256,7 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
         D_00354DA0->vel[1] = 0;
         D_00354DA0->vel[0] = sinv * radius;
         D_00354DA0->vel[2] = cosv * radius;
-        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_0034DF38) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354DA0->pos[0] = 0;
         D_00354DA0->pos[2] = 0;
@@ -1353,7 +1354,7 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354E00->pos[0] = 0;
         D_00354E00->pos[2] = 0;
@@ -1452,7 +1453,7 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
         D_00354E60->vel[1] = 0;
         D_00354E60->vel[0] = sinv * radius;
         D_00354E60->vel[2] = cosv * radius;
-        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354E60->pos[0] = 0;
         D_00354E60->pos[2] = 0;
@@ -1785,7 +1786,7 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00355060->pos[0] = 0;
         D_00355060->pos[2] = 0;
@@ -5182,21 +5183,25 @@ void func_00182A38(EffPCPDriftEventWork *work, u32 val) {
 }
 
 typedef struct EffPCPPairedEventParams {
-    u8 pad00[0x18];
+    f32 origin[4];
+    u8 repeat;
+    u8 pad11[3];
+    s32 duration;
     u32 count;
     s32 delaySpread;
-    u8 pad20[8];
-    f32 baseSpeed, spreadA, baseSpin, spreadB;
-    u8 fragmentParams[0x54];
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 baseRadius, radiusJitter, baseTiltStep, tiltJitter;
+    EffThunderFragmentParams fragmentParams;
 } EffPCPPairedEventParams;
 
 typedef struct EffPCPPairedEvent {
     u32 fragment;
     void *eventA, *eventB;
-    f32 phase, speed;
-    u32 unk14;
-    f32 spin;
-    s32 delay;
+    f32 phase, radius;
+    f32 tilt;
+    f32 tiltStep;
+    s32 frame;
 } EffPCPPairedEvent;
 
 typedef struct EffPCPPairedEventWork {
@@ -5209,7 +5214,7 @@ typedef struct EffPCPPairedEventWork {
     void *handle;
 } EffPCPPairedEventWork;
 
-/* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start delay. */
+/* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start frame. */
 EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
     u32 count = src->count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
@@ -5244,10 +5249,10 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->fragment = (u32)effThunderFragCreate(src->fragmentParams);
+        entry->fragment = (u32)effThunderFragCreate(&src->fragmentParams);
         entry->eventA = (void *)effEventCreate(work->ownerA, 2, &place);
         entry->eventB = (void *)effEventCreate(work->ownerB, 2, &place);
-        entry->delay = -(effMiscRand(D_0034DF38) % life);
+        entry->frame = -(effMiscRand(D_0034DF38) % life);
         entry++;
     }
     return work;
@@ -5295,10 +5300,10 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->fragment = (u32)effThunderFragCreate(src->params.fragmentParams);
+        entry->fragment = (u32)effThunderFragCreate(&src->params.fragmentParams);
         entry->eventA = (void *)effEventCreate(src->ownerA, 2, &place);
         entry->eventB = (void *)effEventCreate(src->ownerB, 2, &place);
-        entry->delay = -(effMiscRand(D_0034DF38) % life);
+        entry->frame = -(effMiscRand(D_0034DF38) % life);
         entry++;
     }
     return work;
@@ -5330,21 +5335,21 @@ void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
 
 
 /* Randomises slot `index`: phase spread evenly around a full turn, jittered
- * speed, and a spin whose sign is picked at random. */
+ * radius, and a tiltStep whose sign is picked at random. */
 void effPcpRandomizeSlot(EffPCPPairedEventWork *work, s32 index) {
     EffPCPPairedEvent *slot;
     f32 spread;
 
     slot = &work->entries[index];
     slot->phase = (3.14159265f * 2.0f) / work->params.count * index;
-    spread = work->params.spreadA;
-    slot->speed = work->params.baseSpeed * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
-    spread = work->params.spreadB;
-    slot->unk14 = 0;
+    spread = work->params.radiusJitter;
+    slot->radius = work->params.baseRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    slot->tilt = 0;
+    spread = work->params.tiltJitter;
     if (effMiscRand(D_0034DF38) & 1) {
-        slot->spin = work->params.baseSpin * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+        slot->tiltStep = work->params.baseTiltStep * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
     } else {
-        slot->spin = -work->params.baseSpin * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+        slot->tiltStep = -work->params.baseTiltStep * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
     }
 }
 
