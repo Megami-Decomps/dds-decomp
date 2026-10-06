@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "itf.h"
 
 
 typedef struct MdlCtx {
@@ -218,27 +219,6 @@ u32 mdlAdvanceViewerPackageTask(void);
 
 MnuShootingWork *mdlAllocateViewerPackageWork(void);
 
-/* 0xAARRGGBB color split into RGB and alpha fields. */
-typedef struct RgbAlpha {
-    u8 pad_0x00[0x18]; // 0x00
-    u32 rgb;           // 0x18
-    u8 pad_0x1C[0x1C]; // 0x1C
-    u32 alpha;         // 0x38
-    u32 x3C;           // 0x3C
-    u8 pad_0x40[0x10]; // 0x40
-    float f50;         // 0x50
-} RgbAlpha; // 0x54
-
-/* Copy source for func_002CF3F8 (layout inferred from field accesses). */
-typedef struct CfSrc {
-    u8 pad_0x00[0x04]; // 0x00
-    u32 rgb;           // 0x04
-    u8 pad_0x08[0x1C]; // 0x08
-    u32 alpha;         // 0x24
-    u32 x28;           // 0x28
-    u8 pad_0x2C[0x10]; // 0x2C
-    float f3C;         // 0x3C
-} CfSrc; // 0x40
 
 extern char D_0042D4D0[];
 

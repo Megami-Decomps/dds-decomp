@@ -37,5 +37,26 @@ typedef struct UiSprite {
     u8 pad3D[3];
 } UiSprite;
 
+/* Camera color effects use the same float and packed-color fields in both games. */
+typedef struct RgbAlpha {
+    u8 pad00[0x18];
+    u32 rgb;
+    u8 pad1C[0x1C];
+    u32 alpha;
+    u32 x3C;
+    u8 pad40[0x10];
+    f32 f50;
+} RgbAlpha;
+
+typedef struct CfSrc {
+    u8 pad00[4];
+    u32 rgb;
+    u8 pad08[0x1C];
+    u32 alpha;
+    u32 x28;
+    u8 pad2C[0x10];
+    f32 f3C;
+} CfSrc;
+
 
 #endif /* ITF_H */
