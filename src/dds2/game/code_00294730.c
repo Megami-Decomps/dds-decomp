@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mnu_list.h"
 
 extern void func_00295D38();
 
@@ -9,14 +10,87 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
 extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
 
-typedef struct EventSpriteObject {
-    u8 pad00[8];
-    s32 type;
-    u8 pad0C[0xBA];
-    s8 pulseFrame;
-} EventSpriteObject;
+struct MenuSprite;
+struct MenuIconSprites;
 
-u32 evtSelectGraphicSlotBySpriteType(EventSpriteObject *object) {
+typedef struct MenuIconState {
+    u32 kind;
+    u32 unk4;
+    s32 count;
+    struct MenuSprite *sprite[6];
+    u32 left;
+    u32 top;
+    u32 right;
+    u32 bottom;
+    s32 fade;
+} MenuIconState;
+
+typedef struct MenuWindowContainer {
+    s32 id;
+    u32 flags;
+    s32 originX;
+    s32 originY;
+    s32 width;
+    s32 height;
+    struct MenuList *list;
+    s32 field1C;
+    s32 sprite20;
+    s32 param24;
+    s32 param28;
+    struct {
+        u32 sprite;
+        u32 parameter;
+    } decorations[3];
+    u32 decorationX[3];
+    s32 scale50;
+    s32 scale54;
+    MenuIconState panel;
+    struct MenuIconSprites *resource;
+    u32 state;
+} MenuWindowContainer;
+
+/* The camp constructor clears 0x38C bytes, including both panel work areas. */
+typedef struct CampMenuContext {
+    s32 resourceHandle;
+    u8 pad04[4];
+    s32 type;
+    u8 transitionWork[0x4C];
+    s32 popupState;
+    u8 pad5C[4];
+    u8 resourcePair[4];
+    s32 messageHandle;
+    s32 effectHandles[4];
+    s32 state;
+    u8 pad7C[4];
+    MenuWindowContainer *window;
+    void *objects[2];
+    u8 pad8C[4];
+    s32 multiplier;
+    u8 pad94[8];
+    s32 availableCount;
+    u16 unkA0;
+    u16 unkA2;
+    u16 unkA4;
+    u8 padA6[2];
+    u32 rewardCursor;
+    u32 options;
+    s32 previousValue;
+    s32 elapsedFrames;
+    s32 retryFrames;
+    u8 padBC[4];
+    u32 phase;
+    u8 padC4[2];
+    s8 pulseFrame;
+    s8 unkC7;
+    u8 padC8[0x18];
+    s32 prepared;
+    s32 delayFrames;
+    u8 panelWork[2][0x94];
+    u8 pad210[0x16C];
+    u8 gradientFade[0x10];
+} CampMenuContext;
+
+u32 evtSelectGraphicSlotBySpriteType(CampMenuContext *object) {
     u32 result;
 
     result = 0;
@@ -54,15 +128,15 @@ extern void func_00294680(struct BlendDispatchWork *, s32, s32);
 
 
 
-void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
+void func_00294B40(s32 x, s32 y, s32 depth, CampMenuContext *object,
                    s32 scale, s32 option) {
     u32 index;
 
     func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
                   0, scale, 0, D_00438FC8->textures[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], option);
-    func_0026BEC0(0, 0, 0, scale, (u8 *)object + 0xE8, option);
-    func_0026BEC0(0, 0xCF8, 0, scale, (u8 *)object + 0x17C, option);
+    func_0026BEC0(0, 0, 0, scale, object->panelWork[0], option);
+    func_0026BEC0(0, 0xCF8, 0, scale, object->panelWork[1], option);
     func_00294680((struct BlendDispatchWork *)object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
     func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
@@ -72,7 +146,7 @@ void func_00294B40(s32 x, s32 y, s32 depth, EventSpriteObject *object,
 
 extern f32 sdfSinPoly(f32);
 
-void mnuDrawPulsingMenuIcon(EventSpriteObject *object, s32 amplitude, s32 drawArg) {
+void mnuDrawPulsingMenuIcon(CampMenuContext *object, s32 amplitude, s32 drawArg) {
     s32 texture = D_00438FC8->textures[0];
     s32 alpha;
 
@@ -97,69 +171,23 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_002958B0);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00295D38);
 
-typedef struct MenuDrawValueItem {
-    s32 index;
-    u8 pad04[0x5C];
-    s32 value;
-} MenuDrawValueItem;
-
-typedef struct MenuDrawInner {
-    u8 pad00[4];
-    s32 flags;
-    u8 pad08[0x10];
-    MenuDrawValueItem *first;
-    MenuDrawValueItem *item;
-    s32 active;
-    u8 pad24[0xC];
-    s32 *delay;
-} MenuDrawInner;
-
-typedef struct MenuDrawObject {
-    u8 pad00[4];
-    u32 flags;
-    u8 pad08[0x10];
-    MenuDrawInner *inner; /* 0x18 */
-} MenuDrawObject;
-
-typedef struct MenuDrawValuePanel {
-    u8 pad00[0x80];
-    MenuDrawObject *object;
-    u8 pad84[0xC];
-    s32 multiplier;
-    u8 pad94[0x33];
-    s8 unkC7;
-} MenuDrawValuePanel;
 
 /* Draw the child and its container only while the child is active. */
-void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuDrawObject *object, s32 drawArg) {
-    MenuDrawInner *inner = object->inner;
+void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuWindowContainer *object, s32 drawArg) {
+    struct MenuList *inner = object->list;
 
-    if (inner->active != 0) {
+    if (inner->count != 0) {
         mnuDrawListChildrenWithCountdown(x, y, z, (u8 *)inner, drawArg);
         func_002960F0(x, y, z, 0, (u8 *)object, drawArg);
         object->flags |= 4;
     }
 }
 
-typedef struct MenuChild {
-    u8 pad00[0x58];
-    struct MenuChild *next; /* 0x58 */
-} MenuChild;
-
-typedef struct MenuDrawList {
-    u8 pad00[0xC];
-    s32 count;                 /* 0x0C */
-    u8 pad10[8];
-    MenuChild *first;          /* 0x18 */
-    u8 pad1C[0x10];
-    void (*draw)(s32, s32, s32, struct MenuDrawList *, MenuChild *, s32); /* 0x2C */
-    s32 *delay;                /* 0x30: countdown ticking once per draw */
-} MenuDrawList;
 
 /* Tick the list's countdown, then run its draw callback on up to `count` linked children. */
 void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawArg) {
-    MenuDrawList *list = (MenuDrawList *)object;
-    MenuChild *child;
+    struct MenuList *list = (struct MenuList *)object;
+    struct MenuListNode *child;
     s32 i;
 
     if (list->delay != NULL) {
@@ -168,10 +196,10 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
         }
     }
     i = 0;
-    child = list->first;
-    while (i < list->count && child != NULL) {
-        if (list->draw != NULL) {
-            list->draw(x, y, z, list, child, drawArg);
+    child = list->head;
+    while (i < list->visibleCount && child != NULL) {
+        if (list->drawCallback != NULL) {
+            list->drawCallback(x, y, z, list, child, drawArg);
         }
         i++;
         child = child->next;
@@ -179,8 +207,8 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
 }
 
 void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
-    MenuDrawObject *object = (MenuDrawObject *)objectData;
-    MenuDrawInner *inner = object->inner;
+    MenuWindowContainer *object = (MenuWindowContainer *)objectData;
+    struct MenuList *inner = object->list;
     s32 texture = D_00438FC8->textures[0];
     s32 mode = inner->delay[1];
     s32 flags = inner->flags;
@@ -213,10 +241,10 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_00296298);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296430);
 
-void func_002967A0(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 option) {
+void func_002967A0(s32 x, s32 y, s32 z, CampMenuContext *panel, s32 option) {
     s32 texture = D_00438FC8->textures[0];
-    s32 firstIndex = panel->object->inner->first->index;
-    s32 row = panel->object->inner->item->index - firstIndex;
+    s32 firstIndex = panel->window->list->head->index;
+    s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->unkC7 != 1) {
         func_00306CD0(D_003D03F0[30][MENU_ICON_X] << 4,
@@ -230,10 +258,10 @@ void func_002967A0(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 option) {
     }
 }
 
-void func_002968B8(s32 x, s32 y, s32 z, MenuDrawValuePanel *panel, s32 scale, s32 option) {
+void func_002968B8(s32 x, s32 y, s32 z, CampMenuContext *panel, s32 scale, s32 option) {
     s32 texture = D_00438FC8->textures[0];
-    s32 firstIndex = panel->object->inner->first->index;
-    s32 row = panel->object->inner->item->index - firstIndex;
+    s32 firstIndex = panel->window->list->head->index;
+    s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->unkC7 != 1) {
         func_00306CD0(D_003D03F0[30][MENU_ICON_X] << 4,
@@ -254,19 +282,19 @@ extern void func_0019D550(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 extern char D_00437980[];
 
-void func_002969D8(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 option) {
+void func_002969D8(s32 x, s32 y, s32 depth, CampMenuContext *panel, s32 option) {
     char text[16];
     s32 texture = D_00438FC8->textures[0];
-    MenuDrawObject *object = panel->object;
-    MenuDrawInner *inner;
+    MenuWindowContainer *object = panel->window;
+    struct MenuList *inner;
     s32 glyph;
 
     func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
     func_00306CD0(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
-    inner = object->inner;
-    if (inner->active != 0) {
+    inner = object->list;
+    if (inner->count != 0) {
         func_0035C860(text, D_00437980, 0);
         glyph = func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
@@ -306,20 +334,20 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-void func_00296C58(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 option) {
+void func_00296C58(s32 x, s32 y, s32 depth, CampMenuContext *panel, s32 option) {
     char text[16];
     s32 texture = D_00438FC8->textures[0];
-    MenuDrawObject *object = panel->object;
-    MenuDrawInner *inner;
+    MenuWindowContainer *object = panel->window;
+    struct MenuList *inner;
     s32 glyph;
 
     func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
     func_00306CD0(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
-    inner = object->inner;
-    if (inner->active != 0) {
-        func_0035C860(text, D_00437980, inner->item->value * panel->multiplier);
+    inner = object->list;
+    if (inner->count != 0) {
+        func_0035C860(text, D_00437980, inner->cursor->camp.value * panel->multiplier);
         glyph = func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
         func_0019D550(glyph, 1, option);
@@ -327,13 +355,8 @@ void func_00296C58(s32 x, s32 y, s32 depth, MenuDrawValuePanel *panel, s32 optio
     }
 }
 
-typedef struct MenuValueTransitionState {
-    u8 pad00[0xB0];
-    s32 previousValue;
-    s32 elapsedFrames;
-} MenuValueTransitionState;
 
-void func_00296D90(MenuValueTransitionState *state, s32 style) {
+void func_00296D90(CampMenuContext *state, s32 style) {
     char text[16];
 
     if (datGameState->header.currency != state->previousValue) {

@@ -1,5 +1,4 @@
-#include "mnu.h"
-struct MenuListNode;
+#include "mnu_list.h"
 #include "fpu.h"
 #include "dat_state.h"
 
@@ -289,38 +288,6 @@ extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 typedef struct MenuListNode MenuListNode;
 
-struct MenuListNode {
-    s32 index;
-    s32 value;
-    u8 pad8[0x40];
-    u32 flags48;         /* 0x48 */
-    u8 pad4C[4];
-    s32 fadeCounter;     /* 0x50 */
-    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
-    u8 pad55[3];
-    struct MenuListNode *next;
-    struct MenuListNode *prev;
-    u32 sortKeyPrimary;   /* 0x60 */
-    u32 sortKeySecondary; /* 0x64 */
-    u32 sortKeyTertiary;  /* 0x68 */
-    u8 pad6C[8];
-};
-
-struct MenuList {
-    u32 stateFlags;     /* 0x00: cursor and selection-control bits */
-    u32 flags;
-    u32 id; /* 0x08: owner/list identifier */
-    s32 visibleCount;
-    MenuListNode *first;
-    MenuListNode *last;
-    MenuListNode *head;
-    MenuListNode *cursor;
-    s32 count;
-    s32 windowOffset;
-    s32 rowHeight;
-    u8 pad2C[0x10];
-    s32 scale; /* 0x3C: 8.8 fixed-point list scale */
-};
 
 typedef struct MenuSpriteInner {
     u8 unk0[0xC];
@@ -961,7 +928,7 @@ u32 mnuTestListFlagTwo(u32 *flags);
 
 /* Return the stored row step times the visible row count, in native units. */
 s32 mnuGetListViewportHeight(MenuList *list) {
-    return list->rowHeight * list->visibleCount;
+    return list->rowStep * list->visibleCount;
 }
 
 /* Cancel the pending animation on every node in this list. */
@@ -970,9 +937,9 @@ void mnuResetListNodeFadeCounters(MenuList *list) {
 
     node = (s32)list->first;
     if (node != 0) {
-        ((MenuListNode *)node)->fadeCounter = 0;
+        ((MenuListNode *)node)->animationTimer = 0;
         while (node = (s32)((MenuListNode *)node)->next, node != 0) {
-            ((MenuListNode *)node)->fadeCounter = 0;
+            ((MenuListNode *)node)->animationTimer = 0;
         }
     }
 }
@@ -982,14 +949,14 @@ void mnuDecreaseListNodeFadeCounters(u8 *menu) {
     u8 *node = (u8 *)((MenuList *)menu)->first;
     if (node != NULL) {
         do {
-            s32 timer = ((MenuListNode *)node)->fadeCounter;
+            s32 timer = ((MenuListNode *)node)->animationTimer;
             s32 reduced = timer - MNU_NODE_FADE_STEP;
             if (timer > 0) {
-                ((MenuListNode *)node)->fadeCounter = reduced;
+                ((MenuListNode *)node)->animationTimer = reduced;
                 timer = reduced;
             }
             if (timer < 0) {
-                ((MenuListNode *)node)->fadeCounter = 0;
+                ((MenuListNode *)node)->animationTimer = 0;
             }
             node = (u8 *)((MenuListNode *)node)->next;
         } while (node != NULL);
@@ -1022,7 +989,7 @@ u32 mnuBlendListNodeColorByFlags(u32 previousColor, u8 *entry) {
     if (!(flags & 1)) {
         color = (flags & 4) ? MNU_ENTRY_ALTERNATE_COLOR : MNU_ENTRY_DEFAULT_COLOR;
     }
-    return uiBlendColors(color, previousColor, ((MenuListNode *)entry)->fadeCounter);
+    return uiBlendColors(color, previousColor, ((MenuListNode *)entry)->animationTimer);
 }
 
 typedef struct MenuSlotEntry {
@@ -1241,7 +1208,7 @@ void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window,
             func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
         }
         for (i = 0; i < count; i++) {
-            func_00306CD0(x + window->originX, i * window->list->rowHeight + y + window->originY, flags, state, 1,
+            func_00306CD0(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
                           window->sprite20, window->param24, option);
         }
     }
@@ -1285,7 +1252,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
         if (list->stateFlags & MNU_LIST_ALTERNATE_SELECTION_FLAG) {
             selectionMode = 2;
         }
-        y += list->windowOffset * list->rowHeight;
+        y += list->windowOffset * list->rowStep;
         mnuDrawIconPanel(x, y, depth, fadeScale, &window->panel, selectionMode, drawArg);
         mnuHideWindowHandlesKindFourFive(&window->panel);
         if (window->flags & MNU_WINDOW_TRANSITION_FLAG) {

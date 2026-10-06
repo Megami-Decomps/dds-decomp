@@ -3,7 +3,7 @@
 
 #include "mnu.h"
 
-/* Native DDS1 list owner, shared by the allocator and its window consumers. */
+/* Native list owner, shared by both games' allocator and window consumers. */
 struct MenuListNode {
     s32 index;
     s32 value;
@@ -22,7 +22,8 @@ struct MenuListNode {
             u32 sortKeyPrimary;   /* 0x60 */
             u32 sortKeySecondary; /* 0x64 */
             u32 sortKeyTertiary;  /* 0x68 */
-            u8 pad6C[8];
+            u8 pad6C[4];
+            u32 unk70; /* DatPartyRecord address retained by the mantra list. */
         };
         CampWindowParams camp;
     };
@@ -39,7 +40,9 @@ struct MenuList {
     s32 count;
     s32 windowOffset;
     s32 rowStep;        /* 0x28: constructor argument scaled by eight */
-    u8 pad2C[0x10];
+    void (*drawCallback)(); /* 0x2C: native callers supply list-specific arguments. */
+    s32 *delay;             /* 0x30: first countdown word, decremented while drawing. */
+    u8 pad34[8];
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
 
