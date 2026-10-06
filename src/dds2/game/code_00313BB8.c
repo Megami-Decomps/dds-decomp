@@ -1,3 +1,4 @@
+#include "dsp_name.h"
 #include "common.h"
 #include "sdf.h"
 extern void memset();
@@ -63,7 +64,7 @@ extern s32 fileResolvePrimaryBuffer();
 
 extern void effCreateSelectionFlagListFromWork();
 
-extern s32 D_00435E50;
+extern DspMantraName *D_00435E50;
 
 extern s32 datGameState;
 
@@ -348,7 +349,7 @@ void ptyRecomputeMaxHpMp(u32 unit) {
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314500);
 
 u32 scrGetIndexedRecordAddress(u32 scriptId, s32 *record) {
-    *record = D_00435E50 + (scriptId & 0xffff) * 0x13;
+    *record = (s32)&D_00435E50[scriptId & 0xffff];
     return 1;
 }
 

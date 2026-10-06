@@ -1,3 +1,4 @@
+#include "dsp_name.h"
 #include "common.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
