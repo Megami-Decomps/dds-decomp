@@ -1328,7 +1328,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         sound = (SoundTask *)btlCreateMoveOtherUnitsTask(unit, 0x11);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
-            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+            if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 spawned = (SoundTask *)btlScheduleRefreshTask((u8 *)other);
                 spawned->startCondition.kind = 4;
                 spawned->startDelay = 1;
@@ -1343,7 +1343,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
         for (other = state->units; other != NULL; other = other->next) {
-            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+            if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 load = (SoundTask *)btlCreateModelLoadPollTask((u8 *)other, other->resourceKind, other->species, 0);
                 load->startCondition.kind = 4;
                 load->startCondition.value.handle = change->handle;
@@ -2164,7 +2164,7 @@ s32 btlIsSupportedCommandKind(s32 *state) {
 s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
     switch (argument[0]) {
     case 1:
-        if ((unit->flags64 & 0x1200) == 0x200) {
+        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
             return btlGetActorBedAssetIdFromIndex(unit->bedAssetIndex);
         }
         if (argument[1] > 0) {
@@ -3944,8 +3944,10 @@ void btlBlendUnitColor(u8 *unit, u32 color, s32 mode) {
     }
 }
 
-void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value) {
-    mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xffffff) | 0x80000000);
+extern void mdlReleaseInnerResourceHandle(MdlCtx *, s32, f32);
+
+void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value, f32 scalar) {
+    mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xffffff) | 0x80000000, scalar);
 }
 
 extern void effObjFetchInnerFirstVec(u32);
@@ -5058,7 +5060,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
         if (task->tick & 1) {
             scale = -scale;
         }
-        if (task->unit->flags64 & 0x808000000000) {
+        if (btlUnitStatusPair(task->unit) & 0x808000000000) {
             effObjFetchInnerFirstVec(task->unit->effectObject);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
             pos[0] += scale;
@@ -5070,7 +5072,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
         effObjSetInnerFirstVec(task->unit->effectObject, pos);
         task->amplitude *= 0.85f;
     } else {
-        if (task->unit->flags64 & 0x808000000000) {
+        if (btlUnitStatusPair(task->unit) & 0x808000000000) {
             effObjFetchInnerFirstVec(task->unit->effectObject);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         } else {
