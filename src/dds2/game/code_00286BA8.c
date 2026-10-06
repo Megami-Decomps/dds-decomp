@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "dat_state.h"
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08
@@ -7,20 +8,9 @@
 #define MTR_SELECTION_ALPHA_SCALE 128.0f
 #define MTR_UNIT_FADE_FRAMES 10
 
-typedef struct {
-    u16 flags;
-    u16 pad2;
-    u16 unk4;
-    u8 pad6[0x1BE];
-} MtrRecord;
 
-typedef struct MtrGameState {
-    u8 pad00[0xA60];
-    MtrRecord records[32];
-} MtrGameState;
 
-extern MtrGameState *datGameState;
-extern void func_00286A58(MtrRecord *);
+extern void func_00286A58(DatPartyRecord *);
 
 typedef struct MenuListNode MenuListNode;
 typedef struct MenuContainer MenuContainer;
@@ -149,8 +139,8 @@ void func_00286E20(void) {
     s32 recordIndex;
 
     for (recordIndex = 0; recordIndex < MTR_RECORD_COUNT; recordIndex++) {
-        if (datGameState->records[recordIndex].flags & 1) {
-            func_00286A58(&datGameState->records[recordIndex]);
+        if (datGameState->party[recordIndex].flags & 1) {
+            func_00286A58(&datGameState->party[recordIndex]);
         }
     }
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");
