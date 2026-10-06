@@ -196,8 +196,8 @@ void *fileAllocateDispatchRequest(u32 requestName, u32 flags, u32 dispatchValue,
 }
 
 /* Queue PAC work without extra packet setup or completion context. */
-void fileQueuePlainDispatchRequest(u32 requestName) {
-    fileAllocateDispatchRequest(requestName, 0, 0, 0, 0);
+void *fileQueuePlainDispatchRequest(u32 requestName) {
+    return fileAllocateDispatchRequest(requestName, 0, 0, 0, 0);
 }
 
 /* Queue PAC work with extra packet setup enabled and no completion context. */

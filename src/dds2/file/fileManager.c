@@ -193,10 +193,9 @@ void *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchVa
     return requestWork;
 }
 
-/* Queue PAC work without extra packet setup or completion context.
- * Preserve the existing pointer-returning declaration without adding a return. */
+/* Queue PAC work without extra packet setup or completion context. */
 void *fileQueuePlainDispatchRequest(const char *requestName) {
-    fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
+    return fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
 }
 
 /* Queue PAC work with extra packet setup enabled and no completion context. */
