@@ -6,6 +6,8 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "dat_state.h"
+#include "mnu_list.h"
+#include "eff.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -47,9 +49,9 @@ extern s32 mnuFinishCampPopup(s32);
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void mnuClearPanelTransitionState(u8 *);
-extern void mnuInitializeShopStatusBatches(u8 *);
-extern void func_002945B8(u8 *);
-extern void mnuResetGradientFadeColor(u8 *, s32);
+extern void mnuInitializeShopStatusBatches(MenuTerminalContext *);
+extern void func_002945B8(MenuTerminalContext *);
+extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
 extern s32 func_00261198();
@@ -129,7 +131,7 @@ extern void mnuReleaseWindowTextures();
 
 extern void effDestroyResourceSlotSet();
 
-extern s32 mnuShopReleaseSceneObjects(u8 *);
+extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
 
 extern void mnuDrainPanelTransitions(s32, s32);
 
@@ -139,9 +141,9 @@ extern void evtReleaseResourcePairHandle();
 
 extern void sdfReleaseResourceAllocation();
 
-extern void mnuDrawAndStepGradientFade(s32, s32);
+extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
-extern void func_002C1B68(s32, s32);
+extern void func_002C1B68(MenuGradientFade *, s32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
@@ -183,7 +185,7 @@ extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
-extern u8 *effCreateStatusBatch(s32 kind);
+extern EffMappedResource *effCreateStatusBatch(s32 kind);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *packet);
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
@@ -1016,63 +1018,37 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
 
-typedef struct ShopEffectGraphics {
-    u8 pad00[0x20];
-    s32 *params; /* 0x20 */
-} ShopEffectGraphics;
 
-typedef struct ShopEffectObject {
-    u8 pad00[8];
-    ShopEffectGraphics *graphics; /* 0x08 */
-} ShopEffectObject;
-
-typedef struct ShopEffectScene {
-    s32 resourceHandle; /* 0x00 */
-    u8 pad04[0x74];
-    s32 state;          /* 0x78 */
-    u8 pad7C[8];
-    u8 *objects[2];    /* 0x84 */
-    u8 pad8C[0x10];
-    s32 availableCount; /* 0x9C */
-    u16 unkA0;
-    u16 unkA2;
-    u16 unkA4;
-    u8 padA6[6];
-    u32 options;        /* 0xAC */
-    u8 padB0[0x34];
-    s32 mode;           /* 0xE4 */
-} ShopEffectScene;
-
-void mnuInitializeShopStatusBatches(u8 *scene) {
-    u8 *batchObject;
-    u8 *batchGraphics;
+void mnuInitializeShopStatusBatches(MenuTerminalContext *scene) {
+    EffMappedResource *batchObject;
+    EffMappedRecord *batchGraphics;
     s32 *batchParameters;
     s32 initialParameter = CAMP_STATUS_INITIAL_PARAMETER;
-    ((ShopEffectScene *)scene)->state = 0;
+    scene->state = 0;
     batchObject = effCreateStatusBatch(6);
-    batchGraphics = (u8 *)((ShopEffectObject *)batchObject)->graphics;
-    ((ShopEffectScene *)scene)->objects[0] = batchObject;
-    batchParameters = ((ShopEffectGraphics *)batchGraphics)->params;
+    batchGraphics = batchObject->records;
+    scene->objects[0] = batchObject;
+    batchParameters = (s32 *)batchGraphics->status;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
     batchParameters[2] = 0;
     batchParameters[3] = 0;
     batchParameters[4] = 0;
     batchObject = effCreateStatusBatch(1);
-    batchGraphics = (u8 *)((ShopEffectObject *)batchObject)->graphics;
-    ((ShopEffectScene *)scene)->objects[1] = batchObject;
-    batchParameters = ((ShopEffectGraphics *)batchGraphics)->params;
+    batchGraphics = batchObject->records;
+    scene->objects[1] = batchObject;
+    batchParameters = (s32 *)batchGraphics->status;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
 }
 
 /* Destroy both batches and return the second destruction result. */
-s32 mnuShopReleaseSceneObjects(u8 *scene) {
-    s32 *batchCursor = (s32 *)((ShopEffectScene *)scene)->objects;
+s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
+    EffMappedResource **batchCursor = scene->objects;
     s32 destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
-        destroyResult = effDestroyPackedBatch(*batchCursor++);
+        destroyResult = effDestroyPackedBatch((s32)*batchCursor++);
     }
     return destroyResult;
 }
@@ -1135,64 +1111,44 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AE0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
 
-/* DDS2 shop scene fields used while choosing the message resource. */
-typedef struct ShopMessageScene {
-    u8 pad00[8];
-    s32 messageSet;     /* 0x08 */
-    u8 pad0C[0x54];
-    u8 resourcePair[4]; /* 0x60 */
-    s32 pairedHandle;   /* 0x64 */
-    u8 pad68[0x24];
-    s32 shopRow;        /* 0x8C */
-} ShopMessageScene;
 
 extern void evtLoadResourcePair();
 extern void evtCreateMessageWindowIfMissing();
 
-void mnuShopLoadMessageResource(ShopMessageScene *scene) {
-    scene->messageSet = D_003C9A40[scene->shopRow].messageSet;
-    switch (scene->messageSet) {
+void mnuShopLoadMessageResource(MenuTerminalContext *scene) {
+    scene->type = D_003C9A40[scene->shopRow].messageSet;
+    switch (scene->type) {
     case 0:
-        evtLoadResourcePair("/facility/msg/shop/mes_01.bmd", scene->resourcePair);
+        evtLoadResourcePair("/facility/msg/shop/mes_01.bmd", scene->messageResources);
         break;
     case 1:
-        evtLoadResourcePair("/facility/msg/shop/mes_02.bmd", scene->resourcePair);
+        evtLoadResourcePair("/facility/msg/shop/mes_02.bmd", scene->messageResources);
         break;
     case 2:
-        evtLoadResourcePair("/facility/msg/shop/mes_03.bmd", scene->resourcePair);
+        evtLoadResourcePair("/facility/msg/shop/mes_03.bmd", scene->messageResources);
         break;
     case 3:
-        evtLoadResourcePair("/facility/msg/shop/mes_04.bmd", scene->resourcePair);
+        evtLoadResourcePair("/facility/msg/shop/mes_04.bmd", scene->messageResources);
         break;
     }
-    evtCreateMessageWindowIfMissing(scene->pairedHandle);
+    evtCreateMessageWindowIfMissing(scene->messageResources[1]);
 }
 
-typedef struct ShopSceneCleanup {
-    u8 pad00[8];
-    s32 mode;             /* 0x08 */
-    u8 pad0C[0x5C];
-    s32 handles[4];       /* 0x68 through 0x74 */
-    u8 pad78[0x198];
-    MenuEffectResources effectResources; /* 0x210 */
-    u8 pad270[0x108];
-    s32 resourceHandle;   /* 0x378 */
-} ShopSceneCleanup;
 
-void mnuShopReleaseWindowAndEffectResources(s32 scene) {
+void mnuShopReleaseWindowAndEffectResources(MenuTerminalContext *scene) {
     s32 i;
-    s32 *slot = ((ShopSceneCleanup *)scene)->handles;
+    struct EffectSlotSet **slot = scene->effectSlots;
 
-    mnuReleaseWindowTextures(((ShopSceneCleanup *)scene)->resourceHandle);
+    mnuReleaseWindowTextures(scene->windowResource);
     for (i = 1; i >= 0; i--) {
         effDestroyResourceSlotSet(*slot++);
     }
-    effDestroyResourceSlotSet(((ShopSceneCleanup *)scene)->handles[2]);
-    effDestroyResourceSlotSet(((ShopSceneCleanup *)scene)->handles[3]);
-    switch (((ShopSceneCleanup *)scene)->mode) {
+    effDestroyResourceSlotSet(scene->effectSlots[2]);
+    effDestroyResourceSlotSet(scene->effectSlots[3]);
+    switch (scene->type) {
     case 1:
     case 3:
-        mnuShopDestroyNestedEffectBatch(&((ShopSceneCleanup *)scene)->effectResources);
+        mnuShopDestroyNestedEffectBatch(&scene->effectResources);
         break;
     case 0:
     case 2:
@@ -1230,66 +1186,28 @@ s32 mnuCampHasEligibleOwnedItems(void) {
     return result;
 }
 
-typedef struct CampWindowContainer CampWindowContainer;
-
-typedef struct CampWindowNode {
-    u8 pad00[0x48];
-    u32 flags;
-    u8 pad4C[0xC];
-    struct CampWindowNode *next; /* 0x58 */
-    u8 pad5C[4];
-    CampWindowParams params; /* 0x60 */
-} CampWindowNode;
-
-typedef struct CampWindowBuffer {
-    u8 pad00[0xC];
-    u16 unk0C;
-    u16 unk0E;
-    u16 unk10;
-    u8 pad12[2];
-} CampWindowBuffer;
-
-typedef struct CampWindowListData {
-    u8 pad00[0x10];
-    CampWindowNode *first;
-    u8 pad14[8];
-    CampWindowNode *cursor; /* 0x1C */
-    s32 count;
-    u8 pad24[8];
-    s32 (*callback)();
-    void *buffer;
-} CampWindowListData;
-
-struct CampWindowContainer {
-    u8 pad00[0x18];
-    CampWindowListData *list;
-};
-
-struct MenuWindowContainer;
-struct MenuListNode;
 extern struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, s32 value);
 extern void func_00295400(void);
 
-s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, u8 *settings) {
-    CampWindowContainer *window;
-    CampWindowBuffer *storage;
+s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, MenuTerminalContext *settings) {
+    MenuWindowContainer *window;
+    MenuTerminalWindowState *storage;
     s32 i;
 
-    window = (CampWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x16);
+    window = mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x16);
     mnuSetWindowEntryParameters(0, window, 0, 8, 0xA);
     for (i = 0; i < count; i++) {
         if (enabled[i] != 0) {
-            ((CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)window, 0))
-                ->params.value = i;
+            mnuAppendWindowListNode(window, 0)->camp.value = i;
         }
     }
-    window->list->callback = func_00295400;
+    window->list->drawCallback = func_00295400;
     storage = sdfAllocSizeClassBlock(0x14);
     memset(storage, 0, 0x14);
-    window->list->buffer = storage;
-    storage->unk0C = ((ShopEffectScene *)settings)->unkA0;
-    storage->unk0E = ((ShopEffectScene *)settings)->unkA2;
-    storage->unk10 = ((ShopEffectScene *)settings)->unkA4;
+    window->list->context = storage;
+    storage->unk0C = settings->unkA0;
+    storage->unk0E = settings->unkA2;
+    storage->unk10 = settings->unkA4;
     return (s32)window;
 }
 
@@ -1320,41 +1238,31 @@ s32 mnuCampFindActiveSlot(void) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260250);
 
-typedef struct ShopScene {
-    u8 pad00[0x7C];
-    CampWindowContainer *sprites[1]; /* 0x7C */
-    CampWindowContainer *extra;      /* 0x80 */
-    u8 pad84[8];
-    s32 stockGroup;         /* 0x8C */
-    s32 quantity;           /* 0x90: clamped to [1, maximum] */
-    u8 pad94[0x33];
-    u8 atLimit;             /* 0xC7 */
-} ShopScene;
 
-void mnuShopReleaseWindowSprites(s32 keepExtra, ShopScene *scene) {
-    CampWindowContainer **slot = scene->sprites;
-    CampWindowContainer *sprite;
+void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
+    MenuWindowContainer **slot = scene->ownedWindows;
+    MenuWindowContainer *sprite;
     u32 i;
 
     for (i = 0; i < 1; i++) {
         sprite = *slot;
         if (sprite != NULL) {
-            if (sprite->list->buffer != NULL) {
-                sdfReleaseChipBlock(sprite->list->buffer);
+            if (sprite->list->context != NULL) {
+                sdfReleaseChipBlock(sprite->list->context);
                 sprite = *slot;
-                sprite->list->buffer = NULL;
+                sprite->list->context = NULL;
             }
             mnuDestroyWindowContainer(sprite);
         }
         slot++;
     }
     if (keepExtra == 0) {
-        if (scene->extra != NULL) {
-            if (scene->extra->list->buffer != NULL) {
-                sdfReleaseChipBlock(scene->extra->list->buffer);
-                scene->extra->list->buffer = NULL;
+        if (scene->window != NULL) {
+            if (scene->window->list->context != NULL) {
+                sdfReleaseChipBlock(scene->window->list->context);
+                scene->window->list->context = NULL;
             }
-            mnuDestroyWindowContainer(scene->extra);
+            mnuDestroyWindowContainer(scene->window);
         }
     }
 }
@@ -1423,21 +1331,21 @@ void mnuCampClearListedItemCounts(void) {
     } while (index < 3);
 }
 
-u8 *mnuTerminalCreateContext(void) {
+MenuTerminalContext *mnuTerminalCreateContext(void) {
     s32 handle;
-    u8 *obj;
+    MenuTerminalContext *obj;
 
     handle = sdfAllocGeneralBlock(0x38C);
-    obj = sdfResourceRetainAddress(handle);
+    obj = (MenuTerminalContext *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
-    ((ShopEffectScene *)obj)->resourceHandle = handle;
-    mnuClearPanelTransitionState(obj + 0xC);
+    obj->resourceHandle = handle;
+    mnuClearPanelTransitionState(obj->transitionWork);
     mnuInitializeShopStatusBatches(obj);
-    ((ShopEffectScene *)obj)->options = func_00260460();
-    ((ShopEffectScene *)obj)->availableCount = mnuCountActivePartyEntries();
-    ((ShopEffectScene *)obj)->mode = 0xF;
+    obj->options = func_00260460();
+    obj->availableCount = mnuCountActivePartyEntries();
+    obj->delayFrames = 0xF;
     func_002945B8(obj);
-    mnuResetGradientFadeColor(obj + 0x37C, 0x60);
+    mnuResetGradientFadeColor(&obj->gradientFade, 0x60);
     mnuCampClearListedItemCounts();
     sndEnsureMidiBankResident(0x300000);
     sndStartTrackExtended(0x300000);
@@ -1445,22 +1353,22 @@ u8 *mnuTerminalCreateContext(void) {
 }
 
 void mnuTerminalReleaseContextAndResources(s32 arg) {
-    s32 scene = kwlnTaskGetUserValue();
+    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue();
 
     if (scene != 0) {
         mnuShopReleaseWindowSprites(0, scene);
         mnuShopReleaseWindowAndEffectResources(scene);
-        mnuShopReleaseSceneObjects((u8 *)scene);
-        mnuDrainPanelTransitions(scene + 0xC, arg);
+        mnuShopReleaseSceneObjects(scene);
+        mnuDrainPanelTransitions((s32)scene->transitionWork, arg);
         dspCloseChannel();
-        evtReleaseResourcePairHandle(scene + 0x60);
-        sdfReleaseResourceAllocation(*(s32 *)scene);
+        evtReleaseResourcePairHandle(scene->messageResources);
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         mnuPanelTaskCompletionState = 2;
     }
 }
 
 s32 mnuTerminalSyncMessageWindowControl(void) {
-    s32 state = kwlnTaskGetUserValue() + 0x37C;
+    MenuGradientFade *state = &((MenuTerminalContext *)kwlnTaskGetUserValue())->gradientFade;
     mnuDrawAndStepGradientFade(state, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
         func_002C1B68(state, 1);
@@ -1477,12 +1385,12 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BC0);
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BD0);
 
 void func_00260708(const s32 *stockGroup) {
-    ShopScene *scene = (ShopScene *)mnuTerminalCreateContext();
+    MenuTerminalContext *scene = mnuTerminalCreateContext();
     KwlnTask *drawTask;
     KwlnTask *fadeTask;
 
     if (stockGroup != NULL) {
-        scene->stockGroup = *stockGroup;
+        scene->shopRow = *stockGroup;
     }
     kwlnTaskCreate(D_00437838, 0x402, 1, 1,
         mnuPreparePopupAndDispatchSelection, NULL, (u32)scene);
@@ -1516,22 +1424,22 @@ s32 mnuCampConsumePanelTaskCompletion(void) {
     return 0;
 }
 
-static inline s32 campSetHandler(s32 context, u64 mode, s32 callback) {
-    return func_002C4038(context + 0xc, (s32 *)(context + 0x58), mode, callback);
+static inline s32 campSetHandler(MenuTerminalContext *context, u64 mode, s32 callback) {
+    return func_002C4038((s32)context->transitionWork, &context->popupState, mode, callback);
 }
 
 s32 mnuPreparePopupAndDispatchSelection(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
-    mnuSetPopupEntry((s32 *)(context + 0x58), D_003CE658);
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+    mnuSetPopupEntry(&context->popupState, D_003CE658);
     return campSetHandler(context, 0, callback);
 }
 
 s32 mnuAdvanceCampPopup(s32 callback) {
-    return campSetHandler(kwlnTaskGetUserValue(), 1, callback);
+    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 1, callback);
 }
 
 s32 mnuFinishCampPopup(s32 callback) {
-    return campSetHandler(kwlnTaskGetUserValue(), 2, callback);
+    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 2, callback);
 }
 
 typedef struct ShopSourcePriceEntry {
@@ -1728,8 +1636,8 @@ s32 mnuCampGetCompactEntryId(s32 row, s32 column) {
     return *(s32 *)(mnuCampCompactEntries + row * 0x44 + column * 8);
 }
 
-s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
-    s32 value = ((ShopEffectScene *)record)->availableCount;
+s32 mnuCampCountRemainingUses(s32 mode, s32 id, MenuTerminalContext *record) {
+    s32 value = record->availableCount;
 
     if (mode == 1) {
         value -= ptyCountBulletItem(id);
@@ -1753,24 +1661,24 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261198);
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261290);
 
 /* Mark rows unavailable when neither currency nor inventory capacity permits a use. */
-void mnuCampDisableUnavailableItemEntries(u8 *scene) {
-    CampWindowNode *node;
+void mnuCampDisableUnavailableItemEntries(MenuTerminalContext *scene) {
+    struct MenuListNode *node;
     CampWindowParams *item;
     s32 i;
     s32 count;
     s32 remaining;
 
-    node = ((ShopScene *)scene)->extra->list->first;
-    for (i = 0; i < ((ShopScene *)scene)->extra->list->count; i++) {
-        item = &node->params;
+    node = scene->window->list->first;
+    for (i = 0; i < scene->window->list->count; i++) {
+        item = &node->camp;
         /* Keep the unchecked division: retail traps when the row price is zero. */
         count = datGameState->header.currency / item->price;
-        remaining = mnuCampCountRemainingUses(item->mode, item->id, (s32)scene);
+        remaining = mnuCampCountRemainingUses(item->mode, item->id, scene);
         if (remaining < count) {
             count = remaining;
         }
         if (count == 0) {
-            node->flags = 1;
+            node->flags48 = 1;
         }
         node = node->next;
         if (node == NULL) {
@@ -1809,27 +1717,27 @@ s32 func_002613C8(s32 level, s32 price) {
     return price;
 }
 
-s32 mnuCampAdvanceCounter(s32 delta, u8 *scene) {
+s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
     s32 max = func_00261198(scene);
-    CampWindowParams *slot = &((ShopScene *)scene)->extra->list->cursor->params;
-    s32 sum = ((ShopScene *)scene)->quantity + delta;
+    CampWindowParams *slot = &scene->window->list->cursor->camp;
+    s32 sum = scene->multiplier + delta;
     s32 cur;
 
-    ((ShopScene *)scene)->quantity = sum;
+    scene->multiplier = sum;
     if (sum <= 0) {
-        ((ShopScene *)scene)->quantity = 1;
+        scene->multiplier = 1;
     }
-    cur = ((ShopScene *)scene)->quantity;
+    cur = scene->multiplier;
     if (cur >= max) {
-        ((ShopScene *)scene)->atLimit = 1;
-        ((ShopScene *)scene)->quantity = max;
+        scene->unkC7 = 1;
+        scene->multiplier = max;
         cur = max;
     } else {
-        ((ShopScene *)scene)->atLimit = 0;
+        scene->unkC7 = 0;
     }
-    if (((ShopScene *)scene)->sprites[0]->list->cursor->params.value == 3) {
+    if (scene->ownedWindows[0]->list->cursor->camp.value == 3) {
         slot->value = func_002613C8(cur, slot->price);
-        cur = ((ShopScene *)scene)->quantity;
+        cur = scene->multiplier;
     }
     return cur;
 }
@@ -1842,10 +1750,10 @@ extern void func_002B9808();
 extern s32 func_002958B0();
 extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
-s32 func_00261538(ShopScene *scene) {
+s32 func_00261538(MenuTerminalContext *scene) {
     s32 rowIndex;
     ShopRankPriceRow *row;
-    CampWindowContainer *window;
+    MenuWindowContainer *window;
     u32 i;
 
     rowIndex = mnuCampFindActiveSlot();
@@ -1856,85 +1764,85 @@ s32 func_00261538(ShopScene *scene) {
     for (i = 0; i < 0x20; i++) {
         u32 id = row->entries[i].itemId;
         u32 mode = row->entries[i].mode;
-        CampWindowNode *node;
+        struct MenuListNode *node;
         CampWindowParams *params;
         s32 price;
 
         if (mnuIsBulletItemId(id) != 0 || id == 0) {
             continue;
         }
-        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+        node = mnuAppendWindowListNode(scene->window,
             (s32)(D_00435E5C + id * 0x19));
-        func_002B9808((struct MenuWindowContainer *)scene->extra);
-        window = scene->extra;
+        func_002B9808(scene->window);
+        window = scene->window;
         mnuAdvanceListCursorDefault(window->list);
-        params = &node->params;
+        params = &node->camp;
         price = func_00260A58(i, 0);
         params->id = id;
         params->value = price;
         params->price = price;
         params->mode = mode;
         if (func_00261198(scene) == 0) {
-            node->flags = 1;
+            node->flags48 = 1;
         }
     }
-    mnuSelectFirstListNode(scene->extra->list);
+    mnuSelectFirstListNode(scene->window->list);
     return 0;
 }
 
-s32 func_00261850(ShopScene *scene, s32 filterMode);
+s32 func_00261850(MenuTerminalContext *scene, s32 filterMode);
 
-s32 func_00261670(ShopScene *scene) {
-    CampWindowBuffer *buffer;
+s32 func_00261670(MenuTerminalContext *scene) {
+    MenuTerminalWindowState *buffer;
     u8 *entry;
     u32 i;
     s32 row;
 
-    if (scene->extra != NULL) {
-        if (scene->extra->list->buffer != NULL) {
-            sdfReleaseChipBlock(scene->extra->list->buffer);
-            scene->extra->list->buffer = NULL;
+    if (scene->window != NULL) {
+        if (scene->window->list->context != NULL) {
+            sdfReleaseChipBlock(scene->window->list->context);
+            scene->window->list->context = NULL;
         }
-        mnuDestroyWindowContainer(scene->extra);
+        mnuDestroyWindowContainer(scene->window);
     }
-    row = mnuCampResolveFlagRowValue(scene->stockGroup);
-    scene->extra = (CampWindowContainer *)mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
+    row = mnuCampResolveFlagRowValue(scene->shopRow);
+    scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
     /* Each packed stock row spans 0xC1 halfwords. */
     entry = D_003C9BC4 + (row << 8) + (((row << 6) + row) << 1);
     for (i = 0; i < 0x60; i++, entry += 4) {
         u32 id = *(u16 *)(entry - 2);
         u32 mode = entry[0];
-        CampWindowNode *node;
+        struct MenuListNode *node;
         CampWindowParams *params;
         s32 price;
 
         if (mnuIsBulletItemId(id) != 0 || func_002C54B0(id) != 0 || id == 0) {
             continue;
         }
-        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+        node = mnuAppendWindowListNode(scene->window,
             (s32)(D_00435E5C + id * 0x19));
-        func_002B9808((struct MenuWindowContainer *)scene->extra);
-        mnuAdvanceListCursorDefault(scene->extra->list);
-        params = &node->params;
-        price = mnuCampGetSourceItemPrice(i, scene->stockGroup, 0);
+        func_002B9808(scene->window);
+        mnuAdvanceListCursorDefault(scene->window->list);
+        params = &node->camp;
+        price = mnuCampGetSourceItemPrice(i, scene->shopRow, 0);
         params->value = price;
         params->id = id;
         params->price = price;
         params->mode = mode;
         if (func_00261198(scene) == 0) {
-            node->flags = 1;
+            node->flags48 = 1;
         }
     }
     func_00261538(scene);
-    mnuSelectFirstListNode(scene->extra->list);
-    scene->extra->list->callback = func_002958B0;
+    mnuSelectFirstListNode(scene->window->list);
+    scene->window->list->drawCallback = func_002958B0;
     buffer = sdfAllocSizeClassBlock(0x14);
     memset(buffer, 0, 0x14);
-    scene->extra->list->buffer = buffer;
-    return scene->extra->list->count;
+    scene->window->list->context = buffer;
+    return scene->window->list->count;
 }
 
-s32 func_00261850(ShopScene *scene, s32 filterMode) {
+s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
     s32 rowIndex;
     ShopRankPriceRow *row;
     u32 i;
@@ -1947,7 +1855,7 @@ s32 func_00261850(ShopScene *scene, s32 filterMode) {
     for (i = 0; i < 0x20; i++) {
         u32 id = row->entries[i].itemId;
         u32 mode = row->entries[i].mode;
-        CampWindowNode *node;
+        struct MenuListNode *node;
         CampWindowParams *params;
         s32 price;
         s32 include;
@@ -1960,40 +1868,40 @@ s32 func_00261850(ShopScene *scene, s32 filterMode) {
         if (include == 0) {
             continue;
         }
-        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+        node = mnuAppendWindowListNode(scene->window,
             (s32)(D_00435E5C + id * 0x19));
-        func_002B9808((struct MenuWindowContainer *)scene->extra);
-        mnuAdvanceListCursorDefault(scene->extra->list);
-        params = &node->params;
+        func_002B9808(scene->window);
+        mnuAdvanceListCursorDefault(scene->window->list);
+        params = &node->camp;
         price = func_00260A58(i, 0);
         params->value = price;
         params->id = id;
         params->price = price;
         params->mode = mode;
         if (func_00261198(scene) == 0) {
-            node->flags = 1;
+            node->flags48 = 1;
         }
     }
-    mnuSelectFirstListNode(scene->extra->list);
+    mnuSelectFirstListNode(scene->window->list);
     return 0;
 }
 
-s32 func_002619A8(ShopScene *scene, s32 filterMode) {
-    CampWindowBuffer *buffer;
-    CampWindowNode *node;
+s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
+    MenuTerminalWindowState *buffer;
+    struct MenuListNode *node;
     u8 *entry;
     u32 i;
     s32 row;
 
-    if (scene->extra != NULL) {
-        if (scene->extra->list->buffer != NULL) {
-            sdfReleaseChipBlock(scene->extra->list->buffer);
-            scene->extra->list->buffer = NULL;
+    if (scene->window != NULL) {
+        if (scene->window->list->context != NULL) {
+            sdfReleaseChipBlock(scene->window->list->context);
+            scene->window->list->context = NULL;
         }
-        mnuDestroyWindowContainer(scene->extra);
+        mnuDestroyWindowContainer(scene->window);
     }
-    row = mnuCampResolveFlagRowValue(scene->stockGroup);
-    scene->extra = (CampWindowContainer *)mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
+    row = mnuCampResolveFlagRowValue(scene->shopRow);
+    scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
     /* Each packed stock row spans 0xC1 halfwords. */
     entry = D_003C9BC4 + (row << 8) + (((row << 6) + row) << 1);
     for (i = 0; i < 0x60; i++, entry += 4) {
@@ -2011,27 +1919,27 @@ s32 func_002619A8(ShopScene *scene, s32 filterMode) {
         if (include == 0) {
             continue;
         }
-        node = (CampWindowNode *)mnuAppendWindowListNode((struct MenuWindowContainer *)scene->extra,
+        node = mnuAppendWindowListNode(scene->window,
             (s32)(D_00435E5C + id * 0x19));
-        func_002B9808((struct MenuWindowContainer *)scene->extra);
-        mnuAdvanceListCursorDefault(scene->extra->list);
-        params = &node->params;
-        price = mnuCampGetSourceItemPrice(i, scene->stockGroup, 0);
+        func_002B9808(scene->window);
+        mnuAdvanceListCursorDefault(scene->window->list);
+        params = &node->camp;
+        price = mnuCampGetSourceItemPrice(i, scene->shopRow, 0);
         params->value = price;
         params->id = id;
         params->price = price;
         params->mode = mode;
         if (func_00261198(scene) == 0) {
-            node->flags = 1;
+            node->flags48 = 1;
         }
     }
     func_00261850(scene, filterMode);
-    mnuSelectFirstListNode(scene->extra->list);
-    scene->extra->list->callback = func_002958B0;
+    mnuSelectFirstListNode(scene->window->list);
+    scene->window->list->drawCallback = func_002958B0;
     buffer = sdfAllocSizeClassBlock(0x14);
     memset(buffer, 0, 0x14);
-    scene->extra->list->buffer = buffer;
-    return scene->extra->list->count;
+    scene->window->list->context = buffer;
+    return scene->window->list->count;
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261B98);

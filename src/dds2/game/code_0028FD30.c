@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 typedef struct MenuPanelTransition {
     u16 frame;
@@ -9,7 +10,6 @@ typedef struct MenuPanelTransition {
 
 extern s32 func_00292478(void *, s32, s32);
 
-extern u32 D_00438FC8;
 
 extern u32 *mnuPanelSoundEntryPool;
 
@@ -872,7 +872,7 @@ void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining) {
     entry->framesRemaining = framesRemaining;
 }
 
-void func_002945B8(u32 value) {
+void func_002945B8(MenuTerminalContext *value) {
     D_00438FC8 = value;
 }
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);

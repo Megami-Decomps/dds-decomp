@@ -1,49 +1,24 @@
 #include "common.h"
+#include "mnu_list.h"
+#include "eff.h"
 
 extern u32 D_00435E70;
 extern u64 itfDrawBankTextWithLayoutFlags(u64, u64, u64, u16, u32, u64);
 
-typedef struct ItfGlyphInfo {
-    u32 unk0;
-    u32 code;
-    u32 unk8;
-    s32 kind;
-} ItfGlyphInfo;
 
-typedef struct ItfGlyphData {
-    u8 pad00[0x60];
-    ItfGlyphInfo info;
-} ItfGlyphData;
-
-typedef struct ItfGlyphEntry {
-    u8 pad00[0x1C];
-    ItfGlyphData *data;
-    s32 active;
-} ItfGlyphEntry;
-
-typedef struct ItfGlyphList {
-    u8 pad00[0x18];
-    ItfGlyphEntry *selected;
-} ItfGlyphList;
-
-typedef struct ItfGlyphDisplayContext {
-    u8 pad00[0x80];
-    ItfGlyphList *glyphList;
-} ItfGlyphDisplayContext;
-
-void itfEmitSelectedGlyph(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
+void itfEmitSelectedGlyph(MenuTerminalContext *context, u64 unused, u64 parentGlyph,
                   u64 color, u64 glyphAttribute) {
-    ItfGlyphEntry *entry;
-    ItfGlyphInfo *data;
+    struct MenuList *list;
+    CampWindowParams *data;
     u64 glyph;
     s32 y;
     u32 code;
 
-    entry = context->glyphList->selected;
-    if (entry->active != 0) {
-        data = &entry->data->info;
-        code = data->code;
-        if (data->kind == 1 || data->kind == 3) {
+    list = context->window->list;
+    if (list->count != 0) {
+        data = &list->cursor->camp;
+        code = data->id;
+        if (data->mode == 1 || data->mode == 3) {
             y = 0xBD0;
         } else {
             y = 0xB08;
@@ -58,22 +33,15 @@ void itfEmitSelectedGlyph(ItfGlyphDisplayContext *context, u64 unused, u64 paren
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, void *, s32, s32);
 
-typedef struct BlendDispatchWork {
-    u8 pad00[8];
-    u32 mode;      /* 0x08: must be 2 */
-    u8 pad0C[0x64];
-    void *first;   /* 0x70 */
-    void *second;  /* 0x74 */
-} BlendDispatchWork;
 
-void func_00294680(BlendDispatchWork *w, s32 a1, s32 a2) {
-    void *p;
+void func_00294680(MenuTerminalContext *w, s32 a1, s32 a2) {
+    BdWork *work;
 
-    if (w->mode != 2) {
+    if (w->type != 2) {
         return;
     }
-    func_00306CD0(0xE30, 0x610, 0, a1, 0, w->first, 1, a2);
-    p = *(void **)((u8 *)w->second + 0x18);
-    *(f32 *)((u8 *)p + 0xC4) = 90.0f;
-    func_00306CD0(0x9F0, 0x610, 0, a1, 2, w->second, 1, a2);
+    func_00306CD0(0xE30, 0x610, 0, a1, 0, w->effectSlots[2], 1, a2);
+    work = w->effectSlots[3]->workEntries;
+    work[1].angleDegrees = 90.0f;
+    func_00306CD0(0x9F0, 0x610, 0, a1, 2, w->effectSlots[3], 1, a2);
 }
