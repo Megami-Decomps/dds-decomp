@@ -17,21 +17,6 @@ typedef struct SoundSlotPool {
 } SoundSlotPool;
 
 
-/* Nodes passed to the menu model helpers are 0x50-byte records. */
-typedef struct MnuModelNode {
-    f32 primary[4];  /* 0x00 */
-    f32 rotationQuaternion[4]; /* 0x10; supplied to the model basis update */
-    f32 tertiary[4]; /* 0x20 */
-    f32 x;           /* 0x30 */
-    f32 y;           /* 0x34 */
-    f32 z;           /* 0x38 */
-    u32 positionFlag; /* 0x3C */
-    MdlCtx *model;   /* 0x40 */
-    u32 flags;       /* 0x44 */
-    u16 value48;     /* 0x48 */
-    u16 value4A;     /* 0x4A */
-    f32 savedModelValue; /* 0x4C; restored to the model entry's scalar */
-} MnuModelNode;
 
 typedef struct ShortRecord {
     u8 kind;

@@ -6,10 +6,31 @@
 
 struct SdfMemBlock;
 struct MnuSectionObjectList;
-struct MnuModelNode;
+struct MdlCtx;
 struct MnuEffectWork;
 struct WideSlotPool;
 struct CompactSlotPool;
+
+/* Nodes passed to the menu model helpers are complete 0x50-byte records. */
+typedef struct MnuModelNode {
+    f32 primary[4];
+    f32 rotationQuaternion[4];
+    f32 tertiary[4];
+    f32 x;
+    f32 y;
+    f32 z;
+    u32 positionFlag;
+    struct MdlCtx *model;
+    u32 flags;
+    u16 value48;
+    u16 value4A;
+    f32 savedModelValue;
+} MnuModelNode;
+
+typedef char MnuModelNodeLayoutAssert[
+    (sizeof(MnuModelNode)==0x50 &&
+     (unsigned long)&((MnuModelNode*)0)->model==0x40 &&
+     (unsigned long)&((MnuModelNode*)0)->savedModelValue==0x4C)?1:-1];
 
 /* A model group is a complete 0x10-byte list descriptor. */
 typedef struct MnuNodeList {

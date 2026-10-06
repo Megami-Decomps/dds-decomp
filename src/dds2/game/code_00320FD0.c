@@ -7,7 +7,7 @@ extern u32 D_004390C4;
 
 extern void (*sdfTickCallback)(void);
 
-extern u8 D_0045C860[];
+extern MenuProgressParameters D_0045C860;
 
 extern MenuRuntimeCallback D_0043899C;
 
@@ -185,12 +185,12 @@ ResourceNode *mnuFindResourceNodeByHandle(list, handle)
 void func_003211F0(void) {
 }
 
-u8 *mnuGetResourceProgressParameters(void) {
-    return D_0045C860;
+MenuProgressParameters *mnuGetResourceProgressParameters(void) {
+    return &D_0045C860;
 }
 
-void mnuCopyResourceProgressParameters(u8 *parameters) {
-    memcpy(D_0045C860, parameters, 16);
+void mnuCopyResourceProgressParameters(MenuProgressParameters *parameters) {
+    memcpy(&D_0045C860, parameters, sizeof(MenuProgressParameters));
 }
 
 u8 * mnuGetResourceProgressStepState(void) {

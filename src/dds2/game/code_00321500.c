@@ -27,7 +27,7 @@ extern u32 mnuWorkEntryPool;
 
 extern s32 mnuWorkEntryPoolCount;
 
-extern u32 D_004390E4;
+extern MenuRegistryParameters *D_004390E4;
 
 extern u32 D_004390E8;
 
@@ -35,7 +35,7 @@ extern u32 D_004390DC;
 
 extern u32 D_004390E0;
 
-extern u32 D_004390D0;
+extern MenuRegistry *D_004390D0;
 
 extern u32 D_004390D4;
 
@@ -104,12 +104,6 @@ typedef struct MenuWordPair {
 } MenuWordPair;
 
 
-typedef struct MenuRegistryTable MenuRegistryTable;
-
-typedef struct MenuRegistry {
-    u8 pad00[0xC];
-    MenuRegistryTable *table; /* 0x0C */
-} MenuRegistry;
 
 struct MenuRegistryTable {
     u32 flags;
@@ -300,14 +294,14 @@ u16 *func_003224C8(s32 index) {
     return &D_0040B248[index];
 }
 
-void mnuBindMenuRecordRegistry(u32 records, u32 count) {
+void mnuBindMenuRecordRegistry(MenuRegistry *records, u32 count) {
     D_004390D0 = records;
     D_004390D4 = count;
 }
 
-u8 *mnuGetMenuRecordRegistryEntry(u32 taggedIndex) {
+MenuRegistry *mnuGetMenuRecordRegistryEntry(u32 taggedIndex) {
     u16 index = taggedIndex;
-    return (u8 *)D_004390D0 + index * 28;
+    return &D_004390D0[index];
 }
 
 void func_00322510(u32 records, u32 count) {
@@ -319,13 +313,13 @@ u8 *func_00322520(u16 index) {
     return (u8 *)D_004390DC + index * 24;
 }
 
-void func_00322540(u32 records, u32 count) {
+void func_00322540(MenuRegistryParameters *records, u32 count) {
     D_004390E4 = records;
     D_004390E8 = count;
 }
 
-u8 *func_00322550(u8 index) {
-    return (u8 *)D_004390E4 + index * 48;
+MenuRegistryParameters *func_00322550(u8 index) {
+    return &D_004390E4[index];
 }
 
 ShortRecord *mnuFindFirstFixedKindShortRecord(ShortRecordList *list) {
@@ -351,17 +345,17 @@ ShortRecord *func_003225C0(ShortRecordList *list) {
 }
 
 u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord) {
-    u32 registryEntry;
-    u32 registryTable;
+    MenuRegistry *registryEntry;
+    MenuRegistryTable *registryTable;
     if ((((MenuWorkEntry *)taggedRecord)->tag & 0xffff0000) != MNU_REGISTRY_TAG_PREFIX) {
         return 0;
     }
-    registryEntry = (u32)mnuGetMenuRecordRegistryEntry(((MenuWorkEntry *)taggedRecord)->tag);
+    registryEntry = mnuGetMenuRecordRegistryEntry(((MenuWorkEntry *)taggedRecord)->tag);
     if (registryEntry == 0) {
         return 0;
     }
-    registryTable = (u32)((MenuRegistry *)registryEntry)->table;
-    return (u32)((MenuRegistryTable *)registryTable)->recordBase + ((MenuWorkEntry *)taggedRecord)->recordIndex * 16;
+    registryTable = registryEntry->table;
+    return (u32)&registryTable->recordBase[((MenuWorkEntry *)taggedRecord)->recordIndex];
 }
 
 typedef struct MenuByteRecordList {
@@ -426,8 +420,8 @@ u32 mnuGetWorkEntryPool(void) {
 
 /* A flagged registry entry offsets its base value by accumulated resource progress. */
 f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
-    u8 *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-    if ((((MenuRegistry *)registry)->table->flags & 1) != 0) {
+    MenuRegistry *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
+    if ((registry->table->flags & 1) != 0) {
         u8 *progressState = mnuGetResourceProgressStepState();
         u8 *resourceRecord = mnuGetResourceRecordByIndex(entry->unk08);
         return entry->y0 +
@@ -458,7 +452,7 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
     ShortRecord *record;
     ShortRecord empty;
 
-    table = ((MenuRegistry *)mnuGetMenuRecordRegistryEntry(entry->tag))->table;
+    table = mnuGetMenuRecordRegistryEntry(entry->tag)->table;
     row = &table->recordBase[entry->recordIndex];
     list = &row->lists[entry->shortListIndex];
     if (entry->control.bits.countdownEnabled) {
