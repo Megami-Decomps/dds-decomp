@@ -1,9 +1,9 @@
 #include "common.h"
+#include "mnu_work.h"
 #include "sdf.h"
 #include "mdl.h"
 #include "itf.h"
 #include "mnu_shooting.h"
-
 
 
 typedef struct MnuModelNode {
@@ -21,31 +21,6 @@ typedef struct MnuModelNode {
     f32 savedModelValue;
 } MnuModelNode;
 
-typedef union MenuWorkState {
-    u32 word;
-    u8 bytes[4];
-} MenuWorkState;
-
-typedef struct MenuWorkEntry {
-    MenuWorkState state;
-    u32 tag;
-    s32 unk08;
-    MnuModelNode *modelNode;
-    f32 x0;
-    f32 y0;
-    f32 scale0;
-    u8 pad1C[4];
-    f32 x1;
-    f32 y1;
-    f32 scale1;
-    u8 pad2C[8];
-    u16 unk34;
-    u16 remaining;
-    u8 pad38[4];
-    u32 callback;
-    u32 flags;
-    u8 pad44[4];
-} MenuWorkEntry;
 
 typedef struct MenuProgressParameters {
     u16 width;
@@ -422,7 +397,7 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00319388);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 
-void func_00319E48(MenuWorkEntry *record) {
+void func_00319E48(MenuRuntimeRecord *record) {
     MnuModelNode *node;
 
     if ((record->state.bytes[1] & 0xF0) == 0x40) {
@@ -433,7 +408,7 @@ void func_00319E48(MenuWorkEntry *record) {
             dds3ClaimSoundSlot(0x1E00000, 0);
         }
     }
-    node = D_0040ABF8.modelNode;
+    node = D_0040ABF8.object.modelNode;
     if (record->state.bytes[1] == 0x44) {
         node->model->first->frameStep = 1.0f;
         node->savedModelValue = 1.0f;

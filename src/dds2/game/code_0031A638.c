@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_work.h"
 #include "dat_state.h"
 #include "mnu_shooting.h"
 
@@ -10,8 +11,8 @@ extern void mdlFlagClear(s32);
 void func_0031A830(MnuShootingWork *timer);
 
 /* Advance progress for the selected record mode unless the final-band timer is active. */
-void func_0031A638(u8 *record, s32 unused, MnuShootingWork *timer) {
-    if ((record[1] & 0xF) == 4 && timer->completed <= 0) {
+void func_0031A638(MenuRuntimeRecord *record, MenuRuntimeRecord *unused, MnuShootingWork *timer) {
+    if ((record->state.bytes[1] & 0xF) == 4 && timer->completed <= 0) {
         timer->progress++;
         timer->updateCount++;
         func_0031A830(timer);
