@@ -315,22 +315,25 @@ typedef struct MenuPageWindow {
     s32 fade;
 } MenuPageWindow;
 
-#ifdef VERSION_DDS2
-/* The large progress display is distinct from the 0x3F8 terminal scene. */
+struct EffectList;
+
+/* The allocated progress display owns its request list and staff sprite banks. */
 typedef struct MenuProgressHost {
     s32 heapHandle;
-    s32 titleEffectHandle;
-    s32 resourceHandle;
-    u8 pad0C[8];
-    s32 unk14;
-    u8 pad18[0x54];
+    struct EffectList *titleEffectHandle;
+    StaffSlots staffSlots;
     s32 loadState;
     PartyPanel partyPanel;
     MenuPageWindow partyWindow;
-    u8 padA820[4];
+    u32 panelGroup;
     s32 effectResource;
     s32 currentEffect;
 } MenuProgressHost;
+
+#ifdef VERSION_DDS2
+typedef char MenuProgressHost_size_must_be_0xA82C[(sizeof(MenuProgressHost) == 0xA82C) ? 1 : -1];
+#else
+typedef char MenuProgressHost_size_must_be_0x82C[(sizeof(MenuProgressHost) == 0x82C) ? 1 : -1];
 #endif
 
 #ifndef VERSION_DDS2

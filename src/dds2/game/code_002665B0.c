@@ -679,7 +679,7 @@ void mnuEnsureProfilePanelEffect(s32 unused, MenuProgressHost *host) {
     if (host->currentEffect == 0) {
         s32 effect = mnuCreateProfilePanel();
         host->currentEffect = effect;
-        mnuSetGroupProperties(effect, host->resourceHandle, host->unk14, 1, 2);
+        mnuSetGroupProperties(effect, host->staffSlots.baseResources[0], host->staffSlots.pairResources[1], 1, 2);
     }
 }
 
