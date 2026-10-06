@@ -6,6 +6,11 @@
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "kwln.h"
+#include "eff.h"
+#include "btl_resource.h"
+
+extern BtlResBlock *btlResourceBlock;
+extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 extern SceneSlotFadeWork *D_00438F54;
 extern ActorSlotOrder *D_00438F58[2];
@@ -14,7 +19,7 @@ extern s32 btlGetRuntime(void);
 
 extern s32 kwlnTaskGetTaskByName(const char *);
 
-extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
@@ -165,7 +170,7 @@ extern s32 D_004367C0;
 
 extern char D_003B5D10[];
 
-extern char D_003B5B10[];
+extern u8 D_003B5B10[];
 
 extern s32 btlGetEntryFlagsUnlessDisabled(void *);
 
@@ -206,14 +211,14 @@ void func_001C80C8(void) {
 }
 
 /* Submit a scene object at fixed-point screen coordinates and retire its handle. */
-void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u64 first, u64 second) {
-    u64 handle;
+void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
+    u32 glyph;
 
     itfSetTextDrawLimit(0x13);
-    handle = func_0019F5E8(x << 4, y << 3, 0, first, second, 0);
-    func_0019D550(handle, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(handle);
-    itfSetTextDrawLimit(0xffffffffffffffff);
+    glyph = func_0019F5E8(x << 4, y << 3, 0, color, text, 0);
+    func_0019D550(glyph, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(glyph);
+    itfSetTextDrawLimit(-1);
 }
 
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
@@ -310,7 +315,7 @@ void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
     btlGetRuntime();
     roster = datGameState->inventory.counts;
     availability = (RosterAvailability *)datItemSkillRecords;
-    output = (u8 *)D_003B5B10;
+    output = D_003B5B10;
     do {
         if (*roster != 0 && (availability->flags & 2) != 0) {
             output[0] = i;
@@ -823,36 +828,17 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC020);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC438);
 
-typedef struct BtlPanelInner {
-    u8 pad00[0xDCC];
-    s32 fDCC;
-    u8 padDD0[0x6C];
-    s32 fE3C;
-} BtlPanelInner;
-
-typedef struct BtlPanelRes {
-    u8 pad00[0x18];
-    BtlPanelInner *inner;
-} BtlPanelRes;
-
-typedef struct BtlPanelBlock {
-    u8 pad00[0x18];
-    BtlPanelRes *res;
-} BtlPanelBlock;
-
-extern BtlPanelBlock *btlResourceBlock;
-
-extern void func_00306C28(s32, s32, s32, u8 *, s32, BtlPanelRes *, s32, s32);
 
 void btlDrawCenteredPanelSegments(s32 width) {
-    u8 color[16] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 half = width / 2;
     s32 x = width - half + 0x105;
-    func_00306C28(x * 0x10, 0x200, 0, color, 0, btlResourceBlock->res, 0x17, 0x53);
-    btlResourceBlock->res->inner->fDCC = width << 4;
-    func_00306C28((0x100 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->res, 0x16, 0x53);
-    btlResourceBlock->res->inner->fDCC = btlResourceBlock->res->inner->fE3C << 4;
-    func_00306C28((0x92 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->res, 0x15, 0x53);
+    func_00306C28(x * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x17, 0x53);
+    btlResourceBlock->resC->workEntries[0x16].width = width << 4;
+    func_00306C28((0x100 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x16, 0x53);
+    btlResourceBlock->resC->workEntries[0x16].width =
+        btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
+    func_00306C28((0x92 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x15, 0x53);
 }
 
 extern s32 btlGetEffectActive();
