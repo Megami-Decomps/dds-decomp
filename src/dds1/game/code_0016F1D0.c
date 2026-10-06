@@ -33,7 +33,7 @@ extern void *effParamTableGetBlock(void *table, s32 index);
 
 extern void func_001705A0(EffRecordPool *pool);
 
-extern s32 effMultiplyPackedColors(s32 color, s32 param);
+extern u32 effMultiplyPackedColors(u32 color, u32 param);
 extern s32 effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern f32 D_00354980[];
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
