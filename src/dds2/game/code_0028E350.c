@@ -65,7 +65,7 @@ typedef struct MenuSearchObject {
     MantraMenuWork work;
 } MenuSearchObject;
 
-extern s32 mnuGetMantraNodePositionRecord(s32);
+extern s32 mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuGetNodeValueByIndex();
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 extern s32 ptyGetProfileRecordCap(u16);
