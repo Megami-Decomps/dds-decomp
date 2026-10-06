@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "sdf.h"
 
 extern u32 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
@@ -69,7 +70,7 @@ extern s32 sdfReleaseResourceAllocation(s32 allocation);
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
 void evtResetWorldAndProfileRuntime(void);
-extern void *sdfAllocGeneralBlock(s32 size);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
@@ -279,7 +280,89 @@ void evtResetWorldAndProfileRuntime(void) {
 void func_00117808(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117810);
+extern s8 D_003BA9E5;
+extern s8 D_003BA9E6;
+extern s8 D_003BA9E7;
+extern s8 D_003BA9E8;
+extern s8 D_003BA9E9;
+extern s8 D_003BA9EA;
+extern u16 D_003BA9EC;
+extern u32 D_003BA9F0;
+extern u32 D_003BA9F4;
+extern s8 D_003BA9F8;
+extern s8 D_003BA9F9;
+extern u32 D_003C2E30[3];
+extern u32 D_0032A200[3];
+extern u8 D_003C2E40[41];
+extern s32 D_003BD790;
+extern SdfMemBlock *D_003BD794;
+extern SdfMemBlock *D_003BD798;
+extern SdfMemBlock *D_003BD79C;
+extern u32 D_003BD7A0;
+extern s32 mdlFlagTest(s32 flag);
+extern s32 mnuCreateFlagEntries(void);
+extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
+extern void ptySaveActiveUnitsToStock(void);
+extern void mnuCollectFlagArray(u8 *flags);
+
+/* Preserve carried flags and progress before the full runtime reset. */
+void func_00117810(void) {
+    void *copy;
+
+    D_003BA9E5 = 0;
+    D_003BA9E6 = 0;
+    D_003BA9E7 = 0;
+    D_003BA9E8 = 0;
+    D_003BA9E9 = 0;
+    D_003BA9EA = 0;
+    D_003BA9F8 = 0;
+    D_003BA9F9 = 0;
+    memset(D_003C2E30, 0, sizeof(D_003C2E30));
+    D_003BA9EC = 0;
+    D_003BA9F0 = 0;
+    if (mdlFlagTest(0xB90)) {
+        D_003BA9E5 = 1;
+    }
+    if (mdlFlagTest(0xB91)) {
+        D_003BA9E6 = 1;
+    }
+    if (mdlFlagTest(0xB92)) {
+        D_003BA9E7 = 1;
+    }
+    if (mdlFlagTest(0xB93)) {
+        D_003BA9E8 = 1;
+    }
+    if (mdlFlagTest(0xB94)) {
+        D_003BA9E9 = 1;
+    }
+    if (mdlFlagTest(0xB95)) {
+        D_003BA9EA = 1;
+    }
+    if (mdlFlagTest(0xC0E)) {
+        D_003BA9F8 = 1;
+    }
+    memcpy(D_003C2E30, datGameState->battleFlags, sizeof(datGameState->battleFlags));
+    D_003BA9EC = datGameState->header.unk0C;
+    D_003BA9F0 = datGameState->header.secondTick;
+    D_003BA9F4 = datGameState->header.unk20;
+    D_0032A200[0] = datGameState->header.unk24;
+    D_0032A200[1] = datGameState->header.unk28;
+    D_0032A200[2] = datGameState->header.unk2C;
+    D_003BD790 = mnuCreateFlagEntries();
+    D_003BD794 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
+    copy = (void *)sdfMemoryGetBlockAddress(D_003BD794);
+    memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
+    D_003BD798 = sdfAllocGeneralBlock(sizeof(datGameState->profileRecords));
+    copy = (void *)sdfMemoryGetBlockAddress(D_003BD798);
+    memcpy(copy, datGameState->profileRecords, sizeof(datGameState->profileRecords));
+    ptySaveActiveUnitsToStock();
+    D_003BD79C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
+    copy = (void *)sdfMemoryGetBlockAddress(D_003BD79C);
+    memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
+    memset(D_003C2E40, 0, sizeof(D_003C2E40));
+    mnuCollectFlagArray(D_003C2E40);
+    D_003BD7A0 = datGameState->world.slotFlags;
+}
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00117C48);
 
