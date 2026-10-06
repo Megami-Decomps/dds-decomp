@@ -6,6 +6,20 @@
 struct MenuList;
 struct EffectSlotSet;
 
+/* Shop stock by progress row: unlock flag, row price percent, then 32 stock entries. */
+typedef struct ShopRankPriceEntry {
+    u16 itemId;
+    u8 mode;
+    u8 pricePercent; /* 0: use the row's percent */
+    u32 flags;
+} ShopRankPriceEntry;
+
+typedef struct ShopRankPriceRow {
+    s16 unlockFlag;
+    u16 pricePercent;
+    ShopRankPriceEntry entries[0x20];
+} ShopRankPriceRow;
+
 #ifdef VERSION_DDS2
 struct MenuIconSprites;
 
@@ -120,7 +134,7 @@ typedef struct ShopScene {
     s32 count8C;
     s16 extraOption;
     s16 pendingSelection;
-    u8 pad94[4];
+    s32 scanIndex;
     s32 count98;
     s32 previousValue;
     s32 elapsedFrames;
