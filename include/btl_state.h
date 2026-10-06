@@ -14,7 +14,17 @@ struct BtlRuntimeTask;
  * This is one object, not separate script/event/actor-update contexts. Holes
  * remain opaque. DDS2 has a different layout, not a uniform offset shift. */
 typedef struct BtlState {
-    u8 pad000[0x1C0];
+    u8 pad000[0xA0];
+    BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
+    u8 pad0C8[0x68];
+    BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
+    u8 pad158[8];
+    u32 runtimeFlags; /* 0x160 */
+    u8 pad164[0x1C];
+    s32 debugCameraProgress; /* 0x180 */
+    u8 pad184[0x1C];
+    f32 debugCameraParameter; /* 0x1A0 */
+    u8 pad1A4[0x1C];
     s16 eventTaskId; /* 0x1C0: -1 when no event task is available */
     u8 pad1C2[2];
     u32 scriptFlags; /* 0x1C4 */
