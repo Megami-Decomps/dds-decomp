@@ -95,7 +95,7 @@ void *sdfAllocSizeClassBlock(s32 size);
 void func_002EE6F8(PacState *state, PacHead *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
 void sdfPacFinalizeRelocatedPayload(PacState *state);
-void func_002EE828(PacState *state);
+void sdfPacCompleteResourcePacket(PacState *state);
 void sdfPacResetOutputToAllocationEntry(PacState *state);
 void sdfPacAdvanceAllocationEntry(PacState *state);
 void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
@@ -116,7 +116,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
-s32 func_002EDE48(PacState *state, void *input, s32 available) {
+s32 sdfPacFeedInput(PacState *state, void *input, s32 available) {
     s32 consumeBytes;
 
     state->inputCursor = input;
@@ -425,7 +425,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE6F8);
 
-void func_002EE828(PacState *state) {
+void sdfPacCompleteResourcePacket(PacState *state) {
     state->queueTail->resourceHandle = state->slot.resource->result;
     sdfReleaseChipBlock(state->slot.resource);
     sdfDecodePacNodeAndAdvanceTail(state);
@@ -439,7 +439,7 @@ void sdfPacStartAllocationList(PacState *state, PacHead *packet) {
         state->slot.resource = allocation;
         func_002EE6F8(state, packet, allocation);
     }
-    state->onComplete = func_002EE828;
+    state->onComplete = sdfPacCompleteResourcePacket;
 }
 
 

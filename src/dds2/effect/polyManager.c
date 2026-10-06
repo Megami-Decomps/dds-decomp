@@ -161,7 +161,7 @@ void parReleaseCellSystem(PolyStrip *strip);
 void parPrependCellNode(PolyStrip *strip);
 void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 void sdfReleaseChipBlock(void *arg);
-void func_00165690(PolyNode *obj);
+void polyUpdateBasicRingCells(PolyNode *obj);
 void func_00165860(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
@@ -210,7 +210,7 @@ void polyScaleTransformPair(f32 scale, PolyNode *obj) {
 }
 
 /* Fade active basic-ring cells, update their geometry, and restart or finish ages. */
-void func_00165690(PolyNode *obj) {
+void polyUpdateBasicRingCells(PolyNode *obj) {
     u16 index;
     u16 completed;
     u16 count;
@@ -260,7 +260,7 @@ void func_00165690(PolyNode *obj) {
 
 /* Run the shared finish step, then enqueue this node's cell system. */
 void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
-    func_00165690(obj);
+    polyUpdateBasicRingCells(obj);
     parPrependCellNode(obj->strip);
 }
 

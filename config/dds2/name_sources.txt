@@ -1037,6 +1037,7 @@
 0x00165500	parCloneEmitterAndInitCells	inferred	Clones emitter descriptor allocates cells and initializes first subdispatch. [names_reviewed8.tsv]
 0x001655D0	effPolyDestroyWork	inferred	Releases the resource handle at work offset 0xDC and frees the polygon effect work allocation.
 0x00165670	polyScaleTransformPair	inferred	Multiplies both float scaling components on a polygon transform by supplied factor. [names_reviewed6.tsv]
+0x00165690	polyUpdateBasicRingCells	inferred	TaskPurist
 0x00165838	polyFinishAndReleaseNodeHandle	inferred	Finishes polygon processing and releases node-owned resource handle. [names_reviewed6.tsv]
 0x001659B8	polyStripPushPairsApart	inferred	twin of DDS1 0x0015DDC8 [names_M71_ItfBlur.tsv]
 0x00165A78	polyBlendTimedTintColor	inferred	confidence=high; matched-C; src/dds2/effect/polyManager.c:202:func_00165A78; Interpolates packed tint endpoints with elapsed/duration factor and packs RGBA output.; twin=0x0015DE88, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -2136,6 +2137,7 @@
 0x001B7208	btlInitializeActionRecordWithScale	inferred	Initializes an action record with owner arguments, scale and a derived slot value. [names_reviewed17.tsv]
 0x001B7238	btlPanelResourcesLoad	inferred	loads /battle/panel/batle_01.spr, batle_02.spr, battle_03.spr into the block at D_00436804; DDS1 twin func_001AC628
 0x001B7900	btlClearSharedBattleStateWords	inferred	Clears the consecutive state words in the shared battle work region. [names_reviewed17.tsv]
+0x001B7BF0	btlCreateMahenPanelTask	inferred	LeverAudit
 0x001B7DC0	btlIsNamedBattleTaskRegistered	inferred	Requires the indexed battle task to be registered and its named task to exist. [names_reviewed17.tsv]
 0x001B7E40	btlCreateAnalysisPanelTask	inferred	U1
 0x001B7FB8	btlHasRegisteredAnalysisPanelTask	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:2949:func_001B7FB8; Requires tracked analysis-panel handle to remain registered and named analysis task to exist.; twin=0x001AD3A8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -3495,10 +3497,12 @@
 0x00250150	evtIsSkyTransitionActive	inferred	Byte-identical dds1 twin 0x002353B0; Returns the flag marking an unfinished sky-task parameter interpolation. [names_conflicts.tsv]
 0x00250158	evtAdvanceSkyTransition	inferred	Byte-identical dds1 twin 0x002353B8; Advances the sky parameter interpolation and clears its flag at the requested duration. [names_conflicts.tsv]
 0x002502E0	evtUpdateFrameVariableTask	inferred	game/code_00250010: FrameVar task update; calls func_00101958 on the handle at arg0+0x44 and returns 0 [names_L14_MidUnits.tsv]
+0x00250338	evtDrawMenuFrame	inferred	TaskPurist
 0x00250508	evtAppendValueChangeDebugLabel	inferred	Appends the literal VALUE CHANGE. via the formatted SIF command to the caller packet list. [names_reviewed19.tsv]
 0x00250718	evtViewerFloatValueUpdate	inferred	unified with DDS1 twin (was evtDrawFloatValueEntry)
 0x002508D0	evtDrawValueChangeInstructionRow	inferred	Draws configured value and directional adjustment instructions by row selection. [names_reviewed7.tsv]
 0x00250A08	evtUpdateValueChangeDialog	inferred	Draws value editor, reads action controls and adjusts displayed value by one or ten. [names_reviewed7.tsv]
+0x00250F20	evtDrawProjectCommandRow	inferred	U2
 0x002512B0	evtDrawSelectableTextRow	inferred	Draws indexed item name with cursor-dependent highlight color. [names_reviewed7.tsv]
 0x00251340	evtUpdateTextSelectionDialog	inferred	Draws titled item list and handles cursor input when selection mode is active. [names_reviewed7.tsv]
 0x00251440	evtDrawInputValueRow	inferred	DDS1 twin 0x002366A0 [names_M95_Event.tsv]
@@ -4013,6 +4017,7 @@
 0x0028F770	mnuSelectMatchingNode	inferred	Traverses menu nodes and records the index whose payload ID equals the requested ID.
 0x0028F7B8	mnuSelectMantraLimitLine	inferred	readability/matching review (QP16)
 0x00290410	mnuNavigateMantraSelector	inferred	U0
+0x002906E0	mnuResolveSpecialMantraNeighbor	inferred	Fam
 0x00290A70	mnuGetDefaultPanelSelector	inferred	Returns the panel object's selector at offset 0x7A0, used when its alternate selector is absent.
 0x00290B28	mnuUpdateSelectedPanelSlot	inferred	Reuses or allocates the slot indexed by the current menu choice and binds the selected node's value.
 0x00290B98	mnuGetSelectedPanelValue	inferred	Returns the selected slot's halfword indexed by alternate or default selector.
@@ -4092,6 +4097,7 @@
 0x0029CE30	brsGetLevelStepCrossedBy	inferred	byte-identical twin of DDS1 brsGetLevelStepCrossedBy @ 0x265540: returns the LevelStep value whose threshold lies within (position, position+increment]
 0x0029D3D8	brsBuildProfileCapList	inferred	U2
 0x0029D900	mnuTitleInitFourParameters	inferred	DDS1 has the same unprefixed symbol; game/code_0029BC58 uses mnu for the already-described titleInitFourParameters behavior.
+0x0029DB58	mnuDrawUnitProgressRows	inferred	Fam
 0x002A0EE8	brsPollResultCounterCompletion	inferred	readability/matching review (QP16)
 0x002A1040	mnuBuildSoundResourcePath	inferred	src/dds2/game/code_002A05C0.c func_002A1040: Copies eight-byte /sound/ prefix from retail global and appends caller filename with strcat. Twin of DDS1 func_00269420. [names_reviewed24.tsv]
 0x002A1070	mnuBuildVoiceResourcePath	inferred	src/dds2/game/code_002A05C0.c func_002A1070: Copies eight-byte /voice/ prefix from retail global and appends caller filename with strcat. Twin of DDS1 func_00269450. [names_reviewed24.tsv]
@@ -6113,6 +6119,7 @@
 0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
 0x00346B68	sdfPacAdvanceCallbackBoundary	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346B68; Handles 64-byte consumption boundaries, advances input, invokes the callback, and updates activity/remainder according to callback results. [names_qp9.tsv]
 0x00346C40	sdfDecodePacNodeAndAdvanceTail	inferred	Reads the next PAC node, links it into decoder tail, and processes read completion codes. [names_reviewed21.tsv]
+0x00346CF0	sdfPacFeedInput	inferred	U3
 0x00346E08	sdfPacEnqueuePacket	inferred	Allocates and copies a PAC packet, then appends it to the decoder's packet queue.
 0x00346E90	sdfPacRemovePacket	inferred	Unlinks a specified packet from its owner's queue, frees it, and returns its successor.
 0x00346F00	sdfPacDispatchPacket	inferred	Dispatches PAC packet types to their corresponding handlers and returns a status.
@@ -6127,12 +6134,14 @@
 0x003473E0	sdfPacCopyResourceChunk	inferred	Copies pending input into the resource buffer, finalizes its resource slot, and calls the completion handler.
 0x00347488	sdfPacDecodeResourceChunk	inferred	Incrementally decodes compressed input into the resource buffer and finalizes the resource slot when complete.
 0x00347520	sdfPacSkipResourceChunk	inferred	Consumes pending input without copying it, then checks the resource buffer and calls completion.
+0x003476D0	sdfPacCompleteResourcePacket	inferred	U3
 0x00347710	sdfPacStartAllocationList	inferred	Queues a command-2 packet and allocates its per-entry state.
 0x00347768	sdfPacStartNextAllocationEntry	inferred	Passes the allocation state at offsets 0x10 and 0x20 to the entry handler.
 0x00347850	sdfPacSkipAllocationEntryBytes	inferred	Consumes pending input before requesting another allocation entry.
 0x003478C0	sdfPacReadListAllocationCount	inferred	src/dds2/game/code_003478C0.c func_003478C0: Reads count, resets progress, allocates list and computes aligned skip bytes for next handler. Twin of DDS1 func_002EEA18. [names_reviewed24.tsv]
 0x00347948	sdfQueueAndResetPacketWork	inferred	Queues current packet work, allocates another buffer and resets its callback. [names_reviewed9.tsv]
 0x00347D40	sdfStoreWordAndSetState	inferred	Byte-identical dds1 twin 0x002EEE98; Stores a word at offset four and marks its byte state as one. [names_conflicts.tsv]
+0x00347D50	sdfDrawClippedLinePairs	inferred	Fam
 0x003481E8	sdfInitializeTmxImageHeader	inferred	src/dds2/game/code_003478C0.c func_003481E8: Clears header, writes TMX0 magic, type, dimensions, depth and two flags. Twin of DDS1 func_002EF340. [names_reviewed24.tsv]
 0x00348408	sdfStreamDispatchSynchronousCommand	inferred	confidence=high; matched-C; src/dds2/game/code_003478C0.c:196:func_00348408; Handles open, control, chunked read and close commands through the shared stream configuration, synchronizes with its semaphore, and returns the result-word buffer.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00348630	sdfStartAndSuspendWorkerThread	inferred	Creates and starts a worker thread, saves its ID and suspends the caller. [names_reviewed9.tsv]

@@ -117,7 +117,7 @@ void *sdfAllocSizeClassBlock(s32 size);
 
 void func_003475A0(PacState *state, PacHead *packet, PacBuf *buffer);
 
-void func_003476D0(PacState *state);
+void sdfPacCompleteResourcePacket(PacState *state);
 
 void sdfPacAdvanceAllocationEntry(PacState *state);
 
@@ -142,7 +142,7 @@ void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 si
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
-s32 func_00346CF0(PacState *state, void *input, s32 available) {
+s32 sdfPacFeedInput(PacState *state, void *input, s32 available) {
     s32 consumeBytes;
 
     state->inputCursor = input;
@@ -452,7 +452,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
 
 INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_003475A0);
 
-void func_003476D0(PacState *state) {
+void sdfPacCompleteResourcePacket(PacState *state) {
     state->queueTail->resourceHandle = state->slot.resource->result;
     sdfReleaseChipBlock(state->slot.resource);
     sdfDecodePacNodeAndAdvanceTail(state);
@@ -466,7 +466,7 @@ void sdfPacStartAllocationList(PacState *state, PacHead *packet) {
         state->slot.resource = allocation;
         func_003475A0(state, packet, allocation);
     }
-    state->onComplete = func_003476D0;
+    state->onComplete = sdfPacCompleteResourcePacket;
 }
 
 /* Start the next allocation entry at its inline descriptor. */

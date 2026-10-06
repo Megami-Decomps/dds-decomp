@@ -4866,7 +4866,7 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 func_001B8A80(KwlnTask *);
 extern void itfMesCloseAllWindows(KwlnTask *);
 
-s32 func_001B7BF0(const MesWindowConfig *config) {
+s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     BattleController *battle = (BattleController *)btlGetRuntime();
     MesWindowSet *work;
     KwlnTask *task;

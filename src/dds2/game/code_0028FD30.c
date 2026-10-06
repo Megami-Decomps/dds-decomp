@@ -169,7 +169,7 @@ s32 func_00290328(MenuPanelObject *object, MantraNodePos *list, s8 position) {
 
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 func_00290240(MenuPanelObject *, s8);
-extern MantraNodePos *func_002906E0(MenuPanelObject *, u16, s8);
+extern MantraNodePos *mnuResolveSpecialMantraNeighbor(MenuPanelObject *, u16, s8);
 typedef struct MantraNeighborIds {
     u16 id;
     u16 neighbors[6];
@@ -240,7 +240,7 @@ s32 mnuNavigateMantraSelector(MenuPanelObject *object, s8 flags) {
                     }
                     attempts++;
                     if (attempts == 2) {
-                        neighbor = func_002906E0(object, state->defaultSelector->selector.fields.index, position);
+                        neighbor = mnuResolveSpecialMantraNeighbor(object, state->defaultSelector->selector.fields.index, position);
                         if (neighbor != NULL) {
                             state->defaultSelector = neighbor;
                             if (state->navigationState == 0) {
@@ -274,7 +274,7 @@ extern const u16 D_004276A0[3][5];
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437940);
 
-MantraNodePos *func_002906E0(MenuPanelObject *object, u16 id, s8 direction) {
+MantraNodePos *mnuResolveSpecialMantraNeighbor(MenuPanelObject *object, u16 id, s8 direction) {
     s32 i;
     s8 activeFlags = 0;
     u16 bridgeIds[4] = {0x61, 0x62, 0x63, 0x64};

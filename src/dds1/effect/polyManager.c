@@ -159,7 +159,7 @@ typedef struct {
 
 void parReleaseCellSystem(PolyStrip *strip);
 void parPrependCellNode(PolyStrip *strip);
-void func_0015DAA0(PolyNode *obj);
+void polyUpdateBasicRingCells(PolyNode *obj);
 void func_0015DC70(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 void sdfReleaseChipBlock(void *arg);
@@ -210,7 +210,7 @@ void polyScaleTransformPair(f32 scale, PolyNode *obj) {
 }
 
 /* Fade active basic-ring cells, update their geometry, and restart or finish ages. */
-void func_0015DAA0(PolyNode *obj) {
+void polyUpdateBasicRingCells(PolyNode *obj) {
     u16 index;
     u16 completed;
     u16 count;
@@ -260,7 +260,7 @@ void func_0015DAA0(PolyNode *obj) {
 
 /* Run the shared finish step, then enqueue this node's cell system. */
 void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
-    func_0015DAA0(obj);
+    polyUpdateBasicRingCells(obj);
     parPrependCellNode(obj->strip);
 }
 
