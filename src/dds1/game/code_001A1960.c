@@ -2585,6 +2585,12 @@ typedef struct BtlResBlock {
     s32 unk1C;
 } BtlResBlock;
 extern BtlResBlock *btlResourceBlock;
+extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+extern const BattlePanelColors D_003A21B8;
 
 /* 0x2C-byte action record shared by the initializer, updater and renderer. */
 typedef struct BattleMirroredSpriteRecord {
@@ -2644,42 +2650,6 @@ void func_001AC398(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
         } while (remaining != 0);
     }
 }
-
-typedef struct BtlResBlock {
-    s32 unk0;
-    s32 nameA;
-    s32 nameB;
-    s32 nameC;
-    EffectSlotSet *resA;
-    EffectSlotSet *resB;
-    EffectSlotSet *resC;
-    s32 unk1C;
-} BtlResBlock;
-extern BtlResBlock *btlResourceBlock;
-extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
-
-typedef struct BattlePanelColors {
-    u32 values[4];
-} BattlePanelColors;
-extern const BattlePanelColors D_003A21B8;
-
-/* 0x2C-byte action record shared by the initializer, updater and renderer. */
-typedef struct BattleMirroredSpriteRecord {
-    s8 active;
-    u8 pad01;
-    s16 slot;
-    f32 scale;
-    s32 restoredWidth;
-    s32 restoredHeight;
-    s32 width;
-    s32 height;
-    s32 x;
-    s32 y;
-    s32 secondX;
-    s32 frame;
-    s8 alpha;
-    u8 pad29[3];
-} BattleMirroredSpriteRecord;
 
 void func_001AC4A8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
     BattlePanelColors colors = D_003A21B8;
