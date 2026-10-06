@@ -34,7 +34,7 @@ typedef struct SceneAiWork {
     u8 pad1D[0x43];
     s8 rowPhase[3];          /* 0x60: three independent row-animation states */
     u8 pad63[5];
-    f32 rowOffset[3];        /* 0x68: initialized to 80 for each row */
+    f32 rowScale[3];        /* 0x68: row size in percent, initialized to 80 */
     s32 rowPosition[3][2];   /* 0x74: XY outputs from the direction-step table */
     s32 rowStep[3];          /* 0x8C: bounded to 0..5 during row animation */
     s32 rowFade[3];          /* 0x98: initialized to 128 for each row */
