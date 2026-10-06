@@ -1,5 +1,7 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_draw.h"
+#include "dds3obj.h"
 #include "evt_world.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
@@ -85,7 +87,8 @@ typedef struct EventViewerState {
     s32 fallbackEntry;
     u8 pad2030[4];
     struct EvtViewTrack *tracks; /* 0x2034 */
-    u8 pad2038[0x200];
+    u8 pad2038[4];
+    struct EvtWorldLink *objects[127];
     s32 unk2238;
     struct {
         u16 id;
@@ -168,6 +171,8 @@ typedef struct EvtViewEntry {
     EvtViewParam p0C;
     EvtViewParam p10;
     EvtViewParam p14;
+    u8 pad18[0x14];
+    void *payload; /* 0x2C: effect-specific parameter block. */
 } EvtViewEntry;
 
 
@@ -209,7 +214,8 @@ typedef struct EvtViewTrack {
     } owner;                  /* 0x10: payload role is selected by kind */
     u8 pad14[8];
     s16 frameOffset; /* 0x1C: added to relative key frames. */
-    u8 pad1E[6];
+    s8 playbackTimeMode; /* 0x1E */
+    u8 pad1F[5];
     s32 unk24;
     s32 keyMode;              /* 0x28: mode 1 uses the viewer's pending key */
     f32 savedFirstVector[4]; /* 0x2C: restored when detaching a world object. */
@@ -877,7 +883,117 @@ EvtViewKey *evtViewerFindLatestMatchingGlyph(EvtViewTrack *group, s32 position, 
     return best;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FB30);
+typedef struct EvtViewerPlaybackData {
+    ObjBase *object;
+    void *counter;
+} EvtViewerPlaybackData;
+extern void sdfMotionSampleAtFrame(Motion *motion, f32 frame);
+extern void sdfMotionSuspend(Motion *motion);
+extern void sdfMotionResume(Motion *motion);
+extern void sdfFreezeFloatCounter(void *counter);
+extern void sdfUnfreezeFloatCounter(void *counter);
+extern ObjBase *dds3GetObjectOwnedHandle(void *object);
+extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 end);
+
+/* Apply the viewer playback mode to unit, motion and movie-object tracks. */
+void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
+    EventViewerState *viewer = (EventViewerState *)viewerAddr;
+    EvtWorldTable *table;
+    EvtWorldLink *object;
+    EvtViewTrack *track;
+    EvtViewTrack *found;
+    EvtViewKey *key;
+    Motion *motion;
+    void *counter;
+    void *movie;
+    s32 useTrackTime;
+
+    if (dds3GetWorldObject() == NULL) {
+        return;
+    }
+    table = ((EvtWorldObject *)dds3GetWorldObject())->table;
+    object = table->slots[5].head;
+    while (object != NULL) {
+        track = viewer->tracks;
+        found = NULL;
+        while (track != NULL) {
+            if (track->owner.handle == (u32)object) {
+                found = track;
+                break;
+            }
+            track = track->next;
+        }
+        if (found != NULL) {
+            func_0022EB10(frame, object, track, viewer, 1);
+        }
+        object = object->next;
+    }
+    object = table->slots[6].head;
+    while (object != NULL) {
+        motion = ((EvtViewerPlaybackData *)object->data)->object->unk38;
+        if (motion != NULL) {
+            if (mode == 0) {
+                sdfMotionSampleAtFrame(motion, (f32)frame);
+                sdfMotionSuspend(motion);
+            } else {
+                sdfMotionResume(motion);
+            }
+        }
+        object = object->next;
+    }
+    object = table->slots[3].head;
+    while (object != NULL) {
+        counter = ((EvtViewerPlaybackData *)object->data)->counter;
+        if (counter != NULL) {
+            if (mode == 0) {
+                sdfFreezeFloatCounter(counter);
+            } else {
+                sdfUnfreezeFloatCounter(counter);
+            }
+        }
+        object = object->next;
+    }
+    track = viewer->tracks;
+    while (track != NULL) {
+        switch (track->kind) {
+        case 3: case 18: case 20: case 21: case 26:
+            key = track->keys;
+            useTrackTime = 0;
+            while (key != NULL) {
+                switch (track->kind) {
+                case 3: case 26:
+                    useTrackTime = track->playbackTimeMode;
+                    /* These track kinds use the same indexed movie lookup. */
+                case 20: case 21:
+                    if (key->selector.kind < 0) {
+                        break;
+                    }
+                    object = viewer->objects[key->selector.kind];
+                    goto updateMovie;
+                case 18:
+                    object = ((EvtViewEntry *)key)->payload;
+                    useTrackTime = track->playbackTimeMode;
+updateMovie:
+                    if (object != NULL) {
+                        movie = dds3GetObjectOwnedHandle(object)->slots[1];
+                        if (movie != NULL) {
+                            if (useTrackTime == 0) {
+                                evtPolygonMovieScaleByProgress(movie, mode, key->frame, frame);
+                            } else {
+                                evtPolygonMovieScaleByProgress(movie, mode, 0, frame);
+                            }
+                        }
+                    }
+                    break;
+                }
+                key = key->next;
+            }
+            break;
+        }
+        track = track->next;
+    }
+}
+
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
 void evtViewerDispatchFlagMode(u32 viewerAddr) {
