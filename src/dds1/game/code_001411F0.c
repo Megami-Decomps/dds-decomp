@@ -1784,8 +1784,9 @@ void fldReleaseResourceHandles(void) {
 }
 
 typedef struct {
-    s32 unk0, unk4, unk8, unkC;
-    u8 pad10[0x10];
+    s32 unk0;
+    f32 unk4, unk8, unkC;
+    f32 unk10[4];
     s32 *unk20;
     u8 pad24[8];
     s32 unk2C, unk30, unk34, unk38;
@@ -1802,9 +1803,9 @@ void fldClearMenuEntries(void) {
 
     for (i = 0; i < 32; i++) {
         fldRoomEffectEntries[i].unk0 = 0;
-        fldRoomEffectEntries[i].unk4 = 0;
-        fldRoomEffectEntries[i].unk8 = 0;
-        fldRoomEffectEntries[i].unkC = 0;
+        fldRoomEffectEntries[i].unk4 = 0.0f;
+        fldRoomEffectEntries[i].unk8 = 0.0f;
+        fldRoomEffectEntries[i].unkC = 0.0f;
         fldRoomEffectEntries[i].unk20 = 0;
         fldRoomEffectEntries[i].unk2C = 0;
         fldRoomEffectEntries[i].unk30 = 0;
