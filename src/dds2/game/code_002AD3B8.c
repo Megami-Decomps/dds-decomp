@@ -501,13 +501,13 @@ s32 mnuStaffListInput(s32 task) {
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     MenuStaffWindow *window = menu->firstList->window;
-    s32 *cursor = window->cursor;
+    MenuStaffNode *cursor = window->cursor;
     s32 savedNodeIndex;
     s32 savedRowCount;
     s32 i;
 
     if (cursor != 0) {
-        savedNodeIndex = *cursor;
+        savedNodeIndex = cursor->index;
         savedRowCount = window->rowCount;
     } else {
         savedNodeIndex = 0;
@@ -662,13 +662,13 @@ s32 mnuHandleStaffSelectionListNavigation(s32 task) {
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     MenuStaffWindow *window = menu->secondList->window;
-    s32 *cursor = window->cursor;
+    MenuStaffNode *cursor = window->cursor;
     s32 savedNodeIndex;
     s32 savedRowCount;
     s32 i;
 
     if (cursor != 0) {
-        savedNodeIndex = *cursor;
+        savedNodeIndex = cursor->index;
         savedRowCount = window->rowCount;
     } else {
         savedNodeIndex = 0;
@@ -801,13 +801,13 @@ s32 mnuHandleStaffValuePageInput(s32 task) {
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     MenuStaffWindow *window = menu->thirdList->window;
-    s32 *cursor = window->cursor;
+    MenuStaffNode *cursor = window->cursor;
     s32 savedNodeIndex;
     s32 savedRowCount;
     s32 i;
 
     if (cursor != 0) {
-        savedNodeIndex = *cursor;
+        savedNodeIndex = cursor->index;
         savedRowCount = window->rowCount;
     } else {
         savedNodeIndex = 0;
