@@ -10496,30 +10496,22 @@ s32 effClassifyResourceMask(s32 mask) {
     }
 }
 
-typedef struct MnuValueRecord {
-    u32 value;
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    u8 pad10[4];
-} MnuValueRecord;
-
-void *mnuAllocateValueRecord(u32 value) {
-    u8 *record = (u8 *)sdfAllocSizeClassBlock(0x14);
-    memset(record, 0, 0x14);
-    ((MnuValueRecord *)record)->value = value;
-    ((MnuValueRecord *)record)->unk04 = 0;
-    ((MnuValueRecord *)record)->unk08 = 0;
-    ((MnuValueRecord *)record)->unk0C = 0;
-    return record;
+EffectList *mnuAllocateValueRecord(u32 mode) {
+    EffectList *list = sdfAllocSizeClassBlock(sizeof(EffectList));
+    memset(list, 0, sizeof(EffectList));
+    list->mode = mode;
+    list->count = 0;
+    list->first = NULL;
+    list->last = NULL;
+    return list;
 }
 
 void func_00303D58(void) {
     sdfReleaseChipBlock();
 }
 
-u32 mnuGetValueRecordOwner(u32 *value) {
-    return *value;
+u32 mnuGetValueRecordOwner(const EffectList *list) {
+    return list->mode;
 }
 
 typedef struct EffLoadedItem {
@@ -10535,22 +10527,6 @@ typedef struct EffRequest {
     EffLoadedItem *items; // 0x60
 } EffRequest;
 
-typedef struct EffectListNode {
-    u32 state;
-    struct EffectListNode *next;
-    u32 value;
-    u32 length;
-    u32 kind;
-    void **reference; // 0x14: where the loaded resource goes
-} EffectListNode;
-
-typedef struct EffectList {
-    u32 mode;
-    s32 count;
-    EffectListNode *first;
-    EffectListNode *last;
-    EffRequest *request;
-} EffectList;
 
 extern s32 fileRequestIsReady(void *);
 
