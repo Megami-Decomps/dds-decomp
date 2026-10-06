@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "dat_state.h"
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -8,7 +9,6 @@ extern void func_0026C900(void);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern s32 datGameState;
 
 extern char D_003CE848[];
 
@@ -27,11 +27,6 @@ typedef struct PartyFlagPair {
     s32 doneFlag;
 } PartyFlagPair;
 
-typedef struct PartySlotHeader {
-    u16 flags;
-    u16 pad02;
-    u16 unitId;
-} PartySlotHeader;
 
 /* Encoded name-table rows; keep byte storage and the retail table strides. */
 typedef struct DspUnitName {
@@ -58,7 +53,7 @@ extern void dspSetActive();
 s32 dspStartFlagEvent(s32 context) {
     s32 kind = *(s32 *)(context + 0x84);
     s32 i;
-    PartySlotHeader *slot;
+    DatPartyRecord *slot;
 
     if (kind < 2) {
         if (kind >= 0) {
@@ -81,7 +76,7 @@ s32 dspStartFlagEvent(s32 context) {
                 }
             }
             for (i = 0; i < 5; i++) {
-                slot = (PartySlotHeader *)(datGameState + i * 0x1C4 + 0xA60);
+                slot = &datGameState->party[i];
                 if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].needFlag) != 0
                     && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
@@ -224,12 +219,12 @@ u32 func_0026BC78(void) {
 
 /* Index (0-3) of the lowest main character present in the party, as a bit mask over unit ids 1, 2, 5 and 8; 0 when none. */
 s32 mnuFirstPresentMainCharacterIndex(void) {
-    PartySlotHeader *slot;
+    DatPartyRecord *slot;
     u32 present = 0;
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        slot = (PartySlotHeader *)(datGameState + i * 0x1C4 + 0xA60);
+        slot = &datGameState->party[i];
         if (slot->flags & 1) {
             switch (slot->unitId) {
             case 1:
