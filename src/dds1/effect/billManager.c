@@ -472,7 +472,72 @@ void billReleaseList(BillObj *obj) {
     sdfReleaseChipBlock(obj);
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00151398);
+/* Advance an entry's frame timer and apply its current record to the shared
+ * child payload. Plural descriptors are handled by the dispatcher instead. */
+BillChildPayload *func_00151398(BillObj *obj, BillOut *out) {
+    BillAnimationEntry *entry = out->entry;
+    BillData *data = obj->entryList;
+    BillRecord *record;
+    BillChildPayload *child;
+    s32 index;
+    u32 color;
+
+    if (entry->flags & 0x10000000) {
+        return NULL;
+    }
+    if (out->framesRemaining <= 0) {
+        out->frameIndex++;
+        if ((u32)out->frameIndex >= entry->frameCount) {
+            if (entry->flags & 0x10) {
+                obj->unk50 = 0;
+                out->frameIndex = entry->frameCount - 1;
+            } else {
+                out->frameIndex = 0;
+            }
+        }
+        out->framesRemaining = out->record[out->frameIndex].value;
+    } else {
+        out->framesRemaining--;
+    }
+    index = out->frameIndex;
+    record = out->record + index;
+    if (entry->flags & 1) {
+        color = ((u32 *)(data->base + entry->colorOffset))[index];
+    } else {
+        color = 0x80808080;
+    }
+    obj->childParam = color;
+    child = data->children[record->childIndex];
+    if (entry->flags & 2) {
+        obj->unk2E = 2;
+    } else if (entry->flags & 4) {
+        obj->unk2E = 3;
+    } else {
+        obj->unk2E = 1;
+    }
+    obj->lengthScale = record->scale;
+    child->uv.components[0] = record->u0;
+    child->uv.components[1] = record->v0;
+    child->uv.components[2] = record->u1;
+    child->uv.components[3] = record->v0;
+    child->uv.components[4] = record->u1;
+    child->uv.components[5] = record->v1;
+    child->uv.components[6] = record->u0;
+    child->uv.components[7] = record->v1;
+    {
+        f32 halfHeight = record->height * 0.5f;
+        f32 halfWidth = record->width * 0.5f;
+        f32 y = halfHeight - record->y;
+        f32 x = halfWidth - record->x;
+
+        child->halfHeight = halfHeight;
+        child->halfWidth = halfWidth;
+        child->y = y;
+        child->x = x;
+    }
+    return child;
+}
+
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
 u32 effBillModulateColors(u32 colorA, u32 colorB) {
