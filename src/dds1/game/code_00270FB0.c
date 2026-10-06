@@ -1,13 +1,14 @@
 #include "common.h"
 #include "dat_state.h"
 #include "mnu.h"
+#include "eff.h"
 
 typedef struct StaffMenuWork {
     u32 resource;
     u8 pad04[4];
     u8 panel[0x4C];
     u8 pad54[8];
-    void *valueRecord;
+    EffectList *resourceQueue;
     StaffSlots staffSlots;
     u32 categoryPair[2];
     u32 categoryGroup[4];
@@ -35,9 +36,11 @@ extern void mnuReleaseResourceList(u32);
 
 extern s32 kwlnFadeIsActive(void);
 
-extern u32 mnuGetValueRecordOwner(u32 *);
+extern u32 mnuGetValueRecordOwner(const EffectList *);
 
-extern u32 effAppendListEntry(u32 *, char *, u32, u32, u32 *);
+extern s32 effAppendListEntry(EffectList *, u32, u32, u32, u32);
+extern s32 effPollResourceList(EffectList *);
+extern void func_002BC618(EffectList *);
 
 extern u32 D_0037C248[][2];
 
@@ -298,20 +301,20 @@ void mnuInitializeStaffPageWindows(u32 container, StaffSlots *resources, u32 unu
  * Only owner word 1 selects the second column of each image table. */
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2058);
 
-void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
+void mnuAppendCampSpriteRequests(EffectList *resourceList, StaffSlots *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
 
     mnuResolveStaffImageHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_003B2020, D_0037C248[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->mainResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_003B2020, D_0037C248[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_003B2020, D_0037C2C8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->extraResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_003B2020, D_0037C2C8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_0037C2F0[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->pairResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", D_0037C2F0[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->pairResources[resourceIndex]);
     }
 }
 
@@ -332,12 +335,11 @@ void mnuReleaseStaffResourceGroups(StaffSlots *resources) {
 }
 
 
-/* Poll once, then return 1 only if every group contains nonzero handles.
- * DDS1 retains its no-argument poll call. */
-s32 mnuStaffSlotsAllFilled(s32 unused, StaffSlots *slots) {
+/* Poll once, then require nonzero handles in every resource bank. */
+s32 mnuStaffSlotsAllFilled(EffectList *resourceList, StaffSlots *slots) {
     s32 resourceIndex;
 
-    effPollResourceList();
+    effPollResourceList(resourceList);
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         if (slots->baseResources[resourceIndex] == 0) {
             return 0;
@@ -414,7 +416,7 @@ extern u8 *sdfResourceRetainAddress(u32);
 extern void *memset(void *, s32, u32);
 extern void mnuClearPanelTransitionState(s32);
 extern s8 dds3AdminReadPreviousSignedSample(void);
-extern void *mnuAllocateValueRecord(void *);
+extern EffectList *mnuAllocateValueRecord(u32);
 extern void mnuInitPartyPanelSlots(void *);
 extern void func_0027AD80(void *);
 extern void evtCreateMessageWindowIfMissing(s32);
@@ -424,7 +426,7 @@ extern void func_002717D8(void *);
 extern void mnuResetGradientFadeColor(void *, s32);
 extern void func_002E9708(void);
 
-/* Allocate and clear menu work, select its image-table owner word from the
+/* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
 StaffMenuWork *mnuCreateStaffCampWork(void) {
     u32 allocation = sdfAllocGeneralBlock(sizeof(StaffMenuWork));
@@ -433,11 +435,11 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     memset(menu, 0, sizeof(*menu));
     menu->resource = allocation;
     mnuClearPanelTransitionState((s32)menu->panel);
-    /* The opaque owner word selects the normal or alternate staff image table. */
+    /* Mode also selects the normal or alternate staff image table. */
     if (dds3AdminReadPreviousSignedSample() != 0) {
-        menu->valueRecord = mnuAllocateValueRecord((void *)1);
+        menu->resourceQueue = mnuAllocateValueRecord(1);
     } else {
-        menu->valueRecord = mnuAllocateValueRecord(NULL);
+        menu->resourceQueue = mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots(menu->partyPanel);
     func_0027AD80(menu->background);
@@ -470,7 +472,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuReleaseAssets(menu->background);
     mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
-    func_002BC618((u32)menu->valueRecord);
+    func_002BC618(menu->resourceQueue);
     sdfReleaseResourceAllocation(menu->resource);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_002E9730();
