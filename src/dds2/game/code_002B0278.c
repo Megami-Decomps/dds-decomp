@@ -2392,7 +2392,107 @@ s32 mnuListContainsFinalNode(MenuList *list) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B83A0);
+MenuListNode *mnuListAdvanceCursor(MenuList *, s32, s32);
+MenuListNode *mnuListRetreatCursor(MenuList *, s32, s32);
+
+/* Insert a node holding `value` before (or, with options & 2, after) anchor, keeping the visible window and
+ * cursor in place. */
+MenuListNode *func_002B83A0(MenuList *list, MenuListNode *anchor,
+                         s32 value, s32 mode, u32 options) {
+    MenuListNode *node;
+    MenuListNode *walk;
+
+    if (list->count == 0 || anchor == NULL || anchor == list->last) {
+        node = mnuListAppendNode(list, value);
+        if (list->windowOffset >= list->visibleCount - 1 && list->cursor != list->last) {
+            list->head = list->head->next;
+            list->cursor = list->cursor->next;
+            if (mode == -1) {
+                mnuListRetreatCursor(list, 0, 1);
+            }
+        } else if (mode == -2) {
+            mnuListAdvanceCursor(list, 0, 1);
+        }
+        return node;
+    }
+
+    node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
+    node->value = value;
+    if (options & 2) {
+        node->prev = anchor;
+        node->index = anchor->index;
+        node->next = anchor->next;
+        if (anchor->next != NULL) {
+            anchor->next->prev = node;
+        }
+        anchor->next = node;
+        walk = node;
+        do {
+            walk->index++;
+            walk = walk->next;
+        } while (walk != NULL);
+    } else {
+        node->prev = anchor->prev;
+        node->next = anchor;
+        node->index = anchor->index;
+        if (anchor->prev != NULL) {
+            anchor->prev->next = node;
+        }
+        anchor->prev = node;
+        if (anchor == list->first) {
+            list->first = node;
+            if (list->cursor == list->head || list->count < list->visibleCount) {
+                list->head = node;
+            }
+        }
+        walk = anchor;
+        while (walk != NULL) {
+            walk->index++;
+            walk = walk->next;
+        }
+    }
+    list->count++;
+    if (node->index >= list->head->index && node->index < list->cursor->index) {
+        list->cursor = list->cursor->prev;
+        if (list->first == list->head) {
+            if (mode >= 0 || mode == -2) {
+                if (list->count >= list->visibleCount + 1 &&
+                    list->cursor->index - list->head->index == list->visibleCount - 1) {
+                    list->head = list->head->next;
+                    list->cursor = list->cursor->next;
+                } else if (mode == -2) {
+                    mnuListAdvanceCursor(list, 0, 1);
+                }
+            } else {
+                if (list->count >= list->visibleCount + 1 &&
+                    list->cursor->index - list->head->index == list->visibleCount - 1) {
+                    list->head = list->head->next;
+                    list->cursor = list->cursor->next;
+                } else {
+                    mnuListAdvanceCursor(list, 0, 1);
+                }
+            }
+        } else {
+            if (mnuListContainsFinalNode(list)) {
+                if (mode < 0 && mode != -2) {
+                    list->head = list->head->next;
+                }
+            } else {
+                if (mode >= 0 || mode == -2) {
+                    if (mode == -2) {
+                        list->head = list->head->next;
+                        list->cursor = list->cursor->next;
+                    }
+                } else {
+                    list->head = list->head->next;
+                    list->cursor = list->cursor->next;
+                }
+            }
+        }
+    }
+    mnuUpdateListScrollFlags(list);
+    return node;
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B86E8);
 
@@ -2711,7 +2811,7 @@ void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second,
 void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window);
 
 
-void func_002B9708(MenuWindowContainer *menu);
+MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, s32 value, s32 mode, u32 options);
 
 void func_002B9720(MenuWindowContainer *menu);
 
