@@ -83,11 +83,24 @@ typedef struct SdfModel {
 typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
 
 
+/* Serialized clip duration/reserved remain halfwords (tools/fld.py).
+ * The viewer MAXFRAME diagnostic reads their packed little-endian word. */
 typedef struct MotionEntry {
-    u16 frameCount;
-    u16 unk02;
+    union {
+        struct {
+            u16 frameCount;
+            u16 unk02;
+        };
+        u32 packedHeader;
+    };
     u32 bindingData[1];
 } MotionEntry;
+typedef char MotionEntry_header_at_0[((u32)&((MotionEntry *)0)->packedHeader == 0) ? 1 : -1];
+typedef char MotionEntry_frameCount_at_0[((u32)&((MotionEntry *)0)->frameCount == 0) ? 1 : -1];
+typedef char MotionEntry_reserved_at_2[((u32)&((MotionEntry *)0)->unk02 == 2) ? 1 : -1];
+typedef char MotionEntry_binding_at_4[((u32)&((MotionEntry *)0)->bindingData == 4) ? 1 : -1];
+typedef char MotionEntry_header_extent[(sizeof(((MotionEntry *)0)->packedHeader) == 4) ? 1 : -1];
+typedef char MotionEntry_size_must_be_8[(sizeof(MotionEntry) == 8) ? 1 : -1];
 
 typedef struct SdfMotionCommand {
     u32 command;

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_world.h"
+#include "eff_object.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
@@ -1325,27 +1326,7 @@ typedef union EvtMotionValue {
     EvtMotionBits bits;
 } EvtMotionValue;
 
-typedef struct EvtModelRef {
-    u8 pad00[0xC];
-    s32 handle; /* 0xC */
-} EvtModelRef;
-
-typedef struct EvtModelSlot {
-    u8 pad00[0xC];
-    EvtModelRef *ref; /* 0xC */
-} EvtModelSlot;
-
-typedef struct EvtMotionData {
-    u8 pad00[4];
-    s32 **frames; /* 0x4 */
-} EvtMotionData;
-
-typedef struct EvtMotionNode {
-    u8 pad00[8];
-    EvtMotionData *data; /* 0x8 */
-} EvtMotionNode;
-
-extern EvtMotionNode *mdlFindNodeById(s32 model, s32 index);
+extern Motion *mdlFindNodeById(MdlCtx *model, s32 index);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00239E30);
 
@@ -1354,12 +1335,12 @@ extern void func_00239E30();
 /* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
 s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
-    s32 model;
+    MdlCtx *model;
     s32 count;
     EvtMotionValue packed;
 
     list = sdfCreateResetPacketList();
-    model = ((EvtModelSlot *)ctx->frameGroup->info->data)->ref->handle;
+    model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     func_00235598(list, x, y, 0x14, 0xA, 0, 1, (u8 *)ctx, mnuDrawMotionChangeLabel, func_00239E30);
     kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, (void *)list);
     if (ctx->actionMode != 0x10) {
@@ -1441,7 +1422,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     }
     ctx->value = packed.word;
-    if (D_00324510[0x21] < 0 && mdlFindNodeById(model, packed.bits.group)->data->frames[packed.bits.motion] != NULL) {
+    if (D_00324510[0x21] < 0 && mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
         return 1;
     }
     return D_00324510[0x23] >= 0 ? 0 : -1;

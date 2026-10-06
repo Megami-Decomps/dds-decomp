@@ -1,5 +1,5 @@
 #include "common.h"
-#include "dds3obj.h"
+#include "eff_object.h"
 
 
 u32 dds3GetCameraMode(CameraObject *camera) {
@@ -12,8 +12,8 @@ void dds3SetCameraMode(CameraObject *camera, s32 mode) {
     }
 }
 
-u32 func_00113008(CameraObject *camera) {
-    return camera->data->matrix[0][3];
+ObjBase *func_00113008(NodeA *object) {
+    return ((EffectObjectData *)object->payload)->modelHolder;
 }
 
 typedef struct CameraSlotState {
