@@ -25,26 +25,11 @@
 #define DAT_QUARTER_PERCENT 25
 #define DAT_CURRENCY_MAX 0x98967F
 
-typedef struct DatSkillOwner {
-    u16 flags;        /* 0x00: 0x20 selects the external skill table */
-    u16 unk2;
-    u16 skillTableIndex; /* 0x04: index used when the external-table flag is set */
-    u8 unk6[0x1C];
-    u16 skills[DAT_INLINE_SKILL_COUNT]; /* 0x22 */
-} DatSkillOwner;
 
-extern s32 ptyComputeMaxHp(s32 unit);
-extern s32 ptyComputeMaxMp(s32 unit);
-extern s32 datUnitHasSkill(struct DatSkillOwner *unit, s32 skillId);
+extern s32 ptyComputeMaxHp(DatPartyRecord *unit);
+extern s32 ptyComputeMaxMp(DatPartyRecord *unit);
+extern s32 datUnitHasSkill(DatPartyRecord *unit, s32 skillId);
 
-/* Current/maximum HP and MP halfwords. Legacy type name retained here. */
-typedef struct DatCalcCursor {
-    u8 unk0[6]; /* 0x0 */
-    u16 hp;      /* 0x6 */
-    u16 maxHp;   /* 0x8 */
-    u16 mp;      /* 0xA */
-    u16 maxMp;   /* 0xC */
-} DatCalcCursor;
 
 typedef struct UiObject {
     u8 unk_00[0x110];
@@ -57,17 +42,16 @@ typedef struct UiObject {
     u16 statusFlags;
 } UiObject;
 
-/* Clear the requested bits of the halfword status without touching other bytes.
- * Keep the existing raw access and compound-assignment narrowing. */
-void datClearUnitStatusBits(u8 *work, s32 mask) {
-    *(u16 *)(work + 0xE) &= ~mask;
+/* Clear only the requested bits of the unit's halfword status. */
+void datClearUnitStatusBits(DatPartyRecord *work, s32 mask) {
+    work->status &= ~mask;
 }
 
 /* Add each owned HP bonus separately against the original maximum, truncating
  * each unsigned percentage independently. Only inline-skill units cap at 999. */
-u32 datComputeSkillBoostedMaxHp(DatSkillOwner *unit) {
+u32 datComputeSkillBoostedMaxHp(DatPartyRecord *unit) {
     u32 bonusHp = 0;
-    u32 maxHp = ptyComputeMaxHp((s32)unit);
+    u32 maxHp = ptyComputeMaxHp(unit);
 
     if (datUnitHasSkill(unit, DAT_SKILL_HP_BONUS_SMALL)) {
         bonusHp = maxHp * DAT_BONUS_SMALL_PERCENT / DAT_PERCENT_SCALE;
@@ -86,9 +70,9 @@ u32 datComputeSkillBoostedMaxHp(DatSkillOwner *unit) {
 }
 
 /* MP bonuses have the same independent truncation and conditional cap as HP. */
-u32 datComputeSkillBoostedMaxMp(DatSkillOwner *unit) {
+u32 datComputeSkillBoostedMaxMp(DatPartyRecord *unit) {
     u32 bonusMp = 0;
-    u32 maxMp = ptyComputeMaxMp((s32)unit);
+    u32 maxMp = ptyComputeMaxMp(unit);
 
     if (datUnitHasSkill(unit, DAT_SKILL_MP_BONUS_SMALL)) {
         bonusMp = maxMp * DAT_BONUS_SMALL_PERCENT / DAT_PERCENT_SCALE;
@@ -108,7 +92,7 @@ u32 datComputeSkillBoostedMaxMp(DatSkillOwner *unit) {
 
 /* Add delta to current HP, then clamp to 0..maxHp. Preserve unsigned
  * addition, signed comparisons and the final s16 cast. */
-void datAdjustCurrentHp(DatCalcCursor *unit, s32 delta) {
+void datAdjustCurrentHp(DatPartyRecord *unit, s32 delta) {
     u32 currentHp;
 
     currentHp = (u32)unit->hp + delta;
@@ -122,7 +106,7 @@ void datAdjustCurrentHp(DatCalcCursor *unit, s32 delta) {
 }
 
 /* Add delta to current MP and clamp with the same integer/cast rules as HP. */
-void datAdjustCurrentMp(DatCalcCursor *unit, s32 delta) {
+void datAdjustCurrentMp(DatPartyRecord *unit, s32 delta) {
     u32 currentMp;
 
     currentMp = (u32)unit->mp + delta;
@@ -135,27 +119,15 @@ void datAdjustCurrentMp(DatCalcCursor *unit, s32 delta) {
     unit->mp = (s16)currentMp;
 }
 
-extern s8 ptyGetCurrentProfileId(u8 *unit);
-extern s32 func_002CDDB0(u16 profileId, s32 statIndex);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *unit);
+extern u32 func_002CDDB0(u16 profileId, s32 statIndex);
 
-typedef struct DatUnitStatus {
-    u16 flags;
-    u16 affinityTableIndex;
-    u16 unitId;
-    u16 hp;
-    u16 maxHp;
-    u16 mp;
-    u16 maxMp;
-    u16 status;          /* 0x0E */
-    u8 pad10[6];
-    s8 statValues[0x100];
-} DatUnitStatus;
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
  * the existing signed result to 1..99. Stat index is not checked here. */
-s32 datGetClampedProfileAdjustedStat(DatUnitStatus *unit, s32 statIndex) {
-    s32 adjustedStat = unit->statValues[statIndex] +
-                func_002CDDB0((u16)ptyGetCurrentProfileId((u8 *)unit), statIndex);
+s32 datGetClampedProfileAdjustedStat(DatPartyRecord *unit, s32 statIndex) {
+    s32 adjustedStat = unit->baseStats[statIndex] +
+                func_002CDDB0(ptyGetCurrentProfileId(unit), statIndex);
 
     if (adjustedStat <= 0) {
         adjustedStat = 1;
@@ -166,7 +138,7 @@ s32 datGetClampedProfileAdjustedStat(DatUnitStatus *unit, s32 statIndex) {
 
 /* Only an exact masked status of 0x1000 forces one; combinations of low
  * status bits do not take this path. Otherwise use the profile-adjusted stat. */
-s32 datGetStatWithStatusOverride(DatUnitStatus *unit, s32 statIndex) {
+s32 datGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
     if ((unit->status & DAT_STATUS_VALUE_MASK) == DAT_STATUS_STAT_OVERRIDE) {
         return 1;
     }
@@ -186,18 +158,18 @@ extern DatPartyMember *datEnemyRecords;
 
 /* Search 24 inline skill IDs or eight IDs in the selected external record.
  * Return on the first match; no record-index or pointer validation here. */
-s32 datUnitHasSkill(DatSkillOwner *unit, s32 skillId) {
+s32 datUnitHasSkill(DatPartyRecord *unit, s32 skillId) {
     s32 skillIndex;
 
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         for (skillIndex = 0; skillIndex < DAT_INLINE_SKILL_COUNT; skillIndex++) {
-            if (unit->skills[skillIndex] == skillId) {
+            if (unit->effectData[skillIndex] == skillId) {
                 return 1;
             }
         }
     } else {
         for (skillIndex = 0; skillIndex < DAT_TABLE_SKILL_COUNT; skillIndex++) {
-            if (datEnemyRecords[unit->skillTableIndex].skills[skillIndex] == skillId) {
+            if (datEnemyRecords[unit->unitId].skills[skillIndex] == skillId) {
                 return 1;
             }
         }
@@ -208,7 +180,7 @@ s32 datUnitHasSkill(DatSkillOwner *unit, s32 skillId) {
 /* Unless a skip-status bit is set, adjust only the low 16 bits by exact masked
  * status: 8/0x100 floor at 200, 2 at 150, 1 at 300, and 4 forces one.
  * High bits are retained; combined or unlisted statuses leave the value alone. */
-s32 datRaiseCalculatedValueFloor(DatUnitStatus *unit, s32 packedValue) {
+s32 datRaiseCalculatedValueFloor(DatPartyRecord *unit, s32 packedValue) {
     if ((packedValue & DAT_CALC_SKIP_STATUS_MASK) == 0) {
         switch (unit->status & DAT_STATUS_VALUE_MASK) {
         case 8:
@@ -239,7 +211,7 @@ extern s32 *D_003BAA08;
 extern s32 *D_003BAA0C;
 extern s32 *D_003BAA2C;
 
-s32 datGetEffectiveAffinity(DatUnitStatus *unit, s32 element) {
+s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     s32 value;
     u16 unitId;
 
@@ -291,11 +263,11 @@ s32 datGetEffectiveAffinity(DatUnitStatus *unit, s32 element) {
     return value;
 }
 
-u32 datReadLowHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
+u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *unit, s32 element) {
     return (u16)datGetEffectiveAffinity(unit, element);
 }
 
-u32 datReadHighHalfOfCalculatedValue(DatUnitStatus *unit, s32 element) {
+u32 datReadHighHalfOfCalculatedValue(DatPartyRecord *unit, s32 element) {
     return datGetEffectiveAffinity(unit, element) & DAT_CALC_HIGH_MASK;
 }
 
@@ -355,7 +327,7 @@ s32 datFlagToElementIndex(s32 flag) {
 }
 
 /* Test the truncated current-HP percentage; maximum HP must be nonzero. */
-s32 datIsValueBelowQuarterMax(DatCalcCursor *object) {
+s32 datIsValueBelowQuarterMax(DatPartyRecord *object) {
     return object->hp * DAT_PERCENT_SCALE / object->maxHp < DAT_QUARTER_PERCENT;
 }
 

@@ -63,7 +63,7 @@ extern void func_003425B0(void);
 
 
 
-extern void scrClearPackedScriptFlags(void *);
+extern void scrClearPackedScriptFlags(DatPartyRecord *);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern void mnuClearEntryBlocked(s32);

@@ -173,12 +173,12 @@ void mtrMantraEventBitPop(s32 arg) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 
-extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
+extern void scrSetEntryLowFlags(DatPartyRecord *context, u16 entryId, u16 lowFlags);
 void mtrMantraBitResetUnit(DatPartyRecord *record) {
     s32 i;
 
     for (i = 0; i < 0xB0; i++) {
-        scrSetEntryLowFlags((u32)record, i, 0);
+        scrSetEntryLowFlags(record, i, 0);
     }
     evtPrintDeveloperConsoleMessage(
         "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n", record->unitId);

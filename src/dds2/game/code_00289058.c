@@ -4,8 +4,8 @@
 
 extern s32 func_0028A018(s32);
 extern s32 scrGetEntryRequirementFlags(u16);
-extern s32 func_00314990(s32, u16);
-extern s32 scrGetSelectedScriptEntryId(s32);
+extern s32 func_00314990(DatPartyRecord *, u16);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern s32 mnuGetMantraNodePositionRecord(s32);
 extern void func_0028D070(s32, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(void);
@@ -173,7 +173,7 @@ s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *object, s8 target) {
 
 /* Script entry IDs are signed 16-bit indices into the position table. */
 static inline EvtMantraNodePositionRecord *mnuFindNodePosition(u32 value) {
-    s16 id = scrGetSelectedScriptEntryId(value);
+    s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)value);
     return (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(id);
 }
 
@@ -241,9 +241,9 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_00289928);
 
 
 void mnuUpdateSelectedMantraResourceId(s32 object) {
-    s32 state = object + 0x240;
-    s16 id = scrGetSelectedScriptEntryId(((MenuContainer *)object)->list->cursor->unk70);
-    ((MantraMenuWork *)state)->resourceId = mnuGetMantraNodePositionRecord(id);
+    MantraMenuWork *state = &((MenuContainer *)object)->work;
+    s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)((MenuContainer *)object)->list->cursor->unk70);
+    state->resourceId = mnuGetMantraNodePositionRecord(id);
     func_0028D070(object, 5, 0);
 }
 
@@ -292,12 +292,12 @@ void mnuCleanupMantraVisualsAndResetTitleStream(void) {
     mnuResetTitleStreamLocked();
 }
 
-s32 mnuCheckRequiredMantraEntries(s32 object) {
+s32 mnuCheckRequiredMantraEntries(DatPartyRecord *unit) {
     s32 index;
     for (index = 1; index < 0xb0; index++) {
         u16 id = index;
         if ((scrGetEntryRequirementFlags(id) & 1) == 0 &&
-            func_00314990(object, id) == 0) {
+            func_00314990(unit, id) == 0) {
             return 0;
         }
     }
@@ -411,7 +411,7 @@ typedef struct MantraFlagResource {
 } MantraFlagResource;
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern s32 func_00315C68(s32, s32, u32, u16, s32);
+extern s32 func_00315C68(s32, s32, DatPartyRecord *, u16, s32);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D070);
 
@@ -431,9 +431,9 @@ void func_0028DFA0(s32 object) {
     u32 *resourceSlot;
 
     if (node != 0) {
-        resourceSlot = ((MantraMenuWork *)(object + 0x240))->spriteHandles;
+        resourceSlot = ((MenuContainer *)object)->work.spriteHandles;
         do {
-            u32 value = node->unk70;
+            DatPartyRecord *unit = (DatPartyRecord *)node->unk70;
             EvtMantraNodePositionRecord *record =
                 (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(0);
             u16 *flag = ((MantraFlagResource *)*resourceSlot)->flags;
@@ -447,7 +447,7 @@ void func_0028DFA0(s32 object) {
                     if (record->kind == 2) {
                         *flag = (*flag & 0xFFF0) | 2;
                     } else {
-                        if (func_00315C68(1, 2, value, record->id, 0)) {
+                        if (func_00315C68(1, 2, unit, record->id, 0)) {
                             *flag = (*flag & 0xFFF0) | 1;
                         } else {
                             *flag = (*flag & 0xFFF0) | 2;
