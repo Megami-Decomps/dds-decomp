@@ -1,6 +1,7 @@
 #include "common.h"
+#include "eff.h"
+#include "mnu_fade.h"
 
-extern u32 itfFadeTint;
 
 extern void (*sdfTickCallback)(void);
 
@@ -9,26 +10,8 @@ extern void (*sdfTickCallback)(void);
 #define FADE_MODE_OUT 0
 #define FADE_MODE_IN 1
 
-typedef struct FadeOffset {
-    s32 unused;
-    s32 x;
-    s32 y;
-} FadeOffset;
 
-typedef struct FadeEntry {
-    s32 mode;
-    s32 step;
-    s32 queuedMode; /* zero = no transition; otherwise stores mode + 1 */
-    s32 queuedStep;
-    s32 delay;
-    s32 extent;
-    s32 displayValue; /* decimal number or atlas/glyph selection, depending on callback */
-    s32 parameter;
-    s32 secondaryParameter;
-} FadeEntry;
-extern const FadeOffset D_0040B088[];
-extern s32 mnuGetIndexedFadeTexture(s32 index);
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 /* Draw the indexed glyph at its per-glyph origin with the current tint. */
 void mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 extent, s32 index, s32 effect) {
@@ -38,7 +21,7 @@ void mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 extent, s32 index, s32 effect) {
                          0, extent * 2, 0, itfFadeTint, texture, effect);
 }
 
-void itfFadeSetTint(u32 tint) {
+void itfFadeSetTint(EffectSlotSet *tint) {
     itfFadeTint = tint;
 }
 
@@ -75,9 +58,7 @@ u32 itfGetFadeExtent(FadeEntry *entry) {
     return entry->extent;
 }
 
-/* K&R signature retained: matched drawing callbacks omit the argument. */
-s32 itfIsFadeActive(entry)
-    FadeEntry *entry;
+s32 itfIsFadeActive(FadeEntry *entry)
 {
     if (entry->extent == 0) {
         if (entry->mode == 0) {
@@ -121,7 +102,7 @@ void itfUpdateFade(FadeEntry *entry) {
 void itfDrawFadeGlyphStrip(FadeEntry *entry) {
     s64 active;
 
-    active = itfIsFadeActive();
+    active = itfIsFadeActive(entry);
     if (active != 0) {
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 7, 0x54);
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 8, 0x54);
@@ -151,63 +132,63 @@ void itfDrawEightDigitFadeValue(s32 x, s32 y, s32 extent, u32 value) {
     }
 }
 
-void func_0031E7C8(FadeEntry *entry, u32 displayValue) {
+void func_0031E7C8(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
-void itfDrawLowerFadeGlyphPair(FadeEntry *entry) {
+void itfDrawLowerFadeGlyphPair(FadeNumber *entry) {
     s64 active;
 
-    active = itfIsFadeActive();
+    active = itfIsFadeActive(&entry->fade);
     if (active != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 3, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 2, 0x54);
-        itfDrawEightDigitFadeValue(0xe0, 0x2a8, entry->extent, entry->displayValue);
-        itfUpdateFade(entry);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 3, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 2, 0x54);
+        itfDrawEightDigitFadeValue(0xe0, 0x2a8, entry->fade.extent, entry->displayValue);
+        itfUpdateFade(&entry->fade);
         return;
     }
 }
 
-void func_0031E850(FadeEntry *entry, u32 displayValue) {
+void func_0031E850(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
-void itfDrawUpperFadeGlyphPair(FadeEntry *entry) {
+void itfDrawUpperFadeGlyphPair(FadeNumber *entry) {
     s64 active;
 
-    active = itfIsFadeActive();
+    active = itfIsFadeActive(&entry->fade);
     if (active != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 1, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0, 0x54);
-        itfDrawEightDigitFadeValue(0xe0, 0x118, entry->extent, entry->displayValue);
-        itfUpdateFade(entry);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 1, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0, 0x54);
+        itfDrawEightDigitFadeValue(0xe0, 0x118, entry->fade.extent, entry->displayValue);
+        itfUpdateFade(&entry->fade);
         return;
     }
 }
 
-void itfSetFadeParameter(FadeEntry *entry, u32 parameter) {
+void itfSetFadeParameter(FadeGauge *entry, u32 parameter) {
     entry->parameter = parameter;
 }
 
-void itfSetFadeSecondaryParameter(FadeEntry *entry, u32 parameter) {
+void itfSetFadeSecondaryParameter(FadeGauge *entry, u32 parameter) {
     entry->secondaryParameter = parameter;
 }
 
-void func_0031E8E8(FadeEntry *entry, u32 displayValue) {
+void func_0031E8E8(FadeGauge *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E8F0);
 
-void func_0031ED68(FadeEntry *entry, u32 displayValue) {
+void func_0031ED68(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
 /* Clamp the selected atlas row and draw the three-part fade. */
-void mnuDrawFadeSequenceThree(FadeEntry *entry) {
-    if (itfIsFadeActive() != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1b, 0x54);
+void mnuDrawFadeSequenceThree(FadeNumber *entry) {
+    if (itfIsFadeActive(&entry->fade) != 0) {
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x1a, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x1b, 0x54);
         {
             s32 rowIndex = entry->displayValue;
             if (rowIndex < 0) {
@@ -218,21 +199,21 @@ void mnuDrawFadeSequenceThree(FadeEntry *entry) {
                 entry->displayValue = 2;
                 rowIndex = 2;
             }
-            mnuDrawIndexedFadeGlyph(0, rowIndex * 144, entry->extent, 0x1d, 0x54);
+            mnuDrawIndexedFadeGlyph(0, rowIndex * 144, entry->fade.extent, 0x1d, 0x54);
         }
-        itfUpdateFade(entry);
+        itfUpdateFade(&entry->fade);
     }
 }
 
-void func_0031EE28(FadeEntry *entry, u32 displayValue) {
+void func_0031EE28(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
 /* Clamp the selected atlas row and draw the alternate three-part fade. */
-void mnuDrawFadeSequenceTwo(FadeEntry *entry) {
-    if (itfIsFadeActive() != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1c, 0x54);
+void mnuDrawFadeSequenceTwo(FadeNumber *entry) {
+    if (itfIsFadeActive(&entry->fade) != 0) {
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x1a, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x1c, 0x54);
         {
             s32 rowIndex = entry->displayValue;
             if (rowIndex < 0) {
@@ -243,21 +224,21 @@ void mnuDrawFadeSequenceTwo(FadeEntry *entry) {
                 entry->displayValue = 1;
                 rowIndex = 1;
             }
-            mnuDrawIndexedFadeGlyph(0, rowIndex * 144, entry->extent, 0x1d, 0x54);
+            mnuDrawIndexedFadeGlyph(0, rowIndex * 144, entry->fade.extent, 0x1d, 0x54);
         }
-        itfUpdateFade(entry);
+        itfUpdateFade(&entry->fade);
     }
 }
 
-void func_0031EEE8(FadeEntry *entry, u32 displayValue) {
+void func_0031EEE8(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
 /* Draw the offset glyph sequence, clamping its selector to the valid 1..3 range. */
-void mnuDrawFadeSequenceOffset(FadeEntry *entry) {
-    if (itfIsFadeActive() != 0) {
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1e, 0x54);
+void mnuDrawFadeSequenceOffset(FadeNumber *entry) {
+    if (itfIsFadeActive(&entry->fade) != 0) {
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x1a, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x1e, 0x54);
         {
             s32 glyphOffset = entry->displayValue;
             if (glyphOffset <= 0) {
@@ -268,17 +249,17 @@ void mnuDrawFadeSequenceOffset(FadeEntry *entry) {
                 entry->displayValue = 3;
                 glyphOffset = 3;
             }
-            mnuDrawIndexedFadeGlyph(0, 0, entry->extent, glyphOffset + 0x1e, 0x54);
+            mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, glyphOffset + 0x1e, 0x54);
         }
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x22, 0x54);
-        itfUpdateFade(entry);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x22, 0x54);
+        itfUpdateFade(&entry->fade);
     }
 }
 
 void itfDrawFadeGlyphTriplet(FadeEntry *entry) {
     s64 active;
 
-    active = itfIsFadeActive();
+    active = itfIsFadeActive(entry);
     if (active != 0) {
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x1a, 0x54);
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 0x23, 0x54);
@@ -288,30 +269,30 @@ void itfDrawFadeGlyphTriplet(FadeEntry *entry) {
     }
 }
 
-void func_0031F040(FadeEntry *entry, u32 displayValue) {
+void func_0031F040(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
 /* Select optional glyphs from the display value; every choice advances the fade. */
-void itfDrawFadeGlyphForFrame(FadeEntry *entry) {
+void itfDrawFadeGlyphForFrame(FadeNumber *entry) {
     s64 active;
 
-    active = itfIsFadeActive();
+    active = itfIsFadeActive(&entry->fade);
     if (active == 0) {
         return;
     }
-    mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 6, 0x54);
+    mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 6, 0x54);
     switch (entry->displayValue) {
     case 2:
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 5, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 5, 0x54);
         /* fall through */
     case 1:
-        mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 4, 0x54);
+        mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 4, 0x54);
         break;
     default:
         break;
     }
-    itfUpdateFade(entry);
+    itfUpdateFade(&entry->fade);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0031E430", itfFadeTint);
