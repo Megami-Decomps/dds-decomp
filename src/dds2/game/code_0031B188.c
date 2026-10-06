@@ -62,32 +62,6 @@ typedef struct FileQueue {
 
 extern FileQueue *fileCloneQueueEntries(FileQueue *queue);
 
-typedef struct MnuEffectPositionStep {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} MnuEffectPositionStep;
-
-typedef struct MnuEffectRecord {
-    FileQueue *queue;
-    u32 flags;
-    s32 delay;
-    u32 unkC;
-    MnuEffectPositionStep positionStep;
-} MnuEffectRecord;
-
-typedef struct MnuEffectList {
-    MnuEffectRecord *records;
-    s32 count;
-} MnuEffectList;
-
-typedef struct MnuEffectWork {
-    u32 handle;
-    s32 count;
-    MnuEffectList *lists;
-    u32 unkC;
-} MnuEffectWork;
 
 typedef struct SdfMat4 {
     f32 m[16];
@@ -381,9 +355,9 @@ extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 extern void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle);
 
 /* Position-step vectors are copied verbatim; a missing queue aborts the claim. */
-s32 mnuClaimPositionedEffectRecord(void *listAddress, void *stepAddress, s32 delay,
+MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *list,
+                  MnuEffectPositionStep *step, s32 delay,
                   f32 x, f32 y, f32 z, f32 scale) {
-    MnuEffectList *list = (MnuEffectList *)listAddress;
     f32 position[4];
     MnuEffectRecord *record;
     s32 index = 0;
@@ -402,17 +376,17 @@ s32 mnuClaimPositionedEffectRecord(void *listAddress, void *stepAddress, s32 del
                 fileQueueSetScale(record->queue, scale);
                 func_0031BC10(record, 10.0f, 0.0f, 0.0f);
                 record->flags |= 1;
-                if (stepAddress != NULL) {
-                    record->positionStep = *(MnuEffectPositionStep *)stepAddress;
+                if (step != NULL) {
+                    record->positionStep = *step;
                 }
                 record->delay = delay;
                 record->flags = (record->flags | 0x200) & ~0x800;
-                return (s32)record;
+                return record;
             }
-            return 0;
+            return NULL;
         }
     }
-    return 0;
+    return NULL;
 }
 
 MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *list, s32 delay, f32 x, f32 y, f32 z) {

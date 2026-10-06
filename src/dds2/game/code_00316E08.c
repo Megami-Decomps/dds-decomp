@@ -7,25 +7,6 @@
 
 
 
-/* Same effect-list layout produced by mnuCreateEffectWork in code_0031B188. */
-typedef struct MnuEffectList {
-    u8 *records;
-    s32 count;
-} MnuEffectList;
-
-typedef struct MnuEffectWork {
-    u32 handle;
-    s32 count;
-    MnuEffectList *lists;
-    u32 unkC;
-} MnuEffectWork;
-
-/* Effect records have a 0x20-byte stride; bit 0 marks an occupied record. */
-typedef struct MnuEffectRecord {
-    u8 pad00[4];
-    u32 flags;
-    u8 pad08[0x18];
-} MnuEffectRecord;
 
 
 /* The record payload follows this complete 0x10-byte descriptor. */
@@ -57,7 +38,7 @@ extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void mnuDestroyAllModelNodeContexts(MnuNodeList *);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
-extern s32 mnuClaimPositionedEffectRecord(void *, void *, s32, f32, f32, f32, f32);
+extern void fileQueueSetPosition(struct FileQueue *, void *);
 extern void func_00319FF0(void);
 
 typedef struct SoundSlot SoundSlot;
@@ -410,12 +391,26 @@ void func_00319F48(void) {
     value = mnuEvaluateTimedValue(&D_0040ABF8);
     func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
     lists = D_0043891C->effectWork->lists;
-    D_00438930 = (MnuEffectRecord *)mnuClaimPositionedEffectRecord(lists + 2, NULL, 0,
+    D_00438930 = mnuClaimPositionedEffectRecord(lists + 2, NULL, 0,
                                                position[0], position[1], position[2], 0.5f);
     func_00319FF0();
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00319FF0);
+void func_00319FF0(void) {
+    MenuProgressParameters *origin;
+    s32 y, x;
+    f32 value;
+    f32 position[4];
+
+    if (D_00438930 != NULL && (D_00438930->flags & 0x801) == 1) {
+        origin = mnuGetResourceProgressParameters();
+        x = origin->x;
+        y = origin->y;
+        value = mnuEvaluateTimedValue(&D_0040ABF8);
+        func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
+        fileQueueSetPosition(D_00438930->queue, position);
+    }
+}
 
 /* Mark the occupied record with flag 0x800; the flag's meaning is unresolved. */
 void func_0031A090(void) {

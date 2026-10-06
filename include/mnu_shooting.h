@@ -7,7 +7,7 @@
 struct SdfMemBlock;
 struct MnuSectionObjectList;
 struct MdlCtx;
-struct MnuEffectWork;
+struct FileQueue;
 struct WideSlotPool;
 struct CompactSlotPool;
 
@@ -50,6 +50,48 @@ typedef char MnuNodeList_size_must_be_0x10[
     (sizeof(MnuNodeList) == 0x10) ? 1 : -1];
 typedef char MnuSectionModelWork_size_must_be_0x10[
     (sizeof(MnuSectionModelWork) == 0x10) ? 1 : -1];
+
+typedef struct MnuEffectPositionStep {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} MnuEffectPositionStep;
+
+/* The effect-work allocator lays out 0x20-byte queue records after its lists. */
+typedef struct MnuEffectRecord {
+    struct FileQueue *queue;
+    u32 flags;
+    s32 delay;
+    u32 unkC;
+    MnuEffectPositionStep positionStep;
+} MnuEffectRecord;
+
+typedef struct MnuEffectList {
+    MnuEffectRecord *records;
+    s32 count;
+} MnuEffectList;
+
+typedef struct MnuEffectWork {
+    u32 handle;
+    s32 count;
+    MnuEffectList *lists;
+    u32 unkC;
+} MnuEffectWork;
+
+typedef char MnuEffectLayoutsAssert[
+    (sizeof(MnuEffectPositionStep)==0x10 &&
+     sizeof(MnuEffectRecord)==0x20 &&
+     (unsigned long)&((MnuEffectRecord*)0)->queue==0 &&
+     (unsigned long)&((MnuEffectRecord*)0)->flags==4 &&
+     (unsigned long)&((MnuEffectRecord*)0)->delay==8 &&
+     (unsigned long)&((MnuEffectRecord*)0)->positionStep==0x10 &&
+     sizeof(MnuEffectList)==8 &&
+     sizeof(MnuEffectWork)==0x10)?1:-1];
+
+MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *,
+    MnuEffectPositionStep *, s32, f32, f32, f32, f32);
+MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *, s32, f32, f32, f32);
 
 /* DDS2 shooting task allocation, cleared as 0x1E0 bytes by its constructor. */
 typedef struct MnuShootingWork {
