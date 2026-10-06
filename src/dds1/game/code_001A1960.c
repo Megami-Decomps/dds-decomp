@@ -4726,7 +4726,40 @@ void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF8B0);
+void func_001BF8B0(SceneAiWork *work) {
+    s32 i;
+    switch (work->animationPhase) {
+    case 0:
+        for (i = 0; i < 3; i++) {
+            work->rowFade[i] = 128;
+            work->rowScale[i] = 80.0f;
+            work->rowPhase[i] = 0;
+            fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, 0);
+        }
+        break;
+    case 4:
+        break;
+    case 5:
+        for (i = 0; i < 3; i++) {
+            switch (work->rowPhase[i]) {
+            case 0:
+                work->rowStep[i]++;
+                work->rowStep[i] = work->rowStep[i] <= 0 ? 0 : work->rowStep[i] > 5 ? 5 : work->rowStep[i];
+                fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, work->rowStep[i]);
+                if (work->rowStep[i] >= 5) work->rowPhase[i]++;
+                break;
+            case 1:
+                work->rowStep[i]--;
+                work->rowStep[i] = work->rowStep[i] <= 0 ? 0 : work->rowStep[i] > 5 ? 5 : work->rowStep[i];
+                if (work->rowStep[i] <= 0) work->rowPhase[i]++;
+                break;
+            case 2:
+                break;
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BFAD0);
 
