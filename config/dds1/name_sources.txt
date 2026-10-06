@@ -1142,6 +1142,7 @@
 0x001512E8	billCloneList	inferred	clones entry-list object sharing child, bumps child count
 0x00151568	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
 0x001518A0	billResolveEntry	inferred	Resolves a billboard table entry's offset against its base and copies its 0x12 halfword into the output.
+0x001518D8	billSetAnimationEntry	inferred	LeverAudit
 0x00151C58	billReleaseSharedEntryBlock	inferred	Decrements billboard block reference count; on zero releases entries and block. [names_reviewed21.tsv]
 0x00151CE8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x001598D8, input-family pairing. [names_qp10.tsv]
 0x00151D88	billCreateIndexed	inferred	creates instance via D_0034E060 table, inits params/kind/draw
@@ -1643,6 +1644,7 @@
 0x00175420	effScatterCreatePlainRingFromTable	inferred	queued
 0x00175468	effCloneScatterWithSharedResource	inferred	src/dds1/effect/effPCPScatter.c func_00175468: Creates child using particle parameters and shares source scatter resource into child. [names_reviewed24.tsv]
 0x001754B0	effReleaseScatterWorkResources	inferred	Releases owned scatter object and separately frees the scatter work buffer. [names_reviewed19.tsv]
+0x001754E0	effScatterCreateFlatRing	inferred	L13
 0x00175780	effScatterFlatRingUpdate	inferred	VU0 macro rewrite; name from behaviour [names_M58_VuSweep.tsv]
 0x00175908	effScatterUpdatePlainParticleRing	inferred	confidence=high; matched-C; src/dds1/effect/effPCPScatter.c:1721:func_00175908; Updates the plain/flat particle ring with age-based fading and optional looping, then submits its origin and transform.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x00175B00	effScatterCopyFlatParameterVector	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D758, input-family pairing. [names_qp10.tsv]
@@ -1656,6 +1658,7 @@
 0x00176098	effGetScatterNarrowBlock	inferred	Computes base at offset 0x68 plus index times object stride times 8.
 0x001760B0	effGetScatterEntry	inferred	Returns the indexed entry in a scatter effect resource array.
 0x001760C8	effScatterStoreSourceTransformMatrix	inferred	Copies a source transform matrix into scatter effect work using VU registers. [names_reviewed14.tsv]
+0x001760F8	effNeedleCreateWork	inferred	U3
 0x001763B8	effPCPNeedleFree	inferred	releases work handles +0x68/+0x6C/+0x70
 0x001763F0	effPCPNeedleCreate	inferred	spawn wrapper: param-set block 0 + init func_001760F8
 0x00176A00	effPCPNeedleCopyVector	inferred	Copies one effect vector with PCP_COPY_VECTOR.
@@ -2516,6 +2519,7 @@
 0x001A3500	btlFindEligibleTargetForMultiActorCommand	inferred	Scans multiple indexed targets for the command required flag when its record permits it. [names_reviewed12.tsv]
 0x001A3F38	btlEncodeActorIndexAsSelectionMask	inferred	Converts an indexed battle actor value to its single selection bit. [names_reviewed12.tsv]
 0x001A4078	btlCheckSpecialAbility	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A4328	btlAccumulateEnemyDefeatRewards	inferred	U1
 0x001A4520	btlAllActiveUnitsReady	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001A4650	btlChooseAvailableUnit	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001A46F0	btlCountAvailableUnits	inferred	btl battle control and actor operations in game/code_0019DB88.c
@@ -3011,6 +3015,7 @@
 0x001F4798	sndFinishEarringPlayback	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F47E8	sndCreateEarringTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F4950	sndCreateAtracEffectLoadTask	inferred	Creates task that loads indexed ATRAC sound-effect file and initializes playback state. [names_reviewed5.tsv]
+0x001F49D0	sndStartDeadAtracLoad	inferred	Fam
 0x001F4AA8	sndUpdateEarringDeadPlayback	inferred	Handles ATRAC3 dead-load completion and playback-end events; both named in retail log strings.
 0x001F4B98	sndFinishEarringPlaybackTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
 0x001F4C90	btlPlayStationedSe1C	inferred	Twin of dds2 0x00205930; Calls sndLoadAndPlayStationedSe with code 0x1C. [names_R_FuncNames3.tsv]
@@ -3338,6 +3343,7 @@
 0x002071B0	btlSetLinkFlagOn	inferred	sets/clears bit 1 in model flags for species 0x107 unit pair
 0x00207B00	btlIsSpecialActionKind	inferred	btl unit+0x114 action id equals 0x171 or 0x189
 0x00207C18	btlIsSpecialEnemyEffectLinkSatisfied	inferred	Checks whether a special enemy has the required status and owns the linked effect. [names_reviewed14.tsv]
+0x00207CA0	btlFadeAndTintNamedChunkTree	inferred	U2
 0x00207DD0	btlDispatchNamedChunkNode	inferred	Looks up an active unit model named chunk and dispatches the selected descriptor; established DDS2 name. [names_reviewed16.tsv]
 0x00208248	btlAdjustSpeciesAnimation	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002082A0	btlMarkSpecialUnit	inferred	btl battle control and actor operations in game/code_001FF030.c
@@ -3464,6 +3470,7 @@
 0x00213AD0	btlActivateRuntime	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00213B28	btlResetRuntimeState	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00213BC0	btlMarkRuntimeUpdatePending	inferred	Sets the pending update flag on an active battle runtime. [names_reviewed8.tsv]
+0x00213BE0	btlDrawUnitAffinityDebug	inferred	TaskPurist
 0x002142C0	mnuListMoveCursor	inferred	Pad-driven list cursor: up/down by one, page up/down, wrapping; returns 1 on cancel (stick < 0)
 0x00214438	mnuQueueColoredGlyphAtPosition	inferred	Creates a fixed-color menu glyph at the supplied coordinates; located alongside menu cursor controls. [names_reviewed9.tsv]
 0x00214490	btlDrawSelectableListRows	inferred	confidence=high; src/dds1/game/code_0020EA40.c:func_00214490; Draws the visible item range, highlights the selected index and advances each text row position. CORRECTED: body is generic over the item-id array (the two callers are mnuDrawMenuFrameSizedToRows / mnuDrawSelectableMenuRows, not item-specific); 'Item' claimed more than the body shows. [names_qp9.tsv]
@@ -5994,6 +6001,7 @@
 0x002D0F08	sdfGraphRecreateBuffers	inferred	Releases existing graph buffers and allocates three using dimensions and modes from the graph.
 0x002D0F90	sdfGraphSelectDisplayBuffer	inferred	M143; sources=names_M143.tsv; twin=0x00329E40, input-family pairing. [names_qp10.tsv]
 0x002D10B0	sdfRequestDeferredGsImageCapture	inferred	Stores capture parameters and marks a GS image capture request pending. [names_reviewed19.tsv]
+0x002D10C8	sdfCaptureDeferredGsImage	inferred	U0
 0x002D1318	sdfSwapBufferSlots	inferred	replaces buffer index in the two slot bytes with its complement
 0x002D1350	sdfSetBufferSlot	inferred	sets both or one slot byte and arms the vsync flag
 0x002D14C8	sdfServiceGraphicsBuffers	inferred	R_Names32

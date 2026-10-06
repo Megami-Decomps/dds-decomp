@@ -5177,28 +5177,17 @@ s32 btlPositionActorIndexUnits(BtlLinkedCommand *action) {
     return 1;
 }
 
-typedef struct BtlWorldTransform {
-    u8 pad00[0x40];
-    f32 pos[3];
-    u8 pad4C[4];
-    f32 rot[4];
-} BtlWorldTransform;
-
-typedef struct BtlWorldObject {
-    u8 pad00[0x1C];
-    BtlWorldTransform *transform;
-} BtlWorldObject;
 
 void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
-    BtlWorldObject *object;
+    CameraObject *object;
     if (((BtlWork *)btlGetRuntime())->battleFlags & 2) {
-        object = (BtlWorldObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
+        object = (CameraObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
         if (object != 0) {
-            btlBossDebugPrintfN(arg0, (s32)arg1, 0, "P:%.1f %.1f %.1f", (double)object->transform->pos[0],
-                                (double)object->transform->pos[1], (double)object->transform->pos[2]);
+            btlBossDebugPrintfN(arg0, (s32)arg1, 0, "P:%.1f %.1f %.1f", (double)object->inner->position[0],
+                                (double)object->inner->position[1], (double)object->inner->position[2]);
             btlBossDebugPrintfN(arg0, (s32)(arg1 + 0xC), 0, "R:%.3f %.3f %.3f %.3f",
-                                (double)object->transform->rot[0], (double)object->transform->rot[1],
-                                (double)object->transform->rot[2], (double)object->transform->rot[3]);
+                                (double)object->inner->rotation[0], (double)object->inner->rotation[1],
+                                (double)object->inner->rotation[2], (double)object->inner->rotation[3]);
         }
     }
 }

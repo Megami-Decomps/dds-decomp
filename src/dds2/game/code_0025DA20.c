@@ -3,6 +3,7 @@
 #include "sdf.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "evt_unit.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -176,7 +177,6 @@ extern void *memset(void *dst, s32 c, u32 n);
 
 extern KwlnTask *kwlnTaskCreate();
 
-extern void evtTickPackLoad(void);
 
 extern s32 func_002C54B0(s32);
 extern s32 mnuIsBulletItemId(s32);
@@ -191,7 +191,6 @@ extern void frFontSetChildColors(s32, u32);
 
 extern s32 func_0019D550(s32, s32, u32);
 
-extern void evtReleaseEventPackResources(void);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
@@ -215,25 +214,20 @@ extern s32 D_003C99A8[4];
 extern BufferDescriptor kwlnDrawSurfaces[];
 extern s32 effDestroyPackedBatch(s32);
 
-typedef struct CampTaskData {
-    s32 taskId;
-    s32 unk4;
-    u8 pad08[0x40];
-} CampTaskData;
 
 extern u8 D_003CBB70[];
 
 /* Schedule the camp task only if no task currently owns this event ID. */
 void mnuCampCreateTask(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
-    CampTaskData *taskData;
+    EvtPackLoadState *taskData;
 
     if (evtFindTaskById() == 0) {
         evtFormatTaskName(taskId, taskName);
         taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
-        taskData->taskId = taskId;
-        taskData->unk4 = 0;
+        taskData->eventId = taskId;
+        taskData->loaded = 0;
         kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, taskData);
     }
 }

@@ -1,5 +1,7 @@
 #include "mnu.h"
+#include "mnu_list.h"
 #include "sdf.h"
+#include "evt_unit.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -73,8 +75,6 @@ extern void evtFormatTaskName(s32 taskId, void *name);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 c, u32 n);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
-extern void evtTickPackLoad(void);
-extern void evtReleaseEventPackResources(void);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
@@ -87,23 +87,18 @@ extern s32 effLoadIndexedResource(const char *, s32, s32);
 
 #define CAMP_TASK_PRIORITY 0x3EC
 
-typedef struct CampTaskData {
-    s32 taskId;
-    s32 unused4;             /* 0x4: zeroed at creation, never read */
-    u8 pad08[0x40];
-} CampTaskData;
 
 /* Schedule the camp task only if no task currently owns this event ID. */
 void mnuCampCreateTask(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
-    CampTaskData *taskData;
+    EvtPackLoadState *taskData;
 
     if (evtFindTaskById() == 0) {
         evtFormatTaskName(taskId, taskName);
         taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
-        taskData->taskId = taskId;
-        taskData->unused4 = 0;
+        taskData->eventId = taskId;
+        taskData->loaded = 0;
         kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, taskData);
     }
 }
@@ -1492,7 +1487,39 @@ s32 func_00244FA0(ShopScene *context) {
     return limit;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245068);
+void func_00245068(ShopScene *scene) {
+    s32 index = 0;
+    s32 capacity = scene->count8C;
+    struct MenuListNode *node = ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->first;
+    for (; index < ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->count; index++) {
+        CampWindowParams *parameters = &node->camp;
+        s32 globalState = datGameState;
+        s32 itemId = parameters->id;
+        s32 divisor = parameters->price;
+        s32 kind = parameters->mode;
+        s32 affordable = *(s32 *)(globalState + 0x3C) / divisor;
+        s32 available;
+        s32 limit;
+        if (kind == 2) {
+            available = capacity - ptyCountBulletItem(itemId);
+        } else if (kind == 3) {
+            available = 1 - *(u8 *)(itemId + globalState + 0x12A0);
+        } else {
+            available = 99 - *(u8 *)(itemId + globalState + 0x12A0);
+        }
+        if (available < 0) {
+            available = 0;
+        }
+        limit = available < affordable ? available : affordable;
+        if (limit == 0) {
+            node->flags48 = 1;
+        }
+        node = node->next;
+        if (node == NULL) {
+            break;
+        }
+    }
+}
 
 
 s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {

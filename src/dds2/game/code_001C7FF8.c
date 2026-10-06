@@ -473,9 +473,10 @@ INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A10);
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA490);
 
 extern void btlReleaseBattleScratchBlocks(void);
+extern void sdfReleaseChipBlock(void *);
 
 void fldClearBattleSceneObject(void) {
-    sdfReleaseChipBlock(kwlnTaskGetUserValue());
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue());
     ((BattleSceneWork *)btlGetRuntime())->sceneObject = 0;
     btlReleaseBattleScratchBlocks();
 }
