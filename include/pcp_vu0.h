@@ -13,6 +13,23 @@
     ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
     : : "r" (dst), "r" (src) : "$2", "memory")
 
+/* The record prevents EE GCC 2.96 from decaying an array asm input. */
+typedef struct {
+    float components[4];
+} PcpVectorCopyF32;
+
+/* Copy four float elements bit-for-bit with explicit source/destination
+ * memory operands. Both addresses must be 16-byte aligned and designate
+ * four float elements; this is not an integer or opaque-byte copy API.
+ * Address expressions must have no evaluation side effects. Identical
+ * source/destination is allowed. Unrelated memory is not clobbered;
+ * PCP_COPY_VECTOR retains its established global-barrier contract. */
+#define PCP_COPY_VECTOR_F32(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
+    : "=m" (*(PcpVectorCopyF32 *)(dst)) \
+    : "r" (dst), "r" (src), "m" (*(const PcpVectorCopyF32 *)(src)) \
+    : "$2")
+
 /*
  * Fill the x, y and z components of a float vector with one value (plain C;
  * the w component is left alone). Used by the PCP particle and strip
