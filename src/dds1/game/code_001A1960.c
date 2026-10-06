@@ -6,6 +6,10 @@
 #include "eff.h"
 #include "btl_action.h"
 
+extern void mdlFlagSet(s32 flag);
+extern void dspCloseChannel(void);
+extern s32 dspStartEntry(s32 entry);
+extern void evtCreateMessageWindowIfMissing(void *text);
 extern void sdfReleaseChipBlock(void *block);
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -4686,11 +4690,18 @@ void fldClearBattleSceneObject(s64 arg0) {
     btlReleaseBattleScratchBlocks();
 }
 
-void fldInitializeSceneObject(s32 object, s32 owner) {
-    memset((void *)object, 0, 0x30);
-    *(s32 *)object = 1;
-    *(s32 *)(object + 0x28) = owner + 0x20;
-    *(s32 *)(object + 0x2C) = owner;
+extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
+extern s32 func_001BF0F8(s64 task);
+extern s32 func_001B5970(s64 task);
+extern s32 func_001B55A8(s64 task);
+extern void func_001B2AC8(BattleSceneObject *object);
+extern u8 D_00358828[];
+
+void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
+    memset(object, 0, sizeof(*object));
+    object->state = 1;
+    object->commandData = &owner->result;
+    object->owner = owner;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneObjectTaskUserData);
@@ -4702,16 +4713,76 @@ s64 fldGetSceneObjectState(void) {
     if (temp_v0 == 0) {
         return temp_v0;
     }
-    return *(s32 *)fldGetSceneObjectTaskUserData();
+    return fldGetSceneObjectTaskUserData()->state;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF4C0);
+void func_001BF4C0(BtlTask *task) {
+    BattleController *scene;
+    BattleSceneObject *object;
+    u32 handle;
+
+    if (kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef) == 0) {
+        scene = (BattleController *)btlGetRuntime();
+        object = sdfAllocAndClearQuadwords(sizeof(*object));
+        fldInitializeSceneObject(object, task);
+        handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
+                               func_001BF0F8, fldClearBattleSceneObject, (u32)object);
+        func_00101A80(scene->taskParent, handle);
+        scene->sceneObjectTask = handle;
+        func_001B83D8((s32)task, 0, 0);
+        btlInitializeSelectionWork();
+        btlInitializeCommandPanelSlotTables();
+        btlCreateMessageWindow();
+        func_001B2AC8(object);
+        if ((task->unit->flags & 0x200) && !(scene->flags & 0x1000000)) {
+            if (mdlFlagTest(0x81B) == 0) {
+                mdlFlagSet(0x81B);
+                btlTrackedTaskHandles->status.bytes.blocked = 1;
+                scene->flags &= ~0x100000;
+                handle = kwlnTaskCreate(D_003BB3D4, 0x2B0E, 1, 1,
+                                       func_001B5970, btlReleaseWindowTask,
+                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                func_00101A80(scene->taskParent, handle);
+                btlSetTrackedTaskHandle(0xD, handle);
+                dspCloseChannel();
+                evtCreateMessageWindowIfMissing(D_00358828);
+                dspStartEntry(2);
+                func_001BCB88(0, 8);
+            } else if (btlGetTaskState6() != 0) {
+                scene->flags &= ~0x100000;
+                handle = kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
+                                       func_001B55A8, btlFinishTrackedBattleTaskAndCloseWindow,
+                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                func_00101A80(scene->taskParent, handle);
+                btlSetTrackedTaskHandle(0xC, handle);
+                dspCloseChannel();
+                evtCreateMessageWindowIfMissing(D_00358828);
+                func_001BCB88(0, 8);
+            } else {
+                scene->flags |= 0x100000;
+            }
+        }
+    }
+    object = fldGetSceneObjectTaskUserData();
+    if (object->state == 3) {
+        btlCommandPanelWork->state = 2;
+        object->state = 1;
+    } else if (object->state == 8) {
+        object->state = 6;
+        btlCommandPanelWork->state = 2;
+    } else if (object->state != 11) {
+        btlCommandPanelWork->state = 1;
+        object->state = 1;
+    }
+    btlLinkedSelectionTaskBuffer->selectedRow =
+        btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+}
 
 void fldSetSceneObjectAndGroupStates(void) {
-    s32 *task = (s32 *)fldGetSceneObjectTaskUserData();
-    if (task != 0) {
+    BattleSceneObject *object = fldGetSceneObjectTaskUserData();
+    if (object != 0) {
         BattleCmdPanel *panel = btlCommandPanelWork;
-        *task = 5;
+        object->state = 5;
         panel->state = 3;
     }
 }
