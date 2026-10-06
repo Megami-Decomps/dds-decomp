@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "mnu_list.h"
 #include "kwln.h"
 #include "dat_state.h"
 
@@ -1133,7 +1134,7 @@ typedef struct {
     u8 pad00[0x64];
     SceneFrameTable *frameTable; /* 0x64 */
     u8 pad68[0xC];
-    struct EvtBSelectionList *list; /* 0x74 */
+    struct MenuList *list; /* 0x74 */
     u8 pad78[0x64];
     s32 mode; /* 0xDC */
 } SceneFrameOwner;
@@ -1421,9 +1422,9 @@ typedef struct EvtBContext {
     s32 dispatchState; /* 0x54 */
     u32 dispatchTable; /* 0x58 */
     u8 pad5C[0x14];
-    u32 visualList; /* 0x70 */
+    struct MenuList *visualList; /* 0x70 */
     s32 thresholdList; /* 0x74 */
-    s32 selectionList; /* 0x78 */
+    struct MenuList *selectionList; /* 0x78 */
     s32 state7C;       /* 0x7C: nonzero also re-requests the effect resource */
     u8 pad80[0x8];
     s32 panelMode; /* 0x88 */
@@ -1441,21 +1442,7 @@ typedef struct EvtBContext {
 
 
 
-typedef struct EvtBSelectionNode {
-    s32 kind;       /* 0x00 */
-    u8 pad04[0x44];
-    u32 flags;      /* 0x48 */
-    u8 pad4C[0x14];
-    s32 entryIndex; /* 0x60 */
-} EvtBSelectionNode;
 
-typedef struct EvtBSelectionList {
-    u8 pad00[0x1C];
-    EvtBSelectionNode *selected; /* 0x1C */
-    s32 mode; /* 0x20 */
-    u8 pad24[0x18];
-    s32 scale; /* 0x3C: fade scale, 0x100 when fully shown */
-} EvtBSelectionList;
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024B3A8);
 
@@ -1470,7 +1457,7 @@ extern void mnuSetPopupEntryFlagged(s32 *state, void *entry);
 extern void mnuClearListFlagsOneAndTwo(u32 list);
 extern void mnuRetreatListCursorDefault(u32 list);
 extern void mnuAdvanceListCursorDefault(u32 list);
-extern void mnuPlayInputSound(s32 mode, u32 buttons, u32 list);
+extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_0036AC80[];
 extern u8 D_0036ACF8[];
 extern u8 D_0036AD30[];
@@ -1482,10 +1469,10 @@ s32 evtBHandleSelectionPanelInput(u64 input) {
     EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *state = &context->dispatchState;
-    s32 kind = ((EvtBSelectionList *)context->visualList)->selected->kind;
+    s32 kind = context->visualList->cursor->index;
     s32 frames;
     s32 action;
-    EvtBSelectionNode *node;
+    struct MenuListNode *node;
     s32 result;
 
     result = func_00285670((s32)context + 8, state, 0, input);
@@ -1496,18 +1483,18 @@ s32 evtBHandleSelectionPanelInput(u64 input) {
     if (frames != 2) {
         return 0;
     }
-    if (((EvtBSelectionList *)context->visualList)->scale < 0x100) {
+    if (context->visualList->scale < 0x100) {
         return 0;
     }
     if (*state == 0) {
         if (buttons & 1) {
-            node = ((EvtBSelectionList *)context->visualList)->selected;
+            node = context->visualList->cursor;
             action = D_0036AC80[func_00249198() * 5 + context->state7C * 10 + kind];
-            if (!(node->flags & 1) || action == 3 || action == frames) {
+            if (!(node->flags48 & 1) || action == 3 || action == frames) {
                 if (func_0024A1D8(action, (s32)context) == 0) {
                     switch (action) {
                     case 2:
-                        if (((EvtBSelectionList *)context->selectionList)->mode == 1) {
+                        if (context->selectionList->count == 1) {
                             mnuSetPopupEntryFlagged(state, D_0036ADA0);
                         } else {
                             mnuSetPopupEntryFlagged(state, D_0036AD30);
@@ -1536,7 +1523,7 @@ s32 evtBHandleSelectionPanelInput(u64 input) {
         if (buttons & 0x20) {
             mnuAdvanceListCursorDefault(context->visualList);
         }
-        mnuPlayInputSound(0, buttons, context->visualList);
+        mnuPlayInputSound(0, buttons, &context->visualList->stateFlags);
     }
     return 0;
 }
@@ -1567,7 +1554,7 @@ s32 evtBClearAndReset(void) {
     s32 context = kwlnTaskGetUserValue();
 
     evtRememberDispatchCallback(0, context);
-    ((EvtBSelectionList *)((EvtBContext *)context)->visualList)->scale = 0;
+    ((EvtBContext *)context)->visualList->scale = 0;
     mnuSetWorldObjectAndMenuEnabled(0);
     evtFinishMessageWindowAndNotify();
     return 1;
@@ -1680,7 +1667,7 @@ s32 func_0024BB00(u64 input) {
     if (result != 0) {
         return result;
     }
-    if (((EvtBSelectionList *)context->selectionList)->scale < 0x100) {
+    if (context->selectionList->scale < 0x100) {
         return 0;
     }
     if (*state == 0) {
@@ -1700,7 +1687,7 @@ s32 func_0024BB00(u64 input) {
         if (buttons & 0x20) {
             mnuAdvanceListCursorDefault(context->selectionList);
         }
-        mnuPlayInputSound(0, buttons, context->selectionList);
+        mnuPlayInputSound(0, buttons, &context->selectionList->stateFlags);
     }
     return 0;
 }
@@ -1900,10 +1887,10 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 /* Bind the selected text row to message slot zero, then start the entry prompt. */
 u32 evtPrepareSelectedMenuEntry(void) {
     s32 state = kwlnTaskGetUserValue();
-    s32 owner = ((EvtBContext *)state)->selectionList;
-    s32 *selectionIndex = &((EvtBSelectionList *)owner)->selected->entryIndex;
+    struct MenuList *owner = ((EvtBContext *)state)->selectionList;
+    u32 *selectionIndex = &owner->cursor->sortKeyPrimary;
 
-    if (((EvtBSelectionList *)owner)->mode == 1) {
+    if (owner->count == 1) {
         mnuSelectFirstListNode(owner);
     }
     evtCopyEntryStringToActiveWindow(0, D_00347C68[*selectionIndex].encodedText);
@@ -1936,7 +1923,7 @@ s32 evtBChooseSelectionCompletionPopup(u64 input) {
                 if (evtGetCapturedWindowPanelValue() == 0) {
                     mnuResetProgressModeFromOwner((u8 *)context);
                     mnuSetPopupEntryFlagged(state, D_0036ADD8);
-                } else if (((EvtBSelectionList *)context->selectionList)->mode >= 2) {
+                } else if (context->selectionList->count >= 2) {
                     context->transitionPending = 1;
                     mnuSetPopupEntryFlagged(state, D_0036AD30);
                 } else {
