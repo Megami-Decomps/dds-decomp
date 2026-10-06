@@ -6,6 +6,9 @@
 #include "pcp_vu0.h"
 #include "dat_state.h"
 
+extern SceneSlotFadeWork *D_00438F54;
+extern ActorSlotOrder *D_00438F58[2];
+
 extern s32 btlGetRuntime(void);
 
 extern s32 kwlnTaskGetTaskByName(const char *);
@@ -178,7 +181,7 @@ extern u8 *D_00435E64;
 
 extern u8 *D_00435E5C;
 
-extern SceneSlotFadeWork *D_00438F54;
+
 
 
 

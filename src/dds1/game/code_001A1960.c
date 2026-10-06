@@ -8,6 +8,9 @@
 #include "eff.h"
 #include "btl_action.h"
 
+extern SceneSlotFadeWork *D_003BD83C;
+extern ActorSlotOrder *D_003BD840[2];
+
 extern void mdlFlagSet(s32 flag);
 extern void dspCloseChannel(void);
 extern s32 dspStartEntry(s32 entry);
@@ -2905,10 +2908,6 @@ void btlClearTaskActorSlots(void) {
     }
 }
 
-typedef struct ActorSlotOrder {
-    u8 pad00[0xC];
-    s32 entries[12];
-} ActorSlotOrder;
 
 typedef struct ActorOrder12 {
     s32 entries[12];
@@ -2918,7 +2917,7 @@ typedef struct ActorOrder6 {
     s32 entries[6];
 } ActorOrder6;
 
-extern ActorSlotOrder *D_003BD840[2];
+
 extern const ActorOrder12 D_003A2228;
 extern const ActorOrder6 D_003A2258;
 
@@ -5178,7 +5177,7 @@ void fldScaleSceneCoordinateRecord(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C2E90);
 
-extern SceneSlotFadeWork *D_003BD83C;
+
 
 void fldSetSceneSlotRange(s32 index) {
     SceneSlotFadeWork *scene = D_003BD83C;
