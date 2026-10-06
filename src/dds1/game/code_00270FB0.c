@@ -617,7 +617,31 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
     func_001958A0(sprite, 1, 0x54);
     frFontQueueGlyphInSelectedSlot(sprite);
 }
-INCLUDE_ASM(const s32, "game/code_00270FB0", func_002723B0);
+typedef struct StaffGridLabelRow {
+    s32 count;
+    s32 x[5];
+    s8 gridIds[5];
+    u8 pad1D[3];
+} StaffGridLabelRow;
+
+typedef char StaffGridLabelRow_size_check[sizeof(StaffGridLabelRow) == 0x20 ? 1 : -1];
+typedef char StaffGridLabelRow_gridIds_offset_check[
+    ((u32)&((StaffGridLabelRow *)0)->gridIds == 0x18) ? 1 : -1];
+
+extern const StaffGridLabelRow D_003B2100[];
+
+void func_002723B0(s32 kind, s32 slot) {
+    StaffGridLabelRow rows[7];
+    s32 i;
+    memcpy(rows, D_003B2100, sizeof(rows));
+    for (i = 0; i < rows[kind].count; i++) {
+        if (rows[kind].x[i] != 0) {
+            itfDrawGridWithResolvedSlot(rows[kind].x[i], 0xCF0, 0, 1,
+                                       slot, rows[kind].gridIds[i], 0x53);
+        }
+    }
+}
+
 
 typedef struct TextStyleNode TextStyleNode;
 extern void frFontSetChildColors(TextStyleNode *, u32);

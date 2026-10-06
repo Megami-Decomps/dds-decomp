@@ -912,7 +912,38 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
     frFontQueueGlyphInSelectedSlot(sprite);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA7A0);
+typedef struct StaffGridLabelRow {
+    s32 count;
+    s32 x[10];
+    s8 gridIds[10];
+    u8 pad36[2];
+} StaffGridLabelRow;
+typedef char StaffGridLabelRow_size_check[sizeof(StaffGridLabelRow) == 0x38 ? 1 : -1];
+typedef char StaffGridLabelRow_gridIds_offset_check[
+    ((u32)&((StaffGridLabelRow *)0)->gridIds == 0x2C) ? 1 : -1];
+extern const StaffGridLabelRow D_0042AA48[];
+
+void func_002AA7A0(s32 kind, u32 slot) {
+    StaffGridLabelRow rows[9];
+    s32 i;
+    s32 y = 0x1A1;
+    memcpy(rows, D_0042AA48, sizeof(rows));
+    for (i = 0; i < rows[kind].count; i++) {
+        if (rows[kind].x[i] != 0) {
+            if (rows[kind].gridIds[i] == 0x1F) {
+                itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y - 2) << 3, 0, 1,
+                                           slot, 0x1F, 0x53);
+            } else if (rows[kind].gridIds[i] == 8) {
+                itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y + 2) << 3, 0, 1,
+                                           slot, 8, 0x53);
+            } else {
+                itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, y << 3, 0, 1,
+                                           slot, rows[kind].gridIds[i], 0x53);
+            }
+        }
+    }
+}
+
 
 typedef struct TextStyleNode TextStyleNode;
 extern void frFontSetChildColors(TextStyleNode *, u32);
