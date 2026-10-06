@@ -37,7 +37,9 @@ typedef struct BtlUnitEntrySlot {
  * The actor chain ends at +0x344. Command state/action words are a different
  * object and must not be interpreted through this unit layout. */
 typedef struct BtlUnit {
-    u8 pad00[0x30];
+    u8 pad00[0x10];
+    f32 colorStart[4]; /* 0x10: first source color used by the effect blend callback. */
+    f32 colorEnd[4]; /* 0x20: second source color used by the effect blend callback. */
     f32 position[4]; /* 0x30: world position */
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
     f32 effectScale; /* 0x50: scales the SDK-provided actor effect vectors. */
