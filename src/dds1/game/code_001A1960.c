@@ -2565,15 +2565,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB558);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AB810);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001ABDF8);
-
-void btlReleaseAndClearChipBlock(void) {
-    sdfReleaseChipBlock(btlCommandPanelWork);
-    btlCommandPanelWork = 0;
-}
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
-
 typedef struct BtlResBlock {
     s32 unk0;
     s32 nameA;
@@ -2591,6 +2582,60 @@ typedef struct BattlePanelColors {
     u32 values[4];
 } BattlePanelColors;
 extern const BattlePanelColors D_003A21B8;
+
+typedef struct BattleClassLabelOffsets {
+    s32 values[8][2];
+} BattleClassLabelOffsets;
+extern const BattlePanelColors D_003A2158;
+extern const BattleClassLabelOffsets D_003A2168;
+extern void func_001AB558(void);
+
+void func_001ABDF8(void) {
+    BattlePanelColors colors = D_003A2158;
+    BattleClassLabelOffsets offsets = D_003A2168;
+    if (btlCommandPanelWork->state < 5) {
+        if (btlCommandPanelWork->state > 0) {
+            colors.values[0] = btlCommandPanelWork->cornerFade[0] | 0x80808000;
+            colors.values[1] = btlCommandPanelWork->cornerFade[1] | 0x80808000;
+            colors.values[2] = btlCommandPanelWork->cornerFade[2] | 0x80808000;
+            colors.values[3] = btlCommandPanelWork->cornerFade[3] | 0x80808000;
+            func_002BF438(0x50, 0x968, 0, colors.values, 0, btlResourceBlock->resA, 0x1E, 0x53);
+            func_001AB558();
+            colors.values[0] = btlCommandPanelWork->classFade | 0x80808000;
+            colors.values[1] = colors.values[0];
+            colors.values[2] = colors.values[0];
+            colors.values[3] = colors.values[0];
+            func_002BF438((btlCommandPanelWork->classX + 5) << 4,
+                         (btlCommandPanelWork->classY + 0x12D) << 3,
+                         0, colors.values, 0, btlResourceBlock->resA, 0x1A, 0x53);
+            func_002BF438((btlCommandPanelWork->classX + 0x37) << 4,
+                         (btlCommandPanelWork->classY + 0x12D) << 3,
+                         0, colors.values, 0, btlResourceBlock->resA, 0x1B, 0x53);
+            colors.values[0] = btlCommandPanelWork->labelFade | 0x80808000;
+            colors.values[1] = colors.values[0];
+            colors.values[2] = colors.values[0];
+            colors.values[3] = colors.values[0];
+            {
+                s32 x = btlCommandPanelWork->classX + 5;
+                s32 y = btlCommandPanelWork->classY + 0x12D;
+                func_002BF438((x + offsets.values[btlCommandPanelWork->classIndex][0]) << 4,
+                             (y + offsets.values[btlCommandPanelWork->classIndex][1]) << 3,
+                             0, colors.values, 0, btlResourceBlock->resA, (s16)btlCommandPanelWork->labelEntry, 0x53);
+            }
+        }
+    }
+}
+
+void btlReleaseAndClearChipBlock(void) {
+    sdfReleaseChipBlock(btlCommandPanelWork);
+    btlCommandPanelWork = 0;
+}
+
+INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
+
+
+
+
 
 /* 0x2C-byte action record shared by the initializer, updater and renderer. */
 typedef struct BattleMirroredSpriteRecord {
