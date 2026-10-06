@@ -914,7 +914,67 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA7A0);
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA9D8);
+typedef struct TextStyleNode TextStyleNode;
+extern void frFontSetChildColors(TextStyleNode *, u32);
+extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+
+typedef struct StaffFramePiece {
+    s32 gridId;
+    s32 x;
+    s32 y;
+} StaffFramePiece;
+typedef char StaffFramePiece_size_check[sizeof(StaffFramePiece) == 0xC ? 1 : -1];
+extern const StaffFramePiece D_0042AC40[], D_0042AC70[];
+
+void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
+                   u32 drawOption, u32 textOption, u32 conditionTable,
+                   u32 labelOffset, u32 layer) {
+    StaffFramePiece primary[4];
+    StaffFramePiece alternate[4];
+    s32 textPosition[2];
+    StaffFramePiece *pieces;
+    CampVisualWork *menu = (CampVisualWork *)context;
+    s32 i;
+    s32 glyph;
+    memcpy(primary, D_0042AC40, sizeof(primary));
+    memcpy(alternate, D_0042AC70, sizeof(alternate));
+    switch (kind) {
+    case 1:
+        textPosition[0] = 0x2B0;
+        textPosition[1] = 0x1B8;
+        pieces = alternate;
+        break;
+    case 2:
+        textPosition[0] = 0x2B0;
+        textPosition[1] = 0xF8;
+        pieces = alternate;
+        break;
+    case 3:
+        textPosition[0] = 0x3D0;
+        textPosition[1] = 0x268;
+        pieces = alternate;
+        break;
+    default:
+        textPosition[0] = 0x2B0;
+        textPosition[1] = 0xF8;
+        pieces = primary;
+        break;
+    }
+    for (i = 0; i < 4; i++) {
+        itfDrawGridWithResolvedSlot(pieces[i].x, pieces[i].y + 0x918, 0,
+                                   drawOption, menu->titleContext, pieces[i].gridId, layer);
+    }
+    if (textTable != 0) {
+        if (conditionTable != 0 && ((s32 *)conditionTable)[labelIndex] != 0) {
+            if (mdlFlagTest(((s32 *)conditionTable)[labelIndex]) != 0) labelIndex += labelOffset;
+        }
+        glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
+                                             0, labelIndex, textTable, textOption);
+        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC35A);
+        func_0019D550((FrFontGlyph *)glyph, 1, layer);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    }
+}
 
 extern void func_002AA9D8(s32, u32, u32, u32, u32, u32, u32, u32, u32);
 
