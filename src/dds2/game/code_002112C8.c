@@ -4658,8 +4658,6 @@ s32 btlIsSpecialMotion(ActionUnit *actor) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041AAC8);
-
 typedef struct BattleCommandRecord {
     u8 pad00;
     u8 flags;
@@ -4671,6 +4669,8 @@ typedef struct BattleCommandRecord {
 } BattleCommandRecord;
 
 /* Pick a permitted shadow skill from the corresponding party member's list. */
+INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041AAC8);
+
 void func_0021F3E8(ActionStateLink *actor) {
     s32 choices[24];
     s32 partyId;
