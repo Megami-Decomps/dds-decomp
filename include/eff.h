@@ -204,10 +204,12 @@ typedef struct BillRenderPair {
     u16 unk8;
     u16 kind;
     u32 colors[2];
+    SdfListHead *packetList; /* 0x14 */
+    struct BillRenderPair *next; /* 0x18 */
 } BillRenderPair;
 
-typedef char BillRenderPair_size_must_be_0x14[
-    (sizeof(BillRenderPair) == 0x14) ? 1 : -1];
+typedef char BillRenderPair_size_must_be_0x1C[
+    (sizeof(BillRenderPair) == 0x1C) ? 1 : -1];
 
 /* Billboard instance and kind-specific payload (0x64); DDS1/2 effect/billManager.c and game billboard units. */
 typedef struct BillObj {
@@ -227,8 +229,6 @@ typedef struct BillObj {
     u16 unk2E;
     void *entryList;  /* 0x30 */
     BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
-    u32 unk48;
-    u32 unk4C;
     u16 unk50;
     u8 pad52[2];
     u32 modeFlags; /* 0x54: bits 0x40/0x80 select billboard entry modes */
@@ -236,6 +236,9 @@ typedef struct BillObj {
     s32 entryCount;
     void *unk60;
 } BillObj;
+
+typedef char BillObj_size_must_be_0x64[
+    (sizeof(BillObj) == 0x64) ? 1 : -1];
 
 /* Serialized entry offsets are relative to BillData.base. */
 typedef struct BillAnimationEntry {
@@ -302,15 +305,27 @@ typedef struct BillTextureCoordinate {
 
 /* Native billboard UVs are four ordered U/V corners, not a float vector. */
 typedef struct BillTextureQuad {
-    BillTextureCoordinate corners[4];
+    u16 components[8];
 } BillTextureQuad;
 
 typedef char BillTextureQuad_size_must_be_0x10[
     (sizeof(BillTextureQuad) == 0x10) ? 1 : -1];
 
-/* Kind-zero billboard payload shared by the resource initializer and accessors. */
+/* Fifteen billboard quads precede the child manager in its 0x450 allocation. */
+typedef struct BillPacketWork {
+    f32 positions[15][4]; /* 0x000 */
+    u32 colors[15];       /* 0x0F0 */
+    BillTextureQuad uv[15]; /* 0x12C */
+    f32 offsets[15][8];   /* 0x21C: four X/Y corner offsets per quad */
+    s32 count;           /* 0x3FC */
+} BillPacketWork;
+
+typedef char BillPacketWork_size_must_be_0x400[
+    (sizeof(BillPacketWork) == 0x400) ? 1 : -1];
+
+/* Child manager at retained allocation +0x400; shared by resource and draw owners. */
 typedef struct BillChildPayload {
-    s32 value;
+    s32 value; /* 0x00: acquired SdfTex address; preserve the existing word-access contract. */
     union {
         s16 signedVariant;
         u16 variant;
@@ -322,10 +337,16 @@ typedef struct BillChildPayload {
     f32 y;             /* 0x20 */
     f32 halfWidth;  /* 0x24 */
     f32 halfHeight; /* 0x28 */
+    SdfListHead *pendingLists[5]; /* 0x2C */
+    u16 packetListIndex; /* 0x40 */
+    u8 pad42[2];
+    void *allocation; /* 0x44: original allocation handle */
+    BillPacketWork *work; /* 0x48: retained packet-buffer address */
+    struct BillChildPayload *next; /* 0x4C */
 } BillChildPayload;
 
-typedef char BillChildPayload_size_must_be_0x2C[
-    (sizeof(BillChildPayload) == 0x2C) ? 1 : -1];
+typedef char BillChildPayload_size_must_be_0x50[
+    (sizeof(BillChildPayload) == 0x50) ? 1 : -1];
 
 /* Billboard callbacks and metadata (0xC); DDS1/2 effect/billManager.c and game billboard units. */
 typedef struct {
