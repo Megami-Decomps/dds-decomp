@@ -36,7 +36,7 @@ extern u8 D_003AA868[];
 
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
 typedef struct {
-    u8 pad00[0x10];
+    f32 origin[4];     /* 0x00 complete origin quadword */
     u16 systemParam;    /* 0x10 */
     u8 pad12[2];
     u32 cellCount;      /* 0x14 number of cells */
@@ -47,10 +47,13 @@ typedef struct {
     u32 startDelayRange; /* 0x28 modulus of delayFrames */
     u32 activeFrameRange; /* 0x2C modulus of activeFrames before adding one */
     u16 perCell;        /* 0x30 */
-    u8 pad32[0xE];
+    u8 pad32[0xA];
+    f32 bandWidth;     /* 0x3C */
     void *dispatchArg;  /* 0x40 */
-    u8 pad44[8];
+    f32 edgeWidth;     /* 0x44 */
+    u8 pad48[4];
 } EffThunderVectorParams;
+typedef char EffThunderVectorParamsSizeCheck[sizeof(EffThunderVectorParams) == 0x4C ? 1 : -1];
 
 typedef struct {
     u32 delayFrames;
@@ -194,7 +197,107 @@ void effThunderCellRestart(EffThunderVectorWork *work, s32 index) {
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B3D8);
+struct RwV3d;
+extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
+extern void vu0RotMatrixXYZFromVec3(const struct RwV3d *);
+extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
+
+/* Sample a width multiplier, then bend the cell's placement vector around
+ * a perturbed axis while emitting five-vector rows into its kind-4 history.
+ */
+void func_0016B3D8(EffThunderVectorWork *work, s32 index) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 placement[4] __attribute__((aligned(16)));
+    f32 axis[4] __attribute__((aligned(16)));
+    f32 originalAxis[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 origin[4] __attribute__((aligned(16)));
+    f32 width[4] __attribute__((aligned(16)));
+    f32 outerWidth[4] __attribute__((aligned(16)));
+    f32 rotation[4] __attribute__((aligned(16)));
+    EffThunderParSystem *system = work->cellSystem;
+    ParCell *cell = &system->cells[index];
+    EffThunderVectorCell *source;
+    u128 *vertices;
+    s32 count;
+    s32 i;
+    f32 widthScale;
+    f32 rotationScale;
+    f32 radius;
+
+    count = system->vertexCount / 5;
+    cell->vertexCount = system->vertexCount;
+    source = &work->cells[index];
+    vertices = cell->history;
+    widthScale = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.2f + 1.0f;
+    VEC3_SPLAT(width, work->head.bandWidth * widthScale);
+    VEC3_SPLAT(outerWidth, width[0] + work->head.edgeWidth * widthScale);
+    originalAxis[0] = source->rotationAxis[0];
+    originalAxis[1] = source->rotationAxis[1];
+    originalAxis[2] = source->rotationAxis[2];
+    originalAxis[3] = 0.0f;
+    rotationScale = -source->rotationScale;
+    radius = source->radius;
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB_EXTENDED(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
+    placement[0] = source->placementVector[0];
+    placement[1] = 0.0f;
+    placement[2] = source->placementVector[2];
+    PCP_COPY_VECTOR(origin, work->head.origin);
+    origin[1] += source->placementVector[1];
+
+    for (i = 0; i < count; i++) {
+        position[0] = origin[0] + placement[0] * radius;
+        position[1] = origin[1] + placement[1] * radius;
+        position[2] = origin[2] + placement[2] * radius;
+        PCP_COPY_VECTOR(axis, originalAxis);
+        rotation[0] = effMiscRandUnitFloat(D_003AA868) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
+        rotation[1] = effMiscRandUnitFloat(D_003AA868) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
+        rotation[2] = effMiscRandUnitFloat(D_003AA868) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
+        vu0RotMatrixXYZFromVec3((const struct RwV3d *)rotation);
+        VU0_LOAD_VF(vf10, axis);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis,
+            ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.7f) * rotationScale + rotationScale);
+        VU0_LOAD_VF(vf10, placement);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, placement);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, cameraDirection);
+        VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10_EXTENDED();
+        VU0_STORE_VF_UNCLOBBERED(vf10, side);
+        VU0_LOAD_VF(vf11, width);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 3);
+        VU0_LOAD_VF(vf10, side);
+        VU0_LOAD_VF(vf11, outerWidth);
+        VU0_MUL_EXTENDED(vf10, vf10, vf11);
+        VU0_MOVE_VF_EXTENDED(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf12);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+        VU0_SUB_EXTENDED(vf11, vf11, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 4);
+        vertices += 5;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B750);
 
