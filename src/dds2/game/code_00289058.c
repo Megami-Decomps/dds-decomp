@@ -6,7 +6,7 @@ extern s32 func_0028A018(s32);
 extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 func_00314990(DatPartyRecord *, u16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
-extern s32 mnuGetMantraNodePositionRecord(s32);
+extern s32 mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(s32, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(void);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
@@ -102,7 +102,7 @@ typedef struct EvtMantraNodePositionRecord {
     s16 id;
     s16 firstKey;
     s16 secondKey;
-    u8 pad08[0x18];
+    struct EvtMantraNodePositionRecord *neighbors[6]; /* 0x08: ring of six adjacent nodes, NULL when absent */
 } EvtMantraNodePositionRecord;
 
 typedef struct MenuContainer {
@@ -419,7 +419,61 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028D2F8);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D7C8);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028DC08);
+/* Retail sign-extends mode and selection to halfwords at this call (+0x38/+0x4C sll/sra pairs). */
+extern s32 func_0028D7C8(s32, u16, s16, s16);
+
+/* Pick the neighbouring mantra node to move to. The edge mask from func_0028D7C8 is filtered against the
+ * neighbours whose model flag state is compatible with the mode (mode 3 also accepts empty slots); edges 0 and 5
+ * use paired masks, the side edges test the two adjacent neighbours. */
+EvtMantraNodePositionRecord *func_0028DC08(s32 object, u16 nodeId, s32 mode, s32 selection) {
+    EvtMantraNodePositionRecord *record;
+    EvtMantraNodePositionRecord *neighbor;
+    EvtMantraNodePositionRecord **neighbors;
+    s32 edges;
+    s32 compatible;
+    s32 i;
+
+    record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(nodeId);
+    edges = func_0028D7C8(object, nodeId, mode, selection);
+    compatible = 0;
+    if (mode != 3) {
+        neighbors = record->neighbors;
+        for (i = 0; i < 6; i++) {
+            neighbor = neighbors[i];
+            if (neighbor != NULL && neighbor->modelFlagState == mode - 1) {
+                compatible |= 1 << i;
+            }
+        }
+        if ((edges & 1) && (compatible & 0x22)) {
+            return record->neighbors[0];
+        }
+        for (i = 1; i < 5; i++) {
+            if (((edges >> i) & 1) && (compatible & (5 << (i - 1)))) {
+                return record->neighbors[i];
+            }
+        }
+    } else {
+        neighbors = record->neighbors;
+        for (i = 0; i < 6; i++) {
+            neighbor = neighbors[i];
+            if (neighbor == NULL || neighbor->modelFlagState == 3) {
+                compatible |= 1 << i;
+            }
+        }
+        if ((edges & 1) && (compatible & 0x22)) {
+            return record->neighbors[0];
+        }
+        for (i = 1; i < 5; i++) {
+            if (((edges >> i) & 1) && (compatible & (5 << (i - 1)))) {
+                return record->neighbors[i];
+            }
+        }
+    }
+    if ((edges & 0x20) && (compatible & 0x11)) {
+        return record->neighbors[5];
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028DE10);
 
