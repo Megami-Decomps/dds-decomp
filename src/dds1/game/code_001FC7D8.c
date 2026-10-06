@@ -503,7 +503,7 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
         s32 resourceIndex = link->arg;
 
         if (resourceIndex == 0) {
-            if ((owner->flags64 & 0x1400) != 0) {
+            if ((btlUnitStatusPair(owner) & 0x1400) != 0) {
                 if (battleState->commandRestrictFlags & 0x400) {
                     if (owner->flags & 0x400) {
                         func_001AD970(D_00360460[0]);

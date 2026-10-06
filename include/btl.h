@@ -25,6 +25,19 @@ typedef struct BtlUnit BtlUnit;
 
 struct EvtUnit;
 
+/* BtlUnit's status pair at +0x110. Retail touches it two ways: 32-bit flags/stateFlags
+ * accesses that type-based aliasing sees as plain words (dds1 func_001C9098 hoists a
+ * link->unit load above its `flags |=` store), and 64-bit mask tests read through this
+ * union, which GCC treats as alias set 0 (btlAccumulateEnemyDefeatRewards keeps the ld
+ * after the s32 experienceEarned store; a plain u64 read is hoisted above it). */
+typedef union BtlUnitFlagPair {
+    u64 bits;
+    struct {
+        s32 flags;
+        u32 stateFlags;
+    } words;
+} BtlUnitFlagPair;
+
 #ifdef VERSION_DDS1
 /* Seven signed status-entry records embedded in a DDS1 battle unit. */
 typedef struct BtlUnitEntrySlot {
@@ -91,13 +104,8 @@ typedef struct BtlUnit {
     s32 effectArgB; /* 0x100 */
     f32 effectValue; /* 0x104 */
     u64 identity; /* 0x108: copied to effect tasks and compared to command IDs */
-    union {
-        u64 flags64; /* 0x110: retail also loads the complete status pair. */
-        struct {
-            s32 flags; /* 0x110: arithmetic-shift accessors use the signed low word. */
-            u32 stateFlags; /* 0x114 */
-        };
-    };
+    s32 flags; /* 0x110: arithmetic-shift accessors use the signed low word. */
+    u32 stateFlags; /* 0x114 */
     u32 gunResourceFlags; /* 0x118 */
     u8 lookupId; /* 0x11C: retail lookup consumers use unsigned byte loads. */
     u8 pad11D[3];
@@ -206,13 +214,8 @@ typedef struct BtlUnit {
     s32 effectParameter; /* 0x100 */
     f32 effectScale; /* 0x104 */
     u64 owner;      /* 0x108: compared against the battle command's unit ID */
-    union {
-        u64 flags64; /* 0x110 */
-        struct {
-            s32 flags; /* 0x110: same signed status word as DDS1. */
-            u32 stateFlags; /* 0x114 */
-        };
-    };
+    s32 flags; /* 0x110: same signed status word as DDS1. */
+    u32 stateFlags; /* 0x114 */
     s32 gunResourceFlags;
     u8 lookupId;
     u8 pad11D[3];
@@ -261,5 +264,10 @@ typedef struct BtlUnit {
     struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;
 #endif /* VERSION_DDS2 */
+
+/* Whole status pair (flags low, stateFlags high) for the 64-bit mask tests. */
+static inline u64 btlUnitStatusPair(BtlUnit *unit) {
+    return ((BtlUnitFlagPair *)&unit->flags)->bits;
+}
 
 #endif /* BTL_H */

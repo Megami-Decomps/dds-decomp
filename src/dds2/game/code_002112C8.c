@@ -1483,7 +1483,7 @@ s32 func_00214230(s32 unused, s32 battler) {
     for (; node != 0; node = (s32)((ActionStateLink *)node)->next) {
         BtlUnit *target = ((ActionStateLink *)node)->unit;
         if (target != 0 &&
-            (target->flags64 & 0x221) == 0x201 &&
+            (btlUnitStatusPair(target) & 0x221) == 0x201 &&
             func_00213F58(battler, ((ActionStateLink *)node)->actions[0].actionId, 0)) {
             return 1;
         }
@@ -1527,7 +1527,7 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
         if (unit == 0) {
             continue;
         }
-        if ((unit->flags64 & 0x221) != 0x201) {
+        if ((btlUnitStatusPair(unit) & 0x221) != 0x201) {
             continue;
         }
         for (i = 0; i < 8; i++) {
@@ -1556,7 +1556,7 @@ s32 btlHasUnitWithStatusBit(BtlUnit *unit, s32 scanEnemies) {
     if (scanEnemies != 0) {
         BtlUnit *cursor = ((BtlState *)btlGetRuntime())->units;
         while (cursor != NULL) {
-            if ((cursor->flags64 & 0x421) == 0x401) {
+            if ((btlUnitStatusPair(cursor) & 0x421) == 0x401) {
                 if ((cursor->stateFlags & 0x800000) != 0) {
                     return 1;
                 }
@@ -1564,7 +1564,7 @@ s32 btlHasUnitWithStatusBit(BtlUnit *unit, s32 scanEnemies) {
             cursor = cursor->nextActor;
         }
     } else {
-        if ((unit->flags64 & 0x21) == 1) {
+        if ((btlUnitStatusPair(unit) & 0x21) == 1) {
             if ((unit->stateFlags & 0x800000) != 0) {
                 return 1;
             }
@@ -1615,7 +1615,7 @@ s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
 s32 btlAnyGroupUnitHasZeroStat(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if ((battler->flags64 & 0x221) == 0x201 &&
+        if ((btlUnitStatusPair(battler) & 0x221) == 0x201 &&
             battler->unk12A == 0) {
             return 1;
         }
@@ -1771,7 +1771,7 @@ s32 btlActionMatchesUnit(s32 unit, s32 action) {
 
 s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     btlGetRuntime();
-    if ((((BtlUnit *)unit)->flags64 & 0x421) == 0x401) {
+    if ((btlUnitStatusPair((BtlUnit *)unit) & 0x421) == 0x401) {
         if (func_001B2F50(unit, action) != 0) {
             return 1;
         }
@@ -1831,7 +1831,51 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002152D8);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00215C70);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlSelectLowestHealthElementBlockTarget);
+/* Prefer the lowest nonzero HP among element-blocking units; otherwise use the list. */
+s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u32 best;
+    u32 bestIndex;
+    u16 found;
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        found = 0;
+        best = 0x7FFF;
+        bestIndex = 0;
+        for (i = 0; i < count; i++) {
+            BtlUnit *unit = btlGetIndexListEntry(list, i);
+            if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
+                u16 current = btlReadCurrentUnitHp(&unit->statBits);
+                if (best >= current && current != 0) {
+                    best = current;
+                    found++;
+                    bestIndex = i;
+                }
+            }
+        }
+        if (found != 0) {
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
+        } else {
+            for (i = 0; i < count; i++) {
+                flags[i] = 1;
+            }
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, func_00215118(list, flags, count));
+        }
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((ActionStateLink *)actor)->indexWork.indices, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 s32 btlSelectLowestHealthRateTarget(s32 task) {
     u32 matched;
@@ -3150,9 +3194,8 @@ void btlResetActionEffectOnUnit(void) {
         vec[0] = 0.0f;
         vec[1] = 10000.0f;
         vec[2] = -10000.0f;
-        /* As above, preserve the original 32-bit writes to the status pair. */
-        ((u32 *)&unit->flags64)[0] &= ~8;
-        ((u32 *)&unit->flags64)[1] |= 0x180;
+        unit->flags &= ~8;
+        unit->stateFlags |= 0x180;
         effObjSetInnerFirstVec(unit->effectObject, vec);
     }
 }

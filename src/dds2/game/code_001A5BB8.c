@@ -2253,7 +2253,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         btlBossDebugPrintf(D_00415208, reward, datBattleParameters->majinRewardScale);
     }
     controller->experienceEarned += reward;
-    if ((enemy->flags64 & 0x200800000ULL) == 0) {
+    if ((btlUnitStatusPair(enemy) & 0x200800000ULL) == 0) {
         amount = btlCalculateEnemyExperienceReward(NULL, (u8 *)enemy);
         controller->epEarned += amount;
         btlBossDebugPrintf(D_00415220, controller->epEarned, amount);

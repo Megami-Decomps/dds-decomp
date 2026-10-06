@@ -711,7 +711,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
     s32 value;
     switch (argument[0]) {
     case 1:
-        if ((unit->flags64 & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
+        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
             return btlGetActorBedAssetIdFromIndex(unit->unk172);
         }
         if (argument[1] > 0) {
@@ -754,7 +754,7 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
     case 7:
     case 8: {
         s32 index = ((BtlCommandArgument *)argument)->index;
-        if (index == 0xD6 && (unit->flags64 & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
+        if (index == 0xD6 && (btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
             return 0xC;
         }
         return ((BtlActionTableEntry *)datActionAnimationRecords)[index].kind;
@@ -795,7 +795,7 @@ s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 ar
     } else {
         code = 1;
     }
-    if (arg5 != 0 && (actor->flags64 & 0x4000000200) == 0x200) {
+    if (arg5 != 0 && (btlUnitStatusPair(actor) & 0x4000000200) == 0x200) {
         code = 0xB;
     }
     if ((arg1 & 0x20001) == 0) {
@@ -3057,7 +3057,7 @@ void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
 }
 
 u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
-    if ((((BtlUnit *)taskArgs[3])->flags64 & 0x1000000002) == 0x1000000002) {
+    if ((btlUnitStatusPair((BtlUnit *)taskArgs[3]) & 0x1000000002) == 0x1000000002) {
         func_0023C870((u32)((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
     }
     return 1;
@@ -3538,7 +3538,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
         if (args->count & 1) {
             scale = -scale;
         }
-        if (args->unit->flags64 & 0x808000000000) {
+        if (btlUnitStatusPair(args->unit) & 0x808000000000) {
             effObjFetchInnerFirstVec(args->unit->effectObject);
             VU0_STORE_VF(vf10, pos);
             pos[0] += scale;
@@ -3550,7 +3550,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
         effObjSetInnerFirstVec(args->unit->effectObject, pos);
         args->scale *= 0.85f;
     } else {
-        if (args->unit->flags64 & 0x808000000000) {
+        if (btlUnitStatusPair(args->unit) & 0x808000000000) {
             effObjFetchInnerFirstVec(args->unit->effectObject);
             VU0_STORE_VF(vf10, pos);
         } else {
@@ -9346,7 +9346,7 @@ void btlMoveOtherUnitsAway(BtlUnit *unit) {
     for (; other != NULL; other = other->nextActor) {
         if ((other->flags & 1) && (other->flags & mask) && other != unit->link18) {
             btlClearUnitDefeatCandidate(other);
-            if ((other->flags64 & 0x102) == 0x102) {
+            if ((btlUnitStatusPair(other) & 0x102) == 0x102) {
                 func_001E3108(other, pos);
                 pos[1] += 1000000.0f;
                 pos[0] = 0;
@@ -9705,7 +9705,7 @@ void func_00206C18(ActionStateLink *link, BtlUnit *other) {
                 if (unit != slot[0] && unit != slot[1]) {
                     btlClearUnitDefeatCandidate(unit);
                     btlSetUnitPosition(unit, (f32 *)&D_003BE0A0);
-                    if ((unit->flags64 & 0x102) == 0x102) {
+                    if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
                         PCP_COPY_VECTOR(pos, &D_003BE0A0);
                         pos[1] += 1000000.0f;
                         effObjSetInnerFirstVec(unit->effectObject, pos);
