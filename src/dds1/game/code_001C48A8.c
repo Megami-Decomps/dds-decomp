@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "dat_state.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -620,24 +621,9 @@ INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C5F80);
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C6888);
 
-typedef struct PartyDeltaEntry {
-    u16 flags;
-    u8 pad_002[6];
-    u16 weight;
-    u8 pad_00A[4];
-    u16 mask;
-    u8 pad_010[0x188];
-    s32 link;
-    u8 pad_19C[8];
-} PartyDeltaEntry;
-
-typedef struct PartyDeltaState {
-    u8 pad_000[0xA60];
-    PartyDeltaEntry entry[5];
-} PartyDeltaState;
 
 
-extern PartyDeltaState *datGameState;
+
 
 extern void itfMesClearFlags(s32);
 
@@ -662,15 +648,15 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
     brsTaskAllowUpdate();
     evtBeginSolarOverlayFadeOut(8);
     do {
-        func_001A1960(&datGameState->entry[i], -0x45D1);
+        func_001A1960(&datGameState->party[i], -0x45D1);
         if (!(scene->subFlags & 0x40)) {
-            if (datGameState->entry[i].flags & 2) {
+            if (datGameState->party[i].flags & 2) {
                 if (scene->unk258 == 1) {
-                    if (datGameState->entry[i].link != 0 || scene->unk2D0 != 0) {
-                        if (!(datGameState->entry[i].mask & 0x40)) {
-                            if (mnuIsTitleEntryAvailable(&datGameState->entry[i]) == 0) {
-                                datAdjustCurrentHp(&datGameState->entry[i],
-                                               (s32)((f32)datGameState->entry[i].weight * scale));
+                    if (datGameState->party[i].link != 0 || scene->unk2D0 != 0) {
+                        if (!(datGameState->party[i].status & 0x40)) {
+                            if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
+                                datAdjustCurrentHp(&datGameState->party[i],
+                                               (s32)((f32)datGameState->party[i].maxHp * scale));
                             }
                         }
                     }
