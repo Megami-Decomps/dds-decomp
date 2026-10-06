@@ -64,7 +64,7 @@ typedef struct BtlOperandGroup {
     u8 count;
     u8 pad01[3];
     s32 interval;
-    s32 unk08;
+    u32 unk08;
     s32 unk0C;
     u8 unk10; /* Reset bytewise; some predicates read the +0x10/+0x11 pair. */
     u8 unk11;

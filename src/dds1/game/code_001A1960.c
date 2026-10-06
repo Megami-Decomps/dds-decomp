@@ -6,6 +6,10 @@
 #include "eff.h"
 #include "btl_action.h"
 
+extern void mdlFlagSet(s32 flag);
+extern void dspCloseChannel(void);
+extern s32 dspStartEntry(s32 entry);
+extern void evtCreateMessageWindowIfMissing(void *text);
 extern void sdfReleaseChipBlock(void *block);
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -3672,6 +3676,38 @@ void btlReleaseRegisteredChildTaskWork(s64 arg0) {
     btlSetTrackedTaskHandle(7, 0);
 }
 
+/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
+ * the later panel updater handles the other five points and their fades. */
+typedef struct BattlePhasePanelWork {
+    s32 frames;
+    s32 mode;
+    s8 phase;
+    u8 pad09[0xF];
+    s32 waitCounter; /* 0x18: delay before the first slide */
+    u8 pad1C[0x1C];
+    BattleSelectionPosition current[8]; /* 0x38 */
+    BattleSelectionPosition saved[8];   /* 0x78 */
+    s32 fade[8][4];                    /* 0xB8 */
+} BattlePhasePanelWork;
+
+typedef char BattlePhasePanelWork_size_must_be_0x138[
+    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+typedef char BattlePhasePanelWork_waitCounter_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
+typedef char BattlePhasePanelWork_current_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
+typedef char BattlePhasePanelWork_saved_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
+typedef char BattlePhasePanelWork_fade_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
+
+typedef struct BattlePhaseSlotIds { s32 values[3]; } BattlePhaseSlotIds;
+typedef struct BattlePhaseFadeLimits { s32 values[3][4]; } BattlePhaseFadeLimits;
+typedef struct BattlePhaseXBounds { s32 values[3][2]; } BattlePhaseXBounds;
+extern const BattlePhaseSlotIds D_003A2880;
+extern const BattlePhaseFadeLimits D_003A2890;
+extern const BattlePhaseXBounds D_003A28C0;
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2870);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2880);
@@ -3680,22 +3716,90 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2890);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28C0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B1518);
+void func_001B1518(BattlePhasePanelWork *work) {
+    BattlePhaseSlotIds slots = D_003A2880;
+    BattlePhaseFadeLimits limits = D_003A2890;
+    BattlePhaseXBounds bounds = D_003A28C0;
+    s32 i, j;
+    switch (work->phase) {
+    case 0:
+        work->waitCounter++;
+        work->waitCounter = work->waitCounter <= 0 ? 0 : work->waitCounter > 10 ? 10 : work->waitCounter;
+        if (work->waitCounter >= 3) {
+            for (i = 0; i < 3; i++) {
+                work->current[i].x -= 10;
+                work->current[i].x = work->current[i].x <= bounds.values[i][0] ? bounds.values[i][0] :
+                    work->current[i].x < bounds.values[i][1] ? work->current[i].x : bounds.values[i][1];
+                for (j = 0; j < 4; j++) {
+                    work->fade[i][j] += 0x20;
+                    work->fade[i][j] = work->fade[i][j] <= 0 ? 0 : work->fade[i][j] < limits.values[i][j] ? work->fade[i][j] : limits.values[i][j];
+                }
+            }
+            if (work->fade[0][0] >= 0x80) work->phase++;
+        }
+        break;
+    case 1:
+        work->fade[0][0] = 0xFF;
+        work->current[0].x -= 2;
+        if (work->current[0].x <= 300) work->phase++;
+        break;
+    case 2:
+        work->current[0].x -= 20;
+        work->current[1].x -= 16;
+        work->fade[0][0] -= 16;
+        work->fade[0][0] = work->fade[0][0] <= 0 ? 0 : work->fade[0][0] > 0xFF ? 0xFF : work->fade[0][0];
+        if (work->current[0].x <= 128) work->phase++;
+        break;
+    case 3:
+        work->current[0].x -= 18;
+        work->current[1].x -= 18;
+        work->current[2].x -= 18;
+        if (work->current[0].x <= 96) {
+            work->phase++;
+            work->fade[0][0] = 0;
+            work->fade[0][2] = 0;
+        }
+        break;
+    case 4:
+        work->current[0].x -= 20;
+        work->current[1].x -= 20;
+        work->current[2].x -= 20;
+        work->fade[0][1] -= 0x20;
+        work->fade[0][1] = work->fade[0][1] <= 0 ? 0 : work->fade[0][1] > 0x80 ? 0x80 : work->fade[0][1];
+        work->fade[0][3] -= 0x20;
+        work->fade[0][3] = work->fade[0][3] <= 0 ? 0 : work->fade[0][3] > 0x80 ? 0x80 : work->fade[0][3];
+        work->fade[1][2] = work->fade[0][3];
+        work->fade[1][0] = work->fade[0][1];
+        if (work->fade[0][1] <= 64) {
+            work->fade[1][1] -= 0x20;
+            work->fade[1][1] = work->fade[1][1] <= 0 ? 0 : work->fade[1][1] > 0x80 ? 0x80 : work->fade[1][1];
+            work->fade[2][0] = work->fade[1][1];
+            work->fade[2][2] = work->fade[1][3];
+        }
+        if (work->fade[2][0] <= 64) {
+            work->fade[2][1] -= 0x20;
+            work->fade[2][1] = work->fade[2][1] <= 0 ? 0 : work->fade[2][1] > 0x80 ? 0x80 : work->fade[2][1];
+            work->fade[2][3] -= 0x20;
+            work->fade[2][3] = work->fade[2][3] <= 0 ? 0 : work->fade[2][3] > 0x80 ? 0x80 : work->fade[2][3];
+        }
+        break;
+    }
+    if (work->phase >= 3) {
+        for (i = 0; i < 3; i++) {
+            s32 height = btlResourceBlock->resC->workEntries[slots.values[i]].sourceHeight;
+            work->saved[i].y += 3;
+            work->saved[i].y = work->saved[i].y <= 0 ? 0 : work->saved[i].y < height ? work->saved[i].y : height;
+        }
+    }
+    work->fade[1][3] = 0;
+    work->fade[2][0] = 0;
+    work->fade[2][1] = 0;
+    work->fade[2][2] = 0;
+    work->fade[2][3] = 0;
+}
 
-/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
- * the later panel updater handles the other five points and their fades. */
-typedef struct BattlePhasePanelWork {
-    s32 frames;
-    s32 mode;
-    s8 phase;
-    u8 pad09[0x2F];
-    BattleSelectionPosition current[8]; /* 0x38 */
-    BattleSelectionPosition saved[8];   /* 0x78 */
-    s32 fade[8][4];                    /* 0xB8 */
-} BattlePhasePanelWork;
 
-typedef char BattlePhasePanelWork_size_must_be_0x138[
-    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+
 
 extern void fldScaleSceneCoordinateRecord(s32, s32);
 
@@ -4686,11 +4790,18 @@ void fldClearBattleSceneObject(s64 arg0) {
     btlReleaseBattleScratchBlocks();
 }
 
-void fldInitializeSceneObject(s32 object, s32 owner) {
-    memset((void *)object, 0, 0x30);
-    *(s32 *)object = 1;
-    *(s32 *)(object + 0x28) = owner + 0x20;
-    *(s32 *)(object + 0x2C) = owner;
+extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
+extern s32 func_001BF0F8(s64 task);
+extern s32 func_001B5970(s64 task);
+extern s32 func_001B55A8(s64 task);
+extern void func_001B2AC8(BattleSceneObject *object);
+extern u8 D_00358828[];
+
+void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
+    memset(object, 0, sizeof(*object));
+    object->state = 1;
+    object->commandData = &owner->result;
+    object->owner = owner;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneObjectTaskUserData);
@@ -4702,16 +4813,76 @@ s64 fldGetSceneObjectState(void) {
     if (temp_v0 == 0) {
         return temp_v0;
     }
-    return *(s32 *)fldGetSceneObjectTaskUserData();
+    return fldGetSceneObjectTaskUserData()->state;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF4C0);
+void func_001BF4C0(BtlTask *task) {
+    BattleController *scene;
+    BattleSceneObject *object;
+    u32 handle;
+
+    if (kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef) == 0) {
+        scene = (BattleController *)btlGetRuntime();
+        object = sdfAllocAndClearQuadwords(sizeof(*object));
+        fldInitializeSceneObject(object, task);
+        handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
+                               func_001BF0F8, fldClearBattleSceneObject, (u32)object);
+        func_00101A80(scene->taskParent, handle);
+        scene->sceneObjectTask = handle;
+        func_001B83D8((s32)task, 0, 0);
+        btlInitializeSelectionWork();
+        btlInitializeCommandPanelSlotTables();
+        btlCreateMessageWindow();
+        func_001B2AC8(object);
+        if ((task->unit->flags & 0x200) && !(scene->flags & 0x1000000)) {
+            if (mdlFlagTest(0x81B) == 0) {
+                mdlFlagSet(0x81B);
+                btlTrackedTaskHandles->status.bytes.blocked = 1;
+                scene->flags &= ~0x100000;
+                handle = kwlnTaskCreate(D_003BB3D4, 0x2B0E, 1, 1,
+                                       func_001B5970, btlReleaseWindowTask,
+                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                func_00101A80(scene->taskParent, handle);
+                btlSetTrackedTaskHandle(0xD, handle);
+                dspCloseChannel();
+                evtCreateMessageWindowIfMissing(D_00358828);
+                dspStartEntry(2);
+                func_001BCB88(0, 8);
+            } else if (btlGetTaskState6() != 0) {
+                scene->flags &= ~0x100000;
+                handle = kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
+                                       func_001B55A8, btlFinishTrackedBattleTaskAndCloseWindow,
+                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                func_00101A80(scene->taskParent, handle);
+                btlSetTrackedTaskHandle(0xC, handle);
+                dspCloseChannel();
+                evtCreateMessageWindowIfMissing(D_00358828);
+                func_001BCB88(0, 8);
+            } else {
+                scene->flags |= 0x100000;
+            }
+        }
+    }
+    object = fldGetSceneObjectTaskUserData();
+    if (object->state == 3) {
+        btlCommandPanelWork->state = 2;
+        object->state = 1;
+    } else if (object->state == 8) {
+        object->state = 6;
+        btlCommandPanelWork->state = 2;
+    } else if (object->state != 11) {
+        btlCommandPanelWork->state = 1;
+        object->state = 1;
+    }
+    btlLinkedSelectionTaskBuffer->selectedRow =
+        btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+}
 
 void fldSetSceneObjectAndGroupStates(void) {
-    s32 *task = (s32 *)fldGetSceneObjectTaskUserData();
-    if (task != 0) {
+    BattleSceneObject *object = fldGetSceneObjectTaskUserData();
+    if (object != 0) {
         BattleCmdPanel *panel = btlCommandPanelWork;
-        *task = 5;
+        object->state = 5;
         panel->state = 3;
     }
 }

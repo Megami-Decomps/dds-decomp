@@ -114,6 +114,16 @@ typedef struct BtlSceneFadingRecord {
     s32 target;
 } BtlSceneFadingRecord;
 
+/* DDS2 0x1A9F30 loads the whole +0x2AC word; 0x1D0020 loads its two
+ * signed halfword IDs separately for the field/background resource tasks. */
+typedef union BtlBackgroundId {
+    u32 packed;
+    struct {
+        s16 major;
+        s16 minor;
+    } ids;
+} BtlBackgroundId;
+
 
 /* The 0xFD4-byte singleton allocated by DDS2 0x1A9B80 and returned by
  * 0x1AA6F8. Its script-owner/task pair is +0x2C4/+0x2C8, not DDS1's
@@ -182,12 +192,12 @@ typedef struct BtlState {
     u32 unk28C;
     u8 pad290[4];
     s32 effectLayer; /* 0x294 */
-    u8 pad298[8];
+    s32 adjustmentGroupIndex; /* 0x298: encounter pack's group selector */
+    s32 adjustmentEntryIndex; /* 0x29C: entry selector within the group */
     s32 battleMode; /* 0x2A0 */
     s32 requestArgument; /* 0x2A4 */
     u8 pad2A8[4];
-    s16 tileX; /* 0x2AC */
-    s16 tileY;
+    BtlBackgroundId background; /* 0x2AC */
     s32 loadStep;
     u8 pad2B4[0x10];
     struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
