@@ -778,7 +778,48 @@ u32 *func_00320A98(const char *source, const char *request) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320AE8);
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438960);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438968);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438970);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438978);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438980);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438988);
+
+INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438990);
+
+void *func_00320AE8(const char *directory, const char *name, u32 *countOut) {
+    DdsSpriteFileHeader header;
+    u32 info[5];
+    char path[128];
+    SdkFileStream *file;
+    u8 *data;
+    u32 *offsets;
+
+    memset(path, 0, sizeof(path));
+    func_0035C860(path, D_00438988, directory, name);
+    file = func_00359A98(path, "rb");
+    if (file != NULL) {
+        func_00359B18(&header, sizeof(header), 1, file);
+        func_00359B18(info, sizeof(info), 1, file);
+        data = func_0035A828(info[0]);
+        memset(data, 0, info[0]);
+        func_00359B18(data, info[0], 1, file);
+        offsets = func_0035A828(info[3]);
+        memset(offsets, 0, info[3]);
+        func_00359B18(offsets, info[3], 1, file);
+        func_003594A8(file);
+        dds3ApplyRelocationOffsets(data, (u32)data, offsets, info[3]);
+        func_0035A880(offsets);
+        *countOut = info[1];
+        return data;
+    }
+    return NULL;
+}
 
 u32 mnuCreateCallbackNode(u32 userData) {
     u32 *node = (u32 *)func_0035A828(0x18);
@@ -873,19 +914,3 @@ u32 dds3RemoveListNodeAndNotify(u32 list, u32 node) {
     func_0035A880((void *)node);
     return remaining;
 }
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438960);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438968);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438970);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438978);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438980);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438988);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438990);
-
-INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438998);
-
