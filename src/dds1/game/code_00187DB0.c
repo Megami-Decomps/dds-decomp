@@ -1,6 +1,8 @@
 #include "common.h"
 #include "eff.h"
 
+extern void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsCoordinates);
+
 INCLUDE_ASM(const s32, "game/code_00187DB0", effResourceQuadDraw);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -19,19 +21,18 @@ void func_00188050(void) {
     sdfReleaseChipBlock();
 }
 
-extern s32 effResourceQuadDraw(void *data, s32 resource, s32 flags);
 
 /* Generate pixel-coordinate bounds; the renderer applies GS coordinate scale. */
-s32 effResourceRectDrawPixels(EffResourceRectWork *work) {
+void effResourceRectDrawPixels(EffResourceRectWork *work) {
     s32 extent = (s32)((f32)work->params.extent * 1.4f);
     s32 x = work->params.centerX + 0x100;
     s32 y = work->params.centerY + 0xE0;
 
-    work->params.bounds.left = x - extent;
-    work->params.bounds.top = y - extent;
-    work->params.bounds.right = x + extent;
-    work->params.bounds.bottom = y + extent;
-    return effResourceQuadDraw(work->params.color, work->sourceHandle, 0);
+    work->params.draw.bounds.left = x - extent;
+    work->params.draw.bounds.top = y - extent;
+    work->params.draw.bounds.right = x + extent;
+    work->params.draw.bounds.bottom = y + extent;
+    effResourceQuadDraw(&work->params.draw, work->sourceHandle, 0);
 }
 
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */
@@ -45,13 +46,13 @@ void effComputeBlurRectBounds(EffResourceRectWork *work) {
 
     x -= extent;
     extent >>= 1;
-    work->params.bounds.left = x;
+    work->params.draw.bounds.left = x;
     bottom = y + extent;
     y -= extent;
-    work->params.bounds.right = right;
-    work->params.bounds.top = y;
-    work->params.bounds.bottom = bottom;
-    effResourceQuadDraw(work->params.color, work->sourceHandle, 1);
+    work->params.draw.bounds.right = right;
+    work->params.draw.bounds.top = y;
+    work->params.draw.bounds.bottom = bottom;
+    effResourceQuadDraw(&work->params.draw, work->sourceHandle, 1);
 }
 
 typedef struct EffTrackPolyModel EffTrackPolyModel;

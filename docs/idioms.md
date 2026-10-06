@@ -1125,6 +1125,33 @@ of a private descriptor struct.
 The provider remains assembly. Changing its callers' input ownership does not
 authorize modifying its body, compiler flags or expected object.
 
+## Magatuhi history and parent ownership
+
+`EffMagatuhiValueWork` is the complete 0x38-byte history owner at the end of
+one retained allocation. Its arrays hold `count * historyCount` positions and
+sample values, a `historyCount` palette, per-slot colors and ring indices, and
+four angle floats per slot. The angle storage is an array of four-float rows,
+not a second scalar-pointer view.
+
+The separate 0x20-byte `EffMagatuhiOwner` copies seven parameter words into
+its 0x1C-byte `EffMagatuhiHistoryParams` and appends a history-owner pointer.
+Its release/update callers share that owner, rather than padded handle-word
+views. The factory returns the actual history pointer; the allocation handle
+and address returned by the resource-retain API remain separate SDK concepts.
+
+The clone input is seven word-aligned words beginning at the effect head's
+`particleCount`; all ten callers supply that word's address. Preserve that real
+word input instead of erasing its alignment with a byte-blob pointer.
+
+## Textured-square template ownership
+
+The event manager's former nine-word `EffTemplateBody` is the same
+0x24-byte `EffResourceRectParams` consumed by `effCloneResourceTemplate`.
+The live textured-square work is the canonical 0x28-byte `EffResourceRectWork`,
+not a second body-plus-word layout. Its selected source handle follows `params`.
+The event setup table, its whole-parameter setters and the viewer's 0x24-byte
+parameter copies all use the same canonical record.
+
 ## Battle records and saved-party ownership
 
 The DDS1 battle getters return the canonical `DatPartyRecord` entries in
@@ -2024,3 +2051,33 @@ action and the mismatch involves its common tail. Do not duplicate calls
 that would execute twice, invent work or dependencies, or generalize it to
 every branch-likely residual. Selecting one descriptor before one call was
 a distinct failed shape here: it produced `movn` and a shorter function.
+
+## Nested rectangle draw records and void submission
+
+The resource-rectangle family has two real parameter records. The `0x24`
+`EffResourceRectParams` stores extent and center in its first three words,
+then embeds an `0x18` `EffResourceRectDrawParams` at `+0xC`. That inner
+record contains four color bytes, signed blend control, and four signed
+bounds. The `0x28` owner appends its source handle at `+0x24`.
+
+DDS1 `effResourceQuadDraw` (`0x00187DB0`) and DDS2's twin (`0x0018F9E8`)
+receive the inner record directly. Their byte color loads start at input
+`+0`, blend control is at `+4`, and bounds begin at `+8`. An old call that
+passes the outer record's color-array address does not justify introducing
+a second struct view. Embed the actual draw record in its existing owner
+and pass `&work->params.draw`.
+
+These renderers finish with the canonical `SdfPoolNode.append` callback,
+which returns `void`; the four effect dispatch consumers also ignore any
+result. The pixel-bound generator therefore has a real
+`void (EffResourceRectWork *)` contract, not an invented scalar result.
+Changing the nested layout and provider contract preserves the native
+nine-word clone and both bound generators.
+
+This ownership/ABI cleanup is separate from matching the quad renderer.
+The canonical DDS2 draft still differs in 56 of 129 emitted words against
+131 retail words, beginning with the branch distance at `+0xF0` and the
+left-column store order at `+0x104`. Chaining the paired column assignments
+does not change that result. Keep the renderer as assembly rather than
+adding an interior shadow, widened parameter, or store-order lever.
+

@@ -1,64 +1,29 @@
-#include "common.h"
+#include "eff.h"
 
-typedef struct MagatuhiEffectOwner {
-    u8 pad00[0x1C];
-    u32 resource;
-} MagatuhiEffectOwner;
-
-typedef struct MagatuhiEffectData {
-    s32 field00;
-    s32 field04;
-    f32 field08;
-    s32 field0C;
-    s32 field10;
-    s32 field14;
-    f32 field18;
-    s32 field1C;
-} MagatuhiEffectData;
-
-typedef struct {
-    s32 count;
-    u16 historyCount;
-    u8 pad06[2];
-    f32 unk08;
-    f32 unk0C;
-    u32 unk10;
-    f32 (*positions)[4];
-    u32 *colorTable;
-    f32 *unk1C;
-    u32 *values;
-    u16 *writeIndices;
-    u16 *validCounts;
-    f32 *angleValues; /* Four floats per indexed row. */
-    u32 texture;
-    void *resource;
-} EffMagatuhiValueWork;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *sdfAllocGeneralBlock(s32 size);
 extern s32 sdfResourceRetainAddress(void *resource);
 extern s32 effGetResourceFirstWord(s32 index);
-extern s32 func_00190E58(s32, s32, f32, s32, f32);
-extern void effMagatuhiFillColorTable(s32, s32, s32);
 extern s16 D_00452110[];
 
-void *effCloneMagatuhiWithColorResource(MagatuhiEffectData *source) {
-    MagatuhiEffectData *effect;
+EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
+    EffMagatuhiOwner *effect;
 
-    effect = (MagatuhiEffectData *)sdfAllocSizeClassBlock(0x20);
-    memcpy(effect, source, 0x1C);
-    effect->field1C = func_00190E58(effect->field00, effect->field04, effect->field08, effect->field14, effect->field18);
-    effMagatuhiFillColorTable(effect->field1C, effect->field0C, effect->field10);
+    effect = sdfAllocSizeClassBlock(sizeof(*effect));
+    memcpy(&effect->params, source, sizeof(effect->params));
+    effect->valueWork = func_00190E58(effect->params.count, effect->params.historyCount, effect->params.unk08, effect->params.unk14, effect->params.unk18);
+    effMagatuhiFillColorTable(effect->valueWork, effect->params.colorA, effect->params.colorB);
     return effect;
 }
 
-void effReleaseMagatuhiOwner(MagatuhiEffectOwner *effect) {
-    effMagatuhiReleaseResource(effect->resource);
+void effReleaseMagatuhiOwner(EffMagatuhiOwner *effect) {
+    effMagatuhiReleaseResource(effect->valueWork);
     sdfReleaseChipBlock(effect);
 }
 
-void func_00190DE0(MagatuhiEffectOwner *effect) {
-    func_00191010(effect->resource);
+void func_00190DE0(EffMagatuhiOwner *effect) {
+    func_00191010(effect->valueWork);
 }
 
 void func_00190DF8(EffMagatuhiValueWork *work, s32 index) {
@@ -66,16 +31,15 @@ void func_00190DF8(EffMagatuhiValueWork *work, s32 index) {
 
     work->writeIndices[index] = 0;
     work->validCounts[index] = 0;
-    work->values[index] = 0x80808080;
-    angles = work->angleValues;
-    angles += index * 4;
+    work->slotColors[index] = 0x80808080;
+    angles = work->angleRows[index];
     angles[0] = 6.2831853f;
     angles[1] = 0.0f;
     angles[2] = 3.1415926f;
     angles[3] = 0.0f;
 }
 
-s32 func_00190E58(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
+EffMagatuhiValueWork *func_00190E58(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
     s32 countFrames;
     s32 frameTerm;
     s32 countTerm;
@@ -95,7 +59,7 @@ s32 func_00190E58(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
     countFrames = count * frames;
     frameTerm = countFrames + frames;
     countTerm = (countFrames << 2) + count;
-    allocationSize = (((count << 3) + ((countTerm + frameTerm) << 1) + (count << 1)) << 1) + 0x38;
+    allocationSize = (((count << 3) + ((countTerm + frameTerm) << 1) + (count << 1)) << 1) + sizeof(EffMagatuhiValueWork);
     allocation = sdfAllocGeneralBlock(allocationSize);
     positions = sdfResourceRetainAddress(allocation);
     colorTable = positions + (countFrames << 4);
@@ -114,11 +78,11 @@ s32 func_00190E58(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
     resource->positions = (f32 (*)[4])positions;
     resource->colorTable = (u32 *)colorTable;
     resource->unk1C = (f32 *)unknownValues;
-    resource->values = (u32 *)values;
+    resource->slotColors = (u32 *)values;
     resource->writeIndices = (u16 *)writeIndices;
     resource->validCounts = (u16 *)validCounts;
-    resource->angleValues = (f32 *)angleValues;
-    resource->resource = allocation;
+    resource->angleRows = (f32 (*)[4])angleValues;
+    resource->allocationHandle = allocation;
     resource->texture = effGetResourceFirstWord(0);
 
     defaults = D_00452110;
@@ -143,5 +107,5 @@ s32 func_00190E58(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
             i++;
         } while (i < count);
     }
-    return (s32)resource;
+    return resource;
 }
