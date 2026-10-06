@@ -3680,15 +3680,15 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2890);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A28C0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B1518);
-
 /* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
  * the later panel updater handles the other five points and their fades. */
 typedef struct BattlePhasePanelWork {
     s32 frames;
     s32 mode;
     s8 phase;
-    u8 pad09[0x2F];
+    u8 pad09[0xF];
+    s32 waitCounter; /* 0x18: delay before the first slide */
+    u8 pad1C[0x1C];
     BattleSelectionPosition current[8]; /* 0x38 */
     BattleSelectionPosition saved[8];   /* 0x78 */
     s32 fade[8][4];                    /* 0xB8 */
@@ -3696,6 +3696,18 @@ typedef struct BattlePhasePanelWork {
 
 typedef char BattlePhasePanelWork_size_must_be_0x138[
     (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+typedef char BattlePhasePanelWork_waitCounter_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
+typedef char BattlePhasePanelWork_current_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
+typedef char BattlePhasePanelWork_saved_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
+typedef char BattlePhasePanelWork_fade_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
+
+INCLUDE_ASM(const s32, "game/code_001A1960", func_001B1518);
+
+
 
 extern void fldScaleSceneCoordinateRecord(s32, s32);
 

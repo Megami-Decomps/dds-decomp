@@ -5392,6 +5392,31 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004163C0);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004163F0);
 
+/* B8368 allocates 0x138 bytes. The strip renderer uses the first three rows;
+ * the later panel updater handles the other five points and their fades. */
+typedef struct BattlePhasePanelWork {
+    s32 frames;
+    s32 mode;
+    s8 phase;
+    u8 pad09[0xF];
+    s32 waitCounter; /* 0x18: delay before the first slide */
+    u8 pad1C[0x1C];
+    BattleSelectionPosition current[8]; /* 0x38 */
+    BattleSelectionPosition saved[8];   /* 0x78 */
+    s32 fade[8][4];                    /* 0xB8 */
+} BattlePhasePanelWork;
+
+typedef char BattlePhasePanelWork_size_must_be_0x138[
+    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+typedef char BattlePhasePanelWork_waitCounter_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
+typedef char BattlePhasePanelWork_current_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
+typedef char BattlePhasePanelWork_saved_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
+typedef char BattlePhasePanelWork_fade_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
+
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BC138);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416428);
@@ -5421,7 +5446,7 @@ extern void func_001BC8A8();
 extern void func_001BCFB0();
 
 s32 btlUpdatePhaseGatedTaskUntilTimeout(void) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue();
+    BattlePhasePanelWork *state = (BattlePhasePanelWork *)kwlnTaskGetUserValue();
     s32 frame;
     if ((u32)((btlGetNamedTaskPairStatusOrUnavailable() - 1) & 0xFF) < 2U) {
         return 0;
@@ -5434,8 +5459,8 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(void) {
     if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001BCFB0(state);
     }
-    frame = *state + 1;
-    *state = frame;
+    frame = state->frames + 1;
+    state->frames = frame;
     return frame < 0x32 ? 0 : -1;
 }
 
