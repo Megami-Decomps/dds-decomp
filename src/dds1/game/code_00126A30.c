@@ -31,13 +31,25 @@ extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldReleaseActorTasksById(s32);
 /* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
-   scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. */
+   scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. Three transition keys, signed frame
+   counters and two float triples with per-frame increments (same layout as DDS2). */
 typedef struct {
-    u32 unk00[11]; /* 0x00 */
-    f32 unk2C;     /* 0x2C: written as a float by fldApplyActorEntryTrigger */
-    u32 unk30[8];  /* 0x30 */
-    u32 unk50[3];  /* 0x50 */
-} FldActorRow;
+    s32 kind;
+    u32 actorId;
+    u32 unk08;
+    u32 firstKey;
+    u32 unk10;
+    u32 secondKey;
+    u32 transitionKey;
+    s32 firstFrame;
+    s32 secondFrame;
+    s32 transitionFrame;
+    s32 frameCount;
+    f32 firstValues[3];
+    f32 firstStep[3];
+    f32 secondValues[3];
+    f32 secondStep[3];
+} FldActorRow; /* 0x5C bytes */
 
 extern FldActorRow fldActorSlots[];
 extern s32 D_0032E530[];
@@ -4522,14 +4534,14 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     if (kind == 1) {
         if (entry->floor == D_0032E3C4[0] + 1) {
             fldPlayFieldSeVolumePan(entry->sound);
-            fldReleaseActorTasksById(fldActorSlots[index].unk00[1]);
+            fldReleaseActorTasksById(fldActorSlots[index].actorId);
             return;
         }
     } else if (kind == 2) {
         if (entry->floor == fldAreaState[5] + 1) {
             s32 motion = entry->motion;
 
-            ((FldAreaWork *)fldAreaState)->unk174 = fldActorSlots[index].unk2C;
+            ((FldAreaWork *)fldAreaState)->unk174 = fldActorSlots[index].firstValues[0];
             ((FldAreaWork *)fldAreaState)->positionMode = 1;
             if (motion == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
@@ -4858,28 +4870,28 @@ void fldResetActorSlots(void) {
     s32 actorIndex;
 
     for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
-        fldActorSlots[actorIndex].unk00[0] = 0;
-        fldActorSlots[actorIndex].unk00[1] = 0;
-        fldActorSlots[actorIndex].unk00[2] = 0;
-        fldActorSlots[actorIndex].unk00[3] = -1;
-        fldActorSlots[actorIndex].unk00[4] = 0;
-        fldActorSlots[actorIndex].unk00[5] = -1;
-        fldActorSlots[actorIndex].unk00[6] = -1;
-        fldActorSlots[actorIndex].unk00[7] = 0;
-        fldActorSlots[actorIndex].unk00[8] = 0;
-        fldActorSlots[actorIndex].unk00[9] = 0;
-        fldActorSlots[actorIndex].unk2C = 0.0f;
-        fldActorSlots[actorIndex].unk30[0] = 0;
-        fldActorSlots[actorIndex].unk30[1] = 0;
-        fldActorSlots[actorIndex].unk30[2] = 0;
-        fldActorSlots[actorIndex].unk30[3] = 0;
-        fldActorSlots[actorIndex].unk30[4] = 0;
-        fldActorSlots[actorIndex].unk30[5] = 0;
-        fldActorSlots[actorIndex].unk30[6] = 0;
-        fldActorSlots[actorIndex].unk30[7] = 0;
-        fldActorSlots[actorIndex].unk50[0] = 0;
-        fldActorSlots[actorIndex].unk50[1] = 0;
-        fldActorSlots[actorIndex].unk50[2] = 0;
+        fldActorSlots[actorIndex].kind = 0;
+        fldActorSlots[actorIndex].actorId = 0;
+        fldActorSlots[actorIndex].unk08 = 0;
+        fldActorSlots[actorIndex].firstKey = -1;
+        fldActorSlots[actorIndex].unk10 = 0;
+        fldActorSlots[actorIndex].secondKey = -1;
+        fldActorSlots[actorIndex].transitionKey = -1;
+        fldActorSlots[actorIndex].firstFrame = 0;
+        fldActorSlots[actorIndex].secondFrame = 0;
+        fldActorSlots[actorIndex].transitionFrame = 0;
+        fldActorSlots[actorIndex].firstValues[0] = 0.0f;
+        fldActorSlots[actorIndex].firstValues[1] = 0;
+        fldActorSlots[actorIndex].firstValues[2] = 0;
+        fldActorSlots[actorIndex].firstStep[0] = 0;
+        fldActorSlots[actorIndex].firstStep[1] = 0;
+        fldActorSlots[actorIndex].firstStep[2] = 0;
+        fldActorSlots[actorIndex].secondValues[0] = 0;
+        fldActorSlots[actorIndex].secondValues[1] = 0;
+        fldActorSlots[actorIndex].secondValues[2] = 0;
+        fldActorSlots[actorIndex].secondStep[0] = 0;
+        fldActorSlots[actorIndex].secondStep[1] = 0;
+        fldActorSlots[actorIndex].secondStep[2] = 0;
     }
     fldSelectedActorEntryIndex = -1;
 }
@@ -4915,24 +4927,24 @@ void fldReleaseActorTasksById(s32 id) {
             for (i = 0; i < 256; i++) {
                 actor = (FldActorEntry *)(D_00337D00 + i * 108);
                 task = &fldActorSlots[i];
-                if (task->unk00[0] == 1 && task->unk00[1] == id) {
-                    task->unk00[0] = 2;
-                    task->unk00[7] = 0;
-                    task->unk00[8] = 0;
-                    task->unk00[9] = 0;
+                if (task->kind == 1 && task->actorId == id) {
+                    task->kind = 2;
+                    task->firstFrame = 0;
+                    task->secondFrame = 0;
+                    task->transitionFrame = 0;
                     if (actor->motion == 5 || actor->secondaryMotion == 5 || actor->motion == 6
                         || actor->secondaryMotion == 6 || actor->motion == 7 || actor->secondaryMotion == 7
                         || actor->motion == 8 || actor->secondaryMotion == 8) {
-                        task->unk00[10] = 0x28;
+                        task->frameCount = 0x28;
                     } else {
-                        task->unk00[10] = 0x14;
+                        task->frameCount = 0x14;
                     }
-                    task->unk2C = 0.0f;
-                    task->unk30[0] = 0;
-                    task->unk30[1] = 0;
-                    task->unk30[5] = 0;
-                    task->unk30[6] = 0;
-                    task->unk30[7] = 0;
+                    task->firstValues[0] = 0.0f;
+                    task->firstValues[1] = 0;
+                    task->firstValues[2] = 0;
+                    task->secondValues[0] = 0;
+                    task->secondValues[1] = 0;
+                    task->secondValues[2] = 0;
                     fldApplyPendingCameraHeading();
                 }
             }
@@ -4940,9 +4952,88 @@ void fldReleaseActorTasksById(s32 id) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0380);
+extern s32 func_003003F0(const char *, ...);
+extern void evtSetObjectTransitionWork(void *, u32);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00140BE8);
+/* Advance an actor slot's first/second interpolation (ease-weighted for 40-frame moves) or start its door
+ * transition, returning the current values for the key. */
+s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z) {
+    f32 weights[50] = {
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f
+    };
+    s32 i;
+    FldActorRow *row;
+    void *node;
+
+    if (D_0032E3C0[0] >= 200) {
+        return 0;
+    }
+    for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
+        row = &fldActorSlots[i];
+        if (row->firstKey == key) {
+            if (row->kind != 2) {
+                continue;
+            }
+            if (row->firstFrame < row->frameCount) {
+                if (row->frameCount == 40) {
+                    row->firstValues[0] += row->firstStep[0] * weights[row->firstFrame];
+                    row->firstValues[1] += row->firstStep[1] * weights[row->firstFrame];
+                    row->firstValues[2] += row->firstStep[2] * weights[row->firstFrame];
+                } else {
+                    row->firstValues[0] += row->firstStep[0];
+                    row->firstValues[1] += row->firstStep[1];
+                    row->firstValues[2] += row->firstStep[2];
+                }
+                row->firstFrame++;
+            }
+            *x = row->firstValues[0];
+            *y = row->firstValues[1];
+            *z = row->firstValues[2];
+            return 1;
+        } else if (row->secondKey == key) {
+            if (row->kind != 2) {
+                continue;
+            }
+            if (row->secondFrame < row->frameCount) {
+                if (row->frameCount == 40) {
+                    row->secondValues[0] += row->secondStep[0] * weights[row->secondFrame];
+                    row->secondValues[1] += row->secondStep[1] * weights[row->secondFrame];
+                    row->secondValues[2] += row->secondStep[2] * weights[row->secondFrame];
+                } else {
+                    row->secondValues[0] += row->secondStep[0];
+                    row->secondValues[1] += row->secondStep[1];
+                    row->secondValues[2] += row->secondStep[2];
+                }
+                row->secondFrame++;
+            }
+            *x = row->secondValues[0];
+            *y = row->secondValues[1];
+            *z = row->secondValues[2];
+            return 1;
+        } else if (row->transitionKey == key) {
+            if (row->kind != 2) {
+                continue;
+            }
+            if (row->transitionFrame == 0) {
+                node = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), key, 6);
+                if (node != NULL) {
+                    func_003003F0("DOOR SISETU FADE 6\n");
+                    evtSetObjectTransitionWork(node, 9);
+                }
+            }
+            row->transitionFrame++;
+            *x = 0.0f;
+            *y = 0.0f;
+            *z = 0.0f;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void func_00140F68(void) {
 }
