@@ -109,7 +109,7 @@ s32 sdfAllocPacketAligned(s32 size);
 
 void sdfInitPacketList(s32 packet);
 
-s32 func_00151398(s32 arg0, s32 arg1);
+BillChildPayload *func_00151398(BillObj *obj, BillOut *entries);
 
 void func_00152E40(s32 packet, s32 source);
 
@@ -508,15 +508,15 @@ void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;
-            modeValues[2] = func_00151398((s32)billboard, (s32)billboard->unk60);
-            modeValues[1] = func_00151398((s32)billboard, (s32)billboard->unk60 + BILL_ENTRY_BYTES);
+            modeValues[2] = (s32)func_00151398(billboard, billboard->unk60);
+            modeValues[1] = (s32)func_00151398(billboard, (BillOut *)billboard->unk60 + 1);
         } else if (modeFlags & 0x80) {
             modeValues[0] = 3;
-            modeValues[2] = func_00151398((s32)billboard, (s32)billboard->unk60);
-            modeValues[1] = func_00151398((s32)billboard, (s32)billboard->unk60 + BILL_ENTRY_BYTES);
+            modeValues[2] = (s32)func_00151398(billboard, billboard->unk60);
+            modeValues[1] = (s32)func_00151398(billboard, (BillOut *)billboard->unk60 + 1);
         } else {
             modeValues[0] = 0;
-            modeValues[1] = func_00151398((s32)billboard, (s32)billboard->unk60);
+            modeValues[1] = (s32)func_00151398(billboard, billboard->unk60);
         }
     }
 }
