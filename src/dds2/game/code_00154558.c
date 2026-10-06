@@ -4,6 +4,8 @@
 #include "dds3obj.h"
 #include "scr.h"
 
+struct SdfTex;
+
 extern s32 fldGetSceneStatusCode(void);
 
 extern void func_001442A0(s32);
@@ -120,19 +122,19 @@ extern u32 fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
-extern s32 D_004363AC;
+extern struct SdfTex *D_004363AC;
 
-extern s32 D_004363B0;
+extern struct SdfTex *D_004363B0;
 
-extern s32 D_004363B4;
+extern struct SdfTex *D_004363B4;
 
 extern u32 D_00436370;
 
 extern s32 D_00436374;
 
-extern s32 D_00436368;
+extern struct SdfTex *D_00436368;
 
-extern s32 D_0043636C;
+extern struct SdfTex *D_0043636C;
 
 extern u32 fldIndexedResourceHandle;
 
@@ -166,7 +168,7 @@ extern s32 D_00436358;
 
 extern s32 D_00436360;
 
-extern s32 D_0043637C;
+extern struct SdfTex *D_0043637C;
 
 extern s32 fldFindRoomByTask(u32);
 
