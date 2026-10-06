@@ -2,6 +2,7 @@
 #define MNU_SHOOTING_H
 
 #include "common.h"
+#include "mnu_fade.h"
 
 struct SdfMemBlock;
 struct MnuSectionObjectList;
@@ -43,7 +44,14 @@ typedef struct MnuShootingWork {
     struct MnuSectionObjectList *work24;
     struct WideSlotPool *spriteWork;
     struct CompactSlotPool *tintWork;
-    u32 resourceSlots[7];
+    union {
+        u32 resourceSlots[7];
+        struct {
+            u32 slot30;
+            struct EffectSlotSet *fadeSprites;
+            u32 remainingSlots[5];
+        } fadeResources;
+    };
     u8 pad4C[0xC];
     s32 state;
     s32 (*initialize)(u8 *work);
@@ -69,12 +77,16 @@ typedef struct MnuShootingWork {
     s32 phaseTicks;
     u8 padA0[0x10];
     s32 unkB0;
-    u8 padB4[0xB4];
+    FadeEntry strip;
+    FadeNumber lowerNumber;
+    FadeNumber upperNumber;
+    FadeGauge gauge;
+    u8 pad14C[0x1C];
     /* SDK fade payloads: round number, score triplet, and choice renderers. */
-    u8 roundFade[0x1C];             /* 0x168 */
-    u8 scoreFade[0x18];             /* 0x184 */
-    u8 choiceFade[0x24];            /* 0x19C */
-    u8 pad1C0[0x14];
+    FadeNumber roundFade;             /* 0x168 */
+    FadeEntry scoreFade;             /* 0x184 */
+    FadeNumber choiceFade;            /* 0x19C */
+    FadeNumber frame;
     s32 choiceIndex;                /* 0x1D4 */
     u16 unk1D8;
     u8 pad1DA[6];
@@ -86,4 +98,5 @@ typedef char MnuShootingWork_size_must_be_0x1E0[
 typedef char ShootingPoolOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->spriteWork == 0x28 &&
      (unsigned long)&((MnuShootingWork *)0)->tintWork == 0x2C) ? 1 : -1];
+typedef char ShootingFadeOffsetsAssert[((unsigned long)&((MnuShootingWork*)0)->strip==0xB4 && (unsigned long)&((MnuShootingWork*)0)->lowerNumber==0xCC && (unsigned long)&((MnuShootingWork*)0)->upperNumber==0xE8 && (unsigned long)&((MnuShootingWork*)0)->gauge==0x104 && (unsigned long)&((MnuShootingWork*)0)->roundFade==0x168 && (unsigned long)&((MnuShootingWork*)0)->scoreFade==0x184 && (unsigned long)&((MnuShootingWork*)0)->choiceFade==0x19C && (unsigned long)&((MnuShootingWork*)0)->frame==0x1B8 && (unsigned long)&((MnuShootingWork*)0)->fadeResources.fadeSprites==0x34)?1:-1];
 #endif /* MNU_SHOOTING_H */
