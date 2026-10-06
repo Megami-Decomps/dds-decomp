@@ -7,6 +7,7 @@
 #include "dds3obj.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "sdf.h"
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 
@@ -2609,7 +2610,46 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E3E20);
+extern SdfGraphObj D_0040B290;
+extern SdfPoolNode *D_003B6BE0[];
+extern SdfPoolNode *D_003B6BF0[];
+extern s32 sdfAllocPacketAligned(s32);
+extern s32 sdfAllocatePacketList(s32 (*)(s32));
+extern void sdfCreateResourcePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void func_001E3E20(BtlUnit *unit) {
+    MdlCtx *info;
+    s32 packet;
+
+    if ((unit->flags & 2) == 0) {
+        return;
+    }
+    if (unit->unkCC != 0) {
+        return;
+    }
+    unit->mirror->unk34C = sdfAllocPacketAligned(0x70000);
+    packet = sdfAllocatePacketList(0);
+    sdfCreateResourcePacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
+    D_003B6BE0[0]->append((SdfListHead *)D_003B6BE0[0], (SdfListHead *)packet);
+    info = unit->ext->owner;
+    if (unit->unk344 == 0) {
+        unit->unk344 = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        dds3SetObjectFlags(unit->effectObject, 1);
+        return;
+    }
+    func_001E38F0(unit, info, unit->unk344, (u8 *)D_003B6BE0, unit->overlayColor);
+    info = unit->mirror->ext->owner;
+    if (unit->mirror->unk344 == 0) {
+        unit->mirror->unk344 = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        dds3SetObjectFlags(unit->mirror->effectObject, 1);
+        return;
+    }
+    packet = sdfAllocatePacketList(0);
+    sdfCreateDescriptorPacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
+    D_003B6BF0[0]->append((SdfListHead *)D_003B6BF0[0], (SdfListHead *)packet);
+    func_001E38F0(unit->mirror, info, unit->mirror->unk344, (u8 *)D_003B6BF0, unit->mirror->overlayColor);
+}
 
 extern char D_00436A28[];
 
