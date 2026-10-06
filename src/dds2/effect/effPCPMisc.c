@@ -5465,7 +5465,119 @@ void effPcpRandomizeSlot(EffPCPPairedEventWork *work, s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018AD50);
+extern const f32 D_003B1FD0[4] __attribute__((aligned(16)));
+
+/* vu0 routine: rotate a fragment around the view and place events at both ends. */
+void func_0018AD50(EffPCPPairedEventWork *work) {
+    EffPCPEventPlace place;
+    f32 origin[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 tiltAxis[4] __attribute__((aligned(16)));
+    f32 viewAxis[4] __attribute__((aligned(16)));
+    u32 repeat;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 delaySpread;
+    u32 count;
+    u32 color;
+    EffPCPPairedEvent *entry;
+    u32 i;
+    s32 frame;
+
+    count = work->params.count;
+    repeat = work->params.repeat;
+    duration = work->params.duration;
+    fadeIn = work->params.fadeIn;
+    fadeOut = work->params.fadeOut;
+    delaySpread = work->params.delaySpread;
+    entry = work->entries;
+    color = work->color;
+    PCP_COPY_VECTOR(origin, work->params.origin);
+    if (duration == 0) {
+        return;
+    }
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, viewAxis);
+    for (i = 0; i < count; i++, entry++) {
+        frame = entry->frame;
+        if (frame <= duration) {
+            if (frame == 0) {
+                effPcpRandomizeSlot(work, i);
+                frame = entry->frame;
+            }
+            if (frame >= 0) {
+                s32 elapsedFrames = frame;
+                EffThunderFragmentParams *fragment;
+                f32 radius;
+                f32 fade;
+                u32 fadedColor;
+
+                fragment = (EffThunderFragmentParams *)func_0016D290(entry->fragment);
+                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)viewAxis, entry->phase);
+                VU0_LOAD_VF(vf10, D_003B1FD0);
+                VU0_LOAD_VF(vf11, viewAxis);
+                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                VU0_ROTATE_VEC(vf10, vf10);
+                VU0_STORE_VF(vf10, direction);
+                VU0_LOAD_VF(vf11, D_003B1FD0);
+                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                /* This SDK-produced axis is consumed only by the external builder. */
+                VU0_STORE_VF_UNCLOBBERED(vf10, tiltAxis);
+                radius = entry->radius;
+                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)tiltAxis, entry->tilt);
+                VU0_LOAD_VF(vf10, direction);
+                VU0_ROTATE_VEC(vf10, vf10);
+                VU0_STORE_VF(vf10, direction);
+                fragment->start[0] = origin[0] + direction[0] * radius;
+                fragment->start[1] = origin[1] + direction[1] * radius;
+                fragment->start[2] = origin[2] + direction[2] * radius;
+                fragment->end[0] = origin[0];
+                fragment->end[1] = origin[1];
+                fragment->end[2] = origin[2];
+                entry->tilt += entry->tiltStep;
+                if (elapsedFrames < fadeIn && fadeIn != 0) {
+                    fade = (f32)elapsedFrames / (f32)fadeIn;
+                } else {
+                    s32 remainingFrames = duration - frame;
+                    if (remainingFrames <= fadeOut && fadeOut != 0) {
+                        fade = (f32)remainingFrames / (f32)fadeOut;
+                    } else {
+                        fade = 1.0f;
+                    }
+                }
+                fadedColor = effBlendColor(color & 0xFFFFFF, color, fade);
+                effThunderSetFragmentColor((void *)entry->fragment, fadedColor);
+                func_0016D9D8(entry->fragment);
+                place.color = fadedColor;
+                PCP_COPY_VECTOR(place.pos, fragment->end);
+                effEventCopyFileRecordHeader(entry->eventA, &place);
+                func_00197F60(entry->eventA);
+                PCP_COPY_VECTOR(place.pos, fragment->start);
+                effEventCopyFileRecordHeader(entry->eventB, &place);
+                func_00197F60(entry->eventB);
+                frame = entry->frame;
+            }
+            if (repeat != 0 && frame >= duration) {
+                entry->frame = -(effMiscRand(D_003AA868) % delaySpread);
+            } else {
+                entry->frame = frame + 1;
+            }
+        }
+    }
+}
 
 void effPcpCopyRandomizedVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
