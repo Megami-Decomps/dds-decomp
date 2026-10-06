@@ -5259,7 +5259,7 @@ typedef FileSlot FileKeyOut;
 /* Keyframe tracks of a view block (scale, heading and colour curves). */
 typedef struct FileKeyBlock {
     f32 pos[4];             /* 0x00 */
-    u8 pad10[0x10];         /* second source vector, not used here */
+    f32 orientation[4];    /* 0x10: emitter quaternion */
     s32 emissionDuration;   /* 0x20 */
     u32 spawnRate;          /* 0x24 */
     f32 spawnVariance;      /* 0x28 */
@@ -5278,11 +5278,23 @@ typedef struct FileKeyBlock {
     u8 padBE[0x0A];         /* includes grid columns/rows at C0/C4 */
     f32 radius;            /* 0xC8 */
     f32 radiusRandomness;  /* 0xCC */
-    f32 speed;             /* 0xD0 */
-    f32 speedRandomness;   /* 0xD4 */
-    f32 acceleration;      /* 0xD8 */
-    f32 gravity;           /* 0xDC */
-} FileKeyBlock;             /* observed prefix 0xE0, not full allocation size */
+    union {               /* 0xD0: parameter tail selected by record type */
+        struct {
+            f32 speed;
+            f32 speedRandomness;
+            f32 acceleration;
+            f32 gravity;
+        } radial;
+        struct {
+            f32 spread;
+            f32 spreadRandomness;
+            f32 speed;
+            f32 speedRandomness;
+            f32 acceleration;
+            f32 gravity;
+        } directed;
+    } motion;
+} FileKeyBlock;             /* observed prefix through 0xE8, not full allocation size */
 
 extern s32 func_002D7458(void *, void *, s32, s32);
 extern f32 func_002D7770(void *, s32, s32);
@@ -5428,8 +5440,8 @@ void func_002D8AD0(FileSlotTable *record) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
         mode = keys->mode;
-        gravity = keys->gravity;
-        acceleration = keys->acceleration;
+        gravity = keys->motion.radial.gravity;
+        acceleration = keys->motion.radial.acceleration;
         delta[3] = 0.0f;
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
@@ -5474,8 +5486,8 @@ void func_002D8AD0(FileSlotTable *record) {
                             motion->direction[0] = delta[0];
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
-                            motion->speed = fabsf(keys->speed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->speedRandomness + (1.0f - keys->speedRandomness)));
+                            motion->speed = fabsf(keys->motion.radial.speed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->motion.radial.speedRandomness + (1.0f - keys->motion.radial.speedRandomness)));
                             {
                                 f32 radius = keys->radius *
                                     (effMiscRandUnitFloat(&effSharedRandomState) * keys->radiusRandomness + (1.0f - keys->radiusRandomness));
@@ -5483,7 +5495,7 @@ void func_002D8AD0(FileSlotTable *record) {
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
                             VU0_LOAD_VF(vf10, delta);
-                            if (keys->speed < 0.0f) {
+                            if (keys->motion.radial.speed < 0.0f) {
                                 VU0_NEGATE_XYZ(vf10);
                             }
                             if (flags & 1) {
