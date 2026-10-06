@@ -1415,17 +1415,17 @@ void effFlashOrbitArcSetRenderScale(PcpFlashOrbitArcWork *work, f32 value)
     work->renderScale = value;
 }
 
-void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 flag, s32 param) {
+void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 index, s32 param) {
     PcpFlashQuadColorSlot *slot;
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
     slot->color[1] = effMultiplyPackedColors(colorB, param);
-    if (flag & 1) {
+    if (index & 1) {
         slot->color[2] = effMultiplyPackedColors(0x80000000, param);
         slot->color[3] = effMultiplyPackedColors(colorA | 0xFF000000, param);
         slot->color[4] = effMultiplyPackedColors(0x80000000, param);
