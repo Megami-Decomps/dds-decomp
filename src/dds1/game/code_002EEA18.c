@@ -281,7 +281,7 @@ extern s32 sdfGetPacketCursor(void);
 extern void sdfSetPacketCursorAligned(s32 cursorAddress);
 
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
-void *func_002EEEA8(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SdfPacket *packet;
     f32 (*viewport)[4];
     u128 *cursor;
@@ -397,12 +397,12 @@ extern void sdfPostmultiplyVuMatrixFromMemory();
 
 void *func_002EF2B0(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     VU0_LOAD_MATRIX(D_00398470);
-    return func_002EEEA8(vertices, colors, vertexCount, primitiveFlags);
+    return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }
 
 void *func_002EF2E0(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     sdfPostmultiplyVuMatrixFromMemory(D_00398470);
-    return func_002EEEA8(vertices, colors, vertexCount, primitiveFlags);
+    return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }
 
 typedef struct SdfTmxHeader {

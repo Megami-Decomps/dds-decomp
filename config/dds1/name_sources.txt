@@ -1305,6 +1305,7 @@
 0x0015D7E8	parSubmitCellDrawPackets	inferred	Builds cell draw packet batches and submits via emitter finish callback. [names_reviewed8.tsv]
 0x0015D910	parCloneEmitterAndInitCells	inferred	Clones emitter descriptor allocates cells and initializes first subdispatch. [names_reviewed8.tsv]
 0x0015DA80	polyScaleTransformPair	inferred	Multiplies both float scaling components on a polygon transform by supplied factor. [names_reviewed6.tsv]
+0x0015DAA0	polyUpdateBasicRingCells	inferred	TaskPurist
 0x0015DC48	polyFinishAndReleaseNodeHandle	inferred	Finishes polygon processing and releases node-owned resource handle. [names_reviewed6.tsv]
 0x0015DDC8	polyStripPushPairsApart	inferred	for each point pair of the strip entry: normalises the pair delta, scales by the node's D0 scale and adds it to both points [names_M71_ItfBlur.tsv]
 0x0015DE88	polyBlendTimedTintColor	inferred	confidence=high; matched-C; src/dds1/effect/polyManager.c:202:func_0015DE88; Interpolates packed tint endpoints with elapsed/duration factor and packs RGBA output.; twin=0x00165A78, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -2596,6 +2597,7 @@
 0x001AC920	btlClearTaskActorSlots	inferred	Traverses battle task nodes and clears eight forward or reverse actor slots for corresponding active actor mode.
 0x001ACCF0	btlClearSharedBattleStateWords	inferred	Clears the consecutive state words in the shared battle work region. [names_reviewed17.tsv]
 0x001ACED0	btlSetTaskPhase2	inferred	task phase = 2 via kwlnTaskGetTaskByName(D_003BB3A0)
+0x001ACFE0	btlCreateMahenPanelTask	inferred	LeverAudit
 0x001AD1B0	btlIsNamedBattleTaskRegistered	inferred	Requires the indexed battle task to be registered and its named task to exist. [names_reviewed17.tsv]
 0x001AD3A8	btlHasRegisteredAnalysisPanelTask	inferred	confidence=high; matched-C; src/dds1/game/code_001A1960.c:2200:func_001AD3A8; Requires tracked analysis-panel handle to remain registered and named analysis task to exist.; twin=0x001B7FB8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001AD3F0	btlGetRegisteredTaskValueOrDefault	inferred	Returns a registered task value or a fixed default when unavailable. [names_reviewed9.tsv]
@@ -2656,6 +2658,7 @@
 0x001BD190	btlGetCommandOptionCount	inferred	U0
 0x001BD658	btlBuildEligibleActorList	inferred	Unless current battle entry disables selection, scans 192 actor slots and flags, writing pairs of slot index and actor identifier and returning their count.
 0x001BDE98	fldDispatchSceneKindHandler	inferred	twin 0x001C91D8: switch on func_001BD0D0(kind) -> per-state handler
+0x001BE8A0	btlDrawItemCommandRows	inferred	LeverAudit
 0x001BEA80	btlDrawRetreatCommandLabel	inferred	Draws the literal Retreat command label in the battle menu. [names_reviewed12.tsv]
 0x001BF488	fldGetSceneObjectState	inferred	Returns active scene object state or zero without an active task. [names_reviewed5.tsv]
 0x001BF790	fldSetSceneObjectAndGroupStates	inferred	Sets a present scene object and the shared scene group to their next states. [names_reviewed17.tsv]
@@ -3940,6 +3943,7 @@
 0x00235498	evtDestroySkyTask	inferred	destroys the 'sky' kwln task with hierarchy if present
 0x002354D8	evtCreateSkyTask	inferred	Initializes sky rendering values and creates the named sky task.
 0x00235560	evtCreateFrameVariableTask	inferred	Creates the FrameVar task via kwlnTaskCreate.
+0x00235598	evtDrawMenuFrame	inferred	TaskPurist
 0x00235768	evtAppendValueChangeDebugLabel	inferred	Appends the literal VALUE CHANGE. via the formatted SIF command to the caller packet list. [names_reviewed19.tsv]
 0x00235978	evtViewerFloatValueUpdate	inferred	float-valued twin of func_00235C68 (VALUE CHANGE), steps +-0.1/+-1.0 into ctx+0x231C clamped to +0x2320/+0x2324 [names_M74_BattleLarge.tsv]
 0x00235AE0	evtDrawValueChangeNoticeRow	inferred	confidence=high; src/dds1/game/code_00235270.c:func_00235AE0; Appends the VALUE CHANGE. diagnostic text and returns its row-count contribution. CORRECTED: this is a row emitter handed to func_00235598 alongside evtDrawValueChangeInstructionRow = 0x00235B30, not a viewer/dialog routine; 'Viewer' was wrong and the Row suffix matches the sibling. [names_qp9.tsv]
@@ -3948,6 +3952,7 @@
 0x00235DB0	mnuDrawFrameChangeLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
 0x00235E00	evtViewerDrawFrameChangeRow	evidence	DDS2 twin func_00250BA0 (strings " L,R = FRMAE-+", "FRAME-+10", "FRAME-+100", "NOW FRAME", "CAMERA FOCUS") [names_M74_BattleLarge.tsv]
 0x00235FC8	evtViewerFrameChangeUpdate	inferred	DDS2 twin func_00250D68; frame-change window, steps +-1/10/100, dispatches func_0022E5A0 on apply [names_M74_BattleLarge.tsv]
+0x00236180	evtDrawProjectCommandRow	inferred	TaskPurist
 0x002363E0	mnuDrawInfoWindowA	inferred	Builds a window packet (rows 0xB) and reports when its work state is 1
 0x002364B0	evtDrawStringEntry	inferred	draws "%s" text via unk22C4 pointer when set, returns 2/0
 0x00236510	evtDrawSelectableTextRow	inferred	Draws indexed item name with cursor-dependent highlight color. [names_reviewed7.tsv]
@@ -5772,6 +5777,7 @@
 0x002C63D8	sdfCounterInitializeDisplayAnimation	inferred	Initializes the counter display value and animation count. [names_reviewed10.tsv]
 0x002C6408	sdfCounterAdvanceBoundedAnimationValue	inferred	Increments a bounded counter display animation value. [names_reviewed10.tsv]
 0x002C6428	sdfCounterStepDownAnimationValue	inferred	Subtracts two while the animation value is positive, otherwise clears it. [names_reviewed10.tsv]
+0x002C6448	fldDrawLocalMapTransition	inferred	TaskPurist
 0x002C7000	fldCreateMapRequestQueues	inferred	allocates the two MapRequestState queues (func_002C7A60(0x14,0xC/0x18)) and installs func_002C7180/func_002C7430 as their +0x18 callbacks [names_L5_LiteSweep.tsv]
 0x002C7058	fldReleaseMapRequestQueues	inferred	releases both queues through func_002C7B38; returns the second release's status [names_L5_LiteSweep.tsv]
 0x002C7080	fldDrawScaledAuxMapTexture	inferred	readability/matching review (QP16)
@@ -6524,6 +6530,7 @@
 0x002EDC98	sdfPacAdvanceInput	inferred	Advances the PAC input pointer and adjusts available and consumed byte counts.
 0x002EDCC0	sdfPacAdvanceCallbackBoundary	inferred	confidence=high; src/dds1/game/code_002ED8D0.c:func_002EDCC0; Handles 64-byte consumption boundaries, advances input, invokes the callback, and updates activity/remainder according to callback results. [names_qp9.tsv]
 0x002EDD98	sdfDecodePacNodeAndAdvanceTail	inferred	Reads the next PAC node, links it into decoder tail, and processes read completion codes. [names_reviewed21.tsv]
+0x002EDE48	sdfPacFeedInput	inferred	U3
 0x002EDF60	sdfPacEnqueuePacket	inferred	Allocates and copies a PAC packet, then appends it to the decoder's packet queue.
 0x002EDFE8	sdfPacRemovePacket	inferred	Unlinks the selected PAC packet from its owner's queue, frees it and returns the next packet.
 0x002EE058	sdfPacDispatchPacket	inferred	Dispatches PAC packet command bytes to the corresponding handlers and returns distinct completion or unknown-command statuses.
@@ -6540,6 +6547,7 @@
 0x002EE538	sdfPacCopyResourceChunk	inferred	Copies pending input into the resource buffer, finalizes its resource slot, and calls the completion handler.
 0x002EE5E0	sdfPacDecodeResourceChunk	inferred	Incrementally decodes compressed input into the resource buffer and finalizes the resource slot when complete.
 0x002EE678	sdfPacSkipResourceChunk	inferred	Consumes pending input without copying it, then checks the resource buffer and calls completion.
+0x002EE828	sdfPacCompleteResourcePacket	inferred	U3
 0x002EE868	sdfPacStartAllocationList	inferred	Queues a command-2 packet and allocates its per-entry state.
 0x002EE8C0	sdfPacStartNextAllocationEntry	inferred	Passes the allocation state at offsets 0x10 and 0x20 to the entry handler.
 0x002EE900	sdfPacResetOutputToAllocationEntry	inferred	sdf/sdfPacDecode: resets outputCursor to allocation+0x10, pendingBytes to 0x10 and installs the onInput/onComplete callbacks [names_L14_MidUnits.tsv]
@@ -6548,6 +6556,7 @@
 0x002EEA18	sdfPacReadListAllocationCount	inferred	src/dds1/game/code_002EEA18.c func_002EEA18: Reads count, resets progress, allocates list and computes aligned skip bytes for next handler. [names_reviewed24.tsv]
 0x002EEAA0	sdfQueueAndResetPacketWork	inferred	Queues current packet work, allocates another buffer and resets its callback. [names_reviewed9.tsv]
 0x002EEE98	sdfStoreWordAndSetState	inferred	Stores a word at offset four and marks its byte state as one.
+0x002EEEA8	sdfDrawClippedLinePairs	inferred	Fam
 0x002EF340	sdfInitializeTmxImageHeader	inferred	src/dds1/game/code_002EEA18.c func_002EF340: Clears header, writes TMX0 magic, type, dimensions, depth and two flags. [names_reviewed24.tsv]
 0x002EF3D0	sdfStreamSendChunk	inferred	clamps stream length to 0x4000 and forwards to send
 0x002EF560	sdfStreamDispatchSynchronousCommand	inferred	confidence=high; matched-C; src/dds1/game/code_002EEA18.c:154:func_002EF560; Handles open, control, chunked read and close commands through the shared stream configuration, synchronizes with its semaphore, and returns the result-word buffer.; source=fresh-R_Names31-QP13 [names_qp13.tsv]

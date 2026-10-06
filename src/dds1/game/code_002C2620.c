@@ -610,7 +610,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32, s32);
 extern void func_002C4850(s32);
 extern void fldDrawCounterMapMarker(void);
-extern void func_002C6448(s32);
+extern void fldDrawLocalMapTransition(s32);
 extern s32 func_00134CD8(void);
 
 void func_002C3420(void) {
@@ -624,19 +624,19 @@ void func_002C3420(void) {
     case 2:
         func_002C4850(1);
         fldDrawCounterMapMarker();
-        func_002C6448(0);
+        fldDrawLocalMapTransition(0);
         break;
     case 3:
         func_002C4850(0);
         fldDrawCounterMapMarker();
-        func_002C6448(1);
+        fldDrawLocalMapTransition(1);
         break;
     case 4:
         func_002C4850(0);
-        func_002C6448(1);
+        fldDrawLocalMapTransition(1);
         break;
     case 5:
-        func_002C6448(0);
+        fldDrawLocalMapTransition(0);
         break;
     }
     if (D_003BD260 != 0) {

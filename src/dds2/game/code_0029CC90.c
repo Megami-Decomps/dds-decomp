@@ -33,7 +33,7 @@ extern void func_0029CB70(s32, s32, s32, u32, const BrsRewardSummary *, s32, Brs
 
 extern void func_0029C880(s32, s32, s32, u32, BrsRewardSummary *, s32, BrsSkillPackageWork *);
 
-extern void func_0029DB58(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context);
+extern void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context);
 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     BrsRewardSummary *res = &work->rewards;
@@ -51,7 +51,7 @@ void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
     func_0029C618(work);
     func_0029C120(work);
     func_0029C3F0(work);
-    func_0029DB58(0x1D0, 0x3B8, 0, remaining, &work->partyProgress, 0x53);
+    mnuDrawUnitProgressRows(0x1D0, 0x3B8, 0, remaining, &work->partyProgress, 0x53);
     mnuTitleDrawFadeMenuEntries(work);
 }
 
@@ -310,7 +310,7 @@ extern void func_0029E220(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *
 extern s32 brsPollResultCounterCompletion(void);
 extern void func_00341C78(u32 sound);
 
-void func_0029DB58(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
+void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
     KwlnTask *task;
     BrsSkillPackageWork *work = NULL;
     DatPartyRecord *unit;

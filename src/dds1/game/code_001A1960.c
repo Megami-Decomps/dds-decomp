@@ -3005,7 +3005,7 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 func_001ADE68(KwlnTask *);
 extern void itfMesCloseAllWindows(KwlnTask *);
 
-s32 func_001ACFE0(const MesWindowConfig *config) {
+s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     BattleController *battle = (BattleController *)btlGetRuntime();
     MesWindowList *work;
     KwlnTask *task;
@@ -4759,7 +4759,7 @@ u8 *func_001BD708(u8 *object, u16 *value) {
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD750);
 
 extern void btlDrawRetreatCommandLabel(s32);
-extern void func_001BE8A0(BattleSceneObject *);
+extern void btlDrawItemCommandRows(BattleSceneObject *);
 
 void fldDispatchSceneKindHandler(s32 arg0) {
     switch (func_001BD0D0(arg0, btlCommandPanelWork->classIndex)) {
@@ -4770,7 +4770,7 @@ void fldDispatchSceneKindHandler(s32 arg0) {
         func_001BEB58(arg0);
         return;
     case 2:
-        func_001BE8A0((BattleSceneObject *)arg0);
+        btlDrawItemCommandRows((BattleSceneObject *)arg0);
         return;
     case 3:
         func_001BE590(arg0);
@@ -4788,7 +4788,7 @@ extern const BattlePanelColors D_003A2E90;
 extern char D_003BB478[];
 extern s32 func_003014F0(char *, const char *, ...);
 
-void func_001BE8A0(BattleSceneObject *object) {
+void btlDrawItemCommandRows(BattleSceneObject *object) {
     char text[16];
     BattlePanelColors colors = D_003A2E90;
     s32 shown;

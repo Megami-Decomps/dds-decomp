@@ -345,7 +345,7 @@ static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 a
 
 /* Local-map open/close transition: fades the backdrop (func_002C6948), slides the side panels in, and fades the
  * frame pieces (each panel row is x, y, w, h, u, v, uw, vh). */
-void func_002C6448(s32 opening) {
+void fldDrawLocalMapTransition(s32 opening) {
     f32 progress;
     f32 slide = 0.0f;
     f32 alpha1 = 0.0f;
