@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 enum {
     PAC_COMMAND_PAYLOAD = 1,
@@ -41,7 +42,7 @@ typedef struct PacWork {
 } PacWork;
 
 typedef struct PacBuf {
-    s32 result; /* 0x0 */
+    s32 result; /* 0x0: decoded result word, including completed resource addresses */
     s32 resourceSlot; /* 0x4 */
     u8 *cursor; /* 0x8 */
     s32 remainingBytes; /* 0xC */
@@ -98,9 +99,9 @@ void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet);
 void sdfPacStartAllocationList(PacState *state, PacHead *packet);
 void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
-s32 sdfTexAcquireAlternateResourceTexture(void *resource);
+SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
 s32 sdfResourceRetainAddress(s32 handle);
-s32 sdfTexAcquireResourceTexture(s32 resource);
+SdfTex *sdfTexAcquireResourceTexture(void *resource);
 s32 sdfAllocGeneralBlockHigh(s32 size);
 s32 sdfAllocGeneralBlock(s32 size);
 void sdfReleaseMemorySlot(void *slot);
@@ -342,7 +343,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
         sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
@@ -359,7 +360,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     }
     {
         PacBuf *resourceBuffer = state->resourceBuffer;
-        resourceBuffer->result = sdfTexAcquireResourceTexture(sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
         sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
     }
     sdfReleaseChipBlock(state->decoder);
@@ -382,7 +383,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = sdfTexAcquireAlternateResourceTexture(resourceBuffer->cursor);
+        resourceBuffer->result = (s32)sdfTexAcquireAlternateResourceTexture(resourceBuffer->cursor);
         state->onComplete(state);
     }
 }
