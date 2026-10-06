@@ -2516,7 +2516,7 @@ extern void effInitializeColorState(struct EffectColorState *);
 extern void func_001719D0(EffFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void func_00340DC8(f32, f32, f32);
-extern void effEventCopyFileRecordHeader(FileRecordHeader *, const FileRecordHeader *);
+extern void effEventCopyFileRecordHeader(void *, const void *);
 extern void func_00197F60(void *);
 void effThunderDrawHistoryAndEndCap(EffFragmentResources *);
 

@@ -5037,6 +5037,11 @@ void effPcpSetSprayScale(EffPCPPulseWork *work, f32 val) {
     work->scale = val;
 }
 
+struct EffEventWork;
+extern void effEventSetScale(struct EffEventWork *event, f32 scale);
+extern void effEventCopyFileRecordHeader(void *dst, const void *src);
+extern void func_00197F60(struct EffEventWork *event);
+
 /* Placement block handed to every spawned event entry. */
 typedef struct EffPCPEventPlace {
     f32 pos[7];
@@ -5466,23 +5471,25 @@ void func_0018B128(EffPCPPairedEventWork *work, u32 value) {
 }
 
 typedef struct EffPCPSpawnRangeParams {
-    u8 pad00[0x54];
+    f32 origin[4];
+    u8 pad10[0x44];
     s32 duration;
     u32 count;
     s32 delaySpread;
-    u8 pad60[8];
-    f32 unk68, unk6C;
-    u8 pad70[4];
-    f32 unk74, unk78;
-    u8 pad7C[4];
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 initialAngularStep, angularJitter;
+    f32 angularDamping;
+    f32 initialHeightStep, heightJitter;
+    f32 heightDamping;
     f32 startPosition, endPosition, startJitter, endJitter;
-    f32 unk90;
+    f32 startHeightRange;
 } EffPCPSpawnRangeParams;
 
 typedef struct EffPCPSpawnRangeEvent {
     void *event;
-    s32 delay;
-    f32 unk08, unk0C, angle, unk14, position, positionStep;
+    s32 frame;
+    f32 height, heightStep, angle, angularStep, position, positionStep;
 } EffPCPSpawnRangeEvent;
 
 typedef struct EffPCPSpawnRangeWork {
@@ -5496,7 +5503,7 @@ typedef struct EffPCPSpawnRangeWork {
     void *handle;
 } EffPCPSpawnRangeWork;
 
-/* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start delay. */
+/* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
 void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
@@ -5530,9 +5537,9 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     for (i = 0; i < count; i++) {
         entry->event = (void *)effEventCreate(work->owner, 2, &place);
         if (life > 0) {
-            entry->delay = -(effMiscRand(D_003AA868) % life);
+            entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
-            entry->delay = 0;
+            entry->frame = 0;
         }
         entry++;
     }
@@ -5581,9 +5588,9 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     for (i = 0; i < count; i++) {
         entry->event = (void *)effEventCreate(work->owner, 2, &place);
         if (life > 0) {
-            entry->delay = -(effMiscRand(D_003AA868) % life);
+            entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
-            entry->delay = 0;
+            entry->frame = 0;
         }
         entry++;
     }
@@ -5618,18 +5625,19 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
 
     slot = &work->entries[index];
     scale = work->scale;
-    slot->delay = 0;
-    slot->unk08 = -work->params.unk90 * effMiscRandUnitFloat(D_003AA868);
-    spread = work->params.unk78;
-    slot->unk0C = work->params.unk74 * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    slot->frame = 0;
+    slot->height = -work->params.startHeightRange * effMiscRandUnitFloat(D_003AA868);
+    spread = work->params.heightJitter;
+    slot->heightStep = work->params.initialHeightStep * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     slot->angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
-    spread = work->params.unk6C;
-    slot->unk14 = work->params.unk68 * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    spread = work->params.angularJitter;
+    slot->angularStep = work->params.initialAngularStep * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     spread = work->params.startJitter;
     slot->position = work->params.startPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale;
     spread = work->params.endJitter;
     slot->positionStep = (work->params.endPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
 }
+
 
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B778);
@@ -5802,9 +5810,6 @@ void effDestroyParticleEvents(EffPCPMapEventWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void effEventSetScale(void *event, f32 scale);
-extern void effEventCopyFileRecordHeader(void *dst, const void *src);
-extern void func_00197F60(void *event);
 
 /* vu0 routine: latch map-node motion, then place and fade each event. */
 void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
