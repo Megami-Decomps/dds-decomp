@@ -2311,7 +2311,7 @@ void btlAdvanceUnitModelFrame(BtlUnit *unit, f32 frame) {
     }
 }
 
-u16 btlGetUnitModelFrameCount(BtlUnit *unit) {
+s32 btlGetUnitModelFrameCount(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
         return 0;
     }
