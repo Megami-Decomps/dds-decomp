@@ -32,7 +32,7 @@ typedef struct MenuWorkEntry {
     f32 x1, y1, scale1;
     s16 recordIndex;
     s16 shortListIndex;
-    u8 pad30[2];
+    s16 frameCounter; /* 0x30: frames shown of the current short record (func_003230A0) */
     s16 repeatCount;
     u16 unk34;
     u16 remaining;
@@ -70,8 +70,7 @@ typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWork
     (unsigned long)&((MenuWorkEntry*)0)->scale1==0x28 &&
     (unsigned long)&((MenuWorkEntry*)0)->recordIndex==0x2C &&
     (unsigned long)&((MenuWorkEntry*)0)->shortListIndex==0x2E &&
-    (unsigned long)&((MenuWorkEntry*)0)->pad30==0x30 &&
-    sizeof(((MenuWorkEntry*)0)->pad30)==2 &&
+    (unsigned long)&((MenuWorkEntry*)0)->frameCounter==0x30 &&
     (unsigned long)&((MenuWorkEntry*)0)->repeatCount==0x32 &&
     (unsigned long)&((MenuWorkEntry*)0)->unk34==0x34 &&
     (unsigned long)&((MenuWorkEntry*)0)->remaining==0x36 &&
