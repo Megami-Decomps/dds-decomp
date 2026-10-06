@@ -26,7 +26,7 @@ enum {
 
 typedef struct SdfImageUploadRequest {
     void *pixels;
-    s32 allocation;
+    SdfMemBlock *allocation;
     u8 allocationMode;
     u8 format;
     u16 bufferWidth;
@@ -37,8 +37,8 @@ typedef struct SdfImageUploadRequest {
     u16 height;
 } SdfImageUploadRequest;
 
-extern s32 sdfAllocGeneralBlock(s32);
-extern void *sdfResourceRetainAddress(s32);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void func_002D1D80(SdfImageUploadRequest *);
 
 
@@ -61,7 +61,7 @@ typedef struct SdfTexPacketTail {
 typedef struct SdfTexReleaseEntry {
     struct SdfTexReleaseEntry *next; /* 0x00 */
     s32 address;                     /* 0x04 */
-    s32 handle;                      /* 0x08 */
+    SdfMemBlock *handle;              /* 0x08 */
     u8 mode;                         /* 0x0C: 1 = handle, 2 = chip memory address */
     u8 pad0D[0x93];
 } SdfTexReleaseEntry; /* 0xA0 */
@@ -77,8 +77,8 @@ extern SdfTex *sdfResourceListHead;
 extern u8 sdfTextureUpdateQueue;
 extern SdfSemaObj sdfTextureQueueWork;
 extern u8 D_003BD2F0;
-extern u32 D_003BD2F4;
-extern u32 D_003BD2F8;
+extern u8 *D_003BD2F4;
+extern void (*D_003BD2F8)(void *);
 
 void *sdfAllocSizeClassBlock(s32 size);
 extern s32 func_00312C08(void);
@@ -93,17 +93,87 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *sdfAllocAndClearQuadwords(s32 size);
 
-s32 sdfFindGeneralBlockByAddress(s32 address);
+SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
 
 s32 sdfChipIsInRange(s32 address);
 
-void sdfRequestDeferredGsImageCapture(u32 destination, u32 onComplete) {
+void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *)) {
     D_003BD2F4 = destination;
     D_003BD2F8 = onComplete;
     D_003BD2F0 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D10C8);
+typedef struct sceGsStoreImage sceGsStoreImage;
+extern sceGsStoreImage D_003E27B0;
+extern SdfGraphObj D_003980E0;
+extern volatile u8 D_003BD2F1;
+extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16, s16);
+extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
+extern s32 sceGsSyncPath(s32, s32);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
+
+/* Interleave rows from both color buffers into the queued destination. */
+void sdfCaptureDeferredGsImage(void) {
+    s32 width;
+    s32 height;
+    s32 format;
+    s32 pixelBytes;
+    s32 rowBytes;
+    s32 stride;
+    SdfMemBlock *allocation;
+    s32 rows;
+    u8 *pixels;
+    u8 *source;
+    u8 *destination;
+
+    if (D_003BD2F0) {
+        width = D_003980E0.width;
+        height = D_003980E0.height;
+        format = D_003980E0.bufferFormat;
+        pixelBytes = 4;
+        if (format == SDF_PSMCT16) {
+            pixelBytes = 2;
+        }
+        rowBytes = pixelBytes * width;
+        stride = rowBytes * 2;
+        D_003BD2F1 = 5;
+        allocation = sdfAllocGeneralBlock(rowBytes * height);
+        pixels = (u8 *)sdfResourceRetainAddress(allocation);
+        sceGsSetDefStoreImage(
+            (sceGsStoreImage *)(((u32)&D_003E27B0 & 0x0FFFFFFF) | 0x20000000),
+            D_003980E0.buffers[1]->word >> 6,
+            width / 64, format, 0, 0, width, height);
+        sceGsExecStoreImage(&D_003E27B0, pixels);
+        sceGsSyncPath(0, 0);
+        destination = D_003BD2F4;
+        source = pixels;
+        rows = height;
+        do {
+            memcpy(destination, source, rowBytes);
+            destination += stride;
+            source += rowBytes;
+        } while (--rows != 0);
+        sceGsSetDefStoreImage(
+            (sceGsStoreImage *)(((u32)&D_003E27B0 & 0x0FFFFFFF) | 0x20000000),
+            D_003980E0.buffers[0]->word >> 6,
+            width / 64, format, 0, 0, width, height);
+        sceGsExecStoreImage(&D_003E27B0, pixels);
+        sceGsSyncPath(0, 0);
+        destination = D_003BD2F4 + rowBytes;
+        source = pixels;
+        rows = height;
+        do {
+            memcpy(destination, source, rowBytes);
+            destination += stride;
+            source += rowBytes;
+        } while (--rows != 0);
+        sdfReleaseResourceAllocation(allocation);
+        D_003BD2F0 = 0;
+        if (D_003BD2F8) {
+            D_003BD2F8(D_003BD2F4);
+        }
+    }
+}
 
 /* Switch both references off the finished double-buffer slot before
  * publishing the slot currently in use. */
@@ -130,7 +200,6 @@ void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1380);
 
-extern volatile u8 D_003BD2F1;
 extern u8 D_003BD2E1;
 extern s32 D_003BD9D8;
 extern s32 D_003BD2FC;
@@ -527,7 +596,7 @@ void sdfTexQueueResourceRelease(s32 address) {
             entry->mode = 2;
         } else {
             entry->mode = 1;
-            entry->handle = sdfFindGeneralBlockByAddress(address);
+            entry->handle = sdfFindGeneralBlockByAddress((void *)address);
         }
         WaitSema(obj->semaphoreId);
         if (obj->releaseTail != NULL) {
@@ -750,7 +819,7 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
     if (borrowPixels == 0) {
         if (imageBytes > SDF_UPLOAD_CHIP_MAX_BYTES) {
             request.allocation = sdfAllocGeneralBlock(imageBytes);
-            request.pixels = sdfResourceRetainAddress(request.allocation);
+            request.pixels = (void *)sdfResourceRetainAddress(request.allocation);
             request.allocationMode = SDF_UPLOAD_GENERAL_HEAP;
         } else {
             request.pixels = sdfAllocSizeClassBlock(imageBytes);

@@ -1,29 +1,19 @@
 #include "common.h"
+#include "dds3obj.h"
 
-typedef struct {
-    u8 pad0[0xC];
-    u32 valueC;
-    u8 pad10[0x74];
-    s32 mode;
-} CameraData;
-
-typedef struct {
-    u8 pad0[0x18];
-    CameraData *data;
-} CameraObject;
 
 u32 dds3GetCameraMode(CameraObject *camera) {
-    return camera->data->mode;
+    return camera->data->eyeIsRelative;
 }
 
 void dds3SetCameraMode(CameraObject *camera, s32 mode) {
-    if (camera->data->mode != mode) {
-        camera->data->mode = mode;
+    if (camera->data->eyeIsRelative != mode) {
+        camera->data->eyeIsRelative = mode;
     }
 }
 
 u32 func_00113008(CameraObject *camera) {
-    return camera->data->valueC;
+    return camera->data->matrix[0][3];
 }
 
 typedef struct CameraSlotState {

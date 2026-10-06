@@ -237,7 +237,7 @@ extern u64 sdfTexGetPrimarySamplingState(void *);
 
 extern u64 sdfTexGetPrimaryClampState(void *);
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
 typedef struct DmaPacketHeader {
     u16 quadwords;
@@ -889,7 +889,7 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, void *tex
 
 /* Allocate and append texture state; return its packet address. */
 s32 sdfConsCreateDrawPacket(s32 packetList, s32 textureAddress, s32 contextOffset) {
-    SdfDrawPacket *packet = sdfConsInitTextureDrawPacket(sdfAllocPacketAligned(sdfConsGetTextureDrawPacketSize(textureAddress)), (void *)textureAddress, contextOffset);
+    SdfDrawPacket *packet = sdfConsInitTextureDrawPacket((SdfDrawPacket *)sdfAllocPacketAligned(sdfConsGetTextureDrawPacketSize(textureAddress)), (void *)textureAddress, contextOffset);
     sdfAppendPacket(packetList, (u32)packet);
     return (s32)packet;
 }
@@ -927,7 +927,7 @@ void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 reg
 
 /* Allocate loopCount sprite loops with RGBAQ, UV, XYZ2, UV, XYZ2 registers. */
 void *sdfConsAllocateColumnPacket(s32 loopCount) {
-    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
+    void *packet = (void *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
     sdfConsInitPacketHeader(packet, 0x156, 5, 0x53531, loopCount);
     return packet;
 }
@@ -1249,7 +1249,7 @@ u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttrib
 
     packetBytes = sdfMeasureVertexAttributePacketBytes(vertexCount);
     if (allocatePacket == NULL) {
-        cursor = sdfAllocPacketAligned(packetBytes);
+        cursor = (u32 *)sdfAllocPacketAligned(packetBytes);
     } else {
         cursor = allocatePacket(packetBytes);
     }
@@ -1317,7 +1317,7 @@ u32 func_0033BA68(u128 *positions, void *attributes, void *halfAttributes, void 
 
     bytes = sdfMeasureAlignedRecordBufferBytes(count);
     if (alloc == NULL) {
-        cursor = sdfAllocPacketAligned(bytes);
+        cursor = (u32 *)sdfAllocPacketAligned(bytes);
     } else {
         cursor = alloc(bytes);
     }
@@ -1383,7 +1383,7 @@ u32 func_0033BE18(const u128 *positions, const void *attributes,
 
     bytes = sdfMeasureVertexAttributePacketBytes(count);
     if (alloc == NULL) {
-        cursor = sdfAllocPacketAligned(bytes);
+        cursor = (u32 *)sdfAllocPacketAligned(bytes);
     } else {
         cursor = alloc(bytes);
     }
@@ -1451,7 +1451,7 @@ u32 sdfBuildWideVertexVifPacket(u128 *positions, void *byteAttributes, void *hal
 
     packetBytes = sdfMeasureAlignedDrawPacketSize(vertexCount);
     if (allocatePacket == NULL) {
-        cursor = sdfAllocPacketAligned(packetBytes);
+        cursor = (u32 *)sdfAllocPacketAligned(packetBytes);
     } else {
         cursor = allocatePacket(packetBytes);
     }

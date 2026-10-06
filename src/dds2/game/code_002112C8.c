@@ -1,8 +1,11 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 #include "btl_action.h"
+#include "btl_state.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -340,7 +343,7 @@ extern s8 D_00438F84;
 
 extern s32 sdfNamedChunkFindId(void *, void *);
 
-extern void func_0021A1D8(s32, s32);
+extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
 
 extern s32 btlHasAdjacentActorRecordStatus(void);
 
@@ -1352,7 +1355,28 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlHasUnitWithStatusBit);
+/* Test one active battler, or any active enemy, for the extended status flag. */
+s32 btlHasUnitWithStatusBit(BtlUnit *unit, s32 scanEnemies) {
+    if (scanEnemies != 0) {
+        BtlUnit *cursor = ((BtlState *)btlGetRuntime())->units;
+        while (cursor != NULL) {
+            if ((cursor->flags64 & 0x421) == 0x401) {
+                if ((cursor->stateFlags & 0x800000) != 0) {
+                    return 1;
+                }
+            }
+            cursor = cursor->nextActor;
+        }
+    } else {
+        if ((unit->flags64 & 0x21) == 1) {
+            if ((unit->stateFlags & 0x800000) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 
 s32 btlAreUnitsMissingStatusFlag(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
@@ -3337,24 +3361,44 @@ s32 func_0021A098(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A1D8);
+/* vu0 routine: normalize packed RGBA and fade the named chunk tree. */
+void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color) {
+    SdfDrawNode *child;
+    u32 source[4];
+    u32 tint[4];
+    u32 packed[4];
 
-typedef struct NamedChunkNode {
-    u8 pad0[4];
-    struct NamedChunkNode *next;
-    u8 pad8[4];
-    struct NamedChunkNode *firstChild;
-    u8 pad10[4];
-    u16 flags;
-    u8 pad16[6];
-    u32 color;
-} NamedChunkNode;
+    node->flags |= 2;
+    node->color &= 0xFF000000;
+    if (node->color > 0x3FFFFFF) {
+        node->color -= 0x4000000;
+        D_00438F84 = 0;
+    } else {
+        node->color = 0;
+    }
+    source[0] = color;
+    EE_MMI_RGBA_UNPACK(source, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    tint[0] = node->color | 0x808080;
+    EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(packed[0]);
+    child = node->children;
+    node->color = packed[0];
+    if (child != NULL) {
+        do {
+            btlFadeAndTintNamedChunkTree(child, color);
+            child = child->next;
+        } while (child != node->children);
+    }
+}
+
 
 
 
 typedef struct NamedChunkData {
     u8 pad0[0xC];
-    NamedChunkNode **entries;
+    SdfDrawNode **entries;
 } NamedChunkData;
 
 typedef struct NamedChunkDescriptor {
@@ -3392,8 +3436,8 @@ s8 btlDispatchNamedChunkNode(s32 name) {
     NamedChunkDescriptor *chunk;
     s32 index;
     NamedChunkData *data;
-    NamedChunkNode **entries;
-    NamedChunkNode *node;
+    SdfDrawNode **entries;
+    SdfDrawNode *node;
     if (battler == 0) {
         return 1;
     }
@@ -3410,21 +3454,21 @@ s8 btlDispatchNamedChunkNode(s32 name) {
     entries = data->entries;
     node = entries[index];
     D_00438F84 = 1;
-    func_0021A1D8((s32)node, chunk->argument);
+    btlFadeAndTintNamedChunkTree(node, chunk->argument);
     return D_00438F84;
 }
 
-void btlResetNamedChunkNodeTree(NamedChunkNode *node) {
-    NamedChunkNode *child;
+void btlResetNamedChunkNodeTree(SdfDrawNode *node) {
+    SdfDrawNode *child;
 
     node->color = 0x80808080;
-    child = node->firstChild;
+    child = node->children;
     node->flags = node->flags & 0xfffd;
     if (child != 0) {
         do {
             btlResetNamedChunkNodeTree(child);
             child = child->next;
-        } while (child != node->firstChild);
+        } while (child != node->children);
     }
 }
 
@@ -3436,7 +3480,7 @@ void btlClearNamedChunkFlags(s32 name) {
         s32 index = sdfNamedChunkFindId(chunk, (void *)name);
         if (index != -1) {
             NamedChunkData *data = chunk->data;
-            NamedChunkNode **entries = data->entries;
+            SdfDrawNode **entries = data->entries;
             btlResetNamedChunkNodeTree(entries[index]);
         }
     }

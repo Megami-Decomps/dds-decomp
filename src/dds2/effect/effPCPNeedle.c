@@ -26,7 +26,7 @@ extern f32 D_003B1530[4];
 
 
 extern void parReleaseCellSystem(u32);
-extern void sdfReleaseResourceAllocation(u32);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern void func_0017ED50(void *, void *);
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
@@ -39,11 +39,11 @@ void effPCPNeedleCreate(void *parameters) {
     EffPCPNeedleParams *work;
 
     work = effParamTableGetBlock(parameters, 0);
-    func_0017DD50(work);
+    effNeedleCreateWork(work);
 }
 
 void func_0017E068(EffPCPNeedleParams *parameters) {
-    func_0017DD50(parameters);
+    effNeedleCreateWork(parameters);
 }
 
 void func_0017E080(EffPCPNeedleWork *work) {

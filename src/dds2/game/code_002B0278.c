@@ -227,7 +227,6 @@ extern void mnuUpdateAndDrawWindowTransition(s32, s32, s32, s32, s32);
 
 extern void mnuIdleVoiceTimer();
 
-extern void func_002B2408();
 
 extern u32 mnuCreateIconBundle(u32);
 
@@ -259,10 +258,13 @@ typedef struct MenuContext {
     s32 resourceHandle;    /* 0x64 */
     void *displayResource; /* 0x68 */
     s32 alternateResource; /* 0x6C: used when swapping the staff panel view */
-    u8 pad70[0x58];
+    u8 pad70[0x40];
+    s32 selectionResources[6];
     s32 labelHandle;       /* 0xC8 */
     u32 panelModel;       /* 0xCC: model used by the panel resource slots */
-    u8 padD0[0x2C];
+    u8 padD0[0x24];
+    const void *partySelectionLayout; /* 0xF4: layout copied into the party window panel. */
+    u8 padF8[4];
     const void *equippedSkillLayout; /* 0xFC */
     u8 pad100[4];
     s32 imageHandle;       /* 0x104 */
@@ -281,7 +283,7 @@ typedef struct MenuContext {
     u8 padAA40[8];
     s32 party;             /* 0xAA48 */
     u8 padAA4C[0x10];
-    s32 resourceList;      /* 0xAA5C */
+    u32 *resourceList;     /* 0xAA5C */
 } MenuContext;
 
 extern MenuSlot *datAffinityRecords;
@@ -427,10 +429,13 @@ typedef struct PartyMenuData {
     s32 activeCount;                    /* 0x11B4 */
     PartyEntryCopy backup[5];           /* 0x11B8 */
     s32 selection;                      /* 0x1A8C */
-    u8 panelSnapshots[5][0xA0]; /* 0x1A90: copied panel subrecords */
+    MenuPageBar panelSnapshots[5][2]; /* 0x1A90: paired HP/MP snapshots */
     s32 fadeA;                 /* 0x1DB0 */
     s32 fadeB;                 /* 0x1DB4 */
-    u8 pad1DB8[0x20];
+    s32 previousSelection;
+    s32 profileSaved;
+    s32 profilePhase;
+    u32 profileWords[5];
     s32 freezePanel; /* 0x1DD8: set on transition; skips the panel update */
 } PartyMenuData; /* 0x1DDC: native party-selection allocation */
 
@@ -669,8 +674,10 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
     return 1;
 }
 
+extern void func_002B0D90(s32, s32, s32, MenuList *, MenuListNode *, s32);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
 
+extern void func_002B0FA0(MenuContext *);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0FA0);
 
 void mnuDestroyPartySelectionWindow(s32 context) {
@@ -844,6 +851,14 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
     }
 }
 
+
+extern s32 mnuGetSelectionFromFlags(s32);
+extern u32 *mnuCreateProfilePanel(s32);
+extern void mnuSetGroupProperties(u32 *, u32, u32, u32, u32);
+extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, u32 *, s32);
+extern void mnuFreeProfilePanelWork();
+
+extern void func_002B2408(MenuContext *);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2408);
 
 /* Update the final-row flag, draw the panel, and suppress its contents update
@@ -862,7 +877,7 @@ s32 mnuOpenStaffPartySelectionPanel(s32 callback) {
     }
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     if (menu->freezePanel == 0) {
-        func_002B2408(context);
+        func_002B2408((MenuContext *)context);
     }
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
     return menuSetHandler(context, 1, callback);
@@ -1015,8 +1030,6 @@ extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
 extern s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern s32 mnuAllocateSimpleSprite(s32, s32, s32);
-extern s32 mnuCreateProfilePanel(s32 source);
-extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
@@ -1029,7 +1042,7 @@ s32 mnuCreatePanels(s32 callback) {
     s32 data = datGameState + index * 0x1C4 + 0xA60;
     s32 window = context + 0x284;
     s32 *party = (s32 *)menuContext->party;
-    s32 profile;
+    u32 *profile;
 
     mnuSetWindowResource(index, (u32 *)window, menuContext->displayHandle,
                          (s32)menuContext->displayResource,
@@ -1223,7 +1236,7 @@ void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, s32 packedGroup, s32 gro
 void mnuDrawProfilePanelAndSprite(u32 entry, u32 unused1, u32 group, u32 resource,
                                     u32 unused4, u32 spriteFlags) {
     func_002C16F0(0, 0, 0, entry, *(u8 *)((s32)entry + 0x55), group, spriteFlags);
-    mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, resource, spriteFlags);
+    mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, (u32 *)resource, spriteFlags);
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3788);
@@ -3319,7 +3332,6 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window);
 void mnuRefreshPageHandles(MenuPageWindow *window);
 
 
-extern s32 mnuGetSelectionFromFlags(s32);
 
 void mnuSelectPage(MenuPageWindow *window, s32 selected);
 

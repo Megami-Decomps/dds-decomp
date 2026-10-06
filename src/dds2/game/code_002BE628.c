@@ -1,4 +1,6 @@
 #include "common.h"
+#include "dds3obj.h"
+#include "evt_world.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
@@ -166,14 +168,10 @@ extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 extern void evtStageTestAdvanceMotionQueue(void);
 
 
-typedef struct StageCameraTarget {
-    u8 pad[8];
-    void *unk8;
-} StageCameraTarget;
 
-extern StageCameraTarget *evtCreateWorldObjectAtTransform(f32 *, f32 *);
+extern CameraObject *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 
-extern u8 D_00437CB0[];
+extern char D_00437CB0[];
 
 extern void mnuFreePanelItemWork();
 
@@ -490,10 +488,6 @@ void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 
     mnuDrawListPanels(x, y, depth, 0, (MenuPageWindow *)source, mode);
 }
 
-typedef struct MenuPoint {
-    s32 x;
-    s32 y;
-} MenuPoint;
 
 typedef struct MenuPanelState {
     u8 pad00[0xC];
@@ -601,6 +595,10 @@ typedef struct MenuPanelGroup {
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
+struct MenuPanelItem;
+extern void mnuSetPanelItemSelection(struct MenuPanelItem *, s32);
+extern void mnuSetPanelItemOption(struct MenuPanelItem *, u32);
+
 /* Create the five panel items owned by this group and clear its selection. */
 s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
@@ -651,7 +649,10 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuSetGroupSelection);
+void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
+    mnuSetPanelItemSelection((struct MenuPanelItem *)group->entries[index], selection);
+    mnuSetPanelItemOption((struct MenuPanelItem *)group->entries[index], option);
+}
 
 void mnuSetIndexedPanelGroupValue(MenuPanelGroup *group, s32 index, u32 value) {
     mnuStorePanelItemValue(group->entries[index], value);
@@ -1111,16 +1112,6 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     }
 }
 
-/* The profile allocation is a separate 0x48-byte owner, not a panel item. */
-typedef struct MenuProfilePanel {
-    u8 pad00[0x10];
-    u32 unk10;
-    s32 unk14;
-    u8 pad18[0x14];
-    u32 unk2C[5];
-    s32 phase;
-    u32 unk44;
-} MenuProfilePanel;
 
 void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
     panel->unk10 = value;
@@ -2910,9 +2901,9 @@ u32 func_002C79B8(void) {
 void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
-    StageCameraTarget *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
+    CameraObject *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
 
-    cameraTarget->unk8 = D_00437CB0;
+    cameraTarget->caption = D_00437CB0;
     return func_002C79B8;
 }
 

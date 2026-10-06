@@ -269,9 +269,11 @@ void mnuSlideBarSetStateSmall(u32 *state, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4208);
 
-void func_002A4380(s32 bar) {
-    *(u8 *)(bar + 8) = 0;
-}
+
+typedef struct MovieMenuEffectSlot {
+    s32 active;
+    s32 counter;
+} MovieMenuEffectSlot;
 
 typedef struct PickEntry {
     s8 id;
@@ -280,14 +282,21 @@ typedef struct PickEntry {
 } PickEntry;
 
 typedef struct PickList {
-    u8 unk0[8];
+    SlideBar control;
     u8 count;
     PickEntry entry[32];
+    u8 pad69[3];
+    s32 pathProgress; /* 0x6C: normalized 0..4096 path position */
+    s32 unk70;
+    MovieMenuEffectSlot effectSlots[4]; /* 0x74 */
 } PickList;
 
-void mnuTitlePickRandomSlot(list)
-    PickList *list;
-{
+void mnuClearMovieMenuPickList(PickList *bar) {
+    bar->count = 0;
+}
+
+
+void mnuTitlePickRandomSlot(PickList *list) {
     u32 range = 0x20;
     s32 tries;
     tries = 0;
@@ -317,26 +326,28 @@ void mnuTitlePickRandomSlot(list)
     } while (tries <= 0);
 }
 
+extern void func_002A44C0(PickList *, s32);
+
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A44C0);
 
-void mnuPairedSlideBarSetState(u32 *work, s32 state) {
+void mnuPairedSlideBarSetState(PickList *work, s32 state) {
     switch (state) {
     case 2:
-        work[1] = 0;
-        work[0x1c] = 0;
-        work[0x1b] = 0;
+        work->control.pos = 0;
+        work->unk70 = 0;
+        work->pathProgress = 0;
         state = 0;
         break;
     case 3:
-        work[1] = 0x80;
-        work[0x1b] = 0;
-        work[0x1c] = 0x80;
+        work->control.pos = 0x80;
+        work->pathProgress = 0;
+        work->unk70 = 0x80;
         state = 1;
         break;
     default:
         break;
     }
-    work[0] = state;
+    work->control.active = state;
 }
 
 s32 mnuGetSlidePathSegmentWeight(s32 segment) {
@@ -420,88 +431,71 @@ void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
     *outY = y0 + dy * offset / span;
 }
 
-typedef struct MovieMenuEffectSlot {
-    s32 active;
-    s32 counter;
-} MovieMenuEffectSlot;
 
-typedef struct MovieMenuEffectState {
-    u8 pad00[0x74];
-    MovieMenuEffectSlot slots[4];
-} MovieMenuEffectState;
-
-void func_002A49C0(MovieMenuEffectState *work) {
+void mnuStartRandomMovieMenuPulse(PickList *work) {
     s32 selected = -1;
     s32 i;
 
     if (effMiscRand(0) % 60u == 0) {
         for (i = 0; i < 4; i++) {
-            if (work->slots[i].active == 0) {
+            if (work->effectSlots[i].active == 0) {
                 selected = i;
                 break;
             }
         }
         if (selected >= 0) {
-            work->slots[selected].active = 1;
-            work->slots[selected].counter = 0;
+            work->effectSlots[selected].active = 1;
+            work->effectSlots[selected].counter = 0;
         }
     }
 }
 
 extern s16 D_003E38E0[][2];
 
-void func_002A4A68(u8 *menu, s32 drawContext) {
+void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
     s32 i;
-    s32 off = 0x70;
-    u8 *flags = menu + 4;
-    u8 *positions = menu + 8;
 
-    for (i = 0; i < 4; i++, off += 8) {
-        if (*(s32 *)(flags + off) != 0) {
-            s32 pos = *(s32 *)(positions + off);
-
+    for (i = 0; i < 4; i++) {
+        if (menu->effectSlots[i].active != 0) {
+            s32 pos = menu->effectSlots[i].counter;
             if (pos > 0x100) {
                 pos = 0x200 - pos;
             }
             mnuDrawSprite(D_003E38E0[i][0], D_003E38E0[i][1], 0, pos / 2, 0, 0x1E, drawContext);
-            if (*(s32 *)(positions + off) == 0x200) {
-                *(s32 *)(flags + off) = 0;
+            if (menu->effectSlots[i].counter == 0x200) {
+                menu->effectSlots[i].active = 0;
             } else {
-                *(s32 *)(positions + off) += 4;
-                if (*(s32 *)(positions + off) > 0x200) {
-                    *(s32 *)(positions + off) = 0x200;
+                menu->effectSlots[i].counter += 4;
+                if (menu->effectSlots[i].counter > 0x200) {
+                    menu->effectSlots[i].counter = 0x200;
                 }
             }
         }
     }
 }
 
+extern void func_002A4B70(PickList *, s32);
+
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4B70);
-
-extern void mnuTitlePickRandomSlot();
-
-extern void func_002A44C0(SlideBar *, s32);
-
-extern void func_002A4B70(SlideBar *, s32);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-void mnuAdvanceSlideBar(SlideBar *bar, s32 drawContext) {
-    if (bar->active != 0 || bar->pos != 0) {
-        mnuTitlePickRandomSlot();
+void mnuAdvanceSlideBar(PickList *bar, s32 drawContext) {
+    if (bar->control.active != 0 || bar->control.pos != 0) {
+        mnuTitlePickRandomSlot(bar);
         func_002A44C0(bar, drawContext);
-        mnuDrawSprite(0, 0, 0, bar->pos, 0, 0x16, drawContext);
+        mnuDrawSprite(0, 0, 0, bar->control.pos, 0, 0x16, drawContext);
         func_002A4B70(bar, drawContext);
-        if (bar->active != 0) {
-            bar->pos += 8;
+        if (bar->control.active != 0) {
+            bar->control.pos += 8;
         } else {
-            bar->pos -= 8;
+            bar->control.pos -= 8;
         }
-        if (bar->pos < 0) {
-            bar->pos = 0;
+        if (bar->control.pos < 0) {
+            bar->control.pos = 0;
         }
-        if (bar->pos > 0x80) {
-            bar->pos = 0x80;
+        if (bar->control.pos > 0x80) {
+            bar->control.pos = 0x80;
         }
     }
 }

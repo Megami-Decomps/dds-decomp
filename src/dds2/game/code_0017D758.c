@@ -147,4 +147,57 @@ void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
     VU0_STORE_MATRIX(object->matrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DD50);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern u32 parAllocateCellSystem(u32, s32, s32, s32);
+extern void parDispatchSub(u32, s32, s32, s32);
+extern void func_00164C68(u32, u16);
+extern u32 effMiscRand(void *);
+extern f32 effMiscRandUnitFloat(void *);
+extern u8 D_003AA868[];
+
+/* effNeedleCreateWork */
+EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(params->count * sizeof(EffPCPNeedleSlot) +
+                                                  sizeof(EffPCPNeedleWork));
+    EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfResourceRetainAddress(allocation);
+    u32 i;
+    EffResourceWork *resource;
+    u32 count;
+    u32 delayRange;
+    EffPCPNeedleSlot *slot;
+    f32 radiusBase;
+    f32 radiusJitter;
+
+    work->slots = (EffPCPNeedleSlot *)(work + 1);
+    work->params = *params;
+    work->allocationHandle = allocation;
+    work->count = params->count;
+    work->color = 0x80808080;
+    work->system = 0;
+    resource = effCreateResourceEntryWork(params->count);
+    resource->mode = params->mode;
+    work->resource = resource;
+    effBuildRadialFanStreams(resource, params->fanSegments, params->centerColor,
+                            params->outerColor, params->radiusScale, params->viewOffset);
+    work->system = parAllocateCellSystem(work->count, work->params.unk54, 0, 0);
+    parDispatchSub(work->system, 1, work->params.unk58, work->params.unk58);
+    func_00164C68(work->system, (u16)work->params.mode);
+
+    count = work->count;
+    delayRange = params->randomDelayRange;
+    slot = work->slots;
+    if (delayRange == 0) {
+        delayRange = 1;
+    }
+    radiusBase = work->params.radiusBase;
+    radiusJitter = work->params.radiusJitter;
+    for (i = 0; i < count; i++, slot++) {
+        slot->angle = effMiscRandUnitFloat(D_003AA868) * EFFECT_RING_FULL_TURN;
+        slot->radius = radiusBase * (effMiscRandUnitFloat(D_003AA868) *
+                                   radiusJitter + (1.0f - radiusJitter));
+        slot->age = -(effMiscRand(D_003AA868) % delayRange);
+        effSetResourceEntryValue(work->resource, i, 0x808080);
+    }
+    return work;
+}
