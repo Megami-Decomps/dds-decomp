@@ -1149,7 +1149,7 @@ extern void *sdfMemoryGetBlockAddress(s32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
-extern void *func_002EF2B0(f32 (*)[4], u32 *, u32, s32);
+extern void *func_002EF2B0(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.
  * count is reused first as an entry count and then as a vertex count. */
