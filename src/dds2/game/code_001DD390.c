@@ -7,6 +7,7 @@
 #include "dds3obj.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "sdf.h"
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 
@@ -2609,7 +2610,46 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E3E20);
+extern SdfGraphObj D_0040B290;
+extern SdfPoolNode *D_003B6BE0[];
+extern SdfPoolNode *D_003B6BF0[];
+extern s32 sdfAllocPacketAligned(s32);
+extern s32 sdfAllocatePacketList(s32 (*)(s32));
+extern void sdfCreateResourcePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void func_001E3E20(BtlUnit *unit) {
+    MdlCtx *info;
+    s32 packet;
+
+    if ((unit->flags & 2) == 0) {
+        return;
+    }
+    if (unit->unkCC != 0) {
+        return;
+    }
+    unit->mirror->unk34C = sdfAllocPacketAligned(0x70000);
+    packet = sdfAllocatePacketList(0);
+    sdfCreateResourcePacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
+    D_003B6BE0[0]->append((SdfListHead *)D_003B6BE0[0], (SdfListHead *)packet);
+    info = unit->ext->owner;
+    if (unit->unk344 == 0) {
+        unit->unk344 = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        dds3SetObjectFlags(unit->effectObject, 1);
+        return;
+    }
+    func_001E38F0(unit, info, unit->unk344, (u8 *)D_003B6BE0, unit->overlayColor);
+    info = unit->mirror->ext->owner;
+    if (unit->mirror->unk344 == 0) {
+        unit->mirror->unk344 = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        dds3SetObjectFlags(unit->mirror->effectObject, 1);
+        return;
+    }
+    packet = sdfAllocatePacketList(0);
+    sdfCreateDescriptorPacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
+    D_003B6BF0[0]->append((SdfListHead *)D_003B6BF0[0], (SdfListHead *)packet);
+    func_001E38F0(unit->mirror, info, unit->mirror->unk344, (u8 *)D_003B6BF0, unit->mirror->overlayColor);
+}
 
 extern char D_00436A28[];
 
@@ -5803,7 +5843,71 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001ED380);
+/* Mirrored camera aim presets: quaternion, distance and height scale. */
+typedef struct BattleSideCameraPreset {
+    f32 quat[4];
+    f32 distanceScale;
+    f32 heightScale;
+    f32 unk18;
+    f32 unk1C;
+} BattleSideCameraPreset;
+extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
+extern s32 func_001E2E58(BtlUnit *, s32);
+
+void func_001ED380(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
+    f32 muzzle[4];
+    f32 quat[4];
+    BattleSideCameraPreset poses[2] = {
+        {{0x1.70a3d6p-3f, -0x1.999998p-2f, -0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
+        {{0x1.70a3d6p-3f, 0x1.999998p-2f, 0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
+    };
+    BtlUnit *unit = action->link->unit;
+    s32 pose;
+    f32 distance;
+    f32 fov;
+
+    if (unit->flags & 2) {
+        btlClearAllUnitDefeatCandidates();
+        btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
+        if (btlHasSingleLinkedResource((s32)action) == 0) {
+            func_001EF030(action, from);
+        } else {
+            func_001EEB78(action, from, 1);
+        }
+        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quat);
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF(vf10, muzzle);
+        VU0_LOAD_VF(vf10, muzzle);
+        VU0_LOAD_VF(vf11, from->position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        if (muzzle[0] < from->direction[0] * -distance + from->position[0]) {
+            pose = 0;
+        } else {
+            pose = 1;
+        }
+        fov = action->camera.fov;
+        to->fov = fov;
+        if (func_001E3230(unit, 1) == 0) {
+            btlUnitGetMuzzlePosVU(unit);
+        }
+        VU0_STORE_VF(vf10, to->position);
+        to->position[1] *= poses[pose].heightScale;
+        distance = unit->unkC0 * unit->scale / func_00353228(fov * 0.5f);
+        to->distance = distance * poses[pose].distanceScale;
+        VU0_LOAD_VF(vf10, poses[pose].quat);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, to->direction);
+        func_001E88A8(to);
+        action->durationFrames = func_001E2E58(unit, unit->unkEC);
+        action->flags |= 0x815;
+        action->motionProgress = 0;
+    }
+}
 
 void btlRefreshActionPoseBlendSnapshot(BtlLinkedCommand *action) {
     BtlCamState *saved;
@@ -5996,7 +6100,6 @@ void btlFlagUserAndTargetDefeat(BtlLinkedCommand *command, BtlLinkedCommand *unu
     }
 }
 
-extern s32 func_001E2E58(BtlUnit *, s32);
 extern f32 func_001ADBD0(ActionStateLink *);
 extern f32 func_00353140(f32);
 extern f32 func_00353040(f32);
@@ -6464,7 +6567,7 @@ void btlAdvancePlayerCursorAnimation(s32 action, s32 state) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417EF0);
+
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417F30);
 
