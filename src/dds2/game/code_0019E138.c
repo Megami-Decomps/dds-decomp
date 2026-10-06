@@ -48,7 +48,7 @@ extern void itfReleaseFontTestTaskResources(void);
 
 extern u32 D_0043658C;
 
-extern u32 itfBackgroundSpriteTexture;
+extern SdfTex *itfBackgroundSpriteTexture;
 
 extern u8 D_00436580[];
 extern u8 D_003B4378[];
@@ -146,9 +146,11 @@ void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
 
-extern s32 sdfTexAcquireResourceTexture(u32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
-extern u64 sdfReadNamedResource(const char *, u32 *, u64);
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
+extern void sdfTexReleaseReference(SdfTex *);
 
 typedef struct TextPoolNode {
     struct TextPoolNode *previous;
@@ -845,13 +847,13 @@ u32 itfReleaseMemNodeBuffer(u8 *ringBase) {
 /* Acquire the background texture, then release the temporary file allocation. */
 void itfLoadBackgroundSprite(void) {
     u32 resource;
-    u64 fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
+    SdfMemBlock *fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
-    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture(resource);
+    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((void *)resource);
     sdfReleaseResourceAllocation(fileAllocation);
 }
 
-/* Drop the held texture reference; the global word is not cleared here. */
+/* Drop the held texture reference without clearing the global. */
 void itfReleaseBackgroundSpriteTexture(void) {
     sdfTexReleaseReference(itfBackgroundSpriteTexture);
 }
@@ -865,7 +867,7 @@ void itfDrawBackgroundSprite(void) {
     s32 color[ITF_RGBA_COMPONENT_COUNT];
     s16 width;
     s16 height;
-    SdfTex *panel = (SdfTex *)itfBackgroundSpriteTexture;
+    SdfTex *panel = itfBackgroundSpriteTexture;
     if (panel != NULL) {
         width = panel->width;
         height = panel->height;
@@ -1042,13 +1044,13 @@ void itfTranslateStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
 }
 
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
-u64 itfLoadTextureFromAsset(const char *path) {
-    u64 fileAllocation;
-    u64 textureHandle;
+SdfTex *itfLoadTextureFromAsset(const char *path) {
+    SdfMemBlock *fileAllocation;
+    SdfTex *textureHandle;
     u32 assetInfo[ITF_VECTOR_WORD_COUNT];
 
     fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
-    textureHandle = sdfTexAcquireResourceTexture(assetInfo[0]);
+    textureHandle = sdfTexAcquireResourceTexture((void *)assetInfo[0]);
     sdfReleaseResourceAllocation(fileAllocation);
     return textureHandle;
 }
