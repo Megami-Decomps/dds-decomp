@@ -163,7 +163,7 @@ typedef struct BtlLinkedCommand {
     u16 stepKind;            /* 0x12C: action-camera dispatch kind */
     u8 pad12E[2];
     s32 state;               /* 0x130 */
-    s32 actionCode;          /* 0x134 */
+    u32 actionCode;          /* 0x134: unsigned; the VURI camera range test is sltiu */
     BtlIndexList *targetList; /* 0x138 */
     s32 motionProgress;      /* 0x13C: timed-action count or one-shot aim latch */
     u8 pad140[4];
