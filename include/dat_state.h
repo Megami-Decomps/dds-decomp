@@ -85,7 +85,12 @@ typedef struct DatPartyRecord {
 } DatPartyRecord;
 
 typedef struct DatInventory {
+#ifdef VERSION_DDS1
+    u8 counts[192];
+#endif
+#ifdef VERSION_DDS2
     u8 counts[256];
+#endif
 } DatInventory;
 
 /* The field reset constructors prove the 30-byte slot and 64-slot bank. */
@@ -132,7 +137,9 @@ typedef struct DatGameState {
     u8 pad1294[8];
     s32 partyCount;                        /* 0x0129C */
     DatInventory inventory;               /* 0x012A0 */
-    u8 pad13A0[0xD0];
+    s32 unk1360;
+    s16 unk1364;
+    u8 pad1366[0xA];
     DatFieldMapBank maps[40];              /* 0x01370 */
     u64 areaFlags[13][64];                 /* 0x13F70 */
     u8 activationFlags[32];                /* 0x15970 */
@@ -150,7 +157,9 @@ typedef struct DatGameState {
     u8 pad1334[8];
     s32 partyCount;                        /* 0x0133C */
     DatInventory inventory;               /* 0x01340 */
-    u8 pad1440[0x10];
+    s32 unk1440;
+    s16 unk1444;
+    u8 pad1446[0xA];
     DatFieldMapBank maps[31];              /* 0x01450 */
     u64 areaFlags[10][64];                 /* 0x0FCD0 */
     u8 activationFlags[32];                /* 0x110D0 */
@@ -170,6 +179,17 @@ typedef struct DatGameState {
     u8 pad1E664[0x1DC];
 #endif
 } DatGameState;
+
+typedef char DatStateHeaderSizeCheck[sizeof(DatStateHeader) == 0x40 ? 1 : -1];
+typedef char DatFieldMapBankSizeCheck[sizeof(DatFieldMapBank) == 0x780 ? 1 : -1];
+#ifdef VERSION_DDS1
+typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1A4 ? 1 : -1];
+typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x33600 ? 1 : -1];
+#endif
+#ifdef VERSION_DDS2
+typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1C4 ? 1 : -1];
+typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
+#endif
 
 extern DatGameState *datGameState;
 

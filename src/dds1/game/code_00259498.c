@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "dat_state.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -278,14 +279,9 @@ typedef struct MnuSpritePlacement {
     s16 y;
 } MnuSpritePlacement;
 
-typedef struct DatGameCounters {
-    u8 pad00[0x3C];
-    s32 currency;
-} DatGameCounters;
 
 extern MnuSpritePlacement D_0036B510[];
 extern s32 D_0036C698[];
-extern DatGameCounters *datGameState;
 extern char D_003BC4C8[];
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
@@ -311,19 +307,19 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   resource,
                   D_0036B510[34].spriteIndex, context);
-    if (datGameState->currency != scene->displayedCurrency) {
+    if (datGameState->header.currency != scene->displayedCurrency) {
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         scene->currencyFrame++;
         func_003014F0(currencyText, D_003BC4C8,
                       scene->displayedCurrency +
-                      (datGameState->currency - scene->displayedCurrency) *
+                      (datGameState->header.currency - scene->displayedCurrency) *
                           scene->currencyFrame / 20);
         if (scene->currencyFrame == 20) {
-            scene->displayedCurrency = datGameState->currency;
+            scene->displayedCurrency = datGameState->header.currency;
             scene->currencyFrame = 0;
         }
     } else {
-        func_003014F0(currencyText, D_003BC4C8, datGameState->currency);
+        func_003014F0(currencyText, D_003BC4C8, datGameState->header.currency);
     }
     itfDrawGlyphChainWithWidthQuery(x + 0x191, y + 0x39, depth, color,
                                     0, (u32)currencyText, 0, context);
