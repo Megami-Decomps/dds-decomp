@@ -4902,18 +4902,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BEB58);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF040);
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E50);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E60);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E70);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E80);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E90);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
-
 extern void func_001B5CD8(void);
 extern void func_001B60E8(void);
 extern void func_001AADF8(BattleSceneObject *);
@@ -4926,6 +4914,18 @@ static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     fldDispatchSceneKindHandler((s32)object);
     func_001B2D80(object, func_001BD0D0((s32)object, btlCommandPanelWork->classIndex));
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E50);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E60);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E70);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E80);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E90);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
 
 s32 func_001BF0F8(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
