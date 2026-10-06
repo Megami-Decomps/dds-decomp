@@ -222,26 +222,26 @@ void func_001FCBA0(BtlUnit *unit) {
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCFB8);
 
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
-
-/* Select the owner's effect variant for its current condition and task action. */
 s32 func_001FD170(BtlTask *task) {
     BtlUnit *unit = task->unit;
-    switch (unit->conditionFlags & 0x7FFF) {
+    s32 status = unit->conditionFlags & 0x7FFF;
+
+    switch (status) {
     case 0x2000:
         switch (task->result) {
+        case 1:
+            return effOffsetIfOwnerFlagClear(unit, 0x78);
         case 2:
         case 3:
         case 7:
         case 8:
             if (task->arg == 0xE0) {
-                /* Retail discards this result before computing the common base-2 effect. */
                 effOffsetIfOwnerFlagClear(unit, 0x6E);
             }
-            break;
-        case 1:
-            return effOffsetIfOwnerFlagClear(unit, 0x78);
+            /* Retail discards the auxiliary ID before resolving the common ID. */
+        default:
+            return effOffsetIfOwnerFlagClear(unit, 2);
         }
-        return effOffsetIfOwnerFlagClear(unit, 2);
     case 0x200:
         if (task->result != 1) {
             return effOffsetIfOwnerFlagClear(unit, 0x7A);
@@ -277,7 +277,6 @@ s32 func_001FD170(BtlTask *task) {
         return -1;
     }
 }
-
 
 typedef struct BtlCommandTargetResult {
     u8 pad00[8];

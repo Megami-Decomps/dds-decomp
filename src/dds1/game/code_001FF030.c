@@ -2825,7 +2825,7 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
 extern s8 D_003BD86C;
 
 /* vu0 routine: normalize packed RGBA and fade the named chunk tree. */
-void func_00207CA0(SdfDrawNode *node, s32 color)
+void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color)
 {
     SdfDrawNode *child;
     u32 source[4];
@@ -2851,7 +2851,7 @@ void func_00207CA0(SdfDrawNode *node, s32 color)
     node->color = packed[0];
     if (child != NULL) {
         do {
-            func_00207CA0(child, color);
+            btlFadeAndTintNamedChunkTree(child, color);
             child = child->next;
         } while (child != node->children);
     }
@@ -2897,7 +2897,7 @@ s32 btlDispatchNamedChunkNode(void *query) {
     }
     selected = ((BtlNamedChunkDescriptor *)descriptor)->data->entries[index];
     D_003BD86C = 1;
-    func_00207CA0(selected, ((BtlNamedChunkDescriptor *)descriptor)->argument);
+    btlFadeAndTintNamedChunkTree(selected, ((BtlNamedChunkDescriptor *)descriptor)->argument);
     return D_003BD86C;
 }
 

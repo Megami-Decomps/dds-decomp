@@ -40,11 +40,11 @@ void effPCPNeedleCreate(void *data) {
     EffPCPNeedleParams *work;
 
     work = effParamTableGetBlock(data, 0);
-    func_001760F8(work);
+    effNeedleCreateWork(work);
 }
 
 void func_00176410(EffPCPNeedleParams *work) {
-    func_001760F8(work);
+    effNeedleCreateWork(work);
 }
 
 /* Advance the orbiting needle entries and rebuild their camera-facing trails. */
