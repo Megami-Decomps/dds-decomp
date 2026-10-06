@@ -800,7 +800,82 @@ void func_0011B9A0(DatPartyRecord *entry, s32 initFlags) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011BC80);
+extern s32 func_00314B00(DatPartyRecord *, u16);
+extern void func_00314A80(DatPartyRecord *, u16);
+extern s32 func_00314990(DatPartyRecord *, u16);
+extern void func_00314868(DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
+extern void ptySetProfileRecordValue(DatPartyRecord *, u16, u32);
+extern void func_00286738(void);
+extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
+extern s32 scrSetFlag(DatPartyRecord *, u16);
+
+/* Merge saved templates 1 and 2 into roster 8, taking their greater level
+ * and stats and combining both sets of profile and skill flags. */
+void func_0011BC80(DatPartyRecord *entry) {
+    DatPartyRecord first;
+    DatPartyRecord second;
+    s32 index;
+    s32 present;
+    s32 firstValue;
+    s32 secondValue;
+
+    memcpy(entry, &datGameState->templates[1], sizeof(*entry));
+    entry->unitId = 8;
+    memcpy(&first, &datGameState->templates[1], sizeof(first));
+    memcpy(&second, &datGameState->templates[2], sizeof(second));
+    if (second.menuValue != 0) {
+        ptyAdjustItemQuantity(second.menuValue, 1);
+    }
+    if (first.level > second.level) {
+        entry->level = first.level;
+    } else {
+        entry->level = second.level;
+    }
+    for (index = 0; index < PTY_ENTRY_STAT_COUNT; index++) {
+        if (first.baseStats[index] > second.baseStats[index]) {
+            entry->baseStats[index] = first.baseStats[index];
+        } else {
+            entry->baseStats[index] = second.baseStats[index];
+        }
+    }
+    ptyRecomputeMaxHpMp(entry);
+    entry->totalExp = ptyComputeTotalExp(entry, 0);
+    for (index = 1; index < 0xB0; index++) {
+        present = func_00314B00(&first, index) != 0;
+        if (func_00314B00(&second, index)) {
+            present = 1;
+        }
+        if (present) {
+            func_00314A80(entry, index);
+        }
+        present = func_00314990(&first, index) != 0;
+        if (func_00314990(&second, index)) {
+            present = 1;
+        }
+        if (present) {
+            func_00314868(entry, index);
+        }
+        /* This merge compares the raw profile words as signed counters. */
+        firstValue = ptyGetProfileRecordValue(&first, index);
+        secondValue = ptyGetProfileRecordValue(&second, index);
+        if (firstValue >= secondValue) {
+            ptySetProfileRecordValue(entry, index, ptyGetProfileRecordValue(&first, index));
+        } else {
+            ptySetProfileRecordValue(entry, index, ptyGetProfileRecordValue(&second, index));
+        }
+    }
+    func_00286738();
+    for (index = 1; index < 0x2A0; index++) {
+        present = ptyGetSkillNibbleState(&first, index) != 0;
+        if (ptyGetSkillNibbleState(&second, index)) {
+            present = 1;
+        }
+        if (present) {
+            scrSetFlag(entry, index);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C0B0);
 
