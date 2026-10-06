@@ -518,7 +518,7 @@ s32 btlPollActorOrEntryLabelTask(void *arguments) {
         s32 resourceIndex = link->arg;
 
         if (resourceIndex == 0) {
-            if ((owner->flags64 & 0x1400) == 0 && (owner->statBits & 0x10) == 0) {
+            if ((btlUnitStatusPair(owner) & 0x1400) == 0 && (owner->statBits & 0x10) == 0) {
                 func_001B8580((s32)btlGetIndexedUiResource(owner));
             } else if (battleState->commandRestrictFlags & 0x400) {
                 if (owner->flags & 0x400) {

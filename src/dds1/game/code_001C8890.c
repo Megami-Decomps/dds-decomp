@@ -8,6 +8,7 @@
 #include "dat_state.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "btl_action.h"
 #include "sdf.h"
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
@@ -936,7 +937,101 @@ void btlActionSeqCheckDispatch(u8 *task) {
 void func_001C9090(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001C9098);
+typedef struct BattleDeltaSpec {
+    u32 unk_00;
+    u32 unk_04;
+    u32 unk_08;
+    u32 unk_0C;
+    u32 unk_10;
+    u32 unk_14;
+    u32 unk_18;
+    u32 unk_1C;
+    u32 unk_20;
+    u32 unk_24;
+} BattleDeltaSpec;
+
+void *btlCreateActorParameterDeltaTask(u8 *owner, BattleDeltaSpec *spec);
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
+extern s32 btlRollAiBucket(void);
+extern BtlRuntimeTask *btlCreateEffObjB();
+
+/* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
+ * others roll a script-supplied chance (capped at 70, scaled by ability 0x232). */
+void func_001C9098(BattleActionLinkState *link) {
+    BattleDeltaSpec spec;
+    BtlUnit *unit;
+    s32 chance;
+    f32 scale;
+    BtlRuntimeTask *task;
+
+    if (btlCountTasksByKind(0x45) != 0) {
+        return;
+    }
+    unit = link->unit;
+    unit->flags |= 0x4000;
+    switch (unit->conditionFlags & 0x7FFF) {
+    case 8:
+    case 0x20:
+    case 0x200:
+    case 0x1000:
+        if (unit->stateFlags & 4) {
+            unit->stateFlags &= ~4;
+            break;
+        }
+        /* fallthrough */
+    case 1:
+        unit->stateFlags &= ~4;
+        switch (unit->conditionFlags & 0x7FFF) {
+        case 0x1000:
+            chance = evtRunContext(0xE, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 0x200:
+            chance = evtRunContext(0xF, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 0x20:
+            chance = evtRunContext(0x10, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 8:
+            chance = evtRunContext(0x11, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 1:
+            chance = ((BtlState *)btlGetRuntime())->mode == 2 ? 100 : 0;
+            break;
+        default:
+            chance = 0;
+            break;
+        }
+        scale = 1.0f;
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x232)) {
+            scale = datAbilityParameters[0x232 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        chance = chance * scale;
+        if ((unit->conditionFlags & 0x7FFF) != 1 && chance > 70) {
+            chance = 70;
+        }
+        btlBossDebugPrintf("btl:bad recovery=%d%%[ratio=%.2f]\n", chance, scale);
+        if (btlRollAiBucket() >= chance) {
+            break;
+        }
+        /* fallthrough */
+    case 2:
+    case 4:
+        memset(&spec, 0, sizeof(spec));
+        spec.unk_0C = 0x122F;
+        btlStartTask(btlCreateActorParameterDeltaTask((u8 *)unit, &spec));
+        if (unit->conditionFlags & 0x1000) {
+            unit->flags |= 0x20000000;
+            task = btlCreateEffObjB(link->unit, 0xCA);
+            task->ownerId = btlAdvanceRuntimeSequenceCounter();
+            btlStartTask(task);
+            btlStartTask(btlCreateCommandSoundUpdateTask());
+            btlStartTask(btlCreateSecondaryCommandSoundTask());
+            btlStartTask(btlCreateCommandSoundTask((s32)link, 3));
+        }
+        break;
+    }
+    btlDispatchStateHandler(link, 0x1B);
+}
 
 void func_001C93A0(void) {
 }
@@ -2440,19 +2535,6 @@ void btlReleaseObjectBuffers(BattleIndexWork *object) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D2C78);
-
-typedef struct BattleDeltaSpec {
-    u32 unk_00;
-    u32 unk_04;
-    u32 unk_08;
-    u32 unk_0C;
-    u32 unk_10;
-    u32 unk_14;
-    u32 unk_18;
-    u32 unk_1C;
-    u32 unk_20;
-    u32 unk_24;
-} BattleDeltaSpec;
 
 extern u32 func_001D2C78(void *);
 

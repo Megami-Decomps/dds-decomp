@@ -1390,7 +1390,7 @@ s32 btlCommandStateSelectC(ActionStateLink *task) {
                 }
             }
         }
-        if (ready == 1 && (btlIsActiveActor(actor) == 0 || (actor->flags64 & 0xE1) != 1)) {
+        if (ready == 1 && (btlIsActiveActor(actor) == 0 || (btlUnitStatusPair(actor) & 0xE1) != 1)) {
             btlDispatchStateHandler(task, 0x1B);
         } else if (!(task->flags & 8)) {
             btlDispatchStateHandler(task, 0xC);
@@ -1552,7 +1552,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         sound = btlCreateHookedUnitSoundTask(unit, 0x11);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->nextActor) {
-            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+            if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 spawned = btlScheduleRefreshTask(other);
                 spawned->startCondition.kind = 4;
                 spawned->startDelay = 1;
@@ -1566,7 +1566,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
         for (other = state->units; other != NULL; other = other->nextActor) {
-            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+            if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 load = btlCreateModelLoadPollTask(other, other->resourceKind, other->resourceIndex, 0);
                 load->startCondition.kind = 4;
                 load->startCondition.value.handle = change->handle;

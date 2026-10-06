@@ -756,7 +756,7 @@ SceneTask **fldGetActorSceneGroupResource(SceneTask *task) {
     if ((task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) != 0) {
         return scene->groupHandles;
     }
-    actorGroupBits = (u32)task->actor->flags64 & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = task->actor->flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT:
         groupEntries = scene->groupPrimary;
@@ -801,7 +801,7 @@ s32 fldClassifyActorSceneGroup(SceneTask *task) {
     if (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
         return FLD_SCENE_HANDLE_TASK_COUNT;
     }
-    actorGroupBits = (u32)task->actor->flags64 & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = task->actor->flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT: return FLD_SCENE_PRIMARY_TASK_COUNT;
     case FLD_SCENE_ACTOR_SECONDARY_BIT: return FLD_SCENE_SECONDARY_TASK_COUNT;
@@ -1061,7 +1061,7 @@ void btlRotateGroupUntilTaskFirst(SceneTask *task) {
     BtlState *scene;
     u32 rotationCount;
     if (task != 0 && (task->flags & FLD_SCENE_TASK_BOUND_BIT) != 0 && task->actor != 0 && !(task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) &&
-        ((u32)task->actor->flags64 & FLD_SCENE_ACTOR_PRIMARY_BIT) != 0) {
+        (task->actor->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) != 0) {
         rotationCount = 0;
         scene = (BtlState *)btlGetRuntime();
         fldSortGroupByPriority(scene->groupPrimary, FLD_SCENE_PRIMARY_TASK_COUNT);

@@ -492,7 +492,7 @@ s32 fldGetSceneObjectState(void) {
 s32 btlHasSpecialActiveSceneActor(void) {
     BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
     while (actor != 0) {
-        if ((actor->flags64 & 0x421) == 0x401) {
+        if ((btlUnitStatusPair(actor) & 0x421) == 0x401) {
             u16 kind = actor->mode;
             if (kind == 0x4C || kind == 0x3C) {
                 return 1;
@@ -526,7 +526,7 @@ s32 func_001CA8D8(void) {
 s32 btlHasSelectedActiveSceneActor(void) {
     BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
     while (actor != 0) {
-        if ((actor->flags64 & 0x421) == 0x401 &&
+        if ((btlUnitStatusPair(actor) & 0x421) == 0x401 &&
             (actor->conditionFlags & 1) != 0) {
             return 1;
         }
@@ -538,7 +538,7 @@ s32 btlHasSelectedActiveSceneActor(void) {
 s32 btlHaveActiveSceneActorEntriesCleared(void) {
     BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
     while (actor != 0) {
-        if ((actor->flags64 & 0x421) == 0x401 &&
+        if ((btlUnitStatusPair(actor) & 0x421) == 0x401 &&
             btlGetEntryFlagsUnlessDisabled(&actor->statBits) != 0) {
             return 0;
         }

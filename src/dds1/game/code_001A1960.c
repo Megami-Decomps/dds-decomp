@@ -675,7 +675,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         reward *= 100;
     }
     controller->experienceEarned += reward;
-    if ((enemy->flags64 & 0x200800000ULL) == 0) {
+    if ((btlUnitStatusPair(enemy) & 0x200800000ULL) == 0) {
         amount = btlCalculateEnemyExperienceReward(NULL, (u8 *)enemy);
         controller->epEarned += amount;
         btlBossDebugPrintf(D_003A1818, controller->epEarned, amount);
