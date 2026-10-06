@@ -63,13 +63,11 @@
 #define MNU_STAFF_REORDER_CANCEL_MASK 6
 
 typedef struct MenuList MenuList;
-typedef struct MenuIconSprites MenuIconSprites;
 typedef struct MenuIconState MenuIconState;
-typedef struct MenuFadeFields MenuFadeFields;
 
 
 extern void *sdfAllocAndClearQuadwords(s32);
-extern u32 *effCreateResourceSlotSet(u32 *, u32, u32);
+extern struct EffectSlotSet *effCreateResourceSlotSet(u32 *, u32, u32);
 
 extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
@@ -1054,12 +1052,6 @@ void func_002B9820(MenuWindowContainer *menu) {
     mnuTestListFlagTwo((u32)menu->list);
 }
 
-struct MenuIconSprites {
-    u32 handle;
-    u32 value;
-    u32 unk8;
-    void *sprite[3];
-};
 
 void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, s32 *idx, s32 unused) {
     obj->value = value;
@@ -1639,15 +1631,6 @@ void mnuUpdateFade(s32 *list) {
     }
 }
 
-struct MenuFadeFields {
-    MenuWindowContainer previousWindow;
-    s32 previousVisibleCount;
-    MenuIconSprites savedResource;
-    u32 hasResourceCopy;
-    s32 previousProgress;
-    MenuWindowContainer *currentWindow;
-    s32 currentProgress;
-};
 
 /* Reset the original 0x98-byte prefix, then initialize the later fade fields. */
 void mnuInitializeWindowFadeState(MenuFadeFields *menu) {
