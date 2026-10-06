@@ -4299,7 +4299,76 @@ void btlReleaseAndClearChipBlock(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6CA8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6FC0);
+typedef struct BtlResBlock {
+    SdfMemBlock *unk0;
+    s32 nameA;
+    s32 nameB;
+    s32 nameC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
+    s32 unk1C;
+} BtlResBlock;
+extern BtlResBlock *btlResourceBlock;
+
+/* 0x2C-byte action record shared by the initializer, updater and renderer. */
+typedef struct BattleMirroredSpriteRecord {
+    s8 active;
+    u8 pad01;
+    s16 slot;
+    f32 scale;
+    s32 restoredWidth;
+    s32 restoredHeight;
+    s32 width;
+    s32 height;
+    s32 x;
+    s32 y;
+    s32 secondX;
+    s32 frame;
+    s8 alpha;
+    u8 pad29[3];
+} BattleMirroredSpriteRecord;
+
+void func_001B6FC0(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            switch (record->active) {
+            case 1: {
+                s32 scale = (s32)record->scale;
+                s32 x = record->x;
+                s32 y = record->y;
+                s32 width = btlResourceBlock->resA->workEntries[record->slot].sourceWidth;
+                s32 height;
+                s32 scaledWidth;
+                s32 scaledHeight;
+                record->restoredWidth = width;
+                scale = scale >> 1;
+                height = btlResourceBlock->resA->workEntries[record->slot].sourceHeight;
+                scaledWidth = width * scale;
+                scaledHeight = height * scale;
+                record->active = 2;
+                record->restoredHeight = height;
+                x -= (scaledWidth - width) >> 1;
+                y -= (scaledHeight - height) >> 1;
+                record->secondX = x;
+                record->y = y;
+                record->width = scaledWidth << 4;
+                record->height = scaledHeight << 3;
+                break;
+            }
+            case 2:
+                record->width -= 0x800;
+                record->height -= 0x800;
+                if (record->width <= 0x1000) record->active = 0;
+                break;
+            }
+            remaining--;
+            record++;
+        } while (remaining != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B70B8);
 
@@ -4313,22 +4382,9 @@ void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, 
     *(u32 *)(arg0 + 0x24) = 0;
 }
 
-typedef struct BtlResBlock {
-    SdfMemBlock *unk0;
-    s32 nameA;
-    s32 nameB;
-    s32 nameC;
-    EffectSlotSet *resA;
-    EffectSlotSet *resB;
-    EffectSlotSet *resC;
-    s32 unk1C;
-} BtlResBlock;
-
 extern u8 D_00436800;
 
 extern u8 btlResourceBlockLoaded;
-
-extern BtlResBlock *btlResourceBlock;
 
 extern s32 sdfReadNamedResource(const char *, void *, s32);
 
