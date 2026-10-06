@@ -214,6 +214,24 @@ typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1C4 ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
 #endif
 
+/* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
+typedef struct DatEnemyRecord {
+    u32 flags;            /* 0x00 */
+    u8 pad04;
+    u8 level;             /* 0x05 */
+    u8 pad06[0xF];
+    u8 unk15;            /* Copied to the command actor's actionNumber on model change. */
+    u8 pad16[2];
+    u16 skills[8];        /* 0x18 */
+    s32 money;            /* 0x28 */
+    u16 unk2C;
+    u16 experience;       /* 0x2E */
+    u16 huntExperience;   /* 0x30 */
+    u8 pad32[0x1A];
+} DatEnemyRecord;
+
+typedef char DatEnemyRecordSizeCheck[sizeof(DatEnemyRecord) == 0x4C ? 1 : -1];
+
 /* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
 typedef struct DatBattleSceneRecord {
     s8 unk00;            /* 0x00: tested for nonzero (scene color/mode selection) */

@@ -623,19 +623,6 @@ void func_001A4240(u16 item) {
     }
 }
 
-/* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
-typedef struct DatEnemyRecord {
-    u32 flags;            /* 0x00 */
-    u8 pad04;
-    u8 level;             /* 0x05 */
-    u8 pad06[0x12];
-    u16 skills[8];        /* 0x18 */
-    s32 money;            /* 0x28 */
-    u16 unk2C;
-    u16 experience;       /* 0x2E */
-    u16 huntExperience;   /* 0x30 */
-    u8 pad32[0x1A];
-} DatEnemyRecord;
 
 extern s32 func_001A9488(u32);
 extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);

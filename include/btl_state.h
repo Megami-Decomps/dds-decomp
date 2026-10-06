@@ -336,7 +336,7 @@ typedef struct BtlState {
     void (*unitReturnHook)(struct SceneTask *); /* 0x700: custom return-to-group handling */
     u8 pad704[0xC];
     s32 (*hook710)(BtlUnit *, s32);
-    u8 pad714[4];
+    void (*modelChangeSoundHook)(struct ActionStateLink *, u64, s32); /* 0x714: prerequisite handle, delay */
     struct BattleLinkedEffectState *effect; /* 0x718 */
     u32 tint71C;
     u8 pad720[4];

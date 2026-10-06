@@ -139,7 +139,8 @@ typedef struct BtlUnit {
     s32 listNode;
     struct SoundSlotOwner *soundSlotOwner; /* 0x308: shared category/id motion-SE owner. */
     void *gunResource; /* 0x30C */
-    u8 pad310[4];
+    u16 unk310; /* 0x310: battle-effect entry conditions test bits 0..2. */
+    u8 pad312[2];
     s32 unk314;
     u8 firstCountdown; /* 0x318: linked-effect destruction decrements this */
     u8 secondCountdown; /* 0x319 */
