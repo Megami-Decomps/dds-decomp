@@ -2,6 +2,7 @@
 #define BTL_STATE_H
 
 #include "btl.h"
+#include "btl_command.h"
 
 struct KwlnTask;
 struct BtlRuntimeTask;
@@ -37,7 +38,8 @@ typedef struct BtlState {
     BtlUnit *units; /* 0x228 */
     u8 pad22C[0x14];
     struct BattleModelEntry *modelEntries; /* 0x240 */
-    u8 pad244[4];
+    u16 cameraPresetMode; /* 0x244: selects the marked actor's camera preset. */
+    u8 pad246[2];
     u16 turnPhase; /* 0x248 */
     u8 pad24A[2];
     u16 mode; /* 0x24C */
@@ -139,14 +141,22 @@ typedef union BtlBackgroundId {
  * 0x1AA6F8. Its script-owner/task pair is +0x2C4/+0x2C8, not DDS1's
  * offsets plus 0x24. Scene groups, actor lists and SYSEFF slots belong here. */
 typedef struct BtlState {
-    u8 pad000[0x180];
+    u8 pad000[0xA0];
+    BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
+    u8 pad0C8[0x68];
+    BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
+    u8 pad158[0x28];
     u32 runtimeFlags;
     void *activeSlot;
     u8 pad188[0xC];
     u32 activeUnitId;
-    u8 pad198[0x10];
+    u8 pad198[8];
+    s32 debugCameraProgress; /* 0x1A0 */
+    u8 pad1A4[4];
     BtlIndexList *pendingSoundList;
-    u8 pad1AC[0x38];
+    u8 pad1AC[0x18];
+    f32 debugCameraParameter; /* 0x1C4 */
+    u8 pad1C8[0x1C];
     s16 eventTaskId; /* 0x1E4 */
     u8 pad1E6[2];
     u32 scriptFlags; /* 0x1E8 */
