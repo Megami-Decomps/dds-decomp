@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_curve.h"
 #include "file.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -5117,6 +5118,7 @@ INCLUDE_ASM(const s32, "game/code_0028A150", func_00296F58);
 
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00297270);
 
+
 /* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
 typedef struct FileKeyOut {
     f32 pos[4];
@@ -5131,15 +5133,13 @@ typedef struct FileKeyBlock {
     u8 pad00[0x2C];
     u8 unk2C[0x24];
     u8 unk50[0x10];
-    u8 unk60[0x2C];
-    u8 unk8C[0x10];
-    u8 mode;
-    u8 pad9D[0x1B];
+    EffScalarTrack scale; /* 0x60 */
+    EffScalarTrack heading; /* 0x8C */
     s32 length;
 } FileKeyBlock;
 
 extern s32 func_00296F58(void *, void *, s32, s32);
-extern f32 func_00297270(void *, s32, s32);
+extern f32 func_00297270(EffScalarCurve *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target */
 void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
@@ -5147,9 +5147,9 @@ void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *t
     f32 delta[4];
 
     out->color = func_00296F58(block->unk2C, block->unk50, frame, block->length);
-    out->scale = func_00297270(block->unk60, frame, block->length);
-    if (block->mode != 2) {
-        out->angle = func_00297270(block->unk8C, frame, block->length);
+    out->scale = func_00297270(&block->scale.curve, frame, block->length);
+    if (block->heading.curve.headingMode != 2) {
+        out->angle = func_00297270(&block->heading.curve, frame, block->length);
         return;
     }
     VU0_MOVE_VF(vf20, vf28);
