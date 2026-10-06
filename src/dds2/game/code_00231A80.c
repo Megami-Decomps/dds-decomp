@@ -648,9 +648,11 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
     return matchedNode->motionTable->unk00;
 }
 
-/* Pass the inner resource handle to its release/update routine. ctx is required. */
-void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
-    sdfUpdateActiveResourceListScalars((u32)ctx->inner->assetData);
+extern void sdfUpdateActiveResourceListScalars(DevRequest *, s32, f32);
+
+/* Update the inner resource list with the packed model-color word and scalar. */
+void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 value, f32 scalar) {
+    sdfUpdateActiveResourceListScalars(ctx->inner->assetData, value, scalar);
 }
 
 /* Copy a resource path's basename without its extension into destination. */
