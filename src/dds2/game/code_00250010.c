@@ -227,8 +227,6 @@ extern char D_004374F8[]; /* "%3d" */
 extern char D_00437500[]; /* "   CUT" */
 extern char D_00437508[]; /* "%03d" */
 extern s32 sdfCreateResetPacketList(void);
-/* The menu dispatcher accepts legacy callbacks with differing signatures. */
-extern void func_00250338();
 extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 extern s32 func_002521C8();
@@ -362,7 +360,51 @@ void evtCreateFrameVariableTask(void) {
     kwlnTaskCreate(D_00423380, 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250338);
+typedef s32 (*EvtMenuHeaderFn)();
+typedef void (*EvtMenuRowFn)();
+extern u32 D_00437488;
+extern char D_00437490[];
+extern char D_00437498[];
+
+/* Draw a framed debug menu: the optional header returns how many rows it used, the row callback fills the rest,
+ * and blinking scroll markers appear above/below when entries precede `first` or follow the last drawn one. */
+void func_00250338(u32 list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, u8 *data,
+                   EvtMenuHeaderFn header, EvtMenuRowFn row) {
+    s32 i = 0;
+    s32 textX;
+    s32 textY;
+    s32 index;
+
+    kwlnDrawSpriteCell(list, x, y, width, rows);
+    textX = (x << 4) + 0x7000;
+    textY = (y << 3) + 0x7900;
+    if (header != NULL) {
+        s32 headerRows = header(list, textX, textY, data);
+
+        textY += headerRows * 96;
+        i = headerRows;
+    }
+    index = first;
+    for (; i < rows; i++) {
+        if (row != NULL) {
+            row(list, textX, textY, index, data);
+            textY += 96;
+            index++;
+        }
+    }
+    if (D_00437488 & 0x10) {
+        textY = ((y - 10) << 3) + 0x7900;
+        textX = ((x + 5 * width + 6) << 4) + 0x7000;
+        if (first > 0) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_00437490));
+        }
+        textY = ((y + 12 * rows - 2) << 3) + 0x7900;
+        if (index < total) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_00437498));
+        }
+    }
+    D_00437488++;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423380);
 
