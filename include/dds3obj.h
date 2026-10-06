@@ -139,7 +139,8 @@ typedef struct ObjectTransform {
     f32 position[4];
     f32 rotation[4];
     f32 scale[4];
-    u8 pad70[0x50];
+    f32 smoothedPosition[4]; /* 0x70: lagged position used by the field camera. */
+    u8 pad80[0x40];
     u32 flags;
     f32 radius;
     u32 unkC8;

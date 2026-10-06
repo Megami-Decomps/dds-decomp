@@ -111,9 +111,8 @@ typedef struct BtlUnit {
     u16 conditionFlags; /* 0x12E */
     u8 pad130[4];
     u16 actionTime; /* 0x134 */
-    u8 pad136[3];
-    s8 agility; /* 0x139: signed HARI2 agility adjustment, also passed to diagnostics. */
-    u8 pad13A[0x38];
+    s8 baseStats[5]; /* 0x136: signed stat bank copied to the saved party entry. */
+    u8 pad13B[0x37];
     u16 bedAssetIndex; /* 0x172: SDK operand resolution selects the BED asset. */
     u8 pad174[0x138];
     s16 commandKind; /* 0x2AC: queued command kind, paired with actionSlot. */
@@ -193,7 +192,8 @@ typedef struct BtlUnit {
     u8 padCD[3];
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
-    u8 padD8[8];
+    u8 padD8[4];
+    s32 unkDC; /* 0xDC: mode actor selector paired with combatantKind. */
     s32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
