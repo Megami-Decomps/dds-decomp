@@ -1,5 +1,7 @@
 #include "common.h"
 #include "sdf.h"
+#include "btl.h"
+#include "btl_resource.h"
 
 typedef struct UiSlotEntry {
     u8 pad00[0x18];
@@ -162,7 +164,28 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C5D10);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6010);
 
+typedef struct BattleStatPulse {
+    s8 active;
+    u8 pad01[3];
+    u32 phase;
+    s32 progress;
+    s32 yOffset;
+    s16 alpha;
+    u8 pad12[2];
+} BattleStatPulse;
+typedef char BattleStatPulse_size_must_be_0x14[(sizeof(BattleStatPulse) == 0x14) ? 1 : -1];
+
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+
+extern const BattlePanelColors D_004168D8;
+extern BtlResBlock *btlResourceBlock;
+extern f32 sdfSinPoly(f32);
+extern void func_00306C28(s32, s32, s32, s32, s32, s32, s32, s32);
+
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6320);
+
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6648);
 
