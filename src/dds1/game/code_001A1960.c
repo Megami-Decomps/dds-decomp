@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_resource.h"
 #include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "sdf.h"
@@ -2645,16 +2646,6 @@ void func_001AB810(void) {
     }
 }
 
-typedef struct BtlResBlock {
-    s32 unk0;
-    s32 nameA;
-    s32 nameB;
-    s32 nameC;
-    EffectSlotSet *resA;
-    EffectSlotSet *resB;
-    EffectSlotSet *resC;
-    s32 unk1C;
-} BtlResBlock;
 extern BtlResBlock *btlResourceBlock;
 extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
@@ -4436,7 +4427,22 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BAB08);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BAE08);
 
+typedef struct BattleStatPulse {
+    s8 active;
+    u8 pad01[3];
+    u32 phase;
+    s32 progress;
+    s32 yOffset;
+    s16 alpha;
+    u8 pad12[2];
+} BattleStatPulse;
+typedef char BattleStatPulse_size_must_be_0x14[(sizeof(BattleStatPulse) == 0x14) ? 1 : -1];
+
+extern const BattlePanelColors D_003A2D68;
+
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BB118);
+
+
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BB440);
 
