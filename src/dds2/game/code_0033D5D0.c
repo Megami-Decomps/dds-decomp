@@ -186,10 +186,10 @@ extern s32 func_0034D100(void);
 
 extern s32 sceCdSearchFile(void *, s32);
 
-extern DevState *sdfDevCreateCallbackState(s32 arg0,
+extern DevState *sdfDevCreateCallbackState(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
 
-extern s32 func_0033F898(s32, void **);
+extern s32 func_0033F898(const char *, void **);
 
 extern void sdfDevEnqueueStateAndWakeWorker(DevState *);
 
@@ -732,7 +732,7 @@ void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 valu
 }
 
 /* Open a path using the shared reply callback and wait for its initial completion. */
-DevState *sdfDevCreateCommandState(s32 path) {
+DevState *sdfDevCreateCommandState(const char *path) {
     DevState *state;
     if (sdfDevReplySemaphore < 0) {
         sdfDevReplySemaphore = sdfCreateSemaphore(0, SDF_DEV_REPLY_SEMAPHORE_LIMIT, 0);
@@ -1330,7 +1330,7 @@ DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
 }
 
 /* Resolve a path to its worker and enqueue an asynchronous read-only open. */
-DevState *sdfDevCreateCallbackState(s32 path, void (*callback)(DevState *, s32, s32, s32, s32),
+DevState *sdfDevCreateCallbackState(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext) {
     void *resource;
     s32 workerIndex = func_0033F898(path, &resource);
@@ -1345,7 +1345,7 @@ DevState *sdfDevCreateCallbackState(s32 path, void (*callback)(DevState *, s32, 
 }
 
 /* Enqueue a write open; zero options select the device's default creation options. */
-DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32, s32, s32),
+DevState *sdfDevCreateModeState(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
     void *resource;
     s32 workerIndex = func_0033F898(path, &resource);
@@ -1440,7 +1440,7 @@ s32 sdfDevQueueReleaseState(DevState *state) {
 }
 
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
-DevState *sdfDevCreateRequest(s32 path, void *buffer, s32 byteCount,
+DevState *sdfDevCreateRequest(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
     void *resource;
     s32 workerIndex = func_0033F898(path, &resource);
@@ -1458,7 +1458,7 @@ DevState *sdfDevCreateRequest(s32 path, void *buffer, s32 byteCount,
 }
 
 /* Enqueue a one-shot write using the supplied buffer, byte count and creation options. */
-DevState *sdfDevOpenRequest(s32 path, void *buffer, s32 byteCount,
+DevState *sdfDevOpenRequest(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
     void *resource;
