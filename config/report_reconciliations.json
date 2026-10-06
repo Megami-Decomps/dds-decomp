@@ -8,8 +8,8 @@
       "expected_corrected_code": 12020,
       "expected_total_functions": 368,
       "expected_total_code": 53336,
-      "expected_source_functions": 361,
-      "expected_source_code": 47836,
+      "expected_source_functions": 362,
+      "expected_source_code": 48696,
       "corrected_functions": [
         "effPcpDrawViewAlignedRing",
         "effTwinEffectRerollSlot",
@@ -56,7 +56,6 @@
         "effPcpRandomizeSpawnSlot"
       ],
       "fallback_functions": {
-        "func_00178790": 860,
         "func_0017BF90": 456,
         "func_0017C300": 492,
         "func_0017D2F8": 432,
@@ -73,8 +72,8 @@
       "expected_corrected_code": 12020,
       "expected_total_functions": 368,
       "expected_total_code": 53336,
-      "expected_source_functions": 361,
-      "expected_source_code": 47836,
+      "expected_source_functions": 362,
+      "expected_source_code": 48696,
       "corrected_functions": [
         "effPcpDrawViewAlignedRing",
         "effTwinEffectRerollSlot",
@@ -121,7 +120,6 @@
         "effPcpRandomizeSpawnSlot"
       ],
       "fallback_functions": {
-        "func_001803E8": 860,
         "func_00183BE8": 456,
         "func_00183F58": 492,
         "func_00184F50": 432,
