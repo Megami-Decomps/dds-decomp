@@ -248,11 +248,16 @@ typedef struct BtlState {
     s32 (*hook5D4)(BtlUnit *, s32, s32);
     s32 (*hook5D8)(BtlUnit *);
     s32 (*hook5DC)(BtlUnit *, s32);
-    u8 pad5E0[4];
+    void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5E0 */
     s32 (*sceneCallback)(); /* 0x5E4 */
     u8 pad5E8[8];
     s32 (*hook5F0)(BtlUnit *, s32);
-    u8 pad5F4[0x24];
+    u8 pad5F4[4];
+    BtlUnit *(*findModelActor)(s32, s32); /* 0x5F8 */
+    u8 pad5FC[0x10];
+    void (*beforeActorModelReady)(BtlUnit *); /* 0x60C */
+    u8 pad610[4];
+    void (*afterActorModelReady)(BtlUnit *); /* 0x614 */
     s32 (*hook618)(BtlUnit *);
     s32 (*hook61C)(BtlUnit *);
     u8 pad620[4];
