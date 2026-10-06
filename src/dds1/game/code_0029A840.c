@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
@@ -58,15 +59,6 @@ extern u32 D_003BC950;
 
 extern u32 D_003BC954;
 
-/* Effect file request: kind, secondary mode, and a parameter forwarded to instance creation. */
-typedef struct EffFileRequest {
-    u8 pad_00[0xC];     // 0x00
-    u16 kind;           // 0x0C
-    u8 pad_0E[0xE];     // 0x0E
-    u16 secondaryMode;  // 0x1C
-    u8 pad_1E[6];
-    u32 resourceParam;  // 0x24
-} EffFileRequest;
 
 typedef struct EffModelOwner {
     f32 scale;
@@ -178,7 +170,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
-            owner->model = effLoadViewerModelWithVUState(data, ((EffFileRequest *)source)->resourceParam);
+            owner->model = effLoadViewerModelWithVUState(data, ((FileJob *)source)->slots[1].size);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU((void *)owner->model);

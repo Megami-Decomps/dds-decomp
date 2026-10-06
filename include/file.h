@@ -13,6 +13,48 @@ struct FileNode;
 struct FileRequest;
 struct FileCbNode;
 
+/* File-job buffer offsets are relative to the job unless allocation is retained. */
+typedef struct FileJobBufferSlot {
+    u32 offset;
+    u32 size;
+    void *allocation;
+    u16 selector;
+    u16 unkE;
+} FileJobBufferSlot;
+
+/* Effect/file queue entries share this C0-byte record in both games. */
+typedef struct FileJob {
+    u32 unk0;
+    u16 type;
+    u16 unk6;
+    void *data;
+    u16 option;
+    u16 unkE;
+    FileJobBufferSlot slots[2];
+    u8 unk30[0x10];
+    f32 offset[4];    /* 0x40 */
+    f32 quat[4];      /* 0x50 */
+    f32 scale;        /* 0x60 */
+    u32 color;        /* 0x64 */
+    u32 xformFlags;   /* 0x68 */
+    u8 unk6C[0x14];
+    s32 unk80;
+    u32 scaleFlags;   /* 0x84 */
+    u8 unk88[8];
+    u32 id;
+    u32 sector;
+    u32 flags;
+    char name[0x10];  /* 0x9C: queue-entry resource name */
+    struct FileJob *next;
+    struct FileJob *prev;
+    u8 padB4[0xC];
+} FileJob;
+
+typedef char FileJobBufferSlot_size_must_be_0x10[
+    (sizeof(FileJobBufferSlot) == 0x10) ? 1 : -1];
+typedef char FileJob_size_must_be_0xC0[
+    (sizeof(FileJob) == 0xC0) ? 1 : -1];
+
 /* One of the four device-read slots at FileManWork + 0x20. */
 typedef struct FileManSlot {
     u32 value;

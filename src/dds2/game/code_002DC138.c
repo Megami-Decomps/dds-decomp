@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_draw.h"
@@ -159,15 +160,6 @@ void *effCloneModelWithVUState(void *sourceModel) {
     return model;
 }
 
-/* Effect file request; the instance parameter follows the secondary mode. */
-typedef struct EffFileRequest {
-    u8 pad_00[0xC];
-    u16 kind;
-    u8 pad_0E[0xE];
-    u16 secondaryMode;
-    u8 pad_1E[6];
-    u32 resourceParam;
-} EffFileRequest;
 
 EffModelOwner *effCreateModelOwner(u8 *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
@@ -177,7 +169,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
-            owner->model = func_002DC1D0(data, ((EffFileRequest *)source)->resourceParam);
+            owner->model = func_002DC1D0(data, ((FileJob *)source)->slots[1].size);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU((void *)owner->model);

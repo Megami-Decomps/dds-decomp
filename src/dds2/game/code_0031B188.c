@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
@@ -73,7 +74,6 @@ extern u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord);
 extern ShortRecord *func_003225C0(ShortRecordList *list);
 
 
-typedef struct FileJob FileJob;
 typedef struct FileQueue {
     f32 offset[4];
     f32 axis[4];

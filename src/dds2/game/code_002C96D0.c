@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 #include "pcp_vu0.h"
 typedef struct EffectSurfaceNode {
     u32 capacity;
@@ -396,40 +397,6 @@ extern void fileCacheSlotFlagsFromState(void);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-typedef struct FileJobBufferSlot {
-    u32 offset;
-    u32 size;
-    void *allocation;
-    u16 selector;
-    u16 unkE;
-} FileJobBufferSlot;
-
-typedef struct FileJob {
-    u32 unk0;
-    u16 type;
-    u16 unk6;
-    void *data;
-    u16 option;
-    u16 unkE;
-    FileJobBufferSlot slots[2];
-    u8 unk30[0x10];
-    f32 offset[4];    /* 0x40 */
-    f32 quat[4];      /* 0x50 */
-    f32 scale;        /* 0x60 */
-    u32 color;        /* 0x64 */
-    u32 xformFlags;   /* 0x68 */
-    u8 unk6C[0x14];
-    s32 unk80;
-    u32 scaleFlags;   /* 0x84 */
-    u8 unk88[8];
-    u32 id;
-    u32 sector;
-    u32 flags;
-    u8 unk9C[0x10];
-    struct FileJob *next;
-    struct FileJob *prev;
-    u8 padB4[0xC];
-} FileJob;
 
 extern void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource);
 extern void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId);
@@ -3543,7 +3510,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
                 job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
             }
             fileJobCopyHeader(job, entry);
-            strcpy((char *)job->unk9C, (char *)entry->unk9C);
+            strcpy(job->name, entry->name);
             fileQueueAppend(queue, job);
         }
     } else {
@@ -3576,7 +3543,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
                     job->id = (u32)fileJobCreateChild((FileJob *)parent->id);
                 }
                 fileJobCopyHeader(job, entry);
-                strcpy((char *)job->unk9C, (char *)entry->unk9C);
+                strcpy(job->name, entry->name);
                 fileQueueAppend(queue, job);
                 entry++;
             } while (--count != 0);
