@@ -4143,7 +4143,86 @@ void btlCopyUnitStats(s32 arg0, s32 arg1) {
     btlRefreshUnitMaximumMpAndClampCurrentMp((s32)stats);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D6A80);
+extern void mdlSetAllResourceFrames(MdlCtx *, u32);
+extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u64 *);
+extern void func_002D9748(SdfModel *, SdfModel *);
+extern void func_002D9238(SdfPoolNode **, SdfModel *);
+extern u64 D_00359CF0[4];
+extern void mdlBroadcastMasked(MdlCtx *, u32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+
+/* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
+void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode **surfaces, u32 frame) {
+    SdfListHead *list;
+    u64 *packet;
+    MdlResourceItem *item;
+    u16 savedFlags;
+    s32 i;
+
+    if (model->flags & 1) {
+        return;
+    }
+    mdlBroadcastMasked(model, frame);
+    for (i = 0; i != 4; i++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
+        packet[2] = ((u64)0x10000000 << 32) | 0x8001;
+        packet[3] = 0xE;
+        packet[4] = 0x72801;
+        packet[5] = 0x47;
+        sdfAppendPacket(list, packet);
+        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+    }
+    savedFlags = model->inner->unk1A;
+    model->flags |= 2;
+    model->inner->unk1A = 0x2000;
+    mdlProcessContextNodesAndTransforms(model, (s32)surfaces);
+    model->flags &= ~2;
+    model->inner->unk1A = savedFlags;
+    for (i = 0; i != 4; i++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
+        packet[2] = ((u64)0x10000000 << 32) | 0x8001;
+        packet[3] = 0xE;
+        packet[4] = 0x51801;
+        packet[5] = 0x47;
+        sdfAppendPacket(list, packet);
+        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+    }
+    func_002D9748(overlay, model->inner);
+    if (unit->flags & 2) {
+        overlay->lighting = (void *)unit->ext->endpointWorkAddress;
+    } else {
+        overlay->lighting = NULL;
+    }
+    func_002D9238(surfaces, overlay);
+    for (i = 0; i != 4; i++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
+        packet[2] = ((u64)0x10000000 << 32) | 0x8001;
+        packet[3] = 0xE;
+        packet[4] = D_00359CF0[i];
+        packet[5] = 0x47;
+        sdfAppendPacket(list, packet);
+        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+    }
+    mdlSetAllResourceFrames(model, frame);
+    for (item = model->resourceItems; item != NULL; item = item->next) {
+        mdlDispatchViewerAnchorRecord(model, item);
+    }
+}
 
 extern SdfModel *sdfModelCreateWithItems(void *, void *);
 
@@ -4171,9 +4250,8 @@ extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 extern void dds3ClearObjectFlags(s32, s32);
 extern void dds3SetObjectFlags(s32, s32);
-extern void func_001D6A80(BtlUnit *, MdlCtx *, s32, s32, u32);
 extern s32 D_00325788[];
-extern s32 D_00359D10[];
+extern SdfPoolNode *D_00359D10[];
 
 void btlUpdateUnitTransparency(BtlUnit *unit) {
     u32 flags = unit->flags;
@@ -4205,7 +4283,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             } else if (unit->transparencyModel == 0) {
                 btlCreateUnitTransparency(unit);
             } else {
-                func_001D6A80(unit, info, unit->transparencyModel, (s32)D_00359D10, color);
+                func_001D6A80(unit, info, (SdfModel *)unit->transparencyModel, D_00359D10, color);
             }
         }
     }
@@ -4241,7 +4319,7 @@ void func_001D6FB0(BtlUnit *unit) {
         dds3SetObjectFlags(unit->effectObject, 1);
         return;
     }
-    func_001D6A80(unit, info, unit->transparencyModel, (s32)D_00359D20, unit->overlayColor);
+    func_001D6A80(unit, info, (SdfModel *)unit->transparencyModel, D_00359D20, unit->overlayColor);
     info = unit->mirror->ext->owner;
     if (unit->mirror->transparencyModel == 0) {
         unit->mirror->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -4251,7 +4329,7 @@ void func_001D6FB0(BtlUnit *unit) {
     packet = sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(packet, D_003980E0.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
     D_00359D30[0]->append((SdfListHead *)D_00359D30[0], (SdfListHead *)packet);
-    func_001D6A80(unit->mirror, info, unit->mirror->transparencyModel, (s32)D_00359D30, unit->mirror->overlayColor);
+    func_001D6A80(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
 
 extern char D_003A3BA8[];
