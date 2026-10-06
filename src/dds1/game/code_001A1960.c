@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "pcp_vu0.h"
 #include "btl_ui.h"
@@ -5177,21 +5178,20 @@ void fldScaleSceneCoordinateRecord(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C2E90);
 
-extern s32 D_003BD83C;
+extern SceneSlotFadeWork *D_003BD83C;
 
 void fldSetSceneSlotRange(s32 index) {
-    u8 *scene = (u8 *)D_003BD83C;
-    if (*(s8 *)(scene + 0x20) < index) {
+    SceneSlotFadeWork *scene = D_003BD83C;
+    if (scene->currentIndex < index) {
         s32 i;
         for (i = 0; i <= index; i++) {
-            s32 offset = i * 2;
-            scene = (u8 *)D_003BD83C;
-            *(s32 *)(scene + (offset + *(s32 *)(scene + 4)) * 4 + 0x38) = 0x80;
-            *(u8 *)((*(s32 *)(scene + 4) + offset) + (s32)scene + 0x22) = 3;
+            scene = D_003BD83C;
+            scene->fade[i][scene->bank] = 0x80;
+            scene->phase[i][scene->bank] = 3;
         }
-        ((u8 *)D_003BD83C)[0x21] = index;
+        D_003BD83C->lastIndex = index;
     }
-    ((u8 *)D_003BD83C)[0x20] = index;
+    D_003BD83C->currentIndex = index;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C3040);
@@ -5419,7 +5419,7 @@ void fldDestroySceneTasksAndBuffers(void) {
     btlReleaseResourceBlock();
     sdfReleaseChipBlock(D_003BD840[1]);
     sdfReleaseChipBlock(D_003BD840[0]);
-    sdfReleaseChipBlock((void *)D_003BD83C);
+    sdfReleaseChipBlock(D_003BD83C);
     sdfReleaseChipBlock(btlTrackedTaskHandles);
 }
 
