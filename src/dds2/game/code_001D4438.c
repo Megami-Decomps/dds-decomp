@@ -1522,7 +1522,144 @@ void func_001DA1F8(ActionStateLink *task) {
     task->unit->flags |= 0x4000;
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001DA210);
+extern u16 *btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
+extern s32 func_001E2E58(BtlUnit *, s32);
+extern SoundTask *btlScheduleRefreshTask(BtlUnit *unit);
+extern SoundTask *btlCreateModelChangeTask(BtlUnit *unit, s32 model, s32 variant, s32 motion, s32 frames, u8 mode);
+extern SoundTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode);
+extern SoundTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
+extern SoundTask *btlCreateGunLoadPollTask(BtlUnit *unit);
+extern SoundTask *sndCreateEffectSourceTask(struct SoundResourceNode *resource, BtlUnit *unit, u64 wait);
+extern SoundTask *btlCreateEffObjA(BtlUnit *unit, s32 effect);
+extern SoundTask *btlCreateEffObjD(BtlUnit *unit, s32 ability);
+
+/* State-handler table entry (0x3B6A9C); the table holds s32 handlers (btlCommandStateSelectB) and this one
+ * returns without a value, as retail's missing sibling calls show.
+ * Gun-change command (slot 0x11): once no blocking tasks remain, swap the unit to its gun model with the hooked
+ * sound, refresh linked allies and reload their models, start the gun effects, and continue to state 0x19/0x1B;
+ * a unit already holding the gun only restores its motion, swaps back and continues to 0x1C/0x1B. */
+s32 func_001DA210(SceneTask *task) {
+    BtlUnit *unit;
+    BtlState *state;
+    BtlUnit *other;
+    SoundTask *sound;
+    SoundTask *change;
+    SoundTask *spawned;
+    SoundTask *load;
+    u16 *status;
+    s32 motion;
+
+    if (btlCountTasksByKind(0x1A) != 0 || btlCountTasksByKind(0x18) != 0 || btlCountTasksByKind(0x23) != 0) {
+        return;
+    }
+    state = (BtlState *)btlGetRuntime();
+    unit = task->actor;
+    status = btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    if (!(unit->flags & 0x20)) {
+        motion = func_001E2E58(unit, 0x11) + 0x14;
+    } else {
+        motion = status[0x15];
+    }
+    if (!(unit->flags & 0x400020)) {
+        unit->flags &= ~0x1000;
+        unit->statBits &= ~0x1000;
+        sound = btlCreateHookedUnitSoundTask(unit, 0x11);
+        btlStartTask(sound);
+        for (other = state->units; other != NULL; other = other->nextActor) {
+            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+                spawned = btlScheduleRefreshTask(other);
+                spawned->enabled = 4;
+                spawned->startDelay = 1;
+                spawned->conditionHandle = sound->unk_38;
+                spawned->owner = unit->owner;
+                btlStartTask(spawned);
+            }
+        }
+        change = btlCreateModelChangeTask(unit, unit->modelId, unit->modelVariant, motion, 0x18, 0);
+        change->enabled = 4;
+        change->conditionHandle = sound->unk_38;
+        btlStartTask(change);
+        for (other = state->units; other != NULL; other = other->nextActor) {
+            if (other != unit && (other->flags64 & 0x202) == 0x202) {
+                load = btlCreateModelLoadPollTask(other, other->resourceKind, other->resourceIndex, 0);
+                load->enabled = 4;
+                load->conditionHandle = change->unk_38;
+                load->owner = unit->owner;
+                btlStartTask(load);
+                spawned = btlCreateUnitFadeInTask(other, 0, 0);
+                spawned->enabled = 4;
+                spawned->conditionHandle = load->unk_38;
+                spawned->owner = unit->owner;
+                btlStartTask(spawned);
+            }
+        }
+        btlStartTask(btlCreateGunLoadPollTask(unit));
+        btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->unk_38));
+        btlStartTask(sndCreateStationedSeTask(0x1000F));
+        spawned = btlCreateEffObjA(unit, task->command);
+        spawned->enabled = 4;
+        spawned->conditionHandle = sound->unk_38;
+        btlStartTask(spawned);
+        spawned = btlCreateCommandSoundUpdateTask();
+        spawned->enabled = 4;
+        spawned->conditionHandle = sound->unk_38;
+        btlStartTask(spawned);
+        spawned = btlCreateSecondaryCommandSoundTask();
+        spawned->enabled = 4;
+        spawned->conditionHandle = sound->unk_38;
+        btlStartTask(spawned);
+        spawned = btlCreateCommandSoundTask((s32)task, 0xE);
+        spawned->enabled = 4;
+        spawned->conditionHandle = sound->unk_38;
+        btlStartTask(spawned);
+        spawned = (SoundTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
+                                                                btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
+        spawned->enabled = 4;
+        spawned->conditionHandle = sound->unk_38;
+        btlStartTask(spawned);
+        if (!btlDoesEnabledStatusMatchCurrentId(&task->actor->statBits, 0xE0)) {
+            spawned = (SoundTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
+            spawned->enabled = 4;
+            spawned->conditionHandle = sound->unk_38;
+            spawned->owner = unit->owner;
+            btlStartTask(spawned);
+        }
+        if (task->actor->conditionFlags & 0x480) {
+            btlDispatchStateHandler(task, 0x19);
+        } else {
+            btlDispatchStateHandler(task, 0x1B);
+        }
+    } else {
+        if ((unit->conditionFlags & 0x7FFF) != 0x4000) {
+            unit->flags &= ~0x20;
+            if (unit->hp == 0) {
+                unit->hp = 1;
+                btlRefreshUnitMotionSelection(unit);
+            }
+        }
+        if (task->actionStage == 4) {
+            if (!btlCheckSpecialAbility((s32)&unit->statBits, 0x251)) {
+                btlStartTask(btlCreateEffObjB(unit, task->effect));
+                task->actionStage = 0;
+            } else {
+                btlStartTask(btlCreateEffObjD(unit, 0x251));
+            }
+        }
+        unit->flags &= ~0x1000;
+        unit->statBits &= ~0x1000;
+        change = btlCreateModelChangeTask(unit, unit->modelId, unit->modelVariant, motion, 0x12, 3);
+        btlStartTask(change);
+        btlStartTask(btlCreateGunLoadPollTask(unit));
+        btlStartTask(sndCreateEffectSourceTask(state->resources[47], unit, change->unk_38));
+        btlStartTask(sndCreateStationedSeTask(0x1000F));
+        unit->flags &= ~0x400000;
+        if (task->flags & 0x10) {
+            btlDispatchStateHandler(task, 0x1C);
+        } else {
+            btlDispatchStateHandler(task, 0x1B);
+        }
+    }
+}
 
 void func_001DA728(ActionStateLink *task) {
     task->unit->flags |= 0x4000;
@@ -1534,12 +1671,10 @@ void func_001DABC0(ActionStateLink *task) {
     task->unit->flags |= 0x4000;
 }
 
-extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
-
 void func_001DABD8(u8 *task) {
     u8 *actor;
     u8 *effectTask;
-    u8 *modelTask;
+    SoundTask *modelTask;
     u8 *statusTable;
     s32 model;
 
@@ -1814,7 +1949,6 @@ void btlUnitTurnEndCommit(ActionStateLink *unit) {
     }
 }
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern void btlAccumulateEnemyDefeatRewards(BtlUnit *);
 extern SoundTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
 extern SoundTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);

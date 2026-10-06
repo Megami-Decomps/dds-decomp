@@ -195,7 +195,10 @@ typedef struct BtlUnit {
     s32 resourceKind; /* 0xC4 */
     s32 resourceIndex; /* 0xC8 */
     u8 unkCC;
-    u8 padCD[0x13];
+    u8 padCD[3];
+    s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
+    s32 modelVariant; /* 0xD4: its variant argument */
+    u8 padD8[8];
     s32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
