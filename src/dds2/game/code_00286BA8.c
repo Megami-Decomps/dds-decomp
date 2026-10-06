@@ -109,7 +109,7 @@ extern void mnuEnableTerminalTrackMode(s8);
 
 extern u8 mnuResourceTaskName[];
 
-extern void func_00286F18(s32, s32);
+extern void func_00286F18(s32, struct MnuStatusResource *);
 
 extern u8 D_003CFCC0[];
 
@@ -210,9 +210,8 @@ void *func_00286E98(void) {
 }
 
 /* Release status-owned resources only for a nonzero work address; print the release banner even when it is zero. */
-void func_00286F18(s32 unused, s32 resourceAddress) {
-    if (resourceAddress != 0) {
-        MnuStatusResource *resourceWork = (MnuStatusResource *)resourceAddress;
+void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
+    if (resourceWork != NULL) {
 
         dspCloseChannel();
         sdfQueueNonzeroResourceId(resourceWork->resourceIdA);
@@ -229,7 +228,7 @@ void func_00286F18(s32 unused, s32 resourceAddress) {
 /* Store the task handle so the existence probe and explicit stop can
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
-    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00286E98();
+    MnuStatusResource *resourceWork = func_00286E98();
     mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_003CFCC0, func_00286F18, resourceWork);
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -30,31 +31,14 @@ typedef struct {
 
 typedef struct MovieCueNode MovieCueNode;
 
-typedef struct MovieCueLink {
-    u8 pad00[8];
-    struct MovieCueLink *next; /* 0x08 */
-    u8 pad0C[4];
-    MovieCueNode *cue; /* 0x10 */
-} MovieCueLink;
-
-typedef struct {
-    u32 allocation;
-    u8 pad04[4];
-    MovieCueLink *firstCue; /* 0x08 */
-    u8 pad0C[4];
-    u32 userData;
-    u32 callback14;
-    void (*onDestroy)(s32, u32);
-} SdfTaskHeader;
 
 typedef struct {
     s32 allocation;
-    SdfTaskHeader *tasks[10];
+    SdfList *tasks[10];
     s32 activeCount;
     s32 spawnCountdown;
 } MovieResourceGroup;
 
-extern void *sdfCreateTaskHeader(u32);
 extern f32 effMiscRandUnitFloat(s32);
 extern void mnuReleaseOptionalDrawAllocation(void *, void *);
 
@@ -88,11 +72,10 @@ struct MovieCueNode {
     u8 enabled;           /* 0x12 */
 };
 
-extern void func_0025BA20(s32, s32, u8 *, s8);
-extern u8 *sdfListRemoveNode(s32, u8 *);
+extern void func_0025BA20(void *, SdfList *, void *, s8);
 
-s32 mnuTickResourceGroup(s32 owner, s32 group) {
-    u8 *list = *(u8 **)(group + 8);
+SdfList *mnuTickResourceGroup(MovieResourceGroup *owner, SdfList *group) {
+    SdfListNode *list = group->head;
     MovieCueNode *node;
 
     if (list == NULL) {
@@ -100,30 +83,30 @@ s32 mnuTickResourceGroup(s32 owner, s32 group) {
         return 0;
     }
     do {
-        node = *(MovieCueNode **)(list + 0x10);
+        node = list->value;
         node->framesLeft = node->framesLeft - 1;
         /* Fire an enabled cue five frames before its node expires. */
         if (node->framesLeft == node->duration - 5 && node->enabled != 0) {
-            func_0025BA20(owner, group, (u8 *)node, node->cueIndex);
+            func_0025BA20(owner, group, node, node->cueIndex);
         }
         if (node->framesLeft == 0) {
             list = sdfListRemoveNode(group, list);
         } else {
-            list = *(u8 **)(list + 8);
+            list = list->next;
         }
     } while (list != NULL);
     return group;
 }
 void func_0025BDD0(MovieResourceGroup *resources) {
-    SdfTaskHeader **slot;
+    SdfList **slot;
     s32 i;
-    SdfTaskHeader *group;
+    SdfList *group;
 
     if (resources->spawnCountdown == 0) {
         if (resources->activeCount < 10) {
             group = sdfCreateTaskHeader(0);
-            group->callback14 = (u32)mnuReleaseOptionalDrawAllocation;
-            func_0025BA20((s32)resources, (s32)group, NULL, 0);
+            group->onRemove = mnuReleaseOptionalDrawAllocation;
+            func_0025BA20(resources, group, NULL, 0);
             for (i = 0; i < 10; i++) {
                 if (resources->tasks[i] == 0) {
                     resources->tasks[i] = group;
@@ -136,11 +119,11 @@ void func_0025BDD0(MovieResourceGroup *resources) {
     } else {
         resources->spawnCountdown--;
     }
-    slot = (SdfTaskHeader **)resources->tasks;
+    slot = resources->tasks;
     for (i = 0; i < 10; i++, slot++) {
         group = *slot;
         if (group != NULL) {
-            *slot = (SdfTaskHeader *)mnuTickResourceGroup((s32)resources, (s32)group);
+            *slot = mnuTickResourceGroup(resources, group);
             if (*slot == NULL) {
                 resources->activeCount--;
             }
@@ -154,18 +137,18 @@ extern f32 sdfSinPoly(f32);
 /* Draw every live cue in the ten task slots using its remaining-life sine fade. */
 void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
                    MovieResourceGroup *resources, s32 drawArg) {
-    SdfTaskHeader **slot = resources->tasks;
+    SdfList **slot = resources->tasks;
     s32 i;
 
     for (i = 9; i >= 0; i--, slot++) {
-        SdfTaskHeader *group = *slot;
+        SdfList *group = *slot;
 
         if (group != NULL) {
-            MovieCueLink *link = group->firstCue;
+            SdfListNode *link = group->head;
 
             if (link != NULL) {
                 do {
-                    MovieCueNode *cue = link->cue;
+                    MovieCueNode *cue = link->value;
                     f32 fade = sdfSinPoly(((f32)cue->framesLeft /
                                            (f32)cue->duration) * 3.14159265f);
 

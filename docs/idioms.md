@@ -2305,3 +2305,29 @@ source shapes. Its best `MenuPoint`-based candidate differs in 22 of 291
 instruction words and still has constant-pool/shared-data differences.
 Keep that partial parked rather than enabling it or declaring a match.
 
+## SDK callback lists own both teardown hooks
+
+`sdfCreateTaskHeader` allocates and clears the complete `0x1C`-byte
+`SdfList`, including its allocation handle, count, endpoints, userdata
+and both hooks. `sdfListAppend` and `sdfListInsertAfter` allocate and clear
+the complete `0x14`-byte `SdfListNode`; its value is a borrowed payload
+pointer. Movie task slots and their cue links borrow these owners, not
+separate short headers or offset-based link views.
+
+Userdata is a real game-owned pointer: the menu constructors pass their
+resource work through the list to its teardown callback. Setter arguments
+are function pointers, not signed address words. The SDK's generic
+unprototyped hook convention accommodates the shared no-op also used by
+scalar task entries and the specialized ordinal/sentinel-plus-payload
+callbacks. Do not add function-pointer casts or matching-only adapters.
+
+DDS3's indexed heap list is different: its count, head and tail begin at
+`+0`, `+4` and `+8`, and its node is released through the ordinary heap
+free routine rather than the SDK size-class allocator. Its identical
+`0x14`-byte node geometry alone does not prove shared producer identity.
+
+The allocator's unlink helper instead borrows the existing `0x10`-byte
+`SdfMemBlock`. Its previous/next links are at `+0` and `+4`; an eight-byte
+`SdfListNode` projection or byte-offset view is not a second list owner.
+Both titles pass the actual allocation and its predecessor directly.
+

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "sdf.h"
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
@@ -20,31 +21,19 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 }
 
 
-extern void func_0026DED0(s32, s32, u8 *, s8);
-extern u8 *sdfListRemoveNode(s32, u8 *);
-
-typedef struct SdfTaskHeader {
-    u32 allocation;
-    u8 pad04[0xC];
-    u32 userData;
-    u32 callback14;
-    void (*onDestroy)(s32, u32);
-} SdfTaskHeader;
-
-extern void sdfDestroyTaskWork(SdfTaskHeader *);
+extern void func_0026DED0(void *, SdfList *, void *, s8);
 
 typedef struct MovieResourceGroup {
     s32 allocation;
-    SdfTaskHeader *tasks[10];
+    SdfList *tasks[10];
     s32 activeCount;
     s32 spawnCountdown;
 } MovieResourceGroup;
 
-extern void *sdfCreateTaskHeader(u32);
 extern void func_0026DEA8();
 
-SdfTaskHeader *mnuTickMovieGroup(MovieResourceGroup *owner, SdfTaskHeader *group) {
-    u8 *list = *(u8 **)((u8 *)group + 8);
+SdfList *mnuTickMovieGroup(MovieResourceGroup *owner, SdfList *group) {
+    SdfListNode *list = group->head;
     u8 *node;
 
     if (list == NULL) {
@@ -52,30 +41,30 @@ SdfTaskHeader *mnuTickMovieGroup(MovieResourceGroup *owner, SdfTaskHeader *group
         return 0;
     }
     do {
-        node = *(u8 **)(list + 0x10);
+        node = list->value;
         *(s32 *)(node + 8) = *(s32 *)(node + 8) - 1;
         if (*(s32 *)(node + 8) == *(s32 *)(node + 0xC) - 5 && *(u8 *)(node + 0x12) != 0) {
-            func_0026DED0((s32)owner, (s32)group, node, *(s8 *)(node + 0x11));
+            func_0026DED0(owner, group, node, *(s8 *)(node + 0x11));
         }
         if (*(s32 *)(node + 8) == 0) {
-            list = sdfListRemoveNode((s32)group, list);
+            list = sdfListRemoveNode(group, list);
         } else {
-            list = *(u8 **)(list + 8);
+            list = list->next;
         }
     } while (list != NULL);
     return group;
 }
 
 void func_0026E240(MovieResourceGroup *resources) {
-    SdfTaskHeader **slot;
+    SdfList **slot;
     s32 i;
-    SdfTaskHeader *group;
+    SdfList *group;
 
     if (resources->spawnCountdown == 0) {
         if (resources->activeCount < 10) {
             group = sdfCreateTaskHeader(0);
-            group->callback14 = (u32)func_0026DEA8;
-            func_0026DED0((s32)resources, (s32)group, NULL, 0);
+            group->onRemove = func_0026DEA8;
+            func_0026DED0(resources, group, NULL, 0);
             for (i = 0; i < 10; i++) {
                 if (resources->tasks[i] == 0) {
                     resources->tasks[i] = group;

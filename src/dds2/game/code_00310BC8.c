@@ -15,7 +15,6 @@ extern s32 sdfReleaseResourceAllocation(u32);
 
 extern void sdfReleaseChipBlock();
 
-extern void sdfClearTaskList();
 
 extern void sdfDestroyCallbackWork();
 
@@ -70,23 +69,6 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern void func_00313A58(u8 *);
 
-typedef struct SdfListNode {
-    u32 index;                 /* 0x00 */
-    s32 key;                   /* 0x04 */
-    struct SdfListNode *next;  /* 0x08 */
-    struct SdfListNode *prev;  /* 0x0C */
-    void *value;               /* 0x10 */
-} SdfListNode;
-
-typedef struct SdfList {
-    u32 allocation;            /* 0x00 */
-    u32 count;                 /* 0x04 */
-    SdfListNode *head;         /* 0x08 */
-    SdfListNode *tail;         /* 0x0C */
-    u32 userData;              /* 0x10 */
-    void (*onRemove)();        /* 0x14: ordinal/payload hook, installed through the word-address API */
-    void (*onDestroy)(s32, s32); /* 0x18 */
-} SdfList;                     /* 0x1C, allocated by sdfCreateTaskHeader */
 
 typedef struct TaskWork {
     u32 allocation;
@@ -161,14 +143,13 @@ extern void sdfCallbackWorkOnRemove();
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void kwlnTaskCreate();
-extern TaskWork *sdfCreateNamedTaskWork();
+extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
 extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern void kwlnTaskCreate();
-extern TaskWork *sdfCreateNamedTaskWork();
 
 extern void func_00312E20(void);
 
@@ -585,11 +566,11 @@ void func_00311F20(s32 *points, u32 tail, u32 *colors, s32 count,
 }
 
 /* Return a callback-list header address, retaining its allocation handle and teardown userData. */
-void *sdfCreateTaskHeader(u32 userData) {
-    s32 allocation = sdfAllocGeneralBlock(0x1C);
+SdfList *sdfCreateTaskHeader(void *userData) {
+    s32 allocation = sdfAllocGeneralBlock(sizeof(SdfList));
     SdfList *obj = sdfMemoryGetBlockAddress(allocation);
 
-    memset(obj, 0, 0x1C);
+    memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;
     obj->userData = userData;
     obj->onRemove = func_00313BA8;
@@ -597,24 +578,24 @@ void *sdfCreateTaskHeader(u32 userData) {
     return obj;
 }
 
-s64 sdfDestroyTaskWork(SdfList *owner) {
+void sdfDestroyTaskWork(SdfList *owner) {
     if (owner != NULL) {
         sdfClearTaskList(owner);
         owner->onDestroy(-1, owner->userData);
-        return sdfReleaseResourceAllocation(owner->allocation);
+        sdfReleaseResourceAllocation(owner->allocation);
     }
 }
 
-void sdfSetTaskDestroyCallback(s32 work, s32 callback) {
-    if (callback != 0) {
-        ((SdfList *)work)->onDestroy = (void (*)(s32, s32))callback;
+void sdfSetTaskDestroyCallback(SdfList *work, SdfListCallback callback) {
+    if (callback != NULL) {
+        work->onDestroy = callback;
     }
 }
 
 SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
-    SdfListNode *node = sdfAllocSizeClassBlock(0x14);
+    SdfListNode *node = sdfAllocSizeClassBlock(sizeof(SdfListNode));
 
-    memset(node, 0, 0x14);
+    memset(node, 0, sizeof(SdfListNode));
     node->value = value;
     node->index = list->count++;
     node->key = key;
@@ -630,10 +611,10 @@ SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
 
 /* Insert a new node after `after`, bumping the index of every later node. */
 SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void *value) {
-    SdfListNode *node = sdfAllocSizeClassBlock(0x14);
+    SdfListNode *node = sdfAllocSizeClassBlock(sizeof(SdfListNode));
     SdfListNode *it;
 
-    memset(node, 0, 0x14);
+    memset(node, 0, sizeof(SdfListNode));
     node->index = after->index + 1;
     node->key = key;
     node->value = value;
@@ -655,9 +636,9 @@ SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void
     return node;
 }
 
-void sdfSetTaskSecondaryCallback(s32 work, s32 callback) {
-    if (callback != 0) {
-        ((SdfList *)work)->onRemove = (void (*)())callback;
+void sdfSetTaskSecondaryCallback(SdfList *work, SdfListCallback callback) {
+    if (callback != NULL) {
+        work->onRemove = callback;
     }
 }
 
@@ -763,7 +744,7 @@ void sdfSwapLinkedListNodes(SdfList *list, SdfListNode *a, SdfListNode *b) {
 }
 
 /* Find a key in a nonempty list; the first node is read before traversal exhaustion is checked. */
-void *sdfFindTaskListNodeByKey(SdfList *list, s32 key) {
+SdfListNode *sdfFindTaskListNodeByKey(SdfList *list, s32 key) {
     SdfListNode *node;
 
     node = list->head;
@@ -818,7 +799,7 @@ u32 sdfReadPadDirectionMask(void) {
     return flags;
 }
 
-TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
+TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
     TaskWork *work;
 
     work = sdfCreateNamedTaskWork(name, destroyCallback, userData);
