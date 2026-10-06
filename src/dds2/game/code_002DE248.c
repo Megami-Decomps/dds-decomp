@@ -4743,7 +4743,85 @@ void effSeedBillboardFrameCounters(s32 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002ECF78);
+typedef struct EffAlternatingPointSetRow {
+    EffPointSet *set;
+    s32 key;
+    u32 unk08;
+} EffAlternatingPointSetRow;
+
+typedef struct EffAlternatingPointSetTable {
+    EffAlternatingPointSetRow *rows;
+} EffAlternatingPointSetTable;
+
+EffAlternatingPointSetTable *func_002ECF78(EffPointSetTableSource *src) {
+    u32 count = src->count;
+    EffAlternatingPointSetTable *table;
+    EffAlternatingPointSetRow *row;
+    u32 i;
+    u32 alphaA;
+    u32 alphaB;
+    u32 alphaC;
+    u32 lowA;
+    u32 lowB;
+    u32 lowC;
+    s32 rampIn;
+    s32 rampOut;
+    f32 previousRatio;
+
+    table = (EffAlternatingPointSetTable *)sdfAllocSizeClassBlock(count * sizeof(EffAlternatingPointSetRow) + 4);
+    table->rows = (EffAlternatingPointSetRow *)(table + 1);
+    if ((u32)src->layers < 3) {
+        src->layers = 3;
+    }
+    if (!(src->layers & 1)) {
+        src->layers++;
+    }
+    lowA = src->colorA & 0xFFFFFF;
+    lowB = src->colorB & 0xFFFFFF;
+    lowC = src->colorC & 0xFFFFFF;
+    alphaA = src->colorA >> 24;
+    alphaB = src->colorB >> 24;
+    alphaC = src->colorC >> 24;
+    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
+    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    previousRatio = 0.0f;
+    row = table->rows;
+    for (i = 0; i < count; i++) {
+        EffPointSet *set = effCreatePointSet5(src->layers);
+        u32 n;
+        u32 *rec;
+        u32 j;
+
+        row->set = set;
+        n = set->rows / 5;
+        rec = (u32 *)set->tail;
+        for (j = 0; j < n; j++) {
+            f32 ratio;
+
+            if ((j & 1) || j == 0) {
+                if (j < rampIn) {
+                    ratio = (f32)j / (f32)rampIn;
+                } else if (j <= rampOut) {
+                    ratio = 1.0f;
+                } else {
+                    ratio = (f32)(n - j - 1) / (f32)(n - rampOut);
+                }
+                previousRatio = ratio;
+            } else {
+                ratio = previousRatio;
+            }
+            rec[0] = lowC | ((u32)((f32)alphaC * ratio) << 24);
+            rec[1] = lowB | ((u32)((f32)alphaB * ratio) << 24);
+            rec[2] = lowA | ((u32)((f32)alphaA * ratio) << 24);
+            rec[3] = rec[1];
+            rec[4] = rec[0];
+            rec += 5;
+        }
+        row->key = ~(i * 4);
+        row++;
+    }
+    return table;
+}
 
 void effReleaseBillboardFramePointSets(s32 *work) {
     u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
