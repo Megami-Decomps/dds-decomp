@@ -32,19 +32,21 @@
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
+extern void sdfTexReleaseReference(SdfTex *);
 
-extern s32 sdfTexAcquireResourceTexture(u32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern s32 dds3AdminGetActiveMode(void);
 extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);
-extern u64 sdfReadNamedResource(const char *, u32 *, u64);
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern u32 itfFontTestScriptTask;
 extern s64 kwlnTaskGetRegisteredState(u32);
 
 extern u32 D_003BB18C;
 
-extern u32 itfBackgroundSpriteTexture;
+extern SdfTex *itfBackgroundSpriteTexture;
 
 extern u8 D_003BB188[];
 typedef struct FrFontCtx FrFontCtx;
@@ -841,13 +843,13 @@ u32 itfReleaseMemNodeBuffer(u8 *ringBase) {
 /* Acquire the background texture, then release the temporary file allocation. */
 void itfLoadBackgroundSprite(void) {
     u32 resource;
-    u64 fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
+    SdfMemBlock *fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
-    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture(resource);
+    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((void *)resource);
     sdfReleaseResourceAllocation(fileAllocation);
 }
 
-/* Drop the held texture reference; the global word is not cleared here. */
+/* Drop the held texture reference without clearing the global. */
 void itfReleaseBackgroundSpriteTexture(void) {
     sdfTexReleaseReference(itfBackgroundSpriteTexture);
 }
@@ -857,7 +859,7 @@ void itfReleaseBackgroundSpriteTexture(void) {
 void itfDrawBackgroundSprite(void) {
     s32 origin[ITF_VECTOR_WORD_COUNT];
     s32 color[ITF_RGBA_COMPONENT_COUNT];
-    SdfTex *panel = (SdfTex *)itfBackgroundSpriteTexture;
+    SdfTex *panel = itfBackgroundSpriteTexture;
 
     if (panel != NULL) {
         s32 x = panel->width;
@@ -1060,13 +1062,13 @@ typedef struct DrawColorRec {
 } DrawColorRec;
 
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
-u64 itfLoadTextureFromAsset(const char *path) {
-    u64 fileAllocation;
-    u64 textureHandle;
+SdfTex *itfLoadTextureFromAsset(const char *path) {
+    SdfMemBlock *fileAllocation;
+    SdfTex *textureHandle;
     u32 assetInfo[ITF_VECTOR_WORD_COUNT];
 
     fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
-    textureHandle = sdfTexAcquireResourceTexture(assetInfo[0]);
+    textureHandle = sdfTexAcquireResourceTexture((void *)assetInfo[0]);
     sdfReleaseResourceAllocation(fileAllocation);
     return textureHandle;
 }
