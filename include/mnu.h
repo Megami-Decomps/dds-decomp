@@ -68,6 +68,16 @@ typedef struct PartyPanel {
     PartyPanelEntry slots[5];
 } PartyPanel;
 
+/* Native result-menu row shared by the level and profile progress bars. */
+typedef struct BrsProgressRow {
+    u8 pad00[8];
+    u32 unit; /* DatPartyRecord address, retained as the native address word. */
+    u32 levelProgress[4];
+    u32 profileProgress[4];
+} BrsProgressRow;
+
+typedef char BrsProgressRow_size_must_be_0x2C[(sizeof(BrsProgressRow) == 0x2C) ? 1 : -1];
+
 /* Page sprites and their fade/slide state; DDS2 expanded the sprite banks. */
 typedef struct MenuSprites {
     u8 pad00[0xC];
