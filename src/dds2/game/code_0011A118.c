@@ -407,7 +407,83 @@ void func_0011A328(s32 mode) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A510);
+/* Apply field HP attrition without allowing a living roster entry to reach zero. */
+void func_0011A510(s32 mode) {
+    s32 nextHp, loss, slotIndex;
+    if (mode == 1) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if ((entry->flags & 2) && (entry->unkE & 0x80)) {
+                if (entry->currentHp != 0) {
+                    nextHp = entry->currentHp;
+                    loss = nextHp * 3 / 100;
+                    if (loss == 0) loss = 1;
+                    nextHp -= loss;
+                    if (nextHp <= 0) nextHp = 1;
+                    entry->currentHp = nextHp;
+                }
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 2) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->flags & 2) {
+                if (entry->currentHp != 0) {
+                    nextHp = entry->currentHp;
+                    loss = nextHp / 10;
+                    if (loss == 0) loss = 1;
+                    nextHp -= loss;
+                    if (nextHp <= 0) nextHp = 1;
+                    entry->currentHp = nextHp;
+                }
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 3) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->flags & 2) {
+                if (entry->currentHp != 0) {
+                    nextHp = entry->currentHp;
+                    loss = (u32)nextHp / 2;
+                    if (loss == 0) loss = 1;
+                    nextHp -= loss;
+                    if (nextHp <= 0) nextHp = 1;
+                    entry->currentHp = nextHp;
+                }
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 4) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->flags & 2) {
+                if (entry->currentHp != 0) {
+                    nextHp = entry->currentHp;
+                    loss = nextHp * 30 / 100;
+                    if (loss == 0) loss = 1;
+                    nextHp -= loss;
+                    if (nextHp <= 0) nextHp = 1;
+                    entry->currentHp = nextHp;
+                }
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+}
+
 
 /* Recover HP/MP in each occupied roster slot and preserve only status bit 15. */
 void ptyRecoverAllUnits(void) {
