@@ -207,7 +207,7 @@ void sdfPacInitializeDispatchPacket(void *buffer, s32);
 
 void func_002EDC30(void *buffer);
 
-void func_002EDE48(void *buffer, s32, s32);
+s32 func_002EDE48(void *buffer, void *input, s32 available);
 
 void func_00218768(s32, s32, s32, s32);
 
@@ -267,7 +267,7 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s3
     if (flags & 2) {
         func_002EDC30(&request);
     }
-    func_002EDE48(&request, requestFirst, requestSecond);
+    func_002EDE48(&request, (void *)requestFirst, requestSecond);
     func_00218768(request.handle, first, second, flags);
     func_002EDC50(&request);
 }
