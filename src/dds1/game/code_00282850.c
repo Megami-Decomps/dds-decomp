@@ -2440,16 +2440,12 @@ void *evtCreateBattleStageTestCamera(void) {
     return func_00288458;
 }
 
-typedef struct StageGraphicsCallback {
-    u8 unknown[0x10];
-    void (*invoke)(void *, void *);
-} StageGraphicsCallback;
-extern StageGraphicsCallback D_00325708;
+extern SdfPoolNode D_00325708;
 extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, s32);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern s32 sdfCreateFormattedSifCommand();
 extern void evtCreateWorldObjectForKey(s32, s32);
@@ -2457,7 +2453,7 @@ extern void evtCreateWorldObjectForKey(s32, s32);
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */
 void *evtBattleStageTestScreen(void) {
-    void *packetList = sdfAllocPacketAligned(EVT_STAGE_SCREEN_WORK_BYTES);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(EVT_STAGE_SCREEN_WORK_BYTES);
 
     sdfInitPacketList(packetList);
     kwlnDrawSpriteCell(packetList, 0x84, 0x46, 0x14, 9);
@@ -2465,7 +2461,7 @@ void *evtBattleStageTestScreen(void) {
     sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
     sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
-    D_00325708.invoke(&D_00325708, packetList);
+    D_00325708.append((SdfListHead *)&D_00325708, packetList);
     if (D_00324510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_003BC7D0, D_003BC7D4);
         return evtCreateBattleStageTestCamera;
