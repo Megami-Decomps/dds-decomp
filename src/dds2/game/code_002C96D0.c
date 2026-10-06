@@ -5412,6 +5412,29 @@ typedef struct FileKeyBlock {
             f32 angularAcceleration;
             f32 gravity;
         } orientedRing;
+        struct {
+            s16 firstPercent;       /* C8 */
+            u8 padCA[2];
+            f32 firstOffset;
+            f32 firstRandomness;
+            s16 secondPercent;      /* D4 */
+            u8 padD6[2];
+            f32 secondOffset;
+            f32 secondRandomness;
+            s16 spreadDegrees;      /* E0 */
+            u8 padE2[2];
+            f32 angularSpeed;
+            f32 angularRandomness;
+            f32 angularAcceleration;
+            f32 travelSpeed;
+            f32 travelRandomness;
+            f32 travelAcceleration;
+            f32 start[3];           /* FC */
+            f32 end[3];             /* 108 */
+            u8 reserved114[8];
+            f32 endpointRadius;     /* 11C */
+            f32 endpointDrop;
+        } curve;
     } emitter;
 } FileKeyBlock;             /* record-type-dependent parameter extent */
 
@@ -6874,7 +6897,7 @@ void func_002DB2C0(FileSlotTable *record, const f32 *value) {
 }
 
 /* cubic Bezier point at t through four control points; result is left in vf10 */
-void vu0CubicBezierPoint(f32 t, f32 *p0, f32 *p1, f32 *p2, f32 *p3) {
+void vu0CubicBezierPoint(f32 *p0, f32 *p1, f32 *p2, f32 *p3, f32 t) {
     f32 weight[4];
     f32 point[4];
     f32 t2 = t * t;
@@ -6891,6 +6914,24 @@ void vu0CubicBezierPoint(f32 t, f32 *p0, f32 *p1, f32 *p2, f32 *p3) {
     point[2] = p0[2] * weight[0] + p1[2] * weight[1] + p2[2] * weight[2] + p3[2] * weight[3];
     VU0_LOAD_VF(vf10, point);
 }
+
+typedef struct FileCurveMotion {
+    f32 firstControl[3];
+    f32 secondControl[3];
+    f32 rotationReference[3]; /* native live-path input; writer unresolved */
+    f32 endpointOffset[3];
+    f32 angularSpeed;
+    f32 travelSpeed;
+    f32 pathLength;
+    f32 progress;
+    f32 scaleMultiplier;
+    f32 angle;
+    f32 angleMultiplier;
+} FileCurveMotion; /* 0x4C, naturally four-byte aligned */
+
+extern f32 D_003E9140[4];
+struct RwV3d;
+extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *axis, f32 angle);
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002DB3E0);
 
