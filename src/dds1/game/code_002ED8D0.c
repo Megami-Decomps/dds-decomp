@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file_pac.h"
 
 typedef struct DevState DevState;
 typedef struct MemBlock MemBlock;
@@ -29,14 +30,6 @@ typedef struct PacHead {
     u8 payload[1];
 } PacHead;
 
-typedef struct PacWork {
-    struct PacWork *next;
-    struct PacState *owner;
-    s32 resourceHandle;
-    u8 *dataCursor;
-    u8 packet[1];
-} PacWork;
-
 typedef struct PacAlloc {
     s32 entryCount;
     s32 entryIndex;
@@ -50,27 +43,6 @@ typedef struct PacBuf {
     u8 *cursor;
     s32 remainingBytes;
 } PacBuf;
-
-/* Event 0 supplies a payload-size word; event 1 omits it. Keep the
- * packet callback's native short-arity interface unprototyped. */
-typedef struct PacState {
-    u8 phase;
-    u8 flags;
-    u16 packetCounter;
-    s32 (*packetCallback)();
-    void (*onInput)(struct PacState *);
-    void (*onComplete)(struct PacState *);
-    u8 *inputCursor;
-    s32 inputAvailable;
-    s32 consumedBytes;
-    u8 *outputCursor;
-    s32 pendingBytes;
-    PacBuf *decoder;
-    PacBuf *resourceBuffer;
-    PacAlloc *allocation;
-    PacWork *queueHead;
-    PacWork *queueTail;
-} PacState;
 
 /* The built-in packet callback is referenced as an address in this unit. */
 extern u8 sdfPacDispatchPacket[];
