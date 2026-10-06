@@ -37,8 +37,6 @@
 #define CAMP_SLOT_LAST_ROW_OFFSET 0x1450
 #define CAMP_SLOT_ROW_STRIDE 0x104
 #define CAMP_PARTY_SCAN_LAST 4
-#define CAMP_PARTY_FLAGS_OFFSET 0xa60
-#define CAMP_PARTY_HALFWORD_STRIDE 0xe2
 #define CAMP_PARTY_ACTIVE_FLAG 1
 #define CAMP_HEAP_STATS_WORD_COUNT 8
 
@@ -80,7 +78,6 @@ extern u8 D_003CE658[];
 
 extern s32 kwlnHeldTextureReference;
 
-/* Camp reads the currency word, byte-sized inventory counts and a tier input. */
 
 extern s32 sdfAllocatePacketList();
 

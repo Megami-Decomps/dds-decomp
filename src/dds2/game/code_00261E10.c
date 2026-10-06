@@ -29,7 +29,6 @@ extern void func_0025FD78(s32);
 extern void func_00297320(s32);
 extern void func_00297970(s32);
 
-/* Shared save-state item quantities, also used by the camp menu. */
 
 extern s32 D_003CE148[];
 extern u8 D_003CE4EC[];
@@ -137,7 +136,6 @@ typedef struct EvtFlagGate {
     u32 flag;
 } EvtFlagGate;
 
-/* Persistent thresholds and completed-slot cursor in the shared game state. */
 
 extern s32 func_002C5498();
 extern u8 D_003CE604[];

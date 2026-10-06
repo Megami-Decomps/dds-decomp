@@ -20,7 +20,6 @@ extern void func_00286BA8(void *record);
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
-/* Mantra record zeroed before each update call (0x1C4). */
 
 
 
