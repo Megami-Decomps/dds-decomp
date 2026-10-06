@@ -18,6 +18,7 @@ extern u8 D_0034DF38[];
 extern s32 effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern f32 D_00354900[];
 extern f32 D_00354910[];
+extern f32 D_00354920[];
 extern f32 D_00354960[];
 extern f32 D_00354930[];
 extern f32 D_00354940[];
@@ -139,11 +140,11 @@ struct PcpFlashAccumulatingWork {
     u32 colorB;
     f32 unk30;
     f32 unk34;
-    u8 pad38[0x04];
+    f32 orbitRadius;
     f32 unk3C;
-    u8 pad40[0x04];
+    f32 tilt;
     f32 increment;
-    u32 unk48;
+    f32 radialStep;
     u32 unk4C;
     PcpFlashAccumulatingParticle *parts;
     u32 unk54;
@@ -1179,7 +1180,91 @@ void func_0016BAC0(PcpFlashAccumulatingWork *work, s32 index, u32 param) {
     mirror[3] = colors[3];
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016BBB0);
+/* vu0 routine: the orbit offset plus a tilted disc of corner offsets for an
+   accumulating particle, whose radius grows by the work record's radial step */
+void func_0016BBB0(PcpFlashAccumulatingWork *work, s32 index)
+{
+    PcpFlashAccumulatingParticle *part = &work->parts[index];
+    f32 *quad = effGetRecordGroupElement((u32)work->resourceHandle, index * 2);
+    f32 offset[4];
+    f32 unit[4];
+    f32 middle[4];
+    f32 outer[4];
+    f32 inner[4];
+    f32 size[4];
+    f32 center;
+    f32 outerEdge;
+    f32 innerEdge;
+    f32 span;
+    f32 sinv;
+    f32 height;
+    f32 *mirror;
+
+    center = part->unk14;
+    VEC3_SPLAT(middle, center);
+    outerEdge = center + part->unk08;
+    VEC3_SPLAT(outer, outerEdge);
+    innerEdge = center - part->unk08;
+    VEC3_SPLAT(inner, innerEdge);
+    part->unk14 = part->unk14 + work->radialStep;
+    span = part->unk0C;
+    VEC3_SPLAT(size, span);
+    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->accumulator);
+    unit[1] = 0;
+    sinv = sdfSinPoly(part->accumulator);
+    unit[2] = sinv;
+    offset[0] = unit[0] * work->orbitRadius;
+    offset[1] = 0;
+    offset[2] = sinv * work->orbitRadius;
+    height = work->tilt;
+    D_00354920[0] = unit[0] * height;
+    D_00354920[1] = height + -1.0f;
+    D_00354920[2] = sinv * height;
+    VU0_LOAD_VF(vf10, D_00354920);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, unit);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, size);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, outer);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, outer);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, inner);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, inner);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, middle);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_LOAD_VF(vf11, size);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, outer);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    mirror = effGetRecordGroupElement((u32)work->resourceHandle, index * 2 + 1);
+    PCP_COPY_VECTOR(mirror + 8, quad + 8);
+    PCP_COPY_VECTOR(mirror + 4, quad + 4);
+    PCP_COPY_VECTOR(mirror + 12, quad + 12);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, inner);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, mirror);
+}
 
 void effFlashAccumulatingParticleAdvance(PcpFlashAccumulatingWork *work, s32 index)
 {
