@@ -77,9 +77,7 @@ typedef struct FileSlotPreview {
     s8 party[8];
     s8 levels[8];
     u32 money;
-    u32 header24;
-    u32 header28;
-    u32 header2C;
+    u32 modelFlags[3];
 } FileSlotPreview;
 
 extern FileSlotPreview D_003DC800[];
@@ -201,7 +199,7 @@ extern void *fileBeginRequest(const char *, u32 *, u32 *, void *, u32 *);
 
 extern void mcOpenFilePath(u32, const char *, s32);
 
-extern void mcDeleteFilePath(void);
+extern void mcDeleteFilePath(u32 port, u32 pathAddress);
 
 extern void *fileWriteWaitOpen(void);
 
@@ -240,11 +238,37 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
-/* Shared save-header flag word used when leaving and re-entering file flow. */
+/* Five saved party records, with the ID and level copied into the header. */
+typedef struct FileSavePartyMember {
+    u8 pad00[4];
+    u16 id;
+    u8 pad06[0xE];
+    u16 level;
+    u8 pad16[0x18E];
+} FileSavePartyMember;
+
+/* Save header and party data in the primary game-state owner. */
 typedef struct FileSaveState {
-    u8 pad00[0xA54];
+    FileSlotPreview header;
+    u8 pad30[8];
+    s32 playTicks;
+    u32 money;
+    u8 pad40[0xA14];
     u32 slotFlags;
+    u8 padA58[8];
+    FileSavePartyMember party[5];
 } FileSaveState;
+
+typedef struct FilePreviewWork {
+    u8 pad0[0x15990];
+    s16 previewX;
+    s16 previewY;
+} FilePreviewWork;
+
+extern s8 fileReqGetSelectedSlot(s32 request);
+extern s32 mdlFlagTest(s32 flag);
+extern u32 D_003BD8F4;
+extern u32 D_003BD8F8;
 
 extern LoadMirror fileSlotFlagMirror;
 
@@ -478,7 +502,7 @@ extern void *mcHandleSearchResult(void);
 
 extern s32 mcPollNormalizedCommandStatus(void);
 
-extern void *fileBuildMainBlobAndWrite();
+extern void *fileBuildMainBlobAndWrite(void);
 
 extern u8 fileReqIsSlotMetadataDirty(s32 request);
 
@@ -1883,9 +1907,9 @@ void *mcChooseLoadPath(void) {
     s32 slot = fileReqGetSelectedSlot(entry);
     u32 flags = fileReqGetSlotFlags(entry, slot);
     if (!(flags & 8)) {
-        return fileBuildMainBlobAndWrite(entry, D_003B2678);
+        return fileBuildMainBlobAndWrite();
     }
-    mcDeleteFilePath();
+    mcDeleteFilePath(entry, (u32)D_003B2678);
     return fileBuildMainBlobAfterDelete;
 }
 
@@ -2607,11 +2631,7 @@ u32 fileGetLoadSelectionState(void) {
     return D_003BC81C;
 }
 
-typedef struct FilePreviewWork {
-    u8 pad0[0x15990];
-    s16 previewX;
-    s16 previewY;
-} FilePreviewWork;
+
 
 void fileSetPreviewLocation(s16 x, s16 y) {
     FilePreviewWork *work = (FilePreviewWork *)datGameState;
