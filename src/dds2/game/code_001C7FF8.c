@@ -57,11 +57,8 @@ typedef struct SceneDescriptor {
     u8 pad22[6];
 } SceneDescriptor;
 
-typedef struct SceneObject {
-    s32 state;
-} SceneObject;
 
-extern SceneObject *fldGetSceneObjectTaskUserData(void);
+extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
 
 
 typedef struct SceneTask {
@@ -468,19 +465,19 @@ void fldClearBattleSceneObject(void) {
     btlReleaseBattleScratchBlocks();
 }
 
-void fldInitializeSceneObject(u32 *state, u32 owner) {
-    memset(state, 0, 0x30);
-    state[0] = 1;
-    state[11] = owner;
-    state[10] = owner + 0x20;
+void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
+    memset(object, 0, sizeof(*object));
+    object->state = 1;
+    object->owner = owner;
+    object->commandData = &owner->result;
 }
 
-SceneObject *fldGetSceneObjectTaskUserData(void) {
+BattleSceneObject *fldGetSceneObjectTaskUserData(void) {
     u32 handle = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (handle == 0) {
-        return (SceneObject *)handle;
+        return (BattleSceneObject *)handle;
     }
-    return (SceneObject *)kwlnTaskGetUserValue(handle);
+    return (BattleSceneObject *)kwlnTaskGetUserValue(handle);
 }
 
 s32 fldGetSceneObjectState(void) {
@@ -632,14 +629,14 @@ extern char D_00436828[];
 void func_001CAB60(BtlTask *task) {
     char text[32];
     BattleSceneWork *scene;
-    SceneObject *object;
+    BattleSceneObject *object;
     s32 handle;
 
     if (kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef) == 0) {
         D_004367C0 = 0;
         scene = (BattleSceneWork *)btlGetRuntime();
         object = sdfAllocAndClearQuadwords(0x30);
-        fldInitializeSceneObject((u32 *)object, (u32)task);
+        fldInitializeSceneObject(object, task);
         handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1, func_001CA490, fldClearBattleSceneObject,
                                 (s32)object);
         func_00101968(scene->taskParent, handle);
@@ -758,7 +755,7 @@ void func_001CAB60(BtlTask *task) {
 }
 
 void fldSetSceneObjectAndGroupStates(void) {
-    SceneObject *object = fldGetSceneObjectTaskUserData();
+    BattleSceneObject *object = fldGetSceneObjectTaskUserData();
     if (object != 0) {
         object->state = 5;
         btlCommandPanelWork->mode = 3;
@@ -922,13 +919,13 @@ extern s32 btlFindEligibleTargetForMultiActorCommand(s32 source, BtlIndexList *l
  * fills them according to the current scene object state. */
 s32 btlCreateAiWork(s32 source) {
     SceneAiWork *work;
-    SceneObject *object;
+    BattleSceneObject *object;
     SceneAiOther *other;
     s32 id;
     s32 count;
     btlGetRuntime();
     work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
-    object = (SceneObject *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
+    object = (BattleSceneObject *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
     work->listA = btlAllocateIndexList(0xD);
     work->listB = btlAllocateIndexList(0xD);
     if (object->state == 8) {
