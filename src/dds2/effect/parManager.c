@@ -6,6 +6,9 @@
 
 #include "eff.h"
 
+struct ParSystem;
+struct EffTrackPolyList;
+
 enum {
     PAR_BURST_RANDOM_AXIS = 1
 };
@@ -59,7 +62,12 @@ typedef struct {
         ParTable *table;
         f32 scale;
     } value;
-    u8 pad0C[0xC];
+    u8 pad0C[4];
+    struct ParSystem *primaryDrawSystem; /* kind 2 */
+    union {
+        struct ParSystem *system;       /* kind 3 */
+        struct EffTrackPolyList *modelList; /* kind 4 */
+    } secondaryDraw;
 } ParKindState; /* 0x18 */
 
 /* Record contents depend on the emitter; radial records are ParBurstPacket. */
@@ -72,7 +80,8 @@ typedef struct {
 typedef struct {
     f32 origin[4];                /* 0x00 */
     f32 billboardScale;           /* 0x10: radial packet's base scale */
-    u8 pad14[0xC];
+    f32 billboardScaleY;          /* 0x14 */
+    u8 pad18[8];
     s32 particleCount;            /* 0x20 */
     s32 lifetimeFrames;           /* 0x24 */
     u8 pad28[8];
@@ -85,7 +94,8 @@ typedef struct {
     u32 restartStepCount;         /* 0xA4 */
     u8 padA8[8];
     f32 matrix[16];               /* 0xB0 */
-    u8 padF0[8];
+    u8 padF0[4];
+    BillObj *billboard;           /* 0xF4 */
     ParBuffer *buffer;            /* 0xF8 */
     u32 pendingRestartSteps;      /* 0xFC: count, not a pointer */
     f32 sourceMatrix[16];         /* 0x100 */
@@ -123,17 +133,16 @@ typedef struct {
 
 extern void (*D_003AAC20[])();
 
-/* Particle dispatch entry (0xC bytes): command func selected by the
-   u16 at +0x140. */
+/* Constructor, update and destructor operations share one 0xC-byte entry,
+ * selected by the emitter's 16-bit dispatch index at +0x140. */
 typedef struct {
-    void *(*func)(); /* 0x0 */
-    u32 unk4;        /* 0x4 */
-    u32 unk8;        /* 0x8 */
+    void *(*func)();          /* 0x0: constructor */
+    void (*update)(ParObj *); /* 0x4 */
+    void (*destroy)();        /* 0x8 */
 } ParDispatch; /* 0xC bytes */
 
 extern ParDispatch parKindConstructorEntries[];
 
-extern ParDispatch D_003AAB88[];
 extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 /* Release the radial emitter's extra allocation, shared resources, and block. */
@@ -409,9 +418,9 @@ void parCreateIndexed(s32 dispatchIndex, void *creationData) {
     createdObject->dispatchIndex = dispatchIndex;
 }
 
-/* Invoke the selected command with the existing empty argument list. */
+/* Invoke the selected destructor with the existing empty argument list. */
 void parDispatchByKind(ParObj *obj) {
-    D_003AAB88[obj->dispatchIndex].func();
+    parKindConstructorEntries[obj->dispatchIndex].destroy();
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161FE8);
