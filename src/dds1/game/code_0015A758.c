@@ -1369,7 +1369,169 @@ void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
     D_0034E5E0[id * 3 + sub](work, a2, a3);
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D0C0);
+extern const u32 D_0034E360[];
+extern const u32 D_0034E3E0[];
+extern const u32 D_0034E520[];
+extern const u32 D_0034E450[];
+extern const u32 D_0034E4D0[];
+extern ParDrawCmd *D_0034E620[];
+extern ParDrawCmd D_00325248;
+extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
+
+/* Batch pending cell systems by topology, then submit the five draw buckets. */
+void func_0015D0C0(void) {
+    s32 lists[5];
+    s32 *slot;
+    s32 list;
+    s32 specialList;
+    s32 count;
+    s32 i;
+    s32 remaining;
+    ParSystem *system;
+    ParCell *cell;
+    u64 *packet;
+
+    if (D_003BB014 == NULL) {
+        return;
+    }
+    memset(lists, 0, sizeof(lists));
+    for (system = D_003BB014; system != NULL; system = system->next) {
+        slot = &lists[system->bucket];
+        list = *slot;
+        if (list == 0) {
+            *slot = sdfAllocPacketAligned(0x20);
+            sdfInitPacketList((struct SdfListHead *)*slot);
+            sdfConsAppendClearPacket(*slot, NULL);
+            list = *slot;
+        }
+        sdfConsAppendAssetPacket(list, (void *)system->object, NULL);
+        count = system->cellCount;
+        if (system->kind == 0) {
+            parDrawControl.indices = D_0034E360;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.width = 16;
+                parDrawControl.height = 18;
+                remaining = cell->vertexCount;
+                parDrawControl.positions = cell->history;
+                parDrawControl.colors = cell->vertices;
+                parDrawControl.color = cell->color;
+                while (remaining >= 18) {
+                    remaining -= 16;
+                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    parDrawControl.positions += 16;
+                    parDrawControl.colors += 16;
+                }
+                if (remaining >= 4) {
+                    parDrawControl.width = remaining - 2;
+                    parDrawControl.height = remaining;
+                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                }
+            }
+        } else if (system->kind == 1) {
+            parDrawControl.indices = D_0034E3E0;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.width = 16;
+                parDrawControl.height = 15;
+                remaining = cell->vertexCount;
+                parDrawControl.positions = cell->history;
+                parDrawControl.colors = cell->vertices;
+                parDrawControl.color = cell->color;
+                while (remaining >= 15) {
+                    remaining -= 12;
+                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    parDrawControl.positions += 12;
+                    parDrawControl.colors += 12;
+                }
+                if (remaining >= 6) {
+                    parDrawControl.width = (remaining / 3) * 4 - 4;
+                    parDrawControl.height = remaining;
+                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                }
+            }
+        } else if (system->kind == 4) {
+            parDrawControl.indices = D_0034E520;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.width = 8;
+                parDrawControl.height = 10;
+                remaining = cell->vertexCount;
+                parDrawControl.positions = cell->history;
+                parDrawControl.colors = cell->vertices;
+                parDrawControl.color = cell->color;
+                while (remaining >= 10) {
+                    remaining -= 5;
+                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    parDrawControl.positions += 5;
+                    parDrawControl.colors += 5;
+                }
+            }
+        } else if (system->kind == 2) {
+            parDrawControl.indices = D_0034E450;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.width = 10;
+                parDrawControl.height = 12;
+                remaining = cell->vertexCount;
+                parDrawControl.positions = cell->history;
+                parDrawControl.colors = cell->vertices;
+                parDrawControl.color = cell->color;
+                while (remaining >= 12) {
+                    remaining -= 6;
+                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    parDrawControl.positions += 6;
+                    parDrawControl.colors += 6;
+                }
+            }
+        } else {
+            parDrawControl.indices = D_0034E4D0;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.width = 12;
+                parDrawControl.height = 16;
+                remaining = cell->vertexCount;
+                parDrawControl.positions = cell->history;
+                parDrawControl.colors = cell->vertices;
+                parDrawControl.color = cell->color;
+                while (remaining >= 16) {
+                    remaining -= 12;
+                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    parDrawControl.positions += 12;
+                    parDrawControl.colors += 12;
+                }
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (lists[i] != 0) {
+            D_0034E620[i]->finish(D_0034E620[i], lists[i]);
+        }
+    }
+    if (lists[4] != 0) {
+        specialList = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList((struct SdfListHead *)specialList);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x8000000026ULL;
+        packet[5] = 0x42;
+        sdfAppendPacket((struct SdfListHead *)specialList, (u32)packet);
+        D_00325248.finish(&D_00325248, specialList);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x42;
+        packet[5] = 0x42;
+        sdfAppendPacket((struct SdfListHead *)lists[4], (u32)packet);
+        D_00325248.finish(&D_00325248, lists[4]);
+    }
+    D_003BB014 = NULL;
+}
 
 typedef struct ParBlock {
     s32 count;       /* 0x00 */
