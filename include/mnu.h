@@ -323,7 +323,7 @@ struct MenuStaffList {
 };
 
 struct MenuStaffWindow {
-    s32 flags; /* Selection-control bits, including mask 0x8. */
+    u32 flags; /* Selection-control bits, including mask 0x8. */
     u8 pad04[0x0C];
     MenuStaffNode *head; /* 0x10 */
     u8 pad14[4];
