@@ -4399,7 +4399,8 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415C98);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CD8);
 
-const BattlePanelColors D_00415CE8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
+/* Named color constants remain split-owned while C references their symbols. */
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415CE8);
 
 void btlPanelResourcesLoad(void) {
     u8 params[16];
