@@ -2671,7 +2671,42 @@ s32 func_002186C0(BtlUnit *unit, s32 action) {
     return action;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00218798);
+extern void btlFlagAllUnitDefeatCandidatesTask();
+extern u32 effMiscRandMod(void *, u32);
+extern void btlBossDebugPrintf(const char *, ...);
+
+/* Choose one of the special action's three camera paths. */
+s32 func_00218798(BtlLinkedCommand *command) {
+    ActionStateLink *link = command->link;
+    if (btlIsActorCategoryMarked((s32)command) || (link->unit->flags & 0x200)) {
+        return 0;
+    }
+    switch (command->actionCode) {
+    case 0x211:
+        btlFlagAllUnitDefeatCandidatesTask();
+        switch (effMiscRandMod(0, 3)) {
+        case 0:
+            btlBossDebugPrintf("3SIK:LKG-0 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                -970.8f, -594.5f, -817.3f, 0.169f, -0.431f, -0.096f, 0.871f, -515.3f,
+                -871.1f, -1273.9f, 0.271f, -0.195f, -0.068f, 0.931f, 40.0f, 25.0f);
+            return 1;
+        case 1:
+            btlBossDebugPrintf("3SIK:LKG-1 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                295.9f, -443.1f, 1327.6f, -0.028f, -0.976f, -0.143f, -0.091f, -543.2f,
+                -558.4f, 1271.9f, 0.021f, -0.956f, -0.193f, 0.175f, 40.0f, 25.0f);
+            return 1;
+        case 2:
+            btlBossDebugPrintf("3SIK:LKG-2 ++++\n");
+            btlSetEffectCameraKeys((s32)command,
+                718.1f, -571.1f, 362.3f, -0.15f, -0.82f, -0.231f, -0.482f, 1404.2f,
+                -884.0f, 160.6f, -0.198f, -0.691f, -0.192f, -0.653f, 40.0f, 15.0f);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void func_00218968(void) {
     func_0011AEE0(1);
@@ -3810,13 +3845,11 @@ typedef struct BtlEffect {
 
 
 extern BtlActionAnimationRecord *datActionAnimationRecords;
-extern void btlBossDebugPrintf(const char *format, ...);
 extern BtlRuntimeTask *func_001E5FF8(s32, s32);
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
 extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 extern void btlCopyMotionTransform(void *, f32 *);
-extern void btlFlagAllUnitDefeatCandidatesTask();
 extern void btlInitMotionTransformFromComponents(BtlEffect *, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
@@ -5219,7 +5252,6 @@ void btlUnitSetCameraOffset(u32 unit) {
     ((ActionUnit *)unit)->flags |= 0x41;
 }
 
-extern u32 effMiscRandMod(void *stream, u32 modulus);
 extern char D_0041ACA8[]; /* "BRAHMA:I-0 ++++\n" */
 extern char D_0041ACC0[];
 void btlChooseBrahmaIndividualCamera(u32 unit) {
