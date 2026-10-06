@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_list.h"
 #include "mnu_shop.h"
 
 extern s32 mnuUseStaffItem(s32, s32);
