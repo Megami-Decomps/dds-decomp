@@ -13,7 +13,8 @@ typedef struct MenuWorkEntry {
     union {
         u32 word;
         struct {
-            u32 unused00 : 8;
+            u32 loopMode : 4;
+            u32 repeatMode : 4;
             u32 countdownEnabled : 1;
             u32 countdown : 8;
             u32 unused17 : 15;
@@ -31,7 +32,8 @@ typedef struct MenuWorkEntry {
     f32 scale1;     /* 0x28 */
     s16 recordIndex;
     s16 shortListIndex;
-    u8 pad30[4];
+    u8 pad30[2];
+    s16 repeatCount; /* 0x32 */
     u16 unk34;      /* 0x34 */
     u16 remaining;  /* 0x36: decreased until the completion flag is set */
     u16 unk38;
@@ -88,7 +90,8 @@ extern u32 mnuGetActiveEffectWorkEntry(void);
 
 typedef struct ShortRecord {
     u8 kind;
-    u8 pad[7];
+    u8 pad01;
+    s16 parameters[3];
 } ShortRecord;
 
 typedef struct ShortRecordList {
@@ -522,7 +525,45 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003230A0);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003232A0);
+void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
+    ShortRecord *record;
+
+    entry->control.bits.loopMode = 0;
+    record = (ShortRecord *)mnuFindMarkedShortListRecord(list);
+    if (record != NULL) {
+        switch (record->kind) {
+        case 0x11:
+            entry->control.bits.loopMode = 1;
+            if (record->parameters[1] == 0) {
+                entry->control.bits.repeatMode = 1;
+                entry->repeatCount = record->parameters[0];
+            } else if (record->parameters[1] == 1) {
+                entry->control.bits.repeatMode = 2;
+                entry->repeatCount = record->parameters[0];
+            } else if (record->parameters[1] == 2) {
+                entry->control.bits.repeatMode = 3;
+                entry->repeatCount = record->parameters[0];
+            }
+            break;
+        case 0x12:
+            entry->control.bits.loopMode = 2;
+            if (record->parameters[1] == 0) {
+                entry->control.bits.repeatMode = 1;
+                entry->repeatCount = record->parameters[0];
+                entry->unk34 = record->parameters[2];
+            } else if (record->parameters[1] == 1) {
+                entry->control.bits.repeatMode = 2;
+                entry->repeatCount = record->parameters[0];
+                entry->unk34 = record->parameters[2];
+            } else if (record->parameters[1] == 2) {
+                entry->control.bits.repeatMode = 3;
+                entry->repeatCount = record->parameters[0];
+                entry->unk34 = record->parameters[2];
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003233E8);
 
