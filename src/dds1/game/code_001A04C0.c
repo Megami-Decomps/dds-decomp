@@ -489,7 +489,7 @@ typedef struct BtlEntry {
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
 /* Read current HP from a unit-entry address. */
-u16 btlReadCurrentUnitHp(s32 entryAddress) {
+s32 btlReadCurrentUnitHp(void *entryAddress) {
     return ((BtlEntry *)entryAddress)->hp;
 }
 
@@ -525,13 +525,14 @@ void btlAdjustUnitMp(u8 *object, s32 value) {
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
 u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 entryAddress) {
-    u16 currentHp = btlReadCurrentUnitHp(entryAddress);
+    BtlEntry *entry = (BtlEntry *)entryAddress;
+    u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
-    ((BtlEntry *)entryAddress)->maxHp = maxHp;
+    entry->maxHp = maxHp;
     if (maxHp < currentHp) {
-        ((BtlEntry *)entryAddress)->hp = maxHp;
+        entry->hp = maxHp;
     }
-    return ((BtlEntry *)entryAddress)->hp;
+    return entry->hp;
 }
 
 /* Cache the skill-adjusted maximum and return current MP clamped to it.

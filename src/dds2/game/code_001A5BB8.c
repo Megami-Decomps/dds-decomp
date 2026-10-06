@@ -1705,7 +1705,7 @@ s32 btlGetRuntime(void) {
 }
 
 /* Read current HP from a unit-entry address. */
-u16 btlReadCurrentUnitHp(s32 entryAddress) {
+s32 btlReadCurrentUnitHp(void *entryAddress) {
     return ((BtlEntry *)entryAddress)->hp;
 }
 
@@ -1741,13 +1741,14 @@ void btlAdjustUnitMp(void) {
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
 u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 entryAddress) {
-    u16 currentHp = btlReadCurrentUnitHp(entryAddress);
+    BtlEntry *entry = (BtlEntry *)entryAddress;
+    u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
-    ((BtlEntry *)entryAddress)->maxHp = maxHp;
+    entry->maxHp = maxHp;
     if (maxHp < currentHp) {
-        ((BtlEntry *)entryAddress)->hp = maxHp;
+        entry->hp = maxHp;
     }
-    return ((BtlEntry *)entryAddress)->hp;
+    return entry->hp;
 }
 
 /* Cache the skill-adjusted maximum and return current MP clamped to it.
@@ -2859,14 +2860,15 @@ s32 btlHasEnabledSpecialAbilityForSlot(s32 unit, u32 slot) {
 
 f32 func_001AEC18(s32 unit) {
     s32 stats = unit + 0x120;
+    void *entry = (void *)stats;
     s32 maximum;
     s32 percentage;
 
     if (btlCheckSpecialAbility(stats, 0x27A) == 0) {
         return 1.0f;
     }
-    maximum = btlComputeSkillAdjustedMaxHp((void *)stats);
-    percentage = (s32)((f32)btlReadCurrentUnitHp(stats) / (f32)maximum * 100.0f);
+    maximum = btlComputeSkillAdjustedMaxHp(entry);
+    percentage = (s32)((f32)btlReadCurrentUnitHp(entry) / (f32)maximum * 100.0f);
     if (percentage < 6) {
         return 3.0f;
     }

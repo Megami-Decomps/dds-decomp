@@ -1827,7 +1827,7 @@ u32 btlCmdCheckHpPercent(void) {
     }
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & sideMask) && !(unit->flags & 0x20) && unit->identity == lookupId) {
-            u8 *unitStats = (u8 *)unit + 0x120;
+            void *unitStats = &unit->statBits;
             s32 currentHp = btlReadCurrentUnitHp(unitStats);
             s32 maximumHp = btlComputeSkillAdjustedMaxHp(unitStats);
             if (!((u32)(maximumHp * hpPercentThreshold) < (u32)(currentHp * BTL_HP_PERCENT_SCALE))) {
