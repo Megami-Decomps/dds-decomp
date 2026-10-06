@@ -315,6 +315,14 @@ typedef struct MenuPageWindow {
     s32 fade;
 } MenuPageWindow;
 
+typedef struct MenuGradientFade {
+    s32 active;
+    s32 color;
+    s32 blend;
+} MenuGradientFade;
+
+typedef char MenuGradientFade_size_must_be_0x0C[(sizeof(MenuGradientFade) == 0x0C) ? 1 : -1];
+
 struct EffectList;
 
 /* The allocated progress display owns its request list and staff sprite banks. */

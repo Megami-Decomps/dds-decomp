@@ -725,11 +725,6 @@ void mnuFreeSimpleSpriteWork(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C16F0);
 
-typedef struct MenuGradientFade {
-    s32 active;
-    s32 color;
-    s32 blend;
-} MenuGradientFade;
 
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
     state->color = color;
