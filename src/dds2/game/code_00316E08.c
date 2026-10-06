@@ -1,26 +1,9 @@
 #include "common.h"
 #include "sdf.h"
-#include "sdf_draw.h"
+#include "mdl.h"
 #include "itf.h"
 
 
-typedef struct MdlCtx {
-    u32 flags;
-    u8 unk4[8];
-    struct MdlSub *sub;
-    union {
-        u32 word;
-        struct {
-            s16 id;
-            s16 arg;
-        } h;
-    } current;
-    u32 *list14;
-    struct MdlInner *inner;
-    Motion *first;
-    Motion *slots[4];
-    struct MdlDevList *devList;
-} MdlCtx;
 
 typedef struct MnuModelNode {
     f32 primary[4];
