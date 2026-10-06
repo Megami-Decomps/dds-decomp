@@ -2,6 +2,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+struct SdfMemBlock;
+
 enum {
     POLY_INACTIVE_ENTRY_AGE = -0xFFFFFF,
     POLY_RESET_ENTRY_AGE = 0xFFFFFF0,
@@ -23,7 +25,7 @@ typedef struct PolyStrip {
     s32 entryCount;
     s32 count;
     s32 groupDivisor;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     PolyStripEntry *entries;
     f32 *points;
     u32 *colors;
@@ -63,10 +65,12 @@ typedef struct {
     f32 matrix[16];                /* 0x20 */
     u32 color;                     /* 0x60 */
     u8 loop;                       /* 0x64 */
-    u8 pad65[3];
+    u8 pad65;
+    u16 unk66;
     u32 startColorRampFrames;      /* 0x68 */
     u32 endColorRampFrames;        /* 0x6C */
-    u8 pad70[0x42];
+    f32 matrixCopy[16];            /* 0x70: initialized from the template transform */
+    u8 padB0[2];
     u16 active;                    /* 0xB2: cleared when all entries finish */
     u8 padB4[0xC];
 } PolyRingHead; /* 0xC0 */
@@ -87,10 +91,13 @@ typedef struct {
     f32 initialRadiusJitter;
     f32 targetRadiusJitter;
     f32 liftStep;
-    u8 padE0[0x10];
+    u8 padE0[4];
+    void *unkE4;
+    u8 padE8[4];
+    void *unkEC;
     PolyStrip *strip;              /* 0xF0 */
     PolyBandRecord *records;       /* 0xF4 */
-    u32 allocation;                /* 0xF8 */
+    struct SdfMemBlock *allocation; /* 0xF8 */
     u8 padFC[4];
 } PolyBand; /* 0x100, followed by eight-byte records */
 
@@ -109,7 +116,7 @@ typedef struct {
     u8 padD4[0xC];
     PolyStrip *strip;              /* 0xE0 */
     PolyArcRecord *records;        /* 0xE4 */
-    u32 allocation;                /* 0xE8 */
+    struct SdfMemBlock *allocation; /* 0xE8 */
     u8 padEC[4];
 } PolyArc; /* 0xF0, followed by eight-byte records */
 
@@ -147,7 +154,7 @@ typedef struct {
     u8 padE8[0xC];
     PolyStrip *strip;              /* 0xF4 */
     PolyRotatingBandRecord *records; /* 0xF8 */
-    u32 allocation;                /* 0xFC */
+    struct SdfMemBlock *allocation; /* 0xFC */
 } PolyRotatingBand; /* 0x100, followed by 20-byte records */
 
 void parReleaseCellSystem(PolyStrip *strip);
@@ -156,7 +163,7 @@ void func_0015DAA0(PolyNode *obj);
 void func_0015DC70(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 void sdfReleaseChipBlock(void *arg);
-void sdfReleaseResourceAllocation(u32 handle);
+void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);
@@ -297,7 +304,7 @@ extern f32 D_0034E640[4];
 u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
     f32 ratio = 1.0f;
     s32 tint[4];
-    s32 blended[4]; /* never read; gcc drops the stores but keeps the frame slot */
+    u8 unused[16]; /* retail frame 0x20: unused local storage */
     u32 packed;
 
     if (elapsed < duration) {
