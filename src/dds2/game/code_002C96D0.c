@@ -767,7 +767,42 @@ s32 fileIsLoadStepComplete(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002C9BD0);
+/* Draw the expanding prompt panel and report when its input delay has elapsed. */
+s32 func_002C9BD0(void) {
+    s32 y;
+    s32 height;
+    s32 value;
+
+    evtSetDrawSurfaceIndex(0x56);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 128, 3, 0, 0, 1, 1);
+    if (D_00437D48 < 32) {
+        D_00437D48++;
+        D_00437D4C++;
+    }
+    if (D_00437D48 < 4) {
+        height = D_00437D48 * 72;
+        y = 224 - D_00437D48 * 36;
+    } else {
+        y = 80;
+        height = 288;
+    }
+    if (D_00437D48 < 4) {
+        value = D_00437D48 * 70 / 4;
+    } else {
+        value = 70;
+    }
+    evtSubmitDefaultDepthGradientRect(0, y, 512, height,
+                 (((value << 7) / 100) << 24) | 0xA1000,
+                 (((value << 7) / 100) << 24) | 0xA1000,
+                 (((value << 7) / 100) << 24) | 0xA1000,
+                 (((value << 7) / 100) << 24) | 0xA1000);
+    evtSetDrawSurfaceIndex(0x53);
+    if (D_00437D48 < 7) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002C9CF8);
 
