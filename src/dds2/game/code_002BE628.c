@@ -68,7 +68,7 @@ extern s32 func_002C6008();
 
 extern s32 mnuLookupRangeEntry(u16);
 
-extern u64 ptyGetCombinedRecordAndSlotValue(u64, s32);
+extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 
 extern s32 func_002C4038(s32, s32 *, u64, u64);
 
@@ -629,10 +629,10 @@ void mnuSetIndexedPanelGroupValue(MenuPanelGroup *group, s32 index, u32 value) {
     mnuStorePanelItemValue(group->entries[index], value);
 }
 
-/* Apply each of the five packed values to its corresponding panel entry. */
-void mnuApplyPackedGroupValues(MenuPanelGroup *group, u64 value) {
+/* Apply the selected item's five stat values to the panel entries. */
+void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId) {
     u32 child;
-    u64 entryValue;
+    s32 entryValue;
     s32 nextIndex;
     u32 *entries;
     s32 index;
@@ -641,7 +641,7 @@ void mnuApplyPackedGroupValues(MenuPanelGroup *group, u64 value) {
     index = 0;
     do {
         nextIndex = index + 1;
-        entryValue = ptyGetCombinedRecordAndSlotValue(value, index);
+        entryValue = ptyGetCombinedRecordAndSlotValue(itemId, index);
         child = *entries;
         entries = entries + 1;
         mnuStorePanelItemValue(child, entryValue);
