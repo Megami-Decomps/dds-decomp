@@ -14,35 +14,46 @@ typedef struct EffBattleVoiceState {
     s32 activeCount;
 } EffBattleVoiceState;
 
-typedef struct EffBattleVoiceOwner {
-    u32 unk00;
-    EffBattleVoiceState *state;
-    u8 pad08[0x14];
-    u16 voiceKind;
-    u8 pad1E[0xA];
-    s32 parameterWorks[EFF_BATTLE_PARAMETER_WORK_CAPACITY]; /* EffParamWork addresses */
-} EffBattleVoiceOwner;
 
+typedef struct EffParamWork EffParamWork;
 extern char D_003A0DB8[];
-extern void effDispatchParameterDataAndFreeWork(s32);
+extern void effDispatchParameterDataAndFreeWork(EffParamWork *);
 extern void func_003003F0(char *, u16, void *, s32);
 extern void sndUnlinkVoice(void *);
 extern void sdfReleaseChipBlock(void *);
 extern f32 D_00352870[4];
 extern f32 D_00352860[4];
 
-typedef struct EffParamWork EffParamWork;
 extern EffParamWork *effParamWorkCreate(u16 kind, void *data);
 extern EffParamWork *effParamWorkDuplicate(EffParamWork *work);
 
+typedef struct EffBattleEntry {
+    u8 pad00[0x14];
+    u8 kind;     /* 0x14 */
+    u8 pad15[3];
+} EffBattleEntry; /* 0x18 */
+
+typedef struct EffBattleEntryList {
+    u8 pad00[0x48];
+    s32 callbackFrame; /* 0x48 */
+    u8 pad4C[0x20];
+    u16 count;            /* 0x6C */
+    u8 pad6E[0xA];
+    EffBattleEntry entries[1]; /* 0x78 */
+} EffBattleEntryList;
+
 /* Shared work area for the battle-effect helpers in this TU. */
 typedef struct BattleEffect {
-    u8  pad_0x00[0x10]; /* 0x00 */
+    u32 unk00;
+    EffBattleVoiceState *state; /* 0x04 */
+    u8 pad08[8];
     u32 currentFrame;   /* 0x10: incremented after each native update */
     u32 triggerFrame;   /* 0x14: invokes triggerFrameCallbackAddress on equality */
     u32 colorRampEndFrame; /* 0x18: endpoint passed to the native color-ramp helper */
-    u16 frameSelectionMode; /* 0x1C: mode 1 keeps the smaller ramp endpoint */
-    u8  pad_0x1E[0xFA]; /* 0x1E */
+    u16 kind; /* 0x1C: selects the frame policy and identifies the effect in diagnostics */
+    u8 pad1E[6];
+    EffBattleEntryList *list; /* 0x24 */
+    EffParamWork *parameterWorks[EFF_BATTLE_PARAMETER_WORK_CAPACITY]; /* 0x28 */
     u32 sourceFrameCallbackAddress; /* 0x118: called when currentFrame equals source +0x48 */
     u32 triggerFrameCallbackAddress; /* 0x11C: called when currentFrame equals triggerFrame */
     u32 unk120;         /* 0x120: caller-controlled word; interpretation not established */
@@ -50,7 +61,7 @@ typedef struct BattleEffect {
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
  * The diagnostic observes the decremented count before the owner is freed. */
-void effReleaseBattleVoiceOwner(EffBattleVoiceOwner *owner) {
+void effReleaseBattleVoiceOwner(BattleEffect *owner) {
     s32 workIndex;
 
     for (workIndex = 0; workIndex < EFF_BATTLE_PARAMETER_WORK_CAPACITY; workIndex++) {
@@ -60,14 +71,14 @@ void effReleaseBattleVoiceOwner(EffBattleVoiceOwner *owner) {
     }
     sndUnlinkVoice(owner);
     owner->state->activeCount--;
-    func_003003F0(D_003A0DB8, owner->voiceKind, owner->state,
+    func_003003F0(D_003A0DB8, owner->kind, owner->state,
                   owner->state->activeCount);
     sdfReleaseChipBlock(owner);
 }
 
 /* Return the policy controlling trigger-frame copying and minimum ramp selection. */
 u16 effBattleGetMode(BattleEffect *work) {
-    return work->frameSelectionMode;
+    return work->kind;
 }
 
 /* Read the frame counter that the native updater advances after callbacks. */
@@ -90,15 +101,15 @@ void effBattleSetTriggerFrameCallback(BattleEffect *work, u32 callbackAddress) {
     work->triggerFrameCallbackAddress = callbackAddress;
 }
 
-/* Read the callback frame from the linked source at +0x24; keep the existing raw view. */
-s32 effBattleGetLinkedSourceValue(u8 *effectBytes) {
-    return *(s32 *)(*(u8 **)(effectBytes + 0x24) + 0x48);
+/* Read the callback frame from the linked source. */
+s32 effBattleGetLinkedSourceValue(BattleEffect *work) {
+    return work->list->callbackFrame;
 }
 
 /* Set the trigger frame; mode 0 also copies its stored bits into the color-ramp endpoint. */
 void effBattleSetInputValue(BattleEffect *work, s32 triggerFrame) {
     work->triggerFrame = triggerFrame;
-    if (work->frameSelectionMode == EFF_BATTLE_COPY_TRIGGER_FRAME) {
+    if (work->kind == EFF_BATTLE_COPY_TRIGGER_FRAME) {
         work->colorRampEndFrame = triggerFrame;
     }
 }
@@ -110,7 +121,7 @@ u32 effBattleGetInputValue(BattleEffect *work) {
 
 /* Select the ramp endpoint: mode 1 keeps the unsigned minimum; other modes replace it. */
 void effBattleUpdateSelectedValue(BattleEffect *work, u32 endFrame) {
-    if (work->frameSelectionMode == EFF_BATTLE_MINIMUM_RAMP_END_FRAME) {
+    if (work->kind == EFF_BATTLE_MINIMUM_RAMP_END_FRAME) {
         if (endFrame < work->colorRampEndFrame) {
             work->colorRampEndFrame = endFrame;
         }
@@ -170,26 +181,10 @@ INCLUDE_ASM(const s32, "effect/effBattle", func_00160D88);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00161588);
 
-typedef struct EffBattleEntry {
-    u8 pad00[0x14];
-    u8 kind;     /* 0x14 */
-    u8 pad15[3];
-} EffBattleEntry; /* 0x18 */
 
-typedef struct EffBattleEntryList {
-    u8 pad00[0x6C];
-    u16 count;            /* 0x6C */
-    u8 pad6E[0xA];
-    EffBattleEntry entries[1]; /* 0x78 */
-} EffBattleEntryList;
-
-typedef struct EffBattleListOwner {
-    u8 pad00[0x24];
-    EffBattleEntryList *list; /* 0x24 */
-} EffBattleListOwner;
 
 /* True when any entry is of kind 2 or 3. */
-s32 effBattleHasActiveKind(EffBattleListOwner *owner) {
+s32 effBattleHasActiveKind(BattleEffect *owner) {
     EffBattleEntryList *list = owner->list;
     s32 count = list->count;
     EffBattleEntry *entry = list->entries;
@@ -295,7 +290,7 @@ void effBattleReleaseParameterBanks(EffBattleParameterMixer *mixer) {
 
             do {
                 if (entry->kind != 0xFFFE) {
-                    effDispatchParameterDataAndFreeWork((s32)entry->value.work);
+                    effDispatchParameterDataAndFreeWork(entry->value.work);
                 }
                 entry++;
                 remaining--;
