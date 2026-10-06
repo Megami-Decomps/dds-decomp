@@ -1099,6 +1099,19 @@ The DDS2 progress-reward table also used the private name `EvtSlot`, but its
 records are 0x48 bytes and have a different table base and meaning. A repeated
 private name is not evidence that those tables share an owner.
 
+## SDK light-source descriptors
+
+`SdfLightSources` in `sdf_draw.h` is an array of three optional pointers to
+vec4 data, not a pointer followed by two scalar metadata fields. The native
+light setup routine advances its descriptor pointer by four bytes three times.
+For each non-NULL entry it reads the color vec4 at +0 and normalizes/negates
+the direction vec4 at +0x10. The event manager, vector-slot updater and default
+light-direction updater share this ABI; pass the array itself, not the address
+of a private descriptor struct.
+
+The provider remains assembly. Changing its callers' input ownership does not
+authorize modifying its body, compiler flags or expected object.
+
 ## Battle records and saved-party ownership
 
 The DDS1 battle getters return the canonical `DatPartyRecord` entries in

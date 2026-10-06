@@ -6495,9 +6495,9 @@ extern u128 D_003DCBE0[];
 
 extern u128 D_003DCBA0[];
 
-extern u8 D_0037EE80[];
+extern SdfLightSources D_0037EE80;
 
-extern void func_002E1938(void *, void *, void *);
+extern void func_002E1938(void *, SdfLightSources, void *);
 
 s32 effComputeLightDirectionVU(MdlCtx *vector, void *target) {
     s32 result = btlIsRuntimeAllocated();

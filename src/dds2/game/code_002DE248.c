@@ -422,13 +422,13 @@ extern void sdfReleaseChipBlock();
 
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
-extern void func_0033A7E8(u32, void *, void *);
+extern void func_0033A7E8(void *, SdfLightSources, void *);
 
 extern u128 D_004584B0[];
 
 extern u128 D_00458470[];
 
-extern u8 D_003E9F50[];
+extern SdfLightSources D_003E9F50;
 
 
 extern void sdfTexReleaseReference();
