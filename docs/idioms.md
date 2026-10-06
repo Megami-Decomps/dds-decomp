@@ -1152,6 +1152,32 @@ not a second body-plus-word layout. Its selected source handle follows `params`.
 The event setup table, its whole-parameter setters and the viewer's 0x24-byte
 parameter copies all use the same canonical record.
 
+## Model-track parameter and work ownership
+
+`EffTrackPolyParams` in `eff.h` is the complete 0x34-byte constructor input,
+not a model pointer alone. `effTrackPolyCreateWork` allocates a 0x3C-byte
+`EffTrackPolyWork`, copies the thirteen parameter words, installs its fixed
+step count, clears `updateCount` and creates independently owned history data.
+The renderer, constructors and model-viewer record conversion share these records.
+
+`sampleInterval` is unsigned: the active update uses unsigned remainder to
+gate endpoint sampling. Its borrowed `MdlCtx` supplies the SDK model through
+`inner` and the frame bounds through `first->currentFrame`; the former padded
+`EffTrackPolyModel` and `EffTrackPolyModelState` were prefixes of the existing
+context and motion owners, not separate model allocations.
+
+`MdlResourceItem.type` distinguishes the track pointer stored by
+`mdlCreateViewerEffectPart` (type 2) from the handles installed by
+`mdlBindViewerPartRecords`. Keep those alternatives on the same tagged union
+in `mdl.h`, and use `part.track` for track creation, release and update.
+
+DDS2's resource dispatcher is consumed only for its side effects. Its caller
+at `0x234E24` immediately invokes the next-record helper without using `v0`.
+The track creator stores the returned work pointer, then restores registers
+and returns without forming a separate result. Both routines therefore use
+the same void ABI as their DDS1 counterparts rather than returning incidental
+callee register contents as integer handles.
+
 ## Battle records and saved-party ownership
 
 The DDS1 battle getters return the canonical `DatPartyRecord` entries in
@@ -2080,4 +2106,48 @@ The canonical DDS2 draft still differs in 56 of 129 emitted words against
 left-column store order at `+0x104`. Chaining the paired column assignments
 does not change that result. Keep the renderer as assembly rather than
 adding an interior shadow, widened parameter, or store-order lever.
+
+## Party page rows and embedded staff resource banks
+
+`MenuPageWindow.records` borrows the existing `PartyPanel`: its two counts
+are at `+0/+4`, and five `0x34`-byte rows start at `+8`, for a total `0x10C`.
+Each row's party index is at `+4` and resource index at `+8`. Use the real
+`slots[index]` row; a record starting at `+0xC` is a biased projection, not
+another layout. Both games' page-resource and count consumers match with
+this primary owner.
+
+`BrsSkillPackageWork` embeds `StaffSlots` at `+0x4F8` in DDS1 and `+0x51C`
+in DDS2. Pass its address to staff-bank APIs instead of treating adjacent
+scalar fields as an array. The bank retains genuine `u32` SDK handles:
+DDS2 `effLoadIndexedResource` returns that type, and
+`mnuInitializeCampPanelResources` decodes its first resolved handle only
+at the `EffectSlotSet *` constructor boundary.
+
+Keep page-selection clearing on the real `MenuPageWindow.slots` array.
+Direct indexing of the selected row's HP/MP animation states gives the
+native DDS2 helper without a second `MenuWindowSet`/`MenuSlotWindow` view.
+The final shared-header closure is 58 actual CPP consumers, all clean in
+serial `check_unit` runs (2200 matching functions, zero differences).
+
+
+## Profile panels retain sprite-slot pairs
+
+DDS1's `0x3C` `MenuProfilePanel` owns three `MenuProfileSlot` records at
+`+0x18`, `+0x20` and `+0x28`. Each record holds an `EffectSlotSet *` and a
+signed entry index, not XY coordinates. The draw routine dereferences the
+set's work-entry bank and reads the selected `BdWork.sourceWidth`; its
+phase and opacity are the words at `+0x34` and `+0x38`.
+
+The generic two-word `itfGridStorePosition` setter's name does not prove
+that these cached words are positions. Pass the actual slot record and
+the genuine grid/fill-index inputs explicitly. The native first call
+needs no incoming-argument copies; that is not evidence for omitting its
+second and third arguments. Constructor, release, cache and phase advance
+borrow the same primary panel, and DDS1's progress host retains its pointer.
+
+This owner cleanup does not match `func_00285208`. After three natural
+loop forms, the best canonical draft remains 556 bytes against 568 retail
+bytes, with 94 of 139 emitted words differing. The live draw function stays
+assembly. Main intentionally retains the protected PR547 integer-word draw
+bridge; do not widen or reshape it as part of this cleanup.
 

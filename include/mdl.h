@@ -7,6 +7,7 @@
 typedef struct MdlCtx MdlCtx;
 
 struct MdlPartEntry;
+struct EffTrackPolyWork;
 
 typedef struct MdlObjectAttachment {
     MdlCtx *owner;
@@ -24,7 +25,11 @@ typedef struct MdlResourceItem {
     s16 subtype;
     union {
         struct {
-            s32 handle;
+            /* mdlCreateViewerEffectPart stores type-2 tracks; mdlBindViewerPartRecords stores other handles. */
+            union {
+                s32 handle;
+                struct EffTrackPolyWork *track;
+            };
             struct MdlPartEntry *slot;
             void *record;
             f32 value;

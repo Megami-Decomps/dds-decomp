@@ -1,4 +1,6 @@
 #include "common.h"
+#include "eff.h"
+#include "mdl.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
 
@@ -29,39 +31,7 @@ typedef struct EffTrackPolyDraw {
     u8 pad24[8];
 } EffTrackPolyDraw; /* 0x2C */
 
-/* Model handle the track's point queries resolve against. */
-typedef struct {
-    u8 pad00[0x1C];
-    f32 value; /* 0x1C */
-} EffTrackPolyModelState;
 
-typedef struct {
-    u8 pad00[0x18]; /* 0x00 */
-    void *param;       /* 0x18: map-record position-query source */
-    EffTrackPolyModelState *state; /* 0x1C */
-} EffTrackPolyModel;
-
-/* The constructor copies these 13 words before creating owned track data.
- * The model pointer is one parameter, not the constructor's entire input.
- * unk0C/unk10 bound the model value tested by the update routine. */
-typedef struct {
-    EffTrackPolyModel *model;
-    s32 idA;
-    s32 idB;
-    f32 unk0C;
-    f32 unk10;
-    u32 sampleInterval; /* 0x14: updateCount modulus for endpoint sampling */
-    s32 historyLength;  /* 0x18: multiplied by the constructor's step count */
-    u32 unk1C;          /* 0x1C: constructor writes its fixed step count here */
-    u32 kind;
-    u32 gradientColors[4];
-} EffTrackPolyParams; /* 0x34 */
-
-typedef struct {
-    EffTrackPolyParams params;
-    u32 updateCount;    /* 0x34: increments each active update; gates sampling */
-    EffTrackPolyData *data; /* 0x38 */
-} EffTrackPolyWork; /* 0x3C */
 
 
 /* Release both owned resources before freeing this track. */
@@ -79,12 +49,12 @@ extern s32 sdfLoadMapRecordPositionVector(void *param, s32 id);
 void func_00188A78(EffTrackPolyData *data, u128 *src);
 
 void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
-    EffTrackPolyModel *model = work->params.model;
+    MdlCtx *model = work->params.model;
     u128 points[2];
 
-    sdfLoadMapRecordPositionVector(model->param, work->params.idA);
+    sdfLoadMapRecordPositionVector(model->inner, work->params.idA);
     VU0_STORE_VF(vf10, points);
-    sdfLoadMapRecordPositionVector(model->param, work->params.idB);
+    sdfLoadMapRecordPositionVector(model->inner, work->params.idB);
     VU0_STORE_VF(vf10, &points[1]);
     func_00188A78(work->data, points);
 }
@@ -103,8 +73,8 @@ void effTrackPolyDrawWork(EffTrackPolyWork *work) {
 
 /* Per-frame update: while the model's value lies inside [unk0C, unk10] the endpoints are resampled every sampleInterval updates and the strips drawn; above the range the strips fade out, below it the track restarts. */
 void effTrackPolyUpdate(EffTrackPolyWork *work) {
-    EffTrackPolyModel *model = work->params.model;
-    f32 value = model->state->value;
+    MdlCtx *model = work->params.model;
+    f32 value = model->first->currentFrame;
 
     if (work->params.unk0C <= value) {
         if (value <= work->params.unk10) {
@@ -134,7 +104,6 @@ typedef struct EffTrackPolyList {
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
-extern EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *params);
 
 /* Clone count tracks from one parameter block, each with its own data. */
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
