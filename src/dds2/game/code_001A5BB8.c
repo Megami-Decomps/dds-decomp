@@ -2652,7 +2652,84 @@ void btlTickActorEntryCountdowns(UiObject *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AE3A8);
+f32 func_001AE3A8(BtlUnit *unit, s32 attr) {
+    f32 scale = 1.0f;
+
+    switch (attr) {
+    case 2:
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22D)) {
+            scale *= datAbilityParameters[0x22D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x232)) {
+            scale *= datAbilityParameters[0x232 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (scale == 1.0f && (unit->flags & 0x200)) {
+            if (unit->mode == 3) {
+                scale *= datBattleParameters->unkBFC;
+            }
+        }
+        break;
+    case 3:
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22E)) {
+            scale *= datAbilityParameters[0x22E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x233)) {
+            scale *= datAbilityParameters[0x233 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (scale == 1.0f && (unit->flags & 0x200)) {
+            if (unit->mode == 1) {
+                scale *= datBattleParameters->unkBFC;
+            }
+            if (unit->mode == 2) {
+                scale *= datBattleParameters->unkBFC;
+            }
+        }
+        break;
+    case 4:
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22F)) {
+            scale *= datAbilityParameters[0x22F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x234)) {
+            scale *= datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (scale == 1.0f && (unit->flags & 0x200)) {
+            if (unit->mode == 6) {
+                scale *= datBattleParameters->unkBFC;
+            }
+            if (unit->mode == 7) {
+                scale *= datBattleParameters->unkBFC;
+            }
+        }
+        break;
+    case 5:
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x230)) {
+            scale *= datAbilityParameters[0x230 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x235)) {
+            scale *= datAbilityParameters[0x235 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (scale == 1.0f && (unit->flags & 0x200)) {
+            if (unit->mode == 5) {
+                scale *= datBattleParameters->unkBFC;
+            }
+        }
+        break;
+    case 6:
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x231)) {
+            scale *= datAbilityParameters[0x231 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x236)) {
+            scale *= datAbilityParameters[0x236 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (scale == 1.0f && (unit->flags & 0x200)) {
+            if (unit->mode == 4) {
+                scale *= datBattleParameters->unkBFC;
+            }
+        }
+        break;
+    }
+    return scale;
+}
 
 s32 func_001AE678(u8 *actor, s32 attr) {
     u32 value = 100;

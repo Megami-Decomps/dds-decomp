@@ -83,7 +83,7 @@ typedef struct SdfBattleParameters {
     f32 enemyHpScale[10]; /* 0xBCC */
     f32 hekatoRatioScale; /* 0xBF4 */
     f32 hekatoRatioMax; /* 0xBF8 */
-    u8 padBFC[4];
+    f32 unkBFC; /* 0xBFC */
     f32 actionScale; /* 0xC00 */
     f32 brahmaRatioMultiplier; /* 0xC04 */
     f32 brahmaRatioMaximum; /* 0xC08 */
