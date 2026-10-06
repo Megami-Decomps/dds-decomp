@@ -152,7 +152,8 @@ void sdfInitPacketList(s32 packet);
 
 void func_0015AA30(s32 packet, s32 source);
 
-void func_0015AD18(s32 packet, s32 source);
+typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
+void func_0015AD18(SdfListHead *packet, EffCompositeGsDescriptor *source);
 
 void func_0015B330(s32 effect);
 
@@ -544,14 +545,187 @@ void effSubmitGeneratedTexturePacket(s32 sink, s32 source) {
     ((EffPacketSink *)sink)->submit(sink, packetAddress);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015AD18);
+/* Caller-built composite draw description; 0x68 bytes. */
+struct EffCompositeGsDescriptor {
+    f32 position[4];
+    f32 scaleX;
+    f32 scaleY;
+    u8 unk18[8];
+    f32 angle;
+    u32 color;
+    u32 blendMode;
+    BillTextureQuad primaryUv;
+    BillTextureQuad secondaryUv;
+    SdfTex *primaryTexture;
+    u64 primaryClamp;
+    SdfTex *secondaryTexture;
+    u8 unk5C[4];
+    u64 secondaryClamp;
+};
+
+typedef char EffCompositeGsDescriptor_size_must_be_0x68[
+    (sizeof(EffCompositeGsDescriptor) == 0x68) ? 1 : -1];
+
+extern u8 kwlnFrameDrawPacketRecords[];
+extern u32 kwlnGetDrawBufferIndex(void);
+extern void func_0032DB30(s32, u32, s32);
+extern void func_0032DB78(s32, u32, s32);
+extern void sdfAppendDmaTagToList(SdfListHead *, u32);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
+extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
+extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
+extern void func_0033B8B0(u8 *, const f32 *, u32, u32,
+                        const BillTextureQuad *, const BillTextureQuad *, const f32 *);
+
+void func_0015AD18(SdfListHead *list, EffCompositeGsDescriptor *source) {
+    f32 matrix[16] __attribute__((aligned(16)));
+    f32 corners[4][2];
+    u64 *state;
+    u64 *textureState;
+    u8 *geometry;
+    u32 framePacket;
+    u64 restoreBlend;
+    f32 halfWidth, halfHeight;
+    f32 cosine, sine;
+    f32 cornerX, cornerY;
+
+    framePacket = sdfAllocPacketAligned(0x40);
+    func_0032DB30((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+    sdfAppendDmaTagToList(list, framePacket);
+
+    state = (u64 *)sdfAllocPacketAligned(0x40);
+    state[0] = 3;
+    state[1] = 0x5000000310000000ULL;
+    state[2] = 0x1000000000008002ULL;
+    state[3] = 0xE;
+    state[4] = 0x51001;
+    state[5] = 0x47;
+    state[6] = 0x44;
+    state[7] = 0x42;
+    sdfAppendPacket(list, (u32)state);
+
+    state = (u64 *)sdfAllocPacketAligned(0x40);
+    state[0] = 3;
+    state[1] = 0x5000000310000000ULL;
+    state[2] = 0x1000000000008002ULL;
+    state[3] = 0xE;
+    state[4] = 0x51001;
+    state[5] = 0x48;
+    switch (source->blendMode) {
+    case 2:
+        state[6] = 0x58;
+        restoreBlend = 0x48;
+        break;
+    case 3:
+        state[6] = 0x52;
+        restoreBlend = 0x42;
+        break;
+    case 0:
+    case 1:
+        state[6] = 0x54;
+        restoreBlend = 0x44;
+        break;
+    default:
+        restoreBlend = 0;
+        break;
+    }
+    state[7] = 0x43;
+    sdfAppendPacket(list, (u32)state);
+
+    textureState = (u64 *)sdfAllocPacketAligned(0x50);
+    textureState[0] = 4;
+    textureState[1] = 0x5000000410000000ULL;
+    textureState[2] = 0x1000000000008003ULL;
+    textureState[3] = 0xE;
+    textureState[4] = sdfTexGetPrimarySamplingState(source->secondaryTexture);
+    textureState[5] = 0x14;
+    textureState[6] = sdfTexGetPrimaryTextureState(source->secondaryTexture);
+    textureState[7] = 6;
+    textureState[8] = source->secondaryClamp;
+    textureState[9] = 8;
+    sdfAppendPacket(list, (u32)textureState);
+
+    textureState = (u64 *)sdfAllocPacketAligned(0x50);
+    textureState[0] = 4;
+    textureState[1] = 0x5000000410000000ULL;
+    textureState[2] = 0x1000000000008003ULL;
+    textureState[3] = 0xE;
+    textureState[4] = sdfTexGetPrimarySamplingState(source->primaryTexture);
+    textureState[5] = 0x15;
+    textureState[6] = sdfTexGetPrimaryTextureState(source->primaryTexture);
+    textureState[7] = 7;
+    textureState[8] = source->primaryClamp;
+    textureState[9] = 9;
+    sdfAppendPacket(list, (u32)textureState);
+
+    EE_MMI_UNIT_MATRIX(matrix);
+    geometry = (u8 *)sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket((u8 *)geometry, matrix);
+    sdfAppendPacket(list, (u32)geometry);
+
+    halfWidth = (f32)((s16)((u16)source->primaryTexture->width << 4) >> 5) * 0.0625f * source->scaleX;
+    halfHeight = (f32)((s16)((u16)source->primaryTexture->height << 4) >> 5) * 0.0625f * source->scaleY;
+    if (source->angle == 0.0f) {
+        corners[0][0] = -halfWidth;
+        corners[0][1] = -halfHeight;
+        corners[1][0] = halfWidth;
+        corners[1][1] = -halfHeight;
+        corners[2][0] = halfWidth;
+        corners[2][1] = halfHeight;
+        corners[3][0] = -halfWidth;
+        corners[3][1] = halfHeight;
+    } else {
+        cosine = sdfEvaluateCosineViaSinePhaseShift(source->angle);
+        sine = sdfSinPoly(source->angle);
+        cornerX = -halfWidth;
+        cornerY = -halfHeight;
+        corners[0][0] = cornerX * cosine - cornerY * sine;
+        corners[0][1] = cornerX * sine + cornerY * cosine;
+        cornerX = halfWidth;
+        cornerY = -halfHeight;
+        corners[1][0] = cornerX * cosine - cornerY * sine;
+        corners[1][1] = cornerX * sine + cornerY * cosine;
+        cornerX = halfWidth;
+        cornerY = halfHeight;
+        corners[2][0] = cornerX * cosine - cornerY * sine;
+        corners[2][1] = cornerX * sine + cornerY * cosine;
+        cornerX = -halfWidth;
+        cornerY = halfHeight;
+        corners[3][0] = cornerX * cosine - cornerY * sine;
+        corners[3][1] = cornerX * sine + cornerY * cosine;
+    }
+
+    geometry = (u8 *)sdfAllocPacketAligned(0x90);
+    func_0033B8B0((u8 *)geometry, source->position, source->color, source->color,
+                  &source->primaryUv, &source->secondaryUv, &corners[0][0]);
+    sdfAppendPacket(list, (u32)geometry);
+
+    framePacket = sdfAllocPacketAligned(0x40);
+    func_0032DB78((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+    sdfAppendDmaTagToList(list, framePacket);
+
+    state = (u64 *)sdfAllocPacketAligned(0x40);
+    state[0] = 3;
+    state[1] = 0x5000000310000000ULL;
+    state[2] = 0x1000000000008002ULL;
+    state[3] = 0xE;
+    state[4] = 0x71801;
+    state[5] = 0x47;
+    state[6] = restoreBlend;
+    state[7] = 0x42;
+    sdfAppendPacket(list, (u32)state);
+}
+
 
 /* Allocate/init a packet list, generate its composite GS payload, then submit it to the sink. */
 void effSubmitCompositeGsPacket(s32 sink, s32 source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
     sdfInitPacketList(packetAddress);
-    func_0015AD18(packetAddress, source);
+    func_0015AD18((SdfListHead *)packetAddress, (EffCompositeGsDescriptor *)source);
     ((EffPacketSink *)sink)->submit(sink, packetAddress);
 }
 
