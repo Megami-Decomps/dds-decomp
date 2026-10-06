@@ -1,5 +1,33 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mnu.h"
+
+typedef struct StaffMenuWork {
+    u32 resource;
+    u8 pad04[4];
+    u8 panel[0x4C];
+    u8 pad54[8];
+    void *valueRecord;
+    StaffSlots staffSlots;
+    u32 categoryPair[2];
+    u32 categoryGroup[4];
+    u32 partyModels[9];
+    u32 singleResource;
+    u32 primaryImage;
+    u32 resourceList;
+    u32 secondaryImage;
+    u32 images[3];
+    u32 extraImages[2];
+    u32 scrollPanel;
+    u8 background[0x6B0];
+    u8 partyPanel[0x124];
+    s32 displayMode;
+    u8 timer[0x10];
+} StaffMenuWork;
+
+typedef char StaffMenuWork_size_must_be_0x924[(sizeof(StaffMenuWork) == 0x924) ? 1 : -1];
+typedef char StaffMenuWork_staffSlots_offset_check[
+    ((u32)&((StaffMenuWork *)0)->staffSlots == 0x60) ? 1 : -1];
 
 extern void mnuDestroyWindowContainer(u32);
 
@@ -125,23 +153,23 @@ void mnuReleaseStaffImageHandles(u32 *resources) {
 /* Return this category's handle array and count; unknown categories have none. */
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2020);
 
-void *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) {
+u32 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, StaffMenuWork *menu) {
     switch (category) {
     case 1:
         *outEntryCount = 4;
-        return menuBytes + 0xe0;
+        return menu->categoryGroup;
     case 2:
         *outEntryCount = 2;
-        return menuBytes + 0xd8;
+        return menu->categoryPair;
     case 3:
         *outEntryCount = 2;
-        return menuBytes + 0x7c;
+        return menu->staffSlots.pairResources;
     case MNU_STAFF_PARTY_CATEGORY:
         *outEntryCount = 9;
-        return menuBytes + 0xf0;
+        return menu->partyModels;
     case 5:
         *outEntryCount = 1;
-        return menuBytes + 0x114;
+        return &menu->singleResource;
     default:
         *outEntryCount = 0;
         return 0;
@@ -151,96 +179,55 @@ void *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes
 
 extern s8 D_003BC6B5;
 
-/* Resolve entry zero and the active party's adjusted one-based model indices.
- * The supplied count and work are unused; model indices are not range-clamped. */
-void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, u8 *unusedWork) {
-    s32 partyIndex;
-
-    effResolveAndReleaseResource(*(u32 *)modelListAddress);
-    for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
-        DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
-
-        if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
-            s32 modelIndex = partyRecord->unitId + D_003BC6B5;
-
-            effResolveAndReleaseResource(*(u32 *)(modelListAddress + modelIndex * 4 - 4));
-        }
-    }
-}
+extern void movReleaseActivePartyCategoryModels(u32 *, s32, StaffMenuWork *);
+INCLUDE_ASM(const s32, "game/code_00270FB0", movReleaseActivePartyCategoryModels);
 
 /* Resolve all category entries, except party models selected by active records. */
-void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
+void movReleaseCategoryModels(s32 category, StaffMenuWork *menu) {
     s32 entryCount;
-    s32 *modelHandles = (s32 *)mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+    u32 *modelHandles = mnuGetStaffCategoryEntries(category, &entryCount, menu);
     if (category != MNU_STAFF_PARTY_CATEGORY) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
             effResolveAndReleaseResource(modelHandles[resourceIndex]);
         }
     } else {
-        movReleaseActivePartyCategoryModels(modelHandles, entryCount, menuBytes);
+        movReleaseActivePartyCategoryModels(modelHandles, entryCount, menu);
     }
 }
 
 extern void effReleaseTextureHandlesAndResetSlots(u32);
 
 /* Release each category entry's textures without overwriting the handle array. */
-void mnuReleaseStaffCategoryTextureHandles(category, menuBytes)
+void mnuReleaseStaffCategoryTextureHandles(category, menu)
 s32 category;
-u8 *menuBytes;
+StaffMenuWork *menu;
 {
     s32 entryCount;
     s32 resourceIndex = 0;
-    u8 *entryBytes = mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+    u32 *entries = mnuGetStaffCategoryEntries(category, &entryCount, menu);
 
     if (entryCount > 0) {
-        u32 *handleCursor = (u32 *)entryBytes;
+        u32 *handleCursor = entries;
         do {
             effReleaseTextureHandlesAndResetSlots(*handleCursor++);
         } while (++resourceIndex < entryCount);
     }
 }
 
-/* The active resource category is stored in the staff task's display mode. */
-typedef struct StaffMenuWork {
-    u32 resource;
-    u8 pad04[4];
-    u8 panel[0x4C];
-    u8 pad54[8];
-    void *valueRecord;
-    u8 pad60[4];
-    u32 baseImage1; /* +0x64: second base image in the +0x60 resource array */
-    u8 pad68[4];
-    u32 unk6C;
-    u8 pad70[4];
-    u32 unk74;
-    u8 pad78[0xA0];
-    u32 primaryImage;
-    u32 resourceList;
-    u32 secondaryImage;
-    u32 images[3];
-    u32 extraImages[2];
-    u32 scrollPanel; /* 0x138: created panel drawn and destroyed with this task */
-    u8 background[0x6B0];
-    u8 partyPanel[0x124];
-    s32 displayMode;
-    u8 timer[0x10];
-} StaffMenuWork;
-typedef char StaffMenuWork_baseImage1_offset_check[
-    ((u32)&((StaffMenuWork *)0)->baseImage1 == 0x64) ? 1 : -1];
 
 /* On a category change, release old textures and resolve the new model entries. */
-void mnuSetStaffDisplayMode(s32 nextCategory, u8 *menuBytes) {
-    s32 previousCategory = ((StaffMenuWork *)menuBytes)->displayMode;
+void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu) {
+    s32 previousCategory = menu->displayMode;
     if (nextCategory != previousCategory) {
         if (previousCategory != 0) {
             /* Preserve DDS1's short-arity call through the K&R definition. */
             mnuReleaseStaffCategoryTextureHandles(previousCategory);
         }
         if (nextCategory != 0) {
-            movReleaseCategoryModels(nextCategory, menuBytes);
+            movReleaseCategoryModels(nextCategory, menu);
         }
-        ((StaffMenuWork *)menuBytes)->displayMode = nextCategory;
+        menu->displayMode = nextCategory;
     }
 }
 
@@ -298,12 +285,12 @@ void mnuReleaseStaffSpriteHandles(StaffMenuWork *menu) {
     } while (batchIndex < MNU_STAFF_STATUS_BATCH_COUNT);
 }
 
-void mnuInitializeStaffPageWindows(u32 container, u32 *resources, u32 unused, u32 mode) {
-    mnuInitPageWindow(container, mode, resources[3], 7, resources[4], 0, *resources, 0x11);
-    func_0027FAA8(container, *resources);
-    mnuCopyPrimaryWindowHandles(container, resources + 9);
-    mnuCopySecondaryWindowHandles(container, resources + 0x11);
-    mnuRegisterResourceHandles(container, resources + 0x19);
+void mnuInitializeStaffPageWindows(u32 container, StaffSlots *resources, u32 unused, u32 mode) {
+    mnuInitPageWindow(container, mode, resources->baseResources[3], 7, resources->baseResources[4], 0, resources->baseResources[0], 0x11);
+    func_0027FAA8(container, resources->baseResources[0]);
+    mnuCopyPrimaryWindowHandles(container, resources->mainResources);
+    mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
+    mnuRegisterResourceHandles(container, resources->extraResources);
     mnuUpdateHandleStates(container);
 }
 
@@ -311,46 +298,39 @@ void mnuInitializeStaffPageWindows(u32 container, u32 *resources, u32 unused, u3
  * Only owner word 1 selects the second column of each image table. */
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2058);
 
-void mnuAppendCampSpriteRequests(u32 *resourceList, u32 *resourceSlots) {
+void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
 
-    mnuResolveStaffImageHandles(resourceSlots);
+    mnuResolveStaffImageHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_003B2020, D_0037C248[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x24 / 4 + resourceIndex);
+        effAppendListEntry(resourceList, D_003B2020, D_0037C248[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_003B2020, D_0037C2C8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x64 / 4 + resourceIndex);
+        effAppendListEntry(resourceList, D_003B2020, D_0037C2C8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_0037C2F0[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x1C / 4 + resourceIndex);
+        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_0037C2F0[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->pairResources[resourceIndex]);
     }
 }
 
 /* Clear base output slots, then destroy the main, extra and paired slot sets. */
-void mnuReleaseStaffResourceGroups(u32 *resources) {
-    u32 *shiftedSlots = resources + 1;
+void mnuReleaseStaffResourceGroups(StaffSlots *resources) {
     s32 resourceIndex;
 
-    mnuReleaseStaffImageHandles(resources);
+    mnuReleaseStaffImageHandles(resources->baseResources);
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet(resources[9 + resourceIndex]);
+        effDestroyResourceSlotSet(resources->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet(shiftedSlots[24 + resourceIndex]);
+        effDestroyResourceSlotSet(resources->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet(resources[7 + resourceIndex]);
+        effDestroyResourceSlotSet(resources->pairResources[resourceIndex]);
     }
 }
 
-typedef struct StaffSlots {
-    u32 baseResources[7];    /* 0x00 */
-    u32 pairResources[2];    /* 0x1C */
-    u32 mainResources[16];   /* 0x24 */
-    u32 extraResources[5];   /* 0x64 */
-} StaffSlots;
 
 /* Poll once, then return 1 only if every group contains nonzero handles.
  * DDS1 retains its no-argument poll call. */
@@ -383,20 +363,20 @@ s32 mnuStaffSlotsAllFilled(s32 unused, StaffSlots *slots) {
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_002717D8);
 
 
-s64 mnuReleaseStaffResourceSlotGroups(u32 *resources) {
+s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {
     s32 i;
 
-    mnuReleaseStaffResourceGroups(resources + 0x18);
+    mnuReleaseStaffResourceGroups(&menu->staffSlots);
     for (i = 0; i < 2; i++) {
-        effDestroyResourceSlotSet(resources[54 + i]);
+        effDestroyResourceSlotSet(menu->categoryPair[i]);
     }
     for (i = 0; i < 4; i++) {
-        effDestroyResourceSlotSet(resources[56 + i]);
+        effDestroyResourceSlotSet(menu->categoryGroup[i]);
     }
     for (i = 0; i < 9; i++) {
-        effDestroyResourceSlotSet(resources[60 + i]);
+        effDestroyResourceSlotSet(menu->partyModels[i]);
     }
-    return effDestroyResourceSlotSet(resources[69]);
+    return effDestroyResourceSlotSet(menu->singleResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_002719F0);
@@ -410,9 +390,9 @@ void func_00271B48(void) {
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271B50);
 
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
-    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->unk6C, menu->secondaryImage);
+    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->staffSlots.baseResources[3], menu->secondaryImage);
     menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
-    mnuForwardDupArg(menu->images[0], menu->unk74, 0, 0, 0);
+    mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
     menu->images[1] = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
     mnuSetWindowContainerState(menu->images[1], 0x100);
     menu->images[2] = func_00271B50(D_0037B980, 2, 0x200, menu, 0);
@@ -488,7 +468,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuShutdownContext(menu->background + 0x20);
     dspCloseChannel();
     mnuReleaseAssets(menu->background);
-    mnuReleaseStaffResourceSlotGroups((u32 *)menu);
+    mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
     func_002BC618((u32)menu->valueRecord);
     sdfReleaseResourceAllocation(menu->resource);
@@ -654,12 +634,12 @@ void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
     StaffMenuWork *menu = (StaffMenuWork *)context;
     s32 glyph;
     if (kind == 0) {
-        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->unk74, 0x1E, layer);
+        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->staffSlots.baseResources[5], 0x1E, layer);
     } else {
-        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->unk74, 0x2E, layer);
+        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->staffSlots.baseResources[5], 0x2E, layer);
     }
-    itfDrawGridWithResolvedSlot(0x150, 0x9C0, 0, drawOption, menu->unk74, 0, layer);
-    itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->baseImage1, 2, layer);
+    itfDrawGridWithResolvedSlot(0x150, 0x9C0, 0, drawOption, menu->staffSlots.baseResources[5], 0, layer);
+    itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->staffSlots.baseResources[1], 2, layer);
     if (textTable != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
         frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC366);
