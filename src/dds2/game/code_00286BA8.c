@@ -443,7 +443,7 @@ extern char D_00437928[];
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32, s32);
 
-void func_002882B8(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *list,
+void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *list,
                   MenuListNode *node, s32 depth) {
     MtrSelectionState *selection = (MtrSelectionState *)list->userData;
     MnuPartySnapshot *record;

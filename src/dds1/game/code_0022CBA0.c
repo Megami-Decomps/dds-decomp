@@ -11,7 +11,7 @@ extern s32 datGameState;
 extern char evtViewerTaskName[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(s32 viewerAddr);
-void func_00232720(void);
+void evtViewerUpdateFrame(void);
 void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
@@ -1301,7 +1301,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232438);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerPickNextHandler);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232720);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerUpdateFrame);
 
 /* Update the active viewer, then switch to its frame-variable task. */
 void *evtViewerScheduleFrameVariableTask(s32 task) {
@@ -1311,7 +1311,7 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
     func_0022E5A0(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
-    return (void *)func_00232720;
+    return (void *)evtViewerUpdateFrame;
 }
 
 /* Initialize the active viewer and schedule its next update callback. */

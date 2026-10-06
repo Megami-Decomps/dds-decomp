@@ -39,11 +39,11 @@ void effPCPNeedleCreate(void *parameters) {
     EffPCPNeedleParams *work;
 
     work = effParamTableGetBlock(parameters, 0);
-    func_0017DD50(work);
+    effNeedleCreateWork(work);
 }
 
 void func_0017E068(EffPCPNeedleParams *parameters) {
-    func_0017DD50(parameters);
+    effNeedleCreateWork(parameters);
 }
 
 void func_0017E080(EffPCPNeedleWork *work) {

@@ -137,7 +137,7 @@ struct PcpScatterInstanceB {
     u32 color;
     s32 age;
     u32 scatterObject;
-    u32 allocationHandle;
+    SdfMemBlock *allocationHandle;
 };
 
 typedef struct PcpScatterInstanceC PcpScatterInstanceC;
@@ -189,7 +189,7 @@ struct PcpScatterInstanceC {
     u32 color;
     s32 age;
     u32 scatterObject;
-    u32 allocationHandle;
+    SdfMemBlock *allocationHandle;
 };
 
 extern void *effScatterCreateDampedRing();
@@ -1056,7 +1056,7 @@ struct PcpScatterInstance {
     f32 scale;
     u32 color;
     u32 scatterObject;
-    u32 allocationHandle;
+    SdfMemBlock *allocationHandle;
 };
 
 extern void *func_0017D7A8();
@@ -1067,46 +1067,7 @@ extern u32 effMiscRand(void *state);
 
 /* Return ring work with trailing particles and randomized negative initial ages.
  * The delay clamp changes only the local modulus, not the copied parameter head. */
-PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
-    PcpScatterParams *src;
-
-    u32 resource;
-
-{
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x18C);
-    PcpScatterInstance *inst = (PcpScatterInstance *)sdfResourceRetainAddress(allocation);
-    PcpScatterParticle *particle;
-    u32 delayModulus;
-    u32 count;
-    u32 i;
-    PcpScatterDraw *object;
-    u32 drawWord;
-
-    particle = (PcpScatterParticle *)(inst + 1);
-    inst->params = *src;
-    inst->color = EFF_SCATTER_NEUTRAL_COLOR;
-    inst->scale = 1.0f;
-    inst->allocationHandle = (u32)allocation;
-    inst->particles = particle;
-    VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_0017D7A8(src->particleCount, src->unk60);
-    drawWord = src->unk50;
-    inst->scatterObject = (u32)object;
-    object->unk50 = drawWord;
-    if (resource != 0) {
-        effCreateScatterResource(object, resource);
-    }
-    delayModulus = inst->params.randomDelayRange;
-    count = inst->params.particleCount;
-    if ((s32)delayModulus <= 0) {
-        delayModulus = 1;
-    }
-    for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
-        particle++;
-    }
-    return inst;
-}
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterCreateParticleInstance);
 
 /* Return ring work created from the first two parameter-table blocks. */
 PcpScatterInstance *effScatterCreateRingFromTable(void *parameterTable) {
@@ -1125,10 +1086,10 @@ PcpScatterInstance *effScatterCloneWithSharedObject(PcpScatterInstance *work) {
     return child;
 }
 
-/* Release the drawable before the raw-word SDF allocation handle. */
+/* Release the drawable before its owning SDF allocation descriptor. */
 void effScatterReleaseObjectAndBuffer(PcpScatterInstance *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 
@@ -1337,50 +1298,7 @@ void effPcpScatterTransformMatrix(PcpScatterInstance *work, void *source) {
 
 /* Return the radius-damped ring variant with a shared instance clock.
  * Normalize the copied delay range too, because loop restarts read that stored value. */
-void *effScatterCreateDampedRing(src, resource)
-    PcpScatterParamsB *src;
-
-    u32 resource;
-
-{
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x194);
-    PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfResourceRetainAddress(allocation);
-    PcpScatterParticle *particle;
-    u32 delayModulus;
-    u32 count;
-    u32 i;
-    PcpScatterDraw *object;
-    u32 drawWord;
-    s32 delayLimit;
-
-    particle = (PcpScatterParticle *)(inst + 1);
-    inst->params = *src;
-    inst->color = EFF_SCATTER_NEUTRAL_COLOR;
-    inst->scale = 1.0f;
-    inst->allocationHandle = (u32)allocation;
-    inst->particles = particle;
-    inst->age = 0;
-    VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_0017D7A8(src->particleCount, src->unk60);
-    drawWord = src->unk50;
-    inst->scatterObject = (u32)object;
-    object->unk50 = drawWord;
-    if (resource != 0) {
-        effCreateScatterResource(object, resource);
-    }
-    delayLimit = inst->params.randomDelayRange;
-    if (delayLimit <= 0) {
-        inst->params.randomDelayRange = 1;
-        delayLimit = 1;
-    }
-    delayModulus = delayLimit;
-    count = inst->params.particleCount;
-    for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
-        particle++;
-    }
-    return inst;
-}
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effScatterCreateDampedRing);
 
 /* Create radius-damped ring work from its parameter and resource table blocks. */
 void effScatterSpawnFromParameterPair(void *parameterTable) {
@@ -1405,7 +1323,7 @@ PcpScatterInstanceB *effScatterCloneWithSharedResource(PcpScatterInstanceB *work
 /* Release the radius-damped drawable before its owning allocation node. */
 void effScatterReleaseInstanceResources(PcpScatterInstanceB *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 
@@ -1629,50 +1547,7 @@ void effScatterComposeWorkMatrix(PcpScatterInstanceB *work, void *source) {
 
 
 /* Return two-color ring work with an instance clock and normalized stored delay range. */
-void *effScatterCreateTwoColorRing(src, resource)
-    PcpScatterParamsC *src;
-
-    u32 resource;
-
-{
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x19C);
-    PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);
-    PcpScatterParticle *particle;
-    u32 delayModulus;
-    u32 count;
-    u32 i;
-    PcpScatterDraw *object;
-    u32 drawWord;
-    s32 delayLimit;
-
-    particle = (PcpScatterParticle *)(inst + 1);
-    inst->params = *src;
-    inst->color = EFF_SCATTER_NEUTRAL_COLOR;
-    inst->scale = 1.0f;
-    inst->allocationHandle = (u32)allocation;
-    inst->particles = particle;
-    inst->age = 0;
-    VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_0017D7A8(src->particleCount, src->unk60);
-    drawWord = src->unk50;
-    inst->scatterObject = (u32)object;
-    object->unk50 = drawWord;
-    if (resource != 0) {
-        effCreateScatterResource(object, resource);
-    }
-    delayLimit = inst->params.randomDelayRange;
-    if (delayLimit <= 0) {
-        inst->params.randomDelayRange = 1;
-        delayLimit = 1;
-    }
-    delayModulus = delayLimit;
-    count = inst->params.particleCount;
-    for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
-        particle++;
-    }
-    return inst;
-}
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effScatterCreateTwoColorRing);
 
 /* Create two-color ring work from its parameter and resource table blocks. */
 void effScatterCreateFromParameterTable(void *parameterTable) {
@@ -1697,7 +1572,7 @@ PcpScatterInstanceC *effCreateScatterChildSharingParentResource(PcpScatterInstan
 /* Release the two-color drawable before its owning allocation node. */
 void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 
@@ -1976,49 +1851,12 @@ struct PcpScatterPlainInstance {
     f32 scale;
     u32 color;
     u32 scatterObject;
-    u32 allocationHandle;
+    SdfMemBlock *allocationHandle;
 };
 
 /* Return flat-ring work with an identity source matrix and randomized negative ages.
  * Like the first ring variant, only the local delay modulus is normalized. */
-void *effPcpScatterCreatePlainInstance(src, resource)
-    PcpScatterPlainParams *src;
-    u32 resource;
-{
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * 0x28 + 0x13C);
-    PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfResourceRetainAddress(allocation);
-    PcpScatterPlainParticle *particle;
-    u32 delayModulus;
-    u32 count;
-    u32 i;
-    PcpScatterDraw *object;
-    u32 drawWord;
-
-    particle = (PcpScatterPlainParticle *)(inst + 1);
-    inst->params = *src;
-    inst->color = EFF_SCATTER_NEUTRAL_COLOR;
-    inst->scale = 1.0f;
-    inst->allocationHandle = (u32)allocation;
-    inst->particles = particle;
-    EE_MMI_UNIT_MATRIX(inst->matrix);
-    object = func_0017D7A8(src->particleCount, src->unk20);
-    drawWord = src->unk10;
-    inst->scatterObject = (u32)object;
-    object->unk50 = drawWord;
-    if (resource != 0) {
-        effCreateScatterResource(object, resource);
-    }
-    delayModulus = inst->params.randomDelayRange;
-    count = inst->params.particleCount;
-    if ((s32)delayModulus <= 0) {
-        delayModulus = 1;
-    }
-    for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
-        particle++;
-    }
-    return inst;
-}
+INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterCreatePlainInstance);
 
 /* Create flat-ring work from its parameter and resource table blocks. */
 void effScatterCreatePlainRingFromTable(void *parameterTable) {
@@ -2043,11 +1881,11 @@ PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstan
 /* Release the flat-ring drawable before its owning allocation node. */
 void effReleaseScatterWorkResources(PcpScatterPlainInstance *work) {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation((SdfMemBlock *)work->allocationHandle);
+    sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
 /* Seed a flat-ring particle and its paired UVs with independent samples. */
-void func_0017D138(PcpScatterPlainInstance *work, s32 index) {
+void effScatterCreateFlatRing(PcpScatterPlainInstance *work, s32 index) {
     f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
     PcpScatterPlainParticle *ring;
     f32 angle;
@@ -2166,7 +2004,7 @@ void effScatterUpdatePlainParticleRing(PcpScatterPlainInstance *work) {
             draw->colors[i] = 0;
         } else {
             if (age == 0) {
-                func_0017D138(work, i);
+                effScatterCreateFlatRing(work, i);
             } else if (age > 0) {
                 s32 remaining = duration - age;
                 f32 factor;
