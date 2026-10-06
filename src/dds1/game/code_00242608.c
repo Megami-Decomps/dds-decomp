@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_list.h"
 #include "mnu_shop.h"
 #include "sdf.h"
 #include "evt_unit.h"
