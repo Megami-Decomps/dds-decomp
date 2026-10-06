@@ -3630,7 +3630,57 @@ void func_002D1930(s32 x, s32 y, s32 depth, FileConfigList *list,
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D27A0);
+void func_002D27A0(void *arg) {
+    s16 sprites[5][4] = {
+        {0, 2, 99, -57},
+        {0, 3, -31, 365},
+        {0, 5, 0, 120},
+        {0, 4, 0, 120},
+        {0, 6, -20, -20}
+    };
+    f32 labelFade = ((FileConfigTask *)fileConfigTaskWork)->labelFade;
+    f32 choiceFade = ((FileConfigTask *)fileConfigTaskWork)->choiceFade;
+    s32 index;
+
+    index = 0;
+    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 (u32)(labelFade * 256.0f), 0,
+                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
+                 sprites[index][FILE_CONFIG_FRAME], 0x53);
+    index++;
+    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 (u32)(labelFade * 256.0f), 0,
+                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
+                 sprites[index][FILE_CONFIG_FRAME], 0x53);
+    if (((FileConfigTask *)fileConfigTaskWork)->state == 1) {
+        func_00306CD0(0, 0, 0, 256, 0,
+                     (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[4], 0, 0x53);
+    }
+    index++;
+    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 (u32)(labelFade * 256.0f), 0,
+                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
+                 sprites[index][FILE_CONFIG_FRAME], 0x53);
+    index++;
+    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 (u32)(choiceFade * 256.0f), 0,
+                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
+                 sprites[index][FILE_CONFIG_FRAME], 0x53);
+    index++;
+    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 (u32)(labelFade * 256.0f), 0,
+                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
+                 sprites[index][FILE_CONFIG_FRAME], 0x53);
+    for (index = 0; index < 5; index++) {
+        func_00306CD0(0, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+                     (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[2], 9, 0x53);
+        func_00306CD0(461 * 16, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+                     (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[2], 10, 0x53);
+    }
+    func_00306CD0(73 * 16, (326 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[2], 11, 0x53);
+}
+
 
 void effLoadCommonTexturesAndResetRenderFlags(void) {
     effLoadFlashTextures();
@@ -4871,7 +4921,7 @@ EffectSurfaceNode *fileCreateGridLoaderRecord(FileGridHeader *hdr) {
     return fileCreateSurfaceLoaderState(count <= 0x12C ? count : 0x12C);
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042BB28);
+
 
 EffectSurfaceNode *fileCreateEffectSurfaceFromJob(FileJob *job) {
     void *primary = fileResolvePrimaryBuffer(job);
