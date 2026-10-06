@@ -583,7 +583,97 @@ extern void fldSetRecordValueById(s32, s32);
 extern struct WorldChainNode *dds3FindIndexedObjectChainNodeByName(struct EvtWorldObject *, s32, const u8 *);
 extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129660);
+void func_00129660(void) {
+    f32 position[4];
+    f32 rotation[4];
+    FldFileResource *resource = D_00438EB8;
+    u32 count = D_00438EBC;
+    void *world;
+    void *object;
+    FldFileResource *binding;
+    FldFileNameEntry *name;
+    FldScriptResource *script;
+    FldResourceName *linkedName;
+    s32 i;
+    s32 j;
+    u32 k;
+
+    if (resource == NULL) {
+        return;
+    }
+    world = dds3GetWorldSecondaryObject();
+    for (i = 0; i < count; i++, resource++) {
+        script = resource->data;
+        evtCreateScriptObjectWithResource(resource->id, (s32)script->parameters,
+                                         script->unk20, D_00435FA4, (s32)resource->name);
+        /* Retail fills both 16-byte stack vectors before creating the object. */
+        if (resource->transform != NULL) {
+            position[0] = resource->transform[0];
+            position[1] = resource->transform[1];
+            position[2] = resource->transform[2];
+            position[3] = 0.0f;
+            rotation[0] = resource->transform[4];
+            rotation[1] = resource->transform[5];
+            rotation[2] = resource->transform[6];
+            rotation[3] = resource->transform[7];
+        } else {
+            position[0] = 0.0f;
+            position[1] = 0.0f;
+            position[2] = 0.0f;
+            position[3] = 0.0f;
+            rotation[0] = 0.0f;
+            rotation[1] = 0.0f;
+            rotation[2] = 0.0f;
+            rotation[3] = 0.0f;
+        }
+        object = dds3SpawnInnerVecObj6(resource->id, position, rotation);
+        dds3SetWorldEntryCallbackTarget(object, (void *)resource->name);
+        if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
+            if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
+                effObjSetModelHolder(object, 6);
+            } else {
+                switch (i) {
+                    case 0:
+                        effObjSetModelHolder(object, 2);
+                        break;
+                    case 1:
+                        effObjSetModelHolder(object, 3);
+                        break;
+                    case 2:
+                        effObjSetModelHolder(object, 4);
+                        break;
+                    default:
+                        effObjSetModelHolder(object, 5);
+                        break;
+                }
+            }
+        } else {
+            effObjSetModelHolder(object, 7);
+        }
+        func_00113FF8(object, fldParseRoomNumberFromName((char *)resource->name));
+        dds3SetSlotByKind(object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
+        func_00112168(object);
+        binding = D_00438EC0;
+        for (j = 0; j < D_00438EC4; j++, binding++) {
+            if (binding->names != NULL) {
+                name = binding->names->entries;
+                k = 0;
+                for (; k < binding->names->count; k++, name++) {
+                    if (strcmp(resource->name, name->name) == 0) {
+                        fldSetRecordValueById(binding->id, (s32)object);
+                        break;
+                    }
+                }
+            }
+        }
+        /* Retail fetches the link descriptor even when the object is NULL. */
+        linkedName = (FldResourceName *)resource->word14;
+        if (object != NULL) {
+            dds3SetSlotByKind(object, (ObjData *)dds3FindIndexedObjectChainNodeByName(world, 2, (const u8 *)linkedName->name));
+            dds3RegisterObjectInHandlerIndex(object);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129940);
 
