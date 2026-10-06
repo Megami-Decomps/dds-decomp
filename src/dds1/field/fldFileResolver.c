@@ -1,27 +1,6 @@
 #include "common.h"
+#include "fld.h"
 
-typedef struct FldFileNameEntry {
-    u32 word00;
-    const char *name;
-    u32 word08;
-} FldFileNameEntry;
-
-typedef struct FldFileNameTable {
-    u32 count;
-    FldFileNameEntry entries[1];
-} FldFileNameTable;
-
-typedef struct FldFileResource {
-    u32 id;
-    u32 word04;
-    const char *name;
-    u32 word0C;
-    f32 *transform;
-    u32 word14;
-    FldFileNameTable *names;
-    u32 word1C;
-    void *data;
-} FldFileResource;
 
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
