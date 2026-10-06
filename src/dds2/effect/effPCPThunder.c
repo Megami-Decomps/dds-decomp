@@ -299,7 +299,66 @@ void func_0016B3D8(EffThunderVectorWork *work, s32 index) {
 }
 
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B750);
+/* Rotate the live placement direction and every five-vector history row
+ * around the effect origin. The separate placement height is preserved.
+ */
+void func_0016B750(EffThunderVectorWork *work, s32 index) {
+    f32 axis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    EffThunderParSystem *system = work->cellSystem;
+    EffThunderVectorCell *source = &work->cells[index];
+    ParCell *cell = &system->cells[index];
+    u128 *vertices = cell->history;
+    s32 rows = system->vertexCount / 5;
+    s32 i;
+    f32 sample;
+    f32 angle;
+
+    sample = effMiscRandUnitFloat(D_003AA868);
+    angle = source->rotationScale * sample * 3.0f;
+    direction[0] = source->placementVector[0];
+    direction[1] = 0.0f;
+    direction[2] = source->placementVector[2];
+    axis[0] = source->rotationAxis[0];
+    axis[1] = source->rotationAxis[1];
+    axis[2] = source->rotationAxis[2];
+    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+    VU0_LOAD_VF(vf10, direction);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+    source->placementVector[0] = direction[0];
+    source->placementVector[2] = direction[2];
+    VU0_LOAD_VF(vf11, work->head.origin);
+    for (i = 0; i < rows; i++) {
+        VU0_LOAD_VF(vf10, vertices);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+        VU0_LOAD_VF(vf10, vertices + 1);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
+        VU0_LOAD_VF(vf10, vertices + 2);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
+        VU0_LOAD_VF(vf10, vertices + 3);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 3);
+        VU0_LOAD_VF(vf10, vertices + 4);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 4);
+        vertices += 5;
+    }
+}
+
 
 extern void func_0016B3D8(EffThunderVectorWork *, s32);
 extern void func_0016B750(EffThunderVectorWork *, s32);
@@ -521,7 +580,51 @@ void func_0016BF08(EffThunderVectorWork *work, s32 index) {
 }
 
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016C1F8);
+/* Rotate the live placement direction and every two-vector history row
+ * around the effect origin. The separate placement height is preserved.
+ */
+void func_0016C1F8(EffThunderVectorWork *work, s32 index) {
+    f32 axis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    EffThunderParSystem *system = work->cellSystem;
+    EffThunderVectorCell *source = &work->cells[index];
+    ParCell *cell = &system->cells[index];
+    u128 *vertices = cell->history;
+    s32 rows = system->vertexCount >> 1;
+    s32 i;
+    f32 sample;
+    f32 angle;
+
+    sample = effMiscRandUnitFloat(D_003AA868);
+    angle = source->rotationScale * sample * 3.0f;
+    direction[0] = source->placementVector[0];
+    direction[1] = 0.0f;
+    direction[2] = source->placementVector[2];
+    axis[0] = source->rotationAxis[0];
+    axis[1] = source->rotationAxis[1];
+    axis[2] = source->rotationAxis[2];
+    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+    VU0_LOAD_VF(vf10, direction);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+    source->placementVector[0] = direction[0];
+    source->placementVector[2] = direction[2];
+    VU0_LOAD_VF(vf11, work->head.origin);
+    for (i = 0; i < rows; i++) {
+        VU0_LOAD_VF(vf10, vertices);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+        VU0_LOAD_VF(vf10, vertices + 1);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
+        vertices += 2;
+    }
+}
+
 
 extern void func_0016BF08(EffThunderVectorWork *, s32);
 extern void func_0016C1F8(EffThunderVectorWork *, s32);
