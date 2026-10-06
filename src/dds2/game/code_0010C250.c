@@ -1,5 +1,6 @@
 #include "common.h"
 #include "scr.h"
+#include "dat_state.h"
 
 extern u32 kwlnTaskGetUserValue(void);
 
@@ -81,13 +82,6 @@ void scrPushTypeFourValue(ScriptContext *script, u32 value) {
     script->stackDepth = script->stackDepth + 1;
 }
 
-typedef struct ScriptGlobals {
-    u8 pad00[0x40];
-    s32 ints[256];
-    f32 floats[256];
-} ScriptGlobals;
-
-extern ScriptGlobals *datGameState;
 
 s32 bfStackPopInt(ScriptContext *script) {
     s32 stackIndex = script->stackDepth;
@@ -100,9 +94,9 @@ s32 bfStackPopInt(ScriptContext *script) {
     case 1:
         return script->stack.stackFloats[script->stackDepth];
     case 2:
-        return datGameState->ints[script->stack.stackValues[script->stackDepth]];
+        return datGameState->script.ints[script->stack.stackValues[script->stackDepth]];
     case 3:
-        return datGameState->floats[script->stack.stackValues[script->stackDepth]];
+        return datGameState->script.floats[script->stack.stackValues[script->stackDepth]];
     }
     return 0;
 }
@@ -119,9 +113,9 @@ f32 bfStackPopFloat(ScriptContext *script) {
     case 1:
         return script->stack.stackFloats[script->stackDepth];
     case 2:
-        return (f32)datGameState->ints[script->stack.stackValues[script->stackDepth]];
+        return (f32)datGameState->script.ints[script->stack.stackValues[script->stackDepth]];
     case 3:
-        return datGameState->floats[script->stack.stackValues[script->stackDepth]];
+        return datGameState->script.floats[script->stack.stackValues[script->stackDepth]];
     }
     return 0.0f;
 }
