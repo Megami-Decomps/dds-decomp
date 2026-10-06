@@ -209,7 +209,159 @@ extern f32 D_0034E050[4];
 extern BillRenderPair *D_003BD7F8;
 extern void func_00150EB0(BillRenderPair *node);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00150840);
+/* Initialize the paired texture/state list, then append one quad to each
+ * child stream. The second child owns the geometry and common batch count. */
+void func_00150840(BillObj *obj, BillRenderPair *node) {
+    f32 matrix[16];
+    f32 direction[4];
+    f32 dot;
+    BillStatePacket *state;
+    void *framePacket;
+    u32 packet;
+    u8 *geometry;
+    BillChildPayload *child;
+    BillPacketWork *work;
+    s32 index;
+    u32 primaryColor, secondaryColor;
+    f32 x, y, halfWidth, halfHeight;
+    f32 cosine, sine;
+    f32 cornerX, cornerY;
+
+    if (node->packetList == NULL) {
+        node->packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(node->packetList);
+        framePacket = (void *)sdfAllocPacketAligned(0x40);
+        func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), (u32)framePacket, 0);
+        sdfAppendDmaTagToList(node->packetList, (u32)framePacket);
+        state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
+        state->dmaTag = 3;
+        state->vifCommands = 0x5000000310000000ULL;
+        state->gifTag = 0x1000000000008002ULL;
+        state->gifRegisters = 0xE;
+        state->test = 0x51001;
+        state->testRegister = 0x47;
+        state->alpha = 0x44;
+        state->alphaRegister = 0x42;
+        sdfAppendPacket(node->packetList, (u32)state);
+        state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
+        state->dmaTag = 3;
+        state->vifCommands = 0x5000000310000000ULL;
+        state->gifTag = 0x1000000000008002ULL;
+        state->gifRegisters = 0xE;
+        state->test = 0x51001;
+        state->testRegister = 0x48;
+        switch (node->kind) {
+        case 2:
+            state->alpha = 0x58;
+            break;
+        case 3:
+            state->alpha = 0x52;
+            break;
+        case 1:
+            state->alpha = 0x54;
+            break;
+        }
+        state->alphaRegister = 0x43;
+        sdfAppendPacket(node->packetList, (u32)state);
+        packet = sdfAllocPacketAligned(0x20);
+        sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
+            sdfTexGetPrimaryBuffer((SdfTex *)node->children[0]->value),
+            sdfTexGetPrimaryBufferSize((SdfTex *)node->children[0]->value));
+        sdfAppendReferencePacket(node->packetList, packet);
+        packet = sdfAllocPacketAligned(0x20);
+        sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
+            sdfTexGetOrInitializeSecondaryBuffer((SdfTex *)node->children[1]->value),
+            sdfTexGetSecondaryBufferSize((SdfTex *)node->children[1]->value));
+        sdfAppendReferencePacket(node->packetList, packet);
+        geometry = (u8 *)sdfAllocPacketAligned(0x38);
+        if (node->unk8 == 1) {
+            VU0_LOAD_VF(vf10, sdfViewEyeVector);
+            VU0_LOAD_VF(vf11, sdfViewTargetVector);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF(vf11, D_0034E040);
+            VU0_DOT_XYZ(dot, vf10, vf11);
+            D_0034E050[1] = 1.0 - fabs(dot);
+            VU0_STORE_VF(vf10, direction);
+            VU0_MOVE_VF_EXTENDED(vf11, vf10);
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+            VU0_LOAD_VF_MEMORY(vf10, D_0034E050);
+            VU0_SCALE_MATRIX_ROWS(vf10);
+            VU0_STORE_MATRIX(matrix);
+        } else {
+            EE_MMI_UNIT_MATRIX(matrix);
+        }
+        sdfInitGeometryDmaPacket(geometry, matrix);
+        sdfAppendPacket(node->packetList, (u32)geometry);
+        node->next = D_003BD7F8;
+        D_003BD7F8 = node;
+    }
+    child = node->children[1];
+    work = child->work;
+    index = work->count;
+    primaryColor = node->colors[0];
+    child = node->children[0];
+    work = child->work;
+    work->colors[index] = primaryColor;
+    work->uv[index].components[0] = child->uv.components[0];
+    work->uv[index].components[1] = child->uv.components[1];
+    work->uv[index].components[2] = child->uv.components[2];
+    work->uv[index].components[3] = child->uv.components[3];
+    work->uv[index].components[4] = child->uv.components[4];
+    work->uv[index].components[5] = child->uv.components[5];
+    work->uv[index].components[6] = child->uv.components[6];
+    work->uv[index].components[7] = child->uv.components[7];
+    secondaryColor = node->colors[1];
+    child = node->children[1];
+    work = child->work;
+    work->colors[index] = secondaryColor;
+    work->uv[index].components[0] = child->uv.components[0];
+    work->uv[index].components[1] = child->uv.components[1];
+    work->uv[index].components[2] = child->uv.components[2];
+    work->uv[index].components[3] = child->uv.components[3];
+    work->uv[index].components[4] = child->uv.components[4];
+    work->uv[index].components[5] = child->uv.components[5];
+    work->uv[index].components[6] = child->uv.components[6];
+    work->uv[index].components[7] = child->uv.components[7];
+    x = child->x * obj->childScaleX;
+    y = child->y * obj->childScaleY;
+    halfWidth = child->halfWidth * obj->childScaleX;
+    halfHeight = child->halfHeight * obj->childScaleY;
+    if (obj->lengthScale == 0.0f) {
+        work->offsets[index][0] = x - halfWidth;
+        work->offsets[index][1] = y - halfHeight;
+        work->offsets[index][2] = x + halfWidth;
+        work->offsets[index][3] = y - halfHeight;
+        work->offsets[index][4] = x + halfWidth;
+        work->offsets[index][5] = y + halfHeight;
+        work->offsets[index][6] = x - halfWidth;
+        work->offsets[index][7] = y + halfHeight;
+    } else {
+        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->lengthScale);
+        sine = sdfSinPoly(obj->lengthScale);
+        cornerX = x - halfWidth;
+        cornerY = y - halfHeight;
+        work->offsets[index][0] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][1] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y - halfHeight;
+        work->offsets[index][2] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][3] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y + halfHeight;
+        work->offsets[index][4] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][5] = cornerX * sine + cornerY * cosine;
+        cornerX = x - halfWidth;
+        cornerY = y + halfHeight;
+        work->offsets[index][6] = cornerX * cosine - cornerY * sine;
+        work->offsets[index][7] = cornerX * sine + cornerY * cosine;
+    }
+    PCP_COPY_VECTOR(work->positions[index], &obj->unk0);
+    work->count++;
+    if (work->count == 7) {
+        func_00150EB0(node);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
 
