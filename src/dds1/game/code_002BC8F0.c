@@ -1080,7 +1080,34 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BE728);
+extern f32 sdfSinPoly(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+
+void func_002BE728(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY, f32 angle) {
+    f32 aspect = 1.75f;
+    f32 radians = angle * 0.017453293f;
+    f32 rotatedX;
+    f32 rotatedY;
+
+    y = (s32)(y * aspect);
+    rotatedX = sdfEvaluateCosineViaSinePhaseShift(radians) * x - sdfSinPoly(radians) * y;
+    rotatedY = sdfSinPoly(radians) * x + sdfEvaluateCosineViaSinePhaseShift(radians) * y;
+    if (rotatedX > 0.0f) {
+        rotatedX += 0.1f;
+    } else {
+        rotatedX -= 0.1f;
+    }
+    if (rotatedY > 0.0f) {
+        rotatedY += 0.1f;
+    } else {
+        rotatedY -= 0.1f;
+    }
+    *outX = (s32)rotatedX;
+    *outY = (s32)rotatedY;
+    *outX += centerX;
+    *outY = (s32)(*outY / aspect + centerY);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BE8A8);
 
