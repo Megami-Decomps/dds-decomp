@@ -352,7 +352,80 @@ void effDrawBlurRectangle(BlurSource *source)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", effAppendBlurRenderState);
+extern void func_002D4C80(s32 source, u32 packet, s32 variant);
+extern s32 sdfConsCreateDrawPacket(s32 list, s32 textureAddress, s32 context);
+
+void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
+{
+    void *framePacket;
+    u64 *blendPacket;
+    u64 *samplingPacket, *textureAlphaPacket, *clampPacket;
+    void *tag;
+
+    framePacket = (void *)sdfAllocPacketAligned(0x40);
+    func_002D4C80((s32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], (u32)framePacket, 1);
+    sdfAppendDmaTagToList(list, (u32)framePacket);
+
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x31001;
+    blendPacket[5] = 0x48;
+    blendPacket[6] = 0x44;
+    blendPacket[7] = 0x43;
+    sdfAppendPacket(list, (u32)blendPacket);
+    sdfConsCreateDrawPacket((s32)list, resource, 1);
+
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x31001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = blendControl | 0x10;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, (u32)blendPacket);
+
+    tag = (void *)sdfAllocPacketAligned(0x20);
+    sdfAppendDmaPrimary((s32)list, (u32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], tag);
+
+    samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
+    samplingPacket[0] = 2;
+    samplingPacket[1] = 0x5000000210000000ULL;
+    samplingPacket[2] = 0x1000000000008001ULL;
+    samplingPacket[3] = 0xE;
+    samplingPacket[4] = 0x61;
+    samplingPacket[5] = 0x14;
+    sdfAppendPacket(list, (u32)samplingPacket);
+
+    textureAlphaPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    textureAlphaPacket[0] = 3;
+    textureAlphaPacket[1] = 0x5000000310000000ULL;
+    textureAlphaPacket[2] = 0x1000000000008002ULL;
+    textureAlphaPacket[3] = 0xE;
+    textureAlphaPacket[4] = 0x8000000080ULL;
+    textureAlphaPacket[5] = 0x3B;
+    textureAlphaPacket[6] = 0;
+    textureAlphaPacket[7] = 0x3F;
+    sdfAppendPacket(list, (u32)textureAlphaPacket);
+
+    clampPacket = (u64 *)sdfAllocPacketAligned(0x30);
+    clampPacket[0] = 2;
+    clampPacket[1] = 0x5000000210000000ULL;
+    clampPacket[2] = 0x1000000000008001ULL;
+    clampPacket[3] = 0xE;
+    if (kwlnFadeIsBackgroundOverlayActive() != 0) {
+        clampPacket[4] = 0x2DC19000009ULL;
+    } else {
+        clampPacket[4] = 0x37C00000009ULL;
+    }
+    clampPacket[5] = 8;
+    sdfAppendPacket(list, (u32)clampPacket);
+}
+
 
 
 /* Build the two draw packets for `source` and append them to `list`. */
