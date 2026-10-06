@@ -7,6 +7,7 @@
 #include "pcp_vu0.h"
 #include "evt_unit.h"
 #include "eff_transform.h"
+#include "eff_blur.h"
 #include "dat_state.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
@@ -365,21 +366,9 @@ void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
     }
 }
 
-typedef struct BlurSource {
-    u8 color[4];
-    s32 blendControl;
-    f32 rotation;
-    f32 scale;
-    s32 centerX;
-    s32 centerY;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} BlurSource;
 
 typedef struct EffScreenDrawParams {
-    BlurSource source;
+    EffBlurQuad source;
     u8 pad28[8];
 } EffScreenDrawParams;
 
@@ -394,22 +383,9 @@ typedef struct EffSolidRectParams {
 
 typedef struct EffBlurTemplateBody {
     s32 extent;
-    BlurSource source;
+    EffBlurQuad source;
 } EffBlurTemplateBody;
 
-typedef struct EffBlurScatterParams {
-    s32 count;
-    s32 delaySpread;
-    f32 angleStep;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s32 x;
-    s32 y;
-    s32 positionSpread;
-    s32 size;
-} EffBlurScatterParams;
 
 typedef struct EffBlurScaleParams {
     s32 count;
