@@ -1084,7 +1084,47 @@ void fldSetSceneSlotRange(s32 index) {
     D_00438F54->currentIndex = index;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE5C8);
+extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
+
+void func_001CE5C8(void) {
+    s32 bank = D_00438F54->bank;
+    s32 last = D_00438F54->lastIndex;
+    s32 status = btlGetNamedTaskPairStatusOrUnavailable();
+    s32 i;
+    if (D_00438F54->enabled[bank] == 0) return;
+    if (status != 0 && status != 3) return;
+    for (i = 0; i <= last; i++) {
+        switch (D_00438F54->phase[i][bank]) {
+        case 1:
+            D_00438F54->timer++;
+            D_00438F54->timer = D_00438F54->timer <= 0 ? 0 : D_00438F54->timer > 34 ? 34 : D_00438F54->timer;
+            if (D_00438F54->timer >= 34) {
+                D_00438F54->fade[i][bank] += 64;
+                D_00438F54->fade[i][bank] = D_00438F54->fade[i][bank] <= 0 ? 0 : D_00438F54->fade[i][bank] > 255 ? 255 : D_00438F54->fade[i][bank];
+                if (D_00438F54->fade[i][bank] >= 255) {
+                    D_00438F54->phase[i][bank]++;
+                    D_00438F54->phase[i + 1][bank] = 1;
+                }
+            }
+            break;
+        case 2:
+            D_00438F54->fade[i][bank] -= 16;
+            D_00438F54->fade[i][bank] = D_00438F54->fade[i][bank] <= 128 ? 128 : D_00438F54->fade[i][bank] > 255 ? 255 : D_00438F54->fade[i][bank];
+            if (D_00438F54->fade[i][bank] <= 128) {
+                D_00438F54->phase[i][bank]++;
+                if (i == last) D_00438F54->completed = 1;
+            }
+            break;
+        case 3:
+            break;
+        case 4:
+            D_00438F54->fade[i][bank] -= 64;
+            D_00438F54->fade[i][bank] = D_00438F54->fade[i][bank] <= 0 ? 0 : D_00438F54->fade[i][bank] > 128 ? 128 : D_00438F54->fade[i][bank];
+            break;
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE838);
 
