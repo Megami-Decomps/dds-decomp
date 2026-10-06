@@ -996,11 +996,6 @@ void btlActionSeqCheckDispatch(u8 *task) {
 void func_001D4C98(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001D4CA0);
-
-void func_001D4FE0(void) {
-}
-
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s64 btlStartTask(void *);
 extern s32 sndHasActiveActor(void);
@@ -1017,6 +1012,94 @@ typedef struct TaskBlock {
 
 extern BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *, TaskBlock *);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
+
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
+extern s32 btlRollAiBucket(void);
+
+/* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
+ * others roll a script-supplied chance (capped at 70, scaled by ability 0x252). */
+void func_001D4CA0(BtlTask *task) {
+    TaskBlock block;
+    BtlUnit *unit;
+    s32 chance;
+    f32 scale;
+    BtlRuntimeTask *effect;
+
+    if (btlCountTasksByKind(0x49) != 0) {
+        return;
+    }
+    unit = task->unit;
+    unit->flags |= 0x4000;
+    switch (unit->conditionFlags & 0x7FFF) {
+    case 8:
+    case 0x20:
+    case 0x200:
+    case 0x1000:
+    case 0x2000:
+        if (unit->stateFlags & 4) {
+            unit->stateFlags &= ~4;
+            break;
+        }
+        /* fallthrough */
+    case 1:
+        unit->stateFlags &= ~4;
+        switch (unit->conditionFlags & 0x7FFF) {
+        case 0x1000:
+            chance = evtRunContext(0xE, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 0x200:
+            chance = evtRunContext(0xF, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 0x20:
+            chance = evtRunContext(0x10, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 8:
+            chance = evtRunContext(0x11, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        case 1:
+            chance = ((BtlState *)btlGetRuntime())->mode == 2 ? 100 : 0;
+            break;
+        case 0x2000:
+            chance = evtRunContext(0x12, (s32)&unit->statBits, 0, 0, 0);
+            break;
+        default:
+            chance = 0;
+            break;
+        }
+        scale = 1.0f;
+        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x252)) {
+            scale = datAbilityParameters[0x252 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        chance = chance * scale;
+        if ((unit->conditionFlags & 0x7FFF) != 1 && chance > 70) {
+            chance = 70;
+        }
+        btlBossDebugPrintf("btl:bad recovery=%d%%[ratio=%.2f]\n", chance, scale);
+        if (btlRollAiBucket() >= chance) {
+            break;
+        }
+        /* fallthrough */
+    case 2:
+    case 4:
+        memset(&block, 0, sizeof(block));
+        block.word[3] = 0x322F;
+        btlStartTask(btlCreateActorParameterDeltaTask(unit, &block));
+        if (unit->conditionFlags & 0x1000) {
+            unit->flags |= 0x20000000;
+            effect = btlCreateEffObjB(task->unit, 0xCA);
+            effect->ownerId = btlAdvanceRuntimeSequenceCounter();
+            btlStartTask(effect);
+            btlStartTask(btlCreateCommandSoundUpdateTask());
+            btlStartTask(btlCreateSecondaryCommandSoundTask());
+            btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
+        }
+        break;
+    }
+    btlDispatchStateHandler(task, 0x1C);
+}
+
+void func_001D4FE0(void) {
+}
 
 /* Starts the command sound tasks and the follow-up action for the acting
  * unit, chosen by its selection flags. */
