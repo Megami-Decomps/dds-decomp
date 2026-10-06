@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
+#include "itf.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -93,8 +94,7 @@ typedef struct ScrVmOperand {
     u16 h04;           // 0x04
     u8 pad_0x06[0x0E]; // 0x06
     u16 h14;           // 0x14
-    u8 pad_0x16[0x3A]; // 0x16
-    float f50;         // 0x50
+    u8 pad_0x16[0x3E]; // 0x16
     u8 unk54;          // 0x54
     s8 selectedIndex;  // 0x55: active operand chosen by scrSelectOperandIndex
     u8 pad_0x56[2];    // 0x56
@@ -133,16 +133,6 @@ typedef struct Entry24W {
     u8 pad_0x04[0x14]; // 0x04
 } Entry24W; // 0x18
 
-/* 0xAARRGGBB color split into RGB and alpha fields. */
-typedef struct RgbAlpha {
-    u8 pad_0x00[0x18]; // 0x00
-    u32 rgb;           // 0x18: low 24 bits of packed color
-    u8 pad_0x1C[0x1C]; // 0x1C
-    u32 alpha;         // 0x38: high byte of packed color
-    u32 x3C;           // 0x3C
-    u8 pad_0x40[0x10]; // 0x40
-    float f50;         // 0x50
-} RgbAlpha; // 0x54
 
 extern s32 CreateSema(void *);
 
@@ -176,16 +166,6 @@ typedef struct Entry28H {
     u8 pad_0x02[0x1A]; // 0x02
 } Entry28H; // 0x1C
 
-/* Copy source for itfCopyColorFields (layout inferred from field accesses). */
-typedef struct CfSrc {
-    u8 pad_0x00[0x04]; // 0x00
-    u32 rgb;           // 0x04
-    u8 pad_0x08[0x1C]; // 0x08
-    u32 alpha;         // 0x24
-    u32 x28;           // 0x28
-    u8 pad_0x2C[0x10]; // 0x2C
-    float f3C;         // 0x3C
-} CfSrc; // 0x40
 
 extern Entry28W D_003907B8[];
 
@@ -1270,13 +1250,13 @@ void func_002CF248(SdfFlagListWork *work) {
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 
-/* Read the operand's stored float; its gameplay meaning remains unknown. */
-float scrGetOperandFloatValue(ScrVmOperand *operand) {
+/* Read the camera color effect's stored float. */
+float scrGetOperandFloatValue(RgbAlpha *operand) {
     return operand->f50;
 }
 
-/* Replace the operand's stored float without validation. */
-void scrSetOperandFloatValue(ScrVmOperand *operand, float value) {
+/* Replace the camera color effect's stored float without validation. */
+void scrSetOperandFloatValue(RgbAlpha *operand, float value) {
     operand->f50 = value;
 }
 

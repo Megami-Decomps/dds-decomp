@@ -5,6 +5,7 @@ extern void memset();
 
 #include "fpu.h"
 #include "pcp_vu0.h"
+#include "itf.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -100,15 +101,14 @@ typedef struct ScrVmOperand {
     u16 h04;           // 0x04
     u8 pad_0x06[0x0E]; // 0x06
     u16 level;         // 0x14: compared with profile level requirements
-    u8 pad_0x16[0x3A]; // 0x16
-    float f50;         // 0x50
+    u8 pad_0x16[0x3E]; // 0x16
     u8 unk54;          // 0x54
     s8 selectedIndex;  // 0x55: active operand chosen by scrSelectOperandIndex
     u8 pad_0x56[2];    // 0x56
     u32 flags[0x4C];   // 0x58: eight 4-bit flag slots per word
 } ScrVmOperand;
 
-/* Script flag storage overlaps the other VM operand view near 0x50. */
+/* Party skill slots and packed flags used by the profile routines. */
 typedef struct ScriptFlagWork {
     u8 pad00[0x22];
     u16 slotIds[24];       /* 0x22 */
@@ -1399,13 +1399,13 @@ void func_00316C88(SdfFlagListWork *work) {
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 
-/* Read the operand's stored float; its gameplay meaning remains unknown. */
-float scrGetOperandFloatValue(ScrVmOperand *operand) {
+/* Read the camera color effect's stored float. */
+float scrGetOperandFloatValue(RgbAlpha *operand) {
     return operand->f50;
 }
 
-/* Replace the operand's stored float without validation. */
-void scrSetOperandFloatValue(ScrVmOperand *operand, float value) {
+/* Replace the camera color effect's stored float without validation. */
+void scrSetOperandFloatValue(RgbAlpha *operand, float value) {
     operand->f50 = value;
 }
 
