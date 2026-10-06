@@ -4,6 +4,7 @@
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "dat_state.h"
 
 extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 
@@ -24,7 +25,6 @@ extern void mdlAddEntryFlaggedEx(s32, s16, s16, f32, f32);
 
 extern void mdlAddEntryPlainEx(s32, s16, s16, f32, f32);
 
-extern s32 datGameState;
 
 s32 billCreateIndexed(s32, s32);
 
@@ -2654,17 +2654,13 @@ void mdlResetViewerFlagsAndSolarOverlay(void) {
 }
 
 /* Model flag words are stored directly in the global work area at +0x840. */
-typedef struct MdlFlagBank {
-    u8 pad00[0x840];
-    u32 words[0x80];
-} MdlFlagBank;
 
 void mdlFlagClearAll(void) {
     u32 *word;
     s32 remaining;
 
     remaining = 0x7f;
-    word = ((MdlFlagBank *)datGameState)->words;
+    word = datGameState->modelFlags.words;
     do {
         remaining = remaining - 1;
         *word = 0;
@@ -2686,17 +2682,17 @@ void mdlClearFlagRanges(void) {
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */
 void mdlFlagSet(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    ((MdlFlagBank *)datGameState)->words[adjustedFlag >> 5] |= 1 << flag;
+    datGameState->modelFlags.words[adjustedFlag >> 5] |= 1 << flag;
 }
 
 void mdlFlagClear(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    ((MdlFlagBank *)datGameState)->words[adjustedFlag >> 5] &= ~(1 << flag);
+    datGameState->modelFlags.words[adjustedFlag >> 5] &= ~(1 << flag);
 }
 
 s32 mdlFlagTest(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    return (((s32)((MdlFlagBank *)datGameState)->words[adjustedFlag >> 5] >> flag) & 1);
+    return (((s32)datGameState->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004214E8);

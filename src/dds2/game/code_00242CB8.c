@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 
 extern s64 kwlnTaskIsRegistered(u64);
 
@@ -288,35 +289,21 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
     return 1;
 }
 
-typedef struct {
-    u8 pad00[0xA40];
-    u8 flags;          /* 0xA40 */
-    u8 phase;          /* 0xA41 */
-    u8 padA42;          /* 0xA42 */
-    u8 overlayFlag;     /* 0xA43: cleared separately from solar phase */
-    f32 phaseTimer;    /* 0xA44: cleared on phase change */
-    u32 padA48;
-    u32 unkA4C;        /* 0xA4C: cleared when the overlay starts */
-    u32 padA50;
-    u32 padA54;
-    u32 extFlags;      /* 0xA58 */
-} SolarWorldState;
 
-extern SolarWorldState *datGameState;
 
 void evtClearSolarOverlayControl(void) {
-    datGameState->overlayFlag = 0;
+    datGameState->world.overlayFlag = 0;
 }
 
 void func_00243320(void) {
-    datGameState->unkA4C = 0;
+    datGameState->world.unkA4C = 0;
 }
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
-    phase = datGameState->phase;
+    phase = datGameState->world.phase;
     if (phase >= 9) {
         phase = 8 - (phase & 7);
     }
@@ -324,43 +311,43 @@ s32 evtGetMirroredSolarPhase(void) {
 }
 
 u8 evtGetSolarPhase(void) {
-    return datGameState->phase;
+    return datGameState->world.phase;
 }
 
 void evtSetSolarPhase(u8 phase) {
-    datGameState->phase = phase & 0xf;
-    datGameState->phaseTimer = 0;
+    datGameState->world.phase = phase & 0xf;
+    datGameState->world.phaseTimer = 0;
 }
 
 void evtEnableSolarPhaseAdvance(void) {
-    datGameState->flags = datGameState->flags | 1;
+    datGameState->world.flags = datGameState->world.flags | 1;
 }
 
 void evtDisableSolarPhaseAdvance(void) {
-    datGameState->flags = datGameState->flags & 0xfe;
+    datGameState->world.flags = datGameState->world.flags & 0xfe;
 }
 
 void evtSetSolarOverlayFullyVisible(void) {
-    datGameState->flags = datGameState->flags | 2;
+    datGameState->world.flags = datGameState->world.flags | 2;
     evtSolarOverlayAlpha = 1.0f;
     evtBeginSolarOverlayFadeIn(0);
 }
 
 void evtSetSolarOverlayFullyTransparent(void) {
-    datGameState->flags = datGameState->flags & 0xfd;
+    datGameState->world.flags = datGameState->world.flags & 0xfd;
     evtSolarOverlayAlpha = 0.0f;
 }
 
 void evtEnableSolarOverlayAlpha(void) {
-    datGameState->flags = datGameState->flags | 2;
+    datGameState->world.flags = datGameState->world.flags | 2;
 }
 
 void evtDisableSolarOverlayAlpha(void) {
-    datGameState->flags = datGameState->flags & 0xfd;
+    datGameState->world.flags = datGameState->world.flags & 0xfd;
 }
 
 u32 evtUpdateSolarOverlayFade(s32 task) {
-    SolarWorldState *state;
+    DatWorldState *state;
     u32 overlay;
     f32 alpha;
     f32 f;
@@ -370,7 +357,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
         return 0;
     }
     overlay = kwlnTaskGetUserValue(task);
-    state = datGameState;
+    state = &datGameState->world;
     alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
@@ -390,7 +377,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
         }
     }
     /* Two jal sites in retail: the DDS1 twin issues extra draw calls in the first arm, removed here. The flags are re-read from the global; the cached state copy does not match. */
-    if ((datGameState->flags & 2) != 0) {
+    if ((datGameState->world.flags & 2) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     } else if (alpha > 0.0f) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
@@ -434,9 +421,9 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
-    datGameState->padA42 = 0;
-    datGameState->overlayFlag = 0;
-    datGameState->unkA4C = 0;
+    datGameState->world.secondaryPhase = 0;
+    datGameState->world.overlayFlag = 0;
+    datGameState->world.unkA4C = 0;
 }
 
 void evtStopSolarOverlay(void) {
