@@ -3252,7 +3252,8 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2168);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21A8);
 
-const BattlePanelColors D_003A21B8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
+/* Named color constants remain split-owned while C references their symbols. */
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21B8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21C8);
 
