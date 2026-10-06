@@ -117,7 +117,7 @@ typedef struct DatProfileRecord {
     u32 flags;
 } DatProfileRecord;
 
-/* Native DDS2 table backup copies require eight-aligned bitmap storage. */
+/* Global flag APIs use 32-bit words in each unit's bitmap. */
 typedef struct DatMantraBitmap {
 #ifdef VERSION_DDS1
     u32 words[7];
@@ -167,7 +167,7 @@ typedef struct DatGameState {
     u8 pad11130[0x5DC0];
     u32 scriptFlags[4];                    /* 0x16EF0 */
     u32 battleFlags[4];                    /* 0x16F00 */
-    DatMantraBitmap mantraBits[16] __attribute__((aligned(8))); /* 0x16F10 */
+    DatMantraBitmap mantraBits[16];        /* 0x16F10 */
     DatProfileRecord profileRecords[16][176]; /* 0x17210 */
     DatPartyRecord templates[8];           /* 0x1CA10 */
     u8 pad1D830[0xE20];
