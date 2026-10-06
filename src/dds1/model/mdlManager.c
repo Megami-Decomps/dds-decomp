@@ -59,7 +59,7 @@ struct FileWork;
 extern u32 fileGetLoadedDataAddress(struct FileWork *);
 extern u32 fileGetResourceHandle(struct FileWork *);
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
-extern void mdlSetResourceAmount(MdlCtx *ctx, u32 *node, f32 amount);
+extern void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *node, f32 amount);
 
 extern u32 mdlGroupJobSemaphore;
 
@@ -215,14 +215,13 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-extern BattleGroupNode *mdlRequestAsset(u32 group, u32 id, u32 option);
+extern s32 mdlRequestAsset(s32 group, s32 id, s32 blocking);
 
 INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
-/* Request the group/id asset with option 1; that option's meaning is not
- * established by this forwarding body. */
+/* The blocking SDK request returns its group in a native status/address word. */
 BattleGroupNode *func_00217298(u32 group, u32 id) {
-    return mdlRequestAsset(group, id, 1);
+    return (BattleGroupNode *)mdlRequestAsset(group, id, 1);
 }
 
 
@@ -281,7 +280,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_002174C0);
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217680);
 
-extern void mdlDestroyResourceItem(u32 *);
+extern void mdlDestroyResourceItem(MdlResourceItem *);
 extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Destroy motions, resources, device slots and the context itself. Motion
@@ -289,15 +288,15 @@ extern void sdfResourceListRelease(DevRequest *, s32);
  * destroying it. ctx and inner are required, not checked here. */
 void mdlDestroyContext(MdlCtx *ctx) {
     SdfModel *inner = ctx->inner;
-    u32 *resourceNode;
-    u32 *nextResource;
+    MdlResourceItem *resourceNode;
+    MdlResourceItem *nextResource;
 
     while (inner->motionList != NULL) {
         sdfDestroyMotion(inner->motionList);
     }
     sdfResourceListRelease(inner->assetData, 1);
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = nextResource) {
-        nextResource = (u32 *)*resourceNode;
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = nextResource) {
+        nextResource = resourceNode->next;
         mdlDestroyResourceItem(resourceNode);
     }
     mdlReleaseDevSlots(ctx);
@@ -310,13 +309,13 @@ extern void func_002174C0();
 extern s32 sdfMotionUpdate(void *motion);
 extern void sdfModelUpdateCurrentFrameTransforms();
 extern void func_002D9238();
-extern void mdlDispatchViewerAnchorRecord();
+extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
 void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     Motion **slot = ctx->slots;
     SdfModel *inner;
-    u32 *rec;
+    MdlResourceItem *rec;
     s32 i;
 
     for (i = 0; i != 4; i++) {
@@ -341,7 +340,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
             return;
         }
     }
-    for (rec = ctx->list14; rec != NULL; rec = (u32 *)*rec) {
+    for (rec = ctx->resourceItems; rec != NULL; rec = rec->next) {
         mdlDispatchViewerAnchorRecord(ctx, rec);
     }
     if (ctx->devList == NULL) {
@@ -378,7 +377,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
     f32 pitchMagnitude;
     f32 targetWeight;
     f32 existingWeight;
-    u32 *resourceNode;
+    MdlResourceItem *resourceNode;
     s32 slotIndex;
 
     inner = ctx->inner;
@@ -430,7 +429,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
             return;
         }
     }
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = resourceNode->next) {
         mdlDispatchViewerAnchorRecord(ctx, resourceNode);
     }
     if (ctx->devList == NULL) {
@@ -632,9 +631,9 @@ u32 mdlGetBroadcastValue(MdlCtx *ctx) {
 
 /* Forward value to each next-linked resource; an empty resource list is a no-op. */
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value) {
-    u32 *resourceNode;
+    MdlResourceItem *resourceNode;
 
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = resourceNode->next) {
         mdlSetResourceFrame(ctx, resourceNode, value);
     }
 }
@@ -652,9 +651,9 @@ void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
 
 /* Forward the floating amount to each resource without changing broadcastValue. */
 void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
-    u32 *resourceNode;
+    MdlResourceItem *resourceNode;
 
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = resourceNode->next) {
         mdlSetResourceAmount(ctx, resourceNode, amount);
     }
 }

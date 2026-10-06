@@ -6,6 +6,34 @@
 
 typedef struct MdlCtx MdlCtx;
 
+struct MdlPartEntry;
+
+typedef struct MdlObjectAttachment {
+    MdlCtx *owner;
+    s32 objectAddress;
+    s32 data;
+    s32 minimumTime;
+    u8 attributes[8];
+} MdlObjectAttachment;
+
+/* The paired viewer allocators clear 0x20 bytes and prepend this tagged item
+ * to MdlCtx's list at +0x14. The part and object payloads share that allocation. */
+typedef struct MdlResourceItem {
+    struct MdlResourceItem *next;
+    u16 type;
+    s16 subtype;
+    union {
+        struct {
+            s32 handle;
+            struct MdlPartEntry *slot;
+            void *record;
+            f32 value;
+            u8 pad18[8];
+        } part;
+        MdlObjectAttachment object;
+    } payload;
+} MdlResourceItem;
+
 typedef struct BattleGroupSlot {
     s32 flags;
     s16 slot;
@@ -87,7 +115,7 @@ struct MdlCtx {
             s16 arg;
         } h;
     } current;
-    u32 *list14;
+    MdlResourceItem *resourceItems;
     SdfModel *inner;
     Motion *first;
     Motion *slots[4];
@@ -101,6 +129,8 @@ typedef char MdlDevList_size_must_be_0x30[(sizeof(MdlDevList) == 0x30) ? 1 : -1]
 typedef char MdlCtx_size_must_be_0x38[(sizeof(MdlCtx) == 0x38) ? 1 : -1];
 typedef char MdlLoadPayload_size_must_be_0x20[(sizeof(MdlLoadPayload) == 0x20) ? 1 : -1];
 typedef char MdlLoadRequest_size_must_be_0x2C[(sizeof(MdlLoadRequest) == 0x2C) ? 1 : -1];
+typedef char MdlResourceItem_size_must_be_0x20[(sizeof(MdlResourceItem) == 0x20) ? 1 : -1];
+typedef char MdlObjectAttachment_size_must_be_0x18[(sizeof(MdlObjectAttachment) == 0x18) ? 1 : -1];
 
 /* The referenced halfword is promoted to a word-sized SDK result. */
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId);

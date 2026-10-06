@@ -8217,7 +8217,6 @@ void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
     dds3DispatchIndexedCallback(work[0x70 / 4], opacity);
 }
 
-typedef struct MdlResourceItem MdlResourceItem;
 typedef struct SdfTextParam SdfTextParam;
 
 extern void *sdfChunkFindRecordById(SdfTextParam *, s32);

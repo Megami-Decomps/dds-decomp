@@ -56,7 +56,6 @@ s32 effCreateNodeFromDescriptor(s32);
 #define MDL_MAP_POSITION_DATA_OFFSET 0x10
 #define MDL_MAP_POSITION_RECORD_BYTES 0x40
 
-typedef struct MdlResource MdlResource;
 
 typedef struct MdlSifCommand {
     s32 source;
@@ -116,7 +115,7 @@ typedef struct MdlViewState {
     s16 unk52;
     f32 viewerScale; /* 0x54: viewer zoom, in hundredths */
     u8 pad58[0x38];
-    MdlResource *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
+    MdlCtx *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
     s32 packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
 
@@ -141,7 +140,7 @@ extern void sdfPktInit(void *, s32, s32, s32, s32);
 extern s32 sdfFormatSifPacket();
 
 
-extern s32 mdlGetNodeField2C(MdlResource *, s32);
+extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 
 typedef struct MdlCountNode {
     u8 pad00[4];
@@ -150,19 +149,7 @@ typedef struct MdlCountNode {
     SdfTex **textures;
 } MdlCountNode;
 
-typedef struct MdlLoadedInfo {
-    u8 pad00[8];
-    MdlCountNode *first; /* 0x08 */
-} MdlLoadedInfo;
 
-typedef struct MdlMotionState {
-    u8 pad00[0x1C];
-    f32 time;   /* 0x1C */
-    u8 pad20[0xE];
-    u16 length; /* 0x2E */
-    u8 pad30[2];
-    u8 reverse; /* 0x32 */
-} MdlMotionState;
 
 
 extern void *memset(void *dst, s32 value, u32 size);
@@ -177,7 +164,7 @@ extern void effObjSetInnerFloat(s32 obj, f32 value);
 
 extern void func_00112058(s32 obj, s32 a, s32 b);
 
-extern MdlResource *dds3GetObjectBaseResourceHandle(s32 obj);
+extern MdlCtx *dds3GetObjectBaseResourceHandle(s32 obj);
 
 extern void func_001129C8(s32 obj, s32 a);
 
@@ -315,15 +302,6 @@ typedef struct MdlNodeInfo {
     f32 pos[4];   /* 0x10 */
 } MdlNodeInfo;
 
-typedef struct MdlAnchorRec {
-    u8 pad00[4];
-    u16 type;          /* 0x04 */
-    u8 pad06[2];
-    s32 handle;        /* 0x08 */
-    u8 pad0C[4];
-    MdlNodeInfo *info; /* 0x10 */
-    f32 scale;         /* 0x14 */
-} MdlAnchorRec;
 
 extern u8 sdfViewTargetVector[];
 
@@ -516,32 +494,8 @@ typedef struct MdlRecord {
     u16 unk10;       /* 0x10 */
 } MdlRecord;
 
-typedef struct MdlViewerSlots MdlViewerSlots;
 
-/* The viewer resource holds a pointer to the table container at +0x0C. */
-typedef struct MdlViewerData {
-    u8 pad00[0xA4];
-    MdlRecord *records;         /* 0xA4: relative-linked model records */
-    MdlViewerSlots *slotTable; /* 0xA8: indexable object slots */
-} MdlViewerData;
 
-/* Native loaded resource: viewer tables, linked parts, chunk data and motion. */
-struct MdlResource {
-    u8 pad00[0x0C];
-    MdlViewerData *data; /* 0x0C */
-    u8 pad10[2];
-    s16 unk12;
-    struct MdlResourceItem *first; /* 0x14: owned resource-item list */
-    u8 *chunk;              /* 0x18: SDK chunk data, including the node-count prefix */
-    MdlMotionState *motion; /* 0x1C: time also gates deferred object initialization */
-};
-
-struct MdlViewerSlots {
-    u8 pad00[4];
-    s16 count; /* 0x04 */
-    u8 pad06[6];
-    s32 entryBase; /* 0x0C: base of 0x10-byte slot entries */
-};
 
 typedef struct MdlObj {
     s32 unk0;             /* 0x00 */
@@ -573,32 +527,6 @@ typedef struct MdlItemCfg {
     u8 unk3;
 } MdlItemCfg;
 
-/* Object attachment payload, embedded at resource item +8. */
-typedef struct MdlObjectAttachment {
-    MdlResource *owner;
-    s32 objectAddress; /* Retain the native address-word type. */
-    s32 data;
-    s32 minimumTime; /* Owner's motion must reach this threshold. */
-    u8 attributes[8]; /* Passed to stream initialization. */
-} MdlObjectAttachment;
-
-/* Native 0x20-byte list item. type selects a part handle or a deferred object
- * attachment; these are alternative payloads, not separate allocations. */
-typedef struct MdlResourceItem {
-    struct MdlResourceItem *next; /* 0x00 */
-    u16 type; /* 0x04: MDL_RESOURCE_* */
-    s16 subtype; /* 0x06 */
-    union {
-        struct {
-            s32 handle; /* 0x08: billboard, effect, or tracked-poly handle */
-            MdlPartEntry *unk0C; /* Retained slot; only written here. */
-            void *unk10; /* Retained chunk record; only written here. */
-            f32 unk14; /* Optional record value; only written here. */
-            u8 pad18[8];
-        } part;
-        MdlObjectAttachment object;
-    } payload;
-} MdlResourceItem;
 
 
 /* Read the model record's payload word without advancing its relative link. */
@@ -612,8 +540,8 @@ u16 mdlGetViewerRecordListCount(MdlRecord *record) {
 }
 
 /* Follow relative links in the resource's record table to find an ID. */
-MdlRecord *mdlFindViewerRecord(MdlResource *resource, s32 recordId) {
-    MdlRecord *recordTable = resource->data->records;
+MdlRecord *mdlFindViewerRecord(MdlCtx *resource, s32 recordId) {
+    MdlRecord *recordTable = resource->sub->partInfo;
     MdlRecord *recordCursor;
     s32 remainingRecords;
 
@@ -904,13 +832,13 @@ void mdlDestroyPartList(DevRequest *partList) {
 }
 
 /* Prepend a cleared, typed resource item to the owner's list. */
-MdlResourceItem *mdlInsertResourceItem(MdlResource *owner, s32 type, s32 subtype) {
+MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 subtype) {
     MdlResourceItem *item = sdfAllocAndClearQuadwords(sizeof(MdlResourceItem));
-    MdlResourceItem *previousHead = owner->first;
+    MdlResourceItem *previousHead = owner->resourceItems;
     item->type = type;
     item->next = previousHead;
     item->subtype = subtype;
-    owner->first = item;
+    owner->resourceItems = item;
     return item;
 }
 
@@ -925,17 +853,17 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
 }
 
 /* Resolve a native fixed-size slot when its table exists and index is below the upper bound; no lower-bound check. */
-s32 mdlFindViewerPartSlot(MdlResource *resource, s32 slotIndex) {
-    MdlViewerSlots *slotTable;
+s32 mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
+    DevRequest *slotTable;
 
-    slotTable = resource->data->slotTable;
+    slotTable = resource->sub->partList;
     if (slotTable == NULL) {
         return 0;
     }
-    if (slotIndex >= slotTable->count) {
+    if (slotIndex >= slotTable->usedCount) {
         return 0;
     }
-    return slotTable->entryBase + slotIndex * MDL_PART_SLOT_BYTES;
+    return (s32)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES;
 }
 
 typedef struct MdlPartRec {
@@ -951,11 +879,11 @@ typedef struct MdlPartRec {
 extern void *sdfChunkFindRecordById(void *chunk, s32 id);
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-s32 mdlBindViewerPartRecords(MdlResource *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
+s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = (MdlPartEntry *)mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
-        void *chunk = owner->chunk;
+        void *chunk = owner->inner;
         s32 recordId = partRecord->firstId;
         s32 remainingRecords = partRecord->count;
         f32 optionalValue = 0.0f;
@@ -971,9 +899,9 @@ s32 mdlBindViewerPartRecords(MdlResource *owner, MdlPartRec *partRecord, s32 sub
                 MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
 
                 resourceItem->payload.part.handle = createPart(partSlot);
-                resourceItem->payload.part.unk0C = partSlot;
-                resourceItem->payload.part.unk10 = chunkRecord;
-                resourceItem->payload.part.unk14 = optionalValue;
+                resourceItem->payload.part.slot = partSlot;
+                resourceItem->payload.part.record = chunkRecord;
+                resourceItem->payload.part.value = optionalValue;
             }
         } while (--remainingRecords != 0);
     }
@@ -995,7 +923,7 @@ typedef struct MdlEffectRec {
 } MdlEffectRec;
 
 typedef struct MdlEffectParams {
-    MdlResource *owner; /* 0x00 */
+    MdlCtx *owner; /* 0x00 */
     s32 effectId;            /* 0x04 */
     s32 param0C;             /* 0x08 */
     f32 scaleX;              /* 0x0C */
@@ -1013,7 +941,7 @@ typedef struct MdlEffectParams {
 extern s32 effTrackPolyCreateWork(MdlEffectParams *params);
 
 /* Convert the effect record to native creation parameters and retain the resulting handle in a list item. */
-s32 mdlCreateViewerEffectPart(MdlResource *owner, MdlEffectRec *effectRecord, s32 subtype) {
+s32 mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 subtype) {
     MdlResourceItem *resourceItem;
     MdlEffectParams effectParams;
 
@@ -1069,7 +997,7 @@ typedef struct MdlSlotRec {
 extern void *sdfFindResourceById(s32 id);
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-s32 mdlClaimViewerObjectPart(MdlResource *owner, MdlEntryRec *entryRecord, s32 subtype) {
+s32 mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
     MdlSlotRec *partSlot = (MdlSlotRec *)mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
@@ -1100,7 +1028,7 @@ void mdlCondInitEntry(s32 itemAddress) {
     s32 objectAddress = ((MdlResourceItem *)itemAddress)->payload.object.objectAddress;
     if (((MdlObj *)objectAddress)->initialized == 0) {
         s32 minimumTime = ((MdlResourceItem *)itemAddress)->payload.object.minimumTime;
-        f32 motionTime = ((MdlResourceItem *)itemAddress)->payload.object.owner->motion->time;
+        f32 motionTime = ((MdlResourceItem *)itemAddress)->payload.object.owner->first->currentFrame;
         if ((u32)(s32)motionTime < (u32)minimumTime) {
             return;
         }
@@ -1108,9 +1036,9 @@ void mdlCondInitEntry(s32 itemAddress) {
     }
 }
 
-extern s32 mdlBindViewerPartRecords(MdlResource *object, MdlPartRec *record, s32 option, s32 type, s32 (*advance)(MdlPartEntry *));
+extern s32 mdlBindViewerPartRecords(MdlCtx *object, MdlPartRec *record, s32 option, s32 type, s32 (*advance)(MdlPartEntry *));
 
-extern s32 mdlClaimViewerObjectPart(MdlResource *object, MdlEntryRec *record, s32 option);
+extern s32 mdlClaimViewerObjectPart(MdlCtx *object, MdlEntryRec *record, s32 option);
 
 /* Dispatch the five record kinds, retaining the game's native return behavior. */
 s32 mdlDispatchResourceEntry(s32 owner, MdlRecord *record, s32 subtype) {
@@ -1131,7 +1059,7 @@ s32 mdlDispatchResourceEntry(s32 owner, MdlRecord *record, s32 subtype) {
 
 /* Find the requested record list and apply each relative-linked entry with the supplied subtype. */
 void mdlApplyResourceEntries(s32 resourceAddress, s32 recordId, s32 subtype) {
-    MdlRecord *recordList = mdlFindViewerRecord((MdlResource *)resourceAddress, recordId);
+    MdlRecord *recordList = mdlFindViewerRecord((MdlCtx *)resourceAddress, recordId);
     if (recordList != NULL) {
         MdlRecord *recordCursor = mdlGetFirstRecord((s32)recordList);
         while (recordCursor != NULL) {
@@ -1158,8 +1086,8 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
 }
 
 /* Unlink matching subtypes without losing the incoming link when consecutive items are removed. */
-void mdlRemoveResourceSubtype(MdlResource *owner, s32 subtype) {
-    MdlResourceItem **itemLink = &owner->first;
+void mdlRemoveResourceSubtype(MdlCtx *owner, s32 subtype) {
+    MdlResourceItem **itemLink = &owner->resourceItems;
     MdlResourceItem *item = *itemLink;
     while (item != 0) {
         if (item->subtype == subtype) {
@@ -1175,10 +1103,10 @@ void mdlRemoveResourceSubtype(MdlResource *owner, s32 subtype) {
 }
 
 /* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
-void mdlResolveAnchorPosition(void *chunk, MdlAnchorRec *anchorRecord, f32 *positionOut) {
-    MdlNodeInfo *nodeInfo = anchorRecord->info;
+void mdlResolveAnchorPosition(void *chunk, MdlResourceItem *anchorRecord, f32 *positionOut) {
+    MdlNodeInfo *nodeInfo = anchorRecord->payload.part.record;
     u8 *drawNode = sdfModelFindDrawNode(chunk, nodeInfo->id);
-    f32 scale = anchorRecord->scale;
+    f32 scale = anchorRecord->payload.part.value;
 
     VU0_LOAD_MATRIX(drawNode + 0xC0);
     VU0_LOAD_VF(vf10, nodeInfo->pos);
@@ -1194,26 +1122,26 @@ void mdlResolveAnchorPosition(void *chunk, MdlAnchorRec *anchorRecord, f32 *posi
 }
 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
-void mdlDispatchViewerAnchorRecord(MdlResource *owner, MdlAnchorRec *anchorRecord) {
-    void *chunk = owner->chunk;
+void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord) {
+    void *chunk = owner->inner;
     f32 position[4];
     s32 resourceHandle;
 
     switch (anchorRecord->type) {
     case 0:
         mdlResolveAnchorPosition(chunk, anchorRecord, position);
-        resourceHandle = anchorRecord->handle;
+        resourceHandle = anchorRecord->payload.part.handle;
         effCopyVector(resourceHandle, position);
         billInvokeCallback(resourceHandle);
         break;
     case 1:
         mdlResolveAnchorPosition(chunk, anchorRecord, position);
-        resourceHandle = anchorRecord->handle;
+        resourceHandle = anchorRecord->payload.part.handle;
         effCopyVectorToNodeInstance(resourceHandle, position);
         effUpdateNode(resourceHandle);
         break;
     case 2:
-        effTrackPolyUpdate(anchorRecord->handle);
+        effTrackPolyUpdate(anchorRecord->payload.part.handle);
         break;
     case 3:
         mdlCondInitEntry((s32)anchorRecord);
@@ -1370,12 +1298,12 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
     return 0;
 }
 
-extern MdlResource *func_00232198(s16 a, s16 b);
+extern MdlCtx *func_00232198(s16 a, s16 b);
 
-extern void mdlAddEntryFlagged(MdlResource *loaded, s32 a, s32 b);
+extern void mdlAddEntryFlagged(MdlCtx *loaded, s32 a, s32 b);
 
 void mdlLoadViewerResourceAndResetCursors(void) {
-    MdlResource *loaded;
+    MdlCtx *loaded;
 
     loaded = func_00232198(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
     mdlViewerState.resources[0] = loaded;
@@ -1385,7 +1313,7 @@ void mdlLoadViewerResourceAndResetCursors(void) {
     mdlViewerState.unk28 = 0;
     mdlViewerState.unk2A = 0;
     mdlViewerState.unk2C = 0;
-    if (loaded->motion != NULL) {
+    if (loaded->first != NULL) {
         mdlAddEntryFlagged(loaded, 0, 0);
     }
     mdlViewerState.nodeCursor = 0;
@@ -1401,7 +1329,7 @@ void mdlResetViewerBasisVectors(void) {
 /* Rotate the viewer resource list in place without moving its allocation. */
 void mdlRotateViewResourcesRight(void) {
     s32 resourceIndex = mdlViewerState.resourceCount - 1;
-    MdlResource *lastResource = mdlViewerState.resources[resourceIndex];
+    MdlCtx *lastResource = mdlViewerState.resources[resourceIndex];
 
     if (resourceIndex > 0) {
         do {
@@ -1416,7 +1344,7 @@ void mdlRotateViewResourcesRight(void) {
 void mdlRotateViewList(void) {
     s32 resourceIndex;
     s32 resourceCount = mdlViewerState.resourceCount;
-    MdlResource *firstResource = mdlViewerState.resources[0];
+    MdlCtx *firstResource = mdlViewerState.resources[0];
 
     for (resourceIndex = 0; resourceIndex < resourceCount - 1; resourceIndex++) {
         mdlViewerState.resources[resourceIndex] = mdlViewerState.resources[resourceIndex + 1];
@@ -1447,7 +1375,7 @@ void func_00235728(void) {
     sdfAppendPacket(mdlViewerState.packetList,
                     sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
 
-    nodeCount = mdlGetNodeRefHalf((MdlCtx *)mdlViewerState.resources[0], 0);
+    nodeCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], 0);
     if (nodeCount == 0) {
         formatted = sdfFormatSifPacket(&packet, D_00437068);
     } else {
@@ -1670,10 +1598,10 @@ u32 mdlRunViewerIndexedLabelTask(void) {
     return 0;
 }
 
-extern void mdlLoadPrimaryVectorVU(MdlResource *context);
-extern void mdlStorePrimaryVectorVU(MdlResource *context);
-extern void mdlLoadSecondaryVectorVU(MdlResource *context);
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlResource *context);
+extern void mdlLoadPrimaryVectorVU(MdlCtx *context);
+extern void mdlStorePrimaryVectorVU(MdlCtx *context);
+extern void mdlLoadSecondaryVectorVU(MdlCtx *context);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *context);
 extern f32 D_0040B530[4];
 extern f32 D_0040B540[4];
 extern f32 D_0040B550[4];
@@ -1845,8 +1773,8 @@ extern void sdfAppendFillRectanglePacket();
 /* Draw the motion progress bar: timeline frame, playhead marker and "[time/length]" label, then the zoom value. */
 void mdlDrawViewerMotionTimeline(void) {
     s32 packetList;
-    MdlResource *resource;
-    MdlMotionState *motion;
+    MdlCtx *resource;
+    Motion *motion;
     s32 playheadX;
     s32 textStyle;
 
@@ -1856,15 +1784,15 @@ void mdlDrawViewerMotionTimeline(void) {
     sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8200, 0x7960, 0x8200, 0x79C0, 0xFF0080, 0);
     sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8EC0, 0x7960, 0x8EC0, 0x79C0, 0xFF0080, 0);
     resource = mdlViewerState.resources[0];
-    motion = resource->motion;
+    motion = resource->first;
     if (motion != NULL) {
-        playheadX = (s32)(motion->time * 3264.0f / motion->length);
+        playheadX = (s32)(motion->currentFrame * 3264.0f / motion->frameCount);
         if (playheadX < 0) {
             playheadX = 0;
         }
         playheadX += 0x8200;
         sdfAppendFillRectanglePacket(packetList, 0x800000E0, 0, playheadX, 0x7960, playheadX, 0x79C0, 0xFF0090, 0);
-        sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->time, motion->length));
+        sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->currentFrame, motion->frameCount));
     } else {
         sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
     }
@@ -1889,16 +1817,16 @@ u32 func_00236E58(void) {
     return 0;
 }
 
-extern u16 mdlGetContextResourceGroup(MdlResource *resource);
-extern u16 mdlGetContextResourceId(MdlResource *resource);
-extern void mdlDestroyContext(MdlResource *resource);
+extern u16 mdlGetContextResourceGroup(MdlCtx *resource);
+extern u16 mdlGetContextResourceId(MdlCtx *resource);
+extern void mdlDestroyContext(MdlCtx *resource);
 extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
 void mdlApplyViewerResourceMenuAction(void) {
     s32 i;
-    MdlResource *resource;
+    MdlCtx *resource;
     s32 entryId;
-    MdlMotionState *motion;
+    Motion *motion;
 
     if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.scrollPage, 5, 1) != 0) {
         return;
@@ -1936,10 +1864,10 @@ void mdlApplyViewerResourceMenuAction(void) {
     case 4:
         for (i = 0; i < mdlViewerState.resourceCount; i++) {
             resource = mdlViewerState.resources[i];
-            motion = resource->motion;
+            motion = resource->first;
             if (motion != NULL) {
-                entryId = resource->unk12;
-                if (motion->reverse == 0) {
+                entryId = resource->current.h.arg;
+                if (motion->loopEnabled == 0) {
                     sdfMotionInitializeAtZeroTime(motion, entryId, 0);
                 } else {
                     sdfMotionInitializeAtZeroTime(motion, entryId, 1);
@@ -1950,7 +1878,7 @@ void mdlApplyViewerResourceMenuAction(void) {
     }
     mdlViewerState.unk1C = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
     mdlViewerState.unk1E = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
-    i = mdlViewerState.resources[0]->unk12;
+    i = mdlViewerState.resources[0]->current.h.arg;
     if (i < 0) {
         i = 0;
     }
@@ -1968,7 +1896,7 @@ u32 mdlRunViewerResourceMenuTask(void) {
 void mdlHandleViewerNodeCursorInput(void) {
     MdlCountNode *node;
 
-    node = ((MdlLoadedInfo *)mdlViewerState.resources[0]->chunk)->first;
+    node = mdlViewerState.resources[0]->inner->assetData;
     if (node != NULL) {
         if (node->count > 0) {
             mdlUpdateViewerCursor(&mdlViewerState.nodeCursor, node->count);
@@ -1992,7 +1920,7 @@ void mdlDrawViewerTexturePreview(void) {
     s32 selectedNumber = 0;
 
     mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0x1060, 0x8F0, 0);
-    node = ((MdlLoadedInfo *)mdlViewerState.resources[0]->chunk)->first;
+    node = mdlViewerState.resources[0]->inner->assetData;
     if (node != NULL) {
         count = node->count;
         index = mdlViewerState.nodeCursor;
@@ -2137,7 +2065,7 @@ u32 mdlRunViewerSettingsTask(void) {
 
 /* Sum list -1 and active-entry counts, retaining both independent lookups. */
 s32 mdlCountActiveRecords(void) {
-    MdlResource *resource = mdlViewerState.resources[0];
+    MdlCtx *resource = mdlViewerState.resources[0];
     s32 firstListCount = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
     s32 activeListCount = mdlCountRecords((s32)mdlFindViewerRecord(resource, mdlViewerState.activeEntryId));
 
@@ -2267,12 +2195,12 @@ extern s32 func_00343188(s32, s32);
 void mdlSubmitViewerResourceDrawPacket(void) {
     s32 packetList;
     s32 drawPacket;
-    MdlResource *resource;
+    MdlCtx *resource;
 
     if (mdlViewerState.taskPhase == 3) {
         packetList = sdfCreateResetPacketList();
         resource = mdlViewerState.resources[0];
-        VU0_LOAD_MATRIX(resource->chunk + 0x20);
+        VU0_LOAD_MATRIX(resource->inner->matrix);
         drawPacket = func_00348188(D_003C89B0, D_003C89F0, 4, 0x80);
         if ((sdfPadButtonStates[13] < 0) & (D_004370F8 == 0)) {
             D_004370F8 = 1;
@@ -2314,20 +2242,20 @@ void mdlRestartViewerPhaseTask(void) {
 INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
 
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
-void mdlDrawMapPositionRecords(MdlResource *resource) {
-    s32 recordCount = sdfCountMapPositionRecords((s32)resource->chunk);
+void mdlDrawMapPositionRecords(MdlCtx *resource) {
+    s32 recordCount = sdfCountMapPositionRecords((s32)resource->inner);
 
     if (recordCount > 0) {
         s32 recordIndex = 0;
         s32 packetList = sdfCreateResetPacketList();
-        s32 recordCursor = sdfChunkFindByTag((s32)resource->chunk, MDL_MAP_POSITION_TAG) + MDL_MAP_POSITION_DATA_OFFSET;
+        s32 recordCursor = sdfChunkFindByTag((s32)resource->inner, MDL_MAP_POSITION_TAG) + MDL_MAP_POSITION_DATA_OFFSET;
 
         do {
             s32 currentRecord = recordCursor;
 
             recordIndex++;
             recordCursor += MDL_MAP_POSITION_RECORD_BYTES;
-            sdfSetLookAtBasisFromRecord((s32)resource->chunk, currentRecord);
+            sdfSetLookAtBasisFromRecord((s32)resource->inner, currentRecord);
             sdfAppendPacket(packetList, func_00348188(D_003C8A00, D_003C8A60, 6, 0x80));
         } while (recordIndex != recordCount);
         D_00380048.submit(&D_00380048, packetList);
@@ -2493,11 +2421,11 @@ void func_00238D38(void) {
 /* Clear each occupied resource slot before destroying its context; retain the native scan form. */
 void mdlFreeViewResources(void) {
     MdlViewState *viewerState = &mdlViewerState;
-    MdlResource **resourceSlot = viewerState->resources;
+    MdlCtx **resourceSlot = viewerState->resources;
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex != MDL_VIEWER_RESOURCE_SLOTS; resourceIndex++) {
-        MdlResource *resource = *resourceSlot;
+        MdlCtx *resource = *resourceSlot;
 
         if (resource != 0) {
             *resourceSlot = 0;
@@ -2778,7 +2706,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     dds3SetObjectFlags(obj, 0x20);
     effObjSetInnerFloat(obj, 10.0f);
     func_00112058(obj, slotKind, resource);
-    if (dds3GetObjectBaseResourceHandle(obj)->motion != NULL) {
+    if (dds3GetObjectBaseResourceHandle(obj)->first != NULL) {
         mdlAddEntryFlagged(dds3GetObjectBaseResourceHandle(obj), 0, 0);
     }
     func_001129C8(obj, 0);

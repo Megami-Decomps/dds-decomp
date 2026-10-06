@@ -155,7 +155,7 @@ INCLUDE_ASM(const s32, "game/code_00231A80", func_00231FD8);
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_00232198);
 
-extern void mdlDestroyResourceItem(u32 *);
+extern void mdlDestroyResourceItem(MdlResourceItem *);
 
 extern void sdfResourceListRelease(u32, s32);
 
@@ -164,15 +164,15 @@ extern void sdfResourceListRelease(u32, s32);
  * destroying it. ctx and inner are required, not checked here. */
 void mdlDestroyContext(MdlCtx *ctx) {
     SdfModel *inner = ctx->inner;
-    u32 *resourceNode;
-    u32 *nextResource;
+    MdlResourceItem *resourceNode;
+    MdlResourceItem *nextResource;
 
     while (inner->motionList != NULL) {
         sdfDestroyMotion(inner->motionList);
     }
     sdfResourceListRelease((u32)inner->assetData, 1);
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = nextResource) {
-        nextResource = (u32 *)*resourceNode;
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = nextResource) {
+        nextResource = resourceNode->next;
         mdlDestroyResourceItem(resourceNode);
     }
     mdlReleaseDevSlots(ctx);
@@ -185,13 +185,13 @@ extern void func_00231FD8();
 extern s32 sdfMotionUpdate(Motion *);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 extern void func_003320E8();
-extern void mdlDispatchViewerAnchorRecord();
+extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
 void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     Motion **slot = ctx->slots;
     SdfModel *inner;
-    u32 *rec;
+    MdlResourceItem *rec;
     s32 i;
 
     for (i = 0; i != 4; i++) {
@@ -216,7 +216,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
             return;
         }
     }
-    for (rec = ctx->list14; rec != NULL; rec = (u32 *)*rec) {
+    for (rec = ctx->resourceItems; rec != NULL; rec = rec->next) {
         mdlDispatchViewerAnchorRecord(ctx, rec);
     }
     if (ctx->devList == NULL) {
@@ -253,7 +253,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
     f32 pitchMagnitude;
     f32 targetWeight;
     f32 existingWeight;
-    u32 *resourceNode;
+    MdlResourceItem *resourceNode;
     s32 slotIndex;
 
     inner = ctx->inner;
@@ -305,7 +305,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
             return;
         }
     }
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = resourceNode->next) {
         mdlDispatchViewerAnchorRecord(ctx, resourceNode);
     }
     if (ctx->devList == NULL) {
@@ -514,9 +514,9 @@ u32 mdlGetBroadcastValue(MdlCtx *ctx) {
 
 /* Forward value to each next-linked resource; an empty resource list is a no-op. */
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value) {
-    u32 *resourceNode;
+    MdlResourceItem *resourceNode;
 
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = resourceNode->next) {
         mdlSetResourceFrame(ctx, resourceNode, value);
     }
 }
@@ -532,13 +532,13 @@ void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
     mdlSetAllResourceFrames(ctx, value);
 }
 
-extern void mdlSetResourceAmount(MdlCtx *ctx, u32 *node, f32 amount);
+extern void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *node, f32 amount);
 
 /* Forward the floating amount to each resource without changing color. */
 void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
-    u32 *resourceNode;
+    MdlResourceItem *resourceNode;
 
-    for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = (u32 *)*resourceNode) {
+    for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = resourceNode->next) {
         mdlSetResourceAmount(ctx, resourceNode, amount);
     }
 }
