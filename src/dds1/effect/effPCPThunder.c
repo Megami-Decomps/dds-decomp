@@ -565,7 +565,7 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
 
 /* Spark parameter prefix (0xA4 bytes); updates also rewrite its position vectors. */
 typedef struct {
-    u8 pad00[0x10];
+    f32 origin[4];     /* 0x00 complete orbit origin quadword */
     f32 loweredPosition[4]; /* 0x10: complete endpoint quadword */
     f32 position[4];    /* 0x20: complete endpoint quadword */
     u16 systemParam;    /* 0x30 */
@@ -853,7 +853,82 @@ void func_00164BA8(EffThunderSparkWork *work, s32 index) {
 }
 
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00165110);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+
+/* Advance each spark through delayed initialization, motion and alpha fades.
+ * Snapshot the entry parameters and age; initialization and geometry callbacks
+ * can update the work while the frame's timing decision remains unchanged.
+ */
+void func_00165110(EffThunderSparkWork *work) {
+    f32 position[3];
+    f32 origin[4] __attribute__((aligned(16)));
+    u32 tintColor;
+    s32 count;
+    s32 loop = work->head.loop;
+    s32 duration = work->head.duration;
+    s32 delaySpread = work->head.startDelaySpread;
+    s32 fadeInTime = work->head.fadeInTime;
+    s32 fadeOutTime = work->head.fadeOutTime;
+    f32 heightOffset = work->head.heightOffset;
+    f32 verticalDamping = work->head.verticalDamping;
+    f32 angularDamping = work->head.angularDamping;
+    EffThunderSpark *spark;
+    ParCell *renderCell;
+    s32 i;
+    s32 age;
+    f32 angle;
+    f32 radius;
+    f32 alpha;
+    f32 lowerHeight;
+    u32 color;
+
+    tintColor = work->tintColor;
+    PCP_COPY_VECTOR(origin, work->head.origin);
+    count = work->head.sparkCount;
+    spark = work->sparks;
+    for (i = 0; i < count; i++, spark++) {
+        age = spark->age;
+        if (age == 0) {
+            effThunderSparkInit(work, i);
+            parCellInit((void *)spark->systemHandle, 0);
+        } else if (age > 0 && age <= duration) {
+            angle = spark->orbitAngle;
+            radius = spark->orbitRadius;
+            position[0] = origin[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            position[1] = origin[1] + spark->verticalOffset - spark->heightOffset;
+            position[2] = origin[2] + sdfSinPoly(angle) * radius;
+            spark->verticalOffset += spark->verticalSpeed;
+            spark->orbitAngle += spark->angularSpeed;
+            spark->verticalSpeed *= verticalDamping;
+            spark->angularSpeed *= angularDamping;
+            if (age < fadeInTime) {
+                alpha = (f32)age / fadeInTime;
+            } else if (duration - age <= fadeOutTime) {
+                alpha = (f32)(duration - age) / fadeOutTime;
+            } else {
+                alpha = 1.0f;
+            }
+            color = effMultiplyPackedColors(((u32)(alpha * 127.0f) << 24) | 0x808080, tintColor);
+            renderCell = ((EffThunderParSystem *)spark->systemHandle)->cells;
+            lowerHeight = position[1] - heightOffset;
+            work->head.loweredPosition[0] = position[0];
+            work->head.loweredPosition[1] = lowerHeight;
+            work->head.loweredPosition[2] = position[2];
+            work->head.position[0] = position[0];
+            work->head.position[1] = position[1];
+            work->head.position[2] = position[2];
+            func_00164BA8(work, i);
+            renderCell->color = color;
+            parPrependCellNode((void *)spark->systemHandle);
+        }
+        if (age >= duration && loop) {
+            spark->age = -(effMiscRand(D_0034DF38) % delaySpread);
+        } else {
+            spark->age++;
+        }
+    }
+}
+
 
 extern void parRiseFallSymmetricCellAlpha(void *system, u32 a, u32 b, u32 c);
 
