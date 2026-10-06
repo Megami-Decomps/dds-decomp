@@ -6,6 +6,29 @@
 
 struct EffNode;
 
+struct EffRequest;
+
+/* Resource jobs retain a destination slot until their request completes. */
+typedef struct EffectListNode {
+    u32 state;
+    struct EffectListNode *next;
+    u32 value;
+    u32 length;
+    u32 kind;
+    void **reference;
+} EffectListNode;
+
+typedef struct EffectList {
+    u32 mode;
+    s32 count;
+    EffectListNode *first;
+    EffectListNode *last;
+    struct EffRequest *request;
+} EffectList;
+
+typedef char EffectListNode_size_must_be_0x18[(sizeof(EffectListNode) == 0x18) ? 1 : -1];
+typedef char EffectList_size_must_be_0x14[(sizeof(EffectList) == 0x14) ? 1 : -1];
+
 void effCopyVectorToNodeInstance(struct EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(struct EffNode *node, const void *matrix);
 
