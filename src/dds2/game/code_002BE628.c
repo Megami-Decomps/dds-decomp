@@ -595,6 +595,10 @@ typedef struct MenuPanelGroup {
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
+struct MenuPanelItem;
+extern void mnuSetPanelItemSelection(struct MenuPanelItem *, s32);
+extern void mnuSetPanelItemOption(struct MenuPanelItem *, u32);
+
 /* Create the five panel items owned by this group and clear its selection. */
 s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
@@ -645,7 +649,10 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuSetGroupSelection);
+void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
+    mnuSetPanelItemSelection((struct MenuPanelItem *)group->entries[index], selection);
+    mnuSetPanelItemOption((struct MenuPanelItem *)group->entries[index], option);
+}
 
 void mnuSetIndexedPanelGroupValue(MenuPanelGroup *group, s32 index, u32 value) {
     mnuStorePanelItemValue(group->entries[index], value);
