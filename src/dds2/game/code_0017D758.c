@@ -157,7 +157,7 @@ extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
 
 /* effNeedleCreateWork */
-EffPCPNeedleWork *func_0017DD50(EffPCPNeedleParams *params) {
+EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(params->count * sizeof(EffPCPNeedleSlot) +
                                                   sizeof(EffPCPNeedleWork));
     EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfResourceRetainAddress(allocation);

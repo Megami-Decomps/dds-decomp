@@ -1,11 +1,7 @@
 #include "common.h"
+#include "dat_state.h"
 
-typedef struct ScoreGlobalState {
-    u8 pad00[0x1E660];
-    u32 highScore;
-} ScoreGlobalState;
 
-extern ScoreGlobalState *datGameState;
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 

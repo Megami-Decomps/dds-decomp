@@ -68,6 +68,16 @@ typedef struct PartyPanel {
     PartyPanelEntry slots[5];
 } PartyPanel;
 
+/* Native result-menu row shared by the level and profile progress bars. */
+typedef struct BrsProgressRow {
+    u8 pad00[8];
+    u32 unit; /* DatPartyRecord address, retained as the native address word. */
+    u32 levelProgress[4];
+    u32 profileProgress[4];
+} BrsProgressRow;
+
+typedef char BrsProgressRow_size_must_be_0x2C[(sizeof(BrsProgressRow) == 0x2C) ? 1 : -1];
+
 /* Page sprites and their fade/slide state; DDS2 expanded the sprite banks. */
 typedef struct MenuSprites {
     u8 pad00[0xC];
@@ -323,11 +333,11 @@ struct MenuStaffList {
 };
 
 struct MenuStaffWindow {
-    s32 flags; /* Selection-control bits, including mask 0x8. */
+    u32 flags; /* Selection-control bits, including mask 0x8. */
     u8 pad04[0x0C];
     MenuStaffNode *head; /* 0x10 */
     u8 pad14[4];
-    s32 *cursor;
+    MenuStaffNode *cursor; /* 0x18 */
     MenuStaffNode *selectedNode; /* 0x1C */
     s32 panelActive; /* 0x20: selects the alternate panel drawing path */
     s32 rowCount; /* 0x24 */
@@ -339,7 +349,9 @@ struct MenuStaffWindow {
 };
 
 struct MenuStaffNode {
-    u8 pad00[0x48];
+    s32 index; /* List position, saved when switching staff pages. */
+    s32 value; /* Entry payload supplied to mnuAppendWindowListNode. */
+    u8 pad08[0x40];
     u32 flags; /* 0x48 */
     u8 pad4C[0x0C];
     MenuStaffNode *next; /* 0x58 */

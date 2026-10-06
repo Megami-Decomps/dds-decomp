@@ -17,7 +17,7 @@ void *sdfAllocSizeClassBlock(s32 size);
 
 void *func_00157D38(void *arg);
 
-void func_001594C8(BillObj *arg0, s32 arg1);
+void billSetAnimationEntry(BillObj *arg0, s32 arg1);
 
 void *func_00159678(void *arg);
 
@@ -205,7 +205,7 @@ BillObj *billAllocList(void *resourceData) {
     newobj->unk48 = 0;
     newobj->unk4C = 0;
     newobj->pair.unk8 = 0;
-    func_001594C8(newobj, 0);
+    billSetAnimationEntry(newobj, 0);
     return newobj;
 }
 
@@ -223,7 +223,7 @@ BillObj *billCloneList(BillObj *obj) {
     newobj->unk50 = 1;
     newobj->unk48 = 0;
     newobj->unk4C = 0;
-    func_001594C8(newobj, 0);
+    billSetAnimationEntry(newobj, 0);
     return newobj;
 }
 
@@ -273,9 +273,95 @@ void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     out->framesRemaining = (s32)framesRemaining;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_001594C8);
+extern s32 func_0035B6E0(const char *, ...);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00159678);
+/* Select an animation and initialize the plural records' signed start delays. */
+void billSetAnimationEntry(BillObj *obj, s32 index) {
+    BillData *data = obj->entryList;
+    BillAnimationEntry *entry = data->entries + index;
+
+    if (entry->frameCount == 0) {
+        obj->unk50 = 0;
+        return;
+    }
+    if (entry->flags & 0x10000000) {
+        BillRecord *records;
+        u32 i = 0;
+
+        func_0035B6E0("billAnim..PLURAL SET\n");
+        obj->modeFlags = 0x10000000;
+        obj->unk58 = index;
+        obj->entryCount = entry->frameCount;
+        records = (BillRecord *)(data->base + entry->offset);
+        for (; i < entry->frameCount; i++) {
+            billResolveEntry(data, records[i].entryIndex, (BillOut *)obj->unk60 + i);
+            ((BillOut *)obj->unk60)[i].frameIndex = -records[i].delay;
+        }
+    } else if (entry->unk8 & 0xC0) {
+        func_0035B6E0("billAnim..(A)MTEX SET\n");
+        obj->modeFlags = entry->unk8;
+        obj->unk58 = index;
+        obj->entryCount = 2;
+        billResolveEntry(data, index, obj->unk60);
+        billResolveEntry(data, index + 1, (BillOut *)obj->unk60 + 1);
+    } else {
+        obj->modeFlags = 0;
+        obj->entryCount = 1;
+        obj->unk58 = index;
+        billResolveEntry(data, index, obj->unk60);
+    }
+    if (entry->unk8 & 0x100) {
+        func_0035B6E0("billAnim..P2A POLYGON\n");
+    }
+    obj->unk50 = 1;
+}
+
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
+extern s32 func_0035B6E0(const char *format, ...);
+
+void *func_00159678(void *resource) {
+    u8 *source = resource;
+    s32 *header = resource;
+    s32 *childOffsets = (s32 *)(source + header[0]);
+    s32 childCount = *childOffsets++;
+    SdfMemBlock *allocation;
+    BillData *data;
+    u8 *base;
+    s32 count;
+    s32 i;
+
+    allocation = sdfAllocGeneralBlock(header[0] + childCount * 0x50 + sizeof(*data));
+    data = (BillData *)sdfResourceRetainAddress(allocation);
+    base = (u8 *)(data + 1);
+    data->allocation = allocation;
+    memcpy(base, source, header[0]);
+    data->base = base;
+    data->childCount = childCount;
+    data->entries = (BillAnimationEntry *)(base + 8);
+    data->children = (BillChildPayload **)(base + *(s32 *)base + 8);
+    for (i = 0; i < childCount; i++) {
+        data->children[i] = func_00157D38(source + *childOffsets++);
+    }
+    data->entryCount = data->listRefCount = 1;
+    count = ((s32 *)data->base)[1];
+    for (i = 0; i < count; i++) {
+        BillAnimationEntry *entry = &data->entries[i];
+        if (entry->flags & 0x10000000) {
+            data->entryCount = entry->frameCount;
+            func_0035B6E0("billAnim no[%d][%d]...PLURAL\n", i, data->entryCount);
+        } else {
+            if (entry->unk8 & 0x40) {
+                data->entryCount = 2;
+                func_0035B6E0("billAnim no[%d][%d]...MTEX\n", i, 2);
+            } else if (entry->unk8 & 0x80) {
+                data->entryCount = 2;
+                func_0035B6E0("billAnim no[%d][%d]...AMTEX\n", i, 2);
+            }
+        }
+    }
+    return data;
+}
 
 
 extern void effReleaseSharedTextureRecord(void *arg);

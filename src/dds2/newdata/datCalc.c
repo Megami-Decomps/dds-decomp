@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "dat_state.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -48,7 +49,6 @@ typedef struct DatCalcCursor {
     u16 maxMp;
 } DatCalcCursor;
 
-extern s32 datGameState;
 
 typedef struct UiObject {
     u8 unk_00[0x110];
@@ -61,10 +61,6 @@ typedef struct UiObject {
     u16 statusFlags;
 } UiObject;
 
-typedef struct DatGameCounters {
-    u8 pad00[0x3C];
-    s32 currency;        /* 0x3C: clamped to 0..9,999,999 */
-} DatGameCounters;
 
 /* Clear the requested bits of the halfword status without touching other bytes.
  * Keep the existing raw access and compound-assignment narrowing. */
@@ -410,21 +406,21 @@ s32 datIsValueBelowQuarterMax(DatCalcCursor *object) {
 /* Add delta using the existing s32 addition, then clamp the currency balance
  * to 0..9,999,999. No overflow validation is performed before the clamp. */
 s32 datAddCurrencyClamped(s32 delta) {
-    s32 balance = ((DatGameCounters *)datGameState)->currency + delta;
+    s32 balance = datGameState->header.currency + delta;
     if (balance < 0) {
         balance = 0;
     }
     if (balance > DAT_CURRENCY_MAX) {
         balance = DAT_CURRENCY_MAX;
     }
-    ((DatGameCounters *)datGameState)->currency = balance;
+    datGameState->header.currency = balance;
     return balance;
 }
 
 /* Compare the signed balance against the requested amount; no debit or
  * validation is performed, so negative requests keep their original semantics. */
 s32 datHasEnoughCurrency(s32 requiredAmount) {
-    if (*(s32 *)(datGameState + 0x3C) < requiredAmount) {
+    if (datGameState->header.currency < requiredAmount) {
         return 0;
     }
     return 1;

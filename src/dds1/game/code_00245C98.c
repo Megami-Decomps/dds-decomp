@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "dat_state.h"
 
 /* The dispatcher passes its last argument to entry callbacks as opaque data,
  * not as a function address. Modes select polling, primary and secondary actions. */
@@ -15,7 +16,6 @@
 extern void func_0025DF68(s32, s32);
 
 extern void func_00261760(s32);
-extern s32 datGameState;
 
 extern void mnuStorePendingMenuCommandValue(s32, u32);
 extern void func_0025ECD0();
@@ -136,7 +136,7 @@ s32 evtInitializeActiveMenuState(void) {
     }
     windowAddress = ((EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target)->window;
     pendingSelection = mnuShopHasPendingFlag(stateAddress);
-    ((EvtDispatchState *)stateAddress)->savedValue = *(s32 *)(datGameState + 0x3C);
+    ((EvtDispatchState *)stateAddress)->savedValue = datGameState->header.currency;
     *(s16 *)(windowAddress + 0xE) = pendingSelection;
     ((EvtDispatchState *)stateAddress)->pendingSelection = pendingSelection;
     return 1;
@@ -544,7 +544,7 @@ void evtAccumulateStateScore(s32 stateAddress) {
         ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target)->entryRecord->params;
 
     if ((u32)(values->id - 0x60) < 0x20) {
-        *(s32 *)(datGameState + 0xA50) += values->value * ((EvtDispatchState *)stateAddress)->scoreFactor;
+        datGameState->world.score += values->value * ((EvtDispatchState *)stateAddress)->scoreFactor;
     }
 }
 

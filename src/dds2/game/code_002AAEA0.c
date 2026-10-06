@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "dat_state.h"
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -241,12 +242,7 @@ s32 mtrMantraIdIsValid(s32 mantraId) {
     return 0;
 }
 
-typedef struct SaveItemCounts {
-    u8 pad00[0x1340];
-    u8 counts[0x100];
-} SaveItemCounts;
 
-extern SaveItemCounts *datGameState;
 extern u16 D_00437B6E;
 extern u8 D_00437B88;
 extern u16 D_003E6730[];
@@ -265,7 +261,7 @@ s32 mtrHasEnoughOwnedMantras(void) {
     }
     for (i = 0; i < D_00437B6E; i++) {
         s32 mantraId = D_003E6730[i];
-        if (datGameState->counts[mantraId] != 0) {
+        if (datGameState->inventory.counts[mantraId] != 0) {
             if (mtrMantraIdIsValid(mantraId) == 0) {
                 owned++;
             }

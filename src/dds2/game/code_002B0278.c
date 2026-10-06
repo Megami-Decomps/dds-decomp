@@ -1,4 +1,7 @@
 #include "mnu.h"
+struct MenuListNode;
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #include "fpu.h"
 #include "sdf.h"
 
@@ -262,7 +265,9 @@ typedef struct MenuContext {
     s32 selectionResources[6];
     s32 labelHandle;       /* 0xC8 */
     u32 panelModel;       /* 0xCC: model used by the panel resource slots */
-    u8 padD0[0x2C];
+    u8 padD0[0x24];
+    const void *partySelectionLayout; /* 0xF4: layout copied into the party window panel. */
+    u8 padF8[4];
     const void *equippedSkillLayout; /* 0xFC */
     u8 pad100[4];
     s32 imageHandle;       /* 0x104 */
@@ -672,8 +677,10 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
     return 1;
 }
 
+extern void func_002B0D90(s32, s32, s32, MenuList *, MenuListNode *, s32);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
 
+extern void func_002B0FA0(MenuContext *);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0FA0);
 
 void mnuDestroyPartySelectionWindow(s32 context) {
@@ -2813,12 +2820,12 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
     return cursor;
 }
 
-void mnuAdvanceListCursorDefault(u32 list) {
-    mnuListAdvanceCursor(list, 0, 0);
+MenuListNode *mnuAdvanceListCursorDefault(u32 list) {
+    return mnuListAdvanceCursor((MenuList *)list, 0, 0);
 }
 
-void mnuRetreatListCursorDefault(u32 list) {
-    mnuListRetreatCursor(list, 0, 0);
+MenuListNode *mnuRetreatListCursorDefault(u32 list) {
+    return mnuListRetreatCursor((MenuList *)list, 0, 0);
 }
 
 s32 mnuScrollListToEnd(MenuList *list) {
@@ -3362,4 +3369,5 @@ INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C20);
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C28);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C30);
+
 

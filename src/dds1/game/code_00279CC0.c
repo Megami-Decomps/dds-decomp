@@ -1,4 +1,7 @@
 #include "mnu.h"
+struct MenuListNode;
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 
 typedef struct MenuWindowContainer MenuWindowContainer;
 
@@ -96,37 +99,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
 
-struct MenuListNode {
-    s32 index;
-    s32 value;
-    u8 pad8[0x40];
-    u32 flags48;        /* 0x48 */
-    u8 pad4C[4];
-    s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
-    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
-    u8 pad55[3];
-    struct MenuListNode *next;
-    struct MenuListNode *prev;
-    u32 sortKeyPrimary;   /* 0x60 */
-    u32 sortKeySecondary; /* 0x64 */
-    u32 sortKeyTertiary;  /* 0x68 */
-    u8 pad6C[8];
-};
-struct MenuList {
-    u32 stateFlags;     /* 0x00: cursor and selection-control bits */
-    u32 flags;
-    s32 id;             /* 0x08: owner/list identifier */
-    s32 visibleCount;
-    MenuListNode *first;
-    MenuListNode *last;
-    MenuListNode *head;
-    MenuListNode *cursor;
-    s32 count;
-    s32 windowOffset;
-    s32 rowStep;        /* 0x28: constructor argument scaled by eight */
-    u8 pad2C[0x10];
-    s32 scale;          /* 0x3C: 8.8 fixed-point default */
-};
+#include "mnu_list.h"
 /* Window prefix shared with the drawable container in code_0027BF00. */
 struct MenuWindowContainer {
     s32 id;
@@ -856,12 +829,12 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
     return cursor;
 }
 
-void mnuAdvanceListCursorDefault(u32 list) {
-    mnuListAdvanceCursor(list, 0, 0);
+MenuListNode *mnuAdvanceListCursorDefault(u32 list) {
+    return mnuListAdvanceCursor((MenuList *)list, 0, 0);
 }
 
-void mnuRetreatListCursorDefault(u32 list) {
-    mnuListRetreatCursor(list, 0, 0);
+MenuListNode *mnuRetreatListCursorDefault(u32 list) {
+    return mnuListRetreatCursor((MenuList *)list, 0, 0);
 }
 
 void mnuClearListFlagsOneAndTwo(u32 *flags) {
@@ -876,4 +849,5 @@ u32 mnuTestListFlagTwo(u32 *flags) {
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
+
 

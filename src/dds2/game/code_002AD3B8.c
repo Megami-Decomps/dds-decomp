@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "dat_state.h"
 
 /* Staff callbacks receive a task handle as an integer word. Preserve the
  * native parameter widths and the short-arity task-user-value calls. */
@@ -501,13 +502,13 @@ s32 mnuStaffListInput(s32 task) {
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     MenuStaffWindow *window = menu->firstList->window;
-    s32 *cursor = window->cursor;
+    MenuStaffNode *cursor = window->cursor;
     s32 savedNodeIndex;
     s32 savedRowCount;
     s32 i;
 
     if (cursor != 0) {
-        savedNodeIndex = *cursor;
+        savedNodeIndex = cursor->index;
         savedRowCount = window->rowCount;
     } else {
         savedNodeIndex = 0;
@@ -662,13 +663,13 @@ s32 mnuHandleStaffSelectionListNavigation(s32 task) {
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     MenuStaffWindow *window = menu->secondList->window;
-    s32 *cursor = window->cursor;
+    MenuStaffNode *cursor = window->cursor;
     s32 savedNodeIndex;
     s32 savedRowCount;
     s32 i;
 
     if (cursor != 0) {
-        savedNodeIndex = *cursor;
+        savedNodeIndex = cursor->index;
         savedRowCount = window->rowCount;
     } else {
         savedNodeIndex = 0;
@@ -801,13 +802,13 @@ s32 mnuHandleStaffValuePageInput(s32 task) {
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
     MenuStaffWindow *window = menu->thirdList->window;
-    s32 *cursor = window->cursor;
+    MenuStaffNode *cursor = window->cursor;
     s32 savedNodeIndex;
     s32 savedRowCount;
     s32 i;
 
     if (cursor != 0) {
-        savedNodeIndex = *cursor;
+        savedNodeIndex = cursor->index;
         savedRowCount = window->rowCount;
     } else {
         savedNodeIndex = 0;
@@ -846,7 +847,6 @@ typedef struct MenuRequirementRecord {
     s8 requiredCount;
 } MenuRequirementRecord;
 
-extern s32 datGameState;
 extern s32 D_00435E3C;
 
 /* A zero entry has no requirement. Keep the signed requiredCount comparison:
@@ -858,7 +858,7 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
     if (entryId == 0) {
         return 0;
     }
-    availableCount = *(u8 *)(entryId + datGameState + 0x20000 - 0x1910);
+    availableCount = datGameState->itemRequirementCounts[requirementIndex];
     return availableCount < ((MenuRequirementRecord *)D_00435E3C)[requirementIndex].requiredCount;
 }
 

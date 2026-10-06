@@ -110,7 +110,28 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275B0);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290240);
+s32 func_00290240(MenuPanelObject *object, s8 direction) {
+    MantraNodePos *position = object->state.defaultSelector;
+    s32 grid[2];
+    s32 neighbor;
+
+    grid[0] = position->x / 10 + (position->x & 1);
+    grid[1] = position->y / 10;
+    switch (direction) {
+    /* Vertical moves depend on the staggered row; horizontal moves do not. */
+    case 1: neighbor = (grid[1] & 1) ? 5 : 0; break;
+    case 4: neighbor = (grid[1] & 1) ? 3 : 2; break;
+    case 2: neighbor = 1; break;
+    case 8: neighbor = 4; break;
+    /* Upper diagonals, then lower diagonals. */
+    case 9: neighbor = 5; break;
+    case 3: neighbor = 0; break;
+    case 12: neighbor = 3; break;
+    case 6: neighbor = 2; break;
+    default: return -1;
+    }
+    return neighbor;
+}
 
 
 s32 func_00290328(MenuPanelObject *object, MantraNodePos *list, s8 position) {
@@ -486,17 +507,32 @@ void func_00292998(MenuPanelObject *object) {
     *(u16 *)(record + 2) = (*(u16 *)(record + 2) & 0xfff0) | 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292A60);
+extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
+extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, u32);
+extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
+extern void func_00278EA8(u32);
+extern void func_00279080(u32);
+
+void func_00292A60(MenuPanelObject *object) {
+    MenuPanelState *state = &object->state;
+
+    state->defaultSelector = mnuGetMantraPanelPositionRecord(8);
+    mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->state.selectionController);
+    mnuSpawnMantraIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->state.selectionController);
+    func_00278EA8(object->state.selectionController);
+    func_00279080(object->state.selectionController);
+    state->flags &= ~0x20000000;
+}
 
 s32 func_00292B90(s32 object) {
     return func_002917C0(object, 0, 8);
 }
 
 
-extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 extern void func_00278F60(u32);
 extern void func_002790F0(s32, s32, u32);
-extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
 void itfPositionMantraSelectionController(MenuPanelObject *object) {
     MantraNodePos *record;
 
@@ -507,11 +543,58 @@ void itfPositionMantraSelectionController(MenuPanelObject *object) {
 
 extern void itfInstallDefaultMantraSelector(MenuPanelObject *);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", itfInstallDefaultMantraSelector);
+void itfInstallDefaultMantraSelector(MenuPanelObject *object) {
+    MantraNodePos *record;
+    MenuPanelState *state = &object->state;
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292CF0);
+    record = mnuGetMantraPanelPositionRecord(0x71);
+    state->defaultSelector = record;
+    mnuSpawnMantraIconAtPosition((s32)((f32)record->x / 10.0f * 40.0f),
+        (s32)((f32)record->y / 10.0f * 39.0f), object->state.selectionController);
+}
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004277A0);
+s32 func_00292CF0(MenuPanelObject *object) {
+    MenuPanelTransition steps[23] = {
+        {0, 22, 0, 0},
+        {30, 22, 0, 4},
+        {90, 22, 0, 1},
+        {120, 0, 1, 6},
+        {120, 75, 1, 0},
+        {150, 75, 1, 4},
+        {210, 75, 1, 1},
+        {240, 15, 1, 0},
+        {270, 15, 1, 4},
+        {330, 15, 1, 1},
+        {360, 0, 2, 6},
+        {360, 69, 2, 0},
+        {390, 69, 2, 4},
+        {450, 69, 2, 1},
+        {480, 39, 2, 0},
+        {510, 39, 2, 4},
+        {570, 39, 2, 1},
+        {600, 113, 2, 0},
+        {630, 113, 2, 7},
+        {630, 113, 2, 5},
+        {770, 113, 2, 8},
+        {800, 113, 2, 1},
+        {800, 0, 2, 15},
+    };
+    MenuPanelState *state = &object->state;
+    u32 i;
+
+    for (i = 0; i < 23; i++) {
+        if (steps[i].frame == (u16)(state->flags >> 8)) {
+            state->flags = (state->flags & 0xF0FFFFFF) | ((steps[i].mode & 15) << 24);
+            if (func_00292478(object, steps[i].panelId, steps[i].action)) {
+                return 1;
+            }
+        }
+    }
+    state->flags = (state->flags & 0xFF0000FF) | ((u16)((state->flags >> 8) + 1) << 8);
+    return 0;
+}
+
+
 
 s32 func_00292EA8(MenuPanelObject *object) {
     MenuPanelTransition steps[6] = {

@@ -210,7 +210,7 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
     data->entryId = 0;
     data->ownerKind = 0;
     handle = effObjGetObjectHandle(obj);
-    ((ObjBase *)handle)->unk8 = 2;
+    ((ObjBase *)handle)->resourceState = 2;
     id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         ((ObjBase *)handle)->slots[5] = id;
@@ -275,7 +275,7 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle(obj);
-    ((ObjBase *)objectHandle)->unk8 = 2;
+    ((ObjBase *)objectHandle)->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         ((ObjBase *)objectHandle)->slots[5] = worldNode;
@@ -337,7 +337,7 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle(obj);
-    ((ObjBase *)objectHandle)->unk8 = 2;
+    ((ObjBase *)objectHandle)->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         ((ObjBase *)objectHandle)->slots[5] = worldNode;
@@ -390,7 +390,7 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle(obj);
-    ((ObjBase *)objectHandle)->unk8 = 2;
+    ((ObjBase *)objectHandle)->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         ((ObjBase *)objectHandle)->slots[5] = worldNode;

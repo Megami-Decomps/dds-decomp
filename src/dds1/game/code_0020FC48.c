@@ -1,8 +1,10 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "dat_state.h"
 #include "btl_state.h"
 #include "btl_command.h"
 #include "ee_mmi.h"
+#include "sdf_draw.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -1161,7 +1163,47 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
                          depth, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211B88);
+extern u8 kwlnFrameDrawPacketRecords[];
+extern void *sdfAllocPacketAligned(s32);
+extern s32 kwlnGetDrawBufferIndex(void);
+extern void sdfAppendDmaPrimary(s32, void *, void *);
+
+void func_00211B88(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 xOffset;
+    s32 yOffset;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 horizontal[4];
+    s32 vertical[4];
+    void *packet;
+    s32 index;
+
+    packet = sdfAllocPacketAligned(0x20);
+    index = kwlnGetDrawBufferIndex();
+    sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + index * 0x1F40, packet);
+    halfWidth = 0x1000;
+    halfHeight = 0x700;
+    xOffset = (s32)((f32)halfWidth * scale);
+    yOffset = (s32)((f32)halfHeight * scale);
+    horizontal[0] = halfWidth - xOffset;
+    horizontal[1] = halfWidth + xOffset;
+    vertical[0] = halfHeight - yOffset;
+    vertical[1] = halfHeight + yOffset;
+    left = horizontal[0] + 0x7000;
+    top = vertical[0] + 0x7900;
+    right = horizontal[1] + 0x7000;
+    bottom = vertical[1] + 0x7900;
+    sdfQueueTexturedQuad(list, color, primitive,
+                         left, top, 0, 0,
+                         right, top, 0x2000, 0,
+                         left, bottom, 0, 0xE00,
+                         right, bottom, 0x2000, 0xE00,
+                         depth, 0);
+}
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -1697,7 +1739,7 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EC0);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EF8);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00213BE0);
+INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawUnitAffinityDebug);
 
 typedef struct PadButtons {
     s8 unk_0;
@@ -1960,7 +2002,73 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00215FF8);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_002162E0);
+extern u8 D_003BBB0E;
+extern u8 D_003BBB10;
+extern u8 D_003BBB58;
+extern DatPartyRecord D_00361DA0[5];
+extern s32 D_003625D8[5][24];
+extern u32 btlComputeSkillAdjustedMaxHp(s32);
+extern u32 btlComputeSkillAdjustedMaxMp(s32);
+extern void mdlFlagSet(u32);
+
+void func_002162E0(void) {
+    u32 i;
+    u32 n;
+
+    if (D_003BBB0E != 0) {
+        btlGetRuntime();
+        datGameState->partyCount = 5;
+        for (i = 0; i < datGameState->partyCount; i++) {
+            if (D_003BBB58 != 0) {
+                memcpy(&datGameState->party[i], &D_00361DA0[i],
+                       sizeof(DatPartyRecord));
+                for (n = 0; D_003625D8[i][n] >= 0; n++) {
+                    datGameState->party[i].effectData[n] = D_003625D8[i][n];
+                }
+                for (; n < 24; n++) {
+                    datGameState->party[i].effectData[n] = 0;
+                }
+                datGameState->party[i].pad20[0] = 0;
+            }
+            if (i < D_003BBB10) {
+                datGameState->party[i].flags |= 0x1002;
+            } else {
+                datGameState->party[i].flags =
+                    (datGameState->party[i].flags | 0x1000) & ~2;
+            }
+            datGameState->pad1294[i] = i;
+            datGameState->party[i].maxHp =
+                btlComputeSkillAdjustedMaxHp((s32)&datGameState->party[i]);
+            datGameState->party[i].maxMp =
+                btlComputeSkillAdjustedMaxMp((s32)&datGameState->party[i]);
+            if (datGameState->party[i].maxHp < datGameState->party[i].hp ||
+                D_003BBB58 != 0) {
+                datGameState->party[i].hp = datGameState->party[i].maxHp;
+            }
+            if (datGameState->party[i].maxMp < datGameState->party[i].mp ||
+                D_003BBB58 != 0) {
+                datGameState->party[i].mp = datGameState->party[i].maxMp;
+            }
+            datGameState->party[i].menuValue = 0xA1;
+        }
+        for (; i < 5; i++) {
+            memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
+        }
+        datGameState->inventory.counts[0] = 0;
+        for (i = 1; i < 192; i++) {
+            datGameState->inventory.counts[i] = 99;
+        }
+        mdlFlagSet(0x62);
+        mdlFlagSet(0x68);
+        mdlFlagSet(0x63);
+        mdlFlagSet(0x64);
+        mdlFlagSet(0x65);
+        mdlFlagSet(0x66);
+        mdlFlagSet(0x81B);
+        datGameState->world.slotFlags |= 0xC;
+        D_003BBB58 = 0;
+    }
+}
 
 /* Create the model-job semaphore and clear both lists for all eight groups. */
 void btlInitializeCommandSemaphoreSlots(void) {
@@ -2157,33 +2265,27 @@ typedef struct MotionRecordTable {
     MotionRecord entries[1];
 } MotionRecordTable;
 
-typedef struct MotionObject {
-    u8 pad00[0x28];
-    s16 recordIndex; /* 0x28 */
-    s16 slot;        /* 0x2A */
-} MotionObject;
 
 typedef struct MotionOwner {
     u8 pad00[0xC];
     MotionRecordTable *records; /* 0x0C */
     u8 pad10[8];
     void *heap;                 /* 0x18 */
-    MotionObject *first;        /* 0x1C: object created for slot 0 */
-    MotionObject *slots[1];     /* 0x20 */
+    Motion *first;        /* 0x1C: motion created for slot 0 */
+    Motion *slots[1];     /* 0x20 */
 } MotionOwner;
 
-extern MotionObject *func_002DB230();
+extern Motion *func_002DB230();
 
-/* Creates the object for record `index`; the record is reached as table->entries[index]
-   at each use (the repeated array address is what keeps two address registers live). */
-MotionObject *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
+/* Create and attach the motion for the selected resource record. */
+Motion *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
     void *resource = owner->records->entries[index].resource;
     s16 slot = owner->records->entries[index].slot;
-    MotionObject *object = func_002DB230(owner->heap, resource);
+    Motion *object = func_002DB230(owner->heap, resource);
 
-    object->recordIndex = index;
+    object->searchId = index;
     owner->slots[slot] = object;
-    object->slot = slot;
+    object->slotIndex = slot;
     if (slot == 0) {
         owner->first = object;
     }

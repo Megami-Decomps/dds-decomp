@@ -3,6 +3,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "dat_state.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -129,23 +130,8 @@ extern void btlRemoveTaskFromSceneGroup(SceneTask *);
 
 extern void fldInitializeSceneGroups(void);
 
-typedef struct SceneEntry {
-    u16 flags;                /* 0x000 */
-    u8 pad02[6];
-    u16 weight;               /* 0x008 */
-    u8 pad0A[4];
-    u16 mask;                 /* 0x00E */
-    u8 pad10[0x1A8];
-    s32 link;                 /* 0x1B8 */
-    u8 pad1BC[8];
-} SceneEntry;
 
-typedef struct SceneParty {
-    u8 pad00[0xA60];
-    SceneEntry entry[5];
-} SceneParty;
 
-extern SceneParty *datGameState;
 
 extern s32 func_00206090();
 
@@ -661,14 +647,14 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
     brsTaskAllowUpdate();
     evtBeginSolarOverlayFadeOut(8);
     do {
-        func_001AA868(&datGameState->entry[i], -0x45D1);
+        func_001AA868(&datGameState->party[i], -0x45D1);
         if (!(scene->commandRestrictFlags & 0x40)) {
-            if (datGameState->entry[i].flags & 2) {
+            if (datGameState->party[i].flags & 2) {
                 if (scene->eventReady == 1) {
-                    if (datGameState->entry[i].link != 0 || scene->unk2F8 != 0) {
-                        if (!(datGameState->entry[i].mask & 0x40)) {
-                            if (func_0029D000(&datGameState->entry[i]) == 0) {
-                                datAdjustCurrentHp(&datGameState->entry[i], (s32)((f32)datGameState->entry[i].weight * scale));
+                    if (datGameState->party[i].link != 0 || scene->unk2F8 != 0) {
+                        if (!(datGameState->party[i].status & 0x40)) {
+                            if (func_0029D000(&datGameState->party[i]) == 0) {
+                                datAdjustCurrentHp(&datGameState->party[i], (s32)((f32)datGameState->party[i].maxHp * scale));
                             }
                         }
                     }

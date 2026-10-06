@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "dat_state.h"
 
 typedef struct UiQuadColor {
     s32 red;
@@ -36,7 +37,6 @@ extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 
-extern s32 datGameState;
 
 extern s32 btlRuntime;
 
@@ -414,7 +414,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 
 void btlResetActorEntryState(void) {
     s32 context = btlRuntime;
-    s32 *entries = (s32 *)(datGameState + 0xBF8);
+    DatPartyRecord *entries = datGameState->party;
     u32 i;
     *(s32 *)(context + 0x2C0) = 0;
     *(s32 *)(context + 0x2C4) = 0;
@@ -422,8 +422,8 @@ void btlResetActorEntryState(void) {
     *(s32 *)(context + 0x2CC) = 0;
     *(s32 *)(context + 0x2D0) = 0;
     for (i = 0; i < 5; i++) {
-        *entries = 0;
-        entries = (s32 *)((u8 *)entries + 0x1A4);
+        entries[i].link = 0;
+
     }
     memset((void *)(btlRuntime + 0x2B4), 0, 12);
 }

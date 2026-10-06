@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 extern u32 func_0029D790();
 typedef struct PrfSkillList {
@@ -374,18 +375,10 @@ extern s32 func_00314C10(s32);
 
 extern u32 ptyGetProfileRecordCap(u16);
 
-/* Match the progress-row layout in DDS1 game/code_002653A0.c. */
 typedef struct BrsUnitExp {
     u8 pad00[0x10];
     s32 totalExp;           /* 0x10 */
 } BrsUnitExp;
-
-typedef struct BrsProgressRow {
-    u8 pad00[8];
-    u32 unit;               /* 0x08 */
-    u32 levelProgress[4];   /* 0x0C */
-    u32 profileProgress[4]; /* 0x1C */
-} BrsProgressRow;
 
 /* Set up the level and profile progress bars for one party member. */
 void brsBuildUnitProgressRow(u8 *state, u8 *entry) {

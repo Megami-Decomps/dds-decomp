@@ -2,10 +2,10 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
+#include "dat_state.h"
 
 extern u32 D_00435E80;
 
-extern s32 datGameState;
 
 extern s64 scrGetWorkTaskHandle(void);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
@@ -62,15 +62,6 @@ typedef struct EvtScaledValue {
     u32 value18;
 } EvtScaledValue;
 
-typedef struct SdfRuntime {
-    u8 pad00[0x30];
-    s32 backingAllocation; /* 0x30: handle returned by scene allocator */
-    u32 firstTick;
-    u32 secondTick;
-    u8 pad3C[0xA1C];
-    u32 commandFlags; /* 0xA58 */
-    u32 updateMode;
-} SdfRuntime;
 
 typedef struct SdfPackedValue {
     u8 pad00[6];
@@ -269,14 +260,14 @@ void evtLoadValueSecondaryVectorIntoVu(EvtScaledValue *value) {
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
     void *mem = sdfAllocGeneralBlock(0x1E840);
-    u8 *state = (u8 *)sdfResourceRetainAddress(mem);
+    DatGameState *state = sdfResourceRetainAddress(mem);
 
     memset(state, 0, 0x1E840);
-    ((SdfRuntime *)state)->backingAllocation = (s32)mem;
-    ((SdfRuntime *)state)->firstTick = 0;
-    ((SdfRuntime *)state)->secondTick = 0;
+    state->header.backingAllocation = (s32)mem;
+    state->header.firstTick = 0;
+    state->header.secondTick = 0;
     kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
-    datGameState = (s32)state;
+    datGameState = state;
     evtResetWorldAndProfileRuntime();
 }
 
@@ -285,25 +276,25 @@ void sdfDestroyRuntimeTask(void) {
 
     kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
     func_00117A80();
-    allocation = ((SdfRuntime *)datGameState)->backingAllocation;
+    allocation = datGameState->header.backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
     sdfReleaseResourceAllocation(allocation);
     datGameState = 0;
 }
 
 s32 sdfBumpTickCounters(void) {
-    SdfRuntime *runtime;
+    DatGameState *runtime;
 
-    runtime = (SdfRuntime *)datGameState;
-    runtime->firstTick += 1;
-    runtime->secondTick += 1;
+    runtime = datGameState;
+    runtime->header.firstTick += 1;
+    runtime->header.secondTick += 1;
     return 0;
 }
 
 void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
-    ((SdfRuntime *)datGameState)->updateMode = 8;
+    datGameState->world.updateMode = 8;
     func_0011AB38();
     func_00122B58(0);
     ptyClearProfileRecords();
@@ -328,15 +319,15 @@ void sdfResetGameRuntime(s32 fullReset) {
 
     if (fullReset == 1) {
         func_00117A88();
-        backingAllocation = ((SdfRuntime *)datGameState)->backingAllocation;
-        memset((void *)datGameState, 0, 0x1E840);
-        ((SdfRuntime *)datGameState)->backingAllocation = backingAllocation;
+        backingAllocation = datGameState->header.backingAllocation;
+        memset(datGameState, 0, 0x1E840);
+        datGameState->header.backingAllocation = backingAllocation;
     }
-    ((SdfRuntime *)datGameState)->firstTick = 0;
-    ((SdfRuntime *)datGameState)->secondTick = 0;
+    datGameState->header.firstTick = 0;
+    datGameState->header.secondTick = 0;
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
-    ((SdfRuntime *)datGameState)->updateMode = 8;
+    datGameState->world.updateMode = 8;
     func_0011AB38();
     mdlFlagClear(0xC0E);
     mdlFlagSet(0x801);
@@ -657,16 +648,16 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, SdfPackedValue *item) {
     }
     switch (datCommandRecords[channel].mode30) {
     case 5:
-        ((SdfRuntime *)datGameState)->commandFlags |= 1;
+        datGameState->world.fieldFlags |= 1;
         break;
     case 6:
-        ((SdfRuntime *)datGameState)->commandFlags |= 2;
+        datGameState->world.fieldFlags |= 2;
         break;
     case 7:
-        ((SdfRuntime *)datGameState)->commandFlags |= 4;
+        datGameState->world.fieldFlags |= 4;
         break;
     case 8:
-        ((SdfRuntime *)datGameState)->commandFlags |= 8;
+        datGameState->world.fieldFlags |= 8;
         break;
     }
     return 1;

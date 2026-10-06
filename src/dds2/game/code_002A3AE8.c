@@ -291,7 +291,7 @@ typedef struct PickList {
     MovieMenuEffectSlot effectSlots[4]; /* 0x74 */
 } PickList;
 
-void func_002A4380(PickList *bar) {
+void mnuClearMovieMenuPickList(PickList *bar) {
     bar->count = 0;
 }
 
@@ -432,7 +432,7 @@ void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
 }
 
 
-void func_002A49C0(PickList *work) {
+void mnuStartRandomMovieMenuPulse(PickList *work) {
     s32 selected = -1;
     s32 i;
 
@@ -452,7 +452,7 @@ void func_002A49C0(PickList *work) {
 
 extern s16 D_003E38E0[][2];
 
-void func_002A4A68(PickList *menu, s32 drawContext) {
+void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
     s32 i;
 
     for (i = 0; i < 4; i++) {

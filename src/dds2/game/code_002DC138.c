@@ -1,6 +1,8 @@
 #include "common.h"
+#include "file.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_draw.h"
 
 typedef struct EffModelOwner {
     f32 scale;
@@ -96,12 +98,7 @@ extern s32 mdlGetContextResourceId(void *model);
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 extern void *sdfAllocGeneralBlock(u32);
 
-/* Model-manager prefixes plus the effect owner's lighting attachment.
- * Unrelated node fields and inner matrices remain opaque. */
-typedef struct MdlNode {
-    u8 pad00[0x20];
-    f32 floatValue;
-} MdlNode;
+/* Model context prefix and the effect owner's lighting attachment. */
 
 typedef struct MdlInner {
     u8 pad00[8];
@@ -114,7 +111,7 @@ typedef struct MdlCtx {
     u32 flags;
     u8 pad04[0x14];
     MdlInner *inner;
-    MdlNode *first;
+    Motion *first;
 } MdlCtx;
 
 /* Initialize the VU transforms and the first node's float slot, if present. */
@@ -128,7 +125,7 @@ VU0_MOVE_VF(vf10, vf0);
     mdlBroadcastMasked(model, 0x80808080);
     if (((MdlCtx *)model)->first != NULL) {
         mdlAddEntryPlain(model, 0, 0);
-        ((MdlCtx *)model)->first->floatValue = 1.0f;
+        ((MdlCtx *)model)->first->frameStep = 1.0f;
     }
     ((MdlCtx *)model)->flags &= ~1;
 }
@@ -163,15 +160,6 @@ void *effCloneModelWithVUState(void *sourceModel) {
     return model;
 }
 
-/* Effect file request; the instance parameter follows the secondary mode. */
-typedef struct EffFileRequest {
-    u8 pad_00[0xC];
-    u16 kind;
-    u8 pad_0E[0xE];
-    u16 secondaryMode;
-    u8 pad_1E[6];
-    u32 resourceParam;
-} EffFileRequest;
 
 EffModelOwner *effCreateModelOwner(u8 *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
@@ -181,7 +169,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
-            owner->model = func_002DC1D0(data, ((EffFileRequest *)source)->resourceParam);
+            owner->model = func_002DC1D0(data, ((FileJob *)source)->slots[1].size);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU((void *)owner->model);

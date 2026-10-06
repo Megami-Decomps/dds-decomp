@@ -1,4 +1,5 @@
 #include "mnu.h"
+struct MenuListNode;
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -121,38 +122,7 @@ extern char D_003B2348[];
 
 extern void itfGridLookupValueOrDefault(s32, s32);
 
-struct MenuList {
-    u32 stateFlags;     /* 0x00: cursor and selection-control bits */
-    u32 flags;
-    s32 id;             /* 0x08: owner/list identifier */
-    s32 visibleCount;
-    MenuListNode *first;
-    MenuListNode *last;
-    MenuListNode *head;
-    MenuListNode *cursor;
-    s32 count;
-    s32 windowOffset;
-    s32 rowStep;        /* 0x28: constructor argument scaled by eight */
-    u8 pad2C[0x10];
-    s32 scale;          /* 0x3C: 8.8 fixed-point default */
-};
-
-struct MenuListNode {
-    s32 index;
-    s32 value;
-    u8 pad8[0x40];
-    u32 flags48;        /* 0x48 */
-    u8 pad4C[4];
-    s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
-    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
-    u8 pad55[3];
-    struct MenuListNode *next;
-    struct MenuListNode *prev;
-    u32 sortKeyPrimary;   /* 0x60 */
-    u32 sortKeySecondary; /* 0x64 */
-    u32 sortKeyTertiary;  /* 0x68 */
-    u8 pad6C[8];
-};
+#include "mnu_list.h"
 
 extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
@@ -166,7 +136,7 @@ typedef struct MenuSpriteGrid {
     MenuSpriteRef slots[8];
 } MenuSpriteGrid;
 
-void mnuAdvanceListCursorDefault(u32 list);
+struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 
 void mnuClearListFlagsOneAndTwo(u32 *flags);
 
@@ -1746,7 +1716,7 @@ void mnuClearListFlags(s32 which, MenuPageWindow *menu) {
 
 extern u32 mnuMapPadMaskToFlags(u32);
 
-extern void mnuRetreatListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32, u32, s32);
 
 /* Step the selected party-panel list from the pad: left/right move its cursor, any input restarts the fade. */
@@ -2007,3 +1977,4 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_00281780);
 void mnuClearPanelWorkState(u32 panel) {
     memset(panel, 0, 0x20);
 }
+

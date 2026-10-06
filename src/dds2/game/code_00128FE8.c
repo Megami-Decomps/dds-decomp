@@ -2374,7 +2374,6 @@ void fldClearCameraMoveMode(void) {
     D_004360AC = 0;
 }
 
-extern u8 *dds3GetObjectOwnedHandle(u32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
 extern void fldSetCameraObjectHighlightFlag(void);
 extern void fldClearSceneModelColors(void);
@@ -2398,7 +2397,7 @@ void fldUpdateCameraProximity(void) {
             return;
         }
     }
-    slot = *(s32 *)(dds3GetObjectOwnedHandle(fldPlayerObject) + 0x5C);
+    slot = dds3GetObjectOwnedHandle(fldPlayerObject)->resourceSlots[4];
     modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
     if (mdlFlagTest(0x31)) {
         range = 56.0f;

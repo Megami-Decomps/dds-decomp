@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 
 extern u32 mnuMovieShutdownCounter;
 
@@ -14,13 +15,7 @@ extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
 extern s8 mnuCampTaskState;
 
-extern s32 datGameState;
 
-/* Item quantities are byte-indexed in the shared save-state block. */
-typedef struct SaveItemCounts {
-    u8 pad00[0x1340];
-    u8 counts[0x100];
-} SaveItemCounts;
 
 extern s8 D_00437B73;
 
@@ -60,20 +55,6 @@ extern void mnuResetGradientFadeColor(u8 *, s32);
 
 extern void func_003425B0(void);
 
-/* One of five 0x1C4-byte party records at datGameState + 0xA60. */
-typedef struct PartyRecord {
-    u16 flags;
-    u16 pad02;
-    u16 slotIndex; /* +0x04: selects an entry in the category-model list */
-    u8 pad06[0x1AC];
-    u16 unk1B2;
-    u8 pad1B4[0x10];
-} PartyRecord;
-/* Global scene's spendable currency is clamped by datAddCurrencyClamped. */
-typedef struct CampCurrency {
-    u8 pad00[0x3C];
-    s32 currency;
-} CampCurrency;
 
 
 extern void scrClearPackedScriptFlags(void *);
@@ -124,20 +105,20 @@ extern u32 D_003E68D8[][2];
 extern u32 D_003E6900[][2];
 
 void ptyResetPartyRecordsAndProfiles(void) {
-    s32 offset = 0;
+    s32 partyIndex = 0;
     s32 i = 4;
 
     do {
-        PartyRecord *rec = (PartyRecord *)(datGameState + offset + 0xA60);
-        offset += 0x1C4;
+        DatPartyRecord *rec = &datGameState->party[partyIndex];
+        partyIndex++;
         if (rec->flags & 1) {
             scrClearPackedScriptFlags(rec);
-            rec->unk1B2 = 0;
+            rec->itemId = 0;
         }
         i--;
     } while (i >= 0);
     for (i = 0xC0; i < 0x100; i++) {
-        ((SaveItemCounts *)datGameState)->counts[i] = 0;
+        datGameState->inventory.counts[i] = 0;
         mnuClearEntryBlocked(i);
     }
     mdlFlagClear(0x901);
@@ -163,8 +144,6 @@ extern u32 effLoadIndexedResource(char *, u32, u32);
 #define MNU_STAFF_STATUS_BATCH_COUNT 2
 #define MNU_STAFF_PANEL_COUNT 3
 #define MNU_STAFF_PARTY_COUNT 5
-#define MNU_STAFF_PARTY_RECORD_BYTES 0x1C4
-#define MNU_STAFF_PARTY_RECORD_BASE 0xA60
 #define MNU_STAFF_PARTY_PRESENT_BIT 1
 #define MNU_STAFF_PARTY_CATEGORY 4
 #define MNU_STAFF_RETAIN_RESOURCE 1
@@ -375,10 +354,10 @@ void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, 
 
     effResolveAndReleaseResource(*(u32 *)modelListAddress);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
-        PartyRecord *partyRecord = (PartyRecord *)(datGameState + MNU_STAFF_PARTY_RECORD_BASE + partyIndex * MNU_STAFF_PARTY_RECORD_BYTES);
+        DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
-            s32 modelIndex = partyRecord->slotIndex + D_00437B73;
+            s32 modelIndex = partyRecord->unitId + D_00437B73;
 
             effResolveAndReleaseResource(*(u32 *)(modelListAddress + modelIndex * 4 - 4));
         }
@@ -883,7 +862,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
         return;
     }
     func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawContext, 0x3F, layer);
-    func_0035C860(buffer, D_00437B80, ((CampCurrency *)datGameState)->currency);
+    func_0035C860(buffer, D_00437B80, datGameState->header.currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);

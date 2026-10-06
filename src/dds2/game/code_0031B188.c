@@ -1,5 +1,7 @@
 #include "common.h"
+#include "file.h"
 #include "pcp_vu0.h"
+#include "sdf_draw.h"
 
 typedef struct SoundSlot {
     u32 remainingFrames;
@@ -13,15 +15,11 @@ typedef struct SoundSlotPool {
 } SoundSlotPool;
 
 /* Model fields shared with the mdlManager context and node records. */
-typedef struct MdlNode {
-    u8 pad00[0x20];
-    f32 floatValue;
-} MdlNode;
 
 typedef struct MdlCtx {
     u32 flags;
     u8 pad04[0x18];
-    MdlNode *first;
+    Motion *first;
 } MdlCtx;
 
 /* Nodes passed to the menu model helpers are 0x50-byte records. */
@@ -76,7 +74,6 @@ extern u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord);
 extern ShortRecord *func_003225C0(ShortRecordList *list);
 
 
-typedef struct FileJob FileJob;
 typedef struct FileQueue {
     f32 offset[4];
     f32 axis[4];
@@ -301,7 +298,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work) {
                         node = work->modelNode;
                         if (node != NULL) {
                             model = node->model;
-                            model->first->floatValue = 0.5f;
+                            model->first->frameStep = 0.5f;
                             node->savedModelValue = 0.5f;
                             mdlAddEntryFlaggedEx(model, 0, record->parameters[1],
                                                 0.0f, record->parameters[2]);
@@ -388,7 +385,27 @@ void mnuDestroyNodeJobQueues(s32 *listAddress) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B748);
+extern FileQueue *fileQueueClone(FileQueue *source);
+extern char D_0040AD50[][64];
+extern const char D_00438950[]; /* "%d:%s\n"; shared sdata in current build. */
+
+/* Give the first record the source queue and clone it for subsequent records. */
+void func_0031B748(MnuEffectList *list, s32 resourceIndex, FileQueue **sources) {
+    FileQueue *source = NULL;
+    MnuEffectRecord *record = list->records;
+    s32 i;
+
+    for (i = 0; i < list->count; i++, record++) {
+        if (source == NULL) {
+            source = sources[resourceIndex];
+            record->queue = source;
+            evtPrintDeveloperConsoleMessage(D_00438950, resourceIndex, D_0040AD50[resourceIndex]);
+        } else {
+            record->queue = fileQueueClone(source);
+        }
+        record->flags = (record->flags & ~0x1FE) | ((u8)resourceIndex << 1);
+    }
+}
 
 extern void fileQueueSetPosition(FileQueue *queue, void *vector);
 extern void fileQueueSetScale(FileQueue *queue, f32 scale);
@@ -711,7 +728,7 @@ void mnuOverrideActiveNodeModelDepth(MnuNodeList *list, f32 z) {
         u32 active = node->flags & 1;
 
         if (active == 1) {
-            node->model->first->floatValue = z;
+            node->model->first->frameStep = z;
         }
         node++;
     }
@@ -726,7 +743,7 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
         u32 active = node->flags & 1;
 
         if (active == 1) {
-            node->model->first->floatValue = node->savedModelValue;
+            node->model->first->frameStep = node->savedModelValue;
         }
         node++;
     }
@@ -737,7 +754,7 @@ void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resource
     MdlCtx *model = (MdlCtx *)func_00232198(resourceGroup, resourceId);
     node->model = model;
     if (entryFlags != -1) {
-        model->first->floatValue = z;
+        model->first->frameStep = z;
         node->savedModelValue = z;
         mdlAddEntryFlaggedEx(model, 0, entryFlags, x, y);
     }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 extern s32 sdfAllocGeneralBlock(s32 size);
 extern s8 *sdfMemoryGetBlockAddress();
 
@@ -19,20 +20,8 @@ extern void func_00286BA8(void *record);
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
-/* Mantra record zeroed before each update call (0x1C4). */
-typedef struct {
-    u16 flags;      /* 0x0: low bit marks an active unit */
-    u16 pad2;       /* 0x2 */
-    u16 unk4;       /* 0x4 */
-    u8 pad6[0x1BE]; /* 0x6 */
-} MtrRecord;
 
-typedef struct MtrGameState {
-    u8 pad00[0xA60];
-    MtrRecord records[32];
-} MtrGameState;
 
-extern MtrGameState *datGameState;
 
 /* Sprite grid geometry: cell counts at +0x1C/+0x1E. */
 typedef struct {
@@ -167,22 +156,22 @@ void mtrMantraEventBitPop(s32 arg) {
 }
 
 extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
-void mtrMantraBitResetUnit(MtrRecord *record) {
+void mtrMantraBitResetUnit(DatPartyRecord *record) {
     s32 i;
 
     for (i = 0; i < 0xB0; i++) {
         scrSetEntryLowFlags((u32)record, i, 0);
     }
     evtPrintDeveloperConsoleMessage(
-        "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n", record->unk4);
+        "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n", record->unitId);
 }
 
 void mtrMantraBitReset(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (datGameState->records[i].flags & 1) {
-            mtrMantraBitResetUnit(&datGameState->records[i]);
+        if (datGameState->party[i].flags & 1) {
+            mtrMantraBitResetUnit(&datGameState->party[i]);
         }
     }
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraBitReset()]*****************\n");
@@ -202,10 +191,10 @@ void mtrMantraEventBitReset(void) {
 }
 
 void func_00286618(void) {
-    MtrRecord record;
+    DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
-    record.unk4 = 2;
+    record.unitId = 2;
     func_00286BA8(&record);
     mnuSynchronizeMantraModelFlags(0);
     if (mdlFlagTest(0x9A0)) {
@@ -214,10 +203,10 @@ void func_00286618(void) {
 }
 
 void func_00286670(void) {
-    MtrRecord record;
+    DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
-    record.unk4 = 1;
+    record.unitId = 1;
     func_00286BA8(&record);
     mnuSynchronizeMantraModelFlags(1);
     if (mdlFlagTest(0x9A1)) {
@@ -226,18 +215,18 @@ void func_00286670(void) {
 }
 
 void func_002866C8(void) {
-    MtrRecord record;
+    DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
-    record.unk4 = 3;
+    record.unitId = 3;
     func_00286BA8(&record);
 }
 
 void func_00286700(void) {
-    MtrRecord record;
+    DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
-    record.unk4 = 7;
+    record.unitId = 7;
     func_00286BA8(&record);
 }
 

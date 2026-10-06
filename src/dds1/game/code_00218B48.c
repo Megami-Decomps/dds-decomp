@@ -4,6 +4,7 @@
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "dat_state.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -116,7 +117,6 @@ static inline s8 mdlGetViewerDisplayMode(MdlViewState *state) {
 
 extern MdlCtrlState mdlViewerControlState;
 
-extern s32 datGameState;
 
 extern s32 D_003D7B10[];
 
@@ -1967,7 +1967,7 @@ extern void sdfConsCreateDrawPacket(s32, SdfTex *, s32);
 extern void sdfAppendTexturedLinePacket(s32, u32, s32, s32, s32, s32, s32,
                                         s32, s32, s32, s32, s32, s32);
 
-void func_0021C6E8(void) {
+void mdlDrawViewerTexturePreview(void) {
     s32 index = 0;
     s32 count = 0;
     s32 width, height;
@@ -2013,7 +2013,7 @@ void func_0021C6E8(void) {
 
 u32 mdlUpdateViewerNodeCursorTask(void) {
     mdlHandleViewerNodeCursorInput();
-    func_0021C6E8();
+    mdlDrawViewerTexturePreview();
     return 0;
 }
 
@@ -2595,15 +2595,10 @@ void mdlResetViewerFlagsAndSolarOverlay(void) {
     evtDisableSolarPhaseAdvance();
 }
 
-/* Model flag words are stored directly in the global work area at +0x840. */
-typedef struct MdlFlagBank {
-    u8 pad00[0x840];
-    u32 words[0x80];
-} MdlFlagBank;
 
 void mdlFlagClearAll(void) {
     s32 i = 0x7f;
-    u32 *word = ((MdlFlagBank *)datGameState)->words;
+    u32 *word = datGameState->modelFlags.words;
 
     do {
         i -= 1;
@@ -2628,17 +2623,17 @@ void mdlClearFlagRanges(void) {
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */
 void mdlFlagSet(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    ((MdlFlagBank *)datGameState)->words[adjustedFlag >> 5] |= 1 << flag;
+    datGameState->modelFlags.words[adjustedFlag >> 5] |= 1 << flag;
 }
 
 void mdlFlagClear(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    ((MdlFlagBank *)datGameState)->words[adjustedFlag >> 5] &= ~(1 << flag);
+    datGameState->modelFlags.words[adjustedFlag >> 5] &= ~(1 << flag);
 }
 
 s32 mdlFlagTest(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    return (((s32)((MdlFlagBank *)datGameState)->words[adjustedFlag >> 5] >> flag) & 1);
+    return (((s32)datGameState->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF78);

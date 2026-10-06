@@ -1346,7 +1346,7 @@ extern char D_00437700[];
 extern char D_00437708[];
 extern s8 D_004376D0[3];
 
-void func_00254678(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
+void evtDrawGroupPropertyTable(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
     s32 offset = 0;
     EvtRuntimeGroup *group = runtime->frameGroup;
     s32 i;

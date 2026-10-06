@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 
 extern u32 mtrHasEnoughOwnedMantras(void);
 
@@ -16,7 +17,6 @@ extern void scrClearAllSecondaryScriptFlags(u8 *work);
 
 extern void scrSetSecondaryScriptFlag(u8 *work, u16 index);
 
-extern s32 datGameState;
 
 extern s32 scrSetIntegerReturnValue(s32 arg0);
 
@@ -82,7 +82,7 @@ s32 scrCmdSetEntryFlagsInBothStores(void) {
     s32 result = 0;
 
     if (index >= 0) {
-        u8 *entry = (u8 *)(datGameState + index * 0x1C4 + 0xA60);
+        void *entry = &datGameState->party[index];
 
         scrSetFlag(entry, b);
         scrClearAllSecondaryScriptFlags(entry);

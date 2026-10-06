@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "mnu.h"
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
@@ -111,9 +112,17 @@ extern char D_00428550[]; /* "result2_draw" */
 typedef struct BrsResultCounter {
     u8 pad00[0x14];
     s8 phase;
-    u8 pad15[0x1F];
+    u8 pad15[7];
+    s32 alpha;
+    u8 pad20[0x10];
+    s32 shown;
     s32 remaining;
-    u8 pad38[0x14];
+    s32 increment;
+    u8 pad3C[5];
+    s8 unk41;
+    u8 pad42[2];
+    s32 unk44;
+    s32 unk48;
     s8 unk4C;
     u8 pad4D[0x13];
     s8 unk60;
@@ -123,9 +132,14 @@ typedef struct BrsResultCounter {
 typedef struct BrsResultWork {
     u8 pad00[0xAEAC];
     s32 settledFrames;
-    u8 padAEB0[0x19C];
+    u8 padAEB0[8];
+    s8 soundStarted;
+    u8 padAEB9[0x193];
     BrsResultCounter levelCounters[8];
     BrsResultCounter profileCounters[8];
+    u8 padB6CC[0x14];
+    s32 fadeProgress;
+    u8 padB6E4[0x20];
 } BrsResultWork;
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A05C0);

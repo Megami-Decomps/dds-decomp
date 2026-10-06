@@ -3,6 +3,7 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -1822,7 +1823,7 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE90);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BEC8);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022E4E0);
+INCLUDE_ASM(const s32, "game/code_0022AC10", btlDrawUnitAffinityDebug);
 
 typedef struct MenuList {
     u32 count;
@@ -2202,33 +2203,27 @@ typedef struct MotionRecordTable {
     MotionRecord entries[1];
 } MotionRecordTable;
 
-typedef struct MotionObject {
-    u8 pad00[0x28];
-    s16 recordIndex; /* 0x28 */
-    s16 slot;        /* 0x2A */
-} MotionObject;
 
 typedef struct MotionOwner {
     u8 pad00[0xC];
     MotionRecordTable *records; /* 0x0C */
     u8 pad10[8];
     void *heap;                 /* 0x18 */
-    MotionObject *first;        /* 0x1C: object created for slot 0 */
-    MotionObject *slots[1];     /* 0x20 */
+    Motion *first;        /* 0x1C: motion created for slot 0 */
+    Motion *slots[1];     /* 0x20 */
 } MotionOwner;
 
-extern MotionObject *func_003340E0();
+extern Motion *func_003340E0();
 
-/* Creates the object for record `index`; the record is reached as table->entries[index]
-   at each use (the repeated array address is what keeps two address registers live). */
-MotionObject *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
+/* Create and attach the motion for the selected resource record. */
+Motion *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
     void *resource = owner->records->entries[index].resource;
     s16 slot = owner->records->entries[index].slot;
-    MotionObject *object = func_003340E0(owner->heap, resource);
+    Motion *object = func_003340E0(owner->heap, resource);
 
-    object->recordIndex = index;
+    object->searchId = index;
     owner->slots[slot] = object;
-    object->slot = slot;
+    object->slotIndex = slot;
     if (slot == 0) {
         owner->first = object;
     }
