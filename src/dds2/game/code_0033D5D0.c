@@ -705,19 +705,61 @@ void sdfPathPrefixCat(char *dst, char *src) {
     strcat(dst, src);
 }
 
-u32 func_0033E800(void) {
+u32 func_0033E800(char *path) {
     return 0;
 }
 
-u32 func_0033E808(void) {
+u32 func_0033E808(char *path) {
     return 0;
 }
 
-u32 func_0033E810(void) {
+u32 func_0033E810(char *path) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E818);
+extern char D_00438B00[]; /* cdrom */
+extern u8 D_00438AE0;
+extern char *strchr(const char *, s32);
+extern s32 strncmp(const char *, const char *, u32);
+
+char *func_0033E818(char *path) {
+    s32 length = strlen(path);
+    char *result = sdfAllocSizeClassBlock(0x80);
+    char *cursor;
+    s32 character;
+    if (strchr(path, ':') != NULL) {
+        memcpy(result, path, length);
+        result[length] = 0;
+        if (strncmp(result, D_00438B00, 5) == 0) {
+            cursor = result + 5;
+            character = *cursor;
+            while (character != 0) {
+                if (character == '/') *cursor = '\\';
+                else if (character >= 'a' && character <= 'z') *cursor = character - 0x20;
+                cursor++;
+                character = *cursor;
+            }
+            *cursor++ = ';';
+            *cursor++ = '1';
+            *cursor = 0;
+        }
+    } else if (func_0033E800(path)) {
+        sdfDevMakeDiscPath(result, path);
+    } else if (func_0033E808(path)) {
+        sdfDevBuildPath(result, path);
+    } else if (func_0033E810(path)) {
+        sdfPathPrefixCat(result, path);
+    } else {
+        switch (D_00438AE0) {
+        case 0: sdfDevMakeDiscPath(result, path); break;
+        case 2: sdfPathPrefixCat(result, path); break;
+        case 1: sdfDevBuildPath(result, path); break;
+        default: strcpy(result, path); break;
+        }
+    }
+    return result;
+}
+
 
 /* Capture seek/size replies, then wake the synchronous command waiter. */
 void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 callbackContext) {
@@ -795,7 +837,6 @@ char *sdfDevGetPathBuffer(void) {
     return D_0040B9D0;
 }
 
-extern s8 D_00438AE0;
 
 void func_0033EC28(s8 value) {
     D_00438AE0 = value;
