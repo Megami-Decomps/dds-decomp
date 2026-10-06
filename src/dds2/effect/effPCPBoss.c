@@ -606,7 +606,21 @@ void effBossApplyGroupTint(u8 *work, s32 value) {
     effBossTrailSetColor(work, value);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018D830);
+/* Create paired four-point chains; the update fills their point vectors. */
+PairedEffectResources *func_0018D830(PairedEffectParams *src)
+{
+    PairedEffectResources *work = sdfAllocSizeClassBlock(sizeof(PairedEffectResources));
+    EffThunderGroupParams chain;
+
+    memcpy(work, src, sizeof(PairedEffectParams));
+    work->colorWithAlpha = 0x80808080;
+    work->frame = 0;
+    chain.params = work->fragment;
+    chain.count = 4;
+    work->resource[0] = effThunderChainGroupCreate(&chain);
+    work->resource[1] = effThunderChainGroupCreate(&chain);
+    return work;
+}
 
 PairedEffectResources *func_0018DA38(void *data) {
     void *work;

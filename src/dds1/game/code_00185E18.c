@@ -105,10 +105,10 @@ typedef struct {
     s32 bottom;       /* 0x24 */
 } BlurSource;
 
-extern void *effCreateSizedDrawPacket();
-extern void *billGetWorkTransformMatrix();
-extern void effBuildBlurUnitTextureQuad();
-extern void effBuildBlurTransformedQuad();
+extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
+extern s32 billGetWorkTransformMatrix(s32 packet);
+
+
 extern void sdfAppendPacket();
 
 typedef struct BlurFilterOps {
@@ -134,9 +134,162 @@ extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendDmaPrimary(void *, const void *, void *);
 
-INCLUDE_ASM(const s32, "game/code_00185E18", effBuildBlurTransformedQuad);
+/* One ST/XYZ2 pair in the packed draw payload. */
+typedef struct BlurPacketVertex {
+    f32 s, t;
+    u8 pad08[8];
+    s32 x, y;
+    u32 depth;
+    u16 xyzControl;
+    u8 pad1E[2];
+} BlurPacketVertex;
 
-INCLUDE_ASM(const s32, "game/code_00185E18", effBuildBlurUnitTextureQuad);
+typedef struct BlurPacketQuad {
+    u32 color[4];
+    BlurPacketVertex vertices[4];
+} BlurPacketQuad;
+
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+
+void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+{
+    f32 centerX, centerY, scale, cosine, sine;
+    f32 scaledU, scaledV, u, v;
+
+    /* Scratch coordinates first normalize the center, then rotate each sample. */
+
+    quad->color[0] = source->color[0];
+    quad->color[1] = source->color[1];
+    quad->color[2] = source->color[2];
+    quad->color[3] = source->color[3];
+    if (fixedPointCoordinates == 0) {
+        quad->vertices[0].x = (source->left << 4) + 0x7000;
+        quad->vertices[0].y = (source->top << 3) + 0x7900;
+        quad->vertices[1].x = quad->vertices[0].x;
+        quad->vertices[1].y = (source->bottom << 3) + 0x7900;
+        quad->vertices[2].x = (source->right << 4) + 0x7000;
+        quad->vertices[2].y = quad->vertices[0].y;
+        quad->vertices[3].x = quad->vertices[2].x;
+        quad->vertices[3].y = quad->vertices[1].y;
+        quad->vertices[0].s = source->left * (1.0f / 512.0f);
+        quad->vertices[0].t = source->top * (1.0f / 512.0f);
+        quad->vertices[1].s = quad->vertices[0].s;
+        quad->vertices[1].t = source->bottom * (1.0f / 512.0f);
+        quad->vertices[2].s = source->right * (1.0f / 512.0f);
+        quad->vertices[2].t = quad->vertices[0].t;
+        quad->vertices[3].s = quad->vertices[2].s;
+        quad->vertices[3].t = quad->vertices[1].t;
+    } else {
+        quad->vertices[0].x = source->left + 0x7000;
+        quad->vertices[0].y = source->top + 0x7900;
+        quad->vertices[1].x = quad->vertices[0].x;
+        quad->vertices[1].y = source->bottom + 0x7900;
+        quad->vertices[2].x = source->right + 0x7000;
+        quad->vertices[2].y = quad->vertices[0].y;
+        quad->vertices[3].x = quad->vertices[2].x;
+        quad->vertices[3].y = quad->vertices[1].y;
+        quad->vertices[0].s = source->left * (1.0f / 8192.0f);
+        quad->vertices[0].t = source->top * (1.0f / 4096.0f);
+        quad->vertices[1].s = quad->vertices[0].s;
+        quad->vertices[1].t = source->bottom * (1.0f / 4096.0f);
+        quad->vertices[2].s = source->right * (1.0f / 8192.0f);
+        quad->vertices[2].t = quad->vertices[0].t;
+        quad->vertices[3].s = quad->vertices[2].s;
+        quad->vertices[3].t = quad->vertices[1].t;
+    }
+    quad->vertices[0].depth = 0;
+    quad->vertices[0].xyzControl = 0;
+    quad->vertices[1].depth = 0;
+    quad->vertices[1].xyzControl = 0;
+    quad->vertices[2].depth = 0;
+    quad->vertices[2].xyzControl = 0;
+    quad->vertices[3].depth = 0;
+    quad->vertices[3].xyzControl = 0;
+    if (fixedPointCoordinates == 0) {
+        u = source->centerX + 256.0f;
+        v = source->centerY + 224.0f;
+        centerX = u * (1.0f / 512.0f);
+        centerY = v * (1.0f / 448.0f);
+    } else {
+        u = source->centerX + 4096.0f;
+        v = source->centerY + 1792.0f;
+        centerX = u * (1.0f / 8192.0f);
+        centerY = v * (1.0f / 3584.0f);
+    }
+    scale = source->scale;
+    cosine = sdfEvaluateCosineViaSinePhaseShift(source->rotation);
+    sine = sdfSinPoly(source->rotation);
+    scaledU = (quad->vertices[0].s - centerX) * scale;
+    scaledV = (quad->vertices[0].t - centerY) * scale;
+    u = scaledU * cosine - scaledV * sine;
+    v = scaledU * sine + scaledV * cosine;
+    quad->vertices[0].s = u + centerX;
+    quad->vertices[0].t = v + centerY;
+    scaledU = (quad->vertices[1].s - centerX) * scale;
+    scaledV = (quad->vertices[1].t - centerY) * scale;
+    u = scaledU * cosine - scaledV * sine;
+    v = scaledU * sine + scaledV * cosine;
+    quad->vertices[1].s = u + centerX;
+    quad->vertices[1].t = v + centerY;
+    scaledU = (quad->vertices[2].s - centerX) * scale;
+    scaledV = (quad->vertices[2].t - centerY) * scale;
+    u = scaledU * cosine - scaledV * sine;
+    v = scaledU * sine + scaledV * cosine;
+    quad->vertices[2].s = u + centerX;
+    quad->vertices[2].t = v + centerY;
+    scaledU = (quad->vertices[3].s - centerX) * scale;
+    scaledV = (quad->vertices[3].t - centerY) * scale;
+    u = scaledU * cosine - scaledV * sine;
+    v = scaledU * sine + scaledV * cosine;
+    quad->vertices[3].s = u + centerX;
+    quad->vertices[3].t = v + centerY;
+}
+
+
+void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+{
+    quad->color[0] = 0x80;
+    quad->color[1] = 0x80;
+    quad->color[2] = 0x80;
+    quad->color[3] = source->color[3];
+    if (fixedPointCoordinates == 0) {
+        quad->vertices[0].x = (source->left << 4) + 0x7000;
+        quad->vertices[0].y = (source->top << 3) + 0x7900;
+        quad->vertices[1].x = quad->vertices[0].x;
+        quad->vertices[1].y = (source->bottom << 3) + 0x7900;
+        quad->vertices[2].x = (source->right << 4) + 0x7000;
+        quad->vertices[2].y = quad->vertices[0].y;
+        quad->vertices[3].x = quad->vertices[2].x;
+        quad->vertices[3].y = quad->vertices[1].y;
+    } else {
+        quad->vertices[0].x = source->left + 0x7000;
+        quad->vertices[0].y = source->top + 0x7900;
+        quad->vertices[1].x = quad->vertices[0].x;
+        quad->vertices[1].y = source->bottom + 0x7900;
+        quad->vertices[2].x = source->right + 0x7000;
+        quad->vertices[2].y = quad->vertices[0].y;
+        quad->vertices[3].x = quad->vertices[2].x;
+        quad->vertices[3].y = quad->vertices[1].y;
+    }
+    quad->vertices[0].s = 0.0f;
+    quad->vertices[0].t = 0.0f;
+    quad->vertices[1].s = 0.0f;
+    quad->vertices[1].t = 1.0f;
+    quad->vertices[2].s = 1.0f;
+    quad->vertices[2].t = 0.0f;
+    quad->vertices[3].s = 1.0f;
+    quad->vertices[3].t = 1.0f;
+    quad->vertices[0].depth = 0;
+    quad->vertices[0].xyzControl = 0;
+    quad->vertices[1].depth = 0;
+    quad->vertices[1].xyzControl = 0;
+    quad->vertices[2].depth = 0;
+    quad->vertices[2].xyzControl = 0;
+    quad->vertices[3].depth = 0;
+    quad->vertices[3].xyzControl = 0;
+}
+
 
 void effDrawBlurRectangle(BlurSource *source)
 {
@@ -191,7 +344,7 @@ void effDrawBlurRectangle(BlurSource *source)
         clampPacket[5] = 8;
         sdfAppendPacket(list, clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
-        effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
+        effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((s32)drawPacket), 0);
         sdfAppendPacket(list, drawPacket);
         D_003253E8.draw(&D_003253E8, list);
     }
@@ -205,10 +358,10 @@ void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPoint
     void *packet;
 
     packet = effCreateSizedDrawPacket(1, 0x200);
-    effBuildBlurUnitTextureQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
+    effBuildBlurUnitTextureQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((s32)packet), fixedPointCoordinates);
     sdfAppendPacket(list, packet);
     packet = effCreateSizedDrawPacket(1, 0);
-    effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
+    effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((s32)packet), fixedPointCoordinates);
     sdfAppendPacket(list, packet);
 }
 
