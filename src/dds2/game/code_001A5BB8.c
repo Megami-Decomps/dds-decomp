@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 #include "itf.h"
 #include "btl_state.h"
 #include "btl_ui.h"
@@ -140,20 +141,6 @@ typedef struct UiObject {
     u8 pad_318[0x4C];
     struct UiObject *next;
 } UiObject;
-
-typedef struct BtlSlotRecord {
-    u8 pad00[0xC];
-    s32 unk0C;
-    u8 pad10[0x6C];
-    s32 unk7C;
-    u8 pad80[4];
-    u32 word[7];
-} BtlSlotRecord;
-
-typedef struct BtlSlotOwner {
-    u8 pad_00[0x18];
-    BtlSlotRecord *records;
-} BtlSlotOwner;
 
 /* Actor-task record; the separate unit-data list uses UiObject. */
 typedef struct SceneTask {
@@ -4331,9 +4318,9 @@ typedef struct BtlResBlock {
     s32 nameA;
     s32 nameB;
     s32 nameC;
-    BtlSlotOwner *resA;
-    BtlSlotOwner *resB;
-    BtlSlotOwner *resC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
     s32 unk1C;
 } BtlResBlock;
 
@@ -4389,12 +4376,12 @@ void btlPanelResourcesLoad(void) {
 
 typedef struct BtlWorkRes {
     u8 pad[0x4D8];
-    BtlSlotOwner *resA;
-    BtlSlotOwner *resB;
-    BtlSlotOwner *resC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
 } BtlWorkRes;
 
-extern BtlSlotOwner *func_00305148();
+extern EffectSlotSet *func_00305148();
 
 void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
@@ -4408,7 +4395,7 @@ void btlLoadResourceBlock(void) {
     }
 }
 
-extern s32 effDestroyResourceSlotSet(BtlSlotOwner *);
+extern s32 effDestroyResourceSlotSet(EffectSlotSet *);
 
 void btlReleaseResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
@@ -5063,8 +5050,8 @@ typedef struct BtlPanelStrip {
     s32 texture;
 } BtlPanelStrip;
 
-extern u32 btlSetSlotLowByteClamped(BtlSlotOwner *, s32, s32, s32);
-extern void func_00306C28(s32, s32, s32, u32 *, s32, BtlSlotOwner *, s32, s32);
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004160F0);
 
@@ -5089,8 +5076,8 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004162F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB1E8);
 
-u32 btlSetSlotLowByteClamped(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta) {
-    u32 word = owner->records[group].word[slot];
+u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delta) {
+    u32 word = owner->workEntries[group].savedColors[slot];
     u32 limit;
     u32 value;
     if (delta > 0) {
@@ -5388,11 +5375,11 @@ s32 btlDrawTimedDialogTask(s64 task) {
     half = width / 32;
     func_00306C28(((width >> 4) - half + 0x105) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C = (width >> 4) << 4;
+    btlResourceBlock->resC->workEntries[0x16].width = (width >> 4) << 4;
     func_00306C28((0x100 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->records[0x16].unk0C =
-        btlResourceBlock->resC->records[0x16].unk7C << 4;
+    btlResourceBlock->resC->workEntries[0x16].width =
+        btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     func_00306C28((0x92 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
     if (expired) {
