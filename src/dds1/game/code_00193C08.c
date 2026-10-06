@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 #define FR_FONT_BYTE_MASK 0xFF
 #define FR_FONT_ENTRY_ENABLED 1
@@ -251,11 +252,11 @@ void frFontUploadClearedTexture(void) {
     sdfReleaseResourceAllocation((void *)allocation);
 }
 
-extern void *sdfReadNamedResource();
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void frFontBindResourceSections(u8, u8 *, void *);
 
 /* Load only when the slot word is not exactly one; slot one borrows entry zero's allocation. */
-void frFontEnsureSlotLoaded(s32 slotId, s32 path) {
+void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     s32 slotIndex = slotId & FR_FONT_BYTE_MASK;
     FrFontSystem *fontSystem = &frFontWork;
 
