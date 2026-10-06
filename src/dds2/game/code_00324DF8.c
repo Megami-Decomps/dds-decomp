@@ -429,7 +429,50 @@ f32 *sdfVectorTransformByMatrix(f32 *vec, f32 *mat) {
     return vec;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00327C80);
+extern f64 func_003532A0(f64);
+
+/* Convert a rotation basis to quaternion components, choosing the largest
+ * diagonal when the trace branch is ill-conditioned. */
+void func_00327C80(f32 *out, SdfMat4 *matrix) {
+    SdfMat4 copy;
+    f32 quaternion[4];
+    f32 trace;
+    f32 scale;
+    s32 i;
+    u8 j;
+    u8 k;
+
+    trace = matrix->m[0] + matrix->m[5] + matrix->m[10] + 1.0f;
+    if (trace >= 1.0f) {
+        scale = func_003532A0(trace) * 2.0;
+        out[3] = scale * 0.25f;
+        out[0] = (matrix->m[6] - matrix->m[9]) / scale;
+        out[1] = (matrix->m[8] - matrix->m[2]) / scale;
+        out[2] = (matrix->m[1] - matrix->m[4]) / scale;
+    } else {
+        copy = *matrix;
+        i = copy.m[0] > copy.m[5] ? 0 : 1;
+        if (copy.m[i * 4 + i] < copy.m[10]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        scale = func_003532A0(copy.m[i * 4 + i] - copy.m[j * 4 + j] -
+                             copy.m[k * 4 + k] + 1.0f) * 2.0;
+        if (scale != 0.0f) {
+            quaternion[i] = scale * 0.25f;
+            quaternion[j] = (copy.m[i * 4 + j] + copy.m[j * 4 + i]) / scale;
+            quaternion[k] = (copy.m[i * 4 + k] + copy.m[k * 4 + i]) / scale;
+            quaternion[3] = (copy.m[j * 4 + k] - copy.m[k * 4 + j]) / scale;
+        } else {
+            quaternion[i] = 1.0f;
+            quaternion[j] = 0.0f;
+            quaternion[k] = 0.0f;
+            quaternion[3] = 0.0f;
+        }
+        memcpy(out, quaternion, sizeof(quaternion));
+    }
+}
 
 void func_00328018(SdfMat4 *out, SdfVec4 *q) {
     f32 xx = q->x * q->x;
