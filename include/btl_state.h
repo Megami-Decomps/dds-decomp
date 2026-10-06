@@ -97,6 +97,7 @@ typedef struct BtlState {
 #ifdef VERSION_DDS2
 struct ActionStateLink;
 struct SceneTask;
+struct BtlLinkedCommand;
 
 /* Three-byte scene scheduling slot; IDs move with their group/countdown. */
 typedef struct BtlSceneSlot {
@@ -112,11 +113,18 @@ typedef struct BtlSceneFadingRecord {
 } BtlSceneFadingRecord;
 
 
-/* Same singleton battle work as DDS1, returned by func_001AA6F8. In particular
- * the script-owner/task pair is +0x2C4/+0x2C8, not DDS1's offsets plus 0x24.
- * Sparse actor-list, effect-context and script-resource views are this object. */
+/* The 0xFD4-byte singleton allocated by DDS2 0x1A9B80 and returned by
+ * 0x1AA6F8. Its script-owner/task pair is +0x2C4/+0x2C8, not DDS1's
+ * offsets plus 0x24. Scene groups, actor lists and SYSEFF slots belong here. */
 typedef struct BtlState {
-    u8 pad000[0x1E4];
+    u8 pad000[0x180];
+    u32 runtimeFlags;
+    void *activeSlot;
+    u8 pad188[0xC];
+    u32 activeUnitId;
+    u8 pad198[0x10];
+    BtlIndexList *pendingSoundList;
+    u8 pad1AC[0x38];
     s16 eventTaskId; /* 0x1E4 */
     u8 pad1E6[2];
     u32 scriptFlags; /* 0x1E8 */
@@ -135,7 +143,8 @@ typedef struct BtlState {
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk220;
-    u8 pad224[8];
+    u8 pad224[4];
+    s32 unk228;
     s32 currentScene; /* 0x22C */
     s32 queuedScene;
     s32 frame;
@@ -145,18 +154,31 @@ typedef struct BtlState {
     s32 scriptArg;
     struct ActionStateLink *tasks; /* 0x248: 0x180-byte sequence list, next at +0x178 */
     BtlUnit *units; /* 0x24C */
-    u8 pad250[0x1E];
+    struct SoundTask *taskTail; /* 0x250: newest scheduler registration */
+    struct SoundTask *taskHead; /* 0x254: oldest scheduler registration */
+    struct SoundResourceNode *soundResourceHead;
+    struct ActiveSoundNode *soundList;
+    struct SoundSlotOwner *soundSlotOwners;
+    u8 pad264[4];
+    u16 unk268;
+    u8 pad26A[4];
     u8 encounterKind; /* 0x26E: scene setup selects 0, 2 or 3. */
     u8 pad26F;
     u16 mode; /* 0x270 */
     u8 pad272[2];
     s32 turnCount; /* 0x274 */
-    u8 pad278[4];
+    s32 unk278;
     u8 eventReady; /* 0x27C */
-    u8 pad27D[3];
+    u8 pad27D;
+    u16 unk27E;
     u16 phase; /* 0x280 */
     u8 requestMode; /* 0x282 */
-    u8 pad283[0x11];
+    u8 pad283;
+    u16 earringPlaybackCount;
+    u8 pad286[2];
+    u32 unk288;
+    u32 unk28C;
+    u8 pad290[4];
     s32 effectLayer; /* 0x294 */
     u8 pad298[8];
     s32 battleMode; /* 0x2A0 */
@@ -172,7 +194,10 @@ typedef struct BtlState {
     u32 sceneObject; /* 0x2D0 */
     u32 spriteObject;
     u32 sceneStatus;
-    u8 pad2DC[0x1C];
+    u8 pad2DC[0xC];
+    s32 moneyEarned;
+    u8 pad2EC[8];
+    s32 experienceEarned;
     s32 unk2F8;
     u8 pad2FC[2];
     BtlSceneSlot slots[8]; /* 0x2FE */
@@ -186,30 +211,86 @@ typedef struct BtlState {
     s32 activeGroupCount;
     BtlSceneFadingRecord fading[8]; /* 0x480 */
     struct SceneTask *currentTask;
-    u8 pad4C4[0x10];
+    s8 unk4C4;
+    u8 pad4C5[3];
+    f32 unk4C8;
+    s32 messageWindows[2];
     s32 scriptTarget;
     u8 pad4D8[4];
     struct EffectSlotSet *resB; /* 0x4DC: resource slots used for battle-number glyphs */
-    u8 pad4E0[8];
+    u8 pad4E0[4];
+    u32 unk4E4; /* First word returned by the indexed scene-value API. */
     u32 buttonTextureHandle; /* 0x4E8 */
-    u8 pad4EC[0xDC];
+    struct SoundResourceNode *resources[0x31]; /* 0x4EC: SYSEFF resource slots */
+    void *primaryBuffer;
+    void *secondaryBuffer;
+    u8 fadeEnabled;
+    u8 pad5B9[3];
+    u32 fadeColor;
+    s32 soundTransitionTask;
+    u8 pad5C4[4];
     void (*bossCleanup)(void); /* 0x5C8 */
     s32 (*selectScriptArg)(void); /* 0x5CC */
-    u8 pad5D0[0x14];
+    u8 pad5D0[4];
+    s32 (*hook5D4)(BtlUnit *, s32, s32);
+    s32 (*hook5D8)(BtlUnit *);
+    s32 (*hook5DC)(BtlUnit *, s32);
+    u8 pad5E0[4];
     s32 (*sceneCallback)(); /* 0x5E4 */
-    u8 pad5E8[0x3C];
+    u8 pad5E8[8];
+    s32 (*hook5F0)(BtlUnit *, s32);
+    u8 pad5F4[0x24];
+    s32 (*hook618)(BtlUnit *);
+    s32 (*hook61C)(BtlUnit *);
+    u8 pad620[4];
     void (*afterUnitUpdate)(void); /* 0x624 */
     s32 (*selectScriptState)(void); /* 0x628 */
     void (*completionHook)(); /* 0x62C */
-    u8 pad630[0x34];
-    s32 (*actionCameraStepHook)(BtlUnit *); /* 0x664: nonzero handles the camera step. */
-    u8 pad668[0x84];
+    s32 (*actionStateSelectionHook)(struct ActionStateLink *);
+    u8 pad634[4];
+    void (*commandTurnEndHook)(struct ActionStateLink *);
+    s32 (*commandHook)(s32, s32);
+    u8 pad640[8];
+    s32 (*hook648)(BtlUnit *);
+    s32 (*hook64C)(BtlUnit *);
+    s32 (*hook650)(BtlUnit *);
+    s32 (*hook654)(BtlUnit *);
+    s32 (*hook658)(BtlUnit *);
+    u8 pad65C[4];
+    s32 (*hook660)(BtlUnit *, s32, s32);
+    s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
+    s32 (*hook668)(BtlUnit *);
+    s32 (*hook66C)(BtlUnit *);
+    s32 (*hook670)(struct BtlLinkedCommand *);
+    u8 pad674[0x10];
+    s32 (*hook684)(s32, s32);
+    s32 (*hook688)(s32, s32);
+    void (*preActionHook)(struct ActionStateLink *, s32, u64, u64, u64);
+    void (*postActionHook)(struct ActionStateLink *, s32, BtlUnit *, u64, u64, s32);
+    u8 pad694[8];
+    s32 (*hook69C)(BtlUnit *);
+    s32 (*hook6A0)(BtlUnit *);
+    u8 pad6A4[4];
+    void (*linkedActionHook)(struct ActionStateLink *);
+    u8 pad6AC[0x24];
+    void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
+    u8 pad6D4[0xC];
+    s32 (*hook6E0)(BtlUnit *);
+    s32 (*hook6E4)(BtlUnit *);
+    s32 (*hook6E8)(BtlUnit *);
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
-    u8 pad6F0[0x10];
+    void (*hook6F0)(BtlUnit *, s32, s32, s32, s32, f32);
+    void (*hook6F4)(BtlUnit *, s32, f32);
+    void (*hook6F8)(BtlUnit *, s32, s32);
+    s32 (*hook6FC)(BtlUnit *, s32, s32);
     void (*unitReturnHook)(struct SceneTask *); /* 0x700: custom return-to-group handling */
-    u8 pad704[0x14];
+    u8 pad704[0xC];
+    s32 (*hook710)(BtlUnit *, s32);
+    u8 pad714[4];
     struct BattleLinkedEffectState *effect; /* 0x718 */
-    u8 pad71C[0xC];
+    u32 tint71C;
+    u8 pad720[4];
+    s32 unk724;
     s32 unk_728;
     s32 unk_72C;
     u8 pad730[8];
