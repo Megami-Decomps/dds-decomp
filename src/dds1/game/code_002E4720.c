@@ -670,19 +670,59 @@ void sdfPathPrefixCat(char *destination, char *path) {
     strcat(destination, path);
 }
 
-u32 func_002E5958(void) {
+u32 func_002E5958(char *path) {
     return 0;
 }
 
-u32 func_002E5960(void) {
+u32 func_002E5960(char *path) {
     return 0;
 }
 
-u32 func_002E5968(void) {
+u32 func_002E5968(char *path) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5970);
+extern char D_003BD410[]; /* cdrom */
+extern char *strchr(const char *, s32);
+extern s32 strncmp(const char *, const char *, u32);
+
+char *func_002E5970(char *path) {
+    s32 length = strlen(path);
+    char *result = sdfAllocSizeClassBlock(0x80);
+    char *cursor;
+    s32 character;
+    if (strchr(path, ':') != NULL) {
+        memcpy(result, path, length);
+        result[length] = 0;
+        if (strncmp(result, D_003BD410, 5) == 0) {
+            cursor = result + 5;
+            character = *cursor;
+            while (character != 0) {
+                if (character == '/') *cursor = '\\';
+                else if (character >= 'a' && character <= 'z') *cursor = character - 0x20;
+                cursor++;
+                character = *cursor;
+            }
+            *cursor++ = ';';
+            *cursor++ = '1';
+            *cursor = 0;
+        }
+    } else if (func_002E5958(path)) {
+        sdfDevMakeDiscPath(result, path);
+    } else if (func_002E5960(path)) {
+        sdfDevBuildPath(result, path);
+    } else if (func_002E5968(path)) {
+        sdfPathPrefixCat(result, path);
+    } else {
+        switch (D_003BD3F0) {
+        case 0: sdfDevMakeDiscPath(result, path); break;
+        case 2: sdfPathPrefixCat(result, path); break;
+        case 1: sdfDevBuildPath(result, path); break;
+        default: strcpy(result, path); break;
+        }
+    }
+    return result;
+}
 
 /* Capture seek/size replies, then wake the synchronous command waiter. */
 void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 callbackContext) {
