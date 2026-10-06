@@ -4218,7 +4218,54 @@ void effPcpReleaseBeamClone(EffPCPBeamWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001808F8);
+/* Grow the beam's visible geometry and fade it over its configured lifetime. */
+void func_001808F8(EffPCPBeamWork *work) {
+    s32 vertexFrames = work->params.vertexGrowthFrames;
+    s32 endFrame = vertexFrames;
+    s32 frame = work->frame;
+    s32 fadeIn = work->params.fadeInFrames;
+    s32 fadeOut = work->params.fadeOutFrames;
+    f32 t;
+    u32 color;
+    EffPCPBeamNode *beam;
+
+    if (endFrame < work->params.radiusGrowthFrames) {
+        endFrame = work->params.radiusGrowthFrames;
+    }
+    endFrame += work->params.holdFrames;
+    if (frame > endFrame) return;
+    if (frame < vertexFrames) {
+        u32 groups;
+        t = (f32)frame / (f32)vertexFrames;
+        groups = (u32)((f32)(work->vertexCount >> 2) * t);
+        work->node->vertexCount = groups << 2;
+    } else {
+        work->node->vertexCount = work->vertexCount;
+    }
+    if (frame < work->params.radiusGrowthFrames) {
+        t = (f32)work->frame / (f32)work->params.radiusGrowthFrames;
+        effPcpBuildConcentricBeamVertices(
+            (work->params.endRadius - work->params.unk28) *
+                t + work->params.unk28,
+            work);
+    } else {
+        effPcpBuildConcentricBeamVertices(work->params.endRadius, work);
+    }
+    if (frame < fadeIn && fadeIn != 0) {
+        t = (f32)frame / (f32)fadeIn;
+    } else if (endFrame - frame <= fadeOut && fadeOut != 0) {
+        t = (f32)(endFrame - frame) / (f32)fadeOut;
+    } else {
+        t = 1.0f;
+    }
+    color = effBlendColor(work->color & 0xFFFFFF, work->color, t);
+    beam = work->node;
+    beam->color = color;
+    PCP_COPY_VECTOR(&beam->position, work->params.position);
+    effPcpDrawBeamGeometryNode(beam);
+    work->frame++;
+}
+
 
 void effPcpCopyBeamVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
