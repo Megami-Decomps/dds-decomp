@@ -2162,6 +2162,16 @@ its selected slot is the halfword at `+0x12`. Use
 `((MenuTerminalWindowState *)list->context)->command` through a typed local,
 without a second action-owner projection.
 
+The command value is signed `s32`: the row and window fades load it into
+`cvt.s.w` directly, with no unsigned-conversion branch. The same primary
+context has a signed pulse counter at `+0x08`; the selected-row callback
+increments it through 60 and converts it directly to float for its sine.
+The matching window fade at `0x002960F0` borrows this context directly,
+instead of projecting its command through a separate `s32 *` array.
+Its complete consumer unit is clean at 13 matching functions. The larger
+row callback at `0x002958B0` remains assembly after three honest source
+shapes, with its best bounded candidate parked rather than enabled.
+
 The separate `0x38C` `MenuTerminalContext` owns the terminal's phase at
 `+0xC0` and frame counter at `+0xBC`. The phase is signed: the wait helper
 uses `slti`, not `sltiu`. Its slot-advance count at `+0xCC` is also signed
@@ -2217,7 +2227,7 @@ gradient-control callers borrow `&state->active` under the same contract
 store zero or test it for zero/nonzero, with no sign-dependent use.
 The PR534/547 word-setter callers remain intentionally protected residuals,
 as does the separately deferred dispatcher ABI.
- 
+
 The staff-value callback at `0x002AFE18` matches all 856 native bytes using
 the primary staff, window, list and party-record owners. Its final item-use
 arm is a normal nested `if (operation == 0) { failure } else { reset }`,
@@ -2225,4 +2235,73 @@ not an inverted `else if` chain. Keep the actual `u16` current-ID getter
 return type and its existing integer-address parameter contract; the two
 older label callers and the new callback all preserve their native code.
 
+
+## Flag lists own their complete embedded color parameters
+
+The DDS1 `0x002CEAE8` and DDS2 `0x00316528` factories allocate
+`0x58 + 0x30 * count` bytes. The `SdfFlagListWork` is appended after
+three separate arrays: two four-float vertices (`0x20` bytes), two packed
+colors (`0x08` bytes), and one `SdfFlagListMark` (`0x08` bytes) per entry.
+The work owns those array pointers and the SDK allocation handle at `+0x54`.
+The factory copies the entire `0x40`-byte `SdfFlagListParams` to `+0x14`;
+neither the old `RgbAlpha` prefix nor a separate selection-work view is a
+complete owner.
+
+The parameter's `0x24`-byte color track contains packed color words, not
+floats at every word. Its following `0x10`-byte alpha track carries the
+alpha value, draw-surface index, and floating fade-in/fade-out fractions.
+The final three parameter words are the signed frame limit, entry count,
+and speed. Field color defaults and updates borrow this same parameter
+record, and color-copy APIs write directly into the embedded record.
+
+Rain and field effect slots store `SdfFlagListWork *`, not game-pointer
+words. DDS1's battle slot is `+0x58C`; DDS2's is `+0x5C0`. The existing
+singleton battle getter's address-word ABI is unchanged. SDK retained
+address conversion and allocation partitioning occur only at the factory
+boundary; callers do not reconstruct this owner's fields through offsets.
+
+
+## Runtime task handles retain the unsigned sequence counter
+
+`btlStartTask` returns the runtime task's `u64 handle` at `+0x38`.
+DDS1's `0x001D4860` stores the fresh 64-bit sequence counter with `sd`
+and rereads that same member with `ld v0` at `0x001D48A8` before returning.
+The shared `BtlRuntimeTask` and DDS2 provider use the same member.
+Use `u64`, not a widened signed return invented to obtain code generation.
+Both complete provider units and the unprotected local-extern consumers
+retain their native code after this return-only correction. The protected
+PR530 consumer in DDS2 `code_00227288` intentionally retains its local
+`s64` declaration; there is no conflicting shared-header declaration.
+
+The effect creator's scheduler predicate at `+0x08` belongs to
+`startCondition.value.taskKind`; it is not the runtime `taskId` at `+0x20`.
+The DDS1 scene consumer borrows the existing `BtlRuntimeTask` rather than
+a misleading short request prefix. Its readiness function remains assembly:
+three natural forms failed, and the best candidate is parked, not enabled.
+The separate task-argument getter ABI and its 180 declaration/call/definition
+sites are unchanged; a provider-local pointer prototype is not a substitute
+for an actual getter/consumer cutover.
+
+## Party pages borrow complete stat rows and texture/effect bars
+
+`PartyPanelEntry` is a real `0x34`-byte row, not three words followed by
+padding. DDS2's producer at `0x002C4328` copies the party record's level,
+current HP/MP and maxima into `+0x0C` through `+0x1C`, then sign-extends
+the five base-stat bytes into the five words at `+0x20` through `+0x30`.
+The natural indexed five-stat `for` loop matches all 260 native bytes;
+the caller passes the actual `DatPartyRecord *` without a byte-view cast.
+The complete producer unit remains clean at 172 matching functions.
+
+The HP/MP subrecords in each DDS2 page bank are the same complete
+`0x50`-byte texture/effect owners used by the ratio-panel helpers.
+`MenuPageBar` owns the settings, seven textures, two effect nodes, fade
+and effect-update state. The former local `MenuEffectPair` was a second
+view of this storage, not another owner; its consumers now borrow the
+shared primary type. Fade/reset callers use `fade` and `fadeOut` directly,
+and the complete companion unit remains clean at 109 matching functions.
+
+The larger page renderer at `0x002BFEA0` stays assembly after three honest
+source shapes. Its best `MenuPoint`-based candidate differs in 22 of 291
+instruction words and still has constant-pool/shared-data differences.
+Keep that partial parked rather than enabling it or declaring a match.
 
