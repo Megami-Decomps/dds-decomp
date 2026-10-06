@@ -5037,6 +5037,11 @@ void effPcpSetSprayScale(EffPCPPulseWork *work, f32 val) {
     work->scale = val;
 }
 
+struct EffEventWork;
+extern void effEventSetScale(struct EffEventWork *event, f32 scale);
+extern void effEventCopyFileRecordHeader(void *dst, const void *src);
+extern void func_00197F60(struct EffEventWork *event);
+
 /* Placement block handed to every spawned event entry. */
 typedef struct EffPCPEventPlace {
     f32 pos[7];
@@ -5466,23 +5471,25 @@ void func_0018B128(EffPCPPairedEventWork *work, u32 value) {
 }
 
 typedef struct EffPCPSpawnRangeParams {
-    u8 pad00[0x54];
+    f32 origin[4];
+    u8 pad10[0x44];
     s32 duration;
     u32 count;
     s32 delaySpread;
-    u8 pad60[8];
-    f32 unk68, unk6C;
-    u8 pad70[4];
-    f32 unk74, unk78;
-    u8 pad7C[4];
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 initialAngularStep, angularJitter;
+    f32 angularDamping;
+    f32 initialHeightStep, heightJitter;
+    f32 heightDamping;
     f32 startPosition, endPosition, startJitter, endJitter;
-    f32 unk90;
+    f32 startHeightRange;
 } EffPCPSpawnRangeParams;
 
 typedef struct EffPCPSpawnRangeEvent {
     void *event;
-    s32 delay;
-    f32 unk08, unk0C, angle, unk14, position, positionStep;
+    s32 frame;
+    f32 height, heightStep, angle, angularStep, position, positionStep;
 } EffPCPSpawnRangeEvent;
 
 typedef struct EffPCPSpawnRangeWork {
@@ -5496,7 +5503,7 @@ typedef struct EffPCPSpawnRangeWork {
     void *handle;
 } EffPCPSpawnRangeWork;
 
-/* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start delay. */
+/* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
 void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
@@ -5530,9 +5537,9 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     for (i = 0; i < count; i++) {
         entry->event = (void *)effEventCreate(work->owner, 2, &place);
         if (life > 0) {
-            entry->delay = -(effMiscRand(D_003AA868) % life);
+            entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
-            entry->delay = 0;
+            entry->frame = 0;
         }
         entry++;
     }
@@ -5581,9 +5588,9 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     for (i = 0; i < count; i++) {
         entry->event = (void *)effEventCreate(work->owner, 2, &place);
         if (life > 0) {
-            entry->delay = -(effMiscRand(D_003AA868) % life);
+            entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
-            entry->delay = 0;
+            entry->frame = 0;
         }
         entry++;
     }
@@ -5618,13 +5625,13 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
 
     slot = &work->entries[index];
     scale = work->scale;
-    slot->delay = 0;
-    slot->unk08 = -work->params.unk90 * effMiscRandUnitFloat(D_003AA868);
-    spread = work->params.unk78;
-    slot->unk0C = work->params.unk74 * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    slot->frame = 0;
+    slot->height = -work->params.startHeightRange * effMiscRandUnitFloat(D_003AA868);
+    spread = work->params.heightJitter;
+    slot->heightStep = work->params.initialHeightStep * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     slot->angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
-    spread = work->params.unk6C;
-    slot->unk14 = work->params.unk68 * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    spread = work->params.angularJitter;
+    slot->angularStep = work->params.initialAngularStep * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     spread = work->params.startJitter;
     slot->position = work->params.startPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale;
     spread = work->params.endJitter;
@@ -5632,7 +5639,74 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
 }
 
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B778);
+
+/* vu0 routine: move delayed radial events, apply damping, then fade and draw. */
+void func_0018B778(EffPCPSpawnRangeWork *work) {
+    EffPCPEventPlace place;
+    f32 origin[4] __attribute__((aligned(16)));
+    u32 count = work->params.count;
+    s32 duration = work->params.duration;
+    s32 fadeIn = work->params.fadeIn;
+    s32 fadeOut = work->params.fadeOut;
+    f32 angularDamping = work->params.angularDamping;
+    f32 heightDamping = work->params.heightDamping;
+    EffPCPSpawnRangeEvent *entry = work->entries;
+    u32 color = work->color;
+    u32 i;
+    s32 frame;
+
+    PCP_COPY_VECTOR(origin, work->params.origin);
+    if (duration == 0) {
+        return;
+    }
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    for (i = 0; i < count; i++, entry++) {
+        frame = entry->frame;
+        if (frame <= duration) {
+            if (frame == 0) {
+                effPcpRandomizeSpawnSlot(work, i);
+                effEventSetScale(entry->event, work->scale);
+                frame = entry->frame;
+            }
+            if (frame >= 0) {
+                f32 angle = entry->angle;
+                f32 radius = entry->position;
+                f32 cosine;
+                f32 sine;
+                f32 fade;
+
+                cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+                sine = sdfSinPoly(angle);
+                place.pos[0] = origin[0] + cosine * radius;
+                place.pos[1] = origin[1] + entry->height;
+                place.pos[2] = origin[2] + sine * radius;
+                entry->height += entry->heightStep;
+                entry->position += entry->positionStep;
+                entry->angle += entry->angularStep;
+                entry->heightStep *= heightDamping;
+                entry->angularStep *= angularDamping;
+                if (frame < fadeIn && fadeIn != 0) {
+                    fade = (f32)frame / (f32)fadeIn;
+                } else if (duration - frame <= fadeOut && fadeOut != 0) {
+                    fade = (f32)(duration - frame) / (f32)fadeOut;
+                } else {
+                    fade = 1.0f;
+                }
+                place.color = effBlendColor(color & 0xFFFFFF, color, fade);
+                effEventCopyFileRecordHeader(entry->event, &place);
+                func_00197F60(entry->event);
+                frame = entry->frame;
+            }
+            entry->frame = frame + 1;
+        }
+    }
+}
 
 void effPcpCopySpawnRangeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -5802,9 +5876,6 @@ void effDestroyParticleEvents(EffPCPMapEventWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void effEventSetScale(void *event, f32 scale);
-extern void effEventCopyFileRecordHeader(void *dst, const void *src);
-extern void func_00197F60(void *event);
 
 /* vu0 routine: latch map-node motion, then place and fade each event. */
 void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {

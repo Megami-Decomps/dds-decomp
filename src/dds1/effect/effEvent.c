@@ -999,8 +999,8 @@ void effEventReleaseNode(EffEventWork *work) {
 }
 
 /* Copy the packed 0x30-byte record while retaining its native packed layout. */
-void effEventCopyFileRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
-    *destination = *source;
+void effEventCopyFileRecordHeader(void *destination, const void *source) {
+    *(FileRecordHeader *)destination = *(const FileRecordHeader *)source;
 }
 
 /* This copies a packed 0x30-byte record, not a complete 0x60-byte billboard state. */
