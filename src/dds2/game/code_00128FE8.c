@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "fld.h"
 
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -546,6 +547,41 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
         }
     }
 }
+
+typedef struct FldScriptResource {
+    u8 pad00[0x10];
+    u8 parameters[0x10];
+    s32 unk20;
+} FldScriptResource;
+
+typedef struct FldResourceName {
+    u32 unk00;
+    const char *name;
+} FldResourceName;
+
+extern FldFileResource *D_00438EB8;
+extern u32 D_00438EBC;
+extern FldFileResource *D_00438EC0;
+extern u32 D_00438EC4;
+extern s32 D_00435FA4;
+extern s32 evtCreateScriptObjectWithResource(s32, s32, s32, s32, s32);
+struct WorldObj;
+struct EffectObject;
+struct WorldEntry;
+struct WorldListNode;
+struct WorldChainNode;
+struct EvtWorldObject;
+extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern void dds3SetWorldEntryCallbackTarget(struct WorldEntry *, void *);
+extern void effObjSetModelHolder(struct EffectObject *, u32);
+extern s32 fldParseRoomNumberFromName(char *);
+extern void func_00113FF8(struct EffectObject *, u32);
+extern struct WorldListNode *dds3FindWorldObjectNodeByKey(struct EvtWorldObject *, u32, s32);
+extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
+extern void func_00112168(void *);
+extern void fldSetRecordValueById(s32, s32);
+extern struct WorldChainNode *dds3FindIndexedObjectChainNodeByName(struct EvtWorldObject *, s32, const u8 *);
+extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129660);
 
