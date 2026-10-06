@@ -52,6 +52,21 @@ typedef struct BrsResultTransition {
     s32 state;
 } BrsResultTransition;
 
+#ifdef VERSION_DDS1
+typedef struct BrsProgressAnimation {
+    u8 pad00[0x14];
+    s8 state;
+    u8 pad15[0x17];
+    s16 level;
+    u8 pad2E[6];
+    s32 remaining;
+    s32 applied;
+    s32 frames;
+    s8 unk40;
+    u8 pad41[0x27];
+} BrsProgressAnimation;
+#endif
+
 /* Allocation/zeroing: DDS1 00262684/0026269C; DDS2 0029959C/002995B4. */
 typedef struct BrsSkillPackageWork {
     s32 handle;
@@ -114,7 +129,13 @@ typedef struct BrsSkillPackageWork {
     u8 padD3D[7];
     s32 teardownHandle;
     u32 opacity;
-    u8 padD4C[0x828];
+    s8 resultPhase;
+    s8 unkD4D;
+    u8 padD4E[0x192];
+    BrsProgressAnimation levelAnimation[5];
+    u8 pad10E8[0x138];
+    BrsProgressAnimation profileAnimation[5];
+    u8 pad1428[0x14C];
 #else
     MenuCampEffect campEffect;
     s8 opacityReady;
@@ -145,6 +166,11 @@ typedef char BrsActiveProgressList_size_must_be_0xE0[(sizeof(BrsActiveProgressLi
 #ifdef VERSION_DDS1
 typedef char BrsRewardSummary_size_must_be_0x2C[(sizeof(BrsRewardSummary) == 0x2C) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0x1590[(sizeof(BrsSkillPackageWork) == 0x1590) ? 1 : -1];
+typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
+typedef char BrsSkillPackageWork_levelAnimation_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xEE0) ? 1 : -1];
+typedef char BrsSkillPackageWork_profileAnimation_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->profileAnimation == 0x1220) ? 1 : -1];
 #else
 typedef char BrsRewardSummary_size_must_be_0x30[(sizeof(BrsRewardSummary) == 0x30) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0xB704[(sizeof(BrsSkillPackageWork) == 0xB704) ? 1 : -1];
