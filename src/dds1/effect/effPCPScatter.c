@@ -796,7 +796,176 @@ void effScatterSpriteSpawn(PcpScatterSpinWork *work, s32 index)
     sprite->dirZ = direction[2];
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00171B28);
+struct RwV3d;
+extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
+
+/* Rotate each particle around its seeded axis and build its six-vertex strip. */
+void func_00171B28(PcpScatterSpinWork *work) {
+    f32 axis[4];
+    f32 next[4];
+    f32 position[4];
+    f32 duplicatePosition[4];
+    f32 direction[4];
+    f32 radial[4];
+    f32 halfWidth[4];
+    f32 halfHeight[4];
+    f32 side[4];
+    s32 respawn;
+    s32 pulse;
+    s32 duplicates;
+    u32 i;
+    u32 count;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 color;
+    u32 baseColor;
+    u32 perGroup;
+    s32 duration;
+    s32 endAge;
+    s32 duplicateStart;
+    PcpScatterSpinParticle *particle;
+    f32 pulseAngle;
+    f32 angleDamping;
+
+    i = 0;
+    duration = work->params.duration;
+    endAge = work->params.fadeDuration + duration;
+    duplicates = work->duplicatedHandles != NULL;
+    count = work->params.particleCount;
+    VEC3_SPLAT(halfWidth, work->params.width * 0.5f);
+    VEC3_SPLAT(halfHeight, work->params.height * 0.5f);
+    particle = work->particles;
+    respawn = work->params.respawn;
+    pulse = work->params.adjustAngle;
+    pulseAngle = work->params.endAngleStep;
+    fadeIn = work->params.fadeIn;
+    fadeOut = work->params.fadeOut;
+    angleDamping = work->params.angleDamping;
+    duplicateStart = work->params.duplicateStartAge;
+    perGroup = work->params.particlesPerGroup;
+    baseColor = work->color;
+
+    for (; i < count; i++, particle++) {
+        s32 age = particle->age;
+        u128 *vertices = (u128 *)effPcpScatterGetRecordAddress(work->childWork, i);
+        u32 *colors = (u32 *)effPcpScatterGetAuxRecordAddress(work->childWork, i);
+        if (age == 0) {
+            effScatterSpriteSpawn(work, i);
+        } else if (age > 0) {
+            f32 factor = 0.0f;
+            s32 moving;
+            f32 angle;
+            f32 radius;
+            f32 angleStep;
+            u32 j;
+
+            if (age <= endAge) {
+                if (age < fadeIn && fadeIn != 0) {
+                    factor = (f32)age / fadeIn;
+                } else if (endAge - age <= fadeOut && fadeOut != 0) {
+                    factor = (f32)(endAge - age) / fadeOut;
+                } else {
+                    factor = 1.0f;
+                }
+            }
+            moving = age < duration;
+            color = effBlendColor(baseColor & 0xFFFFFF, baseColor, factor);
+            angle = particle->angle;
+            radius = particle->radius;
+            angleStep = particle->angleStep;
+            if (!moving && pulse) {
+                if (age == duration) {
+                    angle += pulseAngle;
+                } else if (age == duration + 1) {
+                    angle -= pulseAngle;
+                }
+            }
+            axis[0] = particle->dirX;
+            axis[1] = particle->dirY;
+            axis[2] = particle->dirZ;
+            sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+            position[0] = radius;
+            position[1] = 0.0f;
+            position[2] = 0.0f;
+            VU0_LOAD_VF(vf10, position);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            VU0_MOVE_VF(vf12, vf10);
+            for (j = 0; j < 3; j++, vertices++, colors++) {
+                colors[0] = color;
+                colors[3] = color;
+                angle += sdfAtan2Poly(halfWidth[0] / radius);
+                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+                next[0] = radius;
+                next[1] = 0.0f;
+                next[2] = 0.0f;
+                VU0_LOAD_VF(vf10, next);
+                VU0_APPLY_MATRIX(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, next);
+                VU0_LOAD_VF(vf10, next);
+                VU0_LOAD_VF(vf11, position);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+                VU0_LOAD_VF(vf11, halfWidth);
+                VU0_MUL(vf10, vf10, vf11);
+                VU0_ADD(vf10, vf10, vf12);
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                VU0_STORE_VF_UNCLOBBERED(vf10, radial);
+                radial[1] = 0.0f;
+                VU0_LOAD_VF(vf10, direction);
+                VU0_LOAD_VF(vf11, radial);
+                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                VU0_LOAD_VF(vf11, halfHeight);
+                VU0_MUL(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, side);
+                VU0_LOAD_VF(vf10, position);
+                VU0_LOAD_VF(vf11, side);
+                VU0_ADD(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 3);
+                if (j == 1) {
+                    PCP_COPY_VECTOR(duplicatePosition, position);
+                }
+                PCP_COPY_VECTOR(position, next);
+            }
+            if (moving) {
+                particle->radius += particle->radiusStep;
+                particle->angle += angleStep;
+                particle->angleStep = angleStep * angleDamping;
+            }
+        } else {
+            colors[0] = 0;
+            colors[1] = 0;
+            colors[2] = 0;
+            colors[3] = 0;
+            colors[4] = 0;
+            colors[5] = 0;
+        }
+        if (respawn && age >= endAge) {
+            particle->age = -1;
+        }
+        if (duplicates && age >= duplicateStart && age >= 0 && i % perGroup == 0) {
+            u32 group = i / perGroup;
+            effParamWorkCallback3(work->duplicatedHandles[group], baseColor);
+            VU0_LOAD_VF(vf10, work->params.origin);
+            VU0_LOAD_VF(vf11, duplicatePosition);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, duplicatePosition);
+            effParamWorkCallback0(work->duplicatedHandles[group], duplicatePosition);
+            effParamWorkInvokeCallback(work->duplicatedHandles[group]);
+        }
+        particle->age++;
+    }
+    work->childWork->origin[0] = work->params.origin[0];
+    work->childWork->origin[1] = work->params.origin[1];
+    work->childWork->origin[2] = work->params.origin[2];
+    effPcpScatterDrawPool(work->childWork);
+}
 
 /* Copy the spin variant's packed parameter vector, including its existing W lane. */
 void effScatterCopySpinVector(void *destination, void *source) {
