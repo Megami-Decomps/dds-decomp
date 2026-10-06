@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "mdl.h"
 
 typedef struct EffParamWork EffParamWork;
 
@@ -130,18 +131,6 @@ typedef struct {
     u32 color[5];
 } EffBossColorSlot;
 
-typedef struct {
-    u8 pad00[0x20];
-    f32 unk20;
-    u8 pad24[0xA];
-    u16 frameCount; /* Copied from the motion clip; also sizes the trail history. */
-} EffBossMotionNode;
-
-typedef struct {
-    u8 pad00[0x18];
-    void *inner;
-    EffBossMotionNode *motion;
-} EffBossModelContext;
 
 extern void *effParamWorkGetData(EffParamWork *handle);
 extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
@@ -182,7 +171,7 @@ void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
 /* Create a draw pool and delayed cells for each model map-position group. */
 void func_0018C288(EffBossWork *work)
 {
-    EffBossModelContext *model = effParamWorkGetData(work->paramWork);
+    MdlCtx *model = effParamWorkGetData(work->paramWork);
     EffBossGroup *group;
     EffBossCell *nextCells;
     u32 i;
@@ -191,9 +180,9 @@ void func_0018C288(EffBossWork *work)
     if ((s32)work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    model->motion->unk20 = work->head.unk14;
+    model->first->frameStep = work->head.unk14;
     mdlAddEntryPlain(model, 0, 0);
-    work->cellCount = model->motion->frameCount;
+    work->cellCount = model->first->frameCount;
     work->groupCount = sdfCountMapPositionRecords(model->inner);
     work->system = parAllocateCellSystem(work->groupCount, work->cellCount, 1, 1);
     func_00164C68(work->system, work->head.systemParam);
