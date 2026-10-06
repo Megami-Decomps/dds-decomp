@@ -2,6 +2,7 @@
 #include "file.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "mnu_shooting.h"
 
 typedef struct SoundSlot {
     u32 remainingFrames;
@@ -31,11 +32,6 @@ typedef struct MnuModelNode {
     f32 savedModelValue; /* 0x4C; restored to the model entry's scalar */
 } MnuModelNode;
 
-typedef struct MnuNodeList {
-    MnuModelNode *nodes; /* 0x00 */
-    s32 count;           /* 0x04 */
-    u8 pad08[8];
-} MnuNodeList;
 typedef struct ShortRecord {
     u8 kind;
     u8 pad01;
@@ -162,6 +158,7 @@ extern MdlCtx *func_00232198(s32 resourceGroup, s32 resourceId);
 extern void mdlAddEntryFlaggedEx(MdlCtx *model, s32 searchId, s32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames);
 extern u32 sdfAllocGeneralBlock(s32 bytes);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
+extern void mdlDestroyContext(MdlCtx *);
 
 extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];
@@ -582,33 +579,27 @@ u32 mnuResumeEffectQueueFrameAdvance(void) {
 }
 
 
-typedef struct MnuModelWork {
-    u32 handle;
-    s32 count;
-    MnuNodeList *lists;
-    u32 unk0C;
-} MnuModelWork;
 
 extern char D_0042DAE8[];
 
-MnuModelWork *func_0031BFE0(s32 listCount, s32 *nodeCounts) {
+MnuSectionModelWork *func_0031BFE0(s32 listCount, s32 *nodeCounts) {
     s32 listBytes = listCount * sizeof(MnuNodeList);
-    s32 allocationSize = listBytes + sizeof(MnuModelWork);
+    s32 allocationSize = listBytes + sizeof(MnuSectionModelWork);
     s32 i;
     u32 handle;
-    MnuModelWork *work;
+    MnuSectionModelWork *work;
     MnuNodeList *list;
     u8 *records;
 
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
     evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
     handle = sdfAllocGeneralBlock(allocationSize);
-    work = (MnuModelWork *)sdfMemoryGetBlockAddress(handle);
+    work = (MnuSectionModelWork *)sdfMemoryGetBlockAddress(handle);
     memset(work, 0, allocationSize);
-    work->handle = handle;
+    work->allocation = (struct SdfMemBlock *)handle;
     work->count = listCount;
-    work->lists = (MnuNodeList *)(work + 1);
-    list = work->lists;
+    work->groups = (MnuNodeList *)(work + 1);
+    list = work->groups;
     records = (u8 *)list + listBytes;
     for (i = 0; i < listCount; i++, list++) {
         list->count = nodeCounts[i];
@@ -646,18 +637,18 @@ void mnuDeactivateAllModelNodes(s32 *list) {
     }
 }
 
-void mnuDestroyAllModelNodeContexts(s32 *list) {
-    u8 *node = (u8 *)list[0];
+void mnuDestroyAllModelNodeContexts(MnuNodeList *list) {
+    MnuModelNode *node = list->nodes;
     s16 index = 0;
-    if (list[1] > 0) {
+    if (list->count > 0) {
         do {
-            u32 model = (u32)((MnuModelNode *)node)->model;
-            node += 0x50;
-            if (model != 0) {
+            MdlCtx *model = node->model;
+            node++;
+            if (model != NULL) {
                 mdlDestroyContext(model);
             }
             index++;
-        } while (index < list[1]);
+        } while (index < list->count);
     }
 }
 

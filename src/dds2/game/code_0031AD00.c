@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_shooting.h"
 extern u32 dds3AdvanceWorldCounter(void);
 extern s32 dds3CreateConfiguredCameraObject(s32 arg0, void *arg1, void *arg2, void *arg3);
 extern void dds3SetWorldEntryCallbackTarget(s32 arg0, void *arg1);
@@ -21,92 +22,64 @@ extern void mnuDrawFadeSequenceOffset(void *);
 extern void itfDrawFadeGlyphTriplet(void *);
 extern void mnuDrawFadeSequenceTwo(void *);
 
-typedef struct MnuDepthNodeList {
-    void *nodes;
-    s32 count;
-} MnuDepthNodeList;
 
-typedef struct MnuDepthNodeEntry {
-    MnuDepthNodeList list;
-    u32 unk8;
-    u32 unkC;
-} MnuDepthNodeEntry;
+extern void mnuOverrideActiveNodeModelDepth(MnuNodeList *list, f32 depth);
+extern void mnuRestoreActiveNodeModelDepth(MnuNodeList *list);
 
-typedef struct MnuDepthEntryArray {
-    u32 unk0;
-    s32 count;
-    MnuDepthNodeEntry *entries;
-} MnuDepthEntryArray;
-
-typedef struct MnuDepthObject {
-    u8 unk00[0x1C];
-    MnuDepthEntryArray *depthEntries;
-} MnuDepthObject;
-
-extern void mnuOverrideActiveNodeModelDepth(MnuDepthNodeList *list, f32 depth);
-extern void mnuRestoreActiveNodeModelDepth(MnuDepthNodeList *list);
-
-void itfDispatchObjectFadeSequenceMode(u8 *object) {
-    s16 mode = *(s16 *)(object + 0x98);
-
-    switch (mode) {
+void itfDispatchObjectFadeSequenceMode(MnuShootingWork *object) {
+    switch (object->phase) {
     case 0:
-        itfSetFadeMode(object + 0x168, 1, 8);
-        itfQueueFadeMode(object + 0x168, 0, 8, 0x78);
-        func_0031EEE8(object + 0x168,
-                      *(s16 *)(object + 0x96) + 1);
+        itfSetFadeMode(object->roundFade, 1, 8);
+        itfQueueFadeMode(object->roundFade, 0, 8, 0x78);
+        func_0031EEE8(object->roundFade, object->round + 1);
         return;
     case 1:
-        mnuDrawFadeSequenceOffset(object + 0x168);
+        mnuDrawFadeSequenceOffset(object->roundFade);
         return;
     case 5:
-        itfDrawFadeGlyphTriplet(object + 0x184);
+        itfDrawFadeGlyphTriplet(object->scoreFade);
         return;
     case 10:
     case 11:
     case 12:
-        mnuDrawFadeSequenceTwo(object + 0x19C);
+        mnuDrawFadeSequenceTwo(object->choiceFade);
         break;
     }
 }
 
-void func_0031ADD8(MnuDepthObject *object) {
-    MnuDepthNodeEntry *entries = object->depthEntries->entries;
+void func_0031ADD8(MnuShootingWork *object) {
+    MnuNodeList *entries = object->modelWork->groups;
     s32 i = 0;
 
-    if (object->depthEntries->count > 0) {
-        MnuDepthNodeEntry *entry = entries;
+    if (object->modelWork->count > 0) {
+        MnuNodeList *entry = entries;
         do {
-            mnuOverrideActiveNodeModelDepth(&entry->list, 0.0f);
+            mnuOverrideActiveNodeModelDepth(entry, 0.0f);
             i++;
             entry++;
-        } while (i < object->depthEntries->count);
+        } while (i < object->modelWork->count);
     }
 }
 
-void func_0031AE48(MnuDepthObject *object) {
-    MnuDepthNodeEntry *entries = object->depthEntries->entries;
+void func_0031AE48(MnuShootingWork *object) {
+    MnuNodeList *entries = object->modelWork->groups;
     s32 i = 0;
 
-    if (object->depthEntries->count > 0) {
-        MnuDepthNodeEntry *entry = entries;
+    if (object->modelWork->count > 0) {
+        MnuNodeList *entry = entries;
         do {
-            mnuRestoreActiveNodeModelDepth(&entry->list);
+            mnuRestoreActiveNodeModelDepth(entry);
             i++;
             entry++;
-        } while (i < object->depthEntries->count);
+        } while (i < object->modelWork->count);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AEB8);
 
-typedef struct ItfChoiceState {
-    u8 pad00[0x1D4];
-    s32 selectionIndex;
-} ItfChoiceState;
 
-void func_0031AF58(ItfChoiceState *object) {
-    object->selectionIndex = 0;
+void func_0031AF58(MnuShootingWork *object) {
+    object->choiceIndex = 0;
 }
 
 void func_0031AF60(void) {
@@ -117,25 +90,25 @@ extern SoundSlot *dds3ClaimSoundSlot(u32 sequence, u32 frames);
 extern s8 D_0037F510[];
 
 /* Clamp cursor movement before confirm/cancel override the navigation sound. */
-s32 func_0031AF68(ItfChoiceState *object) {
+s32 func_0031AF68(MnuShootingWork *object) {
     s32 result = -1;
     s32 sound = 0;
 
     if (D_0037F510[0x26] < 0) {
-        if (--object->selectionIndex < 0) {
-            object->selectionIndex = 0;
+        if (--object->choiceIndex < 0) {
+            object->choiceIndex = 0;
         } else {
             sound = 1;
         }
     } else if (D_0037F510[0x27] < 0) {
-        if (++object->selectionIndex < 3) {
+        if (++object->choiceIndex < 3) {
             sound = 1;
         } else {
-            object->selectionIndex = 2;
+            object->choiceIndex = 2;
         }
     }
     if (D_0037F510[0x21] < 0) {
-        result = object->selectionIndex;
+        result = object->choiceIndex;
         sound = 2;
     } else if (D_0037F510[0x23] < 0) {
         result = 0;
