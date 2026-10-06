@@ -8485,7 +8485,7 @@ void effApplyBattleCameraToObject(work)
 
 INCLUDE_ASM(const s32, "game/code_002DE248", effQueueEffectFileJob);
 
-/* A 20-byte creation command, not the runtime FileJob queue entry. */
+/* A 0x20-byte creation command, not the runtime FileJob queue entry. */
 typedef struct EffFileJobRequest {
     char *name;
     u16 fileKind;
