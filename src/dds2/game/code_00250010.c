@@ -35,14 +35,11 @@ extern void sdfAppendPacket(s32 list, s32 packet);
 extern s32 sdfCreateFormattedSifCommand();
 
 typedef struct {
-    s16 enabled;
-    s8 tableValue; /* D_003C9732 aliases this byte for indexed menu lookups. */
-    u8 pad3[7];
+    s16 columnCount;
+    s8 columns[8]; /* The halfword counts signed property selectors. */
 } EvtTblEntry; /* 0xA bytes */
 
 extern EvtTblEntry D_003C9730[];
-
-extern s8 D_003C9732[];
 
 extern void *kwlnTaskGetUserValue();
 
@@ -1414,12 +1411,12 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 s32 evtIsMenuTableEntryEnabled(s32 *index) {
-    return D_003C9730[*index].enabled != 0;
+    return D_003C9730[*index].columnCount != 0;
 }
 
 /* Return the table value selected by this group's type and editor column. */
 s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
-    return D_003C9732[runtime->tableColumn + runtime->frameGroup->type * 10];
+    return D_003C9730[runtime->frameGroup->type].columns[runtime->tableColumn];
 }
 
 extern char *D_003C9880[];
@@ -1439,8 +1436,8 @@ void evtDrawGroupPropertyTable(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *r
     if (hidden != 0) {
         return;
     }
-    for (i = 0; i < D_003C9730[group->type].enabled; i++) {
-        field = D_003C9732[i + group->type * 10];
+    for (i = 0; i < D_003C9730[group->type].columnCount; i++) {
+        field = D_003C9730[group->type].columns[i];
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + offset * 192, y,
             0xFEFFFF, 14, D_003C9880[field]));
         style = i == runtime->tableColumn && runtime->actionMode == 15 ? 4 : 0;
