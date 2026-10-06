@@ -22,6 +22,26 @@ typedef struct FileJobBufferSlot {
     u16 unkE;
 } FileJobBufferSlot;
 
+/* Separately allocated payload and its serialized 0x2C header. Queue entries
+ * refer to this object through their address-valued id field. */
+typedef struct FileJobPayload {
+    u32 unk0;
+    u16 type;
+    u16 unk6;
+    void *data;
+    u16 option;             /* selects primary payload interpretation */
+    u16 unkE;
+    FileJobBufferSlot primary; /* selector at 0x1C describes the secondary payload */
+    struct {
+        u32 offset;
+        u32 size;
+        void *allocation;
+    } secondary;            /* 0x20; no selector follows this descriptor */
+} FileJobPayload;
+
+typedef char FileJobPayload_size_must_be_0x2C[
+    (sizeof(FileJobPayload) == 0x2C) ? 1 : -1];
+
 /* Effect/file queue entries share this C0-byte record in both games. */
 typedef struct FileJob {
     u32 unk0;
