@@ -779,4 +779,72 @@ typedef struct {
 #define VU0_CROSS_XYZ_EXTENDED(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder" : :)
 
+/* Positive homogeneous clip-plane vector. Shared SDK inline:
+ * DDS1 002EEFE4, DDS2 00347E8C, Nocturne debug 002C694C (sdfCore3DPrim.c). */
+#define VU0_POSITIVE_CLIP_PLANE(dst) __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz " #dst ", vf0, vf0w\n\t" \
+    "vmulw.w " #dst ", vf0, vf0w\n\t.set reorder")
+
+/* Negative clip-plane vector; the explicit W rewrite is present in the
+ * original shared inline. DDS1 002EEFF8, DDS2 00347EA0, Nocturne debug
+ * 002C6960 (sdfCore3DPrim.c). */
+#define VU0_NEGATIVE_CLIP_PLANE(dst) __asm__ volatile ( \
+    ".set noreorder\n\tvsubw.xyzw " #dst ", vf0, vf0w\n\t" \
+    "vsubw.w " #dst ", vf0, vf0w\n\t.set reorder")
+
+/* Prepare homogeneous distances and position/colour deltas for clipping one
+ * end of a segment. vf2 contains the plane; vf3/vf4 are its distances,
+ * vf5/vf6 are the position/colour deltas. Shared SDK inline:
+ * DDS1 002EF000, DDS2 00347EA8, Nocturne debug 002C6968 (sdfCore3DPrim.c). */
+#define VU0_CLIP_SEGMENT_PREP(first, second, firstColor, secondColor) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulw.xyzw vf3, vf2, " #first "w\n\t" \
+    "vmulw.xyzw vf4, vf2, " #second "w\n\t" \
+    "vsub.xyzw vf5, " #second ", " #first "\n\t" \
+    "vsub.xyzw vf6, " #secondColor ", " #firstColor "\n\t" \
+    "vsub.xyzw vf3, " #first ", vf3\n\t" \
+    "vsub.xyzw vf4, " #second ", vf4\n\t" \
+    "vsub.xyzw vf4, vf4, vf3\n\t.set reorder")
+
+/* Divide the selected homogeneous distance component after its VU pipeline
+ * latency. Shared SDK inline, x/y/z sites respectively:
+ * DDS1 002EF048/002EF034/002EF060, DDS2 00347EF0/00347EDC/00347F08,
+ * Nocturne debug 002C69B0/002C699C/002C69C8 (sdfCore3DPrim.c). */
+#define VU0_CLIP_RATIO(axis) __asm__ volatile ( \
+    ".set noreorder\n\tvnop\n\tvnop\n\t" \
+    "vdiv Q, vf3" #axis ", vf4" #axis "\n\t.set reorder")
+
+/* Apply Q's absolute interpolation ratio to one position/colour pair and
+ * refresh that position's clip flags. vf2, ACC and Q are implicit scratch;
+ * vf5/vf6 contain the deltas prepared above. Shared SDK inline:
+ * DDS1 002EF06C, DDS2 00347F14, Nocturne debug 002C69D4 (sdfCore3DPrim.c). */
+#define VU0_CLIP_SEGMENT_UPDATE(position, color) __asm__ volatile ( \
+    ".set noreorder\n\tvwaitq\n\tvaddq.x vf2, vf0, Q\n\tvabs.x vf2, vf2\n\t" \
+    "vmulaw.xyzw ACC, " #position ", vf0w\n\t" \
+    "vmaddx.xyzw " #position ", vf5, vf2x\n\t" \
+    "vmulaw.xyzw ACC, " #color ", vf0w\n\t" \
+    "vmaddx.xyzw " #color ", vf6, vf2x\n\t" \
+    "vclipw.xyz " #position ", " #position "w\n\t.set reorder")
+
+/* Project two homogeneous positions with a shared scale/offset, preserving
+ * the interleaved Q pipeline. Colours become integer lanes; positions become
+ * GS 12.4 lanes and their W lanes are cleared. ACC/Q are implicit scratch.
+ * Shared SDK inline: DDS1 002EF1B0, DDS2 00348058, Nocturne debug 002C6B18
+ * (sdfCore3DPrim.c); loads/stores and acceptance control flow remain in C. */
+#define VU0_PROJECT_COLORED_SEGMENT(first, second, firstColor, secondColor, scale, offset) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vdiv Q, vf0w, " #first "w\n\t" \
+    "vmul.xyz " #first ", " #first ", " #scale "\n\t" \
+    "vmulaw.xyz ACC, " #offset ", vf0w\n\t" \
+    "vmulx.w " #first ", " #first ", vf0x\n\t" \
+    "vftoi0.xyzw " #firstColor ", " #firstColor "\n\tvwaitq\n\t" \
+    "vmaddq.xyz " #first ", " #first ", Q\n\t" \
+    "vdiv Q, vf0w, " #second "w\n\t" \
+    "vmul.xyz " #second ", " #second ", " #scale "\n\t" \
+    "vmulx.w " #second ", " #second ", vf0x\n\t" \
+    "vftoi4.xyzw " #first ", " #first "\n\t" \
+    "vftoi0.xyzw " #secondColor ", " #secondColor "\n\tvwaitq\n\t" \
+    "vmaddq.xyz " #second ", " #second ", Q\n\t" \
+    "vftoi4.xyzw " #second ", " #second "\n\t.set reorder")
+
 #endif

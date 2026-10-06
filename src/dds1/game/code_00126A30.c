@@ -1774,20 +1774,20 @@ void fldSubmitAlternateFramePacket(void) {
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
-extern f32 D_0032F4E0[];
+extern f32 D_0032F4E0[][4];
 extern u32 D_0032F500[];
-extern void *func_002EF2B0(const void *, const void *, s32, s32);
+extern void *func_002EF2B0(const f32 (*)[4], const u32 *, s32, u32);
 
 void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     s32 resource;
     s32 record;
     SdfPoolNode *descriptor;
-    D_0032F4E0[0] = x;
-    D_0032F4E0[1] = y;
-    D_0032F4E0[2] = z;
-    D_0032F4E0[4] = u;
-    D_0032F4E0[5] = v;
-    D_0032F4E0[6] = w;
+    D_0032F4E0[0][0] = x;
+    D_0032F4E0[0][1] = y;
+    D_0032F4E0[0][2] = z;
+    D_0032F4E0[1][0] = u;
+    D_0032F4E0[1][1] = v;
+    D_0032F4E0[1][2] = w;
     D_0032F500[1] = second;
     D_0032F500[0] = first;
     resource = sdfAllocPacketAligned(0x20);

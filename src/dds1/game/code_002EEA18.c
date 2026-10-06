@@ -2,6 +2,7 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "ee_mmi.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -275,20 +276,133 @@ void sdfStoreWordAndSetState(SdfWordState *work, u32 value) {
     work->state = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEEA8);
+extern f32 D_00398440[][4];
+extern s32 sdfGetPacketCursor(void);
+extern void sdfSetPacketCursorAligned(s32 cursorAddress);
+
+/* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
+void *func_002EEEA8(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+    SdfPacket *packet;
+    f32 (*viewport)[4];
+    u128 *cursor;
+    s32 i;
+    s32 emitted;
+    s32 plane;
+    u32 clipFlags;
+    u32 firstClip;
+    u32 secondClip;
+    u32 quadwordCount;
+
+    packet = (SdfPacket *)sdfGetPacketCursor();
+    cursor = (u128 *)(packet + 1);
+    viewport = D_00398440;
+    VU0_LOAD_VF_AT(vf14, 0x0, viewport);
+    VU0_LOAD_VF_AT(vf15, 0x10, viewport);
+    emitted = 0;
+    for (i = 0; i < vertexCount; i += 2) {
+        VU0_LOAD_VF(vf10, vertices[i]);
+        EE_MMI_RGBA_TO_VF(vf8, colors[i]);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_LOAD_VF(vf11, vertices[i + 1]);
+        EE_MMI_RGBA_TO_VF(vf9, colors[i + 1]);
+        VU0_TRANSFORM_POINT(vf11, vf11);
+        VU0_CLIPW_XYZ(vf10);
+        VU0_CLIPW_XYZ(vf11);
+        VU0_READ_CLIP_FLAGS_WAIT5(clipFlags);
+        firstClip = (clipFlags >> 6) & 0x3F;
+        secondClip = clipFlags & 0x3F;
+        if ((firstClip & secondClip) != 0 || (firstClip & 0x20) != 0 || (secondClip & 0x20) != 0) {
+            continue;
+        }
+        if (firstClip != 0 || secondClip != 0) {
+            for (plane = 4; plane != -1; plane--) {
+                if (firstClip & (1 << plane)) {
+                    if ((plane & 1) == 0) {
+                        VU0_POSITIVE_CLIP_PLANE(vf2);
+                    } else {
+                        VU0_NEGATIVE_CLIP_PLANE(vf2);
+                    }
+                    VU0_CLIP_SEGMENT_PREP(vf10, vf11, vf8, vf9);
+                    switch (plane) {
+                    case 0:
+                    case 1:
+                        VU0_CLIP_RATIO(x);
+                        break;
+                    case 2:
+                    case 3:
+                        VU0_CLIP_RATIO(y);
+                        break;
+                    default:
+                        VU0_CLIP_RATIO(z);
+                        break;
+                    }
+                    VU0_CLIP_SEGMENT_UPDATE(vf10, vf8);
+                    VU0_READ_CLIP_FLAGS_WAIT5(firstClip);
+                    firstClip &= 0x3F;
+                    if (firstClip & secondClip) {
+                        break;
+                    }
+                }
+                if (secondClip & (1 << plane)) {
+                    if ((plane & 1) == 0) {
+                        VU0_POSITIVE_CLIP_PLANE(vf2);
+                    } else {
+                        VU0_NEGATIVE_CLIP_PLANE(vf2);
+                    }
+                    VU0_CLIP_SEGMENT_PREP(vf11, vf10, vf9, vf8);
+                    switch (plane) {
+                    case 0:
+                    case 1:
+                        VU0_CLIP_RATIO(x);
+                        break;
+                    case 2:
+                    case 3:
+                        VU0_CLIP_RATIO(y);
+                        break;
+                    default:
+                        VU0_CLIP_RATIO(z);
+                        break;
+                    }
+                    VU0_CLIP_SEGMENT_UPDATE(vf11, vf9);
+                    VU0_READ_CLIP_FLAGS_WAIT5(secondClip);
+                    secondClip &= 0x3F;
+                    if (firstClip & secondClip) {
+                        break;
+                    }
+                }
+            }
+            if (firstClip & secondClip) {
+                continue;
+            }
+        }
+        VU0_PROJECT_COLORED_SEGMENT(vf10, vf11, vf8, vf9, vf14, vf15);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf8, 0x0, cursor);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf10, 0x10, cursor);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf9, 0x20, cursor);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf11, 0x30, cursor);
+        cursor += 4;
+        emitted += 2;
+    }
+    sdfSetPacketCursorAligned((s32)cursor & 0x0FFFFFFF);
+    quadwordCount = emitted * 2 + 1;
+    packet->unk0 = (quadwordCount & 0xFFFF) | 0x20000000;
+    packet->unk8 = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;
+    packet->unk10 = emitted | ((u64)(primitiveFlags | 9) << 47) | 0x2000400000008000ULL;
+    packet->unk18 = 0x41;
+    return packet;
+}
 
 extern u8 D_00398470[];
 extern void sdfPostmultiplyVuMatrixFromMemory();
-extern void func_002EEEA8();
 
-void func_002EF2B0(void) {
+void *func_002EF2B0(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     VU0_LOAD_MATRIX(D_00398470);
-    func_002EEEA8();
+    return func_002EEEA8(vertices, colors, vertexCount, primitiveFlags);
 }
 
-void func_002EF2E0(s32 a, s32 b, s32 c, s32 d) {
+void *func_002EF2E0(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     sdfPostmultiplyVuMatrixFromMemory(D_00398470);
-    func_002EEEA8(a, b, c, d);
+    return func_002EEEA8(vertices, colors, vertexCount, primitiveFlags);
 }
 
 typedef struct SdfTmxHeader {

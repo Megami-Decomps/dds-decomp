@@ -245,11 +245,11 @@ extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 extern void func_0032DB78(s32, u32, s32);
 
-extern f32 D_0038A980[];
+extern f32 D_0038A980[][4];
 
 extern u32 D_0038A9A0[];
 
-extern void *func_00348158(const void *, const void *, s32, s32);
+extern void *func_00348158(const f32 (*)[4], const u32 *, s32, u32);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -1875,12 +1875,12 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     s32 resource;
     s32 record;
     SdfPoolNode *descriptor;
-    D_0038A980[0] = x;
-    D_0038A980[1] = y;
-    D_0038A980[2] = z;
-    D_0038A980[4] = u;
-    D_0038A980[5] = v;
-    D_0038A980[6] = w;
+    D_0038A980[0][0] = x;
+    D_0038A980[0][1] = y;
+    D_0038A980[0][2] = z;
+    D_0038A980[1][0] = u;
+    D_0038A980[1][1] = v;
+    D_0038A980[1][2] = w;
     D_0038A9A0[1] = second;
     D_0038A9A0[0] = first;
     resource = sdfAllocPacketAligned(0x20);

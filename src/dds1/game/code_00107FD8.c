@@ -600,20 +600,20 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     sdfQueueAssetRelease(asset);
 }
 
-extern f32 D_003245B0[];
+extern f32 D_003245B0[][4];
 
 extern u32 D_003245D0[];
 
-extern void *func_002EF2B0(const void *, const void *, s32, s32);
+extern void *func_002EF2B0(const f32 (*)[4], const u32 *, s32, u32);
 
 void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     void *list;
-    D_003245B0[0] = x;
-    D_003245B0[1] = y;
-    D_003245B0[2] = z;
-    D_003245B0[4] = u;
-    D_003245B0[5] = v;
-    D_003245B0[6] = w;
+    D_003245B0[0][0] = x;
+    D_003245B0[0][1] = y;
+    D_003245B0[0][2] = z;
+    D_003245B0[1][0] = u;
+    D_003245B0[1][1] = v;
+    D_003245B0[1][2] = w;
     D_003245D0[1] = second;
     D_003245D0[0] = first;
     list = sdfAllocPacketAligned(0x20);

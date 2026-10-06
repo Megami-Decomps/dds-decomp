@@ -165,11 +165,11 @@ extern void sdfAppendDmaTagToList(void *, void *);
 
 extern void func_0032DB78(const void *, void *, s32);
 
-extern f32 D_0037F5B0[];
+extern f32 D_0037F5B0[][4];
 
 extern u32 D_0037F5D0[];
 
-extern void *func_00348158(const void *, const void *, s32, s32);
+extern void *func_00348158(const f32 (*)[4], const u32 *, s32, u32);
 
 extern s8 evtSelectionStateActive;
 
@@ -603,12 +603,12 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
 
 void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     void *list;
-    D_0037F5B0[0] = x;
-    D_0037F5B0[1] = y;
-    D_0037F5B0[2] = z;
-    D_0037F5B0[4] = u;
-    D_0037F5B0[5] = v;
-    D_0037F5B0[6] = w;
+    D_0037F5B0[0][0] = x;
+    D_0037F5B0[0][1] = y;
+    D_0037F5B0[0][2] = z;
+    D_0037F5B0[1][0] = u;
+    D_0037F5B0[1][1] = v;
+    D_0037F5B0[1][2] = w;
     D_0037F5D0[1] = second;
     D_0037F5D0[0] = first;
     list = sdfAllocPacketAligned(0x20);

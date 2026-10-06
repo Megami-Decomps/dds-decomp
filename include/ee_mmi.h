@@ -82,6 +82,18 @@
     ".set reorder" \
     : : "r"(unit), "r"(src), "m"(*(const u32 *)(src)) : "$2")
 
+/* Unscaled RGBA8888 -> four floats in the selected VU register; $2 is scratch.
+ * Shared SDK inline: DDS1 002EEF18, DDS2 00347DC0, Nocturne debug 002C6880
+ * (sdfCore3DPrim.c). Unlike the normalized unpack, no 1/128 scale is applied. */
+#define EE_MMI_RGBA_TO_VF(vf, rgba) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %0\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, " #vf "\n\t" \
+    "vitof0.xyzw " #vf ", " #vf "\n\t" \
+    ".set reorder" \
+    : : "r" (rgba) : "$2")
+
 /*
  * vf10 (floats, 0..1) -> RGBA8888 word: scale by 128.0 through vf2x, then
  *     vftoi0 vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out
