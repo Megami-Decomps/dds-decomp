@@ -65,9 +65,7 @@ extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #define MNU_STAFF_REORDER_CANCEL_MASK 6
 
 typedef struct MenuList MenuList;
-typedef struct MenuIconSprites MenuIconSprites;
 typedef struct MenuIconState MenuIconState;
-typedef struct MenuFadeFields MenuFadeFields;
 typedef struct FrFontGlyph FrFontGlyph;
 
 extern u32 uiBlendColors(u32, u32, u32);
@@ -252,22 +250,7 @@ typedef struct MenuSlot {
     u16 flags;
 } MenuSlot;
 
-struct MenuIconSprites {
-    u32 handle;
-    u32 value;
-    u32 unk8;
-    void *sprite[3];
-};
 
-struct MenuFadeFields {
-    MenuWindowContainer previousWindow;
-    s32 previousVisibleCount;
-    MenuIconSprites savedResource;
-    u32 hasResourceCopy;
-    s32 previousProgress;
-    MenuWindowContainer *currentWindow;
-    s32 currentProgress;
-};
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {

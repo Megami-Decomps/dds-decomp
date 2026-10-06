@@ -2,6 +2,9 @@
 #define MNU_H
 
 #include "common.h"
+#ifdef VERSION_DDS2
+#include "mnu_shop.h"
+#endif
 
 /* DDS2 scheduler word: zero or the encoded next-handler address. */
 extern s32 func_002C4038(s32, s32 *, u64, u64);
@@ -322,6 +325,30 @@ typedef struct MenuGradientFade {
 } MenuGradientFade;
 
 typedef char MenuGradientFade_size_must_be_0x0C[(sizeof(MenuGradientFade) == 0x0C) ? 1 : -1];
+
+#ifdef VERSION_DDS2
+struct EffectSlotSet;
+
+typedef struct MenuIconSprites {
+    u32 handle;
+    u32 value;
+    u32 unk8;
+    struct EffectSlotSet *sprite[3];
+} MenuIconSprites;
+
+typedef struct MenuFadeFields {
+    MenuWindowContainer previousWindow;
+    s32 previousVisibleCount;
+    MenuIconSprites savedResource;
+    u32 hasResourceCopy;
+    s32 previousProgress;
+    MenuWindowContainer *currentWindow;
+    s32 currentProgress;
+} MenuFadeFields;
+
+typedef char MenuIconSprites_size_must_be_0x18[(sizeof(MenuIconSprites) == 0x18) ? 1 : -1];
+typedef char MenuFadeFields_size_must_be_0xC4[(sizeof(MenuFadeFields) == 0xC4) ? 1 : -1];
+#endif
 
 struct EffectList;
 
