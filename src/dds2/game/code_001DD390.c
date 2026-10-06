@@ -7,6 +7,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "fpu.h"
+#include "dat_state.h"
 
 extern void sdfReleaseChipBlock(void *block);
 extern s32 btlIsUnitInActiveList(void *unit);
@@ -6613,19 +6614,8 @@ void func_001F4F10(BtlLinkedCommand *action, s32 state) {
     }
 }
 
-typedef struct BtlCursorPartyEntry {
-    u16 flags;
-    u8 pad02[0x1C2];
-} BtlCursorPartyEntry;
 
-typedef struct BtlCursorGameState {
-    u8 pad0000[0xA60];
-    BtlCursorPartyEntry party[5];
-    u8 pad1334[8];
-    s32 partyCount;
-} BtlCursorGameState;
 
-extern u8 *datGameState;
 extern u32 btlNextScaledRandom(u32);
 extern s16 D_003BBD90[];
 extern s16 D_003BBD70[];
@@ -6638,14 +6628,14 @@ extern const BtlCursorChoices D_004184D8;
 
 void func_001F5018(BtlLinkedCommand *action, s32 state) {
     BtlCursorChoices choices = D_004184D8;
-    BtlCursorGameState *game;
+    DatGameState *game;
     s16 markedCount = 0;
     s16 i;
     s16 random;
 
     memset(CURSOR, 0, 0x130);
     CURSOR->mode = 0;
-    game = (BtlCursorGameState *)datGameState;
+    game = datGameState;
     for (i = 0; i < game->partyCount; i++) {
         if (game->party[i].flags & 2) {
             markedCount++;
