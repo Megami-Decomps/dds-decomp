@@ -2327,7 +2327,21 @@ void btlSeekUnitModelFrameZero(BtlUnit *unit) {
 
 extern u32 effMiscRandMod(void *state, u32 modulus);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", btlSeekRandomModelFrame);
+void btlSeekRandomModelFrame(BtlUnit *object) {
+    s32 duration;
+    u32 randomFrame;
+    f32 frame;
+
+    if ((object->flags & 2) == 0) {
+        return;
+    }
+    duration = btlGetUnitModelFrameCount(object);
+    if (duration > 0) {
+        randomFrame = effMiscRandMod(0, duration);
+        frame = (f32)randomFrame;
+        sdfMotionSampleAtFrame(object->ext->owner->first, frame);
+    }
+}
 
 s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
