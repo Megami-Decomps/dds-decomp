@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "btl.h"
+#include "btl_state.h"
 #include "btl_resource.h"
 
 typedef struct UiSlotEntry {
@@ -30,32 +31,25 @@ extern void *kwlnTaskGetTaskByName(const char *name);
 
 extern s32 btlGetRuntime(void);
 
-typedef struct UiSceneNode {
-    u8 pad00[0x108];
-    s64 key;
-    u8 pad110[0xC];
-    u8 slot;
-    u8 pad11D[0x247];
-    struct UiSceneNode *next;
-} UiSceneNode;
 
-extern u8 btlHasRequiredActorStatusBits(UiSceneNode *node);
+extern u8 btlHasRequiredActorStatusBits(BtlUnit *node);
 
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
-void btlUpdateActorSlotPresentationState(UiSceneNode *object, s8 mode, s8 value) {
+void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     s32 count = 0;
     u8 slot = 0;
-    UiSceneNode *node = *(UiSceneNode **)(btlGetRuntime() + 0x24C);
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
     u8 *entry;
     UiSlotRow *slotEntry;
     void *task;
     s32 offset;
 
-    for (; node != 0; node = node->next) {
+    for (; node != 0; node = node->nextActor) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
-            slot = node->slot;
-            if (object->key == node->key) {
+            slot = node->lookupId;
+            if (object->owner == node->owner) {
                 break;
             }
             count++;
@@ -78,16 +72,17 @@ void btlUpdateActorSlotPresentationState(UiSceneNode *object, s8 mode, s8 value)
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3850);
 
-void btlResetActorSlotPresentationValue(UiSceneNode *object) {
+void btlResetActorSlotPresentationValue(BtlUnit *object) {
     s32 count = 0;
     u8 slot = 0;
-    UiSceneNode *node = *(UiSceneNode **)(btlGetRuntime() + 0x24C);
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
     u8 *entry;
     s32 offset;
-    for (; node != 0; node = node->next) {
+    for (; node != 0; node = node->nextActor) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
-            slot = object->slot;
-            if (object->key == node->key) {
+            slot = object->lookupId;
+            if (object->owner == node->owner) {
                 break;
             }
             count++;

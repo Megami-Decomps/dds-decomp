@@ -1873,14 +1873,15 @@ s32 btlFindPartyEntryIndexForActor(UiObject *object) {
 void func_001AABD8(void) {
 }
 
-UiObject *btlFindActiveActorByKind(s32 kind) {
-    UiObject *unit;
+BtlUnit *btlFindActiveActorByKind(s32 kind) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->next) {
+    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
         flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                if (kind == unit->kind) {
+                if (kind == unit->unk2E4) {
                     return unit;
                 }
             }
@@ -5532,8 +5533,8 @@ u32 func_001BB8D0(UiObject *object, s32 current, s32 total, s8 mode) {
            ((color << 24) | ((color >> 8) & 0xFF00));
 }
 
-u8 btlHasRequiredActorStatusBits(s32 arg0) {
-    return (~*(u64 *)(arg0 + 0x110) & 0x201) == 0;
+u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
+    return (~btlUnitStatusPair(unit) & 0x201) == 0;
 }
 
 void func_001BB988(s32 unit, u16 a, u16 b, u16 c) {
@@ -5543,15 +5544,15 @@ void func_001BB988(s32 unit, u16 a, u16 b, u16 c) {
     *(u16 *)(data + 0x2D0) = c;
 }
 
-s32 btlCountEligibleLinkedActors(u8 *scene) {
-    u8 *actor = *(u8 **)(scene + 0x24C);
+s32 btlCountEligibleLinkedActors(BtlState *battle) {
+    BtlUnit *unit = battle->units;
     s32 count = 0;
-    while (actor != 0) {
-        if ((*(u64 *)(actor + 0x110) & 0x201) == 0x201 &&
-            (*(u16 *)(actor + 0x120) & 2) != 0) {
+    while (unit != 0) {
+        if ((btlUnitStatusPair(unit) & 0x201) == 0x201 &&
+            (unit->statBits & 2) != 0) {
             count++;
         }
-        actor = *(u8 **)(actor + 0x364);
+        unit = unit->nextActor;
     }
     return count;
 }

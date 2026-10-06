@@ -105,11 +105,6 @@ extern void func_001BCB88(s32, s32);
 extern s32 datGetStatWithStatusOverride(s32, s32);
 
 
-typedef struct BtlActorWork {
-    u8 pad_00[0x228];
-    BtlUnit *actorList;
-} BtlActorWork;
-
 typedef struct SndPad {
     u8 pad00[0x21];
     s8 confirm;
@@ -315,13 +310,14 @@ s32 btlFindPartyEntryIndexForActor(s32 arg0) {
 void func_001A1CD0(void) {
 }
 
-s32 btlFindActiveActorByKind(s32 index) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+BtlUnit *btlFindActiveActorByKind(s32 index) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
+    for (; node != 0; node = node->next) {
+        u32 flags = node->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
-                if (index == *(u8 *)(node + 0x2C4)) {
+                if (index == node->unk2C4) {
                     return node;
                 }
             }
@@ -3674,8 +3670,8 @@ u32 func_001B0CB8(BtlUnit *object, s32 current, s32 total, s8 mode) {
            ((color << 24) | ((color >> 8) & 0xFF00));
 }
 
-u8 btlHasRequiredActorStatusBits(s32 arg0) {
-    return (~*(u64 *)(arg0 + 0x110) & 0x201) == 0;
+u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
+    return (~btlUnitStatusPair(unit) & 0x201) == 0;
 }
 
 void func_001B0D70(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
@@ -3687,12 +3683,12 @@ void func_001B0D70(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     *(s16 *)(temp_v0 + 0x2b0) = arg3;
 }
 
-s32 btlCountEligibleLinkedActors(s32 context) {
-    s32 node = *(s32 *)(context + 0x228);
+s32 btlCountEligibleLinkedActors(BtlState *battle) {
+    BtlUnit *node = battle->units;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        if ((*(u64 *)(node + 0x110) & 0x201) == 0x201) {
-            if ((*(u16 *)(node + 0x120) & 2) != 0) {
+    for (; node != 0; node = node->next) {
+        if ((btlUnitStatusPair(node) & 0x201) == 0x201) {
+            if ((node->statBits & 2) != 0) {
                 count++;
             }
         }
@@ -4347,12 +4343,13 @@ typedef struct BtlSlotRow {
 void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     s32 count = 0;
     u8 slot = 0;
-    BtlUnit *node = ((BtlActorWork *)btlGetRuntime())->actorList;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
     u8 *entry;
     BtlSlotRow *slotEntry;
     s32 offset;
     for (; node != 0; node = node->next) {
-        if (btlHasRequiredActorStatusBits((s32)node) != 0) {
+        if (btlHasRequiredActorStatusBits(node) != 0) {
             slot = node->lookupId;
             if (object->identity == node->identity) {
                 break;
@@ -4377,16 +4374,17 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B8650);
 
-void btlResetActorSlotPresentationValue(u8 *object) {
+void btlResetActorSlotPresentationValue(BtlUnit *object) {
     s32 count = 0;
     u8 slot = 0;
-    u8 *node = *(u8 **)(btlGetRuntime() + 0x228);
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
     u8 *entry;
     s32 offset;
-    for (; node != 0; node = *(u8 **)(node + 0x344)) {
+    for (; node != 0; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
-            slot = *(u8 *)(object + 0x11C);
-            if (*(s64 *)(object + 0x108) == *(s64 *)(node + 0x108)) {
+            slot = object->lookupId;
+            if (object->identity == node->identity) {
                 break;
             }
             count++;
