@@ -4660,7 +4660,86 @@ s32 btlIsSpecialMotion(ActionUnit *actor) {
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041AAC8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021F3E8);
+typedef struct BattleCommandRecord {
+    u8 pad00;
+    u8 flags;
+    u8 pad02[6];
+    u8 enabled;
+    u8 pad09[0xD];
+    u16 kind;
+    u8 pad18[0x20];
+} BattleCommandRecord;
+
+/* Pick a permitted shadow skill from the corresponding party member's list. */
+void func_0021F3E8(ActionStateLink *actor) {
+    s32 choices[24];
+    s32 partyId;
+    DatPartyRecord *entry;
+    s32 i;
+    s32 count;
+
+    actor->indexWork.phase = 1;
+    actor->indexWork.skillId = 0;
+    if (!(actor->pendingFlags & 8)) return;
+    switch (actor->unit->mode) {
+    case 0x12A: partyId = 1; break;
+    case 0x12B: partyId = 2; break;
+    case 0x12C: partyId = 5; break;
+    case 0x12D: partyId = 6; break;
+    default: return;
+    }
+    entry = NULL;
+    for (i = 0; i < 5; i++) {
+        if (datGameState->party[i].unitId == partyId) {
+            entry = &datGameState->party[i];
+            break;
+        }
+    }
+    if (entry == NULL) return;
+    count = 0;
+    for (i = 0; i < 24; i++) {
+        s32 skillId = entry->effectData[i];
+        s32 category;
+        if ((u32)(skillId - 1) >= 0x21F) continue;
+        category = datCommandSelectors[skillId * 2 + 1];
+        if (category == 2) continue;
+        if (category == 1) continue;
+        switch (datCommandSelectors[skillId * 2]) {
+        case -1:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+            continue;
+        }
+        if (!(((BattleCommandRecord *)datCommandRecords)[skillId].flags & 2)) continue;
+        switch (skillId) {
+        case 0x09:
+        case 0x12:
+        case 0x1B:
+        case 0x24:
+        case 0x2D:
+        case 0x34:
+        case 0x5B:
+        case 0x5C:
+        case 0x5D:
+        case 0x5F:
+        case 0xAB:
+        case 0xAC:
+        case 0xBF:
+            break;
+        default:
+            choices[count++] = skillId;
+            break;
+        }
+    }
+    if (count != 0) {
+        actor->indexWork.phase = 2;
+        actor->indexWork.skillId = choices[effMiscRandMod(NULL, count)];
+        btlBossDebugPrintf("btl:boss CHERUN shadow = %X\n", actor->indexWork.skillId);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021F698);
 
@@ -5978,13 +6057,7 @@ void func_00224F88(u32 unit) {
 
 extern s32 btlGetRuntime(void);
 
-typedef struct BattleCommandRecord {
-    u8 pad00[8];
-    u8 enabled;
-    u8 pad09[0xD];
-    u16 kind;
-    u8 pad18[0x20];
-} BattleCommandRecord;
+
 
 
 
