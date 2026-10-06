@@ -116,9 +116,28 @@ The Thunder declarations use the existing shared EffSegmentedBezierSlot
 owner, replacing the superseded local curve types after that owner was
 promoted on main. The old Bezier update bytes are unchanged.
 
+## First-segment generation
+
+The first-segment counterparts are `func_00165758` (DDS1) and `func_0016D3B0`
+(DDS2), 1,572 bytes each. They use the work's own start vector and generate
+every first row rather than copying a predecessor seed. The same allocator
+and two-row loop still account for exactly 10h quadwords. The helper body
+matches on its first reconstruction using the already recovered owners and
+VU operations; no additional primitive or parameter fields are needed.
+
+Removing the seed branch naturally lets the compiler use a countdown loop
+and hoist its phase increment. The source remains an ordinary forward C for
+loop. Its final join reads still stay within the last completed row, and the
+XYZ/W-lane conclusions above remain valid.
+
+At h=0 this helper performs no history writes or seed access, but setup,
+including distance/h, still occurs before the zero-loop guard. That native
+ordering is preserved; positive h remains necessary for meaningful geometry,
+and continuation segments still require a nonempty predecessor row.
+
 ## Verification
 
-Canonical whole-unit checks report 64 matches and zero differences for each
+Canonical whole-unit checks report 65 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
