@@ -80,7 +80,7 @@ extern u8 D_003D9178[];
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern u64 sdfSoundIsCommandBusy(void);
+extern u32 sdfSoundIsCommandBusy(void);
 
 typedef struct { u64 v; } __attribute__((packed)) u64p;
 
@@ -325,8 +325,8 @@ void mnuStopTitleVoicePlayback(void) {
     sdfSoundStopNamedPlayback();
 }
 
-void mnuQueryTitleSoundBusy(void) {
-    sdfSoundIsCommandBusy();
+s32 mnuQueryTitleSoundBusy(void) {
+    return sdfSoundIsCommandBusy();
 }
 
 void func_00269728(void) {
@@ -372,8 +372,10 @@ u32 sndOpStopNamedPlayback(void) {
     return 1;
 }
 
+extern void scrSetIntegerReturnValue(s32 value);
+
 u32 sndOpPushCommandBusyState(void) {
-    u64 soundBusy;
+    u32 soundBusy;
 
     soundBusy = sdfSoundIsCommandBusy();
     scrSetIntegerReturnValue(soundBusy);

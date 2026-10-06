@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "dds3obj.h"
@@ -8,16 +9,18 @@
 #include "eff_transform.h"
 #include "dat_state.h"
 
-extern void *kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
+struct EvtViewer;
+struct CampScene;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(s32 viewerAddr);
-void evtViewerUpdateFrame(void);
+s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
-void evtEventViewerReset(u64 arg0);
+void evtEventViewerReset(struct EvtViewer *viewer);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void func_00232E20(s32 arg0);
 extern s32 mnuPollTitleStreamStateLocked(void);
@@ -87,7 +90,8 @@ typedef struct EventViewerState {
     s32 glyphAdvanceStart;    /* 0x10 */
     s32 glyphAdvanceLimit;    /* 0x14 */
     s32 glyphAdvancePosition; /* 0x18 */
-    u8 pad1C[8];
+    s32 previousGlyphPosition; /* 0x1C */
+    u8 pad20[4];
     u8 unitNames[256][32];
     s32 selectedEntry;
     u8 pad2028[4];
@@ -166,7 +170,9 @@ typedef struct EventViewerState {
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0x10];
     s32 titleStreamWaitFrames; /* 0x2440 */
-    u8 pad2444[0x34];
+    u8 pad2444[0x2C];
+    s32 voicePending; /* 0x2470 */
+    s32 voiceMessage; /* 0x2474 */
     s32 unk2478;
     u8 pad247C[0xC];
     s32 commandStart; /* 0x2488 */
@@ -937,7 +943,7 @@ s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F7F8);
 
-void func_0022F9F0(void) {
+void func_0022F9F0(EventViewerState *viewer) {
 }
 
 /* Tick the current glyph while text is advancing; wrap after thirty ticks. */
@@ -955,7 +961,7 @@ void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
     }
 }
 
-void func_0022FA60(void) {
+void func_0022FA60(EventViewerState *viewer) {
 }
 
 s32 evtViewerTestIndexedCondition(u32 condition);
@@ -1632,13 +1638,96 @@ s32 func_00232438(s32 unused0, s32 unused1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerPickNextHandler);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerUpdateFrame);
+extern s16 D_003BBE7C;
+extern s8 D_00324510[];
+extern s32 itfMesStartEntry(s32, s32, s32);
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void func_0022FFC8(EventViewerState *);
+extern void mnuAdvanceShopMenuState(struct CampScene *);
+extern s32 func_00270088(void);
+extern s32 evtViewerPickNextHandler(KwlnTask *);
+
+/* Advance the viewer timeline, deferred voice and task-update handoff. */
+s32 evtViewerUpdateFrame(KwlnTask *task) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
+    s32 flags;
+
+    D_003BBE7C = 0;
+    if (viewer->unk2238 == 1) {
+        func_0022F9F0(viewer);
+    }
+    evtViewerAdvanceGlyphTick(viewer);
+    func_0022CD30(viewer);
+    flags = viewer->flags;
+    if (!(flags & 8)) {
+        if (D_00324510[0x22] < 0) {
+            viewer->flags = flags | 1;
+            evtViewerDispatchFlagMode((u32)viewer);
+            viewer->currentId = 0;
+            viewer->historyCount = 0;
+            viewer->commandResetId = 0;
+            evtViewerPushCommandHistory(1, 0x24, 0x18, (s32)viewer);
+            return (s32)evtViewerPickNextHandler;
+        }
+        func_0022FA60(viewer);
+    } else {
+        if (viewer->glyphAdvancePosition == viewer->glyphAdvanceStart) {
+            viewer->flags = flags & ~1;
+            evtViewerDispatchFlagMode((u32)viewer);
+        }
+        if (D_00324510[0x22] >= 0 && D_00324510[0x2C] < 0 &&
+            evtViewerHasUpdateFlag((s32)viewer) == 0) {
+            func_0022F2E0(viewer);
+        }
+    }
+    if (viewer->voicePending == 1 && evtViewerHasUpdateFlag((s32)viewer) == 0 &&
+        mnuQueryTitleSoundBusy() == 0) {
+        itfMesStartEntry(((EvtWindowContext *)viewer->windowContext)->windowHandle,
+            viewer->voiceMessage, 0);
+        viewer->voicePending = 0;
+        evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",
+            viewer->voiceMessage);
+    }
+    if (viewer->glyphAdvancePosition != viewer->previousGlyphPosition) {
+        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    }
+    viewer->previousGlyphPosition = viewer->glyphAdvancePosition;
+    if (viewer->flags & 8) {
+        evtViewerApplySelectedEntry(viewer);
+    }
+    func_0022FFC8(viewer);
+    func_0022F418(viewer);
+    mnuAdvanceShopMenuState((struct CampScene *)viewer);
+    if (viewer->flags & 8) {
+        if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
+            return -1;
+        }
+        if (evtViewerHasUpdateFlag((s32)viewer) == 1 && viewer->updateCount >= 25) {
+            return -1;
+        }
+    }
+    if (!(viewer->flags & 1)) {
+        if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
+            if (!(viewer->flags & 8)) {
+                viewer->flags ^= 1;
+                evtViewerDispatchFlagMode((u32)viewer);
+            }
+        } else if (viewer->timedActive == 1) {
+            if (func_00270088() == 2) {
+                viewer->glyphAdvancePosition++;
+            }
+        } else {
+            viewer->glyphAdvancePosition++;
+        }
+    }
+    return 0;
+}
 
 /* Update the active viewer, then switch to its frame-variable task. */
 void *evtViewerScheduleFrameVariableTask(s32 task) {
     void *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (void *)kwlnTaskGetUserValue((KwlnTask *)task);
     func_0022E5A0(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
@@ -1646,10 +1735,10 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
-void *evtViewerInitializeUpdateSequence(void) {
-    u64 viewer;
+void *evtViewerInitializeUpdateSequence(KwlnTask *task) {
+    struct EvtViewer *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (struct EvtViewer *)kwlnTaskGetUserValue(task);
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     kwlnDrawControlFlags |= 0x2000000;
@@ -1657,8 +1746,8 @@ void *evtViewerInitializeUpdateSequence(void) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-void *evtViewerAdvanceUpdate(void) {
-    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
+void *evtViewerAdvanceUpdate(KwlnTask *task) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     EvtWindowContext *window;
     s32 windowFlags;
 
@@ -1687,8 +1776,8 @@ void *evtViewerAdvanceUpdate(void) {
     }
 }
 
-void *evtViewerStartUpdate(void) {
-    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
+void *evtViewerStartUpdate(KwlnTask *task) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     u8 *context;
     u16 eventId;
     u16 sceneId;
@@ -1768,18 +1857,18 @@ void evtViewerReleaseResources(viewer)
 }
 
 /* Destroy the currently active event viewer. */
-void func_00232D08(void) {
-    u64 viewer;
+void func_00232D08(KwlnTask *task) {
+    EventViewerState *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     evtViewerReleaseResources(viewer);
 }
 
 /* Alternate destroy callback for the same active viewer. */
-void func_00232D28(void) {
-    u64 viewer;
+void func_00232D28(KwlnTask *task) {
+    EventViewerState *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     evtViewerReleaseResources(viewer);
 }
 
