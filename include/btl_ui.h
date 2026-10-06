@@ -4,6 +4,8 @@
 #include "common.h"
 
 struct BtlTask;
+struct ActionStateLink;
+struct BattleIndexWork;
 
 typedef struct BattleSceneSelection {
     u16 cursor;
@@ -17,9 +19,21 @@ typedef struct BattleSceneObject {
     s32 state;
     BattleSceneSelection selections[7]; /* +0x04: indexed by scene kind 0..6. */
     u8 pad20[8];
-    s32 *commandData; /* +0x28: points to the owning task's +0x20 result/work. */
-    struct BtlTask *owner; /* +0x2C */
+    struct BattleIndexWork *commandData; /* +0x28: owning actor's complete +0x20 work. */
+#ifdef VERSION_DDS1
+    struct BtlTask *owner; /* +0x2C: the 0x170-byte DDS1 actor */
+#else
+    struct ActionStateLink *owner; /* +0x2C: the 0x180-byte DDS2 actor */
+#endif
 } BattleSceneObject;
+
+#ifdef VERSION_DDS1
+void fldInitializeSceneObject(BattleSceneObject *object, struct BtlTask *owner);
+#else
+void fldInitializeSceneObject(BattleSceneObject *object, struct ActionStateLink *owner);
+s32 fldSelectSceneMode(struct ActionStateLink *task);
+void func_001CAB60(struct ActionStateLink *task);
+#endif
 
 /* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
  * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */

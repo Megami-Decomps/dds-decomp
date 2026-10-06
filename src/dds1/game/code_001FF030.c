@@ -256,8 +256,8 @@ s32 btlRunAiAction(BtlTask *task, s32 id, u32 packed) {
     u32 payload = packed & 0x3fffff;
 
     func_001FFE30(task, id & 0xffff, &lookup.slot, &lookup.result);
-    task->result = lookup.result;
-    task->arg = lookup.slot;
+    task->indexWork.phase = lookup.result;
+    task->indexWork.skillId = lookup.slot;
     task->unit->actionSlot = lookup.slot;
     btlAiActionHandlers[op](task, payload, lookup.result);
     return 1;
@@ -1373,18 +1373,18 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
             }
         }
         if (found != 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, btlGetIndexListEntry(list, bestIndex));
+            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
         } else {
             u32 n = count;
             for (i = 0; i < n; i++) {
                 flags[i] = 1;
             }
-            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
+            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, flags, count));
         }
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1421,11 +1421,11 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         } else {
             result = func_002024A8(list, flags, count);
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, result);
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, result);
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1447,11 +1447,11 @@ s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1473,11 +1473,11 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1499,11 +1499,11 @@ s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1550,16 +1550,16 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
             }
         }
         if (found == 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, ((BtlTask *)actor)->unit);
+            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
             btlFreeIndexList(list);
             return 1;
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, picked, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, picked, count));
         btlFreeIndexList(list);
         return 1;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     return 1;
@@ -1571,7 +1571,7 @@ s32 btlAppendSelfAfterTargetScan(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
     func_001A30F8(actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(((BtlTask *)actor)->targetList, ((BtlTask *)actor)->unit);
+    btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
     btlFreeIndexList(list);
     return 1;
 }
@@ -1590,7 +1590,7 @@ u32 btlAppendEffectActorToCommandIndices(s32 task) {
     u32 actor;
 
     actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->targetList, (void *)actor);
+    btlAppendIndexListEntry(((BtlTask *)task)->indexWork.indices, (void *)actor);
     return 1;
 }
 
@@ -1609,11 +1609,11 @@ s32 btlSelectTargetsBlockingElement(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1647,11 +1647,11 @@ s32 btlSelectTargetsPassingCheck(s32 actor, s32 action) {
                 }
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -1681,11 +1681,11 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
                 }
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -2351,7 +2351,94 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     return (bits * 2) & 4;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00205BD8);
+extern void func_00205730(BtlUnit *);
+extern void btlInitializeEffectVectorsFromSourceRecords();
+
+/* Re-pairs the two linked units of modes 0x107/0x108. While the effect is idle the 0x108 unit keeps its
+ * position and rotation, the 0x107 unit copies them and both reload their effect vectors; a 0x108 unit with
+ * flags 0xE0 (and a 0x107 unit without) is moved 400 units away. With an effect running the 0x107 unit is
+ * moved aside and rebuilt as the active body. */
+void func_00205BD8(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *first = NULL;
+    BtlUnit *second = NULL;
+    BattleEffectState *effect = state->effect;
+    BtlUnit *unit;
+    f32 position[4];
+
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        u32 flags = unit->flags;
+
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (unit->mode) {
+                case 0x107:
+                    first = unit;
+                    break;
+                case 0x108:
+                    second = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (effect->active == 1 || effect->owner == 0) {
+        second->position[0] = 0.0f;
+        btlSetUnitPosition(second, second->position);
+        PCP_COPY_VECTOR(first->position, second->position);
+        btlSetUnitPosition(first, second->position);
+        btlSetUnitRotation(second, second->rotation);
+        PCP_COPY_VECTOR(first->rotation, second->rotation);
+        btlSetUnitRotation(first, second->rotation);
+        if (second->species != first->species) {
+            btlInitializeEffectVectorsFromSourceRecords(second, second->resourceKind, second->species);
+            btlInitializeEffectVectorsFromSourceRecords(first, first->resourceKind, first->species);
+        } else {
+            btlInitializeEffectVectorsFromSourceRecords(second, second->resourceKind, second->species);
+            first->bodyOffsetXBits = 0;
+            first->bodyOffsetY = -380.0f;
+            first->bodyOffsetZ = 0.0f;
+            first->bodyOffsetWBits = 0;
+            first->reach = 170.0f;
+            first->height = 325.0f;
+        }
+        first->stateFlags &= ~0x100;
+        btlBeginEffectActorFadeOut();
+        if ((second->flags & 0xE0) && !(first->flags & 0xE0) && second->species == 0x108) {
+            PCP_COPY_VECTOR(position, second->position);
+            position[0] += 400.0f;
+            position[2] += 400.0f;
+            btlSetUnitPosition(second, position);
+            btlInitializeEffectVectorsFromSourceRecords(second, first->resourceKind, first->species);
+            second->bodyOffset[0] += 400.0f;
+            second->bodyOffset[2] += 400.0f;
+        }
+    } else {
+        if (first != NULL) {
+            first->stateFlags &= ~0x100;
+            PCP_COPY_VECTOR(position, first->position);
+            position[0] += 420.0f;
+            btlSetUnitPosition(first, position);
+            btlSetUnitRotation(first, first->rotation);
+            btlInitializeEffectVectorsFromSourceRecords(first, 1, 0x107);
+            first->stateFlags |= 0x100;
+            func_00205730(first);
+            first->stateFlags |= 0x200;
+            first->bodyOffsetY = -245.0f;
+            first->reach = 155.0f;
+            first->height = 340.0f;
+            first->bodyOffsetXBits = 0;
+            first->bodyOffsetZ = 0.0f;
+            first->bodyOffsetWBits = 0;
+        }
+        if (second != NULL) {
+            PCP_COPY_VECTOR(position, first->position);
+            btlSetUnitPosition(second, second->position);
+            btlSetUnitRotation(second, second->rotation);
+            btlInitializeEffectVectorsFromSourceRecords(second, 1, 0x108);
+        }
+    }
+}
 
 void func_00205EE0(void) {
     func_00205BD8();
@@ -3123,8 +3210,6 @@ u32 btlGetSpecialModeEffectValue(void) {
     return *(u16 *)(effect + 0x4);
 }
 
-extern void btlInitializeEffectVectorsFromSourceRecords();
-
 extern void func_001F53F0(void);
 
 void btlTriggerSpecialUnitAction(void) {
@@ -3665,13 +3750,13 @@ s32 btlPickRandomMarkedTask(void) {
     task = candidates[effMiscRandMod(0, count)];
     unit = task->unit;
     fldAppendSceneGroupHandle(task);
-    task->result = 2;
+    task->indexWork.phase = 2;
     if (mark->variant != 0) {
-        task->arg = 0xD1;
+        task->indexWork.skillId = 0xD1;
     } else {
-        task->arg = 0xD2;
+        task->indexWork.skillId = 0xD2;
     }
-    btlAppendIndexListEntry(task->targetList, unit);
+    btlAppendIndexListEntry(task->indexWork.indices, unit);
     mark->marked = 1;
     return -1;
 }
@@ -3761,9 +3846,9 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
         task = candidates[effMiscRandMod(0, count)];
         unit = task->unit;
         fldAppendSceneGroupHandle(task);
-        task->result = 2;
-        task->arg = 0xD2;
-        btlAppendIndexListEntry(task->targetList, unit);
+        task->indexWork.phase = 2;
+        task->indexWork.skillId = 0xD2;
+        btlAppendIndexListEntry(task->indexWork.indices, unit);
     } else {
         if (state->battleFlags & 0x800) {
             return -1;
@@ -3795,8 +3880,8 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
             (*formCount)++;
             task = (BtlTask *)btlFindUnitByActor((s32)unit);
             fldAppendSceneGroupHandle(task);
-            task->result = 0x11;
-            btlAppendIndexListEntry(task->targetList, task->unit);
+            task->indexWork.phase = 0x11;
+            btlAppendIndexListEntry(task->indexWork.indices, task->unit);
             btlBossDebugPrintf("btl:HARI1 form = %d\n", *formCount);
         }
     }
@@ -4169,8 +4254,8 @@ s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
         if ((flags & 0x1000) == 0) {
             return 0;
         }
-        if (btlGetIndexListCount(((BtlTask *)entry)->targetList) == 1) {
-            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->targetList, 0);
+        if (btlGetIndexListCount(((BtlTask *)entry)->indexWork.indices) == 1) {
+            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->indexWork.indices, 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -4191,8 +4276,8 @@ s32 btlHandleTargetedDefeatAction(u8 *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
     u8 *other;
     if (((BtlTask *)entry)->unit->flags & 0x200) {
-        if (btlGetIndexListCount(((BtlTask *)entry)->targetList) == 1) {
-            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->targetList, 0);
+        if (btlGetIndexListCount(((BtlTask *)entry)->indexWork.indices) == 1) {
+            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->indexWork.indices, 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -4341,8 +4426,8 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
         }
         return 1;
     } else if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
-        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->targetList) == 1) {
-            void *other = btlGetIndexListEntry(((BtlEventEntry *)unit)->task->targetList, 0);
+        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->indexWork.indices) == 1) {
+            void *other = btlGetIndexListEntry(((BtlEventEntry *)unit)->task->indexWork.indices, 0);
             btlFlagAllUnitDefeatCandidatesTask();
             func_0020B190(unit, other);
         } else {

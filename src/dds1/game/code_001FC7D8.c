@@ -229,14 +229,14 @@ s32 func_001FD170(BtlTask *task) {
 
     switch (status) {
     case 0x2000:
-        switch (task->result) {
+        switch (task->indexWork.phase) {
         case 1:
             return effOffsetIfOwnerFlagClear(unit, 0x78);
         case 2:
         case 3:
         case 7:
         case 8:
-            if (task->arg == 0xE0) {
+            if (task->indexWork.skillId == 0xE0) {
                 effOffsetIfOwnerFlagClear(unit, 0x6E);
             }
             /* Retail discards the auxiliary ID before resolving the common ID. */
@@ -244,14 +244,14 @@ s32 func_001FD170(BtlTask *task) {
             return effOffsetIfOwnerFlagClear(unit, 2);
         }
     case 0x200:
-        if (task->result != 1) {
+        if (task->indexWork.phase != 1) {
             return effOffsetIfOwnerFlagClear(unit, 0x7A);
         }
         return effOffsetIfOwnerFlagClear(unit, 0x78);
     case 0x40:
         return effOffsetIfOwnerFlagClear(unit, 6);
     case 0x20:
-        switch (task->result) {
+        switch (task->indexWork.phase) {
         case 13:
             return effOffsetIfOwnerFlagClear(unit, 0x72);
         case 14:
@@ -260,7 +260,7 @@ s32 func_001FD170(BtlTask *task) {
         case 3:
         case 7:
         case 8:
-            if (task->arg == 0xE0) {
+            if (task->indexWork.skillId == 0xE0) {
                 return effOffsetIfOwnerFlagClear(unit, 0x6E);
             }
             break;
@@ -279,14 +279,6 @@ s32 func_001FD170(BtlTask *task) {
     }
 }
 
-typedef struct BtlCommandTargetResult {
-    u8 pad00[8];
-    s32 kind;
-    u8 pad0C[4];
-    u8 skipped;
-    u8 pad11[0xA0B];
-} BtlCommandTargetResult;
-
 typedef struct BtlCommandEffect {
     s32 command;
     s16 effect;
@@ -304,12 +296,11 @@ extern BtlCommandEffect D_00360468[];
 extern BtlEffectCommandRecord *datCommandRecords;
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
 
-/* The +0x80 pointer retains SDK operand groups, outside BtlTask's named
- * fields; the command/index-work parent has a different native layout. */
+/* Retained operand groups can suppress the command's effect. */
 s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
-    BtlCommandTargetResult *result = *(BtlCommandTargetResult **)((u8 *)task + 0x80);
+    BtlOperandGroup *result = task->indexWork.groups;
     u32 i;
-    u32 count = btlGetIndexListCount(task->targetList);
+    u32 count = btlGetIndexListCount(task->indexWork.indices);
     s8 rejected = 0;
     s16 effect;
     u8 adjustSide;
@@ -331,7 +322,7 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
             break;
         }
     }
-    if (btlCheckCommandRequiredEntryMatches(task->targetList, command) != 0) {
+    if (btlCheckCommandRequiredEntryMatches(task->indexWork.indices, command) != 0) {
         if (datCommandRecords[command].requiredFlags == 0x800 ||
             datCommandRecords[command].requiredFlags == 0x1000) {
             effect = 0x6A;
@@ -344,9 +335,9 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
         s32 ownerSide = task->unit->flags & 0x600;
         s32 targetSides = 0;
 
-        count = btlGetIndexListCount(task->targetList);
+        count = btlGetIndexListCount(task->indexWork.indices);
         for (i = 0; i < count; i++) {
-            targetSides |= ((BtlUnit *)btlGetIndexListEntry(task->targetList, i))->flags & 0x600;
+            targetSides |= ((BtlUnit *)btlGetIndexListEntry(task->indexWork.indices, i))->flags & 0x600;
         }
         if (ownerSide != targetSides && targetSides != 0) {
             effect = (task->unit->flags & 0x200) ? effect + 1 : effect - 1;
@@ -912,8 +903,8 @@ s32 btlAllocAndCheck(s32 object) {
 }
 
 u32 btlAssignTaskResultAndArgument(s32 task) {
-    ((BtlTask *)task)->result = 0xb;
-    ((BtlTask *)task)->arg = 0xc2;
+    ((BtlTask *)task)->indexWork.phase = 0xb;
+    ((BtlTask *)task)->indexWork.skillId = 0xc2;
     return 1;
 }
 

@@ -4873,7 +4873,7 @@ extern u8 D_00358828[];
 void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
     memset(object, 0, sizeof(*object));
     object->state = 1;
-    object->commandData = &owner->result;
+    object->commandData = &owner->indexWork;
     object->owner = owner;
 }
 

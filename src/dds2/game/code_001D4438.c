@@ -1192,9 +1192,9 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
     }
 }
 
-void func_001D5330(u32 task) {
+void func_001D5330(ActionStateLink *task) {
     btlGetRuntime();
-    ((BtlTask *)task)->flags = ((BtlTask *)task)->flags & 0xfffffffb;
+    task->pendingFlags = task->pendingFlags & 0xfffffffb;
     func_001CAB60(task);
 }
 
