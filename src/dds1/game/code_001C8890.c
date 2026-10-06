@@ -63,14 +63,6 @@ typedef struct SceneSlot {
     u8 id;
 } SceneSlot;
 
-/* Actor-task prefix; the separate unit-data list uses UiObject. */
-typedef struct SceneTask {
-    s32 state;
-    u8 pad04[4];
-    u32 flags;
-    u8 pad0C[0xC];
-    UiObject *actor;
-} SceneTask;
 
 struct CameraPoseAction;
 
@@ -101,9 +93,9 @@ typedef struct BattleController {
     s32 spriteObject;
     u8 pad_2B0[0x24];
     SceneSlot slots[8];
-    SceneTask *groupPrimary[20];
-    SceneTask *groupSecondary[45];
-    SceneTask *groupTertiary[15];
+    BtlTask *groupPrimary[20];
+    BtlTask *groupSecondary[45];
+    BtlTask *groupTertiary[15];
     u8 pad_42C[0x184];
     s32 (*sceneCallback)();
     u8 pad_5B4[0x5C];
@@ -538,7 +530,7 @@ void btlSetTrackedTaskDisplayMode(s32 mode);
 
 void btlSyncPlayerWork(UiObject *actor);
 
-void fldAppendTaskToGroup(SceneTask *task);
+void fldAppendTaskToGroup(BtlTask *task);
 
 void fldCreateSceneSpriteTask(s32 arg0);
 
@@ -1012,7 +1004,7 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(u8 *task) {
         btlFlagUnitDefeatCandidate(unit);
         btlRefreshUnitMotionSelection(unit);
         btlStartTask(btlAllocateIndexedUnitEffectTask(unit, 0xE, 0, 1.0f));
-        fldAppendTaskToGroup((SceneTask *)task);
+        fldAppendTaskToGroup((BtlTask *)task);
         btlDispatchStateHandler(task, 2);
     }
     return;
@@ -1598,7 +1590,7 @@ extern s32 func_001A3638(void);
 
 extern void fldUpdateSceneGroupTask(s32 task);
 
-extern void btlRemoveTaskFromSceneGroup(SceneTask *task);
+extern void btlRemoveTaskFromSceneGroup(BtlTask *task);
 
 
 void btlCommandTaskReturnUpdate(s32 task) {
@@ -1625,7 +1617,7 @@ void btlCommandTaskReturnUpdate(s32 task) {
             func_001A2258(unit);
         }
         fldUpdateSceneGroupTask(task);
-        btlRemoveTaskFromSceneGroup((SceneTask *)task);
+        btlRemoveTaskFromSceneGroup((BtlTask *)task);
         btlDispatchStateHandler(task, 0x1E);
     }
 }
@@ -1833,7 +1825,7 @@ void btlRemoveEligibleActorSceneTask(s32 arg0) {
         actor->marker = -1;
         btlClearAllActorEntrySlots((u32)actor);
         fldUpdateSceneGroupTask(arg0);
-        btlRemoveTaskFromSceneGroup((SceneTask *)arg0);
+        btlRemoveTaskFromSceneGroup((BtlTask *)arg0);
         btlDispatchStateHandler(arg0, 1);
     } else {
         if ((actor->flags & 0x400) == 0) {
@@ -1844,7 +1836,7 @@ void btlRemoveEligibleActorSceneTask(s32 arg0) {
             return;
         }
         fldUpdateSceneGroupTask(arg0);
-        btlRemoveTaskFromSceneGroup((SceneTask *)arg0);
+        btlRemoveTaskFromSceneGroup((BtlTask *)arg0);
         if ((entryFlags & 0x200) && (actor->flags & 0x40) == 0) {
             btlDispatchStateHandler(arg0, 1);
         } else {
@@ -2017,10 +2009,10 @@ extern char D_003A37C8[];
 /* Display the eight slot entries, retaining each group's last valid task. */
 void btlDebugPrintActionOrder(s32 x, s32 y) {
     BattleController *controller = (BattleController *)btlGetRuntime();
-    SceneTask **primary;
-    SceneTask **secondary;
-    SceneTask **tertiary;
-    SceneTask *task;
+    BtlTask **primary;
+    BtlTask **secondary;
+    BtlTask **tertiary;
+    BtlTask *task;
     s32 color;
     u32 i;
 
@@ -2059,7 +2051,7 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
             color = 0;
             break;
         }
-        if (task == NULL || task->actor == NULL) {
+        if (task == NULL || task->unit == NULL) {
             continue;
         }
         if (controller->slots[i].b == 100) {
