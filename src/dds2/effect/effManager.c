@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ee_mmi.h"
+#include "eff.h"
 
 /* Per-effect-type operations act on the instance returned by create. */
 typedef struct EffTypeOps {
@@ -8,8 +9,8 @@ typedef struct EffTypeOps {
     void (*destroy)(s32);    /* 0x08 */
     void (*fn0C)(s32);       /* 0x0C */
     s32 (*fn10)();           /* 0x10: returns 1 when absent */
-    void (*fn14)();          /* 0x14 */
-    void (*fn18)(s32);       /* 0x18 */
+    void (*fn14)(s32, const void *); /* 0x14: copy a supplied vector into the instance. */
+    void (*fn18)(s32, const void *); /* 0x18: apply a supplied transform matrix. */
     void (*fn1C)(s32);       /* 0x1C */
     void (*fn20)();          /* 0x20 */
     s32 (*fn24)();           /* 0x24: returns 1 when absent */
@@ -92,12 +93,12 @@ s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node) {
     return effNodeTypeOperations[node->type].fn10(node->instance);
 }
 
-void effCopyVectorToNodeInstance(EffNode *node) {
-    effNodeTypeOperations[node->type].fn14(node->instance);
+void effCopyVectorToNodeInstance(EffNode *node, const void *vector) {
+    effNodeTypeOperations[node->type].fn14(node->instance, vector);
 }
 
-void effApplyNodeTransformMatrix(EffNode *node) {
-    effNodeTypeOperations[node->type].fn18(node->instance);
+void effApplyNodeTransformMatrix(EffNode *node, const void *matrix) {
+    effNodeTypeOperations[node->type].fn18(node->instance, matrix);
 }
 
 void effSetNodeParameterValue(EffNode *node) {

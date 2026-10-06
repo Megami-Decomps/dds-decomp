@@ -4,6 +4,7 @@
 #include "fpu.h"
 #include "mdl.h"
 #include "dat_state.h"
+#include "eff.h"
 
 typedef struct EffNode EffNode;
 typedef struct EffNodeDescriptor EffNodeDescriptor;
@@ -481,7 +482,6 @@ extern void dds3SetObjectFlags();
 
 extern void effRestartNodeInstance(EffNode *node);
 
-extern void effCopyVectorToNodeInstance(s32 handle, f32 *pos);
 
 typedef struct FieldPair48 {
     f32 pos[4];
@@ -1877,7 +1877,7 @@ void fldUpdateIndexedResourceEffectPosition(void) {
         position[0] = state->position[0];
         position[1] = state->position[1];
         position[2] = state->position[2];
-        effCopyVectorToNodeInstance(fldIndexedResourceEffect, position);
+        effCopyVectorToNodeInstance((EffNode *)fldIndexedResourceEffect, position);
         effUpdateNode(fldIndexedResourceEffect);
     }
 }
@@ -1902,7 +1902,7 @@ void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         effRestartNodeInstance(handle);
-        effCopyVectorToNodeInstance(mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
+        effCopyVectorToNodeInstance((EffNode *)mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
         mnuPositionedResourceActive[mnuPositionedResourceCursor] = 1;
         mnuPositionedResourceCursor = (mnuPositionedResourceCursor + 1) % 4;
     }
@@ -2280,7 +2280,7 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
     pos[2] = z;
     pos[3] = 1.0f;
     effRestartNodeInstance(fldAreaDamageEffect);
-    effCopyVectorToNodeInstance(fldAreaDamageEffect, pos);
+    effCopyVectorToNodeInstance((EffNode *)fldAreaDamageEffect, pos);
     fldAreaDamageEffectPlaced = 1;
     return 1;
 }
@@ -2782,7 +2782,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         effRestartNodeInstance(fldDamEffectNode);
-        effCopyVectorToNodeInstance(fldDamEffectNode, pos);
+        effCopyVectorToNodeInstance((EffNode *)fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
     if (fldYukEffectNode != 0) {
@@ -2790,7 +2790,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         effRestartNodeInstance(fldYukEffectNode);
-        effCopyVectorToNodeInstance(fldYukEffectNode, pos);
+        effCopyVectorToNodeInstance((EffNode *)fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
 }
