@@ -3994,9 +3994,9 @@ void btlCopyUnitStats(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D6A80);
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3B70);
-
 extern SdfModel *sdfModelCreateWithItems(void *, void *);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3B70);
 
 void btlCreateUnitTransparency(BtlUnit *unit) {
     BattleGroupNode *shape;
@@ -11027,3 +11027,4 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5410);
+
