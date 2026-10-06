@@ -11107,7 +11107,7 @@ u32 func_00305148(u32 allocationHandle, u32 keepAllocation) {
     return (u32)set;
 }
 
-u32 *effCreateResourceSlotSet(u32 *sourceHandle, u32 slot, u32 count) {
+EffectSlotSet *effCreateResourceSlotSet(u32 *sourceHandle, u32 slot, u32 count) {
     EffectSlotSet *source = (EffectSlotSet *)sourceHandle;
     EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
     u32 index = 0;
@@ -11132,7 +11132,7 @@ u32 *effCreateResourceSlotSet(u32 *sourceHandle, u32 slot, u32 count) {
             index++;
         } while (index < effect->count);
     }
-    return (u32 *)effect;
+    return effect;
 }
 
 u32 effDestroyResourceSlotSet(u32 effect) {
