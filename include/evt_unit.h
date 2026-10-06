@@ -19,6 +19,16 @@ typedef struct EvtEffObj {
     EvtEffData *data;              /* 0x1C */
 } EvtEffObj;
 
+/* Native 0x40-byte slot: three vec4 followed by two auxiliary coordinates.
+ * The static pool contains seven slots in DDS1 and ten in DDS2. */
+typedef struct EvtUnitVectorSlot {
+    s32 state;                    /* 0x00: active states are 2 and 3. */
+    s32 id;                       /* 0x04: unit bound to a state-3 slot. */
+    f32 vec[14];                  /* 0x08: vec4 at 0x08/0x18/0x28, then 0x38/0x3C. */
+} EvtUnitVectorSlot;
+
+typedef char EvtUnitVectorSlotSizeCheck[sizeof(EvtUnitVectorSlot) == 0x40 ? 1 : -1];
+
 /* Event motion work, not the world-list node which contains its address.
  * Setup opcodes pass this same object to evtPrepareUnitMotionState and
  * evtConfigureUnitMotionSlot; the direction updater passes it to planar aim.

@@ -7,15 +7,8 @@
 #include "scr.h"
 
 
-/* Effect slot: three vec4 at +0x08/+0x18/+0x28 (the last carries w = 1.0f),
- * then the two floats returned by evtFindUnitSlotAuxCoordinates at +0x38/+0x3C. */
-typedef struct {
-    s32 state;          /* 0x00: 2 or 3 when in use */
-    s32 id;             /* 0x04: bound object id (state 3) */
-    f32 vec[14];        /* 0x08 */
-} EvtSlot;
 
-extern EvtSlot D_003D7BD8[7];
+extern EvtUnitVectorSlot D_003D7BD8[7];
 
 typedef struct EvtSlotEnds {
     f32 (*points)[4];
