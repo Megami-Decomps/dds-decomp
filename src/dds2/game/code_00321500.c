@@ -318,7 +318,8 @@ void func_00322540(MenuRegistryParameters *records, u32 count) {
     D_004390E8 = count;
 }
 
-MenuRegistryParameters *func_00322550(u8 index) {
+MenuRegistryParameters *func_00322550(u32 taggedIndex) {
+    u8 index = taggedIndex;
     return &D_004390E4[index];
 }
 
@@ -579,12 +580,12 @@ void func_00323938(MenuRuntimePairCallback records) {
 
 /* Remaining is interpreted as signed 16-bit; updated/finished flags stay latched. */
 u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
-    if ((s16)entry->remaining - elapsed < 1) {
+    if (entry->remaining - elapsed < 1) {
         entry->remaining = 0;
         entry->flags = entry->flags | MNU_WORK_FINISHED;
         return 1;
     }
-    entry->remaining = (s16)entry->remaining - (s16)elapsed;
+    entry->remaining = entry->remaining - (s16)elapsed;
     entry->flags = entry->flags | MNU_WORK_UPDATED;
     return 0;
 }
