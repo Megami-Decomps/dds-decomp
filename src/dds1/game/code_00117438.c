@@ -3,7 +3,7 @@
 #include "btl_action.h"
 #include "dat_state.h"
 
-extern s64 scrGetWorkTaskHandle(void);
+extern u32 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
 
 extern u32 D_003BAAAC;
@@ -321,8 +321,8 @@ void sdfFirePendingCallback(void) {
     scrDestroyWorkTask();
 }
 
-u8 scrIsCurrentWorkTask(s64 expectedValue) {
-    s64 currentValue;
+u8 scrIsCurrentWorkTask(u32 expectedValue) {
+    u32 currentValue;
 
     currentValue = scrGetWorkTaskHandle();
     return currentValue == expectedValue;
