@@ -932,21 +932,13 @@ typedef struct EffFragmentResources {
     u32 *endColors;
 } EffFragmentResources;
 
-typedef struct EffBezierPoint { f32 x, y, z; } EffBezierPoint;
-typedef struct EffBezierSlot {
-    EffBezierPoint controlPoints[7];
-    u32 pointIndex;
-    f32 t;
-    f32 parameterStep;
-} EffBezierSlot;
-
 /* Two joined cubic segments followed by their stepping state. */
 typedef struct EffGroupSlot {
     f32 position[4];
     s32 age;
     f32 scale;
     EffFragmentResources *resources;
-    EffBezierSlot curve;
+    EffSegmentedBezierSlot curve;
     void *node;
 } EffGroupSlot;
 
@@ -966,7 +958,7 @@ typedef struct EffGroupParams {
 } EffGroupParams;
 
 /* Kind-two placement is 0x30 bytes; its four palette colors are separate. */
-typedef char EffBezierSlotSizeCheck[sizeof(EffBezierSlot) == 0x60 ? 1 : -1];
+typedef char EffBezierSlotSizeCheck[sizeof(EffSegmentedBezierSlot) == 0x60 ? 1 : -1];
 typedef char EffGroupSlotSizeCheck[sizeof(EffGroupSlot) == 0x80 ? 1 : -1];
 typedef char EffGroupParamsSizeCheck[sizeof(EffGroupParams) == 0x50 ? 1 : -1];
 
@@ -1164,7 +1156,6 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
-extern s32 effStepBezierSlotSegment(EffBezierSlot *, f32 *);
 extern void effInitializeColorState(struct EffectColorState *);
 extern void func_001719D0(EffFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
