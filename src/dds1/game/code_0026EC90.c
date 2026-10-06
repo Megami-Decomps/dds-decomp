@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 extern u8 D_0037B8BC[];
 
@@ -16,7 +17,7 @@ extern u32 mnuMovieDrawTask;
 
 extern u16 mnuMovieTaskState;
 
-extern u32 *mnuMovieWork;
+extern MnuStaffMovieWork *mnuMovieWork;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -70,19 +71,21 @@ void func_0026F518(void) {
     mnuUnloadStaffFonts();
 }
 
-extern u64 frFontBuildColoredGlyphWithSharedFlags();
-extern u32 frFontMeasureLines(u64);
-extern void frFontDrawGlyphWithSharedFlags(u64, s8);
-extern s32 frFontQueueGlyphInSelectedSlot(u64);
+struct FrFontCtx;
+struct FrFontGlyph;
+extern struct FrFontCtx *frFontBuildColoredGlyphWithSharedFlags();
+extern u32 frFontMeasureLines(struct FrFontGlyph *);
+extern void frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
-s32 func_0026F530(s64 alternate, s32 color, u64 source, f32 x, f32 y) {
-    u64 glyph;
+s32 func_0026F530(s32 alternate, u32 color, const char *source, f32 x, f32 y) {
+    struct FrFontGlyph *glyph;
 
     if (alternate == 0) {
-        glyph = frFontBuildColoredGlyphWithSharedFlags(
+        glyph = (struct FrFontGlyph *)frFontBuildColoredGlyphWithSharedFlags(
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 1, 1, 10, color, source, 0);
     } else {
-        glyph = frFontBuildColoredGlyphWithSharedFlags(
+        glyph = (struct FrFontGlyph *)frFontBuildColoredGlyphWithSharedFlags(
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, 8, color, source, 0);
     }
     frFontMeasureLines(glyph);
@@ -97,8 +100,8 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F918);
 
 s32 mnuStaffImageProc(void) {
-    mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork[1], 0x10, 0, 0x27);
-    mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork[1], D_0037AF70[mnuMovieWork[5]], 0, 0x53);
+    mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);
+    mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, D_0037AF70[mnuMovieWork->imageIndex], 0, 0x53);
     func_0026F230(0x53);
     func_0026F918();
     return 0;
@@ -114,12 +117,12 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
-    sdfQueueNonzeroResourceId(*mnuMovieWork);
-    mnuMovieWork = (u32 *)0x0;
+    sdfQueueNonzeroResourceId(mnuMovieWork->allocation);
+    mnuMovieWork = NULL;
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet(mnuMovieWork[1]);
+    effDestroyResourceSlotSet(mnuMovieWork->spriteSet);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_002ECA40(0);
@@ -127,10 +130,10 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
 
 void mnuInitializeMovieRollViewport(void) {
     s32 i;
-    u32 *movie = mnuMovieWork;
+    MnuStaffMovieWork *movie = mnuMovieWork;
 
-    movie[4] = 0;
-    movie[5] = 0;
+    movie->unk10 = 0;
+    movie->imageIndex = 0;
     D_003BC614 = 0;
     D_003BC618 = 4;
     mnuLoadMovieRollSprite();
@@ -154,21 +157,21 @@ extern s32 sdfResourceRetainAddress(s32);
 
 extern void func_0026A5F0(s32);
 
-extern void func_0026F5E8(void);
+extern s32 func_0026F5E8(void);
 
 extern void mnuFinishStaffMovieAndFreeState(void);
 
 void mnuMovieCreateTask(void) {
     s32 handle;
-    u32 *movie;
+    MnuStaffMovieWork *movie;
 
     D_003BA8EC = 0x80000000;
     handle = sdfAllocGeneralBlock(0x20);
-    movie = (u32 *)sdfResourceRetainAddress(handle);
+    movie = (MnuStaffMovieWork *)sdfResourceRetainAddress(handle);
     mnuMovieWork = movie;
-    movie[0] = handle;
-    movie[2] = 0;
-    movie[3] = 0;
+    movie->allocation = handle;
+    movie->phase = 0;
+    movie->scrollTicks = 0;
     func_0026A5F0(0x13);
     mnuMovieTaskState = 1;
     kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, mnuFinishStaffMovieAndFreeState, 0);
