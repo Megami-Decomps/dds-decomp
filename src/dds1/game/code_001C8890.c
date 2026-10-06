@@ -1135,7 +1135,7 @@ void func_001C9660(BtlTask *task) {
 
     state = fldGetSceneObjectState();
     if (state == 3 || state == 8) {
-        if (btlIsSupportedCommandKind(&task->result) != 0) {
+        if (btlIsSupportedCommandKind(&task->indexWork.phase) != 0) {
             btlDispatchStateHandler(task, 7);
         } else {
             fldSetSceneObjectAndGroupStates();
@@ -1233,7 +1233,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                         btlDispatchStateHandler(task, 0xC);
                     }
                 } else if (kwlnTaskIsRegistered(scene->boundTask) == 0) {
-                    if (task->result == -1) {
+                    if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
                         btlRunRandomWeightedAiTableAction(task);
@@ -1285,10 +1285,10 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
     }
 }
 
-void btlResetCommandIndexWork(s32 arg0) {
+void btlResetCommandIndexWork(BtlTask *task) {
     func_001ACC20();
-    btlResetIndexWork(arg0 + 0x20);
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x2f4) = 0xffffffff;
+    btlResetIndexWork(&task->indexWork);
+    task->unit->unk2F4 = -1;
 }
 
 void btlCommandStartSoundTasks(u8 *task) {
@@ -1454,7 +1454,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
         btlStartTask(sndCreateEffectSourceTask((u32)state->resources[45], (u8 *)unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
-        spawned = (SoundTask *)btlCreateEffObjA(unit, task->result);
+        spawned = (SoundTask *)btlCreateEffObjA(unit, task->indexWork.phase);
         spawned->startCondition.kind = 4;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -1493,10 +1493,10 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
                 btlRefreshUnitMotionSelection((u8 *)unit);
             }
         }
-        if (task->actionStage == 4) {
+        if (task->indexWork.stage == 4) {
             if (!btlCheckSpecialAbility((s32)&unit->statBits, 0x231)) {
-                btlStartTask(btlCreateEffObjB(unit, task->effect));
-                task->actionStage = 0;
+                btlStartTask(btlCreateEffObjB(unit, task->indexWork.parameter));
+                task->indexWork.stage = 0;
             } else {
                 btlStartTask(btlCreateEffObjD(unit, 0x231));
             }
@@ -1584,7 +1584,7 @@ void func_001CE5F0(BtlTask *task) {
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
         btlStartTask(sndCreateEffectSourceTask((u32)state->resources[45], (u8 *)unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
-        spawned = (SoundTask *)btlCreateEffObjA(unit, task->result);
+        spawned = (SoundTask *)btlCreateEffObjA(unit, task->indexWork.phase);
         spawned->startCondition.kind = 4;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -1900,23 +1900,23 @@ void btlFinalizeLinkedActionAndAdvanceHistory(void) {
 
 extern void btlAdvanceHistoryCounter(s32 task);
 
-extern void btlResetIndexWork();
 
 void btlUnitTurnEndCommit(s32 task) {
     void (*hook)(s32) = *(void (**)(s32))(btlGetRuntime() + 0x600);
-    s32 owner = *(s32 *)(task + 0x18);
+    BtlTask *command = (BtlTask *)task;
+    BtlUnit *owner = command->unit;
 
     if (hook != 0) {
         hook(task);
     }
     btlAdvanceHistoryCounter(task);
-    btlResetIndexWork((u8 *)task + 0x20);
-    *(s32 *)(owner + 0x2F4) = -1;
-    *(u32 *)(task + 0xC) &= ~1;
-    *(s32 *)(task + 0x14) += 1;
-    *(u32 *)(owner + 0x110) &= ~0x4000;
+    btlResetIndexWork(&command->indexWork);
+    owner->unk2F4 = -1;
+    command->options &= ~1;
+    command->unk14 += 1;
+    owner->flags &= ~0x4000;
     fldUpdateSceneGroupTask(task);
-    if (*(u32 *)(*(s32 *)(task + 0x18) + 0x110) & 0x20) {
+    if (command->unit->flags & 0x20) {
         btlUnitTurnEndStateSelect((u8 *)task);
     } else {
         btlDispatchStateHandler(task, 2);
@@ -2004,22 +2004,21 @@ void btlStartActorDefeatTransition(s32 command) {
     }
 }
 
-extern void btlResetIndexWork();
 
-void btlRemoveEligibleActorSceneTask(s32 arg0) {
-    BtlUnit *actor = *(BtlUnit **)(arg0 + 0x18);
+void btlRemoveEligibleActorSceneTask(BtlTask *task) {
+    BtlUnit *actor = task->unit;
     s32 entryFlags;
 
     if (actor->flags & 0x200) {
         if (fldReleaseIdleSceneActorResources(actor) == 0) {
             return;
         }
-        btlResetIndexWork(arg0 + 0x20);
+        btlResetIndexWork(&task->indexWork);
         actor->unk2F4 = -1;
         btlClearAllActorEntrySlots((u32)actor);
-        fldUpdateSceneGroupTask(arg0);
-        btlRemoveTaskFromSceneGroup((BtlTask *)arg0);
-        btlDispatchStateHandler(arg0, 1);
+        fldUpdateSceneGroupTask(task);
+        btlRemoveTaskFromSceneGroup(task);
+        btlDispatchStateHandler(task, 1);
     } else {
         if ((actor->flags & 0x400) == 0) {
             return;
@@ -2028,12 +2027,12 @@ void btlRemoveEligibleActorSceneTask(s32 arg0) {
         if ((actor->flags & 0x40) == 0 && !(entryFlags & 0x200)) {
             return;
         }
-        fldUpdateSceneGroupTask(arg0);
-        btlRemoveTaskFromSceneGroup((BtlTask *)arg0);
+        fldUpdateSceneGroupTask(task);
+        btlRemoveTaskFromSceneGroup(task);
         if ((entryFlags & 0x200) && (actor->flags & 0x40) == 0) {
-            btlDispatchStateHandler(arg0, 1);
+            btlDispatchStateHandler(task, 1);
         } else {
-            btlDispatchStateHandler(arg0, 0x1E);
+            btlDispatchStateHandler(task, 0x1E);
         }
     }
 }
@@ -2119,23 +2118,23 @@ void btlDispatchStateHandler(void *object, s32 kind) {
 }
 extern char D_003A3788[]; /* "btl:action seq create[%p]\n" */
 
-u8 *btlCreateActionSeq(void) {
-    u8 *sequence = sdfAllocAndClearQuadwords(0x170);
-    u8 *context;
-    u8 *head;
+BtlTask *btlCreateActionSeq(void) {
+    BtlTask *sequence = sdfAllocAndClearQuadwords(sizeof(*sequence));
+    BtlState *context;
+    BtlTask *head;
 
-    *(u16 *)(sequence + 4) = 1;
-    btlInitBattleIndexWork(sequence + 0x20);
-    context = (u8 *)btlGetRuntime();
-    *(u8 **)(sequence + 0x168) = 0;
-    head = *(u8 **)(context + 0x224);
+    sequence->actionNumber = 1;
+    btlInitBattleIndexWork(&sequence->indexWork);
+    context = (BtlState *)btlGetRuntime();
+    sequence->prev = 0;
+    head = context->tasks;
     if (head != 0) {
-        *(u8 **)(head + 0x168) = sequence;
-        *(u8 **)(sequence + 0x16C) = *(u8 **)(context + 0x224);
+        head->prev = sequence;
+        sequence->next = context->tasks;
     } else {
-        *(u8 **)(sequence + 0x16C) = 0;
+        sequence->next = 0;
     }
-    *(u8 **)(context + 0x224) = sequence;
+    context->tasks = sequence;
     btlDispatchStateHandler(sequence, 0);
     btlBossDebugPrintf(D_003A3788, sequence);
     return sequence;
@@ -2143,29 +2142,29 @@ u8 *btlCreateActionSeq(void) {
 
 extern char D_003A37A8[]; /* "btl:action seq delete[%p]\n" */
 
-void btlDestroyActionSeq(s32 object) {
+void btlDestroyActionSeq(BtlTask *object) {
     btlBossDebugPrintf(D_003A37A8, object);
-    btlReleaseObjectBuffers(object + 0x20);
-    if (*(s32 *)(object + 0x16C) != 0) {
-        *(s32 *)(*(s32 *)(object + 0x16C) + 0x168) = *(s32 *)(object + 0x168);
+    btlReleaseObjectBuffers(&object->indexWork);
+    if (object->next != 0) {
+        object->next->prev = object->prev;
     }
-    if (*(s32 *)(object + 0x168) != 0) {
-        *(s32 *)(*(s32 *)(object + 0x168) + 0x16C) = *(s32 *)(object + 0x16C);
+    if (object->prev != 0) {
+        object->prev->next = object->next;
     } else {
-        s32 context = btlGetRuntime();
-        *(s32 *)(context + 0x224) = *(s32 *)(object + 0x16C);
+        BtlState *context = (BtlState *)btlGetRuntime();
+        context->tasks = object->next;
     }
     sdfReleaseChipBlock(object);
 }
 
 void btlUpdateActionSeqs(void) {
-    s32 action = *(s32 *)(btlGetRuntime() + 0x224);
+    BtlTask *action = ((BtlState *)btlGetRuntime())->tasks;
     while (action != 0) {
-        s32 flags = *(s32 *)(action + 8);
-        s32 next = *(s32 *)(action + 0x16C);
+        s32 flags = action->flags;
+        BtlTask *next = action->next;
         if (flags & 1) {
-            D_00359B28[*(s32 *)action].update(action);
-            *(s32 *)(action + 0x10) += 1;
+            D_00359B28[action->state].update(action);
+            action->stateTime += 1;
         } else if (flags & 2) {
             btlDestroyActionSeq(action);
         }
@@ -2174,10 +2173,10 @@ void btlUpdateActionSeqs(void) {
 }
 
 void btlDestroyAllActionSeqs(void) {
-    u8 *node = *(u8 **)(btlGetRuntime() + 0x224);
+    BtlTask *node = ((BtlState *)btlGetRuntime())->tasks;
     while (node != 0) {
-        u8 *next = *(u8 **)(node + 0x16C);
-        btlDestroyActionSeq((s32)node);
+        BtlTask *next = node->next;
+        btlDestroyActionSeq(node);
         node = next;
     }
 }
@@ -2452,67 +2451,6 @@ typedef struct BtlOperandSlot {
     s32 kind;
 } BtlOperandSlot;
 
-/* Operand payload words remain unknown; only the flag bits are identified. */
-typedef struct BtlOperandEntry {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    u8 pad14[4];
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 pad24[2];
-    u16 flags;
-} BtlOperandEntry;
-
-/* Retained group: a header followed by 64 operands. Reset leaves the payload intact. */
-typedef struct BtlOperandGroup {
-    u8 count;
-    u8 pad01[7];
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10;
-    u8 pad11[3];
-    u8 unk14;
-    u8 pad15[7];
-    BtlOperandEntry entries[64];
-} BtlOperandGroup;
-
-/* Owns an index list and an SDK allocation containing thirteen operand groups. */
-typedef struct BattleIndexWork {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 unk24[9];
-    u8 unk2D;
-    u8 unk2E;
-    u8 pad2F;
-    u16 unk30;
-    u8 pad32[2];
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    BtlIndexList *indices;
-    u8 pad44[4];
-    u64 unk48;
-    s32 unk50;
-    s32 unk54;
-    s32 unk58;
-    u16 unk5C;
-    u8 unk5E;
-    u8 pad5F;
-    BtlOperandGroup *groups;
-    u32 allocationHandle;
-} BattleIndexWork;
-
 /* Test whether the operand is empty, subject to command-category and slot-kind exclusions. */
 s32 btlActionEntryIsEmpty(s32 index, BtlOperandSlot *slot, BtlOperandEntry *entry) {
     s32 kind;
@@ -2586,31 +2524,31 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001D12A0);
 /* Reset work status and group headers, preserving the retained payload and allocation. */
 void btlResetIndexWork(BattleIndexWork *work) {
     u32 i;
-    work->unk00 = -1;
-    work->unk04 = -1;
-    work->unk08 = -1;
+    work->phase = -1;
+    work->skillId = -1;
+    work->reference = -1;
     work->unk0C = 0;
     work->unk10 = 0;
-    work->unk14 = 0;
+    work->linkedUnit = 0;
     work->unk18 = -1;
-    work->unk1C = 0;
+    work->stageValue = 0;
     work->unk20 = 8;
-    work->unk30 = 0;
-    work->unk34 = 0;
-    work->unk38 = -1;
+    work->stage = 0;
+    work->parameter = 0;
+    work->wait = -1;
     work->unk3C = 0;
     work->unk2D = 0;
     work->unk2E = 0;
     work->unk50 = 0;
     work->unk54 = 0;
     work->unk58 = 0;
-    work->unk5C = 0;
+    work->flags = 0;
     work->unk5E = 0;
     for (i = 0; i < 13; i++) {
         work->groups[i].count = 0;
-        work->groups[i].unk08 = 0;
+        work->groups[i].kind = 0;
         work->groups[i].unk14 = 0;
-        work->groups[i].unk10 = 0;
+        work->groups[i].skipped = 0;
     }
     btlClearIndexList(work->indices);
 }
@@ -6585,7 +6523,7 @@ u32 btlHasMarkedEntry10(u8 *object) {
     count = btlGetIndexListCount(resource->actorIndices);
     entry = resource->groups;
     for (index = 0; index < count; index++, entry++) {
-        if (entry->unk10 != 0) {
+        if (entry->skipped != 0) {
             return 1;
         }
     }
@@ -6635,7 +6573,7 @@ s32 btlHasIdleLinkedSlotKindTwo(u8 *actor) {
     count = btlGetIndexListCount(linked->actorIndices);
     entry = linked->groups;
     for (; i < count; i++, entry++) {
-        if (entry->unk10 == 0 && entry->unk08 == 1 && entry->unk0C == 2 &&
+        if (entry->skipped == 0 && entry->kind == 1 && entry->unk0C == 2 &&
             !(((BtlUnit *)btlGetIndexListEntry(linked->actorIndices, i))->flags & 0x80002000)) {
             return 1;
         }
@@ -6656,7 +6594,7 @@ s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor) {
     count = btlGetIndexListCount(linked->actorIndices);
     entry = linked->groups;
     for (; i < count; i++, entry++) {
-        if (entry->unk08 == 2 &&
+        if (entry->kind == 2 &&
             !(((BtlUnit *)btlGetIndexListEntry(linked->actorIndices, i))->flags & 0x80002000)) {
             return 1;
         }

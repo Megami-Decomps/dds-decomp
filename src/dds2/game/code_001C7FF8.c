@@ -466,11 +466,11 @@ void fldClearBattleSceneObject(void) {
     btlReleaseBattleScratchBlocks();
 }
 
-void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
+void fldInitializeSceneObject(BattleSceneObject *object, ActionStateLink *owner) {
     memset(object, 0, sizeof(*object));
     object->state = 1;
     object->owner = owner;
-    object->commandData = &owner->result;
+    object->commandData = &owner->indexWork;
 }
 
 BattleSceneObject *fldGetSceneObjectTaskUserData(void) {
@@ -564,7 +564,7 @@ extern s32 mdlFlagTest();
 
 extern s32 btlGetTaskState6();
 
-s32 fldSelectSceneMode(BtlTask *task) {
+s32 fldSelectSceneMode(ActionStateLink *task) {
     s32 flag = ((BattleSceneWork *)btlGetRuntime())->phaseFlag == 3;
     if (mdlFlagTest(0x801) != 0) {
         return 1;
@@ -627,7 +627,7 @@ extern u8 D_00385228[];
 extern char D_00436828[];
 
 /* Open the battle command panel task and, on the first eligible ally turn, start the matching tutorial dialog. */
-void func_001CAB60(BtlTask *task) {
+void func_001CAB60(ActionStateLink *task) {
     char text[32];
     BattleSceneWork *scene;
     BattleSceneObject *object;
