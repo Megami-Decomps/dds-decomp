@@ -191,9 +191,17 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
 extern u8 D_00401320[][36];
 
+/* A 20-byte prerequisite operand: operation, thresholds and up to eight IDs. */
+typedef struct PrfRequirementOperand {
+    u32 operation;
+    u8 pad04[4];
+    u32 minimumCount; /* 0x08 */
+    u8 profileIds[8]; /* 0x0C */
+} PrfRequirementOperand;
+
 typedef struct ScriptEntry44 {
     u32 state;
-    u8 unknown[40];
+    PrfRequirementOperand rules[2];
 } ScriptEntry44;
 
 extern ScriptEntry44 D_00402BE0[];
@@ -790,11 +798,6 @@ s32 output;
     return prfBuildSkillList((ScriptFlagWork *)unit, unusedProfile, (PrfSkillList *)output, 0);
 }
 
-/* The +8 threshold is compared with counts or a global counter. */
-typedef struct PtyReqCount {
-    u8 pad00[8];
-    u32 minimumCount; /* 0x08 */
-} PtyReqCount;
 
 /* Count leading profile IDs up to the first zero or the eight-entry bound. */
 u32 prfCountProfileList(u8 *operand) {
@@ -835,7 +838,7 @@ s32 ptyReqProfileCountAtLeast(s32 unit, u8 *operand) {
             }
         } while (profileIndex < profileCount);
     }
-    if (matchedCount < ((PtyReqCount *)operand)->minimumCount) {
+    if (matchedCount < ((PrfRequirementOperand *)operand)->minimumCount) {
         return 0;
     }
     return 1;
@@ -853,7 +856,7 @@ s32 ptyProfileCountAtLeast(u8 *unit, u8 *operand) {
             }
         }
     }
-    if (matchedCount < ((PtyReqCount *)operand)->minimumCount) {
+    if (matchedCount < ((PrfRequirementOperand *)operand)->minimumCount) {
         return 0;
     }
     return 1;
@@ -899,13 +902,14 @@ s32 prfReqCheckUnitLevel(u8 *unit, u8 *operand) {
 
 /* Test the global counter against the prerequisite's minimum. */
 s32 prfReqCheckGlobalCounter(u8 *operand) {
-    if (*(u32 *)(datGameState + 0x3C) < ((PtyReqCount *)operand)->minimumCount) {
+    if (*(u32 *)(datGameState + 0x3C) < ((PrfRequirementOperand *)operand)->minimumCount) {
         return 0;
     }
     return 1;
 }
 
-s32 func_00315950(s16 id, s32 context, s32 mode) {
+/* The word-sized ID API narrows only when calling the node-record lookup. */
+s32 func_00315950(s32 id, s32 context, s32 mode) {
     s32 result = 1;
     MantraNodePos *record = mnuGetMantraNodePositionRecord(id);
     MantraNodePos **adjacent;
@@ -944,7 +948,7 @@ s32 func_00315950(s16 id, s32 context, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315A50);
 
-s32 mnuIsResourceCategoryAvailable(s16 id) {
+s32 mnuIsResourceCategoryAvailable(s32 id) {
     MantraNodePos *info = mnuGetMantraNodePositionRecord(id);
     if (info == 0) {
         return 0;
@@ -959,6 +963,8 @@ s32 func_00315C40(u32 index) {
     return D_0045C828[index] != 0;
 }
 
+/* The evaluator masks its incoming requirement ID to the lower sixteen bits. */
+extern s32 func_00315C68(u32, u32, u32, u32, u32 *);
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315C68);
 
 void func_00315FA0(u32 context, u32 value, u16 id) {
