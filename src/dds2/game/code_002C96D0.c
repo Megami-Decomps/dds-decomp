@@ -5391,6 +5391,16 @@ typedef struct FileKeyBlock {
             f32 angularAcceleration;
             f32 gravity;
         } circular;
+        struct {
+            f32 initialRadius;
+            f32 initialRadiusRandomness;
+            f32 finalRadius;
+            f32 finalRadiusRandomness;
+            f32 angularSpeed;
+            f32 angularSpeedRandomness;
+            f32 angularAcceleration;
+            f32 gravity;
+        } orientedRing;
     } emitter;
 } FileKeyBlock;             /* record-type-dependent parameter extent */
 
@@ -6169,7 +6179,224 @@ void effLoadObjScaleParamsC(ScaleOwner *owner, f32 scale) {
     dst->unkF0 = src->unkF0 * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D9AF8);
+typedef struct FileOrientedRingMotion {
+    f32 origin[4];          /* 0x00: xyz only */
+    f32 orientationAngle;   /* 0x10 */
+    f32 tiltAngle;
+    f32 radius;
+    f32 radiusStep;
+    f32 angularSpeed;
+    f32 initialPhase;
+    f32 height;
+    f32 scaleMultiplier;
+    f32 angle;
+    f32 angleMultiplier;
+} FileOrientedRingMotion;   /* 0x38, ordinary word alignment */
+
+extern void func_003364B8(f32 angle);
+extern void func_00336818(f32 angle);
+extern void sdfMultiplyVuMatrixInPlace(void);
+
+/* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
+void func_002D9AF8(FileSlotTable *record) {
+    f32 direction[4];
+    f32 radiusVector[4];
+    f32 position[4];
+    f32 origin[4];
+    f32 previousPosition[4];
+    FileKeyBlock *keys;
+    u32 i;
+    u32 count;
+    u32 flags;
+    FileSlot *slot;
+    FileOrientedRingMotion *motion;
+    s32 duration;
+    s32 prewarm;
+    s32 mode;
+    f32 gravity;
+    f32 angularAcceleration;
+    s32 toSpawn;
+    s32 prewarmLength;
+    s32 frame;
+    f32 age;
+    f32 phase;
+    f32 radius;
+    s32 length;
+
+    keys = (FileKeyBlock *)record->data0;
+    count = record->instances;
+    length = keys->length;
+    flags = record->flags;
+    slot = record->slots;
+    motion = (FileOrientedRingMotion *)record->unk1C;
+    if (length != 0) {
+        duration = keys->emissionDuration;
+        prewarmLength = keys->length;
+        mode = keys->heading.track.curve.headingMode;
+        gravity = keys->emitter.orientedRing.gravity;
+        angularAcceleration = keys->emitter.orientedRing.angularAcceleration;
+        direction[3] = 0.0f;
+        position[3] = 0.0f;
+        /* Retail also initializes this scratch vector's W; its XYZ are unused here. */
+        radiusVector[3] = 0.0f;
+        PCP_COPY_VECTOR(origin, keys->pos);
+        if (duration != 0 && (s32)record->references >= duration) {
+            toSpawn = 0;
+            prewarm = 0;
+        } else {
+            if (record->references == 0 && keys->prewarm != 0) {
+                prewarm = 1;
+                toSpawn = count;
+                if (keys->spawnVariance > 0.0f) {
+                    toSpawn = (s32)((f32)record->instances *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                }
+            } else {
+                prewarm = 0;
+                if (keys->spawnVariance > 0.0f) {
+                    record->spawnRemainder += (f32)keys->spawnRate *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                } else {
+                    record->spawnRemainder += (f32)keys->spawnRate;
+                }
+                toSpawn = (s32)fabsf(record->spawnRemainder);
+                record->spawnRemainder -= (f32)toSpawn;
+            }
+        }
+        i = 0;
+        if (count != 0) {
+            do {
+                if (slot->state >= length) {
+                    slot->state = duration != 0 ? -2 : -1;
+                    fileInvalidateSlotGroup(record, (u32)slot);
+                }
+                frame = slot->state;
+                if (frame != -2) {
+                    if (frame == -1) {
+                        if (toSpawn != 0) {
+                            f32 initialRadius;
+                            f32 finalRadius;
+                            s32 localSpace;
+
+                            initialRadius = keys->emitter.orientedRing.initialRadius *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.orientedRing.initialRadiusRandomness +
+                                 (1.0f - keys->emitter.orientedRing.initialRadiusRandomness));
+                            finalRadius = keys->emitter.orientedRing.finalRadius *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.orientedRing.finalRadiusRandomness +
+                                 (1.0f - keys->emitter.orientedRing.finalRadiusRandomness));
+                            motion->radius = initialRadius;
+                            motion->radiusStep = (finalRadius - initialRadius) / (f32)length;
+                            motion->angularSpeed = keys->emitter.orientedRing.angularSpeed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.orientedRing.angularSpeedRandomness +
+                                 (1.0f - keys->emitter.orientedRing.angularSpeedRandomness));
+                            motion->initialPhase = effMiscRandUnitFloat(&effSharedRandomState) * 1.5707962512969971f;
+                            motion->height = 0.0f;
+                            motion->orientationAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            motion->tiltAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            func_003364B8(motion->orientationAngle);
+                            func_00336818(motion->tiltAngle);
+                            sdfMultiplyVuMatrixInPlace();
+                            direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * initialRadius;
+                            direction[1] = 0.0f;
+                            direction[2] = sdfSinPoly(motion->initialPhase) * initialRadius;
+                            VU0_LOAD_VF(vf10, direction);
+                            VU0_ROTATE_VEC(vf10, vf10);
+                            localSpace = flags & 1;
+                            if (localSpace == 0) {
+                                motion->origin[0] = origin[0];
+                                motion->origin[1] = origin[1];
+                                motion->origin[2] = origin[2];
+                                VU0_LOAD_VF(vf11, origin);
+                                VU0_ADD(vf10, vf10, vf11);
+                            }
+                            VU0_STORE_VF(vf10, slot->pos);
+                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                                (1.0f - keys->scale.emitter.randomness);
+                            if (mode != 2) {
+                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                    (1.0f - keys->heading.emitter.randomness);
+                                if (mode == 1) {
+                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                        motion->angleMultiplier = -motion->angleMultiplier;
+                                    }
+                                } else {
+                                    motion->angle = 0.0f;
+                                }
+                            } else {
+                                motion->angleMultiplier = 1.0f;
+                                motion->angle = 0.0f;
+                            }
+                            slot->state = 0;
+                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            if (prewarm != 0) {
+                                age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                motion->height += gravity * age * age * 0.5f;
+                                motion->radius += motion->radiusStep * age;
+                                radius = motion->radius;
+                                direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * radius;
+                                direction[1] = 0.0f;
+                                direction[2] = sdfSinPoly(motion->initialPhase) * radius;
+                                VU0_LOAD_VF(vf10, direction);
+                                VU0_ROTATE_VEC(vf10, vf10);
+                                if (localSpace == 0) {
+                                    VU0_MOVE_VF(vf11, vf10);
+                                    VU0_LOAD_VF(vf10, origin);
+                                    VU0_ADD(vf10, vf10, vf11);
+                                }
+                                VU0_STORE_VF(vf10, slot->pos);
+                                slot->state = (s32)age;
+                                slot->pos[1] += motion->height;
+                            }
+                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            slot->scale *= motion->scaleMultiplier;
+                            slot->angle *= motion->angleMultiplier;
+                            slot->angle += motion->angle;
+                            if (prewarm != 0) {
+                                fileCopyAndInvalidateSlotGroup(record, slot);
+                                slot->state++;
+                            }
+                            toSpawn--;
+                        }
+                    } else {
+                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        age = (f32)frame;
+                        motion->height += gravity * age;
+                        motion->radius += motion->radiusStep;
+                        phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
+                        func_003364B8(motion->orientationAngle);
+                        func_00336818(motion->tiltAngle);
+                        sdfMultiplyVuMatrixInPlace();
+                        radius = motion->radius;
+                        direction[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
+                        direction[1] = 0.0f;
+                        direction[2] = sdfSinPoly(phase) * radius;
+                        VU0_LOAD_VF(vf10, direction);
+                        VU0_ROTATE_VEC(vf10, vf10);
+                        VU0_STORE_VF(vf10, position);
+                        if (!(flags & 1)) {
+                            position[0] += motion->origin[0];
+                            position[1] += motion->origin[1];
+                            position[2] += motion->origin[2];
+                        }
+                        slot->pos[0] = position[0];
+                        slot->pos[1] = position[1] + motion->height;
+                        slot->pos[2] = position[2];
+                        fileSampleKeyTracks(slot, keys, frame, previousPosition);
+                        slot->scale *= motion->scaleMultiplier;
+                        slot->angle *= motion->angleMultiplier;
+                        slot->angle += motion->angle;
+                        func_002D7B58(record, slot);
+                        slot->state = frame + 1;
+                    }
+                }
+                motion++;
+                slot++;
+                i++;
+            } while (i < count);
+        }
+    }
+}
 
 void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
     ScaleSet *dst = owner->dst;
