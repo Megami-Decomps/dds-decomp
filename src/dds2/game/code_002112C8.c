@@ -2042,7 +2042,40 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_002162C0);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002163C8);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlSelectLowestRankTarget);
+s32 btlSelectLowestRankTarget(s32 task) {
+    u32 matched;
+    u32 count;
+    BtlIndexList *list;
+    u16 i;
+
+    list = btlBuildActorIndexListAndCount(task, &matched, &count);
+    switch (matched) {
+    case 0: {
+        u16 picked[12] = {0};
+        u16 best = 0x7FFF;
+        u16 bestIndex = 0;
+
+        for (i = 0; i < count; i++) {
+            u16 value = ((BtlUnit *)btlGetIndexListEntry(list, i))->actionTime;
+
+            if (best >= value) {
+                picked[bestIndex] = 0;
+                best = value;
+                picked[i] = 1;
+                bestIndex = i;
+            }
+        }
+        btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices, func_00215118(list, picked, count));
+        break;
+    }
+    case 1:
+    case 2:
+        btlCopyIndexList(((ActionStateLink *)task)->indexWork.indices, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216888);
 

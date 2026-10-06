@@ -5155,7 +5155,67 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8580);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *, s32);
+extern void func_00101968(KwlnTask *, KwlnTask *);
+extern s32 func_001BEF28(KwlnTask *);
+extern void btlFreeRegisteredTaskData(KwlnTask *);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern u32 frFontMeasureLines(struct FrFontGlyph *);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+
+typedef struct BtlPanelTransitionWork {
+    KwlnTask *task;
+    const u8 *text;
+    u8 pad08[4];
+    s32 frames;
+    s32 width;
+    u8 pad14[0xA];
+    s16 unk1E;
+    s16 fadeLevels[4];
+    BattleSelectionPosition initial[2];
+    s8 phase;
+    u8 pad39[3];
+    BattleSelectionPosition current[2];
+} BtlPanelTransitionWork;
+
+s32 func_001B8580(const u8 *text) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(1);
+    BtlPanelTransitionWork *work;
+    u32 glyph;
+
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
+    }
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
+    }
+    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work->text = text;
+    work->frames = 30;
+    work->unk1E = 0;
+    work->fadeLevels[2] = work->fadeLevels[0] = 0x40;
+    work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
+    glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
+    work->width = frFontMeasureLines((struct FrFontGlyph *)glyph);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyph);
+    work->initial[0].x = work->width - work->width / 2 + 0x105;
+    work->initial[0].y = 0x40;
+    work->initial[1].x = 0x92 - work->width / 2;
+    work->initial[1].y = 0x40;
+    task = kwlnTaskCreate(D_004367C8, 0x2B0E, 1, 1,
+                          func_001BEF28, btlFreeRegisteredTaskData, (u32)work);
+    func_00101968(battle->scriptOwner, task);
+    work->task = task;
+    btlSetTrackedTaskHandle(1, (s32)task);
+    return 1;
+}
 
 u32 btlHasRegisteredAphNamePanelTask(void) {
     KwlnTask *task;
@@ -5695,17 +5755,6 @@ void btlReleaseCmsleffPanelWork(KwlnTask *task) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BEF28);
-
-typedef struct BtlPanelTransitionWork {
-    u8 pad00[0x10];
-    s32 width;
-    u8 pad14[0xC];
-    s16 fadeLevels[4];
-    BattleSelectionPosition initial[2];
-    s8 phase;
-    u8 pad39[3];
-    BattleSelectionPosition current[2];
-} BtlPanelTransitionWork;
 
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
