@@ -6933,7 +6933,286 @@ extern f32 D_003E9140[4];
 struct RwV3d;
 extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *axis, f32 angle);
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002DB3E0);
+/* vu0 routine: advances randomized cubic-curve slots and their axial rotation. */
+void func_002DB3E0(FileSlotTable *record) {
+    f32 axis[4];
+    f32 previousPosition[4];
+    f32 start[4];
+    f32 endpoint[4];
+    f32 lateral[4];
+    f32 point[4];
+    f32 firstPoint[4];
+    f32 secondPoint[4];
+    f32 sampledEndpoint[4];
+    FileKeyBlock *keys;
+    u32 i;
+    u32 count;
+    FileSlot *slot;
+    FileCurveMotion *motion;
+    s32 duration;
+    s32 prewarm;
+    s32 mode;
+    f32 travelAcceleration;
+    f32 angularAcceleration;
+    s32 prewarmLength;
+    s32 toSpawn;
+    s32 frame;
+    f32 age;
+    f32 travel;
+    f32 rotation;
+    f32 progress;
+    s32 length;
+
+    keys = (FileKeyBlock *)record->data0;
+    count = record->instances;
+    length = keys->length;
+    slot = record->slots;
+    motion = (FileCurveMotion *)record->unk1C;
+
+    if (length != 0) {
+        duration = keys->emissionDuration;
+        prewarmLength = keys->length;
+        mode = keys->heading.track.curve.headingMode;
+        angularAcceleration = keys->emitter.curve.angularAcceleration;
+        travelAcceleration = keys->emitter.curve.travelAcceleration;
+        start[0] = keys->emitter.curve.start[0];
+        start[1] = keys->emitter.curve.start[1];
+        start[2] = keys->emitter.curve.start[2];
+        VU0_LOAD_VF(vf10, keys->orientation);
+        effMiscQuaternionToMatrixVU();
+        if (duration != 0 && (s32)record->references >= duration) {
+            prewarm = 0;
+            toSpawn = 0;
+        } else {
+            if (record->references == 0 && keys->prewarm != 0) {
+                prewarm = 1;
+                if (!(keys->spawnVariance > 0.0f)) {
+                    toSpawn = record->instances;
+                } else {
+                    toSpawn = (s32)((f32)record->instances *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                }
+            } else {
+                prewarm = 0;
+                if (keys->spawnVariance > 0.0f) {
+                    record->spawnRemainder += (f32)keys->spawnRate *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                } else {
+                    record->spawnRemainder += (f32)keys->spawnRate;
+                }
+                toSpawn = (s32)fabsf(record->spawnRemainder);
+                record->spawnRemainder -= (f32)toSpawn;
+            }
+        }
+        i = 0;
+        if (count != 0) {
+            do {
+                if (slot->state >= length) {
+                    slot->state = duration != 0 ? -2 : -1;
+                    fileInvalidateSlotGroup(record, (u32)slot);
+                }
+                frame = slot->state;
+                if (frame != -2) {
+                    if (frame == -1) {
+                        if (toSpawn != 0) {
+                            f32 angle;
+                            f32 offset;
+
+                            angle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            motion->endpointOffset[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * keys->emitter.curve.endpointRadius;
+                            motion->endpointOffset[1] = -keys->emitter.curve.endpointDrop;
+                            motion->endpointOffset[2] = sdfSinPoly(angle) * keys->emitter.curve.endpointRadius;
+                            endpoint[0] = keys->emitter.curve.end[0] + motion->endpointOffset[0];
+                            endpoint[1] = keys->emitter.curve.end[1] + motion->endpointOffset[1];
+                            endpoint[2] = keys->emitter.curve.end[2] + motion->endpointOffset[2];
+                            VU0_LOAD_VF(vf12, start);
+                            VU0_MOVE_VF(vf10, vf12);
+                            VU0_LOAD_VF(vf11, endpoint);
+                            VU0_LERP_VF10((f32)keys->emitter.curve.firstPercent / 100.0f);
+                            VU0_STORE_VF(vf10, firstPoint);
+                            VU0_MOVE_VF(vf10, vf12);
+                            VU0_LERP_VF10((f32)keys->emitter.curve.secondPercent / 100.0f);
+                            VU0_STORE_VF(vf10, secondPoint);
+                            VU0_MOVE_VF(vf10, vf12);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_LENGTH_VF10(motion->pathLength);
+                            VU0_NORMALIZE_VF10();
+                            VU0_STORE_VF(vf10, axis);
+                            VU0_MOVE_VF(vf12, vf10);
+                            VU0_LOAD_VF(vf11, D_003E9140);
+                            VU0_CROSS_XYZ(vf10, vf10, vf11);
+                            VU0_MOVE_VF(vf11, vf12);
+                            VU0_CROSS_XYZ(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, lateral);
+                            angle = (f32)keys->emitter.curve.spreadDegrees *
+                                ((effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f) *
+                                0.5f * 0.0174532925f;
+                            sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+                            offset = keys->emitter.curve.firstOffset *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.curve.firstRandomness +
+                                 (1.0f - keys->emitter.curve.firstRandomness));
+                            VU0_LOAD_VF(vf10, firstPoint);
+                            VU0_LOAD_VF(vf12, lateral);
+                            VU0_MOVE_VF(vf11, vf12);
+                            VU0_SCALE_VF(vf11, offset);
+                            VU0_ROTATE_VEC(vf11, vf11);
+                            VU0_ADD(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, point);
+                            motion->firstControl[0] = point[0];
+                            motion->firstControl[1] = point[1];
+                            motion->firstControl[2] = point[2];
+                            offset = keys->emitter.curve.secondOffset *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.curve.secondRandomness +
+                                 (1.0f - keys->emitter.curve.secondRandomness));
+                            VU0_LOAD_VF(vf10, secondPoint);
+                            VU0_MOVE_VF(vf11, vf12);
+                            VU0_SCALE_VF(vf11, offset);
+                            VU0_ROTATE_VEC(vf11, vf11);
+                            VU0_ADD(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, point);
+                            motion->secondControl[0] = point[0];
+                            motion->secondControl[1] = point[1];
+                            motion->secondControl[2] = point[2];
+                            motion->travelSpeed = keys->emitter.curve.travelSpeed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.curve.travelRandomness +
+                                 (1.0f - keys->emitter.curve.travelRandomness));
+                            motion->angularSpeed = keys->emitter.curve.angularSpeed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.curve.angularRandomness +
+                                 (1.0f - keys->emitter.curve.angularRandomness));
+                            motion->progress = 0.0f;
+                            PCP_COPY_VECTOR(slot->pos, start);
+                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                                (1.0f - keys->scale.emitter.randomness);
+                            if (mode != 2) {
+                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                    (1.0f - keys->heading.emitter.randomness);
+                                if (mode == 1) {
+                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                        motion->angleMultiplier = -motion->angleMultiplier;
+                                    }
+                                } else {
+                                    motion->angle = 0.0f;
+                                }
+                            } else {
+                                motion->angleMultiplier = 1.0f;
+                                motion->angle = 0.0f;
+                            }
+                            slot->state = 0;
+                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            if (prewarm != 0) {
+                                age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                travel = motion->travelSpeed * age;
+                                travel += travelAcceleration * age * age * 0.5f;
+                                if (travel < 0.0f) {
+                                    travel = 0.0f;
+                                }
+                                rotation = motion->angularSpeed * age;
+                                rotation += angularAcceleration * age * age * 0.5f;
+                                if (rotation < 0.0f) {
+                                    rotation = 0.0f;
+                                }
+                                progress = travel / 1000.0f;
+                                if (progress > 1.0f) {
+                                    progress = 1.0f;
+                                }
+                                if (progress < motion->progress) {
+                                    progress = motion->progress;
+                                } else {
+                                    motion->progress = progress;
+                                }
+                                sampledEndpoint[0] = endpoint[0];
+                                sampledEndpoint[1] = endpoint[1];
+                                sampledEndpoint[2] = endpoint[2];
+                                vu0CubicBezierPoint(keys->emitter.curve.start, motion->firstControl,
+                                    motion->secondControl, sampledEndpoint, progress);
+                                if (rotation != 0.0f) {
+                                    VU0_STORE_VF(vf10, point);
+                                    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, rotation);
+                                    VU0_LOAD_VF(vf11, axis);
+                                    VU0_SCALE_VF(vf11, motion->pathLength * progress);
+                                    VU0_LOAD_VF(vf10, point);
+                                    VU0_SUB(vf10, vf10, vf11);
+                                    VU0_ROTATE_VEC(vf10, vf10);
+                                    VU0_ADD(vf10, vf10, vf11);
+                                }
+                                VU0_STORE_VF(vf10, slot->pos);
+                                slot->state = (s32)age;
+                            }
+                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            slot->scale *= motion->scaleMultiplier;
+                            slot->angle *= motion->angleMultiplier;
+                            slot->angle += motion->angle;
+                            if (prewarm != 0) {
+                                fileCopyAndInvalidateSlotGroup(record, slot);
+                                slot->state++;
+                            }
+                            toSpawn--;
+                        }
+                    } else {
+                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        age = (f32)frame;
+                        travel = motion->travelSpeed * age;
+                        travel += travelAcceleration * age * age * 0.5f;
+                        if (travel < 0.0f) {
+                            travel = 0.0f;
+                        }
+                        rotation = motion->angularSpeed * age;
+                        rotation += angularAcceleration * age * age * 0.5f;
+                        if (rotation < 0.0f) {
+                            rotation = 0.0f;
+                        }
+                        progress = travel / 1000.0f;
+                        if (progress > 1.0f) {
+                            progress = 1.0f;
+                        }
+                        if (progress < motion->progress) {
+                            progress = motion->progress;
+                        } else {
+                            motion->progress = progress;
+                        }
+                        sampledEndpoint[0] = keys->emitter.curve.end[0] + motion->endpointOffset[0];
+                        sampledEndpoint[1] = keys->emitter.curve.end[1] + motion->endpointOffset[1];
+                        sampledEndpoint[2] = keys->emitter.curve.end[2] + motion->endpointOffset[2];
+                        vu0CubicBezierPoint(keys->emitter.curve.start, motion->firstControl,
+                            motion->secondControl, sampledEndpoint, progress);
+                        if (rotation != 0.0f) {
+                            VU0_STORE_VF(vf10, point);
+                            /* These native fields are read here without being written at spawn. */
+                            endpoint[0] = motion->rotationReference[0];
+                            endpoint[1] = motion->rotationReference[1];
+                            endpoint[2] = motion->rotationReference[2];
+                            VU0_LOAD_VF(vf10, start);
+                            VU0_LOAD_VF(vf11, endpoint);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_NORMALIZE_VF10();
+                            VU0_STORE_VF(vf10, axis);
+                            sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, rotation);
+                            VU0_LOAD_VF(vf11, axis);
+                            VU0_SCALE_VF(vf11, motion->pathLength * progress);
+                            VU0_LOAD_VF(vf10, point);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_ROTATE_VEC(vf10, vf10);
+                            VU0_ADD(vf10, vf10, vf11);
+                        }
+                        VU0_STORE_VF(vf10, slot->pos);
+                        fileSampleKeyTracks(slot, keys, frame, previousPosition);
+                        slot->scale *= motion->scaleMultiplier;
+                        slot->angle *= motion->angleMultiplier;
+                        slot->angle += motion->angle;
+                        func_002D7B58(record, slot);
+                        slot->state = frame + 1;
+                    }
+                }
+                motion++;
+                slot++;
+                i++;
+            } while (i < count);
+        }
+    }
+}
+
+
 
 void effScaleParameterSetBase(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
