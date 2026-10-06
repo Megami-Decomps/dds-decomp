@@ -717,16 +717,21 @@ Black, SOTN). They are worth trying, but not yet confirmed here:
 -O2 turns a call in tail position into `j callee`. Retail keeps
 `jal callee; ...; ld $31; jr $31` when:
 
-- the caller or callee is varargs, or the callee returns a struct;
+- the caller is varargs, or aggregate-return handling requires storage.
+  A varargs **callee alone** does not prevent a sibling call when its arguments
+  fit the ABI registers (tested with one and three integer arguments);
 - the caller returns the callee's value and their return modes differ: an
   `s64`/`u64` function returning an `s32` call, or a narrow (`s8`/`u8`/`s16`/
   `u16`) callee returned from a wider caller (`return (u8)f();` too).
-  `void`→`void`, `s32`→`s32` and `u32`→`u32` always sibcall. A shared wrapper
-  that returns `u64`, written as `return menuRunPanel(...)` from an `s64`
-  function, is why whole menu units have no `j` tails (no file flag needed);
-  use the callee's real return type from its matched definition, never a
-  made-up one;
-- the address of a local or parameter is taken, or arguments go on the stack;
+  Compatible `void`→`void`, `s32`→`s32` and `u32`→`u32` return modes do not
+  themselves inhibit sibling calls. Use the callee's real return type from
+  its matched definition, never a made-up one. In particular, `menuRunPanel`
+  returns the `s32` scheduler word in `include/mnu.h`; its `u64` mode and
+  argument parameters are not evidence for a wide result;
+- a local/parameter address escapes, the early RTL frame has local storage, or
+  the outgoing stack argument area exceeds the caller's incoming area.
+  Stack arguments alone do **not** prohibit sibling calls: a nine-argument
+  forwarding function can reuse its incoming stack argument and emit `j`;
 - the whole file was built with `-fno-optimize-sibling-calls` (see
   `config/dds1/cflags.txt`; `tools/find_nosibcall.py` finds such files).
 - the caller returns a value (non-`void`) but ends in a call to a `void`
@@ -746,9 +751,72 @@ Black, SOTN). They are worth trying, but not yet confirmed here:
   `jal` form is `s64` (it matches byte-exact with `s64 btlAnyGroup200HasAction`
   returning the s32 call) needs evidence for the wide return before use.
 
-Plain `void w(void) { f(0); }` always sibcalls, whatever f returns. Don't try
-to "fix" a jal tail in a normal file with dummy code; park it
-(`build/parked/`) for `tools/flag_probe.py`.
+An ordinary direct `void w(void) { f(0); }` with a scalar/void callee and no
+other inhibition sibcalls. Don't "fix" a `jal` tail with dummy code or an
+unsupported return type; retain `INCLUDE_ASM` and park the natural candidate.
+Flag changes require evidence for the original translation unit.
+
+### Expansion provenance: an inlined indirect call can remain `jal`
+
+The installed `2.96-ee-001003-1/cc1` first decides whether to generate a
+`CALL_PLACEHOLDER` containing a sibling alternative in `expand_call`.
+It requires a known callee `FUNCTION_DECL`; an indirect call gets only the
+normal-call sequence. Later sibling optimization selects an existing
+alternative, rather than inventing one after the target becomes constant.
+
+A shared inline taking a correctly typed operation callback can therefore
+inline to a **direct** `jal` with a separate epilogue, even in a branch-free
+caller with a 0x10 frame. RTL inlining substitutes the constant target into
+the callback's ordinary call without regenerating a sibling alternative.
+This is different from merely placing a direct call inside a `static inline`:
+the direct-forwarding inline control still emitted `j`.
+
+Scratch-only probes used the normal unit flags (`-quiet -O2`, default `-G8`,
+original assembler `-EL -G8 -g -Iinclude`) through `tools/ee_gcc_probe.py`.
+For DDS2 `func_0026DB28`, `func_0026DB70`, and `func_0026DBB8`, a synthetic
+three-site callback inline with the real
+`void (*)(DatPartyRecord *, u16, u32)` prototype reproduced all three 32-byte
+retail bodies: `check_unit.py --source` reported **3 match, 0 differ** for this
+three-function diagnostic, **not** for the full unit. The direct-call and
+direct-inline controls emitted sibling jumps. `tools/ee_gcc_why.py` located
+the first difference at `rtl.00.rtl`: the direct call had a
+`CALL_PLACEHOLDER`, while the callback-inline call did not.
+`tools/ee_gcc_delay_slots.py` identified selector setup in the `jal` delay slot
+and stack restoration in the return delay slot.
+
+**This establishes a compiler mechanism, not original-source evidence.**
+No corresponding callback inline was found in the checked-in `include/` and
+`src/` inline inventory. The Nocturne December debug ELF has an empty
+`.mdebug.eabi64` section and no symbol/type debug sections; its `__FILE__`
+mapping does not recover this missing helper. The synthetic helper was not
+landed or saved as a decompilation candidate. Three matching sites do not
+justify inventing an abstraction solely to inhibit sibling calls. Recover a
+real shared callback helper/API from headers, source, or independent callers
+before applying this explanation to a retail function.
+
+A local function pointer initialized to a known callee also reproduced `jal`
+in a diagnostic: its target remained indirect through `rtl.13.life` and
+became direct in `rtl.14.combine`, after sibling selection. Adding such a
+meaningless local to a game function is a forbidden matching lever.
+
+Other controls confirmed that typed returns, discarded scalar results,
+straight-line implicit-int definitions, K&R definitions, and unprototyped
+direct callees still emitted `j`. A variadic caller, an escaped parameter
+address, outgoing ninth argument without incoming stack capacity, aggregate
+return, and dynamic allocation emitted ordinary calls, but introduced real
+ABI/storage work absent from the tiny retail wrappers. The interleaved DDS2
+clear/test callbacks are particularly useful flag evidence: retail
+`func_0026DB28` calls `scrClearEntryFlag` with `jal`, whereas adjacent
+`func_0026DB48` jumps to `scrTestEntryFlag` with `j`. Do not apply a whole-file
+no-sibling flag to make only the clear callbacks match.
+
+Primary compiler references: the installed cc1's `expand_call` at
+`0x080B5A80` and `optimize_sibling_and_tail_recursive_calls` at `0x081DFCEC`,
+corroborated by contemporary upstream GCC
+[calls.c](https://github.com/gcc-mirror/gcc/blob/fd442cef30223941cf09068241580e3d8f3fb7ae/gcc/calls.c)
+and
+[sibcall.c](https://github.com/gcc-mirror/gcc/blob/fd442cef30223941cf09068241580e3d8f3fb7ae/gcc/sibcall.c)
+(2000-09-24; upstream, not a claim of identical Sony backend source).
 
 ## Calls with no arguments that read `$a0`
 
@@ -1036,6 +1104,13 @@ Keep the actual GIF register list and GS A+D payload entries as `s64` /
 hardware words. Both games' eleven interface emitters, border wrapper,
 panel renderers, and picture submission wrappers remained byte-exact with
 these distinctions.
+
+Blur drawing shares the `0x28`-byte `EffBlurQuad` payload in `eff_blur.h`.
+Event callbacks and event-viewer serialized records embed that same payload;
+a four-byte color array does not establish a separate `BlurSource` owner.
+Keep the surrounding serialized records distinct from allocated blur work:
+the scatter and scale parameter prefixes are both `0x2C` bytes, but their
+fields differ and neither includes the live owner's allocation or slot tail.
 
 The interface sprite constructor is a different boundary: its optional
 argument is a kind-selected `u32` payload word, not a universally typed
