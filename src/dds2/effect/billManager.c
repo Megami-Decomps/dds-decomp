@@ -533,14 +533,14 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
         return;
     }
     if (entry->flags & 0x10000000) {
-        BillRecord *records;
+        BillPluralRecord *records;
         u32 i = 0;
 
         func_0035B6E0("billAnim..PLURAL SET\n");
         obj->modeFlags = 0x10000000;
         obj->unk58 = index;
         obj->entryCount = entry->frameCount;
-        records = (BillRecord *)(data->base + entry->offset);
+        records = (BillPluralRecord *)(data->base + entry->offset);
         for (; i < entry->frameCount; i++) {
             billResolveEntry(data, records[i].entryIndex, (BillOut *)obj->unk60 + i);
             ((BillOut *)obj->unk60)[i].frameIndex = -records[i].delay;
