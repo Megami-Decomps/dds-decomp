@@ -315,9 +315,30 @@ Count <= 0 skips only the row loop, retaining the direction update and setup.
 Kind-0 color and rendering behavior applies; the distinct kind-4 odd-p color
 restriction does not carry over. No new field, helper or primitive is added.
 
+## Fragment restart window
+
+`func_00165D80` (DDS1) and `func_0016D9D8` (DDS2) each match 336 bytes.
+The existing 0x54-byte FragmentParams owner exposes restartFrameLimit at 0x28
+as a u32, matching its use with the unsigned update counter. Zero allows
+unlimited restarts. A nonzero limit gates only resampling after delay, active
+geometry and alpha fade have finished; work already in progress continues.
+Render vertex count and color are accessed through one indexed ParCell array,
+letting ordinary strength reduction share its cursor without field-pointer
+backtracking. The fragment loop itself keeps the native signed count test.
+
+The prior two-word frontier came from PRE: a shared finalizer's counter and
+system loads were partially redundant along the empty-count path, so missing
+loop-exit loads were inserted in expression-table order. The final source
+refreshes its existing counter snapshot after the callback-bearing positive
+loop and retains the entry snapshot on the callback-free empty path. PRE then
+supplies only the system load after that explicit counter producer. One shared
+increment/store and submission preserve the target epilogue scheduling.
+This adds no runtime read or artificial ordering constraint. Unsigned counter
+wrap and the once-per-update increment, including empty updates, are retained.
+
 ## Verification
 
-Canonical whole-unit checks report 73 matches and zero differences for each
+Canonical whole-unit checks report 74 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
