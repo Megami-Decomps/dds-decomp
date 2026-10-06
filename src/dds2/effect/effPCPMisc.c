@@ -5640,7 +5640,73 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
 
 
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B778);
+/* vu0 routine: move delayed radial events, apply damping, then fade and draw. */
+void func_0018B778(EffPCPSpawnRangeWork *work) {
+    EffPCPEventPlace place;
+    f32 origin[4] __attribute__((aligned(16)));
+    u32 count = work->params.count;
+    s32 duration = work->params.duration;
+    s32 fadeIn = work->params.fadeIn;
+    s32 fadeOut = work->params.fadeOut;
+    f32 angularDamping = work->params.angularDamping;
+    f32 heightDamping = work->params.heightDamping;
+    EffPCPSpawnRangeEvent *entry = work->entries;
+    u32 color = work->color;
+    u32 i;
+    s32 frame;
+
+    PCP_COPY_VECTOR(origin, work->params.origin);
+    if (duration == 0) {
+        return;
+    }
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    for (i = 0; i < count; i++, entry++) {
+        frame = entry->frame;
+        if (frame <= duration) {
+            if (frame == 0) {
+                effPcpRandomizeSpawnSlot(work, i);
+                effEventSetScale(entry->event, work->scale);
+                frame = entry->frame;
+            }
+            if (frame >= 0) {
+                f32 angle = entry->angle;
+                f32 radius = entry->position;
+                f32 cosine;
+                f32 sine;
+                f32 fade;
+
+                cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+                sine = sdfSinPoly(angle);
+                place.pos[0] = origin[0] + cosine * radius;
+                place.pos[1] = origin[1] + entry->height;
+                place.pos[2] = origin[2] + sine * radius;
+                entry->height += entry->heightStep;
+                entry->position += entry->positionStep;
+                entry->angle += entry->angularStep;
+                entry->heightStep *= heightDamping;
+                entry->angularStep *= angularDamping;
+                if (frame < fadeIn && fadeIn != 0) {
+                    fade = (f32)frame / (f32)fadeIn;
+                } else if (duration - frame <= fadeOut && fadeOut != 0) {
+                    fade = (f32)(duration - frame) / (f32)fadeOut;
+                } else {
+                    fade = 1.0f;
+                }
+                place.color = effBlendColor(color & 0xFFFFFF, color, fade);
+                effEventCopyFileRecordHeader(entry->event, &place);
+                func_00197F60(entry->event);
+                frame = entry->frame;
+            }
+            entry->frame = frame + 1;
+        }
+    }
+}
 
 void effPcpCopySpawnRangeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
