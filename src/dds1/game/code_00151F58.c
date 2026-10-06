@@ -111,7 +111,8 @@ void sdfInitPacketList(s32 packet);
 
 BillChildPayload *func_00151398(BillObj *obj, BillOut *entries);
 
-void func_00152E40(s32 packet, s32 source);
+typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
+void func_00152E40(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
 typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
 void func_00153128(SdfListHead *packet, EffCompositeGsDescriptor *source);
@@ -524,7 +525,101 @@ void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_001528C0);
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00152E40);
+/* Generated texture quad input. Producers initialize fields through +0x28;
+ * +0x18..+0x1F are not accessed by this packet builder. */
+struct EffGeneratedTextureDescriptor {
+    f32 position[4];
+    f32 scaleX;
+    f32 scaleY;
+    u8 unk18[8];
+    f32 angle;
+    u32 color;
+    SdfTex *texture;
+};
+
+extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
+extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
+extern u64 sdfTexGetPrimaryClampState(SdfTex *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
+extern void func_002E2680(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
+
+void func_00152E40(SdfListHead *list, EffGeneratedTextureDescriptor *source) {
+    f32 matrix[16] __attribute__((aligned(16)));
+    BillTextureQuad uv;
+    f32 corners[4][2];
+    u64 *packet;
+    s16 width, height;
+    f32 halfWidth, halfHeight;
+    f32 cosine, sine;
+    f32 cornerX, cornerY;
+
+    packet = (u64 *)sdfAllocPacketAligned(0x50);
+    packet[0] = 4;
+    packet[1] = 0x5000000410000000ULL;
+    packet[2] = 0x1000000000008003ULL;
+    packet[3] = 0xE;
+    packet[4] = sdfTexGetPrimarySamplingState(source->texture);
+    packet[5] = 0x14;
+    packet[6] = sdfTexGetPrimaryTextureState(source->texture);
+    packet[7] = 6;
+    packet[8] = sdfTexGetPrimaryClampState(source->texture);
+    packet[9] = 8;
+    sdfAppendPacket(list, (u32)packet);
+
+    EE_MMI_UNIT_MATRIX(matrix);
+    packet = (u64 *)sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket((u8 *)packet, matrix);
+    sdfAppendPacket(list, (u32)packet);
+
+    width = (u16)source->texture->width << 4;
+    height = (u16)source->texture->height << 4;
+    halfWidth = (f32)(width >> 5) * 0.0625f * source->scaleX;
+    halfHeight = (f32)(height >> 5) * 0.0625f * source->scaleY;
+    uv.components[0] = 0;
+    uv.components[1] = 0;
+    uv.components[2] = width;
+    uv.components[3] = 0;
+    uv.components[4] = width;
+    uv.components[5] = height;
+    uv.components[6] = 0;
+    uv.components[7] = height;
+    if (source->angle == 0.0f) {
+        corners[0][0] = -halfWidth;
+        corners[0][1] = -halfHeight;
+        corners[1][0] = halfWidth;
+        corners[1][1] = -halfHeight;
+        corners[2][0] = halfWidth;
+        corners[2][1] = halfHeight;
+        corners[3][0] = -halfWidth;
+        corners[3][1] = halfHeight;
+    } else {
+        cosine = sdfEvaluateCosineViaSinePhaseShift(source->angle);
+        sine = sdfSinPoly(source->angle);
+        cornerX = -halfWidth;
+        cornerY = -halfHeight;
+        corners[0][0] = cornerX * cosine - cornerY * sine;
+        corners[0][1] = cornerX * sine + cornerY * cosine;
+        cornerX = halfWidth;
+        cornerY = -halfHeight;
+        corners[1][0] = cornerX * cosine - cornerY * sine;
+        corners[1][1] = cornerX * sine + cornerY * cosine;
+        cornerX = halfWidth;
+        cornerY = halfHeight;
+        corners[2][0] = cornerX * cosine - cornerY * sine;
+        corners[2][1] = cornerX * sine + cornerY * cosine;
+        cornerX = -halfWidth;
+        cornerY = halfHeight;
+        corners[3][0] = cornerX * cosine - cornerY * sine;
+        corners[3][1] = cornerX * sine + cornerY * cosine;
+    }
+
+    packet = (u64 *)sdfAllocPacketAligned(0x80);
+    func_002E2680((u8 *)packet, source->position, source->color, &uv, &corners[0][0]);
+    sdfAppendPacket(list, (u32)packet);
+}
 
 /* Effect owner installs a callback at +0x10 to accept a new packet list. */
 typedef struct EffPacketSink {
@@ -537,7 +632,7 @@ void effSubmitGeneratedTexturePacket(s32 sink, s32 source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
     sdfInitPacketList(packetAddress);
-    func_00152E40(packetAddress, source);
+    func_00152E40((SdfListHead *)packetAddress, (EffGeneratedTextureDescriptor *)source);
     ((EffPacketSink *)sink)->submit(sink, packetAddress);
 }
 
@@ -567,12 +662,6 @@ extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_002D4C80(s32, u32, s32);
 extern void func_002D4CC8(s32, u32, s32);
 extern void sdfAppendDmaTagToList(SdfListHead *, u32);
-extern void sdfAppendPacket(SdfListHead *, u32);
-extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
-extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
-extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern void func_002E2A00(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
