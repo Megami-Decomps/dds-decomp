@@ -396,20 +396,6 @@ typedef struct BtlResourceTableEntry {
     u8 pad04[72];
 } BtlResourceTableEntry;
 
-/* Pose command state: the progress slot is initialized as bits, then used as float. */
-typedef struct BattlePoseBlendState {
-    u8 pad00[0x130];
-    s32 blendMode;           /* 0x130 */
-    u8 pad134[8];
-    s32 state13C;            /* 0x13C */
-    u8 pad140[0xC];
-    union {
-        s32 progressBits;
-        f32 progress;
-    };                      /* 0x14C */
-    s32 durationFrames;     /* 0x150 */
-    f32 duration;           /* 0x154 */
-} BattlePoseBlendState;
 
 typedef struct BtlStateHandler {
     void (*start)(void *);
@@ -827,12 +813,6 @@ extern s32 fileGetResourceSize(s32);
 
 extern void func_003422F8(s32, s32);
 
-typedef struct BattleFieldBlocks {
-    u8 unk_00[0x2B8];
-    s32 fieldF1;
-    s32 fieldF2;
-    s32 fieldTB;
-} BattleFieldBlocks;
 
 
 
@@ -1522,15 +1502,6 @@ void func_001D5FA8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001D5FB0);
 
-typedef struct BattleVisualState {
-    u8 pad00[0x110];
-    u32 flags;
-} BattleVisualState;
-
-typedef struct BattleVisualObject {
-    u8 pad00[0x18];
-    BattleVisualState *visual;
-} BattleVisualObject;
 
 void func_001D7228(void) {
 }
@@ -1546,21 +1517,21 @@ void func_001D8C78(void) {
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001D8C80);
 
-/* Four callbacks mark the linked visual state; bit 0x4000's meaning is unconfirmed. */
-void func_001DA1F8(BattleVisualObject *object) {
-    object->visual->flags = object->visual->flags | 0x4000;
+/* Command-state callbacks mark the same world unit as the return/end handlers. */
+void func_001DA1F8(ActionStateLink *task) {
+    task->unit->flags |= 0x4000;
 }
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DA210);
 
-void func_001DA728(BattleVisualObject *object) {
-    object->visual->flags = object->visual->flags | 0x4000;
+void func_001DA728(ActionStateLink *task) {
+    task->unit->flags |= 0x4000;
 }
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DA740);
 
-void func_001DABC0(BattleVisualObject *object) {
-    object->visual->flags = object->visual->flags | 0x4000;
+void func_001DABC0(ActionStateLink *task) {
+    task->unit->flags |= 0x4000;
 }
 
 extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
@@ -1597,8 +1568,8 @@ void func_001DABD8(u8 *task) {
     }
 }
 
-void func_001DACE0(BattleVisualObject *object) {
-    object->visual->flags = object->visual->flags | 0x4000;
+void func_001DACE0(ActionStateLink *task) {
+    task->unit->flags |= 0x4000;
 }
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DACF8);
