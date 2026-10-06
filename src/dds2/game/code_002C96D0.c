@@ -1,5 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
+extern s32 D_00437D4C;
+extern s32 func_002C9BD0(void);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
+
 /* Compact metadata copied from the beginning of each save blob. */
 typedef struct FileRecordHeader {
     char signature[3];
@@ -331,7 +335,7 @@ extern s8 D_004580C3[];
 
 extern void *(*fileMenuStateHandler)(s32);
 
-extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSetDrawSurfaceIndex(u32);
 
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
@@ -1897,7 +1901,6 @@ void *mcdAdvanceToLoadSelection(void) {
 
 extern s32 D_00437D00;
 extern s32 D_00437D28;
-extern s32 D_00437D4C;
 extern void fileLoadSetMode(s8);
 extern void fileSetMenuValueAndInitializeFlags(u32);
 extern void fileResetLoadContextSlide(void);
