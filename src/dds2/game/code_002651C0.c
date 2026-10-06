@@ -92,6 +92,8 @@ typedef struct EvtMenuContext {
     u16 selectedSlot;             /* 0xA6 */
     u8 padA8[0x25];
     s8 unkCD;
+    u8 padCE[0x2BA];
+    u8 rewardGranted;             /* 0x388: set once the slot's reward was handed out */
 } EvtMenuContext;
 
 s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
@@ -160,7 +162,31 @@ s32 evtFinishPopupAfterMenuConfiguration(s32 callback) {
     return evtMenuSetHandler(context, 2, callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_002651C0", func_00265408);
+/* Hand out the captured slot's reward: an item (named in the window) or a currency amount. */
+s32 func_00265408(void) {
+    char text[0x40];
+    EvtMenuContext *context = (EvtMenuContext *)kwlnTaskGetUserValue();
+    s32 slotIndex = func_00265038();
+    s32 choice;
+    s32 rewardId;
+
+    context->rewardGranted = 0;
+    if (context->unkCD != 0 && slotIndex >= 0) {
+        choice = evtGetCapturedWindowPanelValue();
+        rewardId = D_003CE1A8[slotIndex].sub[choice].id;
+        if (D_003CE1A8[slotIndex].sub[choice].kind == 0) {
+            evtCopyEntryStringToActiveWindow(0, (s32)D_00435E5C[rewardId]);
+            ptyAdjustItemQuantity(rewardId, 1);
+        } else {
+            func_0035C860(text, D_00437850, rewardId);
+            evtCopyEntryStringToActiveWindow(0, (s32)text);
+            datAddCurrencyClamped(rewardId);
+        }
+        context->rewardGranted = 1;
+        dspStartEntry(0x28);
+    }
+    return 1;
+}
 
 /* Walk the list until its selected id is found, then persist the slot choice. */
 s32 evtMenuPersistSelectedSlot(void) {
