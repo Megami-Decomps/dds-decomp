@@ -363,16 +363,10 @@ typedef struct BillAnimationEntry {
     u32 flags;
 } BillAnimationEntry;
 
-/* Plural entries use the first two halfwords as an entry index and delay. */
+/* Ordinary animation frames contain geometry and texture coordinates. */
 typedef struct BillRecord {
-    union {
-        s16 width;
-        s16 entryIndex;
-    };
-    union {
-        s16 height;
-        s16 delay;
-    };
+    s16 width;
+    s16 height;
     s16 x;
     s16 y;
     u16 u0;
@@ -383,6 +377,19 @@ typedef struct BillRecord {
     s16 value;
     f32 scale;
 } BillRecord;
+
+/* The 0x10000000 animation format is a list of positioned, delayed entry
+ * references. Its trailing sixteen serialized bytes have no established use. */
+typedef struct BillPluralRecord {
+    s16 entryIndex; /* 0x00 */
+    s16 delay;      /* 0x02 */
+    s16 x;          /* 0x04 */
+    s16 y;          /* 0x06 */
+    u8 unk08[0x10];
+} BillPluralRecord;
+
+typedef char BillPluralRecord_size_must_be_0x18[
+    (sizeof(BillPluralRecord) == 0x18) ? 1 : -1];
 
 typedef struct BillOut {
     s32 unk0;
