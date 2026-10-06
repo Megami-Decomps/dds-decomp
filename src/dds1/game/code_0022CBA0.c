@@ -1639,7 +1639,90 @@ s32 func_00232438(s32 unused0, s32 unused1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerPickNextHandler);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerUpdateFrame);
+extern s16 D_003BBE7C;
+extern s8 D_00324510[];
+extern s32 itfMesStartEntry(s32, s32, s32);
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void func_0022FFC8(EventViewerState *);
+extern void mnuAdvanceShopMenuState(struct CampScene *);
+extern s32 func_00270088(void);
+extern s32 evtViewerPickNextHandler(KwlnTask *);
+
+/* Advance the viewer timeline, deferred voice and task-update handoff. */
+s32 evtViewerUpdateFrame(KwlnTask *task) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
+    s32 flags;
+
+    D_003BBE7C = 0;
+    if (viewer->unk2238 == 1) {
+        func_0022F9F0(viewer);
+    }
+    evtViewerAdvanceGlyphTick(viewer);
+    func_0022CD30(viewer);
+    flags = viewer->flags;
+    if (!(flags & 8)) {
+        if (D_00324510[0x22] < 0) {
+            viewer->flags = flags | 1;
+            evtViewerDispatchFlagMode((u32)viewer);
+            viewer->currentId = 0;
+            viewer->historyCount = 0;
+            viewer->commandResetId = 0;
+            evtViewerPushCommandHistory(1, 0x24, 0x18, (s32)viewer);
+            return (s32)evtViewerPickNextHandler;
+        }
+        func_0022FA60(viewer);
+    } else {
+        if (viewer->glyphAdvancePosition == viewer->glyphAdvanceStart) {
+            viewer->flags = flags & ~1;
+            evtViewerDispatchFlagMode((u32)viewer);
+        }
+        if (D_00324510[0x22] >= 0 && D_00324510[0x2C] < 0 &&
+            evtViewerHasUpdateFlag((s32)viewer) == 0) {
+            func_0022F2E0(viewer);
+        }
+    }
+    if (viewer->voicePending == 1 && evtViewerHasUpdateFlag((s32)viewer) == 0 &&
+        mnuQueryTitleSoundBusy() == 0) {
+        itfMesStartEntry(((EvtWindowContext *)viewer->windowContext)->windowHandle,
+            viewer->voiceMessage, 0);
+        viewer->voicePending = 0;
+        evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",
+            viewer->voiceMessage);
+    }
+    if (viewer->glyphAdvancePosition != viewer->previousGlyphPosition) {
+        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    }
+    viewer->previousGlyphPosition = viewer->glyphAdvancePosition;
+    if (viewer->flags & 8) {
+        evtViewerApplySelectedEntry(viewer);
+    }
+    func_0022FFC8(viewer);
+    func_0022F418(viewer);
+    mnuAdvanceShopMenuState((struct CampScene *)viewer);
+    if (viewer->flags & 8) {
+        if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
+            return -1;
+        }
+        if (evtViewerHasUpdateFlag((s32)viewer) == 1 && viewer->updateCount >= 25) {
+            return -1;
+        }
+    }
+    if (!(viewer->flags & 1)) {
+        if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
+            if (!(viewer->flags & 8)) {
+                viewer->flags ^= 1;
+                evtViewerDispatchFlagMode((u32)viewer);
+            }
+        } else if (viewer->timedActive == 1) {
+            if (func_00270088() == 2) {
+                viewer->glyphAdvancePosition++;
+            }
+        } else {
+            viewer->glyphAdvancePosition++;
+        }
+    }
+    return 0;
+}
 
 /* Update the active viewer, then switch to its frame-variable task. */
 void *evtViewerScheduleFrameVariableTask(s32 task) {
