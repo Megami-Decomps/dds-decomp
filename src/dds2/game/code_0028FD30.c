@@ -486,17 +486,32 @@ void func_00292998(MenuPanelObject *object) {
     *(u16 *)(record + 2) = (*(u16 *)(record + 2) & 0xfff0) | 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292A60);
+extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
+extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, u32);
+extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
+extern void func_00278EA8(u32);
+extern void func_00279080(u32);
+
+void func_00292A60(MenuPanelObject *object) {
+    MenuPanelState *state = &object->state;
+
+    state->defaultSelector = mnuGetMantraPanelPositionRecord(8);
+    mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->state.selectionController);
+    mnuSpawnMantraIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->state.selectionController);
+    func_00278EA8(object->state.selectionController);
+    func_00279080(object->state.selectionController);
+    state->flags &= ~0x20000000;
+}
 
 s32 func_00292B90(s32 object) {
     return func_002917C0(object, 0, 8);
 }
 
 
-extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 extern void func_00278F60(u32);
 extern void func_002790F0(s32, s32, u32);
-extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
 void itfPositionMantraSelectionController(MenuPanelObject *object) {
     MantraNodePos *record;
 
