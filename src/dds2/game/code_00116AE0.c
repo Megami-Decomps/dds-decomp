@@ -1,13 +1,12 @@
 #include "common.h"
 #include "sdf_draw.h"
 
-typedef struct SdfMotionManager SdfMotionManager;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 dds3AppendWorldObjectNode(s32 kind);
-extern void *sdfModelCreateWithItems(void *data, void *listRef);
-extern Motion *func_003340E0(SdfMotionManager *, MotionTable *);
-extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
+extern SdfModel *sdfModelCreateWithItems(void *data, void *listRef);
+extern Motion *func_003340E0(SdfModel *, MotionTable *);
+extern void sdfMotionInitializeAtZeroTime(Motion *, s32, s32);
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];
@@ -60,19 +59,19 @@ s32 evtCreateScriptObjectWithResource(s32 a, s32 b, s32 c, s32 d, s32 e) {
 }
 
 /* Create the model from the loaded resource, or from the fallback. */
-s32 evtCreateModelFromObject(ObjWithWork *object) {
+SdfModel *evtCreateModelFromObject(ObjWithWork *object) {
     ObjWork *work = (ObjWork *)object->work;
-    void *model;
+    SdfModel *model;
 
     if (work->unkC != NULL) {
         model = sdfModelCreateWithItems(work->unkC, work->unk4);
     } else {
         model = sdfModelCreateWithItems(((ObjWithWork *)work->unk0)->work, work->unk4);
     }
-    return (s32)model;
+    return model;
 }
 
-Motion *evtAttachScriptToObject(ScriptObj *object, SdfMotionManager *owner) {
+Motion *evtAttachScriptToObject(ScriptObj *object, SdfModel *owner) {
     Motion *motion = NULL;
     ObjWork *work;
 
