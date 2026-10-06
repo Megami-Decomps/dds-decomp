@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 
@@ -78,27 +79,7 @@ typedef struct EffBlurTemplate {
     u32 resourceWord;
 } EffBlurTemplate;
 
-typedef struct EffBlurScatterParams {
-    s32 count;
-    s32 delaySpread;
-    f32 angleStep;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s32 x;
-    s32 y;
-    s32 positionSpread;
-    s32 size;
-} EffBlurScatterParams;
 
-typedef struct EffBlurScatterSlot EffBlurScatterSlot;
-typedef struct EffBlurScatterWork {
-    EffBlurScatterParams params;
-    u32 sourceHandle;
-    u32 allocation;
-    EffBlurScatterSlot *slots;
-} EffBlurScatterWork;
 
 typedef struct EffBlurScaleParams {
     s32 count;
@@ -179,12 +160,10 @@ extern void sdfAppendPacket();
 extern s32 sdfCreateFormattedSifCommand();
 
 extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
-extern EffBlurScatterWork *func_00186F90(void *arg);
 extern EffTemplate *effCloneResourceTemplate(void *arg);
 extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
 extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
-extern void func_00187098(EffBlurScatterWork *arg);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 extern void func_00187C08(EffSolidRectParams *arg);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 extern u32 effMiscRand(void *state);
@@ -207,19 +208,6 @@ typedef struct {
     EffPCPRectBounds bounds;
 } EffPCPTexturedBlurParams;
 
-typedef struct {
-    s32 count;
-    s32 delaySpread;
-    f32 angleStep;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s32 x;
-    s32 y;
-    s32 positionSpread;
-    s32 size;
-} EffBlurScatterParams;
 
 typedef struct {
     s32 count;
@@ -292,7 +280,6 @@ typedef struct {
     u32 resource;
 } EffPCPCompactWork;
 
-extern u32 func_0018EBC8(void *params);
 
 extern u32 effCloneBlurWorkWithSlots(void *params);
 
@@ -2772,7 +2759,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactScatterParams 
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = func_0018EBC8(&params->res);
+    work->resource = (u32)func_0018EBC8(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2807,7 +2794,7 @@ void effPcpChargeRespawn(EffPCPCompactWork *work) {
 }
 
 void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseFirstResource(work->resource);
+    effBlurReleaseFirstResource((EffBlurScatterWork *)work->resource);
     sdfReleaseChipBlock(work);
 }
 
