@@ -31,7 +31,8 @@ typedef struct BtlLinkedCommand {
     s32 actionCode;          /* 0x114 */
     BtlIndexList *targetList; /* 0x118: indexed target list */
     s32 motionProgress;      /* 0x11C: one-shot aim latch */
-    u8 pad120[0x10];
+    u8 pad120[0xC];
+    s32 durationFrames;       /* 0x12C */
     f32 motionParameter;     /* 0x130: aim setup stores 10 */
 } BtlLinkedCommand;
 #endif /* VERSION_DDS1 */
@@ -44,27 +45,92 @@ typedef union BattleActionSlot {
 } BattleActionSlot;
 
 
-/* Native 0x180-byte command-actor allocation; its two list links are at
- * 0x174/0x178. */
+/* The thirteen retained groups contain 32 fixed-size operand records each. */
+typedef struct BtlOperandEntry {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    u8 pad14[4];
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    u8 pad24[4];
+    u32 flags;
+} BtlOperandEntry;
+
+typedef struct BtlOperandGroup {
+    u8 count;
+    u8 pad01[3];
+    s32 interval;
+    u32 unk08;
+    s32 unk0C;
+    u8 unk10; /* Reset bytewise; some predicates read the +0x10/+0x11 pair. */
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[6];
+    BtlOperandEntry entries[32]; /* 0x1C; group stride 0x59C */
+} BtlOperandGroup;
+
+/* Embedded 0x70-byte index work. DDS2 0x1DF700/0x1DF7B8/0x1DF810
+ * reset, initialize and release its owned list and thirteen-group buffer. */
+typedef struct BattleIndexWork {
+    s32 phase;
+    s32 skillId;
+    s32 reference;
+    s32 unk0C;
+    s32 unk10;
+    BtlUnit *linkedUnit;
+    s32 unk18;
+    s32 stageValue;
+    s32 unk20;
+    s32 slot;
+    s32 adjustedValue;
+    s8 resultKind;
+    u8 unk2D;
+    u8 unk2E;
+    u8 pad2F;
+    u16 stage;
+    u8 pad32[2];
+    s32 parameter;
+    s32 wait;
+    s32 unk3C;
+    BtlIndexList *indices;
+    u8 pad44[4];
+    u64 unk48;
+    s32 unk50;
+    s32 unk54;
+    s32 unk58;
+    u16 flags;
+    u8 pad5E[2];
+    s32 unk60;
+    u8 unk64;
+    u8 pad65[3];
+    BtlOperandGroup *groups;
+    u32 allocationHandle;
+} BattleIndexWork;
+
+void btlInitBattleIndexWork(BattleIndexWork *work);
+void btlResetIndexWork(BattleIndexWork *work);
+void btlReleaseObjectBuffers(BattleIndexWork *work);
+
+/* DDS2 0x1DCF58 allocates this 0x180-byte command actor; its two list links
+ * are at 0x174/0x178. It is distinct from the 0x368-byte world unit. */
 typedef struct ActionStateLink {
     u32 state; /* 0x00: scene readiness compares this state as an unsigned word. */
-    u8 pad04[4];
+    u16 actionNumber;
+    u8 pad06[2];
     u32 pendingFlags; /* 0x08 */
     u32 flags; /* 0x0C */
-    u8 pad10[8];
+    s32 stateTime;
+    s32 completedTurns;
     BtlUnit *unit; /* 0x18 */
     u8 pad1C[4];
-    s32 phase; /* 0x20 */
-    s32 skillId; /* 0x24 */
-    u8 pad28[0x1C];
-    s32 slot; /* 0x44: action-kind table/resource-node index */
-    s32 adjustedValue; /* 0x48 */
-    s8 resultKind; /* 0x4C */
-    u8 pad4D[0x13];
-    BtlIndexList *actorIndices; /* 0x60 */
-    u8 pad64[0x24];
-    struct BtlOperandGroup *groups; /* 0x88: retained groups for actorIndices */
-    u8 pad8C[4];
+    BattleIndexWork indexWork; /* 0x20..0x8F */
     u16 aiCounter; /* 0x90: wraps as a halfword, then clamps to 0xFF */
     u8 pad92[0xBC];
     s8 lowHpActionHold; /* 0x14E: positive suppresses the low-HP action */
@@ -75,6 +141,10 @@ typedef struct ActionStateLink {
     struct ActionStateLink *next;
     u8 pad17C[4];
 } ActionStateLink;
+
+ActionStateLink *btlCreateActionSeq(void);
+void btlDestroyActionSeq(ActionStateLink *actor);
+ActionStateLink *btlFindUnitByActor(BtlUnit *unit);
 
 typedef struct BtlLinkedCommand {
     BtlCamState camera;       /* 0x00 */

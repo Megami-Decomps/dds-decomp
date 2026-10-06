@@ -3,17 +3,34 @@
 
 #include "common.h"
 
-/* Base object flags, eight indexed slots and extension (0x3C); DDS1/2 basic/dds3ObjectBase.c. */
-typedef struct {
+/* The slot-state constructor allocates and clears this complete 0xB4-byte owner.
+ * Object resources, indexed slots and motion control share the same record. */
+#define DDS3_OBJECT_RESOURCE_SLOT_COUNT 24
+
+struct Motion;
+
+typedef struct ObjBase {
     u32 flags;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
+    u32 worldIndexNode;
+    u32 resourceState;
+    u32 resourceHandle;
     void *slots[8];
     void *extData;
-    u8 pad34[4];
-    void *unk38;
+    s32 devSlot;
+    struct Motion *motion;
+    s32 mode;
+    f32 weight;
+    u32 unk44;
+    s32 resourceSlotCount;
+    s32 resourceSlots[DDS3_OBJECT_RESOURCE_SLOT_COUNT];
+    u32 unkAC;
+    s32 currentSlot;
 } ObjBase;
+
+typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
+
+ObjBase *dds3CreateSlotResourceState(void *owner);
+ObjBase *dds3GetObjectOwnedHandle();
 
 /* Four-word object inner record (0x10); no direct C unit users yet. */
 typedef struct {

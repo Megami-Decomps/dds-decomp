@@ -5,6 +5,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
+#include "dat_state.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -2152,42 +2153,25 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
     return result;
 }
 
-typedef struct BtlSlotEntry {
-    u16 flags;
-    u8 unk_02[2];
-    u16 kind;
-    u16 unk_06;
-    u16 unk_08;
-    u8 unk_0A[4];
-    u16 unk_0E;
-    u8 unk_10[0x12];
-    u16 effectData[24];
-    u8 unk_52[0x1A4 - 0x52];
-} BtlSlotEntry;
 
-typedef struct BtlSlotTable {
-    u8 unk_000[0xA60];
-    BtlSlotEntry entry[5];
-} BtlSlotTable;
 
-extern BtlSlotTable *datGameState;
 
 /* The effect slot is reused for mode-specific work; keep each handler's payload view. */
 void btlSelectSlotEntries(void) {
     s32 *effectState = (s32 *)((BtlState *)btlGetRuntime())->effect;
-    BtlSlotEntry *slotEntry;
-    BtlSlotEntry *readyEntry = NULL;
-    BtlSlotEntry *activeEntry = NULL;
+    DatPartyRecord *slotEntry;
+    DatPartyRecord *readyEntry = NULL;
+    DatPartyRecord *activeEntry = NULL;
     u32 i;
-    slotEntry = datGameState->entry;
+    slotEntry = datGameState->party;
     for (i = 0; i < 5; i++) {
         u16 flags = slotEntry->flags;
         effectState[i] = flags;
         if (flags & 1) {
-            if (slotEntry->kind == 3) {
+            if (slotEntry->unitId == 3) {
                 readyEntry = slotEntry;
             }
-            if (slotEntry->kind == 1) {
+            if (slotEntry->unitId == 1) {
                 slotEntry->flags = flags | 2;
                 activeEntry = slotEntry;
             } else {
@@ -2196,36 +2180,36 @@ void btlSelectSlotEntries(void) {
         }
         slotEntry++;
     }
-    activeEntry->unk_0E = 0;
+    activeEntry->status = 0;
     if (readyEntry != NULL) {
-        readyEntry->unk_0E = 0;
+        readyEntry->status = 0;
     }
     memcpy(effectState + 5, activeEntry->effectData, 0x30);
     for (i = 0; i < 24; i++) {
         activeEntry->effectData[i] = 0;
     }
-    activeEntry->unk_06 = activeEntry->unk_08;
+    activeEntry->hp = activeEntry->maxHp;
 }
 
 void btlRestoreSlotEntriesFromEffect(void) {
     s32 *effectState = (s32 *)((BtlState *)btlGetRuntime())->effect;
-    BtlSlotEntry *activeEntry = NULL;
+    DatPartyRecord *activeEntry = NULL;
     u32 i;
 
     for (i = 0; i < 5; i++) {
         if (effectState[i] & 1) {
             if (effectState[i] & 2) {
-                datGameState->entry[i].flags |= 2;
+                datGameState->party[i].flags |= 2;
             } else {
-                datGameState->entry[i].flags &= ~2;
+                datGameState->party[i].flags &= ~2;
             }
-            if (datGameState->entry[i].kind == 1) {
-                activeEntry = &datGameState->entry[i];
+            if (datGameState->party[i].unitId == 1) {
+                activeEntry = &datGameState->party[i];
             }
         }
     }
     memcpy(activeEntry->effectData, effectState + 5, 0x30);
-    activeEntry->unk_06 = activeEntry->unk_08;
+    activeEntry->hp = activeEntry->maxHp;
 }
 
 
@@ -4238,7 +4222,114 @@ s32 btlHandleTargetedDefeatAction(u8 *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B818);
+extern s32 btlIsActorCategoryMarked(s32);
+extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+/* Opaque pose parameters use the native owners defined in code_001C8890. */
+typedef struct CameraPoseAction CameraPoseAction;
+typedef struct CameraPoseTransform CameraPoseTransform;
+extern void btlSetupCameraPoseAimUnit(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+extern void btlPrepareRandomizedActionCameraPose(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+
+/* Boss action camera (proposed btlSelectBossActionCameraPose): aim poses for ally actors, fixed DERUTA/I-E key
+ * sets for mode 0x11B. */
+s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
+    BtlTask *task = command->task;
+    s32 kind;
+    u32 shot;
+
+    if (btlIsActorCategoryMarked((s32)command) != 0) {
+        return 0;
+    }
+    if (task->unit->flags & 0x200) {
+        if (a == 1 || b != 1) {
+            return 0;
+        }
+        kind = datActionAnimationRecords[command->actionCode].cameraKind;
+        if (kind < 8) {
+            if (kind >= 6) {
+                btlSetupCameraPoseAimUnit((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
+                                          (CameraPoseTransform *)&command->backCamera);
+                return 1;
+            }
+        }
+        func_001DF410(command, &command->frontCamera, &command->backCamera);
+        return 1;
+    }
+    if (task->unit->mode == 0x11B) {
+        switch (command->actionCode) {
+        case 0x1A5:
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlSetEffectCameraKeys(command, -23.1f, -127.9f, -2318.1f, -0.087f, 0.008f, -0.011f, 0.987f, -25.7f,
+                                   -309.8f, -1504.8f, -0.133f, 0.001f, -0.011f, 0.982f, 40.0f, 20.0f);
+            return 1;
+        case 0x1AD:
+            btlFlagAllUnitsDefeatCandidate();
+            shot = effMiscRandMod(0, 4);
+            switch (shot) {
+            case 0:
+                func_003003F0("DERUTA:0++++++++++++++++++++++++++\n");
+                btlInitMotionTransformFromComponents(&command->frontCamera, 3.96f, -295.73f, -2203.02f,
+                    -0.03f, 0.0f, 0.0f, 1.0f, 40.0f);
+                break;
+            case 1:
+                func_003003F0("DERUTA:1++++++++++++++++++++++++++\n");
+                btlInitMotionTransformFromComponents(&command->frontCamera, 3.96f, -851.77f, -2549.8f,
+                    0.05f, 0.0f, 0.0f, 1.0f, 40.0f);
+                break;
+            case 2:
+                func_003003F0("DERUTA:2++++++++++++++++++++++++++\n");
+                btlInitMotionTransformFromComponents(&command->frontCamera, 790.81f, -117.84f, -2170.96f,
+                    -0.07f, 0.15f, -0.02f, 0.98f, 40.0f);
+                break;
+            case 3:
+                func_003003F0("DERUTA:3++++++++++++++++++++++++++\n");
+                btlInitMotionTransformFromComponents(&command->frontCamera, -764.19f, -1539.55f, -2171.55f,
+                    0.17f, -0.12f, -0.03f, 0.97f, 40.0f);
+                break;
+            }
+            btlInitMotionTransformFromComponents(&command->backCamera, -3.958f, -873.85406f, -1516.681f,
+                0.065002f, -0.001673f, -0.000109f, 0.997884f, 40.0f);
+            command->durationFrames = 30;
+            command->flags |= 0x20001;
+            return 1;
+        default:
+            btlFlagAllUnitDefeatCandidatesTask();
+            shot = effMiscRandMod(0, 5);
+            switch (shot) {
+            case 0:
+                func_003003F0("I-E:0++++++++++++++++++++++++++\n");
+                btlSetEffectCameraKeys(command, 1307.2f, -1435.2f, -946.7f, 0.06f, 0.288f, 0.005f, 0.947f, 271.0f,
+                                       -238.1f, -1158.7f, -0.108f, 0.068f, -0.021f, 0.983f, 40.0f, 30.0f);
+                return 1;
+            case 1:
+                func_003003F0("I-E:1++++++++++++++++++++++++++\n");
+                btlSetEffectCameraKeys(command, -719.0f, -115.0f, -1337.4f, -0.147f, -0.166f, 0.015f, 0.966f, -506.0f,
+                                       -1117.8f, -1679.8f, 0.064f, -0.099f, -0.016f, 0.984f, 40.0f, 30.0f);
+                return 1;
+            case 2:
+                func_003003F0("I-E:2++++++++++++++++++++++++++\n");
+                btlSetEffectCameraKeys(command, -369.7f, -44.1f, -939.2f, -0.188f, -0.181f, 0.024f, 0.956f, 140.2f,
+                                       -0.4f, -1049.2f, -0.187f, 0.089f, -0.029f, 0.969f, 40.0f, 25.0f);
+                return 1;
+            case 3:
+                func_003003F0("I-E:3++++++++++++++++++++++++++\n");
+                btlSetEffectCameraKeys(command, -26.9f, -28.0f, -1957.9f, -0.086f, 0.015f, -0.011f, 0.987f, -17.6f,
+                                       -1157.3f, -1562.0f, 0.066f, 0.013f, -0.009f, 0.989f, 40.0f, 30.0f);
+                return 1;
+            case 4:
+                func_003003F0("I-E:4++++++++++++++++++++++++++\n");
+                btlSetEffectCameraKeys(command, 424.0f, -219.1f, -987.8f, -0.163f, 0.165f, -0.041f, 0.963f, -339.8f,
+                                       -21.7f, -1033.8f, -0.168f, -0.125f, 0.008f, 0.969f, 40.0f, 25.0f);
+                return 1;
+            }
+            break;
+        }
+    }
+    btlPrepareRandomizedActionCameraPose((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
+                                         (CameraPoseTransform *)&command->backCamera);
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6338);
 

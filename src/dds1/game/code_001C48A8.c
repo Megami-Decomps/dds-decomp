@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
 
@@ -37,34 +38,6 @@
 #define FLD_SCENE_FLAGS_OFFSET 0x1F4
 #define FLD_SCENE_GROUP_WORD_BYTES 4
 
-typedef struct ActorEntrySlot {
-    s16 code;
-    s16 unk02;
-    s16 countdown;
-} ActorEntrySlot;
-
-typedef struct UiObject {
-    u8 unk_00[0x110];
-    u32 flags;
-    u32 actionFlags;
-    u8 unk_118[8];
-    u16 entryMask;
-    u8 entryDataTail[2];
-    u16 index;
-    u16 currentValue;
-    u16 maximumValue;
-    u8 unk_12A[4];
-    u16 statusFlags;
-    u8 unk_130[6];
-    u8 unk_136[0x18E];
-    u8 kind;
-    u8 pad_2C5;
-    ActorEntrySlot entrySlots[7];
-    s32 selectedEntryIndex;
-    u32 marker;
-    u8 pad_2F8[0x4C];
-    struct UiObject *next;
-} UiObject;
 
 /* Three-byte scheduling slot. IDs move with slots; insertion renumbers them. */
 typedef struct SceneSlot {
@@ -86,19 +59,19 @@ typedef struct SceneLinkedNode {
     u8 pad04[4];
     u32 flags;
     u8 pad0C[0xC];
-    UiObject *actor;
+    BtlUnit *actor;
     u8 pad1C[0x150];
     struct SceneLinkedNode *next; /* 0x16C */
 } SceneLinkedNode;
 
 
-/* Actor-task prefix; the separate unit-data list uses UiObject. */
+/* Actor-task prefix; the separate unit-data list uses BtlUnit. */
 typedef struct SceneTask {
     s32 state;
     u8 pad04[4];
     u32 flags;
     u8 pad0C[0xC];
-    UiObject *actor;
+    BtlUnit *actor;
     u8 pad1C[0x24];
     u64 owner; /* 0x40: identifier used by task-owner queries */
 } SceneTask;
@@ -118,7 +91,7 @@ typedef struct BattleSceneWork {
     s32 scriptState;           /* 0x21C */
     s32 scriptArg;             /* 0x220 */
     SceneLinkedNode *linkedNodes; /* 0x224 */
-    UiObject *actors;
+    BtlUnit *actors;
     u8 pad_22C[0x20];
     u16 variant;
     u8 pad_24E[2];
@@ -404,95 +377,11 @@ typedef struct SceneEffectRequest {
 
 extern void btlTickActorEntryCountdowns(u8 *);
 extern void btlClearNodeFlags(void);
-extern void btlClearActorSelectedEntryIndex(UiObject *);
+extern void btlClearActorSelectedEntryIndex(BtlUnit *);
 extern void btlRefreshUnitMotionSelection(u8 *);
-extern SceneEffectRequest *btlCreateEffObjC(UiObject *, s32);
+extern SceneEffectRequest *btlCreateEffObjC(BtlUnit *, s32);
 
-s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
-    s32 ready = 1;
-    u32 group = scene->variant == 1 ? FLD_SCENE_ACTOR_PRIMARY_BIT : FLD_SCENE_ACTOR_SECONDARY_BIT;
-    SceneLinkedNode *head = scene->linkedNodes;
-    SceneLinkedNode *node;
-    UiObject *actor;
-
-    for (node = head; node != NULL; node = node->next) {
-        if ((node->flags & FLD_SCENE_TASK_BOUND_BIT) &&
-            (node->actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) &&
-            node->state >= 3) {
-            ready = 0;
-            break;
-        }
-    }
-    for (node = head; node != NULL; node = node->next) {
-        if (node->flags & FLD_SCENE_TASK_BOUND_BIT) {
-            actor = node->actor;
-            if ((actor->flags & group) && (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) &&
-                !(actor->flags & 0xE0)) {
-                if (node->state != 2) {
-                    ready = 0;
-                }
-            }
-        }
-    }
-    if (ready && scene->frame > 16) {
-        for (node = head; node != NULL; node = node->next) {
-            if (node->flags & FLD_SCENE_TASK_BOUND_BIT) {
-                actor = node->actor;
-                if (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) {
-                    if (!(actor->flags & 0xE0)) {
-                        actor->flags &= ~0x10U;
-                        btlTickActorEntryCountdowns((u8 *)actor);
-                        if (actor->statusFlags & 0x122F) {
-                            btlDispatchStateHandler(node, 4);
-                        }
-                        if (actor->flags & group) {
-                            btlClearNodeFlags();
-                            btlClearActorSelectedEntryIndex(actor);
-                            btlRefreshUnitMotionSelection((u8 *)actor);
-                        }
-                    }
-                }
-            }
-        }
-        if (scene->subFlags & FLD_SCENE_COUNTERS_ENABLED_BIT) {
-            s32 affected = 0;
-            s32 total = 0;
-            UiObject *selected = NULL;
-            s32 message;
-            SceneEffectRequest *request;
-            u16 status;
-
-            for (actor = scene->actors; actor != NULL; actor = actor->next) {
-                if (actor->flags & FLD_SCENE_TASK_ACTIVE_BIT) {
-                    if (actor->flags & FLD_SCENE_ACTOR_SECONDARY_BIT) {
-                        total++;
-                        status = actor->statusFlags & 1;
-                        if (status != 0) {
-                            affected++;
-                            selected = actor;
-                        }
-                    }
-                }
-            }
-            if (affected == 1) {
-                message = 0;
-            } else if (affected == total) {
-                message = 1;
-            } else {
-                message = 2;
-            }
-            if (affected != 0) {
-                request = btlCreateEffObjC(selected, message);
-                request->startKind = 0xA;
-                request->taskId = 0x2B;
-                btlStartTask(request);
-            }
-            scene->subFlags &= ~FLD_SCENE_COUNTERS_ENABLED_BIT;
-        }
-        return 8;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_001C48A8", btlAdvanceSceneWhenActorTasksReady);
 
 extern void fldClearSceneAdvanceFlag(void);
 extern s32 btlCanStartPrimaryScriptTask(void);
@@ -904,7 +793,7 @@ void btlSortSceneGroupByPriorityDesc(SceneTask **group, s32 entryCount) {
             SceneTask *first = pairCursor[0];
             SceneTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                func_001A29D0((s32)first->actor + 0x120, 3) < func_001A29D0((s32)second->actor + 0x120, 3)) {
+                func_001A29D0((s32)&first->actor->statBits, 3) < func_001A29D0((s32)&second->actor->statBits, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;
@@ -924,7 +813,7 @@ void fldSortGroupByPriority(SceneTask **group, s32 entryCount) {
             SceneTask *first = pairCursor[0];
             SceneTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                *(u8 *)((s32)first->actor + 0x11C) > *(u8 *)((s32)second->actor + 0x11C)) {
+                first->actor->lookupId > second->actor->lookupId) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;
@@ -1181,7 +1070,7 @@ extern void btlRemoveTaskFromSceneGroup(SceneTask *task);
 void fldUpdateSceneGroupTask(s32 taskValue) {
     SceneTask *task = (SceneTask *)taskValue;
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
-    UiObject *actor;
+    BtlUnit *actor;
     s32 kind;
 
     if ((task->flags & 0x40) == 0) {

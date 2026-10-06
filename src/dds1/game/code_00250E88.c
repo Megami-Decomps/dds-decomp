@@ -1,4 +1,6 @@
+#include "dsp_name.h"
 #include "mnu.h"
+#include "dat_state.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -58,10 +60,6 @@ typedef struct MnuProfileProgress {
     u32 cap;               /* 0x0C */
 } MnuProfileProgress;
 
-typedef struct DatGameCounters {
-    u8 pad00[0x3C];
-    s32 currency;
-} DatGameCounters;
 
 typedef struct MenuGridCell {
     u32 index;
@@ -125,9 +123,6 @@ typedef struct DspUnitName {
     u8 encodedText[17];
 } DspUnitName;
 
-typedef struct DspMantraName {
-    u8 encodedText[19];
-} DspMantraName;
 
 extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
@@ -178,7 +173,6 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
-extern u8 *datGameState;
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
@@ -190,7 +184,7 @@ s32 mnuCreateSceneWork(void) {
     mnuInitializeMantraSelectionGrid((s32)sceneWork);
     ((MenuSceneWork *)sceneWork)->coordinateA = 0;
     ((MenuSceneWork *)sceneWork)->coordinateB = 0;
-    ((MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1))->displayedCurrency = ((DatGameCounters *)datGameState)->currency;
+    ((MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1))->displayedCurrency = datGameState->header.currency;
     mnuCopySceneCoordinates((s32)sceneWork);
     return (s32)sceneWork;
 }
@@ -405,7 +399,7 @@ s32 func_00253830(void) {
         if (entry->profileFlag != 0) {
             return 0;
         }
-        ((DatGameCounters *)datGameState)->currency -= mnuGetMantraSourceValue(entry->sceneId);
+        datGameState->header.currency -= mnuGetMantraSourceValue(entry->sceneId);
         break;
     case 4:
         itfDspSignalA();
