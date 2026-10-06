@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "dat_state.h"
 #include "btl_state.h"
 #include "btl_command.h"
 #include "ee_mmi.h"
@@ -2001,7 +2002,73 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00215FF8);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_002162E0);
+extern u8 D_003BBB0E;
+extern u8 D_003BBB10;
+extern u8 D_003BBB58;
+extern DatPartyRecord D_00361DA0[5];
+extern s32 D_003625D8[5][24];
+extern u32 btlComputeSkillAdjustedMaxHp(s32);
+extern u32 btlComputeSkillAdjustedMaxMp(s32);
+extern void mdlFlagSet(u32);
+
+void func_002162E0(void) {
+    u32 i;
+    u32 n;
+
+    if (D_003BBB0E != 0) {
+        btlGetRuntime();
+        datGameState->partyCount = 5;
+        for (i = 0; i < datGameState->partyCount; i++) {
+            if (D_003BBB58 != 0) {
+                memcpy(&datGameState->party[i], &D_00361DA0[i],
+                       sizeof(DatPartyRecord));
+                for (n = 0; D_003625D8[i][n] >= 0; n++) {
+                    datGameState->party[i].effectData[n] = D_003625D8[i][n];
+                }
+                for (; n < 24; n++) {
+                    datGameState->party[i].effectData[n] = 0;
+                }
+                datGameState->party[i].pad20[0] = 0;
+            }
+            if (i < D_003BBB10) {
+                datGameState->party[i].flags |= 0x1002;
+            } else {
+                datGameState->party[i].flags =
+                    (datGameState->party[i].flags | 0x1000) & ~2;
+            }
+            datGameState->pad1294[i] = i;
+            datGameState->party[i].maxHp =
+                btlComputeSkillAdjustedMaxHp((s32)&datGameState->party[i]);
+            datGameState->party[i].maxMp =
+                btlComputeSkillAdjustedMaxMp((s32)&datGameState->party[i]);
+            if (datGameState->party[i].maxHp < datGameState->party[i].hp ||
+                D_003BBB58 != 0) {
+                datGameState->party[i].hp = datGameState->party[i].maxHp;
+            }
+            if (datGameState->party[i].maxMp < datGameState->party[i].mp ||
+                D_003BBB58 != 0) {
+                datGameState->party[i].mp = datGameState->party[i].maxMp;
+            }
+            datGameState->party[i].menuValue = 0xA1;
+        }
+        for (; i < 5; i++) {
+            memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
+        }
+        datGameState->inventory.counts[0] = 0;
+        for (i = 1; i < 192; i++) {
+            datGameState->inventory.counts[i] = 99;
+        }
+        mdlFlagSet(0x62);
+        mdlFlagSet(0x68);
+        mdlFlagSet(0x63);
+        mdlFlagSet(0x64);
+        mdlFlagSet(0x65);
+        mdlFlagSet(0x66);
+        mdlFlagSet(0x81B);
+        datGameState->world.slotFlags |= 0xC;
+        D_003BBB58 = 0;
+    }
+}
 
 /* Create the model-job semaphore and clear both lists for all eight groups. */
 void btlInitializeCommandSemaphoreSlots(void) {
