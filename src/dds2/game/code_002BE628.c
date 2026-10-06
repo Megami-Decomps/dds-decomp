@@ -130,13 +130,6 @@ typedef struct RangeEntry {
     u8 pad28[0x10];
 } RangeEntry;
 
-
-typedef struct AffinityRow {
-    s32 affinity[4];
-} AffinityRow;
-
-extern u32 datAffinityRecords;
-
 extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
 
 extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
@@ -1833,7 +1826,7 @@ u8 mnuIsAbilityValueMarked(u32 commandId) {
 }
 
 s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
-    s32 flags = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 flags = datAffinityRecords[(affinityId - DAT_AFFINITY_FIRST_COMMAND) & 0xFFFF].requirements[index];
 
     if (flags == -1) {
         return -1;
@@ -1872,7 +1865,7 @@ s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
 }
 
 s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index) {
-    s32 value = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 value = datAffinityRecords[(affinityId - DAT_AFFINITY_FIRST_COMMAND) & 0xFFFF].requirements[index];
 
     if (value == -1) {
         return 0;

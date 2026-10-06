@@ -2,6 +2,7 @@
 #define DAT_STATE_H
 
 #include "common.h"
+#include "dat_affinity.h"
 
 /* The first 0x30 bytes also form compact save metadata; GBWK retains the
  * runtime scene handle at +0x30. */

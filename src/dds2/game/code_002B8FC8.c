@@ -231,13 +231,6 @@ extern char D_003E75A8[];
 
 extern void sndSetSequenceVolumePan();
 
-typedef struct MenuSlot {
-    s32 resources[3];
-    u16 unused;
-    u16 flags;
-} MenuSlot;
-
-
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */
@@ -269,8 +262,6 @@ typedef struct MenuContext {
     u8 padAA4C[0x10];
     s32 resourceList;      /* 0xAA5C */
 } MenuContext;
-
-extern MenuSlot *datAffinityRecords;
 
 extern void mnuReleaseSpriteTextures(s32);
 

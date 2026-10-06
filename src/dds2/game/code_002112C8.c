@@ -1781,7 +1781,70 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00214C78);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00214DF8);
+extern void func_0035B6E0(const char *fmt, ...);
+extern u32 fldCountSceneSlots(void);
+extern s32 btlFindCommandPartnersByAffinity(BtlUnit *, s32, BtlUnit **, BtlUnit **);
+extern s32 func_00214C78(BtlUnit *, s32, BtlUnit **, BtlUnit **);
+extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, s32, s32);
+extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
+
+/* Whether unit can start combo command cmd with two partners, none of which may be
+ * blocked by action mask 0x10 or by func_001ABDE8 against the other two. */
+s32 func_00214DF8(BtlUnit *unit, s32 command) {
+    BtlUnit *members[3];
+    BtlState *state;
+    u32 i = 0;
+
+    memset(members, 0, sizeof(members));
+    state = (BtlState *)btlGetRuntime();
+    if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
+        if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) && !(datBattleSceneRecords[state->battleMode].flags & 1)) {
+            if (datCommandSelectors[command * 2 + 1] != 1) {
+                func_0035B6E0(D_00419C80);
+                return 0;
+            }
+            if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
+                func_0035B6E0(D_00419CB0);
+                return 0;
+            }
+            if (fldCountSceneSlots() < btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
+                func_0035B6E0(D_00419CD8);
+                return 0;
+            }
+            if (btlFindCommandPartnersByAffinity(unit, command, &members[1], &members[2]) != 0) {
+                members[0] = unit;
+                for (; i < 3; i++) {
+                    if (members[i] != NULL && btlUnitHasActionMask((s32)members[i], 0x10)) {
+                        return 0;
+                    }
+                }
+                for (i = 0; i < 3; i++) {
+                    if (members[i % 3] != NULL &&
+                        func_001ABDE8(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                        return 0;
+                    }
+                }
+                return 1;
+            }
+        } else if (func_00214C78(unit, command, &members[1], &members[2]) != 0) {
+            members[0] = unit;
+            for (i = 0; i < 3; i++) {
+                if (members[i] != NULL && btlUnitHasActionMask((s32)members[i], 0x10)) {
+                    return 0;
+                }
+            }
+            for (i = 0; i < 3; i++) {
+                if (members[i % 3] != NULL &&
+                    func_001ABDE8(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                    return 0;
+                }
+            }
+            return 1;
+        }
+    }
+    func_0035B6E0(D_00419D00);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00215118);
 
