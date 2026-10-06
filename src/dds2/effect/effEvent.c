@@ -341,12 +341,7 @@ s32 effGetSlotAt(EffArrHdr *table, s32 index) {
     return (s32)&((EffSegmentedBezierSlot *)table->slots)[index];
 }
 
-typedef struct GsSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct GsSurface *, void *);
-} GsSurface;
-
-extern GsSurface kwlnPositionedTextSurface;
+extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, s32);
@@ -371,7 +366,7 @@ void effDrawMarkerBoxAtPoint(f32 *position) {
     pixel[0] = x;
     pixel[1] = y;
     sdfAppendPacket(list, func_0011F250((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR));
-    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 /* Project a point and use color for both the marker's fill and border. */
@@ -391,7 +386,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     pixel[0] = x;
     pixel[1] = y;
     sdfAppendPacket(list, func_0011F250((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color));
-    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 extern void *func_0011F3D8(s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -423,7 +418,7 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     pixel[2] = x1;
     pixel[3] = y1;
     sdfAppendPacket(list, func_0011F3D8((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0));
-    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 /* Draw a GS line between two projected points, using color at both vertices. */
@@ -453,7 +448,7 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     pixel[2] = x1;
     pixel[3] = y1;
     sdfAppendPacket(list, func_0011F3D8((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0));
-    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 /* Submit the native command at biased screen coordinates; payload args stay opaque. */
@@ -461,7 +456,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     sdfInitPacketList(list);
     sdfAppendPacket(list, sdfCreateFormattedSifCommand(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, arg3));
-    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00196740);
@@ -478,7 +473,7 @@ void effSubmitSizedDrawPacket(s32 x, s32 y, s32 width, s32 height, s32 fillColor
     void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011F250(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor));
-    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 void effEnableRectangleBlur(void) {

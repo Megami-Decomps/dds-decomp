@@ -1,57 +1,36 @@
 #include "common.h"
+#include "mnu_result.h"
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BC58);
 
-typedef struct {
-    u8 pad0[6];
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-    u16 unkC;
-    u16 unkE;
-} TitleSeq;
 
-typedef struct TitleMenuWork {
-    u8 pad00[0x9C];
-    TitleSeq **sequence;      /* 0x009C */
-    u8 padA0[0xAE08];
-    s8 opacityReady;          /* 0xAEA8 */
-    u8 padAEA9[7];
-    s32 iconResource;         /* 0xAEB0 */
-    u32 opacity;              /* 0xAEB4 */
-    u8 padAEB8[0x828];
-    s32 fadeProgress;         /* 0xB6E0 */
-    u8 padB6E4[0x10];
-    s32 sequenceMode;         /* 0xB6F4 */
-} TitleMenuWork;
+extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
-extern void mnuRefreshSelectedUnitPanels(TitleSeq *, u8 *);
+extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 
-extern s32 btlAddBaseStats(u8 *, TitleSeq *);
-
-void mnuTitleApplySequenceState(u8 *work) {
-    s32 state = ((TitleMenuWork *)work)->sequenceMode;
-    TitleSeq *seq = *((TitleMenuWork *)work)->sequence;
+void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
+    s32 state = work->rewardMode;
+    DatPartyRecord *seq = work->selectedRewardRow->unit;
 
     switch (state) {
     case 5:
         break;
     case 4:
-        btlAddBaseStats(work + 0x3F4, seq);
+        btlAddBaseStats(work->statGains, seq);
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 1:
-        seq->unk6 = seq->unk8;
-        seq->unkA = seq->unkC;
-        seq->unkE = 0;
+        seq->hp = seq->maxHp;
+        seq->mp = seq->maxMp;
+        seq->status = 0;
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 2:
-        seq->unk6 = seq->unk8;
+        seq->hp = seq->maxHp;
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     case 3:
-        seq->unkA = seq->unkC;
+        seq->mp = seq->maxMp;
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
         break;
     }

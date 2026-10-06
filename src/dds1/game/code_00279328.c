@@ -28,7 +28,7 @@ extern void mnuStepPartyPanelListFromInput();
 extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
 extern void mnuClearListFlags();
-extern void mnuPlayInputSound(s32, u32, s32);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 
 typedef struct SkillListNode {
     s32 index;                   /* 0x00 */

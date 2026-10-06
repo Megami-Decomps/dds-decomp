@@ -50,7 +50,8 @@ typedef struct BtlUnit BtlUnit;
 /* Battle task link to a unit and task chain (0x170), shared by DDS1/2. */
 typedef struct BtlTask {
     s32 state;              /* +0x00 */
-    u8 pad04[4];
+    u16 actionNumber;       /* +0x04: "btl:actnum 0" guard and scene-slot repetitions. */
+    u8 pad06[2];
     u32 flags;               /* +0x08 */
     u8 unk_0C[0xC];
     BtlUnit *unit;           /* +0x18 */

@@ -15,32 +15,6 @@ typedef struct ItfMesSlot {
 
 extern ItfMesSlot itfWindowSlots[];
 
-/* Node of the pool at itfMesWork + 0x10 (0x14 bytes each). */
-typedef struct ItfMesPoolNode {
-    struct ItfMesPoolNode *previous; /* 0x0 */
-    struct ItfMesPoolNode *next;     /* 0x4 */
-    s32 index;                       /* 0x8 */
-    s32 stateAddress;                /* 0xC: retained message-window state */
-    s32 resourceHandle;              /* 0x10: window allocation handle */
-} ItfMesPoolNode;
-
-typedef struct ItfMesPool {
-    ItfMesPoolNode *activeHead; /* 0x0 */
-    ItfMesPoolNode *activeTail; /* 0x4 */
-    ItfMesPoolNode *firstFree;  /* 0x8 */
-    ItfMesPoolNode *lastFree;   /* 0xC */
-} ItfMesPool;
-
-/* Globals behind D_003D6EA0: word at +0x4, bitfield at +0xC. */
-typedef struct ItfMesGlobals {
-    u32 activeWindowCount; /* 0x0: incremented on creation, decremented on destruction */
-    u32 windowTexture;     /* 0x4: /itf/MESWIN.TMX resource */
-    u32 unk8; /* 0x8 */
-    u16 flags; /* 0xC: set/cleared by itfMesSetGlobalFlags */
-    u16 unkE; /* 0xE */
-    ItfMesPool pool; /* 0x10 */
-    ItfMesPoolNode nodes[0x40]; /* 0x20 */
-} ItfMesGlobals;
 
 extern ItfMesGlobals itfMesWork;
 
@@ -266,7 +240,7 @@ extern void frFontLoadTemporaryEntry(u32);
 
 extern ItfMesNode *itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub);
 
-extern u32 itfLoadTextureFromAsset(const char *path);
+extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
 
@@ -300,7 +274,7 @@ extern void func_0019DD48();
 
 extern s32 func_0019DBA8();
 
-extern UiSprite *func_001A1858(s32, u32);
+extern UiSprite *func_001A1858(s32 kind, u32 payload);
 
 extern void itfSetPanelLayoutAndNotify();
 
@@ -563,7 +537,7 @@ s32 itfMesScriptSetMessageRange(void) {
 }
 
 /* Return the loaded message-window texture resource, not a window index. */
-u32 itfMesGetGlobalWindowValue(void) {
+SdfTex *itfMesGetGlobalWindowValue(void) {
     return itfMesWork.windowTexture;
 }
 
@@ -686,7 +660,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     bounds[1] = 0x430;
     bounds[2] = 0x1200 + halfWidth;
     bounds[3] = 0x530 + rowsHeight;
-    panelBlock->panelHandle = (s32)func_001A1858(9, itfMesWork.windowTexture);
+    panelBlock->panelHandle = (s32)func_001A1858(9, (u32)itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(panelBlock->panelHandle, bounds[0], bounds[1], bounds[2], bounds[3], mes->renderValue);
     itfPanelUpdateValuesAndNotify(panelBlock->panelHandle, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;

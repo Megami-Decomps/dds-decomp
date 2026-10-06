@@ -107,6 +107,21 @@ all twelve consumer declarations now agree. The two provider units each
 check at 56 match, 0 differ, and narrowing the sole wide consumer declaration
 in DDS2 `code_00265AD8` leaves that unit at 21 match, 0 differ.
 
+The kernel task interface also distinguishes real `KwlnTask *` values from
+the native 32-bit words retained by game-side tracking slots. Task lookup
+takes `const char *`; the registration query returns `s32`, and user data
+is transported as `u32`. Decode tracked words at that SDK boundary and use
+real pointer callback parameters, not `s64` pointer/status temporaries.
+In DDS1 `code_001A1960`, six named-task registration guards match with
+nested positive tests for tracked-task presence, registration, and named
+task presence. An early registration-failure return differs at the
+branch-likely/delay pair even when the SDK result is correctly typed.
+The separate `btlGetTaskState6` forwarding query is not solved by this
+guard shape: three genuine 32-bit-result forms exceed its retail 0x40-byte
+body. It stays ASM with an honest parked candidate; a fabricated wide
+return is not an acceptable way to suppress the compiler's tail handling.
+
+
 ## Promoted channel arguments and byte storage
 
 Byte members do not establish a byte-parameter API. `kwlnFadeSetColor` takes
@@ -942,6 +957,48 @@ reads: drop it from the definition (`func_00108CB8`).
 member (`f(&work->dma)`); `lw $a0, 0x68($base)` loads a pointer member
 (`f(work->dma)`). An embedded array behind a header is a struct with the
 array as its last member (`EffectRingBlock`, `MapRequestRing`).
+
+## SDK packet words versus GS payload words
+
+SDF's packet allocator and cursor helpers transport EE addresses as 32-bit
+words. The DDS1 `code_002D33C8` / DDS2 `code_0032C278` providers return
+`s32` from `sdfAllocPacketAligned`; `sdfAppendPacket` takes
+`(SdfListHead *, u32)`. The corresponding `code_002DDC98` / `code_00336B48`
+constructors take a real `SdfDrawPacket *` in `sdfConsInitPacketHeader`,
+return `u32` from `sdfConsFinalizePacketHeader`, and return `s32` from
+`sdfConsMeasurePacketWithHeader`. Decode a transported address at the
+SDK buffer boundary, rather than changing these providers to invented
+pointer or 64-bit signatures.
+
+Packet-list owners passed between draw helpers are `SdfListHead *`, and
+texture-bound helpers take `SdfTex *`. These are not GS register values.
+Keep the actual GIF register list and GS A+D payload entries as `s64` /
+`u64`: narrowing the address interface must not narrow those packed
+hardware words. Both games' eleven interface emitters, border wrapper,
+panel renderers, and picture submission wrappers remained byte-exact with
+these distinctions.
+
+The interface sprite constructor is a different boundary: its optional
+argument is a kind-selected `u32` payload word, not a universally typed
+texture parameter. Texture callers encode their `SdfTex *` once when
+passing that word. The sprite's allocation descriptors remain genuine
+`SdfMemBlock *`, and its payload remains the generic `u32` buffer. Do not
+reinterpret an allocation descriptor as a texture or impose a second
+structure view merely because kinds 6--9 initialize the first payload word.
+
+The kernel's 98 draw surfaces are complete `SdfPoolNode` owners of size
+`0x20`, not unrelated module-specific callback prefixes. Both SDF providers
+initialize the next link, transported first/last packet-list words, and the
+native `void append(SdfListHead *, SdfListHead *)` / three-argument
+`s32 prepend` callbacks. The SDK itself accepts the owner through its common
+packet-list prefix at the call boundary; keep the full owner for array
+indexing and callback access. `D_003255A8` / `D_003805A8` are surface 83,
+`D_00325708` / `D_00380708` are surface 94, and
+`kwlnPositionedTextSurface` is surface 96. Submission has no status result:
+`itfBuildAndSubmitPanelPacket` returns `void`.
+The SDK's separate 16-byte float-key-pool node is `SdfKeyPoolNode`; its kind
+at `+0x0C` and allocation/free-chain logic are unrelated to draw surfaces.
+
 
 ## Calls with fewer arguments than the callee reads
 

@@ -267,7 +267,6 @@ void mnuClearCampResourceFlagEntries(void) {
     }
 }
 
-typedef struct MapPacket MapPacket;
 
 extern const CampMapArguments D_00424DE0;
 extern const CampEffectRows D_00424E10;
@@ -276,10 +275,10 @@ extern u64 sdfReadNamedResource();
 extern u32 effCreateMappedResource(u32);
 extern void sdfReleaseResourceAllocation();
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuSetCampEffectResourceHandles(u32, u32, u32 *);
-extern void mnuCopyCampEffectRowData(s32, s32);
+extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);
+extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 
-void func_00266460(u32 object, MapPacket *packet) {
+void func_00266460(u32 object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424DE0;
     CampEffectRows rows = D_00424E10;
     u32 dataAddress;
@@ -289,9 +288,9 @@ void func_00266460(u32 object, MapPacket *packet) {
     allocation = sdfReadNamedResource(D_00424E30, &dataAddress, 0);
     mappedResource = effCreateMappedResource(dataAddress);
     sdfReleaseResourceAllocation(allocation);
-    mnuInitializeMapPacket(1, mapArguments.values, 11, packet);
-    mnuSetCampEffectResourceHandles(object, mappedResource, (u32 *)packet);
-    mnuCopyCampEffectRowData((s32)&rows, (s32)packet);
+    mnuInitializeMapPacket(1, mapArguments.values, 11, &resources->packet);
+    mnuSetCampEffectResourceHandles(object, mappedResource, resources);
+    mnuCopyCampEffectRowData(&rows, resources);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D50);

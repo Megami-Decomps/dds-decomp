@@ -777,7 +777,7 @@ extern s32 fileConsumeConfigTaskReady(void);
 
 extern void mnuDestroyCampTasks(void);
 
-extern void mnuPlayInputSound();
+extern void mnuPlayInputSound(s32, s32, u32 *);
 
 /* Mapped cancel input closes camp only through the full guard chain.
  * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */

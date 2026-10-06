@@ -48,7 +48,7 @@ extern f32 D_003245EC[];
 
 
 
-extern u8 kwlnPositionedTextSurface[];
+extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern u8 kwlnPadMotorLevels[2];
 
@@ -68,7 +68,7 @@ extern void effMiscSeedRandom(void *data, u32 tag);
 extern s32 kwlnTextureViewerHandlePad(void);
 extern void func_00104B88(void *data, s32 handle);
 
-extern void kwlnTextureAttachTask(u8 *scene);
+extern void kwlnTextureAttachTask(SdfPoolNode *surface);
 
 extern void func_00105150(s32 arg0);
 
@@ -77,10 +77,10 @@ extern void func_00105890(void);
 extern void evtEnsureDrawVectorState(void);
 
 extern void sdfGraphSetDisplayMode(s32 arg0);
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
 extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
-extern void sdfAppendPacket();
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern u32 kwlnTaskGetTimer(void);
 extern s32 effMiscRandMod(s32, s32);
@@ -112,11 +112,7 @@ typedef struct KwlnPadState {
 } KwlnPadState;
 extern KwlnPadState sdfPadButtonStates;
 extern s32 func_00104A18(s32);
-typedef struct KwlnGraphicsSink {
-    u8 unknown[0x10];
-    void (*submit)(void *, void *);
-} KwlnGraphicsSink;
-extern KwlnGraphicsSink D_00325708;
+extern SdfPoolNode D_00325708;
 
 
 extern void sdfDevConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
@@ -330,7 +326,7 @@ s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32
 /* Append a cell rectangle; rowSpan also supplies the horizontal padding. */
 void kwlnDrawSpriteCell(u32 packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket(packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
+    sdfAppendPacket((SdfListHead *)packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
@@ -338,7 +334,7 @@ void kwlnDrawSpriteCell(u32 packetList, s32 column, s32 row, s32 columnCount, s3
 /* Append the same cell rectangle with caller-selected depth. */
 void kwlnDrawSpriteCellZ(u32 packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket(packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
+    sdfAppendPacket((SdfListHead *)packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
@@ -614,7 +610,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
-    func_00104B88(kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
+    func_00104B88(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
     return 0;
 }
 
@@ -735,11 +731,11 @@ void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
 }
 
 /* Build an allocation-map packet list and submit it through the surface callback. */
-void kwlnTextureAttachTask(u8 *surface) {
-    void *packetList = sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
+void kwlnTextureAttachTask(SdfPoolNode *surface) {
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
-    (*(void (**)(void *, void *))(surface + 0x10))(surface, packetList);
+    surface->append((SdfListHead *)surface, packetList);
 }
 
 /* Submit the default surface's map only when the control array's first byte is zero. */
@@ -747,7 +743,7 @@ s32 kwlnEnsureDefaultResource(void) {
     if (D_0032453B[0] != 0) {
         return 0;
     }
-    kwlnTextureAttachTask(kwlnPositionedTextSurface);
+    kwlnTextureAttachTask(&kwlnPositionedTextSurface);
     return 0;
 }
 
@@ -941,7 +937,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 s32 evtBuildFrameStatePacketList(s32 stateIndex) {
     s32 packetList = sdfCreateResetPacketList();
 
-    sdfAppendPacket(packetList, D_003C2620 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES);
+    sdfAppendPacket((SdfListHead *)packetList, (u32)(D_003C2620 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
     return packetList;
 }
 
@@ -1068,11 +1064,11 @@ void kwlnFadeUpdate(void) {
 /* Submit diagnostics when enabled and either counter is nonzero; only positive
  * counters produce text, so negative-only errors still submit an empty list. */
 void kwlnDrawBlurErrorCounters(void) {
-    void *packetList;
+    SdfListHead *packetList;
 
     if (D_003BA724 != 0) {
         if (kwlnDistanceBlurErrorCount != 0 || kwlnRippleBlurErrorCount != 0) {
-            packetList = sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
+            packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
             sdfInitPacketList(packetList);
             if (kwlnDistanceBlurErrorCount > 0) {
                 sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
@@ -1080,7 +1076,7 @@ void kwlnDrawBlurErrorCounters(void) {
             if (kwlnRippleBlurErrorCount > 0) {
                 sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
             }
-            D_00325708.submit(&D_00325708, packetList);
+            D_00325708.append((SdfListHead *)&D_00325708, packetList);
         }
     }
 }

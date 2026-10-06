@@ -8,6 +8,7 @@
 #include "sdf.h"
 #include "btl_action.h"
 #include "scr.h"
+#include "dat_state.h"
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x31];
@@ -31,21 +32,21 @@ extern const UiQuadColor D_00414D50;
 
 extern u32 D_004367F8;
 
-extern u32 D_004367CC;
+extern const char *D_004367CC;
 
 extern s32 dds3FindEntryIndex();
 
 extern s32 btlGetIndexedPartyEntryRecord(s32);
 
-extern s32 func_00101820(u32);
+extern KwlnTask *func_00101820(u32 priority);
 
-extern s8 D_003B4CF8[13];
+extern const char *D_003B4CF8[];
 
 extern u32 sndTestMessageResourceIndex;
 
-extern s32 sndTestMessageTexture;
+extern SdfTex *sndTestMessageTexture;
 
-extern s32 itfLoadTextureFromAsset(u32);
+extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern u64 D_004366E8;
 
@@ -65,25 +66,26 @@ extern s32 btlGetRuntime(void);
 
 extern BattleCmdPanel *btlCommandPanelWork;
 
-extern s32 datGameState;
 
-extern u32 btlMahenPanelTaskNameRef;
+extern const char *btlMahenPanelTaskNameRef;
 
-extern s64 kwlnTaskGetTaskByName();
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
-extern s64 kwlnTaskIsRegistered(s64);
+extern s32 kwlnTaskIsRegistered(KwlnTask *task);
 
-extern u32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delay);
+extern void func_00101968(KwlnTask *parent, KwlnTask *child);
 
-extern u32 btlAnalyzPanelTaskNameRef;
+extern const char *btlAnalyzPanelTaskNameRef;
 
-extern u32 D_004367E0;
+extern const char *D_004367E0;
 
-extern u32 D_004367D8;
+extern const char *D_004367D8;
 
-extern u32 D_004367C8;
+extern const char *D_004367C8;
 
-extern u32 D_004367C4;
+extern const char *D_004367C4;
 
 extern u32 D_00438F4C;
 
@@ -181,7 +183,7 @@ typedef struct BattleController {
     s32 adjustmentGroupIndex;  /* 0x298 */
     s32 adjustmentEntryIndex;  /* 0x29C */
     u8 pad_2A0[0x24];
-    s32 drawTask;
+    KwlnTask *drawTask;
     u8 pad2C8[0x14];
     BattleItemDrop itemDrops[3];
     s32 moneyEarned; /* 0x2E8 */
@@ -250,7 +252,6 @@ extern void mdlFlagClear(s32);
 
 extern char D_00415638[]; /* "btl:hunt mp rec[%d]\n" */
 
-extern u8 *datBattleSceneRecords;
 
 /* Native per-species AI record, shared layout with the action evaluator. */
 typedef struct AiSlot {
@@ -278,37 +279,18 @@ extern char D_004159A0[];
 
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
-typedef struct SndMessageNode {
-    struct SndMessageNode *previous;
-    struct SndMessageNode *next;
-    s32 message;
-    void *object;
-} SndMessageNode;
 
-typedef struct SoundQueue {
-    s32 unk00;
-    s32 allocation;
-    s32 unk08;
-    u16 drawFlags;
-    u16 unk0E;
-    SndMessageNode *head;
-    SndMessageNode *tail;
-} SoundQueue;
 
-extern SoundQueue itfMesWork;
+extern ItfMesGlobals itfMesWork;
 
 extern void itfMesDestroyWindow(s32 arg0);
 
-extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-extern s32 sndUpdateTestMsgTask(void);
+extern s32 sndUpdateTestMsgTask(KwlnTask *task);
 
-typedef struct SndDev {
-    u8 unk0[0x10];
-    void (*submitPacket)(void *, s32);
-} SndDev;
 
-extern SndDev D_003805A8;
+extern SdfPoolNode D_003805A8;
 
 extern u8 D_003B4D08[];
 
@@ -318,11 +300,11 @@ extern u8 D_003B4D28[];
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
-extern void sdfInitPacketList(s32 mem);
+extern void sdfInitPacketList(SdfListHead *list);
 
-extern void itfSendTablePacket(s32 arg0, s32 arg1, s32 arg2);
+extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
-extern void itfQueueTextureBoundQuadPacket(void *arg0, void *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 typedef struct UiPanelPlacement {
     UiSprite *frame;
@@ -412,15 +394,10 @@ extern SndPad D_0037F510;
 extern s32 func_001A6AB8();
 extern void itfResetBattleFadeState(s32, s32);
 
-typedef struct UiSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct UiSurface *, s32);
-    u8 pad14[0xC];
-} UiSurface;
 typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
-extern UiSurface kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 extern UiOwnerRef *D_003B4778[];
-extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, UiSurface *surface);
+extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
 extern void func_001A7798(UiSprite *sprite);
 
 /* Party/enemy entry; the HP/MP/status prefix is shared with DDS1. */
@@ -458,7 +435,7 @@ void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     UiPanelPlacement *place = &panel->place;
     s32 top;
     if (place->sprite == 0) {
-        place->sprite = func_001A1858(6, itfMesWork.allocation);
+        place->sprite = func_001A1858(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
             place->sprite->unk20 = panel->origin.tex->unk4 + func_0019DBA8(0, panel->origin.tex);
         }
@@ -476,7 +453,7 @@ void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
     if (origin->tex != 0 && !(panel->flags & 0x10000)) {
         if (place->frame == 0) {
             s32 width = origin->tex->unkC * 16;
-            place->frame = func_001A1858(7, itfMesWork.allocation);
+            place->frame = func_001A1858(7, (u32)itfMesWork.windowTexture);
             itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->unkC);
             itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
@@ -624,11 +601,14 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
 
-void itfUpdateBattleDisplayAndFadeIndicator(u32 arg0) {
-    itfMesUpdatePanelFades();
-    func_001A6350(arg0);
-    func_001A6528(arg0);
-    btlUpdateFadeIndicator(arg0);
+void itfMesUpdatePanelFades(UiPanel *panel);
+void btlUpdateFadeIndicator(UiPanel *panel);
+
+void itfUpdateBattleDisplayAndFadeIndicator(UiPanel *panel) {
+    itfMesUpdatePanelFades(panel);
+    func_001A6350(panel);
+    func_001A6528(panel);
+    btlUpdateFadeIndicator(panel);
 }
 
 void itfMesUpdatePanelFades(UiPanel *panel) {
@@ -781,8 +761,8 @@ void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6AB8);
 
 
-void btlUpdateFadeIndicator(u8 *obj) {
-    BtlFade *fade = (BtlFade *)(obj + 0x1D0);
+void btlUpdateFadeIndicator(UiPanel *panel) {
+    BtlFade *fade = &panel->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
         if (fade->timer > 0) {
@@ -821,7 +801,7 @@ void itfUpdateSoundSelectorPanel(UiPanel *panel) {
     SndSeqSelect *selection;
     s32 glyph;
 
-    itfMesWork.drawFlags &= ~2;
+    itfMesWork.flags &= ~2;
     itfMesRenderActivePanelSprites(panel);
     glyph = (s32)panel->origin.tex;
     if (!(flags & 0x10000) && glyph != 0) {
@@ -874,7 +854,7 @@ void itfMesRenderActivePanelSprites(UiPanel *panel) {
         if (panel->state != 3) {
             itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->index]);
         }
-        itfMesWork.drawFlags |= 2;
+        itfMesWork.flags |= 2;
         if (place->overlay != 0) {
             itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->index]);
         }
@@ -898,20 +878,20 @@ void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
     BtlFade *fade = &object->fade;
     s32 packet;
     s32 expansion;
-    UiSurface *surface;
+    SdfPoolNode *surface;
 
     bounds[0] = 0x1AA0;
     bounds[1] = 0xC60;
     bounds[2] = 0x1BD0;
     bounds[3] = 0xD58;
     packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
+    sdfInitPacketList((SdfListHead *)packet);
     D_003B4A08[3] = 0xFF;
     itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->unkC,
-                                  itfMesWork.allocation, 0, packet);
+                                  itfMesWork.windowTexture, 0, (SdfListHead *)packet);
     D_003B4A08[3] = fade->alpha;
     itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->unkC,
-                                  itfMesWork.allocation, 0, packet);
+                                  itfMesWork.windowTexture, 0, (SdfListHead *)packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
         bounds[0] -= expansion * 2;
@@ -919,28 +899,21 @@ void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
         bounds[2] += expansion * 2;
         bounds[3] += expansion;
         D_003B4A08[3] = fade->timer;
-        itfSendTablePacket(packet, 1, 0);
+        itfSendTablePacket((SdfListHead *)packet, 1, 0);
         itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->unkC,
-                                      itfMesWork.allocation, 0, packet);
-        itfSendTablePacket(packet, 0, 0);
+                                      itfMesWork.windowTexture, 0, (SdfListHead *)packet);
+        itfSendTablePacket((SdfListHead *)packet, 0, 0);
     }
     surface = &kwlnDrawSurfaces[object->index];
-    surface->submit(surface, packet);
+    surface->append((SdfListHead *)surface, (SdfListHead *)packet);
 }
 
-typedef struct SndQueueNode {
-    u32 unk0;
-    struct SndQueueNode *next;
-    u32 unk8;
-    u32 value;
-} SndQueueNode;
 
-extern SndQueueNode *D_00452950[];
 
 s32 sndVisitQueuedResources(void) {
-    SndQueueNode *node;
-    for (node = D_00452950[0]; node != 0; node = node->next) {
-        itfUpdateBattleDisplayAndFadeIndicator(node->value);
+    ItfMesPoolNode *node;
+    for (node = itfMesWork.pool.activeHead; node != 0; node = node->next) {
+        itfUpdateBattleDisplayAndFadeIndicator((UiPanel *)node->stateAddress);
     }
     return 0;
 }
@@ -948,22 +921,22 @@ s32 sndVisitQueuedResources(void) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A76C8);
 
 void sndFlushMessageQueue(void) {
-    SndMessageNode *node = itfMesWork.head;
+    ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     s32 message;
     while (node != 0) {
-        message = node->message;
+        message = node->index;
         node = node->next;
         itfMesDestroyWindow(message);
     }
-    sdfTexReleaseReferenceViaHandler(itfMesWork.allocation);
-    itfMesWork.allocation = 0;
+    sdfTexReleaseReferenceViaHandler(itfMesWork.windowTexture);
+    itfMesWork.windowTexture = NULL;
 }
 
-extern SndDev D_00380708;
+extern SdfPoolNode D_00380708;
 extern s32 D_003B4A18[];
 extern u8 D_00436630[5];
 extern u8 D_00436638[5];
-extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, s32);
+extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
 void func_001A7798(UiSprite *sprite) {
     s32 vertices[4][2] = {
@@ -975,9 +948,9 @@ void func_001A7798(UiSprite *sprite) {
     s32 packet;
 
     packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
-    itfEmitQuadListA(vertices, D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, packet);
-    D_00380708.submitPacket(&D_00380708, packet);
+    sdfInitPacketList((SdfListHead *)packet);
+    itfEmitQuadListA(vertices, D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, (SdfListHead *)packet);
+    D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)packet);
 }
 
 void itfAdjustPanelBoundsWithPad(UiPanelPlacement *object, s32 mode) {
@@ -1065,9 +1038,9 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-SndMessageNode *func_001A7A98(SndMessageNode *node) {
+ItfMesPoolNode *func_001A7A98(ItfMesPoolNode *node) {
     s32 index = 0;
-    s32 count = itfMesWork.unk00;
+    s32 count = itfMesWork.activeWindowCount;
 
     if (count <= 0) {
         return NULL;
@@ -1077,9 +1050,9 @@ SndMessageNode *func_001A7A98(SndMessageNode *node) {
             node = node->previous;
         }
         if (node == NULL) {
-            node = itfMesWork.tail;
+            node = itfMesWork.pool.activeTail;
         }
-        if (((UiPanel *)node->object)->place.sprite != NULL) {
+        if (((UiPanel *)node->stateAddress)->place.sprite != NULL) {
             break;
         }
         index++;
@@ -1092,7 +1065,7 @@ SndMessageNode *func_001A7A98(SndMessageNode *node) {
 }
 
 void itfQueueOffsetTexturedRect(s32 *bounds, s32 *region, s32 x, s32 y,
-                   s32 alpha, s32 texture, s32 command) {
+                   s32 alpha, SdfTex *texture, SdfListHead *command) {
     s32 positions[4];
     s32 uv[4];
     UiQuadColor color = D_00414D50;
@@ -1121,11 +1094,11 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A85E0);
 
 extern s32 D_00435CBC;
 
-extern s32 kwlnTaskCreate(s32 name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void itfPrintTestMessageCallback();
 
-extern s32 itfUpdateTestMessageResourceInput();
+extern s32 itfUpdateTestMessageResourceInput(KwlnTask *task);
 
 extern u8 D_003B4A28[];
 
@@ -1136,9 +1109,9 @@ extern void itfMesSetWindowCallbackAddress();
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(((ScrData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)))->resourceIndex, itfPrintTestMessageCallback);
-    kwlnTaskCreate((s32)"TestMsgMngC", 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
-    kwlnTaskCreate((s32)"TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
+    itfMesSetWindowCallbackAddress(((ScrData *)kwlnTaskGetUserValue((KwlnTask *)scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)))->resourceIndex, itfPrintTestMessageCallback);
+    kwlnTaskCreate("TestMsgMngC", 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
+    kwlnTaskCreate("TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
 
 void sndCycleTestMessageResource(void) {
@@ -1148,25 +1121,25 @@ void sndCycleTestMessageResource(void) {
     }
     sndTestMessageResourceIndex = (sndTestMessageResourceIndex + 1) & 3;
     if (sndTestMessageResourceIndex != 3) {
-        sndTestMessageTexture = itfLoadTextureFromAsset(*(u32 *)(D_003B4CF8 + sndTestMessageResourceIndex * 4));
+        sndTestMessageTexture = itfLoadTextureFromAsset(D_003B4CF8[sndTestMessageResourceIndex]);
     }
 }
 
-s32 itfUpdateTestMessageResourceInput(void) {
+s32 itfUpdateTestMessageResourceInput(KwlnTask *task) {
     if (D_0037F530[0] < 0) {
         sndCycleTestMessageResource();
     }
     return 0;
 }
 
-s32 sndUpdateTestMsgTask(void) {
+s32 sndUpdateTestMsgTask(KwlnTask *task) {
     s32 mem;
     if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
         mem = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(mem);
-        itfSendTablePacket(mem, 0, 0);
-        itfQueueTextureBoundQuadPacket(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
-        D_003805A8.submitPacket(&D_003805A8, mem);
+        sdfInitPacketList((SdfListHead *)mem);
+        itfSendTablePacket((SdfListHead *)mem, 0, 0);
+        itfQueueTextureBoundQuadPacket(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, (SdfListHead *)mem);
+        D_003805A8.append((SdfListHead *)&D_003805A8, (SdfListHead *)mem);
         return 0;
     }
     return 0;
@@ -1284,7 +1257,7 @@ extern s32 D_00438F3C;
 extern UiQuadColor D_003B4D80;
 extern f32 sdfSinPoly(f32);
 extern s32 sdfCreateResetPacketList(void);
-extern void sdfAppendPacket(s32, u64 *);
+extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern u64 *func_001A9580(s32, s32, s32, s32, s32, u32, u32);
 
 void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
@@ -1293,7 +1266,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     s32 i;
     u8 *component;
     s32 list;
-    UiSurface *surface;
+    SdfPoolNode *surface;
     f32 phase;
 
     phase = (f32)(D_00438F3C % 4096) * (1.0f / 4096.0f);
@@ -1305,11 +1278,11 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     }
     color |= alpha << 24;
     list = sdfCreateResetPacketList();
-    sdfAppendPacket(list, btlCreateGsTestRegisterPacket(0x33001, 0));
-    sdfAppendPacket(list, btlCreateGsAlphaRegisterPacket(6, 0));
-    sdfAppendPacket(list, func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    sdfAppendPacket((SdfListHead *)list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
+    sdfAppendPacket((SdfListHead *)list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
+    sdfAppendPacket((SdfListHead *)list, (u32)func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->submit(surface, list);
+    surface->append((SdfListHead *)surface, (SdfListHead *)list);
 }
 
 void btlResetRuntimeSequenceCounter(void) {
@@ -1364,7 +1337,7 @@ extern s32 func_001E9130(void);
 
 extern s32 btlExitWhenAudioAndTasksIdle(void);
 
-s32 btlUpdateActiveBattleFrame(void) {
+s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
     if (btlRuntime == 0) {
         return 0;
     }
@@ -1403,7 +1376,7 @@ extern s32 fldInitializeBattleSceneFlow(void);
 
 extern s32 btlClearDeferredTasks(void);
 
-s32 btlUpdateBattleFieldPresentation(void) {
+s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
     BattleController *battle = (BattleController *)btlRuntime;
     if (battle == 0) {
         return 0;
@@ -1421,27 +1394,27 @@ s32 btlUpdateBattleFieldPresentation(void) {
     return 0;
 }
 
-void func_001A9AA8(void) {
+void func_001A9AA8(KwlnTask *task) {
 }
 
 extern char D_004366F0[];
 
-extern void func_001A9AA8();
+extern void func_001A9AA8(KwlnTask *task);
 
-extern s32 btlUpdateBattleFieldPresentation();
+extern s32 btlUpdateBattleFieldPresentation(KwlnTask *task);
 
-extern s32 btlUpdateActiveBattleFrame();
+extern s32 btlUpdateActiveBattleFrame(KwlnTask *task);
 
 void btlCreateDrawTasks(void) {
     BattleController *battle = (BattleController *)btlRuntime;
-    s32 draw;
-    draw = kwlnTaskCreate((s32)D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A9AA8, 0);
+    KwlnTask *draw;
+    draw = kwlnTaskCreate(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A9AA8, 0);
     battle->drawTask = draw;
-    func_00101968(draw, kwlnTaskCreate((s32)"battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
+    func_00101968(draw, kwlnTaskCreate("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
-    s64 task;
+    KwlnTask *task;
 
     task = func_00101820(0x3f9);
     if (task != 0) {
@@ -1682,19 +1655,10 @@ s32 btlHasPendingRuntimeActivity(void) {
     return *(u32 *)(state + 0x718) != 0;
 }
 
-/* The persistent party record is 0x1C4 bytes, distinct from a battle actor. */
-typedef struct BtlPartyEntry {
-    u32 header; /* 0x00: the reset path clears the full packed state word. */
-    u16 displayId;
-    u16 currentHp;
-    u16 maxHp;
-    u16 pad0A;
-    u32 words[0x6E];
-} BtlPartyEntry;
 
 void btlResetActorEntryState(void) {
     s32 context = btlRuntime;
-    BtlPartyEntry *entries = (BtlPartyEntry *)(datGameState + 0xC18);
+    DatPartyRecord *party = datGameState->party;
     u32 i;
     *(s32 *)(context + 0x2E8) = 0;
     *(s32 *)(context + 0x2EC) = 0;
@@ -1703,8 +1667,7 @@ void btlResetActorEntryState(void) {
     *(s32 *)(context + 0x2F8) = 0;
     *(u16 *)(context + 0x2FC) = 0;
     for (i = 0; i < 5; i++) {
-        entries->header = 0;
-        entries++;
+        party[i].link = 0;
     }
     memset((void *)(btlRuntime + 0x2DC), 0, 12);
 }
@@ -1841,11 +1804,11 @@ s32 btlGetCurrentPartyEntryRecord(void) {
     s32 temp_v0;
 
     temp_v0 = dds3FindEntryIndex();
-    return datGameState + temp_v0 * 0x1c4 + 0xa60;
+    return (s32)&datGameState->party[temp_v0];
 }
 
 s32 btlGetIndexedPartyEntryRecord(s32 index) {
-    return datGameState + index * 0x1c4 + 0xa60;
+    return (s32)&datGameState->party[index];
 }
 
 void btlSyncPlayerWork(UiObject *actor) {
@@ -1956,9 +1919,9 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABA40);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABB10);
 
-s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObject *second,
+s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, UiObject *first, UiObject *second,
                   UiObject *third, s32 command) {
-    BtlPartyEntry snapshot = *base;
+    DatPartyRecord snapshot = *base;
     s32 totalMaxHp = 0;
     s32 count = 0;
     s32 average;
@@ -1977,7 +1940,7 @@ s32 btlGetCombinedPartyCommandPower(BtlPartyEntry *base, UiObject *first, UiObje
     }
     average = totalMaxHp / count;
     snapshot.maxHp = average;
-    snapshot.currentHp = average;
+    snapshot.hp = average;
     return btlApplyCommandAbilityMultiplier((s32)&snapshot, command);
 }
 
@@ -2429,7 +2392,7 @@ s32 btlCountAvailableUnits(void) {
 /* Count ready scene actors plus eligible party entries stored in script state. */
 s32 btlCountAvailableParticipants(void) {
     UiObject *unit;
-    u8 *entry;
+    DatPartyRecord *entry;
     s32 count = 0;
     s32 i;
     u32 flags;
@@ -2443,16 +2406,16 @@ s32 btlCountAvailableParticipants(void) {
             }
         }
     }
-    entry = (u8 *)(datGameState + 0xA60);
+    entry = datGameState->party;
     for (i = 4; i >= 0; i--) {
-        if (((BtlEntry *)entry)->flags & 1) {
-            if (!(((BtlEntry *)entry)->flags & 2)) {
-                if (!(((BtlEntry *)entry)->status & 0x4000)) {
+        if (entry->flags & 1) {
+            if (!(entry->flags & 2)) {
+                if (!(entry->status & 0x4000)) {
                     count++;
                 }
             }
         }
-        entry += 0x1C4;
+        entry++;
     }
     return count;
 }
@@ -3263,8 +3226,7 @@ f32 func_001B20C8(u8 *acquirer, u8 *enemy, s32 rewardKind) {
     s32 difference;
     f32 factor;
 
-    if (*(u16 *)(datBattleSceneRecords +
-                ((BtlState *)btlGetRuntime())->battleMode * 40 + 0x20) & 0x400) {
+    if (datBattleSceneRecords[((BtlState *)btlGetRuntime())->battleMode].flags & 0x400) {
         btlBossDebugPrintf("btl:ep hosei off\n");
         return 1.0f;
     }
@@ -3512,7 +3474,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2AF8);
 
 s32 btlIsSelectedActorStatusAndRecordClear(u8 *unit) {
     s32 work = btlGetRuntime();
-    if (*(s8 *)(datBattleSceneRecords + *(s32 *)(work + 0x2A0) * 40) != 0) {
+    if (datBattleSceneRecords[*(s32 *)(work + 0x2A0)].unk00 != 0) {
         return 0;
     }
     if (((UiObject *)unit)->statusFlags & 0x2A0F) {
@@ -4690,7 +4652,7 @@ void btlClearSharedBattleStateWords(void) {
     s32 temp_v0;
 
     temp_v0 = 3;
-    puVar1 = (u32 *)(datGameState + 0x16f00);
+    puVar1 = datGameState->battleFlags;
     do {
         temp_v0 = temp_v0 - 1;
         *puVar1 = 0;
@@ -4698,11 +4660,6 @@ void btlClearSharedBattleStateWords(void) {
     } while (-1 < temp_v0);
 }
 
-/* The reset routine clears all four words of the shared battle flag bank. */
-typedef struct BattleFlagSaveState {
-    u8 pad00000[0x16F00];
-    u32 sharedBattleFlags[4];
-} BattleFlagSaveState;
 
 s32 func_001B7940(s32 id, s32 operation) {
     s32 selector;
@@ -4722,13 +4679,13 @@ s32 func_001B7940(s32 id, s32 operation) {
     }
     switch (selector) {
     case 0:
-        ((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] |= 1 << bit;
+        datGameState->battleFlags[word] |= 1 << bit;
         break;
     case 1:
-        ((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] &= ~(1 << bit);
+        datGameState->battleFlags[word] &= ~(1 << bit);
         break;
     default:
-        return ((((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] & (1 << bit)) != 0);
+        return ((datGameState->battleFlags[word] & (1 << bit)) != 0);
     }
     return 1;
 }
@@ -4742,15 +4699,15 @@ void func_001B7A00(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7A38);
 
-extern u32 D_004367B8;
+extern const char *D_004367B8;
 
-s64 btlSetTaskPhase2(void) {
-    s64 task = kwlnTaskGetTaskByName(D_004367B8);
+s32 btlSetTaskPhase2(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_004367B8);
     if (task != 0) {
         *(s32 *)kwlnTaskGetUserValue(task) = 2;
         return 1;
     }
-    return task;
+    return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7B20);
@@ -4758,17 +4715,15 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7B20);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7BF0);
 
 u32 btlIsNamedBattleTaskRegistered(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(10);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(10);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -4776,7 +4731,7 @@ u32 btlIsNamedBattleTaskRegistered(void) {
 
 void func_001B7E08(void) {
     u8 *puVar1;
-    s64 temp_v0;
+    KwlnTask *temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
     if (temp_v0 != 0) {
@@ -4803,28 +4758,28 @@ extern u32 btlHasRegisteredGuidePanelTask(void);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern void btlSetTrackedTaskHandle(s32, s32);
-extern s32 func_001B9158(s32);
-extern void btlReleaseTaskAndRefreshCursorIfFlagged(s32);
+extern s32 func_001B9158(KwlnTask *task);
+extern void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *task);
 
 s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     BattleController *context = (BattleController *)btlGetRuntime();
     BtlAnalysisPanelWork *data;
-    s32 task;
+    KwlnTask *task;
 
     if (btlHasRegisteredAnalysisPanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(11), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(11), 0);
     }
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredAphNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
     data = sdfAllocAndClearQuadwords(sizeof(*data));
     data->state = 0;
@@ -4835,25 +4790,23 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->unk04 = entry;
     data->frame = 0;
     task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001B9158,
-                          btlReleaseTaskAndRefreshCursorIfFlagged, data);
+                          btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
     func_00101968(context->drawTask, task);
-    btlSetTrackedTaskHandle(11, task);
+    btlSetTrackedTaskHandle(11, (s32)task);
     context->flags &= ~0x100000;
     return 1;
 }
 
 u32 btlHasRegisteredAnalysisPanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(0xb);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(11);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -4868,7 +4821,7 @@ s32 btlGetRegisteredTaskValueOrDefault(void) {
 
 u32 func_001B8038(void) {
     u8 *puVar1;
-    s64 temp_v0;
+    KwlnTask *temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
     if (temp_v0 != 0) {
@@ -4887,8 +4840,8 @@ typedef struct BtlGuidePanelWork {
     s32 unk28;
 } BtlGuidePanelWork;
 
-extern s32 func_001BB5C0(s64);
-extern void btlReleaseMessageWindowTask(void);
+extern s32 func_001BB5C0(KwlnTask *task);
+extern void btlReleaseMessageWindowTask(KwlnTask *task);
 extern u32 btlHasRegisteredGuidePanelTask(void);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
@@ -4897,19 +4850,19 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     BattleController *context = (BattleController *)btlGetRuntime();
     BtlGuidePanelWork *data;
-    s32 task;
+    KwlnTask *task;
 
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredAphNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
     data = sdfAllocAndClearQuadwords(sizeof(*data));
     data->state = 0;
@@ -4918,15 +4871,15 @@ s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     data->unk24 = arg0;
     data->unk28 = arg1;
     task = kwlnTaskCreate(D_004367E0, 0x2B0E, 1, 1, func_001BB5C0,
-                          btlReleaseMessageWindowTask, data);
+                          btlReleaseMessageWindowTask, (u32)data);
     func_00101968(context->drawTask, task);
-    btlSetTrackedTaskHandle(9, task);
+    btlSetTrackedTaskHandle(9, (s32)task);
     return 1;
 }
 
 void func_001B81B0(void) {
     u8 *puVar1;
-    s64 temp_v0;
+    KwlnTask *temp_v0;
 
     temp_v0 = kwlnTaskGetTaskByName(D_004367E0);
     if (temp_v0 != 0) {
@@ -4936,30 +4889,28 @@ void func_001B81B0(void) {
 }
 
 u32 btlHasRegisteredGuidePanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(9);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_004367E0);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(9);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_004367E0);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
 }
 
-extern u32 btlCommandPanelTaskNameRef;
+extern const char *btlCommandPanelTaskNameRef;
 
 typedef struct BtlPhaseTask {
     s32 phase;
 } BtlPhaseTask;
 
 void btlSetTaskPhase5(void) {
-    s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (task != 0) {
         ((BtlPhaseTask *)kwlnTaskGetUserValue(task))->phase = 5;
         btlCommandPanelWork->state = 3;
@@ -4970,7 +4921,7 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
     s32 task = btlGetTrackedTaskHandle(7);
     s32 *state;
     if (task != 0) {
-        state = (s32 *)kwlnTaskGetUserValue(task);
+        state = (s32 *)kwlnTaskGetUserValue((KwlnTask *)task);
         state[2] = mode;
         if (mode == 0) {
             state[1] = 1;
@@ -4985,22 +4936,20 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
 
 void btlInvalidateSceneFadeCounts(void) {
     btlGetRuntime();
-    kwlnTaskGetUserValue(btlGetTrackedTaskHandle(7));
+    kwlnTaskGetUserValue((KwlnTask *)btlGetTrackedTaskHandle(7));
     btlTrackedTaskHandles->fadeKindsCached = 0;
 }
 
 u32 btlHasRegisteredPsechgPanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(6);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_004367D8);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(6);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_004367D8);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -5009,17 +4958,15 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8368);
 
 u32 btlHasRegisteredSkillNamePanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(1);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_004367C8);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(1);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_004367C8);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
@@ -5028,24 +4975,22 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8580);
 
 u32 btlHasRegisteredAphNamePanelTask(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = btlGetTrackedTaskHandle(0);
-    if (temp_v0 != 0) {
-        temp_v0 = kwlnTaskIsRegistered(temp_v0);
-        if (temp_v0 == 0) {
-            return 0;
-        }
-        temp_v0 = kwlnTaskGetTaskByName(D_004367C4);
-        if (temp_v0 != 0) {
-            return 1;
+    task = (KwlnTask *)btlGetTrackedTaskHandle(0);
+    if (task != 0) {
+        if (kwlnTaskIsRegistered(task) != 0) {
+            task = kwlnTaskGetTaskByName(D_004367C4);
+            if (task != 0) {
+                return 1;
+            }
         }
     }
     return 0;
 }
 
 typedef struct MsgQueueTaskData {
-    s32 task;
+    KwlnTask *task;
     s32 id;
     s32 unk08;
     s32 counter;
@@ -5058,13 +5003,13 @@ extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
 
 extern void *sdfAllocAndClearQuadwords(s32);
-extern s32 btlDrawTimedDialogTask(s64);
-extern void btlReleaseDialogTaskData(s32);
+extern s32 btlDrawTimedDialogTask(KwlnTask *task);
+extern void btlReleaseDialogTaskData(KwlnTask *task);
 extern s32 btlGetTrackedTaskHandle(s32);
 
 s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
-    s32 context = btlGetRuntime();
-    s32 task = btlGetTrackedTaskHandle(0);
+    BattleController *context = (BattleController *)btlGetRuntime();
+    KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
 
     if (btlHasRegisteredAphNamePanelTask() != 0) {
@@ -5072,22 +5017,22 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     }
     data = (MsgQueueTaskData *)sdfAllocAndClearQuadwords(0x40);
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
     data->id = arg0;
     data->unk08 = arg1;
     data->value = 0x2D;
-    task = kwlnTaskCreate((s32)D_004367C4, 0x2B0E, 1, 1, btlDrawTimedDialogTask,
-                          btlReleaseDialogTaskData, data);
-    func_00101968(*(s32 *)(context + 0x2C4), task);
+    task = kwlnTaskCreate(D_004367C4, 0x2B0E, 1, 1, btlDrawTimedDialogTask,
+                          btlReleaseDialogTaskData, (u32)data);
+    func_00101968(context->drawTask, task);
     data->task = task;
-    btlSetTrackedTaskHandle(0, task);
+    btlSetTrackedTaskHandle(0, (s32)task);
     return 1;
 }
 
@@ -5120,7 +5065,7 @@ typedef struct MesWindowSet {
     u16 active[9][2];
 } MesWindowSet;
 
-void itfMesCloseAllWindows(s32 handle) {
+void itfMesCloseAllWindows(KwlnTask *handle) {
     MesWindowSet *set;
     s32 i;
     btlGetRuntime();
@@ -5151,7 +5096,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B9158);
 
 extern void btlInitCursorAndApplyAction(s32, s32, s32);
 
-void btlReleaseTaskAndRefreshCursorIfFlagged(s32 handle) {
+void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *handle) {
     u8 *work = (u8 *)btlGetRuntime();
     u8 *actor;
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
@@ -5291,8 +5236,8 @@ u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delt
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB5C0);
 
-void btlReleaseMessageWindowTask(void) {
-    u8 *window = (u8 *)kwlnTaskGetUserValue();
+void btlReleaseMessageWindowTask(KwlnTask *task) {
+    u8 *window = (u8 *)kwlnTaskGetUserValue(task);
     itfMesCleanupWindow(*(s32 *)(window + 0x24), 0);
     sdfReleaseChipBlock(window);
     btlSetTrackedTaskHandle(9, 0);
@@ -5344,19 +5289,19 @@ s32 btlCountEligibleLinkedActors(u8 *scene) {
     return count;
 }
 
-extern s32 D_004367DC;
+extern const char *D_004367DC;
 
-extern void func_001BBA80();
+extern s32 func_001BBA80(KwlnTask *task);
 
-extern void btlReleaseRegisteredChildTaskWork();
+extern void btlReleaseRegisteredChildTaskWork(KwlnTask *task);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
 void btlStartRegisteredChildTask(void) {
-    u8 *work = (u8 *)btlGetRuntime();
-    s32 task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, sdfAllocAndClearQuadwords(0x20));
-    func_00101968(*(s32 *)(work + 0x2C4), task);
-    btlSetTrackedTaskHandle(7, task);
+    BattleController *work = (BattleController *)btlGetRuntime();
+    KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(0x20));
+    func_00101968(work->drawTask, task);
+    btlSetTrackedTaskHandle(7, (s32)task);
 }
 
 void func_001BBA60(s32 arg0) {
@@ -5368,8 +5313,8 @@ void func_001BBA60(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BBA80);
 
-void btlReleaseRegisteredChildTaskWork(void) {
-    sdfReleaseChipBlock(kwlnTaskGetUserValue());
+void btlReleaseRegisteredChildTaskWork(KwlnTask *task) {
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(7, 0);
 }
 
@@ -5521,8 +5466,8 @@ extern void func_001BC8A8();
 
 extern void func_001BCFB0();
 
-s32 btlUpdatePhaseGatedTaskUntilTimeout(void) {
-    BattlePhasePanelWork *state = (BattlePhasePanelWork *)kwlnTaskGetUserValue();
+s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
+    BattlePhasePanelWork *state = (BattlePhasePanelWork *)kwlnTaskGetUserValue(task);
     s32 frame;
     if ((u32)((btlGetNamedTaskPairStatusOrUnavailable() - 1) & 0xFF) < 2U) {
         return 0;
@@ -5540,8 +5485,8 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(void) {
     return frame < 0x32 ? 0 : -1;
 }
 
-void btlReleasePsechgPanelWork(void) {
-    sdfReleaseChipBlock(kwlnTaskGetUserValue());
+void btlReleasePsechgPanelWork(KwlnTask *task) {
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(6, 0);
 }
 
@@ -5568,8 +5513,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BE9E8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BEBD0);
 
-void btlReleaseCmsleffPanelWork(void) {
-    sdfReleaseChipBlock(kwlnTaskGetUserValue());
+void btlReleaseCmsleffPanelWork(KwlnTask *task) {
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(5, 0);
 }
 
@@ -5635,7 +5580,7 @@ void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *work) {
     }
 }
 
-void btlFreeRegisteredTaskData(s32 handle) {
+void btlFreeRegisteredTaskData(KwlnTask *handle) {
     btlGetRuntime();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     btlSetTrackedTaskHandle(1, 0);
@@ -5653,7 +5598,7 @@ void btlToggleModelFlagOnInput(void) {
     }
 }
 
-s32 btlDrawTimedDialogTask(s64 task) {
+s32 btlDrawTimedDialogTask(KwlnTask *task) {
     BattlePanelColors colors = D_004165C0;
     MsgQueueTaskData *data;
     s32 expired;
@@ -5696,7 +5641,7 @@ s32 btlDrawTimedDialogTask(s64 task) {
     return 0;
 }
 
-void btlReleaseDialogTaskData(s32 handle) {
+void btlReleaseDialogTaskData(KwlnTask *handle) {
     u8 *window;
     btlGetRuntime();
     window = (u8 *)kwlnTaskGetUserValue(handle);
@@ -5749,11 +5694,11 @@ void btlReleaseRegisteredTaskBuffer(void) {
 
 s32 func_001C0008(void) {
     s32 i;
-    s32 *flags;
+    u32 *flags;
     if (mdlFlagTest(0xb8f)) {
         return 0;
     }
-    flags = (s32 *)(datGameState + 0x16f00);
+    flags = datGameState->battleFlags;
     for (i = 0; i < 4; i++) {
         if (flags[i]) {
             return 0;
@@ -5781,14 +5726,9 @@ s32 func_001C0080(s32 arg0) {
     return count;
 }
 
-s64 btlGetTaskState6(void) {
-    s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-    if (task != 0) {
-        s32 *state = *(s32 **)(kwlnTaskGetUserValue(task) + 0x2C);
-        return func_001C0080(state[6]);
-    }
-    return task;
-}
+extern s32 btlGetTaskState6(void);
+
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlGetTaskState6);
 
 typedef struct FlagEntry {
     u32 unk0;
@@ -5799,9 +5739,9 @@ typedef struct FlagEntry {
 extern FlagEntry *fldGetCachedSceneActorNameAndId(s32, u16 *);
 extern s32 func_001B7940(s32, s32);
 
-s64 btlClearFlagEntries(void) {
+s32 btlClearFlagEntries(void) {
     u16 count;
-    s64 task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     FlagEntry *entries;
     s32 i;
     if (task != 0) {
@@ -5811,23 +5751,23 @@ s64 btlClearFlagEntries(void) {
         }
         return 1;
     }
-    return task;
+    return 0;
 }
 
-extern u32 D_004367EC;
+extern const char *D_004367EC;
 
 extern s32 dspCloseChannel(void);
 
-s64 btlDestroyTaskC(void) {
-    s64 result = kwlnTaskGetTaskByName(D_004367EC);
-    if (result != 0) {
+s32 btlDestroyTaskC(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_004367EC);
+    if (task != 0) {
         dspCloseChannel();
         if (btlGetTrackedTaskHandle(0xC) != 0) {
-            kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xC), 0);
+            kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0xC), 0);
         }
-        result = 1;
+        return 1;
     }
-    return result;
+    return 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416650);
@@ -5836,7 +5776,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0240);
 
 extern s32 evtFinishMessageWindowAndNotify();
 
-void btlFinishTrackedBattleTaskAndCloseWindow(s32 handle) {
+void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *handle) {
     u8 *work = (u8 *)btlGetRuntime();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     btlSetTrackedTaskHandle(0xC, 0);
@@ -5850,21 +5790,21 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0630);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0828);
 
-extern u32 D_004367F0;
+extern const char *D_004367F0;
 
-s64 btlDestroyTaskD(void) {
-    s64 result = kwlnTaskGetTaskByName(D_004367F0);
-    if (result != 0) {
+s32 btlDestroyTaskD(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_004367F0);
+    if (task != 0) {
         dspCloseChannel();
         if (btlGetTrackedTaskHandle(0xD) != 0) {
-            kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xD), 0);
+            kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0xD), 0);
         }
-        result = 1;
+        return 1;
     }
-    return result;
+    return 0;
 }
 
-void btlReleaseDialogTaskAndMarkBattleState(s32 handle) {
+void btlReleaseDialogTaskAndMarkBattleState(KwlnTask *handle) {
     BattleController *battle = (BattleController *)btlGetRuntime();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     btlSetTrackedTaskHandle(0xD, 0);
@@ -5927,8 +5867,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1A68);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
-void btlReleaseStwrPanelResource(void) {
-    sdfReleaseResourceAllocation(*(SdfMemBlock **)kwlnTaskGetUserValue());
+void btlReleaseStwrPanelResource(KwlnTask *task) {
+    sdfReleaseResourceAllocation(*(SdfMemBlock **)kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(3, 0);
 }
 

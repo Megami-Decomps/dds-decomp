@@ -8,6 +8,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff.h"
+#include "sdf.h"
 
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 
@@ -40,15 +41,9 @@ typedef struct EffGsPacket {
     u64 registerAddress;
 } EffGsPacket;
 
-/* Kernel surface entries have a 0x20-byte stride and submit at +0x10. */
-typedef struct EffDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct EffDrawSurface *, void *);
-    u8 pad14[0xC];
-} EffDrawSurface;
 
-static inline void effSubmitSurfacePacket(EffDrawSurface *surface, void *list) {
-    surface->submit(surface, list);
+static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
+    surface->append((SdfListHead *)surface, list);
 }
 
 extern void *sdfAllocPacketAligned(s32);
@@ -58,11 +53,11 @@ extern void sdfConsAppendVuPacket();
 extern void sdfConsAppendAssetPacket();
 extern void *func_00167A10(EffPacketParams *);
 extern u32 D_003E9D80[];
-extern EffDrawSurface *D_003E9DC0[];
-extern EffDrawSurface *D_003E9F38[];
+extern SdfPoolNode *D_003E9DC0[];
+extern SdfPoolNode *D_003E9F38[];
 extern u32 D_003E9BE0[];
-extern EffDrawSurface *D_003E9C28[];
-extern EffDrawSurface kwlnDrawSurfaces[];
+extern SdfPoolNode *D_003E9C28[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 
 typedef struct EffectStateSnapshot {
     s128 vectors[8];
@@ -4957,7 +4952,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, packet);
         }
-        D_003E9DC0[set->type]->submit(D_003E9DC0[set->type], list);
+        D_003E9DC0[set->type]->append((SdfListHead *)D_003E9DC0[set->type], list);
     }
 }
 
@@ -6597,7 +6592,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, packet);
         }
-        D_003E9F38[set->type]->submit(D_003E9F38[set->type], list);
+        D_003E9F38[set->type]->append((SdfListHead *)D_003E9F38[set->type], list);
     }
 }
 
@@ -11132,20 +11127,20 @@ u8 effHasFirstTextureHandle(s32 owner) {
 }
 
 /* Allocate and clear count 0x6C-byte records; retain the existing allocation/count/address header order. */
-u32 *effCreatePayload(u32 recordCount) {
+EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
-    u32 *payload = (u32 *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffPayload *payload = (EffPayload *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     u32 allocation = sdfAllocGeneralBlock(recordBytes);
-    payload[1] = recordCount;
-    payload[0] = allocation;
-    payload[2] = sdfResourceRetainAddress(allocation);
-    memset((void *)payload[2], 0, recordBytes);
+    payload->count = recordCount;
+    payload->allocation = allocation;
+    payload->records = (u8 *)sdfResourceRetainAddress(allocation);
+    memset(payload->records, 0, recordBytes);
     return payload;
 }
 
 /* Release the record allocation before freeing its small header. */
-u32 effDestroyPayload(u32 payload) {
-    sdfReleaseResourceAllocation(*(u32 *)payload);
+u32 effDestroyPayload(EffPayload *payload) {
+    sdfReleaseResourceAllocation(payload->allocation);
     sdfReleaseChipBlock(payload);
     return 1;
 }

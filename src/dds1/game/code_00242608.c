@@ -1,5 +1,5 @@
 #include "mnu.h"
-#include "mnu_list.h"
+#include "mnu_shop.h"
 #include "sdf.h"
 #include "evt_unit.h"
 #include "dat_state.h"
@@ -359,18 +359,14 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00242C30);
 
 extern s32 strcmp(const char *a, const char *b);
 
-typedef struct BufferDescriptor {
-    u8 pad00[0x10];
-    void (*open)(struct BufferDescriptor *, s32);
-} BufferDescriptor;
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(s32 packet);
-extern void itfSendTablePacket(u64 packet, s32 table, s32 mode);
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
+extern void sdfInitPacketList(SdfListHead *packet);
+extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern s32 D_00368BA8[4];
 extern s32 D_00368BB8[4];
 extern s32 D_00368BC8[4];
-extern BufferDescriptor D_003255A8;
+extern SdfPoolNode D_003255A8;
 
 typedef struct CampDisplayDefaults {
     s32 x;
@@ -562,7 +558,7 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     s32 halfWidth;
     s32 halfHeight;
     s32 variant;
-    s32 packet;
+    SdfListHead *packetList;
 
     D_00368BB8[2] = texture->width << 4;
     D_00368BB8[3] = texture->height << 4;
@@ -578,18 +574,18 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     D_00368BC8[3] = display->color[3];
     variant = display->variant;
     if (display->color[3] != 0) {
-        packet = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(packet);
+        packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(packetList);
         if (variant == 0) {
-            itfSendTablePacket(packet, 0, 0);
+            itfSendTablePacket(packetList, 0, 0);
         } else if (variant == 1) {
-            itfSendTablePacket(packet, 1, 0);
+            itfSendTablePacket(packetList, 1, 0);
         } else if (variant == 2) {
-            itfSendTablePacket(packet, 2, 0);
+            itfSendTablePacket(packetList, 2, 0);
         }
         itfQueueTextureBoundQuadPacket(D_00368BA8, D_00368BB8, D_00368BC8,
-                                      0xFF, (s32)texture, 0, packet);
-        D_003255A8.open(&D_003255A8, packet);
+                                      0xFF, texture, 0, packetList);
+        D_003255A8.append((SdfListHead *)&D_003255A8, packetList);
     }
 }
 
@@ -775,7 +771,7 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
 }
 
 
-extern BufferDescriptor D_00325708;
+extern SdfPoolNode D_00325708;
 extern u8 D_00325860[];
 extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
@@ -803,7 +799,7 @@ void func_00243BF0(CampScene *scene) {
     sdfCreatePatchableResourcePacket((void *)surface, (void *)context, 0, 0, 0x200, 0xE0,
                                     (void *)scene->descriptorResource, 0, 0, 0);
     sdfAppendPacketChainNode(D_00325860, (void *)context);
-    D_00325708.open(&D_00325708, surface);
+    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
 }
 
 void mnuShopSubmitDescriptor(CampScene *scene) {
@@ -812,7 +808,7 @@ void mnuShopSubmitDescriptor(CampScene *scene) {
     if (scene->descriptorResource != 0) {
         drawPacket = sdfAllocatePacketList(0);
         sdfCreateDescriptorPacket(drawPacket, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, scene->descriptorResource, 0);
-        D_00325708.open(&D_00325708, drawPacket);
+        D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)drawPacket);
     }
 }
 
@@ -915,27 +911,6 @@ void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
     scene->registeredCount = 0;
 }
 
-/* Allocated and cleared as 0xB4 bytes by mnuShopCreateScene. */
-typedef struct ShopScene {
-    s32 resourceHandle; /* 0x00 */
-    u8 pad04[0x58];
-    u8 resourcePair[4]; /* 0x5C */
-    s32 pairedHandle; /* 0x60 */
-    u32 spriteResource; /* 0x64 */
-    s32 batchState; /* 0x68 */
-    u8 *sprite; /* 0x6C */
-    s32 window; /* 0x70 */
-    u8 *batches[2]; /* 0x74, 0x78 */
-    s32 initialSelection; /* 0x7C */
-    s32 counter; /* 0x80: selected transaction quantity */
-    u8 pad84[8];
-    s32 count8C; /* 0x8C: mnuCountActivePartyEntries */
-    s16 extraOption; /* 0x90: adds the middle transaction option */
-    u8 pad92[6];
-    s32 count98; /* 0x98: func_00244848 */
-    u8 pad9C[0x17];
-    u8 atLimit; /* 0xB3: selected quantity has reached its bound */
-} ShopScene;
 
 typedef struct ShopBatchGraphics {
     u8 pad00[0x20];
@@ -1014,55 +989,35 @@ s32 mnuShopHasPendingFlag(void) {
     return found;
 }
 
-typedef struct ShopWindowListData {
-    u8 pad00[0x1C];
-    u8 *unk1C;
-    u8 pad20[0xC];
-    s32 (*callback)();
-    void *buffer;
-} ShopWindowListData;
-
-typedef struct ShopWindowContainer {
-    u8 pad00[0x14];
-    ShopWindowListData *list;
-} ShopWindowContainer;
-
-typedef struct ShopWindowBuffer {
-    u8 pad00[0xC];
-    u16 value;
-    u8 pad0E[2];
-} ShopWindowBuffer;
 
 
-struct MenuWindowContainer;
-struct MenuListNode;
 extern struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, s32 value);
-extern s32 func_0025E820();
+extern void func_0025E820();
 
-s32 func_002443F8(const void *unused, s32 count, ShopScene *settings) {
-    ShopWindowContainer *window;
-    ShopWindowBuffer *buffer;
+MenuWindowContainer *func_002443F8(const void *unused, s32 count, ShopScene *settings) {
+    MenuWindowContainer *window;
+    MnuShopListContext *buffer;
     s32 i;
 
     if (settings->extraOption != 0) {
         count++;
     }
-    window = (ShopWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x15);
+    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x15);
     mnuInitializeWindowEntryPlacement(0, window, 0, 8, 0xA);
     for (i = 0; i < count; i++) {
-        mnuAppendWindowListNode((struct MenuWindowContainer *)window, 0);
+        mnuAppendWindowListNode(window, 0);
     }
-    window->list->callback = func_0025E820;
+    window->list->drawCallback = func_0025E820;
     buffer = sdfAllocSizeClassBlock(0x10);
     memset(buffer, 0, 0x10);
-    window->list->buffer = buffer;
-    buffer->value = settings->extraOption;
-    return (s32)window;
+    window->list->context = buffer;
+    buffer->extraOption = settings->extraOption;
+    return window;
 }
 
 
 void func_002444D0(ShopScene *scene) {
-    scene->sprite = (u8 *)func_002443F8(D_00368C40, 3, scene);
+    scene->sprite = func_002443F8(D_00368C40, 3, scene);
 }
 
 typedef struct CampFlagRow {
@@ -1101,30 +1056,21 @@ s32 mnuCampFindActiveSlot(void) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244658);
 
-typedef struct ShopBuf {
-    u8 pad00[0x30];
-    void *buffer;    /* 0x30 */
-} ShopBuf;
 
-typedef struct ShopSprite {
-    u8 pad00[0x14];
-    ShopBuf *data;   /* 0x14 */
-} ShopSprite;
-
-extern void mnuDestroyWindowContainer();
+extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 extern void sdfReleaseChipBlock();
 
 void mnuShopReleaseSprites(ShopScene *scene) {
-    ShopSprite **slot = (ShopSprite **)&scene->sprite;
+    MenuWindowContainer **slot = &scene->sprite;
     u32 i;
 
     for (i = 0; i < 1; i++) {
-        ShopSprite *sprite = *slot;
+        MenuWindowContainer *sprite = *slot;
 
-        if (sprite->data->buffer != NULL) {
-            sdfReleaseChipBlock(sprite->data->buffer);
+        if (sprite->list->context != NULL) {
+            sdfReleaseChipBlock(sprite->list->context);
             sprite = *slot;
-            sprite->data->buffer = NULL;
+            sprite->list->context = NULL;
         }
         mnuDestroyWindowContainer(sprite);
         slot++;
@@ -1203,7 +1149,7 @@ ShopScene *mnuShopCreateScene(void) {
     obj = (ShopScene *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0xB4);
     obj->resourceHandle = handle;
-    mnuClearPanelTransitionState((u8 *)obj + 8);
+    mnuClearPanelTransitionState(obj->transitionWork);
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj->resourcePair);
@@ -1394,8 +1340,8 @@ s32 func_00244D10(s32 index, s32 halfPrice) {
 extern const s32 D_003BC3A8[];
 
 s32 mnuShopGetTransactionLimit(ShopScene *scene) {
-    ShopWindowContainer *window = (ShopWindowContainer *)scene->window;
-    CampWindowParams *parameters = (CampWindowParams *)(window->list->unk1C + 0x60);
+    MenuWindowContainer *window = scene->window;
+    CampWindowParams *parameters = &window->list->cursor->camp;
     s16 extraOption = scene->extraOption;
     s32 itemId = parameters->id;
     s32 price = parameters->price;
@@ -1409,9 +1355,9 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
 
     memcpy(operations, D_003BC3A8, sizeof(operations));
     if (extraOption != 0) {
-        operation = *(s32 *)((ShopWindowContainer *)scene->sprite)->list->unk1C + 1;
+        operation = scene->sprite->list->cursor->index + 1;
     } else {
-        operation = operations[*(s32 *)((ShopWindowContainer *)scene->sprite)->list->unk1C];
+        operation = operations[scene->sprite->list->cursor->index];
     }
     capacity = scene->count8C;
     switch (operation) {
@@ -1452,9 +1398,9 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
 
 s32 func_00244FA0(ShopScene *context) {
     DatGameState *globalState = datGameState;
-    ShopWindowContainer *itemObject = (ShopWindowContainer *)context->window;
-    ShopWindowListData *record = itemObject->list;
-    CampWindowParams *parameters = (CampWindowParams *)(record->unk1C + 0x60);
+    MenuWindowContainer *itemObject = context->window;
+    struct MenuList *record = itemObject->list;
+    CampWindowParams *parameters = &record->cursor->camp;
     s32 itemId = parameters->id;
     s32 divisor = parameters->price;
     s32 kind = parameters->mode;
@@ -1487,8 +1433,8 @@ s32 func_00244FA0(ShopScene *context) {
 void func_00245068(ShopScene *scene) {
     s32 index = 0;
     s32 capacity = scene->count8C;
-    struct MenuListNode *node = ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->first;
-    for (; index < ((struct MenuList *)((ShopWindowContainer *)scene->window)->list)->count; index++) {
+    struct MenuListNode *node = scene->window->list->first;
+    for (; index < scene->window->list->count; index++) {
         CampWindowParams *parameters = &node->camp;
         DatGameState *globalState = datGameState;
         s32 itemId = parameters->id;

@@ -164,12 +164,7 @@ extern void btlReleaseOwnedData(void);
 
 extern void *memset(void *, s32, u32);
 
-typedef struct BattleGraphicsCallback {
-    u8 unknown[0x10];
-    void (*invoke)(void *, void *);
-} BattleGraphicsCallback;
-
-extern BattleGraphicsCallback D_00380608;
+extern SdfPoolNode D_00380608;
 
 extern u8 D_00380860[];
 
@@ -352,12 +347,7 @@ extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, void *, u32);
 
 extern u8 D_00436EF8[];
 
-typedef struct BtlMenuDrawer {
-    u8 unk_00[0x10];
-    void (*draw)(struct BtlMenuDrawer *, s32);
-} BtlMenuDrawer;
-
-extern BtlMenuDrawer kwlnPositionedTextSurface;
+extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -1422,14 +1412,14 @@ void btlInitializeGraphicsRuntime(void) {
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xe0, runtime->resource, 0, 0, 0);
     sdfAppendPacketChainNode(D_00380860, context);
-    D_00380608.invoke(&D_00380608, surface);
+    D_00380608.append((SdfListHead *)&D_00380608, (SdfListHead *)surface);
 }
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     void *surface = sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(surface, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->resource, 0);
-    D_00380608.invoke(&D_00380608, surface);
+    D_00380608.append((SdfListHead *)&D_00380608, (SdfListHead *)surface);
     sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
@@ -1442,7 +1432,7 @@ void btlInitializeOverlayGraphics(void) {
     sdfClearLinkedPacketList(context);
     func_0032EB80(surface, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode(D_00380860, context);
-    D_00380608.invoke(&D_00380608, surface);
+    D_00380608.append((SdfListHead *)&D_00380608, (SdfListHead *)surface);
     btlRuntimeState.options |= 1;
 }
 
@@ -1869,7 +1859,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.draw(&kwlnPositionedTextSurface, (s32)indexPackets);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, mode, selectionState, rowTexts);
 }
 

@@ -4,6 +4,7 @@
 #include "dat_state.h"
 #include "btl_state.h"
 #include "btl_command.h"
+#include "sdf.h"
 #include "ee_mmi.h"
 #include "mdl.h"
 
@@ -1236,12 +1237,7 @@ void btlInitFadeColors(void) {
     btlRuntimeState.color20 = 0;
 }
 
-typedef struct BattleGraphicsCallback {
-    u8 unknown[0x10];
-    void (*invoke)(void *, void *);
-} BattleGraphicsCallback;
-
-extern BattleGraphicsCallback D_00325708;
+extern SdfPoolNode D_00325708;
 
 extern s32 sdfCreateResetPacketList(void);
 
@@ -1253,7 +1249,7 @@ s32 btlUpdateFadeIn(void) {
         btlRuntimeState.color18 += 0x10000000;
     }
     func_00212998(packets, btlRuntimeState.color14, btlRuntimeState.color1C, btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
-    D_00325708.invoke(&D_00325708, (void *)packets);
+    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)packets);
     if ((btlRuntimeState.color14 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color14 -= 0x08000000;
         btlRuntimeState.color1C -= 0x08000000;
@@ -1331,7 +1327,7 @@ void btlInitializeGraphicsRuntime(void) {
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
     sdfAppendPacketChainNode(D_00325860, context);
-    D_00325708.invoke(&D_00325708, surface);
+    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
 }
 
 extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
@@ -1343,7 +1339,7 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     void *surface = sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(surface, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->request, 0);
-    D_00325708.invoke(&D_00325708, surface);
+    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
     sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
     runtime->request = 0;
@@ -1358,7 +1354,7 @@ void btlInitializeOverlayGraphics(void) {
     sdfClearLinkedPacketList(context);
     func_002D5CD0(surface, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode(D_00325860, context);
-    D_00325708.invoke(&D_00325708, surface);
+    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
     btlRuntimeState.options |= 1;
 }
 
@@ -1787,12 +1783,7 @@ extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, void *, u32);
 
 extern u8 D_003BBAA8[];
 
-typedef struct BtlMenuDrawer {
-    u8 unk_00[0x10];
-    void (*draw)(struct BtlMenuDrawer *, s32);
-} BtlMenuDrawer;
-
-extern BtlMenuDrawer kwlnPositionedTextSurface;
+extern SdfPoolNode kwlnPositionedTextSurface;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
@@ -1823,7 +1814,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.draw(&kwlnPositionedTextSurface, (s32)indexPackets);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, mode, selectionState, rowTexts);
 }
 

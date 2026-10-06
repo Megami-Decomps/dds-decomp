@@ -185,22 +185,17 @@ extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 extern u8 *effCreateStatusBatch(s32 kind);
-typedef struct BufferDescriptor {
-    u8 pad00[0x10];
-    void (*open)(struct BufferDescriptor *, s32);
-    u8 pad14[0xC];
-} BufferDescriptor;
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(s32 packet);
-extern void itfSendTablePacket(void *packet, s32 table, s32 mode);
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
+extern void sdfInitPacketList(SdfListHead *packet);
+extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003C9988[4];
 extern s32 D_003C9998[4];
 extern s32 D_003C99A8[4];
-extern BufferDescriptor kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 effDestroyPackedBatch(s32);
 
 
@@ -651,9 +646,9 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     s32 halfWidth;
     s32 halfHeight;
     s32 variant;
-    s32 packet;
+    SdfListHead *packet;
     s32 surfaceIndex = 0x53;
-    BufferDescriptor *surface;
+    SdfPoolNode *surface;
 
     D_003C9998[2] = texture->width << 4;
     D_003C9998[3] = texture->height << 4;
@@ -669,14 +664,14 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     D_003C99A8[3] = display->color[3];
     variant = display->variant;
     if (display->color[3] != 0) {
-        packet = sdfAllocPacketAligned(0x20);
+        packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(packet);
         if (variant == 0) {
-            itfSendTablePacket((void *)packet, 0, 0);
+            itfSendTablePacket(packet, 0, 0);
         } else if (variant == 1) {
-            itfSendTablePacket((void *)packet, 1, 0);
+            itfSendTablePacket(packet, 1, 0);
         } else if (variant == 2) {
-            itfSendTablePacket((void *)packet, 2, 0);
+            itfSendTablePacket(packet, 2, 0);
         }
         if (display->unk1C != 0) {
             surfaceIndex = 0x3E;
@@ -684,13 +679,13 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
             evtSubmitPrimaryAlphaBlendMode(0);
             evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
             itfQueueTextureBoundQuadPacket(D_003C9988, D_003C9998, D_003C99A8,
-                                          0xFF, (s32)texture, 0, packet);
+                                          0xFF, texture, 0, packet);
         } else {
             itfQueueTextureBoundQuadPacket(D_003C9988, D_003C9998, D_003C99A8,
-                                          0xFF, (s32)texture, 0, packet);
+                                          0xFF, texture, 0, packet);
         }
         surface = &kwlnDrawSurfaces[surfaceIndex];
-        surface->open(surface, packet);
+        surface->append((SdfListHead *)surface, packet);
     }
 }
 
@@ -874,7 +869,7 @@ void mnuAdvanceShopMenuState(CampScene *scene) {
 }
 
 
-extern BufferDescriptor D_00380708;
+extern SdfPoolNode D_00380708;
 extern u8 D_00380860[];
 extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
@@ -901,7 +896,7 @@ void func_0025EFD8(CampScene *scene) {
     sdfCreatePatchableResourcePacket((void *)surface, (void *)context, 0, 0, 0x200, 0xE0,
                                     (void *)scene->descriptorHandle, 0, 0, 0);
     sdfAppendPacketChainNode(D_00380860, (void *)context);
-    D_00380708.open(&D_00380708, surface);
+    D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)surface);
 }
 
 void mnuShopSubmitDescriptor(u8 *scene) {
@@ -910,7 +905,7 @@ void mnuShopSubmitDescriptor(u8 *scene) {
     if (((CampScene *)scene)->descriptorHandle != 0) {
         drawPacket = sdfAllocatePacketList(0);
         sdfCreateDescriptorPacket(drawPacket, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, ((CampScene *)scene)->descriptorHandle, 0);
-        D_00380708.open(&D_00380708, drawPacket);
+        D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)drawPacket);
     }
 }
 
@@ -1083,7 +1078,6 @@ s32 mnuShopReleaseSceneObjects(u8 *scene) {
     return destroyResult;
 }
 
-typedef struct MapPacket MapPacket;
 
 extern const CampMapArguments D_00424A90;
 extern const CampEffectRows D_00424AC0;
@@ -1091,11 +1085,11 @@ extern const char D_00424AE0[];
 extern u64 sdfReadNamedResource();
 extern u32 effCreateMappedResource(u32);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuSetCampEffectResourceHandles(u32, u32, u32 *);
-extern void mnuCopyCampEffectRowData(s32, s32);
+extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);
+extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 extern void mnuOrEntryFlags(u32, u32 *);
 
-void func_0025F8B8(u32 object, MapPacket *packet) {
+void func_0025F8B8(u32 object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424A90;
     CampEffectRows rows = D_00424AC0;
     u32 dataAddress;
@@ -1105,20 +1099,15 @@ void func_0025F8B8(u32 object, MapPacket *packet) {
     allocation = sdfReadNamedResource(D_00424AE0, &dataAddress, 0);
     mappedResource = effCreateMappedResource(dataAddress);
     sdfReleaseResourceAllocation(allocation);
-    mnuInitializeMapPacket(2, mapArguments.values, 11, packet);
-    mnuSetCampEffectResourceHandles(object, mappedResource, (u32 *)packet);
-    mnuCopyCampEffectRowData((s32)&rows, (s32)packet);
-    mnuOrEntryFlags(7, (u32 *)packet);
+    mnuInitializeMapPacket(2, mapArguments.values, 11, &resources->packet);
+    mnuSetCampEffectResourceHandles(object, mappedResource, resources);
+    mnuCopyCampEffectRowData(&rows, resources);
+    mnuOrEntryFlags(7, &resources->packet.type);
 }
 
-/* The background-effect packet owns the packed animation created for it. */
-typedef struct MenuEffectResources {
-    u8 pad00[0x3C];
-    u32 animationHandle;
-} MenuEffectResources;
 
-void mnuShopDestroyNestedEffectBatch(s32 object) {
-    effDestroyPackedBatch(((MenuEffectResources *)object)->animationHandle);
+void mnuShopDestroyNestedEffectBatch(MenuEffectResources *resources) {
+    effDestroyPackedBatch(resources->animationHandle);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A00);
@@ -1185,7 +1174,9 @@ typedef struct ShopSceneCleanup {
     s32 mode;             /* 0x08 */
     u8 pad0C[0x5C];
     s32 handles[4];       /* 0x68 through 0x74 */
-    u8 pad78[0x300];
+    u8 pad78[0x198];
+    MenuEffectResources effectResources; /* 0x210 */
+    u8 pad270[0x108];
     s32 resourceHandle;   /* 0x378 */
 } ShopSceneCleanup;
 
@@ -1202,7 +1193,7 @@ void mnuShopReleaseWindowAndEffectResources(s32 scene) {
     switch (((ShopSceneCleanup *)scene)->mode) {
     case 1:
     case 3:
-        mnuShopDestroyNestedEffectBatch(scene + 0x210);
+        mnuShopDestroyNestedEffectBatch(&((ShopSceneCleanup *)scene)->effectResources);
         break;
     case 0:
     case 2:

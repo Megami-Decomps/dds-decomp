@@ -2,6 +2,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff.h"
+#include "sdf.h"
 
 extern void effResetSlotWork(u32, u32);
 
@@ -689,23 +690,23 @@ u8 effHasFirstTextureHandle(s32 set) {
 }
 
 /* Allocate and clear count 0x6C-byte records; retain the existing allocation/count/address header order. */
-u32 *effCreatePayload(u32 recordCount) {
+EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
-    u32 *header = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffPayload *header = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     u32 allocation = (u32)sdfAllocGeneralBlock(recordBytes);
-    u32 recordAddress;
+    u8 *records;
 
-    header[1] = recordCount;
-    header[0] = allocation;
-    recordAddress = sdfResourceRetainAddress(allocation);
-    header[2] = recordAddress;
-    memset((void *)recordAddress, 0, recordBytes);
+    header->count = recordCount;
+    header->allocation = allocation;
+    records = (u8 *)sdfResourceRetainAddress(allocation);
+    header->records = records;
+    memset(records, 0, recordBytes);
     return header;
 }
 
 /* Release the record allocation before freeing its small header. */
-u32 effDestroyPayload(u32 payload) {
-    sdfReleaseResourceAllocation(*(u32 *)payload);
+u32 effDestroyPayload(EffPayload *payload) {
+    sdfReleaseResourceAllocation(payload->allocation);
     sdfReleaseChipBlock(payload);
     return 1;
 }
@@ -976,13 +977,8 @@ void effSelectPresetByKind(u32 mode, u32 value) {
     }
 }
 
-typedef struct EffDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct EffDrawSurface *, void *);
-    u8 pad14[0xC];
-} EffDrawSurface;
 
-extern EffDrawSurface kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 typedef struct SdfTex SdfTex;
 typedef struct SdfDrawPacket SdfDrawPacket;
 
@@ -1003,14 +999,14 @@ typedef union EffSpriteColor {
     } channels;
 } EffSpriteColor;
 
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
@@ -1018,15 +1014,15 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flip,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
     u32 uv[4];
-    void *packet;
-    void *list;
+    s32 packet;
+    SdfListHead *list;
     u64 *dst;
     s32 x0;
     s32 y0;
     s32 x1;
     s32 y1;
     s32 temp;
-    EffDrawSurface *surface;
+    SdfPoolNode *surface;
 
     if (mode == 0) {
         sdfTexSetPrimaryBufferModeBits(texture, 0, 1);
@@ -1034,9 +1030,9 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
         sdfTexSetPrimaryBufferModeBits(texture, 1, 1);
     }
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
-    sdfConsInitPacketHeader(packet, 0x156, 5, 0x43431, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x156, 5, 0x43431, 1);
     /* The SDK size helper also skips the packet's two header quadwords. */
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     x0 = x + 0x7000;
     y0 = y + 0x7900;
     uv[0] = uvRect->u0 * 16;
@@ -1071,12 +1067,12 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
     dst[5] = z;
     dst[9] = z;
     effSelectPresetByKind(blendKind, surfaceId);
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsCreateDrawPacket((s32)list, (s32)texture, 0);
+    sdfConsCreateDrawPacket(list, texture, 0);
     sdfAppendPacket(list, packet);
     surface = &kwlnDrawSurfaces[surfaceId];
-    surface->submit(surface, list);
+    surface->append((SdfListHead *)surface, list);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 

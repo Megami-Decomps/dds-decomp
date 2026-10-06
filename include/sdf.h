@@ -197,6 +197,20 @@ typedef struct SdfListHead {
     u32 unk1C;
 } SdfListHead;
 
+/* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
+typedef struct SdfPoolNode {
+    struct SdfPoolNode *next; /* 0x00 */
+    u32 first;               /* 0x04 */
+    u32 last;                /* 0x08 */
+    u32 unkC;
+    void (*append)(SdfListHead *, SdfListHead *);      /* 0x10 */
+    s32 (*prepend)(SdfListHead *, s32, SdfListHead *); /* 0x14 */
+    u32 unk18;
+    u32 unk1C;
+} SdfPoolNode;
+
+typedef char SdfPoolNode_size_must_be_0x20[(sizeof(SdfPoolNode) == 0x20) ? 1 : -1];
+
 /* Four-doubleword DMA packet payload (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfPacket {
     u64 unk0;

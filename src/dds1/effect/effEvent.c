@@ -172,7 +172,7 @@ extern u8 D_003558D8[];
 extern u8 D_003558A8[];
 extern u8 D_00355948[];
 extern u8 D_00355970[];
-extern u8 kwlnPositionedTextSurface[];
+extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket();
@@ -327,7 +327,7 @@ void effDrawMarkerBoxAtPoint(f32 *position) {
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
-    u8 *scene;
+    SdfPoolNode *scene;
 
     sdfInitPacketList(list);
     VU0_LOAD_VF(vf10, position);
@@ -338,8 +338,8 @@ void effDrawMarkerBoxAtPoint(f32 *position) {
     pixel[0] = x;
     pixel[1] = y;
     sdfAppendPacket(list, func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR));
-    scene = kwlnPositionedTextSurface;
-    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+    scene = &kwlnPositionedTextSurface;
+    scene->append((SdfListHead *)scene, (SdfListHead *)list);
 }
 
 /* Project a point and use color for both the marker's fill and border. */
@@ -349,7 +349,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
-    u8 *scene;
+    SdfPoolNode *scene;
 
     sdfInitPacketList(list);
     VU0_LOAD_VF(vf10, position);
@@ -360,8 +360,8 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     pixel[0] = x;
     pixel[1] = y;
     sdfAppendPacket(list, func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color));
-    scene = kwlnPositionedTextSurface;
-    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+    scene = &kwlnPositionedTextSurface;
+    scene->append((SdfListHead *)scene, (SdfListHead *)list);
 }
 
 extern void *func_0011D570(s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -376,7 +376,7 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     s32 y0;
     s32 x1;
     s32 y1;
-    u8 *scene;
+    SdfPoolNode *scene;
 
     sdfInitPacketList(list);
     VU0_LOAD_VF(vf10, from);
@@ -394,8 +394,8 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     pixel[2] = x1;
     pixel[3] = y1;
     sdfAppendPacket(list, func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0));
-    scene = kwlnPositionedTextSurface;
-    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+    scene = &kwlnPositionedTextSurface;
+    scene->append((SdfListHead *)scene, (SdfListHead *)list);
 }
 
 /* Draw a GS line between two projected points, using color at both vertices. */
@@ -408,7 +408,7 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     s32 y0;
     s32 x1;
     s32 y1;
-    u8 *scene;
+    SdfPoolNode *scene;
 
     sdfInitPacketList(list);
     VU0_LOAD_VF(vf10, from);
@@ -426,19 +426,19 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     pixel[2] = x1;
     pixel[3] = y1;
     sdfAppendPacket(list, func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0));
-    scene = kwlnPositionedTextSurface;
-    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+    scene = &kwlnPositionedTextSurface;
+    scene->append((SdfListHead *)scene, (SdfListHead *)list);
 }
 
 /* Submit the native command at biased screen coordinates; payload args stay opaque. */
 void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *task = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
-    u8 *scene;
+    SdfPoolNode *scene;
 
     sdfInitPacketList(task);
     sdfAppendPacket(task, sdfCreateFormattedSifCommand((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, arg3));
-    scene = kwlnPositionedTextSurface;
-    (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
+    scene = &kwlnPositionedTextSurface;
+    scene->append((SdfListHead *)scene, (SdfListHead *)task);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018EB08);
@@ -452,12 +452,12 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_0018EED0);
  * scaling and the distinct shift/multiply forms used by the other draw paths. */
 void effSubmitSizedDrawPacket(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
     void *list = sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
-    u8 *scene;
+    SdfPoolNode *scene;
 
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011D3E8(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor));
-    scene = kwlnPositionedTextSurface;
-    (*(void (**)(void *, void *))(scene + 0x10))(scene, list);
+    scene = &kwlnPositionedTextSurface;
+    scene->append((SdfListHead *)scene, (SdfListHead *)list);
 }
 
 void effEnableRectangleBlur(void) {

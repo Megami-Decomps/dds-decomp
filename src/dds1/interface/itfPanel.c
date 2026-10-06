@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itf.h"
+#include "sdf.h"
 
 #define ITF_PANEL_PACKET_LIST_BYTES 0x20
 
@@ -61,20 +62,18 @@ void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 firstValue, s32 secondVa
     }
 }
 
-/* The packet owner's callback occupies its 0x10 dispatch slot. */
-typedef struct PanelPacketDispatch {
-    u8 pad00[0x10];
-    s32 (*handler)(s32 owner, s32 packet);
-} PanelPacketDispatch;
 
-/* Allocate/init a list, append GS state and panel packets, then return the
- * owner's submission result. Owner callback and allocation must be valid.
- * Keep DDS1's extra allocator argument and existing integer packet handles. */
-s32 itfBuildAndSubmitPanelPacket(UiSprite *panel, s32 packetOwner) {
-    s32 packetList = sdfAllocPacketAligned(ITF_PANEL_PACKET_LIST_BYTES, packetOwner);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void itfAppendGsPanelStatePacket(SdfListHead *);
+extern void itfPanelDispatchHandler(UiSprite *, SdfListHead *);
+
+/* Build the panel list and append it to the SDK draw-surface pool. */
+void itfBuildAndSubmitPanelPacket(UiSprite *panel, SdfPoolNode *packetOwner) {
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(ITF_PANEL_PACKET_LIST_BYTES);
 
     sdfInitPacketList(packetList);
     itfAppendGsPanelStatePacket(packetList);
     itfPanelDispatchHandler(panel, packetList);
-    return ((PanelPacketDispatch *)packetOwner)->handler(packetOwner, packetList);
+    packetOwner->append((SdfListHead *)packetOwner, packetList);
 }

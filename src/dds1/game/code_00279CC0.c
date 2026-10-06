@@ -1,12 +1,16 @@
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "dat_state.h"
+#include "eff.h"
+
+extern EffPayload *effCreatePayload(u32);
+extern u32 effDestroyPayload(EffPayload *);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 struct MenuListNode;
 extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 
-typedef struct MenuWindowContainer MenuWindowContainer;
 
 typedef struct MenuList MenuList;
 
@@ -39,7 +43,7 @@ extern void func_00272668(s32, s32, s32, s32, s32, s32);
 
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 
-extern void mnuPlayInputSound(s32, s32, s32);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
@@ -65,16 +69,6 @@ extern s32 kwlnTaskGetUserValue();
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
 
-#include "mnu_list.h"
-/* Window prefix shared with the drawable container in code_0027BF00. */
-struct MenuWindowContainer {
-    s32 id;
-    u32 flags;
-    s32 width;
-    s32 height;
-    u8 pad10[4];
-    MenuList *list; /* Its initial stateFlags word controls navigation sounds. */
-};
 
 /* Selected child window and page of the party skill-menu runtime. */
 typedef struct MenuPartyRuntime {
@@ -246,7 +240,7 @@ s32 mnuUpdateSkillListInput(s32 callback) {
             mnuAdvanceWindowListSelection(list[8 + menu[11]]);
         }
         mnuClearWindowPanelTransitionFlag(list[8 + menu[11]]);
-        mnuPlayInputSound(0, buttons, (s32)((MenuWindowContainer *)list[8 + menu[11]])->list);
+        mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
         if (buttons & 2) {
             mnuSetPopupEntryFlagged(popup, D_0037CC20);
             mnuActivatePanelAndConfigureGridResources(*(u32 **)(context + 0x138), *(s32 *)(context + 0x6C), 0, 1);
@@ -323,37 +317,26 @@ s32 func_0027AC00(s32 callback) {
     return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
 }
 
-typedef struct MenuEffectPayload {
-    u8 pad0[8];
-    u8 *data;
-} MenuEffectPayload;
-
-typedef struct MenuAssets {
-    u32 sprites[5];
-    u32 material;
-    MenuEffectPayload *layerA;
-    MenuEffectPayload *layerB;
-} MenuAssets;
 
 void mnuBindAssetEffectPayloads(MenuAssets *assets) {
     s32 packet;
-    MenuEffectPayload *first;
-    MenuEffectPayload *second;
+    EffPayload *first;
+    EffPayload *second;
 
-    first = (MenuEffectPayload *)effCreatePayload(2);
+    first = effCreatePayload(2);
     assets->layerA = first;
-    second = (MenuEffectPayload *)effCreatePayload(2);
-    packet = (s32)second->data;
+    second = effCreatePayload(2);
+    packet = (s32)second->records;
     assets->layerB = second;
     effSetSlotIndexedResource(packet + 0x28, assets->material, 0, 0xc);
-    effSetSlotIndexedResource((s32)assets->layerB->data + 0x94, assets->material, 1, 0xc);
-    effSetMaterialSlots(assets->sprites[4], 0, 0, (u32)assets->layerB->data);
-    effSetMaterialSlots(assets->sprites[4], 1, 0, (s32)assets->layerB->data + 0x6c);
-    effSetMaterialSlots(assets->sprites[4], 2, 0, (s32)assets->layerB->data + 0x6c);
-    effSetMaterialSlots(assets->sprites[4], 3, 0, (u32)assets->layerB->data);
-    effSetMaterialSlots(assets->sprites[4], 4, 0, (u32)assets->layerB->data);
-    effSetSlotIndexedResource((s32)assets->layerA->data + 0x28, assets->material, 2, 0xd);
-    effSetSlotOverrideWork(assets->sprites[1], 0, (u32)assets->layerA->data);
+    effSetSlotIndexedResource((s32)assets->layerB->records + 0x94, assets->material, 1, 0xc);
+    effSetMaterialSlots(assets->sprites[4], 0, 0, (u32)assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 1, 0, (s32)assets->layerB->records + 0x6c);
+    effSetMaterialSlots(assets->sprites[4], 2, 0, (s32)assets->layerB->records + 0x6c);
+    effSetMaterialSlots(assets->sprites[4], 3, 0, (u32)assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 4, 0, (u32)assets->layerB->records);
+    effSetSlotIndexedResource((s32)assets->layerA->records + 0x28, assets->material, 2, 0xd);
+    effSetSlotOverrideWork(assets->sprites[1], 0, (u32)assets->layerA->records);
     effConfigureIndexedSlotResource(assets->sprites[2], 0, assets->material, 3, 4);
     effConfigureIndexedSlotResource(assets->sprites[3], 0, assets->material, 4, 4);
 }

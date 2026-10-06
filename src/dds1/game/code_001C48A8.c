@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "btl_action.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
 
@@ -53,28 +54,6 @@ typedef struct SceneFadingRecord {
     s32 target;
 } SceneFadingRecord;
 
-/* Dispatch-list node, separate from the unit-data actor list. */
-typedef struct SceneLinkedNode {
-    u32 state;
-    u8 pad04[4];
-    u32 flags;
-    u8 pad0C[0xC];
-    BtlUnit *actor;
-    u8 pad1C[0x150];
-    struct SceneLinkedNode *next; /* 0x16C */
-} SceneLinkedNode;
-
-
-/* Actor-task prefix; the separate unit-data list uses BtlUnit. */
-typedef struct SceneTask {
-    s32 state;
-    u8 pad04[4];
-    u32 flags;
-    u8 pad0C[0xC];
-    BtlUnit *actor;
-    u8 pad1C[0x24];
-    u64 owner; /* 0x40: identifier used by task-owner queries */
-} SceneTask;
 
 /* Primary scene controller; loading and group scheduling share this record. */
 typedef struct BattleSceneWork {
@@ -90,7 +69,7 @@ typedef struct BattleSceneWork {
     u8 pad218[4];
     s32 scriptState;           /* 0x21C */
     s32 scriptArg;             /* 0x220 */
-    SceneLinkedNode *linkedNodes; /* 0x224 */
+    BtlTask *linkedNodes; /* 0x224 */
     BtlUnit *actors;
     u8 pad_22C[0x20];
     u16 variant;
@@ -111,12 +90,12 @@ typedef struct BattleSceneWork {
     u8 pad2B0[0x20];
     s32 unk2D0;
     SceneSlot slots[8];
-    SceneTask *groupPrimary[20];
-    SceneTask *groupSecondary[45];
-    SceneTask *groupTertiary[15];
-    SceneTask *groupHandles[8];
+    BtlTask *groupPrimary[20];
+    BtlTask *groupSecondary[45];
+    BtlTask *groupTertiary[15];
+    BtlTask *groupHandles[8];
     SceneFadingRecord fading[8]; /* 0x44C */
-    SceneTask *currentTask;
+    BtlTask *currentTask;
     u8 pad_490[0x108];
     s32 (*selectScriptArg)(void); /* 0x598 */
     u8 pad59C[0x14];
@@ -128,6 +107,7 @@ typedef struct BattleSceneWork {
 
 extern s32 btlCountTasksForOwner(s64);
 extern s64 btlStartTask(void *);
+extern s32 fldCreateSceneTileTask(u32 soundId, u32 variant);
 extern void btlDispatchStateHandler(void *, s32);
 
 extern void func_001BCB88(s32, s32);
@@ -191,8 +171,8 @@ s32 btlLoadBankWhenTasksIdle(void) {
 }
 
 void fldMarkGridTiles(u8 *context) {
-    SceneTask *node = (SceneTask *)fldCreateSceneTileTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A));
-    node->owner = 0x8000000000000001ULL;
+    BtlRuntimeTask *node = (BtlRuntimeTask *)fldCreateSceneTileTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A));
+    node->ownerId = 0x8000000000000001ULL;
     btlStartTask(node);
     btlStartTask(btlCreateFloorLoadTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A)));
 }
@@ -418,12 +398,12 @@ void func_001C5B90(BattleSceneWork *scene) {
         kwlnDrawControlFlags &= 0xDFFFFFFF;
         return;
     case 0xF000000: {
-        SceneTask *task = (SceneTask *)fldGetActiveSceneGroupValue();
+        BtlTask *task = (BtlTask *)fldGetActiveSceneGroupValue();
 
         if (task != NULL) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
-            if (task->actor->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) {
+            if (task->unit->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) {
                 btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
             } else {
                 btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
@@ -566,7 +546,7 @@ extern s32 brsTaskPollDone();
 
 /* Drive field loading or dispatch linked nodes to state 30; return 0xB while pending. */
 u32 fldStepAreaLoad(BattleSceneWork *work) {
-    SceneLinkedNode *node;
+    BtlTask *node;
     s32 step;
 
     if (func_002629A8() == 1) {
@@ -613,7 +593,7 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
 }
 
 void fldMarkLinkedSceneActors(s32 context) {
-    SceneLinkedNode *entry;
+    BtlTask *entry;
     btlAdvanceTitleStateWithAudioCleanup(context);
     entry = ((BattleSceneWork *)context)->linkedNodes;
     while (entry != 0) {
@@ -714,10 +694,10 @@ s32 *fldGetActorSceneGroupResource(s32 *task) {
     s32 scene = btlGetRuntime();
     s32 *groupEntries = (s32 *)((BattleSceneWork *)scene)->groupSecondary;
     u32 actorGroupBits;
-    if (((SceneTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
+    if (((BtlTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
         return (s32 *)((BattleSceneWork *)scene)->groupHandles;
     }
-    actorGroupBits = ((SceneTask *)task)->actor->flags & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = ((BtlTask *)task)->unit->flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT:
         groupEntries = (s32 *)((BattleSceneWork *)scene)->groupPrimary;
@@ -760,10 +740,10 @@ s32 fldGetSceneGroupResource(u8 groupId) {
 s32 fldClassifyActorSceneGroup(s32 *task) {
     u32 actorGroupBits;
     btlGetRuntime();
-    if (((SceneTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
+    if (((BtlTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
         return FLD_SCENE_HANDLE_TASK_COUNT;
     }
-    actorGroupBits = ((SceneTask *)task)->actor->flags & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = ((BtlTask *)task)->unit->flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT: return FLD_SCENE_PRIMARY_TASK_COUNT;
     case FLD_SCENE_ACTOR_SECONDARY_BIT: return FLD_SCENE_SECONDARY_TASK_COUNT;
@@ -773,17 +753,17 @@ s32 fldClassifyActorSceneGroup(s32 *task) {
 }
 
 /* Sort adjacent occupied tasks by descending accessor value; null slots stay put. */
-void btlSortSceneGroupByPriorityDesc(SceneTask **group, s32 entryCount) {
+void btlSortSceneGroupByPriorityDesc(BtlTask **group, s32 entryCount) {
     s32 swapped;
     do {
-        SceneTask **pairCursor = group;
+        BtlTask **pairCursor = group;
         u32 pairIndex = 0;
         swapped = 0;
         for (; pairIndex < entryCount - 1; pairIndex++, pairCursor++) {
-            SceneTask *first = pairCursor[0];
-            SceneTask *second = pairCursor[1];
+            BtlTask *first = pairCursor[0];
+            BtlTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                func_001A29D0((s32)&first->actor->statBits, 3) < func_001A29D0((s32)&second->actor->statBits, 3)) {
+                func_001A29D0((s32)&first->unit->statBits, 3) < func_001A29D0((s32)&second->unit->statBits, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;
@@ -793,17 +773,17 @@ void btlSortSceneGroupByPriorityDesc(SceneTask **group, s32 entryCount) {
 }
 
 /* Sort adjacent occupied tasks by ascending actor byte priority; null slots stay put. */
-void fldSortGroupByPriority(SceneTask **group, s32 entryCount) {
+void fldSortGroupByPriority(BtlTask **group, s32 entryCount) {
     s32 swapped;
     do {
-        SceneTask **pairCursor = group;
+        BtlTask **pairCursor = group;
         u32 pairIndex = 0;
         swapped = 0;
         for (; pairIndex < entryCount - 1; pairIndex++, pairCursor++) {
-            SceneTask *first = pairCursor[0];
-            SceneTask *second = pairCursor[1];
+            BtlTask *first = pairCursor[0];
+            BtlTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                first->actor->lookupId > second->actor->lookupId) {
+                first->unit->lookupId > second->unit->lookupId) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;
@@ -813,8 +793,8 @@ void fldSortGroupByPriority(SceneTask **group, s32 entryCount) {
 }
 
 /* Map an exact actor-group bit pattern to its group ID; combined bits return zero. */
-s32 fldGetSceneGroupIndexByActorFlags(u8 *task) {
-    u32 actorGroupBits = *(u32 *)(*(u8 **)(task + 0x18) + 0x110) & FLD_SCENE_ACTOR_GROUP_MASK;
+s32 fldGetSceneGroupIndexByActorFlags(BtlTask *task) {
+    u32 actorGroupBits = task->unit->flags & FLD_SCENE_ACTOR_GROUP_MASK;
     s32 groupId;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT:
@@ -999,8 +979,8 @@ void fldInitializeSceneGroups(void) {
 }
 
 /* Move a member behind its occupied successors; native membership/bounds are unchecked. */
-void btlMoveTaskToGroupTail(SceneTask *task) {
-    SceneTask **groupCursor = (SceneTask **)fldGetActorSceneGroupResource((s32 *)task);
+void btlMoveTaskToGroupTail(BtlTask *task) {
+    BtlTask **groupCursor = (BtlTask **)fldGetActorSceneGroupResource((s32 *)task);
     u32 groupCapacity = fldClassifyActorSceneGroup((s32 *)task);
     u32 lastIndex;
     u32 entryIndex;
@@ -1017,12 +997,12 @@ void btlMoveTaskToGroupTail(SceneTask *task) {
 }
 
 /* Sort, then rotate at most one primary-group capacity to put a bound task first. */
-void btlRotateGroupUntilTaskFirst(SceneTask *task) {
+void btlRotateGroupUntilTaskFirst(BtlTask *task) {
     BattleSceneWork *scene;
     u32 rotationCount;
 
-    if (task != 0 && (task->flags & FLD_SCENE_TASK_BOUND_BIT) != 0 && task->actor != 0 &&
-        (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) == 0 && (task->actor->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) != 0) {
+    if (task != 0 && (task->flags & FLD_SCENE_TASK_BOUND_BIT) != 0 && task->unit != 0 &&
+        (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) == 0 && (task->unit->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) != 0) {
         rotationCount = 0;
         scene = (BattleSceneWork *)btlGetRuntime();
         fldSortGroupByPriority(scene->groupPrimary, FLD_SCENE_PRIMARY_TASK_COUNT);
@@ -1034,9 +1014,9 @@ void btlRotateGroupUntilTaskFirst(SceneTask *task) {
 
 /* Append at the first empty entry, then restore the former head's ordering.
  * Retain the native capacity query and unchecked append scan. */
-void fldAppendTaskToGroup(SceneTask *task) {
-    SceneTask **groupCursor = (SceneTask **)fldGetActorSceneGroupResource((s32 *)task);
-    SceneTask *previousHead;
+void fldAppendTaskToGroup(BtlTask *task) {
+    BtlTask **groupCursor = (BtlTask **)fldGetActorSceneGroupResource((s32 *)task);
+    BtlTask *previousHead;
     fldClassifyActorSceneGroup((s32 *)task);
     previousHead = *groupCursor;
     while (*groupCursor != 0) {
@@ -1055,18 +1035,18 @@ void fldAppendSceneGroupHandle(s32 handle) {
     *handleCursor = handle;
 }
 
-extern void btlRemoveTaskFromSceneGroup(SceneTask *task);
+extern void btlRemoveTaskFromSceneGroup(BtlTask *task);
 
 void fldUpdateSceneGroupTask(s32 taskValue) {
-    SceneTask *task = (SceneTask *)taskValue;
+    BtlTask *task = (BtlTask *)taskValue;
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     BtlUnit *actor;
     s32 kind;
 
     if ((task->flags & 0x40) == 0) {
-        actor = task->actor;
+        actor = task->unit;
         kind = (actor->flags & 0x200) != 0 ? 1 : 2;
-        if (task == *(SceneTask **)fldGetActorSceneGroupResource((s32 *)task) &&
+        if (task == *(BtlTask **)fldGetActorSceneGroupResource((s32 *)task) &&
             scene->variant == kind) {
             scene->flags |= 8;
         }
@@ -1081,8 +1061,8 @@ void fldUpdateSceneGroupTask(s32 taskValue) {
 }
 
 /* Clear the matching member and move that hole to the last group entry. */
-void btlRemoveTaskFromSceneGroup(SceneTask *task) {
-    SceneTask **groupEntries = (SceneTask **)fldGetActorSceneGroupResource((s32 *)task);
+void btlRemoveTaskFromSceneGroup(BtlTask *task) {
+    BtlTask **groupEntries = (BtlTask **)fldGetActorSceneGroupResource((s32 *)task);
     u32 groupCapacity = fldClassifyActorSceneGroup((s32 *)task);
     u32 entryIndex = 0;
     u32 lastIndex;
@@ -1094,8 +1074,8 @@ void btlRemoveTaskFromSceneGroup(SceneTask *task) {
     }
     lastIndex = groupCapacity - 1;
     for (; entryIndex < lastIndex; entryIndex++) {
-        SceneTask *current = groupEntries[entryIndex];
-        SceneTask *next = groupEntries[entryIndex + 1];
+        BtlTask *current = groupEntries[entryIndex];
+        BtlTask *next = groupEntries[entryIndex + 1];
         groupEntries[entryIndex + 1] = current;
         groupEntries[entryIndex] = next;
     }
@@ -1147,7 +1127,7 @@ extern s32 func_001A8188(void);
 /* Advance one scene group task after both scene gates have opened. */
 void func_001C8330(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
-    SceneTask *task;
+    BtlTask *task;
 
     if ((scene->flags & 4) != 0) {
         if ((scene->flags & 8) != 0) {
@@ -1176,9 +1156,9 @@ void func_001C8330(void) {
             } else if (fldAreSceneSlotsFinished() != 0) {
                 scene->flags |= 0x400;
             } else {
-                task = *(SceneTask **)fldGetSceneGroupResource(scene->slots[0].group);
-                if (task == 0 || (task->actor->flags & 0xE0) != 0 || task->state != 2 ||
-                    (task->actor->flags & 0x30400000) != 0) {
+                task = *(BtlTask **)fldGetSceneGroupResource(scene->slots[0].group);
+                if (task == 0 || (task->unit->flags & 0xE0) != 0 || task->state != 2 ||
+                    (task->unit->flags & 0x30400000) != 0) {
                     return;
                 }
                 scene->currentTask = task;

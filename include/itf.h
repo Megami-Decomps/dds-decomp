@@ -37,6 +37,36 @@ typedef struct UiSprite {
     u8 pad3D[3];
 } UiSprite;
 
+/* The message manager owns a fixed pool of 64 windows in this 0x520-byte bank. */
+typedef struct ItfMesPoolNode {
+    struct ItfMesPoolNode *previous;
+    struct ItfMesPoolNode *next;
+    s32 index;
+    s32 stateAddress;
+    s32 resourceHandle;
+} ItfMesPoolNode;
+
+typedef struct ItfMesPool {
+    ItfMesPoolNode *activeHead;
+    ItfMesPoolNode *activeTail;
+    ItfMesPoolNode *firstFree;
+    ItfMesPoolNode *lastFree;
+} ItfMesPool;
+
+typedef struct ItfMesGlobals {
+    u32 activeWindowCount;
+    SdfTex *windowTexture;
+    u32 unk8;
+    u16 flags;
+    u16 unkE;
+    ItfMesPool pool;
+    ItfMesPoolNode nodes[0x40];
+} ItfMesGlobals;
+
+typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(ItfMesPoolNode) == 0x14) ? 1 : -1];
+typedef char ItfMesPool_size_must_be_0x10[(sizeof(ItfMesPool) == 0x10) ? 1 : -1];
+typedef char ItfMesGlobals_size_must_be_0x520[(sizeof(ItfMesGlobals) == 0x520) ? 1 : -1];
+
 /* Camera color effects use the same float and packed-color fields in both games. */
 typedef struct RgbAlpha {
     u8 pad00[0x18];

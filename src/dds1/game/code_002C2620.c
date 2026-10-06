@@ -320,13 +320,8 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 }
 
 
-typedef struct LmapDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct LmapDrawSurface *, void *); /* 0x10 */
-    u8 pad14[0xC];
-} LmapDrawSurface; /* 0x20 */
 
-extern LmapDrawSurface kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
@@ -337,25 +332,25 @@ extern void *func_0011D3E8();
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surfaceIndex) {
     void *packetList = sdfAllocPacketAligned(0x20);
-    LmapDrawSurface *drawSurface;
+    SdfPoolNode *drawSurface;
     u8 packetHeader[0x10];
 
     sdfInitPacketList(packetList);
     sdfPktInit(packetHeader, x + 0x7000, y + 0x7900, width, height);
     sdfAppendPacket(packetList, sdfFormatSifPacket(packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
-    drawSurface->submit(drawSurface, packetList);
+    drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
     void *packetList = sdfAllocPacketAligned(0x20);
-    LmapDrawSurface *drawSurface;
+    SdfPoolNode *drawSurface;
 
     sdfInitPacketList(packetList);
     sdfAppendPacket(packetList, func_0011D3E8(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
-    drawSurface->submit(drawSurface, packetList);
+    drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
 
 s32 fldLmapTaskUpdate(void) {

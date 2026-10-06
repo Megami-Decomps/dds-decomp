@@ -54,6 +54,47 @@ typedef struct CampEffectRows {
     u32 values[2][4];
 } CampEffectRows;
 
+/* The backdrop packet's complete resource payload, also used by shop callbacks. */
+typedef struct MapPacket {
+    u32 type;
+    u32 value;
+    u32 sheets[1]; /* The resource destructor iterates this one-sheet bank. */
+    u32 items[11];
+    s32 count;
+} MapPacket;
+
+typedef struct MenuEffectResources {
+    MapPacket packet;
+    u32 animationHandle;
+    CampEffectRows rows;
+} MenuEffectResources;
+
+/* DDS2 result/camp backdrop: resources, sixteen sparks and the badge fade. */
+typedef struct MenuCampEffect {
+    MenuEffectResources resources;
+    s32 direction[16];
+    s32 velocity[16][2];
+    s32 life[16];
+    s32 count;
+    s32 fade;
+} MenuCampEffect;
+
+typedef char MapPacket_size_must_be_0x3C[(sizeof(MapPacket) == 0x3C) ? 1 : -1];
+typedef char MenuEffectResources_size_must_be_0x60[(sizeof(MenuEffectResources) == 0x60) ? 1 : -1];
+typedef char MenuCampEffect_size_must_be_0x168[(sizeof(MenuCampEffect) == 0x168) ? 1 : -1];
+
+struct EffPayload;
+
+/* DDS1's complete two-layer backdrop asset set. */
+typedef struct MenuAssets {
+    u32 sprites[5];
+    u32 material;
+    struct EffPayload *layerA;
+    struct EffPayload *layerB;
+} MenuAssets;
+
+typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1];
+
 /* The occupied-party display and its five native 0x34-byte entries. */
 typedef struct PartyPanelEntry {
     s32 unk0;
@@ -72,7 +113,8 @@ typedef struct PartyPanel {
 struct DatPartyRecord;
 
 typedef struct BrsProgressRow {
-    u8 pad00[8];
+    s32 flags;
+    s32 amount;
     struct DatPartyRecord *unit; /* 0x08: profile record for the row. */
     u32 levelProgress[4];
     u32 profileProgress[4];

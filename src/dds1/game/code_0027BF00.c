@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_shop.h"
 struct MenuListNode;
 
 #define MNU_ENTRY_SPRITE_COUNT 4
@@ -25,11 +26,9 @@ struct MenuListNode;
 #define MNU_FADING_MUTATION_THRESHOLD 5
 #define MNU_FADING_WORD_STEP 0x40
 
-typedef struct MenuWindowContainer MenuWindowContainer;
 
 typedef struct MenuList MenuList;
 
-typedef struct MenuPanelHandles MenuPanelHandles;
 
 extern void func_0027CA90();
 
@@ -110,7 +109,7 @@ extern u32 mnuCreateFadeSpriteResourceSet(u32);
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
-extern u32 mnuCreateWindowState(u32, u32, u32, u32);
+extern struct MenuWindowSpriteGroup *mnuCreateWindowState(u32, u32, u32, u32);
 
 extern s32 func_0027B888(u32);
 
@@ -253,18 +252,6 @@ typedef struct MenuPanelSprite {
     MenuPanelSpriteState *state;
 } MenuPanelSprite;
 
-/* The 0x38-byte panel is embedded at window +0x4C and copied as one layout. */
-struct MenuPanelHandles {
-    u32 mode;
-    u8 pad04[4];
-    s32 count;
-    MenuPanelSprite *handles[6];
-    u32 left;
-    u32 top;
-    u32 right;
-    u32 bottom;
-    s32 transition;
-};
 
 typedef struct MenuPanelPosition {
     s32 x;
@@ -283,30 +270,6 @@ extern MenuPanelPositionTable4 D_003B2380;
 
 extern MenuPanelPositionTable2 D_003B23A0;
 
-/* One 0x8c-byte drawable window owns a list and its panel sprite handles. */
-struct MenuWindowContainer {
-    s32 id;             /* 0x00 */
-    u32 flags;          /* 0x04 */
-    s32 width;          /* 0x08 */
-    s32 height;         /* 0x0c */
-    u8 pad10[4];
-    MenuList *list;     /* 0x14: owned list state */
-    s32 entryValue;      /* 0x18 */
-    s32 entryX;          /* 0x1C */
-    s32 entryY;          /* 0x20 */
-    s32 alternateEntryY; /* 0x24: entryY + 3 */
-    s32 entryOption;     /* 0x28 */
-    s32 x;              /* 0x2c */
-    s32 y;              /* 0x30 */
-    u32 sprite;         /* 0x34 */
-    u32 effect;         /* 0x38 */
-    u32 overlaySprite;  /* 0x3c */
-    u32 overlayColor;   /* 0x40 */
-    u8 pad44[8];
-    MenuPanelHandles panel; /* 0x4C: embedded drawable panel layout */
-    s32 textures;       /* 0x84 */
-    s32 fade;           /* 0x88 */
-};
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
 s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
@@ -323,7 +286,7 @@ s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s3
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
 void mnuDestroyWindowContainer(MenuWindowContainer *window) {
-    s32 textures;
+    struct MenuWindowSpriteGroup *textures;
 
     mnuDestroyListState(window->list);
     textures = window->textures;
@@ -383,7 +346,7 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
 
 void mnuAttachWindowTextureState(MenuWindowContainer *panel, u32 source, u32 mode, u32 variant,
                                     u32 option) {
-    u32 textures;
+    struct MenuWindowSpriteGroup *textures;
 
     textures = mnuCreateWindowState(source, mode, variant, option);
     panel->textures = textures;
@@ -497,6 +460,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
 void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg) {
     s32 fadeScale = menu->fade;
     s32 value;
+    struct MenuWindowSpriteGroup *textures;
 
     menu->list->scale = fadeScale;
     func_0027CA90();
@@ -506,9 +470,9 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     }
     func_0027C140(x, y, depth, menu->width, menu->height, fadeScale, menu->flags,
                   menu->list, drawArg);
-    value = menu->textures;
-    if (value != 0) {
-        mnuDrawWindowSprites(x, y, depth, menu->list->flags, value, drawArg);
+    textures = menu->textures;
+    if (textures != NULL) {
+        mnuDrawWindowSprites(x, y, depth, menu->list->flags, textures, drawArg);
     }
     value = menu->fade;
     if (value < MNU_FULL_FADE) {
@@ -536,7 +500,7 @@ extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 *sdfResourceRetainAddress(s32);
 
-extern void func_0027CF28(s32 *, u32, u32, u32, u32);
+extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
 typedef struct MenuWindowSpriteGroup {
     s32 resourceHandle;
@@ -545,14 +509,14 @@ typedef struct MenuWindowSpriteGroup {
 } MenuWindowSpriteGroup;
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
-u32 mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
+MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
     s32 allocationHandle = sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
     MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(allocationHandle);
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
     group->resourceHandle = allocationHandle;
-    func_0027CF28((s32 *)group, source, mode, variant, option);
-    return (u32)group;
+    func_0027CF28(group, source, mode, variant, option);
+    return group;
 }
 
 /* Destroy every native sprite slot, then release the group's allocation handle. */

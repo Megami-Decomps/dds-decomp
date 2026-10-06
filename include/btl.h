@@ -115,7 +115,9 @@ typedef struct BtlUnit {
     s8 agility; /* 0x139: signed HARI2 agility adjustment, also passed to diagnostics. */
     u8 pad13A[0x38];
     u16 bedAssetIndex; /* 0x172: SDK operand resolution selects the BED asset. */
-    u8 pad174[0x13C];
+    u8 pad174[0x138];
+    s16 commandKind; /* 0x2AC: queued command kind, paired with actionSlot. */
+    u16 unk2AE; /* 0x2AE: saved with commandKind and actionSlot in the party record. */
     s16 actionSlot; /* 0x2B0 */
     u8 pad2B2[0x12];
     u8 unk2C4; /* 0x2C4: saved party-entry index, read with lbu. */
