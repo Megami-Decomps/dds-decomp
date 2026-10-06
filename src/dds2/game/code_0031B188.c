@@ -1,7 +1,7 @@
 #include "common.h"
 #include "file.h"
 #include "pcp_vu0.h"
-#include "sdf_draw.h"
+#include "mdl.h"
 
 typedef struct SoundSlot {
     u32 remainingFrames;
@@ -14,13 +14,6 @@ typedef struct SoundSlotPool {
     s32 count;
 } SoundSlotPool;
 
-/* Model fields shared with the mdlManager context and node records. */
-
-typedef struct MdlCtx {
-    u32 flags;
-    u8 pad04[0x18];
-    Motion *first;
-} MdlCtx;
 
 /* Nodes passed to the menu model helpers are 0x50-byte records. */
 typedef struct MnuModelNode {
@@ -145,18 +138,18 @@ static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
-extern void mdlBroadcastMasked();
-extern void mdlStorePrimaryVectorVU(void *model);
-extern void mdlStoreTertiaryVectorVU(void *model);
+extern void mdlBroadcastMasked(MdlCtx *, u32);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern u32 *dds3SoundSlotPool;
 extern u32 fileClearRenderFlag(u32 mask);
 
-extern u32 mdlGetBroadcastValue(u32 model);
+extern u32 mdlGetBroadcastValue(MdlCtx *);
 
 extern void func_00328160(f32 *out);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(u32 model);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 
 void mnuClearNodeBroadcastFlag(u8 *node);
@@ -165,7 +158,7 @@ void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 
 void mnuDeactivateModelNode(s32 nodeAddress);
 
-extern u8 *func_00232198(s32 resourceGroup, s32 resourceId);
+extern MdlCtx *func_00232198(s32 resourceGroup, s32 resourceId);
 extern void mdlAddEntryFlaggedEx(MdlCtx *model, s32 searchId, s32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames);
 extern u32 sdfAllocGeneralBlock(s32 bytes);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
@@ -751,7 +744,7 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
 
 /* Create the resource-backed model; -1 omits flagged-entry setup and scalar saving. */
 void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
-    MdlCtx *model = (MdlCtx *)func_00232198(resourceGroup, resourceId);
+    MdlCtx *model = func_00232198(resourceGroup, resourceId);
     node->model = model;
     if (entryFlags != -1) {
         model->first->frameStep = z;
@@ -814,7 +807,7 @@ void mnuRefreshNodeSecondaryVector(u8 *node) {
     ((MnuModelNode *)node)->rotationQuaternion[2] = quaternion[2];
     ((MnuModelNode *)node)->rotationQuaternion[3] = quaternion[3];
     VU0_LOAD_VF(vf10, node + 0x10);
-    mdlUpdateContextRotationBasisFromQuaternion((u32)((MnuModelNode *)node)->model);
+    mdlUpdateContextRotationBasisFromQuaternion(((MnuModelNode *)node)->model);
 }
 
 void func_0031C688(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
@@ -849,7 +842,7 @@ void func_0031C688(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
     vector[2] = quaternion[2];
     vector[3] = quaternion[3];
     VU0_LOAD_VF(vf10, vector);
-    mdlUpdateContextRotationBasisFromQuaternion((u32)node->model);
+    mdlUpdateContextRotationBasisFromQuaternion(node->model);
 }
 
 /* Fill the tertiary (0x20) vector with one value and load it into the model. */
@@ -864,8 +857,8 @@ void mnuSetNodeScaleVector(u8 *node, f32 value) {
     mdlStoreTertiaryVectorVU(modelNode->model);
 }
 
-void mnuBroadcastNodeModelState(u8 *node) {
-    mdlBroadcastMasked((u32)((MnuModelNode *)node)->model);
+void mnuBroadcastNodeModelState(u8 *node, u32 color) {
+    mdlBroadcastMasked(((MnuModelNode *)node)->model, color);
 }
 
 
@@ -874,9 +867,9 @@ void mnuSetModelNodeBroadcastAlpha(void) {
 
 /* Replace only the high byte of the model's broadcast word. */
 void mnuSetNodeModelBroadcastByte(u8 *node, u8 highByte) {
-    u32 broadcastLowBytes = mdlGetBroadcastValue((u32)((MnuModelNode *)node)->model) & 0xFFFFFF;
+    u32 broadcastLowBytes = mdlGetBroadcastValue(((MnuModelNode *)node)->model) & 0xFFFFFF;
 
-    mdlBroadcastMasked((u32)((MnuModelNode *)node)->model, broadcastLowBytes | ((u32)highByte << 24));
+    mdlBroadcastMasked(((MnuModelNode *)node)->model, broadcastLowBytes | ((u32)highByte << 24));
 }
 
 void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
