@@ -47,7 +47,8 @@ struct MenuList {
     /* 0x30 is generic list user data: DDS1 25F408 interprets a countdown
      * pointer, 2443F8 stores a buffer, and 272D50 stores staff draw context. */
     void *context;
-    u8 pad34[8];
+    s32 categoryIndex; /* 0x34: selects one of the skill-window category layouts. */
+    u8 pad38[4];
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
 
