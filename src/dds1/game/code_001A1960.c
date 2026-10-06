@@ -2650,7 +2650,6 @@ extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 typedef struct BattlePanelColors {
     u32 values[4];
 } BattlePanelColors;
-/* Named color constants remain split-owned while C references their symbols. */
 extern const BattlePanelColors D_003A21B8;
 
 void func_001AC4A8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
@@ -3293,7 +3292,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2168);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21A8);
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21B8);
+const BattlePanelColors D_003A21B8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21C8);
 

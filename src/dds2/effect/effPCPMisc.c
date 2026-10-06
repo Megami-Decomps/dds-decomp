@@ -5867,7 +5867,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
     }
 }
 
-INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00414610);
+const f32 D_00414610[4] __attribute__((aligned(16))) = {0.0f, 1.0f, 0.0f, 0.0f};
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 
