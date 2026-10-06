@@ -690,10 +690,12 @@ typedef struct {
 /* Ring parameters copied verbatim into the work at +0x40 (0xDC). */
 typedef struct {
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u8 pad10[4];
+    u8 respawn;
+    u8 pad11[3];
     s32 lifetimeFrames;
     s32 delaySpread;
-    u8 pad1C[8];
+    s32 fadeIn;
+    s32 fadeOut;
     f32 angleStep;
     f32 angleJitter;
     f32 heightSpread;
@@ -768,7 +770,72 @@ void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B348);
+/* Sample the current fixed-height ring before advancing angle and radius.
+ * Keep the cached age across initialization and preserve fade-in priority. */
+void func_0018B348(EffMagatuhiRingWork *work) {
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    EffMagatuhiValueWork *valueWork;
+    EffMagatuhiRingParticle *particle;
+    u8 respawn;
+    u32 count;
+    s32 life;
+    s32 spread;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 tintColor;
+    f32 angle, radius, fade;
+    s32 age;
+    u32 i;
+
+    particle = work->particles;
+    count = work->head.particleCount;
+    respawn = work->head.respawn;
+    life = work->head.lifetimeFrames;
+    spread = work->head.delaySpread;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    tintColor = work->tintColor;
+    valueWork = work->managedResource->valueWork;
+    PCP_COPY_VECTOR_F32(origin, work->head.origin);
+    VU0_LOAD_MATRIX(work->matrix);
+    for (i = 0; i < count; i++, particle++) {
+        age = particle->age;
+        if (age == 0) {
+            effMagatuhiInitParticleA(work, i);
+        }
+        if (age > 0 && age <= life) {
+            angle = particle->angle;
+            radius = particle->radius;
+            out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            out[1] = particle->height;
+            out[2] = sdfSinPoly(angle) * radius;
+            VU0_LOAD_VF(vf11, origin);
+            VU0_LOAD_VF(vf10, out);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, out);
+            particle->angle += particle->angleStep;
+            particle->radius += particle->radiusStep;
+            if (age < fadeIn) {
+                fade = (f32)age / (f32)fadeIn;
+            } else if (life - age <= fadeOut) {
+                fade = (f32)(life - age) / (f32)fadeOut;
+            } else {
+                fade = 1.0f;
+            }
+            effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
+                ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
+            func_00189818(valueWork, i, out);
+        }
+        if (age >= life && respawn) {
+            particle->age = -(effMiscRand(D_0034DF38) % spread);
+        } else {
+            particle->age++;
+        }
+    }
+    func_001891A8(work->managedResource);
+}
 
 /* Copy the ring origin as one quadword, including its fourth component. */
 void effMagatuhiSetRingOrigin(EffMagatuhiRingWork *work, void *origin) {
