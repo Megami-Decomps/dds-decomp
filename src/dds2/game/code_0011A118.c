@@ -340,7 +340,72 @@ s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
     return *(s8 *)(byteOffset + datGameState + 0xa76);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
+/* Shared packed status header consumed by the status-raising helper. */
+typedef struct SdfPackedValue {
+    u8 pad00[6];
+    u16 hp;
+    u8 pad08[6];
+    u16 flagsAndValue;
+} SdfPackedValue;
+extern void sdfRaisePackedChannelValue(SdfPackedValue *, u32);
+
+/* Event penalties affect living roster slots, then optionally raise a status channel. */
+void func_0011A328(s32 mode) {
+    s32 nextHp, loss, slotIndex;
+    if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->currentHp != 0) {
+                nextHp = entry->currentHp;
+                loss = nextHp / 10;
+                if (loss == 0) loss = 1;
+                nextHp -= loss;
+                if (nextHp <= 0) nextHp = 1;
+                entry->currentHp = nextHp;
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 2) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->currentHp != 0) {
+                nextHp = entry->currentHp;
+                loss = (u32)nextHp / 2;
+                if (loss == 0) loss = 1;
+                nextHp -= loss;
+                if (nextHp <= 0) nextHp = 1;
+                entry->currentHp = nextHp;
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 3) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->currentHp != 0) entry->currentHp = 1;
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode >= 4 && mode <= 6) {
+        slotIndex = 0;
+        do {
+            if (((PartyInventory *)datGameState)->roster[slotIndex].currentHp != 0) {
+                if (mode == 4) sdfRaisePackedChannelValue((SdfPackedValue *)(datGameState + slotIndex * PTY_ACTIVE_ROSTER_STRIDE + PTY_ACTIVE_ROSTER_OFFSET), 0x80);
+                if (mode == 5) sdfRaisePackedChannelValue((SdfPackedValue *)(datGameState + slotIndex * PTY_ACTIVE_ROSTER_STRIDE + PTY_ACTIVE_ROSTER_OFFSET), 0x40);
+                if (mode == 6) sdfRaisePackedChannelValue((SdfPackedValue *)(datGameState + slotIndex * PTY_ACTIVE_ROSTER_STRIDE + PTY_ACTIVE_ROSTER_OFFSET), 0x10);
+            }
+            slotIndex++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A510);
 
