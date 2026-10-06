@@ -6637,7 +6637,202 @@ void fileScaleEffectSurfaceParameterFields(ScaleOwner *owner, f32 factor) {
     destination[0xE4 / 4] = source[0xE4 / 4] * factor;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002DAAE0);
+/* vu0 routine: advances slots within a bounded azimuth of the emitter frame. */
+void func_002DAAE0(FileSlotTable *record) {
+    f32 delta[4];
+    f32 radiusVector[4];
+    f32 previousPosition[4];
+    FileKeyBlock *keys;
+    u32 i;
+    u32 count;
+    u32 flags;
+    FileSlot *slot;
+    FileSlotMotion *motion;
+    s32 duration;
+    s32 prewarm;
+    s32 mode;
+    f32 gravity;
+    f32 acceleration;
+    s32 toSpawn;
+    s32 prewarmLength;
+    s32 frame;
+    f32 distance;
+    s32 length;
+
+    keys = (FileKeyBlock *)record->data0;
+    count = record->instances;
+    length = keys->length;
+    flags = record->flags;
+    slot = record->slots;
+    motion = (FileSlotMotion *)record->unk1C;
+
+    if (length != 0) {
+        duration = keys->emissionDuration;
+        prewarmLength = keys->length;
+        mode = keys->heading.track.curve.headingMode;
+        gravity = keys->emitter.sector.gravity;
+        acceleration = keys->emitter.sector.acceleration;
+        delta[3] = 0.0f;
+        VU0_LOAD_VF(vf10, keys->orientation);
+        effMiscQuaternionToMatrixVU();
+        if (duration != 0 && (s32)record->references >= duration) {
+            toSpawn = 0;
+            prewarm = 0;
+        } else {
+            if (record->references == 0 && keys->prewarm != 0) {
+                prewarm = 1;
+                if (!(keys->spawnVariance > 0.0f)) {
+                    toSpawn = record->instances;
+                } else {
+                    toSpawn = (s32)((f32)record->instances *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                }
+            } else {
+                prewarm = 0;
+                if (keys->spawnVariance > 0.0f) {
+                    record->spawnRemainder += (f32)keys->spawnRate *
+                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                } else {
+                    record->spawnRemainder += (f32)keys->spawnRate;
+                }
+                toSpawn = (s32)fabsf(record->spawnRemainder);
+                record->spawnRemainder -= (f32)toSpawn;
+            }
+        }
+        i = 0;
+        if (count != 0) {
+            do {
+                if (slot->state >= length) {
+                    slot->state = duration != 0 ? -2 : -1;
+                    fileInvalidateSlotGroup(record, (u32)slot);
+                }
+                frame = slot->state;
+                if (frame != -2) {
+                    if (frame == -1) {
+                        if (toSpawn != 0) {
+                            f32 angle;
+                            f32 spread;
+                            s32 localSpace;
+
+                            angle = (f32)keys->emitter.sector.azimuthDegrees *
+                                ((effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f) *
+                                0.5f * 0.0174532925f - 1.5707962512969971f;
+                            spread = keys->emitter.sector.spread *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.sector.spreadRandomness +
+                                 (1.0f - keys->emitter.sector.spreadRandomness));
+                            delta[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * spread;
+                            delta[1] = -(1.0f - spread);
+                            delta[2] = sdfSinPoly(angle) * spread;
+                            VU0_LOAD_VF(vf10, delta);
+                            VU0_NORMALIZE_VF10();
+                            localSpace = flags & 1;
+                            if (localSpace == 0) {
+                                VU0_ROTATE_VEC(vf10, vf10);
+                            }
+                            VU0_STORE_VF(vf10, delta);
+                            motion->direction[0] = delta[0];
+                            motion->direction[1] = delta[1];
+                            motion->direction[2] = delta[2];
+                            motion->speed = fabsf(keys->emitter.sector.speed *
+                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.sector.speedRandomness + (1.0f - keys->emitter.sector.speedRandomness)));
+                            {
+                                f32 radius = keys->emitter.sector.radius *
+                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.sector.radiusRandomness + (1.0f - keys->emitter.sector.radiusRandomness));
+                                VEC3_SPLAT(radiusVector, radius);
+                            }
+                            /* Retail initializes only XYZ of this radius vector; W is left untouched. */
+                            VU0_LOAD_VF(vf10, delta);
+                            if (keys->emitter.sector.speed < 0.0f) {
+                                VU0_NEGATE_XYZ(vf10);
+                            }
+                            if (localSpace != 0) {
+                                VU0_LOAD_VF(vf11, radiusVector);
+                                VU0_MUL(vf10, vf10, vf11);
+                            } else {
+                                VU0_LOAD_VF(vf11, radiusVector);
+                                VU0_MUL(vf10, vf10, vf11);
+                                VU0_LOAD_VF(vf11, keys->pos);
+                                VU0_ADD(vf10, vf10, vf11);
+                            }
+                            VU0_STORE_VF(vf10, slot->pos);
+                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                                (1.0f - keys->scale.emitter.randomness);
+                            if (mode != 2) {
+                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                    (1.0f - keys->heading.emitter.randomness);
+                                if (mode == 1) {
+                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                        motion->angleMultiplier = -motion->angleMultiplier;
+                                    }
+                                } else {
+                                    motion->angle = 0.0f;
+                                }
+                            } else {
+                                motion->angleMultiplier = 1.0f;
+                                motion->angle = 0.0f;
+                            }
+                            slot->state = 0;
+                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            if (prewarm != 0) {
+                                f32 age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                VU0_LOAD_VF(vf11, slot->pos);
+                                distance = motion->speed * age;
+                                distance += acceleration * age * age * 0.5f;
+                                if (distance < 0.0f) {
+                                    distance = 0.0f;
+                                }
+                                delta[0] = distance * motion->direction[0];
+                                delta[1] = distance * motion->direction[1];
+                                delta[2] = distance * motion->direction[2];
+                                delta[1] += gravity * age * age * 0.5f;
+                                VU0_LOAD_VF(vf10, delta);
+                                VU0_ADD(vf10, vf10, vf11);
+                                VU0_STORE_VF(vf10, slot->pos);
+                                slot->state = (s32)age;
+                            }
+                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            slot->scale *= motion->scaleMultiplier;
+                            slot->angle *= motion->angleMultiplier;
+                            slot->angle += motion->angle;
+                            if (prewarm != 0) {
+                                fileCopyAndInvalidateSlotGroup(record, slot);
+                                slot->state++;
+                            }
+                            toSpawn--;
+                        }
+                    } else {
+                        f32 age;
+                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        VU0_LOAD_VF(vf11, slot->pos);
+                        age = (f32)frame;
+                        distance = motion->speed + acceleration * age;
+                        if (distance < 0.0f) {
+                            distance = 0.0f;
+                        }
+                        delta[0] = distance * motion->direction[0];
+                        delta[1] = distance * motion->direction[1];
+                        delta[2] = distance * motion->direction[2];
+                        delta[1] += gravity * age;
+                        VU0_LOAD_VF(vf10, delta);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, slot->pos);
+                        fileSampleKeyTracks(slot, keys, frame, previousPosition);
+                        slot->scale *= motion->scaleMultiplier;
+                        slot->angle *= motion->angleMultiplier;
+                        slot->angle += motion->angle;
+                        func_002D7B58(record, slot);
+                        slot->state = frame + 1;
+                    }
+                }
+                motion++;
+                slot++;
+                i++;
+            } while (i < count);
+        }
+    }
+}
+
 
 void sdfScaleResourceFloatParameterGroups(ScaleOwner *owner, f32 factor) {
     f32 *source = (f32 *)owner->src;
