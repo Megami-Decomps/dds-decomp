@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_work.h"
 
 #define MNU_WORK_ACTIVE   1
 #define MNU_WORK_UPDATED  2
@@ -9,51 +10,18 @@
 #define MNU_STATE_WAIT_PENDING 8
 #define MNU_REGISTRY_TAG_PREFIX 0x02010000
 
-typedef struct MenuWorkEntry {
-    union {
-        u32 word;
-        struct {
-            u32 loopMode : 4;
-            u32 repeatMode : 4;
-            u32 countdownEnabled : 1;
-            u32 countdown : 8;
-            u32 unused17 : 15;
-        } bits;
-    } control;
-    u32 tag;        /* 0x04 */
-    s32 unk08;      /* 0x08 */
-    u8 pad0C[4];
-    f32 x0;         /* 0x10 */
-    f32 y0;         /* 0x14 */
-    f32 scale0;     /* 0x18 */
-    u8 pad1C[4];
-    f32 x1;         /* 0x20 */
-    f32 y1;         /* 0x24 */
-    f32 scale1;     /* 0x28 */
-    s16 recordIndex;
-    s16 shortListIndex;
-    u8 pad30[2];
-    s16 repeatCount; /* 0x32 */
-    u16 unk34;      /* 0x34 */
-    u16 remaining;  /* 0x36: decreased until the completion flag is set */
-    u16 unk38;
-    u16 elapsed;
-    u32 callback;   /* 0x3C */
-    u32 flags;      /* 0x40 */
-    u8 pad44[4];
-} MenuWorkEntry; /* 0x48 */
 
 extern u32 mnuActiveEffectEntry;
 
-extern u8 *D_004389B0;
+extern MenuRuntimePairCallback D_004389B0;
 
-extern u8 *D_004389AC;
+extern MenuRuntimeWorkCallback D_004389AC;
 
-extern void (*D_004389A8)(MenuWorkEntry *, s32);
+extern MenuWorkCallback D_004389A8;
 
-extern u8 *D_004389A4;
+extern MenuWorkCallback D_004389A4;
 
-extern u8 *D_004389A0;
+extern MenuWorkCallback D_004389A0;
 
 extern u32 mnuWorkEntryPool;
 
@@ -133,12 +101,6 @@ typedef struct MenuWordPair {
     u8 pad08[8];
 } MenuWordPair;
 
-typedef struct MenuTaggedRecord {
-    u8 pad00[4];
-    u32 tag;          /* 0x04 */
-    u8 pad08[0x24];
-    s16 recordIndex;  /* 0x2C: indexes 16-byte records */
-} MenuTaggedRecord;
 
 typedef struct MenuRegistryTable MenuRegistryTable;
 
@@ -320,13 +282,13 @@ s32 dds3MeasureRecordBlock(s32 *records, s32 count) {
     return byteSize;
 }
 
-void func_003224B0(void) {
+void func_003224B0(MenuWorkEntry *entry, struct MnuShootingWork *context) {
 }
 
-void func_003224B8(void) {
+void func_003224B8(MenuRuntimeRecord *record, MenuWorkEntry *entry, struct MnuShootingWork *context) {
 }
 
-void func_003224C0(void) {
+void func_003224C0(MenuRuntimeRecord *record, MenuRuntimeRecord *other, struct MnuShootingWork *context) {
 }
 
 extern u16 D_0040B248[];
@@ -388,15 +350,15 @@ ShortRecord *func_003225C0(ShortRecordList *list) {
 u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord) {
     u32 registryEntry;
     u32 registryTable;
-    if ((((MenuTaggedRecord *)taggedRecord)->tag & 0xffff0000) != MNU_REGISTRY_TAG_PREFIX) {
+    if ((((MenuWorkEntry *)taggedRecord)->tag & 0xffff0000) != MNU_REGISTRY_TAG_PREFIX) {
         return 0;
     }
-    registryEntry = (u32)mnuGetMenuRecordRegistryEntry(((MenuTaggedRecord *)taggedRecord)->tag);
+    registryEntry = (u32)mnuGetMenuRecordRegistryEntry(((MenuWorkEntry *)taggedRecord)->tag);
     if (registryEntry == 0) {
         return 0;
     }
     registryTable = (u32)((MenuRegistry *)registryEntry)->table;
-    return (u32)((MenuRegistryTable *)registryTable)->recordBase + ((MenuTaggedRecord *)taggedRecord)->recordIndex * 16;
+    return (u32)((MenuRegistryTable *)registryTable)->recordBase + ((MenuWorkEntry *)taggedRecord)->recordIndex * 16;
 }
 
 typedef struct MenuByteRecordList {
@@ -574,10 +536,10 @@ void mnuVisitActiveWorkAndEffectEntry(s32 context) {
         MenuWorkEntry *entry = &((MenuWorkEntry *)mnuWorkEntryPool)[entryIndex];
 
         if (entry->flags & MNU_WORK_ACTIVE) {
-            D_004389A8(entry, context);
+            D_004389A8(entry, (struct MnuShootingWork *)context);
         }
     }
-    D_004389A8((MenuWorkEntry *)mnuGetActiveEffectWorkEntry(), context);
+    D_004389A8((MenuWorkEntry *)mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00323748);
@@ -598,23 +560,23 @@ void mnuVisitActiveRecords(s32 context) {
     }
 }
 
-void func_00323918(u8 *records) {
+void func_00323918(MenuWorkCallback records) {
     D_004389A0 = records;
 }
 
-void func_00323920(u8 *records) {
+void func_00323920(MenuWorkCallback records) {
     D_004389A4 = records;
 }
 
-void mnuSetActiveWorkVisitor(void (*callback)(MenuWorkEntry *, s32)) {
+void mnuSetActiveWorkVisitor(MenuWorkCallback callback) {
     D_004389A8 = callback;
 }
 
-void func_00323930(u8 *records) {
+void func_00323930(MenuRuntimeWorkCallback records) {
     D_004389AC = records;
 }
 
-void func_00323938(u8 *records) {
+void func_00323938(MenuRuntimePairCallback records) {
     D_004389B0 = records;
 }
 

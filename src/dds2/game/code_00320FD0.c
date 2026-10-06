@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_work.h"
 
 extern u32 mnuResourceRecords;
 
@@ -8,7 +9,7 @@ extern void (*sdfTickCallback)(void);
 
 extern u8 D_0045C860[];
 
-extern u32 D_0043899C;
+extern MenuRuntimeCallback D_0043899C;
 
 extern void mnuFreeOptionalBlock(u32);
 
@@ -239,10 +240,10 @@ u8 *mnuGetResourceRecordByIndex(s32 recordIndex) {
 
 INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321340);
 
-void func_003214C0(void) {
+void func_003214C0(MenuRuntimeRecord *record) {
 }
 
-void func_003214C8(u32 value) {
+void func_003214C8(MenuRuntimeCallback value) {
     D_0043899C = value;
 }
 
