@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct BtlTask;
+struct SdfMemBlock;
 struct ActionStateLink;
 struct BattleIndexWork;
 
@@ -103,5 +104,61 @@ typedef struct BattleSelectionWork {
     s16 backdropFade; /* +0x2C */
     u8 pad2E[2];
 } BattleSelectionWork;
+
+/* The actor-panel allocation has three active rows and four reserve rows. */
+typedef struct BattleActorPanelEntry {
+    s32 x;
+    s32 y;
+    u8 pad08[0xC];
+    s8 presentationState;
+    s8 presentationValue;
+    u8 pad16[0xA];
+    s32 transitionGeometry[4];
+    u8 transitionFade[2];
+    u8 pad32[2];
+    s32 pulseDirection[2];
+    s32 unk3C[2];
+    s32 pulseOffsets[2][2];
+    s16 pulseLevel[2];
+    u32 highlightPhase[8];
+    u8 highlightLevel[8];
+    u8 transitionState;
+    s8 secondaryPresentationValue;
+    u8 pad82[0xA];
+    s32 secondaryGeometry[4];
+    u8 secondaryFade[2];
+    u8 pad9E[0x12];
+    s32 secondaryPulseOffsets[2][2];
+    s16 secondaryPulseLevel[2];
+    u8 padC4[0x28];
+    s8 pendingSceneState;
+    u8 padED[0x13];
+    u8 unk100;
+    u8 pad101[0xBB];
+    s32 hpLevel;
+    s32 mpLevel;
+    u8 unk1C4;
+    u8 unk1C5;
+    u8 pad1C6[0x16];
+    s32 hpTarget;
+    s32 mpTarget;
+    u8 pad1E4[0xAC];
+} BattleActorPanelEntry;
+
+typedef struct BattleActorPanelWork {
+    struct SdfMemBlock *allocation;
+    s32 activeCount;
+    s32 reserveCount;
+    BattleActorPanelEntry activeEntries[3];
+    u16 unk7BC;
+    s16 partyRecordIndex;
+    BattleActorPanelEntry reserveEntries[4];
+    struct SdfMemBlock *reserveUnitAllocation;
+} BattleActorPanelWork;
+
+typedef char BattleActorPanelEntrySizeCheck[sizeof(BattleActorPanelEntry) == 0x290 ? 1 : -1];
+typedef char BattleActorPanelWorkSizeCheck[sizeof(BattleActorPanelWork) == 0x1204 ? 1 : -1];
+typedef char BattleActorPanelActiveOffsetCheck[((u32)&((BattleActorPanelWork *)0)->activeEntries == 0xC) ? 1 : -1];
+typedef char BattleActorPanelReserveOffsetCheck[((u32)&((BattleActorPanelWork *)0)->reserveEntries == 0x7C0) ? 1 : -1];
 
 #endif /* BTL_UI_H */
