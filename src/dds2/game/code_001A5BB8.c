@@ -4841,15 +4841,25 @@ s32 btlSetTaskPhase2(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7B20);
 
+/* Mahen entries carry a halfword key and a displayed byte value. */
+typedef struct MesWindowItem {
+    u16 textId;
+    u8 value;
+    u8 pad03;
+} MesWindowItem;
+
 typedef struct MesWindowConfig {
-    u16 active[9][2];
+    MesWindowItem active[9];
 } MesWindowConfig;
 
 typedef struct MesWindowSet {
     s8 state;
     u8 pad01[3];
     u32 handle[9];
-    u8 pad28[0x18];
+    u8 pad28[4];
+    s16 alpha;
+    u8 pad2E[2];
+    u32 colors[4];
     s32 x;
     s32 y;
     MesWindowConfig config;
@@ -4886,7 +4896,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     work->config = *config;
     work->state = 0;
     for (i = 0; i < 9; i++) {
-        if (work->config.active[i][0] != 0) {
+        if (work->config.active[i].textId != 0) {
             work->handle[i] = itfMesCreateWindow(&D_00385A08);
         }
     }
@@ -5249,7 +5259,7 @@ void itfMesCloseAllWindows(KwlnTask *handle) {
     btlGetRuntime();
     set = (MesWindowSet *)kwlnTaskGetUserValue(handle);
     for (i = 0; i < 9; i++) {
-        if (set->config.active[i][0] != 0) {
+        if (set->config.active[i].textId != 0) {
             itfMesCleanupWindow(set->handle[i], 0);
             itfMesDestroyWindowIfPresent(set->handle[i]);
         }
