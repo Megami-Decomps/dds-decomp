@@ -51,18 +51,20 @@ extern char D_00436450[];
 
 extern EffHandler D_003B2068[];
 
-extern void func_0036B420(void);
+extern s32 func_0036B420(s32 directory);
 
 /* Directory entry filled by the effect data directory iterator. */
 typedef struct EffDirEnt {
     u32 flags;      /* 0x00: bit 12 cleared */
     u8 pad04[0x3C]; /* 0x04 */
-    char name[0x40]; /* 0x40 */
+    char name[0x100]; /* 0x40: SDK directory-name buffer */
+    void *privateData; /* 0x140 */
 } EffDirEnt;
+typedef char EffDirEnt_size_must_be_0x144[(sizeof(EffDirEnt) == 0x144) ? 1 : -1];
 
 extern char *D_003B20D8[];
 
-extern s32 func_0036B588(void);
+extern s32 func_0036B588(s32 directory, EffDirEnt *entry);
 
 extern u8 sdfViewMatrix[];
 
@@ -306,17 +308,17 @@ s32 effOpenDataDir(void *name) {
 }
 
 /* Run the native directory callback only in debug filesystem mode; its result is ignored. */
-void effRunIfEnabled(void) {
+void effRunIfEnabled(s32 directory) {
     if (sdfPfsDebugMode != 0) {
-        func_0036B420();
+        func_0036B420(directory);
     }
 }
 
 /* Debug mode delegates to the native iterator. Built-in mode copies the next name,
    clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
-s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
+s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {
     if (sdfPfsDebugMode != 0) {
-        return func_0036B588();
+        return func_0036B588(directory, entry);
     }
     if ((u32)effDataDirectoryIndex >= EFF_BUILTIN_NAME_COUNT) {
         return 0;
@@ -327,29 +329,41 @@ s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
     return strlen(entry->name);
 }
 
+/* Directory list roots and filename nodes have distinct allocation extents. */
+typedef struct EffResourceListNode {
+    u32 type;
+    char name[0x30];
+    struct EffResourceListNode *previous;
+    struct EffResourceListNode *next;
+} EffResourceListNode;
+
+typedef struct EffResourceList {
+    s32 resourceCount;
+    char *directoryPath;
+    EffResourceListNode *head;
+} EffResourceList;
+typedef char EffResourceList_size_must_be_12[(sizeof(EffResourceList) == 12) ? 1 : -1];
+typedef char EffResourceListNode_size_must_be_60[(sizeof(EffResourceListNode) == 60) ? 1 : -1];
+
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194BD0);
 
 /* Free linked nodes, then the root's separate payload and the root itself.
    Save each successor before freeing; node payloads are not separately released here. */
-void effFreeWorkList(EffWork *root) {
-    EffWork *node = (EffWork *)root->listHead;
+void effFreeWorkList(EffResourceList *root) {
+    EffResourceListNode *node = root->head;
 
     if (node != NULL) {
         do {
-            EffWork *next = node->next;
+            EffResourceListNode *next = node->next;
             sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
     }
-    sdfReleaseChipBlock(root->payload);
+    sdfReleaseChipBlock(root->directoryPath);
     sdfReleaseChipBlock(root);
 }
 
-typedef struct EffResourceList {
-    s32 resourceCount;
-    s32 unk04;
-    void *head;
-} EffResourceList;
+
 
 typedef struct EffResourceDescriptor {
     u32 word00;
@@ -360,8 +374,8 @@ typedef struct EffResourceDescriptor {
     u32 word24;
     u32 word28;
     u32 word2C;
-    void *word30;
-    void *word34;
+    EffResourceListNode *word30;
+    EffResourceListNode *word34;
     u32 word38;
     u32 word3C;
     EffResourceList *resourceList; /* 0x40: source list pointer copied into descriptor */
