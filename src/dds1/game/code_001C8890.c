@@ -189,7 +189,8 @@ typedef struct BtlUnit {
     u32 gunResourceFlags;
     u8 lookupId;
     u8 pad_11D[3];
-    u32 statBits;
+    u16 statBits;
+    u16 unk122; /* Script-controlled unit parameter; precedes the AI entry id. */
     u16 mode; /* Species/actor entry identifier used by the AI table. */
     u8 pad_126[8];
     u16 conditionFlags;
@@ -250,6 +251,9 @@ typedef struct BtlActorWork {
     u8 fadeEnabled; /* 0 raises the tint, 1 lowers it; refreshed by the frame updater. */
     u8 pad585[3];
     u32 fadeColor; /* Packed tint; retain the original whole-word arithmetic. */
+    u8 pad58C[0x58];
+    s32 (*hook5E4)(BtlUnit *); /* Actor-state predicate consulted by the defeat transition. */
+    s32 (*hook5E8)(BtlUnit *); /* Fallback predicate consulted when hook5E4 returns 0. */
 } BtlActorWork;
 
 /* Tagged scheduler predicate, embedded for task entry and exit. */
@@ -1733,7 +1737,86 @@ void btlUnitTurnEndCommit(s32 task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlStartActorDefeatTransition);
+extern void btlAccumulateEnemyDefeatRewards(s32);
+extern u8 *btlCreateActorModelBlendTask(u8 *, u32, u32, u32, f32);
+extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
+extern u8 *func_001D9468(u8 *, u32);
+extern SoundTask *sndCreateStationedSeTask(u32);
+
+void btlStartActorDefeatTransition(s32 command) {
+    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
+    BtlTask *commandTask = (BtlTask *)command;
+    BtlUnit *actor = commandTask->unit;
+    u16 *profile = &actor->statBits;
+    SoundTask *soundTask;
+    SoundTask *object;
+    s64 sequence;
+    s32 entryFlags;
+    s32 result;
+
+    actor->unk2F0 = -1;
+    func_001A1948(profile, 0x4000);
+    btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
+    if (!(commandTask->flags & 0x100)) {
+        soundTask = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)actor, 11);
+        btlStartTask(soundTask);
+        sequence = soundTask->handle;
+    } else {
+        sequence = btlAdvanceRuntimeSequenceCounter();
+    }
+    if (actor->flags & 0x200) {
+        if (!(commandTask->flags & 0x100)) {
+            if (!(actor->flags & 0x8000000) && actor->unkEC != 11) {
+                object = (SoundTask *)btlCreateActorModelBlendTask((u8 *)actor, 0, 11, 2, 1.0f);
+                object->startCondition.kind = 4;
+                object->startCondition.value.handle = sequence;
+                btlStartTask(object);
+            }
+            btlRefreshUnitMotionSelection((u8 *)actor);
+        }
+    } else if (actor->flags & 0x400) {
+        btlAccumulateEnemyDefeatRewards((s32)actor);
+        if (actor->flags & 0x8000000) {
+            object = (SoundTask *)btlCreateSelectedEffectUpdateTask((u8 *)actor);
+            object->startCondition.kind = 4;
+            object->startCondition.value.handle = sequence;
+            btlStartTask(object);
+            object = sndCreateStationedSeTask(0x1000E);
+            object->startCondition.kind = 4;
+            object->startCondition.value.handle = sequence;
+            btlStartTask(object);
+            actor->flags &= ~1;
+        } else {
+            entryFlags = btlGetEntryFlagsUnlessDisabled((s32)profile);
+            result = 0;
+            if (work->hook5E4 != 0) {
+                result = work->hook5E4(actor);
+            }
+            if ((entryFlags & 0x200) && result == 0) {
+                result = 1;
+                if (work->hook5E8 != 0) {
+                    result = work->hook5E8(actor);
+                }
+                if (result != 0) {
+                    if (actor->unkEC != 11) {
+                        object = (SoundTask *)btlCreateActorModelBlendTask((u8 *)actor, 0, 11, 2, 1.0f);
+                        object->startCondition.kind = 4;
+                        object->startCondition.value.handle = sequence;
+                        btlStartTask(object);
+                    }
+                    btlRefreshUnitMotionSelection((u8 *)actor);
+                }
+            } else {
+                object = (SoundTask *)func_001D9468((u8 *)actor, 0);
+                object->startCondition.kind = 4;
+                object->startCondition.value.handle = sequence;
+                btlStartTask(object);
+                actor->flags &= ~1;
+            }
+        }
+        actor->statBits &= ~2;
+    }
+}
 
 extern void btlResetIndexWork();
 
@@ -11045,4 +11128,3 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5410);
-
