@@ -12,38 +12,41 @@ void *sdfReadNamedResource(s32 arg0, u32 *arg1, s32 arg2);
 void sdfReleaseResourceAllocation(void *arg);
 void sdfReleaseChipBlock(void *arg);
 void effReleaseSharedTextureRecord(void *arg);
-void func_001502B0(void *arg0, void *arg1);
+void func_001502B0(BillObj *obj, BillChildPayload *child);
 void billReleaseSharedEntryBlock(void *arg);
 void *func_00150148(void *arg);
 void billSetAnimationEntry(BillObj *arg0, s32 arg1);
 void *func_00151A88(void *arg);
 
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(SdfListHead *list);
+extern void sdfAppendPacket(SdfListHead *list, u32 packet);
+extern void sdfAppendReferencePacket(SdfListHead *list, u32 packet);
+typedef struct DmaPacketHeader DmaPacketHeader;
+extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
+extern u32 sdfTexGetPrimaryBuffer(SdfTex *texture);
+extern s32 sdfTexGetPrimaryBufferSize(SdfTex *texture);
+extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
+extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 D_0034E010[4];
+extern f32 D_0034E020[4];
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+extern f64 fabs(f64 value);
+extern BillChildPayload *D_003BD7F4;
+
 INCLUDE_ASM(const s32, "effect/billManager", func_001502B0);
 
 
-typedef struct BillManagerNode BillManagerNode;
 
-struct BillManagerNode {
-    u8 pad00[0x2C];
-    SdfListHead *pendingLists[5];
-    u16 packetListIndex;
-    u8 pad42[6];
-    void *work;
-    BillManagerNode *next;
-};
-
-typedef struct BillPacketWork {
-    u8 pad00[0x3FC];
-    s32 count;
-} BillPacketWork;
-
-extern BillManagerNode *D_003BD7F4;
+extern BillChildPayload *D_003BD7F4;
 extern SdfPoolNode *D_0034E030[5];
-extern void sdfAppendPacket(SdfListHead *list, u32 packet);
-extern u32 sdfBuildCompactVertexVifPacket(void *work, void *arg1, void *arg2, void *arg3, s32 count, s32 callback);
 
 void func_00150750(void) {
-    BillManagerNode *node;
+    BillChildPayload *node;
 
     node = D_003BD7F4;
     if (node != NULL) {
@@ -53,8 +56,8 @@ void func_00150750(void) {
             s32 i;
 
             if (count > 0) {
-                u32 packet = sdfBuildCompactVertexVifPacket(work, (u8 *)work + 0xF0, (u8 *)work + 0x12C,
-                                           (u8 *)work + 0x21C, count, 0);
+                u32 packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors, work->uv,
+                                           work->offsets, count, 0);
                 sdfAppendPacket(node->pendingLists[node->packetListIndex], packet);
                 work->count = 0;
             }
@@ -69,7 +72,7 @@ void func_00150750(void) {
             }
 
             {
-                BillManagerNode *next = node->next;
+                BillChildPayload *next = node->next;
                 node->next = node;
                 node = next;
             }
@@ -80,13 +83,6 @@ void func_00150750(void) {
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00150840);
 
-typedef struct BillDrawNode {
-    BillManagerNode *first;
-    BillManagerNode *second;
-    u8 pad08[0xC];
-    SdfListHead *packetList;
-    struct BillDrawNode *next;
-} BillDrawNode;
 INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
 
 
@@ -102,25 +98,23 @@ typedef struct BillStatePacket {
     u64 alphaRegister;
 } BillStatePacket;
 
-extern BillDrawNode *D_003BD7F8;
+extern BillRenderPair *D_003BD7F8;
 extern SdfPoolNode D_00325228;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
-extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 extern void func_002D4CC8(const void *, void *, s32);
-extern void func_00150EB0(BillDrawNode *);
+extern void func_00150EB0(BillRenderPair *);
 
 void func_00151010(void) {
-    BillDrawNode *node = D_003BD7F8;
+    BillRenderPair *node = D_003BD7F8;
     SdfListHead *list;
     void *texture;
     BillStatePacket *packet;
 
     if (node != NULL) {
         do {
-            BillPacketWork *work = node->second->work;
+            BillPacketWork *work = node->children[1]->work;
             if (work->count != 0) {
                 func_00150EB0(node);
             }
@@ -129,12 +123,12 @@ void func_00151010(void) {
             node = node->next;
         } while (node != NULL);
     }
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
+    texture = (void *)sdfAllocPacketAligned(0x40);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
-    packet = sdfAllocPacketAligned(0x40);
+    packet = (BillStatePacket *)sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;
     packet->vifCommands = 0x5000000310000000ULL;
     packet->gifTag = 0x1000000000008002ULL;
@@ -186,8 +180,8 @@ BillObj *billAllocList(void *resourceData) {
     newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
-    newobj->unk48 = 0;
-    newobj->unk4C = 0;
+    newobj->pair.packetList = 0;
+    newobj->pair.next = 0;
     newobj->pair.unk8 = 0;
     billSetAnimationEntry(newobj, 0);
     return newobj;
@@ -205,8 +199,8 @@ BillObj *billCloneList(BillObj *obj) {
     newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
-    newobj->unk48 = 0;
-    newobj->unk4C = 0;
+    newobj->pair.packetList = 0;
+    newobj->pair.next = 0;
     billSetAnimationEntry(newobj, 0);
     return newobj;
 }
@@ -373,7 +367,6 @@ typedef struct BillSnapshot {
     BillTextureQuad uv; /* 0x14 */
 } BillSnapshot;
 
-extern void *memcpy(void *, const void *, u32);
 extern BillChildPayload *func_00151398(BillObj *obj, BillOut *entries);
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
