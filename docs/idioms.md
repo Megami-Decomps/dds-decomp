@@ -600,6 +600,40 @@ sq $2,0(dst); jr $31; nop`. A plain `u128` copy in C gives `lq; jr; sq`
 `.set noreorder`, like `fsqrtf`). This is the only non-COP2 asm helper
 allowed, and only for this exact instruction pair.
 
+For a copy between four-float vectors,
+`PCP_COPY_VECTOR_F32(dst, src)` declares both complete vector objects
+without a global memory barrier. Both addresses must designate four float
+elements, be 16-byte aligned, and have no evaluation side effects.
+It is a float-vector API; do not use it for integer or opaque-byte objects.
+The existing `PCP_COPY_VECTOR` keeps its established barrier contract.
+A plain C quadword copy was tried first and produced 175 words rather than
+retail's 177-word orbit body.
+
+The orbit updaters (`func_0018BB88` / `func_001937C0`, 708 bytes each)
+retain the already loaded history owner when the particle count is zero,
+and reload it after a nonempty loop. A global copy barrier prevents that
+reuse. The bounded float-vector form preserves it. Cache the actual
+particle owner before its count and resolve the value owner after the
+scalar parameters, as in the native entry.
+
+Use a record containing the four floats for the memory operands.
+EE GCC 2.96 converts an array input into `asm_input:SI` and a stack-stored
+pointer; the record stays `asm_input:BLK` for the actual vector. A scalar
+`u128` operand or a byte-array record produces the same matching updater
+here, but neither is a valid generic float-vector alias contract in this
+compiler: a diagnostic store/copy/read sequence returns a stale cached
+float. The float-member record correctly reloads the destination and
+retains all four source stores before the copy. An integer readback remains
+a useful negative control for the float-only API. Separate float-component
+operands are truthful but keep the origin address in a saved register here,
+changing allocation.
+
+GCC documents the general
+[record-wrapped fixed-size memory-span idiom](https://gcc.gnu.org/onlinedocs/gcc-3.4.4/gcc/Extended-Asm.html).
+The component type still matters for this old compiler's alias analysis;
+a record containing bytes does not automatically inherit the universal
+alias behavior of a direct character access.
+
 ## Struct assignment vs `memcpy`
 
 `*dst = *src` on a struct of `u32 word[N]` reproduces retail's `ldl/ldr`
