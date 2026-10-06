@@ -4515,7 +4515,40 @@ void btlClearSharedBattleStateWords(void) {
     } while (-1 < temp_v0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7940);
+/* The reset routine clears all four words of the shared battle flag bank. */
+typedef struct BattleFlagSaveState {
+    u8 pad00000[0x16F00];
+    u32 sharedBattleFlags[4];
+} BattleFlagSaveState;
+
+s32 func_001B7940(s32 id, s32 operation) {
+    s32 selector;
+    s32 offset;
+    u32 word;
+    u32 bit;
+
+    id = (u16)id;
+    offset = id - 0x1AB;
+    selector = (s8)operation;
+    if (offset != 0) {
+        word = (u32)offset >> 5;
+        bit = offset & 0x1F;
+    } else {
+        word = 0;
+        bit = 0;
+    }
+    switch (selector) {
+    case 0:
+        ((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] |= 1 << bit;
+        break;
+    case 1:
+        ((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] &= ~(1 << bit);
+        break;
+    default:
+        return ((((BattleFlagSaveState *)datGameState)->sharedBattleFlags[word] & (1 << bit)) != 0);
+    }
+    return 1;
+}
 
 void func_001B7A00(void) {
     s32 i;
