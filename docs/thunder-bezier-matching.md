@@ -150,9 +150,24 @@ outer row. Both renderer kinds reach the XYZ-only packer, so the earlier
 unused-W and scoped SDK-store conclusions apply. Zero-count setup remains
 unchanged. Both complete first drafts match without source variants.
 
+## Per-spark generation
+
+`func_00164BA8` (DDS1) and `func_0016C800` (DDS2) each match 1,384 bytes.
+The indexed spark owns one kind-0 system with exactly one cell. Two two-vector
+rows per iteration fill its 4h-quadword capacity, with vertices-2/vertices-1
+joining within the last row. The same XYZ-only consumer and zero-count setup
+restrictions apply.
+
+The local SparkParams recovery gives the endpoint quadwords at 0x10/0x20
+complete four-float objects, exposes wave amplitude at 0x3C and width at 0x4C,
+and asserts the unchanged 0xA4 size. Destination selection directly reads the
+indexed spark's system field after preparing the width vectors; it does not
+keep an unnecessary alias for the full spark record. That natural entry
+boundary reproduces the remaining address and scheduling details.
+
 ## Verification
 
-Canonical whole-unit checks report 66 matches and zero differences for each
+Canonical whole-unit checks report 67 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
