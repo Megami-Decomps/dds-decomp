@@ -267,7 +267,47 @@ void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_003140C8);
+extern void func_00313D80(s32, DatPartyRecord *);
+void ptyRecomputeMaxHpMp(DatPartyRecord *);
+extern void func_00314868(DatPartyRecord *, u16);
+s32 func_00315388(u16, PrfSkillList *);
+void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
+void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
+
+void func_003140C8(s32 mode, DatPartyRecord *unit) {
+    PrfSkillList list;
+    s32 profile;
+    u16 profileId;
+    u32 i;
+
+    func_00313D80(mode, unit);
+    switch (mode) {
+    case 0:
+        ptyLoadPresetSkillSlots(unit);
+        ptyMarkPresetSkillPool(unit);
+        ptyRecomputeMaxHpMp(unit);
+        unit->hp = unit->maxHp;
+        unit->mp = unit->maxMp;
+        break;
+    case 1:
+        profile = func_00314C10(unit);
+        profileId = profile;
+        if (profile != 0 && func_00314990(unit, profileId) == 0) {
+            func_00314868(unit, profileId);
+            memset(&list, 0, sizeof(list));
+            func_00315388(profileId, &list);
+            if (list.count != 0) {
+                scrClearAllSecondaryScriptFlags(unit);
+                for (i = 0; i < list.count; i++) {
+                    u16 skillId = list.skills[i];
+                    scrSetFlag(unit, skillId);
+                    scrSetSecondaryScriptFlag(unit, skillId);
+                }
+            }
+        }
+        break;
+    }
+}
 
 /* Rebuild skill lists for the five occupied party slots. */
 void ptyRebuildAllProfiles(void) {
