@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_resource.h"
 #include "eff.h"
 #include "itf.h"
 #include "btl_state.h"
@@ -4365,16 +4366,6 @@ void func_001B6438(void) {
     }
 }
 
-typedef struct BtlResBlock {
-    SdfMemBlock *unk0;
-    s32 nameA;
-    s32 nameB;
-    s32 nameC;
-    EffectSlotSet *resA;
-    EffectSlotSet *resB;
-    EffectSlotSet *resC;
-    s32 unk1C;
-} BtlResBlock;
 extern BtlResBlock *btlResourceBlock;
 
 extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
