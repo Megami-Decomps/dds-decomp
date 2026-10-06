@@ -4288,7 +4288,81 @@ void btlUpdateCommandPanelRowFades(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6180);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6438);
+typedef struct BattleCornerFadeDefaults {
+    s16 values[20];
+} BattleCornerFadeDefaults;
+typedef struct BattleCornerPhaseDefaults {
+    u32 values[12];
+} BattleCornerPhaseDefaults;
+extern const BattleCornerFadeDefaults D_00415C30;
+extern const BattleCornerPhaseDefaults D_00415C58;
+
+void func_001B6438(void) {
+    BattleCornerFadeDefaults limits = D_00415C30;
+    BattleCornerPhaseDefaults phases = D_00415C58;
+    s32 i;
+    switch (btlCommandPanelWork->state) {
+    case 1:
+        btlCommandPanelWork->labelFade += 0x10;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade += 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] += 0x10;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] >= limits.values[i] ? limits.values[i] : btlCommandPanelWork->cornerFade[i];
+            btlCommandPanelWork->cornerPhase[i] = phases.values[i];
+        }
+        if (btlCommandPanelWork->labelFade >= 0x80 && btlCommandPanelWork->slotsB[0].fadeValue >= 0xF0)
+            btlCommandPanelWork->state = 2;
+        break;
+    case 2: {
+        btlCommandPanelWork->labelFade -= 8;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0x80 ? 0x80 :
+            btlCommandPanelWork->labelFade >= 0x100 ? 0xFF : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0x80 ? 0x80 :
+            btlCommandPanelWork->classFade >= 0x100 ? 0xFF : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerPhase[i] = (btlCommandPanelWork->cornerPhase[i] + 8) % 360;
+            btlCommandPanelWork->cornerFade[i] =
+                (u32)((sdfSinPoly((f32)((btlCommandPanelWork->cornerPhase[i] + 90) % 360) /
+                                  180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 128.0f);
+        }
+        break;
+    }
+    case 3:
+        btlCommandPanelWork->labelFade -= 0x10;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= 0x10;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] -= 0x10;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
+        }
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        break;
+    case 4:
+        btlCommandPanelWork->labelFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
+            btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
+        btlCommandPanelWork->classFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlCommandPanelWork->classFade = btlCommandPanelWork->classFade <= 0 ? 0 :
+            btlCommandPanelWork->classFade > 0x80 ? 0x80 : btlCommandPanelWork->classFade;
+        for (i = 0; i < 4; i++) {
+            btlCommandPanelWork->cornerFade[i] -= btlTrackedTaskHandles->status.bytes.fadeStep;
+            btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
+                btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
+        }
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        break;
+    }
+}
 
 typedef struct BtlResBlock {
     SdfMemBlock *unk0;
