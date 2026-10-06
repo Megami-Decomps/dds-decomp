@@ -137,7 +137,7 @@ extern s32 D_00359A78[];
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 extern u32 fldGetSceneScriptTaskUserData(void);
 
@@ -254,7 +254,35 @@ void btlClearActorSelectedEntryIndex(s32 actor) {
     ((BtlUnit *)actor)->selectedEntryIndex = -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A1990);
+/* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */
+void func_001A1990(DatPartyRecord *entry, s32 index) {
+    u32 count;
+    u32 i;
+
+    memset(entry, 0, sizeof(*entry));
+    entry->flags = 1;
+    entry->affinityTableIndex = 0;
+    entry->unitId = index;
+    entry->level = datEnemyRecords[index].level;
+    entry->totalExp = 0;
+    for (i = 0; i < 5; i++) {
+        entry->baseStats[i] = datEnemyRecords[index].baseStats[i];
+    }
+    count = 0;
+    for (i = 0; i < 8; i++) {
+        if (datEnemyRecords[index].skills[i] != 0) {
+            entry->effectData[count++] = datEnemyRecords[index].skills[i];
+        }
+    }
+    for (i = count; i < 24; i++) {
+        entry->effectData[i] = 0;
+    }
+    entry->unk20 = count;
+    entry->maxHp = datEnemyRecords[index].maxHp;
+    entry->hp = datEnemyRecords[index].hp;
+    entry->maxMp = datEnemyRecords[index].maxMp;
+    entry->mp = datEnemyRecords[index].mp;
+}
 
 void *btlGetActorEntryData(BtlUnit *actor) {
     DatPartyRecord *entry;
@@ -308,10 +336,11 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2258);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2608);
 
 s32 btlGetEntryFlagsUnlessDisabled(s32 entry) {
-    if ((*(u16 *)entry & 4) != 0) {
+    DatPartyRecord *record = (DatPartyRecord *)entry;
+    if ((record->flags & 4) != 0) {
         return 0;
     }
-    return *(s32 *)(datEnemyRecords + *(u16 *)(entry + 4) * 76);
+    return datEnemyRecords[record->unitId].flags;
 }
 
 void func_001A29B8(void) {
@@ -464,8 +493,9 @@ s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
 }
 
 s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
-    if (index == 0 && (*(u32 *)(object + 0x110) & 0x400) != 0) {
-        return *(s8 *)(datEnemyRecords + *(u16 *)(object + 0x124) * 76 + 0x46);
+    BtlUnit *unit = (BtlUnit *)object;
+    if (index == 0 && (unit->flags & 0x400) != 0) {
+        return datEnemyRecords[unit->mode].unk46;
     }
     return *(s8 *)(datCommandSelectors + index * 2);
 }
@@ -634,7 +664,7 @@ extern char D_003A1848[];
 
 void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     BattleController *controller = (BattleController *)btlGetRuntime();
-    DatEnemyRecord *record = &((DatEnemyRecord *)datEnemyRecords)[enemy->mode];
+    DatEnemyRecord *record = &datEnemyRecords[enemy->mode];
     s32 level = func_001A9488(4);
     s32 enemyLevel = record->level;
     s32 allowance = datBattleParameters->rewardLevelAllowance;
@@ -1424,7 +1454,7 @@ u8 func_001A6968(BtlUnit *unit, s32 command) {
 u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
     if (index == 0) {
         if ((((BtlUnit *)object)->flags & 0x400) != 0) {
-            return *(u8 *)(datEnemyRecords + ((BtlUnit *)object)->mode * 76 + 0x48);
+            return datEnemyRecords[((BtlUnit *)object)->mode].unk48;
         }
         return 12;
     }
@@ -1577,7 +1607,7 @@ s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
     if (acquirer != 0 && !(((BtlUnit *)acquirer)->flags & 0x200)) {
         return result;
     }
-    entry = &((DatEnemyRecord *)datEnemyRecords)[((BtlUnit *)enemy)->mode];
+    entry = &datEnemyRecords[((BtlUnit *)enemy)->mode];
     ratio = func_001A7C20(acquirer, enemy, 1);
     ep = (u32)((f32)entry->experience * ratio);
     if (entry->flags & 0x2000) {
@@ -1639,7 +1669,7 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     if (acquirer != 0 && !(((BtlUnit *)acquirer)->flags & 0x200)) {
         return result;
     }
-    entry = &((DatEnemyRecord *)datEnemyRecords)[((BtlUnit *)enemy)->mode];
+    entry = &datEnemyRecords[((BtlUnit *)enemy)->mode];
     money = entry->money;
     if (entry->flags & 0x2000) {
         money *= 100;
@@ -1656,7 +1686,7 @@ extern f32 func_001A7C20(u8 *, u8 *, s32);
 
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
 s32 btlCalculateHuntEpReward(u8 *arg0, u8 *arg1) {
-    DatEnemyRecord *entry = &((DatEnemyRecord *)datEnemyRecords)[((BtlUnit *)arg1)->mode];
+    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)arg1)->mode];
     f32 ratio = func_001A7C20(arg0, arg1, 0);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
@@ -1955,7 +1985,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8A30);
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
-    u8 *status = (u8 *)(datEnemyRecords + ((BtlUnit *)object)->mode * 76 + 0x3E);
+    u8 *status = datEnemyRecords[((BtlUnit *)object)->mode].unk3E;
     u32 i;
     for (i = 0; i < 2; i++) {
         if (*status++ != 0) {
@@ -2255,7 +2285,7 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(s32 object) {
     if ((((BtlUnit *)object)->flags & 0x400) == 0) {
         return 0;
     }
-    return ((s32)((DatEnemyRecord *)datEnemyRecords)[((BtlUnit *)object)->mode].flags & 0x100) > 0;
+    return ((s32)datEnemyRecords[((BtlUnit *)object)->mode].flags & 0x100) > 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);

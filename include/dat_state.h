@@ -68,7 +68,8 @@ typedef struct DatPartyRecord {
     u8 pad1B;
     u16 hpBonus;
     u16 mpBonus;
-    u8 pad20[2];
+    u8 unk20; /* Packed nonzero effectData count written by the enemy constructor. */
+    u8 pad21;
     u16 effectData[24];
     u16 menuValue;
     u8 pad54;
@@ -214,12 +215,18 @@ typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1C4 ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
 #endif
 
-/* The 0x4C-byte enemy table supplies skills and all three reward quantities. */
+/* The 0x4C-byte enemy table supplies initial party vitals/stats, skills and
+ * rewards (DDS1 001A1990, DDS2 001AA898 copy the leading values). */
 typedef struct DatEnemyRecord {
     u32 flags;            /* 0x00 */
     u8 pad04;
     u8 level;             /* 0x05 */
-    u8 pad06[0xF];
+    u16 hp;               /* 0x06 */
+    u16 maxHp;            /* 0x08 */
+    u16 mp;               /* 0x0A */
+    u16 maxMp;            /* 0x0C */
+    u8 pad0E[2];
+    u8 baseStats[5];      /* 0x10 */
     u8 unk15;            /* Copied to the command actor's actionNumber on model change. */
     u8 pad16[2];
     u16 skills[8];        /* 0x18 */
@@ -227,7 +234,13 @@ typedef struct DatEnemyRecord {
     u16 unk2C;
     u16 experience;       /* 0x2E */
     u16 huntExperience;   /* 0x30 */
-    u8 pad32[0x1A];
+    u8 pad32[0xC];
+    u8 unk3E[2];          /* The battle status accessor tests both adjacent bytes. */
+    u8 pad40[6];
+    s8 unk46;            /* Signed indexed-value accessor. */
+    u8 pad47;
+    u8 unk48;            /* Enemy display-byte accessor. */
+    u8 pad49[3];
 } DatEnemyRecord;
 
 typedef char DatEnemyRecordSizeCheck[sizeof(DatEnemyRecord) == 0x4C ? 1 : -1];

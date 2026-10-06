@@ -2005,7 +2005,7 @@ void btlApplyPartySetupOverride(void) {
                 for (; n < 24; n++) {
                     datGameState->party[i].effectData[n] = 0;
                 }
-                datGameState->party[i].pad20[0] = 0;
+                datGameState->party[i].unk20 = 0;
             }
             if (i < D_003BBB10) {
                 datGameState->party[i].flags |= 0x1002;
