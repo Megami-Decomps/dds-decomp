@@ -52,8 +52,9 @@ typedef struct BrsResultTransition {
     s32 state;
 } BrsResultTransition;
 
-#ifdef VERSION_DDS1
+/* Both games use 0x68-byte progress rows, with different live field offsets. */
 typedef struct BrsProgressAnimation {
+#ifdef VERSION_DDS1
     u8 pad00[0x14];
     s8 state;
     u8 pad15[0x17];
@@ -64,8 +65,17 @@ typedef struct BrsProgressAnimation {
     s32 frames;
     s8 unk40;
     u8 pad41[0x27];
-} BrsProgressAnimation;
+#else
+    u8 pad00[0x10];
+    s8 state;
+    u8 pad11[7];
+    s16 level;
+    u8 pad1A[2];
+    s32 remaining;
+    s32 applied;
+    u8 pad24[0x44];
 #endif
+} BrsProgressAnimation;
 
 /* Allocation/zeroing: DDS1 00262684/0026269C; DDS2 0029959C/002995B4. */
 typedef struct BrsSkillPackageWork {
@@ -144,7 +154,11 @@ typedef struct BrsSkillPackageWork {
     u32 opacity;
     s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
     s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
-    u8 padAEBA[0x826];
+    u8 padAEBA[0x1A6];
+    BrsProgressAnimation levelAnimation[5];
+    u8 padB268[0x138];
+    BrsProgressAnimation profileAnimation[5];
+    u8 padB5A8[0x138];
 #endif
     s32 fadeProgress;
     u32 selectionInitialized;
@@ -174,6 +188,11 @@ typedef char BrsSkillPackageWork_profileAnimation_offset_check[
 #else
 typedef char BrsRewardSummary_size_must_be_0x30[(sizeof(BrsRewardSummary) == 0x30) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0xB704[(sizeof(BrsSkillPackageWork) == 0xB704) ? 1 : -1];
+typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
+typedef char BrsSkillPackageWork_levelAnimation_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xB060) ? 1 : -1];
+typedef char BrsSkillPackageWork_profileAnimation_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->profileAnimation == 0xB3A0) ? 1 : -1];
 typedef char BrsSkillPackageWork_earnedItem_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->earnedItem == 0xB700) ? 1 : -1];
 #endif
