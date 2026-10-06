@@ -1092,10 +1092,6 @@ u16 itfMesGetGlobalFlags(void) {
     return itfMesWork.flags;
 }
 
-typedef struct ItfMesDrawCallback {
-    u8 pad0[0x10];
-    void (*invoke)(void *, s32);
-} ItfMesDrawCallback;
 
 struct ItfMesWindowRec {
     u8 pad00[0xC];
@@ -1111,10 +1107,10 @@ extern char D_00436610[];
 extern char D_00436618[];
 extern char D_00436620[];
 extern char D_00436628[];
-extern ItfMesDrawCallback kwlnPositionedTextSurface;
+extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void sdfAppendPacket(s32, s32);
+extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_001A7A98(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
@@ -1133,7 +1129,7 @@ s32 func_001A4CF8(void) {
     ItfMesBlkA4 *panel;
     UiSprite *panelSprite;
     s32 *position;
-    s32 packetList;
+    SdfListHead *packetList;
     s32 item;
     s32 y;
     const char *format;
@@ -1198,7 +1194,7 @@ s32 func_001A4CF8(void) {
         }
     }
 
-    packetList = sdfCreateResetPacketList();
+    packetList = (SdfListHead *)sdfCreateResetPacketList();
     kwlnDrawSpriteCell(packetList, 0x10, 0x10, 0x1E, 9);
     format = D_00436618;
     y = 0x7A00;
@@ -1235,7 +1231,7 @@ s32 func_001A4CF8(void) {
                                                  position[1] >> 3,
                                                  position[2] >> 4,
                                                  position[3] >> 3));
-    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, packetList);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, packetList);
     return 0;
 }
 
