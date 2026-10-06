@@ -192,9 +192,39 @@ C scalar substitutions. The inherited legacy SDK-store restriction continues
 to apply only to these reviewed bodies and their observed readbacks; changed
 loops or branches require another audit.
 
+## Vector-cell strip generation
+
+`func_00163780` (DDS1) and `func_0016B3D8` (DDS2) each match 884 bytes.
+The separate effCreateThunderCellSystemWork constructor supplies kind-4
+history with 5(p+1) quadwords. The generator computes row count from that
+system capacity before publishing the active cell count, then binds the
+indexed source cell. That source boundary avoids an alias-induced reload.
+Each iteration writes one complete five-vector row.
+
+The existing local 0x4C-byte VectorParams layout exposes the origin quadword
+and widths at 0x3C/0x44. A single random multiplier scales both widths. Each
+row uses three sampled 75-degree Euler angles to perturb its source axis,
+then a fourth sample perturbs the cell's negative rotation angle by 70 percent.
+The center is computed from the previous placement before the next rotation.
+
+The original axis explicitly has W=0. Placement and output scratch W lanes
+retain the original unspecified state; only XYZ contributes to rotation,
+normalization and the kind-4 packet consumer. The existing SDK-store limitation
+still applies. In particular, the actual next-iteration scalar loads of the
+VU-written placement vector and the axis-angle callee's reads are part of this
+pair's focused readback audit.
+
+Geometry alone fills its capacity for every constructor u16 perCell value.
+The existing symmetric-color initializer has a stricter convention: it uses
+half=(rowCount>>1), divides by half before its cell-count guard, and writes
+paired rows. Thus p=0 divides by zero during construction, and an even p>0
+leaves the last color row untouched. Fully initialized constructor colors
+require odd p>=1 unless another producer supplies that row. No new guard or
+color-fill change is included here.
+
 ## Verification
 
-Canonical whole-unit checks report 68 matches and zero differences for each
+Canonical whole-unit checks report 69 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
