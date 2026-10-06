@@ -1,30 +1,20 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mnu_shooting.h"
 
 
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 
-typedef struct TimerWork {
-    u8 pad00[0x74];
-    s32 currentScore; /* 0x74: capped run score */
-    s32 peakScore; /* 0x78: high-water mark seeded from the saved score */
-    s32 pendingScore; /* 0x7C: score snapshot clamped/committed by the score callbacks */
-    s32 progress;  /* 0x80 clamped to 100 */
-    s32 step;      /* 0x84 quantised progress band */
-    s16 completed; /* 0x88: remaining final-band ticks, decremented by the update */
-    s16 countdown; /* 0x8A: interval before the next progress decrement */
-    s32 updateCount; /* 0x8C */
-} TimerWork;
 
-void func_0031A830(u8 *work);
+void func_0031A830(MnuShootingWork *timer);
 
 /* Advance progress for the selected record mode unless the final-band timer is active. */
-void func_0031A638(u8 *record, s32 unused, TimerWork *timer) {
+void func_0031A638(u8 *record, s32 unused, MnuShootingWork *timer) {
     if ((record[1] & 0xF) == 4 && timer->completed <= 0) {
         timer->progress++;
         timer->updateCount++;
-        func_0031A830((u8 *)timer);
+        func_0031A830(timer);
     }
 }
 
@@ -32,7 +22,7 @@ extern void func_0035B6E0(const char *fmt, ...);
 extern s32 mdlFlagTest(s32);
 
 /* Seed the saved-score floor and score snapshots, then clear the current score. */
-void mnuInitializeHighScoreState(TimerWork *work) {
+void mnuInitializeHighScoreState(MnuShootingWork *work) {
     u32 minimum = mdlFlagTest(0x80E) == 0 ? 300000U : 600000U;
     if (datGameState->highScore < minimum) {
         datGameState->highScore = minimum;
@@ -46,7 +36,7 @@ void mnuInitializeHighScoreState(TimerWork *work) {
 
 
 /* Clamp the pending score snapshot to the current high-water mark. */
-void func_0031A730(TimerWork *work) {
+void func_0031A730(MnuShootingWork *work) {
     u32 peakScore = work->peakScore;
     u32 pendingScore = work->pendingScore;
 
@@ -59,7 +49,7 @@ void func_0031A730(TimerWork *work) {
 
 
 /* Commit a new saved high score and record whether this snapshot beat the old value. */
-void mnuUpdateHighScoreFlag(TimerWork *work) {
+void mnuUpdateHighScoreFlag(MnuShootingWork *work) {
     u32 pendingScore = work->pendingScore;
 
     if (datGameState->highScore < pendingScore) {
@@ -74,7 +64,7 @@ void mnuUpdateHighScoreFlag(TimerWork *work) {
 
 
 /* Reset current and peak scores to the pending snapshot. */
-void func_0031A7F8(TimerWork *work) {
+void func_0031A7F8(MnuShootingWork *work) {
     s32 pendingScore = work->pendingScore;
 
     work->peakScore = pendingScore;
@@ -83,8 +73,7 @@ void func_0031A7F8(TimerWork *work) {
 }
 
 /* Clamp/quantize progress; reaching the last band starts the timed completion state. */
-void func_0031A830(u8 *work) {
-    TimerWork *timer = (TimerWork *)work;
+void func_0031A830(MnuShootingWork *timer) {
     s32 progress;
     f32 progressRatio;
 
@@ -112,10 +101,10 @@ void func_0031A830(u8 *work) {
 }
 
 /* Decay progress at the current interval and maintain the score high-water mark. */
-void mnuTickScoreProgressState(TimerWork *work) {
+void mnuTickScoreProgressState(MnuShootingWork *work) {
     u32 currentScore;
 
-    func_0031A830((u8 *)work);
+    func_0031A830(work);
     if (work->completed > 0) {
         work->completed--;
     }
@@ -147,4 +136,111 @@ void mnuTickScoreProgressState(TimerWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031AA10);
+extern void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration);
+extern void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration);
+extern void itfSetFadeMode(void *entry, s32 mode, s32 step);
+extern void itfQueueFadeMode(void *entry, u32 mode, u32 step, u32 delay);
+extern void func_0031EE28(void *entry, u32 displayValue);
+extern void mnuAdvanceTitleStateUnderSemaphore(void);
+extern s8 D_0037F510[];
+
+s32 func_0031AA10(MnuShootingWork *work) {
+    switch (work->phase) {
+    case 0:
+        work->phaseTicks = 0;
+        work->phase = 1;
+        kwlnFadeOutStart(0, 0, 0, 30);
+        break;
+    case 1:
+        if (++work->phaseTicks > 180) {
+            work->phaseTicks = 0;
+            work->phase = 2;
+        }
+        break;
+    case 3:
+        work->phase = 4;
+        work->phaseTicks = 0;
+        itfSetFadeMode(work->scoreFade, 1, 8);
+        itfQueueFadeMode(work->scoreFade, 0, 8, 120);
+        break;
+    case 4:
+        if (++work->phaseTicks > 200) {
+            work->phaseTicks = 0;
+            work->phase = 5;
+        }
+        break;
+    case 5:
+        if (++work->phaseTicks > 180) {
+            work->phaseTicks = 0;
+            work->phase = 6;
+            kwlnFadeInStart(0, 0, 0, 30);
+            mnuAdvanceTitleStateUnderSemaphore();
+        }
+        break;
+    case 6:
+        if (++work->phaseTicks > 60) {
+            work->phaseTicks = 0;
+            work->phase = 7;
+        }
+        break;
+    case 7:
+        work->state = 0;
+        work->phase = 0;
+        work->round++;
+        return 1;
+    case 8:
+        work->phaseTicks = 0;
+        work->phase = 9;
+        break;
+    case 9:
+        if (++work->phaseTicks > 120) {
+            work->phaseTicks = 0;
+            work->phase = 10;
+            work->choiceIndex = 0;
+            itfSetFadeMode(work->choiceFade, 1, 8);
+        }
+        break;
+    case 10:
+        if (D_0037F510[0x26] < 0) {
+            work->choiceIndex--;
+        }
+        if (D_0037F510[0x27] < 0) {
+            work->choiceIndex++;
+        }
+        if (work->choiceIndex < 0) {
+            work->choiceIndex = 0;
+        }
+        if (work->choiceIndex > 1) {
+            work->choiceIndex = 1;
+        }
+        func_0031EE28(work->choiceFade, work->choiceIndex);
+        if (D_0037F510[0x21] < 0) {
+            work->phase = 11;
+            work->result = work->choiceIndex;
+        }
+        break;
+    case 11:
+        work->phaseTicks = 0;
+        work->phase = 12;
+        itfSetFadeMode(work->choiceFade, 0, 8);
+        kwlnFadeInStart(0, 0, 0, 120);
+        mnuAdvanceTitleStateUnderSemaphore();
+        break;
+    case 12:
+        if (++work->phaseTicks > 120) {
+            work->phaseTicks = 0;
+            switch (work->result) {
+            case 0:
+                work->phase = 0;
+                work->state = 0;
+                return 3;
+            case 1:
+                work->phase = 0;
+                work->state = 0;
+                return 2;
+            }
+        }
+        break;
+    }
+    return 0;
+}

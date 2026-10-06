@@ -2,6 +2,7 @@
 #include "sdf.h"
 #include "mdl.h"
 #include "itf.h"
+#include "mnu_shooting.h"
 
 
 
@@ -80,12 +81,6 @@ typedef struct MnuSectionObjectList {
     u8 *objects;
 } MnuSectionObjectList;
 
-typedef struct MnuSectionModelWork {
-    SdfMemBlock *allocation;
-    s32 count;
-    s32 (*groups)[4];
-    u32 unkC;
-} MnuSectionModelWork;
 
 /* Package entries are walked through their first-word link by the loader. */
 typedef struct MnuPackageEntry {
@@ -100,43 +95,11 @@ typedef struct MnuPackageEntry {
     s32 unk1C;
 } MnuPackageEntry;
 
-/* Shared work for the shooting task's package requests and state callbacks. */
-typedef struct MnuShootingWork {
-    SdfMemBlock *allocation;
-    MnuSectionObjectList *objects;
-    MnuSectionObjectList *playerObjects;
-    MnuSectionObjectList *mapObjects;
-    MnuSectionObjectList *drawObjects;
-    MnuSectionObjectList *progressWork;
-    MnuSectionObjectList *alternateProgressWork;
-    MnuSectionModelWork *modelWork;
-    MnuEffectWork *effectWork;
-    MnuSectionObjectList *work24;
-    u32 *spriteWork;
-    u32 *tintWork;
-    u32 resourceSlots[7];
-    u8 pad4C[0xC];
-    s32 state;
-    s32 (*initialize)(u8 *work);
-    s32 (*update)(u8 *work);
-    u8 pad64[4];
-    u32 unk68;
-    u32 unk6C;
-    u32 unk70Bit0 : 1;
-    u32 initialized : 1;
-    u32 unk70Rest : 30;
-    u32 unk74;
-    u8 pad78[0x1E];
-    s16 unk96;
-    u8 pad98[0x140];
-    u16 unk1D8;
-    u8 pad1DA[6];
-} MnuShootingWork;
 
 extern MenuWorkEntry D_0040ABF8;
 extern void mnuDeactivateWorkEntry(MenuWorkEntry *);
 extern void sdfReleaseResourceAllocation(SdfMemBlock *);
-extern void mnuDestroyAllModelNodeContexts(s32 *);
+extern void mnuDestroyAllModelNodeContexts(MnuNodeList *);
 extern u8 *mnuGetResourceProgressParameters(void);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
@@ -185,7 +148,7 @@ extern void func_0031DF48(u32 *);
 extern void dds3ReleaseSoundSlotPool(void);
 extern SdfMemBlock *D_00438948;
 extern void mnuDestroyNodeJobQueues(s32 *);
-extern void mnuUpdateHighScoreFlag(void *);
+extern void mnuUpdateHighScoreFlag(MnuShootingWork *);
 /* Retail passes the task work to this otherwise empty legacy callback. */
 extern void func_0031AF60();
 extern void itfClearTintAndWorkBuffers(u8 *);
@@ -269,8 +232,8 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
     work->allocation = block;
     work->unk68 = 0;
     work->unk1D8 = 0x80;
-    work->unk96 = 0;
-    work->unk74 = 0;
+    work->round = 0;
+    work->currentScore = 0;
     return work;
 }
 
@@ -373,7 +336,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     }
     D_00435CBC = 0x80000000;
     dds3DestroyWorldNode(dds3GetWorldSecondaryObject());
-    if (work->unk96 >= 3) {
+    if (work->round >= 3) {
         mdlFlagSet(0x849);
     } else {
         mdlFlagClear(0x849);
@@ -438,7 +401,7 @@ void func_00318570(MnuShootingWork *work) {
     }
     if (work->modelWork != NULL) {
         for (i = 0; i < work->modelWork->count; i++) {
-            mnuDestroyAllModelNodeContexts(work->modelWork->groups[i]);
+            mnuDestroyAllModelNodeContexts(&work->modelWork->groups[i]);
         }
         sdfReleaseResourceAllocation(work->modelWork->allocation);
         work->modelWork = NULL;
