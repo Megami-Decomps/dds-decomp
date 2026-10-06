@@ -319,13 +319,24 @@ typedef struct {
 
 extern FldS16Row fldActorWaypointRows[];
 
-/* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
-   scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. */
+/* Actor slots use three transition keys, signed frame counters and two float
+   triples with per-frame increments; func_00142B70 initializes the motion data. */
 typedef struct {
-    u32 unk00[11]; /* 0x00 */
-    f32 unk2C;     /* 0x2C: read as a float when copying to fldAreaState[96] */
-    u32 unk30[8];  /* 0x30 */
-    u32 unk50[3];  /* 0x50 */
+    s32 kind;
+    u32 actorId;
+    u32 unk08;
+    u32 firstKey;
+    u32 unk10;
+    u32 secondKey;
+    u32 transitionKey;
+    s32 firstFrame;
+    s32 secondFrame;
+    s32 transitionFrame;
+    s32 frameCount;
+    f32 firstValues[3];
+    f32 firstStep[3];
+    f32 secondValues[3];
+    f32 secondStep[3];
 } FldActorRow; /* 0x5C bytes */
 
 extern FldActorRow fldActorSlots[];
@@ -1366,13 +1377,13 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     if (kind == 1) {
         if (entry->floor == D_00389784[0] + 1) {
             fldPlayMenuSound(entry->sound);
-            fldBeginNpcInteractionById(fldActorSlots[index].unk00[1]);
+            fldBeginNpcInteractionById(fldActorSlots[index].actorId);
             return;
         }
     } else if (kind == 2) {
         if (entry->floor == fldAreaState[5] + 1) {
             fldAreaState[97] = 1;
-            *(f32 *)&fldAreaState[96] = fldActorSlots[index].unk2C;
+            *(f32 *)&fldAreaState[96] = fldActorSlots[index].firstValues[0];
             if (entry->motion == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
                 return;
@@ -1647,28 +1658,28 @@ void fldResetActorSlots(void) {
     s32 actorIndex;
 
     for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
-        fldActorSlots[actorIndex].unk00[0] = 0;
-        fldActorSlots[actorIndex].unk00[1] = 0;
-        fldActorSlots[actorIndex].unk00[2] = 0;
-        fldActorSlots[actorIndex].unk00[3] = -1;
-        fldActorSlots[actorIndex].unk00[4] = 0;
-        fldActorSlots[actorIndex].unk00[5] = -1;
-        fldActorSlots[actorIndex].unk00[6] = -1;
-        fldActorSlots[actorIndex].unk00[7] = 0;
-        fldActorSlots[actorIndex].unk00[8] = 0;
-        fldActorSlots[actorIndex].unk00[9] = 0;
-        fldActorSlots[actorIndex].unk2C = 0.0f;
-        fldActorSlots[actorIndex].unk30[0] = 0;
-        fldActorSlots[actorIndex].unk30[1] = 0;
-        fldActorSlots[actorIndex].unk30[2] = 0;
-        fldActorSlots[actorIndex].unk30[3] = 0;
-        fldActorSlots[actorIndex].unk30[4] = 0;
-        fldActorSlots[actorIndex].unk30[5] = 0;
-        fldActorSlots[actorIndex].unk30[6] = 0;
-        fldActorSlots[actorIndex].unk30[7] = 0;
-        fldActorSlots[actorIndex].unk50[0] = 0;
-        fldActorSlots[actorIndex].unk50[1] = 0;
-        fldActorSlots[actorIndex].unk50[2] = 0;
+        fldActorSlots[actorIndex].kind = 0;
+        fldActorSlots[actorIndex].actorId = 0;
+        fldActorSlots[actorIndex].unk08 = 0;
+        fldActorSlots[actorIndex].firstKey = -1;
+        fldActorSlots[actorIndex].unk10 = 0;
+        fldActorSlots[actorIndex].secondKey = -1;
+        fldActorSlots[actorIndex].transitionKey = -1;
+        fldActorSlots[actorIndex].firstFrame = 0;
+        fldActorSlots[actorIndex].secondFrame = 0;
+        fldActorSlots[actorIndex].transitionFrame = 0;
+        fldActorSlots[actorIndex].firstValues[0] = 0.0f;
+        fldActorSlots[actorIndex].firstValues[1] = 0;
+        fldActorSlots[actorIndex].firstValues[2] = 0;
+        fldActorSlots[actorIndex].firstStep[0] = 0;
+        fldActorSlots[actorIndex].firstStep[1] = 0;
+        fldActorSlots[actorIndex].firstStep[2] = 0;
+        fldActorSlots[actorIndex].secondValues[0] = 0;
+        fldActorSlots[actorIndex].secondValues[1] = 0;
+        fldActorSlots[actorIndex].secondValues[2] = 0;
+        fldActorSlots[actorIndex].secondStep[0] = 0;
+        fldActorSlots[actorIndex].secondStep[1] = 0;
+        fldActorSlots[actorIndex].secondStep[2] = 0;
     }
     fldSelectedActorEntryIndex = -1;
 }
@@ -1700,7 +1711,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142B70);
 
 void fldBeginNpcInteractionById(s32 id) {
     s32 i;
-    u32 *npc;
+    FldActorRow *npc;
     FldActorEntry *actor;
 
     if (id == 0) {
@@ -1712,8 +1723,8 @@ void fldBeginNpcInteractionById(s32 id) {
     if (D_00389780[0] == 0x1D || D_00389780[0] == 0x1E) {
         for (i = 0; i < 0x100; i++) {
             actor = (FldActorEntry *)(D_003932A0 + i * 108);
-            npc = (u32 *)&fldActorSlots[i];
-            if (npc[0] == 1 && npc[1] == id) {
+            npc = &fldActorSlots[i];
+            if (npc->kind == 1 && npc->actorId == id) {
                 fldApplyRoomObjectModeZero(0, 0, actor->motionName, 0);
                 return;
             }
@@ -1721,24 +1732,24 @@ void fldBeginNpcInteractionById(s32 id) {
     } else {
         for (i = 0; i < 256; i++) {
             actor = (FldActorEntry *)(D_003932A0 + i * 108);
-            npc = (u32 *)&fldActorSlots[i];
-            if (npc[0] == 1 && npc[1] == id) {
-                npc[0] = 2;
-                npc[7] = 0;
-                npc[8] = 0;
-                npc[9] = 0;
+            npc = &fldActorSlots[i];
+            if (npc->kind == 1 && npc->actorId == id) {
+                npc->kind = 2;
+                npc->firstFrame = 0;
+                npc->secondFrame = 0;
+                npc->transitionFrame = 0;
                 if (actor->motion == 5 || actor->secondaryMotion == 5 || actor->motion == 6 || actor->secondaryMotion == 6
                     || actor->motion == 7 || actor->secondaryMotion == 7 || actor->motion == 8 || actor->secondaryMotion == 8) {
-                    npc[10] = 0x28;
+                    npc->frameCount = 0x28;
                 } else {
-                    npc[10] = 0x14;
+                    npc->frameCount = 0x14;
                 }
-                npc[11] = 0;
-                npc[12] = 0;
-                npc[13] = 0;
-                npc[17] = 0;
-                npc[18] = 0;
-                npc[19] = 0;
+                npc->firstValues[0] = 0;
+                npc->firstValues[1] = 0;
+                npc->firstValues[2] = 0;
+                npc->secondValues[0] = 0;
+                npc->secondValues[1] = 0;
+                npc->secondValues[2] = 0;
                 fldApplyPendingCameraHeading();
             }
         }
