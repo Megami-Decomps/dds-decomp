@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mnu.h"
 
 extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
 
@@ -472,86 +473,86 @@ void movReleaseTitleEffects(u32 *resourceSlots) {
     }
 }
 
-void mnuInitializeCampPanelResources(u32 container, u32 *resources, u32 unused, u32 mode) {
-    func_002BCD90(container, mode, *resources, 1, resources[1], 0x2d, resources[1], 0x1d);
-    func_002BC498(container, resources[1]);
-    mnuCopyPrimaryWindowHandles(container, resources + 4);
-    mnuCopySecondaryWindowHandles(container, resources + 0xc);
-    mnuRegisterResourceHandles(container, resources + 0x14);
+void mnuInitializeCampPanelResources(u32 container, StaffSlots *resources, u32 unused, u32 mode) {
+    func_002BCD90(container, mode, resources->baseResources[0], 1, resources->baseResources[1], 0x2d, resources->baseResources[1], 0x1d);
+    func_002BC498(container, resources->baseResources[1]);
+    mnuCopyPrimaryWindowHandles(container, resources->mainResources);
+    mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
+    mnuRegisterResourceHandles(container, resources->extraResources);
     func_002BCA98(container);
-    mnuSetPanelSlotValues(container, resources[1]);
+    mnuSetPanelSlotValues(container, resources->baseResources[1]);
 }
 
 /* Snapshot base handles, then queue the main, extra and paired sprite groups.
  * Only owner word 1 selects the second column of each image table. */
-void mnuAppendCampSpriteRequests(u32 *resourceList, u32 *resourceSlots) {
+void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
 
-    mnuSnapshotCampTextureHandles(resourceSlots);
+    mnuSnapshotCampTextureHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x10 / 4 + resourceIndex);
+        effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x50 / 4 + resourceIndex);
+        effAppendListEntry(resourceList, D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, resourceSlots + 0x8 / 4 + resourceIndex);
+        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->pairResources[resourceIndex]);
     }
 }
 
 /* Clear base output slots, then destroy the main, extra and paired slot sets.
  * Each countdown decreases while its handle cursor advances forward. */
-void mnuReleaseTitleEffectSprites(u32 *resourceSlots) {
+void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots) {
     s32 resourceCountdown;
     u32 *mainCursor;
     u32 *extraCursor;
     u32 *pairCursor;
 
-    mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots);
-    mainCursor = resourceSlots + 0x10 / 4;
+    mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots->baseResources);
+    mainCursor = resourceSlots->mainResources;
     for (resourceCountdown = MNU_STAFF_MAIN_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
         effDestroyResourceSlotSet(*mainCursor++);
     }
-    extraCursor = resourceSlots + 0x50 / 4;
+    extraCursor = resourceSlots->extraResources;
     for (resourceCountdown = MNU_STAFF_EXTRA_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
         effDestroyResourceSlotSet(*extraCursor++);
     }
-    pairCursor = resourceSlots + 0x8 / 4;
+    pairCursor = resourceSlots->pairResources;
     for (resourceCountdown = MNU_STAFF_PAIR_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
         effDestroyResourceSlotSet(*pairCursor++);
     }
 }
 
 /* Poll the supplied resource list, then require nonzero handles in every group. */
-s32 movAreTitleEffectsReady(s32 resourceListAddress, u32 *resourceSlots) {
+s32 movAreTitleEffectsReady(s32 resourceListAddress, StaffSlots *resourceSlots) {
     u32 *resourceSlot;
     u32 *pairSlot;
     s32 resourceIndex;
     effPollResourceList(resourceListAddress);
     resourceIndex = 0;
-    resourceSlot = resourceSlots;
+    resourceSlot = resourceSlots->baseResources;
     for (; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         if (*resourceSlot++ == 0) {
             return 0;
         }
     }
     resourceIndex = 0;
-    resourceSlot = resourceSlots + 4;
+    resourceSlot = resourceSlots->mainResources;
     for (; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
         if (*resourceSlot++ == 0) {
             return 0;
         }
     }
     resourceIndex = 0;
-    resourceSlot = resourceSlots + 0x50 / 4;
+    resourceSlot = resourceSlots->extraResources;
     for (; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
         if (*resourceSlot++ == 0) {
             return 0;
         }
     }
-    pairSlot = resourceSlots + 2;
+    pairSlot = resourceSlots->pairResources;
     resourceIndex = 0;
     for (; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
         if (*pairSlot++ == 0) {
