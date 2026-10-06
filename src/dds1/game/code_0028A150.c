@@ -5116,7 +5116,61 @@ void fileResetSlotStates(FileRecordSlots *record) {
 
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00296F58);
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00297270);
+f32 func_00297270(EffScalarCurve *curve, s32 frame, s32 length) {
+    f32 from, to, factor, duration;
+    s32 firstFrame, secondFrame;
+    if (length == 0) {
+        return curve->initialValue;
+    }
+    duration = length;
+    switch (curve->mode) {
+    case 0:
+        factor = (f32)frame / duration;
+        from = curve->initialValue;
+        to = curve->finalValue;
+        break;
+    case 1:
+        firstFrame = (s32)(curve->firstFraction * duration);
+        if (frame < firstFrame) {
+            factor = (f32)frame / firstFrame;
+            from = curve->initialValue;
+            to = curve->firstValue;
+        } else {
+            f32 span = length - firstFrame;
+            factor = (f32)(frame - firstFrame) / span;
+            from = curve->firstValue;
+            to = curve->finalValue;
+        }
+        break;
+    case 2:
+        firstFrame = (s32)(curve->firstFraction * duration);
+        if (frame < firstFrame) {
+            factor = (f32)frame / firstFrame;
+            from = curve->initialValue;
+            to = curve->firstValue;
+        } else {
+            secondFrame = (s32)(curve->secondFraction * duration);
+            if (frame < secondFrame) {
+                f32 span = secondFrame - firstFrame;
+                factor = (f32)(frame - firstFrame) / span;
+                from = curve->firstValue;
+                to = curve->secondValue;
+            } else {
+                f32 span = length - secondFrame;
+                factor = (f32)(frame - secondFrame) / span;
+                from = curve->secondValue;
+                to = curve->finalValue;
+            }
+        }
+        break;
+    default:
+        from = curve->initialValue;
+        to = curve->finalValue;
+        factor = 0.0f;
+        break;
+    }
+    return from + (to - from) * factor;
+}
 
 
 /* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
