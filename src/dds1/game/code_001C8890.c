@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "fpu.h"
+#include "dat_state.h"
 
 extern void sdfReleaseChipBlock(void *block);
 extern s32 btlIsUnitInActiveList(void *unit);
@@ -6102,11 +6103,6 @@ u32 btlIsRuntimeFlag2000Clear(void) {
 }
 
 
-typedef struct WorldMotionData {
-    u8 pad0[0x20];
-    s32 unk20;
-} WorldMotionData;
-
 typedef struct WorldObjectSub {
     u8 pad0[0x34];
     s32 handle;
@@ -6124,28 +6120,28 @@ typedef struct WorldObj {
 
 extern void *dds3GetWorldObject(void);
 
-extern WorldMotionData *dds3GetWorldCameraObject(void *);
+extern u32 dds3GetWorldCameraObject(void *);
 
-extern void dds3SetWorldCameraObject(void *, s32);
+extern void dds3SetWorldCameraObject(void *, u32);
 
-extern f32 dds3GetCameraFieldOfView(s32);
+extern f32 dds3GetCameraFieldOfView(CameraObject *);
 
 extern void func_00106488(f32);
 void btlRefreshWorldCameraHandle(void) {
     WorldObj *object;
-    s32 handle;
+    u32 handle;
     if (((BattleController *)btlGetRuntime())->flags & 2) {
         object = dds3GetWorldObject();
         if (object != NULL) {
-            handle = (s32)dds3GetWorldCameraObject(object);
+            handle = dds3GetWorldCameraObject(object);
             if (handle != 0) {
-                if (((WorldMotionData *)handle)->unk20 != 0) {
-                    handle = ((WorldMotionData *)handle)->unk20;
+                if (((CameraObject *)handle)->next != NULL) {
+                    handle = (u32)((CameraObject *)handle)->next;
                 } else {
                     handle = object->head->sub->handle;
                 }
                 dds3SetWorldCameraObject(object, handle);
-                func_00106488(dds3GetCameraFieldOfView(handle));
+                func_00106488(dds3GetCameraFieldOfView((CameraObject *)handle));
             }
         }
     }
@@ -6156,20 +6152,18 @@ extern s32 D_003BB668;
 extern s32 D_003BB664;
 
 s32 btlGetWorldObjectDefault(void) {
-    WorldMotionData *data;
-    s32 *value;
+    CameraObject *camera;
     if (!(((BattleController *)btlGetRuntime())->flags & 2)) {
         return D_003BB668;
     }
-    data = dds3GetWorldCameraObject(dds3GetWorldObject());
-    if (data == 0) {
+    camera = (CameraObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
+    if (camera == NULL) {
         return D_003BB668;
     }
-    value = (s32 *)((u8 *)data + 8);
-    if (*value == 0) {
+    if (camera->caption == NULL) {
         return D_003BB664;
     }
-    return *value;
+    return (s32)camera->caption;
 }
 
 s32 btlIsWorldMotionIdle(void) {
@@ -6178,11 +6172,11 @@ s32 btlIsWorldMotionIdle(void) {
         return 0;
     }
     {
-        s32 state = dds3GetWorldCameraObject(dds3GetWorldObject());
-        if (state == 0) {
+        CameraObject *camera = (CameraObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
+        if (camera == NULL) {
             return 0;
         }
-        return *(s32 *)(state + 8) == 0;
+        return camera->caption == NULL;
     }
 }
 
@@ -6265,37 +6259,25 @@ void btlResetCameraMotion(s32 action) {
         }
     }
 }
-typedef struct BtlDebugWorldTransform {
-    u8 pad00[0x40];
-    f32 position[3];
-    u8 pad4C[4];
-    f32 rotation[4];
-} BtlDebugWorldTransform;
-
-typedef struct BtlDebugWorldObject {
-    u8 pad00[0x1C];
-    BtlDebugWorldTransform *transform;
-} BtlDebugWorldObject;
-
 extern char D_003A3DF0[];
 extern char D_003A3E08[];
 extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
 
 void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
-    BtlDebugWorldObject *object;
+    CameraObject *object;
 
     if (((BattleController *)btlGetRuntime())->flags & 2) {
-        object = (BtlDebugWorldObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
+        object = (CameraObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
         if (object != 0) {
             btlBossDebugPrintfN(arg0, (s32)arg1, 0, (s32)D_003A3DF0,
-                                (double)object->transform->position[0],
-                                (double)object->transform->position[1],
-                                (double)object->transform->position[2]);
+                                (double)object->inner->position[0],
+                                (double)object->inner->position[1],
+                                (double)object->inner->position[2]);
             btlBossDebugPrintfN(arg0, (s32)(arg1 + 0xC), 0, (s32)D_003A3E08,
-                                (double)object->transform->rotation[0],
-                                (double)object->transform->rotation[1],
-                                (double)object->transform->rotation[2],
-                                (double)object->transform->rotation[3]);
+                                (double)object->inner->rotation[0],
+                                (double)object->inner->rotation[1],
+                                (double)object->inner->rotation[2],
+                                (double)object->inner->rotation[3]);
         }
     }
 }
@@ -7825,19 +7807,8 @@ void func_001E6260(CameraPoseAction *action, s32 state) {
     }
 }
 
-typedef struct BtlCursorPartyEntry {
-    u16 flags;
-    u8 pad02[0x1A2];
-} BtlCursorPartyEntry;
 
-typedef struct BtlCursorGameState {
-    u8 pad0000[0xA60];
-    BtlCursorPartyEntry party[5];
-    u8 pad1294[8];
-    s32 partyCount;
-} BtlCursorGameState;
 
-extern u8 *datGameState;
 extern u32 btlNextScaledRandom(u32);
 extern void func_001E6BB0(s32, s32, s32, s32);
 extern void func_001E6668(s32, s32, s32, s32);
@@ -7852,14 +7823,14 @@ extern const BtlCursorChoices D_003A4668;
 
 void func_001E6368(CameraPoseAction *action, s32 state) {
     BtlCursorChoices choices = D_003A4668;
-    BtlCursorGameState *game;
+    DatGameState *game;
     s16 markedCount = 0;
     s16 i;
     s16 random;
 
     memset(CURSOR, 0, 0x130);
     CURSOR->mode = 0;
-    game = (BtlCursorGameState *)datGameState;
+    game = datGameState;
     for (i = 0; i < game->partyCount; i++) {
         if (game->party[i].flags & 2) {
             markedCount++;
