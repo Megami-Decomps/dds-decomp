@@ -1,4 +1,4 @@
-# Scatter strip updater matching
+# Scatter effect matching
 
 `func_00170F28` (DDS1) and `func_00178B80` (DDS2) each match 1,512 bytes.
 The paired routines advance radial particles, build a six-vertex strip for
@@ -69,10 +69,36 @@ translation row; the caller retains the native four-component operation. The sam
 inherited duplicate-state assumptions apply. No helper, primitive, header,
 compiler flag or artificial producer is added to make either body match.
 
+## Radius-damped ring allocation
+
+`effScatterCreateDampedRing` (DDS1 0x00173B48 / DDS2 0x0017B7A0)
+matches 560 bytes per title. The existing 0x194-byte instance owns a contiguous
+array of 0x28-byte particles. Its 0x13C-byte serialized parameter copy starts at
+0x40 and ends exactly at the particles pointer at 0x17C. The allocation size
+uses these existing owner types, and allocationHandle stays SdfMemBlock*.
+The retain API returns the payload address; the destructor releases the draw
+resource and then the allocation descriptor.
+
+The prior struct-assignment body, with the current pointer owner, differed in
+three metadata stores. Its typed block copy did not constrain the later
+pointer store, while color and scale had anti-dependencies on the copy tail.
+Standard memcpy of the complete serialized parameter block preserves every
+byte, including padding, and records the actual generic byte-copy contract.
+The descriptor-pointer store then has the same tail-copy anti-dependency and
+retains native color/scale/allocation order. No field is weakened to an integer,
+and no artificial memory clobber or extra runtime operation is introduced.
+
+The constructor copies the native matrix, creates the draw object, optionally
+attaches its resource, and initializes particle ages from the RNG. It clamps
+the copied delay limit using the native signed test, then uses an unsigned
+modulus. Allocation failure, oversized counts and source matrix alignment
+retain their existing native preconditions.
+
 ## Validation
 
 The radial bodies compare exactly against all 378 retail instruction words
-per title; the spin bodies compare exactly against all 381 words per title. Both installed canonical whole-unit checks report 71 matches
+per title; the spin bodies compare exactly against all 381 words per title.
+The damped-ring constructors compare exactly against all 140 words per title. Both installed canonical whole-unit checks report 72 matches
 and zero differences. Both retail SHA-1 checks and both dev-ELF gates pass,
 followed by a no-work repeat. Validation uses the pinned current source and
 a byte-identical private copy of its canonical header in the established
