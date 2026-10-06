@@ -138,7 +138,7 @@ typedef struct ObjectTransform {
     u128 matrix[4];
     f32 position[4];
     f32 rotation[4];
-    u128 scale;
+    f32 scale[4];
     u8 pad70[0x50];
     u32 flags;
     f32 radius;

@@ -70,12 +70,6 @@ typedef struct {
     void *node; /* 0x2C released and replaced by effObjReplaceActiveEventNode */
 } EffectData; /* 0x30 bytes */
 
-typedef struct {
-    u8 pad0[0x40];
-    f32 vector[4];
-    u8 pad50[0x10];
-    f32 parameter;
-} EffectParameters;
 
 typedef struct EffectObj {
     u8 pad0[4];       /* 0x0 */
@@ -84,7 +78,7 @@ typedef struct EffectObj {
     u8 kind;           /* 0xF checked ==7 by effObjGetReadyData */
     u8 pad10[8];       /* 0x10 */
     EffectData *data; /* 0x18 */
-    EffectParameters *params; /* 0x1C vector base; scalar parameter at +0x60 */
+    ObjectTransform *params; /* Separately allocated position, rotation and scale owner. */
 } EffectObj;
 
 EffectData *effObjGetReadyData(EffectObj *obj);
@@ -559,19 +553,19 @@ s32 effObjLoadReadyParameterVector(EffectObj *obj) {
     if (effObjGetReadyData(obj) == NULL) {
         return 0;
     }
-    VU0_LOAD_VF(vf10, obj->params->vector);
+    VU0_LOAD_VF(vf10, obj->params->position);
     return 1;
 }
 
 /* Truncate the ready scalar float to s32; zero also represents unavailable data. */
 s32 effObjGetIntParam(EffectObj *obj) {
-    EffectParameters *parameters;
+    ObjectTransform *parameters;
 
     if (effObjGetReadyData(obj) == NULL) {
         return 0;
     }
     parameters = obj->params;
-    return (s32)parameters->parameter;
+    return (s32)parameters->scale[0];
 }
 
 extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
