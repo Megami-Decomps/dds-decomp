@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
+#include "btl_state.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -1354,7 +1355,28 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlHasUnitWithStatusBit);
+/* Test one active battler, or any active enemy, for the extended status flag. */
+s32 btlHasUnitWithStatusBit(BtlUnit *unit, s32 scanEnemies) {
+    if (scanEnemies != 0) {
+        BtlUnit *cursor = ((BtlState *)btlGetRuntime())->units;
+        while (cursor != NULL) {
+            if ((cursor->flags64 & 0x421) == 0x401) {
+                if ((cursor->stateFlags & 0x800000) != 0) {
+                    return 1;
+                }
+            }
+            cursor = cursor->nextActor;
+        }
+    } else {
+        if ((unit->flags64 & 0x21) == 1) {
+            if ((unit->stateFlags & 0x800000) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 
 s32 btlAreUnitsMissingStatusFlag(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
