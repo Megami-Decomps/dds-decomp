@@ -109,12 +109,28 @@ negative ages. It leaves the copied randomDelayRange unchanged. Matrix copy,
 draw creation, optional resource attachment, ownership and native unchecked
 count/alignment assumptions retain the established contracts.
 
+## Two-color ring allocation
+
+`effScatterCreateTwoColorRing` (DDS1 0x00174680 / DDS2 0x0017C2D8)
+matches 512 bytes per title. The existing 0x19C-byte owner contains its
+0x144-byte parameter block at [0x40, 0x184), then runtime fields, followed
+by 0x28-byte particles. The complete byte copy and pointer owner retain the
+same reviewed contracts. The shorter code reflects its four-byte copy tail;
+the damped variant has a 28-byte tail.
+
+This variant initializes the instance age to zero and normalizes a signed
+nonpositive copied delay range to one, preserving the writeback and unsigned
+RNG remainder. All five initial metadata stores, matrix copy, drawable setup,
+optional resource attachment and particle-age initialization remain native.
+No shared header, owner layout or primitive changes are required.
+
 ## Validation
 
 The radial bodies compare exactly against all 378 retail instruction words
 per title; the spin bodies compare exactly against all 381 words per title.
 The damped-ring constructors compare exactly against all 140 words per title;
-the basic ring constructors compare exactly against all 134 words per title. Both installed canonical whole-unit checks report 73 matches
+the basic ring constructors compare exactly against all 134 words per title,
+and the two-color constructors against all 128 words per title. Both installed canonical whole-unit checks report 74 matches
 and zero differences. Both retail SHA-1 checks and both dev-ELF gates pass,
 followed by a no-work repeat. Validation uses the pinned current source and
 a byte-identical private copy of its canonical header in the established
