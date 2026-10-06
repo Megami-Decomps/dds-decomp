@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_ui.h"
@@ -177,7 +178,7 @@ extern u8 *D_00435E64;
 
 extern u8 *D_00435E5C;
 
-extern s32 D_00438F54;
+extern SceneSlotFadeWork *D_00438F54;
 
 
 
@@ -1070,18 +1071,17 @@ void fldScaleSceneCoordinateRecord(SceneCoordinateWork *work, s32 index) {
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE418);
 
 void fldSetSceneSlotRange(s32 index) {
-    u8 *scene = (u8 *)D_00438F54;
-    if (*(s8 *)(scene + 0x20) < index) {
+    SceneSlotFadeWork *scene = D_00438F54;
+    if (scene->currentIndex < index) {
         s32 i;
         for (i = 0; i <= index; i++) {
-            s32 offset = i * 2;
-            scene = (u8 *)D_00438F54;
-            *(s32 *)(scene + (offset + *(s32 *)(scene + 4)) * 4 + 0x38) = 0x80;
-            *(u8 *)((*(s32 *)(scene + 4) + offset) + (s32)scene + 0x22) = 3;
+            scene = D_00438F54;
+            scene->fade[i][scene->bank] = 0x80;
+            scene->phase[i][scene->bank] = 3;
         }
-        ((u8 *)D_00438F54)[0x21] = index;
+        D_00438F54->lastIndex = index;
     }
-    ((u8 *)D_00438F54)[0x20] = index;
+    D_00438F54->currentIndex = index;
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE5C8);

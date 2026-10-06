@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_state.h"
@@ -149,7 +150,7 @@ extern u32 D_00435E64;
 
 extern u32 D_00435E5C;
 
-extern s32 D_00438F54;
+extern SceneSlotFadeWork *D_00438F54;
 
 
 extern s32 datItemSkillRecords;
