@@ -619,7 +619,28 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
 }
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_002723B0);
 
-INCLUDE_ASM(const s32, "game/code_00270FB0", func_00272518);
+typedef struct TextStyleNode TextStyleNode;
+extern void frFontSetChildColors(TextStyleNode *, u32);
+extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+
+void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
+                   s32 drawOption, s32 textOption, s32 layer) {
+    StaffMenuWork *menu = (StaffMenuWork *)context;
+    s32 glyph;
+    if (kind == 0) {
+        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->unk74, 0x1E, layer);
+    } else {
+        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->unk74, 0x2E, layer);
+    }
+    itfDrawGridWithResolvedSlot(0x150, 0x9C0, 0, drawOption, menu->unk74, 0, layer);
+    itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->baseImage1, 2, layer);
+    if (textTable != 0) {
+        glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
+        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC366);
+        func_001958A0((FrFontGlyph *)glyph, 0, layer);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    }
+}
 
 void func_00272668(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 drawOption, s32 layer) {
     func_00272518(kind, labelIndex, textTable, context, drawOption, 0, layer);
