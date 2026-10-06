@@ -1,5 +1,7 @@
 #include "mnu.h"
 #include "dat_state.h"
+
+extern void *sdfAllocAndClearQuadwords(s32);
 struct MenuListNode;
 extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
@@ -515,7 +517,6 @@ void mnuUpdateListScrollFlags(MenuList *list) {
     list->flags |= 2;
 }
 
-extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
 MenuListNode *mnuListAppendNode(list, value)
     MenuList *list;
@@ -568,6 +569,9 @@ s32 mnuListContainsFinalNode(MenuList *list) {
     }
     return 0;
 }
+
+MenuListNode *mnuListAdvanceCursor(MenuList *, s32, s32);
+MenuListNode *mnuListRetreatCursor(MenuList *, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B540);
 
