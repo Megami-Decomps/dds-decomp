@@ -95,6 +95,24 @@ typedef struct MenuAssets {
 
 typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1];
 
+/* Native staff sprite banks; DDS2 retains only two base resources. */
+typedef struct StaffSlots {
+#ifdef VERSION_DDS2
+    u32 baseResources[2];
+#else
+    u32 baseResources[7];
+#endif
+    u32 pairResources[2];
+    u32 mainResources[16];
+    u32 extraResources[5];
+} StaffSlots;
+
+#ifdef VERSION_DDS2
+typedef char StaffSlots_size_must_be_0x64[(sizeof(StaffSlots) == 0x64) ? 1 : -1];
+#else
+typedef char StaffSlots_size_must_be_0x78[(sizeof(StaffSlots) == 0x78) ? 1 : -1];
+#endif
+
 /* The occupied-party display and its five native 0x34-byte entries. */
 typedef struct PartyPanelEntry {
     s32 unk0;
