@@ -47,7 +47,7 @@ typedef struct {
     u16 pointCapacity;
     ParSlot *slots;
     BillObj **billboardRef;
-    u32 resource;
+    SdfMemBlock *resource;
 } ParTable; /* 0x10 */
 
 /* Kind 1 uses a point-history table; kinds 2..4 use the same word as a
@@ -117,7 +117,7 @@ typedef struct {
     f32 initialRadiusJitter;
     f32 targetRadiusJitter;
     ParHistoryTable history;
-    u32 childHandle;             /* 0x174: additional owned allocation */
+    SdfMemBlock *childHandle;     /* 0x174: additional owned allocation */
     f32 previousOrigin[3];       /* 0x178: native updater caches origin here */
 } ParBurstEmitter; /* 0x184 */
 
@@ -134,6 +134,7 @@ typedef struct {
 extern ParDispatch parKindConstructorEntries[];
 
 extern ParDispatch D_003AAB88[];
+extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 /* Release the radial emitter's extra allocation, shared resources, and block. */
 void parReleaseObject(ParBurstEmitter *obj) {
