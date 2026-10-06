@@ -184,7 +184,60 @@ extern BtlResBlock *btlResourceBlock;
 extern f32 sdfSinPoly(f32);
 extern void func_00306C28(s32, s32, s32, s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6320);
+void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat) {
+    BattlePanelColors colors = D_004168D8;
+    f32 value;
+    f32 maximum;
+    s32 xOffset;
+    s32 yOffset;
+    s32 sprite;
+    s32 targetProgress;
+    s32 remaining;
+    s32 i;
+
+    if (!(stat & 1)) {
+        value = unit->hp;
+        maximum = unit->maxHp;
+        xOffset = 57;
+        yOffset = 49;
+        sprite = 3;
+    } else {
+        value = unit->unk12A;
+        maximum = unit->unk12C;
+        xOffset = 28;
+        yOffset = 64;
+        sprite = 4;
+    }
+    if (maximum == 0.0f) maximum = 1.0f;
+    targetProgress = (s32)(value / maximum * 39.0f);
+    if (pulse->active == 0) {
+        pulse->progress++;
+        pulse->progress = pulse->progress <= 0 ? 0 : pulse->progress >= targetProgress ? targetProgress : pulse->progress;
+        remaining = 39 - pulse->progress;
+        remaining = remaining <= 0 ? 0 : remaining >= alpha ? alpha : remaining;
+        if (pulse->progress >= targetProgress) {
+            pulse->active = 1;
+            pulse->phase = 260;
+        }
+        pulse->alpha = alpha - remaining;
+    } else {
+        pulse->phase = (pulse->phase + 16) % 360;
+        pulse->alpha = (s32)((alpha + 119) * ((sdfSinPoly((f32)((pulse->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f) + 8.0f);
+        if (pulse->phase >= 160 && pulse->phase <= 180) {
+            pulse->active = 0;
+            pulse->phase = 0;
+            pulse->progress = 0;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        colors.values[i] = (colors.values[i] & 0xFFFFFF00) | pulse->alpha;
+    }
+    if (!(unit->flags & 0x20) && value != 0.0f && !(unit->conditionFlags & 0x4800)) {
+        func_00306C28((x + xOffset + pulse->progress) << 4,
+                     (y + yOffset + pulse->yOffset) << 3, 0, (s32)colors.values,
+                     0, (s32)btlResourceBlock->resA, sprite, 0x53);
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6648);
