@@ -34,8 +34,6 @@
 #define CAMP_STATUS_BATCH_COUNT 2
 #define CAMP_STATUS_INITIAL_PARAMETER 15
 #define CAMP_SLOT_LAST_ROW_INDEX 0x14
-#define CAMP_SLOT_LAST_ROW_OFFSET 0x1450
-#define CAMP_SLOT_ROW_STRIDE 0x104
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
 #define CAMP_HEAP_STATS_WORD_COUNT 8
@@ -199,7 +197,21 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 effDestroyPackedBatch(s32);
 
 
-extern u8 D_003CBB70[];
+/* Shop stock by progress row: unlock flag, row price percent, then 32 stock entries. */
+typedef struct ShopRankPriceEntry {
+    u16 itemId;
+    u8 mode;
+    u8 pricePercent; /* 0: use the row's percent */
+    u32 flags;
+} ShopRankPriceEntry;
+
+typedef struct ShopRankPriceRow {
+    s16 unlockFlag;
+    u16 pricePercent;
+    ShopRankPriceEntry entries[0x20];
+} ShopRankPriceRow;
+
+extern ShopRankPriceRow D_003CBB70[];
 
 /* Schedule the camp task only if no task currently owns this event ID. */
 void mnuCampCreateTask(s32 taskId) {
@@ -1311,10 +1323,8 @@ s32 mnuCampResolveFlagRowValue(s32 row) {
 /* Highest matching row wins; rows with nonpositive flags are not queried. */
 s32 mnuCampFindActiveSlot(void) {
     s32 rowIndex;
-    u8 *slotTable = D_003CBB70;
-    s16 *flagId = (s16 *)(slotTable + CAMP_SLOT_LAST_ROW_OFFSET);
-    for (rowIndex = CAMP_SLOT_LAST_ROW_INDEX; rowIndex >= 0; rowIndex--, flagId = (s16 *)((u8 *)flagId - CAMP_SLOT_ROW_STRIDE)) {
-        if (*flagId > 0 && mdlFlagTest(*flagId)) {
+    for (rowIndex = CAMP_SLOT_LAST_ROW_INDEX; rowIndex >= 0; rowIndex--) {
+        if (D_003CBB70[rowIndex].unlockFlag > 0 && mdlFlagTest(D_003CBB70[rowIndex].unlockFlag)) {
             return rowIndex;
         }
     }
@@ -1847,7 +1857,7 @@ extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
 s32 func_00261538(ShopScene *scene) {
     s32 rowIndex;
-    u8 *entry;
+    ShopRankPriceRow *row;
     CampWindowContainer *window;
     u32 i;
 
@@ -1855,10 +1865,10 @@ s32 func_00261538(ShopScene *scene) {
     if (rowIndex == -1) {
         return 0;
     }
-    entry = D_003CBB70 + rowIndex * 0x104;
-    for (i = 0; i < 0x20; i++, entry += 8) {
-        u32 id = *(u16 *)(entry + 4);
-        u32 mode = entry[6];
+    row = &D_003CBB70[rowIndex];
+    for (i = 0; i < 0x20; i++) {
+        u32 id = row->entries[i].itemId;
+        u32 mode = row->entries[i].mode;
         CampWindowNode *node;
         CampWindowParams *params;
         s32 price;
@@ -1939,17 +1949,17 @@ s32 func_00261670(ShopScene *scene) {
 
 s32 func_00261850(ShopScene *scene, s32 filterMode) {
     s32 rowIndex;
-    u8 *entry;
+    ShopRankPriceRow *row;
     u32 i;
 
     rowIndex = mnuCampFindActiveSlot();
     if (rowIndex == -1) {
         return 0;
     }
-    entry = D_003CBB70 + rowIndex * 0x104;
-    for (i = 0; i < 0x20; i++, entry += 8) {
-        u32 id = *(u16 *)(entry + 4);
-        u32 mode = entry[6];
+    row = &D_003CBB70[rowIndex];
+    for (i = 0; i < 0x20; i++) {
+        u32 id = row->entries[i].itemId;
+        u32 mode = row->entries[i].mode;
         CampWindowNode *node;
         CampWindowParams *params;
         s32 price;
