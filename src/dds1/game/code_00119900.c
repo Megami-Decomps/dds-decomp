@@ -252,7 +252,77 @@ s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
     return *(s8 *)(byteOffset + datGameState + 0xa76);
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_00119B08);
+/* Shared packed status header consumed by the status-raising helper. */
+typedef struct SdfPackedValue {
+    u8 pad00[6];
+    u16 hp;
+    u8 pad08[6];
+    u16 flagsAndValue;
+} SdfPackedValue;
+extern void sdfRaisePackedChannelValue(SdfPackedValue *, u32);
+
+typedef struct PtyRosterState {
+    u8 pad00[PTY_ACTIVE_ROSTER_OFFSET];
+    Entry1A4 active[PTY_ACTIVE_ROSTER_COUNT];
+} PtyRosterState;
+
+/* Event penalties affect living roster slots, then optionally raise a status channel. */
+void func_00119B08(s32 mode) {
+    s32 nextHp, loss, slotIndex;
+    if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->unk6 != 0) {
+                nextHp = entry->unk6;
+                loss = nextHp / 10;
+                if (loss == 0) loss = 1;
+                nextHp -= loss;
+                if (nextHp <= 0) nextHp = 1;
+                entry->unk6 = nextHp;
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 2) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->unk6 != 0) {
+                nextHp = entry->unk6;
+                loss = (u32)nextHp / 2;
+                if (loss == 0) loss = 1;
+                nextHp -= loss;
+                if (nextHp <= 0) nextHp = 1;
+                entry->unk6 = nextHp;
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 3) {
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + PTY_ACTIVE_ROSTER_OFFSET);
+        slotIndex = 0;
+        do {
+            if (entry->unk6 != 0) entry->unk6 = 1;
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode >= 4 && mode <= 6) {
+        slotIndex = 0;
+        do {
+            if (((PtyRosterState *)datGameState)->active[slotIndex].unk6 != 0) {
+                if (mode == 4) sdfRaisePackedChannelValue((SdfPackedValue *)(datGameState + slotIndex * PTY_ACTIVE_ROSTER_STRIDE + PTY_ACTIVE_ROSTER_OFFSET), 0x80);
+                if (mode == 5) sdfRaisePackedChannelValue((SdfPackedValue *)(datGameState + slotIndex * PTY_ACTIVE_ROSTER_STRIDE + PTY_ACTIVE_ROSTER_OFFSET), 0x40);
+                if (mode == 6) sdfRaisePackedChannelValue((SdfPackedValue *)(datGameState + slotIndex * PTY_ACTIVE_ROSTER_STRIDE + PTY_ACTIVE_ROSTER_OFFSET), 0x10);
+            }
+            slotIndex++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_00119CF0);
 
