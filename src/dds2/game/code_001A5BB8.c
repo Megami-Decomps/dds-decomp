@@ -4187,9 +4187,34 @@ u32 func_001B5600(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004159A0);
+extern char D_004159C0[]; /* "btl:auto attack[%X]\n" */
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5688);
+/* Pick one of the unit's auto-attack skills at random (0x96/0x95/0x94 for abilities 0x22C/0x22B/0x22A);
+ * -1 when it has none. */
+s32 func_001B5688(BtlUnit *unit) {
+    s32 skills[3];
+    u16 count = 0;
+    s32 skill;
+
+    if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22C)) {
+        skills[count] = 0x96;
+        count++;
+    }
+    if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22B)) {
+        skills[count] = 0x95;
+        count++;
+    }
+    if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22A)) {
+        skills[count] = 0x94;
+        count++;
+    }
+    if (count == 0) {
+        return -1;
+    }
+    skill = skills[effMiscRandMod(0, count)];
+    btlBossDebugPrintf(D_004159C0, skill);
+    return skill;
+}
 
 s32 btlHasHighPriorityState(void) {
     BattleSelectionWork *table;
@@ -4224,6 +4249,10 @@ s32 btlCountFlaggedSceneActors(void) {
 extern void *sdfAllocAndClearQuadwords(s32);
 extern s16 btlGetActorIdForClass(s8);
 extern void btlGetActorClassPair(s8, u32 *, u32 *);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004159A0);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004159C0);
 
 void btlInitializeCommandPanelSlotTables(void) {
     u32 tableA[5] = {0x40, 0x30, 0x20, 0x10, 0};
