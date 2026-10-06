@@ -1099,6 +1099,19 @@ The DDS2 progress-reward table also used the private name `EvtSlot`, but its
 records are 0x48 bytes and have a different table base and meaning. A repeated
 private name is not evidence that those tables share an owner.
 
+## Terminal progress-reward table
+
+DDS2's `MnuProgressEntry` in `mnu.h` owns the complete 0x48-byte records at
+`D_003CE1A8`: an unsigned threshold, a model flag and eight 0x08-byte
+`MnuProgressReward` entries. The native selector scans eight records with a
+0x48 stride and compares the threshold unsigned. A reward's value is an item ID
+when its kind is zero, and a currency amount otherwise.
+
+`D_003CE1AC` is the first record's flag address, not a separate table of
+flag-first records. Flag readers must use the canonical table's `flag` member;
+do not retain the shifted-base padded view. The selection-label and grant
+callbacks use the same reward array.
+
 ## SDK light-source descriptors
 
 `SdfLightSources` in `sdf_draw.h` is an array of three optional pointers to
