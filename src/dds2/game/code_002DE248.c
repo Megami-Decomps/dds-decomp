@@ -114,13 +114,6 @@ extern void fileQueueRemoveAndDestroyJob(s32, void *);
 
 extern EffectAssetLink *D_003FF128[24];
 
-typedef struct EffectVectorRequest {
-    u8 kind;
-    u8 count;
-    u8 size;
-    u8 pad_03;
-    u32 unk04;
-} EffectVectorRequest;
 
 
 typedef struct EffViewScale {

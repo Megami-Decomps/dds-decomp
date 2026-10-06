@@ -6323,13 +6323,6 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
     }
 }
 
-typedef struct EffectVectorRequest {
-    u8 kind;
-    u8 count;
-    u8 size;
-    u8 pad_03;
-    u32 unk04;
-} EffectVectorRequest;
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 
