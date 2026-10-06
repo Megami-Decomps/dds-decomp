@@ -2279,7 +2279,7 @@ typedef struct EffFragmentResources {
     s32 count;
     s32 activePointCount;
     s32 position;
-    u8 pad14[4];
+    s32 subdivisionCount; /* 0x14: retained subdivision factor */
     u128 *points;
     u32 *colors;
     u32 resourceHandle;
@@ -2960,7 +2960,70 @@ void func_00169938(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x54) = arg1;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00169940);
+typedef struct EffThunderDrawParams {
+    s16 primitiveCount;
+    s16 pointCount;
+    u16 flags;
+    u8 pad06[2];
+    u32 color;
+    const u32 *primitiveIndices; /* 0x0C: packed triangle-index words */
+    u128 *points;
+    u8 pad14[0xC];
+    u32 *colors;
+    u8 pad24[0xC];
+} EffThunderDrawParams;
+
+extern EffThunderDrawParams D_003D64F0;
+extern EffThunderDrawParams D_003D6520;
+
+struct SdfTextParam;
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern void func_002DA420(struct SdfTextParam *, f32);
+extern const f32 D_00354860[8][4];
+extern const u32 D_003547D0[28];
+extern const u32 D_00354840[8];
+extern void *memcpy(void *, const void *, u32);
+
+/* Lay out history vertices/colors, eight cap vertices/colors, then the owner.
+ * The two global draw descriptors are reset through their native 0x2C prefix.
+ */
+EffFragmentResources *func_00169940(s32 historyLength, s32 subdivisions) {
+    s32 count = historyLength * subdivisions * 3 + 6;
+    u32 colorBytes = count * sizeof(u32);
+    u32 bufferBytes = count * (sizeof(u128) + sizeof(u32)) + 8 * (sizeof(u128) + sizeof(u32));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(bufferBytes + sizeof(EffFragmentResources));
+    u8 *storage = (u8 *)sdfResourceRetainAddress(allocation);
+    EffFragmentResources *history = (EffFragmentResources *)(storage + bufferBytes);
+    SdfAsset *asset;
+
+    history->points = (u128 *)storage;
+    storage += count * sizeof(u128);
+    history->endPoints = (u128 *)storage;
+    storage += 8 * sizeof(u128);
+    history->colors = (u32 *)storage;
+    storage += colorBytes;
+    history->endColors = (u32 *)storage;
+    history->surfaceIndex = 2;
+    history->count = count;
+    history->position = 3;
+    history->subdivisionCount = subdivisions;
+    history->color = 0x80808080;
+    history->allocation = allocation;
+    history->activePointCount = 0;
+    memcpy(history->endPoints, D_00354860, sizeof(D_00354860));
+    asset = sdfCreateAssetWithDrawEntries();
+    history->resourceHandle = (u32)asset;
+    func_002DA420((struct SdfTextParam *)asset, 1.0f);
+    memset(&D_003D64F0, 0, 0x2C);
+    D_003D64F0.flags = 0x4000;
+    D_003D64F0.primitiveIndices = D_003547D0;
+    memset(&D_003D6520, 0, 0x2C);
+    D_003D6520.flags = 0x4000;
+    D_003D6520.primitiveIndices = D_00354840;
+    D_003D6520.primitiveCount = 6;
+    D_003D6520.pointCount = 8;
+    return history;
+}
 
 /* The packed color state is identical to the sequel's effect state layout. */
 typedef struct EffectColorState {
@@ -3038,26 +3101,12 @@ void func_00169D78(EffFragmentResources *history, u128 *source) {
     }
 }
 
-typedef struct EffThunderDrawParams {
-    s16 primitiveCount;
-    s16 pointCount;
-    u16 flags;
-    u8 pad06[2];
-    u32 color;
-    u8 pad0C[4];
-    u128 *points;
-    u8 pad14[0xC];
-    u32 *colors;
-    u8 pad24[0xC];
-} EffThunderDrawParams;
 
 typedef struct EffThunderSurface {
     u8 pad00[0x10];
     void (*submit)(struct EffThunderSurface *, s32);
 } EffThunderSurface;
 
-extern EffThunderDrawParams D_003D64F0;
-extern EffThunderDrawParams D_003D6520;
 extern EffThunderSurface *D_003548E0[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(s32);
@@ -3136,7 +3185,6 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
 }
 
 
-extern void *memcpy(void *dst, const void *src, u32 size);
 extern EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount);
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */

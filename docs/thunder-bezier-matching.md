@@ -336,11 +336,36 @@ increment/store and submission preserve the target epilogue scheduling.
 This adds no runtime read or artificial ordering constraint. Unsigned counter
 wrap and the once-per-update increment, including empty updates, are retained.
 
+## History resource allocation
+
+`func_00169940` (DDS1) and `func_00171598` (DDS2) each match 508 bytes.
+They allocate one block for n = 3 * historyLength * subdivisions + 6 history
+vertices, eight cap vertices, the corresponding color arrays, and the 0x30-byte
+resource owner. The total is 20n + 0xD0 bytes. Quadword regions retain their
+16-byte alignment; the owner and color arrays need four-byte alignment.
+The stored subdivision factor is samples per active update: the updater emits
+factor - 1 loop samples followed by one final sample.
+
+Existing local owners now expose the retained subdivision count at 0x14 and
+the draw descriptor's packed triangle-index pointer at 0x0C. Both owner sizes
+remain 0x30. The native descriptor resets cover only the first 0x2C bytes.
+Read-only template declarations describe eight float vectors and the two
+packed index streams; their existing data definitions stay in place. The
+asset creator and parameter setter use their provider signatures, with an
+explicit conversion to the setter's tagged view of the same allocation.
+
+The descriptor initialization groups flags and the index stream before its
+six-primitive/eight-point counts. Ordinary memcpy copies the cap template;
+no new primitive or artificial dependency is required. Native assumptions
+remain unchanged: negative history lengths, oversized products and allocation
+failure are unchecked.
+
 ## Verification
 
-Canonical whole-unit checks report 74 matches and zero differences for each
+Canonical whole-unit checks report 75 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
-functions in both units remain exact. The two affected miscellaneous-effect
+functions in both units remain exact. All function bodies in both Thunder
+units are now reconstructed; existing assembly data owners remain. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
 and both dev-ELF build gates pass, followed by a no-work repeat build.
 
