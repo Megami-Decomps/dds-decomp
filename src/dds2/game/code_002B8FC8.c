@@ -67,6 +67,9 @@ typedef struct MenuIconState MenuIconState;
 
 
 extern void *sdfAllocAndClearQuadwords(s32);
+extern void *sdfAllocSizeClassBlock(s32);
+extern s32 mdlFlagTest(s32);
+extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern struct EffectSlotSet *effCreateResourceSlotSet(u32 *, u32, u32);
 
 extern s32 dspStartEntry(s32 entry);
@@ -1961,7 +1964,7 @@ void mnuClearEntries(u8 *menu) {
     ((MenuPageWindow *)menu)->flags &= ~0x80;
 }
 
-extern void itfSetGridEntryQuantizedAndRefresh();
+
 
 typedef struct MenuIconEntry {
     u32 id;
