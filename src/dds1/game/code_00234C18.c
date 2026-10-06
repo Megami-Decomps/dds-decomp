@@ -133,9 +133,8 @@ void evtDestroyTaskHierarchy(u32 task) {
     kwlnTaskDestroyWithHierarchy(task, 1);
 }
 
-/* The owner argument is part of the allocator callback signature; the
- * returned context starts with both words clear. */
-EventContext *evtAllocateContext(s32 *owner) {
+/* Allocate the picture task's flag and texture state. */
+EventContext *evtAllocateContext(void) {
     EventContext *context = (EventContext *)sdfAllocSizeClassBlock(8);
     context->flags = 0;
     context->texture = NULL;
