@@ -1,4 +1,6 @@
 #include "mnu.h"
+#include "mnu_list.h"
+#include "mnu_shop.h"
 #include "dat_state.h"
 
 /* Staff callbacks receive a task handle as an integer word. Preserve the
@@ -63,12 +65,12 @@ extern u32 mnuMapPadMaskToFlags();
 extern void mnuStepPartyPanelListFromInput();
 extern void mnuSetPopupEntryFlagged();
 extern void mnuClearActionFlags();
-extern void mnuPlayInputSound();
-extern void func_002B9808();
-extern void mnuRetreatWindowListSelection();
+extern void mnuPlayInputSound(s32, s32, u32 *);
+extern void func_002B9808(MenuWindowContainer *);
+extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
 extern void mnuAdvanceWindowListSelection();
 extern void mnuHandlePanelListPageJumpInput();
-extern void mnuClearWindowPanelTransitionFlag();
+extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 extern void mnuRetreatListCursorDefault();
 extern void mnuAdvanceListCursorDefault();
 extern void mnuClearListFlagsOneAndTwo();
@@ -87,34 +89,20 @@ extern void mnuSetIndexedWindowPageSpriteFlags(s32, u32 *, s32, s32);
 extern void *mnuCreatePanelGroup(s32, s32, s32);
 extern void *mnuCreateSpriteState(s32, s32, s32);
 
-/* Prefixes of the menu list and node used to read the current page index.
- * The primary list implementation also stores its cursor at +0x1C. */
-typedef struct MenuListNode {
-    s32 index;
-} MenuListNode;
-
-typedef struct MenuList {
-    u8 pad00[0x1C];
-    MenuListNode *cursor;
-} MenuList;
+typedef struct MenuListNode MenuListNode;
+typedef struct MenuList MenuList;
 
 typedef struct MenuSceneConfig {
     u8 pad00[0x10];
     s32 entries[5];
 } MenuSceneConfig;
 
-typedef struct MenuStaffObject {
-    u8 pad00[0x18];
-    MenuStaffWindow *window;
-    u8 pad1C[0x78];
-    s32 spriteAlpha;
-} MenuStaffObject;
 
 /* Staff menu state: selected objects, three list variants, and pending transitions. */
 typedef struct MenuStaffChoices {
     u8 pad00[8];
-    MenuStaffObject *primaryObject;   /* 0x08 */
-    MenuStaffObject *secondaryObject; /* 0x0C */
+    MenuWindowContainer *primaryObject;   /* 0x08 */
+    MenuWindowContainer *secondaryObject; /* 0x0C */
     MenuStaffList *firstList;         /* 0x10 */
     MenuStaffList *secondList;        /* 0x14 */
     MenuStaffList *thirdList;         /* 0x18 */
@@ -137,17 +125,17 @@ typedef struct MenuStaffChoices {
 s32 mnuStaffImageEnterA(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
-    MenuStaffObject *object;
+    MenuWindowContainer *object;
 
     func_002AAE80(task);
     mnuCreateStaffImageSprite(5);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
-    if (object->window->panelActive != 0) {
+    if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 0);
     } else {
         if (menu->secondListState == 0) {
-            func_00306CD0(0x390, 0x570, 0, object->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+            func_00306CD0(0x390, 0x570, 0, object->state, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
@@ -345,7 +333,7 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(0xc33);
     s32 state;
-    MenuStaffObject *object;
+    MenuWindowContainer *object;
 
     state = func_002C4038(context + 8, popup, 0, task);
     if (state != 0) {
@@ -360,17 +348,17 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     object = menu->secondaryObject;
     if (object != 0) {
         if (!(buttons & 0x300000)) {
-            func_002B9808((s32)object);
+            func_002B9808(object);
         }
         if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
-            mnuRetreatWindowListSelection((s32)object);
+            mnuRetreatWindowListSelection(object);
         }
         if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
-            mnuAdvanceWindowListSelection((s32)object);
+            mnuAdvanceWindowListSelection(object);
         }
         mnuHandlePanelListPageJumpInput(object, &buttons);
         mnuClearWindowPanelTransitionFlag(object);
-        mnuPlayInputSound(0, buttons, (s32)object->window);
+        mnuPlayInputSound(0, buttons, &object->list->stateFlags);
     }
     return 0;
 }
@@ -378,16 +366,16 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
 s32 mnuStaffImageEnterD(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
-    MenuStaffObject *object;
+    MenuWindowContainer *object;
 
     func_002AAE80(task);
     mnuCreateStaffImageSprite(0xD);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->secondaryObject;
-    if (object->window->panelActive != 0) {
+    if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, object->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+        func_00306CD0(0x390, 0x570, 0, object->state, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(2, ((MenuStaffContext *)context)->group);
@@ -405,13 +393,13 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
 s32 mnuStaffImageEnterB(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
-    MenuStaffObject *object;
+    MenuWindowContainer *object;
 
     func_002AAE80(task);
     mnuCreateStaffImageSprite(6);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
-    if (object->window->panelActive != 0) {
+    if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 0);
     } else {
         func_002AAC98(0,

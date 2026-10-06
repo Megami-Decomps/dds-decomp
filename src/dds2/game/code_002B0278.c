@@ -1,4 +1,7 @@
 #include "mnu.h"
+#include "mnu_list.h"
+#include "eff.h"
+#include "mnu_shop.h"
 struct MenuListNode;
 extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
@@ -63,7 +66,6 @@ extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #define MNU_STAFF_REORDER_INPUT_MASK 0x37
 #define MNU_STAFF_REORDER_CANCEL_MASK 6
 
-typedef struct MenuWindowContainer MenuWindowContainer;
 typedef struct MenuList MenuList;
 typedef struct MenuIconSprites MenuIconSprites;
 typedef struct MenuIconState MenuIconState;
@@ -170,7 +172,7 @@ extern s32 mnuGetAbilityByteCategory();
 
 extern void mnuSetPopupEntry();
 
-extern void mnuPlayInputSound();
+extern void mnuPlayInputSound(s32, s32, u32 *);
 
 extern u32 D_003E7828[];
 
@@ -306,94 +308,6 @@ extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 typedef struct MenuListNode MenuListNode;
 
-struct MenuListNode {
-    s32 index;
-    s32 value;
-    u8 pad8[0x40];
-    u32 flags48;         /* 0x48 */
-    u8 pad4C[4];
-    s32 fadeCounter;     /* 0x50 */
-    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
-    u8 pad55[3];
-    struct MenuListNode *next;
-    struct MenuListNode *prev;
-    u32 sortKeyPrimary;   /* 0x60 */
-    u32 sortKeySecondary; /* 0x64 */
-    u32 sortKeyTertiary;  /* 0x68 */
-    u8 pad6C[8];
-};
-
-struct MenuList {
-    u32 stateFlags;     /* 0x00: cursor and selection-control bits */
-    u32 flags;
-    u32 id; /* 0x08: owner/list identifier */
-    s32 visibleCount;
-    MenuListNode *first;
-    MenuListNode *last;
-    MenuListNode *head;
-    MenuListNode *cursor;
-    s32 count;
-    s32 windowOffset;
-    s32 rowHeight;
-    void (*drawEntry)(); /* 0x2C */
-    void *owner;         /* 0x30 */
-    u8 pad34[8];
-    s32 scale; /* 0x3C: 8.8 fixed-point list scale */
-};
-
-typedef struct MenuSpriteInner {
-    u8 unk0[0xC];
-    s32 shade;
-    u8 pad10[0x18];
-    u32 flags; /* 0x28: low flag cleared when the selection moves */
-    u8 pad2C[0x50];
-    s32 shadeSource;
-} MenuSpriteInner;
-
-typedef struct MenuSprite {
-    u8 unk0[0x18];
-    MenuSpriteInner *inner;
-} MenuSprite;
-
-struct MenuIconState {
-    u32 kind;
-    u32 unk4;
-    s32 count;
-    MenuSprite *sprite[6];
-    u32 left;
-    u32 top;
-    u32 right;
-    u32 bottom;
-    s32 fade;
-};
-
-struct MenuWindowContainer {
-    s32 id;                /* 0x00 */
-    u32 flags;             /* 0x04 */
-    s32 originX;           /* 0x08 */
-    s32 originY;           /* 0x0C */
-    s32 width;             /* 0x10 */
-    s32 height;            /* 0x14 */
-    MenuList *list;        /* 0x18 */
-    s32 field1C;           /* 0x1C */
-    s32 sprite20;          /* 0x20 */
-    s32 param24;           /* 0x24 */
-    s32 param28;           /* 0x28 */
-    u32 layout2C;         /* 0x2C */
-    u32 layout30;
-    u32 layout34;
-    u32 layout38;
-    u32 layout3C;
-    u32 layout40;
-    u32 layout44;
-    u32 layout48;
-    u32 layout4C;
-    s32 scale50;           /* 0x50 */
-    s32 scale54;           /* 0x54 */
-    MenuIconState panel; /* 0x58: embedded drawable panel layout */
-    MenuIconSprites *resource; /* 0x90: owned sprite-resource bundle */
-    u32 state;             /* 0x94 */
-};
 
 typedef struct PartyEntryCopy {
     u16 flags;
@@ -1360,8 +1274,8 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, s32 callback) {
     mnuInitializeBasicWindowLayout(window, context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, placement);
-    window->list->owner = context;
-    window->list->drawEntry = func_002B3CA0;
+    window->list->context = context;
+    window->list->drawCallback = func_002B3CA0;
     for (i = 0; i < skillCount; i++) {
         u16 skill = ((MenuGameState *)datGameState)->party[selected].skills[i];
         MenuListNode *node;
@@ -1647,7 +1561,7 @@ void mnuCampMenuHandleInput(s32 callback) {
             mnuAdvanceWindowListSelection((s32)window);
         }
         mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, inputFlags, (s32)window->list);
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
     }
 }
 
@@ -1707,7 +1621,7 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
             mnuAdvanceWindowListSelection((s32)window);
         }
         mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, inputFlags, (s32)window->list);
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
     }
 }
 
@@ -2024,7 +1938,7 @@ s32 ptySkillMenuBrowseCandidatePages(s32 callback) {
         mnuAdvanceListCursorDefault(menu[3]);
         mnuSeekSelectedWindowRow((s32)(menu + 2), offset);
     }
-    mnuPlayInputSound(0, buttons, menu[3]);
+    mnuPlayInputSound(0, buttons, &((MenuList *)menu[3])->stateFlags);
     windowSlot = windows + ((MenuList *)menu[3])->cursor->index;
     window = (MenuWindowContainer *)*windowSlot;
     if (input & 1) {
@@ -2044,7 +1958,7 @@ s32 ptySkillMenuBrowseCandidatePages(s32 callback) {
     if (input & 2) {
         mnuSetPopupEntryFlagged(popup, D_003E773C);
     }
-    mnuPlayInputSound(0, input, (s32)window->list);
+    mnuPlayInputSound(0, input, &window->list->stateFlags);
     return 0;
 }
 
@@ -2181,7 +2095,7 @@ s32 mnuUpdateSkillListInput(s32 callback) {
     }
     mnuHandlePanelListPageJumpInput(list[8 + menu[11]], &buttons);
     mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)list[8 + menu[11]]);
-    mnuPlayInputSound(0, buttons, (s32)((MenuWindowContainer *)list[8 + menu[11]])->list);
+    mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
     if (buttons & 2) {
         mnuSetPopupEntryFlagged(popup, D_003E7720);
         mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayHandle, 0, 1);
@@ -2450,7 +2364,7 @@ MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing) {
     MenuList *node = (MenuList *)sdfAllocAndClearQuadwords(0x40);
     node->id = owner;
     node->visibleCount = visibleCount;
-    node->rowHeight = rowSpacing * 8;
+    node->rowStep = rowSpacing * 8;
     node->scale = 0x100;
     node->head = NULL;
     node->first = NULL;
@@ -2553,14 +2467,10 @@ typedef struct MenuSpriteRef {
     s32 effect;
 } MenuSpriteRef;
 
-typedef struct MenuSpriteGrid {
-    s32 pad0[2];
-    MenuSpriteRef slots[8];
-} MenuSpriteGrid;
 
-void mnuSetGridSpriteSlot(MenuSpriteGrid *grid, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
-    grid->slots[row * 4 + col].sprite = sprite;
-    grid->slots[row * 4 + col].effect = effect;
+void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
+    node->sprites[row * 4 + col].sprite = sprite;
+    node->sprites[row * 4 + col].effect = effect;
     itfSetGridEntryQuantizedAndRefresh(sprite, effect, x, y, x, y);
 }
 
@@ -2679,7 +2589,7 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade) {
             return NULL;
         }
         if (keepFade == 0) {
-            cursor->fadeCounter = 0x100;
+            cursor->animationTimer = 0x100;
         }
         offset = list->windowOffset;
         cursor = next;
@@ -2737,7 +2647,7 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
             return NULL;
         }
         if (keepFade == 0) {
-            cursor->fadeCounter = 0x100;
+            cursor->animationTimer = 0x100;
         }
         offset = list->windowOffset;
         cursor = prev;
@@ -2830,25 +2740,16 @@ void mnuResetListNodeFadeCounters(MenuList *list);
 void mnuDecreaseListNodeFadeCounters(u8 *menu);
 
 /* Draw one four-sprite bank; the cursor entry selects the second bank. */
-void mnuDrawFourEntries(s32 x, s32 y, s32 depth, s32 menu, s32 panel, s32 drawArg);
+void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *node, s32 drawArg);
 
 /* Blend the flag-selected packed color with the caller's previous color.
  * Flag one takes precedence over DDS2's additional flag-four color choice. */
-u32 mnuBlendListNodeColorByFlags(u32 previousColor, u8 *entry);
+u32 mnuBlendListNodeColorByFlags(u32 previousColor, MenuListNode *entry);
 
-typedef struct MenuSlotEntry {
-    u8 pad0[0x14];
-    s32 colors[4];
-    u8 pad24[0x7C];
-} MenuSlotEntry;
 
-typedef struct MenuSlotSet {
-    u8 pad0[0x18];
-    MenuSlotEntry *entries;
-} MenuSlotSet;
 
 /* Apply the same entry-state blend to all four packed colors in one slot. */
-void mnuDispatchEntryWords(MenuSlotSet *menu, s32 index, u8 *entry);
+void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry);
 
 
 
