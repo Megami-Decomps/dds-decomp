@@ -581,9 +581,15 @@ typedef struct EffPCPBeamNode {
 } EffPCPBeamNode;
 
 typedef struct EffPCPBeamParams {
-    u8 pad00[0x28];
+    f32 position[4];
+    s32 fadeInFrames;
+    s32 fadeOutFrames;
+    s32 holdFrames;
+    s32 vertexGrowthFrames;
+    u8 pad20[4];
+    s32 radiusGrowthFrames;
     f32 unk28;
-    u8 pad2C[4];
+    f32 endRadius;
     u32 segments;          /* 0x30 */
     u32 drawKind;          /* 0x34 */
     f32 firstWidth;
@@ -596,11 +602,13 @@ typedef struct EffPCPBeamParams {
 
 typedef struct EffPCPBeamWork {
     EffPCPBeamParams params;
-    u32 unk50;
+    s32 frame;
     u32 color;                 /* 0x54 */
     u32 vertexCount;       /* 0x58 */
     EffPCPBeamNode *node;   /* 0x5C */
 } EffPCPBeamWork;
+typedef char EffPCPBeamParams_size_0x50[(sizeof(EffPCPBeamParams) == 0x50) ? 1 : -1];
+typedef char EffPCPBeamWork_size_0x60[(sizeof(EffPCPBeamWork) == 0x60) ? 1 : -1];
 
 /* The ring geometry, angle preparation and timeline operate on the same
    0x80-byte clone. Radius and rotation each have independent decay inputs. */
@@ -4332,7 +4340,7 @@ void effPcpBuildConcentricBeamVertices(f32 radius, EffPCPBeamWork *work) {
 
 void effResetChild(EffPCPBeamWork *work) {
     effPcpBuildConcentricBeamVertices(work->params.unk28, work);
-    work->unk50 = 0;
+    work->frame = 0;
 }
 
 u8 *effBeamEffectClone(src)
@@ -4347,7 +4355,7 @@ u8 *effBeamEffectClone(src)
 
     work->params = *src;
     work->color = 0x80808080;
-    work->unk50 = 0;
+    work->frame = 0;
     segments = src->segments;
     if (segments < 3) {
         src->segments = 3;
@@ -4389,7 +4397,54 @@ void effPcpReleaseBeamClone(EffPCPBeamWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188550);
+/* Grow the beam's visible geometry and fade it over its configured lifetime. */
+void func_00188550(EffPCPBeamWork *work) {
+    s32 vertexFrames = work->params.vertexGrowthFrames;
+    s32 endFrame = vertexFrames;
+    s32 frame = work->frame;
+    s32 fadeIn = work->params.fadeInFrames;
+    s32 fadeOut = work->params.fadeOutFrames;
+    f32 t;
+    u32 color;
+    EffPCPBeamNode *beam;
+
+    if (endFrame < work->params.radiusGrowthFrames) {
+        endFrame = work->params.radiusGrowthFrames;
+    }
+    endFrame += work->params.holdFrames;
+    if (frame > endFrame) return;
+    if (frame < vertexFrames) {
+        u32 groups;
+        t = (f32)frame / (f32)vertexFrames;
+        groups = (u32)((f32)(work->vertexCount >> 2) * t);
+        work->node->vertexCount = groups << 2;
+    } else {
+        work->node->vertexCount = work->vertexCount;
+    }
+    if (frame < work->params.radiusGrowthFrames) {
+        t = (f32)work->frame / (f32)work->params.radiusGrowthFrames;
+        effPcpBuildConcentricBeamVertices(
+            (work->params.endRadius - work->params.unk28) *
+                t + work->params.unk28,
+            work);
+    } else {
+        effPcpBuildConcentricBeamVertices(work->params.endRadius, work);
+    }
+    if (frame < fadeIn && fadeIn != 0) {
+        t = (f32)frame / (f32)fadeIn;
+    } else if (endFrame - frame <= fadeOut && fadeOut != 0) {
+        t = (f32)(endFrame - frame) / (f32)fadeOut;
+    } else {
+        t = 1.0f;
+    }
+    color = effBlendColor(work->color & 0xFFFFFF, work->color, t);
+    beam = work->node;
+    beam->color = color;
+    PCP_COPY_VECTOR(&beam->position, work->params.position);
+    effPcpDrawBeamGeometryNode(beam);
+    work->frame++;
+}
+
 
 void effPcpCopyBeamVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
