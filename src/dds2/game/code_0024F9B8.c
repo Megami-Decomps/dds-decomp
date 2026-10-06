@@ -1,15 +1,16 @@
 #include "common.h"
 #include "kwln.h"
+#include "sdf.h"
 
 extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
-extern u32 itfLoadTextureFromAsset(u32);
+extern SdfTex *itfLoadTextureFromAsset(const char *);
 
 extern u32 sdfAllocSizeClassBlock(u32);
 
-typedef struct {
+typedef struct EventContext {
     u32 flags; /* 0x00: bit 0 toggled without disturbing the other bits */
-    u32 value; /* 0x04 */
+    SdfTex *texture;
 } EventContext;
 
 extern char D_004373B8[];
@@ -133,20 +134,16 @@ void evtDestroyTaskHierarchy(u32 task) {
     kwlnTaskDestroyWithHierarchy(task, 1);
 }
 
-/* The owner argument is part of the allocator callback signature; the
- * returned context starts with both words clear. */
-EventContext *evtAllocateContext(s32 *owner) {
+/* Allocate the picture task's flag and texture state. */
+EventContext *evtAllocateContext(void) {
     EventContext *context = (EventContext *)sdfAllocSizeClassBlock(8);
     context->flags = 0;
-    context->value = 0;
+    context->texture = NULL;
     return context;
 }
 
-void evtSetConvertedContextValue(EventContext *context, u32 value) {
-    u32 result;
-
-    result = itfLoadTextureFromAsset(value);
-    context->value = result;
+void evtSetConvertedContextValue(EventContext *context, const char *path) {
+    context->texture = itfLoadTextureFromAsset(path);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024F9B8", D_00423360);
