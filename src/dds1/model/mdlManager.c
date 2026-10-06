@@ -1,7 +1,7 @@
 #include "ee_mmi.h"
 #include "common.h"
 #include "pcp_vu0.h"
-#include "sdf_draw.h"
+#include "mdl.h"
 
 extern u8 sdfViewMatrix[];
 extern u8 sdfProjectionMatrix[];
@@ -10,91 +10,17 @@ extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern void sdfMultiplyVuMatrixInPlace(void);
 
-/* Sub-record behind MdlCtx.sub (+0x8/+0xA read by mdlGetContextResourceGroup/E0). */
-typedef struct MdlSub {
-    u8 unk0[8]; /* 0x0 */
-    u16 unk8;   /* 0x8 */
-    u16 unkA;   /* 0xA */
-} MdlSub;
 
 
-/* Entry table pointed to by the first word of MdlInner. */
-typedef struct MdlEntryTable {
-    u8 unk0[4];        /* 0x0 */
-    s16 count;         /* 0x4 */
-    u8 unk6[6];        /* 0x6 */
-    SdfDrawNode **items; /* 0xC */
-} MdlEntryTable;
-
-
-/* Record behind MdlCtx.inner. */
-typedef struct MdlInner {
-    MdlEntryTable *entries; /* 0x0 */
-    u8 unk4[4];  /* 0x4 */
-    u32 resourceHandle; /* 0x8: released through sdfUpdateActiveResourceListScalars */
-    u8 unkC[8];  /* 0xC */
-    Motion *list; /* 0x14: intrusive list walked by mdlSuspendAllContextMotions/368 */
-    u8 unk18;    /* 0x18 */
-    u8 flags19;  /* 0x19: bit 0x10 enables anchor dispatch */
-    u8 unk1A[2]; /* 0x1A */
-    u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
-    u128 vector20; /* 0x20: matrix row 0 (vf28) */
-    u128 vector30; /* 0x30: matrix row 1 (vf29) */
-    u128 vector40; /* 0x40: matrix row 2 (vf30) */
-    u128 vector50; /* 0x50 */
-    u128 vector60; /* 0x60 */
-    u128 vector70; /* 0x70 */
-} MdlInner;
-
-/* Context shared by the matched mdlManager helpers. */
-typedef struct MdlCtx {
-    u32 flags;         /* 0x0: 1 = skip update, 2 = skip anchors, 4 = needs inner flag 0x10 */
-    struct MdlCtx *next; /* 0x4: link in the owner's context list */
-    u8 unk8[4];        /* 0x8 */
-    MdlSub *sub;       /* 0xC */
-    union {
-        u32 word;      /* 0x10: low byte read by mdlIsInnerSentinel */
-        struct {
-            s16 id;    /* 0x10 */
-            s16 arg;   /* 0x12 */
-        } h;
-    } current;
-    u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
-    MdlInner *inner;   /* 0x18 */
-    Motion *first;    /* 0x1C */
-    Motion *slots[4]; /* 0x20 */
-    struct MdlDevList *devList; /* 0x30: device slots released with the model */
-} MdlCtx;
-
-typedef struct MdlDevSlot {
-    struct MdlDevSlot *next; /* 0x0 */
-    void *slot;              /* 0x4 */
-} MdlDevSlot;
-
-typedef struct MdlDevList {
-    MdlDevSlot *first; /* 0x0 */
-} MdlDevList;
-
-/* Packet parsed by mdlExecuteAndFreeJob. */
-typedef struct MdlPacket {
-    u16 unk0;     /* 0x0 */
-    u16 unk2;     /* 0x2 */
-    u8 unk4[4];   /* 0x4 */
-    u32 unk8;     /* 0x8 */
-    u16 extra[1]; /* 0xC: start of the variable payload */
-} MdlPacket;
-
-/* Load request touched by mdlRecordLoadedSizeAndReleaseHandle. */
-typedef struct MdlLoadReq {
-    u8 unk0[0xC]; /* 0x0 */
-    u32 size;      /* 0xC: size read from the current file resource */
-} MdlLoadReq;
-
-/* Resource released by mdlDestroyLoadRequestOwner. */
-typedef struct MdlRes {
-    u8 unk0[8]; /* 0x0 */
-    u32 unk8;   /* 0x8 */
-} MdlRes;
+/* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */
+typedef struct MdlDoneJob {
+    u16 group;         /* 0x0 */
+    u16 id;            /* 0x2 */
+    u32 arg;           /* 0x4 */
+    void *owner;       /* 0x8: request slot from fileAllocateDispatchRequest */
+    void (*done)(u32); /* 0xC */
+    u32 doneArg;       /* 0x10 */
+} MdlDoneJob;
 /* 8-byte prefix copied from D_003BBB60 by mdlBuildPrefixedString. */
 typedef struct Hdr8 {
     u8 b[8];
@@ -129,26 +55,25 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
-extern void *fileGetLoadedDataAddress();
-extern u32 sndBuildResourceHandleListFromOffsets(void *);
+struct FileWork;
+extern u32 fileGetLoadedDataAddress(struct FileWork *);
+extern u32 fileGetResourceHandle(struct FileWork *);
+extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 extern void mdlSetResourceAmount(MdlCtx *ctx, u32 *node, f32 amount);
 
 extern u32 mdlGroupJobSemaphore;
 
-extern void *btlFindGroupedEntity();
+extern BattleGroupNode *btlFindGroupedEntity(s32 group, s32 id);
 
-void mdlClearSlotAndRelease(void *ctx, Motion *node) {
-    s32 offset = node->slotIndex * 4 + 0x20;
-    void **slot = (void **)((u8 *)ctx + offset);
-
-    if (*slot == node) {
-        *slot = NULL;
+void mdlClearSlotAndRelease(MdlCtx *ctx, Motion *node) {
+    if (ctx->slots[node->slotIndex] == node) {
+        ctx->slots[node->slotIndex] = NULL;
     }
     sdfDestroyMotion(node);
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
-    Motion *node = ctx->inner->list;
+    Motion *node = ctx->inner->motionList;
 
     while (node != NULL) {
         if (node->searchId == id) {
@@ -159,64 +84,47 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     }
 }
 
-typedef struct MdlSlot {
-    u32 flags;      /* 0x0: 1 = bit 0x100 of the request mode, 2 = bit 0x200 */
-    s16 value4;     /* 0x4 */
-    s16 value6;     /* 0x6 */
-    u32 first;      /* 0x8 */
-    u32 resource;   /* 0xC: released through sdfReleaseResourceAllocation */
-} MdlSlot;
-
-typedef struct MdlSlotOwner {
-    u8 pad00[0xC];
-    u8 hasResources;    /* 0x0C */
-    u8 pad0D[3];
-    MdlCtx *contexts;   /* 0x10 */
-    u8 pad14[0xC];
-    MdlSlot slots[1];   /* 0x20 */
-} MdlSlotOwner;
 
 extern void sdfReleaseResourceAllocation();
 
 /* Release slot `index`: destroy its motions in every context and free the attached resource. */
-void mdlReleaseOwnerSlotResources(MdlSlotOwner *owner, s32 index) {
+void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
     MdlCtx *ctx;
 
     if (owner != NULL) {
-        if (owner->slots[index].first == 0) {
+        if (owner->slots[index].data == NULL) {
             return;
         }
-        for (ctx = owner->contexts; ctx != NULL; ctx = ctx->next) {
+        for (ctx = owner->modelContext; ctx != NULL; ctx = ctx->next) {
             mdlReleaseFirstMatch(ctx, index);
         }
-        if (owner->hasResources != 0) {
-            if (owner->slots[index].resource != 0) {
-                sdfReleaseResourceAllocation(owner->slots[index].resource);
+        if (owner->ownsResources != 0) {
+            if (owner->slots[index].resourceHandle != 0) {
+                sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
             }
         }
-        owner->slots[index].first = 0;
-        owner->slots[index].resource = 0;
+        owner->slots[index].data = NULL;
+        owner->slots[index].resourceHandle = 0;
     }
 }
 
-void mdlApplyCommandToGroupedEntity(void *unused0, void *unused1, void *command) {
-    void *entity;
+void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 index) {
+    BattleGroupNode *entity;
 
-    /* Only the grouped entity and command are forwarded to the worker. */
-    entity = btlFindGroupedEntity();
-    mdlReleaseOwnerSlotResources(entity, command);
+    entity = btlFindGroupedEntity(group, id);
+    mdlReleaseOwnerSlotResources(entity, index);
 }
 
-void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value4, u32 first, u32 resource) {
-    MdlSlotOwner *owner = btlFindGroupedEntity(group, id);
-    MdlSlot *slot;
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, void *data, u32 resourceHandle) {
+    BattleGroupNode *owner = btlFindGroupedEntity(group, id);
+    BattleGroupSlot *slot;
 
     mdlReleaseOwnerSlotResources(owner, index);
     slot = &owner->slots[index];
-    slot->value4 = value4;
-    slot->value6 = value6;
-    slot->first = first;
-    slot->resource = resource;
+    slot->slot = slotIndex;
+    slot->motionIndex = motionIndex;
+    slot->data = data;
+    slot->resourceHandle = resourceHandle;
     slot->flags = 0;
     if (mode & 0x100) {
         slot->flags = 1;
@@ -226,108 +134,78 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 value6, s32 
     }
 }
 
-/* Group setup record carried in the payload of an mdlRequestAsset job. */
-typedef struct MdlGroupSetup {
-    s32 resourceList;  /* 0x0: 4th arg of btlCreateGroupNode */
-    s32 unk4;          /* 0x4: 5th arg of btlCreateGroupNode */
-    s32 requestHandle; /* 0x8: 6th arg of btlCreateGroupNode */
-    s32 flags;         /* 0xC */
-    s32 resource;      /* 0x10: resource of mdlConfigureGroupedEntitySlot */
-    s32 handleA;       /* 0x14: stored to MdlGroupEntity +0xA4 */
-    s32 handleB;       /* 0x18: stored to MdlGroupEntity +0xA0 */
-    s32 handleC;       /* 0x1C: stored to MdlGroupEntity +0xA8 */
-} MdlGroupSetup;
 
-typedef struct MdlGroupEntity {
-    u8 unk0[0xA0];
-    void *unkA0;
-    void *unkA4;
-    void *unkA8;
-} MdlGroupEntity;
+extern void btlCreateGroupNode(s32 group, s32 id, s32 mode, DevRequest *resourceList, void *itemList, s32 requestHandle);
 
-extern void btlCreateGroupNode();
+void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
+    BattleGroupNode *entity;
 
-void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
-    MdlGroupEntity *entity;
-
-    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->unk4, setup->requestHandle);
-    if (setup->flags != 0) {
-        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->flags, setup->resource);
+    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->itemList, setup->requestHandle);
+    if (setup->motionData != NULL) {
+        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->motionData, setup->motionResource);
     }
-    if (setup->handleA != 0) {
+    if (setup->partInfo != NULL) {
         entity = btlFindGroupedEntity(group, id);
-        entity->unkA4 = setup->handleA;
-        entity->unkA0 = setup->handleB;
-        entity->unkA8 = setup->handleC;
+        entity->partInfo = setup->partInfo;
+        entity->resourceHandle = setup->resourceHandle;
+        entity->partList = setup->partList;
     }
 }
 
 extern s32 btlGroupContainsId(s32 group, s32 id);
 extern s32 fileManUpdate(void);
 
-void *mdlWaitGroupThenFind(s32 group, s32 id) {
+BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id) {
     while (btlGroupContainsId(group, id)) {
         fileManUpdate();
     }
     return btlFindGroupedEntity(group, id);
 }
 
-void mdlExecuteAndFreeJob(MdlPacket *packet) {
-    mdlApplyGroupSetup(packet->unk0, packet->unk2, packet->unk8, packet->extra);
+void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
+    mdlApplyGroupSetup(request->group, request->id, request->options, &request->payload);
     WaitSema(mdlGroupJobSemaphore);
-    btlRemoveGroupId(packet->unk0, packet->unk2);
+    btlRemoveGroupId(request->group, request->id);
     SignalSema(mdlGroupJobSemaphore);
-    sdfReleaseChipBlock(packet);
+    sdfReleaseChipBlock(request);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(void *resource, MdlLoadReq *destination) {
-    void *handle;
-    u32 size;
+void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadRequest *destination) {
+    u32 handle;
+    DevRequest *resourceList;
 
-    handle = fileGetLoadedDataAddress();
-    size = sndBuildResourceHandleListFromOffsets(handle);
-    destination->size = size;
+    handle = fileGetLoadedDataAddress(resource);
+    resourceList = sndBuildResourceHandleListFromOffsets((const void *)handle);
+    destination->payload.resourceList = resourceList;
     handle = fileGetResourceHandle(resource);
     sdfReleaseResourceAllocation(handle);
     filePollEntryCleanup(resource);
 }
 
-typedef struct MdlLoadCmd {
-    u8 unk0[6];    /* 0x0 */
-    u8 deferred;   /* 0x6: non-zero when the caller runs the job itself */
-    u8 unk7[9];    /* 0x7 */
-    u32 size;      /* 0x10 */
-    u32 handle;    /* 0x14 */
-} MdlLoadCmd;
 
 extern s32 sdfRelocatePackedResourcePayload();
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
-void mdlFinishLoadCmd(s32 entryId, MdlLoadCmd *cmd) {
-    cmd->handle = fileGetResourceHandle(entryId);
-    cmd->size = sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(entryId));
-    filePollEntryCleanup(entryId);
-    if (cmd->deferred == 0) {
-        mdlExecuteAndFreeJob((MdlPacket *)cmd);
+void mdlFinishLoadCmd(struct FileWork *resource, MdlLoadRequest *request) {
+    request->payload.requestHandle = fileGetResourceHandle(resource);
+    request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(resource));
+    filePollEntryCleanup(resource);
+    if (request->deferred == 0) {
+        mdlExecuteAndFreeJob(request);
     }
 }
 
 extern s32 sdfRelocatePackedResourceWordsFromHeader();
 
-typedef struct MdlLoadJob {
-    u8 unk0[0x18]; /* 0x0 */
-    u32 sizeWord;  /* 0x18 */
-    u32 handle;    /* 0x1C */
-} MdlLoadJob;
 
-/* Retain the handle and relocated size word, retire the file entry, then run
- * the group job. Unlike mdlFinishLoadCmd, this path has no deferred flag. */
-void mdlFinishLoadJob(s32 entryId, MdlLoadJob *job) {
-    job->handle = fileGetResourceHandle(entryId);
-    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(entryId));
-    filePollEntryCleanup(entryId);
-    mdlExecuteAndFreeJob((MdlPacket *)job);
+/* Retain the handle and relocated motion data, retire the file entry, then run
+ * the group job. This callback completes the additional file request. */
+void mdlFinishLoadJob(struct FileWork *resource, MdlLoadRequest *request) {
+    request->payload.motionResource = fileGetResourceHandle(resource);
+    request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(resource));
+    filePollEntryCleanup(resource);
+    mdlExecuteAndFreeJob(request);
 }
 
 /* Copy the fixed eight-byte prefix, then append src. Prefix termination and
@@ -337,51 +215,38 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-extern void *mdlRequestAsset(u32 group, u32 id, u32 option);
+extern BattleGroupNode *mdlRequestAsset(u32 group, u32 id, u32 option);
 
 INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
 /* Request the group/id asset with option 1; that option's meaning is not
  * established by this forwarding body. */
-void *func_00217298(u32 group, u32 id) {
+BattleGroupNode *func_00217298(u32 group, u32 id) {
     return mdlRequestAsset(group, id, 1);
 }
 
-typedef struct MdlGroup {
-    u8 unk0[0xC];
-    u8 destroyWhenEmpty;
-    u8 unkD[3];
-    struct MdlLink *tail;
-} MdlGroup;
 
-typedef struct MdlLink {
-    u8 unk0[4];
-    struct MdlLink *prev;
-    struct MdlLink *next;
-    MdlGroup *group;
-} MdlLink;
+extern void btlDestroyGroupNode(BattleGroupNode *group);
 
-extern void btlDestroyGroupNode();
+/* Unlink without clearing this context's own links. A resource-owning group is
+ * destroyed when its last context leaves. */
+void mdlUnlinkGroupEntry(MdlCtx *ctx) {
+    MdlCtx *nextContext = ctx->next;
+    MdlCtx *previousContext = ctx->previous;
+    BattleGroupNode *group;
 
-/* Unlink without clearing this entry's own links. Update the group tail and
- * destroy the group only when its last entry leaves and destroyWhenEmpty is set. */
-void mdlUnlinkGroupEntry(MdlLink *link) {
-    MdlLink *previousEntry = link->prev;
-    MdlLink *nextEntry = link->next;
-    MdlGroup *group;
-
-    if (previousEntry != NULL) {
-        previousEntry->next = nextEntry;
+    if (nextContext != NULL) {
+        nextContext->previous = previousContext;
     }
-    if (nextEntry != NULL) {
-        nextEntry->prev = previousEntry;
+    if (previousContext != NULL) {
+        previousContext->next = nextContext;
     } else {
-        group = link->group;
-        if (previousEntry != NULL) {
-            group->tail = previousEntry;
+        group = ctx->sub;
+        if (nextContext != NULL) {
+            group->modelContext = nextContext;
         } else {
-            group->tail = NULL;
-            if (group->destroyWhenEmpty != 0) {
+            group->modelContext = NULL;
+            if (group->ownsResources != 0) {
                 btlDestroyGroupNode(group);
             }
         }
@@ -417,27 +282,27 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_002174C0);
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217680);
 
 extern void mdlDestroyResourceItem(u32 *);
-extern void sdfResourceListRelease(u32, s32);
+extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Destroy motions, resources, device slots and the context itself. Motion
- * destruction must unlink inner->list; save each resource's next link before
+ * destruction must unlink inner->motionList; save each resource's next link before
  * destroying it. ctx and inner are required, not checked here. */
 void mdlDestroyContext(MdlCtx *ctx) {
-    MdlInner *inner = ctx->inner;
+    SdfModel *inner = ctx->inner;
     u32 *resourceNode;
     u32 *nextResource;
 
-    while (inner->list != NULL) {
-        sdfDestroyMotion(inner->list);
+    while (inner->motionList != NULL) {
+        sdfDestroyMotion(inner->motionList);
     }
-    sdfResourceListRelease(inner->resourceHandle, 1);
+    sdfResourceListRelease(inner->assetData, 1);
     for (resourceNode = ctx->list14; resourceNode != NULL; resourceNode = nextResource) {
         nextResource = (u32 *)*resourceNode;
         mdlDestroyResourceItem(resourceNode);
     }
     mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
-    mdlUnlinkGroupEntry((MdlLink *)ctx);
+    mdlUnlinkGroupEntry(ctx);
     sdfReleaseChipBlock(ctx);
 }
 
@@ -450,7 +315,7 @@ extern void mdlDispatchViewerAnchorRecord();
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
 void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     Motion **slot = ctx->slots;
-    MdlInner *inner;
+    SdfModel *inner;
     u32 *rec;
     s32 i;
 
@@ -472,7 +337,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
         return;
     }
     if (ctx->flags & 4) {
-        if ((inner->flags19 & 0x10) == 0) {
+        if ((inner->flags & 0x10) == 0) {
             return;
         }
     }
@@ -507,7 +372,7 @@ extern void sdfRotateVuMatrixAboutY(f32 angle);
  * -1 skips basis blending. Slot motions/blending precede the skip flags.
  * updateArg is forwarded unchanged to the remaining update routines. */
 void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, f32 pitch, f32 yaw) {
-    MdlInner *inner;
+    SdfModel *inner;
     SdfDrawNode *entry = NULL;
     f32 targetRows[4][4];
     f32 pitchMagnitude;
@@ -518,8 +383,8 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
 
     inner = ctx->inner;
     if (entryIndex != MDL_NO_BLEND_ENTRY) {
-        entry = inner->entries->items[entryIndex];
-        sdfSetPrimaryIdentityMatrixVU(inner->entries);
+        entry = ((SdfDrawNode **)inner->list->buffer)[entryIndex];
+        sdfSetPrimaryIdentityMatrixVU(inner->list);
         sdfRotateVuMatrixAboutX(pitch * MDL_RADIANS_PER_DEGREE);
         sdfRotateVuMatrixAboutY(yaw * MDL_RADIANS_PER_DEGREE);
         VU0_STORE_MATRIX(targetRows);
@@ -561,7 +426,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
         return;
     }
     if (ctx->flags & MDL_REQUIRE_ANCHOR_ENABLE) {
-        if ((inner->flags19 & MDL_ANCHOR_ENABLE_BIT) == 0) {
+        if ((inner->flags & MDL_ANCHOR_ENABLE_BIT) == 0) {
             return;
         }
     }
@@ -577,9 +442,9 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
 /* Enable each table entry. The signed table count governs iteration; entry
  * pointers and the context's inner/table pointers are required. */
 void mdlEnableAllEntries(MdlCtx *ctx) {
-    MdlEntryTable *table = ctx->inner->entries;
-    s32 entryCount = table->count;
-    SdfDrawNode **entries = table->items;
+    DevRequest *table = ctx->inner->list;
+    s32 entryCount = table->usedCount;
+    SdfDrawNode **entries = table->buffer;
     s32 entryIndex;
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
@@ -600,7 +465,7 @@ void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex,
     Motion *node;
     s16 slotIndex;
 
-    for (node = ctx->inner->list; node != NULL; node = node->next) {
+    for (node = ctx->inner->motionList; node != NULL; node = node->next) {
         if (node->searchId == searchId) {
             break;
         }
@@ -647,7 +512,7 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLea
 Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
     Motion *node;
 
-    for (node = ctx->inner->list; node != NULL; node = node->next) {
+    for (node = ctx->inner->motionList; node != NULL; node = node->next) {
         if (node->searchId == id) {
             return node;
         }
@@ -724,18 +589,18 @@ void mdlSetNodeFloat20(MdlCtx *ctx, s32 searchId, f32 value) {
 
 /* vu0 routine: load the primary vector into vf10, not a C return value. */
 void mdlLoadPrimaryVectorVU(MdlCtx *ctx) {
-    VU0_LOAD_VF_MEMORY(vf10, &ctx->inner->vector50);
+    VU0_LOAD_VF_MEMORY(vf10, ctx->inner->matrix[3]);
 }
 
 /* vu0 routine: force vf10.w to one and store it as the primary vector. */
 void mdlStorePrimaryVectorVU(MdlCtx *ctx) {
     VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF(vf10, &ctx->inner->vector50);
+    VU0_STORE_VF(vf10, ctx->inner->matrix[3]);
 }
 
 /* vu0 routine: load the secondary vector into vf10 without interpreting it. */
 void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
-    VU0_LOAD_VF_MEMORY(vf10, &ctx->inner->vector60);
+    VU0_LOAD_VF_MEMORY(vf10, ctx->inner->unk60);
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
@@ -743,26 +608,26 @@ extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: consume vf10 as a quaternion, preserve it in the secondary vector,
  * then store the resulting basis rows from vf28-vf30. No C argument supplies vf10. */
 void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx) {
-    VU0_STORE_VF(vf10, &ctx->inner->vector60);
+    VU0_STORE_VF(vf10, ctx->inner->unk60);
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF(vf28, &ctx->inner->vector20);
-    VU0_STORE_VF(vf29, &ctx->inner->vector30);
-    VU0_STORE_VF(vf30, &ctx->inner->vector40);
+    VU0_STORE_VF(vf28, ctx->inner->matrix[0]);
+    VU0_STORE_VF(vf29, ctx->inner->matrix[1]);
+    VU0_STORE_VF(vf30, ctx->inner->matrix[2]);
 }
 
 /* vu0 routine: load the tertiary vector into vf10; projection uses its row scale. */
 void mdlLoadTertiaryVectorVU(MdlCtx *ctx) {
-    VU0_LOAD_VF_MEMORY(vf10, &ctx->inner->vector70);
+    VU0_LOAD_VF_MEMORY(vf10, ctx->inner->scaleVector);
 }
 
 /* vu0 routine: store all vf10 components as the tertiary vector, without forcing w. */
 void mdlStoreTertiaryVectorVU(MdlCtx *ctx) {
-    VU0_STORE_VF(vf10, &ctx->inner->vector70);
+    VU0_STORE_VF(vf10, ctx->inner->scaleVector);
 }
 
 /* Return the last original value stored by either broadcast path. */
 u32 mdlGetBroadcastValue(MdlCtx *ctx) {
-    return ctx->inner->broadcastValue;
+    return ctx->inner->color;
 }
 
 /* Forward value to each next-linked resource; an empty resource list is a no-op. */
@@ -775,13 +640,13 @@ void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value) {
 }
 
 void mdlBroadcastMasked(MdlCtx *ctx, u32 value) {
-    ctx->inner->broadcastValue = value;
+    ctx->inner->color = value;
     mdlSetAllResourceFrames(ctx, (value & 0xFF000000) | 0x808080);
 }
 
 /* Cache the original value and send that same value to every resource. */
 void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
-    ctx->inner->broadcastValue = value;
+    ctx->inner->color = value;
     mdlSetAllResourceFrames(ctx, value);
 }
 
@@ -805,7 +670,7 @@ void mdlProjectPointVU(MdlCtx *ctx, void *point)
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
     VU0_MOVE_VF(vf27, vf31);
-    VU0_LOAD_MATRIX(&ctx->inner->vector20);
+    VU0_LOAD_MATRIX(ctx->inner->matrix);
     VU0_SCALE_MATRIX_ROWS(vf10);
     sdfMultiplyVuMatrixInPlace();
     VU0_LOAD_VF(vf10, point);
@@ -827,8 +692,8 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4]
 {
     s32 pointIndex;
 
-    VU0_LOAD_MATRIX(&ctx->inner->vector20);
-    VU0_LOAD_VF(vf10, &ctx->inner->vector70);
+    VU0_LOAD_MATRIX(ctx->inner->matrix);
+    VU0_LOAD_VF(vf10, ctx->inner->scaleVector);
     VU0_SCALE_MATRIX_ROWS(vf10);
     sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
@@ -848,7 +713,7 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4]
 void mdlSuspendAllContextMotions(MdlCtx *ctx) {
     Motion *motionNode;
 
-    for (motionNode = ctx->inner->list; motionNode != NULL; motionNode = motionNode->next) {
+    for (motionNode = ctx->inner->motionList; motionNode != NULL; motionNode = motionNode->next) {
         sdfMotionSuspend(motionNode);
     }
 }
@@ -857,7 +722,7 @@ void mdlSuspendAllContextMotions(MdlCtx *ctx) {
 void mdlResumeAllContextMotions(MdlCtx *ctx) {
     Motion *motionNode;
 
-    for (motionNode = ctx->inner->list; motionNode != NULL; motionNode = motionNode->next) {
+    for (motionNode = ctx->inner->motionList; motionNode != NULL; motionNode = motionNode->next) {
         sdfMotionResume(motionNode);
     }
 }
@@ -872,12 +737,12 @@ u8 mdlHasNode(MdlCtx *ctx, s32 searchId) {
 
 /* Read the context resource-group halfword; ctx/sub are required. */
 u16 mdlGetContextResourceGroup(MdlCtx *ctx) {
-    return ctx->sub->unk8;
+    return ctx->sub->group;
 }
 
 /* Read the context resource-id halfword; ctx/sub are required. */
 u16 mdlGetContextResourceId(MdlCtx *ctx) {
-    return ctx->sub->unkA;
+    return ctx->sub->type;
 }
 
 u32 func_002183F0(void) {
@@ -902,7 +767,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
 
 /* Pass the inner resource handle to its release/update routine. ctx is required. */
 void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
-    sdfUpdateActiveResourceListScalars(ctx->inner->resourceHandle);
+    sdfUpdateActiveResourceListScalars(ctx->inner->assetData);
 }
 
 /* Copy a resource path's basename without its extension into destination. */
@@ -955,20 +820,6 @@ void func_00218460(s32 selectionListIndex, s32 selectionIndex, char *destination
     destination[copyLength] = '\0';
 }
 
-#define MDL_SENTINEL_CURRENT_BYTE 1
-#define MDL_PART_INFO_TAG 0x30424950
-
-/* Test the raw PIB0 marker only when the low current byte is one. This is a
- * pointer-value comparison, not a dereference or a check of the complete id. */
-s32 mdlIsInnerSentinel(MdlCtx *ctx) {
-    s32 isSentinel = 0;
-
-    if ((u8)ctx->current.word == MDL_SENTINEL_CURRENT_BYTE) {
-        isSentinel = ctx->inner == (MdlInner *)MDL_PART_INFO_TAG;
-    }
-    return isSentinel;
-}
-
 typedef struct PacWork {
     struct PacWork *next;
     struct PacState *owner;
@@ -986,212 +837,33 @@ typedef struct PacHead {
     s32 decodedSize;
     u8 payload[1];
 } PacHead;
-
-typedef struct MdlPartList MdlPartList;
-typedef struct MdlRecord {
-    s32 kind;
-    s32 nextOffset;
-    union {
-        u32 word;
-        struct {
-            u16 selectorA;
-            u16 selectorB;
-        } stream;
-    } payload;
-    union {
-        u32 word;
-        struct {
-            s16 value;
-            u16 partIndex;
-        } part;
-    } parameter;
-    u16 unk10;
-} MdlRecord;
-
-typedef struct MdlPartEntry {
-    u32 kind;
-    u8 state;
-    u8 pad05[3];
-    s32 object;
-    u8 pad0C[4];
-} MdlPartEntry;
-
-extern PacWork *sdfPacRemovePacket(PacWork *);
-extern s32 mdlGetViewerRecordPayloadWord(MdlRecord *);
-extern u16 func_002193E8(MdlRecord *);
-extern u16 func_002193F0(MdlRecord *);
-extern MdlPartList *mdlCreateBufferedPartRequest(u32);
-extern void mdlAddBillboardPart(MdlPartList *, s32);
-extern void mdlAddEffectPart(MdlPartList *, s32);
-extern void mdlAppendObjectPart(MdlPartList *, s32, void *, s32);
-extern void sdfReleaseResourceAllocation(s32);
-extern void *memset(void *, s32, u32);
-
 #define MDL_PART_PACKET_COMMAND 1
-#define MDL_RESOURCE_LIST_PACKET_COMMAND 9
-#define MDL_REQUEST_PACKET_COMMAND 6
-#define MDL_RESOURCE_PACKET_COMMAND 8
-#define MDL_BILLBOARD_PART_TAG 0x413250
-#define MDL_EFFECT_PART_TAG 0x503344
-#define MDL_OBJECT_PART_TAG 0x555049
+#define MDL_PART_INFO_TAG 0x30424950
 
-/* Consume all packet work, then apply the accumulated group setup once.
- * Request/resource packets latch a nonzero handle; part-info replaces its data
- * and handle, but retains an existing part list when its requested count is zero.
- * Resource-list packets overwrite their handle. Part additions assume a list.
- * Unknown commands/tags are still removed. Normal completion returns NULL. */
-PacWork *mdlApplyQueuedGroupPackets(PacWork *packetWork, s32 group, s32 id, s32 mode) {
-    MdlGroupSetup groupSetup;
-    MdlPartList *partList;
-    s32 requestedPartCount;
+/* A part-info packet has command 1 and the PIB0 tag in its inline packet header. */
+s32 mdlIsInnerSentinel(PacWork *packetWork) {
+    s32 isSentinel = 0;
 
-    memset(&groupSetup, 0, sizeof(groupSetup));
-    partList = NULL;
-    while (packetWork != NULL) {
-        switch (((PacHead *)packetWork->packet)->command) {
-        case MDL_PART_PACKET_COMMAND:
-            switch (((PacHead *)packetWork->packet)->tag) {
-            case MDL_PART_INFO_TAG: /* PIB0: model part information. */
-                groupSetup.handleA = (s32)packetWork->dataCursor;
-                groupSetup.handleB = packetWork->resourceHandle;
-                requestedPartCount = func_002193E8((MdlRecord *)packetWork->dataCursor);
-                if (requestedPartCount > 0) {
-                    partList = mdlCreateBufferedPartRequest(requestedPartCount);
-                    groupSetup.handleC = (s32)partList;
-                }
-                break;
-            case MDL_BILLBOARD_PART_TAG: /* P2A: billboard part. */
-                mdlAddBillboardPart(partList, (s32)packetWork->dataCursor);
-                sdfReleaseResourceAllocation(packetWork->resourceHandle);
-                break;
-            case MDL_EFFECT_PART_TAG: /* D3P: effect part. */
-                mdlAddEffectPart(partList, (s32)packetWork->dataCursor);
-                sdfReleaseResourceAllocation(packetWork->resourceHandle);
-                break;
-            }
-            break;
-        case MDL_RESOURCE_LIST_PACKET_COMMAND:
-            groupSetup.resourceList = packetWork->resourceHandle;
-            break;
-        case MDL_REQUEST_PACKET_COMMAND:
-            if (groupSetup.requestHandle == 0) {
-                groupSetup.requestHandle = packetWork->resourceHandle;
-                groupSetup.unk4 = (s32)packetWork->dataCursor;
-            }
-            break;
-        case MDL_RESOURCE_PACKET_COMMAND:
-            if (groupSetup.resource == 0) {
-                groupSetup.resource = packetWork->resourceHandle;
-                groupSetup.flags = (s32)packetWork->dataCursor;
-            }
-            break;
-        }
-        packetWork = sdfPacRemovePacket(packetWork);
+    if (((PacHead *)packetWork->packet)->command == MDL_PART_PACKET_COMMAND) {
+        isSentinel = ((PacHead *)packetWork->packet)->tag == MDL_PART_INFO_TAG;
     }
-    mdlApplyGroupSetup(group, id, mode, &groupSetup);
-    return packetWork;
+    return isSentinel;
 }
 
-/* Expand a sentinel batch into its model parts and grouped-entity slots.
- * Ordinary packet chains continue through the general group setup path. */
-PacWork *func_00218768(PacWork *packetWork, s32 group, s32 id, s32 mode) {
-    MdlGroupSetup groupSetup;
-    MdlPartEntry unknownPart;
-    PacHead *packetHeader;
-    MdlRecord *record;
-    MdlRecord *slotRecord;
-    s32 partCount;
-    MdlPartList *partList;
-    s32 slotCount;
-    s32 objectSize;
-    s32 remainingParts;
 
-    if (mdlIsInnerSentinel((MdlCtx *)packetWork) == 0) {
-        return mdlApplyQueuedGroupPackets(packetWork, group, id, mode);
-    }
-    record = (MdlRecord *)packetWork->dataCursor;
-    if (mdlGetViewerRecordPayloadWord(record) <= 0) {
-        return mdlApplyQueuedGroupPackets(packetWork, group, id, mode);
-    }
 
-    memset(&groupSetup, 0, sizeof(groupSetup));
-    groupSetup.handleA = (s32)record;
-    groupSetup.handleB = packetWork->resourceHandle;
-    packetWork = sdfPacRemovePacket(packetWork);
-    partCount = func_002193E8(record);
-    remainingParts = partCount;
-    if (partCount > 0) {
-        partList = mdlCreateBufferedPartRequest(partCount);
-        groupSetup.handleC = (s32)partList;
-    }
-    if (remainingParts > 0) {
-        do {
-            switch (((PacHead *)packetWork->packet)->tag) {
-            case MDL_BILLBOARD_PART_TAG:
-                mdlAddBillboardPart(partList, (s32)packetWork->dataCursor);
-                sdfReleaseResourceAllocation(packetWork->resourceHandle);
-                break;
-            case MDL_EFFECT_PART_TAG:
-                mdlAddEffectPart(partList, (s32)packetWork->dataCursor);
-                sdfReleaseResourceAllocation(packetWork->resourceHandle);
-                break;
-            case MDL_OBJECT_PART_TAG:
-                objectSize = ((PacHead *)packetWork->packet)->decodedSize;
-                if (objectSize == 0) {
-                    objectSize = ((PacHead *)packetWork->packet)->payloadSize
-                               + (((PacHead *)packetWork->packet)->flags & 0xF0) - 0x10;
-                }
-                mdlAppendObjectPart(partList, (s32)packetWork->dataCursor,
-                                    (void *)packetWork->resourceHandle, objectSize);
-                break;
-            default:
-                packetHeader = (PacHead *)packetWork->packet;
-                unknownPart.kind = packetHeader->tag;
-                unknownPart.state = 0;
-                break;
-            }
-            packetWork = sdfPacRemovePacket(packetWork);
-            remainingParts--;
-        } while (remainingParts != 0);
-    }
+extern PacWork *mdlApplyQueuedGroupPackets(PacWork *, s32, s32, s32);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlApplyQueuedGroupPackets);
 
-    if (((PacHead *)packetWork->packet)->command == MDL_RESOURCE_LIST_PACKET_COMMAND) {
-        groupSetup.resourceList = packetWork->resourceHandle;
-        packetWork = sdfPacRemovePacket(packetWork);
-    }
-    groupSetup.requestHandle = packetWork->resourceHandle;
-    groupSetup.unk4 = (s32)packetWork->dataCursor;
-    packetWork = sdfPacRemovePacket(packetWork);
-    mdlApplyGroupSetup(group, id, mode, &groupSetup);
+extern PacWork *func_00218768(PacWork *, s32, s32, s32);
+INCLUDE_ASM(const s32, "model/mdlManager", func_00218768);
 
-    slotCount = func_002193F0(record);
-    while (slotCount > 0) {
-        slotRecord = (MdlRecord *)(packetWork->dataCursor - 0x10);
-        mdlConfigureGroupedEntitySlot(group, id, mode, slotRecord->parameter.part.value,
-                                      slotRecord->payload.stream.selectorA,
-                                      slotRecord->payload.stream.selectorB,
-                                      (u32)packetWork->dataCursor, packetWork->resourceHandle);
-        packetWork = sdfPacRemovePacket(packetWork);
-        slotCount--;
-    }
-    return packetWork;
-}
-
-/* Clean up the owner word at +8, then release its containing block. */
-void mdlDestroyLoadRequestOwner(MdlRes *ownerBlock) {
-    func_00288788(ownerBlock->unk8);
+/* Clean up the retained dispatch request, then release its completion job. */
+void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
+    func_00288788(ownerBlock->owner);
     sdfReleaseChipBlock(ownerBlock);
 }
 
-/* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */
-typedef struct MdlDoneJob {
-    u16 group;         /* 0x0 */
-    u16 id;            /* 0x2 */
-    u32 arg;           /* 0x4 */
-    void *owner;       /* 0x8: request slot from fileAllocateDispatchRequest */
-    void (*done)(u32); /* 0xC */
-    u32 doneArg;       /* 0x10 */
-} MdlDoneJob;
 
 /* Request slot handed back by fileAllocateDispatchRequest; its +0x60 word feeds the load apply. */
 typedef struct MdlLoadSlot {
@@ -1210,12 +882,12 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     SignalSema(mdlGroupJobSemaphore);
     if (completionJob->done != NULL) {
         completionJob->done(completionJob->doneArg);
-        mdlDestroyLoadRequestOwner((MdlRes *)completionJob);
+        mdlDestroyLoadRequestOwner(completionJob);
     }
 }
 
 extern void *sdfAllocAndClearQuadwords();
-extern s32 fileAllocateDispatchRequest();
+extern void *fileAllocateDispatchRequest();
 extern void func_00288C50();
 extern void mdlCompleteGroupedJobAndNotify();
 
@@ -1227,7 +899,7 @@ extern void mdlCompleteGroupedJobAndNotify();
  * Preserve the provider's existing short-arity/unprototyped calling convention. */
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
-    s32 requestSlot;
+    void *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
@@ -1238,7 +910,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
         func_00288C50(requestSlot);
-        mdlDestroyLoadRequestOwner((MdlRes *)completionJob);
+        mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;
 }

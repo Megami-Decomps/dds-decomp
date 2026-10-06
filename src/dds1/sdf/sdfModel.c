@@ -6,11 +6,10 @@
 
 extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
 extern void *sdfAllocSizeClassBlock(s32 arg0);
-extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
-extern void sdfFreeNodeLists(void);
-extern void *sdfEnsureFreeRootWorkspace(void *arg0);
+extern void sdfFreeNodeLists(SdfDrawNode *node);
+extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_002D86E0(void *arg0, void *arg1);
 extern void sdfMultiplyVuMatrixInPlace(void);
@@ -37,97 +36,18 @@ typedef struct {
     } vifCodes;
 } SdfPacket; /* 0x10 */
 
-typedef struct {
-    u8 pad_0x00[0x18];
-    u32 unk18;
-} SdfEntry;
-
-typedef struct {
-    u8 pad_0x00[0x04];
-    s16 count; /* 0x04: draw-node entries */
-    u8 pad_0x06[0x06];
-    struct SdfDrawNode **entries;
-} SdfList;
 
 typedef struct SdfSlotPair {
     s32 index;
     f32 weight;
 } SdfSlotPair;
 
-/* The parsed asset list is separate from the model's two-weight slot buffer. */
-typedef struct SdfAssetPacketTable {
-    u8 pad00[0xC];
-    u32 **wordsByIndex;
-} SdfAssetPacketTable;
 
 typedef struct SdfSlotEntry {
     SdfSlotPair pair[2];
 } SdfSlotEntry;
 
-typedef struct SdfSlotBuf {
-    u8 pad00[4];
-    s16 count;             /* 0x04 */
-    u8 pad06[6];
-    SdfSlotEntry *entries; /* 0x0C */
-} SdfSlotBuf;
 
-typedef struct SdfModel {
-    SdfList *list;     /* 0x00 */
-    u8 pad_0x04[0x04]; /* 0x04 */
-    void *assetData;   /* 0x08: retained creation data */
-    SdfAssetPacketTable *resources; /* 0x0C: parsed resource list */
-    SdfSlotBuf *slotPairs; /* 0x10: buffer allocated by sdfModelAllocateSlotPairs */
-    u8 pad_0x14[0x05]; /* 0x14 */
-    u8 flags;          /* 0x19: bit 0 looks up node IDs; bit 2 selects alternate item setup */
-    u8 pad_0x1A[0x06]; /* 0x1A */
-    u8 transformStart; /* 0x20: COP2 reads 0x40 bytes across following fields */
-    u8 pad_0x21[0x07];
-    struct SdfNode *nodes[2]; /* 0x28: per-slot node lists */
-    s32 packetAddressBase; /* 0x30: base of 128-byte indexed address packets */
-    u8 pad_0x34[0x04]; /* 0x34 */
-    s32 commandList;   /* 0x38: source measured and compiled into both slot lists */
-    u8 pad_0x3C[0x34];
-    u8 scaleVector[0x10]; /* 0x70 */
-} SdfModel;
-
-typedef struct {
-    u8 pad_0x00[0x04];
-    u32 unk4;
-    u32 unk8;
-} SdfInfo;
-
-typedef struct SdfNode {
-    void *next;        /* 0x00: next node in the per-slot command list */
-    u8 kind;          /* 0x04: packed payload or routed command */
-    s8 packetSelector; /* 0x05: high nibble filters the pass, low nibble selects a packet list */
-    s16 quadwordCount; /* 0x06: payload size rounded up to 16-byte units */
-    u8 pad_0x08[0x4]; /* 0x8 */
-    s32 resourceHandle; /* 0x0C: retained backing allocation, zero for standalone nodes */
-} SdfNode; /* 0x10 */
-
-typedef struct {
-    u8 pad_0x00[0x28];
-    void *unk28;
-} SdfLink;
-
-typedef struct {
-    u8 pad_0x00[0x04];
-    s16 unk4;
-    u8 pad_0x06[0x06];
-    void *unkC;
-} SdfBuf;
-
-/* The copy descriptor counts fixed-width, 16-byte entries. */
-typedef struct {
-    u8 bytes[0x10];
-} SdfObjectEntry;
-
-typedef struct {
-    u8 pad_0x00[0x04];
-    s16 count;
-    u8 pad_0x06[0x06];
-    SdfObjectEntry *entries;
-} SdfObj;
 
 typedef struct {
     s32 firstWord;
@@ -170,13 +90,13 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 /* Retail selects by nodeId when flags bit 0 is set, otherwise by array index. */
 u8 *sdfModelFindDrawNode(void *chunk, s32 id) {
     SdfModel *model = (SdfModel *)chunk;
-    SdfList *list = model->list;
+    DevRequest *list = model->list;
     s16 count;
     SdfDrawNode **entries;
     s32 i;
 
-    count = list->count;
-    entries = list->entries;
+    count = list->usedCount;
+    entries = list->buffer;
     if (model->flags & 1) {
         for (i = 0; i < count; i++) {
             SdfDrawNode *node = entries[i];
@@ -193,8 +113,8 @@ u8 *sdfModelFindDrawNode(void *chunk, s32 id) {
 }
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
-SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 index) {
-    u32 address = (model->packetAddressBase + (index << 7)) & 0x0FFFFFFF;
+SdfPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfPacket *packet, s32 index) {
+    u32 address = (node->address + (index << 7)) & 0x0FFFFFFF;
 
     packet->dmaTag.bits = ((s64)address << 32) | 0x30000008;
     packet->vifCodes.fields.secondCode = 0x6C07C000;
@@ -211,7 +131,7 @@ SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
 
 /* Select an asset packet from the root model's parsed resource table. */
 void *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, void *packet, s32 frame) {
-    return sdfInitNodeHeaderFromWords(model->resources->wordsByIndex[index], packet, frame);
+    return sdfInitNodeHeaderFromWords(((u32 **)model->resources->buffer)[index], packet, frame);
 }
 
 /* A command-list entry: a kind byte followed by per-kind payload words. */
@@ -306,18 +226,8 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7FB0);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8130);
 
-SdfNode *func_002D8388(SdfModel *model, s32 packetSelector, s32 listIndex) {
-    SdfNode *node = sdfAllocSizeClassBlock(sizeof(SdfNode));
-    SdfNode **head = (SdfNode **)(((u32)listIndex << 2) + (u32)model + 0x28);
-    SdfNode *next = *head;
-
-    node->packetSelector = packetSelector;
-    *head = node;
-    node->quadwordCount = 1;
-    node->resourceHandle = 0;
-    node->next = next;
-    return node;
-}
+extern SdfCommandNode *func_002D8388(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex);
+INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8388);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D83F8);
 
@@ -344,28 +254,22 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D86E0);
 
-/* Reset the node lists and initialize both per-model slots. */
-void sdfModelResetAndInitNodes(SdfModel *model, s32 commandList, s32 packetSelector) {
-    s32 i = 0;
-    s32 j = 0;
+/* Reset a draw node's command lists and initialize both buffered passes. */
+void sdfModelResetAndInitNodes(SdfDrawNode *node, s32 commandList, s32 packetSelector) {
+    s32 i;
 
-    model->commandList = commandList;
-    sdfFreeNodeLists();
-    sdfEnsureFreeRootWorkspace(model);
-    sdfDrawNodeBuildMatrix((SdfDrawNode *)model);
-    /* The re-initialization below is load-bearing for a byte-identical build. */
-    i = 0;
-    j = 0;
-    do {
-        i++;
-        func_002D83F8(model, commandList, packetSelector, 0, j);
-        j = i;
-    } while (i != 2);
+    node->sourceItem = (void *)commandList;
+    sdfFreeNodeLists(node);
+    sdfEnsureFreeRootWorkspace(node);
+    sdfDrawNodeBuildMatrix(node);
+    for (i = 0; i != 2; i++) {
+        func_002D83F8(node, commandList, packetSelector, 0, i);
+    }
 }
 
 /* Allocate `count` zeroed two-pair slot entries and attach them to the model. */
 void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
-    SdfSlotBuf *buf;
+    DevRequest *buf;
     SdfSlotEntry *entries;
     s32 i;
     s32 j;
@@ -373,14 +277,14 @@ void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
     if (count > 0) {
         buf = sdfDevCreateBufferedRequest(count, 0x10, 1);
         model->slotPairs = buf;
-        entries = buf->entries;
+        entries = buf->buffer;
         for (i = 0; i != count; i++) {
             for (j = 0; j != 2; j++) {
                 entries[i].pair[j].index = 0;
                 entries[i].pair[j].weight = 0.0f;
             }
         }
-        buf->count = count;
+        buf->usedCount = count;
     }
 }
 
@@ -396,7 +300,7 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
 
     if (count != i) {
         do {
-            func_002D86E0(model->list->entries[i], item);
+            func_002D86E0(((SdfDrawNode **)model->list->buffer)[i], item);
             item += 0x50;
             i++;
         } while (i != count);
@@ -418,7 +322,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
     item = &list->firstItem;
     if (count != i) {
         do {
-            sdfDrawNodeSetFromItem(model->list->entries[i], (SdfItem *)item);
+            sdfDrawNodeSetFromItem(((SdfDrawNode **)model->list->buffer)[i], (SdfItem *)item);
             item += 0x50;
             i++;
         } while (i != count);
@@ -468,9 +372,9 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
 /* Scale the root transform and propagate it into the first draw node. */
 void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     u128 rootMatrix[4];
-    u8 *transform = &model->transformStart;
-    u8 *scale;
-    SdfList *list;
+    void *transform = model->matrix;
+    f32 *scale;
+    DevRequest *list;
 
     VU0_LOAD_MATRIX(transform);
     scale = model->scaleVector;
@@ -478,7 +382,7 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     VU0_MUL_MATRIX_ROWS_VF10();
     VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
     list = model->list;
-    sdfModelUpdateDrawNodeTransforms(list->entries[0], rootMatrix, frame);
+    sdfModelUpdateDrawNodeTransforms(((SdfDrawNode **)list->buffer)[0], rootMatrix, frame);
 }
 
 /* Update the model with the engine's current signed frame index. */
@@ -502,14 +406,14 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8DD0);
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D9238);
 
 /* Copy the destination's declared number of 16-byte object entries. */
-void sdfModelCopyData(SdfObj *dst, SdfObj *src) {
+void sdfModelCopyData(DevRequest *dst, DevRequest *src) {
     s16 count;
 
     if (dst == NULL) {
         return;
     }
-    count = dst->count;
+    count = dst->usedCount;
     if (count > 0) {
-        memcpy(dst->entries, src->entries, count * 16);
+        memcpy(dst->buffer, src->buffer, count * 16);
     }
 }

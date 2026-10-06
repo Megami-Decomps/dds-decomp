@@ -129,7 +129,8 @@ typedef struct EventViewerState {
     s32 historyCount;
     u32 currentId;
     s32 commandResetId; /* 0x2284 */
-    u8 pad2288[8];
+    u8 pad2288[4];
+    void *unk228C;
     s32 blurRectangleEnabled; /* 0x2290 */
     s32 texturedBlurEnabled;  /* 0x2294 */
     s32 filterBlurEnabled;    /* 0x2298 */
@@ -140,7 +141,7 @@ typedef struct EventViewerState {
     s32 unk22AC;
     u8 pad22B0[4];
     s32 unk22B4;
-    u8 pad22B8[4];
+    s32 unk22B8;
     s32 optionSelection; /* 0x22BC */
     s32 optionCount; /* 0x22C0 */
     const char *optionTitle; /* 0x22C4 */
@@ -153,29 +154,50 @@ typedef struct EventViewerState {
     u8 pad22E1[7];
     char eventName[0x14];
     s32 commandTableOffset; /* 0x22FC: byte offset into command descriptors */
-    u8 pad2300[8];
+    s32 unk2300;
+    s32 unk2304;
     struct EvtViewTrack *sel; /* 0x2308: selected timeline track */
     s32 commandCategory; /* 0x230C: selected parameter category. */
     u32 commandValue; /* 0x2310: value of the active command */
     s32 commandMinimum; /* 0x2314 */
     s32 commandMaximum; /* 0x2318 */
-    u8 pad231C[0x8C];
+    f32 unk231C;
+    f32 unk2320;
+    f32 unk2324;
+    s32 unk2328;
+    s32 unk232C;
+    f32 commandMatrix[12];
+    f32 savedCommandMatrix[12];
+    s32 unk2390;
+    s32 unk2394;
+    s32 unk2398;
+    u8 pad239C[4];
+    s32 unk23A0;
+    s32 unk23A4;
     f32 commandX; /* 0x23A8 */
     f32 commandY; /* 0x23AC */
-    u8 pad23B0[0x10];
+    f32 unk23B0;
+    f32 unk23B4;
+    s32 unk23B8;
+    u8 pad23BC[4];
     s32 updateCount;
     u8 pad23C4;
     u8 windowActive;
-    u8 pad23C6[0xA];
+    u8 pad23C6[2];
+    s32 unk23C8;
+    u8 pad23CC[4];
     s32 ch71; /* 0x23D0 */
     s32 ch72; /* 0x23D4 */
     s32 ch76; /* 0x23D8 */
     s32 ch75; /* 0x23DC */
     u8 pad23E0[0x10];
     s32 glyphTickCount;
-    u8 pad23F4[4];
+    s32 unk23F4;
     s32 framebufferQuadEnabled; /* 0x23F8 */
-    u8 pad23FC[0x14];
+    u8 pad23FC[8];
+    s32 unk2404;
+    s32 unk2408;
+    s32 unk240C;
     u32 glyph;
     s32 timedActive; /* 0x2414: gated time interval */
     s32 timedStart;  /* 0x2418 */
@@ -220,24 +242,17 @@ typedef struct EvtTaskContext {
 } EvtTaskContext;
 
 
-/* Script-command parameter slots hold a float, word, halfwords or bytes
- * depending on the command; only the accessed prefix is modeled here. */
+/* Script-command parameter slots are interpreted according to track kind. */
 typedef union EvtViewParam {
     f32 f;
     s32 i;
+    u32 u;
     u16 h[2];
+    s16 sh[2];
     u8 b[4];
+    s8 sb[4];
 } EvtViewParam;
 
-typedef struct EvtViewEntry {
-    u8 pad00[8];
-    EvtViewParam p08;
-    EvtViewParam p0C;
-    EvtViewParam p10;
-    EvtViewParam p14;
-    u8 pad18[0x14];
-    void *payload; /* 0x2C: effect-specific parameter block. */
-} EvtViewEntry;
 
 u16 evtViewerPopHistory(EventViewerState *viewer);
 
@@ -247,32 +262,39 @@ extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 struct PolyMovieObject;
 
-/* Timeline key shared by several track kinds, not a rendered font glyph.
- * The selector/channel widths depend on the enclosing track and key kind. */
+/* Linked timeline keys share their parameter words across track kinds. */
 typedef struct EvtViewKey {
-    u16 frame; /* 0x00: track-local frame position. */
+    u16 frame;
     u16 duration;
-    u8 pad04[4];
+    s32 interpolationMode;
     union {
-        s8 kind;
-        s16 unitIndex;
-    } selector; /* Interpretation depends on the enclosing track kind. */
-    s16 enabled;
+        EvtViewParam p08;
+        struct {
+            union { s8 kind; s16 unitIndex; } selector;
+            s16 enabled;
+        };
+    };
     union {
-        s8 value;
-        s16 objectIndex;
-        u8 bytes[2];
-    } channel; /* 0x0C: byte value or signed world-object name-table index. */
-    s16 param;    /* 0x0E */
-    s16 condition; /* 0x10 */
-    u8 pad12[2];
+        EvtViewParam p0C;
+        struct {
+            union { s8 value; s16 objectIndex; u8 bytes[2]; } channel;
+            s16 param;
+        };
+    };
     union {
-        s16 condition; /* Secondary indexed condition for kind-0x11 tracks. */
-        f32 value;
-    } parameter14;
-    u8 pad18[0x18];
-    struct EvtViewKey *next; /* 0x30 */
-    struct EvtViewKey *previous; /* 0x34 */
+        EvtViewParam p10;
+        struct { s16 condition; u8 pad12[2]; };
+    };
+    union {
+        EvtViewParam p14;
+        union { s16 condition; f32 value; } parameter14;
+    };
+    EvtViewParam p18;
+    EvtViewParam p1C;
+    u8 pad20[0xC];
+    void *payload;
+    struct EvtViewKey *next;
+    struct EvtViewKey *previous;
 } EvtViewKey;
 
 /* Linked timeline track. Saved vectors and the attachment latch are used by
@@ -300,6 +322,7 @@ typedef struct EvtViewTrack {
     EvtViewKey *lastKey; /* 0x58 */
     u8 pad5C[0x20];
     struct EvtViewTrack *next; /* 0x7C */
+    struct EvtViewTrack *previous; /* 0x80 */
 } EvtViewTrack;
 extern s8 D_003C953A[];
 extern void evtReorderListNodes(EvtViewTrack *track);
@@ -1176,7 +1199,7 @@ void func_0024A738(s32 mode, u32 frame, s32 viewerAddr) {
                     object = viewer->objects[key->selector.kind];
                     goto updateMovie;
                 case 18:
-                    object = ((EvtViewEntry *)key)->payload;
+                    object = key->payload;
                     useTrackTime = track->playbackTimeMode;
 updateMovie:
                     if (object != NULL) {
@@ -1526,7 +1549,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024C650);
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
 s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EventViewerState *viewer) {
     s32 value = viewer->commandValue;
-    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
         return 0;
@@ -1542,12 +1565,12 @@ s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EventViewerState *viewer) {
 
 /* Store the command value in the selected halfword of a viewer entry. */
 u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EventViewerState *viewer) {
-    EvtViewEntry *entry;
+    EvtViewKey *entry;
     u32 value;
     s32 slot;
 
     value = viewer->commandValue;
-    entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
         slot = viewer->sel->kind - 1;
         if ((u32)slot < 0x13u) {
@@ -1586,9 +1609,9 @@ u32 func_0024C9D0(void) {
 
 /* Copy the current command word into the selected script entry. */
 u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EventViewerState *viewer) {
-    EvtViewEntry *entry;
+    EvtViewKey *entry;
 
-    entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
         entry->p0C.i = viewer->commandValue;
         func_00249088(viewer->glyphAdvancePosition, viewer);
@@ -1599,11 +1622,11 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EventViewerState 
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CA28);
 
-u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, u8 *scene) {
-    u8 *record = (u8 *)evtEventViewerGetPendingNode((s32)scene);
-    if (record != NULL) {
-        f32 *dst = *(f32 **)(record + 0x2C);
-        f32 *src = (f32 *)(scene + 0x2350);
+u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EventViewerState *viewer) {
+    EvtViewKey *key = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+    if (key != NULL) {
+        f32 *dst = key->payload;
+        f32 *src = viewer->commandMatrix + 8;
         s32 index = 3;
         do {
             index--;
@@ -1613,16 +1636,16 @@ u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, u8 *scene) {
             src++;
             dst++;
         } while (index >= 0);
-        func_00249088(((EventViewerState *)scene)->glyphAdvancePosition, scene);
-        evtViewerPopHistory((EventViewerState *)scene);
+        func_00249088(viewer->glyphAdvancePosition, viewer);
+        evtViewerPopHistory(viewer);
         return 0;
     }
-    return (u32)record;
+    return (u32)key;
 }
 
 /* Transfer a selected two-component viewer position to the command entry. */
 s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
         return 0;
@@ -1646,7 +1669,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", evtViewCmdResolveSlot);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
 
     entry->p0C.b[0] = viewer->slotType;
     entry->p0C.b[1] = viewer->slotFlag;
@@ -1694,7 +1717,7 @@ INCLUDE_RODATA(const s32, "game/code_00247518", D_00423050);
 
 /* Restore default effect parameters for the selected timeline key. */
 s32 func_0024D148(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
+    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
     u128 *destination;
     u128 *source;
     EvtViewerDrawVector *draw;

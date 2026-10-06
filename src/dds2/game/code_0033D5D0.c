@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_draw.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 #define SDF_DEV_DEFAULT_PRIORITY 0x48
@@ -156,14 +157,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 strlen(const char *s);
 extern f32 sdfNormalizedAsinSamples[];
 
-typedef struct DevRequest {
-    s32 handle;
-    s16 flags;
-    u16 count;
-    s16 stride;
-    s16 mode;
-    s32 buffer;
-} DevRequest;
 
 extern s32 sdfAllocGeneralBlock(s32 size);
 
@@ -1678,17 +1671,17 @@ s32 sdfDecimalToPackedDigits(s32 number) {
     return packedDigits;
 }
 
-/* Allocate element storage; mode records the number of elements added by each grow. */
+/* Allocate element storage with a fixed element stride and growth increment. */
 DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32 growthStep) {
     DevRequest *request = sdfAllocSizeClassBlock(sizeof(*request));
 
-    request->mode = growthStep;
-    request->flags = 0;
-    request->count = elementCount;
+    request->growStep = growthStep;
+    request->usedCount = 0;
+    request->capacity = elementCount;
     request->stride = elementStride;
     if (elementCount != 0) {
         request->handle = sdfAllocGeneralBlock(elementStride * elementCount);
-        request->buffer = sdfResourceRetainAddress(request->handle);
+        request->buffer = (void *)sdfResourceRetainAddress(request->handle);
     } else {
         request->handle = 0;
         request->buffer = 0;
@@ -1706,39 +1699,39 @@ extern void sdfDecrementAllocationReferenceCount(s32 handle);
 extern void func_00329600(s32 handle, s32 size);
 void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 
-/* Grow by mode elements; preserve the native 16-bit count and signed-size cast. */
+/* Grow capacity, preserving the SDK's signed 16-bit allocation-size arithmetic. */
 void sdfDevBufferedRequestGrow(DevRequest *request) {
     if (request->handle == 0) {
-        sdfDevResizeBufferedRequest(request, request->mode);
+        sdfDevResizeBufferedRequest(request, request->growStep);
         return;
     }
     sdfDecrementAllocationReferenceCount(request->handle);
-    request->count = request->count + request->mode;
-    func_00329600(request->handle, (s16)request->count * request->stride);
-    request->buffer = sdfResourceRetainAddress(request->handle);
+    request->capacity = request->capacity + request->growStep;
+    func_00329600(request->handle, (s16)request->capacity * request->stride);
+    request->buffer = (void *)sdfResourceRetainAddress(request->handle);
 }
 
-/* Resize storage; nonpositive counts release existing storage, and flags are clamped. */
+/* Resize storage and clamp the live entry count to the new capacity. */
 void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     if (request->handle == 0) {
         if (elementCount > 0) {
-            request->count = elementCount;
+            request->capacity = elementCount;
             request->handle = sdfAllocGeneralBlock(request->stride * elementCount);
-            request->buffer = sdfResourceRetainAddress(request->handle);
+            request->buffer = (void *)sdfResourceRetainAddress(request->handle);
         }
     } else if (elementCount <= 0) {
         sdfReleaseResourceAllocation(request->handle);
         request->handle = 0;
-        request->flags = 0;
-        request->count = 0;
+        request->usedCount = 0;
+        request->capacity = 0;
         request->buffer = 0;
     } else {
         sdfDecrementAllocationReferenceCount(request->handle);
-        request->count = elementCount;
+        request->capacity = elementCount;
         func_00329600(request->handle, request->stride * elementCount);
-        request->buffer = sdfResourceRetainAddress(request->handle);
-        if (elementCount < request->flags) {
-            request->flags = elementCount;
+        request->buffer = (void *)sdfResourceRetainAddress(request->handle);
+        if (elementCount < request->usedCount) {
+            request->usedCount = elementCount;
         }
     }
 }

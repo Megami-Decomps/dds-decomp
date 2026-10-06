@@ -161,26 +161,12 @@ typedef struct SdfSynchronizedRequest {
     u32 state;
 } SdfSynchronizedRequest;
 
-extern void sdfReleaseQueuedResource(s32, s32);
+extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
 
-/* Dev slot: buffered request, unit matrix at +0x20, two vectors at +0x60/+0x70. */
-typedef struct SdfDevSlot {
-    u32 request;
-    u8 pad04[8];
-    s32 resource;
-    void *device;
-    u8 pad14[6];
-    s16 unk1A;
-    u32 unk1C;
-    u128 unitMatrix[4]; /* 0x20: four quadword rows */
-    u128 zeroVector;    /* 0x60 */
-    u128 unitScale;     /* 0x70: ones in XYZ */
-} SdfDevSlot;
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void *sdfDevCreateBufferedRequest(s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D33C8);
 
@@ -1779,25 +1765,14 @@ SdfDrawNode *func_002D7830(void) {
     return node;
 }
 
-typedef struct SdfFreeNode {
-    struct SdfFreeNode *next;
-    u8 pad04[8];
-    s32 allocation;
-} SdfFreeNode;
-
-typedef struct SdfFreeRoot {
-    u8 pad00[0x28];
-    SdfFreeNode *lists[2]; /* 0x28 */
-    void *workspace;       /* 0x30 */
-} SdfFreeRoot;
 
 /* Return the root's workspace, allocating it on first use. */
-void *sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
-    void *workspace = root->workspace;
+void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root) {
+    void *workspace = (void *)root->address;
 
     if (workspace == NULL) {
         workspace = (void *)sdfAllocSizeClassBlock(0x100);
-        root->workspace = workspace;
+        root->address = (u32)workspace;
     }
     return workspace;
 }
@@ -1806,16 +1781,16 @@ extern void sdfReleaseResourceAllocation(s32 allocation);
 extern void sdfReleaseChipBlock(void *allocation);
 
 /* Release allocations in both free-node lists; the stored head pointers are not cleared. */
-void sdfFreeNodeLists(SdfFreeRoot *root) {
-    SdfFreeNode **listCursor = root->lists;
+void sdfFreeNodeLists(SdfDrawNode *root) {
+    SdfCommandNode **listCursor = root->lists;
     s32 listIndex = 0;
     s32 listCount = 2;
     do {
-        SdfFreeNode *node = *listCursor;
+        SdfCommandNode *node = *listCursor;
         while (node != NULL) {
-            SdfFreeNode *next = node->next;
-            if (node->allocation != 0) {
-                sdfReleaseResourceAllocation(node->allocation);
+            SdfCommandNode *next = node->next;
+            if (node->resourceHandle != 0) {
+                sdfReleaseResourceAllocation(node->resourceHandle);
             } else {
                 sdfReleaseChipBlock(node);
             }
@@ -1826,97 +1801,80 @@ void sdfFreeNodeLists(SdfFreeRoot *root) {
     } while (listIndex != listCount);
 }
 
-void sdfReleaseFreeRoot(SdfFreeRoot *root) {
+void sdfReleaseFreeRoot(SdfDrawNode *root) {
     sdfFreeNodeLists(root);
-    sdfReleaseChipBlock(root->workspace);
-    root->workspace = NULL;
+    sdfReleaseChipBlock((void *)root->address);
+    root->address = 0;
     sdfReleaseChipBlock(root);
 }
 
-/* Allocate a dev slot and seed its unit matrix, unit scale and colour. */
-SdfDevSlot *sdfCreateBufferedTransformSlot(void) {
-    SdfDevSlot *slot;
+/* Allocate a model root and seed its unit matrix, unit scale and colour. */
+SdfModel *sdfCreateBufferedTransformSlot(void) {
+    SdfModel *slot;
 
-    slot = sdfAllocAndClearQuadwords(0x9C);
-    slot->request = sdfDevCreateBufferedRequest(0, 4, 0x20);
-    EE_MMI_UNIT_MATRIX((u8 *)&slot->unitMatrix[0]);
-    VU0_STORE_VF(vf0, (u8 *)&slot->zeroVector);
+    slot = sdfAllocAndClearQuadwords(sizeof(SdfModel));
+    slot->list = sdfDevCreateBufferedRequest(0, 4, 0x20);
+    EE_MMI_UNIT_MATRIX(slot->matrix);
+    VU0_STORE_VF(vf0, slot->unk60);
     VU0_SET_ONES_XYZ(vf10);
-    VU0_STORE_VF(vf10, (u8 *)&slot->unitScale);
+    VU0_STORE_VF(vf10, slot->scaleVector);
     slot->unk1A = -1;
-    slot->unk1C = 0x80808080;
+    slot->color = 0x80808080;
     return slot;
 }
 
-typedef struct SdfObjectList {
-    u8 pad00[4];
-    s16 count;
-    s16 capacity; /* 0x06: native signed bound used before buffered-request growth */
-    u8 pad08[4];
-    SdfFreeRoot **elements;
-} SdfObjectList;
-extern void sdfDestroyDevRequest(void *);
+extern void sdfDestroyDevRequest(DevRequest *request);
+extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
+extern void sdfDevBufferedRequestGrow(DevRequest *request);
 
 /* Release each element root, then the buffered request and its owner allocation. */
-void sdfDestroyObjectList(SdfObjectList **owner) {
+void sdfDestroyObjectList(SdfModel *owner) {
     s32 elementIndex;
-    for (elementIndex = 0; elementIndex < (*owner)->count; elementIndex++) {
-        sdfReleaseFreeRoot((*owner)->elements[elementIndex]);
+    for (elementIndex = 0; elementIndex < owner->list->usedCount; elementIndex++) {
+        sdfReleaseFreeRoot(((SdfDrawNode **)owner->list->buffer)[elementIndex]);
     }
-    sdfDestroyDevRequest(*owner);
+    sdfDestroyDevRequest(owner->list);
     sdfReleaseChipBlock(owner);
 }
 
-void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
+void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release) {
     if (slot == NULL) {
         return;
     }
     if (release != 0) {
-        sdfReleaseQueuedResource(slot->resource, 1);
+        sdfReleaseQueuedResource(slot->resources, 1);
     }
-    if (slot->device != NULL) {
-        sdfDestroyDevRequest(slot->device);
+    if (slot->slotPairs != NULL) {
+        sdfDestroyDevRequest(slot->slotPairs);
     }
     if (recycle != 0) {
         sdfPendingQueuePush((SdfPendingOwner *)&sdfObjectListReleaseQueue, (u32)slot);
     } else {
-        sdfDestroyDevRequest((void *)slot->request);
+        sdfDestroyDevRequest(slot->list);
         sdfReleaseChipBlock(slot);
     }
 }
 
-void sdfResizeBufferedSlotRequest(u32 *handle) {
-    sdfDevResizeBufferedRequest(*handle);
+void sdfResizeBufferedSlotRequest(SdfModel *model, s32 count) {
+    sdfDevResizeBufferedRequest(model->list, count);
 }
 
-/* Node of the object tree: first child, else next sibling, else back up. */
-typedef struct SdfHierarchyNode {
-    u8 pad00[4];
-    struct SdfHierarchyNode *nextSibling; /* 0x4 */
-    struct SdfHierarchyNode *parent;      /* 0x8 */
-    struct SdfHierarchyNode *firstChild;  /* 0xC */
-} SdfHierarchyNode;
-
-typedef struct SdfHierarchy {
-    SdfObjectList *list; /* 0x0 */
-    SdfHierarchyNode *root; /* 0x4 */
-} SdfHierarchy;
 
 /* Store the preorder hierarchy traversal in the element array; capacity is the caller's responsibility. */
-void sdfCollectTreeNodes(SdfHierarchy *hierarchy) {
-    SdfHierarchyNode **nodeArray = (SdfHierarchyNode **)hierarchy->list->elements;
-    SdfHierarchyNode *currentNode = hierarchy->root;
-    SdfHierarchyNode **output;
+void sdfCollectTreeNodes(SdfModel *hierarchy) {
+    SdfDrawNode **nodeArray = hierarchy->list->buffer;
+    SdfDrawNode *currentNode = hierarchy->rootNode;
+    SdfDrawNode **output;
 
     if (currentNode != NULL) {
         output = nodeArray;
         do {
             *output++ = currentNode;
-            if (currentNode->firstChild != NULL) {
-                currentNode = currentNode->firstChild;
+            if (currentNode->children != NULL) {
+                currentNode = currentNode->children;
             } else {
                 do {
-                    SdfHierarchyNode *nextSibling = currentNode->nextSibling;
+                    SdfDrawNode *nextSibling = currentNode->next;
                     if (nextSibling != NULL) {
                         currentNode = nextSibling;
                         break;
@@ -1928,100 +1886,83 @@ void sdfCollectTreeNodes(SdfHierarchy *hierarchy) {
     }
 }
 
-typedef struct SdfRouteNode SdfRouteNode;
-typedef struct SdfRouteOwner {
-    s32 requestAddress; /* 0x00: buffered root's request; opaque for other owners */
-    SdfRouteNode *first;
-    u8 pad08[4];
-    SdfRouteNode *last;
-} SdfRouteOwner;
 
-struct SdfRouteNode {
-    SdfRouteNode *next;
-    SdfRouteNode *previous;
-    SdfRouteOwner *owner;
-    SdfRouteNode *unkC;
-    SdfRouteOwner *root;
-};
-
-/* Append node to list's buffered request, then attach it to owner (NULL: root head).
- * Fetch the element buffer after growth, since the SDK can relocate its allocation.
- * list is the buffered root; owner/node and array entries remain 32-bit addresses.
- */
-void sdfAppendBufferedRouteNode(s32 *list, u32 owner, u32 node) {
+/* Grow the buffered root's node array if needed, then attach the new node.
+ * Fetch the element buffer after growth because its allocation can move. */
+void sdfAppendBufferedRouteNode(SdfModel *list, SdfDrawNode *owner, SdfDrawNode *node) {
     s16 usedCount;
-    s32 elementsAddress;
-    s32 requestAddress;
+    SdfDrawNode **elements;
+    DevRequest *request;
     s32 newCount;
 
-    requestAddress = ((SdfRouteOwner *)list)->requestAddress;
-    usedCount = ((SdfObjectList *)requestAddress)->count;
+    request = list->list;
+    usedCount = request->usedCount;
     newCount = usedCount + 1;
-    if ((s64)((SdfObjectList *)requestAddress)->capacity < (s64)newCount) {
-        sdfDevBufferedRequestGrow(requestAddress);
-        requestAddress = ((SdfRouteOwner *)list)->requestAddress;
+    if ((s16)request->capacity < newCount) {
+        sdfDevBufferedRequestGrow(request);
+        request = list->list;
     }
-    elementsAddress = (s32)((SdfObjectList *)requestAddress)->elements;
-    ((SdfRouteNode *)node)->root = (SdfRouteOwner *)list;
-    ((SdfObjectList *)requestAddress)->count = (s16)newCount;
-    *(s32 *)(usedCount * 4 + elementsAddress) = (s32)node;
+    elements = request->buffer;
+    node->root = list;
+    request->usedCount = newCount;
+    elements[usedCount] = node;
     sdfLinkRouteNode(node, owner);
 }
 
-void sdfUnlinkRouteNode(SdfRouteNode *node) {
-    SdfRouteOwner *owner = node->owner;
+void sdfUnlinkRouteNode(SdfDrawNode *node) {
+    SdfDrawNode *owner = node->parent;
     if (owner == NULL) {
-        SdfRouteOwner *root = node->root;
-        if (root->first == node) {
-            root->first = NULL;
+        SdfModel *root = node->root;
+        if (root->rootNode == node) {
+            root->rootNode = NULL;
         }
         return;
     }
     {
-        SdfRouteNode *previous = node->previous;
-        SdfRouteNode *next = node->next;
-        if (previous != node) {
-            previous->next = next;
+        SdfDrawNode *next = node->next;
+        SdfDrawNode *previous = node->previous;
+        if (next != node) {
             next->previous = previous;
-            if (owner->last == node) {
-                owner->last = previous;
+            previous->next = next;
+            if (owner->children == node) {
+                owner->children = next;
             }
-            node->next = node;
             node->previous = node;
+            node->next = node;
             return;
         }
-        if (owner->last == node) {
-            owner->last = NULL;
+        if (owner->children == node) {
+            owner->children = NULL;
         }
     }
 }
 
-void sdfLinkRouteNode(SdfRouteNode *node, SdfRouteOwner *owner) {
+void sdfLinkRouteNode(SdfDrawNode *node, SdfDrawNode *owner) {
     if (owner == NULL) {
-        SdfRouteOwner *root = node->root;
-        SdfRouteNode *first = root->first;
+        SdfModel *root = node->root;
+        SdfDrawNode *first = root->rootNode;
         if (first != node) {
-            root->first = node;
+            root->rootNode = node;
             if (first != NULL) {
-                first->owner = (SdfRouteOwner *)node;
-                node->unkC = first;
+                node->children = first;
+                first->parent = node;
             }
-            node->owner = NULL;
+            node->parent = NULL;
         }
-    } else if (node->owner != owner) {
-        SdfRouteNode *last;
+    } else if (node->parent != owner) {
+        SdfDrawNode *first;
         sdfUnlinkRouteNode(node);
-        last = owner->last;
-        if (last == NULL) {
-            owner->last = node;
+        first = owner->children;
+        if (first == NULL) {
+            owner->children = node;
         } else {
-            SdfRouteNode *next = last->next;
-            node->next = next;
-            next->previous = node;
-            last->next = node;
-            node->previous = last;
+            SdfDrawNode *previous = first->previous;
+            node->previous = previous;
+            previous->next = node;
+            first->previous = node;
+            node->next = first;
         }
-        node->owner = owner;
+        node->parent = owner;
     }
 }
 

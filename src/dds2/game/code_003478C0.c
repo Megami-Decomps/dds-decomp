@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
+#include "sdf_draw.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -134,7 +135,7 @@ typedef struct SdfPacCounter {
 
 typedef struct SdfPacList {
     u8 pad00[8];
-    void *list;    /* 0x8 */
+    DevRequest *list; /* 0x8 */
 } SdfPacList;
 
 typedef struct SdfPacRead {
@@ -152,7 +153,7 @@ typedef struct SdfPacRead {
 } SdfPacRead;
 
 extern void sdfPacAdvanceInput();
-extern void *sdfCreateConfiguredBufferedResourceList();
+extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32 count);
 extern void sdfPacSkipAllocationEntryBytes();
 
 /* Read the entry count word, size the list for it and arm the skip handler. */

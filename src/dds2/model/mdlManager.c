@@ -1,71 +1,17 @@
 #include "common.h"
 #include "pcp_vu0.h"
-#include "sdf_draw.h"
+#include "mdl.h"
 
-extern u64 fileGetResourceHandle(u64);
-
-extern u64 fileGetLoadedDataAddress();
-
-extern u32 sndBuildResourceHandleListFromOffsets(u64);
+struct FileWork;
+extern u32 fileGetResourceHandle(struct FileWork *);
+extern u32 fileGetLoadedDataAddress(struct FileWork *);
+extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
+extern void filePollEntryCleanup(struct FileWork *);
 
 extern u32 mdlGroupJobSemaphore;
 
-extern void *btlFindGroupedEntity();
+extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 
-/* Sub-record behind MdlCtx.sub (+0x8/+0xA read by func_002183D0/E0). */
-typedef struct MdlSub {
-    u8 unk0[8]; /* 0x0 */
-    u16 unk8;   /* 0x8 */
-    u16 unkA;   /* 0xA */
-} MdlSub;
-
-
-/* Entry table pointed to by the first word of MdlInner. */
-typedef struct MdlEntryTable {
-    u8 unk0[4];       /* 0x0 */
-    s16 count;        /* 0x4 */
-    u8 unk6[6];       /* 0x6 */
-    SdfDrawNode **items; /* 0xC */
-} MdlEntryTable;
-
-/* Record behind MdlCtx.inner. */
-typedef struct MdlInner {
-    MdlEntryTable *entries; /* 0x0 */
-    u8 unk4[4];  /* 0x4 */
-    u32 resourceHandle; /* 0x8: released by mdlReleaseInnerResourceHandle */
-    u8 unkC[8];  /* 0xC */
-    Motion *list; /* 0x14: intrusive node list */
-    u8 unk18[4]; /* 0x18 */
-    u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
-    u128 vector20; /* 0x20: matrix row 0 (vf28) */
-    u128 vector30; /* 0x30: matrix row 1 (vf29) */
-    u128 vector40; /* 0x40: matrix row 2 (vf30) */
-    u128 vector50; /* 0x50 */
-    u128 vector60; /* 0x60 */
-    u128 vector70; /* 0x70 */
-} MdlInner;
-
-/* Context shared by the matched mdlManager helpers. */
-typedef struct MdlCtx {
-    u8 unk0[4];        /* 0x0 */
-    struct MdlCtx *next; /* 0x4: link in the owner's context list */
-    u8 unk8[4];        /* 0x8 */
-    MdlSub *sub;       /* 0xC */
-    u32 unk10;         /* 0x10 */
-    u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
-    MdlInner *inner;   /* 0x18 */
-    u8 unk1C[0x14];    /* 0x1C */
-    struct MdlDevList *devList; /* 0x30: device slots released with the model */
-} MdlCtx;
-
-typedef struct MdlDevSlot {
-    struct MdlDevSlot *next; /* 0x0 */
-    void *slot;              /* 0x4 */
-} MdlDevSlot;
-
-typedef struct MdlDevList {
-    MdlDevSlot *first; /* 0x0 */
-} MdlDevList;
 
 
 extern void sdfDestroyMotion(Motion *arg);
@@ -74,18 +20,15 @@ extern s32 btlGroupContainsId(s32 group, s32 id);
 
 extern s32 fileManUpdate(void);
 
-void mdlClearSlotAndRelease(void *ctx, Motion *node) {
-    s32 offset = node->slotIndex * 4 + 0x20;
-    void **slot = (void **)((u8 *)ctx + offset);
-
-    if (*slot == node) {
-        *slot = NULL;
+void mdlClearSlotAndRelease(MdlCtx *ctx, Motion *node) {
+    if (ctx->slots[node->slotIndex] == node) {
+        ctx->slots[node->slotIndex] = NULL;
     }
     sdfDestroyMotion(node);
 }
 
 void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
-    Motion *node = ctx->inner->list;
+    Motion *node = ctx->inner->motionList;
 
     while (node != NULL) {
         if (node->searchId == id) {
@@ -96,67 +39,47 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     }
 }
 
-typedef struct MdlSlot {
-    u32 flags;      /* 0x0: 1 = bit 0x100 of the request mode, 2 = bit 0x200 */
-    s16 value4;     /* 0x4 */
-    s16 value6;     /* 0x6 */
-    u32 first;      /* 0x8 */
-    u32 resource;   /* 0xC: released through sdfReleaseResourceAllocation */
-} MdlSlot;
-
-typedef struct MdlSlotOwner {
-    u8 pad00[0xC];
-    u8 hasResources;    /* 0x0C */
-    u8 pad0D[3];
-    MdlCtx *contexts;   /* 0x10 */
-    u8 pad14[0xC];
-    MdlSlot slots[1];   /* 0x20 */
-} MdlSlotOwner;
 
 extern void sdfReleaseResourceAllocation();
 
-/* Release slot `index`: destroy its motions in every context and free the attached resource.
-   K&R definition: the caller below passes u64 values. */
-void mdlReleaseOwnerSlotResources(owner, index)
-    MdlSlotOwner *owner;
-    s32 index;
-{
+/* Release slot `index`: destroy its motions in every context and free the attached resource. */
+void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
     MdlCtx *ctx;
 
     if (owner != NULL) {
-        if (owner->slots[index].first == 0) {
+        if (owner->slots[index].data == NULL) {
             return;
         }
-        for (ctx = owner->contexts; ctx != NULL; ctx = ctx->next) {
+        for (ctx = owner->modelContext; ctx != NULL; ctx = ctx->next) {
             mdlReleaseFirstMatch(ctx, index);
         }
-        if (owner->hasResources != 0) {
-            if (owner->slots[index].resource != 0) {
-                sdfReleaseResourceAllocation(owner->slots[index].resource);
+        if (owner->ownsResources != 0) {
+            if (owner->slots[index].resourceHandle != 0) {
+                sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
             }
         }
-        owner->slots[index].first = 0;
-        owner->slots[index].resource = 0;
+        owner->slots[index].data = NULL;
+        owner->slots[index].resourceHandle = 0;
     }
 }
 
-void mdlApplyCommandToGroupedEntity(u64 unused0, u64 unused1, u64 command) {
-    u64 entity;
+void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 index) {
+    BattleGroupNode *entity;
 
-    entity = btlFindGroupedEntity();
-    mdlReleaseOwnerSlotResources(entity, command);
+    entity = btlFindGroupedEntity(group, id);
+    mdlReleaseOwnerSlotResources(entity, index);
 }
 
-void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value4, u32 first, u32 resource) {
-    MdlSlotOwner *owner = btlFindGroupedEntity(group, id);
-    MdlSlot *slot;
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, void *data, u32 resourceHandle) {
+    BattleGroupNode *owner = btlFindGroupedEntity(group, id);
+    BattleGroupSlot *slot;
 
     mdlReleaseOwnerSlotResources(owner, index);
     slot = &owner->slots[index];
-    slot->value4 = value4;
-    slot->value6 = value6;
-    slot->first = first;
-    slot->resource = resource;
+    slot->slot = slotIndex;
+    slot->motionIndex = motionIndex;
+    slot->data = data;
+    slot->resourceHandle = resourceHandle;
     slot->flags = 0;
     if (mode & 0x100) {
         slot->flags = 1;
@@ -166,69 +89,47 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 value6, s32 
     }
 }
 
-/* Group setup record carried in the payload of an mdlRequestAsset job. */
-typedef struct MdlGroupSetup {
-    s32 resourceList;  /* 0x0: 4th arg of btlCreateGroupNode */
-    s32 unk4;          /* 0x4: 5th arg of btlCreateGroupNode */
-    s32 requestHandle; /* 0x8: 6th arg of btlCreateGroupNode */
-    s32 flags;         /* 0xC */
-    s32 resource;      /* 0x10: resource of mdlConfigureGroupedEntitySlot */
-    s32 handleA;       /* 0x14: stored to MdlGroupEntity +0xA4 */
-    s32 handleB;       /* 0x18: stored to MdlGroupEntity +0xA0 */
-    s32 handleC;       /* 0x1C: stored to MdlGroupEntity +0xA8 */
-} MdlGroupSetup;
 
-typedef struct MdlGroupEntity {
-    u8 unk0[0xA0];
-    void *unkA0;
-    void *unkA4;
-    void *unkA8;
-} MdlGroupEntity;
+extern void btlCreateGroupNode(s32, s32, s32, DevRequest *, void *, s32);
 
-extern void btlCreateGroupNode();
 
-extern void mdlConfigureGroupedEntitySlot();
+void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
+    BattleGroupNode *entity;
 
-void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlGroupSetup *setup) {
-    MdlGroupEntity *entity;
-
-    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->unk4, setup->requestHandle);
-    if (setup->flags != 0) {
-        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->flags, setup->resource);
+    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->itemList, setup->requestHandle);
+    if (setup->motionData != NULL) {
+        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->motionData, setup->motionResource);
     }
-    if (setup->handleA != 0) {
+    if (setup->partInfo != NULL) {
         entity = btlFindGroupedEntity(group, id);
-        entity->unkA4 = setup->handleA;
-        entity->unkA0 = setup->handleB;
-        entity->unkA8 = setup->handleC;
+        entity->partInfo = setup->partInfo;
+        entity->resourceHandle = setup->resourceHandle;
+        entity->partList = setup->partList;
     }
 }
 
-void *mdlWaitGroupThenFind(s32 group, s32 id) {
+BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id) {
     while (btlGroupContainsId(group, id)) {
         fileManUpdate();
     }
     return btlFindGroupedEntity(group, id);
 }
 
-void mdlExecuteAndFreeJob(u32 job) {
-    u16 *words;
-
-    words = (u16 *)job;
-    mdlApplyGroupSetup(*words, words[1], *(u32 *)(words + 4), words + 6);
+void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
+    mdlApplyGroupSetup(request->group, request->id, request->options, &request->payload);
     WaitSema(mdlGroupJobSemaphore);
-    btlRemoveGroupId(*words, words[1]);
+    btlRemoveGroupId(request->group, request->id);
     SignalSema(mdlGroupJobSemaphore);
-    sdfReleaseChipBlock(job);
+    sdfReleaseChipBlock(request);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(u64 resource, s32 destination) {
-    u64 handle;
-    u32 resolved;
+void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadRequest *destination) {
+    u32 handle;
+    DevRequest *resourceList;
 
-    handle = fileGetLoadedDataAddress();
-    resolved = sndBuildResourceHandleListFromOffsets(handle);
-    *(u32 *)(destination + 0xc) = resolved;
+    handle = fileGetLoadedDataAddress(resource);
+    resourceList = sndBuildResourceHandleListFromOffsets((const void *)handle);
+    destination->payload.resourceList = resourceList;
     handle = fileGetResourceHandle(resource);
     sdfReleaseResourceAllocation(handle);
     filePollEntryCleanup(resource);

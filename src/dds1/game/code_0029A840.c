@@ -2,7 +2,8 @@
 #include "file.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
-#include "sdf_draw.h"
+#include "mdl.h"
+#include "sdf.h"
 
 extern u32 sdfResourceRetainAddress(u32);
 
@@ -18,20 +19,10 @@ extern void *fileResolvePrimaryBuffer();
 
 extern u32 *fileResolveSecondaryBuffer(void *);
 
-/* Texture record read by the floor-model setup (see SdfTex). */
-typedef struct EffTexture {
-    u8 pad_00[0xC];
-    s16 width;   // 0x0C
-    s16 height;  // 0x0E
-    u8 pad_10[0xA];
-    u8 format;   // 0x1A
-    u8 pad_1B[9];
-    s32 slot;    // 0x24
-} EffTexture;
 
 typedef struct EffTexTable {
     u8 pad_00[0xC];
-    EffTexture **entries; // 0x0C
+    SdfTex **entries; // 0x0C
 } EffTexTable;
 
 /* Battle state: resource headers for texture slots 1 and 2. */
@@ -62,24 +53,21 @@ extern u32 D_003BC954;
 
 typedef struct EffModelOwner {
     f32 scale;
-    s32 model;
+    MdlCtx *model;
     void *ownedBuffer;
+    u32 flags;
 } EffModelOwner;
 
-typedef struct EffectObjectFlag {
-    u8 pad00[0xC];
-    u32 flags;
-} EffectObjectFlag;
 
 typedef struct EffectObjectNode {
-    EffectObjectFlag *object;
+    EffModelOwner *object;
     struct EffectObjectNode *prev;
     struct EffectObjectNode *next;
 } EffectObjectNode;
 
 extern EffectObjectNode *effFloorModelListHead;
 
-extern s64 btlIsRuntimeAllocated(void);
+extern u8 btlIsRuntimeAllocated(void);
 
 extern s32 btlIsCurrentActorFullyMarked(void);
 
@@ -93,38 +81,29 @@ typedef struct RefObj {
     s32 cnt1C;         // 0x1C
 } RefObj; // 0x20
 
-extern void sdfMotionSampleAtFrame(void *, float);
+extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern u32 effSharedTextureReferenceCount;
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 
-extern void mdlStoreTertiaryVectorVU(void *);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void *func_0029BD90(void *);
 
-extern void mdlStorePrimaryVectorVU(void *);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
+extern void mdlBroadcastMasked(MdlCtx *, u32);
+extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
+extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
+extern void mdlDestroyContext(MdlCtx *);
+extern u16 mdlGetContextResourceGroup(MdlCtx *);
+extern u16 mdlGetContextResourceId(MdlCtx *);
 
-/* Model context prefix and the effect owner's lighting attachment. */
-
-typedef struct MdlInner {
-    u8 pad00[8];
-    u32 resourceHandle;
-    u8 pad0C[0x74];
-    void *lighting;
-} MdlInner;
-
-typedef struct MdlCtx {
-    u32 flags;
-    u8 pad04[0x14];
-    MdlInner *inner;
-    Motion *first;
-} MdlCtx;
 
 /* Initialize the VU transforms and the first node's float slot, if present. */
-void effInitModelVUState(void *model) {
+void effInitModelVUState(MdlCtx *model) {
     VU0_MOVE_VF(vf10, vf0);
     mdlStorePrimaryVectorVU(model);
     VU0_MOVE_VF(vf10, vf0);
@@ -132,23 +111,23 @@ void effInitModelVUState(void *model) {
     VU0_SET_ONES_XYZ(vf10);
     mdlStoreTertiaryVectorVU(model);
     mdlBroadcastMasked(model, 0x80808080);
-    if (((MdlCtx *)model)->first != NULL) {
+    if (model->first != NULL) {
         mdlAddEntryPlain(model, 0, 0);
-        ((MdlCtx *)model)->first->frameStep = 1.0f;
+        model->first->frameStep = 1.0f;
     }
-    ((MdlCtx *)model)->flags &= ~1;
+    model->flags &= ~1;
 }
 
 extern u16 D_003BC944;
 
-extern void mdlLoadViewerPackage(u32, u16, u32, u32, u32);
+extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
-extern void *func_00217680(u32, u32);
+extern MdlCtx *func_00217680(s32, s32);
 
-extern void effInitModelVUState(void *);
+extern void effInitModelVUState(MdlCtx *);
 
-void *effLoadViewerModelWithVUState(u32 first, u32 second) {
-    void *model;
+MdlCtx *effLoadViewerModelWithVUState(void *first, u32 second) {
+    MdlCtx *model;
     mdlLoadViewerPackage(6, D_003BC944, 0x101, first, second);
     model = func_00217680(6, D_003BC944);
     effInitModelVUState(model);
@@ -157,23 +136,23 @@ void *effLoadViewerModelWithVUState(u32 first, u32 second) {
 }
 
 /* Clear the lighting attachment before destroying its model context. */
-void effDestroyModelContext(s32 model) {
-    ((MdlCtx *)model)->inner->lighting = NULL;
-    mdlDestroyContext();
+void effDestroyModelContext(MdlCtx *model) {
+    model->inner->lighting = NULL;
+    mdlDestroyContext(model);
 }
 
 EffModelOwner *effCreateModelOwner(u8 *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
     owner->ownedBuffer = sdfAllocAndClearQuadwords(0xE0);
     if (source != NULL) {
-        s32 data;
+        void *data;
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
             owner->model = effLoadViewerModelWithVUState(data, ((FileJob *)source)->slots[1].size);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
-            mdlStoreTertiaryVectorVU((void *)owner->model);
+            mdlStoreTertiaryVectorVU(owner->model);
         }
     }
     return owner;
@@ -200,7 +179,7 @@ u32 *effDuplicateEffectHeader(u32 *source) {
 void effRecreateModelFromSource(u32 *work, u8 *source) {
     EffModelOwner *owner = (EffModelOwner *)work;
     EffModelOwner *original = (EffModelOwner *)source;
-    void *model;
+    MdlCtx *model;
 
     if (owner->model != 0) {
         effDestroyModelContext(owner->model);
@@ -210,70 +189,70 @@ void effRecreateModelFromSource(u32 *work, u8 *source) {
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALE_VF_MFC1(vf10, owner->scale);
     mdlStoreTertiaryVectorVU(model);
-    owner->model = (u32)model;
+    owner->model = model;
 }
 
-void effModelAnimationStop(s32 owner) {
-    sdfMotionSampleAtFrame(((MdlCtx *)((EffModelOwner *)owner)->model)->first, 0.0f);
+void effModelAnimationStop(EffModelOwner *owner) {
+    sdfMotionSampleAtFrame(owner->model->first, 0.0f);
 }
 
 extern u8 D_00325828[];
 
-extern s64 effComputeLightDirectionVU(void *, void *);
+extern s32 effComputeLightDirectionVU(MdlCtx *, void *);
 
-extern void mdlProcessContextNodesAndTransforms(void *, void *);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
 /* Attach the owner's lighting buffer when the direction update succeeds. */
-void effRefreshModelLighting(u8 *work) {
-    void *model;
-    if (effComputeLightDirectionVU((void *)((EffModelOwner *)work)->model, ((EffModelOwner *)work)->ownedBuffer) != 0) {
-        model = (void *)((EffModelOwner *)work)->model;
-        ((MdlCtx *)model)->inner->lighting = ((EffModelOwner *)work)->ownedBuffer;
+void effRefreshModelLighting(EffModelOwner *work) {
+    MdlCtx *model;
+    if (effComputeLightDirectionVU(work->model, work->ownedBuffer) != 0) {
+        model = work->model;
+        model->inner->lighting = work->ownedBuffer;
     } else {
-        model = (void *)((EffModelOwner *)work)->model;
+        model = work->model;
     }
-    mdlProcessContextNodesAndTransforms(model, D_00325828);
+    mdlProcessContextNodesAndTransforms(model, (s32)D_00325828);
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
-void effApplyModelPrimaryVector(s32 owner, void *vec) {
+void effApplyModelPrimaryVector(EffModelOwner *owner, void *vec) {
     VU0_LOAD_VF(vf10, vec);
-    mdlStorePrimaryVectorVU((void *)((EffModelOwner *)owner)->model);
+    mdlStorePrimaryVectorVU(owner->model);
 }
 
-void effApplyModelVecB(s32 owner, void *vec) {
+void effApplyModelVecB(EffModelOwner *owner, void *vec) {
     VU0_LOAD_VF(vf10, vec);
-    mdlUpdateContextRotationBasisFromQuaternion((void *)((EffModelOwner *)owner)->model);
+    mdlUpdateContextRotationBasisFromQuaternion(owner->model);
 }
 
-void effBroadcastModelMask(s32 owner) {
-    mdlBroadcastMasked(((EffModelOwner *)owner)->model);
+void effBroadcastModelMask(EffModelOwner *owner, u32 color) {
+    mdlBroadcastMasked(owner->model, color);
 }
 
-void effApplyScaledModelTertiaryVector(s32 model, float scale) {
+void effApplyScaledModelTertiaryVector(EffModelOwner *owner, float scale) {
     float v[3];
     float t;
 
-    t = *(float *)model * scale;
+    t = owner->scale * scale;
     v[0] = v[1] = v[2] = t;
     VU0_LOAD_VF(vf10, v);
-    mdlStoreTertiaryVectorVU((void *)((EffModelOwner *)model)->model);
+    mdlStoreTertiaryVectorVU(owner->model);
 }
 
 void effUploadModelTextures(EffModelOwner *owner) {
     s32 i = 0;
     EffBattleTexHeaders *battle = (EffBattleTexHeaders *)btlGetRuntime();
-    EffTexTable *table = (EffTexTable *)((MdlCtx *)owner->model)->inner->resourceHandle;
+    EffTexTable *table = owner->model->inner->assetData;
 
     do {
-        EffTexture *tex = table->entries[i++];
+        SdfTex *tex = table->entries[i++];
         u8 *header;
         u8 *pixels;
         s16 width;
         s16 height;
         u8 format;
 
-        switch (tex->slot) {
+        switch (tex->unk24) {
         case 1:
             header = battle->slot1;
             break;
@@ -290,7 +269,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
         }
         width = tex->width;
         height = tex->height;
-        format = tex->format;
+        format = tex->pixelFormat;
         sdfTexSubmitImageCopy(sdfTexGetPrimaryResourceWord(tex), width, height, format, pixels, 1);
     } while (i < 2);
 }
@@ -298,20 +277,20 @@ void effUploadModelTextures(EffModelOwner *owner) {
 /* Track floor models only while battle is active and the current actor is not fully marked. */
 EffModelOwner *effCreateFloorModelOwner(u8 *source) {
     EffModelOwner *owner;
-    s64 battleActive;
+    s32 battleActive;
 
     owner = effCreateModelOwner(source);
     effUploadModelTextures(owner);
     battleActive = btlIsRuntimeAllocated();
     if ((battleActive != 0) && (battleActive = btlIsCurrentActorFullyMarked(), battleActive == 0)) {
-        effFloorModelListPush((EffectObjectFlag *)owner);
+        effFloorModelListPush(owner);
     }
     return owner;
 }
 
 void effMarkFloorModelForDestruction(u8 *work) {
-    u32 flags = ((EffectObjectFlag *)work)->flags | 2;
-    ((EffectObjectFlag *)work)->flags = flags;
+    u32 flags = ((EffModelOwner *)work)->flags | 2;
+    ((EffModelOwner *)work)->flags = flags;
     if ((flags & 4) == 0) {
         effDestroyModelOwner(work);
     }
@@ -336,26 +315,22 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AE88);
 extern u32 effModelUpdateControlFlags;
 
 void effMarkFloorModelForUpdate(u8 *work) {
-    u32 previous = ((EffectObjectFlag *)work)->flags;
+    u32 previous = ((EffModelOwner *)work)->flags;
     u32 flags = previous | 1;
-    ((EffectObjectFlag *)work)->flags = flags;
+    ((EffModelOwner *)work)->flags = flags;
     if ((flags & 4) == 0) {
         if ((effModelUpdateControlFlags & 1) == 0) {
             func_0029AE88(work);
         }
     } else if ((effModelUpdateControlFlags & 1) != 0) {
-        ((EffectObjectFlag *)work)->flags = previous | 0x31;
+        ((EffModelOwner *)work)->flags = previous | 0x31;
     }
 }
 
 extern void *sdfAllocAndClearQuadwords(u32);
 
-typedef struct TrackedEffectObject {
-    u8 unk_00[0xC];
-    u32 flags;
-} TrackedEffectObject;
 
-void effFloorModelListPush(EffectObjectFlag *obj) {
+void effFloorModelListPush(EffModelOwner *obj) {
     EffectObjectNode *entry = sdfAllocAndClearQuadwords(sizeof(EffectObjectNode));
 
     entry->object = obj;
@@ -377,7 +352,7 @@ extern void func_003003F0(const char *, void *);
 void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->object != NULL) {
         func_003003F0(D_003B2AA0, node->object);
-        effDestroyModelOwner((EffModelOwner *)node->object);
+        effDestroyModelOwner(node->object);
         node->object = NULL;
     }
     if (node->next != NULL) {
@@ -413,7 +388,7 @@ void effSweepFloorModelList(void) {
 
 void mdlPropagateObjectFlag(void) {
     EffectObjectNode *node = effFloorModelListHead;
-    EffectObjectFlag *object;
+    EffModelOwner *object;
     s32 flags;
 
     if (node != NULL) {
@@ -429,7 +404,7 @@ void mdlPropagateObjectFlag(void) {
 }
 
 void mdlClearListedObjectFlag(void) {
-    EffectObjectFlag *object;
+    EffModelOwner *object;
     EffectObjectNode *node;
 
     node = effFloorModelListHead;
@@ -441,7 +416,7 @@ void mdlClearListedObjectFlag(void) {
 }
 
 void mdlSetListedObjectFlag(void) {
-    EffectObjectFlag *object;
+    EffModelOwner *object;
     EffectObjectNode *node;
 
     node = effFloorModelListHead;
@@ -454,7 +429,7 @@ void mdlSetListedObjectFlag(void) {
 
 void mdlMarkAndProcessObjectNodes(void) {
     EffectObjectNode *node = effFloorModelListHead;
-    EffectObjectFlag *object;
+    EffModelOwner *object;
     EffectObjectNode *next;
     s32 flags;
 
@@ -484,7 +459,7 @@ typedef struct EffResourceOwner {
     u8 pad_40[4];
     void **entries;
     void *buffer;
-    u32 model;
+    MdlCtx *model;
 } EffResourceOwner;
 
 void effDestroyResourceOwner(EffResourceOwner *owner) {
@@ -525,16 +500,16 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     if (dst->model != 0) {
         effDestroyModelContext(dst->model);
     }
-    dst->model = (u32)func_00217680(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
-    effInitModelVUState((void *)dst->model);
-    if (((MdlCtx *)dst->model)->first != NULL) {
+    dst->model = func_00217680(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
+    effInitModelVUState(dst->model);
+    if (dst->model->first != NULL) {
         if (dst->plainEntry != 0) {
             mdlAddEntryPlain(dst->model, 0, 0);
         } else {
             mdlAddEntryFlagged(dst->model, 0, 0);
         }
     }
-    dst->count = sdfCountMapPositionRecords((u32)((MdlCtx *)dst->model)->inner);
+    dst->count = sdfCountMapPositionRecords((u32)dst->model->inner);
     if (src->buffer != 0) {
         if (dst->buffer != 0) {
             for (i = 0; i < dst->count; i++) {
@@ -550,34 +525,34 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     }
 }
 
-void effResetModelMotionAndOwnerFlag(s32 work) {
-    sdfMotionSampleAtFrame(((MdlCtx *)((EffResourceOwner *)work)->model)->first, 0.0f);
-    ((EffResourceOwner *)work)->unk04 = 0;
+void effResetModelMotionAndOwnerFlag(EffResourceOwner *work) {
+    sdfMotionSampleAtFrame(work->model->first, 0.0f);
+    work->unk04 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029B818);
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
-void effLoadModelPrimaryVector(s32 work, void *vec) {
+void effLoadModelPrimaryVector(EffResourceOwner *work, void *vec) {
     VU0_LOAD_VF(vf10, vec);
-    mdlStorePrimaryVectorVU((void *)((EffResourceOwner *)work)->model);
+    mdlStorePrimaryVectorVU(work->model);
 }
 
-void effSetModelRotationQuaternion(s32 work, void *vec) {
+void effSetModelRotationQuaternion(EffResourceOwner *work, void *vec) {
     VU0_LOAD_VF(vf10, vec);
-    mdlUpdateContextRotationBasisFromQuaternion((void *)((EffResourceOwner *)work)->model);
+    mdlUpdateContextRotationBasisFromQuaternion(work->model);
 }
 
-void effPropagateResourceModelMask(s32 work) {
-    mdlBroadcastMasked(((EffResourceOwner *)work)->model);
+void effPropagateResourceModelMask(EffResourceOwner *work, u32 color) {
+    mdlBroadcastMasked(work->model, color);
 }
 
-void effScaleModelVec(s32 work, float scale) {
+void effScaleModelVec(EffResourceOwner *work, float scale) {
     u32 bits;
 
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALAR_OP_TMP(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
-    mdlStoreTertiaryVectorVU((void *)((EffResourceOwner *)work)->model);
+    mdlStoreTertiaryVectorVU(work->model);
 }
 
 void effObjectListCountersReset(void) {
@@ -595,16 +570,16 @@ u32 effCloneSharedReferenceWithValue(u32 source, u32 value) {
     return (u32)copy;
 }
 
-extern u8 *D_003BC958;
+extern SdfTex *D_003BC958;
 
 extern void sdfTexReleaseReference(void *);
 
 void effReleaseSharedReference(RefObj *obj) {
     effSharedTextureReferenceCount--;
     if (effSharedTextureReferenceCount == 0) {
-        u8 *graphics = D_003BC958;
-        ((EffTexture *)graphics)->width = 0x100;
-        ((EffTexture *)graphics)->height = 0x100;
+        SdfTex *graphics = D_003BC958;
+        graphics->width = 0x100;
+        graphics->height = 0x100;
         D_003BC950 = -1;
         sdfTexReleaseReference(graphics);
     }
@@ -620,6 +595,7 @@ RefObj *effRetainSharedReference(RefObj *obj) {
     return obj;
 }
 
+extern SdfTex *func_0029C048(void *, RefObj *);
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C048);
 
 /* Each 0x10-byte entry contributes itself plus the number stored in its first word. */
@@ -628,7 +604,7 @@ typedef struct EffExpandedList {
     u32 count;
     u8 pad8[8];
     u8 *entries;
-    void **handles; // 0x14
+    RefObj **handles; // 0x14
     s32 total;      // 0x18
     u32 refCount;   // 0x1C
     s32 unk20;
@@ -662,7 +638,7 @@ void effReleaseReferenceHolder(u8 *holder) {
         return;
     }
     for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
-        effReleaseSharedReference(((RefObj **)((EffExpandedList *)holder)->handles)[i]);
+        effReleaseSharedReference(((EffExpandedList *)holder)->handles[i]);
     }
     sdfReleaseResourceAllocation(((EffExpandedList *)holder)->buffer);
 }
@@ -739,8 +715,11 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     out->pad_08 = 0;
 }
 
-void effAssignSampledSegmentReference(s32 owner, u32 target, s32 indexSource) {
-    func_0029C048(target, (u32)((EffExpandedList *)owner)->handles[((EffAnimSample *)indexSource)->segment]);
+SdfTex *effAssignSampledSegmentReference(void *owner, void *target, const void *indexSource) {
+    EffExpandedList *list = owner;
+    const EffAnimSample *sample = indexSource;
+
+    return func_0029C048(target, list->handles[sample->segment]);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2AA0);
