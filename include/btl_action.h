@@ -60,7 +60,8 @@ extern BtlAbilityParameter *datAbilityParameters;
 /* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
 typedef struct BtlActionAnimationRecord {
     u8 cameraKind; /* 0x00: values 6 and 7 select an aim pose. */
-    u8 pad01[2];
+    u8 delayIndex; /* 0x01: row of the action delay table */
+    u8 pad02;
     u8 kind;
     u16 displayCode;
     u8 pad06[0x16];
