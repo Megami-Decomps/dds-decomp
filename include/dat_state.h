@@ -75,7 +75,11 @@ typedef struct DatPartyRecord {
     s8 profileId;
     u8 pad56[2];
     u32 skillFlags[76];                    /* 0x058: eight four-bit skill states per word. */
-    u8 pad188[0xC];
+    u8 pad188[4];
+    u16 unk18C;
+    u16 unk18E;
+    u16 unk190;
+    u8 pad192[2];
     s32 randomizedValue;
     s32 link;
     u8 pad19C[8];
