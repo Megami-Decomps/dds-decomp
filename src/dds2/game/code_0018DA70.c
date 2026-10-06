@@ -99,7 +99,7 @@ typedef struct {
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 struct EffectDispatchState;
 extern s32 billGetWorkTransformMatrix(struct EffectDispatchState *packet);
-extern void effBuildBlurUnitTextureQuad();
+
 
 extern void sdfAppendPacket();
 
@@ -239,7 +239,49 @@ void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0018DA70", effBuildBlurUnitTextureQuad);
+void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+{
+    quad->color[0] = 0x80;
+    quad->color[1] = 0x80;
+    quad->color[2] = 0x80;
+    quad->color[3] = source->color[3];
+    if (fixedPointCoordinates == 0) {
+        quad->vertices[0].x = (source->left << 4) + 0x7000;
+        quad->vertices[0].y = (source->top << 3) + 0x7900;
+        quad->vertices[1].x = quad->vertices[0].x;
+        quad->vertices[1].y = (source->bottom << 3) + 0x7900;
+        quad->vertices[2].x = (source->right << 4) + 0x7000;
+        quad->vertices[2].y = quad->vertices[0].y;
+        quad->vertices[3].x = quad->vertices[2].x;
+        quad->vertices[3].y = quad->vertices[1].y;
+    } else {
+        quad->vertices[0].x = source->left + 0x7000;
+        quad->vertices[0].y = source->top + 0x7900;
+        quad->vertices[1].x = quad->vertices[0].x;
+        quad->vertices[1].y = source->bottom + 0x7900;
+        quad->vertices[2].x = source->right + 0x7000;
+        quad->vertices[2].y = quad->vertices[0].y;
+        quad->vertices[3].x = quad->vertices[2].x;
+        quad->vertices[3].y = quad->vertices[1].y;
+    }
+    quad->vertices[0].s = 0.0f;
+    quad->vertices[0].t = 0.0f;
+    quad->vertices[1].s = 0.0f;
+    quad->vertices[1].t = 1.0f;
+    quad->vertices[2].s = 1.0f;
+    quad->vertices[2].t = 0.0f;
+    quad->vertices[3].s = 1.0f;
+    quad->vertices[3].t = 1.0f;
+    quad->vertices[0].depth = 0;
+    quad->vertices[0].xyzControl = 0;
+    quad->vertices[1].depth = 0;
+    quad->vertices[1].xyzControl = 0;
+    quad->vertices[2].depth = 0;
+    quad->vertices[2].xyzControl = 0;
+    quad->vertices[3].depth = 0;
+    quad->vertices[3].xyzControl = 0;
+}
+
 
 void effDrawBlurRectangle(BlurSource *source)
 {
