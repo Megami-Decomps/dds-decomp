@@ -359,7 +359,7 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
 /* Adds one to the base unless bit 9 of the owner's flags is set. */
 
 s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
-    return base + ((((s32)owner->flags >> 9) ^ 1U) & 1);
+    return base + (((owner->flags >> 9) ^ 1U) & 1);
 }
 
 /* Number display: initializes both anchor vectors, then adds the offset before projection. */

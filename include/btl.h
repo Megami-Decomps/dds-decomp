@@ -87,7 +87,7 @@ typedef struct BtlUnit {
     union {
         u64 flags64; /* 0x110: retail also loads the complete status pair. */
         struct {
-            u32 flags; /* 0x110 */
+            s32 flags; /* 0x110: arithmetic-shift accessors use the signed low word. */
             u32 stateFlags; /* 0x114 */
         };
     };
@@ -209,7 +209,7 @@ typedef struct BtlUnit {
     union {
         u64 flags64; /* 0x110 */
         struct {
-            u32 flags; /* 0x110 */
+            s32 flags; /* 0x110: same signed status word as DDS1. */
             u32 stateFlags; /* 0x114 */
         };
     };
