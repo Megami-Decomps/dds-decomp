@@ -582,9 +582,58 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00236180);
+extern const char *D_003BC070[];
+extern const char *D_003AE0D8[];
+extern char D_003BC080[];
+extern char D_003BC088[];
+/* The camp provider owns the scene type (CampScene); the viewer passes its runtime. */
+extern u32 mnuCampGetPrimaryOption(void *scene);
+extern u32 mnuCampGetSecondaryOption(void *scene);
 
-extern void func_00236180();
+/* Draw a project-menu command, including its current toggle/skip option. */
+void func_00236180(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    char labels[11][30] = {
+        "SAVE PROJ    >>",
+        "LOAD PROJ    >>",
+        "LOAD NEW PROJ>>",
+        "SET START FRAME",
+        "SET END   FRAME",
+        "SET TOTAL FRAME",
+        "CAPTURE        ",
+        "BATCH CAPTURE  ",
+        "MOVE ALLFRAME ",
+        "BISTA",
+        "SKIP"
+    };
+    const char *primaryOptions[2];
+    const char *secondaryOptions[3];
+    s32 style;
+
+    memcpy(primaryOptions, D_003BC070, sizeof(primaryOptions));
+    memcpy(secondaryOptions, D_003AE0D8, sizeof(secondaryOptions));
+    if (index < 11) {
+        if (ctx->inputA == index) {
+            if (ctx->actionMode == 1) {
+                style = 4;
+            } else {
+                style = 5;
+            }
+        } else {
+            style = 0;
+        }
+        if (index == 9) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+                D_003BC080, labels[index], primaryOptions[mnuCampGetPrimaryOption(ctx)]));
+        } else if (index == 10) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+                D_003BC080, labels[index], secondaryOptions[mnuCampGetSecondaryOption(ctx)]));
+        } else {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+                D_003BC088, labels[index]));
+        }
+    }
+}
+
 extern void func_00237130();
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
@@ -598,7 +647,6 @@ s32 mnuDrawInfoWindowA(s32 x, s32 y, u8 *work) {
     return kwlnStepTwoListCursors(0, 1, 0xB, 1, 0xB, 0, 0, 0, (s32 *)(work + 0x22A8));
 }
 
-extern char D_003BC088[];
 extern char D_003BC090[];
 extern char D_003BC0A0[];
 extern u8 D_003688B8[];
