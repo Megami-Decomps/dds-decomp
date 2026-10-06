@@ -59,7 +59,50 @@ extern s32 sceSifInitIopHeap(void);
 extern s32 func_003415A8(void);
 extern void func_003417E0(s32, void *, s32);
 
-INCLUDE_ASM(const s32, "game/code_00341650", func_00341650);
+extern SndRingPacket D_00477A00[32];
+extern u32 D_00438B90;
+/* The worker consumes entries while this producer publishes and polls cursors. */
+extern vu16 D_004391E2;
+extern vu16 D_004391E4;
+extern s32 D_004391E8;
+extern s32 WakeupThread(s32 thread);
+extern s32 func_003414E8(void);
+extern void *memcpy(void *, const void *, u32);
+
+u32 func_00341650(u32 command, u32 channel, void *packet, s32 size) {
+    s32 next;
+    s32 retries;
+    SndRingPacket *entry;
+    u32 packetQuadwords;
+
+    if (++D_00438B90 == 0) {
+        D_00438B90 = 1;
+    }
+    next = ((s16)D_004391E4 + 1) & 31;
+    if (next == (s16)D_004391E2) {
+        for (retries = 8; retries != 0; retries--) {
+            do {
+                WakeupThread(D_004391E8);
+            } while ((s16)D_004391E2 != next);
+        }
+        return 0;
+    }
+    entry = &D_00477A00[(s16)D_004391E4];
+    entry->sequence = D_00438B90;
+    if (size != 0) {
+        memcpy(entry->payload, packet, size);
+    }
+    packetQuadwords = (size + 0x14 + 15) >> 4;
+    entry->command = (command << 16) | (channel & 0xffff) | (packetQuadwords << 28);
+    D_004391E4 = next;
+    if (D_004391E0 != 0) {
+        while (func_003414E8() != 0) {
+        }
+    } else {
+        WakeupThread(D_004391E8);
+    }
+    return D_00438B90;
+}
 
 void func_003417A0(u32 unused) {
 }
