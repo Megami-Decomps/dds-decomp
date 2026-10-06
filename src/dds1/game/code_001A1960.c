@@ -141,7 +141,7 @@ extern s32 datEnemyRecords;
 
 extern u32 fldGetSceneScriptTaskUserData(void);
 
-extern u64 func_001978E8(s32, s32, u64, u64, u64, u64);
+extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
@@ -4624,14 +4624,14 @@ void func_001BCE90(void) {
 void func_001BCE98(void) {
 }
 
-void fldSubmitSceneObjectAtCoordinates(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
+    u32 glyph;
 
     itfSetTextDrawLimit(0x13);
-    temp_v0 = func_001978E8(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_001958A0(temp_v0, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(temp_v0);
-    itfSetTextDrawLimit(0xffffffffffffffff);
+    glyph = func_001978E8(x << 4, y << 3, 0, color, text, 0);
+    func_001958A0(glyph, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(glyph);
+    itfSetTextDrawLimit(-1);
 }
 
 extern u8 *D_003BAA8C;
@@ -4759,6 +4759,7 @@ u8 *func_001BD708(u8 *object, u16 *value) {
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD750);
 
 extern void btlDrawRetreatCommandLabel(s32);
+extern void func_001BE8A0(BattleSceneObject *);
 
 void fldDispatchSceneKindHandler(s32 arg0) {
     switch (func_001BD0D0(arg0, btlCommandPanelWork->classIndex)) {
@@ -4769,7 +4770,7 @@ void fldDispatchSceneKindHandler(s32 arg0) {
         func_001BEB58(arg0);
         return;
     case 2:
-        func_001BE8A0(arg0);
+        func_001BE8A0((BattleSceneObject *)arg0);
         return;
     case 3:
         func_001BE590(arg0);
@@ -4779,11 +4780,55 @@ void fldDispatchSceneKindHandler(s32 arg0) {
     }
 }
 
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E50);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E60);
+
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BDF60);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E70);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E80);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BE590);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BE8A0);
+extern const BattlePanelColors D_003A2E90;
+extern char D_003BB478[];
+extern s32 func_003014F0(char *, const char *, ...);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E90);
+
+void func_001BE8A0(BattleSceneObject *object) {
+    char text[16];
+    BattlePanelColors colors = D_003A2E90;
+    s32 shown;
+    s32 total;
+    s32 index;
+    s32 selected;
+    s32 row = 0;
+    s32 y = 0x14C;
+    s32 color;
+    s32 countY;
+
+    shown = btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+    total = btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 1);
+    index = object->selections[2].cursor;
+    selected = object->selections[2].entry;
+    for (; row < shown && index < total; row++, index++, y += 0x17) {
+        color = selected == index ? 0x89FEFF80 : 0xA09DC380;
+        color = (color & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[row];
+        btlQueueIndexedTextWithinDrawLimit(0x1A, y, 0xFF0010, color, D_00358FE0[index * 2]);
+        countY = y + 4;
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_002BF438(0x900, countY << 3, 0, colors.values, 0,
+                     btlResourceBlock->resA, 5, 0x53);
+        func_003014F0(text, D_003BB478, D_00358FE0[index * 2 + 1]);
+        fldSubmitSceneObjectAtCoordinates(0xA0, countY, color, text);
+    }
+}
 
 void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8];
@@ -4805,21 +4850,11 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     itfSetTextDrawLimit(-1);
 }
 
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
+
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BEB58);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF040);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E50);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E60);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E70);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E80);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E90);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2EA0);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BF0F8);
 
