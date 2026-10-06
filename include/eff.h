@@ -4,6 +4,22 @@
 #include "common.h"
 #include "sdf.h"
 
+typedef struct EffBezierPoint {
+    f32 x;
+    f32 y;
+    f32 z;
+} EffBezierPoint;
+
+/* Two consecutive cubic segments share seven control points in a 0x60-byte slot. */
+typedef struct EffSegmentedBezierSlot {
+    EffBezierPoint controlPoints[7];
+    u32 pointIndex; /* First control point, not a segment ordinal. */
+    f32 t;
+    f32 parameterStep;
+} EffSegmentedBezierSlot;
+
+extern s32 effStepBezierSlotSegment(EffSegmentedBezierSlot *slot, f32 *out);
+
 /* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
 typedef struct {
     f32 start[4];

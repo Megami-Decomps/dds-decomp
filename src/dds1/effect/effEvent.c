@@ -3,7 +3,6 @@
 #include "pcp_vu0.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
-#define EFF_EVENT_BEZIER_POINT_COUNT 7
 #define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
 #define EFF_EVENT_BEZIER_SLOT_BYTES 0x60
 #define EFF_EVENT_SLOT_HEADER_BYTES 0xC
@@ -132,19 +131,6 @@ typedef struct EffTemplate {
     u32 resourceWord;
 } EffTemplate;
 
-typedef struct EffBezierPoint {
-    f32 x;
-    f32 y;
-    f32 z;
-} EffBezierPoint;
-
-/* A 0x60-byte slot: seven control points, the first point's index, t and its step. */
-typedef struct EffBezierSlot {
-    EffBezierPoint controlPoints[EFF_EVENT_BEZIER_POINT_COUNT];
-    u32 pointIndex; /* 0x54: first control point, not a segment ordinal */
-    f32 t;       /* 0x58 */
-    f32 parameterStep; /* 0x5C */
-} EffBezierSlot;
 
 
 
@@ -210,7 +196,7 @@ extern u8 *sdfResourceRetainAddress(s32);
 EffArrHdr *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
     s32 handle = sdfAllocGeneralBlock(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
-    EffBezierSlot *slot = (EffBezierSlot *)sdfResourceRetainAddress(handle);
+    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfResourceRetainAddress(handle);
     EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
     table->allocation = (void *)handle;
@@ -236,7 +222,7 @@ void effReleaseSlotArrayAllocation(EffArrHdr *header) {
 /* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
  * clamps to 1 and advances the index by three; there is no general bounds check. */
 s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
-    EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
+    EffSegmentedBezierSlot *slot = &((EffSegmentedBezierSlot *)table->slots)[index];
     u32 pointIndex = slot->pointIndex;
     f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
     f32 t;
@@ -269,7 +255,7 @@ s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
 
 /* Evaluate at the entry t before advancing. The first segment carries excess t;
  * the second stores t = 1 and returns 0 after producing output at the entry t. */
-s32 effStepBezierSlotSegment(EffBezierSlot *slot, f32 *out) {
+s32 effStepBezierSlotSegment(EffSegmentedBezierSlot *slot, f32 *out) {
     f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
     u32 pointIndex = slot->pointIndex;
     f32 t = slot->t;
@@ -301,25 +287,26 @@ s32 effStepBezierSlotSegment(EffBezierSlot *slot, f32 *out) {
 
 /* Evaluate four control points starting at pointIndex into xyz with w = 1;
  * unlike the stepping paths, this does not update t or the point index. */
-void effEvaluateSlotBezierPosition(EffBezierSlot *slot, f32 *out) {
+void effEvaluateSlotBezierPosition(EffSegmentedBezierSlot *slot, f32 *out) {
     EffBezierPoint *controlPoints = &slot->controlPoints[slot->pointIndex];
     f32 t = slot->t;
     f32 u = 1.0f - t;
-    f32 w[EFF_EVENT_BEZIER_WEIGHT_COUNT]; /* never read; gcc drops the stores but keeps the frame slot */
-    f32 w0 = u * u * u;
-    f32 w1 = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    f32 w2 = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    f32 w3 = t * t * t;
+    f32 w[EFF_EVENT_BEZIER_WEIGHT_COUNT];
 
-    out[0] = controlPoints[0].x * w0 + controlPoints[1].x * w1 + controlPoints[2].x * w2 + controlPoints[3].x * w3;
-    out[1] = controlPoints[0].y * w0 + controlPoints[1].y * w1 + controlPoints[2].y * w2 + controlPoints[3].y * w3;
-    out[2] = controlPoints[0].z * w0 + controlPoints[1].z * w1 + controlPoints[2].z * w2 + controlPoints[3].z * w3;
+    w[0] = u * u * u;
+    w[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    w[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    w[3] = t * t * t;
+
+    out[0] = controlPoints[0].x * w[0] + controlPoints[1].x * w[1] + controlPoints[2].x * w[2] + controlPoints[3].x * w[3];
+    out[1] = controlPoints[0].y * w[0] + controlPoints[1].y * w[1] + controlPoints[2].y * w[2] + controlPoints[3].y * w[3];
+    out[2] = controlPoints[0].z * w[0] + controlPoints[1].z * w[1] + controlPoints[2].z * w[2] + controlPoints[3].z * w[3];
     out[3] = 1.0f;
 }
 
 /* Reset only curve progress and its default step; retain all control points. */
 void effInitSlotTail(EffArrHdr *table, s32 index) {
-    EffBezierSlot *slot = &((EffBezierSlot *)table->slots)[index];
+    EffSegmentedBezierSlot *slot = &((EffSegmentedBezierSlot *)table->slots)[index];
 
     slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
     slot->pointIndex = slot->t = 0;
@@ -327,7 +314,7 @@ void effInitSlotTail(EffArrHdr *table, s32 index) {
 
 /* Return the selected slot address through the native signed-word interface. */
 s32 effGetSlotAt(EffArrHdr *table, s32 index) {
-    return (s32)&((EffBezierSlot *)table->slots)[index];
+    return (s32)&((EffSegmentedBezierSlot *)table->slots)[index];
 }
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
