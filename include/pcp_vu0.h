@@ -117,7 +117,10 @@
 #define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
     : : "r" (dst) : "memory")
-/* Store variant for existing asm without a compiler memory clobber. */
+/* Legacy SDK input-address-only store, for audited original VU pipelines.
+ * This is NOT a general memory barrier: even EE GCC 2.96 can reuse stale
+ * reads across branches/loops. Prefer VU0_STORE_VF for new code; see
+ * docs/thunder-bezier-matching.md before changing a verified caller. */
 #define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
     : : "r" (dst))
@@ -732,5 +735,28 @@
     "vmulaw.xyzw ACC, vf10, vf0w\n\tvmaddaw.xyzw ACC, vf11, vf2w\n\tvmsubw.xyzw vf16, vf10, vf2w\n\t" \
     "sqc2 vf15, 0x30(%0)\n\tsqc2 vf16, 0x20(%0)\n\t.set reorder" \
     : : "r" (node), "r" (first), "r" (second) : "memory")
+
+/* Extended-asm forms of the register-only VU operations. The empty operand
+ * sections preserve the SDK's volatile ASM_OPERANDS boundary in EE GCC 2.96;
+ * basic asm has the same opcodes but is a different compiler representation.
+ * All VU registers and ACC/Q effects remain implicit in the SDF VU convention.
+ */
+#define VU0_MOVE_VF_EXTENDED(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder" : :)
+#define VU0_ROTATE_VEC_EXTENDED(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddz.xyzw " #dst ", vf30, " #src "z\n\t.set reorder" : :)
+#define VU0_SUB_EXTENDED(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder" : :)
+#define VU0_ADD_EXTENDED(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder" : :)
+#define VU0_MUL_EXTENDED(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder" : :)
+#define VU0_NORMALIZE_VF10_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder" : :)
+#define VU0_CROSS_XYZ_EXTENDED(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder" : :)
 
 #endif
