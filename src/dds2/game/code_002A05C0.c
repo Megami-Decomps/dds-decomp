@@ -988,8 +988,6 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     D_00435BB0 = 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428680);
-
 extern void mnuSlideBarSetState(u32 *work, s32 state);
 extern void mnuSlideBarSetStateB(u32 *state, u32 mode);
 extern void mnuSlideBarSetStateSmall(u32 *state, u32 mode);
@@ -1003,6 +1001,8 @@ extern void func_002A50F8(void *work);
 
 /* Title-menu event handler (proposed mnuHandleTitleMenuEvent): drives the menu's slide bars, the background
  * movie and its fade for menu events 2..32; returns 1 once the movie has stopped after event 32. */
+INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428680);
+
 s32 func_002A2C28(s32 event) {
     s32 done = 0;
 
