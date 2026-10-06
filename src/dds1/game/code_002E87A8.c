@@ -1,3 +1,4 @@
+#include "snd_ring.h"
 #include "common.h"
 
 typedef struct CmdPacket {
@@ -10,7 +11,7 @@ typedef struct CmdPacket {
 
 u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
-u32 func_002E87A8(u32 command, u32 channel, void *packet, u32 size);
+u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 size);
 
 void sndEnsureMidiBankResident(s32 trackId);
 
@@ -58,7 +59,51 @@ extern s32 sceSifInitIopHeap(void);
 extern s32 func_002E8700(void);
 extern void func_002E8938(s32, void *, s32);
 
-INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E87A8);
+extern SndRingPacket D_003FB080[32];
+extern u32 D_003BD4A0;
+/* The worker consumes entries while this producer publishes and polls cursors. */
+extern vu16 D_003BDA82;
+extern vu16 D_003BDA84;
+extern s32 D_003BDA88;
+extern s32 WakeupThread(s32 thread);
+extern s32 func_002E8640(void);
+extern void *memcpy(void *, const void *, u32);
+
+u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 size) {
+    s32 next;
+    s32 retries;
+    SndRingPacket *entry;
+    u32 packetQuadwords;
+
+    if (++D_003BD4A0 == 0) {
+        D_003BD4A0 = 1;
+    }
+    next = ((s16)D_003BDA84 + 1) & 31;
+    if (next == (s16)D_003BDA82) {
+        for (retries = 8; retries != 0; retries--) {
+            do {
+                WakeupThread(D_003BDA88);
+            } while ((s16)D_003BDA82 != next);
+        }
+        return 0;
+    }
+    entry = &D_003FB080[(s16)D_003BDA84];
+    entry->sequence = D_003BD4A0;
+    if (size != 0) {
+        memcpy(entry->payload, packet, size);
+    }
+    packetQuadwords = (size + 0x14 + 15) >> 4;
+    entry->command = (command << 16) | (channel & 0xffff) | (packetQuadwords << 28);
+    D_003BDA84 = next;
+    if (D_003BDA80 != 0) {
+        while (func_002E8640() != 0) {
+        }
+    } else {
+        WakeupThread(D_003BDA88);
+    }
+    return D_003BD4A0;
+}
+
 
 void func_002E88F8(u32 unused) {
 }
