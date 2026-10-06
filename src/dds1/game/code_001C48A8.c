@@ -106,7 +106,7 @@ typedef struct BattleSceneWork {
 } BattleSceneWork;
 
 extern s32 btlCountTasksForOwner(s64);
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 extern s32 fldCreateSceneTileTask(u32 soundId, u32 variant);
 extern void btlDispatchStateHandler(void *, s32);
 
@@ -339,17 +339,11 @@ void fldAdvanceSceneVariant(BattleSceneWork *scene) {
     func_001AC7D8();
 }
 
-typedef struct SceneEffectRequest {
-    u8 startKind;
-    u8 pad01[7];
-    u16 taskId;
-} SceneEffectRequest;
-
 extern void btlTickActorEntryCountdowns(u8 *);
 extern void btlClearNodeFlags(void);
 extern void btlClearActorSelectedEntryIndex(BtlUnit *);
 extern void btlRefreshUnitMotionSelection(u8 *);
-extern SceneEffectRequest *btlCreateEffObjC(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
 
 INCLUDE_ASM(const s32, "game/code_001C48A8", btlAdvanceSceneWhenActorTasksReady);
 
