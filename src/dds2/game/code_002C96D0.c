@@ -5367,6 +5367,17 @@ typedef struct FileKeyBlock {
             f32 gravity;
         } directed;
         struct {
+            f32 radius;
+            f32 radiusRandomness;
+            f32 spread;
+            f32 spreadRandomness;
+            f32 speed;
+            f32 speedRandomness;
+            f32 acceleration;
+            f32 gravity;
+            s32 azimuthDegrees; /* 0xE8: signed angular extent */
+        } sector;
+        struct {
             f32 initialRadius;
             f32 axialSpeed;
             f32 axialSpeedRandomness;
