@@ -94,11 +94,27 @@ the copied delay limit using the native signed test, then uses an unsigned
 modulus. Allocation failure, oversized counts and source matrix alignment
 retain their existing native preconditions.
 
+## Basic ring allocation
+
+`effPcpScatterCreateParticleInstance` (DDS1 0x001730D0 / DDS2 0x0017AD28)
+matches 536 bytes per title. The 0x138-byte parameter block occupies
+[0x40, 0x178) inside the existing 0x18C-byte owner, followed by the runtime
+fields and its contiguous 0x28-byte particles. The constructor uses the same
+complete serialized-parameter memcpy and current SdfMemBlock pointer owner.
+The existing memcpy declaration now precedes this earlier consumer.
+
+The constructor interprets the delay modulus with a signed nonpositive test,
+clamps the local value to one, and uses unsigned RNG remainder for initial
+negative ages. It leaves the copied randomDelayRange unchanged. Matrix copy,
+draw creation, optional resource attachment, ownership and native unchecked
+count/alignment assumptions retain the established contracts.
+
 ## Validation
 
 The radial bodies compare exactly against all 378 retail instruction words
 per title; the spin bodies compare exactly against all 381 words per title.
-The damped-ring constructors compare exactly against all 140 words per title. Both installed canonical whole-unit checks report 72 matches
+The damped-ring constructors compare exactly against all 140 words per title;
+the basic ring constructors compare exactly against all 134 words per title. Both installed canonical whole-unit checks report 73 matches
 and zero differences. Both retail SHA-1 checks and both dev-ELF gates pass,
 followed by a no-work repeat. Validation uses the pinned current source and
 a byte-identical private copy of its canonical header in the established
