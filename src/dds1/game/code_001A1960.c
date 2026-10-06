@@ -2574,7 +2574,76 @@ void btlReleaseAndClearChipBlock(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC398);
+typedef struct BtlResBlock {
+    s32 unk0;
+    s32 nameA;
+    s32 nameB;
+    s32 nameC;
+    EffectSlotSet *resA;
+    EffectSlotSet *resB;
+    EffectSlotSet *resC;
+    s32 unk1C;
+} BtlResBlock;
+extern BtlResBlock *btlResourceBlock;
+
+/* 0x2C-byte action record shared by the initializer, updater and renderer. */
+typedef struct BattleMirroredSpriteRecord {
+    s8 active;
+    u8 pad01;
+    s16 slot;
+    f32 scale;
+    s32 restoredWidth;
+    s32 restoredHeight;
+    s32 width;
+    s32 height;
+    s32 x;
+    s32 y;
+    s32 secondX;
+    s32 frame;
+    s8 alpha;
+    u8 pad29[3];
+} BattleMirroredSpriteRecord;
+
+void func_001AC398(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+    if (count > 0) {
+        BattleMirroredSpriteRecord *record = records;
+        s32 remaining = count;
+        do {
+            switch (record->active) {
+            case 1: {
+                s32 scale = (s32)record->scale;
+                s32 x = record->x;
+                s32 y = record->y;
+                s32 width = btlResourceBlock->resA->workEntries[record->slot].sourceWidth;
+                s32 height;
+                s32 scaledWidth;
+                s32 scaledHeight;
+                record->restoredWidth = width;
+                scale = scale / 2;
+                height = btlResourceBlock->resA->workEntries[record->slot].sourceHeight;
+                scaledWidth = width * scale;
+                scaledHeight = height * scale;
+                record->active = 2;
+                record->restoredHeight = height;
+                x -= (scaledWidth - width) / 2;
+                y -= (scaledHeight - height) / 2;
+                record->secondX = x;
+                record->y = y;
+                record->width = scaledWidth << 4;
+                record->height = scaledHeight << 3;
+                break;
+            }
+            case 2:
+                record->width -= 0x800;
+                record->height -= 0x800;
+                if (record->width <= 0x1000) record->active = 0;
+                break;
+            }
+            remaining--;
+            record++;
+        } while (remaining != 0);
+    }
+}
 
 typedef struct BtlResBlock {
     s32 unk0;
