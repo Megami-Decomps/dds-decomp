@@ -77,7 +77,8 @@ typedef struct SdfModel {
     f32 unk8C;
     u32 unk90;
     u32 unk94;
-    u32 unk98;
+    u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
+    u8 pad99[3];
 } SdfModel;
 
 typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
