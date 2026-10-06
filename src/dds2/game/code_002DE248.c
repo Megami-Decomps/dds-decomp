@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_curve.h"
 #include "file.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -959,7 +960,7 @@ void effSelectionFrameAdvance(s32 *counter) {
     *counter = frame + 1;
 }
 
-extern f32 func_002D7770(u8 *, s32, s32);
+extern f32 func_002D7770(EffScalarCurve *, s32, s32);
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
@@ -1004,30 +1005,16 @@ typedef struct EffFadeCurve2 {
     f32 value2;    /* 0x0C */
 } EffFadeCurve2; /* 0x10 */
 
-/* Curve entry the rate helper (func_00297270) reads; 0x2C bytes. */
-typedef struct EffRateCurve {
-    u8 mode;          /* 0x00 */
-    u8 pad01[3];
-    f32 span;         /* 0x04: divisor when mode is 0 */
-    f32 rate;         /* 0x08 */
-    u8 pad0C[8];
-    f32 value2;       /* 0x14 */
-    f32 threshold;    /* 0x18 */
-    f32 value3;       /* 0x1C */
-    f32 value4;       /* 0x20 */
-    u8 pad24[8];
-} EffRateCurve; /* 0x2C */
 
 typedef struct EffFadeConfig {
-    /* Individually placed curves, not a regular array. The two the blend
-     * helper takes sit at 0x00 and 0x34; the two the rate helper takes sit at
-     * 0x60 and 0x8C. Strides are irregular, so they are named, not indexed. */
+    /* Color and alpha tracks at 0x00/0x24, followed by three scalar
+     * tracks at 0x34, 0x60 and 0x8C. The scalar extents differ. */
     EffFadeCurve blendA;   /* 0x00 */
     EffFadeCurve2 blendB2; /* 0x24 */
-    EffFadeCurve blendB;   /* 0x34 */
+    EffScalarCurve blendB;   /* 0x34 */
     u8 pad58[8];
-    EffRateCurve rateA;   /* 0x60 */
-    EffRateCurve rateB;   /* 0x8C */
+    EffScalarTrack rateA;   /* 0x60 */
+    EffScalarTrack rateB;   /* 0x8C */
     s32 progress;         /* 0xB8 */
     u8 padBC[4];
     EffFadeOut out;       /* 0xC0 */
@@ -1076,15 +1063,14 @@ typedef struct EffRateOut {
 } EffRateOut;
 
 typedef struct EffRateConfig {
-    /* Individually placed curves, not a regular array. The two the blend
-     * helper takes sit at 0x00 and 0x34; the two the rate helper takes sit at
-     * 0x60 and 0x8C. Strides are irregular, so they are named, not indexed. */
+    /* Color and alpha tracks at 0x00/0x24, followed by three scalar
+     * tracks at 0x34, 0x60 and 0x8C. The scalar extents differ. */
     EffFadeCurve blendA;   /* 0x00 */
     EffFadeCurve2 blendB2; /* 0x24 */
-    EffFadeCurve blendB;   /* 0x34 */
+    EffScalarCurve blendB;   /* 0x34 */
     u8 pad58[8];
-    EffRateCurve rateA;   /* 0x60 */
-    EffRateCurve rateB;   /* 0x8C */
+    EffScalarTrack rateA;   /* 0x60 */
+    EffScalarTrack rateB;   /* 0x8C */
     s32 progress;         /* 0xB8 */
     u8 fixedMode;         /* 0xBC */
     u8 padBD[3];
@@ -1129,7 +1115,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effDrawBlurRectangle(out);
 }
@@ -1174,7 +1160,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB, limit, progress);
+    rate = func_002D7770(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->posX = 0;
         out->posY = 0;
@@ -1209,7 +1195,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
@@ -1248,7 +1234,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB, limit, progress);
+    rate = func_002D7770(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1279,7 +1265,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     func_0018ECD0(out);
 }
@@ -1318,7 +1304,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB, limit, progress);
+    rate = func_002D7770(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1349,7 +1335,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effBlurStepScaleSlotsAndDraw(out);
 }
@@ -1396,7 +1382,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     out->rateA = func_002D7770(&config->blendB, limit, progress) + 1.0f;
-    out->rateB = func_002D7770(&config->rateA, limit, progress);
+    out->rateB = func_002D7770(&config->rateA.curve, limit, progress);
     out->param = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
@@ -1841,15 +1827,23 @@ typedef struct EffBillConfig {
     u8 pad_00[0x28];
     u32 textureId;      // 0x28, copied into the output record
     u8 pad_2C[8];
-    u32 progress;       // 0x34
     union {
-        u32 count;      // 0x38
-        s32 signedCount;
-    } frames;
-    u8 outputMode;      // 0x3C, copied to the blend output
-    u8 pad_3D[0x19];
-    u8 mode;            // 0x56
-    u8 pad_57[0x19];
+        struct {
+            u32 progress; /* 0x34, frame-animation variant */
+            union {
+                u32 count;
+                s32 signedCount;
+            } frames; /* 0x38 */
+            u8 outputMode; /* 0x3C */
+            u8 pad_3D[0x19];
+            u8 mode; /* 0x56 */
+            u8 pad_57;
+        };
+        /* The quantized-mesh resource copies a 0x98-byte configuration;
+         * its draw callback samples this scalar track at 0x34. */
+        EffScalarCurve scaleCurve;
+    };
+    u8 pad_58[0x18];
     u32 drawProgress;    // 0x70, progress of the mesh-draw variant
     u8 pad_74[4];
     f32 fadeInEnd;      // 0x78, ramp-up length as a fraction of `resourceId`
@@ -6168,7 +6162,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     ((EffMeshOutput *)out)->color = blended[0];
     ((EffMeshOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
     ((EffMeshOutput *)out)->mode = ((EffBillConfig *)config)->meshMode;
-    scale = func_002D7770(config + 0x34, limit, progress) * work->scale;
+    scale = func_002D7770(&((EffBillConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);

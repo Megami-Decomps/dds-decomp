@@ -32,7 +32,8 @@ typedef struct {
     u32 startDelayRange;     /* 0x30 modulus of delayFrames */
     u32 activeFrameRange;    /* 0x34 modulus of activeFrames before adding one */
     u16 halfLife;            /* 0x38 */
-    u8 pad3A[6];
+    u8 pad3A[2];
+    f32 coreWidth;          /* 0x3C: half-width of the primary strip */
     u32 arg40;               /* 0x40 */
     f32 bandWidth;          /* 0x44: width of the continued strip */
     u32 arg48;               /* 0x48 */

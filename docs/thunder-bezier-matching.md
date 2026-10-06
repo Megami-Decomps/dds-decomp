@@ -135,9 +135,24 @@ including distance/h, still occurs before the zero-loop guard. That native
 ordering is preserved; positive h remains necessary for meaningful geometry,
 and continuation segments still require a nonempty predecessor row.
 
+## Dual-strip generation
+
+`func_001661D8` (DDS1) and `func_0016DE30` (DDS2) each match 1,592 bytes.
+They partition each row into a kind-0 core strip with two vertices and a
+kind-1 outer strip with three. The existing parameter owner exposes the real
+float coreWidth at 0x3C without changing its 0x54-byte layout. The native
+association (coreWidth + edgeWidth) + bandWidth is retained.
+
+For h steps, kind 0 allocates 2(2h-1)+2 = 4h quads and kind 1 allocates 6h.
+The loop fills exactly four core and six outer quads per iteration. Its
+vertices-3/vertices-1 join choices are the endpoints of the last completed
+outer row. Both renderer kinds reach the XYZ-only packer, so the earlier
+unused-W and scoped SDK-store conclusions apply. Zero-count setup remains
+unchanged. Both complete first drafts match without source variants.
+
 ## Verification
 
-Canonical whole-unit checks report 65 matches and zero differences for each
+Canonical whole-unit checks report 66 matches and zero differences for each
 version, including the two 5,988-byte bodies and their switch tables. Existing
 functions in both units remain exact. The two affected miscellaneous-effect
 units each retain 358 matches and zero differences. Both retail SHA-1 checks
