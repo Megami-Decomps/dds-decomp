@@ -151,7 +151,6 @@ extern s32 func_001ACAE0(void);
 
 extern u16 scrReadIntParameter(u32);
 
-extern s32 scrGetCurrentCommandWork(void);
 
 extern u32 btlButtonIconTexture;
 
@@ -2187,13 +2186,14 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 }
 
 extern s32 D_003BAAA8;
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 
 void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 slot = scrCreateTaskForProcessId((s32)state->scriptOwner->priority - 1, D_003BAAA8, taskArg);
     s32 handle;
-    scrSetCurrentActor(slot, actor);
-    handle = ((ScrProcTask *)kwlnTaskGetUserValue(slot))->resourceIndex;
+    scrSetCurrentActor((KwlnTask *)slot, actor);
+    handle = ((ScrData *)kwlnTaskGetUserValue((KwlnTask *)slot))->resourceIndex;
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
         func_0019C590(handle, 0, unit->mode, (unit->statBits & 0x20) ? 1 : 2);

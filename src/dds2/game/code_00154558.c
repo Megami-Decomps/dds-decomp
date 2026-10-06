@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3obj.h"
+#include "scr.h"
 
 extern s32 fldGetSceneStatusCode(void);
 
@@ -203,11 +204,6 @@ extern s32 fldGetTaskRecordValue(u32 key);
 
 extern void func_00140A58(void *entry);
 
-/* Work object queried by fldReleaseWeatherEffects; +0xE4 holds the key for func_0013BEE8. */
-typedef struct {
-    u8 unk00[0xE4]; /* 0x00 */
-    u32 key;        /* 0xE4 */
-} EffCmdWork;
 
 typedef struct FldSceneParamRow {
     s32 unk0;
@@ -265,7 +261,6 @@ extern s32 D_003897C8[];
 
 extern s32 D_00389988[];
 
-extern s32 scrGetCurrentContext(void);
 
 extern s32 fldGetActorStat0(s32);
 
@@ -436,7 +431,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId((u32)scrGetCurrentContext()->task), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -470,7 +465,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId((u32)scrGetCurrentContext()->task), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -525,7 +520,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId((u32)scrGetCurrentContext()->task), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -1409,7 +1404,7 @@ INCLUDE_RODATA(const s32, "game/code_00154558", D_00414090);
 s32 fldCmdPushSceneParam(void) {
     s32 room;
 
-    room = fldFindRoomByTask(((EffCmdWork *)scrGetCurrentContext())->key);
+    room = fldFindRoomByTask((u32)scrGetCurrentContext()->task);
     switch (scrReadIntParameter(0)) {
     case 0:
         scrSetIntegerReturnValue(D_003A8EB0[room].unk0);
@@ -1431,17 +1426,17 @@ s32 fldCmdPushSceneParam(void) {
 }
 
 u32 fldCmdActivateTaskRoomObject(void) {
-    s32 task;
+    ScrData *script;
     u64 room;
 
-    task = scrGetCurrentContext();
-    room = fldFindRoomByTask(((EffCmdWork *)task)->key);
+    script = scrGetCurrentContext();
+    room = fldFindRoomByTask((u32)script->task);
     fldActivateFlaggedObject(room);
     return 1;
 }
 
 u32 fldCmdTestTaskRoomObjectActive(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomByTask(((EffCmdWork *)scrGetCurrentContext())->key)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomByTask((u32)scrGetCurrentContext()->task)) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1456,7 +1451,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
         func_00140BC8(0);
         return 1;
     }
-    scene = fldGetTaskRecordValue(((EffCmdWork *)scrGetCurrentContext())->key);
+    scene = fldGetTaskRecordValue((u32)scrGetCurrentContext()->task);
     if (scene) {
         func_00140BC8(scene);
     }
@@ -1550,7 +1545,7 @@ u32 fldCmdUpdateTaskRecordScene(void) {
     if (fldIsSceneStateEight()) {
         scene = 0;
     } else {
-        scene = fldFindTaskRecordId(((EffCmdWork *)scrGetCurrentContext())->key);
+        scene = fldFindTaskRecordId((u32)scrGetCurrentContext()->task);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
@@ -1659,8 +1654,8 @@ s32 fldCmdSetDefaultEncounterId(void) {
 }
 
 s32 fldCmdApplyTaskRecordEntry(void) {
-    EffCmdWork *work = scrGetCurrentContext();
-    void *entry = fldGetTaskRecordValue(work->key);
+    ScrData *work = scrGetCurrentContext();
+    void *entry = fldGetTaskRecordValue((u32)work->task);
 
     if (entry != NULL) {
         func_00140A58(entry);

@@ -4,6 +4,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "scr.h"
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_004371F0;
@@ -241,7 +242,6 @@ extern char D_00421AF8[];
 
 extern void effObjDispatchReadyState(void *arg0);
 
-extern s32 scrGetCurrentContext(void);
 
 extern s32 func_0025D230(s32 arg0, s32 arg1);
 

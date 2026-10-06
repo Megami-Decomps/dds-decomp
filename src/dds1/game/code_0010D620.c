@@ -1,47 +1,27 @@
 #include "common.h"
+#include "scr.h"
 
-/* Script label records are 0x20 bytes; the address lives at +0x18. */
-typedef struct {
-    u8 pad[0x18];
-    u32 address;
-    u8 pad1C[4];
-} ScriptLabel;
-
-typedef struct {
-    u8 pad0[0x18];
-    u32 programCounter;
-    u8 pad1C[0x98];
-    ScriptLabel *procedures;
-    ScriptLabel *labels;
-    u8 padBC[0x10];
-    u32 window;
-    u32 timer;
-    u32 commandTimer;
-    u8 padD8[0x18];
-    u32 unkF0;
-} ScriptState;
 
 extern u64 scrReadIntParameter(u64);
 extern u64 mdlFlagTest(u64);
 
-extern ScriptState *scrCurrentContext;
 
 extern s8 D_00398629[];
 
 u32 scrGetProcedureAddress(s32 index) {
-    return scrCurrentContext->procedures[index].address;
+    return scrCurrentContext->procedures[index].addr;
 }
 
 u32 scrGetLabelAddress(s32 index) {
-    return scrCurrentContext->labels[index].address;
+    return scrCurrentContext->labels[index].addr;
 }
 
 u32 scrGetProgramCounter(void) {
-    return scrCurrentContext->programCounter;
+    return scrCurrentContext->pc;
 }
 
 void scrSetProgramCounter(u32 address) {
-    scrCurrentContext->programCounter = address;
+    scrCurrentContext->pc = address;
 }
 
 u32 scrGetTimer(void) {
@@ -49,19 +29,19 @@ u32 scrGetTimer(void) {
 }
 
 u32 scrGetCommandTimer(void) {
-    return scrCurrentContext->commandTimer;
+    return scrCurrentContext->cmdTimer;
 }
 
 u32 scrGetWindow(void) {
-    return scrCurrentContext->window;
+    return scrCurrentContext->resourceIndex;
 }
 
-s32 scrGetCurrentContext(void) {
-    return (s32)scrCurrentContext;
+ScrData *scrGetCurrentContext(void) {
+    return scrCurrentContext;
 }
 
-u32 scrGetCurrentCommandWork(void) {
-    return scrCurrentContext->unkF0;
+void *scrGetCurrentCommandWork(void) {
+    return scrCurrentContext->actor;
 }
 
 s32 scrHasNegativeMarkerDuringCommandTimer(void) {

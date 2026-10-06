@@ -3,6 +3,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
+#include "scr.h"
 
 extern s64 btlStartTask();
 
@@ -85,7 +86,6 @@ extern u32 btlButtonIconTexture;
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
-extern s32 scrGetCurrentCommandWork(void);
 
 extern u16 scrReadIntParameter(u32);
 
@@ -2504,8 +2504,7 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
 }
 
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
-extern void scrSetCurrentActor(u32, u32);
-extern u32 kwlnTaskGetUserValue(s32);
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void func_00101968(s32, s32);
 extern void func_001A45C0(s32, s32, s32, s32);
 
@@ -2515,8 +2514,8 @@ void btlBindActorSlot(s32 actor, s32 option) {
     s32 window;
 
     task = scrCreateTaskForProcessId((s32)((BtlState *)battle)->scriptOwner->priority - 1, D_00435E7C, option);
-    scrSetCurrentActor(task, actor);
-    window = *(s32 *)(kwlnTaskGetUserValue(task) + 0xCC);
+    scrSetCurrentActor((KwlnTask *)task, (void *)actor);
+    window = ((ScrData *)kwlnTaskGetUserValue((KwlnTask *)task))->resourceIndex;
     if (window >= 0) {
         s32 unit = (s32)((BtlActor *)actor)->unit;
         s32 width = 2;

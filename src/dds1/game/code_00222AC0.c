@@ -4,6 +4,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "scr.h"
 
 
 /* Effect slot: three vec4 at +0x08/+0x18/+0x28 (the last carries w = 1.0f),
@@ -100,7 +101,6 @@ extern void dds3SetObjectFlags(void *object, s32 flags);
 extern void dds3ClearObjectFlags(void *object, s32 flags);
 extern void evtResetObjectPendingValue(void *arg0);
 extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
-extern s32 scrGetCurrentContext(void);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);

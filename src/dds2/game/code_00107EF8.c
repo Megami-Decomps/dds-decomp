@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf.h"
+#include "scr.h"
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
@@ -87,7 +88,6 @@ extern char D_00411370[];
 
 extern void fldStartSequenceRecord(void);
 
-typedef struct KwlnTask KwlnTask;
 
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
@@ -103,17 +103,9 @@ extern s32 D_00389780[];
 
 extern void fldStartLmapTask(s32 arg0);
 
-extern void *scrNamedProcessHead;
-
-extern void *scrNamedProcessTail;
 
 extern u32 scrNamedProcessCount;
 
-typedef struct {
-    u8 pad00[0xE8];
-    void *previous;
-    void *next;
-} B728Work;
 
 extern u8 kwlnPositionedTextSurface[];
 
@@ -1481,8 +1473,8 @@ void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
 }
 
 /* Append to the event-work doubly linked list, maintaining both endpoints. */
-void evtLinkWorkNode(B728Work *node) {
-    B728Work *tail = scrNamedProcessTail;
+void evtLinkWorkNode(ScrData *node) {
+    ScrData *tail = scrNamedProcessTail;
 
     if (tail == NULL) {
         scrNamedProcessHead = node;
@@ -1500,18 +1492,18 @@ void evtLinkWorkNode(B728Work *node) {
 }
 
 /* Detach from either end or the middle, and clear the old links. */
-void evtUnlinkWorkNode(B728Work *node) {
-    if ((B728Work *)scrNamedProcessHead == node) {
+void evtUnlinkWorkNode(ScrData *node) {
+    if (scrNamedProcessHead == node) {
         scrNamedProcessHead = node->next;
     }
     else {
-        ((B728Work *)node->previous)->next = node->next;
+        node->previous->next = node->next;
     }
-    if ((B728Work *)scrNamedProcessTail == node) {
+    if (scrNamedProcessTail == node) {
         scrNamedProcessTail = node->previous;
     }
     else {
-        ((B728Work *)node->next)->previous = node->previous;
+        node->next->previous = node->previous;
     }
     node->previous = NULL;
     node->next = NULL;
@@ -1522,34 +1514,25 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", bfContextCreate);
 
-typedef struct BfFlw0Section {
-    s32 type;
-    s32 unk04;
-    s32 count;
-    s32 offset;
-} BfFlw0Section;
-
 typedef struct BfFlw0Header {
     u8 pad00[8];
     u32 magic;
     u8 pad0C[4];
     s32 sectionCount;
     u8 pad14[0xC];
-    BfFlw0Section sections[1];
+    ScrSection sections[1];
 } BfFlw0Header;
 
-extern s32 bfContextCreate(s32 header, s32 sectionTable, s32 procedures, s32 labels,
-                           s32 instructions, s32 auxiliaryData, s32 strings, s32 procedureIndex);
 
 /* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
    Zero-count auxiliary sections are ignored, and absent sections remain null. */
-s32 bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
-    BfFlw0Section *sections;
-    s32 procedures = 0;
-    s32 labels = 0;
-    s32 instructions = 0;
-    s32 auxiliaryData = 0;
-    s32 strings = 0;
+ScrData *bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
+    ScrSection *sections;
+    ScrLabel *procedures = NULL;
+    ScrLabel *labels = NULL;
+    ScrInstr *instructions = NULL;
+    void *auxiliaryData = NULL;
+    char *strings = NULL;
     s32 i;
 
     sections = header->sections;
@@ -1559,27 +1542,27 @@ s32 bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
     for (i = 0; i < header->sectionCount; i++) {
         switch (sections[i].type) {
             case BF_FLW0_SECTION_PROCEDURES:
-                procedures = (s32)((u8 *)header + sections[i].offset);
+                procedures = (ScrLabel *)((u8 *)header + sections[i].offset);
                 break;
             case BF_FLW0_SECTION_LABELS:
-                labels = (s32)((u8 *)header + sections[i].offset);
+                labels = (ScrLabel *)((u8 *)header + sections[i].offset);
                 break;
             case BF_FLW0_SECTION_INSTRUCTIONS:
-                instructions = (s32)((u8 *)header + sections[i].offset);
+                instructions = (ScrInstr *)((u8 *)header + sections[i].offset);
                 break;
             case BF_FLW0_SECTION_AUXILIARY:
                 if (sections[i].count != 0) {
-                    auxiliaryData = (s32)((u8 *)header + sections[i].offset);
+                    auxiliaryData = (u8 *)header + sections[i].offset;
                 }
                 break;
             case BF_FLW0_SECTION_STRINGS:
-                strings = (s32)((u8 *)header + sections[i].offset);
+                strings = (char *)header + sections[i].offset;
                 break;
             default:
                 return 0;
         }
     }
-    return bfContextCreate((s32)header, (s32)sections, procedures, labels, instructions,
+    return bfContextCreate(header, sections, procedures, labels, instructions,
                            auxiliaryData, strings, procedureIndex);
 }
 

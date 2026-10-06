@@ -5,6 +5,7 @@
 #include "dds3obj.h"
 #include "sdf.h"
 #include "fld.h"
+#include "scr.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -21,7 +22,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 typedef struct DmaPacketHeader DmaPacketHeader;
 /* Packet addresses are 32-bit handles; GS and GIF payload words remain 64-bit. */
 
-extern s32 scrGetCurrentContext(void);
 extern void fldPlayFieldSeVolumePan(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
@@ -81,7 +81,7 @@ typedef struct FldActionSpawn {
     s32 firstValue;
 } FldActionSpawn;
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 extern s32 evtSpawnActionObj2(s32, s32);
 extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
@@ -412,7 +412,126 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001270A8);
+typedef struct FldScriptResource {
+    u8 pad00[0x10];
+    u8 parameters[0x10];
+    s32 unk20;
+} FldScriptResource;
+
+typedef struct FldResourceName {
+    u32 unk00;
+    const char *name;
+} FldResourceName;
+
+extern FldFileResource *D_003BD7B0;
+extern u32 D_003BD7B4;
+extern FldFileResource *D_003BD7B8;
+extern u32 D_003BD7BC;
+extern s32 D_003BAC14;
+extern s32 evtCreateScriptObjectWithResource(s32, s32, s32, s32, s32);
+extern void *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
+extern void effObjSetModelHolder(void *, u32);
+extern s32 fldParseRoomNumberFromName(const char *);
+extern void func_00113DD0(void *, u32);
+extern void *dds3FindWorldObjectNodeByKey(void *, u32, s32);
+extern void dds3SetSlotByKind(void *, void *);
+extern void func_00111F40(void *);
+extern void fldSetRecordValueById(s32, s32);
+extern void *dds3FindIndexedObjectChainNodeByName(void *, s32, const u8 *);
+extern void dds3RegisterObjectInHandlerIndex(void *);
+
+void func_001270A8(void) {
+    f32 position[4];
+    f32 rotation[4];
+    FldFileResource *resource = D_003BD7B0;
+    u32 count = D_003BD7B4;
+    void *world;
+    void *object;
+    FldFileResource *binding;
+    FldFileNameEntry *name;
+    FldScriptResource *script;
+    FldResourceName *linkedName;
+    s32 i;
+    s32 j;
+    u32 k;
+
+    if (resource == NULL) {
+        return;
+    }
+    world = dds3GetWorldSecondaryObject();
+    for (i = 0; i < count; i++, resource++) {
+        script = resource->data;
+        evtCreateScriptObjectWithResource(resource->id, (s32)script->parameters,
+                                         script->unk20, D_003BAC14, (s32)resource->name);
+        /* Retail fills both 16-byte stack vectors before creating the object. */
+        if (resource->transform != NULL) {
+            position[0] = resource->transform[0];
+            position[1] = resource->transform[1];
+            position[2] = resource->transform[2];
+            position[3] = 0.0f;
+            rotation[0] = resource->transform[4];
+            rotation[1] = resource->transform[5];
+            rotation[2] = resource->transform[6];
+            rotation[3] = resource->transform[7];
+        } else {
+            position[0] = 0.0f;
+            position[1] = 0.0f;
+            position[2] = 0.0f;
+            position[3] = 0.0f;
+            rotation[0] = 0.0f;
+            rotation[1] = 0.0f;
+            rotation[2] = 0.0f;
+            rotation[3] = 0.0f;
+        }
+        object = dds3SpawnInnerVecObj6(resource->id, position, rotation);
+        dds3SetWorldEntryCallbackTarget(object, resource->name);
+        if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
+            if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
+                effObjSetModelHolder(object, 6);
+            } else {
+                switch (i) {
+                    case 0:
+                        effObjSetModelHolder(object, 2);
+                        break;
+                    case 1:
+                        effObjSetModelHolder(object, 3);
+                        break;
+                    case 2:
+                        effObjSetModelHolder(object, 4);
+                        break;
+                    default:
+                        effObjSetModelHolder(object, 5);
+                        break;
+                }
+            }
+        } else {
+            effObjSetModelHolder(object, 7);
+        }
+        func_00113DD0(object, fldParseRoomNumberFromName(resource->name));
+        dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));
+        func_00111F40(object);
+        binding = D_003BD7B8;
+        for (j = 0; j < D_003BD7BC; j++, binding++) {
+            if (binding->names != NULL) {
+                name = binding->names->entries;
+                k = 0;
+                for (; k < binding->names->count; k++, name++) {
+                    if (strcmp(resource->name, name->name) == 0) {
+                        fldSetRecordValueById(binding->id, (s32)object);
+                        break;
+                    }
+                }
+            }
+        }
+        /* Retail fetches the link descriptor even when the object is NULL. */
+        linkedName = (FldResourceName *)resource->word14;
+        if (object != NULL) {
+            dds3SetSlotByKind(object, dds3FindIndexedObjectChainNodeByName(world, 2, linkedName->name));
+            dds3RegisterObjectInHandlerIndex(object);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00127388);
 
@@ -838,7 +957,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001281E0);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128780);
 
 extern s32 D_003BAC10;
-extern s32 D_003BAC14;
 extern FldTransferChunk *D_003BAC18;
 extern u32 D_003BAC1C;
 extern FldTransferChunk *D_003BAC20;
@@ -3656,7 +3774,6 @@ void fldResetZoneRecordsAndActorSlots(void) {
     fldResetActorSlots();
 }
 
-extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 D_003BAE18;
 extern s32 D_003BAE20;
 extern s32 D_003BAE2C;
@@ -3664,12 +3781,11 @@ typedef struct FldTaskInfo {
     s32 unk0;
     s32 slot;
 } FldTaskInfo;
-extern s32 dds3FindWorldObjectNodeByKey(u64, u32, s32);
-extern u32 dds3GetPathState(s32);
+extern u32 dds3GetPathState(void *);
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
     s32 slotIndex;
-    u64 world;
+    void *world;
     u32 task;
     FldTaskInfo *taskInfo;
 
@@ -4321,12 +4437,6 @@ s32 fldQuerySelectedActorMotionState(s32 query) {
     return 0;
 }
 
-/* Same +0xE4 task-record key layout used by DDS2's EffCmdWork view. */
-typedef struct FldTaskRecordWork {
-    u8 pad00[0xE4];
-    u32 key;
-} FldTaskRecordWork;
-
 /* Kinds 10, 11 and 12 have no case body, and that is deliberate: retail tests
    them in exactly this order (10, 11, 12, then 4), so moving any of them
    changes the branch layout and stops matching. */
@@ -4337,7 +4447,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     FldActorEntry *entry;
 
     if (checkTaskRecord != 0) {
-        record = fldGetTaskRecordValue(((FldTaskRecordWork *)scrGetCurrentContext())->key);
+        record = fldGetTaskRecordValue((u32)scrGetCurrentContext()->task);
         if (record == 0) {
             return;
         }
@@ -4384,7 +4494,6 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     }
 }
 
-extern void *dds3FindIndexedObjectChainNodeByName(void *, s32, const u8 *);
 extern void dds3SetWorldCameraObject(void *, u32);
 void func_0013DDF0(const char *name) {
     FldActorEntry *entry;

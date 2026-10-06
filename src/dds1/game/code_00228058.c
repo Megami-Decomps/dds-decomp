@@ -1,11 +1,7 @@
 #include "common.h"
 #include "dat_state.h"
+#include "scr.h"
 
-/* Event-command work prefix; the +0xE4 key is also used by field task lookup. */
-typedef struct EvtCommandWork {
-    u8 pad00[0xE4];
-    s32 taskKey;
-} EvtCommandWork;
 
 /* The first word is the solarnoise.spr handle; the work allocation is 0x104 bytes. */
 typedef struct SolarOverlayWork {
@@ -24,7 +20,6 @@ void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
 void func_00101A80(s32 arg0, s32 arg1);
 
-EvtCommandWork *scrGetCurrentContext(void);
 
 char *scrReadStringParameter(s32 idx);
 
@@ -70,7 +65,7 @@ void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 
 u32 evtCreateTextureEntryChildTask(void) {
-    EvtCommandWork *work;
+    ScrData *work;
     s32 id;
     s32 entry;
     s32 task;
@@ -79,7 +74,7 @@ u32 evtCreateTextureEntryChildTask(void) {
     if (work == NULL) {
         return 1;
     }
-    if (work->taskKey == 0) {
+    if (work->task == NULL) {
         func_003003F0(D_003ACA78);
         return 1;
     }
@@ -90,25 +85,25 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     task = evtCreateTaskWithValue(0x2AFE, entry);
-    func_00101A80(work->taskKey, task);
+    func_00101A80((s32)work->task, task);
     scrSetIntegerReturnValue(task);
     return 1;
 }
 
 u32 evtOpcodeCreateWorldChildTask(void) {
-    EvtCommandWork *work;
+    ScrData *work;
     s32 task;
 
     work = scrGetCurrentContext();
     if (work == NULL) {
         return 1;
     }
-    if (work->taskKey == 0) {
+    if (work->task == NULL) {
         func_003003F0(D_003ACAE0);
         return 1;
     }
     task = evtCreateTask(0x2afe, scrReadStringParameter(0));
-    func_00101A80(work->taskKey, task);
+    func_00101A80((s32)work->task, task);
     scrSetIntegerReturnValue(task);
     return 1;
 }

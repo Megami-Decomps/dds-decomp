@@ -2,6 +2,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "scr.h"
 
 typedef struct FldCamPose {
     u8 pad0[0x10];
@@ -51,7 +52,6 @@ extern s32 fldGetActorStat0(s32);
 
 extern s32 scrReadIntParameter(s32);
 
-extern s32 scrGetCurrentContext(void);
 
 extern s32 fldFindRoomByTask(u32);
 
@@ -231,11 +231,6 @@ extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
-/* Script execution state retains the task id used by the room lookup. */
-typedef struct FldScriptTask {
-    u8 pad00[0xE4];
-    s32 taskId; /* 0xE4 */
-} FldScriptTask;
 
 void fldFireRoomEffects(void);
 
@@ -249,7 +244,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((FldScriptTask *)scrGetCurrentContext())->taskId), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId((u32)scrGetCurrentContext()->task), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -283,7 +278,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((FldScriptTask *)scrGetCurrentContext())->taskId), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId((u32)scrGetCurrentContext()->task), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -334,7 +329,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((FldScriptTask *)scrGetCurrentContext())->taskId), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId((u32)scrGetCurrentContext()->task), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -1171,7 +1166,7 @@ typedef struct FldSceneParam {
 extern FldSceneParam D_0034C8F0[];
 
 s32 fldCmdPushSceneParam(void) {
-    s32 room = fldFindRoomByTask(((FldScriptTask *)scrGetCurrentContext())->taskId);
+    s32 room = fldFindRoomByTask((u32)scrGetCurrentContext()->task);
 
     switch (scrReadIntParameter(0)) {
     case 0:
@@ -1193,24 +1188,19 @@ s32 fldCmdPushSceneParam(void) {
     return 1;
 }
 
-/* Script task's scene-record key, shared by the adjacent field commands. */
-typedef struct FldTaskWork {
-    u8 pad00[0xE4];
-    s32 recordKey; /* 0xE4 */
-} FldTaskWork;
 
 u32 fldCmdActivateTaskRoomObject(void) {
-    s32 task;
+    ScrData *script;
     u64 room;
 
-    task = scrGetCurrentContext();
-    room = fldFindRoomByTask(((FldTaskWork *)task)->recordKey);
+    script = scrGetCurrentContext();
+    room = fldFindRoomByTask((u32)script->task);
     fldActivateFlaggedObject(room);
     return 1;
 }
 
 u32 fldCmdTestTaskRoomObjectActive(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomByTask(((FldTaskWork *)scrGetCurrentContext())->recordKey)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomByTask((u32)scrGetCurrentContext()->task)) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1225,7 +1215,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
         func_0013DF60(0);
         return 1;
     }
-    scene = fldGetTaskRecordValue(((FldTaskWork *)scrGetCurrentContext())->recordKey);
+    scene = fldGetTaskRecordValue((u32)scrGetCurrentContext()->task);
     if (scene) {
         func_0013DF60(scene);
     }
