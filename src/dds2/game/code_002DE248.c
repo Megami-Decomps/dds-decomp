@@ -9,7 +9,7 @@
 #include "mdl.h"
 #include "eff.h"
 
-extern void mdlAddEntryPlain(s32, u32, u32);
+extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 
 extern void func_00200930(f32 *, f32 *, s32);
 typedef struct FileQueue FileQueue;
@@ -132,16 +132,6 @@ typedef struct EffViewScale {
     f32 scale;
 } EffViewScale;
 
-typedef struct EffModelAssetData {
-    u8 pad00[0x14];
-    u32 unk14;
-    u32 unk18;
-} EffModelAssetData;
-
-typedef struct EffModelAssetHeader {
-    u8 pad00[0xC];
-    EffModelAssetData *data; // pointer to the model data block
-} EffModelAssetHeader;
 
 
 typedef struct EffSurfaceEndpoints {
@@ -152,20 +142,10 @@ typedef struct EffSurfaceEndpoints {
     s16 endIndex;
 } EffSurfaceEndpoints;
 
-typedef struct EffModelParameter {
-    u8 pad00[0x20];
-    f32 value;
-} EffModelParameter;
-
-typedef struct EffModelContextView {
-    u8 pad00[0x18];
-    s32 lookAtBasis;
-    EffModelParameter *parameters;
-} EffModelContextView;
 
 typedef struct EffModelBindings {
     u32 material;
-    void *model;
+    MdlCtx *model;
 } EffModelBindings;
 
 typedef struct EffAimConfig {
@@ -266,7 +246,7 @@ typedef struct EffModelResource {
     u32 color;
     s32 updateCount;
     s32 kind;
-    void *model;
+    MdlCtx *model;
     u32 attributes;
     u32 childResource;
     void *source;
@@ -276,7 +256,7 @@ typedef struct EffModelCreateRequest {
     u8 pad0[0x2C];
     u16 kind;
     u8 pad2E[2];
-    u32 assetId;
+    MdlCtx *assetId;
     u32 attributes;
     u8 pad38[4];
     void *source;
@@ -386,7 +366,7 @@ extern void effDrawFourPointGroups(u8 *, void *);
 
 extern void func_002F1888(u8 *, void *);
 
-extern void sdfMotionSampleAtFrame(s32, f32);
+extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern void kwlnPadStartMotor(s32, u8, s32);
 
@@ -418,11 +398,13 @@ extern u32 effCreateMappedResource(u32);
 
 extern u32 sdfResourceRetainAddress();
 
-extern u64 fileGetResourceHandle(void);
+struct FileWork;
+extern u32 fileGetResourceHandle(struct FileWork *);
+extern void *fileCreateCallbackRequest(const char *, s32, s32, s32);
 
 extern u32 func_00305148();
 
-extern void *sdfModelCreateWithAlternateItems(u32, u32);
+extern SdfModel *sdfModelCreateWithAlternateItems(DevRequest *, void *);
 
 extern void *sdfAllocSizeClassBlock(s32);
 
@@ -442,7 +424,7 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void sdfReleaseChipBlock();
 
-extern void mdlLoadPrimaryVectorVU(void *);
+extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
 extern void func_0033A7E8(u32, void *, void *);
 
@@ -457,9 +439,9 @@ extern void sdfTexReleaseReference();
 
 extern void effReleaseSharedReference();
 
-extern s64 btlIsRuntimeAllocated(void);
+extern u8 btlIsRuntimeAllocated(void);
 
-extern s32 func_002DC1D0(u32, u32);
+extern MdlCtx *func_002DC1D0(void *, u32);
 
 extern void dds3DispatchIndexedCallback(s32, f32);
 
@@ -469,7 +451,7 @@ extern void billMarkKindOneFlag(s32);
 
 extern u8 D_00380828[];
 
-extern void mdlProcessContextNodesAndTransforms(void *, const void *);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
 typedef struct EffectObjectFlag {
     u32 state;
@@ -537,7 +519,7 @@ extern u32 D_004387B0;
 
 extern u32 D_00438774;
 
-extern void mdlStoreTertiaryVectorVU(void *);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void *func_002DDAA8(void *);
 
@@ -647,11 +629,11 @@ extern u8 D_00400250[];
 
 extern EffClassOps D_003E9D00[];
 
-extern void *func_00232198(s32 group, s32 id);
+extern MdlCtx *func_00232198(s32 group, s32 id);
 
-extern s32 mdlGetContextResourceGroup(void *model);
+extern u16 mdlGetContextResourceGroup(MdlCtx *);
 
-extern s32 mdlGetContextResourceId(void *model);
+extern u16 mdlGetContextResourceId(MdlCtx *);
 
 
 
@@ -747,15 +729,13 @@ extern void fileQueueDestroy(s32);
 
 extern void *fileQueueClone(void *);
 
-extern void sdfMotionSampleAtFrame(s32, f32);
 
-extern u8 *D_00437E40;
 
-void *effCloneModelWithVUState(void *sourceModel);
+MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel);
 
-void effDestroyModelContext(s32 owner);
+void effDestroyModelContext(MdlCtx *owner);
 
-void effInitModelVUState(void *model);
+void effInitModelVUState(MdlCtx *model);
 
 RefObj *effReferenceObjectRetain(RefObj *obj);
 
@@ -6461,7 +6441,7 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
     VU0_STORE_VF_UNCLOBBERED($vf0, &effect->transform[0x10]);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
-        effect->model = (void *)func_002DC1D0((u32)secondary, param);
+        effect->model = func_002DC1D0(secondary, param);
         effect->attributes = param;
         effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
@@ -6470,22 +6450,22 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
 }
 
 u32 effCreateModelResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer();
+    void *first = fileResolvePrimaryBuffer(work);
     void *second = fileResolveSecondaryBuffer(work);
     return effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
 
 void effDestroyModelResource(EffModelResource *effect) {
     effModelResourceOperations[effect->kind].destroyResource(effect->childResource);
-    effDestroyModelContext((s32)effect->model);
+    effDestroyModelContext(effect->model);
     sdfReleaseChipBlock(effect);
 }
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = (EffModelResource *)effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
-    u32 x = mdlGetContextResourceGroup(work->assetId);
-    u32 y = mdlGetContextResourceId(work->assetId);
-    void *model = func_00232198(x, y);
+    s32 x = mdlGetContextResourceGroup(work->assetId);
+    s32 y = mdlGetContextResourceId(work->assetId);
+    MdlCtx *model = func_00232198(x, y);
 
     effect->model = model;
     effInitModelVUState(model);
@@ -6496,15 +6476,13 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
 }
 
 void effResetModelResourceUpdateCount(u8 *work) {
-    effModelResourceOperations[((EffModelResource *)work)->kind].initialize();
+    effModelResourceOperations[((EffModelResource *)work)->kind].initialize(work);
     ((EffModelResource *)work)->updateCount = 0;
 }
 
-void effDispatchModelResourceUpdate(work)
-s32 *work;
-{
+void effDispatchModelResourceUpdate(s32 *work) {
     if ((effModelUpdateControlFlags & 2) == 0) {
-        effModelResourceOperations[((EffModelResource *)work)->kind].update();
+        effModelResourceOperations[((EffModelResource *)work)->kind].update(work);
         ((EffModelResource *)work)->updateCount++;
     }
 }
@@ -6513,9 +6491,9 @@ void effDispatchModelResourceCallback(s32 work) {
     effModelResourceOperations[((EffModelResource *)work)->kind].draw((void *)work);
 }
 
-void effStepModelResourceCallbacks(u32 work) {
-    effDispatchModelResourceUpdate();
-    effDispatchModelResourceCallback(work);
+void effStepModelResourceCallbacks(s32 *work) {
+    effDispatchModelResourceUpdate(work);
+    effDispatchModelResourceCallback((s32)work);
 }
 
 void effSetModelResourcePrimaryTransformVector(s128 *dst, s128 *src) {
@@ -6842,7 +6820,7 @@ void effSyncLinkedActorChildParameter(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F64D8);
 
-s64 effComputeLightDirectionVU(void *model, void *target) {
+s32 effComputeLightDirectionVU(MdlCtx *model, void *target) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
@@ -6854,7 +6832,7 @@ s64 effComputeLightDirectionVU(void *model, void *target) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_CLEAR_W(vf10);
     VU0_NORMALIZE_VF10();
-        VU0_STORE_VF(vf10, D_00458470);
+    VU0_STORE_VF(vf10, D_00458470);
     func_0033A7E8(target, D_003E9F50, D_004584A0);
     return 1;
 }
@@ -7382,19 +7360,19 @@ void func_002F7E88(s32 owner) {
     func_002E8770(*(u32 *)((EffActiveResource *)owner)->resource);
 }
 
-u32 *effAllocateModelObjectSlot(u32 owner) {
-    u32 *work = (u32 *)sdfAllocSizeClassBlock(4);
-    *work = 0;
+MdlCtx **effAllocateModelObjectSlot(u32 owner) {
+    MdlCtx **work = sdfAllocSizeClassBlock(sizeof(*work));
+    *work = NULL;
     return work;
 }
 
 
-extern void mdlAddEntryFlagged(s32, u32, u32);
+extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
-u32 *effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, u32 source, u32 settings) {
-    u32 *work = effAllocateModelObjectSlot((u32)owner);
-    s32 object = func_002DC1D0(source, settings);
-    s32 active = (s32)((EffModelContextView *)object)->parameters;
+MdlCtx **effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, void *source, u32 settings) {
+    MdlCtx **work = effAllocateModelObjectSlot((u32)owner);
+    MdlCtx *object = func_002DC1D0(source, settings);
+    Motion *active = object->first;
     *work = object;
     if (active != 0) {
         if (*owner != 0) {
@@ -7406,16 +7384,16 @@ u32 *effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, u32 source, u32 s
     return work;
 }
 
-u32 *effCreateAndAttachModelFromResourceDescriptor(u8 *request) {
+MdlCtx **effCreateAndAttachModelFromResourceDescriptor(u8 *request) {
     u32 *owner = ((EffActiveResource *)request)->payload;
-    void **source = (void **)((EffActiveResource *)request)->resource;
-    u32 *work = effAllocateModelObjectSlot((u32)owner);
+    MdlCtx **source = (MdlCtx **)((EffActiveResource *)request)->resource;
+    MdlCtx **work = effAllocateModelObjectSlot((u32)owner);
     s32 a = mdlGetContextResourceGroup(*source);
     s32 b = mdlGetContextResourceId(*source);
-    void *object = func_00232198(a, b);
-    *work = (u32)object;
+    MdlCtx *object = func_00232198(a, b);
+    *work = object;
     effInitModelVUState(object);
-    if (((EffModelContextView *)*work)->parameters != NULL) {
+    if ((*work)->first != NULL) {
         if (*owner != 0) {
             mdlAddEntryPlain(*work, 0, 0);
         } else {
@@ -7425,31 +7403,31 @@ u32 *effCreateAndAttachModelFromResourceDescriptor(u8 *request) {
     return work;
 }
 
-void effReleaseOwnedModelContextWork(u32 handle) {
-    if (*(s32 *)handle != 0) {
-        effDestroyModelContext(*(s32 *)handle);
+void effReleaseOwnedModelContextWork(MdlCtx **handle) {
+    if (*handle != NULL) {
+        effDestroyModelContext(*handle);
     }
     sdfReleaseChipBlock(handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F8040);
 
-s32 *func_002F81A8(s32 *owner) {
-    s32 *work = (s32 *)sdfAllocSizeClassBlock(8);
-    work[0] = 0;
-    work[1] = 0;
+EffModelBindings *func_002F81A8(s32 *owner) {
+    EffModelBindings *work = sdfAllocSizeClassBlock(sizeof(*work));
+    work->material = 0;
+    work->model = NULL;
     return work;
 }
 
-s32 *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, u32 source, u32 settings) {
-    s32 *work = func_002F81A8(owner);
-    s32 object;
-    s32 active;
+EffModelBindings *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, void *source, u32 settings) {
+    EffModelBindings *work = func_002F81A8(owner);
+    MdlCtx *object;
+    Motion *active;
 
-    work[0] = effCreateClassResourceWork(4, (u32)owner);
+    work->material = effCreateClassResourceWork(4, (u32)owner);
     object = func_002DC1D0(source, settings);
-    active = (s32)((EffModelContextView *)object)->parameters;
-    work[1] = object;
+    active = object->first;
+    work->model = object;
     if (active != 0) {
         if (owner[0x34 / 4] != 0) {
             mdlAddEntryPlain(object, 0, 0);
@@ -7460,29 +7438,29 @@ s32 *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, u32 source, u32 s
     return work;
 }
 
-s32 *effCreateModelEffectWorkFromPayload(u8 *request) {
+EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     s32 *owner = ((EffActiveResource *)request)->payload;
-    u32 *source = (u32 *)((EffActiveResource *)request)->resource;
-    s32 *work = func_002F81A8(owner);
+    EffModelBindings *source = (EffModelBindings *)((EffActiveResource *)request)->resource;
+    EffModelBindings *work = func_002F81A8(owner);
     s32 a;
     s32 b;
-    void *object;
+    MdlCtx *object;
     s32 material;
-    u32 modelSource;
+    MdlCtx *modelSource;
 
-    material = effPayloadPointerGet(source[0]);
-    modelSource = source[1];
-    work[0] = material;
-    a = mdlGetContextResourceGroup((void *)modelSource);
-    b = mdlGetContextResourceId((void *)source[1]);
+    material = effPayloadPointerGet(source->material);
+    modelSource = source->model;
+    work->material = material;
+    a = mdlGetContextResourceGroup(modelSource);
+    b = mdlGetContextResourceId(source->model);
     object = func_00232198(a, b);
-    work[1] = (s32)object;
+    work->model = object;
     effInitModelVUState(object);
-    if (((EffModelContextView *)work[1])->parameters != NULL) {
+    if (work->model->first != NULL) {
         if (owner[0x34 / 4] != 0) {
-            mdlAddEntryPlain(work[1], 0, 0);
+            mdlAddEntryPlain(work->model, 0, 0);
         } else {
-            mdlAddEntryFlagged(work[1], 0, 0);
+            mdlAddEntryFlagged(work->model, 0, 0);
         }
     }
     return work;
@@ -7490,12 +7468,12 @@ s32 *effCreateModelEffectWorkFromPayload(u8 *request) {
 
 extern void effDestroyClassResourceWork(s32);
 
-void effDestroyMaterialAndModelEffectWork(s32 *work) {
-    if (work[1] != 0) {
-        effDestroyModelContext(work[1]);
+void effDestroyMaterialAndModelEffectWork(EffModelBindings *work) {
+    if (work->model != NULL) {
+        effDestroyModelContext(work->model);
     }
-    if (work[0] != 0) {
-        effDestroyClassResourceWork(work[0]);
+    if (work->material != 0) {
+        effDestroyClassResourceWork(work->material);
     }
     sdfReleaseChipBlock(work);
 }
@@ -7503,7 +7481,7 @@ void effDestroyMaterialAndModelEffectWork(s32 *work) {
 /* vu0 routine: orient along target minus model origin, save distance, and advance the resource. */
 void effOrientClassResourceAlongTargetOffset(u8 *work) {
     u8 *object = ((EffActiveResource *)work)->payload;
-    s32 *handle = (s32 *)((EffActiveResource *)work)->resource;
+    EffModelBindings *handle = (EffModelBindings *)((EffActiveResource *)work)->resource;
     u128 mtx[4];
     f32 target[4];
     f32 origin[4];
@@ -7515,10 +7493,10 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
         VU0_LOAD_VF(vf10, work);
     }
     VU0_STORE_VF_UNCLOBBERED(vf10, target);
-    sdfLoadMapRecordLookAtBasis(((EffModelContextView *)handle[1])->lookAtBasis, 0);
+    sdfLoadMapRecordLookAtBasis((s32)handle->model->inner, 0);
     VU0_STORE_VF_UNCLOBBERED(vf31, origin);
-    effCopyClassResourcePosition((s128 *)handle[0], (s128 *)target);
-    state = ((EffClassWork *)handle[0])->payload;
+    effCopyClassResourcePosition((s128 *)handle->material, (s128 *)target);
+    state = ((EffClassWork *)handle->material)->payload;
     VU0_LOAD_VF(vf10, target);
     VU0_LOAD_VF(vf11, origin);
     VU0_SUB(vf10, vf10, vf11);
@@ -7541,32 +7519,32 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
     sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
-    effCopyClassResourceOrientation((s128 *)handle[0], (s128 *)look);
-    effAdvanceClassResourceFrame(handle[0]);
+    effCopyClassResourceOrientation((s128 *)handle->material, (s128 *)look);
+    effAdvanceClassResourceFrame(handle->material);
 }
 
-extern void mdlStorePrimaryVectorVU(void *);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 /* The model helpers read vf10, following the SDK's VU0 macro-mode convention. */
 void effApplyModelTransform(u8 *work) {
-    u8 *modelContext = (u8 *)((EffActiveResource *)work)->resource;
+    EffModelBindings *modelContext = (EffModelBindings *)((EffActiveResource *)work)->resource;
     u8 *animation = ((EffActiveResource *)work)->payload;
     u32 bits;
     float scale;
     VU0_LOAD_VF_MEMORY(vf10, work);
-    mdlStorePrimaryVectorVU(((EffModelBindings *)modelContext)->model);
+    mdlStorePrimaryVectorVU(modelContext->model);
     VU0_LOAD_VF_MEMORY(vf10, work + 0x10);
-    mdlUpdateContextRotationBasisFromQuaternion(((EffModelBindings *)modelContext)->model);
+    mdlUpdateContextRotationBasisFromQuaternion(modelContext->model);
     VU0_SET_ONES_XYZ(vf10);
     scale = ((EffActiveResource *)work)->scale;
     VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
-    mdlStoreTertiaryVectorVU(((EffModelBindings *)modelContext)->model);
-    ((EffModelContextView *)((EffModelBindings *)modelContext)->model)->parameters->value =
+    mdlStoreTertiaryVectorVU(modelContext->model);
+    modelContext->model->first->frameStep =
         ((EffAimConfig *)animation)->modelParameter;
-    mdlProcessContextNodesAndTransforms(((EffModelBindings *)modelContext)->model, D_00380828);
-    effDrawClassResourceWork(*(s32 *)modelContext);
+    mdlProcessContextNodesAndTransforms(modelContext->model, (s32)D_00380828);
+    effDrawClassResourceWork(modelContext->material);
 }
 
 extern s32 *sdfCreateAssetWithDrawEntries(void);
@@ -7782,7 +7760,7 @@ u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, s32 secondary, u32 
 }
 
 void effCreateActiveResourceFromFile(s32 *source) {
-    void *primary = fileResolvePrimaryBuffer();
+    void *primary = fileResolvePrimaryBuffer(source);
     s32 secondary = fileResolveSecondaryBuffer(source);
     func_002F9608(((FileJob *)source)->option, primary,
                   ((FileJob *)source)->slots[0].selector, secondary, ((FileJob *)source)->slots[1].size);
@@ -7826,9 +7804,7 @@ void effClearCallbackFrame(u32 *obj) {
     }
 }
 
-void effAdvanceCallbackFrame(work)
-u8 *work;
-{
+void effAdvanceCallbackFrame(u8 *work) {
     if (btlIsRuntimeAllocated() != 0 && (effModelUpdateControlFlags & 2) == 0) {
         s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
         EffResourceOps *entry = &D_003EA018[kind];
@@ -7849,8 +7825,8 @@ void effDispatchEnabledCallback(u8 *work) {
     }
 }
 
-void effAdvanceActiveResourceCallbacks(u32 work) {
-    effAdvanceCallbackFrame();
+void effAdvanceActiveResourceCallbacks(u8 *work) {
+    effAdvanceCallbackFrame(work);
     effDispatchEnabledCallback(work);
 }
 
@@ -7941,7 +7917,7 @@ typedef struct EffectSlotNode80 {
     f32 speedRandomness;    // 0x28
     f32 angularAcceleration; // 0x2C
     u8 pad30[0x30];
-    u32 model;              // 0x60
+    MdlCtx *model;           // 0x60
     void *deviceSlot;       // 0x64
     u32 resourceEntries;    // 0x68
     u32 entryAllocation;    // 0x6C
@@ -8083,8 +8059,8 @@ s32 *effCloneOwnedState(u8 *owner) {
 
 void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
     s32 kind = src->resourceKind;
-    s32 model;
-    EffModelAssetData *modelData;
+    MdlCtx *model;
+    BattleGroupNode *modelData;
     u32 count;
     u32 i;
 
@@ -8096,10 +8072,10 @@ void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
         if (dst->deviceSlot != 0) {
             sdfReleaseDevSlot(dst->deviceSlot, 1, 1);
         }
-        model = (s32)effCloneModelWithVUState((void *)src->model);
-        modelData = ((EffModelAssetHeader *)model)->data;
+        model = effCloneModelWithVUState(src->model);
+        modelData = model->sub;
         dst->model = model;
-        dst->deviceSlot = sdfModelCreateWithAlternateItems(modelData->unk14, modelData->unk18);
+        dst->deviceSlot = sdfModelCreateWithAlternateItems(modelData->resourceList, modelData->itemList);
         kind = src->resourceKind;
         break;
     case 6:
@@ -8155,8 +8131,8 @@ void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
 }
 
 void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, u32 kind, u32 config) {
-    EffModelAssetData *modelData;
-    s32 model;
+    BattleGroupNode *modelData;
+    MdlCtx *model;
     void *deviceSlot;
 
     if (work->model != 0) {
@@ -8167,11 +8143,10 @@ void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, u32 kin
         sdfReleaseDevSlot(work->deviceSlot, 1, 1);
         work->deviceSlot = 0;
     }
-    model = func_002DC1D0(kind, config);
-    /* Keep the header load raw: it must precede the parent model-pointer store. */
-    modelData = (EffModelAssetData *)*(s32 *)(model + 0xc);
+    model = func_002DC1D0((void *)kind, config);
+    modelData = model->sub;
     work->model = model;
-    deviceSlot = sdfModelCreateWithAlternateItems(modelData->unk14, modelData->unk18);
+    deviceSlot = sdfModelCreateWithAlternateItems(modelData->resourceList, modelData->itemList);
     work->deviceSlot = deviceSlot;
 }
 
@@ -8312,7 +8287,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB5C0);
 
 
 typedef struct EffSharedEffectResource {
-    u32 model;
+    MdlCtx *model;
     u32 deviceSlot;
     u32 data;
     u8 pad0C[4];
@@ -8367,9 +8342,9 @@ void effShareReferenceCountedEffectObject(s32 target, s32 source) {
 }
 
 void func_002FB968(s32 *work) {
-    s32 *context = *(s32 **)work[0x478 / 4];
+    MdlCtx *context = *(MdlCtx **)work[0x478 / 4];
     if (context != NULL) {
-        sdfMotionSampleAtFrame(context[0x1C / 4], 0.0f);
+        sdfMotionSampleAtFrame(context->first, 0.0f);
     }
 }
 
@@ -10712,11 +10687,11 @@ u32 effLoadIndexedResource(s32 category, s32 index, s32 keepAllocation) {
 }
 
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
-void effCompleteTransientResourceJob(u64 job, u32 *outInstance) {
-    u64 allocation;
+void effCompleteTransientResourceJob(void *job, u32 *outInstance) {
+    u32 allocation;
     u32 instance;
 
-    allocation = fileGetResourceHandle();
+    allocation = fileGetResourceHandle(job);
     instance = func_00305148(allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = instance;
     sdfReleaseResourceAllocation(allocation);
@@ -10724,11 +10699,11 @@ void effCompleteTransientResourceJob(u64 job, u32 *outInstance) {
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
-void effCompleteRetainedResourceJob(u64 job, u32 *outInstance) {
-    u64 allocation;
+void effCompleteRetainedResourceJob(void *job, u32 *outInstance) {
+    u32 allocation;
     u32 instance;
 
-    allocation = fileGetResourceHandle();
+    allocation = fileGetResourceHandle(job);
     instance = func_00305148(allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = instance;
     filePollEntryCleanup(job);
@@ -10740,9 +10715,9 @@ void effRequestResourceByMode(s32 category, s32 index, s32 mode, u32 *outInstanc
     func_0035C860(path, D_004387E8, category, index);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
-        fileCreateCallbackRequest(path, 0, effCompleteRetainedResourceJob, outInstance);
+        fileCreateCallbackRequest(path, 0, (s32)effCompleteRetainedResourceJob, (s32)outInstance);
     } else {
-        fileCreateCallbackRequest(path, 0, effCompleteTransientResourceJob, outInstance);
+        fileCreateCallbackRequest(path, 0, (s32)effCompleteTransientResourceJob, (s32)outInstance);
     }
 }
 
@@ -10760,12 +10735,12 @@ u32 effLoadMappedResource(s32 category, s32 index) {
 }
 
 /* Publish mapped records before releasing their source allocation and completing the file job. */
-void effCompleteMappedResourceJob(u64 job, u32 *outMappedResource) {
-    u64 allocation;
+void effCompleteMappedResourceJob(void *job, u32 *outMappedResource) {
+    u32 allocation;
     u32 sourceAddress;
     u32 mappedResource;
 
-    allocation = fileGetResourceHandle();
+    allocation = fileGetResourceHandle(job);
     sourceAddress = sdfResourceRetainAddress(allocation);
     mappedResource = effCreateMappedResource(sourceAddress);
     *outMappedResource = mappedResource;
@@ -10778,7 +10753,7 @@ void effRequestMappedResource(s32 category, s32 index, u32 *outMappedResource) {
     char path[EFF_RESOURCE_PATH_BYTES];
     func_0035C860(path, D_004387E8, category, index);
     *outMappedResource = 0;
-    fileCreateCallbackRequest(path, 0, effCompleteMappedResourceJob, outMappedResource);
+    fileCreateCallbackRequest(path, 0, (s32)effCompleteMappedResourceJob, (s32)outMappedResource);
 }
 
 /* Create an owner list with sixteen initially empty record buckets. */
