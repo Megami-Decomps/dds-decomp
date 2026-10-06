@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "fpu.h"
+#include "dat_state.h"
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -220,7 +221,6 @@ extern u32 mnuCreateIconBundle(u32);
 
 extern u32 func_002B9FF8();
 
-extern s32 datGameState;
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
@@ -371,13 +371,6 @@ struct MenuWindowContainer {
     u32 state;             /* 0x94 */
 };
 
-typedef struct PartyEntryCopy {
-    u16 flags;
-    u16 pad02;
-    u16 displayId; /* 0x04: used to select a party display asset */
-    u16 pad06;
-    u32 word[0x6F];
-} PartyEntryCopy; /* 0x1C4 bytes, versus 0x1A4 in DDS1 */
 
 /* One allocated party-selection work area: original/current/backup entries,
  * saved panel payloads, and fade state all belong to this same allocation. */
@@ -385,10 +378,10 @@ typedef struct PartyMenuData {
     s32 allocation;
     u8 pad04[4];
     MenuWindowContainer *primaryWindow; /* 0x08 */
-    PartyEntryCopy original[5];         /* 0x0C */
-    PartyEntryCopy current[5];          /* 0x8E0 */
+    DatPartyRecord original[5];         /* 0x0C */
+    DatPartyRecord current[5];          /* 0x8E0 */
     s32 activeCount;                    /* 0x11B4 */
-    PartyEntryCopy backup[5];           /* 0x11B8 */
+    DatPartyRecord backup[5];           /* 0x11B8 */
     s32 selection;                      /* 0x1A8C */
     u8 panelSnapshots[5][0xA0]; /* 0x1A90: copied panel subrecords */
     s32 fadeA;                 /* 0x1DB0 */
