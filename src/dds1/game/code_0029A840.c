@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_anim.h"
 #include "file.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -648,28 +649,6 @@ RefObj *effReferenceObjectRetain(RefObj *obj) {
     return obj;
 }
 
-typedef struct EffAnimSegment {
-    u32 length;     // 0x00
-    u8 pad_04[0xC];
-} EffAnimSegment;
-
-typedef struct EffAnimSet {
-    u8 pad_00[4];
-    u32 count;                 // 0x04
-    u32 flags;                 // 0x08: 1 loop, 4 double speed
-    u8 pad_0C[4];
-    EffAnimSegment *segments;  // 0x10
-    u8 pad_14[4];
-    u32 length;                // 0x18
-} EffAnimSet;
-
-typedef struct EffAnimSample {
-    f32 weight;     // 0x00
-    f32 speed;      // 0x04
-    u32 pad_08;
-    s32 segment;    // 0x0C
-} EffAnimSample;
-
 void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     u32 count = set->count;
     u32 local = 0;
@@ -702,24 +681,21 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
             }
         }
     }
-    out->weight = 1.0f;
+    out->scaleX = 1.0f;
     {
-        f32 speed = 2.0f;
+        f32 scaleY = 2.0f;
 
         if (!(set->flags & 4)) {
-            speed = 1.0f;
+            scaleY = 1.0f;
         }
         out->segment = segment;
-        out->speed = speed;
+        out->scaleY = scaleY;
     }
-    out->pad_08 = 0;
+    out->angle = 0.0f;
 }
 
-SdfTex *effAssignSampledSegmentReference(void *owner, void *target, const void *indexSource) {
-    EffExpandedList *list = owner;
-    const EffAnimSample *sample = indexSource;
-
-    return func_0029C048(target, list->handles[sample->segment]);
+SdfTex *effAssignSampledSegmentReference(EffAnimSet *set, void *target, const EffAnimSample *sample) {
+    return func_0029C048(target, set->handles[sample->segment]);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2AA0);
