@@ -449,12 +449,6 @@ s32 btlCheckScenePairResult(s32 self, SceneCheckArgs *args) {
     return resultB;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_004169F0);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A00);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A10);
-
 /* The actor-panel allocation has three active rows and four reserve rows. */
 typedef struct BattleActorPanelEntry {
     s32 x;
@@ -522,6 +516,12 @@ static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     fldDispatchSceneKindHandler((s32)object);
     func_001BD9A0(object, func_001C82D8((s32)object, btlCommandPanelWork->kind));
 }
+
+INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_004169F0);
+
+INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A00);
+
+INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A10);
 
 s32 func_001CA490(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
