@@ -694,11 +694,8 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     out->angle = 0.0f;
 }
 
-SdfTex *effAssignSampledSegmentReference(void *owner, void *target, const void *indexSource) {
-    EffExpandedList *list = owner;
-    const EffAnimSample *sample = indexSource;
-
-    return func_0029C048(target, list->handles[sample->segment]);
+SdfTex *effAssignSampledSegmentReference(EffAnimSet *set, void *target, const EffAnimSample *sample) {
+    return func_0029C048(target, set->handles[sample->segment]);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2AA0);
