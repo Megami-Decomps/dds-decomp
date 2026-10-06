@@ -93,6 +93,11 @@ extern s32 mnuDestroyListState();
 extern s32 effDestroyResourceSlotSet();
 #include "kwln.h"
 #include "fpu.h"
+struct MenuListNode;
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
 
 extern void *fileDuplicateJob(void *);
 
@@ -3157,7 +3162,7 @@ extern s32 func_002D1058(s32 mode);
 
 extern s32 fileStartQueuedLoad(void);
 extern void fileConfigTaskDestroy(void);
-extern void func_002D1450(void);
+extern s32 func_002D1450(void);
 extern u32 fileGetConfigTaskFailure(void);
 
 extern s8 fileConfigTaskState;

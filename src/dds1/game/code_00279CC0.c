@@ -1,4 +1,7 @@
 #include "mnu.h"
+struct MenuListNode;
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 
 typedef struct MenuWindowContainer MenuWindowContainer;
 
@@ -826,12 +829,12 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
     return cursor;
 }
 
-void mnuAdvanceListCursorDefault(u32 list) {
-    mnuListAdvanceCursor(list, 0, 0);
+MenuListNode *mnuAdvanceListCursorDefault(u32 list) {
+    return mnuListAdvanceCursor((MenuList *)list, 0, 0);
 }
 
-void mnuRetreatListCursorDefault(u32 list) {
-    mnuListRetreatCursor(list, 0, 0);
+MenuListNode *mnuRetreatListCursorDefault(u32 list) {
+    return mnuListRetreatCursor((MenuList *)list, 0, 0);
 }
 
 void mnuClearListFlagsOneAndTwo(u32 *flags) {
@@ -846,4 +849,5 @@ u32 mnuTestListFlagTwo(u32 *flags) {
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
+
 

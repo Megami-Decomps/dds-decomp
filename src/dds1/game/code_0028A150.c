@@ -3,6 +3,10 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "fpu.h"
+struct MenuListNode;
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 struct EffectSlotSet;
 extern void func_002BF4E0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -172,7 +176,7 @@ extern u32 D_003BD8EC;
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
 
 extern void *fileWaitContinuation;
 
@@ -3282,6 +3286,7 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigLoadTaskName);
 INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigOwnerTaskName);
 
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00291418);
+
 
 s32 fileStartQueuedLoad(void) {
     if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
