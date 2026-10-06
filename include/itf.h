@@ -20,15 +20,20 @@ typedef struct UiSprite {
     SdfMemBlock *allocation;
     SdfMemBlock *payloadAllocation;
     u32 *payload;
-    u8 pad0C[4];
+    s32 unk0C;
     s32 left;
     s32 top;
     s32 right;
     s32 bottom;
     s32 unk20;
     s32 screenY;
-    u8 pad28[0x14];
-    s8 kind;
+    u8 pad28[4];
+    /* The secondary panel notification copies these four opaque values. */
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    s32 unk38;
+    u8 kind; /* Unsigned index into the panel handler tables. */
     u8 pad3D[3];
 } UiSprite;
 
