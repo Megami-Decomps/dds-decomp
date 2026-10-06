@@ -2,11 +2,14 @@
 #include "scr.h"
 
 
-extern u64 scrReadIntParameter(u64);
+extern s32 scrReadIntParameter(s32);
 
 extern s8 D_0040B7D9[];
 
-extern u64 mdlFlagTest(u64);
+extern s32 mdlFlagTest(s32);
+extern void mdlFlagSet(s32);
+extern void mdlFlagClear(s32);
+extern void scrSetIntegerReturnValue(s32);
 
 u32 scrGetProcedureAddress(s32 index) {
     return scrCurrentContext->procedures[index].addr;
@@ -56,16 +59,16 @@ s32 scrHasNegativeMarkerDuringCommandTimer(void) {
 
 /* Evaluate a script-supplied model flag and push the test result. */
 u32 scrOpcodeTestModelFlag(void) {
-    u64 flagId;
+    s32 value;
 
-    flagId = scrReadIntParameter(0);
-    flagId = mdlFlagTest(flagId);
-    scrSetIntegerReturnValue(flagId);
+    value = scrReadIntParameter(0);
+    value = mdlFlagTest(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
 u32 scrOpcodeSetModelFlag(void) {
-    u64 flagId;
+    s32 flagId;
 
     flagId = scrReadIntParameter(0);
     mdlFlagSet(flagId);
@@ -73,7 +76,7 @@ u32 scrOpcodeSetModelFlag(void) {
 }
 
 u32 scrOpcodeClearModelFlag(void) {
-    u64 flagId;
+    s32 flagId;
 
     flagId = scrReadIntParameter(0);
     mdlFlagClear(flagId);

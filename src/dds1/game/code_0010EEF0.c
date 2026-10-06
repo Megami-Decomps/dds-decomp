@@ -3,8 +3,10 @@
 #include "eff_transform.h"
 #include "dds3obj.h"
 
-extern u64 ptyReadSignedRosterStatByte(u64);
-extern u64 scrReadIntParameter(u64);
+extern s8 ptyReadSignedRosterStatByte(s32);
+extern s32 scrReadIntParameter(s32);
+extern void scrSetIntegerReturnValue(s32);
+extern void func_00119B08(s32);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *p);
@@ -17,10 +19,10 @@ void effObjInnerVecInit(EffTransformNode *node);
 
 
 u32 func_0010EEF0(void) {
-    u64 context;
+    s32 mode;
 
-    context = scrReadIntParameter(0);
-    func_00119B08(context);
+    mode = scrReadIntParameter(0);
+    func_00119B08(mode);
     return 1;
 }
 
@@ -30,11 +32,11 @@ u32 ptyScriptRestoreEntireParty(void) {
 }
 
 u32 func_0010EF38(void) {
-    u64 context;
+    s32 value;
 
-    context = scrReadIntParameter(0);
-    context = ptyReadSignedRosterStatByte(context);
-    scrSetIntegerReturnValue(context);
+    value = scrReadIntParameter(0);
+    value = ptyReadSignedRosterStatByte(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 

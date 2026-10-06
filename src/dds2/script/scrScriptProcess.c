@@ -114,7 +114,7 @@ void scrProcDestroyTask(ScrData *process) {
 
 extern s32 strcmp(const char *a, const char *b);
 
-extern s32 scrIsCurrentWorkTask(void *);
+extern u8 scrIsCurrentWorkTask(u32);
 extern void kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 flag);
 
 
@@ -130,7 +130,7 @@ void scrDestroyAllNamedProcesses(void)
     }
     while (1) {
         next = node->next;
-        if (scrIsCurrentWorkTask(node) == 0) {
+        if (scrIsCurrentWorkTask((u32)node) == 0) {
             if (node->task != NULL) {
                 kwlnTaskDestroyWithHierarchy(node->task, 0);
             } else {

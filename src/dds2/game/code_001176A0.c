@@ -7,7 +7,7 @@
 extern u32 D_00435E80;
 
 
-extern s64 scrGetWorkTaskHandle(void);
+extern u32 scrGetWorkTaskHandle(void);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
@@ -423,8 +423,8 @@ void sdfFirePendingCallback(void) {
     scrDestroyWorkTask();
 }
 
-u8 scrIsCurrentWorkTask(s64 expected) {
-    s64 current;
+u8 scrIsCurrentWorkTask(u32 expected) {
+    u32 current;
 
     current = scrGetWorkTaskHandle();
     return current == expected;
