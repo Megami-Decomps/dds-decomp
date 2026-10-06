@@ -2633,7 +2633,43 @@ s32 func_00218690(void) {
     return ((BattleWork *)btlGetRuntime())->mode == 0x303 ? 1 : 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002186C0);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(u8 *);
+
+/* Enemy forms replace a few action modes according to their health state. */
+s32 func_002186C0(BtlUnit *unit, s32 action) {
+    u32 flags = unit->flags;
+    if (!(flags & 0x400)) {
+        return action;
+    }
+    if (!(flags & 2)) {
+        return action;
+    }
+    switch (unit->mode) {
+    case 0x14B:
+    case 0x14C:
+    case 0x14D:
+        switch (action) {
+        case 9:
+        case 10:
+            return 0;
+        case 11:
+            return 1;
+        case 13:
+            return -1;
+        }
+        break;
+    default:
+        switch (action) {
+        case 2:
+        case 9:
+            return btlIsCurrentValueBelowQuarterThreshold((u8 *)unit) ? 10 : 0;
+        case 13:
+            return -1;
+        }
+        break;
+    }
+    return action;
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218798);
 
@@ -2652,7 +2688,6 @@ s32 btlOverrideActionResultForEnemyMode(s32 battler, s32 action, s32 defaultValu
     return defaultValue;
 }
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(u8 *);
 
 s32 btlIsUnitListReady(void) {
     BtlUnit *unit;
