@@ -327,6 +327,23 @@ typedef struct MenuGradientFade {
 typedef char MenuGradientFade_size_must_be_0x0C[(sizeof(MenuGradientFade) == 0x0C) ? 1 : -1];
 
 #ifdef VERSION_DDS2
+/* The terminal's eight progress thresholds and their selectable rewards. */
+typedef struct MnuProgressReward {
+    u8 kind;
+    s32 value; /* Item ID for kind zero, currency amount otherwise. */
+} MnuProgressReward;
+
+typedef struct MnuProgressEntry {
+    u32 threshold;
+    s32 flag;
+    MnuProgressReward rewards[8];
+} MnuProgressEntry;
+
+typedef char MnuProgressReward_size_must_be_0x8[(sizeof(MnuProgressReward) == 0x8) ? 1 : -1];
+typedef char MnuProgressEntry_size_must_be_0x48[(sizeof(MnuProgressEntry) == 0x48) ? 1 : -1];
+
+extern MnuProgressEntry D_003CE1A8[8];
+
 struct EffectSlotSet;
 struct EffMappedResource;
 

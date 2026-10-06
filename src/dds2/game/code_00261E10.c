@@ -55,15 +55,6 @@ extern s32 mnuTickExtendedCommandPhase();
 extern s32 mdlFlagTest();
 extern void mdlFlagSet();
 extern void dspStartEntry();
-extern u8 D_003CE1A8[];
-typedef struct EvtSlot {
-    u32 threshold;
-    s32 flag;
-    struct {
-        u8 kind;
-        s32 id;
-    } sub[8];
-} EvtSlot;
 
 typedef struct EvtSceneObject {
     u8 pad00[0x18];
@@ -1092,7 +1083,7 @@ s32 evtIsLastSlot(s32 slotIndex) {
     s32 activeSlots = 0;
     u32 entryIndex;
     for (entryIndex = 0; entryIndex < EVT_PROGRESS_SLOT_COUNT; entryIndex++) {
-        if (((EvtSlot *)D_003CE1A8)[entryIndex].flag != 0) {
+        if (D_003CE1A8[entryIndex].flag != 0) {
             activeSlots++;
         }
     }

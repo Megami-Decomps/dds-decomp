@@ -17,18 +17,6 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_003CE63C[];
-typedef struct EvtSlotReward {
-    u8 kind;
-    s32 id;
-} EvtSlotReward;
-
-typedef struct EvtSlot {
-    u32 threshold;
-    s32 flag;
-    EvtSlotReward sub[8];
-} EvtSlot;
-
-extern EvtSlot D_003CE1A8[];
 extern char (*D_00435E5C)[25];
 extern char D_00437850[];
 extern s32 func_00265038();
@@ -65,19 +53,19 @@ s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 slotIndex = func_00265038();
     s32 i;
-    EvtSlotReward *reward;
+    MnuProgressReward *reward;
     char text[0x40];
 
     if (context->unkCD != 0) {
         if (slotIndex >= 0) {
             i = 0;
-            reward = D_003CE1A8[slotIndex].sub;
+            reward = D_003CE1A8[slotIndex].rewards;
             do {
-                s32 id = reward->id;
+                s32 value = reward->value;
                 if ((reward++)->kind == 0) {
-                    evtCopyEntryStringToActiveWindow(i, (s32)D_00435E5C[id]);
+                    evtCopyEntryStringToActiveWindow(i, (s32)D_00435E5C[value]);
                 } else {
-                    func_0035C860(text, D_00437850, id);
+                    func_0035C860(text, D_00437850, value);
                     evtCopyEntryStringToActiveWindow(i, (s32)text);
                 }
                 i++;
@@ -133,19 +121,19 @@ s32 func_00265408(void) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
     s32 slotIndex = func_00265038();
     s32 choice;
-    s32 rewardId;
+    s32 rewardValue;
 
     context->rewardGranted = 0;
     if (context->unkCD != 0 && slotIndex >= 0) {
         choice = evtGetCapturedWindowPanelValue();
-        rewardId = D_003CE1A8[slotIndex].sub[choice].id;
-        if (D_003CE1A8[slotIndex].sub[choice].kind == 0) {
-            evtCopyEntryStringToActiveWindow(0, (s32)D_00435E5C[rewardId]);
-            ptyAdjustItemQuantity(rewardId, 1);
+        rewardValue = D_003CE1A8[slotIndex].rewards[choice].value;
+        if (D_003CE1A8[slotIndex].rewards[choice].kind == 0) {
+            evtCopyEntryStringToActiveWindow(0, (s32)D_00435E5C[rewardValue]);
+            ptyAdjustItemQuantity(rewardValue, 1);
         } else {
-            func_0035C860(text, D_00437850, rewardId);
+            func_0035C860(text, D_00437850, rewardValue);
             evtCopyEntryStringToActiveWindow(0, (s32)text);
-            datAddCurrencyClamped(rewardId);
+            datAddCurrencyClamped(rewardValue);
         }
         context->rewardGranted = 1;
         dspStartEntry(0x28);
