@@ -99,7 +99,10 @@ typedef struct EvtUnit {
     u8 padCA[6];
     s8 firstSlot;                  /* 0xD0: consumed by stored-slot activation */
     s8 secondSlot;                 /* 0xD1 */
-    u8 padD2[0xE];
+    u8 padD2;
+    u8 unkD3;                     /* 0xD3: byte parameter written by timeline keys */
+    f32 unkD4;                    /* 0xD4: float parameter written by timeline keys */
+    u8 padD8[8];
     u8 slotFlags[12];              /* 0xE0 */
     u8 padEC[4];
 #ifdef VERSION_DDS1
