@@ -226,14 +226,14 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     return texture;
 }
 
-/* Process a resource address with packet variant zero. */
-void sdfTexAcquireResourceTexture(void *resourceAddress) {
-    sdfTexCreateFromFileHeader(resourceAddress, 0);
+/* Build the texture and its packet with variant zero. */
+SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress) {
+    return sdfTexCreateFromFileHeader(resourceAddress, 0);
 }
 
-/* Process a resource address with packet variant one. */
-void sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
-    sdfTexCreateFromFileHeader(resourceAddress, 1);
+/* Build the texture and its packet with variant one. */
+SdfTex *sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
+    return sdfTexCreateFromFileHeader(resourceAddress, 1);
 }
 
 /* Build one intensity byte for every source pixel. */
