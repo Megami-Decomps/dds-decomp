@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "mnu_list.h"
 
 typedef struct MenuPanelTransition {
     u16 frame;
@@ -20,20 +21,7 @@ extern u64 mnuFindPanelSlotById(u32, u64, u64);
 typedef struct MenuContainer MenuContainer;
 extern u32 func_002890A8(MenuContainer *);
 
-typedef struct MenuPanelNode {
-    s32 index;
-    u8 pad04[0x54];
-    struct MenuPanelNode *next;
-    u8 pad5C[0x14];
-    s32 value;
-} MenuPanelNode;
 
-typedef struct MenuPanelList {
-    u8 pad00[0x10];
-    MenuPanelNode *head;
-    u8 pad14[8];
-    MenuPanelNode *selected;
-} MenuPanelList;
 
 typedef struct MenuPanelSlot {
     u8 pad00[8];
@@ -66,8 +54,24 @@ typedef struct MenuPanelEntryPool {
     s32 count;
 } MenuPanelEntryPool;
 
+/* The eight-byte acquisition record uses its low byte as the mantra id. */
+typedef struct MenuMantraRecord {
+    union {
+        u16 flags;
+        struct {
+            u8 mantraId;
+            u8 flagsHigh;
+        };
+    };
+    u8 pad02[2];
+    s8 element;
+    u8 pad05[3];
+} MenuMantraRecord;
+
 typedef struct MenuPanelState {
-    u8 pad00[0x560];
+    u8 pad00[0x554];
+    u32 drawFlags;
+    u8 pad558[8];
     MantraNodePos *defaultSelector;
     MantraNodePos *alternateSelector;
     u8 pad568[4];
@@ -77,7 +81,9 @@ typedef struct MenuPanelState {
     s32 collectedCount;
     u8 pad5DC[4];
     s8 selectionIndex;
-    u8 pad5E1[0x3C3];
+    u8 pad5E1[3];
+    MenuMantraRecord records[112];
+    u8 pad964[0x40];
     s32 navigationState;
     u8 pad9A8[4];
     u32 resource;
@@ -94,7 +100,7 @@ typedef struct MenuPanelState {
 
 typedef struct MenuPanelObject {
     u8 pad00[4];
-    MenuPanelList *list;
+    struct MenuList *list;
     u8 pad08[0x238];
     MenuPanelState state;
 } MenuPanelObject;
@@ -364,7 +370,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateSelectedPanelSlot);
 u16 mnuGetSelectedPanelValue(MenuPanelObject *object) {
     s32 values;
 
-    values = (s32)object->state.slots[object->list->selected->index]->values;
+    values = (s32)object->state.slots[object->list->cursor->index]->values;
     if (object->state.alternateSelector != 0) {
         return *(u16 *)(object->state.alternateSelector->selector.fields.index * 2 + values);
     }
@@ -374,7 +380,7 @@ u16 mnuGetSelectedPanelValue(MenuPanelObject *object) {
 u16 mnuGetPanelValueAt(MenuPanelObject *object, s32 index) {
     return *(u16 *)
                     (((index << 0x10) >> 0xf) +
-                    (s32)object->state.slots[object->list->selected->index]->values);
+                    (s32)object->state.slots[object->list->cursor->index]->values);
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290C20);
@@ -467,11 +473,11 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276A0);
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
 
 void mnuStoreMantraPanelFlagsToScript(MenuPanelObject *object) {
-    MenuPanelNode *node = object->list->head;
+    struct MenuListNode *node = object->list->first;
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
-        u32 context = node->value;
+        u32 context = node->unk70;
         u16 *values = object->state.slots[slotIndex]->values;
         s32 i;
 
@@ -486,11 +492,11 @@ extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
 
 /* Read each list node's 0xB0 script entry flags into its panel slot and log the slot number. */
 void mnuLoadMantraPanelFlagsFromScript(MenuPanelObject *object) {
-    MenuPanelNode *node = object->list->head;
+    struct MenuListNode *node = object->list->first;
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
-        s32 context = node->value;
+        s32 context = node->unk70;
         u16 *values = object->state.slots[slotIndex]->values;
         s32 i;
 
@@ -758,13 +764,13 @@ s32 func_00293148(MenuPanelObject *object) {
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002932B0);
 
 void mnuCollectPanelNodeValues(MenuPanelObject *object) {
-    MenuPanelNode *node = object->list->head;
+    struct MenuListNode *node = object->list->first;
     s32 count = 0;
     MenuPanelState *state = &object->state;
     if (node != 0) {
         u32 *slot = object->state.collectedValues;
         do {
-            u32 value = node->value;
+            u32 value = node->unk70;
             count++;
             node = node->next;
             *slot++ = value;
