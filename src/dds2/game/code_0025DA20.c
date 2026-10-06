@@ -749,7 +749,7 @@ void func_0025EC00(CampScene *scene) {
 
 
 /* The genuine three-row typed candidate remains non-matching. */
-INCLUDE_ASM(const s32, "../matchings/game/code_0025DA20", fldApplyCameraColorKeyWords);
+INCLUDE_ASM(const s32, "game/code_0025DA20", fldApplyCameraColorKeyWords);
 
 void func_0025EE00(CampScene *scene) {
     func_0025EC00(scene);
