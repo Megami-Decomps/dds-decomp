@@ -143,6 +143,8 @@ extern u32 mnuMantraSpriteSlots[12];
 
 /* The panel pool allocates 48-byte records shared by animation and sprite controls. */
 typedef struct MantraPanelAnimation {
+    /* Packed control word: mnuSpawnPanelSlotA uses LW/SW at 0x279CAC/0x279CE8
+     * and SB at 0x279CF0; func_0027A198 dispatches the kind with LBU at 0x27A254. */
     union {
         u32 flags;
         struct {
