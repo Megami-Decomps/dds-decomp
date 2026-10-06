@@ -1,4 +1,5 @@
 #include "mnu.h"
+struct MenuListNode;
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -135,7 +136,7 @@ typedef struct MenuSpriteGrid {
     MenuSpriteRef slots[8];
 } MenuSpriteGrid;
 
-void mnuAdvanceListCursorDefault(u32 list);
+struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 
 void mnuClearListFlagsOneAndTwo(u32 *flags);
 
@@ -1715,7 +1716,7 @@ void mnuClearListFlags(s32 which, MenuPageWindow *menu) {
 
 extern u32 mnuMapPadMaskToFlags(u32);
 
-extern void mnuRetreatListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32, u32, s32);
 
 /* Step the selected party-panel list from the pad: left/right move its cursor, any input restarts the fade. */
@@ -1976,3 +1977,4 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_00281780);
 void mnuClearPanelWorkState(u32 panel) {
     memset(panel, 0, 0x20);
 }
+
