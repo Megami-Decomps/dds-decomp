@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "itf.h"
+#include "sdf.h"
 
 #define ITF_PANEL_COLUMN_COUNT 4
 #define ITF_PANEL_ROW_COUNT 2
@@ -76,7 +77,7 @@ typedef struct PanelEntry {
 } PanelEntry;
 
 extern PanelEntry itfWindowSlots[];
-extern void (*itfPanelHandlers[])(UiSprite *);
+extern void (*itfPanelHandlers[])(UiSprite *, SdfListHead *);
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern u32 scrGetWindow(void);
 extern void scrSetIntegerReturnValue(s32);
@@ -87,16 +88,16 @@ extern void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 extern s32 itfPanelColorTemplates[];
 extern s32 D_00357B50[];
-extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, u64 command);
+extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command);
 extern u8 D_003BB1C8[8];
 extern u8 D_003BB1D0[8];
-extern void *sdfAllocPacketAligned(s32);
-extern u64 *sdfConsFinalizePacketHeader(void *, s32);
-extern void sdfAppendPacket(void *, void *);
-extern void func_00198990(PanelRect *rect, u32 *colors, u32 tail, s32 width, u64 command);
+extern s32 sdfAllocPacketAligned(s32);
+extern u32 sdfConsFinalizePacketHeader(u32, s32);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern void func_00198990(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
 extern u32 D_00357D68[];
-extern void itfSendTablePacket(u64 command, s32 index, s32 flag);
-extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command);
+extern void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag);
+extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
 extern u8 D_003BB1D8[8];
 extern u8 D_003BB1E0[8];
 extern s32 itfPanelGradientColorTemplate[];
@@ -106,7 +107,7 @@ extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
 extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
 extern u8 D_00357C38[], D_00357C50[], D_00357C68[];
 extern u8 D_003BB1A8[8], D_003BB1B0[8];
-extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, u64);
+extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 extern u8 D_00357C78[];
 extern u8 D_00357C88[];
 extern u8 D_003BB1B8[8];
@@ -137,8 +138,8 @@ typedef struct PanelPt {
 } PanelPt;
 
 /* Invoke the indexed panel handler; panel and kind are trusted. */
-void itfPanelDispatchHandler(UiSprite *panel) {
-    itfPanelHandlers[panel->kind](panel);
+void itfPanelDispatchHandler(UiSprite *panel, SdfListHead *list) {
+    itfPanelHandlers[panel->kind](panel, list);
 }
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
@@ -299,7 +300,7 @@ extern u8 D_00357BD0[];
 extern u8 D_00357BE0[];
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
-void itfDrawIndexedPanelFlatQuads(UiSprite *panel, u64 command) {
+void itfDrawIndexedPanelFlatQuads(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 4;
     s32 quadIndex;
@@ -312,7 +313,7 @@ void itfDrawIndexedPanelFlatQuads(UiSprite *panel, u64 command) {
 
 /* Update seven alpha words, then emit three wide and six side strips.
    The first color row is deliberately excluded from the alpha update. */
-void itfDrawSevenColorPanelQuads(UiSprite *panel, u64 command) {
+void itfDrawSevenColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 21;
     s32 alpha = panel->unk38;
@@ -332,7 +333,7 @@ void itfDrawSevenColorPanelQuads(UiSprite *panel, u64 command) {
 
 /* Update five alpha words, then emit three wide and two side strips.
    The first color row is deliberately excluded from the alpha update. */
-void itfDrawFiveColorPanelQuads(UiSprite *panel, u64 command) {
+void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 17;
     s32 alpha = panel->unk38;
@@ -350,7 +351,7 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, u64 command) {
     }
 }
 
-void func_0019A420(UiSprite *panel, u64 command) {
+void func_0019A420(UiSprite *panel, SdfListHead *command) {
     PanelPt vertices[12];
     PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
@@ -379,7 +380,7 @@ void func_0019A420(UiSprite *panel, u64 command) {
 }
 
 /* Update the first color row's alpha and emit one indexed quad. */
-void itfDrawPanelQuadWithCommand(UiSprite *panel, u64 command) {
+void itfDrawPanelQuadWithCommand(UiSprite *panel, SdfListHead *command) {
     PktRec *colors = (PktRec *)panel->payload + 2;
 
     colors->unkC = panel->unk38;
@@ -387,7 +388,7 @@ void itfDrawPanelQuadWithCommand(UiSprite *panel, u64 command) {
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
-void itfEmitPanelQuadPacket(UiSprite *panel, u64 command) {
+void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 3;
 
@@ -404,7 +405,7 @@ INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A9A8);
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AAC0);
 
 /* Copy bounds and draw the tinted border; alpha uses the native signed 103/128 scale. */
-void itfDrawTintedPanelRect(UiSprite *panel, u64 command) {
+void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
     PanelRect rect;
 
     D_00357D68[3] = panel->unk38 * ITF_PANEL_TINT_ALPHA_NUMERATOR / ITF_PANEL_TINT_ALPHA_DENOMINATOR;
@@ -416,9 +417,9 @@ void itfDrawTintedPanelRect(UiSprite *panel, u64 command) {
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
-void itfAppendGsPanelStatePacket(void *list) {
-    void *packet = sdfAllocPacketAligned(ITF_PANEL_STATE_PACKET_BYTES);
-    u64 *stateWords = sdfConsFinalizePacketHeader(packet, ITF_PANEL_STATE_PACKET_BYTES);
+void itfAppendGsPanelStatePacket(SdfListHead *list) {
+    s32 packet = sdfAllocPacketAligned(ITF_PANEL_STATE_PACKET_BYTES);
+    u64 *stateWords = (u64 *)sdfConsFinalizePacketHeader(packet, ITF_PANEL_STATE_PACKET_BYTES);
 
     stateWords[4] = 0x5101B;
     stateWords[5] = 0x47;

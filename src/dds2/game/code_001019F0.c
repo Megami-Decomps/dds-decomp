@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3Admin.h"
 #include "kwln.h"
+#include "sdf.h"
 
 extern u32 dds3ActiveWorld;
 
@@ -115,17 +116,13 @@ s32 func_00101AC0(void) {
     return 0;
 }
 
-typedef struct KwlnDrawSink {
-    u8 pad00[0x10];
-    void (*invoke)(void *, void *); /* 0x10 */
-} KwlnDrawSink;
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003808B0[];
-extern u8 kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 extern u8 D_00380860[];
 extern u8 D_00380870[];
 extern void sdfWaitAndSelectBuffer(void);
-extern void func_0032D0F0(void *, s32);
+extern void func_0032D0F0(SdfPoolNode *, s32);
 extern void sdfClearPacketListHead(void *);
 extern void func_00105070(s32);
 extern void sdfInitializeDrawPacketGroups(u8 *);
@@ -165,7 +162,7 @@ s32 kwlnPrepareFrameDrawPackets(void) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     s32 groupIndex;
     u8 *packetGroups;
-    KwlnDrawSink *drawSink;
+    SdfPoolNode *drawSink;
 
     sdfWaitAndSelectBuffer();
     func_0032D0F0(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
@@ -176,8 +173,8 @@ s32 kwlnPrepareFrameDrawPackets(void) {
         sdfInitializeDrawPacketGroups(packetGroups);
         packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
-    drawSink = (KwlnDrawSink *)kwlnDrawSurfaces;
-    drawSink->invoke(drawSink, D_00380870 + bufferIndex * KWLN_FRAME_BUFFER_BYTES);
+    drawSink = kwlnDrawSurfaces;
+    drawSink->append((SdfListHead *)drawSink, (SdfListHead *)(D_00380870 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
     return 0;
 }
 
@@ -205,7 +202,7 @@ extern void sdfAppendDmaPrimary(void *, u8 *, void *);
 extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
 extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
-extern s32 *sdfFlushPoolNodes(void *);
+extern s32 sdfFlushPoolNodes(SdfPoolNode *);
 extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
 extern void func_00106288(void);
@@ -214,16 +211,16 @@ extern void func_00105CF8(void);
 extern void func_00107108(void);
 extern u32 func_001200E0(void);
 extern void func_00343468(s32);
-extern void sdfQueueFramePackets(s32 *, void *);
+extern void sdfQueueFramePackets(SdfListHead *, void *);
 extern u8 D_00380788[];
 extern u8 kwlnFrameDrawPacketRecords[];
-extern u8 D_00380708[];
+extern SdfPoolNode D_00380708;
 extern u8 kwlnDrawOverlayEnabled;
 extern s16 kwlnDrawOverlayAlpha;
 extern s16 kwlnDrawOverlayScale;
 extern s32 D_00435CE0[2];
 extern u8 D_00435BC8;
-extern s32 *D_00435C14;
+extern SdfListHead *D_00435C14;
 extern u32 kwlnDrawControlFlags;
 extern s8 D_00438A20;
 
@@ -239,7 +236,7 @@ s32 kwlnRenderFrame(void) {
     u64 *blendPacket;
     KwlnSpriteVertex *vertex;
     s32 *spritePacket;
-    s32 *poolHead;
+    SdfListHead *poolHead;
     s32 edgeDistances[4];
     s32 i;
 
@@ -308,12 +305,12 @@ s32 kwlnRenderFrame(void) {
         vertex->corner[1].mask = 0;
         vertex->corner[1].flag = 0;
         sdfAppendPacket(packetList, spritePacket);
-        ((KwlnDrawSink *)D_00380708)->invoke(D_00380708, packetList);
+        D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)packetList);
     }
-    poolHead = sdfFlushPoolNodes(kwlnDrawSurfaces);
+    poolHead = (SdfListHead *)sdfFlushPoolNodes(kwlnDrawSurfaces);
     D_00435C14 = poolHead;
     if (D_00435BC8 != 0) {
-        func_00343468(poolHead[1]);
+        func_00343468(poolHead->first);
         D_00435BC8 = 0;
     }
     if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {

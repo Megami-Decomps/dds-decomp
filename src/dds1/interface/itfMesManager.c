@@ -176,32 +176,6 @@ typedef struct ItfMesColorSrc {
 } ItfMesColorSrc;
 
 
-/* Node of the pool at itfMesWork + 0x10 (0x14 bytes each). */
-typedef struct ItfMesPoolNode {
-    struct ItfMesPoolNode *previous; /* 0x0 */
-    struct ItfMesPoolNode *next;     /* 0x4 */
-    s32 index;                       /* 0x8 */
-    s32 stateAddress;                /* 0xC: retained message-window state */
-    s32 resourceHandle;              /* 0x10: window allocation handle */
-} ItfMesPoolNode;
-
-typedef struct ItfMesPool {
-    ItfMesPoolNode *activeHead; /* 0x0 */
-    ItfMesPoolNode *activeTail; /* 0x4 */
-    ItfMesPoolNode *firstFree;  /* 0x8 */
-    ItfMesPoolNode *lastFree;   /* 0xC */
-} ItfMesPool;
-
-/* Globals behind itfMesWork: word at +0x4, bitfield at +0xC. */
-typedef struct ItfMesGlobals {
-    u32 activeWindowCount; /* 0x0: incremented on creation, decremented on destruction */
-    u32 windowTexture;     /* 0x4: /itf/MESWIN.TMX resource */
-    u32 unk8; /* 0x8 */
-    u16 flags; /* 0xC: set/cleared by itfMesSetGlobalFlags/itfMesClearGlobalFlags */
-    u16 unkE; /* 0xE */
-    ItfMesPool pool; /* 0x10 */
-    ItfMesPoolNode nodes[0x40]; /* 0x20 */
-} ItfMesGlobals;
 
 /* State of the interactive message-layout inspector. */
 typedef struct ItfMesDebugState {
@@ -306,7 +280,7 @@ extern void frFontLoadTemporaryEntry(u32 arg0);
 
 extern ItfMesNode *itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub);
 
-extern u32 itfLoadTextureFromAsset(const char *path);
+extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
 
@@ -340,7 +314,7 @@ extern void itfResetBattleFadeState();
 
 extern s32 func_00195ED8();
 
-extern UiSprite *func_00199828(s32, u32);
+extern UiSprite *func_00199828(s32 kind, u32 payload);
 
 extern void itfSetPanelLayoutAndNotify();
 
@@ -574,7 +548,7 @@ s32 itfMesScriptSetMessageRange(void) {
 }
 
 /* Return the loaded message-window texture resource, not a window index. */
-u32 itfMesGetGlobalWindowValue(void) {
+SdfTex *itfMesGetGlobalWindowValue(void) {
     return itfMesWork.windowTexture;
 }
 
@@ -697,7 +671,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     bounds[1] = 0x430;
     bounds[2] = 0x1200 + halfWidth;
     bounds[3] = 0x530 + rowsHeight;
-    panelBlock->panelHandle = (s32)func_00199828(9, itfMesWork.windowTexture);
+    panelBlock->panelHandle = (s32)func_00199828(9, (u32)itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(panelBlock->panelHandle, bounds[0], bounds[1], bounds[2], bounds[3], mes->renderValue);
     itfPanelUpdateValuesAndNotify(panelBlock->panelHandle, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
@@ -1141,10 +1115,6 @@ u16 itfMesGetGlobalFlags(void) {
     return itfMesWork.flags;
 }
 
-typedef struct ItfMesDrawCallback {
-    u8 pad0[0x10];
-    void (*invoke)(void *, s32);
-} ItfMesDrawCallback;
 
 struct ItfMesWindowRec {
     u8 pad00[0xC];
@@ -1160,10 +1130,10 @@ extern char D_003BB210[];
 extern char D_003BB218[];
 extern char D_003BB220[];
 extern char D_003BB228[];
-extern ItfMesDrawCallback kwlnPositionedTextSurface;
+extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void sdfAppendPacket(s32, s32);
+extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_0019FA70(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
@@ -1182,7 +1152,7 @@ s32 func_0019CCD8(void) {
     ItfMesBlkA4 *panel;
     UiSprite *panelSprite;
     s32 *position;
-    s32 packetList;
+    SdfListHead *packetList;
     s32 item;
     s32 y;
     const char *format;
@@ -1247,7 +1217,7 @@ s32 func_0019CCD8(void) {
         }
     }
 
-    packetList = sdfCreateResetPacketList();
+    packetList = (SdfListHead *)sdfCreateResetPacketList();
     kwlnDrawSpriteCell(packetList, 0x10, 0x10, 0x1E, 9);
     format = D_003BB218;
     y = 0x7A00;
@@ -1284,7 +1254,7 @@ s32 func_0019CCD8(void) {
                                                  position[1] >> 3,
                                                  position[2] >> 4,
                                                  position[3] >> 3));
-    kwlnPositionedTextSurface.invoke(&kwlnPositionedTextSurface, packetList);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, packetList);
     return 0;
 }
 

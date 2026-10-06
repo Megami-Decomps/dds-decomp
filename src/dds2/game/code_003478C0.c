@@ -108,18 +108,18 @@ extern void SleepThread(void);
 
 extern s32 D_00439224;
 
-typedef struct SdfPoolNode {
-    struct SdfPoolNode *next;
+typedef struct SdfKeyPoolNode {
+    struct SdfKeyPoolNode *next;
     s32 unk4;
     u8 unk8[4];
     s32 kind;
-} SdfPoolNode;
+} SdfKeyPoolNode;
 
 typedef struct SdfPool {
     u8 unk0[4];
-    SdfPoolNode *head;  /* 0x04: first node of the chain */
-    SdfPoolNode *tail;  /* 0x08: last node of the chain */
-    SdfPoolNode *freeHead;
+    SdfKeyPoolNode *head;  /* 0x04: first node of the chain */
+    SdfKeyPoolNode *tail;  /* 0x08: last node of the chain */
+    SdfKeyPoolNode *freeHead;
     u8 unk10[8];
     struct SdfKeyTreeNode *keyTree[1]; /* 0x18: key tree root */
 } SdfPool;
@@ -749,7 +749,7 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
     }
 }
 
-void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
+void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
     if (node->unk4 != 0) {
         if (node->kind == SDF_POOL_FREE_KIND) {
             node->next = pool->freeHead;
@@ -763,9 +763,9 @@ void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
 extern void sdfConnectPacketLists(void *left, void *right);
 
 /* Append a pool-node chain after the list's tail, or make it the head of an empty list, then advance the tail to the chain's last node. */
-void sdfAppendPoolNodeChain(void *first, SdfPoolNode **head, SdfPoolNode **tail) {
-    SdfPoolNode *current;
-    SdfPoolNode *next;
+void sdfAppendPoolNodeChain(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
+    SdfKeyPoolNode *current;
+    SdfKeyPoolNode *next;
 
     if (first != NULL) {
         if (*tail == NULL) {
@@ -783,7 +783,7 @@ void sdfAppendPoolNodeChain(void *first, SdfPoolNode **head, SdfPoolNode **tail)
 }
 
 /* Append items in descending key order (right, item, left). The starting node must be non-null. */
-void sdfKeyTreeApply(SdfKeyTreeNode *node, SdfPoolNode **head, SdfPoolNode **tail) {
+void sdfKeyTreeApply(SdfKeyTreeNode *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
     SdfKeyTreeNode *next;
 
     do {
@@ -798,8 +798,8 @@ void sdfKeyTreeApply(SdfKeyTreeNode *node, SdfPoolNode **head, SdfPoolNode **tai
 
 /* Rebuild the pool's chain: collect the free list's chain, then append every key tree node's chain, and store the resulting head and tail. */
 void sdfRebuildPoolChain(SdfPool *pool) {
-    SdfPoolNode *head = NULL;
-    SdfPoolNode *tail = NULL;
+    SdfKeyPoolNode *head = NULL;
+    SdfKeyPoolNode *tail = NULL;
 
     sdfAppendPoolNodeChain(pool->freeHead, &head, &tail);
     if (pool->keyTree[0] != NULL) {
@@ -809,7 +809,7 @@ void sdfRebuildPoolChain(SdfPool *pool) {
     pool->tail = tail;
 }
 
-void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfPoolNode *node) {
+void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *node) {
     switch (mode) {
     case SDF_POOL_REBUILD_CHAIN:
         sdfRebuildPoolChain(pool);

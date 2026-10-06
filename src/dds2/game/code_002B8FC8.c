@@ -161,7 +161,7 @@ extern void mnuPlayInputSound();
 
 extern u32 D_003E7828[];
 
-extern u32 D_003E7858[];
+extern const CampEffectRows D_003E7858;
 
 extern char *D_003E7818[];
 
@@ -751,28 +751,17 @@ s32 mnuCampMenuDrawStatus(s32 callback);
 
 s32 func_002B76B0(s32 callback);
 
-typedef struct MapPacket {
-    u32 type;
-    u32 value;
-    u32 unk_08;
-    u32 items[11];
-    s32 count;
-} MapPacket;
 
 void mnuInitializeMapPacket(u32 value, u32 *values, s32 count, MapPacket *packet);
 
 void mnuOrEntryFlags(u32 flags, u32 *entryFlags);
 
-void mnuCopyCampEffectRowData(s32 sourceBase, s32 destinationBase);
+void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 
-void mnuSetCampEffectResourceHandles(u32 first, u32 second, u32 *menu);
+void mnuSetCampEffectResourceHandles(u32 first, u32 second, MenuEffectResources *);
 
-typedef struct MenuEffectResources {
-    MapPacket packet;      /* 0x00–0x3B */
-    u32 animationHandle;   /* 0x3C */
-} MenuEffectResources;
 
-void mnuBindCampEffectAnimation(s32 resources);
+void mnuBindCampEffectAnimation(MenuEffectResources *);
 
 
 
@@ -804,31 +793,20 @@ void mnuBindCampEffectAnimation(s32 resources);
 
 
 
-void mnuLoadEffectResources(u8 *effect);
+void mnuLoadEffectResources(MenuEffectResources *);
 
-void mnuRequestEffectResources(u8 *effect);
+void mnuRequestEffectResources(MenuEffectResources *);
 
-u32 mnuBindCampEffectWhenLoaded(u32 *menu);
+u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *);
 
-void mnuDestroyEffectResources(u8 *ctx);
+void mnuDestroyEffectResources(MenuEffectResources *);
 
-typedef struct MenuSparkSet {
-    u32 flags;
-    u8 pad04[4];
-    s32 sheet;       /* 0x08 */
-    s32 handle[8];   /* 0x0C */
-    u8 pad2C[0x60 - 0x2C];
-    /* 0x060 */ s32 direction[16];
-    /* 0x0A0 */ s32 velocity[16][2];
-    /* 0x120 */ s32 life[16];
-    /* 0x160 */ s32 count;
-} MenuSparkSet;
 
-void mnuSpawnSpark(MenuSparkSet *fx);
+void mnuSpawnSpark(MenuCampEffect *fx);
 
-void mnuRetireCampSpark(s32 effects, s32 index);
+void mnuRetireCampSpark(MenuCampEffect *, s32 index);
 
-void mnuDrawAndAdvanceCampSparks(MenuSparkSet *fx, s32 arg);
+void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg);
 
 
 
@@ -842,14 +820,6 @@ typedef struct MenuBadgeLayout {
     MenuBadgePlace place[2];
 } MenuBadgeLayout;
 
-typedef struct MenuBadgeSet {
-    u32 flags;
-    u8 pad4[4];
-    s32 sheet;       /* 0x08 */
-    s32 handle[8];   /* 0x0C */
-    u8 pad2C[0x164 - 0x2C];
-    s32 fade;        /* 0x164 */
-} MenuBadgeSet;
 
 extern MenuBadgeLayout D_0042AED0;
 
@@ -863,11 +833,11 @@ extern MenuBadgeLayout D_0042AED0;
     } \
 }
 
-void mnuDrawBadgeFade(MenuBadgeSet *set, s32 arg);
+void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg);
 
 extern MenuBadgeLayout D_0042AEE8;
 
-void mnuDrawCampIconBackdrop(MenuBadgeSet *set, s32 arg);
+void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg);
 
 void mnuEnableCampBadgeFade(u32 *flags);
 

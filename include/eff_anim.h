@@ -17,7 +17,13 @@ typedef struct EffAnimSet {
     EffAnimSegment *segments;  // 0x10
     void **handles;            // 0x14
     u32 length;                // 0x18
+    u32 refCount;              // 0x1C
+    s32 unk20;                 // 0x20: initialized to -1 by the container constructor
+    u32 allocation;            // 0x24: retained block released with the final reference
 } EffAnimSet;
+
+typedef char EffAnimSet_size_must_be_0x28[
+    (sizeof(EffAnimSet) == 0x28) ? 1 : -1];
 
 typedef struct EffAnimSample {
     f32 scaleX;     // 0x00

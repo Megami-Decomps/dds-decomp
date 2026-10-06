@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "dat_state.h"
 
 /* The dispatcher passes its last argument to entry callbacks as opaque data,
@@ -24,7 +25,7 @@ extern u8 D_0036AB64[];
 extern void func_0025E108(s32, s32);
 
 extern void mnuSetCommandPhase(s32, u32);
-extern void func_00260570(s32, u32);
+extern void func_00260570(struct MenuList *, u32);
 extern void func_00260AB0(s32);
 extern void func_0025F138();
 extern s32 func_00245A40(s32);
@@ -53,53 +54,14 @@ extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuTickExtendedCommandPhase(s32);
 extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_00260550(s32, u32);
-extern s32 mnuCampClampSceneCounter();
-extern void func_0027C788(s32);
-extern void mnuRetreatWindowListSelection(s32);
-extern void mnuAdvanceWindowListSelection(s32);
-extern void mnuPlayInputSound(s32, s32, s32 *);
+extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
+extern void func_0027C788(MenuWindowContainer *);
+extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
+extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_0036AAF4[];
+extern void mnuSelectLastListNode(struct MenuList *);
 
-typedef struct EvtDispatchLink {
-    u8 pad00[0x14];
-    s32 target; /* 0x14 */
-} EvtDispatchLink;
-
-typedef struct EvtEntryRecord {
-    s32 index;
-    u8 pad04[0x5C];
-    CampWindowParams params;
-} EvtEntryRecord;
-
-typedef struct EvtDispatchTask {
-    u8 pad00[0x1C];
-    EvtEntryRecord *entryRecord;
-    u8 pad20[0xC];
-    s32 callback; /* 0x2C */
-    s32 window;   /* 0x30 */
-} EvtDispatchTask;
-
-typedef struct EvtDispatchState {
-    u8 pad00[0x54];
-    s32 dispatchState; /* 0x54 */
-    s32 stateTable;    /* 0x58 */
-    u8 pad5C[0x10];
-    s32 menuLink;      /* 0x6C */
-    s32 taskLink;      /* 0x70 */
-    u8 pad74[0xC];
-    s32 scoreFactor;   /* 0x80 */
-    s32 mode;          /* 0x84 */
-    u8 pad88[8];
-    s16 initialSelection; /* 0x90 */
-    s16 pendingSelection; /* 0x92 */
-    u8 pad94[8];
-    s32 savedValue;       /* 0x9C */
-    u8 padA0[4];
-    s32 progressTicks; /* 0xA4 */
-    u8 padA8[4];
-    s32 action;
-    s16 substate;
-} EvtDispatchState;
 
 /* Wait until both the keyword fade and the dispatch callback are idle. */
 s32 evtIsFadeDispatchIdle(void) {
@@ -111,40 +73,40 @@ s32 evtIsFadeDispatchIdle(void) {
     return evtGetMessageWindowControlState() == 0;
 }
 
-void evtInstallStateTable(EvtDispatchState *state) {
-    if (state->mode == 2) {
+void evtInstallStateTable(ShopScene *state) {
+    if (state->menuMode == 2) {
         state->stateTable = (s32)D_0036AA68;
         mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AA68 + 0xC4);
     }
 }
 
 extern s32 func_00244658();
-extern void func_002444D0();
-extern s16 mnuShopHasPendingFlag();
+extern void func_002444D0(ShopScene *);
+extern s16 mnuShopHasPendingFlag(ShopScene *);
 
 /* Prepare the active menu state and copy the selection into its window. */
 s32 evtInitializeActiveMenuState(void) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    s32 windowAddress;
+    MnuShopListContext *windowData;
     s16 pendingSelection;
 
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 2);
-    if (((EvtDispatchState *)stateAddress)->menuLink == 0) {
-        ((EvtDispatchState *)stateAddress)->initialSelection = func_00244658(stateAddress);
-        func_002444D0(stateAddress);
+    if (((ShopScene *)stateAddress)->sprite == 0) {
+        ((ShopScene *)stateAddress)->extraOption = func_00244658(stateAddress);
+        func_002444D0((ShopScene *)stateAddress);
     }
-    windowAddress = ((EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target)->window;
-    pendingSelection = mnuShopHasPendingFlag(stateAddress);
-    ((EvtDispatchState *)stateAddress)->savedValue = datGameState->header.currency;
-    *(s16 *)(windowAddress + 0xE) = pendingSelection;
-    ((EvtDispatchState *)stateAddress)->pendingSelection = pendingSelection;
+    windowData = ((ShopScene *)stateAddress)->sprite->list->context;
+    pendingSelection = mnuShopHasPendingFlag((ShopScene *)stateAddress);
+    ((ShopScene *)stateAddress)->previousValue = datGameState->header.currency;
+    windowData->pendingSelection = pendingSelection;
+    ((ShopScene *)stateAddress)->pendingSelection = pendingSelection;
     return 1;
 }
 
 /* Advance command phase when the current menu state is phase one. */
 s32 evtAdvancePhaseOne(void) {
-    EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
 
     if (state->action == 1) {
         mnuSetCommandPhase((s32)state, 4);
@@ -168,15 +130,15 @@ s32 evtSetupDispatchSync(s32 callbackContext) {
     return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
 }
 
-void evtInstallStateTableB(EvtDispatchState *state) {
-    if (state->mode == 1) {
+void evtInstallStateTableB(ShopScene *state) {
+    if (state->menuMode == 1) {
         state->stateTable = (s32)D_0036AA84;
         mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AA84 + 0xA8);
     }
 }
 
 s32 func_00246160(void) {
-    EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
 
     if (state->action == 1) {
         func_002453C8(state);
@@ -187,19 +149,19 @@ s32 func_00246160(void) {
 /* Map actions five and seven to their menu phases, then reset substate. */
 s32 evtSelectStateAction(void) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    s32 action = ((EvtDispatchState *)stateAddress)->action;
+    s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
         mnuSetCommandPhase(stateAddress, 3);
     } else if (action == 7) {
-        s32 linkedTaskAddress;
+        struct MenuList *linkedTask;
 
         mnuSetCommandPhase(stateAddress, 9);
-        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
-        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025F138;
-        func_00260570(linkedTaskAddress, 10);
+        linkedTask = ((ShopScene *)stateAddress)->window->list;
+        linkedTask->drawCallback = func_0025F138;
+        func_00260570(linkedTask, 10);
     }
-    ((EvtDispatchState *)stateAddress)->substate = 0;
+    ((ShopScene *)stateAddress)->substate = 0;
     return 1;
 }
 
@@ -219,37 +181,37 @@ s32 evtSetupDispatchSyncB(s32 callbackContext) {
     return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
 }
 
-void evtInstallStateTableC(EvtDispatchState *state) {
-    if (state->mode == 1) {
+void evtInstallStateTableC(ShopScene *state) {
+    if (state->menuMode == 1) {
         state->stateTable = (s32)D_0036AAA0;
         mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AAA0 + 0x8C);
     }
 }
 
 s32 func_00246538(void) {
-    s32 *stateWords = (s32 *)kwlnTaskGetUserValue();
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
 
-    if (stateWords[43] == 1) {
-        func_002457E8(stateWords);
+    if (state->action == 1) {
+        func_002457E8(state);
     }
     return 1;
 }
 
 s32 evtSelectStateActionB(void) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    s32 action = ((EvtDispatchState *)stateAddress)->action;
+    s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
         mnuSetCommandPhase(stateAddress, 3);
     } else if (action == 7) {
-        s32 linkedTaskAddress;
+        struct MenuList *linkedTask;
 
         mnuSetCommandPhase(stateAddress, 9);
-        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
-        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025F138;
-        func_00260570(linkedTaskAddress, 10);
+        linkedTask = ((ShopScene *)stateAddress)->window->list;
+        linkedTask->drawCallback = func_0025F138;
+        func_00260570(linkedTask, 10);
     }
-    ((EvtDispatchState *)stateAddress)->substate = 0;
+    ((ShopScene *)stateAddress)->substate = 0;
     return 1;
 }
 
@@ -269,8 +231,8 @@ s32 evtSetupDispatchSyncC(s32 callbackContext) {
     return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
 }
 
-void evtInstallStateTableD(EvtDispatchState *state) {
-    if (state->mode == 2) {
+void evtInstallStateTableD(ShopScene *state) {
+    if (state->menuMode == 2) {
         state->stateTable = (s32)D_0036AABC;
         mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AABC + 0x70);
     }
@@ -279,27 +241,27 @@ void evtInstallStateTableD(EvtDispatchState *state) {
 s32 evtEnableStateFlag(void) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
-    if ((((EvtDispatchState *)stateAddress)->action == 1) && (func_00245A40(stateAddress) == 0)) {
-        ((EvtDispatchState *)stateAddress)->mode = 2;
+    if ((((ShopScene *)stateAddress)->action == 1) && (func_00245A40(stateAddress) == 0)) {
+        ((ShopScene *)stateAddress)->menuMode = 2;
     }
     return 1;
 }
 
 s32 evtSelectStateActionC(void) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    s32 action = ((EvtDispatchState *)stateAddress)->action;
+    s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
         mnuSetCommandPhase(stateAddress, 3);
     } else if (action == 7) {
-        s32 linkedTaskAddress;
+        struct MenuList *linkedTask;
 
         mnuSetCommandPhase(stateAddress, 9);
-        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
-        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025F138;
-        func_00260570(linkedTaskAddress, 10);
+        linkedTask = ((ShopScene *)stateAddress)->window->list;
+        linkedTask->drawCallback = func_0025F138;
+        func_00260570(linkedTask, 10);
     }
-    ((EvtDispatchState *)stateAddress)->substate = 0;
+    ((ShopScene *)stateAddress)->substate = 0;
     return 1;
 }
 
@@ -309,13 +271,13 @@ s32 func_002469F0(KwlnTask *task) {
     s32 inputFlags;
     s32 stateAddress;
     s32 *dispatchSlot;
-    EvtDispatchTask *linkedTask;
-    EvtDispatchTask *callbackTask;
+    struct MenuList *linkedTask;
+    struct MenuList *callbackTask;
 
     stateAddress = kwlnTaskGetUserValue(task);
     inputFlags = mnuMapPadMaskToFlags(0x33);
-    dispatchSlot = &((EvtDispatchState *)stateAddress)->dispatchState;
-    linkedTask = (EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
+    dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
+    linkedTask = ((ShopScene *)stateAddress)->window->list;
     dispatchResult = func_00285670(stateAddress + 8, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (s32)task);
     if (dispatchResult == 0) {
         switch (mnuTickExtendedCommandPhase(stateAddress)) {
@@ -327,37 +289,37 @@ s32 func_002469F0(KwlnTask *task) {
             break;
         case 5:
             mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA68);
-            mnuStorePendingMenuCommandValue(((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target, 10);
+            mnuStorePendingMenuCommandValue((s32)((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
             mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAF4);
             break;
         case 8:
             mnuSetCommandPhase(stateAddress, 6);
-            callbackTask = (EvtDispatchTask *)((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
-            callbackTask->callback = (s32)func_0025ECD0;
+            callbackTask = ((ShopScene *)stateAddress)->window->list;
+            callbackTask->drawCallback = func_0025ECD0;
             mnuStorePendingMenuCommandValue((s32)callbackTask, 0);
-            ((EvtDispatchState *)stateAddress)->substate = 10;
+            ((ShopScene *)stateAddress)->substate = 10;
             break;
         case 6:
-            evtInstallStateTableD((EvtDispatchState *)stateAddress);
+            evtInstallStateTableD((ShopScene *)stateAddress);
             /* Continue into the common input handling after installing the table. */
         default:
-            if (((EvtDispatchState *)stateAddress)->dispatchState == 0) {
+            if (((ShopScene *)stateAddress)->dispatchState == 0) {
                 if (inputFlags & 1) {
                     mnuSetCommandPhase(stateAddress, 7);
                 } else if (inputFlags & 2) {
                     mnuSetCommandPhase(stateAddress, 5);
                     func_00260550((s32)linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
-                    func_0027C788(((EvtDispatchState *)stateAddress)->taskLink);
+                    func_0027C788(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
-                    mnuRetreatWindowListSelection(((EvtDispatchState *)stateAddress)->taskLink);
+                    mnuRetreatWindowListSelection(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x20) {
-                    mnuAdvanceWindowListSelection(((EvtDispatchState *)stateAddress)->taskLink);
+                    mnuAdvanceWindowListSelection(((ShopScene *)stateAddress)->window);
                 }
             }
-            mnuPlayInputSound(0, inputFlags, (s32 *)((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target);
+            mnuPlayInputSound(0, inputFlags, &((ShopScene *)stateAddress)->window->list->stateFlags);
             break;
         }
         return 0;
@@ -383,8 +345,8 @@ u32 evtResetStateProgressTimer(void) {
     s32 stateAddress;
 
     stateAddress = kwlnTaskGetUserValue();
-    ((EvtDispatchState *)stateAddress)->progressTicks = 0;
-    mnuSelectLastListNode(((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target);
+    ((ShopScene *)stateAddress)->progressTicks = 0;
+    mnuSelectLastListNode(((ShopScene *)stateAddress)->sprite->list);
     return 1;
 }
 
@@ -394,13 +356,13 @@ s32 evtQueryStateProgress(u64 callbackContext) {
     s32 dispatchResult = func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
     if (dispatchResult == 0) {
-        if ((((EvtDispatchState *)stateAddress)->dispatchState == 0) && (evtGetMessageWindowControlState() == 0)) {
-            s32 progressTicks = ((EvtDispatchState *)stateAddress)->progressTicks;
+        if ((((ShopScene *)stateAddress)->dispatchState == 0) && (evtGetMessageWindowControlState() == 0)) {
+            s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
 
             if ((f32)progressTicks < 20.0f) {
-                ((EvtDispatchState *)stateAddress)->progressTicks = progressTicks + 1;
+                ((ShopScene *)stateAddress)->progressTicks = progressTicks + 1;
             } else {
-                mnuSetPopupEntry((s32)&((EvtDispatchState *)stateAddress)->dispatchState, (s32)D_0036AB64);
+                mnuSetPopupEntry((s32)&((ShopScene *)stateAddress)->dispatchState, (s32)D_0036AB64);
             }
         }
         dispatchResult = 0;
@@ -411,7 +373,7 @@ s32 evtQueryStateProgress(u64 callbackContext) {
 s32 evtFetchDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
-    func_0025E108(stateAddress, ((EvtDispatchState *)stateAddress)->progressTicks);
+    func_0025E108(stateAddress, ((ShopScene *)stateAddress)->progressTicks);
     return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
 }
 
@@ -423,9 +385,9 @@ s32 evtSetupDispatchSyncE(s32 callbackContext) {
 }
 
 s32 evtApplyBaseRateProgressStep(void) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue();
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
 
-    state[32] = 1;
+    state->counter = 1;
     mnuCampClampSceneCounter(-1, state);
     return 1;
 }
@@ -433,14 +395,14 @@ s32 evtApplyBaseRateProgressStep(void) {
 s32 evtAdvanceStateStage(void) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
-    if (((EvtDispatchState *)stateAddress)->action == 0xA) {
-        s32 linkedTaskAddress;
+    if (((ShopScene *)stateAddress)->action == 0xA) {
+        struct MenuList *linkedTask;
 
-        ((EvtDispatchState *)stateAddress)->substate = 0xA;
+        ((ShopScene *)stateAddress)->substate = 0xA;
         mnuSetCommandPhase(stateAddress, 6);
-        linkedTaskAddress = ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target;
-        ((EvtDispatchTask *)linkedTaskAddress)->callback = (s32)func_0025ECD0;
-        mnuStorePendingMenuCommandValue(linkedTaskAddress, 0);
+        linkedTask = ((ShopScene *)stateAddress)->window->list;
+        linkedTask->drawCallback = func_0025ECD0;
+        mnuStorePendingMenuCommandValue((s32)linkedTask, 0);
     }
     return 1;
 }
@@ -452,8 +414,8 @@ extern u8 D_0036AB10[];
 
 s32 evtPollQuantitySelection(u64 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    s32 *dispatchSlot = &((EvtDispatchState *)stateAddress)->dispatchState;
-    s32 previousQuantity = ((EvtDispatchState *)stateAddress)->scoreFactor;
+    s32 *dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
+    s32 previousQuantity = ((ShopScene *)stateAddress)->counter;
     s32 input = mnuMapPadMaskToFlags(0xF000F3);
     s32 result = func_00285670(stateAddress + 8, dispatchSlot,
                              EVT_DISPATCH_OPERATION_POLL, callbackContext);
@@ -461,17 +423,16 @@ s32 evtPollQuantitySelection(u64 callbackContext) {
     if (result != 0) {
         return result;
     }
-    switch (mnuTickCommandWaitPhase((EvtDispatchState *)stateAddress)) {
+    switch (mnuTickCommandWaitPhase((ShopScene *)stateAddress)) {
     case -1:
         break;
     case 9:
         mnuSetCommandPhase(stateAddress, 11);
         break;
     case 10: {
-        EvtDispatchTask *primaryTask = (EvtDispatchTask *)
-            ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->menuLink)->target;
+        struct MenuList *primaryTask = ((ShopScene *)stateAddress)->sprite->list;
         mnuSetPopupEntryFlagged((s32)dispatchSlot,
-            (s32)(D_0036AA84 + primaryTask->entryRecord->index * 0x1C));
+            (s32)(D_0036AA84 + primaryTask->cursor->index * 0x1C));
         break;
     }
     case 12:
@@ -479,30 +440,29 @@ s32 evtPollQuantitySelection(u64 callbackContext) {
         break;
     case 11:
     default:
-        if (((EvtDispatchState *)stateAddress)->dispatchState == 0) {
+        if (((ShopScene *)stateAddress)->dispatchState == 0) {
             if (input & 1) {
                 mnuSetCommandPhase(stateAddress, 12);
             } else if (input & 2) {
                 mnuSetCommandPhase(stateAddress, 10);
-                func_00260590((EvtDispatchTask *)
-                    ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target, 10);
+                func_00260590(((ShopScene *)stateAddress)->window->list, 10);
             }
             if (input & 0x300030) {
                 if (input & 0x10) {
-                    mnuCampClampSceneCounter(1, (EvtDispatchState *)stateAddress);
+                    mnuCampClampSceneCounter(1, (ShopScene *)stateAddress);
                 } else if (input & 0x20) {
-                    mnuCampClampSceneCounter(-1, (EvtDispatchState *)stateAddress);
+                    mnuCampClampSceneCounter(-1, (ShopScene *)stateAddress);
                 }
-                if (previousQuantity == ((EvtDispatchState *)stateAddress)->scoreFactor) {
+                if (previousQuantity == ((ShopScene *)stateAddress)->counter) {
                     input &= 3;
                 }
             } else if (input & 0xC0) {
                 if (input & 0x80) {
-                    mnuCampClampSceneCounter(10, (EvtDispatchState *)stateAddress);
+                    mnuCampClampSceneCounter(10, (ShopScene *)stateAddress);
                 } else if (input & 0x40) {
-                    mnuCampClampSceneCounter(-10, (EvtDispatchState *)stateAddress);
+                    mnuCampClampSceneCounter(-10, (ShopScene *)stateAddress);
                 }
-                if (previousQuantity == ((EvtDispatchState *)stateAddress)->scoreFactor) {
+                if (previousQuantity == ((ShopScene *)stateAddress)->counter) {
                     input &= 3;
                 }
             }
@@ -540,11 +500,10 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002472D8);
 
 void evtAccumulateStateScore(s32 stateAddress) {
-    CampWindowParams *values = &((EvtDispatchTask *)
-        ((EvtDispatchLink *)((EvtDispatchState *)stateAddress)->taskLink)->target)->entryRecord->params;
+    CampWindowParams *values = &((ShopScene *)stateAddress)->window->list->cursor->camp;
 
     if ((u32)(values->id - 0x60) < 0x20) {
-        datGameState->world.score += values->value * ((EvtDispatchState *)stateAddress)->scoreFactor;
+        datGameState->world.score += values->value * ((ShopScene *)stateAddress)->counter;
     }
 }
 
@@ -564,9 +523,9 @@ s32 evtSetupDispatchSyncG(s32 callbackContext) {
 extern void dspStartEntry();
 
 s32 evtPlayDispatchModeCue(void) {
-    EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
     dspSetActive(1);
-    switch (state->mode) {
+    switch (state->menuMode) {
     case 1:
         dspStartEntry(5);
         break;
@@ -583,8 +542,8 @@ extern u8 D_0036AA68[];
 extern void mnuSetCommandPhase(s32, u32);
 
 s32 evtApplyDispatchModeState(void) {
-    EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
-    switch (state->mode) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+    switch (state->menuMode) {
     case 1:
         mnuSetCommandPhase((s32)state, 6);
         break;
@@ -594,7 +553,7 @@ s32 evtApplyDispatchModeState(void) {
         }
         break;
     }
-    state->mode = 0;
+    state->menuMode = 0;
     return 1;
 }
 
@@ -605,11 +564,11 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(u64 callbackContext) {
     s32 *dispatchSlot;
 
     stateAddress = kwlnTaskGetUserValue();
-    dispatchSlot = (s32 *)(stateAddress + 0x54);
+    dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     result = func_00285670(stateAddress + 8, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
         if ((*dispatchSlot == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, ((EvtDispatchState *)stateAddress)->stateTable);
+            mnuSetPopupEntryFlagged((s32)dispatchSlot, ((ShopScene *)stateAddress)->stateTable);
         }
         result = 0;
     }
@@ -617,26 +576,26 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(u64 callbackContext) {
 }
 
 extern void func_0025E308(s32, s32, s32, void *, s32, s32);
-extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, void *, s32, s32);
+extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025E6B0(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
-extern void func_0025FD50(s32, s32, s32, void *, s32);
-extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
+extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
+extern void func_0025FD50(s32, s32, s32, ShopScene *, s32);
+extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
-extern void mnuClearWindowPanelTransitionFlag(void *);
-extern void func_00260100(void *, s32);
+extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+extern void func_00260100(ShopScene *, s32);
 extern void func_00260208(s32, u32, s32, s32);
 
 s32 func_00247A78(s32 callbackContext) {
-    EvtDispatchState *state = (EvtDispatchState *)kwlnTaskGetUserValue();
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
 
-    switch (state->mode) {
+    switch (state->menuMode) {
     case 1:
         func_0025E308(0, 0, 0, state, 0x100, 0x53);
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
         func_0025E6B0(0, 0, 0, state, 0x100, 0x53);
-        mnuDrawIfActive(0, 0, 0, (void *)state->taskLink, 0x53);
+        mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         func_0025FD50(0, 0, 0, state, 0x53);
         func_00260100(state, 0xA09DC380);
         func_00260208((s32)state, 0x100, 3, 0x53);
@@ -645,22 +604,21 @@ s32 func_00247A78(s32 callbackContext) {
         if (state->stateTable == (s32)D_0036AA68) {
             func_0025E308(0, 0, 0, state, 0x100, 0x53);
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
-            mnuDrawListChildrenWithCountdown(
-                0, 0, 0, (u8 *)((EvtDispatchLink *)state->menuLink)->target, 0x53);
+            mnuDrawListChildrenWithCountdown(0, 0, 0, state->sprite->list, 0x53);
             func_00260100(state, 0xA09DC380);
             func_00260208((s32)state, 0x100, 4, 0x53);
         } else {
             func_0025E308(0, 0, 0, state, 0x100, 0x53);
             mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
             func_0025E6B0(0, 0, 0, state, 0x100, 0x53);
-            mnuClearWindowPanelTransitionFlag((void *)state->menuLink);
+            mnuClearWindowPanelTransitionFlag(state->sprite);
             mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)state, 0x100, 0x53);
             func_00260100(state, 0xA09DC380);
             func_00260208((s32)state, 0x100, 2, 0x53);
         }
         break;
     }
-    return func_00285670((s32)state + 8, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_00285670((s32)state->transitionWork, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
 }
 
 s32 evtSetupDispatchSyncH(s32 callbackContext) {
@@ -689,7 +647,7 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_00247D58);
 
 s32 evtRefreshDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    s32 progressTicks = ((EvtDispatchState *)stateAddress)->progressTicks;
+    s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
 
     if (progressTicks != 0) {
         func_0025DF68(stateAddress, progressTicks);

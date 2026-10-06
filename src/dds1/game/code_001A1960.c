@@ -4494,12 +4494,8 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BBE18);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC540);
 
-typedef struct UiDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct UiDrawSurface *, void *);
-} UiDrawSurface;
 
-extern UiDrawSurface D_003255A8;
+extern SdfPoolNode D_003255A8;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
 extern s32 sdfConsCreateDrawPacket(s32 list, s32 texture, s32 context);
@@ -4534,7 +4530,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
         x3 * 0x10 + 0x7000, y3 * 8 + 0x7900, uRight, vBottom, colors[3],
         0xFEFFD0, NULL);
-    D_003255A8.submit(&D_003255A8, list);
+    D_003255A8.append((SdfListHead *)&D_003255A8, list);
     return 1;
 }
 

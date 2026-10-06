@@ -1,7 +1,9 @@
 #include "common.h"
 #include "mnu.h"
+#include "dat_state.h"
+#include "mnu_result.h"
 
-extern u32 ptyBuildProfileCapSkillList(u32, s32);
+extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
 extern s32 mdlFlagTest(u32);
 
@@ -12,57 +14,49 @@ typedef struct LevelStep {
 
 extern LevelStep brsLevelStepThresholds[];
 
-extern s32 datGameState;
+extern s32 ptyCalcLevelUps(DatPartyRecord *);
+extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
+extern s32 ptyHasSkill(DatPartyRecord *, u16);
 
-typedef struct TitleMenuWork {
-    u8 pad00[0x1574];
-    s32 fadeProgress; /* 0x1574 */
-} TitleMenuWork;
 
 extern struct { s32 v[6]; } D_0036D4B0;
 extern u32 uiBlendColors(u32, u32, s32);
-extern void itfDrawCountText(s32, s32, s32, u32, u8 *, s32);
-extern void mnuQueueRightAlignedFormattedInfoText(s32, s32, s32, u32, u8 *, s32);
-extern void func_002650C8(s32, s32, s32, u32, u8 *, s32, u8 *);
+extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
+extern void mnuQueueRightAlignedFormattedInfoText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
+extern void func_002650C8(s32, s32, s32, u32, BrsRewardSummary *, s32, BrsSkillPackageWork *);
 
-void mnuTitleDrawFadeMenuEntries(u8 *work) {
-    u8 *res = work + 0x5C;
+void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
+    BrsRewardSummary *res = &work->rewards;
     s32 rowOffset = 0x80;
-    u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - ((TitleMenuWork *)work)->fadeProgress);
+    u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - work->fadeProgress);
 
     itfDrawCountText(D_0036D4B0.v[0], D_0036D4B0.v[1] + rowOffset, 0, color, res, 0x53);
     mnuQueueRightAlignedFormattedInfoText(D_0036D4B0.v[2], D_0036D4B0.v[3] + rowOffset, 0, color, res, 0x53);
     func_002650C8(D_0036D4B0.v[4], D_0036D4B0.v[5] + rowOffset, 0, color, res, 0x53, work);
 }
 
-typedef struct TitleFadeWork TitleFadeWork;
 
-extern void itfUpdateFadeColor(TitleFadeWork *);
-extern void mnuDrawTitleFadeSprites(TitleFadeWork *);
-extern void brsStepAnimDecay(TitleFadeWork *);
+extern void itfUpdateFadeColor(BrsSkillPackageWork *);
+extern void mnuDrawTitleFadeSprites(BrsSkillPackageWork *);
+extern void brsStepAnimDecay(BrsSkillPackageWork *);
 extern void func_00264B08();
 extern void func_00264D90();
 
-void mnuRefreshPanelLayer(u8 *work) {
-    s32 y = 0x100 - *(s32 *)(work + 0x1574);
+void mnuRefreshPanelLayer(BrsSkillPackageWork *work) {
+    s32 y = 0x100 - work->fadeProgress;
 
-    itfUpdateFadeColor((TitleFadeWork *)work);
-    mnuDrawTitleFadeSprites((TitleFadeWork *)work);
+    itfUpdateFadeColor(work);
+    mnuDrawTitleFadeSprites(work);
     func_00264B08(work);
     func_00264D90(work);
-    func_00266250(0x2C0, 0x3D8, 0, y, work + 0x3E4, 0x53);
+    func_00266250(0x2C0, 0x3D8, 0, y, &work->partyProgress, 0x53);
     mnuTitleDrawFadeMenuEntries(work);
 }
 
-typedef struct {
-    u8 pad00[4];
-    u16 kind;       /* 0x04 */
-    u8 pad06[0xE];
-    u16 animation;  /* 0x14 */
-} TitleEntry;
 
-void brsDecaySharedAnimCounter(s32 animationState) {
-    brsStepAnimDecay((TitleFadeWork *)animationState);
+void brsDecaySharedAnimCounter(BrsSkillPackageWork *animationState) {
+    brsStepAnimDecay(animationState);
 }
 
 u8 brsGetLevelStepForValue(s32 value) {
@@ -98,7 +92,6 @@ u32 func_00265598(void) {
     return 0;
 }
 
-extern u8 D_0036F40C[];
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
 
@@ -107,23 +100,15 @@ INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
 #define BRS_HALF_EXP_SKILL 0x21F
 #define BRS_FULL_EXP_SKILL 0x220
 
-/* Party-unit flags and AP restriction shared by reward calculations. */
-typedef struct BrsExpUnit {
-    u16 flags;          /* 0x00: bit 1 means active party member */
-    u8 pad02[0xC];
-    u16 apStatus;       /* 0x0E: bit 6 prevents AP gain */
-    u8 pad10[0x45];
-    s8 profileId;
-} BrsExpUnit;
 
-s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
+s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
     s32 gain;
-    if (((BrsExpUnit *)unit)->apStatus & BRS_AP_BLOCKED_FLAG) {
+    if (unit->status & BRS_AP_BLOCKED_FLAG) {
         return 0;
     }
     gain = baseApTotal;
     gain += perUnitBonus;
-    if ((((BrsExpUnit *)unit)->flags & BRS_ACTIVE_PARTY_FLAG) == 0) {
+    if ((unit->flags & BRS_ACTIVE_PARTY_FLAG) == 0) {
         gain = perUnitBonus;
         gain += baseApTotal;
     }
@@ -132,10 +117,10 @@ s32 brsCalcApGain(u8 *unit, s32 baseApTotal, s32 perUnitBonus) {
 
 /* Active party members take full EXP; benched members need the half/full
  * EXP skills (0x21F/0x220 respectively). The third caller arg is unused. */
-s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
+s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp, s32 unused) {
     s32 result;
 
-    if ((((BrsExpUnit *)unit)->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {
+    if ((unit->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {
         result = exp;
     } else {
         result = 0;
@@ -149,8 +134,8 @@ s32 brsCalcExpGain(u8 *unit, s32 exp, s32 unused) {
     return result;
 }
 
-s32 mnuIsTitleEntryAvailable(TitleEntry *entry) {
-    if (mdlFlagTest(0x902) == 0 && entry->kind == 4) {
+s32 mnuIsTitleEntryAvailable(DatPartyRecord *entry) {
+    if (mdlFlagTest(0x902) == 0 && entry->unitId == 4) {
         return 1;
     }
     return 0;
@@ -160,136 +145,44 @@ INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildRewardRows);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
 
-extern s32 datGameState;
 
 s32 mnuCountAdvancingTitleAnimations(void) {
-    s32 offset = 0;
+    s32 i;
     s32 count = 0;
-    s32 remaining = 4;
-    do {
-        s32 step = ptyCalcLevelUps(datGameState + 0xa60 + offset);
+    for (i = 0; i < 5; i++) {
+        s32 step = ptyCalcLevelUps(&datGameState->party[i]);
         count += step > 0;
-        offset += 0x1a4;
-    } while (--remaining >= 0);
+    }
     return count;
 }
 
-typedef struct BrsLevelUpRow {
-    u32 unit;
-    s32 levelUps;
-    s32 partyIndex;
-    u8 pad0C[0xC];
-} BrsLevelUpRow;
 
-typedef struct BrsLevelUpList {
-    BrsLevelUpRow rows[5];
-    s32 count;
-} BrsLevelUpList;
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
 
-s32 brsBuildLevelUpList(BrsLevelUpList *list) {
-    s32 *rowData = &list->rows[0].levelUps;
-    s32 offset = 0;
-    s32 partyIndex = 0;
-    u8 *unit;
 
-    memset(list, 0, 0x7C);
-    list->count = 0;
-    while (partyIndex < 5) {
-        unit = (u8 *)(datGameState + 0xA60 + offset);
-        offset += 0x1A4;
-        if ((*(u16 *)unit & 1) != 0) {
-            s32 levelUps = ptyCalcLevelUps(unit);
-            if (levelUps <= 0) {
-                partyIndex++;
-                continue;
-            }
 
-            {
-                s32 rowIndex = list->count * 6;
-                u32 *unitRow = &((u32 *)list)[rowIndex];
-                s32 *levelRow = &rowData[rowIndex];
-
-                *levelRow = levelUps;
-                *unitRow = (u32)unit;
-                rowData[list->count * 6 + 1] = partyIndex;
-                list->count++;
-            }
-        }
-        partyIndex++;
-    }
-    return list->count;
-}
-
-typedef struct BrsProfileCapRow {
-    u32 unit;
-    u32 skillState;
-    u8 pad08[0x10];
-} BrsProfileCapRow;
-
-typedef struct BrsProfileCapList {
-    BrsProfileCapRow rows[5];
-    s32 count;
-} BrsProfileCapList;
-
-typedef struct ScrVmOperand ScrVmOperand;
-
-extern u32 ptyGetCurrentProfileRecord(ScrVmOperand *);
-extern s32 ptyTestProfileFlag0(s32, u16);
-extern u32 prfBuildSkillListState0(u32, u32, u32);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
+extern u32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
 extern u32 prfGetCapValue(u16);
 
-s32 brsBuildProfileCapList(BrsProfileCapList *list) {
-    u8 skillState[0x34];
-    u32 *states = (u32 *)((u8 *)list + 4);
-    u32 *units = (u32 *)list;
-    s32 offset = 0;
-    s32 remaining = 4;
+INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildProfileCapList);
 
-    memset(list, 0, 0x7C);
-    list->count = 0;
-    do {
-        u8 *unit = (u8 *)(datGameState + 0xA60 + offset);
-        offset += 0x1A4;
-        if ((*(u16 *)unit & 1) != 0) {
-            s32 *profile = (s32 *)ptyGetCurrentProfileRecord((ScrVmOperand *)unit);
-
-            prfBuildSkillListState0((u32)unit, (u32)profile, (u32)skillState);
-            if (*(s8 *)(unit + 0x55) != 0 &&
-                prfGetCapValue((u16)*(s8 *)(unit + 0x55)) == *profile) {
-                if (ptyTestProfileFlag0((s32)unit, (u16)*(s8 *)(unit + 0x55)) == 0) {
-                    s32 rowIndex = list->count * 6;
-                    u32 *unitRow = &units[rowIndex];
-                    u32 *stateRow = &states[rowIndex];
-                    *stateRow = *(u32 *)(skillState + 0x20);
-                    *unitRow = (u32)unit;
-                    list->count++;
-                }
-            }
-        }
-    } while (--remaining >= 0);
-    return list->count;
-}
-
-s32 mnuAdvanceTitleEntryAnimation(TitleEntry *entry) {
+s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *entry) {
     s32 step = ptyCalcLevelUps(entry);
-    entry->animation += step;
+    entry->level += step;
     ptyRecomputeMaxHpMp(entry);
     return step;
 }
 
-/* Five contiguous signed base stats begin at offset 0x16 in the party unit. */
-typedef struct {
-    u8 pad00[0x16];
-    s8 baseStats[5];
-} BrsStatUnit;
 
-s32 btlAddBaseStats(u8 *src, u8 *obj) {
+s32 btlAddBaseStats(s32 *src, DatPartyRecord *obj) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        s8 *stat = &((BrsStatUnit *)obj)->baseStats[i];
+        s8 *stat = &obj->baseStats[i];
 
-        *stat += src[i * 4];
+        *stat += src[i];
         if (*stat >= 100) {
             *stat = 99;
         }
@@ -300,30 +193,24 @@ s32 btlAddBaseStats(u8 *src, u8 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyAccumulateStatGains);
 
-typedef struct PrfSkillList {
-    u32 flags[8];
-    u32 count;
-    u16 skills[8];
-} PrfSkillList;
 
-extern void scrClearFlags(ScrVmOperand *);
-extern s32 scrSetFlag(ScrVmOperand *, u16);
-extern void scrSetSecondaryScriptFlag(ScrVmOperand *, u16);
+extern void scrClearFlags(DatPartyRecord *);
+extern s32 scrSetFlag(DatPartyRecord *, u16);
+extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
 
 /* Apply the capped profile's pending skills and return their list to the caller. */
-u32 ptyBuildProfileCapSkillList(u32 unitAddress, s32 outputAddress) {
+u32 ptyBuildProfileCapSkillList(DatPartyRecord *unit, PrfSkillList *output) {
     PrfSkillList skills;
-    ScrVmOperand *unit = (ScrVmOperand *)unitAddress;
-    s32 *profile;
+    DatProfileRecord *profile;
     u32 count = 0;
     u32 i;
 
     memset(&skills, 0, sizeof(skills));
-    profile = (s32 *)ptyGetCurrentProfileRecord(unit);
-    if (((BrsExpUnit *)unit)->profileId != 0) {
-        if (prfGetCapValue((u16)((BrsExpUnit *)unit)->profileId) == *profile) {
-            if (ptyTestProfileFlag0((s32)unit, (u16)((BrsExpUnit *)unit)->profileId) == 0) {
-                prfBuildSkillListState0(unitAddress, (u32)profile, (u32)&skills);
+    profile = ptyGetCurrentProfileRecord(unit);
+    if (unit->profileId != 0) {
+        if (prfGetCapValue(unit->profileId) == profile->value) {
+            if (ptyTestProfileFlag0(unit, unit->profileId) == 0) {
+                prfBuildSkillListState0(unit, profile, &skills);
                 count = skills.count;
                 if (count != 0) {
                     scrClearFlags(unit);
@@ -336,7 +223,7 @@ u32 ptyBuildProfileCapSkillList(u32 unitAddress, s32 outputAddress) {
             }
         }
     }
-    *(PrfSkillList *)outputAddress = skills;
+    *output = skills;
     return count;
 }
 
@@ -348,32 +235,26 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
     state[3] = fourth;
 }
 
-extern s32 ptyCalcLevelUps(u8 *);
-extern s32 ptyComputeTotalExp(u8 *, s32);
-extern s32 ptyAddProfilePoints(u8 *, s32);
-extern s8 ptyGetCurrentProfileId(u8 *);
+extern u32 ptyAddProfilePoints(DatPartyRecord *, s32);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 prfGetCapValue(u16);
 extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 
-typedef struct BrsUnitExp {
-    u8 pad00[0x10];
-    s32 totalExp;        /* 0x10 */
-} BrsUnitExp;
 
 
 /* Set up the level and profile progress bars for one party member. */
-void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
+void brsBuildUnitProgressRow(BrsProgressRow *state, DatPartyRecord *entry) {
     s32 levelDelta;
     s32 profilePoints;
 
     memset(state, 0, 0x2C);
-    ((BrsProgressRow *)state)->unit = (u32)entry;
+    state->unit = entry;
     levelDelta = ptyCalcLevelUps(entry);
-    mnuTitleInitFourParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
-        ((BrsUnitExp *)entry)->totalExp - ptyComputeTotalExp(entry, levelDelta),
+    mnuTitleInitFourParameters(state->levelProgress, 0x6E0, 0x50,
+        entry->totalExp - ptyComputeTotalExp(entry, levelDelta),
         ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
     profilePoints = ptyAddProfilePoints(entry, 0);
-    mnuTitleInitFourParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
+    mnuTitleInitFourParameters(state->profileProgress, 0x3C0, 0x50, profilePoints,
         prfGetCapValue(ptyGetCurrentProfileId(entry) & 0xFFFF));
 }
 
@@ -384,28 +265,22 @@ void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
 
 extern u32 uiBlendColors(u32, u32, s32);
 
-u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
-    ptyGetCurrentProfileId(*(u32 *)(resource + 8));
+u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource) {
+    ptyGetCurrentProfileId(resource->unit);
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }
 
-typedef struct BrsActiveProgressList {
-    BrsProgressRow rows[5];
-    u32 count;
-} BrsActiveProgressList;
 
 void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
-    s32 offset = 0;
-    s32 remaining = 4;
+    s32 i;
 
     memset(output, 0, sizeof(*output));
-    do {
-        u8 *unit = (u8 *)(datGameState + 0xA60 + offset);
-        offset += 0x1A4;
-        if ((*(u16 *)unit & 1) != 0) {
-            brsBuildUnitProgressRow((u8 *)&output->rows[output->count++], unit);
+    for (i = 0; i < 5; i++) {
+        DatPartyRecord *unit = &datGameState->party[i];
+        if ((unit->flags & 1) != 0) {
+            brsBuildUnitProgressRow(&output->rows[output->count++], unit);
         }
-    } while (--remaining >= 0);
+    }
 }
 
 INCLUDE_ASM(const s32, "game/code_002653A0", func_00266250);

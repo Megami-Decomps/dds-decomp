@@ -661,17 +661,6 @@ s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
     }
 }
 
-/* Pool entry with a packet list and the handlers used to append/prepend lists. */
-typedef struct SdfPoolNode {
-    struct SdfPoolNode *next; /* 0x0 */
-    u32 first;                /* 0x4 */
-    u32 last;                 /* 0x8 */
-    u32 unkC;
-    void (*append)(SdfListHead *, SdfListHead *);      /* 0x10 */
-    s32 (*prepend)(SdfListHead *, s32, SdfListHead *); /* 0x14 */
-    u32 unk18;
-    u32 unk1C;
-} SdfPoolNode;
 
 extern void func_002D4240(SdfPoolNode *, s32);
 
@@ -760,19 +749,19 @@ void sdfChainReferenceNodes(SdfListHead *list) {
 }
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
 s32 sdfFlushPoolNodes(SdfPoolNode *node) {
-    SdfPoolNode *tail = NULL;
+    SdfListHead *tail = NULL;
     s32 head = 0;
 
     for (; node != NULL; node = node->next) {
         node->prepend((SdfListHead *)node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
-                sdfConnectPacketLists(tail, node->first);
+                sdfConnectPacketLists(tail, (SdfListHead *)node->first);
             } else {
                 head = node->first;
                 sdfChainReferenceNodes((SdfListHead *)head);
             }
-            tail = (SdfPoolNode *)node->last;
+            tail = (SdfListHead *)node->last;
         }
     }
     if (tail != NULL) {

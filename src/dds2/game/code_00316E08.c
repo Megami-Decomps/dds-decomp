@@ -48,7 +48,8 @@ typedef struct MenuWorkEntry {
 } MenuWorkEntry;
 
 typedef struct MenuProgressParameters {
-    u32 word00;
+    u16 width;
+    u16 height;
     u32 word04;
     s32 x;
     s32 y;
@@ -75,10 +76,12 @@ typedef struct MnuEffectRecord {
 } MnuEffectRecord;
 
 
+/* The record payload follows this complete 0x10-byte descriptor. */
 typedef struct MnuSectionObjectList {
     SdfMemBlock *allocation;
     s32 count;
     u8 *objects;
+    u8 pad0C[4];
 } MnuSectionObjectList;
 
 

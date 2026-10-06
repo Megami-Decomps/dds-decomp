@@ -1491,7 +1491,7 @@ void mnuHandlePanelListPageJumpInput(u32 item, u32 option) {
 }
 
 /* Bits 0x8000 and 0x4000 return early in that order; state bits may suppress navigation SE. */
-void mnuPlayInputSound(s32 unused, s32 inputFlags, s32 *stateFlags) {
+void mnuPlayInputSound(s32 unused, s32 inputFlags, u32 *stateFlags) {
     if (inputFlags & 0x8000) {
         sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         return;

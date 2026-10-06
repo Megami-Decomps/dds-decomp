@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "mdl.h"
+#include "sdf.h"
 
 
 typedef struct EffPacketParams {
@@ -32,15 +33,9 @@ typedef struct EffGsPacket {
     u64 registerAddress;
 } EffGsPacket;
 
-/* Kernel surface entries have a 0x20-byte stride and submit at +0x10. */
-typedef struct EffDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct EffDrawSurface *, void *);
-    u8 pad14[0xC];
-} EffDrawSurface;
 
-static inline void effSubmitSurfacePacket(EffDrawSurface *surface, void *list) {
-    surface->submit(surface, list);
+static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
+    surface->append((SdfListHead *)surface, list);
 }
 
 extern void *sdfAllocPacketAligned(s32);
@@ -50,11 +45,11 @@ extern void sdfConsAppendVuPacket();
 extern void sdfConsAppendAssetPacket();
 extern void *func_0015FE20(EffPacketParams *);
 extern u32 D_0037ECB0[];
-extern EffDrawSurface *D_0037ECF0[];
-extern EffDrawSurface *D_0037EE68[];
+extern SdfPoolNode *D_0037ECF0[];
+extern SdfPoolNode *D_0037EE68[];
 extern u32 D_0037EB30[];
-extern EffDrawSurface *D_0037EB78[];
-extern EffDrawSurface kwlnDrawSurfaces[];
+extern SdfPoolNode *D_0037EB78[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 
 extern char D_003B39C8[]; /* "/tool/effect/ep/" */
 
@@ -4613,7 +4608,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, packet);
         }
-        D_0037ECF0[set->type]->submit(D_0037ECF0[set->type], list);
+        D_0037ECF0[set->type]->append((SdfListHead *)D_0037ECF0[set->type], list);
     }
 }
 
@@ -6323,7 +6318,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, packet);
         }
-        D_0037EE68[set->type]->submit(D_0037EE68[set->type], list);
+        D_0037EE68[set->type]->append((SdfListHead *)D_0037EE68[set->type], list);
     }
 }
 

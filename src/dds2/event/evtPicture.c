@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 /* Picture task data: active flags and the attached texture. */
 typedef struct {
@@ -9,28 +10,24 @@ typedef struct {
 extern void *kwlnTaskGetUserValue(void);
 extern void sdfTexReleaseReferenceViaHandler(void *);
 extern void sdfReleaseChipBlock(void *);
-typedef struct PicturePacketDevice {
-    u8 pad00[0x10];
-    void (*invoke)(void *, s32);
-} PicturePacketDevice;
 
 extern u8 D_003C9498[];
 extern u8 D_003C94A8[];
 extern u8 D_003C94B8[];
-extern PicturePacketDevice D_003805A8;
+extern SdfPoolNode D_003805A8;
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(s32 packet);
-extern void itfSendTablePacket(s32 packet, s32 index, s32 flag);
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
+extern void sdfInitPacketList(SdfListHead *packet);
+extern void itfSendTablePacket(SdfListHead *packet, s32 index, s32 flag);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 void evtSubmitPictureDrawPacket(void *texture) {
-    s32 packet;
+    SdfListHead *packet;
 
-    packet = sdfAllocPacketAligned(0x20);
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     itfSendTablePacket(packet, 0, 0);
-    itfQueueTextureBoundQuadPacket(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, (s32)texture, 0, packet);
-    D_003805A8.invoke(&D_003805A8, packet);
+    itfQueueTextureBoundQuadPacket(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, texture, 0, packet);
+    D_003805A8.append((SdfListHead *)&D_003805A8, packet);
 }
 
 /* Run the picture's own update step while its active flag is set. */

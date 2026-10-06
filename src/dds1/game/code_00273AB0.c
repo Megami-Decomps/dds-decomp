@@ -31,7 +31,7 @@ extern s32 mnuMapPadMaskToFlags();
 extern void mnuStepPartyPanelListFromInput();
 extern void mnuClearListFlags();
 extern void mnuSetPopupEntryFlagged();
-extern void mnuPlayInputSound(s32, s32, s32 *);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 extern void mnuSetPopupEntry(s32, s32);
 extern u8 D_0037C860[];
 extern char D_0037CA38[];
@@ -56,7 +56,7 @@ typedef struct StaffImageNode {
 } StaffImageNode;
 
 typedef struct StaffImageWindow {
-    s32 flags;
+    u32 flags; /* the input-sound provider tests these state bits as u32 */
     u8 pad04[0x14];
     s32 *cursor; /* 0x18 */
     StaffImageNode *selectedNode; /* 0x1C */

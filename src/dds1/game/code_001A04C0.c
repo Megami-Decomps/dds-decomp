@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
+#include "sdf.h"
 
 typedef struct UiQuadColor {
     s32 red;
@@ -9,13 +10,8 @@ typedef struct UiQuadColor {
     s32 alpha;
 } UiQuadColor;
 
-typedef struct UiSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct UiSurface *, s32);
-    u8 pad14[0xC];
-} UiSurface;
 
-extern UiSurface kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 D_003BD824;
 extern UiQuadColor D_00358390;
 extern f32 sdfSinPoly(f32);
@@ -72,7 +68,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     s32 i;
     u8 *component;
     s32 list;
-    UiSurface *surface;
+    SdfPoolNode *surface;
     f32 phase;
 
     phase = (f32)(D_003BD824 % 4096) * (1.0f / 4096.0f);
@@ -88,7 +84,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     sdfAppendPacket(list, btlCreateGsAlphaRegisterPacket(6, 0));
     sdfAppendPacket(list, func_001A0910(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->submit(surface, list);
+    surface->append((SdfListHead *)surface, (SdfListHead *)list);
 }
 
 void btlResetRuntimeSequenceCounter(void) {

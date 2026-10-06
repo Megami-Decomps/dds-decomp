@@ -189,10 +189,11 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
     struct MenuList *list = (struct MenuList *)object;
     struct MenuListNode *child;
     s32 i;
+    s32 *delay = list->context;
 
-    if (list->delay != NULL) {
-        if (*list->delay != 0) {
-            *list->delay = *list->delay - 1;
+    if (delay != NULL) {
+        if (*delay != 0) {
+            *delay = *delay - 1;
         }
     }
     i = 0;
@@ -210,17 +211,18 @@ void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) 
     MenuWindowContainer *object = (MenuWindowContainer *)objectData;
     struct MenuList *inner = object->list;
     s32 texture = D_00438FC8->textures[0];
-    s32 mode = inner->delay[1];
+    s32 *delay = inner->context;
+    s32 mode = delay[1];
     s32 flags = inner->flags;
     f32 alpha = 0.0f;
 
     switch (mode) {
     case 1:
-        alpha = (f32)inner->delay[0] / 15.0f;
+        alpha = (f32)delay[0] / 15.0f;
         alpha = 1.0f - alpha;
         break;
     case 2:
-        alpha = (f32)inner->delay[0] / 15.0f;
+        alpha = (f32)delay[0] / 15.0f;
         break;
     }
     if (flags & 1) {

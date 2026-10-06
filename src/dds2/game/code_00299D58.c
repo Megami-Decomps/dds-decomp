@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_result.h"
 extern s32 mdlFlagTest(u32 flagId);
 
 extern void mdlFlagSet(u32 flagId);
@@ -9,7 +10,7 @@ extern s32 dspStartEntry(s32 index);
 
 
 
-extern u32 func_0029D790(u32, s32);
+extern u32 func_0029D790(DatPartyRecord *, PrfSkillList *);
 
 extern void func_0026C900(void);
 
@@ -17,62 +18,12 @@ extern u32 kwlnTaskGetUserValue();
 
 extern s32 mnuMapPadMaskToFlags(s32);
 
-extern void mnuTitleRenderFadeAndPanels(s32);
+extern void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *);
 
 extern s32 brsTaskIsUiUpdateAllowed(s32);
 
-extern void brsDecaySharedAnimCounter(s32);
+extern void brsDecaySharedAnimCounter(BrsSkillPackageWork *);
 
-typedef struct MenuItem {
-    u8 pad00[4];
-    u16 kind;
-    u8 pad06[0x10];
-    s8 components[5]; /* Summed when bounding the available selection extent. */
-    u8 pad1B[0x3A];
-    u8 selection;
-} MenuItem;
-
-/* The selected item and the multiplier used to derive its available extent. */
-typedef struct MenuItemSelectionData {
-    MenuItem *item;
-    s32 extentFactor;
-} MenuItemSelectionData;
-
-typedef struct ProfileCapSkillList {
-    u8 pad00[0x20];
-    s32 count;
-    u16 skillIds[8];
-} ProfileCapSkillList;
-
-typedef struct MenuItemScene {
-    u8 pad00[4];
-    u32 overlayFlags;
-    u8 dispatchWork[0x4C];
-    s32 dispatchState;
-    u8 pad58[0x30];
-    u16 unk88;
-    u8 pad8A[0x12];
-    MenuItemSelectionData *selectionData; /* 0x9C */
-    u8 padA0[0x1C4];
-    s32 resetStateA; /* 0x264 */
-    s32 pendingSkillCount; /* 0x268: consumed by capped-skill message processing */
-    s32 pendingSkillIndex;
-    u32 selectionApplied; /* 0x270 */
-    u8 pad274[0x78];
-    s32 extentLimit;
-    u8 pad2F0[0x78];
-    s32 partyUnitCount; /* 0x368 */
-    u8 pad36C[0x7C];
-    u32 resetStateB; /* 0x3E8 */
-    u8 pad3EC[8];
-    s32 slots[5];
-    u8 pad408[0xE0];
-    ProfileCapSkillList skillList;
-    u8 pad51C[0xA820];
-    s32 extentExhausted; /* 0xAD3C: selects the exhausted-extent message. */
-    u8 padAD40[0x9BC];
-    u32 thresholdMessageShown;
-} MenuItemScene;
 
 /* Reward/AP coefficients and scene-message thresholds share this 0xE0 record. */
 typedef struct FieldResourceRecord {
@@ -93,7 +44,7 @@ extern s32 func_001514A8(void);
 extern s16 func_001514B8(void);
 extern s32 func_002C4038(s32, s32 *, u64, u64);
 extern s32 evtGetMessageWindowControlState(void);
-extern void func_00299B98(MenuItemScene *, s32);
+extern void func_00299B98(BrsSkillPackageWork *, s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void mnuSetPopupEntryFlagged(s32, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
@@ -103,33 +54,33 @@ extern char D_003D64E4[];
 extern char D_003D6458[];
 
 extern void func_0029C878(void *);
-extern void func_0029C860(s32 *);
+extern void func_0029C860(BrsSkillPackageWork *);
 extern s32 brsPollResultCounterCompletion(void);
 extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_0037F530[];
 extern u8 D_003D643C[];
 
 s32 brsMessageInputStep(u64 input) {
-    s32 context;
+    BrsSkillPackageWork *context;
     s32 *window;
     s32 buttons;
     s32 result;
 
-    context = kwlnTaskGetUserValue();
-    window = (s32 *)(context + 0x54);
+    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    window = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
-    if (brsTaskIsUiUpdateAllowed(context) == 0) {
+    if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
         return 0;
     }
-    result = func_002C4038(context + 8, window, 0, input);
+    result = func_002C4038((s32)&context->transition, window, 0, input);
     if (result != 0) {
         return result;
     }
     if (*window == 0) {
-        func_0029C878((void *)context);
+        func_0029C878(context);
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
-            func_0029C860((s32 *)context);
+            func_0029C860(context);
             mnuSetPopupEntry(window, D_003D643C);
         }
     }
@@ -137,20 +88,20 @@ s32 brsMessageInputStep(u64 input) {
 }
 
 s32 mnuStaffRunPanel1(s32 input) {
-    s32 context = kwlnTaskGetUserValue();
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
 
-    if (brsTaskIsUiUpdateAllowed(context) != 0) {
+    if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
-        return menuSetHandler(context, 1, input);
+        return menuSetHandler((s32)context, 1, input);
     }
 }
 
 s32 mnuStaffRunPanel2(s32 input) {
-    s32 context = kwlnTaskGetUserValue();
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
 
-    if (brsTaskIsUiUpdateAllowed(context) != 0) {
+    if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         brsDecaySharedAnimCounter(context);
-        return menuSetHandler(context, 2, input);
+        return menuSetHandler((s32)context, 2, input);
     }
 }
 
@@ -169,9 +120,9 @@ s32 mnuStaffRunPanel0(s32 input) {
 }
 
 s32 mnuRefreshAndDispatchCurrentPanel(s32 input) {
-    s32 context = kwlnTaskGetUserValue();
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     mnuTitleRenderFadeAndPanels(context);
-    return menuSetHandler(context, 1, input);
+    return menuSetHandler((s32)context, 1, input);
 }
 
 s32 func_00299FA0(s32 input) {
@@ -187,21 +138,20 @@ u32 func_00299FE0(void) {
     return 1;
 }
 
-extern u32 *ptyGetCurrentProfileRecord(MenuItem *);
-extern u32 ptyGetProfileRecordCap(u8);
-extern s32 func_00314990(MenuItem *, u8);
-extern void func_00314868(MenuItem *, u8);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+extern u32 ptyGetProfileRecordCap(u16);
+extern s32 func_00314990(DatPartyRecord *, u16);
+extern void func_00314868(DatPartyRecord *, u16);
 
 /* Apply a capped selected profile and record whether the selection was applied. */
-void mnuApplyCompletedProfile(u32 context) {
-    MenuItemScene *state = (MenuItemScene *)context;
-    MenuItem *item = state->selectionData->item;
-    u32 *profile = ptyGetCurrentProfileRecord(item);
+void mnuApplyCompletedProfile(BrsSkillPackageWork *state) {
+    DatPartyRecord *item = state->selectedRewardRow->unit;
+    DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
 
-    if (item->selection != 0 &&
-        ptyGetProfileRecordCap(item->selection) == *profile &&
-        func_00314990(item, item->selection) == 0) {
-        func_00314868(item, item->selection);
+    if (item->profileId != 0 &&
+        ptyGetProfileRecordCap(item->profileId) == profile->value &&
+        func_00314990(item, item->profileId) == 0) {
+        func_00314868(item, item->profileId);
         state->selectionApplied = 1;
         state->overlayFlags = state->overlayFlags | 1;
         return;
@@ -210,15 +160,11 @@ void mnuApplyCompletedProfile(u32 context) {
 }
 
 /* Build the capped skill list and cache its pending count; return 1. */
-u32 mnuProcessItemSelection(u32 context) {
+u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     u32 skillCount;
-    MenuItemScene *scene;
-
-    scene = (MenuItemScene *)context;
-    skillCount = func_0029D790((u32)scene->selectionData->item,
-                               (s32)&scene->skillList);
+    skillCount = func_0029D790(scene->selectedRewardRow->unit, &scene->skillList);
     scene->pendingSkillCount = skillCount;
-    mnuApplyCompletedProfile(context);
+    mnuApplyCompletedProfile(scene);
     return 1;
 }
 
@@ -229,27 +175,27 @@ typedef struct DspUnitName {
 extern DspUnitName *D_00435E48;
 extern DspUnitName *D_00435E64;
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
-extern s32 func_00314C10(s32);
+extern s32 func_00314C10(DatPartyRecord *);
 extern s32 scrGetIndexedRecordAddress(u16, s32 *);
 
-void prfCapPresentMessages(MenuItemScene *scene) {
+void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     s32 message;
-    MenuItem *item = scene->selectionData->item;
-    s32 profileId = func_00314C10((s32)item);
+    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    s32 profileId = func_00314C10(item);
     u16 skillId;
 
     if (scene->selectionApplied != 0) {
         evtCopyEntryStringToActiveWindow(
-            0, (s32)D_00435E48[item->kind].encodedText);
+            0, (s32)D_00435E48[item->unitId].encodedText);
         scrGetIndexedRecordAddress(profileId & 0xFFFF, &message);
         evtCopyEntryStringToActiveWindow(1, message);
         dspSetActive(1);
-        dspStartEntry(item->kind + 3);
+        dspStartEntry(item->unitId + 3);
         scene->selectionApplied = 0;
     } else if (scene->pendingSkillCount > 0) {
-        skillId = scene->skillList.skillIds[scene->pendingSkillIndex];
+        skillId = scene->skillList.skills[scene->pendingSkillIndex];
         evtCopyEntryStringToActiveWindow(
-            0, (s32)D_00435E48[item->kind].encodedText);
+            0, (s32)D_00435E48[item->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
             1, (s32)D_00435E64[skillId].encodedText);
         dspSetActive(1);
@@ -259,11 +205,11 @@ void prfCapPresentMessages(MenuItemScene *scene) {
     }
 }
 
-u32 func_0029A1E0(MenuItemScene *scene) {
+u32 func_0029A1E0(BrsSkillPackageWork *scene) {
     return 0;
 }
 
-s32 mnuRequestContextLatchedSceneDsp(MenuItemScene *state)
+s32 mnuRequestContextLatchedSceneDsp(BrsSkillPackageWork *state)
 {
     if (mdlFlagTest(0xB8F) == 0) {
         if (state->overlayFlags & 1) {
@@ -280,7 +226,7 @@ s32 mnuRequestContextLatchedSceneDsp(MenuItemScene *state)
     return 0;
 }
 
-s32 mnuRequestContextClearSceneDsp(MenuItemScene *state)
+s32 mnuRequestContextClearSceneDsp(BrsSkillPackageWork *state)
 {
     if (mdlFlagTest(0xB8F) == 0) {
         if (mdlFlagTest(0x290) != 0) {
@@ -301,7 +247,7 @@ s32 mnuRequestContextClearSceneDsp(MenuItemScene *state)
 }
 
 /* Request the weighted-profile message bucket only once. */
-s32 mnuRequestWeightedProfileMessage(MenuItemScene *scene) {
+s32 mnuRequestWeightedProfileMessage(BrsSkillPackageWork *scene) {
     s32 profileIndex;
     u32 value;
     s32 rank;
@@ -312,7 +258,7 @@ s32 mnuRequestWeightedProfileMessage(MenuItemScene *scene) {
         if (profileIndex == -1) {
             return 0;
         }
-        value = scene->unk88 * D_00435E18[profileIndex].unk0E;
+        value = scene->rewards.mitama * D_00435E18[profileIndex].unk0E;
         value += func_001514B8() * D_00435E18[profileIndex].unk0C;
         record = &D_00435E18[profileIndex];
         rank = 0;
@@ -330,21 +276,21 @@ s32 mnuRequestWeightedProfileMessage(MenuItemScene *scene) {
 
 s32 mnuDispatchProfileSelectionScene(void *task) {
     s32 result;
-    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue(task);
-    s32 *dispatchStatus = &scene->dispatchState;
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    s32 *dispatchStatus = &scene->transition.state;
 
-    result = func_002C4038((s32)scene + 8, dispatchStatus, 0, (s32)task);
+    result = func_002C4038((s32)&scene->transition, dispatchStatus, 0, (s32)task);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
             (result = evtGetMessageWindowControlState(), result == 0)) {
-            if (scene->resetStateA < scene->extentLimit ||
+            if (scene->selectedRow < scene->secondaryRewards.count ||
                 scene->pendingSkillCount > 0 ||
                 scene->selectionApplied != 0) {
                 if ((scene->pendingSkillCount == 0 ||
-                     scene->resetStateA == 0) &&
+                     scene->selectedRow == 0) &&
                     scene->selectionApplied == 0) {
                     func_00299B98(scene, 0);
-                    mnuProcessItemSelection((u32)scene);
+                    mnuProcessItemSelection(scene);
                 }
                 prfCapPresentMessages(scene);
                 return 0;
@@ -361,7 +307,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
             if (mnuRequestWeightedProfileMessage(scene) != 0) {
                 return 0;
             }
-            if (scene->partyUnitCount == 0) {
+            if (scene->primaryRewards.count == 0) {
                 kwlnFadeInStart(0, 0, 0, 0xF);
                 mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D64E4);
                 return 0;
@@ -380,10 +326,10 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
 
 
 s32 func_0029A588(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
 
     mnuTitleRenderFadeAndPanels(context);
-    return menuSetHandler(context, 1, request);
+    return menuSetHandler((s32)context, 1, request);
 }
 
 s32 func_0029A5D8(s32 request) {
@@ -395,8 +341,8 @@ s32 func_0029A5D8(s32 request) {
 
 /* Clear the scene's two selection-processing markers; return 1. */
 s32 mnuResetItemSelectionMarkers(void) {
-    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
-    scene->resetStateA = 0;
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    scene->selectedRow = 0;
     scene->resetStateB = 0;
     return 1;
 }
@@ -405,24 +351,24 @@ u32 func_0029A650(void) {
     return 1;
 }
 
-void func_0029A658(MenuItemScene *scene) {
+void func_0029A658(BrsSkillPackageWork *scene) {
     struct ActiveItemSlots {
         s32 indices[5];
         s32 values[5];
         s32 count;
     } active;
-    MenuItem *item = scene->selectionData->item;
+    DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 i;
 
     memset(&active, 0, sizeof(active));
     for (i = 0; i < 5; i++) {
-        if (scene->slots[i] > 0) {
+        if (scene->statGains[i] > 0) {
             active.indices[active.count] = i;
-            active.values[active.count] = scene->slots[i];
+            active.values[active.count] = scene->statGains[i];
             active.count++;
         }
     }
-    evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[item->kind].encodedText);
+    evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[item->unitId].encodedText);
     dspSetActive(1);
     if (scene->extentExhausted == 0) {
         dspStartEntry(0x15);
@@ -440,20 +386,20 @@ u32 mnuKindIsSelectable(u32 kind) {
 
 extern char D_004379B0[];
 extern s32 func_0035C860(char *, const char *, ...);
-extern void func_0029A658(MenuItemScene *);
+extern void func_0029A658(BrsSkillPackageWork *);
 
 
 /* Cap the available extent by the remaining capacity of five components. */
-void func_0029A768(MenuItemScene *scene) {
+void func_0029A768(BrsSkillPackageWork *scene) {
     char text[16];
-    MenuItem *item = scene->selectionData->item;
-    s32 available = scene->selectionData->extentFactor * 3;
+    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    s32 available = scene->selectedRewardRow->values.amount * 3;
     s32 sum = 0;
     s32 i;
     u16 kind;
 
     for (i = 0; i < 5; i++) {
-        sum += item->components[i];
+        sum += item->baseStats[i];
     }
     if (495 - sum < available) {
         available = 495 - sum;
@@ -463,7 +409,7 @@ void func_0029A768(MenuItemScene *scene) {
     } else {
         scene->extentExhausted = 0;
     }
-    kind = item->kind;
+    kind = item->unitId;
     if (mnuKindIsSelectable(kind) != 0) {
         evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[kind].encodedText);
         func_0035C860(text, D_004379B0, available);
@@ -481,14 +427,14 @@ void func_0029A768(MenuItemScene *scene) {
 
 extern void evtStageTestUpdateCamera(void);
 extern s32 brsAdvanceSkillPackagePanel(s32);
-extern void ptyAccumulateStatGains(s32 *, s32, u8 *);
-extern s32 mnuAdvanceTitleEntryAnimation(u8 *);
-extern void mnuStaffCopyPanelBlock(MenuItem *, MenuItemScene *);
-extern void mnuRefreshSelectedUnitPanels(u32, s32);
+extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
+extern s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *);
+extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
+extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 /* The legacy call forwards its request; this initializer reads current task data. */
 extern u32 mnuResetSelectionWidthsFromConfig();
 extern void mnuSetPopupEntry(s32 *, void *);
-extern s32 btlAddBaseStats(s32 *, MenuItem *);
+extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void func_00342580(u32);
 extern char D_003D6474[];
 extern char D_003D64AC[];
@@ -496,17 +442,17 @@ extern char D_003D64AC[];
 /* Advance the selected party member, apply its gains, and choose the next popup. */
 s32 func_0029A898(u64 request) {
     s32 result;
-    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     s32 *dispatchStatus;
     s32 *slots;
-    MenuItem *item;
+    DatPartyRecord *item;
 
     evtStageTestUpdateCamera();
     if (evtGetMessageWindowControlState() != 0) {
         return 0;
     }
-    dispatchStatus = &scene->dispatchState;
-    result = func_002C4038((s32)scene->dispatchWork, dispatchStatus, 0, request);
+    dispatchStatus = &scene->transition.state;
+    result = func_002C4038((s32)&scene->transition, dispatchStatus, 0, request);
     if (result != 0) {
         return result;
     }
@@ -514,17 +460,17 @@ s32 func_0029A898(u64 request) {
         return 0;
     }
     if (*dispatchStatus == 0) {
-        if (scene->resetStateA < scene->partyUnitCount) {
+        if (scene->selectedRow < scene->primaryRewards.count) {
             func_00299B98(scene, 1);
-            slots = scene->slots;
-            ptyAccumulateStatGains(slots, scene->selectionData->extentFactor,
-                                   (u8 *)scene->selectionData->item);
+            slots = scene->statGains;
+            ptyAccumulateStatGains(slots, scene->selectedRewardRow->values.amount,
+                                   scene->selectedRewardRow->unit);
             func_0029A768(scene);
-            mnuAdvanceTitleEntryAnimation((u8 *)scene->selectionData->item);
-            mnuStaffCopyPanelBlock(scene->selectionData->item, scene);
-            mnuRefreshSelectedUnitPanels((u32)scene->selectionData->item, (s32)scene);
-            item = scene->selectionData->item;
-            if (mnuKindIsSelectable(item->kind) != 0) {
+            mnuAdvanceTitleEntryAnimation(scene->selectedRewardRow->unit);
+            mnuStaffCopyPanelBlock(scene->selectedRewardRow->unit, scene);
+            mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit, scene);
+            item = scene->selectedRewardRow->unit;
+            if (mnuKindIsSelectable(item->unitId) != 0) {
                 mnuResetSelectionWidthsFromConfig(request);
                 if (scene->extentExhausted == 0) {
                     mnuSetPopupEntry(dispatchStatus, D_003D6474);
@@ -532,7 +478,7 @@ s32 func_0029A898(u64 request) {
                 }
             } else {
                 btlAddBaseStats(slots, item);
-                mnuRefreshSelectedUnitPanels((u32)scene->selectionData->item, (s32)scene);
+                mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit, scene);
             }
             mnuSetPopupEntry(dispatchStatus, D_003D64AC);
         } else {

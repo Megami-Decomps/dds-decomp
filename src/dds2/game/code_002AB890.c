@@ -288,7 +288,7 @@ extern void func_002B9808(s32);
 extern void mnuRetreatWindowListSelection(s32);
 extern void mnuAdvanceWindowListSelection(s32);
 extern void mnuClearWindowPanelTransitionFlag(s32);
-extern void mnuPlayInputSound(s32, s32, MenuStaffWindow *);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_003E7450[];
 extern char D_003E746C[];
 extern char D_003E7488[];
@@ -362,7 +362,7 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
                 mnuAdvanceWindowListSelection((s32)window);
             }
             mnuClearWindowPanelTransitionFlag((s32)window);
-            mnuPlayInputSound(0, input, window->window);
+            mnuPlayInputSound(0, input, &window->window->flags);
         }
     }
     return 0;
@@ -528,7 +528,7 @@ s32 func_002AD118(u64 callback) {
         }
         mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
         mnuClearWindowPanelTransitionFlag((s32)window);
-        mnuPlayInputSound(0, input, window->window);
+        mnuPlayInputSound(0, input, &window->window->flags);
     }
     return 0;
 }

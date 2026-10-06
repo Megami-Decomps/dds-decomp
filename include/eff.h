@@ -168,6 +168,13 @@ typedef struct EffArrHdr {
     void *allocation; /* Allocation handle. */
 } EffArrHdr;
 
+/* Header for count 0x6C-byte records; allocation is retained as a resource handle. */
+typedef struct EffPayload {
+    u32 allocation;
+    u32 count;
+    u8 *records;
+} EffPayload;
+
 /* Two-child draw descriptor embedded in the billboard instance at +0x34. */
 typedef struct BillRenderPair {
     struct BillChildPayload *children[2];

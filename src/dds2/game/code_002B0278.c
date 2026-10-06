@@ -174,7 +174,7 @@ extern void mnuPlayInputSound();
 
 extern u32 D_003E7828[];
 
-extern u32 D_003E7858[];
+extern const CampEffectRows D_003E7858;
 
 extern char *D_003E7818[];
 
@@ -2222,13 +2222,6 @@ s32 func_002B76B0(s32 callback) {
     return menuSetHandler(context, 2, callback);
 }
 
-typedef struct MapPacket {
-    u32 type;
-    u32 value;
-    u32 unk_08;
-    u32 items[11];
-    s32 count;
-} MapPacket;
 
 void mnuInitializeMapPacket(u32 value, u32 *values, s32 count, MapPacket *packet) {
     s32 index = 0;
@@ -2247,47 +2240,19 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags) {
     *entryFlags = *entryFlags | flags;
 }
 
-void mnuCopyCampEffectRowData(s32 sourceBase, s32 destinationBase) {
-    u32 *source;
-    s32 offset;
-    u32 *destination;
-    s32 remaining;
-    s32 sourceIndex;
-    u32 row;
+void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
+INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyCampEffectRowData);
 
-    row = 0;
-    sourceIndex = 0;
-    do {
-        destination = (u32 *)(destinationBase + 0x40);
-        offset = sourceIndex << 2;
-        remaining = 3;
-        do {
-            source = (u32 *)(offset + sourceBase);
-            offset = offset + 4;
-            remaining = remaining - 1;
-            *destination = *source;
-            destination = destination + 1;
-        } while (-1 < remaining);
-        row = row + 1;
-        destinationBase = destinationBase + 0x10;
-        sourceIndex = sourceIndex + 4;
-    } while (row < 2);
+void mnuSetCampEffectResourceHandles(u32 first, u32 second, MenuEffectResources *resources) {
+    resources->packet.sheets[0] = first;
+    resources->animationHandle = second;
 }
 
-void mnuSetCampEffectResourceHandles(u32 first, u32 second, u32 *menu) {
-    menu[2] = first;
-    menu[15] = second;
-}
 
-typedef struct MenuEffectResources {
-    MapPacket packet;      /* 0x00–0x3B */
-    u32 animationHandle;   /* 0x3C */
-} MenuEffectResources;
-
-void mnuBindCampEffectAnimation(s32 resources) {
-    effConfigureIndexedSlotResource(((MenuEffectResources *)resources)->packet.unk_08,
-                   ((MenuEffectResources *)resources)->packet.items[4],
-                   ((MenuEffectResources *)resources)->animationHandle, 0, 4);
+void mnuBindCampEffectAnimation(MenuEffectResources *resources) {
+    effConfigureIndexedSlotResource(resources->packet.sheets[0],
+                   resources->packet.items[4],
+                   resources->animationHandle, 0, 4);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AD38);
@@ -2320,55 +2285,42 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE48);
 
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 
-void mnuLoadEffectResources(u8 *effect) {
-    MenuEffectResources *resources = (MenuEffectResources *)effect;
-
+void mnuLoadEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
-    mnuCopyCampEffectRowData((s32)D_003E7858, (s32)effect);
-    resources->packet.unk_08 = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
+    mnuCopyCampEffectRowData(&D_003E7858, resources);
+    resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
     resources->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
-    mnuBindCampEffectAnimation((s32)effect);
+    mnuBindCampEffectAnimation(resources);
 }
 
-void mnuRequestEffectResources(u8 *effect) {
-    mnuInitializeMapPacket(0, D_003E7828, 0xb, (MapPacket *)effect);
-    mnuCopyCampEffectRowData((s32)D_003E7858, (s32)effect);
-    effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0, (u32 *)(effect + 8));
-    effRequestMappedResource("/camp/mot/", D_003E7820[0], (u32 *)(effect + 0x3c));
+void mnuRequestEffectResources(MenuEffectResources *resources) {
+    mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
+    mnuCopyCampEffectRowData(&D_003E7858, resources);
+    effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0, &resources->packet.sheets[0]);
+    effRequestMappedResource("/camp/mot/", D_003E7820[0], &resources->animationHandle);
 }
 
-u32 mnuBindCampEffectWhenLoaded(u32 *menu) {
-    if (menu[2] == 0) {
+u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *resources) {
+    if (resources->packet.sheets[0] == 0) {
         return 0;
     }
-    if (menu[15] == 0) {
+    if (resources->animationHandle == 0) {
         return 0;
     }
-    mnuBindCampEffectAnimation(menu);
+    mnuBindCampEffectAnimation(resources);
     return 1;
 }
 
-void mnuDestroyEffectResources(u8 *ctx) {
+void mnuDestroyEffectResources(MenuEffectResources *resources) {
     u32 i;
-    for (i = 0; i < 1; i++) {
-        effDestroyResourceSlotSet(*(u32 *)(ctx + 8 + i * 4));
+    for (i = 0; i < ARRAY_COUNT(resources->packet.sheets); i++) {
+        effDestroyResourceSlotSet(resources->packet.sheets[i]);
     }
-    effDestroyPackedBatch(((MenuEffectResources *)ctx)->animationHandle);
+    effDestroyPackedBatch(resources->animationHandle);
 }
 
-typedef struct MenuSparkSet {
-    u32 flags;
-    u8 pad04[4];
-    s32 sheet;       /* 0x08 */
-    s32 handle[8];   /* 0x0C */
-    u8 pad2C[0x60 - 0x2C];
-    /* 0x060 */ s32 direction[16];
-    /* 0x0A0 */ s32 velocity[16][2];
-    /* 0x120 */ s32 life[16];
-    /* 0x160 */ s32 count;
-} MenuSparkSet;
 
-void mnuSpawnSpark(MenuSparkSet *fx) {
+void mnuSpawnSpark(MenuCampEffect *fx) {
     s32 slot = -1;
     s32 i;
 
@@ -2394,30 +2346,30 @@ void mnuSpawnSpark(MenuSparkSet *fx) {
     }
 }
 
-void mnuRetireCampSpark(s32 effects, s32 index) {
-    ((MenuSparkSet *)effects)->direction[index] = 0;
-    ((MenuSparkSet *)effects)->count = ((MenuSparkSet *)effects)->count - 1;
+void mnuRetireCampSpark(MenuCampEffect *effects, s32 index) {
+    effects->direction[index] = 0;
+    effects->count = effects->count - 1;
 }
 
-void mnuDrawAndAdvanceCampSparks(MenuSparkSet *fx, s32 arg) {
+void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg) {
     s32 i;
     for (i = 0; i < 0x10; i++) {
         if (fx->direction[i] > 0) {
-            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->sheet, fx->handle[6], arg);
+            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
             if (fx->direction[i] == 1) {
                 fx->velocity[i][0] += fx->life[i];
                 if (fx->velocity[i][0] > 0x2000) {
-                    mnuRetireCampSpark((s32)fx, i);
+                    mnuRetireCampSpark(fx, i);
                 }
             } else {
                 fx->velocity[i][0] -= fx->life[i];
                 if (fx->velocity[i][0] < -0xFA0) {
-                    mnuRetireCampSpark((s32)fx, i);
+                    mnuRetireCampSpark(fx, i);
                 }
             }
         }
     }
-    if (fx->flags & 4) {
+    if (fx->resources.packet.type & 4) {
         if ((effMiscRand(0) & 3) == 0) {
             mnuSpawnSpark(fx);
         }
@@ -2438,14 +2390,6 @@ typedef struct MenuBadgeLayout {
     MenuBadgePlace place[2];
 } MenuBadgeLayout;
 
-typedef struct MenuBadgeSet {
-    u32 flags;
-    u8 pad4[4];
-    s32 sheet;       /* 0x08 */
-    s32 handle[8];   /* 0x0C */
-    u8 pad2C[0x164 - 0x2C];
-    s32 fade;        /* 0x164 */
-} MenuBadgeSet;
 
 extern MenuBadgeLayout D_0042AED0;
 
@@ -2459,23 +2403,23 @@ extern MenuBadgeLayout D_0042AED0;
     } \
 }
 
-void mnuDrawBadgeFade(MenuBadgeSet *set, s32 arg) {
+void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg) {
     MenuBadgeLayout layout = D_0042AED0;
     s32 handle;
-    if (!(set->flags & 4)) {
-        handle = set->handle[layout.place[0].slot];
-        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->sheet, handle, arg);
-        itfGridLookupValueOrDefault(set->sheet, handle);
+    if (!(set->resources.packet.type & 4)) {
+        handle = set->resources.packet.items[layout.place[0].slot];
+        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, arg);
+        itfGridLookupValueOrDefault(set->resources.packet.sheets[0], handle);
         MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
-    if (!(set->flags & 2)) {
-        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->sheet, set->handle[layout.place[1].slot], arg);
+    if (!(set->resources.packet.type & 2)) {
+        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
     }
 }
 
 extern MenuBadgeLayout D_0042AEE8;
 
-void mnuDrawCampIconBackdrop(MenuBadgeSet *set, s32 arg) {
+void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg) {
     MenuBadgePlace blank[1];
     MenuBadgeLayout layout;
     u32 i;
@@ -2485,14 +2429,14 @@ void mnuDrawCampIconBackdrop(MenuBadgeSet *set, s32 arg) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, arg);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
     for (i = 0; i < 1; i++) {
-        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->sheet, set->handle[blank[i].slot], arg);
+        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
     }
-    if (!(set->flags & 2)) {
+    if (!(set->resources.packet.type & 2)) {
         for (i = 0; i < 2; i++) {
-            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->sheet, set->handle[layout.place[i].slot], arg);
+            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
         }
     }
-    if (!(set->flags & 4)) {
+    if (!(set->resources.packet.type & 4)) {
         mnuDrawBadgeFade(set, arg);
     }
     func_002B7C10(set, arg);

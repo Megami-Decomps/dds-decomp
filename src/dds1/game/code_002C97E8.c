@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "fpu.h"
+#include "sdf.h"
 
 extern s8 D_00324510[];
 
@@ -464,27 +465,23 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
     return result;
 }
 
-typedef struct SdfOverlaySurface {
-    u8 pad00[0x10];
-    void (*submit)(struct SdfOverlaySurface *, s32);
-    u8 pad14[0xC];
-} SdfOverlaySurface;
 
+typedef struct SdfDrawPacket SdfDrawPacket;
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(s32);
+extern void sdfInitPacketList(SdfListHead *);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern s32 sdfConsInitPacketHeader(s32, s32, s32, s64, s32);
+extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern void sdfAppendPacket(s32, s32);
-extern SdfOverlaySurface kwlnDrawSurfaces[];
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Build an indexed RGBA/XYZ2 packet and submit it through the selected surface. */
 void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
                    s32 useFirstColor, s32 surfaceIndex) {
-    s32 list = sdfAllocPacketAligned(0x20);
+    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 packet;
     u64 *vertex;
-    SdfOverlaySurface *surface;
+    SdfPoolNode *surface;
     u32 *selectedColors;
     s32 i;
     s32 x;
@@ -493,7 +490,7 @@ void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
 
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    sdfConsInitPacketHeader(packet, 0x14D, 2, 0x41, count);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14D, 2, 0x41, count);
     vertex = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     for (i = 0; i < count; i++) {
         if (useFirstColor & 1) {
@@ -516,7 +513,7 @@ void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
     }
     sdfAppendPacket(list, packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->submit(surface, list);
+    surface->append((SdfListHead *)surface, list);
 }
 
 

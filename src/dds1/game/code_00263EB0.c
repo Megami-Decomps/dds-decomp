@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_result.h"
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -15,45 +16,14 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern char D_003BC550[];
 extern char D_003BC558[];
 extern char *D_0036D3A8[];
+extern void mnuClearItemSelectionSlots(BrsSkillPackageWork *);
+extern void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
-typedef struct MenuSumBytes {
-    u8 pad00[4];
-    u16 itemId;
-    u8 pad06[0xE];
-    u16 level;
-    s8 values[MENU_SUM_COUNT];
-} __attribute__((aligned(4))) MenuSumBytes;
-
-typedef struct BrsLevelStepState {
-    MenuSumBytes *entry;
-    s32 increment;
-} BrsLevelStepState;
-
-typedef struct MenuSumTable {
-    u8 pad00[0x54];
-    s32 panelState; /* 0x54 */
-    u8 pad58[0x40];
-    BrsLevelStepState *state;
-    u32 previewUnit[0x69]; /* 0x9C */
-    u8 pad240[0x188];
-    s32 assignedPoints; /* 0x3C8 */
-    s32 availablePoints; /* 0x3CC */
-    s32 values[MENU_SUM_COUNT];
-    u8 pad3E4[0x92C];
-    s32 panelGroup; /* 0xD10 */
-    u8 padD14[0x864];
-    u32 selectionInitialized; /* 0x1578 */
-    u8 pad157C[4];
-    u32 commitComplete; /* 0x1580 */
-    u32 unk1584;
-    s32 rewardMode;
-    s32 rewardIndex;
-} MenuSumTable;
 
 /* All five signed-byte plus table-word totals must meet the minimum. */
-s32 mnuCheckTableSums(s32 bytes, s32 table) {
-    s32 *tableValues = ((MenuSumTable *)table)->values;
-    s8 *byteValues = ((MenuSumBytes *)bytes)->values;
+s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
+    s32 *tableValues = table->statGains;
+    s8 *byteValues = bytes->baseStats;
     s32 index = 0;
 
     do {
@@ -75,57 +45,57 @@ extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuGetPanelGroupSelection(s32);
 extern void mnuSetPanelGroupSelection(s32, s32);
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
-extern void mnuPlayInputSound(s32, s32, s32);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0036D440[];
 
 s32 func_00263EF8(u64 request) {
-    MenuSumTable *work;
-    MenuSumBytes *entry;
+    BrsSkillPackageWork *work;
+    DatPartyRecord *entry;
     s32 inputFlags;
     s32 selection;
     s32 changed = 0;
     s32 result;
 
-    work = (MenuSumTable *)kwlnTaskGetUserValue();
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     inputFlags = mnuMapPadMaskToFlags(0xF3);
-    entry = work->state->entry;
+    entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_00285670((s32)work + 8, &work->panelState, 0, request);
+    result = func_00285670((s32)&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
-    if (work->panelState != 0 || evtGetMessageWindowControlState() != 0) {
+    if (work->transition.state != 0 || evtGetMessageWindowControlState() != 0) {
         return 0;
     }
 
     if (work->selectionInitialized == 0) {
-        mnuSetPanelGroupSelection(work->panelGroup, 0);
+        mnuSetPanelGroupSelection(work->panelHandle, 0);
         work->selectionInitialized = 1;
     }
 
-    if (work->availablePoints == work->assignedPoints ||
-        mnuCheckTableSums((s32)entry, (s32)work) != 0) {
+    if (work->assignedStatPoints == work->availableStatPoints ||
+        mnuCheckTableSums(entry, work) != 0) {
         dspStartEntry(0x16);
         evtSetMessageWindowOptionWhenOpen(0);
         evtStoreValueAndCaptureWindowPanelValue(0x1D);
-        mnuSetPopupEntryFlagged(&work->panelState, D_0036D440);
+        mnuSetPopupEntryFlagged(&work->transition.state, D_0036D440);
     } else {
-        selection = mnuGetPanelGroupSelection(work->panelGroup);
+        selection = mnuGetPanelGroupSelection(work->panelHandle);
         if ((inputFlags & 0x81) != 0) {
-            if (entry->values[selection] + work->values[selection] < 99) {
+            if (entry->baseStats[selection] + work->statGains[selection] < 99) {
                 inputFlags = 1;
                 changed = 1;
-                work->availablePoints++;
-                work->values[selection]++;
+                work->assignedStatPoints++;
+                work->statGains[selection]++;
             } else {
                 inputFlags = 0x8000;
             }
         }
         if ((inputFlags & 0x40) != 0) {
-            if (work->availablePoints > 0 && work->values[selection] > 0) {
+            if (work->assignedStatPoints > 0 && work->statGains[selection] > 0) {
                 changed = 1;
-                work->availablePoints--;
-                work->values[selection]--;
+                work->assignedStatPoints--;
+                work->statGains[selection]--;
             } else {
                 inputFlags = 0x8000;
             }
@@ -135,8 +105,8 @@ s32 func_00263EF8(u64 request) {
             mnuClearItemSelectionSlots(work);
         }
         if (changed != 0) {
-            memcpy(entry, work->previewUnit, 0x1A4);
-            mnuRefreshPartyUnitVitalsPanels((u32)entry, (u32)work);
+            memcpy(entry, &work->previewUnit, sizeof(*entry));
+            mnuRefreshPartyUnitVitalsPanels(entry, work);
         }
         if ((inputFlags & 0x10) != 0) {
             selection--;
@@ -150,21 +120,21 @@ s32 func_00263EF8(u64 request) {
         if (selection >= 5) {
             selection = 0;
         }
-        mnuSetPanelGroupSelection(work->panelGroup, selection);
+        mnuSetPanelGroupSelection(work->panelHandle, selection);
     }
     mnuPlayInputSound(0, inputFlags, 0);
     return 0;
 }
 
-extern void mnuDrawItemPanelBackdrop(s32);
-extern void func_00263B78(s32, s32);
+extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
+extern void func_00263B78(BrsSkillPackageWork *, s32);
 
 s32 mnuDrawItemPanelDuringRequest(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
-    return menuRunPanel(context, 1, request);
+    return menuRunPanel((s32)context, 1, request);
 }
 
 s32 func_00264238(s32 input) {
@@ -175,10 +145,10 @@ s32 func_00264238(s32 input) {
 }
 
 u32 mnuBeginPanelEntryAndCaptureSoundMode(void) {
-    s32 context;
+    BrsSkillPackageWork *context;
 
-    context = kwlnTaskGetUserValue();
-    mnuSetPanelGroupSelection(*(u32 *)(context + 0xd10), 0xffffffffffffffff);
+    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    mnuSetPanelGroupSelection(context->panelHandle, -1);
     dspStartEntry(0x16);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0x1d);
@@ -190,50 +160,50 @@ u32 func_002642C8(void) {
 }
 
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern s32 btlAddBaseStats(u8 *, u8 *);
+extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void mnuClearPanelGroupSelection(s32);
 extern void mnuBindPresentMenuEntry(void *, s32 *);
 extern char D_0036D45C[];
 
 s32 func_002642D0(u64 request) {
-    MenuSumTable *work;
-    MenuSumBytes *entry;
+    BrsSkillPackageWork *work;
+    DatPartyRecord *entry;
     s32 result;
 
-    work = (MenuSumTable *)kwlnTaskGetUserValue();
-    entry = work->state->entry;
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_00285670((s32)work + 8, &work->panelState, 0, request);
+    result = func_00285670((s32)&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
-    if (work->panelState == 0 && evtGetMessageWindowControlState() == 0) {
+    if (work->transition.state == 0 && evtGetMessageWindowControlState() == 0) {
         s8 capturedValue = evtGetCapturedWindowPanelValue();
-        s32 *stats = work->values;
+        s32 *stats = work->statGains;
 
         if (capturedValue == 0) {
-            btlAddBaseStats((u8 *)stats, (u8 *)work->state->entry);
+            btlAddBaseStats(stats, work->selectedRewardRow->unit);
             mnuClearItemSelectionSlots(work);
-            mnuClearPanelGroupSelection(work->panelGroup);
-            mnuSetPopupEntryFlagged(&work->panelState, D_0036D45C);
+            mnuClearPanelGroupSelection(work->panelHandle);
+            mnuSetPopupEntryFlagged(&work->transition.state, D_0036D45C);
             work->commitComplete = 1;
         } else {
             mnuClearItemSelectionSlots(work);
-            mnuSetPanelGroupSelection(work->panelGroup, 0);
-            memcpy(entry, work->previewUnit, 0x1A4);
-            mnuRefreshPartyUnitVitalsPanels((u32)entry, (u32)work);
-            mnuBindPresentMenuEntry((u8 *)work + 8, &work->panelState);
+            mnuSetPanelGroupSelection(work->panelHandle, 0);
+            memcpy(entry, &work->previewUnit, sizeof(*entry));
+            mnuRefreshPartyUnitVitalsPanels(entry, work);
+            mnuBindPresentMenuEntry(&work->transition, &work->transition.state);
         }
     }
     return 0;
 }
 
 s32 func_00264498(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
-    return menuRunPanel(context, 1, request);
+    return menuRunPanel((s32)context, 1, request);
 }
 
 s32 func_002644F0(s32 input) {
@@ -245,14 +215,14 @@ s32 func_002644F0(s32 input) {
 
 u32 func_00264538(void) {
     char text[0x20];
-    MenuSumTable *work = (MenuSumTable *)kwlnTaskGetUserValue();
-    BrsLevelStepState *state = work->state;
-    MenuSumBytes *entry = state->entry;
-    u32 step = brsGetLevelStepCrossedBy(entry->level - state->increment, state->increment);
+    BrsSkillPackageWork *work = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    BrsRewardRow *state = work->selectedRewardRow;
+    DatPartyRecord *entry = state->unit;
+    u32 step = brsGetLevelStepCrossedBy(entry->level - state->values.amount, state->values.amount);
 
-    work->unk1584 = step;
+    work->crossedSteps = step;
     if (step != 0) {
-        func_003014F0(text, D_003BC558, D_003BAA70 + entry->itemId * 17);
+        func_003014F0(text, D_003BC558, D_003BAA70 + entry->unitId * 17);
         evtCopyEntryStringToActiveWindow(0, text);
         func_003014F0(text, D_003BC550, brsGetLevelStepForValue(entry->level));
         evtCopyEntryStringToActiveWindow(1, text);
@@ -274,12 +244,12 @@ extern char D_0036D478[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
 s32 mnuRunPanelWithIdleFallback(u64 request) {
-    s32 context = kwlnTaskGetUserValue();
-    s32 *panelState = (s32 *)(context + 0x54);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    s32 *panelState = &context->transition.state;
     s32 result;
 
     evtStageTestUpdateCamera();
-    result = func_00285670(context + 8, panelState, 0, request);
+    result = func_00285670((s32)&context->transition, panelState, 0, request);
     if (result != 0) {
         return result;
     }
@@ -290,11 +260,11 @@ s32 mnuRunPanelWithIdleFallback(u64 request) {
 }
 
 s32 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 0);
-    return menuRunPanel(context, 1, request);
+    return menuRunPanel((s32)context, 1, request);
 }
 
 s32 func_002646F8(s32 input) {
@@ -306,14 +276,14 @@ s32 func_002646F8(s32 input) {
 
 
 u32 func_00264740(void) {
-    u8 *context = (u8 *)kwlnTaskGetUserValue();
-    u8 *item = *(u8 **)(*(u8 **)(context + 0x98));
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    DatPartyRecord *item = context->selectedRewardRow->unit;
 
-    if (*(s32 *)(context + 0x1588) != 0) {
-        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + *(u16 *)(item + 4) * 17);
+    if (context->rewardMode != 0) {
+        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + item->unitId * 17);
         dspStartEntry(0x18);
     }
-    memset(context + 0x3D0, 0, 0x14);
+    memset(context->statGains, 0, sizeof(context->statGains));
     return 1;
 }
 
@@ -322,22 +292,22 @@ u32 func_002647B0(void) {
     return 1;
 }
 
-s32 func_002647D0(MenuSumTable *work) {
-    MenuSumBytes *entry = work->state->entry;
+s32 func_002647D0(BrsSkillPackageWork *work) {
+    DatPartyRecord *entry = work->selectedRewardRow->unit;
     s32 result;
 
     switch (work->rewardMode) {
     case 4: {
         s32 rewardIndex = work->rewardIndex;
 
-        work->values[rewardIndex]++;
+        work->statGains[rewardIndex]++;
         evtCopyEntryStringToActiveWindow(1, D_0036D3A8[rewardIndex]);
     }
     /* fall through */
     case 1:
     case 2:
     case 3:
-        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + entry->itemId * 17);
+        evtCopyEntryStringToActiveWindow(0, D_003BAA70 + entry->unitId * 17);
         dspStartEntry(work->rewardMode + 0x18);
         break;
     default:

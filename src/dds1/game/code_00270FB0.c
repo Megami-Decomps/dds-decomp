@@ -504,6 +504,8 @@ u32 func_00271FC8(void) {
     return 0;
 }
 
+extern void mnuPlayInputSound(s32, s32, u32 *);
+
 /* Mapped cancel input closes camp only through the full guard chain.
  * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */
 s32 mnuStaffCampCancelCheck(s32 menu) {

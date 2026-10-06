@@ -1,27 +1,23 @@
 #include "common.h"
 #include "eff.h"
+#include "mnu_result.h"
 
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002649B0);
 
 
-extern void mnuDrawItemPanelBackdrop(s32);
-extern void func_00263B78(s32, s32);
+extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
+extern void func_00263B78(BrsSkillPackageWork *, s32);
 
 /* The dispatcher consumes the inline work area and its adjacent status word. */
-typedef struct {
-    u8 pad00[8];
-    u8 dispatchWork[0x4C]; /* 0x08 */
-    s32 dispatchStatus;     /* 0x54 */
-} PanelDispatchContext;
 
 s32 itfRunPanelMode1(u64 request) {
     s32 context = kwlnTaskGetUserValue();
-    PanelDispatchContext *panel = (PanelDispatchContext *)context;
+    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
-    mnuDrawItemPanelBackdrop(context);
-    func_00263B78(context, 0);
-    return func_00285670((s32)panel->dispatchWork, &panel->dispatchStatus, 1, request);
+    mnuDrawItemPanelBackdrop(panel);
+    func_00263B78(panel, 0);
+    return func_00285670((s32)&panel->transition, &panel->transition.state, 1, request);
 }
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
@@ -31,10 +27,10 @@ extern void func_0024DC98(s32);
 
 s32 itfRunPanelMode2(u64 request) {
     s32 context = kwlnTaskGetUserValue();
-    PanelDispatchContext *panel = (PanelDispatchContext *)context;
+    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0024DC98(0);
-    return func_00285670((s32)panel->dispatchWork, &panel->dispatchStatus, 2, request);
+    return func_00285670((s32)&panel->transition, &panel->transition.state, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264B08);
@@ -44,17 +40,8 @@ extern u32 uiBlendColors(u32, u32, s32);
 
 /* The opacity update latches at its threshold. Keep fadeProgress signed:
  * the decay path converts it through a signed float. */
-typedef struct TitleFadeWork {
-    u8 pad00[0xD3C];
-    s8 opacityReady; /* 0xD3C */
-    u8 padD3D[7];
-    s32 spriteResource;
-    u32 opacity;      /* 0xD48 */
-    u8 padD4C[0x828];
-    s32 fadeProgress; /* 0x1574 */
-} TitleFadeWork;
 
-void itfUpdateFadeColor(TitleFadeWork *work) {
+void itfUpdateFadeColor(BrsSkillPackageWork *work) {
     s32 remaining = 0x100 - work->fadeProgress;
 
     if (work->opacityReady == 0) {
@@ -71,7 +58,7 @@ extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);
 
-void mnuDrawTitleFadeSprites(TitleFadeWork *work) {
+void mnuDrawTitleFadeSprites(BrsSkillPackageWork *work) {
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 positions[8][3] = {
         {-5, -5, 0x23},
@@ -85,7 +72,7 @@ void mnuDrawTitleFadeSprites(TitleFadeWork *work) {
     };
     s32 i;
 
-    if (work->spriteResource) {
+    if (work->teardownHandle) {
         for (i = 0; i < 8; i++) {
             u32 color = work->opacity | 0x80808000;
 
@@ -94,7 +81,7 @@ void mnuDrawTitleFadeSprites(TitleFadeWork *work) {
             colors[2] = color;
             colors[3] = color;
             func_002BF438(positions[i][0] << 4, positions[i][1] << 3, 0,
-                         colors, 0, (EffectSlotSet *)work->spriteResource, positions[i][2], 0x53);
+                         colors, 0, (EffectSlotSet *)work->teardownHandle, positions[i][2], 0x53);
         }
     }
 }
@@ -106,16 +93,16 @@ void func_00265080(void) {
 }
 
 /* Decay only the fade progress; opacity stops updating once it crosses 0x80. */
-void brsStepAnimDecay(TitleFadeWork *work) {
+void brsStepAnimDecay(BrsSkillPackageWork *work) {
     work->fadeProgress = (s32)((f32)work->fadeProgress / 1.2f);
 }
 
 
-u32 mnuGetTitleState(TitleFadeWork *work) {
+u32 mnuGetTitleState(BrsSkillPackageWork *work) {
     return work->fadeProgress;
 }
 
-void mnuClearTitleState(TitleFadeWork *work) {
+void mnuClearTitleState(BrsSkillPackageWork *work) {
     work->fadeProgress = 0;
 }
 
@@ -133,22 +120,22 @@ struct FrFontGlyph;
 extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
-void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
+void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
     char text[32];
     u32 handle;
 
-    func_003014F0(text, D_003BC568, *(s32 *)(info + 0x10));
+    func_003014F0(text, D_003BC568, info->totalExp);
     handle = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
     func_001958A0((struct FrFontGlyph *)handle, 1, color);
     frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)handle);
 }
 
-void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
+void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
     char text[32];
     u32 handle;
 
-    func_003014F0(text, D_003BC568, *(s32 *)(info + 0xC));
+    func_003014F0(text, D_003BC568, info->macca);
     handle = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
     func_001958A0((struct FrFontGlyph *)handle, 1, color);

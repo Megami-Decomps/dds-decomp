@@ -108,11 +108,11 @@ extern void fldStartLmapTask(s32 arg0);
 extern u32 scrNamedProcessCount;
 
 
-extern u8 kwlnPositionedTextSurface[];
+extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern s8 D_0037F53B[];
 
-extern void evtDrawHeapUsageOverlay(void *arg0);
+extern void evtDrawHeapUsageOverlay(SdfPoolNode *);
 
 typedef struct {
     f32 x;
@@ -137,11 +137,6 @@ extern u16 D_00438DFA;
 
 extern u16 D_00438DF8;
 
-typedef struct EvtDrawSurface {
-    u8 unk_00[0x10];
-    void (*submit)(struct EvtDrawSurface *, void *);
-    u8 unk_14[0xC];
-} EvtDrawSurface;
 
 /* GS AD packet payload starts after the 0x20-byte command header. */
 typedef struct EvtGsCommand {
@@ -150,7 +145,7 @@ typedef struct EvtGsCommand {
     u64 registerId;
 } EvtGsCommand;
 
-extern EvtDrawSurface kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 
 extern void *sdfAllocPacketAligned(s32);
 
@@ -371,8 +366,8 @@ void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s3
     command->registerId = EVT_GS_TEST_PRIMARY;
     sdfAppendPacket(list, packet);
     {
-        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-        surface->submit(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -388,8 +383,8 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
     command->registerId = EVT_GS_TEST_SECONDARY;
     sdfAppendPacket(list, packet);
     {
-        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-        surface->submit(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -434,8 +429,8 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
     command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfAppendPacket(list, packet);
     {
-        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-        surface->submit(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -451,8 +446,8 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfAppendPacket(list, packet);
     {
-        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-        surface->submit(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -464,8 +459,8 @@ void func_00108D80(void) {
     func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
     sdfAppendDmaTagToList(list, framePacket);
     {
-        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-        surface->submit(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -477,8 +472,8 @@ void func_00108E20(void) {
     func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
     sdfAppendDmaTagToList(list, framePacket);
     {
-        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-        surface->submit(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -515,7 +510,7 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     s32 indices[EVT_QUAD_VERTEX_COUNT];
     u64 strip[2];
     void *list;
-    EvtDrawSurface *surface;
+    SdfPoolNode *surface;
 
     list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
@@ -547,7 +542,7 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     strip[0] = D_0037F5A0[0];
     sdfAppendPacket(list, func_0033B050(&desc));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-    surface->submit(surface, list);
+    surface->append((SdfListHead *)surface, list);
 }
 
 /* Submit the same native vertex permutation with rectangular UVs, then queue asset release. */
@@ -559,7 +554,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     f32 uvs[8];
     void *asset;
     void *list;
-    EvtDrawSurface *surface;
+    SdfPoolNode *surface;
 
     asset = sdfCreateAssetWithDrawEntries();
     func_003332E8(asset, bits);
@@ -602,7 +597,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     uvs[7] = v0;
     sdfAppendPacket(list, func_0033B050(&desc));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-    surface->submit(surface, list);
+    surface->append((SdfListHead *)surface, list);
     sdfQueueAssetRelease(asset);
 }
 
@@ -620,8 +615,8 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_00348158(D_0037F5B0, D_0037F5D0, 2, 0x80));
     {
-        EvtDrawSurface *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-        surface->submit(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -634,15 +629,15 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     u8 sifParameters[16];
     void *list;
     void *packet;
-    EvtDrawSurface *surface;
+    SdfPoolNode *surface;
     list = (void *)sdfCreateResetPacketList();
     packet = sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
     sdfAppendPacket(list, packet);
     sdfPktInit(sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
     sdfAppendPacket(list, sdfFormatSifPacket(sifParameters, drawArg));
-    surface = (EvtDrawSurface *)kwlnPositionedTextSurface;
-    surface->submit(surface, list);
+    surface = &kwlnPositionedTextSurface;
+    surface->append((SdfListHead *)surface, list);
 }
 
 void evtPrepareSizedDrawResource(s32 width, s32 height, u64 first, u64 second) {
@@ -1411,12 +1406,11 @@ extern void func_0010B3D8(void *list, s32 source, s32 end);
 
 /* Format general/chip free-memory statistics into the supplied draw surface.
    Keep the native heap-ratio coordinate calculation and title-specific initial packet. */
-void evtDrawHeapUsageOverlay(void *surfaceAddress) {
+void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     s32 generalHeapStats[6];
     SdfChipStats chipHeapStats;
     char statusText[100];
     void *packetList;
-    EvtDrawSurface *surface = surfaceAddress;
 
     sdfGetGeneralHeapStats(generalHeapStats);
     D_00435D4C = generalHeapStats[0];
@@ -1430,7 +1424,7 @@ void evtDrawHeapUsageOverlay(void *surfaceAddress) {
     func_0035C860(statusText, D_00435D58, chipHeapStats.freeBytes);
     sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x86C0,
         (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText));
-    surface->submit(surface, packetList);
+    surface->append((SdfListHead *)surface, packetList);
 }
 
 /* Draw the overlay only when the control byte is zero; return zero in either case. */
@@ -1438,7 +1432,7 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
     if (D_0037F53B[0] != 0) {
         return 0;
     }
-    evtDrawHeapUsageOverlay(kwlnPositionedTextSurface);
+    evtDrawHeapUsageOverlay(&kwlnPositionedTextSurface);
     return 0;
 }
 

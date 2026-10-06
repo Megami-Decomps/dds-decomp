@@ -3,19 +3,9 @@
 #include "pcp_vu0.h"
 #include "scr.h"
 
-extern void btlUpdateFadeIndicator(u8 *);
 
-typedef struct SoundQueue {
-    s32 unk00;
-    s32 allocation;
-    s32 unk08;
-    u16 drawFlags;
-    u16 unk0E;
-    struct SoundQueueNode *head;
-    struct SoundQueueNode *tail;
-} SoundQueue;
 
-extern SoundQueue itfMesWork;
+extern ItfMesGlobals itfMesWork;
 
 
 typedef struct UiPanelPlacement {
@@ -109,23 +99,18 @@ typedef struct SndPad {
     s8 fineUp;
 } SndPad;
 
-typedef struct UiSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct UiSurface *, s32);
-    u8 pad14[0xC];
-} UiSurface;
 
 typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
 
 extern SndPad D_00324510;
 
-extern UiSurface kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 
 extern UiOwnerRef *D_00357D88[];
 
 extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
 
-extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, UiSurface *surface);
+extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
 
 extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
 
@@ -141,15 +126,14 @@ extern s8 D_00324530[];
 
 extern u32 kwlnTaskGetUserValue(s64);
 
-extern u32 D_00358308[];
+extern const char *D_00358308[];
 
 extern u32 sndTestMessageResourceIndex;
 
-extern s32 sndTestMessageTexture;
+extern SdfTex *sndTestMessageTexture;
 
-extern s32 itfLoadTextureFromAsset(u32);
+extern SdfTex *itfLoadTextureFromAsset(const char *);
 
-extern u8 D_003D6EB0[0x18];
 
 /* Message-window nodes are linked through the word at offset 0x24. */
 typedef struct MessageNodeLink {
@@ -169,7 +153,7 @@ void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     UiPanelPlacement *place = &panel->place;
     s32 spriteTop;
     if (place->sprite == 0) {
-        place->sprite = func_00199828(6, itfMesWork.allocation);
+        place->sprite = func_00199828(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
             place->sprite->unk20 = panel->origin.tex->unk4 + func_00195ED8(0, panel->origin.tex);
         }
@@ -187,7 +171,7 @@ void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
     if (origin->tex != 0 && !(panel->flags & 0x10000)) {
         if (place->frame == 0) {
             s32 width = origin->tex->unkC * 16;
-            place->frame = func_00199828(7, itfMesWork.allocation);
+            place->frame = func_00199828(7, (u32)itfMesWork.windowTexture);
             itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->unkC);
             itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
@@ -375,8 +359,11 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E048);
 
-void itfUpdateBattleDisplayAndFadeIndicator(u32 object) {
-    itfMesUpdatePanelFades();
+void itfMesUpdatePanelFades(UiPanel *panel);
+void btlUpdateFadeIndicator(UiPanel *panel);
+
+void itfUpdateBattleDisplayAndFadeIndicator(UiPanel *object) {
+    itfMesUpdatePanelFades(object);
     func_0019E320(object);
     func_0019E4F8(object);
     btlUpdateFadeIndicator(object);
@@ -535,8 +522,8 @@ void sndStepSequenceIndex(SoundSeq *obj, s32 dir) {
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019EA88);
 
 
-void btlUpdateFadeIndicator(u8 *obj) {
-    BtlFade *fade = &((UiPanel *)obj)->fade;
+void btlUpdateFadeIndicator(UiPanel *panel) {
+    BtlFade *fade = &panel->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
         if (fade->timer > 0) {
@@ -576,7 +563,7 @@ void itfUpdateSoundSelectorPanel(UiPanel *panel) {
     SoundSeq *selection;
     s32 glyph;
 
-    itfMesWork.drawFlags &= ~2;
+    itfMesWork.flags &= ~2;
     itfMesRenderActivePanelSprites(panel);
     glyph = (s32)panel->origin.tex;
     if (!(flags & 0x10000) && glyph != 0) {
@@ -629,7 +616,7 @@ void itfMesRenderActivePanelSprites(UiPanel *panel) {
         if (panel->state != 3) {
             itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->index]);
         }
-        itfMesWork.drawFlags |= 2;
+        itfMesWork.flags |= 2;
         if (place->overlay != 0) {
             itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->index]);
         }
@@ -647,9 +634,9 @@ extern u8 D_00358008[];
 extern u8 D_00357FF8[];
 extern s32 D_00358018[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(s32);
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
-extern void itfSendTablePacket(s32, s32, s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfSendTablePacket(SdfListHead *, s32, s32);
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
 void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
@@ -657,20 +644,20 @@ void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
     BtlFade *fade = &object->fade;
     s32 packet;
     s32 expansion;
-    UiSurface *surface;
+    SdfPoolNode *surface;
 
     bounds[0] = 0x1AA0;
     bounds[1] = 0xC60;
     bounds[2] = 0x1BD0;
     bounds[3] = 0xD58;
     packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
+    sdfInitPacketList((SdfListHead *)packet);
     D_00358018[3] = 0xFF;
     itfQueueTextureBoundQuadPacket(bounds, D_00358008, D_00358018, object->unkC,
-                                  itfMesWork.allocation, 0, packet);
+                                  itfMesWork.windowTexture, 0, (SdfListHead *)packet);
     D_00358018[3] = fade->alpha;
     itfQueueTextureBoundQuadPacket(bounds, D_00357FF8, D_00358018, object->unkC,
-                                  itfMesWork.allocation, 0, packet);
+                                  itfMesWork.windowTexture, 0, (SdfListHead *)packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
         bounds[0] -= expansion * 2;
@@ -678,26 +665,20 @@ void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
         bounds[2] += expansion * 2;
         bounds[3] += expansion;
         D_00358018[3] = fade->timer;
-        itfSendTablePacket(packet, 1, 0);
+        itfSendTablePacket((SdfListHead *)packet, 1, 0);
         itfQueueTextureBoundQuadPacket(bounds, D_00357FF8, D_00358018, object->unkC,
-                                      itfMesWork.allocation, 0, packet);
-        itfSendTablePacket(packet, 0, 0);
+                                      itfMesWork.windowTexture, 0, (SdfListHead *)packet);
+        itfSendTablePacket((SdfListHead *)packet, 0, 0);
     }
     surface = &kwlnDrawSurfaces[object->index];
-    surface->submit(surface, packet);
+    surface->append((SdfListHead *)surface, (SdfListHead *)packet);
 }
 
-typedef struct SoundQueueNode {
-    struct SoundQueueNode *previous;
-    struct SoundQueueNode *next; /* 0x04 */
-    s32 window;                  /* 0x08: released when flushing the message queue */
-    UiPanel *object;             /* 0x0C: updated by the sound-queue visitor */
-} SoundQueueNode;
 
 s32 sndVisitQueuedResources(void) {
-    SoundQueueNode *node = *(SoundQueueNode **)D_003D6EB0;
+    ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     while (node != 0) {
-        itfUpdateBattleDisplayAndFadeIndicator(node->object);
+        itfUpdateBattleDisplayAndFadeIndicator((UiPanel *)node->stateAddress);
         node = node->next;
     }
     return 0;
@@ -705,34 +686,30 @@ s32 sndVisitQueuedResources(void) {
 
 extern void itfMesDestroyWindow(s32 window);
 
-extern void sdfTexReleaseReferenceViaHandler(s32 texture);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F6A0);
 
 void sndFlushMessageQueue(void) {
-    SoundQueueNode *node = itfMesWork.head;
+    ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     s32 window;
     while (node != 0) {
-        window = node->window;
+        window = node->index;
         node = node->next;
         itfMesDestroyWindow(window);
     }
-    sdfTexReleaseReferenceViaHandler(itfMesWork.allocation);
-    itfMesWork.allocation = 0;
+    sdfTexReleaseReferenceViaHandler(itfMesWork.windowTexture);
+    itfMesWork.windowTexture = NULL;
 }
 
-typedef struct KwlnDrawSink {
-    u8 unk0[0x10];
-    void (*submit)(void *, s32);
-} KwlnDrawSink;
 
-extern KwlnDrawSink D_00325708;
+extern SdfPoolNode D_00325708;
 extern s32 D_00358028[];
 extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(s32 mem);
-extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, u64);
+extern void sdfInitPacketList(SdfListHead *list);
+extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
 void func_0019F770(UiSprite *sprite) {
     s32 vertices[4][2] = {
@@ -744,9 +721,9 @@ void func_0019F770(UiSprite *sprite) {
     s32 packet;
 
     packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
-    itfEmitQuadListA(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, packet);
-    D_00325708.submit(&D_00325708, packet);
+    sdfInitPacketList((SdfListHead *)packet);
+    itfEmitQuadListA(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, (SdfListHead *)packet);
+    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)packet);
 }
 
 void itfAdjustPanelBoundsWithPad(UiPanelPlacement *object, s32 mode) {
@@ -834,9 +811,9 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-SoundQueueNode *func_0019FA70(SoundQueueNode *node) {
+ItfMesPoolNode *func_0019FA70(ItfMesPoolNode *node) {
     s32 index = 0;
-    s32 count = itfMesWork.unk00;
+    s32 count = itfMesWork.activeWindowCount;
 
     if (count <= 0) {
         return NULL;
@@ -846,9 +823,9 @@ SoundQueueNode *func_0019FA70(SoundQueueNode *node) {
             node = node->previous;
         }
         if (node == NULL) {
-            node = itfMesWork.tail;
+            node = itfMesWork.pool.activeTail;
         }
-        if (node->object->place.sprite != NULL) {
+        if (((UiPanel *)node->stateAddress)->place.sprite != NULL) {
             break;
         }
         index++;
@@ -909,12 +886,8 @@ s32 itfUpdateTestMessageResourceInput(void) {
     return 0;
 }
 
-typedef struct SndDev {
-    u8 unk0[0x10];
-    void (*unk10)(void *, s32);
-} SndDev;
 
-extern SndDev D_003255A8;
+extern SdfPoolNode D_003255A8;
 
 extern u8 D_00358318[];
 
@@ -922,18 +895,15 @@ extern u8 D_00358328[];
 
 extern u8 D_00358338[];
 
-extern void itfSendTablePacket(s32 packet, s32, s32);
-
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, s32, s32, s32);
 
 s32 sndUpdateTestMsgTask(void) {
     s32 mem;
     if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
         mem = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(mem);
-        itfSendTablePacket(mem, 0, 0);
-        itfQueueTextureBoundQuadPacket(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
-        D_003255A8.unk10(&D_003255A8, mem);
+        sdfInitPacketList((SdfListHead *)mem);
+        itfSendTablePacket((SdfListHead *)mem, 0, 0);
+        itfQueueTextureBoundQuadPacket(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, (SdfListHead *)mem);
+        D_003255A8.append((SdfListHead *)&D_003255A8, (SdfListHead *)mem);
         return 0;
     }
     return 0;
