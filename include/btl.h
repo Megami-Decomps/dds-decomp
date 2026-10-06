@@ -257,7 +257,7 @@ typedef struct BtlUnit {
     s32 effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
     s32 unk344; /* Alternate SDF model used by the transparency path. */
-    u8 pad348[4];
+    struct BtlUnit *mirror; /* 0x348: created and destroyed by the model-change task. */
     s32 unk34C;
     s32 unk350;
     u8 pad354[8];
@@ -265,6 +265,8 @@ typedef struct BtlUnit {
     struct BtlUnit *previousActor; /* 0x360 */
     struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;
+typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 1 : -1];
+typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
 #endif /* VERSION_DDS2 */
 
 /* Whole status pair (flags low, stateFlags high) for the 64-bit mask tests. */
