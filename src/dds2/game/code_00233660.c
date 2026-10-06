@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "common.h"
 #include "sdf.h"
 #include "mdl.h"
@@ -2297,20 +2298,20 @@ void mdlViewerTaskDestroy(void) {
 
 typedef struct MdlViewerTaskDef {
     const char *name;
-    void *update;
+    TaskUpdate update;
     s32 data;
 } MdlViewerTaskDef;
 
 extern MdlViewerTaskDef D_003C87F0[];
 
-extern s32 kwlnTaskCreate(const char *name, s32 id, s32, s32, void *update, void *destroy, s32 data);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void func_00101968(s32, s32);
 
 void mdlRestartViewerPhaseTask(void) {
     mdlViewerTaskDestroy();
     mdlViewerState.viewerTask =
-        kwlnTaskCreate(D_003C87F0[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0,
+        (s32)kwlnTaskCreate(D_003C87F0[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0,
                        D_003C87F0[mdlViewerState.taskPhase - 1].update, 0,
                        D_003C87F0[mdlViewerState.taskPhase - 1].data);
     func_00101968(mdlViewerState.unk00, mdlViewerState.viewerTask);
@@ -2438,6 +2439,17 @@ void mdlLoadViewerPresentationConfig(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238BD8);
 
+typedef struct MdlTaskDef {
+    const char *name;
+    s32 arg;
+} MdlTaskDef;
+
+extern MdlTaskDef D_003C8890[];
+
+extern char D_004214E8[];
+
+extern char D_004214F8[];
+
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238D38);
 
 /* Clear each occupied resource slot before destroying its context; retain the native scan form. */
@@ -2456,17 +2468,6 @@ void mdlFreeViewResources(void) {
         resourceSlot++;
     }
 }
-
-typedef struct MdlTaskDef {
-    s32 name;
-    s32 arg;
-} MdlTaskDef;
-
-extern MdlTaskDef D_003C8890[];
-
-extern char D_004214E8[];
-
-extern char D_004214F8[];
 
 void mdlCleanupViewerTasksAndResources(void) {
     MdlTaskDef *def;

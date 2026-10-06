@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "common.h"
 #include "sdf.h"
 #include "mdl.h"
@@ -124,7 +125,7 @@ extern s8 D_003D7A60[];
 
 typedef struct MdlViewerTaskDef {
     const char *name;
-    void *update;
+    TaskUpdate update;
     s32 data;
 } MdlViewerTaskDef;
 
@@ -153,9 +154,9 @@ extern char D_003ABCD8[]; /* "%02x/%02x" */
 
 extern char D_003BBC28[]; /* "" */
 
-extern void mdlViewer();
+extern s32 mdlViewer(KwlnTask *);
 
-extern void mdlViewerEnd();
+extern s32 mdlViewerEnd(KwlnTask *);
 
 s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
@@ -193,7 +194,7 @@ extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
-extern s32 kwlnTaskCreate(const char *name, s32 id, s32, s32, void *update, void *destroy, s32 data);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 void dds3AdminSetControlFlag(void);
 
@@ -2265,7 +2266,7 @@ void mdlViewerTaskDestroy(void) {
 
 void mdlRestartViewerPhaseTask(void) {
     mdlViewerTaskDestroy();
-    mdlViewerState.viewerTask = kwlnTaskCreate(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
+    mdlViewerState.viewerTask = (s32)kwlnTaskCreate(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
     func_00101A80(mdlViewerState.unk00, mdlViewerState.viewerTask);
 }
 
