@@ -214,19 +214,6 @@ typedef struct {
 } EffPCPTexturedBlurParams;
 
 
-typedef struct {
-    s32 count;
-    f32 phaseStep;
-    f32 spacing;
-    u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 angleStep;
-    s32 x;
-    s32 y;
-    s32 size;
-} EffBlurScaleParams;
 
 typedef struct {
     EffPCPCompactTimelineParams timeline;
@@ -286,7 +273,10 @@ typedef struct {
 } EffPCPCompactWork;
 
 
-extern u32 effCloneBlurWorkWithSlots(void *params);
+extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
+extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
+extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
+extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 
 /* Shared 0x24-byte thunder ray work. The renderer places its first point
    startDistance along the muzzle direction, then advances by length. */
@@ -2927,7 +2917,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactScaleParams *par
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = (void *)effCloneBlurWorkWithSlots(&params->res);
+    work->resource = effCloneBlurWorkWithSlots(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2961,11 +2951,60 @@ void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
 }
 
 void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseSecondResource((u32)work->resource);
+    effBlurReleaseSecondResource((EffBlurScaleWork *)work->resource);
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183F58);
+/* vu0 routine: grow the scale slots and restart looping world-space bursts. */
+void func_00183F58(EffPCPCompactWork *work) {
+    f32 projected[4] __attribute__((aligned(16)));
+    s32 frame = work->frame;
+    s32 duration = work->duration;
+    u8 flags = work->flags;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 opacity;
+    f32 displacement;
+    u32 color;
+
+    if (duration < frame) {
+        if (flags != 2) {
+            return;
+        }
+        work->frame = 0;
+        frame = 0;
+        effBlurSecondInitSlots((EffBlurScaleWork *)work->resource);
+    }
+    fadeIn = work->fadeIn;
+    fadeOut = work->fadeOut;
+    displacement = (f32)(work->endExtent - work->startExtent) *
+                   (f32)frame / (f32)duration;
+    displacement = (s32)displacement;
+    ((EffBlurScaleWork *)work->resource)->params.size =
+        (f32)work->startExtent + displacement;
+    if (flags == 0 || flags == 2) {
+        VU0_LOAD_VF(vf10, work->position);
+        sdfProjectVuVectorToScreen();
+        VU0_STORE_VF(vf10, projected);
+        ((EffBlurScaleWork *)work->resource)->params.x = (s32)projected[0] - 2048;
+        ((EffBlurScaleWork *)work->resource)->params.y = (u32)((s32)projected[1] - 2048) << 1;
+    } else {
+        ((EffBlurScaleWork *)work->resource)->params.x = 0;
+        ((EffBlurScaleWork *)work->resource)->params.y = 0;
+    }
+    if (frame < fadeIn && fadeIn != 0) {
+        opacity = (f32)frame / (f32)fadeIn;
+    } else if (duration - frame <= fadeOut && fadeOut != 0) {
+        opacity = (f32)(duration - frame) / (f32)fadeOut;
+    } else {
+        opacity = 1.0f;
+    }
+    color = work->color;
+    ((EffBlurScaleWork *)work->resource)->params.color = effMultiplyPackedColors(
+        effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
+    effBlurStepScaleSlotsAndDraw((EffBlurScaleWork *)work->resource);
+    work->frame++;
+}
 
 void effPcpCopyShortThunderFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);

@@ -13,35 +13,8 @@ typedef struct {
     s32 bottom;
 } EffSolidRectParams;
 
-/* Scale variant: phase controls its size/lifetime, angle drives displacement. */
-typedef struct {
-    f32 phase;
-    f32 angle;
-    EffBlurQuad quad;
-} EffBlurScaleSlot; /* 0x30 */
 
-/* Serialized prefix, matching EffBlurScaleParams in effBlur_Filter. */
-typedef struct {
-    s32 count;
-    f32 phaseStep;
-    f32 spacing;
-    u32 color;
-    s32 unk10; /* Copied to quad.blendControl by the slot reset callback. */
-    f32 unk14; /* Copied to quad.angle by the slot reset callback. */
-    f32 unk18; /* Native update uses this as the displacement amplitude. */
-    f32 angleStep;
-    s32 x;
-    s32 y;
-    s32 size;
-} EffBlurScaleParams; /* 0x2C */
 
-/* Live owner followed by count slots; its allocation tail is not serialized. */
-typedef struct {
-    EffBlurScaleParams params;
-    u32 sourceHandle;
-    void *allocation;
-    EffBlurScaleSlot *slots;
-} EffBlurScaleWork; /* 0x38 */
 extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *allocation);
 extern s32 effGetResourceFirstWord(s32 index);
