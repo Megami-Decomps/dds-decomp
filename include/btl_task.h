@@ -53,7 +53,12 @@ typedef struct BtlTask {
     u16 actionNumber;       /* +0x04: "btl:actnum 0" guard and scene-slot repetitions. */
     u8 pad06[2];
     u32 flags;               /* +0x08 */
+#ifdef VERSION_DDS2
+    u32 options;             /* +0x0C: command selection options. */
+    u8 unk_10[8];
+#else
     u8 unk_0C[0xC];
+#endif
     BtlUnit *unit;           /* +0x18 */
     u8 unk_1C[4];
     s32 result;              /* +0x20 */
@@ -62,13 +67,14 @@ typedef struct BtlTask {
     u8 unk_28[0x10];
     s32 value38; /* 0x38: count retained by the HARI2 command (0xD5). */
     u8 pad3C[0x14];
+#else
+    s32 commandReference;    /* +0x28: command 4 resolves this item reference. */
+    u8 pad2C[0x24];
+#endif
     u16 actionStage; /* 0x50: 4 while the gun-change command still owes its effect */
     u8 pad52[2];
     s32 effect; /* 0x54 */
     u8 pad58[8];
-#else
-    u8 unk_28[0x38];
-#endif
     BtlIndexList *targetList; /* Selected unit/ID index list consumed by battle commands. */
     u8 unk_64[0xE4];
     u32 actions[8];         /* +0x148: opaque queued action slots */
