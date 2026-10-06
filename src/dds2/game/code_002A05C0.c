@@ -57,7 +57,17 @@ typedef struct MovieMenuState {
     s32 state;
     s32 cursor;
     s32 mode;
-    u8 pad1C[0xFC];
+    u8 pad1C[0x14];
+    u32 bar[2];           /* 0x30 */
+    u32 barB[2];          /* 0x38 */
+    u32 barSmall[3];      /* 0x40 */
+    PickList paired;      /* 0x4C */
+    SlideBarTimed timedA; /* 0xE0: pos below 0x200 while the menu bar is on screen */
+    SlideBarTimed timedB; /* 0xF0 */
+    u8 movie[0xC];        /* 0x100 */
+    s32 movieDrawn;       /* 0x10C */
+    s32 movieAlpha;       /* 0x110 */
+    s32 movieFrame;       /* 0x114 */
 } MovieMenuState;
 
 extern MovieMenuState *mnuMovieMenuState;
@@ -980,7 +990,123 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
 
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428680);
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2C28);
+extern void mnuSlideBarSetState(u32 *work, s32 state);
+extern void mnuSlideBarSetStateB(u32 *state, u32 mode);
+extern void mnuSlideBarSetStateSmall(u32 *state, u32 mode);
+extern void mnuPairedSlideBarSetState(PickList *work, s32 state);
+extern void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value);
+extern void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1);
+extern u32 mnuIsTitleMovieDrawActive(void);
+extern void func_002A50F8(void *work);
+
+/* Title-menu event handler (proposed mnuHandleTitleMenuEvent): drives the menu's slide bars, the background
+ * movie and its fade for menu events 2..32; returns 1 once the movie has stopped after event 32. */
+s32 func_002A2C28(s32 event) {
+    s32 done = 0;
+
+    switch (event) {
+    case 2:
+        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 2);
+        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 2);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
+        mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
+        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
+        break;
+    case 3:
+        kwlnFadeInStart(0, 0, 0, 0);
+        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 3);
+        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 3);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 3, 0);
+        mnuSlideBarSetState(mnuMovieMenuState->bar, 3);
+        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
+        func_003458E8(1);
+        sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x80808080);
+        mnuArmTitleMovieDrawAndResetFrame(0x5B, 0);
+        break;
+    case 5:
+        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 2);
+        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 2);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
+        mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
+        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
+        func_002A50F8(mnuMovieMenuState->movie);
+        func_003458E8(0);
+        mnuStopTitleMovieDraw();
+        break;
+    case 19:
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 3, 0);
+        break;
+    case 20:
+        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 1);
+        break;
+    case 21:
+        if (++mnuMovieMenuState->cursor < 0x14B) {
+            break;
+        }
+        mnuSlideBarSetState(mnuMovieMenuState->bar, 1);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 1, 0);
+        break;
+    case 23:
+        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 1);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 3, 0);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 0, 0x14);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 3, 0);
+        mnuSlideBarSetState(mnuMovieMenuState->bar, 3);
+        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 1);
+        func_003458E8(1);
+        sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x808080);
+        mnuArmTitleMovieDrawAndResetFrame(0x5B, 1);
+        break;
+    case 25:
+        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 3);
+        /* fallthrough */
+    case 26:
+    case 31:
+        if (mnuMovieMenuState->timedA.pos < 0x200) {
+            if (mnuMovieMenuState->movieDrawn == 0) {
+                mnuArmTitleMovieDrawAndResetFrame(0x5B, 1);
+            }
+            if (mnuMovieMenuState->movieFrame < 0x32A) {
+                mnuMovieMenuState->movieAlpha += 4;
+                if (mnuMovieMenuState->movieAlpha > 0x80) {
+                    mnuMovieMenuState->movieAlpha = 0x80;
+                }
+            } else if (mnuMovieMenuState->movieDrawn != 0) {
+                mnuMovieMenuState->movieAlpha -= 4;
+                if (mnuMovieMenuState->movieAlpha < 0) {
+                    mnuMovieMenuState->movieAlpha = 0;
+                }
+                if (mnuMovieMenuState->movieAlpha == 0) {
+                    mnuStopTitleMovieDraw();
+                }
+            }
+        }
+        sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, (mnuMovieMenuState->movieAlpha << 24) | 0x808080);
+        mnuMovieMenuState->movieFrame++;
+        break;
+    case 32:
+        if (!mnuIsTitleMovieDrawActive()) {
+            break;
+        }
+        done = 1;
+        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 2);
+        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 2);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
+        mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
+        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
+        func_002A50F8(mnuMovieMenuState->movie);
+        mnuStopTitleMovieDraw();
+        func_003458E8(0);
+        break;
+    }
+    return done;
+}
 
 INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A30C0);
 
