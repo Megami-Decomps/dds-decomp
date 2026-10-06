@@ -1595,6 +1595,22 @@ void btlMarkRuntimeUpdatePending(void) {
     }
 }
 
+extern s32 *D_00435DD8;
+extern s32 *D_00435DDC;
+extern s32 *D_00435DFC;
+extern char D_00436EE8[];
+extern char D_00436EF0[];
+extern s32 func_001ABF50();
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
+
+typedef struct BtlAffinityRow {
+    s32 value[19];
+} BtlAffinityRow;
+
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B988);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B9A0);
@@ -1669,77 +1685,61 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC20);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC30);
 
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC40);
+void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
+    BtlAffinityRow row;
+    const char *elementNames[19] = {"BUTURI  ", "ZYUGEKI ", "KAEN    ", "HYOKETU ", "DENGEKI ", "SHOGEKI ", "TIHEN   ", "BANNO   ", "HAMA    ", "JYUSATU ", "CHARM   ", "POISON  ", "CLOSE   ", "PANIC   ", "SINKEI  ", "HUNT    ", "RECOVERY", "HOJO    ", "SPECIAL "};
+    const char *labels[13] = {"DV_MUKOU ", "DV_HANSYA", "DV_KYUSYU", "DV_BADOFF", "DV_WK    ", "MUKOU|WK ", "HANSYA|WK", "KYUSYU|WK", "BADOFF|WK", "MUKOU|BOFF", "HANSYA|BOFF", "KYUSYU|BOFF", "DV_BUG!!!"};
+    u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 i;
+    s32 value;
+    s32 label;
 
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC50);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC60);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC70);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC80);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BC90);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BCA0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BCB0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BCC0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BCD0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BCE0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BCF0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD00);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD10);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD20);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD30);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD40);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD50);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD60);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BD70);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BDC0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BDD0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BDE0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BDF0);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE00);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE10);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE20);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE30);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE40);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE50);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE60);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE70);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE80);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BE90);
-
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041BEC8);
-
-INCLUDE_ASM(const s32, "game/code_0022AC10", btlDrawUnitAffinityDebug);
+    if ((unit->flags & 1) != 0) {
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        color[3] = color[2] = color[1] = color[0] = 0x80A0A0A0;
+        evtSubmitDefaultDepthGradientRect(x, y, 240, 2, color[0], color[1], color[2], color[3]);
+        color[3] = color[2] = color[1] = color[0] = 0x80101010;
+        evtSubmitDefaultDepthGradientRect(x, y, 240, 320, color[0], color[1], color[2], color[3]);
+        color[3] = color[2] = color[1] = color[0] = 0x80A0A0A0;
+        evtSubmitDefaultDepthGradientRect(x, y + 320, 240, 2, color[0], color[1], color[2], color[3]);
+        btlBossDebugPrintfN(x, y, 0, D_00436EE8);
+        if ((unit->flags & 0x200) != 0) {
+            if ((unit->flags & 0x1000) != 0) {
+                row = ((BtlAffinityRow *)D_00435DD8)[unit->mode];
+            } else {
+                row = ((BtlAffinityRow *)D_00435DDC)[unit->mode];
+            }
+        } else {
+            row = ((BtlAffinityRow *)D_00435DFC)[unit->mode];
+        }
+        for (i = 0; i < 16; i++) {
+            row.value[i] = func_001ABF50(unit, i);
+            value = row.value[i];
+            if ((value & 0xFFFF0000) != 0) {
+                switch (value & 0xFFFF0000) {
+                case 0x10000: label = 0; break;
+                case 0x20000: label = 1; break;
+                case 0x40000: label = 2; break;
+                case 0x100000: label = 3; break;
+                case 0x80000000: label = 4; break;
+                case 0x80010000: label = 5; break;
+                case 0x80020000: label = 6; break;
+                case 0x80040000: label = 7; break;
+                case 0x80100000: label = 8; break;
+                case 0x110000: label = 9; break;
+                case 0x120000: label = 10; break;
+                case 0x140000: label = 11; break;
+                default: label = 12; break;
+                }
+                btlBossDebugPrintfN(x, y + (i + 1) * 18, 0, "%s:%3d|%s", elementNames[i], (u16)row.value[i], labels[label]);
+            } else {
+                btlBossDebugPrintfN(x, y + (i + 1) * 18, 0, D_00436EF0, elementNames[i], (u16)value);
+            }
+        }
+    }
+}
 
 typedef struct MenuList {
     u32 count;

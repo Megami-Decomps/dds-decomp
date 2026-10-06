@@ -305,7 +305,7 @@ typedef struct MantraBackgroundState {
     u16 clock;            /* 0x0A */
     f32 value;            /* 0x0C */
     u32 enabled;          /* 0x10 */
-    u32 selectedValue;    /* 0x14 */
+    s32 selectedValue;    /* 0x14: one bit per node; func_00270568 tests it with srav (signed) */
     MantraBurstPool *burstPool; /* 0x18 */
 } MantraBackgroundState;
 
@@ -1236,7 +1236,72 @@ void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
     mnuDrawMantraRotatedSprite(0, 0x140, 0, amount, 0x5A, 0, packet, 180.0f);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270568);
+void func_00270568(MantraDrawItem *item) {
+    /* Retail copies 0x90 bytes of paired positions and 0x48 bytes of icons to the stack. */
+    s16 positions[2][18][2] = {
+        {
+            {0xD6, 0x67},
+            {0xA5, 0x53},
+            {0x87, 0x67},
+            {0x7F, 0xA5},
+            {0x6B, 0xCD},
+            {0xEE, 0x67},
+            {0x120, 0x53},
+            {0x13E, 0x67},
+            {0x153, 0xA5},
+            {0x167, 0xCD},
+            {0xD6, 0x13B},
+            {0xA5, 0x150},
+            {0x87, 0x13C},
+            {0x7F, 0xF4},
+            {0xEE, 0x13B},
+            {0x11F, 0x150},
+            {0x13D, 0x13C},
+            {0x153, 0xF4}
+        },
+        {
+            {0xCF, 0x55},
+            {0x9D, 0x41},
+            {0x7F, 0x55},
+            {0x6A, 0xA5},
+            {0x56, 0xCD},
+            {0xF7, 0x55},
+            {0x129, 0x41},
+            {0x147, 0x55},
+            {0x15C, 0xA5},
+            {0x170, 0xCD},
+            {0xCF, 0x144},
+            {0x9D, 0x158},
+            {0x7F, 0x144},
+            {0x6A, 0xF4},
+            {0xF7, 0x144},
+            {0x129, 0x158},
+            {0x147, 0x144},
+            {0x15C, 0xF5}
+        }
+    };
+    u16 icons[2][18] = {
+        {0x111, 0x111, 0x111, 0x115, 0x115, 0x112, 0x112, 0x112, 0x116, 0x116, 0x113, 0x113, 0x113, 0x115, 0x114, 0x114, 0x114, 0x116},
+        {0x117, 0x117, 0x117, 0x11B, 0x11B, 0x118, 0x118, 0x118, 0x11C, 0x11C, 0x119, 0x119, 0x119, 0x11B, 0x11A, 0x11A, 0x11A, 0x11C}
+    };
+    MantraBackgroundState *background;
+    s32 alpha;
+    s32 i;
+
+    background = item->data;
+    if (background->variants.currentVariant != background->variants.nextVariant) {
+        alpha = (s32)((f32)background->timing.transitionDelay / 5.0f * 128.0f * background->value);
+    } else {
+        alpha = (s32)((5.0f - (f32)background->timing.transitionDelay) / 5.0f * 128.0f * background->value);
+    }
+    for (i = 0; i < 18; i++) {
+        if ((background->selectedValue >> i) & 1) {
+            mnuDrawMantraSprite(positions[1][i][0], positions[1][i][1], 0, alpha, icons[1][i], 0, 0x4A);
+        } else {
+            mnuDrawMantraSprite(positions[0][i][0], positions[0][i][1], 0, alpha, icons[0][i], 0, 0x4A);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270848);
 
@@ -1272,10 +1337,6 @@ void mnuKeepMantraBackgroundMaskVisible(u32 pool) {
     item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 4);
     ((MantraPulseFade *)item->data)->state = 2;
 }
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004251C8);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425258);
 
 u32 mnuInitMantraBackgroundMaskDraw(void) {
     u32 data = sdfAllocSizeClassBlock(0xc);

@@ -789,7 +789,12 @@ def main():
     # label) and data items such as string literals (bytes must equal retail's).
     funcs_by_off = sorted(funcs)
     covered = set()
-    starts = sorted({t[0] for t in tables} | set(bounds) | {len(rodata)})
+    # Items the object's own initializer tables point at (string literals of a
+    # `{"..", ..}` table) start an item too: the REL addend is the target offset.
+    pointed = {struct.unpack_from("<I", rodata, o)[0] for o, (_, s) in rodata_relocs.items()
+               if s == ".rodata" and o + 4 <= len(rodata)}
+    starts = sorted({t[0] for t in tables} | set(bounds) | {p for p in pointed if p < len(rodata)}
+                    | {len(rodata)})
     # Two retail copies that the C compiles to one object item: gcc merged
     # identical constants (e.g. two equal string initializers) that the
     # original kept apart, so the unit's rodata comes out short.
@@ -873,7 +878,9 @@ def main():
             bad += 1
             print(f"PAD jump table of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
                   "after it that no C or asm supplies; keep the function as asm")
-    for b in bounds:  # as-built items: compared by the full-unit .rodata check
+    # As-built items and the strings a compiled table points at: compared by the
+    # full-unit .rodata check.
+    for b in set(bounds) | pointed:
         if 0 <= b < len(rodata):
             covered.update(range(b, next(s for s in starts if s > b)))
     stray = [o for o in range(ro_size) if o not in covered and rodata[o]]

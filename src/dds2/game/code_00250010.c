@@ -577,9 +577,57 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250F20);
+extern const char *D_004374B8[];
+extern const char *D_00423688[];
+extern char D_004374C8[];
+extern char D_004374D0[];
+/* The camp provider owns the scene type (CampScene); the viewer passes its runtime. */
+extern u32 mnuCampGetPrimaryOption(void *scene);
+extern u32 mnuCampGetSecondaryOption(void *scene);
 
-extern void func_00250F20(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
+/* Draw a project-menu command, including its current toggle/skip option. */
+void func_00250F20(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    char labels[11][30] = {
+        "SAVE PROJ    >>",
+        "LOAD PROJ    >>",
+        "LOAD NEW PROJ>>",
+        "SET START FRAME",
+        "SET END   FRAME",
+        "SET TOTAL FRAME",
+        "CAPTURE        ",
+        "BATCH CAPTURE  ",
+        "MOVE ALLFRAME ",
+        "BISTA",
+        "SKIP"
+    };
+    const char *primaryOptions[2];
+    const char *secondaryOptions[3];
+    s32 style;
+
+    memcpy(primaryOptions, D_004374B8, sizeof(primaryOptions));
+    memcpy(secondaryOptions, D_00423688, sizeof(secondaryOptions));
+    if (index < 11) {
+        if (ctx->inputA == index) {
+            if (ctx->actionMode == 1) {
+                style = 4;
+            } else {
+                style = 5;
+            }
+        } else {
+            style = 0;
+        }
+        if (index == 9) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+                D_004374C8, labels[index], primaryOptions[mnuCampGetPrimaryOption(ctx)]));
+        } else if (index == 10) {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+                D_004374C8, labels[index], secondaryOptions[mnuCampGetSecondaryOption(ctx)]));
+        } else {
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+                D_004374D0, labels[index]));
+        }
+    }
+}
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;

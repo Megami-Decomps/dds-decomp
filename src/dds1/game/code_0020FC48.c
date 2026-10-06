@@ -1515,6 +1515,22 @@ void btlMarkRuntimeUpdatePending(void) {
     }
 }
 
+extern s32 *D_003BAA08;
+extern s32 *D_003BAA0C;
+extern s32 *D_003BAA2C;
+extern char D_003BBA98[];
+extern char D_003BBAA0[];
+extern s32 func_001A2F50();
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
+
+typedef struct BtlAffinityRow {
+    s32 value[19];
+} BtlAffinityRow;
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A69C0);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A69D8);
@@ -1589,77 +1605,61 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6C50);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6C60);
 
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6C70);
+void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
+    BtlAffinityRow row;
+    const char *elementNames[19] = {"BUTURI  ", "ZYUGEKI ", "KAEN    ", "HYOKETU ", "DENGEKI ", "SHOGEKI ", "TIHEN   ", "BANNO   ", "HAMA    ", "JYUSATU ", "CHARM   ", "POISON  ", "CLOSE   ", "PANIC   ", "SINKEI  ", "HUNT    ", "RECOVERY", "HOJO    ", "SPECIAL "};
+    const char *labels[13] = {"DV_MUKOU ", "DV_HANSYA", "DV_KYUSYU", "DV_BADOFF", "DV_WK    ", "MUKOU|WK ", "HANSYA|WK", "KYUSYU|WK", "BADOFF|WK", "MUKOU|BOFF", "HANSYA|BOFF", "KYUSYU|BOFF", "DV_BUG!!!"};
+    u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 i;
+    s32 value;
+    s32 label;
 
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6C80);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6C90);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6CA0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6CB0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6CC0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6CD0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6CE0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6CF0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D00);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D10);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D20);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D30);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D40);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D50);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D60);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D70);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D80);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6D90);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6DA0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6DF0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E00);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E10);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E20);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E30);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E40);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E50);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E60);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E70);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E80);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6E90);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EA0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EB0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EC0);
-
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6EF8);
-
-INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawUnitAffinityDebug);
+    if ((unit->flags & 1) != 0) {
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        color[3] = color[2] = color[1] = color[0] = 0x80A0A0A0;
+        evtSubmitDefaultDepthGradientRect(x, y, 240, 2, color[0], color[1], color[2], color[3]);
+        color[3] = color[2] = color[1] = color[0] = 0x80101010;
+        evtSubmitDefaultDepthGradientRect(x, y, 240, 320, color[0], color[1], color[2], color[3]);
+        color[3] = color[2] = color[1] = color[0] = 0x80A0A0A0;
+        evtSubmitDefaultDepthGradientRect(x, y + 320, 240, 2, color[0], color[1], color[2], color[3]);
+        btlBossDebugPrintfN(x, y, 0, D_003BBA98);
+        if ((unit->flags & 0x200) != 0) {
+            if ((unit->flags & 0x1000) != 0) {
+                row = ((BtlAffinityRow *)D_003BAA08)[unit->mode];
+            } else {
+                row = ((BtlAffinityRow *)D_003BAA0C)[unit->mode];
+            }
+        } else {
+            row = ((BtlAffinityRow *)D_003BAA2C)[unit->mode];
+        }
+        for (i = 0; i < 16; i++) {
+            row.value[i] = func_001A2F50(unit, i);
+            value = row.value[i];
+            if ((value & 0xFFFF0000) != 0) {
+                switch (value & 0xFFFF0000) {
+                case 0x10000: label = 0; break;
+                case 0x20000: label = 1; break;
+                case 0x40000: label = 2; break;
+                case 0x100000: label = 3; break;
+                case 0x80000000: label = 4; break;
+                case 0x80010000: label = 5; break;
+                case 0x80020000: label = 6; break;
+                case 0x80040000: label = 7; break;
+                case 0x80100000: label = 8; break;
+                case 0x110000: label = 9; break;
+                case 0x120000: label = 10; break;
+                case 0x140000: label = 11; break;
+                default: label = 12; break;
+                }
+                btlBossDebugPrintfN(x, y + (i + 1) * 18, 0, "%s:%3d|%s", elementNames[i], (u16)row.value[i], labels[label]);
+            } else {
+                btlBossDebugPrintfN(x, y + (i + 1) * 18, 0, D_003BBAA0, elementNames[i], (u16)value);
+            }
+        }
+    }
+}
 
 typedef struct PadButtons {
     s8 unk_0;

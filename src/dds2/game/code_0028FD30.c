@@ -264,9 +264,94 @@ s32 mnuNavigateMantraSelector(MenuPanelObject *object, s8 flags) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427668);
+extern s32 mnuGetActiveMantraModelFlagState(void);
+extern s32 mdlFlagTest(s32);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_002906E0);
+extern void *memcpy(void *, const void *, u32);
+extern const s16 D_00427668[4][3];
+extern const u16 D_00427680[3][5];
+extern const u16 D_004276A0[3][5];
+
+INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437940);
+
+MantraNodePos *func_002906E0(MenuPanelObject *object, u16 id, s8 direction) {
+    s32 i;
+    s8 activeFlags = 0;
+    u16 bridgeIds[4] = {0x61, 0x62, 0x63, 0x64};
+    s16 destinations[4][3];
+    u16 horizontalNodes[3][5];
+    u16 verticalNodes[3][5];
+    s8 state;
+
+    memcpy(destinations, D_00427668, sizeof(destinations));
+    memcpy(horizontalNodes, D_00427680, sizeof(horizontalNodes));
+    memcpy(verticalNodes, D_004276A0, sizeof(verticalNodes));
+    state = mnuGetActiveMantraModelFlagState();
+
+    if (state == 3) {
+        return NULL;
+    }
+    for (i = 0; i < 4; i++) {
+        if (mdlFlagTest(0x977 + i)) {
+            activeFlags |= 1 << i;
+        }
+    }
+    for (i = 0; i < sizeof(bridgeIds) / sizeof(bridgeIds[0]); i++) {
+        if (bridgeIds[i] == id) {
+            if (i >= 2) {
+                if (direction == 5 || direction == 0) {
+                    return mnuGetMantraNodePositionRecord(destinations[i][state]);
+                }
+            } else {
+                if (direction == 2 || direction == 3) {
+                    return mnuGetMantraNodePositionRecord(destinations[i][state]);
+                }
+            }
+            return NULL;
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        if (horizontalNodes[state][i] == id &&
+            (direction == 5 || direction == 0)) {
+            if (i < 2) {
+                if (activeFlags & 1) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[0]);
+                }
+                if (activeFlags & 2) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[1]);
+                }
+            } else {
+                if (activeFlags & 2) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[1]);
+                }
+                if (activeFlags & 1) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[0]);
+                }
+            }
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        if (verticalNodes[state][i] == id &&
+            (direction == 2 || direction == 3)) {
+            if (i < 2) {
+                if (activeFlags & 4) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[2]);
+                }
+                if (activeFlags & 8) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[3]);
+                }
+            } else {
+                if (activeFlags & 8) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[3]);
+                }
+                if (activeFlags & 4) {
+                    return mnuGetMantraNodePositionRecord(bridgeIds[2]);
+                }
+            }
+        }
+    }
+    return NULL;
+}
 
 u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
     return (u32)object->state.defaultSelector;
@@ -373,6 +458,12 @@ extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 /* Write each panel slot's 0xB0 saved flag words back to its list node's script entries and log the slot number. */
+INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427668);
+
+INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427680);
+
+INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276A0);
+
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
 
 void mnuStoreMantraPanelFlagsToScript(MenuPanelObject *object) {
@@ -784,10 +875,6 @@ void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining) {
 void func_002945B8(u32 value) {
     D_00438FC8 = value;
 }
-INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437940);
-
-INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437948);
-
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437958);
