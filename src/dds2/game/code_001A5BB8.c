@@ -4712,7 +4712,63 @@ s32 btlSetTaskPhase2(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7B20);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7BF0);
+typedef struct MesWindowConfig {
+    u16 active[9][2];
+} MesWindowConfig;
+
+typedef struct MesWindowSet {
+    s8 state;
+    u8 pad01[3];
+    u32 handle[9];
+    u8 pad28[0x18];
+    s32 x;
+    s32 y;
+    MesWindowConfig config;
+} MesWindowSet;
+
+extern ItfMesSub D_00385A08;
+extern u32 btlIsNamedBattleTaskRegistered(void);
+extern u32 btlHasRegisteredGuidePanelTask(void);
+extern u32 btlHasRegisteredSkillNamePanelTask(void);
+extern u32 btlHasRegisteredAphNamePanelTask(void);
+extern void btlSetTrackedTaskHandle(s32, s32);
+extern s32 func_001B8A80(KwlnTask *);
+extern void itfMesCloseAllWindows(KwlnTask *);
+
+s32 func_001B7BF0(const MesWindowConfig *config) {
+    BattleController *battle = (BattleController *)btlGetRuntime();
+    MesWindowSet *work;
+    KwlnTask *task;
+    s32 i;
+
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
+    }
+    if (btlHasRegisteredGuidePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlHasRegisteredSkillNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
+    }
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
+    }
+    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work->config = *config;
+    work->state = 0;
+    for (i = 0; i < 9; i++) {
+        if (work->config.active[i][0] != 0) {
+            work->handle[i] = itfMesCreateWindow(&D_00385A08);
+        }
+    }
+    work->x = 0x20;
+    work->y = 0x20;
+    task = kwlnTaskCreate(btlMahenPanelTaskNameRef, 0x2B0E, 1, 1,
+                          func_001B8A80, itfMesCloseAllWindows, (u32)work);
+    func_00101968(battle->drawTask, task);
+    btlSetTrackedTaskHandle(10, (s32)task);
+    return 1;
+}
 
 u32 btlIsNamedBattleTaskRegistered(void) {
     KwlnTask *task;
@@ -5058,20 +5114,13 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8A80);
 
 extern void itfMesCleanupWindow(s32, s32);
 
-typedef struct MesWindowSet {
-    u32 unk0;
-    u32 handle[9];
-    u8 pad28[0x20];
-    u16 active[9][2];
-} MesWindowSet;
-
 void itfMesCloseAllWindows(KwlnTask *handle) {
     MesWindowSet *set;
     s32 i;
     btlGetRuntime();
     set = (MesWindowSet *)kwlnTaskGetUserValue(handle);
     for (i = 0; i < 9; i++) {
-        if (set->active[i][0] != 0) {
+        if (set->config.active[i][0] != 0) {
             itfMesCleanupWindow(set->handle[i], 0);
             itfMesDestroyWindowIfPresent(set->handle[i]);
         }
