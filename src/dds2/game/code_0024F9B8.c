@@ -1,6 +1,7 @@
 #include "common.h"
+#include "kwln.h"
 
-extern u32 kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
 extern u32 itfLoadTextureFromAsset(u32);
 
@@ -113,17 +114,18 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     return task;
 }
 
-void evtSetContextFlag(void) {
+/* Flag operations act on the scheduler task's user-value context. */
+void evtSetContextFlag(KwlnTask *task) {
     EventContext *context;
 
-    context = (EventContext *)kwlnTaskGetUserValue();
+    context = (EventContext *)kwlnTaskGetUserValue(task);
     context->flags = context->flags | 1;
 }
 
-void evtClearContextFlag(void) {
+void evtClearContextFlag(KwlnTask *task) {
     EventContext *context;
 
-    context = (EventContext *)kwlnTaskGetUserValue();
+    context = (EventContext *)kwlnTaskGetUserValue(task);
     context->flags = context->flags & 0xfffffffe;
 }
 

@@ -1,13 +1,13 @@
 #include "common.h"
 
-extern u64 sdfSoundIsCommandBusy(void);
+extern u32 sdfSoundIsCommandBusy(void);
 
-extern u64 fldGetCurrentSceneSelectionResource(void);
+extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern s32 D_0032E4E4[];
 
 u32 fldCmdGetCurrentSceneSelectionResource(void) {
-    u64 value;
+    s32 value;
 
     value = fldGetCurrentSceneSelectionResource();
     scrSetIntegerReturnValue(value);
@@ -86,7 +86,7 @@ u32 fldCommandSendSoundControl(void) {
 
 /* Return sound-command busy state to the field script interpreter. */
 u32 fldCommandIsSoundBusy(void) {
-    u64 busy;
+    u32 busy;
 
     busy = sdfSoundIsCommandBusy();
     scrSetIntegerReturnValue(busy);
