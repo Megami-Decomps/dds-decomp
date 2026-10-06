@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_state.h"
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void mnuArmMantraLimitLineFlags(u32, u32);
@@ -10,16 +11,11 @@ typedef struct MenuSearchState {
     s16 targetId;
 } MenuSearchState;
 
-typedef struct MenuSearchValue {
-    u8 pad0[4];
-    u16 id;
-} MenuSearchValue;
-
 typedef struct MenuSearchNode {
     u8 pad0[0x58];
     struct MenuSearchNode *next;
     u8 pad5C[0x14];
-    MenuSearchValue *value; /* 0x70: item whose ID is compared */
+    DatPartyRecord *value; /* 0x70: party record carried by the SDK node */
 } MenuSearchNode;
 
 typedef struct MenuSearchList {
@@ -73,7 +69,7 @@ extern s32 mnuGetMantraNodePositionRecord(s32);
 extern s32 mnuGetNodeValueByIndex();
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 extern s32 ptyGetProfileRecordCap(u16);
-extern s32 ptyGetProfileRecordValue(s32, u16);
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
 INCLUDE_ASM(const s32, "game/code_0028E350", func_0028E350);
 
@@ -115,15 +111,15 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
     MantraNodePos *entry;
     MantraNodePos **entries;
     MenuSearchNode *node;
-    MenuSearchValue *value;
+    DatPartyRecord *value;
     s32 i, j;
     s32 cap;
 
     for (i = 0, slot = work->slots; i < 5; i++, slot++) {
         if (slot->nodeId != 0) {
             record = (MantraNodePos *)mnuGetMantraNodePositionRecord(slot->nodeId);
-            value = (MenuSearchValue *)mnuGetNodeValueByIndex(object, i);
-            if (ptyAnyActivePartyMemberAtProfileCap(record->id, value->id) == 0) {
+            value = (DatPartyRecord *)mnuGetNodeValueByIndex(object, i);
+            if (ptyAnyActivePartyMemberAtProfileCap(record->id, value->unitId) == 0) {
                 for (j = 0; j < 6; j++) {
                     entry = record->entries[j];
                     if (entry != 0 && entry->kind == 2 && entry->id == state->requestedId) {
@@ -154,7 +150,7 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
         for (j = 0, entries = record->entries; j < 6; j++, entries++) {
             if (*entries != 0) {
                 cap = ptyGetProfileRecordCap((*entries)->id);
-                if (cap == ptyGetProfileRecordValue((s32)value, (*entries)->id)) {
+                if (cap == ptyGetProfileRecordValue(value, (*entries)->id)) {
                     state->selectedIndex = i;
                     return 1;
                 }
@@ -170,7 +166,7 @@ s32 mnuSelectMatchingNode(MenuSearchObject *object, MenuSearchState *state) {
     MenuSearchNode *current = object->list->head;
     s32 index = 0;
     while (current != 0) {
-        if (current->value->id == state->targetId) {
+        if (current->value->unitId == state->targetId) {
             state->selectedIndex = index;
             return 0;
         }
