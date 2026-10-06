@@ -143,8 +143,8 @@ extern void func_00317AD0(MnuShootingWork *handle);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
 extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
-extern void func_0031D928(u32 *);
-extern void func_0031DF48(u32 *);
+extern void func_0031D928(struct WideSlotPool *);
+extern void func_0031DF48(struct CompactSlotPool *);
 extern void dds3ReleaseSoundSlotPool(void);
 extern SdfMemBlock *D_00438948;
 extern void mnuDestroyNodeJobQueues(s32 *);
