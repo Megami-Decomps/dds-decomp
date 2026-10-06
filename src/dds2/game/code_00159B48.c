@@ -501,6 +501,8 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
+BillChildPayload *func_00158F88(BillObj *obj, BillOut *entries);
+
 /* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
 void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
     BillObj *billboard = instance->billboard;
@@ -510,15 +512,15 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;
-            modeValues[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
-            modeValues[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + BILL_ENTRY_BYTES);
+            modeValues[2] = (s32)func_00158F88(billboard, billboard->unk60);
+            modeValues[1] = (s32)func_00158F88(billboard, (BillOut *)billboard->unk60 + 1);
         } else if (modeFlags & 0x80) {
             modeValues[0] = 3;
-            modeValues[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
-            modeValues[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + BILL_ENTRY_BYTES);
+            modeValues[2] = (s32)func_00158F88(billboard, billboard->unk60);
+            modeValues[1] = (s32)func_00158F88(billboard, (BillOut *)billboard->unk60 + 1);
         } else {
             modeValues[0] = 0;
-            modeValues[1] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            modeValues[1] = (s32)func_00158F88(billboard, billboard->unk60);
         }
     }
 }
