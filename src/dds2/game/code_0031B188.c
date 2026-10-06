@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_work.h"
 #include "file.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
@@ -51,13 +52,6 @@ typedef struct MenuRegistryRecord {
     ShortRecordList *secondLists;
 } MenuRegistryRecord;
 
-typedef struct MenuWorkEntry {
-    u8 pad00[0xC];
-    MnuModelNode *modelNode;
-    u8 pad10[0x2A];
-    u16 elapsed;
-    u8 pad3C[0xC];
-} MenuWorkEntry;
 
 extern u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord);
 extern ShortRecord *func_003225C0(ShortRecordList *list);
@@ -285,7 +279,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work) {
                         evtPrintDeveloperConsoleMessage("%d:%d:%d:%d\n", frame,
                             record->parameters[0], record->parameters[1],
                             record->parameters[2]);
-                        node = work->modelNode;
+                        node = work->object.modelNode;
                         if (node != NULL) {
                             model = node->model;
                             model->first->frameStep = 0.5f;
@@ -577,7 +571,6 @@ void mnuPauseEffectQueueFrameAdvance(void) {
 u32 mnuResumeEffectQueueFrameAdvance(void) {
     return fileClearRenderFlag(2);
 }
-
 
 
 extern char D_0042DAE8[];
