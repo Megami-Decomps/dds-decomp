@@ -7,6 +7,7 @@
 #include "sdf.h"
 #include "fld.h"
 #include "scr.h"
+#include "dat_state.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -210,7 +211,6 @@ extern void *dds3GetWorldObject(void);
 extern s32 dds3GetWorldCameraObject(s32);
 extern s64 fldGetPlayerSceneState(void);
 
-extern s32 datBattleSceneRecords;
 
 extern u32 D_003BACF8;
 
@@ -2269,7 +2269,7 @@ s32 fldEncProc(void) {
 }
 
 void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
-    if ((recordIndex < 0x400) && ((*(u16 *)((s32)recordIndex * 0x28 + datBattleSceneRecords + 0x20) & 0x8000) != 0))
+    if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
         fldSetEncounterMode(3);

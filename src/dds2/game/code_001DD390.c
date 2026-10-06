@@ -65,7 +65,8 @@ typedef struct BtlEffectResource {
     f32 f18;
     f32 f1C;
     f32 f20;
-    u8 pad24[8];
+    u8 pad24[6];
+    u16 unk2A;
     BtlEffectNode nodes[1];
 } BtlEffectResource;
 
@@ -116,32 +117,6 @@ typedef struct BtlStateHandler {
 
 extern BtlStateHandler D_003B69D8[];
 
-typedef struct BtlFx {
-    u8 pad0[0x50];
-    f32 f50;
-    u8 pad54[4];
-    f32 f58;
-    u8 pad5C[0x24];
-    f32 f80;
-    u8 pad84[4];
-    f32 f88;
-    u8 pad8C[4];
-    union {
-        s128 vec90;
-        struct {
-            f32 f90;
-            f32 f94;
-            f32 f98;
-            f32 f9C;
-        };
-    };
-    s128 vecA0;
-    f32 fB0;
-    f32 fB4;
-    f32 fB8;
-    f32 fBC;
-    f32 fC0;
-} BtlFx;
 
 typedef struct BtlFxSrcA {
     f32 f0;
@@ -292,13 +267,6 @@ extern void func_002A2200(s32);
 
 extern s32 D_00435E0C;
 
-extern s32 datBattleSceneRecords;
-
-typedef struct SoundSceneEntry {
-    u8 pad00[0x24];
-    u16 unk24;
-    u8 pad26[2];
-} SoundSceneEntry;
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
@@ -553,7 +521,7 @@ extern void sdfMotionSampleAtFrame(Motion *, f32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
-extern void btlInitUnitFxDefaults(BtlFx *);
+extern void btlInitUnitFxDefaults(BtlUnit *);
 extern void btlClearSceneTaskActiveFlag(ActionStateLink *);
 
 extern s32 btlCheckSpecialAbility(s32, s32);
@@ -1772,70 +1740,57 @@ void btlDumpTaskQueue(void) {
     btlBossDebugPrintf("btl:packet tail[%p]\n", *(void **)(context + 0x254));
 }
 
-void btlInitUnitFxDefaults(BtlFx *fx) {
-    PCP_COPY_VECTOR(&fx->vec90, &D_003B6B80);
-    fx->fB0 = 220.0f;
-    fx->fB4 = 80.0f;
-    fx->fC0 = 75.0f;
+void btlInitUnitFxDefaults(BtlUnit *unit) {
+    PCP_COPY_VECTOR(unit->bodyOffset, &D_003B6B80);
+    unit->height = 220.0f;
+    unit->reach = 80.0f;
+    unit->unkC0 = 75.0f;
 }
 
 extern s128 D_003B6B90;
 
 extern s128 D_003B6BA0;
 
-typedef struct BtlFxLight {
-    s128 vecA;
-    s128 vecB;
-    f32 intensity;
-    u32 color;
-    u32 unk8;
-} BtlFxLight;
 
-typedef struct BtlFxLights {
-    u8 pad0[0x30];
-    BtlFxLight light0;
-    BtlFxLight light1;
-} BtlFxLights;
-
-void btlInitFxLights(BtlFxLights *fx) {
-    PCP_COPY_VECTOR(&fx->light0.vecA, &D_003B6B90);
-    PCP_COPY_VECTOR(&fx->light0.vecB, &D_003B6BA0);
-    fx->light0.unk8 = 0;
-    fx->light0.intensity = 1.0f;
-    fx->light0.color = 0x80808080;
-    PCP_COPY_VECTOR(&fx->light1.vecA, &D_003B6B90);
-    PCP_COPY_VECTOR(&fx->light1.vecB, &D_003B6BA0);
-    fx->light1.intensity = 1.0f;
-    fx->light1.color = 0x80808080;
-    fx->light1.unk8 = 0;
+void btlInitFxLights(BtlUnit *unit) {
+    PCP_COPY_VECTOR(unit->position, &D_003B6B90);
+    PCP_COPY_VECTOR(unit->rotation, &D_003B6BA0);
+    unit->unk58 = 0.0f;
+    unit->unk50 = 1.0f;
+    unit->baseColor = 0x80808080;
+    PCP_COPY_VECTOR(unit->currentPosition, &D_003B6B90);
+    PCP_COPY_VECTOR(unit->orientation, &D_003B6BA0);
+    unit->scale = 1.0f;
+    unit->overlayColor = 0x80808080;
+    unit->positionZOffset = 0.0f;
 }
 
 extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
 
-void btlInitializeEffectVectorsFromSourceRecords(BtlFx *fx, s32 kind, s32 index) {
+void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 index) {
     BtlFxSrcA *alt = btlSelectSharedOrIndexedTransformParameters(kind, index);
     BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
     if (alt->fC == 0.0f) {
-        PCP_COPY_VECTOR(&fx->vec90, base);
-        fx->fB4 = base->f18;
-        fx->fB0 = base->f1C;
-        fx->fC0 = base->f20;
+        PCP_COPY_VECTOR(unit->bodyOffset, base);
+        unit->reach = base->f18;
+        unit->height = base->f1C;
+        unit->unkC0 = base->f20;
     } else {
-        fx->f90 = alt->f0;
-        fx->f94 = alt->f4;
-        fx->f98 = alt->f8;
-        fx->f9C = 0.0f;
-        fx->fB4 = alt->f10;
-        fx->fB0 = alt->f14;
+        unit->bodyOffset[0] = alt->f0;
+        unit->bodyOffset[1] = alt->f4;
+        unit->bodyOffset[2] = alt->f8;
+        unit->bodyOffset[3] = 0.0f;
+        unit->reach = alt->f10;
+        unit->height = alt->f14;
     }
-    PCP_COPY_VECTOR(&fx->vecA0, base);
-    fx->fBC = base->f18;
-    fx->fB8 = base->f1C;
-    fx->fC0 = base->f20;
-    fx->f80 = base->f10;
-    fx->f50 = base->f10;
-    fx->f88 = base->f14;
-    fx->f58 = base->f14;
+    PCP_COPY_VECTOR(unit->muzzleOffset, base);
+    unit->unkBC = base->f18;
+    unit->unkB8 = base->f1C;
+    unit->unkC0 = base->f20;
+    unit->scale = base->f10;
+    unit->unk50 = base->f10;
+    unit->positionZOffset = base->f14;
+    unit->unk58 = base->f14;
 }
 
 s32 btlHasMatchingModel(s32 effect, s32 model) {
@@ -3967,8 +3922,8 @@ BtlUnit *btlCreateUnit(void) {
     unit->gunResource = 0;
     unit->effectObject = 0;
     unit->ext = 0;
-    btlInitUnitFxDefaults((BtlFx *)unit);
-    btlInitFxLights((BtlFxLights *)unit);
+    btlInitUnitFxDefaults(unit);
+    btlInitFxLights(unit);
     btlResetUnitLinks(unit);
     work = (BtlState *)btlGetRuntime();
     unit->previousActor = 0;
@@ -4182,28 +4137,17 @@ u32 btlFindListIndex(BtlIndexList *list, void *entry) {
     return -1;
 }
 
-typedef struct BtlEffObjInner {
-    u8 pad00[0x60];
-    f32 vec60[4];
-    u8 pad70[0x50];
-    u32 flagsC0;
-} BtlEffObjInner;
-
-typedef struct BtlEffObj {
-    u8 pad00[0x1C];
-    BtlEffObjInner *inner;
-} BtlEffObj;
 
 void btlApplyUnitEffectScale(BtlUnit *unit) {
-    BtlEffObjInner *inner;
+    ObjectTransform *inner;
     if (unit->flags & 2) {
-        btlInitializeEffectVectorsFromSourceRecords((BtlFx *)unit, unit->resourceKind, unit->resourceIndex);
+        btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->resourceIndex);
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
-        inner = ((BtlEffObj *)unit->effectObject)->inner;
-        inner->flagsC0 |= 1;
-        inner->flagsC0 &= ~2;
-        VU0_STORE_VF(vf10, inner->vec60);
+        inner = ((NodeA *)unit->effectObject)->inner;
+        inner->flags |= 1;
+        inner->flags &= ~2;
+        VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(unit->ext->owner);
         mdlSetAmountOnAllContextResources(unit->ext->owner, unit->unk50);
         btlSetUnitPosition(unit, unit->currentPosition);
@@ -8530,13 +8474,11 @@ void sndSetStationedSeHighVolume(u32 sequence) {
 void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
     s32 work = btlGetRuntime();
     u32 v = 0;
-    SoundSceneEntry *entry;
     if (soundIndex != 0) {
         v = *(u16 *)(D_00435E0C + soundIndex * 0x190 + 4);
     }
-    entry = (SoundSceneEntry *)(sceneIndex * 0x28 + datBattleSceneRecords);
-    if (entry->unk24 != 0) {
-        v = entry->unk24;
+    if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
+        v = datBattleSceneRecords[sceneIndex].unk24;
     } else if (*(u8 *)(work + 0x26E) == 3) {
         v = 1;
     }

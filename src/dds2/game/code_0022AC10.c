@@ -7,6 +7,7 @@
 #include "mdl.h"
 #include "evt_unit.h"
 #include "scr.h"
+#include "dat_state.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -35,8 +36,6 @@
 
 #define BTL_EVENT_TASK_NONE (-1)
 #define BTL_EVENT_ACTION_NONE (-1)
-#define BTL_SCENE_RECORD_BYTES 0x28
-#define BTL_SCENE_EVENT_ID_OFFSET 0x26
 #define BTL_EVENT_SCENE_MODE_LIMIT 0x400
 #define BTL_EVENT_SOUND_RESOURCE_COUNT 15
 #define BTL_EVENT_SOUND_KEY_FIRST 0x32
@@ -374,7 +373,6 @@ extern void sdfReleaseChipBlock(void *);
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022AC10);
 
-extern u8 *datBattleSceneRecords;
 extern char D_0041B6A8[]; /* "/event/e%03d/e%03d/scr/e%03d.bf" */
 extern char D_0041B6C8[]; /* "btl:event[%s]\n" */
 extern char D_0041B6D8[]; /* "btl:event BE load[e%03d]\n" */
@@ -409,7 +407,7 @@ void func_0022AF90(void) {
     if (battleMode >= BTL_EVENT_SCENE_MODE_LIMIT) {
         return;
     }
-    rawEventId = *(u16 *)(datBattleSceneRecords + battleMode * BTL_SCENE_RECORD_BYTES + BTL_SCENE_EVENT_ID_OFFSET);
+    rawEventId = datBattleSceneRecords[battleMode].eventId;
     if (rawEventId == 0) {
         return;
     }
