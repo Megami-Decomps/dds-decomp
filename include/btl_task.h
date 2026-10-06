@@ -51,7 +51,13 @@ typedef struct BtlTask {
     u8 unk_1C[4];
     s32 result;              /* +0x20 */
     s32 arg;                 /* +0x24 */
+#ifdef VERSION_DDS1
+    u8 unk_28[0x10];
+    s32 value38; /* 0x38: count retained by the HARI2 command (0xD5). */
+    u8 pad3C[0x24];
+#else
     u8 unk_28[0x38];
+#endif
     BtlIndexList *targetList; /* Selected unit/ID index list consumed by battle commands. */
     u8 unk_64[0xE4];
     u32 actions[8];         /* +0x148: opaque queued action slots */

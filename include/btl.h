@@ -102,7 +102,9 @@ typedef struct BtlUnit {
     u16 conditionFlags; /* 0x12E */
     u8 pad130[4];
     u16 actionTime; /* 0x134 */
-    u8 pad136[0x17A];
+    u8 pad136[3];
+    s8 agility; /* 0x139: signed HARI2 agility adjustment, also passed to diagnostics. */
+    u8 pad13A[0x176];
     s16 actionSlot; /* 0x2B0 */
     u8 pad2B2[0x12];
     u8 unk2C4; /* 0x2C4: saved party-entry index, read with lbu. */
