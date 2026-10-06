@@ -86,7 +86,76 @@ typedef struct MapRequestQueue {
     s32 callback;  /* 0x18: handler installed after queue creation */
 } MapRequestQueue;
 
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E390);
+typedef struct FieldTransitionStyle {
+    s32 unk0;
+    s32 unk4;
+    s32 kind;
+} FieldTransitionStyle;
+
+extern FieldTransitionStyle *D_0043888C;
+extern s32 D_0043909C;
+extern void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2, u32 color3, s32 image, s32 flags,
+                          s32 depth);
+extern void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 image, s32 flags, s32 depth);
+
+/* Field transition backdrop at `progress` (0..1): a corner-faded panel, the style's caption, the frame and the
+ * sliding banner. */
+void func_0030E390(f32 progress) {
+    f32 alpha;
+    f32 fade;
+    s32 depth = 0x54; /* retail keeps the shared draw depth in s0 across every call */
+
+    if (progress < 0.5f) {
+        alpha = progress * 0.2f;
+    } else {
+        alpha = 1.0f;
+    }
+    if (progress < 0.25f) {
+        fade = 0.0f;
+    } else if (progress < 0.75f) {
+        fade = (progress - 0.25f) + (progress - 0.25f);
+    } else {
+        fade = 1.0f;
+    }
+    func_0030DBF0(0, 0, 0, (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
+                  (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000, 0x1F, 0, depth);
+    if (progress < 0.3f) {
+        alpha = 0.0f;
+    } else if (progress < 0.8f) {
+        alpha = (progress - 0.3f) + (progress - 0.3f);
+    } else {
+        alpha = 1.0f;
+    }
+    if (D_0043888C != NULL) {
+        switch (D_0043888C->kind) {
+        case 1:
+            sdfDrawPositionedSlotImage(0, -2, 0, (s32)(alpha * 128.0f), D_0043909C + 0x25, 0, depth);
+            break;
+        case 2:
+            sdfDrawPositionedSlotImage(0, -2, 0, (s32)(alpha * 128.0f), D_0043909C + 0x2D, 0, depth);
+            break;
+        case 3:
+            func_0030DBF0(0, -2, 0, (u32)(alpha * 128.0f) | 0x80808000, (u32)(alpha * 104.0f) | 0x80808000,
+                          (u32)(alpha * 104.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
+                          D_0043909C + 0x35, 0, depth);
+            break;
+        }
+    }
+    sdfDrawPositionedSlotImage(0, -2, 0, (s32)(alpha * 128.0f), 0x16, 0, depth);
+    alpha = 0.0f;
+    if (!(progress < 0.6f)) {
+        alpha = (progress - 0.6f) / 0.4f;
+    }
+    if (progress < 0.4f) {
+        fade = 0.0f;
+    } else if (progress < 0.8f) {
+        fade = (progress - 0.4f) / 0.4f;
+    } else {
+        fade = 1.0f;
+    }
+    sdfDrawPositionedSlotImage((s32)((1.0f - fade) * 50.0f), 1, 0, (s32)(alpha * 128.0f), D_0043909C + 0x17, 0,
+                               depth);
+}
 
 void func_0030E878(void) {
 }
