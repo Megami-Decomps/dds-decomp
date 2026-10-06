@@ -2816,8 +2816,6 @@ typedef struct EffPCPAimBattle {
 extern f32 func_001F66D8(u32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern f32 sdfAtan2(f32 y, f32 x);
-extern void effCopyVectorToNodeInstance(s32 node, f32 *pos);
-extern void effApplyNodeTransformMatrix(s32 node, void *mtx);
 extern void effSetNodeParameterValue(s32 node, u32 color);
 extern void effUpdateNode(s32 node);
 
@@ -2863,13 +2861,13 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         VU0_LOAD_VF(vf11, params->anchor);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
-        effCopyVectorToNodeInstance(node, muzzle);
+        effCopyVectorToNodeInstance((struct EffNode *)node, muzzle);
         if (work->frame > params->holdFrames) {
             work->angle += work->spin;
         }
         func_002DD688(work->angle);
         VU0_STORE_MATRIX(mtx);
-        effApplyNodeTransformMatrix(node, mtx);
+        effApplyNodeTransformMatrix((struct EffNode *)node, mtx);
         if (fadeFrames >= remaining && fadeFrames != 0) {
             t = (f32)remaining / (f32)fadeFrames;
         } else {

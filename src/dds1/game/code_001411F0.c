@@ -4,6 +4,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
+#include "eff.h"
 
 /* Retained field-area work, not a camera-only object. Unknown regions remain
  * opaque; this prefix covers the camera, event state and fldmix map resources. */
@@ -1534,7 +1535,6 @@ void mnuInitializeResourceEntries(void) {
 
 extern void effRestartNodeInstance(s32 handle);
 
-extern void effCopyVectorToNodeInstance(s32 handle, f32 *pos);
 
 extern s32 mnuPositionedResourceCursor;
 
@@ -1548,7 +1548,7 @@ void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         effRestartNodeInstance(handle);
-        effCopyVectorToNodeInstance(mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
+        effCopyVectorToNodeInstance((struct EffNode *)mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
         mnuPositionedResourceActive[mnuPositionedResourceCursor] = 1;
         mnuPositionedResourceCursor = (mnuPositionedResourceCursor + 1) % 4;
     }
@@ -2443,7 +2443,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         effRestartNodeInstance(fldDamEffectNode);
-        effCopyVectorToNodeInstance(fldDamEffectNode, pos);
+        effCopyVectorToNodeInstance((struct EffNode *)fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
     if (fldYukEffectNode != 0) {
@@ -2451,7 +2451,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         effRestartNodeInstance(fldYukEffectNode);
-        effCopyVectorToNodeInstance(fldYukEffectNode, pos);
+        effCopyVectorToNodeInstance((struct EffNode *)fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
 }

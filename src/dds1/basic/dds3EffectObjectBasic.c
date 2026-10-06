@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "eff.h"
 
 #define EFF_OBJ_KIND 7
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -82,7 +83,6 @@ struct EffNodeDescriptor;
 extern struct EffNode *effCreateNodeFromDescriptor(struct EffNodeDescriptor *descriptor);
 extern u32 dds3AdvanceWorldCounter(void);
 extern void effCopyVector(void *source, void *destination);
-extern void effCopyVectorToNodeInstance(void *source, void *destination);
 
 extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);

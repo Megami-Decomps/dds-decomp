@@ -7,6 +7,7 @@
 #include "ee_mmi.h"
 #include "dat_state.h"
 #include "sdf_draw.h"
+#include "eff.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -1058,7 +1059,6 @@ extern void effCopyVector(s32 handle, f32 *src);
 
 extern void billInvokeCallback(s32 handle);
 
-extern void effCopyVectorToNodeInstance(s32 handle, f32 *pos);
 
 extern void effUpdateNode(s32 handle);
 
@@ -1080,7 +1080,7 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
     case 1:
         mdlResolveAnchorPosition(chunk, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
-        effCopyVectorToNodeInstance(resourceHandle, position);
+        effCopyVectorToNodeInstance((struct EffNode *)resourceHandle, position);
         effUpdateNode(resourceHandle);
         break;
     case 2:
@@ -1093,7 +1093,7 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
 }
 
 /* Set a billboard/effect frame; other resource-item kinds have no frame dispatch. */
-void mdlSetResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
+void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
         billSetChildParameter(item->payload.part.handle, frame);
@@ -1105,7 +1105,7 @@ void mdlSetResourceFrame(s32 unused, MdlResourceItem *item, s32 frame) {
 }
 
 /* Apply amount to billboard/effect scale; other resource-item kinds are ignored. */
-void mdlSetResourceAmount(s32 unused, MdlResourceItem *item, float amount) {
+void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
         billSetChildScaleComponents(item->payload.part.handle, amount, amount);

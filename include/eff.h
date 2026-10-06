@@ -4,6 +4,11 @@
 #include "common.h"
 #include "sdf.h"
 
+struct EffNode;
+
+void effCopyVectorToNodeInstance(struct EffNode *node, const void *vector);
+void effApplyNodeTransformMatrix(struct EffNode *node, const void *matrix);
+
 typedef struct EffBezierPoint {
     f32 x;
     f32 y;
