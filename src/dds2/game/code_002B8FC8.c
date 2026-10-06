@@ -1857,11 +1857,11 @@ void mnuReleasePartyPanelTextures(s32 menu) {
 
 void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve) {
     MenuPageSlot *entry = &((MenuPageWindow *)menu)->slots[index];
-    entry->contents[0].hp.unk48 = 0;
-    entry->contents[0].mp.unk48 = 0;
+    entry->contents[0].hp.fadeOut = 0;
+    entry->contents[0].mp.fadeOut = 0;
     if (preserve == 0) {
-        entry->contents[0].hp.unk44 = 0x100;
-        entry->contents[0].mp.unk44 = 0x100;
+        entry->contents[0].hp.fade = 0x100;
+        entry->contents[0].mp.fade = 0x100;
     }
 }
 
@@ -2167,8 +2167,8 @@ void mnuRebuildScrollLists(MenuPageWindow *context, PartyPanel *records) {
 
 void mnuClearPageSelection(MenuPageWindow *menu) {
     if (menu->selected >= 0) {
-        menu->slots[menu->selected].contents[0].hp.unk44 = 0x100;
-        menu->slots[menu->selected].contents[0].mp.unk44 = 0x100;
+        menu->slots[menu->selected].contents[0].hp.fade = 0x100;
+        menu->slots[menu->selected].contents[0].mp.fade = 0x100;
         menu->selected = -1;
     }
     menu->flags &= ~0x200;

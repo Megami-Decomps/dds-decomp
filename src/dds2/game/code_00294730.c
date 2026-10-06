@@ -129,18 +129,18 @@ void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) 
     MenuWindowContainer *object = (MenuWindowContainer *)objectData;
     struct MenuList *inner = object->list;
     s32 texture = (s32)D_00438FC8->effectSlots[0];
-    s32 *delay = inner->context;
-    s32 mode = delay[1];
+    MenuTerminalWindowState *state = inner->context;
+    s32 mode = state->command.mode;
     s32 flags = inner->flags;
     f32 alpha = 0.0f;
 
     switch (mode) {
     case 1:
-        alpha = (f32)delay[0] / 15.0f;
+        alpha = (f32)state->command.value / 15.0f;
         alpha = 1.0f - alpha;
         break;
     case 2:
-        alpha = (f32)delay[0] / 15.0f;
+        alpha = (f32)state->command.value / 15.0f;
         break;
     }
     if (flags & 1) {

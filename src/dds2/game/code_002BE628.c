@@ -748,25 +748,8 @@ typedef struct MenuEffectNode {
     MenuEffectPosition *position;
 } MenuEffectNode;
 
-/* The native initializer clears the complete 0x50-byte texture/effect owner. */
-typedef struct MenuEffectPair {
-    s32 variant;
-    u8 pad04[0x0C];
-    s32 quantizedSpan; /* 0x10 */
-    s32 *settings; /* 0x14: four selectable effect settings */
-    u8 settingIndex; /* 0x18 */
-    s8 positionY; /* 0x19 */
-    u8 pad1A[2];
-    s32 textures[7]; /* 0x1C */
-    MenuEffectNode *effects[2]; /* 0x38 */
-    s32 activeEffect;
-    s32 fade;
-    s32 fadeOut;
-    s32 holdEffectUpdate;
-} MenuEffectPair;
-
 /* Set both effect positions; only the first Y comes from the active menu entry. */
-void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
+void mnuSetPairedEffectPositions(MenuPageBar *pair) {
     MenuEffectNode *first = pair->effects[0];
     MenuEffectNode *second = pair->effects[1];
     MenuEffectPosition *firstPosition = first->position;
@@ -783,7 +766,7 @@ void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
 }
 
 /* Divide a quantized horizontal span into the two effect-grid regions. */
-void func_002C1D10(MenuEffectPair *pair) {
+void func_002C1D10(MenuPageBar *pair) {
     s32 start = ((pair->quantizedSpan * 8) / 100) * 16;
     s32 end = ((pair->quantizedSpan * 77) / 100) * 16;
     s32 offset = -0x60;
@@ -799,7 +782,7 @@ void func_002C1D10(MenuEffectPair *pair) {
 }
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
-void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
+void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
     s32 *settings;
     s32 setting;
 
@@ -819,7 +802,7 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
 
-void mnuCreatePairedEffects(MenuEffectPair *pair) {
+void mnuCreatePairedEffects(MenuPageBar *pair) {
     u32 effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
@@ -830,7 +813,7 @@ void mnuCreatePairedEffects(MenuEffectPair *pair) {
 
 /* The public word-pointer boundary refers to the same complete panel owner. */
 void mnuReleasePairedEffectBatches(s32 *objectWords) {
-    MenuEffectPair *pair = (MenuEffectPair *)objectWords;
+    MenuPageBar *pair = (MenuPageBar *)objectWords;
     u32 effectIndex;
 
     for (effectIndex = 0; effectIndex < 2; effectIndex++) {
@@ -861,7 +844,7 @@ void mnuDrawPanelSequenceByRow(s32 x, s32 y, s32 depth, s32 color, s32 variant, 
 
 /* Release the seven sprite texture handles, then the paired effect batches. */
 void mnuReleaseSpriteTextures(u32 *objectWords) {
-    s32 *textureCursor = ((MenuEffectPair *)objectWords)->textures;
+    s32 *textureCursor = ((MenuPageBar *)objectWords)->textures;
     u32 textureIndex = 0;
     do {
         effDestroyResourceSlotSet(*textureCursor++);
@@ -895,11 +878,11 @@ extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
-extern void func_002C22D0(s32, s32, s32, u32, u32, s32, s32, MenuEffectPair *, u32);
-extern void func_002C1E48(s32, s32, s32, u32, MenuEffectPair *, u32);
+extern void func_002C22D0(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
+extern void func_002C1E48(s32, s32, s32, u32, MenuPageBar *, u32);
 
 void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
-                  s32 limit, MenuEffectPair *pair, u32 flags) {
+                  s32 limit, MenuPageBar *pair, u32 flags) {
     s32 fade = pair->fade;
     s32 barWidth;
     s32 quantizedWidth;
@@ -1281,10 +1264,23 @@ void mnuBindPresentMenuEntry(s32 stateAddress, u32 entrySlotAddress) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4328);
+void func_002C4328(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
+    s32 i;
 
-
-extern void func_002C4328(u8 *entry, s32 arg1, u32 index, PartyPanel *panel);
+    if (entry->flags & 2)
+        panel->unk0++;
+    else
+        panel->unk4++;
+    panel->slots[index].unk8 = entry->unitId - 1;
+    panel->slots[index].level = entry->level;
+    panel->slots[index].hp = entry->hp;
+    panel->slots[index].mp = entry->mp;
+    panel->slots[index].maxHp = entry->maxHp;
+    panel->slots[index].maxMp = entry->maxMp;
+    for (i = 0; i < 5; i++) {
+        panel->slots[index].stats[i] = entry->baseStats[i];
+    }
+}
 
 /* Populate occupied party slots; empty slots retain the native unknown-field sentinel. */
 void mnuInitPartyPanelSlots(PartyPanel *panel) {
@@ -1297,7 +1293,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         partyEntry = &datGameState->party[partyIndex];
         if (partyEntry->flags & 1) {
-            func_002C4328((u8 *)partyEntry, 0, partyIndex, panel);
+            func_002C4328(partyEntry, 0, partyIndex, panel);
             panel->slots[partyIndex].index = partyIndex;
         } else {
             panel->slots[partyIndex].unk8 = -1;

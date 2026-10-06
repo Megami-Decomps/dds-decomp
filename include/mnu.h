@@ -121,7 +121,12 @@ typedef struct PartyPanelEntry {
     s32 unk0;
     s32 index;
     s32 unk8;
-    s32 pad[10];
+    s32 level;
+    s32 hp;
+    s32 mp;
+    s32 maxHp;
+    s32 maxMp;
+    s32 stats[5];
 } PartyPanelEntry;
 
 typedef struct PartyPanel {
@@ -230,14 +235,23 @@ typedef char MenuProfilePanel_size_must_be_0x3C[(sizeof(MenuProfilePanel) == 0x3
 #endif
 
 #ifdef VERSION_DDS2
+struct MenuEffectNode;
+
+/* Complete 0x50-byte texture/effect owner embedded in each page bank. */
 typedef struct MenuPageBar {
-    u8 pad00[0x10];
-    s32 percentage;
-    u8 pad14[0x2C];
-    s32 unk40;
-    u32 unk44;
-    u32 unk48;
-    u32 unk4C;
+    s32 variant;
+    u8 pad04[0x0C];
+    s32 quantizedSpan; /* 0x10 */
+    s32 *settings; /* 0x14: four selectable effect settings */
+    u8 settingIndex;
+    s8 positionY;
+    u8 pad1A[2];
+    s32 textures[7]; /* 0x1C */
+    struct MenuEffectNode *effects[2]; /* 0x38 */
+    s32 activeEffect;
+    s32 fade;
+    s32 fadeOut;
+    s32 holdEffectUpdate;
 } MenuPageBar;
 
 typedef struct MenuQueuedCommand {
@@ -259,7 +273,8 @@ typedef struct MenuPageSlotContent {
     u32 frame[8];
     struct MenuSprites *windowSprites;
     u32 iconBundle;
-    u8 padD8[0xC];
+    u32 unkD8;
+    u8 padDC[8];
     MenuQueuedCommand command;
     s32 unk100;
     u8 pad104[0xF20];
@@ -372,14 +387,14 @@ struct EffectSlotSet;
 struct EffMappedResource;
 
 typedef struct MenuAction {
-    u32 value;
+    s32 value;
     u32 mode;
 } MenuAction;
 
 /* Per-list storage allocated and cleared as 0x14 bytes by the terminal window builder. */
 typedef struct MenuTerminalWindowState {
     MenuAction command;
-    u8 pad08[4];
+    s32 pulseFrame;
     u16 unk0C;
     u16 unk0E;
     u16 unk10;
