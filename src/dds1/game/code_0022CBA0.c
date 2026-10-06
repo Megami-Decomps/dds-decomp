@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "dds3obj.h"
@@ -8,16 +9,18 @@
 #include "eff_transform.h"
 #include "dat_state.h"
 
-extern void *kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
+struct EvtViewer;
+struct CampScene;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(s32 viewerAddr);
-void evtViewerUpdateFrame(void);
+s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
-void evtEventViewerReset(u64 arg0);
+void evtEventViewerReset(struct EvtViewer *viewer);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void func_00232E20(s32 arg0);
 extern s32 mnuPollTitleStreamStateLocked(void);
@@ -87,7 +90,8 @@ typedef struct EventViewerState {
     s32 glyphAdvanceStart;    /* 0x10 */
     s32 glyphAdvanceLimit;    /* 0x14 */
     s32 glyphAdvancePosition; /* 0x18 */
-    u8 pad1C[8];
+    s32 previousGlyphPosition; /* 0x1C */
+    u8 pad20[4];
     u8 unitNames[256][32];
     s32 selectedEntry;
     u8 pad2028[4];
@@ -166,7 +170,9 @@ typedef struct EventViewerState {
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0x10];
     s32 titleStreamWaitFrames; /* 0x2440 */
-    u8 pad2444[0x34];
+    u8 pad2444[0x2C];
+    s32 voicePending; /* 0x2470 */
+    s32 voiceMessage; /* 0x2474 */
     s32 unk2478;
     u8 pad247C[0xC];
     s32 commandStart; /* 0x2488 */
@@ -937,7 +943,7 @@ s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F7F8);
 
-void func_0022F9F0(void) {
+void func_0022F9F0(EventViewerState *viewer) {
 }
 
 /* Tick the current glyph while text is advancing; wrap after thirty ticks. */
@@ -955,7 +961,7 @@ void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
     }
 }
 
-void func_0022FA60(void) {
+void func_0022FA60(EventViewerState *viewer) {
 }
 
 s32 evtViewerTestIndexedCondition(u32 condition);
@@ -1639,7 +1645,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerUpdateFrame);
 void *evtViewerScheduleFrameVariableTask(s32 task) {
     void *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (void *)kwlnTaskGetUserValue((KwlnTask *)task);
     func_0022E5A0(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
@@ -1647,10 +1653,10 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
-void *evtViewerInitializeUpdateSequence(void) {
-    u64 viewer;
+void *evtViewerInitializeUpdateSequence(KwlnTask *task) {
+    struct EvtViewer *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (struct EvtViewer *)kwlnTaskGetUserValue(task);
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     kwlnDrawControlFlags |= 0x2000000;
@@ -1658,8 +1664,8 @@ void *evtViewerInitializeUpdateSequence(void) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-void *evtViewerAdvanceUpdate(void) {
-    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
+void *evtViewerAdvanceUpdate(KwlnTask *task) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     EvtWindowContext *window;
     s32 windowFlags;
 
@@ -1688,8 +1694,8 @@ void *evtViewerAdvanceUpdate(void) {
     }
 }
 
-void *evtViewerStartUpdate(void) {
-    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
+void *evtViewerStartUpdate(KwlnTask *task) {
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     u8 *context;
     u16 eventId;
     u16 sceneId;
@@ -1769,18 +1775,18 @@ void evtViewerReleaseResources(viewer)
 }
 
 /* Destroy the currently active event viewer. */
-void func_00232D08(void) {
-    u64 viewer;
+void func_00232D08(KwlnTask *task) {
+    EventViewerState *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     evtViewerReleaseResources(viewer);
 }
 
 /* Alternate destroy callback for the same active viewer. */
-void func_00232D28(void) {
-    u64 viewer;
+void func_00232D28(KwlnTask *task) {
+    EventViewerState *viewer;
 
-    viewer = kwlnTaskGetUserValue();
+    viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
     evtViewerReleaseResources(viewer);
 }
 
