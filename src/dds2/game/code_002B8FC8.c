@@ -1008,8 +1008,11 @@ MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value) {
     return mnuListAppendNode((u32)menu->list, value);
 }
 
-void func_002B9708(MenuWindowContainer *menu) {
-    func_002B83A0((u32)menu->list);
+extern MenuListNode *func_002B83A0(MenuList *list, MenuListNode *anchor, s32 value, s32 mode, u32 options);
+
+/* Insert `value` beside anchor in the window's list (see func_002B83A0). */
+MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, s32 value, s32 mode, u32 options) {
+    return func_002B83A0(menu->list, anchor, value, mode, options);
 }
 
 void func_002B9720(MenuWindowContainer *menu) {
