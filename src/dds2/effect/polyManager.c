@@ -34,7 +34,15 @@ typedef struct PolyStrip {
 
 /* Basic node: +0xDC is a cell-system pointer, not the band's float step. */
 typedef struct {
-    u8 pad00[0xC8];
+    u8 pad00[0x10];
+    u16 entryCount;                /* 0x10 */
+    u8 pad12[2];
+    s32 duration;                  /* 0x14 */
+    u8 pad18[0x9A];
+    u16 active;                    /* 0xB2: cleared when every entry finishes */
+    u8 padB4[0xC];
+    u8 loop;                       /* 0xC0: restart finished entries */
+    u8 padC1[7];
     u16 segments;
     u8 padCA[2];
     f32 radius;
@@ -146,7 +154,9 @@ void parReleaseCellSystem(PolyStrip *strip);
 void parPrependCellNode(PolyStrip *strip);
 void sdfReleaseResourceAllocation(u32 handle);
 void sdfReleaseChipBlock(void *arg);
-void func_00165690(void);
+void func_00165690(PolyNode *obj);
+void func_00165860(PolyNode *node, s32 index);
+void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_003364B8(f32 angle);
@@ -192,11 +202,58 @@ void polyScaleTransformPair(f32 scale, PolyNode *obj) {
     obj->pairDisplacement = obj->pairDisplacement * scale;
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00165690);
+/* Fade active basic-ring cells, update their geometry, and restart or finish ages. */
+void func_00165690(PolyNode *obj) {
+    u16 index;
+    u16 completed;
+    u16 count;
+    u8 loop;
+    s32 duration;
+    f32 alphaStep;
+    PolyStripEntry *entry;
+    s32 *ages;
+
+    if (obj->active != 0) {
+        duration = obj->duration;
+        completed = 0;
+        count = obj->entryCount;
+        entry = obj->strip->entries;
+        alphaStep = 128.0f / (f32)duration;
+        ages = obj->ages;
+        loop = obj->loop;
+        for (index = 0; index < count; index++) {
+            s32 age = *ages;
+
+            if (age == POLY_INACTIVE_ENTRY_AGE) {
+                func_00165860(obj, index);
+                *ages = 0;
+            } else if (age >= 0) {
+                entry->color = ((u32)(alphaStep * (f32)(duration - age)) << 24) | 0x808080;
+                polyStripPushPairsApart(obj, index);
+            }
+            if (age >= duration) {
+                entry->color = 0x808080;
+                if (loop != 0) {
+                    *ages = POLY_INACTIVE_ENTRY_AGE;
+                } else {
+                    completed++;
+                    if (completed >= count) {
+                        entry->color = 0;
+                        obj->active = 0;
+                    }
+                }
+            } else {
+                (*ages)++;
+            }
+            ages++;
+            entry++;
+        }
+    }
+}
 
 /* Run the shared finish step, then enqueue this node's cell system. */
 void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
-    func_00165690();
+    func_00165690(obj);
     parPrependCellNode(obj->strip);
 }
 
