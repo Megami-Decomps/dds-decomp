@@ -3,6 +3,10 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "fpu.h"
+struct MenuListNode;
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 struct EffectSlotSet;
 extern void func_002BF4E0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -172,7 +176,7 @@ extern u32 D_003BD8EC;
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
 
 extern void *fileWaitContinuation;
 
@@ -3281,7 +3285,125 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigLoadTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigOwnerTaskName);
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00291418);
+s32 func_00291418(void) {
+    s32 oldIndex;
+    s32 index;
+    s32 i;
+    s32 ticks;
+    f32 fade;
+    FileConfigListNode *cursor;
+    FileConfigTask *loadingWork;
+
+    if (((FileConfigTask *)fileConfigTaskWork)->transitionTicks != 0) {
+        ((FileConfigTask *)fileConfigTaskWork)->transitionTicks--;
+    }
+    switch (((FileConfigTask *)fileConfigTaskWork)->result) {
+    case 0:
+        if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
+            ((FileConfigTask *)fileConfigTaskWork)->pending = 1;
+            for (i = 0; i < 4; i++) {
+                loadingWork = (FileConfigTask *)fileConfigTaskWork;
+                if (loadingWork->slots[i] == 0) {
+                    loadingWork->pending = 0;
+                    return 0;
+                }
+            }
+        }
+        ((FileConfigTask *)fileConfigTaskWork)->result = 1;
+        /* fallthrough */
+    case 1:
+        ticks = ((FileConfigTask *)fileConfigTaskWork)->ticks;
+        ((FileConfigTask *)fileConfigTaskWork)->ticks = ticks + 1;
+        fade = (f32)ticks / 15.0f;
+        ((FileConfigTask *)fileConfigTaskWork)->choiceFade = ((FileConfigTask *)fileConfigTaskWork)->labelFade = fade;
+        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 16) {
+            ((FileConfigTask *)fileConfigTaskWork)->result = 2;
+            ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
+            ((FileConfigTask *)fileConfigTaskWork)->choiceFade = ((FileConfigTask *)fileConfigTaskWork)->labelFade = 1.0f;
+        }
+        break;
+    case 2:
+        ((FileConfigTask *)fileConfigTaskWork)->ticks++;
+        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 121) {
+            ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
+        }
+        break;
+    case 3:
+        if (((FileConfigTask *)fileConfigTaskWork)->state == 1) {
+            kwlnFadeInStart(0, 0, 0, 15);
+        }
+        ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
+        ((FileConfigTask *)fileConfigTaskWork)->result = 4;
+        /* fallthrough */
+    case 4:
+        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 6) {
+            ((FileConfigTask *)fileConfigTaskWork)->labelFade = 0.0f;
+        } else {
+            ((FileConfigTask *)fileConfigTaskWork)->labelFade = 1.0f - (f32)((FileConfigTask *)fileConfigTaskWork)->ticks / 5.0f;
+        }
+        ticks = ((FileConfigTask *)fileConfigTaskWork)->ticks;
+        ((FileConfigTask *)fileConfigTaskWork)->ticks = ticks + 1;
+        ((FileConfigTask *)fileConfigTaskWork)->choiceFade = 1.0f - (f32)ticks / 15.0f;
+        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 16) {
+            ((FileConfigTask *)fileConfigTaskWork)->result = 5;
+            ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
+            ((FileConfigTask *)fileConfigTaskWork)->labelFade = 0.0f;
+            ((FileConfigTask *)fileConfigTaskWork)->choiceFade = 0.0f;
+        }
+        return 0;
+    case 5:
+        ((FileConfigTask *)fileConfigTaskWork)->result |= 0x80000000;
+        return -1;
+    }
+
+    oldIndex = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
+    if ((u8)D_00324510[0x26] & 2) {
+        if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
+            ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
+        }
+    }
+    if ((u8)D_00324510[0x27] & 2) {
+        if (mnuAdvanceListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
+            ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
+        }
+    }
+    index = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
+    if (index < 4) {
+        if (D_00324510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)(datGameState + 0xA54)) == 0) {
+            fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)(datGameState + 0xA54));
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
+            cursor->resource->ticks = 8;
+        }
+        if (D_00324510[0x25] < 0) {
+            if (fileTestSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)(datGameState + 0xA54)) != 0) {
+                fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)(datGameState + 0xA54));
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
+                cursor->resource->ticks = 8;
+            }
+        }
+    }
+    if (D_00324510[0x26] == 0 && D_00324510[0x27] == 0) {
+        mnuClearListFlagsOneAndTwo((u32 *)((FileConfigTask *)fileConfigTaskWork)->frame);
+    }
+    if (D_00324510[0x21] < 0) {
+        if (((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index == 4) {
+            ((FileConfigTask *)fileConfigTaskWork)->result = 3;
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        }
+    } else if (D_00324510[0x23] < 0) {
+        ((FileConfigTask *)fileConfigTaskWork)->result = 3;
+        fileRestoreSlotFlagsToState();
+        sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+    }
+    return 0;
+}
+
 
 s32 fileStartQueuedLoad(void) {
     if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {

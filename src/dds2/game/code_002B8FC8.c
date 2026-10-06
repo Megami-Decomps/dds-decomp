@@ -1,4 +1,5 @@
 #include "mnu.h"
+struct MenuListNode;
 #include "fpu.h"
 #include "dat_state.h"
 
@@ -946,9 +947,9 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
-void mnuAdvanceListCursorDefault(u32 list);
+struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 
-void mnuRetreatListCursorDefault(u32 list);
+struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 
 s32 mnuScrollListToEnd(MenuList *list);
 
@@ -2533,4 +2534,5 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFB8);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFD8);
+
 
