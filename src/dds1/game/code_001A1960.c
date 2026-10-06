@@ -5145,7 +5145,33 @@ void fldMarkActiveSceneScriptState(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001C1850);
+void func_001C1850(s32 index, s8 operation) {
+    s32 bank = D_003BD83C->bank;
+    s32 count;
+    s32 i;
+    if (D_003BD83C->enabled[bank] == 0) return;
+    switch (operation) {
+    case 0:
+        if (D_003BD840[bank]->state[index] >= 3) return;
+        D_003BD840[bank]->state[index] = 3;
+        count = D_003BD83C->currentIndex;
+        for (i = 0; i < count; i++) {
+            if ((u8)(D_003BD840[bank]->state[i] - 4) < 3) {
+                D_003BD840[bank]->state[i] = 6;
+                D_003BD840[bank]->scalePercent[i][0] = 132.0f;
+                D_003BD840[bank]->slotValues[i][0] = 16;
+                D_003BD840[bank]->scalePercent[i][1] = 105.0f;
+                D_003BD840[bank]->slotValues[i][1] = 24;
+            }
+        }
+        break;
+    case 1:
+        D_003BD840[bank]->state[index] = 7;
+        D_003BD83C->phase[index + 1][bank] = 4;
+        break;
+    }
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A30A8);
 
