@@ -1,4 +1,4 @@
-# Scatter radial updater matching
+# Scatter strip updater matching
 
 `func_00170F28` (DDS1) and `func_00178B80` (DDS2) each match 1,512 bytes.
 The paired routines advance radial particles, build a six-vertex strip for
@@ -6,7 +6,7 @@ each active particle, update optional duplicate work, and submit the pool.
 
 ## State and bounds
 
-The existing 0x74-byte local parameter layout now exposes the signed trailing
+The existing 0x74-byte radial parameter layout now exposes the signed trailing
 fade duration at 0x38, float height and angle damping at 0x40/0x48, and the
 pulse flag/angle at 0x60/0x64. No shared owner or layout changes.
 
@@ -51,10 +51,28 @@ producers. Grouping each configuration value with its associated flag and
 updating radius before angle/height gives the native schedule. No redundant
 reads, guards, volatile fields, register constraints or compiler flags are used.
 
+## Spin variant
+
+`func_00171B28` (DDS1) and `func_00179780` (DDS2) each match 1,524 bytes.
+Both first reconstructed drafts match using the radial variant's reviewed
+fade, pool and duplicate-work model. Existing 0x64-byte spin parameters and
+0x20-byte particles require no field or layout changes.
+
+The spin variant copies the particle's seeded XYZ axis and builds the native
+axis-angle matrix for each angular sample. It applies the complete four-lane
+matrix operation to a radius vector, then uses the same tangent/transverse
+strip construction. Radius and angle advance only during active motion;
+angle-step damping and the two-frame trailing angle adjustment remain native.
+A ninth full scratch vector holds the axis, covering the provider's quadword
+load. Its formulas consume XYZ and explicitly form the basis W lanes and
+translation row; the caller retains the native four-component operation. The same six-vertex/color bounds and
+inherited duplicate-state assumptions apply. No helper, primitive, header,
+compiler flag or artificial producer is added to make either body match.
+
 ## Validation
 
-The individual bodies compare exactly against all 378 retail instruction
-words per title. Both installed canonical whole-unit checks report 70 matches
+The radial bodies compare exactly against all 378 retail instruction words
+per title; the spin bodies compare exactly against all 381 words per title. Both installed canonical whole-unit checks report 71 matches
 and zero differences. Both retail SHA-1 checks and both dev-ELF gates pass,
 followed by a no-work repeat. Validation uses the pinned current source and
 a byte-identical private copy of its canonical header in the established
