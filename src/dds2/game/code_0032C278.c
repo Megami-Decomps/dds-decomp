@@ -1759,7 +1759,7 @@ void sdfInitializeObjectListRequest(void) {
 }
 
 
-SdfDrawNode *func_003306E0(void) {
+SdfDrawNode *sdfCreateDrawNode(void) {
     SdfDrawNode *node = sdfAllocAndClearQuadwords(0x100);
 
     node->color = 0x80808080;
