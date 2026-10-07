@@ -5227,7 +5227,13 @@ void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
     object->owner = owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneObjectTaskUserData);
+BattleSceneObject *fldGetSceneObjectTaskUserData(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    if (task == NULL) {
+        return NULL;
+    }
+    return (BattleSceneObject *)kwlnTaskGetUserValue(task);
+}
 
 s32 fldGetSceneObjectState(void) {
     KwlnTask *temp_v0;
