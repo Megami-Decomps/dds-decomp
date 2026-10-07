@@ -40,7 +40,7 @@ extern s32 D_003BABF0;
 
 extern u32 D_003BABD0;
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern EffWorldNode *dds3GetWorldSecondaryObject(void);
 extern s64 dds3GetWorldValueCount(u64);
 extern u64 dds3ReadIndexedWorldObjectWord(u64);
 extern s64 dds3AdvanceObjectValueCursor(u64);
@@ -758,7 +758,7 @@ void fldSubmitVisibleWorldBackground(void) {
     u64 objectChain;
     u64 worldObject;
 
-    objectChain = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 5);
+    objectChain = dds3CopyWorldListToValueChain((u64)dds3GetWorldSecondaryObject(), 5);
     if (objectChain != 0) {
         if (dds3ResetObjectValueCursor(objectChain) != 0) {
             do {
@@ -1366,7 +1366,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
     s64 status;
     u64 worldObject;
 
-    valueChain = dds3GetWorldSecondaryObject();
+    valueChain = (u64)dds3GetWorldSecondaryObject();
     valueChain = dds3CopyWorldListToValueChain(valueChain, 6);
     status = dds3GetWorldValueCount(valueChain);
     if (status == 0) {
@@ -1780,7 +1780,7 @@ void fldResetPlayerSceneObjectState(void) {
 }
 
 extern void dds3ClearObjectFlags(u32, s32);
-extern void dds3SetWorldPlayerObject(u64, u32);
+extern void dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
 extern void func_00111E30(u32, s32, s32);
 extern u32 dds3SpawnCameraSlotObj5(s32, f32 *, f32 *);
 extern s32 D_0032F1DC[];
@@ -1798,7 +1798,7 @@ void fldCreatePlayerObject(void) {
     if (fldPlayerObject == 0) {
         fldPlayerObject = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
         dds3SetWorldNodeValue((struct EffWorldNode *)fldPlayerObject, (u32)D_0039FC50);
-        dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), fldPlayerObject);
+        dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)fldPlayerObject);
         if (D_003BAB50 != 0) {
             dds3ClearObjectFlags(fldPlayerObject, 0x20);
         }
@@ -1839,7 +1839,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetWorldNodeValue((struct EffWorldNode *)cameraObject, (u32)D_003BABC0);
     dds3SetCameraVector(*cameraObjectSlot, &worldEye);
     effObjSetInnerFloat(*cameraObjectSlot, 2.0f);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), *cameraObjectSlot);
+    dds3SetWorldCameraObject((u64)dds3GetWorldSecondaryObject(), *cameraObjectSlot);
 }
 
 u32 func_001243C0(void) {
@@ -2211,7 +2211,7 @@ s32 fldDispatchPendingSceneResource(void) {
     }
     fldAreaState.unk100 = 0;
     if ((D_003BAB3C & 2) && *(s8 *)D_0032C9A0 != 0) {
-        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), D_0032C9A0);
+        evtStartSceneResourceTask((u64)dds3GetWorldSecondaryObject(), D_0032C9A0);
         overrideFlags = D_003BAB3C;
         if (!(overrideFlags & 1)) {
             D_0032C9A0[0] = 0;
@@ -2220,11 +2220,11 @@ s32 fldDispatchPendingSceneResource(void) {
         return 1;
     }
     if (sceneWork->primaryState == 0 && sceneWork->resourceName[0] != 0) {
-        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), sceneWork->resourceName);
+        evtStartSceneResourceTask((u64)dds3GetWorldSecondaryObject(), sceneWork->resourceName);
         return 1;
     }
     if (fldAreaState.fallbackResourceName != 0) {
-        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), fldAreaState.fallbackResourceName);
+        evtStartSceneResourceTask((u64)dds3GetWorldSecondaryObject(), fldAreaState.fallbackResourceName);
         return 1;
     }
     return 0;

@@ -103,7 +103,7 @@ extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, 
 
 extern void *dds3GetWorldObject(void);
 
-extern void *dds3GetWorldPlayerObject(void *arg0);
+extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 
 extern s32 scrSetIntegerReturnValue(s32 arg0);
 
@@ -529,14 +529,14 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
 
 u32 evtGetWorldObjectId(void) {
     void *world;
-    EvtUnit *object;
+    EffWorldNode *object;
     s32 id;
 
     world = dds3GetWorldObject();
     object = dds3GetWorldPlayerObject(world);
     id = -1;
     if (object != NULL) {
-        id = object->objectId;
+        id = object->key;
     }
     scrSetIntegerReturnValue(id);
     return 1;

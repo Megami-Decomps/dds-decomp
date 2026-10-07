@@ -57,7 +57,7 @@ typedef struct EvtWorldTable {
     struct SdfMemBlock *resource; /* 0x04: descriptor owning the slot array */
     EvtWorldSlot *slots; /* 0x08; valid index range is a caller contract */
     u32 cameraObject; /* 0x0C */
-    u32 playerObject; /* 0x10 */
+    EffWorldNode *playerObject; /* 0x10 */
     u32 indexedHandle; /* 0x14 */
     u32 unk18;
     u32 unk1C;

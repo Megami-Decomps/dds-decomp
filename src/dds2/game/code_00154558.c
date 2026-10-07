@@ -421,14 +421,14 @@ void fldStartSceneBgm(void);
 
 void fldStartSceneBgmAlternate(void);
 
-extern s32 fldTestRoomProbeFacingAndRange(s32, void *);
+extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry);
 
-extern s32 fldTestRoomProbeFacing(s32, void *);
+extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = fldPlayerObject;
-    void *entry;
+    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
+    EffWorldNode *entry;
     s32 result;
 
     if (unit == 0) {
@@ -461,8 +461,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
 
 s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = fldPlayerObject;
-    void *entry;
+    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
+    EffWorldNode *entry;
     s32 result;
 
     if (unit == 0) {
@@ -517,8 +517,8 @@ s32 fldCmdReadSceneStatus(void) {
 
 s32 fldCmdTestActorEntryCondition(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = fldPlayerObject;
-    void *entry;
+    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
+    EffWorldNode *entry;
 
     if (unit == 0) {
         scrSetIntegerReturnValue(0);
