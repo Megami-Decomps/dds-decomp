@@ -4648,23 +4648,6 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6CA8);
 
 
 
-/* 0x2C-byte action record shared by the initializer, updater and renderer. */
-typedef struct BattleMirroredSpriteRecord {
-    s8 active;
-    u8 pad01;
-    s16 slot;
-    f32 scale;
-    s32 restoredWidth;
-    s32 restoredHeight;
-    s32 width;
-    s32 height;
-    s32 x;
-    s32 y;
-    s32 secondX;
-    s32 frame;
-    s8 alpha;
-    u8 pad29[3];
-} BattleMirroredSpriteRecord;
 
 void func_001B6FC0(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
     if (count > 0) {
