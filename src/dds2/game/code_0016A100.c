@@ -1,5 +1,7 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_state.h"
+#include "eff.h"
+#include "ee_mmi.h"
 #include "evt_unit.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
@@ -136,7 +138,122 @@ typedef struct {
     u32 handle;         /* 0x60 */
 } EffThunderWork4C; /* 0x64 */
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A100);
+typedef struct EffBattleUnitColorCommand {
+    EffectVectorRequest request;
+    u32 firstColor;
+    u32 secondColor;
+    u32 startFrame;
+    s32 startDurationIndex;
+    u32 endFrame;
+    s32 endDurationIndex;
+} EffBattleUnitColorCommand;
+
+extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLFieldColorGetVariantSelector(void);
+extern void evtSetUnitStatusFlags(EvtUnit *);
+extern void func_0023C870(EvtUnit *, s32, u32, u32);
+extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
+extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
+extern u32 btlCameraVectorHasNaN(void);
+extern u32 btlBlendColorVec(f32 *, f32 *, f32);
+
+/* Apply and restore a selected group's two-color and direction keyframe. */
+void func_0016A100(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame) {
+    BtlUnit *selected[16];
+    f32 direction[4];
+    u32 packedStart[4];
+    u32 packedEnd[4];
+    u32 startFrame = command->startFrame;
+    u32 endFrame = command->endFrame;
+    u32 startDuration = effBattleMiscGetTableEntry(command->startDurationIndex);
+    u32 endDuration = effBattleMiscGetTableEntry(command->endDurationIndex);
+    u32 restoreFrame;
+    u32 mask = 0;
+    u32 count;
+    u32 index;
+    BtlState *battle;
+    BtlUnit *current;
+    EvtUnit *eventUnit;
+
+    if (startFrame >= endFrame) {
+        return;
+    }
+    if (endFrame < endDuration) {
+        return;
+    }
+    restoreFrame = endFrame - endDuration;
+    if (startFrame >= restoreFrame) {
+        return;
+    }
+    if (frame != startFrame && frame != restoreFrame) {
+        return;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    if (battle->battleFlags & 0x40000000) {
+        return;
+    }
+    count = 0;
+    switch (command->request.kind) {
+    case 0:
+        selected[0] = unit;
+        count = 1;
+        break;
+    case 1:
+        mask = ((BtlUnit *)effBTLFieldColorGetOriginalSelector())->flags & 0xE00;
+        break;
+    case 2:
+        mask = ((BtlUnit *)effBTLFieldColorGetVariantSelector())->flags & 0xE00;
+        break;
+    case 3:
+        mask = 0xE00;
+        break;
+    }
+    if (count == 0) {
+        for (current = battle->units; current != NULL; current = current->nextActor) {
+            u32 flags = current->flags;
+            if ((flags & 2) && (current->stateFlags & 0x10) &&
+                current->ext != NULL && (flags & mask)) {
+                selected[count++] = current;
+            }
+        }
+    }
+    if (frame == startFrame) {
+        for (index = 0; index < count; index++) {
+            eventUnit = selected[index]->ext;
+            evtSetUnitStatusFlags(eventUnit);
+            func_0023C870(eventUnit, startDuration, command->firstColor, command->secondColor);
+            effBattleMiscDirectionTo(selected[index], &command->request, direction);
+            VU0_LOAD_VF(vf10, direction);
+            evtSetUnitNormalizedDirection(eventUnit, startDuration);
+        }
+    }
+    if (frame == restoreFrame) {
+        for (index = 0; index < count; index++) {
+            u32 firstColor;
+            u32 secondColor;
+
+            eventUnit = selected[index]->ext;
+
+            evtSetUnitStatusFlags(eventUnit);
+            if (btlCameraVectorHasNaN()) {
+                firstColor = btlBlendColorVec(battle->lightColor, selected[index]->colorStart, 0.3f);
+                secondColor = btlBlendColorVec(battle->ambientColor, selected[index]->colorEnd, 0.3f);
+            } else {
+                VU0_LOAD_VF(vf10, selected[index]->colorStart);
+                EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+                firstColor = packedStart[0];
+                VU0_LOAD_VF(vf10, selected[index]->colorEnd);
+                EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+                secondColor = packedEnd[0];
+            }
+            func_0023C870(eventUnit, endDuration, firstColor, secondColor);
+            VU0_LOAD_VF(vf10, selected[index]->lightDirection);
+            evtSetUnitNormalizedDirection(eventUnit, endDuration);
+        }
+    }
+}
+
+
 
 void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *command, s32 frame) {
     u32 startFrame = command->startFrame;
