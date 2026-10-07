@@ -35,7 +35,7 @@ typedef struct GridDrawWork {
 } GridDrawWork;
 
 extern s32 effGetSlotWorkOrOverride(s32, s32);
-extern u8 *effUpdateTimedStates(u8 *, u32, u8 *);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -74,7 +74,7 @@ s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
     if (entry->states[0].delay == 0) {
         func_00307018(object, key);
     }
-    result = (s32)effUpdateTimedStates((u8 *)object, (u32)key, (u8 *)entry);
+    result = (s32)effUpdateTimedStates(object, (u32)key, entry);
     if (result == 0) {
         result = object->defaultValue;
     }
