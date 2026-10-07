@@ -15,227 +15,79 @@
 [progress]: https://decomp.dev/Megami-Decomps/dds-decomp
 
 A work-in-progress **matching decompilation** of *Shin Megami Tensei: Digital
-Devil Saga* and *Digital Devil Saga 2* for the PlayStation 2. The goal is C
-source that compiles to byte-identical copies of the retail executables and
-reads like the source the developers wrote.
+Devil Saga* and *Digital Devil Saga 2* for PlayStation 2. The goal is to
+understand and document how the games work by reconstructing readable source
+code from their retail binaries. Matching builds verify the reconstruction
+against the original executables.
 
-> [!IMPORTANT]
-> This repository contains reconstructed source, including source-form game
-> scripts and data. It does **not** contain disc images, retail executables or
-> archives, extracted game files, SDK binaries, or generated build outputs.
-> You need your own copy of the games to build the retail executables.
->
-> This is not a PC port. It rebuilds the original PS2 executables.
+Building requires your own lawfully obtained copy of the corresponding game.
+Disc images and retail executables are not included; the required files are
+extracted locally from your copy.
 
-> [!WARNING]
-> Work in progress. Unfinished functions are still assembly, and function
-> names, types and file layout change often. Most names were chosen by us (see
-> [Names](#names)).
+## Status and versions
 
-## Versions
+Unfinished functions use assembly extracted from the original executable, so a
+matching build does not mean the decompilation is complete. Names, types, and
+source organization are still being recovered.
 
 | Version | Game | Serial | ELF SHA-1 |
 |---|---|---|---|
 | `dds1` | Digital Devil Saga (USA) | `SLUS_209.74` | `6d18898e2724bf1d145392766e8ba1e678487419` |
 | `dds2` | Digital Devil Saga 2 (USA) | `SLUS_211.52` | `9be91ee1b4a535a4cb6ec89237b5a6ba41be2add` |
 
-`ninja` verifies each rebuilt executable against its retail SHA-1. The build
-includes assembly fallbacks for unfinished functions, so a byte-identical
-executable does not mean all its code has been decompiled.
-
-### Reading progress
-
-- `python tools/progress.py` reports current **source coverage** after splitting:
-  game functions and their retail code bytes that no longer use `INCLUDE_ASM`.
-  This inventory does not compile or independently verify the functions.
-- [decomp.dev][progress] uses the generated **objdiff comparison reports**.
-  Exact matching credits only functions with a 100% comparison result; fuzzy
-  matching also gives partial credit for similar instructions. These are
-  different measures from source coverage.
-- The primary reports cover **Atlus game/engine EE code**, the C reconstruction
-  target. Their overall totals and **Atlus game/engine** category contain the
-  same units, including unfinished game functions. The headline and code-byte
-  badges measure matching bytes; the separate function badges measure matching
-  function counts. A short function and a large function contribute equally
-  only to the latter.
-- **Sony SDK / C runtime** code was linked from prebuilt libraries and remains
-  assembly. **VU1 microcode (binary)** is the binary `.vutext` program, which
-  splat exposes as a text unit rather than individual EE functions. These are
-  outside the primary game-code denominator and `tools/progress.py`, but stay
-  in the full-binary audit reports and local objdiff configurations.
-- The reports do not currently set objdiff's **complete/linked** metadata.
-  A zero there is not a measurement of source coverage or build success.
-
-Objdiff bases are compiled separately with `-DSKIP_ASM`. ee-gcc 2.96 can select
-different instructions when the surrounding source or compiler pathnames
-change, so an accepted C function can score below 100% in that comparison.
-Relocatable objects can also represent the same linked address or literal with
-different relocation kinds. `tools/check_unit.py` checks against the linked
-retail executable and recognizes these matches. See
-[the matching workflow](docs/CONTRIBUTING.md#3-verify) and
-[compiler context](docs/idioms.md#code-that-changes-with-unrelated-text-context).
-The report generator corrects only explicitly configured relocation-only
-cases after resolving every source instruction against that same executable.
-Its checked source-object/fallback partition keeps assembly functions in the
-denominator with zero C credit. Other context discrepancies remain visible;
-use the unit checks and retail checksum build when validating a match.
-
-`ninja report` generates both views: `build/<v>/report.json` is the primary
-game-code report, and `build/<v>/report.all.json` retains game, SDK/runtime,
-and VU1 units with their separate categories. The root `report.json` combines
-both games' full-binary reports. CI publishes the primary files as
-`dds1_report` and `dds2_report` for decomp.dev and the full-binary files in the
-separate **build-audit** artifact on [the build run][actions]. Objdiff computes
-each report's scope and raw totals. `tools/reconcile_report.py` applies the
-bounded linked-word corrections to the primary, audit, and combined reports.
+The badges track matching game/engine code bytes and function counts for each
+game. SDK/runtime code and VU1 microcode are outside those totals.
+[Reading progress](docs/progress.md) explains the measurements and comparison
+limits.
 
 ## Quickstart
 
 Requirements:
-- Linux x86-64 (or WSL)
-- Python 3.10+, `ninja`, `cpp`, `git`
-- A kernel that runs 32-bit i386 programs (any normal x86-64 Linux or WSL2).
-  The 2000-era compiler binaries are i386 ELF. `tools/download_tools.py`
-  fetches the exact 32-bit glibc they are run under (Fedora `glibc-2.43-8`
-  i686), because ee-gcc 2.96's output can depend on the C library's heap
-  layout: a different libc can compile some functions differently.
+
+- Linux x86-64 or WSL2, with support for running 32-bit i386 programs.
+- Python 3.10+, `ninja`, `cpp`, and `git`.
+- Your own disc image of either supported game.
 
 ```sh
-git clone https://github.com/Megami-Decomps/dds-decomp.git && cd dds-decomp
+git clone https://github.com/Megami-Decomps/dds-decomp.git
+cd dds-decomp
 python -m pip install -r requirements.txt
-python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objdiff-cli
-# copy your disc image(s) into the repo root or orig/, then:
-python tools/extract.py          # -> SHA-1-checked executables and authored archive inputs under orig/
-python configure.py              # split with splat, write build.ninja and objdiff.json
-ninja                            # build and verify every extracted version (or: ninja dds1)
-ninja dds1-dev dds2-dev          # build the relocatable development ELFs
-ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
-ninja dds1-field-data dds2-field-data  # assemble and verify field tables, models, automaps, palettes, and lighting
-ninja dds1-field-archives dds2-field-archives  # rebuild field resources inside exact LB archives
-ninja dds1-battle-data dds2-battle-data  # assemble and verify battle tables
-python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script view
+python tools/download_tools.py
+
+# Copy your disc image(s) into the repository root or orig/, then:
+python tools/extract.py
+python configure.py
+ninja
 ```
 
-See [`docs/flw0.md`](docs/flw0.md) for script source,
-[`docs/inf.md`](docs/inf.md) for interaction tables, and
-[`docs/wap.md`](docs/wap.md) for actor, elevator, door, and transition tables.
-See [`docs/fld.md`](docs/fld.md) for relocatable FLD1/FLD2 field resources,
-[`docs/amb.md`](docs/amb.md) for standalone automap resources,
-[`docs/field-environment.md`](docs/field-environment.md) for NPL palettes and
-SKY light sets,
-[`docs/lb.md`](docs/lb.md) for their compressed field archives, and
-[`docs/tmx.md`](docs/tmx.md) for field texture bundles and PNG decoding. See
-[`docs/battle-tables.md`](docs/battle-tables.md) for encounter and battle
-content tables. See [`docs/development-build.md`](docs/development-build.md)
-for the experimental relocatable development ELFs.
+`ninja` builds every extracted version and checks each executable against its
+retail SHA-1. Use `ninja dds1` or `ninja dds2` to build one game. A checksum
+mismatch fails the build.
 
-`ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
-(`build/<v>/SLUS_*`). It is silent when the ELF matches. A mismatch prints
+See [Building](docs/building.md) for optional script, data, and development
+targets, generated files, and checksum troubleshooting. The
+[toolchain notes](docs/toolchain.md) explain the original compiler, assembler,
+and pinned 32-bit runtime.
 
-```
-build/dds1/SLUS_209.74: FAILED
-```
+## Documentation and contributing
 
-and the build fails.
+Start with the [contribution guide](docs/CONTRIBUTING.md) and
+[confirmed source idioms](docs/idioms.md) to reconstruct a function. Pick an
+`INCLUDE_ASM` function, replace it with readable C, check the whole unit with
+`tools/check_unit.py`, and verify that `ninja` still produces a matching
+executable.
 
-## How it's built
+DDS2 reuses much of DDS1's engine. The contribution guide also covers sharing
+reconstructed functions between games and recovering names and types.
 
-The toolchain was identified from the binaries, not guessed:
+The [documentation index](docs/README.md) groups the available references:
 
-| Code | Toolchain |
-|---|---|
-| Atlus game and engine code | ee-gcc 2.96 (`2.96-ee-001003-1`) at `-O2`, assembled by Sony's ee-as with `-G8` |
-| Sony SDK 2.5.x libraries, newlib, libgcc | prebuilt archives, identified by signature matching |
-| `.vutext` | VU1 microcode, kept as binary |
-
-Evidence:
-- Callee-saved registers are stored with `sd`, never `sq` (MWCC uses `sq`).
-- `move` is encoded as `daddu`.
-- `.mdebug.eabi64` is present.
-- Of 231 random functions compiled straight from m2c output, 94 match under
-  ee-gcc 2.96, against 0 to 26 for the other candidate compilers.
-
-The original assembler matters too: modern GNU as encodes `move` differently
-and inserts FPU hazard `nop`s, so C is assembled with ee-as.
-`docs/p4-transfer.md` has a second check against the Persona 4 decomp.
-
-A handful of files were built without sibling-call optimisation. They are
-recorded with their evidence in `config/<v>/cflags.txt`.
-
-## Project structure
-
-```text
-config/versions.json        serial, SHA-1 and gp of each version
-config/<v>/SLUS_*.yaml      splat config: every .text unit and its .rodata/.lit4/.sdata
-config/<v>/symbol_addrs.txt names and addresses (curated on top, generated below)
-config/<v>/name_sources.txt provenance of every curated name (evidence / inferred)
-config/<v>/cflags.txt       per-file compiler options, with evidence
-src/<v>/<dir>/<unit>.c      C units; INCLUDE_ASM marks functions not decompiled yet
-src/<v>/scripts/            exact, editable source for decompiled game scripts
-src/<v>/data/field/         exact, editable source for field resources and interaction tables
-include/                    common.h, include_asm.h, fpu.h, macro.inc
-docs/CONTRIBUTING.md        how to decompile, verify, name and share a function
-docs/compiler-decision-atlas.md route mismatches to compiler evidence and stop rules
-docs/idioms.md              source shapes confirmed against retail codegen
-docs/inf.md                 field interaction layout and editable source format
-docs/field-environment.md   field NPC palette and sky-light source formats
-docs/tu-names.md            where unit names come from (Nocturne __FILE__ strings)
-tools/                      build, checking, splitting and analysis tools
-asm/ assets/ build/ orig/   generated or extracted locally (git-ignored)
-```
-
-`.text` is split into C units named after the original source files where the
-evidence exists (`kernel/dds3KernelCore`, `effect/effPCPMisc`,
-`sdf/sdfModel`, ...). DDS has no `__FILE__` strings, but a December 2002
-debug build of *Nocturne*, which shares the engine, does. Units without
-proven names are `game/code_<vram>`, split at proven file boundaries.
-
-## FAQ
-
-**What is a matching decompilation?**
-Hand-written C that, compiled with the original compiler and flags,
-reproduces the original machine code byte for byte. It isn't the original
-source, but it behaves identically, and its structure and names are meant to
-be what the developers could plausibly have written.
-
-**Are there shortcuts in the matched code?**
-No. `tools/check_unit.py` rejects the common fakematch techniques: register
-pinning, computed-goto label tables standing in for switches, and functions
-that only match when compiled outside their unit. Inline assembly is limited
-to VU0 instructions that C cannot express. The rules are in
-[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md#matching-rules).
-
-**Why two games in one repository?**
-DDS2 reuses most of DDS1's engine: about 8,600 functions are byte-identical
-once relocations are masked. Each one decompiled in either game is ported to
-the other automatically (`tools/shared_funcs.py`).
-
-**Can I mod the game with this?**
-Not comfortably yet. The experimental `dds1-dev` and `dds2-dev` targets can
-each recompile and relocate selected code, read-only data, and initialized
-small data from eleven source objects, and move three source-owned
-zero-initialized state objects into an appended loadable segment without
-changing the exact retail targets. Replacement code may change size and retain
-explicitly verified assembly fallbacks and initialized small-data islands. The
-targets also link a development-only C entry hook and state block. Arbitrary
-mutable-state relocation and a mod loader remain out of scope.
-
-## Names
-
-Neither game ships symbols, so nearly every function and variable name here
-was chosen by contributors. Names follow Atlus's convention: a lowercase
-module prefix plus CamelCase, e.g. `sdfAddHandler` or `btlResetRuntime`.
-`config/<v>/name_sources.txt` marks each name as `evidence` (the binary names
-the function in its own debug text) or `inferred` (our choice). Treat
-`inferred` names as descriptions, not original symbols.
-
-## Contributing
-
-Contributions are welcome, including small ones. Start with
-[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and
-[docs/idioms.md](docs/idioms.md), pick an `INCLUDE_ASM` function, and send a
-pull request once `ninja` stays green and `check_unit.py` is clean for the
-units you touched.
+- **Code reconstruction:** matching workflow, compiler behavior, and unit names.
+- **Scripts:** compiled VM scripts and editable source.
+- **Field resources:** interaction and transition tables, field formats,
+  automaps, lighting, archives, and textures.
+- **Battle data:** encounter and battle content tables.
+- **Development builds:** experimental relocatable executables.
 
 ## Acknowledgements
 

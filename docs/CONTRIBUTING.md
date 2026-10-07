@@ -40,7 +40,7 @@ before you start.
 
 `python tools/progress.py` shows per-game source coverage (functions and retail
 code bytes no longer using `INCLUDE_ASM`); it does not verify matching. See
-[Reading progress](../README.md#reading-progress) for the report categories
+[Reading progress](progress.md) for the report categories
 and comparison limits. Every retail function
 belongs to a C unit in `src/<v>/<dir>/<unit>.c`. A function that isn't done
 yet is an `INCLUDE_ASM(const s32, "<dir>/<unit>", NAME);` line, and its
@@ -129,6 +129,13 @@ Other diff tools:
 - decomp.me (compiler `ee-gcc2.96`, flags `-O2`; `tools/m2ctx.py` writes the context)
 
 ## 4. Name
+
+Neither game ships symbols, so nearly every function and variable name here
+was chosen by contributors. Names follow Atlus's convention: a lowercase
+module prefix plus CamelCase, e.g. `sdfAddHandler` or `btlResetRuntime`.
+`config/<v>/name_sources.txt` marks each name as `evidence` (the binary names
+the function in its own debug text) or `inferred` (our choice). Treat
+`inferred` names as descriptions, not original symbols.
 
 ```sh
 python tools/names.py apply <v> names.tsv
