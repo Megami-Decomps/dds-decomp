@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -108,11 +109,11 @@ extern u32 kwlnDrawControlFlags;
 
 s32 func_00126200(s32 id);
 
-void evtSetWorldSlotStatusFlag();
+void evtSetWorldSlotStatusFlag(void *unit);
 
-void evtClearWorldSlotStatusFlag();
+void evtClearWorldSlotStatusFlag(void *unit);
 
-void evtSetWorldSlotValue(void *unit, s32 value);
+void evtSetWorldSlotValue(void *unit, u32 value);
 
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
@@ -734,7 +735,7 @@ extern void *effObjGetDataHandle(void *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3SetSlotKey(ObjectWithResource *, u32);
 extern void dds3ReplaceObjectResource(ObjectWithResource *);
-extern u32 dds3GetObjectResourceHandle(ObjectWithResource *);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(ObjectWithResource *);
 extern void func_00117568(u32, s32);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
 
@@ -743,7 +744,7 @@ s32 func_002272B0(void) {
     EvtWorldUnit *target;
     ObjBase *data;
     ObjectWithResource *slot;
-    u32 path;
+    Dds3PathCurveWork *path;
     s32 room;
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
@@ -774,7 +775,7 @@ s32 func_002272B0(void) {
         return 1;
     switch (scrReadIntParameter(2)) {
     case 0:
-        func_00117568(path, 0);
+        func_00117568((u32 *)&path->state, 0);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -782,7 +783,7 @@ s32 func_002272B0(void) {
         }
         break;
     case 1:
-        func_00117568(path, 1);
+        func_00117568((u32 *)&path->state, 1);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -800,7 +801,7 @@ s32 func_002274A0(void) {
     void *target;
     ObjBase *data;
     ObjectWithResource *slot;
-    u32 path;
+    Dds3PathCurveWork *path;
     s32 targetId;
     s32 mode;
 
@@ -841,10 +842,10 @@ s32 func_002274A0(void) {
     mode = scrReadIntParameter(2);
     switch (mode) {
     case 0:
-        func_00117568(path, 0);
+        func_00117568((u32 *)&path->state, 0);
         break;
     case 1:
-        func_00117568(path, 1);
+        func_00117568((u32 *)&path->state, 1);
         break;
     }
     return 1;
