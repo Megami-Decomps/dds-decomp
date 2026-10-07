@@ -10950,16 +10950,16 @@ u32 effReleaseSlotWorkAllocation(s32 owner) {
 }
 
 /* Return the normal slot address unless its stored alternate address is nonzero. */
-s32 effGetSlotWorkOrOverride(s32 owner, s32 slotIndex) {
+void *effGetSlotWorkOrOverride(EffectSlotSet *owner, s32 slotIndex) {
     s32 alternateAddress;
     s32 entryAddress;
 
-    entryAddress = slotIndex * EFF_SLOT_WORK_BYTES + (s32)((EffectSlotSet *)owner)->workEntries;
+    entryAddress = slotIndex * EFF_SLOT_WORK_BYTES + (s32)owner->workEntries;
     alternateAddress = ((BdWork *)entryAddress)->alternate.address;
     if (alternateAddress != 0) {
         entryAddress = alternateAddress;
     }
-    return entryAddress;
+    return (void *)entryAddress;
 }
 
 /* Start at zero when bit zero is set, otherwise at the full 16.16 endpoint.
@@ -11250,7 +11250,11 @@ s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
 
 extern u32 effResetRecordRun(u8 *, u32, u32);
 
-EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, BdWork *entry) {
+EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entryData) {
+    /* Alternate payloads may be only 0x6C bytes; direct access here is limited to timed states.
+     * Bucket callbacks retain their existing kind-specific pointer contract.
+     */
+    BdWork *entry = (BdWork *)entryData;
     EffTimedState *states = entry->states;
     BdWork *record = &effect->workEntries[slot];
     s32 idle = 1;

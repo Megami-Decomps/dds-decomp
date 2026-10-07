@@ -225,7 +225,7 @@ extern u32 func_002B9FF8();
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
-extern void mnuHideWindowHandlesKindFourFive(MenuIconState *);
+extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_003E75E0[];
@@ -916,7 +916,8 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
 }
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
+MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
+                                                s32 visibleCount, s32 rowSpacing) {
     MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(MNU_WINDOW_CONTAINER_BYTES);
     MenuList *list;
     window->width = width;
@@ -925,7 +926,7 @@ s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s3
     list = mnuCreateListState(id, visibleCount, rowSpacing);
     window->state = 0;
     window->list = list;
-    return (s32)window;
+    return window;
 }
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
@@ -1145,7 +1146,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
         }
         y += list->windowOffset * list->rowStep;
         mnuDrawIconPanel(x, y, depth, fadeScale, &window->panel, selectionMode, drawArg);
-        mnuHideWindowHandlesKindFourFive(&window->panel);
+        mnuUpdateWindowPanelHandleStatesKindFourFive(&window->panel);
         if (window->flags & MNU_WINDOW_TRANSITION_FLAG) {
             window->panel.fade += MNU_NODE_FADE_STEP;
             if (window->panel.fade >= MNU_PANEL_FADE_LIMIT) {
@@ -1343,7 +1344,7 @@ void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32
 }
 
 
-void mnuHideWindowHandlesKindFourFive(MenuIconState *obj) {
+void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *obj) {
     switch (obj->kind) {
     case 4:
         itfGridLookupValueOrDefault(obj->sprite[2], 0);

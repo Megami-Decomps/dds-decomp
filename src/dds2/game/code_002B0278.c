@@ -230,7 +230,7 @@ extern u32 func_002B9FF8();
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
-extern void mnuHideWindowHandlesKindFourFive(MenuIconState *);
+extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_003E75E0[];
@@ -388,7 +388,7 @@ extern s32 mnuGetEntryUseStatus(s32, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
+MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
 void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state);
 void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second);
 void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
@@ -1291,7 +1291,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, s32 callback) {
         placement = defaults.indices[2];
         break;
     }
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
+    window = mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
     mnuSetWindowContainerState(window, MNU_FULL_FADE);
     mnuInitializeBasicWindowLayout(window, context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
@@ -3052,7 +3052,7 @@ void func_002BA7A8(u32 x, u32 y, u32 depth, u32 fade, MenuIconState *panel, u32 
 void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
 
 
-void mnuHideWindowHandlesKindFourFive(MenuIconState *obj);
+void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *obj);
 
 /* Rebuild the first-node pointer by walking backward from the cursor. */
 void mnuRebuildListFirstFromCursor(MenuList *list);
