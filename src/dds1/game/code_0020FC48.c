@@ -1367,7 +1367,7 @@ extern void *sdfAllocGeneralBlockHigh(s32);
 
 extern void *sdfResourceRetainAddress(void *);
 
-extern void *sdfAllocatePacketList(s32);
+extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
 extern void *sdfAllocPacketAligned(s32);
 
@@ -1381,16 +1381,16 @@ extern u8 D_00325860[];
 
 void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    void *surface;
+    SdfListHead *packetList;
     void *context;
     runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
     runtime->request = sdfResourceRetainAddress(runtime->handle);
-    surface = sdfAllocatePacketList(0);
+    packetList = (SdfListHead *)sdfAllocatePacketList(0);
     context = sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
+    sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
     sdfAppendPacketChainNode(D_00325860, context);
-    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
+    D_00325708.append((SdfListHead *)&D_00325708, packetList);
 }
 
 extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
@@ -1400,9 +1400,9 @@ extern void sdfQueueNonzeroResourceId(void *);
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    void *surface = sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket(surface, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->request, 0);
-    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    sdfCreateDescriptorPacket(packetList, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->request, 0);
+    D_00325708.append((SdfListHead *)&D_00325708, packetList);
     sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
     runtime->request = 0;
@@ -1412,12 +1412,12 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
 extern void func_002D5CD0(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void btlInitializeOverlayGraphics(void) {
-    void *surface = sdfAllocatePacketList(0);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
     void *context = sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    func_002D5CD0(surface, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    func_002D5CD0(packetList, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode(D_00325860, context);
-    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
+    D_00325708.append((SdfListHead *)&D_00325708, packetList);
     btlRuntimeState.options |= 1;
 }
 
