@@ -476,7 +476,53 @@ EvtMantraNodePositionRecord *func_0028DC08(s32 object, u16 nodeId, s32 mode, s32
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028DE10);
+extern void mnuStorePanelEntry(s32, s32);
+extern void func_0028DFA0(s32);
+
+/* Collect selected neighbours, then advance their three rank chains for at most 20 passes. */
+void func_0028DE10(s32 object, u16 index) {
+    EvtMantraNodePositionRecord *nodes[3];
+    EvtMantraNodePositionRecord **cursor;
+    EvtMantraNodePositionRecord **neighbors;
+    EvtMantraNodePositionRecord **nextNode;
+    EvtMantraNodePositionRecord *record;
+    s32 i = 0;
+    s32 hasNode = 0;
+    s16 rank = 0;
+    s16 remaining;
+    s32 modelFlagState = mnuGetActiveMantraModelFlagState();
+    s32 selected;
+
+    evtPrintDeveloperConsoleMessage("DrawRank[%d]\n", modelFlagState);
+    memset(nodes, 0, sizeof(nodes));
+    selected = func_0028D7C8(object, index, modelFlagState, 0);
+    record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(index);
+    neighbors = record->neighbors;
+    nextNode = nodes;
+    for (; i < 6; i++, neighbors++) {
+        if ((selected >> i) & 1) {
+            *nextNode++ = func_0028DC08(object, (*neighbors)->id, modelFlagState, 0);
+            hasNode = 1;
+        }
+    }
+    remaining = 20;
+    if (hasNode) {
+        do {
+            rank += 3;
+            hasNode = 0;
+            cursor = nodes;
+            for (i = 2; i >= 0; i--, cursor++) {
+                if (*cursor != NULL) {
+                    *cursor = func_0028DC08(object, (*cursor)->id, modelFlagState, rank);
+                    hasNode = 1;
+                }
+            }
+            remaining--;
+        } while (hasNode && remaining != 0);
+    }
+    mnuStorePanelEntry(0x20006, 0);
+    func_0028DFA0(object);
+}
 
 
 
