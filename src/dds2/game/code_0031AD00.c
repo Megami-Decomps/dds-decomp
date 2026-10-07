@@ -125,15 +125,16 @@ s32 func_0031AF68(MnuShootingWork *object) {
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031B080);
 
 void func_0031B0F8(void) {
-    s32 object;
+    s32 world;
+    struct EffWorldNode *camera;
     u128 *worldEye = (u128 *)D_0040ABD0;
 
-    object = (s32)dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, worldEye, (u128 *)D_0040ABB0);
-    D_00438944 = object;
-    dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)D_00438938);
+    camera = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, worldEye, (u128 *)D_0040ABB0);
+    D_00438944 = (s32)camera;
+    dds3SetWorldNodeValue(camera, (u32)D_00438938);
     dds3SetCameraVector((struct EffWorldNode *)D_00438944, worldEye);
     effObjSetInnerFloat(D_00438944, 2.0f);
-    object = dds3GetWorldSecondaryObject();
-    dds3SetWorldCameraObject((struct EffWorldNode *)object, (struct EffWorldNode *)D_00438944);
+    world = dds3GetWorldSecondaryObject();
+    dds3SetWorldCameraObject((struct EffWorldNode *)world, (struct EffWorldNode *)D_00438944);
     func_001063A8(0.6283184886f);
 }
