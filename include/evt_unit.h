@@ -15,6 +15,11 @@ typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_VALUE = 4
 } EvtUnitMotionState;
 
+/* EvtUnit.flags bit selecting path-follow motion from progress 1 toward 0. */
+enum EvtUnitFlags {
+    EVT_UNIT_FLAG_PATH_REVERSE = 0x4
+};
+
 /* Shared light-target payload used by the event manager and battle base-light task. */
 typedef struct EvtTargetInfo {
     f32 firstColor[4];           /* 0x00 */

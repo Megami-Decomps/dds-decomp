@@ -164,7 +164,7 @@ s32 func_00220678(EvtUnit *unit) {
         break;
     case 3:
         value = evtGetValueScaleFactor((void *)unit->pathHandle);
-        if (unit->flags & 4) {
+        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
             }
@@ -191,7 +191,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
         break;
     case 2:
         t = evtGetValueScaleFactor((void *)unit->pathHandle);
-        if (unit->flags & 4) {
+        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
             }
