@@ -4042,6 +4042,7 @@
 0x00241BF0	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x00241CA0	evtRefreshTaskData	inferred	rebuilds taskdata+0x38 via func_00241BF0/func_002D3288/effSetCh72Id, freeing old
 0x00241D28	evtSpawnResourceObject	inferred	looks up the task resource, creates an effect object (flags 1) and scales it by slot scale ratio D_003BAA20[index]/D_003BAA10 [names_M95_Event.tsv]
+0x00241F78	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
 0x00242278	evtFreeEventPackState	inferred	Frees the state returned by func_00101A70.
 0x00242298	evtCreateMotionSeTask	inferred	creates the named mse task and retains its three arguments
 0x00242340	evtBeginEventPackScriptLoad	inferred	confidence=high; matched-C; src/dds1/event/evtEventPack.c:51:func_00242340; Formats grouped event .be script path, requests resource, saves handle and sets loading state.; twin=0x0025D758, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]

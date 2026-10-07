@@ -3571,6 +3571,7 @@
 0x0025CF98	evtGetTaskValueWord	inferred	Reads a task's data word at offset four by ID or returns minus one if the task is missing.
 0x0025D008	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x0025D140	evtSpawnResourceObject	inferred	DDS1 twin 0x00241D28 [names_M95_Event.tsv]
+0x0025D390	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
 0x0025D6B0	evtCreateMotionSeTask	inferred	twin of DDS1 evtCreateMotionSeTask
 0x0025D758	evtBeginEventPackScriptLoad	inferred	confidence=high; matched-C; src/dds2/event/evtEventPack.c:52:func_0025D758; Formats grouped event .be script path, requests resource, saves handle and sets loading state.; twin=0x00242340, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0025D7E0	evtCompleteEventPackScriptLoad	inferred	readability/matching review (QP16)
