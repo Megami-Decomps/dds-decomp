@@ -1254,7 +1254,7 @@ void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 colo
     }
 }
 
-extern s32 effAppendTexturedTrianglePacket(s32, s32, s32,
+extern void effAppendTexturedTrianglePacket(s32, s32, s32,
     s32, s32, f32, f32, s32, s32, f32, f32, s32, s32, f32, f32, s32);
 
 /* The textured cell uses the same six-triangle rim as the flat cell above. */
