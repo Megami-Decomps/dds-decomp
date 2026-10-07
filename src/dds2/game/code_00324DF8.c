@@ -16,7 +16,7 @@ extern f32 sdfVec3Normalize();
 
 extern u64 sdfAllocateBlockBySizeThreshold(u64);
 
-extern void *func_0035A828(u64);
+extern void *func_0035A828(u32);
 
 extern u64 func_00325790(u64, u32);
 
@@ -41,7 +41,8 @@ typedef struct ResourceNode {
 } ResourceNode;
 
 typedef struct ResourceList {
-    u32 count;
+    /* mnuClearResourceList clears the word; retail 0032504C serializes its low halfword. */
+    union { u32 word; u16 packed; } count;
     ResourceNode *first;
 } ResourceList;
 
@@ -112,17 +113,97 @@ void func_00324F38(ResourceList **list) {
     mnuFindResourceNodeById(*list);
 }
 
-void *func_00324F50(s32 owner, u64 resource) {
+void *func_00324F50(u32 *owner, u32 resource) {
     void *handle;
 
     handle = func_0035A828(resource);
-    func_00320CE0(*(u32 *)(owner + 4), 0, (u32)handle);
+    func_00320CE0(owner[1], 0, (u32)handle);
     return handle;
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", mnuRemoveLinkedResourceByHandle);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00324FD0);
+typedef struct DdsCountedPayload {
+    u32 count;
+    void *data;
+} DdsCountedPayload;
+
+typedef struct DdsNestedGroup {
+    u32 unk_00;
+    u16 firstCount;
+    u16 secondCount;
+    DdsCountedPayload *first;
+    DdsCountedPayload *second;
+} DdsNestedGroup;
+
+/* The packed nested format is 0x14 bytes, unlike the separate 0x18 SdfResourceRecord. */
+typedef struct DdsNestedHeader {
+    u32 unk_00;
+    u32 unk_04;
+    u32 unk_08;
+    u16 unk_0C;
+    u16 groupCount;
+    DdsNestedGroup *groups;
+} DdsNestedHeader;
+
+extern s32 dds3MeasureMenuRecord(DdsNestedGroup *);
+
+DdsNestedHeader *func_00324FD0(u32 *owner, ResourceList **list) {
+    ResourceNode *node;
+    DdsNestedHeader *buffer;
+    DdsNestedGroup *group;
+    DdsCountedPayload *entries;
+    u8 *cursor;
+    s32 totalSize;
+    s32 i;
+    s32 j;
+
+    node = (*list)->first;
+    if (node == NULL) {
+        return NULL;
+    }
+    totalSize = 0;
+    do {
+        totalSize += dds3MeasureMenuRecord((DdsNestedGroup *)node->handle);
+        node = node->next;
+    } while (node != NULL);
+    buffer = func_00324F50(owner, totalSize + sizeof(*buffer));
+    memset(buffer, 0, totalSize);
+    buffer->groupCount = (*list)->count.packed;
+    buffer->groups = (DdsNestedGroup *)(buffer + 1);
+    cursor = (u8 *)buffer->groups;
+    node = (*list)->first;
+    if (node != NULL) {
+        do {
+            group = (DdsNestedGroup *)node->handle;
+            memcpy(cursor, group, sizeof(*group));
+            cursor += sizeof(*group);
+            node = node->next;
+        } while (node != NULL);
+    }
+    group = buffer->groups;
+    for (i = 0; i < buffer->groupCount; i++, group++) {
+        memcpy(cursor, group->first, group->firstCount * sizeof(*entries));
+        group->first = (DdsCountedPayload *)cursor;
+        entries = group->first;
+        cursor += group->firstCount * sizeof(*entries);
+        for (j = 0; j < group->firstCount; j++, entries++) {
+            memcpy(cursor, entries->data, entries->count * 8);
+            entries->data = cursor;
+            cursor += entries->count * 8;
+        }
+        memcpy(cursor, group->second, group->secondCount * sizeof(*entries));
+        group->second = (DdsCountedPayload *)cursor;
+        entries = group->second;
+        cursor += group->secondCount * sizeof(*entries);
+        for (j = 0; j < group->secondCount; j++, entries++) {
+            memcpy(cursor, entries->data, entries->count * 8);
+            entries->data = cursor;
+            cursor += entries->count * 8;
+        }
+    }
+    return buffer;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003251C0);
 
@@ -138,7 +219,7 @@ typedef struct SdfFilteredRecords {
     SdfFilterRecord *records;
 } SdfFilteredRecords;
 
-SdfFilteredRecords *func_003255A0(s32 owner, SdfFilterRecord *records, u32 count) {
+SdfFilteredRecords *func_003255A0(u32 *owner, SdfFilterRecord *records, u32 count) {
     u32 enabled = 0;
     u32 i;
     s32 size;
@@ -170,12 +251,12 @@ u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
 
     if (count != 0) {
         do {
-            SdfResourceRecord *copy = (SdfResourceRecord *)func_00324F50((s32)owner, sizeof(*copy));
+            SdfResourceRecord *copy = (SdfResourceRecord *)func_00324F50(owner, sizeof(*copy));
 
             *copy = *source;
-            copy->items = (u32 *)func_00324F50((s32)owner, copy->count * sizeof(*copy->items));
+            copy->items = (u32 *)func_00324F50(owner, copy->count * sizeof(*copy->items));
             memcpy(copy->items, source->items, copy->count * sizeof(*copy->items));
-            copy->info = (SdfResourceInfo *)func_00324F50((s32)owner, sizeof(*copy->info));
+            copy->info = (SdfResourceInfo *)func_00324F50(owner, sizeof(*copy->info));
             *copy->info = *source->info;
             func_00324DF8(owner, (u32)copy);
             source++;
