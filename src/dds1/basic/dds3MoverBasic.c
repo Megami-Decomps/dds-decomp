@@ -15,12 +15,6 @@ typedef struct {
     u128 position;
 } MoverPositionData;
 
-typedef struct {
-    u8 pad00[0x88];
-    u32 fovUpdatePending;
-    f32 fieldOfView;
-} MoverScalarData;
-
 extern void dds3InterpolatePathVectorVU(Dds3PathCurveWork *);
 extern void dds3PreparePathVectorPair(Dds3PathCurveWork *);
 extern f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *);
@@ -51,7 +45,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
     EffWorldNode *target = work->target;
     ObjectTransform *inner = target->inner;
     s32 (*updateCallback)(ObjectTransform *, EffWorldNode *);
-    MoverScalarData *cameraData;
+    CameraData *cameraData;
     f32 fieldOfView;
 
     if (work->path != NULL) {

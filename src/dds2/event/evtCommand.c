@@ -744,7 +744,7 @@ s32 func_00241F10(void) {
         return 1;
     switch (scrReadIntParameter(2)) {
     case 0:
-        sdfSetFloatCounterDirection((u32 *)&path->state, 0);
+        sdfSetFloatCounterDirection((u32 *)&path->direction, 0);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -752,7 +752,7 @@ s32 func_00241F10(void) {
         }
         break;
     case 1:
-        sdfSetFloatCounterDirection((u32 *)&path->state, 1);
+        sdfSetFloatCounterDirection((u32 *)&path->direction, 1);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -811,10 +811,10 @@ s32 func_00242100(void) {
     mode = scrReadIntParameter(2);
     switch (mode) {
     case 0:
-        sdfSetFloatCounterDirection((u32 *)&path->state, 0);
+        sdfSetFloatCounterDirection((u32 *)&path->direction, 0);
         break;
     case 1:
-        sdfSetFloatCounterDirection((u32 *)&path->state, 1);
+        sdfSetFloatCounterDirection((u32 *)&path->direction, 1);
         break;
     }
     return 1;
