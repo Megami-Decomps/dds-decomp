@@ -207,6 +207,11 @@ s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321A30);
 
+extern MenuRuntimeRecord *func_00321F18(MenuRuntimeList *);
+extern MenuRuntimeCallback D_0043899C;
+extern f64 cos(f64);
+extern f64 sin(f64);
+
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321C60);
 
 void func_00321E18(MenuRuntimeRecord *records, s32 capacity) {
