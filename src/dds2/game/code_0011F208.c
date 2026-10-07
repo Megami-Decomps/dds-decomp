@@ -2255,15 +2255,6 @@ u8 fldGetCampSceneControlMode(void) {
     return fldTestSceneControlFlags(0x20) != 0 ? 0 : 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001273E8);
-
-u8 fldGetSceneReadyOrPendingState(void) {
-    if (D_00435F80 > 0) {
-        return 2;
-    }
-    return fldGetSceneReadyFlag() != 0;
-}
-
 extern void *dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(EffWorldNode *, s8);
 extern void kwlnFadeStartIn(s32);
@@ -2273,6 +2264,80 @@ extern void func_00133F08(void);
 extern u8 fldHasPendingSceneFlags(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00123B88(s32, s32, f32, f32, f32);
+extern void kwlnFadeStartOut(s32 duration);
+extern void mnuCreateCampTasks(void);
+extern void evtSetSolarOverlayFullyVisible(void);
+extern void fldApplySkyLightSetToPlayerVU(void);
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
+extern void fldClearSceneLifecycleFlags(u32 mask);
+extern u8 fldTestSceneLifecycleFlags(u32 mask);
+extern s16 D_00389898[];
+
+/* Complete a delayed camp handoff or advance the player scene transition. */
+s32 func_001273E8(void) {
+    FldAreaWork *scene;
+    s32 control;
+
+    if (D_00435F7C > 0) {
+        D_00435F7C--;
+        if (D_00435F7C == 0) {
+            dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+            kwlnFadeStartIn(4);
+            mnuCreateCampTasks();
+        }
+        return 0;
+    }
+    if (fldTestSceneControlFlags(0x20) == 0 && fldGetCampSceneControlMode() == 3) {
+        fldClearSceneLifecycleFlags(1);
+        fldPreparePlayerSceneCameraTarget();
+        evtSetSolarOverlayFullyVisible();
+        /* Retail retains both branches of this shared scene-state gate. */
+        if (D_00389898[0] != 0) {
+            fldApplySkyLightSetToPlayerVU();
+        } else {
+            fldApplySkyLightSetToPlayerVU();
+        }
+        dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+        fldSetSceneControlFlags(0x20);
+        kwlnFadeStartOut(0);
+        kwlnFadeStartIn(8);
+        return 0;
+    }
+    control = fldTestSceneControlFlags(0x20);
+    if (control == 0) {
+        return control;
+    }
+    control = fldTestSceneControlFlags(0x40);
+    if (control == 0) {
+        return control;
+    }
+    if (fldTestSceneLifecycleFlags(1) == 1 || fldHasPendingSceneFlags() != 0 || fldGetSceneReadyFlag() != 0) {
+        return 0;
+    }
+    scene = &fldAreaState;
+    if (scene->sceneMode == 0 && (s8)D_0037F530[0] < 0) {
+        sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
+        fldSetSceneLifecycleFlags(1);
+        fldResetPlayerSceneObjectState();
+        func_00133F08();
+        evtSetSolarOverlayFullyTransparent();
+        scene->sceneMode = 4;
+        scene->sceneState = 5;
+        fldClearSceneControlFlags(0x20);
+        kwlnFadeInStart(0, 0, 0, 4);
+        D_00435F7C = 5;
+        fldSetCameraNodeModeWithTen();
+    }
+    return 0;
+}
+
+u8 fldGetSceneReadyOrPendingState(void) {
+    if (D_00435F80 > 0) {
+        return 2;
+    }
+    return fldGetSceneReadyFlag() != 0;
+}
+
 
 /* Gate next-floor input on camp/readiness flags, then start the native scene
  * transition or its delayed fade path. All return paths retain zero. */
