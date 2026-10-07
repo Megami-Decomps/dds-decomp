@@ -1311,7 +1311,56 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1918);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5690);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A57A0);
+/* Three 0x38-byte saved records; the snapshot writer clears all 0xA8 bytes. */
+typedef struct BtlActorStateSnapshot {
+    BtlUnitEntrySlot entrySlots[7];
+    u8 pad2A[2];
+    u32 flags;
+    u8 pad30[4];
+    u16 status;
+    u16 unitId;
+} BtlActorStateSnapshot;
+
+extern BtlActorStateSnapshot D_003D73F0[3];
+extern s32 func_003003F0(const char *, ...);
+
+void func_001A57A0(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u32 slot;
+    BtlUnit *unit;
+    u16 status;
+
+    for (slot = 0; slot < 3; slot++) {
+        if (D_003D73F0[slot].unitId == 0) {
+            continue;
+        }
+        for (unit = battle->units; unit != NULL; unit = unit->next) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x200) {
+                    if (unit->partyRecord.unitId == D_003D73F0[slot].unitId) {
+                        if (D_003D73F0[slot].flags & 0x1000) {
+                            unit->flags |= 0x1000;
+                            unit->partyRecord.flags |= 0x1000;
+                        } else {
+                            unit->flags &= ~0x1000;
+                            unit->partyRecord.flags &= ~0x1000;
+                        }
+                        memcpy(unit->entrySlots, D_003D73F0[slot].entrySlots,
+                               sizeof(D_003D73F0[slot].entrySlots));
+                        status = D_003D73F0[slot].status;
+                        unit->partyRecord.status = status;
+                        if ((status & 0x7FFF) == 0x4000) {
+                            unit->flags |= 0x20;
+                            unit->partyRecord.hp = 0;
+                        }
+                        func_003003F0("btl:state pos[%d:%X]\n", slot, unit->partyRecord.unitId);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5958);
 

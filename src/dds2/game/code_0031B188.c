@@ -4,6 +4,8 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 #include "mnu_shooting.h"
+#include "eff_transform.h"
+#include "dds3obj.h"
 
 typedef struct SoundSlot {
     u32 remainingFrames;
@@ -124,18 +126,16 @@ extern void effObjSetInnerFirstVec(void *node, u128 *vector);
 /* Reload the camera vectors, invoke its update callback, then restore both copies
  * of the final vector in the camera data. */
 void func_0031B188(void) {
-    u8 *cameraObject;
-    void (*updateCamera)(void *);
-    u8 *cameraData;
+    CameraData *cameraData;
+    EffWorldNode *camera;
 
-    dds3SetCameraVector((struct EffWorldNode *)D_00438944, D_0040ABD0);
-    effObjSetInnerFirstVec((void *)D_00438944, (u128 *)D_0040ABC0);
-    cameraObject = (u8 *)D_00438944;
-    updateCamera = *(void (**)(void *))(*(u8 **)(cameraObject + 0x10) + 8);
-    updateCamera(cameraObject);
-    cameraData = *(u8 **)((u8 *)D_00438944 + 0x18);
-    PCP_COPY_VECTOR(cameraData + 0x50, D_0040ABB0);
-    PCP_COPY_VECTOR(cameraData + 0x70, D_0040ABB0);
+    dds3SetCameraVector((EffWorldNode *)D_00438944, D_0040ABD0);
+    effObjSetInnerFirstVec((EffWorldNode *)D_00438944, (u128 *)D_0040ABC0);
+    camera = (EffWorldNode *)D_00438944;
+    camera->ops->update(camera);
+    cameraData = (CameraData *)((EffWorldNode *)D_00438944)->data;
+    PCP_COPY_VECTOR(&cameraData->localUp, D_0040ABB0);
+    PCP_COPY_VECTOR(&cameraData->worldUp, D_0040ABB0);
 }
 
 void dds3InitSoundSlotPool(void) {

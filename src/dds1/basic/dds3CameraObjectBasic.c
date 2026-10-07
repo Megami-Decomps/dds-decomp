@@ -7,9 +7,9 @@
 extern void effObjFreeInner(EffWorldNode *node);
 extern void dds3DestroyObjectBase(ObjBase *base);
 extern void sdfReleaseChipBlock(void *block);
-extern EffWorldNode *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
-extern void dds3EnsureSlotData();
+extern void dds3EnsureSlotData(void *object);
 extern void effObjSetInnerFirstVec(EffWorldNode *obj, u128 *vec);
 extern void effObjSetInnerSecondVec(EffWorldNode *obj, u128 *vec);
 extern void effObjInnerVecBackup(ObjectTransform *inner);
@@ -102,11 +102,11 @@ ObjBase *dds3GetCameraHandle(EffWorldNode *camera) {
 }
 
 
-/* Append a camera-kind world object, store its scalar, and allocate slot data. */
-EffWorldNode *dds3CreateCameraObjectWithSlotData(s32 value) {
+/* Append a camera-kind node, set its key, and ensure slot data. */
+EffWorldNode *dds3CreateCameraObjectWithSlotData(s32 key) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(4);
 
-    obj->key = value;
+    obj->key = key;
     dds3EnsureSlotData(obj);
     return obj;
 }
@@ -172,8 +172,8 @@ void dds3ReleaseCameraWorldNode(void) {
 }
 
 /* Load the owned look-at matrix into vf28-vf31. */
-void dds3LoadObjectMatrixPointerIntoVu(void *obj) {
-    VU0_LOAD_MATRIX(((CameraData *)((EffWorldNode *)obj)->data)->matrix);
+void dds3LoadObjectMatrixPointerIntoVu(EffWorldNode *camera) {
+    VU0_LOAD_MATRIX(((CameraData *)camera->data)->matrix);
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */

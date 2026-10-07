@@ -1,8 +1,10 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "eff_event.h"
 
 
-extern u32 sdfAllocSizeClassBlock(u32);
+extern void *sdfAllocSizeClassBlock(s32 size);
+extern s32 effObjInnerCreate(EffWorldNode *object);
 
 /* Object resource storage is polymorphic: reset expects the kind-7 effect
  * prefix below, while initialization attaches a separate 16-byte slot block. */
@@ -20,13 +22,6 @@ typedef struct WorldResource {
     u16 entryId; /* +0x24: entry forwarded to that lookup */
     u16 unk26; /* Written from the bound owner's kind; no read established. */
 } WorldResource;
-
-/* The initializer allocates 16 bytes and writes only the slot-state handle.
- * The remaining bytes and subsequent uses of this word are unknown here. */
-typedef struct DdsSlotResourceBlock {
-    ObjBase *unk00;
-    u8 pad04[0xC];
-} DdsSlotResourceBlock;
 
 /* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
  * The caller supplies an existing effect resource; this does not free its owner. */
@@ -114,14 +109,14 @@ INCLUDE_ASM(const s32, "game/code_00115F40", func_00116078);
 
 /* Attach a 16-byte slot block, then publish its newly created state handle.
  * The block is attached before the state constructor sees the object. Returns 1. */
-u32 dds3InitializeResourceOwner(WorldResourceOwner *object) {
+u32 dds3InitializeResourceOwner(EffWorldNode *object) {
     DdsSlotResourceBlock *resource;
     ObjBase *handle;
 
-    effObjInnerCreate();
+    effObjInnerCreate(object);
     resource = (DdsSlotResourceBlock *)sdfAllocSizeClassBlock(0x10);
-    object->resource = resource;
+    object->data = resource;
     handle = dds3CreateSlotResourceState(object);
-    resource->unk00 = handle;
+    resource->resourceState = handle;
     return 1;
 }

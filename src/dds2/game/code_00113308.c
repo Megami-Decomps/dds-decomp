@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
 #include "eff.h"
@@ -45,7 +46,9 @@ typedef struct WorldObj {
     f32 *source;          /* 0x1C */
 } WorldObj;
 
-extern void effObjInnerCreate();
+extern s32 effObjInnerCreate(EffWorldNode *node);
+extern void effObjFreeInner(EffWorldNode *node);
+extern void evtEndObjectValueTransition(EffWorldNode *object);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
@@ -195,7 +198,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
     EffectObjectData *data;
     void *work;
 
-    effObjInnerCreate(object);
+    effObjInnerCreate((EffWorldNode *)object);
     work = sdfAllocSizeClassBlock(sizeof(EffectObjectData));
     object->data = work;
     memset(work, 0, sizeof(EffectObjectData));
@@ -219,8 +222,8 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
 void evtDestroyEffectObjectData(EffectObject *object) {
     EffectObjectData *data;
 
-    evtEndObjectValueTransition();
-    effObjFreeInner(object);
+    evtEndObjectValueTransition((EffWorldNode *)object);
+    effObjFreeInner((EffWorldNode *)object);
     data = object->data;
     if (data->handle != -1) {
         data->handle = -1;
@@ -431,12 +434,12 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
 extern void evtEndUnitValueTransitionForObject(EffWorldNode *, s32);
 extern void evtSetUnitValueTransitionForObject(void *, EffWorldNode *, s32);
 
-void evtEndObjectValueTransition(EffectObject *object) {
+void evtEndObjectValueTransition(EffWorldNode *object) {
     EffectObjectData *data;
 
     data = object->data;
     if (data->activeId != -1) {
-        evtEndUnitValueTransitionForObject((EffWorldNode *)object, 10);
+        evtEndUnitValueTransitionForObject(object, 10);
         data->activeId = 0xffffffff;
     }
 }
@@ -459,7 +462,8 @@ extern s32 dds3GetWorldValueCount(void *);
 extern s32 dds3ResetObjectValueCursor(void *);
 extern u32 dds3ReadIndexedWorldObjectWord(void *);
 extern s32 dds3AdvanceObjectValueCursor(void *);
-extern void dds3DestroyWorldIndexNode(void *);
+struct NodeB;
+extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern s32 func_0010FBD0(f32 *, f32 *);
 void func_00113D18(EffectObject *object) {
     EffectObjectData *data = object->data;
@@ -476,7 +480,7 @@ void func_00113D18(EffectObject *object) {
         return;
     }
     if (dds3GetWorldValueCount(list) == 0) {
-        dds3DestroyWorldIndexNode(list);
+        dds3DestroyWorldIndexNode((struct NodeB *)list);
         return;
     }
     if (dds3ResetObjectValueCursor(list) != 0) {
@@ -491,7 +495,7 @@ void func_00113D18(EffectObject *object) {
             }
         } while (dds3AdvanceObjectValueCursor(list) != 0);
     }
-    dds3DestroyWorldIndexNode(list);
+    dds3DestroyWorldIndexNode((struct NodeB *)list);
 
     if (data->activeId == -1) {
         list = dds3CopyWorldListToValueChain(world, 9);
@@ -508,13 +512,13 @@ void func_00113D18(EffectObject *object) {
         } while (dds3AdvanceObjectValueCursor(list) != 0);
 
 destroy_list:
-        dds3DestroyWorldIndexNode(list);
+        dds3DestroyWorldIndexNode((struct NodeB *)list);
         return;
 
 attach_transition:
         evtSetUnitValueTransitionForObject(other, (EffWorldNode *)object, 10);
         data->activeId = other->valueId;
-        dds3DestroyWorldIndexNode(list);
+        dds3DestroyWorldIndexNode((struct NodeB *)list);
     }
 }
 
@@ -590,7 +594,7 @@ void func_00114068(u32 value) {
     D_00435DA0 = value;
 }
 
-s32 effObjInitializeTransformData(EffectObject *object) {
+s32 effObjInitializeTransformData(EffWorldNode *object) {
     EffectTransformData *data;
     void *work;
 
@@ -598,7 +602,7 @@ s32 effObjInitializeTransformData(EffectObject *object) {
     work = sdfAllocSizeClassBlock(sizeof(EffectTransformData));
     object->data = work;
     memset(work, 0, sizeof(EffectTransformData));
-    data = (EffectTransformData *)object->data;
+    data = object->data;
     data->resourceState = dds3CreateSlotResourceState(object);
     data->flags = 0;
     data->opacityMode = 0;
@@ -615,11 +619,11 @@ s32 effObjInitializeTransformData(EffectObject *object) {
     return 1;
 }
 
-void evtReleaseEffectObjectHandleAndData(EffectObject *object) {
+void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
     EffectTransformData *data;
 
-    effObjFreeInner();
-    data = (EffectTransformData *)object->data;
+    effObjFreeInner(object);
+    data = object->data;
     dds3DestroyObjectBase(data->resourceState);
     sdfReleaseChipBlock(data);
 }
@@ -688,26 +692,6 @@ void dds3RefreshStoredVec3(WorldObj *obj) {
     dst->vec[2] = src[0x12];
 }
 
-/* Kind-7 object data is allocated and cleared at 0x50 bytes by
- * evtInitializeEffectObjectData; the final 0x20 bytes are opaque here. */
-typedef struct EffectDependencyState {
-    ObjBase *objectHandle;
-    u32 flags;
-    s32 state;
-    void *handle;
-    u32 word10;
-    u32 word14;
-    void *word18;
-    u8 pad1C[4];
-    void *owner;
-    u16 entryId;
-    u16 ownerKind;
-    void *vector;
-    void *node;
-    u8 pad30[0x20];
-} EffectDependencyState;
-typedef char EffectDependencyStateSizeCheck[sizeof(EffectDependencyState) == 0x50 ? 1 : -1];
-
 struct EffEventWork;
 extern void effDestroyNode(struct EffNode *);
 extern void billDispatchByKind(BillObj *);
@@ -717,7 +701,7 @@ extern void sdfReleaseChipBlock(void *);
 
 /* Release each dependency according to the active state, clearing ownership
  * before releasing the next dependency. State 4 only borrows its handle. */
-void func_00114640(void *state) {
+void effObjReleaseStateDependencies(EffectDependencyState *state) {
     EffectDependencyState *data = state;
 
     switch (data->state) {

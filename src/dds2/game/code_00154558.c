@@ -828,7 +828,7 @@ extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 extern u16 dds3GetWorldValueCount(s32 object);
 extern u32 dds3AdvanceObjectValueCursor(void *object);
 extern void *dds3CopyWorldListToValueChain(void *object, s32 kind);
-extern void dds3DestroyWorldIndexNode(void *node);
+extern void dds3DestroyWorldIndexNode(NodeB *node);
 extern u32 dds3ResetObjectValueCursor(void *object);
 
 typedef struct FldWorldItem {
@@ -887,7 +887,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
                     }
                 }
             } while (dds3AdvanceObjectValueCursor(list) != 0);
-            dds3DestroyWorldIndexNode(list);
+            dds3DestroyWorldIndexNode((NodeB *)list);
         }
     }
     return 1;
@@ -947,7 +947,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                     }
                 }
             } while (dds3AdvanceObjectValueCursor(list) != 0);
-            dds3DestroyWorldIndexNode(list);
+            dds3DestroyWorldIndexNode((NodeB *)list);
         }
     }
     return 1;

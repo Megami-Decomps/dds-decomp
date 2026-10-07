@@ -19,6 +19,8 @@
 #define MNU_COLOR_LOW_BYTE_MASK 0xFF
 
 
+extern void mnuCreateResourceTask(void);
+
 extern s32 func_0027B888(u32);
 
 extern s8 D_003BC3E1;
@@ -70,7 +72,8 @@ typedef struct MenuTerminalWork {
     s32 allocation;          /* 0x00 */
     s32 groupResource;       /* 0x04 */
     MenuPopupState transitionWork; /* 0x08 */
-    u8 pad54[8];
+    s32 popupState;         /* 0x54 */
+    u8 pad58[4];
     s32 messageResources[2]; /* 0x5C: second handle opens the message window */
     SceneFrameTable *batch;  /* 0x64 */
     u32 secondResource;     /* 0x68 */
@@ -80,7 +83,8 @@ typedef struct MenuTerminalWork {
     MenuProgressOwner *owner;/* 0x78 */
     s32 mode;                /* 0x7C */
     s32 initState;           /* 0x80 */
-    u8 pad84[0x18];
+    u8 pad84[0x14];
+    s32 resourcePhase;      /* 0x98 */
     s32 panelFade;          /* 0x9C: 0..0x100 color blend weight */
     s32 effect[7];           /* 0xA0: effect batches; [4] and [5] are the pair selected via cursor */
     s32 cursor[2];           /* 0xBC: current and previous node, -1 until selected */
@@ -699,7 +703,62 @@ s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249A60);
+extern s32 D_003BC3E4;
+extern char D_003AF590[];
+extern char D_003AF620[];
+extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern s32 kwlnFadeIsActive(void);
+extern s32 evtIsActiveFlagSet(s32);
+
+/* Wait for the terminal effect or world-menu transition to finish. */
+s32 func_00249A60(s8 closing) {
+    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(D_003BC3E4);
+
+    if (closing == 1) {
+        if (work->mode == 0) {
+            if (D_003BC3E1 == 0) {
+                mnuFadeOrPlayCloseSfx(0, (u8 *)work);
+                D_003BC3E1 = 1;
+            } else if (evtIsActiveFlagSet(0) != 0) {
+                return 1;
+            }
+        } else if (D_003BC3E1 == 0) {
+            if (work->effectHandle == 0) {
+                work->effectHandle = mnuRequestEffectResource((u32)D_003AF590, (u32)D_003AF620);
+            } else if (mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle) != 0) {
+                kwlnFadeOutStart(0, 0, 0, 15);
+                D_003BC3E1 = 1;
+                work->effectStage = 1;
+            }
+        } else {
+            if (kwlnFadeIsActive() == 0) {
+                return 1;
+            }
+        }
+    } else if (work->mode == 0) {
+        if (D_003BC3E1 == 1) {
+            evtClearActiveFlag(0);
+            evtSetBoundedDisplayValue(0, 5);
+            evtSetBoundedDisplayValue(1, 0);
+            D_003BC3E1 = 0;
+        } else if (evtIsActiveFlagSet(0) != 0) {
+            return 1;
+        }
+    } else if (D_003BC3E1 == 1) {
+        kwlnFadeInStart(0, 0, 0, 15);
+        D_003BC3E1 = -1;
+    } else if (kwlnFadeIsActive() == 0) {
+        if (work->effectHandle != 0) {
+            mnuReleaseEffectResource((MenuResourceWork *)work->effectHandle);
+            work->effectHandle = 0;
+            work->effectStage = 0;
+        }
+        D_003BC3E1 = 0;
+        return 1;
+    }
+    return 0;
+}
+
 /* Only the exact signed-byte value one enables the world/menu flags; all others disable. */
 void mnuSetWorldObjectAndMenuEnabled(s8 enabled) {
     s64 worldObject;
@@ -1906,7 +1965,48 @@ s32 mnuOpenTerminalSelectionMessageWindow(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024C3F8);
+/* Sequence resource teardown, reload and fade before returning to the terminal menu. */
+s32 func_0024C3F8(s32 request) {
+    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(request);
+    s32 result = menuRunPanel(work, 0, (void *)request);
+
+    if (result != 0) {
+        return result;
+    }
+    if (kwlnFadeIsActive() != 0) {
+        return 0;
+    }
+    if (work->resourcePhase == 0) {
+        if (fldClassifyRemainingFrames(work) == 0) {
+            mnuReleaseBothVisualResourceTextures(work);
+            func_00249A60(0);
+            work->resourcePhase = 1;
+        }
+    } else if (work->resourcePhase == 1) {
+        if (func_00249A60(0) != 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
+            mnuCreateResourceTask();
+            kwlnFadeOutStart(0, 0, 0, 0);
+            work->resourcePhase = 2;
+        }
+    }
+    if (work->popupState == 0) {
+        if (work->resourcePhase == 2) {
+            if (mnuCheckResourceTask() != 0 || sdfCheckPendingWorkWithInterrupts() != 0) {
+                return 0;
+            }
+            mnuReleaseVisualResources(work);
+            func_00249A60(1);
+            work->resourcePhase = 3;
+        } else if (work->resourcePhase == 3) {
+            if (func_00249A60(1) != 0) {
+                mnuTerminalSelectResourceBank(work);
+                work->resourcePhase = 0;
+                mnuSetPopupEntryFlagged(&work->popupState, D_0036ACF8);
+            }
+        }
+    }
+    return 0;
+}
 
 /* While the panel fade is nonzero, choose its transition direction from the selection chain, then run the panel. */
 s32 evtBPollSelectionChainPanel(s32 item) {

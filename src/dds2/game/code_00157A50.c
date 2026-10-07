@@ -25,7 +25,53 @@ void *effCloneSourceWithTypeHandler(EffectSource *source) {
     return copy;
 }
 
-INCLUDE_ASM(const s32, "game/code_00157A50", func_00157AC8);
+typedef struct EffNodeDescriptor {
+    u32 type;
+    u32 arg;
+    u32 pad08;
+    f32 version;
+    u8 payload[0];
+} EffNodeDescriptor;
+
+extern void func_0035B6E0(const char *format, ...);
+
+void func_00157AC8(EffNodeDescriptor *descriptor) {
+    u8 *payload = descriptor->payload;
+
+    if (descriptor->version == 1.0f) {
+        u32 type = descriptor->type;
+        switch (type) {
+        case 0:
+            *(u32 *)(payload + 0xA0) = 0xAC;
+            break;
+        case 1:
+            {
+                u8 *source = payload + *(u32 *)(payload + 4);
+                payload = source + 0x10;
+                *(u32 *)(payload + 0xA0) = 0xAC;
+            }
+            break;
+        case 2:
+            *(u32 *)(payload + 0x18) = 0x20;
+            break;
+        }
+    }
+
+    if (descriptor->version <= 1.01f) {
+        u32 type = descriptor->type;
+        if (type == 1) {
+            u8 *source = payload + *(u32 *)(payload + 4);
+            payload = source + 0x10;
+            *(f32 *)(payload + 0x8C) =
+                *(f32 *)(payload + 0x8C) * 0.1f *
+                    (f32)*(s32 *)(payload + 0x24) +
+                *(f32 *)(payload + 0x10);
+        }
+        if (type < 2 && descriptor->arg == 0) {
+            func_0035B6E0("effManager:par spiral old version!![%f]\n", descriptor->version);
+        }
+    }
+}
 
 typedef struct MemBlock MemBlock;
 
@@ -58,7 +104,7 @@ extern void func_002C7CE8(EffBillResourceArchive *archive);
 extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
 extern void sdfReleaseResourceAllocation(MemBlock *block);
 extern BillObj *billCreateIndexed(s32 kind, u32 data);
-extern void func_0035B6E0(const char *format, const char *value);
+extern void func_0035B6E0(const char *format, ...);
 
 void effInitializeBillResourceOwners(void) {
     EffBillResourceArchive *archive;

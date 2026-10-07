@@ -7118,3 +7118,5 @@
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
 0x00113E20	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
 0x00113E30	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.
+0x00116598	dds3GetLightObjectResource	inferred	Kind-nine light payload getter returns its owned ObjBase resource at offset 0x74; complete constructor/destructor and kind selector establish ownership.
+0x001143D8	effObjReleaseStateDependencies	inferred	Releases owned dependencies according to kind-seven payload state, preserves borrowed state-four handle, then clears the active state and handle.

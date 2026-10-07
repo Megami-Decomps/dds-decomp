@@ -206,6 +206,7 @@ extern s32 fldRainTextureResource;
 extern s32 fldCameraModelObject;
 
 extern u32 fldPlayerObject;
+extern void evtEndObjectValueTransition(EffWorldNode *object);
 extern u8 D_003BAB3C;
 
 extern u32 D_003BAD34;
@@ -3324,7 +3325,7 @@ void fldSetCameraObjectActiveFlag(s32 enabled) {
         return;
     }
     dds3SetObjectFlags(fldPlayerObject, 0x100);
-    evtEndObjectValueTransition(fldPlayerObject);
+    evtEndObjectValueTransition((EffWorldNode *)fldPlayerObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00133640);

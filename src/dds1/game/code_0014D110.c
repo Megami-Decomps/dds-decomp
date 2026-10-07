@@ -120,7 +120,7 @@ extern char D_003BB000[]; /* "BARIA" */
 
 extern char *D_003BAE44;
 
-extern void *dds3FindWorldObjectNodeByKey(u64, s32, s32);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 id, s32 kind);
 
 extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry);
 
@@ -150,9 +150,9 @@ extern s32 D_0032E570[];
 
 extern u8 D_003BAE78[];
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
-extern u32 *dds3FindObjectChainNodeByName(u64 world, const char *name);
+extern u32 *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 
 extern void func_003003F0(const char *fmt, ...);
 
@@ -379,7 +379,7 @@ extern void func_0012DB70(void);
 s32 fldCmdFocusCameraOnObject(void) {
     FldCamPose *work;
     EffWorldNode *obj;
-    u64 world = dds3GetWorldSecondaryObject();
+    EffWorldNode *world = dds3GetWorldSecondaryObject();
 
     obj = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 4);
     if (obj == NULL) {
@@ -639,22 +639,22 @@ s32 fldCmdSetFadeAndSway(void) {
 
 extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 
-extern s64 dds3GetWorldValueCount(u64);
+extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
-extern s64 dds3AdvanceObjectValueCursor(u64);
+extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern u64 dds3CopyWorldListToValueChain(u64, u64);
+extern void *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
-extern void dds3DestroyWorldIndexNode(u64);
+extern void dds3DestroyWorldIndexNode(NodeB *node);
 
-extern s32 dds3ResetObjectValueCursor(u64);
+extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
 typedef struct FldWorldItem {
     u8 pad0[0x18];
     s32 *data;
 } FldWorldItem;
 
-extern FldWorldItem *dds3ReadIndexedWorldObjectWord(u64);
+extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
@@ -664,7 +664,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 mode;
     char *name;
     s32 room;
-    u64 list;
+    void *list;
     FldWorldItem *item;
 
     world = scrReadIntParameter(0);
@@ -687,10 +687,10 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
-        if (dds3GetWorldValueCount(list) != 0) {
-            dds3ResetObjectValueCursor(list);
+        if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
+            dds3ResetObjectValueCursor((WorldValueIndices *)list);
             do {
-                item = dds3ReadIndexedWorldObjectWord(list);
+                item = (FldWorldItem *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
@@ -704,8 +704,8 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
                         break;
                     }
                 }
-            } while (dds3AdvanceObjectValueCursor(list) != 0);
-            dds3DestroyWorldIndexNode(list);
+            } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
+            dds3DestroyWorldIndexNode((NodeB *)list);
         }
     }
     return 1;
@@ -717,7 +717,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     s32 mode;
     char *name;
     s32 room;
-    u64 list;
+    void *list;
     FldWorldItem *item;
 
     world = scrReadIntParameter(0);
@@ -743,10 +743,10 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     }
     if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
-        if (dds3GetWorldValueCount(list) != 0) {
-            dds3ResetObjectValueCursor(list);
+        if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
+            dds3ResetObjectValueCursor((WorldValueIndices *)list);
             do {
-                item = dds3ReadIndexedWorldObjectWord(list);
+                item = (FldWorldItem *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
@@ -760,8 +760,8 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                         break;
                     }
                 }
-            } while (dds3AdvanceObjectValueCursor(list) != 0);
-            dds3DestroyWorldIndexNode(list);
+            } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
+            dds3DestroyWorldIndexNode((NodeB *)list);
         }
     }
     return 1;

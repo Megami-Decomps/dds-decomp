@@ -49,6 +49,18 @@ extern s32 evtGetMessageWindowControlState(void);
 
 
 extern u32 kwlnTaskGetUserValue();
+extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
+extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
+extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
+extern void func_00260100(ShopScene *, s32);
+extern void func_00260208(s32, u32, s32, s32);
+extern s32 D_003BC3D8[];
+
+typedef struct {
+    s32 values[2];
+} MenuSelectionPair;
 
 extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuTickExtendedCommandPhase(ShopScene *);
@@ -559,7 +571,35 @@ s32 func_00247420(KwlnTask *task) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247588);
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00247728);
+s32 func_00247728(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
+    s32 selectedIndex;
+    MenuSelectionPair options = *(MenuSelectionPair *)D_003BC3D8;
+
+    if (state->extraOption != 0) {
+        selectedIndex = state->sprite->list->cursor->index;
+    } else {
+        selectedIndex = options.values[state->sprite->list->cursor->index];
+    }
+
+    func_0025E308(0, 0, 0, state, 0x100, 0x53);
+    func_00260100(state, 0xA09DC380);
+    mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
+    func_0025F680(0, 0, 0, state, 0x53);
+    mnuDrawIfActive(0, 0, 0, state->window, 0x53);
+    func_0025FFC8(0, 0, 0, state, 0x53);
+
+    switch (selectedIndex) {
+    case 0:
+    case 1:
+        func_00260208((s32)state, 0x100, 1, 0x53);
+        break;
+    case 2:
+        func_00260208((s32)state, 0x100, 0, 0x53);
+        break;
+    }
+    return func_00285670(&state->transitionWork, &state->dispatchState, 1, task);
+}
 
 s32 evtSetupDispatchSyncG(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
@@ -623,17 +663,12 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(void *callbackContext) {
     return result;
 }
 
-extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
-extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void func_0025FD50(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
-extern void func_00260100(ShopScene *, s32);
-extern void func_00260208(s32, u32, s32, s32);
 
 s32 func_00247A78(s32 callbackContext) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
