@@ -68,6 +68,7 @@ extern void func_0024A2D8(s32 arg0);
 extern void func_0024DD78(void);
 extern void *dds3GetWorldSecondaryObject(void);
 extern s32 dds3GetWorldObjectValue(EffWorldNode *world);
+extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern void dspSetActive();
 extern void itfMesSetWindowHighFlags(s32, s32);
@@ -313,9 +314,14 @@ u32 func_0024D608(void) {
 /* Copy the source node's nested value only on a successful lookup.
  * The destination and both nested data pointers are caller-owned. */
 s32 evtCopyWorldObjectEntryValue(s32 objectId, s32 destination) {
-    s32 source = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 9, objectId);
-    if (source != 0) {
-        *(s32 *)(*(s32 *)(destination + 0x18) + 0x80) = *(s32 *)(*(s32 *)(source + 0x18) + 0x78);
+    EffWorldNode *source;
+    EffWorldNode *destinationNode;
+
+    source = dds3FindIndexedObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(), 9,
+                                                  (const u8 *)objectId);
+    if (source != NULL) {
+        destinationNode = (EffWorldNode *)destination;
+        *(s32 *)((u8 *)destinationNode->data + 0x80) = *(s32 *)((u8 *)source->data + 0x78);
         return 1;
     }
     return 0;

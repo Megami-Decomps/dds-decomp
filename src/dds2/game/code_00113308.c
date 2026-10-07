@@ -564,8 +564,8 @@ void func_00113FD0(EffWorldNode *node) {
     dds3RemoveWorldObjectNode(node);
 }
 
-void effObjSetModelHolder(EffectObject *object, u32 value) {
-    object->data->modelHolder = (ObjBase *)value;
+void effObjSetActiveId(EffWorldNode *object, s32 activeId) {
+    ((EffectTransformData *)object->data)->activeId = activeId;
 }
 
 void effObjSetRoomNumber(EffectObject *object, u32 value) {

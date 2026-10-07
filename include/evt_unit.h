@@ -15,6 +15,11 @@ typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_VALUE = 4
 } EvtUnitMotionState;
 
+/* EvtUnit.flags bit selecting path-follow motion from progress 1 toward 0. */
+enum EvtUnitFlags {
+    EVT_UNIT_FLAG_PATH_REVERSE = 0x4
+};
+
 /* Shared light-target payload used by the event manager and battle base-light task. */
 typedef struct EvtTargetInfo {
     f32 firstColor[4];           /* 0x00 */
@@ -43,10 +48,16 @@ typedef struct EvtEffObj {
     EvtEffData *data;              /* 0x1C */
 } EvtEffObj;
 
+typedef enum EvtUnitVectorSlotState {
+    EVT_UNIT_VECTOR_SLOT_EMPTY = 0,
+    EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK = 2,
+    EVT_UNIT_VECTOR_SLOT_UNIT_BOUND = 3
+} EvtUnitVectorSlotState;
+
 /* Native 0x40-byte slot: three vec4 followed by two auxiliary coordinates.
  * The static pool contains seven slots in DDS1 and ten in DDS2. */
 typedef struct EvtUnitVectorSlot {
-    s32 state;                    /* 0x00: active states are 2 and 3. */
+    s32 state;                    /* 0x00: EvtUnitVectorSlotState. */
     s32 id;                       /* 0x04: unit bound to a state-3 slot. */
     f32 vec[14];                  /* 0x08: vec4 at 0x08/0x18/0x28, then 0x38/0x3C. */
 } EvtUnitVectorSlot;

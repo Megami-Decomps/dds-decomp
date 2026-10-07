@@ -264,13 +264,14 @@ s32 evtCommandAttachLightToUnitPath(void) {
 INCLUDE_ASM(const s32, "event/evtCommand", func_002411A0);
 
 
-extern EffWorldNode *dds3FindObjectChainNodeByName(s32 world, char *id);
+extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *id);
 
 /* Return the named world-chain node's key to the script VM. */
 s32 evtCommandReadSecondaryWorldIdValue(void) {
     EffWorldNode *node;
 
-    node = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), scrReadStringParameter(0));
+    node = dds3FindObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(),
+                                         (const u8 *)scrReadStringParameter(0));
     if (node == NULL) {
         func_0035B6E0("ID : id not found!! <%s>\n", scrReadStringParameter(0));
         evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));

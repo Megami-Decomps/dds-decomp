@@ -2,8 +2,11 @@
 #include "mnu.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_transform.h"
 
 extern u32 kwlnTaskGetUserValue();
+extern void *dds3GetWorldSecondaryObject(void);
+extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 
 extern void mnuDrawTerminalBackdrop(s32);
 
@@ -364,9 +367,14 @@ u32 func_0026C168(void) {
 }
 
 s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
-    s32 src = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 9, id);
-    if (src != 0) {
-        *(s32 *)(*(s32 *)(dst + 0x18) + 0x80) = *(s32 *)(*(s32 *)(src + 0x18) + 0x78);
+    EffWorldNode *src;
+    EffWorldNode *destinationNode;
+
+    src = dds3FindIndexedObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(), 9,
+                                               (const u8 *)id);
+    if (src != NULL) {
+        destinationNode = (EffWorldNode *)dst;
+        *(s32 *)((u8 *)destinationNode->data + 0x80) = *(s32 *)((u8 *)src->data + 0x78);
         return 1;
     }
     return 0;
