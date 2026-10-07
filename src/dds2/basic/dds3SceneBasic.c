@@ -9,7 +9,7 @@ extern s32 bfFindScriptIndexByName(void *, const char *);
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 extern void evtReleaseSceneResource(Scene *);
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 
 /* Scene object fields used by the resource helpers (0x20). */
 typedef struct {

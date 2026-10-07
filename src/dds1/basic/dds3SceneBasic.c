@@ -1,12 +1,13 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "kwln.h"
 
 extern void sdfReleaseResourceAllocation(void *);
 extern void *sdfResourceRetainAddress(void *);
 extern void *sdfReadNamedResource(const char *, void **, s32);
 extern s32 bfFindScriptIndexByName(void *, const char *);
-extern void *kwlnTaskGetTaskByName(const char *);
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 extern s32 scrCreateTaskForProcessId(s32, void *, s32);
 extern void evtReleaseSceneResource(Scene *);
 
@@ -92,7 +93,7 @@ INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtStartSceneResourceTask);
  * unusedContext is not read. The nested early return retains the matched
  * jal/epilogue rather than turning the destruction into a sibling call. */
 void evtDestroyNamedTask(void *unusedContext, const char *taskName) {
-    void *task;
+    KwlnTask *task;
 
     if (taskName != NULL) {
         task = kwlnTaskGetTaskByName(taskName);
