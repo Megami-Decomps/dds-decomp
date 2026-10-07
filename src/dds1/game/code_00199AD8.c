@@ -436,7 +436,57 @@ void func_0019A9A8(UiSprite *panel, SdfListHead *command) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AAC0);
+extern u8 D_00357D48[];
+extern u8 D_00357D58[];
+extern DrawColorRec D_00357A78;
+extern DrawColorRec D_00357A88;
+extern DrawColorRec D_00357A98;
+extern DrawColorRec D_00357AA8;
+
+/* Draw the three inset flat quads, then split a tall texture into top, stretch
+ * and bottom bands. The short path uses the live rectangle in the panel. */
+void func_0019AAC0(UiSprite *panel, SdfListHead *command) {
+    DrawVertex rect[2];
+    UiSpriteBandPayload *payload = (UiSpriteBandPayload *)panel->payload;
+    DrawVertex *vertices = payload->vertices;
+    DrawColorRec *colors = payload->colors;
+    s32 i;
+    s32 top;
+    s32 bottom;
+
+    colors[1].components[3] = (panel->unk38 * 0x20) >> 7;
+    for (i = 0; i < 3; i++) {
+        itfDrawQuadFlat4(vertices, colors, &D_00357D48[i * 4],
+                        &D_00357D58[i * 4], panel->unk0C, command);
+    }
+    bottom = panel->bottom;
+    top = panel->top;
+    if (bottom - top >= 0x569) {
+        s32 topEnd = top + 0x2B4;
+        s32 bottomStart = bottom - 0x2B4;
+        s32 *color = &panel->unk2C;
+
+        rect[0].x = panel->left;
+        rect[0].y = top;
+        rect[1].x = panel->right;
+        rect[1].y = topEnd;
+        itfQueueTextureBoundQuadPacket(rect, &D_00357A78, color, panel->unk0C,
+                                      payload->texture, 0, command);
+        rect[0].y = topEnd;
+        rect[1].y = bottomStart;
+        itfQueueTextureBoundQuadPacket(rect, &D_00357A88, color, panel->unk0C,
+                                      payload->texture, 0, command);
+        rect[0].y = bottomStart;
+        rect[1].y = panel->bottom;
+        itfQueueTextureBoundQuadPacket(rect, &D_00357A98, color, panel->unk0C,
+                                      payload->texture, 0, command);
+    } else {
+        itfQueueTextureBoundQuadPacket(&panel->left, &D_00357AA8,
+                                      &panel->unk2C, panel->unk0C,
+                                      payload->texture, 0, command);
+    }
+}
+
 
 /* Copy bounds and draw the tinted border; alpha uses the native signed 103/128 scale. */
 void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
