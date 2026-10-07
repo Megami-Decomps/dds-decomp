@@ -296,8 +296,54 @@ void ptyClampExp(DatPartyRecord *unit) {
     }
 }
 
-extern void brsApplyPartyRewards(BrsSkillPackageWork *, BrsRewardBatch *);
-INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
+void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch) {
+    s32 partyIndex;
+    s32 partyOffset;
+    s32 rewardOffset;
+    s32 rewardIndex;
+    DatPartyRecord *currentPartyUnit;
+    DatPartyRecord *unit;
+    s32 profilePointGain;
+    s32 experienceGain;
+    BrsRewardValues *values;
+
+    for (partyOffset = 0, partyIndex = 0; partyIndex < 5;
+         partyIndex++, partyOffset += sizeof(DatPartyRecord)) {
+        currentPartyUnit =
+            (DatPartyRecord *)((u8 *)datGameState->party + partyOffset);
+
+        if ((currentPartyUnit->flags & 1) != 0 &&
+            (currentPartyUnit->status & 0x4000) != 0) {
+            unit = currentPartyUnit;
+            func_00262A30(partyWork, partyIndex, unit->level,
+                          unit->totalExp,
+                          ptyGetCurrentProfileRecord(currentPartyUnit)->value, 0, 0);
+        }
+    }
+
+    rewardIndex = 0;
+    if (batch->count > 0) {
+        values = &batch->rows[0].values;
+        rewardOffset = 0;
+        do {
+            unit = ((BrsRewardRow *)((u8 *)batch->rows + rewardOffset))->unit;
+            profilePointGain = values->amount;
+            experienceGain = values->secondaryValue;
+
+            func_00262A30(partyWork, values->partySlot, unit->level,
+                          unit->totalExp, ptyGetCurrentProfileRecord(unit)->value,
+                          experienceGain, profilePointGain);
+            unit->totalExp += experienceGain;
+            ptyClampExp(unit);
+            if (unit->profileId != 0) {
+                ptyAddProfilePoints(unit, profilePointGain);
+            }
+            rewardIndex++;
+            values = (BrsRewardValues *)((u8 *)values + sizeof(BrsRewardRow));
+            rewardOffset += sizeof(BrsRewardRow);
+        } while (rewardIndex < batch->count);
+    }
+}
 
 /* Apply item/icon rewards before awarding the party's accumulated gains. */
 void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batch,
