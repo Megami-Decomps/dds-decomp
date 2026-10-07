@@ -169,7 +169,7 @@ typedef struct MenuSprites {
     s32 primarySprite;
     s32 sprites[7];
     s32 overlaySprites[2];
-    u8 pad3C[4];
+    s32 profileFade;
 #endif
     s32 drawAlpha;
     s32 fadeOut;
