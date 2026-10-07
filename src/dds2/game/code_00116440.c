@@ -1,10 +1,6 @@
 #include "common.h"
 #include "eff_light.h"
-
-typedef struct WorldResourceOwner {
-    u8 pad00[0x18];
-    u32 *resource;
-} WorldResourceOwner;
+#include "eff_event.h"
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */
 
@@ -27,8 +23,8 @@ EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *s
     return obj;
 }
 
-u32 dds3GetResourceOwnerHandle(WorldResourceOwner *object) {
-    return *object->resource;
+ObjBase *dds3GetResourceOwnerHandle(EffWorldNode *object) {
+    return ((DdsSlotResourceBlock *)object->data)->resourceState;
 }
 
 /* Allocate the kind-9 light payload and its auxiliary buffer. */
