@@ -212,7 +212,29 @@ extern MenuRuntimeCallback D_0043899C;
 extern f64 cos(f64);
 extern f64 sin(f64);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00321C60);
+MenuRuntimeRecord *func_00321C60(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
+                           s32 offsetX, s32 offsetY, s32 direction,
+                           s16 speed, s16 remaining, f32 angle) {
+    MenuRuntimeRecord *record = func_00321F18(list);
+
+    if (record == NULL) {
+        return NULL;
+    }
+    record->state.kind = kind;
+    record->state.directionDegrees = direction;
+    record->unk18 = 0.0f;
+    record->unk1C = 0.0f;
+    record->unk04 = x;
+    record->unk08 = y;
+    record->unk0C = offsetX * cos(angle + 1.5707963f) + offsetY * sin(angle + 1.5707963f);
+    record->unk10 = offsetY * cos(angle + 1.5707963f) - offsetX * sin(angle + 1.5707963f);
+    record->angle = angle;
+    record->speed = speed;
+    record->remaining = remaining;
+    D_0043899C(record);
+    return record;
+}
+
 
 void func_00321E18(MenuRuntimeRecord *records, s32 capacity) {
     memset(D_0045C870, 0, sizeof(MenuRuntimeList));
