@@ -3587,11 +3587,14 @@
 0x0021A8F0	mdlResetViewerBasisVectors	inferred	Copies three default basis vectors to viewer basis and resets small vector state. [names_reviewed7.tsv]
 0x0021A948	mdlRotateViewResourcesRight	inferred	Shifts the viewer resource slot list toward higher indices and wraps its last slot to the front.
 0x0021A998	mdlRotateViewList	inferred	mdl model resources and viewer in game/code_00218B48.c
+0x0021ABB8	mdlDrawViewerModelAndMotionSummary	inferred	Appends model identity and motion selector/count labels to the viewer packet list
 0x0021ACF0	mdlAddViewEntryFlagged	inferred	adds current view entry with min/low bounds
 0x0021AD78	mdlAddPlainViewerEntryForSelectedNode	inferred	Checks selected model node, clamps first range bound and adds plain entry. [names_reviewed7.tsv]
 0x0021B4E8	mdlRunViewerAssetSelectionTask	inferred	confidence=high; matched-C; src/dds1/game/code_00218B48.c:1331:func_0021B4E8; Combines asset/node entry-selection input and corresponding resource identifier/name display; retail callees show selection and entry counts.; twin=0x00236058, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x0021B510	mdlUpdateViewerCameraFromPad	inferred	Updates the viewer camera transform from pad input
 0x0021B950	mdlDrawViewerIndexedLabelOverlay	inferred	Draws a model viewer label selected by its index onto a framed packet. [names_reviewed14.tsv]
 0x0021B9D0	mdlRunViewerIndexedLabelTask	inferred	confidence=high; matched-C; src/dds1/game/code_00218B48.c:1348:func_0021B9D0; Runs viewer input handler and indexed-label overlay renderer, then returns zero.; twin=0x00236540, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x0021B9F8	mdlUpdateViewerSelectedModelFromPad	inferred	Updates the selected model resource transform from pad input
 0x0021BDD0	mdlDrawViewerSelectionLabel	inferred	Submits a model viewer rectangle and formatted text for the selected index. [names_reviewed17.tsv]
 0x0021BE50	mdlRunViewerSelectionLabelTask	inferred	confidence=high; matched-C; src/dds1/game/code_00218B48.c:1363:func_0021BE50; Runs viewer selection input handler, conditionally draws selection label and returns zero.; twin=0x002369C0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0021BE88	mdlAdjustViewerScale	inferred	Adjusts MdlViewState.unk54 in hundredths with progressively larger increments.
