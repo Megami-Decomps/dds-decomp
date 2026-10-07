@@ -18,7 +18,7 @@ extern void sdfReleaseChipBlock(s32);
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D230);
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
-s32 func_0025D390(s32 eventId, s32 resourceId) {
+s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     EvtPackLoadState *data;
     EvtPackEntry *entry;
     s32 count;
