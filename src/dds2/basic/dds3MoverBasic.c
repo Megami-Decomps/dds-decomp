@@ -34,10 +34,6 @@ extern void effObjMulInnerThirdVec(EffWorldNode *, void *);
 extern void effObjQuatMulInnerSecondVec(EffWorldNode *, u128 *);
 extern void effObjAddInnerFirstVec(EffWorldNode *, void *);
 
-#define DDS3_MOVER_POSITION_CHANNEL_BIT 1
-#define DDS3_MOVER_ROTATION_CHANNEL_BIT 2
-#define DDS3_MOVER_FOV_CHANNEL_BIT 4
-#define DDS3_MOVER_WORLD_TRANSFORM_CHANNEL_BIT 0x10
 #define DDS3_MOVER_POSITION_COPY_KIND 6
 #define DDS3_MOVER_CAMERA_KIND 4
 #define DDS3_MOVER_WORLD_TRANSFORM_KIND 9
@@ -59,7 +55,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
     f32 fieldOfView;
 
     if (work->path != NULL) {
-        if (work->path->flags & DDS3_MOVER_POSITION_CHANNEL_BIT) {
+        if (work->path->flags & DDS3_PATH_POSITION_CHANNEL) {
             dds3InterpolatePathVectorVU(work->path);
             VU0_STORE_VF(vf10, pathVector);
             effObjSetInnerFirstVec(target, pathVector);
@@ -67,12 +63,12 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
                 PCP_COPY_VECTOR(&((MoverPositionData *)target->data)->position, pathVector);
             }
         }
-        if (work->path->flags & DDS3_MOVER_ROTATION_CHANNEL_BIT) {
+        if (work->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
             dds3PreparePathVectorPair(work->path);
             VU0_STORE_VF(vf10, pathVector);
             effObjSetInnerSecondVec(target, pathVector);
         }
-        if (work->path->flags & DDS3_MOVER_FOV_CHANNEL_BIT) {
+        if (work->path->flags & DDS3_PATH_SCALAR_CHANNEL) {
             if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {
                 fieldOfView = sdfSampleActiveLinearCurve(work->path);
                 cameraData = target->data;
@@ -80,7 +76,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
                 cameraData->fovUpdatePending |= DDS3_MOVER_FOV_UPDATE_BIT;
             }
         }
-        if (work->path->flags & DDS3_MOVER_WORLD_TRANSFORM_CHANNEL_BIT) {
+        if (work->path->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
             if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_WORLD_TRANSFORM_KIND) {
                 dds3InterpolatePathOutput(work->path, &transformParams);
                 dds3LoadWorldTransformParams(target, &transformParams);

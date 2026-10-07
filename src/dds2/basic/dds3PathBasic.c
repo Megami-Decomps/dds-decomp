@@ -23,7 +23,7 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     Dds3PathKeyframes *data;
     PathPositionKey *entries;
 
-    if (path->flags & 1) {
+    if (path->flags & DDS3_PATH_POSITION_CHANNEL) {
         data = path->positionKeys;
         dds3SamplePathKeyframeInterval(&index, &fraction, data, path->time);
         entries = (PathPositionKey *)data->data;
@@ -50,7 +50,7 @@ void dds3PreparePathVectorPair(Dds3PathCurveWork *arg) {
     PathQuaternionKey *base;
     PathQuaternionKey *p1;
     PathQuaternionKey *p2;
-    if (arg->flags & 2) {
+    if (arg->flags & DDS3_PATH_ROTATION_CHANNEL) {
         data = arg->rotationKeys;
         dds3SamplePathKeyframeInterval(&idx, &frac, data, arg->time);
         base = (PathQuaternionKey *)data->data;
@@ -71,7 +71,7 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *ou
     Dds3PathKeyframes *data;
     WorldTransformParams *entries;
 
-    if (path->flags & 0x10) {
+    if (path->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
         data = path->transformKeys;
         dds3SamplePathKeyframeInterval(&index, &fraction, data, path->time);
         entries = (WorldTransformParams *)data->data;
