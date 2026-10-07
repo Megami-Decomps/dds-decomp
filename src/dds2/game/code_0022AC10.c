@@ -4,6 +4,7 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
+#include "sdf_linked_packet.h"
 #include "mdl.h"
 #include "evt_unit.h"
 #include "scr.h"
@@ -149,13 +150,13 @@ extern void *sdfResourceRetainAddress(void *);
 
 extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
-extern void sdfClearLinkedPacketList(void *);
+extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfCreatePatchableResourcePacket(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
+extern void sdfCreatePatchableResourcePacket(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, void *, s32, s32, s32);
 
-extern void sdfAppendPacketChainNode(void *, void *);
+extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
-extern void func_0032EB80(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_0032EB80(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
 
@@ -1373,14 +1374,14 @@ void btlResetHeldTextureState(void) {
 void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     SdfListHead *packetList;
-    void *context;
+    SdfLinkedPacketList *context;
     runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
     runtime->resource = sdfResourceRetainAddress(runtime->handle);
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
-    context = sdfAllocPacketAligned(16);
+    context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, runtime->resource, 0, 0, 0);
-    sdfAppendPacketChainNode(D_00380860, context);
+    sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
 }
 
@@ -1397,10 +1398,10 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
 
 void btlInitializeOverlayGraphics(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
-    void *context = sdfAllocPacketAligned(16);
+    SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     func_0032EB80(packetList, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
-    sdfAppendPacketChainNode(D_00380860, context);
+    sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
     btlRuntimeState.options |= 1;
 }

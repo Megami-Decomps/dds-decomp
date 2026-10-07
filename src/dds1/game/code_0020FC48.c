@@ -5,6 +5,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "sdf.h"
+#include "sdf_linked_packet.h"
 #include "ee_mmi.h"
 #include "mdl.h"
 
@@ -1371,25 +1372,25 @@ extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
 extern void *sdfAllocPacketAligned(s32);
 
-extern void sdfClearLinkedPacketList(void *);
+extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfCreatePatchableResourcePacket(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
+extern void sdfCreatePatchableResourcePacket(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, void *, s32, s32, s32);
 
-extern void sdfAppendPacketChainNode(void *, void *);
+extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
 extern u8 D_00325860[];
 
 void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     SdfListHead *packetList;
-    void *context;
+    SdfLinkedPacketList *context;
     runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
     runtime->request = sdfResourceRetainAddress(runtime->handle);
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
-    context = sdfAllocPacketAligned(16);
+    context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
-    sdfAppendPacketChainNode(D_00325860, context);
+    sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
 }
 
@@ -1409,14 +1410,14 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     runtime->options |= 1;
 }
 
-extern void func_002D5CD0(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_002D5CD0(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void btlInitializeOverlayGraphics(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
-    void *context = sdfAllocPacketAligned(16);
+    SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     func_002D5CD0(packetList, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
-    sdfAppendPacketChainNode(D_00325860, context);
+    sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
     btlRuntimeState.options |= 1;
 }

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln_sprite.h"
 #include "dds3Admin.h"
+#include "sdf_linked_packet.h"
 #include "kwln.h"
 #include "sdf.h"
 
@@ -125,7 +126,7 @@ extern u8 D_00325860[];
 extern u8 D_00325870[];
 extern void sdfWaitAndSelectBuffer(void);
 extern void func_002D4240(SdfPoolNode *, s32);
-extern void sdfClearPacketListHead(void *);
+extern void sdfClearPacketListHead(SdfPacketChain *);
 extern void func_00105150(s32);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
@@ -168,7 +169,7 @@ s32 kwlnPrepareFrameDrawPackets(void) {
 
     sdfWaitAndSelectBuffer();
     func_002D4240(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
-    sdfClearPacketListHead(D_00325860);
+    sdfClearPacketListHead((SdfPacketChain *)D_00325860);
     func_00105150(bufferIndex);
     packetGroups = D_003258B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
     for (groupIndex = KWLN_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
@@ -198,7 +199,7 @@ extern void func_00105DD8(void);
 extern void func_001071E8(void);
 extern s32 func_0011E278(void);
 extern void func_002EA5C0(s32);
-extern void sdfQueueFramePackets(SdfListHead *, void *);
+extern void sdfQueueFramePackets(SdfListHead *, SdfPacketChain *);
 extern u8 D_00325788[];
 extern u8 kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00325708;
@@ -301,7 +302,7 @@ s32 kwlnRenderFrame(void) {
         D_003BA7FC = 0;
     }
     if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
-        sdfQueueFramePackets(poolHead, D_00325860);
+        sdfQueueFramePackets(poolHead, (SdfPacketChain *)D_00325860);
     } else {
         kwlnDrawControlFlags &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }
