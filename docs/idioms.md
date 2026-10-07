@@ -2789,3 +2789,21 @@ receives a `MenuWorkEntry *`, not a numeric node identifier; the animated
 effect factory likewise returns the allocated work entry. The canonical
 record and these pointer contracts live in `mnu_work.h`.
 
+## DDS1 staff pages retain one embedded window owner
+
+DDS1 `func_00276898` receives a `KwlnTask *` and explicitly forwards it to
+`kwlnTaskGetUserValue`; the native accessor loads the task's `+0x38` word.
+`CampMenuContext.partyWindow` starts at `+0x15C`, with native slots at window
+`+0x78` and a `0x134` stride. The slot's `unk10C` list pointer accounts for
+the context `+0x67C` selection read, while `partyWindow.lists[0]` accounts
+for context `+0x7D8`. These are fields of the same primary window, not
+overlapping selection-list views. The following `PartyPanel` starts at
+`+0x7EC`. Slot flags and sprite `profileFade` are accessed through their
+existing owners.
+
+The scene initializer resets one `EffectSlotSet *`: the reset producer
+accepts no second argument, regardless of an incidental native `$5` value.
+The 380-byte target and all other C in its unit check `65 match, 0 differ`;
+all 66 current direct/indirect `mnu.h` and `mnu_staff.h` includers also
+check with zero differences or context/data diagnostics.
+
