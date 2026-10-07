@@ -118,7 +118,7 @@ typedef struct SdfCurveUser {
     SdfCurveTable *curve; /* 0x1C */
 } SdfCurveUser;
 
-extern void func_00116DE8(s32 *index, f32 *fraction, void *table, f32 time);
+extern void dds3SamplePathKeyframeInterval(s32 *index, f32 *fraction, void *table, f32 time);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
 f32 sdfSampleActiveLinearCurve(SdfCurveUser *user) {
@@ -129,7 +129,7 @@ f32 sdfSampleActiveLinearCurve(SdfCurveUser *user) {
 
     if (user->flags & 4) {
         curve = user->curve;
-        func_00116DE8(&index, &fraction, curve, user->time);
+        dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->time);
         values = curve->values;
         return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
     }

@@ -25,7 +25,7 @@ typedef struct {
     f32 unk24;
 } PathOut;
 
-void func_00116DE8(u32 *index, f32 *fraction, Dds3PathKeyframes *keys, f32 time);
+void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *keys, f32 time);
 
 void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
@@ -44,7 +44,7 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
 
     if (path->flags & 1) {
         data = path->positionKeys;
-        func_00116DE8(&index, &fraction, data, path->time);
+        dds3SamplePathKeyframeInterval(&index, &fraction, data, path->time);
         entries = (PathEntry12 *)data->data;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1][0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1][1]);
@@ -71,7 +71,7 @@ void dds3PreparePathVectorPair(Dds3PathCurveWork *arg) {
     PathEntry16 *p2;
     if (arg->flags & 2) {
         data = arg->rotationKeys;
-        func_00116DE8(&idx, &frac, data, arg->time);
+        dds3SamplePathKeyframeInterval(&idx, &frac, data, arg->time);
         base = (PathEntry16 *)data->data;
         p1 = &base[idx];
         VU0_LOAD_VF_MEMORY(vf10, p1);
@@ -92,7 +92,7 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, PathOut *out) {
 
     if (path->flags & 0x10) {
         data = path->transformKeys;
-        func_00116DE8(&index, &fraction, data, path->time);
+        dds3SamplePathKeyframeInterval(&index, &fraction, data, path->time);
         entries = (PathEntry40 *)data->data;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1].f[0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1].f[1]);
