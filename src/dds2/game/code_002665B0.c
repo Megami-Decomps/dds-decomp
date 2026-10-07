@@ -1319,7 +1319,51 @@ void func_00268CC0(u32 mode, s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268EC8);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002690A8);
+/* Configure three terminal grid entries from the current mode's effect. */
+void func_002690A8(u32 mode, s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    s32 index = 0;
+    s32 setting = 0;
+    s32 kind = 0;
+    s32 y = 0;
+    s32 z = 0;
+    s32 *effect;
+    u32 effectAddress;
+
+    switch (mode) {
+    case 1:
+        y = -0x100;
+        kind = 2;
+        setting = 5;
+        index = 2;
+        break;
+    case 3:
+        y = -0x100;
+        z = 0;
+        kind = 2;
+        setting = 7;
+        index = 2;
+        break;
+    case 4:
+        y = 0;
+    case 2:
+        z = 0x100;
+        kind = 2;
+        setting = 4;
+        index = 3;
+        break;
+    }
+    effectAddress = sizeof(state->effect[0]) * index + (u32)context;
+    effectAddress += (u32)((u8 *)&state->effect[0] - (u8 *)state);
+    effect = (s32 *)effectAddress;
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 8, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 8, *effect, 0, setting, kind);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 0x38, 0, y, 0, z);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x38, *effect, 0, setting, kind);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 0x39, 0, y, 0, z);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x39, *effect, 0, setting, kind);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00269230);
 
@@ -1727,7 +1771,7 @@ s32 evtClearDispatchVisualFlag(void) {
     return 1;
 }
 
-extern void func_002690A8(s32, s32);
+extern void func_002690A8(u32, s32);
 
 extern void func_00269230(void);
 
