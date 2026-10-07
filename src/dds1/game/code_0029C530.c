@@ -6846,9 +6846,9 @@ EffCopiedPayload *effCloneEffectPayloadFromOwner(s32 work) {
     return effect;
 }
 
-void effReleaseTargetSlots(u8 *work) {
-    EffWorldNode **effects = ((EffCopiedPayload *)work)->effects;
-    Dds3PathCurveWork **targets = ((EffCopiedPayload *)work)->targets;
+void effReleaseTargetSlots(EffCopiedPayload *payload) {
+    EffWorldNode **effects = payload->effects;
+    Dds3PathCurveWork **targets = payload->targets;
     u32 i;
 
     for (i = 0; i < 5; i++) {
@@ -6861,7 +6861,7 @@ void effReleaseTargetSlots(u8 *work) {
         }
         effects++;
     }
-    sdfReleaseResourceAllocation(((EffCopiedPayload *)work)->allocation);
+    sdfReleaseResourceAllocation(payload->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B3698);
