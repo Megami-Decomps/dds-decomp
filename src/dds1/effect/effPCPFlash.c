@@ -25,8 +25,8 @@ extern f32 D_00354940[];
 extern f32 D_00354950[];
 extern f32 D_003548F0[];
 extern f32 D_00354970[];
-extern s32 effGetGroupRecordByIndex(EffRecordPool *pool, s32 index);
-extern s32 effGetRecordGroupElement(EffRecordPool *pool, s32 index);
+extern void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 index);
+extern void *effGetRecordGroupElement(EffRecordPool *pool, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
@@ -1158,7 +1158,7 @@ void effFlashAccumulatingParticleSetRenderScale(PcpFlashAccumulatingWork *work, 
 }
 
 typedef struct EffRecordPool EffRecordPool;
-extern s32 effGetRecordGroupAuxEntry(EffRecordPool *, s32);
+extern void *effGetRecordGroupAuxEntry(EffRecordPool *, s32);
 
 void func_0016BAC0(PcpFlashAccumulatingWork *work, s32 index, u32 param) {
     u32 *colors;
@@ -1185,7 +1185,7 @@ void func_0016BAC0(PcpFlashAccumulatingWork *work, s32 index, u32 param) {
 void func_0016BBB0(PcpFlashAccumulatingWork *work, s32 index)
 {
     PcpFlashAccumulatingParticle *part = &work->parts[index];
-    f32 *quad = effGetRecordGroupElement((u32)work->resourceHandle, index * 2);
+    f32 *quad = effGetRecordGroupElement(work->resourceHandle, index * 2);
     f32 offset[4];
     f32 unit[4];
     f32 middle[4];
@@ -1256,7 +1256,7 @@ void func_0016BBB0(PcpFlashAccumulatingWork *work, s32 index)
     VU0_LOAD_VF(vf11, outer);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    mirror = effGetRecordGroupElement((u32)work->resourceHandle, index * 2 + 1);
+    mirror = effGetRecordGroupElement(work->resourceHandle, index * 2 + 1);
     PCP_COPY_VECTOR(mirror + 8, quad + 8);
     PCP_COPY_VECTOR(mirror + 4, quad + 4);
     PCP_COPY_VECTOR(mirror + 12, quad + 12);
