@@ -7146,8 +7146,8 @@ void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
     for (i = 0; i < 5; i++) {
         Dds3PathCurveWork *object = objects[i];
         if (object != 0) {
-            ((EffectObjectFlag *)object)->state = 0;
-            ((EffectObjectFlag *)object)->flags = 0;
+            object->direction = 0;
+            object->time = 0.0f;
         }
     }
 }
