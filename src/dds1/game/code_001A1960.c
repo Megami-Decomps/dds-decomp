@@ -303,7 +303,35 @@ DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
     return &datGameState->party[index];
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlSyncPlayerWork);
+void btlSyncPlayerWork(BtlUnit *actor) {
+    DatPartyRecord *src = &actor->partyRecord;
+    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->unk2C4);
+    s32 maxHp;
+    s32 maxMp;
+
+    if (src->flags & 0x1000) {
+        dst->flags |= 0x1000;
+    } else {
+        dst->flags &= ~0x1000;
+    }
+    if (src->flags & 0x4000) {
+        dst->flags |= 0x4000;
+    } else {
+        dst->flags &= ~0x4000;
+    }
+    dst->level = src->level;
+    maxHp = datComputeSkillBoostedMaxHp(dst);
+    maxMp = datComputeSkillBoostedMaxMp(dst);
+    dst->hp = src->hp < maxHp ? src->hp : maxHp;
+    dst->mp = src->mp < maxMp ? src->mp : maxMp;
+    memcpy(dst->baseStats, src->baseStats, 5);
+    dst->status = src->status & 0x7FFF;
+    dst->unk18C = src->unk18C;
+    dst->unk18E = src->unk18E;
+    dst->unk190 = src->unk190;
+    btlBossDebugPrintf("btl:player work set[%p]\n", actor);
+}
+
 
 s32 btlFindPartyEntryIndexForActor(s32 arg0) {
     return dds3FindEntryIndex(((BtlUnit *)arg0)->partyRecord.unitId);
