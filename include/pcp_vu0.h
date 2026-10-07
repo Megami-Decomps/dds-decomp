@@ -112,6 +112,24 @@ typedef struct {
     ".set reorder" \
     : : "r" (src) : "memory")
 
+/* The aggregate keeps a 64-byte matrix memory operand from decaying to a
+ * pointer under EE GCC 2.96. */
+typedef struct {
+    float rows[4][4];
+} PcpMatrixF32;
+
+/* Load a 16-byte-aligned float matrix into vf24-vf27. The explicit input
+ * describes the four rows read without clobbering unrelated memory.
+ * The source address expression must have no evaluation side effects. */
+#define VU0_LOAD_MATRIX_B_F32(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src), "m" (*(const PcpMatrixF32 *)(src)))
+
 /* Store the second matrix bank vf24-vf27 to four quadwords. */
 #define VU0_STORE_MATRIX_B(dst) __asm__ volatile ( \
     ".set noreorder\n\t" \
