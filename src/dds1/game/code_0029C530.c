@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "btl_state.h"
 #include "evt_unit.h"
 #include "eff_blur.h"
@@ -6776,7 +6777,7 @@ typedef struct EffCopiedPayload {
     u32 state;           // 0x08
     u32 unk0C;
     u32 effects[5];      // 0x10
-    u32 targets[5];      // 0x24
+    Dds3PathCurveWork *targets[5]; // 0x24
     u8 *allocation;      // 0x38
     u8 pad3C[4];
 } EffCopiedPayload;
@@ -6788,11 +6789,13 @@ typedef struct EffCopiedPayloadWork {
     u32 parameter;
 } EffCopiedPayloadWork;
 
+extern void dds3FreePathObject(Dds3PathCurveWork *path);
+
 void effResetObjectSlots(u8 *work) {
-    u32 *objects = ((EffCopiedPayloadWork *)work)->payload->targets;
+    Dds3PathCurveWork **objects = ((EffCopiedPayloadWork *)work)->payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
-        u32 object = objects[i];
+        Dds3PathCurveWork *object = objects[i];
         if (object != 0) {
             ((EffectObjectFlag *)object)->state = 0;
             ((EffectObjectFlag *)object)->flags = 0;
@@ -6845,7 +6848,7 @@ u32 effCloneEffectPayloadFromOwner(s32 work) {
 
 void effReleaseTargetSlots(u8 *work) {
     u32 *effects = ((EffCopiedPayload *)work)->effects;
-    u32 *targets = ((EffCopiedPayload *)work)->targets;
+    Dds3PathCurveWork **targets = ((EffCopiedPayload *)work)->targets;
     u32 i;
 
     for (i = 0; i < 5; i++) {
