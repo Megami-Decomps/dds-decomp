@@ -446,7 +446,8 @@ extern s32 dds3GetWorldValueCount(void *);
 extern s32 dds3ResetObjectValueCursor(void *);
 extern u32 dds3ReadIndexedWorldObjectWord(void *);
 extern s32 dds3AdvanceObjectValueCursor(void *);
-extern void dds3DestroyWorldIndexNode(void *);
+struct NodeB;
+extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern s32 func_0010F9A8(f32 *, f32 *);
 void func_00113AF0(EffectObject *obj) {
     EffectObjectData *data = obj->data;
@@ -463,7 +464,7 @@ void func_00113AF0(EffectObject *obj) {
         return;
     }
     if (dds3GetWorldValueCount(list) == 0) {
-        dds3DestroyWorldIndexNode(list);
+        dds3DestroyWorldIndexNode((struct NodeB *)list);
         return;
     }
     if (dds3ResetObjectValueCursor(list) != 0) {
@@ -478,7 +479,7 @@ void func_00113AF0(EffectObject *obj) {
             }
         } while (dds3AdvanceObjectValueCursor(list) != 0);
     }
-    dds3DestroyWorldIndexNode(list);
+    dds3DestroyWorldIndexNode((struct NodeB *)list);
 
     if (data->activeId == -1) {
         list = dds3CopyWorldListToValueChain(world, 9);
@@ -495,13 +496,13 @@ void func_00113AF0(EffectObject *obj) {
         } while (dds3AdvanceObjectValueCursor(list) != 0);
 
 destroy_list:
-        dds3DestroyWorldIndexNode(list);
+        dds3DestroyWorldIndexNode((struct NodeB *)list);
         return;
 
 attach_transition:
         evtSetUnitValueTransitionForObject(other, (EffWorldNode *)obj, 10);
         data->activeId = other->valueId;
-        dds3DestroyWorldIndexNode(list);
+        dds3DestroyWorldIndexNode((struct NodeB *)list);
     }
 }
 

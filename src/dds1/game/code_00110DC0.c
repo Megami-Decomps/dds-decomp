@@ -17,7 +17,7 @@ s32 dds3ExchangeAreaSlot(void *arg);
 
 extern s32 dds3InvokeAreaCallback(void *arg);
 
-void dds3DestroyWorldIndexNode(u32 node);
+void dds3DestroyWorldIndexNode(struct NodeB *node);
 
 void sdfReleaseChipBlock(void *arg);
 
@@ -144,7 +144,7 @@ void dds3DestroyObjectPointerChains(WorldObjectPointer *object) {
     dds3VisitWorldObjectValues(p[0], dds3ExchangeAreaSlot);
     dds3VisitWorldObjectValues(p[1], dds3ExchangeAreaSlot);
     for (i = 0; i < 2; i++) {
-        dds3DestroyWorldIndexNode(p[i]);
+        dds3DestroyWorldIndexNode((struct NodeB *)p[i]);
     }
     sdfReleaseChipBlock(p);
 }
