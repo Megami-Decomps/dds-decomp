@@ -41,9 +41,6 @@ s8 func_002BDA78(s32 value) {
     return *(s8 *)(D_00435E3C + index * 6 + 5);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDAA8);
-
-
 /* Text builders return integer glyph handles; frFont consumes glyph pointers. */
 typedef struct FrFontGlyph FrFontGlyph;
 
@@ -61,7 +58,33 @@ extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_002BDAA8(s32, s32, s32, s32, s32, s32);
+extern char D_00437C38[];
+
+void func_002BDAA8(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteArg) {
+    char text[0x10];
+    s32 current;
+    s32 required;
+    u32 glyph;
+    u32 color;
+    s32 thresholdX = x + 0x130;
+
+    if (entryId != 0) {
+        current = func_002BDA50(entryId);
+        required = func_002BDA78(entryId);
+        func_0035C860(text, D_00437C38, required - current);
+        color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
+        glyph = func_0019F5E8(x, y, 0, color, text, 0);
+        frFontSetChainFlag((FrFontGlyph *)glyph, 4);
+        func_0019D550((FrFontGlyph *)glyph, 1, 0x53);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+        func_00306CD0(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
+        func_0035C860(text, D_00437C38, required);
+        color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
+        glyph = func_0019F5E8(thresholdX, y, 0, color, text, 0);
+        func_0019D550((FrFontGlyph *)glyph, 1, 0x53);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    }
+}
 
 void func_002BDC38(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSprites *page, s32 param) {
     char text[0x20];
