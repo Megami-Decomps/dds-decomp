@@ -26,17 +26,20 @@ typedef struct DatCommandRecord {
     u16 restriction;               /* 0x0C */
     u8 unk_0E[3];
     u8 stat11;
-    u8 unk_12[4];
+    u8 unk_12[2];
+    u8 rangeMin;                  /* 0x14 */
+    u8 rangeMax;                  /* 0x15 */
     u16 primaryLimitKind;          /* 0x16 */
     s16 stat18;
     u16 secondaryLimitKind;        /* 0x1A */
     s16 stat1C;
-    u8 unk_1E[6];
+    u8 unk_1E[4];
+    u16 unk22;
     DatCommandAttribute attribute; /* 0x24 */
     s32 requirementBits;           /* 0x28 */
     u8 unk_2C;
     u8 stat2D;
-    u8 unk_2E[2];
+    u16 unk2E;
     s32 unk30;
     s16 stat34;
     s16 stat36;
