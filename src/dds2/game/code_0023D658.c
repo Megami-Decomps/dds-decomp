@@ -345,10 +345,10 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     }
     switch (dirFlag) {
     case 0:
-        work->flags &= ~4;
+        work->flags &= ~EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     case 1:
-        work->flags |= 4;
+        work->flags |= EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     }
     switch (sideMode) {
@@ -395,7 +395,7 @@ void evtResetUnitVectorSlots(void) {
 
     for (i = 0; i < 10; i++) {
         mnuInitializeCampPanelVisualDefaults(&evtUnitVectorSlots[i].vec[0], &evtUnitVectorSlots[i].vec[4], &evtUnitVectorSlots[i].vec[8], &evtUnitVectorSlots[i].vec[12], &evtUnitVectorSlots[i].vec[13]);
-        evtUnitVectorSlots[i].state = 0;
+        evtUnitVectorSlots[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
         evtUnitVectorSlots[i].id = 0;
     }
 }
@@ -415,7 +415,7 @@ void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpo
         evtUnitVectorSlots[slotIndex].vec[9] = color[1];
         evtUnitVectorSlots[slotIndex].vec[10] = color[2];
         evtUnitVectorSlots[slotIndex].vec[11] = 1.0f;
-        if (slotState == 3) {
+        if (slotState == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND) {
             evtUnitVectorSlots[slotIndex].id = unitId;
         } else {
             evtUnitVectorSlots[slotIndex].id = 0;
@@ -431,14 +431,14 @@ s32 func_0023E350(s32 id, f32 *out) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == id) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (evtUnitVectorSlots[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -462,14 +462,14 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == (s32)unit) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == (s32)unit) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (evtUnitVectorSlots[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -504,14 +504,14 @@ s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == id) {
             *outX = evtUnitVectorSlots[i].vec[12];
             *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
         }
     }
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 2) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
             *outX = evtUnitVectorSlots[i].vec[12];
             *outY = evtUnitVectorSlots[i].vec[13];
             return 1;

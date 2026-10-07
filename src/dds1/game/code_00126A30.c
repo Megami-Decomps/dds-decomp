@@ -458,7 +458,7 @@ extern struct DevRequest *D_003BAC14;
 extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
 extern void *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
-extern void effObjSetModelHolder(void *, u32);
+extern void effObjSetActiveId(EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
 extern void effObjSetRoomNumber(void *, u32);
 extern void *dds3FindWorldObjectNodeByKey(void *, u32, s32);
@@ -515,25 +515,25 @@ void fldCreateResourceScriptObjects(void) {
         dds3SetWorldNodeValue(object, (u32)resource->name);
         if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
             if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
-                effObjSetModelHolder(object, 6);
+                effObjSetActiveId((EffWorldNode *)object, 6);
             } else {
                 switch (i) {
                     case 0:
-                        effObjSetModelHolder(object, 2);
+                        effObjSetActiveId((EffWorldNode *)object, 2);
                         break;
                     case 1:
-                        effObjSetModelHolder(object, 3);
+                        effObjSetActiveId((EffWorldNode *)object, 3);
                         break;
                     case 2:
-                        effObjSetModelHolder(object, 4);
+                        effObjSetActiveId((EffWorldNode *)object, 4);
                         break;
                     default:
-                        effObjSetModelHolder(object, 5);
+                        effObjSetActiveId((EffWorldNode *)object, 5);
                         break;
                 }
             }
         } else {
-            effObjSetModelHolder(object, 7);
+            effObjSetActiveId((EffWorldNode *)object, 7);
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName(resource->name));
         dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));

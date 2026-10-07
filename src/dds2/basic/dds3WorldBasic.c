@@ -142,7 +142,7 @@ NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
         return NULL;
     }
     worldInfo = (WorldInfo *)dds3ActiveWorld->data;
-    if (worldInfo->unk1E < initialCount) {
+    if (worldInfo->freeEntryCount < initialCount) {
         return NULL;
     }
     indexNode = sdfAllocSizeClassBlock(DDS3_WORLD_INDEX_NODE_BYTES);

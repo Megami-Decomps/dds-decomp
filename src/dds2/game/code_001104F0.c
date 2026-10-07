@@ -32,7 +32,7 @@ u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    ((WorldInfo *)dds3ActiveWorld->data)->unk14[object->cursorIndex].unk0 = value;
+    ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].value = value;
     return 1;
 }
 
@@ -43,7 +43,7 @@ u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    return ((WorldInfo *)dds3ActiveWorld->data)->unk14[object->cursorIndex].unk0;
+    return ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].value;
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
@@ -56,7 +56,7 @@ u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    object->cursorIndex = ((WorldInfo *)dds3ActiveWorld->data)->unk14[object->cursorIndex].unk4;
+    object->cursorIndex = ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].nextIndex;
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 
