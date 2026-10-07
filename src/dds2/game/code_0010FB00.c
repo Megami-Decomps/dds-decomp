@@ -23,7 +23,7 @@ typedef struct {
     ObjectTransform *transform;
 } WorldObject;
 
-extern void dds3DestroyWorldNode(void *node);
+extern void dds3DestroyWorldNode(EffWorldNode *node);
 extern void dds3DestroyWorldIndexNode(void *node);
 extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);

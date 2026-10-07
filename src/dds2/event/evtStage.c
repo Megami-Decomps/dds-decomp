@@ -9,11 +9,12 @@ extern void dds3ReplaceObjectResource(void *);
 extern s32 dds3GetSlot1Data(void);
 
 extern s32 dds3GetWorldSecondaryObject(void);
+extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
 
 void evtDestroySecondaryWorldNode(void) {
-    s64 secondary;
+    EffWorldNode *secondary;
 
-    secondary = dds3GetWorldSecondaryObject();
+    secondary = (EffWorldNode *)dds3GetWorldSecondaryObject();
     if (secondary != 0) {
         dds3DestroyWorldNode(secondary);
         return;
