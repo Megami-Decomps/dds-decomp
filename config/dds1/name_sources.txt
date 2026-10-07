@@ -2397,7 +2397,7 @@
 0x0019B3E0	itfMesScriptActivatePanel	inferred	sets the 0x200000 flag and signals func_0014DAF0
 0x0019B428	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x0019B4A0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]
-0x0019B540	itfMesScriptSetWindowGeometry	inferred	forwards three script arguments to func_0019C590
+0x0019B540	itfMesScriptSetTextSlotFromValue	inferred	Reads script slot, value and selector arguments and installs the selected text in the active message window.
 0x0019B5C0	itfMesScriptToggleMessageFlag	inferred	sets or clears the 0x400000 message flag
 0x0019B628	itfMesScriptSetScaledPosition	inferred	forwards script coordinates scaled by sixteen and eight
 0x0019B690	itfMesScriptSetDefaultBounds	inferred	forwards fixed 0x4B0 and 0xAF8 dimensions

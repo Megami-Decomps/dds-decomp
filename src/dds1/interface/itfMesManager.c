@@ -234,7 +234,7 @@ void itfMesRelocate(ItfMesBin *bin);
 
 void itfMesDestroyWindow(s32 window);
 
-void func_0019C590(s32 window, s32 arg1, s32 arg2, s32 arg3);
+void func_0019C590(s32 window, s32 slotIndex, s32 value, s32 selector);
 
 void func_0019C9F0(s32 window, s32 arg1, s32 arg2);
 
@@ -430,20 +430,20 @@ u32 func_0019B538(void) {
     return 1;
 }
 
-/* Read x, y and width in order for the script window; return 1. */
-s32 itfMesScriptSetWindowGeometry(void) {
+/* Read the text-slot index, value and selector from script parameters. */
+s32 itfMesScriptSetTextSlotFromValue(void) {
     s32 window = scrGetWindow();
-    s32 x;
-    s32 y;
-    s32 width;
+    s32 slotIndex;
+    s32 value;
+    s32 selector;
 
     if (window < 0) {
         return 1;
     }
-    x = scrReadIntParameter(0);
-    y = scrReadIntParameter(1);
-    width = scrReadIntParameter(2);
-    func_0019C590(window, x, y, width);
+    slotIndex = scrReadIntParameter(0);
+    value = scrReadIntParameter(1);
+    selector = scrReadIntParameter(2);
+    func_0019C590(window, slotIndex, value, selector);
     return 1;
 }
 
