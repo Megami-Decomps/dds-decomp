@@ -665,26 +665,26 @@ u32 func_003091F8(void) {
     return 0;
 }
 
-s32 itfActivateGridTextWidget(s32 widget) {
+s32 itfActivateGridTextWidget(GridTextWidget *widget) {
     if (widget == 0) {
         return 0;
     }
-    ((GridTextWidget *)widget)->flags = (((GridTextWidget *)widget)->flags & -2) | 2;
+    widget->flags = (widget->flags & -2) | 2;
     return 1;
 }
 
 /* Apply parent flags and enable bit 1 on the linked child widget, if present. */
-s32 itfSetWidgetFlagsAndActivateChild(u8 *widget, u32 flags) {
-    s32 childLink;
+s32 itfSetWidgetFlagsAndActivateChild(GridTextWidget *widget, u32 flags) {
+    GridTextListItem *childLink;
     if (widget == 0) {
         return 0;
     }
-    ((GridTextWidget *)widget)->flags = (((GridTextWidget *)widget)->flags & ~2) | flags;
-    childLink = (s32)((GridTextWidget *)widget)->selected;
+    widget->flags = (widget->flags & ~2) | flags;
+    childLink = widget->selected;
     if (childLink != 0) {
-        s32 childWidget = (s32)((GridTextListItem *)childLink)->child;
+        GridTextWidget *childWidget = childLink->child;
         if (childWidget != 0) {
-            ((GridTextWidget *)childWidget)->flags |= 2;
+            childWidget->flags |= 2;
         }
     }
     return 1;
@@ -963,20 +963,20 @@ void itfReverseSelectedGridScroll(GridTextWidget *owner, u32 steps) {
     }
 }
 
-s32 itfGetGridChildLayoutMode(u8 *widget, u32 target) {
-    u32 flags = ((GridTextWidget *)widget)->flags;
+s32 itfGetGridChildLayoutMode(GridTextWidget *widget, GridTextListItem *target) {
+    u32 flags = widget->flags;
 
     if (flags & 2) {
-        if (target == (u32)((GridTextWidget *)widget)->selected) {
+        if (target == widget->selected) {
             return (flags & 1) ? 6 : 4;
         }
         return 0;
     }
     if (flags & 0x80) {
-        if (target == (u32)((GridTextWidget *)widget)->selected) {
+        if (target == widget->selected) {
             return 12;
         }
-    } else if (target == (u32)((GridTextWidget *)widget)->selected && (flags & 1)) {
+    } else if (target == widget->selected && (flags & 1)) {
         return 6;
     }
     return 0;
@@ -1051,7 +1051,7 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
         if (offsetY < rowEnd) {
             if ((u16)widget->rows != 0) {
                 do {
-                    s32 layout = itfGetGridChildLayoutMode((u8 *)widget, (u32)item);
+                    s32 layout = itfGetGridChildLayoutMode(widget, item);
                     s32 drawMode = 0;
 
                     if (invokeSelected != 0) {
