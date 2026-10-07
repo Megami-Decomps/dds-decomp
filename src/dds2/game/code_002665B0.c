@@ -41,7 +41,8 @@ typedef struct MenuSlotState {
     s32 heapHandle;
     u8 pad04[4];
     MenuPopupState transitionWork; /* 0x08 */
-    u8 pad54[8];
+    s32 dispatchStatus; /* 0x54 */
+    u32 dispatchValue; /* 0x58 */
     EvtResourcePair messageResources; /* 0x5C */
     s32 resourceBank[4]; /* 0x64: encoded base-resource owners */
     EffectSlotSet *alternateBatch; /* 0x74 */
@@ -1083,26 +1084,17 @@ s32 func_002685F0(s32 action, s32 context) {
     return 0;
 }
 
-typedef struct {
-    u8 pad00[6];
-    u16 hp;          /* 0x06 */
-    u16 maxHp;       /* 0x08 */
-    u16 mp;          /* 0x0A */
-    u16 maxMp;       /* 0x0C */
-    u16 statusFlags; /* 0x0E */
-} SceneOptionRecord;
-
 /* Restore current HP/MP to their stored maxima and clear exactly the charged status bits.
  * No boosted-max calculation or range validation is performed here. */
-void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
-    u16 statusFlags = option->statusFlags;
+void fldSaveSceneOptionsAndClearFlags(DatPartyRecord *option) {
+    u16 statusFlags = option->status;
     u16 maxHp = option->maxHp;
     u16 maxMp = option->maxMp;
     u16 retainedStatus = statusFlags & MNU_RECOVERY_STATUS_KEEP_MASK;
 
     option->hp = maxHp;
     option->mp = maxMp;
-    option->statusFlags = retainedStatus;
+    option->status = retainedStatus;
 }
 
 
@@ -1573,10 +1565,10 @@ u32 func_00269C48(void) {
 extern u32 mnuMapPadMaskToFlags(s32 mask);
 extern s32 func_002685F0(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
-extern void mnuClearListFlagsOneAndTwo(u32 list);
-extern void mnuRetreatListCursorDefault(u32 list);
-extern void mnuAdvanceListCursorDefault(u32 list);
-extern void mnuPlayInputSound(s32 mode, u32 buttons, u32 list);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
+extern MenuListNode *mnuRetreatListCursorDefault(u32 list);
+extern MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_003CE7D0[];
 extern char D_003CE848[];
 extern char D_003CE880[];
@@ -1634,7 +1626,7 @@ s32 evtBHandleSelectionPanelInput(void *input) {
             mnuSetPopupEntryFlagged(state, D_003CE8B8);
         }
         if (!(buttons & 0x300000)) {
-            mnuClearListFlagsOneAndTwo((u32)context->visualState);
+            mnuClearListFlagsOneAndTwo((u32 *)context->visualState);
         }
         if (buttons & 0x10) {
             mnuRetreatListCursorDefault((u32)context->visualState);
@@ -1642,7 +1634,7 @@ s32 evtBHandleSelectionPanelInput(void *input) {
         if (buttons & 0x20) {
             mnuAdvanceListCursorDefault((u32)context->visualState);
         }
-        mnuPlayInputSound(0, buttons, (u32)context->visualState);
+        mnuPlayInputSound(0, buttons, (u32 *)context->visualState);
     }
     return 0;
 }
@@ -1794,7 +1786,7 @@ s32 func_0026A2E0(void *request) {
             mnuSetPopupEntryFlagged(dispatch, D_003CE848);
         }
         if (!(buttons & 0x300000)) {
-            mnuClearListFlagsOneAndTwo((u32)context->menuOwner);
+            mnuClearListFlagsOneAndTwo((u32 *)context->menuOwner);
         }
         if (buttons & 0x10) {
             mnuRetreatListCursorDefault((u32)context->menuOwner);
@@ -1802,7 +1794,7 @@ s32 func_0026A2E0(void *request) {
         if (buttons & 0x20) {
             mnuAdvanceListCursorDefault((u32)context->menuOwner);
         }
-        mnuPlayInputSound(0, buttons, (u32)context->menuOwner);
+        mnuPlayInputSound(0, buttons, (u32 *)context->menuOwner);
     }
     return 0;
 }
@@ -1848,7 +1840,53 @@ u32 evtBEnterStateA(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A598);
+/* Recover the selected affordable party member, then process list input. */
+s32 func_0026A598(KwlnTask *task) {
+    extern u32 kwlnTaskGetUserValue(KwlnTask *);
+    MenuSlotState *host = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    u32 buttons = mnuMapPadMaskToFlags(0x33);
+    s32 *dispatch = &host->dispatchStatus;
+    s32 result = func_002C4038(&host->transitionWork, dispatch, 0, task);
+    MenuListNode *node;
+    MenuThresholdEntry *entry;
+
+    if (result != 0) {
+        return result;
+    }
+    if (*dispatch == 0) {
+        if (buttons & 1) {
+            node = host->progressList->cursor;
+            if (!(node->flags48 & 1)) {
+                entry = &node->terminal;
+                buttons = 0;
+                fldSaveSceneOptionsAndClearFlags(&datGameState->party[entry->entryId]);
+                sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+                mnuReleaseSelectedProgressPanel(host);
+                datAddCurrencyClamped(-entry->requiredAmount);
+                mnuRefreshThresholdNodeFlags(host->progressList);
+                if (host->progressList->count == 0) {
+                    mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+                }
+            } else {
+                buttons = 0x8000;
+            }
+        }
+        if (buttons & 2) {
+            mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+        }
+        if (!(buttons & 0x300000)) {
+            mnuClearListFlagsOneAndTwo(&host->progressList->stateFlags);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatListCursorDefault((u32)host->progressList);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceListCursorDefault((u32)host->progressList);
+        }
+        mnuPlayInputSound(0, buttons, &host->progressList->stateFlags);
+    }
+    return 0;
+}
 
 
 extern char D_00437868[];
