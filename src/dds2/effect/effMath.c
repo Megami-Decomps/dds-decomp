@@ -1,10 +1,6 @@
 #include "common.h"
+#include "eff.h"
 extern f32 D_00433528;
-
-typedef struct EffMathWork {
-    u8 pad00[8];
-    u32 resource;
-} EffMathWork;
 
 /* One cubic segment: four xyz control points, t and its increment (0x38 bytes). */
 typedef struct EffCubicBezierSlot {
@@ -13,18 +9,14 @@ typedef struct EffCubicBezierSlot {
     f32 step; /* 0x34 */
 } EffCubicBezierSlot;
 
-typedef struct EffMathSlotList {
-    EffCubicBezierSlot *slots;
-} EffMathSlotList;
-
-void effMathReleaseWorkResource(EffMathWork *work) {
-    sdfReleaseResourceAllocation(work->resource);
+void effMathReleaseWorkResource(EffArrHdr *work) {
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 
 /* Evaluate the cubic Bezier at t into out[3], advance t, and report whether it is still below 1. */
-s32 effMathStepBezierSlot(EffMathSlotList *table, s32 index, f32 *out) {
-    EffCubicBezierSlot *slot = &table->slots[index];
+s32 effMathStepBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
+    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[index];
     f32 w[4];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -68,12 +60,12 @@ s32 func_00195D00(EffCubicBezierSlot *slot, f32 *out) {
     return 1;
 }
 
-void effMathResetBezierSlot(EffMathSlotList *list, s32 index) {
-    EffCubicBezierSlot *slot = &list->slots[index];
+void effMathResetBezierSlot(EffArrHdr *list, s32 index) {
+    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)list->slots)[index];
     slot->step = 0.05f;
     slot->t = 0;
 }
 
-s32 effMathGetSlotAt(EffMathSlotList *list, s32 index) {
-    return (s32)&list->slots[index];
+s32 effMathGetSlotAt(EffArrHdr *list, s32 index) {
+    return (s32)&((EffCubicBezierSlot *)list->slots)[index];
 }
