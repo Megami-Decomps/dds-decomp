@@ -176,7 +176,7 @@ extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 
-void func_0021B9F8(void);
+void mdlUpdateViewerSelectedModelFromPad(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
@@ -1293,7 +1293,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A9F8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021AAB8);
 
-void func_0021ABB8(void) {
+void mdlDrawViewerModelAndMotionSummary(void) {
     SifCommand packet;
     const char *format;
     s32 displayMode;
@@ -1417,7 +1417,7 @@ extern f32 sdfViewMatrix[];
 extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
-void func_0021B510(void) {
+void mdlUpdateViewerCameraFromPad(void) {
     f32 speed;
     s32 rotated;
 
@@ -1535,7 +1535,7 @@ void mdlDrawViewerIndexedLabelOverlay(void) {
 }
 
 u32 mdlRunViewerIndexedLabelTask(void) {
-    func_0021B510();
+    mdlUpdateViewerCameraFromPad();
     mdlDrawViewerIndexedLabelOverlay();
     return 0;
 }
@@ -1549,7 +1549,7 @@ extern f32 D_00398390[4];
 extern f32 D_003983A0[4];
 
 /* vu0 routine: edit the viewer transform with translation or quaternion steps. */
-void func_0021B9F8(void) {
+void mdlUpdateViewerSelectedModelFromPad(void) {
     f32 speed;
     f32 angle;
 
@@ -1659,7 +1659,7 @@ void mdlDrawViewerSelectionLabel(void) {
 }
 
 s32 mdlRunViewerSelectionLabelTask(void) {
-    func_0021B9F8();
+    mdlUpdateViewerSelectedModelFromPad();
     if (D_003D7A60[0] == 0) {
         mdlDrawViewerSelectionLabel();
     }

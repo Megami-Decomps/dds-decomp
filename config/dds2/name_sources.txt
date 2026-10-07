@@ -3218,10 +3218,13 @@
 0x002353F0	mdlLoadViewerResourceAndResetCursors	inferred	Loads selected resource, resets viewer indices and initializes first flagged entry. [names_reviewed7.tsv]
 0x00235460	mdlResetViewerBasisVectors	inferred	Copies three default basis vectors to viewer basis and resets small vector state. [names_reviewed7.tsv]
 0x002354B8	mdlRotateViewResourcesRight	inferred	Byte-identical DDS1 counterpart: Shifts the viewer resource slot list toward higher indices and wraps its last slot to the front.
+0x00235728	mdlDrawViewerModelAndMotionSummary	inferred	Appends model identity and motion selector/count labels to the viewer packet list
 0x002358E8	mdlAddPlainViewerEntryForSelectedNode	inferred	Checks selected model node, clamps first range bound and adds plain entry. [names_reviewed7.tsv]
 0x00236058	mdlRunViewerAssetSelectionTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1358:func_00236058; Combines asset/node entry-selection input and corresponding resource identifier/name display; retail callees show selection and entry counts.; twin=0x0021B4E8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00236080	mdlUpdateViewerCameraFromPad	inferred	Updates the viewer camera transform from pad input
 0x002364C0	mdlDrawViewerIndexedLabelOverlay	inferred	Draws a model viewer label selected by its index onto a framed packet. [names_reviewed14.tsv]
 0x00236540	mdlRunViewerIndexedLabelTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1374:func_00236540; Runs viewer input handler and indexed-label overlay renderer, then returns zero.; twin=0x0021B9D0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00236568	mdlUpdateViewerSelectedModelFromPad	inferred	Updates the selected model resource transform from pad input
 0x00236940	mdlDrawViewerSelectionLabel	inferred	Submits a model viewer rectangle and formatted text for the selected index. [names_reviewed17.tsv]
 0x002369C0	mdlRunViewerSelectionLabelTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1390:func_002369C0; Runs viewer selection input handler, conditionally draws selection label and returns zero.; twin=0x0021BE50, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00236B20	mdlDrawViewerMotionTimeline	inferred	confidence=high; src/dds2/game/code_00233660.c:func_00236B20; Draws the motion progress marker and time/length text, with an empty-motion placeholder and viewer scale mode. [names_qp9.tsv]
