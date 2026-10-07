@@ -1058,7 +1058,47 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AE0);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
+extern s32 mnuFirstPresentMainCharacterIndex(void);
+extern u32 effLoadIndexedResource(s32 category, s32 index, s32 keepAllocation);
+extern MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
+                    u32 resourceHandle, s32 *indices, u32 unused);
+extern const char *D_003CE470[4];
+extern const char *D_003CE480[]; /* Two entries in external .data, not small data. */
+extern const char *D_003CE488[4];
+
+/* Load the shop resource sets and initialize its two scrolling panels. */
+void func_0025FA28(MenuTerminalContext *scene) {
+    s32 indices[3] = {77, 78, 76};
+    DspScrollingStripState *firstPanel = &scene->panelWork[0];
+    DspScrollingStripState *secondPanel = &scene->panelWork[1];
+
+    scene->effectSlots[0] = (struct EffectSlotSet *)effLoadIndexedResource(
+        (s32)"/facility/spr/shop/", (s32)D_003CE470[0], 0);
+    switch (scene->type) {
+    case 0:
+    case 2:
+        scene->effectSlots[1] = (struct EffectSlotSet *)effLoadIndexedResource(
+            (s32)"/facility/spr/shop/", (s32)D_003CE470[1], 0);
+        break;
+    case 1:
+    case 3:
+        scene->effectSlots[1] = (struct EffectSlotSet *)effLoadIndexedResource(
+            (s32)"/facility/spr/shop/", (s32)D_003CE470[2], 0);
+        func_0025F8B8((u32)scene->effectSlots[1], &scene->effectResources);
+        break;
+    }
+    scene->effectSlots[2] = (struct EffectSlotSet *)effLoadIndexedResource(
+        (s32)"/facility/spr/shop/", (s32)D_003CE480[0], 0);
+    scene->effectSlots[3] = (struct EffectSlotSet *)effLoadIndexedResource(
+        (s32)"/facility/spr/shop/", (s32)D_003CE488[mnuFirstPresentMainCharacterIndex()], 0);
+    mnuInitScrollingStripState(firstPanel, 0, scene->effectSlots[0], 0x46, 0x43);
+    func_0026BE28(firstPanel, 1, 0x10, 0x20);
+    mnuInitScrollingStripState(secondPanel, 0, scene->effectSlots[0], 0x46, 0x43);
+    func_0026BE28(secondPanel, 0, 0x10, 0x20);
+    func_0026BEB0(secondPanel, 0x1150, 0xCB8, 0);
+    scene->windowResource = (u32)mnuCreateWindowSpriteResources(
+        0, 0, 0, (u32)scene->effectSlots[0], indices, 3);
+}
 
 
 extern void evtLoadResourcePair();
