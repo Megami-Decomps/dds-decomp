@@ -4042,6 +4042,7 @@
 0x00241BF0	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x00241CA0	evtRefreshTaskEffectTexture	inferred	Releases the task's previous effect texture, resolves the keyed resource, updates effect channel 72, and retains the replacement at task-data +0x38. The former name described rebuilding that field via 0x00241BF0/0x002D3288 and freeing its old handle.
 0x00241D28	evtSpawnResourceObject	inferred	looks up the task resource, creates an effect object (flags 1) and scales it by slot scale ratio D_003BAA20[index]/D_003BAA10 [names_M95_Event.tsv]
+0x00241E18	evtCreateModelFromPackResource	inferred	Called by evtOpBindMotionSoundToModel to load the requested kind-5 pack payload and return its spawned model handle, or -1 when absent.
 0x00241F78	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
 0x002420B8	evtUpdateMotionSeTask	inferred	registered motion-SE task callback; matches its resource's motion and frame cues, updates the event sound sequence, logs EVE_SE
 0x00242278	evtFreeEventPackState	inferred	Frees the state returned by func_00101A70.

@@ -3572,6 +3572,7 @@
 0x0025D008	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x0025D0B8	evtRefreshTaskEffectTexture	inferred	DDS1 twin: replaces the event task's retained effect texture when the keyed resource is present, updates channel 72, and stores the replacement at task-data +0x38.
 0x0025D140	evtSpawnResourceObject	inferred	DDS1 twin 0x00241D28 [names_M95_Event.tsv]
+0x0025D230	evtCreateModelFromPackResource	inferred	DDS1 twin: evtOpBindMotionSoundToModel requests a kind-5 pack payload and uses the returned model handle to create its motion-SE task.
 0x0025D390	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
 0x0025D4D0	evtUpdateMotionSeTask	inferred	DDS1 twin: registered motion-SE task callback matching resource motion and frame cues before updating the event sound sequence
 0x0025D6B0	evtCreateMotionSeTask	inferred	twin of DDS1 evtCreateMotionSeTask
