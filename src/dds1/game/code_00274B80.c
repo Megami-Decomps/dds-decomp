@@ -258,8 +258,6 @@ extern s32 datGameState;
 extern s32 D_003BAA7C;
 extern u32 itfDrawUnderscoreTextSegment();
 extern s32 D_003BAA70;
-extern void mnuDrawPartyInfoSprites();
-
 extern void mnuDestroyWindowContainer(u32);
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
@@ -783,9 +781,9 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
 }
 
-void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 obj, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, spriteFlags);
-    mnuDrawPartyInfoSprites(0, 0, 0, entry, group, spriteFlags);
+    mnuDrawPartyInfoSprites(0, 0, 0, entry, spriteState, spriteFlags);
     itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);
     mnuDrawTextSprite(0x220, 0xa20, 0, 0xa09dc380, D_003BAA70 + ((PartyEntryCopy *)entry)->displayId * 17 + 0x110, spriteFlags);
     itfDrawGridWithResolvedSlot(0x120, 0xad0, 0, 1, *(s32 *)(obj + 0x14), 0x25, spriteFlags);

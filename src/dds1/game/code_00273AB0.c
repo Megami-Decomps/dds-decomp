@@ -448,7 +448,7 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
                   ((StaffImageContext *)context)->panelHandle, 0x53);
     if (mdlFlagTest(0x901) != 0) {
         mnuDrawPartyInfoSprites(0, 0, 0, partyEntry,
-                      (s32)((StaffImageContext *)context)->spriteHandle, 0x53);
+                      ((StaffImageContext *)context)->spriteHandle, 0x53);
     }
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->list, 0x53);
     list = menu->list;

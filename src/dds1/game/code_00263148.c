@@ -378,7 +378,6 @@ void func_00263A00(BrsSkillPackageWork *scene) {
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawPanelListDefault();
-extern void mnuDrawPartyInfoSprites(s32, s32, s32, void *, s32, s32);
 extern void func_00263A00(BrsSkillPackageWork *);
 extern s8 evtStageTestUpdate(s32);
 extern u8 D_00325788[];
