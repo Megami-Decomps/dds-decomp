@@ -6,6 +6,7 @@
 #include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_state.h"
+#include "eff_transform.h"
 #include "dat_state.h"
 #include "evt_unit.h"
 #include "mdl.h"
@@ -372,7 +373,7 @@ extern u64 btlStartTask(void *);
 
 extern void func_001E3108(void *, f32 *);
 
-extern void btlSetUnitPosition(void *, void *);
+extern void btlSetUnitPosition(BtlUnit *, f32 *);
 
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(s32, s32);
 
@@ -4677,7 +4678,7 @@ extern void func_00224F88(u32);
 
 extern void func_001ADFE0(u32, u32, u32);
 
-extern void btlSetUnitRotation(u32, const u8 *);
+extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern void func_002218C8(void);
 
@@ -5693,7 +5694,7 @@ void btlRefreshSpecialActionUnits(void) {
                 s32 action = unit->mode;
                 if (action < 0x122) {
                     if (action >= 0x11d) {
-                        btlSetUnitRotation((u32)unit, D_003BF950);
+                        btlSetUnitRotation(unit, (s128 *)D_003BF950);
                         unit->flags &= ~0x80000;
                     }
                 }
@@ -7060,7 +7061,107 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     return (bits * 2) & 4;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00226F58);
+extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
+extern void btlBeginEffectActorFadeOut(void);
+extern void func_001E3108(void *, f32 *);
+extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
+extern void func_00226AB0(BtlUnit *);
+
+void func_00226F58(void) {
+    BtlUnit *twin = NULL;
+    BtlUnit *mainUnit = NULL;
+    BtlState *battle;
+    BtlUnit *unit;
+    BattleLinkedEffectState *effect;
+    f32 position[4];
+    s32 flags;
+
+    battle = (BtlState *)btlGetRuntime();
+    unit = battle->units;
+    effect = battle->effect;
+    while (unit != NULL) {
+        flags = unit->flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (unit->mode) {
+                case 0x12E:
+                    mainUnit = unit;
+                    break;
+                case 0x12F:
+                    twin = unit;
+                    break;
+                }
+            }
+        }
+        unit = unit->nextActor;
+    }
+
+    if (effect->active == 1 || effect->actor == 0) {
+        mainUnit->position[0] = 0.0f;
+        btlSetUnitPosition(mainUnit, mainUnit->position);
+        PCP_COPY_VECTOR(twin->position, mainUnit->position);
+        btlSetUnitPosition(twin, mainUnit->position);
+        btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
+        PCP_COPY_VECTOR(twin->rotation, mainUnit->rotation);
+        btlSetUnitRotation(twin, (s128 *)mainUnit->rotation);
+        if (mainUnit->resourceIndex != twin->resourceIndex) {
+            btlInitializeEffectVectorsFromSourceRecords(mainUnit,
+                mainUnit->resourceKind, mainUnit->resourceIndex);
+            btlInitializeEffectVectorsFromSourceRecords(twin,
+                twin->resourceKind, twin->resourceIndex);
+        } else {
+            btlInitializeEffectVectorsFromSourceRecords(mainUnit,
+                mainUnit->resourceKind, mainUnit->resourceIndex);
+            twin->bodyOffset[0] = 0.0f;
+            twin->bodyOffset[1] = -380.0f;
+            twin->reach = 170.0f;
+            twin->height = 325.0f;
+            twin->bodyOffset[2] = 0.0f;
+            twin->bodyOffset[3] = 0.0f;
+        }
+        twin->stateFlags &= ~0x100;
+        btlBeginEffectActorFadeOut();
+        if ((mainUnit->flags & 0xE0) && !(twin->flags & 0xE0) &&
+            mainUnit->resourceIndex == 0x12E && (mainUnit->flags & 2)) {
+            func_001E3108(mainUnit, position);
+            position[1] += 1000000.0f;
+            effObjSetInnerFirstVec((EffTransformNode *)mainUnit->effectObject,
+                (u128 *)position);
+        }
+        if ((twin->flags & 0xE0) && !(mainUnit->flags & 0xE0) &&
+            twin->resourceIndex == 0x12F && (twin->flags & 2)) {
+            func_001E3108(twin, position);
+            position[1] += 1000000.0f;
+            effObjSetInnerFirstVec((EffTransformNode *)twin->effectObject,
+                (u128 *)position);
+        }
+    } else {
+        if (twin != NULL) {
+            twin->stateFlags &= ~0x100;
+            PCP_COPY_VECTOR(position, twin->position);
+            position[0] += 420.0f;
+            btlSetUnitPosition(twin, position);
+            btlSetUnitRotation(twin, (s128 *)twin->rotation);
+            btlInitializeEffectVectorsFromSourceRecords(twin, 1, 0x12F);
+            twin->stateFlags |= 0x100;
+            func_00226AB0(twin);
+            twin->stateFlags |= 0x200;
+            twin->bodyOffset[1] = -245.0f;
+            twin->reach = 155.0f;
+            twin->height = 340.0f;
+            twin->bodyOffset[0] = 0.0f;
+            twin->bodyOffset[2] = 0.0f;
+            twin->bodyOffset[3] = 0.0f;
+        }
+        if (mainUnit != NULL) {
+            /* The snapshot is not used by the following main-unit refresh. */
+            PCP_COPY_VECTOR(position, twin->position);
+            btlSetUnitPosition(mainUnit, mainUnit->position);
+            btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
+            btlInitializeEffectVectorsFromSourceRecords(mainUnit, 1, 0x12E);
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041B4F8);
 

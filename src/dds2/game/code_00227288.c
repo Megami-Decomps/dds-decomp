@@ -39,15 +39,6 @@ typedef struct BtlUnitInfo {
     struct BtlUnitData *data;
 } BtlUnitInfo;
 
-typedef struct BattleLinkedEffectState {
-    u32 actor;
-    struct BtlUnit *linkedUnit;
-    u32 value;
-    u16 timer;
-    u8 active, phase;
-    u32 effect;
-    f32 speed;
-} BattleLinkedEffectState;
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
