@@ -64,7 +64,7 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
 
 extern void *dds3GetWorldObject(void);
 extern void *kwlnTaskGetUserValue();
-extern s32 dds3ContainsNodeInAnyObjectChain();
+extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList();
 extern s32 func_0010F190();
@@ -84,7 +84,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
         return -1;
     }
     node = kwlnTaskGetUserValue(task);
-    if (dds3ContainsNodeInAnyObjectChain(dds3GetWorldObject(), node) == 0) {
+    if (dds3ContainsNodeInAnyObjectChain(dds3GetWorldObject(), (EffWorldNode *)node) == 0) {
         return (s32)func_002458B8;
     }
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
