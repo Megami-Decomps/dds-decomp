@@ -2930,7 +2930,7 @@ void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window);
 
 MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, s32 value, s32 mode, u32 options);
 
-void func_002B9720(MenuWindowContainer *menu);
+void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu);
 
 /* Advance selection; clear its byte and panel sprite flags only when a node is returned. */
 MenuListNode *mnuAdvanceListSelection(MenuWindowContainer *menu, s32 step);

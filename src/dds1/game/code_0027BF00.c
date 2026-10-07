@@ -347,7 +347,7 @@ MenuListNode *func_0027C688(MenuWindowContainer *window, MenuListNode *anchor, s
     return func_0027B540(window->list, anchor, value, mode, options);
 }
 
-void func_0027C6A0(MenuWindowContainer *window) {
+void mnuRemoveWindowListCursorNode(MenuWindowContainer *window) {
     func_0027B888(window->list);
 }
 
