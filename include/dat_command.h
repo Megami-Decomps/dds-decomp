@@ -8,7 +8,7 @@ typedef union DatCommandAttribute {
     u32 bits;
     struct {
         u8 kind;
-        u8 stat25;
+        u8 hitChance;
         u16 flagMask;
     } parts;
 } DatCommandAttribute;
