@@ -56,8 +56,8 @@ EffWorldNode *evtSpawnActionObjD(s32 a, void *work, s32 c) {
     return obj;
 }
 
-u32 dds3GetPathState(s32 path) {
-    return (u32)((PathObject *)path)->state;
+void *dds3GetWorldObjectPayload(EffWorldNode *object) {
+    return object->data;
 }
 
 void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, Dds3PathKeyframes *keys, f32 frame) {
