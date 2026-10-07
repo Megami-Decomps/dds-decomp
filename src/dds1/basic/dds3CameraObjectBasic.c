@@ -26,9 +26,9 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void func_00106488(f32 value);
-extern u8 sdfViewEyeVector[];
-extern u8 sdfViewTargetVector[];
-extern u8 sdfViewUpVector[];
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewUpVector[4];
 
 
 /* Release the camera's inner node, base handle, and owned data block. */

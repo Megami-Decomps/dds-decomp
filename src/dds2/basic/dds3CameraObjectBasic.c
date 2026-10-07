@@ -25,9 +25,9 @@ void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjInnerVecBackup(ObjectTransform *inner);
 extern void dds3RebuildCameraBasis(EffWorldNode *obj);
 extern void func_001063A8(f32 value);
-extern u8 sdfViewEyeVector[];
-extern u8 sdfViewTargetVector[];
-extern u8 sdfViewUpVector[];
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewUpVector[4];
 
 /* Rebuild dirty vectors and publish only the active world's camera; return 1.
  * A pending field-of-view update is consumed only while this camera is active. */
