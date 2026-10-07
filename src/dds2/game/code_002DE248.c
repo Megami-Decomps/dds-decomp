@@ -7176,8 +7176,8 @@ extern void fldRelocatePackedTransferChunk(s32, s32);
 
 extern void func_002F6A80(s32 *);
 
-EffCopiedPayload *effCreateRelocatedEffectPayload(u32 owner, u32 unused, const void *source, u32 kind) {
-    EffCopiedPayload *work = effAllocateCopiedEffectPayload(owner, source, kind);
+EffCopiedPayload *effCreateRelocatedEffectPayload(u32 owner, u32 unused, const void *source, s32 size) {
+    EffCopiedPayload *work = effAllocateCopiedEffectPayload(owner, source, size);
     s32 object = *(s32 *)work;
     fldRelocatePackedTransferChunk(object, object + 8);
     func_002F6A80(work);
