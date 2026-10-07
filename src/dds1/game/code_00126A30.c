@@ -158,6 +158,10 @@ typedef struct FldAreaWork {
     f32 overrideAngle; /* Queued angle copied to targetAngle by the C consumer. */
 } FldAreaWork;
 extern FldCamRow fldCameraFollowRows[];
+extern f32 D_00330630[];
+extern s32 D_003BAD24;
+extern s32 D_003BAD28;
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern f32 D_00330650[];
 extern f32 D_00330660[];
 extern f32 sdfSinPoly(f32);
@@ -2513,7 +2517,32 @@ void fldUpdateCameraProjectionEndpoints(void) {
     D_00330660[3] = 1.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012D3D8);
+void func_0012D3D8(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } nearPoint, farPoint;
+    s32 *world = fldGetPlayerSceneStateAddress();
+    f32 ratio = (f32)D_003BAD24 / (f32)D_003BAD28;
+    f32 remaining = 1.0f - ratio;
+    EffWorldNode *node;
+
+    nearPoint.f[0] = D_00330650[0] * ratio + D_00330630[0] * remaining;
+    nearPoint.f[1] = D_00330650[1] * ratio + D_00330630[1] * remaining;
+    nearPoint.f[2] = D_00330650[2] * ratio + D_00330630[2] * remaining;
+    farPoint.f[0] = D_00330660[0] * ratio + D_00330660[0] * remaining;
+    farPoint.f[1] = D_00330660[1] * ratio + D_00330660[1] * remaining;
+    farPoint.f[2] = D_00330660[2] * ratio + D_00330660[2] * remaining;
+    PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
+    PCP_COPY_VECTOR(fldLookAtFarPoint, &farPoint);
+    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, &farPoint.q);
+    node = (EffWorldNode *)(u32)*world;
+    node->ops->update(node);
+    D_003BAD24++;
+    if (D_003BAD28 < D_003BAD24) {
+        ((FldAreaWork *)fldAreaState)->mode = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012D528);
 
@@ -2829,7 +2858,7 @@ void fldUpdateCameraTarget(void) {
             vec.f[0] = st->targetX;
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
-            effObjSetInnerFirstVec(fldPlayerObject, vec.f);
+            effObjSetInnerFirstVec((EffWorldNode *)fldPlayerObject, &vec.q);
             st->positionPending = 0;
             effObjFetchInnerFirstVec(fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
