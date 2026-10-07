@@ -183,7 +183,7 @@ extern s32 func_001A8DD8(s32, s32 *);
 
 extern s32 btlCheckSpecialAbility(s32, s32);
 
-extern void func_001B83D8(s32, s32, s32);
+extern void func_001B83D8(BtlTask *, s8, s8);
 
 extern s32 btlGetRuntime(void);
 
@@ -2589,7 +2589,7 @@ extern SndPad D_00324510;
 
 extern u8 D_00359160[];
 
-extern void func_001B83D8(s32, s32, s32);
+extern void func_001B83D8(BtlTask *, s8, s8);
 
 extern void sndSetStationedSeVolume(u32);
 
@@ -4904,7 +4904,7 @@ s32 btlUpdateCommandUiTransition(void) {
             flow->counter = counter;
             if (btlAreLinkedSceneCountersAtThreshold() != 0) {
                 if (task != 0) {
-                    func_001B83D8(*(s32 *)(kwlnTaskGetUserValue(task) + 0x2C), 2, 0);
+                    func_001B83D8(((BattleSceneObject *)kwlnTaskGetUserValue(task))->owner, 2, 0);
                 }
                 btlTrackedTaskHandles->status.bytes.state = 0;
             }
@@ -5307,7 +5307,7 @@ void func_001BF4C0(BtlTask *task) {
                                func_001BF0F8, fldClearBattleSceneObject, (u32)object);
         func_00101A80(scene->taskParent, (KwlnTask *)handle);
         scene->sceneObjectTask = handle;
-        func_001B83D8((s32)task, 0, 0);
+        func_001B83D8(task, 0, 0);
         btlInitializeSelectionWork();
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();
