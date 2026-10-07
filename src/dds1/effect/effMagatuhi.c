@@ -165,7 +165,7 @@ extern s32 effMathGetSlotAt(void *slots, s32 index);
 
 
 void func_00189C80(EffMagatuhiValueWork *valueWork, s32 index) {
-    func_001891C0(valueWork, index);
+    effResetMagatuhiValueSlot(valueWork, index);
 }
 
 /* Ring state is one 0x18-byte slot; replay visits every third slot. */
