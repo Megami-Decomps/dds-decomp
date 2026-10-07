@@ -44,8 +44,8 @@ typedef struct EvtLoadedRecord {
 
 typedef char EvtLoadedRecord_size_must_be_0x0C[(sizeof(EvtLoadedRecord) == 0x0C) ? 1 : -1];
 
-/* The primary object returned by dds3GetWorldObject, not the World/WorldInfo
- * handle that owns it. Event lookup, lip-sync and viewer code share this chain:
+/* The primary object returned by dds3GetWorldObject is distinct from the active
+ * world's WorldInfo payload. Event lookup, lip-sync and viewer code share this chain:
  * object +0x18 -> table +0x08 -> 0x0C-byte slot entries, each with head +0x04.
  * DDS1 and DDS2 use the same observed layout. Node payloads depend on the slot. */
 enum {
