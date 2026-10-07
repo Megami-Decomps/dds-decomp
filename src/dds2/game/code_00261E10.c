@@ -69,7 +69,7 @@ extern u8 D_003CE604[];
 extern u16 D_003CE3F8[];
 extern void func_00261670();
 extern void func_00294930();
-extern void func_00298648();
+extern s32 func_00298648(MenuTerminalContext *);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
@@ -641,7 +641,7 @@ s32 evtPollQuantitySelection(s32 callbackContext) {
 s32 func_00263B98(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
-    func_00298648(stateAddress);
+    func_00298648((MenuTerminalContext *)stateAddress);
     return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -740,7 +740,7 @@ s32 evtDispatchSceneReadyFollowup(s32 callbackContext) {
     if (((MenuTerminalContext *)stateAddress)->sceneReady == 1) {
         func_00297970(stateAddress);
     } else {
-        func_00298648(stateAddress);
+        func_00298648((MenuTerminalContext *)stateAddress);
     }
     return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
