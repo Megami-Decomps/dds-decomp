@@ -5,6 +5,13 @@
 
 struct EffPrim;
 
+enum Dds3PathChannelFlags {
+    DDS3_PATH_POSITION_CHANNEL = 1,
+    DDS3_PATH_ROTATION_CHANNEL = 2,
+    DDS3_PATH_SCALAR_CHANNEL = 4,
+    DDS3_PATH_WORLD_TRANSFORM_CHANNEL = 0x10
+};
+
 /* A channel descriptor stores payload samples and their frame numbers. */
 typedef struct Dds3PathKeyframes {
     u32 count;
