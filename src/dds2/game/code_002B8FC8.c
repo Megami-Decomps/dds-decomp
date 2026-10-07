@@ -109,7 +109,6 @@ extern void evtStageTestQueueMotion();
 
 extern s32 D_00435E48;
 
-extern void mnuApplyPackedGroupValues();
 
 extern void func_002C0D18();
 
@@ -256,7 +255,7 @@ typedef struct MenuContext {
     s32 partyPanelActive;  /* 0xA928 */
     s32 partyPanelLast;    /* 0xA92C */
     u8 padA930[0x104];
-    s32 panelGroup;        /* 0xAA34 */
+    MenuPanelGroup *panelGroup; /* 0xAA34 */
     s32 panelRequest;      /* 0xAA38 */
     MenuSpriteState *panelEffects; /* 0xAA3C */
     u8 padAA40[8];
@@ -485,7 +484,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
-extern s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
 extern s32 mnuCreateProfilePanel(s32 source);
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
@@ -512,7 +510,7 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, s32 packedGroup, s32 group, s32 unused, s32 spriteFlags);
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags);
 
 void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState, u32 resource,
                                     u32 unused4, u32 spriteFlags);

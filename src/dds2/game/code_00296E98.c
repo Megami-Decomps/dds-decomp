@@ -497,7 +497,6 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
 }
 
 extern void mnuReleaseStaffMenuResources(s32);
-extern s32 mnuCreatePanelGroup(s32, s32, s32);
 extern void evtStageTestInit(s32);
 
 
@@ -508,7 +507,7 @@ extern void mnuForwardTableByte(s32);
  * forward the selected unit ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     u32 *group = work->staffSlots.baseResources;
-    s32 panel;
+    MenuPanelGroup *panel;
 
     mnuReleaseStaffMenuResources((s32)group);
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
@@ -527,7 +526,6 @@ extern void effDestroyResourceSlotSet(s32);
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
 extern void mnuShutdownContext();
-extern void mnuDestroyPanelGroup(s32);
 extern void mnuDestroyEffectResources(MenuEffectResources *);
 extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuReleaseTitleEffectSprites(StaffSlots *);

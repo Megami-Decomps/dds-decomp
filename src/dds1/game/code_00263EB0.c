@@ -42,8 +42,6 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
 extern s32 evtStageTestUpdateCamera(void);
 extern s32 evtGetMessageWindowControlState(void);
 extern s32 mnuMapPadMaskToFlags(s32);
-extern s32 mnuGetPanelGroupSelection(s32);
-extern void mnuSetPanelGroupSelection(s32, s32);
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0036D440[];
@@ -161,7 +159,6 @@ u32 func_002642C8(void) {
 
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void mnuClearPanelGroupSelection(s32);
 extern void mnuBindPresentMenuEntry(void *, s32 *);
 extern char D_0036D45C[];
 

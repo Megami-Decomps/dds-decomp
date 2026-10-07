@@ -136,7 +136,7 @@ typedef struct CampMenuContext {
     s32 activePanel;          /* 0x7EC: active party panel */
     s32 finalPanelSlot;       /* 0x7F0: last displayed slot */
     u8 pad7F4[0x104];
-    s32 sceneGroup;           /* 0x8F8 */
+    MenuPanelGroup *sceneGroup; /* 0x8F8 */
     MenuSpriteState *sprite;  /* 0x8FC */
     MenuSimpleSpriteState *effect; /* 0x900 */
     u8 pad904[8];
@@ -258,7 +258,6 @@ extern s32 datGameState;
 extern s32 D_003BAA7C;
 extern u32 itfDrawUnderscoreTextSegment();
 extern s32 D_003BAA70;
-extern void func_00283110();
 extern void func_002833B0();
 
 extern void mnuDestroyWindowContainer(u32);
@@ -597,7 +596,6 @@ extern void func_00276720();
 extern void btlStopStage();
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
-extern void mnuDestroyPanelGroup();
 extern void mnuFreeProfilePanelWork();
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 extern void mnuStoreScrollPanelSelectionAndGridPosition();
@@ -785,7 +783,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
 }
 
-void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 obj, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 obj, s32 spriteFlags) {
     func_00283110(0xeb0, 0x518, 0, entry, packedGroup, spriteFlags);
     func_002833B0(0, 0, 0, entry, group, spriteFlags);
     itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);

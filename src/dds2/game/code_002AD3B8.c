@@ -31,10 +31,9 @@ extern void func_002ACA98(s32);
 extern void func_002B2C88(s32, s32, s32, s32);
 extern void mnuClearPageSelectionHandles(s32);
 extern void mnuClearEntries(s32);
-extern void mnuDestroyPanelGroup(s32);
 extern void func_002C1B68(u32 *, u32);
 extern void mnuReleaseStaffMenuTextureHandles(s32);
-extern void func_002C2AA8(s32, s32);
+extern void func_002C2AA8(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
 extern s32 D_003E7400[];
@@ -84,17 +83,9 @@ extern void func_002BB9C8(MenuSprites *, u32);
 extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetWindowResource(s32, u32 *, s32, s32, s32, s32, s32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, u32 *, s32, s32);
-extern void *mnuCreatePanelGroup(s32, s32, s32);
 
 typedef struct MenuListNode MenuListNode;
 typedef struct MenuList MenuList;
-
-typedef struct MenuSceneConfig {
-    u8 pad00[0x10];
-    s32 entries[5];
-} MenuSceneConfig;
-
-
 
 /* Prepare the primary staff object, then enter the image state. */
 s32 mnuStaffImageEnterA(s32 task) {
@@ -424,7 +415,7 @@ s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
-        mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
+        mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
@@ -571,7 +562,7 @@ s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
-        mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
+        mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
@@ -722,7 +713,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
-        mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
+        mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
@@ -921,10 +912,10 @@ s32 func_002AFE18(s32 task) {
     return 0;
 }
 
-void mnuSetPanelItemsFromRow(MenuSceneConfig *config, s32 rowIndex) {
+void mnuSetPanelItemsFromRow(MenuPanelGroup *config, s32 rowIndex) {
     char *activeSlots = D_003E7207 + rowIndex * 0x1C;
     char *entryFlags;
-    s32 *configEntry;
+    struct MenuPanelItem **configEntry;
     u32 lastActiveSlot = 0;
     s32 i;
 
@@ -940,7 +931,7 @@ void mnuSetPanelItemsFromRow(MenuSceneConfig *config, s32 rowIndex) {
     }
 }
 
-void mnuClearStaffSceneConfigEntries(MenuSceneConfig *config) {
+void mnuClearStaffSceneConfigEntries(MenuPanelGroup *config) {
     s32 i;
     for (i = 0; i < 5; i++) {
         func_002C2AA8(config->entries[i], 0);
