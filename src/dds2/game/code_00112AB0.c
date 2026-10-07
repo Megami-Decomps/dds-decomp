@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_object.h"
+#include "eff_dependency.h"
 #include "eff_event.h"
 
 extern ObjBase *dds3GetLightObjectResource(EffWorldNode *object);
@@ -19,7 +20,7 @@ ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object) {
     case 0: handle = dds3GetCameraHandle(object); break;
     case 1: handle = dds3GetEffectObjectModelHolder(object); break;
     case 2: handle = (ObjBase *)effObjGetDataHandle(object); break;
-    case 3: handle = (ObjBase *)effObjGetObjectHandle(object); break;
+    case 3: handle = effObjGetObjectHandle(object); break;
     case 4: handle = dds3GetResourceOwnerHandle(object); break;
     case 5: handle = dds3GetLightObjectResource(object); break;
     }

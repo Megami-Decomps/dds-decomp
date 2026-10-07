@@ -30,4 +30,6 @@ typedef char EffectDependencyState_node_at_0x2C[((u32)&((EffectDependencyState *
 
 void effObjReleaseStateDependencies(EffectDependencyState *state);
 
+ObjBase *effObjGetObjectHandle(EffWorldNode *object);
+
 #endif
