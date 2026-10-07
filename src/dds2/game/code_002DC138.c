@@ -21,7 +21,7 @@ extern u32 effModelUpdateControlFlags;
 
 extern void *fileResolvePrimaryBuffer();
 
-extern s32 fileResolveSecondaryBuffer(void *);
+extern void *fileResolveSecondaryBuffer(FileJobPayload *);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
@@ -152,15 +152,15 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 }
 
 
-EffModelOwner *effCreateModelOwner(u8 *source) {
+EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
     owner->ownedBuffer = sdfAllocAndClearQuadwords(0xE0);
     if (source != NULL) {
-        s32 data;
+        void *data;
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
-            owner->model = func_002DC1D0((void *)data, ((FileJob *)source)->slots[1].size);
+            owner->model = func_002DC1D0(data, source->secondary.size);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU(owner->model);
