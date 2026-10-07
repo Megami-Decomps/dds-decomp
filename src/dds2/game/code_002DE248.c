@@ -10728,7 +10728,7 @@ void effRequestMappedResource(s32 category, s32 index, u32 *outMappedResource) {
 }
 
 /* Create an owner list with sixteen initially empty record buckets. */
-void *effCreateOwnerRecordList(u32 ownerAddress) {
+EffectOwnerRecord *effCreateOwnerRecordList(u32 ownerAddress) {
     EffectOwnerRecord *list = (EffectOwnerRecord *)sdfAllocSizeClassBlock(EFF_OWNER_LIST_BYTES);
     memset(list, 0, EFF_OWNER_LIST_BYTES);
     list->owner = (void *)ownerAddress;
