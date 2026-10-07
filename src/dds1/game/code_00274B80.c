@@ -129,6 +129,7 @@ typedef struct PartyMenuData {
 } PartyMenuData; /* 0x1C08: native party-selection allocation */
 
 /* Byte-offset copies keep their field displacement tied to the owner layout. */
+#define PARTY_CURRENT_OFFSET ((s32)&((PartyMenuData *)0)->current)
 #define PARTY_BACKUP_OFFSET ((s32)&((PartyMenuData *)0)->backup)
 
 /* Staff/skill menu context: resource handles and current panel work. */
@@ -375,7 +376,48 @@ void mnuCopyPartyEntries(context)
     menuWork->selection = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00275030);
+extern void func_00285960(DatPartyRecord *, s32, u32, PartyPanel *);
+extern void mnuUpdateHandleStates(MenuPageWindow *);
+extern void func_00280048(s32);
+
+/* Transfer one current party record and refresh the selected panel slot. */
+void func_00275030(s32 partyIndex, s32 mode, s32 skipUpdate,
+                   CampMenuContext *context) {
+    PartyMenuData *menu = (PartyMenuData *)context->menu;
+    s32 previousPanelCount = context->partyPanel.unk0;
+    s32 previousPanelOther = context->partyPanel.unk4;
+    s32 panelIndex;
+
+    menu->backup[menu->selection] = *(PartyEntryCopy *)(
+        partyIndex * (s32)sizeof(PartyEntryCopy) + (s32)menu + PARTY_CURRENT_OFFSET);
+    memset(&menu->current[partyIndex], 0, sizeof(menu->current[partyIndex]));
+
+    if (mode == 2) {
+        menu->backup[menu->selection].flags |= 2;
+        context->partyWindow.slots[menu->selection].flags &= ~0x80;
+        func_00285960((DatPartyRecord *)&menu->backup[menu->selection], 0,
+                      menu->selection, &context->partyPanel);
+    } else {
+        menu->backup[menu->selection].flags &= ~2;
+        func_00285960((DatPartyRecord *)&menu->backup[menu->selection], 0,
+                      menu->selection, &context->partyPanel);
+    }
+
+    context->partyPanel.slots[menu->selection].index = partyIndex;
+    context->partyPanel.unk0 = previousPanelCount;
+    context->partyPanel.unk4 = previousPanelOther;
+
+    if (skipUpdate == 0) {
+        mnuUpdateHandleStates(&context->partyWindow);
+    }
+    for (panelIndex = context->partyPanel.unk0; panelIndex < 5; panelIndex++) {
+        context->partyWindow.slots[panelIndex].flags |= 0x80;
+    }
+    func_00280048((s32)&context->partyWindow);
+    context->partyPanel.unk0++;
+    context->partyPanel.unk4--;
+    menu->selection++;
+}
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources.
  * The second loop counts down while the backup byte offset advances forward. */
@@ -390,7 +432,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
 
     for (entryCounter = 0; entryCounter < MNU_STAFF_PARTY_SLOT_COUNT; entryCounter++) {
         if (entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
-            func_00275030(entryCounter, -3, 1, context);
+            func_00275030(entryCounter, -3, 1, (CampMenuContext *)context);
         }
         entryCursor++;
     }
@@ -402,7 +444,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
     panelWork = (s32)&((CampMenuContext *)context)->partyWindow;
     mnuReleasePartyPanelTextures(panelWork);
     mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
-    mnuUpdateHandleStates(panelWork);
+    mnuUpdateHandleStates((MenuPageWindow *)panelWork);
     func_00280048(panelWork);
 }
 
@@ -433,7 +475,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
     ((CampMenuContext *)context)->partyPanel.unk0 = 1;
     ((CampMenuContext *)context)->partyPanel.unk4 = mnuCountActiveSlots() - 1;
-    mnuUpdateHandleStates((s32)&((CampMenuContext *)context)->partyWindow);
+    mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
         ((CampMenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x80;
     }
@@ -446,7 +488,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 void mnuRefreshPartyPanelSlots(s32 context) {
     mnuReleasePartyPanelTextures((s32)&((CampMenuContext *)context)->partyWindow);
     mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
-    mnuUpdateHandleStates((s32)&((CampMenuContext *)context)->partyWindow);
+    mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
@@ -494,7 +536,7 @@ s32 func_00275920(s32 callback) {
             case 0:
                 if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
                     window->list->cursor->flags48 |= 1;
-                    func_00275030(entryIndex, 2, 0, (s32)context);
+                    func_00275030(entryIndex, 2, 0, context);
                 } else {
                     inputFlags = 0x8000;
                 }

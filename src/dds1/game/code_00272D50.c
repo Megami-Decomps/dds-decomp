@@ -4,7 +4,7 @@
 
 extern s32 mnuUseStaffItem(s32, s32);
 
-extern s32 kwlnTaskGetUserValue();
+extern u32 kwlnTaskGetUserValue();
 
 extern u8 *datGameState;
 
@@ -56,7 +56,11 @@ typedef struct {
     struct MenuList *selectionList; /* 0x7D8 */
     u8 pad7DC[0x130];
     StaffWindowResources *resources; /* 0x90C */
+    s32 displayMode; /* 0x910 */
+    MenuGradientFade gradient; /* 0x914 */
+    u8 pad920[4];
 } StaffDisplayContext;
+typedef char StaffDisplayContext_size[(sizeof(StaffDisplayContext) == 0x924) ? 1 : -1];
 
 extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
@@ -295,6 +299,8 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
     return 1;
 }
 
+extern void func_00283BF0(u32 *, u32);
+
 /* On successful item use, publish the remaining count and record the selected item. */
 void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
     StaffWindowResources *resources;
@@ -307,10 +313,75 @@ void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
                   ((SaveItemCounts *)datGameState)->counts[selection];
         resources->selection = selection;
     }
-    func_00283BF0(context + 0x914, 1);
+    func_00283BF0(&((StaffDisplayContext *)context)->gradient.active, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_002738A0);
+extern s32 evtGetMessageWindowControlState(void);
+extern s32 mnuGetAbilityByteCategory(u16);
+extern char D_0037CA1C[];
+extern char D_0037C9AC[];
+
+/* Use an eligible staff item and update its selection window while messages are idle. */
+s32 func_002738A0(s32 task) {
+    StaffDisplayContext *context;
+    StaffWindowResources *resources;
+    MenuWindowContainer *window;
+    struct MenuList *list;
+    struct MenuListNode *node;
+    s32 *popup;
+    s32 item;
+    s32 result;
+    u32 input;
+
+    context = (StaffDisplayContext *)kwlnTaskGetUserValue(task);
+    popup = &context->popupState;
+    resources = context->resources;
+    input = mnuMapPadMaskToFlags(0x33);
+    result = menuRunPanel(context, 0, (void *)task);
+    if (result != 0) {
+        return result;
+    }
+    if (evtGetMessageWindowControlState() == 0) {
+        func_00283BF0(&context->gradient.active, 0);
+        if (input & 1) {
+            list = resources->windows[0]->list;
+            if (list->count != 0) {
+                node = list->cursor;
+                if (node->flags48 == 0) {
+                    item = node->sortKeySecondary;
+                    if (mnuGetAbilityByteCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
+                        mnuRefreshStaffItemSelection(item, (s32)context);
+                    } else {
+                        mnuSetPopupEntry((s32)popup, (s32)D_0037CA1C);
+                    }
+                } else {
+                    input = 0x8000;
+                }
+            } else {
+                input = 0;
+            }
+        }
+        if (input & 2) {
+            mnuSetPopupEntry((s32)popup, (s32)D_0037C9AC);
+        }
+        window = resources->windows[0];
+        if (window != NULL) {
+            if ((input & 0x300000) == 0) {
+                func_0027C788(window);
+            }
+            if (input & 0x10) {
+                mnuRetreatWindowListSelection(window);
+            }
+            if (input & 0x20) {
+                mnuAdvanceWindowListSelection(window);
+            }
+            mnuClearWindowPanelTransitionFlag(window);
+            mnuPlayInputSound(0, input, &window->list->stateFlags);
+        }
+    }
+    return 0;
+}
+
 
 /* Refresh the description panel from the selected node in one of the staff-menu windows. */
 void func_00273A30(StaffDisplayContext *context, s32 windowIndex) {
