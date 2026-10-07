@@ -1118,7 +1118,7 @@ u32 btlScriptSetActorUnitParameter(void) {
 
     context = scrGetCurrentCommandWork();
     parameterValue = scrReadIntParameter(0);
-    ((BtlCmdCtx *)context)->unit->unk122 = parameterValue;
+    ((BtlCmdCtx *)context)->unit->partyRecord.affinityTableIndex = parameterValue;
     return 1;
 }
 
@@ -1827,7 +1827,7 @@ u32 btlCmdCheckHpPercent(void) {
     }
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & sideMask) && !(unit->flags & 0x20) && unit->identity == lookupId) {
-            void *unitStats = &unit->statBits;
+            DatPartyRecord *unitStats = &unit->partyRecord;
             s32 currentHp = btlReadCurrentUnitHp(unitStats);
             s32 maximumHp = btlComputeSkillAdjustedMaxHp(unitStats);
             if (!((u32)(maximumHp * hpPercentThreshold) < (u32)(currentHp * BTL_HP_PERCENT_SCALE))) {
@@ -2196,7 +2196,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     handle = ((ScrData *)kwlnTaskGetUserValue((KwlnTask *)slot))->resourceIndex;
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
-        func_0019C590(handle, 0, unit->mode, (unit->statBits & 0x20) ? 1 : 2);
+        func_0019C590(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
     func_00101A80(state->scriptOwner, slot);
     state->boundTask = slot;
