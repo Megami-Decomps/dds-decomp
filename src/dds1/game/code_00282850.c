@@ -678,7 +678,61 @@ void mnuCyclePairedEffectSetting(MenuEffectBoundsOwner *pair) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283EE0);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
+extern void effInitializeSlotWork(s32, s32);
+extern u32 effConfigureIndexedSlotResource(s32, s32, s32, s32, u32);
+
+/* Draw the paired effect at its current rate and initialize its alternate on demand. */
+void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectBoundsOwner *owner,
+                   s32 surface) {
+    s32 rate = mnuRateByThreshold(owner);
+    u32 scale;
+
+    switch (rate) {
+    case 1:
+        scale = 0xB3;
+        break;
+    default:
+        scale = 0x100;
+        break;
+    case 2:
+        scale = 0x33;
+        break;
+    }
+    scale = (scale * opacity) >> 8;
+
+    switch (owner->updateState) {
+    case 0:
+        func_002BF4E0(x, y - 8, z, scale, 0, (s32)owner->leftGrid, 0, surface);
+        itfGridLookupValueOrDefault(owner->leftGrid, 0);
+        if (owner->leftGrid->workEntries[0].states[0].source == NULL) {
+            effInitializeSlotWork((s32)owner->rightGrid, 0);
+            effConfigureIndexedSlotResource((s32)owner->rightGrid, 0,
+                                            (s32)owner->effects[1], 0, 0);
+            owner->updateState = 1;
+        }
+        break;
+    case 1: {
+        s32 xOffset;
+        if (owner->initialValue == 0) {
+            xOffset = -0xC0;
+        } else {
+            xOffset = -0x90;
+        }
+
+        func_002BF4E0(x + owner->resourceSets[1]->workEntries[0].geometry.bounds[2] + xOffset,
+                     y - 0x40, z, scale, 0, (s32)owner->rightGrid, 0, surface);
+        itfGridLookupValueOrDefault(owner->rightGrid, 0);
+        if (owner->rightGrid->workEntries[0].states[0].source == NULL) {
+            effInitializeSlotWork((s32)owner->leftGrid, 0);
+            effConfigureIndexedSlotResource((s32)owner->leftGrid, 0,
+                                            (s32)owner->effects[0], 0, 0);
+            owner->updateState = 0;
+        }
+        break;
+    }
+    }
+}
 
 void mnuCreatePairedEffects(MenuEffectPair *pair) {
     u32 effectHandle;
