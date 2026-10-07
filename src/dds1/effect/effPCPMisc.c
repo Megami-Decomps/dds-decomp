@@ -226,7 +226,7 @@ extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern u32 effCloneResourceTemplate(void *params);
 extern void *effCloneBlurTemplate(void *params);
-extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
+extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
 extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
@@ -3039,22 +3039,23 @@ void effPcpCopyHalfTurnMatrix(void *dst, void *src) {
 typedef struct {
     f32 origin[4];
     f32 offset[3][2];
-    u32 groupStartFrame[3];
-    u32 handleDelay[7];
+    s32 groupStartFrame[3];
+    s32 handleDelay[7];
 } EffPCPTripleParams;
 
 typedef struct {
     EffPCPTripleParams head;
-    u32 frame;
+    s32 frame;
     u32 color;
-    u32 handleA[7];
-    u32 handleB[7];
-    u32 handleC[7];
+    u32 handles[21];
 } EffPCPTripleWork;
+
+typedef char EffPCPTripleParamsSizeCheck[sizeof(EffPCPTripleParams) == 0x50 ? 1 : -1];
+typedef char EffPCPTripleWorkSizeCheck[sizeof(EffPCPTripleWork) == 0xAC ? 1 : -1];
 
 extern u32 effCloneSourceWithTypeHandler(u32 handle);
 
-void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
+void *effPcpTripleHandleCreate(void *block0, void **blocks) {
     EffPCPTripleWork *work;
     u32 *handle;
     u32 i;
@@ -3063,9 +3064,9 @@ void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
     work->head = *(EffPCPTripleParams *)block0;
     work->frame = 0;
     work->color = 0x80808080;
-    handle = work->handleA;
+    handle = work->handles;
     for (i = 0; i < 7; i++) {
-        handle[0] = effCreateNodeFromDescriptor(blocks[i]);
+        handle[0] = effCreateNodeFromDescriptor((u32)blocks[i]);
         handle[7] = effCloneSourceWithTypeHandler(handle[0]);
         handle[14] = effCloneSourceWithTypeHandler(handle[0]);
         handle++;
@@ -3100,8 +3101,8 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     work->head = src->head;
     work->frame = 0;
     work->color = 0x80808080;
-    from = src->handleC;
-    to = work->handleC;
+    from = (src->handles + 14);
+    to = (work->handles + 14);
     for (i = 0; i < 7; i++) {
         to[-14] = effCloneSourceWithTypeHandler(from[-14]);
         to[-7] = effCloneSourceWithTypeHandler(from[-7]);
@@ -3116,7 +3117,7 @@ void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
     u32 *handle;
     u32 i;
 
-    handle = work->handleA;
+    handle = work->handles;
     for (i = 0; i < 7; i++) {
         effDestroyNode(handle[14]);
         effDestroyNode(handle[7]);
@@ -3125,6 +3126,9 @@ void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
     }
     sdfReleaseChipBlock(work);
 }
+
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern u8 sdfViewUpVector[];
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017D2F8);
 
@@ -4467,8 +4471,6 @@ typedef struct EffPCPBeamLargeWork {
     EffPCPBeamNode *node;
 } EffPCPBeamLargeWork;
 
-extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
 /* Fill the node's point buffer with four concentric rings (radius, +stepA, +stepB, +stepC) of unit directions, rotated by the VU matrix. */
