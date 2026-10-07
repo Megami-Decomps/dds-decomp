@@ -33,6 +33,7 @@
 #define CAMP_TRANSFORM_LAST_START 8
 
 #define CAMP_REGISTERED_ID_LIMIT 10
+#define CAMP_TIMELINE_SCRIPT_REGISTER_BASE 200
 #define CAMP_STATUS_BATCH_COUNT 2
 #define CAMP_STATUS_INITIAL_PARAMETER 15
 #define CAMP_SLOT_LAST_ROW_INDEX 4
@@ -790,7 +791,42 @@ u32 mnuCampGetSecondaryOption(CampScene *scene) {
     return (scene->options & CAMP_SECONDARY_OPTION_MASK) >> CAMP_SECONDARY_OPTION_SHIFT;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243F48);
+/* Clear script registers 200..209 whose type-4 key is not active at this frame. */
+void func_00243F48(CampScene *scene) {
+    CampKeyTrack *track = scene->entries;
+    s32 slotIndex;
+
+    while (track != NULL) {
+        if (track->type == 4) {
+            break;
+        }
+        track = track->next;
+    }
+    if (track != NULL) {
+        for (slotIndex = 0; slotIndex < CAMP_REGISTERED_ID_LIMIT; slotIndex++) {
+            CampKeyNode *key = track->first;
+            s32 found = 0;
+            while (key != NULL) {
+                s32 low;
+                s32 high;
+                mnuUnpackNibbleFields(key, &low, &high);
+                if (key->frame > scene->clampedOffset) {
+                    break;
+                }
+                if (high - 1 == slotIndex) {
+                    found = 1;
+                    break;
+                }
+                key = key->next;
+            }
+            if (!found) {
+                if (datGameState->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] != -1) {
+                    datGameState->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] = -1;
+                }
+            }
+        }
+    }
+}
 
 /* Save the first and last four-component vectors; leave the middle unsaved. */
 void mnuShopSavePrimaryTransform(u8 *scene) {

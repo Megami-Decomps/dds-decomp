@@ -6,25 +6,20 @@ typedef struct WorldInnerState {
     ObjBase *unk80;
     u8 pad84[4];
     u32 state88;
+    u8 pad8C[4]; /* Complete native 0x90-byte allocation at 00112958. */
 } WorldInnerState;
 
-typedef struct WorldInnerOwner {
-    u8 pad00[0xF];
-    u8 kind; /* 0x0F selects which handle the object owns */
-    u8 pad10[0x8];
-    WorldInnerState *inner;
-} WorldInnerOwner;
 
-extern s32 sdfAllocSizeClassBlock(u32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 /* Each object kind keeps its handle in a different structure. */
-ObjBase *dds3GetObjectOwnedHandle(WorldInnerOwner *object) {
+ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object) {
     ObjBase *handle;
 
     handle = 0;
-    switch (object->kind - 4) {
+    switch ((object->kindTag >> 24) - 4) {
     case 0: handle = (ObjBase *)dds3GetCameraHandle(object); break;
-    case 1: handle = func_00113008((EffWorldNode *)object); break;
+    case 1: handle = func_00113008(object); break;
     case 2: handle = (ObjBase *)effObjGetDataHandle(object); break;
     case 3: handle = (ObjBase *)effObjGetObjectHandle(object); break;
     case 4: handle = (ObjBase *)dds3GetResourceOwnerHandle(object); break;
@@ -36,7 +31,7 @@ ObjBase *dds3GetObjectOwnedHandle(WorldInnerOwner *object) {
 
 
 /* Store the opaque auxiliary value in the shared object base. */
-void dds3SetOwnedWorldInnerValue(WorldInnerOwner *object, u32 value) {
+void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value) {
     ObjBase *base;
 
     base = dds3GetObjectOwnedHandle(object);
@@ -44,13 +39,13 @@ void dds3SetOwnedWorldInnerValue(WorldInnerOwner *object, u32 value) {
 }
 
 /* Allocate the inner state and associate it with its world-object handle. */
-u32 dds3CreateWorldInnerState(WorldInnerOwner *object) {
+u32 dds3CreateWorldInnerState(EffWorldNode *object) {
     WorldInnerState *inner;
     ObjBase *objectBase;
 
     effObjInnerCreate();
-    inner = (WorldInnerState *)sdfAllocSizeClassBlock(0x90);
-    object->inner = inner;
+    inner = sdfAllocSizeClassBlock(0x90);
+    object->data = inner;
     objectBase = dds3CreateSlotResourceState(object);
     inner->unk80 = objectBase;
     dds3SetObjectFlags(object, 0x62);

@@ -148,7 +148,33 @@ void evtComputePlanarTargetDirectionVu(EvtUnit *unit) {
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
 }
 
-INCLUDE_ASM(const s32, "game/code_002203B0", func_00220678);
+/* vu0 routine: test target range or the selected path endpoint. */
+s32 func_00220678(EvtUnit *unit) {
+    f32 value;
+
+    switch (unit->motionSubmode) {
+    case 0:
+    case 1:
+    case 2:
+        evtComputeHorizontalDisplacementVu(unit->targetVector, unit->effObj->data->position);
+        VU0_LENGTH_VF10(value);
+        if (value <= 20.0f) {
+            return 1;
+        }
+        break;
+    case 3:
+        value = evtGetValueScaleFactor((void *)unit->pathHandle);
+        if (unit->flags & 4) {
+            if (value == 0.0f) {
+                return 1;
+            }
+        } else if (value == 1.0f) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 extern void evtScaleValueByMultiplier(void *value, f32 multiplier);
 extern void dds3InterpolatePathVectorVU(void *value);

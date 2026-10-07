@@ -74,7 +74,7 @@ typedef struct BtlState {
     s16 eventActive; /* 0x1CC */
     u8 pad1CE[2];
     s32 eventAction; /* 0x1D0 */
-    s32 eventResult; /* 0x1D4 */
+    void *eventResult; /* 0x1D4 */
     void *eventRequest; /* 0x1D8 */
     void *eventData; /* 0x1DC */
     BtlUnit *eventUnit; /* 0x1E0 */
@@ -147,9 +147,15 @@ typedef struct BtlState {
     u8 pad598[0x20];
     s32 unk_5B8;
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
-    u8 pad5C0[0x10];
+    u8 pad5C0[4];
+    BtlUnit *(*findReusableUnit)(u32, u32); /* 0x5C4 */
+    u8 pad5C8[8];
     void (*cleanup)(void); /* 0x5D0 */
-    u8 pad5D4[0x1C];
+    u8 pad5D4[4];
+    void (*prepareModelUnit)(BtlUnit *); /* 0x5D8 */
+    u8 pad5DC[4];
+    void (*finishModelUnit)(BtlUnit *); /* 0x5E0 */
+    u8 pad5E4[0xC];
     void (*updateCallback)(void); /* 0x5F0 */
     u8 pad5F4[0x38];
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
@@ -244,7 +250,7 @@ typedef struct BtlState {
     s16 eventActive; /* 0x1F0 */
     u8 pad1F2[2];
     s32 eventAction; /* 0x1F4 */
-    s32 eventResult; /* 0x1F8 */
+    void *eventResult; /* 0x1F8 */
     void *eventRequest; /* 0x1FC */
     void *eventData; /* 0x200 */
     BtlUnit *eventUnit; /* 0x204 */

@@ -4256,7 +4256,45 @@ void btlDispatchSpecialEnemyActionWhenPhaseAllows(u8 *unit, s32 action) {
     btlRestoreUnitMinimumValueAndClearStatus(unit, action);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020A560);
+s32 func_0020A560(void) {
+    u32 species[6];
+    u32 missing[6];
+    u32 count = 0;
+    u32 i;
+    u32 selected;
+    s32 flags;
+    BtlUnit *unit;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+
+    species[0] = 0x13D;
+    species[1] = 0x13E;
+    species[2] = 0x13F;
+    species[3] = 0x140;
+    species[4] = 0x141;
+    species[5] = 0x142;
+    for (i = 0; i < 6; i++) {
+        for (unit = battle->units; unit != NULL; unit = unit->next) {
+            flags = unit->flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    if (unit->partyRecord.unitId == species[i]) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (unit == NULL) {
+            btlBossDebugPrintf("btl:HARI2 %d:%X\n", count, species[i]);
+            missing[count++] = species[i];
+        }
+    }
+    if (count == 0) {
+        return -1;
+    }
+    selected = effMiscRand(&effSharedRandomState) % count;
+    btlBossDebugPrintf("btl:HARI2 summon=%X\n", missing[selected]);
+    return missing[selected];
+}
 
 s32 btlMapCommandToSkill(u32 command) {
     switch (command) {
@@ -4593,7 +4631,43 @@ s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B640);
+s32 func_0020B640(BtlLinkedCommand *command) {
+    BtlTask *task = command->task;
+    u32 flags = task->unit->flags;
+    BtlUnit *target;
+    if (flags & 0x200) {
+        if ((flags & 0x1000) == 0) {
+            return 0;
+        }
+        if (btlGetIndexListCount(task->indexWork.indices) == 1) {
+            target = (BtlUnit *)btlGetIndexListEntry(task->indexWork.indices, 0);
+            if ((target->flags & 0x400) == 0) {
+                return 0;
+            }
+            switch (target->partyRecord.unitId) {
+            case 0x11B:
+                func_002045E8(command, &command->camera, 0.5f, -0.1f);
+                return 1;
+            case 0x13D:
+            case 0x13E:
+                if (command->state == 0) {
+                    func_002045E8(command, &command->camera, 1.25f, 1.0f);
+                    btlFlagAllUnitDefeatCandidatesTask();
+                }
+                return 1;
+            case 0x13F:
+            case 0x140:
+                func_002045E8(command, &command->camera, 0.5f, 0.0f);
+                return 1;
+            case 0x141:
+            case 0x142:
+                func_002045E8(command, &command->camera, -0.5f, 0.0f);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 s32 btlHandleTargetedDefeatAction(u8 *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;

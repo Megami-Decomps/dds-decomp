@@ -129,19 +129,20 @@ typedef struct FxTask {
 
 typedef struct SoundLink {
     u32 owner;
-    struct BtlEffectHandle *effectHandle;
+    struct SoundVoice *effectHandle;
     u32 *effect;
     u16 flags;
 } SoundLink;
 
 typedef struct SoundResourceLink {
     BtlUnit *owner;
-    struct BtlEffectHandle *effectHandle;
+    struct SoundVoice *effectHandle;
     struct SoundResourceNode *effect;
     u32 flags;
     u8 refreshRequested;
     u8 pad11[3];
 } SoundResourceLink;
+
 
 typedef struct SoundEntry {
     u32 unk0;
@@ -275,16 +276,6 @@ extern s64 func_00201718(void);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
-typedef struct SoundResourceNode {
-    u32 flags;
-    u32 unk_04;
-    u32 unk_08;
-    s32 fadeCountdown;
-    u32 resourceHandle; /* Owned clone; destruction releases its voices. */
-    u32 sourceHandle;   /* Indexed nodes borrow this archive resource. */
-    struct SoundResourceNode *previous;
-    struct SoundResourceNode *next;
-} SoundResourceNode;
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
@@ -922,7 +913,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
 
 extern u32 sdfAllocGeneralBlock(s32);
 
-extern u32 sdfResourceRetainAddress(u32);
+extern void *sdfResourceRetainAddress(u32);
 
 /* Allocate the index list and retained groups, then initialize their headers. */
 void btlInitBattleIndexWork(BattleIndexWork *work) {
@@ -3766,71 +3757,66 @@ BtlRuntimeTask *func_001E6428(BtlUnit *actor, s32 option) {
 }
 
 
-typedef struct BtlEffectHandle {
-    u8 pad0[8];
-    u32 color;
-    u16 flags;
-} BtlEffectHandle;
 
 typedef struct UnitEffectTaskArgs {
     BtlUnit *unit;
-    s32 effectId;
-    BtlEffectHandle *effect;
+    SoundMixer *mixer;
+    SoundVoice *effect;
     s32 duration;
     s32 counter;
 } UnitEffectTaskArgs;
 
-extern s32 sndMixerClone(s32);
-extern BtlEffectHandle *func_00168548(s32, s32, BtlUnit *, s32);
-extern void effBattleUpdateSelectedValue(BtlEffectHandle *, s32);
-extern void func_00168978(BtlEffectHandle *);
+extern SoundVoice *func_00168548(SoundMixer *, s32, BtlUnit *, s32);
+extern void effBattleUpdateSelectedValue(SoundVoice *, s32);
+extern void func_00168978(SoundVoice *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
 s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
     BtlUnit *unit = args->unit;
-    BtlState *work;
     if (!(unit->flags & 2)) {
         return 1;
     }
-    work = (BtlState *)btlGetRuntime();
-    if (args->effect == 0) {
-        s32 handle = work->resources[BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT]->sourceHandle;
-        unit->flags |= 0x80;
-        args->effectId = sndMixerClone(handle);
-        args->effect = func_00168548(args->effectId, 2, unit, 0);
-        args->duration = 0xE;
-        args->effect->flags &= 0xFFF9;
-        effBattleUpdateSelectedValue(args->effect, 0xE);
-        unit->flags &= ~8;
-        if (unit->flags & 2) {
-            unit->ext->owner->flags |= 1;
+    {
+        BtlState *battle = (BtlState *)btlGetRuntime();
+        if (args->effect == 0) {
+            void *handle = battle->resources[BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT]->sourceHandle;
+            unit->flags |= 0x80;
+            args->mixer = sndMixerClone(handle);
+            args->effect = func_00168548(args->mixer, 2, unit, 0);
+            args->duration = 0xE;
+            args->effect->flags &= 0xFFF9;
+            effBattleUpdateSelectedValue(args->effect, 0xE);
+            unit->flags &= ~8;
+            if (unit->flags & 2) {
+                unit->ext->owner->flags |= 1;
+            }
         }
+        args->counter = args->counter + 1;
+        if (args->counter >= args->duration) {
+            unit->flags = (unit->flags & ~0x80) | 0x40;
+            return 1;
+        }
+        func_00168978(args->effect);
+        return 0;
     }
-    args->counter = args->counter + 1;
-    if (args->counter >= args->duration) {
-        unit->flags = (unit->flags & ~0x80) | 0x40;
-        return 1;
-    }
-    func_00168978(args->effect);
-    return 0;
 }
 
-void btlFinishSelectedUnitEffect(u32 *arguments) {
-    u32 value = arguments[2];
-    if (value != 0) {
-        effReleaseBattleVoiceOwner(value);
+void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
+    SoundVoice *voice = arguments->effect;
+    if (voice != 0) {
+        effReleaseBattleVoiceOwner(voice);
     }
-    if (arguments[1] != 0) {
-        sndReleaseAllVoices(arguments[1]);
+    if (arguments->mixer != 0) {
+        sndReleaseAllVoices(arguments->mixer);
     }
-    btlClearUnitDefeatCandidate(arguments[0]);
-    ((BtlUnit *)arguments[0])->flags |= 0x40;
+    btlClearUnitDefeatCandidate(arguments->unit);
+    arguments->unit->flags |= 0x40;
 }
 
 BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    SoundTaskArgs *args;
+    UnitEffectTaskArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0x16;
@@ -3840,10 +3826,10 @@ BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     task->onFinish = btlFinishSelectedUnitEffect;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->unk_08 = 0;
-    args->unk_10 = 0;
-    args->unk_0C = 0;
+    args->unit = unit;
+    args->effect = 0;
+    args->counter = 0;
+    args->duration = 0;
     return task;
 }
 
@@ -8187,22 +8173,22 @@ s32 sndLookupResourceType(s32 actor, s32 resourceIndex) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00201828);
 
-void sndCreateSystemEffect(u32 *effect) {
-    if (effect[0] & 8) {
-        if (effect[4] == 0) {
-            if (effect[1] == 0) {
-                effect[4] = sndMixerClone(effect[5]);
-                btlBossDebugPrintf("btl:system effect create[%p]\n", effect[4]);
+void sndCreateSystemEffect(SoundEffectNode *effect) {
+    if (effect->flags & 8) {
+        if (effect->handle == 0) {
+            if (effect->referenceCount == 0) {
+                effect->handle = sndMixerClone(effect->source);
+                btlBossDebugPrintf("btl:system effect create[%p]\n", effect->handle);
             }
         }
     }
 }
 
-void sndDeleteSystemEffect(u32 *effect) {
-    if ((effect[0] & 8) && effect[4] && !effect[1]) {
-        btlBossDebugPrintf("btl:system effect delete[%p]\n", effect[4]);
-        sndReleaseAllVoices(effect[4]);
-        effect[4] = 0;
+void sndDeleteSystemEffect(SoundEffectNode *effect) {
+    if ((effect->flags & 8) && effect->handle && !effect->referenceCount) {
+        btlBossDebugPrintf("btl:system effect delete[%p]\n", effect->handle);
+        sndReleaseAllVoices(effect->handle);
+        effect->handle = 0;
     }
 }
 
@@ -8303,7 +8289,7 @@ typedef union ActorEffectOwner {
 
 typedef struct ActorEffectTaskArgs {
     SoundEffectNode *source;
-    BtlEffectHandle *effect;
+    SoundVoice *effect;
     ActorEffectOwner owner;
     u32 duration;
     s32 counter;
@@ -8321,7 +8307,7 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     unit->unk334++;
 }
 
-extern u32 effBattleGetCurrentFrame(BtlEffectHandle *);
+extern u32 effBattleGetCurrentFrame(SoundVoice *);
 extern void effBTLFieldColorSetSelectors(s32, u32, s32, s32);
 
 s32 func_00202100(ActorEffectTaskArgs *args) {
@@ -8739,14 +8725,13 @@ SoundResourceNode *sndAllocResourceNode(void) {
     return node;
 }
 
-SoundResourceNode *sndCreateResourceNode(u32 soundId) {
+SoundResourceNode *sndCreateResourceNode(SoundMixer *soundId) {
     SoundResourceNode *node = (SoundResourceNode *)sndAllocResourceNode();
     node->resourceHandle = sndMixerClone(soundId);
     node->flags |= 2;
     return node;
 }
 
-extern void sndReleaseAllVoices(u32);
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -8895,8 +8880,7 @@ void sndFreeResourceLink(SoundResourceLink *link) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_002034A8);
 
-void btlMarkTaskReady(s32 link) {
-    SoundResourceLink *resource = (SoundResourceLink *)link;
+void btlMarkTaskReady(SoundResourceLink *resource) {
     resource->refreshRequested = 1;
 }
 
@@ -9113,7 +9097,8 @@ void btlRefreshSoundEntries(void) {
     btlGetRuntime();
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
         if (D_003BDE18[i].unk4 != 0) {
-            btlCreateIndexedSoundResourceNode(i, D_003BDE18[i].unk4);
+            /* Bank entries retain their original data-address word representation. */
+            btlCreateIndexedSoundResourceNode(i, (void *)D_003BDE18[i].unk4);
         }
     }
 }
@@ -9131,7 +9116,7 @@ void sndFreeBattleSoundEntries(void) {
 }
 
 /* Register a borrowed archive source in its SYSEFF slot, without cloning it. */
-void btlCreateIndexedSoundResourceNode(s32 slotIndex, u32 handle) {
+void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle) {
     u32 flags;
     s32 work;
     SoundResourceNode *node;

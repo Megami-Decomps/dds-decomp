@@ -14,9 +14,45 @@ extern s32 func_00292478(void *, s32, s32);
 
 extern u32 *mnuPanelSoundEntryPool;
 
-extern u64 mnuSpawnPanelSlotB(u32, u64, u64, u64, u64, u64);
+typedef struct MantraPanelPool MantraPanelPool;
 
-extern u64 mnuFindPanelSlotById(u32, u64, u64);
+/* Shared 48-byte animation record used by the panel pool in code_0026DBF8. */
+typedef struct MantraPanelAnimation {
+    union {
+        u32 flags;
+        struct {
+            u8 kind;
+            u8 control[3];
+        } tag;
+    };
+    s16 startDelay;
+    s16 endDelay;
+    s32 animationTicks;
+    u16 x;
+    u16 y;
+    u32 visualParameters[3];
+    u8 byte1C;
+    u8 byte1D;
+    s16 frame;
+    u8 stateA;
+    u8 stateB;
+    u8 stateC;
+    u8 pad23;
+    u32 spriteHandle;
+    u32 burstPool;
+    s16 id;
+    s16 transitionDelay;
+} MantraPanelAnimation;
+
+extern u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *, u32, s16);
+extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
+extern void func_00278FA8(s32);
+extern void func_00279148(s32);
+extern void mnuStorePanelEntry(s32, s32);
+
+extern MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *, s32, s8, s16, s16, u32);
+
+extern MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
 
 typedef struct MenuContainer MenuContainer;
 extern u32 func_002890A8(MenuContainer *);
@@ -86,7 +122,7 @@ typedef struct MenuPanelState {
     u8 pad964[0x40];
     s32 navigationState;
     u8 pad9A8[4];
-    u32 resource;
+    MantraPanelPool *resource;
     union {
         u32 flags;
         u8 flagBytes[4];
@@ -534,14 +570,20 @@ s32 mnuValidateProfileEntry(MenuPanelSlot *slot, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291338);
 
+/* Updated as a halfword here, and read as signed high-byte flags elsewhere. */
 typedef struct MenuPanelPositionRecord {
     u16 id;
-    u8 pad02;
-    s8 flags;
+    union {
+        u16 stateFlags;
+        struct {
+            u8 state;
+            s8 flags;
+        };
+    };
 } MenuPanelPositionRecord;
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
-extern const MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
+extern MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
 
 
 void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
@@ -569,7 +611,57 @@ void mnuSetPanelSelection(MenuPanelObject *object, s8 selection) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291590);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_002917C0);
+extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
+
+void func_002917C0(MenuPanelObject *object, s32 selector, u16 id) {
+    MenuPanelState *state = &object->state;
+    MantraNodePos *position;
+    MantraNodePos **neighbor;
+    MenuPanelPositionRecord *record;
+    MantraPanelAnimation *animation;
+    MantraPanelPool *resource;
+    u32 changed = 1;
+    s32 i;
+
+    resource = object->state.resource;
+    position = mnuGetMantraPanelPositionRecord(id);
+    record = func_00291400(selector, id);
+    animation = mnuFindPanelSlotById(resource, id, 1);
+    mnuQueuePanelAnimationTransition(animation, 1, 0);
+    animation->animationTicks = 60;
+    animation = mnuSpawnPanelSlotB(resource, id, 2, 61, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 0, 0);
+    animation->flags |= 0x10000000;
+    record->stateFlags |= 0x100;
+    neighbor = position->neighbors;
+    for (i = 5; i >= 0; i--, neighbor++) {
+        if (*neighbor != NULL) {
+            u32 nodeFlags = (*neighbor)->selector.packed;
+            s32 maxTier = (state->flags >> 28) & 1;
+
+            if (maxTier >= ((s8)nodeFlags >> 4) && (nodeFlags & 15) == 1) {
+                record = func_00291400(selector, (*neighbor)->selector.fields.index);
+                if ((record->stateFlags & 15) == 2) {
+                    changed |= 2;
+                    animation = mnuFindPanelSlotById(resource, (*neighbor)->selector.fields.index, 0);
+                    mnuQueuePanelAnimationTransition(animation, 1, 10);
+                    animation = mnuSpawnPanelSlotB(resource, (*neighbor)->selector.fields.index, 1, 50, 0, 0);
+                    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+                    record->stateFlags = (record->stateFlags & 0xFFF0) | 1;
+                }
+            }
+        }
+    }
+    func_00278FA8(object->state.selectionController);
+    func_00279148(object->state.selectionController);
+    if (changed & 1) {
+        mnuStorePanelEntry(0x20004, 5);
+    }
+    if (changed & 2) {
+        mnuStorePanelEntry(0x20005, 38);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291A20);
 
@@ -589,19 +681,19 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427740);
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292478);
 
 void func_00292998(MenuPanelObject *object) {
-    u32 resource;
-    s32 record;
-    u64 effectHandle;
+    MantraPanelPool *resource;
+    MenuPanelPositionRecord *record;
+    MantraPanelAnimation *animation;
 
     resource = object->state.resource;
     mnuGetMantraPanelPositionRecord(0);
     record = func_00291400(0, 8);
-    effectHandle = mnuFindPanelSlotById(resource, 8, 0);
-    mnuQueuePanelAnimationTransition(effectHandle, 7, 0);
-    effectHandle = mnuSpawnPanelSlotB(resource, 8, 1, 0, 0, 0);
-    mnuOffsetPanelAndSetVisualParams(effectHandle, 0, 0, 0, 0x80, 0x53, 0, 0);
-    mnuQueuePanelAnimationTransition(effectHandle, 8, 0);
-    *(u16 *)(record + 2) = (*(u16 *)(record + 2) & 0xfff0) | 1;
+    animation = mnuFindPanelSlotById(resource, 8, 0);
+    mnuQueuePanelAnimationTransition(animation, 7, 0);
+    animation = mnuSpawnPanelSlotB(resource, 8, 1, 0, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 0x80, 0x53, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 8, 0);
+    record->stateFlags = (record->stateFlags & 0xfff0) | 1;
 }
 
 extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
@@ -623,8 +715,8 @@ void func_00292A60(MenuPanelObject *object) {
     state->flags &= ~0x20000000;
 }
 
-s32 func_00292B90(s32 object) {
-    return func_002917C0(object, 0, 8);
+void func_00292B90(MenuPanelObject *object) {
+    func_002917C0(object, 0, 8);
 }
 
 

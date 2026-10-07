@@ -264,7 +264,52 @@ u32 func_00274048(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274050);
+extern s32 evtGetIndexedEventRecordId(s32);
+extern s32 mnuGetAbilityByteCategory(u16);
+extern s32 mnuUseStaffItem(s32, s32);
+extern s32 mnuIsStaffWindowReadyForItem(s32, s32);
+extern char D_0037C9C8[];
+
+s32 func_00274050(KwlnTask *task) {
+    u32 userValue = kwlnTaskGetUserValue(task);
+    StaffImageContext *staff = (StaffImageContext *)userValue;
+    StaffImageChoices *menu = staff->menu;
+    u32 buttons = mnuMapPadMaskToFlags(3);
+    s32 state;
+    s32 itemId = 0;
+    s32 itemCountIsZero = 0;
+
+    state = menuRunPanel(staff, 0, task);
+    if (state != 0) {
+        return state;
+    }
+    mnuStepPartyPanelListFromInput(4, &staff->windowFlags);
+    if (menu->primaryObject->window->panelActive != 0) {
+        itemId = menu->primaryObject->window->selectedNode->sortKeySecondary;
+    }
+    if (mnuGetAbilityByteCategory((u16)evtGetIndexedEventRecordId(itemId)) == 2) {
+        staff->windowFlags |= 0x10;
+    }
+    if (mnuGetAbilityByteCategory((u16)evtGetIndexedEventRecordId(itemId)) == 3) {
+        staff->windowFlags |= 0x20;
+    }
+    if (buttons & MNU_STAFF_INPUT_CONFIRM) {
+        buttons = mnuUseStaffItem(itemId, userValue) == 0 ? 0x8000 : 0;
+        menu->primaryObject->window->selectedNode->sortKeyPrimary = datGameState->inventory.counts[itemId];
+        if (mnuIsStaffWindowReadyForItem((u16)itemId, userValue) == 0) {
+            mnuSetPopupEntryFlagged(&staff->popupState, D_0037C9AC);
+            mnuClearListFlags(0, &staff->windowFlags);
+        } else {
+            itemCountIsZero = datGameState->inventory.counts[itemId] == 0;
+        }
+    }
+    if ((buttons & MNU_STAFF_INPUT_CANCEL) != 0 || itemCountIsZero != 0) {
+        mnuSetPopupEntryFlagged(&staff->popupState, D_0037C9C8);
+        mnuClearListFlags(0, &staff->windowFlags);
+    }
+    mnuPlayInputSound(0, buttons, 0);
+    return 0;
+}
 
 s32 mnuStaffImageEnterB(s32 task) {
     s32 context = kwlnTaskGetUserValue();

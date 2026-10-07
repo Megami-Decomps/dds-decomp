@@ -625,7 +625,8 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
 
 
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
-extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
+/* The shared value provider owns a DatPartyRecord, not an integer address. */
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
 
 /* 1 when some active party member other than unit `skipId` has `scriptId` at its profile record cap. */
 s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
@@ -637,7 +638,7 @@ s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
         if (datGameState->party[i].flags & 1) {
             slot = &datGameState->party[i];
             if (slot->unitId != skipId) {
-                if (ptyGetProfileRecordCap(scriptId) == ptyGetProfileRecordValue((u32)slot, scriptId)) {
+                if (ptyGetProfileRecordCap(scriptId) == ptyGetProfileRecordValue(slot, scriptId)) {
                     return 1;
                 }
             }

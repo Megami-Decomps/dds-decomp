@@ -188,7 +188,8 @@ extern s32 func_0022D2F8(u32, u32);
 extern u32 btlAllocTask(u32);
 
 
-extern void func_0022BA08(void);
+struct BattleScriptTaskData;
+extern u32 func_0022BA08(struct BattleScriptTaskData *);
 
 extern void btlStartSkillEventTask(u32);
 
@@ -232,7 +233,7 @@ typedef struct BattleTask {
 } BattleTask;
 
 typedef struct BattleScriptTaskData {
-    u32 object;
+    BtlUnit *object;
     u32 group;
     u32 frames;
 } BattleScriptTaskData;
@@ -245,7 +246,7 @@ extern char btlPrimaryScriptResourceName[];
 
 extern char btlSecondaryScriptResourceName[];
 
-extern s32 evtFindTaskResourceEntryByKey(s16, s32);
+extern void *evtFindTaskResourceEntryByKey(u32, s32);
 
 extern char D_0041B7E0[];
 
@@ -427,7 +428,7 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_0041B768);
 }
 
-extern void btlCreateIndexedSoundResourceNode(s32 slotIndex, u32 handle);
+extern void btlCreateIndexedSoundResourceNode(s32 slotIndex, void *handle);
 
 /* Populate sound slots 11..25 from event keys 50..64; skip missing bindings. */
 void func_0022B288(void) {
@@ -442,7 +443,7 @@ void func_0022B288(void) {
     for (resourceIndex = 0; resourceIndex < BTL_EVENT_SOUND_RESOURCE_COUNT; resourceIndex++) {
         s32 resourceKey = resourceIndex + BTL_EVENT_SOUND_KEY_FIRST;
         s32 slotIndex = resourceIndex + BTL_EVENT_SOUND_SLOT_FIRST;
-        s32 resourceValue = evtFindTaskResourceEntryByKey(battleState->eventTaskId, resourceKey);
+        void *resourceValue = evtFindTaskResourceEntryByKey(battleState->eventTaskId, resourceKey);
 
         if (resourceValue == 0) {
             btlBossDebugPrintf(D_0041B780, slotIndex, resourceKey);
@@ -475,7 +476,7 @@ s32 btlCommandSelectEventAction(void) {
     s32 actionKey = scrReadIntParameter(2);
     BtlUnit *selectedUnit;
     BtlState *battleState;
-    s32 actionResource;
+    void *actionResource;
     if (modeSelector == 0) {
         selectedUnit = (BtlUnit *)btlFindUnitByModeClear(unitId);
     } else {
@@ -680,15 +681,37 @@ u32 func_0022B9D0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022BA08);
+u32 func_0022BA08(BattleScriptTaskData *record) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    void *resource;
+
+    if (record->frames == 0) {
+        if (!(record->object->flags & 2)) {
+            return 1;
+        }
+        resource = evtFindTaskResourceEntryByKey(battle->eventTaskId, record->group);
+        if (resource == 0) {
+            return 1;
+        }
+        battle->eventResult = resource;
+        battle->eventActive = 1;
+        battle->eventUnit = record->object;
+        battle->eventAction = record->group;
+    }
+    if (battle->eventActive == 0) {
+        return 1;
+    }
+    record->frames++;
+    return 0;
+}
 
 /* Queue script-resource work for object/group; return its 32-bit task address. */
-u32 btlCreateScriptResourceTask(u32 object, u32 group) {
+u32 btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
     BattleTask *task = (BattleTask *)btlAllocTask(12);
     BattleScriptTaskData *data;
     task->enabled = 1;
     task->taskId = 0x68;
-    task->callback.update = func_0022BA08;
+    task->callback.processScript = func_0022BA08;
     task->status = 0;
     data = btlGetTaskArguments(task);
     data->object = object;
@@ -727,7 +750,7 @@ void *btlCreateActionTask(void *object, s32 group) {
     task->callback.processScript = btlUpdateScriptResourceTask;
     task->status = 0;
     data = btlGetTaskArguments(task);
-    data->object = (u32)object;
+    data->object = object;
     data->group = group;
     data->frames = 0;
     return task;

@@ -361,7 +361,7 @@ typedef struct EffectMapping {
 
 extern EffectMapping effMappingState;
 
-extern u32 D_0045C2F0[];
+extern f32 D_0045C2F0[4];
 
 extern u8 D_004386E0[];
 
@@ -9649,11 +9649,80 @@ u32 effPollNamedFileJob(void) {
     return result;
 }
 
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+extern void func_00336538(f32);
+extern char D_0042D030[], D_0042D048[];
+extern s8 sdfPadButtonStates[];
+extern f32 D_003FFCB0[4];
+
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D030);
 
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D048);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FEDD0);
+s32 func_002FEDD0(void) {
+    f32 vector[4];
+    f32 step;
+    f32 length;
+    f32 angle;
+    s32 flags = 1;
+
+    btlBossDebugPrintfN(8, 8, 0, D_0042D030);
+    btlBossDebugPrintfN(8, 20, 0, D_0042D048);
+    btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : RADIUS");
+    if (sdfPadButtonStates[6] & 2) {
+        D_0045C2F0[1] -= 10.0f;
+        flags = 3;
+    } else if (sdfPadButtonStates[7] & 2) {
+        D_0045C2F0[1] += 10.0f;
+        flags = 3;
+    }
+    if (sdfPadButtonStates[11] & 2) {
+        step = -10.0f;
+        flags |= 2;
+    } else if (sdfPadButtonStates[9] & 2) {
+        step = 10.0f;
+        flags |= 2;
+    } else {
+        step = 0.0f;
+    }
+    /* Project onto the horizontal plane to find the movement direction. */
+    vector[0] = D_0045C2F0[0];
+    vector[1] = 0.0f;
+    vector[2] = D_0045C2F0[2];
+    vector[3] = 0.0f;
+    if (vector[0] != 0.0f || vector[2] != 0.0f) {
+        VU0_LOAD_VF(vf10, vector);
+        VU0_LENGTH_VF10(length);
+        angle = 0.0f;
+        if (sdfPadButtonStates[5] & 2) {
+            angle = (100.0f / length) * 0.08726646f;
+            flags |= 2;
+        } else if (sdfPadButtonStates[4] & 2) {
+            angle = (100.0f / length) * -0.08726646f;
+            flags |= 2;
+        }
+        if (angle != 0.0f) {
+            func_00336538(angle);
+            VU0_LOAD_VF(vf10, vector);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF(vf10, vector);
+        } else {
+            VU0_LOAD_VF(vf10, vector);
+        }
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, D_003FFCB0);
+    }
+    vector[0] += D_003FFCB0[0] * step;
+    vector[2] += D_003FFCB0[2] * step;
+    D_0045C2F0[0] = vector[0];
+    D_0045C2F0[2] = vector[2];
+    if (sdfPadButtonStates[3] < 0) {
+        flags &= ~1;
+    } else {
+        flags |= 0x200000;
+    }
+    return flags;
+}
 
 s32 effResetStaticState(void) {
     D_0045C2F0[0] = 0;

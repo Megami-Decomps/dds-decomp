@@ -1143,7 +1143,49 @@ void mnuDrawTerminalBackdrop(s32 address) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268838);
+void func_00268838(s32 decrement, MenuSlotState *state) {
+    if (D_00437859 == 0) {
+        return;
+    }
+    if (state->reducedMode != 0) {
+        state->panelHoldFrames = 0;
+    } else {
+        switch (state->mode) {
+        case 0:
+            func_00306CD0(0, 0, 0, state->panelFade, 1,
+                         (EffectSlotSet *)state->resourceBank[1], 1, 0x52);
+            ((EffectSlotSet *)state->resourceBank[3])->workEntries[1].angleDegrees = 90.0f;
+            func_00306CD0(0x7B0, 0x698, 0, state->panelFade, 3,
+                         (EffectSlotSet *)state->resourceBank[3], 1, 0x52);
+            if (state->panelHoldFrames > 0) {
+                state->panelHoldFrames--;
+                return;
+            }
+            break;
+        case 1:
+        case 2:
+            state->panelHoldFrames = 0;
+            break;
+        }
+    }
+    if (decrement == 0) {
+        if (state->panelFade < 0x100) {
+            state->panelFade += 12;
+        }
+        if (state->panelFade > 0x100) {
+            state->panelFade = 0x100;
+        }
+    } else {
+        if (state->panelFade > 0) {
+            state->panelFade -= 0x11;
+        }
+        if (state->panelFade < 0) {
+            state->panelFade = 0;
+        }
+    }
+    func_0026BEC0(0, 0, 0, state->panelFade, &state->panels[0], 0x52);
+    func_0026BEC0(0, 0xCF8, 0, state->panelFade, &state->panels[1], 0x52);
+}
 
 /* Classify panel fade: zero, nonzero below sixty, or at least sixty.
  * This is a blend weight, not a remaining-frame countdown. */
@@ -1610,7 +1652,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
     EventDispatchState *dispatchState = (EventDispatchState *)state;
 
     mnuDrawTerminalBackdrop(state);
-    func_00268838(0, state);
+    func_00268838(0, (MenuSlotState *)state);
     if (fldClassifyRemainingFrames((void *)state) != 2) {
         return 0;
     }
@@ -1769,7 +1811,7 @@ s32 func_0026A3F8(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     mnuDrawTerminalBackdrop(state);
-    func_00268838(0, state);
+    func_00268838(0, (MenuSlotState *)state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     mnuDrawTerminalSelectedSlots(state);
@@ -1835,7 +1877,7 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     mnuDrawTerminalBackdrop(state);
-    func_00268838(0, state);
+    func_00268838(0, (MenuSlotState *)state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     mnuDrawTerminalSelectedSlots(state);
@@ -1949,7 +1991,6 @@ s32 evtPollDispatchAfterFade(void *request) {
     return result;
 }
 
-extern void func_00268838(s32, s32);
 
 extern void mnuDispatchTransitionHostCallbacks(s32);
 
@@ -1961,7 +2002,7 @@ s32 func_0026AC90(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     mnuDrawTerminalBackdrop(state);
-    func_00268838(0, state);
+    func_00268838(0, (MenuSlotState *)state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     mnuDrawTerminalSelectedSlots(state);
@@ -2025,7 +2066,7 @@ s32 func_0026AEB0(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     mnuDrawTerminalBackdrop(state);
-    func_00268838(0, state);
+    func_00268838(0, (MenuSlotState *)state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     mnuDrawTerminalSelectedSlots(state);
@@ -2075,7 +2116,7 @@ s32 mnuPrepareDispatchStateAndBindHandler(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     mnuDrawTerminalBackdrop(state);
-    func_00268838(0, state);
+    func_00268838(0, (MenuSlotState *)state);
     mnuDispatchTransitionHostCallbacks(state);
     func_00268EC8(state);
     mnuDrawTerminalSelectedSlots(state);
@@ -2156,9 +2197,9 @@ s32 evtBDispatchSyncD2(s32 request) {
 
     mnuDrawTerminalBackdrop(state);
     if (func_00268C08((MenuSlotState *)state) == 0) {
-        func_00268838(1, state);
+        func_00268838(1, (MenuSlotState *)state);
     } else {
-        func_00268838(0, state);
+        func_00268838(0, (MenuSlotState *)state);
     }
     mnuDispatchTransitionHostCallbacks(state);
     if (dispatchState->stage != 3) {

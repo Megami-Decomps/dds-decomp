@@ -55,7 +55,7 @@ void func_0035B6E0(const char *fmt, ...);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
-s32 evtFindTaskResourceEntryByKey(u32 id, s32 key);
+void *evtFindTaskResourceEntryByKey(u32, s32);
 KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
 KwlnTask *evtCreateTask(s32, const char *);
 s32 evtPreloadBgm(s32 id);
@@ -66,7 +66,7 @@ INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242CB8);
 u32 evtCreateTextureEntryChildTask(void) {
     ScrData *work;
     s32 id;
-    s32 entry;
+    struct SdfTex *entry;
     KwlnTask *task;
 
     work = scrGetCurrentContext();
@@ -83,7 +83,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         evtPrintDeveloperConsoleMessage(D_00422030, scrReadIntParameter(1));
         return 1;
     }
-    task = evtCreateTaskWithValue(0x2AFE, (struct SdfTex *)entry);
+    task = evtCreateTaskWithValue(0x2AFE, entry);
     func_00101968(work->task, task);
     scrSetIntegerReturnValue((s32)task);
     return 1;

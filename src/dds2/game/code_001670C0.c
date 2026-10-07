@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "kwln_sprite.h"
 
 #include "pcp_vu0.h"
@@ -30,7 +31,6 @@ extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
-extern void effReleaseBattleVoiceOwner(void *);
 extern void effBattleReleaseParameterBanks(void *);
 extern void sdfReleaseResourceAllocation(void *);
 extern void func_00168280();
@@ -77,32 +77,9 @@ typedef struct BillWork {
     u8 stagedValue;
 } BillWork;
 
-typedef struct SoundBank {
-    u8 pad00[8];
-    s32 value08;
-    u8 pad0C[0x44];
-    s32 value50;
-    u8 pad54[0x24];
-    s32 value78;
-    u8 pad7C[0x59C];
-} SoundBank;
 
-typedef struct SoundVoice SoundVoice;
 
-typedef struct SoundMixer {
-    SoundBank banks[2];
-    u8 pad0C30[8];
-    void *resource;
-    u32 unk0C3C;
-    SoundVoice *voiceList;
-} SoundMixer;
 
-struct SoundVoice {
-    u8 pad00[4];
-    SoundMixer *mixer;
-    u8 pad08[0x11C];
-    SoundVoice *next;
-};
 
 void *effBillCreateDispatch(s32 index, void *arg) {
     EffectDispatchState *effect = effBillConstructorEntries[index].func(arg);
@@ -431,7 +408,7 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
     mixer->resource = (void *)handle;
     memcpy(mixer, src, 0xC38);
     effBattleRebuildClonedParameterBanks(mixer, src);
-    mixer->unk0C3C = 0;
+    mixer->active = 0;
     mixer->voiceList = NULL;
     return mixer;
 }

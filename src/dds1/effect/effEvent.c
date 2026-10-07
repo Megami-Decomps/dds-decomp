@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
 #include "eff_channel.h"
@@ -1042,12 +1043,12 @@ void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters) {
     D_003561C8 = *parameters;
 }
 
-u32 func_00190100() {
-    return sndMixerClone();
+SoundMixer *func_00190100(SoundMixer *source) {
+    return sndMixerClone(source);
 }
 
-void func_00190118() {
-    sndReleaseAllVoices();
+void func_00190118(SoundMixer *mixer) {
+    sndReleaseAllVoices(mixer);
 }
 
 
@@ -1084,11 +1085,11 @@ typedef struct {
 } __attribute__((packed)) FileRecordHeader;
 
 
-extern void *func_00160958(u32, u16, s32, s32);
+extern SoundVoice *func_00160958(SoundMixer *, u16, void *, s32);
 extern void func_00161588(void *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
-EffEventWork *effEventCreate(u32 owner, u16 kind, const EffEventInit *params) {
+EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const EffEventInit *params) {
     EffEventWork *work = sdfAllocSizeClassBlock(EFF_EVENT_COMPACT_WORK_BYTES);
 
     memcpy(work, params, sizeof(*params));
@@ -1129,7 +1130,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00190328);
 
 /* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
 typedef struct EffEventLight {
-    u32 handle;           /* 0x00 */
+    SoundMixer *handle;    /* 0x00 */
     EffEventWork *owner;   /* 0x04 */
     EffEventInit init;    /* 0x08 */
     u8 active;            /* 0x38 */
@@ -1138,7 +1139,7 @@ typedef struct EffEventLight {
 
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
-EffEventLight *effEventLightCreate(u32 arg, f32 param) {
+EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
     work->init.orientation[3] = 1.0f;
@@ -1175,7 +1176,7 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
 
     work->owner = effEventCreate(src->handle, 0, block);
     work->handle = src->handle;
-    work->init = *block;
+    memcpy(&work->init, block, sizeof(work->init));
     work->active = 0;
     return work;
 }

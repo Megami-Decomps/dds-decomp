@@ -37,6 +37,9 @@ extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8
 extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, s32, s32, s32, s32);
 /* The SDK definition and its declarations use legacy K&R parameters. */
 extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 
 extern u32 mnuAllocateMantraPanelBurstPool(void);
@@ -3687,7 +3690,9 @@ s32 mnuDrawFadedMantraDualCyclePanel(s32 x, s32 y, s32 z, s32 amount, s32 unused
 typedef struct MantraSparkle {
     s16 age;
     s16 life;
-    u32 flags;
+    u32 active : 1;
+    u32 alternateMotion : 1;
+    u32 reserved : 30;
     f32 vx;
     f32 vy;
 } MantraSparkle;
@@ -3726,7 +3731,58 @@ void mnuFreeMantraSparkleEmitter(u32 sprite) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284508);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284818);
+MantraSparkle *func_00284818(MantraSparkleEmitter *emitter) {
+    MantraSparkle *spark = emitter->sparkle;
+    u32 i;
+
+    for (i = 0; i < 10; i++, spark++) {
+        if (spark->active == 0) {
+            if (emitter->kind == 0) {
+                if (emitter->count < 6) {
+                    spark->life = effMiscRandUnitFloat(0) * 80.0f + 50.0f;
+                    spark->vx = effMiscRandUnitFloat(0) * 4.0f + -2.0f;
+                    spark->vy = effMiscRandUnitFloat(0) * 4.0f + -2.0f;
+                } else {
+                    spark->life = effMiscRandUnitFloat(0) * 40.0f + 30.0f;
+                    spark->vx = effMiscRandUnitFloat(0) * 6.0f + -5.0f;
+                    if (spark->vx >= -2.0f) {
+                        spark->vx += 4.0f;
+                    }
+                    spark->vy = effMiscRandUnitFloat(0) * 6.0f + -5.0f;
+                    if (spark->vy >= -2.0f) {
+                        spark->vy += 4.0f;
+                    }
+                }
+            } else {
+                if (emitter->count >= 6) {
+                    return 0;
+                }
+                if (effMiscRandUnitFloat(0) < 0.7f) {
+                    spark->alternateMotion = 0;
+                    spark->life = effMiscRandUnitFloat(0) * 30.0f + 30.0f;
+                    spark->vx = effMiscRandUnitFloat(0) * 10.0f + -5.0f;
+                    spark->vy = effMiscRandUnitFloat(0) * 10.0f + -5.0f;
+                } else {
+                    spark->alternateMotion = 1;
+                    spark->life = effMiscRandUnitFloat(0) * 70.0f + 60.0f;
+                    spark->vx = effMiscRandUnitFloat(0) * 10.0f + -10.0f;
+                    if (spark->vx >= -5.0f) {
+                        spark->vx += 10.0f;
+                    }
+                    spark->vy = effMiscRandUnitFloat(0) * 10.0f + -10.0f;
+                    if (spark->vy >= -5.0f) {
+                        spark->vy += 10.0f;
+                    }
+                }
+            }
+            spark->age = 0;
+            emitter->count++;
+            spark->active = 1;
+            return spark;
+        }
+    }
+    return 0;
+}
 
 /* Both burst allocators create this 16-byte pool header followed by 100 slots. */
 typedef struct MantraBurstSlot {
@@ -3891,15 +3947,15 @@ typedef struct MantraSparkEffectState {
 
 void mnuUpdateSparkle(MantraSpark *);
 void mnuTickMantraSparkParticles(MantraSparkState *);
-s32 func_00285AC0(MantraSparkEffectState *, u32, s32);
+void func_00285AC0(MantraSparkState *, u32, s32);
 
-s32 func_00285788(MantraSparkEffectState *state, s32 unused, s32 arg2) {
+void func_00285788(MantraSparkEffectState *state, s32 sprite, s32 surfaceIndex) {
     f32 fraction = (f32)state->sparkle.timer / (f32)state->sparkle.unk4;
 
     fraction = 1.0f - fraction;
     sdfSinPoly(fraction * 3.14159265f);
     mnuTickMantraSparkParticles(&state->sparkle);
-    return func_00285AC0(state, state->effectHandle, arg2);
+    func_00285AC0(&state->sparkle, state->effectHandle, surfaceIndex);
 }
 
 /* Reset the shared timer as needed, then advance all eight spark particles. */
@@ -3943,13 +3999,34 @@ void mnuUpdateSparkle(MantraSpark *spark) {
 
 
 /* Evaluate the active particle's remaining-life sine envelope; discard the result. */
-void mnuEvaluateActiveSparkleSine(MantraSpark *object) {
+void mnuEvaluateActiveSparkleSine(MantraSpark *object, u32 sprite, s32 surfaceIndex) {
     if (object->phase != 0) {
         sdfSinPoly((1.0f - (f32)object->timer / (f32)object->timerMax) * 3.14159265f);
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285AC0);
+void func_00285AC0(MantraSparkState *state, u32 sprite, s32 surfaceIndex) {
+    MantraSpark *particle;
+    s32 i = 7;
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000L, surfaceIndex);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, surfaceIndex);
+    uiDrawActiveSurfaceRegion(surfaceIndex);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x50000L, surfaceIndex);
+    particle = state->particles;
+    do {
+        mnuEvaluateActiveSparkleSine(particle, sprite, surfaceIndex);
+        particle++;
+        i--;
+    } while (i >= 0);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x30000L, surfaceIndex);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, surfaceIndex);
+}
 
 /* 0x28-byte header for a variable-length effect slot pool. */
 typedef struct MantraEffectPoolHeader {

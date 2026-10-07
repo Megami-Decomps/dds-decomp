@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
 #include "mdl.h"
@@ -688,10 +689,6 @@ typedef struct EffPCPSpinWork {
     void *handle1;   /* 0x64 */
 } EffPCPSpinWork; /* 0x68 */
 
-typedef struct {
-    u8 pad00[0xC3C];
-    u32 active;
-} EffPCPEventOwner;
 
 
 extern void effEventReleaseNode(void *event);
@@ -5285,7 +5282,7 @@ typedef struct EffPCPEventPlace {
     u32 color;
 } EffPCPEventPlace;
 
-extern EffPCPEventOwner *func_00197D38(void *params);
+extern SoundMixer *func_00197D38(SoundMixer *params);
 
 /* Serialized drift ranges followed by the retained event array. */
 typedef struct EffPCPDriftEventParams {
@@ -5312,7 +5309,7 @@ typedef struct EffPCPDriftEvent {
 typedef struct EffPCPDriftEventWork {
     EffPCPDriftEventParams params;
     EffPCPDriftEvent *entries;
-    EffPCPEventOwner *owner;
+    SoundMixer *owner;
     u8 unk10C;
     u8 pad10D[3];
     f32 scale;
@@ -5552,7 +5549,7 @@ typedef struct EffPCPPairedEvent {
 typedef struct EffPCPPairedEventWork {
     EffPCPPairedEventParams params;
     EffPCPPairedEvent *entries;
-    EffPCPEventOwner *ownerA, *ownerB;
+    SoundMixer *ownerA, *ownerB;
     u8 unk98;
     u8 pad99[3];
     u32 color;
@@ -5844,7 +5841,7 @@ typedef struct EffPCPSpawnRangeEvent {
 typedef struct EffPCPSpawnRangeWork {
     EffPCPSpawnRangeParams params;
     EffPCPSpawnRangeEvent *entries;
-    EffPCPEventOwner *owner;
+    SoundMixer *owner;
     u8 unk9C;
     u8 pad9D[3];
     f32 scale;
@@ -6092,7 +6089,7 @@ typedef struct {
     EffPCPEventParamHead params;
     EffPCPMapEventEntry *entries;
     SdfMemBlock *entriesHandle;
-    EffPCPEventOwner *owner;
+    SoundMixer *owner;
     u32 modelResource;
     f32 scale;
     s32 frame;
@@ -6152,7 +6149,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
 }
 
 
-extern EffPCPEventOwner *func_00197D38(void *params);
+extern SoundMixer *func_00197D38(SoundMixer *params);
 
 /* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
 void *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {

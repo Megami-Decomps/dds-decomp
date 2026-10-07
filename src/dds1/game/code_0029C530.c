@@ -6364,59 +6364,59 @@ void effGetWorldVector(u32 which) {
 s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     s32 count = 0;
     u32 mask = 0;
-    u8 *state = (u8 *)btlGetRuntime();
-    u8 *actor = (u8 *)effBTLFieldColorGetOriginalSelector();
-    u8 *other = (u8 *)effBTLFieldColorGetVariantSelector();
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+    BtlUnit *other = (BtlUnit *)effBTLFieldColorGetVariantSelector();
 
     switch (kind) {
     case 1:
-        if ((((BtlUnit *)actor)->flags & 2) && ((BtlUnit *)actor)->ext != 0) {
-            out[0] = (BtlUnit *)actor;
+        if ((actor->flags & 2) && actor->ext != 0) {
+            out[0] = actor;
             count = 1;
         }
         break;
     case 4:
-        mask = ((BtlUnit *)other)->flags & 0x600;
+        mask = other->flags & 0x600;
         break;
     case 3:
-        mask = ((BtlUnit *)actor)->flags & 0x600;
+        mask = actor->flags & 0x600;
         break;
     case 5:
         mask = 0x600;
         break;
     case 6:
-        other = (u8 *)effBTLFieldColorGetOverrideSelector();
-        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
-            out[0] = (BtlUnit *)other;
+        other = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
+        if ((other->flags & 2) && other->ext != 0) {
+            out[0] = other;
             count = 1;
         }
         break;
     case 7:
-        other = (u8 *)effBTLFieldColorGetFinalSelector();
-        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
-            out[0] = (BtlUnit *)other;
+        other = (BtlUnit *)effBTLFieldColorGetFinalSelector();
+        if ((other->flags & 2) && other->ext != 0) {
+            out[0] = other;
             count = 1;
         }
         break;
     case 0:
     case 2:
-        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
-            out[0] = (BtlUnit *)other;
+        if ((other->flags & 2) && other->ext != 0) {
+            out[0] = other;
             count = 1;
         }
         break;
     }
     if (mask != 0) {
-        u8 *link;
+        BtlUnit *link;
 
-        for (link = (u8 *)((BtlState *)state)->units; link != NULL; link = (u8 *)((BtlUnit *)link)->next) {
-            u32 flags = ((BtlUnit *)link)->flags;
+        for (link = battle->units; link != NULL; link = link->next) {
+            u32 flags = link->flags;
 
             if (flags & 1) {
                 if (flags & 2) {
-                    if (((BtlUnit *)link)->ext != 0) {
+                    if (link->ext != 0) {
                         if (flags & mask) {
-                            out[count++] = (BtlUnit *)link;
+                            out[count++] = link;
                         }
                     }
                 }
@@ -6928,11 +6928,10 @@ void effReportResourceStatus(u8 *work) {
 
 /* Apply the selected battle state's stored tint vectors immediately when its mask is set. */
 void effApplyBattleStateTint(void) {
-    s32 actor;
+    BtlState *battle = (BtlState *)btlGetRuntime();
 
-    actor = btlGetRuntime();
-    if ((((BtlState *)actor)->battleFlags & 0x6000000) != 0) {
-        func_001EFD58(actor + 0x50, actor + 0x60, 0);
+    if ((battle->battleFlags & 0x6000000) != 0) {
+        func_001EFD58(battle->lightColor, battle->ambientColor, 0);
         return;
     }
 }
@@ -7013,10 +7012,9 @@ void effSetActiveSlot(u32 index, u8 color, u32 value) {
 }
 
 void effResetActiveEffectSlots(void) {
-    s32 actor;
+    BtlState *battle = (BtlState *)btlGetRuntime();
 
-    actor = btlGetRuntime();
-    if ((((BtlState *)actor)->battleFlags & 0x6000000) != 0) {
+    if ((battle->battleFlags & 0x6000000) != 0) {
         effResetSlots();
         return;
     }
@@ -8225,13 +8223,82 @@ u32 effPollNamedFileJob(void) {
     return result;
 }
 
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+extern void func_002DD688(f32);
+extern char D_003B3A90[], D_003B3AA8[];
+extern s8 sdfPadButtonStates[];
+extern f32 D_0038F530[4];
+
+extern f32 D_003DFA20[4];
+
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3A90);
 
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3AA8);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B7B78);
+s32 func_002B7B78(void) {
+    f32 vector[4];
+    f32 step;
+    f32 length;
+    f32 angle;
+    s32 flags = 1;
 
-extern u32 D_003DFA20[];
+    btlBossDebugPrintfN(8, 8, 0, D_003B3A90);
+    btlBossDebugPrintfN(8, 20, 0, D_003B3AA8);
+    btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : RADIUS");
+    if (sdfPadButtonStates[6] & 2) {
+        D_003DFA20[1] -= 10.0f;
+        flags = 3;
+    } else if (sdfPadButtonStates[7] & 2) {
+        D_003DFA20[1] += 10.0f;
+        flags = 3;
+    }
+    if (sdfPadButtonStates[11] & 2) {
+        step = -10.0f;
+        flags |= 2;
+    } else if (sdfPadButtonStates[9] & 2) {
+        step = 10.0f;
+        flags |= 2;
+    } else {
+        step = 0.0f;
+    }
+    /* Project onto the horizontal plane to find the movement direction. */
+    vector[0] = D_003DFA20[0];
+    vector[1] = 0.0f;
+    vector[2] = D_003DFA20[2];
+    vector[3] = 0.0f;
+    if (vector[0] != 0.0f || vector[2] != 0.0f) {
+        VU0_LOAD_VF(vf10, vector);
+        VU0_LENGTH_VF10(length);
+        angle = 0.0f;
+        if (sdfPadButtonStates[5] & 2) {
+            angle = (100.0f / length) * 0.08726646f;
+            flags |= 2;
+        } else if (sdfPadButtonStates[4] & 2) {
+            angle = (100.0f / length) * -0.08726646f;
+            flags |= 2;
+        }
+        if (angle != 0.0f) {
+            func_002DD688(angle);
+            VU0_LOAD_VF(vf10, vector);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF(vf10, vector);
+        } else {
+            VU0_LOAD_VF(vf10, vector);
+        }
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, D_0038F530);
+    }
+    vector[0] += D_0038F530[0] * step;
+    vector[2] += D_0038F530[2] * step;
+    D_003DFA20[0] = vector[0];
+    D_003DFA20[2] = vector[2];
+    if (sdfPadButtonStates[3] < 0) {
+        flags &= ~1;
+    } else {
+        flags |= 0x200000;
+    }
+    return flags;
+}
 
 s32 effResetStaticState(void) {
     D_003DFA20[0] = 0;
