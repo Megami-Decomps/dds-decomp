@@ -48,6 +48,7 @@ typedef struct WorldObj {
 
 extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
+extern void evtEndObjectValueTransition(EffWorldNode *object);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
@@ -221,7 +222,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
 void evtDestroyEffectObjectData(EffectObject *object) {
     EffectObjectData *data;
 
-    evtEndObjectValueTransition();
+    evtEndObjectValueTransition((EffWorldNode *)object);
     effObjFreeInner((EffWorldNode *)object);
     data = object->data;
     if (data->handle != -1) {
@@ -433,12 +434,12 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
 extern void evtEndUnitValueTransitionForObject(EffWorldNode *, s32);
 extern void evtSetUnitValueTransitionForObject(void *, EffWorldNode *, s32);
 
-void evtEndObjectValueTransition(EffectObject *object) {
+void evtEndObjectValueTransition(EffWorldNode *object) {
     EffectObjectData *data;
 
     data = object->data;
     if (data->activeId != -1) {
-        evtEndUnitValueTransitionForObject((EffWorldNode *)object, 10);
+        evtEndUnitValueTransitionForObject(object, 10);
         data->activeId = 0xffffffff;
     }
 }

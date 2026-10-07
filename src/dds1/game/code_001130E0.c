@@ -34,6 +34,7 @@ extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
+extern void evtEndObjectValueTransition(EffWorldNode *object);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void dds3SetObjectFlags(void *, s32);
 
@@ -205,7 +206,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
 void evtDestroyEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
 
-    evtEndObjectValueTransition();
+    evtEndObjectValueTransition((EffWorldNode *)obj);
     effObjFreeInner((EffWorldNode *)obj);
     data = obj->data;
     if (data->handle != -1) {
@@ -417,12 +418,12 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
 extern void evtEndUnitValueTransitionForObject(EffWorldNode *, s32);
 extern void evtSetUnitValueTransitionForObject(void *, EffWorldNode *, s32);
 
-void evtEndObjectValueTransition(EffectObject *obj) {
+void evtEndObjectValueTransition(EffWorldNode *object) {
     EffectObjectData *data;
 
-    data = obj->data;
+    data = object->data;
     if (data->activeId != -1) {
-        evtEndUnitValueTransitionForObject((EffWorldNode *)obj, 10);
+        evtEndUnitValueTransitionForObject(object, 10);
         data->activeId = 0xffffffff;
     }
 }
