@@ -600,11 +600,138 @@ void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
     sdfReleaseChipBlock(data);
 }
 
+extern u32 dds3GetObjectBaseResourceHandle(EffWorldNode *);
+extern void dds3LoadOrBuildObjectMatrix(u8 *object);
+extern s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z);
+extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
+
 INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F720);
 
 INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F730);
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_00113F28);
+s32 func_00113F28(EffWorldNode *object) {
+    EffectTransformData *data = object->data;
+    SdfModel *model;
+    u32 mode = data->opacityMode;
+    s32 alpha;
+    f32 coordinates[3];
+    ObjectTransform *inner;
+
+    switch (mode) {
+    case 0:
+        object->color = 0x80808080;
+        break;
+    case 1:
+        object->color = 0x80808080;
+        break;
+    case 2:
+        object->color = 0x00808080;
+        break;
+    case 3:
+        alpha = ((u8 *)&object->color)[3];
+        if (alpha < 0x80) {
+            alpha += 8;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        object->color = 0x00808080 | ((u32)alpha << 24);
+        break;
+    case 4:
+        alpha = ((u8 *)&object->color)[3];
+        if (alpha > 0x20) {
+            alpha -= 8;
+        }
+        if (alpha < 0x20) {
+            alpha = 0x20;
+        }
+        object->color = 0x00808080 | ((u32)alpha << 24);
+        break;
+    case 5:
+        alpha = ((u8 *)&object->color)[3];
+        if (alpha < 0x80) {
+            alpha += 4;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        object->color = 0x00808080 | ((u32)alpha << 24);
+        break;
+    case 6:
+        alpha = ((u8 *)&object->color)[3];
+        if (alpha != 0) {
+            alpha -= 4;
+        } else {
+            alpha = 0;
+        }
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        object->color = 0x00808080 | ((u32)alpha << 24);
+        break;
+    case 7:
+        alpha = ((u8 *)&object->color)[3];
+        if (alpha < 0x80) {
+            alpha += 2;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        object->color = 0x00808080 | ((u32)alpha << 24);
+        break;
+    case 8:
+        alpha = ((u8 *)&object->color)[3];
+        if (alpha != 0) {
+            alpha -= 2;
+        } else {
+            alpha = 0;
+        }
+        if (alpha <= 0) {
+            alpha = 0;
+        }
+        object->color = 0x00808080 | ((u32)alpha << 24);
+        break;
+    case 9:
+        alpha = ((u8 *)&object->color)[3];
+        if (alpha != 0) {
+            alpha -= 11;
+        } else {
+            alpha = 0;
+        }
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        object->color = 0x00808080 | ((u32)alpha << 24);
+        break;
+    }
+
+    model = (SdfModel *)dds3GetObjectBaseResourceHandle(object);
+    if (model != NULL) {
+        effObjClearNodeFlags((f32 *)object->inner, 1);
+        effObjFetchInnerSecondVecNorm((EffectObject *)object);
+        VU0_STORE_VF(vf10, model->unk60);
+        dds3LoadOrBuildObjectMatrix((u8 *)object);
+        effObjFetchInnerFirstVec((EffectObject *)object);
+        if (func_00140BE8(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
+            f32 x = coordinates[0];
+            f32 y = coordinates[1];
+            inner = object->inner;
+            inner->position[0] = data->offset[0] + data->position[0] + x;
+            inner->position[1] = data->offset[1] + data->position[1] + y;
+            inner->position[2] = data->offset[2] + data->position[2] + coordinates[2];
+        } else {
+            inner = object->inner;
+            inner->position[0] = data->offset[0] + data->position[0];
+            inner->position[1] = data->offset[1] + data->position[1];
+            inner->position[2] = data->offset[2] + data->position[2];
+        }
+        VU0_MOVE_VF(vf31, vf10);
+        VU0_STORE_MATRIX(model->matrix);
+        effObjInnerVecBackup((f32 *)inner);
+        sdfModelUpdateCurrentFrameTransforms(model);
+    }
+    return 1;
+}
 
 extern void fldSelectDisplayBuffer(s32 index);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);

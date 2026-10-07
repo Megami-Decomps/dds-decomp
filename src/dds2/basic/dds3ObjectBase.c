@@ -76,29 +76,31 @@ void dds3DestroyObjectBase(ObjBase *base) {
     sdfReleaseChipBlock(base);
 }
 
-/* Set mask bits in the resolved base; retain DDS2's unprototyped getter call. */
-void dds3SetObjectFlags(u32 unused, u32 mask) {
+/* Set mask bits in the object's resolved base. */
+void dds3SetObjectFlags(void *object, u32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     base->flags = base->flags | mask;
 }
 
-/* Clear mask bits in the resolved base; retain the existing argument convention. */
-void dds3ClearObjectFlags(u32 unused, u32 mask) {
+/* Clear mask bits in the object's resolved base. */
+void dds3ClearObjectFlags(void *object, u32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     base->flags = base->flags & ~mask;
 }
 
 /* Return whether any requested mask bit is set, not whether all bits are set. */
-u8 dds3TestObjectFlags(u32 unused, u32 mask) {
+u8 dds3TestObjectFlags(void *object, u32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     return (base->flags & mask) != 0;
 }
+
+void *dds3GetExtData(void *object);
 
 /* Replace the extension pointer without releasing its previous value.
  * Keep the existing extension getter call before the store. */
@@ -111,8 +113,8 @@ void dds3SetExtData(void *object, void *extensionData) {
 }
 
 /* Return the stored extension pointer; no copy or ownership change. */
-void *dds3GetExtData(void) {
-    return dds3GetObjectOwnedHandle()->extData;
+void *dds3GetExtData(void *object) {
+    return dds3GetObjectOwnedHandle(object)->extData;
 }
 
 /* Exchange the slot selected by the data kind; NULL data leaves every slot alone. */
@@ -138,16 +140,16 @@ void *dds3GetSlot(void *object, s32 slotIndex) {
 }
 
 /* Return the world-index node word also used when destroying the full base. */
-u32 dds3GetObjectIndexNode(void) {
+u32 dds3GetObjectIndexNode(void *object) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     return base->worldIndexNode;
 }
 
 /* Return the primary resource-handle word, whose interpretation depends on state. */
-u32 dds3GetObjectBaseResourceHandle(void) {
-    return dds3GetObjectOwnedHandle()->resourceHandle;
+u32 dds3GetObjectBaseResourceHandle(void *object) {
+    return dds3GetObjectOwnedHandle(object)->resourceHandle;
 }
 
 /* A nonzero handle releases model/context state (0) or device/motion state (1),

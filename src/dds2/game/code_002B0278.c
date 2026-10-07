@@ -1559,7 +1559,96 @@ void func_002B4270(u32 context) {
 void func_002B4290(s32 context) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4298);
+extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
+extern void mnuDispatchEntryWords(EffectSlotSet *, s32, MenuListNode *);
+extern void itfGridCopyEntryQuad(s32, s32);
+typedef struct MnuCategoryPositions {
+    s32 entries[4][2];
+} MnuCategoryPositions;
+extern const MnuCategoryPositions D_0042AE28;
+extern u32 scrGetSecondaryScriptFlag(DatPartyRecord *, u16);
+
+void func_002B4298(s32 x, s32 y, s32 depth, MenuList *list,
+                   MenuListNode *node, s32 texture) {
+    MnuCategoryPositions categoryPositions = D_0042AE28;
+    MenuContext *context = (MenuContext *)list->context;
+    SkillMenuRuntime *runtime = (SkillMenuRuntime *)context->party;
+    s32 category;
+    s32 selected;
+    s32 fade;
+    s32 opacity;
+    s32 markerX;
+    s32 markerY;
+    u32 skill;
+    DatPartyRecord *actor;
+
+    mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
+    selected = list->cursor == node;
+    actor = &datGameState->party[
+        context->partyWindow.lists[0]->cursor->index];
+    if (node == list->head && list->categoryMarkerEnabled != 0) {
+        category = list->categoryIndex;
+        markerX = categoryPositions.entries[category][0];
+        markerY = categoryPositions.entries[category][1];
+        fade = runtime->fade;
+        if (fade < 0x100) {
+            opacity = fade;
+        } else {
+            opacity = 0x200 - fade;
+        }
+        func_00306CD0(markerX, markerY, depth, opacity, 1,
+                      (EffectSlotSet *)context->resourceHandle, 0x1E, texture);
+    }
+
+    if (node->index == 0) {
+        if (selected != 0) {
+            s32 edgeY = y - 8;
+            itfDrawGridWithResolvedSlot(x + 0x2A0, y, depth, 1,
+                (u32)context->labelHandle, 0x23, texture);
+            itfDrawGridWithResolvedSlot(x - 0x30, edgeY, depth, 1,
+                (u32)context->resourceHandle, 0x1F, texture);
+            itfDrawGridWithResolvedSlot(x + 0xB10, edgeY, depth, 1,
+                (u32)context->resourceHandle, 0x1F, texture);
+        } else {
+            itfDrawGridWithResolvedSlot(x + 0x60, y, depth, 1,
+                (u32)context->labelHandle, 0x1D, texture);
+        }
+        return;
+    }
+
+    skill = node->sortKeyPrimary;
+    if ((u32)(skill - 1) <= 0xFFFD &&
+        scrGetSecondaryScriptFlag(actor, (u16)skill) != 0) {
+        s32 skillFade = runtime->fade;
+        if (skillFade < 0x100) {
+            opacity = skillFade;
+        } else {
+            opacity = 0x200 - skillFade;
+        }
+        func_00306CD0(x + 0x60, y + 0x10, depth, opacity, 1,
+                      (EffectSlotSet *)context->resourceHandle, 0x1E, texture);
+    }
+
+    if (skill != 0 && skill != 0xFFFF) {
+        mnuDrawRangeCostAndIcon(x + 0x970, y + 0x30, depth, 0x1F0,
+            list->scale, actor,
+            (u16)skill, selected, node->flags48 & 1,
+            (EffectSlotSet *)context->resourceHandle,
+            texture);
+        return;
+    }
+
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)context->resourceHandle;
+        s32 entryIndex = selected + 0x1B;
+        markerX = x + 0x1C0;
+        markerY = y + 0x40;
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        mnuDrawRepeatedPanelSprites(markerX, markerY, depth, 0x100, 8,
+                                    resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+    }
+}
 
 extern s32 ptyHasSkill(DatPartyRecord *, s32);
 extern u32 scrGetSecondaryScriptFlag(DatPartyRecord *, u16);

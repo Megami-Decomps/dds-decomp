@@ -1732,7 +1732,11 @@ extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
 typedef struct BtlActorMotionSlot {
     u8 pad00[4];
     s16 kind; /* 0x04: motion/effect-kind discriminator */
-    u8 pad06[0xE];
+    s16 alphaStartFrame; /* 0x06 */
+    f32 alphaFrameScale; /* 0x08 */
+    u8 pad0C[4];
+    s16 alphaDuration; /* 0x10 */
+    u8 pad12[2];
 } BtlActorMotionSlot;
 
 typedef struct BtlActorStatusRecord {
@@ -6075,7 +6079,74 @@ u8 *btlCreateActorModelBlendTask(u8 *actor, u32 target, u32 index, u32 value, f3
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DA468);
+/* Update motion completion, alpha transitions, and the selected-unit color pulse. */
+void func_001DA468(void) {
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    BtlActorStatusRecord *status;
+    s32 parameter;
+    s32 frame;
+    s32 index;
+    f32 pulse;
+    u32 packed[4]; /* SDK color workspace; the low word holds RGBA8888. */
+
+    if (runtime->beforeMotionUpdate != NULL) {
+        runtime->beforeMotionUpdate();
+    }
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
+        if (!(unit->flags & 0x600) || !(unit->flags & 2)) {
+            continue;
+        }
+        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+            unit->resourceKind, unit->species);
+        if (unit->flags & 0x40000000) {
+            btlSeekRandomModelFrame(unit);
+            unit->flags &= ~0x40000000;
+        }
+        if (unit->flags & 0x80000000) {
+            parameter = 1;
+            if (runtime->chooseMotion != NULL) {
+                parameter = runtime->chooseMotion(unit, 1, 0);
+            }
+            if (unit->unkEC != parameter && parameter != -1) {
+                btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
+            } else {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                if (frame >= status->model) {
+                    sdfMotionSampleAtFrame(unit->ext->owner->first, (f32)status->model);
+                    btlResetUnitModelProgress(unit);
+                    unit->flags &= ~0x80000000;
+                }
+            }
+        }
+        if (unit->updateFlags & 2) {
+            if (unit->updateFlags & 4) {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                index = unit->unkEC;
+                if (index == mdlGetNodeField2C(unit->ext->owner, 0)) {
+                    if (frame >= status->motions[index].alphaStartFrame) {
+                        evtSetUnitAlphaTransition(unit->ext,
+                            (s32)((f32)status->motions[index].alphaDuration /
+                                (status->motions[index].alphaFrameScale * runtime->modelFrameScale)),
+                            unit->overlayColor & 0xFFFFFF);
+                        unit->updateFlags &= ~4;
+                    }
+                }
+            }
+            unit->overlayColor = mdlGetBroadcastValue(unit->ext->owner);
+        }
+        if (unit->flags & 0x8000) {
+            pulse = (f32)(runtime->frame % 30) / 15.0f;
+            if (pulse > 1.0f) {
+                pulse = 2.0f - pulse;
+            }
+            VU0_SET_ONES_XYZ(vf10);
+            VU0_SCALAR_OP(pulse * 1.6f + 0.3f, "vmulx.xyzw vf10, vf10, vf2x");
+            EE_MMI_RGBA_PACK(packed[0]);
+            btlBlendUnitColor((u8 *)unit, (packed[0] & 0xFFFFFF) | 0x80000000, 0);
+        }
+    }
+}
 
 void btlUpdateActorModelColorAndLinks(void) {
     BtlUnit *unit = ((BtlActorWork *)btlGetRuntime())->actorList;
