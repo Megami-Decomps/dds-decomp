@@ -8,6 +8,7 @@
 #include "sdf_sif_command.h"
 #include "kwln.h"
 #include "evt_unit.h"
+#include "evt_polygon_movie.h"
 
 extern u32 evtSkyOverlayEnabled;
 
@@ -110,7 +111,7 @@ typedef union EvtFrameRange {
 typedef struct EvtRuntime {
     u8 pad0000[4];
     u32 flags; /* 0x04 */
-    struct EvtMessageWindow *windowContext; /* 0x08: message window context */
+    PolyMovieWork *windowContext; /* 0x08: message window context */
     s32 headerThird; /* 0x0C: third emitted header word */
     s32 headerFirst; /* 0x10: first emitted header word */
     EvtFrameRange frameRange; /* 0x14: second header word and terminal span value */
@@ -1147,16 +1148,12 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
 extern char D_00423EC0[]; /* "MESSAGE MENU (MESMAX %3d)" */
 
 /* The message-menu work references a window whose entry handle lives at +0x104. */
-typedef struct EvtMessageWindow {
-    u8 pad00[0x104];
-    s32 entryHandle;
-} EvtMessageWindow;
 
 
 /* Draw the message count from the runtime window context
  * and its entry handle, returning two rows used. */
 s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtRuntime *ctx) {
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->windowContext->entryHandle)));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->windowContext->handle)));
     return 2;
 }
 
@@ -1213,9 +1210,9 @@ void evtDrawMessageDataRow(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
             color = 0;
         }
         sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004374A0, ctx->value & 0xFFF));
-        if (ctx->windowContext->entryHandle == -1) {
+        if (ctx->windowContext->handle == -1) {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
-        } else if (itfMesGetWindowEntryItems(ctx->windowContext->entryHandle, ctx->value & 0xFFF) == 0) {
+        } else if (itfMesGetWindowEntryItems(ctx->windowContext->handle, ctx->value & 0xFFF) == 0) {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
         } else {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
@@ -1294,7 +1291,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         ctx->messageField = !field;
     }
     if (D_0037F510.confirm < 0) {
-        handle = ctx->windowContext->entryHandle;
+        handle = ctx->windowContext->handle;
         if (handle != -1) {
             if (branch == 0) {
                 if (itfMesGetWindowEntryItems(handle, number) == 0) {
@@ -2674,14 +2671,12 @@ extern void evtEventViewerShutdown(EvtRuntime *runtime);
 extern void evtDestroySecondaryWorldNode(void);
 extern void evtEventViewerReleaseGroups(EvtRuntime *runtime);
 extern void evtEventViewerReset(EvtRuntime *runtime);
-extern s32 func_0024FB48(u16 a, u16 b, s32 mode);
-extern void func_0025A280(s32 handle, EvtRuntime *runtime);
 
 s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     char path0[0x80];
     char path1[0x80];
     char path2[0x80];
-    s32 handle;
+    PolyMovieWork *work;
 
     mnuReleaseCampSceneRegisteredIds(runtime);
     if (runtime->timedActive == 1) {
@@ -2718,13 +2713,13 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     runtime->flags |= 1;
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    handle = func_0024FB48(D_004372B0, D_004372B2, mode);
-    if (handle != 0) {
-        runtime->windowContext = (EvtMessageWindow *)handle;
-        func_0025A280(handle, runtime);
+    work = func_0024FB48(D_004372B0, D_004372B2, mode);
+    if (work != NULL) {
+        runtime->windowContext = work;
+        func_0025A280(work, runtime);
         return 1;
     }
-    return handle;
+    return 0;
 }
 
 s32 evtEncodeBgmSoundCode(s32 eventId, s32 variation) {

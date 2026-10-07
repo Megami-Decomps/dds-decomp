@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_unit.h"
+#include "file.h"
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -14,7 +15,56 @@ extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
 extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_00241E18);
+extern s32 D_003BC368;
+extern s32 func_003003F0(const char *, ...);
+extern void mdlLoadViewerPackage(s32, s32, s32, void *, s32);
+extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
+
+/* Decode one retained unit payload and return its new viewer-object key. */
+s32 func_00241E18(s32 eventId, s32 resourceId) {
+    EvtPackLoadState *data;
+    EvtPackEntry *entry;
+    s32 i;
+    s32 entrySize;
+    u8 *payload;
+    s32 unitKey;
+
+    data = evtGetTaskData(eventId);
+    i = 0;
+    if (data->header->entryCount > 0) {
+        entry = data->entries;
+        do {
+            if (entry->secondaryResourceId == resourceId) {
+                switch (entry->kind) {
+                case 5:
+                    entrySize = entry->dataSize;
+                    payload = data->data + entry->dataOffset;
+                    func_003003F0("unit decode rid:%d, size:%d\n", resourceId, entrySize);
+                    switch (eventId) {
+                    case 0x2A4:
+                    case 0x2AC:
+                    case 0x2AE:
+                    case 0x2B0:
+                        mdlLoadViewerPackage(3, D_003BC368, 0x101, payload, entrySize);
+                        break;
+                    default:
+                        mdlLoadViewerPackage(3, D_003BC368, 0x103, payload, entrySize);
+                        break;
+                    }
+                    unitKey = mdlSpawnCameraSlotViewerObject(3, D_003BC368);
+                    D_003BC368++;
+                    if (D_003BC368 >= 0x7D0) {
+                        D_003BC368 = 0x3E8;
+                    }
+                    func_003003F0("BE regist unit %d < %d >\n", D_003BC368, entrySize);
+                    return unitKey;
+                }
+            }
+            entry++;
+        } while (++i < data->header->entryCount);
+    }
+    return -1;
+}
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 func_00241F78(s32 eventId, s32 resourceId) {
@@ -98,7 +148,6 @@ extern char D_003AF270[];
 extern char D_003BC370[];
 extern s32 func_003003F0();
 extern char D_003D8090[];
-extern s32 fileQueueDefaultCallbackRequest(char *path);
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {

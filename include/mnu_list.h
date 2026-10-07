@@ -3,6 +3,14 @@
 
 #include "mnu.h"
 
+/* DDS1 248D40 writes the two terminal payload words; 24BDB8 consumes them
+ * as a party index and its signed recovery cost. The surrounding node storage
+ * is also the camp/sort payload, not a second progress-node struct view. */
+typedef struct MenuThresholdEntry {
+    s32 entryId;
+    s32 requiredAmount;
+} MenuThresholdEntry;
+
 /* Native list owner, shared by both games' allocator and window consumers. */
 struct MenuListNode {
     s32 index;
@@ -28,6 +36,7 @@ struct MenuListNode {
             u8 pad6C[4];
         };
         CampWindowParams camp;
+        MenuThresholdEntry terminal;
     };
     /* +0x70: terminal recovery panel at 267050; title at 2674C8.
      * Mantra lists retain a DatPartyRecord address in the same word. */
@@ -57,5 +66,10 @@ struct MenuList {
     u32 categoryMarkerEnabled; /* 0x38: draw the active category marker. */
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
+
+#ifdef VERSION_DDS1
+struct MenuListNode *mnuAdvanceListCursorDefault(struct MenuList *list);
+struct MenuListNode *mnuRetreatListCursorDefault(struct MenuList *list);
+#endif
 
 #endif

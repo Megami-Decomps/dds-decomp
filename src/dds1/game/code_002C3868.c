@@ -2,6 +2,7 @@
 #include "eff_transform.h"
 #include "gs_packet.h"
 #include "sdf.h"
+#include "mnu_list.h"
 
 extern void sdfCounterTickCountdown(void);
 
@@ -402,8 +403,6 @@ void sdfCounterTickCountdownAndMapTimers(void) {
 extern s8 D_00324510[];
 extern s32 D_003BD240;
 extern s8 D_003BD280;
-extern SdfCounterChannel *mnuRetreatListCursorDefault(SdfCounterRuntime *);
-extern SdfCounterChannel *mnuAdvanceListCursorDefault(SdfCounterRuntime *);
 extern void mnuClearListFlagsOneAndTwo(SdfCounterRuntime *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void sdfCounterSetMode(s32);
@@ -418,7 +417,7 @@ s32 sdfHandleMapCounterSelectionInput(void) {
 
     if (D_00324510[0x26] < 0 || (D_00324510[0x26] & 2)) {
         previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
-        if (mnuRetreatListCursorDefault((SdfCounterRuntime *)sdfActiveCounterRuntime) != NULL) {
+        if (mnuRetreatListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
             index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
@@ -428,7 +427,7 @@ s32 sdfHandleMapCounterSelectionInput(void) {
     }
     if (D_00324510[0x27] < 0 || (D_00324510[0x27] & 2)) {
         previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
-        if (mnuAdvanceListCursorDefault((SdfCounterRuntime *)sdfActiveCounterRuntime) != NULL) {
+        if (mnuAdvanceListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
             index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
             sdfCounterSetMode(previousIndex);
             sndSetSequenceVolumePan(0, 127, 63);

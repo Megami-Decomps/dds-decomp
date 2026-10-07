@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_task_args.h"
 #include "btl_action.h"
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "pcp_vu0.h"
@@ -1328,7 +1329,7 @@ u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode)
     }
     *(u32 *)(actionTask + 0x4C) = (u32)fldDispatchSceneGroupRequestWhenAllowed;
     *(u32 *)(actionTask + 0x48) = 0;
-    requestData = (u8 *)btlGetTaskArguments(actionTask);
+    requestData = btlGetTaskArguments(actionTask);
     *(u32 *)(requestData + 0) = (u32)actorTask;
     *(u32 *)(requestData + 4) = counterAmount;
     requestData[8] = counterModeByte;
@@ -1371,7 +1372,7 @@ u8 *fldCreateSceneActorAction(u8 *actorTask, s32 slotCount) {
     }
     *(u32 *)(actionTask + 0x48) = (u32)fldStopSceneActorActionUpdate;
     *(u32 *)(actionTask + 0x4C) = (u32)fldActivateRequestedSceneActor;
-    requestData = (u8 *)btlGetTaskArguments(actionTask);
+    requestData = btlGetTaskArguments(actionTask);
     *(u32 *)requestData = (u32)actorTask;
     *(s32 *)(requestData + 4) = slotCount;
     return actionTask;

@@ -105,7 +105,7 @@ extern void func_00282DA0(s32, s32, s32, s32, s32);
 s32 ptySkillMenuUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
-    s32 state = menuRunPanel(context, 0, callback);
+    s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -190,12 +190,12 @@ s32 ptySkillMenuEnterPage(s32 callback) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(0, work->actor);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 ptySkillMenuDispatchPageRequest(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, selection);
+    return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
 s32 ptySkillMenuUseSelectedInField(id, context)
@@ -250,7 +250,7 @@ s32 ptySkillMenuHandleFieldUse(s32 callback) {
     s32 label;
     u16 code;
     s32 window;
-    state = func_00285670(context + 8, popup, 0, callback);
+    state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -285,12 +285,12 @@ s32 ptySkillMenuEnterConfirm(s32 callback) {
     menu->selected->list->flags &= ~8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
     func_002723B0(0, ((SkillMenuContext *)context)->actor);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 ptySkillMenuDispatchConfirmRequest(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, selection);
+    return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
 extern void mnuSelectPage(void *, u32);
@@ -316,8 +316,6 @@ s32 mnuCloseSelectionAndReleasePartyPanel(s32 selection) {
     return 1;
 }
 
-extern void mnuRetreatListCursorDefault();
-extern void mnuAdvanceListCursorDefault();
 extern void mnuClearListFlagsOneAndTwo();
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 

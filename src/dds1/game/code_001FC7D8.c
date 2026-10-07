@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_task_args.h"
 #include "pcp_vu0.h"
 
 
@@ -414,7 +415,6 @@ typedef struct BtlEffectTask {
 } BtlEffectTask;
 
 extern BtlEffectTask *btlAllocTask(s32);
-extern BtlObjLink *btlGetTaskArguments(BtlEffectTask *);
 extern s32 func_001FD5C8();
 
 /* Create the selected numbered-display task with its frame count starting at zero. */
@@ -436,7 +436,7 @@ BtlEffectTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     task->owner = owner->identity;
     task->update = func_001FD5C8;
     task->onFinish = effDecrementFirstCountdown;
-    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(task);
+    args = btlGetTaskArguments(task);
     args->payload.linked.kind = kind;
     args->unit = owner;
     args->payload.linked.value = value;

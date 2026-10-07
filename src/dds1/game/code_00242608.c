@@ -61,7 +61,6 @@ extern s32 kwlnTaskFindByPriority(u32);
 
 extern s64 evtFindTaskById(void);
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -1137,9 +1136,9 @@ void mnuShopDestroyScene(s32 arg) {
     }
 }
 
-extern s32 mnuCampRunPanel0(u64 request);
-extern s32 mnuCampRunPanel1(u64 request);
-extern s32 mnuCampRunPanel2(u64 request);
+extern s32 mnuCampRunPanel0(void *request);
+extern s32 mnuCampRunPanel1(void *request);
+extern s32 mnuCampRunPanel2(void *request);
 
 /* Create the camp context and its three scheduler tasks (main, draw, update).
  * Optionally seed the initial selection from the caller. */
@@ -1181,22 +1180,22 @@ s32 mnuPollTaskState(void) {
 extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_0036AB48[];
 
-s32 mnuCampRunPanel0(u64 request) {
+s32 mnuCampRunPanel0(void *request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
     mnuSetPopupEntry(panel, D_0036AB48);
-    return menuRunPanel(state, 0, request);
+    return menuRunPanel((void *)state, 0, request);
 }
 
 
-s32 mnuCampRunPanel1(u64 request) {
+s32 mnuCampRunPanel1(void *request) {
     s32 state = kwlnTaskGetUserValue();
-    return menuRunPanel(state, 1, request);
+    return menuRunPanel((void *)state, 1, request);
 }
 
-s32 mnuCampRunPanel2(u64 request) {
+s32 mnuCampRunPanel2(void *request) {
     s32 state = kwlnTaskGetUserValue();
-    return menuRunPanel(state, 2, request);
+    return menuRunPanel((void *)state, 2, request);
 }
 
 typedef struct ShopSourcePriceEntry {

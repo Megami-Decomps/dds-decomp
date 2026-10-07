@@ -1,6 +1,8 @@
 #include "common.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "file.h"
+
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6

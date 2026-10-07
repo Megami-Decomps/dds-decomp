@@ -47,7 +47,6 @@ extern s32 kwlnFadeIsActive(void);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -121,14 +120,14 @@ s32 evtPrimeDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_00260670(stateAddress);
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSync(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 void evtInstallStateTableB(ShopScene *state) {
@@ -172,14 +171,14 @@ s32 evtStageDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_00260AB0(stateAddress);
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncB(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 void evtInstallStateTableC(ShopScene *state) {
@@ -222,14 +221,14 @@ s32 evtStageDispatchStartB(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_00260AB0(stateAddress);
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncC(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 void evtInstallStateTableD(ShopScene *state) {
@@ -279,7 +278,7 @@ s32 func_002469F0(KwlnTask *task) {
     inputFlags = mnuMapPadMaskToFlags(0x33);
     dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     linkedTask = ((ShopScene *)stateAddress)->window->list;
-    dispatchResult = func_00285670(stateAddress + 8, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (s32)task);
+    dispatchResult = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, task);
     if (dispatchResult == 0) {
         switch (mnuTickExtendedCommandPhase((ShopScene *)stateAddress)) {
         case -1:
@@ -332,14 +331,14 @@ s32 evtStageDispatchStartC(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_00260AB0(stateAddress);
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncD(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 u32 evtResetStateProgressTimer(void) {
@@ -352,9 +351,9 @@ u32 evtResetStateProgressTimer(void) {
 }
 
 /* Keep the dispatch query alive for 20 idle ticks before restarting its table. */
-s32 evtQueryStateProgress(u64 callbackContext) {
+s32 evtQueryStateProgress(void *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    s32 dispatchResult = func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 dispatchResult = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
     if (dispatchResult == 0) {
         if ((((ShopScene *)stateAddress)->dispatchState == 0) && (evtGetMessageWindowControlState() == 0)) {
@@ -375,14 +374,14 @@ s32 evtFetchDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0025E108(stateAddress, ((ShopScene *)stateAddress)->progressTicks);
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncE(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 s32 evtApplyBaseRateProgressStep(void) {
@@ -413,13 +412,12 @@ extern void func_00260590(struct MenuList *, u32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_0036AB10[];
 
-s32 evtPollQuantitySelection(u64 callbackContext) {
+s32 evtPollQuantitySelection(void *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     s32 previousQuantity = ((ShopScene *)stateAddress)->counter;
     s32 input = mnuMapPadMaskToFlags(0xF000F3);
-    s32 result = func_00285670(stateAddress + 8, dispatchSlot,
-                             EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
     if (result != 0) {
         return result;
@@ -486,14 +484,14 @@ s32 evtAlignDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_00261760((ShopScene *)stateAddress);
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncF(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247190);
@@ -518,7 +516,7 @@ s32 evtSetupDispatchSyncG(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 extern void dspStartEntry();
@@ -559,14 +557,14 @@ s32 evtApplyDispatchModeState(void) {
 }
 
 /* After idle dispatch, resume the state table at its saved position. */
-s32 evtSetPopupEntryWhenMessageWindowIdle(u64 callbackContext) {
+s32 evtSetPopupEntryWhenMessageWindowIdle(void *callbackContext) {
     s32 stateAddress;
     s32 result;
     s32 *dispatchSlot;
 
     stateAddress = kwlnTaskGetUserValue();
     dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
-    result = func_00285670(stateAddress + 8, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
         if ((*dispatchSlot == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
             mnuSetPopupEntryFlagged((s32)dispatchSlot, ((ShopScene *)stateAddress)->stateTable);
@@ -619,14 +617,14 @@ s32 func_00247A78(s32 callbackContext) {
         }
         break;
     }
-    return func_00285670((s32)state->transitionWork, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_00285670(state->transitionWork, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncH(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 u32 evtStartScriptFadeAndResetDisplayFlags(void) {
@@ -653,14 +651,14 @@ s32 evtRefreshDispatchStart(s32 callbackContext) {
     if (progressTicks != 0) {
         func_0025DF68(stateAddress, progressTicks);
     }
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncI(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 u32 evtResetStateFlags(void) {
@@ -682,14 +680,14 @@ INCLUDE_ASM(const s32, "game/code_00245C98", func_002481A0);
 s32 evtDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 /* Select the secondary entry action with the same opaque callback context. */
 s32 evtDispatchSync(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
-    return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 u32 func_002482B0(void) {

@@ -63,7 +63,6 @@ extern u32 evtDisplayValues[];
 
 extern void func_0024A2D8(s32 arg0);
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
@@ -172,7 +171,7 @@ u32 func_0024D260(void) {
 s32 dspUpdateFlagEvent(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
-    s32 result = func_00285670(workAddress + 8, popupSlot, 0, request);
+    s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     if (result != 0) {
         return result;
     }
@@ -190,14 +189,14 @@ s32 dspUpdateFlagEvent(s32 request) {
 s32 mnuDispatchTerminalPanel(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     func_0024A2D8(workAddress);
-    return menuRunPanel(workAddress, 1, request);
+    return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Request the message-window transition before dispatching terminal panel mode two. */
 s32 mnuDispatchTerminalPanelExit(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     func_0024DD78();
-    return menuRunPanel(workAddress, 2, request);
+    return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
 
 /* Reset display slots for a zero exit marker, otherwise start the existing fade-in.
@@ -238,7 +237,7 @@ extern char D_0036AE48[];
 s32 mnuUpdateTerminalReadyPopup(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
-    s32 result = menuRunPanel(workAddress, 0, request);
+    s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     s32 ready;
 
     if (result != 0) {
@@ -264,14 +263,14 @@ s32 mnuUpdateTerminalReadyPopup(s32 request) {
 s32 func_0024D500(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
     func_0024A2D8(workAddress);
-    return menuRunPanel(workAddress, 1, request);
+    return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Dispatch current work in panel mode two without the message transition request. */
 s32 func_0024D550(s32 request) {
     s32 workAddress = kwlnTaskGetUserValue();
 
-    return menuRunPanel(workAddress, 2, request);
+    return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
 
 /* Clear the terminal task's stored selection word and report completion. */

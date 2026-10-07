@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "btl_state.h"
+#include "btl_task_args.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "dat_state.h"
@@ -44,7 +45,6 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(s32, u32);
 extern void btlDispatchStateHandler(void *, s32);
 extern u64 btlStartTask(void *);
 extern BtlRuntimeTask *btlAllocTask(s32);
-extern void *btlGetTaskArguments(s32);
 
 extern s32 btlHasRegisteredGuidePanelTask(void);
 
@@ -1292,7 +1292,7 @@ u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode)
     }
     actionTask->callback = fldDispatchSceneGroupRequestWhenAllowed;
     actionTask->onStart = 0;
-    requestData = btlGetTaskArguments((s32)actionTask);
+    requestData = btlGetTaskArguments(actionTask);
     *(u32 *)(requestData + 0) = (u32)actorTask;
     *(u32 *)(requestData + 4) = counterAmount;
     requestData[8] = counterModeByte;
@@ -1332,7 +1332,7 @@ u8 *fldCreateSceneActorAction(u8 *actorTask, u32 slotCount) {
     }
     actionTask->onStart = fldStopSceneActorActionUpdate;
     actionTask->callback = fldActivateRequestedSceneActor;
-    requestData = btlGetTaskArguments((s32)actionTask);
+    requestData = btlGetTaskArguments(actionTask);
     requestData[0] = (u32)actorTask;
     requestData[1] = slotCount;
     return (u8 *)actionTask;
@@ -1352,7 +1352,7 @@ u8 *fldCreateActorAction(s32 counterAmount) {
     actionTask->callback = fldApplySceneSlotSwapRequest;
     actionTask->endCondition.kind = 0;
     actionTask->onStart = 0;
-    *(u32 *)btlGetTaskArguments((s32)actionTask) = counterAmount;
+    *(u32 *)btlGetTaskArguments(actionTask) = counterAmount;
     return (u8 *)actionTask;
 }
 

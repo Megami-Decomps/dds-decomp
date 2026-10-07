@@ -141,7 +141,6 @@ typedef struct MenuSpriteRef {
 } MenuSpriteRef;
 
 
-struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 
 void mnuClearListFlagsOneAndTwo(u32 *flags);
 
@@ -745,7 +744,7 @@ void mnuResetNodeLinks(MenuList *list, s32 restoreCursor) {
             if (node == oldCursor) {
                 return;
             }
-            mnuAdvanceListCursorDefault((u32)list);
+            mnuAdvanceListCursorDefault(list);
             node = node->next;
         } while (node != NULL);
     }
@@ -1666,7 +1665,6 @@ void mnuClearListFlags(s32 which, MenuPageWindow *menu) {
 
 extern u32 mnuMapPadMaskToFlags(u32);
 
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
 /* Step the selected party-panel list from the pad: left/right move its cursor, any input restarts the fade. */
@@ -1691,13 +1689,13 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
             if (mnuTestListFlagTwo((u32 *)list) == 0) {
                 window->fade = 0x100;
             }
-            mnuRetreatListCursorDefault((u32)list);
+            mnuRetreatListCursorDefault(list);
         }
         if (input & 0x20) {
             if (mnuTestListFlagTwo((u32 *)list) == 0) {
                 window->fade = 0x100;
             }
-            mnuAdvanceListCursorDefault((u32)list);
+            mnuAdvanceListCursorDefault(list);
         }
         mnuPlayInputSound(0, input, &list->stateFlags);
     }

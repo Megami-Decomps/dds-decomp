@@ -2,6 +2,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "fld.h"
+#include "evt_polygon_movie.h"
 
 /* Global event state behind kwlnTaskGetUserValue; the polygon-movie word at 0x0 and
  * the pointer to the shared flag word at 0x8. */
@@ -103,92 +104,6 @@ typedef struct ObjectFlagsTarget {
 
 /* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
  * offsets are relative to the start of the block. */
-typedef struct PmdEntry {
-    u32 type;     /* 0x00 */
-    u32 unk_04;   /* 0x04 */
-    u32 value;    /* 0x08 */
-    u32 offset;   /* 0x0C */
-} PmdEntry;
-
-typedef struct PmdHeader {
-    u8 pad[0x10];
-    s32 count;    /* 0x10 */
-    s32 kind;     /* 0x14 */
-    u8 pad2[8];
-    PmdEntry entries[1]; /* 0x20 */
-} PmdHeader;
-
-typedef struct PolyMovieWork {
-    u32 unk_00;        /* 0x00 */
-    s32 res04;         /* 0x04 */
-    s32 res08;         /* 0x08 */
-    u32 unk_0C;        /* 0x0C */
-    PmdHeader *data;   /* 0x10 */
-    PmdEntry *entries; /* 0x14 */
-    u8 *mainEntry1Data;   /* 0x18 */
-    u32 unk_1C;        /* 0x1C */
-    u8 *mainEntry2Data;   /* 0x20 */
-    u32 unk_24;        /* 0x24 */
-    u8 *mainEntry10Data;  /* 0x28 */
-    u8 *mainEntry11Data;  /* 0x2C */
-    u8 *mainEntry12Data;  /* 0x30 */
-    u8 *mainEntry3Data;   /* 0x34 */
-    u32 unk_38;        /* 0x38 */
-    u8 *mainEntry9Data;   /* 0x3C */
-    u8 *mainEntry7Data;   /* 0x40 */
-    u32 unk_44;        /* 0x44 */
-    u8 *mainEntry8Data;   /* 0x48 */
-    u8 *mainEntry6Data;   /* 0x4C */
-    u8 *mainEntry22Data;  /* 0x50 */
-    u32 unk_54;        /* 0x54 */
-    u8 *mainEntry23Data;  /* 0x58 */
-    s32 res5C;         /* 0x5C */
-    s32 res60;         /* 0x60 */
-    u32 unk_64;        /* 0x64 */
-    u32 unk_68;        /* 0x68 */
-    s32 res6C;         /* 0x6C */
-    u32 unk_70;        /* 0x70 */
-    PmdHeader *sub;    /* 0x74 */
-    PmdEntry *subEntries; /* 0x78 */
-    u8 *subEntry1Data;    /* 0x7C */
-    u32 unk_80;        /* 0x80 */
-    u8 *subEntry0Data;    /* 0x84 */
-    u8 *subEntry4Kind4Data; /* 0x88 */
-    u8 *subEntry4OtherData; /* 0x8C */
-    PmdHeader *sub2;   /* 0x90 */
-    PmdEntry *sub2Entries; /* 0x94 */
-    u8 *secondEntry4Data; /* 0x98 */
-    u32 unk_9C;        /* 0x9C */
-    u32 unk_A0;        /* 0xA0 */
-    u8 *subEntry5Data;    /* 0xA4 */
-    u32 unk_A8;        /* 0xA8 */
-    u8 *subEntry13Data;   /* 0xAC */
-    u32 unk_B0;        /* 0xB0 */
-    u8 *subEntry14Data;   /* 0xB4 */
-    u32 unk_B8;        /* 0xB8 */
-    u8 *subEntry15Data;   /* 0xBC */
-    u32 unk_C0;        /* 0xC0 */
-    u8 *subEntry16Data;   /* 0xC4 */
-    u32 unk_C8;        /* 0xC8 */
-    u8 *subEntry17Data;   /* 0xCC */
-    u32 unk_D0;        /* 0xD0 */
-    u8 *subEntry18Data;   /* 0xD4 */
-    u32 unk_D8;        /* 0xD8 */
-    u8 *subEntry19Data;   /* 0xDC */
-    u32 unk_E0;        /* 0xE0 */
-    u8 *subEntry20Data;   /* 0xE4 */
-    u32 unk_E8;        /* 0xE8 */
-    u8 *subEntry24Data;   /* 0xEC */
-    u32 unk_F0;        /* 0xF0 */
-    u8 *subEntry21Data;   /* 0xF4 */
-    u32 unk_F8;        /* 0xF8 */
-    u8 *subEntry25Data;   /* 0xFC */
-    u32 unk_100;       /* 0x100 */
-    s32 handle;        /* 0x104 */
-    u32 unk_108[3];    /* 0x108 */
-    u32 unk_114;       /* 0x114 */
-    s32 *buffer;       /* 0x118 */
-} PolyMovieWork;
 
 extern ObjectFlagsTarget *effObjGetTransitionWork(PolyMovieObject *obj);
 extern void dds3SetObjectFlags(PolyMovieObject *obj, s32 flags);
@@ -199,8 +114,8 @@ extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern s32 sdfAllocGeneralBlock(s32 size);
-extern void *sdfResourceRetainAddress(s32 handle);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
 
 extern f32 D_00368540[4];
 extern f32 D_00368550[4];
@@ -215,8 +130,8 @@ extern EvtBlendA D_003686A0;
 extern s32 itfMesCreateWindow(u8 *arg);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
-extern void filePollEntryCleanup(s32 arg);
-extern void sdfReleaseResourceAllocation(s32 arg);
+extern s32 filePollEntryCleanup(void *arg);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *arg);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void func_003003F0(const char *fmt, ...);
@@ -641,9 +556,9 @@ void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 unused, s32 start, s32
 }
 
 /* Allocate and clear a polygon-movie event work block. */
-void *evtPolygonMovieAllocWork(void)
+PolyMovieWork *evtPolygonMovieAllocWork(void)
 {
-    void *work;
+    PolyMovieWork *work;
 
     work = sdfAllocSizeClassBlock(0x11C);
     if (work == NULL) {
@@ -873,20 +788,20 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
             work->handle = -1;
         }
         fileWaitIdle();
-        if (work->res04 != 0) {
-            filePollEntryCleanup(work->res04);
+        if (work->mainResource.request != 0) {
+            filePollEntryCleanup(work->mainResource.request);
         }
-        if (work->res5C != 0) {
-            filePollEntryCleanup(work->res5C);
+        if (work->secondaryResource.request != 0) {
+            filePollEntryCleanup(work->secondaryResource.request);
         }
-        if (work->res08 != 0) {
-            sdfReleaseResourceAllocation(work->res08);
+        if (work->mainResource.handle != 0) {
+            sdfReleaseResourceAllocation(work->mainResource.handle);
         }
-        if (work->res60 != 0) {
-            sdfReleaseResourceAllocation(work->res60);
+        if (work->secondaryResource.handle != 0) {
+            sdfReleaseResourceAllocation(work->secondaryResource.handle);
         }
-        if (work->res6C != 0) {
-            sdfReleaseResourceAllocation(work->res6C);
+        if (work->tertiaryResource.handle != 0) {
+            sdfReleaseResourceAllocation(work->tertiaryResource.handle);
         }
         if (mnuQueryTitleSoundBusy() == 1) {
             mnuStopTitleVoicePlayback();
@@ -901,14 +816,14 @@ s32 evtPolygonMovieCreateHeader(void **out)
 {
     s32 header[16] = {0, 0, 0x32444D50, 0, 1, 9, 0, 0, 0, 0x10, 1, 0x30, 0, 999, 1000, 0};
     s32 size;
-    s32 handle;
+    SdfMemBlock *handle;
     void *block;
 
     size = 0x40;
     handle = sdfAllocGeneralBlock(size);
-    block = sdfResourceRetainAddress(handle);
+    block = (void *)sdfResourceRetainAddress(handle);
     memcpy(block, header, size);
     *out = block;
-    return handle;
+    return (s32)handle;
 }
 

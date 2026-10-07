@@ -38,10 +38,10 @@ static inline s32 menuSetHandler(void *context, s32 mode, void *callback) {
     return func_002C4038((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
 }
 /* DDS1 uses the same scheduler-word contract as the DDS2 dispatcher. */
-extern s32 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_00285670(void *work, s32 *entrySlot, s32 mode, void *callback);
 
-static inline s32 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
+static inline s32 menuRunPanel(void *context, s32 mode, void *callback) {
+    return func_00285670((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
 }
 
 static inline s32 evtMenuSetHandler(void *context, s32 mode, void *callback) {

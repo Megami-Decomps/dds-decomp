@@ -14,7 +14,7 @@ extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_00324530[];
 extern u8 D_0036D3EC[];
 
-s32 brsMessageInputStep(u64 input) {
+s32 brsMessageInputStep(void *input) {
     BrsSkillPackageWork *context;
     s32 *window;
     s32 buttons;
@@ -26,7 +26,7 @@ s32 brsMessageInputStep(u64 input) {
     if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
         return 0;
     }
-    result = menuRunPanel((s32)context, 0, input);
+    result = menuRunPanel(context, 0, input);
     if (result != 0) {
         return result;
     }
@@ -47,7 +47,7 @@ s32 mnuStaffRunPanel1(s32 input) {
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         mnuRefreshPanelLayer(context);
-        return menuRunPanel((s32)context, 1, input);
+        return menuRunPanel(context, 1, (void *)input);
     }
 }
 
@@ -58,7 +58,7 @@ s32 mnuStaffRunPanel2(s32 input) {
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         brsDecaySharedAnimCounter(context);
-        return menuRunPanel((s32)context, 2, input);
+        return menuRunPanel(context, 2, (void *)input);
     }
 }
 
@@ -73,18 +73,18 @@ u32 func_00263058(void) {
 s32 mnuStaffRunPanel0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuMapPadMaskToFlags(0x33);
-    return menuRunPanel(context, 0, input);
+    return menuRunPanel((void *)context, 0, (void *)input);
 }
 
 s32 mnuRefreshAndDispatchCurrentPanel(s32 input) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     mnuRefreshPanelLayer(context);
-    return menuRunPanel((s32)context, 1, input);
+    return menuRunPanel(context, 1, (void *)input);
 }
 
 s32 func_00263100(s32 input) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, input);
+    return menuRunPanel((void *)context, 2, (void *)input);
 }
 
 u32 func_00263138(void) {

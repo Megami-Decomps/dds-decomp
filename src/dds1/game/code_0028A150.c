@@ -4,9 +4,8 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "fpu.h"
+#include "mnu_list.h"
 struct MenuListNode;
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 struct EffectSlotSet;
 extern void func_002BF4E0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
@@ -380,7 +379,6 @@ extern char D_003B26C8[];
 
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
-extern u32 fileQueueDefaultCallbackRequest(const char *path);
 
 extern void dds3DispatchIndexedCallback(void *callback);
 
@@ -3367,14 +3365,14 @@ s32 func_00291418(void) {
 
     oldIndex = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
     if ((u8)D_00324510[0x26] & 2) {
-        if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuRetreatListCursorDefault((struct MenuList *)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
         }
     }
     if ((u8)D_00324510[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuAdvanceListCursorDefault((struct MenuList *)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;

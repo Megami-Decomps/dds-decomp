@@ -3,6 +3,7 @@
 #include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
+#include "btl_task_args.h"
 #include "btl_command.h"
 #include "sdf.h"
 #include "ee_mmi.h"
@@ -442,7 +443,6 @@ typedef struct BattleTaskData {
 
 extern BattleTask *btlAllocTask(s32);
 
-extern BattleTaskData *btlGetTaskArguments(BattleTask *);
 
 extern s32 func_00210670(void *);
 

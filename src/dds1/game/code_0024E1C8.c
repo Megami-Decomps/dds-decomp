@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff.h"
+#include "mnu_list.h"
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 #define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
@@ -415,7 +416,36 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024EF68);
+void func_0024EF68(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+            D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->workEntries[6].width =
+            (s32)(scaleX * (f32)resource->workEntries[6].sourceWidth) << 4;
+        resource->workEntries[6].height =
+            (s32)(scaleY * (f32)resource->workEntries[6].sourceHeight) << 3;
+    }
+    func_002BF4E0(
+        (s32)((f32)(x + D_0036BC68[placementIndex][MNU_SPRITE_X_OFFSET]) *
+              scaleX) << 4,
+        (s32)((f32)(y + D_0036BC68[placementIndex][MNU_SPRITE_Y_OFFSET]) *
+              scaleY) << 3,
+        z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+        D_0036C698[D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+        6, context);
+    {
+        /* Reload the resource after drawing before restoring native size. */
+        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+            D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+
+        resource->workEntries[6].width =
+            resource->workEntries[6].sourceWidth << 4;
+        resource->workEntries[6].height =
+            resource->workEntries[6].sourceHeight << 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F0D0);
 
@@ -670,14 +700,14 @@ u32 mnuGetSelectedNodeValue(void) {
 void mnuStopResourceAnimation(void) {
     s32 taskAddress = func_002CB3B8(mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)taskAddress)->menuList);
-    mnuRetreatListCursorDefault(((MnuResourceTask *)taskAddress)->menuList);
+    mnuRetreatListCursorDefault((struct MenuList *)((MnuResourceTask *)taskAddress)->menuList);
 }
 
 /* Clear the list's two animation flags and request its default advance. */
 void mnuResetResourceAnimation(void) {
     s32 taskAddress = func_002CB3B8(mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)taskAddress)->menuList);
-    mnuAdvanceListCursorDefault(((MnuResourceTask *)taskAddress)->menuList);
+    mnuAdvanceListCursorDefault((struct MenuList *)((MnuResourceTask *)taskAddress)->menuList);
 }
 
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */

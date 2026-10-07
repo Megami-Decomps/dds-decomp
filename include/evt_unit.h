@@ -178,7 +178,8 @@ typedef struct EvtUnit {
 /* BE resource files have a 0x20-byte header and fixed 0x20-byte records. */
 typedef struct EvtPackEntry {
     s32 kind;                     /* 0x00 */
-    u8 pad04[8];
+    s32 dataSize;                 /* 0x04: package byte count loaded at DDS1 241E7C. */
+    u8 pad08[4];
     u32 dataOffset;               /* 0x0C: relative to the retained file base */
     s32 secondaryResourceId;      /* 0x10 */
     s32 resourceId;               /* 0x14 */

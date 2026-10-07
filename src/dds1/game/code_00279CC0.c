@@ -9,8 +9,6 @@ extern u32 effDestroyPayload(EffPayload *);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 struct MenuListNode;
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 
 
 typedef struct MenuList MenuList;
@@ -58,7 +56,6 @@ extern s32 func_0027B888(u32);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 
 
 /* Selected child window and page of the party skill-menu runtime. */
@@ -120,11 +117,11 @@ s32 mnuOpenSkillDetailPanel(s32 callback) {
     ((MenuWindowContainer *)window)->list->stateFlags |= 8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, window, 0x53);
     func_002723B0(3, *(s32 *)(context + 0x78));
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 func_0027A0A8(s32 callback) {
-    return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
+    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
 }
 
 void mnuDrawSelectionLabel(s32 selection) {
@@ -215,7 +212,7 @@ s32 mnuUpdateSkillListInput(s32 callback) {
     s32 state;
     s32 *list;
 
-    state = menuRunPanel(context, 0, callback);
+    state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state == 0) {
         if ((buttons & 0x300000) == 0) {
             list = menu + 1;
@@ -299,11 +296,11 @@ s32 mnuCampMenuDrawStatus(s32 param) {
         }
     }
     func_002723B0(2, ((MenuContextSprites *)context)->sprite78);
-    return menuRunPanel(context, 1, param);
+    return menuRunPanel((void *)context, 1, (void *)param);
 }
 
 s32 func_0027AC00(s32 callback) {
-    return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
+    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
 }
 
 
@@ -813,12 +810,12 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
     return cursor;
 }
 
-MenuListNode *mnuAdvanceListCursorDefault(u32 list) {
-    return mnuListAdvanceCursor((MenuList *)list, 0, 0);
+MenuListNode *mnuAdvanceListCursorDefault(MenuList *list) {
+    return mnuListAdvanceCursor(list, 0, 0);
 }
 
-MenuListNode *mnuRetreatListCursorDefault(u32 list) {
-    return mnuListRetreatCursor((MenuList *)list, 0, 0);
+MenuListNode *mnuRetreatListCursorDefault(MenuList *list) {
+    return mnuListRetreatCursor(list, 0, 0);
 }
 
 void mnuClearListFlagsOneAndTwo(u32 *flags) {
