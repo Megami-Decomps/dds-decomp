@@ -661,7 +661,7 @@ typedef char PcpFlashTrianglePulseWorkSizeCheck[sizeof(PcpFlashTrianglePulseWork
 
 /* Shared scatter texture reference, created and released independently of pools. */
 typedef struct PcpScatterRes {
-    u32 textureHandle;
+    SdfTex *textureHandle;
     s32 refCount;
 } PcpScatterRes; /* 0x08 */
 

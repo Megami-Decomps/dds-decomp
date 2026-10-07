@@ -5003,9 +5003,31 @@ s32 btlIsSceneActorLimitSatisfied(s32 unused, u32 limit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD0D0);
+extern const s8 D_003BB460[];
+extern const s8 D_003BB468[];
+extern const s8 D_003BB470[];
 
-extern s32 func_001BD0D0(s32, s8);
+/* Resolve the command class through the owning actor's status-selected table. */
+s32 func_001BD0D0(BattleSceneObject *object, s8 mode) {
+    s32 flags = object->owner->unit->flags;
+    s8 normal[6];
+    s8 alternate[6];
+    s8 restricted[6];
+    const s8 *classes;
+
+    memcpy(normal, D_003BB460, sizeof(normal));
+    memcpy(alternate, D_003BB468, sizeof(alternate));
+    memcpy(restricted, D_003BB470, sizeof(restricted));
+    if ((flags & 0x400) != 0) {
+        classes = restricted;
+    } else {
+        classes = normal;
+        if ((flags & 0x1000) != 0) {
+            classes = alternate;
+        }
+    }
+    return classes[mode];
+}
 extern void func_001BD2C0(s32, s16 *, s32, s32, s32);
 extern void btlBuildEligibleActorList(s32, s16 *);
 extern u8 *func_001BD708(u8 *, u16 *);
@@ -5017,7 +5039,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DC8);
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2DD8);
 
 u32 btlGetCommandOptionCount(s32 object, s8 mode, s8 unlimited) {
-    s32 kind = func_001BD0D0(object, mode);
+    s32 kind = func_001BD0D0((BattleSceneObject *)object, mode);
     s16 count;
 
     switch (kind) {
@@ -5096,7 +5118,7 @@ extern void btlDrawRetreatCommandLabel(s32);
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
 void fldDispatchSceneKindHandler(s32 arg0) {
-    switch (func_001BD0D0(arg0, btlCommandPanelWork->classIndex)) {
+    switch (func_001BD0D0((BattleSceneObject *)arg0, btlCommandPanelWork->classIndex)) {
     case 0:
         func_001BDF60(arg0, 0, 2, 3);
         return;
@@ -5188,7 +5210,7 @@ extern s32 btlHasHighPriorityState(void);
 extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     fldDispatchSceneKindHandler((s32)object);
-    func_001B2D80(object, func_001BD0D0((s32)object, btlCommandPanelWork->classIndex));
+    func_001B2D80(object, func_001BD0D0(object, btlCommandPanelWork->classIndex));
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2E50);

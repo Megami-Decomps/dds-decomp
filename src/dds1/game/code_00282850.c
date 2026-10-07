@@ -786,7 +786,7 @@ void mnuStorePanelItemValue(MenuPanelItem *item, u32 value) {
     item->value10 = value;
 }
 
-void func_00284C00(MenuPanelItem *item, s32 value, s32 option) {
+void mnuSetPanelItemValueAndOption(MenuPanelItem *item, s32 value, s32 option) {
     item->value18 = value;
     item->option = option;
 }

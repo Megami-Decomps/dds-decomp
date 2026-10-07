@@ -4852,6 +4852,7 @@
 0x002848E0	mnuInitializePanelGroupGridSlots	inferred	Binds group resource-set/index grid slots and initializes quantized bounds; native body and same-unit constructor callers.
 0x00284A90	mnuInitializePanelItemGridSlots	inferred	Binds item resource-set/index grid slots and initializes quantized bounds; native body and same-unit constructor callers.
 0x00284BF8	mnuStorePanelItemValue	inferred	Stores supplied value in selected panel item. [names_reviewed8.tsv]
+0x00284C00	mnuSetPanelItemValueAndOption	inferred	high-confidence; stores the supplied row value and option into the panel item; the native five-row group renderer calls it once per item
 0x00284C10	mnuSetPanelItemSelection	inferred	When selection changes resets selection fade ramp then stores selected value. [names_reviewed5.tsv]
 0x00284C28	mnuSetPanelItemOption	inferred	Stores item drawing option consumed by panel rendering. [names_reviewed5.tsv]
 0x00284C30	mnuFreePanelItemWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:743:func_00284C30; Panel-item storage-release entry; the allocation contains cached grid points and selection-ramp state.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
