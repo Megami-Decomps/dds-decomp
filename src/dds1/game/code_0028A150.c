@@ -759,7 +759,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void fileCursorPulseUpdate(void);
-extern void func_00290A88(s32, s32, s32);
+extern void fileDrawCursorPulse(s32, s32, s32);
 extern s32 D_003BC85C;
 extern s32 D_003BC884;
 
@@ -769,7 +769,7 @@ void fileDrawSaveWindow(void) {
     func_00108FA0(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
     func_00108FA0(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
     fileCursorPulseUpdate();
-    func_00290A88(0x17E, 0x118, 0x56);
+    fileDrawCursorPulse(0x17E, 0x118, 0x56);
     D_003BC85C++;
 }
 
@@ -2609,7 +2609,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     fileFadeStepDown();
     if (D_003BC850 == 0) {
         fileCursorPulseUpdate();
-        func_00290A88(0x25, 0x1F, 0x53);
+        fileDrawCursorPulse(0x25, 0x1F, 0x53);
     }
     fileLoadCtxSlideUpdate();
     if (fileLoadMenuState.unk10 == 0) {
@@ -3040,7 +3040,7 @@ void fileCursorPulseUpdate(void) {
 
 extern const s32 D_003B28A0[3][2];
 
-void func_00290A88(s32 x, s32 y, s32 surface) {
+void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
     s32 texturePositions[3][2] = {{54, 39}, {54, 67}, {54, 39}};
     s32 offsets[3][2];
     s32 i;

@@ -12,7 +12,7 @@ INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D270);
 
 INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D480);
 
-s32 func_0026D510(void) {
+s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
     s32 selection;
 

@@ -3533,7 +3533,7 @@ typedef struct BtlPanelTransitionWork {
     BattleSelectionPosition current[2];
 } BtlPanelTransitionWork;
 
-extern s32 func_001B4308(KwlnTask *);
+extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 extern u32 frFontMeasureLines(u32);
 extern s32 frFontQueueGlyphInSelectedSlot(u32);
@@ -3570,7 +3570,7 @@ s32 func_001AD970(const u8 *text) {
     work->initial[1].x = 0x92 - work->width / 2;
     work->initial[1].y = 0x40;
     task = kwlnTaskCreate(D_003BB3AC, 0x2B0E, 1, 1,
-                          func_001B4308, btlFreeRegisteredTaskData, (u32)work);
+                          btlUpdateSkillNamePanelTask, btlFreeRegisteredTaskData, (u32)work);
     func_00101A80(battle->taskParent, task);
     work->task = task;
     btlSetTrackedTaskHandle(1, (s32)task);
@@ -3867,7 +3867,7 @@ void btlReleaseMessageWindowTask(KwlnTask *task) {
     btlSetTrackedTaskHandle(9, 0);
 }
 
-u32 func_001B0CB8(BtlUnit *object, s32 current, s32 total, s8 mode) {
+u32 btlGetVitalTextColor(BtlUnit *object, s32 current, s32 total, s8 mode) {
     u32 color;
 
     if (mode == 1 && (object->flags & 0x20) != 0) {
@@ -4155,7 +4155,7 @@ extern void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *);
 struct FrFontGlyph;
 extern void frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 
-s32 func_001B4308(KwlnTask *task) {
+s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     BattlePanelColors colors = D_003A2A80;
     BtlPanelTransitionWork *work;
     s16 *fade;

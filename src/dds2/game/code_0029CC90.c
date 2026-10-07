@@ -48,7 +48,7 @@ void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
     s32 remaining = 0x100 - work->fadeProgress;
 
     itfUpdateFadeColor(work);
-    func_0029C618(work);
+    brsDrawResultPanelSprites(work);
     func_0029C120(work);
     func_0029C3F0(work);
     mnuDrawUnitProgressRows(0x1D0, 0x3B8, 0, remaining, &work->partyProgress, 0x53);

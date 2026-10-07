@@ -442,7 +442,7 @@ extern void btlClearRuntimeState(void);
 
 extern s32 kwlnTaskCreate(s32 name, s32 priority, s32, s32, s32, s32, s32);
 
-extern void func_00131000(s32, s32, f32);
+extern void fldUpdateCameraModelMotion(s32, s32, f32);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
 
@@ -2782,7 +2782,7 @@ void func_00130FF0(u32 first, u32 second) {
     D_004360C8 = second;
 }
 
-void func_00131000(s32 modelMotion, s32 motion, f32 blendFrames) {
+void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
     s32 currentMotion;
 
     if (D_00389888[0] == 1) {
@@ -2962,7 +2962,7 @@ s32 fldUpdateCameraFrame(void) {
         node = ((MdlCtx *)fldCameraModelObject)->current.h.arg;
         func_00131478(node, node);
         if (fldAreaState[70] == 1) {
-            func_00131000(0, 0, 6.0f);
+            fldUpdateCameraModelMotion(0, 0, 6.0f);
         }
         fldSyncObjectFlagsB();
         return 0;
@@ -3053,19 +3053,19 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00133B10);
 void fldSetCameraNodeModeWithTen(void) {
     s16 node = ((MdlCtx *)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
-        func_00131000(node, 0x12, 10.0f);
+        fldUpdateCameraModelMotion(node, 0x12, 10.0f);
         return;
     }
-    func_00131000(node, 3, 10.0f);
+    fldUpdateCameraModelMotion(node, 3, 10.0f);
 }
 
 void fldSetCameraNodeModeWithZero(void) {
     s16 node = ((MdlCtx *)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
-        func_00131000(node, 0x12, 0.0f);
+        fldUpdateCameraModelMotion(node, 0x12, 0.0f);
         return;
     }
-    func_00131000(node, 3, 0.0f);
+    fldUpdateCameraModelMotion(node, 3, 0.0f);
 }
 
 void fldAddCameraModelEntry(s32 value) {

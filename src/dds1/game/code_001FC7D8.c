@@ -978,7 +978,7 @@ typedef struct AiSpecies {
 } AiSpecies;
 
 extern AiSpecies *datEnemyAiRecords;
-extern void func_001FF560(BtlUnit *unit, u16 species, s32 *row, s32 arg);
+extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 arg);
 extern u32 btlPickWeightedAiSlot();
 extern s32 btlRunAiAction();
 
@@ -995,7 +995,7 @@ s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
     species = unit->partyRecord.unitId;
     work[0] = (s32)task;
     work[1] = species;
-    func_001FF560(unit, species, &row, 0);
+    btlSelectTierMatrixAiRoute(unit, species, &row, 0);
     index = btlPickWeightedAiSlot(unit, species, row);
     btlRunAiAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                    datEnemyAiRecords[species].slot[row * 5 + index].actionArg);

@@ -360,7 +360,7 @@ extern void func_00108EC0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32,
 
 extern void fileCursorPulseUpdate(void);
 
-extern void func_002CFF38(s32, s32, s32);
+extern void fileDrawCursorPulse(s32, s32, s32);
 
 extern s32 D_00437D78;
 
@@ -740,7 +740,7 @@ void fileDrawSaveWindow(void) {
     func_00108EC0(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D78);
     func_00108EC0(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00437D78);
     fileCursorPulseUpdate();
-    func_002CFF38(0x17E, 0x118, 0x56);
+    fileDrawCursorPulse(0x17E, 0x118, 0x56);
     D_00437D44++;
 }
 
@@ -2365,7 +2365,7 @@ s32 func_002CD028(s32 work) {
     fileFadeStepDown();
     if (D_00437D38 == 0) {
         fileCursorPulseUpdate();
-        func_002CFF38(0x25, 0x1F, 0x53);
+        fileDrawCursorPulse(0x25, 0x1F, 0x53);
     }
     fileLoadCtxSlideUpdate();
     if (fileLoadMenuState.unk10 == 0) {
@@ -3043,7 +3043,7 @@ void fileCursorPulseUpdate(void) {
 
 extern const s32 D_0042B8F8[3][2];
 
-void func_002CFF38(s32 x, s32 y, s32 surface) {
+void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
     s32 texturePositions[3][2] = {{54, 39}, {54, 67}, {54, 39}};
     s32 offsets[3][2];
     s32 i;

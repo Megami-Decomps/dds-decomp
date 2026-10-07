@@ -5350,7 +5350,7 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *, s32);
 extern void func_00101968(KwlnTask *, KwlnTask *);
-extern s32 func_001BEF28(KwlnTask *);
+extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 frFontMeasureLines(struct FrFontGlyph *);
@@ -5406,7 +5406,7 @@ s32 func_001B8580(const u8 *text) {
     work->initial[1].x = 0x92 - work->width / 2;
     work->initial[1].y = 0x40;
     task = kwlnTaskCreate(D_004367C8, 0x2B0E, 1, 1,
-                          func_001BEF28, btlFreeRegisteredTaskData, (u32)work);
+                          btlUpdateSkillNamePanelTask, btlFreeRegisteredTaskData, (u32)work);
     func_00101968(battle->scriptOwner, task);
     work->task = task;
     btlSetTrackedTaskHandle(1, (s32)task);
@@ -5675,7 +5675,7 @@ void btlReleaseMessageWindowTask(KwlnTask *task) {
     btlSetTrackedTaskHandle(9, 0);
 }
 
-u32 func_001BB8D0(BtlUnit *object, s32 current, s32 total, s8 mode) {
+u32 btlGetVitalTextColor(BtlUnit *object, s32 current, s32 total, s8 mode) {
     u32 color;
 
     if (mode == 1 && (object->flags & 0x20) != 0) {
@@ -5953,7 +5953,7 @@ void btlReleaseCmsleffPanelWork(KwlnTask *task) {
 extern const BattlePanelColors D_004165B0;
 extern void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *);
 
-s32 func_001BEF28(KwlnTask *task) {
+s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     BattlePanelColors colors = D_004165B0;
     BtlPanelTransitionWork *work;
     s16 *fade;
