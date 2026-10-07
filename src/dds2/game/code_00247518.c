@@ -27,7 +27,7 @@ extern void sdfSetViewFieldOfView(f32);
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 extern void effObjFetchInnerFirstVec(EffWorldNode *);
-extern u32 *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
+extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
@@ -759,11 +759,11 @@ void func_00249C40(s32 position, EventViewerState *viewer) {
                     VU0_STORE_VF(vf10, &node->owner.transform->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {
-                    u32 *object = dds3FindObjectChainNodeByName(
+                    EffWorldNode *object = dds3FindObjectChainNodeByName(
                         dds3GetWorldObject(), viewer->unitNames[channel]);
 
                     mdlAttachWorldObjectToSourceVector(
-                        node->owner.transform->key, object[1]);
+                        node->owner.transform->key, object->key);
                     node->objectAttached = 1;
                 }
             }
