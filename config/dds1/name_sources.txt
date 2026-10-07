@@ -4732,6 +4732,8 @@
 0x0027D4A0	mnuCreatePanelSpriteHandles	inferred	U3
 0x0027D740	mnuClearEntryFlags	inferred	Clears bit 0 of each entry's descriptor flags and calls func_002BD5A0 on it.
 0x0027D7E0	mnuReleaseResourceList	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
+0x0027DA80	mnuDrawFourPanelIconsAtOffsets	inferred	Draws four panel handles using four offsets from the panel position table; panel mode one selects this renderer
+0x0027DBD0	mnuDrawPanelIconPairsAtFixedPositions	inferred	Draws two handle pairs at the two absolute positions in the position table; panel mode two selects this renderer
 0x0027DCE8	mnuDrawIconPanel	inferred	Dispatches icon panel drawing mode according to first word of panel record. [names_reviewed5.tsv]
 0x0027DD58	mnuDrawIconPanelDefaultFlag	inferred	Draws an icon panel with its optional selection flag disabled, retaining caller fade. [names_reviewed18.tsv]
 0x0027DD78	mnuDrawIconPanelFullFade	inferred	Draws the icon panel with full fixed-point fade and default selection flag. [names_reviewed18.tsv]
