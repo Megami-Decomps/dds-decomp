@@ -692,8 +692,8 @@ void sdfTexInitializeSemaphore(void) {
     sdfResetSemaphoreState(obj);
 }
 
-u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
-    return (u32)texture->primaryBuffer;
+SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture) {
+    return texture->primaryBuffer;
 }
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
@@ -707,15 +707,15 @@ s32 sdfTexGetPrimaryBufferSize(SdfTex *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
-s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
+SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buffer;
 
     buffer = texture->secondaryBuffer;
     if (buffer == NULL) {
-        sdfTexCreateSecondPacket();
+        sdfTexCreateSecondPacket(texture);
         buffer = texture->secondaryBuffer;
     }
-    return (s32)buffer;
+    return buffer;
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
@@ -811,7 +811,7 @@ void sdfTexSetSecondaryPacketBits(SdfTex *texture, s32 magFilter, s32 minFilter)
     SdfTexBuf *buffer = texture->secondaryBuffer;
 
     if (buffer == NULL) {
-        sdfTexCreateSecondPacket();
+        sdfTexCreateSecondPacket(texture);
         buffer = texture->secondaryBuffer;
     }
     buffer->samplingState = (minFilter << SDF_MIN_FILTER_SHIFT) | ((magFilter << SDF_MAG_FILTER_SHIFT) | (buffer->samplingState & ~SDF_TEX_FILTER_MASK));
@@ -819,7 +819,7 @@ void sdfTexSetSecondaryPacketBits(SdfTex *texture, s32 magFilter, s32 minFilter)
 
 void sdfTexSetClampMode(SdfTex *texture, u8 value) {
     texture->clampMode = value;
-    sdfTexRefreshResourcePackets();
+    sdfTexRefreshResourcePackets(texture);
 }
 
 /* Borrow pixels or copy them to the selected heap; return the source cursor after the transfer bytes. */

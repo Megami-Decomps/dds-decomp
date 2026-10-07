@@ -1716,7 +1716,7 @@ void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsW
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
-extern u32 sdfTexGetPrimaryBuffer(SdfTex *);
+extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *);
 extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 extern void sdfAppendReferencePacket(SdfListHead *, u32);
@@ -1739,7 +1739,7 @@ void fldSubmitModelPacket(SdfTex *texture, u8 *modelData) {
 
     sdfInitPacketList((SdfListHead *)command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
+    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
     sdfAppendReferencePacket((SdfListHead *)command, header);
     func_002DD708(((FldModelPacketInput *)modelData)->angle);
         VU0_STORE_MATRIX(mat);

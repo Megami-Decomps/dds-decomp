@@ -369,7 +369,7 @@ extern u8 D_0037FA00[];
 
 extern u8 D_00384790[];
 
-extern u32 sdfTexGetPrimaryBuffer(SdfTex *);
+extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *);
 
 extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 
@@ -1823,7 +1823,7 @@ void fldSubmitModelPacket(SdfTex *texture, u8 *modelData) {
 
     sdfInitPacketList((SdfListHead *)command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
+    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
     sdfAppendReferencePacket((SdfListHead *)command, header);
     func_003365B8(((FldModelPacketInput *)modelData)->angle);
     VU0_STORE_MATRIX(mat);
