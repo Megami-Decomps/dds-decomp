@@ -127,7 +127,7 @@ typedef struct GridAngleSlot {
 INCLUDE_ASM(const s32, "game/code_002BF790", itfGridApplySqrtBoundsAndColorScale);
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
-s32 func_002BFCE0(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 squares[2];
     s32 deltas[2];
@@ -201,7 +201,7 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ow
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0200);
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
-s32 func_002C0340(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 scaled[2];
     s32 deltas[2];
