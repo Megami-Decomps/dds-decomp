@@ -113,9 +113,9 @@ extern void dds3SetObjectFlags(void *object, s32 flags);
 
 extern void dds3ClearObjectFlags(void *object, s32 flags);
 
-extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
+extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 
-extern void evtResetObjectPendingValue(void *arg0);
+extern void evtResetObjectPendingValue(EffWorldNode *object);
 
 extern void *memset(void *dst, s32 c, u32 n);
 

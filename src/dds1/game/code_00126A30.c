@@ -456,11 +456,11 @@ extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern struct DevRequest *D_003BAC14;
 extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
-extern void *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
-extern void effObjSetRoomNumber(void *, u32);
+extern void effObjSetRoomNumber(EffWorldNode *, u32);
 extern void *dds3FindWorldObjectNodeByKey(void *, u32, s32);
 extern void dds3SetSlotByKind(void *, void *);
 extern void func_00111F40(void *);
@@ -474,7 +474,7 @@ void fldCreateResourceScriptObjects(void) {
     FldFileResource *resource = D_003BD7B0;
     u32 count = D_003BD7B4;
     void *world;
-    void *object;
+    EffWorldNode *object;
     FldFileResource *binding;
     FldFileNameEntry *name;
     FldScriptResource *script;
@@ -515,25 +515,25 @@ void fldCreateResourceScriptObjects(void) {
         dds3SetWorldNodeValue(object, (u32)resource->name);
         if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
             if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
-                effObjSetActiveId((EffWorldNode *)object, 6);
+                effObjSetActiveId(object, 6);
             } else {
                 switch (i) {
                     case 0:
-                        effObjSetActiveId((EffWorldNode *)object, 2);
+                        effObjSetActiveId(object, 2);
                         break;
                     case 1:
-                        effObjSetActiveId((EffWorldNode *)object, 3);
+                        effObjSetActiveId(object, 3);
                         break;
                     case 2:
-                        effObjSetActiveId((EffWorldNode *)object, 4);
+                        effObjSetActiveId(object, 4);
                         break;
                     default:
-                        effObjSetActiveId((EffWorldNode *)object, 5);
+                        effObjSetActiveId(object, 5);
                         break;
                 }
             }
         } else {
-            effObjSetActiveId((EffWorldNode *)object, 7);
+            effObjSetActiveId(object, 7);
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName(resource->name));
         dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));

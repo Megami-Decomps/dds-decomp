@@ -82,7 +82,7 @@ extern u32 kwlnDrawControlFlags;
 
 void dds3RemoveWorldObjectNode(void *unit);
 
-void dds3RefreshStoredVec3(void *);
+void dds3RefreshStoredVec3(EffWorldNode *object);
 
 void *func_001287B8(u32 id);
 
