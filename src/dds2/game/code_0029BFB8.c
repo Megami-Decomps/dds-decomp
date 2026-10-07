@@ -4,7 +4,6 @@ extern void frFontSetChainFlag();
 extern s32 frFontQueueGlyphInSelectedSlot();
 extern s32 func_0019D550();
 
-extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -17,7 +16,7 @@ s32 itfRunPanelMode1(s32 request) {
 
     func_0029AA48(panel);
     func_0029AC20(panel, 0);
-    return func_002C4038((s32)&panel->transition, &panel->transition.state, 1, request);
+    return func_002C4038(&panel->transition, &panel->transition.state, 1, (void *)request);
 }
 
 s32 itfRunPanelMode2(s32 request) {
@@ -25,7 +24,7 @@ s32 itfRunPanelMode2(s32 request) {
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0026C8E8(0);
-    return func_002C4038((s32)&panel->transition, &panel->transition.state, 2, request);
+    return func_002C4038(&panel->transition, &panel->transition.state, 2, (void *)request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C120);

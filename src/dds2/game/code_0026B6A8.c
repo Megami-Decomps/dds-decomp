@@ -106,7 +106,7 @@ u32 func_0026B930(void) {
 s32 dspUpdateFlagEvent(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
-    s32 result = func_002C4038(state + 8, panel, 0, request);
+    s32 result = func_002C4038((u8 *)state + 8, panel, 0, (void *)request);
     if (result != 0) {
         return result;
     }
@@ -124,14 +124,14 @@ s32 mnuDispatchTerminalPanel(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     mnuDrawTerminalBackdrop(state);
-    return menuSetHandler(state, 1, request);
+    return menuSetHandler((void *)state, 1, (void *)request);
 }
 
 s32 mnuDispatchTerminalPanelExit(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0026C900();
-    return menuSetHandler(state, 2, request);
+    return menuSetHandler((void *)state, 2, (void *)request);
 }
 
 u32 mnuStartTaskFadeIn(void) {
@@ -161,10 +161,10 @@ extern s32 kwlnFadeIsActive(void);
 extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
-s32 func_0026BAF8(u64 request) {
+s32 func_0026BAF8(void *request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panelState = (s32 *)(state + 0x54);
-    s32 result = func_002C4038(state + 8, panelState, 0, request);
+    s32 result = func_002C4038((u8 *)state + 8, panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && kwlnFadeIsActive() == 0) {
             mnuSetPopupEntryFlagged(panelState, D_003CE998);
@@ -178,13 +178,13 @@ s32 func_0026BB78(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     mnuDrawTerminalBackdrop(state);
-    return menuSetHandler(state, 1, request);
+    return menuSetHandler((void *)state, 1, (void *)request);
 }
 
 s32 func_0026BBC8(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
-    return menuSetHandler(state, 2, request);
+    return menuSetHandler((void *)state, 2, (void *)request);
 }
 
 u32 mnuClearTerminalPanelSelection(void) {

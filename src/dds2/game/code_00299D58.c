@@ -42,11 +42,9 @@ typedef struct FieldResourceRecord {
 extern FieldResourceRecord *D_00435E18;
 extern s32 func_001514A8(void);
 extern s16 func_001514B8(void);
-extern s32 func_002C4038(s32, s32 *, u64, u64);
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_00299B98(BrsSkillPackageWork *, s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
-extern void mnuSetPopupEntryFlagged(s32, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
 extern void func_00341CF8(void);
 extern s32 btlHasPendingRuntimeActivity(void);
@@ -56,11 +54,10 @@ extern char D_003D6458[];
 extern void func_0029C878(void *);
 extern void func_0029C860(BrsSkillPackageWork *);
 extern s32 brsPollResultCounterCompletion(void);
-extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_0037F530[];
 extern u8 D_003D643C[];
 
-s32 brsMessageInputStep(u64 input) {
+s32 brsMessageInputStep(void *input) {
     BrsSkillPackageWork *context;
     s32 *window;
     s32 buttons;
@@ -72,7 +69,7 @@ s32 brsMessageInputStep(u64 input) {
     if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
         return 0;
     }
-    result = func_002C4038((s32)&context->transition, window, 0, input);
+    result = func_002C4038(&context->transition, window, 0, input);
     if (result != 0) {
         return result;
     }
@@ -92,7 +89,7 @@ s32 mnuStaffRunPanel1(s32 input) {
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
-        return menuSetHandler((s32)context, 1, input);
+        return menuSetHandler(context, 1, (void *)input);
     }
 }
 
@@ -101,7 +98,7 @@ s32 mnuStaffRunPanel2(s32 input) {
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         brsDecaySharedAnimCounter(context);
-        return menuSetHandler((s32)context, 2, input);
+        return menuSetHandler(context, 2, (void *)input);
     }
 }
 
@@ -116,18 +113,18 @@ u32 func_00299EF8(void) {
 s32 mnuStaffRunPanel0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuMapPadMaskToFlags(0x33);
-    return menuSetHandler(context, 0, input);
+    return menuSetHandler((void *)context, 0, (void *)input);
 }
 
 s32 mnuRefreshAndDispatchCurrentPanel(s32 input) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     mnuTitleRenderFadeAndPanels(context);
-    return menuSetHandler((s32)context, 1, input);
+    return menuSetHandler(context, 1, (void *)input);
 }
 
 s32 func_00299FA0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, input);
+    return menuSetHandler((void *)context, 2, (void *)input);
 }
 
 u32 func_00299FD8(void) {
@@ -279,7 +276,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     s32 *dispatchStatus = &scene->transition.state;
 
-    result = func_002C4038((s32)&scene->transition, dispatchStatus, 0, (s32)task);
+    result = func_002C4038(&scene->transition, dispatchStatus, 0, task);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
             (result = evtGetMessageWindowControlState(), result == 0)) {
@@ -309,14 +306,14 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
             }
             if (scene->primaryRewards.count == 0) {
                 kwlnFadeInStart(0, 0, 0, 0xF);
-                mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D64E4);
+                mnuSetPopupEntryFlagged(dispatchStatus, D_003D64E4);
                 return 0;
             }
             if (btlHasPendingRuntimeActivity() != 0) {
                 return 0;
             }
             brsStartPartyPanelResourcesOnce((s32)scene);
-            mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D6458);
+            mnuSetPopupEntryFlagged(dispatchStatus, D_003D6458);
             func_00341CF8();
         }
         result = 0;
@@ -329,14 +326,14 @@ s32 func_0029A588(s32 request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
 
     mnuTitleRenderFadeAndPanels(context);
-    return menuSetHandler((s32)context, 1, request);
+    return menuSetHandler(context, 1, (void *)request);
 }
 
 s32 func_0029A5D8(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    return menuSetHandler(context, 2, request);
+    return menuSetHandler((void *)context, 2, (void *)request);
 }
 
 /* Clear the scene's two selection-processing markers; return 1. */
@@ -433,14 +430,13 @@ extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 /* The legacy call forwards its request; this initializer reads current task data. */
 extern u32 mnuResetSelectionWidthsFromConfig();
-extern void mnuSetPopupEntry(s32 *, void *);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void func_00342580(u32);
 extern char D_003D6474[];
 extern char D_003D64AC[];
 
 /* Advance the selected party member, apply its gains, and choose the next popup. */
-s32 func_0029A898(u64 request) {
+s32 func_0029A898(void *request) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     s32 *dispatchStatus;
@@ -452,7 +448,7 @@ s32 func_0029A898(u64 request) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
-    result = func_002C4038((s32)&scene->transition, dispatchStatus, 0, request);
+    result = func_002C4038(&scene->transition, dispatchStatus, 0, request);
     if (result != 0) {
         return result;
     }
@@ -484,7 +480,7 @@ s32 func_0029A898(u64 request) {
         } else {
             func_00342580(0x50001);
             kwlnFadeInStart(0, 0, 0, 0xF);
-            mnuSetPopupEntryFlagged((s32)dispatchStatus, (s32)D_003D64E4);
+            mnuSetPopupEntryFlagged(dispatchStatus, D_003D64E4);
         }
     }
     return 0;

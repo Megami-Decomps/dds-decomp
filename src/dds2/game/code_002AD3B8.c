@@ -63,7 +63,6 @@ extern char D_003E7530[];
 extern char D_003E7434[];
 extern u32 mnuMapPadMaskToFlags();
 extern void mnuStepPartyPanelListFromInput();
-extern void mnuSetPopupEntryFlagged();
 extern void mnuClearActionFlags();
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern void func_002B9808(MenuWindowContainer *);
@@ -82,7 +81,7 @@ extern void func_002ABD60(void *);
 extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
 extern s32 mdlFlagTest();
-extern void func_002BB9C8(s32, s32);
+extern void func_002BB9C8(MenuSprites *, u32);
 extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetWindowResource(s32, u32 *, s32, s32, s32, s32, s32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, u32 *, s32, s32);
@@ -118,7 +117,7 @@ s32 mnuStaffImageEnterA(s32 task) {
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return menuSetHandler(context, 1, task);
+    return menuSetHandler((void *)context, 1, (void *)task);
 }
 
 /* Request value one from the message-window worker, then run the teardown phase. */
@@ -126,7 +125,7 @@ s32 mnuStaffImageExitA(s32 task) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 u32 func_002AD508(void) {
@@ -146,7 +145,7 @@ s32 mnuStaffImageInputA(s32 task) {
     s32 state;
     u8 *window;
 
-    state = func_002C4038(context + 8, popup, 0, task);
+    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -174,13 +173,13 @@ s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return menuSetHandler(context, 1, task);
+    return menuSetHandler((void *)context, 1, (void *)task);
 }
 
 /* Run the label-image state's teardown phase and return its scheduler word. */
 s32 mnuExitStaffImageAndSelectionLabel(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 u32 func_002AD6F8(void) {
@@ -199,7 +198,7 @@ s32 mnuPollStaffSlotSelectionConfirmation(s32 task) {
     s32 state;
     u8 *window;
 
-    state = func_002C4038(context + 8, popup, 0, task);
+    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -227,13 +226,13 @@ s32 func_002AD808(s32 task) {
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return menuSetHandler(context, 1, task);
+    return menuSetHandler((void *)context, 1, (void *)task);
 }
 
 /* Run this image variant's teardown phase and return its scheduler word. */
 s32 func_002AD8B0(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 u32 func_002AD8E8(void) {
@@ -252,7 +251,7 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
     s32 state;
     u8 *window;
 
-    state = func_002C4038(context + 8, popup, 0, task);
+    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -279,13 +278,13 @@ s32 func_002AD9F8(s32 task) {
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return menuSetHandler(context, 1, task);
+    return menuSetHandler((void *)context, 1, (void *)task);
 }
 
 /* Run this image variant's teardown phase and return its scheduler word. */
 s32 func_002ADAA0(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 u32 mnuRefreshSecondaryStaffObject(void) {
@@ -313,7 +312,7 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     s32 state;
     MenuWindowContainer *object;
 
-    state = func_002C4038(context + 8, popup, 0, task);
+    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -357,13 +356,13 @@ s32 mnuStaffImageEnterD(s32 task) {
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(2, ((MenuStaffContext *)context)->group);
-    return menuSetHandler(context, 1, task);
+    return menuSetHandler((void *)context, 1, (void *)task);
 }
 
 /* Run the secondary-image state's teardown phase and return its scheduler word. */
 s32 mnuStaffImageExitD(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
@@ -385,13 +384,13 @@ s32 mnuStaffImageEnterB(s32 task) {
             (s32)D_003E7050, context, 1, 0x53);
     }
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return menuSetHandler(context, 1, task);
+    return menuSetHandler((void *)context, 1, (void *)task);
 }
 
 /* Run the alternate primary-image state's teardown phase and return its scheduler word. */
 s32 mnuStaffImageExitB(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 s32 mnuInitializeSelectedStaffPage(s32 unused) {
@@ -531,22 +530,15 @@ s32 func_002AEA58(s32 task) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
-
-/* One 0x2138-byte page slot supplies the resource checked before page setup. */
-typedef struct MenuStaffPanelSlot {
-    u8 pad00[0xDC];
-    s32 resourceHandle;
-    u8 padE0[0x2058];
-} MenuStaffPanelSlot;
 
 s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     u32 *window = &context->windowFlags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = context->selection->cursor->index;
-    u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
+    MenuPageSlot *slot = &((MenuPageWindow *)&context->windowFlags)->slots[index];
 
     mnuSelectPage(window, index);
     mnuCreateOrderedStaffItemWindow(context);
@@ -555,7 +547,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(((MenuStaffPanelSlot *)slot)->resourceHandle, 1);
+        func_002BB9C8(slot->contents[0].windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
@@ -684,7 +676,7 @@ s32 mnuExitStaffValuePage(s32 task) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    return menuSetHandler(context, 2, task);
+    return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 s32 mnuInitializeStaffValuePage(s32 unused) {
@@ -692,7 +684,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     u32 *window = &context->windowFlags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = context->selection->cursor->index;
-    u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
+    MenuPageSlot *slot = &((MenuPageWindow *)&context->windowFlags)->slots[index];
 
     mnuSelectPage(window, index);
     mnuCreateOwnedCatalogItemWindow(context);
@@ -701,7 +693,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(((MenuStaffPanelSlot *)slot)->resourceHandle, 1);
+        func_002BB9C8(slot->contents[0].windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, context->spriteArg2);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
@@ -830,7 +822,6 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
 
 extern s32 evtGetMessageWindowControlState(void);
 extern s32 func_002ACAC0(s32, MenuStaffContext *);
-extern void mnuSetPopupEntry(s32, s32);
 extern char D_003E74A4[];
 extern char D_003E754C[];
 extern char D_003E7568[];
@@ -845,7 +836,7 @@ s32 func_002AFE18(s32 task) {
     s32 current;
 
     party = &datGameState->party[context->selection->cursor->index];
-    result = menuSetHandler((s32)context, 0, task);
+    result = menuSetHandler(context, 0, (void *)task);
     if (result != 0) {
         return result;
     }
@@ -886,7 +877,7 @@ s32 func_002AFE18(s32 task) {
             if (current != 0) {
                 if (menu->windows[4]->list->cursor->index == 0) {
                     if (func_002BDA50(current) != 0) {
-                        mnuSetPopupEntry((s32)&context->popupState, (s32)D_003E7568);
+                        mnuSetPopupEntry(&context->popupState, D_003E7568);
                     } else {
                         func_002C1B68(&context->unkAA50, 1);
                         evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
@@ -894,7 +885,7 @@ s32 func_002AFE18(s32 task) {
                     }
                 } else if (menu->windows[4]->list->count != 0) {
                     if (mnuIsStaffRequirementUnmet(current) != 0) {
-                        mnuSetPopupEntry((s32)&context->popupState, (s32)D_003E754C);
+                        mnuSetPopupEntry(&context->popupState, D_003E754C);
                     } else {
                         func_002C1B68(&context->unkAA50, 1);
                         dspStartEntry(7);
@@ -911,12 +902,12 @@ s32 func_002AFE18(s32 task) {
         }
         if (input & 2) {
             menu->thirdListEnabled = 1;
-            mnuSetPopupEntryFlagged((s32)&context->popupState, (s32)D_003E74A4);
+            mnuSetPopupEntryFlagged(&context->popupState, D_003E74A4);
         }
         mnuPlayInputSound(0, input, &window->list->stateFlags);
     } else {
         if (func_002ACAC0(menu->thirdListState, context) == 0) {
-            mnuSetPopupEntryFlagged((s32)&context->popupState, (s32)D_003E7434);
+            mnuSetPopupEntryFlagged(&context->popupState, D_003E7434);
             mnuClearActionFlags(0, (u8 *)&context->windowFlags);
             mnuBeginWindowFadeTransition(0, (s32)context->tail);
         } else {

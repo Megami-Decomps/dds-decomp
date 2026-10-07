@@ -74,7 +74,6 @@ extern CampFlagRow D_003C9A40[];
 
 extern s32 mdlFlagTest(u32);
 
-extern void mnuSetPopupEntry(s32 *, void *);
 
 extern u8 D_003CE658[];
 
@@ -116,7 +115,6 @@ extern char D_00424BD0[]; /* "camp_update" */
 
 extern s8 mnuPanelTaskCompletionState;
 
-extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -1376,22 +1374,22 @@ s32 mnuCampConsumePanelTaskCompletion(void) {
     return 0;
 }
 
-static inline s32 campSetHandler(MenuTerminalContext *context, u64 mode, s32 callback) {
-    return func_002C4038((s32)context->transitionWork, &context->popupState, mode, callback);
+static inline s32 campSetHandler(MenuTerminalContext *context, s32 mode, void *callback) {
+    return func_002C4038(context->transitionWork, &context->popupState, mode, callback);
 }
 
 s32 mnuPreparePopupAndDispatchSelection(s32 callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
     mnuSetPopupEntry(&context->popupState, D_003CE658);
-    return campSetHandler(context, 0, callback);
+    return campSetHandler(context, 0, (void *)callback);
 }
 
 s32 mnuAdvanceCampPopup(s32 callback) {
-    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 1, callback);
+    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 1, (void *)callback);
 }
 
 s32 mnuFinishCampPopup(s32 callback) {
-    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 2, callback);
+    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 2, (void *)callback);
 }
 
 typedef struct ShopSourcePriceEntry {

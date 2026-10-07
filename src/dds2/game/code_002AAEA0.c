@@ -9,7 +9,6 @@ extern s64 fileConsumeConfigTaskReady(void);
 
 extern u8 D_003E7034[];
 
-extern void mnuSetPopupEntryFlagged();
 
 extern u8 D_003E7200[];
 
@@ -18,7 +17,6 @@ extern u8 D_003E73F8[];
 extern s32 mnuUseFieldSkillOnParty(s32, s32, s32);
 extern u32 mnuMapPadMaskToFlags(s32);
 extern s32 func_002A9AB8(s32);
-extern void mnuSetPopupEntry(s32, s32);
 extern void func_002B9808(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
 extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
@@ -79,7 +77,7 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
     context = (CampVisualWork *)kwlnTaskGetUserValue();
     input = mnuMapPadMaskToFlags(0x33);
     popup = &context->popup;
-    state = func_002C4038((s32)context->dispatchState, popup, 0, callback);
+    state = func_002C4038(context->dispatchState, popup, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -94,14 +92,14 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
             if ((entry->flags48 & 1) == 0) {
                 u32 index = entry->sortKeyPrimary + 1;
 
-                mnuSetPopupEntry((s32)popup, (s32)(D_003E6F38 + index * 0x1C));
+                mnuSetPopupEntry(popup, (D_003E6F38 + index * 0x1C));
                 context->titleFadingOut = 1;
             } else {
                 input = 0x8000;
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry((s32)popup, (s32)D_003E6F38);
+            mnuSetPopupEntry(popup, D_003E6F38);
         }
     }
     if ((input & 0x300000) == 0) {
@@ -124,7 +122,7 @@ s32 mnuFinishStaffConfigPopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, callback);
+    return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
 u32 mnuOpenCampConfigPanelTasks(void) {
@@ -150,7 +148,7 @@ u32 mnuConfigureCampDrawContextPanel(void) {
 s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *dispatchEntry = (s32 *)(context + 0x54);
-    s32 state = func_002C4038(context + 8, dispatchEntry, 0, callback);
+    s32 state = func_002C4038(((CampVisualWork *)context)->dispatchState, dispatchEntry, 0, (void *)callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, D_003E7034);
@@ -168,14 +166,14 @@ s32 mnuDrawStaffImageScreen(s32 callback) {
     func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->modelHandle, 0x54);
     mnuCreateStaffImageSprite(0x18);
     func_002AA7A0(2, ((CampVisualWork *)context)->drawContext);
-    return menuSetHandler(context, 1, callback);
+    return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
 s32 mnuFinishStaffImagePopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, callback);
+    return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
 u32 func_002AB3A0(void) {
@@ -192,12 +190,12 @@ s32 mnuPollCampFieldSkillAndPopup(s32 callback) {
     s32 state;
 
     context = kwlnTaskGetUserValue();
-    state = menuSetHandler(context, 0, callback);
+    state = menuSetHandler((void *)context, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
     mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 1);
-    mnuSetPopupEntry(context + 0x54, D_003E7034);
+    mnuSetPopupEntry(&((CampVisualWork *)context)->popup, D_003E7034);
     return 0;
 }
 
@@ -207,7 +205,7 @@ s32 mnuFinishFieldSkillPopup(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return menuSetHandler(context, 2, callback);
+    return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
 u32 func_002AB550(void) {

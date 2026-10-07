@@ -7,7 +7,6 @@ extern u32 kwlnTaskGetUserValue();
 
 extern void sdfReleaseResourceAllocation(s32);
 
-extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_002AAE80(s32);
 
@@ -267,8 +266,6 @@ s32 mnuDestroyWindowOwnerResourceSet(void) {
 }
 
 extern s32 mnuMapPadMaskToFlags(s32);
-extern void mnuSetPopupEntry(s32, s32);
-extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void mnuConfigurePanelResource(s32, s32, s32, s32);
 extern void func_002B9808(s32);
 extern void mnuRetreatWindowListSelection(s32);
@@ -290,7 +287,7 @@ extern char D_003E7434[];
 extern char D_003E74DC[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
-s32 mnuHandleStaffPopupSelection(u64 callback) {
+s32 mnuHandleStaffPopupSelection(void *callback) {
     MenuStaffContext *context;
     MenuStaffChoices *resources;
     MenuWindowContainer *window;
@@ -303,7 +300,7 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
     popup = &context->popupState;
     resources = (MenuStaffChoices *)context->menu;
     input = mnuMapPadMaskToFlags(0x33);
-    result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
+    result = func_002C4038(&context->transitionWork, popup, 0, callback);
     if (result != 0) {
         return result;
     }
@@ -313,26 +310,26 @@ s32 mnuHandleStaffPopupSelection(u64 callback) {
             switch (itemKind) {
             case 0:
                 resources->secondListState = 0;
-                mnuSetPopupEntry((s32)popup, (s32)D_003E7450);
+                mnuSetPopupEntry(popup, D_003E7450);
                 break;
             case 1:
-                mnuSetPopupEntry((s32)popup, (s32)D_003E746C);
+                mnuSetPopupEntry(popup, D_003E746C);
                 break;
             case 2:
-                mnuSetPopupEntry((s32)popup, (s32)D_003E7488);
+                mnuSetPopupEntry(popup, D_003E7488);
                 break;
             case 3:
-                mnuSetPopupEntry((s32)popup, (s32)D_003E74A4);
+                mnuSetPopupEntry(popup, D_003E74A4);
                 break;
             default:
-                mnuSetPopupEntry((s32)popup, (s32)D_003E74C0);
+                mnuSetPopupEntry(popup, D_003E74C0);
                 break;
             }
             mnuSeekListNode(0, resources->windows[0]->list);
             mnuSeekListNode(0, resources->windows[1]->list);
         }
         if (input & 2) {
-            mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7418);
+            mnuSetPopupEntryFlagged(popup, D_003E7418);
             mnuConfigurePanelResource(context->unk118, context->group, 0, 1);
             mnuBeginWindowFadeTransition(context->unk104, (s32)context->tail);
         }
@@ -368,11 +365,11 @@ s32 func_002ACE58(s32 callback) {
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return menuSetHandler(context, 1, callback);
+    return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
 s32 mnuFinishStaffReturnPopup(s32 callback) {
-    return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
+    return menuSetHandler((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
 }
 
 extern s32 func_002C5A28(s32, s32, s32, s32);
@@ -438,7 +435,7 @@ u32 func_002AD0E8(void) {
     return 1;
 }
 
-s32 func_002AD118(u64 callback) {
+s32 func_002AD118(void *callback) {
     MenuStaffContext *context;
     MenuStaffChoices *resources;
     MenuWindowContainer *window;
@@ -453,7 +450,7 @@ s32 func_002AD118(u64 callback) {
     resources = (MenuStaffChoices *)context->menu;
     popup = &context->popupState;
     input = mnuMapPadMaskToFlags(0xC33);
-    result = func_002C4038((s32)((u8 *)context + 8), popup, 0, callback);
+    result = func_002C4038(&context->transitionWork, popup, 0, callback);
     if (result != 0) {
         return result;
     }
@@ -471,7 +468,7 @@ s32 func_002AD118(u64 callback) {
                     if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(itemId)) == 0) {
                         mnuApplyResourceSelection(itemId, (s32)context);
                     } else {
-                        mnuSetPopupEntry((s32)popup, (s32)D_003E74DC);
+                        mnuSetPopupEntry(popup, D_003E74DC);
                     }
                 } else {
                     input = 0x8000;
@@ -481,11 +478,11 @@ s32 func_002AD118(u64 callback) {
             }
         }
         if (input & 2) {
-            mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7434);
+            mnuSetPopupEntryFlagged(popup, D_003E7434);
         }
     } else {
         if (mnuIsStaffWindowReadyForItem(resources->secondListState & 0xFFFF, context) == 0) {
-            mnuSetPopupEntryFlagged((s32)popup, (s32)D_003E7434);
+            mnuSetPopupEntryFlagged(popup, D_003E7434);
             mnuClearActionFlags(0, (u8 *)&context->windowFlags);
             mnuBeginWindowFadeTransition(0, (s32)context->tail);
         } else {

@@ -201,9 +201,103 @@ u32 func_001FF558(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF560);
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
+s32 func_001FF560(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+    s8 matches[3][3];
+    u32 predicates[3];
+    u32 firstTier, endTier;
+    u32 tier, predicateIndex;
+
+    if (requestedRow == 0) {
+        firstTier = 0;
+        endTier = 3;
+    } else {
+        firstTier = requestedRow - 1;
+        endTier = requestedRow;
+    }
+    for (tier = 0; tier < 3; tier++) {
+        for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
+            matches[tier][predicateIndex] = 0;
+        }
+    }
+    for (tier = firstTier; tier < endTier; tier++) {
+        predicates[0] = datEnemyAiRecords[species].decisions[tier].predicates[0];
+        predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
+        predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
+        for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
+            matches[tier][predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+        }
+    }
+    for (tier = 0; tier < 3; tier++) {
+        if (matches[tier][0] && matches[tier][1] && matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[0];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 0;
+                return 1;
+            }
+        }
+        if (matches[tier][0] && matches[tier][1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[1] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[1];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 1;
+                return 1;
+            }
+        }
+        if (matches[tier][0] && matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[2] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[2];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 2;
+                return 1;
+            }
+        }
+        if (matches[tier][1] && matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[3] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[3];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 3;
+                return 1;
+            }
+        }
+        if (matches[tier][0]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[4] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[4];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 4;
+                return 1;
+            }
+        }
+        if (matches[tier][1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[5] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[5];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 5;
+                return 1;
+            }
+        }
+        if (matches[tier][2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[6] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[6];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 6;
+                return 1;
+            }
+        }
+        if (datEnemyAiRecords[species].decisions[tier].routes[7] != 8) {
+            *selected = datEnemyAiRecords[species].decisions[tier].routes[7];
+            btlActionScratchWork->rowIndex = tier;
+            btlActionScratchWork->conditionKind = 7;
+            return 1;
+        }
+    }
+    *selected = 0;
+    btlActionScratchWork->rowIndex = 0;
+    btlActionScratchWork->conditionKind = 8;
+    return 1;
+}
 
 s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
     s8 matches[3];
