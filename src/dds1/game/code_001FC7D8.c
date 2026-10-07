@@ -105,7 +105,7 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     if (task->flags & 0x40) {
         return result;
     }
-    flags = unit->conditionFlags;
+    flags = unit->partyRecord.status;
     if (!(flags & 0x20)) {
         return result;
     }
@@ -225,7 +225,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCFB8);
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 s32 func_001FD170(BtlTask *task) {
     BtlUnit *unit = task->unit;
-    s32 status = unit->conditionFlags & 0x7FFF;
+    s32 status = unit->partyRecord.status & 0x7FFF;
 
     switch (status) {
     case 0x2000:
@@ -662,7 +662,7 @@ s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
 
     if (link->elapsedTicks == 0) {
         if (owner != NULL) {
-            func_0019C590(state->dialogId, 0, owner->mode, (owner->statBits & 0x20) ? 0xE : 0xF);
+            func_0019C590(state->dialogId, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         func_003003F0("JYOKYO ID : %d\n", state->dialogId);
         btlReplaceDialogTasksAndQueueMessage(state->dialogId, link->arg);
@@ -697,13 +697,13 @@ s32 btlUpdateLinkedDialogueEffect(BtlObjLink *link) {
     s32 battleState = btlGetRuntime();
     BtlUnit *owner = link->owner;
 
-    if (owner != 0 && !(owner->conditionFlags & 1)) {
+    if (owner != 0 && !(owner->partyRecord.status & 1)) {
         return 1;
     }
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_0019C590(((BtlJyokyoState *)battleState)->alternateDialogId, 0, owner->mode,
-                          (owner->statBits & 0x20) ? 0xE : 0xF);
+            func_0019C590(((BtlJyokyoState *)battleState)->alternateDialogId, 0, owner->partyRecord.unitId,
+                          (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlJyokyoState *)battleState)->alternateDialogId, link->arg);
     }
@@ -760,8 +760,8 @@ s32 btlPollTimedPresentationTask(BtlObjLink *link) {
 
     if (link->elapsedTicks == 0) {
         if (owner != NULL) {
-            func_0019C590(state->thirdDialogId, 0, owner->mode,
-                          (owner->statBits & 0x20) ? 1 : 2);
+            func_0019C590(state->thirdDialogId, 0, owner->partyRecord.unitId,
+                          (owner->partyRecord.flags & 0x20) ? 1 : 2);
         }
         btlReplaceDialogTasksAndQueueMessage(state->thirdDialogId, link->arg);
     }
@@ -944,7 +944,7 @@ s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
     s32 result;
 
     btlActionScratchWork = (s32)work;
-    work[1] = owner->mode;
+    work[1] = owner->partyRecord.unitId;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
     sdfReleaseChipBlock(btlActionScratchWork);
@@ -992,7 +992,7 @@ s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
 
     unit = task->unit;
     btlActionScratchWork = (s32)work;
-    species = unit->mode;
+    species = unit->partyRecord.unitId;
     work[0] = (s32)task;
     work[1] = species;
     func_001FF560(unit, species, &row, 0);

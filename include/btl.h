@@ -3,6 +3,9 @@
 
 #include "common.h"
 #include "btl_task.h"
+#ifdef VERSION_DDS1
+#include "dat_state.h"
+#endif
 
 /* Battle effect actor, flags and timing (0x18); DDS1/2 identical views. */
 typedef struct BattleEffectState {
@@ -110,24 +113,7 @@ typedef struct BtlUnit {
     u32 gunResourceFlags; /* 0x118 */
     u8 lookupId; /* 0x11C: retail lookup consumers use unsigned byte loads. */
     u8 pad11D[3];
-    u16 statBits; /* 0x120: base of the unit stat accessors */
-    u16 unk122; /* 0x122: script-controlled unit parameter */
-    u16 mode; /* 0x124 */
-    u16 hp; /* 0x126 */
-    u16 maxHp; /* 0x128 */
-    u16 unk_12A;
-    u16 unk12C; /* 0x12C: reset value for the unit parameter at 0x12A */
-    u16 conditionFlags; /* 0x12E */
-    u8 pad130[4];
-    u16 actionTime; /* 0x134 */
-    s8 baseStats[5]; /* 0x136: signed stat bank copied to the saved party entry. */
-    u8 pad13B[0x37];
-    u16 bedAssetIndex; /* 0x172: SDK operand resolution selects the BED asset. */
-    u8 pad174[0x138];
-    s16 commandKind; /* 0x2AC: queued command kind, paired with actionSlot. */
-    u16 unk2AE; /* 0x2AE: saved with commandKind and actionSlot in the party record. */
-    s16 actionSlot; /* 0x2B0 */
-    u8 pad2B2[0x12];
+    DatPartyRecord partyRecord; /* 0x120: complete copied actor record (0x1A4). */
     u8 unk2C4; /* 0x2C4: saved party-entry index, read with lbu. */
     u8 pad2C5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2C6 */
@@ -156,6 +142,9 @@ typedef struct BtlUnit {
     struct BtlUnit *previousActor; /* 0x340 */
     struct BtlUnit *next; /* 0x344: actor-list link, not a task-chain link */
 } BtlUnit;
+typedef char BtlUnitRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
+typedef char BtlUnitRecordEndCheck[((u32)&((BtlUnit *)0)->unk2C4 == 0x2C4) ? 1 : -1];
+typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x348) ? 1 : -1];
 #endif /* VERSION_DDS1 */
 
 

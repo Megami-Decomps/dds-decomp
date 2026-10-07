@@ -21,7 +21,26 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025DF68);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E108);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E308);
+extern void func_0025E420(ShopScene *, s32, s32);
+
+/* Draw the fixed shop frame, then its pulsing icon. */
+void func_0025E308(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
+    u32 texture = D_003BC520;
+
+    func_002BF4E0(D_0036C728[32][BRS_ICON_X] << 4,
+                  D_0036C728[32][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[32][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[27][BRS_ICON_X] << 4,
+                  D_0036C728[27][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[27][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[28][BRS_ICON_X] << 4,
+                  D_0036C728[28][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[28][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[0][BRS_ICON_X] << 4,
+                  D_0036C728[0][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[0][BRS_ICON_ID], mode);
+    func_0025E420(scene, 0x100, mode);
+}
 
 extern f32 sdfSinPoly(f32);
 
@@ -61,7 +80,41 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
     func_002BF4E0(D_0036C728[22][BRS_ICON_X] << 4, D_0036C728[22][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[22][BRS_ICON_ID], c);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E6B0);
+extern s32 ptyCountBulletItem(s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern struct FrFontCtx *func_00197A98(s32, s32, s32, u32, const char *, s32);
+extern void func_001958A0(struct FrFontCtx *, s32, s32);
+extern void frFontQueueGlyphInSelectedSlot(struct FrFontCtx *);
+extern char D_003BC4F0[];
+
+/* Draw the selected item quantity; bullets include matching party slot values. */
+void func_0025E6B0(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mode) {
+    char text[16];
+    u32 texture = D_003BC520;
+    struct MenuList *list;
+
+    func_002BF4E0(D_0036C728[23][BRS_ICON_X] << 4,
+                  D_0036C728[23][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[23][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[24][BRS_ICON_X] << 4,
+                  D_0036C728[24][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[24][BRS_ICON_ID], mode);
+    list = scene->window->list;
+    if (list->count != 0) {
+        CampWindowParams *item = &list->cursor->camp;
+        s32 quantity = datGameState->inventory.counts[item->id];
+        u32 style = (s32)((f32)(alpha << 7) * 0.00390625f) | 0xA09DC300;
+        struct FrFontCtx *glyph;
+
+        if (item->mode == 2) {
+            quantity = ptyCountBulletItem(item->id);
+        }
+        func_003014F0(text, D_003BC4F0, quantity);
+        glyph = func_00197A98(0x1A70, 0xAA0, depth, style, text, 0);
+        func_001958A0(glyph, 1, mode);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E820);
 
@@ -138,12 +191,7 @@ void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object,
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F680);
 
-extern s32 func_003014F0(char *, const char *, ...);
-extern struct FrFontCtx *func_00197A98(s32, s32, s32, u32, const char *, s32);
 extern void frFontSetChainFlag(struct FrFontCtx *, u8);
-extern void func_001958A0(struct FrFontCtx *, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(struct FrFontCtx *);
-extern char D_003BC4F0[];
 
 void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
     char text[16];

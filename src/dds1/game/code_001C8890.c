@@ -493,7 +493,7 @@ void fldAppendTaskToGroup(BtlTask *task);
 
 void fldCreateSceneSpriteTask(s32 arg0);
 
-void func_001A1960();
+void func_001A1960(DatPartyRecord *record, s32 mask);
 
 typedef struct BattleActionLinkState {
     u8 pad00[0x18];
@@ -859,7 +859,7 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(u8 *task) {
     flags = *(u32 *)(unit + 0x110);
     if ((flags & 0x400) == 0 && (*(u16 *)(unit + 0x12E) & 0x4000) == 0) {
         if (*(s32 *)(unit + 0xC8) == 0x1F) {
-            func_001A1948(unit + 0x120, 0x1000);
+            func_001A1948(&((BtlUnit *)unit)->partyRecord, 0x1000);
             flags = *(u32 *)(unit + 0x110);
         }
         masked = flags & ~0x20;
@@ -968,7 +968,7 @@ void func_001C9098(BattleActionLinkState *link) {
     }
     unit = link->unit;
     unit->flags |= 0x4000;
-    switch (unit->conditionFlags & 0x7FFF) {
+    switch (unit->partyRecord.status & 0x7FFF) {
     case 8:
     case 0x20:
     case 0x200:
@@ -980,18 +980,18 @@ void func_001C9098(BattleActionLinkState *link) {
         /* fallthrough */
     case 1:
         unit->stateFlags &= ~4;
-        switch (unit->conditionFlags & 0x7FFF) {
+        switch (unit->partyRecord.status & 0x7FFF) {
         case 0x1000:
-            chance = evtRunContext(0xE, (s32)&unit->statBits, 0, 0, 0);
+            chance = evtRunContext(0xE, (s32)&unit->partyRecord, 0, 0, 0);
             break;
         case 0x200:
-            chance = evtRunContext(0xF, (s32)&unit->statBits, 0, 0, 0);
+            chance = evtRunContext(0xF, (s32)&unit->partyRecord, 0, 0, 0);
             break;
         case 0x20:
-            chance = evtRunContext(0x10, (s32)&unit->statBits, 0, 0, 0);
+            chance = evtRunContext(0x10, (s32)&unit->partyRecord, 0, 0, 0);
             break;
         case 8:
-            chance = evtRunContext(0x11, (s32)&unit->statBits, 0, 0, 0);
+            chance = evtRunContext(0x11, (s32)&unit->partyRecord, 0, 0, 0);
             break;
         case 1:
             chance = ((BtlState *)btlGetRuntime())->mode == 2 ? 100 : 0;
@@ -1001,11 +1001,11 @@ void func_001C9098(BattleActionLinkState *link) {
             break;
         }
         scale = 1.0f;
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x232)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord, 0x232)) {
             scale = datAbilityParameters[0x232 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         chance = chance * scale;
-        if ((unit->conditionFlags & 0x7FFF) != 1 && chance > 70) {
+        if ((unit->partyRecord.status & 0x7FFF) != 1 && chance > 70) {
             chance = 70;
         }
         btlBossDebugPrintf("btl:bad recovery=%d%%[ratio=%.2f]\n", chance, scale);
@@ -1018,7 +1018,7 @@ void func_001C9098(BattleActionLinkState *link) {
         memset(&spec, 0, sizeof(spec));
         spec.unk_0C = 0x122F;
         btlStartTask(btlCreateActorParameterDeltaTask((u8 *)unit, &spec));
-        if (unit->conditionFlags & 0x1000) {
+        if (unit->partyRecord.status & 0x1000) {
             unit->flags |= 0x20000000;
             task = btlCreateEffObjB(link->unit, 0xCA);
             task->ownerId = btlAdvanceRuntimeSequenceCounter();
@@ -1212,7 +1212,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
         if (sndHasActiveActor() == 0) {
             if (fldCheckSceneResourcesIdle((s32)task->unit) != 0) {
                 if (!(task->flags & 0x80)) {
-                    index = task->unit->mode;
+                    index = task->unit->partyRecord.unitId;
                     scene->boundTask = 0;
                     if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck((s32)task) != 0) {
                         btlAssignTaskResultAndArgument((s32)task);
@@ -1418,7 +1418,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     }
     if (!(unit->flags & 0x400020)) {
         unit->flags &= ~0x1000;
-        unit->statBits &= ~0x1000;
+        unit->partyRecord.flags &= ~0x1000;
         sound = (SoundTask *)btlCreateMoveOtherUnitsTask(unit, 0x11);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
@@ -1479,21 +1479,21 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         spawned->startCondition.value.handle = sound->handle;
         spawned->owner = unit->identity;
         btlStartTask(spawned);
-        if (task->unit->conditionFlags & 0x480) {
+        if (task->unit->partyRecord.status & 0x480) {
             btlDispatchStateHandler(task, 0x18);
         } else {
             btlDispatchStateHandler(task, 0x1A);
         }
     } else {
-        if ((unit->conditionFlags & 0x7FFF) != 0x4000) {
+        if ((unit->partyRecord.status & 0x7FFF) != 0x4000) {
             unit->flags &= ~0x20;
-            if (unit->hp == 0) {
-                unit->hp = 1;
+            if (unit->partyRecord.hp == 0) {
+                unit->partyRecord.hp = 1;
                 btlRefreshUnitMotionSelection((u8 *)unit);
             }
         }
         if (task->indexWork.stage == 4) {
-            if (!btlCheckSpecialAbility((s32)&unit->statBits, 0x231)) {
+            if (!btlCheckSpecialAbility((s32)&unit->partyRecord, 0x231)) {
                 btlStartTask(btlCreateEffObjB(unit, task->indexWork.parameter));
                 task->indexWork.stage = 0;
             } else {
@@ -1501,7 +1501,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
             }
         }
         unit->flags &= ~0x1000;
-        unit->statBits &= ~0x1000;
+        unit->partyRecord.flags &= ~0x1000;
         change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x12,
                                                        3);
         btlStartTask(change);
@@ -1548,7 +1548,7 @@ void func_001CE5F0(BtlTask *task) {
     }
     if (!(unit->flags & 0x20000020)) {
         unit->flags |= 0x1000;
-        unit->statBits |= 0x1000;
+        unit->partyRecord.flags |= 0x1000;
         sound = (SoundTask *)btlCreateMoveOtherUnitsTask(unit, 0x10);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
@@ -1609,14 +1609,14 @@ void func_001CE5F0(BtlTask *task) {
         spawned->startCondition.value.handle = sound->handle;
         spawned->owner = unit->identity;
         btlStartTask(spawned);
-        if (task->unit->conditionFlags & 0x480) {
+        if (task->unit->partyRecord.status & 0x480) {
             btlDispatchStateHandler(task, 0x18);
         } else {
             btlDispatchStateHandler(task, 0x1A);
         }
     } else {
         unit->flags |= 0x1000;
-        unit->statBits |= 0x1000;
+        unit->partyRecord.flags |= 0x1000;
         change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->unkDC, unit->displaySpecies, motion, 0x12,
                                                        3);
         btlStartTask(change);
@@ -1805,7 +1805,7 @@ void btlCommandTaskReturnUpdate(s32 task) {
     }
     if (fldReleaseIdleSceneActorResources((BtlUnit *)*(s32 *)(task + 0x18)) != 0) {
         if (*(u32 *)(unit + 0x110) & 0x200) {
-            func_001A1960(unit + 0x120, 8);
+            func_001A1960(&((BtlUnit *)unit)->partyRecord, 8);
             func_001A2258(unit);
         }
         fldUpdateSceneGroupTask(task);
@@ -1932,7 +1932,7 @@ void btlStartActorDefeatTransition(s32 command) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
     BtlTask *commandTask = (BtlTask *)command;
     BtlUnit *actor = commandTask->unit;
-    u16 *profile = &actor->statBits;
+    DatPartyRecord *profile = &actor->partyRecord;
     SoundTask *soundTask;
     SoundTask *object;
     s64 sequence;
@@ -1940,7 +1940,7 @@ void btlStartActorDefeatTransition(s32 command) {
     s32 result;
 
     actor->selectedEntryIndex = -1;
-    func_001A1948(profile, 0x4000);
+    func_001A1948(&actor->partyRecord, 0x4000);
     btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
     if (!(commandTask->flags & 0x100)) {
         soundTask = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)actor, 11);
@@ -1999,7 +1999,7 @@ void btlStartActorDefeatTransition(s32 command) {
                 actor->flags &= ~1;
             }
         }
-        actor->statBits &= ~2;
+        actor->partyRecord.flags &= ~2;
     }
 }
 
@@ -2022,7 +2022,7 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
         if ((actor->flags & 0x400) == 0) {
             return;
         }
-        entryFlags = btlGetEntryFlagsUnlessDisabled((s32)&actor->statBits);
+        entryFlags = btlGetEntryFlagsUnlessDisabled((s32)&actor->partyRecord);
         if ((actor->flags & 0x40) == 0 && !(entryFlags & 0x200)) {
             return;
         }
@@ -2366,7 +2366,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
     switch (argument[0]) {
     case 1:
         if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
-            return btlGetActorBedAssetIdFromIndex(unit->bedAssetIndex);
+            return btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue);
         }
         if (argument[1] > 0) {
             return argument[1];
@@ -2649,7 +2649,7 @@ u32 btlApplyDeferredUnitStatus(void *argument) {
     if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
         return 1;
     }
-    func_001A1948(owner + 0x120, args[1]);
+    func_001A1948(&((BtlUnit *)owner)->partyRecord, args[1]);
     btlRefreshUnitMotionSelection(owner);
     btlIsUnitDefeatTriggeredByValueDelta(owner, 0);
     return 1;
@@ -2686,8 +2686,8 @@ u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
         return 1;
     }
     if (((BtlCategoryTableEntry *)datCommandRecords)[args->category].flags00 & 8) {
-        btlAdjustUnitHp((u8 *)&unit->statBits, -0x7FFF);
-        func_001A1948(&unit->statBits, 0x4000);
+        btlAdjustUnitHp((u8 *)&unit->partyRecord, -0x7FFF);
+        func_001A1948(&unit->partyRecord, 0x4000);
         unit->flags |= 0x20;
     }
     if (args->amount == 0) {
@@ -2695,10 +2695,10 @@ u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     }
     switch (((BtlCategoryTableEntry *)datCommandRecords)[args->category].kind03) {
     case 1:
-        btlAdjustUnitHp((u8 *)&unit->statBits, -args->amount);
+        btlAdjustUnitHp((u8 *)&unit->partyRecord, -args->amount);
         return 1;
     case 2:
-        btlAdjustUnitMp((u8 *)&unit->statBits, -args->amount);
+        btlAdjustUnitMp((u8 *)&unit->partyRecord, -args->amount);
         return 1;
     default:
         return 1;
@@ -2934,7 +2934,7 @@ u32 btlRefreshEligibleActors(void) {
                         if ((entry & 0x400) == 0) {
                             if ((*(u32 *)(actor + 0x114) & 8) == 0) {
                                 u16 prior = *(u16 *)(actor + 0x12E);
-                                func_001A1948(actor + 0x120, 1);
+                                func_001A1948(&((BtlUnit *)actor)->partyRecord, 1);
                                 btlRefreshUnitMotionSelection(actor);
                                 if (*(u16 *)(actor + 0x12E) == 1 &&
                                     prior != *(u16 *)(actor + 0x12E)) {
@@ -4135,15 +4135,11 @@ void btlUnitFaceTargetScaled(u8 *object, u8 *target, f32 scale) {
     }
 }
 
-typedef struct BtlUnitStats {
-    u32 word[0x69];
-} BtlUnitStats;
-
 void btlCopyUnitStats(s32 arg0, s32 arg1) {
-    BtlUnitStats *stats = (BtlUnitStats *)(arg0 + 0x120);
-    *stats = *(BtlUnitStats *)arg1;
-    btlRefreshUnitMaximumHpAndClampCurrentHp((s32)stats);
-    btlRefreshUnitMaximumMpAndClampCurrentMp((s32)stats);
+    DatPartyRecord *record = &((BtlUnit *)arg0)->partyRecord;
+    *record = *(DatPartyRecord *)arg1;
+    btlRefreshUnitMaximumHpAndClampCurrentHp((s32)record);
+    btlRefreshUnitMaximumMpAndClampCurrentMp((s32)record);
 }
 
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
@@ -4351,7 +4347,7 @@ s32 btlFormatUnitBedName(u8 *actor, char *filename) {
                       *(u16 *)(actor + 0x124));
     } else {
         func_003014F0(filename, D_003A3BA8, D_003BB5F8,
-                      btlGetActorBedAssetIdFromIndex(((BtlUnit *)actor)->bedAssetIndex),
+                      btlGetActorBedAssetIdFromIndex(((BtlUnit *)actor)->partyRecord.menuValue),
                       *(u16 *)(actor + 0x124));
     }
     return 1;
@@ -6483,8 +6479,8 @@ void btlResetCameraMotion(s32 action) {
                                 if (node == 0xD || node == 0x12) {
                                     current = btlGetUnitModelValue1C(unit);
                                     limit = (f32)btlGetUnitModelFrameCount(unit);
-                                    if (unit->mode < 8) {
-                                        limit = limit * D_00359EC0[unit->mode];
+                                    if (unit->partyRecord.unitId < 8) {
+                                        limit = limit * D_00359EC0[unit->partyRecord.unitId];
                                     } else {
                                         limit = limit * fallbackScale;
                                     }
@@ -6618,7 +6614,7 @@ s32 btlCanUseLinkedActor(s32 actor) {
             return 0;
         }
     }
-    if (((BtlUnit *)linked->unit)->conditionFlags & 0x480) {
+    if (((BtlUnit *)linked->unit)->partyRecord.status & 0x480) {
         return 0;
     }
     category = *(s32 *)(actor + 0x114);
@@ -8375,7 +8371,7 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
 }
 void btlInitCommandCursorForCategory(s32 action, s32 state) {
     memset(&D_0035F100, 0, sizeof(D_0035F100));
-    switch (((CameraPoseAction *)action)->link->unit->mode) {
+    switch (((CameraPoseAction *)action)->link->unit->partyRecord.unitId) {
     case 1:
         func_001E6BB0(action, state, 4, 0);
         CURSOR->unk_0C = 0;
@@ -10057,7 +10053,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     } else {
         effectId = 0;
     }
-    if (effectId != 0 && !(actor->conditionFlags & 0x4000)) {
+    if (effectId != 0 && !(actor->partyRecord.status & 0x4000)) {
         if (link->effectHandle == 0) {
             link->effect = (u32 *)work->soundResourceSlots[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
             sndCreateSystemEffect(link->effect);
@@ -11117,13 +11113,13 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         }
         unit = args->unit;
         if (unit->flags & 0x200) {
-            id = unit->mode;
+            id = unit->partyRecord.unitId;
             if (unit->flags & 0x1000) {
                 id += 0x10;
             }
             func_003014F0(path, D_003A5178, D_003A5188, id);
         } else {
-            func_003014F0(path, D_003A5198, D_003A5188, unit->mode);
+            func_003014F0(path, D_003A5198, D_003A5188, unit->partyRecord.unitId);
         }
         args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5370, path);

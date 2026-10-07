@@ -4,6 +4,9 @@
 #include "itf_grid_text.h"
 #include "sdf.h"
 
+extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
+
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
@@ -38,24 +41,24 @@ void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags,
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
 /* Resolve an entry by key, falling back to the object's stored value. */
-s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
-    s32 entry = effGetSlotWorkOrOverride(object, key);
+s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
+    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride((s32)object, key);
     s32 result;
 
-    if (*(s32 *)(entry + 0x30) == 0) {
+    if (entry->states[0].delay == 0) {
         func_002BF828(object, key);
     }
-    result = effUpdateTimedStates(object, key, entry);
+    result = (s32)effUpdateTimedStates(object, (u32)key, entry);
     if (result == 0) {
-        result = ((EffectSlotSet *)object)->defaultValue;
+        result = object->defaultValue;
     }
     return result;
 }
 
 extern void func_002BD3D8(void *, s32, void *);
 
-void itfSetGridEntryQuantizedAndRefresh(u8 *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    EffectSlotDescription *entry = &((EffectSlotSet *)object)->descriptions[index];
+void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    EffectSlotDescription *entry = &object->descriptions[index];
     s32 record = effGetSlotWorkOrOverride((s32)object, index);
 
     entry->xOffset = x >> 4;
@@ -66,10 +69,10 @@ void itfSetGridEntryQuantizedAndRefresh(u8 *object, s32 index, s32 x, s32 y, s32
 }
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
-void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
+void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
-    EffectSlotDescription *entry = &((EffectSlotSet *)object)->descriptions[index];
-    u32 *destination = (u32 *)((EffectSlotSet *)object)->workEntries[index].bounds.grid.quantizedBounds;
+    EffectSlotDescription *entry = &object->descriptions[index];
+    u32 *destination = (u32 *)object->workEntries[index].bounds.grid.quantizedBounds;
     u32 *source;
     s32 remaining = 3;
     entry->xOffset = x >> 4;
@@ -82,8 +85,8 @@ void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
     } while (--remaining >= 0);
 }
 
-void itfGridSetBounds(s32 object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
+void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride((s32)object, index);
     widget->parameters[0] = x;
     widget->parameters[1] = y;
     widget->parameters[2] = width;
@@ -127,7 +130,7 @@ typedef struct GridAngleSlot {
 INCLUDE_ASM(const s32, "game/code_002BF790", itfGridApplySqrtBoundsAndColorScale);
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
-s32 func_002BFCE0(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 squares[2];
     s32 deltas[2];
@@ -201,7 +204,7 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ow
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0200);
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
-s32 func_002C0340(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 scaled[2];
     s32 deltas[2];
@@ -605,14 +608,6 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
     return 1;
 }
 
-typedef struct GridNumericDescriptor {
-    s32 mode;
-    f32 minimum;
-    f32 maximum;
-    f32 step;
-    f32 value;
-} GridNumericDescriptor;
-
 /* Destroy linked child widgets recursively before releasing the parent widget. */
 u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     GridTextListItem *childLink;
@@ -741,14 +736,14 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     maximum = ((GridNumericDescriptor *)item->parameter)->maximum;
 
     switch (descriptor->mode) {
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             while (maximum >= 16.0f) {
                 maximum *= 0.0625f;
                 width++;
             }
             width += 2;
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             while (maximum >= 10.0f) {
                 maximum /= 10.0f;
                 width++;
@@ -764,7 +759,7 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     }
 
     item->formatWidth = width;
-    if (widget->flags & 0x100) {
+    if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
         length += width;
     } else {
         length += width + 1;
@@ -872,24 +867,24 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
             func_003014F0(prefix, "%s ", entry->text);
         }
         switch (((GridNumericDescriptor *)entry->parameter)->mode) {
-        case 0:
+        case GRID_NUMERIC_FORMAT_DECIMAL:
             func_003014F0(format, "%%s%%0%dd", entry->formatWidth);
             func_003014F0(text, format, prefix, (s32)entry->number);
             break;
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             func_003014F0(format, "%%s0x%%0%dX", entry->formatWidth - 2);
             func_003014F0(text, format, prefix, (s32)entry->number);
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             func_003014F0(format, "%%s%%0%d.1f", entry->formatWidth);
             func_003014F0(text, format, prefix, (double)entry->number);
             break;
         }
     }
-    if (widget->flags & 0x100) {
+    if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
         s32 row = entry->index + widget->rowOffset;
 
-        if (!(widget->flags & 0x200)) {
+        if (!(widget->flags & GRID_TEXT_HEX_ROW_INDEX)) {
             func_003014F0(out, "%03d:%s", row, text);
         } else {
             func_003014F0(out, "0x%03X:%s", row, text);
@@ -925,13 +920,13 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                     if (invokeSelected != 0) {
                         drawMode = layout;
                     }
-                    if (!(widget->flags & 0x40)) {
-                        if (item == widget->selected && (widget->flags & 4)) {
+                    if (!(widget->flags & GRID_TEXT_HIDE_ROWS)) {
+                        if (item == widget->selected && (widget->flags & GRID_TEXT_HIGHLIGHT_SELECTION)) {
                             column = (s32)item->number;
 
-                            if (widget->flags & 0x100) {
+                            if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
                                 column += 4;
-                                if (widget->flags & 0x200) {
+                                if (widget->flags & GRID_TEXT_HEX_ROW_INDEX) {
                                     column += 2;
                                 }
                             }
@@ -940,13 +935,13 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                                                    0xD0, 0x78, 0x40408080,
                                                    surfaceIndex);
                         }
-                        if ((widget->flags & 8) && item->value != 0) {
+                        if ((widget->flags & GRID_TEXT_HIGHLIGHT_VALUES) && item->value != 0) {
                             s32 width = strlen(item->text) * 0xC0 + 0x10;
                             s32 indent;
 
-                            if (widget->flags & 0x100) {
+                            if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
                                 indent = 0x300;
-                                if (widget->flags & 0x200) {
+                                if (widget->flags & GRID_TEXT_HEX_ROW_INDEX) {
                                     indent = 0x480;
                                 }
                             } else {

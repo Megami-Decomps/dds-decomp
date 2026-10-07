@@ -89,9 +89,22 @@ typedef struct MenuTerminalWork {
     s32 selectedSlot;        /* 0xD8 */
     s32 reduced;             /* 0xDC */
     u32 imageHandles[7];     /* 0xE0: copied by mnuResolveStaffImageHandles */
-    u8 padFC[0x64];
+    u8 padFC[0x5C];
+    u32 effectHandle; /* 0x158: effect-resource address word. */
+    s32 effectStage; /* 0x15C */
     u32 bgmHandle;           /* 0x160: encoded bank/track handle */
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
+typedef char MenuTerminalWork_size[(sizeof(MenuTerminalWork) == 0x164) ? 1 : -1];
+
+typedef struct {
+    u8 pad00[0x6C];
+    u32 resourceHandle;
+} MenuResourceWork;
+typedef char MenuResourceWork_size[(sizeof(MenuResourceWork) == 0x70) ? 1 : -1];
+
+extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
+extern void mnuReleaseEffectResource(MenuResourceWork *);
+extern u32 mnuRequestEffectResource(u32, u32);
 
 extern s32 mnuCreateDualPercentPanel(DatPartyRecord *, s32);
 
@@ -511,7 +524,7 @@ void mnuReleaseWorkResources(u8 *work) {
     mnuDestroyListState((u32)((MenuTerminalWork *)work)->owner);
 }
 
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
 extern void evtCreateEventScriptProcess(s32);
 
@@ -2022,7 +2035,6 @@ u32 evtBRebuildTerminalMenuAndResetDispatch(void) {
     return 1;
 }
 
-extern void mnuReleaseEffectResource();
 
 s32 func_0024CB80(u64 input) {
     EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
@@ -2090,7 +2102,6 @@ s32 evtBDispatchSyncB(s32 request) {
     return menuRunPanel(context, 2, request);
 }
 
-extern u32 mnuRequestEffectResource(u32, u32);
 extern char D_003AF590[];
 extern char D_003AF620[];
 
@@ -2101,7 +2112,7 @@ u32 evtBEndDispatchAndReloadEffectResource(void) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 0);
     if (context->state7C != 0) {
-        context->effectHandle = mnuRequestEffectResource(D_003AF590, D_003AF620);
+        context->effectHandle = mnuRequestEffectResource((u32)D_003AF590, (u32)D_003AF620);
     }
     return 1;
 }
@@ -2109,14 +2120,6 @@ u32 evtBEndDispatchAndReloadEffectResource(void) {
 u32 func_0024CE20(void) {
     return 1;
 }
-
-
-typedef struct {
-    u8 pad00[0x6C];
-    u32 resourceHandle;
-} MenuResourceWork;
-
-extern u8 mnuHasEffectResourceHandle(MenuResourceWork *work);
 
 extern const char D_003AF710[];
 extern u8 D_0036AE10[];

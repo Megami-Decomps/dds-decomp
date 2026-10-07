@@ -18,14 +18,6 @@ typedef struct UiQuadWords {
 } UiQuadWords; // 0x10
 
 
-typedef struct GridNumericDescriptor {
-    s32 mode;
-    f32 minimum;
-    f32 maximum;
-    f32 step;
-    f32 value;
-} GridNumericDescriptor;
-
 /* Result bit 1: at least widget->rows successors remain from firstVisible. */
 enum { GRID_LIST_HAS_COUNT_FOLLOWERS = 2 };
 
@@ -42,7 +34,8 @@ typedef struct GridDrawWork {
     s32 overlayDataSize;     /* 0x34 */
 } GridDrawWork;
 
-extern s32 effGetSlotWorkOrOverride();
+extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -74,16 +67,16 @@ void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags,
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307018);
 
-s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
-    s32 entry = effGetSlotWorkOrOverride(object, key);
+s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
+    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride((s32)object, key);
     s32 result;
 
-    if (*(s32 *)(entry + 0x30) == 0) {
+    if (entry->states[0].delay == 0) {
         func_00307018(object, key);
     }
-    result = effUpdateTimedStates(object, key, entry);
+    result = (s32)effUpdateTimedStates(object, (u32)key, entry);
     if (result == 0) {
-        result = ((EffectSlotSet *)object)->defaultValue;
+        result = object->defaultValue;
     }
     return result;
 }
@@ -93,7 +86,7 @@ extern void func_00304B18();
 /* Store grid bounds in the renderer's fixed-point coordinate units. */
 void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     EffectSlotDescription *entry = &object->descriptions[index];
-    s32 record = effGetSlotWorkOrOverride(object, index);
+    s32 record = effGetSlotWorkOrOverride((s32)object, index);
 
     entry->xOffset = x >> 4;
     entry->yOffset = y >> 3;
@@ -120,8 +113,8 @@ void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
 }
 
 /* Set the unquantized bounds of the selected grid widget. */
-void itfGridSetBounds(s32 object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
+void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride((s32)object, index);
     widget->parameters[0] = x;
     widget->parameters[1] = y;
     widget->parameters[2] = width;
@@ -149,8 +142,11 @@ void itfGridStorePosition(GridPosition *position, s32 x, s32 y) {
     position->y = y;
 }
 
-void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, u32 width, u32 height, u32 data, u32 context) {
-    sdfCreateDescriptorPacket(context, packetHandle, 0, 0, width, height, data, 0);
+extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, s32 width, s32 height, u8 *data,
+                  SdfListHead *context) {
+    sdfCreateDescriptorPacket(context, (s32)packetHandle, 0, 0, width, height, (s32)data, 0);
 }
 
 /* The overlay packet is present only when this work flag is set. */
@@ -159,7 +155,7 @@ u8 itfGridGetOverlayFlag(GridDrawWork *work) {
 }
 
 /* Two overlay kinds use a 16x16 region; other kinds use 8x2. */
-void itfDrawGridOverlayPacket(GridDrawWork *work, s32 x, s32 y) {
+void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, SdfListHead *context) {
     s32 width;
     s32 height;
     if (work->overlayKind == 0x13 || work->overlayKind == 0x1B) {
@@ -169,7 +165,7 @@ void itfDrawGridOverlayPacket(GridDrawWork *work, s32 x, s32 y) {
         width = 8;
         height = 2;
     }
-    itfCreateGridPacketWithDefaultFlags(work->overlayHandle, width, height, x, y);
+    itfCreateGridPacketWithDefaultFlags(work->overlayHandle, width, height, data, context);
 }
 
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -187,11 +183,11 @@ GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 ki
     sdfInitPacketList(context);
     cursor = data + (data[1] & 0xF0) + 0x40;
     if (itfGridGetOverlayFlag(object) != 0) {
-        itfDrawGridOverlayPacket(object, (s32)cursor, (s32)context);
+        itfDrawGridOverlayPacket(object, cursor, context);
         cursor += object->overlayDataSize;
     }
     itfCreateGridPacketWithDefaultFlags(object->packetHandle, object->width,
-                  object->height, (s32)cursor, (u32)context);
+                  object->height, cursor, context);
     entry = &kwlnDrawSurfaces[kind];
     entry->append((SdfListHead *)entry, context);
     return object;
@@ -244,7 +240,7 @@ void itfSetGridDescriptorControlBit(s32 object, s32 index) {
 INCLUDE_ASM(const s32, "game/code_00306F80", itfGridApplySqrtBoundsAndColorScale);
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
-s32 func_00307710(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 squares[2];
     s32 deltas[2];
@@ -318,7 +314,7 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ow
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307C30);
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
-s32 func_00307D70(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 scaled[2];
     s32 deltas[2];
@@ -862,14 +858,14 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     maximum = ((GridNumericDescriptor *)item->parameter)->maximum;
 
     switch (descriptor->mode) {
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             while (maximum >= 16.0f) {
                 maximum *= 0.0625f;
                 width++;
             }
             width += 2;
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             while (maximum >= 10.0f) {
                 maximum /= 10.0f;
                 width++;
@@ -885,7 +881,7 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     }
 
     item->formatWidth = width;
-    if (widget->flags & 0x100) {
+    if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
         length += width;
     } else {
         length += width + 1;
@@ -993,24 +989,24 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
             func_0035C860(prefix, "%s ", entry->text);
         }
         switch (((GridNumericDescriptor *)entry->parameter)->mode) {
-        case 0:
+        case GRID_NUMERIC_FORMAT_DECIMAL:
             func_0035C860(format, "%%s%%0%dd", entry->formatWidth);
             func_0035C860(text, format, prefix, (s32)entry->number);
             break;
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             func_0035C860(format, "%%s0x%%0%dX", entry->formatWidth - 2);
             func_0035C860(text, format, prefix, (s32)entry->number);
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             func_0035C860(format, "%%s%%0%d.1f", entry->formatWidth);
             func_0035C860(text, format, prefix, (double)entry->number);
             break;
         }
     }
-    if (widget->flags & 0x100) {
+    if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
         s32 row = entry->index + widget->rowOffset;
 
-        if (!(widget->flags & 0x200)) {
+        if (!(widget->flags & GRID_TEXT_HEX_ROW_INDEX)) {
             func_0035C860(out, "%03d:%s", row, text);
         } else {
             func_0035C860(out, "0x%03X:%s", row, text);
@@ -1046,13 +1042,13 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                     if (invokeSelected != 0) {
                         drawMode = layout;
                     }
-                    if (!(widget->flags & 0x40)) {
-                        if (item == widget->selected && (widget->flags & 4)) {
+                    if (!(widget->flags & GRID_TEXT_HIDE_ROWS)) {
+                        if (item == widget->selected && (widget->flags & GRID_TEXT_HIGHLIGHT_SELECTION)) {
                             column = (s32)item->number;
 
-                            if (widget->flags & 0x100) {
+                            if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
                                 column += 4;
-                                if (widget->flags & 0x200) {
+                                if (widget->flags & GRID_TEXT_HEX_ROW_INDEX) {
                                     column += 2;
                                 }
                             }
@@ -1061,13 +1057,13 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                                                    0xD0, 0x78, 0x40408080,
                                                    surfaceIndex);
                         }
-                        if ((widget->flags & 8) && item->value != 0) {
+                        if ((widget->flags & GRID_TEXT_HIGHLIGHT_VALUES) && item->value != 0) {
                             s32 width = strlen(item->text) * 0xC0 + 0x10;
                             s32 indent;
 
-                            if (widget->flags & 0x100) {
+                            if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
                                 indent = 0x300;
-                                if (widget->flags & 0x200) {
+                                if (widget->flags & GRID_TEXT_HEX_ROW_INDEX) {
                                     indent = 0x480;
                                 }
                             } else {

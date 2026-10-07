@@ -212,6 +212,17 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     stamp.parent.mkdir(parents=True, exist_ok=True)
     stamp.write_text(digest)
 
+
+def write_configure_build(n, configure_inputs: list[str], argv: list[str]) -> None:
+    """Write the Ninja regeneration edge without persisting one-shot options."""
+    generator_args = [arg for arg in argv if arg != "--force-split"]
+    n.build(
+        "build.ninja",
+        "configure",
+        implicit=configure_inputs,
+        variables={"args": " ".join(generator_args)},
+    )
+
 def provide_data_symbols(version: str) -> None:
     """Give every D_XXXXXXXX the asm refers to its retail address as a fallback.
 
@@ -1181,8 +1192,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         battle_manifest = ROOT / "config" / version / "battle_tables.sha1"
         if battle_manifest.exists():
             configure_inputs.append(str(battle_manifest.relative_to(ROOT)))
-    n.build("build.ninja", "configure", implicit=configure_inputs,
-            variables={"args": " ".join(sys.argv[1:])})
+    write_configure_build(n, configure_inputs, sys.argv[1:])
     n.default(defaults)
     n.close()
     return units

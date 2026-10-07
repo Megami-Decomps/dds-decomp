@@ -4718,6 +4718,7 @@
 0x0027C620	mnuAttachWindowTextureState	inferred	Creates a window texture state from four inputs and stores resulting handle in window. [names_reviewed21.tsv]
 0x0027C658	mnuClearWindowPanelTransitionFlag	inferred	Clears bit four of the window-container flags, the flag read by animated selection drawing. [names_reviewed18.tsv]
 0x0027C670	mnuAppendWindowListNode	inferred	Appends new list node to MenuWindowContainer list referenced by supplied window. [names_reviewed18.tsv]
+0x0027C6A0	mnuRemoveWindowListCursorNode	inferred	Removes and frees the window list's cursor node; the staff-item caller removes a row whose inventory count is zero
 0x0027C6B8	mnuAdvanceListSelection	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027C708	mnuReverseListSelection	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027C758	mnuAdvanceWindowListSelection	inferred	Adapts window container to its list and advances selection by default direction. [names_reviewed18.tsv]
@@ -4731,6 +4732,8 @@
 0x0027D4A0	mnuCreatePanelSpriteHandles	inferred	U3
 0x0027D740	mnuClearEntryFlags	inferred	Clears bit 0 of each entry's descriptor flags and calls func_002BD5A0 on it.
 0x0027D7E0	mnuReleaseResourceList	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
+0x0027DA80	mnuDrawFourPanelIconsAtOffsets	inferred	Draws four panel handles using four offsets from the panel position table; panel mode one selects this renderer
+0x0027DBD0	mnuDrawPanelIconPairsAtFixedPositions	inferred	Draws two handle pairs at the two absolute positions in the position table; panel mode two selects this renderer
 0x0027DCE8	mnuDrawIconPanel	inferred	Dispatches icon panel drawing mode according to first word of panel record. [names_reviewed5.tsv]
 0x0027DD58	mnuDrawIconPanelDefaultFlag	inferred	Draws an icon panel with its optional selection flag disabled, retaining caller fade. [names_reviewed18.tsv]
 0x0027DD78	mnuDrawIconPanelFullFade	inferred	Draws the icon panel with full fixed-point fade and default selection flag. [names_reviewed18.tsv]
@@ -5680,7 +5683,9 @@
 0x002BFB50	itfGridCopyEntryQuad	inferred	Byte-identical dds2 twin 0x00307340; Copies four words from a grid entry's later record into its earlier record. [names_conflicts.tsv]
 0x002BFB98	itfGridStorePosition	inferred	Writes the supplied x and y coordinates into a position pair.
 0x002BFBA8	itfGridApplySqrtBoundsAndColorScale	inferred	readability/matching review (QP16)
+0x002BFCE0	itfGridApplyQuadraticZoomBoundsAndFadeAlpha	inferred	sqrt(delta) times fixed-point phase is squared for quadratic bounds easing; symmetrically updates bounds, scales four corner alpha bytes, and returns cycle step
 0x002C0178	itfUpdateAngleAndGetCycleStep	inferred	Converts a fixed-point angle to degrees and returns its cycle step. [names_reviewed8.tsv]
+0x002C0340	itfGridApplyLinearZoomBoundsAndFadeAlpha	inferred	linear fixed-point delta times phase updates symmetric bounds, scales four corner alpha bytes, and returns cycle step
 0x002C05F0	itfGridUnpackColorChannels	inferred	Unpacks four color bytes into two 64-bit channel words.
 0x002C0858	itfSetPrimaryFramebufferAlphaFlag	inferred	confidence=high; matched-C; src/dds1/game/code_002BF790.c:242:func_002C0858; Normalizes the byte flag to zero/one and submits GS FBA_1 (0x4A) through the requested draw surface.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x002C0878	itfSubmitToggledGridWord	inferred	Submits a word and one of two descriptor opcodes to the grid renderer. [names_reviewed8.tsv]
@@ -5741,6 +5746,8 @@
 0x002C2FF8	fldShutdownLmapResources	inferred	teardown chain called by fldStopLmapTask (fldReleaseLocalMapResources, evtDestroySecondaryWorldNode, ...); DDS2 0030AB88 [names_M33_SmallSweep2.tsv]
 0x002C3060	fldStartAndPollLocalMapTrack	inferred	Starts the local map sound track when absent and polls until its request is ready. [names_reviewed16.tsv]
 0x002C30F0	fldInitializeLocalMapScene	inferred	confidence=high; matched-C; src/dds1/game/code_002C2620.c:427:func_002C30F0; Selects the local-map stage mode, creates its camera/counter channels, loads map/message resources, initializes scene lighting and requests music plus white fade.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x002C3220	fldUpdateLocalMapController	inferred	Drives local-map selection, timer, camera-transition, message-overlay and task-state updates; its task caller uses -1 as completion and 2 as a no-draw transition.
+0x002C3420	fldDrawLocalMapOverlay	inferred	Sets up the local-map draw surface and background, then draws state-specific counter marker and transition UI. Paired behavior with DDS2 0030B470.
 0x002C3510	mdlCollectLowFlagBits	inferred	L68; sources=names_pending_main.tsv [names_qp10.tsv]
 0x002C35C8	mdlCollectFlagBitsIntoMask	inferred	Packs six model flag predicates into their designated output bits. [names_reviewed10.tsv]
 0x002C3640	fldGetLmapStage	inferred	Selects stage two, one or zero based on successive field map flags.

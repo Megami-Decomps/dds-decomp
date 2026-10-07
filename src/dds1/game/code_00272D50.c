@@ -72,7 +72,7 @@ void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
     mnuDestroyWindowContainer(resources->windows[1]);
 }
 
-extern void func_0027C6A0(MenuWindowContainer *);
+extern void mnuRemoveWindowListCursorNode(MenuWindowContainer *);
 
 /* Refresh the bullet-item window if inventory is empty; return whether the
  * window still has entries. */
@@ -80,7 +80,7 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId, s32 context) {
     StaffWindowResources *resources = ((StaffDisplayContext *)context)->resources;
 
     if (((SaveItemCounts *)datGameState)->counts[itemId & 0xFFFF] == 0) {
-        func_0027C6A0(resources->windows[0]);
+        mnuRemoveWindowListCursorNode(resources->windows[0]);
     }
     return resources->windows[0]->list->count != 0;
 }

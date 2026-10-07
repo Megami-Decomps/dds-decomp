@@ -4421,6 +4421,7 @@
 0x002B9678	mnuCreateListWithDefaults	inferred	Creates a menu list from four incoming parameters and a local copy of the twelve-byte D_0042AF00 defaults.
 0x002B96D8	mnuClearWindowPanelTransitionFlag	inferred	Clears bit four in passed window container flags; all callers supply container, matching first-game 0027C658. [names_reviewed18.tsv]
 0x002B96F0	mnuAppendWindowListNode	inferred	Sequel twin of first-game 0027C670; appends a new node to passed window container list. [names_reviewed18.tsv]
+0x002B9720	mnuRemoveWindowListCursorNode	inferred	Removes and frees the window list's cursor node; the staff-item caller removes a row whose inventory count is zero
 0x002B97D8	mnuAdvanceWindowListSelection	inferred	Same window-to-list adapter as DDS1; advances list selection with default direction. [names_reviewed18.tsv]
 0x002B97F0	mnuRetreatWindowListSelection	inferred	Same window-to-list adapter as DDS1; retreats list selection with default direction. [names_reviewed18.tsv]
 0x002B9838	mnuInitIconSprites	inferred	wrong or missing short module prefix [names_audit.tsv]
@@ -5313,7 +5314,9 @@
 0x00307428	itfSubmitGridPacketsAndDraw	inferred	Builds optional overlay and main grid descriptor packets then dispatches the draw callback. [names_reviewed15.tsv]
 0x003074F0	itfGetGridResourceEntryData	inferred	M141; sources=names_pending_main.tsv [names_qp10.tsv]
 0x003075A0	itfSetGridDescriptorControlBit	inferred	Changes the selected grid descriptor control word by clearing upper bits and setting one flag. [names_reviewed15.tsv]
+0x00307710	itfGridApplyQuadraticZoomBoundsAndFadeAlpha	inferred	sqrt(delta) times fixed-point phase is squared for quadratic bounds easing; symmetrically updates bounds, scales four corner alpha bytes, and returns cycle step
 0x00307BA8	itfUpdateAngleAndGetCycleStep	inferred	Converts a fixed-point angle to degrees and returns its cycle step. [names_reviewed8.tsv]
+0x00307D70	itfGridApplyLinearZoomBoundsAndFadeAlpha	inferred	linear fixed-point delta times phase updates symmetric bounds, scales four corner alpha bytes, and returns cycle step
 0x00308020	itfGridUnpackColorChannels	inferred	Unpacks four color bytes into two 64-bit channel words.
 0x003081A8	itfGridDrawBooleanDescriptor	inferred	Normalizes the input byte to zero or one and submits alternate Boolean grid draw descriptors.
 0x00308288	itfSetPrimaryFramebufferAlphaFlag	inferred	confidence=high; matched-C; src/dds2/game/code_00306F80.c:373:func_00308288; Normalizes the byte flag to zero/one and submits GS FBA_1 (0x4A) through the requested draw surface.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
@@ -5364,13 +5367,16 @@
 0x0030A700	fldLmapSubmitPositionedCommandPacket	inferred	src/dds2/game/code_0030A128.c func_0030A700: Builds rectangle header with GS coordinate biases, formats command packet and submits to selected surface. Twin of DDS1 func_002C2BF8. [names_reviewed24.tsv]
 0x0030A7C8	fldLmapSubmitScaledSpritePacket	inferred	src/dds2/game/code_0030A128.c func_0030A7C8: Builds sprite packet with GS coordinate biases and scaled dimensions, then submits to selected surface. Twin of DDS1 func_002C2CC0. [names_reviewed24.tsv]
 0x0030A970	fldStartLmapTask	inferred	DDS1 twin 002C2E38 (DDS2 additionally allocates and clears the 0x88 task state) [names_M33_SmallSweep2.tsv]
+0x0030AAB0	fldLocalMapTrackSlotFromMode	inferred	Maps the local-map mode to the track-selection ordinal consumed by fldCountMaskBitsBeforeOrdinal; paired with DDS1 002C2F40 with title-specific mode encodings.
 0x0030AB20	fldInitializeLmapTaskVariant	inferred	Clears task state and chooses variant 1..3 from mdlFlagTest(0x1c) and mdlFlagTest(0x13).
 0x0030AB88	fldShutdownLmapResources	inferred	DDS1 twin 002C2FF8 [names_M33_SmallSweep2.tsv]
 0x0030B078	fldInitializeLocalMapScene	inferred	confidence=high; matched-C; src/dds2/game/code_0030A128.c:403:func_0030B078; Semantic local-map setup counterpart: selects stage mode from story flags, installs the camera/counter/map/message/light resources and starts music/fade. DDS2 adds a third stage mode and chooses black/white fade from story state.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x0030B470	fldDrawLocalMapOverlay	inferred	Draws the local-map frame then state-specific selected marker and transition UI; paired behavior with DDS1 002C3420.
 0x0030B568	fldPackLocalMapFlagStates	inferred	confidence=medium; matched-C; src/dds2/game/code_0030A128.c:451:func_0030B568; Packs the queried eight flag states into a permuted byte mask in the local-map scene unit.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0030B600	mdlCollectFlagBitsIntoMask	inferred	Packs six model flag predicates into their designated output bits. [names_reviewed10.tsv]
 0x0030B680	fldDisplayLocalMapCounterMessage	inferred	Formats the selected counter word and starts the local-map message entry, then captures window sound mode. [names_reviewed9.tsv]
 0x0030B6D8	fldLmapToggleOverlay	inferred	DDS1 twin 002C36E8 [names_M33_SmallSweep2.tsv]
+0x0030B728	sdfClearCounterDisplayFlags	inferred	Clears map-selection flags corresponding to the committed counter index; paired behavior with DDS1 002C3738, retaining title-specific flag IDs.
 0x0030B7D0	fldCreateLocalMapCamera	inferred	Creates a world object tagged Lmap_Cam and attaches it to local-map world. [names_reviewed8.tsv]
 0x0030B838	sdfInitInnerVectors	inferred	sets inner first/second vec on D_004388B4 then vtbl refresh
 0x0030BA98	sdfInitializeMapCounterSelection	inferred	readability/matching review (QP16)

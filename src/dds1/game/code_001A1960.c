@@ -100,6 +100,8 @@ extern s32 btlGetEffectActive(void);
 
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
+extern void datClearUnitStatusBits(DatPartyRecord *record, s32 mask);
+
 extern void func_001BCB88(s32, s32);
 
 extern s32 datGetStatWithStatusOverride(s32, s32);
@@ -236,8 +238,8 @@ extern void func_001C45F0(void);
 
 extern void itfMesDestroyWindowIfPresent(s32);
 
-void func_001A1960() {
-    datClearUnitStatusBits();
+void func_001A1960(DatPartyRecord *record, s32 mask) {
+    datClearUnitStatusBits(record, mask);
 }
 
 /* Set the actor's selected entry index. */
@@ -280,14 +282,14 @@ void func_001A1990(DatPartyRecord *entry, s32 index) {
     entry->mp = datEnemyRecords[index].mp;
 }
 
-void *btlGetActorEntryData(BtlUnit *actor) {
+DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
     DatPartyRecord *entry;
 
     if ((actor->flags & 0x400) == 0) {
         entry = btlGetIndexedPartyEntryRecord(actor->unk2C4);
         return entry;
     }
-    return &actor->statBits;
+    return &actor->partyRecord;
 }
 
 DatPartyRecord *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
@@ -301,10 +303,38 @@ DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
     return &datGameState->party[index];
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlSyncPlayerWork);
+void btlSyncPlayerWork(BtlUnit *actor) {
+    DatPartyRecord *src = &actor->partyRecord;
+    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->unk2C4);
+    s32 maxHp;
+    s32 maxMp;
+
+    if (src->flags & 0x1000) {
+        dst->flags |= 0x1000;
+    } else {
+        dst->flags &= ~0x1000;
+    }
+    if (src->flags & 0x4000) {
+        dst->flags |= 0x4000;
+    } else {
+        dst->flags &= ~0x4000;
+    }
+    dst->level = src->level;
+    maxHp = datComputeSkillBoostedMaxHp(dst);
+    maxMp = datComputeSkillBoostedMaxMp(dst);
+    dst->hp = src->hp < maxHp ? src->hp : maxHp;
+    dst->mp = src->mp < maxMp ? src->mp : maxMp;
+    memcpy(dst->baseStats, src->baseStats, 5);
+    dst->status = src->status & 0x7FFF;
+    dst->unk18C = src->unk18C;
+    dst->unk18E = src->unk18E;
+    dst->unk190 = src->unk190;
+    btlBossDebugPrintf("btl:player work set[%p]\n", actor);
+}
+
 
 s32 btlFindPartyEntryIndexForActor(s32 arg0) {
-    return dds3FindEntryIndex(*(u16 *)(arg0 + 0x124));
+    return dds3FindEntryIndex(((BtlUnit *)arg0)->partyRecord.unitId);
 }
 
 void func_001A1CD0(void) {
@@ -385,16 +415,16 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
     }
     if (*(u8 *)(datCommandRecords + command * 56 + 2) == 1 ||
         *(u8 *)(datCommandRecords + command * 56 + 3) == 2) {
-        if ((unit->conditionFlags & 0x7FFF) == 0x10) {
+        if ((unit->partyRecord.status & 0x7FFF) == 0x10) {
             return 3;
         }
     }
     if (*(s8 *)(datCommandSelectors + command * 2 + 1) == 2 &&
-        (unit->conditionFlags & 0x7FFF) == 0x40) {
+        (unit->partyRecord.status & 0x7FFF) == 0x40) {
         return 5;
     }
     if (*(s8 *)(datCommandSelectors + command * 2 + 1) == 1) {
-        if ((unit->conditionFlags & 0x7FFF) == 0x1000) {
+        if ((unit->partyRecord.status & 0x7FFF) == 0x1000) {
             return 4;
         }
         if (fldCountSceneSlots() < (u32)func_001A2AE8(command)) {
@@ -405,19 +435,19 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
         return 0;
     }
 
-    cost = btlApplyCommandAbilityMultiplier((s32)&unit->statBits, command);
+    cost = btlApplyCommandAbilityMultiplier((s32)&unit->partyRecord, command);
     switch (*(u8 *)(datCommandRecords + command * 56 + 3)) {
     case 1:
         if ((*(u8 *)(datCommandRecords + command * 56) & 8) == 0) {
-            if (cost >= unit->hp) {
+            if (cost >= unit->partyRecord.hp) {
                 result = 1;
             }
-        } else if (unit->hp < cost) {
+        } else if (unit->partyRecord.hp < cost) {
             result = 1;
         }
         break;
     case 2:
-        result = unit->unk_12A < cost ? 2 : 0;
+        result = unit->partyRecord.mp < cost ? 2 : 0;
         break;
     }
     return result;
@@ -431,15 +461,15 @@ s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUni
     s32 average;
 
     if (first != NULL) {
-        totalMaxHp = first->maxHp;
+        totalMaxHp = first->partyRecord.maxHp;
         count = 1;
     }
     if (second != NULL) {
-        totalMaxHp += second->maxHp;
+        totalMaxHp += second->partyRecord.maxHp;
         count++;
     }
     if (third != NULL) {
-        totalMaxHp += third->maxHp;
+        totalMaxHp += third->partyRecord.maxHp;
         count++;
     }
     average = totalMaxHp / count;
@@ -459,40 +489,40 @@ s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
         if ((first->flags & 0x100) == 0) {
             return 3;
         }
-        if ((first->conditionFlags & 0x2A0E) != 0) {
+        if ((first->partyRecord.status & 0x2A0E) != 0) {
             return 3;
         }
-        totalMaxHp = first->maxHp;
+        totalMaxHp = first->partyRecord.maxHp;
         count = 1;
     }
     if (second != NULL) {
         if ((second->flags & 0x100) == 0) {
             return 3;
         }
-        if ((second->conditionFlags & 0x2A0E) != 0) {
+        if ((second->partyRecord.status & 0x2A0E) != 0) {
             return 3;
         }
         count++;
-        totalMaxHp += second->maxHp;
+        totalMaxHp += second->partyRecord.maxHp;
     }
     if (third != NULL) {
         if ((third->flags & 0x100) == 0) {
             return 3;
         }
-        if ((third->conditionFlags & 0x2A0E) != 0) {
+        if ((third->partyRecord.status & 0x2A0E) != 0) {
             return 3;
         }
         count++;
-        totalMaxHp += third->maxHp;
+        totalMaxHp += third->partyRecord.maxHp;
     }
-    snapshot.maxHp = totalMaxHp / count;
+    snapshot.partyRecord.maxHp = totalMaxHp / count;
     return btlGetCommandFailureReason(&snapshot, command);
 }
 
 s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
     BtlUnit *unit = (BtlUnit *)object;
     if (index == 0 && (unit->flags & 0x400) != 0) {
-        return datEnemyRecords[unit->mode].unk46;
+        return datEnemyRecords[unit->partyRecord.unitId].unk46;
     }
     return *(s8 *)(datCommandSelectors + index * 2);
 }
@@ -500,7 +530,7 @@ s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 
 s32 func_001A2F50(BtlUnit *battler, s32 element) {
-    return btlResolveUnitValueWithOverride((s32)&battler->statBits, element);
+    return btlResolveUnitValueWithOverride((s32)&battler->partyRecord, element);
 }
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
@@ -587,7 +617,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
             *(u16 *)(datCommandRecords + index * 56 + 0x26) != 0) {
             for (i = 0; i < count; i++) {
                 if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
-                     ((BtlUnit *)btlGetIndexListEntry(targets, i))->conditionFlags) != 0) {
+                     ((BtlUnit *)btlGetIndexListEntry(targets, i))->partyRecord.status) != 0) {
                     return i;
                 }
             }
@@ -700,7 +730,7 @@ extern char D_003A1848[];
 
 void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     BattleController *controller = (BattleController *)btlGetRuntime();
-    DatEnemyRecord *record = &datEnemyRecords[enemy->mode];
+    DatEnemyRecord *record = &datEnemyRecords[enemy->partyRecord.unitId];
     s32 level = func_001A9488(4);
     s32 enemyLevel = record->level;
     s32 allowance = datBattleParameters->rewardLevelAllowance;
@@ -1337,17 +1367,17 @@ s32 btlTestActorStatusPredicate(s32 object) {
     if (predicate != 0 && predicate(object) != 0) {
         return 1;
     }
-    return (((BtlUnit *)object)->conditionFlags & 0x806) != 0;
+    return (((BtlUnit *)object)->partyRecord.status & 0x806) != 0;
 }
 
 s32 btlComputeStatusPenaltyFifth(s32 object) {
     s32 result = 0;
-    u16 category = ((BtlUnit *)object)->conditionFlags & 0x7FFF;
+    u16 category = ((BtlUnit *)object)->partyRecord.status & 0x7FFF;
     switch (category) {
     case 0x80:
     case 0x400:
     case 0x2000:
-        result = -((BtlUnit *)object)->maxHp / 5;
+        result = -((BtlUnit *)object)->partyRecord.maxHp / 5;
         break;
     }
     return result;
@@ -1358,7 +1388,7 @@ s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     if ((*(u32 *)(btlGetRuntime() + 0x1FC) & 0x80) != 0) return 0;
     if ((((BtlUnit *)actor)->stateFlags & 8) != 0) return 0;
     if ((flags & 1) == 0) return 0;
-    if ((((BtlUnit *)actor)->conditionFlags & 1) != 0) return 0;
+    if ((((BtlUnit *)actor)->partyRecord.status & 1) != 0) return 0;
     ratio = 0;
     if (options & 2) {
         ratio = 30;
@@ -1473,8 +1503,8 @@ u8 func_001A6968(BtlUnit *unit, s32 command) {
     }
     if (((EventModeSlot *)datCommandSelectors)[command].kind == 5 &&
         (unit->flags & 0x200) != 0) {
-        minimum = ((EventRosterStat *)datRosterDetails)[unit->mode].rangeMin;
-        maximum = ((EventRosterStat *)datRosterDetails)[unit->mode].rangeMax;
+        minimum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMin;
+        maximum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMax;
     } else {
         minimum = ((EventStatRecord *)datCommandRecords)[command].rangeMin;
         maximum = ((EventStatRecord *)datCommandRecords)[command].rangeMax;
@@ -1490,7 +1520,7 @@ u8 func_001A6968(BtlUnit *unit, s32 command) {
 u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
     if (index == 0) {
         if ((((BtlUnit *)object)->flags & 0x400) != 0) {
-            return datEnemyRecords[((BtlUnit *)object)->mode].unk48;
+            return datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].unk48;
         }
         return 12;
     }
@@ -1514,7 +1544,7 @@ s32 func_001A6AA0(BtlUnit *unit, s32 actionId) {
     s32 *delay;
 
     if ((actionId == 0) || (*(s8 *)(datCommandSelectors + actionId * 2 + 1) == 5)) {
-        if (((unit->flags & 0x200) != 0) && (unit->mode == 6)) {
+        if (((unit->flags & 0x200) != 0) && (unit->partyRecord.unitId == 6)) {
             return 9;
         }
     }
@@ -1615,7 +1645,7 @@ s32 btlQueryUnitChannelFlags(s32 first, s32 second, s32 other, s32 variant, s32 
         return 0;
     }
     flags = sdfQueryChannelBits(other, first + 0x120, second + 0x120);
-    if ((((BtlUnit *)second)->conditionFlags & 8) != 0 && variant == 2) {
+    if ((((BtlUnit *)second)->partyRecord.status & 8) != 0 && variant == 2) {
         flags |= 8;
     }
     return flags;
@@ -1677,7 +1707,7 @@ s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
     if (acquirer != 0 && !(((BtlUnit *)acquirer)->flags & 0x200)) {
         return result;
     }
-    entry = &datEnemyRecords[((BtlUnit *)enemy)->mode];
+    entry = &datEnemyRecords[((BtlUnit *)enemy)->partyRecord.unitId];
     ratio = func_001A7C20(acquirer, enemy, 1);
     ep = (u32)((f32)entry->experience * ratio);
     if (entry->flags & 0x2000) {
@@ -1708,12 +1738,12 @@ f32 func_001A7C20(u8 *acquirer, u8 *enemy, s32 rewardKind) {
     if (acquirer == NULL) {
         level = func_001A9488(4);
     } else {
-        level = ((BtlUnit *)acquirer)->actionTime;
+        level = ((BtlUnit *)acquirer)->partyRecord.level;
     }
     if (level > 60) {
         level = 60;
     }
-    difference = level - ((BtlUnit *)enemy)->actionTime;
+    difference = level - ((BtlUnit *)enemy)->partyRecord.level;
     if (difference > 15) {
         difference = 15;
     } else if (difference < -15) {
@@ -1739,7 +1769,7 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     if (acquirer != 0 && !(((BtlUnit *)acquirer)->flags & 0x200)) {
         return result;
     }
-    entry = &datEnemyRecords[((BtlUnit *)enemy)->mode];
+    entry = &datEnemyRecords[((BtlUnit *)enemy)->partyRecord.unitId];
     money = entry->money;
     if (entry->flags & 0x2000) {
         money *= 100;
@@ -1756,7 +1786,7 @@ extern f32 func_001A7C20(u8 *, u8 *, s32);
 
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
 s32 btlCalculateHuntEpReward(u8 *arg0, u8 *arg1) {
-    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)arg1)->mode];
+    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)arg1)->partyRecord.unitId];
     f32 ratio = func_001A7C20(arg0, arg1, 0);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
@@ -1786,21 +1816,21 @@ s32 btlCalculateAbilityRecoveryAmount(u8 *actor) {
 s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *actor, s32 delta) {
     if (btlGetEntryFlagsUnlessDisabled((s32)(actor + 0x120)) & 4) return 0;
     if (btlHasEnemyRecordDefeatExemptionFlag((s32)actor)) return 0;
-    if ((((BtlUnit *)actor)->conditionFlags & 0x7FFF) == 0x4000) return 1;
+    if ((((BtlUnit *)actor)->partyRecord.status & 0x7FFF) == 0x4000) return 1;
     if ((*(u32 *)(btlGetRuntime() + 0x1F4) & 0x80) == 0) return 0;
-    return ((BtlUnit *)actor)->hp + delta < 1;
+    return ((BtlUnit *)actor)->partyRecord.hp + delta < 1;
 }
 
 s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
-    return object->hp * 100 / object->maxHp < 25;
+    return object->partyRecord.hp * 100 / object->partyRecord.maxHp < 25;
 }
 
 s32 btlWouldUiValueFallBelowQuarter(BtlUnit *object, s32 delta) {
-    s32 value = object->hp + delta;
+    s32 value = object->partyRecord.hp + delta;
     if (value <= 0) {
         return 1;
     }
-    return value * 100 / object->maxHp < 25;
+    return value * 100 / object->partyRecord.maxHp < 25;
 }
 
 s32 btlBothSidesActive(BtlUnit *unit) {
@@ -1835,7 +1865,7 @@ s32 btlBothSidesActive(BtlUnit *unit) {
 
 s32 btlIsUiObjectIndexAllowed(BtlUnit *object) {
     if ((object->flags & 0x400) != 0) {
-        if (object->mode >= 0x100) {
+        if (object->partyRecord.unitId >= 0x100) {
             return 0;
         }
     }
@@ -1843,7 +1873,7 @@ s32 btlIsUiObjectIndexAllowed(BtlUnit *object) {
 }
 
 s32 btlIsUnitStatusFlagClear(BtlUnit *object) {
-    if ((object->conditionFlags & 0x1000) != 0) {
+    if ((object->partyRecord.status & 0x1000) != 0) {
         return 0;
     }
     return 1;
@@ -1956,15 +1986,15 @@ s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     if (datBattleSceneRecords[index].unk00 != 0) {
         return 0;
     }
-    if ((((BtlUnit *)object)->conditionFlags & 0x2A0F) != 0) {
+    if ((((BtlUnit *)object)->partyRecord.status & 0x2A0F) != 0) {
         return 0;
     }
-    return datEnemyAiRecords[((BtlUnit *)object)->mode * 0x15C] == 0;
+    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId * 0x15C] == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
 s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
-    if ((((BtlUnit *)actor)->conditionFlags & 0x40) != 0) {
+    if ((((BtlUnit *)actor)->partyRecord.status & 0x40) != 0) {
         return 0;
     }
     return (btlGetEntryFlagsUnlessDisabled(actor + 0x120) & 0x40) < 1;
@@ -1991,7 +2021,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
         return 0;
     }
 
-    statAddresses[0] = (s32)&unit->statBits;
+    statAddresses[0] = (s32)&unit->partyRecord;
     for (candidate = controller->actors; candidate != NULL; candidate = candidate->next) {
         u32 flags = candidate->flags;
 
@@ -2001,13 +2031,13 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
         if ((flags & 0x400) == 0) {
             continue;
         }
-        if ((candidate->conditionFlags & 0x2A0E) != 0) {
+        if ((candidate->partyRecord.status & 0x2A0E) != 0) {
             continue;
         }
         if (unit == candidate) {
             continue;
         }
-        statAddresses[1] = (s32)&candidate->statBits;
+        statAddresses[1] = (s32)&candidate->partyRecord;
         if (requiredCount == 3) {
             for (partner = controller->actors; partner != NULL; partner = partner->next) {
                 u32 partnerFlags = partner->flags;
@@ -2018,13 +2048,13 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
                 if ((partnerFlags & 0x400) == 0) {
                     continue;
                 }
-                if ((partner->conditionFlags & 0x2A0E) != 0) {
+                if ((partner->partyRecord.status & 0x2A0E) != 0) {
                     continue;
                 }
                 if (unit == partner || candidate == partner) {
                     continue;
                 }
-                statAddresses[2] = (s32)&partner->statBits;
+                statAddresses[2] = (s32)&partner->partyRecord;
                 if (ptyMatchAffinityPermutation(statAddresses, command) == 0) {
                     continue;
                 }
@@ -2055,7 +2085,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8A30);
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
-    u8 *status = datEnemyRecords[((BtlUnit *)object)->mode].unk3E;
+    u8 *status = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].unk3E;
     u32 i;
     for (i = 0; i < 2; i++) {
         if (*status++ != 0) {
@@ -2345,7 +2375,7 @@ s32 btlRollActorEligibilityWithAbilityOverride(u8 *actor) {
     s32 (*predicate)(u8 *) = *(s32 (**)(u8 *))(battle + 0x65C);
     if (predicate != 0 && predicate(actor) == 0) return 0;
     if (((BtlUnit *)actor)->stateFlags & 0x2000) return 0;
-    if ((((BtlUnit *)actor)->conditionFlags & 0x7FFF) == 0x4000) return 0;
+    if ((((BtlUnit *)actor)->partyRecord.status & 0x7FFF) == 0x4000) return 0;
     if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x231)) return 1;
     btlBossDebugPrintf(D_003A1DA0, 5, 1.0);
     return btlRollAiBucket() < 5;
@@ -2355,7 +2385,7 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(s32 object) {
     if ((((BtlUnit *)object)->flags & 0x400) == 0) {
         return 0;
     }
-    return ((s32)datEnemyRecords[((BtlUnit *)object)->mode].flags & 0x100) > 0;
+    return ((s32)datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].flags & 0x100) > 0;
 }
 
 extern s32 effMiscRand(void *);
@@ -2371,8 +2401,8 @@ u32 btlGetHuntPenaltyFlags(s32 unit, BtlUnit *enemy) {
     if (btlCheckSpecialAbility(unit + 0x120, 0x225) != 0) {
         return 0;
     }
-    status = enemy->conditionFlags & 0x7FFF;
-    record = &datEnemyRecords[enemy->mode];
+    status = enemy->partyRecord.status & 0x7FFF;
+    record = &datEnemyRecords[enemy->partyRecord.unitId];
     switch (status) {
     case 0x400:
         chance = record->huntPenaltyChance * 3;
@@ -2931,7 +2961,53 @@ void btlReleaseResourceBlock(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlResetSceneSlotFades);
+extern s32 func_001ACAE0(void);
+extern void func_001AC9E8(s32, s32);
+extern void btlClearTaskActorSlots(void);
+extern s32 func_001AD758(s32);
+
+s32 btlResetSceneSlotFades(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    SceneSlotFadeWork *state;
+    ActorSlotOrder **bank;
+    s32 kind;
+    s32 count;
+    s32 i;
+
+    memset(D_003BD83C, 0, sizeof(*D_003BD83C));
+    memset(D_003BD840[0], 0, sizeof(*D_003BD840[0]));
+    memset(D_003BD840[1], 0, sizeof(*D_003BD840[1]));
+    btlTrackedTaskHandles->fadeKindsCached = 0;
+    func_001ACAE0();
+    if (battle->mode == 1) {
+        kind = 0;
+        count = btlTrackedTaskHandles->fadeKindACount;
+        D_003BD83C->enabled[1] = 0;
+    } else {
+        kind = 1;
+        count = btlTrackedTaskHandles->fadeKindBCount;
+        D_003BD83C->enabled[0] = 0;
+    }
+    bank = &D_003BD840[kind];
+    D_003BD83C->currentIndex = count;
+    D_003BD83C->lastIndex = count;
+    D_003BD83C->bank = kind;
+    D_003BD83C->enabled[kind] = 1;
+    D_003BD83C->phase[0][kind] = 1;
+    D_003BD83C->timer = 0;
+    (*bank)->state[0] = 1;
+    state = D_003BD83C;
+    state->unk18 = 0;
+    state->completed = 0;
+    for (i = 0; i < count; i++) {
+        (*bank)->unk6C[i] = 30.0f;
+        (*bank)->unk8C[i] = 130;
+    }
+    func_001AC9E8(kind, count);
+    btlClearTaskActorSlots();
+    return func_001AD758(kind);
+}
+
 
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {
@@ -3755,7 +3831,7 @@ u32 func_001B0CB8(BtlUnit *object, s32 current, s32 total, s8 mode) {
 
     if (mode == 1 && (object->flags & 0x20) != 0) {
         color = 0x4F4E3E40;
-    } else if ((object->conditionFlags & 0x4800) != 0) {
+    } else if ((object->partyRecord.status & 0x4800) != 0) {
         color = 0x4F4E3E40;
     } else if (current * 2 >= total) {
         color = 0xA09DC380;
@@ -3790,7 +3866,7 @@ s32 btlCountEligibleLinkedActors(BtlState *battle) {
     s32 count = 0;
     for (; node != 0; node = node->next) {
         if ((btlUnitStatusPair(node) & 0x201) == 0x201) {
-            if ((node->statBits & 2) != 0) {
+            if ((node->partyRecord.flags & 2) != 0) {
                 count++;
             }
         }
@@ -4683,14 +4759,14 @@ void func_001BB118(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alph
     s32 i;
 
     if (!(stat & 1)) {
-        value = unit->hp;
-        maximum = unit->maxHp;
+        value = unit->partyRecord.hp;
+        maximum = unit->partyRecord.maxHp;
         xOffset = 57;
         yOffset = 49;
         sprite = 3;
     } else {
-        value = unit->unk_12A;
-        maximum = unit->unk12C;
+        value = unit->partyRecord.mp;
+        maximum = unit->partyRecord.maxMp;
         xOffset = 28;
         yOffset = 64;
         sprite = 4;
@@ -4719,7 +4795,7 @@ void func_001BB118(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alph
     for (i = 0; i < 4; i++) {
         colors.values[i] = (colors.values[i] & 0xFFFFFF00) | pulse->alpha;
     }
-    if (!(unit->flags & 0x20) && value != 0.0f && !(unit->conditionFlags & 0x4800)) {
+    if (!(unit->flags & 0x20) && value != 0.0f && !(unit->partyRecord.status & 0x4800)) {
         func_002BF438((x + xOffset + pulse->progress) << 4,
                      (y + yOffset + pulse->yOffset) << 3, 0, colors.values,
                      0, btlResourceBlock->resA, sprite, 0x53);
@@ -5898,4 +5974,3 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3268);
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3278);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A32F0);
-
