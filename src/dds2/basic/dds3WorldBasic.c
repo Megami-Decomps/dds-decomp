@@ -16,7 +16,7 @@ void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);
 
 s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
 
-void *dds3GetWorldValueCount(void *arg0, void *arg1, s32 arg2);
+u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
 void dds3ResetObjectValueCursor(void *arg);
 
@@ -198,13 +198,12 @@ INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3RemoveCurrentWorldValueEntry)
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3ReleaseWorldValueEntries);
 
 /* Reset the cursor and remove the first matching value, or all matches when
- * processAllMatches is nonzero. Return whether any match was processed.
- * Retain the existing count prototype and three-argument call convention. */
+ * processAllMatches is nonzero. Return whether any match was processed. */
 s32 dds3ProcessMatchingWorldNodes(WorldValueIndices *indexNode, void *targetWord, s32 processAllMatches) {
     s32 processedMatch;
 
     processedMatch = 0;
-    if (dds3GetWorldValueCount(indexNode, targetWord, processAllMatches) != NULL) {
+    if (dds3GetWorldValueCount(indexNode) != 0) {
         dds3ResetObjectValueCursor(indexNode);
         do {
             if (dds3SeekWorldNode(indexNode, (u32)targetWord) != 1) {
