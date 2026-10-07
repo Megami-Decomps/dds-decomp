@@ -50,7 +50,44 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *owner) {
     return resources->windows[0]->list->count != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
+extern char (*D_00435E5C)[25];
+extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
+extern struct MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
+extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
+extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
+extern s32 mnuIsBulletItemId(s32);
+
+void func_002ABD60(MenuStaffContext *owner) {
+    MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
+    s32 itemId = 1;
+    s32 textOffset = 25;
+    u32 quantity;
+
+    window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    window->list->context = owner;
+    window->list->drawCallback = func_002AB890;
+    do {
+        if (datGameState->inventory.counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
+            node = mnuAppendWindowListNode(window, (s32)((char *)D_00435E5C + textOffset));
+            quantity = datGameState->inventory.counts[itemId];
+            node->sortKeySecondary = itemId;
+            node->sortKeyPrimary = quantity;
+        }
+        itemId++;
+        textOffset += 25;
+    } while (itemId < 0x100);
+    resources->windows[2] = window;
+    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x12);
+    mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, owner->spriteArg0);
+}
 
 void func_002ABEB0(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[2]);
@@ -66,16 +103,9 @@ typedef struct MenuCatalogItem {
 } MenuCatalogItem;
 
 extern const MenuCatalogItem D_003E7200[18];
-extern char (*D_00435E5C)[25];
 extern char D_00437BC8[];
 extern void func_002AC750();
-extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
-extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
-extern struct MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
 extern void mnuSetWindowContainerLayout(MenuWindowContainer *, u32, u32, u32, u32, u32, u32, u32, u32);
-extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern void func_002AC050();
 extern s32 func_002C54B0(s32);
 extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
@@ -83,7 +113,6 @@ extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
 extern s32 mtrMantraIdIsValid(s32);
 extern s32 mdlFlagTest(s32);
 extern void mnuSortItems(struct MenuList *, s32, s32);
-extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
 
 /* The upper item-ID range shares ordered staff entries with mantra availability. */
 void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
