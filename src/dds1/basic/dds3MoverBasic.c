@@ -1,30 +1,20 @@
 #include "common.h"
 #include "dds3_path.h"
+#include "eff_transform.h"
 #include "pcp_vu0.h"
-
-/* Stack transform node shared with effObjInnerVecInit and its vector modifiers. */
-typedef struct EffLocalNode {
-    u8 pad00[0x40];
-    u128 position;
-    u128 rotation;
-    u128 scale;
-    u8 pad70[0x58];
-    u32 unkC8;
-    u8 padCC[4];
-} EffLocalNode;
 
 typedef struct MoverTarget {
     u8 pad00[0xF];
     u8 kind;
     u8 pad10[8];
     void *data;
-    EffLocalNode *inner;
+    ObjectTransform *inner;
 } MoverTarget;
 
 typedef struct {
     MoverTarget *target;
     Dds3PathCurveWork *path;
-    s32 (*update)(EffLocalNode *, MoverTarget *);
+    s32 (*update)(ObjectTransform *, MoverTarget *);
 } MoverWork;
 
 typedef struct {
@@ -51,10 +41,10 @@ extern void dds3LoadWorldTransformParams(MoverTarget *, f32 *);
 extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *);
 extern void effObjSetInnerFirstVec(MoverTarget *, void *);
 extern void effObjSetInnerSecondVec(MoverTarget *, void *);
-extern void effObjInnerVecInit(EffLocalNode *);
-extern void effObjMulInnerThirdVec(MoverTarget *, u128 *);
+extern void effObjInnerVecInit(ObjectTransform *);
+extern void effObjMulInnerThirdVec(MoverTarget *, void *);
 extern void effObjQuatMulInnerSecondVec(MoverTarget *, u128 *);
-extern void effObjAddInnerFirstVec(MoverTarget *, u128 *);
+extern void effObjAddInnerFirstVec(MoverTarget *, void *);
 
 #define DDS3_MOVER_POSITION_CHANNEL_BIT 1
 #define DDS3_MOVER_ROTATION_CHANNEL_BIT 2
@@ -72,11 +62,11 @@ s32 dds3UpdateMoverTransform(MoverObject *object)
 {
     f32 pathVector[4];
     f32 transformParams[10];
-    EffLocalNode relativeTransform;
+    ObjectTransform relativeTransform;
     MoverWork *work = object->work;
     MoverTarget *target = work->target;
-    EffLocalNode *inner = target->inner;
-    s32 (*updateCallback)(EffLocalNode *, MoverTarget *);
+    ObjectTransform *inner = target->inner;
+    s32 (*updateCallback)(ObjectTransform *, MoverTarget *);
     MoverScalarData *cameraData;
     f32 fieldOfView;
 
@@ -117,9 +107,9 @@ s32 dds3UpdateMoverTransform(MoverObject *object)
         if (updateCallback != NULL) {
             effObjInnerVecInit(&relativeTransform);
             if (updateCallback(&relativeTransform, target) == 1) {
-                effObjMulInnerThirdVec(target, &relativeTransform.scale);
-                effObjQuatMulInnerSecondVec(target, &relativeTransform.rotation);
-                effObjAddInnerFirstVec(target, &relativeTransform.position);
+                effObjMulInnerThirdVec(target, relativeTransform.scale);
+                effObjQuatMulInnerSecondVec(target, (u128 *)&relativeTransform.rotation);
+                effObjAddInnerFirstVec(target, relativeTransform.position);
             }
         }
     }
