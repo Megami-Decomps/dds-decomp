@@ -1004,7 +1004,23 @@ void mnuBindPresentMenuEntry(s32 stateAddress, u32 entrySlotAddress) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00285960);
+void func_00285960(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
+    s32 i;
+
+    if (entry->flags & 2)
+        panel->unk0++;
+    else
+        panel->unk4++;
+    panel->slots[index].unk8 = entry->unitId - 1;
+    panel->slots[index].level = entry->level;
+    panel->slots[index].hp = entry->hp;
+    panel->slots[index].mp = entry->mp;
+    panel->slots[index].maxHp = entry->maxHp;
+    panel->slots[index].maxMp = entry->maxMp;
+    for (i = 0; i < 5; i++) {
+        panel->slots[index].stats[i] = entry->baseStats[i];
+    }
+}
 
 /* Populate occupied party slots; empty slots retain the native unknown-field sentinel. */
 void mnuInitPartyPanelSlots(PartyPanel *panel) {
