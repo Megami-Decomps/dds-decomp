@@ -149,7 +149,7 @@ extern void kwlnDrawEnableD30();
 extern void btlMarkRuntimeUpdatePending();
 extern s32 btlAreWorkBuffersReady(void);
 extern s32 func_0022E490(void);
-extern s32 func_001B73E8(void);
+extern s32 btlResetSceneSlotFades(void);
 extern s32 func_001B3DD8(void);
 extern void func_001AD5B0(u16);
 
@@ -334,7 +334,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
         btlAreWorkBuffersReady() != 0 &&
         func_0022E490() != 0) {
         fldInitializeSceneGroups();
-        func_001B73E8();
+        btlResetSceneSlotFades();
         scene->eventReady = 0;
         func_001B3DD8();
         if (datBattleSceneRecords[scene->battleMode].unk01 != 0) {
@@ -378,7 +378,7 @@ void fldAdvanceSceneGroupInitialization(BtlState *scene) {
     scene->groupHandleCount = 0;
     scene->turnCount = scene->turnCount + 1;
     fldInitializeSceneGroups();
-    func_001B73E8();
+    btlResetSceneSlotFades();
 }
 
 typedef struct SceneEffectRequest {

@@ -7,3 +7,4 @@ dds1 0x001FA270  # false shared pair with DDS2 0x0020C140 (different functions)
 dds2 0x0020C140  # false shared pair with DDS1 0x001FA270
 dds2 0x002CAED0  # fileResetSlotSelection deferred in DDS2: with mcdCreateMenuDrawHandle it flips fileAcquireRecord (code_002C96D0)
 dds2 0x002C9818  # mcdCreateMenuDrawHandle deferred (same flip)
+dds2 0x002119E0  # DDS1 btlSelectConditionalAiRoute: the name tips btlSelectLowestRankTarget (code_002112C8) to CONTEXT

@@ -1621,7 +1621,7 @@ s32 btlQueryUnitChannelFlags(s32 first, s32 second, s32 other, s32 variant, s32 
     return flags;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A7410);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlGetAdjustedSlotAffinity);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A7548);
 
@@ -2328,7 +2328,7 @@ extern s32 effMiscRand(void *);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);
 
-u32 func_001A9F40(s32 unit, BtlUnit *enemy) {
+u32 btlGetHuntPenaltyFlags(s32 unit, BtlUnit *enemy) {
     DatEnemyRecord *record;
     s32 chance;
     u16 status;
@@ -2914,7 +2914,7 @@ void btlReleaseResourceBlock(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC7D8);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlResetSceneSlotFades);
 
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {

@@ -3343,7 +3343,7 @@ s32 btlQueryUnitChannelFlags(s32 first, s32 second, s32 other, s32 variant, s32 
     return flags;
 }
 
-u32 func_001B16B0(BtlUnit *unit, s32 unused, s32 index) {
+u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     s32 selection;
     u32 value;
     u32 ratio;
@@ -4139,7 +4139,7 @@ extern s32 effMiscRand(void *);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415840);
 
-u32 func_001B4828(s32 unit, BtlUnit *enemy) {
+u32 btlGetHuntPenaltyFlags(s32 unit, BtlUnit *enemy) {
     DatEnemyRecord *record;
     s32 chance;
     u16 status;
@@ -4840,7 +4840,7 @@ extern void func_001B75F8(s32, s32);
 extern void btlClearTaskActorSlots(void);
 extern s32 func_001B8368(s32);
 
-s32 func_001B73E8(void) {
+s32 btlResetSceneSlotFades(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     SceneSlotFadeWork *state;
     ActorSlotOrder **bank;

@@ -83,7 +83,7 @@ extern void evtUpdateFlaggedEntries(void);
 extern void dds3ForEachEntry(void);
 extern void mdlFlagClear(s32 flag);
 extern void func_00120C08(s32 mode);
-extern void func_00117810(void);
+extern void sdfSaveResetSnapshot(void);
 extern void func_00117C48(void);
 
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
@@ -300,7 +300,7 @@ extern void ptySaveActiveUnitsToStock(void);
 extern void mnuCollectFlagArray(u8 *flags);
 
 /* Preserve carried flags and progress before the full runtime reset. */
-void func_00117810(void) {
+void sdfSaveResetSnapshot(void) {
     void *copy;
 
     D_003BA9E5 = 0;
@@ -365,7 +365,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     s32 backingAllocation;
 
     if (fullReset == 1) {
-        func_00117810();
+        sdfSaveResetSnapshot();
         backingAllocation = datGameState->header.backingAllocation;
         memset(datGameState, 0, 0x33600);
         datGameState->header.backingAllocation = backingAllocation;

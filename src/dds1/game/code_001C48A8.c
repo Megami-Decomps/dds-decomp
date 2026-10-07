@@ -290,7 +290,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         btlAreWorkBuffersReady() != 0 &&
         func_00213B90() != 0) {
         fldInitializeSceneGroups();
-        func_001AC7D8();
+        btlResetSceneSlotFades();
         *(u8 *)(arg0 + 0x258) = 0;
         func_001A9780();
         if (datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01 != 0) {
@@ -323,7 +323,7 @@ s32 fldConsumeSceneInputFlags(s32 scene) {
     return result;
 }
 
-extern void func_001AC7D8();
+extern void btlResetSceneSlotFades();
 
 void fldAdvanceSceneVariant(BattleSceneWork *scene) {
     s32 notFirst = scene->variant != 1;
@@ -336,7 +336,7 @@ void fldAdvanceSceneVariant(BattleSceneWork *scene) {
     }
     scene->step = scene->step + 1;
     fldInitializeSceneGroups();
-    func_001AC7D8();
+    btlResetSceneSlotFades();
 }
 
 extern void btlTickActorEntryCountdowns(u8 *);

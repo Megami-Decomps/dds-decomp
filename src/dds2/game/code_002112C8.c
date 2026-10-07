@@ -7139,7 +7139,7 @@ extern void func_001E3108(void *, f32 *);
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern void func_00226AB0(BtlUnit *);
 
-void func_00226F58(void) {
+void btlUpdateLinkedEffectUnitTransforms(void) {
     BtlUnit *twin = NULL;
     BtlUnit *mainUnit = NULL;
     BtlState *battle;

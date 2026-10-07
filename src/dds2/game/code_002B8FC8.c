@@ -357,7 +357,7 @@ typedef struct MenuListDefaults {
 extern MenuListDefaults D_0042AF00;
 
 
-extern void func_002B0278(s32);
+extern void mnuDrawStaffPartySelectionPanel(s32);
 
 
 
@@ -412,7 +412,7 @@ void mnuCopyPartyEntries();
 
 
 
-extern void func_002B12B0();
+extern void mnuAssignSelectedPartyEntry();
 extern void func_002BCAB0();
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources.

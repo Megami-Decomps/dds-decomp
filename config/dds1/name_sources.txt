@@ -571,6 +571,7 @@
 0x00117730	sdfDestroyRuntimeTask	inferred	destroys the GBWK task hierarchy and frees the runtime allocation
 0x00117780	sdfBumpTickCounters	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x001177A8	evtResetWorldAndProfileRuntime	inferred	Clears script state and reinitializes world and profile runtime records. [names_reviewed9.tsv]
+0x00117810	sdfSaveResetSnapshot	inferred	Fam
 0x00118020	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00117438.c:292:func_00118020; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:22 [names_qp13.tsv]
 0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118140	scrIsCurrentWorkTask	inferred	Compares the current script work-task handle against the expected handle. [names_reviewed10.tsv]
@@ -2580,6 +2581,7 @@
 0x001A9CD0	btlClearUnitStatusMask	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001A9E50	btlRollActorEligibilityWithAbilityOverride	inferred	Rejects blocked actor states, accepts a special ability or rolls the battle RNG. [names_reviewed8.tsv]
 0x001A9EF8	btlHasEnemyRecordDefeatExemptionFlag	inferred	Checks an enemy record flag that suppresses value-based unit defeat evaluation. [names_reviewed12.tsv]
+0x001A9F40	btlGetHuntPenaltyFlags	inferred	Near95b
 0x001AA030	btlRollPassiveAbilityAction	inferred	Fam_Mid3
 0x001AA868	btlRestoreUnitMinimumValueAndClearStatus	inferred	Clears actor and record status flags and restores a zero value to one; established DDS2 name. [names_reviewed16.tsv]
 0x001AAA18	btlIsBattleRecordEligible	inferred	Checks optional battle predicate, resource record state code two and nonzero species index disabled marker.
@@ -3243,6 +3245,7 @@
 0x001FEFF0	btlCmdWithArgF	inferred	jal+epilogue wrapper forwarding arg plus 0 to func_00204048
 0x001FF010	btlCmdSimpleJ	inferred	jal+epilogue passthrough wrapper of func_00204080
 0x001FF030	btlRunWeightedAiAction	inferred	allocates the 0x10-byte D_003BB87C state, picks a weighted AI slot for the unit's species (btlPickWeightedAiSlot), runs it through func_001FFDA0 and releases the state (sibling j func_002CFF98) [names_M63_Mid.tsv]
+0x001FF8D8	btlSelectConditionalAiRoute	inferred	Light1b
 0x001FFC18	btlPickWeightedAiSlot	inferred	twin of DDS2 func_00211D20: cumulative u8 slot weights over the per-species table D_003BAA24 until the roll from func_001FFCD8 [names_M42_BattleMid.tsv]
 0x001FFCD8	btlRollAiBucket	inferred	two 0..0xFFF rolls summed, folded to 0..99 via /41; rerolled when within 3 of the previous bucket (D_003BB878) [names_M89_Battle3.tsv]
 0x001FFDA0	btlRunAiAction	inferred	looks the action id up (func_001FFE30), stores result/actionSlot on the task and dispatches D_00360E38[packed >> 22] with the low 22 bits [names_M89_Battle3.tsv]
@@ -6575,6 +6578,7 @@
 0x002F0034	sceGsDefDispEnv	evidence	string "sceGsDefDispEnv:Not support displaymode for 0x%x!!" (Sony libgraph)
 0x002F0C00	sceGsExecStoreImage	evidence	strings "sceGsExecStoreImage: DMA Ch.1/GS does not terminate" (Sony libgraph)
 0x002F5850	sceSdRemoteInit	evidence	its message "sceSdRemoteInit() RPC bind error!" (Sony libsdr)
+0x00315A28	litodp	inferred	Fam-3
 0x00324550	effSharedRandomState	inferred	confidence=high; src/dds1/game/code_00102ED8.c:D_00324550; type=PRNG state storage (u8[]); refs=kwlnInitMagicState,btlSelectActorAction; Seeded with a fixed value and passed to random generators for effect frame, position and scale variation. [names_qp9.tsv]
 0x003245E0	sdfSceneProjectionParameters	inferred	confidence=high; data D_003245E0; matched-C-users=4; src/dds1/game/code_00102ED8.c:383:evtResetDisplayProjectionAndVectorState; src/dds1/game/code_00282850.c:1700:mnuResetWorkFloats; src/dds1/game/code_00282850.c:1845:evtStageTestUpdateCamera; src/dds1/game/code_00218B48.c:1829:mdlLoadViewerPresentationConfig; Passed to projection construction and scene/viewer matrix-packet builders; data-twin=D_0037F5E0, supported by 4 independently paired matched functions.; retail-data-start=asm/dds1/data/data.data.s:380.; seed-placeholder=D_003245E0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00324610	sdfProjectionMatrix	inferred	confidence=high; data D_00324610; matched-C-users=8; src/dds1/game/code_00151F58.c:419:effComputeProjectedOffsetAngle; src/dds1/game/code_0018CAC8.c:427:sdfProjectVuVectorToScreen; src/dds1/game/code_0028A150.c:2400:mnuProjectViewPoint; src/dds1/game/code_0028A150.c:3703:fileSampleKeyTracks; src/dds1/game/code_00126A30.c:992:fldProjectPointSetup; Projection helpers postmultiply view transform by this matrix before perspective divide; data-twin=D_0037F610, supported by 7 independently paired matched functions.; retail-data-start=asm/dds1/data/data.data.s:407.; seed-placeholder=D_00324610; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
