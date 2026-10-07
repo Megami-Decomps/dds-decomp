@@ -3809,7 +3809,7 @@
 0x002284E0	evtCommandQueueBgmWithFade	inferred	confidence=high; src/dds1/game/code_00228058.c:func_002284E0; Reads sound-id and fade script parameters and queues the validated BGM change. [names_qp9.tsv]
 0x00228570	evtOpcodeSetBgmVolumePan	inferred	Event opcode obtains two script arguments and passes them to evtSetBgmVolumePan.
 0x002285B0	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds1/game/code_00228058.c:func_002285B0; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
-0x002285F0	evtOpcodeRefreshTaskData	inferred	Forwards two event operands to the already-named evtRefreshTaskData.
+0x002285F0	evtOpcodeRefreshTaskData	inferred	Forwards the task ID and resource key to evtRefreshTaskEffectTexture.
 0x00228630	evtOpcodeInitializeEffectSoundChannel	inferred	Invokes effInitCh72Id and returns event opcode completion status one.
 0x00228650	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds1/game/code_00228058.c:func_00228650; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
 0x002286C0	evtGetMirroredSolarPhase	inferred	Returns the raw phase below nine, otherwise folds the low three bits around eight.
@@ -4040,7 +4040,7 @@
 0x00241B58	evtFindTaskById	inferred	formats e%03d_p name from id then kwlnTaskGetTaskByName, returns handle or 0
 0x00241BB8	evtGetTaskData	inferred	finds task by id then returns its data pointer via 00101A70, or 0
 0x00241BF0	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
-0x00241CA0	evtRefreshTaskData	inferred	rebuilds taskdata+0x38 via func_00241BF0/func_002D3288/effSetCh72Id, freeing old
+0x00241CA0	evtRefreshTaskEffectTexture	inferred	Releases the task's previous effect texture, resolves the keyed resource, updates effect channel 72, and retains the replacement at task-data +0x38. The former name described rebuilding that field via 0x00241BF0/0x002D3288 and freeing its old handle.
 0x00241D28	evtSpawnResourceObject	inferred	looks up the task resource, creates an effect object (flags 1) and scales it by slot scale ratio D_003BAA20[index]/D_003BAA10 [names_M95_Event.tsv]
 0x00241F78	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
 0x002420B8	evtUpdateMotionSeTask	inferred	registered motion-SE task callback; matches its resource's motion and frame cues, updates the event sound sequence, logs EVE_SE
