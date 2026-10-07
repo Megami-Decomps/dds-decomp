@@ -13,7 +13,7 @@ void dds3DestroyCameraData(EffWorldNode *camera) {
 
     effObjFreeInner(camera);
     data = ((CameraData *)camera->data);
-    dds3DestroyObjectBase((ObjBase *)data->handle);
+    dds3DestroyObjectBase(data->handle);
     sdfReleaseChipBlock(data);
 }
 
@@ -85,7 +85,7 @@ void dds3RebuildCameraBasis(EffWorldNode *obj) {
 }
 
 /* Return the base handle owned by the camera data. */
-u32 dds3GetCameraHandle(EffWorldNode *camera) {
+ObjBase *dds3GetCameraHandle(EffWorldNode *camera) {
     return ((CameraData *)camera->data)->handle;
 }
 
