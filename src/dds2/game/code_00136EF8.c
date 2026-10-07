@@ -1209,7 +1209,25 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FA98);
 
 extern s32 D_004361C8;
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldGetActorSlotAttribute);
+s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
+    s32 index = actorId - 10;
+    s32 value = 0;
+
+    switch (attribute) {
+    case 0:
+        value = D_0038E2D0.sets[D_004361C8].messages[index].kind;
+        break;
+    case 1:
+        value = D_0038E2D0.sets[D_004361C8].messages[index].message;
+        break;
+    case 2:
+        if (D_0038E2D0.sets[D_004361C8].messages[index].view & 0x80) {
+            value = 1;
+        }
+        break;
+    }
+    return value;
+}
 
 void fldLoadInfoTable(s32 field) {
     char path[64];

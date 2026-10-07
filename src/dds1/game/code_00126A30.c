@@ -246,9 +246,6 @@ extern s32 fldAreaState[];
 extern u32 D_0032E538[];
 extern u32 D_0032E544[];
 extern u32 D_0032E570[];
-extern s16 D_00333910[];
-extern s16 D_00333912[];
-extern u8 D_0033391C[];
 extern s32 D_003BAE38;
 extern u32 D_0032E59C[];
 extern u32 D_0032E5A8[];
@@ -291,7 +288,8 @@ extern s32 fldEncounterRuntimeState;
 extern u32 D_003BACFC;
 extern u32 D_00330738[];
 extern u32 D_003306B0[];
-extern u32 D_003306C0[];
+extern f32 D_003306C0[];
+extern f32 D_00330670[];
 extern u32 D_003308B0[];
 extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
@@ -3225,7 +3223,50 @@ void fldBeginSelectedValueTransition(u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00132BD0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00132E38);
+extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
+extern void evtSetUnitStatusFlags(EvtUnit *unit);
+extern void func_00221D00(EvtUnit *unit, s32 index, s32 colorA, s32 colorB);
+extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
+
+/* VU0 direction setters consume vf10, as in the DDS2 lighting routine. */
+void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+                   f32 redB, f32 greenB, f32 blueB,
+                   f32 x, f32 y, f32 z) {
+    EvtUnit *player;
+    u32 colorA;
+    u32 colorB;
+    s32 red, green, blue;
+    f32 direction[4];
+
+    player = evtUnitGetNestedValue((EffWorldNode *)fldPlayerObject);
+    evtSetUnitStatusFlags(player);
+    red = redA * 128.0f;
+    green = greenA * 128.0f;
+    blue = blueA * 128.0f;
+    colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+    red = redB * 128.0f;
+    green = greenB * 128.0f;
+    blue = blueB * 128.0f;
+    colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+    func_00221D00(player, duration, colorA, colorB);
+    direction[0] = x;
+    direction[1] = y;
+    direction[2] = z;
+    direction[3] = 0.0f;
+    VU0_LOAD_VF(vf10, direction);
+    evtSetUnitNormalizedDirection(player, duration);
+    VU0_LOAD_VF(vf10, direction);
+    evtSetUnitNormalizedDirection(player, 0);
+    D_00330670[0] = redA;
+    D_00330670[1] = greenA;
+    D_00330670[2] = blueA;
+    D_00330670[4] = x;
+    D_00330670[5] = y;
+    D_00330670[6] = z;
+    D_003306C0[0] = redB;
+    D_003306C0[1] = greenB;
+    D_003306C0[2] = blueB;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00132FD0);
 
@@ -3316,11 +3357,6 @@ extern s32 kwlnSetBackgroundColorTarget(s32, void *);
 extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
 extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
-
-extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
-extern void evtSetUnitStatusFlags(EvtUnit *unit);
-extern void func_00221D00(EvtUnit *unit, s32 index, s32 colorA, s32 colorB);
-extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 
 void fldApplySkyLightSetToPlayerVU(void) {
     FldLightSet *light;
@@ -4522,7 +4558,25 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013CBA8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013CEB0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldGetActorSlotAttribute);
+s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
+    s32 index = actorId - 10;
+    s32 value = 0;
+
+    switch (attribute) {
+    case 0:
+        value = D_00332E30.sets[D_003BAE38].messages[index].kind;
+        break;
+    case 1:
+        value = D_00332E30.sets[D_003BAE38].messages[index].message;
+        break;
+    case 2:
+        if (D_00332E30.sets[D_003BAE38].messages[index].view & 0x80) {
+            value = 1;
+        }
+        break;
+    }
+    return value;
+}
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern u32 sdfDevCreateCommandState(const char *);
