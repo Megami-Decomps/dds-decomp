@@ -58,6 +58,8 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 #define EVT_STAGE_SCREEN_WORK_BYTES 0x20
 #define EVT_STAGE_RESOURCE_TASK_KIND 6
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
+
+typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
@@ -103,7 +105,7 @@ extern u8 D_003E7950[];
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
-extern void mnuPositionPanelItemPoints(s32, s32, s32);
+extern void mnuPositionPanelItemPoints(MenuPanelItem *, s32, s32);
 
 extern s8 D_003E7928[];
 extern s32 mdlRequestAsset(s32, s32, s32);
@@ -141,7 +143,7 @@ extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 
 extern char D_00437CB0[];
 
-extern void mnuFreePanelItemWork();
+extern void mnuFreePanelItemWork(MenuPanelItem *);
 
 extern void sdfReleaseChipBlock();
 
@@ -544,31 +546,31 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
-extern s32 mnuCreatePanelItem(void);
+extern MenuPanelItem *mnuCreatePanelItem(void);
 
-extern void func_002C26D8(s32, s32, s32, s32, s32);
+extern void func_002C26D8(MenuPanelItem *, s32, s32, s32, s32);
 
 typedef struct MenuPanelGroup {
     u8 pad00[0x0C];
     s32 texture;       /* 0x0C */
-    s32 entries[5];    /* 0x10 */
+    MenuPanelItem *entries[5]; /* 0x10 */
     u32 selection;     /* 0x24 */
     s32 initialValue;  /* 0x28: initialized to 0x100 */
 } MenuPanelGroup;
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
-struct MenuPanelItem;
-extern void mnuSetPanelItemSelection(struct MenuPanelItem *, s32);
-extern void mnuSetPanelItemOption(struct MenuPanelItem *, u32);
+extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
+extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
+extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 
 /* Create the five panel items owned by this group and clear its selection. */
 s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
-    s32 *itemCursor = group->entries;
+    MenuPanelItem **itemCursor = group->entries;
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
-        s32 panelItem = mnuCreatePanelItem();
+        MenuPanelItem *panelItem = mnuCreatePanelItem();
         func_002C26D8(panelItem, owner, texture, mode, panelIndex);
         *itemCursor++ = panelItem;
     }
@@ -613,8 +615,8 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
-    mnuSetPanelItemSelection((struct MenuPanelItem *)group->entries[index], selection);
-    mnuSetPanelItemOption((struct MenuPanelItem *)group->entries[index], option);
+    mnuSetPanelItemSelection(group->entries[index], selection);
+    mnuSetPanelItemOption(group->entries[index], option);
 }
 
 void mnuSetIndexedPanelGroupValue(MenuPanelGroup *group, s32 index, u32 value) {
@@ -636,7 +638,7 @@ void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId) {
         entryValue = ptyGetCombinedRecordAndSlotValue(itemId, index);
         child = *entries;
         entries = entries + 1;
-        mnuStorePanelItemValue(child, entryValue);
+        mnuStorePanelItemValue((MenuPanelItem *)child, entryValue);
         index = nextIndex;
     } while (nextIndex < 5);
 }
@@ -919,7 +921,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
 }
 
 /* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
-typedef struct MenuPanelItem {
+struct MenuPanelItem {
     u8 pad00[0x10];
     u32 value10;
     s32 value14;
@@ -934,24 +936,23 @@ typedef struct MenuPanelItem {
     u32 initialValue; /* 0xA0 */
     u32 selectionRamp; /* 0xA4 */
     s32 phase;
-} MenuPanelItem;
+};
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
-s32 mnuCreatePanelItem(void) {
+MenuPanelItem *mnuCreatePanelItem(void) {
     MenuPanelItem *panelItem = (MenuPanelItem *)sdfAllocSizeClassBlock(MNU_PANEL_ITEM_BYTES);
 
     memset(panelItem, 0, MNU_PANEL_ITEM_BYTES);
     panelItem->value14 = 0x63;
     panelItem->value10 = 0x8c;
     panelItem->initialValue = 0x100;
-    return (s32)panelItem;
+    return panelItem;
 }
 
 /* Bind the panel item's nine sprite cells to their grid entries (the extra pair only when an extra grid
  * exists) and pick the panel's label entry. */
-void func_002C26D8(s32 itemAddress, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
+void func_002C26D8(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
     s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
-    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
     itfGridStorePosition(&item->sprites[0], secondaryGrid, 4);
     itfGridStorePosition(&item->sprites[1], secondaryGrid, 5);
@@ -981,9 +982,8 @@ void func_002C26D8(s32 itemAddress, s32 primaryGrid, s32 secondaryGrid, s32 extr
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuPositionPanelItemPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
+void mnuPositionPanelItemPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
-    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
     itfGridStorePosition(&item->points[0], gridObject, 7);
     itfSetGridEntryQuantizedAndRefresh(item->points[0].x, item->points[0].y, -0x50, -0x50, 0, 0);
@@ -1025,8 +1025,8 @@ void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
     item->option = option;
 }
 
-void mnuFreePanelItemWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreePanelItemWork(MenuPanelItem *item) {
+    sdfReleaseChipBlock(item);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
