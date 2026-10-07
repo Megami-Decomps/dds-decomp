@@ -698,7 +698,7 @@ extern void sdfReleaseChipBlock(void *);
 
 /* Release each dependency according to the active state, clearing ownership
  * before releasing the next dependency. State 4 only borrows its handle. */
-void func_00114640(void *state) {
+void effObjReleaseStateDependencies(EffectDependencyState *state) {
     EffectDependencyState *data = state;
 
     switch (data->state) {
