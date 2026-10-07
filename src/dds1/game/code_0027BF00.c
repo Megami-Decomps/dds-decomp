@@ -8,6 +8,13 @@ struct FrFontGlyph;
 struct FrFontCtx;
 struct TextStyleNode;
 
+enum MenuPanelKind {
+    MNU_PANEL_KIND_SIX_SLOTS = 0,
+    MNU_PANEL_KIND_FOUR_OFFSET_ICONS = 1,
+    MNU_PANEL_KIND_FIXED_ICON_PAIRS = 2,
+    MNU_PANEL_KIND_COUNT = 3
+};
+
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
 #define MNU_ENTRY_MARKED_COLOR 0x89BDC940
@@ -23,7 +30,6 @@ struct TextStyleNode;
 #define MNU_WINDOW_CONTAINER_BYTES 0x8C
 #define MNU_PANEL_LAYOUT_BYTES 0x38
 #define MNU_WINDOW_RESOURCE_SPRITES 7
-#define MNU_PANEL_KIND_LIMIT 3
 #define MNU_SORT_KEY_COUNT 3
 #define MNU_SORT_COMPARATOR_COUNT 6
 #define MNU_LIST_POINTER_BYTES 4
@@ -549,14 +555,14 @@ extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
 extern void effConfigureIndexedSlotMaterial(s32, s32, s32, s32, s32, s32, s32);
 
 /* Panel kind chooses the native sprite-slot layout. */
-u32 mnuCreatePanelSpriteHandles(u32 mode, s32 resource, s32 target) {
+u32 mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 target) {
     MenuPanelSlotIndices indices = D_003B2368;
     MenuPanelHandles *panel = (MenuPanelHandles *)sdfAllocAndClearQuadwords(sizeof(MenuPanelHandles));
     s32 i;
 
-    panel->mode = mode;
-    switch (mode) {
-    case 0:
+    panel->panelKind = panelKind;
+    switch (panelKind) {
+    case MNU_PANEL_KIND_SIX_SLOTS:
         panel->count = 6;
         for (i = 0; i < panel->count; i++) {
             panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, indices.slots[i], 1);
@@ -564,7 +570,7 @@ u32 mnuCreatePanelSpriteHandles(u32 mode, s32 resource, s32 target) {
         effConfigureWithDefaultSetting((s32)panel->handles[4], 0, target, 0, 0, 12);
         effConfigureWithDefaultSetting((s32)panel->handles[5], 0, target, 0, 0, 12);
         break;
-    case 1:
+    case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         panel->count = 4;
         panel->handles[0] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, 23, 1);
         panel->handles[1] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, 23, 1);
@@ -575,7 +581,7 @@ u32 mnuCreatePanelSpriteHandles(u32 mode, s32 resource, s32 target) {
         effConfigureIndexedSlotMaterial((s32)panel->handles[2], 0, target, 1, 0, 10, 12);
         effConfigureIndexedSlotMaterial((s32)panel->handles[3], 0, target, 1, 10, 10, 12);
         break;
-    case 2:
+    case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
         panel->count = 4;
         for (i = 0; i < panel->count; i++) {
             panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, indices.slots[i + 2], 1);
@@ -593,7 +599,7 @@ extern void effInitializeSlotWork(s32, s32);
 void mnuClearEntryFlags(MenuPanelHandles *group) {
     s32 spriteIndex;
 
-    if (group->handles[0] != NULL && group->mode < MNU_PANEL_KIND_LIMIT) {
+    if (group->handles[0] != NULL && group->panelKind < MNU_PANEL_KIND_COUNT) {
         for (spriteIndex = 0; spriteIndex < group->count; spriteIndex++) {
             EffectSlotSet *entry = group->handles[spriteIndex];
             u32 *flags = &entry->workEntries->states[0].flags;
@@ -649,14 +655,14 @@ void mnuDrawPanelIconPairsAtFixedPositions(s32 x, s32 y, s32 depth, s32 alpha, M
 
 /* Dispatch the three DDS1 panel kinds; only kind one forces full fade. */
 void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *panel, s32 selectionMode, s32 drawArg) {
-    switch (panel->mode) {
-    case 0:
+    switch (panel->panelKind) {
+    case MNU_PANEL_KIND_SIX_SLOTS:
         func_0027D850(x, y, depth, fade, panel, selectionMode, drawArg);
         return;
-    case 1:
+    case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         mnuDrawFourPanelIconsAtOffsets(x, y, depth, MNU_FULL_FADE, panel, drawArg);
         return;
-    case 2:
+    case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
         mnuDrawPanelIconPairsAtFixedPositions(x, y, depth, fade, panel, drawArg);
         break;
     }
@@ -671,18 +677,18 @@ void mnuDrawIconPanelFullFade(s32 x, s32 y, s32 depth, MenuPanelHandles *list, s
 }
 
 void mnuHideWindowHandles(MenuPanelHandles *panel) {
-    switch (panel->mode) {
-    case 0:
+    switch (panel->panelKind) {
+    case MNU_PANEL_KIND_SIX_SLOTS:
         itfGridLookupValueOrDefault(panel->handles[4], 0);
         itfGridLookupValueOrDefault(panel->handles[5], 0);
         return;
-    case 1:
+    case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         itfGridLookupValueOrDefault(panel->handles[0], 0);
         itfGridLookupValueOrDefault(panel->handles[1], 0);
         itfGridLookupValueOrDefault(panel->handles[2], 0);
         itfGridLookupValueOrDefault(panel->handles[3], 0);
         return;
-    case 2:
+    case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
         itfGridLookupValueOrDefault(panel->handles[2], 0);
         itfGridLookupValueOrDefault(panel->handles[3], 0);
         break;
