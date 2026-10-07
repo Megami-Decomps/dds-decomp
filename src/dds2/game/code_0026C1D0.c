@@ -497,10 +497,11 @@ typedef struct {
 } EvtLoadedRecord;
 
 typedef struct EvtMantraNodePositionRecord {
-    u8 pad00[4];
+    u16 flags;
+    s16 id;
     s16 firstKey;  /* 0x04 */
     s16 secondKey; /* 0x06 */
-    u8 pad08[0x18];
+    struct EvtMantraNodePositionRecord *neighbors[6];
 } EvtMantraNodePositionRecord; /* 0x20 */
 
 void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
