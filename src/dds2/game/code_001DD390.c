@@ -1897,7 +1897,22 @@ void btlClearUnitDefeatCandidate(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", btlIsUnitInfoFlagOneEligible);
+u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
+    u32 flags = unit->flags;
+    u8 modelFlags;
+
+    if (flags & 0x08000000) {
+        return 0;
+    }
+    if (!(flags & 1)) {
+        return 0;
+    }
+    if (!(flags & 2)) {
+        return 0;
+    }
+    modelFlags = unit->ext->owner->flags;
+    return modelFlags & 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417940);
 
