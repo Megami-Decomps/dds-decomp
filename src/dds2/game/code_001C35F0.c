@@ -229,14 +229,14 @@ void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alph
     s32 i;
 
     if (!(stat & 1)) {
-        value = unit->hp;
-        maximum = unit->maxHp;
+        value = unit->partyRecord.hp;
+        maximum = unit->partyRecord.maxHp;
         xOffset = 57;
         yOffset = 49;
         sprite = 3;
     } else {
-        value = unit->unk12A;
-        maximum = unit->unk12C;
+        value = unit->partyRecord.mp;
+        maximum = unit->partyRecord.maxMp;
         xOffset = 28;
         yOffset = 64;
         sprite = 4;
@@ -265,7 +265,7 @@ void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alph
     for (i = 0; i < 4; i++) {
         colors.values[i] = (colors.values[i] & 0xFFFFFF00) | pulse->alpha;
     }
-    if (!(unit->flags & 0x20) && value != 0.0f && !(unit->conditionFlags & 0x4800)) {
+    if (!(unit->flags & 0x20) && value != 0.0f && !(unit->partyRecord.status & 0x4800)) {
         func_00306C28((x + xOffset + pulse->progress) << 4,
                      (y + yOffset + pulse->yOffset) << 3, 0, (s32)colors.values,
                      0, (s32)btlResourceBlock->resA, sprite, 0x53);

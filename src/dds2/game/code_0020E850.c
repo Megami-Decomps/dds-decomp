@@ -188,7 +188,7 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     if (task->flags & 0x40) {
         return result;
     }
-    flags = unit->conditionFlags;
+    flags = unit->partyRecord.status;
     if (!(flags & 0x20)) {
         return result;
     }
@@ -311,7 +311,7 @@ extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 /* Select the owner's effect variant for its current condition and task action. */
 s32 func_0020F200(BtlTask *task) {
     BtlUnit *unit = task->unit;
-    switch (unit->conditionFlags & 0x7FFF) {
+    switch (unit->partyRecord.status & 0x7FFF) {
     case 0x2000:
         return effOffsetIfOwnerFlagClear(unit, 0xD2);
     case 0x200:
@@ -518,7 +518,7 @@ s32 btlPollActorOrEntryLabelTask(void *arguments) {
         s32 resourceIndex = link->arg;
 
         if (resourceIndex == 0) {
-            if ((btlUnitStatusPair(owner) & 0x1400) == 0 && (owner->statBits & 0x10) == 0) {
+            if ((btlUnitStatusPair(owner) & 0x1400) == 0 && (owner->partyRecord.flags & 0x10) == 0) {
                 func_001B8580((s32)btlGetIndexedUiResource(owner));
             } else if (battleState->commandRestrictFlags & 0x400) {
                 if (owner->flags & 0x400) {
@@ -666,7 +666,7 @@ s32 btlPollActorDialogTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->messageWindows[0], 0, owner->mode, (owner->statBits & 0x20) ? 0xE : 0xF);
+            func_001A45C0(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], link->arg);
     }
@@ -701,12 +701,12 @@ s32 btlUpdateLinkedDialogueEffect(void *arguments) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     BtlUnit *owner = link->owner;
 
-    if (owner != 0 && !(owner->conditionFlags & 1)) {
+    if (owner != 0 && !(owner->partyRecord.status & 1)) {
         return 1;
     }
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->messageWindows[1], 0, owner->mode, (owner->statBits & 0x20) ? 0xE : 0xF);
+            func_001A45C0(battleState->messageWindows[1], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[1], link->arg);
     }
@@ -764,7 +764,7 @@ s32 btlPollTimedPresentationTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->scriptTarget, 0, owner->mode, (owner->statBits & 0x20) ? 1 : 2);
+            func_001A45C0(battleState->scriptTarget, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 1 : 2);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->scriptTarget, link->arg);
     }
@@ -873,7 +873,7 @@ s32 btlAdvanceActorEffectLabelTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->messageWindows[0], 0, owner->mode, (owner->statBits & 0x20) ? 0xE : 0xF);
+            func_001A45C0(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
             func_0035C860(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
             itfMesCopyStringToWindowTableSlot(battleState->messageWindows[0], 1, text);
         }
@@ -1002,7 +1002,7 @@ s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
     s32 result;
 
     btlActionScratchWork = (s32)work;
-    work[1] = owner->mode;
+    work[1] = owner->partyRecord.unitId;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
     sdfReleaseChipBlock(btlActionScratchWork);
@@ -1050,7 +1050,7 @@ s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
 
     unit = task->unit;
     btlActionScratchWork = (s32)work;
-    species = unit->mode;
+    species = unit->partyRecord.unitId;
     work[0] = (s32)task;
     work[1] = species;
     func_00211658(unit, species, &row, 0);
@@ -1071,7 +1071,7 @@ void btlShiftActorStateHistory(ActionStateLink *obj, s8 flag) {
         if (flag == 0) {
             obj->actions[0].word = obj->indexWork.skillId;
         } else {
-            obj->actions[0].word = obj->unit->actionSlot;
+            obj->actions[0].word = obj->unit->partyRecord.actionSlot;
         }
     } else {
         obj->actions[0].word = 0;
