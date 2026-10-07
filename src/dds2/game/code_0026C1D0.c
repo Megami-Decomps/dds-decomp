@@ -1,5 +1,6 @@
 #include "evt_world.h"
 #include "dat_state.h"
+#include "scr.h"
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0x100
 #define EVT_DISPLAY_VALUE_COUNT 0x10
@@ -23,7 +24,7 @@
 
 extern s32 mnuMantraPanelPositionTable;
 
-extern s32 mnuMantraNodePositionTable;
+extern EvtLoadedRecord *mnuMantraNodePositionTable;
 
 extern s32 func_0026CD50(u32);
 
@@ -490,12 +491,6 @@ typedef struct {
     s32 heightSource; /* 0x18: passed to mnuGetListViewportHeight for the panel height */
 } EvtPanelRecord;
 
-typedef struct {
-    u32 handle; /* 0x0: released by sdfReleaseResourceAllocation */
-    s32 recordsAddress; /* 0x4: origin of a 32-byte-stride lookup */
-    u32 recordCount;    /* 0x8: bound used by the coordinate search */
-} EvtLoadedRecord;
-
 typedef struct EvtMantraNodePositionRecord {
     u16 flags;
     s16 id;
@@ -525,26 +520,26 @@ void mnuLoadMantraNodePositionTable(u32 resourceId) {
     if (mnuMantraNodePositionTable != 0) {
         mnuReleaseMantraNodePositionTable();
     }
-    mnuMantraNodePositionTable = func_0026CD50(resourceId);
+    mnuMantraNodePositionTable = (EvtLoadedRecord *)func_0026CD50(resourceId);
 }
 
 /* Release the retained node-position handle and clear the global table address. */
 void mnuReleaseMantraNodePositionTable(void) {
-    sdfReleaseResourceAllocation(((EvtLoadedRecord *)mnuMantraNodePositionTable)->handle);
+    sdfReleaseResourceAllocation(mnuMantraNodePositionTable->handle);
     mnuMantraNodePositionTable = 0;
 }
 
 /* Return a 32-byte record address for a signed halfword index; callers sign-extend the index at the call
  * (func_0028DC08 +0x34), and this body re-extends it (sll/sra 16). */
 s32 mnuGetMantraNodePositionRecord(s16 index) {
-    return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->recordsAddress + index * 32;
+    return mnuMantraNodePositionTable->recordsAddress + index * 32;
 }
 
 /* Find the first position matching two signed-halfword, staggered-grid keys.
  * The second coordinate's odd bit adds five to the first key; both scale by ten.
  * A loaded table is required; a failed search returns address zero. */
 s32 mnuFindMantraNodePositionRecord(s32 firstCoordinate, s32 secondCoordinate) {
-    EvtLoadedRecord *loaded = (EvtLoadedRecord *)mnuMantraNodePositionTable;
+    EvtLoadedRecord *loaded = mnuMantraNodePositionTable;
     s16 firstKey;
     s16 secondKey;
     EvtMantraNodePositionRecord *record;
@@ -567,7 +562,7 @@ s32 mnuFindMantraNodePositionRecord(s32 firstCoordinate, s32 secondCoordinate) {
 
 /* Return the loaded node-position count; the table must already exist. */
 u32 mnuGetMantraNodePositionRecordCount(void) {
-    return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->recordCount;
+    return mnuMantraNodePositionTable->recordCount;
 }
 
 /* Replace the panel-position resource, releasing an existing table first. */
@@ -684,10 +679,10 @@ void func_0026DB20(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB28);
 
-/* Pass the supplied entry and selector 0xF to the existing flag routine.
- * Its result is discarded; the broader callback role is not established. */
-void func_0026DB48(u32 context, u8 entry) {
-    scrTestEntryFlag(context, entry, 0xf);
+/* Pass the supplied entry and selector 0xF to the existing flag routine
+ * and return its result. */
+s32 func_0026DB48(u32 context, u8 entry) {
+    return scrTestEntryFlag(context, entry, 0xf);
 }
 
 void func_0026DB68(void) {
