@@ -1,6 +1,7 @@
 #include "common.h"
+#include "mnu_list.h"
 
-extern s32 mnuMovieMenuState;
+extern MovieMenuState *mnuMovieMenuState;
 
 extern void func_00134CD8(void);
 extern f32 effMiscRandUnitFloat(void *);
@@ -26,7 +27,7 @@ typedef struct {
     s32 pulseTimer;       /* 0x20 */
     s32 transitionOffset; /* 0x24 */
     s32 mode;             /* 0x28 */
-    u32 linkedState;       /* 0x2C: passed to the func_0027Bxxx helpers */
+    u8 pad2C[4];
     s32 pad30;
     s32 word34;
     s32 slideOffset;      /* 0x38 */
@@ -37,8 +38,11 @@ extern s8 D_00324510[];
 extern void mnuReleaseMenuResourceSlots(void);
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
+extern u32 mnuDestroyListState(struct MenuList *);
+extern void mnuSelectFirstListNode(struct MenuList *);
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32);
 
-extern s32 mnuListAppendNode(s32, s32);
+extern struct MenuListNode *mnuListAppendNode(struct MenuList *, s32);
 
 extern void func_0026D480();
 extern void sndSetSequenceVolumePan(s32, s32, s32);
@@ -79,33 +83,33 @@ void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
 
 void mnuRecreateMenuSelectionList(void) {
     s32 i;
-    s32 node;
+    struct MenuList *list;
 
-    if (((MenuState *)mnuMovieMenuState)->linkedState != 0) {
-        mnuDestroyListState(((MenuState *)mnuMovieMenuState)->linkedState);
+    if (mnuMovieMenuState->selectionList != NULL) {
+        mnuDestroyListState(mnuMovieMenuState->selectionList);
     }
-    node = (s32)mnuCreateListState(0, 3, 0);
-    ((MenuState *)mnuMovieMenuState)->linkedState = node;
-    ((MenuState *)node)->linkedState = (s32)func_0026D480;
+    list = mnuCreateListState(0, 3, 0);
+    mnuMovieMenuState->selectionList = list;
+    list->drawCallback = func_0026D480;
     for (i = 0; i < 3; i++) {
-        mnuListAppendNode(((MenuState *)mnuMovieMenuState)->linkedState, 0);
+        mnuListAppendNode(mnuMovieMenuState->selectionList, 0);
     }
 }
 
 u32 mnuDestroyMovieMenuSelectionList(void) {
-    return mnuDestroyListState(((MenuState *)mnuMovieMenuState)->linkedState);
+    return mnuDestroyListState(mnuMovieMenuState->selectionList);
 }
 
 u32 func_0026BED0(void) {
-    return **(u32 **)(((MenuState *)mnuMovieMenuState)->linkedState + 0x1c);
+    return mnuMovieMenuState->selectionList->cursor->index;
 }
 
 void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
-    mnuSelectFirstListNode(((MenuState *)mnuMovieMenuState)->linkedState);
+    mnuSelectFirstListNode(mnuMovieMenuState->selectionList);
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            mnuAdvanceListCursorDefault(((MenuState *)mnuMovieMenuState)->linkedState);
+            mnuAdvanceListCursorDefault((u32)mnuMovieMenuState->selectionList);
         } while (advanceCount != 0);
     }
 }

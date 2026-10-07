@@ -70,7 +70,6 @@ extern s32 mnuLookupRangeEntry(u16);
 
 extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 
-extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 func_002C6CE8(void);
 
@@ -82,7 +81,6 @@ extern s32 datCommandRecords;
 
 extern s32 datCommandSelectors;
 
-extern void mnuSetPopupEntry(s32, s32);
 
 
 extern s8 D_003E7970[];
@@ -1140,25 +1138,6 @@ void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *panelWords, s32 opt
     panel->phase = phase - MNU_PROFILE_PHASE_PERIOD;
 }
 
-typedef u32 (*MenuPopupCallback)();
-
-typedef struct MenuPopupEntry {
-    u32 flags;
-    MenuPopupCallback enter;
-    MenuPopupCallback leave;
-    MenuPopupCallback start;
-    MenuPopupCallback update;
-    MenuPopupCallback finish;
-    MenuPopupCallback canEnter;
-} MenuPopupEntry;
-
-/* The dispatcher keeps sixteen saved entries and the two closed-entry addresses. */
-typedef struct MenuPopupState {
-    s32 count;
-    MenuPopupEntry *entries[16];
-    s32 entryAddress;
-    s32 lastEntryAddress;
-} MenuPopupState;
 
 /* Clear the complete native popup-transition state, including saved entry addresses. */
 void mnuClearPanelTransitionState(u32 stateAddress) {
@@ -1230,21 +1209,21 @@ u8 mnuIsPopupEntryValue(s32 stateAddress, s32 entryAddress) {
 }
 
 /* Bind the entry address and retain only the entry's low sixteen flag bits. */
-void mnuSetPopupEntry(s32 entrySlotAddress, s32 entryAddress) {
+void mnuSetPopupEntry(s32 *entrySlot, void *entry) {
     u16 retainedFlags;
 
-    retainedFlags = *(u16 *)entryAddress;
-    *(s32 *)entrySlotAddress = entryAddress;
-    *(s32 *)entryAddress = retainedFlags;
+    retainedFlags = *(u16 *)entry;
+    *entrySlot = (s32)entry;
+    *(s32 *)entry = retainedFlags;
 }
 
 /* Bind the entry with the native insert-before-top bit after preserving low flags. */
-void mnuSetPopupEntryFlagged(s32 entrySlotAddress, s32 entryAddress) {
+void mnuSetPopupEntryFlagged(s32 *entrySlot, void *entry) {
     u16 retainedFlags;
 
-    retainedFlags = *(u16 *)entryAddress;
-    *(s32 *)entrySlotAddress = entryAddress;
-    *(s32 *)entryAddress = retainedFlags | MNU_POPUP_INSERT_BEFORE_TOP;
+    retainedFlags = *(u16 *)entry;
+    *entrySlot = (s32)entry;
+    *(s32 *)entry = retainedFlags | MNU_POPUP_INSERT_BEFORE_TOP;
 }
 
 /* Bind the entry with both native marking bits after preserving low flags. */
@@ -1259,7 +1238,7 @@ void mnuAttachAndMarkMenuEntry(s32 entrySlotAddress, s32 entryAddress) {
 /* Bind the current popup entry only when its saved address is nonzero. */
 void mnuBindPresentMenuEntry(s32 stateAddress, u32 entrySlotAddress) {
     if (((MenuPopupState *)stateAddress)->entryAddress != 0) {
-        mnuSetPopupEntryFlagged(entrySlotAddress, ((MenuPopupState *)stateAddress)->entryAddress);
+        mnuSetPopupEntryFlagged((s32 *)entrySlotAddress, (void *)((MenuPopupState *)stateAddress)->entryAddress);
         return;
     }
 }

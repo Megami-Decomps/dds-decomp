@@ -76,7 +76,7 @@ s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     }
     func_0029AA48(context);
     func_0029AC20(context, 0);
-    return menuSetHandler((s32)context, 1, request);
+    return menuSetHandler(context, 1, (void *)request);
 }
 
 s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
@@ -86,7 +86,7 @@ s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
         return 0;
     }
     func_0026C900();
-    return menuSetHandler((s32)context, 2, request);
+    return menuSetHandler(context, 2, (void *)request);
 }
 
 /* The five signed config bytes reserve space before the selected entry width. */

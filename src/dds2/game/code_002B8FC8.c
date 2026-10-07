@@ -157,7 +157,6 @@ extern u32 mnuMapPadMaskToFlags();
 
 extern s32 mnuGetAbilityByteCategory();
 
-extern void mnuSetPopupEntry();
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
@@ -183,7 +182,6 @@ extern void mnuHideIconGroup();
 
 extern s32 evtGetCapturedWindowPanelValue();
 
-extern void mnuSetPopupEntryFlagged();
 
 extern void mnuBeginWindowFadeTransition(s32, s32);
 
@@ -274,7 +272,6 @@ extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern void effResolveAndReleaseResource(s32);
 
-extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 /* Menu state handler installer: the call is inlined at each use, so callers
  * return its result through a real call rather than a sibcall. */
@@ -1868,8 +1865,8 @@ void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve) {
     }
 }
 
-void func_002BB9C8(u32 *destination, u32 value) {
-    *destination = value;
+void func_002BB9C8(MenuSprites *page, u32 flags) {
+    page->flags = flags;
 }
 
 void mnuSetPageParams(MenuSprites *page, s32 mode) {

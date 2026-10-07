@@ -2,6 +2,7 @@
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_list.h"
+#include "kwln.h"
 
 /* The dispatcher passes its last argument to entry callbacks as opaque data,
  * not as a function address. Modes select polling, primary and secondary actions. */
@@ -19,7 +20,6 @@ extern s32 evtAdvanceSlotFlags(void);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern s32 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -35,7 +35,6 @@ extern u8 D_003CE4EC[];
 extern void func_00297220(struct MenuList *, u32);
 extern s32 mnuCampAdvanceCounter(s32, MenuTerminalContext *);
 
-extern void mnuSetPopupEntry(s32, s32);
 
 extern u8 D_003CE498[];
 extern s32 D_00435E48;
@@ -71,7 +70,6 @@ extern u16 D_003CE3F8[];
 extern void func_00261670();
 extern void func_00294930();
 extern void func_00298648();
-extern void mnuSetPopupEntryFlagged(s32, s32);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
@@ -94,6 +92,14 @@ extern u8 D_003CE690[];
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
 extern void func_002958B0();
+extern s32 mnuMapPadMaskToFlags(s32);
+extern void func_002971E0(struct MenuList *, u32);
+extern void func_002B9808(MenuWindowContainer *);
+extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
+extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+extern void mnuHandleListPageJumpInput(s32, u8 *, u32 *);
+extern void mnuPlayInputSound(s32, s32, u32 *);
+extern u8 D_003CE578[];
 
 
 s32 evtIsFadeDispatchIdle(void) {
@@ -108,7 +114,7 @@ s32 evtIsFadeDispatchIdle(void) {
 void evtInstallStateTable(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 2) {
         ((MenuTerminalContext *)stateAddress)->stateTable = (s32)D_003CE498;
-        mnuSetPopupEntry((s32)&((MenuTerminalContext *)stateAddress)->popupState, (s32)(D_003CE498 + 0x118));
+        mnuSetPopupEntry(&((MenuTerminalContext *)stateAddress)->popupState, (D_003CE498 + 0x118));
     }
 }
 
@@ -144,19 +150,19 @@ s32 func_00262190(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297320(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSync(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 void evtInstallStateTableB(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
         ((MenuTerminalContext *)stateAddress)->stateTable = (s32)D_003CE4B4;
-        mnuSetPopupEntry((s32)&((MenuTerminalContext *)stateAddress)->popupState, (s32)(D_003CE4B4 + 0xfc));
+        mnuSetPopupEntry(&((MenuTerminalContext *)stateAddress)->popupState, (D_003CE4B4 + 0xfc));
     }
 }
 
@@ -189,19 +195,19 @@ s32 func_00262598(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297970(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncB(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 void evtInstallStateTableC(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
         ((MenuTerminalContext *)stateAddress)->stateTable = (s32)D_003CE4D0;
-        mnuSetPopupEntry((s32)&((MenuTerminalContext *)stateAddress)->popupState, (s32)(D_003CE4D0 + 0xe0));
+        mnuSetPopupEntry(&((MenuTerminalContext *)stateAddress)->popupState, (D_003CE4D0 + 0xe0));
     }
 }
 
@@ -234,19 +240,19 @@ s32 func_002629A8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297970(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_00262A00(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 void func_00262A48(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
         ((MenuTerminalContext *)stateAddress)->stateTable = (s32)D_003CE4EC;
-        mnuSetPopupEntry((s32)&((MenuTerminalContext *)stateAddress)->popupState, (s32)(D_003CE4EC + 0xc4));
+        mnuSetPopupEntry(&((MenuTerminalContext *)stateAddress)->popupState, (D_003CE4EC + 0xc4));
     }
 }
 
@@ -279,19 +285,19 @@ s32 func_00262DB8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297970(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_00262E10(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-void evtInstallStateTableD(s32 stateAddress) {
-    if (((MenuTerminalContext *)stateAddress)->dispatchMode == 2) {
-        ((MenuTerminalContext *)stateAddress)->stateTable = (s32)D_003CE508;
-        mnuSetPopupEntry((s32)&((MenuTerminalContext *)stateAddress)->popupState, (s32)(D_003CE508 + 0xa8));
+void evtInstallStateTableD(MenuTerminalContext *state) {
+    if (state->dispatchMode == 2) {
+        state->stateTable = (s32)D_003CE508;
+        mnuSetPopupEntry(&state->popupState, D_003CE508 + 0xa8);
     }
 }
 
@@ -318,19 +324,79 @@ s32 evtEnterProgressCommandPhase(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00262F78);
+s32 func_00262F78(KwlnTask *task) {
+    s32 dispatchResult;
+    u32 inputFlags;
+    MenuTerminalContext *state;
+    s32 *dispatchSlot;
+    struct MenuList *linkedList;
+    struct MenuList *callbackList;
+
+    state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    inputFlags = mnuMapPadMaskToFlags(0xC33);
+    dispatchSlot = &state->popupState;
+    linkedList = state->window->list;
+    dispatchResult = func_002C4038(state->transitionWork, dispatchSlot, 0, task);
+    if (dispatchResult == 0) {
+        switch (mnuTickExtendedCommandPhase(state)) {
+        case -1:
+            break;
+        case 4:
+            mnuSetCommandPhase(state, 6);
+            mnuStorePendingMenuCommandValue(linkedList, 10);
+            break;
+        case 5:
+            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
+            mnuStorePendingMenuCommandValue(state->ownedWindows[0]->list, 10);
+            break;
+        case 7:
+            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE578);
+            break;
+        case 8:
+            mnuSetCommandPhase(state, 6);
+            callbackList = state->window->list;
+            callbackList->drawCallback = func_002958B0;
+            mnuStorePendingMenuCommandValue(callbackList, 0);
+            state->stateStep = 10;
+            break;
+        case 6:
+            evtInstallStateTableD(state);
+        default:
+            if (state->popupState == 0) {
+                if (inputFlags & 1) {
+                    mnuSetCommandPhase(state, 7);
+                } else if (inputFlags & 2) {
+                    mnuSetCommandPhase(state, 5);
+                    func_002971E0(linkedList, 4);
+                } else if ((inputFlags & 0x300000) == 0) {
+                    func_002B9808(state->window);
+                } else if (inputFlags & 0x10) {
+                    mnuRetreatWindowListSelection(state->window);
+                } else if (inputFlags & 0x20) {
+                    mnuAdvanceWindowListSelection(state->window);
+                }
+                mnuHandleListPageJumpInput(state->windowResource,
+                                          (u8 *)state->window, &inputFlags);
+            }
+            mnuPlayInputSound(0, inputFlags, &state->window->list->stateFlags);
+            break;
+        }
+        return 0;
+    }
+    return dispatchResult;
+}
 
 s32 func_00263180(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297970(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_002631D8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 /* Return a slot's remaining threshold, or -1 for an unavailable slot. */
@@ -374,10 +440,10 @@ u32 func_00263378(void) {
 s32 evtOpenProgressResultPopupWhenIdle(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 dispatchResult = func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (evtGetMessageWindowControlState() == 0) {
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_003CE498);
+            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
         }
         return 0;
     }
@@ -388,13 +454,13 @@ s32 func_002633F0(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297320(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_00263448(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263490);
@@ -406,10 +472,10 @@ u32 func_002635E0(void) {
 s32 func_002635E8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 dispatchResult = func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (evtGetMessageWindowControlState() == 0) {
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_003CE498);
+            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
         }
         return 0;
     }
@@ -420,13 +486,13 @@ s32 func_00263658(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297320(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_002636B0(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 u32 evtResetStateProgressTimer(void) {
@@ -442,7 +508,7 @@ u32 evtResetStateProgressTimer(void) {
 s32 evtQueryStateProgress(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 dispatchResult = func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -463,13 +529,13 @@ s32 evtDispatchProgressCallback(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00294930(stateAddress, ((MenuTerminalContext *)stateAddress)->retryFrames);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncE(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 s32 evtApplyBaseRateProgressStep(void) {
@@ -505,8 +571,8 @@ s32 evtPollQuantitySelection(s32 callbackContext) {
     CampWindowParams *values =
         &((MenuTerminalContext *)stateAddress)->window->list->cursor->camp;
     s32 input = mnuMapPadMaskToFlags(0xF000F3);
-    s32 result = func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot,
-                             EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 result = func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot,
+                             EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
 
     if (result != 0) {
         return result;
@@ -521,12 +587,12 @@ s32 evtPollQuantitySelection(s32 callbackContext) {
         struct MenuList *primaryList =
             ((MenuTerminalContext *)stateAddress)->ownedWindows[0]->list;
         values->value = values->price;
-        mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)(D_003CE4B4 +
+        mnuSetPopupEntryFlagged(dispatchSlot, (D_003CE4B4 +
             primaryList->cursor->camp.value * 0x1C));
         break;
     }
     case 12:
-        mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_003CE594);
+        mnuSetPopupEntryFlagged(dispatchSlot, D_003CE594);
         break;
     case 11:
     default:
@@ -576,13 +642,13 @@ s32 func_00263B98(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00298648(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_00263BF0(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00263C38);
@@ -676,13 +742,13 @@ s32 evtDispatchSceneReadyFollowup(s32 callbackContext) {
     } else {
         func_00298648(stateAddress);
     }
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_002642B8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 s32 evtPlayDispatchModeCue(void) {
@@ -715,17 +781,17 @@ s32 evtApplyDispatchModeState(void) {
     return 1;
 }
 
-s32 evtSetPopupEntryWhenMessageWindowIdle(u64 callbackContext) {
+s32 evtSetPopupEntryWhenMessageWindowIdle(void *callbackContext) {
     s32 stateAddress;
     s32 result;
     s32 *dispatchSlot;
 
     stateAddress = kwlnTaskGetUserValue();
     dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    result = func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    result = func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
         if ((*dispatchSlot == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, ((MenuTerminalContext *)stateAddress)->stateTable);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)((MenuTerminalContext *)stateAddress)->stateTable);
         }
         result = 0;
     }
@@ -778,13 +844,13 @@ s32 func_00264480(s32 callbackContext) {
         }
         break;
     }
-    return func_002C4038((s32)state->transitionWork, &state->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(state->transitionWork, &state->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_002646C8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00264710);
@@ -816,8 +882,8 @@ s32 evtAdvancePendingRewards(s32 callbackContext) {
 
     state = (MenuTerminalContext *)kwlnTaskGetUserValue();
     dispatchSlot = &state->popupState;
-    result = func_002C4038((s32)state->transitionWork, dispatchSlot,
-                         EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    result = func_002C4038(state->transitionWork, dispatchSlot,
+                         EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (result == 0) {
         if (*dispatchSlot == 0 &&
             (result = evtGetMessageWindowControlState()) == 0) {
@@ -833,7 +899,7 @@ s32 evtAdvancePendingRewards(s32 callbackContext) {
                 state->announceNextReward = 0;
                 dspStartEntry(0x2F);
             } else if (state->remainingRewards == 0) {
-                mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_003CE5E8);
+                mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5E8);
             } else if (state->rewardDelay <= 0) {
                 if (state->rewardMode < 0) {
                     column = func_00260DF0(state->rewardRow);
@@ -882,13 +948,13 @@ s32 func_00264AB8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297970(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_00264B10(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 /* Mark each newly completed slot and advance the persistent slot index. */
@@ -922,11 +988,11 @@ u32 func_00264C58(void) {
 s32 evtOpenSlotAdvancePopupWhenIdle(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 dispatchResult = func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
-                mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_003CE604);
+                mnuSetPopupEntryFlagged(dispatchSlot, D_003CE604);
             }
         }
         return 0;
@@ -938,13 +1004,13 @@ s32 func_00264CE0(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297970(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_00264D38(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 /* Raise a gate's flag and play its cue only on the first threshold crossing. */
@@ -987,12 +1053,12 @@ u32 func_00264EF8(void) {
 s32 evtTriggerProgressGateThenOpenPopup(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    s32 dispatchResult = func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
                 if (evtTriggerProgressFlagGate(stateAddress) == 0) {
-                    mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_003CE620);
+                    mnuSetPopupEntryFlagged(dispatchSlot, D_003CE620);
                 }
             }
         }
@@ -1005,13 +1071,13 @@ s32 func_00264F98(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0025FD78(stateAddress);
     func_00297970(stateAddress);
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 func_00264FF0(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038((s32)((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, callbackContext);
+    return func_002C4038(((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00265038);

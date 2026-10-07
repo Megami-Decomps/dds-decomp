@@ -6,11 +6,36 @@
 #include "mnu_shop.h"
 #endif
 
-/* DDS2 scheduler word: zero or the encoded next-handler address. */
-extern s32 func_002C4038(s32, s32 *, u64, u64);
+typedef u32 (*MenuPopupCallback)();
 
-static inline s32 menuSetHandler(s32 context, u64 mode, s32 callback) {
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
+typedef struct MenuPopupEntry {
+    u32 flags;
+    MenuPopupCallback enter;
+    MenuPopupCallback leave;
+    MenuPopupCallback start;
+    MenuPopupCallback update;
+    MenuPopupCallback finish;
+    MenuPopupCallback canEnter;
+} MenuPopupEntry;
+
+/* Both games keep sixteen saved entries and the two closed-entry addresses. */
+typedef struct MenuPopupState {
+    s32 count;
+    MenuPopupEntry *entries[16];
+    s32 entryAddress;
+    s32 lastEntryAddress;
+} MenuPopupState;
+
+/* DDS2 scheduler word: zero or the encoded next-handler address. */
+extern s32 func_002C4038(void *work, s32 *entrySlot, s32 mode, void *callback);
+#ifdef VERSION_DDS2
+void mnuSetPopupEntry(s32 *entrySlot, void *entry);
+void mnuSetPopupEntryFlagged(s32 *entrySlot, void *entry);
+#endif
+
+
+static inline s32 menuSetHandler(void *context, s32 mode, void *callback) {
+    return func_002C4038((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
 }
 /* DDS1 uses the same scheduler-word contract as the DDS2 dispatcher. */
 extern s32 func_00285670(s32, s32 *, u64, u64);
@@ -19,8 +44,8 @@ static inline s32 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
 }
 
-static inline s32 evtMenuSetHandler(s32 context, u64 mode, s32 callback) {
-    return func_002C4038(context + 0xc, (s32 *)(context + 0x58), mode, callback);
+static inline s32 evtMenuSetHandler(void *context, s32 mode, void *callback) {
+    return func_002C4038((u8 *)context + 0xC, (s32 *)((u8 *)context + 0x58), mode, callback);
 }
 
 static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
@@ -148,9 +173,10 @@ typedef struct BrsProgressRow {
 
 typedef char BrsProgressRow_size_must_be_0x2C[(sizeof(BrsProgressRow) == 0x2C) ? 1 : -1];
 
-/* Page sprites and their fade/slide state; DDS2 expanded the sprite banks. */
+/* DDS1 allocates 0x50 bytes; DDS2's expanded sprite banks and byte flags use 0x78. */
 typedef struct MenuSprites {
-    u8 pad00[0xC];
+    u32 flags;
+    u8 pad04[8];
     s32 unkC;
 #ifdef VERSION_DDS2
     void *icon[5];
@@ -169,8 +195,8 @@ typedef struct MenuSprites {
     s32 slideOffset;
     s32 slideSpeed;
 #ifdef VERSION_DDS2
-    u8 unk74;
-    u8 unk75;
+    s8 unk74;
+    s8 unk75;
 #endif
 } MenuSprites;
 
@@ -536,7 +562,8 @@ typedef struct MovieMenuState {
     s32 cursor;          /* 0x14 */
     s32 mode;            /* 0x18 */
     s32 unk1C;           /* 0x1C */
-    u8 pad20[0x10];
+    u8 pad20[0x0C];
+    struct MenuList *selectionList; /* 0x2C: created by the movie selection-list builder */
     void *resources;     /* 0x30 */
     s32 unk34;           /* 0x34 */
     u8 pad38[8];
@@ -570,7 +597,8 @@ struct MenuIconState;
 
 
 typedef struct MenuStaffContext {
-    u8 pad00[0x54];
+    u8 pad00[8];
+    MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState;       /* 0x54 */
     u8 pad58[8];
     s32 group;            /* 0x60 */

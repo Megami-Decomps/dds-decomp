@@ -904,24 +904,6 @@ void mnuClearPanelTransitionState(u32 stateAddress) {
     memset(stateAddress, 0, MNU_POPUP_STATE_BYTES);
 }
 
-typedef u32 (*MenuPopupCallback)();
-
-typedef struct MenuPopupEntry {
-    u32 flags;
-    MenuPopupCallback enter;
-    MenuPopupCallback leave;
-    MenuPopupCallback start;
-    MenuPopupCallback update;
-    MenuPopupCallback finish;
-    MenuPopupCallback canEnter;
-} MenuPopupEntry;
-
-typedef struct MenuPopupState {
-    s32 count;
-    MenuPopupEntry *entries[16];
-    s32 entryAddress;
-    s32 lastEntryAddress;
-} MenuPopupState;
 
 void func_002854B0(s32 action, MenuPopupEntry *entry, MenuPopupState *state, u32 argument) {
     MenuPopupCallback callback;

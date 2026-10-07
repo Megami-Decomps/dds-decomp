@@ -14,7 +14,6 @@ extern void func_00297970(s32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_003CE63C[];
 extern char (*D_00435E5C)[25];
@@ -90,7 +89,7 @@ u32 func_002652D8(void) {
 s32 evtMenuPollWindow(s32 callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
     s32 *window = &context->popupState;
-    s32 state = func_002C4038((s32)context->transitionWork, window, 0, callback);
+    s32 state = func_002C4038(context->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -106,13 +105,13 @@ s32 func_00265360(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
-    return evtMenuSetHandler(context, 1, callback);
+    return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
 s32 evtFinishPopupAfterMenuConfiguration(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C7F8(1, 0);
-    return evtMenuSetHandler(context, 2, callback);
+    return evtMenuSetHandler((void *)context, 2, (void *)callback);
 }
 
 /* Hand out the captured slot's reward: an item (named in the window) or a currency amount. */
@@ -167,13 +166,13 @@ s32 func_002657F8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
-    return evtMenuSetHandler(context, 1, callback);
+    return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
 s32 func_00265850(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
-    return evtMenuSetHandler(context, 2, callback);
+    return evtMenuSetHandler((void *)context, 2, (void *)callback);
 }
 
 /* Fade out according to the event mode, with a separate flag-dependent case 2. */

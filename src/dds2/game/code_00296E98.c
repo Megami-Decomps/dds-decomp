@@ -549,7 +549,7 @@ void brsStaffTaskDestroy(s32 taskArg) {
 
 extern s32 kwlnTaskCreate(void *name, s32 flags, s32 prio, s32 stacked, void *update, void *destroy, void *data);
 extern BrsSkillPackageWork *brsCreateRewardTaskWork(void);
-extern s32 brsMessageInputStep(u64);
+extern s32 brsMessageInputStep(void *);
 extern s32 mnuStaffRunPanel1(s32);
 extern s32 mnuStaffRunPanel2(s32);
 extern void brsStaffTaskDestroy(s32);

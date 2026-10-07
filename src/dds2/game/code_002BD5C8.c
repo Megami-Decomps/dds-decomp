@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mnu.h"
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD5C8);
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD710);
@@ -41,7 +42,121 @@ s8 func_002BDA78(s32 value) {
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDAA8);
 
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDC38);
+typedef struct MenuCommandRecord {
+    u8 pad00[0x18];
+    s16 unk18;
+    u8 pad1A[0x1E];
+} MenuCommandRecord;
+
+/* Text builders return integer glyph handles; frFont consumes glyph pointers. */
+typedef struct FrFontGlyph FrFontGlyph;
+
+extern MenuCommandRecord *datCommandRecords;
+extern const u8 (*D_00435E5C)[25];
+extern char D_00437C40[];
+extern u32 uiBlendColors(u32, u32, u32);
+extern s32 mdlFlagTest(u32);
+extern s32 mnuGetPartyEntryMenuValue(DatPartyRecord *);
+extern s32 mnuGetPartyEntryCurrentId(DatPartyRecord *);
+extern s32 evtGetIndexedEventRecordId(s32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
+extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_002BDAA8(s32, s32, s32, s32, s32, s32);
+
+void func_002BDC38(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSprites *page, s32 param) {
+    char text[0x20];
+    DatPartyRecord *party = &datGameState->party[partyIndex];
+    void **sprite = page->item;
+    u32 i = 0;
+    s32 alpha = page->drawAlpha;
+    u32 color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
+    s32 showCurrent = mdlFlagTest(0x901);
+    s32 x = page->slideOffset * 16 + 0xC80;
+    s32 value;
+    s32 glyph;
+
+    do {
+        void *resource = *sprite++;
+
+        if (resource != NULL) {
+            if (i == 2) {
+                func_00306CD0(x - 0x40, 0x10, depth, alpha, 0, (s32)page->item[2], 0, param);
+            } else {
+                func_00306CD0(x, 0x20, depth, alpha, 0, (s32)resource, 0, param);
+            }
+        }
+        i++;
+    } while (i < 11);
+
+    value = mnuGetPartyEntryMenuValue(party);
+    if (value != 0) {
+        glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
+        func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].unk18);
+        glyph = func_0019F5E8(x + 0x1050, 0x360, depth, color, text, glyph);
+        if (page->unk74 != 0) {
+            frFontSetChainFlag((FrFontGlyph *)glyph, 4);
+        }
+        func_0019D550((FrFontGlyph *)glyph, 1, param);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    } else {
+        func_00306CD0(x, 0x20, depth, alpha, 0, (s32)page->cursor[0], 0, param);
+    }
+
+    if (showCurrent != 0) {
+        value = mnuGetPartyEntryCurrentId(party);
+        if (value != 0) {
+            s8 style;
+
+            glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x418, depth, color, D_00435E5C[value], 0);
+            style = page->unk75;
+            if (style == 1 || (style == 2 && func_002BDA50(value) == 0)) {
+                frFontSetChainFlag((FrFontGlyph *)glyph, 4);
+            } else if (style == 2) {
+                frFontSetChainFlag((FrFontGlyph *)glyph, 3);
+            }
+            func_0019D550((FrFontGlyph *)glyph, 1, param);
+            frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+            if (page->flags & 1) {
+                func_00306CD0(x + 0xE30, 0x408, depth, alpha, 0, (s32)page->cursor[3], 0, param);
+                func_002BDAA8(x + 0x1020, 0x438, alpha, value, (s32)page->cursor[2], 0);
+            }
+        } else {
+            func_00306CD0(x, 0x20, depth, alpha, 0, (s32)page->cursor[1], 0, param);
+        }
+    }
+
+    if (page->fadeOut == 0) {
+        if (page->drawAlpha < 256) {
+            page->drawAlpha += 16;
+        }
+        if (page->drawAlpha > 256) {
+            page->drawAlpha = 256;
+        }
+        page->slideOffset -= page->slideSpeed / 256;
+        if (page->slideOffset < 0) {
+            page->slideOffset = 0;
+        }
+        if (page->slideOffset != 0) {
+            page->slideSpeed *= 1.5f;
+        }
+    } else {
+        if (page->drawAlpha > 0) {
+            page->drawAlpha -= 32;
+        }
+        if (page->drawAlpha < 0) {
+            page->drawAlpha = 0;
+        }
+        page->slideOffset += page->slideSpeed / 256;
+        if (page->slideOffset != 0) {
+            page->slideSpeed /= 1.5f;
+        }
+    }
+}
 
 extern void func_00314500(u32, s32, char *);
 extern s32 func_0019CE78(s32 *, s32, s32, s32, s32);
@@ -57,16 +172,12 @@ void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     item = func_0019CE78((s32 *)text, 0, 0, 0, 0);
     frFontSetChildColors(item, color);
     frFontSetContextPair(item, x, y);
-    func_0019D550(item, 1, param);
-    frFontQueueGlyphInSelectedSlot(item);
+    func_0019D550((FrFontGlyph *)item, 1, param);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
 }
 
 extern s32 func_00314C10(DatPartyRecord *);
-extern s32 uiBlendColors();
 extern s32 scrGetIndexedRecordAddress(s32, s32 *);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern void func_0019D550(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                                       s32 partyIndex, s32 param) {
@@ -84,8 +195,8 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             return;
         }
         item = itfCreateConvertedTextGlyph(0x16B0, 0x4B8, depth, texture, (const u8 *)outValue, 0);
-        func_0019D550(item, 1, param);
-        frFontQueueGlyphInSelectedSlot(item);
+        func_0019D550((FrFontGlyph *)item, 1, param);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
     }
 }
 
@@ -105,17 +216,13 @@ typedef struct MenuBlendObject {
     MenuBlendContext *context;
 } MenuBlendObject;
 
-void mnuBlendPanelSlots(MenuBlendObject *dst, MenuBlendObject *src, u32 amount) {
+void mnuBlendPanelSlots(MenuBlendObject *dst, MenuBlendObject *src, s32 amount) {
     s32 i;
-    s32 ctx = (s32)dst->context;
 
     for (i = 0; i < 4; i++) {
-        s32 result = uiBlendColors(((MenuBlendContext *)ctx)->source[i],
-                                   src->context->source[i],
-                                   (s32)amount / 2 + 0x80, ctx);
-        s32 current = (s32)dst->context;
-        ctx = current;
-        ((MenuBlendContext *)current)->result[i] = result;
+        dst->context->result[i] = uiBlendColors(dst->context->source[i],
+                                             src->context->source[i],
+                                             amount / 2 + 0x80);
     }
 }
 INCLUDE_RODATA(const s32, "game/code_002BD5C8", D_0042B028);
