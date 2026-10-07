@@ -6,6 +6,7 @@
 #include "btl_state.h"
 #include "btl_ui.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "btl_action.h"
 #include "scr.h"
 #include "dat_state.h"
@@ -1579,7 +1580,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     state = (BattleInitState *)btlRuntime;
     if (state->commandRestrictFlags & 0x8000) {
         state->commandRestrictFlags &= ~0x8000;
-        sdfSceneProjectionParameters.farZ = 65536.0f;
+        sdfSceneProjectionParameters.camera.farZ = 65536.0f;
         btlBossDebugPrintf(D_00414F98);
     }
 
