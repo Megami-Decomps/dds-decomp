@@ -5570,7 +5570,7 @@
 0x002B3390	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
 0x002B3588	effCreateInitializedObject	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B35C8	effCloneEffectPayloadFromOwner	inferred	Copies a payload read from owner record into a reference-backed work and initializes it. [names_reviewed5.tsv]
-0x002B3608	effReleaseTargetSlots	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B3608	effDestroyCopiedEffectPayload	inferred	releases the five retained path targets and world nodes before freeing the copied payload allocation
 0x002B3AC0	effApplyOverlaySpecs	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002B3BB8	effReportResourceStatus	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B3C20	effApplyBattleStateTint	inferred	Medium: passes the selected battle state's stored vectors to the same immediate transition callee used for RGB tint, gated by any bit of 0x06000000. [names_qp9.tsv]

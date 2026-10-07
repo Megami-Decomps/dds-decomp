@@ -5200,6 +5200,7 @@
 0x002F69F0	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
 0x002F6BE8	effCreateRelocatedEffectPayload	inferred	Copies effect payload, relocates its packed transfer data and initializes its work. [names_reviewed5.tsv]
 0x002F6C30	effCloneEffectPayloadFromOwner	inferred	Copies a payload read from owner record into a reference-backed work and initializes it. [names_reviewed5.tsv]
+0x002F6C70	effDestroyCopiedEffectPayload	inferred	releases the five retained path targets and world nodes before freeing the copied payload allocation
 0x002F7128	effApplySelectedActorEffects	inferred	confidence=high; src/dds2/game/code_002DE248.c:func_002F7128; Collects selected model actors and applies eligible indexed effects with a unit scale, respecting hold/actor flags and looping. [names_qp9.tsv]
 0x002F72D8	effApplyBattleStateTint	inferred	Medium: passes the selected battle state's stored vectors to the same immediate transition callee used for RGB tint, gated by both bits of 0x06000000. [names_qp9.tsv]
 0x002F7320	effStartTintTransitionFromColors	inferred	At frame 0 unpacks two packed RGB words from the effect record into float triples (/255) and starts a tint transition over the given duration [names_M80_EffLarge.tsv]
