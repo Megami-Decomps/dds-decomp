@@ -294,8 +294,8 @@ void *src;
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effBossTrailSetColor(u8 *work, s32 value) {
-    *(s32 *)(work + 0xA0) = value;
+void effBossTrailSetColor(EffBossWork *work, s32 value) {
+    work->color = value;
 }
 
 /* Copy the beam vector and create its model and auxiliary parameter works. */
@@ -586,7 +586,7 @@ void func_00185BA8(void *work) {
     effBossSetPosition(work);
 }
 
-void effBossApplyGroupTint(u8 *work, s32 value) {
+void effBossApplyGroupTint(EffBossWork *work, s32 value) {
     effBossTrailSetColor(work, value);
 }
 
