@@ -650,7 +650,34 @@ void dds3ForEachEntry(void) {
     } while (updateIndex < 2);
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", ptyMergeStockSkills);
+extern u16 D_0032AEF0[16][4];
+extern void scrClearFlags(DatPartyRecord *unit);
+extern s32 scrSetFlag(DatPartyRecord *unit, u16 skill);
+extern void scrSetSecondaryScriptFlag(DatPartyRecord *unit, u16 skill);
+
+void ptyMergeStockSkills(DatPartyRecord *unit) {
+    u16 unitId = unit->unitId;
+    DatPartyRecord *stock = &datGameState->templates[unitId];
+    u16 occupied = stock->flags & 1;
+    u32 i;
+    u16 skill;
+
+    if (occupied != 0) {
+        for (i = 0; i < 77; i++) {
+            unit->skillSnapshotWords[i] |= stock->skillSnapshotWords[i];
+        }
+        unit->profileId = stock->profileId;
+    }
+    scrClearFlags(unit);
+    for (i = 0; i < 4; i++) {
+        u32 value = D_0032AEF0[unitId][i];
+        skill = value;
+        if (value != 0) {
+            scrSetFlag(unit, skill);
+            scrSetSecondaryScriptFlag(unit, skill);
+        }
+    }
+}
 
 /* Visit occupied roster slots for native per-entry processing. */
 void dds3ForEachFlagged(void) {
