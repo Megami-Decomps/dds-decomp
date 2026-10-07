@@ -34,7 +34,10 @@ typedef struct BattleLinkedEffectState {
     u32 value;
     u16 timer;
     u8 active, phase;
-    u32 effect;
+    union {
+        u32 effect;
+        f32 height; /* Actor vertical motion in code_00227288. */
+    };
     f32 speed;
 } BattleLinkedEffectState;
 #endif
