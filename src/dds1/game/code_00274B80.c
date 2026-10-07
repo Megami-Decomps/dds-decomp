@@ -152,7 +152,7 @@ typedef struct StaffMenuWork {
     s32 staffImage;           /* 0x14 */
     u8 pad18[4];
     s32 staffExit;            /* 0x1C */
-    s32 resourceList;         /* 0x20 */
+    MenuPanelHandles *resourceList; /* 0x20 */
     s32 selectedList;         /* 0x24 */
     s32 activeMark;           /* 0x28 */
     u8 pad2C[4];
@@ -627,7 +627,7 @@ s32 mnuStaffReleasePanelScene(s32 unused) {
         mnuFreeProfilePanelWork(work->extraResource);
         work->extraResource = 0;
     }
-    mnuReleaseResourceList((MenuPanelHandles *)menu->resourceList);
+    mnuReleaseResourceList(menu->resourceList);
     effResolveAndReleaseResource(work->resource);
     mnuStoreScrollPanelSelectionAndGridPosition(work->display, work->resource, 0, 0);
     return 1;
