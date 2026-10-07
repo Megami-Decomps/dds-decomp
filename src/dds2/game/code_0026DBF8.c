@@ -139,7 +139,7 @@ extern s32 mnuDrawMantraGauge();
 extern u32 mnuInitMantraGaugeData();
 extern void mnuReleaseMantraGaugeData();
 extern s32 mnuUpdateMantraRecordPanelFade();
-extern void func_00274FF8();
+extern s32 func_00274FF8();
 extern u32 mnuCreateTypeOneRecord(void);
 extern void mnuReleaseMantraRecordPanelData();
 extern u32 mnuMantraSpriteSlots[12];
@@ -178,13 +178,13 @@ typedef struct MantraPanelAnimation {
 /* Full allocation used by both the record-panel controls and its fade update. */
 typedef struct MantraRecordPanelState {
     u16 state;
-    u16 flags;
+    s16 flags;
     u16 elapsed;
     u16 cycle;
     f32 scale;
     s32 delay;
-    u32 unk10;
-    u8 pad14[4];
+    s32 shown;
+    s32 step;
 } MantraRecordPanelState;
 
 typedef struct MantraDisplayNode {
@@ -2140,7 +2140,7 @@ u32 mnuCreateTypeOneRecord(void) {
     memset(record, 0, sizeof(MantraRecordPanelState));
     record->state = 1;
     record->flags = 0;
-    record->unk10 = datGameState->header.currency;
+    record->shown = datGameState->header.currency;
     return (u32)record;
 }
 
@@ -2193,7 +2193,48 @@ s32 mnuUpdateMantraRecordPanelFade(s32 unused, MantraDrawItem *item) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274FF8);
+extern void mnuDrawMantraCounterTweenB(u32, u32, u32, u32, MantraCountStateB *, u32);
+
+s32 func_00274FF8(u32 pool, MantraDrawItem *item) {
+    MantraRecordPanelState *record = (MantraRecordPanelState *)item->data;
+    s32 remaining = 15 - record->delay;
+    s32 scale = (s32)(record->scale * 128.0f);
+    f32 fade;
+    f32 returnFade;
+    f32 scaleFade;
+    f32 radians;
+
+    if (remaining < 10) {
+        fade = (f32)remaining / 10.0f;
+    } else {
+        fade = 1.0f;
+    }
+    radians = fade * 1.5707963f;
+    fade = sdfSinPoly(radians);
+
+    remaining = 15 - record->delay;
+    if (remaining < 10) {
+        returnFade = (f32)remaining / 10.0f;
+    } else {
+        returnFade = (f32)(15 - remaining) / 5.0f;
+    }
+
+    switch (record->flags) {
+    case 0:
+        scaleFade = 1.0f - fade;
+        mnuDrawMantraCounterTweenB(0, (s32)(scaleFade * -10.0f), 0, scale,
+                                   (MantraCountStateB *)record, 0x53);
+        mnuDrawMantraSprite(0, 0, 0, (s32)((f32)scale * scaleFade), 0x66, 0, 0x53);
+        break;
+    case 1:
+        mnuDrawMantraCounterTweenB(0, (s32)(fade * -10.0f), 0, scale,
+                                   (MantraCountStateB *)record, 0x53);
+        mnuDrawMantraSprite(0, 0, 0, (s32)((f32)scale * fade), 0x66, 0, 0x53);
+        mnuDrawMantraSprite(0, 0, 0, (s32)((f32)scale * returnFade), 0x67, 0, 0x53);
+        break;
+    }
+    return 0;
+}
 
 void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountStateB *state, u32 drawArg) {
     char text[16];
