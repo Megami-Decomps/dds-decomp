@@ -6,6 +6,7 @@
 
 extern void effObjFreeInner(EffWorldNode *node);
 extern void dds3DestroyObjectBase(ObjBase *base);
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 extern void sdfReleaseChipBlock(void *block);
 extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
@@ -168,8 +169,8 @@ EffWorldNode *dds3CreateCameraObjectWithVectors(s32 key, f32 fieldOfView, void *
     return obj;
 }
 
-void dds3ReleaseCameraWorldNode(void) {
-    dds3RemoveWorldObjectNode();
+void dds3ReleaseCameraWorldNode(EffWorldNode *node) {
+    dds3RemoveWorldObjectNode(node);
 }
 
 /* Load the owned look-at matrix into vf28-vf31. */
