@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "mnu.h"
+#include "mnu_list.h"
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
@@ -18,23 +19,16 @@ typedef struct MenuTitleState {
     u8 pad18[4];
     s32 sequenceTimer; /* 0x1C */
     u8 pad20[4];
-    s32 overlayHandle; /* 0x24 */
+    struct MenuList *selectionList; /* 0x24 */
     s32 phase;         /* 0x28 */
-    u8 pad2C[0xE0];
+    u8 pad2C[0xD4];
+    u8 movie[0xC];     /* 0x100 */
     u32 movieDrawActive; /* 0x10C */
     u32 drawAlpha;       /* 0x110 */
     u32 movieFrame;      /* 0x114 */
 } MenuTitleState;
 
-/* Selection-list record shared with the sprite-menu routines. */
-typedef struct SpriteMenuList {
-    u8 pad00[0x1C];
-    u32 *selected;
-    u8 pad20[0xC];
-    void (*callback)(void);
-} SpriteMenuList;
-
-extern s32 mnuMovieMenuState;
+extern MenuTitleState *mnuMovieMenuState;
 
 extern u16 mnuMovieTaskState;
 
@@ -112,7 +106,7 @@ void func_002A55B8(s32 mode, s32 frame) {
             }
             alpha = (s32)(factor * 128.0f);
             mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
-            if (i == *((SpriteMenuList *)((MenuTitleState *)mnuMovieMenuState)->overlayHandle)->selected) {
+            if (i == ((MenuTitleState *)mnuMovieMenuState)->selectionList->cursor->index) {
                 mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
             }
         }
@@ -130,7 +124,7 @@ void func_002A55B8(s32 mode, s32 frame) {
             }
             alpha = (s32)(factor * 128.0f);
             mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
-            if (i == *((SpriteMenuList *)((MenuTitleState *)mnuMovieMenuState)->overlayHandle)->selected) {
+            if (i == ((MenuTitleState *)mnuMovieMenuState)->selectionList->cursor->index) {
                 mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
             }
         }
@@ -143,7 +137,7 @@ void func_002A55B8(s32 mode, s32 frame) {
         alpha = (s32)(factor * 128.0f);
         for (i = 0; i < 3; i++) {
             mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
-            if (i == *((SpriteMenuList *)((MenuTitleState *)mnuMovieMenuState)->overlayHandle)->selected) {
+            if (i == ((MenuTitleState *)mnuMovieMenuState)->selectionList->cursor->index) {
                 mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
             }
         }
@@ -180,11 +174,11 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
                 opening->phase = 1;
                 opening->selectedPage = 0;
             }
-            func_002A50E8(mnuMovieMenuState + 0x100, 0, 1);
+            func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 1);
             return 0;
         }
         sndSetSequenceVolumePan(8, 127, 63);
-        func_002A50E8(mnuMovieMenuState + 0x100, 0, 0);
+        func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 0);
         return 1;
     case 1:
         if (state->selectedPage < 90) {
@@ -194,7 +188,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             sndSetSequenceVolumePan(8, 127, 63);
-            func_002A50E8(mnuMovieMenuState + 0x100, 0, 0);
+            func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 0);
             return 1;
         }
         state = (MenuTitleState *)mnuMovieMenuState;
@@ -216,14 +210,14 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
 }
 
 void mnuUpdateTitlePageByMode(void) {
-    s32 *title = (s32 *)mnuMovieMenuState;
+    MenuTitleState *title = mnuMovieMenuState;
 
-    switch (title[0x28 / 4]) {
+    switch (title->phase) {
     case 0:
-        func_002A5260(0, title[0x14 / 4]);
+        func_002A5260(0, title->selectedPage);
         return;
     case 1:
-        func_002A5260(1, title[0x14 / 4]);
+        func_002A5260(1, title->selectedPage);
         break;
     case 2:
         break;
@@ -251,35 +245,35 @@ void mnuDrawTitleSceneForPhase(void) {
     case 1:
         func_002A5260(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
         func_002A55B8(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8(mnuMovieMenuState + 0x100, 1, 1);
+        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 0:
         func_002A55B8(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8(mnuMovieMenuState + 0x100, 1, 1);
+        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 2:
-        mnuCallInitWide(0, 0, 0, ((MenuTitleState *)mnuMovieMenuState)->overlayHandle, 0x53);
+        mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)mnuMovieMenuState)->selectionList, 0x53);
         return;
     case 3:
     case 4:
         func_002A55B8(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8(mnuMovieMenuState + 0x100, 1, 0);
+        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 0);
         break;
     }
 }
 
 void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1) {
-    u32 work;
+    MenuTitleState *work;
 
     mnuRequestIndexedMovieResource();
     work = mnuMovieMenuState;
     if (mnuMovieMenuState != 0) {
         ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 1;
         if (arg1 == 0) {
-            ((MenuTitleState *)work)->drawAlpha = 0x80;
+            work->drawAlpha = 0x80;
         }
         else {
-            ((MenuTitleState *)work)->drawAlpha = 0;
+            work->drawAlpha = 0;
         }
         ((MenuTitleState *)mnuMovieMenuState)->movieFrame = 0;
     }
