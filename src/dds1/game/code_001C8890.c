@@ -5806,9 +5806,84 @@ u8 *btlCreateStiffenDamageShakeTask(u8 *owner, f32 value) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D9C28);
+typedef struct BtlPositionEffectArgs {
+    BtlUnit *unit;
+    s32 tick;
+    f32 amount;
+    f32 velocity;
+} BtlPositionEffectArgs;
 
-extern void func_001D9C28();
+u32 func_001D9C28(BtlPositionEffectArgs *task) {
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = task->unit;
+    s32 flags;
+    s32 approved;
+    s32 parameter;
+    f32 amplitude;
+    f32 offset;
+    f32 velocity;
+    f32 delta;
+    f32 position[4];
+
+    if (!(unit->flags & 2)) {
+        return 1;
+    }
+    flags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
+    if ((unit->flags & 0x200) || (flags & 0x200)) {
+        approved = 1;
+        if (runtime->allowPositionEffect != NULL) {
+            approved = runtime->allowPositionEffect(unit);
+        }
+        if (approved) {
+            parameter = 13;
+            if (runtime->chooseMotion != NULL) {
+                parameter = runtime->chooseMotion(unit, 13, 0);
+            }
+            if (parameter != -1) {
+                btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
+                return 1;
+            }
+        }
+    }
+    amplitude = unit->unkBC * unit->scale * 0.8f;
+    if (amplitude > 100.0f) {
+        amplitude = 100.0f;
+    }
+    if (task->tick == 0) {
+        task->amount = 0.0f;
+        task->velocity = 0.3f;
+    }
+    velocity = task->velocity;
+    if (velocity >= 0.0f) {
+        offset = amplitude * task->amount;
+        task->velocity = velocity + 0.02f;
+        delta = (1.0f - task->amount) * velocity;
+        task->amount += delta;
+        if (task->amount >= 0.99f) {
+            task->velocity = -0.17999998f;
+        }
+    } else {
+        offset = amplitude * task->amount;
+        task->velocity = velocity - 0.01f;
+        delta = task->amount * -velocity;
+        task->amount -= delta;
+        if (task->amount <= 0.01f) {
+            func_001D6300((u8 *)task->unit, position);
+            position[2] += task->unit->zOffset;
+            effObjSetInnerFirstVec(task->unit->effectObject, position);
+            return 1;
+        }
+    }
+    func_001D6300((u8 *)task->unit, position);
+    position[0] += offset;
+    position[2] += task->unit->zOffset;
+    effObjSetInnerFirstVec(task->unit->effectObject, position);
+    task->tick++;
+    return 0;
+}
+
+
+extern u32 func_001D9C28(BtlPositionEffectArgs *);
 
 u8 *func_001D9E48(u8 *arg0) {
     u8 *task = btlAllocTask(0x10);
