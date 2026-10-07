@@ -809,23 +809,6 @@ s32 btlAllActiveUnitsReady(void) {
     return 1;
 }
 
-typedef struct BattleAdjustmentEntry {
-    s8 value;
-    u8 pad_01[5];
-} BattleAdjustmentEntry;
-
-typedef struct BattleAdjustmentGroup {
-    u8 pad_00[0x24];
-    BattleAdjustmentEntry entries[14];
-    u8 pad_78[4];
-} BattleAdjustmentGroup;
-
-typedef struct BattleAdjustmentRecord {
-    BattleAdjustmentGroup groups[4];
-    u8 pad_1F0[0x1C];
-} BattleAdjustmentRecord;
-
-extern BattleAdjustmentRecord *D_003BAA3C;
 
 
 f32 func_001A4598(void) {
@@ -1994,7 +1977,50 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResul
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8640);
+const char D_003A1C88[] = "btl:escape=%d%%[ratio=%.2f]\n";
+
+extern s32 evtRunContext(s32, u8 *, s32, s32, s32);
+
+s32 func_001A8640(s32 actor) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *enemy;
+    s32 noEligibleEnemy;
+    s32 chance;
+    f32 ratio;
+
+    if (datBattleSceneRecords[battle->battleMode].unk00 != 0) {
+        return 0;
+    }
+    if (datBattleSceneRecords[battle->battleMode].flags & 0x20) {
+        return 1;
+    }
+    noEligibleEnemy = 1;
+    for (enemy = battle->units; enemy != NULL; enemy = enemy->next) {
+        if ((enemy->flags & 1) != 0) {
+            if ((enemy->flags & 0x400) != 0) {
+                if ((enemy->partyRecord.status & 0x2A0F) == 0) {
+                    noEligibleEnemy = 0;
+                    break;
+                }
+            }
+        }
+    }
+    if (noEligibleEnemy) {
+        return 1;
+    }
+    actor += 0x120;
+    chance = evtRunContext(0x14, (u8 *)actor, 0, 0, 0);
+    ratio = 1.0f;
+    if (btlCheckSpecialAbility(actor, 0x230)) {
+        ratio = datAbilityParameters[0x230 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    chance = chance * ratio;
+    if (chance > 95) {
+        chance = 95;
+    }
+    btlBossDebugPrintf(D_003A1C88, chance, ratio);
+    return btlRollAiBucket() < chance;
+}
 
 
 extern u8 *datEnemyAiRecords;
@@ -4642,7 +4668,43 @@ void btlReleaseTrackedTaskResource(void) {
     btlSetTrackedTaskHandle(8, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B83D8);
+extern void func_001B8838(u8 *, s8);
+extern void btlUpdateActorSlotStates(u8 *, s8);
+extern void func_001B8BB0(BtlTask *, BattleActorPanelWork *, s32);
+
+void func_001B83D8(BtlTask *task, s8 mode, s8 value) {
+    s32 count = 0;
+    u8 slot = 0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = battle->units;
+    KwlnTask *panelTask;
+    BattleActorPanelWork *panel;
+
+    for (; actor != NULL; actor = actor->next) {
+        if (btlHasRequiredActorStatusBits(actor)) {
+            slot = actor->lookupId;
+            if (task->unit->identity == actor->identity) {
+                break;
+            }
+            count++;
+        }
+    }
+    if (count < 3) {
+        panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
+        if (panelTask != NULL) {
+            panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
+            func_001B8838((u8 *)panel, mode);
+            btlUpdateActorSlotStates((u8 *)panel, 0);
+            panel->activeEntries[slot].presentationState = 2;
+            panel->activeEntries[slot].presentationValue = value;
+            if (mode == 0) {
+                func_001B8BB0(task, panel, 0);
+            } else if (mode == 2) {
+                func_001B8BB0(task, panel, 1);
+            }
+        }
+    }
+}
 
 typedef struct BtlSlotRow {
     u8 pad_00[0x10];

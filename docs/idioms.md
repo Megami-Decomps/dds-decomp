@@ -1201,6 +1201,17 @@ Use the shared record for party scans and command-power snapshots, and the
 shared game-state inventory, battle-flag bank and 40-byte scene records
 rather than local byte-offset views.
 
+DDS1's 280-byte scene-stream selector at `0x001F3278` reads the same
+complete `BattleAdjustmentRecord` used by encounter rolls and stat
+adjustment. Its `u16 streamSelection` is at `+4`, while the four
+`0x7C`-byte groups begin at `+0x1C` and each contain twenty six-byte
+entries. Keep this owner in `dat_state.h`; the old stat consumer's
+fourteen-entry, rebased local view was not the actual record boundary.
+`BtlState.unk24A` is the existing byte selecting fallback stream 2 when
+the scene record has no sound override. Selection 5 cycles through the
+five-ID table using the unsigned counter modulo 5, then increments it.
+The three migrated units gate clean at 83/0, 272/0 and 570/0.
+
 DDS2's `ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot)` returns an
 `s32` sum of the item's base value and saved stat bonus. Its menu consumer
 `mnuApplyPackedGroupValues` now passes a word-sized item ID and keeps the
