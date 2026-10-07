@@ -1,50 +1,45 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "evt_world.h"
+#include "kwln.h"
 
 extern void sdfReleaseResourceAllocation(void *);
 extern void *sdfResourceRetainAddress(void *);
 extern void *sdfReadNamedResource(const char *, void **, s32);
 extern s32 bfFindScriptIndexByName(void *, const char *);
-extern void *kwlnTaskGetTaskByName(const char *);
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 extern s32 scrCreateTaskForProcessId(s32, void *, s32);
-extern void evtReleaseSceneResource(Scene *);
-
-/* Resource ownership and resolved address stored in the scene object. */
-typedef struct {
-    u8 pad0[0x18];
-    void *resourceHandle;
-    void *resourceAddress;
-} SceneObjectResourceState;
+extern void evtReleaseSceneResource(EffWorldNode *worldNode);
 
 /* Release field resources before clearing the scene object's state word.
  * The scene resource handle/address are released separately. */
-void dds3ClearSceneObjectState(Scene *scene) {
-    SceneObject *sceneObject;
+void dds3ClearSceneObjectState(EffWorldNode *worldNode) {
+    EvtWorldTable *worldData;
 
-    sceneObject = scene->object;
+    worldData = (EvtWorldTable *)worldNode->data;
     fldReleaseFieldResources();
-    sceneObject->state = 0;
+    worldData->indexedHandle = 0;
 }
 
-s32 evtLoadSceneResourceFrom(Scene *scene, const char *resourceName) {
-    SceneObjectResourceState *object;
+s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) {
+    EvtWorldTable *worldData;
     void *resourceHandle;
     void *resourceAddress;
 
-    object = (SceneObjectResourceState *)scene->object;
+    worldData = (EvtWorldTable *)worldNode->data;
     if (resourceName == NULL) {
         return 0;
     }
-    if (object->resourceHandle != NULL) {
-        evtReleaseSceneResource(scene);
+    if (worldData->unk18 != 0) {
+        evtReleaseSceneResource(worldNode);
     }
     resourceHandle = sdfReadNamedResource(resourceName, &resourceAddress, 0);
     if (resourceAddress == NULL) {
         return 0;
     }
-    object->resourceHandle = resourceHandle;
-    object->resourceAddress = resourceAddress;
+    worldData->unk18 = (u32)resourceHandle;
+    worldData->unk1C = (u32)resourceAddress;
     return 1;
 }
 
@@ -52,21 +47,21 @@ s32 evtLoadSceneResourceFrom(Scene *scene, const char *resourceName) {
  * attachment, 0 otherwise. NULL preserves the current resource. A non-NULL
  * handle releases the old resource first, so failure does not restore it;
  * a NULL resolved address fails attachment without undoing the retain. */
-s32 evtRetainSceneResource(Scene *scene, void *resourceHandle) {
+s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
     s32 result = 0;
     void *resourceAddress;
-    SceneObjectResourceState *sceneObject = (SceneObjectResourceState *)scene->object;
+    EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (resourceHandle == NULL) {
         return result;
     }
-    if (sceneObject->resourceHandle != NULL) {
-        evtReleaseSceneResource(scene);
+    if (worldData->unk18 != 0) {
+        evtReleaseSceneResource(worldNode);
     }
     resourceAddress = sdfResourceRetainAddress(resourceHandle);
     if (resourceAddress != NULL) {
-        sceneObject->resourceHandle = resourceHandle;
-        sceneObject->resourceAddress = resourceAddress;
+        worldData->unk18 = (u32)resourceHandle;
+        worldData->unk1C = (u32)resourceAddress;
         return 1;
     }
     return result;
@@ -74,14 +69,14 @@ s32 evtRetainSceneResource(Scene *scene, void *resourceHandle) {
 
 /* Release a stored allocation handle when present, then always clear both
  * handle and resolved address. Safe for an already-cleared resource state. */
-void evtReleaseSceneResource(Scene *scene) {
-    SceneObjectResourceState *sceneObject = (SceneObjectResourceState *)scene->object;
+void evtReleaseSceneResource(EffWorldNode *worldNode) {
+    EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
-    if (sceneObject->resourceHandle != NULL) {
-        sdfReleaseResourceAllocation(sceneObject->resourceHandle);
+    if (worldData->unk18 != 0) {
+        sdfReleaseResourceAllocation((void *)worldData->unk18);
     }
-    sceneObject->resourceHandle = NULL;
-    sceneObject->resourceAddress = NULL;
+    worldData->unk18 = 0;
+    worldData->unk1C = 0;
 }
 
 /* Starts the named script task on the scene object's resource; stays asm:
@@ -92,7 +87,7 @@ INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtStartSceneResourceTask);
  * unusedContext is not read. The nested early return retains the matched
  * jal/epilogue rather than turning the destruction into a sibling call. */
 void evtDestroyNamedTask(void *unusedContext, const char *taskName) {
-    void *task;
+    KwlnTask *task;
 
     if (taskName != NULL) {
         task = kwlnTaskGetTaskByName(taskName);

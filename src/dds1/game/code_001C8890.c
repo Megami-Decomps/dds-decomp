@@ -9359,11 +9359,9 @@ void btlTickFieldSwayAndTint(void) {
 }
 
 
-struct WorldTransformOwner;
-struct WorldUnitOwner;
 extern WorldTransformSetup D_003D74A0;
-extern void dds3LoadWorldTransformSetup(struct WorldTransformOwner *, WorldTransformSetup *);
-extern void evtBeginUnitValueColorTransition(struct WorldUnitOwner *, s32);
+extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
+extern void evtBeginUnitValueColorTransition(EffWorldNode *, s32);
 
 void func_001EFD58(f32 *position, f32 *scale, s32 value) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -9382,8 +9380,8 @@ void func_001EFD58(f32 *position, f32 *scale, s32 value) {
     D_003D74A0.transform.rotation[1] = 0.0f;
     D_003D74A0.transform.rotation[2] = 0.0f;
     D_003D74A0.transform.rotation[3] = 0.0f;
-    dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_003D74A0);
-    evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->listener, value);
+    dds3LoadWorldTransformSetup((EffWorldNode *)listener, &D_003D74A0);
+    evtBeginUnitValueColorTransition((EffWorldNode *)work->listener, value);
 }
 
 extern SdfFlagListParams D_0035F5F8;
@@ -9703,8 +9701,8 @@ s32 func_001F06E0(SceneLightRestoreArgs *args) {
         D_003D74A0.transform.rotation[1] = 0.0f;
         D_003D74A0.transform.rotation[2] = 0.0f;
         D_003D74A0.transform.rotation[3] = 0.0f;
-        dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_003D74A0);
-        evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->listener, args->value);
+        dds3LoadWorldTransformSetup((EffWorldNode *)listener, &D_003D74A0);
+        evtBeginUnitValueColorTransition((EffWorldNode *)work->listener, args->value);
         PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);
         PCP_COPY_VECTOR_F32(work->ambientColor, work->baselineAmbientColor);
         PCP_COPY_VECTOR_F32(work->lightDirection, work->baselineLightDirection);

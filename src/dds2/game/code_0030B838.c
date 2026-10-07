@@ -328,7 +328,7 @@ typedef struct EffectObject EffectObject;
 
 extern void *dds3GetWorldSecondaryObject(void);
 extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 type, const u8 *name);
-extern void evtSetObjectTransitionWork(EffectObject *object, u32 value);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Fixed-width names identify the corresponding local-map model chain. */
 void func_0030C250(s32 index, s32 value) {
@@ -349,7 +349,7 @@ void func_0030C250(s32 index, s32 value) {
         node = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6,
                                                   (const u8 *)names[modelIndex]);
         if (node != NULL) {
-            evtSetObjectTransitionWork((EffectObject *)node, value);
+            dds3SetObjectPayloadWord8(node, value);
         }
     }
 }

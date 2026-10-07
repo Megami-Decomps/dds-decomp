@@ -7,6 +7,33 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "dds3obj.h"
+
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuatMultiplyVU(void);
+extern u32 dds3AdvanceWorldCounter(void);
+extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
+extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
+extern EffWorldNode *dds3GetWorldSecondaryObject(void);
+extern void dds3SetWorldPlayerObject(EffWorldNode *world, EffWorldNode *node);
+extern void func_00112058(EffWorldNode *node, s32 kind, s32 resource);
+extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
+extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
+extern void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector);
+extern void sdfSetTextFloatPairOverride(void *param, f32 first, f32 second);
+extern void func_00136718(void);
+extern void func_001526B8(void);
+extern void func_00153FA0(void);
+extern EffWorldNode *D_00435F1C;
+extern MdlCtx *D_00435F20;
+
+extern void func_001542D8(void);
+extern void func_001523F0(void);
+extern void func_001525F0(void);
+extern void func_00152C88(void);
+extern void func_00153068(void);
+extern s32 func_001515E0(f32 x, f32 z, s16 *gridX, s16 *gridY);
+
 
 typedef struct EffNode EffNode;
 typedef struct EffNodeDescriptor EffNodeDescriptor;
@@ -57,7 +84,8 @@ typedef struct FldAreaWork {
     s16 unk12A; /* 0x12A */
     u8 pad12C[0xC];
     s32 unk138;
-    u8 pad13C[8];
+    u8 pad13C[4];
+    s32 targetGuideActive; /* 0x140: selects the per-frame guide update path. */
     s32 unk144;           /* 0x144: location-panel fade countdown. */
     u8 pad148[4];
     f32 x;                /* 0x14C */
@@ -3225,7 +3253,8 @@ typedef struct FieldTargetGuideState {
     s32 unk54;
     u8 pad58[0xC];
     s32 unk64;
-    u8 pad68[4];
+    s16 previousGridX;
+    s16 previousGridY;
     s32 unk6C;
     s32 cycleIndex;
 } FieldTargetGuideState;
@@ -3594,7 +3623,29 @@ s32 fldReportCampVolumeError(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00153410);
+void func_00153410(void) {
+    if (fldTargetGuideState.disabled != 1) {
+        if (FLD_WORK->targetGuideActive == 0 && fldTestSceneControlFlags(0x40) == 0) {
+            if (fldTargetGuideState.unk64 == 14) {
+                func_00153068();
+                return;
+            }
+            if (fldGetSceneReadyOrPendingState() != 0) {
+                func_0035B6E0(D_00413F78);
+                return;
+            }
+        } else {
+            func_001542D8();
+            func_001523F0();
+            func_001525F0();
+            func_00152C88();
+            func_00153068();
+            func_001515E0(FLD_WORK->x, FLD_WORK->z, &D_00438EF8.x, &D_00438EF8.y);
+            fldTargetGuideState.previousGridX = fldTargetGuideState.gridX;
+            fldTargetGuideState.previousGridY = fldTargetGuideState.gridY;
+        }
+    }
+}
 
 s32 fldIsTargetWithinInteractionRange(void) {
     f32 distance;
@@ -3663,11 +3714,44 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00153D60);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153FA0);
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414020);
+void func_001540E8(void) {
+    f32 position[4] __attribute__((aligned(16))) = {0, 0, 0, 1.0f};
+    f32 rotation[4] __attribute__((aligned(16))) = {0, 0, 0, 1.0f};
+    f32 axis[4] __attribute__((aligned(16))) = {0, 1.0f, 0, 1.0f};
+    f32 scale[4] __attribute__((aligned(16))) = {1.2f, 1.2f, 1.2f, 1.0f};
+    ObjectTransform *inner;
+    EffWorldNode *object;
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414030);
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001540E8);
+    VU0_LOAD_VF(vf10, axis);
+    effMiscAxisAngleToQuaternionVU(3.14159265f);
+    VU0_LOAD_VF(vf11, rotation);
+    effMiscQuatMultiplyVU();
+    /* The SDK store is followed by opaque consumers, with no scalar readback. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+    D_00435F1C = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
+    dds3SetWorldNodeValue(D_00435F1C, (u32)"OIKAKE_UNIT");
+    dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), D_00435F1C);
+    func_00112058(D_00435F1C, 1, 0x103);
+    effObjSetInnerFloat(D_00435F1C, 180.0f);
+    dds3SetObjectFlags(D_00435F1C, 0x400);
+    position[0] = 800.0f;
+    position[1] = 0.0f;
+    position[2] = 800.0f;
+    object = D_00435F1C;
+    inner = object->inner;
+    PCP_COPY_VECTOR_F32(inner->position, position);
+    PCP_COPY_VECTOR_F32(inner->smoothedPosition, position);
+    PCP_COPY_VECTOR_F32(inner->rotation, rotation);
+    effObjSetInnerFirstVec(object, position);
+    effObjSetInnerSecondVec(D_00435F1C, (u128 *)rotation);
+    effObjSetInnerThirdVec(D_00435F1C, (u128 *)scale);
+    D_00435F20 = (MdlCtx *)dds3GetObjectBaseResourceHandle(D_00435F1C);
+    mdlAddEntryFlagged(D_00435F20, 0, 0x11);
+    sdfSetTextFloatPairOverride(D_00435F20->inner, 15.0f, 0.0f);
+    func_00136718();
+    func_001526B8();
+    func_00153FA0();
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001542D8);
 

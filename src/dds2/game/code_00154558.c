@@ -331,7 +331,7 @@ extern s32 fldGetPlayerSceneState(void);
 
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
-extern void dds3TransformCameraVectorsByInnerRotation(s32, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *, f32 *, f32 *);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
@@ -691,7 +691,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (object == NULL) {
             return 1;
         }
-        dds3TransformCameraVectorsByInnerRotation((s32)object, pos, rot);
+        dds3TransformCameraVectorsByInnerRotation(object, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_0038BAD0[0] = pos[0];
         D_0038BAD0[1] = pos[1];
@@ -838,7 +838,7 @@ typedef struct FldWorldItem {
 
 extern u32 dds3ReadIndexedWorldObjectWord(void *object);
 
-extern void evtSetObjectTransitionWork(FldWorldItem *, s32);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;
@@ -876,13 +876,13 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
-                        evtSetObjectTransitionWork(item, 1);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 1);
                         break;
                     case 1:
-                        evtSetObjectTransitionWork(item, 5);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 5);
                         break;
                     case 2:
-                        evtSetObjectTransitionWork(item, 7);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 7);
                         break;
                     }
                 }
@@ -936,13 +936,13 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
-                        evtSetObjectTransitionWork(item, 2);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 2);
                         break;
                     case 1:
-                        evtSetObjectTransitionWork(item, 6);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 6);
                         break;
                     case 2:
-                        evtSetObjectTransitionWork(item, 8);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 8);
                         break;
                     }
                 }

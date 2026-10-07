@@ -33,7 +33,7 @@ EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
 
 extern s32 dds3GetWorldSlotValue();
 extern u32 dds3ResetObjectValueCursor();
-extern s32 dds3SeekWorldNode();
+extern s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
 extern void dds3GrowWorldValueChain();
 extern u32 dds3WriteIndexedWorldObjectWord();
 
@@ -41,7 +41,7 @@ void dds3EnsureWorldNodeInSlot(s32 object, u8 *node) {
     s32 slot = dds3GetWorldSlotValue(object, func_00111388(node[0xF]));
 
     dds3ResetObjectValueCursor(slot);
-    if (dds3SeekWorldNode(slot, node) != 1) {
+    if (dds3SeekWorldNode((WorldValueIndices *)slot, (u32)node) != 1) {
         dds3GrowWorldValueChain(slot, 1);
         dds3WriteIndexedWorldObjectWord(slot, node);
     }

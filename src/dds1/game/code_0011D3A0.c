@@ -6,6 +6,7 @@
 #include "fpu.h"
 #include "fld.h"
 #include "evt_world.h"
+#include "dds3obj.h"
 #include "dat_state.h"
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
@@ -42,11 +43,12 @@ extern s32 D_003BABF0;
 extern u32 D_003BABD0;
 
 extern EffWorldNode *dds3GetWorldSecondaryObject(void);
-extern s64 dds3GetWorldValueCount(u64);
-extern u64 dds3ReadIndexedWorldObjectWord(u64);
-extern s64 dds3AdvanceObjectValueCursor(u64);
-extern u64 dds3CopyWorldListToValueChain(u64, u64);
-extern s64 evtGetObjectTransitionWork(u64);
+extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
+extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
+extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
+extern void *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 
 extern s32 sdfAllocPacketAligned(s32 size);
@@ -740,9 +742,9 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011EA10);
 
-extern u32 dds3ResetObjectValueCursor(u64);
-extern s32 dds3TestObjectFlags(u64, s32);
-extern void dds3DestroyWorldIndexNode(u64);
+extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
+extern u8 dds3TestObjectFlags(void *object, s32 mask);
+extern void dds3DestroyWorldIndexNode(NodeB *node);
 extern void fldSelectDisplayBuffer(s32);
 extern void fldSubmitBackgroundResourcePacket(void);
 extern void fldSubmitBackgroundDescriptorPacket(void);
@@ -756,20 +758,20 @@ enum {
  * The whole value chain is visited and destroyed before the scene override. */
 void fldSubmitVisibleWorldBackground(void) {
     s32 hasEligibleBackground = 0;
-    u64 objectChain;
-    u64 worldObject;
+    NodeB *objectChain;
+    EffWorldNode *worldObject;
 
-    objectChain = dds3CopyWorldListToValueChain((u64)dds3GetWorldSecondaryObject(), 5);
+    objectChain = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 5);
     if (objectChain != 0) {
-        if (dds3ResetObjectValueCursor(objectChain) != 0) {
+        if (dds3ResetObjectValueCursor((WorldValueIndices *)objectChain) != 0) {
             do {
-                worldObject = dds3ReadIndexedWorldObjectWord(objectChain);
+                worldObject = (EffWorldNode *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)objectChain);
                 if (dds3TestObjectFlags(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
                     if (dds3TestObjectFlags(worldObject, FIELD_BACKGROUND_EXCLUDED_OBJECT_FLAG) == 0) {
                         hasEligibleBackground = 1;
                     }
                 }
-            } while (dds3AdvanceObjectValueCursor(objectChain) != 0);
+            } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)objectChain) != 0);
         }
         dds3DestroyWorldIndexNode(objectChain);
     }
@@ -1360,32 +1362,31 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     return fsqrtf(dx * dx + dy * dy + dz * dz);
 }
 
-/* For objects in transition state 4, set state 3 or clear it to 0.
- * status honestly covers the count, transition state and cursor result. */
+/* For kind-6 objects in mode 4, set mode 3 or clear it to 0.
+ * status covers the count, payload mode word and cursor result. */
 void fldToggleWorldNodeState(s64 clearMode) {
-    u64 valueChain;
-    s64 status;
-    u64 worldObject;
+    NodeB *valueChain;
+    u32 status;
+    EffWorldNode *worldObject;
 
-    valueChain = (u64)dds3GetWorldSecondaryObject();
-    valueChain = dds3CopyWorldListToValueChain(valueChain, 6);
-    status = dds3GetWorldValueCount(valueChain);
+    valueChain = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
+    status = dds3GetWorldValueCount((WorldValueIndices *)valueChain);
     if (status == 0) {
         return;
     }
-    dds3ResetObjectValueCursor(valueChain);
+    dds3ResetObjectValueCursor((WorldValueIndices *)valueChain);
     do {
-        worldObject = dds3ReadIndexedWorldObjectWord(valueChain);
-        status = evtGetObjectTransitionWork(worldObject);
+        worldObject = (EffWorldNode *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)valueChain);
+        status = dds3GetObjectPayloadWord8(worldObject);
         if (status == 4) {
             if (clearMode == 0) {
-                evtSetObjectTransitionWork(worldObject, 3);
+                dds3SetObjectPayloadWord8(worldObject, 3);
             }
             else {
-                evtSetObjectTransitionWork(worldObject, 0);
+                dds3SetObjectPayloadWord8(worldObject, 0);
             }
         }
-        status = dds3AdvanceObjectValueCursor(valueChain);
+        status = dds3AdvanceObjectValueCursor((WorldValueIndices *)valueChain);
     } while (status != 0);
     dds3DestroyWorldIndexNode(valueChain);
 }
@@ -1821,7 +1822,7 @@ extern FieldVec4 D_0039FC80;
 extern FieldVec4 D_0039FC90;
 extern char D_003BABC0[];
 extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, FieldVec4 *);
-extern void dds3SetCameraVector(u32, FieldVec4 *);
+extern void dds3SetCameraVector(struct EffWorldNode *camera, void *vector);
 extern void effObjSetInnerFloat(u32, f32);
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
@@ -1838,7 +1839,7 @@ void fldCreateSecondaryWorldCamera(void) {
     cameraObject = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), &targetPosition, &worldEye, &localUp);
     *cameraObjectSlot = cameraObject;
     dds3SetWorldNodeValue((struct EffWorldNode *)cameraObject, (u32)D_003BABC0);
-    dds3SetCameraVector(*cameraObjectSlot, &worldEye);
+    dds3SetCameraVector((struct EffWorldNode *)*cameraObjectSlot, &worldEye);
     effObjSetInnerFloat(*cameraObjectSlot, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }

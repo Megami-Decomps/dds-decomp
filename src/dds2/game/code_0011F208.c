@@ -6,6 +6,7 @@
 
 #include "fld.h"
 #include "evt_world.h"
+#include "dds3obj.h"
 #include "kwln.h"
 #include "dat_state.h"
 
@@ -35,15 +36,16 @@ extern s32 fldDeferredCommand;
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern s64 dds3GetWorldValueCount(u64);
+extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
-extern u64 dds3ReadIndexedWorldObjectWord(u64);
+extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
-extern s64 dds3AdvanceObjectValueCursor(u64);
+extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern u64 dds3CopyWorldListToValueChain(u64, u64);
+extern void *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
-extern s64 evtGetObjectTransitionWork(u64);
+extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
@@ -230,11 +232,11 @@ extern void fldSetCameraMoveMode(s32 mode);
 
 extern void fldClearCameraMoveMode(void);
 
-extern u32 dds3ResetObjectValueCursor(u64);
+extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
-extern s32 dds3TestObjectFlags(u64, s32);
+extern u8 dds3TestObjectFlags(void *object, s32 mask);
 
-extern void dds3DestroyWorldIndexNode(u64);
+extern void dds3DestroyWorldIndexNode(NodeB *node);
 
 extern void fldSubmitBackgroundResourcePacket(void);
 
@@ -913,20 +915,20 @@ enum {
  * The whole value chain is visited and destroyed before the scene override. */
 void fldSubmitVisibleWorldBackground(void) {
     s32 hasEligibleBackground = 0;
-    u64 objectChain;
-    u64 worldObject;
+    NodeB *objectChain;
+    EffWorldNode *worldObject;
 
     objectChain = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 5);
     if (objectChain != 0) {
-        if (dds3ResetObjectValueCursor(objectChain) != 0) {
+        if (dds3ResetObjectValueCursor((WorldValueIndices *)objectChain) != 0) {
             do {
-                worldObject = dds3ReadIndexedWorldObjectWord(objectChain);
+                worldObject = (EffWorldNode *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)objectChain);
                 if (dds3TestObjectFlags(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
                     if (dds3TestObjectFlags(worldObject, FIELD_BACKGROUND_EXCLUDED_OBJECT_FLAG) == 0) {
                         hasEligibleBackground = 1;
                     }
                 }
-            } while (dds3AdvanceObjectValueCursor(objectChain) != 0);
+            } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)objectChain) != 0);
         }
         dds3DestroyWorldIndexNode(objectChain);
     }
@@ -1560,32 +1562,32 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     return fsqrtf(dx * dx + dy * dy + dz * dz);
 }
 
-/* For objects in transition state 4, set state 3 or clear it to 0.
- * status honestly covers the count, transition state and cursor result. */
+/* For kind-6 objects in mode 4, set mode 3 or clear it to 0.
+ * status covers the count, payload mode word and cursor result. */
 void fldToggleWorldNodeState(s64 clearMode) {
-    u64 valueChain;
-    s64 status;
-    u64 worldObject;
+    NodeB *valueChain;
+    u32 status;
+    EffWorldNode *worldObject;
 
     valueChain = dds3GetWorldSecondaryObject();
     valueChain = dds3CopyWorldListToValueChain(valueChain, 6);
-    status = dds3GetWorldValueCount(valueChain);
+    status = dds3GetWorldValueCount((WorldValueIndices *)valueChain);
     if (status == 0) {
         return;
     }
-    dds3ResetObjectValueCursor(valueChain);
+    dds3ResetObjectValueCursor((WorldValueIndices *)valueChain);
     do {
-        worldObject = dds3ReadIndexedWorldObjectWord(valueChain);
-        status = evtGetObjectTransitionWork(worldObject);
+        worldObject = (EffWorldNode *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)valueChain);
+        status = dds3GetObjectPayloadWord8(worldObject);
         if (status == 4) {
             if (clearMode == 0) {
-                evtSetObjectTransitionWork(worldObject, 3);
+                dds3SetObjectPayloadWord8(worldObject, 3);
             }
             else {
-                evtSetObjectTransitionWork(worldObject, 0);
+                dds3SetObjectPayloadWord8(worldObject, 0);
             }
         }
-        status = dds3AdvanceObjectValueCursor(valueChain);
+        status = dds3AdvanceObjectValueCursor((WorldValueIndices *)valueChain);
     } while (status != 0);
     dds3DestroyWorldIndexNode(valueChain);
 }
@@ -1978,7 +1980,7 @@ extern FieldVec4 D_00412F10;
 extern FieldVec4 D_00412F20;
 extern char D_00435F58[];
 extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, FieldVec4 *);
-extern void dds3SetCameraVector(u32, FieldVec4 *);
+extern void dds3SetCameraVector(struct EffWorldNode *camera, void *vector);
 extern void effObjSetInnerFloat(u32, f32);
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
@@ -1995,7 +1997,7 @@ void fldCreateSecondaryWorldCamera(void) {
     cameraObject = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), &targetPosition, &worldEye, &localUp);
     *cameraObjectSlot = cameraObject;
     dds3SetWorldNodeValue((struct EffWorldNode *)cameraObject, (u32)D_00435F58);
-    dds3SetCameraVector(*cameraObjectSlot, &worldEye);
+    dds3SetCameraVector((struct EffWorldNode *)*cameraObjectSlot, &worldEye);
     effObjSetInnerFloat(*cameraObjectSlot, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
@@ -2255,15 +2257,6 @@ u8 fldGetCampSceneControlMode(void) {
     return fldTestSceneControlFlags(0x20) != 0 ? 0 : 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001273E8);
-
-u8 fldGetSceneReadyOrPendingState(void) {
-    if (D_00435F80 > 0) {
-        return 2;
-    }
-    return fldGetSceneReadyFlag() != 0;
-}
-
 extern void *dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(EffWorldNode *, s8);
 extern void kwlnFadeStartIn(s32);
@@ -2273,6 +2266,80 @@ extern void func_00133F08(void);
 extern u8 fldHasPendingSceneFlags(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00123B88(s32, s32, f32, f32, f32);
+extern void kwlnFadeStartOut(s32 duration);
+extern void mnuCreateCampTasks(void);
+extern void evtSetSolarOverlayFullyVisible(void);
+extern void fldApplySkyLightSetToPlayerVU(void);
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
+extern void fldClearSceneLifecycleFlags(u32 mask);
+extern u8 fldTestSceneLifecycleFlags(u32 mask);
+extern s16 D_00389898[];
+
+/* Complete a delayed camp handoff or advance the player scene transition. */
+s32 func_001273E8(void) {
+    FldAreaWork *scene;
+    s32 control;
+
+    if (D_00435F7C > 0) {
+        D_00435F7C--;
+        if (D_00435F7C == 0) {
+            dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+            kwlnFadeStartIn(4);
+            mnuCreateCampTasks();
+        }
+        return 0;
+    }
+    if (fldTestSceneControlFlags(0x20) == 0 && fldGetCampSceneControlMode() == 3) {
+        fldClearSceneLifecycleFlags(1);
+        fldPreparePlayerSceneCameraTarget();
+        evtSetSolarOverlayFullyVisible();
+        /* Retail retains both branches of this shared scene-state gate. */
+        if (D_00389898[0] != 0) {
+            fldApplySkyLightSetToPlayerVU();
+        } else {
+            fldApplySkyLightSetToPlayerVU();
+        }
+        dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+        fldSetSceneControlFlags(0x20);
+        kwlnFadeStartOut(0);
+        kwlnFadeStartIn(8);
+        return 0;
+    }
+    control = fldTestSceneControlFlags(0x20);
+    if (control == 0) {
+        return control;
+    }
+    control = fldTestSceneControlFlags(0x40);
+    if (control == 0) {
+        return control;
+    }
+    if (fldTestSceneLifecycleFlags(1) == 1 || fldHasPendingSceneFlags() != 0 || fldGetSceneReadyFlag() != 0) {
+        return 0;
+    }
+    scene = &fldAreaState;
+    if (scene->sceneMode == 0 && (s8)D_0037F530[0] < 0) {
+        sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
+        fldSetSceneLifecycleFlags(1);
+        fldResetPlayerSceneObjectState();
+        func_00133F08();
+        evtSetSolarOverlayFullyTransparent();
+        scene->sceneMode = 4;
+        scene->sceneState = 5;
+        fldClearSceneControlFlags(0x20);
+        kwlnFadeInStart(0, 0, 0, 4);
+        D_00435F7C = 5;
+        fldSetCameraNodeModeWithTen();
+    }
+    return 0;
+}
+
+u8 fldGetSceneReadyOrPendingState(void) {
+    if (D_00435F80 > 0) {
+        return 2;
+    }
+    return fldGetSceneReadyFlag() != 0;
+}
+
 
 /* Gate next-floor input on camp/readiness flags, then start the native scene
  * transition or its delayed fade path. All return paths retain zero. */

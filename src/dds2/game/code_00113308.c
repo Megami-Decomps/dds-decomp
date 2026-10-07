@@ -2,10 +2,13 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
+#include "eff.h"
+#include "btl_sound.h"
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
+extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 
 extern u32 D_00435DA0;
 
@@ -46,7 +49,7 @@ extern void effObjInnerCreate();
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void dds3SetObjectFlags(EffectObject *, s32);
+extern void dds3SetObjectFlags(void *, s32);
 
 u32 dds3GetEffectDataHandle(EffectObject *object) {
     return (u32)object->data->handle;
@@ -396,7 +399,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     if (target == NULL) {
         return 1;
     }
-    config = (MdlCtx *)func_00113230((EffWorldNode *)obj)->resourceHandle;
+    config = (MdlCtx *)dds3GetEffectObjectModelHolder((EffWorldNode *)obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
         level = target->height;
     } else {
@@ -425,15 +428,15 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     return 1;
 }
 
-extern void evtEndUnitValueTransitionForObject(void *, s32);
-extern void evtSetUnitValueTransitionForObject(void *, void *, s32);
+extern void evtEndUnitValueTransitionForObject(EffWorldNode *, s32);
+extern void evtSetUnitValueTransitionForObject(void *, EffWorldNode *, s32);
 
 void evtEndObjectValueTransition(EffectObject *object) {
     EffectObjectData *data;
 
     data = object->data;
     if (data->activeId != -1) {
-        evtEndUnitValueTransitionForObject(object, 10);
+        evtEndUnitValueTransitionForObject((EffWorldNode *)object, 10);
         data->activeId = 0xffffffff;
     }
 }
@@ -483,7 +486,7 @@ void func_00113D18(EffectObject *object) {
             if (!(otherData->flags & 4) &&
                 func_0010FBD0(object->source, other->source) == 0 &&
                 data->activeId == other->valueId) {
-                evtEndUnitValueTransitionForObject(object, 10);
+                evtEndUnitValueTransitionForObject((EffWorldNode *)object, 10);
                 data->activeId = -1;
             }
         } while (dds3AdvanceObjectValueCursor(list) != 0);
@@ -509,7 +512,7 @@ destroy_list:
         return;
 
 attach_transition:
-        evtSetUnitValueTransitionForObject(other, object, 10);
+        evtSetUnitValueTransitionForObject(other, (EffWorldNode *)object, 10);
         data->activeId = other->valueId;
         dds3DestroyWorldIndexNode(list);
     }
@@ -570,12 +573,17 @@ u32 func_00114008(u64 id) {
     return object->data->word04;
 }
 
-void evtSetObjectTransitionWork(EffectObject *object, u32 value) {
-    object->data->transitionWork = (EffFollowRec *)value;
+/* Payload word 8 is interpreted by object kind, not always as a pointer. */
+void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value) {
+    u32 *payload = object->data;
+
+    payload[2] = value;
 }
 
-u32 evtGetObjectTransitionWork(EffectObject *object) {
-    return (u32)object->data->transitionWork;
+u32 dds3GetObjectPayloadWord8(EffWorldNode *object) {
+    u32 *payload = object->data;
+
+    return payload[2];
 }
 
 void func_00114068(u32 value) {
@@ -680,19 +688,102 @@ void dds3RefreshStoredVec3(WorldObj *obj) {
     dst->vec[2] = src[0x12];
 }
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00114640);
+/* Kind-7 object data is allocated and cleared at 0x50 bytes by
+ * evtInitializeEffectObjectData; the final 0x20 bytes are opaque here. */
+typedef struct EffectDependencyState {
+    ObjBase *objectHandle;
+    u32 flags;
+    s32 state;
+    void *handle;
+    u32 word10;
+    u32 word14;
+    void *word18;
+    u8 pad1C[4];
+    void *owner;
+    u16 entryId;
+    u16 ownerKind;
+    void *vector;
+    void *node;
+    u8 pad30[0x20];
+} EffectDependencyState;
+typedef char EffectDependencyStateSizeCheck[sizeof(EffectDependencyState) == 0x50 ? 1 : -1];
 
-s32 evtInitializeEffectObjectData(EffectObject *obj) {
-    EffectObjectData *data;
+struct EffEventWork;
+extern void effDestroyNode(struct EffNode *);
+extern void billDispatchByKind(BillObj *);
+extern void effEventReleaseNode(struct EffEventWork *);
+extern void func_00197D50(SoundMixer *);
+extern void sdfReleaseChipBlock(void *);
+
+/* Release each dependency according to the active state, clearing ownership
+ * before releasing the next dependency. State 4 only borrows its handle. */
+void func_00114640(void *state) {
+    EffectDependencyState *data = state;
+
+    switch (data->state) {
+    case 1:
+        if (data->handle != NULL) {
+            effDestroyNode(data->handle);
+            data->handle = NULL;
+        }
+        break;
+    case 2:
+    case 3:
+        if (data->handle != NULL) {
+            billDispatchByKind(data->handle);
+            data->handle = NULL;
+        }
+        break;
+    case 4:
+        if (data->handle != NULL) {
+            data->handle = NULL;
+        }
+        break;
+    case 5:
+        if (data->node != NULL) {
+            effEventReleaseNode(data->node);
+            data->node = NULL;
+        }
+        if (data->handle != NULL) {
+            func_00197D50(data->handle);
+            data->handle = NULL;
+        }
+        if (data->vector != NULL) {
+            sdfReleaseChipBlock(data->vector);
+            data->vector = NULL;
+        }
+        break;
+    case 7:
+    case 8:
+        if (data->handle != NULL) {
+            effDestroyNode(data->handle);
+            data->handle = NULL;
+        }
+        if (data->node != NULL) {
+            sdfReleaseChipBlock(data->node);
+            data->node = NULL;
+        }
+        if (data->vector != NULL) {
+            sdfReleaseChipBlock(data->vector);
+            data->vector = NULL;
+        }
+        break;
+    }
+    data->state = 0;
+    data->handle = NULL;
+}
+
+
+s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
+    EffectDependencyState *data;
 
     effObjInnerCreate(obj);
     obj->data = sdfAllocSizeClassBlock(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
-    data->handle = dds3CreateSlotResourceState(obj);
+    data->objectHandle = dds3CreateSlotResourceState(obj);
     dds3SetObjectFlags(obj, 0x60);
     return 1;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00113308", D_00435DA0);
-

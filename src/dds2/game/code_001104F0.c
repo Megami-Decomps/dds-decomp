@@ -134,8 +134,8 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
     return 0;
 }
 
-extern void dds3ClearSceneObjectState();
-extern void evtReleaseSceneResource();
+extern void dds3ClearSceneObjectState(EffWorldNode *object);
+extern void evtReleaseSceneResource(EffWorldNode *object);
 extern void sdfReleaseResourceAllocation(struct SdfMemBlock *resource);
 void dds3RemoveWorldObjectNode(EffWorldNode *node);
 

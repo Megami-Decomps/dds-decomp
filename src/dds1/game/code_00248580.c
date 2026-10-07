@@ -1371,7 +1371,45 @@ void mnuApplyGridPanelHostSetting(u32 kind, GridPanelHost *host) {
     effConfigureWithDefaultSetting(host->grid, 0x1A, host->settings[slot], 0, value, flags);
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024B168);
+extern const MenuGridPositions D_003AF700;
+
+/* Slide the threshold list out while closing, or in after its grid entry completes. */
+void func_0024B168(s32 close, MenuTerminalWork *work) {
+    MenuGridPositions positions = D_003AF700;
+    s32 offset = 0;
+    s32 direction = 0;
+    s32 scale;
+
+    itfDrawGridWithResolvedSlot(positions.entries[0].firstValue,
+        positions.entries[0].secondValue, 0, 0x80, (s32)work->batch, 0x1A, 0x53);
+    scale = ((u32)work->batch->records[0x1A].unk14 << 8) /
+        work->batch->records[0x1A].unk84;
+    if (close != 0) {
+        if (work->list->scale > 0) {
+            work->list->scale -= 0x40;
+        }
+        if (work->list->scale < 0) {
+            work->list->scale = 0;
+        }
+        direction = -1;
+    } else if (scale == 0x100) {
+        if (work->list->scale < 0x100) {
+            work->list->scale += 0x40;
+        }
+        if (work->list->scale > 0x100) {
+            work->list->scale = 0x100;
+        }
+        direction = 1;
+    }
+    scale = work->list->scale;
+    if (direction < 0) {
+        offset = (0x100 - scale) / 2;
+    }
+    if (direction > 0) {
+        offset = -((0x100 - scale) / 2);
+    }
+    mnuCallInitWide(0, offset + 0x4F0, 0, (s32)work->list, 0x53);
+}
 
 typedef struct {
     u8 pad00[0xC4];
@@ -1727,7 +1765,7 @@ s32 evtBSetupDispatchSyncC(s32 request) {
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-extern void func_0024B168(void);
+extern void func_0024B168(s32, MenuTerminalWork *);
 
 u32 evtEnterThresholdSelectionList(void) {
     s32 context = kwlnTaskGetUserValue();

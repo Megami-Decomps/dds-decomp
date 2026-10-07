@@ -1493,7 +1493,59 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     sdfAdvanceBufferedPlayback(state);
     return 1;
 }
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC5E0);
+extern u32 D_003BD614;
+
+/* Advance playback cadence, refill active feeds and retry a deferred IPU input. */
+void func_002EC5E0(s32 cadence) {
+    SdfStreamFrameNode *node = (SdfStreamFrameNode *)D_003BDAA4;
+    s32 elapsed;
+    s32 interruptsEnabled;
+
+    if (node != NULL && node->pad12 != 0) {
+        sdfSoundStartIpuInputDma(node);
+    }
+    node = sdfSoundNodeHead;
+    while (node != NULL) {
+        if (node->unk13 != 0) {
+            node->unk13--;
+        }
+        elapsed = node->pad17;
+        /* The playback provider views the same 0x8C stream allocation. */
+        switch (node->firstStop) {
+        case 1:
+            sdfSubmitBufferedPlayback((MidiPlaybackState *)node);
+            node->firstStop = 2;
+            node->pad17 = node->playbackMode;
+            break;
+        case 2:
+            if (D_003BD614 != 1) {
+                elapsed += node->playbackMode;
+                if (elapsed >= cadence) {
+                    if (sdfSubmitBufferedPlayback((MidiPlaybackState *)node) != 0) {
+                        elapsed -= cadence;
+                    }
+                }
+                node->pad17 = elapsed;
+            }
+            break;
+        }
+        if (node->active == 1) {
+            sdfStreamInitializeFromHeader(node);
+            if (D_003BD614 != 1) {
+                if (node->filledSlots < SDF_STREAM_RING_SLOTS) {
+                    interruptsEnabled = func_00312C08();
+                    sndFillStreamFeedRing(node);
+                    if (interruptsEnabled != 0) {
+                        EIntr();
+                    }
+                }
+                node->read(node, node->source, 2, NULL, 0);
+            }
+        }
+        node = node->next;
+    }
+    func_002EC230(0);
+}
 
 void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, s32 format, s32 source, s32 sourceSize, s32 value) {
     sdfStreamOpen(node, format, source, sourceSize);
