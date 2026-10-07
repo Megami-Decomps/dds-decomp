@@ -6829,20 +6829,20 @@ extern void func_002B3420(u32);
 
 
 
-u32 effCreateInitializedObject(u32 type, u32 parameter, u32 index) {
-    u32 *effect = (u32 *)effAllocateCopiedEffectPayload(type, parameter, index);
-    u32 child = *effect;
+EffCopiedPayload *effCreateInitializedObject(u32 type, u32 parameter, u32 index) {
+    EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, parameter, index);
+    u32 child = *(u32 *)effect;
     fldRelocatePackedTransferChunk(child, child + 8);
     func_002B3420((u32)effect);
-    return (u32)effect;
+    return effect;
 }
 
-u32 effCloneEffectPayloadFromOwner(s32 work) {
-    u32 effect;
+EffCopiedPayload *effCloneEffectPayloadFromOwner(s32 work) {
+    EffCopiedPayload *effect;
 
-    effect = (u32)effAllocateCopiedEffectPayload(((EffCopiedPayloadWork *)work)->parameter, ((EffCopiedPayloadWork *)work)->payload->body,
-                                                    ((EffCopiedPayloadWork *)work)->payload->size);
-    func_002B3420(effect);
+    effect = effAllocateCopiedEffectPayload(((EffCopiedPayloadWork *)work)->parameter, ((EffCopiedPayloadWork *)work)->payload->body,
+                                             ((EffCopiedPayloadWork *)work)->payload->size);
+    func_002B3420((u32)effect);
     return effect;
 }
 
