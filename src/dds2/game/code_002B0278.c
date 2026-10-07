@@ -94,7 +94,7 @@ extern char D_003E75C4[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, s32, s32);
 
-extern s32 func_002B86E8(u32);
+extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void func_002AAE80();
 
@@ -2428,10 +2428,10 @@ MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing) {
 }
 
 u32 mnuDestroyListState(MenuList *list) {
-    s64 result;
+    MenuListNode *result;
 
     do {
-        result = func_002B86E8((u32)list);
+        result = func_002B86E8(list);
     } while (result != 0);
     sdfReleaseChipBlock(list);
     return 1;

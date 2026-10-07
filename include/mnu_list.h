@@ -26,9 +26,15 @@ struct MenuListNode {
             u32 sortKeySecondary; /* 0x64 */
             u32 sortKeyTertiary;  /* 0x68 */
             u8 pad6C[4];
-            u32 unk70; /* DatPartyRecord address retained by the mantra list. */
         };
         CampWindowParams camp;
+    };
+    /* +0x70: terminal recovery panel at 267050; title at 2674C8.
+     * Mantra lists retain a DatPartyRecord address in the same word. */
+    union {
+        u32 unk70;
+        s32 childPanel;
+        char *title;
     };
 };
 struct MenuList {

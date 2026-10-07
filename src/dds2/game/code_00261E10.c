@@ -46,7 +46,7 @@ extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern void func_00260020();
 extern s32 mnuCampHasEligibleOwnedItems();
-extern void func_002B86E8();
+extern struct MenuListNode *func_002B86E8(struct MenuList *);
 extern s32 D_003CE14C[];
 extern u8 D_003CE620[];
 extern u8 D_003CE400[];
