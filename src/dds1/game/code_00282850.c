@@ -2460,8 +2460,8 @@ s32 btlDestroyStageTask(taskWork)
     return 1;
 }
 
-void func_00288788(void) {
-    btlDestroyStageTask();
+s32 func_00288788(void *request) {
+    return btlDestroyStageTask(request);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2608);
