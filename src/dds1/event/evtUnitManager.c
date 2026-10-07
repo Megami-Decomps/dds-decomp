@@ -83,7 +83,7 @@ extern void sdfSetTextFloatPairOverride(void *, f32, f32);
 extern void sdfClearTextFloatPairOverride(void *);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
-void func_00220910(EvtUnit *unit) {
+void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     f32 identity[4];
     f32 targetDirection[4];
     f32 previousDirection[4];

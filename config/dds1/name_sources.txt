@@ -3651,6 +3651,7 @@
 0x002205D8	evtComputeHorizontalDisplacementVu	inferred	Subtracts vectors in VU0 and resets the vertical component. [names_reviewed11.tsv]
 0x00220600	evtComputePlanarTargetDirectionVu	inferred	Derives a normalized planar target direction from a model quaternion. [names_reviewed10.tsv]
 0x00220830	evtMeasurePathTrajectoryLength	inferred	Samples path at increments of one twentieth; sums distances and restores saved scale. [names_reviewed6.tsv]
+0x00220910	evtAdvanceUnitVisualTransitions	inferred	Advances an event unit's model colour and directional transition state; paired exact DDS2 C twin.
 0x00221890	evtLoadUnitFirstColorVectorVU	inferred	Chooses packed unit color or target/default first vector and loads VU register vf10. [names_reviewed6.tsv]
 0x00221940	evtLoadUnitSecondColorVectorVU	inferred	Chooses second packed color or target/default vector and loads VU register vf10. [names_reviewed6.tsv]
 0x002219F8	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]

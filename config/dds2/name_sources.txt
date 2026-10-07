@@ -3274,6 +3274,7 @@
 0x0023B170	evtComputePlanarTargetDirectionVu	inferred	Derives a normalized planar target direction from a model quaternion. [names_reviewed10.tsv]
 0x0023B2B8	evtUnitStepScaledValue	inferred	twin dds1 0x00220748 [names_M55_VuScalar.tsv]
 0x0023B3A0	evtMeasurePathTrajectoryLength	inferred	Samples path at increments of one twentieth; sums distances and restores saved scale. [names_reviewed6.tsv]
+0x0023B480	evtAdvanceUnitVisualTransitions	inferred	Advances an event unit's model colour and directional transition state; paired exact DDS1 C twin.
 0x0023C400	evtLoadUnitFirstColorVectorVU	inferred	Chooses packed unit color or target/default first vector and loads VU register vf10. [names_reviewed6.tsv]
 0x0023C4B0	evtLoadUnitSecondColorVectorVU	inferred	Chooses second packed color or target/default vector and loads VU register vf10. [names_reviewed6.tsv]
 0x0023C568	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]
