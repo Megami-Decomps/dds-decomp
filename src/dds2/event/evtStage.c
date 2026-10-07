@@ -40,7 +40,7 @@ extern char D_00421578[];
 extern char D_003C8BA0[];
 extern char D_003C8C60[];
 extern char D_003C8C80[];
-extern void *dds3AppendWorldNode(void);
+extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3SetWorldSecondaryObject(void *);
 extern void dds3SetWorldObject(void *);
 extern void dds3SetWorldObjectValue(void *, u32);
@@ -57,7 +57,7 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
 {
     char directory[0x40];
     char resourcePath[0x50];
-    void *worldObject;
+    EffWorldNode *worldObject;
 
     evtDestroySecondaryWorldNode();
     worldObject = dds3AppendWorldNode();
@@ -86,7 +86,7 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32 arg4, s32 arg5)
 {
-    void *worldObject;
+    EffWorldNode *worldObject;
     char directory[0x40];
 
     evtDestroySecondaryWorldNode();

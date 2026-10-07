@@ -81,7 +81,7 @@ void *dds3GetWorldSecondaryObject(void) {
 
 /* Create a kind-1 world node and append it at the tail.
  * Missing active world or failed creation returns NULL without changing the list. */
-void *dds3AppendWorldNode(void) {
+EffWorldNode *dds3AppendWorldNode(void) {
     WorldInfo *worldInfo;
     EffWorldNode *worldNode;
 
