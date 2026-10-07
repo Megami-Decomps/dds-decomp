@@ -76,27 +76,27 @@ void dds3DestroyObjectBase(ObjBase *base) {
     sdfReleaseChipBlock(base);
 }
 
-/* Set mask bits in the resolved base; retain DDS2's unprototyped getter call. */
-void dds3SetObjectFlags(u32 unused, u32 mask) {
+/* Set mask bits in the object's resolved base. */
+void dds3SetObjectFlags(void *object, u32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     base->flags = base->flags | mask;
 }
 
-/* Clear mask bits in the resolved base; retain the existing argument convention. */
-void dds3ClearObjectFlags(u32 unused, u32 mask) {
+/* Clear mask bits in the object's resolved base. */
+void dds3ClearObjectFlags(void *object, u32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     base->flags = base->flags & ~mask;
 }
 
 /* Return whether any requested mask bit is set, not whether all bits are set. */
-u8 dds3TestObjectFlags(u32 unused, u32 mask) {
+u8 dds3TestObjectFlags(void *object, u32 mask) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     return (base->flags & mask) != 0;
 }
 
