@@ -6787,6 +6787,37 @@ void effSyncLinkedActorChildParameter(void) {
     }
 }
 
+/* Header common to the resource-instance constructors and callback dispatchers. */
+typedef struct EffActiveResource {
+    u8 pad_00[0x20];
+    f32 scale;           // 0x20
+    u32 color;           // 0x24
+    u32 frame;           // 0x28
+    union {
+        u32 index;       // 0x2C
+        s32 signedIndex;
+        u16 shortIndex;
+    } kind;
+    u32 resource;        // 0x30
+    u8 pad_34[4];
+    void *payload;       // 0x38
+    u8 pad_3C[4];
+} EffActiveResource;
+typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
+
+/* Entire payload copied for resource kind 2 by effAllocateResourcePayload. */
+typedef struct EffActorTintConfig {
+    u32 duration;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 color;
+    u8 actorSelection;
+    u8 pad11[3];
+} EffActorTintConfig;
+typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 : -1];
+
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F64D8);
 
 s32 effComputeLightDirectionVU(MdlCtx *model, void *target) {
@@ -6923,21 +6954,7 @@ typedef struct EffAnimInfo {
     u16 loop;
 } EffAnimInfo;
 
-/* Header common to the resource-instance constructors and callback dispatchers. */
-typedef struct EffActiveResource {
-    u8 pad_00[0x20];
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    union {
-        u32 index;       // 0x2C
-        s32 signedIndex;
-        u16 shortIndex;
-    } kind;
-    u32 resource;        // 0x30
-    u8 pad_34[4];
-    void *payload;       // 0x38
-} EffActiveResource;
+
 
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, u16, s32, f32);
