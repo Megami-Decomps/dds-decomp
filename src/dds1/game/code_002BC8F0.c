@@ -2,6 +2,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff.h"
+#include "eff_record_bucket.h"
 #include "sdf.h"
 
 extern void effResetSlotWork(u32, u32);
@@ -106,14 +107,7 @@ typedef struct EffStateSource {
     u32 kind; // 0x14
 } EffStateSource;
 
-typedef struct EffectRecordGroup {
-    u32 unk_00;
-    s32 (*step)(BdWork *, BdWork *, EffTimedState *);
-    u32 count;
-    u8 *records;
-} EffectRecordGroup;
-
-extern EffectRecordGroup D_0038FD88[];
+extern EffRecordBucket D_0038FD88[];
 
 
 extern u32 effSharedTextureReferenceCount;
@@ -448,7 +442,7 @@ extern u32 effConvertParamValue(u32 *, void *, void *, void *);
 
 /* Sum the status-storage byte requirements for the selected record category. */
 u32 effSumRecordStatuses(u32 *recordWords) {
-    EffectRecordGroup *group = &D_0038FD88[recordWords[5]];
+    EffRecordBucket *group = &D_0038FD88[recordWords[5]];
     u32 statusBytes = 0;
     u32 recordIndex;
 
@@ -847,7 +841,7 @@ u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
         EffStateSource *source = (EffStateSource *)state->source;
 
         if (source != 0 && source->kind != 0) {
-            EffectRecordGroup *group = &D_0038FD88[source->kind];
+            EffRecordBucket *group = &D_0038FD88[source->kind];
             s32 step = group->step(record, (BdWork *)entry, state);
 
             if (state->delay > 0) {
