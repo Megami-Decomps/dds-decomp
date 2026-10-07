@@ -66,7 +66,37 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AC20);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
+extern void mnuDrawPanelListDefault();
+extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, DatPartyRecord *, MenuPanelGroup *, s32, s32);
+extern void func_002C10F0(s32, s32, s32, DatPartyRecord *, MenuSpriteState *, s32);
+extern s8 evtStageTestUpdate(s32);
+extern char D_00380788[];
+
+void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
+    DatPartyRecord *unit = context->selectedRewardRow->unit;
+    s32 i;
+
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x19, 0x53);
+    itfDrawGridWithResolvedSlot(0x1740, 0x510, 0, 1, context->unitHandle, 0xA, 0x53);
+    context->partyWindow.flags |= 0x200;
+    mnuDrawPanelListDefault(0, 0, 0, &context->partyWindow, 0x53);
+
+    for (i = 0; i < 5; i++) {
+        if (copyOptions == 0) {
+            mnuSetGroupSelection(context->panelHandle, i, context->statGains[i], 0);
+        } else {
+            mnuSetGroupSelection(context->panelHandle, i, context->statGains[i],
+                                 context->statGains[i]);
+        }
+    }
+    mnuApplyPackedGroupValues(context->panelHandle, unit->itemId);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelHandle, 0, 0x53);
+    func_002C10F0(0, 0, 0, unit, context->spriteHandle, 0x53);
+    mnuDrawRemainingSelectionExtent(context);
+    evtStageTestUpdate((s32)D_00380788);
+}
 
 s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
