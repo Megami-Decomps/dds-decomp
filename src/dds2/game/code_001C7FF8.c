@@ -917,9 +917,9 @@ void btlDrawCenteredPanelSegments(s32 width) {
     s32 half = width / 2;
     s32 x = width - half + 0x105;
     func_00306C28(x * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width = width << 4;
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = width << 4;
     func_00306C28((0x100 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width =
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     func_00306C28((0x92 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x15, 0x53);
 }
@@ -1194,8 +1194,8 @@ void func_001CDEC0(s32 bank, s32 index) {
 
 
 void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
-    work->workEntries[index].width = work->workEntries[index].sourceWidth << 4;
-    work->workEntries[index].height = work->workEntries[index].sourceHeight << 3;
+    work->workEntries[index].geometry.bounds[2] = work->workEntries[index].sourceWidth << 4;
+    work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE418);

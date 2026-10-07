@@ -97,12 +97,12 @@ INCLUDE_ASM(const s32, "game/code_0031C940", itfDrawUniformlyScaledIndexedImage)
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CF88);
 
 void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {
-    INDEXED_SPRITE(index)->angleDegrees = angle * 57.29577637f;
+    INDEXED_SPRITE(index)->geometry.angleDegrees = angle * 57.29577637f;
     func_00306CD0((x + D_0040AE28[index][2]) << 4,
                   (y + D_0040AE28[index][3]) << 3,
                   z, (u32)((f32)alpha * 256.0f * 0.0078125f), flags,
                   D_0045C840[D_0040AE28[index][0]], D_0040AE28[index][1], context);
-    INDEXED_SPRITE(index)->angleDegrees = 0.0f;
+    INDEXED_SPRITE(index)->geometry.angleDegrees = 0.0f;
 }
 
 /* Allocate list headers and all instance records in one contiguous work block. */

@@ -2,6 +2,8 @@
 #include "itf.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "sdf_sif_command.h"
+#include "sdf_projection.h"
 
 
 
@@ -89,7 +91,8 @@ typedef struct SndPad {
     s8 next;
     u8 pad28[9];
     s8 unk31;
-    u8 pad32[2];
+    u8 unk32;
+    s8 cancel;
     s8 coarseDown;
     s8 coarseUp;
     s8 unk36;
@@ -923,7 +926,41 @@ void itfPrintTestMessageCallback(void) {
     func_003003F0("********* AAAA ********\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FCC8);
+typedef struct ItfFovPanelWork {
+    u8 pad00[8];
+    f32 degrees;
+    u8 pad0C[4];
+} ItfFovPanelWork;
+
+extern ItfFovPanelWork D_003D73C0;
+extern s32 sdfCreateResetPacketList(void);
+extern s32 func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
+
+s32 func_0019FCC8(void) {
+    SifCommand packet;
+    s32 list;
+    f32 radiansToDegrees = 57.2957795f;
+
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket((SdfListHead *)list,
+                    func_0011D3E8(0x8500, 0x79C0, 0xFEFFFF,
+                                  0xA80, 0x120, 0x60000000, 0x40806020));
+    sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
+    sdfAppendPacket((SdfListHead *)list,
+                    (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
+                        sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
+    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)list);
+    if (D_00324510.cancel < 0) {
+        return -1;
+    }
+    D_003D73C0.degrees = sdfSceneProjectionParameters.camera.fov * radiansToDegrees;
+    if (itfStepFloatWithPad(&D_003D73C0.degrees, 1.0f, 89.0f, 0.1f, 1.0f) != 0) {
+        sdfSceneProjectionParameters.camera.fov = D_003D73C0.degrees * 0.0174532925f;
+    }
+    return 0;
+}
 
 s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
     f32 current = *value;

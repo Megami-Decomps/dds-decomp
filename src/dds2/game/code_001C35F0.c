@@ -120,7 +120,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3850);
 
-void btlResetActorSlotPresentationValue(BtlUnit *object) {
+void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *sceneObject) {
     s32 count = 0;
     u8 slot = 0;
     BtlState *battle = (BtlState *)btlGetRuntime();

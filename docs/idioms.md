@@ -575,7 +575,7 @@ functions use trampolines and are a different case.
   glyph/color and `char *` text contract, rather than old `u64` placeholders.
   DDS2's corresponding helper now follows matched `func_0019F5E8`'s same
   contract. Reusing the existing `BtlResBlock` and `EffectSlotSet` owners also
-  replaces that unit's partial panel views: `resC->workEntries[0x16].width`
+  replaces that unit's partial panel views: `resC->workEntries[0x16].geometry.bounds[2]`
   and `.sourceWidth` are the old inner offsets 0xDCC and 0xE3C.
   Do not assume the DDS1 renderer transfers unchanged: DDS2's three honest
   forms still exceeded its 476-byte body and remain parked, not enabled.
@@ -2260,7 +2260,7 @@ This scene embeds the complete `0x168`-byte `MenuCampEffect` at `+0x210`,
 not just its `0x60`-byte resource prefix: the sixteen spark records and badge
 fade continue through `+0x377`, before `windowResource` at `+0x378`.
 DDS2 `0x0025FD78` draws effect slots 1, 2 and 3 for scene types 0 and 2,
-setting slot 3's primary `BdWork.angleDegrees` to 90 degrees. Types 1 and 3
+setting slot 3's primary `BdWork.geometry.angleDegrees` to 90 degrees. Types 1 and 3
 pass `&scene->campEffect` to `mnuDrawCampIconBackdrop`; resource loading and
 teardown borrow `&scene->campEffect.resources`. The renderer and every live
 caller use `MenuTerminalContext *` and a void return contract.
@@ -2689,7 +2689,7 @@ preserve it, so replacing the switch with a nonzero-mode test is incorrect.
 Reduced mode also clears the hold counter.
 
 The bank's `+0x18` pointer is `EffectSlotSet.workEntries`; the `+0xC4`
-angle write is `workEntries[1].angleDegrees`, not an offset in the bank.
+angle write is `workEntries[1].geometry.angleDegrees`, not an offset in the bank.
 Fade-in adds twelve and clamps to 256; fade-out subtracts seventeen and
 clamps to zero. The two final draws use the scene's owned
 `DspScrollingStripState` records.
@@ -2699,4 +2699,28 @@ terminal statement, reproducing the native sibling tail call. The enclosing
 conditional form was four words shorter. The typed implementation and all
 eight task-address caller conversions pass the normal whole-unit checker:
 `114 match, 0 differ`, with no context or data diagnostics.
+
+## Battle camera state embeds the linked-command payload
+
+The battle singleton's `+0x70` address is passed to the same camera-motion
+helpers as an ordinary `BtlLinkedCommand`. Its active, start and end poses,
+flags, progress and target list therefore belong to one embedded
+`cameraCommand`, not a second camera-only view. The member ends at `+0x1A4`
+in DDS1 and `+0x1C8` in DDS2, preserving the following event fields.
+DDS2 `func_001E9130` additionally loads the command's quaternion at `+0x100`
+and translation at `+0xF0`; the singleton's `+0x6B0` predicate receives
+the entire command before its selected camera handler runs.
+
+## Resource-slot geometry has one contiguous bounds array
+
+`BdWork.geometry` owns four signed bounds (x, y, width, height), four packed
+corner colors, and the rotation angle at the unchanged native `+0x04..+0x24`
+offsets. Grid easing walks the first two bound coordinates and then the
+geometry's actual `cornerColors` member; it does not walk beyond a scalar
+or reach colors through a second record view.
+
+DDS2 `itfGridApplySqrtBoundsAndColorScale` (`0x003075D8`, 312 bytes) and
+`func_00307EF8` (`0x00307EF8`, 296 bytes) match using this grouped owner and
+the mapped record's real `status` pointer. The complete grid unit checks
+`67 match, 0 differ`; the bounds and palette cursors remain natural C.
 

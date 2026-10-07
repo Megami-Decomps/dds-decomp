@@ -27,6 +27,8 @@ typedef struct BattleEffectState {
 typedef struct BtlUnit BtlUnit;
 
 struct EvtUnit;
+struct SoundResourceLink;
+struct EffWorldNode;
 
 /* BtlUnit's status pair at +0x110. Retail touches it two ways: 32-bit flags/stateFlags
  * accesses that type-based aliasing sees as plain words (dds1 func_001C9098 hoists a
@@ -120,7 +122,7 @@ typedef struct BtlUnit {
     s32 selectedEntryIndex; /* 0x2F0: -1 denotes no selected entry. */
     u32 unk2F4;
     s32 resourceNode;
-    s32 resourceLink;
+    struct SoundResourceLink *resourceLink; /* 0x2FC: linked model-resource task. */
     s32 link;
     s32 listNode;
     struct SoundSlotOwner *soundSlotOwner; /* 0x308: shared category/id motion-SE owner. */
@@ -131,7 +133,7 @@ typedef struct BtlUnit {
     u8 firstCountdown; /* 0x318: linked-effect destruction decrements this */
     u8 secondCountdown; /* 0x319 */
     u8 pad31A[2];
-    u32 effectObject; /* 0x31C: supplies the effect's first inner vector */
+    struct EffWorldNode *effectObject; /* 0x31C: actor's world node and transform. */
     struct EvtUnit *ext; /* 0x320: the event manager's complete 0x170-byte work. */
     s32 transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
     struct BtlUnit *mirror; /* 0x328: unit drawn from this unit's transparency packet buffer */

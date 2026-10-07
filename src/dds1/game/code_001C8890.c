@@ -3593,14 +3593,119 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D4E60);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D4E98);
+/* Kind-5 world-node payload attaches the event unit at +8. */
+typedef struct EventUnitData {
+    u8 pad00[8];
+    EvtUnit *unit;
+} EventUnitData;
+
+extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
+extern void *dds3GetWorldObject(void);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
+extern void dds3RemoveWorldObjectNode(EffWorldNode *);
+extern void dds3ClearObjectFlags(void *, s32);
+extern void dds3SetObjectFlags(void *, s32);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
+extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
+extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
+extern void btlMarkTaskReady(SoundResourceLink *);
+extern void btlResetUnitModelProgress(BtlUnit *);
+extern void btlSetUnitPosition(u8 *, void *);
+extern void btlSetUnitRotation(u8 *, void *);
+
+/* vu0 routine: initialize the actor world transform with the SDK unit vector. */
+void func_001D4E98(BtlUnit *unit, u32 kind, u32 id) {
+    BtlUnit *reused = NULL;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    MdlCtx *model;
+    BtlActorStatusRecord *status;
+    EventUnitData *data;
+    s32 key;
+
+    unit->resourceKind = kind;
+    unit->species = id;
+    unit->unkCC = 0;
+    btlInitializeEffectVectorsFromSourceRecords(unit, kind, id);
+    if (battle->findReusableUnit) {
+        reused = battle->findReusableUnit(kind, id);
+        if (reused) {
+            if (reused->resourceKind != kind || reused->species != id) {
+                key = mdlSpawnCameraSlotViewerObject(kind, id);
+                dds3RemoveWorldObjectNode(dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), key, 5));
+            }
+            func_001D4E60(unit, reused);
+        }
+    }
+    if (battle->prepareModelUnit) {
+        battle->prepareModelUnit(unit);
+    }
+    if (reused == NULL) {
+        key = mdlSpawnCameraSlotViewerObject(kind, id);
+        unit->effectObject = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), key, 5);
+        data = unit->effectObject->data;
+        unit->ext = data->unit;
+        model = unit->ext->owner;
+        unit->ext->flags |= 0x200000;
+        VU0_SET_ONES_XYZ(vf10);
+        VU0_SCALAR_OP(unit->effectScale, "vmulx.xyzw vf10, vf10, vf2x");
+        unit->effectObject->inner->flags = (unit->effectObject->inner->flags | 1) & ~2;
+        VU0_STORE_VF(vf10, unit->effectObject->inner->scale);
+        mdlStoreTertiaryVectorVU(model);
+        if (unit->effectScale != 1.0f) {
+            mdlSetAmountOnAllContextResources(model, unit->effectScale);
+        }
+        dds3ClearObjectFlags(unit->effectObject, 0x400);
+        unit->flags |= 8;
+        unit->soundSlotOwner = sndAcquireSlotOwner(kind, id);
+        unit->flags |= 2;
+    }
+    btlSetUnitPosition((u8 *)unit, unit->position);
+    btlSetUnitRotation((u8 *)unit, unit->rotation);
+    unit->updateFlags = 0;
+    unit->effectTimerA = 0;
+    unit->unkEC = -1;
+    unit->effectTimerB = 0;
+    btlRefreshUnitMotionSelection((u8 *)unit);
+    if (unit->effectArgA != 0xB) {
+        btlApplyScaledUnitEffectParameter((u8 *)unit, unit->effectArgA, 1, 1.0f);
+    } else {
+        btlApplyScaledUnitEffectParameter((u8 *)unit, 0xB, 2, 1.0f);
+    }
+    if (unit->resourceLink) {
+        btlMarkTaskReady(unit->resourceLink);
+    }
+    unit->flags |= 0x40000000;
+    if (unit->flags & 0x20) {
+        model = unit->ext->owner;
+        unit->ext->motionState = 0;
+        unit->ext->flags &= ~0xA0;
+        mdlAddEntryPlain(model, 0, 0xB);
+        unit->unkEC = 0xB;
+        sdfMotionSampleAtFrame(model->first, model->first->frameCount);
+        unit->flags = unit->flags & 0x7FFFFFFF & 0xBFFFFFFF;
+    } else if (btlTestActorStatusPredicate(unit)) {
+        unit->ext->motionState = 0;
+        model = unit->ext->owner;
+        unit->ext->flags &= ~0xA0;
+        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, id);
+        mdlAddEntryPlain(model, 0, 1);
+        unit->unkEC = 1;
+        sdfMotionSampleAtFrame(model->first, status->model);
+        btlResetUnitModelProgress(unit);
+        unit->flags = (unit->flags | 0x2000) & 0x7FFFFFFF & 0xBFFFFFFF;
+    }
+    unit->flags |= 0x80004;
+    if (battle->finishModelUnit) {
+        battle->finishModelUnit(unit);
+    }
+}
 
 extern const char D_003A3AD0[];
 
 void btlReleaseActorModelResources(u8 *object) {
     s32 sound;
     s32 load;
-    s32 model;
+    EffWorldNode *model;
     u32 state;
     u32 flags;
     if (object[0xCC] == 0) {
@@ -3615,7 +3720,7 @@ void btlReleaseActorModelResources(u8 *object) {
             *(s32 *)(object + 0x324) = 0;
             btlBossDebugPrintf(D_003A3AD0, object);
         }
-        model = *(s32 *)(object + 0x31C);
+        model = *(EffWorldNode **)(object + 0x31C);
         if (model != 0) {
             dds3RemoveWorldObjectNode(model);
             *(s32 *)(object + 0x31C) = 0;
@@ -4292,9 +4397,9 @@ void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value, f32 scalar) {
     mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xffffff) | 0x80000000, scalar);
 }
 
-extern void effObjFetchInnerFirstVec(u32);
+extern void effObjFetchInnerFirstVec(EffWorldNode *);
 
-extern void effObjFetchInnerSecondVecNorm(u32);
+extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
 
 
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
@@ -4455,8 +4560,6 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
 extern void sdfReleaseDevSlot(s32, s32, s32);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
-extern void dds3ClearObjectFlags(s32, s32);
-extern void dds3SetObjectFlags(s32, s32);
 extern s32 D_00325788[];
 extern SdfPoolNode *D_00359D10[];
 
@@ -4843,7 +4946,6 @@ extern char D_003A3BC8[];
 
 extern char D_003A3BE8[];
 
-extern void func_001D4E98(u8 *, u32, u32);
 
 void btlRequestModelOrReuse(u32 *arguments) {
     u8 *object = (u8 *)arguments[0];
@@ -4853,7 +4955,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         return;
     }
     if (btlHasMatchingModel(effect, model)) {
-        func_001D4E98(object, effect, model);
+        func_001D4E98((BtlUnit *)object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
             evtSetUnitAlphaTransition(*(u32 *)(object + 0x320), 0, 0);
@@ -4879,7 +4981,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
         if (!btlCheckModelAssetByMode(object, effect, model)) {
             return 0;
         }
-        func_001D4E98(object, effect, model);
+        func_001D4E98((BtlUnit *)object, effect, model);
         btlReleaseModelAssetByMode(object, effect, model);
         btlBossDebugPrintf(D_003A3C08, effect, model, object);
     }
@@ -4991,7 +5093,7 @@ u32 func_001D8190(BtlModelChangeArgs *args) {
         btlReleaseActorModelResources((u8 *)unit);
         btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
         btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
-        func_001D4E98((u8 *)unit, resourceKind, resourceId);
+        func_001D4E98(unit, resourceKind, resourceId);
         btlReleaseModelAssetByMode((u32)unit, resourceKind, resourceId);
         if (args->duration == 0) {
             kwlnDrawControlFlags |= 0x2000000;
@@ -5843,26 +5945,28 @@ SoundTask *btlCreateUpdateUnitEffectsTask(void) {
 
 extern void btlCreateUnitTransparency(BtlUnit *);
 
-extern s32 btlCreateActorTransparency(u32 *);
+typedef struct BtlActorTransparencyArgs {
+    BtlUnit *unit;
+} BtlActorTransparencyArgs;
 
-s32 btlCreateActorTransparency(u32 *arguments) {
-    BtlUnit *actor = (BtlUnit *)arguments[0];
+s32 btlCreateActorTransparency(BtlActorTransparencyArgs *arguments) {
+    BtlUnit *actor = arguments->unit;
     if ((actor->flags & 2) == 0) {
         return 0;
     }
     btlCreateUnitTransparency(actor);
-    ((BtlUnit *)arguments[0])->flags |= 0x20000;
+    arguments->unit->flags |= 0x20000;
     return 1;
 }
 
-void *btlCreateActorTransparencyTask(u32 actor) {
+void *btlCreateActorTransparencyTask(BtlUnit *actor) {
     u8 *task = btlAllocTask(4);
     task[0] = 1;
     *(u16 *)(task + 0x20) = 0x25;
     *(void **)(task + 0x4C) = btlCreateActorTransparency;
     task[0x10] = 0;
     *(u32 *)(task + 0x48) = 0;
-    *(u32 *)btlGetTaskArguments(task) = actor;
+    ((BtlActorTransparencyArgs *)btlGetTaskArguments(task))->unit = actor;
     return task;
 }
 
@@ -6568,7 +6672,6 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001DBE68);
 extern f32 D_00359EA0[4], D_00359EB0[4];
 extern f32 D_00359E80[4], D_00359E90[4];
 extern u32 D_003BB660;
-extern void *dds3GetWorldObject(void);
 extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
@@ -6584,7 +6687,7 @@ void func_001DC0E8(void) {
     CameraData *data;
     BtlState *battle = (BtlState *)btlGetRuntime();
 
-    battle->camera.fov = 0.6981317f;
+    battle->cameraCommand.camera.fov = 0.6981317f;
     VU0_LOAD_VF(vf10, D_00359EA0);
     VU0_LOAD_VF(vf11, battle->position);
     VU0_ADD(vf10, vf10, vf11);
@@ -6605,7 +6708,7 @@ void func_001DC0E8(void) {
     dds3SetCameraFieldOfView(camera, 0.6981317f);
     dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
     battle->cameraObject = camera;
-    battle->pendingSoundList = btlAllocateIndexList(13);
+    battle->cameraCommand.targetList = btlAllocateIndexList(13);
     battle->battleFlags |= 0x10;
 }
 
@@ -9870,7 +9973,7 @@ typedef union ActorEffectOwner {
 } ActorEffectOwner;
 
 typedef struct ActorEffectTaskArgs {
-    SoundEffectNode *source;
+    SoundResourceNode *source;
     SoundVoice *effect;
     ActorEffectOwner owner;
     u32 duration;
@@ -9878,14 +9981,14 @@ typedef struct ActorEffectTaskArgs {
 } ActorEffectTaskArgs;
 
 void sndStartEffectTask(ActorEffectTaskArgs *args) {
-    SoundEffectNode *source;
+    SoundResourceNode *source;
     BtlUnit *unit;
 
     args->effect = 0;
     sndCreateSystemEffect((u32 *)args->source);
     source = args->source;
     unit = args->owner.unit;
-    source->referenceCount++;
+    source->unk_04++;
     unit->unk314++;
 }
 
@@ -9901,7 +10004,7 @@ s32 func_001F1470(ActorEffectTaskArgs *args) {
         return 1;
     }
     if (args->effect == 0) {
-        args->effect = func_00160958(args->source->handle, 0, unit, 0);
+        args->effect = func_00160958(args->source->resourceHandle, 0, unit, 0);
         effBattleUpdateSelectedValue((u8 *)args->effect, args->duration);
     }
     if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
@@ -9927,7 +10030,7 @@ s32 func_001F1470(ActorEffectTaskArgs *args) {
 
 
 void sndFinishActorEffectTask(ActorEffectTaskArgs *args) {
-    SoundEffectNode *source;
+    SoundResourceNode *source;
     BtlUnit *unit;
 
     if (args->effect != 0) {
@@ -9935,12 +10038,12 @@ void sndFinishActorEffectTask(ActorEffectTaskArgs *args) {
     }
     source = args->source;
     unit = args->owner.unit;
-    source->referenceCount--;
+    source->unk_04--;
     unit->unk314--;
     sndDeleteSystemEffect((u32 *)source);
 }
 
-BtlRuntimeTask *sndCreateActorEffectTask(SoundEffectNode *source, BtlUnit *owner, u32 duration) {
+BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source, BtlUnit *owner, u32 duration) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(ActorEffectTaskArgs));
     ActorEffectTaskArgs *args;
 

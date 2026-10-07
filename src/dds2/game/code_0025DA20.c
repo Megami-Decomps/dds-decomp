@@ -1190,7 +1190,7 @@ void func_0025FD78(MenuTerminalContext *scene) {
     case 2:
         func_00306CD0(0, 0, 0, 0x100, 0, scene->effectSlots[1], 0, 0x53);
         func_00306CD0(0xE30, 0x610, 0, 0x100, 0, scene->effectSlots[2], 0, 0x53);
-        scene->effectSlots[3]->workEntries[0].angleDegrees = 90.0f;
+        scene->effectSlots[3]->workEntries[0].geometry.angleDegrees = 90.0f;
         func_00306CD0(0x9F0, 0x610, 0, 0x100, 2, scene->effectSlots[3], 0, 0x53);
         return;
     case 1:

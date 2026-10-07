@@ -3078,14 +3078,14 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
     return total;
 }
 
-s32 btlTestActorStatusPredicate(u8 *unit) {
-    s32 (*hook)(u8 *) = *(s32 (**)(u8 *))(btlGetRuntime() + 0x698);
+s32 btlTestActorStatusPredicate(BtlUnit *unit) {
+    s32 (*hook)(BtlUnit *) = *(s32 (**)(BtlUnit *))(btlGetRuntime() + 0x698);
     if (hook != 0) {
         if (hook(unit) != 0) {
             return 1;
         }
     }
-    return (((UiObject *)unit)->statusFlags & 0x2806) != 0;
+    return (unit->partyRecord.status & 0x2806) != 0;
 }
 
 s32 btlComputeStatusPenaltyFifth(UiObject *object) {
@@ -4707,8 +4707,8 @@ void func_001B70B8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
         do {
             if (record->active != 0) {
                 u32 color;
-                btlResourceBlock->resA->workEntries[record->slot].width = record->width;
-                btlResourceBlock->resA->workEntries[record->slot].height = record->height;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[2] = record->width;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[3] = record->height;
                 color = record->alpha | 0x80808000;
                 colors.values[0] = color;
                 colors.values[1] = color;
@@ -4716,8 +4716,8 @@ void func_001B70B8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
                 colors.values[3] = color;
                 func_00306C28(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
                 func_00306C28(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
-                btlResourceBlock->resA->workEntries[record->slot].width = record->restoredWidth << 4;
-                btlResourceBlock->resA->workEntries[record->slot].height = record->restoredHeight << 3;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[2] = record->restoredWidth << 4;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[3] = record->restoredHeight << 3;
             }
             record++;
         } while (--remaining != 0);
@@ -6017,11 +6017,11 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
     colors.values[3] = work->fadeLevels[3] | 0x80808000;
     if (work->verticalShift > 0) {
-        btlResourceBlock->resC->workEntries[0x15].height =
+        btlResourceBlock->resC->workEntries[0x15].geometry.bounds[3] =
             (btlResourceBlock->resC->workEntries[0x15].sourceHeight << 3) - (work->verticalShift << 4);
-        btlResourceBlock->resC->workEntries[0x16].height =
+        btlResourceBlock->resC->workEntries[0x16].geometry.bounds[3] =
             (btlResourceBlock->resC->workEntries[0x16].sourceHeight << 3) - (work->verticalShift << 4);
-        btlResourceBlock->resC->workEntries[0x17].height =
+        btlResourceBlock->resC->workEntries[0x17].geometry.bounds[3] =
             (btlResourceBlock->resC->workEntries[0x17].sourceHeight << 3) - (work->verticalShift << 4);
     }
     func_00306C28(work->initial[1].x << 4, (work->initial[1].y + work->verticalShift) << 3,
@@ -6036,17 +6036,17 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     colors.values[1] = work->fadeLevels[3] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
     colors.values[3] = work->fadeLevels[0] | 0x80808000;
-    btlResourceBlock->resC->workEntries[0x16].width = width << 4;
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = width << 4;
     func_00306C28((0x100 - width / 2) << 4, (work->initial[1].y + work->verticalShift) << 3,
                   0, colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width =
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     if (work->verticalShift > 0) {
-        btlResourceBlock->resC->workEntries[0x15].height =
+        btlResourceBlock->resC->workEntries[0x15].geometry.bounds[3] =
             btlResourceBlock->resC->workEntries[0x15].sourceHeight << 3;
-        btlResourceBlock->resC->workEntries[0x16].height =
+        btlResourceBlock->resC->workEntries[0x16].geometry.bounds[3] =
             btlResourceBlock->resC->workEntries[0x16].sourceHeight << 3;
-        btlResourceBlock->resC->workEntries[0x17].height =
+        btlResourceBlock->resC->workEntries[0x17].geometry.bounds[3] =
             btlResourceBlock->resC->workEntries[0x17].sourceHeight << 3;
     }
     return 0;
@@ -6144,10 +6144,10 @@ s32 btlDrawTimedDialogTask(KwlnTask *task) {
     half = width / 32;
     func_00306C28(((width >> 4) - half + 0x105) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width = (width >> 4) << 4;
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = (width >> 4) << 4;
     func_00306C28((0x100 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width =
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     func_00306C28((0x92 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);

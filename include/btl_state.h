@@ -53,19 +53,8 @@ typedef struct BtlState {
     f32 lightDirection[4];
     f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
     f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
-    BtlCamState camera; /* 0x70: active camera pose; fov stored at 001DC110. */
-    u8 pad098[8];
-    BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
-    u8 pad0C8[0x68];
-    BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
-    u8 pad158[8];
-    u32 runtimeFlags; /* 0x160 */
-    u8 pad164[0x1C];
-    s32 debugCameraProgress; /* 0x180 */
-    u8 pad184[4];
-    BtlIndexList *pendingSoundList; /* 0x188: allocated at 001DC1F0, stored at 001DC1FC. */
-    u8 pad18C[0x14];
-    f32 debugCameraParameter; /* 0x1A0 */
+    /* The same command payload is passed to the action-camera helpers. */
+    BtlLinkedCommand cameraCommand; /* 0x70..0x1A3 */
     u8 pad1A4[0x1C];
     s16 eventTaskId; /* 0x1C0: -1 when no event task is available */
     u8 pad1C2[2];
@@ -226,22 +215,8 @@ typedef struct BtlState {
     f32 lightDirection[4]; /* 0x40: current scene light direction. */
     f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
     f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
-    BtlCamState camera; /* 0x70: active camera pose; fov stored at 001E9438. */
-    u8 pad098[8];
-    BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
-    u8 pad0C8[0x68];
-    BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
-    u8 pad158[0x28];
-    u32 runtimeFlags;
-    void *activeSlot;
-    u8 pad188[0xC];
-    u32 activeUnitId;
-    u8 pad198[8];
-    s32 debugCameraProgress; /* 0x1A0 */
-    u8 pad1A4[4];
-    BtlIndexList *pendingSoundList;
-    u8 pad1AC[0x18];
-    f32 debugCameraParameter; /* 0x1C4 */
+    /* The same command payload is passed to the action-camera helpers. */
+    BtlLinkedCommand cameraCommand; /* 0x70..0x1C7 */
     u8 pad1C8[0x1C];
     s16 eventTaskId; /* 0x1E4 */
     u8 pad1E6[2];
@@ -362,7 +337,10 @@ typedef struct BtlState {
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5F0: same override, DDS2 001E3264. */
     u8 pad5F4[4];
     BtlUnit *(*findModelActor)(s32, s32); /* 0x5F8 */
-    u8 pad5FC[0x10];
+    u64 (*beginBattleEntryTasks)(s32); /* 0x5FC: supplies the model-load dependency. */
+    s32 (*selectEntryModelVariant)(BtlUnit *); /* 0x600 */
+    u8 pad604[4];
+    void (*finishEnemyEntryTasks)(u64); /* 0x608: receives the completed enemy chain. */
     void (*beforeActorModelReady)(BtlUnit *); /* 0x60C */
     u8 pad610[4];
     void (*afterActorModelReady)(BtlUnit *); /* 0x614 */
@@ -398,7 +376,9 @@ typedef struct BtlState {
     s32 (*hook6A0)(BtlUnit *);
     u8 pad6A4[4];
     void (*linkedActionHook)(struct ActionStateLink *);
-    u8 pad6AC[0x24];
+    u8 pad6AC[4];
+    s32 (*cameraUpdatePredicate)(BtlLinkedCommand *); /* 0x6B0: gates the active camera handler. */
+    u8 pad6B4[0x1C];
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
     u8 pad6D4[8];
     s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: func_001B0B30 calls the range override. */

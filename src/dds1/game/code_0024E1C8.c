@@ -142,7 +142,7 @@ void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
                    s32 context, f32 rotation) {
     ((EffectSlotSet *)D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
-        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].angleDegrees = rotation;
+        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = rotation;
     func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
@@ -153,7 +153,7 @@ void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
                   context);
     ((EffectSlotSet *)D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
-        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].angleDegrees = 0.0f;
+        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = 0.0f;
 }
 
 void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
@@ -163,13 +163,13 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
             (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             (s32)(scaleX *
                   (f32)resource
                       ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
                       .sourceWidth)
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY *
                   (f32)resource
                       ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
@@ -192,11 +192,11 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
             (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceWidth
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceHeight
             << 3;
@@ -210,13 +210,13 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
             (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             (s32)(scaleX *
                   (f32)resource->workEntries[D_0036B510[placementIndex]
                                             [MNU_SPRITE_INDEX]]
                       .sourceWidth)
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY *
                   (f32)resource->workEntries[D_0036B510[placementIndex]
                                             [MNU_SPRITE_INDEX]]
@@ -244,11 +244,11 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
             (EffectSlotSet *)D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceWidth
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceHeight
             << 3;
@@ -263,13 +263,13 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-            .width = (s32)(scaleX *
+            .geometry.bounds[2] = (s32)(scaleX *
                            (f32)resource->workEntries[D_0036B510[placementIndex]
                                                       [MNU_SPRITE_INDEX]]
                                .sourceWidth)
                     << 4;
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-            .height = (s32)(scaleY *
+            .geometry.bounds[3] = (s32)(scaleY *
                             (f32)resource->workEntries[D_0036B510[placementIndex]
                                                        [MNU_SPRITE_INDEX]]
                                 .sourceHeight)
@@ -291,12 +291,12 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-            .width =
+            .geometry.bounds[2] =
             resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceWidth
             << 4;
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
-            .height =
+            .geometry.bounds[3] =
             resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceHeight
             << 3;
@@ -309,9 +309,9 @@ void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             (s32)(scaleX * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
     }
     func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
@@ -326,9 +326,9 @@ void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
     }
 }
@@ -339,9 +339,9 @@ void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             (s32)(scaleX * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
     }
     func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
@@ -356,9 +356,9 @@ void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
     }
 }
@@ -370,13 +370,13 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
             (EffectSlotSet *)D_0036C698[
                 D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             (s32)(scaleX *
                   (f32)resource->workEntries[D_0036BC68[placementIndex]
                                             [MNU_SPRITE_INDEX]]
                       .sourceWidth)
             << 4;
-        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY *
                   (f32)resource->workEntries[D_0036BC68[placementIndex]
                                             [MNU_SPRITE_INDEX]]
@@ -405,11 +405,11 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
             (EffectSlotSet *)D_0036C698[
                 D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].width =
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceWidth
             << 4;
-        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].height =
+        resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceHeight
             << 3;
@@ -422,9 +422,9 @@ void func_0024EF68(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[6].width =
+        resource->workEntries[6].geometry.bounds[2] =
             (s32)(scaleX * (f32)resource->workEntries[6].sourceWidth) << 4;
-        resource->workEntries[6].height =
+        resource->workEntries[6].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[6].sourceHeight) << 3;
     }
     func_002BF4E0(
@@ -440,9 +440,9 @@ void func_0024EF68(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
             D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[6].width =
+        resource->workEntries[6].geometry.bounds[2] =
             resource->workEntries[6].sourceWidth << 4;
-        resource->workEntries[6].height =
+        resource->workEntries[6].geometry.bounds[3] =
             resource->workEntries[6].sourceHeight << 3;
     }
 }
@@ -482,9 +482,9 @@ void func_0024F338(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         EffectSlotSet *resource =
             (EffectSlotSet *)D_0036C698[D_0036B7F0[placementIndex][0]];
 
-        resource->workEntries[spriteIndex].width =
+        resource->workEntries[spriteIndex].geometry.bounds[2] =
             (s32)(scaleX * (f32)resource->workEntries[spriteIndex].sourceWidth) << 4;
-        resource->workEntries[spriteIndex].height =
+        resource->workEntries[spriteIndex].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[spriteIndex].sourceHeight) << 3;
     }
     func_002BF4E0(
@@ -496,9 +496,9 @@ void func_0024F338(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         EffectSlotSet *resource =
             (EffectSlotSet *)D_0036C698[D_0036B7F0[placementIndex][0]];
 
-        resource->workEntries[spriteIndex].width =
+        resource->workEntries[spriteIndex].geometry.bounds[2] =
             resource->workEntries[spriteIndex].sourceWidth << 4;
-        resource->workEntries[spriteIndex].height =
+        resource->workEntries[spriteIndex].geometry.bounds[3] =
             resource->workEntries[spriteIndex].sourceHeight << 3;
     }
 }

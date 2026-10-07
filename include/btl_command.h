@@ -83,7 +83,9 @@ typedef struct BtlLinkedCommand {
     BtlCamState frontCamera;  /* 0x30 */
     u8 pad58[0x68];
     BtlCamState backCamera;   /* 0xC0 */
-    u8 padE8[0x28];
+    u8 padE8[8];
+    f32 translation[4];      /* 0xF0: applied to the embedded battle camera pose */
+    f32 rotation[4];         /* 0x100: quaternion for that pose transform */
     u32 flags;               /* 0x110: includes facing-direction bit 0x200 */
     struct ActionStateLink *link; /* 0x114: fallback actor is link->unit (+0x18) */
     BtlUnit *linkedA;         /* 0x118: also read by func_002172B8 */
