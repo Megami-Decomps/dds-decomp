@@ -4,7 +4,7 @@
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
-extern s32 itfFindGridNodeByKey(u32, u32);
+extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
 typedef struct GridPosition {
     s32 x; // 0x00
@@ -906,14 +906,14 @@ s32 func_00309880(GridTextWidget *widget, GridTextListItem *item,
 }
 
 /* Advance by at least one configured step; crossing the maximum wraps to minimum. */
-void itfAdvanceGridScrollPosition(u32 owner, u32 key, s32 steps) {
+void itfAdvanceGridScrollPosition(GridTextWidget *owner, u32 key, s32 steps) {
     GridScrollRange *range;
     GridTextListItem *entry;
     float *position;
     float delta;
     float previous;
 
-    entry = (GridTextListItem *)itfFindGridNodeByKey(key, owner);
+    entry = itfFindGridNodeByKey(key, owner);
     range = entry->parameter;
     position = &entry->number;
     delta = range->step;
@@ -927,26 +927,22 @@ void itfAdvanceGridScrollPosition(u32 owner, u32 key, s32 steps) {
     }
 }
 
-void itfAdvanceSelectedGridScroll(u32 owner, u32 steps) {
-    s32 widgetAddr;
-
-    widgetAddr = (s32)owner;
-    if ((((GridTextWidget *)widgetAddr)->flags & 1) != 0) {
-        itfAdvanceGridScrollPosition(owner, (u32)((GridTextWidget *)widgetAddr)->selected->index + ((GridTextWidget *)widgetAddr)->rowOffset,
-                                    steps);
+void itfAdvanceSelectedGridScroll(GridTextWidget *owner, u32 steps) {
+    if ((owner->flags & 1) != 0) {
+        itfAdvanceGridScrollPosition(owner, (u32)owner->selected->index + owner->rowOffset, steps);
         return;
     }
 }
 
 /* Reverse by at least one configured step; crossing the minimum wraps to maximum. */
-void itfReverseGridScrollPosition(u32 owner, u32 key, s32 steps) {
+void itfReverseGridScrollPosition(GridTextWidget *owner, u32 key, s32 steps) {
     GridScrollRange *range;
     GridTextListItem *entry;
     float *position;
     float delta;
     float previous;
 
-    entry = (GridTextListItem *)itfFindGridNodeByKey(key, owner);
+    entry = itfFindGridNodeByKey(key, owner);
     range = entry->parameter;
     position = &entry->number;
     delta = range->step;
@@ -960,13 +956,9 @@ void itfReverseGridScrollPosition(u32 owner, u32 key, s32 steps) {
     }
 }
 
-void itfReverseSelectedGridScroll(u32 owner, u32 steps) {
-    s32 widgetAddr;
-
-    widgetAddr = (s32)owner;
-    if ((((GridTextWidget *)widgetAddr)->flags & 1) != 0) {
-        itfReverseGridScrollPosition(owner, (u32)((GridTextWidget *)widgetAddr)->selected->index + ((GridTextWidget *)widgetAddr)->rowOffset,
-                                    steps);
+void itfReverseSelectedGridScroll(GridTextWidget *owner, u32 steps) {
+    if ((owner->flags & 1) != 0) {
+        itfReverseGridScrollPosition(owner, (u32)owner->selected->index + owner->rowOffset, steps);
         return;
     }
 }
@@ -1121,14 +1113,13 @@ void func_00309DF8(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
     }
 }
 
-s32 itfFindGridNodeByKey(u32 key, u32 head) {
-    u32 n;
+GridTextListItem *itfFindGridNodeByKey(u32 key, GridTextWidget *widget) {
+    GridTextListItem *item = widget->head;
 
-    n = (u32)((GridTextWidget *)head)->head;
-    while (n != 0 && ((GridTextListItem *)n)->index != key) {
-        n = (u32)((GridTextListItem *)n)->next;
+    while (item != NULL && item->index != key) {
+        item = item->next;
     }
-    return n;
+    return item;
 }
 
 s32 sdfGridSeekSelectedNodeByIndex(s32 index, u8 *widget) {
