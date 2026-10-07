@@ -256,15 +256,17 @@ u32 dds3GetWorldCameraObject(EffWorldNode *object) {
     return ((EvtWorldTable *)object->data)->cameraObject;
 }
 
-void dds3SetWorldPlayerObject(EffWorldNode *object, u32 value) {
+EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object);
+
+void dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value) {
     EvtWorldTable *data;
 
     data = ((EvtWorldTable *)object->data);
-    dds3GetWorldPlayerObject();
+    dds3GetWorldPlayerObject(object);
     data->playerObject = value;
 }
 
-u32 dds3GetWorldPlayerObject(EffWorldNode *object) {
+EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object) {
     return ((EvtWorldTable *)object->data)->playerObject;
 }
 

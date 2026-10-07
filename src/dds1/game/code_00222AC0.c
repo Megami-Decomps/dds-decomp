@@ -70,7 +70,7 @@ extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 
 
 extern void *dds3FindWorldObjectNodeByKey(void *world, s32 objectId, s32 kind);
-extern void *dds3GetWorldPlayerObject(void *world);
+extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void effObjDispatchReadyState(void *arg0);
 extern void dds3RemoveWorldObjectNode(void *arg0);
@@ -469,14 +469,14 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
 
 u32 evtGetWorldObjectId(void) {
     void *world;
-    EvtUnit *object;
+    EffWorldNode *object;
     s32 id;
 
     world = dds3GetWorldObject();
     object = dds3GetWorldPlayerObject(world);
     id = -1;
     if (object != NULL) {
-        id = object->objectId;
+        id = object->key;
     }
     scrSetIntegerReturnValue(id);
     return 1;
