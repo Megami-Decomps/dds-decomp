@@ -705,7 +705,7 @@ extern void dds3EnsureSlotData(void *);
 extern void dds3SetSlotKey(ObjectWithResource *, u32);
 extern void dds3ReplaceObjectResource(ObjectWithResource *);
 extern Dds3PathCurveWork *dds3GetObjectResourceHandle(ObjectWithResource *);
-extern void func_001177D0(u32, s32);
+extern void sdfSetFloatCounterDirection(u32, s32);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
 s32 func_00241F10(void) {
@@ -744,7 +744,7 @@ s32 func_00241F10(void) {
         return 1;
     switch (scrReadIntParameter(2)) {
     case 0:
-        func_001177D0((u32 *)&path->state, 0);
+        sdfSetFloatCounterDirection((u32 *)&path->state, 0);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -752,7 +752,7 @@ s32 func_00241F10(void) {
         }
         break;
     case 1:
-        func_001177D0((u32 *)&path->state, 1);
+        sdfSetFloatCounterDirection((u32 *)&path->state, 1);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -811,10 +811,10 @@ s32 func_00242100(void) {
     mode = scrReadIntParameter(2);
     switch (mode) {
     case 0:
-        func_001177D0((u32 *)&path->state, 0);
+        sdfSetFloatCounterDirection((u32 *)&path->state, 0);
         break;
     case 1:
-        func_001177D0((u32 *)&path->state, 1);
+        sdfSetFloatCounterDirection((u32 *)&path->state, 1);
         break;
     }
     return 1;

@@ -81,7 +81,7 @@ extern s32 dds3CreatePathCurveWork(void *);
 extern void dds3InterpolatePathVectorVU(s32);
 extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
-extern void func_00117568(s32, s32);
+extern void sdfSetFloatCounterDirection(s32, s32);
 extern void func_002E7F20(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effObjSetInnerSecondVec(void *, void *);
@@ -265,10 +265,10 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
         evtScaleValueByMultiplier(path, 0.0f);
-        func_00117568(path, 0);
+        sdfSetFloatCounterDirection(path, 0);
     } else {
         evtScaleValueByMultiplier(path, 1.0f);
-        func_00117568(path, 1);
+        sdfSetFloatCounterDirection(path, 1);
         work->pathSpeed = -work->pathSpeed;
     }
     switch (mode) {
