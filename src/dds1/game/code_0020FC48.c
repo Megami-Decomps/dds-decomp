@@ -6,6 +6,7 @@
 #include "btl_command.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "mdl.h"
 
@@ -1374,8 +1375,6 @@ extern void *sdfAllocPacketAligned(s32);
 
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfCreatePatchableResourcePacket(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, void *, s32, s32, s32);
-
 extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
 extern u8 D_00325860[];
@@ -1389,7 +1388,7 @@ void btlInitializeGraphicsRuntime(void) {
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
     context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
+    sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->request, 0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
 }
@@ -1410,13 +1409,11 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     runtime->options |= 1;
 }
 
-extern void sdfCreateGraphBufferCopyPacket(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 void btlInitializeOverlayGraphics(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
     SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    sdfCreateGraphBufferCopyPacket(packetList, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfCreateGraphBufferCopyPacket(packetList, context, ((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
     btlRuntimeState.options |= 1;
