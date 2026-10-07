@@ -72,7 +72,7 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00115F40", func_00116078);
+INCLUDE_ASM(const s32, "game/code_00115F40", effUpdateConfiguredBillboard);
 
 /* Attach a 16-byte slot block, then publish its newly created state handle.
  * The block is attached before the state constructor sees the object. Returns 1. */
