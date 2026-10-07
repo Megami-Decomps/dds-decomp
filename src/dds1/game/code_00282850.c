@@ -522,7 +522,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     func_002BF4E0(x, y, depth, color, 1, drawArg, rangeIndex * 2 + variant, texture);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyInfoSprites);
 
 /* Create the DDS1 sprite record, including its five resource sets and blend weight. */
 MenuSimpleSpriteState *mnuAllocateSimpleSprite(

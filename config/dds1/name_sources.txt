@@ -4835,6 +4835,7 @@
 0x00283280	mnuCreateSpriteState	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x002832F8	mnuFreeSpriteStateWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:464:func_002832F8; Sprite-state storage-release entry; forwards its incoming work address to chip-block release without releasing a texture.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00283310	mnuDrawRangeSpriteVariant	inferred	Looks up a range entry and derives the draw variant from its index and alternate flag; sequel twin 002C1068 uses a different variant formula.
+0x002833B0	mnuDrawPartyInfoSprites	inferred	draws party-record info sprites and glyphs using the party level and sprite fade state
 0x00283788	mnuAllocateSimpleSprite	inferred	Allocates zeroed sprite work and initializes its position and other fields. [names_reviewed8.tsv]
 0x00283820	mnuFreeSimpleSpriteWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:496:func_00283820; Simple-sprite storage-release entry adjacent to its cleared 0x28-byte constructor; only frees the work allocation.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00283BE0	mnuResetGradientFadeColor	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:508:func_00283BE0; Sets the menu gradient fade color and resets its active flag and blend amount to zero.; source=revalidated-unapplied-names_R_Names22b.tsv:78 [names_qp13.tsv]
