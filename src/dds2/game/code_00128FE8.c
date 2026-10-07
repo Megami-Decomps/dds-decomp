@@ -27,8 +27,7 @@ typedef struct FldUnitLightParams {
 
 extern FldUnitLightParams D_0038BB10;
 extern FldUnitLightParams D_0038BB60;
-struct EvtUnitNode;
-extern s32 evtUnitGetNestedValue(struct EvtUnitNode *);
+extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
 extern void evtSetUnitStatusFlags(EvtUnit *);
 extern void func_0023C870(EvtUnit *, s32, u32, u32);
 extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
@@ -3354,10 +3353,10 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     f32 direction[4];
 
     if (fldSecondarySceneObject != 0) {
-        secondary = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldSecondarySceneObject);
+        secondary = evtUnitGetNestedValue((EffWorldNode *)fldSecondarySceneObject);
         evtSetUnitStatusFlags(secondary);
     }
-    player = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldPlayerObject);
+    player = evtUnitGetNestedValue((EffWorldNode *)fldPlayerObject);
     evtSetUnitStatusFlags(player);
     red = redA * 128.0f;
     green = greenA * 128.0f;
