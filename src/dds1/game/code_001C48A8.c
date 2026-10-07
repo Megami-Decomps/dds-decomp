@@ -134,7 +134,7 @@ u32 btlHasRegisteredGuidePanelTask(void);
 
 u32 func_001A29D0(s32 arg0, s32 arg1);
 
-void func_001AD5A0(void);
+void btlRequestGuidePanelClose(void);
 
 void func_001C48A8(void) {
 }
@@ -441,7 +441,7 @@ s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
         } else if (*(s32 *)(arg0 + 0x210) >= 0x2D) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_00324530[1] < 0) {
-                    func_001AD5A0();
+                    btlRequestGuidePanelClose();
                     func_001BCB88(1, 0x14);
                 }
             } else {

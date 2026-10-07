@@ -165,7 +165,13 @@ extern void func_0013F100(s32, u32);
 extern u32 D_0032E4EC[];
 extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern s32 D_003BABEC;
-extern u8 D_0034C8F0[];
+typedef struct FieldActivationRecord {
+    s32 kind;
+    s16 parameter;
+    u8 pad06[0xA];
+} FieldActivationRecord;
+
+extern FieldActivationRecord D_0034C8F0[256];
 extern void fldActivateObjectById(s32);
 extern void mdlFlagSet(s32);
 extern void func_0011B150(s32);
@@ -951,7 +957,16 @@ s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldActivateFlaggedObject);
+void fldActivateFlaggedObject(u32 flagIndex) {
+    datGameState->activationFlags[(s32)flagIndex >> 3] |= 1 << (flagIndex & 7);
+    fldActivateObjectById(flagIndex);
+    if (flagIndex >= 0xF0 && flagIndex < 0x100) {
+        mdlFlagSet(flagIndex + 0x610);
+    }
+    if (D_0034C8F0[flagIndex].kind == 2) {
+        func_0011B150(D_0034C8F0[flagIndex].parameter);
+    }
+}
 
 u8 fldTestObjectActivationFlag(u32 flagIndex) {
     return (datGameState->activationFlags[(s32)flagIndex >> 3] >> (flagIndex & 7)) & 1;
