@@ -1,9 +1,9 @@
 #include "common.h"
 #include "mnu_work.h"
 
-extern u32 mnuResourceRecords;
+extern MenuResourceRecord *mnuResourceRecords;
 
-extern u32 D_004390C4;
+extern s32 D_004390C4;
 
 extern void (*sdfTickCallback)(void);
 
@@ -228,14 +228,14 @@ void mnuResetResourceProgressCounters(void) {
     mnuStepCounterState.progress = 0;
 }
 
-void mnuBindResourceRecordTable(u32 records, u32 count) {
+void mnuBindResourceRecordTable(MenuResourceRecord *records, s32 count) {
     mnuResourceRecords = records;
     D_004390C4 = count;
 }
 
 /* The externally owned table stores 28-byte records. */
-u8 *mnuGetResourceRecordByIndex(s32 recordIndex) {
-    return (u8 *)mnuResourceRecords + recordIndex * 28;
+MenuResourceRecord *mnuGetResourceRecordByIndex(s32 recordIndex) {
+    return &mnuResourceRecords[recordIndex];
 }
 
 INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321340);

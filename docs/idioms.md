@@ -2721,8 +2721,10 @@ or reach colors through a second record view.
 
 DDS2 `itfGridApplySqrtBoundsAndColorScale` (`0x003075D8`, 312 bytes) and
 `func_00307EF8` (`0x00307EF8`, 296 bytes) match using this grouped owner and
-the mapped record's real `status` pointer. The complete grid unit checks
-`67 match, 0 differ`; the bounds and palette cursors remain natural C.
+the mapped record's real `status` pointer. `func_00307A68` (`0x00307A68`,
+320 bytes) ports the same owner's threshold-alpha easing from the matched
+DDS1 `func_002C0038`, including its destination/source palette cursors.
+The complete DDS2 grid unit now checks `68 match, 0 differ`.
 
 ## Battle ability queries receive the party record
 
@@ -2759,4 +2761,31 @@ two UV components come from child zero and its last two from child one;
 the paired packet builder consumes those arrays before both counts reset.
 The paired builder is DDS1 `func_002E2BB8` / DDS2 `func_0033BA68`, distinct
 from the compact single-stream vertex builder.
+
+## Party vitals use one paired-effect owner
+
+DDS1 `func_00275B40` writes numeric-bar opacity at `MenuEffectPair +0x4C`;
+the existing paired-effect helpers own its position nodes at `+0x40/+0x44`.
+Those types now live once in `mnu.h`. The draw banks and cost-icon arguments
+are `EffectSlotSet *`, while the font builder retains its existing integer
+glyph-handle API. The 1028-byte target and all 66 menu-header includers match.
+
+## Debug FOV and battle presentation preserve real call contracts
+
+DDS1 `func_0019FCC8` builds a complete `SifCommand`, appends the pointer returned
+by the variadic SIF formatter, and edits `SdfProjectionRecord.camera.fov`.
+Its native format literal is function-owned; the complete unit checks 35/0.
+All six native callers of `btlResetActorSlotPresentationValue` deliberately
+pass a `BattleSceneObject *` in the second argument, even though the callee
+does not use it. DDS2's `+0x6A4` battle callback likewise receives a `BtlUnit *`,
+now represented by `BtlState.actorEligibilityOverride`.
+
+## Resource-progress records retain their array owner
+
+DDS2 `func_00321340` indexes 28-byte `MenuResourceRecord` entries, reloads
+the table after registry lookup, and compares its signed `progress` member
+with the unsigned halfword progress counter. The constructor at `00322E18`
+receives a `MenuWorkEntry *`, not a numeric node identifier; the animated
+effect factory likewise returns the allocated work entry. The canonical
+record and these pointer contracts live in `mnu_work.h`.
 

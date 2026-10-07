@@ -128,6 +128,17 @@ typedef void (*MenuRuntimeCallback)(MenuRuntimeRecord *);
 typedef void (*MenuRuntimeWorkCallback)(MenuRuntimeRecord *, MenuWorkEntry *, struct MnuShootingWork *);
 typedef void (*MenuRuntimePairCallback)(MenuRuntimeRecord *, MenuRuntimeRecord *, struct MnuShootingWork *);
 
+/* Resource-progress records use a 0x1C-byte stride. */
+typedef struct MenuResourceRecord {
+    u32 flags;
+    u32 tag;
+    s32 x;
+    s32 progress;
+    u8 unk10[4];
+    s16 angleDegrees;
+    u8 unk16[6];
+} MenuResourceRecord;
+
 typedef struct MenuProgressParameters {
     u16 width;
     u16 height;
@@ -160,6 +171,11 @@ typedef struct MenuRegistry {
 
 typedef char MenuResourceLayoutsAssert[
     (sizeof(MenuProgressParameters)==0x10 &&
+     sizeof(MenuResourceRecord)==0x1C &&
+     (unsigned long)&((MenuResourceRecord*)0)->tag==4 &&
+     (unsigned long)&((MenuResourceRecord*)0)->x==8 &&
+     (unsigned long)&((MenuResourceRecord*)0)->progress==0x0C &&
+     (unsigned long)&((MenuResourceRecord*)0)->angleDegrees==0x14 &&
      (unsigned long)&((MenuRegistry*)0)->unk08==8 &&
      sizeof(((MenuRegistry*)0)->unk08)==2 &&
      sizeof(MenuRegistryParameters)==0x30 &&
@@ -170,6 +186,12 @@ typedef char MenuResourceLayoutsAssert[
      (unsigned long)&((MenuRegistry*)0)->table==0x0C &&
      (unsigned long)&((MenuRegistry*)0)->score==0x18 &&
      (unsigned long)&((MenuRegistry*)0)->progress==0x1A)?1:-1];
+
+void mnuBindResourceRecordTable(MenuResourceRecord *, s32);
+MenuResourceRecord *mnuGetResourceRecordByIndex(s32);
+MenuWorkEntry *mnuFindUnusedWorkEntry(void);
+void func_00322E18(MenuWorkEntry *, u32, s32, s32, s32, f32);
+MenuWorkEntry *mnuCreateAnimatedEffect(u32, f32, f32, f32);
 
 MenuProgressParameters *mnuGetResourceProgressParameters(void);
 void mnuCopyResourceProgressParameters(MenuProgressParameters *);
