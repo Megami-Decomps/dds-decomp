@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "sdf.h"
+#include "mnu_shop.h"
 
 typedef struct FrFontGlyph FrFontGlyph;
 typedef struct FrFontCtx FrFontCtx;
@@ -600,7 +601,7 @@ extern void mnuDestroyPanelGroup();
 extern void mnuFreeSpriteStateWork();
 extern void mnuFreeSimpleSpriteWork();
 extern void mnuFreeProfilePanelWork();
-extern void mnuReleaseResourceList();
+extern void mnuReleaseResourceList(MenuPanelHandles *);
 extern void mnuStoreScrollPanelSelectionAndGridPosition();
 
 /* Tear down the staff panel and all four optional scene-side resources. */
@@ -630,7 +631,7 @@ s32 mnuStaffReleasePanelScene(s32 unused) {
         mnuFreeProfilePanelWork(work->extraResource);
         work->extraResource = 0;
     }
-    mnuReleaseResourceList(menu->resourceList);
+    mnuReleaseResourceList((MenuPanelHandles *)menu->resourceList);
     effResolveAndReleaseResource(work->resource);
     mnuStoreScrollPanelSelectionAndGridPosition(work->display, work->resource, 0, 0);
     return 1;

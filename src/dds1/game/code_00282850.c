@@ -3,6 +3,7 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "mdl.h"
 #include "dat_state.h"
 
@@ -143,7 +144,8 @@ extern u32 effCreateStatusBatch(u32);
 
 extern s32 mnuLookupRangeEntry(u16);
 
-extern u32 mnuCreatePanelSpriteHandles(u32);
+extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
+extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
@@ -373,7 +375,7 @@ typedef struct MenuPanelState {
     u32 fourthValueB; /* 0x54 */
     u32 fourthValueC; /* 0x58 */
     u8 pad5C[4];
-    u32 resourceHandle; /* 0x60 */
+    MenuPanelHandles *resourceHandle; /* 0x60 */
 } MenuPanelState;
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
@@ -386,7 +388,7 @@ void *mnuCreatePanelState(s32 width, s32 height) {
 }
 
 void mnuDestroyPanelState(MenuPanelState *panel) {
-    s32 resourceHandle;
+    MenuPanelHandles *resourceHandle;
 
     resourceHandle = panel->resourceHandle;
     if (resourceHandle != 0) {
@@ -409,11 +411,8 @@ void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
     itfGridStorePosition(&panel->secondPosition, x, y);
 }
 
-void mnuInitializePanelResource(MenuPanelState *panel) {
-    u32 resourceHandle;
-
-    resourceHandle = mnuCreatePanelSpriteHandles(2);
-    panel->resourceHandle = resourceHandle;
+void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 target) {
+    panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
 }
 
 void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,

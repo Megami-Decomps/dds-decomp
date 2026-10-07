@@ -114,7 +114,7 @@ extern void mnuReleaseSpriteTextures(s32);
 
 extern void sdfReleaseChipBlock(void *);
 
-extern u32 mnuCreatePanelSpriteHandles(u32, s32, s32);
+extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 
 extern u32 mnuCreateFadeSpriteResourceSet(u32);
 
@@ -555,7 +555,7 @@ extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
 extern void effConfigureIndexedSlotMaterial(s32, s32, s32, s32, s32, s32, s32);
 
 /* Panel kind chooses the native sprite-slot layout. */
-u32 mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 target) {
+MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 target) {
     MenuPanelSlotIndices indices = D_003B2368;
     MenuPanelHandles *panel = (MenuPanelHandles *)sdfAllocAndClearQuadwords(sizeof(MenuPanelHandles));
     s32 i;
@@ -590,7 +590,7 @@ u32 mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 target) {
         effConfigureWithDefaultSetting((s32)panel->handles[3], 0, target, 0, 0, 12);
         break;
     }
-    return (u32)panel;
+    return panel;
 }
 
 extern void effInitializeSlotWork(s32, s32);
@@ -611,16 +611,17 @@ void mnuClearEntryFlags(MenuPanelHandles *group) {
 }
 
 /* Destroy nonzero slots, reloading the native count after each destruction, then free. */
-void mnuReleaseResourceList(s32 *object) {
+void mnuReleaseResourceList(MenuPanelHandles *panel) {
     s32 slotIndex;
-    s32 count = object[2];
+    s32 count = panel->count;
+
     for (slotIndex = 0; slotIndex < count; slotIndex++) {
-        if (object[slotIndex + 3] != 0) {
-            effDestroyResourceSlotSet(object[slotIndex + 3]);
-            count = object[2];
+        if (panel->handles[slotIndex] != NULL) {
+            effDestroyResourceSlotSet((s32)panel->handles[slotIndex]);
+            count = panel->count;
         }
     }
-    sdfReleaseChipBlock(object);
+    sdfReleaseChipBlock(panel);
 }
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027D850);
