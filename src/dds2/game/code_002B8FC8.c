@@ -4,6 +4,8 @@
 #include "eff.h"
 #include "mnu_shop.h"
 
+extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
+
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
 #define MNU_ENTRY_MARKED_COLOR 0x89BDC940
@@ -787,16 +789,6 @@ void mnuUpdateListScrollFlags(MenuList *list);
 MenuListNode * mnuListAppendNode();
 
 s32 mnuListContainsFinalNode(MenuList *list);
-
-
-
-
-
-typedef struct MenuSpriteRef {
-    s32 sprite;
-    s32 effect;
-} MenuSpriteRef;
-
 
 void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect);
 
@@ -1707,9 +1699,9 @@ typedef struct MenuScrollPanel {
     u32 firstSprite;
     u32 secondSprite;
     u8 pad10[4];
-    MenuSpriteRef positions[3]; /* 0x14 */
-    MenuSpriteRef active;       /* 0x2C */
-    MenuSpriteRef pending;      /* 0x34 */
+    MenuGridSlot positions[3]; /* 0x14 */
+    MenuGridSlot active;       /* 0x2C */
+    MenuGridSlot pending;      /* 0x34 */
     ScrollHandle *handles[3];
 } MenuScrollPanel;
 
@@ -1751,9 +1743,9 @@ MenuScrollPanel *mnuCreateScrollPanel(u32 owner) {
     memset(menu, 0, 0x48);
     menu->firstSprite = 0;
     menu->secondSprite = 0;
-    itfGridStorePosition(&menu->positions[0], owner, 0x40);
-    itfGridStorePosition(&menu->positions[1], owner, 0x41);
-    itfGridStorePosition(&menu->positions[2], owner, 0x44);
+    itfGridStorePosition(&menu->positions[0], (EffectSlotSet *)owner, 0x40);
+    itfGridStorePosition(&menu->positions[1], (EffectSlotSet *)owner, 0x41);
+    itfGridStorePosition(&menu->positions[2], (EffectSlotSet *)owner, 0x44);
     itfGridStorePosition(&menu->active, 0, 0);
     itfGridStorePosition(&menu->pending, 0, 0);
     mnuInitScrollHandles(menu);
@@ -1767,14 +1759,14 @@ void mnuDestroyScrollPanel(MenuScrollPanel *menu) {
 
 
 void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
-    s32 pendingHandle;
+    EffectSlotSet *pendingHandle;
 
-    pendingHandle = context->pending.sprite;
-    context->active.sprite = pendingHandle;
-    context->active.effect = context->pending.effect;
-    context->pending.sprite = 0;
+    pendingHandle = context->pending.set;
+    context->active.set = pendingHandle;
+    context->active.index = context->pending.index;
+    context->pending.set = 0;
     if (pendingHandle != 0) {
-        effConfigureWithDefaultSetting(pendingHandle, context->pending.effect,
+        effConfigureWithDefaultSetting((u32)pendingHandle, context->pending.index,
                                        context->handles[2], 0, 10, 2);
         return;
     }
@@ -1783,13 +1775,13 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
 void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 color) {
     mnuActivatePendingPanelResource(menu);
     menu->color = color;
-    menu->pending.sprite = model;
-    menu->pending.effect = value;
+    menu->pending.set = (EffectSlotSet *)model;
+    menu->pending.index = value;
     effConfigureIndexedSlotResource(model, value, menu->handles[0], 0, 3);
 }
 
 u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
-    return resources->active.sprite != 0;
+    return resources->active.set != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BB510);

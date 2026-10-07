@@ -11,6 +11,8 @@
 #include "eff.h"
 #include "dat_state.h"
 
+extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
+
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 #define MNU_PANEL_ITEM_COUNT 5
@@ -483,17 +485,17 @@ typedef struct MenuPanelState {
     u32 state; /* 0x14 */
     u32 firstValueA; /* 0x18 */
     u32 firstValueB; /* 0x1C */
-    MenuPoint firstPosition; /* 0x20 */
+    MenuGridSlot backgroundSlot; /* 0x20 */
     MenuPoint corners[5]; /* 0x28 */
-    MenuPoint guideStart; /* 0x50 */
-    MenuPoint guideEnd; /* 0x58 */
-    MenuPoint secondPosition; /* 0x60 */
+    MenuGridSlot selectedCenterSlot; /* 0x50 */
+    MenuGridSlot selectedCornerSlot; /* 0x58 */
+    MenuGridSlot rowSlot; /* 0x60 */
     u32 secondValueA; /* 0x68 */
     u32 secondValueB; /* 0x6C */
-    MenuPoint thirdPosition; /* 0x70 */
+    MenuGridSlot headingSlot; /* 0x70 */
     u32 thirdValueA; /* 0x78 */
     u32 thirdValueB; /* 0x7C */
-    u32 thirdValueC; /* 0x80 */
+    const s32 *headingIndices; /* 0x80: caller supplies a static sprite-index table. */
     u8 pad84[4];
     struct MenuIconState *resourceHandle; /* 0x88 */
 } MenuPanelState;
@@ -521,16 +523,16 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+                                    s32 index) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
-    itfGridStorePosition(&panel->firstPosition, x, y);
+    itfGridStorePosition(&panel->backgroundSlot, resource, index);
 }
 
-void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, s32 guideX, s32 guideTopY, s32 guideBottomY) {
-    itfGridStorePosition(&panel->guideStart, guideX, guideTopY);
-    itfGridStorePosition(&panel->guideEnd, guideX, guideBottomY);
+void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, EffectSlotSet *resource, s32 centerIndex, s32 cornerIndex) {
+    itfGridStorePosition(&panel->selectedCenterSlot, resource, centerIndex);
+    itfGridStorePosition(&panel->selectedCornerSlot, resource, cornerIndex);
     panel->corners[0].x = x;
     panel->corners[0].y = y;
     panel->corners[1].x = x + 0xC0;
@@ -547,19 +549,19 @@ void mnuInitializePanelResource(MenuPanelState *panel, s32 resource) {
     panel->resourceHandle = func_002B9FF8(5, resource);
 }
 
-void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+                                    s32 index) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
-    itfGridStorePosition(&panel->secondPosition, x, y);
+    itfGridStorePosition(&panel->rowSlot, resource, index);
 }
 
-void func_002C0908(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 additionalValue) {
+void func_002C0908(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+                                    const s32 *indices) {
     panel->thirdValueA = valueA;
     panel->thirdValueB = valueB;
-    itfGridStorePosition(&panel->thirdPosition, x, 0);
-    panel->thirdValueC = additionalValue;
+    itfGridStorePosition(&panel->headingSlot, resource, 0);
+    panel->headingIndices = indices;
 }
 
 void mnuSetPanelState(MenuPanelState *panel, u32 state) {
@@ -964,21 +966,21 @@ MenuPanelItem *mnuCreatePanelItem(void) {
 void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
     s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
 
-    itfGridStorePosition(&item->spriteGridSlots[0], secondaryGrid, 4);
-    itfGridStorePosition(&item->spriteGridSlots[1], secondaryGrid, 5);
+    itfGridStorePosition(&item->spriteGridSlots[0], (EffectSlotSet *)secondaryGrid, 4);
+    itfGridStorePosition(&item->spriteGridSlots[1], (EffectSlotSet *)secondaryGrid, 5);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[1].set, item->spriteGridSlots[1].index, 0xD40, 0x40, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[2], primaryGrid, 0x51);
+    itfGridStorePosition(&item->spriteGridSlots[2], (EffectSlotSet *)primaryGrid, 0x51);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[2].set, item->spriteGridSlots[2].index, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[3], primaryGrid, 0x53);
+    itfGridStorePosition(&item->spriteGridSlots[3], (EffectSlotSet *)primaryGrid, 0x53);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[3].set, item->spriteGridSlots[3].index, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[4], primaryGrid, 0x52);
+    itfGridStorePosition(&item->spriteGridSlots[4], (EffectSlotSet *)primaryGrid, 0x52);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[4].set, item->spriteGridSlots[4].index, 0x460, 0x20, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[5], primaryGrid, 0x54);
+    itfGridStorePosition(&item->spriteGridSlots[5], (EffectSlotSet *)primaryGrid, 0x54);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[5].set, item->spriteGridSlots[5].index, 0x460, 0x20, 0, 0);
     if (extraGrid != 0) {
-        itfGridStorePosition(&item->spriteGridSlots[6], primaryGrid, 0x56);
+        itfGridStorePosition(&item->spriteGridSlots[6], (EffectSlotSet *)primaryGrid, 0x56);
         itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[6].set, item->spriteGridSlots[6].index, 0x4B0, 0x48, 0, 0);
-        itfGridStorePosition(&item->spriteGridSlots[7], extraGrid, 0x19);
+        itfGridStorePosition(&item->spriteGridSlots[7], (EffectSlotSet *)extraGrid, 0x19);
         itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[7].set, item->spriteGridSlots[7].index, 0x460, 0x20, 0, 0);
     } else {
         item->spriteGridSlots[6].set = 0;
@@ -986,7 +988,7 @@ void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, s32 
         item->spriteGridSlots[7].set = 0;
         item->spriteGridSlots[7].index = 0;
     }
-    itfGridStorePosition(&item->spriteGridSlots[8], primaryGrid, panelEntryIds[panelIndex]);
+    itfGridStorePosition(&item->spriteGridSlots[8], (EffectSlotSet *)primaryGrid, panelEntryIds[panelIndex]);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[8].set, item->spriteGridSlots[8].index, 0x130, -0x30, 0, 0);
 }
 
@@ -995,15 +997,15 @@ void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, s32 
 void mnuInitializePanelItemGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
 
-    itfGridStorePosition(&item->gridSlots[0], gridObject, 7);
+    itfGridStorePosition(&item->gridSlots[0], (EffectSlotSet *)gridObject, 7);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[0].set, item->gridSlots[0].index, -0x50, -0x50, 0, 0);
-    itfGridStorePosition(&item->gridSlots[1], gridObject, 5);
+    itfGridStorePosition(&item->gridSlots[1], (EffectSlotSet *)gridObject, 5);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[1].set, item->gridSlots[1].index, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->gridSlots[2], gridObject, 6);
+    itfGridStorePosition(&item->gridSlots[2], (EffectSlotSet *)gridObject, 6);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[2].set, item->gridSlots[2].index, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->gridSlots[3], gridObject, 9);
+    itfGridStorePosition(&item->gridSlots[3], (EffectSlotSet *)gridObject, 9);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[3].set, item->gridSlots[3].index, 0x5D0, 0, 0, 0);
-    itfGridStorePosition(&item->gridSlots[4], gridObject, entryIndices[panelIndex]);
+    itfGridStorePosition(&item->gridSlots[4], (EffectSlotSet *)gridObject, entryIndices[panelIndex]);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[4].set, item->gridSlots[4].index, 0x130, -0x30, 0, 0);
 }
 
