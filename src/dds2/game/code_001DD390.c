@@ -22,6 +22,9 @@ extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 #include "dat_command.h"
 #include "file.h"
 
+extern void btlClearAllUnitDefeatCandidates(void);
+extern void func_001F3C30(BtlLinkedCommand *action);
+
 extern void sdfReleaseChipBlock(void *block);
 extern s32 btlIsUnitInActiveList(void *unit);
 
@@ -6976,7 +6979,82 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F35C8);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F3888);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F3C30);
+/* Nine actor camera rows, each containing two 0x74-byte mode records. */
+typedef struct BtlActionCameraPose {
+    f32 position[4];
+    f32 direction[4];
+} BtlActionCameraPose;
+
+typedef struct BtlActionCameraMode {
+    BtlActionCameraPose front;
+    BtlActionCameraPose back;
+    u8 pad40[0x24];
+    f32 motionParameter; /* 0x64 */
+    u8 pad68[0xC];
+} BtlActionCameraMode;
+
+typedef struct BtlActionCameraSettings {
+    BtlActionCameraMode mode[2];
+} BtlActionCameraSettings;
+
+typedef char BtlActionCameraMode_size_check[
+    (sizeof(BtlActionCameraMode) == 0x74) ? 1 : -1];
+typedef char BtlActionCameraSettings_size_check[
+    (sizeof(BtlActionCameraSettings) == 0xE8) ? 1 : -1];
+
+extern BtlActionCameraSettings D_003B6E50[9];
+
+/* Mark defeat candidates and initialize the selected actor camera mode. */
+void func_001F3C30(BtlLinkedCommand *action) {
+    BtlUnit *user = action->link->unit;
+    u16 unitId = user->partyRecord.unitId;
+    u32 count;
+    u32 i;
+    u32 targetFlags;
+    u32 mode;
+
+    btlFlagUserAndTargetDefeat(action, action);
+    if (unitId >= 9)
+        return;
+    if (D_003B6E50[unitId].mode[0].motionParameter == 0.0f)
+        return;
+
+    mode = ((s32)action->flags >> 9) & 1;
+    targetFlags = 0;
+    count = btlGetIndexListCount(action->targetList);
+    for (i = 0; i < count; i++) {
+        BtlUnit *target = btlGetIndexListEntry(action->targetList, i);
+        targetFlags |= target->flags & 0x600;
+    }
+
+    btlClearAllUnitDefeatCandidates();
+    if (targetFlags == 0x200) {
+        btlFlagUnitDefeatCandidate(user);
+    } else {
+        btlFlagMatchingUnitsDefeatCandidate(0x200);
+    }
+
+    btlInitMotionTransformFromComponents((u8 *)&action->frontCamera,
+                                         D_003B6E50[unitId].mode[mode].front.position[0],
+                                         D_003B6E50[unitId].mode[mode].front.position[1],
+                                         D_003B6E50[unitId].mode[mode].front.position[2],
+                                         D_003B6E50[unitId].mode[mode].front.direction[0],
+                                         D_003B6E50[unitId].mode[mode].front.direction[1],
+                                         D_003B6E50[unitId].mode[mode].front.direction[2],
+                                         D_003B6E50[unitId].mode[mode].front.direction[3], 40.0f);
+    btlInitMotionTransformFromComponents((u8 *)&action->backCamera,
+                                         D_003B6E50[unitId].mode[mode].back.position[0],
+                                         D_003B6E50[unitId].mode[mode].back.position[1],
+                                         D_003B6E50[unitId].mode[mode].back.position[2],
+                                         D_003B6E50[unitId].mode[mode].back.direction[0],
+                                         D_003B6E50[unitId].mode[mode].back.direction[1],
+                                         D_003B6E50[unitId].mode[mode].back.direction[2],
+                                         D_003B6E50[unitId].mode[mode].back.direction[3], 40.0f);
+    action->motionParameter = D_003B6E50[unitId].mode[mode].motionParameter;
+    action->flags |= 0x80041;
+    action->motionProgress = 1;
+    *(s32 *)action->pad140 = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F3E48);
 
@@ -10226,8 +10304,6 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         btlUnitFaceTarget(slot[2], target);
     }
 }
-
-extern void btlClearAllUnitDefeatCandidates(void);
 
 void func_00206570(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
     BtlUnit *slot[3];
