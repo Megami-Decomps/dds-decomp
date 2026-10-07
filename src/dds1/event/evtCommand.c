@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
@@ -63,7 +64,6 @@ void scrDestroyAllNamedProcesses(void);
 
 void evtDrainSecondaryWorldNodes(void);
 
-void dds3ResetWorldResourceState(void *unit);
 
 void dds3RemoveWorldObjectNode(void *unit);
 

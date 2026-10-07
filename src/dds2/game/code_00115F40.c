@@ -1,45 +1,31 @@
 #include "common.h"
 #include "dds3obj.h"
 #include "eff_event.h"
+#include "eff_dependency.h"
 
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 effObjInnerCreate(EffWorldNode *object);
 
-/* Object resource storage is polymorphic: reset expects the kind-7 effect
- * prefix below, while initialization attaches a separate 16-byte slot block. */
-typedef struct WorldResourceOwner {
-    u8 pad00[0x18];
-    void *resource;
-} WorldResourceOwner;
-
-/* Kind-7 effect owner-link prefix, also consumed by dds3EffectObjectBasic. */
-typedef struct WorldResource {
-    u8 pad00[4];
-    u32 flags;
-    u8 pad08[0x18];
-    void *owner; /* +0x20: owner used by the billboard parameter lookup */
-    u16 entryId; /* +0x24: entry forwarded to that lookup */
-    u16 unk26; /* Written from the bound owner's kind; no read established. */
-} WorldResource;
-
 /* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
  * The caller supplies an existing effect resource; this does not free its owner. */
-void dds3ResetWorldResourceState(WorldResourceOwner *owner) {
-    WorldResource *resource = owner->resource;
+void dds3ResetWorldResourceState(EffWorldNode *owner) {
+    EffectDependencyState *resource = owner->data;
 
     resource->entryId = 0;
     resource->owner = NULL;
-    resource->unk26 = 0;
+    resource->ownerKind = 0;
     resource->flags &= ~4;
     resource->flags &= ~8;
 }
 
-extern void effObjSetFlags(void *object, s32 flags);
-extern void billSetKind1Entry(u32 billboard, u32 entry);
+struct EffectObj;
+struct BillObj;
+extern void effObjSetFlags(struct EffectObj *object, u32 flags);
+extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
 extern void billSetChildHalfExtents(s32 billboard, f32 width, f32 height);
-extern void billSetVariantValue(u32 billboard, s32 value);
-extern void billSetBillboardMode(u32 billboard, s32 mode);
+extern void billSetVariantValue(struct BillObj *billboard, s32 value);
+extern void billSetBillboardMode(struct BillObj *billboard, s32 mode);
 
 typedef struct BillConfig {
     u32 flags;   /* 0x00: bit 0 / bit 1 select the billboard mode */
@@ -51,56 +37,37 @@ typedef struct BillConfig {
     u32 entry;   /* 0x20 */
 } BillConfig;
 
-typedef struct BillSource {
-    u8 pad00[0x40];
-    f32 vec[4];  /* 0x40 */
-} BillSource;
-
-typedef struct BillResource {
-    u8 pad00[0xC];
-    u32 billboard;  /* 0x0C */
-    u8 pad10[0x2C];
-    BillConfig *config; /* 0x3C */
-    f32 vec[4];  /* 0x40 */
-} BillResource;
-
-typedef struct BillOwner {
-    u8 pad00[0x18];
-    BillResource *resource; /* 0x18 */
-    BillSource *source;     /* 0x1C */
-} BillOwner;
-
 /* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
-void billCopySourceVectorAndSetConfig(BillOwner *owner, BillConfig *config) {
-    BillResource *resource = owner->resource;
-    BillSource *source = owner->source;
+void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
+    EffectDependencyState *resource = owner->data;
+    ObjectTransform *source = owner->inner;
 
     resource->config = config;
-    resource->vec[0] = source->vec[0];
-    resource->vec[1] = source->vec[1];
-    resource->vec[2] = source->vec[2];
-    resource->vec[3] = source->vec[3];
-    effObjSetFlags(owner, 0x10);
+    resource->sourcePosition[0] = source->position[0];
+    resource->sourcePosition[1] = source->position[1];
+    resource->sourcePosition[2] = source->position[2];
+    resource->sourcePosition[3] = source->position[3];
+    effObjSetFlags((struct EffectObj *)owner, 0x10);
     switch (resource->config->kind) {
     case 0:
     case 3:
-        billSetChildHalfExtents(resource->billboard, resource->config->width, resource->config->height);
+        billSetChildHalfExtents((s32)resource->handle, resource->config->width, resource->config->height);
         if (resource->config->kind == 3) {
-            billSetVariantValue(resource->billboard, 1);
+            billSetVariantValue(resource->handle, 1);
         }
         if (resource->config->flags & 1) {
-            billSetBillboardMode(resource->billboard, 2);
+            billSetBillboardMode(resource->handle, 2);
             return;
         }
         if (resource->config->flags & 2) {
-            billSetBillboardMode(resource->billboard, 3);
+            billSetBillboardMode(resource->handle, 3);
             return;
         }
         break;
     case 2:
         break;
     case 1:
-        billSetKind1Entry(resource->billboard, resource->config->entry);
+        billSetKind1Entry(resource->handle, resource->config->entry);
         break;
     }
 }

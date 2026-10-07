@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
@@ -26,7 +27,6 @@ struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
 s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
 
-void dds3ResetWorldResourceState(void *unit);
 
 void scrSetIntegerReturnValue(s32 value);
 
