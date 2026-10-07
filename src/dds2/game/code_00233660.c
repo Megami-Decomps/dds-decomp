@@ -2726,7 +2726,7 @@ extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 
 extern void dds3EnsureSlotData(s32 obj);
 
-extern void dds3SetWorldCameraObject(void *world, s32 obj);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *obj);
 
 s32 mdlSpawnViewerWorldObject(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};
@@ -2738,7 +2738,7 @@ s32 mdlSpawnViewerWorldObject(void) {
     obj = dds3CreateCameraObject(dds3AdvanceWorldCounter(), pos, rot);
     effObjSetInnerFloat(obj, 10.0f);
     dds3EnsureSlotData(obj);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), obj);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)obj);
     func_001129C8(obj, 0);
 }
 

@@ -43,7 +43,7 @@ extern u8 D_003CE498[];
 extern s32 D_00435E48;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
-extern void evtCopyEntryStringToActiveWindow();
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
@@ -56,7 +56,7 @@ extern u8 D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
 extern s32 mdlFlagTest();
 extern void mdlFlagSet();
-extern void dspStartEntry();
+extern s32 dspStartEntry(s32);
 
 
 typedef struct EvtFlagGate {
@@ -424,10 +424,10 @@ s32 evtShowResultText(void) {
     char formattedText[0x40];
     evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
     func_0035C860(formattedText, D_00437840, datGameState->progressTotal);
-    evtCopyEntryStringToActiveWindow(1, formattedText);
+    evtCopyEntryStringToActiveWindow(1, (s32)formattedText);
     evtCopyEntryStringToActiveWindow(2, D_003C9A20[datGameState->progressSlot]);
     func_0035C860(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
-    evtCopyEntryStringToActiveWindow(3, formattedText);
+    evtCopyEntryStringToActiveWindow(3, (s32)formattedText);
     if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
         dspStartEntry(datGameState->progressSlot + 0x1a);
     } else {
@@ -654,7 +654,34 @@ s32 func_00263BF0(s32 callbackContext) {
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00263C38);
+extern void dspSetActive(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
+extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
+s32 func_00263C38(void) {
+    MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue();
+    s32 entry = 7;
+    CampWindowParams *item = &state->window->list->cursor->camp;
+    s32 mode = state->ownedWindows[0]->list->cursor->camp.value + 1;
+    char text[16];
+
+    state->previousValue = datGameState->header.currency;
+    state->elapsedFrames = 0;
+    if (mode == 4) {
+        if ((u32)(item->value * state->multiplier + datGameState->header.currency) > 9999999U) {
+            entry = 12;
+        }
+    }
+    func_0035C860(text, D_00437840, item->value * state->multiplier);
+    evtCopyEntryStringToActiveWindow(3, (s32)text);
+    dspSetActive(1);
+    dspStartEntry(entry);
+    evtSetMessageWindowOptionWhenOpen(0);
+    evtStoreValueAndCaptureWindowPanelValue(11);
+    state->window->list->drawCallback = func_00295D38;
+    state->sceneReady = 0;
+    return 1;
+}
+
 
 s32 evtUpdateSlotItemCompletionState(void) {
     s32 stateAddress = kwlnTaskGetUserValue();
@@ -962,12 +989,12 @@ s32 evtAdvancePendingRewards(s32 callbackContext) {
                     return 0;
                 }
                 if (state->rewardKind == 0) {
-                    evtCopyEntryStringToActiveWindow(0, D_00435E5C[state->rewardValue]);
-                    evtCopyEntryStringToActiveWindow(1, D_00437848);
+                    evtCopyEntryStringToActiveWindow(0, (s32)D_00435E5C[state->rewardValue]);
+                    evtCopyEntryStringToActiveWindow(1, (s32)D_00437848);
                     dspStartEntry(0x2D);
                 } else {
                     func_0035C860(text, D_00437850, state->rewardValue);
-                    evtCopyEntryStringToActiveWindow(0, text);
+                    evtCopyEntryStringToActiveWindow(0, (s32)text);
                     dspStartEntry(0x2E);
                 }
                 state->remainingRewards--;
@@ -1074,7 +1101,7 @@ s32 evtShowSlotText(void) {
     if (((MenuTerminalContext *)kwlnTaskGetUserValue())->advancedSlots > 0) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
         func_0035C860(formattedText, D_00437840, D_003CE148[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
-        evtCopyEntryStringToActiveWindow(1, formattedText);
+        evtCopyEntryStringToActiveWindow(1, (s32)formattedText);
         evtCopyEntryStringToActiveWindow(2, D_003C9A20[datGameState->progressSlot]);
         if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
             dspStartEntry(0x24);
@@ -1139,4 +1166,3 @@ INCLUDE_SDATA(const s32, "game/code_00261E10", D_00437840);
 INCLUDE_SDATA(const s32, "game/code_00261E10", D_00437848);
 
 INCLUDE_SDATA(const s32, "game/code_00261E10", D_00437850);
-

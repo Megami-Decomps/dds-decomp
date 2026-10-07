@@ -75,7 +75,7 @@ extern s32 sdfGetLodChunkValue();
 extern EvtUnitVectorSlot evtUnitVectorSlots[10];
 
 
-extern void func_0033A7E8(s32, SdfLightSources, f32 *);
+extern void func_0033A7E8(void *, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
@@ -103,7 +103,7 @@ extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, 
 
 extern void *dds3GetWorldObject(void);
 
-extern void *dds3GetWorldPlayerObject(void *arg0);
+extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 
 extern s32 scrSetIntegerReturnValue(s32 arg0);
 
@@ -495,8 +495,8 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_0033A7E8(unit->endpointWorkAddress, desc, color);
-    unit->value = unit->endpointWorkAddress;
+    func_0033A7E8(unit->endpointWork, desc, color);
+    unit->value = (u32)unit->endpointWork;
 }
 
 /* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
@@ -529,14 +529,14 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
 
 u32 evtGetWorldObjectId(void) {
     void *world;
-    EvtUnit *object;
+    EffWorldNode *object;
     s32 id;
 
     world = dds3GetWorldObject();
     object = dds3GetWorldPlayerObject(world);
     id = -1;
     if (object != NULL) {
-        id = object->objectId;
+        id = object->key;
     }
     scrSetIntegerReturnValue(id);
     return 1;

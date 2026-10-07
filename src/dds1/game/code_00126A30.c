@@ -212,7 +212,7 @@ extern u32 D_003BAD40;
 extern u32 D_003BAD1C;
 
 extern void *dds3GetWorldObject(void);
-extern s32 dds3GetWorldCameraObject(s32);
+extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
 extern s64 fldGetPlayerSceneState(void);
 
 
@@ -2529,7 +2529,7 @@ s64 fldGetUnselectedWorldEntry(void) {
     s64 selectedEntry;
 
     worldObject = (s32)dds3GetWorldObject();
-    currentEntry = dds3GetWorldCameraObject(worldObject);
+    currentEntry = (s32)dds3GetWorldCameraObject((EffWorldNode *)worldObject);
     selectedEntry = fldGetPlayerSceneState();
     if (selectedEntry == currentEntry) {
         currentEntry = 0;
@@ -2539,7 +2539,8 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
-    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject((s32)dds3GetWorldObject()), D_003C9230, D_003C9220);
+    dds3TransformCameraVectorsByInnerRotation((s32)dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230,
+                                              D_003C9220);
     D_003BAD20 = 0;
 }
 
@@ -2564,7 +2565,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_003BAD1C == -2) {
             direction = -1.0f;
         }
-        camera = (EffWorldNode *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = dds3GetWorldCameraObject(dds3GetWorldObject());
         if (D_003BAD1C == 1 || D_003BAD1C == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;
@@ -4040,20 +4041,9 @@ typedef struct FldProbeKind {
     u32 *kind; /* 0x0C */
 } FldProbeKind;
 
-typedef struct FldProbeTarget {
-    u8 pad00[0x40];
-    u8 position[0x10]; /* 0x40 */
-    u8 quaternion[0x10]; /* 0x50 */
-} FldProbeTarget;
-
-typedef struct FldProbeActor {
-    u8 pad00[0x1C];
-    FldProbeTarget *target; /* 0x1C */
-} FldProbeActor;
-
 extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
-s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, EffWorldNode *entry) {
+s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     f32 dir[4];
     f32 position[4];
     f32 length;
@@ -4074,7 +4064,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, EffWorldNode *entry) {
                 position[0] = source[0];
                 position[1] = source[1];
                 position[2] = source[2];
-                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
@@ -4083,7 +4073,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, EffWorldNode *entry) {
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, actor->target->position);
+                VU0_LOAD_VF(vf11, actor->inner->position);
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF(vf10, dir);
                 dir[1] = 0.0f;
@@ -4102,7 +4092,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, EffWorldNode *entry) {
             case 1:
                 return fldRoomRecords[i].unk13C == kind;
             case 2:
-                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
@@ -4121,7 +4111,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, EffWorldNode *entry) {
 }
 
 /* vu0 routine: the alternate entry probe only constrains facing, not range. */
-s32 fldTestRoomProbeFacing(FldProbeActor *actor, EffWorldNode *entry) {
+s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
     f32 dir[4];
     f32 position[4];
     f32 dot;
@@ -4137,7 +4127,7 @@ s32 fldTestRoomProbeFacing(FldProbeActor *actor, EffWorldNode *entry) {
             switch (kind) {
             case 0:
                 PCP_COPY_VECTOR(position, entry->data);
-                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
@@ -4146,7 +4136,7 @@ s32 fldTestRoomProbeFacing(FldProbeActor *actor, EffWorldNode *entry) {
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, actor->target->position);
+                VU0_LOAD_VF(vf11, actor->inner->position);
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF(vf10, dir);
                 dir[1] = 0.0f;
@@ -4162,7 +4152,7 @@ s32 fldTestRoomProbeFacing(FldProbeActor *actor, EffWorldNode *entry) {
             case 1:
                 return fldRoomRecords[i].unk13C == kind;
             case 2:
-                VU0_LOAD_VF(vf10, actor->target->quaternion);
+                VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
@@ -4181,7 +4171,7 @@ s32 fldTestRoomProbeFacing(FldProbeActor *actor, EffWorldNode *entry) {
 }
 
 
-s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *position) {
+s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position) {
     f32 dir[4];
     f32 length;
     f32 dot;
@@ -4191,7 +4181,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *positio
     kind = *((FldProbeKind *)D_003307B0[index][8])->kind;
     switch (kind) {
     case 0:
-        VU0_LOAD_VF(vf10, actor->target->quaternion);
+        VU0_LOAD_VF(vf10, actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_STORE_VF(vf30, dir);
         dir[1] = 0.0f;
@@ -4200,7 +4190,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *positio
         VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_MOVE_VF(vf12, vf10);
         VU0_LOAD_VF(vf10, position);
-        VU0_LOAD_VF(vf11, actor->target->position);
+        VU0_LOAD_VF(vf11, actor->inner->position);
         VU0_SUB(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, dir);
         dir[1] = 0.0f;
@@ -4219,7 +4209,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, FldProbeActor *actor, f32 *positio
     case 1:
         return fldRoomRecords[index].unk13C == kind;
     case 2:
-        VU0_LOAD_VF(vf10, actor->target->quaternion);
+        VU0_LOAD_VF(vf10, actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_STORE_VF(vf30, dir);
         dir[1] = 0.0f;
@@ -4793,11 +4783,11 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     }
 }
 
-extern void dds3SetWorldCameraObject(void *, u32);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 void func_0013DDF0(const char *name) {
     FldActorEntry *entry;
     char *entryName;
-    u32 *camera;
+    EffWorldNode *camera;
     s32 i;
 
     if (name == NULL) {
@@ -4818,9 +4808,9 @@ void func_0013DDF0(const char *name) {
                     return;
                 }
                 if (entry->variantMode == 0 && entry->linkKind == 3) {
-                    camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4,
-                                                                 entry->linkName);
-                    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)camera);
+                    camera = (EffWorldNode *)dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4,
+                                                                                  entry->linkName);
+                    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
                     fldEnableCameraObjectFlag();
                     return;
                 }

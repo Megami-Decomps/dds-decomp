@@ -88,6 +88,8 @@ extern EffectSlotSet *effCreateResourceSlotSet(u32 *, u32, u32);
 extern void func_00266460(u32, MenuEffectResources *);
 extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
+extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
 /* The directory and strings are owned by code_00265AD8. */
@@ -459,7 +461,31 @@ void mnuReleaseSelectedProgressPanel(MenuSlotState *host) {
 }
 
 extern void func_00267238();
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00267238);
+extern u32 mnuBlendListNodeColorByFlags(u32, MenuListNode *);
+void func_00267238(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node, s32 priority) {
+    s32 width = list->scale;
+    MenuSlotState *host = (MenuSlotState *)list->context;
+    s32 isCurrent = node == list->cursor;
+    u32 chainFlags = 0;
+    u32 color;
+    FrFontGlyph *glyph;
+
+    if (node->flags48 & 1) {
+        width /= 2;
+    }
+    if (isCurrent) {
+        func_00306CD0(x, y, 0, width, 0, (EffectSlotSet *)host->resourceBank[0], 0x18, priority);
+        chainFlags = 4;
+    }
+    color = (node->flags48 & 1) ? 0xA09DC320 : 0xA09DC380;
+    color = mnuBlendListNodeColorByFlags(color, node);
+    color = uiBlendColors(color, color & ~0xFF, width);
+    glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
+    frFontSetChainFlag(glyph, chainFlags);
+    func_0019D550(glyph, 1, priority);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
+
 
 typedef struct MenuSlotKind {
     s16 kind;
@@ -1268,8 +1294,8 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F58);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F88);
 
-s32 func_00269418(s32 object) {
-    switch (*(s32 *)(object + 0x20)) {
+s32 func_00269418(MenuList *list) {
+    switch (list->count) {
     case 2: return 0x3a;
     case 3: return 0x3b;
     case 4: return 0x3c;
@@ -1281,7 +1307,65 @@ s32 func_00269418(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00269478);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269638);
+void func_00269638(s32 close, MenuSlotState *host) {
+    struct {
+        s32 slot;
+        s32 x;
+        s32 y;
+    } rows[4] = {
+        {0, 0x1C0, 0x238},
+        {0x40, 0x1C0, 0x380},
+        {0x41, 0x320, 0x2F8},
+        {0x42, 0x3B0, 0x3D8}
+    };
+    s32 count = host->secondaryList->count;
+    s32 slot;
+    s32 x;
+    s32 y;
+    s32 i;
+    u32 progress;
+    EffectSlotSet *slots;
+
+    if (count > 7) {
+        count = 7;
+    }
+    itfDrawGridWithResolvedSlot(rows[2].x, rows[2].y, 0, 0x80,
+                               host->resourceBank[0], rows[2].slot, 0x52);
+    slot = rows[3].slot;
+    x = rows[3].x;
+    y = rows[3].y;
+    for (i = 0; i < count; i++) {
+        itfDrawGridWithResolvedSlot(x, y, 0, 0,
+                                   host->resourceBank[0], slot, 0x52);
+        y += 0xB0;
+    }
+    itfGridLookupValueOrDefault((EffectSlotSet *)host->resourceBank[0], slot);
+    mnuCallInitWide(0x3B0, 0x3D8, 0, (s32)host->secondaryList, 0x52);
+    slot = func_00269418(host->secondaryList);
+    itfDrawGridWithResolvedSlot(rows[0].x, rows[0].y, 0, 0x80,
+                               host->resourceBank[0], slot, 0x52);
+    itfDrawGridWithResolvedSlot(rows[1].x, rows[1].y + count * 0xB0 - 0xB0, 0, 0x80,
+                               host->resourceBank[0], rows[1].slot, 0x52);
+    slot = func_00269418(host->secondaryList);
+    slots = (EffectSlotSet *)host->resourceBank[0];
+    progress = ((u32)*(u8 *)&slots->workEntries[slot].cornerColors[0] << 8) /
+               *(u8 *)&slots->workEntries[slot].savedColors[0];
+    if (close != 0) {
+        if (host->secondaryList->scale > 0) {
+            host->secondaryList->scale -= 0x40;
+        }
+        if (host->secondaryList->scale < 0) {
+            host->secondaryList->scale = 0;
+        }
+    } else if (progress == 0x100) {
+        if (host->secondaryList->scale < 0x100) {
+            host->secondaryList->scale += 0x40;
+        }
+        if (host->secondaryList->scale > 0x100) {
+            host->secondaryList->scale = 0x100;
+        }
+    }
+}
 
 
 
@@ -1398,7 +1482,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 
 
-extern void func_00269638(void);
+extern void func_00269638(s32, MenuSlotState *);
 
 extern void func_00269478(s32, s32);
 
@@ -2181,7 +2265,6 @@ s32 evtBDispatchSyncC(s32 request) {
 
     return menuSetHandler(state, 2, (void *)request);
 }
-INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FC8);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FF8);
 

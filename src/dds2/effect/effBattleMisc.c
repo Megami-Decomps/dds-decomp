@@ -13,7 +13,8 @@ extern u32 D_003AB050[];
 extern void (*D_003AF208[])();
 
 extern void *dds3GetWorldObject(void);
-extern void *dds3GetWorldCameraObject(void *object);
+struct EffWorldNode;
+extern struct EffWorldNode *dds3GetWorldCameraObject(struct EffWorldNode *object);
 extern void dds3LoadCameraVectorVU(void *object);
 extern void effObjFetchInnerFirstVec(void *object);
 extern f32 D_003AF1C0[];
@@ -242,7 +243,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
     f32 height;
     f32 out[4];
     f32 dir[4];
-    void *object;
+    struct EffWorldNode *object;
     s32 lengthParam = param->unk04;
     u32 sub = param->size;
     u32 kind = param->count;

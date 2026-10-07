@@ -17,7 +17,7 @@ extern u8 D_0039F708[];
 typedef struct {
     f32 components[4];
 } CameraVector;
-extern s32 dds3GetWorldCameraObject(s32 world);
+extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
 extern void *dds3GetWorldSecondaryObject(void);
 extern s32 effObjTestNodeFlags(void *node, s32 flags);
 extern void effObjClearNodeFlags(void *node, s32 flags);
@@ -50,7 +50,7 @@ s32 dds3UpdateCameraObject(EffWorldNode *camera) {
         dds3RebuildCameraBasis(camera);
         effObjInnerVecBackup((s32)inner);
     }
-    if (dds3GetWorldCameraObject((s32)dds3GetWorldSecondaryObject()) == (s32)camera) {
+    if (dds3GetWorldCameraObject(dds3GetWorldSecondaryObject()) == camera) {
         PCP_COPY_VECTOR(sdfViewTargetVector, &inner->position);
         PCP_COPY_VECTOR(sdfViewEyeVector, &data->worldEye);
         PCP_COPY_VECTOR(sdfViewUpVector, &data->worldUp);

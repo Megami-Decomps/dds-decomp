@@ -161,7 +161,7 @@ extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern s32 effMathGetSlotAt(void *slots, s32 index);
+extern void *effMathGetSlotAt(void *slots, s32 index);
 
 
 void func_00189C80(EffMagatuhiValueWork *valueWork, s32 index) {
@@ -226,7 +226,7 @@ typedef struct {
 } EffMagatuhiSlot;
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
  * The vector scratch w and the raw accesses below retain their native forms. */
-void func_00189E98(EffMagatuhiWideFirst *work, s32 index) {
+void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     EffMagatuhiDriftParticle *particle = &work->particles[index];
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
@@ -271,7 +271,7 @@ void func_00189E98(EffMagatuhiWideFirst *work, s32 index) {
 /* Drift until the particle enters the capture radius, then follow a randomized
  * cubic path to the target. Fade-in takes priority over an overlapping fade-out.
  * Preserve the native unwritten point w and unchecked fade divisors. */
-void func_0018A098(EffMagatuhiWideFirst *work) {
+void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
     f32 point[4];
     f32 origin[4];
     f32 basePosition[4];
@@ -318,7 +318,7 @@ void func_0018A098(EffMagatuhiWideFirst *work) {
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
         if (age == 0) {
-            func_00189E98(work, i);
+            effMagatuhiInitWideFirstParticle(work, i);
         }
         if (age > 0 && age <= life) {
             if (slot->step == 0.0f) {

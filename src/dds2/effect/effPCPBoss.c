@@ -9,8 +9,8 @@ typedef struct EffParamWork EffParamWork;
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_0018C820(void *work);
-extern void effBossSetPosition();
-extern PairedEffectResources *func_0018D830(PairedEffectParams *src);
+extern void effBossSetPosition(void *dst, void *src);
+extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -100,10 +100,8 @@ typedef struct {
     u8 pad11[3];
 } EffBossCell; /* 0x14 */
 
-typedef struct EffBossDrawPool EffBossDrawPool;
-
 typedef struct {
-    EffBossDrawPool *drawPool;
+    EffRecordPool *drawPool;
     f32 direction[3]; /* Unit Y initially; mode 2 refreshes it from the model. */
     u8 pad10[4];
     f32 rotationAngle;
@@ -139,17 +137,17 @@ extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 extern void func_00164C68(u32 system, u32 value);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
-extern EffBossDrawPool *func_00177760(s32 cellCount);
-extern u32 effGetIndexedEffectGroupRecord(EffBossDrawPool *pool, s32 index);
-extern EffBossColorSlot *effGetIndexedEffectGroupIndexEntry(EffBossDrawPool *pool, s32 index);
-extern void effSetVectorIncrementBits(EffBossDrawPool *pool, u32 bits);
+extern EffRecordPool *func_00177760(u32 cellCount);
+extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
+extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
+extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
 extern f32 D_004334C4;
 extern void func_0018C288(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
-extern void effReleaseRecordGroupAssetAndHandle(EffBossDrawPool *pool);
+extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
 extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
 extern void parReleaseCellSystem(u32 system);
 
@@ -287,9 +285,7 @@ void effBossDestroy(EffBossWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C820);
 
-void effBossSetPosition(dst, src)
-void *dst;
-void *src;
+void effBossSetPosition(void *dst, void *src)
 {
     PCP_COPY_VECTOR(dst, src);
 }
@@ -587,8 +583,8 @@ void effBossUpdateGeometryCallback(void *work) {
     func_0018C820(work);
 }
 
-void func_0018D800(void *work) {
-    effBossSetPosition(work);
+void func_0018D800(void *work, void *position) {
+    effBossSetPosition(work, position);
 }
 
 void effBossApplyGroupTint(EffBossWork *work, s32 value) {
@@ -596,7 +592,7 @@ void effBossApplyGroupTint(EffBossWork *work, s32 value) {
 }
 
 /* Create paired four-point chains; the update fills their point vectors. */
-PairedEffectResources *func_0018D830(PairedEffectParams *src)
+PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src)
 {
     PairedEffectResources *work = sdfAllocSizeClassBlock(sizeof(PairedEffectResources));
     EffThunderGroupParams chain;
@@ -611,13 +607,13 @@ PairedEffectResources *func_0018D830(PairedEffectParams *src)
     return work;
 }
 
-PairedEffectResources *func_0018DA38(void *data) {
+PairedEffectResources *effBossCreatePairedChainsFromTable(void *data) {
     void *work;
 
     work = effParamTableGetBlock(data, 0);
-    return func_0018D830(work);
+    return effBossCreatePairedChainResources(work);
 }
 
-PairedEffectResources *func_0018DA58(void *work) {
-    return func_0018D830(work);
+PairedEffectResources *effBossCreatePairedChainsFromParams(void *work) {
+    return effBossCreatePairedChainResources(work);
 }

@@ -17,7 +17,7 @@ extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern void effObjSetInnerFloat(s32, f32);
 
-extern void dds3SetWorldCameraObject(s32, s32);
+extern struct EffWorldNode *dds3SetWorldCameraObject(struct EffWorldNode *, struct EffWorldNode *);
 
 extern s32 dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
 
@@ -25,7 +25,7 @@ void fldCreateLocalMapCamera(void) {
     fldLocalMapCameraObject = dds3CreateCameraObject(dds3AdvanceWorldCounter(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
     dds3SetWorldNodeValue((struct EffWorldNode *)fldLocalMapCameraObject, (u32)"Lmap_Cam");
     effObjSetInnerFloat(fldLocalMapCameraObject, 2.0f);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), fldLocalMapCameraObject);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (struct EffWorldNode *)fldLocalMapCameraObject);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", fldLocalMapCameraObject);

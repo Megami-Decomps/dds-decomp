@@ -22,7 +22,7 @@ typedef struct {
 extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
-extern void dds3DestroyWorldNode(void *node);
+extern void dds3DestroyWorldNode(EffWorldNode *node);
 extern void dds3DestroyWorldIndexNode(void *node);
 extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);

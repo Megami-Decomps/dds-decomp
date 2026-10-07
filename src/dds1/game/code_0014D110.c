@@ -114,7 +114,7 @@ extern s32 fldSecondaryEffectPositionPending;
 
 extern s32 dds3GetWorldObject(void);
 
-extern s32 dds3GetWorldPlayerObject(s32 arg0);
+extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object);
 
 extern char D_003BB000[]; /* "BARIA" */
 
@@ -122,9 +122,9 @@ extern char *D_003BAE44;
 
 extern void *dds3FindWorldObjectNodeByKey(u64, s32, s32);
 
-extern s32 fldTestRoomProbeFacingAndRange(s32, void *);
+extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry);
 
-extern s32 fldTestRoomProbeFacing(s32, void *);
+extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
@@ -231,8 +231,8 @@ void fldFireRoomEffects(void);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = dds3GetWorldPlayerObject(world);
-    void *entry;
+    EffWorldNode *unit = dds3GetWorldPlayerObject((EffWorldNode *)world);
+    EffWorldNode *entry;
     s32 result;
 
     if (unit == 0) {
@@ -265,8 +265,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
 
 s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = dds3GetWorldPlayerObject(world);
-    void *entry;
+    EffWorldNode *unit = dds3GetWorldPlayerObject((EffWorldNode *)world);
+    EffWorldNode *entry;
     s32 result;
 
     if (unit == 0) {
@@ -317,8 +317,8 @@ s32 fldCmdReadSceneStatus(void) {
 
 s32 fldCmdTestActorEntryCondition(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = dds3GetWorldPlayerObject(world);
-    void *entry;
+    EffWorldNode *unit = dds3GetWorldPlayerObject((EffWorldNode *)world);
+    EffWorldNode *entry;
 
     if (unit == 0) {
         scrSetIntegerReturnValue(0);
@@ -338,10 +338,10 @@ s32 fldCmdTestActorEntryCondition(void) {
 }
 
 s32 fldCmdRestoreCameraNodeMode(void) {
-    s32 object;
+    EffWorldNode *object;
 
     fldResetPlayerSceneObjectState();
-    object = dds3GetWorldPlayerObject(dds3GetWorldObject());
+    object = dds3GetWorldPlayerObject((EffWorldNode *)dds3GetWorldObject());
     if (object == 0) {
         return 1;
     }
@@ -350,13 +350,13 @@ s32 fldCmdRestoreCameraNodeMode(void) {
 }
 
 s32 fldCmdReleaseCurrentObject(void) {
-    s32 object;
+    EffWorldNode *object;
 
-    object = dds3GetWorldPlayerObject(dds3GetWorldObject());
+    object = dds3GetWorldPlayerObject((EffWorldNode *)dds3GetWorldObject());
     if (object == 0) {
         return 1;
     }
-    dds3InvokeSlot1Handler(object, 0);
+    dds3InvokeSlot1Handler((u32)object, 0);
     fldSetCameraNodeModeWithTen();
     fldPreparePlayerSceneCameraTarget();
     return 1;
@@ -467,7 +467,7 @@ s32 fldCmdSetLookAtHeading(void) {
 
 extern s32 fldGetPlayerSceneState(void);
 
-extern s32 dds3SetWorldCameraObject(s32, s32);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 extern void dds3TransformCameraVectorsByInnerRotation(s32, f32 *, f32 *);
 
@@ -485,7 +485,7 @@ s32 fldCmdCaptureObjectPose(void) {
     f32 pos[4];
     f32 rot[4];
     s32 handle;
-    s32 object;
+    EffWorldNode *object;
     s32 world;
 
     if (scrReadIntParameter(0) == -1) {
@@ -493,11 +493,11 @@ s32 fldCmdCaptureObjectPose(void) {
         if (handle == 0) {
             return 1;
         }
-        object = dds3SetWorldCameraObject(dds3GetWorldObject(), handle);
-        if (object == 0) {
+        object = dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)handle);
+        if (object == NULL) {
             return 1;
         }
-        dds3TransformCameraVectorsByInnerRotation(object, pos, rot);
+        dds3TransformCameraVectorsByInnerRotation((s32)object, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_00330630[0] = pos[0];
         D_00330630[1] = pos[1];
@@ -514,7 +514,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (handle == 0) {
             return 1;
         }
-        dds3SetWorldCameraObject(dds3GetWorldObject(), handle);
+        dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)handle);
     }
     return 1;
 }

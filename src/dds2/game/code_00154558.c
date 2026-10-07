@@ -329,7 +329,7 @@ extern void *dds3FindWorldObjectNodeByKey(u64, s32, s32);
 
 extern s32 fldGetPlayerSceneState(void);
 
-extern s32 dds3SetWorldCameraObject(s32, s32);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 extern void dds3TransformCameraVectorsByInnerRotation(s32, f32 *, f32 *);
 
@@ -421,14 +421,14 @@ void fldStartSceneBgm(void);
 
 void fldStartSceneBgmAlternate(void);
 
-extern s32 fldTestRoomProbeFacingAndRange(s32, void *);
+extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry);
 
-extern s32 fldTestRoomProbeFacing(s32, void *);
+extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = fldPlayerObject;
-    void *entry;
+    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
+    EffWorldNode *entry;
     s32 result;
 
     if (unit == 0) {
@@ -461,8 +461,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
 
 s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = fldPlayerObject;
-    void *entry;
+    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
+    EffWorldNode *entry;
     s32 result;
 
     if (unit == 0) {
@@ -517,8 +517,8 @@ s32 fldCmdReadSceneStatus(void) {
 
 s32 fldCmdTestActorEntryCondition(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = fldPlayerObject;
-    void *entry;
+    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
+    EffWorldNode *entry;
 
     if (unit == 0) {
         scrSetIntegerReturnValue(0);
@@ -679,7 +679,7 @@ s32 fldCmdCaptureObjectPose(void) {
     f32 pos[4];
     f32 rot[4];
     s32 handle;
-    s32 object;
+    EffWorldNode *object;
     s32 world;
 
     if (scrReadIntParameter(0) == -1) {
@@ -687,11 +687,11 @@ s32 fldCmdCaptureObjectPose(void) {
         if (handle == 0) {
             return 1;
         }
-        object = dds3SetWorldCameraObject(dds3GetWorldObject(), handle);
-        if (object == 0) {
+        object = dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)handle);
+        if (object == NULL) {
             return 1;
         }
-        dds3TransformCameraVectorsByInnerRotation(object, pos, rot);
+        dds3TransformCameraVectorsByInnerRotation((s32)object, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_0038BAD0[0] = pos[0];
         D_0038BAD0[1] = pos[1];
@@ -708,7 +708,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (handle == 0) {
             return 1;
         }
-        dds3SetWorldCameraObject(dds3GetWorldObject(), handle);
+        dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)handle);
     }
     return 1;
 }

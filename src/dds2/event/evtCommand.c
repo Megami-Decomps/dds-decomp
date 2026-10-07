@@ -21,6 +21,10 @@ s32 scrReadIntParameter(s32 idx);
 
 void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
+struct EffectObj;
+s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
+s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
+
 void dds3ResetWorldResourceState(void *unit);
 
 void scrSetIntegerReturnValue(s32 value);
@@ -94,7 +98,7 @@ void evtPolygonMovieClearFlagBits(s32 movieId, u32 bits);
 
 u32 fldGetPlayerSceneState(void);
 
-void dds3SetWorldCameraObject(s32 world, u32 unit);
+EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *unit);
 
 f32 bfWaitReadArgFloat(s32 idx);
 extern void func_00340DC8(f32, f32, f32);
@@ -170,8 +174,8 @@ s32 evtCommandEnablePathUnit(void)
 /* Bind the selected effect path to the first owner found in kinds 4..9.
  * Missing paths or owners complete the command without binding anything. */
 s32 evtCommandAssignEffectObjectOwner(void) {
-    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 owner;
+    struct EffectObj *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    void *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -179,10 +183,10 @@ s32 evtCommandAssignEffectObjectOwner(void) {
     }
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        owner = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == 0);
-    if (owner == 0) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
+    if (owner == NULL) {
         return 1;
     }
     effObjBindValidatedOwner(effectPath, owner);
@@ -191,8 +195,8 @@ s32 evtCommandAssignEffectObjectOwner(void) {
 
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
-    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 owner;
+    struct EffectObj *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    void *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -200,10 +204,10 @@ s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
     }
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        owner = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == 0);
-    if (owner == 0) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
+    if (owner == NULL) {
         return 1;
     }
     effObjBindOwnerBillEntry(effectPath, owner, scrReadIntParameter(2));
@@ -548,25 +552,25 @@ s32 evtCommandClearAllUnitsAndWait(void)
 }
 
 s32 evtCommandAddEffectUnitToWorld(void) {
-    void *unit;
+    EffWorldNode *unit;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)fldGetPlayerSceneState();
+        unit = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
     if (unit == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
     return 1;
 }
 
 s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
-    void *unit;
+    EffWorldNode *unit;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)fldGetPlayerSceneState();
+        unit = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
         ((EvtWorldUnit *)unit)->inner->statusFlags |= 1;
@@ -574,7 +578,7 @@ s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     if (unit == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
     return 1;
 }
 
@@ -584,8 +588,8 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00241B98);
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern u32 dds3AdvanceWorldCounter(void);
-extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
-extern void effObjSetInnerFloat(s32 obj, f32 value);
+extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
+extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
 s32 evtCommandCreateWorldEffectObject(void) {
