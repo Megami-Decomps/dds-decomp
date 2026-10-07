@@ -1315,7 +1315,7 @@ void func_00106368(void) {
     evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
 }
 
-void func_00106488(f32 value) {
+void sdfSetViewFieldOfView(f32 value) {
     D_003245EC[0] = value;
 }
 

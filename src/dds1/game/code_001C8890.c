@@ -6944,7 +6944,7 @@ typedef struct WorldObj {
 
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
 
-extern void func_00106488(f32);
+extern void sdfSetViewFieldOfView(f32);
 void btlRefreshWorldCameraHandle(void) {
     WorldObj *object;
     EffWorldNode *handle;
@@ -6959,7 +6959,7 @@ void btlRefreshWorldCameraHandle(void) {
                     handle = (EffWorldNode *)object->head->sub->handle;
                 }
                 dds3SetWorldCameraObject((EffWorldNode *)object, handle);
-                func_00106488(dds3GetCameraFieldOfView(handle));
+                sdfSetViewFieldOfView(dds3GetCameraFieldOfView(handle));
             }
         }
     }

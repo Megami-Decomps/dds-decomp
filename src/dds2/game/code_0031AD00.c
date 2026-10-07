@@ -8,7 +8,7 @@ extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
 extern s32 dds3GetWorldSecondaryObject(void);
 extern struct EffWorldNode *dds3SetWorldCameraObject(struct EffWorldNode *world, struct EffWorldNode *camera);
-extern void func_001063A8(f32 arg0);
+extern void sdfSetViewFieldOfView(f32 arg0);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern u8 D_0040ABD0[];
@@ -136,5 +136,5 @@ void func_0031B0F8(void) {
     effObjSetInnerFloat(D_00438944, 2.0f);
     world = dds3GetWorldSecondaryObject();
     dds3SetWorldCameraObject((struct EffWorldNode *)world, (struct EffWorldNode *)D_00438944);
-    func_001063A8(0.6283184886f);
+    sdfSetViewFieldOfView(0.6283184886f);
 }
