@@ -542,7 +542,7 @@ extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetModelHolder(struct EffectObject *, u32);
 extern s32 fldParseRoomNumberFromName(char *);
-extern void func_00113FF8(struct EffectObject *, u32);
+extern void effObjSetRoomNumber(struct EffectObject *, u32);
 extern struct EffWorldNode *dds3FindWorldObjectNodeByKey(struct EffWorldNode *, u32, s32);
 extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
 extern void func_00112168(void *);
@@ -617,7 +617,7 @@ void fldCreateResourceScriptObjects(void) {
         } else {
             effObjSetModelHolder(object, 7);
         }
-        func_00113FF8(object, fldParseRoomNumberFromName((char *)resource->name));
+        effObjSetRoomNumber(object, fldParseRoomNumberFromName((char *)resource->name));
         dds3SetSlotByKind(object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
         func_00112168(object);
         binding = D_00438EC0;
