@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_draw.h"
+#include "sdf_sif_command.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 #define SDF_DEV_DEFAULT_PRIORITY 0x48
@@ -80,13 +81,6 @@ extern s32 func_0033E008(u32, u8 *, u32);
 extern u32 sdfDevControlReplyValue;
 
 extern u32 sdfDevOperationReplyValue;
-
-typedef struct SifCommand {
-    s32 source;   /* 0x0 */
-    s32 end;      /* 0x4 */
-    s32 argument; /* 0x8 */
-    u32 command;  /* 0xC */
-} SifCommand;
 
 extern u32 D_0040B990[];
 
