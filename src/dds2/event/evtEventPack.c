@@ -17,7 +17,60 @@ extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
 extern void sdfReleaseChipBlock(s32);
 
-INCLUDE_ASM(const s32, "event/evtEventPack", evtCreateModelFromPackResource);
+extern s32 D_004377D8;
+extern s32 func_0035B6E0(const char *, ...);
+extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
+extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
+
+/* Keep the complete diagnostic records, including their native trailing zeros. */
+const char D_00424830[0x20] __attribute__((aligned(8))) = "unit decode rid:%d, size:%d\n";
+const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %d >\n";
+
+/* Decode one retained unit payload and return its new viewer-object key. */
+s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
+    EvtPackLoadState *data;
+    EvtPackEntry *entry;
+    s32 i;
+    s32 entrySize;
+    u8 *payload;
+    s32 unitKey;
+
+    data = evtGetTaskData(eventId);
+    i = 0;
+    if (data->header->entryCount > 0) {
+        entry = data->entries;
+        do {
+            if (entry->secondaryResourceId == resourceId) {
+                switch (entry->kind) {
+                case 5:
+                    entrySize = entry->dataSize;
+                    payload = data->data + entry->dataOffset;
+                    func_0035B6E0(D_00424830, resourceId, entrySize);
+                    switch (eventId) {
+                    case 0x2A4:
+                    case 0x2AC:
+                    case 0x2AE:
+                    case 0x2B0:
+                        mdlLoadViewerPackage(3, D_004377D8, 0x101, (s32)payload, entrySize);
+                        break;
+                    default:
+                        mdlLoadViewerPackage(3, D_004377D8, 0x103, (s32)payload, entrySize);
+                        break;
+                    }
+                    unitKey = mdlSpawnCameraSlotViewerObject(3, D_004377D8);
+                    D_004377D8++;
+                    if (D_004377D8 >= 0x7D0) {
+                        D_004377D8 = 0x3E8;
+                    }
+                    func_0035B6E0(D_00424850, D_004377D8, entrySize);
+                    return unitKey;
+                }
+            }
+            entry++;
+        } while (++i < data->header->entryCount);
+    }
+    return -1;
+}
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
@@ -101,7 +154,6 @@ void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
 
 extern char D_004248A0[];
 extern char D_004377E0[];
-extern s32 func_0035B6E0();
 extern char D_00453C50[];
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
