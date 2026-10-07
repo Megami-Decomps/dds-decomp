@@ -32,7 +32,7 @@ void sdfReleaseChipBlock(void *arg0);
 
 void sdfFreeMemoryFromEitherHeap(void *arg0);
 
-void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
+SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 
 void *sdfAllocSizeClassBlock(s32 arg0);
 
@@ -42,7 +42,10 @@ u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 
-void sdfBuildTextureStatePacket(void *arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4, u32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
+void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,
+    u32 primaryResourceWord, s32 pixelFormat, u32 secondaryResourceWord,
+    s32 clutFormat, s32 textureColorComponents, s32 maxMipLevel,
+    s32 lodParameters, s32 clampMode, s32 variant);
 
 extern u8 sdfTextureReleaseQueue;
 
@@ -132,8 +135,8 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
 INCLUDE_ASM(const s32, "sdf/sdfTex", sdfBuildTextureStatePacket);
 
 /* Allocate and populate one of the two resource packet variants. */
-void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
-    void *packet;
+SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
+    SdfTexBuf *packet;
     u32 primary;
     u32 secondary;
 
