@@ -3668,6 +3668,7 @@
 0x00221FE8	evtSetUnitStatusFlags	inferred	Sets unit flag bits 0x300.
 0x00221FF8	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]
 0x00222090	evtGetWorldUnitNestedValue	inferred	Looks up a world object of kind five by id and reads its inner value if found. [names_reviewed6.tsv]
+0x002220F0	evtCreateUnitTransitionWork	inferred	Allocates and initializes complete event unit transition work and its owned endpoint block; native caller stores it for the paired release API.
 0x00222200	evtReleaseUnitTransitionWork	inferred	Clears nested reference and frees its path, handle and work block. [names_reviewed6.tsv]
 0x00222270	evtGetUnitMotionState	inferred	Returns the unit state read by motion-completion check. [names_reviewed6.tsv]
 0x00222278	evtUnitSetStoredParameter	inferred	confidence=high; src/dds1/event/evtUnitManager.c:func_00222278; Stores the event unit slotSelect halfword. CORRECTED: the field is a u16 written by a script int parameter (evtCommandSetUnitValue), not a slot selector; 'slotSelect' had no basis in the body or in EvtUnit. [names_qp9.tsv]
