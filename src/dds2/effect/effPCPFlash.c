@@ -567,7 +567,7 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
 
 extern u32 effMiscRand(void *);
 extern u8 D_003AA868[];
-extern EffRecordPool *func_00177760(u32 cellCount);
+extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
 PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     PcpFlashStreakWork *src;
@@ -587,7 +587,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
     record->drawMode = work->unk3C;
     range = work->randomRange;
@@ -868,7 +868,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
     record->drawMode = work->unk44;
     work->resourceHandle = record;
@@ -1372,7 +1372,7 @@ PcpFlashOrbitArcWork *source;
         ring->randomRange = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    record = func_00177760(ring->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(ring->particleCount);
     record->scale = 1.0f;
     record->drawMode = ring->unk54;
     ring->resourceHandle = record;
@@ -1627,7 +1627,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
     record->drawMode = work->unk48;
     range = work->randomRange;
@@ -2338,7 +2338,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
     record->drawMode = work->unk4C;
     work->resourceHandle = record;

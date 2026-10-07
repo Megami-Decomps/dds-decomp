@@ -371,8 +371,8 @@ void func_0016F7B0(EffRingWork *work)
     effDrawTransformedRecordPool(handle);
 }
 
-extern EffRecordPool *func_0016FB08(u32 count);
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FB08);
+extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
+INCLUDE_ASM(const s32, "game/code_0016F1D0", effRecordPoolCreateFiveVertexGroups);
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *group) {
@@ -658,7 +658,7 @@ s32 effGetRecordGroupAuxEntry(EffRecordPool *group, s32 groupIndex) {
 
 /* Allocate five-vertex fan groups, then set the returned header's matrix. */
 EffRecordPool *effAllocateIdentityMatrixWork(u32 fanCount) {
-    EffRecordPool *pool = func_0016FB08(fanCount);
+    EffRecordPool *pool = effRecordPoolCreateFiveVertexGroups(fanCount);
 
     EE_MMI_UNIT_MATRIX(pool->matrix);
     return pool;

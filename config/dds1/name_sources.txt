@@ -1565,6 +1565,7 @@
 0x0016F4D8	effFlashWriteRingColorSlots	inferred	writes five color slots via func_0018DDF8 (index parity picks the pair); twin of effWriteFlashColorSlot in effPCPFlash
 0x0016F5C8	effBuildOrbitingArcQuadPoints	inferred	confidence=high; src/dds1/game/code_0016F1D0.c:func_0016F5C8; Computes orbit position and oriented/scaled directions, then writes the indexed arc-quad point group. [names_qp9.tsv]
 0x0016F790	effAdvanceVectorRecord	inferred	Adds the group's float increment to the indexed sixteen-byte vector record's value at offset eight.
+0x0016FB08	effRecordPoolCreateFiveVertexGroups	inferred	Allocates a record pool for five-vertex groups, with five positions and five colors per requested group; paired DDS2 twin 0x00177760.
 0x0016FC28	effReleaseRecordGroupAssetAndHandle	inferred	Queues effect record group asset release and disposes its secondary handle. [names_reviewed16.tsv]
 0x0016FC58	effDrawScaledRecordPool	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:340:func_0016FC58; Builds a scaled-and-translated identity transform, emits record-pool position/color packets in fan chunks, and submits them through the selected draw mode.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0016FF08	effGetIndexedEffectGroupRecord	inferred	Computes the indexed resource record within an effect record group. [names_reviewed16.tsv]
