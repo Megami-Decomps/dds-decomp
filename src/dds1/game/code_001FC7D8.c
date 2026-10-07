@@ -79,7 +79,7 @@ extern s32 func_001FDA78();
 extern s32 btlPollEffectWaitTask();
 extern s32 btlHasRegisteredAphNamePanelTask();
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
-extern void func_0019C590(s32, s32, s32, s32);
+extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 extern void func_003003F0(const char *fmt, ...);
 extern s8 D_00324510[];
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
@@ -662,7 +662,7 @@ s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
 
     if (link->elapsedTicks == 0) {
         if (owner != NULL) {
-            func_0019C590(state->dialogId, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
+            itfMesSetTextSlotFromValue(state->dialogId, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         func_003003F0("JYOKYO ID : %d\n", state->dialogId);
         btlReplaceDialogTasksAndQueueMessage(state->dialogId, link->arg);
@@ -702,7 +702,7 @@ s32 btlUpdateLinkedDialogueEffect(BtlObjLink *link) {
     }
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_0019C590(((BtlJyokyoState *)battleState)->alternateDialogId, 0, owner->partyRecord.unitId,
+            itfMesSetTextSlotFromValue(((BtlJyokyoState *)battleState)->alternateDialogId, 0, owner->partyRecord.unitId,
                           (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlJyokyoState *)battleState)->alternateDialogId, link->arg);
@@ -760,7 +760,7 @@ s32 btlPollTimedPresentationTask(BtlObjLink *link) {
 
     if (link->elapsedTicks == 0) {
         if (owner != NULL) {
-            func_0019C590(state->thirdDialogId, 0, owner->partyRecord.unitId,
+            itfMesSetTextSlotFromValue(state->thirdDialogId, 0, owner->partyRecord.unitId,
                           (owner->partyRecord.flags & 0x20) ? 1 : 2);
         }
         btlReplaceDialogTasksAndQueueMessage(state->thirdDialogId, link->arg);
@@ -796,7 +796,7 @@ s32 btlPollEffectWaitTask(BtlObjLink *link) {
 
     if (link->elapsedTicks == 0) {
         if (link->owner != 0) {
-            func_0019C590(((BtlJyokyoState *)battleState)->dialogId, 0, *(u16 *)&link->arg, 0xD);
+            itfMesSetTextSlotFromValue(((BtlJyokyoState *)battleState)->dialogId, 0, *(u16 *)&link->arg, 0xD);
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlJyokyoState *)battleState)->dialogId, 0x75);
     }

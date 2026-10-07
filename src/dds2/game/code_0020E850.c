@@ -129,7 +129,7 @@ typedef struct BtlPackedCtx {
     s32 unk4;
 } BtlPackedCtx;
 extern s32 D_00435E5C;
-extern void func_001A45C0(s32, s32, s32, s32);
+extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 extern void func_001B8580(s32);
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
@@ -666,7 +666,7 @@ s32 btlPollActorDialogTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
+            itfMesSetTextSlotFromValue(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], link->arg);
     }
@@ -706,7 +706,7 @@ s32 btlUpdateLinkedDialogueEffect(void *arguments) {
     }
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->messageWindows[1], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
+            itfMesSetTextSlotFromValue(battleState->messageWindows[1], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[1], link->arg);
     }
@@ -764,7 +764,7 @@ s32 btlPollTimedPresentationTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->scriptTarget, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 1 : 2);
+            itfMesSetTextSlotFromValue(battleState->scriptTarget, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 1 : 2);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->scriptTarget, link->arg);
     }
@@ -798,7 +798,7 @@ s32 btlPollEffectWaitTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (link->owner != 0) {
-            func_001A45C0(battleState->messageWindows[0], 0, *(u16 *)&link->arg, 0xD);
+            itfMesSetTextSlotFromValue(battleState->messageWindows[0], 0, *(u16 *)&link->arg, 0xD);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], 0x75);
     }
@@ -873,7 +873,7 @@ s32 btlAdvanceActorEffectLabelTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
-            func_001A45C0(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
+            itfMesSetTextSlotFromValue(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
             func_0035C860(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
             itfMesCopyStringToWindowTableSlot(battleState->messageWindows[0], 1, text);
         }
