@@ -20,9 +20,14 @@ understand and document how the games work by reconstructing readable source
 code from their retail binaries. Matching builds verify the reconstruction
 against the original executables.
 
-Building requires your own lawfully obtained copy of the corresponding game.
-Disc images and retail executables are not included; the required files are
-extracted locally from your copy.
+> [!IMPORTANT]
+> **This is a binary reconstruction and analysis project for understanding and
+> documenting how the games work. You cannot use this repository to play the
+> games; it is not a port.**
+>
+> Building requires your own lawfully obtained copy of the corresponding game.
+> Required files are extracted locally from your copy. Disc images and retail
+> executables are not included.
 
 ## Status and versions
 

@@ -873,8 +873,8 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback) {
     return 0;
 }
 
-void mnuDrawSlotIcons(s32 x, s32 context) {
-    DatPartyRecord *slot = &datGameState->party[((CampMenuContext *)context)->partyWindow.slots[3].unk10C->cursor->index];
+void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
+    DatPartyRecord *slot = &datGameState->party[page->lists[0]->cursor->index];
     s32 i;
     s32 y;
     s32 handle;
@@ -930,13 +930,13 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
 }
 
-void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(u8 *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, spriteFlags);
     mnuDrawPartyInfoSprites(0, 0, 0, entry, spriteState, spriteFlags);
     itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);
     mnuDrawTextSprite(0x220, 0xa20, 0, 0xa09dc380, D_003BAA70 + ((PartyEntryCopy *)entry)->displayId * 17 + 0x110, spriteFlags);
     itfDrawGridWithResolvedSlot(0x120, 0xad0, 0, 1, *(s32 *)(obj + 0x14), 0x25, spriteFlags);
-    mnuDrawSlotIcons(-0x16, id);
+    mnuDrawSlotIcons(-0x16, page);
 }
 
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);

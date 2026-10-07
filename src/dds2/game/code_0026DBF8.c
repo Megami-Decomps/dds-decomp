@@ -3549,9 +3549,51 @@ void mnuResetMantraPanelAnimationStates(u32 unused, s32 view) {
 void func_002803A0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002803A8);
+typedef struct MantraSpinState {
+    u8 pad00[0x20];
+    u8 phaseA;
+    u8 phaseB;
+    u8 phaseC;
+    u8 pad23[9];
+    s16 selected;
+} MantraSpinState;
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425C98);
+s32 func_002803A8(u32 x, u32 y, u32 z, u32 amount, u32 unused, MantraSpinState *state, u32 packet) {
+    u8 slots[14] = {68, 14, 35, 7, 21, 28, 83, 94, 59, 90, 84, 92, 91, 64};
+    f32 spinA;
+    f32 spinB;
+    u32 i;
+
+    state->phaseA += 1;
+    if (state->phaseA >= 0xB5) {
+        state->phaseA = 0;
+    }
+    state->phaseB += 1;
+    if (state->phaseB >= 0xC9) {
+        state->phaseB = 0;
+    }
+    state->phaseC += 1;
+    if (state->phaseC >= 0xFB) {
+        state->phaseC = 0;
+    }
+    spinA = state->phaseC / 250.0f;
+    spinB = state->phaseB / 200.0f;
+    mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, z, amount, 0xC1, 0, packet);
+    mnuDrawMantraRotatedSprite(x, y, z, amount, 0xC2, 0, packet, spinA * 360.0f);
+    mnuDrawMantraRotatedSprite(x, y, z, amount, 0xC3, 0, packet, spinB * 360.0f);
+    for (i = 0; i < 14; i++) {
+        if (state->selected == slots[i]) {
+            mnuDrawMantraSprite(x, y, z, amount, 0xCA + i, 0, packet);
+            i = -1;
+            break;
+        }
+    }
+    if (i != -1) {
+        mnuDrawMantraSprite(x, y, z, amount, 0xCA, 0, packet);
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425CA8);
 

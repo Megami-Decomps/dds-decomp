@@ -10,6 +10,7 @@
 #include "btl_action.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "mnu_result.h"
 #include "dat_command.h"
 #include "sdf_sif_command.h"
 
@@ -190,10 +191,10 @@ typedef struct BattleController {
     u8 pad2C8[0x14];
     BattleItemDrop itemDrops[3];
     s32 moneyEarned; /* 0x2E8 */
-    u8 pad2EC[4];
+    u32 rewardMacca; /* 0x2EC */
     s32 experienceEarned; /* 0x2F0 */
     s32 epEarned; /* 0x2F4 */
-    u8 pad2F8[4];
+    s32 rewardAp; /* 0x2F8 */
     u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
     u8 pad2FE[0x3DE];
     s32 (*commandRangeOverride)(UiObject *, s32);
@@ -219,6 +220,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 
 extern char D_00415158[];
+extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 
 extern void btlBossDebugPrintf(const char *, ...);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
@@ -1690,7 +1692,32 @@ void btlResetActorEntryState(void) {
     memset((void *)(btlRuntime + 0x2DC), 0, 12);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA400);
+s32 func_001AA400(BrsRewardSummary *rewards) {
+    u32 i;
+
+    if (btlIsRuntimeAllocated() == 0) {
+        return 0;
+    }
+    rewards->macca = mdlFlagTest(0x290) ? ((BattleController *)btlRuntime)->rewardMacca : 0;
+    rewards->mitama = ((BattleController *)btlRuntime)->specialEnemyDefeats;
+    rewards->totalExp = ((BattleController *)btlRuntime)->experienceEarned;
+    rewards->totalAp = ((BattleController *)btlRuntime)->rewardAp;
+    btlBossDebugPrintf("btl:----------------------\n");
+    btlBossDebugPrintf("btl:money =%d\n", rewards->macca);
+    btlBossDebugPrintf("btl:exp   =%d\n", rewards->totalExp);
+    btlBossDebugPrintf("btl:ep    =%d\n", rewards->totalAp);
+    btlBossDebugPrintf("btl:mitama=%d\n", rewards->mitama);
+    for (i = 0; i < 5; i++) {
+        rewards->unitApBonus[i] = datGameState->party[i].huntExp;
+        btlBossDebugPrintf(D_004150B0, rewards->unitApBonus[i], datGameState->party[i].unitId);
+    }
+    btlBossDebugPrintf("btl:----------------------\n");
+    for (i = 0; i < 3; i++) {
+        rewards->icons[i].id = ((BattleController *)btlRuntime)->itemDrops[i].id;
+        rewards->icons[i].param = ((BattleController *)btlRuntime)->itemDrops[i].count;
+    }
+    return 1;
+}
 
 s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     s32 buffer[2];
@@ -1857,6 +1884,8 @@ s32 btlGetCurrentPartyEntryRecord(void) {
 DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
     return &datGameState->party[index];
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004150B0);
 
 void btlSyncPlayerWork(BtlUnit *actor) {
     DatPartyRecord *src = &actor->partyRecord;

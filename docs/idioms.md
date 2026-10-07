@@ -2794,12 +2794,12 @@ record and these pointer contracts live in `mnu_work.h`.
 DDS1 `func_00276898` receives a `KwlnTask *` and explicitly forwards it to
 `kwlnTaskGetUserValue`; the native accessor loads the task's `+0x38` word.
 `CampMenuContext.partyWindow` starts at `+0x15C`, with native slots at window
-`+0x78` and a `0x134` stride. The slot's `unk10C` list pointer accounts for
-the context `+0x67C` selection read, while `partyWindow.lists[0]` accounts
-for context `+0x7D8`. These are fields of the same primary window, not
-overlapping selection-list views. The following `PartyPanel` starts at
-`+0x7EC`. Slot flags and sprite `profileFade` are accessed through their
-existing owners.
+`+0x78` and a `0x134` stride. Its `lists[0]` is at window `+0x67C`, hence
+context `+0x7D8`. `mnuDrawSlotIcons` receives the window itself: the native
+staff scene callback passes `context + 0x15C` through the party-status draw
+to that icon routine. No additional slot field or overlapping selection-list
+view is needed. The following `PartyPanel` starts at `+0x7EC`. Slot flags
+and sprite `profileFade` are accessed through their existing owners.
 
 The scene initializer resets one `EffectSlotSet *`: the reset producer
 accepts no second argument, regardless of an incidental native `$5` value.
