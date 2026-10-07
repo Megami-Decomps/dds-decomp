@@ -57,7 +57,6 @@ extern s32 mnuFindMatchingPartyEntryIndex(s32);
 extern s32 mnuSeekListNode(s32, struct MenuList *);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
-extern s32 mnuCreatePanelGroup(s32);
 extern MenuProfilePanel *mnuCreateProfilePanel(s32);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);

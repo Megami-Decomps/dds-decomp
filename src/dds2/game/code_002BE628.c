@@ -538,14 +538,6 @@ extern MenuPanelItem *mnuCreatePanelItem(void);
 
 extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32, s32, s32);
 
-typedef struct MenuPanelGroup {
-    u8 pad00[0x0C];
-    s32 texture;       /* 0x0C */
-    MenuPanelItem *entries[5]; /* 0x10 */
-    u32 selection;     /* 0x24 */
-    s32 initialValue;  /* 0x28: initialized to 0x100 */
-} MenuPanelGroup;
-
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
@@ -553,7 +545,7 @@ extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 
 /* Create the five panel items owned by this group and clear its selection. */
-s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
+MenuPanelGroup *mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     MenuPanelItem **itemCursor = group->entries;
     s32 panelIndex;
@@ -565,7 +557,7 @@ s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     mnuClearPanelGroupSelection(group);
     group->texture = texture;
     group->initialValue = 0x100;
-    return (s32)group;
+    return group;
 }
 
 /* Release every owned panel item before releasing the group allocation. */

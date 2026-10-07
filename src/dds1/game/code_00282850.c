@@ -154,13 +154,6 @@ extern s32 func_002877A8(void);
 
 typedef struct MenuPanelItem MenuPanelItem;
 
-typedef struct MenuPanelGroup {
-    u8 pad00[0x0C];
-    MenuPanelItem *children[5]; /* 0x0C */
-    u32 selection;    /* 0x20 */
-    s32 initialValue; /* 0x24: initialized to 0x100 */
-} MenuPanelGroup;
-
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
@@ -448,7 +441,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
 /* Create the five panel items owned by this group and clear its selection. */
-s32 mnuCreatePanelGroup(s32 parent) {
+MenuPanelGroup *mnuCreatePanelGroup(s32 parent) {
     MenuPanelGroup *group = sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
@@ -458,7 +451,7 @@ s32 mnuCreatePanelGroup(s32 parent) {
     }
     mnuClearPanelGroupSelection(group);
     group->initialValue = 0x100;
-    return (s32)group;
+    return group;
 }
 
 /* Release every owned panel item before releasing the group allocation. */

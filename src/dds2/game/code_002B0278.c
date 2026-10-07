@@ -118,9 +118,7 @@ extern void evtStageTestQueueMotion();
 
 extern s32 D_00435E48;
 
-extern void mnuApplyPackedGroupValues();
-
-extern void func_002C0D18();
+extern void func_002C0D18(s32, s32, s32, DatPartyRecord *, MenuPanelGroup *, s32, s32);
 
 extern void func_002C10F0();
 
@@ -264,7 +262,7 @@ typedef struct MenuContext {
     u8 pad11C[0x168];
     MenuPageWindow partyWindow; /* 0x284: lists, page slots and selection */
     PartyPanel partyPanel; /* 0xA928: counters and five native 0x34-byte entries */
-    s32 panelGroup;        /* 0xAA34 */
+    MenuPanelGroup *panelGroup; /* 0xAA34 */
     MenuSpriteState *panelRequest; /* 0xAA38 */
     MenuSpriteState *panelEffects; /* 0xAA3C */
     u8 padAA40[8];
@@ -411,8 +409,8 @@ extern const char *D_003E78D0[];
 extern s32 D_00435E70;
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const char *, s32);
 extern void func_002AF2E0(s32, s32, s32, MenuContext *);
-extern void mnuSetPanelItemsFromRow(s32, u32);
-extern void mnuClearStaffSceneConfigEntries(s32);
+extern void mnuSetPanelItemsFromRow(MenuPanelGroup *, s32);
+extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);
 
 void mnuDrawStaffPartySelectionPanel(s32 task) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(task);
@@ -966,7 +964,6 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
-extern s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
@@ -1163,7 +1160,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
 }
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, s32 packedGroup, s32 group, s32 unused, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
     mnuApplyPackedGroupValues(packedGroup, entry->itemId);
     func_002C0D18(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
     func_002C10F0(0, 0, 0, entry, group, spriteFlags);
