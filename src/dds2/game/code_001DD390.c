@@ -493,6 +493,8 @@ extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(void *, s32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+extern u32 mdlGetBroadcastValue(MdlCtx *);
+extern void sdfQueueNonzeroResourceId(s32);
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *);
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *);
@@ -526,7 +528,7 @@ extern void func_001F5868(s32, s32, s32, s32);
 extern void func_001F5320(s32, s32, s32, s32);
 extern SdfFlagListParams D_003BDCC8;
 extern void mnuReleaseSoundBufferLocked(void);
-extern void evtSetUnitAlphaTransition(u32, s32, u32);
+extern void evtSetUnitAlphaTransition(EvtUnit *, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern s32 fldReleaseIdleSceneActorResources(BtlUnit *);
@@ -1938,7 +1940,7 @@ void btlApplyUnitMotionSelection(u8 *object, u32 index, s32 mode, f32 rate) {
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, color);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0, color);
+        evtSetUnitAlphaTransition(unit->ext, 0, color);
         unit->overlayColor = color;
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
@@ -2071,7 +2073,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, color);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0, color);
+        evtSetUnitAlphaTransition(unit->ext, 0, color);
         unit->overlayColor = color;
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
@@ -3040,7 +3042,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         func_001E1BB8(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            evtSetUnitAlphaTransition((u32)((BtlUnit *)object)->ext, 0, 0);
+            evtSetUnitAlphaTransition(((BtlUnit *)object)->ext, 0, 0);
             ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_00417AF0, effect, model);
@@ -3065,7 +3067,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        evtSetUnitAlphaTransition((u32)((BtlUnit *)object)->ext, 0, 0);
+        evtSetUnitAlphaTransition(((BtlUnit *)object)->ext, 0, 0);
         ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
     }
     ((BtlUnit *)object)->gunResourceFlags = (((BtlUnit *)object)->gunResourceFlags & ~1) | 2;
@@ -3116,27 +3118,47 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B30);
 
+/* Exact 0x1C argument allocation owned by the model-change task creator. */
+typedef struct BtlModelChangeArgs {
+    BtlUnit *unit;
+    u32 resourceKind;
+    u32 resourceId;
+    s32 delay;
+    u32 duration;
+    s32 elapsed;
+    u8 phase;
+    u8 transitionMode;
+    u8 pad1A[2];
+} BtlModelChangeArgs;
+typedef char BtlModelChangeArgsSizeCheck[sizeof(BtlModelChangeArgs) == 0x1C ? 1 : -1];
+typedef char BtlModelChangeArgsElapsedOffsetCheck[((u32)&((BtlModelChangeArgs *)0)->elapsed == 0x14) ? 1 : -1];
+typedef char BtlModelChangeArgsPhaseOffsetCheck[((u32)&((BtlModelChangeArgs *)0)->phase == 0x18) ? 1 : -1];
+
 void btlBeginModelChange(u32 argumentsAddress) {
-    u32 *arguments = (u32 *)argumentsAddress;
-    s32 owner = arguments[0];
-    u32 model = arguments[1];
-    u32 variant = arguments[2];
+    BtlModelChangeArgs *arguments = (BtlModelChangeArgs *)argumentsAddress;
+    BtlUnit *unit = arguments->unit;
+    u32 model = arguments->resourceKind;
+    u32 variant = arguments->resourceId;
     s32 status = btlHasMatchingModel(model, variant);
 
     if (status == 0) {
-        btlRequestModelAssetByMode(owner, model, variant);
-        ((BtlUnit *)owner)->gunResourceFlags = (((BtlUnit *)owner)->gunResourceFlags | 1) & ~2;
+        btlRequestModelAssetByMode((u32)unit, model, variant);
+        unit->gunResourceFlags = (unit->gunResourceFlags | 1) & ~2;
         btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
     }
 }
 
+extern void func_001E1B80(BtlUnit *, BtlUnit *);
+extern BtlUnit *btlCreateUnit(void);
+extern void btlDestroyUnit(BtlUnit *);
+
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E50E0);
 
-extern u32 func_001E50E0(u32 *);
+extern u32 func_001E50E0(BtlModelChangeArgs *);
 
 BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08, s32 value0C, s32 value10, u8 flag19) {
-    BtlRuntimeTask *task = btlAllocTask(0x1C);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlModelChangeArgs));
+    BtlModelChangeArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0x1A;
@@ -3145,14 +3167,14 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08,
     task->onStart = btlBeginModelChange;
     task->callback = func_001E50E0;
     args = btlGetTaskArguments((s32)task);
-    args->actor = unit;
-    args->option = option;
-    args->unk_08 = value08;
-    args->unk_0C = value0C;
-    args->unk_10 = value10;
-    args->flag19 = flag19;
-    args->flag18 = 0;
-    args->unk_14 = 0;
+    args->unit = unit;
+    args->resourceKind = option;
+    args->resourceId = value08;
+    args->delay = value0C;
+    args->duration = value10;
+    args->transitionMode = flag19;
+    args->phase = 0;
+    args->elapsed = 0;
     return task;
 }
 
@@ -3236,8 +3258,8 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
             btlFlagUnitDefeatCandidate(unit);
             mdlBroadcastMasked(unit->ext->owner, 0);
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            evtSetUnitAlphaTransition((u32)unit->ext, 0, 0);
-            evtSetUnitAlphaTransition((u32)unit->ext, args->fadeIn, args->color);
+            evtSetUnitAlphaTransition(unit->ext, 0, 0);
+            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, args->color);
             unit->flags |= 0x100000;
         }
         if (args->count == args->fadeIn - 1) {
@@ -3250,7 +3272,7 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
     if (!(unit->flags & 0x100000)) {
         if (args->count >= total) {
             evtSetUnitRgbTransition(unit->ext, 0, args->color);
-            evtSetUnitAlphaTransition((u32)unit->ext, 0, args->color);
+            evtSetUnitAlphaTransition(unit->ext, 0, args->color);
             return 1;
         }
     }
@@ -3288,7 +3310,7 @@ s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
         if (args->count == args->fadeOut - 1) {
             unit->overlayColor = 0x80000000;
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            evtSetUnitAlphaTransition((u32)unit->ext, args->fadeIn, 0);
+            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, 0);
         }
     } else {
         unit->overlayColor = 0x80000000;
@@ -3326,7 +3348,7 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     if ((s32)arguments[1] == -1) {
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0, unit->overlayColor);
+        evtSetUnitAlphaTransition(unit->ext, 0, unit->overlayColor);
         btlClearUnitDefeatCandidate(unit);
         return 1;
     }
@@ -3335,7 +3357,7 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     }
     if (arguments[1] == 0) {
         evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0,
+        evtSetUnitAlphaTransition(unit->ext, 0,
                                   (unit->overlayColor & 0xFFFFFF) | 0x80000000);
     }
     if ((s32)arguments[2] >= (s32)arguments[1]) {
@@ -3420,7 +3442,7 @@ u32 func_001E6228(u32 *arguments) {
             evtSetUnitRgbTransition(unit->ext, 10, 0x80000000);
         } else if (arguments[2] == 10) {
             evtSetUnitRgbTransition(unit->ext, 0, 0x80000000);
-            evtSetUnitAlphaTransition((u32)unit->ext, 6, 0);
+            evtSetUnitAlphaTransition(unit->ext, 6, 0);
             unit->flags |= 0x200000;
         }
         if ((unit->flags & 0x200000) == 0 && (s32)arguments[2] >= 16) {
@@ -3957,7 +3979,6 @@ BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E7648);
 
-extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void func_001E3E20(BtlUnit *);
 extern void func_002034A8(struct SoundResourceLink *);
 extern void btlUpdateUnitCommandEffect(struct SoundLink *);
@@ -4064,7 +4085,6 @@ extern void sndFreeLink(struct SoundLink *);
 
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
-extern void sdfQueueNonzeroResourceId(s32);
 
 extern void btlReleaseActorModelResources(BtlUnit *);
 
