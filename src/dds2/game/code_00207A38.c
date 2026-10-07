@@ -764,7 +764,38 @@ void btlUpdateUnitActors(void) {
         }
     }
 }
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00209078);
+extern void evtSetUnitStatusFlags(struct EvtUnit *);
+extern void evtSetUnitNormalizedDirection(struct EvtUnit *, s32);
+extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+extern u32 kwlnDrawControlFlags;
+
+/* Refresh active actor lighting and restore eligible enemy colors. */
+void func_00209078(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = state->units;
+    struct EvtUnit *effect;
+
+    while (unit != NULL) {
+        if (unit->flags & 2) {
+            if (unit->stateFlags & 0x10) {
+                effect = unit->ext;
+                evtSetUnitStatusFlags(effect);
+                VU0_LOAD_VF(vf10, unit->lightDirection);
+                evtSetUnitNormalizedDirection(effect, 0);
+                if ((*(u64 *)&unit->flags & 0x4E0) == 0x420) {
+                    if (btlGetEntryFlagsUnlessDisabled(&unit->partyRecord) & 0x200) {
+                        evtSetUnitRgbTransition(unit->ext, 0, unit->baseColor);
+                    }
+                }
+            }
+        }
+        unit = unit->nextActor;
+    }
+    if (state->commandRestrictFlags & 0x800000) {
+        kwlnDrawControlFlags |= 0x2000000;
+    }
+}
 
 
 /* Count matching units with bit 0 set, excluding every unit with bit 0x20. */
