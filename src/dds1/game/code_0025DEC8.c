@@ -1,40 +1,27 @@
 #include "common.h"
+#include "mnu_list.h"
+#include "mnu_shop.h"
 
-extern u32 D_003BAA9C;
+extern s32 D_003BAA9C;
 
-extern u64 itfDrawBankTextWithLayoutFlags(u64, u64, u64, u16, u32, u64);
+struct FrFontGlyph;
+struct TextStyleNode;
 
-typedef struct ItfGlyphData {
-    u8 pad00[0x64];
-    u16 code; /* 0x64 */
-} ItfGlyphData;
+extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern void frFontSetChildColors(struct TextStyleNode *, u32);
+extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
-typedef struct ItfGlyphEntry {
-    u8 pad00[0x1C];
-    ItfGlyphData *data; /* 0x1C */
-    s32 active; /* 0x20 */
-} ItfGlyphEntry;
+void itfEmitSelectedGlyph(ShopScene *context, s32 unused, s32 layoutFlags,
+                   u32 color, u32 glyphAttribute) {
+    struct MenuList *list;
+    struct FrFontGlyph *glyph;
 
-typedef struct ItfGlyphList {
-    u8 pad00[0x14];
-    ItfGlyphEntry *selected; /* 0x14 */
-} ItfGlyphList;
-
-typedef struct ItfGlyphDisplayContext {
-    u8 pad00[0x70];
-    ItfGlyphList *glyphList; /* 0x70 */
-} ItfGlyphDisplayContext;
-
-void itfEmitSelectedGlyph(ItfGlyphDisplayContext *context, u64 unused, u64 parentGlyph,
-                   u64 color, u64 glyphAttribute) {
-    ItfGlyphEntry *entry;
-    u64 glyph;
-
-    entry = context->glyphList->selected;
-    if (entry->active != 0) {
-        glyph = itfDrawBankTextWithLayoutFlags(0x970, 0xb58, 1, entry->data->code, D_003BAA9C,
-                              parentGlyph);
-        frFontSetChildColors(glyph, color);
+    list = context->window->list;
+    if (list->count != 0) {
+        glyph = (struct FrFontGlyph *)itfDrawBankTextWithLayoutFlags(0x970, 0xb58, 1, list->cursor->camp.id, D_003BAA9C,
+                              layoutFlags);
+        frFontSetChildColors((struct TextStyleNode *)glyph, color);
         func_001958A0(glyph, 1, glyphAttribute);
         frFontQueueGlyphInSelectedSlot(glyph);
         return;
