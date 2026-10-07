@@ -1353,7 +1353,54 @@ void itfSendTablePacket(SdfListHead *list, s32 index, s32 flag) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1590);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1668);
+extern u8 D_00436598[8];
+extern u8 D_004365A0[8];
+extern u8 D_003B43A8[];
+extern u8 D_003B43B0[];
+extern TextVector D_003B43B8[4];
+
+/* Draw filled and remaining quad regions. The optional highlight is produced
+ * as signed fixed-point vectors and passed as their four-word RGBA image. */
+void func_001A1668(s32 value, s32 limit, s32 highlight,
+                   DrawVertex *bounds, u32 tail, DrawColorRec *filledColor,
+                   DrawColorRec *remainingColor, SdfListHead *command) {
+    DrawVertex vertices[6];
+    TextVector highlightColors[4];
+    s32 left = bounds[0].x;
+    s32 right = bounds[1].x;
+    s32 width = (right - left) >> 4;
+    s32 filledWidth;
+
+    if (limit > 0) {
+        filledWidth = (((value << 16) / limit) * width) >> 12;
+    } else {
+        filledWidth = 0;
+    }
+    vertices[0].x = left;
+    vertices[0].y = bounds[0].y;
+    vertices[1].x = filledWidth + left;
+    vertices[1].y = bounds[0].y;
+    vertices[2].x = right;
+    vertices[2].y = bounds[0].y;
+    vertices[3].x = left;
+    vertices[3].y = bounds[1].y;
+    vertices[4].x = filledWidth + left;
+    vertices[4].y = bounds[1].y;
+    vertices[5].x = right;
+    vertices[5].y = bounds[1].y;
+    itfDrawQuadFlat4(vertices, filledColor, D_00436598, D_004365A0, tail, command);
+    itfDrawQuadFlat4(vertices, remainingColor, D_00436598 + 4, D_004365A0, tail, command);
+    if (highlight != 0 && filledWidth >= 3) {
+        itfScaleVectors(highlightColors, filledColor->components[0],
+                        filledColor->components[1], filledColor->components[2],
+                        filledColor->components[3], D_003B43B8, 4);
+        itfEmitQuadListA(vertices, (DrawColorRec *)highlightColors,
+                        D_003B43A8, D_003B43B0, 3, tail, command);
+        itfEmitQuadListA(vertices, (DrawColorRec *)highlightColors,
+                        D_003B43A8 + 3, D_003B43B0 + 3, 3, tail, command);
+    }
+}
+
 
 u32 func_001A1810(void) {
     return 0;
