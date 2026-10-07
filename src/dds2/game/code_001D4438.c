@@ -111,7 +111,8 @@ extern char D_003B5D10[];
 
 extern char D_003B5B10[];
 
-extern s32 btlGetEntryFlagsUnlessDisabled(void *);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+extern void btlSyncPlayerWork(BtlUnit *);
 
 extern void fldInitializeSceneGroups(void);
 
@@ -2099,7 +2100,7 @@ extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 void btlStartActorDefeatTransition(ActionStateLink *command) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *actor = command->unit;
-    u16 *profile = &actor->partyRecord.flags;
+    DatPartyRecord *profile = &actor->partyRecord;
     BtlRuntimeTask *soundTask;
     BtlRuntimeTask *object;
     s64 sequence;
@@ -2188,7 +2189,7 @@ void btlRemoveEligibleActorSceneTask(ActionStateLink *task) {
     } else if (unit->flags & 0x400) {
         hookResult = 0;
         work = (BtlState *)btlGetRuntime();
-        entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord.flags);
+        entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
         if (work->hook618 != 0) {
             hookResult = work->hook618(unit);
         }

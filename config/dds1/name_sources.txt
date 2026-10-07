@@ -3809,7 +3809,7 @@
 0x002284E0	evtCommandQueueBgmWithFade	inferred	confidence=high; src/dds1/game/code_00228058.c:func_002284E0; Reads sound-id and fade script parameters and queues the validated BGM change. [names_qp9.tsv]
 0x00228570	evtOpcodeSetBgmVolumePan	inferred	Event opcode obtains two script arguments and passes them to evtSetBgmVolumePan.
 0x002285B0	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds1/game/code_00228058.c:func_002285B0; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
-0x002285F0	evtOpcodeRefreshTaskData	inferred	Forwards two event operands to the already-named evtRefreshTaskData.
+0x002285F0	evtOpcodeRefreshTaskData	inferred	Forwards the task ID and resource key to evtRefreshTaskEffectTexture.
 0x00228630	evtOpcodeInitializeEffectSoundChannel	inferred	Invokes effInitCh72Id and returns event opcode completion status one.
 0x00228650	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds1/game/code_00228058.c:func_00228650; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
 0x002286C0	evtGetMirroredSolarPhase	inferred	Returns the raw phase below nine, otherwise folds the low three bits around eight.
@@ -4040,8 +4040,10 @@
 0x00241B58	evtFindTaskById	inferred	formats e%03d_p name from id then kwlnTaskGetTaskByName, returns handle or 0
 0x00241BB8	evtGetTaskData	inferred	finds task by id then returns its data pointer via 00101A70, or 0
 0x00241BF0	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
-0x00241CA0	evtRefreshTaskData	inferred	rebuilds taskdata+0x38 via func_00241BF0/func_002D3288/effSetCh72Id, freeing old
+0x00241CA0	evtRefreshTaskEffectTexture	inferred	Releases the task's previous effect texture, resolves the keyed resource, updates effect channel 72, and retains the replacement at task-data +0x38. The former name described rebuilding that field via 0x00241BF0/0x002D3288 and freeing its old handle.
 0x00241D28	evtSpawnResourceObject	inferred	looks up the task resource, creates an effect object (flags 1) and scales it by slot scale ratio D_003BAA20[index]/D_003BAA10 [names_M95_Event.tsv]
+0x00241F78	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
+0x002420B8	evtUpdateMotionSeTask	inferred	registered motion-SE task callback; matches its resource's motion and frame cues, updates the event sound sequence, logs EVE_SE
 0x00242278	evtFreeEventPackState	inferred	Frees the state returned by func_00101A70.
 0x00242298	evtCreateMotionSeTask	inferred	creates the named mse task and retains its three arguments
 0x00242340	evtBeginEventPackScriptLoad	inferred	confidence=high; matched-C; src/dds1/event/evtEventPack.c:51:func_00242340; Formats grouped event .be script path, requests resource, saves handle and sets loading state.; twin=0x0025D758, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -4828,10 +4830,12 @@
 0x002830F0	mnuSetPanelGroupSelection	inferred	Sets selected index word of panel group. [names_reviewed5.tsv]
 0x002830F8	mnuClearPanelGroupSelection	inferred	Resets selected index word to sentinel all bits set. [names_reviewed5.tsv]
 0x00283108	mnuGetPanelGroupSelection	inferred	Returns the panel group's stored selected index. [names_reviewed5.tsv]
+0x00283110	mnuDrawAndAdvancePanelGroup	inferred	draws five party-stat panel items and advances the group fade value
 0x00283238	mnuSetGroupSelection	inferred	Curated DDS2 twin 0x002C0F00: selects one of five panel-group children and updates its state (+0x20) and option (+0x1C).
 0x00283280	mnuCreateSpriteState	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x002832F8	mnuFreeSpriteStateWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:464:func_002832F8; Sprite-state storage-release entry; forwards its incoming work address to chip-block release without releasing a texture.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00283310	mnuDrawRangeSpriteVariant	inferred	Looks up a range entry and derives the draw variant from its index and alternate flag; sequel twin 002C1068 uses a different variant formula.
+0x002833B0	mnuDrawPartyInfoSprites	inferred	draws party-record info sprites and glyphs using the party level and sprite fade state
 0x00283788	mnuAllocateSimpleSprite	inferred	Allocates zeroed sprite work and initializes its position and other fields. [names_reviewed8.tsv]
 0x00283820	mnuFreeSimpleSpriteWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:496:func_00283820; Simple-sprite storage-release entry adjacent to its cleared 0x28-byte constructor; only frees the work allocation.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00283BE0	mnuResetGradientFadeColor	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:508:func_00283BE0; Sets the menu gradient fade color and resets its active flag and blend amount to zero.; source=revalidated-unapplied-names_R_Names22b.tsv:78 [names_qp13.tsv]
@@ -6091,6 +6095,7 @@
 0x002D35B8	sdfBuildResourceTransferPacket	inferred	U2
 0x002D37A8	sdfCreateResourcePacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D38B8	sdfCreatePatchableResourcePacket	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:121:func_002D38B8; Allocates a resource packet with a linked callback header, builds its payload from resource entry zero, then appends the header to the fixup list and the payload range to the draw list.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x002D39B0	sdfBuildHostToLocalImagePacket	inferred	Builds destination image-transfer registers with TRXDIR0, host image DMA reference and qword count, then TEXFLUSH.
 0x002D3B28	sdfCreateDescriptorPacket	inferred	Allocates descriptor, initializes it, and queues its packet range.
 0x002D3C30	sdfPendingQueuePush	inferred	DDS2 func_0032CAE0 [names_M49_GridSdf.tsv]
 0x002D3D00	sdfDetachQueue	inferred	takes D_003BDA00 list, clears each node link, returns head
@@ -6118,7 +6123,7 @@
 0x002D4490	sdfFlushPoolNodes	inferred	chains packet lists of pool nodes and terminates the tail [names_M37_SmallSweep6.tsv]
 0x002D4540	sdfClearLinkedPacketList	inferred	Clears all four linked-packet list header fields. [names_reviewed8.tsv]
 0x002D4558	sdfAppendLinkedPacketNode	inferred	Appends a node to the list's first/last pointer chain and clears its next word.
-0x002D4578	sdfClearPacketListHead	inferred	Clears packet list head and first-node pointer. [names_reviewed8.tsv]
+0x002D4578	sdfClearPacketChain	inferred	Clears the linked-packet chain head and tail pointers.
 0x002D4588	sdfAppendPacketChainNode	inferred	Links a node after the stored tail or installs it as head. [names_reviewed8.tsv]
 0x002D45B0	sdfInitializeDmaReferenceTag	inferred	Initializes packet DMA tag with source address and GIF marker. [names_reviewed8.tsv]
 0x002D45F0	sdfBuildDmaReferenceChain	inferred	Builds chained DMA reference and terminal tag words. [names_reviewed8.tsv]
@@ -6127,6 +6132,7 @@
 0x002D47B8	sdfInitDrawPacket	inferred	sdf writes constant tag doublewords 0..7 of a DMA packet
 0x002D4800	sdfBuildSceneDrawHeader	inferred	Initializes packet header before writing scene draw fields. [names_reviewed8.tsv]
 0x002D48A8	sdfBuildTextureScenePacket	inferred	confidence=high; src/dds1/game/code_002D33C8.c:func_002D48A8; Builds texture setup for both rendering contexts, centered bounds, test/blend registers, and the draw packet. [names_qp9.tsv]
+0x002D49E8	sdfRefreshSceneNodePackets	inferred	Registered scene callback rebuilds both frame/depth contexts and refreshes paired FRAME words and texture packets from the retained graph view and buffer index.
 0x002D4BA0	sdfInitSceneNode	inferred	sets view box, draw packet and GS register words [names_M37_SmallSweep6.tsv]
 0x002D4C40	sdfAppendLinkedPacketPayload	inferred	Links the supplied packet node in one list and appends its payload at offset 0x10 to another.
 0x002D4D10	sdfAppendDmaPrimary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
@@ -6160,6 +6166,7 @@
 0x002D5B18	sdfInitializeExtendedDrawPacket	inferred	Initializes extended draw packet DMA header and writes its payload. [names_reviewed8.tsv]
 0x002D5B70	sdfCreateExtendedPacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D5C90	sdfPatchPacketResourceReference	inferred	Patches low packet reference bits from indexed resource table entry. [names_reviewed8.tsv]
+0x002D5CD0	sdfCreateGraphBufferCopyPacket	inferred	Builds a local-to-local GS copy packet from graph buffer zero into the destination, publishing its linked metadata node and DMA payload.
 0x002D5EB0	sdfAppendTexturedLinePacket	inferred	Allocates and appends packet containing UV and XYZ for two vertices. [names_reviewed8.tsv]
 0x002D5FD8	sdfBuildTriPacket104	inferred	Byte-identical dds2 twin 0x0032EE88; GIF packet with 0x104 flag and three vertex pairs [names_conflicts.tsv]
 0x002D6080	sdfQueueFlatTriangle	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1101:func_002D6080; Allocates a DMA/VIF packet containing three same-color XY vertices and appends it to the list.; source=revalidated-unapplied-names_R_Names31.tsv:34 [names_qp12_apply.tsv]
@@ -6181,6 +6188,7 @@
 0x002D7670	sdfBuildQuadPacket	inferred	four-corner packet fill, kind 0x102
 0x002D7720	sdfAppendClosedRectanglePacket	inferred	Allocates and appends five-vertex rectangle packet closing its first vertex. [names_reviewed8.tsv]
 0x002D7810	sdfInitializeObjectListRequest	inferred	Initializes synchronized request with object-list destructor. [names_reviewed8.tsv]
+0x002D7830	sdfCreateDrawNode	inferred	Allocates and clears the complete0x100 draw node, initializes self-links, color/sentinel and default transforms.
 0x002D78F0	sdfFreeNodeLists	inferred	Traverses two node lists and releases their allocations.
 0x002D7988	sdfReleaseFreeRoot	inferred	Byte-identical dds2 twin 0x00330838; Releases the root's node lists, workspace and root allocation. [names_conflicts.tsv]
 0x002D79C0	sdfCreateBufferedTransformSlot	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1501:func_002D79C0; Allocates a cleared slot, creates a buffered request and initializes identity matrix, zero vector and unit scale.; source=revalidated-unapplied-names_R_Names31.tsv:44 [names_qp12_apply.tsv]

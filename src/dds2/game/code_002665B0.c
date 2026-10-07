@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "evt_world.h"
 #include "mnu_list.h"
+#include "eff.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -23,7 +24,7 @@ extern void func_00101968(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(s32);
 extern s32 func_00268550(s32);
 extern s32 func_00268588(s32);
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 
 extern void func_00266C08();
@@ -50,7 +51,8 @@ typedef struct MenuSlotState {
     struct MenuList *secondaryList;
     s32 reduced;    /* 0x84 */
     s32 slot;       /* 0x88 */
-    u8 pad8C[0x1C];
+    u8 pad8C[0x18];
+    s32 panelFade; /* 0xA4 */
     s32 effect[7]; /* 0xA8 */
     s32 selectedSlots[2]; /* 0xC4: current slot, then previous slot */
     u8 padCC[0x14];
@@ -59,9 +61,9 @@ typedef struct MenuSlotState {
     u32 imageHandles[2]; /* 0xE8: native camp texture pair */
     u8 padF0[0x5C];
     s32 stage;      /* 0x14C */
-    u8 pad150[4];
+    s32 panelHoldFrames; /* 0x150 */
     s32 bgmHandle;  /* 0x154: encoded bank/track handle */
-    u8 pad158[0x128];
+    u8 panelWork[2][0x94]; /* 0x158: two native scrolling-panel records */
     u8 campIcons[0x174]; /* 0x280: owned badge-set work buffer */
     s32 reducedMode;     /* 0x3F4 */
 } MenuSlotState;
@@ -718,7 +720,7 @@ s32 mnuDrawLoadedProgressPanels(s32 resource, MenuProgressHost *host, s32 mode) 
     host->partyWindow.flags |= 0x280;
     mnuDrawListPanels(0, 0, 0, *(u8 *)(resource + 0x55), (s32)&host->partyWindow, mode);
     func_002C16F0(0, 0, 0, resource, *(u8 *)(resource + 0x55),
-                   host->effectResource, mode);
+                   (s32)host->effectResource, mode);
     return 1;
 }
 
@@ -865,7 +867,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         ((MenuSlotState *)obj)->selectedSlots[i] = -1;
     }
-    *(s32 *)(obj + 0x150) = 0xF;
+    ((MenuSlotState *)obj)->panelHoldFrames = 0xF;
     mnuTerminalSelectResourceBank((MenuSlotState *)obj);
     mnuApplyFadeTrackMode(0, (MenuSlotState *)obj);
     mnuResetGradientFadeColor(obj + 0x3E8, 0x60);
@@ -1040,24 +1042,13 @@ void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
     option->statusFlags = retainedStatus;
 }
 
-typedef struct MenuBackdropSprite {
-    u8 pad00[0x24];
-    f32 rotation;
-    u8 pad28[0x78];
-} MenuBackdropSprite;
-
-typedef struct MenuBackdropBank {
-    u8 pad00[0x18];
-    MenuBackdropSprite *sprites;
-} MenuBackdropBank;
-
 extern void mnuDrawCampIconBackdrop(void *work, s32 priority);
 
 /* Draw and animate the mode-dependent terminal backdrop. */
 void mnuDrawTerminalBackdrop(s32 address) {
     MenuSlotState *state = (MenuSlotState *)address;
-    MenuBackdropBank *bank;
-    MenuBackdropSprite *sprite;
+    EffectSlotSet *bank;
+    BdWork *work;
     s32 resource;
 
     if (state->stage == 0 || D_00437859 == 0) {
@@ -1067,8 +1058,8 @@ void mnuDrawTerminalBackdrop(s32 address) {
         switch (state->mode) {
         case 0:
             func_00306CD0(0, 0, 0, 0x100, 0, state->backdrop, 0, MNU_TEXT_DRAW_PRIORITY);
-            bank = (MenuBackdropBank *)state->overlay;
-            bank->sprites[0].rotation = 90.0f;
+            bank = (EffectSlotSet *)state->overlay;
+            bank->workEntries[0].angleDegrees = 90.0f;
             func_00306CD0(0x7B0, 0x698, 0, 0x100, 2, state->overlay, 0, MNU_TEXT_DRAW_PRIORITY);
             break;
         case 1:
@@ -1080,11 +1071,11 @@ void mnuDrawTerminalBackdrop(s32 address) {
         func_00306CD0(0, 0, 0, 0x100, 0, state->backdrop, 0, MNU_TEXT_DRAW_PRIORITY);
         resource = state->backdrop;
         func_00306CD0(0x60, -0x30, 0, 0x100, 0, resource, 1, MNU_TEXT_DRAW_PRIORITY);
-        bank = (MenuBackdropBank *)resource;
-        sprite = &bank->sprites[1];
-        sprite->rotation += 0.6f;
-        if (sprite->rotation > 360.0f) {
-            sprite->rotation -= 360.0f;
+        bank = (EffectSlotSet *)resource;
+        work = &bank->workEntries[1];
+        work->angleDegrees += 0.6f;
+        if (work->angleDegrees > 360.0f) {
+            work->angleDegrees -= 360.0f;
         }
     }
 }
@@ -1092,17 +1083,12 @@ void mnuDrawTerminalBackdrop(s32 address) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268838);
 
-/* The sequel stores the terminal panel's blend weight eight bytes later than DDS1.
- * Retail func_00268838 changes this field by +12/-17 and clamps it to 0..256. */
-typedef struct {
-    u8 pad00[0xA4];
-    s32 panelFade; /* 0xA4: blend weight, not a remaining-frame countdown */
-} SceneTimerView;
-
 /* Classify panel fade: zero, nonzero below sixty, or at least sixty.
- * This field is a blend weight, not a remaining-frame countdown. */
-s32 fldClassifyRemainingFrames(SceneTimerView *work) {
+ * This is a blend weight, not a remaining-frame countdown. */
+s32 fldClassifyRemainingFrames(void *address) {
+    MenuSlotState *work = (MenuSlotState *)address;
     s32 fade = work->panelFade;
+
     if (fade == 0) {
         return 0;
     }
@@ -1492,7 +1478,7 @@ s32 evtBHandleSelectionPanelInput(void *input) {
     if (result != 0) {
         return result;
     }
-    frames = fldClassifyRemainingFrames((SceneTimerView *)context);
+    frames = fldClassifyRemainingFrames(context);
     if (frames != 2) {
         return 0;
     }
@@ -1547,7 +1533,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
 
     mnuDrawTerminalBackdrop(state);
     func_00268838(0, state);
-    if (fldClassifyRemainingFrames(state) != 2) {
+    if (fldClassifyRemainingFrames((void *)state) != 2) {
         return 0;
     }
     mnuDispatchTransitionHostCallbacks(state);
@@ -1810,7 +1796,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
     }
     if (*panel == 0) {
         if (evtGetMessageWindowControlState() == 0) {
-            if (fldClassifyRemainingFrames(state) == 0) {
+            if (fldClassifyRemainingFrames((void *)state) == 0) {
                 mnuSetPopupEntry(panel, D_003CE97C);
             }
         }
@@ -2070,7 +2056,7 @@ s32 evtBStartSelectionChainAfterFade(void *request) {
     s32 result = func_002C4038(state->dispatchWork, dispatch, 0, request);
 
     if (result == 0) {
-        if (*dispatch == 0 && fldClassifyRemainingFrames((SceneTimerView *)state) == 0) {
+        if (*dispatch == 0 && fldClassifyRemainingFrames((void *)state) == 0) {
             switch (state->stage) {
             case 1:
                 kwlnFadeInStart(0, 0, 0, 15);

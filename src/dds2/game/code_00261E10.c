@@ -24,6 +24,9 @@ extern s32 evtGetMessageWindowControlState(void);
 extern s32 kwlnFadeIsActive(void);
 
 extern u32 kwlnTaskGetUserValue();
+extern s32 datAddCurrencyClamped(s32);
+extern s32 mnuCampFindListedItemIndex(s32);
+extern void mdlFlagClear(s32);
 extern void func_002619A8(s32, s32);
 extern void func_0025FD78(s32);
 extern void func_00297320(s32);
@@ -730,7 +733,44 @@ s32 func_00263F50(s32 progressDelta) {
     return datGameState->progressTotal;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00263FB0);
+/* Apply the selected shop transaction and preserve its progress baseline. */
+s32 func_00263FB0(KwlnTask *task) {
+    MenuTerminalContext *state;
+    CampWindowParams *values;
+    s32 itemId;
+    s32 operation;
+    s32 total;
+
+    state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    values = &state->window->list->cursor->camp;
+    itemId = values->id;
+    operation = state->ownedWindows[0]->list->cursor->camp.value + 1;
+    total = values->value * state->multiplier;
+    state->unkC8 = datGameState->progressTotal;
+    switch (operation) {
+    case 1:
+    case 2:
+    case 3:
+        datAddCurrencyClamped(-total);
+        if (mnuCampFindListedItemIndex(itemId) < 0) {
+            datGameState->inventory.counts[itemId] += state->multiplier;
+        }
+        if (!evtIsAllowedId(itemId)) {
+            func_00263F50(total / 100);
+        }
+        break;
+    case 4:
+        datAddCurrencyClamped(total);
+        datGameState->inventory.counts[itemId] -= state->multiplier;
+        if (itemId == 0x54) {
+            mdlFlagClear(0xA20);
+        }
+        func_00263F50(total / 100);
+        break;
+    }
+    values->value = values->price;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00264120);
 
@@ -860,7 +900,6 @@ u32 func_00264848(void) {
 }
 
 extern void ptyAdjustItemQuantity(s32, s32);
-extern void datAddCurrencyClamped(s32);
 extern s32 func_00260DF0(s32);
 extern u8 func_00260FE8(s32, s32);
 extern u8 func_00261018(s32, s32);

@@ -3,6 +3,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "sdf.h"
+#include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mdl.h"
@@ -198,7 +199,6 @@ extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
-extern s32 sdfCreateFormattedSifCommand();
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern s32 D_00437CB8;
 extern s32 D_00437CBC;
@@ -538,14 +538,6 @@ extern MenuPanelItem *mnuCreatePanelItem(void);
 
 extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32, s32, s32);
 
-typedef struct MenuPanelGroup {
-    u8 pad00[0x0C];
-    s32 texture;       /* 0x0C */
-    MenuPanelItem *entries[5]; /* 0x10 */
-    u32 selection;     /* 0x24 */
-    s32 initialValue;  /* 0x28: initialized to 0x100 */
-} MenuPanelGroup;
-
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
@@ -553,7 +545,7 @@ extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 
 /* Create the five panel items owned by this group and clear its selection. */
-s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
+MenuPanelGroup *mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     MenuPanelItem **itemCursor = group->entries;
     s32 panelIndex;
@@ -565,7 +557,7 @@ s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     mnuClearPanelGroupSelection(group);
     group->texture = texture;
     group->initialValue = 0x100;
-    return (s32)group;
+    return group;
 }
 
 /* Release every owned panel item before releasing the group allocation. */
@@ -600,7 +592,7 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
     return group->selection;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawAndAdvancePanelGroup);
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
     mnuSetPanelItemSelection(group->entries[index], selection);
@@ -631,27 +623,21 @@ void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId) {
     } while (nextIndex < 5);
 }
 
-typedef struct MenuSpriteState {
-    u8 pad00[0x10];
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 initialValue; /* 0x1C: initialized to 0x100 */
-} MenuSpriteState;
-
-/* Create a zeroed sprite-position state with its native initial value. */
-void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
+/* Create the sprite-resource state with its native initial value. */
+MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
+                                      struct EffectSlotSet *resourceSet1,
+                                      struct EffectSlotSet *resourceSet2) {
     MenuSpriteState *spriteState = sdfAllocSizeClassBlock(MNU_SPRITE_STATE_BYTES);
     memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
-    spriteState->x = x;
-    spriteState->y = y;
-    spriteState->z = z;
+    spriteState->resourceSets[0] = resourceSet0;
+    spriteState->resourceSets[1] = resourceSet1;
+    spriteState->resourceSets[2] = resourceSet2;
     spriteState->initialValue = 0x100;
     return spriteState;
 }
 
-void mnuFreeSpriteStateWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
+    sdfReleaseChipBlock(spriteState);
 }
 
 /* The sequel selects its draw variant from the range index plus eight. */
@@ -665,19 +651,21 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
 
-/* Create the DDS2 sprite-position record with its native initial value. */
-void *mnuAllocateSimpleSprite(s32 x, s32 y, s32 z) {
+/* Create the DDS2 simple sprite state from its three resource sets. */
+MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
+                                       struct EffectSlotSet *resourceSet1,
+                                       struct EffectSlotSet *resourceSet2) {
     MenuSpriteState *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
-    sprite->x = x;
-    sprite->y = y;
-    sprite->z = z;
+    sprite->resourceSets[0] = resourceSet0;
+    sprite->resourceSets[1] = resourceSet1;
+    sprite->resourceSets[2] = resourceSet2;
     sprite->initialValue = 0x100;
     return sprite;
 }
 
-void mnuFreeSimpleSpriteWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSimpleSpriteWork(MenuSpriteState *sprite) {
+    sdfReleaseChipBlock(sprite);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C16F0);
@@ -2855,10 +2843,10 @@ void *evtBattleStageTestScreen(void) {
 
     sdfInitPacketList(packetList);
     kwlnDrawSpriteCell(packetList, 0x84, 0x46, 0x14, 9);
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00380708.append((SdfListHead *)&D_00380708, packetList);
     if (D_0037F510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_00437CB8, D_00437CBC);
@@ -2961,4 +2949,3 @@ INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB0);
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB8);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CBC);
-

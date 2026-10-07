@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 #include "sdf.h"
+#include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mnu_shop.h"
@@ -152,13 +153,6 @@ extern s32 sdfAllocSizeClassBlock(u32);
 extern s32 func_002877A8(void);
 
 typedef struct MenuPanelItem MenuPanelItem;
-
-typedef struct MenuPanelGroup {
-    u8 pad00[0x0C];
-    MenuPanelItem *children[5]; /* 0x0C */
-    u32 selection;    /* 0x20 */
-    s32 initialValue; /* 0x24: initialized to 0x100 */
-} MenuPanelGroup;
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
@@ -370,14 +364,14 @@ typedef struct MenuPanelState {
     u32 state; /* 0x14 */
     u32 firstValueA; /* 0x18 */
     u32 firstValueB; /* 0x1C */
-    MenuPoint firstPosition; /* 0x20 */
+    MenuGridSlot firstSlot; /* 0x20 */
     u32 secondValueA; /* 0x28 */
     u32 secondValueB; /* 0x2C */
-    MenuPoint secondPosition; /* 0x30 */
-    MenuPoint thirdPosition; /* 0x38 */
+    MenuGridSlot secondSlot; /* 0x30 */
+    MenuGridSlot thirdSlot; /* 0x38 */
     u32 thirdValueA; /* 0x40 */
     u32 thirdValueB; /* 0x44 */
-    MenuPoint fourthPosition; /* 0x48 */
+    MenuGridSlot fourthSlot; /* 0x48 */
     u32 fourthValueA; /* 0x50 */
     u32 fourthValueB; /* 0x54 */
     u32 fourthValueC; /* 0x58 */
@@ -407,36 +401,36 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void func_00282CA8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_00282CA8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
-    itfGridStorePosition(&panel->firstPosition, x, y);
+    itfGridStorePosition(&panel->firstSlot, resource, index);
 }
 
-void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
-    itfGridStorePosition(&panel->secondPosition, x, y);
+    itfGridStorePosition(&panel->secondSlot, resource, index);
 }
 
 void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 target) {
     panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
 }
 
-void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index) {
     panel->thirdValueA = valueA;
     panel->thirdValueB = valueB;
-    itfGridStorePosition(&panel->thirdPosition, x, y);
+    itfGridStorePosition(&panel->thirdSlot, resource, index);
 }
 
-void func_00282D50(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y, u32 additionalValue) {
+void func_00282D50(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index, u32 additionalValue) {
     panel->fourthValueA = valueA;
     panel->fourthValueB = valueB;
-    itfGridStorePosition(&panel->fourthPosition, x, y);
+    itfGridStorePosition(&panel->fourthSlot, resource, index);
     panel->fourthValueC = additionalValue;
 }
 
@@ -447,7 +441,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
 /* Create the five panel items owned by this group and clear its selection. */
-s32 mnuCreatePanelGroup(s32 parent) {
+MenuPanelGroup *mnuCreatePanelGroup(s32 parent) {
     MenuPanelGroup *group = sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
@@ -457,7 +451,7 @@ s32 mnuCreatePanelGroup(s32 parent) {
     }
     mnuClearPanelGroupSelection(group);
     group->initialValue = 0x100;
-    return (s32)group;
+    return group;
 }
 
 /* Release every owned panel item before releasing the group allocation. */
@@ -490,34 +484,28 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
     return group->selection;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawAndAdvancePanelGroup);
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
     mnuSetPanelItemSelection(group->children[index], selection);
     mnuSetPanelItemOption(group->children[index], option);
 }
 
-typedef struct MenuSpriteState {
-    u8 pad00[0x10];
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 initialValue; /* 0x1C: initialized to 0x100 */
-} MenuSpriteState;
-
-/* Create a zeroed sprite-position state with its native initial value. */
-void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
+/* Create a zeroed sprite-resource state with its native initial value. */
+MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
+                                      struct EffectSlotSet *resourceSet1,
+                                      struct EffectSlotSet *resourceSet2) {
     MenuSpriteState *spriteState = sdfAllocSizeClassBlock(MNU_SPRITE_STATE_BYTES);
     memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
-    spriteState->x = x;
-    spriteState->y = y;
-    spriteState->z = z;
+    spriteState->resourceSets[0] = resourceSet0;
+    spriteState->resourceSets[1] = resourceSet1;
+    spriteState->resourceSets[2] = resourceSet2;
     spriteState->initialValue = 0x100;
     return spriteState;
 }
 
-void mnuFreeSpriteStateWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
+    sdfReleaseChipBlock(spriteState);
 }
 
 /* Select the range entry's sprite variant before submitting its draw request. */
@@ -534,23 +522,26 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     func_002BF4E0(x, y, depth, color, 1, drawArg, rangeIndex * 2 + variant, texture);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyInfoSprites);
 
-/* Create the DDS1 sprite record, including its color and texture words. */
-u32 *mnuAllocateSimpleSprite(u32 x, u32 y, u32 z, u32 color, u32 texture) {
-    u32 *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
+/* Create the DDS1 sprite record, including its five resource sets and blend weight. */
+MenuSimpleSpriteState *mnuAllocateSimpleSprite(
+    struct EffectSlotSet *resourceSet0, struct EffectSlotSet *resourceSet1,
+    struct EffectSlotSet *resourceSet2, struct EffectSlotSet *resourceSet3,
+    struct EffectSlotSet *resourceSet4) {
+    MenuSimpleSpriteState *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
-    sprite[4] = x;
-    sprite[5] = y;
-    sprite[6] = z;
-    sprite[7] = color;
-    sprite[8] = texture;
-    sprite[9] = 0x100;
+    sprite->resourceSets[0] = resourceSet0;
+    sprite->resourceSets[1] = resourceSet1;
+    sprite->resourceSets[2] = resourceSet2;
+    sprite->resourceSets[3] = resourceSet3;
+    sprite->resourceSets[4] = resourceSet4;
+    sprite->blendFactor = 0x100;
     return sprite;
 }
 
-void mnuFreeSimpleSpriteWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *sprite) {
+    sdfReleaseChipBlock(sprite);
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283838);
@@ -2393,7 +2384,6 @@ extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
-extern s32 sdfCreateFormattedSifCommand();
 extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
@@ -2403,10 +2393,10 @@ void *evtBattleStageTestScreen(void) {
 
     sdfInitPacketList(packetList);
     kwlnDrawSpriteCell(packetList, 0x84, 0x46, 0x14, 9);
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
     if (D_00324510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_003BC7D0, D_003BC7D4);

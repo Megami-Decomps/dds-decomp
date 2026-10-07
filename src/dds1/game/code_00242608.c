@@ -2,6 +2,8 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "sdf.h"
+#include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
 #include "evt_unit.h"
 #include "dat_state.h"
 #include "fld.h"
@@ -730,16 +732,13 @@ extern SdfPoolNode D_00325708;
 extern u8 D_00325860[];
 extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
-extern void sdfClearLinkedPacketList(void *list);
-extern void sdfCreatePatchableResourcePacket(void *list, void *linkedList, s32 arg2, s32 arg3,
-                                            s32 width, s32 height, void *resource, s32 arg7,
-                                            s32 arg8, s32 (*alloc)(s32));
-extern void sdfAppendPacketChainNode(void *head, void *node);
+extern void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
+extern void sdfAppendPacketChainNode(SdfPacketChain *head, SdfLinkedPacketList *node);
 extern void sdfCreateDescriptorPacket();
 
 void func_00243BF0(CampScene *scene) {
     s32 surface;
-    s32 context;
+    SdfLinkedPacketList *context;
     s32 handle;
 
     if (scene->descriptorBackingHandle == 0) {
@@ -749,11 +748,11 @@ void func_00243BF0(CampScene *scene) {
     }
     memset((void *)scene->descriptorResource, 0x40, 0x70000);
     surface = sdfAllocatePacketList(0);
-    context = sdfAllocPacketAligned(0x10);
-    sdfClearLinkedPacketList((void *)context);
-    sdfCreatePatchableResourcePacket((void *)surface, (void *)context, 0, 0, 0x200, 0xE0,
-                                    (void *)scene->descriptorResource, 0, 0, 0);
-    sdfAppendPacketChainNode(D_00325860, (void *)context);
+    context = (SdfLinkedPacketList *)sdfAllocPacketAligned(0x10);
+    sdfClearLinkedPacketList(context);
+    sdfCreatePatchableResourcePacket((SdfListHead *)surface, context, 0, 0, 0x200, 0xE0,
+                                    scene->descriptorResource, 0, 0, 0);
+    sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
     D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
 }
 

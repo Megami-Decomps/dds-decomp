@@ -2,6 +2,7 @@
 #include "sdf.h"
 #include "evt_unit.h"
 #include "file.h"
+#include "evt_motion_se.h"
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -19,7 +20,7 @@ extern void sdfReleaseChipBlock(s32);
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D230);
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
-s32 func_0025D390(s32 eventId, s32 resourceId) {
+s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     EvtPackLoadState *data;
     EvtPackEntry *entry;
     s32 count;
@@ -68,7 +69,7 @@ s32 func_0025D390(s32 eventId, s32 resourceId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D4D0);
+INCLUDE_ASM(const s32, "event/evtEventPack", evtUpdateMotionSeTask);
 
 /* Free the current task's user-value block. */
 void evtFreeEventPackState(void) {
@@ -78,24 +79,24 @@ void evtFreeEventPackState(void) {
     sdfReleaseChipBlock(stateHandle);
 }
 
-void func_0025D4D0(void);
+void evtUpdateMotionSeTask(void);
 extern void func_0035C860(char *, char *, ...);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 extern char D_00424890[];
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
-void evtCreateMotionSeTask(s32 taskArg, s32 namePart1, s32 namePart2) {
+void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
-    s32 *params;
+    EvtMotionSeTaskParams *params;
 
-    func_0035C860(taskName, D_00424890, namePart1, namePart2);
+    func_0035C860(taskName, D_00424890, eventTaskId, resourceId);
     params = sdfAllocSizeClassBlock(0xC);
     memset(params, 0, 0xC);
-    params[0] = taskArg;
-    params[1] = namePart1;
-    params[2] = namePart2;
-    kwlnTaskCreate(taskName, 0x3EC, 0, 0, func_0025D4D0, evtFreeEventPackState, params);
+    params->modelKey = modelKey;
+    params->eventTaskId = eventTaskId;
+    params->resourceId = resourceId;
+    kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeEventPackState, params);
 }
 
 extern char D_004248A0[];
@@ -180,7 +181,7 @@ extern void effInitCh72Id(void);
 extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
-extern void sdfTexReleaseReferenceViaHandler(s32);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void sdfReleaseResourceAllocation(s32);
 extern void sdfReleaseChipBlock(s32);
@@ -200,15 +201,15 @@ void evtReleaseEventPackResources(void) {
         }
         if (state->effect71 != 0) {
             effInitCh71Id();
-            sdfTexReleaseReferenceViaHandler(state->effect71);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)state->effect71);
         }
         if (state->effect76 != 0) {
             effInitCh76Id();
-            sdfTexReleaseReferenceViaHandler(state->effect76);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)state->effect76);
         }
         if (state->effect75 != 0) {
             effInitCh75Id();
-            sdfTexReleaseReferenceViaHandler(state->effect75);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)state->effect75);
         }
         if (state->fileHandle != 0) {
             filePollEntryCleanup((struct FileCleanup *)state->fileHandle);

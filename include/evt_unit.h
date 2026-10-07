@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct MdlCtx;
+struct SdfTex;
 
 /* Effect-vector data saved/restored during the motion dry run. Planar aim
  * passes orientation to the quaternion-to-matrix VU routine. */
@@ -209,7 +210,7 @@ typedef struct EvtPackLoadState {
     u8 pad28[8];
     s32 sceneAllocation2;         /* 0x30 */
     u8 pad34[4];
-    s32 effect72;                 /* 0x38 */
+    struct SdfTex *effect72;      /* 0x38 */
     s32 effect71;                 /* 0x3C */
     s32 effect76;                 /* 0x40 */
     s32 effect75;                 /* 0x44 */

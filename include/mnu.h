@@ -221,6 +221,100 @@ typedef struct MenuPoint {
 
 struct EffectSlotSet;
 
+/* Native sprite-state allocation: three resource-set owners and a state word. */
+typedef struct MenuSpriteState {
+    u8 pad00[0x10];
+    struct EffectSlotSet *resourceSets[3];
+    s32 initialValue; /* 0x1C: initialized to 0x100 */
+} MenuSpriteState;
+
+typedef char MenuSpriteState_size_must_be_0x20[(sizeof(MenuSpriteState) == 0x20) ? 1 : -1];
+typedef char MenuSpriteState_resourceSets_offset_check[
+    ((u32)&((MenuSpriteState *)0)->resourceSets == 0x10) ? 1 : -1];
+typedef char MenuSpriteState_initialValue_offset_check[
+    ((u32)&((MenuSpriteState *)0)->initialValue == 0x1C) ? 1 : -1];
+
+MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *, struct EffectSlotSet *, struct EffectSlotSet *);
+void mnuFreeSpriteStateWork(MenuSpriteState *);
+
+#ifndef VERSION_DDS2
+void mnuDrawPartyInfoSprites(s32, s32, s32, void *, MenuSpriteState *, s32);
+#endif
+
+#ifdef VERSION_DDS2
+MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *, struct EffectSlotSet *,
+                                       struct EffectSlotSet *);
+void mnuFreeSimpleSpriteWork(MenuSpriteState *);
+#endif
+
+#ifndef VERSION_DDS2
+/* DDS1's simple sprite owns five effect resource sets and a blend factor. */
+typedef struct MenuSimpleSpriteState {
+    u8 pad00[0x10];
+    struct EffectSlotSet *resourceSets[5];
+    u32 blendFactor; /* 0x24: initial color-blend weight */
+} MenuSimpleSpriteState;
+
+typedef char MenuSimpleSpriteState_size_must_be_0x28[
+    (sizeof(MenuSimpleSpriteState) == 0x28) ? 1 : -1];
+typedef char MenuSimpleSpriteState_resourceSets_offset_check[
+    ((u32)&((MenuSimpleSpriteState *)0)->resourceSets == 0x10) ? 1 : -1];
+typedef char MenuSimpleSpriteState_blendFactor_offset_check[
+    ((u32)&((MenuSimpleSpriteState *)0)->blendFactor == 0x24) ? 1 : -1];
+
+MenuSimpleSpriteState *mnuAllocateSimpleSprite(
+    struct EffectSlotSet *, struct EffectSlotSet *, struct EffectSlotSet *,
+    struct EffectSlotSet *, struct EffectSlotSet *);
+void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *);
+#endif
+
+struct MenuPanelItem;
+
+/* Native group allocations own five panel items and retain their selection. */
+typedef struct MenuPanelGroup {
+    u8 pad00[0x0C];
+#ifdef VERSION_DDS2
+    s32 texture; /* 0x0C */
+    struct MenuPanelItem *entries[5]; /* 0x10 */
+    u32 selection; /* 0x24 */
+    s32 initialValue; /* 0x28 */
+#else
+    struct MenuPanelItem *children[5]; /* 0x0C */
+    u32 selection; /* 0x20 */
+    s32 initialValue; /* 0x24 */
+#endif
+} MenuPanelGroup;
+
+#ifdef VERSION_DDS2
+typedef char MenuPanelGroup_size_must_be_0x2C[(sizeof(MenuPanelGroup) == 0x2C) ? 1 : -1];
+typedef char MenuPanelGroup_texture_offset[((u32)&((MenuPanelGroup *)0)->texture == 0x0C) ? 1 : -1];
+typedef char MenuPanelGroup_entries_offset[((u32)&((MenuPanelGroup *)0)->entries == 0x10) ? 1 : -1];
+typedef char MenuPanelGroup_selection_offset[((u32)&((MenuPanelGroup *)0)->selection == 0x24) ? 1 : -1];
+typedef char MenuPanelGroup_initialValue_offset[((u32)&((MenuPanelGroup *)0)->initialValue == 0x28) ? 1 : -1];
+#else
+typedef char MenuPanelGroup_size_must_be_0x28[(sizeof(MenuPanelGroup) == 0x28) ? 1 : -1];
+typedef char MenuPanelGroup_children_offset[((u32)&((MenuPanelGroup *)0)->children == 0x0C) ? 1 : -1];
+typedef char MenuPanelGroup_selection_offset[((u32)&((MenuPanelGroup *)0)->selection == 0x20) ? 1 : -1];
+typedef char MenuPanelGroup_initialValue_offset[((u32)&((MenuPanelGroup *)0)->initialValue == 0x24) ? 1 : -1];
+#endif
+
+#ifdef VERSION_DDS2
+extern MenuPanelGroup *mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
+#else
+extern MenuPanelGroup *mnuCreatePanelGroup(s32 parent);
+#endif
+extern void mnuDestroyPanelGroup(MenuPanelGroup *group);
+extern void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject);
+extern void mnuSetPanelGroupSelection(MenuPanelGroup *group, u32 selection);
+extern void mnuClearPanelGroupSelection(MenuPanelGroup *group);
+extern u32 mnuGetPanelGroupSelection(MenuPanelGroup *group);
+extern void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option);
+#ifdef VERSION_DDS2
+extern void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId);
+#else
+extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, void *, MenuPanelGroup *, s32);
+#endif
+
 /* An indexed render slot owned by an effect resource set. */
 typedef struct MenuGridSlot {
     struct EffectSlotSet *set;
@@ -524,11 +618,12 @@ typedef struct MenuProgressHost {
     s32 loadState;
     PartyPanel partyPanel;
     MenuPageWindow partyWindow;
-    u32 panelGroup;
-    s32 effectResource;
+    MenuPanelGroup *panelGroup;
 #ifdef VERSION_DDS2
+    MenuSpriteState *effectResource;
     s32 currentEffect;
 #else
+    MenuSimpleSpriteState *effectResource;
     MenuProfilePanel *currentEffect;
 #endif
 } MenuProgressHost;
@@ -620,8 +715,8 @@ typedef struct MenuStaffContext {
     u8 pad288[0xA68C];
     struct MenuList *selection; /* 0xA914: retained party-selection list */
     u8 padA918[0x11C];
-    void *panelHandle;    /* 0xAA34 */
-    void *spriteHandle;   /* 0xAA38 */
+    MenuPanelGroup *panelHandle; /* 0xAA34 */
+    MenuSpriteState *spriteHandle; /* 0xAA38 */
     u8 padAA3C[0xC];
     void *menu;           /* 0xAA48: menu-mode-specific child allocation */
     u8 padAA4C[4];

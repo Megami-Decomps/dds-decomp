@@ -1,6 +1,7 @@
 #include "mnu.h"
 #include "itf.h"
 #include "sdf.h"
+#include "itf_panel_draw.h"
 
 #define ITF_PANEL_COLUMN_COUNT 4
 #define ITF_PANEL_ROW_COUNT 2
@@ -209,10 +210,10 @@ void itfSetPanelCornerGrid(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
 
 /* Write four fixed horizontal columns with inset top/bottom coordinates.
    x0 and x1 are intentionally unused; do not replace the fixed horizontal positions. */
-void itfSetPanelInsetVertexColumns(u8 *base, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfSetPanelInsetVertexColumns(UiSpriteBandPayload *base, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
-    PanelVert *vertices = (PanelVert *)(base + 4);
+    DrawVertex *vertices = base->vertices;
     s32 columnIndex;
     columnX[0] = 0x1A0;
     columnX[1] = 0x480;
@@ -299,21 +300,16 @@ void itfPanelInitRects30(PanelVert *data, s32 red, s32 green, s32 blue, s32 alph
     colorRow[1].y = alpha;
 }
 
-/* The panel's two four-channel colors begin 0x44 and 0x54 bytes in. */
-typedef struct PanelColorPair {
-    s32 pad00[0x11];
-    s32 first[4];
-    s32 second[4];
-} PanelColorPair;
+
 
 /* Set both panel colors to the same blue tint with zero alpha. */
-void itfPanelSetBlueTint(PanelColorPair *panel) {
-    s32 *colorRow = panel->first;
+void itfPanelSetBlueTint(UiSpriteBandPayload *panel) {
+    u32 *colorRow = panel->colors[0].components;
     colorRow[0] = 0x73;
     colorRow[1] = 0x87;
     colorRow[2] = 0xFF;
     colorRow[3] = 0;
-    colorRow = panel->second;
+    colorRow = panel->colors[1].components;
     colorRow[0] = 0x73;
     colorRow[1] = 0x87;
     colorRow[2] = 0xFF;
@@ -424,9 +420,92 @@ void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2658);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A29D8);
+extern DrawColorRec D_003B4720;
+extern DrawColorRec D_003B4730;
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2AF0);
+/* Bind the texture for the left cap, then draw the center and reversed right
+ * cap. Insets are captured before the first submission; Y bounds are live. */
+void func_001A29D8(UiSprite *panel, SdfListHead *command) {
+    DrawVertex rect[2];
+    DrawColorRec *color = (DrawColorRec *)&panel->unk2C;
+    UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
+    s32 leftInset = panel->left + 0x3E0;
+    s32 rightInset = panel->right - 0x3E0;
+
+    rect[0].x = panel->left;
+    rect[0].y = panel->top;
+    rect[1].x = leftInset;
+    rect[1].y = panel->bottom;
+    itfQueueTextureBoundQuadPacket(rect, &D_003B4720, color, panel->unk0C,
+                                  payload->texture, 0, command);
+
+    rect[0].x = leftInset;
+    rect[0].y = panel->top;
+    rect[1].x = rightInset;
+    rect[1].y = panel->bottom;
+    itfQueueColoredTexturedQuadPacket(rect, &D_003B4730, color, panel->unk0C, 0, command);
+
+    rect[0].x = panel->right;
+    rect[0].y = panel->top;
+    rect[1].x = rightInset;
+    rect[1].y = panel->bottom;
+    itfQueueColoredTexturedQuadPacket(rect, &D_003B4720, color, panel->unk0C, 0, command);
+}
+
+
+extern u8 D_003B4740[];
+extern u8 D_003B4750[];
+extern DrawColorRec D_003B4470;
+extern DrawColorRec D_003B4480;
+extern DrawColorRec D_003B4490;
+extern DrawColorRec D_003B44A0;
+
+/* Draw the three inset flat quads, then split a tall texture into top, stretch
+ * and bottom bands. The short path uses the live rectangle in the panel. */
+void func_001A2AF0(UiSprite *panel, SdfListHead *command) {
+    DrawVertex rect[2];
+    UiSpriteBandPayload *payload = (UiSpriteBandPayload *)panel->payload;
+    DrawVertex *vertices = payload->vertices;
+    DrawColorRec *colors = payload->colors;
+    s32 i;
+    s32 top;
+    s32 bottom;
+
+    colors[1].components[3] = (panel->unk38 * 0x20) >> 7;
+    for (i = 0; i < 3; i++) {
+        itfDrawQuadFlat4(vertices, colors, &D_003B4740[i * 4],
+                        &D_003B4750[i * 4], panel->unk0C, command);
+    }
+    bottom = panel->bottom;
+    top = panel->top;
+    if (bottom - top >= 0x569) {
+        s32 topEnd = top + 0x2B4;
+        s32 bottomStart = bottom - 0x2B4;
+        s32 *color = &panel->unk2C;
+
+        rect[0].x = panel->left;
+        rect[0].y = top;
+        rect[1].x = panel->right;
+        rect[1].y = topEnd;
+        itfQueueTextureBoundQuadPacket(rect, &D_003B4470, color, panel->unk0C,
+                                      payload->texture, 0, command);
+        rect[0].y = topEnd;
+        rect[1].y = bottomStart;
+        itfQueueTextureBoundQuadPacket(rect, &D_003B4480, color, panel->unk0C,
+                                      payload->texture, 0, command);
+        rect[0].y = bottomStart;
+        rect[1].y = panel->bottom;
+        itfQueueTextureBoundQuadPacket(rect, &D_003B4490, color, panel->unk0C,
+                                      payload->texture, 0, command);
+    } else {
+        itfQueueTextureBoundQuadPacket(&panel->left, &D_003B44A0,
+                                      &panel->unk2C, panel->unk0C,
+                                      payload->texture, 0, command);
+    }
+}
+
 
 /* Copy bounds and draw the tinted border; alpha uses the native signed 103/128 scale. */
 void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {

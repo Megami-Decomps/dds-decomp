@@ -57,8 +57,6 @@ extern s32 mnuFindMatchingPartyEntryIndex(s32);
 extern s32 mnuSeekListNode(s32, struct MenuList *);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
-extern s32 mnuCreatePanelGroup(s32);
-extern u32 *mnuAllocateSimpleSprite(u32, u32, u32, u32, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(s32);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
@@ -661,7 +659,12 @@ void mnuSetupStaffMenuProfilePage(s32 source, MenuProgressHost *work) {
     mnuSetWindowResource(index, window, work->staffSlots.pairResources[0], work->staffSlots.pairResources[1]);
     mnuAttachPartyIconBundle(index, window, work->staffSlots.pairResources[0]);
     work->panelGroup = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
-    work->effectResource = (s32)mnuAllocateSimpleSprite(work->staffSlots.baseResources[5], work->staffSlots.baseResources[2], work->staffSlots.baseResources[3], work->staffSlots.baseResources[0], work->staffSlots.pairResources[0]);
+    work->effectResource = mnuAllocateSimpleSprite(
+        (struct EffectSlotSet *)work->staffSlots.baseResources[5],
+        (struct EffectSlotSet *)work->staffSlots.baseResources[2],
+        (struct EffectSlotSet *)work->staffSlots.baseResources[3],
+        (struct EffectSlotSet *)work->staffSlots.baseResources[0],
+        (struct EffectSlotSet *)work->staffSlots.pairResources[0]);
     work->currentEffect = mnuCreateProfilePanel(source);
     mnuCacheProfilePanelGridPositions(work->currentEffect, work->staffSlots.pairResources[1], 5, 14, 15);
     func_00276720(window, 1, 1, 1);
@@ -692,7 +695,7 @@ s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {
     mnuDrawStageTestList(0, 0, 0, ((s8 *)control)[0x55],
         &work->partyWindow, context);
     func_00283838(0, 0, 0, (s32)control, ((s8 *)control)[0x55],
-        work->effectResource, context);
+        (s32)work->effectResource, context);
     return 1;
 }
 

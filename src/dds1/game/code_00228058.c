@@ -276,7 +276,7 @@ u32 evtOpcodeRefreshTaskData(void) {
 
     task = scrReadIntParameter(0);
     value = scrReadIntParameter(1);
-    evtRefreshTaskData(task, value);
+    evtRefreshTaskEffectTexture(task, value);
     return 1;
 }
 

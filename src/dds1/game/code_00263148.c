@@ -375,9 +375,6 @@ void func_00263A00(BrsSkillPackageWork *scene) {
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawPanelListDefault();
-extern void mnuSetGroupSelection(s32, s32, s32, s32);
-extern void func_00283110(s32, s32, s32, void *, s32, s32);
-extern void func_002833B0(s32, s32, s32, void *, s32, s32);
 extern void func_00263A00(BrsSkillPackageWork *);
 extern s8 evtStageTestUpdate(s32);
 extern u8 D_00325788[];
@@ -398,8 +395,8 @@ void func_00263B78(BrsSkillPackageWork *scene, s32 copyOptions) {
                                  scene->statGains[i]);
         }
     }
-    func_00283110(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
-    func_002833B0(0, 0, 0, item, scene->spriteHandle, 0x53);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
+    mnuDrawPartyInfoSprites(0, 0, 0, item, scene->spriteHandle, 0x53);
     func_00263A00(scene);
     evtStageTestUpdate((s32)D_00325788);
 }
