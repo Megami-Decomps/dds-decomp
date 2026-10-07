@@ -17,6 +17,26 @@ typedef struct EffectObject {
 
 extern u32 D_003BA9D0;
 
+/* Mode 0 is the initialized neutral tint; other values describe the native
+ * alpha updates performed by the paired transform renderer. */
+enum {
+    EFFECT_OPACITY_MODE_INITIAL = 0,
+    EFFECT_OPACITY_MODE_ALPHA_CLEAR = 2,
+    EFFECT_OPACITY_MODE_ALPHA_RISE_8 = 3,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_8_TO_32 = 4,
+    EFFECT_OPACITY_MODE_ALPHA_RISE_4 = 5,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_4 = 6,
+    EFFECT_OPACITY_MODE_ALPHA_RISE_2 = 7,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_2 = 8,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_11 = 9,
+    EFFECT_OPACITY_MODE_ALPHA_FADE_START = EFFECT_OPACITY_MODE_ALPHA_RISE_8,
+    EFFECT_OPACITY_MODE_ALPHA_FADE_END = EFFECT_OPACITY_MODE_ALPHA_RISE_4,
+    EFFECT_OPACITY_ALPHA_MAX = 0x80,
+    EFFECT_OPACITY_FALL_8_FLOOR = 0x20,
+    EFFECT_OPACITY_COLOR_NEUTRAL = 0x80808080,
+    EFFECT_OPACITY_COLOR_TRANSPARENT = 0x00808080
+};
+
 extern void *dds3GetWorldSecondaryObject(void);
 
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
@@ -25,6 +45,7 @@ extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
 extern void evtEndObjectValueTransition(EffWorldNode *object);
 extern void *sdfAllocSizeClassBlock(s32 size);
+extern void sdfReleaseChipBlock(void *memory);
 extern void dds3SetObjectFlags(void *, s32);
 
 u32 dds3GetEffectDataHandle(EffectObject *obj) {
@@ -577,7 +598,7 @@ s32 effObjInitializeTransformData(EffWorldNode *object) {
     data = object->data;
     data->resourceState = dds3CreateSlotResourceState(object);
     data->flags = 0;
-    data->opacityMode = 0;
+    data->opacityMode = EFFECT_OPACITY_MODE_INITIAL;
     data->activeId = -1;
     data->offset[0] = 0.0f;
     data->offset[1] = 0.0f;
@@ -758,13 +779,13 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
         fldSelectDisplayBuffer(0x22);
         fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
         opacityMode = data->opacityMode;
-        if (opacityMode < 5) {
-            if (opacityMode >= 3) {
-                if (object->color != 0x80808080) {
+        if (opacityMode < EFFECT_OPACITY_MODE_ALPHA_FADE_END) {
+            if (opacityMode >= EFFECT_OPACITY_MODE_ALPHA_FADE_START) {
+                if (object->color != EFFECT_OPACITY_COLOR_NEUTRAL) {
                     if (dds3TestObjectFlags(fldPlayerObject, 1)) {
                         u32 savedColor = object->color;
 
-                        object->color = 0x80808080;
+                        object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
                         func_001122F0(D_00325788 + data->activeId * 0x10, object);
                         object->color = savedColor;
                     } else {
@@ -796,7 +817,6 @@ extern void effDestroyNode(struct EffNode *);
 extern void billDispatchByKind(BillObj *);
 extern void effEventReleaseNode(struct EffEventWork *);
 extern void func_00190118(SoundMixer *);
-extern void sdfReleaseChipBlock(void *);
 
 /* Release each dependency according to the active state, clearing ownership
  * before releasing the next dependency. State 4 only borrows its handle. */
