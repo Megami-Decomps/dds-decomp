@@ -459,8 +459,8 @@ void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 groupIndex) {
 }
 
 /* Address the group's five packed color words. */
-s32 effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 groupIndex) {
-    return pool->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES;
+void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 groupIndex) {
+    return (void *)(pool->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES);
 }
 
 /* Store raw control bits: this view interprets them as a submission mode. */
