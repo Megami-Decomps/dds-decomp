@@ -2006,8 +2006,6 @@ void fldStartQuadPacketList(s32 quadState) {
 
 extern SdfPoolNode D_00325708;
 extern SdfPoolNode kwlnPositionedTextSurface;
-extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
-extern void *sdfFormatSifPacket(void *, const char *, ...);
 extern void sdfInvertScaledVuTransform(void);
 
 void func_0012B940(f32 x, f32 y, f32 z, s32 drawValue) {

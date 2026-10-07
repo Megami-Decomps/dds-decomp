@@ -10,7 +10,6 @@
 #include "eff.h"
 #include "sdf_sif_command.h"
 
-extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 
 extern void sdfReleaseChipBlock();
 extern void *sdfAllocAndClearQuadwords(s32 size);
@@ -130,9 +129,7 @@ extern char D_00421248[]; /* "%02x/%02x" */
 
 extern char D_00437068[]; /* "" */
 
-extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
 
-extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);

@@ -303,8 +303,6 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
-extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
-extern void *sdfFormatSifPacket(void *, const char *, ...);
 extern void *func_0011D3E8();
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
