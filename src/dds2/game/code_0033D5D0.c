@@ -127,7 +127,6 @@ typedef struct DevWorkerEntry {
     u8 pad10[8];
 } DevWorkerEntry;
 
-
 extern s32 SignalSema(s32 sema);
 
 extern s32 sdfDeviceWorkerPriority;
@@ -150,7 +149,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern u32 strlen(const char *s);
 extern f32 sdfNormalizedAsinSamples[];
-
 
 extern s32 sdfAllocGeneralBlock(s32 size);
 
@@ -236,9 +234,21 @@ extern char *strcpy(char *, char *);
 
 extern char *strcat(char *, char *);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
+/* SifCommand is the complete 0x10-byte input value. Console rendering uses
+ * source/end as x/y storage, argument as depth bits, and command as RGBA.
+ * Its RPC source/end interpretation remains unchanged. */
+extern void *func_0033D5D0(SifCommand *input, const char *format, void *args);
+extern void sdfDevConsInit(void);
+extern s32 func_00360E78(char *destination, const char *format, void *args);
+extern s32 sdfGetPacketCursor(void);
+extern void sdfSetPacketCursorAligned(s32 cursorAddress);
+struct SdfTex;
+extern u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
+extern u32 D_0040B810[96];
+/* Cached texture keeps the provider's opaque pointer/address boundary. */
+extern u32 D_00439194;
 
-extern void *func_0033D5D0(void *packet, const char *fmt, void *args);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
 
 void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index);
 
@@ -338,8 +348,6 @@ void func_0033DA30(const char *text) {
         func_00367B60(D_00438AC0, text);
     }
 }
-
-extern s32 func_00360E78(char *dst, const char *fmt, void *args);
 
 s32 sdfPrintFormattedDevMessage(const char *fmt, ...) {
     char buffer[0x100];
@@ -754,7 +762,6 @@ char *func_0033E818(char *path) {
     return result;
 }
 
-
 /* Capture seek/size replies, then wake the synchronous command waiter. */
 void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 callbackContext) {
     if (event != SDF_DEV_EVENT_SEEK_REPLY) {
@@ -830,7 +837,6 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EB80);
 char *sdfDevGetPathBuffer(void) {
     return D_0040B9D0;
 }
-
 
 void func_0033EC28(s8 value) {
     D_00438AE0 = value;
@@ -1403,7 +1409,6 @@ char *func_0033F650(char *path, s32 worker) {
     }
     return result;
 }
-
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
 

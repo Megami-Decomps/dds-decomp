@@ -186,10 +186,6 @@ extern u8 D_003BD478;
 extern s32 func_00312618(const char *, s32, void *, s32 *);
 extern void func_003003F0(const char *);
 
-extern void *func_002E4720(void *packet, const char *format, void *args);
-
-extern s32 func_00305B08(char *dst, const char *fmt, void *args);
-
 extern void func_002E4B80(const char *text);
 
 extern u8 sdfDiscReadMode;
@@ -210,6 +206,20 @@ extern s32 D_003BDA54;
 extern u8 *D_003BDA50;
 extern u8 D_003FA000[SDF_DEV_DISC_SECTOR_BYTES];
 extern void sdfServicePendingOperationUnderSemaphore(void);
+
+/* SifCommand is the complete 0x10-byte input value. Console rendering uses
+ * source/end as x/y storage, argument as depth bits, and command as RGBA.
+ * Its RPC source/end interpretation remains unchanged. */
+extern void *func_002E4720(SifCommand *input, const char *format, void *args);
+extern void sdfDevConsInit(void);
+extern s32 func_00305B08(char *destination, const char *format, void *args);
+extern s32 sdfGetPacketCursor(void);
+extern void sdfSetPacketCursorAligned(s32 cursorAddress);
+struct SdfTex;
+extern u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
+extern u32 D_00398660[96];
+/* Cached texture keeps the provider's opaque pointer/address boundary. */
+extern void *D_003BDA34;
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
 
@@ -640,7 +650,6 @@ void sdfDevMakeDiscPath(char *dst, char *src) {
     dst[2] = 0;
 }
 
-
 typedef struct Bytes7 {
     s8 b[7];
 } Bytes7;
@@ -860,7 +869,6 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     sdfReleaseChipBlock(state->resource);
     sdfReleaseChipBlock(state);
 }
-
 
 /* Move state from both active lists to the completed cache, evict the oldest
  * entry at nine cached states, and wake any remaining request on this worker. */
@@ -1346,7 +1354,6 @@ char *func_002E67A8(char *path, s32 worker) {
     return result;
 }
 
-
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E69F0);
 
 /* Allocate a request state and retain the callback's opaque context word. */
@@ -1362,7 +1369,6 @@ DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
     state->callbackContext = callbackContext;
     return state;
 }
-
 
 /* Resolve a path to its worker and enqueue an asynchronous read-only open. */
 DevState *sdfDevCreateCallbackState(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
@@ -1429,7 +1435,6 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
     return 0;
 }
 
-
 /* Queue a byte-counted write; return -1 without changing an inactive request. */
 s32 sdfDevQueueWrite(DevState *state, void *buffer, s32 byteCount) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
@@ -1441,7 +1446,6 @@ s32 sdfDevQueueWrite(DevState *state, void *buffer, s32 byteCount) {
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
-
 
 /* Clear an inactive request's result and return it to the active state. */
 s32 sdfDevReactivate(DevState *state) {
@@ -1475,7 +1479,6 @@ s32 sdfDevQueueReleaseState(DevState *state) {
     }
     return -1;
 }
-
 
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
 DevState *sdfDevCreateRequest(const char *path, s32 buffer, s32 byteCount,
@@ -1774,7 +1777,6 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     }
 }
 
-
 /* Mirror the phase into a quarter turn, then evaluate an odd ninth-degree polynomial. */
 f32 sdfSinPoly(f32 angle) {
     f32 phase = angle * SDF_TRIG_INVERSE_TAU;
@@ -1804,7 +1806,6 @@ f32 sdfSinPoly(f32 angle) {
     inputNinthPower = inputSeventhPower * inputSquared;
     return polynomialInput * SDF_TRIG_HALF_PI + inputCubed * -0.64596367f + inputFifthPower * 0.07968968f + inputSeventhPower * -0.0046737656f + inputNinthPower * 0.00015148419f;
 }
-
 
 /* Apply a quarter-turn phase shift to the existing sine approximation. */
 f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
