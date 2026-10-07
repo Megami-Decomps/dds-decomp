@@ -3249,9 +3249,11 @@ typedef struct FieldTargetGuideState {
     f32 targetYaw;
     f32 stepDistance;
     s32 age;
-    s32 unk50;
+    s32 updateFlags;
     s32 unk54;
-    u8 pad58[0xC];
+    f32 targetDistance; /* 0x58 */
+    f32 targetBearing;  /* 0x5C */
+    f32 viewAngleError; /* 0x60 */
     s32 unk64;
     s16 previousGridX;
     s16 previousGridY;
@@ -3264,7 +3266,7 @@ extern FieldTargetGuideState fldTargetGuideState;
 void fldResetViewState(void) {
     fldTargetGuideState.unk6C = -1;
     fldTargetGuideState.unk54 = 0;
-    fldTargetGuideState.unk50 = 0;
+    fldTargetGuideState.updateFlags = 0;
     fldTargetGuideState.unk64 = 0;
     fldTargetGuideState.mode = 0;
     fldTargetGuideState.cycleIndex = 0;
@@ -3333,7 +3335,8 @@ void fldMapGridToScreenPosition(s16 x, s16 y, f32 *outX, f32 *outY) {
 
 typedef struct FieldCoordinateRecord {
     u8 x, y, z, w;
-    u8 unk04[0xC];
+    u32 flags; /* 0x04 */
+    u8 pad08[8];
 } FieldCoordinateRecord;
 
 typedef struct {
@@ -3548,7 +3551,86 @@ void func_001523D0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001523F0);
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+
+void func_001523F0(void) {
+    FieldTargetGuideState *state = &fldTargetGuideState;
+    FldVec4 guidePosition;
+    FldVec4 areaPosition;
+    f32 dx;
+    f32 dz;
+    f32 magnitude;
+    f32 viewAngle;
+    f32 guideX;
+    f32 guideZ;
+    f32 areaX;
+    f32 areaZ;
+
+    state->updateFlags = 0;
+    fldCalcTargetDistanceYaw(&state->targetDistance, &state->targetBearing);
+
+    dx = sdfViewEyeVector[0] - sdfViewTargetVector[0];
+    dz = sdfViewEyeVector[2] - sdfViewTargetVector[2];
+    magnitude = fsqrtf(dx * dx + dz * dz);
+    viewAngle = 0.0f;
+    if (!(magnitude < 1.0f)) {
+        viewAngle = sdfAtan2(dx, dz) * 180.0f / 3.14f;
+    }
+    magnitude = fldAngleDifference(180.0f - viewAngle, state->yaw);
+    if (magnitude < 0.0f) {
+        magnitude = -magnitude;
+    }
+    guideX = state->position[0];
+    guideZ = state->position[2];
+    areaX = FLD_WORK->x;
+    areaZ = FLD_WORK->z;
+    state->viewAngleError = magnitude;
+
+    guidePosition.v[0] = guideX;
+    guidePosition.v[1] = 0.0f;
+    guidePosition.v[2] = guideZ;
+    guidePosition.v[3] = 1.0f;
+    areaPosition.v[0] = areaX;
+    areaPosition.v[1] = 0.0f;
+    areaPosition.v[2] = areaZ;
+    areaPosition.v[3] = 1.0f;
+
+    if (state->mode == 0) {
+        return;
+    }
+    if (state->mode == 1) {
+        if (state->moveTimer > 0) {
+            return;
+        }
+        if (state->gridX != D_00438EF8.x || state->gridY != D_00438EF8.y) {
+            func_001519E8(2);
+        }
+    }
+    state = &fldTargetGuideState;
+    if (state->mode == 4) {
+        if (state->moveTimer > 0) {
+            return;
+        }
+    }
+    if (state->mode == 3) {
+        if (state->gridX == D_00438EF8.x && state->gridY == D_00438EF8.y) {
+            func_001519E8(4);
+            state->updateFlags |= 0x80;
+            return;
+        }
+    }
+    state = &fldTargetGuideState;
+    if (state->mode == 2) {
+        if (state->routeRecord != NULL && (state->routeRecord->flags & 1) != 0) {
+            func_001519E8(3);
+            state->updateFlags |= 0x80;
+        }
+        return;
+    } else {
+        return;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F20);
 
