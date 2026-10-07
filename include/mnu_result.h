@@ -114,7 +114,7 @@ typedef struct BrsSkillPackageWork {
     PartyPanel partyPanel;
     MenuPageWindow partyWindow;
     s32 panelHandle;
-    s32 spriteHandle;
+    MenuSpriteState *spriteHandle;
     s32 extentExhausted;
 #ifdef VERSION_DDS1
     MenuAssets assets;

@@ -497,27 +497,21 @@ void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 o
     mnuSetPanelItemOption(group->children[index], option);
 }
 
-typedef struct MenuSpriteState {
-    u8 pad00[0x10];
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 initialValue; /* 0x1C: initialized to 0x100 */
-} MenuSpriteState;
-
-/* Create a zeroed sprite-position state with its native initial value. */
-void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
+/* Create a zeroed sprite-resource state with its native initial value. */
+MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
+                                      struct EffectSlotSet *resourceSet1,
+                                      struct EffectSlotSet *resourceSet2) {
     MenuSpriteState *spriteState = sdfAllocSizeClassBlock(MNU_SPRITE_STATE_BYTES);
     memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
-    spriteState->x = x;
-    spriteState->y = y;
-    spriteState->z = z;
+    spriteState->resourceSets[0] = resourceSet0;
+    spriteState->resourceSets[1] = resourceSet1;
+    spriteState->resourceSets[2] = resourceSet2;
     spriteState->initialValue = 0x100;
     return spriteState;
 }
 
-void mnuFreeSpriteStateWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
+    sdfReleaseChipBlock(spriteState);
 }
 
 /* Select the range entry's sprite variant before submitting its draw request. */
