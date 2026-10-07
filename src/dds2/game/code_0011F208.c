@@ -274,7 +274,7 @@ extern void dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
 
 extern void func_00112058(u32, s32, s32);
 
-extern u32 dds3SpawnCameraSlotObj5(s32, f32 *, f32 *);
+extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 
 extern s32 D_0038A67C[];
 
@@ -2001,7 +2001,7 @@ void fldCreatePlayerObject(void) {
     memset(rotation, 0, sizeof(rotation));
     rotation[3] = 1.0f;
     if (fldPlayerObject == 0) {
-        fldPlayerObject = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
+        fldPlayerObject = (u32)dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
         dds3SetWorldNodeValue((struct EffWorldNode *)fldPlayerObject, (u32)D_00412EC0);
         dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)fldPlayerObject);
         if (D_00435F30 != 0) {
