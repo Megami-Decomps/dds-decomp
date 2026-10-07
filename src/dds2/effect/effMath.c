@@ -38,7 +38,7 @@ s32 effMathStepBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
 }
 
 /* Direct-slot variant of effMathStepBezierSlot. */
-s32 func_00195D00(EffCubicBezierSlot *slot, f32 *out) {
+s32 effMathStepBezierSlotDirect(EffCubicBezierSlot *slot, f32 *out) {
     f32 w[4];
     f32 t = slot->t;
     f32 u = 1.0f - t;

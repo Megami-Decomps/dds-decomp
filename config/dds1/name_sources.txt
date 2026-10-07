@@ -7093,3 +7093,4 @@
 0x00185BD8	effBossCreatePairedChainResources	inferred	Allocates the retained resource owner, copies its parameters and creates two four-point Thunder chains.
 0x00185DE0	effBossCreatePairedChainsFromTable	inferred	Gets parameter block zero from the packed table and forwards it to the paired-chain resource constructor.
 0x00185E00	effBossCreatePairedChainsFromParams	inferred	Forwards the supplied parameter address unchanged to the paired-chain resource constructor.
+0x0018E0C8	effMathStepBezierSlotDirect	inferred	Evaluates the cubic from a direct slot, writes homogeneous output, advances and clamps t, and reports whether interpolation continues; direct-input sibling of effMathStepBezierSlot.

@@ -10765,3 +10765,4 @@ func_00320000 = 0x00320000; // type:func
 func_00320320 = 0x00320320; // type:func
 func_00323130 = 0x00323130; // type:func
 // END romwright
+effMathStepBezierSlotDirect = 0x0018E0C8; // type:func
