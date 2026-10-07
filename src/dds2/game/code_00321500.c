@@ -110,6 +110,52 @@ struct MenuRegistryTable {
 void func_003214D0(u32, s32);
 s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
 
+typedef struct MenuStateRecord {
+    union {
+        u16 word;
+        struct {
+            u16 completed : 1;
+        } bits;
+    } flags;
+    u8 pad02[2];
+    u16 waitCount; /* 0x04 */
+    s16 elapsedCount; /* 0x06: advances toward duration, then resets */
+    s16 value;     /* 0x08 */
+    u8 pad0A;
+    u8 mode;       /* 0x0B */
+    u8 pad0C[2];
+    s16 duration;  /* 0x0E */
+    u8 pad10[4];
+    s16 waitLimit; /* 0x14 */
+    s16 limit;     /* 0x16 */
+    u8 pad18[4];
+    s16 offsetX;   /* 0x1C: optional spawn offset */
+    s16 offsetY;   /* 0x1E */
+    s16 effect;    /* 0x20: positive values select an animated effect */
+} MenuStateRecord; /* Native named-record allocation is 0x22 bytes. */
+
+typedef struct MenuTimedStateNode {
+    u32 id;
+    u32 key;
+    struct MenuTimedStateNode *next;
+    struct MenuTimedStateNode *previous;
+    MenuStateRecord *record;
+} MenuTimedStateNode;
+
+typedef struct MenuTimedStateList {
+    u32 count;
+    MenuTimedStateNode *first;
+    MenuTimedStateNode *last;
+    u32 userData;
+    void (*onRemove)(u32, u32);
+    void (*onDestroy)(s32, u32);
+} MenuTimedStateList; /* Native callback-list allocation is 0x18 bytes. */
+
+s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
+extern MenuRuntimeRecord *func_00321A30(MenuStateRecord *record,
+                                        MenuRuntimeList *runtimeList,
+                                        s32 x, s32 y, f32 angle);
+
 u32 mnuCreateReleaseCallbackNode(void) {
     MenuCallbackNode *node = (MenuCallbackNode *)mnuCreateCallbackNode(0);
     node->callback = func_003214D0;
@@ -117,12 +163,36 @@ u32 mnuCreateReleaseCallbackNode(void) {
 }
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321528);
 
-void func_00321688(u32 left, u32 right, u32 value, u32 count) {
-    func_003216A8(left, right, value, count, 1);
+void func_003216A8(MenuTimedStateList *, MenuRuntimeList *, s32, s32, s32, f32);
+
+void func_00321688(u32 left, u32 right, u32 value, u32 count, f32 angle) {
+    func_003216A8((MenuTimedStateList *)left, (MenuRuntimeList *)right,
+                  value, count, 1, angle);
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003216A8);
+void func_003216A8(MenuTimedStateList *list, MenuRuntimeList *runtimeList,
+                   s32 x, s32 y, s32 enabled, f32 angle) {
+    MenuTimedStateNode *node = list->first;
+    MenuStateRecord *record;
+
+    if (node != NULL) {
+        do {
+            record = node->record;
+            if (mnuAdvanceTimedStateRecord(record) != 0 && enabled != 0) {
+                record->flags.word &= 0xFFFE;
+                /* The native dispatcher retains separate kind paths even
+                 * though both currently invoke the same spawn provider. */
+                if ((record->mode & 0xF) >= 2) {
+                    func_00321A30(record, runtimeList, x, y, angle);
+                } else {
+                    func_00321A30(record, runtimeList, x, y, angle);
+                }
+            }
+            node = node->next;
+        } while (node != NULL);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321798);
 
@@ -144,24 +214,6 @@ void mnuFreeOptionalBlock(u32 ptr) {
     }
 }
 
-
-typedef struct MenuStateRecord {
-    union {
-        u16 word;
-        struct {
-            u16 completed : 1;
-        } bits;
-    } flags;
-    u8 pad02[2];
-    u16 waitCount; /* 0x04 */
-    s16 elapsedCount; /* 0x06: advances toward duration, then resets */
-    s16 value;     /* 0x08 */
-    u8 pad0A[4];
-    s16 duration;  /* 0x0E */
-    u8 pad10[4];
-    s16 waitLimit; /* 0x14 */
-    s16 limit;     /* 0x16 */
-} MenuStateRecord;
 
 /* Advance optional wait and active counters; completion stays latched. */
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
