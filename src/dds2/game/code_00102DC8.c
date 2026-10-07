@@ -392,7 +392,7 @@ void kwlnPadStepLargeMotorLevel(void) {
 
 extern u8 D_00438D98[2];
 extern u32 D_00438DA0[2];
-extern s32 fileTestSavedSlotFlags();
+extern s32 fileTestSavedSlotFlags(u32 kind);
 extern void sdfPadSetSmallMotor(s32 padIndex, u16 strength);
 extern void sdfPadSetLargeMotor(s32 padIndex, u8 strength);
 
