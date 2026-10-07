@@ -39,7 +39,7 @@ INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BEEA0);
 
 extern void sdfSubmitGsTestOneRegisterPacket();
 extern void effSelectPresetAndDispatch(u32, u32, u32, u32, u32, u32, u32, u32);
-extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 extern void func_002BEEA0(s32, s32, s32, s32, s32, u32 *, u32 *,
                         s32 *, s32, s32, s32, s32, u32, s32);
 extern void func_002BE8A8(s32, s32, s32, s32, s32, s32 *, s32,

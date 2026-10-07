@@ -35,7 +35,7 @@ typedef struct GridDrawWork {
 } GridDrawWork;
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
-extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 

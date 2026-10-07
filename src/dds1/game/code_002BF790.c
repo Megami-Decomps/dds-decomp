@@ -5,7 +5,7 @@
 #include "sdf.h"
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
-extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
