@@ -35,7 +35,7 @@ void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value) {
     base->unk44 = value;
 }
 
-u32 dds3CreateCameraData(EffWorldNode *object) {
+s32 dds3CreateCameraData(EffWorldNode *object) {
     CameraData *inner;
     ObjBase *objectBase;
 

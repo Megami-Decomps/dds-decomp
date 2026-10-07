@@ -35,7 +35,7 @@ void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value) {
 }
 
 /* Allocate the inner state and associate it with its world-object handle. */
-u32 dds3CreateCameraData(EffWorldNode *object) {
+s32 dds3CreateCameraData(EffWorldNode *object) {
     CameraData *inner;
     ObjBase *objectBase;
 
