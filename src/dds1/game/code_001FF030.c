@@ -455,9 +455,9 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5988);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFE30);
 
-extern s32 btlReadCurrentUnitHp(void *);
+extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
-extern s32 btlComputeSkillAdjustedMaxHp(void *);
+extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 /* Compare HP against a signed percentage using the native products and unsigned comparison. */
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {
@@ -901,9 +901,9 @@ s32 btlIsReadyWithoutTurns(void) {
     return 0;
 }
 
-extern s32 btlReadCurrentUnitMp(void *);
+extern u16 btlReadCurrentUnitMp(DatPartyRecord *);
 
-extern s32 btlComputeSkillAdjustedMaxMp(void *);
+extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */
@@ -1597,7 +1597,7 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         for (i = 0; i < count; i++) {
             DatPartyRecord *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
-            s32 percent = current * 100 / btlComputeSkillAdjustedMaxHp(stats);
+            s32 percent = current * 100 / (s32)btlComputeSkillAdjustedMaxHp(stats);
 
             if (best >= percent && current != 0) {
                 best = percent;
