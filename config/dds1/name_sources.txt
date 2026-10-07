@@ -5741,6 +5741,8 @@
 0x002C2FF8	fldShutdownLmapResources	inferred	teardown chain called by fldStopLmapTask (fldReleaseLocalMapResources, evtDestroySecondaryWorldNode, ...); DDS2 0030AB88 [names_M33_SmallSweep2.tsv]
 0x002C3060	fldStartAndPollLocalMapTrack	inferred	Starts the local map sound track when absent and polls until its request is ready. [names_reviewed16.tsv]
 0x002C30F0	fldInitializeLocalMapScene	inferred	confidence=high; matched-C; src/dds1/game/code_002C2620.c:427:func_002C30F0; Selects the local-map stage mode, creates its camera/counter channels, loads map/message resources, initializes scene lighting and requests music plus white fade.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x002C3220	fldUpdateLocalMapController	inferred	Drives local-map selection, timer, camera-transition, message-overlay and task-state updates; its task caller uses -1 as completion and 2 as a no-draw transition.
+0x002C3420	fldDrawLocalMapOverlay	inferred	Sets up the local-map draw surface and background, then draws state-specific counter marker and transition UI. Paired behavior with DDS2 0030B470.
 0x002C3510	mdlCollectLowFlagBits	inferred	L68; sources=names_pending_main.tsv [names_qp10.tsv]
 0x002C35C8	mdlCollectFlagBitsIntoMask	inferred	Packs six model flag predicates into their designated output bits. [names_reviewed10.tsv]
 0x002C3640	fldGetLmapStage	inferred	Selects stage two, one or zero based on successive field map flags.

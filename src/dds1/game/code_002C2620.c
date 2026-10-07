@@ -47,8 +47,8 @@ extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
 extern s32 fldStartAndPollLocalMapTrack(void);
 extern void fldInitializeLocalMapScene(void);
-extern s32 func_002C3220(void);
-extern void func_002C3420(void);
+extern s32 fldUpdateLocalMapController(void);
+extern void fldDrawLocalMapOverlay(void);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern s32 fldLocalMapTrackState;
@@ -346,14 +346,14 @@ s32 fldLmapTaskUpdate(void) {
         return 0;
     }
     if (state == 2) {
-        result = func_002C3220();
+        result = fldUpdateLocalMapController();
         if (result == -1) {
             return result;
         }
         if (result == 2) {
             return 0;
         }
-        func_002C3420();
+        fldDrawLocalMapOverlay();
     }
     return 0;
 }
@@ -501,7 +501,7 @@ void fldInitializeLocalMapScene(void) {
     sdfCounterInitializeDisplayAnimation();
 }
 
-s32 func_002C3220(void) {
+s32 fldUpdateLocalMapController(void) {
     s32 result = 0;
 
     switch (D_003BD25C) {
@@ -590,7 +590,7 @@ extern void fldDrawCounterMapMarker(void);
 extern void fldDrawLocalMapTransition(s32);
 extern s32 func_00134CD8(void);
 
-void func_002C3420(void) {
+void fldDrawLocalMapOverlay(void) {
     func_00132010();
     evtSetDrawSurfaceIndex(84);
     evtSubmitPrimaryAlphaBlendMode(0);
