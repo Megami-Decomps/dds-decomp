@@ -100,6 +100,8 @@ u8 dds3TestObjectFlags(void *object, u32 mask) {
     return (base->flags & mask) != 0;
 }
 
+void *dds3GetExtData(void *object);
+
 /* Replace the extension pointer without releasing its previous value.
  * Keep the existing extension getter call before the store. */
 void dds3SetExtData(void *object, void *extensionData) {
@@ -111,8 +113,8 @@ void dds3SetExtData(void *object, void *extensionData) {
 }
 
 /* Return the stored extension pointer; no copy or ownership change. */
-void *dds3GetExtData(void) {
-    return dds3GetObjectOwnedHandle()->extData;
+void *dds3GetExtData(void *object) {
+    return dds3GetObjectOwnedHandle(object)->extData;
 }
 
 /* Exchange the slot selected by the data kind; NULL data leaves every slot alone. */
