@@ -97,7 +97,7 @@ extern void effParamWorkInvokeCallback(void *param);
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
 EffChanWork *effChanWorkCreate(EffChanSource *source) {
     u32 recordCount = source->head.count;
-    void *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocationHandle);
     EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
     void *parameterTemplate;
