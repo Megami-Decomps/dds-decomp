@@ -6139,6 +6139,7 @@
 0x002D4C40	sdfAppendLinkedPacketPayload	inferred	Links the supplied packet node in one list and appends its payload at offset 0x10 to another.
 0x002D4D10	sdfAppendDmaPrimary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D4D70	sdfAppendDmaSecondary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
+0x002D4DD0	sdfPrepareFrameDepthPacket	inferred	Packet-builder callback selects FRAME/ZBUF context registers and writes packed frame/depth values for the selected graph buffer.
 0x002D4E70	sdfInitPacketBuilder	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D4EE8	sdfQueueFramePackets	inferred	readability/matching review (QP16)
 0x002D4FE8	sdfSetNonnegativePacketIndex	inferred	Clamps negative index values to zero before storing current packet index. [names_reviewed8.tsv]
