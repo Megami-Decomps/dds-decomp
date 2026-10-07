@@ -2398,7 +2398,7 @@ u32 func_001ADA10(void) {
     return *(u32 *)(controller + 0x278);
 }
 
-extern u32 effMiscRandMod(s32, s32);
+extern u32 effMiscRandMod(void *, u32);
 
 /* Return a random eligible actor task, or 0 if no candidate is available. */
 s32 btlChooseAvailableUnit(void) {
