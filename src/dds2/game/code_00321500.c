@@ -194,7 +194,31 @@ void func_003216A8(MenuTimedStateList *list, MenuRuntimeList *runtimeList,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00321798);
+void func_00321798(MenuTimedStateList *list, MenuRuntimeList *runtimeList,
+                   s32 kindMask, s32 x, s32 y, s32 enabled, f32 angle) {
+    MenuTimedStateNode *node = list->first;
+    MenuStateRecord *record;
+
+    if (node != NULL) {
+        do {
+            record = node->record;
+            if (mnuAdvanceTimedStateRecord(record) != 0 && enabled != 0) {
+                u32 kind = record->mode & 0xF;
+                if ((kindMask >> kind) & 1) {
+                    record->flags.word &= 0xFFFE;
+                    /* Retain the two native kind paths, as in the unfiltered
+                     * updater, though both use the same spawn provider. */
+                    if (kind >= 2) {
+                        func_00321A30(record, runtimeList, x, y, angle);
+                    } else {
+                        func_00321A30(record, runtimeList, x, y, angle);
+                    }
+                }
+            }
+            node = node->next;
+        } while (node != NULL);
+    }
+}
 
 /* Allocate a zeroed 0x22-byte record with an eight-byte tag at offset 0xA. */
 u8 *mnuCreateNamedRecord(u8 *tagData) {
