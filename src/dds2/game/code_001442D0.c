@@ -8,6 +8,14 @@
 #include "dat_state.h"
 #include "eff.h"
 
+extern void func_001542D8(void);
+extern void func_001523F0(void);
+extern void func_001525F0(void);
+extern void func_00152C88(void);
+extern void func_00153068(void);
+extern s32 func_001515E0(f32 x, f32 z, s16 *gridX, s16 *gridY);
+
+
 typedef struct EffNode EffNode;
 typedef struct EffNodeDescriptor EffNodeDescriptor;
 
@@ -57,7 +65,8 @@ typedef struct FldAreaWork {
     s16 unk12A; /* 0x12A */
     u8 pad12C[0xC];
     s32 unk138;
-    u8 pad13C[8];
+    u8 pad13C[4];
+    s32 targetGuideActive; /* 0x140: selects the per-frame guide update path. */
     s32 unk144;           /* 0x144: location-panel fade countdown. */
     u8 pad148[4];
     f32 x;                /* 0x14C */
@@ -3225,7 +3234,8 @@ typedef struct FieldTargetGuideState {
     s32 unk54;
     u8 pad58[0xC];
     s32 unk64;
-    u8 pad68[4];
+    s16 previousGridX;
+    s16 previousGridY;
     s32 unk6C;
     s32 cycleIndex;
 } FieldTargetGuideState;
@@ -3594,7 +3604,29 @@ s32 fldReportCampVolumeError(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00153410);
+void func_00153410(void) {
+    if (fldTargetGuideState.disabled != 1) {
+        if (FLD_WORK->targetGuideActive == 0 && fldTestSceneControlFlags(0x40) == 0) {
+            if (fldTargetGuideState.unk64 == 14) {
+                func_00153068();
+                return;
+            }
+            if (fldGetSceneReadyOrPendingState() != 0) {
+                func_0035B6E0(D_00413F78);
+                return;
+            }
+        } else {
+            func_001542D8();
+            func_001523F0();
+            func_001525F0();
+            func_00152C88();
+            func_00153068();
+            func_001515E0(FLD_WORK->x, FLD_WORK->z, &D_00438EF8.x, &D_00438EF8.y);
+            fldTargetGuideState.previousGridX = fldTargetGuideState.gridX;
+            fldTargetGuideState.previousGridY = fldTargetGuideState.gridY;
+        }
+    }
+}
 
 s32 fldIsTargetWithinInteractionRange(void) {
     f32 distance;
