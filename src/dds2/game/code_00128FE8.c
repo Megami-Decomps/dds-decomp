@@ -149,11 +149,12 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 
 extern f32 D_004360B0;
 
-extern u8 D_00444980[];
+extern f32 D_00444980[];
 
 extern f32 D_00444970[];
 
-extern void dds3TransformCameraVectorsByInnerRotation(s64, void *, void *);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
+                                                      f32 *targetPositionOut);
 
 extern f32 sdfAtan2(f32 y, f32 x);
 
@@ -2591,7 +2592,7 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_004360AC = value;
-    dds3TransformCameraVectorsByInnerRotation((s32)dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980,
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980,
                                               D_00444970);
     D_004360B0 = 0;
 }
