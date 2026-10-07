@@ -388,7 +388,7 @@ s32 mnuSlotKindsInSameGroup(s32 index, s32 requestedKind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249058);
+INCLUDE_ASM(const s32, "game/code_00248580", mnuBuildEligibleSlotList);
 
 /* Return whether model flag 0x902 is clear; its storyline meaning is not asserted. */
 u8 func_00249198(void) {
@@ -522,7 +522,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     mnuBuildTerminalNodeList(host);
     mnuResolveStaffImageHandles(host->imageHandles);
     mnuUpdateGroupResources((u8 *)host);
-    func_00249058(host);
+    mnuBuildEligibleSlotList(host);
     mnuHighlightProgressNodeFromOwnerSelection(host);
     mnuHighlightProgressNodeByMode(host);
 }

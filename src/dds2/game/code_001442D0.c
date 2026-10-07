@@ -243,7 +243,7 @@ extern s32 D_00436360;
 
 extern void sdfReleaseResourceAllocation(s32);
 
-extern s32 func_0014E6A8();
+extern s32 fldTitleTaskUpdate();
 
 extern SdfTex *D_0043637C;
 
@@ -2517,7 +2517,7 @@ void func_0014E698(void) {
 }
 
 /* Render the field title through delay, fade-in, hold and fade-out phases. */
-s32 func_0014E6A8(void) {
+s32 fldTitleTaskUpdate(void) {
     s32 alpha;
     u32 color;
     s32 nextFrame;
@@ -2672,7 +2672,7 @@ void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
         sdfReleaseResourceAllocation(handle);
     }
     if (fldTitleIsActive() == 0) {
-        kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, func_0014E6A8, fldReleaseTitleTextures, 0);
+        kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, fldTitleTaskUpdate, fldReleaseTitleTextures, 0);
     }
 }
 

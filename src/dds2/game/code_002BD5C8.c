@@ -87,7 +87,7 @@ void func_002BDAA8(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteA
     }
 }
 
-void func_002BDC38(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSprites *page, s32 param) {
+void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSprites *page, s32 param) {
     char text[0x20];
     DatPartyRecord *party = &datGameState->party[partyIndex];
     void **sprite = page->item;

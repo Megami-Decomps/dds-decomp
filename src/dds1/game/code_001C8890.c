@@ -4446,8 +4446,6 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
     }
 }
 
-
-
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3B70);
 
 void btlCreateUnitTransparency(BtlUnit *unit) {

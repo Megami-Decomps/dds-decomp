@@ -102,7 +102,7 @@ extern const char *D_003CE7C0[4];
 extern void evtLoadResourcePair(u32, EvtResourcePair *);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void mnuSnapshotCampTextureHandles(u32 *);
-extern void func_002673B8();
+extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
@@ -515,7 +515,7 @@ s32 mnuSlotKindsInSameGroup(s32 index, s32 kind) {
 }
 
 extern MenuSlotKind D_0038A480[];
-void func_002673B8(MenuSlotState *host) {
+void mnuBuildEligibleSlotList(MenuSlotState *host) {
     MenuList *list;
     s32 kind;
     s32 i;
@@ -659,7 +659,7 @@ void mnuTerminalBuildMenus(MenuSlotState *host) {
     mnuBuildTerminalNodeList(host);
     mnuSnapshotCampTextureHandles(host->imageHandles);
     mnuCreateThresholdNodePanels(host);
-    func_002673B8(host);
+    mnuBuildEligibleSlotList(host);
     mnuHighlightProgressNodeFromOwnerSelection(host);
     mnuHighlightProgressNodeByMode(host);
 }

@@ -2037,6 +2037,9 @@
 0x00185B90	effBossUpdateGeometryCallback	inferred	confidence=medium; matched-C; src/dds1/effect/effPCPBoss.c:505:func_00185B90; Callback adapter advances boss grouped geometry; retail callee rebuilds strips/colors and increments frame.; twin=0x0018D7E8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00185BA8	effBossSetPositionCallback	inferred	Forwards the descriptor-supplied boss work and position pointers unchanged to effBossSetPosition; registered in the boss operation descriptor at 0x00354790; twin=0x0018D800.
 0x00185BC0	effBossApplyGroupTint	inferred	confidence=high; matched-C; src/dds1/effect/effPCPBoss.c:534:func_00185BC0; Applies a tint input to the owning boss trail/cell work through its color update entry.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00185BD8	effBossCreatePairedChainResources	inferred	Allocates the retained resource owner, copies its parameters and creates two four-point Thunder chains.
+0x00185DE0	effBossCreatePairedChainsFromTable	inferred	Gets parameter block zero from the packed table and forwards it to the paired-chain resource constructor.
+0x00185E00	effBossCreatePairedChainsFromParams	inferred	Forwards the supplied parameter address unchanged to the paired-chain resource constructor.
 0x00185E18	effFreePairedResources	inferred	Releases both resource handles at offsets 0x74 and 0x70 before freeing the containing object.
 0x00185E50	effUpdatePairedResources	inferred	per-frame fade (in/out ratio) of the two paired resources: blended colour plus lerped vectors [names_M83_Lerp.tsv]
 0x00186030	effCopyPairedResourceEndpoint	inferred	High: copies only the leading vector used as the paired resources' interpolation endpoint. [names_reviewed23.tsv]
@@ -2091,6 +2094,7 @@
 0x00188958	effTrackPolyCopyHistoryPointPair	inferred	confidence=high; matched-C; src/dds1/effect/effModelTrackPoly.c:306:func_00188958; Calculates a stepped wrapped ring position and copies its two endpoint vectors to outputs.; source=revalidated-unapplied-names_R_Names31.tsv:17 [names_qp12_apply.tsv]
 0x001889B8	effTrackPolyAdvancePosition	inferred	Updates the polygon position using step and period with wrap below 2.
 0x00188A00	effTrackPolyAppendPointPair	inferred	confidence=high; matched-C; src/dds1/effect/effModelTrackPoly.c:330:func_00188A00; Stores two endpoints, advances the ring by two, mirrors the wrap pair, and grows active point count.; source=revalidated-unapplied-names_R_Names31.tsv:18 [names_qp12_apply.tsv]
+0x00188A78	effTrackPolyResampleHistory	inferred	First-pair initialization, fixed-step linear extension for short history and Catmull-Rom resampling for established history; both endpoint callers pass the retained track history and a new point pair.
 0x00188E10	effTrackPolyDrawStrips	inferred	Builds packet draws for active track-poly point ranges. [names_qp9.tsv]
 0x001890D8	effCloneMagatuhiWithColorResource	inferred	src/dds1/game/code_001890D8.c func_001890D8: Copies Magatuhi parameters, creates new subresource and fills its color table. [names_reviewed24.tsv]
 0x00189178	effReleaseMagatuhiOwner	inferred	Byte-identical dds2 twin 0x00190DB0; Releases the Magatuhi resource at owner offset 0x1C and frees the owner record. [names_conflicts.tsv]
@@ -2166,6 +2170,7 @@
 0x0018DF00	effAllocSlotArray	inferred	allocs n*0x38+0xC slot array with header, inits slots to 0 and 0.05f
 0x0018DF90	effMathReleaseWorkResource	inferred	Releases the handle at offset 8 in the math-effect work.
 0x0018DFA8	effMathStepBezierSlot	inferred	M141; sources=names_pending_main.tsv; twin=0x00195BE0, input-family pairing. [names_qp10.tsv]
+0x0018E0C8	effMathStepBezierSlotDirect	inferred	Evaluates the cubic from a direct slot, writes homogeneous output, advances and clamps t, and reports whether interpolation continues; direct-input sibling of effMathStepBezierSlot.
 0x0018E1D8	effMathResetBezierSlot	inferred	confidence=high; matched-C; src/dds1/effect/effMath.c:54:func_0018E1D8; Resets the selected math slot progress word to zero and its step to 0.05; the adjacent cubic Bezier evaluator reads these same members as t and step.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0018E2A8	effReleaseSlotArrayAllocation	inferred	Byte-identical dds2 twin 0x00195EE0; Releases the allocation handle at offset eight of the shared EffArrHdr. [names_conflicts.tsv]
 0x0018E2C0	effStepActiveBezierSlot	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:200:func_0018E2C0; Evaluates the selected active cubic Bezier slot into xyz/w, returns zero for segment seven, and advances/clamps parameter t and segment state.; source=names_pending_main.tsv:114 [names_qp11.tsv]
@@ -2643,6 +2648,7 @@
 0x001B2A98	btlReleasePsechgPanelWork	inferred	confidence=medium; src/dds1/game/code_001A1960.c:func_001B2A98; Frees task user data and clears tracked slot six, whose retail task label is bpnl_psechg_nm. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
 0x001B2D58	btlReleaseBattleScratchBlocks	inferred	Releases both temporary battle blocks held by the shared battle work. [names_reviewed16.tsv]
 0x001B42D8	btlReleaseCmsleffPanelWork	inferred	confidence=medium; src/dds1/game/code_001A1960.c:func_001B42D8; Frees task user data and clears tracked slot five; its retail task label bpnl_cmsleff__nm supports the cmsleff-panel role. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
+0x001B4308	btlUpdateSkillNamePanelTask	inferred	Fam-3
 0x001B47A8	btlUpdatePanelTransitionGradients	inferred	U3
 0x001B49E0	btlFreeRegisteredTaskData	inferred	Frees task user data and clears its battle registration. [names_reviewed8.tsv]
 0x001B4A20	btlToggleModelFlagOnInput	inferred	Toggles a model flag when its mapped input is active. [names_reviewed8.tsv]
@@ -3262,6 +3268,7 @@
 0x001FEFF0	btlCmdWithArgF	inferred	jal+epilogue wrapper forwarding arg plus 0 to func_00204048
 0x001FF010	btlCmdSimpleJ	inferred	jal+epilogue passthrough wrapper of func_00204080
 0x001FF030	btlRunWeightedAiAction	inferred	allocates the 0x10-byte D_003BB87C state, picks a weighted AI slot for the unit's species (btlPickWeightedAiSlot), runs it through func_001FFDA0 and releases the state (sibling j func_002CFF98) [names_M63_Mid.tsv]
+0x001FF560	btlSelectTierMatrixAiRoute	inferred	Light1b
 0x001FF8D8	btlSelectConditionalAiRoute	inferred	Light1b
 0x001FFC18	btlPickWeightedAiSlot	inferred	twin of DDS2 func_00211D20: cumulative u8 slot weights over the per-species table D_003BAA24 until the roll from func_001FFCD8 [names_M42_BattleMid.tsv]
 0x001FFCD8	btlRollAiBucket	inferred	two 0..0xFFF rolls summed, folded to 0..99 via /41; rerolled when within 3 of the previous bucket (D_003BB878) [names_M89_Battle3.tsv]
@@ -4539,6 +4546,7 @@
 0x0026CAD0	mnuSwapStateWords	inferred	mnu menu, title, shop, or movie UI in game/code_0026BD80.c
 0x0026D138	mnuClearGlobalMenuStateFields	inferred	Clears three tracked state fields in the global MenuState. [names_reviewed16.tsv]
 0x0026D160	mnuPollMovieMenuInputAndTimeout	inferred	confidence=high; matched-C; src/dds1/game/code_0026BD80.c:212:func_0026D160; Polls menu input across opening/idle/countdown states, resets sequence volume/pan on input, and returns -1 after the 601-frame idle timeout; otherwise reports completion or waiting.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x0026D510	mnuHandleMovieMenuInput	inferred	Light1b
 0x0026DC50	mnuDrawFixedSpriteLayerGroup	inferred	Initializes draw state then submits five fixed sprite layers sharing one draw context. [names_reviewed19.tsv]
 0x0026E188	mnuTickMovieGroup	inferred	mnu twin of mnuTickResourceGroup for movie sprite groups
 0x0026E4F0	mnuCreateMovieSpriteResource	inferred	Allocates a 0x48-byte movie sprite record with owner, sprite, variant and randomized lifetime.
@@ -7099,8 +7107,3 @@
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
-0x00188A78	effTrackPolyResampleHistory	inferred	First-pair initialization, fixed-step linear extension for short history and Catmull-Rom resampling for established history; both endpoint callers pass the retained track history and a new point pair.
-0x00185BD8	effBossCreatePairedChainResources	inferred	Allocates the retained resource owner, copies its parameters and creates two four-point Thunder chains.
-0x00185DE0	effBossCreatePairedChainsFromTable	inferred	Gets parameter block zero from the packed table and forwards it to the paired-chain resource constructor.
-0x00185E00	effBossCreatePairedChainsFromParams	inferred	Forwards the supplied parameter address unchanged to the paired-chain resource constructor.
-0x0018E0C8	effMathStepBezierSlotDirect	inferred	Evaluates the cubic from a direct slot, writes homogeneous output, advances and clamps t, and reports whether interpolation continues; direct-input sibling of effMathStepBezierSlot.

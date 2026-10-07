@@ -257,7 +257,7 @@ extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u32 func_002A3C78(void);
 
-s32 func_002A5B08(void) {
+s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
     s32 selection;
 
@@ -891,7 +891,7 @@ void mnuTitleSetPaletteTransition(MnuTitlePaletteTransition *state, s32 mode) {
     state->mode = mode;
 }
 
-void func_002A73C0(MnuTitlePaletteTransition *state) {
+void mnuDrawAndAdvanceStaffImageBlend(MnuTitlePaletteTransition *state) {
     void *sprite = (void *)mnuMovieWork->sprite;
     s32 frame;
     s32 index;
@@ -982,7 +982,7 @@ void func_002A75A8(StaffScrollTransition *state) {
 }
 
 
-s32 func_002A7730(void) {
+s32 mnuUpdateStaffMoviePresentation(void) {
     s32 seconds;
     s32 endSeconds;
 
@@ -1011,7 +1011,7 @@ s32 func_002A7730(void) {
     }
     mnuAdvanceSpriteSlideBar(&mnuMovieWork->slideBar);
     func_002A6F88(mnuMovieWork->backdropState);
-    func_002A73C0(&mnuMovieWork->paletteTransition);
+    mnuDrawAndAdvanceStaffImageBlend(&mnuMovieWork->paletteTransition);
     func_002A75A8(&mnuMovieWork->scrollTransition);
     func_002A6858();
     return 0;

@@ -656,6 +656,7 @@
 0x00130C28	fldUpdateCameraProximity	inferred	Camera mode by distance of player model point to camera anchor; twin of D1 0x0012E6F8 [names_M53_Field.tsv]
 0x00130DE0	fldUpdateCameraFollow	inferred	game/code_00128FE8: DDS2 twin of DDS1 func_0012E878 (per-frame camera update: FOV from D_0038AEB0[rowIdx].fov, mode 0/1/4 dispatch) [names_M94_Field.tsv]
 0x00130F38	fldSyncObjectFlagsB	inferred	When object D_00435F0C has flag 1 set, sets flag 1 on D_00435F10
+0x00131000	fldUpdateCameraModelMotion	inferred	Fam-3
 0x00133840	fldUpdateCameraFrame	inferred	Per-frame field camera update dispatch; twin of D1 0x00131098 [names_M53_Field.tsv]
 0x00133950	fldHasPendingSceneFlags	inferred	Returns true if any of three adjacent field scene-state words is nonzero. [names_reviewed5.tsv]
 0x00133988	fldHideSceneModelsAndResetCamera	inferred	Sets visibility flags on field objects and restores the camera node mode. [names_reviewed13.tsv]
@@ -771,6 +772,7 @@
 0x0014DDD8	fldFlushQueuedEffectPositions	inferred	twin of DDS1 func_00149A98: consumes the queued flags D_00436340/D_00436344 and spawns the queued positions (D_003A8E90/D_003A8EA0) through mnuSpawnResourceAtPosition when field state D_00389770[4] < 0xC8 and nothing blocks [names_M63_Mid.tsv]
 0x0014E3A8	fldLoadNpcPalette	inferred	DDS1 0014A060 (named fldLoadNpcPalette) loads %sF%03d.NPL into the NPC palette; DDS2 adds F033/F034/F037 overrides under mdlFlagTest(25)
 0x0014E620	fldGetCurrentSceneSelectionResource	inferred	Returns the selected field entry resource or zero when none is selected. [names_reviewed12.tsv]
+0x0014E6A8	fldTitleTaskUpdate	inferred	Purist6b
 0x0014EBB8	fldReleaseTitleTextures	inferred	releases both cached title texture handles [names_R_FuncNames2.tsv]
 0x0014EC00	fldStartTitle	evidence	DDS1 twin 0x0014A960 is fldStartTitle; creates the "fldTitle" task and loads df%03d panel textures [names_M51_FieldMenu.tsv]
 0x0014F138	fldReleaseTitleMiniTexture	inferred	releases cached mini-title texture handle [names_R_FuncNames2.tsv]
@@ -1668,6 +1670,9 @@
 0x0018D7E8	effBossUpdateGeometryCallback	inferred	confidence=medium; matched-C; src/dds2/effect/effPCPBoss.c:510:func_0018D7E8; Callback adapter advances boss grouped geometry; retail callee rebuilds strips/colors and increments frame.; twin=0x00185B90, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0018D800	effBossSetPositionCallback	inferred	Forwards the descriptor-supplied boss work and position pointers unchanged to effBossSetPosition; registered in the boss operation descriptor at 0x003B10C0; twin=0x00185BA8.
 0x0018D818	effBossApplyGroupTint	inferred	confidence=high; matched-C; src/dds2/effect/effPCPBoss.c:539:func_0018D818; Applies a tint input to the owning boss trail/cell work through its color update entry.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x0018D830	effBossCreatePairedChainResources	inferred	Allocates the retained resource owner, copies its parameters and creates two four-point Thunder chains.
+0x0018DA38	effBossCreatePairedChainsFromTable	inferred	Gets parameter block zero from the packed table and forwards it to the paired-chain resource constructor.
+0x0018DA58	effBossCreatePairedChainsFromParams	inferred	Forwards the supplied parameter address unchanged to the paired-chain resource constructor.
 0x0018DAA8	effUpdatePairedResources	inferred	DDS1 0x00185E50 twin [names_M83_Lerp.tsv]
 0x0018DC68	effCopyPairedResourceEndpoint	inferred	High: copies only the leading vector used as the paired resources' interpolation endpoint; DDS1 twin 0x00186030. [names_reviewed23.tsv]
 0x0018DC78	effSetPairedResourceColor	inferred	High: assigns the packed color whose top byte is interpolated by the paired-resource update; DDS1 twin 0x00186040. [names_reviewed23.tsv]
@@ -1719,6 +1724,7 @@
 0x001904B0	effTrackPolyFillGradientColors	inferred	confidence=high; matched-C; src/dds2/effect/effModelTrackPoly.c:286:func_001904B0; Interpolates the two endpoint color pairs into alternating point colors across the track history.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00190590	effTrackPolyCopyHistoryPointPair	inferred	confidence=high; matched-C; src/dds2/effect/effModelTrackPoly.c:305:func_00190590; Calculates a stepped wrapped ring position and copies its two endpoint vectors to outputs.; source=revalidated-unapplied-names_R_Names31.tsv:17 [names_qp12_apply.tsv]
 0x00190638	effTrackPolyAppendPointPair	inferred	confidence=high; matched-C; src/dds2/effect/effModelTrackPoly.c:331:func_00190638; Stores two endpoints, advances the ring by two, mirrors the wrap pair, and grows active point count.; source=revalidated-unapplied-names_R_Names31.tsv:18 [names_qp12_apply.tsv]
+0x001906B0	effTrackPolyResampleHistory	inferred	First-pair initialization, fixed-step linear extension for short history and Catmull-Rom resampling for established history; both endpoint callers pass the retained track history and a new point pair.
 0x00190A48	effTrackPolyDrawStrips	inferred	Builds packet draws for active track-poly point ranges; DDS1 twin. [names_qp9.tsv]
 0x00190D10	effCloneMagatuhiWithColorResource	inferred	src/dds2/game/code_00190D10.c func_00190D10: Copies Magatuhi parameters, creates new subresource and fills its color table. Twin of DDS1 func_001890D8. [names_reviewed24.tsv]
 0x00190DB0	effReleaseMagatuhiOwner	inferred	Releases the Magatuhi resource at owner offset 0x1C and frees the owner record.
@@ -1767,6 +1773,7 @@
 0x00195A30	effMultiplyPackedColors	inferred	RGBA modulation lives beside effBlendColor and other effect-color routines, not in an interface module. [names_reviewed9.tsv]
 0x00195AB0	effPointToLineDistance	inferred	confidence=high; matched-C; src/dds2/game/code_00194700.c:490:func_00195AB0; M141; source=names_pending_main.tsv:105; review=Subtracts the projection of point-origin onto direction and returns the residual length; direction must be unit length. [names_qp11.tsv]
 0x00195BE0	effMathStepBezierSlot	inferred	M141; sources=names_pending_main.tsv; twin=0x0018DFA8, input-family pairing. [names_qp10.tsv]
+0x00195D00	effMathStepBezierSlotDirect	inferred	Evaluates the cubic from a direct slot, writes homogeneous output, advances and clamps t, and reports whether interpolation continues; direct-input sibling of effMathStepBezierSlot.
 0x00195E10	effMathResetBezierSlot	inferred	confidence=high; matched-C; src/dds2/effect/effMath.c:55:func_00195E10; Resets the selected math slot progress word to zero and its step to 0.05; the adjacent cubic Bezier evaluator reads these same members as t and step.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00195E38	effMathGetSlotAt	inferred	Returns the indexed math-effect slot using the list base and a 0x38-byte stride.
 0x00195E50	effCreateSlotArray	inferred	Allocates count contiguous 0x60-byte slots plus a trailing descriptor containing pointer count and handle.
@@ -2176,6 +2183,7 @@
 0x001BB078	btlDrawThreePanelSpriteStrips	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:3344:func_001BB078; Draws the three explicitly configured panel texture strips at their x/y offsets, applies the supplied low-byte color limit to each of their four corner colors, and submits indexed strip quads.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x001BB550	btlSetSlotLowByteClamped	inferred	dds1 twin 001B0938 [names_reviewed2.tsv]
 0x001BB888	btlReleaseMessageWindowTask	inferred	Cleans the message window and frees its registered task work. [names_reviewed8.tsv]
+0x001BB8D0	btlGetVitalTextColor	inferred	Fam-3
 0x001BB970	btlHasRequiredActorStatusBits	inferred	Checks that both required actor status bits are set. [names_reviewed16.tsv]
 0x001BB9A0	btlCountEligibleLinkedActors	inferred	Counts linked actors with 0x201 actor status bits and eligibility bit 2 set.
 0x001BB9E8	btlStartRegisteredChildTask	inferred	Creates a child task with allocated data and registers it in battle state. [names_reviewed8.tsv]
@@ -2184,6 +2192,7 @@
 0x001BD6B8	btlReleasePsechgPanelWork	inferred	confidence=medium; src/dds2/game/code_001A5BB8.c:func_001BD6B8; Frees task user data and clears tracked slot six, whose retail task label is bpnl_psechg_nm. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
 0x001BD978	btlReleaseBattleScratchBlocks	inferred	Releases both temporary battle blocks held by the shared battle work. [names_reviewed16.tsv]
 0x001BEEF8	btlReleaseCmsleffPanelWork	inferred	confidence=medium; src/dds2/game/code_001A5BB8.c:func_001BEEF8; Frees task user data and clears tracked slot five; its retail task label bpnl_cmsleff__nm supports the cmsleff-panel role. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
+0x001BEF28	btlUpdateSkillNamePanelTask	inferred	Fam-3
 0x001BF3C8	btlUpdatePanelTransitionGradients	inferred	U3
 0x001BF600	btlFreeRegisteredTaskData	inferred	Frees task user data and clears its battle registration. [names_reviewed8.tsv]
 0x001BF640	btlToggleModelFlagOnInput	inferred	Toggles a model flag when its mapped input is active. [names_reviewed8.tsv]
@@ -3705,6 +3714,7 @@
 0x002671E8	mnuReleaseProgressWorkList	inferred	Destroys the list state owned by a menu progress work object. [names_reviewed17.tsv]
 0x00267200	mnuReleaseSelectedProgressPanel	inferred	Releases the selected panel and passes its owner list to cleanup. [names_reviewed10.tsv]
 0x00267358	mnuSlotKindsInSameGroup	inferred	readability/matching review (QP16)
+0x002673B8	mnuBuildEligibleSlotList	inferred	Near95b
 0x00267500	mnuThresholdNodeDrawCallback	inferred	Installed as list->updateCallback in mnuBuildThresholdNodeList; draws two sprites per node. [names_M44_Mid3.tsv]
 0x002675C8	mnuBuildThresholdNodeList	inferred	Builds a menu node list from supplied item IDs while excluding the supplied array index.
 0x00267680	mnuHighlightProgressNodeFromOwnerSelection	inferred	Highlights a progress node only when owner selection is idle. [names_reviewed10.tsv]
@@ -4044,6 +4054,7 @@
 0x0028CCA8	mnuStartMantraPanelEntryTransition	inferred	Resets menu transition timer and selects state one, which advances to state three after six frames. [names_reviewed18.tsv]
 0x0028CCB8	mnuStartMantraPanelExitTransition	inferred	Resets menu transition timer and selects state two, which returns to idle after six frames. [names_reviewed18.tsv]
 0x0028CCC8	mnuAdvanceMantraPanelTransitionTimer	inferred	Ticks entry or exit panel transition for six frames and changes menu transition state. [names_reviewed18.tsv]
+0x0028DE10	mtrDrawRankPass	inferred	FreshD2
 0x0028F570	mnuSelectPreferredMantraNode	inferred	U0
 0x0028F770	mnuSelectMatchingNode	inferred	Traverses menu nodes and records the index whose payload ID equals the requested ID.
 0x0028F7B8	mnuSelectMantraLimitLine	inferred	readability/matching review (QP16)
@@ -4121,6 +4132,7 @@
 0x0029BEB8	mnuTitleApplySequenceState	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleApplySequenceState behavior.
 0x0029C450	itfUpdateFadeColor	inferred	Updates title opacity and latches at 0x80; behavioral twin of already-named DDS1 itfUpdateFadeColor.
 0x0029C4D8	mnuTitleDrawBurstSprites	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleDrawBurstSprites behavior.
+0x0029C618	brsDrawResultPanelSprites	inferred	FreshD2
 0x0029CA68	mnuCampDrawMenuIconLayer	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described campDrawMenuIconLayer behavior.
 0x0029CC90	mnuTitleDrawFadeMenuEntries	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleDrawFadeMenuEntries behavior.
 0x0029CD60	mnuTitleRenderFadeAndPanels	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleRenderFadeAndPanels behavior.
@@ -4214,7 +4226,9 @@
 0x002A6C70	mnuAdvanceSpriteSlideBar	inferred	Draws a single sprite and advances its active slide bar.
 0x002A6D28	mnuFadeSetStateOff	inferred	mode 2/3 both clear state[1]; state[0] = 0/1
 0x002A7350	mnuTitleSetPaletteTransition	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described titleSetPaletteTransition behavior.
+0x002A73C0	mnuDrawAndAdvanceStaffImageBlend	inferred	FreshD2
 0x002A7560	mnuFadeSetStateB	inferred	same shape as func_002A6C28 (separate copy)
+0x002A7730	mnuUpdateStaffMoviePresentation	inferred	FreshD2
 0x002A78B0	mnuFinishStaffMovieAndFreeState	inferred	Waits for pending movie work, tears down fonts, and frees movie state. [names_reviewed8.tsv]
 0x002A7900	mnuReleaseMovieResourceAfterPendingWork	inferred	Destroys movie resources, drains pending work and clears movie mode. [names_reviewed8.tsv]
 0x002A7938	mnuInitializeMovieRollViewport	inferred	confidence=high; src/dds2/game/code_002A5260.c:func_002A7938; Resets movie-roll state, loads its sprite and establishes the scaled viewport bounds/tint. [names_qp9.tsv]
@@ -4517,6 +4531,7 @@
 0x002BD3E0	mnuClearActionFlags	inferred	DDS2-only symbol; game/code_002B0278 uses mnu for the already-described menuClearActionFlags behavior.
 0x002BD480	mnuStepPartyPanelListFromInput	inferred	Fam_Mid
 0x002BD9E0	mnuClearWindowPendingFlagAfterSelection	inferred	Clears the window pending flag when the selection handler succeeds. [names_reviewed11.tsv]
+0x002BDC38	mnuDrawPartyCommandPage	inferred	Fam-3
 0x002BE138	mnuDrawSelectedPartyProfileLabel	inferred	Draws the chosen party profile code or its resolved text label. [names_reviewed12.tsv]
 0x002BE6E8	mnuSetPanelSlotValues	inferred	stores one value into both sub-blocks of the five 0x2138-byte panels at menu+0x84 [names_M97_PcpMisc.tsv]
 0x002BEE50	mnuQueueListEntry	inferred	picks the lower-count of two 0x1024-byte entry blocks and dispatches by kind [names_M59_D2Mid.tsv]
@@ -4746,6 +4761,7 @@
 0x002CFC38	fileCursorOffsetLookup	inferred	DDS1 0x00290788 twin
 0x002CFD48	fileInitCursorPulse	inferred	initializes three cursor pulse modes and alpha channels [names_R_FuncNames2.tsv]
 0x002CFD80	fileCursorPulseUpdate	inferred	DDS1 0x002908D0 twin
+0x002CFF38	fileDrawCursorPulse	inferred	FreshD2
 0x002D0148	fileResetLoadContextSlide	inferred	clears load context animation mode and offsets [names_R_FuncNames2.tsv]
 0x002D0160	fileLoadCtxSlideUpdate	inferred	DDS1 0x00290CB0 twin
 0x002D02D0	mcdFinishFileDetectionWithAudio	inferred	On a detected file status, resets flow mode, sets sequence volume and invokes the queued continuation.
@@ -5689,6 +5705,7 @@
 0x003219F0	mnuCanAdvanceIdleStateRecord	inferred	Accepts a record only while it is not busy and its optional value limit has not been reached. [names_reviewed15.tsv]
 0x00321EE8	mnuClearPackedMenuRecordBlock	inferred	Zeros the complete backing array of fixed-size menu records using its stored record count. [names_reviewed15.tsv]
 0x00321F78	mnuDeactivateListRecord	inferred	Clears the record's low active bit and decrements the enclosing list's active-record count.
+0x00321F98	mnuAdvanceMovingRuntimeRecords	inferred	Fam-3
 0x00322438	dds3MeasureMenuRecord	inferred	Computes the 16-byte header plus both counted record-block lengths.
 0x00322480	dds3MeasureRecordBlock	inferred	Computes eight bytes per record plus eight bytes per record's first-word count.
 0x003224E0	mnuBindMenuRecordRegistry	inferred	Stores base pointer and count of the first menu-record registry; no tag semantics established. [names_reviewed18.tsv]
@@ -5717,6 +5734,7 @@
 0x00324E80	mnuRemoveMatchedNodesFromLinkedResourceLists	inferred	Looks up a resource by key and removes its matching node from both linked lists. [names_reviewed17.tsv]
 0x00324EF0	mnuClearOwnedResourceListPair	inferred	high confidence; src/dds2/game/code_00324DF8.c func_00324EF0: Clears both owned linked resource lists in order; the retail callee invokes each list callback, frees every node and zeroes count and endpoints. [names_reviewed25.tsv]
 0x00324F98	mnuRemoveLinkedResourceByHandle	inferred	high confidence; src/dds2/game/code_00324DF8.c func_00324F98: Looks up the implicit handle in the second owned resource list and removes the found node with notification. [names_reviewed25.tsv]
+0x00324FD0	sdfCloneNestedResourceRecord	inferred	FreshD2
 0x00325688	sdfCloneOwnedResourceRecords	inferred	readability/matching review (QP16)
 0x003268A8	sdfVectorAdd	inferred	Adds the three delta components in place to a vector.
 0x003268E0	sdfVectorSubtract	inferred	Subtracts three delta components in place from a vector.
@@ -6669,8 +6687,3 @@
 0x00476480	sdfPadPorts	inferred	high confidence; src/dds2/game/code_00336B48.c sdfPadUpdatePorts(): sdfPadUpdatePort(&D_00476480[i]); Instruction-aligned data counterpart of DDS1 D_003F9B00 in the matched sdfPadUpdatePorts() twin. Two pad-port work records updated by the pad polling loop. [names_reviewed26.tsv]
 0x0047AA40	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds2/game/code_00341650.c:func_00341958, src/dds2/game/code_00341FE8.c:func_00342168; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
-0x001906B0	effTrackPolyResampleHistory	inferred	First-pair initialization, fixed-step linear extension for short history and Catmull-Rom resampling for established history; both endpoint callers pass the retained track history and a new point pair.
-0x0018D830	effBossCreatePairedChainResources	inferred	Allocates the retained resource owner, copies its parameters and creates two four-point Thunder chains.
-0x0018DA38	effBossCreatePairedChainsFromTable	inferred	Gets parameter block zero from the packed table and forwards it to the paired-chain resource constructor.
-0x0018DA58	effBossCreatePairedChainsFromParams	inferred	Forwards the supplied parameter address unchanged to the paired-chain resource constructor.
-0x00195D00	effMathStepBezierSlotDirect	inferred	Evaluates the cubic from a direct slot, writes homogeneous output, advances and clamps t, and reports whether interpolation continues; direct-input sibling of effMathStepBezierSlot.

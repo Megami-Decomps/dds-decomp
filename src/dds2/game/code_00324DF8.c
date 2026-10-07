@@ -148,7 +148,7 @@ typedef struct DdsNestedHeader {
 
 extern s32 dds3MeasureMenuRecord(DdsNestedGroup *);
 
-DdsNestedHeader *func_00324FD0(u32 *owner, ResourceList **list) {
+DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, ResourceList **list) {
     ResourceNode *node;
     DdsNestedHeader *buffer;
     DdsNestedGroup *group;

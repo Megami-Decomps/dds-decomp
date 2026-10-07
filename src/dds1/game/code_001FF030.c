@@ -203,7 +203,7 @@ u32 func_001FF558(void) {
 
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
-s32 func_001FF560(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
     s8 matches[3][3];
     u32 predicates[3];
     u32 firstTier, endTier;

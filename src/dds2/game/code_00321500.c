@@ -275,7 +275,7 @@ extern f64 cos(f64);
 extern f64 sin(f64);
 extern s32 func_0035C200(void);
 
-void func_00321F98(MenuRuntimeList *list) {
+void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
     MenuProgressParameters *parameters;
     MenuRuntimeRecord *record;
     MenuWorkEntry *work;
@@ -342,12 +342,12 @@ void func_00321F98(MenuRuntimeList *list) {
 }
 
 void func_003223F8(void) {
-    func_00321F98((MenuRuntimeList *)D_0045C870);
+    mnuAdvanceMovingRuntimeRecords((MenuRuntimeList *)D_0045C870);
 }
 
 
 void func_00322418(void) {
-    func_00321F98((MenuRuntimeList *)D_0045C880);
+    mnuAdvanceMovingRuntimeRecords((MenuRuntimeList *)D_0045C880);
 }
 
 

@@ -480,7 +480,7 @@ extern void mnuStorePanelEntry(s32, s32);
 extern void func_0028DFA0(s32);
 
 /* Collect selected neighbours, then advance their three rank chains for at most 20 passes. */
-void func_0028DE10(s32 object, u16 index) {
+void mtrDrawRankPass(s32 object, u16 index) {
     EvtMantraNodePositionRecord *nodes[3];
     EvtMantraNodePositionRecord **cursor;
     EvtMantraNodePositionRecord **neighbors;

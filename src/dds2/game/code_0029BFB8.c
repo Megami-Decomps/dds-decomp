@@ -69,7 +69,7 @@ extern const s32 D_004284E0[9][3];
 extern s32 mdlFlagTest(u32);
 extern void func_00306CD0(s32, s32, s32, u32, s32, void *, s32, s32);
 
-void func_0029C618(BrsSkillPackageWork *work) {
+void brsDrawResultPanelSprites(BrsSkillPackageWork *work) {
     s32 table[9][3];
     s32 count;
     s32 i;
