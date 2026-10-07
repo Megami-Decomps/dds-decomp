@@ -73,8 +73,9 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_003BD358, D_003BD35C;
-extern s32 dds3GetWorldObject(void);
-extern s32 dds3ContainsNodeInObjectChain(s32, s32, s32);
+extern void *dds3GetWorldObject(void);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, s32);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
 extern s32 sdfLoadMapRecordPositionVector(void *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void func_00107DE8(void);
@@ -767,10 +768,10 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
 }
 
 EvtUnit *evtGetWorldUnitNestedValue(s32 id) {
-    u8 *obj = (u8 *)dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, 5);
+    EffWorldNode *obj = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, 5);
 
     if (obj != NULL) {
-        return (EvtUnit *)*(s32 *)(*(u8 **)(obj + 0x18) + 8);
+        return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
     }
     return NULL;
 }
