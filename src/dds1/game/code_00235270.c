@@ -2788,15 +2788,16 @@ extern void effSetCh72Id(u32);
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetTaskData(taskId);
     s32 address = evtFindTaskResourceEntryByKey(taskId, key);
+    SdfTex *texture;
     if (address != 0) {
-        s32 old = data->effect72;
+        SdfTex *old = data->effect72;
         if (old != 0) {
-            sdfTexReleaseReferenceViaHandler((SdfTex *)old);
+            sdfTexReleaseReferenceViaHandler(old);
             data->effect72 = 0;
         }
-        address = (s32)sdfTexAcquireResourceTexture((void *)address);
-        effSetCh72Id(address);
-        data->effect72 = address;
+        texture = sdfTexAcquireResourceTexture((void *)address);
+        effSetCh72Id((u32)texture);
+        data->effect72 = texture;
     }
 }
 
