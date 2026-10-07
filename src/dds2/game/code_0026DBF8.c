@@ -134,7 +134,6 @@ extern s32 mnuUpdateMantraInfoPulseFade();
 extern void func_00273828();
 extern u32 mnuInitMantraInfoDraw();
 extern void mnuReleaseMantraInfoDraw();
-extern s32 mnuUpdateMantraGaugeFade();
 extern s32 mnuDrawMantraGauge();
 extern u32 mnuInitMantraGaugeData();
 extern void mnuReleaseMantraGaugeData();
@@ -220,6 +219,7 @@ typedef struct MantraDrawItem {
     u32 createArg;     /* 0x1C: constructor argument */
     void *data;       /* 0x20: constructor result */
 } MantraDrawItem;
+s32 mnuUpdateMantraGaugeFade(s32 unused, MantraDrawItem *item);
 
 typedef struct MantraDrawPool {
     u32 handle;
@@ -1857,6 +1857,20 @@ typedef struct MantraGaugeState {
     /* 0x14 */ f32 value;
 } MantraGaugeState;
 
+/* Slot 3 shares its word with the reverse and countdown controls. */
+typedef union MantraGaugePackedView {
+    MantraGaugeState fields;
+    struct {
+        u8 slotPrefix[8];
+        u32 slotControlWord;
+    };
+} MantraGaugePackedView;
+
+typedef char MantraGaugePackedView_size_check[
+    sizeof(MantraGaugePackedView) == 0x18 ? 1 : -1];
+typedef char MantraGaugePackedView_control_offset_check[
+    ((u32)&((MantraGaugePackedView *)0)->slotControlWord == 8) ? 1 : -1];
+
 
 void mnuBeginMantraScrollCursorExit(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 8);
@@ -1922,7 +1936,68 @@ void mnuReleaseMantraGaugeData(u32 obj) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuUpdateMantraGaugeFade);
+s32 mnuUpdateMantraGaugeFade(s32 unused, MantraDrawItem *item) {
+    MantraGaugePackedView *packed = (MantraGaugePackedView *)item->data;
+    MantraGaugeState *gauge = &packed->fields;
+    s32 i;
+
+    if ((packed->slotControlWord & 0x01FE0000) != 0) {
+        gauge->countdown -= 1;
+    }
+    for (i = 0; i < 4; i++) {
+        if (gauge->slots[i].active != 0) {
+            if (gauge->slots[i].level < 10) {
+                gauge->slots[i].level += 1;
+            }
+        } else if (gauge->slots[i].level != 0) {
+            gauge->slots[i].level -= 1;
+        }
+    }
+
+    switch (gauge->state) {
+    case 1:
+    case 6:
+        gauge->value = (f32)gauge->timer / 10.0f;
+        gauge->timer += 1;
+        if (gauge->timer >= 10) {
+            if ((packed->slotControlWord & 0x10000) != 0) {
+                gauge->state = 4;
+            } else {
+                gauge->state = 2;
+            }
+            gauge->timer = 0;
+            gauge->value = 1.0f;
+            packed->slotControlWord &= 0xFFFEFFFF;
+        }
+        break;
+    case 2:
+        gauge->value = 1.0f;
+        break;
+    case 3:
+    case 5:
+        gauge->value = 1.0f - (f32)gauge->timer / 10.0f;
+        gauge->timer += 1;
+        if (gauge->timer >= 10) {
+            gauge->timer = 0;
+            gauge->value = 0.0f;
+            if (gauge->state == 5) {
+                if ((packed->slotControlWord & 0x10000) != 0) {
+                    gauge->state = 2;
+                } else {
+                    gauge->state = 4;
+                }
+                packed->slotControlWord &= 0xFFFEFFFF;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        gauge->value = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 s32 mnuDrawMantraGauge(s32 unused, s32 item) {
     s32 icons[4] = {0x3F, 0x40, 0x41, 0x42};
