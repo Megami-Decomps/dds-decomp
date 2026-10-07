@@ -17,7 +17,7 @@ extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
 extern void sdfReleaseChipBlock(s32);
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D230);
+INCLUDE_ASM(const s32, "event/evtEventPack", evtCreateModelFromPackResource);
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
