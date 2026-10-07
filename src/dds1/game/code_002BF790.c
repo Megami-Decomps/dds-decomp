@@ -756,7 +756,7 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     }
 
     item->formatWidth = width;
-    if (widget->flags & 0x100) {
+    if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
         length += width;
     } else {
         length += width + 1;
@@ -878,10 +878,10 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
             break;
         }
     }
-    if (widget->flags & 0x100) {
+    if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
         s32 row = entry->index + widget->rowOffset;
 
-        if (!(widget->flags & 0x200)) {
+        if (!(widget->flags & GRID_TEXT_HEX_ROW_INDEX)) {
             func_003014F0(out, "%03d:%s", row, text);
         } else {
             func_003014F0(out, "0x%03X:%s", row, text);
@@ -917,13 +917,13 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                     if (invokeSelected != 0) {
                         drawMode = layout;
                     }
-                    if (!(widget->flags & 0x40)) {
-                        if (item == widget->selected && (widget->flags & 4)) {
+                    if (!(widget->flags & GRID_TEXT_HIDE_ROWS)) {
+                        if (item == widget->selected && (widget->flags & GRID_TEXT_HIGHLIGHT_SELECTION)) {
                             column = (s32)item->number;
 
-                            if (widget->flags & 0x100) {
+                            if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
                                 column += 4;
-                                if (widget->flags & 0x200) {
+                                if (widget->flags & GRID_TEXT_HEX_ROW_INDEX) {
                                     column += 2;
                                 }
                             }
@@ -932,13 +932,13 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                                                    0xD0, 0x78, 0x40408080,
                                                    surfaceIndex);
                         }
-                        if ((widget->flags & 8) && item->value != 0) {
+                        if ((widget->flags & GRID_TEXT_HIGHLIGHT_VALUES) && item->value != 0) {
                             s32 width = strlen(item->text) * 0xC0 + 0x10;
                             s32 indent;
 
-                            if (widget->flags & 0x100) {
+                            if (widget->flags & GRID_TEXT_PREFIX_ROW_INDEX) {
                                 indent = 0x300;
-                                if (widget->flags & 0x200) {
+                                if (widget->flags & GRID_TEXT_HEX_ROW_INDEX) {
                                     indent = 0x480;
                                 }
                             } else {

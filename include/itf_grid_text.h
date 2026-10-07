@@ -22,6 +22,15 @@ typedef struct GridNumericDescriptor {
     f32 value;      /* 0x10 */
 } GridNumericDescriptor;
 
+/* Display behavior in GridTextWidget.flags. */
+enum {
+    GRID_TEXT_HIGHLIGHT_SELECTION = 0x4,
+    GRID_TEXT_HIGHLIGHT_VALUES = 0x8,
+    GRID_TEXT_HIDE_ROWS = 0x40,
+    GRID_TEXT_PREFIX_ROW_INDEX = 0x100,
+    GRID_TEXT_HEX_ROW_INDEX = 0x200
+};
+
 /* Shared grid and local-map list owner. */
 struct GridTextWidget {
     char *text;                     /* 0x00 */
