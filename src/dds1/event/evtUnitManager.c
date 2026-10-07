@@ -109,7 +109,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     previousWeight = 0.0f;
     /* The model RGB and alpha tracks preserve the other packed channel. */
     flags = unit->flags;
-    if (flags & 0x8000) {
+    if (flags & EVT_UNIT_FLAG_RGB_TRANSITION) {
         u32 packed;
         factor = unit->rgbDuration ? (f32)unit->rgbElapsed / unit->rgbDuration : 1.0f;
         rgbTarget[0] = unit->color64;
@@ -125,13 +125,13 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         rgbResult[0] = packed;
         mdlBroadcastMasked((MdlCtx *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
         if (unit->rgbElapsed >= unit->rgbDuration) {
-            flags = unit->flags &= ~0x8000;
+            flags = unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
         } else {
             flags = unit->flags;
             unit->rgbElapsed++;
         }
     }
-    if (flags & 0x10000) {
+    if (flags & EVT_UNIT_FLAG_ALPHA_TRANSITION) {
         u32 packed;
         factor = unit->alphaDuration ? (f32)unit->alphaElapsed / unit->alphaDuration : 1.0f;
         alphaTarget[0] = unit->color64;
@@ -147,21 +147,21 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         alphaResult[0] = packed;
         mdlBroadcastMasked((MdlCtx *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
         if (unit->alphaElapsed >= unit->alphaDuration) {
-            flags = unit->flags &= ~0x10000;
+            flags = unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
         } else {
             flags = unit->flags;
             unit->alphaElapsed++;
         }
     }
     /* Stale world-node references must not reach the target-vector reads. */
-    if (flags & 0x40000) {
+    if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
         if (unit->currentTransitionValue == 0) {
-            unit->flags = flags & ~0x40000;
+            unit->flags = flags & ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         } else if (!dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9,
                                                  (EffWorldNode *)unit->currentTransitionValue)) {
             unit->currentTransitionValue = 0;
             unit->previousTransitionValue = 0;
-            unit->flags &= ~0x40000;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         }
     }
     if (unit->previousTransitionValue &&
@@ -176,7 +176,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     currentWeight = 0.0f;
     if (unit->currentTransitionValue) {
         flags = unit->flags;
-        if (flags & 0x40000) {
+        if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
             f32 distance;
             target = ((EvtTarget *)unit->currentTransitionValue)->info;
             if (unit->previousTransitionValue) {
@@ -220,23 +220,23 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
                 flags = unit->flags;
                 ownVector = 1;
             } else {
-                if (unit->flags & 0x180000) {
+                if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_PHASES) {
                     if ((u16)unit->transitionFrameCount) {
                         transition = (f32)(u16)unit->transitionElapsed / (u16)unit->transitionFrameCount;
                     } else {
                         transition = 1.0f;
                     }
-                    if (unit->flags & 0x100000) {
+                    if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) {
                         transition = 1.0f - transition;
                     }
                     if ((u16)unit->transitionFrameCount) {
                         if ((u16)unit->transitionFrameCount <= (u16)++unit->transitionElapsed) {
-                            if (unit->flags & 0x100000) {
+                            if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) {
                                 unit->currentTransitionValue = 0;
-                                unit->flags &= ~0x40000;
+                                unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
                             }
                             unit->previousTransitionValue = 0;
-                            unit->flags &= ~0x180000;
+                            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
                         }
                     }
                 } else {
@@ -506,7 +506,7 @@ void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & 0x40000)) {
+    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
         info = ((EvtTarget *)unit->currentTransitionValue)->info;
         if (info->flags & 0x8) {
             ownVector = 1;
@@ -530,7 +530,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & 0x40000)) {
+    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
         info = ((EvtTarget *)unit->currentTransitionValue)->info;
         if (info->flags & 0x8) {
             ownVector = 1;
@@ -551,7 +551,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
 void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
     s32 ownVector = 0;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & 0x40000)) {
+    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
         if (((EvtTarget *)unit->currentTransitionValue)->info->flags & 0x8) {
             ownVector = 1;
         }
@@ -581,11 +581,11 @@ void evtRefreshUnitEndpointWork(EvtUnit *unit) {
     u32 flags = unit->flags;
     s32 i;
 
-    if (flags & 0x20000) {
+    if (flags & EVT_UNIT_FLAG_VALUE_CHANGED) {
         return;
     }
     unit->value = 0;
-    if (!(flags & 0x40000)) {
+    if (!(flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
         if (!(flags & 0x700)) {
             evtApplyMatchingUnitSlotEndpoints(unit);
             return;
@@ -612,17 +612,17 @@ void evtRefreshUnitEndpointWork(EvtUnit *unit) {
 }
 
 void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
-    unit->flags |= 0x40000;
+    unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
     unit->previousTransitionValue = unit->currentTransitionValue;
     unit->currentTransitionValue = value;
     if (duration == 0) {
         unit->previousTransitionValue = 0;
         unit->transitionElapsed = 0;
         unit->transitionDuration = 0;
-        unit->flags &= ~0x180000;
+        unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
     } else {
-        unit->flags |= 0x80000;
-        unit->flags &= ~0x100000;
+        unit->flags |= EVT_UNIT_FLAG_TARGET_BLEND_IN;
+        unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_OUT;
         unit->transitionDuration = duration;
         unit->transitionElapsed = 0;
     }
@@ -631,13 +631,13 @@ void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
 void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
     if (unit->currentTransitionValue != 0) {
         if (duration == 0) {
-            unit->flags &= ~0x40000;
-            unit->flags &= ~0x180000;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
             unit->currentTransitionValue = 0;
         } else {
-            unit->flags &= ~0x80000;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_IN;
             unit->transitionDuration = duration;
-            unit->flags |= 0x100000;
+            unit->flags |= EVT_UNIT_FLAG_TARGET_BLEND_OUT;
             unit->transitionElapsed = 0;
         }
     }
@@ -646,11 +646,11 @@ void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
 void evtUnitSetValueAndFlag(EvtUnit *unit, u32 value)
 {
     unit->value = value;
-    unit->flags = unit->flags | 0x20000;
+    unit->flags = unit->flags | EVT_UNIT_FLAG_VALUE_CHANGED;
 }
 
 void evtClearUnitValueChangeFlag(EvtUnit *unit) {
-    unit->flags = unit->flags & ~0x20000;
+    unit->flags = unit->flags & ~EVT_UNIT_FLAG_VALUE_CHANGED;
     evtRefreshUnitEndpointWork(unit);
 }
 
@@ -708,13 +708,13 @@ void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
         unit->color60 = (unit->color60 & 0xFF000000) | (color & 0xFFFFFF);
-        unit->flags &= ~0x8000;
+        unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
     } else {
         u32 currentRgb = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF;
 
         unit->color60 = (unit->color60 & 0xFF000000) | currentRgb;
         unit->color64 = (unit->color64 & 0xFF000000) | (color & 0xFFFFFF);
-        unit->flags |= 0x8000;
+        unit->flags |= EVT_UNIT_FLAG_RGB_TRANSITION;
     }
 }
 
@@ -725,13 +725,13 @@ void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
         unit->color60 = (unit->color60 & 0xFFFFFF) | (color & 0xFF000000);
-        unit->flags &= ~0x10000;
+        unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
     } else {
         u32 currentAlpha = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000;
 
         unit->color60 = (unit->color60 & 0xFFFFFF) | currentAlpha;
         unit->color64 = (unit->color64 & 0xFFFFFF) | (color & 0xFF000000);
-        unit->flags |= 0x10000;
+        unit->flags |= EVT_UNIT_FLAG_ALPHA_TRANSITION;
     }
 }
 
