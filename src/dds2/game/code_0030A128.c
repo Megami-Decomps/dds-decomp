@@ -44,14 +44,14 @@ extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
-extern void *sdfAllocGeneralBlock(s32 size);
-extern u32 *sdfMemoryGetBlockAddress(u32 handle);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern void func_0030A8A8(void);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 D_00438890;
 extern void func_00342580(u32);
-extern s32 sdfReleaseAllSpriteSlots(void);
+extern void sdfReleaseAllSpriteSlots(void);
 extern void sdfDestroyActiveCounterRuntime(void);
 extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
@@ -324,8 +324,8 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A8A8);
 
 void fldStartLmapTask(s32 mode) {
-    void *allocation = sdfAllocGeneralBlock(0x88);
-    u32 *taskData = sdfMemoryGetBlockAddress((u32)allocation);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(0x88);
+    u32 *taskData = (u32 *)sdfMemoryGetBlockAddress(allocation);
 
     memset(taskData, 0, 0x88);
     if (mode != 0) {
