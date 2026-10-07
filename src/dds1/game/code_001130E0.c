@@ -558,7 +558,7 @@ void effObjSetModelHolder(EffectObject *obj, u32 value) {
     obj->data->modelHolder = (ObjBase *)value;
 }
 
-void func_00113DD0(EffectObject *obj, u32 value) {
+void effObjSetRoomNumber(EffectObject *obj, u32 value) {
     obj->data->word04 = value;
 }
 
