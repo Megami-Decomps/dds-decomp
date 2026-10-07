@@ -1,5 +1,7 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -236,7 +238,7 @@ extern u64 kwlnTaskGetUserValue(void);
 
 extern void fldSelectDisplayBuffer(u32);
 
-extern void func_00129900(u32);
+extern void func_00129900(s32);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -771,38 +773,28 @@ void fldReleaseSceneRecordChunk(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001426E0);
 
-typedef struct {
-    u8 pad0[0xC];
-    s32 *unkC;
-} FldEmitterRes;
 
-typedef struct {
-    FldEmitterRes *res;
-    u8 pad4[0x4C];
+extern SdfPoolNode *D_00325838[];
+
+extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
+
+extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
+
+extern void func_002D9238(SdfPoolNode **, SdfModel *);
+
+void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
-} FldEmitter;
-
-extern u8 D_00325838[];
-
-extern void sdfDrawNodeBuildMatrix();
-
-extern void sdfModelUpdateCurrentFrameTransforms();
-
-extern void func_002D9238();
-
-void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
-    f32 pos[4];
-    s32 handle;
+    SdfDrawNode *handle;
 
     memset(pos, 0, sizeof(pos));
     pos[3] = 1.0f;
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    handle = *emitter->res->unkC;
+    handle = *(SdfDrawNode **)emitter->list->buffer;
         VU0_LOAD_VF_MEMORY(vf10, pos);
         VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, emitter->pos);
+        VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
     func_002D9238(D_00325838, emitter);
@@ -846,20 +838,33 @@ typedef struct {
     f32 z;
 } FldPoint;
 
+typedef struct FldIcon {
+    u32 kind;
+    FldPoint *position;
+} FldIcon;
+
 typedef struct {
-    u8 pad0[0x10];
-    s32 value;
+    char *name;
+    u32 nodeIndex;
+    struct FldIcon *icons;
+    u32 iconCount;
+    s32 floor;
     FldPoint *pointA; /* 0x14 */
     FldPoint *pointB; /* 0x18 */
 } FldItem; /* 0x1C bytes */
 
 typedef struct {
-    u8 pad0[4];
+    char *name;
     FldItem *items;
     u32 count;
-    s32 model; /* 0xC */
+    SdfItemListRef *model; /* 0xC */
     FldPoint *pos; /* 0x10 */
 } FldSceneRecord; /* 0x14 bytes */
+
+typedef char FldPoint_size_must_be_C[(sizeof(FldPoint) == 0xC) ? 1 : -1];
+typedef char FldIcon_size_must_be_8[(sizeof(FldIcon) == 8) ? 1 : -1];
+typedef char FldItem_size_must_be_1C[(sizeof(FldItem) == 0x1C) ? 1 : -1];
+typedef char FldSceneRecord_size_must_be_14[(sizeof(FldSceneRecord) == 0x14) ? 1 : -1];
 
 s32 fldFindRecordItem(s32 scene, u32 index) {
     s32 result = 1;
@@ -872,7 +877,7 @@ s32 fldFindRecordItem(s32 scene, u32 index) {
         item = rec->items;
         for (j = 0; j < rec->count; j++, item++) {
             if (i == scene && j == index) {
-                result = item->value + 1;
+                result = item->floor + 1;
             }
         }
     }
@@ -937,8 +942,8 @@ s32 fldGetMaxItemValue(void) {
     for (i = 0; i < (s32)fldSceneRecordCount; i++, rec++) {
         item = rec->items;
         for (j = 0; j < rec->count; j++, item++) {
-            if (max < item->value) {
-                max = item->value;
+            if (max < item->floor) {
+                max = item->floor;
             }
         }
     }
@@ -991,7 +996,7 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
-extern void frFontSetSharedRenderFlags(s32);
+extern void frFontSetSharedRenderFlags(u32);
 
 void fldReleaseTitleSlots(void) {
     if (D_003D40A0[2] != 0) {
@@ -1009,7 +1014,7 @@ void fldReleaseTitleSlots(void) {
     frFontSetSharedRenderFlags(0x54);
 }
 
-extern u32 D_00348F30[];
+extern SdfModel *D_00348F30[];
 
 typedef struct FldSlot {
     u32 unk_0;
@@ -1019,7 +1024,7 @@ typedef struct FldSlot {
 
 extern FldSlot D_003D40B0[];
 
-extern void sdfReleaseDevSlot(u32, s32, s32);
+extern void sdfReleaseDevSlot(SdfModel *, s32, s32);
 
 void fldReleaseMenuSlots(void) {
     s32 i;
@@ -1111,11 +1116,11 @@ void fldEnterSceneCamera(void) {
     D_00324B30.unk4 = 255.0f;
     D_00324B30.unkC = 20000.0f;
     D_00324B30.unk10 = 0x108010;
-    D_00324980.offsetX = 2244.0f;
-    D_00324980.offsetY = 2118.0f;
+    D_00324980.camera.offsetX = 2244.0f;
+    D_00324980.camera.offsetY = 2118.0f;
 }
 
-extern s32 sdfModelCreateWithAlternateItems(s32, s32);
+
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
@@ -1173,8 +1178,8 @@ void fldLoadSceneModelsAndCamera(void) {
     D_00324B30.unk4 = 255.0f;
     D_00324B30.unkC = 20000.0f;
     D_00324B30.unk10 = 0x108010;
-    D_00324980.offsetX = 2244.0f;
-    D_00324980.offsetY = 2118.0f;
+    D_00324980.camera.offsetX = 2244.0f;
+    D_00324980.camera.offsetY = 2118.0f;
 }
 
 void fldReleaseMenuSlotsAfterWait(void) {
@@ -1304,11 +1309,6 @@ void func_00146CD0(s32 index) {
     }
 }
 
-typedef struct {
-    u8 pad0[8];
-    u32 count;
-    u8 padC[8];
-} FldSceneEntry; /* 0x14 bytes */
 
 extern s32 fldFindRecordItem(s32 scene, u32 index);
 
@@ -1317,7 +1317,7 @@ s32 fldFindPreviousMarkedValue(s32 limit) {
     u32 j;
     s32 item;
     s32 best = -1;
-    FldSceneEntry *entry = (FldSceneEntry *)fldSceneRecords;
+    FldSceneRecord *entry = (FldSceneRecord *)fldSceneRecords;
 
     for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
@@ -1340,7 +1340,7 @@ s32 fldFindNextMarkedValue(s32 limit) {
     u32 j;
     s32 item;
     s32 best = 999;
-    FldSceneEntry *entry = (FldSceneEntry *)fldSceneRecords;
+    FldSceneRecord *entry = (FldSceneRecord *)fldSceneRecords;
 
     for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
@@ -1360,12 +1360,12 @@ s32 fldFindNextMarkedValue(s32 limit) {
 
 void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z) {
     s32 i;
-    s32 entry = fldSceneRecords;
-    for (i = 0; i < (s32)fldSceneRecordCount; i++, entry += 0x14) {
+    FldSceneRecord *entry = (FldSceneRecord *)fldSceneRecords;
+    for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
         if (i == index) {
-            f32 *position = *(f32 **)(entry + 0x10);
-            *x = position[0];
-            *z = position[2];
+            FldPoint *position = entry->pos;
+            *x = position->x;
+            *z = position->z;
             return;
         }
     }
@@ -2029,7 +2029,7 @@ void fldDrawGaugeBar(s32 width) {
 
 extern void fldSelectDisplayBuffer(u32);
 
-extern void func_00129900(u32);
+extern void func_00129900(s32);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
