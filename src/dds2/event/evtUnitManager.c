@@ -581,9 +581,9 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
 extern void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit);
 extern void func_0033A7E8(void *, SdfLightSources, f32 *);
 
-/* Rebuild the unit's endpoint render work from its own colour/vector when the
- * value-change flag is set; otherwise defer to the matching-slot selector. */
-void func_0023C5F0(EvtUnit *unit) {
+/* Refresh endpoint render work after the value-change flag is cleared; defer
+ * to the matching-slot selector when no target or color transition is active. */
+void evtRefreshUnitEndpointWork(EvtUnit *unit) {
     f32 ends[4][4];
     f32 color[4];
     SdfLightSources desc = { ends, 0, 0 };
@@ -663,7 +663,7 @@ void evtUnitSetValueAndFlag(EvtUnit *unit, u32 value) {
 
 void evtClearUnitValueChangeFlag(EvtUnit *unit) {
     unit->flags = unit->flags & ~0x20000;
-    func_0023C5F0(unit);
+    evtRefreshUnitEndpointWork(unit);
 }
 
 typedef struct EvtUnitColorEndpoints {

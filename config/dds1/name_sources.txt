@@ -3693,6 +3693,7 @@
 0x00221890	evtLoadUnitFirstColorVectorVU	inferred	Chooses packed unit color or target/default first vector and loads VU register vf10. [names_reviewed6.tsv]
 0x00221940	evtLoadUnitSecondColorVectorVU	inferred	Chooses second packed color or target/default vector and loads VU register vf10. [names_reviewed6.tsv]
 0x002219F8	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]
+0x00221A80	evtRefreshUnitEndpointWork	inferred	Refreshes endpoint render work after the value-change flag is cleared; uses the matching-slot selector when no target or color transition is active.
 0x00221BE0	evtSetUnitValueTransition	inferred	Saves the previous unit value, installs a new value, and sets elapsed/duration and transition flags.
 0x00221C50	evtEndUnitValueTransition	inferred	Clears the current unit transition immediately or switches to its timed ending mode.
 0x00221CB8	evtUnitSetValueAndFlag	inferred	Byte-identical dds2 twin 0x0023C828; Writes a unit value at offset 0x6c and sets the 0x20000 flag. [names_conflicts.tsv]
