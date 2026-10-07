@@ -193,7 +193,11 @@ typedef union BtlBackgroundId {
  * 0x1AA6F8. Its script-owner/task pair is +0x2C4/+0x2C8, not DDS1's
  * offsets plus 0x24. Scene groups, actor lists and SYSEFF slots belong here. */
 typedef struct BtlState {
-    u8 pad000[0x50];
+    u8 pad000[0x10];
+    f32 baselineLightDirection[4]; /* 0x10: initializer source for current direction. */
+    f32 baselineLightColor[4]; /* 0x20: initializer source for current light color. */
+    f32 baselineAmbientColor[4]; /* 0x30: initializer source for current ambient color. */
+    f32 lightDirection[4]; /* 0x40: current scene light direction. */
     f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
     f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
     u8 pad070[0x30];
@@ -410,6 +414,14 @@ typedef struct BtlState {
     u8 unk_E0D; /* 0xFD1 */
     s16 unk_E0E; /* 0xFD2 */
 } BtlState;
+typedef char BtlSceneLightOffset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
+typedef char BtlSceneLightOffset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
+typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbientColor == 0x30) ? 1 : -1];
+typedef char BtlSceneLightOffset3[((unsigned int)&((BtlState *)0)->lightDirection == 0x40) ? 1 : -1];
+typedef char BtlSceneLightOffset4[((unsigned int)&((BtlState *)0)->lightColor == 0x50) ? 1 : -1];
+typedef char BtlSceneLightOffset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
+typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
+typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 #endif /* VERSION_DDS2 */
 
 #endif /* BTL_STATE_H */

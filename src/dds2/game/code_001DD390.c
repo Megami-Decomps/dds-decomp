@@ -275,7 +275,10 @@ extern s32 D_00435E0C;
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
 
-extern s64 func_00201520(void);
+typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
+extern s64 func_00201520(SceneLightRestoreArgs *);
+extern void evtSetUnitStatusFlags(EvtUnit *);
+extern void func_0023C870(EvtUnit *, s32, u32, u32);
 
 extern s64 func_00201718(void);
 
@@ -3096,14 +3099,14 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08,
 
 void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
     if ((((BtlUnit *)((SoundTaskArgs *)taskArgs)->unk_0C)->flags & 2) != 0) {
-        evtSetUnitStatusFlags((u32)((BtlUnit *)((SoundTaskArgs *)taskArgs)->unk_0C)->ext);
+        evtSetUnitStatusFlags(((BtlUnit *)((SoundTaskArgs *)taskArgs)->unk_0C)->ext);
         return;
     }
 }
 
 u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
     if ((btlUnitStatusPair((BtlUnit *)taskArgs[3]) & 0x1000000002) == 0x1000000002) {
-        func_0023C870((u32)((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
+        func_0023C870(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
     }
     return 1;
 }
@@ -3127,7 +3130,7 @@ BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 value, s32 option, s32 va
 
 void btlPrepareUnitStatusFxOnStart(s32 taskArgs) {
     if ((((FxTask *)taskArgs)->unit->flags & 2) != 0) {
-        evtSetUnitStatusFlags((u32)((FxTask *)taskArgs)->unit->ext);
+        evtSetUnitStatusFlags(((FxTask *)taskArgs)->unit->ext);
         return;
     }
 }
@@ -7553,13 +7556,13 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00201268);
 
-extern s32 func_00201268();
+extern s32 func_00201268(SceneLightRestoreArgs *);
 
 BtlRuntimeTask *func_002014A8(value)
     u32 value;
 {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    SceneLightRestoreArgs *args;
     task->startCondition.kind = 1;
     task->taskId = 4;
     task->flags |= 2;
@@ -7571,13 +7574,13 @@ BtlRuntimeTask *func_002014A8(value)
     return task;
 }
 
-s64 func_00201520(void) {
+s64 func_00201520(SceneLightRestoreArgs *args) {
     D_00436AD4 = 1;
-    return func_00201268();
+    return func_00201268(args);
 }
 
-BtlRuntimeTask *btlCreateSoundUpdateTask(void) {
-    BtlRuntimeTask *task = (BtlRuntimeTask *)func_002014A8();
+BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value) {
+    BtlRuntimeTask *task = func_002014A8(value);
     task->taskId = 7;
     task->callback = func_00201520;
     return task;
