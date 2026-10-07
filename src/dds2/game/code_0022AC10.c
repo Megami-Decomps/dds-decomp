@@ -955,7 +955,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
 }
 
-extern s32 btlGetEntryFlagsUnlessDisabled(u8 *);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 extern s32 btlLowestSetPairIndex(u32);
 
 s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
@@ -983,7 +983,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     if (datCommandRecords[commandId].kind == 2 ||
         (datCommandRecords[commandId].flags & 0x20)) {
         for (i = 0; i < count; i++) {
-            flags = btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120);
+            flags = btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord);
             if (flags & 0x8000) {
                 return 7;
             }
@@ -997,7 +997,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
             return 9;
         }
         for (i = 0; i < count; i++) {
-            if (btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120) & 0x800) {
+            if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord) & 0x800) {
                 return 9;
             }
         }

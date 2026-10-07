@@ -172,7 +172,7 @@ extern char D_003B5D10[];
 
 extern u8 D_003B5B10[];
 
-extern s32 btlGetEntryFlagsUnlessDisabled(void *);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
 extern u8 *D_00435E64;
 
@@ -623,7 +623,7 @@ s32 btlHaveActiveSceneActorEntriesCleared(void) {
     BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x421) == 0x401 &&
-            btlGetEntryFlagsUnlessDisabled(&actor->partyRecord.flags) != 0) {
+            btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) != 0) {
             return 0;
         }
         actor = actor->nextActor;
