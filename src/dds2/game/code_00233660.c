@@ -8,6 +8,7 @@
 #include "dat_state.h"
 #include "sdf_draw.h"
 #include "eff.h"
+#include "sdf_sif_command.h"
 
 extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 
@@ -57,13 +58,6 @@ s32 effCreateNodeFromDescriptor(s32);
 #define MDL_MAP_POSITION_DATA_OFFSET 0x10
 #define MDL_MAP_POSITION_RECORD_BYTES 0x40
 
-
-typedef struct MdlSifCommand {
-    s32 source;
-    s32 end;
-    s32 argument;
-    u32 command;
-} MdlSifCommand;
 
 /* Viewer-wide state for the model viewer task (DDS2 game/code_00233660 and
  * DDS1 game/code_00218B48 share this layout field for field). Fields that are
@@ -136,9 +130,9 @@ extern char D_00421248[]; /* "%02x/%02x" */
 
 extern char D_00437068[]; /* "" */
 
-extern void sdfPktInit(void *, s32, s32, s32, s32);
+extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
 
-extern s32 sdfFormatSifPacket();
+extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
@@ -1344,11 +1338,11 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00235568);
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235628);
 
 void func_00235728(void) {
-    MdlSifCommand packet;
+    SifCommand packet;
     const char *format;
     s32 displayMode;
     s32 nodeCount;
-    s32 formatted;
+    void *formatted;
 
     mdlAppendViewerRectToDrawList(0x7E10, 0x8608, 0xFF0080, 0xEA0, 0x90, 0);
     sdfPktInit(&packet, 0x7E40, 0x8620, 0xFF0080, 0);
@@ -1359,7 +1353,7 @@ void func_00235728(void) {
         format = D_00421220;
     }
     sdfAppendPacket(mdlViewerState.packetList,
-                    sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
+                    (u32)sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
 
     nodeCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], 0);
     if (nodeCount == 0) {
@@ -1373,7 +1367,7 @@ void func_00235728(void) {
         formatted = sdfFormatSifPacket(&packet, format,
                                        mdlGetNodeField2C(mdlViewerState.resources[0], 0), nodeCount - 1);
     }
-    sdfAppendPacket(mdlViewerState.packetList, formatted);
+    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 }
 
 void mdlAddViewEntryFlagged(void) {

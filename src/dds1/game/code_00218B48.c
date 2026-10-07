@@ -8,6 +8,7 @@
 #include "dat_state.h"
 #include "sdf_draw.h"
 #include "eff.h"
+#include "sdf_sif_command.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -33,13 +34,6 @@
 #define MDL_MAP_POSITION_DATA_OFFSET 0x10
 #define MDL_MAP_POSITION_RECORD_BYTES 0x40
 
-
-typedef struct MdlSifCommand {
-    s32 source;
-    s32 end;
-    s32 argument;
-    u32 command;
-} MdlSifCommand;
 
 /* Viewer-wide state for the model viewer task (DDS1 game/code_00218B48 and
  * DDS2 game/code_00233660 share this layout field for field). Fields that are
@@ -175,7 +169,7 @@ s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 s32 mdlUpdateViewerCursor(s16 *, s32);
 
-extern void sdfPktInit(void *, s32, s32, s32, s32);
+extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
 
 extern void *sdfFormatSifPacket(void *, const char *, ...);
 
@@ -1300,7 +1294,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A9F8);
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021AAB8);
 
 void func_0021ABB8(void) {
-    MdlSifCommand packet;
+    SifCommand packet;
     const char *format;
     s32 displayMode;
     s32 nodeCount;
