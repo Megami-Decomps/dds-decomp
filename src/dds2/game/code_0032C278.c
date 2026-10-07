@@ -997,7 +997,7 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     sdfInitDrawPacket(packet->draw);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D898);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfRefreshSceneNodePackets);
 
 typedef struct SdfSceneNode {
     u8 pad00[4];
@@ -1010,13 +1010,13 @@ typedef struct SdfSceneNode {
     u64 regs[8];       /* 0x140 */
 } SdfSceneNode;
 
-extern void func_0032D898();
+extern void sdfRefreshSceneNodePackets();
 
 /* Retain the render-target view and initialize the scene callback and fixed drawing state. */
 void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
-    node->handler = func_0032D898;
+    node->handler = sdfRefreshSceneNodePackets;
     sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     node->regs[0] = SDF_GS_SCENE_TEST;
     node->regs[1] = SDF_GS_TEST_PRIMARY;

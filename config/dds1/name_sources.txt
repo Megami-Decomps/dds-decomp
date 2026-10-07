@@ -6132,6 +6132,7 @@
 0x002D47B8	sdfInitDrawPacket	inferred	sdf writes constant tag doublewords 0..7 of a DMA packet
 0x002D4800	sdfBuildSceneDrawHeader	inferred	Initializes packet header before writing scene draw fields. [names_reviewed8.tsv]
 0x002D48A8	sdfBuildTextureScenePacket	inferred	confidence=high; src/dds1/game/code_002D33C8.c:func_002D48A8; Builds texture setup for both rendering contexts, centered bounds, test/blend registers, and the draw packet. [names_qp9.tsv]
+0x002D49E8	sdfRefreshSceneNodePackets	inferred	Registered scene callback rebuilds both frame/depth contexts and refreshes paired FRAME words and texture packets from the retained graph view and buffer index.
 0x002D4BA0	sdfInitSceneNode	inferred	sets view box, draw packet and GS register words [names_M37_SmallSweep6.tsv]
 0x002D4C40	sdfAppendLinkedPacketPayload	inferred	Links the supplied packet node in one list and appends its payload at offset 0x10 to another.
 0x002D4D10	sdfAppendDmaPrimary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
