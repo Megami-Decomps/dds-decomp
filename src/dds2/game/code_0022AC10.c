@@ -155,7 +155,9 @@ extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
 extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
-extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
+extern void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress,
+                                      s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+                                      s32 imageAddress, s32 (*allocatePacket)(s32));
 
 extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 
@@ -1385,7 +1387,8 @@ void btlInitializeGraphicsRuntime(void) {
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket(packetList, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->resource, 0);
+    sdfCreateDescriptorPacket(packetList, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource,
+                              0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
     sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
