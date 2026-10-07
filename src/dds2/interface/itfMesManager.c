@@ -1109,7 +1109,7 @@ extern char D_00436620[];
 extern char D_00436628[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
-extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_001A7A98(ItfMesWindowRec *window);
@@ -1205,7 +1205,7 @@ s32 func_001A4CF8(void) {
             marker = D_00436620;
         }
         sdfAppendPacket(packetList,
-                        sdfCreateFormattedSifCommand(0x7180, y, 0xFFFFF0, 0,
+                        (u32)sdfCreateFormattedSifCommand(0x7180, y, 0xFFFFF0, 0,
                                                      format, marker, D_003B4990[item]));
     }
 
@@ -1213,19 +1213,19 @@ s32 func_001A4CF8(void) {
     panelSprite = panel->unk4;
     position = &panelSprite->left;
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7E00, 0x7A00, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7A00, 0xFFFFF0, 0,
                                                  positionFormat, position[0] >> 4,
                                                  position[1] >> 3));
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7E00, 0x7A60, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7A60, 0xFFFFF0, 0,
                                                  positionFormat, position[2] >> 4,
                                                  position[3] >> 3));
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
                                                  D_00436628, panel->unk28));
     position = &D_003B4770.window->mes->blkA4.offsetLeft;
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
                                                  "OFFSET : %3d,%3d - %3d,%3d",
                                                  position[0] >> 4,
                                                  position[1] >> 3,
