@@ -149,7 +149,7 @@ typedef struct {
     u32 baseColor;    /* 0x1344 initialised to grey 0x80808080 */
     u32 secondaryHandle; /* 0x1348: parameter block 1 */
     u32 primaryHandle;   /* 0x134C: parameter block 0 */
-    u32 allocationHandle; /* 0x1350: backing allocation */
+    SdfMemBlock *allocationHandle; /* 0x1350: backing allocation */
 } EffPCPChargeWork;
 
 typedef char EffPCPChargeWork_size_must_be_0x1354[(sizeof(EffPCPChargeWork) == 0x1354) ? 1 : -1];
@@ -946,9 +946,9 @@ void effPcpChargeInitTail(EffPCPChargeWork *work) {
 }
 
 EffPCPChargeWork *effCreateChargeWork(void *source) {
-    void *resource = sdfAllocGeneralBlock(0x1354);
+    SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
-    work->allocationHandle = (u32)resource;
+    work->allocationHandle = resource;
     work->primaryHandle = effParamCreateFromTable(source, 0);
     work->secondaryHandle = effParamCreateFromTable(source, 1);
     effPcpChargeInitTail(work);
@@ -967,10 +967,10 @@ void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
 }
 
 EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
-    void *resource = sdfAllocGeneralBlock(0x1354);
+    SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
     u32 firstHandle = source->primaryHandle;
-    work->allocationHandle = (u32)resource;
+    work->allocationHandle = resource;
     work->primaryHandle = effParamWorkDuplicate(firstHandle);
     work->secondaryHandle = effParamWorkDuplicate(source->secondaryHandle);
     effPcpChargeInitTail(work);
