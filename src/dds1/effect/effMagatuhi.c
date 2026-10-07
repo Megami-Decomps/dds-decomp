@@ -533,7 +533,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
 
 /* Advance delayed Bezier particles, pack their fade, and submit the owner.
  * Fade-in wins when its interval overlaps fade-out; divisors are unchecked. */
-void func_0018AB40(EffMagatuhiWideSecond *work) {
+void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
     void *slots = work->mathResource;
     EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
     s32 *delays = work->delays;
@@ -744,7 +744,7 @@ void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
 
 /* Sample the current fixed-height ring before advancing angle and radius.
  * Keep the cached age across initialization and preserve fade-in priority. */
-void func_0018B348(EffMagatuhiRingWork *work) {
+void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     EffMagatuhiValueWork *valueWork;
@@ -995,7 +995,7 @@ void effMagatuhiInitOrbitParticle(EffMagatuhiOrbitWork *work, s32 index) {
 
 /* Sample and transform the current orbit before advancing its three rates.
  * Keep the cached age across initialization and preserve fade-in priority. */
-void func_0018BB88(EffMagatuhiOrbitWork *work) {
+void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     EffMagatuhiValueWork *valueWork;
@@ -1236,7 +1236,7 @@ void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
 
 /* Accumulate lift, transform the drift sample, then advance scale and angle.
  * Keep the cached age across initialization and preserve fade-in priority. */
-void func_0018C4C8(EffMagatuhiDriftWork *work) {
+void effMagatuhiUpdateDriftParticles(EffMagatuhiDriftWork *work) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     EffMagatuhiValueWork *valueWork;
