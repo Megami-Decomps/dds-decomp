@@ -814,9 +814,9 @@ u32 effClampSlotPhaseAtStart(s32 work, s32 index, EffTimedState *effect) {
     return 1;
 }
 
-u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
-    EffTimedState *states = (EffTimedState *)(entry + 0x28);
-    BdWork *record = &((EffectSlotSet *)effect)->workEntries[slot];
+EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, BdWork *entry) {
+    EffTimedState *states = entry->states;
+    BdWork *record = &effect->workEntries[slot];
     s32 idle = 1;
     u32 i;
 
@@ -826,7 +826,7 @@ u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
 
         if (source != 0 && source->category != 0) {
             EffRecordBucket *group = &D_0038FD88[source->category];
-            s32 step = group->step(record, (BdWork *)entry, state);
+            s32 step = group->step(record, entry, state);
 
             if (state->delay > 0) {
                 step = 0;
@@ -837,7 +837,7 @@ u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
                     if (state->value != 0x10000) {
                         state->value += step;
                         idle = 0;
-                        if (effClampSlotPhaseAtEnd(effect, slot, state) == 0) {
+                        if (effClampSlotPhaseAtEnd((s32)effect, slot, state) == 0) {
                             state->delay = state->delayMax;
                             return 0;
                         }
@@ -845,7 +845,7 @@ u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
                 } else if (state->value != 0) {
                     state->value -= step;
                     idle = 0;
-                    if (effClampSlotPhaseAtStart(effect, slot, state) == 0) {
+                    if (effClampSlotPhaseAtStart((s32)effect, slot, state) == 0) {
                         state->delay = state->delayMax;
                         return 0;
                     }
@@ -854,7 +854,7 @@ u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
         }
     }
     if (idle != 0) {
-        effResetRecordRun(effect, slot, -1);
+        effResetRecordRun((u8 *)effect, slot, -1);
         return 0;
     }
     return effect;
@@ -891,14 +891,14 @@ u32 effClearSlotOverrideWork(s32 work, s32 index) {
 u32 effConfigureSlotResource(s32 work, s32 index, u32 value, u32 flags) {
     BdWork *effect = &((EffectSlotSet *)work)->workEntries[index];
     effSetSlotResourceAndFlags(&effect->states[0], value, flags);
-    effUpdateTimedStates((u8 *)work, index, (u8 *)effect);
+    effUpdateTimedStates((EffectSlotSet *)work, index, effect);
     return 1;
 }
 
 u32 effConfigureIndexedSlotResource(s32 work, s32 index, s32 data, s32 item, u32 flags) {
     BdWork *effect = &((EffectSlotSet *)work)->workEntries[index];
     effSetSlotResourceAndFlags(&effect->states[0], (u32)&((EffMappedResource *)data)->records[item], flags);
-    effUpdateTimedStates((u8 *)work, index, (u8 *)effect);
+    effUpdateTimedStates((EffectSlotSet *)work, index, effect);
     return 1;
 }
 
@@ -906,7 +906,7 @@ u32 effConfigureIndexedSlotMaterial(s32 work, s32 index, s32 data, s32 item,
                   u32 flags, u32 color, u32 option) {
     BdWork *effect = &((EffectSlotSet *)work)->workEntries[index];
     effSetSlotResourceAndFlags(&effect->states[0], (u32)&((EffMappedResource *)data)->records[item], option);
-    effUpdateTimedStates((u8 *)work, index, (u8 *)effect);
+    effUpdateTimedStates((EffectSlotSet *)work, index, effect);
     effect->states[0].materialFlags = flags;
     effect->states[0].materialValue = color;
     return 1;
