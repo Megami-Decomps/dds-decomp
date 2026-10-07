@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_primitive.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -885,23 +886,23 @@ typedef struct ConsMatrixPacket {
 
 
 /* Emit two matrices and three vectors; also cache the inverse origin in node. */
-void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, u8 *node, void *transformMatrix) {
+void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(packet->matrixA);
-    sdfPostmultiplyVuMatrixFromMemory(node + 0x30);
+    sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
     VU0_STORE_MATRIX(packet->matrixB);
-    VU0_LOAD_VF_MEMORY(vf10, node + 0x70);
+    VU0_LOAD_VF_MEMORY(vf10, &node->camera.halfWidth);
     VU0_STORE_VF(vf10, packet->vecC);
-    VU0_LOAD_VF_MEMORY(vf10, node + 0x80);
+    VU0_LOAD_VF_MEMORY(vf10, &node->camera.originX);
     VU0_STORE_VF(vf10, packet->vecD);
     VU0_LOAD_MATRIX(transformMatrix);
     sdfInvertRigidVuTransform();
     VU0_MOVE_VF(vf10, vf31);
     VU0_STORE_VF(vf10, packet->vecE);
-    VU0_STORE_VF(vf10, node + 0x90);
+    VU0_STORE_VF(vf10, node->inverseOrigin);
     packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
     packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
     packet->reservedA = 0;
@@ -915,15 +916,15 @@ extern u8 D_003984B0[];
 extern u8 D_003984F0[];
 
 /* Cache node data, its composed transform, and the transformed cached origin. */
-void sdfConsCacheTransformedNode(u8 *node, void *transformMatrix) {
+void sdfConsCacheTransformedNode(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(D_003984B0);
-    sdfPostmultiplyVuMatrixFromMemory(node + 0x30);
-    VU0_LOAD_VF_MEMORY(vf10, node + 0x90);
+    sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
+    VU0_LOAD_VF_MEMORY(vf10, node->inverseOrigin);
     VU0_STORE_MATRIX(D_00398470);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_STORE_VF(vf10, D_003984F0);
-    memcpy(D_003983D0, node, 0xA0);
+    memcpy(D_003983D0, node, sizeof(*node));
 }
 
 
