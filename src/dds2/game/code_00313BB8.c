@@ -471,7 +471,14 @@ s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314A80);
+/* Mark the second bit of the decoded mantra pair for this unit. */
+void func_00314A80(DatPartyRecord *unit, u16 id) {
+    u32 word;
+    u32 shift;
+
+    prfDecodeFlagPair(id, &word, &shift);
+    datGameState->mantraBits[unit->unitId].words[word] |= 1U << (shift + 1);
+}
 
 s32 func_00314B00(DatPartyRecord *work, u16 id) {
     u32 word, shift;
