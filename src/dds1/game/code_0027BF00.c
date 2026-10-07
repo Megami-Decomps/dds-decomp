@@ -4,6 +4,9 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 struct MenuListNode;
+struct FrFontGlyph;
+struct FrFontCtx;
+struct TextStyleNode;
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -63,9 +66,9 @@ extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern void func_00196088(s32, s32, s32);
 
-extern void func_001958A0(s32, s32, s32);
+extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
 
-extern s32 frFontQueueGlyphInSelectedSlot(s32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -1777,8 +1780,8 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
         item = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
         item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, item);
     }
-    func_001958A0(item, 1, param);
-    frFontQueueGlyphInSelectedSlot(item);
+    func_001958A0((struct FrFontGlyph *)item, 1, param);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)item);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
             page->drawAlpha += 16;
@@ -1809,22 +1812,23 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
 
 extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
 
-extern s32 func_001951C8(char *text, s32, s32, s32, s32);
+extern struct FrFontGlyph *func_001951C8(void *, s8, s8, s8, struct FrFontGlyph *);
 
-extern s32 frFontMeasureGlyphChain(s32 item);
+extern u32 frFontMeasureGlyphChain(void *);
 
-extern void frFontSetContextPair(s32 item, s32 x, s32 y);
+extern void frFontSetContextPair(struct FrFontCtx *, u32, u32);
+extern void frFontSetChildColors(struct TextStyleNode *, u32);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
-    s32 item;
+    struct FrFontGlyph *item;
     s32 width;
 
     func_002CD0D8(textId & 0xFFFF, 1, text);
     item = func_001951C8(text, 0, 0, 0, 0);
-    frFontSetChildColors(item, color);
+    frFontSetChildColors((struct TextStyleNode *)item, color);
     width = frFontMeasureGlyphChain(item) + 8;
-    frFontSetContextPair(item, x - (width * 0x10 >> 1) + 0x5F0, y);
+    frFontSetContextPair((struct FrFontCtx *)item, x - (width * 0x10 >> 1) + 0x5F0, y);
     func_001958A0(item, 1, param);
     frFontQueueGlyphInSelectedSlot(item);
 }
@@ -1846,8 +1850,8 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
         }
         item = itfCreateConvertedTextGlyph(0, 0, depth, texture, (const u8 *)outValue, 0);
         func_00196088(0x1710, 0x5F0, item);
-        func_001958A0(item, 1, param);
-        frFontQueueGlyphInSelectedSlot(item);
+        func_001958A0((struct FrFontGlyph *)item, 1, param);
+        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)item);
     }
 }
 
