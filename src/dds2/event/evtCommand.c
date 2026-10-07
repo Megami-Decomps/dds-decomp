@@ -21,6 +21,10 @@ s32 scrReadIntParameter(s32 idx);
 
 void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
+struct EffectObj;
+s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
+s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
+
 void dds3ResetWorldResourceState(void *unit);
 
 void scrSetIntegerReturnValue(s32 value);
@@ -170,8 +174,8 @@ s32 evtCommandEnablePathUnit(void)
 /* Bind the selected effect path to the first owner found in kinds 4..9.
  * Missing paths or owners complete the command without binding anything. */
 s32 evtCommandAssignEffectObjectOwner(void) {
-    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 owner;
+    struct EffectObj *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    void *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -179,10 +183,10 @@ s32 evtCommandAssignEffectObjectOwner(void) {
     }
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        owner = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == 0);
-    if (owner == 0) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
+    if (owner == NULL) {
         return 1;
     }
     effObjBindValidatedOwner(effectPath, owner);
@@ -191,8 +195,8 @@ s32 evtCommandAssignEffectObjectOwner(void) {
 
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
-    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 owner;
+    struct EffectObj *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    void *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -200,10 +204,10 @@ s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
     }
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        owner = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == 0);
-    if (owner == 0) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
+    if (owner == NULL) {
         return 1;
     }
     effObjBindOwnerBillEntry(effectPath, owner, scrReadIntParameter(2));
