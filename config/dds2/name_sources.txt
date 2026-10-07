@@ -5796,6 +5796,7 @@
 0x0032C448	sdfRegisterTextureReleaseRequestHandler	inferred	Binds texture release callback to the synchronized request slot rather than merely echoing initialization. [names_reviewed12.tsv]
 0x0032C730	sdfPatchPacketResourceField	inferred	Replaces the low fourteen packet bits with the indexed resource entry's offset-0xC word shifted right six.
 0x0032C768	sdfCreatePatchableResourcePacket	inferred	confidence=high; matched-C; src/dds2/game/code_0032C278.c:177:func_0032C768; Allocates a resource packet with a linked callback header, builds its payload from resource entry zero, then appends the header to the fixup list and the payload range to the draw list.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x0032C860	sdfBuildHostToLocalImagePacket	inferred	Builds destination image-transfer registers with TRXDIR0, host image DMA reference and qword count, then TEXFLUSH.
 0x0032CA90	sdfInitializeSynchronizedRequest	inferred	Creates a shared semaphore if needed, then initializes a two-word request and clears its state.
 0x0032CAE0	sdfPendingQueuePush	inferred	pushes an entry onto the owner's pending node (0x3F-entry chunks) under D_004389FC [names_M49_GridSdf.tsv]
 0x0032CBB0	sdfDetachQueue	inferred	Byte-identical dds1 twin 0x002D3D00; takes D_003BDA00 list, clears each node link, returns head [names_conflicts.tsv]

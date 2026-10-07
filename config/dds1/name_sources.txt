@@ -6094,6 +6094,7 @@
 0x002D35B8	sdfBuildResourceTransferPacket	inferred	U2
 0x002D37A8	sdfCreateResourcePacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D38B8	sdfCreatePatchableResourcePacket	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:121:func_002D38B8; Allocates a resource packet with a linked callback header, builds its payload from resource entry zero, then appends the header to the fixup list and the payload range to the draw list.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x002D39B0	sdfBuildHostToLocalImagePacket	inferred	Builds destination image-transfer registers with TRXDIR0, host image DMA reference and qword count, then TEXFLUSH.
 0x002D3B28	sdfCreateDescriptorPacket	inferred	Allocates descriptor, initializes it, and queues its packet range.
 0x002D3C30	sdfPendingQueuePush	inferred	DDS2 func_0032CAE0 [names_M49_GridSdf.tsv]
 0x002D3D00	sdfDetachQueue	inferred	takes D_003BDA00 list, clears each node link, returns head

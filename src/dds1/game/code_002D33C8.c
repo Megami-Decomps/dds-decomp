@@ -279,7 +279,7 @@ typedef struct SdfDescriptorPacket {
     u64 finishRegister;
 } SdfDescriptorPacket;
 
-void func_002D39B0(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
+void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
                    s64 destinationX, s64 destinationY, s32 transferWidth,
                    s32 transferHeight, u32 sourceAddress) {
     s32 qwc;
@@ -314,7 +314,7 @@ void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress, s32 a, 
         allocatePacket = sdfAllocPacketAligned;
     }
     packetAddress = allocatePacket(SDF_DESCRIPTOR_PACKET_BYTES);
-    func_002D39B0((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)descriptorAddress,
+    sdfBuildHostToLocalImagePacket((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)descriptorAddress,
                   a, b, c, d, e);
     sdfAppendPacketRange(list, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
 }
