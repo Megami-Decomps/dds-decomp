@@ -9,7 +9,7 @@
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 
 extern u32 D_00435DA0;
@@ -546,13 +546,15 @@ void func_00113FF8(EffectObject *object, u32 value) {
     object->data->word04 = value;
 }
 
-u32 func_00114008(u64 id) {
-    EffectObject *object;
-    u64 world;
+u32 func_00114008(u32 id) {
+    EffWorldNode *world;
+    EffWorldNode *node;
+    EffectTransformData *data;
 
     world = dds3GetWorldSecondaryObject();
-    object = (EffectObject *)dds3FindWorldObjectNodeByKey(world, id, 6);
-    return object->data->word04;
+    node = dds3FindWorldObjectNodeByKey(world, id, 6);
+    data = (EffectTransformData *)node->data;
+    return data->flags;
 }
 
 /* Payload word 8 is interpreted by object kind, not always as a pointer. */
