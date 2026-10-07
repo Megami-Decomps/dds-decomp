@@ -36,6 +36,7 @@ import platform
 import re
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -133,6 +134,62 @@ def missing_field_archive_bases(version: str, sources: list[Path]) -> list[Path]
     return [base for base in bases if not (ROOT / base).is_file()]
 
 
+def _regular_files(paths: list[Path]) -> list[Path]:
+    """List existing regular files under paths without following symlinks."""
+    files = []
+    for path in paths:
+        candidates = path.rglob("*") if path.is_dir() and not path.is_symlink() else (path,)
+        for candidate in candidates:
+            try:
+                mode = candidate.lstat().st_mode
+            except FileNotFoundError:
+                continue
+            if stat.S_ISREG(mode):
+                files.append(candidate)
+    return files
+
+
+def snapshot_generated_files(paths: list[Path]) -> dict[Path, tuple[bytes, int, int]]:
+    """Record content digests and nanosecond timestamps for generated files."""
+    snapshot = {}
+    for path in _regular_files(paths):
+        try:
+            metadata = path.stat(follow_symlinks=False)
+            digest = hashlib.sha256(path.read_bytes()).digest()
+        except FileNotFoundError:
+            # A concurrently removed file is simply absent from the snapshot.
+            continue
+        snapshot[path] = (digest, metadata.st_atime_ns, metadata.st_mtime_ns)
+    return snapshot
+
+
+def restore_unchanged_timestamps(snapshot: dict[Path, tuple[bytes, int, int]]) -> None:
+    """Restore timestamps only when the same regular file still has identical bytes."""
+    for path, (digest, atime_ns, mtime_ns) in snapshot.items():
+        try:
+            if not stat.S_ISREG(path.lstat().st_mode):
+                continue
+            if hashlib.sha256(path.read_bytes()).digest() != digest:
+                continue
+            os.utime(path, ns=(atime_ns, mtime_ns), follow_symlinks=False)
+        except FileNotFoundError:
+            # Deleted outputs and outputs replaced during generation are untouched.
+            continue
+
+
+def generated_footprint(version: str) -> list[Path]:
+    """Return splat and postprocessor outputs whose timestamps feed Ninja."""
+    serial = VERSIONS[version]["serial"]
+    config = ROOT / "config" / version
+    return [
+        ROOT / "asm" / version,
+        ROOT / "assets" / version,
+        *(ROOT / "src" / version).rglob("*.c"),
+        ROOT / "build" / version / f"{serial}.ld",
+        *config.glob("undefined_*_auto.txt"),
+    ]
+
+
 def run_splat(version: str, yaml: Path, force: bool) -> None:
     """Split when the config inputs changed since the last successful split."""
     inputs = [yaml, ROOT / "config" / version / "symbol_addrs.txt", ROOT / "config" / version / "reloc_addrs.txt"]
@@ -141,6 +198,7 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     if not force and stamp.exists() and stamp.read_text() == digest and (ROOT / "asm" / version).exists():
         return
     print(f"splat: {version}")
+    snapshot = snapshot_generated_files(generated_footprint(version))
     # splat never deletes files: a unit or rodata split that moved leaves stale
     # asm behind (and include_rodata.py would include it twice).
     shutil.rmtree(ROOT / "asm" / version, ignore_errors=True)
@@ -150,6 +208,7 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     subprocess.run([sys.executable, "tools/include_sdata.py", version], cwd=ROOT, check=True)
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
     provide_data_symbols(version)
+    restore_unchanged_timestamps(snapshot)
     stamp.parent.mkdir(parents=True, exist_ok=True)
     stamp.write_text(digest)
 

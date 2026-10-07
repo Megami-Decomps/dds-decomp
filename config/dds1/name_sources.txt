@@ -2604,6 +2604,7 @@
 0x001AD3A8	btlHasRegisteredAnalysisPanelTask	inferred	confidence=high; matched-C; src/dds1/game/code_001A1960.c:2200:func_001AD3A8; Requires tracked analysis-panel handle to remain registered and named analysis task to exist.; twin=0x001B7FB8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001AD3F0	btlGetRegisteredTaskValueOrDefault	inferred	Returns a registered task value or a fixed default when unavailable. [names_reviewed9.tsv]
 0x001AD468	btlCreateGuidePanelTask	inferred	U0
+0x001AD5A0	btlRequestGuidePanelClose	inferred	Guide task constructor and registration check use the same task name; dialog release caller requests state 2 before its close transition; paired native function is a relocation twin.
 0x001AD5D8	btlHasRegisteredGuidePanelTask	inferred	confidence=high; src/dds1/game/code_001A1960.c:func_001AD5D8; Requires tracked task slot nine to remain registered and the retail bpnl_guide_nm named task to exist. [names_qp9.tsv]
 0x001AD620	btlSetTaskPhase5	inferred	task phase = 5, state byte 3
 0x001AD668	btlSetTrackedTaskDisplayMode	inferred	Changes the registered task display mode and its state values. [names_reviewed8.tsv]
@@ -5709,12 +5710,15 @@
 0x002C1910	itfDestroyGridTextWidgetTree	inferred	Recursively destroys widgets attached to each child entry before freeing the owner widget.
 0x002C1978	itfExpandWidgetColumnWidth	inferred	Byte-identical dds2 twin 0x00309480; DDS1 has the same unprefixed symbol; game/code_00306F80 uses itf for the already-described expandWidgetColumnWidth behavior. [names_conflicts.tsv]
 0x002C19C0	itfGetGridListLinkFlags	inferred	Reports head presence and whether the list spans its requested count. [names_reviewed8.tsv]
+0x002C1A30	itfAppendGridTextItem	inferred	Allocates an owned text item, appends it to the widget tail, initializes selection for an empty list and assigns its index.
 0x002C1B30	itfRemoveSelectedGridTextItem	inferred	Unlinks and releases the selected grid-text item, updates indices/visible links, and returns the new selected item; paired native helpers and both destructor callers agree.
 0x002C1CC8	itfReplaceGridTextAndExpandColumn	inferred	Replaces copied grid cell text and expands its column when needed. [names_reviewed8.tsv]
+0x002C1D78	itfSetGridNumericItemDescriptor	inferred	Copies a numeric descriptor into the item, initializes its value and derives the formatted column width from mode and maximum.
 0x002C1F88	itfAdvanceSelectedGridScroll	inferred	Scrolls the selected grid node forward when enabled. [names_reviewed8.tsv]
 0x002C2040	itfReverseSelectedGridScroll	inferred	Scrolls the selected grid node backward when enabled. [names_reviewed8.tsv]
 0x002C2088	itfGetGridChildLayoutMode	inferred	Computes grid child layout mode from widget flags and child identity. [names_reviewed8.tsv]
 0x002C20F8	itfFormatGridValueEntryText	inferred	confidence=high; src/dds1/game/code_002BF790.c:func_002C20F8; Formats labeled decimal/hex/float entries or a custom formatter and optionally prefixes a decimal/hex row index. [names_qp9.tsv]
+0x002C22F0	itfDrawGridTextRows	inferred	Draws visible grid text rows, selection highlights and the selected-item callback; used by the local-map list renderer.
 0x002C2568	sdfGridSeekSelectedNodeByIndex	inferred	Traverses a grid node list to the selected index and tracks skipped nodes. [names_reviewed10.tsv]
 0x002C25E0	sdfGridSeekFirstNode	inferred	Seeks to the first grid node via the indexed selection routine. [names_reviewed11.tsv]
 0x002C2600	sdfGridSeekLastNode	inferred	Seeks to the final grid node via the indexed selection routine. [names_reviewed11.tsv]

@@ -187,7 +187,7 @@ extern s32 btlCreateFadeStateResetTask();
 
 extern void btlCreateGuidePanelTask();
 
-extern void func_001B81B0();
+extern void btlRequestGuidePanelClose();
 
 extern void fldEnableSceneGroupAdvancement(void);
 
@@ -494,7 +494,7 @@ s32 fldSceneStateWaitScriptRelease(BtlState *scene) {
         } else if (scene->frame >= 0x2D) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_0037F531[0] < 0) {
-                    func_001B81B0();
+                    btlRequestGuidePanelClose();
                     func_001C7DB8(1, 0x14);
                 }
             } else {
