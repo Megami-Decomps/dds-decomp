@@ -30,7 +30,7 @@ typedef struct MtrCell {
     s16 unk06;
     s8 direction;
     s8 state;
-    s8 remainingDepth;
+    u8 remainingDepth;
     u8 unk0B;
 } MtrCell;
 
@@ -39,14 +39,32 @@ typedef struct MtrGrid {
     u8 pad00[4];
     MtrCell *cells;
     s32 count;
-    u8 pad0C[0x10];
+    u8 pad0C[8];
+    s16 unk14;
+    s16 unk16;
+    s16 remainingDelay;
+    s16 delayRange;
     s16 unk1C;
     s16 unk1E;
     u8 pad20[4];
     void (*draw)(s32, s32, s32, s32, struct MtrGrid *, s32, s32);
 } MtrGrid;
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
+extern void func_002860D8(MtrGrid *grid, MtrCell *source, s8 mode);
+extern void func_002862B0(MtrGrid *grid);
+extern f32 effMiscRandUnitFloat(void *state);
+
+void func_00285CE8(MtrGrid *grid) {
+    if (grid->remainingDelay == 0) {
+        if (grid->unk14 < grid->unk16) {
+            func_002860D8(grid, NULL, 1);
+        }
+        grid->remainingDelay = grid->delayRange * effMiscRandUnitFloat(0) + 1.0f;
+    } else {
+        grid->remainingDelay--;
+    }
+    func_002862B0(grid);
+}
 extern f32 sdfSinPoly(f32);
 
 void func_00285D78(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
@@ -118,7 +136,22 @@ void mnuDrawCellScaledGrid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4
     uiDrawUniformColorRect(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
 }
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_002862B0);
+void func_002862B0(MtrGrid *grid) {
+    MtrCell *cell = grid->cells;
+    s32 i;
+
+    for (i = 0; i < grid->count; i++, cell++) {
+        if (cell->state != 0) {
+            cell->unk04--;
+            if (cell->unk04 == cell->unk06 - 5 && cell->remainingDepth != 0) {
+                func_002860D8(grid, cell, cell->state);
+            }
+            if (cell->unk04 == 0) {
+                cell->state = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 

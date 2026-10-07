@@ -517,8 +517,8 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     return obj;
 }
 
-void func_00115840(void) {
-    effObjCreateMagatuhiForKind();
+EffectObj *func_00115840(s32 kind, struct EffNodeDescriptor *descriptor) {
+    return effObjCreateMagatuhiForKind(kind, descriptor);
 }
 
 /* Resolve a named resource for the kind/value constructor, then release that resource. */
