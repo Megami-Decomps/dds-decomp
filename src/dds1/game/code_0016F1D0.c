@@ -449,8 +449,8 @@ void effDrawScaledRecordPool(EffRecordPool *work)
 }
 
 /* Address the five-position record for a group; no index bounds check. */
-s32 effGetIndexedEffectGroupRecord(EffRecordPool *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
+void *effGetIndexedEffectGroupRecord(EffRecordPool *group, s32 groupIndex) {
+    return (void *)(group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES);
 }
 
 /* Address the group's five packed color words. */
@@ -564,8 +564,8 @@ s32 effGetGroupRecordByIndex(EffRecordPool *group, s32 groupIndex) {
 }
 
 /* Address three packed color words for one triangle. */
-s32 effGetGroupIndexRecord(EffRecordPool *group, s32 groupIndex) {
-    return group->auxRecordBase + groupIndex * EFF_TRIANGLE_COLOR_BYTES;
+void *effGetGroupIndexRecord(EffRecordPool *group, s32 groupIndex) {
+    return (void *)(group->auxRecordBase + groupIndex * EFF_TRIANGLE_COLOR_BYTES);
 }
 
 /* Allocate four positions and four colors per quad, followed by the header.

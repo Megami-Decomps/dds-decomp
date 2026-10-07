@@ -140,7 +140,7 @@ extern void func_00164C68(u32 system, u32 value);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
 extern EffBossDrawPool *func_00177760(s32 cellCount);
-extern u32 effGetIndexedEffectGroupRecord(EffBossDrawPool *pool, s32 index);
+extern void *effGetIndexedEffectGroupRecord(EffBossDrawPool *pool, s32 index);
 extern EffBossColorSlot *effGetIndexedEffectGroupIndexEntry(EffBossDrawPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffBossDrawPool *pool, u32 bits);
 extern u32 effMiscRand(void *state);
