@@ -148,6 +148,8 @@ typedef struct EvtGsCommand {
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
+extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
+
 typedef struct SdfDrawPacket SdfDrawPacket;
 
 extern s32 sdfAllocPacketAligned(s32);
@@ -1502,19 +1504,51 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B7B8);
+extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
+extern s32 func_0019C628(void);
+extern s32 func_0019C618(void);
+extern s32 effGetFontListCount(void);
+extern const char D_004113A0[];
+
+s32 func_0010B7B8(KwlnTask *task) {
+    s32 heapStats[6];
+    s32 heapRatio;
+    SdfListHead *list;
+    void *packet;
+    s32 fontCount;
+    s32 textCount;
+    s32 gsCount;
+
+    sdfGetGeneralHeapStats(heapStats);
+    /* The unused heap ratio retains the native zero-divisor check. */
+    heapRatio = heapStats[1] / heapStats[0];
+    list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    sdfInitPacketList(list);
+    packet = (void *)sdfAllocPacketAligned(0x40);
+    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
+    sdfAppendPacket(list, (u32)packet);
+    sdfAppendPacket(list, (u32)func_0011F250(0x70d0, 0x7968, 0xffff7f,
+                                          0xf70, 0x98, 0x20000000, 0x40806040));
+    fontCount = func_0019C628();
+    textCount = func_0019C618();
+    gsCount = effGetFontListCount();
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x7980,
+                    0xffff80, 0, D_004113A0, fontCount, textCount, gsCount));
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
+    return 0;
+}
 
 void func_0010B8D0(void) {
 }
 
-extern void func_0010B7B8(void);
+extern s32 func_0010B7B8(KwlnTask *task);
 extern void func_0010B8D0(void);
 extern s32 D_00438E68;
 extern char D_004113B8[]; /* "DebugTimeGrph" */
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, func_0010B7B8, func_0010B8D0, NULL);
+        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)func_0010B7B8, func_0010B8D0, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy((void *)D_00438E68, 0);
     }
@@ -1571,6 +1605,8 @@ typedef struct BfFlw0Header {
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 itfMesCreateWindow(void *data);
+
+INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113A0);
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
