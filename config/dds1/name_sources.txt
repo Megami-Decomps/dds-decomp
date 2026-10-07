@@ -4845,8 +4845,8 @@
 0x00284340	mnuReleaseSpriteTextures	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x002843A0	mnuGetPanelRatioColor	inferred	Maps calculated ratio tier to one of three panel colors when default disabled. [names_reviewed5.tsv]
 0x00284888	mnuCreatePanelItem	inferred	Allocates a 0x90-byte item with initial constants at +0x10,+0x14 and +0x88; sequel twin 002C2680 uses 0xAC bytes.
-0x002848E0	mnuPositionPanelGroupPoints	inferred	L13
-0x00284A90	mnuPositionPanelItemPoints	inferred	Fills five item points from fixed parent anchors then places associated graphics; sequel twin 002C2920.
+0x002848E0	mnuInitializePanelGroupGridSlots	inferred	Binds group resource-set/index grid slots and initializes quantized bounds; native body and same-unit constructor callers.
+0x00284A90	mnuInitializePanelItemGridSlots	inferred	Binds item resource-set/index grid slots and initializes quantized bounds; native body and same-unit constructor callers.
 0x00284BF8	mnuStorePanelItemValue	inferred	Stores supplied value in selected panel item. [names_reviewed8.tsv]
 0x00284C10	mnuSetPanelItemSelection	inferred	When selection changes resets selection fade ramp then stores selected value. [names_reviewed5.tsv]
 0x00284C28	mnuSetPanelItemOption	inferred	Stores item drawing option consumed by panel rendering. [names_reviewed5.tsv]

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "mnu_movie.h"
 #include "sdf.h"
 
 extern u8 D_0037B8BC[];
@@ -24,13 +25,6 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
-typedef struct MnuMovieRollEntry {
-    u8 pad00[0xC];
-    u8 unk0C;
-    u8 pad0D[0xF];
-} MnuMovieRollEntry;
-
-extern MnuMovieRollEntry D_003DC1E0[];
 extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
 extern void func_0026E8D8(void);
@@ -143,7 +137,7 @@ void mnuInitializeMovieRollViewport(void) {
     sdfSetGridScaledDrawBounds(0x68, 0x69, 0x180, 0xEE, 0x80808080);
     for (i = 0; i < 32; i++) {
         func_0026E8D8();
-        D_003DC1E0[i].unk0C = 0;
+        D_003DC1E0[i].active = 0;
     }
 }
 
