@@ -9,6 +9,7 @@ extern FldInfTable D_00332E30;
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "fld.h"
+#include "mdl.h"
 #include "scr.h"
 #include "dat_state.h"
 
@@ -95,7 +96,7 @@ extern s32 func_0012FC20(void);
 extern void func_0012F578(void);
 extern void func_0012EEA0(s16, s16);
 extern void func_0012FF48(void);
-extern void func_0012EA50(s16, s32, f32);
+extern void func_0012EA50(s32, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
 extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
@@ -310,8 +311,15 @@ extern u32 fldAreaPackedArchive;
 extern u8 D_003BAC90[];
 extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern void func_00288788(u32 arg0);
-extern void mdlSuspendAllContextMotions(s32 arg0);
-extern void mdlResumeAllContextMotions(s32 arg0);
+extern void mdlSuspendAllContextMotions(MdlCtx *ctx);
+extern void mdlResumeAllContextMotions(MdlCtx *ctx);
+extern void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                               f32 blendDurationFrames);
+extern void mdlSetNodeFloat20(MdlCtx *ctx, s32 searchId, f32 value);
+extern void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex);
+extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
+extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
+extern s32 D_0032E4C8[];
 extern s32 D_003BAE30;
 extern s32 D_003BAE1C;
 extern s32 fldTaskSlotCount;
@@ -2434,7 +2442,7 @@ void fldUpdateCameraProximity(void) {
         }
     }
     slot = dds3GetObjectOwnedHandle(fldPlayerObject)->resourceSlots[4];
-    modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
+    modelRef = (u8 **)((MdlCtx *)(u32)fldCameraModelObject)->inner;
     if (slot >= 0) {
         model = *modelRef;
         matrices = ((FldModelMatrices *)model)->rows;
@@ -2505,11 +2513,11 @@ void fldReleaseCameraModel(u32 enabled) {
     if (enabled == 0) {
         D_003BAD40 = 0;
         if (fldCameraModelObject != 0) {
-            mdlResumeAllContextMotions(fldCameraModelObject);
+            mdlResumeAllContextMotions((MdlCtx *)(u32)fldCameraModelObject);
         }
     } else {
         D_003BAD40 = enabled;
-        mdlSuspendAllContextMotions(fldCameraModelObject);
+        mdlSuspendAllContextMotions((MdlCtx *)(u32)fldCameraModelObject);
     }
 }
 
@@ -2572,24 +2580,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FE30);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FF48);
 
 /* Field camera model: node id at +0x12, render-data pointer at +0x18. */
-typedef struct FldCameraModel {
-    u8 pad00[0x12];
-    s16 nodeId;
-    u8 pad14[4];
-    u8 *renderData;
-    u8 *child; /* 0x1C: node used by the model scale setter */
-} FldCameraModel;
-
-typedef struct FldCameraRenderData {
-    u8 pad00[0x1C];
-    u32 color;
-} FldCameraRenderData;
-typedef struct FldCameraChild {
-    u8 pad00[0x20];
-    f32 scale; /* 0x20 */
-} FldCameraChild;
-
-
 s32 fldUpdateCameraFrame(void) {
     s16 node;
 
@@ -2606,7 +2596,7 @@ s32 fldUpdateCameraFrame(void) {
         func_0012FC20();
         fldUpdateCameraTarget();
         func_0012F578();
-        node = ((FldCameraModel *)fldCameraModelObject)->nodeId;
+        node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
         func_0012EEA0(node, node);
         if (fldAreaState[70] == 1) {
             func_0012EA50(0, 0, 6.0f);
@@ -2655,11 +2645,11 @@ void fldSetCameraObjectHighlightFlag(void) {
 }
 
 void fldClearCameraModelColor(void) {
-    ((FldCameraRenderData *)((FldCameraModel *)fldCameraModelObject)->renderData)->color = 0;
+    ((MdlCtx *)(u32)fldCameraModelObject)->inner->color = 0;
 }
 
 void fldRestoreCameraModelColor(void) {
-    ((FldCameraRenderData *)((FldCameraModel *)fldCameraModelObject)->renderData)->color = 0x80808080;
+    ((MdlCtx *)(u32)fldCameraModelObject)->inner->color = 0x80808080;
 }
 
 void func_00131290(void) {
@@ -2676,10 +2666,10 @@ extern void effObjClearNodeFlags(void *, s32);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001312D8);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
-extern void func_0012EA50(s16, s32, f32);
+extern void func_0012EA50(s32, s32, f32);
 
 void fldSetCameraNodeModeWithTen(void) {
-    s16 node = ((FldCameraModel *)fldCameraModelObject)->nodeId;
+    s16 node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
         func_0012EA50(node, 0x12, 10.0f);
         return;
@@ -2688,7 +2678,7 @@ void fldSetCameraNodeModeWithTen(void) {
 }
 
 void fldSetCameraNodeModeWithZero(void) {
-    s16 node = ((FldCameraModel *)fldCameraModelObject)->nodeId;
+    s16 node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
         func_0012EA50(node, 0x12, 0.0f);
         return;
@@ -2696,22 +2686,19 @@ void fldSetCameraNodeModeWithZero(void) {
     func_0012EA50(node, 3, 0.0f);
 }
 
-extern s32 fldCameraModelObject;
-extern s32 mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
-s32 fldAddCameraModelEntry(s32 value) {
-    s32 object = fldCameraModelObject;
-    ((FldCameraChild *)((FldCameraModel *)object)->child)->scale = 1.0f;
-    return mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
+
+
+void fldAddCameraModelEntry(s32 value) {
+    MdlCtx *model = (MdlCtx *)(u32)fldCameraModelObject;
+    model->first->frameStep = 1.0f;
+    mdlAddEntryPlainEx(model, 0, value, 2.0f, 5.0f);
 }
 
-extern void mdlSetNodeFloat20(s32, s32, f32);
-extern void mdlAddEntryFlagged(s32, s32, s32);
-
 void fldAddCameraModelPair(s32 first, s32 second) {
-    mdlSetNodeFloat20(fldCameraModelObject, 0, 1.0f);
-    mdlSetNodeFloat20(fldCameraModelObject, 1, 1.0f);
-    mdlAddEntryFlagged(fldCameraModelObject, 0, first);
-    mdlAddEntryFlagged(fldCameraModelObject, 1, second);
+    mdlSetNodeFloat20((MdlCtx *)(u32)fldCameraModelObject, 0, 1.0f);
+    mdlSetNodeFloat20((MdlCtx *)(u32)fldCameraModelObject, 1, 1.0f);
+    mdlAddEntryFlagged((MdlCtx *)(u32)fldCameraModelObject, 0, first);
+    mdlAddEntryFlagged((MdlCtx *)(u32)fldCameraModelObject, 1, second);
 }
 
 void func_00131580(void) {
