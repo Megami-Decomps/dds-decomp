@@ -90,7 +90,8 @@ typedef struct DatPartyRecord {
     u8 profileId;
     u8 pad56[2];
     u32 skillFlags[85];                    /* 0x058: scrClearFlagsTable clears all 0x154 bytes. */
-    u8 pad1AC[6];
+    u8 pad1AC[4];
+    s16 actionSlot;
     u16 itemId;
     s32 randomizedValue;                  /* 0x1B4: initialized to 0x12 minus a four-way roll. */
     s32 huntExp; /* 0x1B8: hunt EP accumulated this battle */
@@ -212,6 +213,8 @@ typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x33600 ? 1 : -1];
 #endif
 #ifdef VERSION_DDS2
 typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1C4 ? 1 : -1];
+typedef char DatPartyRecordActionSlotOffsetCheck[((u32)&((DatPartyRecord *)0)->actionSlot == 0x1B0) ? 1 : -1];
+typedef char DatPartyRecordItemIdOffsetCheck[((u32)&((DatPartyRecord *)0)->itemId == 0x1B2) ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
 #endif
 

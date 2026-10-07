@@ -1247,7 +1247,7 @@ u32 btlScriptSetActorUnitParameter(void) {
 
     context = scrGetCurrentCommandWork();
     parameterValue = scrReadIntParameter(0);
-    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk122 = parameterValue;
+    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->partyRecord.affinityTableIndex = parameterValue;
     return 1;
 }
 
@@ -2123,7 +2123,7 @@ u32 btlScriptReturnUnitHpRatioPercent(void) {
     }
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & sideMask) && !(unit->flags & 0x20) && unit->owner == lookupId) {
-            void *unitStats = &unit->statBits;
+            void *unitStats = &unit->partyRecord.flags;
             s32 currentHp = btlReadCurrentUnitHp(unitStats);
             s32 maximumHp = btlComputeSkillAdjustedMaxHp(unitStats);
             if (!((u32)(maximumHp * hpPercentThreshold) < (u32)(currentHp * BTL_HP_PERCENT_SCALE))) {
@@ -2226,7 +2226,7 @@ u32 btlCmdReturnActorActionTime(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
-    scrSetIntegerReturnValue(((BtlUnit *)((BtlCommandCtx *)context)->actor)->actionTime);
+    scrSetIntegerReturnValue(((BtlUnit *)((BtlCommandCtx *)context)->actor)->partyRecord.level);
     return 1;
 }
 
@@ -2442,7 +2442,7 @@ u32 btlScriptReturnActorUnitParameter(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
-    scrSetIntegerReturnValue(((BtlUnit *)context->actor)->unk122);
+    scrSetIntegerReturnValue(((BtlUnit *)context->actor)->partyRecord.affinityTableIndex);
     return 1;
 }
 
@@ -2512,10 +2512,10 @@ void btlBindActorSlot(s32 actor, s32 option) {
         s32 unit = (s32)((BtlActor *)actor)->unit;
         s32 width = 2;
 
-        if (((BtlUnit *)unit)->statBits & 0x20) {
+        if (((BtlUnit *)unit)->partyRecord.flags & 0x20) {
             width = 1;
         }
-        func_001A45C0(window, 0, ((BtlUnit *)unit)->mode, width);
+        func_001A45C0(window, 0, ((BtlUnit *)unit)->partyRecord.unitId, width);
     }
     func_00101968((s32)((BtlState *)battle)->scriptOwner, task);
     ((BtlState *)battle)->boundTask = task;

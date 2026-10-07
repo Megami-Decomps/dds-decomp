@@ -741,7 +741,7 @@ s32 btlHasRestrictedUnit(void) {
             if (unitFlags & 0xe0) {
                 return 1;
             }
-            if (unitCursor->conditionFlags & 0x4000) {
+            if (unitCursor->partyRecord.status & 0x4000) {
                 return 1;
             }
         }
@@ -941,7 +941,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     targetCount = btlGetIndexListCount(targetList);
     if (datCommandRecords[commandId].flags & 8) {
         for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
-            if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->conditionFlags & 0x800) {
+            if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->partyRecord.status & 0x800) {
                 flaggedTargetCount++;
             }
         }
@@ -1676,12 +1676,12 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
         btlBossDebugPrintfN(x, y, 0, D_00436EE8);
         if ((unit->flags & 0x200) != 0) {
             if ((unit->flags & 0x1000) != 0) {
-                row = ((BtlAffinityRow *)D_00435DD8)[unit->mode];
+                row = ((BtlAffinityRow *)D_00435DD8)[unit->partyRecord.unitId];
             } else {
-                row = ((BtlAffinityRow *)D_00435DDC)[unit->mode];
+                row = ((BtlAffinityRow *)D_00435DDC)[unit->partyRecord.unitId];
             }
         } else {
-            row = ((BtlAffinityRow *)D_00435DFC)[unit->mode];
+            row = ((BtlAffinityRow *)D_00435DFC)[unit->partyRecord.unitId];
         }
         for (i = 0; i < 16; i++) {
             row.value[i] = func_001ABF50(unit, i);

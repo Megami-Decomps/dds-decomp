@@ -1983,33 +1983,33 @@ s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
         if ((first->flags & 0x100) == 0) {
             return 3;
         }
-        if ((first->conditionFlags & 0x2A0E) != 0) {
+        if ((first->partyRecord.status & 0x2A0E) != 0) {
             return 3;
         }
-        totalMaxHp = first->maxHp;
+        totalMaxHp = first->partyRecord.maxHp;
         count = 1;
     }
     if (second != NULL) {
         if ((second->flags & 0x100) == 0) {
             return 3;
         }
-        if ((second->conditionFlags & 0x2A0E) != 0) {
+        if ((second->partyRecord.status & 0x2A0E) != 0) {
             return 3;
         }
         count++;
-        totalMaxHp += second->maxHp;
+        totalMaxHp += second->partyRecord.maxHp;
     }
     if (third != NULL) {
         if ((third->flags & 0x100) == 0) {
             return 3;
         }
-        if ((third->conditionFlags & 0x2A0E) != 0) {
+        if ((third->partyRecord.status & 0x2A0E) != 0) {
             return 3;
         }
         count++;
-        totalMaxHp += third->maxHp;
+        totalMaxHp += third->partyRecord.maxHp;
     }
-    snapshot.maxHp = totalMaxHp / count;
+    snapshot.partyRecord.maxHp = totalMaxHp / count;
     return func_001ABB10(&snapshot, command);
 }
 
@@ -2023,7 +2023,7 @@ s8 btlGetActorIndexedSignedValue(UiObject *object, s32 index) {
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 
 s32 func_001ABF50(BtlUnit *battler, s32 element) {
-    return btlResolveUnitValueWithOverride((s32)&battler->statBits, element);
+    return btlResolveUnitValueWithOverride((s32)&battler->partyRecord.flags, element);
 }
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
@@ -2110,7 +2110,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
             *(u16 *)(datCommandRecords + index * 56 + 0x26) != 0) {
             for (i = 0; i < count; i++) {
                 if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
-                     ((BtlUnit *)btlGetIndexListEntry(targets, i))->conditionFlags) != 0) {
+                     ((BtlUnit *)btlGetIndexListEntry(targets, i))->partyRecord.status) != 0) {
                     return i;
                 }
             }
@@ -2282,7 +2282,7 @@ extern char D_00415250[];
 
 void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     BattleController *controller = (BattleController *)btlGetRuntime();
-    DatEnemyRecord *record = &datEnemyRecords[enemy->mode];
+    DatEnemyRecord *record = &datEnemyRecords[enemy->partyRecord.unitId];
     s32 level = func_001B39E8(4);
     s32 enemyLevel = record->level;
     s32 allowance = datBattleParameters->rewardLevelAllowance;
@@ -2323,7 +2323,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     if (item != 0) {
         func_001AD5B0(item);
     }
-    kind = enemy->mode;
+    kind = enemy->partyRecord.unitId;
     if (kind < 104) {
         if (kind >= 100) {
             controller->specialEnemyDefeats++;
@@ -2715,72 +2715,72 @@ f32 func_001AE3A8(BtlUnit *unit, s32 attr) {
 
     switch (attr) {
     case 2:
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22D)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x22D)) {
             scale *= datAbilityParameters[0x22D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x232)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x232)) {
             scale *= datAbilityParameters[0x232 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         if (scale == 1.0f && (unit->flags & 0x200)) {
-            if (unit->mode == 3) {
+            if (unit->partyRecord.unitId == 3) {
                 scale *= datBattleParameters->unkBFC;
             }
         }
         break;
     case 3:
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22E)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x22E)) {
             scale *= datAbilityParameters[0x22E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x233)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x233)) {
             scale *= datAbilityParameters[0x233 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         if (scale == 1.0f && (unit->flags & 0x200)) {
-            if (unit->mode == 1) {
+            if (unit->partyRecord.unitId == 1) {
                 scale *= datBattleParameters->unkBFC;
             }
-            if (unit->mode == 2) {
+            if (unit->partyRecord.unitId == 2) {
                 scale *= datBattleParameters->unkBFC;
             }
         }
         break;
     case 4:
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22F)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x22F)) {
             scale *= datAbilityParameters[0x22F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x234)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x234)) {
             scale *= datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         if (scale == 1.0f && (unit->flags & 0x200)) {
-            if (unit->mode == 6) {
+            if (unit->partyRecord.unitId == 6) {
                 scale *= datBattleParameters->unkBFC;
             }
-            if (unit->mode == 7) {
+            if (unit->partyRecord.unitId == 7) {
                 scale *= datBattleParameters->unkBFC;
             }
         }
         break;
     case 5:
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x230)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x230)) {
             scale *= datAbilityParameters[0x230 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x235)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x235)) {
             scale *= datAbilityParameters[0x235 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         if (scale == 1.0f && (unit->flags & 0x200)) {
-            if (unit->mode == 5) {
+            if (unit->partyRecord.unitId == 5) {
                 scale *= datBattleParameters->unkBFC;
             }
         }
         break;
     case 6:
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x231)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x231)) {
             scale *= datAbilityParameters[0x231 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)&unit->statBits, 0x236)) {
+        if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x236)) {
             scale *= datAbilityParameters[0x236 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         if (scale == 1.0f && (unit->flags & 0x200)) {
-            if (unit->mode == 4) {
+            if (unit->partyRecord.unitId == 4) {
                 scale *= datBattleParameters->unkBFC;
             }
         }
@@ -4148,8 +4148,8 @@ u32 btlGetHuntPenaltyFlags(s32 unit, BtlUnit *enemy) {
     if (btlCheckSpecialAbility(unit + 0x120, 0x245) != 0) {
         return 0;
     }
-    status = enemy->conditionFlags & 0x7FFF;
-    record = &datEnemyRecords[enemy->mode];
+    status = enemy->partyRecord.status & 0x7FFF;
+    record = &datEnemyRecords[enemy->partyRecord.unitId];
     switch (status) {
     case 0x400:
         chance = record->huntPenaltyChance * 3;
@@ -4348,15 +4348,15 @@ s32 func_001B5688(BtlUnit *unit) {
     u16 count = 0;
     s32 skill;
 
-    if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22C)) {
+    if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x22C)) {
         skills[count] = 0x96;
         count++;
     }
-    if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22B)) {
+    if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x22B)) {
         skills[count] = 0x95;
         count++;
     }
-    if (btlCheckSpecialAbility((s32)&unit->statBits, 0x22A)) {
+    if (btlCheckSpecialAbility((s32)&unit->partyRecord.flags, 0x22A)) {
         skills[count] = 0x94;
         count++;
     }
@@ -5697,7 +5697,7 @@ s32 btlCountEligibleLinkedActors(BtlState *battle) {
     s32 count = 0;
     while (unit != 0) {
         if ((btlUnitStatusPair(unit) & 0x201) == 0x201 &&
-            (unit->statBits & 2) != 0) {
+            (unit->partyRecord.flags & 2) != 0) {
             count++;
         }
         unit = unit->nextActor;
