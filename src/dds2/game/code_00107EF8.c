@@ -623,8 +623,6 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
 
 extern s32 sdfCreateResetPacketList(void);
 
-extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
-extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     SifCommand sifParameters;
@@ -1401,8 +1399,6 @@ extern void sdfGetChipHeapStats(SdfChipStats *stats);
 extern char D_00435D50[];
 extern char D_00435D58[];
 extern void func_0035C860(char *buffer, const char *format, ...);
-extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index,
-                                           const char *text, ...);
 extern void func_0010B3D8(void *list, s32 source, s32 end);
 
 /* Format general/chip free-memory statistics into the supplied draw surface.

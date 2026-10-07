@@ -169,9 +169,7 @@ s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 s32 mdlUpdateViewerCursor(s16 *, s32);
 
-extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
 
-extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
@@ -470,7 +468,6 @@ u16 func_002193F0(MdlRecord *record) {
     return record->unk10;
 }
 
-extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[], D_003ABAD0[];
 extern char D_003BBB80[], D_003BBB88[];
 

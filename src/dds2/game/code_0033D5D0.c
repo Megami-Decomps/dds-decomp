@@ -351,7 +351,6 @@ void *func_0033D5D0(SifCommand *input, const char *format, void *arguments) {
     return start;
 }
 
-void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index);
 
 void *sdfFormatSifPacket(void *packet, const char *fmt, ...) {
     __builtin_va_list args;

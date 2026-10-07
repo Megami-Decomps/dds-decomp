@@ -343,9 +343,7 @@ extern s32 sdfCreateResetPacketList(void);
 
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
-extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
 
-extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 /* Submit primary-context GS TEST settings. Z testing is always enabled;
    unusedZte is a retained native formal, not the source of the ZTE bit. */
@@ -1365,7 +1363,6 @@ extern void sdfGetGeneralHeapStats(s32 *);
 extern void sdfGetChipHeapStats(SdfChipStats *);
 extern void func_0010B1B0(void *, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
-extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];
 

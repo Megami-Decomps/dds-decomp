@@ -287,9 +287,7 @@ typedef struct {
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 
-extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
 
-extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 extern void sdfInvertScaledVuTransform(void);
 
