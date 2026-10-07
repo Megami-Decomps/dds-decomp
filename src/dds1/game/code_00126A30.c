@@ -122,7 +122,12 @@ typedef struct {
 /* Retained field-area work: projection, player-position history and facing requests.
  * The ASM camera/motion routines share these words; this is not a separate camera object. */
 typedef struct FldAreaWork {
-    u8 pad0[0x50];
+    u8 pad0[0x10];
+    s32 area;
+    s32 floor;
+    u8 pad18[0xC];
+    s32 unk24;
+    u8 pad28[0x28];
     s32 mode;
     u8 pad54[4];
     s32 rowIdx;
@@ -132,7 +137,9 @@ typedef struct FldAreaWork {
     f32 dist;
     u8 pad70[0x14];
     s32 positionPending;
-    u8 pad88[0xA2];
+    u8 pad88[0x7C];
+    s16 unk104;
+    u8 pad106[0x24];
     s16 colorEffectSuppressed;
     u8 pad12C[0x14];
     f32 x;
@@ -4522,12 +4529,6 @@ s32 fldGetCurrentSceneSelectionId(void) {
     return D_003C9518[slot * 160];
 }
 
-typedef struct FldAreaState {
-    u8 pad0[0x14];
-    s32 floor;
-    u8 pad18[0xEC];
-    s16 unk104;
-} FldAreaState;
 
 extern s32 D_003BAE38;
 extern const char D_00332DF0[];
@@ -4540,7 +4541,7 @@ const char *func_0013C600(const char *eventName) {
     for (i = 0; i < 8; i++) {
         if (D_00332E30.packs[i].setIndex != 0) {
             for (j = 0; j < 5; j++) {
-                if (D_00332E30.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                if (D_00332E30.packs[i].hits[j].area == ((FldAreaWork *)fldAreaState)->floor + 1 &&
                     strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
                     s32 candidateSet = D_00332E30.packs[i].setIndex;
                     if (D_00332E30.sets[D_003BAE38].kindArea.packed == 1) {
@@ -4553,7 +4554,7 @@ const char *func_0013C600(const char *eventName) {
     }
     for (i = 0; i < 40; i++) {
         if (D_00332E30.sets[i].kindArea.packed == 1 &&
-            D_00332E30.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            D_00332E30.sets[i].action == ((FldAreaWork *)fldAreaState)->floor + 1 &&
             strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
             D_003BAE38 = i;
             return D_00332DF0;
@@ -4570,7 +4571,7 @@ const char *func_0013C7F8(const char *eventName) {
     for (i = 0; i < 8; i++) {
         if (D_00332E30.packs[i].setIndex != 0) {
             for (j = 0; j < 5; j++) {
-                if (D_00332E30.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                if (D_00332E30.packs[i].hits[j].area == ((FldAreaWork *)fldAreaState)->floor + 1 &&
                     strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
                     s32 candidateSet = D_00332E30.packs[i].setIndex;
                     if (D_00332E30.sets[D_003BAE38].kindArea.packed == 0) {
@@ -4583,7 +4584,7 @@ const char *func_0013C7F8(const char *eventName) {
     }
     for (i = 0; i < 40; i++) {
         if (D_00332E30.sets[i].kindArea.packed == 0 &&
-            D_00332E30.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            D_00332E30.sets[i].action == ((FldAreaWork *)fldAreaState)->floor + 1 &&
             strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
             D_003BAE38 = i;
             return D_00332DF0;
@@ -4600,7 +4601,7 @@ const char *func_0013C9E0(const char *eventName) {
     for (i = 0; i < 8; i++) {
         if (D_00332E30.packs[i].setIndex != 0) {
             for (j = 0; j < 5; j++) {
-                if (D_00332E30.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                if (D_00332E30.packs[i].hits[j].area == ((FldAreaWork *)fldAreaState)->floor + 1 &&
                     strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
                     D_003BAE38 = D_00332E30.packs[i].setIndex;
                     return D_00332DF0;
@@ -4610,7 +4611,7 @@ const char *func_0013C9E0(const char *eventName) {
     }
     for (i = 0; i < 40; i++) {
         if ((u16)D_00332E30.sets[i].kindArea.packed < 2 &&
-            D_00332E30.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            D_00332E30.sets[i].action == ((FldAreaWork *)fldAreaState)->floor + 1 &&
             strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
             D_003BAE38 = i;
             return D_00332DF0;
@@ -4709,8 +4710,8 @@ u8 *fldPickActorTemplateByName(const char *name) {
         entry = (FldActorEntry *)(D_00337D00 + i * 108);
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && (((FldAreaState *)fldAreaState)->unk104 == 0 || !(entry->flags31 & 4))
-            && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1
+            && (((FldAreaWork *)fldAreaState)->unk104 == 0 || !(entry->flags31 & 4))
+            && entry->floor == ((FldAreaWork *)fldAreaState)->floor + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
@@ -4767,8 +4768,8 @@ u8 *fldFindActorEntryByName(const char *name) {
         entry = (FldActorEntry *)(D_00337D00 + i * 108);
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && (((FldAreaState *)fldAreaState)->unk104 == 0 || !(entry->flags31 & 4))
-            && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1
+            && (((FldAreaWork *)fldAreaState)->unk104 == 0 || !(entry->flags31 & 4))
+            && entry->floor == ((FldAreaWork *)fldAreaState)->floor + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
@@ -4923,7 +4924,7 @@ void func_0013DDF0(const char *name) {
             continue;
         }
         entryName = entry->name;
-        if (entry->floor == ((FldAreaState *)fldAreaState)->floor + 1) {
+        if (entry->floor == ((FldAreaWork *)fldAreaState)->floor + 1) {
             if (strcmp(name, entryName) == 0) {
                 if (entry->variantMode == 2) {
                     return;
