@@ -6483,7 +6483,47 @@ typedef struct EffActorTintConfig {
 } EffActorTintConfig;
 typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2F20);
+/* Apply a temporary tint to eligible actors, then restore their original RGB. */
+void func_002B2F20(EffActiveResource *work) {
+    BtlUnit *actors[16];
+    EffActorTintConfig *config = work->payload;
+    u32 frame = work->frame;
+    u32 color = config->color;
+    u32 count = effCollectModelEffectActors(actors, config->actorSelection);
+    u32 i;
+
+    if (frame == 0) {
+        for (i = 0; i < count; i++) {
+            u32 flags = actors[i]->flags;
+
+            if (flags & 2) {
+                if ((flags & 0xE0) == 0) {
+                    u32 baseColor = actors[i]->baseColor;
+                    EvtUnit *effect = actors[i]->ext;
+                    u32 blended;
+
+                    if ((baseColor & 0xFFFFFF) != 0x808080) {
+                        blended = (color & baseColor) + (((color ^ baseColor) & 0xFEFEFEFE) >> 1);
+                    } else {
+                        blended = color;
+                    }
+                    evtSetUnitRgbTransition(effect, config->fadeIn, blended);
+                }
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->fadeOut) {
+        for (i = 0; i < count; i++) {
+            u32 flags = actors[i]->flags;
+
+            if (flags & 2) {
+                if ((flags & 0xE0) == 0) {
+                    evtSetUnitRgbTransition(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
+                }
+            }
+        }
+    }
+}
 
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
