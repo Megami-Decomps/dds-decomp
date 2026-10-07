@@ -238,8 +238,6 @@ void func_00289550(MenuContainer *object, s8 target) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_00289710);
-
 /* The selection allocator reserves 0x16C bytes for 176 inline flag entries. */
 typedef struct MantraFlagResource {
     u32 allocation;
@@ -249,6 +247,63 @@ typedef struct MantraFlagResource {
 } MantraFlagResource;
 
 typedef char MantraFlagResource_size[(sizeof(MantraFlagResource) == 0x16C) ? 1 : -1];
+
+/* Skip unavailable neighbors after retreating the node selection. */
+void func_00289710(MenuContainer *object) {
+    MantraMenuWork *work = &object->work;
+    EvtMantraNodePositionRecord *position;
+    EvtMantraNodePositionRecord *initialPosition;
+    EvtMantraNodePositionRecord *neighbor;
+    EvtMantraNodePositionRecord **neighbors;
+    u16 *flags;
+    u32 selectedValue;
+    u32 selectedIndex;
+    s32 i;
+
+    extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, u32);
+    extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, u32);
+
+    mnuAdvanceMantraUnitPanelListState(object->work.drawPool);
+    mnuRetreatNodeCursorAndClearListFlags(object);
+    selectedValue = mnuGetSelectedNodeValue(object);
+    selectedIndex = func_002890A8(object);
+    initialPosition = (EvtMantraNodePositionRecord *)work->resourceId;
+    flags = ((MantraFlagResource *)work->spriteHandles[selectedIndex])->flags;
+
+    if ((flags[initialPosition->id] & 0xF) == 3) {
+        position = initialPosition;
+        neighbors = position->neighbors;
+        for (i = 0; i < 6; i++) {
+            if (neighbors[i] != NULL) {
+                selectedIndex = func_002890A8(object);
+                neighbor = neighbors[i];
+                flags =
+                    ((MantraFlagResource *)work->spriteHandles[selectedIndex])->flags;
+                if ((flags[neighbor->id] & 0xF) != 3) {
+                    position = neighbor;
+                    break;
+                }
+            }
+        }
+
+        work->resourceId = (s32)position;
+        mnuSpawnMantraVariantIconAtPosition(
+            (s32)((f32)(position->firstKey * 20) / 10.0f),
+            (s32)((f32)(position->secondKey * 20) / 10.0f),
+            object->work.drawPool);
+    }
+
+    {
+        s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)selectedValue);
+
+        position = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(id);
+        mnuSpawnMantraShortLoopVariantIconAtPosition(
+            (s32)((f32)(position->firstKey * 20) / 10.0f),
+            (s32)((f32)(position->secondKey * 20) / 10.0f),
+            object->work.drawPool);
+        func_0028F8A8((u8 *)object);
+    }
+}
 
 /* Skip unavailable neighbors before refreshing both transition icons. */
 void func_00289928(MenuContainer *object) {
