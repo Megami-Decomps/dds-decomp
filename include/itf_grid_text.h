@@ -6,6 +6,22 @@
 typedef struct GridTextWidget GridTextWidget;
 typedef struct GridTextListItem GridTextListItem;
 
+/* Numeric item formatting modes stored in GridNumericDescriptor.mode. */
+enum {
+    GRID_NUMERIC_FORMAT_DECIMAL = 0,
+    GRID_NUMERIC_FORMAT_HEXADECIMAL = 1,
+    GRID_NUMERIC_FORMAT_FLOAT = 2 /* One fractional digit. */
+};
+
+/* Complete 0x14-byte descriptor copied into a numeric item's parameter. */
+typedef struct GridNumericDescriptor {
+    s32 mode;       /* 0x00 */
+    f32 minimum;    /* 0x04 */
+    f32 maximum;    /* 0x08 */
+    f32 step;       /* 0x0C */
+    f32 value;      /* 0x10 */
+} GridNumericDescriptor;
+
 /* Shared grid and local-map list owner. */
 struct GridTextWidget {
     char *text;                     /* 0x00 */
@@ -46,5 +62,6 @@ struct GridTextListItem {
 
 typedef char GridTextWidgetSizeCheck[sizeof(GridTextWidget) == 0x40 ? 1 : -1];
 typedef char GridTextListItemSizeCheck[sizeof(GridTextListItem) == 0x2C ? 1 : -1];
+typedef char GridNumericDescriptorSizeCheck[sizeof(GridNumericDescriptor) == 0x14 ? 1 : -1];
 
 #endif

@@ -605,14 +605,6 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
     return 1;
 }
 
-typedef struct GridNumericDescriptor {
-    s32 mode;
-    f32 minimum;
-    f32 maximum;
-    f32 step;
-    f32 value;
-} GridNumericDescriptor;
-
 /* Destroy linked child widgets recursively before releasing the parent widget. */
 u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     GridTextListItem *childLink;
@@ -741,14 +733,14 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     maximum = ((GridNumericDescriptor *)item->parameter)->maximum;
 
     switch (descriptor->mode) {
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             while (maximum >= 16.0f) {
                 maximum *= 0.0625f;
                 width++;
             }
             width += 2;
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             while (maximum >= 10.0f) {
                 maximum /= 10.0f;
                 width++;
@@ -872,15 +864,15 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
             func_003014F0(prefix, "%s ", entry->text);
         }
         switch (((GridNumericDescriptor *)entry->parameter)->mode) {
-        case 0:
+        case GRID_NUMERIC_FORMAT_DECIMAL:
             func_003014F0(format, "%%s%%0%dd", entry->formatWidth);
             func_003014F0(text, format, prefix, (s32)entry->number);
             break;
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             func_003014F0(format, "%%s0x%%0%dX", entry->formatWidth - 2);
             func_003014F0(text, format, prefix, (s32)entry->number);
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             func_003014F0(format, "%%s%%0%d.1f", entry->formatWidth);
             func_003014F0(text, format, prefix, (double)entry->number);
             break;
