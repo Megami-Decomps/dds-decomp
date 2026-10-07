@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "eff_transform.h"
 #include "eff.h"
 
@@ -15,12 +16,6 @@ typedef struct {
     u8 pad00[0x18];
     PathState *state;
 } PathObject;
-
-typedef struct Dds3PathKeyframes {
-    u32 count;
-    f32 *data;
-    u32 *frames;
-} Dds3PathKeyframes;
 
 
 typedef struct ActionSub {
@@ -101,18 +96,6 @@ typedef struct Dds3PathCurveTable {
     Dds3PathCurveEntry entries[1];
 } Dds3PathCurveTable;
 
-typedef struct Dds3PathCurveWork {
-    s32 state;
-    u32 flags;
-    f32 duration;
-    f32 time;
-    EffPrim *unk10;
-    Dds3PathKeyframes *unk14;
-    Dds3PathKeyframes *unk18;
-    Dds3PathKeyframes *unk1C;
-    Dds3PathKeyframes *unk20;
-} Dds3PathCurveWork;
-
 extern void *sdfAllocSizeClassBlock(s32 bytes);
 extern void *memset(void *destination, s32 value, u32 bytes);
 extern EffPrim *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
@@ -140,20 +123,20 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
         keys = entry->keys;
         switch (entry->kind) {
         case 4:
-            work->unk1C = keys;
+            work->scalarKeys = keys;
             work->flags |= 4;
             break;
         case 0:
             work->flags |= 1;
-            work->unk14 = keys;
-            work->unk10 = effCreatePrimitiveCurve(keys->data, keys->count, 1);
+            work->positionKeys = keys;
+            work->primitiveCurve = effCreatePrimitiveCurve(keys->data, keys->count, 1);
             break;
         case 2:
-            work->unk18 = keys;
+            work->rotationKeys = keys;
             work->flags |= 2;
             break;
         case 5:
-            work->unk20 = keys;
+            work->transformKeys = keys;
             work->flags |= 0x10;
             break;
         }
