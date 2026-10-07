@@ -147,7 +147,7 @@ s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
     return 1;
 }
 
-void func_0010FD58(WorldObject *object)
+void dds3DestroyWorldObjectEntry(WorldObject *object)
 {
     WorldEntry *entry = object->entry;
 
