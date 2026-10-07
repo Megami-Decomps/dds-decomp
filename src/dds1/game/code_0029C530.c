@@ -6791,8 +6791,8 @@ typedef struct EffCopiedPayloadWork {
 extern void dds3FreePathObject(Dds3PathCurveWork *path);
 extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
-void effResetObjectSlots(u8 *work) {
-    Dds3PathCurveWork **objects = ((EffCopiedPayloadWork *)work)->payload->targets;
+void effResetObjectSlots(EffCopiedPayloadWork *work) {
+    Dds3PathCurveWork **objects = work->payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
         Dds3PathCurveWork *object = objects[i];
@@ -6837,11 +6837,11 @@ EffCopiedPayload *effCreateInitializedObject(u32 type, const void *source, u32 i
     return effect;
 }
 
-EffCopiedPayload *effCloneEffectPayloadFromOwner(s32 work) {
+EffCopiedPayload *effCloneEffectPayloadFromOwner(EffCopiedPayloadWork *work) {
     EffCopiedPayload *effect;
 
-    effect = effAllocateCopiedEffectPayload(((EffCopiedPayloadWork *)work)->parameter, ((EffCopiedPayloadWork *)work)->payload->body,
-                                             ((EffCopiedPayloadWork *)work)->payload->size);
+    effect = effAllocateCopiedEffectPayload(work->parameter, work->payload->body,
+                                             work->payload->size);
     func_002B3420((u32)effect);
     return effect;
 }
