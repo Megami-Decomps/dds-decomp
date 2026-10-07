@@ -1,4 +1,6 @@
 #include "common.h"
+#include "btl_state.h"
+#include "evt_unit.h"
 #include "eff_blur.h"
 #include "eff_curve.h"
 #include "file.h"
@@ -237,15 +239,6 @@ extern void func_00288C50(void *);
 extern void *func_002BD9C0(u32, u32);
 
 /* Battle state: resource headers for texture slots 1 and 2. */
-typedef struct EffBattleTexHeaders {
-    u8 pad_000[0x1F4];
-    u32 statusFlags; /* 0x1F4 */
-    u8 pad_1F8[0x30];
-    struct EffBattleUnit *units; /* 0x228 */
-    u8 pad_22C[0x350];
-    u8 *slot1; // 0x57C
-    u8 *slot2; // 0x580
-} EffBattleTexHeaders;
 
 extern u32 D_003BC950;
 
@@ -6162,18 +6155,6 @@ typedef struct EffModelCreateRequest {
 } EffModelCreateRequest;
 
 /* Battle actor subset used by effect filters (matches the battle unit offsets). */
-typedef struct EffBattleUnit {
-    u8 pad_000[0x54];
-    u32 effectValue; /* 0x54: copied to the actor's effect work */
-    u8 pad_058[0xB8];
-    u32 flags;
-    u8 pad_114[0x1FC];
-    u16 overlayFlags; /* 0x310 */
-    u8 pad_312[0xE];
-    u32 model;        /* 0x320 */
-    u8 pad_324[0x20];
-    struct EffBattleUnit *next; /* 0x344 */
-} EffBattleUnit;
 
 void effDestroyModelResource(EffModelResource *effect) {
     effModelResourceOperations[effect->kind].destroyResource((void *)effect->childResource);
@@ -6380,7 +6361,7 @@ void effGetWorldVector(u32 which) {
     }
 }
 
-s32 effCollectModelEffectActors(u8 **out, u32 kind) {
+s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     s32 count = 0;
     u32 mask = 0;
     u8 *state = (u8 *)btlGetRuntime();
@@ -6389,38 +6370,38 @@ s32 effCollectModelEffectActors(u8 **out, u32 kind) {
 
     switch (kind) {
     case 1:
-        if ((((EffBattleUnit *)actor)->flags & 2) && ((EffBattleUnit *)actor)->model != 0) {
-            out[0] = actor;
+        if ((((BtlUnit *)actor)->flags & 2) && ((BtlUnit *)actor)->ext != 0) {
+            out[0] = (BtlUnit *)actor;
             count = 1;
         }
         break;
     case 4:
-        mask = ((EffBattleUnit *)other)->flags & 0x600;
+        mask = ((BtlUnit *)other)->flags & 0x600;
         break;
     case 3:
-        mask = ((EffBattleUnit *)actor)->flags & 0x600;
+        mask = ((BtlUnit *)actor)->flags & 0x600;
         break;
     case 5:
         mask = 0x600;
         break;
     case 6:
         other = (u8 *)effBTLFieldColorGetOverrideSelector();
-        if ((((EffBattleUnit *)other)->flags & 2) && ((EffBattleUnit *)other)->model != 0) {
-            out[0] = other;
+        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
+            out[0] = (BtlUnit *)other;
             count = 1;
         }
         break;
     case 7:
         other = (u8 *)effBTLFieldColorGetFinalSelector();
-        if ((((EffBattleUnit *)other)->flags & 2) && ((EffBattleUnit *)other)->model != 0) {
-            out[0] = other;
+        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
+            out[0] = (BtlUnit *)other;
             count = 1;
         }
         break;
     case 0:
     case 2:
-        if ((((EffBattleUnit *)other)->flags & 2) && ((EffBattleUnit *)other)->model != 0) {
-            out[0] = other;
+        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
+            out[0] = (BtlUnit *)other;
             count = 1;
         }
         break;
@@ -6428,14 +6409,14 @@ s32 effCollectModelEffectActors(u8 **out, u32 kind) {
     if (mask != 0) {
         u8 *link;
 
-        for (link = (u8 *)((EffBattleTexHeaders *)state)->units; link != NULL; link = (u8 *)((EffBattleUnit *)link)->next) {
-            u32 flags = ((EffBattleUnit *)link)->flags;
+        for (link = (u8 *)((BtlState *)state)->units; link != NULL; link = (u8 *)((BtlUnit *)link)->next) {
+            u32 flags = ((BtlUnit *)link)->flags;
 
             if (flags & 1) {
                 if (flags & 2) {
-                    if (((EffBattleUnit *)link)->model != 0) {
+                    if (((BtlUnit *)link)->ext != 0) {
                         if (flags & mask) {
-                            out[count++] = link;
+                            out[count++] = (BtlUnit *)link;
                         }
                     }
                 }
@@ -6447,34 +6428,102 @@ s32 effCollectModelEffectActors(u8 **out, u32 kind) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2938);
 
-typedef struct EffLinkedActorChild {
-    u8 pad00[0x60];
-    u32 effectValue;
-} EffLinkedActorChild;
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2A48);
+
+extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
 
 void effSyncLinkedActorChildParameter(void) {
     u8 *state = (u8 *)btlGetRuntime();
     u8 *effect;
 
-    if ((((EffBattleTexHeaders *)state)->statusFlags & 0x6000000) == 0) {
+    if ((((BtlState *)state)->battleFlags & 0x6000000) == 0) {
         return;
     }
-    effect = (u8 *)((EffBattleTexHeaders *)state)->units;
+    effect = (u8 *)((BtlState *)state)->units;
     while (effect != NULL) {
-        if (((EffBattleUnit *)effect)->flags & 2) {
-            u8 *work = (u8 *)((EffBattleUnit *)effect)->model;
+        if (((BtlUnit *)effect)->flags & 2) {
+            u8 *work = (u8 *)((BtlUnit *)effect)->ext;
             if (work != NULL) {
-                ((EffLinkedActorChild *)work)->effectValue = ((EffBattleUnit *)effect)->effectValue;
-                evtSetUnitRgbTransition(work, 0, ((EffBattleUnit *)effect)->effectValue);
+                ((EvtUnit *)work)->color60 = ((BtlUnit *)effect)->baseColor;
+                evtSetUnitRgbTransition((EvtUnit *)work, 0, ((BtlUnit *)effect)->baseColor);
             }
         }
-        effect = (u8 *)((EffBattleUnit *)effect)->next;
+        effect = (u8 *)((BtlUnit *)effect)->next;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2F20);
+/* Header common to the resource-instance constructors and callback dispatchers. */
+typedef struct EffActiveResource {
+    f32 position[4];
+    f32 orientation[4];
+    f32 scale;           // 0x20
+    u32 color;           // 0x24
+    u32 frame;           // 0x28
+    union {
+        u32 index;       // 0x2C
+        s32 signedIndex;
+        u16 shortIndex;
+    } kind;
+    u32 resource;        // 0x30
+    u8 pad_34[4];
+    void *payload;       // 0x38
+    u8 pad_3C[4];
+} EffActiveResource;
+typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
+
+/* Entire copied payload for resource kind 2. */
+typedef struct EffActorTintConfig {
+    u32 duration;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 color;
+    u8 actorSelection;
+    u8 pad11[3];
+} EffActorTintConfig;
+typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 : -1];
+
+/* Apply a temporary tint to eligible actors, then restore their original RGB. */
+void func_002B2F20(EffActiveResource *work) {
+    BtlUnit *actors[16];
+    EffActorTintConfig *config = work->payload;
+    u32 frame = work->frame;
+    u32 color = config->color;
+    u32 count = effCollectModelEffectActors(actors, config->actorSelection);
+    u32 i;
+
+    if (frame == 0) {
+        for (i = 0; i < count; i++) {
+            u32 flags = actors[i]->flags;
+
+            if (flags & 2) {
+                if ((flags & 0xE0) == 0) {
+                    u32 baseColor = actors[i]->baseColor;
+                    EvtUnit *effect = actors[i]->ext;
+                    u32 blended;
+
+                    if ((baseColor & 0xFFFFFF) != 0x808080) {
+                        blended = (color & baseColor) + (((color ^ baseColor) & 0xFEFEFEFE) >> 1);
+                    } else {
+                        blended = color;
+                    }
+                    evtSetUnitRgbTransition(effect, config->fadeIn, blended);
+                }
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->fadeOut) {
+        for (i = 0; i < count; i++) {
+            u32 flags = actors[i]->flags;
+
+            if (flags & 2) {
+                if ((flags & 0xE0) == 0) {
+                    evtSetUnitRgbTransition(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
+                }
+            }
+        }
+    }
+}
 
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
@@ -6623,31 +6672,12 @@ void effReleaseTargetSlots(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B3698);
 
 
-extern void btlApplyScaledUnitEffectParameter(void *, s32, u32, f32);
+extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 
 extern void btlStartMoveOtherUnitsTask(void *, s32);
 
-/* Header common to the resource-instance constructors and callback dispatchers. */
-typedef struct EffActiveResource {
-    f32 position[4];
-    f32 orientation[4];
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    union {
-        u32 index;       // 0x2C
-        s32 signedIndex;
-        u16 shortIndex;
-    } kind;
-    u32 resource;        // 0x30
-    u8 pad_34[4];
-    void *payload;       // 0x38
-} EffActiveResource;
 
-typedef struct EffModelRef {
-    u8 pad00[0x8C];
-    MdlCtx *nodeReference;
-} EffModelRef;
+
 
 typedef struct EffAnimInfo {
     u16 id;
@@ -6658,7 +6688,7 @@ typedef struct EffAnimInfo {
 } EffAnimInfo;
 
 void effApplyOverlaySpecs(u8 *work) {
-    u8 *objects[16];
+    BtlUnit *objects[16];
     u16 *spec;
     u32 count;
     u32 i;
@@ -6669,12 +6699,12 @@ void effApplyOverlaySpecs(u8 *work) {
     spec = ((EffActiveResource *)work)->payload;
     count = effCollectModelEffectActors(objects, ((EffAnimInfo *)spec)->actorSelection);
     for (i = 0; i < count; i++) {
-        u32 flags = ((EffBattleUnit *)objects[i])->flags;
+        u32 flags = ((BtlUnit *)objects[i])->flags;
         if (flags & 2) {
             if ((flags & 0x20) == 0) {
-                if ((((EffBattleUnit *)objects[i])->overlayFlags & 0x10) == 0) {
-                    if (mdlGetNodeRefHalf(((EffModelRef *)((EffBattleUnit *)objects[i])->model)->nodeReference, 0) > ((EffAnimInfo *)spec)->id) {
-                        btlApplyScaledUnitEffectParameter(objects[i], ((EffAnimInfo *)spec)->id, ((EffAnimInfo *)spec)->flags | 0x100, 1.0f);
+                if ((((BtlUnit *)objects[i])->unk310 & 0x10) == 0) {
+                    if (mdlGetNodeRefHalf(objects[i]->ext->owner, 0) > ((EffAnimInfo *)spec)->id) {
+                        btlApplyScaledUnitEffectParameter((u8 *)objects[i], ((EffAnimInfo *)spec)->id, ((EffAnimInfo *)spec)->flags | 0x100, 1.0f);
                         if (((EffAnimInfo *)spec)->loop == 0) {
                             btlStartMoveOtherUnitsTask(objects[i], ((EffAnimInfo *)spec)->id);
                         }
@@ -6709,7 +6739,7 @@ void effApplyBattleStateTint(void) {
     s32 actor;
 
     actor = btlGetRuntime();
-    if ((((EffBattleTexHeaders *)actor)->statusFlags & 0x6000000) != 0) {
+    if ((((BtlState *)actor)->battleFlags & 0x6000000) != 0) {
         func_001EFD58(actor + 0x50, actor + 0x60, 0);
         return;
     }
@@ -6794,7 +6824,7 @@ void effResetActiveEffectSlots(void) {
     s32 actor;
 
     actor = btlGetRuntime();
-    if ((((EffBattleTexHeaders *)actor)->statusFlags & 0x6000000) != 0) {
+    if ((((BtlState *)actor)->battleFlags & 0x6000000) != 0) {
         effResetSlots();
         return;
     }
