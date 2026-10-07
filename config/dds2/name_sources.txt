@@ -267,6 +267,8 @@
 0x00110008	dds3AppendWorldNode	inferred	Appends a node to the global world's doubly linked list; identical role to DDS1 dds3AppendWorldNode.
 0x001100F0	dds3AppendWorldIndexNode	inferred	Allocates and initializes a 16-byte NodeB, appends it to WorldInfo's index-node chain, and initializes it with the requested index.
 0x001101A8	dds3DestroyWorldIndexNode	inferred	Unlinks the supplied index node from the world's doubly linked list and frees it.
+0x00110240	dds3RemoveCurrentWorldValueEntry	inferred	confidence=high; matched-C; src/dds2/basic/dds3WorldBasic.c:dds3ProcessMatchingWorldNodes; Removes the current cursor-selected entry from the world value list and repairs neighboring and free-list links. twin=0x00110018.
+0x00110348	dds3ReleaseWorldValueEntries	inferred	confidence=high; matched-C; src/dds2/basic/dds3WorldBasic.c:dds3DestroyWorldIndexNode; Releases every value entry owned by the index node, restores the pool links, and clears its cursor/count. twin=0x00110120.
 0x00110408	dds3ProcessMatchingWorldNodes	inferred	Starts a world-node iteration and invokes the node processor for each matching target until none remain or one match is processed.
 0x00110498	dds3SeekWorldNode	inferred	Advances a world-node iterator until its current node is the requested target or iteration ends.
 0x001104F0	dds3GrowWorldValueChain	inferred	High: removes requested entries from the global free chain and appends them to the object's indexed value chain; DDS1 twin 0x001102C8. [names_reviewed23.tsv]
