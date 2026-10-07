@@ -379,7 +379,15 @@ s32 scrCheckStateBits(DatPartyRecord *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptySetProfileFlag1);
+/* Mark the second bit of the decoded mantra pair for this unit. */
+void ptySetProfileFlag1(DatPartyRecord *unit, u16 id) {
+    u32 word;
+    u32 shift;
+
+    prfDecodeFlagPair(id, &word, &shift);
+    shift++;
+    datGameState->mantraBits[unit->unitId].words[word] |= 1U << shift;
+}
 
 s32 ptyTestProfileFlag1(DatPartyRecord *work, u16 id) {
     u32 word;

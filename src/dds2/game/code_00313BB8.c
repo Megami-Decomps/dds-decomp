@@ -219,7 +219,7 @@ void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
 
 /* Clear the complete per-unit profile-record table in game state. */
 void ptyClearProfileRecords(void) {
-    memset(datGameState->profileRecords, 0, sizeof(datGameState->profileRecords));
+    memset(datGameState->profileBanks, 0, sizeof(datGameState->profileBanks));
 }
 
 void func_00313C70(DatPartyRecord *work) {
@@ -471,7 +471,14 @@ s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314A80);
+/* Mark the second bit of the decoded mantra pair for this unit. */
+void func_00314A80(DatPartyRecord *unit, u16 id) {
+    u32 word;
+    u32 shift;
+
+    prfDecodeFlagPair(id, &word, &shift);
+    datGameState->mantraBits[unit->unitId].words[word] |= 1U << (shift + 1);
+}
 
 s32 func_00314B00(DatPartyRecord *work, u16 id) {
     u32 word, shift;
@@ -485,7 +492,7 @@ u32 scrGetSelectedScriptEntryId(DatPartyRecord *work) {
 
 /* Address an unchecked profile record within the unit's record bank. */
 DatProfileRecord *ptyGetProfileRecordPointer(DatPartyRecord *unit, u16 profileId) {
-    return &datGameState->profileRecords[unit->unitId][profileId];
+    return &datGameState->profileBanks[unit->unitId].records[profileId];
 }
 
 u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId) {

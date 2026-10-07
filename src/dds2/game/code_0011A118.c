@@ -723,7 +723,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
     evtCopyRosterTableValue(entry);
     gameState = datGameState;
     memcpy(&gameState->mantraBits[2], &gameState->mantraBits[1], sizeof(gameState->mantraBits[2]));
-    memcpy(gameState->profileRecords[2], gameState->profileRecords[1], sizeof(gameState->profileRecords[2]));
+    memcpy(gameState->profileBanks[2].records, gameState->profileBanks[1].records, sizeof(gameState->profileBanks[2].records));
     func_00286618();
     entry->itemId = 0;
 }
@@ -759,7 +759,7 @@ void func_0011B9A0(DatPartyRecord *entry, s32 initFlags) {
     }
     gameState = datGameState;
     memcpy(&gameState->mantraBits[3], &gameState->mantraBits[7], sizeof(gameState->mantraBits[3]));
-    memcpy(gameState->profileRecords[3], gameState->profileRecords[7], sizeof(gameState->profileRecords[3]));
+    memcpy(gameState->profileBanks[3].records, gameState->profileBanks[7].records, sizeof(gameState->profileBanks[3].records));
     func_002866C8();
     if (!(initFlags & 2)) {
         func_003140C8(1, entry);
@@ -938,7 +938,62 @@ void dds3ForEachEntry(void) {
     } while (updateIndex < 2);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011CA88);
+extern void func_00286670(void);
+extern void func_00286700(void);
+extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
+extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
+extern u16 D_003862D0[16][4];
+
+/* Restore special-character banks, occupied stock skills and four presets. */
+void func_0011CA88(DatPartyRecord *entry) {
+    u16 unitId = entry->unitId;
+    u32 stockId;
+    u16 occupied;
+    DatPartyRecord *stock;
+    u32 i;
+    u16 *preset;
+    if (!mdlFlagTest(0x80E)) {
+        switch (unitId) {
+        case 1:
+            stockId = 8;
+            datGameState->mantraBits[1] = datGameState->mantraBits[8];
+            datGameState->profileBanks[1] = datGameState->profileBanks[8];
+            func_00286670();
+            break;
+        case 7:
+            stockId = 7;
+            if (datGameState->templates[3].totalExp != 0) {
+                stockId = 3;
+                datGameState->mantraBits[7] = datGameState->mantraBits[3];
+                datGameState->profileBanks[7] = datGameState->profileBanks[3];
+                func_00286700();
+            }
+            break;
+        default:
+            stockId = unitId;
+            break;
+        }
+        stock = &datGameState->templates[stockId];
+        occupied = stock->flags & 1;
+        if (occupied != 0) {
+            for (i = 0; i < 85; i++)
+                entry->skillFlags[i] |= stock->skillFlags[i];
+            entry->profileId = stock->profileId;
+        }
+    }
+    scrClearAllSecondaryScriptFlags(entry);
+    preset = D_003862D0[unitId];
+    i = 0;
+    do {
+        u32 value = *preset++;
+        u16 skill = value;
+        if (value != 0) {
+            scrSetFlag(entry, skill);
+            scrSetSecondaryScriptFlag(entry, skill);
+        }
+        i++;
+    } while (i < 4);
+}
 
 /* Visit occupied roster slots for native per-entry processing. */
 void dds3ForEachFlagged(void) {
