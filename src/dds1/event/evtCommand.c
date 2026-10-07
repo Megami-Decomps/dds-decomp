@@ -133,7 +133,7 @@ extern char D_003ACA58[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
 void sdfPrintFormattedDevMessage(const char *msg, ...);
 
-void func_00241F78(s32 first, s32 second);
+s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId);
 
 extern s32 D_0032E3C0[];
 
@@ -497,7 +497,7 @@ s32 evtCommandDispatchFieldBE(void)
     sdfPrintFormattedDevMessage("FIELD_BE start\n");
     firstArg = scrReadIntParameter(0);
     secondArg = scrReadIntParameter(1);
-    func_00241F78(firstArg, secondArg);
+    evtTryCreateWorldObjectFromPackResourceSet(firstArg, secondArg);
     sdfPrintFormattedDevMessage("FIELD_BE end\n");
     return 1;
 }

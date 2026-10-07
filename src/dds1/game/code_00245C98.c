@@ -506,7 +506,56 @@ void evtAccumulateStateScore(s32 stateAddress) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00245C98", func_00247420);
+extern s32 datAddCurrencyClamped(s32);
+extern u32 func_002CD800(u32);
+extern void mdlFlagSet(s32);
+
+/* Apply the selected buy/sell operation, then restore the row's displayed price. */
+INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3B0);
+
+INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3B8);
+
+INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3C0);
+
+s32 func_00247420(KwlnTask *task) {
+    ShopScene *scene;
+    CampWindowParams *values;
+    s32 itemId;
+    s32 operation;
+
+    scene = (ShopScene *)kwlnTaskGetUserValue(task);
+    {
+        s32 options[2] = {1, 3};
+        values = &scene->window->list->cursor->camp;
+        itemId = values->id;
+        if (scene->extraOption != 0) {
+            operation = scene->sprite->list->cursor->index + 1;
+        } else {
+            operation = options[scene->sprite->list->cursor->index];
+        }
+        switch (operation) {
+        case 1:
+        case 2:
+            datAddCurrencyClamped(-values->value * scene->counter);
+            if (values->mode == 1) {
+                func_002CD800((u32)itemId & 0xFFFF);
+            } else {
+                datGameState->inventory.counts[itemId] += scene->counter;
+            }
+            break;
+        case 3:
+            datAddCurrencyClamped(values->value * scene->counter);
+            datGameState->inventory.counts[itemId] -= scene->counter;
+            if (itemId == 0x6C) {
+                mdlFlagSet(0x97F);
+            }
+            break;
+        }
+        values->value = values->price;
+        return 1;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247588);
 
@@ -820,14 +869,6 @@ INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF570);
 INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF580);
 
 INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF590);
-
-INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3B0);
-
-INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3B8);
-
-INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3C0);
-
-INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3C8);
 
 INCLUDE_SDATA(const s32, "game/code_00245C98", D_003BC3D0);
 

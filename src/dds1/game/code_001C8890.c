@@ -1215,7 +1215,87 @@ void btlCommandResultEffectSelect(u8 *task) {
     fldCreateSceneSpriteTask((s32)task);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001C9960);
+extern s32 fldGetSceneScriptState(void);
+extern BtlIndexList *fldGetSceneScriptValue(void);
+extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
+extern void fldMarkActiveSceneScriptState(void);
+extern s32 btlSetTaskPhase2(void);
+
+void func_001C9960(BtlTask *task) {
+    BtlState *work = (BtlState *)btlGetRuntime();
+    s32 state;
+    BtlIndexList *selected;
+    s32 selection;
+    s32 reason;
+
+    if (work->battleFlags & 0x20) {
+        return;
+    }
+    state = fldGetSceneScriptState();
+    if ((task->flags & 4) == 0 && state != 3 && sndHasActiveActor() == 0) {
+        if (btlGetActiveUnitId() != 9) {
+            btlStartTask(btlCreateCommandSoundUpdateTask());
+            btlStartTask(btlCreateSecondaryCommandSoundTask());
+        }
+        btlStartTask(btlCreateCommandSoundTask((s32)task, 0xA));
+        task->flags |= 4;
+    }
+    if (state == 3) {
+        selected = fldGetSceneScriptValue();
+        switch (task->indexWork.phase) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 7:
+        case 8:
+            if (task->indexWork.phase == 4) {
+                selection = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
+            } else {
+                selection = task->indexWork.skillId;
+            }
+            reason = btlGetCommandTargetEligibility(selected, selection);
+            switch (reason) {
+            case 3:
+            case 4:
+                btlStartTask(btlCreateEffObjB(task->unit, 0x6A));
+                sndSetStationedSeVolume(0xD);
+                btlSetTaskPhase2();
+                return;
+            case 5:
+                btlStartTask(btlCreateEffObjB(task->unit, 0xA6));
+                sndSetStationedSeVolume(0xD);
+                btlSetTaskPhase2();
+                return;
+            case 8:
+                btlStartTask(btlCreateEffObjB(task->unit, 0xCC));
+                sndSetStationedSeVolume(0xD);
+                btlSetTaskPhase2();
+                return;
+            }
+            break;
+        }
+        if (task->indexWork.phase != 9) {
+            sndSetStationedSeVolume(8);
+        }
+        btlCopyIndexList(task->indexWork.indices, selected);
+        fldSetSceneObjectAndGroupStates();
+        fldMarkActiveSceneScriptState();
+        if (btlAiCheckStatusRollEligibility(task) != 0) {
+            btlDispatchStateHandler(task, 0xB);
+        } else {
+            btlDispatchStateHandler(task, 0xC);
+        }
+    } else if (state == 4) {
+        fldMarkActiveSceneScriptState();
+        btlDispatchStateHandler(task, 6);
+    } else if (work->battleFlags & 0x8000) {
+        fldSetSceneObjectAndGroupStates();
+        fldMarkActiveSceneScriptState();
+        btlDispatchStateHandler(task, 9);
+    }
+}
+
 
 void func_001C9C20(s32 arg0) {
     *(u32 *)(arg0 + 8) = *(u32 *)(arg0 + 8) & 0xffffff7f;
@@ -3553,7 +3633,22 @@ void btlClearUnitDefeatCandidate(BtlUnit *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlIsUnitInfoFlagOneEligible);
+u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
+    u32 flags = unit->flags;
+    u8 modelFlags;
+
+    if (flags & 0x08000000) {
+        return 0;
+    }
+    if (!(flags & 1)) {
+        return 0;
+    }
+    if (!(flags & 2)) {
+        return 0;
+    }
+    modelFlags = unit->ext->owner->flags;
+    return modelFlags & 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3AD0);
 

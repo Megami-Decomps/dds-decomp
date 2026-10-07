@@ -33,11 +33,20 @@ extern MenuTitleState *mnuMovieMenuState;
 extern u16 mnuMovieTaskState;
 
 typedef struct {
+    u32 mode;           /* 0x00 */
+    s32 opacity;        /* 0x04: signed fade clamps */
+    s32 phase;          /* 0x08 */
+    s32 spriteIndices[4]; /* 0x0C */
+} MnuTitlePaletteTransition;
+
+typedef struct {
     SdfMemBlock *handle;
     u32 sprite;
     s32 state;
     s32 frame;
-    u8 pad10[0xAC];
+    u8 pad10[0x7C];
+    MnuTitlePaletteTransition paletteTransition; /* 0x8C */
+    u8 padA8[0x14];
     s32 scrollPaused; /* 0xBC: suppresses staff text and frame advancement. */
     u8 padC0[0x14];
     s32 streamPhase;
@@ -814,7 +823,7 @@ void mnuFadeSetState(u32 *state, u32 mode) {
     state[0] = mode;
 }
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     u32 sprite = mnuMovieWork->sprite;
@@ -848,22 +857,23 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6D68);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6F88);
 
+extern void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize);
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7260);
 
-void mnuTitleSetPaletteTransition(u32 *state, s32 mode) {
+void mnuTitleSetPaletteTransition(MnuTitlePaletteTransition *state, s32 mode) {
     switch (mode) {
     case 2:
-        state[1] = 0;
+        state->opacity = 0;
         mode = 0;
-        state[2] = 0;
+        state->phase = 0;
         func_002A7260(state, 0);
         break;
     case 3:
-        state[1] = 0x200;
+        state->opacity = 0x200;
         mode = 1;
         break;
     }
-    state[0] = mode;
+    state->mode = mode;
 }
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A73C0);

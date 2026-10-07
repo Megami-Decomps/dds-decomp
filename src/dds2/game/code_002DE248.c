@@ -4281,11 +4281,16 @@ void effRandomizeParticleFields(s32 *work) {
     }
 }
 
+/* Class kinds 1 and 4 copy the complete 0x88-byte serialized record. */
 typedef struct EffPointSetTableSource {
-    u8 pad00[0x38];
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    s32 duration;
     u32 count;     /* 0x38: rows, one point set each */
     s32 layers;    /* 0x3C: at least 3 */
-    u8 pad40[0x28];
+    u8 pad40[0x1C];
+    u8 drawFlag;  /* 0x5C: copied into the point set's draw flag */
+    u8 pad5D[0x0B];
     f32 unk68;     /* 0x68: fade-in share of a set */
     f32 unk6C;     /* 0x6C: end of the full-alpha span */
     u32 colorA;    /* 0x70: low 24 bits kept, top byte ramped */
@@ -4295,10 +4300,19 @@ typedef struct EffPointSetTableSource {
     f32 unk84;     /* 0x84: copied separately from the descriptor prefix */
 } EffPointSetTableSource;
 
+
+/* The factory appends the copied parameters to its real 0x40-byte header. */
+typedef struct EffPointSetClassWork {
+    EffClassWork header;
+    EffPointSetTableSource parameters;
+} EffPointSetClassWork;
+typedef char EffPointSetTableSource_size[(sizeof(EffPointSetTableSource) == 0x88) ? 1 : -1];
+typedef char EffPointSetClassWork_size[(sizeof(EffPointSetClassWork) == 0xC8) ? 1 : -1];
+
 typedef struct EffPointSetRow {
     EffPointSet *set; /* 0x00 */
     s32 key;          /* 0x04 */
-    u32 pad08;
+    u32 color;        /* 0x08: packed color written by the class updater */
     f32 angle;        /* 0x0C: phase of the radial class instance */
 } EffPointSetRow;
 
@@ -4671,7 +4685,7 @@ void effSeedBillboardFrameCounters(s32 *work) {
 typedef struct EffAlternatingPointSetRow {
     EffPointSet *set;
     s32 key;
-    u32 unk08;
+    u32 color;
 } EffAlternatingPointSetRow;
 
 typedef struct EffAlternatingPointSetTable {
@@ -6787,7 +6801,101 @@ void effSyncLinkedActorChildParameter(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F64D8);
+/* Header common to the resource-instance constructors and callback dispatchers. */
+typedef struct EffActiveResource {
+    u8 pad_00[0x20];
+    f32 scale;           // 0x20
+    u32 color;           // 0x24
+    u32 frame;           // 0x28
+    union {
+        u32 index;       // 0x2C
+        s32 signedIndex;
+        u16 shortIndex;
+    } kind;
+    u32 resource;        // 0x30
+    u8 pad_34[4];
+    void *payload;       // 0x38
+    u8 pad_3C[4];
+} EffActiveResource;
+typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
+
+/* Entire payload copied for resource kind 2 by effAllocateResourcePayload. */
+typedef struct EffActorTintConfig {
+    u32 duration;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 color;
+    u8 actorSelection;
+    u8 pad11[3];
+} EffActorTintConfig;
+typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 : -1];
+
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+
+/* Tint selected eligible actors, then restore their original RGB at fade-out. */
+void func_002F64D8(EffActiveResource *work) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *actors[16];
+    EffActorTintConfig *config = work->payload;
+    u32 frame = work->frame;
+    u32 color = config->color;
+    u32 count = effCollectModelEffectActors(actors, config->actorSelection);
+    u32 i;
+
+    if (frame == 0) {
+        for (i = 0; i < count; i++) {
+            if (actors[i]->flags & 2) {
+                if (actors[i]->flags & 0xE0) {
+                    s32 handled;
+
+                    if (actors[i]->flags & 0x200) {
+                        continue;
+                    }
+                    handled = 0;
+                    if (state->hook618 != NULL) {
+                        handled = state->hook618(actors[i]);
+                    }
+                    if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
+                        continue;
+                    }
+                }
+                {
+                    u32 baseColor = actors[i]->baseColor;
+                    EvtUnit *effect = actors[i]->ext;
+                    u32 blended;
+
+                    if ((baseColor & 0xFFFFFF) != 0x808080) {
+                        blended = (color & baseColor) + (((color ^ baseColor) & 0xFEFEFEFE) >> 1);
+                    } else {
+                        blended = color;
+                    }
+                    evtSetUnitRgbTransition(effect, config->fadeIn, blended);
+                }
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->fadeOut) {
+        for (i = 0; i < count; i++) {
+            if (actors[i]->flags & 2) {
+                if (actors[i]->flags & 0xE0) {
+                    s32 handled;
+
+                    if (actors[i]->flags & 0x200) {
+                        continue;
+                    }
+                    handled = 0;
+                    if (state->hook618 != NULL) {
+                        handled = state->hook618(actors[i]);
+                    }
+                    if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
+                        continue;
+                    }
+                }
+                evtSetUnitRgbTransition(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
+            }
+        }
+    }
+}
 
 s32 effComputeLightDirectionVU(MdlCtx *model, void *target) {
     if (btlIsRuntimeAllocated() == 0) {
@@ -6923,21 +7031,7 @@ typedef struct EffAnimInfo {
     u16 loop;
 } EffAnimInfo;
 
-/* Header common to the resource-instance constructors and callback dispatchers. */
-typedef struct EffActiveResource {
-    u8 pad_00[0x20];
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    union {
-        u32 index;       // 0x2C
-        s32 signedIndex;
-        u16 shortIndex;
-    } kind;
-    u32 resource;        // 0x30
-    u8 pad_34[4];
-    void *payload;       // 0x38
-} EffActiveResource;
+
 
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, u16, s32, f32);

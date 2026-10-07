@@ -1,5 +1,7 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
@@ -83,11 +85,6 @@ typedef struct SdfDmaTag {
     u64 vifCommands;
 } SdfDmaTag;
 
-typedef struct SdfPacketChain {
-    SdfListHead *head;
-    SdfListHead *tail;
-} SdfPacketChain;
-
 typedef struct SdfPacketSlot {
     SdfListHead *list;
     u32 unk4;
@@ -154,7 +151,7 @@ void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
 void func_002D4DD0();
 s32 sdfAllocPacketAligned(s32 size);
 void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
-void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node);
+void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
 
 typedef struct SdfSynchronizedRequest {
     u32 value;
@@ -251,8 +248,8 @@ void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
 
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
  * The drawing arguments remain opaque and are forwarded to the native builder. */
-void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
-                   s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
+                   s32 arg4, s32 arg5, s32 resourceAddress, s32 arg7, s32 arg8,
                    s32 (*allocatePacket)(s32)) {
     s32 packetAddress;
 
@@ -262,7 +259,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList
     packetAddress = allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     ((SdfNode *)packetAddress)->unk4 = (u32)sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket((SdfResourcePacket *)(packetAddress + SDF_QWORD_BYTES),
-        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, resourceAddress, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packetAddress);
     sdfAppendPacketRange(list, packetAddress + SDF_QWORD_BYTES, packetAddress + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
@@ -282,7 +279,7 @@ typedef struct SdfDescriptorPacket {
     u64 finishRegister;
 } SdfDescriptorPacket;
 
-void func_002D39B0(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
+void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
                    s64 destinationX, s64 destinationY, s32 transferWidth,
                    s32 transferHeight, u32 sourceAddress) {
     s32 qwc;
@@ -317,7 +314,7 @@ void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress, s32 a, 
         allocatePacket = sdfAllocPacketAligned;
     }
     packetAddress = allocatePacket(SDF_DESCRIPTOR_PACKET_BYTES);
-    func_002D39B0((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)descriptorAddress,
+    sdfBuildHostToLocalImagePacket((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)descriptorAddress,
                   a, b, c, d, e);
     sdfAppendPacketRange(list, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
 }
@@ -771,14 +768,14 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
     return head;
 }
 
-void sdfClearLinkedPacketList(SdfListHead *list) {
+void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {
     list->unk0 = 0;
     list->first = 0;
     list->last = 0;
     list->unkC = 0;
 }
 
-void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
+void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node) {
     if (list->last == 0) {
         list->first = (u32)node;
     }
@@ -789,19 +786,19 @@ void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
     *node = 0;
 }
 
-void sdfClearPacketListHead(SdfListHead *list) {
-    list->unk0 = 0;
-    list->first = 0;
+void sdfClearPacketChain(SdfPacketChain *chain) {
+    chain->head = NULL;
+    chain->tail = NULL;
 }
 
-void sdfAppendPacketChainNode(SdfPacketChain *head, SdfListHead *node) {
-    if (head->tail == NULL) {
-        head->head = node;
+void sdfAppendPacketChainNode(SdfPacketChain *chain, SdfLinkedPacketList *node) {
+    if (chain->tail == NULL) {
+        chain->head = node;
     }
     else {
-        *(u32 *)head->tail->last = node->last;
+        *(u32 *)chain->tail->last = node->last;
     }
-    head->tail = node;
+    chain->tail = node;
 }
 
 /* Encode the packed A+D payload count and its DMA/VIF transfer length. */
@@ -956,7 +953,7 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     sdfInitDrawPacket(packet->draw);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D49E8);
+INCLUDE_ASM(const s32, "game/code_002D33C8", sdfRefreshSceneNodePackets);
 
 typedef struct SdfSceneNode {
     u8 pad00[4];
@@ -969,13 +966,13 @@ typedef struct SdfSceneNode {
     u64 regs[8];       /* 0x140 */
 } SdfSceneNode;
 
-extern void func_002D49E8();
+extern void sdfRefreshSceneNodePackets();
 
 /* Retain the render-target view and initialize the scene callback and fixed drawing state. */
 void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
-    node->handler = func_002D49E8;
+    node->handler = sdfRefreshSceneNodePackets;
     sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     node->regs[0] = SDF_GS_SCENE_TEST;
     node->regs[1] = SDF_GS_TEST_PRIMARY;
@@ -989,7 +986,7 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
 }
 
 /* Link the metadata node separately from the DMA payload one quadword later. */
-void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfListHead *linkedList, u32 *linkedNode) {
+void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *linkedList, u32 *linkedNode) {
     sdfAppendLinkedPacketNode(linkedList, linkedNode);
     sdfAppendPacket(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
@@ -1322,8 +1319,8 @@ void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
 extern SdfGraphObj D_003980E0;
 
 /* Build a local-to-local GS copy from graph buffer zero into destination. */
-void func_002D5CD0(SdfListHead *drawList, SdfListHead *linkedList,
-                   SdfTexHead *destination, s32 destinationX, s32 destinationY,
+void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *linkedList,
+                   SdfTexResource *destination, s32 destinationX, s32 destinationY,
                    s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
                    s32 resourceIndexXor, s32 (*allocPacket)(s32)) {
     SdfNode *packet;
@@ -1338,7 +1335,7 @@ void func_002D5CD0(SdfListHead *drawList, SdfListHead *linkedList,
     drawPacket = (SdfPacket *)(packet + 1);
 
     sdfInitializeExtendedDrawPacket(
-        drawPacket, destination->address, destination->width,
+        drawPacket, destination->word, destination->width,
         destination->format, destinationX, destinationY, D_003980E0.buffers[0]->word,
         D_003980E0.width, D_003980E0.bufferFormat, sourceX, sourceY, transferWidth,
         transferHeight, 2);
@@ -1739,7 +1736,7 @@ void sdfInitializeObjectListRequest(void) {
 }
 
 
-SdfDrawNode *func_002D7830(void) {
+SdfDrawNode *sdfCreateDrawNode(void) {
     SdfDrawNode *node = sdfAllocAndClearQuadwords(0x100);
 
     node->color = 0x80808080;

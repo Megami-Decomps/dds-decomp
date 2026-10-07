@@ -292,13 +292,13 @@ extern u32 btlAppendEffectActorToCommandIndices(s32);
 extern s32 mdlFlagTest(s32);
 
 
-extern s32 btlReadCurrentUnitHp(void *);
+extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
-extern s32 btlComputeSkillAdjustedMaxHp(void *);
+extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
-extern s32 btlReadCurrentUnitMp(void *);
+extern u16 btlReadCurrentUnitMp(DatPartyRecord *);
 
-extern s32 btlComputeSkillAdjustedMaxMp(void *);
+extern s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
 
 
@@ -649,7 +649,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00211F38);
 
 /* Compare HP against a signed percentage using the native products and unsigned comparison. */
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {
-    u8 *statAddress = (u8 *)&unit->partyRecord.flags;
+    DatPartyRecord *statAddress = &unit->partyRecord;
     s32 currentHp = btlReadCurrentUnitHp(statAddress);
     s32 maximumHp = btlComputeSkillAdjustedMaxHp(statAddress);
     if ((u32)(maximumHp * healthPercent) < (u32)(currentHp * BTL_HEALTH_RATE_SCALE)) {
@@ -674,7 +674,7 @@ s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unit != 0; unit = unit->nextActor) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            u8 *stats = (u8 *)&unit->partyRecord.flags;
+            DatPartyRecord *stats = &unit->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if ((u32)(maximum * multiplier) >= (u32)(current * 100)) {
@@ -689,7 +689,7 @@ s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unit != 0; unit = unit->nextActor) {
         if ((*(u64 *)&unit->flags & 0x221) == 0x201) {
-            u8 *stats = (u8 *)&unit->partyRecord.flags;
+            DatPartyRecord *stats = &unit->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if ((u32)(current * 100) >= (u32)(maximum * multiplier)) {
@@ -1143,7 +1143,7 @@ s32 btlIsReadyWithoutTurns(void) {
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */
 s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
-    void *statAddress = &unit->partyRecord.flags;
+    DatPartyRecord *statAddress = &unit->partyRecord;
     u32 currentValue = btlReadCurrentUnitMp(statAddress);
     u32 scaledMaximum = btlComputeSkillAdjustedMaxMp(statAddress) * percentage;
     if (scaledMaximum < currentValue * BTL_HEALTH_RATE_SCALE) {
@@ -1153,7 +1153,7 @@ s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
 }
 
 s32 btlUnitStatAtOrAboveRate(BtlUnit *unit, u32 percentage) {
-    void *stats = &unit->partyRecord.flags;
+    DatPartyRecord *stats = &unit->partyRecord;
     u32 current = btlReadCurrentUnitMp(stats);
     u32 maximum = btlComputeSkillAdjustedMaxMp(stats);
     if (current * 100 < maximum * percentage) {
@@ -1163,7 +1163,7 @@ s32 btlUnitStatAtOrAboveRate(BtlUnit *unit, u32 percentage) {
 }
 
 s32 btlUnitStatAtMost(BtlUnit *unit, u32 limit) {
-    void *stats = &unit->partyRecord.flags;
+    DatPartyRecord *stats = &unit->partyRecord;
     u32 current = btlReadCurrentUnitMp(stats);
     btlComputeSkillAdjustedMaxMp(stats);
     if (limit < current) {
@@ -1173,7 +1173,7 @@ s32 btlUnitStatAtMost(BtlUnit *unit, u32 limit) {
 }
 
 s32 btlUnitStatAtLeast(BtlUnit *unit, u32 limit) {
-    void *stats = &unit->partyRecord.flags;
+    DatPartyRecord *stats = &unit->partyRecord;
     u32 current = btlReadCurrentUnitMp(stats);
     btlComputeSkillAdjustedMaxMp(stats);
     if (current < limit) {
@@ -1914,7 +1914,7 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
         for (i = 0; i < count; i++) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
             if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
-                u16 current = btlReadCurrentUnitHp(&unit->partyRecord.flags);
+                u16 current = btlReadCurrentUnitHp(&unit->partyRecord);
                 if (best >= current && current != 0) {
                     best = current;
                     found++;
@@ -1957,7 +1957,7 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
         memset(picked, 0, sizeof(picked));
         lowestIndex = 0x20;
         for (i = 0; i < count; i++) {
-            u8 *stats = (u8 *)&((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord.flags;
+            DatPartyRecord *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 percent = current * 100 / btlComputeSkillAdjustedMaxHp(stats);
 

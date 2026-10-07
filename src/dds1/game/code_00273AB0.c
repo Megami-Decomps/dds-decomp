@@ -101,8 +101,8 @@ typedef struct StaffImageContext {
     u8 pad160[0x678];
     MenuList *selection; /* 0x7D8: page-selection list */
     u8 pad7DC[0x11C];
-    void *panelHandle; /* 0x8F8 */
-    void *spriteHandle; /* 0x8FC */
+    MenuPanelGroup *panelHandle; /* 0x8F8 */
+    MenuSpriteState *spriteHandle; /* 0x8FC */
     u8 pad900[0xC];
     StaffImageChoices *menu; /* 0x90C */
 } StaffImageContext;
@@ -112,15 +112,11 @@ extern void mnuCreateStaffBulletItemWindow();
 extern void mnuReleaseStaffMenuResources();
 extern void mnuSetWindowResource();
 extern void mnuAttachPartyIconBundle();
-extern void *mnuCreatePanelGroup();
-extern void *mnuCreateSpriteState();
 extern void func_00276720();
 extern void mnuReleaseStaffExtraWindow();
 extern void mnuReleasePageHandlesAndClearSelection();
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
-extern void mnuDestroyPanelGroup();
-extern void mnuFreeSpriteStateWork();
 extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuSeekListNode(s32, s32);
 extern void mnuAdvanceWindowListSelection(StaffImageList *);
@@ -305,7 +301,10 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     mnuSetWindowResource(index, context + 0x15C, ((StaffImageContext *)context)->spriteScene, ((StaffImageContext *)context)->windowParam);
     mnuAttachPartyIconBundle(index, context + 0x15C, ((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->panelHandle = mnuCreatePanelGroup(((StaffImageContext *)context)->spriteScene);
-    ((StaffImageContext *)context)->spriteHandle = mnuCreateSpriteState(((StaffImageContext *)context)->spriteArg0, ((StaffImageContext *)context)->spriteArg1, ((StaffImageContext *)context)->spriteScene);
+    ((StaffImageContext *)context)->spriteHandle =
+        mnuCreateSpriteState((struct EffectSlotSet *)((StaffImageContext *)context)->spriteArg0,
+                             (struct EffectSlotSet *)((StaffImageContext *)context)->spriteArg1,
+                             (struct EffectSlotSet *)((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->windowFlags |= 0x400;
     ((StaffImageContext *)context)->windowFlags &= ~0x100;
     func_00276720(context + 0x15C, 1, 0, 0);
@@ -322,11 +321,11 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
     mnuClearEntries(context + 0x15C);
     mnuReleasePartyIconBundles(context + 0x15C);
     if (((StaffImageContext *)context)->panelHandle != 0) {
-        mnuDestroyPanelGroup((s32)((StaffImageContext *)context)->panelHandle);
+        mnuDestroyPanelGroup(((StaffImageContext *)context)->panelHandle);
         ((StaffImageContext *)context)->panelHandle = 0;
     }
     if (((StaffImageContext *)context)->spriteHandle != 0) {
-        mnuFreeSpriteStateWork((s32)((StaffImageContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork(((StaffImageContext *)context)->spriteHandle);
         ((StaffImageContext *)context)->spriteHandle = 0;
     }
     func_00283BF0(context + 0x914, 0);
@@ -443,11 +442,11 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
     mnuDrawStaffPanelGridBackdrop(1, (StaffSlots *)(context + 0x60));
     mnuDrawStaffCampScreen(1, task);
     mnuCreateStaffImageSprite(8);
-    func_00283110(0xEB0, 0x518, 0, partyEntry,
-                  (s32)((StaffImageContext *)context)->panelHandle, 0x53);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, (void *)partyEntry,
+                  ((StaffImageContext *)context)->panelHandle, 0x53);
     if (mdlFlagTest(0x901) != 0) {
-        func_002833B0(0, 0, 0, partyEntry,
-                      (s32)((StaffImageContext *)context)->spriteHandle, 0x53);
+        mnuDrawPartyInfoSprites(0, 0, 0, partyEntry,
+                      ((StaffImageContext *)context)->spriteHandle, 0x53);
     }
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->list, 0x53);
     list = menu->list;

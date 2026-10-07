@@ -429,7 +429,9 @@ u32 func_002CD7F8(void) {
     return 0;
 }
 
-u32 func_002CD800(void) {
+/* Retail stub retains the caller's unused item-ID word. */
+u32 func_002CD800(u32 itemId) {
+    (void)itemId;
     return 1;
 }
 

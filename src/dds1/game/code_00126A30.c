@@ -9,6 +9,7 @@ extern FldInfTable D_00332E30;
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "fld.h"
+#include "mdl.h"
 #include "scr.h"
 #include "dat_state.h"
 
@@ -95,7 +96,7 @@ extern s32 func_0012FC20(void);
 extern void func_0012F578(void);
 extern void func_0012EEA0(s16, s16);
 extern void func_0012FF48(void);
-extern void func_0012EA50(s16, s32, f32);
+extern void func_0012EA50(s32, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
 extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
@@ -195,7 +196,7 @@ extern s32 fldSwayOffset;
 
 extern SdfFlagListWork *fldCameraColorEffect;
 extern u32 fldCameraColorEnabled;
-extern s32 fldRainTextureReference;
+extern SdfTex *fldRainTextureReference;
 extern s32 fldRainTextureResource;
 
 extern s32 fldCameraModelObject;
@@ -261,6 +262,7 @@ extern u8 D_0032F260[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void fldResetRecordState(void);
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
@@ -310,8 +312,15 @@ extern u32 fldAreaPackedArchive;
 extern u8 D_003BAC90[];
 extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern void func_00288788(u32 arg0);
-extern void mdlSuspendAllContextMotions(s32 arg0);
-extern void mdlResumeAllContextMotions(s32 arg0);
+extern void mdlSuspendAllContextMotions(MdlCtx *ctx);
+extern void mdlResumeAllContextMotions(MdlCtx *ctx);
+extern void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                               f32 blendDurationFrames);
+extern void mdlSetNodeFloat20(MdlCtx *ctx, s32 searchId, f32 value);
+extern void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex);
+extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
+extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
+extern s32 D_0032E4C8[];
 extern s32 D_003BAE30;
 extern s32 D_003BAE1C;
 extern s32 fldTaskSlotCount;
@@ -1836,11 +1845,183 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AEB0);
+extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
+extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B090);
+/* Submit the field overlay's fixed register state and textured sprite payload. */
+void func_0012AEB0(void) {
+    SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
+    SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    s32 sprite;
+    FldSpriteVertex *vertex;
+    SdfPoolNode *surface;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B2B0);
+    sdfAppendDmaPrimary((s32)list,
+        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+    texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfAppendPacket(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x31001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = 0x44;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, (u32)blendPacket);
+    sprite = (s32)sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = 0x30;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF7;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0x3FFF;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xE00;
+    vertex->corner[1].x = 0x9009;
+    vertex->corner[1].y = 0x8705;
+    vertex->corner[1].mask = 0x3FFF;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(list, sprite);
+    surface = &kwlnDrawSurfaces[fldDisplayRow];
+    surface->append((SdfListHead *)surface, list);
+}
+
+
+/* Submit the field overlay's fixed register state and textured sprite payload. */
+void func_0012B090(s32 mode) {
+    SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
+    SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    s32 sprite;
+    FldSpriteVertex *vertex;
+    SdfPoolNode *surface;
+
+    sdfAppendDmaPrimary((s32)list,
+        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+    texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfAppendPacket(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x33001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = 0x8000000064ULL;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, (u32)blendPacket);
+    sprite = (s32)sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+    if (mode == 0) {
+        vertex->r = 0x81;
+        vertex->g = 0x81;
+        vertex->b = 0x81;
+        vertex->a = 0x80;
+    } else {
+        vertex->r = 0x81;
+        vertex->g = 0x81;
+        vertex->b = 0x84;
+        vertex->a = 0x80;
+    }
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF8;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xDFF;
+    vertex->corner[1].x = 0x8FF8;
+    vertex->corner[1].y = 0x86FB;
+    vertex->corner[1].mask = 0;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(list, sprite);
+    surface = &kwlnDrawSurfaces[fldDisplayRow];
+    surface->append((SdfListHead *)surface, list);
+}
+
+
+/* Submit the field overlay's fixed register state and textured sprite payload. */
+void func_0012B2B0(s32 alpha) {
+    SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
+    SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    s32 sprite;
+    FldSpriteVertex *vertex;
+    SdfPoolNode *surface;
+
+    sdfAppendDmaPrimary((s32)list,
+        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+    texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfAppendPacket(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x33001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = ((u64)(u32)alpha << 32) | 0x64;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, (u32)blendPacket);
+    sprite = (s32)sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = alpha;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF8;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xDFF;
+    vertex->corner[1].x = 0x8FF8;
+    vertex->corner[1].y = 0x86FB;
+    vertex->corner[1].mask = 0;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(list, sprite);
+    surface = &kwlnDrawSurfaces[fldDisplayRow];
+    surface->append((SdfListHead *)surface, list);
+}
+
 
 typedef struct FldMarkerPacket {
     f32 pos[3];
@@ -1937,7 +2118,7 @@ void fldReleaseBackgroundBuffer(void) {
 }
 
 extern u32 D_003980F0[];
-extern u32 sdfAllocatePacketList(s32);
+extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
 extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
@@ -2434,7 +2615,7 @@ void fldUpdateCameraProximity(void) {
         }
     }
     slot = dds3GetObjectOwnedHandle(fldPlayerObject)->resourceSlots[4];
-    modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
+    modelRef = (u8 **)((MdlCtx *)(u32)fldCameraModelObject)->inner;
     if (slot >= 0) {
         model = *modelRef;
         matrices = ((FldModelMatrices *)model)->rows;
@@ -2505,11 +2686,11 @@ void fldReleaseCameraModel(u32 enabled) {
     if (enabled == 0) {
         D_003BAD40 = 0;
         if (fldCameraModelObject != 0) {
-            mdlResumeAllContextMotions(fldCameraModelObject);
+            mdlResumeAllContextMotions((MdlCtx *)(u32)fldCameraModelObject);
         }
     } else {
         D_003BAD40 = enabled;
-        mdlSuspendAllContextMotions(fldCameraModelObject);
+        mdlSuspendAllContextMotions((MdlCtx *)(u32)fldCameraModelObject);
     }
 }
 
@@ -2518,7 +2699,107 @@ void func_0012EA40(u32 index, u32 value) {
     D_003BAD38 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EA50);
+void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
+    s32 currentMotion;
+
+    if (D_0032E4C8[0] == 1) {
+        if ((s32)D_003BAD40 > 0) {
+            if (--D_003BAD40 != 0) {
+                return;
+            }
+            mdlResumeAllContextMotions((MdlCtx *)fldCameraModelObject);
+        }
+        currentMotion = D_003BAD3C;
+        switch (motion) {
+        case 1:
+            break;
+        case 2:
+            if ((s32)D_003BAD38 > 0) {
+                motion = 3;
+            }
+            break;
+        case 3:
+            if (currentMotion == 0x66) {
+                motion = 2;
+                currentMotion = 2;
+            }
+            break;
+        default:
+            if (currentMotion == 0x66) {
+                motion = 2;
+                currentMotion = 2;
+            } else {
+                motion = 3;
+            }
+            break;
+        }
+        if (D_003BAD34 == 1) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
+            D_003BAD34 = -1;
+            if (motion == 2 && D_003BAD3C == 3) {
+                D_003BAD3C = motion;
+                ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+            }
+        } else if (D_003BAD34 == 0x66) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 0x66;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 2) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 2;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 3) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 3, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 3;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 3, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 5) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 5, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 5;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 5, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 6) {
+            if (motion == 1) {
+                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 2.0f);
+                mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 6);
+                D_003BAD34 = -1;
+            } else {
+                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 2.0f);
+                mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 4);
+                D_003BAD34 = -1;
+                D_003BAD3C = 4;
+                ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 4, blendFrames, blendFrames);
+            }
+        } else if (currentMotion != motion && D_003BAD3C != 5) {
+            D_003BAD3C = motion;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.5f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, motion, blendFrames, blendFrames);
+            if (D_003BAD38 == 0) {
+                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
+            }
+        }
+        if ((s32)D_003BAD38 > 0) {
+            D_003BAD38--;
+        }
+    } else if (modelMotion != motion) {
+        ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+        mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, motion, blendFrames, blendFrames);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EEA0);
 
@@ -2572,24 +2853,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FE30);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FF48);
 
 /* Field camera model: node id at +0x12, render-data pointer at +0x18. */
-typedef struct FldCameraModel {
-    u8 pad00[0x12];
-    s16 nodeId;
-    u8 pad14[4];
-    u8 *renderData;
-    u8 *child; /* 0x1C: node used by the model scale setter */
-} FldCameraModel;
-
-typedef struct FldCameraRenderData {
-    u8 pad00[0x1C];
-    u32 color;
-} FldCameraRenderData;
-typedef struct FldCameraChild {
-    u8 pad00[0x20];
-    f32 scale; /* 0x20 */
-} FldCameraChild;
-
-
 s32 fldUpdateCameraFrame(void) {
     s16 node;
 
@@ -2606,7 +2869,7 @@ s32 fldUpdateCameraFrame(void) {
         func_0012FC20();
         fldUpdateCameraTarget();
         func_0012F578();
-        node = ((FldCameraModel *)fldCameraModelObject)->nodeId;
+        node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
         func_0012EEA0(node, node);
         if (fldAreaState[70] == 1) {
             func_0012EA50(0, 0, 6.0f);
@@ -2655,11 +2918,11 @@ void fldSetCameraObjectHighlightFlag(void) {
 }
 
 void fldClearCameraModelColor(void) {
-    ((FldCameraRenderData *)((FldCameraModel *)fldCameraModelObject)->renderData)->color = 0;
+    ((MdlCtx *)(u32)fldCameraModelObject)->inner->color = 0;
 }
 
 void fldRestoreCameraModelColor(void) {
-    ((FldCameraRenderData *)((FldCameraModel *)fldCameraModelObject)->renderData)->color = 0x80808080;
+    ((MdlCtx *)(u32)fldCameraModelObject)->inner->color = 0x80808080;
 }
 
 void func_00131290(void) {
@@ -2676,10 +2939,10 @@ extern void effObjClearNodeFlags(void *, s32);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001312D8);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
-extern void func_0012EA50(s16, s32, f32);
+extern void func_0012EA50(s32, s32, f32);
 
 void fldSetCameraNodeModeWithTen(void) {
-    s16 node = ((FldCameraModel *)fldCameraModelObject)->nodeId;
+    s16 node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
         func_0012EA50(node, 0x12, 10.0f);
         return;
@@ -2688,7 +2951,7 @@ void fldSetCameraNodeModeWithTen(void) {
 }
 
 void fldSetCameraNodeModeWithZero(void) {
-    s16 node = ((FldCameraModel *)fldCameraModelObject)->nodeId;
+    s16 node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState[4], fldAreaState[5] + 1) & 0x40) {
         func_0012EA50(node, 0x12, 0.0f);
         return;
@@ -2696,22 +2959,19 @@ void fldSetCameraNodeModeWithZero(void) {
     func_0012EA50(node, 3, 0.0f);
 }
 
-extern s32 fldCameraModelObject;
-extern s32 mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
-s32 fldAddCameraModelEntry(s32 value) {
-    s32 object = fldCameraModelObject;
-    ((FldCameraChild *)((FldCameraModel *)object)->child)->scale = 1.0f;
-    return mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
+
+
+void fldAddCameraModelEntry(s32 value) {
+    MdlCtx *model = (MdlCtx *)(u32)fldCameraModelObject;
+    model->first->frameStep = 1.0f;
+    mdlAddEntryPlainEx(model, 0, value, 2.0f, 5.0f);
 }
 
-extern void mdlSetNodeFloat20(s32, s32, f32);
-extern void mdlAddEntryFlagged(s32, s32, s32);
-
 void fldAddCameraModelPair(s32 first, s32 second) {
-    mdlSetNodeFloat20(fldCameraModelObject, 0, 1.0f);
-    mdlSetNodeFloat20(fldCameraModelObject, 1, 1.0f);
-    mdlAddEntryFlagged(fldCameraModelObject, 0, first);
-    mdlAddEntryFlagged(fldCameraModelObject, 1, second);
+    mdlSetNodeFloat20((MdlCtx *)(u32)fldCameraModelObject, 0, 1.0f);
+    mdlSetNodeFloat20((MdlCtx *)(u32)fldCameraModelObject, 1, 1.0f);
+    mdlAddEntryFlagged((MdlCtx *)(u32)fldCameraModelObject, 0, first);
+    mdlAddEntryFlagged((MdlCtx *)(u32)fldCameraModelObject, 1, second);
 }
 
 void func_00131580(void) {

@@ -118,9 +118,7 @@ extern void evtStageTestQueueMotion();
 
 extern s32 D_00435E48;
 
-extern void mnuApplyPackedGroupValues();
-
-extern void func_002C0D18();
+extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, DatPartyRecord *, MenuPanelGroup *, s32, s32);
 
 extern void func_002C10F0();
 
@@ -183,7 +181,7 @@ extern void effRequestMappedResource(char *, char *, u32 *);
 
 extern void mnuFreeWindowSprites();
 
-extern void mnuHideIconGroup();
+extern void mnuClearEntryFlags();
 
 extern s32 evtGetCapturedWindowPanelValue();
 
@@ -264,9 +262,9 @@ typedef struct MenuContext {
     u8 pad11C[0x168];
     MenuPageWindow partyWindow; /* 0x284: lists, page slots and selection */
     PartyPanel partyPanel; /* 0xA928: counters and five native 0x34-byte entries */
-    s32 panelGroup;        /* 0xAA34 */
-    s32 panelRequest;      /* 0xAA38 */
-    s32 panelEffects;      /* 0xAA3C */
+    MenuPanelGroup *panelGroup; /* 0xAA34 */
+    MenuSpriteState *panelRequest; /* 0xAA38 */
+    MenuSpriteState *panelEffects; /* 0xAA3C */
     u8 padAA40[8];
     s32 party;             /* 0xAA48 */
     u8 padAA4C[0x10];
@@ -411,8 +409,8 @@ extern const char *D_003E78D0[];
 extern s32 D_00435E70;
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const char *, s32);
 extern void func_002AF2E0(s32, s32, s32, MenuContext *);
-extern void mnuSetPanelItemsFromRow(s32, u32);
-extern void mnuClearStaffSceneConfigEntries(s32);
+extern void mnuSetPanelItemsFromRow(MenuPanelGroup *, s32);
+extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);
 
 void mnuDrawStaffPartySelectionPanel(s32 task) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(task);
@@ -428,7 +426,7 @@ void mnuDrawStaffPartySelectionPanel(s32 task) {
     if (selection != 0) {
         mnuSetPanelItemsFromRow(context->panelGroup, view->window->list->cursor->sortKeyTertiary);
     }
-    func_002C0D18(0xEB0, 0x518, 0, unit, context->panelGroup, 2, 0x53);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelGroup, 2, 0x53);
     if (selection != 0) {
         mnuClearStaffSceneConfigEntries(context->panelGroup);
     }
@@ -966,9 +964,6 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
-extern s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
-extern s32 mnuCreateSpriteState(s32, s32, s32);
-extern s32 mnuAllocateSimpleSprite(s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
@@ -989,12 +984,13 @@ s32 mnuCreatePanels(s32 callback) {
     mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
     menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
                                                    (s32)menuContext->displayResource, 0);
-    menuContext->panelRequest = mnuCreateSpriteState(menuContext->resourceHandle,
-                                                       (s32)menuContext->displayResource,
-                                                       menuContext->displayHandle);
-    menuContext->panelEffects = mnuAllocateSimpleSprite(menuContext->resourceHandle,
-                                                         menuContext->alternateResource,
-                                                         menuContext->displayHandle);
+    menuContext->panelRequest = mnuCreateSpriteState((struct EffectSlotSet *)menuContext->resourceHandle,
+                                                    (struct EffectSlotSet *)menuContext->displayResource,
+                                                    (struct EffectSlotSet *)menuContext->displayHandle);
+    menuContext->panelEffects = mnuAllocateSimpleSprite(
+        (struct EffectSlotSet *)menuContext->resourceHandle,
+        (struct EffectSlotSet *)menuContext->alternateResource,
+        (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel((s32)data);
     menuContext->resourceList = profile;
     mnuSetGroupProperties(profile, menuContext->displayHandle,
@@ -1164,17 +1160,17 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
 }
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, s32 packedGroup, s32 group, s32 unused, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
     mnuApplyPackedGroupValues(packedGroup, entry->itemId);
-    func_002C0D18(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
+    mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
     func_002C10F0(0, 0, 0, entry, group, spriteFlags);
     mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, D_00435E48 + entry->unitId * 0x11 + 0x110, spriteFlags);
     mnuDrawSlotIcons(0x14a, id);
 }
 
-void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, u32 group, u32 resource,
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState, u32 resource,
                                     u32 unused4, u32 spriteFlags) {
-    func_002C16F0(0, 0, 0, entry, entry->profileId, group, spriteFlags);
+    func_002C16F0(0, 0, 0, entry, entry->profileId, (s32)spriteState, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, (u32 *)resource, spriteFlags);
 }
 
@@ -2993,7 +2989,7 @@ extern void effInitializeSlotWork();
 
 
 /* Reset low sprite flags only for a present first sprite and a supported panel kind. */
-void mnuHideIconGroup(MenuIconState *group);
+void mnuClearEntryFlags(MenuIconState *group);
 
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
 void mnuReleaseResourceList(MenuIconState *list);

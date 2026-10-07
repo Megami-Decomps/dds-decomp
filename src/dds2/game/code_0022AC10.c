@@ -5,6 +5,8 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
+#include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
 #include "mdl.h"
 #include "evt_unit.h"
 #include "scr.h"
@@ -148,17 +150,15 @@ extern void *sdfAllocGeneralBlockHigh(s32);
 
 extern void *sdfResourceRetainAddress(void *);
 
-extern void *sdfAllocatePacketList(s32);
+extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
-extern void sdfClearLinkedPacketList(void *);
+extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfCreatePatchableResourcePacket(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
+extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
-extern void sdfAppendPacketChainNode(void *, void *);
-
-extern void func_0032EB80(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
-extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
+extern void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress,
+                                      s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+                                      s32 imageAddress, s32 (*allocatePacket)(s32));
 
 extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
 
@@ -955,7 +955,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
 }
 
-extern s32 btlGetEntryFlagsUnlessDisabled(u8 *);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 extern s32 btlLowestSetPairIndex(u32);
 
 s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
@@ -983,7 +983,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     if (datCommandRecords[commandId].kind == 2 ||
         (datCommandRecords[commandId].flags & 0x20)) {
         for (i = 0; i < count; i++) {
-            flags = btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120);
+            flags = btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord);
             if (flags & 0x8000) {
                 return 7;
             }
@@ -997,7 +997,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
             return 9;
         }
         for (i = 0; i < count; i++) {
-            if (btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120) & 0x800) {
+            if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord) & 0x800) {
                 return 9;
             }
         }
@@ -1372,23 +1372,24 @@ void btlResetHeldTextureState(void) {
 
 void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    void *surface;
-    void *context;
+    SdfListHead *packetList;
+    SdfLinkedPacketList *context;
     runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
     runtime->resource = sdfResourceRetainAddress(runtime->handle);
-    surface = sdfAllocatePacketList(0);
-    context = sdfAllocPacketAligned(16);
+    packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xe0, runtime->resource, 0, 0, 0);
-    sdfAppendPacketChainNode(D_00380860, context);
-    D_00380608.append((SdfListHead *)&D_00380608, (SdfListHead *)surface);
+    sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->resource, 0, 0, 0);
+    sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
+    D_00380608.append((SdfListHead *)&D_00380608, packetList);
 }
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    void *surface = sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket(surface, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->resource, 0);
-    D_00380608.append((SdfListHead *)&D_00380608, (SdfListHead *)surface);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    sdfCreateDescriptorPacket(packetList, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource,
+                              0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
+    D_00380608.append((SdfListHead *)&D_00380608, packetList);
     sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
@@ -1396,12 +1397,12 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
 }
 
 void btlInitializeOverlayGraphics(void) {
-    void *surface = sdfAllocatePacketList(0);
-    void *context = sdfAllocPacketAligned(16);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    func_0032EB80(surface, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
-    sdfAppendPacketChainNode(D_00380860, context);
-    D_00380608.append((SdfListHead *)&D_00380608, (SdfListHead *)surface);
+    sdfCreateGraphBufferCopyPacket(packetList, context, ((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
+    D_00380608.append((SdfListHead *)&D_00380608, packetList);
     btlRuntimeState.options |= 1;
 }
 

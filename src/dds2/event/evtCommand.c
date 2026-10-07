@@ -56,7 +56,7 @@ void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char
 
 void sdfPrintFormattedDevMessage(const char *msg, ...);
 
-void func_0025D390(s32 first, s32 second);
+s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId);
 
 s32 dds3GetWorldSecondaryObject(void);
 
@@ -463,7 +463,7 @@ s32 evtCommandDispatchFieldBE(void)
     sdfPrintFormattedDevMessage("FIELD_BE start\n");
     firstArg = scrReadIntParameter(0);
     secondArg = scrReadIntParameter(1);
-    func_0025D390(firstArg, secondArg);
+    evtTryCreateWorldObjectFromPackResourceSet(firstArg, secondArg);
     sdfPrintFormattedDevMessage("FIELD_BE end\n");
     return 1;
 }

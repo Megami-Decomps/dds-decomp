@@ -495,7 +495,11 @@ extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(void *, s32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
-extern s32 btlGetEntryFlagsUnlessDisabled(const void *);
+extern u32 mdlGetBroadcastValue(MdlCtx *);
+extern void sdfQueueNonzeroResourceId(s32);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *);
+extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *);
 extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
 extern void evtUnitSetStoredParameter(void *, s32);
 extern void evtSetTransitionMotionScale(void *, f32);
@@ -526,7 +530,7 @@ extern void func_001F5868(s32, s32, s32, s32);
 extern void func_001F5320(s32, s32, s32, s32);
 extern SdfFlagListParams D_003BDCC8;
 extern void mnuReleaseSoundBufferLocked(void);
-extern void evtSetUnitAlphaTransition(u32, s32, u32);
+extern void evtSetUnitAlphaTransition(EvtUnit *, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern s32 fldReleaseIdleSceneActorResources(BtlUnit *);
@@ -759,7 +763,7 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
 s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     s32 code;
 
-    btlGetEntryFlagsUnlessDisabled(&actor->partyRecord.flags);
+    btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
     if (arg6 >= 0) {
         switch (datCommandRecords[arg6].unk30) {
         case 1:
@@ -1895,7 +1899,22 @@ void btlClearUnitDefeatCandidate(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", btlIsUnitInfoFlagOneEligible);
+u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
+    u32 flags = unit->flags;
+    u8 modelFlags;
+
+    if (flags & 0x08000000) {
+        return 0;
+    }
+    if (!(flags & 1)) {
+        return 0;
+    }
+    if (!(flags & 2)) {
+        return 0;
+    }
+    modelFlags = unit->ext->owner->flags;
+    return modelFlags & 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417940);
 
@@ -1938,7 +1957,7 @@ void btlApplyUnitMotionSelection(u8 *object, u32 index, s32 mode, f32 rate) {
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, color);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0, color);
+        evtSetUnitAlphaTransition(unit->ext, 0, color);
         unit->overlayColor = color;
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
@@ -2066,12 +2085,12 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     if ((unit->flags & 2) == 0) {
         return;
     }
-    entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord.flags);
+    entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
     work = (BtlState *)btlGetRuntime();
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, color);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0, color);
+        evtSetUnitAlphaTransition(unit->ext, 0, color);
         unit->overlayColor = color;
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
@@ -2516,24 +2535,24 @@ typedef struct {
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004179E0);
 
-s32 btlClassifySpecialEntryObject(BattleEntryHeader *entry) {
+s32 btlClassifySpecialEntryObject(BtlUnit *entry) {
     if (!(entry->flags & 0x400)) {
         return 0;
     }
-    switch (entry->objectId) {
+    switch (entry->partyRecord.unitId) {
     case 0x109: case 0x10A: case 0x110: case 0x111: case 0x112:
     case 0x119: case 0x11D: case 0x11E: case 0x11F: case 0x120:
     case 0x121: case 0x127: case 0x12E: case 0x12F: case 0x131:
     case 0x132: case 0x133: case 0x134: case 0x135: case 0x136:
         return 2;
     default:
-        return (btlGetEntryFlagsUnlessDisabled((u8 *)entry + 0x120) >> 14) & 1;
+        return (btlGetEntryFlagsUnlessDisabled(&entry->partyRecord) >> 14) & 1;
     }
 }
 
-void btlCopyUnitStats(s32 unit, s32 source) {
-    DatPartyRecord *stats = &((BtlUnit *)unit)->partyRecord;
-    *stats = *(DatPartyRecord *)source;
+void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
+    DatPartyRecord *stats = &unit->partyRecord;
+    *stats = *source;
     btlRefreshUnitMaximumHpAndClampCurrentHp(stats);
     btlRefreshUnitMaximumMpAndClampCurrentMp(stats);
 }
@@ -3040,7 +3059,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         func_001E1BB8(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            evtSetUnitAlphaTransition((u32)((BtlUnit *)object)->ext, 0, 0);
+            evtSetUnitAlphaTransition(((BtlUnit *)object)->ext, 0, 0);
             ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_00417AF0, effect, model);
@@ -3065,7 +3084,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        evtSetUnitAlphaTransition((u32)((BtlUnit *)object)->ext, 0, 0);
+        evtSetUnitAlphaTransition(((BtlUnit *)object)->ext, 0, 0);
         ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
     }
     ((BtlUnit *)object)->gunResourceFlags = (((BtlUnit *)object)->gunResourceFlags & ~1) | 2;
@@ -3110,6 +3129,22 @@ BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit) {
 }
 
 /* Task-start callbacks do not return a status to the scheduler. */
+/* Exact 0x1C argument allocation owned by the model-change task creator. */
+typedef struct BtlModelChangeArgs {
+    BtlUnit *unit;
+    u32 resourceKind;
+    u32 resourceId;
+    s32 delay;
+    u32 duration;
+    s32 elapsed;
+    u8 phase;
+    u8 transitionMode;
+    u8 pad1A[2];
+} BtlModelChangeArgs;
+typedef char BtlModelChangeArgsSizeCheck[sizeof(BtlModelChangeArgs) == 0x1C ? 1 : -1];
+typedef char BtlModelChangeArgsElapsedOffsetCheck[((u32)&((BtlModelChangeArgs *)0)->elapsed == 0x14) ? 1 : -1];
+typedef char BtlModelChangeArgsPhaseOffsetCheck[((u32)&((BtlModelChangeArgs *)0)->phase == 0x18) ? 1 : -1];
+
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417AF0);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
@@ -3117,26 +3152,179 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B30);
 
 void btlBeginModelChange(u32 argumentsAddress) {
-    u32 *arguments = (u32 *)argumentsAddress;
-    s32 owner = arguments[0];
-    u32 model = arguments[1];
-    u32 variant = arguments[2];
+    BtlModelChangeArgs *arguments = (BtlModelChangeArgs *)argumentsAddress;
+    BtlUnit *unit = arguments->unit;
+    u32 model = arguments->resourceKind;
+    u32 variant = arguments->resourceId;
     s32 status = btlHasMatchingModel(model, variant);
 
     if (status == 0) {
-        btlRequestModelAssetByMode(owner, model, variant);
-        ((BtlUnit *)owner)->gunResourceFlags = (((BtlUnit *)owner)->gunResourceFlags | 1) & ~2;
+        btlRequestModelAssetByMode((u32)unit, model, variant);
+        unit->gunResourceFlags = (unit->gunResourceFlags | 1) & ~2;
         btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E50E0);
+extern void func_001E1B80(BtlUnit *, BtlUnit *);
+extern BtlUnit *btlCreateUnit(void);
+extern void btlDestroyUnit(BtlUnit *);
 
-extern u32 func_001E50E0(u32 *);
+/* Complete model loading, cross-fade the retained actor, and release it. */
+u32 func_001E50E0(BtlModelChangeArgs *args) {
+    BtlUnit *unit = args->unit;
+    u32 resourceKind = args->resourceKind;
+    u32 resourceId = args->resourceId;
+    u32 packedStart[4];
+    u32 packedEnd[4];
+    u32 alpha;
+    u32 color;
+    s32 entryFlags;
+
+    switch (args->phase) {
+    case 0:
+        if (args->delay > args->elapsed) {
+            break;
+        }
+        if (!btlCheckModelAssetByMode((u8 *)unit, resourceKind, resourceId)) {
+            break;
+        }
+        if (args->duration != 0) {
+            unit->mirror = btlCreateUnit();
+            unit->mirror->flags |= 0x40000;
+            func_001E1B80(unit->mirror, unit);
+            if (unit->unkCC == 0) {
+                unit->mirror->unkCC = 0;
+                unit->unkCC = 1;
+            }
+            btlSetUnitPosition(unit->mirror, unit->currentPosition);
+            btlSetUnitRotation(unit->mirror, (s128 *)unit->orientation);
+            if (!(unit->stateFlags & 0x100000)) {
+                btlSetUnitColor(unit->mirror, unit->baseColor, 0);
+            } else {
+                color = mdlGetBroadcastValue(unit->mirror->ext->owner);
+                btlSetUnitColor(unit->mirror, (color & 0xFFFFFF) | 0x80000000, 0);
+            }
+            unit->mirror->flags |= 8;
+            args->phase = 1;
+            args->elapsed = 0;
+        } else {
+            args->phase = 2;
+        }
+        btlReleaseActorModelResources(unit);
+        btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
+        btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
+        func_001E1BB8((u8 *)unit, resourceKind, resourceId);
+        btlReleaseModelAssetByMode((u32)unit, resourceKind, resourceId);
+        if (args->duration == 0) {
+            kwlnDrawControlFlags |= 0x2000000;
+        }
+        btlSetUnitPosition(unit, unit->currentPosition);
+        btlSetUnitRotation(unit, (s128 *)unit->orientation);
+        btlSetUnitColor(unit, unit->baseColor, 0);
+        if (unit->stateFlags & 0x10) {
+            u32 firstColor;
+            u32 secondColor;
+
+            VU0_LOAD_VF(vf10, unit->colorStart);
+            EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+            firstColor = packedStart[0];
+            VU0_LOAD_VF(vf10, unit->colorEnd);
+            EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+            secondColor = packedEnd[0];
+            func_0023C870(unit->ext, 0, firstColor, secondColor);
+        }
+        unit->gunResourceFlags = (unit->gunResourceFlags & ~1) | 2;
+        if (args->phase == 1) {
+            u32 baseRgb = unit->baseColor & 0xFFFFFF;
+
+            unit->overlayColor = baseRgb;
+            unit->mirror->overlayColor = baseRgb | 0x80000000;
+            evtSetUnitAlphaTransition(unit->ext, 0, 0);
+        }
+        break;
+    case 1:
+        if (args->elapsed == 1 && args->duration != 0) {
+            entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
+            if (unit->flags & 0x20) {
+                btlApplyScaledUnitEffectParameter((u8 *)unit, 0xB,
+                    btlGetSlotRateKind((u8 *)unit, 0xB), 1.0f);
+            } else if (args->transitionMode == 2) {
+                unit->unkEC = -1;
+                btlApplyScaledUnitEffectParameter((u8 *)unit, 0xE,
+                    btlGetSlotRateKind((u8 *)unit, 0xE), 1.0f);
+            } else if (args->transitionMode != 3 &&
+                       ((unit->flags & 0x200) || (entryFlags & 0x200)) &&
+                       args->resourceId != 0x1F) {
+                unit->unkEC = -1;
+                if (unit->flags & 0x1000) {
+                    btlApplyScaledUnitEffectParameter((u8 *)unit, 0x10,
+                        btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
+                } else {
+                    btlApplyScaledUnitEffectParameter((u8 *)unit, 0x11,
+                        btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
+                }
+            }
+        }
+        if ((u32)args->elapsed < args->duration) {
+            if (args->transitionMode == 0) {
+                alpha = (u32)((f32)args->elapsed / (f32)args->duration * 128.0f);
+                color = unit->baseColor & 0xFFFFFF;
+                unit->overlayColor = (alpha << 24) | color;
+                if (!(unit->stateFlags & 0x100000)) {
+                    unit->mirror->overlayColor = ((128 - alpha) << 24) | color;
+                } else {
+                    unit->mirror->overlayColor = ((128 - alpha) << 24) |
+                        (mdlGetBroadcastValue(unit->mirror->ext->owner) & 0xFFFFFF);
+                }
+                unit->flags |= 0x10000;
+            } else {
+                if (args->elapsed == 1) {
+                    btlFlagUnitDefeatCandidate(unit->mirror);
+                    evtSetUnitRgbTransition(unit->mirror->ext, args->duration >> 2, 0x80000000);
+                } else if ((u32)args->elapsed == (args->duration >> 2)) {
+                    evtSetUnitAlphaTransition(unit->mirror->ext, args->elapsed, 0);
+                    unit->mirror->flags |= 0x200000;
+                    btlFlagUnitDefeatCandidate(unit);
+                    alpha = unit->baseColor & 0xFF000000;
+                    evtSetUnitRgbTransition(unit->ext, 0, 0);
+                    evtSetUnitAlphaTransition(unit->ext, args->duration >> 2, alpha);
+                    unit->flags |= 0x100000;
+                } else if ((u32)args->elapsed == (args->duration >> 1)) {
+                    unit->overlayColor = unit->baseColor;
+                    evtSetUnitRgbTransition(unit->ext, args->duration >> 1, unit->baseColor);
+                }
+            }
+        } else {
+            if (args->transitionMode == 0) {
+                unit->flags &= ~0x10000;
+            }
+            unit->overlayColor = unit->baseColor;
+            unit->mirror->overlayColor = 0;
+            args->phase = 2;
+        }
+        break;
+    case 2:
+        if (unit->mirror != NULL) {
+            btlDestroyUnit(unit->mirror);
+            unit->mirror = NULL;
+            if (unit->unk350 != 0) {
+                sdfQueueNonzeroResourceId(unit->unk350);
+                unit->unk350 = 0;
+                unit->unk34C = 0;
+            }
+        }
+        btlBossDebugPrintf("btl:model change end[%X,%X]\n", resourceKind, resourceId);
+        return 1;
+    }
+    args->elapsed++;
+    return 0;
+}
+
+extern u32 func_001E50E0(BtlModelChangeArgs *);
 
 BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08, s32 value0C, s32 value10, u8 flag19) {
-    BtlRuntimeTask *task = btlAllocTask(0x1C);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlModelChangeArgs));
+    BtlModelChangeArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0x1A;
@@ -3145,14 +3333,14 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08,
     task->onStart = btlBeginModelChange;
     task->callback = func_001E50E0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->option = option;
-    args->unk_08 = value08;
-    args->unk_0C = value0C;
-    args->unk_10 = value10;
-    args->flag19 = flag19;
-    args->flag18 = 0;
-    args->unk_14 = 0;
+    args->unit = unit;
+    args->resourceKind = option;
+    args->resourceId = value08;
+    args->delay = value0C;
+    args->duration = value10;
+    args->transitionMode = flag19;
+    args->phase = 0;
+    args->elapsed = 0;
     return task;
 }
 
@@ -3236,8 +3424,8 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
             btlFlagUnitDefeatCandidate(unit);
             mdlBroadcastMasked(unit->ext->owner, 0);
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            evtSetUnitAlphaTransition((u32)unit->ext, 0, 0);
-            evtSetUnitAlphaTransition((u32)unit->ext, args->fadeIn, args->color);
+            evtSetUnitAlphaTransition(unit->ext, 0, 0);
+            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, args->color);
             unit->flags |= 0x100000;
         }
         if (args->count == args->fadeIn - 1) {
@@ -3250,7 +3438,7 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
     if (!(unit->flags & 0x100000)) {
         if (args->count >= total) {
             evtSetUnitRgbTransition(unit->ext, 0, args->color);
-            evtSetUnitAlphaTransition((u32)unit->ext, 0, args->color);
+            evtSetUnitAlphaTransition(unit->ext, 0, args->color);
             return 1;
         }
     }
@@ -3288,7 +3476,7 @@ s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
         if (args->count == args->fadeOut - 1) {
             unit->overlayColor = 0x80000000;
             evtSetUnitRgbTransition(unit->ext, 0, 0);
-            evtSetUnitAlphaTransition((u32)unit->ext, args->fadeIn, 0);
+            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, 0);
         }
     } else {
         unit->overlayColor = 0x80000000;
@@ -3326,7 +3514,7 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     if ((s32)arguments[1] == -1) {
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0, unit->overlayColor);
+        evtSetUnitAlphaTransition(unit->ext, 0, unit->overlayColor);
         btlClearUnitDefeatCandidate(unit);
         return 1;
     }
@@ -3335,7 +3523,7 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     }
     if (arguments[1] == 0) {
         evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
-        evtSetUnitAlphaTransition((u32)unit->ext, 0,
+        evtSetUnitAlphaTransition(unit->ext, 0,
                                   (unit->overlayColor & 0xFFFFFF) | 0x80000000);
     }
     if ((s32)arguments[2] >= (s32)arguments[1]) {
@@ -3420,7 +3608,7 @@ u32 func_001E6228(u32 *arguments) {
             evtSetUnitRgbTransition(unit->ext, 10, 0x80000000);
         } else if (arguments[2] == 10) {
             evtSetUnitRgbTransition(unit->ext, 0, 0x80000000);
-            evtSetUnitAlphaTransition((u32)unit->ext, 6, 0);
+            evtSetUnitAlphaTransition(unit->ext, 6, 0);
             unit->flags |= 0x200000;
         }
         if ((unit->flags & 0x200000) == 0 && (s32)arguments[2] >= 16) {
@@ -3957,7 +4145,6 @@ BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E7648);
 
-extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void func_001E3E20(BtlUnit *);
 extern void func_002034A8(struct SoundResourceLink *);
 extern void btlUpdateUnitCommandEffect(struct SoundLink *);
@@ -4064,7 +4251,6 @@ extern void sndFreeLink(struct SoundLink *);
 
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
-extern void sdfQueueNonzeroResourceId(s32);
 
 extern void btlReleaseActorModelResources(BtlUnit *);
 
