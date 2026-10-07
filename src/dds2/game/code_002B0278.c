@@ -225,7 +225,7 @@ extern void mnuIdleVoiceTimer();
 
 extern u32 mnuCreateIconBundle(u32);
 
-extern u32 func_002B9FF8();
+extern MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
 
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
@@ -999,7 +999,7 @@ s32 mnuCreatePanels(s32 callback) {
     menuContext->resourceList = profile;
     mnuSetGroupProperties(profile, menuContext->displayHandle,
                           menuContext->alternateResource, 1, 2);
-    party[8] = func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
+    party[8] = (s32)func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
         party[11] = -1;
     } else {
@@ -1037,7 +1037,7 @@ s32 mnuDestroyPanels(s32 callback) {
         mnuFreeProfilePanelWork(((MenuContext *)context)->resourceList);
         ((MenuContext *)context)->resourceList = 0;
     }
-    mnuReleaseResourceList(menu[8]);
+    mnuReleaseResourceList((MenuIconState *)menu[8]);
     return 1;
 }
 
@@ -2995,15 +2995,8 @@ extern void effInitializeSlotWork();
 /* Reset low sprite flags only for a present first sprite and a supported panel kind. */
 void mnuHideIconGroup(MenuIconState *group);
 
-typedef struct ResourceList {
-    /* 0x0 */ u32 unk0;
-    /* 0x4 */ u32 unk4;
-    /* 0x8 */ s32 count;
-    /* 0xC */ u32 items[1];
-} ResourceList;
-
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
-void mnuReleaseResourceList(ResourceList *list);
+void mnuReleaseResourceList(MenuIconState *list);
 
 typedef struct MenuPos {
     s32 x;
