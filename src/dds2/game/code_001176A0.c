@@ -55,7 +55,7 @@ typedef struct EvtScaledValue {
     f32 base;
     f32 scaled;
     u8 pad10[8];
-    u32 value18;
+    u8 pad18[4];
 } EvtScaledValue;
 
 
@@ -198,24 +198,24 @@ EffWorldNode *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
     return obj;
 }
 
-u32 func_001178B0(EvtScaledValue *value) {
-    return value->value18;
+void *func_001178B0(EffWorldNode *node) {
+    return node->data;
 }
 
-u32 func_001178B8(EvtScaledValue *value) {
-    return value->value18;
+void *func_001178B8(EffWorldNode *node) {
+    return node->data;
 }
 
-/* Load the vector at the slot's +0x18 pointer into VF10. */
-void evtLoadValueVectorIntoVu(EvtScaledValue *value) {
-    void *vec = (void *)func_001178B8(value);
+/* Load the world node's borrowed data vector into VF10. */
+void evtLoadValueVectorIntoVu(EffWorldNode *node) {
+    void *vec = func_001178B8(node);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
-/* Same, from the second quadword at +0x18. */
-void evtLoadValueSecondaryVectorIntoVu(EvtScaledValue *value) {
-    void *vec = (void *)((u8 *)func_001178B8(value) + 0x10);
+/* Same, from the second quadword in the borrowed vector. */
+void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
+    void *vec = (void *)((u8 *)func_001178B8(node) + 0x10);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
