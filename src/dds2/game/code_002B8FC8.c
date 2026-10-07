@@ -2428,3 +2428,4 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFB8);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFD8);
+
