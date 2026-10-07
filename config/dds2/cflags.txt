@@ -30,3 +30,4 @@ game/code_0029DF18  -fno-optimize-sibling-calls  # jal tail calls only, no j to 
 game/code_002A3AE8  -fno-optimize-sibling-calls  # 7 jal tail calls, 0 sibcalls in 43 functions (find_nosibcall.py); func_002A3C58 and func_002A3F28 match only with the flag
 game/code_0022A8A8  -fno-optimize-sibling-calls  # 9 functions 0x22A8A8-0x22AC10, 5 jal+epilogue tails, no sibcall; bounded by sibcall functions btlReleaseBossData and func_0022AC10; btlReleaseScriptResourceA/B match with natural s32 only with the option (twin of DDS1 code_0020F8E0)
 game/code_0030E390  -fno-optimize-sibling-calls  # 4 jal+epilogue tails in 19 functions, no sibcall; bounded by sibcall functions func_0030E1A0 and sdfCounterDrawGlyphAtGridCell; twin of DDS1 code_002C5FD8 (same flag)
+game/code_0028E568  -fno-optimize-sibling-calls  # 4 jal+epilogue tails in 13 functions, no sibcall; bounded by func_0028E350 and func_0028FD10; node-panel update matches only with it
