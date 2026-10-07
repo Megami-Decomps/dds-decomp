@@ -68,7 +68,7 @@ void evtDrainSecondaryWorldNodes(void);
 
 void dds3RemoveWorldObjectNode(void *unit);
 
-void dds3RefreshStoredVec3(void *);
+void dds3RefreshStoredVec3(EffWorldNode *object);
 
 void fldStopCurrentBgm(void);
 

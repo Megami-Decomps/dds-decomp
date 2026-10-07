@@ -88,8 +88,8 @@ extern void effObjSetInnerSecondVec(void *, void *);
 
 extern void dds3SetObjectFlags(void *object, s32 flags);
 extern void dds3ClearObjectFlags(void *object, s32 flags);
-extern void evtResetObjectPendingValue(void *arg0);
-extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
+extern void evtResetObjectPendingValue(EffWorldNode *object);
+extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
