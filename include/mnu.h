@@ -458,7 +458,10 @@ typedef struct MenuPageSlot {
     struct MenuPageResources *resources;
     struct MenuSprites *windowSprites;
     u32 iconBundle;
-    u8 padE8[0x4C];
+    u8 padE8[0x24];
+    /* DDS1 mnuDrawSlotIcons reads ctx+0x67C: page.slot[3]+0x10C. */
+    struct MenuList *unk10C;
+    u8 pad110[0x24];
 } MenuPageSlot;
 #endif
 

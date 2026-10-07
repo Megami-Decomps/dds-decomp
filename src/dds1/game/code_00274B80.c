@@ -3,7 +3,20 @@
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "dat_state.h"
+#include "kwln.h"
 #include "eff.h"
+struct MenuScrollPanel;
+extern u32 kwlnTaskGetUserValue();
+extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
+extern void mnuStoreScrollPanelSelectionAndGridPosition(struct MenuScrollPanel *, u32, u32, u32);
+extern void mnuSetWindowResource(s32, s32, s32, s32);
+extern void mnuAttachPartyIconBundle(s32, s32, u32);
+extern MenuProfilePanel *mnuCreateProfilePanel(s32);
+extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
+extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
+extern s32 mnuClassifyQuarterHalfPercent(s32, s32);
+extern s32 evtStageTestSelectEntry(s32, s32, s32);
+extern void func_00276720(s32, s32, s32, s32);
 
 typedef struct FrFontGlyph FrFontGlyph;
 typedef struct FrFontCtx FrFontCtx;
@@ -39,8 +52,6 @@ extern char D_003BC700[];
 #define MNU_STAFF_PARTY_ACTIVE_BIT 1
 #define MNU_STAFF_NODE_UNAVAILABLE 1
 #define MNU_STAFF_NODE_SELECTED 2
-#define MNU_STAFF_PARTY_PANEL_BASE 0x15C
-#define MNU_STAFF_PARTY_SLOTS_BASE 0x7EC
 #define MNU_STAFF_FADE_STEP 0x10
 #define MNU_STAFF_FADE_CLOSE_THRESHOLD 0x50
 #define MNU_STAFF_FADE_OPEN_THRESHOLD 0xB0
@@ -121,9 +132,10 @@ typedef struct PartyMenuData {
 
 /* Staff/skill menu context: resource handles and current panel work. */
 typedef struct CampMenuContext {
-    u8 pad00[0x64];
+    u8 pad00[0x60];
+    s32 unk60;
     s32 resource;             /* 0x64 */
-    u8 pad68[4];
+    s32 unk68;
     s32 displayVariant;       /* 0x6C: passed with display to menu drawing */
     u8 pad70[4];
     s32 option;               /* 0x74 */
@@ -136,20 +148,15 @@ typedef struct CampMenuContext {
     s32 panelResource;        /* 0xF0: grid resource handle */
     u8 padF4[0x28];
     const void *partySelectionLayout; /* 0x11C: copied panel layout address */
-    u8 pad120[4];
+    s32 unk120;
     s32 panel;                /* 0x124 */
     u8 pad128[4];
     s32 panelList;            /* 0x12C */
     u8 pad130[8];
     s32 display;              /* 0x138 */
-    u8 pad13C[0x540];
-    struct MenuSelectionList *partySelection; /* 0x67C */
-    u8 pad680[0x158];
-    s32 selectionList;        /* 0x7D8 */
-    u8 pad7DC[0x10];
-    s32 activePanel;          /* 0x7EC: active party panel */
-    s32 finalPanelSlot;       /* 0x7F0: last displayed slot */
-    u8 pad7F4[0x104];
+    u8 pad13C[0x20];
+    MenuPageWindow partyWindow; /* 0x15C..0x7EB: sole primary page owner */
+    PartyPanel partyPanel;    /* 0x7EC..0x8F7: occupied-party display owner */
     MenuPanelGroup *sceneGroup; /* 0x8F8 */
     MenuSpriteState *sprite;  /* 0x8FC */
     MenuSimpleSpriteState *effect; /* 0x900 */
@@ -169,7 +176,7 @@ typedef struct StaffMenuWork {
     MenuPanelHandles *resourceList; /* 0x20 */
     s32 selectedList;         /* 0x24 */
     s32 activeMark;           /* 0x28 */
-    u8 pad2C[4];
+    s32 motionSelection; /* native initialization writes -1 or 10 */
     u32 selectionFlags;       /* 0x30 */
     u32 selectionId;          /* 0x34 */
 } StaffMenuWork;
@@ -219,10 +226,6 @@ extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
 extern void mnuSeekListNode(s32, s32);
 
 
-typedef struct PartyPanelSlot {
-    u32 flags;
-    u8 pad04[0x130]; /* next slot at +0x134 */
-} PartyPanelSlot;
 
 typedef struct PartySkillSlots {
     u8 pad00[0x22];
@@ -240,9 +243,9 @@ typedef struct MenuSpriteArguments {
 } MenuSpriteArguments;
 
 extern u32 mnuMapPadMaskToFlags(u32);
-extern void mnuClearListFlagsOneAndTwo();
+extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan();
-extern void func_00276898();
+extern s32 func_00276898(KwlnTask *);
 extern void mnuSetPopupEntry();
 extern void mnuSetPopupEntryFlagged(s32, void *);
 extern void func_0027C788(s32);
@@ -392,9 +395,9 @@ void mnuRestorePartyEntriesAndRefresh(context)
         *(PartyEntryCopy *)(backupByteOffset + (s32)datGameState + MNU_STAFF_PARTY_BASE) = *(PartyEntryCopy *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
         backupByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
     }
-    panelWork = context + MNU_STAFF_PARTY_PANEL_BASE;
+    panelWork = (s32)&((CampMenuContext *)context)->partyWindow;
     mnuReleasePartyPanelTextures(panelWork);
-    mnuInitPartyPanelSlots(context + MNU_STAFF_PARTY_SLOTS_BASE);
+    mnuInitPartyPanelSlots((s32)&((CampMenuContext *)context)->partyPanel);
     mnuUpdateHandleStates(panelWork);
     func_00280048(panelWork);
 }
@@ -424,11 +427,11 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     mnuCopyPartyEntries();
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
-    ((CampMenuContext *)context)->activePanel = 1;
-    ((CampMenuContext *)context)->finalPanelSlot = mnuCountActiveSlots() - 1;
-    mnuUpdateHandleStates(context + MNU_STAFF_PARTY_PANEL_BASE);
+    ((CampMenuContext *)context)->partyPanel.unk0 = 1;
+    ((CampMenuContext *)context)->partyPanel.unk4 = mnuCountActiveSlots() - 1;
+    mnuUpdateHandleStates((s32)&((CampMenuContext *)context)->partyWindow);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
-        ((PartyPanelSlot *)(context + 0x1D8))[entryIndex].flags |= 0x80;
+        ((CampMenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x80;
     }
     for (nodeAddress = (s32)menuWork->primaryWindow->list->first; nodeAddress != 0; nodeAddress = (s32)((MenuSelectionNode *)nodeAddress)->next) {
         ((MenuSelectionNode *)nodeAddress)->flags &= ~MNU_STAFF_NODE_UNAVAILABLE;
@@ -437,9 +440,9 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures(context + MNU_STAFF_PARTY_PANEL_BASE);
-    mnuInitPartyPanelSlots(context + MNU_STAFF_PARTY_SLOTS_BASE);
-    mnuUpdateHandleStates(context + MNU_STAFF_PARTY_PANEL_BASE);
+    mnuReleasePartyPanelTextures((s32)&((CampMenuContext *)context)->partyWindow);
+    mnuInitPartyPanelSlots((s32)&((CampMenuContext *)context)->partyPanel);
+    mnuUpdateHandleStates((s32)&((CampMenuContext *)context)->partyWindow);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
@@ -599,7 +602,7 @@ void mnuReleaseStaffMenuResources(s32 *menuWork) {
 void mnuReleaseStaffMenuTextureHandles(s32 *menuWork) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
-        effReleaseTextureHandlesAndResetSlots(menuWork[7 + resourceIndex]);
+        effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)menuWork[7 + resourceIndex]);
     }
 }
 
@@ -644,10 +647,10 @@ s32 mnuStaffPopupUpdate(s32 callback) {
         return stateWord;
     }
     if (*popupState == 0) {
-        panelWork = context + MNU_STAFF_PARTY_PANEL_BASE;
+        panelWork = (s32)&((CampMenuContext *)context)->partyWindow;
         mnuStepPartyPanelListFromInput(4, panelWork);
         if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
-            *(s32 *)(menuWork + 0x18) = *((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot;
+            *(s32 *)(menuWork + 0x18) = ((CampMenuContext *)context)->partyWindow.lists[0]->cursor->index;
             mnuSetPopupEntry(popupState, D_0037CAB0);
             *(s32 *)(menuWork + 0x24) = 1;
         }
@@ -700,21 +703,55 @@ s32 mnuStepStaffCampPageControl(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276720);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276898);
 
-extern void func_00276720();
+s32 func_00276898(KwlnTask *task) {
+    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    MenuPageWindow *page = &context->partyWindow;
+    StaffMenuWork *menu = (StaffMenuWork *)context->menu;
+    s32 index = context->partyWindow.lists[0]->cursor->index;
+    DatPartyRecord *record = &datGameState->party[index];
+    MenuProfilePanel *profilePanel;
+
+    effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)context->resource);
+    mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)context->display,
+                                               context->staffVariant, 0x3D, 1);
+    mnuSetWindowResource(index, (s32)page, context->staffVariant, context->staffParam);
+    mnuAttachPartyIconBundle(index, (s32)page, context->staffVariant);
+    context->sceneGroup = mnuCreatePanelGroup(context->staffVariant);
+    context->sprite = mnuCreateSpriteState((EffectSlotSet *)context->option,
+                                        (EffectSlotSet *)context->unk68,
+                                        (EffectSlotSet *)context->staffVariant);
+    context->effect = mnuAllocateSimpleSprite((EffectSlotSet *)context->option,
+                                            (EffectSlotSet *)context->unk68,
+                                            (EffectSlotSet *)context->displayVariant,
+                                            (EffectSlotSet *)context->unk60,
+                                            (EffectSlotSet *)context->staffVariant);
+    profilePanel = mnuCreateProfilePanel((s32)record);
+    context->extraResource = profilePanel;
+    mnuCacheProfilePanelGridPositions(profilePanel, context->staffParam, 5, 0xE, 0xF);
+    menu->resourceList = mnuCreatePanelSpriteHandles(1, context->displayVariant, context->unk120);
+    if (mnuClassifyQuarterHalfPercent(record->hp, record->maxHp) < 2) {
+        menu->motionSelection = -1;
+    } else {
+        menu->motionSelection = 10;
+    }
+    evtStageTestSelectEntry(record->unitId, menu->motionSelection, 0);
+    func_00276720((s32)page, 1, menu->staffImage, menu->staffMode);
+    return 1;
+}
+
+
 extern void btlStopStage();
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
-extern void mnuStoreScrollPanelSelectionAndGridPosition();
 
 /* Tear down the staff panel and all four optional scene-side resources. */
 s32 mnuStaffReleasePanelScene(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
-    s32 entryList = context + 0x15C;
+    s32 entryList = (s32)&((CampMenuContext *)context)->partyWindow;
     CampMenuContext *work = (CampMenuContext *)context;
 
     func_00276720(entryList, 0, menu->staffImage, menu->staffMode);
@@ -739,14 +776,14 @@ s32 mnuStaffReleasePanelScene(s32 unused) {
     }
     mnuReleaseResourceList(menu->resourceList);
     effResolveAndReleaseResource(work->resource);
-    mnuStoreScrollPanelSelectionAndGridPosition(work->display, work->resource, 0, 0);
+    mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)work->display, work->resource, 0, 0);
     return 1;
 }
 
 void mnuResetSelectedPanelOpacity(s32 context) {
-    *(u32 *)
-      (*(s32 *)(*(((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot) * 0x134 + context + 0x2b4) + 0x3c) = 0x100
-    ;
+    CampMenuContext *work = (CampMenuContext *)context;
+    s32 index = work->partyWindow.lists[0]->cursor->index;
+    work->partyWindow.slots[index].windowSprites->profileFade = 0x100;
 }
 
 /* Switch the party page, rebuilding its panels; previous takes priority.
@@ -759,17 +796,17 @@ s32 mnuStaffSwitchPartyPage(s32 requestArgument) {
 
     if (inputFlags & MNU_STAFF_INPUT_PREV_PAGE) {
         mnuStaffReleasePanelScene(requestArgument);
-        mnuRetreatListCursorDefault(((CampMenuContext *)context)->selectionList);
+        mnuRetreatListCursorDefault(((CampMenuContext *)context)->partyWindow.lists[0]);
         pageChanged = 1;
     }
     if (inputFlags & MNU_STAFF_INPUT_NEXT_PAGE && pageChanged == 0) {
         mnuStaffReleasePanelScene(requestArgument);
-        mnuAdvanceListCursorDefault(((CampMenuContext *)context)->selectionList);
+        mnuAdvanceListCursorDefault(((CampMenuContext *)context)->partyWindow.lists[0]);
         pageChanged = 1;
     }
-    mnuClearListFlagsOneAndTwo(((CampMenuContext *)context)->selectionList);
+    mnuClearListFlagsOneAndTwo(&((CampMenuContext *)context)->partyWindow.lists[0]->stateFlags);
     if (pageChanged != 0) {
-        func_00276898(requestArgument);
+        func_00276898((KwlnTask *)requestArgument);
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
         menuWork->activeMark = 0;
         if (menuWork->staffMode == 1) {
@@ -814,10 +851,10 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback) {
         if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
             if (menuWork->staffMode == 0) {
                 menuWork->staffMode = 1;
-                func_00276720(context + MNU_STAFF_PARTY_PANEL_BASE, 3, menuWork->staffImage, 1);
+                func_00276720((s32)&((CampMenuContext *)context)->partyWindow, 3, menuWork->staffImage, 1);
             } else {
                 menuWork->staffMode = 0;
-                func_00276720(context + MNU_STAFF_PARTY_PANEL_BASE, 2, menuWork->staffImage, 0);
+                func_00276720((s32)&((CampMenuContext *)context)->partyWindow, 2, menuWork->staffImage, 0);
             }
             menuWork->activeMark = 0;
         }
@@ -837,7 +874,7 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback) {
 }
 
 void mnuDrawSlotIcons(s32 x, s32 context) {
-    s32 slot = (s32)datGameState + *(((CampMenuContext *)context)->partySelection->selectedSlot) * 0x1a4 + 0xa60;
+    DatPartyRecord *slot = &datGameState->party[((CampMenuContext *)context)->partyWindow.slots[3].unk10C->cursor->index];
     s32 i;
     s32 y;
     s32 handle;
@@ -846,7 +883,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
     x = x * 8;
     y = x + 0xbc0;
     for (i = 0; i < 3; i++, y += 0xa8) {
-        handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, D_003BAA7C + ((PartyEntryCopy *)slot)->displayId * 45, i);
+        handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, D_003BAA7C + slot->unitId * 45, i);
         if (handle != 0) {
             func_001958A0((FrFontGlyph *)handle, 1, 0x53);
             frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
@@ -1308,7 +1345,7 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_REORDER_INPUT_MASK);
     MenuSelectionState *window = (MenuSelectionState *)menuWork->selectedList;
-    s32 partyEntry = (s32)datGameState + *((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot * MNU_STAFF_PARTY_ENTRY_BYTES + MNU_STAFF_PARTY_BASE;
+    s32 partyEntry = (s32)&datGameState->party[((CampMenuContext *)context)->partyWindow.lists[0]->cursor->index];
     MenuSelectionList *list = window->list;
 
     list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
