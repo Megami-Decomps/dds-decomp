@@ -110,7 +110,7 @@ extern void evtStageTestQueueMotion();
 extern s32 D_00435E48;
 
 
-extern void func_002C0D18();
+extern void mnuDrawAndAdvancePanelGroup();
 
 extern void func_002C10F0();
 

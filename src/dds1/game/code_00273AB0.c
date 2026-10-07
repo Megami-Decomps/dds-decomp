@@ -444,7 +444,7 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
     mnuDrawStaffPanelGridBackdrop(1, (StaffSlots *)(context + 0x60));
     mnuDrawStaffCampScreen(1, task);
     mnuCreateStaffImageSprite(8);
-    func_00283110(0xEB0, 0x518, 0, (void *)partyEntry,
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, (void *)partyEntry,
                   ((StaffImageContext *)context)->panelHandle, 0x53);
     if (mdlFlagTest(0x901) != 0) {
         func_002833B0(0, 0, 0, partyEntry,
