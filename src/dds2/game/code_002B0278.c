@@ -77,7 +77,7 @@ extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437BF8[];
 
 
@@ -230,7 +230,7 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003E75E0[];
 extern char D_003E75A8[];
 
@@ -1139,12 +1139,12 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
     }
 }
 
-void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles) {
+void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
     s32 alpha;
 
     alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].windowSprites->fade;
-    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, handles[1], 0x55, 0x53);
-    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, *handles, 0x1a, 0x53);
+    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[1], 0x55, 0x53);
+    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[0], 0x1a, 0x53);
 }
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {
@@ -1207,7 +1207,7 @@ u32 func_002B3A58(void) {
 
 void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
                    DatPartyRecord *actor, u16 rangeId, s32 style, s32 dim,
-                   s32 costResource, u32 texture) {
+                   EffectSlotSet *costResource, u32 texture) {
     char text[16];
     u32 color;
     s32 value;
@@ -2369,7 +2369,7 @@ void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg) {
     s32 handle;
     if (!(set->resources.packet.type & 4)) {
         handle = set->resources.packet.items[layout.place[0].slot];
-        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, arg);
+        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, (EffectSlotSet *)set->resources.packet.sheets[0], handle, arg);
         itfGridLookupValueOrDefault(set->resources.packet.sheets[0], handle);
         MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
@@ -3201,7 +3201,7 @@ extern void sdfReleaseChipBlock();
 
 void mnuFreeIconSprites(MenuSprites *menu);
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 
 void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *set, s32 drawArg);
