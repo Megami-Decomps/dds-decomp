@@ -5570,22 +5570,66 @@ SoundTask *func_001D97D8(void) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", btlUnitBaseLightTask);
+typedef struct EvtTargetInfo {
+    f32 firstColor[4];
+    f32 direction[4];
+    u8 pad20[0x20];
+    f32 secondColor[4];
+    f32 nearDistance, farDistance;
+    f32 auxFirst, auxSecond;
+    u32 unk60;
+    u32 flags;
+} EvtTargetInfo;
+typedef struct BtlUnitBaseLightArgs {
+    BtlUnit *unit;
+    s32 delay;
+} BtlUnitBaseLightArgs;
+extern f32 *D_00324770[];
+extern u8 kwlnDefaultColorVector[];
 
-extern u32 btlUnitBaseLightTask(u32 *);
+u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
+    BtlUnit *unit = work->unit;
+    EvtUnit *ext;
+    EvtTargetInfo *info;
+    EffWorldNode *target;
+    if (unit->flags & 2) {
+        if (work->delay >= 2) {
+            ext = unit->ext;
+            evtSetUnitStatusFlags(ext);
+            target = (EffWorldNode *)ext->currentTransitionValue;
+            if (target != NULL && (ext->flags & 0x40000)) {
+                info = target->data;
+                PCP_COPY_VECTOR(unit->colorStart, info->firstColor);
+                PCP_COPY_VECTOR(unit->colorEnd, info->secondColor);
+                PCP_COPY_VECTOR(unit->lightDirection, info->direction);
+            } else {
+                f32 *defaultLight = D_00324770[0];
+                PCP_COPY_VECTOR(unit->colorStart, defaultLight);
+                PCP_COPY_VECTOR(unit->colorEnd, kwlnDefaultColorVector);
+                PCP_COPY_VECTOR(unit->lightDirection, defaultLight + 4);
+                btlBossDebugPrintf("btl:base light error[%p]\n", unit);
+            }
+            unit->stateFlags |= 0x10;
+            btlBossDebugPrintf("btl:base light set[%p]\n", unit);
+            return 1;
+        }
+        work->delay++;
+    }
+    return 0;
+}
 
-void *btlCreateUnitBaseLightTask(u8 *owner) {
+void *btlCreateUnitBaseLightTask(BtlUnit *owner) {
     u8 *task = btlAllocTask(8);
-    u32 *arguments;
+    BtlUnitBaseLightArgs *arguments;
     task[0] = 1;
     task[0x10] = 0;
     *(void **)(task + 0x4C) = btlUnitBaseLightTask;
     *(u16 *)(task + 0x20) = 0x21;
-    *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
+    *(u64 *)(task + 0x40) = owner->identity;
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = 0;
+    arguments->unit = owner;
+    arguments->delay = 0;
     return task;
 }
 
@@ -10676,7 +10720,31 @@ extern s32 D_0035F998[];
 
 extern u32 D_003BB6A8;
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F3278);
+void func_001F3278(s32 adjustmentIndex, s32 sceneIndex) {
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    s32 selection = 0;
+
+    if (adjustmentIndex != 0) {
+        selection = D_003BAA3C[adjustmentIndex].streamSelection;
+    }
+    if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
+        selection = datBattleSceneRecords[sceneIndex].unk24;
+    } else if (runtime->unk24A != 0) {
+        selection = 2;
+    }
+    if (selection == 0) {
+        selection = 1;
+    }
+    if (mnuPollTitleStreamStateLocked() != 0) {
+        mnuResetTitleStreamLocked();
+    }
+    if (selection == 5) {
+        func_0026A5F0(D_0035F998[D_003BB6A8 % 5]);
+        D_003BB6A8++;
+    } else {
+        func_0026A5F0(selection - 1);
+    }
+}
 
 u8 sndIsStreamStatusTwoOrThree(void) {
     s32 temp_v0;

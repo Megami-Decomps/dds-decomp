@@ -1220,27 +1220,6 @@ s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
     return 0;
 }
 
-/* Four conditional encounter groups follow the record's condition header. */
-typedef struct BattleAdjustmentEntry {
-    u16 sceneIndex;
-    u16 weight;
-    s8 value;
-    u8 unk05;
-} BattleAdjustmentEntry;
-
-typedef struct BattleAdjustmentGroup {
-    s32 interval;
-    BattleAdjustmentEntry entries[20];
-} BattleAdjustmentGroup;
-
-typedef struct BattleAdjustmentRecord {
-    u8 pad00[8];
-    u32 conditions[3];
-    u8 variantCodes[8];
-    BattleAdjustmentGroup groups[4];
-} BattleAdjustmentRecord;
-
-extern BattleAdjustmentRecord *D_003BAA3C;
 
 u8 func_0011C790(s32 index) {
     s8 enabled[3];

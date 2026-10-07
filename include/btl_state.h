@@ -95,7 +95,8 @@ typedef struct BtlState {
     u16 cameraPresetMode; /* 0x244: selects the marked actor's camera preset. */
     u8 pad246[2];
     u16 turnPhase; /* 0x248 */
-    u8 pad24A[2];
+    u8 unk24A; /* Nonzero selects stream 2 when the scene has no override. */
+    u8 pad24B[1];
     u16 mode; /* 0x24C */
     u8 pad24E[2];
     s32 turnCount; /* 0x250 */

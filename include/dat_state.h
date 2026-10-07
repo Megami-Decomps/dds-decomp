@@ -276,6 +276,39 @@ typedef struct DatBattleSceneRecord {
 
 typedef char DatBattleSceneRecordSizeCheck[sizeof(DatBattleSceneRecord) == 0x28 ? 1 : -1];
 
+#ifdef VERSION_DDS1
+/* One 0x20C-byte encounter adjustment record. Sound selection shares the
+ * header with condition/variant data; four complete weighted groups follow. */
+typedef struct BattleAdjustmentEntry {
+    u16 sceneIndex;
+    u16 weight;
+    s8 value;
+    u8 unk05;
+} BattleAdjustmentEntry;
+
+typedef struct BattleAdjustmentGroup {
+    s32 interval;
+    BattleAdjustmentEntry entries[20];
+} BattleAdjustmentGroup;
+
+typedef struct BattleAdjustmentRecord {
+    u8 pad00[4];
+    u16 streamSelection; /* 0x04: default stream selector used by 001F3278. */
+    u8 pad06[2];
+    u32 conditions[3];
+    u8 variantCodes[8];
+    BattleAdjustmentGroup groups[4];
+} BattleAdjustmentRecord;
+
+typedef char BattleAdjustmentEntrySizeCheck[sizeof(BattleAdjustmentEntry) == 6 ? 1 : -1];
+typedef char BattleAdjustmentGroupSizeCheck[sizeof(BattleAdjustmentGroup) == 0x7C ? 1 : -1];
+typedef char BattleAdjustmentRecordSizeCheck[sizeof(BattleAdjustmentRecord) == 0x20C ? 1 : -1];
+typedef char BattleAdjustmentStreamOffsetCheck[(u32)&((BattleAdjustmentRecord *)0)->streamSelection == 4 ? 1 : -1];
+typedef char BattleAdjustmentGroupsOffsetCheck[(u32)&((BattleAdjustmentRecord *)0)->groups == 0x1C ? 1 : -1];
+
+extern BattleAdjustmentRecord *D_003BAA3C;
+#endif
+
 extern DatBattleSceneRecord *datBattleSceneRecords;
 
 extern DatGameState *datGameState;
