@@ -405,7 +405,72 @@ MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value);
 
 extern void func_002B0278(s32);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0278);
+typedef struct MenuPartyView {
+    u8 pad00[0x18];
+    MenuWindowContainer *window;
+    u8 pad1C[0x30];
+    s32 viewMode;
+} MenuPartyView;
+
+extern const char *D_003E78D0[];
+extern s32 D_00435E70;
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const char *, s32);
+extern void func_002AF2E0(s32, s32, s32, MenuContext *);
+extern void mnuSetPanelItemsFromRow(s32, u32);
+extern void mnuClearStaffSceneConfigEntries(s32);
+
+void func_002B0278(s32 task) {
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(task);
+    MenuPartyView *view = (MenuPartyView *)context->party;
+    DatPartyRecord *unit = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    s32 selection;
+    FrFontGlyph *glyph;
+
+    mnuDrawCampIconBackdropByKind(1, task);
+    mnuCreateStaffImageSprite(12);
+    mnuApplyPackedGroupValues(context->panelGroup, unit->itemId);
+    selection = view->window->list->count == 0 ? 0 : view->window->list->cursor->sortKeySecondary;
+    if (selection != 0) {
+        mnuSetPanelItemsFromRow(context->panelGroup, view->window->list->cursor->sortKeyTertiary);
+    }
+    func_002C0D18(0xEB0, 0x518, 0, unit, context->panelGroup, 2, 0x53);
+    if (selection != 0) {
+        mnuClearStaffSceneConfigEntries(context->panelGroup);
+    }
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->transition, 0x53);
+    if (selection != 0) {
+        if (view->viewMode == 0) {
+            if (view->window->list->cursor->sortKeyPrimary != 0) {
+                func_002AAC70(2, selection, D_00435E70, context, 1, 1, 0x53);
+            } else {
+                func_002AAC98(2, 0, 0, context, 1, 0x53);
+            }
+        } else {
+            glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, D_003E78D0[0], 0);
+            frFontSetChainFlag(glyph, 4);
+            func_0019D550(glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(glyph);
+            selection = mnuGetPartyEntryCurrentId(unit);
+            if (selection != 0) {
+                func_002AAC70(3, selection, D_00435E70, context, 1, 1, 0x53);
+            } else {
+                func_002AAC98(3, 0, 0, context, 1, 0x53);
+            }
+            func_002AF2E0(0x120, 0xC0, selection, context);
+        }
+    } else {
+        func_002AAC98(2, 0, 0, context, 1, 0x53);
+    }
+    if (view->window->list->cursor != view->window->list->first) {
+        if (view->viewMode == 0) {
+            func_002AA7A0(8, context->displayHandle);
+        } else {
+            func_002AA7A0(7, context->displayHandle);
+        }
+    } else {
+        func_002AA7A0(1, context->displayHandle);
+    }
+}
 
 s32 mnuAdvanceStaffValuePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
@@ -3104,7 +3169,7 @@ void mnuReleasePartyPanelTextures(s32 menu);
 
 void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve);
 
-void func_002BB9C8(u32 *destination, u32 value);
+void func_002BB9C8(MenuSprites *page, u32 flags);
 
 void mnuSetPageParams(MenuSprites *page, s32 mode);
 
