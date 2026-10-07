@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
@@ -87,33 +88,19 @@ extern void sdfSaveResetSnapshot(void);
 extern void func_00117C48(void);
 
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
-typedef struct SdfCurveTable {
-    u8 pad00[4];
-    f32 *values;          /* 0x04 */
-} SdfCurveTable;
-
-typedef struct SdfCurveUser {
-    u8 pad00[4];
-    u32 flags;            /* 0x04: bit 2 = curve active */
-    u8 pad08[4];
-    f32 time;             /* 0x0C */
-    u8 pad10[0xC];
-    SdfCurveTable *curve; /* 0x1C */
-} SdfCurveUser;
-
-extern void dds3SamplePathKeyframeInterval(s32 *index, f32 *fraction, void *table, f32 time);
+extern void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *table, f32 time);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 sdfSampleActiveLinearCurve(SdfCurveUser *user) {
-    s32 index;
+f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
+    u32 index;
     f32 fraction;
-    SdfCurveTable *curve;
+    Dds3PathKeyframes *curve;
     f32 *values;
 
     if (user->flags & 4) {
-        curve = user->curve;
+        curve = user->scalarKeys;
         dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->time);
-        values = curve->values;
+        values = curve->data;
         return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
     }
     return 0.0f;
