@@ -2,6 +2,7 @@
 #include "dat_state.h"
 #include "mnu.h"
 #include "eff.h"
+#include "mnu_shop.h"
 
 typedef struct StaffMenuWork {
     u32 resource;
@@ -15,7 +16,7 @@ typedef struct StaffMenuWork {
     u32 partyModels[9];
     u32 singleResource;
     u32 primaryImage;
-    u32 resourceList;
+    MenuPanelHandles *resourceList;
     u32 secondaryImage;
     u32 images[3];
     u32 extraImages[2];
@@ -32,7 +33,8 @@ typedef char StaffMenuWork_staffSlots_offset_check[
 
 extern void mnuDestroyWindowContainer(u32);
 
-extern void mnuReleaseResourceList(u32);
+extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
+extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 extern s32 kwlnFadeIsActive(void);
 
