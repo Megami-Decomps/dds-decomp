@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_linked_packet.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
@@ -83,11 +84,6 @@ typedef struct SdfDmaTag {
     u64 vifCommands;
 } SdfDmaTag;
 
-typedef struct SdfPacketChain {
-    SdfListHead *head;
-    SdfListHead *tail;
-} SdfPacketChain;
-
 typedef struct SdfPacketSlot {
     SdfListHead *list;
     u32 unk4;
@@ -154,7 +150,7 @@ void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
 void func_002D4DD0();
 s32 sdfAllocPacketAligned(s32 size);
 void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
-void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node);
+void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
 
 typedef struct SdfSynchronizedRequest {
     u32 value;
@@ -251,7 +247,7 @@ void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
 
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
  * The drawing arguments remain opaque and are forwarded to the native builder. */
-void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
+void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
                    s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
                    s32 (*allocatePacket)(s32)) {
     s32 packetAddress;
@@ -771,14 +767,14 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
     return head;
 }
 
-void sdfClearLinkedPacketList(SdfListHead *list) {
+void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {
     list->unk0 = 0;
     list->first = 0;
     list->last = 0;
     list->unkC = 0;
 }
 
-void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
+void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node) {
     if (list->last == 0) {
         list->first = (u32)node;
     }
@@ -789,19 +785,19 @@ void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
     *node = 0;
 }
 
-void sdfClearPacketListHead(SdfListHead *list) {
-    list->unk0 = 0;
-    list->first = 0;
+void sdfClearPacketListHead(SdfPacketChain *chain) {
+    chain->head = NULL;
+    chain->tail = NULL;
 }
 
-void sdfAppendPacketChainNode(SdfPacketChain *head, SdfListHead *node) {
-    if (head->tail == NULL) {
-        head->head = node;
+void sdfAppendPacketChainNode(SdfPacketChain *chain, SdfLinkedPacketList *node) {
+    if (chain->tail == NULL) {
+        chain->head = node;
     }
     else {
-        *(u32 *)head->tail->last = node->last;
+        *(u32 *)chain->tail->last = node->last;
     }
-    head->tail = node;
+    chain->tail = node;
 }
 
 /* Encode the packed A+D payload count and its DMA/VIF transfer length. */
@@ -989,7 +985,7 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
 }
 
 /* Link the metadata node separately from the DMA payload one quadword later. */
-void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfListHead *linkedList, u32 *linkedNode) {
+void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *linkedList, u32 *linkedNode) {
     sdfAppendLinkedPacketNode(linkedList, linkedNode);
     sdfAppendPacket(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
@@ -1322,7 +1318,7 @@ void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
 extern SdfGraphObj D_003980E0;
 
 /* Build a local-to-local GS copy from graph buffer zero into destination. */
-void func_002D5CD0(SdfListHead *drawList, SdfListHead *linkedList,
+void func_002D5CD0(SdfListHead *drawList, SdfLinkedPacketList *linkedList,
                    SdfTexHead *destination, s32 destinationX, s32 destinationY,
                    s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
                    s32 resourceIndexXor, s32 (*allocPacket)(s32)) {
