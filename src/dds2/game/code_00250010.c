@@ -83,7 +83,9 @@ typedef struct EvtRuntimeGroup {
     s16 value1C;
     s8 value1E;
     s8 value1F;
-    u8 pad20[0x30];
+    u8 pad20[8];
+    s32 unk28; /* 0x28: cleared when the property editor is cancelled */
+    u8 pad2C[0x24];
     s32 childCount; /* 0x50 */
     EvtRuntimeChild *children; /* 0x54 */
     EvtRuntimeChild *lastChild; /* 0x58 */
@@ -163,7 +165,9 @@ typedef struct EvtRuntime {
     s32 commandFirst; /* 0x23E4 */
     EvtCommandArgument commandSecond; /* 0x23E8 */
     EvtCommandArgument commandThird; /* 0x23EC */
-    u8 pad23F0[0x24];
+    u8 pad23F0[4];
+    s32 editField; /* 0x23F4 */
+    u8 pad23F8[0x1C];
     s32 timedActive; /* 0x2414 */
     u8 pad2418[0x8];
     u8 shadowMode; /* 0x2420 */
@@ -199,9 +203,9 @@ typedef struct EvtPad {
     s8 decTen;  /* 0x26 */
     s8 incTen;  /* 0x27 */
     u8 decHun;  /* 0x28 */
-    u8 pad29;
+    s8 unk29; /* 0x29: coarse decrease in the property editor */
     u8 incHun;  /* 0x2A */
-    u8 pad2B;
+    s8 unk2B; /* 0x2B: coarse increase in the property editor */
     s8 apply;   /* 0x2C */
     s8 unk2D;
 } EvtPad;
@@ -2140,13 +2144,258 @@ s32 evtPollRuntimeControlReady(void) {
     return 0;
 }
 
+typedef union EvtViewParam {
+    f32 f;
+    s32 i;
+    u32 u;
+    u16 h[2];
+    s16 sh[2];
+    u8 b[4];
+    s8 sb[4];
+} EvtViewParam;
+
+typedef struct EvtViewKey {
+    u16 frame;
+    u16 duration;
+    s32 interpolationMode;
+    EvtViewParam p08;
+    EvtViewParam p0C;
+    EvtViewParam p10;
+    EvtViewParam p14;
+    EvtViewParam p18;
+    EvtViewParam p1C;
+    u8 pad20[0xC];
+    void *payload;
+    struct EvtViewKey *next;
+    struct EvtViewKey *previous;
+} EvtViewKey;
+
+typedef char EvtViewKey_size_must_be_0x38[(sizeof(EvtViewKey) == 0x38) ? 1 : -1];
+
+extern void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y,
+                                   s32 selected, u32 color,
+                                   s32 showNormalized);
+extern char D_00437780[];
+extern char D_00437788[];
+extern char D_00437790[];
+extern char D_00437798[];
+extern char D_004377A0[];
+extern char D_004377A8[];
+extern char D_00424210[];
+extern char D_00424220[];
+extern char D_00424230[];
+extern char D_00424240[];
+
+/* Edit the pending key's position, color, blend mode and scale. */
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424210);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424220);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424230);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002570F8);
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00424240);
+
+s32 func_002570F8(EvtRuntime *runtime) {
+    EvtViewKey *key;
+    u8 *channel;
+    s32 packetList;
+    s32 selectedChannel;
+    s32 step;
+    s32 next;
+    s32 color;
+    s32 style;
+
+    packetList = sdfCreateResetPacketList();
+    kwlnDrawSpriteCell(packetList, 0x78, 0x138, 0xC, 9);
+    key = (EvtViewKey *)evtEventViewerGetPendingNode(runtime);
+
+    style = runtime->editField == 0 ? 6 : 0;
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x82C0, 0xFEFFFF, 0, D_00437780));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x82C0, 0xFEFFFF, style, D_004376F8, key->p0C.sh[0]));
+
+    style = runtime->editField == 1 ? 6 : 0;
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x8320, 0xFEFFFF, 0, D_00437788));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x8320, 0xFEFFFF, style, D_004376F8, key->p0C.sh[1]));
+
+    selectedChannel = runtime->editField - 2;
+    if ((u32)selectedChannel >= 3) {
+        selectedChannel = -1;
+    }
+    color = key->p10.b[0] | (key->p10.b[1] << 8) | (key->p10.b[2] << 16);
+    fldDrawPackedRgbEditor((void *)packetList, 0x7780, 0x8380,
+                           selectedChannel, color, 0);
+
+    style = runtime->editField == 5 ? 6 : 0;
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x84A0, 0xFEFFFF, 0, D_00437790));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x84A0, 0xFEFFFF, style, D_004376F8, key->p10.b[3]));
+
+    style = runtime->editField == 6 ? 6 : 0;
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x8500, 0xFEFFFF, 0, D_00437798));
+    switch ((s8)key->p08.b[1]) {
+    case 0:
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            0x7780, 0x8500, 0xFEFFFF, style, D_00424210));
+        break;
+    case 1:
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            0x7780, 0x8500, 0xFEFFFF, style, D_00424220));
+        break;
+    case 2:
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            0x7780, 0x8500, 0xFEFFFF, style, D_00424230));
+        break;
+    }
+
+    style = runtime->editField == 7 ? 6 : 0;
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x8560, 0xFEFFFF, 0, D_004377A0));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x8560, 0xFEFFFF, style, D_00424240,
+        key->p14.f));
+
+    style = runtime->editField == 8 ? 6 : 0;
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x85C0, 0xFEFFFF, 0, D_004377A8));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7780, 0x85C0, 0xFEFFFF, style, D_00424240,
+        key->p18.f));
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+                                     (SdfListHead *)packetList);
+
+    step = 0;
+    if ((D_0037F510.incTen & 2) != 0) {
+        if (runtime->editField >= 8) {
+            runtime->editField = 0;
+        } else {
+            runtime->editField++;
+        }
+    } else if ((D_0037F510.decTen & 2) != 0) {
+        if (runtime->editField <= 0) {
+            runtime->editField = 8;
+        } else {
+            runtime->editField--;
+        }
+    } else if ((D_0037F510.decOne & 2) != 0) {
+        step = -1;
+    } else if ((D_0037F510.incOne & 2) != 0) {
+        step = 1;
+    } else if ((D_0037F510.unk29 & 2) != 0) {
+        step = -10;
+    } else if ((D_0037F510.unk2B & 2) != 0) {
+        step = 10;
+    }
+
+    if (step != 0) {
+        switch (runtime->editField) {
+        case 0:
+            key->p0C.sh[0] = (s16)(key->p0C.sh[0] + step);
+            if (key->p0C.sh[0] < -500) {
+                key->p0C.sh[0] = -500;
+            }
+            if (key->p0C.sh[0] >= 1001) {
+                key->p0C.sh[0] = 1000;
+            }
+            break;
+        case 1:
+            key->p0C.sh[1] = (s16)(key->p0C.sh[1] + step);
+            if (key->p0C.sh[1] < -500) {
+                key->p0C.sh[1] = -500;
+            }
+            if (key->p0C.sh[1] >= 1001) {
+                key->p0C.sh[1] = 1000;
+            }
+            break;
+        case 2:
+            channel = &key->p10.b[0];
+        editColor:
+            next = *channel + step;
+            if (next >= 255) {
+                *channel = 255;
+            } else if (next <= 0) {
+                *channel = 0;
+            } else {
+                *channel = next;
+            }
+            break;
+        case 3:
+            channel = &key->p10.b[1];
+            goto editColor;
+        case 4:
+            channel = &key->p10.b[2];
+            goto editColor;
+        case 5:
+            channel = &key->p10.b[3];
+            next = *channel + step;
+            if (next >= 255) {
+                *channel = 255;
+            } else if (next <= 0) {
+                *channel = 0;
+            } else {
+                *channel = next;
+            }
+            break;
+        case 6:
+            key->p08.sb[1] += step;
+            if (key->p08.sb[1] <= step && step < 0) {
+                key->p08.sb[1] = 2;
+            }
+            if (key->p08.sb[1] >= step + 2 && step > 0) {
+                key->p08.sb[1] = 0;
+            }
+            if (key->p08.sb[1] < 0) {
+                key->p08.sb[1] = 0;
+            }
+            if (key->p08.sb[1] >= 3) {
+                key->p08.sb[1] = 2;
+            }
+            break;
+        case 7:
+            key->p14.f += ((f32)step / 100.0f);
+            if (key->p14.f <= ((f32)step / 100.0f) + (-10.0f) && ((f32)step / 100.0f) < 0.0f) {
+                key->p14.f = 10.0f;
+            }
+            if (((f32)step / 100.0f) + 10.0f <= key->p14.f && ((f32)step / 100.0f) > 0.0f) {
+                key->p14.f = -10.0f;
+            }
+            if (key->p14.f < -10.0f) {
+                key->p14.f = -10.0f;
+            }
+            if (10.0f < key->p14.f) {
+                key->p14.f = 10.0f;
+            }
+            break;
+        case 8:
+            key->p18.f += ((f32)step / 100.0f);
+            if (key->p18.f <= ((f32)step / 100.0f) + (-10.0f) && ((f32)step / 100.0f) < 0.0f) {
+                key->p18.f = 10.0f;
+            }
+            if (((f32)step / 100.0f) + 10.0f <= key->p18.f && ((f32)step / 100.0f) > 0.0f) {
+                key->p18.f = -10.0f;
+            }
+            if (key->p18.f < -10.0f) {
+                key->p18.f = -10.0f;
+            }
+            if (10.0f < key->p18.f) {
+                key->p18.f = 10.0f;
+            }
+            break;
+        }
+    }
+
+
+    if (D_0037F510.cancel < 0) {
+        runtime->frameGroup->unk28 = 0;
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00257910);
 
