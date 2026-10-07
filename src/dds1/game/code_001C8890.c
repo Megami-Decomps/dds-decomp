@@ -3687,14 +3687,14 @@ void func_001D4E98(BtlUnit *unit, u32 kind, u32 id) {
     unit->flags |= 0x40000000;
     if (unit->flags & 0x20) {
         model = unit->ext->owner;
-        unit->ext->motionState = 0;
+        unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         unit->ext->flags &= ~0xA0;
         mdlAddEntryPlain(model, 0, 0xB);
         unit->unkEC = 0xB;
         sdfMotionSampleAtFrame(model->first, model->first->frameCount);
         unit->flags = unit->flags & 0x7FFFFFFF & 0xBFFFFFFF;
     } else if (btlTestActorStatusPredicate(unit)) {
-        unit->ext->motionState = 0;
+        unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         model = unit->ext->owner;
         unit->ext->flags &= ~0xA0;
         status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, id);

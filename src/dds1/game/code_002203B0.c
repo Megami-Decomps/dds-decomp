@@ -182,7 +182,7 @@ extern void dds3InterpolatePathVectorVU(void *value);
 s32 evtUnitStepScaledValue(EvtUnit *unit) {
     f32 t;
 
-    if (unit->motionState != 1) {
+    if (unit->motionState != EVT_UNIT_MOTION_STATE_SOURCE) {
         return 0;
     }
     switch (unit->transitionSourceKind) {
