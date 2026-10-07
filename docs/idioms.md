@@ -2571,8 +2571,8 @@ slot. Early-return wait guards instead overrun the next function.
 Use `BtlUnit.ext` and the primary `EffWorldNode` payload. The existing
 `EvtUnit.currentTransitionValue` word carries a slot-9 node address when
 flag `0x40000` is set, as also shown by `evtUnitManager.c`. Its light
-payload uses that module's `EvtTargetInfo` layout: first colour at zero,
-direction at `0x10`, and second colour at `0x40`. The six copies use the
+payload uses the shared `EvtTargetInfo` in `evt_unit.h`: first colour at
+zero, direction at `0x10`, and second colour at `0x40`. The six copies use the
 existing Sony-compatible `PCP_COPY_VECTOR` primitive, not new game-code
 assembly. Retain both target-owned diagnostic strings as literals so
 the complete unit's data remains exact.
@@ -2582,6 +2582,18 @@ signed delay. Its owner identity comes from `BtlUnit.identity`; no second
 owner view is needed. The complete current DDS1 unit gate preserved all
 569 C functions with no context, data, or undefined-symbol diagnostics.
 The 280-byte DDS2 instruction twin is `0x001E67E0`.
+
+DDS2 now uses the same ready-first callback and a dedicated unit/delay
+argument tuple rather than the unrelated sound-task argument alias. Its
+complete `game/code_001DD390.c` gate is **520 match, 0 differ**, including
+the 280-byte callback, the unchanged 120-byte creator, and literal data.
+The unchanged 0x68-byte `EvtTargetInfo` was promoted from the identical
+event-manager and DDS1 battle definitions; all three local copies were
+removed rather than introducing another payload view.
+All 27 transitive `evt_unit.h` importers (12 DDS1, 15 DDS2) passed the
+combined serial gate with zero differences or diagnostics; the independently
+resolved inventory and current source/header fingerprints agree with it.
+
 
 ## Camp option availability uses signed halfword flags
 
@@ -2603,4 +2615,38 @@ those owners. The target and complete DDS2 unit are text/data exact
 (`87 match, 0 differ`); a serialized gate of all 66 direct and indirect
 `mnu.h` source includers preserved every compiled C function with no
 context, data, or undefined-symbol diagnostics.
+
+
+## DDS2 staff item use owns the complete party page and fade state
+
+DDS2 `func_002ADDA0` (`0x002ADDA0`, 492 bytes excluding padding) uses
+`MenuStaffContext.partyWindow` at `0x284`, not a flags word projected
+as a page. The retained selection list is `partyWindow.lists[0]` at
+`0xA914`. The same allocation owns `PartyPanel` at `0xA928` and
+`MenuFadeFields` at `0xB10C`; the creator allocates and clears `0xB1E0`
+bytes. Keep its remaining `0x10` bytes opaque. The field-skill window
+at `0x104` is also a real `MenuWindowContainer *`: `002AAEA0` accesses
+its list and last node.
+
+The selected item ID comes from `MenuListNode.sortKeySecondary`;
+`sortKeyPrimary` is its quantity. Item use replaces the input word
+with zero on success or `0x8000` on failure. The readiness helper can
+remove an exhausted cursor, so reload the current cursor and its
+quantity after that call. The failure path precedes the ready path;
+cancel/empty selection does not start another fade.
+
+`mnu_staff.h` is the DDS2 interface used by the actual staff/page/fade
+consumers. Item/effect entry points transport page and party-record
+pointers, not integer-address adapters. The fade starter retains a
+generic resource/task boundary (`void *` arguments) and recovers the
+window and fade owners inside. That natural interface preserves the
+native runtime-alignment copy sequence; direct record-pointer formals
+and a typed-window/opaque-work form changed 77 of 95 emitted words.
+The two recovery locals are necessary object conversions, not
+register-allocation aliases.
+
+The item-use callback and its complete unit are text/data exact
+(`45 match, 0 differ`). All existing control flow, including the
+field-effect provider's pre-existing sound arms and development hooks,
+remains unchanged by the pointer-contract cutover.
 

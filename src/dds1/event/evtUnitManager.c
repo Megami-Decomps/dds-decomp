@@ -7,16 +7,6 @@
 #include "ee_mmi.h"
 
 
-typedef struct EvtTargetInfo {
-    f32 firstColor[4];
-    f32 direction[4];
-    u8 pad20[0x20];
-    f32 secondColor[4];
-    f32 nearDistance, farDistance;
-    f32 auxFirst, auxSecond;
-    u32 unk60;
-    u32 flags;         /* 0x64: bit 3 selects the unit's own vector */
-} EvtTargetInfo;
 
 typedef struct EvtTarget {
     u8 pad0[0x18];
