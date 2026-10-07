@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
+#include "eff_object.h"
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 
@@ -9,11 +10,6 @@ typedef struct {
     Dds3PathCurveWork *path;
     s32 (*update)(ObjectTransform *, EffWorldNode *);
 } MoverWork;
-
-typedef struct {
-    u8 pad00[0x20];
-    u128 position;
-} MoverPositionData;
 
 extern void dds3InterpolatePathVectorVU(Dds3PathCurveWork *);
 extern void dds3PreparePathVectorPair(Dds3PathCurveWork *);
@@ -54,7 +50,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
             VU0_STORE_VF(vf10, pathVector);
             effObjSetInnerFirstVec(target, pathVector);
             if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
-                PCP_COPY_VECTOR(&((MoverPositionData *)target->data)->position, pathVector);
+                PCP_COPY_VECTOR(&((EffectTransformData *)target->data)->position, pathVector);
             }
         }
         if (work->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
