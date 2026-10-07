@@ -4024,7 +4024,7 @@ extern u8 D_003A3B70[];
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerSecondVec(s32, void *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, void *);
 
 void btlSetUnitRotation(u8 *object, void *rotation) {
     u8 vector[16];
@@ -6177,7 +6177,50 @@ SoundTask *btlScheduleContextReset(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DBE68);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001DC0E8);
+extern f32 D_00359EA0[4], D_00359EB0[4];
+extern f32 D_00359E80[4], D_00359E90[4];
+extern u32 D_003BB660;
+extern void *dds3GetWorldObject(void);
+extern EffWorldNode *dds3GetWorldCameraObject(void *);
+extern void dds3SetWorldCameraObject(void *, EffWorldNode *);
+extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
+extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
+extern void effObjSetInnerFloat(EffWorldNode *, f32);
+extern void dds3EnsureSlotData(void *);
+extern void func_001127A0(EffWorldNode *, s32);
+
+/* vu0 routine: add the battle origin to the default camera position. */
+void func_001DC0E8(void) {
+    f32 position[4];
+    EffWorldNode *camera;
+    CameraData *data;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+
+    battle->camera.fov = 0.6981317f;
+    VU0_LOAD_VF(vf10, D_00359EA0);
+    VU0_LOAD_VF(vf11, battle->position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, position);
+    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
+    if (camera != NULL) {
+        effObjSetInnerFirstVec(camera, position);
+        effObjSetInnerSecondVec(camera, D_00359EB0);
+        data = camera->data;
+        dds3SetCameraFieldOfView(camera, 0.6981317f);
+        data->fovUpdatePending |= 1;
+    }
+    camera = dds3CreateCameraObject(dds3AdvanceWorldCounter(), D_00359E80, D_00359E90);
+    camera->value = D_003BB660;
+    effObjSetInnerFloat(camera, 10.0f);
+    dds3EnsureSlotData(camera);
+    func_001127A0(camera, 0);
+    dds3SetCameraFieldOfView(camera, 0.6981317f);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
+    battle->cameraObject = camera;
+    battle->pendingSoundList = btlAllocateIndexList(13);
+    battle->battleFlags |= 0x10;
+}
+
 
 void btlClearPendingSoundList(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
@@ -6324,11 +6367,8 @@ typedef struct WorldObj {
     WorldObjectHead *head;
 } WorldObj;
 
-extern void *dds3GetWorldObject(void);
 
-extern u32 dds3GetWorldCameraObject(void *);
 
-extern void dds3SetWorldCameraObject(void *, u32);
 
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
 
