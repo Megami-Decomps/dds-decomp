@@ -18,14 +18,6 @@ typedef struct UiQuadWords {
 } UiQuadWords; // 0x10
 
 
-typedef struct GridNumericDescriptor {
-    s32 mode;
-    f32 minimum;
-    f32 maximum;
-    f32 step;
-    f32 value;
-} GridNumericDescriptor;
-
 /* Result bit 1: at least widget->rows successors remain from firstVisible. */
 enum { GRID_LIST_HAS_COUNT_FOLLOWERS = 2 };
 
@@ -862,14 +854,14 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     maximum = ((GridNumericDescriptor *)item->parameter)->maximum;
 
     switch (descriptor->mode) {
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             while (maximum >= 16.0f) {
                 maximum *= 0.0625f;
                 width++;
             }
             width += 2;
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             while (maximum >= 10.0f) {
                 maximum /= 10.0f;
                 width++;
@@ -993,15 +985,15 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
             func_0035C860(prefix, "%s ", entry->text);
         }
         switch (((GridNumericDescriptor *)entry->parameter)->mode) {
-        case 0:
+        case GRID_NUMERIC_FORMAT_DECIMAL:
             func_0035C860(format, "%%s%%0%dd", entry->formatWidth);
             func_0035C860(text, format, prefix, (s32)entry->number);
             break;
-        case 1:
+        case GRID_NUMERIC_FORMAT_HEXADECIMAL:
             func_0035C860(format, "%%s0x%%0%dX", entry->formatWidth - 2);
             func_0035C860(text, format, prefix, (s32)entry->number);
             break;
-        case 2:
+        case GRID_NUMERIC_FORMAT_FLOAT:
             func_0035C860(format, "%%s%%0%d.1f", entry->formatWidth);
             func_0035C860(text, format, prefix, (double)entry->number);
             break;
