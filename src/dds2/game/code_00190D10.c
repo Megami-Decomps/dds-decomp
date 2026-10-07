@@ -12,7 +12,7 @@ EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
 
     effect = sdfAllocSizeClassBlock(sizeof(*effect));
     memcpy(&effect->params, source, sizeof(effect->params));
-    effect->valueWork = func_00190E58(effect->params.count, effect->params.historyCount, effect->params.unk08, effect->params.unk14, effect->params.unk18);
+    effect->valueWork = effCreateMagatuhiValueWork(effect->params.count, effect->params.historyCount, effect->params.unk08, effect->params.unk14, effect->params.unk18);
     effMagatuhiFillColorTable(effect->valueWork, effect->params.colorA, effect->params.colorB);
     return effect;
 }
@@ -26,7 +26,7 @@ void func_00190DE0(EffMagatuhiOwner *effect) {
     func_00191010(effect->valueWork);
 }
 
-void func_00190DF8(EffMagatuhiValueWork *work, s32 index) {
+void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index) {
     f32 *angles;
 
     work->writeIndices[index] = 0;
@@ -39,7 +39,7 @@ void func_00190DF8(EffMagatuhiValueWork *work, s32 index) {
     angles[3] = 0.0f;
 }
 
-EffMagatuhiValueWork *func_00190E58(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
     s32 countFrames;
     s32 frameTerm;
     s32 countTerm;
@@ -103,7 +103,7 @@ EffMagatuhiValueWork *func_00190E58(s32 count, s32 frames, f32 param08, s32 para
     if (count != 0) {
         i = 0;
         do {
-            func_00190DF8(resource, i);
+            effResetMagatuhiValueSlot(resource, i);
             i++;
         } while (i < count);
     }

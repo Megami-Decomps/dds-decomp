@@ -2088,6 +2088,8 @@
 0x00188E10	effTrackPolyDrawStrips	inferred	Builds packet draws for active track-poly point ranges. [names_qp9.tsv]
 0x001890D8	effCloneMagatuhiWithColorResource	inferred	src/dds1/game/code_001890D8.c func_001890D8: Copies Magatuhi parameters, creates new subresource and fills its color table. [names_reviewed24.tsv]
 0x00189178	effReleaseMagatuhiOwner	inferred	Byte-identical dds2 twin 0x00190DB0; Releases the Magatuhi resource at owner offset 0x1C and frees the owner record. [names_conflicts.tsv]
+0x001891C0	effResetMagatuhiValueSlot	inferred	resets one indexed value-work slot's counters, color, and angles
+0x00189220	effCreateMagatuhiValueWork	inferred	allocates and initializes the indexed value-work owner and slots
 0x001893C0	effMagatuhiReleaseResource	inferred	Releases the resource at work offset 0x34.
 0x00189BA8	effMagatuhiFillColorTable	inferred	count04 effBlendColor samples from colorA to colorB [names_M61_EffVu.tsv]
 0x00189C98	effMagatuhiCreateFirst	inferred	first-family create: 0x30 particles before work [names_M61_EffVu.tsv]

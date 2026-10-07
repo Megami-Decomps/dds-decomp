@@ -85,14 +85,14 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work);
 void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color);
 void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
 #ifdef VERSION_DDS2
-EffMagatuhiValueWork *func_00190E58(s32, s32, f32, s32, f32);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
 void func_00190DE0(EffMagatuhiOwner *owner);
-void func_00190DF8(EffMagatuhiValueWork *work, s32 index);
+void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
 void func_00191450(EffMagatuhiValueWork *work, s32 index, void *vector);
 #else
-EffMagatuhiValueWork *func_00189220(s32, s32, f32, s32, f32);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
 void func_001891A8(EffMagatuhiOwner *owner);
-void func_001891C0(EffMagatuhiValueWork *work, s32 index);
+void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
 void func_00189818(EffMagatuhiValueWork *work, s32 index, void *vector);
 #endif
 
