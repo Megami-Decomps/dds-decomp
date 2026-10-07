@@ -308,7 +308,7 @@ extern void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection
 #ifdef VERSION_DDS2
 extern void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId);
 #else
-extern void func_00283110(s32, s32, s32, void *, MenuPanelGroup *, s32);
+extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, void *, MenuPanelGroup *, s32);
 #endif
 
 /* An indexed render slot owned by an effect resource set. */

@@ -399,7 +399,7 @@ void func_00263B78(BrsSkillPackageWork *scene, s32 copyOptions) {
                                  scene->statGains[i]);
         }
     }
-    func_00283110(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
     func_002833B0(0, 0, 0, item, scene->spriteHandle, 0x53);
     func_00263A00(scene);
     evtStageTestUpdate((s32)D_00325788);

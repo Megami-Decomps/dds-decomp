@@ -4518,6 +4518,7 @@
 0x002C0CF8	mnuSetPanelGroupSelection	inferred	Sets selected index word of panel group. [names_reviewed5.tsv]
 0x002C0D00	mnuClearPanelGroupSelection	inferred	Resets selected index word to sentinel all bits set. [names_reviewed5.tsv]
 0x002C0D10	mnuGetPanelGroupSelection	inferred	Returns the panel group's stored selected index. [names_reviewed5.tsv]
+0x002C0D18	mnuDrawAndAdvancePanelGroup	inferred	draws five party-stat panel items and advances the group fade value
 0x002C0F00	mnuSetGroupSelection	inferred	Updates two properties of an indexed group entry via func_002C2AB0 and func_002C2AC8.
 0x002C0F48	mnuSetIndexedPanelGroupValue	inferred	Looks up panel group entry by supplied index then stores its corresponding item value. [names_reviewed18.tsv]
 0x002C0F70	mnuApplyPackedGroupValues	inferred	Extracts five values from packed input and writes them to the five panel entries.

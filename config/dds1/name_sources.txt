@@ -4830,6 +4830,7 @@
 0x002830F0	mnuSetPanelGroupSelection	inferred	Sets selected index word of panel group. [names_reviewed5.tsv]
 0x002830F8	mnuClearPanelGroupSelection	inferred	Resets selected index word to sentinel all bits set. [names_reviewed5.tsv]
 0x00283108	mnuGetPanelGroupSelection	inferred	Returns the panel group's stored selected index. [names_reviewed5.tsv]
+0x00283110	mnuDrawAndAdvancePanelGroup	inferred	draws five party-stat panel items and advances the group fade value
 0x00283238	mnuSetGroupSelection	inferred	Curated DDS2 twin 0x002C0F00: selects one of five panel-group children and updates its state (+0x20) and option (+0x1C).
 0x00283280	mnuCreateSpriteState	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x002832F8	mnuFreeSpriteStateWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:464:func_002832F8; Sprite-state storage-release entry; forwards its incoming work address to chip-block release without releasing a texture.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]

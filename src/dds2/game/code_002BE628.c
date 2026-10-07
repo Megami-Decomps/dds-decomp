@@ -592,7 +592,7 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
     return group->selection;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawAndAdvancePanelGroup);
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
     mnuSetPanelItemSelection(group->entries[index], selection);
