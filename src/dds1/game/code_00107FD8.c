@@ -175,7 +175,7 @@ extern void func_0010AC98(void);
 
 extern void *D_003BD764;
 
-extern void evtSubmitGradientRectAtDepth();
+extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32, s32, s32, s32, s32);
 
 typedef struct KwlnResourceNode {
     s32 unk0;
@@ -331,11 +331,15 @@ typedef struct EvtGsCommand {
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfInitPacketList(void *);
+extern void sdfInitPacketList(SdfListHead *);
 
-extern void sdfAppendPacket(void *, void *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+typedef struct SdfDrawPacket SdfDrawPacket;
+extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
@@ -348,15 +352,15 @@ extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 /* Submit primary-context GS TEST settings. Z testing is always enabled;
    unusedZte is a retained native formal, not the source of the ZTE bit. */
 void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
-    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
     command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = EVT_GS_TEST_PRIMARY;
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append((SdfListHead *)surface, list);
@@ -365,15 +369,15 @@ void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s3
 
 /* Submit the same TEST bit layout for the secondary GS context, with ZTE forced on. */
 void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
-    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
     command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = EVT_GS_TEST_SECONDARY;
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append((SdfListHead *)surface, list);
@@ -382,12 +386,12 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
 
 /* Select a primary-context ALPHA equation by mode; unknown modes use 0x44. */
 void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
-    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
 
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
     command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
     switch (blendMode) {
     case 1:
@@ -419,7 +423,7 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
         break;
     }
     command->registerId = EVT_GS_ALPHA_PRIMARY;
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append((SdfListHead *)surface, list);
@@ -428,15 +432,15 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
 
 /* Submit ALPHA_1 = (Cs - Cd) * FIX / 128 + Cd; retain the native unmasked FIX input. */
 void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
-    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
+    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
     command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
     command->data = ((u64)fixedAlpha << 32) | EVT_FIXED_ALPHA_INTERPOLATION;
     command->registerId = EVT_GS_ALPHA_PRIMARY;
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append((SdfListHead *)surface, list);
@@ -452,10 +456,10 @@ extern void func_002D4C80(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
 void func_00108E60(void) {
-    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *framePacket;
     sdfInitPacketList(list);
-    framePacket = sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
     sdfAppendDmaTagToList(list, framePacket);
     {
@@ -467,10 +471,10 @@ void func_00108E60(void) {
 extern void func_002D4CC8(const void *, void *, s32);
 
 void func_00108F00(void) {
-    void *list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     void *framePacket;
     sdfInitPacketList(list);
-    framePacket = sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
     sdfAppendDmaTagToList(list, framePacket);
     {
@@ -510,7 +514,7 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     void *list;
     SdfPoolNode *surface;
 
-    list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
     sdfConsAppendAssetPacket(list, D_003BD6B0, 0);
@@ -538,7 +542,7 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     indices[2] = i3;
     indices[3] = i1;
     strip[0] = D_003245A0[0];
-    sdfAppendPacket(list, func_002E21A0(&desc));
+    sdfAppendPacket(list, (u32)(func_002E21A0(&desc)));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     surface->append((SdfListHead *)surface, list);
 }
@@ -556,7 +560,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
 
     asset = sdfCreateAssetWithDrawEntries();
     func_002DA438(asset, bits);
-    list = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
     sdfConsAppendAssetPacket(list, asset, 0);
@@ -593,7 +597,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     uvs[5] = v1;
     uvs[6] = u1;
     uvs[7] = v0;
-    sdfAppendPacket(list, func_002E21A0(&desc));
+    sdfAppendPacket(list, (u32)(func_002E21A0(&desc)));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     surface->append((SdfListHead *)surface, list);
     sdfQueueAssetRelease(asset);
@@ -615,9 +619,9 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     D_003245B0[1][2] = w;
     D_003245D0[1] = second;
     D_003245D0[0] = first;
-    list = sdfAllocPacketAligned(0x20);
+    list = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfAppendPacket(list, func_002EF2B0(D_003245B0, D_003245D0, 2, 0x80));
+    sdfAppendPacket(list, (u32)(func_002EF2B0(D_003245B0, D_003245D0, 2, 0x80)));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append((SdfListHead *)surface, list);
@@ -630,11 +634,11 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     void *packet;
     SdfPoolNode *surface;
     list = (void *)sdfCreateResetPacketList();
-    packet = sdfAllocPacketAligned(0x40);
+    packet = (void *)sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)(packet));
     sdfPktInit(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
-    sdfAppendPacket(list, sdfFormatSifPacket(&sifParameters, (const char *)drawArg));
+    sdfAppendPacket(list, (u32)(sdfFormatSifPacket(&sifParameters, (const char *)drawArg)));
     surface = &kwlnPositionedTextSurface;
     surface->append((SdfListHead *)surface, list);
 }
@@ -1377,15 +1381,15 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     sdfGetGeneralHeapStats(generalHeapStats);
     D_003BA97C = generalHeapStats[0];
     sdfGetChipHeapStats(&chipHeapStats);
-    packetList = sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     func_0010B1B0(packetList, 0x86C0, 0x79C0);
     func_003014F0(statusText, D_003BA980, generalHeapStats[1]);
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x86C0,
-        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText));
+    sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
+        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText)));
     func_003014F0(statusText, D_003BA988, chipHeapStats.freeBytes);
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x86C0,
-        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText));
+    sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
+        (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText)));
     surface->append((SdfListHead *)surface, packetList);
 }
 
