@@ -1,6 +1,7 @@
 #include "common.h"
 #include "itf.h"
 #include "sdf.h"
+#include "itf_panel_draw.h"
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 
@@ -1057,15 +1058,9 @@ SdfTex *itfLoadTextureFromAsset(const char *path) {
     return textureHandle;
 }
 
-typedef struct DrawVertex {
-    s32 x;
-    s32 y;
-} DrawVertex;
 
-/* Four 32-bit components: RGBA for colors, or two UV pairs in sprite packets. */
-typedef struct DrawColorRec {
-    u32 components[ITF_RGBA_COMPONENT_COUNT];
-} DrawColorRec;
+
+
 
 /* Emit three per-vertex RGBA/XYZ2 records; PRIM's low bits select a triangle.
  * Coordinates receive the native GS screen biases; no clipping is performed. */
@@ -1393,7 +1388,7 @@ UiSprite *func_001A1858(s32 kind, u32 value) {
             *work->payload = value;
             break;
         case 7:
-            *work->payload = value;
+            ((UiSpriteTexturePayload *)work->payload)->texture = (SdfTex *)value;
             break;
         case 8:
             *work->payload = value;
