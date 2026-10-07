@@ -5,6 +5,7 @@
 
 #include "kwln.h"
 #include "sdf.h"
+#include "sdf_sif_command.h"
 #include "scr.h"
 
 enum {
@@ -342,9 +343,7 @@ extern s32 sdfCreateResetPacketList(void);
 
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
-extern void sdfPktInit(void *, s32, s32, s32, s32);
 
-extern void *sdfFormatSifPacket();
 
 /* Submit primary-context GS TEST settings. Z testing is always enabled;
    unusedZte is a retained native formal, not the source of the ZTE bit. */
@@ -626,7 +625,7 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
 }
 
 void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
-    u8 sifParameters[16];
+    SifCommand sifParameters;
     void *list;
     void *packet;
     SdfPoolNode *surface;
@@ -634,8 +633,8 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     packet = sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
     sdfAppendPacket(list, packet);
-    sdfPktInit(sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
-    sdfAppendPacket(list, sdfFormatSifPacket(sifParameters, drawArg));
+    sdfPktInit(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
+    sdfAppendPacket(list, sdfFormatSifPacket(&sifParameters, (const char *)drawArg));
     surface = &kwlnPositionedTextSurface;
     surface->append((SdfListHead *)surface, list);
 }
@@ -1364,7 +1363,6 @@ extern void sdfGetGeneralHeapStats(s32 *);
 extern void sdfGetChipHeapStats(SdfChipStats *);
 extern void func_0010B1B0(void *, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
-extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];
 

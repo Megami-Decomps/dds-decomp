@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_command.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "sdf.h"
@@ -58,6 +59,8 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 #define EVT_STAGE_SCREEN_WORK_BYTES 0x20
 #define EVT_STAGE_RESOURCE_TASK_KIND 6
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
+
+typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
@@ -73,11 +76,11 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 
 extern s32 func_002C6CE8(void);
 
-extern u32 func_002B9FF8(u32);
+extern struct MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
+extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 extern u32 effCreateStatusBatch(u32);
 
-extern s32 datCommandRecords;
 
 extern s32 datCommandSelectors;
 
@@ -102,7 +105,7 @@ extern u8 D_003E7950[];
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
-extern void mnuPositionPanelItemPoints(s32, s32, s32);
+extern void mnuPositionPanelItemPoints(MenuPanelItem *, s32, s32);
 
 extern s8 D_003E7928[];
 extern s32 mdlRequestAsset(s32, s32, s32);
@@ -114,19 +117,7 @@ extern u16 D_003E7902[];
 
 extern s8 D_003E792A[];
 
-typedef struct RangeEntry {
-    u8 pad00;
-    u8 flags;
-    u8 pad02;
-    u8 kind;
-    u16 value;
-    u16 addition;
-    u8 pad08[0x1C];
-    u8 secondaryKind; /* 0x24 */
-    u8 pad25;
-    u16 secondaryValue; /* 0x26 */
-    u8 pad28[0x10];
-} RangeEntry;
+
 
 extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
 
@@ -140,7 +131,7 @@ extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 
 extern char D_00437CB0[];
 
-extern void mnuFreePanelItemWork();
+extern void mnuFreePanelItemWork(MenuPanelItem *);
 
 extern void sdfReleaseChipBlock();
 
@@ -470,11 +461,14 @@ typedef struct MenuPanelState {
     u32 thirdValueB; /* 0x7C */
     u32 thirdValueC; /* 0x80 */
     u8 pad84[4];
-    u32 resourceHandle; /* 0x88 */
+    struct MenuIconState *resourceHandle; /* 0x88 */
 } MenuPanelState;
 
+typedef char MenuPanelStateSizeCheck[(sizeof(MenuPanelState) == MNU_PANEL_STATE_BYTES) ? 1 : -1];
+typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0)->resourceHandle == 0x88) ? 1 : -1];
+
 /* Allocate a zeroed native panel state with the requested dimensions. */
-void *mnuCreatePanelState(s32 width, s32 height) {
+MenuPanelState *mnuCreatePanelState(s32 width, s32 height) {
     MenuPanelState *panel = (MenuPanelState *)sdfAllocSizeClassBlock(MNU_PANEL_STATE_BYTES);
 
     memset(panel, 0, MNU_PANEL_STATE_BYTES);
@@ -484,7 +478,7 @@ void *mnuCreatePanelState(s32 width, s32 height) {
 }
 
 void mnuDestroyPanelState(MenuPanelState *panel) {
-    s32 resourceHandle;
+    struct MenuIconState *resourceHandle;
 
     resourceHandle = panel->resourceHandle;
     if (resourceHandle != 0) {
@@ -515,11 +509,8 @@ void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, s32 guideX, 
     panel->corners[4].y = y + 0xF0;
 }
 
-void mnuInitializePanelResource(MenuPanelState *panel) {
-    u32 resourceHandle;
-
-    resourceHandle = func_002B9FF8(5);
-    panel->resourceHandle = resourceHandle;
+void mnuInitializePanelResource(MenuPanelState *panel, s32 resource) {
+    panel->resourceHandle = func_002B9FF8(5, resource);
 }
 
 void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
@@ -543,31 +534,31 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
-extern s32 mnuCreatePanelItem(void);
+extern MenuPanelItem *mnuCreatePanelItem(void);
 
-extern void func_002C26D8(s32, s32, s32, s32, s32);
+extern void func_002C26D8(MenuPanelItem *, s32, s32, s32, s32);
 
 typedef struct MenuPanelGroup {
     u8 pad00[0x0C];
     s32 texture;       /* 0x0C */
-    s32 entries[5];    /* 0x10 */
+    MenuPanelItem *entries[5]; /* 0x10 */
     u32 selection;     /* 0x24 */
     s32 initialValue;  /* 0x28: initialized to 0x100 */
 } MenuPanelGroup;
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
-struct MenuPanelItem;
-extern void mnuSetPanelItemSelection(struct MenuPanelItem *, s32);
-extern void mnuSetPanelItemOption(struct MenuPanelItem *, u32);
+extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
+extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
+extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 
 /* Create the five panel items owned by this group and clear its selection. */
 s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
-    s32 *itemCursor = group->entries;
+    MenuPanelItem **itemCursor = group->entries;
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
-        s32 panelItem = mnuCreatePanelItem();
+        MenuPanelItem *panelItem = mnuCreatePanelItem();
         func_002C26D8(panelItem, owner, texture, mode, panelIndex);
         *itemCursor++ = panelItem;
     }
@@ -612,8 +603,8 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0D18);
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
-    mnuSetPanelItemSelection((struct MenuPanelItem *)group->entries[index], selection);
-    mnuSetPanelItemOption((struct MenuPanelItem *)group->entries[index], option);
+    mnuSetPanelItemSelection(group->entries[index], selection);
+    mnuSetPanelItemOption(group->entries[index], option);
 }
 
 void mnuSetIndexedPanelGroupValue(MenuPanelGroup *group, s32 index, u32 value) {
@@ -635,7 +626,7 @@ void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId) {
         entryValue = ptyGetCombinedRecordAndSlotValue(itemId, index);
         child = *entries;
         entries = entries + 1;
-        mnuStorePanelItemValue(child, entryValue);
+        mnuStorePanelItemValue((MenuPanelItem *)child, entryValue);
         index = nextIndex;
     } while (nextIndex < 5);
 }
@@ -918,7 +909,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
 }
 
 /* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
-typedef struct MenuPanelItem {
+struct MenuPanelItem {
     u8 pad00[0x10];
     u32 value10;
     s32 value14;
@@ -927,73 +918,71 @@ typedef struct MenuPanelItem {
     s32 selection;
     u32 value24;
     u32 value28;
-    MenuPoint sprites[9]; /* 0x2C: grid object/entry reference pairs. */
-    MenuPoint points[5]; /* 0x74 */
+    MenuGridSlot spriteGridSlots[9]; /* 0x2C */
+    MenuGridSlot gridSlots[5]; /* 0x74 */
     u8 pad9C[4];
     u32 initialValue; /* 0xA0 */
     u32 selectionRamp; /* 0xA4 */
     s32 phase;
-} MenuPanelItem;
+};
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
-s32 mnuCreatePanelItem(void) {
+MenuPanelItem *mnuCreatePanelItem(void) {
     MenuPanelItem *panelItem = (MenuPanelItem *)sdfAllocSizeClassBlock(MNU_PANEL_ITEM_BYTES);
 
     memset(panelItem, 0, MNU_PANEL_ITEM_BYTES);
     panelItem->value14 = 0x63;
     panelItem->value10 = 0x8c;
     panelItem->initialValue = 0x100;
-    return (s32)panelItem;
+    return panelItem;
 }
 
 /* Bind the panel item's nine sprite cells to their grid entries (the extra pair only when an extra grid
  * exists) and pick the panel's label entry. */
-void func_002C26D8(s32 itemAddress, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
+void func_002C26D8(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
     s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
-    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
-    itfGridStorePosition(&item->sprites[0], secondaryGrid, 4);
-    itfGridStorePosition(&item->sprites[1], secondaryGrid, 5);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[1].x, item->sprites[1].y, 0xD40, 0x40, 0, 0);
-    itfGridStorePosition(&item->sprites[2], primaryGrid, 0x51);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[2].x, item->sprites[2].y, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->sprites[3], primaryGrid, 0x53);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[3].x, item->sprites[3].y, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->sprites[4], primaryGrid, 0x52);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[4].x, item->sprites[4].y, 0x460, 0x20, 0, 0);
-    itfGridStorePosition(&item->sprites[5], primaryGrid, 0x54);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[5].x, item->sprites[5].y, 0x460, 0x20, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[0], secondaryGrid, 4);
+    itfGridStorePosition(&item->spriteGridSlots[1], secondaryGrid, 5);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[1].set, item->spriteGridSlots[1].index, 0xD40, 0x40, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[2], primaryGrid, 0x51);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[2].set, item->spriteGridSlots[2].index, 0x4B0, 0x48, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[3], primaryGrid, 0x53);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[3].set, item->spriteGridSlots[3].index, 0x4B0, 0x48, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[4], primaryGrid, 0x52);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[4].set, item->spriteGridSlots[4].index, 0x460, 0x20, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[5], primaryGrid, 0x54);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[5].set, item->spriteGridSlots[5].index, 0x460, 0x20, 0, 0);
     if (extraGrid != 0) {
-        itfGridStorePosition(&item->sprites[6], primaryGrid, 0x56);
-        itfSetGridEntryQuantizedAndRefresh(item->sprites[6].x, item->sprites[6].y, 0x4B0, 0x48, 0, 0);
-        itfGridStorePosition(&item->sprites[7], extraGrid, 0x19);
-        itfSetGridEntryQuantizedAndRefresh(item->sprites[7].x, item->sprites[7].y, 0x460, 0x20, 0, 0);
+        itfGridStorePosition(&item->spriteGridSlots[6], primaryGrid, 0x56);
+        itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[6].set, item->spriteGridSlots[6].index, 0x4B0, 0x48, 0, 0);
+        itfGridStorePosition(&item->spriteGridSlots[7], extraGrid, 0x19);
+        itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[7].set, item->spriteGridSlots[7].index, 0x460, 0x20, 0, 0);
     } else {
-        item->sprites[6].x = 0;
-        item->sprites[6].y = 0;
-        item->sprites[7].x = 0;
-        item->sprites[7].y = 0;
+        item->spriteGridSlots[6].set = 0;
+        item->spriteGridSlots[6].index = 0;
+        item->spriteGridSlots[7].set = 0;
+        item->spriteGridSlots[7].index = 0;
     }
-    itfGridStorePosition(&item->sprites[8], primaryGrid, panelEntryIds[panelIndex]);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[8].x, item->sprites[8].y, 0x130, -0x30, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[8], primaryGrid, panelEntryIds[panelIndex]);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[8].set, item->spriteGridSlots[8].index, 0x130, -0x30, 0, 0);
 }
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuPositionPanelItemPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
+void mnuPositionPanelItemPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
-    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
-    itfGridStorePosition(&item->points[0], gridObject, 7);
-    itfSetGridEntryQuantizedAndRefresh(item->points[0].x, item->points[0].y, -0x50, -0x50, 0, 0);
-    itfGridStorePosition(&item->points[1], gridObject, 5);
-    itfSetGridEntryQuantizedAndRefresh(item->points[1].x, item->points[1].y, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->points[2], gridObject, 6);
-    itfSetGridEntryQuantizedAndRefresh(item->points[2].x, item->points[2].y, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->points[3], gridObject, 9);
-    itfSetGridEntryQuantizedAndRefresh(item->points[3].x, item->points[3].y, 0x5D0, 0, 0, 0);
-    itfGridStorePosition(&item->points[4], gridObject, entryIndices[panelIndex]);
-    itfSetGridEntryQuantizedAndRefresh(item->points[4].x, item->points[4].y, 0x130, -0x30, 0, 0);
+    itfGridStorePosition(&item->gridSlots[0], gridObject, 7);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[0].set, item->gridSlots[0].index, -0x50, -0x50, 0, 0);
+    itfGridStorePosition(&item->gridSlots[1], gridObject, 5);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[1].set, item->gridSlots[1].index, 0x390, -8, 0, 0);
+    itfGridStorePosition(&item->gridSlots[2], gridObject, 6);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[2].set, item->gridSlots[2].index, 0x390, -8, 0, 0);
+    itfGridStorePosition(&item->gridSlots[3], gridObject, 9);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[3].set, item->gridSlots[3].index, 0x5D0, 0, 0, 0);
+    itfGridStorePosition(&item->gridSlots[4], gridObject, entryIndices[panelIndex]);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[4].set, item->gridSlots[4].index, 0x130, -0x30, 0, 0);
 }
 
 void func_002C2A88(MenuPanelItem *item, u32 value) {
@@ -1024,8 +1013,8 @@ void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
     item->option = option;
 }
 
-void mnuFreePanelItemWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreePanelItemWork(MenuPanelItem *item) {
+    sdfReleaseChipBlock(item);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
@@ -1042,13 +1031,18 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     u32 color;
     FrFontGlyph *glyph;
 
-    func_00306CD0(x, y, depth, fade, 0, item->sprites[0].x, item->sprites[0].y, flags);
-    func_00306CD0(x, y, depth, fade, 0, item->sprites[1].x, item->sprites[1].y, flags);
+    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[0].set,
+                  item->spriteGridSlots[0].index, flags);
+    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[1].set,
+                  item->spriteGridSlots[1].index, flags);
     func_002C2AE8(x, y, depth, fade, mode, item, flags);
-    func_00306CD0(x, y, depth, fade, 0, item->sprites[8].x, item->sprites[8].y, flags);
+    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[8].set,
+                  item->spriteGridSlots[8].index, flags);
     if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
-        func_00306CD0(x, y, depth, fade, 0, item->points[0].x, item->points[0].y, flags);
-        func_00306CD0(x, y, depth, fade, 0, item->points[4].x, item->points[4].y, flags);
+        func_00306CD0(x, y, depth, fade, 0, (s32)item->gridSlots[0].set,
+                      item->gridSlots[0].index, flags);
+        func_00306CD0(x, y, depth, fade, 0, (s32)item->gridSlots[4].set,
+                      item->gridSlots[4].index, flags);
     }
     value = item->value18;
     value += item->option;
@@ -1602,24 +1596,24 @@ u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
 
 /* Only secondary-kind-2 entries expose the paired value. */
 u16 mnuGetSecondaryValueIfKind2(s32 commandId) {
-    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
+    DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
 
-    if (command->secondaryKind != 2) {
+    if (command->attribute.parts.kind != 2) {
         return 0;
     }
-    return command->secondaryValue;
+    return command->attribute.parts.flagMask;
 }
 
 /* Return the native value/cost kind from the low-sixteen-bit command ID. */
 u8 mnuGetRangeEntryKind(u32 commandId) {
-    return ((RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords))->kind;
+    return ((DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords))->costMode;
 }
 
 /* HP-kind values use max HP as a percentage basis; other kinds retain the stored value. */
 u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
-    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
-    u16 entryValue = command->value;
-    u16 flatAddition = command->addition;
+    DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
+    u16 entryValue = command->costPercentage;
+    u16 flatAddition = command->costBase;
     if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == MNU_COST_KIND_HP) {
         entryValue = flatAddition + ((DatPartyRecord *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
     }
@@ -1628,9 +1622,9 @@ u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
 
 s32 mnuGetRangeEntryFlatValue(s32 id) {
     s32 index = id & 0xFFFF;
-    RangeEntry *record = (RangeEntry *)(index * 0x38 + datCommandRecords);
-    s32 scale = record->value;
-    s32 addition = record->addition;
+    DatCommandRecord *record = (DatCommandRecord *)(index * 0x38 + (s32)datCommandRecords);
+    s32 scale = record->costPercentage;
+    s32 addition = record->costBase;
 
     if (mnuGetRangeEntryKind(index) == 1) {
         return scale + addition;
@@ -1640,7 +1634,7 @@ s32 mnuGetRangeEntryFlatValue(s32 id) {
 
 /* Compare the stored raw HP/MP cost; equality is affordable and other kinds pass. */
 s32 mnuCanAffordEntryCost(u16 commandId, s32 actorAddress) {
-    u16 cost = ((RangeEntry *)datCommandRecords)[commandId].value;
+    u16 cost = datCommandRecords[commandId].costPercentage;
     s32 costKind = mnuGetRangeEntryKind(commandId);
 
     switch (costKind) {
@@ -1663,15 +1657,15 @@ extern s32 mnuCanAffordEntryCost(u16, s32);
 /* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
 s32 mnuGetEntryUseStatus(s32 actorAddress, u16 commandId) {
     if (mnuCanAffordEntryCost(commandId, actorAddress) == 0) return -1;
-    if ((((RangeEntry *)(datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->flags & 1) == 0) return 1;
+    if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->unk_01 & 1) == 0) return 1;
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return 0;
     return 1;
 }
 
 /* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */
 s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
-    s32 costKind = ((RangeEntry *)datCommandRecords)[commandId].kind;
-    u16 cost = ((RangeEntry *)datCommandRecords)[commandId].value;
+    s32 costKind = datCommandRecords[commandId].costMode;
+    u16 cost = datCommandRecords[commandId].costPercentage;
 
     switch (costKind) {
     case MNU_COST_KIND_HP:
@@ -1690,10 +1684,10 @@ s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
 
 /* Deduct an affordable stored HP/MP cost; unhandled kinds succeed without a deduction. */
 s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
-    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
-    u16 cost = command->value;
+    DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
+    u16 cost = command->costPercentage;
 
-    switch (command->kind) {
+    switch (command->costMode) {
     case MNU_COST_KIND_HP:
         if (((DatPartyRecord *)actorEntry)->hp < cost) {
             return 0;
@@ -1717,7 +1711,7 @@ s32 mnuGetAbilityByteCategory(u16 commandId) {
     if (commandId == 0) {
         return 1;
     }
-    category = *(u8 *)(datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES + 8);
+    category = datCommandRecords[commandId].unk_08;
     switch (category) {
     case 0:
         return 1;

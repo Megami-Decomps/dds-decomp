@@ -1016,7 +1016,7 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
     }
 }
 
-extern void fldLmapSubmitPositionedCommandPacket(s32, s32, s32, s32, s32, s32);
+extern void fldLmapSubmitPositionedCommandPacket(s32, s32, s32, s32, const char *, s32);
 
 /* Draw visible local-map rows and invoke the selected row callback once. */
 void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
@@ -1075,7 +1075,7 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                         }
                         itfFormatGridValueEntryText(widget, item, text);
                         fldLmapSubmitPositionedCommandPacket(offsetX, offsetY, z,
-                                                             drawMode, (s32)text,
+                                                             drawMode, text,
                                                              surfaceIndex);
                     }
                     if (item->select != NULL && item == widget->selected &&

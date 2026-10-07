@@ -8,6 +8,7 @@
 #include "evt_unit.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "dat_command.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -89,38 +90,6 @@ extern void func_002C7CE8(void *);
 extern void sndReleaseSlotOwner(void *);
 
 extern void btlBossDebugPrintf(const char *format, ...);
-
-typedef union BtlCommandAttribute {
-    u32 bits;
-    struct {
-        u8 kind;
-        u8 unused;
-        u16 flagMask;
-    } parts;
-} BtlCommandAttribute;
-
-typedef struct BtlCommandRecord {
-    u8 flags;
-    u8 unk_01;
-    u8 kind;
-    u8 unk_03[6];
-    u8 options; /* +0x09 */
-    u8 unk_0A[2];
-    u16 restriction;
-    u8 unk_0E[8];
-    u16 primaryLimitKind; /* +0x16: governs the primary counter check */
-    u8 unk_18[2];
-    u16 secondaryLimitKind; /* +0x1A */
-    u8 unk_1C[8];
-    BtlCommandAttribute attribute; /* +0x24 */
-    s32 requirementBits; /* +0x28: selects the action-entry condition */
-    u8 unk_2C[4];
-    s32 unk30;
-    u8 unk_34[4];
-} BtlCommandRecord;
-
-extern BtlCommandRecord *datCommandRecords;
-
 
 extern u32 func_001AC360(u64, BtlIndexList *, u64);
 
@@ -343,7 +312,7 @@ extern void sdfInitPacketList(void *);
 
 extern void sdfAppendPacket(void *, s32);
 
-extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, void *, u32);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_00436EF8[];
 
@@ -772,7 +741,7 @@ s32 btlHasRestrictedUnit(void) {
             if (unitFlags & 0xe0) {
                 return 1;
             }
-            if (unitCursor->conditionFlags & 0x4000) {
+            if (unitCursor->partyRecord.status & 0x4000) {
                 return 1;
             }
         }
@@ -947,7 +916,7 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
  * DDS2 omits DDS1's mode/flag gate. Its final empty/all-flagged-target reason
  * is 10, versus 9 in DDS1. Zero means no block. */
 s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
-    BtlCommandRecord *commandRecord;
+    DatCommandRecord *commandRecord;
     BtlIndexList *targetList;
     s32 targetCount;
     s32 flaggedTargetCount;
@@ -958,7 +927,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     if (commandId <= 0) {
         return 0;
     }
-    commandRecord = (BtlCommandRecord *)(commandId * BTL_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
+    commandRecord = (DatCommandRecord *)(commandId * BTL_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     if ((commandRecord->attribute.bits & 0x400000FF) == 0x40000002) {
         if ((~commandRecord->restriction & 0x7FFF) == 0x4000) {
             if (btlHasRestrictedUnit() == 0) {
@@ -972,7 +941,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     targetCount = btlGetIndexListCount(targetList);
     if (datCommandRecords[commandId].flags & 8) {
         for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
-            if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->conditionFlags & 0x800) {
+            if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->partyRecord.status & 0x800) {
                 flaggedTargetCount++;
             }
         }
@@ -1707,12 +1676,12 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
         btlBossDebugPrintfN(x, y, 0, D_00436EE8);
         if ((unit->flags & 0x200) != 0) {
             if ((unit->flags & 0x1000) != 0) {
-                row = ((BtlAffinityRow *)D_00435DD8)[unit->mode];
+                row = ((BtlAffinityRow *)D_00435DD8)[unit->partyRecord.unitId];
             } else {
-                row = ((BtlAffinityRow *)D_00435DDC)[unit->mode];
+                row = ((BtlAffinityRow *)D_00435DDC)[unit->partyRecord.unitId];
             }
         } else {
-            row = ((BtlAffinityRow *)D_00435DFC)[unit->mode];
+            row = ((BtlAffinityRow *)D_00435DFC)[unit->partyRecord.unitId];
         }
         for (i = 0; i < 16; i++) {
             row.value[i] = func_001ABF50(unit, i);
@@ -1855,7 +1824,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
             if (itemIndex != selectedIndex) {
                 selectionFlags = 0;
             }
-            sdfAppendPacket(indexPackets, sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, D_00436EF8, itemIndex));
+            sdfAppendPacket(indexPackets, (u32)sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, (const char *)D_00436EF8, itemIndex));
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }

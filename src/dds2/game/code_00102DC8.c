@@ -59,7 +59,7 @@ extern s32 kwlnTextureCountIncompleteResources(void);
 
 extern s32 func_0035C860();
 
-extern s32 sdfCreateFormattedSifCommand();
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern void sdfAppendPacket(SdfListHead *, u32);
 
@@ -495,12 +495,12 @@ void kwlnDrawImageOutline(s32 packetList, SdfTex *image) {
 }
 
 /* Append the zero-based viewer page and final page index; an empty list prints -1. */
-void kwlnTextureDrawPageCounter(void *packetList) {
+void kwlnTextureDrawPageCounter(SdfListHead *packetList) {
     char pageText[0x70];
     s32 pageIndex = kwlnTextureGetPageIndex();
     s32 resourceCount = kwlnTextureCountIncompleteResources();
     func_0035C860(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
 }
 
 INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004111F8);
@@ -1100,10 +1100,10 @@ void kwlnDrawBlurErrorCounters(void) {
             packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
             sdfInitPacketList(packetList);
             if (kwlnDistanceBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
+                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
             }
             if (kwlnRippleBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
+                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
             }
             D_00380708.append((SdfListHead *)&D_00380708, packetList);
         }

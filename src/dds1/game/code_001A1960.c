@@ -133,7 +133,7 @@ extern s32 D_00358510[];
 
 extern s32 D_00359A78[];
 
-extern s32 mdlFlagTest(u32);
+extern s32 mdlFlagTest(s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -183,7 +183,7 @@ extern s32 func_001A8DD8(s32, s32 *);
 
 extern s32 btlCheckSpecialAbility(s32, s32);
 
-extern void func_001B83D8(s32, s32, s32);
+extern void func_001B83D8(BtlTask *, s8, s8);
 
 extern s32 btlGetRuntime(void);
 
@@ -362,8 +362,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2258);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2608);
 
-s32 btlGetEntryFlagsUnlessDisabled(s32 entry) {
-    DatPartyRecord *record = (DatPartyRecord *)entry;
+s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     if ((record->flags & 4) != 0) {
         return 0;
     }
@@ -691,7 +690,27 @@ s32 btlSelectActorAction(s32 object) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4130);
+s32 func_001A4130(s32 actorAddress, s32 mode) {
+    BtlUnit *actor = (BtlUnit *)actorAddress;
+    DatEnemyRecord *enemy = &datEnemyRecords[actor->partyRecord.unitId];
+    s32 action = 0;
+    u16 i;
+
+    extern u32 btlRollAiBucket(void);
+
+    if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
+        mdlFlagTest(enemy->overrideFlag) != 0) {
+        if ((u8)btlRollAiBucket() < enemy->overrideChance) {
+            action = enemy->overrideAction;
+        }
+    }
+    for (i = 0; i < 2 && action == 0; i++) {
+        if (enemy->unk3E[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
+            action = enemy->unk3E[i];
+        }
+    }
+    return action;
+}
 
 void func_001A4240(u16 item) {
     BattleController *controller = (BattleController *)btlGetRuntime();
@@ -1814,7 +1833,7 @@ s32 btlCalculateAbilityRecoveryAmount(u8 *actor) {
 }
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *actor, s32 delta) {
-    if (btlGetEntryFlagsUnlessDisabled((s32)(actor + 0x120)) & 4) return 0;
+    if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)actor)->partyRecord) & 4) return 0;
     if (btlHasEnemyRecordDefeatExemptionFlag((s32)actor)) return 0;
     if ((((BtlUnit *)actor)->partyRecord.status & 0x7FFF) == 0x4000) return 1;
     if ((*(u32 *)(btlGetRuntime() + 0x1F4) & 0x80) == 0) return 0;
@@ -1997,7 +2016,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
     if ((((BtlUnit *)actor)->partyRecord.status & 0x40) != 0) {
         return 0;
     }
-    return (btlGetEntryFlagsUnlessDisabled(actor + 0x120) & 0x40) < 1;
+    return (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)actor)->partyRecord) & 0x40) < 1;
 }
 
 extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
@@ -2589,7 +2608,7 @@ extern SndPad D_00324510;
 
 extern u8 D_00359160[];
 
-extern void func_001B83D8(s32, s32, s32);
+extern void func_001B83D8(BtlTask *, s8, s8);
 
 extern void sndSetStationedSeVolume(u32);
 
@@ -4904,7 +4923,7 @@ s32 btlUpdateCommandUiTransition(void) {
             flow->counter = counter;
             if (btlAreLinkedSceneCountersAtThreshold() != 0) {
                 if (task != 0) {
-                    func_001B83D8(*(s32 *)(kwlnTaskGetUserValue(task) + 0x2C), 2, 0);
+                    func_001B83D8(((BattleSceneObject *)kwlnTaskGetUserValue(task))->owner, 2, 0);
                 }
                 btlTrackedTaskHandles->status.bytes.state = 0;
             }
@@ -5307,7 +5326,7 @@ void func_001BF4C0(BtlTask *task) {
                                func_001BF0F8, fldClearBattleSceneObject, (u32)object);
         func_00101A80(scene->taskParent, (KwlnTask *)handle);
         scene->sceneObjectTask = handle;
-        func_001B83D8((s32)task, 0, 0);
+        func_001B83D8(task, 0, 0);
         btlInitializeSelectionWork();
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();

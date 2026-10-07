@@ -117,7 +117,7 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
-extern s32 sdfCreateFormattedSifCommand();
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
 extern EffResourceRectWork *effCloneResourceTemplate(void *arg);
@@ -375,7 +375,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     SdfPoolNode *scene;
 
     sdfInitPacketList(task);
-    sdfAppendPacket(task, (u32)(sdfCreateFormattedSifCommand((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, arg3)));
+    sdfAppendPacket(task, (u32)(sdfCreateFormattedSifCommand((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, (const char *)arg3)));
     scene = &kwlnPositionedTextSurface;
     scene->append((SdfListHead *)scene, (SdfListHead *)task);
 }

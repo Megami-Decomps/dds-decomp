@@ -8,8 +8,8 @@
 #include "dat_state.h"
 #include "sdf_draw.h"
 #include "eff.h"
+#include "sdf_sif_command.h"
 
-extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 
 extern void sdfReleaseChipBlock();
 extern void *sdfAllocAndClearQuadwords(s32 size);
@@ -57,13 +57,6 @@ s32 effCreateNodeFromDescriptor(s32);
 #define MDL_MAP_POSITION_DATA_OFFSET 0x10
 #define MDL_MAP_POSITION_RECORD_BYTES 0x40
 
-
-typedef struct MdlSifCommand {
-    s32 source;
-    s32 end;
-    s32 argument;
-    u32 command;
-} MdlSifCommand;
 
 /* Viewer-wide state for the model viewer task (DDS2 game/code_00233660 and
  * DDS1 game/code_00218B48 share this layout field for field). Fields that are
@@ -136,9 +129,7 @@ extern char D_00421248[]; /* "%02x/%02x" */
 
 extern char D_00437068[]; /* "" */
 
-extern void sdfPktInit(void *, s32, s32, s32, s32);
 
-extern s32 sdfFormatSifPacket();
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
@@ -173,7 +164,9 @@ extern s32 dds3GetWorldSecondaryObject();
 
 extern s8 D_00453560[];
 
-void func_00236568(void);
+void mdlUpdateViewerSelectedModelFromPad(void);
+
+void mdlCleanupViewerTasksAndResources(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
@@ -1343,12 +1336,12 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00235568);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235628);
 
-void func_00235728(void) {
-    MdlSifCommand packet;
+void mdlDrawViewerModelAndMotionSummary(void) {
+    SifCommand packet;
     const char *format;
     s32 displayMode;
     s32 nodeCount;
-    s32 formatted;
+    void *formatted;
 
     mdlAppendViewerRectToDrawList(0x7E10, 0x8608, 0xFF0080, 0xEA0, 0x90, 0);
     sdfPktInit(&packet, 0x7E40, 0x8620, 0xFF0080, 0);
@@ -1359,7 +1352,7 @@ void func_00235728(void) {
         format = D_00421220;
     }
     sdfAppendPacket(mdlViewerState.packetList,
-                    sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
+                    (u32)sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
 
     nodeCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], 0);
     if (nodeCount == 0) {
@@ -1373,7 +1366,7 @@ void func_00235728(void) {
         formatted = sdfFormatSifPacket(&packet, format,
                                        mdlGetNodeField2C(mdlViewerState.resources[0], 0), nodeCount - 1);
     }
-    sdfAppendPacket(mdlViewerState.packetList, formatted);
+    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 }
 
 void mdlAddViewEntryFlagged(void) {
@@ -1462,7 +1455,7 @@ extern f32 sdfViewMatrix[];
 extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
-void func_00236080(void) {
+void mdlUpdateViewerCameraFromPad(void) {
     f32 speed;
     s32 rotated;
 
@@ -1579,7 +1572,7 @@ void mdlDrawViewerIndexedLabelOverlay(void) {
 }
 
 u32 mdlRunViewerIndexedLabelTask(void) {
-    func_00236080();
+    mdlUpdateViewerCameraFromPad();
     mdlDrawViewerIndexedLabelOverlay();
     return 0;
 }
@@ -1593,7 +1586,7 @@ extern f32 D_0040B540[4];
 extern f32 D_0040B550[4];
 
 /* vu0 routine: edit the viewer transform with translation or quaternion steps. */
-void func_00236568(void) {
+void mdlUpdateViewerSelectedModelFromPad(void) {
     f32 speed;
     f32 angle;
 
@@ -1704,7 +1697,7 @@ void mdlDrawViewerSelectionLabel(void) {
 }
 
 s32 mdlRunViewerSelectionLabelTask(void) {
-    func_00236568();
+    mdlUpdateViewerSelectedModelFromPad();
     if (D_00453560[0] == 0) {
         mdlDrawViewerSelectionLabel();
     }

@@ -93,7 +93,7 @@ f32 effBTLFieldColorGetActorScale(BtlUnit *unit) {
     f32 maximum = 3.0f;
     f32 radius = ((unit->reach * scale) + (unit->height * scale * 0.5f)) * 0.5f * (1.0f / 87.5f);
 
-    switch (unit->mode) {
+    switch (unit->partyRecord.unitId) {
     case 0x126:
     case 0x127:
         maximum = 4.0f;

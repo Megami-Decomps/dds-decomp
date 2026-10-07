@@ -138,7 +138,7 @@ s32 func_0029CF00(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
 
 /* Active party members take full EXP; benched members need the half/full
  * EXP skills (0x23F/0x240 respectively). */
-s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp, s32 unused) {
+s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     s32 result;
 
     if ((unit->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {

@@ -219,16 +219,15 @@ typedef struct MenuPoint {
     s32 y;
 } MenuPoint;
 
-#ifndef VERSION_DDS2
 struct EffectSlotSet;
 
-typedef struct MenuProfileSlot {
+/* An indexed render slot owned by an effect resource set. */
+typedef struct MenuGridSlot {
     struct EffectSlotSet *set;
     s32 index;
-} MenuProfileSlot;
+} MenuGridSlot;
 
-typedef char MenuProfileSlot_size_must_be_8[(sizeof(MenuProfileSlot) == 8) ? 1 : -1];
-#endif
+typedef char MenuGridSlot_size_must_be_8[(sizeof(MenuGridSlot) == 8) ? 1 : -1];
 
 /* Native profile-progress panel, including its cached sprite-slot pairs. */
 typedef struct MenuProfilePanel {
@@ -247,9 +246,9 @@ typedef struct MenuProfilePanel {
 #else
     s32 capValue;
     s32 option;
-    MenuProfileSlot fill;
-    MenuProfileSlot background;
-    MenuProfileSlot completed;
+    MenuGridSlot fill;
+    MenuGridSlot background;
+    MenuGridSlot completed;
     s32 unk30;
     s32 phase;
     u32 opacity;
