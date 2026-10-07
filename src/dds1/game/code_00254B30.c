@@ -377,7 +377,41 @@ void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 sur
     func_0024E1C8(x, y, 1, alpha, sprite, 0x2D, 0x20, surfaceIndex);
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255B78);
+/* Preserve the provider's legacy K&R GS-register argument boundary. */
+extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+
+void func_00255B78(DspParticleState *state, s32 sprite, s32 surfaceIndex) {
+    s32 i;
+    DspParticle *particle;
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surfaceIndex);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x3000D, surfaceIndex);
+    uiDrawActiveSurfaceRegion(surfaceIndex);
+    for (i = 0; i < 7; i++) {
+        s32 y = i * 64;
+
+        func_0024E1C8(0, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
+        func_0024E1C8(0x100, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
+    }
+    sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, surfaceIndex);
+    particle = state->particles;
+    for (i = 7; i >= 0; i--) {
+        mnuDrawMantraSparkParticle(particle, sprite, surfaceIndex);
+        particle++;
+    }
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surfaceIndex);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, surfaceIndex);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255D00);
 
