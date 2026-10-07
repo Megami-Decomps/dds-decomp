@@ -2665,7 +2665,7 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
-extern void effObjSetInnerFloat(s32 object, f32 value);
+extern void effObjSetInnerFloat(EffWorldNode *object, f32 value);
 
 extern void dds3EnsureSlotData();
 
@@ -2685,25 +2685,25 @@ void mdlSpawnViewerWorldObject(void) {
     memset(rotation, 0, 0x10);
     rotation[3] = 1.0f;
     object = dds3CreateCameraObject(dds3AdvanceWorldCounter(), position, rotation);
-    effObjSetInnerFloat(object, 10.0f);
+    effObjSetInnerFloat((EffWorldNode *)object, 10.0f);
     dds3EnsureSlotData(object);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)object);
     func_001127A0(object, 0);
 }
 
-extern void func_00111E30(s32 object, s32, s32);
+extern void func_00111E30(EffWorldNode *object, s32, s32);
 
-extern s32 dds3SpawnCameraSlotObj5(s32 counter, f32 *position, f32 *rotation);
+extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 counter, void *position, void *rotation);
 
-extern void dds3SetObjectFlags(s32 object, s32 flags);
+extern void dds3SetObjectFlags(void *object, s32 flags);
 
-extern s32 *dds3GetObjectBaseResourceHandle(s32 object);
+extern s32 *dds3GetObjectBaseResourceHandle(void *object);
 
 s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 position[4];
     f32 rotation[4];
     s32 counter;
-    s32 object;
+    EffWorldNode *object;
 
     memset(position, 0, 0x10);
     position[3] = 1.0f;
@@ -2723,9 +2723,9 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
 
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(void *world, s32 id, s32 kind);
 
-extern void *dds3SetSlotByKind(s32 object, void *slot);
+extern void *dds3SetSlotByKind(void *object, void *slot);
 
-extern void dds3RegisterObjectInHandlerIndex(s32 object);
+extern void dds3RegisterObjectInHandlerIndex(void *object);
 
 s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 position[4];

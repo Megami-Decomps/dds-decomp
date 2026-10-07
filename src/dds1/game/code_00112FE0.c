@@ -23,7 +23,7 @@ extern void dds3EnsureSlotData(void *object);
 extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
 extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
 extern void effObjInnerVecBackup(ObjectTransform *node);
-extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
+extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void *dds3ExchangeSlot(void *object, void *slotData, s32 slotIndex);
 extern s32 dds3RegisterObjectInHandlerIndex(void *object);
 
@@ -44,4 +44,5 @@ EffWorldNode *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVect
         dds3RegisterObjectInHandlerIndex(obj);
         return obj;
     }
+    return NULL;
 }

@@ -13,7 +13,7 @@ typedef struct WorldObjectPointer {
 
 s32 dds3InvokeAreaCallback(void *arg);
 
-s32 dds3VisitWorldObjectValues(s32 object, s32 (*callback)(void *));
+s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
 
 s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, s32 value) {
     EffWorldNode *node;
@@ -145,8 +145,8 @@ void dds3DestroyObjectPointerChains(WorldObjectPointer *object) {
     u32 i;
 
     p = object->value;
-    dds3VisitWorldObjectValues(p[0], dds3ExchangeAreaSlot);
-    dds3VisitWorldObjectValues(p[1], dds3ExchangeAreaSlot);
+    dds3VisitWorldObjectValues((WorldValueIndices *)(u32)p[0], (s32 (*)(u32))dds3ExchangeAreaSlot);
+    dds3VisitWorldObjectValues((WorldValueIndices *)(u32)p[1], (s32 (*)(u32))dds3ExchangeAreaSlot);
     for (i = 0; i < 2; i++) {
         dds3DestroyWorldIndexNode((struct NodeB *)p[i]);
     }
@@ -158,6 +158,6 @@ u32 func_001112F8(void) {
 }
 
 s32 ddsDispatchFirstWorldIndexAreas(WorldObjectPointer *object) {
-    dds3VisitWorldObjectValues(*object->value, dds3InvokeAreaCallback);
+    dds3VisitWorldObjectValues((WorldValueIndices *)(u32)*object->value, (s32 (*)(u32))dds3InvokeAreaCallback);
     return 1;
 }

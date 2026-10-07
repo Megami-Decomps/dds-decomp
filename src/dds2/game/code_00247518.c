@@ -22,7 +22,7 @@ extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-extern void func_001063A8(f32);
+extern void sdfSetViewFieldOfView(f32);
 
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
@@ -450,7 +450,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
     }
     if (unit != 0) {
         dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)unit);
-        func_001063A8(dds3GetCameraFieldOfView((EffWorldNode *)unit));
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView((EffWorldNode *)unit));
     }
 }
 

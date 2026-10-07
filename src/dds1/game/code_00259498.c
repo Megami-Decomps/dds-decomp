@@ -11,6 +11,7 @@ extern void *sdfMemoryGetBlockAddress(s32);
 extern f32 effMiscRandUnitFloat(s32);
 
 extern void *memset(void *, s32, u32);
+extern void *memcpy(void *, const void *, u32);
 
 extern f32 sdfSinPoly(f32);
 
@@ -130,17 +131,52 @@ typedef struct MantraPrerequisiteRecord {
     u8 flags[4];
 } MantraPrerequisiteRecord;
 
+typedef struct MantraPulseAnimationWork {
+    s32 frame;
+    u8 pad568[4];
+    s16 alpha[4];
+} MantraPulseAnimationWork;
+
+typedef struct MantraSceneCoordinates {
+    s32 x;
+    s32 y;
+} MantraSceneCoordinates;
+
+typedef struct MantraSceneTransitionList {
+    u8 pad00[8];
+    struct MnuTransRec *first;
+} MantraSceneTransitionList;
+
 /* Same display-work owner as the grid callback producer. */
 typedef struct MantraPulseDisplayWork {
-    u8 pad00[0x484];
-    MantraPulseGrid *grid;
-    u8 pad488[0xD8];
+    s32 allocationHandle;
+    u8 pad004[0x480];
+    struct MenuGrid *gridHandle;
+    u32 gridRefreshControl[2];
+    s32 gridFrame;
+    u8 pad494[8];
+    MantraSceneCoordinates coordinates[10];
+    s32 pendingMantras[8];
+    u8 pad50C[0x34];
+    s32 coordinateA;
+    s32 coordinateB;
+    u8 pad548[8];
+    s32 transitionState;
+    u8 pad554[0xC];
     s32 alpha;
-    u8 pad564[0x3C];
+    MantraPulseAnimationWork pulse;
+    u8 pad574[0x10];
+    MantraSceneTransitionList transitions[2];
+    s16 cursorX;
+    s16 cursorY;
     s16 scrollX;
     s16 scrollY;
-    u8 pad5A4[8];
+    s16 targetX;
+    s16 targetY;
+    u8 pad5A8[4];
     u8 flags;
+    u8 cursorMoving;
+    u8 pad5AE[2];
 } MantraPulseDisplayWork;
 
 extern MantraPrerequisiteRecord D_0036AE80[];
@@ -270,7 +306,79 @@ void func_0025AD68(s32 frame, s32 size, s32 param) {
     func_0024E260(0, 0, 0, (s32)(scale * t), 3, param);
 }
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025AE80);
+void func_0025AE80(MantraPulseDisplayWork *display, s32 inputScale, s32 param) {
+    s8 enabled[4] __attribute__((aligned(4)));
+    const u32 clearWord = 0;
+    MantraPulseAnimationWork *pulse = &display->pulse;
+    s32 threshold;
+    s32 i;
+
+    memcpy(enabled, &clearWord, sizeof(enabled));
+    if (display->scrollY != 0) {
+        enabled[0] = 1;
+    }
+    if (display->scrollY < 0x38E) {
+        enabled[1] = 1;
+    }
+    if (display->scrollX != 0) {
+        enabled[2] = 1;
+    }
+
+    if (display->flags & 4) {
+        threshold = 0x307;
+    } else if (display->flags & 2) {
+        threshold = 0x2C8;
+    } else if (display->flags & 1) {
+        threshold = 0x24C;
+    } else {
+        threshold = 0x1BE;
+    }
+    if (display->scrollX < threshold) {
+        enabled[3] = 1;
+    }
+
+    for (i = 0; i < 4; i++) {
+        if (enabled[i] == 1) {
+            pulse->alpha[i] += 0x20;
+            if (pulse->alpha[i] > 0x80) {
+                pulse->alpha[i] = 0x80;
+            }
+        } else {
+            pulse->alpha[i] -= 0x20;
+            if (pulse->alpha[i] < 0) {
+                pulse->alpha[i] = 0;
+            }
+        }
+
+        switch (i) {
+        case 0:
+            func_0025AA20(pulse->frame,
+                          (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
+                          param);
+            break;
+        case 1:
+            func_0025AC50(pulse->frame,
+                          (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
+                          param);
+            break;
+        case 2:
+            func_0025AD68(pulse->frame,
+                          (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
+                          param);
+            break;
+        case 3:
+            func_0025AB38(pulse->frame,
+                          (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
+                          param);
+            break;
+        }
+    }
+
+    pulse->frame++;
+    if ((f32)pulse->frame > 45.0f) {
+        pulse->frame = 0;
+    }
+}
 
 typedef struct MnuSpritePlacement {
     s16 resourceIndex;

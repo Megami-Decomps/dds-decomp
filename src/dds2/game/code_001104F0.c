@@ -294,9 +294,9 @@ EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 ki
 }
 
 extern struct NodeB *dds3AppendWorldIndexNode(s32 initialCount);
-extern void dds3GrowWorldValueChain();
+extern void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 
-void *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind) {
+struct NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind) {
     EvtWorldTable *data = object->data;
     struct NodeB *indexObject;
     EffWorldNode *node;
@@ -307,8 +307,8 @@ void *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind) {
     indexObject = dds3AppendWorldIndexNode(0);
     node = data->slots[kind].head;
     do {
-        dds3GrowWorldValueChain(indexObject, 1);
-        dds3WriteIndexedWorldObjectWord(indexObject, node);
+        dds3GrowWorldValueChain((WorldValueIndices *)indexObject, 1);
+        dds3WriteIndexedWorldObjectWord((WorldValueIndices *)indexObject, (u32)node);
         node = node->next;
     } while (node != NULL);
     return indexObject;

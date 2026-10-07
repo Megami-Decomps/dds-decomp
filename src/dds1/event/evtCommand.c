@@ -1,6 +1,8 @@
 #include "common.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "eff_dependency.h"
+#include "eff_object.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
@@ -63,7 +65,6 @@ void scrDestroyAllNamedProcesses(void);
 
 void evtDrainSecondaryWorldNodes(void);
 
-void dds3ResetWorldResourceState(void *unit);
 
 void dds3RemoveWorldObjectNode(void *unit);
 
@@ -731,7 +732,6 @@ typedef struct ObjectWithResource {
     ObjectResource *resource;
 } ObjectWithResource;
 
-extern void *effObjGetDataHandle(void *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3SetSlotKey(ObjectWithResource *, u32);
 extern void dds3ReplaceObjectResource(ObjectWithResource *);

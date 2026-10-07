@@ -34,7 +34,10 @@ typedef struct BattleLinkedEffectState {
     u32 value;
     u16 timer;
     u8 active, phase;
-    u32 effect;
+    union {
+        u32 effect;
+        f32 height; /* Actor vertical motion in code_00227288. */
+    };
     f32 speed;
 } BattleLinkedEffectState;
 #endif
@@ -133,7 +136,9 @@ typedef struct BtlState {
     struct SdfFlagListWork *soundTransitionTask; /* 0x58C */
     u8 pad590[4];
     void (*bossCleanup)(void); /* 0x594 */
-    u8 pad598[0x20];
+    u8 pad598[8];
+    s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5A0 */
+    u8 pad5A4[0x14];
     s32 unk_5B8;
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
     u8 pad5C0[4];
@@ -151,7 +156,9 @@ typedef struct BtlState {
     u8 pad630[0x24];
     s32 (*hook654)(BtlUnit *);
     s32 (*hook658)(BtlUnit *);
-    u8 pad65C[0x38];
+    u8 pad65C[0x10];
+    s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
+    u8 pad670[0x24];
     BattleEffectState *effect; /* 0x694 */
     u8 pad698[0xC];
     s32 unk_6A4;

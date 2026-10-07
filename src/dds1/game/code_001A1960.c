@@ -3772,6 +3772,12 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21A8);
 
 const BattlePanelColors D_003A21B8 = {{0x80808080, 0x80808080, 0x80808080, 0x80808080}};
 
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+
+extern const u32 D_003A22C0[4];
+extern const s32 D_003A22D0[2][3], D_003A22E8[2][3], D_003A2300[2][3], D_003A23D8[2][3];
+extern const s32 D_003A2318[16][3];
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21C8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A21E8);
@@ -3788,7 +3794,68 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2298);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A22C0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AE250);
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A22D0);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A22E8);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2300);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2318);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A23D8);
+
+void func_001AE250(s32 section, s32 delta) {
+    /* Rows contain pixel X, pixel Y and sprite slot; section 3 is the sixteen-row grid. */
+    u32 colors[4];
+    s32 primary[2][3];
+    s32 secondary[2][3];
+    s32 lower[2][3];
+    s32 grid[16][3];
+    s32 footer[2][3];
+    s32 (*selectedRows)[3];
+    s32 count;
+    s32 i, j;
+
+    memcpy(colors, D_003A22C0, sizeof(colors));
+    memcpy(primary, D_003A22D0, sizeof(primary));
+    memcpy(secondary, D_003A22E8, sizeof(secondary));
+    memcpy(lower, D_003A2300, sizeof(lower));
+    memcpy(grid, D_003A2318, sizeof(grid));
+    memcpy(footer, D_003A23D8, sizeof(footer));
+
+    switch (section) {
+    case 0:
+        selectedRows = primary;
+        count = 2;
+        break;
+    case 1:
+        selectedRows = secondary;
+        count = 2;
+        break;
+    case 2:
+        selectedRows = lower;
+        count = 2;
+        break;
+    case 3:
+        selectedRows = grid;
+        count = 16;
+        break;
+    case 4:
+    default:
+        selectedRows = footer;
+        count = 2;
+        break;
+    }
+    for (i = 0; i < count; i++) {
+        s32 (*strip)[3] = &selectedRows[i];
+        for (j = 0; j < 4; j++) {
+            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA,
+                                               (*strip)[2], j, delta);
+        }
+        func_002BF438((*strip)[0] << 4, (*strip)[1] << 3, 0, colors, 0,
+                     btlResourceBlock->resA, (*strip)[2], 0x53);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AE540);
 
@@ -3889,8 +3956,6 @@ typedef struct BtlPanelStrip {
     s32 y;
     s32 texture;
 } BtlPanelStrip;
-
-extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A25C0);
 

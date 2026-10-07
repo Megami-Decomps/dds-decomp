@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
@@ -42,8 +43,9 @@ extern s32 itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
-extern s32 func_0019D550(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
+typedef struct FrFontGlyph FrFontGlyph;
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
@@ -58,8 +60,11 @@ extern char D_003E74F8[];
 extern char D_003E7514[];
 extern char D_003E7530[];
 extern char D_003E7434[];
-extern u32 mnuMapPadMaskToFlags();
+extern char D_003E7488[];
+extern s32 mnuMapPadMaskToFlags(s32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
+extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
+extern u32 mnuSetPartyEntryCurrentId(u32, u32);
 extern void func_002B9808(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
 extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
@@ -549,8 +554,8 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
         func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].stat18);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChainFlag(fontHandle, 4);
-        func_0019D550(fontHandle, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot(fontHandle);
+        func_0019D550((FrFontGlyph *)fontHandle, 1, 0x53);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)fontHandle);
     }
 }
 
@@ -729,15 +734,154 @@ s32 mnuHandleStaffSelectionListNavigation(s32 task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF020);
+s32 func_002AF020(KwlnTask *task) {
+    extern u32 kwlnTaskGetUserValue(KwlnTask *);
+    extern void mnuHandlePanelListPageJumpInput(u32, u32);
+
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
+    MenuWindowContainer *window;
+    DatPartyRecord *party;
+    s32 buttons = mnuMapPadMaskToFlags(0xC33);
+    s32 result;
+    s32 eligible;
+    s32 selectionId;
+
+    party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    result = menuSetHandler(context, 0, task);
+    if (result != 0) {
+        return result;
+    }
+
+    menu->thirdListEnabled = 0;
+    if (evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    func_002C1B68(&context->unkAA50, 0);
+
+    if (menu->secondListReset == 0) {
+        if (mnuHandleStaffSelectionListNavigation((s32)task) == 0) {
+            window = menu->windows[3];
+            if ((buttons & 0x300000) == 0) {
+                func_002B9808(window);
+            }
+            if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
+                mnuRetreatWindowListSelection(window);
+            }
+            if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
+                mnuAdvanceWindowListSelection(window);
+            }
+            mnuHandlePanelListPageJumpInput((u32)window, (u32)&buttons);
+            mnuClearWindowPanelTransitionFlag(window);
+
+            if (buttons & MNU_STAFF_INPUT_CONFIRM) {
+                if (menu->windows[3]->list->count != 0) {
+                    eligible = 1;
+                    if (menu->windows[3]->list->cursor->index == 0) {
+                        selectionId = 0;
+                        if (party->itemId == 0) {
+                            eligible = 0;
+                        }
+                    } else {
+                        selectionId = menu->windows[3]->list->cursor->sortKeySecondary;
+                        eligible = selectionId != 0;
+                        if ((menu->windows[3]->list->cursor->flags48 & 1) != 0 &&
+                            selectionId != mnuGetPartyEntryCurrentId(party)) {
+                            eligible = 0;
+                        }
+                    }
+
+                    if (eligible != 0) {
+                        mnuStaffEntrySwapLabels((s32)context, (u8 *)party, selectionId);
+                        mnuSetPartyEntryCurrentId((u32)party, (u32)selectionId);
+                        menu->windows[3]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[selectionId];
+                        mnuInitPartyPanelSlots(&context->partyPanel);
+                        func_002BCAB0(&context->partyWindow);
+                        menu->secondListReset = 1;
+                    } else {
+                        buttons = 0x8000;
+                    }
+                } else {
+                    buttons = 0;
+                }
+            }
+
+            if (buttons & MNU_STAFF_INPUT_CANCEL) {
+                menu->thirdListEnabled = 1;
+                mnuSetPopupEntryFlagged(&context->popupState, D_003E7488);
+            }
+            mnuPlayInputSound(0, buttons, &window->list->stateFlags);
+        }
+    } else {
+        if (mnuUpdateStaffEntrySelectionFlags(menu->alternatePrevious,
+                menu->alternateRequested, context) == 0) {
+            mnuClearActionFlags(0, &context->partyWindow);
+            mnuSetPopupEntryFlagged(&context->popupState, D_003E7434);
+        } else {
+            menu->secondListReset = 0;
+        }
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF2E0);
 
-INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACA0);
+s32 func_002AF5E0(KwlnTask *task) {
+    extern u32 kwlnTaskGetUserValue(KwlnTask *);
+    extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+    extern void func_002BDAA8(s32, s32, s32, s32, s32, s32);
+    extern s32 func_002AF2E0(s32, s32, s32, MenuStaffContext *);
+    extern char D_0042AD08[];
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
+    const u8 *slotsCaption = (const u8 *)D_0042AD08;
+    MenuStaffChoices *menu = context->menu;
+    DatPartyRecord *party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    MenuList *list;
+    s32 selectionId;
+    s32 owned;
+    FrFontGlyph *glyph;
 
-INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
-
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF5E0);
+    mnuDrawCampIconBackdropByKind(1, (s32)task);
+    mnuCreateStaffImageSprite(10);
+    if (menu->windows[3]->list->count != 0) {
+        selectionId = menu->windows[3]->list->cursor->sortKeySecondary;
+    } else {
+        selectionId = 0;
+    }
+    mnuApplyPackedGroupValues(context->panelHandle, selectionId);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, party, context->panelHandle, 1, 0x53);
+    list = menu->windows[3]->list;
+    if (list->cursor->index == 0) {
+        list->stateFlags |= 0x10;
+    } else {
+        list->stateFlags &= ~0x10;
+    }
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, 0x53);
+    if (menu->windows[3]->list->count != 0) {
+        owned = menu->windows[3]->list->cursor->sortKeyPrimary;
+        selectionId = menu->windows[3]->list->cursor->sortKeySecondary;
+        if (owned != 0) {
+            func_002AAC70(1, selectionId, D_00435E70, (s32)context, 1, 1, 0x53);
+        } else {
+            func_002AAC98(1, 0, 0, (s32)context, 1, 0x53);
+        }
+        func_002AF2E0(0, 0, selectionId, context);
+        if (owned != 0 && mdlFlagTest(0x990) != 0) {
+            glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
+            func_0019D550(glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(glyph);
+            func_002BDAA8(0x770, 0xB98, 0x100, selectionId, context->spriteArg0, 0x2C);
+        }
+    } else {
+        func_00306CD0(0x390, 0x570, 0, menu->windows[3]->state, 1,
+                     (struct EffectSlotSet *)context->spriteArg2, 0x11, 0x53);
+        func_002AAC98(1, 0, 0, (s32)context, 1, 0x53);
+        func_002AF2E0(0, 0, 0, context);
+    }
+    func_002AA7A0(1, context->group);
+    return menuSetHandler(context, 1, task);
+}
 
 /* Request value one from the message-window worker before the value-page teardown. */
 s32 mnuExitStaffValuePage(s32 task) {
@@ -1012,6 +1156,12 @@ void mnuClearStaffSceneConfigEntries(MenuPanelGroup *config) {
         func_002C2AA8(config->entries[i], 0);
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACA0);
+
+INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
+
+INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042AD08);
 
 INCLUDE_SDATA(const s32, "game/code_002AD3B8", D_00437BD0);
 

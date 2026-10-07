@@ -17,6 +17,7 @@ extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32, s32);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
 extern void func_00276720(s32, s32, s32, s32);
+extern void mnuInitPartyPanelSlots(PartyPanel *);
 
 typedef struct FrFontGlyph FrFontGlyph;
 typedef struct FrFontCtx FrFontCtx;
@@ -132,7 +133,10 @@ typedef struct PartyMenuData {
 
 /* Staff/skill menu context: resource handles and current panel work. */
 typedef struct CampMenuContext {
-    u8 pad00[0x60];
+    u8 pad00[8];
+    MenuPopupState transitionWork; /* 0x08: saved popup transition state */
+    s32 popupState; /* 0x54: popup entry word */
+    u8 pad58[8];
     s32 unk60;
     s32 resource;             /* 0x64 */
     s32 unk68;
@@ -397,7 +401,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
     }
     panelWork = (s32)&((CampMenuContext *)context)->partyWindow;
     mnuReleasePartyPanelTextures(panelWork);
-    mnuInitPartyPanelSlots((s32)&((CampMenuContext *)context)->partyPanel);
+    mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
     mnuUpdateHandleStates(panelWork);
     func_00280048(panelWork);
 }
@@ -441,7 +445,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
     mnuReleasePartyPanelTextures((s32)&((CampMenuContext *)context)->partyWindow);
-    mnuInitPartyPanelSlots((s32)&((CampMenuContext *)context)->partyPanel);
+    mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
     mnuUpdateHandleStates((s32)&((CampMenuContext *)context)->partyWindow);
 }
 
@@ -462,7 +466,65 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     mnuSetPopupEntryFlagged(menu + 0x54, (s32)D_0037CA58);
     mnuActivatePanelAndConfigureGridResources(((CampMenuContext *)menu)->display, ((CampMenuContext *)menu)->displayVariant, 0, 1);
 }
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00275920);
+s32 func_00275920(s32 callback) {
+    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
+    PartyMenuData *menuWork = (PartyMenuData *)context->menu;
+    s32 inputFlags = mnuMapPadMaskToFlags(0x33);
+    s32 *popup = &context->popupState;
+    MenuWindowContainer *window = menuWork->primaryWindow;
+    s32 entryIndex = window->list->cursor->index;
+    s32 state = func_00285670(&context->transitionWork, popup, 0, (void *)callback);
+
+    if (state != 0) {
+        return state;
+    }
+    if (*popup == 0) {
+        if ((inputFlags & 0x300000) == 0) {
+            func_0027C788((s32)window);
+        }
+        if (inputFlags & 0x10) {
+            mnuRetreatWindowListSelection((s32)window);
+        }
+        if (inputFlags & 0x20) {
+            mnuAdvanceWindowListSelection((s32)window);
+        }
+        mnuClearWindowPanelTransitionFlag((s32)window);
+        if (inputFlags & 1) {
+            switch (mnuIsFinalItemIndex(window->list->cursor->index, (s32)window->list)) {
+            case 0:
+                if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
+                    window->list->cursor->flags48 |= 1;
+                    func_00275030(entryIndex, 2, 0, (s32)context);
+                } else {
+                    inputFlags = 0x8000;
+                }
+                break;
+            case 1:
+                if (menuWork->selection > 0) {
+                    mnuPreparePartyPanelTransition((s32)context);
+                } else {
+                    inputFlags = 0x8000;
+                }
+                break;
+            }
+        } else if (menuWork->activeCount == menuWork->selection) {
+            mnuPreparePartyPanelTransition((s32)context);
+        }
+        if (inputFlags & 2) {
+            if (menuWork->selection > 0) {
+                mnuInitPartyPanelSlots(&context->partyPanel);
+                mnuClearPartySelectionAndActivateSlots((s32)context);
+                func_00280048((s32)&context->partyWindow);
+            } else {
+                mnuSetPopupEntryFlagged((s32)popup, D_0037CA58);
+                mnuActivatePanelAndConfigureGridResources((u32 *)context->display, context->displayVariant, 0, 1);
+            }
+        }
+        mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
+    }
+    return 0;
+}
+
 
 void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *mpBar,
                    DatPartyRecord *entry, EffectSlotSet *marker, u32 opacity,

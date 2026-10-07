@@ -3,6 +3,9 @@
 #include "pcp_vu0.h"
 #include "fld.h"
 #include "evt_polygon_movie.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "dds3obj.h"
 
 /* Global event state behind kwlnTaskGetUserValue; the polygon-movie word at 0x0 and
  * the pointer to the shared flag word at 0x8. */
@@ -97,15 +100,10 @@ typedef struct EvtBlendG {
 s32 kwlnTaskGetUserValue(void);
 u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
 
-typedef struct ObjectFlagsTarget {
-    u8 pad[0x8C];
-    u32 *flags;   /* 0x8C */
-} ObjectFlagsTarget;
-
 /* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
  * offsets are relative to the start of the block. */
 
-extern ObjectFlagsTarget *effObjGetTransitionWork(PolyMovieObject *obj);
+extern EvtUnit *effObjGetTransitionWork(EffWorldNode *object);
 extern void dds3SetObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void dds3ClearObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
@@ -459,10 +457,10 @@ void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, 
 {
     switch (mode) {
     case 0:
-        *effObjGetTransitionWork(obj)->flags &= ~1;
+        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags &= ~1;
         break;
     case 1:
-        *effObjGetTransitionWork(obj)->flags |= 1;
+        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags |= 1;
         break;
     case 2:
         dds3ClearObjectFlags(obj, 0x400);

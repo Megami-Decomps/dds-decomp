@@ -679,8 +679,7 @@ void func_0026DB20(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB28);
 
-/* Pass the supplied entry and selector 0xF to the existing flag routine
- * and return its result. */
+/* Return whether bit 15 is set for the supplied entry. */
 s32 func_0026DB48(u32 context, u8 entry) {
     return scrTestEntryFlag(context, entry, 0xf);
 }

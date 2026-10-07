@@ -3,20 +3,9 @@
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
+#include "evt_unit.h"
 #include "eff.h"
 #include "btl_sound.h"
-
-/* Follow record the object tracks (angle, flags and kind at the end of a longer record). */
-typedef struct EffFollowRec {
-    u8 pad00[0x98];
-    f32 angle;   /* 0x98 */
-    u8 pad9C[0xC];
-    u32 flags;   /* 0xA8 */
-    s16 kind;    /* 0xAC */
-} EffFollowRec;
-
-
-
 
 typedef struct EffectObject {
     u8 pad00[0x18];
@@ -28,9 +17,9 @@ typedef struct EffectObject {
 
 extern u32 D_003BA9D0;
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
-extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
@@ -42,8 +31,8 @@ u32 dds3GetEffectDataHandle(EffectObject *obj) {
     return (u32)obj->data->handle;
 }
 
-u32 effObjGetTransitionWork(EffectObject *obj) {
-    return (u32)obj->data->transitionWork;
+EvtUnit *effObjGetTransitionWork(EffWorldNode *object) {
+    return ((EffectObjectData *)object->data)->transitionWork;
 }
 
 void func_00113100(EffectObject *obj, u32 value) {
@@ -278,7 +267,7 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
     if (model != NULL && effObjTestNodeFlags(obj->source, 1) == 1) {
         effObjClearNodeFlags(obj->source, 1);
         if (data->transitionWork != 0) {
-            if (data->transitionWork->kind == 0 || data->transitionWork->kind == 3) {
+            if (data->transitionWork->motionState == 0 || data->transitionWork->motionState == 3) {
                 if (data->transitionWork->flags & 0x40) {
                     flag = 1;
                 }
@@ -292,8 +281,8 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
             VU0_MOVE_VF(vf11, vf10);
             VU0_MOVE_VF(vf10, vf0);
             VU0_CLEAR_W(vf10);
-            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->angle) * 0.01f, "vaddx.x vf10, vf0, vf2x");
-            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->angle) * 0.004f, "vaddx.y vf10, vf0, vf2x");
+            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->wobblePhase) * 0.01f, "vaddx.x vf10, vf0, vf2x");
+            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->wobblePhase) * 0.004f, "vaddx.y vf10, vf0, vf2x");
             VU0_MUL(vf10, vf10, vf11);
             VU0_ADD(vf10, vf10, vf11);
         }
@@ -303,7 +292,7 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
         if (data->transitionWork != 0 && flag != 0) {
             VU0_MOVE_VF(vf11, vf10);
             VU0_LOAD_VF(vf10, &axis);
-            effMiscAxisAngleToQuaternionVU(sdfSinPoly(data->transitionWork->angle) * 0.006f);
+            effMiscAxisAngleToQuaternionVU(sdfSinPoly(data->transitionWork->wobblePhase) * 0.006f);
             effMiscQuatMultiplyVU();
         }
         if (data->word18 & 1) {
@@ -334,31 +323,16 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
     return 1;
 }
 
-typedef struct FollowTargetInfo {
-    u32 flags;       /* 0x00 */
-    u8 pad04[0x14];
-    s32 mapRecord;   /* 0x18 */
-} FollowTargetInfo;
-
-typedef struct FollowTarget {
-    u8 pad00[0x8C];
-    FollowTargetInfo *info; /* 0x8C */
-    u8 pad90[0x43];
-    u8 height;       /* 0xD3 */
-    f32 offsetY;     /* 0xD4 */
-} FollowTarget;
-
-
-
-extern void func_001122F0(void *, EffectObject *);
+extern void func_001122F0(void *, EffWorldNode *);
 extern void func_0011ECC8(EffectObject *);
-extern s32 sdfLoadMapRecordPositionVector(s32, s32);
+typedef struct SdfTextParam SdfTextParam;
+extern s32 sdfLoadMapRecordPositionVector(SdfTextParam *param, s32 id);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 extern u8 D_00325788[];
 
 s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     f32 vec[4];
-    FollowTarget *target;
+    EvtUnit *target;
     MdlCtx *config;
     s32 level;
     s32 pickMode;
@@ -368,14 +342,14 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     if (dds3TestObjectFlags(obj, 1)) {
         return 1;
     }
-    target = (FollowTarget *)effObjGetTransitionWork(obj);
-    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->info->flags & 1)) {
+    target = effObjGetTransitionWork((EffWorldNode *)obj);
+    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->owner->flags & 1)) {
         func_0011ECC8(obj);
     }
     if ((s32)obj->data->word14 == -1) {
-        func_001122F0(D_00325788, obj);
+        func_001122F0(D_00325788, (EffWorldNode *)obj);
     } else {
-        func_001122F0(D_00325788 + (s32)obj->data->word14 * 0x10, obj);
+        func_001122F0(D_00325788 + (s32)obj->data->word14 * 0x10, (EffWorldNode *)obj);
     }
     if (!dds3TestObjectFlags(obj, 0x400)) {
         return 1;
@@ -388,14 +362,14 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     }
     config = (MdlCtx *)dds3GetEffectObjectModelHolder((EffWorldNode *)obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
-        level = target->height;
+        level = target->unkD3;
     } else {
         level = config->inner->color >> 24;
     }
     pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
-    if (sdfLoadMapRecordPositionVector(target->info->mapRecord, 0)) {
+    if (sdfLoadMapRecordPositionVector((SdfTextParam *)target->owner->inner, 0)) {
         VU0_STORE_VF(vf10, vec);
-        vec[1] = pickMode == 1 ? target->offsetY : obj->source[0x11];
+        vec[1] = pickMode == 1 ? target->unkD4 : obj->source[0x11];
         func_0011E280(level, vec[0], vec[1], vec[2], obj->source[0x31]);
     } else {
         if (effObjTestNodeFlags(obj->source, 8)) {
@@ -408,7 +382,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
             vec[2] = obj->source[0x12];
         }
         if (pickMode == 1) {
-            vec[1] = target->offsetY;
+            vec[1] = target->unkD4;
         }
         func_0011E280(level, vec[0], vec[1], vec[2], obj->source[0x31]);
     }
@@ -441,18 +415,18 @@ typedef struct EffectValueObject {
     f32 *source;
 } EffectValueObject;
 
-extern void *dds3CopyWorldListToValueChain();
-extern s32 dds3GetWorldValueCount(void *);
-extern s32 dds3ResetObjectValueCursor(void *);
-extern u32 dds3ReadIndexedWorldObjectWord(void *);
-extern s32 dds3AdvanceObjectValueCursor(void *);
+extern struct NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
+extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
+extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
+extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 struct NodeB;
 extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern s32 func_0010F9A8(f32 *, f32 *);
 void func_00113AF0(EffectObject *obj) {
     EffectObjectData *data = obj->data;
-    u64 world = dds3GetWorldSecondaryObject();
-    void *list;
+    EffWorldNode *world = dds3GetWorldSecondaryObject();
+    struct NodeB *list;
     EffectValueObject *other;
     EffectValueData *otherData;
 
@@ -463,13 +437,13 @@ void func_00113AF0(EffectObject *obj) {
     if (list == NULL) {
         return;
     }
-    if (dds3GetWorldValueCount(list) == 0) {
-        dds3DestroyWorldIndexNode((struct NodeB *)list);
+    if (dds3GetWorldValueCount((WorldValueIndices *)list) == 0) {
+        dds3DestroyWorldIndexNode(list);
         return;
     }
-    if (dds3ResetObjectValueCursor(list) != 0) {
+    if (dds3ResetObjectValueCursor((WorldValueIndices *)list) != 0) {
         do {
-            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord(list);
+            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
                 func_0010F9A8(obj->source, other->source) == 0 &&
@@ -477,37 +451,39 @@ void func_00113AF0(EffectObject *obj) {
                 evtEndUnitValueTransitionForObject((EffWorldNode *)obj, 10);
                 data->activeId = -1;
             }
-        } while (dds3AdvanceObjectValueCursor(list) != 0);
+        } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
     }
-    dds3DestroyWorldIndexNode((struct NodeB *)list);
+    dds3DestroyWorldIndexNode(list);
 
     if (data->activeId == -1) {
         list = dds3CopyWorldListToValueChain(world, 9);
-        if (dds3ResetObjectValueCursor(list) == 0) {
+        if (dds3ResetObjectValueCursor((WorldValueIndices *)list) == 0) {
             goto destroy_list;
         }
         do {
-            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord(list);
+            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
                 func_0010F9A8(obj->source, other->source) != 0) {
                 goto attach_transition;
             }
-        } while (dds3AdvanceObjectValueCursor(list) != 0);
+        } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
 
 destroy_list:
-        dds3DestroyWorldIndexNode((struct NodeB *)list);
+        dds3DestroyWorldIndexNode(list);
         return;
 
 attach_transition:
         evtSetUnitValueTransitionForObject(other, (EffWorldNode *)obj, 10);
         data->activeId = other->valueId;
-        dds3DestroyWorldIndexNode((struct NodeB *)list);
+        dds3DestroyWorldIndexNode(list);
     }
 }
 
-u32 effObjGetDataHandle(EffectObject *obj) {
-    return obj->data->handle;
+ObjBase *effObjGetDataHandle(EffWorldNode *object) {
+    EffectTransformData *data = object->data;
+
+    return data->resourceState;
 }
 
 typedef struct WorldSubState {
@@ -548,8 +524,10 @@ WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     return obj;
 }
 
-void func_00113DA8(void) {
-    dds3RemoveWorldObjectNode();
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
+
+void func_00113DA8(EffWorldNode *node) {
+    dds3RemoveWorldObjectNode(node);
 }
 
 void effObjSetModelHolder(EffectObject *obj, u32 value) {
@@ -560,13 +538,15 @@ void func_00113DD0(EffectObject *obj, u32 value) {
     obj->data->word04 = value;
 }
 
-u32 func_00113DE0(u64 id) {
-    EffectObject *obj;
-    u64 world;
+u32 func_00113DE0(u32 id) {
+    EffWorldNode *world;
+    EffWorldNode *node;
+    EffectTransformData *data;
 
     world = dds3GetWorldSecondaryObject();
-    obj = (EffectObject *)dds3FindWorldObjectNodeByKey(world, id, 6);
-    return obj->data->word04;
+    node = dds3FindWorldObjectNodeByKey(world, id, 6);
+    data = (EffectTransformData *)node->data;
+    return data->flags;
 }
 
 /* Payload word 8 is interpreted by object kind, not always as a pointer. */
@@ -633,18 +613,18 @@ extern u8 D_00325808[];
 
 /* Submit the normal pass and the opacity-mode pass, temporarily neutralizing
  * the tint while the player is hidden. */
-s32 effObjSubmitTransformOpacityPasses(EffectObject *obj) {
+s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
     EffectTransformData *data;
     u32 opacityMode;
 
     if (D_003BA9D0 == 0) {
         return 1;
     }
-    data = (EffectTransformData *)obj->data;
+    data = object->data;
     if (data->activeId == -1) {
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
-        func_001122F0(D_00325788, obj);
+        func_001122F0(D_00325788, object);
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     } else {
@@ -653,22 +633,22 @@ s32 effObjSubmitTransformOpacityPasses(EffectObject *obj) {
         opacityMode = data->opacityMode;
         if (opacityMode < 5) {
             if (opacityMode >= 3) {
-                if (obj->color != 0x80808080) {
+                if (object->color != 0x80808080) {
                     if (dds3TestObjectFlags(fldPlayerObject, 1)) {
-                        u32 savedColor = obj->color;
+                        u32 savedColor = object->color;
 
-                        obj->color = 0x80808080;
-                        func_001122F0(D_00325788 + data->activeId * 0x10, obj);
-                        obj->color = savedColor;
+                        object->color = 0x80808080;
+                        func_001122F0(D_00325788 + data->activeId * 0x10, object);
+                        object->color = savedColor;
                     } else {
-                        func_001122F0(D_00325808, obj);
+                        func_001122F0(D_00325808, object);
                     }
                 } else {
-                    func_001122F0(D_00325788 + data->activeId * 0x10, obj);
+                    func_001122F0(D_00325788 + data->activeId * 0x10, object);
                 }
             }
         }
-        func_001122F0(D_00325788 + data->activeId * 0x10, obj);
+        func_001122F0(D_00325788 + data->activeId * 0x10, object);
         fldSelectDisplayBuffer(0x22);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     }

@@ -2,13 +2,13 @@
 #include "mnu_shooting.h"
 struct EffWorldNode;
 extern u32 dds3AdvanceWorldCounter(void);
-extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 arg0, void *arg1, void *arg2, void *arg3);
+extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
-extern void dds3SetCameraVector(struct EffWorldNode *camera, void *vector);
+extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
 extern s32 dds3GetWorldSecondaryObject(void);
 extern struct EffWorldNode *dds3SetWorldCameraObject(struct EffWorldNode *world, struct EffWorldNode *camera);
-extern void func_001063A8(f32 arg0);
+extern void sdfSetViewFieldOfView(f32 arg0);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern u8 D_0040ABD0[];
@@ -125,15 +125,16 @@ s32 func_0031AF68(MnuShootingWork *object) {
 INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031B080);
 
 void func_0031B0F8(void) {
-    s32 object;
-    u8 *vector = D_0040ABD0;
+    s32 world;
+    struct EffWorldNode *camera;
+    u128 *worldEye = (u128 *)D_0040ABD0;
 
-    object = (s32)dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, vector, D_0040ABB0);
-    D_00438944 = object;
-    dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)D_00438938);
-    dds3SetCameraVector((struct EffWorldNode *)D_00438944, vector);
+    camera = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, worldEye, (u128 *)D_0040ABB0);
+    D_00438944 = (s32)camera;
+    dds3SetWorldNodeValue(camera, (u32)D_00438938);
+    dds3SetCameraVector((struct EffWorldNode *)D_00438944, worldEye);
     effObjSetInnerFloat(D_00438944, 2.0f);
-    object = dds3GetWorldSecondaryObject();
-    dds3SetWorldCameraObject((struct EffWorldNode *)object, (struct EffWorldNode *)D_00438944);
-    func_001063A8(0.6283184886f);
+    world = dds3GetWorldSecondaryObject();
+    dds3SetWorldCameraObject((struct EffWorldNode *)world, (struct EffWorldNode *)D_00438944);
+    sdfSetViewFieldOfView(0.6283184886f);
 }

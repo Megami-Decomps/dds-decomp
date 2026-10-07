@@ -41,7 +41,8 @@ typedef struct MenuSlotState {
     s32 heapHandle;
     u8 pad04[4];
     MenuPopupState transitionWork; /* 0x08 */
-    u8 pad54[8];
+    s32 dispatchStatus; /* 0x54 */
+    u32 dispatchValue; /* 0x58 */
     EvtResourcePair messageResources; /* 0x5C */
     s32 resourceBank[4]; /* 0x64: encoded base-resource owners */
     EffectSlotSet *alternateBatch; /* 0x74 */
@@ -1083,26 +1084,17 @@ s32 func_002685F0(s32 action, s32 context) {
     return 0;
 }
 
-typedef struct {
-    u8 pad00[6];
-    u16 hp;          /* 0x06 */
-    u16 maxHp;       /* 0x08 */
-    u16 mp;          /* 0x0A */
-    u16 maxMp;       /* 0x0C */
-    u16 statusFlags; /* 0x0E */
-} SceneOptionRecord;
-
 /* Restore current HP/MP to their stored maxima and clear exactly the charged status bits.
  * No boosted-max calculation or range validation is performed here. */
-void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
-    u16 statusFlags = option->statusFlags;
+void fldSaveSceneOptionsAndClearFlags(DatPartyRecord *option) {
+    u16 statusFlags = option->status;
     u16 maxHp = option->maxHp;
     u16 maxMp = option->maxMp;
     u16 retainedStatus = statusFlags & MNU_RECOVERY_STATUS_KEEP_MASK;
 
     option->hp = maxHp;
     option->mp = maxMp;
-    option->statusFlags = retainedStatus;
+    option->status = retainedStatus;
 }
 
 
@@ -1325,13 +1317,96 @@ void func_00268CC0(u32 mode, s32 context) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268EC8);
+/* Draw terminal grids and the selected effect text. */
+void func_00268EC8(s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    EffectPair position[6] = {
+        {0, 0}, {0x200, 0xF0}, {0x1280, 0xC8},
+        {0x840, 0x220}, {0x1500, 0xD0}, {0x1410, 0x1E0}
+    };
+    s32 index = fldGetModeFrameRecordIndex(context);
+    EffectSlotSet *batch;
+    BdWork *record;
+    u32 progress;
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002690A8);
+    if (D_00437859 == 0) {
+        return;
+    }
+    itfDrawGridWithResolvedSlot(position[0].firstValue, position[0].secondValue, 0, 0x81,
+                                state->resourceBank[0], index, MNU_TEXT_DRAW_PRIORITY);
+    batch = (EffectSlotSet *)state->resourceBank[0];
+    record = (BdWork *)(sizeof(*batch->workEntries) * index + (u32)batch->workEntries);
+    progress = ((u32)*(u8 *)&record->geometry.cornerColors[0] << 8) /
+        *(u8 *)&record->savedColors[0];
+    if (state->reduced != 2) {
+        func_00306CD0(position[1].firstValue, position[1].secondValue, 0,
+                      progress, 0x81, batch, 4, MNU_TEXT_DRAW_PRIORITY);
+        batch = (EffectSlotSet *)state->resourceBank[0];
+    }
+    if (*(s32 *)((u8 *)state + 0xA0) != 0) {
+        position[3].firstValue += 0x320;
+    }
+    itfDrawGridWithResolvedSlot(position[3].firstValue, position[3].secondValue, 0, 0x81,
+                                (u32)batch, 7, MNU_TEXT_DRAW_PRIORITY);
+    itfDrawGridWithResolvedSlot(position[3].firstValue, position[3].secondValue, 0, 0x81,
+                                (u32)state->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
+    if (state->mode != 2) {
+        itfDrawGridWithResolvedSlot(position[2].firstValue, position[2].secondValue, 0, 0x81,
+                                    state->resourceBank[0], 6, MNU_TEXT_DRAW_PRIORITY);
+        mnuQueueFontGlyphFromSelectedAtlasSlot(position[4].firstValue, position[4].secondValue,
+                                                0, *(u8 *)&((EffectSlotSet *)state->resourceBank[0])->workEntries[6].geometry.cornerColors[0] | 0xA09DC300,
+                                                (s8)state->slotCopy, (s8)state->mode);
+    }
+}
+
+
+/* Configure three terminal grid entries from the current mode's effect. */
+void func_002690A8(u32 mode, s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    s32 index = 0;
+    s32 setting = 0;
+    s32 kind = 0;
+    s32 y = 0;
+    s32 z = 0;
+    s32 *effect;
+    u32 effectAddress;
+
+    switch (mode) {
+    case 1:
+        y = -0x100;
+        kind = 2;
+        setting = 5;
+        index = 2;
+        break;
+    case 3:
+        y = -0x100;
+        z = 0;
+        kind = 2;
+        setting = 7;
+        index = 2;
+        break;
+    case 4:
+        y = 0;
+    case 2:
+        z = 0x100;
+        kind = 2;
+        setting = 4;
+        index = 3;
+        break;
+    }
+    effectAddress = sizeof(state->effect[0]) * index + (u32)context;
+    effectAddress += (u32)((u8 *)&state->effect[0] - (u8 *)state);
+    effect = (s32 *)effectAddress;
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 8, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 8, *effect, 0, setting, kind);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 0x38, 0, y, 0, z);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x38, *effect, 0, setting, kind);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 0x39, 0, y, 0, z);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x39, *effect, 0, setting, kind);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00269230);
-
-INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F58);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F88);
 
@@ -1346,7 +1421,61 @@ s32 func_00269418(MenuList *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269478);
+/* Configure the terminal selection grid for its entry and transition mode. */
+void func_00269478(u32 mode, s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    s32 effectIndex = 0;
+    s32 materialFlags = 0;
+    s32 height = 0;
+    s32 color = 0;
+    s32 yOffset = 0;
+    s32 slot;
+    s32 *effect;
+
+    switch (mode) {
+    case 2:
+        color = 2;
+        materialFlags = 4;
+        yOffset = 0;
+        height = 0x100;
+        effectIndex = 3;
+        break;
+    case 3:
+        color = 2;
+        materialFlags = 7;
+        yOffset = -0x100;
+        height = 0;
+        effectIndex = 2;
+        break;
+    case 4:
+        materialFlags = 4;
+        yOffset = 0;
+        height = 0x100;
+        effectIndex = 3;
+        break;
+    }
+    slot = func_00269418(state->secondaryList);
+    /* The context word transports the terminal state address. */
+    effect = (s32 *)(effectIndex * sizeof(state->effect[0]) + context +
+        (u32)&((MenuSlotState *)0)->effect);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        slot, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(state->resourceBank[0], slot, *effect,
+        0, materialFlags, color);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        0x40, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x40, *effect,
+        0, materialFlags, color);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        0x41, 0, yOffset, 0, height);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x41, *effect,
+        0, materialFlags, color);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        0x42, 0, yOffset, 0, height);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x42, *effect,
+        0, materialFlags, color);
+}
+
 
 void func_00269638(s32 close, MenuSlotState *host) {
     struct {
@@ -1525,7 +1654,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 extern void func_00269638(s32, MenuSlotState *);
 
-extern void func_00269478(s32, s32);
+extern void func_00269478(u32, s32);
 
 
 
@@ -1573,10 +1702,10 @@ u32 func_00269C48(void) {
 extern u32 mnuMapPadMaskToFlags(s32 mask);
 extern s32 func_002685F0(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
-extern void mnuClearListFlagsOneAndTwo(u32 list);
-extern void mnuRetreatListCursorDefault(u32 list);
-extern void mnuAdvanceListCursorDefault(u32 list);
-extern void mnuPlayInputSound(s32 mode, u32 buttons, u32 list);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
+extern MenuListNode *mnuRetreatListCursorDefault(u32 list);
+extern MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_003CE7D0[];
 extern char D_003CE848[];
 extern char D_003CE880[];
@@ -1634,7 +1763,7 @@ s32 evtBHandleSelectionPanelInput(void *input) {
             mnuSetPopupEntryFlagged(state, D_003CE8B8);
         }
         if (!(buttons & 0x300000)) {
-            mnuClearListFlagsOneAndTwo((u32)context->visualState);
+            mnuClearListFlagsOneAndTwo((u32 *)context->visualState);
         }
         if (buttons & 0x10) {
             mnuRetreatListCursorDefault((u32)context->visualState);
@@ -1642,7 +1771,7 @@ s32 evtBHandleSelectionPanelInput(void *input) {
         if (buttons & 0x20) {
             mnuAdvanceListCursorDefault((u32)context->visualState);
         }
-        mnuPlayInputSound(0, buttons, (u32)context->visualState);
+        mnuPlayInputSound(0, buttons, (u32 *)context->visualState);
     }
     return 0;
 }
@@ -1681,7 +1810,7 @@ s32 evtClearDispatchVisualFlag(void) {
     return 1;
 }
 
-extern void func_002690A8(s32, s32);
+extern void func_002690A8(u32, s32);
 
 extern void func_00269230(void);
 
@@ -1794,7 +1923,7 @@ s32 func_0026A2E0(void *request) {
             mnuSetPopupEntryFlagged(dispatch, D_003CE848);
         }
         if (!(buttons & 0x300000)) {
-            mnuClearListFlagsOneAndTwo((u32)context->menuOwner);
+            mnuClearListFlagsOneAndTwo((u32 *)context->menuOwner);
         }
         if (buttons & 0x10) {
             mnuRetreatListCursorDefault((u32)context->menuOwner);
@@ -1802,7 +1931,7 @@ s32 func_0026A2E0(void *request) {
         if (buttons & 0x20) {
             mnuAdvanceListCursorDefault((u32)context->menuOwner);
         }
-        mnuPlayInputSound(0, buttons, (u32)context->menuOwner);
+        mnuPlayInputSound(0, buttons, (u32 *)context->menuOwner);
     }
     return 0;
 }
@@ -1848,7 +1977,53 @@ u32 evtBEnterStateA(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A598);
+/* Recover the selected affordable party member, then process list input. */
+s32 func_0026A598(KwlnTask *task) {
+    extern u32 kwlnTaskGetUserValue(KwlnTask *);
+    MenuSlotState *host = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    u32 buttons = mnuMapPadMaskToFlags(0x33);
+    s32 *dispatch = &host->dispatchStatus;
+    s32 result = func_002C4038(&host->transitionWork, dispatch, 0, task);
+    MenuListNode *node;
+    MenuThresholdEntry *entry;
+
+    if (result != 0) {
+        return result;
+    }
+    if (*dispatch == 0) {
+        if (buttons & 1) {
+            node = host->progressList->cursor;
+            if (!(node->flags48 & 1)) {
+                entry = &node->terminal;
+                buttons = 0;
+                fldSaveSceneOptionsAndClearFlags(&datGameState->party[entry->entryId]);
+                sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+                mnuReleaseSelectedProgressPanel(host);
+                datAddCurrencyClamped(-entry->requiredAmount);
+                mnuRefreshThresholdNodeFlags(host->progressList);
+                if (host->progressList->count == 0) {
+                    mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+                }
+            } else {
+                buttons = 0x8000;
+            }
+        }
+        if (buttons & 2) {
+            mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+        }
+        if (!(buttons & 0x300000)) {
+            mnuClearListFlagsOneAndTwo(&host->progressList->stateFlags);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatListCursorDefault((u32)host->progressList);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceListCursorDefault((u32)host->progressList);
+        }
+        mnuPlayInputSound(0, buttons, &host->progressList->stateFlags);
+    }
+    return 0;
+}
 
 
 extern char D_00437868[];

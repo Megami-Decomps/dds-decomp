@@ -3,6 +3,21 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 
+typedef s16 MenuIconPlacement[4];
+
+enum {
+    MENU_ICON_TEXTURE,
+    MENU_ICON_FRAME,
+    MENU_ICON_X,
+    MENU_ICON_Y
+};
+
+extern MenuIconPlacement D_003D03F0[];
+extern void func_00306CD0(s32, s32, s32, u32, s32,
+                          struct EffectSlotSet *, s32, s32);
+extern void func_00294680(MenuTerminalContext *, s32, s32);
+extern void func_00296D90(MenuTerminalContext *, s32);
+
 extern void func_00295D38();
 
 extern void func_002958B0();
@@ -27,20 +42,51 @@ u32 evtSelectGraphicSlotBySpriteType(MenuTerminalContext *object) {
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294758);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00294930);
+void func_00294930(MenuTerminalContext *object, s32 elapsedFrames) {
+    f32 elapsed = (f32)elapsedFrames - 0.0f;
+    s32 frameCount = (s32)elapsed;
+    f32 alpha;
+    s32 scale;
+    u32 index;
+    MenuTerminalContext *resources;
 
-typedef s16 MenuIconPlacement[4];
+    if (frameCount < 0) {
+        frameCount = 0;
+    }
+    alpha = (f32)frameCount / 20.0f;
+    if (alpha > 1.0f) {
+        alpha = 1.0f;
+    }
+    if (alpha < 0.0f) {
+        alpha = 0.0f;
+    }
+    alpha = 1.0f - alpha;
+    scale = (s32)(alpha * 256.0f);
 
-enum {
-    MENU_ICON_TEXTURE,
-    MENU_ICON_FRAME,
-    MENU_ICON_X,
-    MENU_ICON_Y
-};
+    func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16,
+                  D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
+                  D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
+                  D_003D03F0[32][MENU_ICON_FRAME], 0x53);
+    func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
+    func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
+    func_00294680(object, scale, 0x53);
 
-extern MenuIconPlacement D_003D03F0[];
-extern void func_00306CD0(s32, s32, s32, u32, s32, void *, s32, s32);
-extern void func_00294680(MenuTerminalContext *, s32, s32);
+    frameCount = (s32)elapsed;
+    alpha = (f32)frameCount / 20.0f;
+    if (alpha > 1.0f) {
+        alpha = 1.0f;
+    }
+    alpha = 1.0f - alpha;
+    func_00296D90(object, 0xA09DC300 | (s32)(alpha * 128.0f));
+
+    index = evtSelectGraphicSlotBySpriteType(object);
+    resources = D_00438FC8;
+    scale = (s32)(alpha * 256.0f);
+    func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16,
+                  D_003D03F0[index][MENU_ICON_Y] * 8, 0, scale, 0,
+                  resources->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
+                  D_003D03F0[index][MENU_ICON_FRAME], 0x53);
+}
 
 
 
