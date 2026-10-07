@@ -14,7 +14,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 
-extern u32 D_00435DA0;
+extern u32 effObjOpacityPassEnabled;
 
 /* Mode 0 is the initialized neutral tint; other values describe the native
  * alpha updates performed by this title's transform renderer. */
@@ -596,8 +596,8 @@ u32 dds3GetObjectPayloadWord8(EffWorldNode *object) {
     return payload[2];
 }
 
-void func_00114068(u32 value) {
-    D_00435DA0 = value;
+void effObjSetOpacityPassEnabled(u32 value) {
+    effObjOpacityPassEnabled = value;
 }
 
 s32 effObjInitializeTransformData(EffWorldNode *object) {
@@ -801,7 +801,7 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
     EffectTransformData *data;
     u32 opacityMode;
 
-    if (D_00435DA0 == 0) {
+    if (effObjOpacityPassEnabled == 0) {
         return 1;
     }
     data = object->data;
@@ -925,5 +925,5 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00113308", D_00435DA0);
+INCLUDE_SDATA(const s32, "game/code_00113308", effObjOpacityPassEnabled);
 

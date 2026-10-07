@@ -14,6 +14,7 @@
 #include "sdf.h"
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern void effObjSetOpacityPassEnabled(u32 enabled);
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -7816,7 +7817,7 @@ void sndResetTransition(void) {
 
 void btlClearTintAndEnableCamera(void) {
     btlQueueTintTransitionToZero(0);
-    func_00114068(1);
+    effObjSetOpacityPassEnabled(1);
 }
 
 void btlUpdateTintAndWorldLight(void) {
@@ -7825,12 +7826,12 @@ void btlUpdateTintAndWorldLight(void) {
 
     if (position[0] == 0.0f && position[1] == 0.0f &&
         position[2] == 0.0f) {
-        func_00114068(0);
+        effObjSetOpacityPassEnabled(0);
     } else {
-        func_00114068(1);
+        effObjSetOpacityPassEnabled(1);
     }
     if (((BtlState *)context)->commandRestrictFlags & 0x20) {
-        func_00114068(0);
+        effObjSetOpacityPassEnabled(0);
     }
     btlStepBlendColor();
 }
