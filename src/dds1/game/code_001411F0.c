@@ -136,7 +136,13 @@ extern s32 dds3GetWorldObject(void);
 
 extern void effUpdateNode(u32 arg0);
 
-extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
+typedef struct FldTransferChunk {
+    u32 unk0;
+    s32 offset;
+    u32 size;
+} FldTransferChunk;
+
+extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 
 extern s32 func_001277A8(s32 arg0);
 
@@ -726,7 +732,90 @@ void fldCacheMapLabelLengths(s32 map) {
     D_003BD7D0 = strlen(D_0033EC90[i]);
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142408);
+extern s32 mdlFlagTest(s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern void fldFormatAreaDirectory(char *, s32, s32);
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
+
+/* The base format occupies the first 16-byte-aligned AMB format record. */
+const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
+
+void func_00142408(void) {
+    char path[128];
+    char directory[64];
+    u32 resourceAddress;
+    s32 transferStart;
+    s32 area;
+    s32 room;
+    u32 *header;
+    s32 rows;
+    s32 count;
+
+    fldFormatAreaDirectory(directory, fldAreaState[4], 1);
+    area = fldAreaState[4];
+    if (area == 0x1C) {
+        if (mdlFlagTest(0x5E1)) {
+            func_003014F0(path, D_003A04B0, directory, fldAreaState[4]);
+        } else if (mdlFlagTest(0x5E2)) {
+            func_003014F0(path, "%sf%03da.amb", directory, fldAreaState[4]);
+        } else if (mdlFlagTest(0x5E3)) {
+            func_003014F0(path, "%sf%03db.amb", directory, fldAreaState[4]);
+        } else if (mdlFlagTest(0x5E4)) {
+            func_003014F0(path, "%sf%03dc.amb", directory, fldAreaState[4]);
+        } else {
+            func_003014F0(path, "%sf%03dd.amb", directory, fldAreaState[4]);
+        }
+    } else if (area == 0x1B) {
+        room = fldAreaState[5];
+        switch (room) {
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+            func_003014F0(path, "%sf%03da.amb", directory, fldAreaState[4]);
+            break;
+        case 7:
+            func_003014F0(path, "%sf%03db.amb", directory, fldAreaState[4]);
+            break;
+        case 22:
+        case 23:
+        case 27:
+            if (mdlFlagTest(0x58D)) {
+                func_003014F0(path, "%sf%03dd.amb", directory, fldAreaState[4]);
+            } else {
+                func_003014F0(path, "%sf%03dc.amb", directory, fldAreaState[4]);
+            }
+            break;
+        case 24:
+        case 25:
+        case 26:
+        default:
+            func_003014F0(path, D_003A04B0, directory, fldAreaState[4]);
+            break;
+        }
+    } else {
+        func_003014F0(path, D_003A04B0, directory, fldAreaState[4]);
+    }
+
+    fldSceneRecordResource = (s32)sdfReadNamedResource(path, &resourceAddress, 0);
+    transferStart = resourceAddress + 8;
+    fldRelocatePackedTransferChunk(resourceAddress, (FldTransferChunk *)transferStart);
+    header = (u32 *)func_001277A8(transferStart);
+    rows = header[1];
+    count = header[2];
+    fldSceneRecordCount = count;
+    fldSceneRecords = rows;
+}
 
 void fldSetSceneRecordChunk(s32 chunk, s32 resourceHandle) {
     /* Descriptor from func_001277A8 precedes the 0x14-byte scene rows. */
@@ -741,7 +830,7 @@ void fldSetSceneRecordChunk(s32 chunk, s32 resourceHandle) {
         s32 transferStart = source + 8;
 
         fldSceneRecordResource = resource;
-        fldRelocatePackedTransferChunk(chunk, transferStart);
+        fldRelocatePackedTransferChunk(chunk, (FldTransferChunk *)transferStart);
         {
             s32 header = func_001277A8(transferStart);
             s32 rows = ((SceneHeader *)header)->rows;
@@ -1479,7 +1568,7 @@ extern s32 fldEffectTextureNodes[];
 
 extern s32 D_0034C8A0[];
 
-extern s32 sdfReadNamedResource();
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern s32 func_0014FE28();
 
@@ -1491,7 +1580,7 @@ void fldLoadFieldEffectTextureSlots(void) {
 
     memcpy(names, D_003A06B0, sizeof(names));
     for (i = 0; i < 4; i++) {
-        fldEffectTextureLoadHandles[i] = sdfReadNamedResource(names[i], &fldEffectTextureData[i], 0);
+        fldEffectTextureLoadHandles[i] = (s32)sdfReadNamedResource(names[i], (u32 *)&fldEffectTextureData[i], 0);
         fldEffectTextureNodes[i] = func_0014FE28(fldEffectTextureData[i]);
         D_0034C8A0[i] = 0;
     }
@@ -2225,7 +2314,7 @@ extern u32 D_003BAFAC;
 
 extern u32 D_003BAF9C;
 
-extern s32 sdfReadNamedResource();
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern char D_003A0810[]; /* "/fld/f/pnl/df%03d.tmx" */
 
@@ -2241,7 +2330,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAFA0 = 0;
     D_003BAFB0 = 0;
     func_003014F0(path, D_003A0810, field);
-    handle = sdfReadNamedResource(path, &resourceAddress, 0);
+    handle = (s32)sdfReadNamedResource(path, (u32 *)&resourceAddress, 0);
     D_003BAFB4 = sdfTexAcquireResourceTexture((void *)resourceAddress);
     sdfReleaseResourceAllocation(handle);
     if (fldTitleIsActive() == 0) {
@@ -2366,7 +2455,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_003BAFB8 = 0;
     D_003BAFBC = 0;
     func_003014F0(path, "/fld/f/pnl/ds%03d.tmx", id);
-    handle = sdfReadNamedResource(path, &data, 0);
+    handle = (s32)sdfReadNamedResource(path, (u32 *)&data, 0);
     D_003BAFC4 = sdfTexAcquireResourceTexture((void *)data);
     sdfReleaseResourceAllocation(handle);
     if (fldTitleIsActive() == 0) {
@@ -2382,7 +2471,7 @@ void fldRequestMiniTitleDismiss(void) {
     }
 }
 
-extern s32 sdfReadNamedResource();
+extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern s32 func_0014FE28();
 
@@ -2390,13 +2479,13 @@ void fldLoadWeatherEffects(void) {
     s32 handle;
     s32 resourceAddress;
 
-    handle = sdfReadNamedResource(s_fieldWeatherLimitPath, &resourceAddress, 0);
+    handle = (s32)sdfReadNamedResource(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
     fldWeatherLimitTexture = sdfTexAcquireResourceTexture((void *)resourceAddress);
     sdfQueueNonzeroResourceId(handle);
-    fldDamEffectResource = sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
+    fldDamEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
     fldDamEffectNode = func_0014FE28(fldDamEffectData);
     fldDamEffectPositioned = 0;
-    fldYukEffectResource = sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
+    fldYukEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
     fldYukEffectNode = func_0014FE28(fldYukEffectData);
     fldYukEffectPositioned = 0;
 }
