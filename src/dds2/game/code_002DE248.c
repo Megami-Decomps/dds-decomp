@@ -183,7 +183,7 @@ typedef struct EffectSlotOwner {
     EffectSlot *slots;  // 0x10
 } EffectSlotOwner;
 
-extern void effBattleMiscQueryPosition(u32, void *, void *);
+extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
@@ -6625,7 +6625,7 @@ void effGetWorldVector(u32 which) {
     if (request.kind != 0xB) {
         u128 *vec = &result;
 
-        effBattleMiscQueryPosition(handle, &request, vec);
+        effBattleMiscQueryPosition((void *)handle, &request, vec);
         VU0_LOAD_VF_MEMORY(vf10, vec);
     } else {
         VU0_MOVE_VF(vf10, vf0);
@@ -6702,7 +6702,7 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
     {
         u128 *vec = &result;
 
-        effBattleMiscQueryPosition(handle, &request, vec);
+        effBattleMiscQueryPosition((void *)handle, &request, vec);
         VU0_LOAD_VF_MEMORY(vf10, vec);
         return 1;
     }
@@ -6815,6 +6815,48 @@ void func_002F5EF0(u32 unusedResource) {
     }
 }
 
+/* Header common to the resource-instance constructors and callback dispatchers. */
+typedef struct EffActiveResource {
+    f32 position[4];
+    u8 pad_10[0x10];
+    f32 scale;           // 0x20
+    u32 color;           // 0x24
+    u32 frame;           // 0x28
+    union {
+        u32 index;       // 0x2C
+        s32 signedIndex;
+        u16 shortIndex;
+    } kind;
+    u32 resource;        // 0x30
+    u8 pad_34[4];
+    void *payload;       // 0x38
+    u8 pad_3C[4];
+} EffActiveResource;
+typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
+
+/* Entire 40-byte payload copied for resource kind 1. */
+typedef struct EffActorLightConfig {
+    u32 duration;
+    s32 colorFadeIn;
+    s32 colorFadeOut;
+    s32 directionFadeIn;
+    s32 directionFadeOut;
+    u32 firstColor;
+    u32 secondColor;
+    u8 actorSelection;
+    u8 pad1D[3];
+    EffectVectorRequest direction;
+} EffActorLightConfig;
+typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 1 : -1];
+extern void evtSetUnitStatusFlags(EvtUnit *);
+extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
+extern void btlUnitGetEffectPosVU(BtlUnit *);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
+extern u32 btlCameraVectorHasNaN(void);
+extern u32 btlBlendColorVec(f32 *, f32 *, f32);
+extern void func_0023C870(EvtUnit *, s32, u32, u32);
+
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F6000);
 
 extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
@@ -6839,23 +6881,6 @@ void effSyncLinkedActorChildParameter(void) {
     }
 }
 
-/* Header common to the resource-instance constructors and callback dispatchers. */
-typedef struct EffActiveResource {
-    u8 pad_00[0x20];
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    union {
-        u32 index;       // 0x2C
-        s32 signedIndex;
-        u16 shortIndex;
-    } kind;
-    u32 resource;        // 0x30
-    u8 pad_34[4];
-    void *payload;       // 0x38
-    u8 pad_3C[4];
-} EffActiveResource;
-typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
 
 /* Entire payload copied for resource kind 2 by effAllocateResourcePayload. */
 typedef struct EffActorTintConfig {
