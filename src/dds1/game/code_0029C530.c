@@ -6829,8 +6829,8 @@ extern void func_002B3420(u32);
 
 
 
-EffCopiedPayload *effCreateInitializedObject(u32 type, const void *source, u32 index) {
-    EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, index);
+EffCopiedPayload *effCreateInitializedObject(u32 type, const void *source, s32 size) {
+    EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, size);
     u32 child = *(u32 *)effect;
     fldRelocatePackedTransferChunk(child, child + 8);
     func_002B3420((u32)effect);
