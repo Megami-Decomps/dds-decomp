@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "pcp_vu0.h"
 
 typedef struct KwlnResourceNode {
@@ -780,8 +781,8 @@ extern void evtEnsureDrawVectorState(void);
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
 void evtResetDisplayProjectionAndVectorState(void) {
     sdfGraphSetDisplayMode(1);
-    sdfCameraBuildProjection(&sdfSceneProjectionParameters);
-    sdfCameraBuildProjection(&D_0037F980);
+    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
+    sdfCameraBuildProjection(&D_0037F980.camera);
     func_00105070(0);
     func_00105070(1);
     func_001057B0();
@@ -800,7 +801,6 @@ extern u32 sdfAllocImageBuffer(u32 width, u32 height, u32 mode);
 extern s32 sdfTexCreateResourceWithReference(u32 width, u32 height, u32 a, u32 b, u32 buffer, u32 c, u32 d, u32 e);
 extern void sdfTexSetClampMode(s32 texture, s32 mode);
 extern void sdfTexCreateFirstPacket(s32 texture);
-extern f32 D_0037F7B0[];
 
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
@@ -824,9 +824,9 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     kwlnHeldTextureReference = textureHandle;
     sdfTexSetClampMode(textureHandle, KWLN_HELD_TEXTURE_CLAMP_MODE);
     sdfTexCreateFirstPacket(textureHandle);
-    D_0037F7B0[1] = value;
-    D_0037F7B0[6] = width;
-    D_0037F7B0[7] = height;
+    D_0037F7B0.camera.aspect = value;
+    D_0037F7B0.camera.width = width;
+    D_0037F7B0.camera.height = height;
     func_00105290();
     return 1;
 }
