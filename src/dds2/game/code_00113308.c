@@ -7,12 +7,36 @@
 #include "eff.h"
 #include "btl_sound.h"
 
+extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
+
 extern void *dds3GetWorldSecondaryObject(void);
 
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 
-extern u32 D_00435DA0;
+extern u32 effObjOpacityPassEnabled;
+
+/* Mode 0 is the initialized neutral tint; other values describe the native
+ * alpha updates performed by this title's transform renderer. */
+enum {
+    EFFECT_OPACITY_MODE_INITIAL = 0,
+    EFFECT_OPACITY_MODE_ALPHA_CLEAR = 2,
+    EFFECT_OPACITY_MODE_ALPHA_RISE_8 = 3,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_8_TO_32 = 4,
+    EFFECT_OPACITY_MODE_ALPHA_RISE_4 = 5,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_4 = 6,
+    EFFECT_OPACITY_MODE_ALPHA_RISE_2 = 7,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_2 = 8,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_11 = 9,
+    EFFECT_OPACITY_MODE_ALPHA_RISE_12 = 10,
+    EFFECT_OPACITY_MODE_ALPHA_FALL_12 = 11,
+    EFFECT_OPACITY_MODE_ALPHA_FADE_START = EFFECT_OPACITY_MODE_ALPHA_RISE_8,
+    EFFECT_OPACITY_MODE_ALPHA_FADE_END = EFFECT_OPACITY_MODE_ALPHA_RISE_4,
+    EFFECT_OPACITY_ALPHA_MAX = 0x80,
+    EFFECT_OPACITY_FALL_8_FLOOR = 0x20,
+    EFFECT_OPACITY_COLOR_NEUTRAL = 0x80808080,
+    EFFECT_OPACITY_COLOR_TRANSPARENT = 0x00808080
+};
 
 typedef struct EffectObject {
     u8 pad00[0x18];
@@ -40,8 +64,9 @@ extern void effObjFreeInner(EffWorldNode *node);
 extern void evtEndObjectValueTransition(EffWorldNode *object);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
+extern void sdfReleaseChipBlock(void *memory);
 
-extern void dds3SetObjectFlags(void *, s32);
+extern void dds3SetObjectFlags(void *object, u32 mask);
 
 u32 dds3GetEffectDataHandle(EffectObject *object) {
     return (u32)object->data->handle;
@@ -133,7 +158,7 @@ void func_00113408(EffectObject *obj, const f32 *targetPosition) {
     data->word34 = 0;
 }
 
-extern void dds3ClearObjectFlags(EffectObject *, s32);
+extern void dds3ClearObjectFlags(void *object, u32 mask);
 
 void func_00113560(EffectObject *object) {
     EffectObjectData *data = object->data;
@@ -221,7 +246,7 @@ void evtDestroyEffectObjectData(EffectObject *object) {
         evtReleaseUnitTransitionWork(data->transitionWork);
         data->transitionWork = 0;
     }
-    dds3ReleaseObjectBaseResources(object);
+    dds3ReleaseObjectBaseResources((EffWorldNode *)object);
     dds3DestroyObjectBase(data->modelHolder);
     sdfReleaseChipBlock(object->data);
 }
@@ -240,7 +265,7 @@ typedef struct EffVec4 {
 
 extern EffVec4 D_004128A0;
 extern EffVec4 D_004128B0;
-extern s32 dds3TestObjectFlags(EffectObject *, s32);
+extern u8 dds3TestObjectFlags(void *object, u32 mask);
 extern s32 effObjTestNodeFlags(f32 *, s32);
 extern void effObjInnerVecInit(EffLocalNode *);
 extern s32 func_0023DA70(EffLocalNode *, EffectObject *);
@@ -259,7 +284,7 @@ extern void effObjInnerVecBackup(f32 *);
 extern void func_00113D18(EffectObject *);
 extern void func_00113560(EffectObject *);
 extern void func_00113408(EffectObject *, const f32 *);
-extern f32 *func_001178B8(s32);
+extern void *func_001178B8(EffWorldNode *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
 s32 effUpdateFollowModelTransform(EffectObject *obj) {
@@ -283,7 +308,8 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
     if (model != NULL && effObjTestNodeFlags(obj->source, 1) == 1) {
         effObjClearNodeFlags(obj->source, 1);
         if (data->transitionWork != 0) {
-            if (data->transitionWork->motionState == 0 || data->transitionWork->motionState == 3) {
+            if (data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_IDLE ||
+                data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_VECTOR) {
                 if (data->transitionWork->flags & 0x40) {
                     flag = 1;
                 }
@@ -542,7 +568,7 @@ void effObjSetModelHolder(EffectObject *object, u32 value) {
     object->data->modelHolder = (ObjBase *)value;
 }
 
-void func_00113FF8(EffectObject *object, u32 value) {
+void effObjSetRoomNumber(EffectObject *object, u32 value) {
     object->data->word04 = value;
 }
 
@@ -570,8 +596,8 @@ u32 dds3GetObjectPayloadWord8(EffWorldNode *object) {
     return payload[2];
 }
 
-void func_00114068(u32 value) {
-    D_00435DA0 = value;
+void effObjSetOpacityPassEnabled(u32 value) {
+    effObjOpacityPassEnabled = value;
 }
 
 s32 effObjInitializeTransformData(EffWorldNode *object) {
@@ -585,7 +611,7 @@ s32 effObjInitializeTransformData(EffWorldNode *object) {
     data = object->data;
     data->resourceState = dds3CreateSlotResourceState(object);
     data->flags = 0;
-    data->opacityMode = 0;
+    data->opacityMode = EFFECT_OPACITY_MODE_INITIAL;
     data->activeId = -1;
     data->offset[0] = 0.0f;
     data->offset[1] = 0.0f;
@@ -626,46 +652,46 @@ s32 func_00114150(EffWorldNode *object) {
     ObjectTransform *inner;
 
     switch (mode) {
-    case 0:
-        object->color = 0x80808080;
+    case EFFECT_OPACITY_MODE_INITIAL:
+        object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
         break;
     case 1:
-        object->color = 0x80808080;
+        object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
         break;
-    case 2:
-        object->color = 0x00808080;
+    case EFFECT_OPACITY_MODE_ALPHA_CLEAR:
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT;
         break;
-    case 3:
+    case EFFECT_OPACITY_MODE_ALPHA_RISE_8:
         alpha = ((u8 *)&object->color)[3];
-        if (alpha < 0x80) {
+        if (alpha < EFFECT_OPACITY_ALPHA_MAX) {
             alpha += 8;
         }
-        if (alpha > 0x80) {
-            alpha = 0x80;
+        if (alpha > EFFECT_OPACITY_ALPHA_MAX) {
+            alpha = EFFECT_OPACITY_ALPHA_MAX;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 4:
+    case EFFECT_OPACITY_MODE_ALPHA_FALL_8_TO_32:
         alpha = ((u8 *)&object->color)[3];
-        if (alpha > 0x20) {
+        if (alpha > EFFECT_OPACITY_FALL_8_FLOOR) {
             alpha -= 8;
         }
-        if (alpha < 0x20) {
-            alpha = 0x20;
+        if (alpha < EFFECT_OPACITY_FALL_8_FLOOR) {
+            alpha = EFFECT_OPACITY_FALL_8_FLOOR;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 5:
+    case EFFECT_OPACITY_MODE_ALPHA_RISE_4:
         alpha = ((u8 *)&object->color)[3];
-        if (alpha < 0x80) {
+        if (alpha < EFFECT_OPACITY_ALPHA_MAX) {
             alpha += 4;
         }
-        if (alpha > 0x80) {
-            alpha = 0x80;
+        if (alpha > EFFECT_OPACITY_ALPHA_MAX) {
+            alpha = EFFECT_OPACITY_ALPHA_MAX;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 6:
+    case EFFECT_OPACITY_MODE_ALPHA_FALL_4:
         alpha = ((u8 *)&object->color)[3];
         if (alpha != 0) {
             alpha -= 4;
@@ -675,19 +701,19 @@ s32 func_00114150(EffWorldNode *object) {
         if (alpha < 0) {
             alpha = 0;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 7:
+    case EFFECT_OPACITY_MODE_ALPHA_RISE_2:
         alpha = ((u8 *)&object->color)[3];
-        if (alpha < 0x80) {
+        if (alpha < EFFECT_OPACITY_ALPHA_MAX) {
             alpha += 2;
         }
-        if (alpha > 0x80) {
-            alpha = 0x80;
+        if (alpha > EFFECT_OPACITY_ALPHA_MAX) {
+            alpha = EFFECT_OPACITY_ALPHA_MAX;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 8:
+    case EFFECT_OPACITY_MODE_ALPHA_FALL_2:
         alpha = ((u8 *)&object->color)[3];
         if (alpha != 0) {
             alpha -= 2;
@@ -697,9 +723,9 @@ s32 func_00114150(EffWorldNode *object) {
         if (alpha <= 0) {
             alpha = 0;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 9:
+    case EFFECT_OPACITY_MODE_ALPHA_FALL_11:
         alpha = ((u8 *)&object->color)[3];
         if (alpha != 0) {
             alpha -= 11;
@@ -709,19 +735,19 @@ s32 func_00114150(EffWorldNode *object) {
         if (alpha < 0) {
             alpha = 0;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 10:
+    case EFFECT_OPACITY_MODE_ALPHA_RISE_12:
         alpha = ((u8 *)&object->color)[3];
-        if (alpha < 0x80) {
+        if (alpha < EFFECT_OPACITY_ALPHA_MAX) {
             alpha += 12;
         }
-        if (alpha > 0x80) {
-            alpha = 0x80;
+        if (alpha > EFFECT_OPACITY_ALPHA_MAX) {
+            alpha = EFFECT_OPACITY_ALPHA_MAX;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
-    case 11:
+    case EFFECT_OPACITY_MODE_ALPHA_FALL_12:
         alpha = ((u8 *)&object->color)[3];
         if (alpha != 0) {
             alpha -= 12;
@@ -731,7 +757,7 @@ s32 func_00114150(EffWorldNode *object) {
         if (alpha < 0) {
             alpha = 0;
         }
-        object->color = 0x00808080 | ((u32)alpha << 24);
+        object->color = EFFECT_OPACITY_COLOR_TRANSPARENT | ((u32)alpha << 24);
         break;
     }
 
@@ -775,7 +801,7 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
     EffectTransformData *data;
     u32 opacityMode;
 
-    if (D_00435DA0 == 0) {
+    if (effObjOpacityPassEnabled == 0) {
         return 1;
     }
     data = object->data;
@@ -789,13 +815,13 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
         fldSelectDisplayBuffer(0x22);
         fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
         opacityMode = data->opacityMode;
-        if (opacityMode < 5) {
-            if (opacityMode >= 3) {
-                if (object->color != 0x80808080) {
+        if (opacityMode < EFFECT_OPACITY_MODE_ALPHA_FADE_END) {
+            if (opacityMode >= EFFECT_OPACITY_MODE_ALPHA_FADE_START) {
+                if (object->color != EFFECT_OPACITY_COLOR_NEUTRAL) {
                     if (dds3TestObjectFlags(fldPlayerObject, 1)) {
                         u32 savedColor = object->color;
 
-                        object->color = 0x80808080;
+                        object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
                         func_00112518(D_00380788 + data->activeId * 0x10, object);
                         object->color = savedColor;
                     } else {
@@ -827,7 +853,6 @@ extern void effDestroyNode(struct EffNode *);
 extern void billDispatchByKind(BillObj *);
 extern void effEventReleaseNode(struct EffEventWork *);
 extern void func_00197D50(SoundMixer *);
-extern void sdfReleaseChipBlock(void *);
 
 /* Release each dependency according to the active state, clearing ownership
  * before releasing the next dependency. State 4 only borrows its handle. */
@@ -900,5 +925,5 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00113308", D_00435DA0);
+INCLUDE_SDATA(const s32, "game/code_00113308", effObjOpacityPassEnabled);
 

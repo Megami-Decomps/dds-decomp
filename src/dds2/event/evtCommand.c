@@ -64,9 +64,9 @@ void sdfPrintFormattedDevMessage(const char *msg, ...);
 
 s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId);
 
-s32 dds3GetWorldSecondaryObject(void);
+void *dds3GetWorldSecondaryObject(void);
 
-s32 dds3GetWorldObjectValue(s32 world);
+s32 dds3GetWorldObjectValue(EffWorldNode *world);
 
 void evtCreateWorldObjectForKey(s32 highPart, s32 lowPart);
 

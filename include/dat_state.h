@@ -116,7 +116,16 @@ typedef struct DatInventory {
 
 /* The field reset constructors prove the 30-byte slot and 64-slot bank. */
 typedef struct DatFieldMapSlot {
-    u16 flagBanks[5];
+    union {
+        u16 flagBanks[5];
+        struct {
+            u16 roomModeFlags;
+            u16 roomObjectModeFlags;
+            u16 roomSceneFlags;
+            u16 mapTargetFlags;
+            u16 alternateMapTargetFlags;
+        };
+    };
     u8 values[16];
     u16 trailingFlagBanks[2];
 } DatFieldMapSlot;

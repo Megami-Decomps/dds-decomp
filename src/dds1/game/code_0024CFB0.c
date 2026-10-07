@@ -1,6 +1,7 @@
 #include "mnu.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "evt_world.h"
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0xC0
 #define EVT_DISPLAY_VALUE_COUNT 0x10
@@ -65,6 +66,8 @@ extern void func_0024A2D8(s32 arg0);
 
 
 extern void func_0024DD78(void);
+extern void *dds3GetWorldSecondaryObject(void);
+extern s32 dds3GetWorldObjectValue(EffWorldNode *world);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern void dspSetActive();
 extern void itfMesSetWindowHighFlags(s32, s32);

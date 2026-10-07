@@ -2,9 +2,9 @@
 
 #include "dds3obj.h"
 
-extern World *dds3ActiveWorld;
+extern EffWorldNode *dds3ActiveWorld;
 
-void effObjNodeDestroy(void *arg);
+void effObjNodeDestroy(EffWorldNode *node);
 
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 
@@ -34,7 +34,7 @@ void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);
 
 /* Destroy the active world if present; clear the global only after destruction. */
 void dds3DestroyWorld(void) {
-    World *world;
+    EffWorldNode *world;
 
     world = dds3ActiveWorld;
     if (world != NULL) {
@@ -46,37 +46,37 @@ void dds3DestroyWorld(void) {
 /* Set the primary selection without releasing its old pointer; no world is a no-op. */
 void dds3SetWorldObject(void *primaryObject) {
     if (dds3ActiveWorld != NULL) {
-        dds3ActiveWorld->info->primaryObject = primaryObject;
+        ((WorldInfo *)dds3ActiveWorld->data)->primaryObject = primaryObject;
     }
 }
 
 /* Return the selected primary object, or NULL when no world is active. */
 void *dds3GetWorldObject(void) {
-    World *world;
+    EffWorldNode *world;
 
     world = dds3ActiveWorld;
     if (world == NULL) {
         return NULL;
     }
-    return world->info->primaryObject;
+    return ((WorldInfo *)world->data)->primaryObject;
 }
 
 /* Set the secondary selection without releasing its old pointer; no world is a no-op. */
 void dds3SetWorldSecondaryObject(void *secondaryObject) {
     if (dds3ActiveWorld != NULL) {
-        dds3ActiveWorld->info->secondaryObject = secondaryObject;
+        ((WorldInfo *)dds3ActiveWorld->data)->secondaryObject = secondaryObject;
     }
 }
 
 /* Return the selected secondary object, or NULL when no world is active. */
 void *dds3GetWorldSecondaryObject(void) {
-    World *world;
+    EffWorldNode *world;
 
     world = dds3ActiveWorld;
     if (world == NULL) {
         return NULL;
     }
-    return world->info->secondaryObject;
+    return ((WorldInfo *)world->data)->secondaryObject;
 }
 
 /* Create a kind-1 world node and append it at the tail.
@@ -88,7 +88,7 @@ EffWorldNode *dds3AppendWorldNode(void) {
     if (dds3ActiveWorld == NULL) {
         return NULL;
     }
-    worldInfo = dds3ActiveWorld->info;
+    worldInfo = (WorldInfo *)dds3ActiveWorld->data;
     worldNode = dds3CreateWorldNodeForKind(DDS3_WORLD_NODE_KIND);
     if (worldNode == NULL) {
         return NULL;
@@ -115,7 +115,7 @@ void dds3DestroyWorldNode(EffWorldNode *worldNode) {
     if (dds3ActiveWorld == NULL) {
         return;
     }
-    worldInfo = dds3ActiveWorld->info;
+    worldInfo = (WorldInfo *)dds3ActiveWorld->data;
     if (worldInfo->firstNode == worldNode) {
         worldInfo->firstNode = worldNode->next;
     }
@@ -141,7 +141,7 @@ NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
     if (dds3ActiveWorld == NULL) {
         return NULL;
     }
-    worldInfo = dds3ActiveWorld->info;
+    worldInfo = (WorldInfo *)dds3ActiveWorld->data;
     if (worldInfo->unk1E < initialCount) {
         return NULL;
     }
@@ -178,7 +178,7 @@ void dds3DestroyWorldIndexNode(NodeB *indexNode) {
     if (dds3ActiveWorld == NULL) {
         return;
     }
-    worldInfo = dds3ActiveWorld->info;
+    worldInfo = (WorldInfo *)dds3ActiveWorld->data;
     dds3ReleaseWorldValueEntries((WorldValueIndices *)indexNode);
     if (indexNode->previous == NULL) {
         worldInfo->firstIndex = indexNode->next;
@@ -197,16 +197,16 @@ INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3RemoveCurrentWorldValueEntry)
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3ReleaseWorldValueEntries);
 
-/* Reset the cursor and remove the first matching value, or all matches when
- * processAllMatches is nonzero. Return whether any match was processed. */
-s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, void *targetWord, s32 processAllMatches) {
+/* Reset the cursor and remove this node's matching address once, or all matches
+ * when processAllMatches is nonzero. Return whether any match was processed. */
+s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNode *targetNode, s32 processAllMatches) {
     s32 processedMatch;
 
     processedMatch = 0;
     if (dds3GetWorldValueCount(indexNode) != 0) {
         dds3ResetObjectValueCursor(indexNode);
         do {
-            if (dds3SeekWorldNode(indexNode, (u32)targetWord) != 1) {
+            if (dds3SeekWorldNode(indexNode, (u32)targetNode) != 1) {
                 break;
             }
             dds3RemoveCurrentWorldValueEntry(indexNode);

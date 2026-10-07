@@ -543,7 +543,88 @@ s32 mnuStaffListInput(s32 task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE580);
+/* Handle staff-item selection, confirmation and popup input. */
+s32 func_002AE580(KwlnTask *task) {
+    extern u32 kwlnTaskGetUserValue(KwlnTask *);
+    extern void mnuHandlePanelListPageJumpInput(u32, u32);
+    extern s32 func_002ABED8(s32, s32, MenuStaffContext *);
+    extern u32 mnuSetPartyEntryMenuValue(s32, u32);
+    extern char D_003E7434[];
+    extern char D_003E746C[];
+
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
+    s32 *popup = &context->popupState;
+    MenuWindowContainer *window;
+    s32 buttons = mnuMapPadMaskToFlags(0xC33);
+    s32 state;
+    s32 input;
+    DatPartyRecord *party =
+        &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    MenuWindowContainer *countWindow;
+
+    state = func_002C4038(&context->transitionWork, popup, 0, task);
+    if (state != 0) {
+        return state;
+    }
+    menu->thirdListEnabled = 0;
+    if (evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    func_002C1B68(&context->unkAA50, 0);
+
+    if (menu->firstListState == 0) {
+        if (mnuStaffListInput((s32)task) == 0) {
+            window = menu->windows[2];
+            if ((buttons & 0x300000) == 0) {
+                func_002B9808(window);
+            }
+            if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
+                mnuRetreatWindowListSelection(window);
+            }
+            if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
+                mnuAdvanceWindowListSelection(window);
+            }
+            mnuHandlePanelListPageJumpInput((u32)window, (u32)&buttons);
+            mnuClearWindowPanelTransitionFlag(window);
+            input = buttons;
+
+            if (input & MNU_STAFF_INPUT_CONFIRM) {
+                if (menu->windows[2]->list->count != 0) {
+                    u32 itemId = menu->windows[2]->list->cursor->sortKeySecondary;
+
+                    mnuPrepareStaffSelectionChangeDialog(
+                        (s32)context, (u8 *)party, itemId);
+                    mnuSetPartyEntryMenuValue((s32)party, itemId);
+                    countWindow = menu->windows[2];
+                    /* Snapshot input before publishing the remaining item count. */
+                    input = buttons;
+                    countWindow->list->cursor->sortKeyPrimary =
+                        datGameState->inventory.counts[itemId];
+                    menu->firstListState = 1;
+                } else {
+                    buttons = 0;
+                    input = 0;
+                }
+            }
+            if (input & MNU_STAFF_INPUT_CANCEL) {
+                menu->thirdListEnabled = 1;
+                mnuSetPopupEntryFlagged(popup, D_003E746C);
+                input = buttons;
+            }
+            mnuPlayInputSound(0, input, &window->list->stateFlags);
+        }
+    } else {
+        if (func_002ABED8(menu->previous, menu->requested, context) == 0) {
+            mnuClearActionFlags(0, &context->partyWindow);
+            mnuSetPopupEntryFlagged(popup, D_003E7434);
+        } else {
+            menu->firstListState = 0;
+        }
+    }
+    return 0;
+}
+
 
 void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
     char captionText[16];

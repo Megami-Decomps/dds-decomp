@@ -264,7 +264,7 @@ void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
 
     if ((u32)(frames - 1) < 100) {
         work->linkedUnit = NULL;
-        work->motionState = 3;
+        work->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
         PCP_COPY_VECTOR(destination, vector);
         work->motionParameter = frames;
         work->directionOffset = 0;
@@ -289,7 +289,7 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
     f32 *destination = work->targetVector;
 
     work->motionSubmode = mode;
-    work->motionState = 1;
+    work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = 0;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(destination, vector);
@@ -365,7 +365,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         work->flags |= 0x10;
         break;
     }
-    work->motionState = 1;
+    work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = 2;
     work->linkedUnit = pathSource;
     dds3InterpolatePathVectorVU(path);
@@ -382,7 +382,7 @@ s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 value) {
     if (value != 0) {
         eventUnit->unk94 = value;
         eventUnit->motionTicks = 0;
-        eventUnit->motionState = 4;
+        eventUnit->motionState = EVT_UNIT_MOTION_STATE_VALUE;
         result = 1;
     }
     return result;

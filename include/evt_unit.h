@@ -6,6 +6,15 @@
 struct MdlCtx;
 struct SdfTex;
 
+/* Values stored in EvtUnit.motionState; the field remains a signed halfword. */
+typedef enum EvtUnitMotionState {
+    EVT_UNIT_MOTION_STATE_IDLE = 0,
+    EVT_UNIT_MOTION_STATE_SOURCE = 1,
+    EVT_UNIT_MOTION_STATE_MOTION = 2,
+    EVT_UNIT_MOTION_STATE_VECTOR = 3,
+    EVT_UNIT_MOTION_STATE_VALUE = 4
+} EvtUnitMotionState;
+
 /* Shared light-target payload used by the event manager and battle base-light task. */
 typedef struct EvtTargetInfo {
     f32 firstColor[4];           /* 0x00 */
@@ -98,7 +107,7 @@ typedef struct EvtUnit {
     s32 pathHandle;                /* 0xA0: freed when replacing the path */
     f32 pathSpeed;                 /* 0xA4: signed progress increment */
     u32 flags;                     /* 0xA8 */
-    s16 motionState;               /* 0xAC: idle 0, source 1, motion 2, vector 3, value 4 */
+    s16 motionState;               /* 0xAC */
     s16 transitionSourceKind;      /* 0xAE */
     s16 motionSubmode;             /* 0xB0 */
     s16 motionTicks;               /* 0xB2 */

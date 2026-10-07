@@ -64,7 +64,7 @@ extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_003BD358, D_003BD35C;
 extern void *dds3GetWorldObject(void);
-extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, s32);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
 extern s32 sdfLoadMapRecordPositionVector(void *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
@@ -157,14 +157,16 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     if (flags & 0x40000) {
         if (unit->currentTransitionValue == 0) {
             unit->flags = flags & ~0x40000;
-        } else if (!dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9, unit->currentTransitionValue)) {
+        } else if (!dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9,
+                                                 (EffWorldNode *)unit->currentTransitionValue)) {
             unit->currentTransitionValue = 0;
             unit->previousTransitionValue = 0;
             unit->flags &= ~0x40000;
         }
     }
     if (unit->previousTransitionValue &&
-        !dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9, unit->previousTransitionValue)) {
+        !dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9,
+                                       (EffWorldNode *)unit->previousTransitionValue)) {
         unit->previousTransitionValue = 0;
     }
     transition = 0.0f;
@@ -785,7 +787,7 @@ EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
     memcpy(defaultVector, (const f32 *)D_003AC060, sizeof(defaultVector));
     work = sdfAllocSizeClassBlock(sizeof(EvtUnit));
     memset(work, 0, sizeof(EvtUnit));
-    work->motionState = 0;
+    work->motionState = EVT_UNIT_MOTION_STATE_IDLE;
     work->transitionSourceKind = 1;
     work->unkB8 = 1.0f;
     work->effObj = effObj;
@@ -853,10 +855,11 @@ void evtStoreUnitMotionShortParameters(EvtUnit *work, s32 a, s32 b) {
 s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
     s32 state = evtGetUnitMotionState(unit);
 
-    if (state == 0) {
+    if (state == EVT_UNIT_MOTION_STATE_IDLE) {
         return 1;
     }
-    if (state == 2 && unit->motionTicks > 0 && unit->owner->first->state == 5) {
+    if (state == EVT_UNIT_MOTION_STATE_MOTION && unit->motionTicks > 0 &&
+        unit->owner->first->state == 5) {
         return 1;
     }
     return 0;
@@ -895,7 +898,7 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     unit->flags &= ~0x40;
     unit->flags &= ~0x400000;
     unit->flags &= ~0x800000;
-    unit->motionState = 2;
+    unit->motionState = EVT_UNIT_MOTION_STATE_MOTION;
     unit->unkC4 = a;
     unit->unkC6 = b;
     unit->unkC8 = c;

@@ -5,7 +5,8 @@
 #include "kwln.h"
 #include "sdf.h"
 
-extern u32 dds3ActiveWorld;
+struct EffWorldNode;
+extern struct EffWorldNode *dds3ActiveWorld;
 
 /* Detach a task from its parent's child list. Detached tasks are left untouched;
  * an attached task must already occur in that parent's sibling chain.

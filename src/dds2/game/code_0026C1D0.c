@@ -59,8 +59,8 @@ typedef struct {
     u16 entryIndices[0];
 } ActiveList;
 
-extern u64 dds3GetWorldSecondaryObject(void);
-extern s32 dds3GetWorldObjectValue(u64);
+extern void *dds3GetWorldSecondaryObject(void);
+extern s32 dds3GetWorldObjectValue(EffWorldNode *world);
 extern void evtCreateWorldObjectForKey(s32, s32);
 /* Recreate the secondary world selection only when its packed key changes.
  * Preserve the signed shift/add rather than treating this as an unsigned OR. */

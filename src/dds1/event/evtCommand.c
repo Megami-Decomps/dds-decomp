@@ -84,9 +84,9 @@ void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char
 
 s32 sdfCheckPendingWorkWithInterrupts(void);
 
-s32 dds3GetWorldSecondaryObject(void);
+void *dds3GetWorldSecondaryObject(void);
 
-s32 dds3GetWorldObjectValue(s32 world);
+s32 dds3GetWorldObjectValue(EffWorldNode *world);
 
 void evtCreateWorldObjectForKey(s32 highPart, s32 lowPart);
 

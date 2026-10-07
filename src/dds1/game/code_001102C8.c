@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "evt_world.h"
 
 struct NodeB;
@@ -10,26 +11,7 @@ extern u32 func_001281E0(u32);
 
 
 
-/* Global world-info entries: payload at +0, next index at +4. */
-typedef struct {
-    u32 value;
-    u16 next;
-    u8 pad06[2];
-} WorldIndexedEntry;
-
-
-/* The global world's +0x18 pointer is world info, not EvtWorldTable. */
-typedef struct {
-    u8 pad00[0x14];
-    WorldIndexedEntry *entries; /* 0x14 */
-} WorldIndexState;
-
-typedef struct {
-    u8 pad00[0x18];
-    WorldIndexState *state; /* 0x18 */
-} WorldHandle;
-
-extern WorldHandle *dds3ActiveWorld;
+extern EffWorldNode *dds3ActiveWorld;
 
 
 INCLUDE_ASM(const s32, "game/code_001102C8", dds3GrowWorldValueChain);
@@ -51,7 +33,7 @@ u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    dds3ActiveWorld->state->entries[object->cursorIndex].value = value;
+    ((WorldInfo *)dds3ActiveWorld->data)->unk14[object->cursorIndex].unk0 = value;
     return 1;
 }
 
@@ -62,7 +44,7 @@ u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    return dds3ActiveWorld->state->entries[object->cursorIndex].value;
+    return ((WorldInfo *)dds3ActiveWorld->data)->unk14[object->cursorIndex].unk0;
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
@@ -75,7 +57,7 @@ u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    object->cursorIndex = dds3ActiveWorld->state->entries[object->cursorIndex].next;
+    object->cursorIndex = ((WorldInfo *)dds3ActiveWorld->data)->unk14[object->cursorIndex].unk4;
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 
@@ -228,7 +210,7 @@ void dds3SetWorldObjectDataValue(EffWorldNode *object, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001102C8", dds3AppendWorldObjectNode);
 
-extern void effObjNodeDestroy(void *node);
+extern void effObjNodeDestroy(EffWorldNode *node);
 
 /* Unlink a world list node from its kind's list in the owner's data and destroy it. */
 void dds3RemoveWorldObjectNode(EffWorldNode *node) {
