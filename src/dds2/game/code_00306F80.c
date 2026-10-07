@@ -34,7 +34,8 @@ typedef struct GridDrawWork {
     s32 overlayDataSize;     /* 0x34 */
 } GridDrawWork;
 
-extern s32 effGetSlotWorkOrOverride();
+extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern u8 *effUpdateTimedStates(u8 *, u32, u8 *);
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -66,16 +67,16 @@ void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags,
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307018);
 
-s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
-    s32 entry = effGetSlotWorkOrOverride(object, key);
+s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
+    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride((s32)object, key);
     s32 result;
 
-    if (*(s32 *)(entry + 0x30) == 0) {
+    if (entry->states[0].delay == 0) {
         func_00307018(object, key);
     }
-    result = effUpdateTimedStates(object, key, entry);
+    result = (s32)effUpdateTimedStates((u8 *)object, (u32)key, (u8 *)entry);
     if (result == 0) {
-        result = ((EffectSlotSet *)object)->defaultValue;
+        result = object->defaultValue;
     }
     return result;
 }
@@ -85,7 +86,7 @@ extern void func_00304B18();
 /* Store grid bounds in the renderer's fixed-point coordinate units. */
 void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     EffectSlotDescription *entry = &object->descriptions[index];
-    s32 record = effGetSlotWorkOrOverride(object, index);
+    s32 record = effGetSlotWorkOrOverride((s32)object, index);
 
     entry->xOffset = x >> 4;
     entry->yOffset = y >> 3;
@@ -112,8 +113,8 @@ void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
 }
 
 /* Set the unquantized bounds of the selected grid widget. */
-void itfGridSetBounds(s32 object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
+void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride((s32)object, index);
     widget->parameters[0] = x;
     widget->parameters[1] = y;
     widget->parameters[2] = width;
