@@ -1,6 +1,8 @@
 #include "common.h"
 #include "sdf.h"
 #include "sdf_projection.h"
+#include "sdf_linked_packet.h"
+#include "sdf_draw.h"
 #include "pcp_vu0.h"
 
 typedef struct {
@@ -742,7 +744,122 @@ s32 kwlnEnsureDefaultResource(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105150);
+typedef struct DmaPacketHeader {
+    u16 quadwords;
+    u16 pad02;
+    u32 address;
+    u32 tag;
+    u32 command;
+    u16 unused10;
+    u8 pad12[6];
+    u32 unused18;
+    u32 unused1C;
+} DmaPacketHeader;
+
+typedef struct ConsMatrixPacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 reservedWord;
+    u32 command;
+    u8 matrixA[0x40];
+    u8 matrixB[0x40];
+    u8 vecC[0x10];
+    u8 vecD[0x10];
+    u8 vecE[0x10];
+    u32 stmodCommand;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
+} ConsMatrixPacket;
+
+typedef struct SdfSceneNode {
+    u8 pad00[4];
+    void (*handler)();
+    SdfGraphObj *view;
+    u8 pad0C[4];
+    SdfPacket header;
+    u64 draw[8];
+    SdfPacket contextOne[2];
+    SdfPacket contextTwo[2];
+    u64 limits[10];
+    u64 regs[8];
+    u64 framePacketWords[4];
+    SdfTexBuf texturePackets[2];
+} SdfSceneNode;
+
+typedef struct KwlnFrameDrawBank {
+    SdfListHead initialList;
+    DmaPacketHeader programReference;
+    u8 packetGroups[13][0x1B0];
+    SdfListHead sceneList;
+    SdfLinkedPacketList linkedList;
+    SdfSceneNode scene;
+    ConsMatrixPacket sceneMatrix;
+    u8 scenePacketStorage[0x420];
+    SdfListHead thirdList;
+    ConsMatrixPacket thirdMatrix;
+    u8 overlayLightPacket[0xE0];
+} KwlnFrameDrawBank;
+
+typedef char KwlnFrameDrawBank_size_check[(sizeof(KwlnFrameDrawBank) == 0x1F40) ? 1 : -1];
+typedef char SdfSceneNode_size_check[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
+typedef char ConsMatrixPacket_size_check[(sizeof(ConsMatrixPacket) == 0xD0) ? 1 : -1];
+typedef char DmaPacketHeader_size_check[(sizeof(DmaPacketHeader) == 0x20) ? 1 : -1];
+
+extern KwlnFrameDrawBank D_00325870[2];
+extern u32 D_003BA8EC;
+extern SdfGraphObj D_003980E0;
+extern SdfLightSources D_00324770;
+extern f32 kwlnDefaultColorVector[4];
+extern u8 sdfViewMatrix[0x40];
+extern u8 D_00329790[0x40];
+extern SdfLightSources D_00324B10;
+extern f32 D_00324B20[4];
+extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
+extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
+extern void sdfInitSceneNode(SdfSceneNode *, SdfGraphObj *);
+extern void sdfBuildCenteredViewBoundsPacket(u64 *, s32, s32, s32, s32);
+extern void sdfAppendLinkedPacketPayload(SdfListHead *, SdfLinkedPacketList *, u32 *);
+extern void func_002E1938(void *, SdfLightSources, f32 *);
+
+/* Initialize the selected frame bank's scene and overlay packet chains. */
+void func_00105150(s32 bufferIndex) {
+    sdfInitPacketList(&D_00325870[bufferIndex].initialList);
+    sdfConsAppendProgramReferencePacket((s32)&D_00325870[bufferIndex].initialList,
+                                        &D_00325870[bufferIndex].programReference);
+    sdfInitPacketList(&D_00325870[bufferIndex].sceneList);
+    sdfClearLinkedPacketList(&D_00325870[bufferIndex].linkedList);
+    sdfInitSceneNode(&D_00325870[bufferIndex].scene, &D_003980E0);
+    /* Update the RGBAQ color word while retaining its floating-point Q word. */
+    *(u32 *)&D_00325870[bufferIndex].scene.limits[4] = D_003BA8EC;
+    if (kwlnDrawControlFlags & 0x10000000) {
+        sdfBuildCenteredViewBoundsPacket(D_00325870[bufferIndex].scene.limits, 0, 0,
+                                         D_003980E0.bufferFormat,
+                                         D_003980E0.auxiliaryFormat);
+        kwlnDrawControlFlags &= 0xEFFFFFFF;
+    }
+    sdfAppendLinkedPacketPayload(&D_00325870[bufferIndex].sceneList,
+                                 &D_00325870[bufferIndex].linkedList,
+                                 (u32 *)&D_00325870[bufferIndex].scene);
+    sdfConsBuildMatrixPacket(&D_00325870[bufferIndex].sceneMatrix,
+                             &sdfSceneProjectionParameters, sdfViewMatrix);
+    sdfAppendPacket(&D_00325870[bufferIndex].sceneList,
+                    (u32)&D_00325870[bufferIndex].sceneMatrix);
+    func_002E1938(&D_00325870[bufferIndex].scenePacketStorage,
+                  D_00324770, kwlnDefaultColorVector);
+    sdfAppendPacket(&D_00325870[bufferIndex].sceneList,
+                    (u32)&D_00325870[bufferIndex].scenePacketStorage);
+
+    sdfInitPacketList(&D_00325870[bufferIndex].thirdList);
+    sdfConsBuildMatrixPacket(&D_00325870[bufferIndex].thirdMatrix,
+                             &D_00324980, D_00329790);
+    sdfAppendPacket(&D_00325870[bufferIndex].thirdList,
+                    (u32)&D_00325870[bufferIndex].thirdMatrix);
+    func_002E1938(&D_00325870[bufferIndex].overlayLightPacket,
+                  D_00324B10, D_00324B20);
+    sdfAppendPacket(&D_00325870[bufferIndex].thirdList,
+                    (u32)&D_00325870[bufferIndex].overlayLightPacket);
+}
 
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
 void evtResetDisplayProjectionAndVectorState(void) {
