@@ -345,10 +345,10 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     }
     switch (dirFlag) {
     case 0:
-        work->flags &= ~4;
+        work->flags &= ~EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     case 1:
-        work->flags |= 4;
+        work->flags |= EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     }
     switch (sideMode) {
