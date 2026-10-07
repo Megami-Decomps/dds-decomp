@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
@@ -58,8 +59,11 @@ extern char D_003E74F8[];
 extern char D_003E7514[];
 extern char D_003E7530[];
 extern char D_003E7434[];
-extern u32 mnuMapPadMaskToFlags();
+extern char D_003E7488[];
+extern s32 mnuMapPadMaskToFlags(s32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
+extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
+extern u32 mnuSetPartyEntryCurrentId(u32, u32);
 extern void func_002B9808(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
 extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
@@ -729,7 +733,96 @@ s32 mnuHandleStaffSelectionListNavigation(s32 task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF020);
+s32 func_002AF020(KwlnTask *task) {
+    extern u32 kwlnTaskGetUserValue(KwlnTask *);
+    extern void mnuHandlePanelListPageJumpInput(u32, u32);
+
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
+    MenuWindowContainer *window;
+    DatPartyRecord *party;
+    s32 buttons = mnuMapPadMaskToFlags(0xC33);
+    s32 result;
+    s32 eligible;
+    s32 selectionId;
+
+    party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    result = menuSetHandler(context, 0, task);
+    if (result != 0) {
+        return result;
+    }
+
+    menu->thirdListEnabled = 0;
+    if (evtGetMessageWindowControlState() != 0) {
+        return 0;
+    }
+    func_002C1B68(&context->unkAA50, 0);
+
+    if (menu->secondListReset == 0) {
+        if (mnuHandleStaffSelectionListNavigation((s32)task) == 0) {
+            window = menu->windows[3];
+            if ((buttons & 0x300000) == 0) {
+                func_002B9808(window);
+            }
+            if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
+                mnuRetreatWindowListSelection(window);
+            }
+            if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
+                mnuAdvanceWindowListSelection(window);
+            }
+            mnuHandlePanelListPageJumpInput((u32)window, (u32)&buttons);
+            mnuClearWindowPanelTransitionFlag(window);
+
+            if (buttons & MNU_STAFF_INPUT_CONFIRM) {
+                if (menu->windows[3]->list->count != 0) {
+                    eligible = 1;
+                    if (menu->windows[3]->list->cursor->index == 0) {
+                        selectionId = 0;
+                        if (party->itemId == 0) {
+                            eligible = 0;
+                        }
+                    } else {
+                        selectionId = menu->windows[3]->list->cursor->sortKeySecondary;
+                        eligible = selectionId != 0;
+                        if ((menu->windows[3]->list->cursor->flags48 & 1) != 0 &&
+                            selectionId != mnuGetPartyEntryCurrentId(party)) {
+                            eligible = 0;
+                        }
+                    }
+
+                    if (eligible != 0) {
+                        mnuStaffEntrySwapLabels((s32)context, (u8 *)party, selectionId);
+                        mnuSetPartyEntryCurrentId((u32)party, (u32)selectionId);
+                        menu->windows[3]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[selectionId];
+                        mnuInitPartyPanelSlots(&context->partyPanel);
+                        func_002BCAB0(&context->partyWindow);
+                        menu->secondListReset = 1;
+                    } else {
+                        buttons = 0x8000;
+                    }
+                } else {
+                    buttons = 0;
+                }
+            }
+
+            if (buttons & MNU_STAFF_INPUT_CANCEL) {
+                menu->thirdListEnabled = 1;
+                mnuSetPopupEntryFlagged(&context->popupState, D_003E7488);
+            }
+            mnuPlayInputSound(0, buttons, &window->list->stateFlags);
+        }
+    } else {
+        if (mnuUpdateStaffEntrySelectionFlags(menu->alternatePrevious,
+                menu->alternateRequested, context) == 0) {
+            mnuClearActionFlags(0, &context->partyWindow);
+            mnuSetPopupEntryFlagged(&context->popupState, D_003E7434);
+        } else {
+            menu->secondListReset = 0;
+        }
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF2E0);
 
