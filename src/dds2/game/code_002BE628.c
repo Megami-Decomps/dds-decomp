@@ -918,8 +918,8 @@ struct MenuPanelItem {
     s32 selection;
     u32 value24;
     u32 value28;
-    MenuPoint sprites[9]; /* 0x2C: grid object/entry reference pairs. */
-    MenuPoint points[5]; /* 0x74 */
+    MenuGridSlot spriteGridSlots[9]; /* 0x2C */
+    MenuGridSlot gridSlots[5]; /* 0x74 */
     u8 pad9C[4];
     u32 initialValue; /* 0xA0 */
     u32 selectionRamp; /* 0xA4 */
@@ -942,30 +942,30 @@ MenuPanelItem *mnuCreatePanelItem(void) {
 void func_002C26D8(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
     s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
 
-    itfGridStorePosition(&item->sprites[0], secondaryGrid, 4);
-    itfGridStorePosition(&item->sprites[1], secondaryGrid, 5);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[1].x, item->sprites[1].y, 0xD40, 0x40, 0, 0);
-    itfGridStorePosition(&item->sprites[2], primaryGrid, 0x51);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[2].x, item->sprites[2].y, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->sprites[3], primaryGrid, 0x53);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[3].x, item->sprites[3].y, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->sprites[4], primaryGrid, 0x52);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[4].x, item->sprites[4].y, 0x460, 0x20, 0, 0);
-    itfGridStorePosition(&item->sprites[5], primaryGrid, 0x54);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[5].x, item->sprites[5].y, 0x460, 0x20, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[0], secondaryGrid, 4);
+    itfGridStorePosition(&item->spriteGridSlots[1], secondaryGrid, 5);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[1].set, item->spriteGridSlots[1].index, 0xD40, 0x40, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[2], primaryGrid, 0x51);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[2].set, item->spriteGridSlots[2].index, 0x4B0, 0x48, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[3], primaryGrid, 0x53);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[3].set, item->spriteGridSlots[3].index, 0x4B0, 0x48, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[4], primaryGrid, 0x52);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[4].set, item->spriteGridSlots[4].index, 0x460, 0x20, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[5], primaryGrid, 0x54);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[5].set, item->spriteGridSlots[5].index, 0x460, 0x20, 0, 0);
     if (extraGrid != 0) {
-        itfGridStorePosition(&item->sprites[6], primaryGrid, 0x56);
-        itfSetGridEntryQuantizedAndRefresh(item->sprites[6].x, item->sprites[6].y, 0x4B0, 0x48, 0, 0);
-        itfGridStorePosition(&item->sprites[7], extraGrid, 0x19);
-        itfSetGridEntryQuantizedAndRefresh(item->sprites[7].x, item->sprites[7].y, 0x460, 0x20, 0, 0);
+        itfGridStorePosition(&item->spriteGridSlots[6], primaryGrid, 0x56);
+        itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[6].set, item->spriteGridSlots[6].index, 0x4B0, 0x48, 0, 0);
+        itfGridStorePosition(&item->spriteGridSlots[7], extraGrid, 0x19);
+        itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[7].set, item->spriteGridSlots[7].index, 0x460, 0x20, 0, 0);
     } else {
-        item->sprites[6].x = 0;
-        item->sprites[6].y = 0;
-        item->sprites[7].x = 0;
-        item->sprites[7].y = 0;
+        item->spriteGridSlots[6].set = 0;
+        item->spriteGridSlots[6].index = 0;
+        item->spriteGridSlots[7].set = 0;
+        item->spriteGridSlots[7].index = 0;
     }
-    itfGridStorePosition(&item->sprites[8], primaryGrid, panelEntryIds[panelIndex]);
-    itfSetGridEntryQuantizedAndRefresh(item->sprites[8].x, item->sprites[8].y, 0x130, -0x30, 0, 0);
+    itfGridStorePosition(&item->spriteGridSlots[8], primaryGrid, panelEntryIds[panelIndex]);
+    itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[8].set, item->spriteGridSlots[8].index, 0x130, -0x30, 0, 0);
 }
 
 /* Bind five grid object/index references and initialize their quantized bounds.
@@ -973,16 +973,16 @@ void func_002C26D8(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 
 void mnuPositionPanelItemPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
 
-    itfGridStorePosition(&item->points[0], gridObject, 7);
-    itfSetGridEntryQuantizedAndRefresh(item->points[0].x, item->points[0].y, -0x50, -0x50, 0, 0);
-    itfGridStorePosition(&item->points[1], gridObject, 5);
-    itfSetGridEntryQuantizedAndRefresh(item->points[1].x, item->points[1].y, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->points[2], gridObject, 6);
-    itfSetGridEntryQuantizedAndRefresh(item->points[2].x, item->points[2].y, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->points[3], gridObject, 9);
-    itfSetGridEntryQuantizedAndRefresh(item->points[3].x, item->points[3].y, 0x5D0, 0, 0, 0);
-    itfGridStorePosition(&item->points[4], gridObject, entryIndices[panelIndex]);
-    itfSetGridEntryQuantizedAndRefresh(item->points[4].x, item->points[4].y, 0x130, -0x30, 0, 0);
+    itfGridStorePosition(&item->gridSlots[0], gridObject, 7);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[0].set, item->gridSlots[0].index, -0x50, -0x50, 0, 0);
+    itfGridStorePosition(&item->gridSlots[1], gridObject, 5);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[1].set, item->gridSlots[1].index, 0x390, -8, 0, 0);
+    itfGridStorePosition(&item->gridSlots[2], gridObject, 6);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[2].set, item->gridSlots[2].index, 0x390, -8, 0, 0);
+    itfGridStorePosition(&item->gridSlots[3], gridObject, 9);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[3].set, item->gridSlots[3].index, 0x5D0, 0, 0, 0);
+    itfGridStorePosition(&item->gridSlots[4], gridObject, entryIndices[panelIndex]);
+    itfSetGridEntryQuantizedAndRefresh(item->gridSlots[4].set, item->gridSlots[4].index, 0x130, -0x30, 0, 0);
 }
 
 void func_002C2A88(MenuPanelItem *item, u32 value) {
@@ -1031,13 +1031,18 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     u32 color;
     FrFontGlyph *glyph;
 
-    func_00306CD0(x, y, depth, fade, 0, item->sprites[0].x, item->sprites[0].y, flags);
-    func_00306CD0(x, y, depth, fade, 0, item->sprites[1].x, item->sprites[1].y, flags);
+    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[0].set,
+                  item->spriteGridSlots[0].index, flags);
+    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[1].set,
+                  item->spriteGridSlots[1].index, flags);
     func_002C2AE8(x, y, depth, fade, mode, item, flags);
-    func_00306CD0(x, y, depth, fade, 0, item->sprites[8].x, item->sprites[8].y, flags);
+    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[8].set,
+                  item->spriteGridSlots[8].index, flags);
     if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
-        func_00306CD0(x, y, depth, fade, 0, item->points[0].x, item->points[0].y, flags);
-        func_00306CD0(x, y, depth, fade, 0, item->points[4].x, item->points[4].y, flags);
+        func_00306CD0(x, y, depth, fade, 0, (s32)item->gridSlots[0].set,
+                      item->gridSlots[0].index, flags);
+        func_00306CD0(x, y, depth, fade, 0, (s32)item->gridSlots[4].set,
+                      item->gridSlots[4].index, flags);
     }
     value = item->value18;
     value += item->option;
