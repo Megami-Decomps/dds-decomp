@@ -1,6 +1,7 @@
 #include "mnu.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "mnu_list.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -44,9 +45,9 @@ typedef struct MenuSlotState {
     u8 pad6C[4];
     s32 overlay;    /* 0x70 */
     SceneFrameTable *alternateBatch; /* 0x74 */
-    s32 menuList;
-    struct MenuProgressList *progressList;
-    struct MenuProgressList *secondaryList;
+    struct MenuList *menuList;
+    struct MenuList *progressList;
+    struct MenuList *secondaryList;
     s32 reduced;    /* 0x84 */
     s32 slot;       /* 0x88 */
     u8 pad8C[0x1C];
@@ -105,7 +106,7 @@ extern s32 fldGetModeFrameRecordIndex(s32);
 
 extern s32 kwlnFadeIsActive(void);
 
-extern s32 func_002B86E8(u32);
+extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void mnuDrawTerminalBackdrop(s32);
 
@@ -145,7 +146,7 @@ extern void func_002C16F0(s32, s32, s32, s32, s32, s32, s32);
 
 extern void mnuTerminalSetTrack(s8, s8);
 
-extern s32 mnuWalkNodeList(s32, s32);
+extern void *mnuWalkNodeList(s32, struct MenuList *);
 
 extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 
@@ -159,7 +160,7 @@ extern KwlnTask *D_0043785C;
 
 extern struct MenuList *mnuCreateListState();
 
-extern s32 mnuListAppendNode(s32, s32);
+extern struct MenuListNode *mnuListAppendNode(struct MenuList *, s32);
 
 extern u8 D_00437870[];
 
@@ -182,30 +183,9 @@ typedef struct MenuResourceGroup {
     s32 reducedMode;
 } MenuResourceGroup;
 
-typedef struct MenuProgressNode {
-    u8 pad00[0x48];
-    u32 flags;
-    u8 pad4C[0xC];
-    struct MenuProgressNode *next;
-    u8 pad5C[4];
-    s32 entryIndex;
-    u32 requiredAmount;
-    u8 pad68[8];
-    s32 childPanel;
-} MenuProgressNode;
+typedef struct MenuListNode MenuListNode;
 
-typedef struct MenuProgressList {
-    u8 pad00[0x10];
-    MenuProgressNode *head;
-    u8 pad14[8];
-    MenuProgressNode *selected;
-    s32 busy;
-    u8 pad24[8];
-    s32 updateCallback;
-    void *userData; /* 0x30: the owning menu object, not an executable callback */
-    u8 pad34[8];
-    s32 visible;
-} MenuProgressList;
+typedef struct MenuList MenuList;
 
 typedef struct MenuTitleResource {
     u8 pad00[6];
@@ -219,7 +199,7 @@ typedef struct MenuTitleResource {
 
 extern u8 D_003CE944[];
 
-extern void mnuDestroyListState(u32);
+extern u32 mnuDestroyListState(struct MenuList *);
 
 extern void mnuReleaseCampTextureHandlesAndClearOutput(u32 *);
 
@@ -345,17 +325,17 @@ s32 mnuTerminalScoreBox(BoxRecord *unit) {
     return (s32)(missingHp * 1.8f) + (s32)(missingMp * (missingMp / 40.0f + 5.0f)) + statusCost;
 }
 
-/* Mark nodes unaffordable when their required amount exceeds current currency. */
-void mnuRefreshThresholdNodeFlags(MenuProgressList *list) {
-    MenuProgressNode *node = list->head;
+/* Mark nodes unaffordable; the secondary payload word carries recovery cost. */
+void mnuRefreshThresholdNodeFlags(MenuList *list) {
+    MenuListNode *node = list->first;
     if (node != 0) {
         s32 base = datGameState;
         do {
             u32 currency = *(u32 *)(base + 0x3c);
-            if (currency < node->requiredAmount) {
-                node->flags |= 1;
+            if (currency < node->sortKeySecondary) {
+                node->flags48 |= 1;
             } else {
-                node->flags &= ~1u;
+                node->flags48 &= ~1u;
             }
             node = node->next;
         } while (node != 0);
@@ -403,9 +383,9 @@ void mnuReleaseDualPercentPanel(s32 panel) {
 
 /* Rebuild each progress node's HP/MP percentage panel from its party slot. */
 void mnuCreateThresholdNodePanels(MenuSlotState *host) {
-    MenuProgressNode *node = host->progressList->head;
+    MenuListNode *node = host->progressList->first;
     while (node != 0) {
-        s32 partyIndex = node->entryIndex;
+        s32 partyIndex = node->camp.value;
         node->childPanel =
             mnuCreateDualPercentPanel((MenuTitleResource *)(datGameState + partyIndex * MNU_PARTY_RECORD_BYTES + 0xa60), host);
         node = node->next;
@@ -414,9 +394,9 @@ void mnuCreateThresholdNodePanels(MenuSlotState *host) {
 
 /* Release each progress node's child panel, leaving the nodes/list intact. */
 void mnuDestroyThresholdNodePanels(MenuSlotState *host) {
-    MenuProgressNode *node;
+    MenuListNode *node;
 
-    for (node = host->progressList->head; node != 0; node = node->next) {
+    for (node = host->progressList->first; node != 0; node = node->next) {
         mnuReleaseDualPercentPanel(node->childPanel);
     }
 }
@@ -428,15 +408,16 @@ INCLUDE_ASM(const s32, "game/code_002665B0", mnuBuildTerminalNodeList);
 
 /* Destroy the progress-list allocation retained by the terminal work. */
 void mnuReleaseProgressWorkList(MenuSlotState *host) {
-    mnuDestroyListState((s32)host->progressList);
+    mnuDestroyListState(host->progressList);
 }
 
 /* Release the selected recovery panel, then pass its owning list to the follow-up. */
 void mnuReleaseSelectedProgressPanel(MenuSlotState *host) {
-    mnuReleaseDualPercentPanel(host->progressList->selected->childPanel);
-    func_002B86E8((u32)host->progressList);
+    mnuReleaseDualPercentPanel(host->progressList->cursor->childPanel);
+    func_002B86E8(host->progressList);
 }
 
+extern void func_00267238();
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267238);
 
 typedef struct MenuSlotKind {
@@ -467,20 +448,57 @@ s32 mnuSlotKindsInSameGroup(s32 index, s32 kind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002673B8);
+extern MenuSlotKind D_0038A480[];
+void func_002673B8(MenuSlotState *host) {
+    MenuList *list;
+    s32 kind;
+    s32 i;
+
+    list = mnuCreateListState(0, 7, 0x16);
+    list->scale = 0;
+    list->drawCallback = func_00267238;
+    list->context = host;
+    host->secondaryList = list;
+    if (host->reduced == 0) {
+        kind = D_0038A3B8[host->slot].kind;
+    } else {
+        kind = D_0038A480[host->slot].kind;
+    }
+    for (i = 0; i < 50; i++) {
+        char *name;
+        MenuListNode *node;
+
+        if (host->reduced == 0 && host->slot == i) {
+            continue;
+        }
+        if (mdlFlagTest(D_0038A3B8[i].unk2) == 0 &&
+            D_0038A3B8[i].unk2 != 0) {
+            continue;
+        }
+        if (mnuSlotKindsInSameGroup(i, kind) == 0) {
+            continue;
+        }
+        name = (char *)D_003A41A8[i].encodedText;
+        if (strlen(name) != 0) {
+            node = mnuListAppendNode(host->secondaryList, (s32)D_00437870);
+            node->camp.value = i;
+            node->title = name;
+        }
+    }
+}
 
 u32 func_002674F8(void) {
     return 0;
 }
 
 /* Draw the command node, dimming flagged rows and marking the current selection. */
-void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuProgressList *list, MenuProgressNode *node, s32 priority) {
-    s32 width = list->visible;
-    MenuSlotState *host = (MenuSlotState *)list->userData;
-    s32 index = node->entryIndex;
-    s32 isCurrent = node == list->selected;
+void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node, s32 priority) {
+    s32 width = list->scale;
+    MenuSlotState *host = (MenuSlotState *)list->context;
+    s32 index = node->camp.value;
+    s32 isCurrent = node == list->cursor;
 
-    if (node->flags & 1) {
+    if (node->flags48 & 1) {
         width /= 2;
     }
     if (isCurrent) {
@@ -491,19 +509,19 @@ void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuProgressList *li
 }
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
-s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, void *owner) {
-    MenuProgressList *list = (MenuProgressList *)mnuCreateListState(0, count, 0x16, owner);
+MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, void *owner) {
+    MenuList *list = mnuCreateListState(0, count, 0x16, owner);
     s32 entryIndex;
-    list->userData = owner;
-    list->updateCallback = (s32)mnuThresholdNodeDrawCallback;
-    list->visible = 0;
+    list->context = owner;
+    list->drawCallback = mnuThresholdNodeDrawCallback;
+    list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
         if (entryIndex != excluded) {
-            MenuProgressNode *node = (MenuProgressNode *)mnuListAppendNode((s32)list, (s32)D_00437870);
-            node->entryIndex = items[entryIndex];
+            MenuListNode *node = mnuListAppendNode(list, (s32)D_00437870);
+            node->camp.value = items[entryIndex];
         }
     }
-    return (s32)list;
+    return list;
 }
 
 /* Mark the selected command-list node only for modes zero/one and an idle owner. */
@@ -513,10 +531,10 @@ void mnuHighlightProgressNodeFromOwnerSelection(MenuSlotState *host) {
         if (state < 0) {
             return;
         }
-        if (host->secondaryList->busy == 0) {
-            MenuProgressNode *selected = (MenuProgressNode *)mnuWalkNodeList(2 - func_002674F8(),
+        if (host->secondaryList->count == 0) {
+            MenuListNode *selected = mnuWalkNodeList(2 - func_002674F8(),
                                               host->menuList);
-            selected->flags |= 1;
+            selected->flags48 |= 1;
         }
     }
 }
@@ -533,9 +551,9 @@ void mnuHighlightProgressNodeByMode(MenuSlotState *host) {
     } else {
         selectedIndex = 3 - func_002674F8();
     }
-    if (host->progressList->busy == 0) {
-        MenuProgressNode *node = (MenuProgressNode *)mnuWalkNodeList(selectedIndex, host->menuList);
-        node->flags |= 1;
+    if (host->progressList->count == 0) {
+        MenuListNode *node = mnuWalkNodeList(selectedIndex, host->menuList);
+        node->flags48 |= 1;
     }
 }
 
@@ -587,12 +605,12 @@ void mnuReleaseWorkResources(u8 *work) {
     u32 i;
 
     for (i = 0; i < 1; i++) {
-        mnuDestroyListState(((s32 *)&host->menuList)[i]);
+        mnuDestroyListState((&host->menuList)[i]);
     }
     mnuDestroyThresholdNodePanels(host);
     mnuReleaseCampTextureHandlesAndClearOutput(host->imageHandles);
     mnuReleaseProgressWorkList(host);
-    mnuDestroyListState((s32)host->secondaryList);
+    mnuDestroyListState(host->secondaryList);
 }
 
 /* Close via the native fade/script choice, including DDS2's extra party/flag gates.
@@ -624,9 +642,9 @@ void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
 /* Return to mode zero and copy the owner's selected entry into the saved slot. */
 void mnuResetProgressModeFromOwner(u8 *work) {
     MenuSlotState *host = (MenuSlotState *)work;
-    MenuProgressList *owner = host->secondaryList;
+    MenuList *owner = host->secondaryList;
     host->reduced = 0;
-    host->slot = owner->selected->entryIndex;
+    host->slot = owner->cursor->camp.value;
 }
 
 /* Allocate/zero the progress host, retain its allocation, and begin resource setup. */
