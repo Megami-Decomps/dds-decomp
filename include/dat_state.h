@@ -234,7 +234,10 @@ typedef struct DatEnemyRecord {
     u16 unk2C;
     u16 experience;       /* 0x2E */
     u16 huntExperience;   /* 0x30 */
-    u8 pad32[0xC];
+    u8 pad32[4];
+    u16 huntPenaltyFlags; /* 0x36: hunt's adverse-outcome mask. */
+    u16 huntPenaltyChance; /* 0x38: base percentage before status modifiers. */
+    u8 pad3A[4];
     u8 unk3E[2];          /* The battle status accessor tests both adjacent bytes. */
     u8 pad40[6];
     s8 unk46;            /* Signed indexed-value accessor. */

@@ -556,7 +556,46 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A30F8);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A3360);
 
 extern s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1);
-INCLUDE_ASM(const s32, "game/code_001A1960", btlFindEligibleTargetForMultiActorCommand);
+s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
+    BtlTask *action = (BtlTask *)arg0;
+    u32 count;
+    u32 i;
+    s32 command;
+    s32 index;
+
+    if (action == NULL || targets == NULL) {
+        return 0;
+    }
+    count = btlGetIndexListCount(targets);
+    if (count < 2) {
+        return 0;
+    }
+    command = action->indexWork.phase;
+    switch (command) {
+    case 2:
+    case 3:
+    case 4:
+    case 7:
+    case 8:
+        if (command == 4) {
+            index = btlGetLoggedIndexedCommandItem(action->indexWork.reference);
+        } else {
+            index = action->indexWork.skillId;
+        }
+        if (*(u8 *)(datCommandRecords + index * 56 + 8) == 0 &&
+            *(u8 *)(datCommandRecords + index * 56 + 0x24) == 2 &&
+            *(u16 *)(datCommandRecords + index * 56 + 0x26) != 0) {
+            for (i = 0; i < count; i++) {
+                if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
+                     ((BtlUnit *)btlGetIndexListEntry(targets, i))->conditionFlags) != 0) {
+                    return i;
+                }
+            }
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A3638);
 
@@ -2287,7 +2326,43 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(s32 object) {
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A9F40);
+extern s32 effMiscRand(void *);
+
+u32 func_001A9F40(s32 unit, BtlUnit *enemy) {
+    DatEnemyRecord *record;
+    s32 chance;
+    u16 status;
+    u16 flags;
+
+    if (btlCheckSpecialAbility(unit + 0x120, 0x225) != 0) {
+        return 0;
+    }
+    status = enemy->conditionFlags & 0x7FFF;
+    record = &datEnemyRecords[enemy->mode];
+    switch (status) {
+    case 0x400:
+        chance = record->huntPenaltyChance * 3;
+        break;
+    case 0x80:
+        chance = record->huntPenaltyChance * 2 + 30;
+        break;
+    default:
+        chance = record->huntPenaltyChance;
+        break;
+    }
+    btlBossDebugPrintf("btl:hunt bad = %d%%\n", chance);
+    if (chance == 0) {
+        return 0;
+    }
+    if (btlRollAiBucket() >= chance) {
+        return 0;
+    }
+    flags = record->huntPenaltyFlags;
+    if (flags == 0x18) {
+        return (effMiscRand(effSharedRandomState) & 1) ? 0x10 : 8;
+    }
+    return flags & 0x18;
+}
 
 extern s32 D_00358690[];
 
