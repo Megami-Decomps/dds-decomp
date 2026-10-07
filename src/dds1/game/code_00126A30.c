@@ -272,13 +272,14 @@ extern void func_00132FD0(u32 arg0, s32 arg1);
 extern s32 strcmp(const char *a, const char *b);
 extern f32 D_003BAD20;
 extern char fldEncounterTaskName[];
-extern u8 D_003C9230[];
+extern f32 D_003C9230[];
 extern f32 D_003C9220[];
 extern s32 fldEncProc(void);
 extern void fldResetEncounterAsyncState(void);
 extern s32 func_00213808(void);
 extern void btlClearRuntimeState(void);
-extern void dds3TransformCameraVectorsByInnerRotation(s64 arg0, void *arg1, void *arg2);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
+                                                      f32 *targetPositionOut);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern u32 fldAreaLoadRequest;
@@ -2537,7 +2538,7 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
-    dds3TransformCameraVectorsByInnerRotation((s32)dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230,
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230,
                                               D_003C9220);
     D_003BAD20 = 0;
 }

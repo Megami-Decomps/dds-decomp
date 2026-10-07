@@ -469,7 +469,7 @@ extern s32 fldGetPlayerSceneState(void);
 
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
-extern void dds3TransformCameraVectorsByInnerRotation(s32, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *, f32 *, f32 *);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
@@ -497,7 +497,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (object == NULL) {
             return 1;
         }
-        dds3TransformCameraVectorsByInnerRotation((s32)object, pos, rot);
+        dds3TransformCameraVectorsByInnerRotation(object, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_00330630[0] = pos[0];
         D_00330630[1] = pos[1];
