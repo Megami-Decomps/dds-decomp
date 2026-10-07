@@ -4,6 +4,8 @@
 #include "dds3obj.h"
 #include "scr.h"
 
+struct EvtUnit;
+
 struct SdfTex;
 
 extern s32 fldGetSceneStatusCode(void);
@@ -217,9 +219,9 @@ typedef struct FldSceneParamRow {
 
 extern FldSceneParamRow D_003A8EB0[];
 
-extern void func_0014BF98(s32 handle);
+extern void func_0014BF98(struct EvtUnit *unit);
 
-extern s32 evtGetWorldUnitNestedValue(s32 param);
+extern struct EvtUnit *evtGetWorldUnitNestedValue(s32 param);
 
 extern char *scrReadStringParameter(s32 idx);
 

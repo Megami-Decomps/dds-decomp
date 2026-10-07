@@ -74,7 +74,9 @@ struct SdfCounterRuntime;
 typedef void (*SdfCounterDrawFn)(s32, s32, s32, struct SdfCounterRuntime *, SdfCounterChannel *, s32);
 
 typedef struct SdfCounterRuntime {
-    u8 pad00[0xC];
+    u32 stateFlags;                 /* 0x00 */
+    u32 flags;                      /* 0x04 */
+    s32 id;                         /* 0x08 */
     s32 base;                       /* 0x0C */
     SdfCounterChannel *first;       /* 0x10 */
     SdfCounterChannel *last;        /* 0x14 */
@@ -85,7 +87,12 @@ typedef struct SdfCounterRuntime {
     s32 posX;                       /* 0x28 */
     SdfCounterDrawFn draw;          /* 0x2C */
     SdfCounterTimer *timer;         /* 0x30 */
+    s32 categoryIndex;              /* 0x34 */
+    u32 categoryMarkerEnabled;      /* 0x38 */
+    s32 scale;                      /* 0x3C */
 } SdfCounterRuntime;
+
+typedef char SdfCounterRuntimeSizeCheck[(sizeof(SdfCounterRuntime) == 0x40) ? 1 : -1];
 
 extern u32 sdfCounterAnimationValue;
 
@@ -433,7 +440,75 @@ void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickPositionTransition();
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C690);
+extern u8 D_0037F510[2][2][16];
+extern s32 D_00438894;
+extern s8 D_004388D0;
+struct MenuListNode;
+extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
+extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
+extern void mnuClearListFlagsOneAndTwo(u32 *);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void sdfCounterSetMode(s32);
+extern void sdfCounterStartTimerPositionTransition(s32, s32);
+extern s32 sdfCounterGetSelectionBoundaryFlags(void);
+extern void mnuSetMapTimerFlags(s32);
+
+/* Navigate the counter channels or restore the selection before confirming. */
+s32 func_0030C690(void) {
+    s32 index;
+    s32 previousIndex;
+
+    if ((s8)D_0037F510[1][0][6] < 0 || (D_0037F510[1][0][6] & 2)) {
+        previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+        if (mnuRetreatListCursorDefault((u32)sdfActiveCounterRuntime) != NULL) {
+            index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+            sdfCounterSetMode(previousIndex);
+            sdfCounterStartTimerPositionTransition(0,
+                index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
+            func_0030C250(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
+            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sndSetSequenceVolumePan(0, 127, 63);
+        }
+    }
+    if ((s8)D_0037F510[1][0][7] < 0 || (D_0037F510[1][0][7] & 2)) {
+        previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+        if (mnuAdvanceListCursorDefault((u32)sdfActiveCounterRuntime) != NULL) {
+            index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+            sdfCounterSetMode(previousIndex);
+            sdfCounterStartTimerPositionTransition(0,
+                index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
+            func_0030C250(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
+            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sndSetSequenceVolumePan(0, 127, 63);
+        }
+    }
+    if ((s8)D_0037F510[1][0][3] < 0) {
+        sdfCounterSetMode(((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index);
+        index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
+        if (D_00438894 != index) {
+            sdfCounterSelectChannelByIndex((SdfCounterRuntime *)sdfActiveCounterRuntime,
+                D_00438894);
+            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 10);
+            func_0030C250(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
+        }
+        sdfSetSelectedIndex(D_00438894);
+        sndSetSequenceVolumePan(10, 127, 63);
+    }
+    if ((s8)D_0037F510[1][0][1] < 0) {
+        sndSetSequenceVolumePan(8, 127, 63);
+        sdfSetSelectedIndex(((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index);
+        return -2;
+    }
+    mnuSetMapTimerFlags(sdfCounterGetSelectionBoundaryFlags());
+    if ((s8)D_0037F510[1][0][6] == 0 && (s8)D_0037F510[1][0][7] == 0) {
+        mnuClearListFlagsOneAndTwo(&((SdfCounterRuntime *)sdfActiveCounterRuntime)->stateFlags);
+    }
+    if (D_004388D0 < 11) {
+        return 0;
+    }
+    return 1;
+}
+
 
 /* Adjust the selected counter value, then redraw its label and cursor. */
 s32 func_0030C8E8(s32 decrease) {
@@ -621,7 +696,7 @@ s32 sdfCounterGetSelectionBoundaryFlags(void) {
     return ((count + rt->base - 1) ^ rt->last->index) != 0 ? (done | 2) : done;
 }
 
-void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
+void sdfCounterStartTimerPositionTransition(s32 x, s32 y) {
     SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     timer->startX = timer->curX;
     timer->startY = timer->curY;

@@ -2,6 +2,7 @@
 #define MNU_SHOP_H
 
 #include "common.h"
+#include "mnu_transition.h"
 
 struct MenuList;
 struct EffectSlotSet;
@@ -117,7 +118,7 @@ typedef struct MnuShopListContext {
 typedef struct ShopScene {
     s32 resourceHandle;
     u8 pad04[4];
-    u8 transitionWork[0x4C];
+    MenuPopupState transitionWork;
     s32 dispatchState;
     s32 stateTable;
     u8 resourcePair[4];

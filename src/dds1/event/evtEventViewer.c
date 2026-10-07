@@ -19,7 +19,7 @@ typedef struct EvtEvEntry {
     s32 unk8;                  /* 0x8 */
     s32 unkC;                  /* 0xC */
     u8 pad10[0x14];            /* 0x10 */
-    s32 tex;                   /* 0x24 */
+    struct SdfTex *tex;        /* 0x24 */
     u8 pad28[0x28];            /* 0x28 */
     s32 nodeCount;             /* 0x50 */
     EvtEvNode *firstNode;      /* 0x54 */
@@ -81,7 +81,7 @@ typedef struct EvtRange {
 
 void evtUnlinkListNode(EvtEvEntry *entry, EvtEvNode *node);
 void sdfReleaseChipBlock(void *ptr);
-void sdfTexReleaseReference(s32 tex);
+void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 
 void func_0022B7A0(void);

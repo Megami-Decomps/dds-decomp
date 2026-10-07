@@ -55,7 +55,7 @@ typedef struct EffMagatuhiValueWork {
     u16 *writeIndices;
     u16 *validCounts;
     f32 (*angleRows)[4];
-    u32 texture;
+    SdfTex *texture;
     void *allocationHandle;
 } EffMagatuhiValueWork;
 
@@ -85,14 +85,14 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work);
 void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color);
 void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
 #ifdef VERSION_DDS2
-EffMagatuhiValueWork *func_00190E58(s32, s32, f32, s32, f32);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
 void func_00190DE0(EffMagatuhiOwner *owner);
-void func_00190DF8(EffMagatuhiValueWork *work, s32 index);
+void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
 void func_00191450(EffMagatuhiValueWork *work, s32 index, void *vector);
 #else
-EffMagatuhiValueWork *func_00189220(s32, s32, f32, s32, f32);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
 void func_001891A8(EffMagatuhiOwner *owner);
-void func_001891C0(EffMagatuhiValueWork *work, s32 index);
+void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
 void func_00189818(EffMagatuhiValueWork *work, s32 index, void *vector);
 #endif
 
@@ -258,7 +258,7 @@ typedef struct EffWork {
     u8 unk28[0xC];
     struct EffWork *prev; /* Previous node in the file-resource chain (+0x34). */
     void *next;
-    u32 textureHandle; /* Retained texture reference. */
+    SdfTex *textureHandle; /* Retained texture reference. */
 } EffWork;
 
 /* Effect callback dispatch entry (0x18); DDS1/2 game/code_0018CAC8/00194700.c. */

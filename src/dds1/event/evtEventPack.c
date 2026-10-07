@@ -22,7 +22,7 @@ extern void mdlLoadViewerPackage(s32, s32, s32, void *, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 
 /* Decode one retained unit payload and return its new viewer-object key. */
-s32 func_00241E18(s32 eventId, s32 resourceId) {
+s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
     EvtPackLoadState *data;
     EvtPackEntry *entry;
     s32 i;

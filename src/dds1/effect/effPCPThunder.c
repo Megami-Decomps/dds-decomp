@@ -2276,7 +2276,7 @@ typedef struct EffFragmentResources {
     s32 subdivisionCount; /* 0x14: retained subdivision factor */
     u128 *points;
     u32 *colors;
-    u32 resourceHandle;
+    SdfAsset *resourceHandle;
     SdfMemBlock *allocation;
     u128 *endPoints;
     u32 *endColors;
@@ -3006,7 +3006,7 @@ EffFragmentResources *func_00169940(s32 historyLength, s32 subdivisions) {
     history->activePointCount = 0;
     memcpy(history->endPoints, D_00354860, sizeof(D_00354860));
     asset = sdfCreateAssetWithDrawEntries();
-    history->resourceHandle = (u32)asset;
+    history->resourceHandle = asset;
     func_002DA420((struct SdfTextParam *)asset, 1.0f);
     memset(&D_003D64F0, 0, 0x2C);
     D_003D64F0.flags = 0x4000;
@@ -3126,7 +3126,7 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, (void *)history->resourceHandle, 0);
+    sdfConsAppendAssetPacket((s32)list, history->resourceHandle, 0);
     recent = history->activePointCount;
     start[0] = history->position - recent;
     if (start[0] < 3) {

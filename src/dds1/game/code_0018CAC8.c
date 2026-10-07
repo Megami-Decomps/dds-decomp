@@ -38,10 +38,10 @@ extern char D_003BB058[];
 extern char D_003BB060[];
 extern char *D_003557A8[];
 extern s32 func_00310320(s32 directory, EffDirEnt *entry);
-extern u32 sdfTexAcquireResourceTexture(u32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 extern u64 sdfReadNamedResource(u64, u32 *, u64);
 extern void sdfReleaseChipBlock(void *arg0);
-extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void sdfReleaseResourceAllocation(u64 arg0);
 extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_003101B8(s32 directory);
@@ -463,9 +463,11 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D4B8);
 
 /* Release any retained texture reference, clear its handle, and free the work block. */
 void effFreeWork(EffWork *work) {
-    if (work->textureHandle != 0) {
-        sdfTexReleaseReferenceViaHandler(work->textureHandle);
-        work->textureHandle = 0;
+    SdfTex *texture = work->textureHandle;
+
+    if (texture != NULL) {
+        sdfTexReleaseReferenceViaHandler(texture);
+        work->textureHandle = NULL;
     }
     sdfReleaseChipBlock(work);
 }
@@ -513,17 +515,17 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
 /* Release the previous texture reference before loading/acquiring its replacement.
    Release the temporary loaded resource afterward; native failure results are unchecked. */
 void effSetWorkTextureResource(EffWork *work, u64 textureResource) {
-    u32 textureHandle;
+    SdfTex *texture;
     u64 loadedResource;
     u32 resourceWords[4];
 
-    if (work->textureHandle != 0) {
+    if (work->textureHandle != NULL) {
         sdfTexReleaseReferenceViaHandler(work->textureHandle);
-        work->textureHandle = 0;
+        work->textureHandle = NULL;
     }
     loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
-    textureHandle = sdfTexAcquireResourceTexture(resourceWords[0]);
-    work->textureHandle = textureHandle;
+    texture = sdfTexAcquireResourceTexture((void *)resourceWords[0]);
+    work->textureHandle = texture;
     sdfReleaseResourceAllocation(loadedResource);
 }
 

@@ -6,9 +6,10 @@ extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern void *dds3GetWorldSecondaryObject(void);
 extern void *dds3FindIndexedObjectChainNodeByName(void *world, s32 index, const char *name);
+struct EffWorldNode;
 extern u32 dds3AdvanceWorldCounter(void);
 extern void *dds3SpawnInnerVecObj6(s32, u32 *, u32 *);
-extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
+extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
 extern s32 fldGetRecordValueById(s32 id);
 extern void fldSetRecordValueById(s32 id, s32 value);
@@ -26,7 +27,7 @@ void *fldCreateDummyMatter(void) {
     args[6] = 0;
     args[7] = 0;
     matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), args, args + 4);
-    dds3SetWorldEntryCallbackTarget(matter, D_0039FD50);
+    dds3SetWorldNodeValue(matter, (u32)D_0039FD50);
     return matter;
 }
 

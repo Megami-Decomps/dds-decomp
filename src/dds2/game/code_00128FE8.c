@@ -27,8 +27,7 @@ typedef struct FldUnitLightParams {
 
 extern FldUnitLightParams D_0038BB10;
 extern FldUnitLightParams D_0038BB60;
-struct EvtUnitNode;
-extern s32 evtUnitGetNestedValue(struct EvtUnitNode *);
+extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
 extern void evtSetUnitStatusFlags(EvtUnit *);
 extern void func_0023C870(EvtUnit *, s32, u32, u32);
 extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
@@ -369,7 +368,7 @@ extern u8 D_0037FA00[];
 
 extern u8 D_00384790[];
 
-extern u32 sdfTexGetPrimaryBuffer(SdfTex *);
+extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *);
 
 extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 
@@ -526,10 +525,9 @@ extern struct DevRequest *D_00435FA4;
 extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
 struct WorldObj;
 struct EffectObject;
-struct WorldEntry;
 struct EffWorldNode;
 extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
-extern void dds3SetWorldEntryCallbackTarget(struct WorldEntry *, void *);
+extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetModelHolder(struct EffectObject *, u32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void func_00113FF8(struct EffectObject *, u32);
@@ -584,7 +582,7 @@ void fldCreateResourceScriptObjects(void) {
             rotation[3] = 0.0f;
         }
         object = dds3SpawnInnerVecObj6(resource->id, position, rotation);
-        dds3SetWorldEntryCallbackTarget(object, (void *)resource->name);
+        dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)resource->name);
         if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
             if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
                 effObjSetModelHolder(object, 6);
@@ -1823,7 +1821,7 @@ void fldSubmitModelPacket(SdfTex *texture, u8 *modelData) {
 
     sdfInitPacketList((SdfListHead *)command);
     header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
+    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
     sdfAppendReferencePacket((SdfListHead *)command, header);
     func_003365B8(((FldModelPacketInput *)modelData)->angle);
     VU0_STORE_MATRIX(mat);
@@ -3354,10 +3352,10 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     f32 direction[4];
 
     if (fldSecondarySceneObject != 0) {
-        secondary = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldSecondarySceneObject);
+        secondary = evtUnitGetNestedValue((EffWorldNode *)fldSecondarySceneObject);
         evtSetUnitStatusFlags(secondary);
     }
-    player = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldPlayerObject);
+    player = evtUnitGetNestedValue((EffWorldNode *)fldPlayerObject);
     evtSetUnitStatusFlags(player);
     red = redA * 128.0f;
     green = greenA * 128.0f;

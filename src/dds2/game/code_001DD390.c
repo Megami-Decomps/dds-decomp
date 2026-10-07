@@ -1148,13 +1148,91 @@ BtlRuntimeTask *func_001E0238(BtlUnit *unit) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E02A8);
+/* Complete eight-byte argument allocation owned by the hunt-EP task. */
+typedef struct BtlHuntExpArgs {
+    BtlUnit *actor;
+    u32 amount;
+} BtlHuntExpArgs;
+typedef char BtlHuntExpArgsSizeCheck[sizeof(BtlHuntExpArgs) == 8 ? 1 : -1];
+extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
+
+u32 func_001E02A8(s32 address) {
+    BtlHuntExpArgs *args = (BtlHuntExpArgs *)address;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    BtlUnit *head;
+    DatPartyRecord *record;
+    u32 count;
+    u32 index;
+    u32 share;
+
+    if (args->amount == 0) {
+        return 1;
+    }
+    if (args->actor->flags & 0x400) {
+        return 1;
+    }
+    if (btlCheckSpecialAbility((s32)&args->actor->partyRecord, 0x26C)) {
+        count = 0;
+        record = btlGetIndexedPartyEntryRecord(args->actor->unk2E4);
+        record->huntExp += args->amount;
+        head = battle->units;
+        for (unit = head; unit != NULL; unit = unit->nextActor) {
+            u32 flags = unit->flags;
+            if (flags & 0x200) {
+                if (flags & 1) {
+                    if (args->actor != unit && !(flags & 0x20) && !(unit->partyRecord.status & 0x40)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        for (index = 0; index < 5; index++) {
+            u16 flags = datGameState->party[index].flags;
+            if (flags & 1) {
+                if (!(flags & 2) && !(datGameState->party[index].status & 0x4040)) {
+                    count++;
+                }
+            }
+        }
+        if (count == 0) {
+            return 1;
+        }
+        share = (u32)((f32)args->amount / (f32)count);
+        for (unit = head; unit != NULL; unit = unit->nextActor) {
+            u32 flags = unit->flags;
+            if (flags & 0x200) {
+                if (flags & 1) {
+                    if (args->actor != unit && !(flags & 0x20) && !(unit->partyRecord.status & 0x40)) {
+                        record = btlGetIndexedPartyEntryRecord(unit->unk2E4);
+                        record->huntExp += share;
+                    }
+                }
+            }
+        }
+        for (index = 0; index < 5; index++) {
+            u16 flags = datGameState->party[index].flags;
+            if (flags & 1) {
+                if (!(flags & 2) && !(datGameState->party[index].status & 0x4040)) {
+                    datGameState->party[index].huntExp += share;
+                }
+            }
+        }
+        btlBossDebugPrintf("btl:AUTO ep=%d[%d],count=%d\n", share, args->amount, count);
+    } else {
+        record = btlGetIndexedPartyEntryRecord(args->actor->unk2E4);
+        record->huntExp += args->amount;
+        btlBossDebugPrintf("btl:hunt ep=%d[%p]\n", args->amount, record);
+    }
+    return 1;
+}
+
 
 extern u32 func_001E02A8(s32);
 
 BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlHuntExpArgs *args;
     task->endCondition.kind = 0;
     task->startCondition.kind = 1;
     task->taskId = 0x50;
@@ -1163,7 +1241,7 @@ BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = option;
+    args->amount = (u32)option;
     return task;
 }
 

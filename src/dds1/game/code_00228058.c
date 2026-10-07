@@ -389,7 +389,39 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00228058", func_00228930);
+extern s32 D_003BBDBC;
+extern void fldConsumePrimarySceneFlag(void);
+extern void fldConsumeSecondarySceneFlag(void);
+extern void fldConsumeFieldTransitionFlag(void);
+extern void fldConsumeSceneCommandFlag(void);
+extern s32 mdlFlagTest(s32);
+extern void mdlFlagClear(s32);
+
+void func_00228930(f32 delta) {
+    if ((u8)(datGameState->world.flags & SOLAR_PHASE_ADVANCE_FLAG)) {
+        f32 timer = datGameState->world.phaseTimer + delta;
+
+        datGameState->world.phaseTimer = timer;
+        if (timer > 4500.0f) {
+            datGameState->world.phaseTimer = 0;
+            evtSetSolarPhase((datGameState->world.phase + 1) & 0xF);
+            D_003BBDBC = 30;
+            if (evtGetMirroredSolarPhase() == 0) {
+                fldConsumePrimarySceneFlag();
+                fldConsumeSecondarySceneFlag();
+                fldConsumeFieldTransitionFlag();
+                fldConsumeSceneCommandFlag();
+            }
+            if (mdlFlagTest(0x819)) {
+                datGameState->world.secondaryPhase++;
+                if (datGameState->world.secondaryPhase >= 81) {
+                    mdlFlagClear(0x819);
+                    datGameState->world.secondaryPhase = 0;
+                }
+            }
+        }
+    }
+}
 
 void *evtCreateSolarOverlayWork(s32 owner) {
     SolarOverlayWork *overlay;

@@ -666,7 +666,7 @@ s32 func_00247A78(s32 callbackContext) {
         }
         break;
     }
-    return func_00285670(state->transitionWork, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
+    return func_00285670(&state->transitionWork, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 s32 evtSetupDispatchSyncH(s32 callbackContext) {

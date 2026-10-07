@@ -45,7 +45,6 @@
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
-extern void mnuClearPanelTransitionState(u8 *);
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
@@ -1103,7 +1102,7 @@ ShopScene *mnuShopCreateScene(void) {
     obj = (ShopScene *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0xB4);
     obj->resourceHandle = handle;
-    mnuClearPanelTransitionState(obj->transitionWork);
+    mnuClearPanelTransitionState(&obj->transitionWork);
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj->resourcePair);
@@ -1115,7 +1114,6 @@ ShopScene *mnuShopCreateScene(void) {
 }
 
 extern s32 kwlnTaskGetUserValue();
-extern void mnuDrainPanelTransitions();
 extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle();
 extern void sdfReleaseResourceAllocation();
@@ -1127,7 +1125,7 @@ void mnuShopDestroyScene(s32 arg) {
         mnuShopReleaseSprites(scene);
         mnuReleaseShopSceneSpriteResources(scene);
         mnuShopReleaseSceneObjects(scene);
-        mnuDrainPanelTransitions((u8 *)scene + 8, arg);
+        mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
         sdfReleaseResourceAllocation(scene->resourceHandle);

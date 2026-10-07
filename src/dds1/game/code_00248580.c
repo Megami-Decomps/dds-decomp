@@ -69,7 +69,8 @@ typedef struct SceneFrameTable SceneFrameTable;
 typedef struct MenuTerminalWork {
     s32 allocation;          /* 0x00 */
     s32 groupResource;       /* 0x04 */
-    u8 pad08[0x54];
+    MenuPopupState transitionWork; /* 0x08 */
+    u8 pad54[8];
     s32 messageResources[2]; /* 0x5C: second handle opens the message window */
     SceneFrameTable *batch;  /* 0x64 */
     u32 secondResource;     /* 0x68 */
@@ -779,8 +780,6 @@ void mnuTerminalSelectResourceBank(MenuTerminalWork *work) {
     sndEnsureMidiBankResident(work->bgmHandle & MNU_BGM_BANK_MASK);
 }
 
-extern void mnuClearPanelTransitionState(void *);
-
 extern void mnuLoadResourceHandles(s32);
 
 extern void mnuTerminalBuildMenus(MenuTerminalWork *host);
@@ -807,7 +806,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     obj = (u8 *)sdfResourceRetainAddress(handle);
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     ((MenuTerminalWork *)obj)->allocation = handle;
-    mnuClearPanelTransitionState(obj + 8);
+    mnuClearPanelTransitionState(&((MenuTerminalWork *)obj)->transitionWork);
     mnuLoadResourceHandles(obj);
     mnuTerminalCreateEffects((MenuTerminalWork *)obj);
     ((MenuTerminalWork *)obj)->mode = reduced;
@@ -826,7 +825,6 @@ u8 *mnuTerminalCreateScene(reduced, slot)
 
 extern s32 kwlnTaskGetUserValue();
 extern void mnuReleaseResourceHandles(u32 *work);
-extern void mnuDrainPanelTransitions(u8 *state, s32 arg);
 extern void dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(u32 *record);
 extern s32 mnuCheckResourceTask(void);
@@ -845,7 +843,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         mnuReleaseWorkResources((u8 *)work);
         mnuReleaseResourceHandles((u32 *)work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
-        mnuDrainPanelTransitions((u8 *)work + 8, arg);
+        mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle((u32 *)work->messageResources);
         sdfReleaseResourceAllocation(work->allocation);

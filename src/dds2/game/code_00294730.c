@@ -53,8 +53,8 @@ void func_00294B40(s32 x, s32 y, s32 depth, MenuTerminalContext *object,
     func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
                   0, scale, 0, (s32)D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], option);
-    func_0026BEC0(0, 0, 0, scale, object->panelWork[0], option);
-    func_0026BEC0(0, 0xCF8, 0, scale, object->panelWork[1], option);
+    func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], option);
+    func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], option);
     func_00294680(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
     func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,

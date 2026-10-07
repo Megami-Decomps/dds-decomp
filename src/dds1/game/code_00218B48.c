@@ -1237,15 +1237,16 @@ void mdlLoadViewerResourceAndResetCursors(void) {
     mdlViewerState.nodeCursor = 0;
 }
 
-extern u128 D_003D7B20;
-
-extern u128 D_003D7B30;
-
-extern u128 D_003D7B40;
-
 typedef struct {
     f32 x, y, z, w;
 } __attribute__((aligned(16))) MdlEyeVec;
+
+extern MdlEyeVec D_003D7B20;
+
+extern MdlEyeVec D_003D7B30;
+
+extern u128 D_003D7B40;
+
 
 extern MdlEyeVec D_00367A10;
 
@@ -1930,6 +1931,8 @@ s32 mdlIsDebugTimeGraph(void) {
     return kwlnTaskGetTaskByName("DebugTimeGrph") != 0;
 }
 
+extern void func_0021E068(void);
+
 /* Debug menu: page 0 selects an action, pages 1-4 edit the color channels and value steps. */
 void mdlUpdateViewerSettingsInput(void) {
     switch (mdlViewerState.unk3E) {
@@ -2267,11 +2270,12 @@ extern char D_003BBCD0[]; /* "%f" */
 extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
-extern void fileWaitReady(s32 file);
+extern void fileWaitReady(u32 requestAddress);
 extern s32 fileGetResourceHandle(s32 file);
 extern char *fileGetLoadedDataAddress(s32 file);
 extern s32 fileGetResourceSize(s32 file);
-extern void filePollEntryCleanup(s32 file);
+struct FileCleanup;
+extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern s32 func_00301588();
 extern s32 memcmp(const void *, const void *, u32);
 
@@ -2302,7 +2306,7 @@ void mdlLoadViewerPresentationConfig(void) {
     resourceHandle = fileGetResourceHandle(fileRequest);
     fileData = fileGetLoadedDataAddress(fileRequest);
     fileSize = fileGetResourceSize(fileRequest);
-    filePollEntryCleanup(fileRequest);
+    filePollEntryCleanup((struct FileCleanup *)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
@@ -2346,7 +2350,26 @@ void mdlLoadViewerPresentationConfig(void) {
     sdfReleaseResourceAllocation(resourceHandle);
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E068);
+const char D_003ABF18[0x60] __attribute__((aligned(8))) = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
+extern s32 func_003014F0(char *, const char *, ...);
+struct FileWindowSlot;
+extern struct FileWindowSlot *fileQueueWindowSlotRequest(s32, s32, s32);
+
+void func_0021E068(void) {
+    char buffer[0x130];
+    s32 size;
+    struct FileWindowSlot *request;
+
+    size = func_003014F0(buffer, D_003ABF18, D_003BA8EC,
+                        D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
+                        D_003D7B30.x, D_003D7B30.y, D_003D7B30.z,
+                        sdfSceneProjectionParameters.fov, (s32)kwlnDrawVector.near,
+                        kwlnDrawVector.value, (s32)kwlnDrawVector.farA,
+                        kwlnDrawVector.farB, kwlnDrawVector.color);
+    request = fileQueueWindowSlotRequest((s32)D_00367AF8, (s32)buffer, size);
+    fileWaitReady((u32)request);
+    filePollEntryCleanup((struct FileCleanup *)request);
+}
 
 extern void func_00218E20(void);
 extern s32 func_00103218(const char *);
@@ -2909,4 +2932,3 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
-

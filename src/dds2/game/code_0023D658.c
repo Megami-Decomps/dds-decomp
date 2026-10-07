@@ -232,7 +232,7 @@ extern char D_00421AF8[];
 extern void effObjDispatchReadyState(void *arg0);
 
 
-extern s32 func_0025D230(s32 arg0, s32 arg1);
+extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
 
@@ -524,7 +524,7 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
     void *world;
 
     world = dds3GetWorldObject();
-    dds3FindWorldObjectNodeByKey(world, id, kind);
+    return dds3FindWorldObjectNodeByKey(world, id, kind);
 }
 
 u32 evtGetWorldObjectId(void) {
@@ -565,7 +565,7 @@ u32 evtOpBindMotionSoundToModel(void) {
     }
     param0 = scrReadIntParameter(0);
     rid = scrReadIntParameter(1);
-    model = func_0025D230(param0, rid);
+    model = evtCreateModelFromPackResource(param0, rid);
     if (model < 0) {
         evtPrintDeveloperConsoleMessage("MODEL_BE not fount RID = %d!\n", scrReadIntParameter(1));
         return 1;
