@@ -364,8 +364,8 @@
 0x00113CD0	evtEndObjectValueTransition	inferred	Ends the object value transition and clears its active identifier. [names_reviewed8.tsv]
 0x00113F00	effObjGetDataHandle	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:396:func_00113F00; Returns the handle word in the effect object data record, not the world-object pointer or transition-work pointer.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00113FE8	effObjSetModelHolder	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:434:func_00113FE8; Stores the supplied pointer in the effect object modelHolder member.; source=revalidated-unapplied-names_R_Names31.tsv:4 [names_qp12_apply.tsv]
-0x00114048	evtSetObjectTransitionWork	inferred	Sequel twin of first-game event object transition work setter; writes same object-data member. [names_reviewed18.tsv]
-0x00114058	evtGetObjectTransitionWork	inferred	Sequel twin of first-game event object transition work getter; reads same object-data member. [names_reviewed18.tsv]
+0x00114048	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
+0x00114058	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.
 0x00114070	effObjInitializeTransformData	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:463:func_00114070; Creates inner transform and transform-data allocation, clears it, creates resource state and initializes homogeneous offset/position vectors plus object flags 0xE2.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00114110	evtReleaseEffectObjectHandleAndData	inferred	Frees the effect-object inner state, resource handle and allocated data. [names_reviewed10.tsv]
 0x00114428	effObjSubmitTransformOpacityPasses	inferred	U1

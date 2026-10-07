@@ -838,7 +838,7 @@ typedef struct FldWorldItem {
 
 extern u32 dds3ReadIndexedWorldObjectWord(void *object);
 
-extern void evtSetObjectTransitionWork(FldWorldItem *, s32);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;
@@ -876,13 +876,13 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
-                        evtSetObjectTransitionWork(item, 1);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 1);
                         break;
                     case 1:
-                        evtSetObjectTransitionWork(item, 5);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 5);
                         break;
                     case 2:
-                        evtSetObjectTransitionWork(item, 7);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 7);
                         break;
                     }
                 }
@@ -936,13 +936,13 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
-                        evtSetObjectTransitionWork(item, 2);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 2);
                         break;
                     case 1:
-                        evtSetObjectTransitionWork(item, 6);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 6);
                         break;
                     case 2:
-                        evtSetObjectTransitionWork(item, 8);
+                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 8);
                         break;
                     }
                 }

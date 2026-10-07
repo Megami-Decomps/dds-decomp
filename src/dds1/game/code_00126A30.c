@@ -5253,7 +5253,7 @@ void fldReleaseActorTasksById(s32 id) {
 }
 
 extern s32 func_003003F0(const char *, ...);
-extern void evtSetObjectTransitionWork(void *, u32);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Advance an actor slot's first/second interpolation (ease-weighted for 40-frame moves) or start its door
  * transition, returning the current values for the key. */
@@ -5322,7 +5322,7 @@ s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z) {
                 node = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), key, 6);
                 if (node != NULL) {
                     func_003003F0("DOOR SISETU FADE 6\n");
-                    evtSetObjectTransitionWork(node, 9);
+                    dds3SetObjectPayloadWord8(node, 9);
                 }
             }
             row->transitionFrame++;
