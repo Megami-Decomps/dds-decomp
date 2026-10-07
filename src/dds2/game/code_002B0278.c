@@ -66,6 +66,8 @@ extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 typedef struct MenuList MenuList;
 typedef struct MenuIconState MenuIconState;
 typedef struct FrFontGlyph FrFontGlyph;
+typedef struct FrFontCtx FrFontCtx;
+struct TextStyleNode;
 
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
@@ -124,17 +126,12 @@ extern void func_002C10F0();
 
 extern void mnuDrawSlotIcons();
 
-extern void frFontAddSharedGlyphFlags();
-
-extern s32 frFontAppendGlyphFromData();
-
-extern void frFontSetContextPair();
-
-extern void frFontStoreShiftedContextValue();
-
-extern void frFontSetChildColors();
-
-extern void frFontClearFlagBits();
+extern void frFontAddSharedGlyphFlags(s32);
+extern FrFontCtx *frFontAppendGlyphFromData(void *, s8, s8, s8, s32);
+extern void frFontSetContextPair(FrFontCtx *, u32, u32);
+extern void frFontStoreShiftedContextValue(FrFontCtx *, u32);
+extern void frFontSetChildColors(struct TextStyleNode *, u32);
+extern u8 frFontClearFlagBits(u8);
 
 extern char D_003E7588[];
 
@@ -1156,12 +1153,12 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles) {
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {
     s32 top = y - 0x10;
-    s32 handle;
+    FrFontCtx *handle;
     frFontAddSharedGlyphFlags(1);
-    handle = frFontAppendGlyphFromData(model, 0, 0, 0, 0);
+    handle = frFontAppendGlyphFromData((void *)model, 0, 0, 0, 0);
     frFontSetContextPair(handle, x, top);
     frFontStoreShiftedContextValue(handle, width << 4);
-    frFontSetChildColors(handle, color);
+    frFontSetChildColors((struct TextStyleNode *)handle, color);
     frFontClearFlagBits(1);
     func_0019D550((FrFontGlyph *)handle, 1, flags);
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
