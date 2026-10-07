@@ -215,7 +215,7 @@ typedef struct FldTaskInfo {
 
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 
-extern u32 dds3GetPathState(s32 path);
+extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 
 typedef struct FldRoomPlanes {
     f32 plane[6][4];
@@ -699,7 +699,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 void fldResetTaskSlots(void) {
     s32 slotIndex;
     EffWorldNode *world;
-    u32 task;
+    void *task;
     FldTaskInfo *taskInfo;
 
     D_004361BC = 1;
@@ -714,9 +714,9 @@ void fldResetTaskSlots(void) {
         for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
             taskInfo = *(FldTaskInfo **)(D_0038BC50[slotIndex] + 8);
             if (taskInfo->slot >= 0) {
-                task = dds3GetPathState((s32)dds3FindWorldObjectNodeByKey(world, *(u32 *)D_00444A30[taskInfo->slot], 0xD));
-                if (scrFindNamedProcessNode(task) != 0) {
-                    evtDestroyNamedTask(dds3GetWorldObject(), task);
+                task = dds3GetWorldObjectPayload(dds3FindWorldObjectNodeByKey(world, *(u32 *)D_00444A30[taskInfo->slot], 0xD));
+                if (scrFindNamedProcessNode((u32)task) != 0) {
+                    evtDestroyNamedTask(dds3GetWorldObject(), (u32)task);
                 }
             }
         }

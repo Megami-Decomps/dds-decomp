@@ -28,7 +28,7 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
     if (handle == NULL) {
         return -1;
     }
-    kind = sdfGetFloatCounterDirection((u32 *)&handle->state);
+    kind = sdfGetFloatCounterDirection((u32 *)&handle->direction);
     if (kind != 0) {
         if (kind != 1) {
             return -1;
