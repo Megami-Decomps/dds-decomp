@@ -43,7 +43,7 @@ extern s32 func_0011B158(s32, s32, u8);
 
 extern s32 datCommandSelectors;
 extern s32 datRosterDetails;
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 extern s32 datCommandRecords;
 extern s32 datItemSkillRecords;
 extern s32 D_003BAAB8;
@@ -99,11 +99,6 @@ typedef struct EventSelector {
     s8 kind;           /* 0x01: kind five uses roster details instead */
 } EventSelector; /* 0x02 */
 
-typedef struct RosterFlagValue {
-    u32 flags;          /* 0x00: battle availability flags */
-    u8 value;          /* 0x04 */
-    u8 pad5[0x47];
-} RosterFlagValue; /* 0x4C */
 typedef struct EventIndexRecord {
     u8 pad00[2];
     u16 index; /* 0x02 */
@@ -204,7 +199,7 @@ u8 evtGetFlaggedRosterValue(s32 entryAddress) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
-    return ((RosterFlagValue *)datEnemyRecords)[entry->unitId].value;
+    return datEnemyRecords[entry->unitId].pad04;
 }
 
 s32 dds3FindEntryIndex(s32 rosterIndex) {
@@ -460,7 +455,7 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
         break;
     case 2:
         if ((entry->flags & 0x20) &&
-            (((RosterFlagValue *)datEnemyRecords)[entry->unitId].flags & 0x10)) {
+            (datEnemyRecords[entry->unitId].flags & 0x10)) {
             return 0;
         }
         value = commands[commandId].percentage;
