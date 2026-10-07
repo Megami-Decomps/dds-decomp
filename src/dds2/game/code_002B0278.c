@@ -2448,7 +2448,60 @@ s32 mnuUpdateSkillListInput(s32 callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7228);
+typedef struct MnuCampPanelDrawRecord {
+    EffectSlotSet *resource;
+    s32 sprite;
+    s32 xOffset;
+    s32 yOffset;
+} MnuCampPanelDrawRecord;
+
+typedef struct MnuCampPanelOrigins {
+    MenuPoint primary;
+    MenuPoint secondary;
+} MnuCampPanelOrigins;
+
+extern const MnuCampPanelOrigins D_0042AE48;
+
+void func_002B7228(MenuContext *context) {
+    MnuCampPanelDrawRecord primaryRows[5] = {
+        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)context->labelHandle, 0x0C, 0x2A0, 0x38},
+        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
+        {(EffectSlotSet *)context->labelHandle, 0x10, 0x180, 0x138},
+    };
+    MnuCampPanelDrawRecord secondaryRows[4] = {
+        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)context->resourceHandle, 0x0E, 0x2C0, 0x50},
+        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
+    };
+    MnuCampPanelOrigins origins = D_0042AE48;
+    s32 i;
+
+    i = 0;
+    do {
+        func_00306CD0(primaryRows[i].xOffset + origins.primary.x, primaryRows[i].yOffset + origins.primary.y,
+            0, 0x100, 1, primaryRows[i].resource, primaryRows[i].sprite, 0x53);
+        i++;
+    } while (i < 4);
+    {
+        s32 x = primaryRows[4].xOffset + origins.primary.x;
+        s32 y = primaryRows[4].yOffset + origins.primary.y;
+        i = 2;
+        do {
+            i--;
+            func_00306CD0(x, y, 0, 0x100, 1, primaryRows[4].resource, primaryRows[4].sprite, 0x53);
+            y += 0xC0;
+        } while (i >= 0);
+    }
+    i = 0;
+    do {
+        func_00306CD0(secondaryRows[i].xOffset + origins.secondary.x, secondaryRows[i].yOffset + origins.secondary.y,
+            0, 0x100, 1, secondaryRows[i].resource, secondaryRows[i].sprite, 0x53);
+        i++;
+    } while (i < 4);
+}
 
 void func_002B7588(s32 context) {
     s32 index;
@@ -2466,7 +2519,7 @@ s32 mnuCampMenuDrawStatus(s32 callback) {
     mnuCreateStaffImageSprite(0x14);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     label = ((MenuWindowContainer *)*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4))->list->cursor->sortKeyPrimary;
-    func_002B7228(context);
+    func_002B7228((MenuContext *)context);
     if (label != 0 && label != 0xffff) {
         label = (u16)label;
         mnuDrawSelectionLabel(label);
