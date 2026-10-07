@@ -32,7 +32,8 @@ extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
-extern void effObjInnerCreate();
+extern s32 effObjInnerCreate(EffWorldNode *node);
+extern void effObjFreeInner(EffWorldNode *node);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void dds3SetObjectFlags(void *, s32);
 
@@ -180,7 +181,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
     EffectObjectData *data;
     void *work;
 
-    effObjInnerCreate(object);
+    effObjInnerCreate((EffWorldNode *)object);
     work = sdfAllocSizeClassBlock(sizeof(EffectObjectData));
     object->data = work;
     memset(work, 0, sizeof(EffectObjectData));
@@ -205,7 +206,7 @@ void evtDestroyEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
 
     evtEndObjectValueTransition();
-    effObjFreeInner(obj);
+    effObjFreeInner((EffWorldNode *)obj);
     data = obj->data;
     if (data->handle != -1) {
         data->handle = -1;
@@ -583,7 +584,7 @@ void func_00113E40(u32 value) {
     D_003BA9D0 = value;
 }
 
-s32 effObjInitializeTransformData(EffectObject *object) {
+s32 effObjInitializeTransformData(EffWorldNode *object) {
     EffectTransformData *data;
     void *work;
 
@@ -591,7 +592,7 @@ s32 effObjInitializeTransformData(EffectObject *object) {
     work = sdfAllocSizeClassBlock(sizeof(EffectTransformData));
     object->data = work;
     memset(work, 0, sizeof(EffectTransformData));
-    data = (EffectTransformData *)object->data;
+    data = object->data;
     data->resourceState = dds3CreateSlotResourceState(object);
     data->flags = 0;
     data->opacityMode = 0;
@@ -608,11 +609,11 @@ s32 effObjInitializeTransformData(EffectObject *object) {
     return 1;
 }
 
-void evtReleaseEffectObjectHandleAndData(EffectObject *obj) {
+void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
     EffectTransformData *data;
 
-    effObjFreeInner();
-    data = (EffectTransformData *)obj->data;
+    effObjFreeInner(object);
+    data = object->data;
     dds3DestroyObjectBase(data->resourceState);
     sdfReleaseChipBlock(data);
 }

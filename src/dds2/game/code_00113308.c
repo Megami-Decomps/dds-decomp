@@ -46,7 +46,8 @@ typedef struct WorldObj {
     f32 *source;          /* 0x1C */
 } WorldObj;
 
-extern void effObjInnerCreate();
+extern s32 effObjInnerCreate(EffWorldNode *node);
+extern void effObjFreeInner(EffWorldNode *node);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
@@ -196,7 +197,7 @@ s32 effObjInitializeFollowModelData(EffectObject *object) {
     EffectObjectData *data;
     void *work;
 
-    effObjInnerCreate(object);
+    effObjInnerCreate((EffWorldNode *)object);
     work = sdfAllocSizeClassBlock(sizeof(EffectObjectData));
     object->data = work;
     memset(work, 0, sizeof(EffectObjectData));
@@ -221,7 +222,7 @@ void evtDestroyEffectObjectData(EffectObject *object) {
     EffectObjectData *data;
 
     evtEndObjectValueTransition();
-    effObjFreeInner(object);
+    effObjFreeInner((EffWorldNode *)object);
     data = object->data;
     if (data->handle != -1) {
         data->handle = -1;
@@ -591,7 +592,7 @@ void func_00114068(u32 value) {
     D_00435DA0 = value;
 }
 
-s32 effObjInitializeTransformData(EffectObject *object) {
+s32 effObjInitializeTransformData(EffWorldNode *object) {
     EffectTransformData *data;
     void *work;
 
@@ -599,7 +600,7 @@ s32 effObjInitializeTransformData(EffectObject *object) {
     work = sdfAllocSizeClassBlock(sizeof(EffectTransformData));
     object->data = work;
     memset(work, 0, sizeof(EffectTransformData));
-    data = (EffectTransformData *)object->data;
+    data = object->data;
     data->resourceState = dds3CreateSlotResourceState(object);
     data->flags = 0;
     data->opacityMode = 0;
@@ -616,11 +617,11 @@ s32 effObjInitializeTransformData(EffectObject *object) {
     return 1;
 }
 
-void evtReleaseEffectObjectHandleAndData(EffectObject *object) {
+void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
     EffectTransformData *data;
 
-    effObjFreeInner();
-    data = (EffectTransformData *)object->data;
+    effObjFreeInner(object);
+    data = object->data;
     dds3DestroyObjectBase(data->resourceState);
     sdfReleaseChipBlock(data);
 }
