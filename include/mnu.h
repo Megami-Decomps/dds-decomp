@@ -523,6 +523,35 @@ typedef struct MenuTerminalWindowState {
 typedef char MenuTerminalWindowState_size_must_be_0x14[(sizeof(MenuTerminalWindowState) == 0x14) ? 1 : -1];
 
 
+typedef struct DspScrollingStrip {
+    void *resource;
+    s32 frameIndex;
+    s32 horizontalOffset;
+    s32 verticalOffset;
+    s32 scrollSpeed;
+} DspScrollingStrip;
+
+typedef struct DspScrollingStripState {
+    s32 unk0;
+    s32 layout;
+    s32 unk8;
+    void *resource;
+    s32 layer;
+    s32 unk14;
+    s32 unk18;
+    DspScrollingStrip strips[6];
+} DspScrollingStripState;
+
+typedef char DspScrollingStrip_size_must_be_0x14[(sizeof(DspScrollingStrip) == 0x14) ? 1 : -1];
+typedef char DspScrollingStripState_size_must_be_0x94[(sizeof(DspScrollingStripState) == 0x94) ? 1 : -1];
+typedef char DspScrollingStripState_strips_offset[((u32)&((DspScrollingStripState *)0)->strips == 0x1C) ? 1 : -1];
+typedef char DspScrollingStripState_firstSpeed_offset[((u32)&((DspScrollingStripState *)0)->strips[0].scrollSpeed == 0x2C) ? 1 : -1];
+
+void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout, void *resource, s32 firstFrame, s32 layer);
+void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum);
+void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
+void func_0026BEC0(s32 x, s32 y, s32 flags, s32 scale, DspScrollingStripState *state, s32 option);
+
 /* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
 typedef struct MenuTerminalContext {
     s32 resourceHandle;
@@ -572,7 +601,7 @@ typedef struct MenuTerminalContext {
     s32 rewardValue;
     s32 prepared;
     s32 delayFrames;
-    u8 panelWork[2][0x94];
+    DspScrollingStripState panelWork[2];
     MenuEffectResources effectResources;
     u8 pad270[0x108];
     u32 windowResource;
@@ -583,6 +612,9 @@ typedef struct MenuTerminalContext {
 } MenuTerminalContext;
 
 typedef char MenuTerminalContext_size_must_be_0x38C[(sizeof(MenuTerminalContext) == 0x38C) ? 1 : -1];
+typedef char MenuTerminalContext_firstPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[0] == 0xE8) ? 1 : -1];
+typedef char MenuTerminalContext_secondPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[1] == 0x17C) ? 1 : -1];
+typedef char MenuTerminalContext_effectResources_offset[((u32)&((MenuTerminalContext *)0)->effectResources == 0x210) ? 1 : -1];
 
 extern MenuTerminalContext *D_00438FC8;
 
