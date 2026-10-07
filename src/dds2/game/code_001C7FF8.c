@@ -1258,7 +1258,61 @@ void func_001CE5C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE838);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CF0B0);
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+extern const s32 D_00416FA0[10][3];
+
+INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416EF8);
+
+void func_001CF0B0(void) {
+    u32 overlays[4] = {0x0000FF00, 0xFF000000, 0x8080FF00, 0xFF808000};
+    u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 rows[10][3] = {
+        {435, 28, 6}, {404, 28, 7}, {373, 28, 8}, {342, 28, 7},
+        {311, 28, 8}, {280, 28, 7}, {249, 28, 8}, {218, 28, 7},
+        {187, 28, 8}, {156, 28, 7}
+    };
+    s32 finalRows[10][3];
+    s32 row;
+    s32 last;
+    s32 channel;
+    s32 fade;
+
+    memcpy(finalRows, D_00416FA0, sizeof(finalRows));
+
+    if (D_00438F54->enabled[D_00438F54->bank] <= 0) {
+        return;
+    }
+    last = D_00438F54->currentIndex - 1;
+    for (row = 0; row < D_00438F54->currentIndex; row++) {
+        for (channel = 0; channel < 4; channel++) {
+            if (channel == 0 || channel == 2) {
+                fade = D_00438F54->fade[row + 1][D_00438F54->bank];
+            } else {
+                fade = D_00438F54->fade[row][D_00438F54->bank];
+            }
+            colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC,
+                                                       rows[row][2], channel, fade);
+            if (fade > 128) {
+                colors[channel] |= overlays[D_00438F54->bank];
+            }
+        }
+        func_00306C28(rows[row][0] << 4, rows[row][1] << 3, 0, colors,
+                      0, btlResourceBlock->resC, rows[row][2], 0x53);
+    }
+    if (last >= 0) {
+        for (channel = 0; channel < 4; channel++) {
+            fade = D_00438F54->fade[last + 1][D_00438F54->bank];
+            colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC,
+                                                       finalRows[last][2], channel, fade);
+            if (fade > 128) {
+                colors[channel] |= overlays[D_00438F54->bank];
+            }
+        }
+        func_00306C28(finalRows[last][0] << 4, finalRows[last][1] << 3,
+                      0, colors, 0, btlResourceBlock->resC, finalRows[last][2], 0x53);
+    }
+}
+
 
 void fldInitSceneFadeRecords(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
@@ -1436,14 +1490,6 @@ void fldCreateSceneCleanupTask(void) {
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CFC40);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", fldDestroySceneTasksAndBuffers);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416EF8);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416F08);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416F18);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416F28);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416FA0);
 
