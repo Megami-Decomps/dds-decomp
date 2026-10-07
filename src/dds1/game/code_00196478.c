@@ -1393,7 +1393,7 @@ UiSprite *func_00199828(s32 kind, u32 value) {
             ((UiSpriteTexturePayload *)work->payload)->texture = (SdfTex *)value;
             break;
         case 8:
-            *work->payload = value;
+            ((UiSpriteBandPayload *)work->payload)->texture = (SdfTex *)value;
             break;
         case 9:
             *work->payload = value;

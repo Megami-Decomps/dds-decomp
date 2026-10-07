@@ -211,10 +211,10 @@ void itfSetPanelCornerGrid(PanelPt *v, s32 x0, s32 y0, s32 x1, s32 y1) {
 
 /* Write four fixed horizontal columns with inset top/bottom coordinates.
    x0 and x1 are intentionally unused; do not replace the fixed horizontal positions. */
-void itfSetPanelInsetVertexColumns(u8 *base, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfSetPanelInsetVertexColumns(UiSpriteBandPayload *base, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
-    PanelPt *vertices = (PanelPt *)(base + 4);
+    DrawVertex *vertices = base->vertices;
     s32 columnIndex;
     columnX[0] = 0x1A0;
     columnX[1] = 0x480;
@@ -289,11 +289,11 @@ void itfPanelInitRects30(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
 }
 
 /* Set both panel colors to the same blue tint with zero alpha. */
-void itfPanelSetBlueTint(u8 *base) {
-    u32 *colorRow = (u32 *)(base + 0x44);
+void itfPanelSetBlueTint(UiSpriteBandPayload *base) {
+    u32 *colorRow = base->colors[0].components;
 
     panelSetVec4(colorRow, 0x73, 0x87, 0xFF, 0);
-    colorRow = (u32 *)(base + 0x54);
+    colorRow = base->colors[1].components;
     panelSetVec4(colorRow, 0x73, 0x87, 0xFF, 0);
 }
 
