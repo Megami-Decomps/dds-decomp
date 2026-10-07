@@ -55,7 +55,7 @@ typedef struct EffMagatuhiValueWork {
     u16 *writeIndices;
     u16 *validCounts;
     f32 (*angleRows)[4];
-    u32 texture;
+    SdfTex *texture;
     void *allocationHandle;
 } EffMagatuhiValueWork;
 
