@@ -274,7 +274,105 @@ s32 mnuTickCommandWaitPhase(MenuTerminalContext *work) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00298648);
+/* Draw the selected terminal/shop page through its entry, change and exit phases. */
+s32 func_00298648(MenuTerminalContext *scene) {
+    s32 category;
+    f32 progress;
+
+    category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
+    func_00294B40(0, 0, 0, scene, 0x100, 0x53);
+    func_00296D90(scene, 0xA09DC380);
+    switch (scene->phase) {
+    case 9:
+        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
+        progress = (f32)scene->commandFrames / 10.0f;
+        func_00296430(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
+        func_00296C58(0, 0, 0, scene, 0x53);
+        func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            func_00296E98((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            break;
+        case 4:
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            func_00296E98((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            break;
+        }
+        break;
+    case 10:
+        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
+        progress = (f32)scene->commandFrames / 10.0f;
+        progress = 1.0f - progress;
+        func_00296430(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
+        func_00296C58(0, 0, 0, scene, 0x53);
+        func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00296E98((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            break;
+        case 4:
+            func_00296E98((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            break;
+        }
+        break;
+    case 12:
+        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        func_00296298(0, 0, 0, scene, 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        func_00296C58(0, 0, 0, scene, 0x53);
+        progress = (f32)scene->commandFrames / 10.0f;
+        progress = 1.0f - progress;
+        func_00295030(0, 0, 0, scene, (s32)(progress * 256.0f), 1, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4,
+                            0xA09DC300 | (s32)(progress * 96.0f), 0x53);
+        func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00296E98((s32)scene, 0x100, 1, 0x53);
+            break;
+        case 4:
+            func_00296E98((s32)scene, 0x100, 0, 0x53);
+            break;
+        }
+        break;
+    case 11:
+        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
+        func_00296298(0, 0, 0, scene, 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
+        func_00296C58(0, 0, 0, scene, 0x53);
+        func_002967A0(0, 0, 0, scene, 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00296E98((s32)scene, 0x100, 1, 0x53);
+            break;
+        case 4:
+            func_00296E98((s32)scene, 0x100, 0, 0x53);
+            break;
+        }
+        break;
+    }
+    return 0;
+}
+
 
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
