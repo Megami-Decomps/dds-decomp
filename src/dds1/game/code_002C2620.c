@@ -47,8 +47,8 @@ extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
 extern s32 fldStartAndPollLocalMapTrack(void);
 extern void fldInitializeLocalMapScene(void);
-extern s32 func_002C3220(void);
-extern void func_002C3420(void);
+extern s32 fldUpdateLocalMapController(void);
+extern void fldDrawLocalMapOverlay(void);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern s32 fldLocalMapTrackState;
@@ -299,33 +299,33 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfPktInit(void *, s32, s32, s32, s32);
 extern void *sdfFormatSifPacket();
 extern void *func_0011D3E8();
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surfaceIndex) {
-    void *packetList = sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfPoolNode *drawSurface;
     u8 packetHeader[0x10];
 
     sdfInitPacketList(packetList);
     sdfPktInit(packetHeader, x + 0x7000, y + 0x7900, width, height);
-    sdfAppendPacket(packetList, sdfFormatSifPacket(packetHeader, command));
+    sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
-    void *packetList = sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfPoolNode *drawSurface;
 
     sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, func_0011D3E8(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
@@ -346,14 +346,14 @@ s32 fldLmapTaskUpdate(void) {
         return 0;
     }
     if (state == 2) {
-        result = func_002C3220();
+        result = fldUpdateLocalMapController();
         if (result == -1) {
             return result;
         }
         if (result == 2) {
             return 0;
         }
-        func_002C3420();
+        fldDrawLocalMapOverlay();
     }
     return 0;
 }
@@ -501,7 +501,7 @@ void fldInitializeLocalMapScene(void) {
     sdfCounterInitializeDisplayAnimation();
 }
 
-s32 func_002C3220(void) {
+s32 fldUpdateLocalMapController(void) {
     s32 result = 0;
 
     switch (D_003BD25C) {
@@ -590,7 +590,7 @@ extern void fldDrawCounterMapMarker(void);
 extern void fldDrawLocalMapTransition(s32);
 extern s32 func_00134CD8(void);
 
-void func_002C3420(void) {
+void fldDrawLocalMapOverlay(void) {
     func_00132010();
     evtSetDrawSurfaceIndex(84);
     evtSubmitPrimaryAlphaBlendMode(0);

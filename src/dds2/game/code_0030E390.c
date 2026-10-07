@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
+#include "fld_lmap_task.h"
 
 extern s32 D_004390A4;
 
@@ -86,13 +87,6 @@ typedef struct MapRequestQueue {
     s32 callback;  /* 0x18: handler installed after queue creation */
 } MapRequestQueue;
 
-typedef struct FieldTransitionStyle {
-    s32 unk0;
-    s32 unk4;
-    s32 kind;
-} FieldTransitionStyle;
-
-extern FieldTransitionStyle *D_0043888C;
 extern s32 D_0043909C;
 extern void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2, u32 color3, s32 image, s32 flags,
                           s32 depth);
@@ -127,7 +121,7 @@ void fldDrawTransitionBackdrop(f32 progress) {
         alpha = 1.0f;
     }
     if (D_0043888C != NULL) {
-        switch (D_0043888C->kind) {
+        switch (D_0043888C->variant) {
         case 1:
             sdfDrawPositionedSlotImage(0, -2, 0, (s32)(alpha * 128.0f), D_0043909C + 0x25, 0, depth);
             break;

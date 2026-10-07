@@ -43,7 +43,7 @@ extern s32 func_0011B158(s32, s32, u8);
 
 extern s32 datCommandSelectors;
 extern s32 datRosterDetails;
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 extern s32 datCommandRecords;
 extern s32 datItemSkillRecords;
 extern s32 D_003BAAB8;
@@ -99,11 +99,6 @@ typedef struct EventSelector {
     s8 kind;           /* 0x01: kind five uses roster details instead */
 } EventSelector; /* 0x02 */
 
-typedef struct RosterFlagValue {
-    u32 flags;          /* 0x00: battle availability flags */
-    u8 value;          /* 0x04 */
-    u8 pad5[0x47];
-} RosterFlagValue; /* 0x4C */
 typedef struct EventIndexRecord {
     u8 pad00[2];
     u16 index; /* 0x02 */
@@ -204,7 +199,7 @@ u8 evtGetFlaggedRosterValue(s32 entryAddress) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
-    return ((RosterFlagValue *)datEnemyRecords)[entry->unitId].value;
+    return datEnemyRecords[entry->unitId].pad04;
 }
 
 s32 dds3FindEntryIndex(s32 rosterIndex) {
@@ -232,7 +227,61 @@ s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
 extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32);
 
 /* Event penalties affect living roster slots, then optionally raise a status channel. */
-INCLUDE_ASM(const s32, "game/code_00119900", func_00119B08);
+void func_00119B08(s32 mode) {
+    s32 nextHp, loss, slotIndex;
+    if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
+        DatPartyRecord *entry = datGameState->party;
+        slotIndex = 0;
+        do {
+            if (entry->hp != 0) {
+                nextHp = entry->hp;
+                loss = nextHp / 10;
+                if (loss == 0) loss = 1;
+                nextHp -= loss;
+                if (nextHp <= 0) nextHp = 1;
+                entry->hp = nextHp;
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 2) {
+        DatPartyRecord *entry = datGameState->party;
+        slotIndex = 0;
+        do {
+            if (entry->hp != 0) {
+                nextHp = entry->hp;
+                loss = (u32)nextHp / 2;
+                if (loss == 0) loss = 1;
+                nextHp -= loss;
+                if (nextHp <= 0) nextHp = 1;
+                entry->hp = nextHp;
+            }
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode == 3) {
+        DatPartyRecord *entry = datGameState->party;
+        slotIndex = 0;
+        do {
+            if (entry->hp != 0) entry->hp = 1;
+            slotIndex++;
+            entry++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+    if (mode >= 4 && mode <= 6) {
+        slotIndex = 0;
+        do {
+            if (datGameState->party[slotIndex].hp != 0) {
+                if (mode == 4) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x80);
+                if (mode == 5) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x40);
+                if (mode == 6) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x10);
+            }
+            slotIndex++;
+        } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+    }
+}
 
 
 /* Apply field HP attrition without allowing a living roster entry to reach zero. */
@@ -406,7 +455,7 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
         break;
     case 2:
         if ((entry->flags & 0x20) &&
-            (((RosterFlagValue *)datEnemyRecords)[entry->unitId].flags & 0x10)) {
+            (datEnemyRecords[entry->unitId].flags & 0x10)) {
             return 0;
         }
         value = commands[commandId].percentage;

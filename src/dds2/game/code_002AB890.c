@@ -39,13 +39,13 @@ void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
     mnuDestroyWindowContainer(resources->windows[1]);
 }
 
-extern void func_002B9720(MenuWindowContainer *);
+extern void mnuRemoveWindowListCursorNode(MenuWindowContainer *);
 
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *owner) {
     MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
 
     if (datGameState->inventory.counts[itemId & 0xFFFF] == 0) {
-        func_002B9720(resources->windows[0]);
+        mnuRemoveWindowListCursorNode(resources->windows[0]);
     }
     return resources->windows[0]->list->count != 0;
 }
@@ -224,7 +224,7 @@ s32 func_002ACAC0(s32 itemId, MenuStaffContext *owner) {
     MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
 
     if (datGameState->inventory.counts[itemId] == 0) {
-        func_002B9720(resources->windows[4]);
+        mnuRemoveWindowListCursorNode(resources->windows[4]);
     }
     return resources->windows[4]->list->count != 0;
 }

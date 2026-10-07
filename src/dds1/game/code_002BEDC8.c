@@ -39,7 +39,7 @@ INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BEEA0);
 
 extern void sdfSubmitGsTestOneRegisterPacket();
 extern void effSelectPresetAndDispatch(u32, u32, u32, u32, u32, u32, u32, u32);
-extern u8 *effUpdateTimedStates(u8 *, u32, u8 *);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
 extern void func_002BEEA0(s32, s32, s32, s32, s32, u32 *, u32 *,
                         s32 *, s32, s32, s32, s32, u32, s32);
 extern void func_002BE8A8(s32, s32, s32, s32, s32, s32 *, s32,
@@ -99,7 +99,7 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
                      kind, draw->angleDegrees, mode, flip, texture, buffer);
     }
     if (flags & 0x80) {
-        effUpdateTimedStates((u8 *)set, slotIndex, (u8 *)draw);
+        effUpdateTimedStates(set, slotIndex, draw);
     }
 }
 void func_002BF400(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer) {

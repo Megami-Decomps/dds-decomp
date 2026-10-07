@@ -102,7 +102,7 @@ s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     i = 0;
     listedMode = ((DatBattleSceneRecord *)(battle->battleMode * (s32)sizeof(DatBattleSceneRecord) +
                                       (u32)datBattleSceneRecords))->unitModes;
-    while (i < 0xB && listedMode[i] != unit->mode) {
+    while (i < 0xB && listedMode[i] != unit->partyRecord.unitId) {
         i++;
     }
     if (i == 0xB) {
@@ -134,7 +134,7 @@ s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
     listedMode = ((DatBattleSceneRecord *)(battle->battleMode * (s32)sizeof(DatBattleSceneRecord) +
                                       (u32)datBattleSceneRecords))->unitModes;
     for (; i < 0xB; i++) {
-        if (listedMode[i] == unit->mode) {
+        if (listedMode[i] == unit->partyRecord.unitId) {
             return 1;
         }
     }

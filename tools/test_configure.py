@@ -28,6 +28,48 @@ from tools import progress  # noqa: E402
 
 
 class ConfigureTests(unittest.TestCase):
+    def test_one_shot_force_split_is_not_persisted_and_cached_split_is_reused(self) -> None:
+        writer = Mock()
+        configure.write_configure_build(
+            writer, ["config/dds1/main.yaml"], ["dds1", "--force-split", "--no-split"]
+        )
+        self.assertEqual(
+            writer.build.call_args,
+            (("build.ninja", "configure"), {
+                "implicit": ["config/dds1/main.yaml"],
+                "variables": {"args": "dds1 --no-split"},
+            }),
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = root / "config/dds1"
+            build = root / "build/dds1"
+            config.mkdir(parents=True)
+            build.mkdir(parents=True)
+            yaml = config / "main.yaml"
+            yaml.write_text("version: dds1\n")
+            (config / "symbol_addrs.txt").write_text("symbol = 0x1;\n")
+            (config / "reloc_addrs.txt").write_text("reloc = 0x2;\n")
+            (build / "main.ld").write_text("main_SBSS_START = .;\nmain_BSS_START = .;\n")
+
+            def run_forced_step(command, **kwargs):
+                if "splat" in command:
+                    (root / "asm/dds1").mkdir(parents=True, exist_ok=True)
+
+            with patch.object(configure, "ROOT", root), \
+                    patch.dict(configure.VERSIONS, {"dds1": {"serial": "main"}}), \
+                    patch.object(configure.subprocess, "run", side_effect=run_forced_step) as run:
+                configure.run_splat("dds1", yaml, force=True)
+                forced_run_count = run.call_count
+                self.assertGreater(forced_run_count, 0)
+
+                # Ninja's regeneration command omits the one-shot flag. With
+                # the stamp written by the forced run, its ordinary configure
+                # pass follows the real cache gate and does not split again.
+                configure.run_splat("dds1", yaml, force=False)
+                self.assertEqual(run.call_count, forced_run_count)
+
     def test_timestamp_restore_only_reverts_unchanged_existing_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

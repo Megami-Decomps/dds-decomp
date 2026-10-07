@@ -70,6 +70,7 @@ extern void *sdfAllocAndClearQuadwords(s32);
 extern void *sdfAllocSizeClassBlock(s32);
 extern s32 mdlFlagTest(s32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 extern struct EffectSlotSet *effCreateResourceSlotSet(u32 *, u32, u32);
 
 extern s32 dspStartEntry(s32 entry);
@@ -1006,7 +1007,7 @@ MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, s32
     return func_002B83A0(menu->list, anchor, value, mode, options);
 }
 
-void func_002B9720(MenuWindowContainer *menu) {
+void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu) {
     func_002B86E8(menu->list);
 }
 

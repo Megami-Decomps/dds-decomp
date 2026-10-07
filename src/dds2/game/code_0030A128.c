@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
+#include "fld_lmap_task.h"
 
 extern s32 func_0030AC10(void);
 
@@ -29,12 +30,6 @@ extern void fldShutdownLmapResources(void);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-typedef struct LmapTaskState {
-    u32 value0;       /* Purpose not established */
-    u32 value4;       /* Cleared when the Lmap task initializes */
-    u32 variant;      /* 1..3, selected by the two model flags */
-} LmapTaskState;
-
 typedef GridTextListItem LmapNode;
 typedef GridTextWidget LmapList;
 
@@ -44,14 +39,14 @@ extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
-extern void *sdfAllocGeneralBlock(s32 size);
-extern u32 *sdfMemoryGetBlockAddress(u32 handle);
-extern s32 func_0030AAB0(s32);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
+extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern void func_0030A8A8(void);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 D_00438890;
 extern void func_00342580(u32);
-extern s32 sdfReleaseAllSpriteSlots(void);
+extern void sdfReleaseAllSpriteSlots(void);
 extern void sdfDestroyActiveCounterRuntime(void);
 extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
@@ -290,33 +285,33 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfPktInit(void *, s32, s32, s32, s32);
 extern void *sdfFormatSifPacket();
 extern void *func_0011F250();
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surfaceIndex) {
-    void *packetList = sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfPoolNode *drawSurface;
     u8 packetHeader[0x10];
 
     sdfInitPacketList(packetList);
     sdfPktInit(packetHeader, x + 0x7000, y + 0x7900, width, height);
-    sdfAppendPacket(packetList, sdfFormatSifPacket(packetHeader, command));
+    sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
-    void *packetList = sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfPoolNode *drawSurface;
 
     sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, func_0011F250(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
+    sdfAppendPacket(packetList, (u32)func_0011F250(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
@@ -324,16 +319,16 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A8A8);
 
 void fldStartLmapTask(s32 mode) {
-    void *allocation = sdfAllocGeneralBlock(0x88);
-    u32 *taskData = sdfMemoryGetBlockAddress((u32)allocation);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(0x88);
+    LmapTaskState *taskData = (LmapTaskState *)sdfMemoryGetBlockAddress(allocation);
 
     memset(taskData, 0, 0x88);
     if (mode != 0) {
-        D_00438890 = func_0030AAB0(mode);
+        D_00438890 = fldLocalMapTrackSlotFromMode(mode);
     } else {
         D_00438890 = 1;
     }
-    fldInitializeLmapTaskVariant((LmapTaskState *)taskData);
+    fldInitializeLmapTaskVariant(taskData);
     kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, func_0030A8A8, 0, taskData);
 }
 
@@ -349,40 +344,39 @@ s32 fldLmapTaskExists(void) {
 void func_0030AA68(const char *fmt, ...) {
 }
 
-/* Counter kind -> timer preset. Kinds 5, 6 and 13 have no arm of their own,
- * so they fall through to the default of 1. */
+/* Map a local-map mode to its track-selection ordinal; unmapped modes use 1. */
 INCLUDE_RODATA(const s32, "game/code_0030A128", fldLocalMapTaskName);
 
-s32 func_0030AAB0(s32 kind) {
-    s32 preset = 1;
+s32 fldLocalMapTrackSlotFromMode(s32 mode) {
+    s32 slot = 1;
 
-    switch (kind - 4) {
+    switch (mode - 4) {
     case 0:
-        preset = 1;
+        slot = 1;
         break;
     case 3:
-        preset = 3;
+        slot = 3;
         break;
     case 4:
-        preset = 2;
+        slot = 2;
         break;
     case 5:
-        preset = 7;
+        slot = 7;
         break;
     case 6:
-        preset = 8;
+        slot = 8;
         break;
     case 7:
-        preset = 4;
+        slot = 4;
         break;
     case 8:
-        preset = 6;
+        slot = 6;
         break;
     case 9:
-        preset = 5;
+        slot = 5;
         break;
     }
-    return preset;
+    return slot;
 }
 
 /* The 0x1C flag takes precedence over 0x13 when selecting the map variant. */
@@ -404,7 +398,7 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
         }
     }
     task->variant = variant;
-    task->value4 = 0;
+    task->phase = 0;
 }
 
 void fldShutdownLmapResources(void) {
@@ -475,7 +469,7 @@ void fldInitializeLocalMapScene(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B1E8);
 
-void func_0030B470(void) {
+void fldDrawLocalMapOverlay(void) {
     func_00134A18();
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x21, 0, 0x53);
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x22, 0, 0x53);
@@ -561,7 +555,7 @@ s32 fldLmapToggleOverlay(void) {
 extern s32 sdfCounterGetDisplayValue(void);
 extern void mdlFlagClear(s32 flag);
 
-void func_0030B728(void) {
+void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);
 
     if (flags & 2) {

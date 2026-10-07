@@ -4,6 +4,16 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 struct MenuListNode;
+struct FrFontGlyph;
+struct FrFontCtx;
+struct TextStyleNode;
+
+enum MenuPanelKind {
+    MNU_PANEL_KIND_SIX_SLOTS = 0,
+    MNU_PANEL_KIND_FOUR_OFFSET_ICONS = 1,
+    MNU_PANEL_KIND_FIXED_ICON_PAIRS = 2,
+    MNU_PANEL_KIND_COUNT = 3
+};
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -20,7 +30,6 @@ struct MenuListNode;
 #define MNU_WINDOW_CONTAINER_BYTES 0x8C
 #define MNU_PANEL_LAYOUT_BYTES 0x38
 #define MNU_WINDOW_RESOURCE_SPRITES 7
-#define MNU_PANEL_KIND_LIMIT 3
 #define MNU_SORT_KEY_COUNT 3
 #define MNU_SORT_COMPARATOR_COUNT 6
 #define MNU_LIST_POINTER_BYTES 4
@@ -45,9 +54,9 @@ extern void func_0027D850(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
 
 extern void *func_0027F230(s32, s32, s32);
 
-extern void func_0027DA80(s32, s32, s32, s32, MenuPanelHandles *, s32);
+extern void mnuDrawFourPanelIconsAtOffsets(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
-extern void func_0027DBD0(s32, s32, s32, s32, MenuPanelHandles *, s32);
+extern void mnuDrawPanelIconPairsAtFixedPositions(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
 extern void func_0027C140();
 
@@ -63,9 +72,9 @@ extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern void func_00196088(s32, s32, s32);
 
-extern void func_001958A0(s32, s32, s32);
+extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
 
-extern s32 frFontQueueGlyphInSelectedSlot(s32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -344,7 +353,7 @@ MenuListNode *func_0027C688(MenuWindowContainer *window, MenuListNode *anchor, s
     return func_0027B540(window->list, anchor, value, mode, options);
 }
 
-void func_0027C6A0(MenuWindowContainer *window) {
+void mnuRemoveWindowListCursorNode(MenuWindowContainer *window) {
     func_0027B888(window->list);
 }
 
@@ -546,14 +555,14 @@ extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
 extern void effConfigureIndexedSlotMaterial(s32, s32, s32, s32, s32, s32, s32);
 
 /* Panel kind chooses the native sprite-slot layout. */
-u32 mnuCreatePanelSpriteHandles(u32 mode, s32 resource, s32 target) {
+u32 mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 target) {
     MenuPanelSlotIndices indices = D_003B2368;
     MenuPanelHandles *panel = (MenuPanelHandles *)sdfAllocAndClearQuadwords(sizeof(MenuPanelHandles));
     s32 i;
 
-    panel->mode = mode;
-    switch (mode) {
-    case 0:
+    panel->panelKind = panelKind;
+    switch (panelKind) {
+    case MNU_PANEL_KIND_SIX_SLOTS:
         panel->count = 6;
         for (i = 0; i < panel->count; i++) {
             panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, indices.slots[i], 1);
@@ -561,7 +570,7 @@ u32 mnuCreatePanelSpriteHandles(u32 mode, s32 resource, s32 target) {
         effConfigureWithDefaultSetting((s32)panel->handles[4], 0, target, 0, 0, 12);
         effConfigureWithDefaultSetting((s32)panel->handles[5], 0, target, 0, 0, 12);
         break;
-    case 1:
+    case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         panel->count = 4;
         panel->handles[0] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, 23, 1);
         panel->handles[1] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, 23, 1);
@@ -572,7 +581,7 @@ u32 mnuCreatePanelSpriteHandles(u32 mode, s32 resource, s32 target) {
         effConfigureIndexedSlotMaterial((s32)panel->handles[2], 0, target, 1, 0, 10, 12);
         effConfigureIndexedSlotMaterial((s32)panel->handles[3], 0, target, 1, 10, 10, 12);
         break;
-    case 2:
+    case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
         panel->count = 4;
         for (i = 0; i < panel->count; i++) {
             panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((u32 *)resource, indices.slots[i + 2], 1);
@@ -590,7 +599,7 @@ extern void effInitializeSlotWork(s32, s32);
 void mnuClearEntryFlags(MenuPanelHandles *group) {
     s32 spriteIndex;
 
-    if (group->handles[0] != NULL && group->mode < MNU_PANEL_KIND_LIMIT) {
+    if (group->handles[0] != NULL && group->panelKind < MNU_PANEL_KIND_COUNT) {
         for (spriteIndex = 0; spriteIndex < group->count; spriteIndex++) {
             EffectSlotSet *entry = group->handles[spriteIndex];
             u32 *flags = &entry->workEntries->states[0].flags;
@@ -617,7 +626,7 @@ void mnuReleaseResourceList(s32 *object) {
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027D850);
 
 /* Draw the four row icons at their table-owned offsets. */
-void func_0027DA80(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
+void mnuDrawFourPanelIconsAtOffsets(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
     MenuPanelPositionTable4 table = D_003B2380;
 
     func_002BF4E0(x + table.positions[0].x, y + table.positions[0].y, depth, alpha, 1,
@@ -631,7 +640,7 @@ void func_0027DA80(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, 
 }
 
 /* Draw two stacked icon pairs; the table already contains absolute screen positions. */
-void func_0027DBD0(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
+void mnuDrawPanelIconPairsAtFixedPositions(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
     MenuPanelPositionTable2 table = D_003B23A0;
     s32 positionX = table.positions[0].x;
     s32 positionY = table.positions[0].y;
@@ -646,15 +655,15 @@ void func_0027DBD0(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, 
 
 /* Dispatch the three DDS1 panel kinds; only kind one forces full fade. */
 void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *panel, s32 selectionMode, s32 drawArg) {
-    switch (panel->mode) {
-    case 0:
+    switch (panel->panelKind) {
+    case MNU_PANEL_KIND_SIX_SLOTS:
         func_0027D850(x, y, depth, fade, panel, selectionMode, drawArg);
         return;
-    case 1:
-        func_0027DA80(x, y, depth, MNU_FULL_FADE, panel, drawArg);
+    case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
+        mnuDrawFourPanelIconsAtOffsets(x, y, depth, MNU_FULL_FADE, panel, drawArg);
         return;
-    case 2:
-        func_0027DBD0(x, y, depth, fade, panel, drawArg);
+    case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
+        mnuDrawPanelIconPairsAtFixedPositions(x, y, depth, fade, panel, drawArg);
         break;
     }
 }
@@ -668,18 +677,18 @@ void mnuDrawIconPanelFullFade(s32 x, s32 y, s32 depth, MenuPanelHandles *list, s
 }
 
 void mnuHideWindowHandles(MenuPanelHandles *panel) {
-    switch (panel->mode) {
-    case 0:
+    switch (panel->panelKind) {
+    case MNU_PANEL_KIND_SIX_SLOTS:
         itfGridLookupValueOrDefault(panel->handles[4], 0);
         itfGridLookupValueOrDefault(panel->handles[5], 0);
         return;
-    case 1:
+    case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         itfGridLookupValueOrDefault(panel->handles[0], 0);
         itfGridLookupValueOrDefault(panel->handles[1], 0);
         itfGridLookupValueOrDefault(panel->handles[2], 0);
         itfGridLookupValueOrDefault(panel->handles[3], 0);
         return;
-    case 2:
+    case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
         itfGridLookupValueOrDefault(panel->handles[2], 0);
         itfGridLookupValueOrDefault(panel->handles[3], 0);
         break;
@@ -1758,7 +1767,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     s32 value;
     s32 alpha;
     s32 color;
-    s32 item;
+    s32 glyphAddress;
 
     value = mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex]);
     alpha = page->drawAlpha;
@@ -1770,15 +1779,15 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
         i++;
     } while (i < 2);
     if (value != 0) {
-        item = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
+        glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
         func_003014F0(text, D_003BC720, *(s16 *)(datCommandRecords + evtGetIndexedEventRecordId(value) * 0x38 + 0x18));
-        item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)text, item);
+        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)text, glyphAddress);
     } else {
-        item = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
-        item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, item);
+        glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
+        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, glyphAddress);
     }
-    func_001958A0(item, 1, param);
-    frFontQueueGlyphInSelectedSlot(item);
+    func_001958A0((struct FrFontGlyph *)glyphAddress, 1, param);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
             page->drawAlpha += 16;
@@ -1809,45 +1818,46 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
 
 extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
 
-extern s32 func_001951C8(char *text, s32, s32, s32, s32);
+extern struct FrFontGlyph *func_001951C8(void *, s8, s8, s8, struct FrFontGlyph *);
 
-extern s32 frFontMeasureGlyphChain(s32 item);
+extern u32 frFontMeasureGlyphChain(void *);
 
-extern void frFontSetContextPair(s32 item, s32 x, s32 y);
+extern void frFontSetContextPair(struct FrFontCtx *, u32, u32);
+extern void frFontSetChildColors(struct TextStyleNode *, u32);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
-    s32 item;
+    struct FrFontGlyph *glyph;
     s32 width;
 
     func_002CD0D8(textId & 0xFFFF, 1, text);
-    item = func_001951C8(text, 0, 0, 0, 0);
-    frFontSetChildColors(item, color);
-    width = frFontMeasureGlyphChain(item) + 8;
-    frFontSetContextPair(item, x - (width * 0x10 >> 1) + 0x5F0, y);
-    func_001958A0(item, 1, param);
-    frFontQueueGlyphInSelectedSlot(item);
+    glyph = func_001951C8(text, 0, 0, 0, 0);
+    frFontSetChildColors((struct TextStyleNode *)glyph, color);
+    width = frFontMeasureGlyphChain(glyph) + 8;
+    frFontSetContextPair((struct FrFontCtx *)glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
+    func_001958A0(glyph, 1, param);
+    frFontQueueGlyphInSelectedSlot(glyph);
 }
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                      s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
+    s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
-    s32 texture;
-    s32 item;
+    s32 color;
+    s32 glyphAddress;
 
-    texture = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
-    code = selectedCode != 0 ? selectedCode : cost;
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    code = selectedCode != 0 ? selectedCode : profileId;
     if (code != 0) {
         if (func_002CD240(code & 0xFFFF, &outValue) != 0) {
-            mnuDrawCenteredLabel(0x1120, 0x5F0, depth, texture, code, param);
+            mnuDrawCenteredLabel(0x1120, 0x5F0, depth, color, code, param);
             return;
         }
-        item = itfCreateConvertedTextGlyph(0, 0, depth, texture, (const u8 *)outValue, 0);
-        func_00196088(0x1710, 0x5F0, item);
-        func_001958A0(item, 1, param);
-        frFontQueueGlyphInSelectedSlot(item);
+        glyphAddress = itfCreateConvertedTextGlyph(0, 0, depth, color, (const u8 *)outValue, 0);
+        func_00196088(0x1710, 0x5F0, glyphAddress);
+        func_001958A0((struct FrFontGlyph *)glyphAddress, 1, param);
+        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
     }
 }
 

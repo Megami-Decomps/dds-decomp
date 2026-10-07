@@ -473,7 +473,7 @@ s32 btlHasRestrictedUnit(void) {
             if (unitFlags & 0xe0) {
                 return 1;
             }
-            if (unitCursor->conditionFlags & 0x4000) {
+            if (unitCursor->partyRecord.status & 0x4000) {
                 return 1;
             }
         }
@@ -697,7 +697,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     if (datCommandSelectors[commandId * 2 + 1] == 2) {
         ownerUnit = actionTask->unit;
         if (ownerUnit->flags & 0x200) {
-            if (ownerUnit->mode == 4) {
+            if (ownerUnit->partyRecord.unitId == 4) {
                 if (mdlFlagTest(0x61) == 0) {
                     return 6;
                 }
@@ -719,7 +719,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     /* Keep this byte-table load separate from commandRecord for the matching address calculation. */
     if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES] & 8) {
         for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
-            if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->conditionFlags & 0x800) {
+            if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->partyRecord.status & 0x800) {
                 flaggedTargetCount++;
             }
         }
@@ -1690,12 +1690,12 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
         btlBossDebugPrintfN(x, y, 0, D_003BBA98);
         if ((unit->flags & 0x200) != 0) {
             if ((unit->flags & 0x1000) != 0) {
-                row = ((BtlAffinityRow *)D_003BAA08)[unit->mode];
+                row = ((BtlAffinityRow *)D_003BAA08)[unit->partyRecord.unitId];
             } else {
-                row = ((BtlAffinityRow *)D_003BAA0C)[unit->mode];
+                row = ((BtlAffinityRow *)D_003BAA0C)[unit->partyRecord.unitId];
             }
         } else {
-            row = ((BtlAffinityRow *)D_003BAA2C)[unit->mode];
+            row = ((BtlAffinityRow *)D_003BAA2C)[unit->partyRecord.unitId];
         }
         for (i = 0; i < 16; i++) {
             row.value[i] = func_001A2F50(unit, i);

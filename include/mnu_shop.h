@@ -67,7 +67,7 @@ struct MenuWindowSpriteGroup;
 
 /* DDS1's generic window panel is embedded at +0x4C and copied as 0x38 bytes. */
 typedef struct MenuPanelHandles {
-    u32 mode;
+    u32 panelKind;
     u8 pad04[4];
     s32 count;
     struct EffectSlotSet *handles[6];
@@ -84,7 +84,7 @@ typedef struct MenuWindowContainer {
     u32 flags;
     s32 width;
     s32 height;
-    u8 pad10[4];
+    u32 unk10; /* Set by staff-panel setup; meaning unknown. */
     struct MenuList *list;
     s32 entryValue;
     s32 entryX;

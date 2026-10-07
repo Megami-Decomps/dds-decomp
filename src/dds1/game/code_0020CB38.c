@@ -120,7 +120,7 @@ s32 btlAllowsSpeciesCondition(BtlUnit *unit, BtlUnit *other, s32 condition) {
     if (condition != 0) {
         return 0;
     }
-    kind = other->mode;
+    kind = other->partyRecord.unitId;
     switch (kind) {
     case 0x13d:
     case 0x13e:
@@ -148,7 +148,7 @@ s32 btlGetEnabledEnemyActionResponse(BtlUnit *unit, s32 action) {
     if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
-    if (unit->mode == 0x114) {
+    if (unit->partyRecord.unitId == 0x114) {
         return 11;
     }
     return -1;
@@ -161,7 +161,7 @@ s32 func_0020D598(BtlUnit *unit, s32 action) {
     if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
-    if (unit->mode == 0x111) {
+    if (unit->partyRecord.unitId == 0x111) {
         return 11;
     }
     return -1;
@@ -179,7 +179,7 @@ s32 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s32 unuse
     if ((other->flags & 0x400) == 0) {
         return 0;
     }
-    if (other->mode != 0x111) {
+    if (other->partyRecord.unitId != 0x111) {
         return 0;
     }
     if (command->actionCode == 0x175) {
@@ -201,7 +201,7 @@ s32 func_0020D690(BtlUnit *unit, s32 action) {
     if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
-    if (unit->mode == 0x109) {
+    if (unit->partyRecord.unitId == 0x109) {
         return 11;
     }
     return -1;
@@ -214,7 +214,7 @@ s32 btlDeactivateOthersOnSpecialUnitDefeat(void) {
     for (; unit != NULL; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->mode == 0x13C) {
+                if (unit->partyRecord.unitId == 0x13C) {
                     if (unit->flags & 0x20) {
                         result = 1;
                         break;
@@ -229,7 +229,7 @@ s32 btlDeactivateOthersOnSpecialUnitDefeat(void) {
                 if (unit->flags & 0x400) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
-                            if (unit->mode != 0x13C) {
+                            if (unit->partyRecord.unitId != 0x13C) {
                                 btlStartTask(btlCreateUnitFadeOutTask(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
@@ -243,7 +243,7 @@ s32 btlDeactivateOthersOnSpecialUnitDefeat(void) {
 }
 
 s32 btlNormalizeActionForSkill(BtlUnit *unit, s32 action) {
-    if ((unit->flags & 0x400) == 0 || unit->mode != 0x13c) {
+    if ((unit->flags & 0x400) == 0 || unit->partyRecord.unitId != 0x13c) {
         return action;
     }
     switch (action) {
@@ -263,7 +263,7 @@ void btlRecenterUnitsOnLead(void) {
     for (unit = work->units; unit != 0; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->mode == 0x137) {
+                if (unit->partyRecord.unitId == 0x137) {
                     lead = unit;
                     break;
                 }
@@ -306,7 +306,7 @@ u8 func_0020D9A8(s32 action) {
 }
 
 s32 btlNormalizeActionForStatus(BtlUnit *unit, s32 action) {
-    if ((unit->flags & 0x400) == 0 || unit->mode != 0x115) {
+    if ((unit->flags & 0x400) == 0 || unit->partyRecord.unitId != 0x115) {
         return action;
     }
     switch (action) {
@@ -323,7 +323,7 @@ s32 func_0020D9F8(BtlUnit *unit, s32 action) {
     if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
-    if (unit->mode == 0x113) {
+    if (unit->partyRecord.unitId == 0x113) {
         return 11;
     }
     return -1;
