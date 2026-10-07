@@ -612,7 +612,43 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AFD8);
+s32 func_0019AFD8(void) {
+    s32 frame;
+    s32 latest = -1;
+    s32 i;
+
+    if (itfHeldPanelCursor.window < 0) {
+        return 1;
+    }
+    frame = scrGetCommandTimer();
+    if (itfHeldPanelCursor.queuedCount == 0) {
+        return 1;
+    }
+    for (i = 0; i < itfHeldPanelCursor.queuedCount; i++) {
+        s32 start = itfHeldPanelCursor.items[i].first;
+
+        if (start >= latest) {
+            latest = start;
+        }
+        if (start == frame) {
+            s16 entry = itfHeldPanelCursor.items[i].second;
+            s32 deadline = frame + itfHeldPanelCursor.items[i].third;
+
+            itfMesStartEntry(itfHeldPanelCursor.window, entry, 0);
+            itfHeldPanelCursor.unk4 = entry;
+            itfHeldPanelCursor.unk8 = deadline;
+        }
+    }
+    if (frame == itfHeldPanelCursor.unk8) {
+        itfMesCleanupWindow(itfHeldPanelCursor.window, 1);
+        itfHeldPanelCursor.unk4 = itfHeldPanelCursor.unk8 = -1;
+    }
+    if (frame >= latest && frame >= itfHeldPanelCursor.unk8) {
+        itfPanelReleaseHold();
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_0019B108(void) {
     s32 window;

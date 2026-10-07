@@ -15,15 +15,6 @@ typedef struct EffFollowRec {
 
 
 
-typedef struct EffectTransformData {
-    ObjBase *resourceState;
-    u32 flags;
-    u32 opacityMode;
-    s32 activeId;
-    f32 offset[4];
-    f32 position[4];
-} EffectTransformData;
-
 typedef struct EffectObject {
     u8 pad00[0x18];
     EffectObjectData *data;

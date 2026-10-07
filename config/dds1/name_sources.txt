@@ -552,7 +552,7 @@
 0x00116AD8	dds3SetPathStateValue	inferred	Writes the word in the path object state record.
 0x00116AE8	dds3GetPathStateValueById	inferred	Looks up a path in the secondary world and reads its state word.
 0x00116B28	evtSpawnActionObjD	inferred	constructor for type 0xD
-0x00116B78	dds3GetPathState	inferred	Returns the path object state pointer at offset 0x18.
+0x00116B78	dds3GetWorldObjectPayload	inferred	Returns the kind-dependent payload pointer from EffWorldNode.data at +0x18; kind 0xD field callers use it as a named-process node.
 0x00116B80	dds3SamplePathKeyframeInterval	inferred	Finds the containing path keyframe interval and its normalized interpolation weight; falls back to the final interval with weight one; paired twin 0x00116DE8.
 0x00116CE8	evtSpawnActionObj10	inferred	constructor for type 0x10
 0x00116D38	dds3CreatePathCurveWork	inferred	readability/matching review (QP16)

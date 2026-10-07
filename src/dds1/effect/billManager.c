@@ -363,7 +363,8 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
     }
 }
 
-extern u32 func_002E2BB8(u128 *, void *, void *, void *, s32, void *(*)(s32));
+extern u32 func_002E2BB8(u128 *positions, void *attributes, void *halfAttributes,
+                         void *wordAttributes, s32 count, void *(*alloc)(s32));
 
 void func_00150EB0(BillRenderPair *pair) {
     u32 colors[7][2];
@@ -396,7 +397,8 @@ void func_00150EB0(BillRenderPair *pair) {
         uv[i][3][3] = data[1]->uv[i].components[7];
     }
     sdfAppendPacket(pair->packetList,
-        func_002E2BB8((u128 *)data[1]->positions, colors, uv, data[1]->offsets, count, NULL));
+        func_002E2BB8((u128 *)data[1]->positions, colors, uv,
+                      data[1]->offsets, count, NULL));
     data[0]->count = 0;
     data[1]->count = 0;
 }
