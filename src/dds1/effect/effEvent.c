@@ -384,7 +384,131 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_0018EB08);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018EED0);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
+extern void *func_002EF2B0(const f32 [][4], const u32 *, s32, u32);
+extern SdfPoolNode kwlnDrawSurfaces[];
+
+/* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
+void func_0018EED0(const f32 *center, u32 color, f32 radius, f32 height) {
+    f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
+    f32 vertices[40][4];
+    u32 colors[40];
+    SdfListHead *list;
+    f32 (*out)[4];
+    SdfPoolNode *surface;
+    u32 ring;
+    u32 segment;
+    f32 y;
+    f32 heightStep;
+    f32 angleStep;
+    f32 angle;
+    f32 oppositeAngle;
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    for (ring = 0; ring < 40; ring++) {
+        colors[ring] = color;
+    }
+    heightStep = height / 19.0f;
+    angleStep = 0.31415924429893494f;
+    y = -height * 0.5f;
+    for (ring = 0; ring < 20; ring++) {
+        angle = 0.0f;
+        out = vertices;
+        point[0] = radius;
+        point[1] = y;
+        point[2] = 0.0f;
+        VU0_LOAD_VF(vf11, center);
+        VU0_LOAD_VF(vf10, point);
+        VU0_ADD(vf10, vf10, vf11);
+        for (segment = 0; segment < 20; segment++) {
+            VU0_STORE_VF(vf10, *out);
+            out++;
+            angle += angleStep;
+            point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            point[1] = y;
+            point[2] = sdfSinPoly(angle) * radius;
+            VU0_LOAD_VF(vf10, point);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, *out);
+            out++;
+        }
+        sdfAppendPacket(list, (u32)func_002EF2B0(vertices, colors, 40, 0x80));
+        y += heightStep;
+    }
+
+    out = vertices;
+    VU0_LOAD_VF(vf11, center);
+    angle = 0.0f;
+    for (segment = 0; segment < 20; segment++) {
+        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[1] = -height * 0.5f;
+        point[2] = sdfSinPoly(angle) * radius;
+        VU0_LOAD_VF(vf10, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, *out);
+        out++;
+        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[1] = height * 0.5f;
+        point[2] = sdfSinPoly(angle) * radius;
+        VU0_LOAD_VF(vf10, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, *out);
+        out++;
+        angle += angleStep;
+    }
+    sdfAppendPacket(list, (u32)func_002EF2B0(vertices, colors, 40, 0x80));
+
+    out = vertices;
+    VU0_LOAD_VF(vf11, center);
+    angle = 0.0f;
+    for (segment = 0; segment < 10; segment++) {
+        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[1] = -height * 0.5f;
+        point[2] = sdfSinPoly(angle) * radius;
+        VU0_LOAD_VF(vf10, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, *out);
+        out++;
+        oppositeAngle = angle + 3.1415926f;
+        point[0] = sdfEvaluateCosineViaSinePhaseShift(oppositeAngle) * radius;
+        point[1] = -height * 0.5f;
+        point[2] = sdfSinPoly(oppositeAngle) * radius;
+        VU0_LOAD_VF(vf10, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, *out);
+        out++;
+        angle += angleStep;
+    }
+    sdfAppendPacket(list, (u32)func_002EF2B0(vertices, colors, 20, 0x80));
+
+    out = vertices;
+    VU0_LOAD_VF(vf11, center);
+    angle = 0.0f;
+    for (segment = 0; segment < 10; segment++) {
+        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[1] = height * 0.5f;
+        point[2] = sdfSinPoly(angle) * radius;
+        VU0_LOAD_VF(vf10, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, *out);
+        out++;
+        oppositeAngle = angle + 3.1415926f;
+        point[0] = sdfEvaluateCosineViaSinePhaseShift(oppositeAngle) * radius;
+        point[1] = height * 0.5f;
+        point[2] = sdfSinPoly(oppositeAngle) * radius;
+        VU0_LOAD_VF(vf10, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, *out);
+        out++;
+        angle += angleStep;
+    }
+    sdfAppendPacket(list, (u32)func_002EF2B0(vertices, colors, 20, 0x80));
+    surface = &kwlnDrawSurfaces[55];
+    surface->append((SdfListHead *)surface, list);
+}
+
 
 
 /* Submit a filled rectangle and its line-strip border. Keep native width/height
