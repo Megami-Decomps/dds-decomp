@@ -376,6 +376,8 @@
 0x0010F948	dds3TestObjectSphereOverlap	inferred	src/dds1/game/code_0010F8D8.c func_0010F948: Computes position-vector distance and compares with sum of stored object radii. [names_reviewed24.tsv]
 0x0010FA00	dds3InvokeWorldCallbackFirst	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FC28, input-family pairing. [names_qp10.tsv]
 0x0010FA40	dds3InvokeWorldCallbackSecond	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FC68, input-family pairing. [names_qp10.tsv]
+0x0010FA98	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
+0x0010FAA8	dds3GetWorldNodeValue	inferred	Returns the kind-selected u32 value at EffWorldNode +0x08, or zero for a null node.
 0x0010FAC0	dds3AllocateWorldObjectEntry	inferred	confidence=high; src/dds1/game/code_0010F8D8.c:func_0010FAC0; Allocates and initializes the object entry, including negative counter sentinels, and reports allocation success. [names_qp9.tsv]
 0x0010FBF8	dds3DispatchWorldEntryCallbackTarget	inferred	confidence=high; src/dds1/game/code_0010F8D8.c:func_0010FBF8; Passes the world entry callback target to its dispatcher only when the target word is nonzero. [names_qp9.tsv]
 0x0010FD30	dds3DestroyWorld	inferred	Destroys the global world object and clears its global pointer.

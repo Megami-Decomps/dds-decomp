@@ -3,6 +3,7 @@
 #include "sdf.h"
 
 extern s32 fldLocalMapCameraObject;
+struct EffWorldNode;
 
 extern SdfQuad fldLocalMapFirstCameraVector;
 
@@ -12,7 +13,7 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-extern void dds3SetWorldEntryCallbackTarget(s32, char *);
+extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern void effObjSetInnerFloat(s32, f32);
 
@@ -22,7 +23,7 @@ extern s32 dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
     fldLocalMapCameraObject = dds3CreateCameraObject(dds3AdvanceWorldCounter(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
-    dds3SetWorldEntryCallbackTarget(fldLocalMapCameraObject, "Lmap_Cam");
+    dds3SetWorldNodeValue((struct EffWorldNode *)fldLocalMapCameraObject, (u32)"Lmap_Cam");
     effObjSetInnerFloat(fldLocalMapCameraObject, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), fldLocalMapCameraObject);
 }
