@@ -52,7 +52,7 @@ typedef struct BtlUnitEntrySlot {
  * The actor chain ends at +0x344. Command state/action words are a different
  * object and must not be interpreted through this unit layout. */
 typedef struct BtlUnit {
-    u8 pad00[0x10];
+    f32 lightDirection[4]; /* 0x00: source direction restored by battle light transitions. */
     f32 colorStart[4]; /* 0x10: first source color used by the effect blend callback. */
     f32 colorEnd[4]; /* 0x20: second source color used by the effect blend callback. */
     f32 position[4]; /* 0x30: world position */
@@ -168,15 +168,9 @@ typedef struct BtlUnit {
  * and the actor-list link at 0x364, so all five are the same object).
  * Fields no unit could name stay unkNN/padNN. */
 typedef struct BtlUnit {
-    s32 state;
-    u16 unk4; /* Written as 1 by the action-sequence constructor. */
-    u8 pad6[2];
-    u32 seqFlags;
-    u32 unkC;
-    s32 stateTime;
-    s32 unk14;
-    struct BtlUnit *link18;
-    u8 pad1C[0x14];
+    f32 lightDirection[4]; /* 0x00: source direction restored by battle light transitions. */
+    f32 colorStart[4]; /* 0x10: first source color used by the effect blend callback. */
+    f32 colorEnd[4]; /* 0x20: second source color used by the effect blend callback. */
     f32 position[4]; /* 0x30: world position */
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
     f32 unk50;
