@@ -208,7 +208,7 @@ void func_00154F18(s32);
 
 void itfMesSetWindowHighFlags(s32 window, u32 mask);
 
-void func_001A45C0(s32 window, s32 slotIndex, s32 value, s32 selector);
+void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 
 void itfMesClearWindowHighFlags(s32 window, u32 mask);
 
@@ -432,7 +432,7 @@ s32 itfMesScriptSetTextSlotFromValue(void) {
     slotIndex = scrReadIntParameter(0);
     value = scrReadIntParameter(1);
     selector = scrReadIntParameter(2);
-    func_001A45C0(window, slotIndex, value, selector);
+    itfMesSetTextSlotFromValue(window, slotIndex, value, selector);
     return 1;
 }
 
@@ -882,7 +882,7 @@ extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, u32 sourceAddress);
 
 /* Copy one of the built-in interface strings into a window replacement slot. */
-void func_001A45C0(s32 window, s32 slotIndex, s32 value, s32 selector) {
+void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector) {
     char formatted[0x10];
     u16 number[0x20];
     char converted13[0x19];
