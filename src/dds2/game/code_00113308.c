@@ -306,7 +306,8 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
     if (model != NULL && effObjTestNodeFlags(obj->source, 1) == 1) {
         effObjClearNodeFlags(obj->source, 1);
         if (data->transitionWork != 0) {
-            if (data->transitionWork->motionState == 0 || data->transitionWork->motionState == 3) {
+            if (data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_IDLE ||
+                data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_VECTOR) {
                 if (data->transitionWork->flags & 0x40) {
                     flag = 1;
                 }
