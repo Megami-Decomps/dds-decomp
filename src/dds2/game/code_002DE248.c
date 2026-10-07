@@ -10,6 +10,7 @@
 #include "mdl.h"
 #include "eff.h"
 #include "eff_record_bucket.h"
+#include "eff_owner_records.h"
 #include "sdf.h"
 
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
@@ -170,18 +171,6 @@ typedef struct EffMotionResourceConfig {
 typedef struct EffectBlock128 {
     u32 word[32];
 } EffectBlock128;
-
-typedef struct EffectRecord {
-    void *owner;
-    s32 slot;
-    struct EffectRecord *prev;
-    struct EffectRecord *next;
-} EffectRecord;
-
-typedef struct EffectOwnerRecord {
-    void *owner;
-    EffectRecord *entries[16];
-} EffectOwnerRecord;
 
 typedef struct EffectSlot {
     u8 pad_0x00[0x28]; // 0x00

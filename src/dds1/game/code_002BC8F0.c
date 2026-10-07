@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "eff.h"
 #include "eff_record_bucket.h"
+#include "eff_owner_records.h"
 #include "sdf.h"
 
 extern void effResetSlotWork(u32, u32);
@@ -305,18 +306,6 @@ void effRequestMappedResource(const char *base, const char *name, u32 *outMapped
     *outMappedResource = 0;
     fileCreateCallbackRequest(path, 0, effCompleteMappedResourceJob, outMappedResource);
 }
-
-typedef struct EffectRecord {
-    void *owner;
-    s32 slot;
-    struct EffectRecord *prev;
-    struct EffectRecord *next;
-} EffectRecord;
-
-typedef struct EffectOwnerRecord {
-    void *owner;
-    EffectRecord *entries[16];
-} EffectOwnerRecord;
 
 /* Create an owner list with sixteen initially empty record buckets. */
 void *effCreateOwnerRecordList(void *owner) {
