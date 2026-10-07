@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_transform.h"
 #include "btl_state.h"
 #include "btl_command.h"
 #include "sdf_draw.h"
@@ -101,6 +102,9 @@ extern u32 btlGetSelectedBossEffectId(void);
 extern u32 btlGetSpecialModeEffectValue(void);
 
 extern s32 btlGetRuntime(void);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
+extern void mdlLoadTertiaryVectorVU(MdlCtx *model);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *model);
 extern void btlBossDebugPrintf(const char *, ...);
 extern s32 btlFindUnitByActor(s32);
 extern void func_001A1990(DatPartyRecord *, s32);
@@ -3508,7 +3512,99 @@ void btlTriggerSpecialUnitActionAndResetPose(s32 unit) {
     func_00208860(unit, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00208A50);
+/* Battle setup allocates exactly eight bytes for this callback's state. */
+typedef struct BtlScaleTransitionState {
+    f32 targetScale; /* 0x00 */
+    u16 stage;       /* 0x04: advanced by func_00208860 */
+    u8 pad06[2];
+} BtlScaleTransitionState;
+typedef char BtlScaleTransitionStateSizeCheck[
+    sizeof(BtlScaleTransitionState) == 8 ? 1 : -1];
+
+/* The model parameter banks are 0x270-byte records. This routine consumes the
+ * model scale and z values at +0x10/+0x14; the rest remains opaque here. */
+typedef struct BtlModelScaleRecord {
+    u8 pad00[0x10];
+    f32 scale; /* 0x10 */
+    f32 z;     /* 0x14 */
+    u8 pad18[0x258];
+} BtlModelScaleRecord;
+typedef char BtlModelScaleRecordSizeCheck[
+    sizeof(BtlModelScaleRecord) == 0x270 ? 1 : -1];
+
+void func_00208A50(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlScaleTransitionState *transition;
+    BtlUnit *unit;
+    BtlUnit *selected;
+    MdlCtx *model;
+    ObjectTransform *inner;
+    BtlModelScaleRecord *modelA;
+    BtlModelScaleRecord *modelB;
+    f32 currentScale;
+    f32 modelAScale;
+    f32 modelBScale;
+    f32 scaleDelta;
+    f32 nextZ;
+    u32 flags;
+
+    if ((battle->battleFlags & 0x80000) == 0) {
+        return;
+    }
+
+    transition = (BtlScaleTransitionState *)battle->effect;
+    selected = 0;
+    for (unit = battle->units; unit != 0; unit = unit->next) {
+        flags = unit->flags;
+        if ((flags & 1) != 0) {
+            if ((flags & 0x400) != 0) {
+                if (unit->partyRecord.unitId == 0x10D) {
+                    selected = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (selected == 0 || (selected->flags & 2) == 0) {
+        return;
+    }
+
+    model = selected->ext->owner;
+    mdlLoadTertiaryVectorVU(model);
+    VU0_GET_VF10_X(currentScale);
+    if (currentScale == transition->targetScale) {
+        return;
+    }
+
+    selected->effectScale = transition->targetScale;
+    selected->scale = transition->targetScale;
+    scaleDelta = transition->targetScale - currentScale;
+    if (__builtin_fabsf(scaleDelta) > 0.01f) {
+        currentScale += scaleDelta * 0.25f;
+    } else {
+        currentScale = transition->targetScale;
+    }
+
+    VU0_SET_ONES_XYZ(vf10);
+    VU0_SCALAR_OP(currentScale, "vmulx.xyzw vf10, vf10, vf2x");
+    inner = selected->effectObject->inner;
+    inner->flags = (inner->flags | 1) & ~2;
+    VU0_STORE_VF(vf10, inner->scale);
+    mdlStoreTertiaryVectorVU(selected->ext->owner);
+
+    modelA = (BtlModelScaleRecord *)btlGetSideIndexedActorStatusTable(1, 0x10D);
+    modelB = (BtlModelScaleRecord *)btlGetSideIndexedActorStatusTable(1, 0x11D);
+    if (modelA->scale != modelB->scale) {
+        modelAScale = modelA->scale;
+        modelBScale = modelB->scale;
+        currentScale -= modelBScale;
+        currentScale /= modelAScale - modelBScale;
+        nextZ = (modelA->z - modelB->z) * currentScale + modelB->z;
+        selected->unk58 = nextZ;
+        selected->zOffset = nextZ;
+        btlSetUnitPosition(selected, selected->currentPosition);
+    }
+}
 
 void func_00208C20(void) {
     func_001F53F0();
