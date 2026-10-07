@@ -17,15 +17,15 @@
 
 extern void func_0025DF68(s32, s32);
 
-extern void func_00261760(s32);
+extern s32 func_00261760(ShopScene *);
 
-extern void mnuStorePendingMenuCommandValue(s32, u32);
+extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 extern void func_0025ECD0();
 extern u8 D_0036AB64[];
 
 extern void func_0025E108(s32, s32);
 
-extern void mnuSetCommandPhase(s32, u32);
+extern void mnuSetCommandPhase(ShopScene *, u32);
 extern void func_00260570(struct MenuList *, u32);
 extern void func_00260AB0(s32);
 extern void func_0025F138();
@@ -52,9 +52,9 @@ extern s32 func_00285670(s32, s32 *, u64, u64);
 extern u32 kwlnTaskGetUserValue();
 
 extern s32 mnuMapPadMaskToFlags(s32);
-extern s32 mnuTickExtendedCommandPhase(s32);
+extern s32 mnuTickExtendedCommandPhase(ShopScene *);
 extern void mnuSetPopupEntryFlagged(s32, s32);
-extern void func_00260550(s32, u32);
+extern void func_00260550(struct MenuList *, u32);
 extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
 extern void func_0027C788(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
@@ -110,7 +110,7 @@ s32 evtAdvancePhaseOne(void) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
 
     if (state->action == 1) {
-        mnuSetCommandPhase((s32)state, 4);
+        mnuSetCommandPhase(state, 4);
     }
     return 1;
 }
@@ -153,11 +153,11 @@ s32 evtSelectStateAction(void) {
     s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
-        mnuSetCommandPhase(stateAddress, 3);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 3);
     } else if (action == 7) {
         struct MenuList *linkedTask;
 
-        mnuSetCommandPhase(stateAddress, 9);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 9);
         linkedTask = ((ShopScene *)stateAddress)->window->list;
         linkedTask->drawCallback = func_0025F138;
         func_00260570(linkedTask, 10);
@@ -203,11 +203,11 @@ s32 evtSelectStateActionB(void) {
     s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
-        mnuSetCommandPhase(stateAddress, 3);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 3);
     } else if (action == 7) {
         struct MenuList *linkedTask;
 
-        mnuSetCommandPhase(stateAddress, 9);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 9);
         linkedTask = ((ShopScene *)stateAddress)->window->list;
         linkedTask->drawCallback = func_0025F138;
         func_00260570(linkedTask, 10);
@@ -253,11 +253,11 @@ s32 evtSelectStateActionC(void) {
     s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
-        mnuSetCommandPhase(stateAddress, 3);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 3);
     } else if (action == 7) {
         struct MenuList *linkedTask;
 
-        mnuSetCommandPhase(stateAddress, 9);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 9);
         linkedTask = ((ShopScene *)stateAddress)->window->list;
         linkedTask->drawCallback = func_0025F138;
         func_00260570(linkedTask, 10);
@@ -281,25 +281,25 @@ s32 func_002469F0(KwlnTask *task) {
     linkedTask = ((ShopScene *)stateAddress)->window->list;
     dispatchResult = func_00285670(stateAddress + 8, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (s32)task);
     if (dispatchResult == 0) {
-        switch (mnuTickExtendedCommandPhase(stateAddress)) {
+        switch (mnuTickExtendedCommandPhase((ShopScene *)stateAddress)) {
         case -1:
             break;
         case 4:
-            mnuSetCommandPhase(stateAddress, 6);
-            mnuStorePendingMenuCommandValue((s32)linkedTask, 10);
+            mnuSetCommandPhase((ShopScene *)stateAddress, 6);
+            mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
             mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA68);
-            mnuStorePendingMenuCommandValue((s32)((ShopScene *)stateAddress)->sprite->list, 10);
+            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
             mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAF4);
             break;
         case 8:
-            mnuSetCommandPhase(stateAddress, 6);
+            mnuSetCommandPhase((ShopScene *)stateAddress, 6);
             callbackTask = ((ShopScene *)stateAddress)->window->list;
             callbackTask->drawCallback = func_0025ECD0;
-            mnuStorePendingMenuCommandValue((s32)callbackTask, 0);
+            mnuStorePendingMenuCommandValue(callbackTask, 0);
             ((ShopScene *)stateAddress)->substate = 10;
             break;
         case 6:
@@ -308,10 +308,10 @@ s32 func_002469F0(KwlnTask *task) {
         default:
             if (((ShopScene *)stateAddress)->dispatchState == 0) {
                 if (inputFlags & 1) {
-                    mnuSetCommandPhase(stateAddress, 7);
+                    mnuSetCommandPhase((ShopScene *)stateAddress, 7);
                 } else if (inputFlags & 2) {
-                    mnuSetCommandPhase(stateAddress, 5);
-                    func_00260550((s32)linkedTask, 4);
+                    mnuSetCommandPhase((ShopScene *)stateAddress, 5);
+                    func_00260550(linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
                     func_0027C788(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
@@ -400,16 +400,16 @@ s32 evtAdvanceStateStage(void) {
         struct MenuList *linkedTask;
 
         ((ShopScene *)stateAddress)->substate = 0xA;
-        mnuSetCommandPhase(stateAddress, 6);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 6);
         linkedTask = ((ShopScene *)stateAddress)->window->list;
         linkedTask->drawCallback = func_0025ECD0;
-        mnuStorePendingMenuCommandValue((s32)linkedTask, 0);
+        mnuStorePendingMenuCommandValue(linkedTask, 0);
     }
     return 1;
 }
 
-extern s32 mnuTickCommandWaitPhase();
-extern void func_00260590();
+extern s32 mnuTickCommandWaitPhase(ShopScene *);
+extern void func_00260590(struct MenuList *, u32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_0036AB10[];
 
@@ -428,7 +428,7 @@ s32 evtPollQuantitySelection(u64 callbackContext) {
     case -1:
         break;
     case 9:
-        mnuSetCommandPhase(stateAddress, 11);
+        mnuSetCommandPhase((ShopScene *)stateAddress, 11);
         break;
     case 10: {
         struct MenuList *primaryTask = ((ShopScene *)stateAddress)->sprite->list;
@@ -443,9 +443,9 @@ s32 evtPollQuantitySelection(u64 callbackContext) {
     default:
         if (((ShopScene *)stateAddress)->dispatchState == 0) {
             if (input & 1) {
-                mnuSetCommandPhase(stateAddress, 12);
+                mnuSetCommandPhase((ShopScene *)stateAddress, 12);
             } else if (input & 2) {
-                mnuSetCommandPhase(stateAddress, 10);
+                mnuSetCommandPhase((ShopScene *)stateAddress, 10);
                 func_00260590(((ShopScene *)stateAddress)->window->list, 10);
             }
             if (input & 0x300030) {
@@ -485,7 +485,7 @@ s32 evtPollQuantitySelection(u64 callbackContext) {
 s32 evtAlignDispatchStart(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
 
-    func_00261760(stateAddress);
+    func_00261760((ShopScene *)stateAddress);
     return func_00285670(stateAddress + 8, stateAddress + 0x54, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
 }
 
@@ -540,17 +540,17 @@ s32 evtPlayDispatchModeCue(void) {
 
 extern u8 D_0036AA68[];
 
-extern void mnuSetCommandPhase(s32, u32);
+extern void mnuSetCommandPhase(ShopScene *, u32);
 
 s32 evtApplyDispatchModeState(void) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
     switch (state->menuMode) {
     case 1:
-        mnuSetCommandPhase((s32)state, 6);
+        mnuSetCommandPhase(state, 6);
         break;
     case 2:
         if (state->stateTable != (s32)D_0036AA68) {
-            mnuSetCommandPhase((s32)state, 5);
+            mnuSetCommandPhase(state, 5);
         }
         break;
     }
@@ -576,9 +576,9 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(u64 callbackContext) {
     return result;
 }
 
-extern void func_0025E308(s32, s32, s32, void *, s32, s32);
+extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
-extern void func_0025E6B0(s32, s32, s32, void *, s32, s32);
+extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void func_0025FD50(s32, s32, s32, ShopScene *, s32);

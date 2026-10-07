@@ -15,6 +15,7 @@ extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 #include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
+#include "dat_command.h"
 
 extern void sdfReleaseChipBlock(void *block);
 extern s32 btlIsUnitInActiveList(void *unit);
@@ -90,21 +91,6 @@ typedef struct BtlActionTableEntry {
     u16 flags;             /* 0x1C */
     u8 pad1E[2];
 } BtlActionTableEntry;
-
-typedef struct BtlCategoryTableEntry {
-    u8 flags00;            /* 0x00 */
-    u8 pad01[2];
-    u8 kind03;             /* 0x03 */
-    u8 pad04[4];
-    u8 restriction;        /* 0x08 */
-    u8 flags09;            /* 0x09 */
-    u8 pad0A[0x1A];
-    u32 flags24;           /* 0x24 */
-    u8 pad28[6];
-    u16 unk2E;
-    s32 categoryType;      /* 0x30 */
-    u8 pad34[4];
-} BtlCategoryTableEntry;
 
 typedef struct BtlResourceTableEntry {
     u32 flags;
@@ -298,8 +284,6 @@ typedef struct SoundResourceNode {
 extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern void sndFormatResourceNameFromUnitMode(s32, s32);
-
-extern s32 datCommandRecords;
 
 extern s32 datActionAnimationRecords;
 
@@ -717,8 +701,8 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
     s32 value;
     switch (argument[0]) {
     case 1:
-        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
-            return btlGetActorBedAssetIdFromIndex(unit->unk172);
+        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->partyRecord.flags & 0x10) == 0) {
+            return btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue);
         }
         if (argument[1] > 0) {
             return argument[1];
@@ -744,8 +728,8 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
     switch (((BtlCommandArgument *)argument)->command) {
     case 1: {
         u32 count = btlGetIndexListCount(((BtlCommandArgument *)argument)->actorIndices);
-        if ((unit->flags & 0x200) && ((unit->flags & 0x1000) || (unit->statBits & 0x10)) &&
-            (unit->conditionFlags & 0x1000) == 0 && count == 1) {
+        if ((unit->flags & 0x200) && ((unit->flags & 0x1000) || (unit->partyRecord.flags & 0x10)) &&
+            (unit->partyRecord.status & 0x1000) == 0 && count == 1) {
             BtlCommandOption *option = ((BtlCommandArgument *)argument)->option;
             if (option->kind == 2 && option->inactive == 0) {
                 return 0x17;
@@ -760,7 +744,7 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
     case 7:
     case 8: {
         s32 index = ((BtlCommandArgument *)argument)->index;
-        if (index == 0xD6 && (btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
+        if (index == 0xD6 && (btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->partyRecord.flags & 0x10) == 0) {
             return 0xC;
         }
         return ((BtlActionTableEntry *)datActionAnimationRecords)[index].kind;
@@ -773,9 +757,9 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
 s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     s32 code;
 
-    btlGetEntryFlagsUnlessDisabled(&actor->statBits);
+    btlGetEntryFlagsUnlessDisabled(&actor->partyRecord.flags);
     if (arg6 >= 0) {
-        switch (((BtlCategoryTableEntry *)datCommandRecords)[arg6].categoryType) {
+        switch (datCommandRecords[arg6].unk30) {
         case 1:
         case 2:
         case 9:
@@ -788,7 +772,7 @@ s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 ar
             break;
         }
     }
-    if ((((BtlCategoryTableEntry *)datCommandRecords)[arg6].flags24 & 0x400000FF) == 0x40000002) {
+    if ((datCommandRecords[arg6].attribute.bits & 0x400000FF) == 0x40000002) {
         return -1;
     }
     if (arg1 & 0x50004) {
@@ -823,7 +807,7 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
         case 0x1A5:
             return 0;
         }
-        switch (((BtlCategoryTableEntry *)datCommandRecords)[index].categoryType) {
+        switch (datCommandRecords[index].unk30) {
         case 1:
         case 2:
         case 9:
@@ -1024,7 +1008,7 @@ u32 btlApplyDeferredUnitStatus(void *arg) {
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    func_001AA850(&unit->statBits, args[1]);
+    func_001AA850(&unit->partyRecord.flags, args[1]);
     btlRefreshUnitMotionSelection(unit);
     btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
@@ -1057,20 +1041,20 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    if (((BtlCategoryTableEntry *)datCommandRecords)[args->category].flags00 & 8) {
-        btlAdjustUnitHp(&unit->statBits, -0x7FFF);
-        func_001AA850(&unit->statBits, 0x4000);
+    if (datCommandRecords[args->category].flags & 8) {
+        btlAdjustUnitHp(&unit->partyRecord.flags, -0x7FFF);
+        func_001AA850(&unit->partyRecord.flags, 0x4000);
         unit->flags |= 0x20;
     }
     if (args->amount == 0) {
         return 1;
     }
-    switch (((BtlCategoryTableEntry *)datCommandRecords)[args->category].kind03) {
+    switch (datCommandRecords[args->category].costMode) {
     case 1:
-        btlAdjustUnitHp(&unit->statBits, -args->amount);
+        btlAdjustUnitHp(&unit->partyRecord.flags, -args->amount);
         return 1;
     case 2:
-        btlAdjustUnitMp(&unit->statBits, -args->amount);
+        btlAdjustUnitMp(&unit->partyRecord.flags, -args->amount);
         return 1;
     default:
         return 1;
@@ -1315,15 +1299,15 @@ u32 btlRefreshEligibleActors(void) {
         u32 flags = unit->flags;
         if (flags & 0x400) {
             if (flags & 1) {
-                if ((flags & 0xE0) == 0 && (u16)(unit->mode - 1) < 0x17F) {
-                    u32 entry = ((BtlResourceTableEntry *)datEnemyRecords)[unit->mode].flags;
+                if ((flags & 0xE0) == 0 && (u16)(unit->partyRecord.unitId - 1) < 0x17F) {
+                    u32 entry = ((BtlResourceTableEntry *)datEnemyRecords)[unit->partyRecord.unitId].flags;
                     if ((entry & 0x40) == 0) {
                         if ((entry & 0x400) == 0) {
                             if ((unit->stateFlags & 8) == 0) {
-                                u16 prior = unit->conditionFlags;
-                                func_001AA850(&unit->statBits, 1);
+                                u16 prior = unit->partyRecord.status;
+                                func_001AA850(&unit->partyRecord.flags, 1);
                                 btlRefreshUnitMotionSelection(unit);
-                                if (unit->conditionFlags == 1 && prior != unit->conditionFlags) {
+                                if (unit->partyRecord.status == 1 && prior != unit->partyRecord.status) {
                                     unit->stateFlags |= 4;
                                     work->commandRestrictFlags |= 0x100;
                                 }
@@ -2080,7 +2064,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     if ((unit->flags & 2) == 0) {
         return;
     }
-    entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->statBits);
+    entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord.flags);
     work = (BtlState *)btlGetRuntime();
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
@@ -2099,7 +2083,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         ((unit->flags & 0x200) || (entryFlags & 0x200))) {
         index = 9;
     }
-    switch (unit->conditionFlags & 0x7FFF) {
+    switch (unit->partyRecord.status & 0x7FFF) {
     case 1: case 8: case 0x10: case 0x20: case 0x40:
     case 0x80: case 0x100: case 0x200: case 0x400: case 0x2000:
         index = 2;
@@ -2545,13 +2529,9 @@ s32 btlClassifySpecialEntryObject(BattleEntryHeader *entry) {
     }
 }
 
-typedef struct BtlUnitStats {
-    u32 word[0x71];
-} BtlUnitStats;
-
 void btlCopyUnitStats(s32 unit, s32 source) {
-    BtlUnitStats *stats = (BtlUnitStats *)(unit + 0x120);
-    *stats = *(BtlUnitStats *)source;
+    DatPartyRecord *stats = &((BtlUnit *)unit)->partyRecord;
+    *stats = *(DatPartyRecord *)source;
     btlRefreshUnitMaximumHpAndClampCurrentHp(stats);
     btlRefreshUnitMaximumMpAndClampCurrentMp(stats);
 }
@@ -2736,12 +2716,12 @@ extern char D_00436A28[];
 s32 btlFormatUnitBedName(BtlUnit *unit, char *name) {
     btlGetRuntime();
     if (unit->flags & 0x200) {
-        if (unit->statBits & 0x10) {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->mode + 0x20);
+        if (unit->partyRecord.flags & 0x10) {
+            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId + 0x20);
         } else if (unit->flags & 0x1000) {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->mode);
+            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId);
         } else {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, btlGetActorBedAssetIdFromIndex(unit->unk172), unit->mode);
+            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue), unit->partyRecord.unitId);
         }
         return 1;
     }
@@ -3870,13 +3850,24 @@ BtlRuntimeTask *btlCreateActorTransparencyTask(u32 value) {
     return task;
 }
 
+typedef struct BtlActorModelBlendArgs {
+    BtlUnit *unit;
+    BtlUnit *target;
+    s32 index;
+    s32 previousModelValue;
+    s32 value;
+    f32 scale;
+    u32 stage;
+} BtlActorModelBlendArgs;
+typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
+
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E72B0);
 
 extern u32 func_001E72B0(u32 *);
 
 BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 index, u32 value, f32 scale) {
-    BtlRuntimeTask *task = btlAllocTask(0x1C);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlActorModelBlendArgs));
+    BtlActorModelBlendArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->callback = func_001E72B0;
@@ -3884,13 +3875,13 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 inde
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments((s32)task);
-    args->actor = unit;
-    args->option = target;
-    args->unk_08 = index;
-    args->unk_10 = value;
-    args->scale14 = scale;
-    args->unk_0C = -1;
-    args->unk_18 = 0;
+    args->unit = unit;
+    args->target = (BtlUnit *)target;
+    args->index = index;
+    args->value = value;
+    args->scale = scale;
+    args->previousModelValue = -1;
+    args->stage = 0;
     return task;
 }
 
@@ -4169,7 +4160,7 @@ s32 btlIsActiveActor(BtlUnit *actor) {
 BtlUnit *btlFindUnitByModeClear(s32 mode) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
-        if (!(unit->statBits & 0x20) && unit->mode == mode) {
+        if (!(unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == mode) {
             return unit;
         }
     }
@@ -4179,7 +4170,7 @@ BtlUnit *btlFindUnitByModeClear(s32 mode) {
 BtlUnit *btlFindUnitByModeFlagged(s32 mode) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
-        if ((unit->statBits & 0x20) && unit->mode == mode) {
+        if ((unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == mode) {
             return unit;
         }
     }
@@ -4960,8 +4951,8 @@ void btlResetCameraMotion(s32 action) {
                             if (node == 0xD || node == 0x12) {
                                 current = btlGetUnitModelValue1C(unit);
                                 limit = (f32)btlGetUnitModelFrameCount(unit);
-                                if (unit->mode < 0xA) {
-                                    limit = limit * D_003B6D90[unit->mode];
+                                if (unit->partyRecord.unitId < 0xA) {
+                                    limit = limit * D_003B6D90[unit->partyRecord.unitId];
                                 } else {
                                     limit = limit * 0.7f;
                                 }
@@ -5130,7 +5121,7 @@ s32 btlCanUseLinkedActor(s32 actor) {
     if (btlHasMarkedEntry14(actor)) {
         return 0;
     }
-    if (((ActionStateLink *)linked)->unit->conditionFlags & 0x480) {
+    if (((ActionStateLink *)linked)->unit->partyRecord.status & 0x480) {
         return 0;
     }
     category = ((BtlLinkedCommand *)actor)->actionCode;
@@ -5268,7 +5259,7 @@ s32 btlIsActorCategoryTypeTwo(s32 actor) {
     if (category == 0) {
         return 0;
     }
-    return ((BtlCategoryTableEntry *)datCommandRecords)[category].categoryType == 2;
+    return datCommandRecords[category].unk30 == 2;
 }
 
 extern s32 btlIsActorCategoryMarked(s32);
@@ -5292,7 +5283,7 @@ s32 btlCanUseActorCategoryFlag2(s32 actor) {
 s32 btlHasSingleLinkedResource(s32 actor) {
     s32 category = ((BtlLinkedCommand *)actor)->actionCode;
 
-    if (category != 0 && ((BtlCategoryTableEntry *)datCommandRecords)[category].restriction != 0) {
+    if (category != 0 && datCommandRecords[category].unk_08 != 0) {
         return 0;
     }
     return btlGetIndexListCount(((BtlLinkedCommand *)actor)->targetList) == 1;
@@ -5304,7 +5295,7 @@ s32 btlCanUseActorCategoryFlag4(s32 actor) {
     if (category == 0) {
         return 0;
     }
-    if ((((BtlCategoryTableEntry *)datCommandRecords)[category].flags09 & 1) == 0) {
+    if ((datCommandRecords[category].options & 1) == 0) {
         if (!btlCanUseLinkedActor(actor)) {
             return 0;
         }
@@ -5318,7 +5309,7 @@ s32 btlIsActorCategoryMarked(s32 actor) {
     if (category == 0) {
         return 0;
     }
-    return ((BtlCategoryTableEntry *)datCommandRecords)[category].categoryType == 1;
+    return datCommandRecords[category].unk30 == 1;
 }
 
 s32 btlHasActorCategoryFlag40(s32 actor) {
@@ -5524,11 +5515,11 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
     }
     flags = link->unit->flags;
     if (flags & 0x200) {
-        if (!(flags & 0x1000) && !(link->unit->statBits & 0x10)) {
+        if (!(flags & 0x1000) && !(link->unit->partyRecord.flags & 0x10)) {
             action->stepKind = 0xB;
             func_001FF5D8(action, action);
         } else if (btlHasSingleLinkedResource((s32)action) != 0) {
-            if ((link->unit->statBits & 0x10) && link->indexWork.slot == 0x17) {
+            if ((link->unit->partyRecord.flags & 0x10) && link->indexWork.slot == 0x17) {
                 action->stepKind = 0xC;
                 func_001F3C30(action);
             } else {
@@ -6967,7 +6958,7 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
 
 void btlInitCommandCursorForCategory(s32 action, s32 state) {
     memset(D_003BD7D0, 0, 0x130);
-    switch (((BtlLinkedCommand *)action)->link->unit->mode) {
+    switch (((BtlLinkedCommand *)action)->link->unit->partyRecord.unitId) {
     case 1:
         func_001F5868(action, state, 4, 0);
         CURSOR->unk_0C = 0;
@@ -8560,11 +8551,11 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     u16 effectId;
 
     if (actor->unk310 > 0) {
-        effectId = ((BtlCategoryTableEntry *)datCommandRecords)[actor->unk310].unk2E;
+        effectId = datCommandRecords[actor->unk310].unk2E;
     } else {
         effectId = 0;
     }
-    if (effectId != 0 && !(actor->conditionFlags & 0x4000)) {
+    if (effectId != 0 && !(actor->partyRecord.status & 0x4000)) {
         if (link->effectHandle == 0) {
             link->effect = (u32 *)work->resources[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
             sndCreateSystemEffect(link->effect);
@@ -9091,7 +9082,7 @@ void sndFormatResourceNameFromIndex(s32 source, s32 output) {
 }
 
 void sndFormatResourceNameFromUnitMode(s32 unit, s32 output) {
-    func_0035C860(output, D_004192E8, ((BtlUnit *)unit)->mode);
+    func_0035C860(output, D_004192E8, ((BtlUnit *)unit)->partyRecord.unitId);
 }
 
 s32 sndResolveResourceId(s32 category, s32 id) {
@@ -9588,15 +9579,15 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         }
         unit = args->unit;
         if (unit->flags & 0x200) {
-            id = unit->mode;
-            if (unit->statBits & 0x10) {
+            id = unit->partyRecord.unitId;
+            if (unit->partyRecord.flags & 0x10) {
                 id += 0x20;
             } else if (unit->flags & 0x1000) {
                 id += 0x10;
             }
             func_0035C860(path, D_004192F8, D_00419308, id);
         } else {
-            func_0035C860(path, D_00419318, D_00419308, unit->mode);
+            func_0035C860(path, D_00419318, D_00419308, unit->partyRecord.unitId);
         }
         args->handle = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:ATRAC3 dead load start[%s]\n", path);
@@ -9971,7 +9962,7 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
         slot[second->lookupId] = second;
         if ((work->commandRestrictFlags & 0x400000) != 0 &&
             btlGetBossSceneStateWhenActive() == 0) {
-            switch (target->mode) {
+            switch (target->partyRecord.unitId) {
             case 0x111:
                 offset = -550.0f;
                 position[0] = offset;

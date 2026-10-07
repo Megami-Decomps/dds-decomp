@@ -208,7 +208,7 @@ void func_00154F18(s32);
 
 void itfMesSetWindowHighFlags(s32 window, u32 mask);
 
-void func_001A45C0(s32 window, s32 x, s32 y, s32 width);
+void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 
 void itfMesClearWindowHighFlags(s32 window, u32 mask);
 
@@ -419,20 +419,20 @@ u32 func_001A3568(void) {
     return 1;
 }
 
-/* Read x, y and width in order for the script window; return 1. */
-s32 itfMesScriptSetWindowGeometry(void) {
+/* Read the text-slot index, value and selector from script parameters. */
+s32 itfMesScriptSetTextSlotFromValue(void) {
     s32 window = scrGetWindow();
-    s32 x;
-    s32 y;
-    s32 width;
+    s32 slotIndex;
+    s32 value;
+    s32 selector;
 
     if (window < 0) {
         return 1;
     }
-    x = scrReadIntParameter(0);
-    y = scrReadIntParameter(1);
-    width = scrReadIntParameter(2);
-    func_001A45C0(window, x, y, width);
+    slotIndex = scrReadIntParameter(0);
+    value = scrReadIntParameter(1);
+    selector = scrReadIntParameter(2);
+    itfMesSetTextSlotFromValue(window, slotIndex, value, selector);
     return 1;
 }
 
@@ -882,7 +882,7 @@ extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, u32 sourceAddress);
 
 /* Copy one of the built-in interface strings into a window replacement slot. */
-void func_001A45C0(s32 window, s32 slotIndex, s32 value, s32 selector) {
+void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector) {
     char formatted[0x10];
     u16 number[0x20];
     char converted13[0x19];
@@ -1109,7 +1109,7 @@ extern char D_00436620[];
 extern char D_00436628[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
-extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_001A7A98(ItfMesWindowRec *window);
@@ -1125,7 +1125,7 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D00);
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D10);
 
-s32 func_001A4CF8(void) {
+s32 itfMesRunPanelLayoutInspector(void) {
     ItfMesBlkA4 *panel;
     UiSprite *panelSprite;
     s32 *position;
@@ -1205,7 +1205,7 @@ s32 func_001A4CF8(void) {
             marker = D_00436620;
         }
         sdfAppendPacket(packetList,
-                        sdfCreateFormattedSifCommand(0x7180, y, 0xFFFFF0, 0,
+                        (u32)sdfCreateFormattedSifCommand(0x7180, y, 0xFFFFF0, 0,
                                                      format, marker, D_003B4990[item]));
     }
 
@@ -1213,19 +1213,19 @@ s32 func_001A4CF8(void) {
     panelSprite = panel->unk4;
     position = &panelSprite->left;
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7E00, 0x7A00, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7A00, 0xFFFFF0, 0,
                                                  positionFormat, position[0] >> 4,
                                                  position[1] >> 3));
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7E00, 0x7A60, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7A60, 0xFFFFF0, 0,
                                                  positionFormat, position[2] >> 4,
                                                  position[3] >> 3));
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
                                                  D_00436628, panel->unk28));
     position = &D_003B4770.window->mes->blkA4.offsetLeft;
     sdfAppendPacket(packetList,
-                    sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
+                    (u32)sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
                                                  "OFFSET : %3d,%3d - %3d,%3d",
                                                  position[0] >> 4,
                                                  position[1] >> 3,

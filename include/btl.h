@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "btl_task.h"
-#ifdef VERSION_DDS1
+#if defined(VERSION_DDS1) || defined(VERSION_DDS2)
 #include "dat_state.h"
 #endif
 
@@ -150,12 +150,8 @@ typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x348) ? 1 : -1];
 
 
 #ifdef VERSION_DDS2
-/* Battle unit, DDS2. Six units declared this locally at varying depths of
- * detail; the offsets below are the union of those, machine-checked against
- * each unit's own disassembly (every unit's assembly reads owner at 0x108, the
- * flags pair at 0x110/0x114, statBits at 0x120, the extension pointer at 0x340
- * and the actor-list link at 0x364, so all five are the same object).
- * Fields no unit could name stay unkNN/padNN. */
+/* Battle unit, DDS2. The complete party record is copied to +0x120; actor-list
+ * links are the distinct pointers at +0x360/+0x364. */
 typedef struct BtlUnit {
     f32 lightDirection[4]; /* 0x00: source direction restored by battle light transitions. */
     f32 colorStart[4]; /* 0x10: first source color used by the effect blend callback. */
@@ -204,25 +200,7 @@ typedef struct BtlUnit {
     s32 gunResourceFlags;
     u8 lookupId;
     u8 pad11D[3];
-    u16 statBits; /* 0x120: queried for bit 0x2000; base of the stat accessors */
-    u16 unk122;   /* 0x122: script-controlled unit parameter */
-    u16 mode;     /* 0x124 */
-    u16 hp;      /* 0x126 */
-    u16 maxHp;   /* 0x128 */
-    u16 unk12A;
-    u16 unk12C;
-    u16 conditionFlags; /* 0x12E */
-    u8 pad130a[4];
-    u16 actionTime; /* 0x134: action timestamp used by the low-HP delay check */
-    u8 pad136[0xC];
-    u16 cards[8]; /* 0x142: eight skill IDs searched for the active card range. */
-    u8 pad152[0x20];
-    u16 unk172; /* Index into datItemSkillRecords for the default action operand. */
-    struct BtlUnit *prev; /* 0x174 */
-    struct BtlUnit *next; /* 0x178 */
-    u8 pad17C[0x154];
-    s16 actionSlot; /* 0x2D0: same per-unit queued action operand as DDS1 */
-    u8 pad2D2[0x12];
+    DatPartyRecord partyRecord; /* 0x120: complete copied roster record (0x1C4). */
     u8 unk2E4;
     u8 pad2E5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2E6: btlClearActorEntrySlot clears each signed record. */
@@ -249,6 +227,8 @@ typedef struct BtlUnit {
     struct BtlUnit *previousActor; /* 0x360 */
     struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;
+typedef char BtlUnitPartyRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
+typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->unk2E4 == 0x2E4) ? 1 : -1];
 typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
 #endif /* VERSION_DDS2 */

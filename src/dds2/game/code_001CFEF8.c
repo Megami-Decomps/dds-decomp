@@ -817,7 +817,7 @@ void btlSortSceneGroupByPriorityDesc(SceneTask **group, s32 entryCount) {
             SceneTask *first = pairCursor[0];
             SceneTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                func_001AB8D8((s32)&first->actor->statBits, 3) < func_001AB8D8((s32)&second->actor->statBits, 3)) {
+                func_001AB8D8((s32)&first->actor->partyRecord.flags, 3) < func_001AB8D8((s32)&second->actor->partyRecord.flags, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;
@@ -1105,7 +1105,7 @@ void fldUpdateSceneGroupTask(SceneTask *task) {
             scene->battleFlags |= 8;
         }
         if ((*(u64 *)&task->flags & 0x400000100LL) == 0) {
-            if (btlDoesEnabledStatusMatchCurrentId((s32)&actor->statBits, 0xDE) != 0) {
+            if (btlDoesEnabledStatusMatchCurrentId((s32)&actor->partyRecord.flags, 0xDE) != 0) {
                 task->options |= 4;
             }
         } else {
@@ -1373,10 +1373,10 @@ void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
     flags = ((BtlUnit *)actorAddress)->flags;
     ((SceneTask *)taskAddress)->actor = (BtlUnit *)actorAddress;
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
-        ((BtlUnit *)actorAddress)->mode <= 0x17F) {
+        ((BtlUnit *)actorAddress)->partyRecord.unitId <= 0x17F) {
         ((SceneTask *)taskAddress)->actionNumber =
-                  (u16)*(u8 *)(((u32)((BtlUnit *)actorAddress)->mode * 0x14 -
-                                                      (u32)((BtlUnit *)actorAddress)->mode) * 4 + datEnemyRecords + 0x15);
+                  (u16)*(u8 *)(((u32)((BtlUnit *)actorAddress)->partyRecord.unitId * 0x14 -
+                                                      (u32)((BtlUnit *)actorAddress)->partyRecord.unitId) * 4 + datEnemyRecords + 0x15);
     }
     flags = ((SceneTask *)taskAddress)->flags;
     ((SceneTask *)taskAddress)->flags = flags | FLD_SCENE_TASK_BOUND_BIT;

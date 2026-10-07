@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_sif_command.h"
 
 extern s32 scrReadIntParameter(s32);
 
@@ -44,8 +45,6 @@ typedef struct MovieList {
 extern MovieList mnuMovieList;
 
 extern s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
-
-extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, char *, ...);
 
 extern void sdfAppendPacket(SdfListHead *, u32);
 
@@ -197,7 +196,7 @@ void mnuDrawMovieList(void) {
         node = node->next;
     }
     for (i = 0; i < 8 && node != NULL; i++, node = node->next) {
-        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
     }
     if (mnuMovieList.top != 0) {
         sdfQueueFlatTriangle((s32)packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
@@ -221,7 +220,7 @@ void mnuDrawMovieProgressCounter(void) {
     if (mnuCheckMovieDecoderStatus() == 0) {
         list = (SdfListHead *)D_00457E58[0];
         sdfAppendPacket(list, func_0011F250(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)mnuMovieDrawContext)->current, ((MovieStatus *)mnuMovieDrawContext)->total));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)mnuMovieDrawContext)->current, ((MovieStatus *)mnuMovieDrawContext)->total));
     }
 }
 
@@ -316,22 +315,22 @@ s32 mnuUpdateIpuRegisterViewer(void) {
     packets = (SdfListHead *)sdfCreateResetPacketList();
     sdfAppendPacket(packets, func_0011F250(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
     sdfCreatePacketA(packets, 0x80A03000, 0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7180, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x79C0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7240, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
-    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.wordSource));
+    sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.wordSource));
     if (mnuMovieDrawSources.wordPending != 0) {
-        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.word));
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.word));
     } else {
-        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
     }
     n = 0;
     y = 0x7A80;
     for (i = 0; i != 8; i++, y += 0x60) {
-        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, y, 0xFF0080, 0, "%08X", mnuMovieDrawSources.blockSource + n));
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7180, y, 0xFF0080, 0, "%08X", mnuMovieDrawSources.blockSource + n));
         x = 0x7840;
         for (col = 0; col != 8; col++, x += 0x240, n++) {
             if (mnuMovieDrawSources.blockPending != 0) {
-                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "%02X", mnuMovieDrawSources.block[n]));
+                sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "%02X", mnuMovieDrawSources.block[n]));
             } else {
-                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "**"));
+                sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "**"));
             }
         }
     }

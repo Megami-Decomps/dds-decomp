@@ -118,8 +118,8 @@ typedef struct BtlVec3 {
 
 extern f32 bfWaitReadArgFloat(s32);
 
-extern s32 btlReadCurrentUnitHp(void *);
-extern s32 btlComputeSkillAdjustedMaxHp(void *);
+extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 extern void effMiscQuaternionToMatrixVU(void);
@@ -2188,6 +2188,7 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 
 extern s32 D_003BAAA8;
 extern u32 kwlnTaskGetUserValue(KwlnTask *task);
+extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -2197,7 +2198,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     handle = ((ScrData *)kwlnTaskGetUserValue((KwlnTask *)slot))->resourceIndex;
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
-        func_0019C590(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
+        itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
     func_00101A80(state->scriptOwner, slot);
     state->boundTask = slot;

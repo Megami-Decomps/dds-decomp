@@ -577,7 +577,7 @@ s32 btlHasSpecialActiveSceneActor(void) {
     BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x421) == 0x401) {
-            u16 kind = actor->mode;
+            u16 kind = actor->partyRecord.unitId;
             if (kind == 0x4C || kind == 0x3C) {
                 return 1;
             }
@@ -596,8 +596,8 @@ s32 func_001CA8D8(void) {
         do {
             if ((actor->flags & requiredFlags) == requiredFlags) {
                 for (i = 0; i < 8; i++) {
-                    if ((u16)(actor->cards[i] - 0xE0) < 0x20) {
-                        return actor->cards[i];
+                    if ((u16)(actor->partyRecord.effectData[i] - 0xE0) < 0x20) {
+                        return actor->partyRecord.effectData[i];
                     }
                 }
             }
@@ -611,7 +611,7 @@ s32 btlHasSelectedActiveSceneActor(void) {
     BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x421) == 0x401 &&
-            (actor->conditionFlags & 1) != 0) {
+            (actor->partyRecord.status & 1) != 0) {
             return 1;
         }
         actor = actor->nextActor;
@@ -623,7 +623,7 @@ s32 btlHaveActiveSceneActorEntriesCleared(void) {
     BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x421) == 0x401 &&
-            btlGetEntryFlagsUnlessDisabled(&actor->statBits) != 0) {
+            btlGetEntryFlagsUnlessDisabled(&actor->partyRecord.flags) != 0) {
             return 0;
         }
         actor = actor->nextActor;

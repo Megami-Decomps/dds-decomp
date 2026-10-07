@@ -124,7 +124,7 @@ extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern u8 *datCommandRecords;
 
-extern s32 btlGetEntryFlagsUnlessDisabled(u8 *);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
 extern s32 btlLowestSetPairIndex(u32);
 
@@ -758,7 +758,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     if (((BtlCommandRecord *)datCommandRecords)[commandId].kind == 2 ||
         (((BtlCommandRecord *)datCommandRecords)[commandId].flags & 0x20)) {
         for (i = 0; i < count; i++) {
-            flags = btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120);
+            flags = btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord);
             if (flags & 0x40) {
                 return 5;
             }
@@ -769,7 +769,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
             return 8;
         }
         for (i = 0; i < count; i++) {
-            if (btlGetEntryFlagsUnlessDisabled((u8 *)btlGetIndexListEntry(indexList, i) + 0x120) & 0x800) {
+            if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord) & 0x800) {
                 return 8;
             }
         }
@@ -1840,7 +1840,7 @@ s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 
 
 extern void sdfInitPacketList(void *);
 
-extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, void *, u32);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_003BBAA8[];
 
@@ -1871,7 +1871,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
             if (itemIndex != selectedIndex) {
                 selectionFlags = 0;
             }
-            sdfAppendPacket(indexPackets, sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, D_003BBAA8, itemIndex));
+            sdfAppendPacket(indexPackets, (u32)sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, (const char *)D_003BBAA8, itemIndex));
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
@@ -1984,8 +1984,8 @@ extern u8 D_003BBB10;
 extern u8 D_003BBB58;
 extern DatPartyRecord D_00361DA0[5];
 extern s32 D_003625D8[5][24];
-extern u32 btlComputeSkillAdjustedMaxHp(s32);
-extern u32 btlComputeSkillAdjustedMaxMp(s32);
+extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
+extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 extern void mdlFlagSet(u32);
 
 void btlApplyPartySetupOverride(void) {
@@ -2015,9 +2015,9 @@ void btlApplyPartySetupOverride(void) {
             }
             datGameState->pad1294[i] = i;
             datGameState->party[i].maxHp =
-                btlComputeSkillAdjustedMaxHp((s32)&datGameState->party[i]);
+                btlComputeSkillAdjustedMaxHp(&datGameState->party[i]);
             datGameState->party[i].maxMp =
-                btlComputeSkillAdjustedMaxMp((s32)&datGameState->party[i]);
+                btlComputeSkillAdjustedMaxMp(&datGameState->party[i]);
             if (datGameState->party[i].maxHp < datGameState->party[i].hp ||
                 D_003BBB58 != 0) {
                 datGameState->party[i].hp = datGameState->party[i].maxHp;

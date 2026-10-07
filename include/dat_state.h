@@ -90,7 +90,8 @@ typedef struct DatPartyRecord {
     u8 profileId;
     u8 pad56[2];
     u32 skillFlags[85];                    /* 0x058: scrClearFlagsTable clears all 0x154 bytes. */
-    u8 pad1AC[6];
+    u8 pad1AC[4];
+    s16 actionSlot;
     u16 itemId;
     s32 randomizedValue;                  /* 0x1B4: initialized to 0x12 minus a four-way roll. */
     s32 huntExp; /* 0x1B8: hunt EP accumulated this battle */
@@ -212,6 +213,8 @@ typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x33600 ? 1 : -1];
 #endif
 #ifdef VERSION_DDS2
 typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1C4 ? 1 : -1];
+typedef char DatPartyRecordActionSlotOffsetCheck[((u32)&((DatPartyRecord *)0)->actionSlot == 0x1B0) ? 1 : -1];
+typedef char DatPartyRecordItemIdOffsetCheck[((u32)&((DatPartyRecord *)0)->itemId == 0x1B2) ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
 #endif
 
@@ -239,7 +242,10 @@ typedef struct DatEnemyRecord {
     u16 huntPenaltyChance; /* 0x38: base percentage before status modifiers. */
     u8 pad3A[4];
     u8 unk3E[2];          /* The battle status accessor tests both adjacent bytes. */
-    u8 pad40[6];
+    u8 actionChances[2];  /* 0x40: bucket thresholds for the two unk3E actions. */
+    u16 overrideFlag;     /* 0x42: model flag gating the override action. */
+    u8 overrideAction;    /* 0x44: action selected before the ordinary slots. */
+    u8 overrideChance;    /* 0x45: bucket threshold for the override action. */
     s8 unk46;            /* Signed indexed-value accessor. */
     u8 pad47;
     u8 unk48;            /* Enemy display-byte accessor. */
@@ -247,6 +253,10 @@ typedef struct DatEnemyRecord {
 } DatEnemyRecord;
 
 typedef char DatEnemyRecordSizeCheck[sizeof(DatEnemyRecord) == 0x4C ? 1 : -1];
+typedef char DatEnemyActionChancesOffsetCheck[((u32)&((DatEnemyRecord *)0)->actionChances == 0x40) ? 1 : -1];
+typedef char DatEnemyOverrideFlagOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideFlag == 0x42) ? 1 : -1];
+typedef char DatEnemyOverrideActionOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideAction == 0x44) ? 1 : -1];
+typedef char DatEnemyOverrideChanceOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideChance == 0x45) ? 1 : -1];
 
 /* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
 typedef struct DatBattleSceneRecord {

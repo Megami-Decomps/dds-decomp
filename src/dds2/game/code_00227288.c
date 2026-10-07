@@ -104,7 +104,7 @@ s32 btlRemapEffectActiveCombatantAction(BtlUnit *unit, s32 code) {
     if (((BtlState *)btlGetRuntime())->effect->active != 1) {
         return code;
     }
-    id = unit->mode;
+    id = unit->partyRecord.unitId;
     if (id == 0x119) {
         return code;
     }
@@ -164,7 +164,7 @@ BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
 
 /* Collapse three special unit modes to one display code. */
 s32 btlGetCanonicalCombatantKind(BtlUnit *unit) {
-    switch (unit->mode) {
+    switch (unit->partyRecord.unitId) {
     case 0x119:
     case 0x12E:
     case 0x12F:
@@ -205,7 +205,7 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
     *(s32 *)(group + 0x28) = 0x16;
     btlStartTask(group);
     effect->phase = 1;
-    return (task->unit->conditionFlags & 0x480) ? 0x19 : 0x1B;
+    return (task->unit->partyRecord.status & 0x480) ? 0x19 : 0x1B;
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
@@ -235,7 +235,7 @@ s32 btlGetSoleTargetKind(void) {
         if (unit->flags & 1) {
             if (unit->flags & 0x200) {
                 if (!(unit->flags & 0xE0)) {
-                    if (!(unit->conditionFlags & 0x800)) {
+                    if (!(unit->partyRecord.status & 0x800)) {
                         count++;
                         last = unit;
                     }
@@ -265,7 +265,7 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->mode == 0x12F) {
+                if (unit->partyRecord.unitId == 0x12F) {
                     break;
                 }
             }
@@ -302,7 +302,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
-                if (unit->mode == 0x12F) {
+                if (unit->partyRecord.unitId == 0x12F) {
                     break;
                 }
             }
@@ -386,7 +386,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
                 if ((flags & 2) != 0) {
-                    if (target->mode == 0x12F) {
+                    if (target->partyRecord.unitId == 0x12F) {
                         break;
                     }
                 }
@@ -518,7 +518,7 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
     BattleLinkedEffectState *effect = battle->effect;
     while (unit != 0) {
         if ((unit->flags & 0x400) &&
-            unit->mode == 0x12F) {
+            unit->partyRecord.unitId == 0x12F) {
             break;
         }
         unit = unit->nextActor;
@@ -611,18 +611,18 @@ s32 btlClearEffectNodeRuntimeFlagForActiveUnits(void) {
 
 void btlMarkBattleUnitEntryForActiveKind(BtlUnit *unit) {
     u32 flags = unit->flags;
-    if ((flags & 0x200) && unit->mode == 2) {
+    if ((flags & 0x200) && unit->partyRecord.unitId == 2) {
         unit->flags = flags | 0x1000;
         unit->stateFlags |= 0x100000;
-        unit->statBits |= 0x1000;
+        unit->partyRecord.flags |= 0x1000;
     }
 }
 
 void btlSetAlternateKindForEnabledSpecialUnit(BtlUnit *unit) {
     if ((unit->flags & 0x400) &&
-        unit->mode == 0x144 &&
+        unit->partyRecord.unitId == 0x144 &&
         mdlFlagTest(0x841)) {
-        unit->hp = 1;
+        unit->partyRecord.hp = 1;
     }
 }
 
@@ -660,7 +660,7 @@ s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
     i = 0;
     listedMode = ((DatBattleSceneRecord *)(battle->battleMode * (s32)sizeof(DatBattleSceneRecord) + (u32)datBattleSceneRecords))->unitModes;
     for (; i < 0xB; i++) {
-        if (listedMode[i] == unit->mode) {
+        if (listedMode[i] == unit->partyRecord.unitId) {
             return 1;
         }
     }

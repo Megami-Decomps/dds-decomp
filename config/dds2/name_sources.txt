@@ -1943,6 +1943,7 @@
 0x001A31E0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
 0x001A3458	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x001A34D0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]
+0x001A3570	itfMesScriptSetTextSlotFromValue	inferred	Reads script slot, value and selector arguments and installs the selected text in the active message window.
 0x001A38A0	itfMesGetGlobalWindowValue	inferred	Returns the stored word at offset 4 of the message manager's global window state.
 0x001A38D8	itfMesCreateWindow	inferred	twin of DDS1 0x0019B8A8: acquires a pool node, allocates the 0x1E0-byte message state, installs the sub resource, resets the sub blocks and bumps the window count at D_00452940 [names_M71_ItfBlur.tsv]
 0x001A39D0	itfMesDestroyWindowIfPresent	inferred	Checks window index and state pointer before destroying it. [names_reviewed6.tsv]
@@ -1963,6 +1964,7 @@
 0x001A4558	itfMesGetWindowTableCount	inferred	confidence=high; matched-C; src/dds2/interface/itfMesManager.c:799:func_001A4558; Returns the selected entry table cached count from the window state.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001A4578	itfMesGetWindowItemIndex	inferred	confidence=high; matched-C; src/dds2/interface/itfMesManager.c:804:func_001A4578; Returns the selected message table item index.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001A4598	itfMesGetWindowTableValue	inferred	Returns the selected indexed word from the message window's embedded table at offset 0xD0.
+0x001A45C0	itfMesSetTextSlotFromValue	inferred	Selects or formats text from a value and copies supported selector cases into the window slot; unsupported selectors leave it unchanged, with DDS2-specific selector cases retained.
 0x001A4858	itfMesCopyStringToWindowTableSlot	inferred	confidence=high; matched-C; src/dds2/interface/itfMesManager.c:792:func_001A4858; Resolves window state and passes table slot, input string address and strlen-based mode; retail callee replaces retained allocation then copies the string.; twin=0x0019C838, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001A48B8	itfMesSetSubResource	inferred	swaps ItfMesSub of a window, returns previous, reads MSG1 magic
 0x001A4940	itfMesGetEntryTableItem	inferred	Gets the indexed message entry's table and reads its selected item.
@@ -1971,6 +1973,7 @@
 0x001A4B98	itfMesSetEntryLastColorChannel	inferred	confidence=high; matched-C; src/dds2/interface/itfMesManager.c:889:func_001A4B98; Stores the fourth color channel used when entry glyphs are built; leaves the field layout and other channels unchanged.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001A4BB8	itfMesSetWindowCallbackAddress	inferred	Stores a callback address on the specified window. [names_reviewed6.tsv]
 0x001A4BD8	itfMesInit	inferred	twin [names_M67_Named.tsv]
+0x001A4CF8	itfMesRunPanelLayoutInspector	inferred	Runs the interactive message-window panel layout inspector, editing bounds/index and displaying coordinates and offsets.
 0x001A50C0	itfMesClearGlobalWords	inferred	Clears all three words of the message manager's D_003B4770 global.
 0x001A50D8	itfMesDestroyWindow	inferred	frees window mes state, effect handles, releases pool node
 0x001A5228	itfMesGetWindowEntryItems	inferred	Returns the selected window entry's item list. [names_reviewed6.tsv]
@@ -3218,10 +3221,13 @@
 0x002353F0	mdlLoadViewerResourceAndResetCursors	inferred	Loads selected resource, resets viewer indices and initializes first flagged entry. [names_reviewed7.tsv]
 0x00235460	mdlResetViewerBasisVectors	inferred	Copies three default basis vectors to viewer basis and resets small vector state. [names_reviewed7.tsv]
 0x002354B8	mdlRotateViewResourcesRight	inferred	Byte-identical DDS1 counterpart: Shifts the viewer resource slot list toward higher indices and wraps its last slot to the front.
+0x00235728	mdlDrawViewerModelAndMotionSummary	inferred	Appends model identity and motion selector/count labels to the viewer packet list
 0x002358E8	mdlAddPlainViewerEntryForSelectedNode	inferred	Checks selected model node, clamps first range bound and adds plain entry. [names_reviewed7.tsv]
 0x00236058	mdlRunViewerAssetSelectionTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1358:func_00236058; Combines asset/node entry-selection input and corresponding resource identifier/name display; retail callees show selection and entry counts.; twin=0x0021B4E8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00236080	mdlUpdateViewerCameraFromPad	inferred	Updates the viewer camera transform from pad input
 0x002364C0	mdlDrawViewerIndexedLabelOverlay	inferred	Draws a model viewer label selected by its index onto a framed packet. [names_reviewed14.tsv]
 0x00236540	mdlRunViewerIndexedLabelTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1374:func_00236540; Runs viewer input handler and indexed-label overlay renderer, then returns zero.; twin=0x0021B9D0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00236568	mdlUpdateViewerSelectedModelFromPad	inferred	Updates the selected model resource transform from pad input
 0x00236940	mdlDrawViewerSelectionLabel	inferred	Submits a model viewer rectangle and formatted text for the selected index. [names_reviewed17.tsv]
 0x002369C0	mdlRunViewerSelectionLabelTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1390:func_002369C0; Runs viewer selection input handler, conditionally draws selection label and returns zero.; twin=0x0021BE50, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00236B20	mdlDrawViewerMotionTimeline	inferred	confidence=high; src/dds2/game/code_00233660.c:func_00236B20; Draws the motion progress marker and time/length text, with an empty-motion placeholder and viewer scale mode. [names_qp9.tsv]

@@ -220,7 +220,7 @@ extern void func_002B2408();
 
 extern u32 mnuCreateIconBundle(u32);
 
-extern u32 func_002B9FF8();
+extern MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
 
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
@@ -1223,20 +1223,13 @@ void mnuHideIconGroup(MenuIconState *group) {
     }
 }
 
-typedef struct ResourceList {
-    /* 0x0 */ u32 unk0;
-    /* 0x4 */ u32 unk4;
-    /* 0x8 */ s32 count;
-    /* 0xC */ u32 items[1];
-} ResourceList;
-
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
-void mnuReleaseResourceList(ResourceList *list) {
+void mnuReleaseResourceList(MenuIconState *list) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < list->count; slotIndex++) {
-        if (list->items[slotIndex] != 0) {
-            effDestroyResourceSlotSet(list->items[slotIndex]);
+        if (list->sprite[slotIndex] != 0) {
+            effDestroyResourceSlotSet(list->sprite[slotIndex]);
         }
     }
     sdfReleaseChipBlock(list);
