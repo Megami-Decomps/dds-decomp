@@ -447,7 +447,7 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, (void *)partyEntry,
                   ((StaffImageContext *)context)->panelHandle, 0x53);
     if (mdlFlagTest(0x901) != 0) {
-        func_002833B0(0, 0, 0, partyEntry,
+        mnuDrawPartyInfoSprites(0, 0, 0, partyEntry,
                       (s32)((StaffImageContext *)context)->spriteHandle, 0x53);
     }
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->list, 0x53);
