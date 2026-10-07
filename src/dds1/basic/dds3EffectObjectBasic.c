@@ -70,7 +70,7 @@ extern struct EffNode *effCreateNodeFromDescriptor(struct EffNodeDescriptor *des
 extern u32 dds3AdvanceWorldCounter(void);
 extern void effCopyVector(void *source, void *destination);
 
-extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
+extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
 
 extern void *billCreateFromResource(s32 kind, s32 resourceId);
@@ -190,7 +190,7 @@ EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *handle;
-    void *id;
+    EffWorldNode *id;
 
     memset(vector, 0, sizeof(vector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
@@ -253,7 +253,7 @@ EffectObj *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVectorA
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
@@ -311,7 +311,7 @@ EffectObj *effObjCreateWithBoundBill(void *bill, void *firstVector, s32 secondVe
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
@@ -360,7 +360,7 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secon
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
@@ -455,7 +455,7 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(firstVector, 0, sizeof(firstVector));
     memset(secondVector, 0, sizeof(secondVector));

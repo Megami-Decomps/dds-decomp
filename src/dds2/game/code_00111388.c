@@ -87,9 +87,9 @@ void *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
     return result;
 }
 
-void *dds3GetFirstWorldObjectNodeOfKind2(void) {
+EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void) {
     NodeB *indexObject;
-    void *node;
+    EffWorldNode *node;
 
     indexObject = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 2);
     if (indexObject == NULL) {
@@ -99,7 +99,7 @@ void *dds3GetFirstWorldObjectNodeOfKind2(void) {
         return NULL;
     }
     dds3ResetObjectValueCursor((WorldValueIndices *)indexObject);
-    node = (void *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)indexObject);
+    node = (EffWorldNode *)(u32)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)indexObject);
     dds3DestroyWorldIndexNode(indexObject);
     return node;
 }
