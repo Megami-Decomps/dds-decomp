@@ -367,7 +367,7 @@ typedef struct FldEncEntry {
 
 extern FldEncEntry *fldEncounterRollTable;
 
-extern s32 mdlFlagTest();
+extern s32 mdlFlagTest(s32 flag);
 
 extern s32 effMiscRand();
 
@@ -1818,11 +1818,66 @@ u32 fldGetSceneStatusCode(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00125380);
 
+struct SdfMemBlock;
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
+
+/* Reload only when the field-selected variant changes or its handle is absent. */
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412D50);
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412D60);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001258B8);
+void func_001258B8(void) {
+    s32 model;
+
+    if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x20) {
+        model = 2;
+    } else {
+        model = fldAreaState.unk118 != 0;
+    }
+    if (fldAreaState.playerModelVariant != model || fldPlayerModelResource == 0) {
+        if (fldPlayerModelResource != 0) {
+            fldUnloadPlayerModel();
+        }
+        switch (model) {
+        case 0:
+            if (mdlFlagTest(0x31)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_13.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x25)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_d.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x1C)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_11.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x13)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_f.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x290)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_d.PB", &D_00435F3C, &D_00435F44);
+            } else {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_a.PB", &D_00435F3C, &D_00435F44);
+            }
+            break;
+        case 1:
+            fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_b.PB", &D_00435F3C, &D_00435F44);
+            break;
+        default:
+            if (mdlFlagTest(0x31)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_13.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x25)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_e.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x1C)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_12.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x13)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_10.PB", &D_00435F3C, &D_00435F44);
+            } else if (mdlFlagTest(0x290)) {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_e.PB", &D_00435F3C, &D_00435F44);
+            } else {
+                fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_l.PB", &D_00435F3C, &D_00435F44);
+            }
+            break;
+        }
+        fldAreaState.playerModelVariant = model;
+    }
+}
+
+
 
 void fldUnloadPlayerModel(void) {
     if (fldPlayerModelResource != 0) {
