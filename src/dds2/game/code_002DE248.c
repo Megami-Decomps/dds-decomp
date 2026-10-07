@@ -7129,7 +7129,7 @@ typedef struct EffCopiedPayload {
     u32 selectedTargetIndex; // 0x0C: chosen target path slot
     EffWorldNode *effects[5]; // 0x10
     Dds3PathCurveWork *targets[5]; // 0x24
-    u8 *allocation;      // 0x38
+    SdfMemBlock *allocation; // 0x38
     u8 pad3C[4];
 } EffCopiedPayload;
 
@@ -7154,7 +7154,7 @@ void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
 
 EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, s32 size) {
     u32 headerSize = 0x40;
-    u8 *base = sdfAllocGeneralBlock(size + headerSize);
+    SdfMemBlock *base = sdfAllocGeneralBlock(size + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
     EffCopiedPayload *node = (EffCopiedPayload *)body;
 
