@@ -123,20 +123,20 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
         switch (entry->kind) {
         case 4:
             work->scalarKeys = keys;
-            work->flags |= 4;
+            work->flags |= DDS3_PATH_SCALAR_CHANNEL;
             break;
         case 0:
-            work->flags |= 1;
+            work->flags |= DDS3_PATH_POSITION_CHANNEL;
             work->positionKeys = keys;
             work->primitiveCurve = effCreatePrimitiveCurve(keys->data, keys->count, 1);
             break;
         case 2:
             work->rotationKeys = keys;
-            work->flags |= 2;
+            work->flags |= DDS3_PATH_ROTATION_CHANNEL;
             break;
         case 5:
             work->transformKeys = keys;
-            work->flags |= 0x10;
+            work->flags |= DDS3_PATH_WORLD_TRANSFORM_CHANNEL;
             break;
         }
         lastFrame = keys->frames[keys->count - 1];

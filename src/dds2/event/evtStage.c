@@ -4,7 +4,7 @@
 #include "evt_world.h"
 
 struct EvtScaledValue;
-extern void func_001177D0(u32 *destination, u32 value);
+extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 extern void sdfFreezeFloatCounter(struct EvtScaledValue *);
 extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *);
 
@@ -175,7 +175,7 @@ void evtSetWorldSlotValue(void *object, u32 value) {
 
     slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
-        func_001177D0((u32 *)&slotData->state, value);
+        sdfSetFloatCounterDirection((u32 *)&slotData->state, value);
     }
 }
 

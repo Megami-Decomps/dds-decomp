@@ -8,7 +8,7 @@ extern void *dds3GetSlot(void *obj, s32 index);
 struct ObjectWithResource;
 struct EvtScaledValue;
 extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct ObjectWithResource *slot);
-extern u32 func_00117570(u32 *handle);
+extern u32 sdfGetFloatCounterDirection(u32 *handle);
 extern f32 evtGetValueScaleFactor(struct EvtScaledValue *handle);
 
 s32 evtCheckWorldObjectResourceScale(void *obj) {
@@ -28,7 +28,7 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
     if (handle == NULL) {
         return -1;
     }
-    kind = func_00117570((u32 *)&handle->state);
+    kind = sdfGetFloatCounterDirection((u32 *)&handle->state);
     if (kind != 0) {
         if (kind != 1) {
             return -1;
