@@ -99,8 +99,8 @@ EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *object, s32 ind
     return NULL;
 }
 
-u32 *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name) {
-    u32 *node;
+EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name) {
+    EffWorldNode *node;
     s32 i;
 
     if (object == NULL || name == NULL) {

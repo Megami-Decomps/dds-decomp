@@ -450,7 +450,7 @@ struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtViewer *viewer) {
 }
 
 struct PolyMovieObject;
-extern u32 *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
+extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *, void *);

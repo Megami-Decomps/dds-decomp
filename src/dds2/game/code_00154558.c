@@ -257,7 +257,7 @@ extern s32 D_003897C0[];
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern u32 *dds3FindObjectChainNodeByName(u64 world, const char *name);
+extern EffWorldNode *dds3FindObjectChainNodeByName(u64 world, const char *name);
 
 extern void func_0035B6E0(const char *fmt, ...);
 
@@ -775,9 +775,9 @@ u32 fldCmdFreeDisplayObjects(void) {
 }
 
 s32 fldFindSearchId(const char *name) {
-    u32 *entry = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), name);
+    EffWorldNode *entry = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), name);
     if (entry != 0) {
-        return entry[1];
+        return entry->key;
     }
     func_0035B6E0("field SEARCH_ID NotFound:[%s]\n", name);
     return -1;

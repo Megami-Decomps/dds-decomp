@@ -336,7 +336,7 @@ extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
-extern s32 *dds3FindObjectChainNodeByName();
+extern EffWorldNode *dds3FindObjectChainNodeByName();
 extern void fldClearMenuEntries();
 extern void fldDestroyTitleTask();
 extern void fldPlayPendingSounds();
@@ -5104,7 +5104,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
  * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
-    s32 *objectNode;
+    EffWorldNode *objectNode;
     s32 secondaryMotion;
 
     switch (attribute) {
@@ -5113,12 +5113,12 @@ s32 fldGetActorStat0(s32 attribute) {
     case 1:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 2:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 3:
         secondaryMotion = (u16)actor->secondaryMotion;
@@ -5138,7 +5138,7 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0280);
 
 s32 fldGetActorStat1(u32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
-    s32 *objectNode;
+    EffWorldNode *objectNode;
 
     switch (attribute) {
     case 0:
@@ -5158,12 +5158,12 @@ s32 fldGetActorStat1(u32 attribute) {
     case 1:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 2:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
         return actor->secondaryMotion;
     case 3:
@@ -5179,7 +5179,7 @@ s32 fldGetActorStat1(u32 attribute) {
 s32 fldGetActorMotionEntry(u32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
     s16 motionIndex = actor->motion;
-    s32 *objectNode;
+    EffWorldNode *objectNode;
     s32 flags;
 
     switch (attribute) {
@@ -5188,12 +5188,12 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     case 1:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].primaryName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 2:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].secondaryName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 3:
         D_003BAE44 = D_00336A60[motionIndex].unk24;
