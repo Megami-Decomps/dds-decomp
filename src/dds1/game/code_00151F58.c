@@ -52,7 +52,7 @@ typedef struct EffEmitterHead {
 } EffEmitterHead;
 
 typedef struct EffTemplatePacketList {
-    u8 pad00[0x10];
+    f32 origin[4];
     f32 x; /* 0x10 */
     f32 y; /* 0x14 */
     f32 z; /* 0x18 */
@@ -63,16 +63,37 @@ typedef struct EffTemplatePacketList {
     u16 kind; /* 0x30: resource type */
     u8 pad32[2];
     u16 subrecordCount; /* 0x34: subrecords per packet */
-    u8 pad36[0x6A];
+    u8 pad36[0x12];
+    u8 fade[0x4C]; /* 0x48 */
+    f32 speedJitter; /* 0x94 */
+    f32 spinJitter; /* 0x98 */
+    u8 pad9C[4];
     s32 templateSize; /* 0xA0: prefix copied before the appended tail */
-    u8 padA4[0x54];
+    u8 padA4[0xC];
+    f32 matrix[16]; /* 0xB0 */
+    u32 colorMask; /* 0xF0 */
+    u8 padF4[4];
     EffectBufferTail *buffer;
-    u8 padFC[0x58];
-    s32 decayStep; /* 0x154: subtraction from each later packet tag */
+    u8 padFC[0x46];
+    u16 active; /* 0x142 */
+    u8 pad144[0xC];
+    u8 randomSphere; /* 0x150 */
+    u8 restart; /* 0x151 */
+    u8 pad152[2];
+    union {
+        s32 decayStep; /* 0x154: subtraction from each later packet tag */
+        u32 delayRange; /* 0x154: bounded-radius spawn delay */
+    };
     f32 recordScale;
     union {
         f32 tailValues[4];
         u32 tailWords[4];
+        struct {
+            f32 targetRadius; /* 0x15C */
+            f32 motionMagnitude; /* 0x160 */
+            f32 accelerationPct; /* 0x164 */
+            f32 unk168;
+        };
     };
     s32 recordList; /* 0x16C: start of the three-word packet records */
     s32 recordsPerPacket; /* 0x170 */
@@ -80,6 +101,8 @@ typedef struct EffTemplatePacketList {
     void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
     s32 auxiliaryAllocation; /* 0x17C */
 } EffTemplatePacketList;
+
+typedef char EffTemplatePacketList_layout_preserved[(sizeof(EffTemplatePacketList) == 0x180) ? 1 : -1];
 
 /* Particle record stored at the beginning of the effect's resource buffer. */
 typedef struct EffParticleRecord {
