@@ -4535,7 +4535,8 @@
 0x002C2258	mnuGetPanelRatioColor	inferred	Maps calculated ratio tier to one of three panel colors when default disabled. [names_reviewed5.tsv]
 0x002C24E8	mnuDrawAndAdvanceRatioPanel	inferred	U0
 0x002C2680	mnuCreatePanelItem	inferred	Allocates and initializes a 0xAC-byte panel item with defaults at +0x10,+0x14 and +0xA0; first-game twin 00284888 uses 0x90 bytes.
-0x002C2920	mnuPositionPanelItemPoints	inferred	Fills five item points from fixed parent anchors then places associated graphics; first-game twin 00284A90.
+0x002C26D8	mnuInitializePanelGroupGridSlots	inferred	Binds nine group resource-set/index grid slots and initializes quantized bounds; native body and same-unit constructor caller.
+0x002C2920	mnuInitializePanelItemGridSlots	inferred	Binds item resource-set/index grid slots and initializes quantized bounds; native body and same-unit constructor callers.
 0x002C2A90	mnuSetGroupPair	inferred	Stores two words at offsets 0x18 and 0x1C of a group entry.
 0x002C2AA0	mnuStorePanelItemValue	inferred	Stores supplied value in selected panel item. [names_reviewed8.tsv]
 0x002C2AB0	mnuSetPanelItemSelection	inferred	When selection changes resets selection fade ramp then stores selected value. [names_reviewed5.tsv]

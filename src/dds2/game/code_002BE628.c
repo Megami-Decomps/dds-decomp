@@ -105,7 +105,7 @@ extern u8 D_003E7950[];
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
-extern void mnuPositionPanelItemPoints(MenuPanelItem *, s32, s32);
+extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, s32, s32);
 
 extern s8 D_003E7928[];
 extern s32 mdlRequestAsset(s32, s32, s32);
@@ -536,7 +536,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
 
-extern void func_002C26D8(MenuPanelItem *, s32, s32, s32, s32);
+extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32, s32, s32);
 
 typedef struct MenuPanelGroup {
     u8 pad00[0x0C];
@@ -559,7 +559,7 @@ s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         MenuPanelItem *panelItem = mnuCreatePanelItem();
-        func_002C26D8(panelItem, owner, texture, mode, panelIndex);
+        mnuInitializePanelGroupGridSlots(panelItem, owner, texture, mode, panelIndex);
         *itemCursor++ = panelItem;
     }
     mnuClearPanelGroupSelection(group);
@@ -583,7 +583,7 @@ void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject) {
     s32 panelIndex;
 
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
-        mnuPositionPanelItemPoints(group->entries[panelIndex], gridObject, panelIndex);
+        mnuInitializePanelItemGridSlots(group->entries[panelIndex], gridObject, panelIndex);
     }
 }
 
@@ -939,7 +939,7 @@ MenuPanelItem *mnuCreatePanelItem(void) {
 
 /* Bind the panel item's nine sprite cells to their grid entries (the extra pair only when an extra grid
  * exists) and pick the panel's label entry. */
-void func_002C26D8(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
+void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
     s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
 
     itfGridStorePosition(&item->spriteGridSlots[0], secondaryGrid, 4);
@@ -970,7 +970,7 @@ void func_002C26D8(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuPositionPanelItemPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelItemGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
 
     itfGridStorePosition(&item->gridSlots[0], gridObject, 7);

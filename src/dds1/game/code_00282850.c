@@ -163,8 +163,8 @@ typedef struct MenuPanelGroup {
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
-extern void mnuPositionPanelGroupPoints(MenuPanelItem *, s32, s32);
-extern void mnuPositionPanelItemPoints(MenuPanelItem *, s32, s32);
+extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32);
+extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, s32, s32);
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
@@ -452,7 +452,7 @@ s32 mnuCreatePanelGroup(s32 parent) {
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         MenuPanelItem *panelItem = mnuCreatePanelItem();
-        mnuPositionPanelGroupPoints(panelItem, parent, panelIndex);
+        mnuInitializePanelGroupGridSlots(panelItem, parent, panelIndex);
         group->children[panelIndex] = panelItem;
     }
     mnuClearPanelGroupSelection(group);
@@ -473,7 +473,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
 void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject) {
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
-        mnuPositionPanelItemPoints(group->children[panelIndex], gridObject, panelIndex);
+        mnuInitializePanelItemGridSlots(group->children[panelIndex], gridObject, panelIndex);
     }
 }
 
@@ -756,7 +756,7 @@ MenuPanelItem *mnuCreatePanelItem(void) {
     return panelItem;
 }
 
-void mnuPositionPanelGroupPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 2, 1, 3, 4};
 
     itfGridStorePosition(&item->groupGridSlots[0], gridObject, 3);
@@ -776,7 +776,7 @@ void mnuPositionPanelGroupPoints(MenuPanelItem *item, s32 gridObject, s32 panelI
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuPositionPanelItemPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelItemGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
 
     itfGridStorePosition(&item->gridSlots[0], gridObject, 7);
