@@ -1,6 +1,7 @@
 #include "kwln.h"
 #include "common.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "mdl.h"
 
 #include "pcp_vu0.h"
@@ -2334,7 +2335,7 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(lineStart, D_003BBCC8, 5) == 0) {
             if (func_00301588(lineStart + 5, D_003BBCD0, &verticalFov) == 1) {
-                sdfSceneProjectionParameters.fov = verticalFov;
+                sdfSceneProjectionParameters.camera.fov = verticalFov;
             }
         } else if (memcmp(lineStart, D_003BBCD8, 4) == 0) {
             if (func_00301588(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
@@ -2363,7 +2364,7 @@ void func_0021E068(void) {
     size = func_003014F0(buffer, D_003ABF18, D_003BA8EC,
                         D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
                         D_003D7B30.x, D_003D7B30.y, D_003D7B30.z,
-                        sdfSceneProjectionParameters.fov, (s32)kwlnDrawVector.near,
+                        sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.near,
                         kwlnDrawVector.value, (s32)kwlnDrawVector.farA,
                         kwlnDrawVector.farB, kwlnDrawVector.color);
     request = fileQueueWindowSlotRequest((s32)D_00367AF8, (s32)buffer, size);
@@ -2397,7 +2398,7 @@ void func_0021E1C8(void) {
     mdlViewerState.unk0E = 0;
     mdlViewerState.unk48 = 0;
     mdlResetViewerBasisVectors();
-    sdfSceneProjectionParameters.fov = 0.4363323f;
+    sdfSceneProjectionParameters.camera.fov = 0.4363323f;
     PCP_COPY_VECTOR(&D_003246C0, &D_00367CD0);
     for (i = 0; i != 12; i++) {
         mdlViewerState.resources[i] = NULL;

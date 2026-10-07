@@ -1,11 +1,12 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "eff_transform.h"
 #include "sdf_draw.h"
 
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
-extern SdfModel *sdfModelCreateWithItems(void *data, void *listRef);
+
 extern Motion *func_003340E0(SdfModel *, MotionTable *);
 extern void sdfMotionInitializeAtZeroTime(Motion *, s32, s32);
 
