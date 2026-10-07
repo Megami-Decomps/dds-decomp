@@ -5354,11 +5354,14 @@ extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 typedef struct BtlPanelTransitionWork {
     KwlnTask *task;
     const u8 *text;
-    u8 pad08[4];
+    s32 elapsed;
     s32 frames;
     s32 width;
-    u8 pad14[0xA];
-    s16 unk1E;
+    s32 unk14;
+    s32 verticalShift;
+    s8 state;
+    u8 pad1D;
+    s16 fade;
     s16 fadeLevels[4];
     BattleSelectionPosition initial[2];
     s8 phase;
@@ -5387,7 +5390,7 @@ s32 func_001B8580(const u8 *text) {
     work = sdfAllocAndClearQuadwords(sizeof(*work));
     work->text = text;
     work->frames = 30;
-    work->unk1E = 0;
+    work->fade = 0;
     work->fadeLevels[2] = work->fadeLevels[0] = 0x40;
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
@@ -5942,7 +5945,96 @@ void btlReleaseCmsleffPanelWork(KwlnTask *task) {
     btlSetTrackedTaskHandle(5, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BEF28);
+extern const BattlePanelColors D_004165B0;
+extern void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *);
+
+s32 func_001BEF28(KwlnTask *task) {
+    BattlePanelColors colors = D_004165B0;
+    BtlPanelTransitionWork *work;
+    s16 *fade;
+    s32 i;
+    s32 width;
+    u32 glyph;
+
+    if (btlGetTrackedTaskHandle(1) == 0) {
+        return 0;
+    }
+    work = (BtlPanelTransitionWork *)kwlnTaskGetUserValue(task);
+    switch (work->state) {
+    case 0:
+        btlUpdatePanelTransitionGradients(work);
+        work->fade += 0x20;
+        work->fade = work->fade <= 0 ? 0 : work->fade > 0x80 ? 0x80 : work->fade;
+        if (work->fade >= 0x80) {
+            work->state = 1;
+        }
+        break;
+    case 1:
+        btlUpdatePanelTransitionGradients(work);
+        if (work->elapsed++ >= work->frames) {
+            work->state = 2;
+        }
+        break;
+    case 2:
+        for (fade = work->fadeLevels, i = 3; i >= 0; i--, fade++) {
+            *fade -= 0x20;
+            *fade = *fade <= 0 ? 0 : *fade > 0x80 ? 0x80 : *fade;
+        }
+        work->fade -= 0x20;
+        work->fade = work->fade <= 0 ? 0 : work->fade > 0x80 ? 0x80 : work->fade;
+        work->unk14++;
+        work->unk14 = work->unk14 <= 0 ? 0 : work->unk14 > 8 ? 8 : work->unk14;
+        work->verticalShift++;
+        work->verticalShift = work->verticalShift <= 0 ? 0 : work->verticalShift > 8 ? 8 : work->verticalShift;
+        if (work->fade <= 0) {
+            return -1;
+        }
+        break;
+    }
+    width = work->width;
+    glyph = itfCreateConvertedTextGlyph((0x100 - (width >> 1)) << 4, 0x220, 0xFF0000,
+                                       work->fade | 0x80808000, work->text, 0);
+    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyph);
+    colors.values[0] = work->fadeLevels[0] | 0x80808000;
+    colors.values[1] = work->fadeLevels[2] | 0x80808000;
+    colors.values[2] = work->fadeLevels[1] | 0x80808000;
+    colors.values[3] = work->fadeLevels[3] | 0x80808000;
+    if (work->verticalShift > 0) {
+        btlResourceBlock->resC->workEntries[0x15].height =
+            (btlResourceBlock->resC->workEntries[0x15].sourceHeight << 3) - (work->verticalShift << 4);
+        btlResourceBlock->resC->workEntries[0x16].height =
+            (btlResourceBlock->resC->workEntries[0x16].sourceHeight << 3) - (work->verticalShift << 4);
+        btlResourceBlock->resC->workEntries[0x17].height =
+            (btlResourceBlock->resC->workEntries[0x17].sourceHeight << 3) - (work->verticalShift << 4);
+    }
+    func_00306C28(work->initial[1].x << 4, (work->initial[1].y + work->verticalShift) << 3,
+                  0, colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
+    colors.values[0] = work->fadeLevels[1] | 0x80808000;
+    colors.values[1] = work->fadeLevels[0] | 0x80808000;
+    colors.values[2] = work->fadeLevels[3] | 0x80808000;
+    colors.values[3] = work->fadeLevels[2] | 0x80808000;
+    func_00306C28(work->initial[0].x << 4, (work->initial[0].y + work->verticalShift) << 3,
+                  0, colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
+    colors.values[0] = work->fadeLevels[2] | 0x80808000;
+    colors.values[1] = work->fadeLevels[3] | 0x80808000;
+    colors.values[2] = work->fadeLevels[1] | 0x80808000;
+    colors.values[3] = work->fadeLevels[0] | 0x80808000;
+    btlResourceBlock->resC->workEntries[0x16].width = width << 4;
+    func_00306C28((0x100 - width / 2) << 4, (work->initial[1].y + work->verticalShift) << 3,
+                  0, colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
+    btlResourceBlock->resC->workEntries[0x16].width =
+        btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
+    if (work->verticalShift > 0) {
+        btlResourceBlock->resC->workEntries[0x15].height =
+            btlResourceBlock->resC->workEntries[0x15].sourceHeight << 3;
+        btlResourceBlock->resC->workEntries[0x16].height =
+            btlResourceBlock->resC->workEntries[0x16].sourceHeight << 3;
+        btlResourceBlock->resC->workEntries[0x17].height =
+            btlResourceBlock->resC->workEntries[0x17].sourceHeight << 3;
+    }
+    return 0;
+}
 
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
