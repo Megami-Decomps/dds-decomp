@@ -6803,7 +6803,7 @@ void effResetObjectSlots(u8 *work) {
     }
 }
 
-EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, u32 source, s32 size) {
+EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, s32 size) {
     u32 headerSize = 0x40;
     u8 *base = sdfAllocGeneralBlock(size + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
@@ -6817,7 +6817,7 @@ EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, u32 source, s32 size
     node->size = size;
     node->body = body;
     node->state = 0;
-    memcpy(body, (void *)source, size);
+    memcpy(body, source, size);
     return node;
 }
 
@@ -6829,8 +6829,8 @@ extern void func_002B3420(u32);
 
 
 
-EffCopiedPayload *effCreateInitializedObject(u32 type, u32 parameter, u32 index) {
-    EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, parameter, index);
+EffCopiedPayload *effCreateInitializedObject(u32 type, const void *source, u32 index) {
+    EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, index);
     u32 child = *(u32 *)effect;
     fldRelocatePackedTransferChunk(child, child + 8);
     func_002B3420((u32)effect);
