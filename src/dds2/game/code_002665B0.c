@@ -720,7 +720,7 @@ s32 mnuDrawLoadedProgressPanels(s32 resource, MenuProgressHost *host, s32 mode) 
     host->partyWindow.flags |= 0x280;
     mnuDrawListPanels(0, 0, 0, *(u8 *)(resource + 0x55), (s32)&host->partyWindow, mode);
     func_002C16F0(0, 0, 0, resource, *(u8 *)(resource + 0x55),
-                   host->effectResource, mode);
+                   (s32)host->effectResource, mode);
     return 1;
 }
 

@@ -266,7 +266,7 @@ typedef struct MenuContext {
     PartyPanel partyPanel; /* 0xA928: counters and five native 0x34-byte entries */
     s32 panelGroup;        /* 0xAA34 */
     MenuSpriteState *panelRequest; /* 0xAA38 */
-    s32 panelEffects;      /* 0xAA3C */
+    MenuSpriteState *panelEffects; /* 0xAA3C */
     u8 padAA40[8];
     s32 party;             /* 0xAA48 */
     u8 padAA4C[0x10];
@@ -967,7 +967,6 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
 extern s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
-extern s32 mnuAllocateSimpleSprite(s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
@@ -991,9 +990,10 @@ s32 mnuCreatePanels(s32 callback) {
     menuContext->panelRequest = mnuCreateSpriteState((struct EffectSlotSet *)menuContext->resourceHandle,
                                                     (struct EffectSlotSet *)menuContext->displayResource,
                                                     (struct EffectSlotSet *)menuContext->displayHandle);
-    menuContext->panelEffects = mnuAllocateSimpleSprite(menuContext->resourceHandle,
-                                                         menuContext->alternateResource,
-                                                         menuContext->displayHandle);
+    menuContext->panelEffects = mnuAllocateSimpleSprite(
+        (struct EffectSlotSet *)menuContext->resourceHandle,
+        (struct EffectSlotSet *)menuContext->alternateResource,
+        (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel((s32)data);
     menuContext->resourceList = profile;
     mnuSetGroupProperties(profile, menuContext->displayHandle,
@@ -1171,9 +1171,9 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, s32 packedGr
     mnuDrawSlotIcons(0x14a, id);
 }
 
-void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, u32 group, u32 resource,
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState, u32 resource,
                                     u32 unused4, u32 spriteFlags) {
-    func_002C16F0(0, 0, 0, entry, entry->profileId, group, spriteFlags);
+    func_002C16F0(0, 0, 0, entry, entry->profileId, (s32)spriteState, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, (u32 *)resource, spriteFlags);
 }
 
