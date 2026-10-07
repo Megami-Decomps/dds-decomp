@@ -320,11 +320,15 @@ typedef struct FldAreaState {
     s32 floor;
     u8 pad18[0x40];
     s32 unk58;
-    u8 pad5C[0x2C];
+    u8 pad5C[8];
+    f32 negatedAngle;
+    u8 pad68[0x20];
     s32 unk88;
     u8 pad8C[0x74];
     s32 unk100;
     s16 unk104;
+    u8 pad106[0x24];
+    s16 colorEffectSuppressed;
 } FldAreaState;
 
 

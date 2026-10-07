@@ -103,6 +103,7 @@ extern s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *, s8);
 
 struct TaskWork;
 extern s32 func_00312810(struct TaskWork *, s32);
+extern void sdfDestroyTaskWorkerTasks(struct TaskWork *);
 
 extern u32 mnuMantraSelectionResource;
 extern void mnuReleaseMantraPanelPositionTable(void);
@@ -250,7 +251,7 @@ s32 mnuCheckResourceTask(void) {
 
 /* Destroy the cached resource-task group and clear its handle. */
 void mnuStopResourceTask(void) {
-    sdfDestroyTaskWorkerTasks(mnuMantraSelectionResource);
+    sdfDestroyTaskWorkerTasks((struct TaskWork *)mnuMantraSelectionResource);
     mnuMantraSelectionResource = 0;
 }
 

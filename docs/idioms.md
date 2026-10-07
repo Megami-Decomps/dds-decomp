@@ -776,6 +776,16 @@ other inhibition sibcalls. Don't "fix" a `jal` tail with dummy code or an
 unsupported return type; retain `INCLUDE_ASM` and park the natural candidate.
 Flag changes require evidence for the original translation unit.
 
+DDS2 `sdfDestroyTaskWorkerTasks`, `sdfRemoveTaskItem`,
+`sdfDestroyTaskResourceWork` and `sdfDestroyGridWork` use `void`, just like
+their retail-byte-identical DDS1 counterparts. Their units `code_00310BC8`
+and `code_00312850` already have the evidenced no-sibling-call flag; no new
+split or wide return is needed. The allocation-release provider is also
+really `void`, so cleanup calls must not return a fictitious release result.
+The full units gate at 46/0 and 31/0; the external resource-task stop caller
+gates at 22/0 after receiving the real worker-destructor declaration.
+
+
 ### Expansion provenance: an inlined indirect call can remain `jal`
 
 The installed `2.96-ee-001003-1/cc1` first decides whether to generate a
@@ -2806,4 +2816,32 @@ accepts no second argument, regardless of an incidental native `$5` value.
 The 380-byte target and all other C in its unit check `65 match, 0 differ`;
 all 66 current direct/indirect `mnu.h` and `mnu_staff.h` includers also
 check with zero differences or context/data diagnostics.
+
+## Rain shares the primary field-area state
+
+DDS1 `func_00134348` and DDS2 `func_00136EF8` load a signed halfword
+at primary area-state `+0x12A` before advancing the camera-color fade or
+drawing the rain layers. A nonzero value suppresses those effects.
+The heading source at `+0x64` is a float. These fields belong to the
+existing `FldAreaWork` / `FldAreaState` owner, not a second rain-only view.
+Their retail globals are respectively `0032E4DA` / `0038989A` and
+`0032E414` / `003897D4`. Completing the primary types leaves both
+non-matching rain functions as `INCLUDE_ASM`.
+
+
+## Relocated resource groups retain their two-pass serialized layout
+
+DDS2 `func_00325CC8` allocates a `0x14`-byte result through its real
+owner-and-size allocator interface. It relocates the data block, then copies
+all eight-byte `DdsCountedPayload` descriptors before appending their
+eight-byte serialized entries and rebasing each descriptor's data pointer.
+The existing `ResourceList.count.packed` supplies both halfword counts.
+`ResourceNode.handle` is a generic address-valued word in this interface;
+its conversion to the existing payload type does not change a callee's
+pointer contract. Ordinary fixed-size `memcpy` emits the native unaligned
+descriptor copy without an invented 64-bit field or inline assembly.
+
+The 508-byte target matches all 127 words on the first natural form.
+Its complete live unit reports `37 match, 0 differ` without context,
+rodata, undefined-symbol or shared-data diagnostics.
 

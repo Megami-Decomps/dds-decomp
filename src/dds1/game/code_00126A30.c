@@ -132,7 +132,9 @@ typedef struct FldAreaWork {
     f32 dist;
     u8 pad70[0x14];
     s32 positionPending;
-    u8 pad88[0xB8];
+    u8 pad88[0xA2];
+    s16 colorEffectSuppressed;
+    u8 pad12C[0x14];
     f32 x;
     f32 y;
     f32 z;

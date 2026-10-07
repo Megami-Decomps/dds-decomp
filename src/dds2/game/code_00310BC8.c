@@ -11,7 +11,7 @@ extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void func_00313BA8(s32, s32);
 
-extern s32 sdfReleaseResourceAllocation(u32);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern void sdfReleaseChipBlock();
 
@@ -582,7 +582,7 @@ void sdfDestroyTaskWork(SdfList *owner) {
     if (owner != NULL) {
         sdfClearTaskList(owner);
         owner->onDestroy(-1, owner->userData);
-        sdfReleaseResourceAllocation(owner->allocation);
+        sdfReleaseResourceAllocation((SdfMemBlock *)owner->allocation);
     }
 }
 
@@ -809,10 +809,10 @@ TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, SdfTaskItemDesc
     return work;
 }
 
-s64 sdfDestroyTaskWorkerTasks(TaskWork *work) {
+void sdfDestroyTaskWorkerTasks(TaskWork *work) {
     if (work != NULL) {
         kwlnTaskDestroyWithHierarchyByName(work->primaryTaskName, 1);
-        return kwlnTaskDestroyWithHierarchyByName(work->secondaryTaskName, 0);
+        kwlnTaskDestroyWithHierarchyByName(work->secondaryTaskName, 0);
     }
 }
 
@@ -839,10 +839,10 @@ void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
     }
 }
 
-s64 sdfRemoveTaskItem(TaskWork *work, s32 key) {
+void sdfRemoveTaskItem(TaskWork *work, s32 key) {
     void *node = sdfFindTaskListNodeByKey(work->list, key);
     if (node != NULL) {
-        return sdfListRemoveNode(work->list, node);
+        sdfListRemoveNode(work->list, node);
     }
 }
 
