@@ -474,10 +474,6 @@ void mdlMarkAndProcessObjectNodes(void) {
     } while (node != NULL);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029B368);
-
-extern void fileQueueDestroy(u32);
-
 /* DDS1 resource owner: same lifetime fields as DDS2, with a shorter payload. */
 typedef struct EffResourceOwner {
     u32 count;
@@ -489,6 +485,55 @@ typedef struct EffResourceOwner {
     void *buffer;
     MdlCtx *model;
 } EffResourceOwner;
+
+typedef struct {
+    u8 bytes[0x38];
+    u32 last;
+} EffectModelHeaderCopy;
+
+struct FileQueue;
+extern void *sdfAllocSizeClassBlock(s32);
+extern u32 sdfCountMapPositionRecords(void *);
+extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
+extern struct FileQueue *fileQueueClone(struct FileQueue *);
+
+u8 *func_0029B368(void *source) {
+    EffResourceOwner *owner = sdfAllocSizeClassBlock(sizeof(EffResourceOwner));
+    u8 *data;
+    u32 i;
+
+    memset(owner, 0, sizeof(EffResourceOwner));
+    if (source != NULL) {
+        data = fileResolvePrimaryBuffer(source);
+        memcpy((u8 *)owner + 8, data, sizeof(EffectModelHeaderCopy));
+        owner->model = effLoadViewerModelWithVUState(data + 0x40,
+                                                   ((FileJob *)source)->slots[0].size - 0x40);
+        if (owner->model->first != NULL) {
+            if (owner->plainEntry != 0) {
+                mdlAddEntryPlain(owner->model, 0, 0);
+            } else {
+                mdlAddEntryFlagged(owner->model, 0, 0);
+            }
+        }
+        owner->count = sdfCountMapPositionRecords(owner->model->inner);
+        if (owner->count == 0) {
+            return (u8 *)owner;
+        }
+        data = (u8 *)fileResolveSecondaryBuffer(source);
+        if (data != NULL) {
+            owner->buffer = sdfAllocGeneralBlock(owner->count * 4);
+            owner->entries = (void **)sdfResourceRetainAddress((u32)owner->buffer);
+            owner->entries[0] = fileCloneQueueEntries((struct FileQueue *)data);
+            for (i = 1; i < owner->count; i++) {
+                owner->entries[i] = fileQueueClone(owner->entries[0]);
+            }
+        }
+    }
+    return (u8 *)owner;
+}
+
+extern void fileQueueDestroy(u32);
+
 
 void effDestroyResourceOwner(EffResourceOwner *owner) {
     u32 i;
@@ -505,10 +550,6 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
     sdfReleaseChipBlock(owner);
 }
 
-typedef struct {
-    u8 bytes[0x38];
-    u32 last;
-} EffectModelHeaderCopy;
 
 extern u8 *func_0029B368(void *);
 
@@ -537,7 +578,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
             mdlAddEntryFlagged(dst->model, 0, 0);
         }
     }
-    dst->count = sdfCountMapPositionRecords((u32)dst->model->inner);
+    dst->count = sdfCountMapPositionRecords(dst->model->inner);
     if (src->buffer != 0) {
         if (dst->buffer != 0) {
             for (i = 0; i < dst->count; i++) {
