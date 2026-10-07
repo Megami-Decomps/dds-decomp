@@ -5,7 +5,7 @@ extern World *dds3ActiveWorld;
 
 void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(void *arg);
-void *dds3CreateWorldNodeForKind(s32 arg);
+EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 void *sdfAllocSizeClassBlock(s32 arg);
 void dds3GrowWorldValueChain(void *arg, s32 arg1);
 void func_00110120(IndexObj *arg);

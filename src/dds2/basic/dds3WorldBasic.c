@@ -6,7 +6,7 @@ extern World *dds3ActiveWorld;
 
 void effObjNodeDestroy(void *arg);
 
-void *dds3CreateWorldNodeForKind(s32 arg);
+EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 
 void *sdfAllocSizeClassBlock(s32 arg);
 
