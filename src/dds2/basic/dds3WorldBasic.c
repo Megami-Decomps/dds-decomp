@@ -199,7 +199,7 @@ INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3ReleaseWorldValueEntries);
 
 /* Reset the cursor and remove the first matching value, or all matches when
  * processAllMatches is nonzero. Return whether any match was processed. */
-s32 dds3ProcessMatchingWorldNodes(WorldValueIndices *indexNode, void *targetWord, s32 processAllMatches) {
+s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, void *targetWord, s32 processAllMatches) {
     s32 processedMatch;
 
     processedMatch = 0;
