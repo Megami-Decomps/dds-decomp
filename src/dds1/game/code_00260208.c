@@ -225,7 +225,108 @@ extern void func_0025FC38(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
 extern void func_0025FB30(s32, s32, s32, ShopScene *, s32);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00261760);
+/* Draw the selected shop page through its entry, change and exit phases. */
+INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC510);
+
+s32 func_00261760(ShopScene *scene) {
+    s32 categoryMap[2] = {0, 2};
+    s32 category;
+    f32 progress;
+
+    if (scene->extraOption != 0) {
+        category = scene->sprite->list->cursor->index;
+    } else {
+        category = categoryMap[scene->sprite->list->cursor->index];
+    }
+    func_0025E308(0, 0, 0, scene, 0x100, 0x53);
+    func_00260100(scene, 0xA09DC380);
+    switch (scene->action) {
+    case 9:
+        mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
+        func_0025E6B0(0, 0, 0, scene, 0x100, 0x53);
+        progress = (f32)scene->frames / 10.0f;
+        func_0025F7F0(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
+        func_0025FFC8(0, 0, 0, scene, 0x53);
+        func_0025FC38(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        switch (category) {
+        case 0:
+        case 1:
+            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            func_00260208((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            break;
+        case 2:
+            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            func_00260208((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            break;
+        }
+        break;
+    case 10:
+        mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
+        func_0025E6B0(0, 0, 0, scene, 0x100, 0x53);
+        progress = (f32)scene->frames / 10.0f;
+        progress = 1.0f - progress;
+        func_0025F7F0(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
+        func_0025FFC8(0, 0, 0, scene, 0x53);
+        func_0025FC38(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        switch (category) {
+        case 0:
+        case 1:
+            func_00260208((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            break;
+        case 2:
+            func_00260208((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            break;
+        }
+        break;
+    case 12:
+        mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
+        func_0025F680(0, 0, 0, scene, 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        func_0025FFC8(0, 0, 0, scene, 0x53);
+        progress = (f32)scene->frames / 10.0f;
+        progress = 1.0f - progress;
+        func_0025E6B0(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4,
+                            0xA09DC300 | (s32)(progress * 96.0f), 0x53);
+        func_0025FC38(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        switch (category) {
+        case 0:
+        case 1:
+            func_00260208((s32)scene, 0x100, 1, 0x53);
+            break;
+        case 2:
+            func_00260208((s32)scene, 0x100, 0, 0x53);
+            break;
+        }
+        break;
+    case 11:
+        mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
+        func_0025E6B0(0, 0, 0, scene, 0x100, 0x53);
+        func_0025F680(0, 0, 0, scene, 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
+        func_0025FFC8(0, 0, 0, scene, 0x53);
+        func_0025FB30(0, 0, 0, scene, 0x53);
+        switch (category) {
+        case 0:
+        case 1:
+            func_00260208((s32)scene, 0x100, 1, 0x53);
+            break;
+        case 2:
+            func_00260208((s32)scene, 0x100, 0, 0x53);
+            break;
+        }
+        break;
+    }
+    return 0;
+}
+
 
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
@@ -780,10 +881,6 @@ INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAD8);
 
 INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAE8);
 
-INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC510);
-
-INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC518);
-
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC520);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", brsTaskState);
@@ -801,3 +898,4 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC540);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC548);
+
