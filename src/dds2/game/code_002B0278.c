@@ -627,7 +627,58 @@ extern void func_002B0D90(s32, s32, s32, MenuList *, MenuListNode *, s32);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
 
 extern void func_002B0FA0(MenuContext *);
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0FA0);
+extern char D_00437BE8[];
+void func_002B0FA0(MenuContext *context) {
+    PartyMenuData *party = (PartyMenuData *)context->party;
+    MenuWindowContainer *window;
+    s32 i;
+    s32 placement;
+
+    window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 6, 0x16);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuInitializeBasicWindowLayout(window, context->panelModel, 0xC);
+    mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0, 0, 0, 0);
+    window->list->context = context;
+    window->list->drawCallback = func_002B0D90;
+
+    for (i = 0; i < 5; i++) {
+        if ((datGameState->party[i].flags & 1) != 0) {
+            s32 id = datGameState->party[i].unitId;
+            MenuListNode *node = mnuAppendWindowListNode(window,
+                D_00435E48 + id * 17);
+
+            node->sortKeyPrimary = id - 1;
+            node->sortKeySecondary = datGameState->party[i].level;
+        }
+    }
+    mnuAppendWindowListNode(window, (s32)D_00437BE8);
+    window->list->visibleCount = window->list->count;
+    switch (window->list->count) {
+    case 1:
+        placement = 0;
+        break;
+    case 2:
+        placement = 1;
+        break;
+    case 3:
+        placement = 2;
+        break;
+    case 4:
+        placement = 3;
+        break;
+    case 5:
+        placement = 4;
+        break;
+    case 6:
+        placement = 5;
+        break;
+    default:
+        placement = 6;
+        break;
+    }
+    mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xC, placement);
+    party->primaryWindow = window;
+}
 
 void mnuDestroyPartySelectionWindow(s32 context) {
     mnuDestroyWindowContainer((u32)((PartyMenuData *)((MenuContext *)context)->party)->primaryWindow);

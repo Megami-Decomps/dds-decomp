@@ -14,8 +14,8 @@ typedef struct EffTrackPolyData {
     s32 step;           /* 0x14 */
     u128 *points;      /* 0x18 */
     u32 *colors;        /* 0x1C: per-vertex gradient table after the points */
-    void *nodeHandle;   /* 0x20: owned draw asset */
-    u32 resourceHandle; /* 0x24: allocation containing points/colors/data */
+    SdfAsset *nodeHandle;   /* 0x20: owned draw asset */
+    SdfMemBlock *resourceHandle; /* 0x24: allocation containing points/colors/data */
 } EffTrackPolyData; /* 0x28 */
 /* Draw-state record read by func_0015FE20 (same layout as ParDrawState in code_0015A758). */
 typedef struct EffTrackPolyDraw {
@@ -99,15 +99,17 @@ void effTrackPolyUpdate(EffTrackPolyWork *work) {
 typedef struct EffTrackPolyList {
     EffTrackPolyWork **items; /* 0x00 */
     u32 count;                /* 0x04 */
-    u32 handle;               /* 0x08 */
+    SdfMemBlock *handle;               /* 0x08 */
 } EffTrackPolyList;
 
-extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
+extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 /* Clone count tracks from one parameter block, each with its own data. */
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
-    u32 handle = sdfAllocGeneralBlock(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
     EffTrackPolyList *list = (EffTrackPolyList *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -208,14 +210,15 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
 }
 extern EffTrackPolyDraw D_003D6640;
 extern u8 D_003556D0[];
-extern void *sdfCreateAssetWithDrawEntries(void);
-extern void func_002DA420(void *asset, f32 scale);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+struct SdfTextParam;
+extern void func_002DA420(struct SdfTextParam *asset, f32 scale);
 
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
     s32 bytes = count * (sizeof(u128) + sizeof(u32));
-    u32 handle = sdfAllocGeneralBlock(bytes + sizeof(EffTrackPolyData));
-    u8 *cursor = sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfAllocGeneralBlock(bytes + sizeof(EffTrackPolyData));
+    u8 *cursor = (u8 *)sdfResourceRetainAddress(handle);
     EffTrackPolyData *data = (EffTrackPolyData *)(cursor + bytes);
 
     data->points = (u128 *)cursor;
@@ -229,7 +232,7 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
     data->resourceHandle = handle;
     data->colors = (u32 *)cursor;
     data->nodeHandle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(data->nodeHandle, 1.0f);
+    func_002DA420((struct SdfTextParam *)data->nodeHandle, 1.0f);
     memset(&D_003D6640, 0, sizeof(D_003D6640));
     D_003D6640.flags = 0x4000;
     D_003D6640.unk0C = D_003556D0;
