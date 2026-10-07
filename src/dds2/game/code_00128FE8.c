@@ -540,7 +540,7 @@ struct EffectObject;
 struct EffWorldNode;
 extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
-extern void effObjSetModelHolder(struct EffectObject *, u32);
+extern void effObjSetActiveId(EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffectObject *, u32);
 extern struct EffWorldNode *dds3FindWorldObjectNodeByKey(struct EffWorldNode *, u32, s32);
@@ -597,25 +597,25 @@ void fldCreateResourceScriptObjects(void) {
         dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)resource->name);
         if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
             if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
-                effObjSetModelHolder(object, 6);
+                effObjSetActiveId((EffWorldNode *)object, 6);
             } else {
                 switch (i) {
                     case 0:
-                        effObjSetModelHolder(object, 2);
+                        effObjSetActiveId((EffWorldNode *)object, 2);
                         break;
                     case 1:
-                        effObjSetModelHolder(object, 3);
+                        effObjSetActiveId((EffWorldNode *)object, 3);
                         break;
                     case 2:
-                        effObjSetModelHolder(object, 4);
+                        effObjSetActiveId((EffWorldNode *)object, 4);
                         break;
                     default:
-                        effObjSetModelHolder(object, 5);
+                        effObjSetActiveId((EffWorldNode *)object, 5);
                         break;
                 }
             }
         } else {
-            effObjSetModelHolder(object, 7);
+            effObjSetActiveId((EffWorldNode *)object, 7);
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName((char *)resource->name));
         dds3SetSlotByKind(object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
