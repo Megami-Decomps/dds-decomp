@@ -127,8 +127,14 @@ typedef struct AiSlot {
     u32 actionArg;
 } AiSlot;
 
+typedef struct AiDecisionRow {
+    u32 predicates[3];
+    u8 routes[8];
+} AiDecisionRow;
+
 typedef struct AiSpecies {
-    u8 pad00[0x40];
+    u8 pad00[4];
+    AiDecisionRow decisions[3];
     AiSlot slot[25];
     u8 pad108[0x54];
 } AiSpecies;
@@ -197,7 +203,95 @@ u32 func_001FF558(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF560);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF8D8);
+extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
+
+s32 func_001FF8D8(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+    s8 matches[3];
+    u32 predicates[3];
+    u32 firstTier, endTier;
+    u32 tier, predicateIndex;
+    if (requestedRow == 0) {
+        firstTier = 0;
+        endTier = 3;
+    } else {
+        firstTier = requestedRow - 1;
+        endTier = requestedRow;
+    }
+    for (tier = firstTier; tier < endTier; tier++) {
+        predicates[0] = datEnemyAiRecords[species].decisions[tier].predicates[0];
+        predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
+        predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
+        for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
+            matches[predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+        }
+        if (matches[0] && matches[1] && matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[0];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 0;
+                return 1;
+            }
+        }
+        if (matches[0] && matches[1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[1] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[1];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 1;
+                return 1;
+            }
+        }
+        if (matches[0] && matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[2] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[2];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 2;
+                return 1;
+            }
+        }
+        if (matches[1] && matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[3] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[3];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 3;
+                return 1;
+            }
+        }
+        if (matches[0]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[4] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[4];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 4;
+                return 1;
+            }
+        }
+        if (matches[1]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[5] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[5];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 5;
+                return 1;
+            }
+        }
+        if (matches[2]) {
+            if (datEnemyAiRecords[species].decisions[tier].routes[6] != 8) {
+                *selected = datEnemyAiRecords[species].decisions[tier].routes[6];
+                btlActionScratchWork->rowIndex = tier;
+                btlActionScratchWork->conditionKind = 6;
+                return 1;
+            }
+        }
+        if (datEnemyAiRecords[species].decisions[tier].routes[7] != 8) {
+            *selected = datEnemyAiRecords[species].decisions[tier].routes[7];
+            btlActionScratchWork->rowIndex = tier;
+            btlActionScratchWork->conditionKind = 7;
+            return 1;
+        }
+    }
+    *selected = 0;
+    btlActionScratchWork->rowIndex = 0;
+    btlActionScratchWork->conditionKind = 8;
+    return 1;
+}
 
 /* Pick the first nonzero-weight slot whose 16-bit cumulative weight reaches the roll.
  * The unit argument is unused; preserve the runtime lookup, debug failure path and zero fallback. */

@@ -3343,7 +3343,41 @@ s32 btlQueryUnitChannelFlags(s32 first, s32 second, s32 other, s32 variant, s32 
     return flags;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B16B0);
+u32 func_001B16B0(BtlUnit *unit, s32 unused, s32 index) {
+    s32 selection;
+    u32 value;
+    u32 ratio;
+
+    if (index == -1) {
+        return 0;
+    }
+    selection = btlEncodeActorIndexAsSelectionMask(index);
+    if ((selection & 1) != 0) {
+        return 0;
+    }
+    if ((selection & 0xE0000) != 0) {
+        return 100;
+    }
+    value = func_001ABF50(unit, index);
+    ratio = func_001AE678((u8 *)unit, index);
+    if (ratio != 100) {
+        ratio = (u16)value * ratio / 100;
+        value = (value & 0xFFFF0000) | ratio;
+        value &= 0x7FFFFFFF;
+    }
+    if (btlHasEnabledSpecialAbilityForSlot((s32)unit, index) != 0) {
+        value |= 0x20000;
+    }
+    if (btlHasSpecialAbility274((s32)unit, index) != 0) {
+        value |= 0x40000;
+    }
+    if (btlHasMappedSpecialAbilityForSlot((s32)unit, index) != 0) {
+        value |= 0x10000;
+    }
+    btlBossDebugPrintf("btl:aisyo=%d%%[%X][ratio=%d]\n",
+                      (u16)value, value & 0xFFFF0000, ratio);
+    return value;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B17E8);
 
