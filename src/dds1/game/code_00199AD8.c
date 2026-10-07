@@ -1,6 +1,7 @@
 #include "mnu.h"
 #include "itf.h"
 #include "sdf.h"
+#include "itf_panel_draw.h"
 
 #define ITF_PANEL_COLUMN_COUNT 4
 #define ITF_PANEL_ROW_COUNT 2

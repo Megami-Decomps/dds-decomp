@@ -1,6 +1,7 @@
 #include "common.h"
 #include "itf.h"
 #include "sdf.h"
+#include "itf_panel_draw.h"
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 
@@ -1053,16 +1054,6 @@ extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern u64 D_00357998[];
 
-typedef struct DrawVertex {
-    s32 x;
-    s32 y;
-} DrawVertex;
-
-/* Four 32-bit components: RGBA for colors, or two UV pairs in sprite packets. */
-typedef struct DrawColorRec {
-    u32 components[ITF_RGBA_COMPONENT_COUNT];
-} DrawColorRec;
-
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
 SdfTex *itfLoadTextureFromAsset(const char *path) {
     SdfMemBlock *fileAllocation;
@@ -1399,7 +1390,7 @@ UiSprite *func_00199828(s32 kind, u32 value) {
             *work->payload = value;
             break;
         case 7:
-            *work->payload = value;
+            ((UiSpriteTexturePayload *)work->payload)->texture = (SdfTex *)value;
             break;
         case 8:
             *work->payload = value;
