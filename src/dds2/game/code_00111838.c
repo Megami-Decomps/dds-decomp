@@ -40,7 +40,7 @@ extern s32 dds3UpdateMoverTransform(EffWorldNode *object);
 
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
-extern u32 dds3AppendWorldIndexNode(s32);
+extern NodeB *dds3AppendWorldIndexNode(s32 initialCount);
 
 /* Bind the owner, select a 16-byte ring entry, and advance the ten-entry cursor. */
 ObjectWithResource *dds3SpawnSlotRingObj3(u32 owner) {
@@ -144,12 +144,12 @@ s32 dds3SelectSlotForObjectKind(u32 kind)
 ObjBase *dds3CreateSlotResourceState(void *owner) {
     ObjBase *state = sdfAllocSizeClassBlock(sizeof(ObjBase));
     s32 i;
-    u32 node;
+    NodeB *node;
 
     memset(state, 0, sizeof(ObjBase));
     state->resourceState = 3;
     node = dds3AppendWorldIndexNode(0);
-    state->worldIndexNode = node;
+    state->worldIndexNode = (u32)node;
     state->slots[0] = owner;
     for (i = 0; i < DDS3_OBJECT_RESOURCE_SLOT_COUNT; i++) {
         state->resourceSlots[i] = -1;
