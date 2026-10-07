@@ -20,7 +20,7 @@ extern s32 func_0035C860(char *buffer, const char *format, ...);
 extern void func_00259AE8();
 extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
-extern void dds3SetWorldCameraObject(void *, s32);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern f32 dds3GetCameraFieldOfView(s32);
 extern void func_001063A8(f32);
 
@@ -449,7 +449,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
         unit = viewer->fallbackEntry;
     }
     if (unit != 0) {
-        dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
+        dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)unit);
         func_001063A8(dds3GetCameraFieldOfView(unit));
     }
 }

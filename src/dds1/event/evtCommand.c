@@ -118,7 +118,7 @@ void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
 u32 fldGetPlayerSceneState(void);
 
-void dds3SetWorldCameraObject(s32 world, u32 unit);
+EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *unit);
 
 
 s32 evtFindTaskById(s32 id);
@@ -588,25 +588,25 @@ s32 evtCommandClearAllUnitsAndWait(void)
 }
 
 s32 evtCommandAddEffectUnitToWorld(void) {
-    void *unit;
+    EffWorldNode *unit;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)fldGetPlayerSceneState();
+        unit = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
     if (unit == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
     return 1;
 }
 
 s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
-    void *unit;
+    EffWorldNode *unit;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)fldGetPlayerSceneState();
+        unit = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
         ((EvtWorldUnit *)unit)->inner->statusFlags |= 1;
@@ -614,7 +614,7 @@ s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     if (unit == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
     return 1;
 }
 

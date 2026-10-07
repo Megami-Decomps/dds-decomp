@@ -1988,7 +1988,7 @@ extern char D_00435F58[];
 extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, FieldVec4 *);
 extern void dds3SetCameraVector(u32, FieldVec4 *);
 extern void effObjSetInnerFloat(u32, f32);
-extern void dds3SetWorldCameraObject(u64, u32);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 /* Create the secondary camera at target origin with the stored eye/up vectors. */
 void fldCreateSecondaryWorldCamera(void) {
@@ -2005,7 +2005,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetWorldNodeValue((struct EffWorldNode *)cameraObject, (u32)D_00435F58);
     dds3SetCameraVector(*cameraObjectSlot, &worldEye);
     effObjSetInnerFloat(*cameraObjectSlot, 2.0f);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), *cameraObjectSlot);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
 
 u32 func_001266D8(void) {

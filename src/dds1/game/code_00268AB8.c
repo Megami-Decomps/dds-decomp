@@ -52,7 +52,7 @@ extern void effObjSetInnerFloat(s32 object, f32 value);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-extern void dds3SetWorldCameraObject(s32, void *);
+extern struct EffWorldNode *dds3SetWorldCameraObject(struct EffWorldNode *, struct EffWorldNode *);
 
 extern u8 D_003DC1C0[];
 

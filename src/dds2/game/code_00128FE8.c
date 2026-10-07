@@ -64,7 +64,7 @@ extern u32 D_00436088;
 
 extern void *dds3GetWorldObject(void);
 
-extern s32 dds3GetWorldCameraObject(s32);
+extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
 
 extern s64 fldGetPlayerSceneState(void);
 
@@ -2581,7 +2581,7 @@ s64 fldGetUnselectedWorldEntry(void) {
     s64 currentObject;
 
     worldObject = (s32)dds3GetWorldObject();
-    object = dds3GetWorldCameraObject(worldObject);
+    object = (s32)dds3GetWorldCameraObject((EffWorldNode *)worldObject);
     currentObject = fldGetPlayerSceneState();
     if (currentObject == object) {
         object = 0;
@@ -2591,7 +2591,8 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_004360AC = value;
-    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject((s32)dds3GetWorldObject()), D_00444980, D_00444970);
+    dds3TransformCameraVectorsByInnerRotation((s32)dds3GetWorldCameraObject(dds3GetWorldObject()), D_00444980,
+                                              D_00444970);
     D_004360B0 = 0;
 }
 
@@ -2616,7 +2617,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_004360AC == -2) {
             direction = -1.0f;
         }
-        camera = (EffWorldNode *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = dds3GetWorldCameraObject(dds3GetWorldObject());
         if (D_004360AC == 1 || D_004360AC == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;
