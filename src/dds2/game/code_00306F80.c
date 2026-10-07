@@ -18,13 +18,6 @@ typedef struct UiQuadWords {
 } UiQuadWords; // 0x10
 
 
-typedef struct GridScrollRange {
-    u32 reserved;
-    float minimum;        /* 0x04 */
-    float maximum;        /* 0x08 */
-    float step;           /* 0x0C */
-} GridScrollRange;
-
 typedef struct GridNumericDescriptor {
     s32 mode;
     f32 minimum;
@@ -903,7 +896,7 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
 
 /* Advance by at least one configured step; crossing the maximum wraps to minimum. */
 void itfAdvanceGridScrollPosition(GridTextWidget *owner, u32 key, s32 steps) {
-    GridScrollRange *range;
+    GridNumericDescriptor *range;
     GridTextListItem *entry;
     float *position;
     float delta;
@@ -932,7 +925,7 @@ void itfAdvanceSelectedGridScroll(GridTextWidget *owner, u32 steps) {
 
 /* Reverse by at least one configured step; crossing the minimum wraps to maximum. */
 void itfReverseGridScrollPosition(GridTextWidget *owner, u32 key, s32 steps) {
-    GridScrollRange *range;
+    GridNumericDescriptor *range;
     GridTextListItem *entry;
     float *position;
     float delta;
@@ -999,7 +992,7 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
         } else {
             func_0035C860(prefix, "%s ", entry->text);
         }
-        switch (*(s32 *)entry->parameter) {
+        switch (((GridNumericDescriptor *)entry->parameter)->mode) {
         case 0:
             func_0035C860(format, "%%s%%0%dd", entry->formatWidth);
             func_0035C860(text, format, prefix, (s32)entry->number);

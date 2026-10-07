@@ -605,13 +605,6 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
     return 1;
 }
 
-typedef struct GridScrollRange {
-    u8 pad00[4];
-    f32 minimum; /* 0x04 */
-    f32 maximum; /* 0x08 */
-    f32 step;  /* 0x0C */
-} GridScrollRange;
-
 typedef struct GridNumericDescriptor {
     s32 mode;
     f32 minimum;
@@ -782,7 +775,7 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
 
 /* Advance by at least one configured step; crossing the maximum wraps to minimum. */
 void itfAdvanceGridScrollPosition(GridTextWidget *widget, u32 key, s32 steps) {
-    GridScrollRange *range;
+    GridNumericDescriptor *range;
     GridTextListItem *entry;
     float *position;
     float delta;
@@ -811,7 +804,7 @@ void itfAdvanceSelectedGridScroll(GridTextWidget *widget, u32 steps) {
 
 /* Reverse by at least one configured step; crossing the minimum wraps to maximum. */
 void itfReverseGridScrollPosition(GridTextWidget *widget, u32 key, s32 steps) {
-    GridScrollRange *range;
+    GridNumericDescriptor *range;
     GridTextListItem *entry;
     float *position;
     float delta;
@@ -878,7 +871,7 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
         } else {
             func_003014F0(prefix, "%s ", entry->text);
         }
-        switch (*(s32 *)entry->parameter) {
+        switch (((GridNumericDescriptor *)entry->parameter)->mode) {
         case 0:
             func_003014F0(format, "%%s%%0%dd", entry->formatWidth);
             func_003014F0(text, format, prefix, (s32)entry->number);
