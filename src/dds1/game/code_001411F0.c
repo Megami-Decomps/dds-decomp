@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -1111,8 +1112,8 @@ void fldEnterSceneCamera(void) {
     D_00324B30.unk4 = 255.0f;
     D_00324B30.unkC = 20000.0f;
     D_00324B30.unk10 = 0x108010;
-    D_00324980.offsetX = 2244.0f;
-    D_00324980.offsetY = 2118.0f;
+    D_00324980.camera.offsetX = 2244.0f;
+    D_00324980.camera.offsetY = 2118.0f;
 }
 
 extern s32 sdfModelCreateWithAlternateItems(s32, s32);
@@ -1173,8 +1174,8 @@ void fldLoadSceneModelsAndCamera(void) {
     D_00324B30.unk4 = 255.0f;
     D_00324B30.unkC = 20000.0f;
     D_00324B30.unk10 = 0x108010;
-    D_00324980.offsetX = 2244.0f;
-    D_00324980.offsetY = 2118.0f;
+    D_00324980.camera.offsetX = 2244.0f;
+    D_00324980.camera.offsetY = 2118.0f;
 }
 
 void fldReleaseMenuSlotsAfterWait(void) {
