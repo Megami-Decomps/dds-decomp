@@ -60,7 +60,7 @@ extern void mnuDrawPanelIconPairsAtFixedPositions(s32, s32, s32, s32, MenuPanelH
 
 extern void func_0027C140();
 
-extern void mnuHideWindowHandles(MenuPanelHandles *);
+extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
 
 extern void mnuDrawWindowSprites();
 
@@ -427,7 +427,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
         }
         y += list->windowOffset * list->rowStep;
         mnuDrawIconPanel(x, y, depth, fadeScale, panel, selectionMode, drawArg);
-        mnuHideWindowHandles(panel);
+        mnuUpdateWindowPanelHandleStates(panel);
         if (window->flags & MNU_WINDOW_TRANSITION_FLAG) {
             window->panel.transition += MNU_NODE_FADE_STEP;
             if (window->panel.transition >= MNU_PANEL_FADE_LIMIT) {
@@ -676,7 +676,7 @@ void mnuDrawIconPanelFullFade(s32 x, s32 y, s32 depth, MenuPanelHandles *list, s
     mnuDrawIconPanelDefaultFlag(x, y, depth, MNU_FULL_FADE, list, drawArg);
 }
 
-void mnuHideWindowHandles(MenuPanelHandles *panel) {
+void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel) {
     switch (panel->panelKind) {
     case MNU_PANEL_KIND_SIX_SLOTS:
         itfGridLookupValueOrDefault(panel->handles[4], 0);

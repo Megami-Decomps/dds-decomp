@@ -4737,7 +4737,7 @@
 0x0027DCE8	mnuDrawIconPanel	inferred	Dispatches icon panel drawing mode according to first word of panel record. [names_reviewed5.tsv]
 0x0027DD58	mnuDrawIconPanelDefaultFlag	inferred	Draws an icon panel with its optional selection flag disabled, retaining caller fade. [names_reviewed18.tsv]
 0x0027DD78	mnuDrawIconPanelFullFade	inferred	Draws the icon panel with full fixed-point fade and default selection flag. [names_reviewed18.tsv]
-0x0027DDA0	mnuHideWindowHandles	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x0027DDA0	mnuUpdateWindowPanelHandleStates	inferred	Runs timed-state updates for panel handles selected by panel mode after icon drawing.
 0x0027DE60	mnuRebuildListFirstFromCursor	inferred	Walks prev chain from cursor and replaces first-node pointer; twin 0x002BA890. [names_R_FuncNames5.tsv]
 0x0027DE98	mnuRebuildListLastFromCursor	inferred	Walks next chain from cursor and replaces last-node pointer; twin 0x002BA8C8. [names_R_FuncNames5.tsv]
 0x0027DED0	mnuResetNodeLinks	inferred	Clears menu[9], copies head into menu[6]/menu[7], optionally traverses nodes and calls func_0027BE90.

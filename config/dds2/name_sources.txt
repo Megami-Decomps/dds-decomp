@@ -4439,7 +4439,7 @@
 0x002BA660	mnuDrawIconPair	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BA738	mnuDrawIconPanel	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BA7C0	mnuDrawIconPanelFullFade	inferred	Same icon-panel wrapper as DDS1; supplies full fade and disabled selection flag to draw helper. [names_reviewed18.tsv]
-0x002BA7E8	mnuHideWindowHandlesKindFourFive	inferred	same shape as DDS1 menuHideWindowHandles for kinds 4/5 [names_reviewed2.tsv]
+0x002BA7E8	mnuUpdateWindowPanelHandleStatesKindFourFive	inferred	Runs timed-state updates for the panel-handle subsets selected by kinds four and five after icon drawing.
 0x002BA890	mnuRebuildListFirstFromCursor	inferred	Walks prev chain from cursor and replaces first-node pointer; twin 0x0027DE60. [names_R_FuncNames5.tsv]
 0x002BA8C8	mnuRebuildListLastFromCursor	inferred	Walks next chain from cursor and replaces last-node pointer; twin 0x0027DE98. [names_R_FuncNames5.tsv]
 0x002BA978	mnuLinkItemList	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuLinkItemList behavior.
