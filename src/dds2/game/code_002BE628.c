@@ -8,6 +8,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "mdl.h"
 #include "eff.h"
 #include "dat_state.h"
@@ -72,7 +73,6 @@ extern s32 mnuScrollListToEnd();
 extern void mnuClearWindowPanelTransitionFlag();
 extern void func_002BE730();
 extern void func_002BED10();
-extern s32 func_002C6008();
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -98,8 +98,7 @@ extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
 extern void mdlProcessContextNodesAndTransforms(s32, s32);
-extern s32 ptySkillApplyFieldUseEffect(s32, u16, s32, s32);
-extern u32 ptyGetSkillNibbleState(s32, u16);
+extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 
 extern void evtStageTestStop(void);
 
@@ -1547,12 +1546,12 @@ void mnuPlayDefaultInputSounds(u32 inputFlags) {
 
 
 /* Find the first occupied slot with the same table ID; zero also serves as no-match. */
-s32 mnuFindMatchingPartyEntryIndex(s32 targetEntryAddress) {
+s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry) {
     s32 partyIndex;
     DatPartyRecord *partyEntry = datGameState->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
-            ((DatPartyRecord *)targetEntryAddress)->unitId == partyEntry->unitId) {
+            targetEntry->unitId == partyEntry->unitId) {
             return partyIndex;
         }
     }
@@ -1687,18 +1686,18 @@ s32 mnuGetEntryUseStatus(s32 actorAddress, u16 commandId) {
 }
 
 /* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */
-s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
+s32 mnuIsEntryCostUnaffordable(u16 commandId, DatPartyRecord *actorEntry) {
     s32 costKind = datCommandRecords[commandId].costMode;
     u16 cost = datCommandRecords[commandId].costPercentage;
 
     switch (costKind) {
     case MNU_COST_KIND_HP:
-        if (((DatPartyRecord *)actorAddress)->hp < cost) {
+        if (actorEntry->hp < cost) {
             return 1;
         }
         break;
     case MNU_COST_KIND_MP:
-        if (((DatPartyRecord *)actorAddress)->mp < cost) {
+        if (actorEntry->mp < cost) {
             return 1;
         }
         break;
@@ -1747,16 +1746,16 @@ s32 mnuGetAbilityByteCategory(u16 commandId) {
     return 0;
 }
 
-void func_002C5128(u16 ability, s32 target, DatPartyRecord *entry) {
+void func_002C5128(u16 ability, DatPartyRecord *target, DatPartyRecord *entry) {
     sdfApplyCommandResults(ability);
 }
 
-u32 func_002C5140(s32 context, s32 ability, s32 target, DatPartyRecord *entry) {
+u32 func_002C5140(MenuPageWindow *context, s32 ability, DatPartyRecord *target, DatPartyRecord *entry) {
     return 0;
 }
 
-s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 selectedEntry) {
-    DatPartyRecord *entry = (DatPartyRecord *)selectedEntry;
+s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRecord *target, DatPartyRecord *selectedEntry) {
+    DatPartyRecord *entry = selectedEntry;
     s32 multiTarget = 0;
     s32 applied = 0;
     s32 mask;
@@ -1766,21 +1765,21 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
     }
 
     if (mnuGetAbilityByteCategory(ability) == 1) {
-        mask = mnuGetMatchingPartyEntryMask((s32)entry);
+        mask = mnuGetMatchingPartyEntryMask(entry);
 
         if (func_0022C600(ability, mask) != 0) {
             return 0;
         }
         func_002C5128(ability, target, entry);
-        mnuQueueListEntry((MenuPageWindow *)context,
-                          mnuFindMatchingPartyEntryIndex((s32)entry), 0, 0);
+        mnuQueueListEntry(context,
+                          mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
         s32 i;
 
         for (i = 0; i < MNU_PARTY_SLOT_COUNT; i++) {
             entry = &datGameState->party[i];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
-                mask = mnuGetMatchingPartyEntryMask((s32)entry);
+                mask = mnuGetMatchingPartyEntryMask(entry);
 
                 if (func_0022C600(ability, mask) == 0) {
                     func_002C5128(ability, target, entry);
@@ -1796,8 +1795,8 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         for (i = 0; i < MNU_PARTY_SLOT_COUNT; i++) {
             entry = &datGameState->party[i];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
-                mnuQueueListEntry((MenuPageWindow *)context,
-                                  mnuFindMatchingPartyEntryIndex((s32)entry), 0, i * 3);
+                mnuQueueListEntry(context,
+                                  mnuFindMatchingPartyEntryIndex(entry), 0, i * 3);
             }
         }
         multiTarget = 1;
@@ -2123,12 +2122,12 @@ s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry) {
 }
 
 /* Return one bit for the first occupied matching table ID, or zero when absent. */
-s32 mnuGetMatchingPartyEntryMask(s32 targetEntryAddress) {
+s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *targetEntry) {
     s32 partyIndex;
     DatPartyRecord *partyEntry = datGameState->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
-            partyEntry->unitId == ((DatPartyRecord *)targetEntryAddress)->unitId) {
+            partyEntry->unitId == targetEntry->unitId) {
             return 1 << partyIndex;
         }
     }
@@ -2207,7 +2206,7 @@ DatPartyRecord *mnuFindPartyEntryBySelection(s32 *out) {
     return 0;
 }
 
-s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
+s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRecord *target, s32 commit) {
     s32 id;
     DatPartyRecord *entry = mnuFindPartyEntryBySelection(&id);
 
@@ -2219,11 +2218,11 @@ s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
             return 0;
         }
         if (commit != 0) {
-            ptySkillApplyFieldUseEffect(skill, id & 0xFFFF, target, (s32)entry);
+            ptySkillApplyFieldUseEffect(page, id & 0xFFFF, target, entry);
             mnuConsumeEntryCost(id & 0xFFFF, (u8 *)target);
-            mnuInitPartyPanelSlots((PartyPanel *)partyPanel);
-            func_002BCA98(skill);
-            func_002BCAB0(skill);
+            mnuInitPartyPanelSlots(partyPanel);
+            func_002BCA98(page);
+            func_002BCAB0(page);
         }
         return 2;
     }
@@ -2251,7 +2250,7 @@ s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6008);
 
-s32 mnuUseFieldSkillOnParty(s32 partyPanel, s32 skill, s32 commit) {
+s32 mnuUseFieldSkillOnParty(PartyPanel *partyPanel, MenuPageWindow *page, s32 commit) {
     u32 used[32];
     DatPartyRecord *entry;
     s32 pass;
@@ -2267,9 +2266,9 @@ s32 mnuUseFieldSkillOnParty(s32 partyPanel, s32 skill, s32 commit) {
                 break;
             }
             if (pass == 0) {
-                result = mnuTryUseFieldSkill(partyPanel, skill, (s32)entry, commit);
+                result = mnuTryUseFieldSkill(partyPanel, page, entry, commit);
             } else {
-                result = func_002C6008(partyPanel, skill, entry, commit);
+                result = func_002C6008(partyPanel, page, entry, commit);
             }
             switch (result) {
             case 0:

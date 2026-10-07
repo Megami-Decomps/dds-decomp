@@ -764,15 +764,14 @@ typedef struct MenuStaffContext {
     struct MenuIconState *unkF8; /* 0xF8: second panel layout */
     struct MenuIconState *unkFC; /* 0xFC: third panel layout */
     u8 pad100[4];
-    s32 unk104;
+    MenuWindowContainer *skillWindow; /* 0x104: field-skill window; 002AAEA0 reads list->last. */
     MenuWindowContainer *activeWindow; /* 0x108 */
     u8 pad10C[0xC];
     s32 unk118;
     u8 pad11C[0x168];
-    u32 windowFlags;      /* 0x284 */
-    u8 pad288[0xA68C];
-    struct MenuList *selection; /* 0xA914: retained party-selection list */
-    u8 padA918[0x11C];
+    /* 002BD480 consumes the full page owner; its first list is at 0xA914. */
+    MenuPageWindow partyWindow; /* 0x284..0xA927 */
+    PartyPanel partyPanel;     /* 0xA928: initialized by 002A9068 and 002ACF38. */
     MenuPanelGroup *panelHandle; /* 0xAA34 */
     MenuSpriteState *spriteHandle; /* 0xAA38 */
     u8 padAA3C[0xC];
@@ -782,7 +781,8 @@ typedef struct MenuStaffContext {
     u8 padAA54[0x3CC];
     u16 catalogOrdinals[0x100]; /* 0xAE20: item-ID-indexed list sorting keys */
     u8 padB020[0xEC];
-    u8 tail[4];           /* 0xB10C */
+    MenuFadeFields fade; /* 0xB10C: initialized by 002A9068; used by 002BAF50/002BB0E8. */
+    u8 tail[0x10];        /* 0xB1D0: remaining opaque bytes of the 0xB1E0 allocation. */
 } MenuStaffContext;
 
 /* Five owned windows and their selection/transition state share one 0x54 allocation. */

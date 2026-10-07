@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
@@ -19,12 +20,10 @@ extern void func_0026C900(void);
 extern void func_002AAE80(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-extern void mnuUpdateAndDrawWindowTransition(s32, s32, s32, s32, s32);
 extern void func_002AA7A0(s32, s32);
 extern u8 D_003E7050[];
 extern char D_003E7207[20];
 extern char D_003E7202[];
-extern void mnuBeginWindowFadeTransition(s32, s32);
 extern void func_002ABEB0(s32);
 extern void func_002AC660(s32);
 extern void func_002ACA98(s32);
@@ -60,8 +59,6 @@ extern char D_003E7514[];
 extern char D_003E7530[];
 extern char D_003E7434[];
 extern u32 mnuMapPadMaskToFlags();
-extern void mnuStepPartyPanelListFromInput();
-extern void mnuClearActionFlags();
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern void func_002B9808(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
@@ -99,7 +96,7 @@ s32 mnuStaffImageEnterA(s32 task) {
 
     func_002AAE80(task);
     mnuCreateStaffImageSprite(5);
-    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     object = menu->windows[0];
     if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 0);
@@ -136,20 +133,18 @@ s32 mnuStaffImageInputA(s32 task) {
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
-    u8 *window;
 
     state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
-    window = (u8 *)(context + 0x284);
-    mnuStepPartyPanelListFromInput(4, window);
+    mnuStepPartyPanelListFromInput(4, &((MenuStaffContext *)context)->partyWindow);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        menu->currentSelection = ((MenuStaffContext *)context)->selection->cursor->index;
+        menu->currentSelection = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E74F8);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuClearActionFlags(0, window);
+        mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
         mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
     mnuPlayInputSound(0, buttons, 0);
@@ -164,7 +159,7 @@ s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
     func_002AAC98(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
-    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
@@ -189,20 +184,18 @@ s32 mnuPollStaffSlotSelectionConfirmation(s32 task) {
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
-    u8 *window;
 
     state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
-    window = (u8 *)(context + 0x284);
-    mnuStepPartyPanelListFromInput(4, window);
+    mnuStepPartyPanelListFromInput(4, &((MenuStaffContext *)context)->partyWindow);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        menu->currentSelection = ((MenuStaffContext *)context)->selection->cursor->index;
+        menu->currentSelection = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E7514);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuClearActionFlags(0, window);
+        mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
         mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
     mnuPlayInputSound(0, buttons, 0);
@@ -217,7 +210,7 @@ s32 func_002AD808(s32 task) {
     func_002AAC98(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
-    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
@@ -242,20 +235,18 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
-    u8 *window;
 
     state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
-    window = (u8 *)(context + 0x284);
-    mnuStepPartyPanelListFromInput(4, window);
+    mnuStepPartyPanelListFromInput(4, &((MenuStaffContext *)context)->partyWindow);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        menu->currentSelection = ((MenuStaffContext *)context)->selection->cursor->index;
+        menu->currentSelection = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
         mnuSetPopupEntryFlagged(popup, D_003E7530);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuClearActionFlags(0, window);
+        mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
         mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
     mnuPlayInputSound(0, buttons, 0);
@@ -269,7 +260,7 @@ s32 func_002AD9F8(s32 task) {
     func_002AAC98(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
-    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
@@ -284,7 +275,7 @@ u32 mnuRefreshSecondaryStaffObject(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    mnuBeginWindowFadeTransition((u32)((MenuStaffChoices *)((MenuStaffContext *)context)->menu)->windows[1], context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuStaffChoices *)((MenuStaffContext *)context)->menu)->windows[1], &((MenuStaffContext *)context)->fade);
     return 1;
 }
 
@@ -292,7 +283,7 @@ u32 mnuRefreshActiveStaffWindow(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    mnuBeginWindowFadeTransition((u32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     return 1;
 }
 
@@ -340,7 +331,7 @@ s32 mnuStaffImageEnterD(s32 task) {
 
     func_002AAE80(task);
     mnuCreateStaffImageSprite(0xD);
-    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     object = menu->windows[1];
     if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 1);
@@ -358,7 +349,52 @@ s32 mnuStaffImageExitD(s32 task) {
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
+extern char D_003E7450[];
+
+s32 func_002ADDA0(s32 task) {
+    s32 item = 0;
+    s32 itemExhausted = 0;
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
+    MenuStaffChoices *menu = context->menu;
+    s32 *popup = &context->popupState;
+    u32 buttons = mnuMapPadMaskToFlags(3);
+    s32 state;
+    MenuPageWindow *party;
+
+    state = func_002C4038(&context->transitionWork, popup, 0, (void *)task);
+    if (state != 0) {
+        return state;
+    }
+    party = &context->partyWindow;
+    mnuStepPartyPanelListFromInput(4, party);
+    if (menu->windows[0]->list->count != 0) {
+        item = menu->windows[0]->list->cursor->sortKeySecondary;
+    }
+    if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(item)) == 2) {
+        party->flags |= 0x10;
+    }
+    if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(item)) == 3) {
+        party->flags |= 0x20;
+    }
+    if (buttons & MNU_STAFF_INPUT_CONFIRM) {
+        buttons = mnuUseStaffItem(item, context) ? 0 : 0x8000;
+        menu->windows[0]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[item];
+        if (mnuIsStaffWindowReadyForItem(item & 0xFFFF, context) == 0) {
+            mnuSetPopupEntryFlagged(popup, D_003E7434);
+            mnuClearActionFlags(0, party);
+            mnuBeginWindowFadeTransition(0, &context->fade);
+        } else {
+            itemExhausted = datGameState->inventory.counts[item] == 0;
+        }
+    }
+    if ((buttons & MNU_STAFF_INPUT_CANCEL) || itemExhausted) {
+        mnuSetPopupEntry(popup, D_003E7450);
+        mnuClearActionFlags(0, party);
+    }
+    mnuPlayInputSound(0, buttons, 0);
+    return 0;
+}
+
 
 s32 mnuStaffImageEnterB(s32 task) {
     s32 context = kwlnTaskGetUserValue();
@@ -367,7 +403,7 @@ s32 mnuStaffImageEnterB(s32 task) {
 
     func_002AAE80(task);
     mnuCreateStaffImageSprite(6);
-    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     object = menu->windows[0];
     if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 0);
@@ -389,8 +425,8 @@ s32 mnuStaffImageExitB(s32 task) {
 s32 mnuInitializeSelectedStaffPage(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
-    u32 *window = &context->windowFlags;
-    s32 index = context->selection->cursor->index;
+    u32 *window = &context->partyWindow.flags;
+    s32 index = context->partyWindow.lists[0]->cursor->index;
 
     mnuSelectPage(window, index);
     mnuCreateStaffBulletItemWindow(context);
@@ -401,11 +437,11 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
-    context->windowFlags |= 0x200;
-    context->windowFlags &= ~0x80;
+    context->partyWindow.flags |= 0x200;
+    context->partyWindow.flags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
     menu->firstListState = 0;
-    mnuBeginWindowFadeTransition((s32)menu->windows[2], (s32)context->tail);
+    mnuBeginWindowFadeTransition(menu->windows[2], &context->fade);
     return 1;
 }
 
@@ -413,7 +449,7 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
 s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
-    mnuBeginWindowFadeTransition((s32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ABEB0(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
@@ -477,14 +513,14 @@ s32 mnuStaffListInput(s32 task) {
     if (buttons & MNU_STAFF_INPUT_PREVIOUS_PAGE) {
         pageChanged = 1;
         mnuReleaseSelectedStaffPageResources(task);
-        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->selection);
+        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->partyWindow.lists[0]);
     }
     if (buttons & MNU_STAFF_INPUT_NEXT_PAGE && pageChanged == 0) {
         pageChanged = 1;
         mnuReleaseSelectedStaffPageResources(task);
-        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->selection);
+        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->partyWindow.lists[0]);
     }
-    mnuClearListFlagsOneAndTwo(&((MenuStaffContext *)context)->selection->stateFlags);
+    mnuClearListFlagsOneAndTwo(&((MenuStaffContext *)context)->partyWindow.lists[0]->stateFlags);
     if (pageChanged == 0) {
         return 0;
     }
@@ -522,7 +558,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
 s32 mnuDrawStaffPartyValuePage(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = ((MenuStaffContext *)context)->menu;
-    s32 index = ((MenuStaffContext *)context)->selection->cursor->index;
+    s32 index = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
     DatPartyRecord *partyEntry = &datGameState->party[index];
     MenuWindowContainer *window;
     MenuList *list;
@@ -532,8 +568,7 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
     mnuApplyPackedGroupValues(((MenuStaffContext *)context)->panelHandle, partyEntry->itemId);
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, partyEntry,
                                ((MenuStaffContext *)context)->panelHandle, 0, 0x53);
-    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0,
-                                     (s32)((MenuStaffContext *)context)->tail, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     window = menu->windows[2];
     list = window->list;
     if (list->count != 0) {
@@ -566,10 +601,10 @@ s32 func_002AEA58(s32 task) {
 
 s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    u32 *window = &context->windowFlags;
+    u32 *window = &context->partyWindow.flags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
-    s32 index = context->selection->cursor->index;
-    MenuPageSlot *slot = &((MenuPageWindow *)&context->windowFlags)->slots[index];
+    s32 index = context->partyWindow.lists[0]->cursor->index;
+    MenuPageSlot *slot = &context->partyWindow.slots[index];
 
     mnuSelectPage(window, index);
     mnuCreateOrderedStaffItemWindow(context);
@@ -584,11 +619,11 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
-    context->windowFlags |= 0x200;
-    context->windowFlags &= ~0x80;
+    context->partyWindow.flags |= 0x200;
+    context->partyWindow.flags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
     menu->secondListReset = 0;
-    mnuBeginWindowFadeTransition((s32)menu->windows[3], (s32)context->tail);
+    mnuBeginWindowFadeTransition(menu->windows[3], &context->fade);
     return 1;
 }
 
@@ -596,7 +631,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
 s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
-    mnuBeginWindowFadeTransition((s32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002AC660(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
@@ -669,14 +704,14 @@ s32 mnuHandleStaffSelectionListNavigation(s32 task) {
     if (buttons & MNU_STAFF_INPUT_PREVIOUS_PAGE) {
         pageChanged = 1;
         mnuReleaseStaffSelectionPageResources(task);
-        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->selection);
+        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->partyWindow.lists[0]);
     }
     if (buttons & MNU_STAFF_INPUT_NEXT_PAGE && pageChanged == 0) {
         pageChanged = 1;
         mnuReleaseStaffSelectionPageResources(task);
-        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->selection);
+        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->partyWindow.lists[0]);
     }
-    mnuClearListFlagsOneAndTwo(&((MenuStaffContext *)context)->selection->stateFlags);
+    mnuClearListFlagsOneAndTwo(&((MenuStaffContext *)context)->partyWindow.lists[0]->stateFlags);
     if (pageChanged == 0) {
         return 0;
     }
@@ -714,10 +749,10 @@ s32 mnuExitStaffValuePage(s32 task) {
 
 s32 mnuInitializeStaffValuePage(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    u32 *window = &context->windowFlags;
+    u32 *window = &context->partyWindow.flags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
-    s32 index = context->selection->cursor->index;
-    MenuPageSlot *slot = &((MenuPageWindow *)&context->windowFlags)->slots[index];
+    s32 index = context->partyWindow.lists[0]->cursor->index;
+    MenuPageSlot *slot = &context->partyWindow.slots[index];
 
     mnuSelectPage(window, index);
     mnuCreateOwnedCatalogItemWindow(context);
@@ -732,14 +767,14 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
-    context->windowFlags |= 0x200;
-    context->windowFlags &= ~0x80;
+    context->partyWindow.flags |= 0x200;
+    context->partyWindow.flags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
     menu->thirdListState = 0;
     if (menu->thirdListEnabled != 0) {
         menu->thirdListReset = 0;
     }
-    mnuBeginWindowFadeTransition((s32)menu->windows[4], (s32)context->tail);
+    mnuBeginWindowFadeTransition(menu->windows[4], &context->fade);
     return 1;
 }
 
@@ -747,7 +782,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
 s32 mnuReleaseStaffValuePageResources(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
-    mnuBeginWindowFadeTransition((s32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
+    mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ACA98(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
@@ -810,14 +845,14 @@ s32 mnuHandleStaffValuePageInput(s32 task) {
     if (buttons & MNU_STAFF_INPUT_PREVIOUS_PAGE) {
         pageChanged = 1;
         mnuReleaseStaffValuePageResources(task);
-        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->selection);
+        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->partyWindow.lists[0]);
     }
     if (buttons & MNU_STAFF_INPUT_NEXT_PAGE && pageChanged == 0) {
         pageChanged = 1;
         mnuReleaseStaffValuePageResources(task);
-        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->selection);
+        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->partyWindow.lists[0]);
     }
-    mnuClearListFlagsOneAndTwo(&((MenuStaffContext *)context)->selection->stateFlags);
+    mnuClearListFlagsOneAndTwo(&((MenuStaffContext *)context)->partyWindow.lists[0]->stateFlags);
     if (pageChanged == 0) {
         return 0;
     }
@@ -870,7 +905,7 @@ s32 func_002AFE18(s32 task) {
     s32 result;
     s32 current;
 
-    party = &datGameState->party[context->selection->cursor->index];
+    party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
     result = menuSetHandler(context, 0, (void *)task);
     if (result != 0) {
         return result;
@@ -943,8 +978,8 @@ s32 func_002AFE18(s32 task) {
     } else {
         if (func_002ACAC0(menu->thirdListState, context) == 0) {
             mnuSetPopupEntryFlagged(&context->popupState, D_003E7434);
-            mnuClearActionFlags(0, (u8 *)&context->windowFlags);
-            mnuBeginWindowFadeTransition(0, (s32)context->tail);
+            mnuClearActionFlags(0, &context->partyWindow);
+            mnuBeginWindowFadeTransition(0, &context->fade);
         } else {
             menu->thirdListState = 0;
         }

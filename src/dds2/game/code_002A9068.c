@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dat_state.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 
 extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
 
@@ -44,7 +45,6 @@ extern s32 dds3AdminReadPreviousSignedSample(void);
 
 extern s32 mnuAllocateValueRecord(s32);
 
-extern void mnuInitPartyPanelSlots(s32);
 
 extern void mnuLoadEffectResources(u8 *);
 
@@ -586,7 +586,7 @@ typedef struct StaffResourceHeader {
     u8 pad68[0x8C];
     u32 baseHandles[3];        /* 0x0F4 */
     s32 resourceOptions;        /* 0x100 */
-    u32 resourceLists[3];      /* 0x104 */
+    MenuWindowContainer *resourceLists[3];      /* 0x104 */
 } StaffResourceHeader;
 
 void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unused,
@@ -597,7 +597,6 @@ void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unu
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9BF8);
 
-extern s32 func_002A9BF8(void *, s32, s32, s32, u8 *, void *);
 
 
 
@@ -606,17 +605,14 @@ extern s32 func_002B9FF8(s32, s32, s32);
 
 
 
-extern void mnuSetWindowContainerState(s32, s32);
 
-extern void mnuInitializeWindowFadeState(u8 *);
 
-extern void mnuBeginWindowFadeTransition(s32, u8 *);
 
 extern u8 D_003E56D0[], D_003E56F0[], D_003E5708[], D_003E6978[], D_003E6998[];
 
 void mnuStaffInitResourceLists(u8 *work) {
-    u8 *ctx = work + 0xB10C;
-    s32 list;
+    MenuFadeFields *ctx = &((MenuStaffContext *)work)->fade;
+    MenuWindowContainer *list;
 
     ((StaffResourceHeader *)work)->baseHandles[0] = func_002B9FF8(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
     ((StaffResourceHeader *)work)->baseHandles[1] = func_002B9FF8(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
@@ -632,13 +628,12 @@ void mnuStaffInitResourceLists(u8 *work) {
     mnuBeginWindowFadeTransition(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }
 
-extern void mnuDestroyWindowContainer(u32);
 
 extern void mnuReleaseResourceList(u32);
 
 /* Destroy the menu windows, then release their associated resource lists. */
 void mnuReleaseStaffSpriteAndResourceHandles(u8 *menuBytes) {
-    u32 *windowCursor = ((StaffResourceHeader *)menuBytes)->resourceLists;
+    MenuWindowContainer **windowCursor = ((StaffResourceHeader *)menuBytes)->resourceLists;
     u32 windowIndex;
 
     for (windowIndex = 0; windowIndex < MNU_STAFF_PANEL_COUNT; windowIndex++) {
@@ -725,7 +720,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     } else {
         ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(0);
     }
-    mnuInitPartyPanelSlots((s32)menuBytes + 0xA928);
+    mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);
     mnuEnableCampBadgeFade(effectBytes);
     evtCreateMessageWindowIfMissing((s32)D_003E5778);

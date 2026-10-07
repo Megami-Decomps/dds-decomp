@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "kwln.h"
 #include "evt_world.h"
 #include "mnu_list.h"
@@ -163,7 +164,6 @@ extern s32 sdfResourceRetainAddress(s32);
 
 extern s32 mnuAllocateValueRecord(s32);
 
-extern void mnuInitPartyPanelSlots(PartyPanel *);
 
 extern void mnuAppendCampSpriteRequests(s32, s32);
 

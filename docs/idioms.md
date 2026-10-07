@@ -1704,7 +1704,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     epilogue a second incoming path and the call stays `jal`; tested with a
     one-call body plus one early `return;`; a `return;` AFTER a call, as in switch
     arms, is harmless, see the switch matrix below). Retail's
-    `j btlAppendIndexListEntry` in DDS2 `func_00220B20` therefore means the whole
+    `j btlAppendIndexListEntry` in DDS2 `btlQueueLoneFreeTeamHandle` (`0x00220B20`) therefore means the whole
     body is nested in `if`s, never `if (...) return;`. Same function: "exactly one
     of two flags is clear" matched only as
     `if (!((a == 0 && b == 0) || (a != 0 && b != 0))) { x = (a == 0 ? first : second); ... }`
@@ -1713,6 +1713,11 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     each differ by 3-40 words. Also: a local that is initialised only inside the
     guarding `if` (not at its declaration) lets gcc fill the `beqz` delay slot with
     the first initialisation, as retail does.
+    The current complete-owner source uses `BattleLinkedEffectState.actor`,
+    `BtlUnit.partyRecord.unitId`, and `ActionStateLink.indexWork`; selecting
+    the first unit using its own unavailable flag gives the native `movz`.
+    The 280-byte target is exact and its whole action unit gates **318 match,
+    0 differ**, without a second unit view or raw state offsets.
     Switch matrix (5 arms + default, scratch): arms written `f(); return;` give `j`
     for every arm including a fall-off default, whatever the caller's and callees'
     void/int types; with `break` arms an `int` or implicit-int caller makes EVERY

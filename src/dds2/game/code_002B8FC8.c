@@ -1,4 +1,5 @@
 #include "mnu_list.h"
+#include "mnu_staff.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "eff.h"
@@ -138,7 +139,6 @@ extern void evtStageTestUpdate();
 
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 
-extern void mnuClearActionFlags();
 
 extern char D_003E7790[];
 
@@ -150,14 +150,12 @@ extern char D_003E773C[];
 
 extern void mnuHandlePanelListPageJumpInput();
 
-extern void mnuStepPartyPanelListFromInput();
 extern char D_003E7758[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
 
 extern u32 mnuMapPadMaskToFlags();
 
-extern s32 mnuGetAbilityByteCategory();
 
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -185,9 +183,7 @@ extern void mnuClearEntryFlags();
 extern s32 evtGetCapturedWindowPanelValue();
 
 
-extern void mnuBeginWindowFadeTransition(s32, s32);
 
-extern void mnuInitPartyPanelSlots();
 
 extern s32 func_002B06A8();
 
@@ -215,7 +211,6 @@ extern void mnuCreateStaffImageSprite();
 
 extern void func_002AA7A0();
 
-extern void mnuUpdateAndDrawWindowTransition(s32, s32, s32, s32, s32);
 
 extern void mnuIdleVoiceTimer();
 
@@ -344,7 +339,6 @@ extern s32 *sdfResourceRetainAddress(s32);
 
 extern void func_0026C900(void);
 
-extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 extern void *memset(void *, s32, u32);
 
@@ -414,7 +408,6 @@ void mnuCopyPartyEntries();
 
 
 extern void mnuAssignSelectedPartyEntry();
-extern void func_002BCAB0();
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources.
  * The second loop counts down while the backup byte offset advances forward. */
@@ -1619,9 +1612,9 @@ void mnuInitializeWindowFadeState(MenuFadeFields *menu) {
 }
 
 /* Snapshot the outgoing window and its resources before starting the next fade. */
-void mnuBeginWindowFadeTransition(s32 windowAddress, s32 work) {
-    MenuWindowContainer *window = (MenuWindowContainer *)windowAddress;
-    MenuFadeFields *menu = (MenuFadeFields *)work;
+void mnuBeginWindowFadeTransition(void *windowAddress, void *work) {
+    MenuWindowContainer *window = windowAddress;
+    MenuFadeFields *menu = work;
     if (menu->currentWindow != NULL) {
         menu->previousWindow = *menu->currentWindow;
         menu->previousVisibleCount = menu->currentWindow->list->visibleCount;
@@ -1650,8 +1643,7 @@ void mnuResetWindowFadeParameters(MenuFadeFields *menu) {
     menu->currentProgress = 0;
 }
 
-void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, s32 work, s32 option) {
-    MenuFadeFields *menu = (MenuFadeFields *)work;
+void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, MenuFadeFields *menu, s32 option) {
     f32 t;
 
     if (menu->previousProgress < 0x200) {
@@ -2432,19 +2424,19 @@ void mnuClearPartyPanelActiveFlags(s32 menu) {
     } while (index < 5);
 }
 
-void mnuClearActionFlags(s32 kind, u8 *ctx) {
-    mnuSeekListNode(0, (MenuList *)*(s32 *)(ctx + kind * 4 + 0xa690));
+void mnuClearActionFlags(s32 kind, MenuPageWindow *page) {
+    mnuSeekListNode(0, page->lists[kind]);
     if (kind == 0) {
-        *(u32 *)ctx &= ~2;
-        *(u32 *)ctx &= ~4;
-        *(u32 *)ctx &= ~8;
-        *(u32 *)ctx &= ~0x10;
-        *(u32 *)ctx &= ~0x20;
+        page->flags &= ~2;
+        page->flags &= ~4;
+        page->flags &= ~8;
+        page->flags &= ~0x10;
+        page->flags &= ~0x20;
     } else {
-        *(u32 *)ctx &= ~2;
-        *(u32 *)ctx &= ~8;
-        *(u32 *)ctx &= ~0x10;
-        *(u32 *)ctx &= ~0x20;
+        page->flags &= ~2;
+        page->flags &= ~8;
+        page->flags &= ~0x10;
+        page->flags &= ~0x20;
     }
 }
 
