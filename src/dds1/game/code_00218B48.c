@@ -2004,6 +2004,14 @@ void mdlUpdateViewerSettingsInput(void) {
     }
 }
 
+extern const s32 D_00367B38[];
+extern const char *D_00367B60[];
+extern const char *D_00367B70[];
+extern char D_003BBC90[];
+extern char D_003BBC98[];
+extern char D_003BBCA0[];
+extern char D_003BBCA8[];
+
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE18);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE30);
@@ -2015,14 +2023,6 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE60);
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE70);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE80);
-
-extern const s32 D_00367B38[];
-extern const char *D_00367B60[];
-extern const char *D_00367B70[];
-extern char D_003BBC90[];
-extern char D_003BBC98[];
-extern char D_003BBCA0[];
-extern char D_003BBCA8[];
 
 void func_0021CB80(void) {
     /* The native prologue fills and then indexes these three status bytes
