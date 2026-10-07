@@ -312,9 +312,13 @@ extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
-extern s64 func_001F0998(void);
+typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
+extern s64 func_001F0998(SceneLightRestoreArgs *);
+extern void evtSetUnitStatusFlags(EvtUnit *);
+extern void func_00221D00(EvtUnit *, s32, u32, u32);
+extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
 
-extern s32 func_001F06E0();
+extern s32 func_001F06E0(SceneLightRestoreArgs *);
 
 extern s64 func_001F0B90(void);
 
@@ -4772,14 +4776,14 @@ u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u
 
 void btlApplyLinkedUnitStatusWhenActorActive(s32 arg0) {
     if ((*(u32 *)(*(s32 *)(arg0 + 0xc) + 0x110) & 2) != 0) {
-        evtSetUnitStatusFlags(*(u32 *)(*(s32 *)(arg0 + 0xc) + 800));
+        evtSetUnitStatusFlags(((BtlUnit *)*(u32 *)(arg0 + 0xc))->ext);
         return;
     }
 }
 
 u32 btlApplyUnitFxWhenLoaded(u32 *arg0) {
     if ((*(u64 *)(arg0[3] + 0x110) & 0x1000000002) == 0x1000000002) {
-        func_00221D00(*(u32 *)(arg0[3] + 800), arg0[2], *arg0, arg0[1]);
+        func_00221D00(((BtlUnit *)arg0[3])->ext, arg0[2], *arg0, arg0[1]);
     }
     return 1;
 }
@@ -4803,7 +4807,7 @@ u8 *btlCreateUnitTask0F(u8 *unit, s32 arg1, s32 arg2, s32 arg3) {
 
 void btlPrepareUnitStatusFxOnStart(s32 arg0) {
     if ((*(u32 *)(*(s32 *)(arg0 + 0x14) + 0x110) & 2) != 0) {
-        evtSetUnitStatusFlags(*(u32 *)(*(s32 *)(arg0 + 0x14) + 800));
+        evtSetUnitStatusFlags(((BtlUnit *)*(u32 *)(arg0 + 0x14))->ext);
         return;
     }
 }
@@ -4812,7 +4816,7 @@ u32 btlApplyUnitVectorFxWhenLoaded(u8 *arguments) {
     u8 *object = *(u8 **)(arguments + 0x14);
     if ((*(u32 *)(object + 0x110) & 2) != 0) {
         VU0_LOAD_VF(vf10, arguments);
-        evtSetUnitNormalizedDirection(*(s32 *)(object + 0x320), *(s32 *)(arguments + 0x10));
+        evtSetUnitNormalizedDirection(((BtlUnit *)object)->ext, *(s32 *)(arguments + 0x10));
     }
     return 1;
 }
@@ -8820,10 +8824,6 @@ void btlTickFieldSwayAndTint(void) {
     btlDrawTintIfVisible();
 }
 
-typedef struct BattleWorldTransitionWork {
-    u8 pad00[0x204];
-    s32 listener;
-} BattleWorldTransitionWork;
 
 struct WorldTransformOwner;
 struct WorldUnitOwner;
@@ -8832,7 +8832,7 @@ extern void dds3LoadWorldTransformSetup(struct WorldTransformOwner *, WorldTrans
 extern void evtBeginUnitValueColorTransition(struct WorldUnitOwner *, s32);
 
 void func_001EFD58(f32 *position, f32 *scale, s32 value) {
-    BattleWorldTransitionWork *work = (BattleWorldTransitionWork *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     s32 listener = work->listener;
 
     D_003D74A0.transform.position[0] = position[0];
@@ -9134,34 +9134,96 @@ void *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F06E0);
+s32 func_001F06E0(SceneLightRestoreArgs *args) {
+    BtlState *work;
+    BtlUnit *unit;
+    s32 listener;
+    u32 firstColor;
+    u32 secondColor;
+    u32 packedStart[4];
+    u32 packedEnd[4];
 
-void *func_001F0920(owner)
-    u32 owner;
-{
-    u8 *task = btlAllocTask(4);
-    u32 *arguments;
+    if (D_003BB694 == 0) {
+        return 1;
+    }
+    D_003BB694--;
+    if (D_003BB694 == 0) {
+        work = (BtlState *)btlGetRuntime();
+        if (work->battleFlags & 0x20000000) {
+            return 1;
+        }
+        if (D_00324770[0][0] == 0.0f && D_00324770[0][1] == 0.0f && D_00324770[0][2] == 0.0f) {
+            VEC3_SPLAT(D_00324770[0], 0.0078125f);
+        }
+        listener = work->listener;
+        D_003D74A0.transform.position[0] = work->baselineLightColor[0];
+        D_003D74A0.transform.position[1] = work->baselineLightColor[1];
+        D_003D74A0.transform.position[2] = work->baselineLightColor[2];
+        D_003D74A0.transform.scale[0] = work->baselineAmbientColor[0];
+        D_003D74A0.transform.scale[1] = work->baselineAmbientColor[1];
+        D_003D74A0.transform.scale[2] = work->baselineAmbientColor[2];
+        D_003D74A0.unk00 = 0;
+        D_003D74A0.flags = 0;
+        D_003D74A0.mode = 0;
+        D_003D74A0.transform.rotation[0] = 0.0f;
+        D_003D74A0.transform.rotation[1] = 0.0f;
+        D_003D74A0.transform.rotation[2] = 0.0f;
+        D_003D74A0.transform.rotation[3] = 0.0f;
+        dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_003D74A0);
+        evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->listener, args->value);
+        PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);
+        PCP_COPY_VECTOR_F32(work->ambientColor, work->baselineAmbientColor);
+        PCP_COPY_VECTOR_F32(work->lightDirection, work->baselineLightDirection);
+        for (unit = work->units; unit != NULL; unit = unit->next) {
+            if (!(unit->flags & 2)) {
+                continue;
+            }
+            if (!(unit->stateFlags & 0x10)) {
+                continue;
+            }
+            if (unit->ext != NULL) {
+                evtSetUnitStatusFlags(unit->ext);
+                VU0_LOAD_VF(vf10, unit->colorStart);
+                EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+                firstColor = packedStart[0];
+                VU0_LOAD_VF(vf10, unit->colorEnd);
+                EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+                secondColor = packedEnd[0];
+                func_00221D00(unit->ext, args->value, firstColor, secondColor);
+                VU0_LOAD_VF(vf10, unit->lightDirection);
+                evtSetUnitNormalizedDirection(unit->ext, args->value);
+            }
+        }
+        D_00324770[0][4] = work->baselineLightDirection[0];
+        D_00324770[0][5] = work->baselineLightDirection[1];
+        D_00324770[0][6] = work->baselineLightDirection[2];
+    }
+    return 1;
+}
 
-    task[0] = 1;
-    task[0x10] = 0;
-    *(u16 *)(task + 0x20) = 4;
-    *(u16 *)(task + 0x24) |= 2;
-    *(void **)(task + 0x4C) = func_001F06E0;
-    *(u32 *)(task + 0x48) = 0;
-    arguments = (u32 *)btlGetTaskArguments((s32)task);
-    arguments[0] = owner;
+BtlRuntimeTask *func_001F0920(u32 value) {
+    BtlRuntimeTask *task = btlAllocTask(4);
+    SceneLightRestoreArgs *arguments;
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->taskId = 4;
+    task->flags |= 2;
+    task->callback = func_001F06E0;
+    task->onStart = 0;
+    arguments = (SceneLightRestoreArgs *)btlGetTaskArguments((s32)task);
+    arguments->value = value;
     return task;
 }
 
-s64 func_001F0998(void) {
+s64 func_001F0998(SceneLightRestoreArgs *arguments) {
     D_003BB694 = 1;
-    return func_001F06E0();
+    return func_001F06E0(arguments);
 }
 
-SoundTask *btlCreateSoundUpdateTask(void) {
-    SoundTask *task = (SoundTask *)func_001F0920();
+BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value) {
+    BtlRuntimeTask *task = func_001F0920(value);
     task->taskId = 7;
-    task->callback.update = func_001F0998;
+    task->callback = func_001F0998;
     return task;
 }
 
