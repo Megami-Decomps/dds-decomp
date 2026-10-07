@@ -1064,6 +1064,14 @@ vertex: keep the element count distinct from the copied byte stride.
   `extern char D_X[]` with their `INCLUDE_SDATA` line: a literal moves to
   `.rodata` and breaks the ELF even when check_unit passes.
 
+DDS1 `func_0020B640` is a concrete negative-literal example: retail loads
+`D_003B98D8` from `.lit4` as `0xBDCCCCCC`, which cc1 reproduces from `-0.1f`.
+Calling the camera routine with that literal preserves the float-constant
+scheduling and matches its 304-byte dispatch and 40-entry jump table.
+An external float declaration instead moves the pool load and the command
+argument setup. The command owns the output pose at offset zero, so the
+typed call passes `&command->camera`, not a second object-prefix view.
+
 ## 128-bit data
 
 `int __attribute__((mode(TI)))` (u128) copies give `lq`/`sq`. gcc fills the
@@ -2500,4 +2508,88 @@ returns are text-exact. The arrays replace their two source
 word into the party-record pointer at the consumer boundary. The full
 unit gate preserves all 23 compiled functions without instruction or
 delay-slot forcing.
+
+## Timeline registration slots belong to script storage
+
+DDS1 `func_00243F48` (`0x00243F48`, 268 bytes plus four bytes of padding)
+selects the first type-4 `CampKeyTrack` and checks its keys against the
+scene's current frame. The ten registration slots at game-state
+`+0x360..+0x384` are existing `DatScriptGlobals.ints[200..209]`, not a
+second game-state layout or `CampScene.registeredIds`.
+
+Reuse the primary track/key records and `mnuUnpackNibbleFields`. Its two
+output parameters are real work even though only the high nibble is used
+here. An absent eligible key clears the corresponding script register
+only if it is not already `-1`. This ordinary nested traversal is
+text-exact; the whole current DDS1 unit gate preserved all 66 compiled
+functions with no context, data, or undefined-symbol diagnostics.
+
+DDS2 `func_0025F330` is the 268-byte instruction twin and reuses the
+current DDS1 traversal unchanged. Its script-slot count remains ten even
+though DDS2's separate `CampScene.registeredIds` registry holds twenty;
+keep those two limits distinct. The full DDS2 unit gate preserves all
+86 compiled functions with no context, data, or undefined-symbol diagnostics.
+
+## Sparse resource cases preserve motion-selector range trees
+
+DDS2 `func_00218520` (`0x00218520`, 268 bytes plus four bytes of padding)
+uses selectors 16/17 to restore saved motion parameters for resource IDs
+`0x104..0x106` and `0x138..0x13A`. A single six-case switch reproduces
+the native range tree; a compound pair of range expressions does not.
+The resource-ID snapshot has the unsigned domain shown by all four
+native `sltiu` comparisons. Retain the shared actor record and its
+existing resource-index field rather than introducing an alternate view.
+
+The motion state belongs to `BtlUnit.ext`, its model to `EvtUnit.owner`,
+and its sampled speed to `Motion.frameStep`. The API accepts five integer
+arguments followed by a float; treating the fifth integer mode as absent
+loses the override carried in `$8`. Its actual callees are the void
+`evtPrepareUnitMotionState`, `mdlAddEntryFlagged`, and
+`sdfMotionSampleAtFrame` providers. The stable whole-unit overlay gate
+preserved all 316 current C functions with no data or context diagnostics.
+
+## Ready-first battle light callbacks preserve the wait counter
+
+DDS1 `btlUnitBaseLightTask` (`0x001D9820`, 280 bytes) runs the lighting
+work only for an active unit whose signed delay has reached two. The
+ready arm returns completion immediately; otherwise the active wait arm
+increments its counter and returns zero. This ordinary ready-first
+control flow reproduces the native branch-likely increment-store delay
+slot. Early-return wait guards instead overrun the next function.
+
+Use `BtlUnit.ext` and the primary `EffWorldNode` payload. The existing
+`EvtUnit.currentTransitionValue` word carries a slot-9 node address when
+flag `0x40000` is set, as also shown by `evtUnitManager.c`. Its light
+payload uses that module's `EvtTargetInfo` layout: first colour at zero,
+direction at `0x10`, and second colour at `0x40`. The six copies use the
+existing Sony-compatible `PCP_COPY_VECTOR` primitive, not new game-code
+assembly. Retain both target-owned diagnostic strings as literals so
+the complete unit's data remains exact.
+
+The creator's eight-byte argument block contains the unit pointer and
+signed delay. Its owner identity comes from `BtlUnit.identity`; no second
+owner view is needed. The complete current DDS1 unit gate preserved all
+569 C functions with no context, data, or undefined-symbol diagnostics.
+The 280-byte DDS2 instruction twin is `0x001E67E0`.
+
+## Camp option availability uses signed halfword flags
+
+DDS2 `func_00260020` (`0x00260020`, 280 bytes) copies a seven-entry,
+28-byte enable configuration, queries availability modes one and three,
+and enables additional options from the shop's message-set ID and
+`DatGameState.progressTotal`. The query provider takes only the scene
+and mode; the remaining caller registers are not extra arguments.
+
+The primary `MenuTerminalContext.unkA0`, `unkA2`, and `unkA4` fields
+are signed halfwords: the native five boolean loads use `lh`, not
+`lhu`. Recover their types rather than casting each predicate. The
+unit-local `CampFlagRow.messageSet` is an unsigned resource ID; grouped
+switch cases one through three reproduce its `sltiu` and zero exclusion.
+
+The resulting window belongs to `ownedWindows[0]` at `+0x7C`, not the
+separate optional `window` at `+0x80`. Its destructor already distinguishes
+those owners. The target and complete DDS2 unit are text/data exact
+(`87 match, 0 differ`); a serialized gate of all 66 direct and indirect
+`mnu.h` source includers preserved every compiled C function with no
+context, data, or undefined-symbol diagnostics.
 

@@ -597,9 +597,9 @@ typedef struct MenuTerminalContext {
     s32 dispatchMode;
     u8 pad98[4];
     s32 availableCount;
-    u16 unkA0;
-    u16 unkA2;
-    u16 unkA4;
+    s16 unkA0;
+    s16 unkA2;
+    s16 unkA4;
     u16 selectedSlot;
     u32 rewardCursor;
     u32 options;
