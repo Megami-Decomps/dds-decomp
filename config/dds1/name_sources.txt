@@ -465,7 +465,7 @@
 0x00112868	dds3GetSlot1Data	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112888	dds3GetObjectOwnedHandle	inferred	switch on the object subtype byte at +0x0F dispatches to the six per-type handle getters; returns 0 for other subtypes [names_L13_FinishUnits.tsv]
 0x00112930	dds3SetOwnedWorldInnerValue	inferred	Stores a value in the owned inner world-object state. [names_reviewed10.tsv]
-0x00112958	dds3CreateWorldInnerState	inferred	Allocates 0x90-byte inner state, stores owner handle and initializes flags.
+0x00112958	dds3CreateCameraData	inferred	Camera kind-4 creation callback: creates the node transform, allocates CameraData, attaches its ObjBase handle and clears the pending-FOV flag.
 0x001129B8	dds3DestroyCameraData	inferred	Releases the camera data handle then frees the camera data allocation.
 0x001129F8	dds3UpdateCameraObject	inferred	Updates a changed camera transform, publishes the selected camera vectors, and applies a pending field-of-view change.
 0x00112AE8	dds3RebuildCameraBasis	inferred	Transforms the camera eye and up vectors through its inner node and rebuilds the look-at basis.
