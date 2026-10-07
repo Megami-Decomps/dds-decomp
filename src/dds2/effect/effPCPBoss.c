@@ -139,7 +139,7 @@ extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
 extern EffRecordPool *func_00177760(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
-extern EffBossColorSlot *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
+extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);

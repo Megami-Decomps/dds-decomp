@@ -626,7 +626,7 @@ void effFlashRotatingStreakSetRenderScale(PcpFlashStreakWork *work, f32 value)
     work->renderScale = value;
 }
 
-extern s32 effGetIndexedEffectGroupIndexEntry();
+extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 
 typedef struct PcpFlashQuadColorSlot {
     s32 color[5];
@@ -638,7 +638,7 @@ void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 flag,
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -916,7 +916,7 @@ void effFlashOrbitScalingSetParticleColors(PcpFlashScalingOrbitWork *work, s32 f
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -1671,7 +1671,7 @@ void effFlashRotatingQuadSetParticleColors(PcpFlashRotatingQuadWork *work, s32 f
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -2386,7 +2386,7 @@ void effFlashFadingOrbitSetParticleColors(PcpFlashFadingOrbitWork *work, s32 fla
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);

@@ -639,7 +639,7 @@ void effFlashRotatingStreakSetRenderScale(PcpFlashStreakWork *work, f32 value)
     work->renderScale = value;
 }
 
-extern s32 effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
+extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 
 void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 index, s32 param)
 {
