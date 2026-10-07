@@ -220,7 +220,43 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFE78);
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0038);
+s32 func_002C0038(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+    GridAngleTable *table;
+    s32 deltas[2];
+    EffectSlotGeometry *geometry = &out->geometry;
+    s32 *dimensions = geometry->bounds;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 factor;
+    s32 i = 0;
+
+    table = (GridAngleTable *)((EffMappedRecord *)owner->source)->status;
+    deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
+    deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
+    for (; i < 2; i++) {
+        s32 delta = deltas[i];
+        s32 magnitude = delta < 0 ? -delta : delta;
+        s32 amount = magnitude * owner->value / 0x10000;
+        if (delta > 0) {
+            dimensions[i] = delta - amount;
+        } else {
+            dimensions[i] = delta + amount;
+        }
+    }
+    factor = ((100 - table->mirrored) << 16) / 100;
+    destColor = geometry->cornerColors;
+    sourceColor = rectangle->savedColors;
+    for (i = 0; i < 4; i++, destColor++, sourceColor++) {
+        if (owner->value < factor) {
+            u32 color = *sourceColor;
+            s32 alpha = *(u8 *)sourceColor;
+            *destColor = (color & ~0xFF) | (alpha * owner->value / factor);
+        } else {
+            *destColor = *sourceColor;
+        }
+    }
+    return 0x10000 / table->divisor;
+}
 
 
 s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *owner) {

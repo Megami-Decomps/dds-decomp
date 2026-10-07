@@ -514,7 +514,7 @@ extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlUnit *);
 extern void btlClearSceneTaskActiveFlag(ActionStateLink *);
 
-extern s32 btlCheckSpecialAbility(s32, s32);
+extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void func_001AA868(void *, s32);
 extern s32 btlCountTasksByKind(u16 kind);
 extern void btlRepositionPartyAroundBattleCenter(void);
@@ -1165,7 +1165,7 @@ u32 func_001E02A8(s32 address) {
     if (args->actor->flags & 0x400) {
         return 1;
     }
-    if (btlCheckSpecialAbility((s32)&args->actor->partyRecord, 0x26C)) {
+    if (btlCheckSpecialAbility(&args->actor->partyRecord, 0x26C)) {
         count = 0;
         record = btlGetIndexedPartyEntryRecord(args->actor->unk2E4);
         record->huntExp += args->amount;

@@ -1097,46 +1097,48 @@ s32 btlHasOtherGroup400DifferentUnitMode(BtlUnit *actor, s32 kind) {
     return 0;
 }
 
+extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
+
 s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
-    s32 unit = (s32)((BtlState *)btlGetRuntime())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 0) {
             return 1;
         }
-        unit = (s32)((BtlUnit *)unit)->next;
+        unit = unit->next;
     }
     return 0;
 }
 
 s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
-    s32 unit = (s32)((BtlState *)btlGetRuntime())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
             return 0;
         }
-        unit = (s32)((BtlUnit *)unit)->next;
+        unit = unit->next;
     }
     return 1;
 }
 
 s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
-    s32 unit = (s32)((BtlState *)btlGetRuntime())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == 0) {
             return 1;
         }
-        unit = (s32)((BtlUnit *)unit)->next;
+        unit = unit->next;
     }
     return 0;
 }
 
 s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
-    s32 unit = (s32)((BtlState *)btlGetRuntime())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == 1) {
             return 0;
         }
-        unit = (s32)((BtlUnit *)unit)->next;
+        unit = unit->next;
     }
     return 1;
 }
@@ -1310,15 +1312,15 @@ s32 btlIsHistoryCounterEmpty(void) {
     return btlHistoryCounter < 1;
 }
 
-extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
+extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
 s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
-    s32 unit = (s32)((BtlState *)btlGetRuntime())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (btlUnitBlocksElementQuery(unit, action, 0x200) != 0) {
             return 1;
         }
-        unit = (s32)((BtlUnit *)unit)->next;
+        unit = unit->next;
     }
     return 0;
 }
@@ -1360,12 +1362,12 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
     return 0;
 }
 
-extern s32 btlHasEnabledSpecialAbilityForSlot(void *, s32);
+extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
 extern s32 fldGetSelectedUnitStat();
 
-s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
-    u32 flags = ((BtlUnit *)unit)->flags;
+s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
+    u32 flags = unit->flags;
     s32 stat;
     s32 value;
     if (flags & 1) {
@@ -1379,17 +1381,17 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                         if (index == 0x80) {
                             continue;
                         }
-                        value = func_001A2F50((BtlUnit *)unit, index);
-                        if (btlHasEnabledSpecialAbilityForSlot((void *)unit, index) != 0 || (value & 0x20000) ||
-                            (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, index) != 0)) {
+                        value = func_001A2F50(unit, index);
+                        if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0 || (value & 0x20000) ||
+                            (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, index) != 0)) {
                             return 1;
                         }
                     }
                     return 0;
                 }
-                value = func_001A2F50((BtlUnit *)unit, action);
-                if (btlHasEnabledSpecialAbilityForSlot((void *)unit, action) != 0 || (value & 0x20000) ||
-                    (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, action) != 0)) {
+                value = func_001A2F50(unit, action);
+                if (btlHasEnabledSpecialAbilityForSlot(unit, action) != 0 || (value & 0x20000) ||
+                    (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, action) != 0)) {
                     return 1;
                 }
             }
@@ -1402,14 +1404,13 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00202158);
 
 extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
-extern s32 btlHasMappedSpecialAbilityForSlot(void *, s32);
+extern s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 btlHasSpecialAbilityWhenArgumentUnset(void *, s32);
+extern u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *, s64);
 
-extern s32 btlHasEnabledSpecialAbilityForSlot(void *, s32);
 
-s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
-    u32 flags = ((BtlUnit *)unit)->flags;
+s32 btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
+    u32 flags = unit->flags;
     if (flags & 1) {
         if (flags & mask) {
             if (!(flags & 0x20)) {
@@ -1442,23 +1443,23 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
 }
 
 s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
-    s32 node = (s32)((BtlState *)btlGetRuntime())->units;
+    BtlUnit *node = ((BtlState *)btlGetRuntime())->units;
     while (node != 0) {
         if (btlUnitBlocksElementQueryForGroup(node, action, 0x200) == 0) {
             return 0;
         }
-        node = (s32)((BtlUnit *)node)->next;
+        node = node->next;
     }
     return 1;
 }
 
 s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
-    s32 node = (s32)((BtlState *)btlGetRuntime())->units;
+    BtlUnit *node = ((BtlState *)btlGetRuntime())->units;
     while (node != 0) {
         if (btlUnitBlocksElementQueryForGroup(node, action, 0x400) == 0) {
             return 0;
         }
-        node = (s32)((BtlUnit *)node)->next;
+        node = node->next;
     }
     return 1;
 }

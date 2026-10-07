@@ -472,7 +472,9 @@ s32 btlGetLoggedIndexedCommandItem(s32 index);
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
-s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *actor, s32 delta);
+extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
+
+s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 /* Set the actor's selected entry index. */ void btlSetActorSelectedEntryIndex(s32 actor, u32 index);
 
@@ -1007,7 +1009,7 @@ void func_001C9098(BattleActionLinkState *link) {
             break;
         }
         scale = 1.0f;
-        if (btlCheckSpecialAbility((s32)&unit->partyRecord, 0x232)) {
+        if (btlCheckSpecialAbility(&unit->partyRecord, 0x232)) {
             scale = datAbilityParameters[0x232 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         chance = chance * scale;
@@ -1579,7 +1581,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
             }
         }
         if (task->indexWork.stage == 4) {
-            if (!btlCheckSpecialAbility((s32)&unit->partyRecord, 0x231)) {
+            if (!btlCheckSpecialAbility(&unit->partyRecord, 0x231)) {
                 btlStartTask(btlCreateEffObjB(unit, task->indexWork.parameter));
                 task->indexWork.stage = 0;
             } else {
@@ -1929,9 +1931,11 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001CF7A0);
 
-void btlRecordLinkedActorOutcome(s32 object) {
+extern s32 func_001A8640(BtlUnit *);
+
+void btlRecordLinkedActorOutcome(BtlTask *object) {
     s32 context = btlGetRuntime();
-    s32 target = *(s32 *)(object + 0x18);
+    BtlUnit *target = object->unit;
     *(s32 *)(context + 0x254) += 1;
     if (func_001A8640(target)) {
         *(u32 *)(context + 0x1F4) |= 0x2000;
@@ -2707,7 +2711,7 @@ u32 btlApplyDeferredActorStats(u8 *arguments) {
     btlAdjustUnitHp(resource, primary);
     btlAdjustUnitMp(resource, *(s32 *)(arguments + 0x24));
     btlRefreshUnitMotionSelection(actor);
-    btlIsUnitDefeatTriggeredByValueDelta(actor, 0);
+    btlIsUnitDefeatTriggeredByValueDelta((BtlUnit *)actor, 0);
     return 1;
 }
 
@@ -2736,7 +2740,7 @@ u32 btlApplyDeferredUnitStatus(void *argument) {
     }
     func_001A1948(&((BtlUnit *)owner)->partyRecord, args[1]);
     btlRefreshUnitMotionSelection(owner);
-    btlIsUnitDefeatTriggeredByValueDelta(owner, 0);
+    btlIsUnitDefeatTriggeredByValueDelta((BtlUnit *)owner, 0);
     return 1;
 }
 
@@ -2898,7 +2902,7 @@ u32 func_001D3688(s32 address) {
     if (args->actor->flags & 0x400) {
         return 1;
     }
-    if (btlCheckSpecialAbility((s32)&args->actor->partyRecord, 0x24C)) {
+    if (btlCheckSpecialAbility(&args->actor->partyRecord, 0x24C)) {
         count = 0;
         record = btlGetIndexedPartyEntryRecord(args->actor->unk2C4);
         record->huntExp += args->amount;
@@ -4014,7 +4018,7 @@ void btlRefreshUnitMotionSelection(u8 *unit) {
             index = selected;
         }
     }
-    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0 &&
+    if (btlIsUnitDefeatTriggeredByValueDelta((BtlUnit *)unit, 0) != 0 &&
         ((*(u32 *)(unit + 0x110) & 0x200) || (entryFlags & 0x200)) &&
         ((*(u32 *)(unit + 0x114) & 0x40) == 0)) {
         index = 11;

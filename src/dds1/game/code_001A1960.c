@@ -181,7 +181,10 @@ extern BattleCmdPanel *btlCommandPanelWork;
 
 extern s32 func_001A8DD8(s32, s32 *);
 
-extern s32 btlCheckSpecialAbility(s32, s32);
+extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
+extern s32 datUnitHasSkill(DatPartyRecord *, s32);
+extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
+extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
 extern void func_001B83D8(BtlTask *, s8, s8);
 
@@ -377,7 +380,7 @@ u32 func_001A29D0(s32 arg0, s32 arg1) {
     return datGetStatWithStatusOverride(arg0, arg1);
 }
 
-s32 btlApplyCommandAbilityMultiplier(s32 arg0, s32 arg1) {
+s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1) {
     u32 value = datCalculateCommandBaseValue(arg0, arg1);
     f32 scale;
 
@@ -434,7 +437,7 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
         return 0;
     }
 
-    cost = btlApplyCommandAbilityMultiplier((s32)&unit->partyRecord, command);
+    cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
     switch (*(u8 *)(datCommandRecords + command * 56 + 3)) {
     case 1:
         if ((*(u8 *)(datCommandRecords + command * 56) & 8) == 0) {
@@ -474,7 +477,7 @@ s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUni
     average = totalMaxHp / count;
     snapshot.maxHp = average;
     snapshot.hp = average;
-    return btlApplyCommandAbilityMultiplier((s32)&snapshot, command);
+    return btlApplyCommandAbilityMultiplier(&snapshot, command);
 }
 
 
@@ -666,7 +669,7 @@ s32 func_001A4060(s32 flag) {
     return datFlagToElementIndex(flag);
 }
 
-s32 btlCheckSpecialAbility(s32 object, s32 flag) {
+s32 btlCheckSpecialAbility(DatPartyRecord *object, s32 flag) {
     if (datUnitHasSkill(object, flag) == 0) {
         return 0;
     }
@@ -1129,47 +1132,47 @@ void btlTickActorEntryCountdowns(u8 *scene) {
     }
 }
 
-f32 func_001A5030(u8 *actor, s32 attr) {
+f32 func_001A5030(BtlUnit *actor, s32 attr) {
     f32 scale = 1.0f;
 
     switch (attr) {
     case 2:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x20D)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x20D)) {
             scale *= datAbilityParameters[0x20D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x212)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x212)) {
             scale *= datAbilityParameters[0x212 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case 3:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x20E)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x20E)) {
             scale *= datAbilityParameters[0x20E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x213)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x213)) {
             scale *= datAbilityParameters[0x213 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case 4:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x20F)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x20F)) {
             scale *= datAbilityParameters[0x20F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x214)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x214)) {
             scale *= datAbilityParameters[0x214 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case 5:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x210)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x210)) {
             scale *= datAbilityParameters[0x210 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x215)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x215)) {
             scale *= datAbilityParameters[0x215 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case 6:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x211)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x211)) {
             scale *= datAbilityParameters[0x211 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x216)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x216)) {
             scale *= datAbilityParameters[0x216 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
@@ -1177,47 +1180,47 @@ f32 func_001A5030(u8 *actor, s32 attr) {
     return scale;
 }
 
-s32 btlGetAbilityAttributeMultiplierPercent(u8 *actor, s32 attr) {
+s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr) {
     u32 value = 100;
 
     switch (attr) {
     case 0:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23C)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x23C)) {
             value = (u32)(datAbilityParameters[0x23C - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 2:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23D)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x23D)) {
             value = (u32)(datAbilityParameters[0x23D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 3:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23E)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x23E)) {
             value = (u32)(datAbilityParameters[0x23E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 4:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x23F)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x23F)) {
             value = (u32)(datAbilityParameters[0x23F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 5:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x240)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x240)) {
             value = (u32)(datAbilityParameters[0x240 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 6:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x241)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x241)) {
             value = (u32)(datAbilityParameters[0x241 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 8:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x242)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x242)) {
             value = (u32)(datAbilityParameters[0x242 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
     case 9:
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x243)) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, 0x243)) {
             value = (u32)(datAbilityParameters[0x243 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)value);
         }
         break;
@@ -1225,63 +1228,63 @@ s32 btlGetAbilityAttributeMultiplierPercent(u8 *actor, s32 attr) {
     return value;
 }
 
-s32 btlHasMappedSpecialAbilityForSlot(s32 unit, u32 slot) {
-    if (slot == 0 && btlCheckSpecialAbility(unit + 0x120, 0x24F) != 0) {
+s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
+    if (slot == 0 && btlCheckSpecialAbility(&unit->partyRecord, 0x24F) != 0) {
         return 1;
     }
-    if (slot == 8 && btlCheckSpecialAbility(unit + 0x120, 0x251) != 0) {
+    if (slot == 8 && btlCheckSpecialAbility(&unit->partyRecord, 0x251) != 0) {
         return 1;
     }
-    if (slot == 9 && btlCheckSpecialAbility(unit + 0x120, 0x252) != 0) {
+    if (slot == 9 && btlCheckSpecialAbility(&unit->partyRecord, 0x252) != 0) {
         return 1;
     }
-    if (slot == 10 && btlCheckSpecialAbility(unit + 0x120, 0x244) != 0) {
+    if (slot == 10 && btlCheckSpecialAbility(&unit->partyRecord, 0x244) != 0) {
         return 1;
     }
-    if (slot == 11 && btlCheckSpecialAbility(unit + 0x120, 0x245) != 0) {
+    if (slot == 11 && btlCheckSpecialAbility(&unit->partyRecord, 0x245) != 0) {
         return 1;
     }
-    if (slot == 12 && btlCheckSpecialAbility(unit + 0x120, 0x246) != 0) {
+    if (slot == 12 && btlCheckSpecialAbility(&unit->partyRecord, 0x246) != 0) {
         return 1;
     }
-    if (slot == 13 && btlCheckSpecialAbility(unit + 0x120, 0x247) != 0) {
+    if (slot == 13 && btlCheckSpecialAbility(&unit->partyRecord, 0x247) != 0) {
         return 1;
     }
-    if (slot == 14 && btlCheckSpecialAbility(unit + 0x120, 0x248) != 0) {
+    if (slot == 14 && btlCheckSpecialAbility(&unit->partyRecord, 0x248) != 0) {
         return 1;
     }
     if (slot < 0xF) {
-        if (slot >= 0xA && btlCheckSpecialAbility(unit + 0x120, 0x253) != 0) {
+        if (slot >= 0xA && btlCheckSpecialAbility(&unit->partyRecord, 0x253) != 0) {
             return 1;
         }
     }
     if (slot < 7) {
-        if (slot >= 2 && btlCheckSpecialAbility(unit + 0x120, 0x257) != 0) {
+        if (slot >= 2 && btlCheckSpecialAbility(&unit->partyRecord, 0x257) != 0) {
             return 1;
         }
     }
-    if (slot != 7 && btlCheckSpecialAbility(unit + 0x120, 0x249) != 0) {
+    if (slot != 7 && btlCheckSpecialAbility(&unit->partyRecord, 0x249) != 0) {
         return 1;
     }
     return 0;
 }
 
-u32 btlHasSpecialAbilityWhenArgumentUnset(s32 arg0, s64 arg1) {
-    if (arg1 == 0 && btlCheckSpecialAbility(arg0 + 0x120, 0x254) != 0) {
+u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1) {
+    if (arg1 == 0 && btlCheckSpecialAbility(&arg0->partyRecord, 0x254) != 0) {
         return 1;
     }
     return 0;
 }
 
-s32 btlHasEnabledSpecialAbilityForSlot(s32 unit, u32 slot) {
-    if (slot == 8 && btlCheckSpecialAbility(unit + 0x120, 0x255)) {
+s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
+    if (slot == 8 && btlCheckSpecialAbility(&unit->partyRecord, 0x255)) {
         return 1;
     }
-    if (slot == 9 && btlCheckSpecialAbility(unit + 0x120, 0x256)) {
+    if (slot == 9 && btlCheckSpecialAbility(&unit->partyRecord, 0x256)) {
         return 1;
     }
     if (slot < 7) {
-        if (slot >= 2 && btlCheckSpecialAbility(unit + 0x120, 0x258)) {
+        if (slot >= 2 && btlCheckSpecialAbility(&unit->partyRecord, 0x258)) {
             return 1;
         }
     }
@@ -1669,19 +1672,19 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
         return 100;
     }
     value = func_001A2F50(unit, index);
-    ratio = btlGetAbilityAttributeMultiplierPercent((u8 *)unit, index);
+    ratio = btlGetAbilityAttributeMultiplierPercent(unit, index);
     if (ratio != 100) {
         ratio = (u16)value * ratio / 100;
         value = (value & 0xFFFF0000) | ratio;
         value &= 0x7FFFFFFF;
     }
-    if (btlHasEnabledSpecialAbilityForSlot((s32)unit, index) != 0) {
+    if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
         value |= 0x20000;
     }
-    if (btlHasSpecialAbilityWhenArgumentUnset((s32)unit, index) != 0) {
+    if (btlHasSpecialAbilityWhenArgumentUnset(unit, index) != 0) {
         value |= 0x40000;
     }
-    if (btlHasMappedSpecialAbilityForSlot((s32)unit, index) != 0) {
+    if (btlHasMappedSpecialAbilityForSlot(unit, index) != 0) {
         value |= 0x10000;
     }
     btlBossDebugPrintf("btl:aisyo=%d%%[%X][ratio=%d]\n",
@@ -1804,23 +1807,23 @@ u32 func_001A7ED8(void) {
 
 extern char D_003A1C10[]; /* "btl:hunt mp rec[%d]\n" */
 
-s32 btlCalculateAbilityRecoveryAmount(u8 *actor) {
+s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor) {
     s32 recovery = 0;
-    if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x24E)) {
-        recovery = (s32)(*(u16 *)(actor + 0x12C) * datAbilityParameters[0x24E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
-    } else if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x229)) {
-        recovery = (s32)(*(u16 *)(actor + 0x12C) * datAbilityParameters[0x229 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
+    if (btlCheckSpecialAbility(&actor->partyRecord, 0x24E)) {
+        recovery = (s32)(actor->partyRecord.maxMp * datAbilityParameters[0x24E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
+    } else if (btlCheckSpecialAbility(&actor->partyRecord, 0x229)) {
+        recovery = (s32)(actor->partyRecord.maxMp * datAbilityParameters[0x229 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
     }
     btlBossDebugPrintf(D_003A1C10, recovery);
     return recovery;
 }
 
-s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *actor, s32 delta) {
-    if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)actor)->partyRecord) & 4) return 0;
-    if (btlHasEnemyRecordDefeatExemptionFlag((s32)actor)) return 0;
-    if ((((BtlUnit *)actor)->partyRecord.status & 0x7FFF) == 0x4000) return 1;
+s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta) {
+    if (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 4) return 0;
+    if (btlHasEnemyRecordDefeatExemptionFlag(actor)) return 0;
+    if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 1;
     if ((*(u32 *)(btlGetRuntime() + 0x1F4) & 0x80) == 0) return 0;
-    return ((BtlUnit *)actor)->partyRecord.hp + delta < 1;
+    return actor->partyRecord.hp + delta < 1;
 }
 
 s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
@@ -1839,7 +1842,7 @@ s32 btlBothSidesActive(BtlUnit *unit) {
     BtlUnit *actor;
     s32 a;
     s32 b;
-    if (btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, 0) != 0) {
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0) {
         return 0;
     }
     if (unit->flags & 0x60) {
@@ -1981,12 +1984,13 @@ const char D_003A1C88[] = "btl:escape=%d%%[ratio=%.2f]\n";
 
 extern s32 evtRunContext(s32, u8 *, s32, s32, s32);
 
-s32 func_001A8640(s32 actor) {
+s32 func_001A8640(BtlUnit *actor) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *enemy;
     s32 noEligibleEnemy;
     s32 chance;
     f32 ratio;
+    DatPartyRecord *record;
 
     if (datBattleSceneRecords[battle->battleMode].unk00 != 0) {
         return 0;
@@ -2008,10 +2012,10 @@ s32 func_001A8640(s32 actor) {
     if (noEligibleEnemy) {
         return 1;
     }
-    actor += 0x120;
-    chance = evtRunContext(0x14, (u8 *)actor, 0, 0, 0);
+    record = &actor->partyRecord;
+    chance = evtRunContext(0x14, (u8 *)record, 0, 0, 0);
     ratio = 1.0f;
-    if (btlCheckSpecialAbility(actor, 0x230)) {
+    if (btlCheckSpecialAbility(record, 0x230)) {
         ratio = datAbilityParameters[0x230 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     chance = chance * ratio;
@@ -2221,14 +2225,14 @@ s32 btlChooseEligibleSkill(s32 object) {
     return choices[effMiscRandMod(0, count)];
 }
 
-f32 btlGetActionCategoryMultiplier(s32 object, s32 unused, s32 index) {
+f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 index) {
     s32 category = *(u16 *)(datCommandRecords + index * 56 + 0x16);
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
         }
     }
-    if (index == 0 && btlCheckSpecialAbility(object + 0x120, 0x21D) != 0) {
+    if (index == 0 && btlCheckSpecialAbility(&object->partyRecord, 0x21D) != 0) {
         return datAbilityParameters[0x21D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     return 0.0f;
@@ -2415,35 +2419,35 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A9D38);
 
 extern char D_003A1DA0[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
 
-s32 btlRollActorEligibilityWithAbilityOverride(u8 *actor) {
+s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *actor) {
     u8 *battle = (u8 *)btlGetRuntime();
-    s32 (*predicate)(u8 *) = *(s32 (**)(u8 *))(battle + 0x65C);
+    s32 (*predicate)(BtlUnit *) = *(s32 (**)(BtlUnit *))(battle + 0x65C);
     if (predicate != 0 && predicate(actor) == 0) return 0;
-    if (((BtlUnit *)actor)->stateFlags & 0x2000) return 0;
-    if ((((BtlUnit *)actor)->partyRecord.status & 0x7FFF) == 0x4000) return 0;
-    if (btlCheckSpecialAbility((s32)(actor + 0x120), 0x231)) return 1;
+    if (actor->stateFlags & 0x2000) return 0;
+    if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 0;
+    if (btlCheckSpecialAbility(&actor->partyRecord, 0x231)) return 1;
     btlBossDebugPrintf(D_003A1DA0, 5, 1.0);
     return btlRollAiBucket() < 5;
 }
 
-s32 btlHasEnemyRecordDefeatExemptionFlag(s32 object) {
-    if ((((BtlUnit *)object)->flags & 0x400) == 0) {
+s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
+    if ((object->flags & 0x400) == 0) {
         return 0;
     }
-    return ((s32)datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].flags & 0x100) > 0;
+    return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
 
 extern s32 effMiscRand(void *);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);
 
-u32 btlGetHuntPenaltyFlags(s32 unit, BtlUnit *enemy) {
+u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     DatEnemyRecord *record;
     s32 chance;
     u16 status;
     u16 flags;
 
-    if (btlCheckSpecialAbility(unit + 0x120, 0x225) != 0) {
+    if (btlCheckSpecialAbility(&unit->partyRecord, 0x225) != 0) {
         return 0;
     }
     status = enemy->partyRecord.status & 0x7FFF;
@@ -2475,7 +2479,7 @@ u32 btlGetHuntPenaltyFlags(s32 unit, BtlUnit *enemy) {
 
 extern s32 D_00358690[];
 
-s32 btlRollPassiveAbilityAction(u8 *actor) {
+s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
     u32 i;
     s32 result;
     s32 threshold;
@@ -2485,7 +2489,7 @@ s32 btlRollPassiveAbilityAction(u8 *actor) {
     }
     result = 0;
     for (i = 0; i < 3; i++) {
-        if (btlCheckSpecialAbility((s32)(actor + 0x120), D_00358690[i * 2])) {
+        if (btlCheckSpecialAbility(&actor->partyRecord, D_00358690[i * 2])) {
             threshold = (s32)(datAbilityParameters[D_00358690[i * 2] - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
             if (btlRollAiBucket() < threshold) {
                 result = (D_00358690 + i * 2)[1];
@@ -2534,11 +2538,11 @@ s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 specie
     return 1;
 }
 
-s32 btlIsActorModeActionCodeAllowed(u8 *actor) {
-    if (*(u32 *)(actor + 0xDC) != 1) {
+s32 btlIsActorModeActionCodeAllowed(BtlUnit *actor) {
+    if (actor->unkDC != 1) {
         return 1;
     }
-    switch (*(u32 *)(actor + 0xE0)) {
+    switch (actor->displaySpecies) {
     case 0x26:
     case 0x54:
     case 0x153:
