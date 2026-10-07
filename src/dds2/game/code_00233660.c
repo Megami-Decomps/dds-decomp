@@ -9,6 +9,8 @@
 #include "sdf_draw.h"
 #include "eff.h"
 #include "sdf_sif_command.h"
+#include "eff_transform.h"
+#include "file.h"
 
 
 extern void sdfReleaseChipBlock();
@@ -160,7 +162,7 @@ extern MdlCtx *dds3GetObjectBaseResourceHandle(s32 obj);
 
 extern void func_001129C8(s32 obj, s32 a);
 
-extern s32 dds3GetWorldSecondaryObject();
+extern void *dds3GetWorldSecondaryObject(void);
 
 extern s8 D_00453560[];
 
@@ -213,9 +215,9 @@ extern s32 D_00453610[];
 
 void sdfAppendPacket(s32, s32);
 
-extern u128 D_00453620;
+extern f32 D_00453620[4] __attribute__((aligned(16)));
 
-extern u128 D_00453630;
+extern f32 D_00453630[4] __attribute__((aligned(16)));
 
 extern u128 D_00453640;
 
@@ -2311,7 +2313,6 @@ extern char D_00437110[]; /* "%f" */
 extern char D_00437118[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
-extern s32 fileQueueDefaultCallbackRequest(char *path);
 extern void fileWaitReady(s32 file);
 extern s32 fileGetResourceHandle(s32 file);
 extern char *fileGetLoadedDataAddress(s32 file);
@@ -2391,7 +2392,25 @@ void mdlLoadViewerPresentationConfig(void) {
     sdfReleaseResourceAllocation(resourceHandle);
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00238BD8);
+const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
+extern s32 func_0035C860(char *, const char *, ...);
+extern s32 fileQueueWindowSlotRequest(char *, char *, s32);
+
+void func_00238BD8(void) {
+    char buffer[0x130];
+    s32 size;
+    s32 request;
+
+    size = func_0035C860(buffer, D_00421488, D_00435CBC,
+                        D_00453620[0], D_00453620[1], D_00453620[2],
+                        D_00453630[0], D_00453630[1], D_00453630[2],
+                        sdfSceneProjectionParameters.fov, (s32)kwlnDrawVector.near,
+                        kwlnDrawVector.value, (s32)kwlnDrawVector.farA,
+                        kwlnDrawVector.farB, kwlnDrawVector.color);
+    request = fileQueueWindowSlotRequest(D_003C88A8, buffer, size);
+    fileWaitReady(request);
+    filePollEntryCleanup(request);
+}
 
 typedef struct MdlTaskDef {
     const char *name;
@@ -2707,7 +2726,7 @@ extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 
 extern void dds3EnsureSlotData(s32 obj);
 
-extern void dds3SetWorldCameraObject(s32 world, s32 obj);
+extern void dds3SetWorldCameraObject(void *world, s32 obj);
 
 s32 mdlSpawnViewerWorldObject(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};
@@ -2745,9 +2764,9 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return world;
 }
 
-extern s32 dds3FindWorldObjectNodeByKey(s32 world, s32 a, s32 b);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(void *world, s32 a, s32 b);
 
-extern void dds3SetSlotByKind(s32 obj, s32 slot);
+extern void *dds3SetSlotByKind(s32 obj, void *slot);
 
 extern void dds3RegisterObjectInHandlerIndex(s32 obj);
 
@@ -2774,48 +2793,40 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return world;
 }
 
-typedef struct MdlAimSrc {
-    u8 pad00[0x18];
-    u8 *vecs;  /* 0x18 */
-} MdlAimSrc;
 
-typedef struct MdlAimObj {
-    u8 pad00[0x1C];
-    u8 *inner; /* 0x1C */
-} MdlAimObj;
 
-extern s32 dds3FindWorldObjectNodeByKey(s32 world, s32 id, s32 kind);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(void *world, s32 id, s32 kind);
 
-extern void effObjSetInnerFirstVec(MdlAimObj *obj, u8 *vec);
+extern void effObjSetInnerFirstVec(EffWorldNode *obj, void *vec);
 
-extern void effObjSetInnerSecondVec(MdlAimObj *obj, f32 *vec);
+extern void effObjSetInnerSecondVec(EffWorldNode *obj, void *vec);
 
-extern void effObjFetchInnerFirstVec(MdlAimObj *obj);
+extern void effObjFetchInnerFirstVec(EffWorldNode *obj);
 
 
 extern void effMiscQuatMultiplyVU();
 
 void mdlAttachWorldObjectToSourceVector(s32 firstId, s32 secondId) {
     f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
-    MdlAimObj *obj;
-    MdlAimSrc *src;
-    u8 *vec;
+    EffWorldNode *obj;
+    EffWorldNode *src;
+    f32 *vec;
 
-    obj = (MdlAimObj *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), firstId, 5);
+    obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), firstId, 5);
     if (obj != NULL) {
-        src = (MdlAimSrc *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), secondId, 0x11);
+        src = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), secondId, 0x11);
         if (src != NULL) {
-            vec = src->vecs;
+            vec = src->data;
             effObjSetInnerFirstVec(obj, vec);
             VU0_LOAD_VF(vf10, axis);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
-            vec += 0x10;
+            vec += 4;
             VU0_LOAD_VF(vf11, vec);
             effMiscQuatMultiplyVU();
             VU0_STORE_VF(vf10, axis);
             effObjSetInnerSecondVec(obj, axis);
             effObjFetchInnerFirstVec(obj);
-            VU0_STORE_VF(vf10, obj->inner + 0x70);
+            VU0_STORE_VF(vf10, obj->inner->smoothedPosition);
         }
     }
 }

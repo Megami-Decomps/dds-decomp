@@ -9,6 +9,8 @@
 #include "sdf_draw.h"
 #include "eff.h"
 #include "sdf_sif_command.h"
+#include "eff_transform.h"
+#include "file.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -252,14 +254,14 @@ typedef struct MdlPackageRequest {
 } MdlPackageRequest;
 
 /* Load a viewer package; flag 2 enables the extra request-preparation step. */
-void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s32 requestSecond) {
+void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, s32 requestSecond) {
     MdlPackageRequest request;
 
     sdfPacInitializeDispatchPacket(&request, 0);
     if (flags & 2) {
         func_002EDC30(&request);
     }
-    sdfPacFeedInput(&request, (void *)requestFirst, requestSecond);
+    sdfPacFeedInput(&request, requestFirst, requestSecond);
     func_00218768(request.handle, first, second, flags);
     func_002EDC50(&request);
 }
@@ -2265,7 +2267,6 @@ extern char D_003BBCD0[]; /* "%f" */
 extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
-extern s32 fileQueueDefaultCallbackRequest(char *path);
 extern void fileWaitReady(s32 file);
 extern s32 fileGetResourceHandle(s32 file);
 extern char *fileGetLoadedDataAddress(s32 file);
@@ -2644,9 +2645,9 @@ extern void effObjSetInnerFloat(s32 object, f32 value);
 
 extern void dds3EnsureSlotData();
 
-extern s32 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
-extern void dds3SetWorldCameraObject(s32 world, s32 object);
+extern void dds3SetWorldCameraObject(void *world, s32 object);
 
 extern void func_001127A0(s32 object, s32 arg);
 
@@ -2696,9 +2697,9 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return counter;
 }
 
-extern void *dds3FindWorldObjectNodeByKey(s32 world, s32 id, s32 kind);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(void *world, s32 id, s32 kind);
 
-extern void dds3SetSlotByKind(s32 object, s32 slot);
+extern void *dds3SetSlotByKind(s32 object, void *slot);
 
 extern void dds3RegisterObjectInHandlerIndex(s32 object);
 
@@ -2718,23 +2719,14 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     effObjSetInnerFloat(object, 10.0f);
     func_00111E30(object, slotKind, resource);
     mdlAddEntryFlagged(dds3GetObjectBaseResourceHandle(object), 0, 0);
-    dds3SetSlotByKind(object, (s32)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
     dds3RegisterObjectInHandlerIndex(object);
     func_001127A0(object, 0);
     dds3SetObjectFlags(object, 0x400);
     return counter;
 }
 
-typedef struct MdlAttachSlot {
-    u8 pad00[0x18];
-    u8 *firstVec; /* 0x18 */
-    u8 pad1C[4];
-} MdlAttachSlot;
 
-typedef struct MdlAttachObj {
-    u8 pad00[0x1C];
-    u8 *inner; /* 0x1C */
-} MdlAttachObj;
 
 extern void effObjSetInnerFirstVec();
 
@@ -2747,25 +2739,25 @@ extern void effMiscQuatMultiplyVU(void);
 
 void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
     f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    MdlAttachObj *target;
-    MdlAttachSlot *source;
-    u8 *base;
+    EffWorldNode *target;
+    EffWorldNode *source;
+    f32 *base;
 
-    target = (MdlAttachObj *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), targetId, 5);
+    target = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), targetId, 5);
     if (target != NULL) {
-        source = (MdlAttachSlot *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceId, 0x11);
+        source = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceId, 0x11);
         if (source != NULL) {
-            base = source->firstVec;
+            base = source->data;
             effObjSetInnerFirstVec(target, base);
                         VU0_LOAD_VF(vf10, quaternion);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
-            base += 0x10;
+            base += 4;
                         VU0_LOAD_VF(vf11, base);
             effMiscQuatMultiplyVU();
                         VU0_STORE_VF(vf10, quaternion);
             effObjSetInnerSecondVec(target, quaternion);
             effObjFetchInnerFirstVec(target);
-            VU0_STORE_VF(vf10, target->inner + 0x70);
+            VU0_STORE_VF(vf10, target->inner->smoothedPosition);
         }
     }
 }

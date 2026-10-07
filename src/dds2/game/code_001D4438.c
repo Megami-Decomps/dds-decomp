@@ -609,7 +609,6 @@ typedef struct {
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
-extern void *btlGetTaskArguments(s32);
 
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 

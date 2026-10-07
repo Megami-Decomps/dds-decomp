@@ -118,7 +118,7 @@ extern struct MenuList *mnuCreateListState();
 
 extern s32 mnuListAppendNode(s32, s32);
 
-extern void func_002491B8(void);
+extern void func_002491B8(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 
 extern u8 D_003BC3F8[];
 
@@ -316,10 +316,6 @@ typedef struct MenuProgressList {
     s32 visible;        /* 0x3C */
 } MenuProgressList;
 
-typedef struct MenuThresholdEntry {
-    s32 entryId;        /* 0x00 */
-    s32 requiredAmount; /* 0x04 */
-} MenuThresholdEntry;
 
 extern s32 mnuTerminalScoreBox(DatPartyRecord *unit);
 
@@ -405,7 +401,34 @@ u8 func_00249198(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);
+extern void func_002BF4E0(s32, s32, s32, s32, s32, void *, s32, s32);
+
+/* Draw selected-row accents in eighth-pixel units, then the indexed panel. */
+void func_002491B8(s32 x, s32 y, s32 arg2, struct MenuList *list,
+                   struct MenuListNode *entry, s32 drawContext) {
+    s32 value = list->scale;
+    MenuTerminalWork *owner = (MenuTerminalWork *)list->context;
+    s32 index = entry->sortKeyPrimary;
+    s32 selected = entry == list->cursor;
+
+    if (entry->flags48 & 1) {
+        value /= 2;
+    }
+    if (selected) {
+        s32 row = list->windowOffset;
+        s32 base = (row * 21 + 0x76) << 3;
+
+        index++;
+        func_002BF4E0(x - 0x40, base, 0, value, 0,
+                      owner->batch, 0x16, drawContext);
+        func_002BF4E0(x + 0x4C0, base, 0, value, 0,
+                      owner->batch, 0x17, drawContext);
+        func_002BF4E0(x + 0xB0, base + 0x18, 0, value, 0,
+                      owner->batch, 0x15, drawContext);
+    }
+    func_002BF4E0(x + 0x1C0, y + 0x68, 0, value, 0,
+                  owner->batch, index, drawContext);
+}
 
 
 
@@ -838,7 +861,6 @@ extern s32 kwlnFadeIsActive(void);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 
 
 extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
@@ -905,21 +927,21 @@ s32 mnuPrepareTerminalPopupAndDispatch(s32 value) {
     s32 *state = (s32 *)(context + 0x54);
 
     mnuSetPopupEntry(state, D_0036ADF4);
-    return menuRunPanel(context, 0, value);
+    return menuRunPanel((void *)context, 0, (void *)value);
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
 s32 func_0024A138(s32 value) {
     s32 context = kwlnTaskGetUserValue();
 
-    return menuRunPanel(context, 1, value);
+    return menuRunPanel((void *)context, 1, (void *)value);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
 s32 func_0024A170(s32 value) {
     s32 context = kwlnTaskGetUserValue();
 
-    return menuRunPanel(context, 2, value);
+    return menuRunPanel((void *)context, 2, (void *)value);
 }
 
 /* Require the fade to be inactive before testing message-window control for idle. */
@@ -983,7 +1005,7 @@ void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024A2D8);
 
 extern s32 D_003AF688[3][2];
-extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
+extern void func_002BF4E0(s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Draw the terminal panels before advancing their 0..256 blend weight.
  * Reduced modes one/two set an endpoint immediately; normal opening adds twelve,
@@ -1452,8 +1474,6 @@ extern s32 func_0024A1D8(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void mnuSetPopupEntryFlagged(s32 *state, void *entry);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_0036AC80[];
 extern u8 D_0036ACF8[];
@@ -1462,7 +1482,7 @@ extern u8 D_0036AD68[];
 extern u8 D_0036ADA0[];
 
 /* Event-B panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
-s32 evtBHandleSelectionPanelInput(u64 input) {
+s32 evtBHandleSelectionPanelInput(void *input) {
     EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *state = &context->dispatchState;
@@ -1472,7 +1492,7 @@ s32 evtBHandleSelectionPanelInput(u64 input) {
     struct MenuListNode *node;
     s32 result;
 
-    result = func_00285670((s32)context + 8, state, 0, input);
+    result = menuRunPanel(context, 0, input);
     if (result != 0) {
         return result;
     }
@@ -1515,10 +1535,10 @@ s32 evtBHandleSelectionPanelInput(u64 input) {
             mnuClearListFlagsOneAndTwo(&context->visualList->stateFlags);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault((u32)context->visualList);
+            mnuRetreatListCursorDefault(context->visualList);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault((u32)context->visualList);
+            mnuAdvanceListCursorDefault(context->visualList);
         }
         mnuPlayInputSound(0, buttons, &context->visualList->stateFlags);
     }
@@ -1526,7 +1546,7 @@ s32 evtBHandleSelectionPanelInput(u64 input) {
 }
 
 
-s32 evtDispatchSelectionAfterFieldFrameGate(u64 request) {
+s32 evtDispatchSelectionAfterFieldFrameGate(void *request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0024A2D8(state);
@@ -1537,14 +1557,14 @@ s32 evtDispatchSelectionAfterFieldFrameGate(u64 request) {
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     mnuDrawTerminalSelectedSlots(state);
-    return menuRunPanel(state, 1, request);
+    return menuRunPanel((void *)state, 1, request);
 }
 
 s32 evtBSetupDispatchSync(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 s32 evtBClearAndReset(void) {
@@ -1579,7 +1599,7 @@ extern void fileEnterMcPackScene(s32);
 s32 func_0024B868(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     s32 *dispatch = (s32 *)(context + 0x54);
-    s32 result = func_00285670(context + 8, dispatch, 0, request);
+    s32 result = menuRunPanel((void *)context, 0, (void *)request);
 
     if (result != 0) {
         return result;
@@ -1606,14 +1626,14 @@ s32 func_0024B868(s32 request) {
 s32 evtBDispatchStart(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    return menuRunPanel(context, 1, request);
+    return menuRunPanel((void *)context, 1, (void *)request);
 }
 
 s32 evtBSetupDispatchSyncB(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 extern void mnuSelectFirstListNode(struct MenuList *);
@@ -1655,13 +1675,13 @@ u32 evtFinishPendingSelectionTransition(void) {
     return 1;
 }
 
-s32 func_0024BB00(u64 input) {
+s32 func_0024BB00(void *input) {
     EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
     s32 *state = &context->dispatchState;
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 result;
 
-    result = func_00285670((s32)context + 8, state, 0, input);
+    result = menuRunPanel(context, 0, input);
     if (result != 0) {
         return result;
     }
@@ -1680,10 +1700,10 @@ s32 func_0024BB00(u64 input) {
             mnuClearListFlagsOneAndTwo(&context->selectionList->stateFlags);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault((u32)context->selectionList);
+            mnuRetreatListCursorDefault(context->selectionList);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault((u32)context->selectionList);
+            mnuAdvanceListCursorDefault(context->selectionList);
         }
         mnuPlayInputSound(0, buttons, &context->selectionList->stateFlags);
     }
@@ -1697,14 +1717,14 @@ s32 func_0024BC18(s32 item) {
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     mnuDrawTerminalSelectedSlots(state);
-    return menuRunPanel(state, 1, item);
+    return menuRunPanel((void *)state, 1, (void *)item);
 }
 
 s32 evtBSetupDispatchSyncC(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 extern void func_0024B168(void);
@@ -1767,14 +1787,14 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
     if (*(s32 *)(state + 0x7C) == 0) {
         mnuDrawTerminalAmountText(1, state);
     }
-    return menuRunPanel(state, 1, item);
+    return menuRunPanel((void *)state, 1, (void *)item);
 }
 
 s32 evtBSetupDispatchSyncD(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 u32 evtSelectFinalVisualNode(void) {
@@ -1790,7 +1810,7 @@ extern u8 D_0036AE2C[];
 s32 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
-    s32 result = func_00285670(state + 8, panel, 0, request);
+    s32 result = menuRunPanel((void *)state, 0, (void *)request);
     if (result != 0) {
         return result;
     }
@@ -1812,7 +1832,7 @@ s32 evtBSetupDispatchSyncE(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 
@@ -1867,13 +1887,13 @@ s32 evtBPollSelectionChainPanel(s32 item) {
         func_0024A930(state);
         mnuDrawTerminalSelectedSlots(state);
     }
-    return menuRunPanel(state, 1, item);
+    return menuRunPanel((void *)state, 1, (void *)item);
 }
 
 s32 evtBDispatchSync(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
@@ -1906,14 +1926,14 @@ u32 func_0024C6F8(void) {
 extern s32 evtGetCapturedWindowPanelValue(void);
 extern u8 D_0036ADD8[];
 
-s32 evtBChooseSelectionCompletionPopup(u64 input) {
+s32 evtBChooseSelectionCompletionPopup(void *input) {
     EvtBContext *context;
     s32 *state;
     s32 result;
 
     context = (EvtBContext *)kwlnTaskGetUserValue();
     state = &context->dispatchState;
-    result = func_00285670((s32)context + 8, state, 0, input);
+    result = menuRunPanel(context, 0, input);
     if (result == 0) {
         if (*state == 0) {
             result = evtGetMessageWindowControlState();
@@ -1941,14 +1961,14 @@ s32 func_0024C7E8(s32 item) {
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     mnuDrawTerminalSelectedSlots(state);
-    return menuRunPanel(state, 1, item);
+    return menuRunPanel((void *)state, 1, (void *)item);
 }
 
 s32 evtBSetupDispatchSyncF(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 
@@ -1967,14 +1987,14 @@ u32 evtBCheckPanelMode(void) {
     return 1;
 }
 
-s32 evtBContinueDispatchOrRestoreTable(u64 input) {
+s32 evtBContinueDispatchOrRestoreTable(void *input) {
     s32 context;
     s32 dispatchResult;
     s32 *dispatchState;
 
     context = kwlnTaskGetUserValue();
     dispatchState = &((EvtBContext *)context)->dispatchState;
-    dispatchResult = func_00285670(context + 8, dispatchState, 0, input);
+    dispatchResult = menuRunPanel((void *)context, 0, input);
     if (dispatchResult == 0) {
         if ((*dispatchState == 0) && (dispatchResult = evtGetMessageWindowControlState(), dispatchResult == 0)) {
             mnuSetPopupEntry(dispatchState, ((EvtBContext *)context)->dispatchTable);
@@ -1991,14 +2011,14 @@ s32 mnuPrepareDispatchStateAndBindHandler(s32 item) {
     mnuDispatchTransitionHostCallbacks(state);
     func_0024A930(state);
     mnuDrawTerminalSelectedSlots(state);
-    return menuRunPanel(state, 1, item);
+    return menuRunPanel((void *)state, 1, (void *)item);
 }
 
 s32 evtBSetupDispatchSyncG(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 
@@ -2036,12 +2056,12 @@ u32 evtBRebuildTerminalMenuAndResetDispatch(void) {
 }
 
 
-s32 func_0024CB80(u64 input) {
+s32 func_0024CB80(void *input) {
     EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
     s32 *state = &context->dispatchState;
     s32 result;
 
-    result = func_00285670((s32)context + 8, state, 0, input);
+    result = menuRunPanel(context, 0, input);
     if (result != 0) {
         return result;
     }
@@ -2093,13 +2113,13 @@ s32 evtBDispatchSyncD2(s32 item) {
         func_0024A930(state);
     }
     mnuDrawTerminalSelectedSlots(state);
-    return menuRunPanel(state, 1, item);
+    return menuRunPanel((void *)state, 1, (void *)item);
 }
 
 s32 evtBDispatchSyncB(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 extern char D_003AF590[];
@@ -2124,11 +2144,11 @@ u32 func_0024CE20(void) {
 extern const char D_003AF710[];
 extern u8 D_0036AE10[];
 
-s32 func_0024CE28(u64 input) {
+s32 func_0024CE28(void *input) {
     EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
     s32 *state = &context->dispatchState;
     s32 canOpen = 0;
-    s32 result = func_00285670((s32)context + 8, state, 0, input);
+    s32 result = menuRunPanel(context, 0, input);
 
     if (result == 0) {
         if (*state == 0) {
@@ -2161,13 +2181,13 @@ s32 evtBLateDispatchStart(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024A2D8(context);
-    return menuRunPanel(context, 1, request);
+    return menuRunPanel((void *)context, 1, (void *)request);
 }
 
 s32 evtBDispatchSyncC(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF6B0);

@@ -24,7 +24,6 @@ extern void mdlFlagSet(s32);
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern void func_0024DD78(void);
 
@@ -125,13 +124,12 @@ extern void func_002E8E50(void);
 extern char D_0036D494[];
 extern char D_0036D408[];
 
-s32 prfCapTaskStep(u64 request) {
+s32 prfCapTaskStep(void *request) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     s32 *dispatchStatus = &scene->transition.state;
 
-    result = func_00285670((s32)scene->transition.data, dispatchStatus, 0,
-                          request);
+    result = func_00285670(scene->transition.data, dispatchStatus, 0, request);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
             (result = evtGetMessageWindowControlState(), result == 0)) {
@@ -174,13 +172,13 @@ s32 prfCapTaskStep(u64 request) {
 s32 func_00263570(s32 request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     mnuRefreshPanelLayer(context);
-    return menuRunPanel((s32)context, 1, request);
+    return menuRunPanel(context, 1, (void *)request);
 }
 
 s32 func_002635C0(s32 request) {
     s32 context = kwlnTaskGetUserValue();
     func_0024DD78();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 /* Clear the scene's two selection-processing markers; return 1. */
@@ -269,14 +267,14 @@ extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
 extern s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *);
 extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
-extern u32 mnuInitializeItemSelectionExtent(u64);
+extern u32 mnuInitializeItemSelectionExtent(void *);
 extern void mnuSetPopupEntry(s32 *, void *);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void func_002E96D8(u32);
 extern char D_0036D424[];
 extern char D_0036D45C[];
 
-s32 func_00263838(u64 request) {
+s32 func_00263838(void *request) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     s32 *dispatchStatus;
@@ -287,8 +285,7 @@ s32 func_00263838(u64 request) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
-    result = func_00285670((s32)scene->transition.data, dispatchStatus, 0,
-                          request);
+    result = func_00285670(scene->transition.data, dispatchStatus, 0, request);
     if (result != 0) {
         return result;
     }
@@ -416,7 +413,7 @@ s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     }
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 0);
-    return menuRunPanel((s32)context, 1, request);
+    return menuRunPanel(context, 1, (void *)request);
 }
 
 s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
@@ -426,11 +423,11 @@ s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
         return 0;
     }
     func_0024DD78();
-    return menuRunPanel((s32)context, 2, request);
+    return menuRunPanel(context, 2, (void *)request);
 }
 
 /* Bound the selection extent by the remaining capacity after five components. */
-u32 mnuInitializeItemSelectionExtent(u64 unused) {
+u32 mnuInitializeItemSelectionExtent(void *unused) {
     s8 component;
     BrsSkillPackageWork *scene;
     s32 *slot;

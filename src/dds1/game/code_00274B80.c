@@ -226,8 +226,6 @@ typedef struct MenuSpriteArguments {
 } MenuSpriteArguments;
 
 extern u32 mnuMapPadMaskToFlags(u32);
-extern void mnuRetreatListCursorDefault();
-extern void mnuAdvanceListCursorDefault();
 extern void mnuClearListFlagsOneAndTwo();
 extern void sndSetSequenceVolumePan();
 extern void func_00276898();
@@ -263,7 +261,6 @@ extern void func_002833B0();
 
 extern void mnuDestroyWindowContainer(u32);
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 extern u8 D_0037CA58[];
 
 void func_00274B80(u32 context) {
@@ -457,11 +454,11 @@ s32 mnuDrawPartySelectionPanelAndStep(s32 callback) {
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryWindow, 0x53);
     func_00276018(context);
     func_002723B0(0, ((CampMenuContext *)context)->actor);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 mnuStepPartySelectionControl(s32 callback) {
-    return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
+    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
 }
 
 u8 mnuIsStateNotOne(void) {
@@ -530,7 +527,7 @@ s32 mnuStaffPopupUpdate(s32 callback) {
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_POPUP_INPUT_MASK);
     s32 stateWord;
     s32 panelWork;
-    stateWord = func_00285670(context + 8, popupState, 0, callback);
+    stateWord = menuRunPanel((void *)context, 0, (void *)callback);
     if (stateWord != 0) {
         return stateWord;
     }
@@ -582,11 +579,11 @@ s32 mnuDrawStaffCampPageWithImage(s32 callback) {
 
         func_00272668(1, *slot, D_0037C3A8, context, 1, 0x53, slot);
     }
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 mnuStepStaffCampPageControl(s32 callback) {
-    return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
+    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276720);
@@ -692,7 +689,7 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback) {
         inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_INPUT_CANCEL);
     }
     popupState = (s32 *)(context + 0x54);
-    stateWord = func_00285670(context + 8, popupState, 0, callback);
+    stateWord = menuRunPanel((void *)context, 0, (void *)callback);
     if (stateWord != 0) {
         return stateWord;
     }
@@ -842,7 +839,7 @@ s32 mnuStaffIdlePartyUpdate(s32 callback) {
     if (menu->staffMode == 0) {
         mnuIdleVoiceTimer((MenuIdleVoiceState *)menu);
     }
-    return menuRunPanel(context, 2, callback);
+    return menuRunPanel((void *)context, 2, (void *)callback);
 }
 
 u32 func_00277638(void) {
@@ -1082,11 +1079,11 @@ s32 mnuCampMenuDrawSlotLabel(s32 param) {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);
     }
     func_002723B0(0, ((CampMenuContext *)context)->actor);
-    return menuRunPanel(context, 1, param);
+    return menuRunPanel((void *)context, 1, (void *)param);
 }
 
 s32 mnuStepSkillSlotControl(s32 callback) {
-    return menuRunPanel(kwlnTaskGetUserValue(), 2, callback);
+    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
 }
 
 void mnuClearSelectedListNodeId() {

@@ -3,6 +3,7 @@
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_state.h"
+#include "btl_task_args.h"
 #include "pcp_vu0.h"
 
 extern u32 btlRandomState;
@@ -118,7 +119,6 @@ typedef struct BtlEffLink {
 
 
 extern BtlRuntimeTask *btlAllocTask(s32 size);
-extern BtlEffLink *btlGetTaskArguments();
 
 
 extern void btlShiftActorStateHistory(ActionStateLink *obj, s8 flag);
@@ -469,7 +469,7 @@ BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     task->ownerId = owner->owner;
     task->callback = func_0020F5E0;
     task->onFinish = effDecrementFirstCountdown;
-    args = (BtlLinkedEffectArgs *)btlGetTaskArguments(task);
+    args = btlGetTaskArguments(task);
     args->payload.linked.kind = kind;
     args->unit = owner;
     args->payload.linked.value = value;

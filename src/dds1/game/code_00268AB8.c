@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "file.h"
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
@@ -643,7 +644,6 @@ extern MnuTitleStreamEntry D_00377350[];
 
 extern char D_003AFCF0[];
 
-extern s32 fileQueueDefaultCallbackRequest(char *path);
 
 /* Load the named sound stream for the requested entry format under the lock. */
 void func_0026A5F0(s32 soundEntryIndex) {

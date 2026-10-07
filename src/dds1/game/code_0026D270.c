@@ -4,8 +4,6 @@
 
 extern MovieMenuState *mnuMovieMenuState;
 extern s8 D_00324510[];
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32);
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u32 func_0026BED0(void);
@@ -19,12 +17,12 @@ s32 func_0026D510(void) {
     s32 selection;
 
     if (D_00324510[0x26] & 2) {
-        if (mnuRetreatListCursorDefault((u32)mnuMovieMenuState->selectionList) != NULL) {
+        if (mnuRetreatListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;
     } else if (D_00324510[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault((u32)mnuMovieMenuState->selectionList) != NULL) {
+        if (mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;

@@ -223,8 +223,8 @@ void *fileCreateCallbackRequest(u32 requestName, u32 callbackMode, u32 callbackA
 }
 
 /* Queue a callback-kind request with mode zero and no callback/context. */
-void fileQueueDefaultCallbackRequest(u32 requestName) {
-    fileCreateCallbackRequest(requestName, 0, 0, 0);
+void *fileQueueDefaultCallbackRequest(const char *requestName) {
+    return fileCreateCallbackRequest((u32)requestName, 0, 0, 0);
 }
 
 /* Queue a callback-kind request with mode one and no callback/context. */

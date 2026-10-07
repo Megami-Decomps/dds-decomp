@@ -11,26 +11,25 @@ extern void func_00263B78(BrsSkillPackageWork *, s32);
 
 /* The dispatcher consumes the inline work area and its adjacent status word. */
 
-s32 itfRunPanelMode1(u64 request) {
+s32 itfRunPanelMode1(void *request) {
     s32 context = kwlnTaskGetUserValue();
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     mnuDrawItemPanelBackdrop(panel);
     func_00263B78(panel, 0);
-    return func_00285670((s32)&panel->transition, &panel->transition.state, 1, request);
+    return func_00285670(&panel->transition, &panel->transition.state, 1, request);
 }
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DC98(s32);
 
-s32 itfRunPanelMode2(u64 request) {
+s32 itfRunPanelMode2(void *request) {
     s32 context = kwlnTaskGetUserValue();
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0024DC98(0);
-    return func_00285670((s32)&panel->transition, &panel->transition.state, 2, request);
+    return func_00285670(&panel->transition, &panel->transition.state, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264B08);

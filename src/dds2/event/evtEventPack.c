@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "evt_unit.h"
+#include "file.h"
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -101,7 +102,6 @@ extern char D_004248A0[];
 extern char D_004377E0[];
 extern s32 func_0035B6E0();
 extern char D_00453C50[];
-extern s32 fileQueueDefaultCallbackRequest(char *path);
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {

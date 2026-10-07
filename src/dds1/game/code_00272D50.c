@@ -8,7 +8,6 @@ extern s32 kwlnTaskGetUserValue();
 
 extern u8 *datGameState;
 
-extern s32 func_00285670(s32, s32 *, u64, u64);
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
 extern void *memset(void *, s32, u32);
@@ -196,7 +195,7 @@ s32 func_002734C0(s32 callback) {
     popup = &context->popupState;
     resources = context->resources;
     input = mnuMapPadMaskToFlags(0x33);
-    result = menuRunPanel((s32)context, 0, callback);
+    result = menuRunPanel(context, 0, (void *)callback);
     if (result != 0) {
         return result;
     }
@@ -257,13 +256,13 @@ s32 mnuStaffDrawImagePanelA(s32 callback) {
     func_00272668(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffDisplayContext *)context)->activeWindow, 0x53);
     func_002723B0(0, ((StaffDisplayContext *)context)->group);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 mnuStaffRunPanel2b(u64 request) {
+s32 mnuStaffRunPanel2b(void *request) {
     s32 state = kwlnTaskGetUserValue();
 
-    return menuRunPanel(state, 2, request);
+    return menuRunPanel((void *)state, 2, request);
 }
 
 extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);

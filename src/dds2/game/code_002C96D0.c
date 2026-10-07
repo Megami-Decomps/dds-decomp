@@ -2669,6 +2669,7 @@ void fileResetMenuFlowState(void) {
 }
 
 #include "file_pac.h"
+
 struct SdfMemBlock;
 struct SdfTex;
 extern void func_001004A0(void);

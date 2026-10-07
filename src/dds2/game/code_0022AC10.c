@@ -1,6 +1,7 @@
 #include "common.h"
 #include "file_pac.h"
 #include "btl_state.h"
+#include "btl_task_args.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
@@ -185,7 +186,6 @@ extern s32 func_0022D2F8(u32, u32);
 
 extern u32 btlAllocTask(u32);
 
-extern u32 btlGetTaskArguments(u32);
 
 extern void func_0022BA08(void);
 
@@ -689,7 +689,7 @@ u32 btlCreateScriptResourceTask(u32 object, u32 group) {
     task->taskId = 0x68;
     task->callback.update = func_0022BA08;
     task->status = 0;
-    data = (BattleScriptTaskData *)btlGetTaskArguments((u32)task);
+    data = btlGetTaskArguments(task);
     data->object = object;
     data->group = group;
     data->frames = 0;
@@ -725,7 +725,7 @@ void *btlCreateActionTask(void *object, s32 group) {
     task->taskId = 0x69;
     task->callback.processScript = btlUpdateScriptResourceTask;
     task->status = 0;
-    data = (BattleScriptTaskData *)btlGetTaskArguments((u32)task);
+    data = btlGetTaskArguments(task);
     data->object = (u32)object;
     data->group = group;
     data->frames = 0;

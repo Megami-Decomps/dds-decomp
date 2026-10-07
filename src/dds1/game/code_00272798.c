@@ -58,7 +58,7 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
     context = (StaffScreenContext *)kwlnTaskGetUserValue();
     input = mnuMapPadMaskToFlags(0x33);
     popup = &context->popup;
-    state = func_00285670((s32)context->dispatchState, popup, 0, callback);
+    state = func_00285670(context->dispatchState, popup, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -100,7 +100,7 @@ INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
 /* Submit a request to the active menu dispatcher in mode 2. */
 s32 func_002729C8(s32 request) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 s32 mnuStartStaffDisplay(void) {
@@ -124,7 +124,7 @@ u32 mnuConfigureCampDrawContextPanel(void) {
 s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *dispatchEntry = (s32 *)(context + 0x54);
-    s32 state = func_00285670(context + 8, dispatchEntry, 0, callback);
+    s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, D_0037C844);
@@ -142,12 +142,12 @@ s32 mnuDrawStaffImageScreen(s32 callback) {
     func_0027E8D8(-0x10, -8, 0, ((StaffScreenContext *)context)->display, 0x54);
     mnuCreateStaffImageSprite(0x14);
     func_002723B0(2, ((StaffScreenContext *)context)->actor);
-    return menuRunPanel(context, 1, callback);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 func_00272B80(s32 request) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, request);
+    return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 u32 func_00272BB8(void) {

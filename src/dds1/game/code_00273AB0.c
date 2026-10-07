@@ -129,8 +129,6 @@ extern void mnuClearWindowPanelTransitionFlag(StaffImageList *);
 extern void func_0027C788(StaffImageList *);
 extern void mnuResetListNodeFadeCounters(s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
-extern void mnuRetreatListCursorDefault();
-extern void mnuAdvanceListCursorDefault();
 extern void mnuClearListFlagsOneAndTwo();
 
 s32 mnuStaffImageEnterA(s32 task) {
@@ -147,7 +145,7 @@ s32 mnuStaffImageEnterA(s32 task) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(0, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, task);
+    return menuRunPanel((void *)context, 1, (void *)task);
 }
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", mnuStaffImageExitA);
@@ -170,7 +168,7 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
     s32 state;
     s32 window;
 
-    state = func_00285670(context + 8, popup, 0, task);
+    state = menuRunPanel((void *)context, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -195,13 +193,13 @@ s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
     func_00272668(1, ((StaffImageContext *)context)->activeWindow->window->selectedNode->label, (s32)D_0037C860, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)((StaffImageContext *)context)->activeWindow, 0x53);
     func_002723B0(0, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, task);
+    return menuRunPanel((void *)context, 1, (void *)task);
 }
 
 /* Run the label-image state's teardown phase and return its scheduler word. */
 s32 mnuExitStaffImageAndSelectionLabel(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, task);
+    return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
@@ -212,7 +210,7 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     s32 state;
     StaffImageList *window;
 
-    state = func_00285670((s32)context + 8, popup, 0, task);
+    state = menuRunPanel(context, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -253,13 +251,13 @@ s32 mnuStaffImageEnterD(s32 task) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(2, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, task);
+    return menuRunPanel((void *)context, 1, (void *)task);
 }
 
 /* Run the secondary-image state's teardown phase and return its scheduler word. */
 s32 mnuStaffImageExitD(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, task);
+    return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 u32 func_00274040(void) {
@@ -286,13 +284,13 @@ s32 mnuStaffImageEnterB(s32 task) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(0, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, task);
+    return menuRunPanel((void *)context, 1, (void *)task);
 }
 
 /* Run the alternate primary-image state's teardown phase and return its scheduler word. */
 s32 mnuStaffImageExitB(s32 task) {
     s32 context = kwlnTaskGetUserValue();
-    return menuRunPanel(context, 2, task);
+    return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 /* Build the staff value page for the current page-selection cursor. */
@@ -469,7 +467,7 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     func_002723B0(1, ((StaffImageContext *)context)->group);
-    return menuRunPanel(context, 1, task);
+    return menuRunPanel((void *)context, 1, (void *)task);
 }
 
 /* Request message-window mode one before the value-page teardown phase. */
@@ -477,7 +475,7 @@ s32 mnuExitStaffValuePage(s32 task) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, task);
+    return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 u32 func_00274B78(void) {

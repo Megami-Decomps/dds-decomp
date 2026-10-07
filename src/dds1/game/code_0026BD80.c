@@ -40,7 +40,6 @@ extern void mnuReleaseMenuResourceSlots(void);
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern u32 mnuDestroyListState(struct MenuList *);
 extern void mnuSelectFirstListNode(struct MenuList *);
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32);
 
 extern struct MenuListNode *mnuListAppendNode(struct MenuList *, s32);
 
@@ -109,7 +108,7 @@ void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            mnuAdvanceListCursorDefault((u32)mnuMovieMenuState->selectionList);
+            mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList);
         } while (advanceCount != 0);
     }
 }

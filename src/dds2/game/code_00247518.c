@@ -12,6 +12,7 @@
 #include "eff.h"
 #include "eff_object.h"
 #include "mdl.h"
+#include "evt_polygon_movie.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
@@ -80,11 +81,10 @@ extern u32 kwlnDrawControlFlags;
 
 void fldInitializeCameraColorResource(void);
 
-extern void func_0024DBB8(s32 arg0);
+extern void func_0024DBB8(PolyMovieWork *work);
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuMarkTitleStreamResetPending(void);
-extern void func_0025A280(s32 arg0, void *arg1);
-extern s32 func_0024D760(u8 *ctx);
+extern s32 func_0024D760(PolyMovieWork *ctx);
 
 struct EvtViewer;
 void evtEventViewerReset(struct EvtViewer *viewer);
@@ -100,7 +100,7 @@ typedef struct EvtViewerObjectData {
 typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
     s32 flags;          /* 0x04: evtViewerHasUpdateFlag reads this as s32 */
-    s32 windowContext; /* 0x08: owns the message-window handle at +0x104 */
+    PolyMovieWork *windowContext; /* 0x08: owns the message-window handle at +0x104 */
     s32 frameCount; /* 0x0C */
     s32 glyphAdvanceStart; /* 0x10 */
     s32 glyphAdvanceLimit;
@@ -179,7 +179,7 @@ typedef struct EventViewerState {
     s32 updateCount;
     u8 pad23C4;
     u8 windowActive;
-    u8 pad23C6[2];
+    s16 unk23C6;
     s32 unk23C8;
     u8 pad23CC[4];
     s32 ch71; /* 0x23D0 */
@@ -216,26 +216,7 @@ typedef struct EventViewerState {
 } EventViewerState;
 
 /* Handles retained by the viewer and by its owning task context. */
-typedef struct EvtViewerAssetSlot {
-    void *request;
-    s32 resource;
-    u32 *address;
-} EvtViewerAssetSlot;
 
-typedef struct EvtWindowContext {
-    s32 flags; /* 0x00 */
-    EvtViewerAssetSlot first;
-    u8 pad10[0x4C];
-    EvtViewerAssetSlot second;
-    EvtViewerAssetSlot third;
-    u8 pad74[0x90];
-    s32 windowHandle;
-} EvtWindowContext;
-
-typedef struct EvtTaskContext {
-    u8 pad00[0x10C];
-    s32 taskId;
-} EvtTaskContext;
 
 
 /* Script-command parameter slots are interpreted according to track kind. */
@@ -807,7 +788,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 position, EventViewerState *viewer
     if (viewer->windowContext == 0) {
         return;
     }
-    if (((EvtWindowContext *)viewer->windowContext)->windowHandle == -1) {
+    if (viewer->windowContext->handle == -1) {
         return;
     }
     for (group = viewer->tracks; group != NULL; group = group->next) {
@@ -816,7 +797,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 position, EventViewerState *viewer
                 if (glyph->frame - 30 == position) {
                     mnuUnpackNibbleFields((PackedPair *)glyph, &entry, &mode);
                     if (itfMesGetWindowEntryItems(
-                            ((EvtWindowContext *)viewer->windowContext)->windowHandle, entry) == 1) {
+                            viewer->windowContext->handle, entry) == 1) {
                         evtViewerMarkWindowActive(viewer);
                         break;
                     }
@@ -845,7 +826,7 @@ extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSoundSetChannelCount(u32 channels);
 extern s32 fldTitleIsActive(void);
 extern void func_0014E668(s32 active);
-void evtViewerCleanupMessageWindow(s32 viewerAddr);
+void evtViewerCleanupMessageWindow(EventViewerState *viewer);
 
 void func_00249EE8(EventViewerState *viewer) {
     if (func_0025E7B0(viewer) == 1 || scrCommandIsProcessControlFlagClear() == 0) {
@@ -877,7 +858,7 @@ void func_00249EE8(EventViewerState *viewer) {
     if (fldTitleIsActive() == 1) {
         func_0014E668(0);
     }
-    evtViewerCleanupMessageWindow((s32)viewer);
+    evtViewerCleanupMessageWindow(viewer);
 }
 
 s32 evtViewerHasUpdateFlag(s32 viewer) {
@@ -1272,29 +1253,40 @@ u16 evtViewerPopHistory(EventViewerState *viewer) {
     return id;
 }
 
+extern u32 itfMesGetWindowFlags(s32);
+extern s16 itfMesGetWindowClearBitCount(s32);
+extern s16 itfPanelGetPairFirst(s32);
+extern void itfPanelSetPairFirst(s32,s16);
+extern void itfMesCleanupWindow(s32,s32);
+extern void itfMesFinishWindowAndClearStatus(s32);
+extern void itfMesResetWindow(s32);
+void evtViewerMarkWindowInactive(EventViewerState *);
+void func_0024AD48(EventViewerState *);
+
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024ABD0);
 
-void evtViewerCleanupMessageWindow(s32 viewerAddr) {
-    s32 v0;
+
+void evtViewerCleanupMessageWindow(EventViewerState *viewer) {
+    PolyMovieWork *v0;
     s32 v1;
 
-    v0 = ((EventViewerState *)viewerAddr)->windowContext;
+    v0 = viewer->windowContext;
     if (v0 == 0) {
         return;
     }
-    v1 = ((EvtWindowContext *)v0)->windowHandle;
+    v1 = v0->handle;
     if (v1 == -1) {
         return;
     }
     itfMesCleanupWindow(v1, 1);
-    v0 = ((EventViewerState *)viewerAddr)->windowContext;
-    itfMesFinishWindowAndClearStatus(((EvtWindowContext *)v0)->windowHandle);
-    v0 = ((EventViewerState *)viewerAddr)->windowContext;
-    itfPanelSetPairFirst(((EvtWindowContext *)v0)->windowHandle, 0);
-    v0 = ((EventViewerState *)viewerAddr)->windowContext;
-    itfMesResetWindow(((EvtWindowContext *)v0)->windowHandle);
-    ((EventViewerState *)viewerAddr)->windowActive = 0;
-    ((EventViewerState *)viewerAddr)->pad23C4 = 0;
+    v0 = viewer->windowContext;
+    itfMesFinishWindowAndClearStatus(v0->handle);
+    v0 = viewer->windowContext;
+    itfPanelSetPairFirst(v0->handle, 0);
+    v0 = viewer->windowContext;
+    itfMesResetWindow(v0->handle);
+    viewer->windowActive = 0;
+    viewer->pad23C4 = 0;
 }
 
 void evtViewerMarkWindowActive(EventViewerState *viewer) {
@@ -1357,7 +1349,7 @@ s32 func_0024B080(s32 arg0, s32 arg1, EventViewerState *viewer) {
     case 6:
         viewer->commandStart = 1;
         viewer->flags |= 1;
-        evtViewerDispatchFlagMode((u32)viewer);
+        evtViewerDispatchFlagMode(viewer);
         viewer->currentId = 0;
         viewer->historyCount = 0;
         viewer->commandResetId = 0;
@@ -1505,7 +1497,6 @@ u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EventViewerSt
     EvtViewKey *entry;
     u32 value;
     s32 slot;
-
     value = viewer->commandValue;
     entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
     if (entry != 0) {
@@ -1737,7 +1728,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     if (!(flags & 8)) {
         if (D_0037F510[0x22] < 0) {
             viewer->flags = flags | 1;
-            evtViewerDispatchFlagMode((u32)viewer);
+            evtViewerDispatchFlagMode(viewer);
             viewer->currentId = 0;
             viewer->historyCount = 0;
             viewer->commandResetId = 0;
@@ -1748,7 +1739,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     } else {
         if (viewer->glyphAdvancePosition == viewer->glyphAdvanceStart) {
             viewer->flags = flags & ~1;
-            evtViewerDispatchFlagMode((u32)viewer);
+            evtViewerDispatchFlagMode(viewer);
         }
         if (D_0037F510[0x22] >= 0 && D_0037F510[0x2C] < 0 &&
             evtViewerHasUpdateFlag((s32)viewer) == 0) {
@@ -1757,7 +1748,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     }
     if (viewer->voicePending == 1 && evtViewerHasUpdateFlag((s32)viewer) == 0 &&
         mnuQueryTitleSoundBusy() == 0) {
-        itfMesStartEntry(((EvtWindowContext *)viewer->windowContext)->windowHandle,
+        itfMesStartEntry(viewer->windowContext->handle,
             viewer->voiceMessage, 0);
         viewer->voicePending = 0;
         evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",
@@ -1785,7 +1776,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
             if (!(viewer->flags & 8)) {
                 viewer->flags ^= 1;
-                evtViewerDispatchFlagMode((u32)viewer);
+                evtViewerDispatchFlagMode(viewer);
             }
         } else if (viewer->timedActive == 1) {
             if (func_002A8028() == 2) {
@@ -1820,8 +1811,8 @@ void *evtViewerInitializeUpdateSequence(void) {
     return (void *)evtViewerScheduleFrameVariableTask;
 }
 
-s32 func_0024D760(u8 *ctx) {
-    s32 id = ((EvtTaskContext *)ctx)->taskId;
+s32 func_0024D760(PolyMovieWork *ctx) {
+    s32 id = ctx->eventId;
 
     if (id == 0x28B || id == 0x28E) {
         return 1;
@@ -1832,11 +1823,11 @@ s32 func_0024D760(u8 *ctx) {
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
 void *evtViewerAdvanceUpdate(void) {
     EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
-    EvtWindowContext *window;
+    PolyMovieWork *window;
     s32 windowFlags;
 
     func_0024DBB8(viewer->windowContext);
-    window = (EvtWindowContext *)viewer->windowContext;
+    window = viewer->windowContext;
     windowFlags = window->flags;
     if ((windowFlags & 8) == 0) {
         kwlnDrawControlFlags |= 0x2000000;
@@ -1846,7 +1837,7 @@ void *evtViewerAdvanceUpdate(void) {
             kwlnDrawControlFlags |= 0x2000000;
             return 0;
         }
-        if (func_0024D760((u8 *)window) == 0) {
+        if (func_0024D760(window) == 0) {
             if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
                 if (viewer->titleStreamWaitFrames == 0x78) {
                     mnuMarkTitleStreamResetPending();
@@ -1864,27 +1855,27 @@ void *evtViewerAdvanceUpdate(void) {
 
 void *evtViewerStartUpdate(void) {
     EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
-    u8 *context;
+    PolyMovieWork *context;
     u16 eventId;
     u16 sceneId;
 
     fldInitializeCameraColorResource();
-    context = (u8 *)viewer->windowContext;
-    eventId = *(u16 *)(context + 0x10C);
-    sceneId = *(u16 *)(context + 0x110);
+    context = viewer->windowContext;
+    eventId = context->eventId;
+    sceneId = context->sceneId;
     D_004372B0 = eventId;
     D_004372B2 = sceneId;
     func_0035C860(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
     viewer->flags = 1;
-    evtViewerDispatchFlagMode((u32)viewer);
+    evtViewerDispatchFlagMode(viewer);
     viewer->unk2238 = 0;
     viewer->flags |= 8;
     kwlnDrawControlFlags |= 0x2000000;
     return evtViewerAdvanceUpdate;
 }
 
-u8 func_0024D908(s32 task) {
-    return ((EvtTaskContext *)task)->taskId == 0x263;
+u8 func_0024D908(PolyMovieWork *task) {
+    return task->eventId == 0x263;
 }
 
 extern f32 D_0037F590[];
@@ -1902,7 +1893,7 @@ extern void sdfReleaseResourceAllocation();
 extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
 extern void mnuReleaseCampSceneRegisteredIds();
-void evtViewerCleanupMessageWindow(s32 arg0);
+void evtViewerCleanupMessageWindow(EventViewerState *viewer);
 
 void evtViewerRelease(viewer)
     EventViewerState *viewer;
@@ -1911,7 +1902,7 @@ void evtViewerRelease(viewer)
         mnuReleaseCampSceneRegisteredIds(viewer);
     }
     evtResetUnitVectorSlots();
-    evtViewerCleanupMessageWindow((s32)viewer);
+    evtViewerCleanupMessageWindow(viewer);
     mnuCampLinkFontGlyph(viewer);
     func_0014E668(0);
     kwlnCancelConfiguredFadeFrames();
@@ -1968,20 +1959,20 @@ void func_0024DAE0() {
 }
 
 extern u32 D_00435CBC;
-extern s32 sdfAllocGeneralBlock(s32 size);
-extern u32 *sdfResourceRetainAddress(s32 handle);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 void evtViewerCreateTaskWithSky(void) {
     u32 *viewer;
-    s32 viewerHandle;
+    SdfMemBlock *viewerHandle;
     void *viewerTask;
 
     D_00435CBC = 0x80000000;
     viewerHandle = sdfAllocGeneralBlock(0x24BC);
-    viewer = sdfResourceRetainAddress(viewerHandle);
+    viewer = (u32 *)sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x24BC);
-    *viewer = viewerHandle;
+    *viewer = (u32)viewerHandle;
     viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_0024DAA0, viewer);
     func_00101968((s32)viewerTask, evtCreateSkyTask());
     func_0024DAE0(viewer);
@@ -1991,56 +1982,53 @@ void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
-struct PolyMovieWork;
 extern s32 fileIsRequestReadyInCurrentMode(void *file);
-extern s32 fileGetResourceHandle(void *file);
+extern u32 fileGetResourceHandle(void *file);
 extern s32 filePollEntryCleanup(void *file);
-extern struct PolyMovieWork *evtPolygonMovieInitWork();
 
-void func_0024DBB8(s32 assetsAddress) {
-    EvtWindowContext *assets = (EvtWindowContext *)assetsAddress;
+void func_0024DBB8(PolyMovieWork *assets) {
 
     if (assets->flags & 8) {
         return;
     }
     if (assets->flags & 2) {
-        if (assets->first.request == 0) {
+        if (assets->mainResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->first.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode(assets->mainResource.request) == 0) {
             return;
         }
-        assets->first.resource = fileGetResourceHandle(assets->first.request);
-        assets->first.address = sdfResourceRetainAddress(assets->first.resource);
-        filePollEntryCleanup(assets->first.request);
-        assets->first.request = 0;
+        assets->mainResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->mainResource.request);
+        assets->mainResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->mainResource.handle);
+        filePollEntryCleanup(assets->mainResource.request);
+        assets->mainResource.request = 0;
         assets->flags &= ~2;
     } else if (assets->flags & 4) {
-        if (assets->second.request == 0) {
+        if (assets->secondaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->second.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode(assets->secondaryResource.request) == 0) {
             return;
         }
-        assets->second.resource = fileGetResourceHandle(assets->second.request);
-        assets->second.address = sdfResourceRetainAddress(assets->second.resource);
-        filePollEntryCleanup(assets->second.request);
-        assets->second.request = 0;
+        assets->secondaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->secondaryResource.request);
+        assets->secondaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->secondaryResource.handle);
+        filePollEntryCleanup(assets->secondaryResource.request);
+        assets->secondaryResource.request = 0;
         assets->flags &= ~4;
     } else if (assets->flags & 0x10) {
-        if (assets->third.request == 0) {
+        if (assets->tertiaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->third.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode(assets->tertiaryResource.request) == 0) {
             return;
         }
-        assets->third.resource = fileGetResourceHandle(assets->third.request);
-        assets->third.address = sdfResourceRetainAddress(assets->third.resource);
-        filePollEntryCleanup(assets->third.request);
-        assets->third.request = 0;
+        assets->tertiaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->tertiaryResource.request);
+        assets->tertiaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->tertiaryResource.handle);
+        filePollEntryCleanup(assets->tertiaryResource.request);
+        assets->tertiaryResource.request = 0;
         assets->flags &= ~0x10;
-    } else if (assets->first.address != NULL && assets->second.address != NULL) {
-        evtPolygonMovieInitWork(assets, assets->first.address, assets->second.address, assets->third.address);
+    } else if (assets->mainResource.address != NULL && assets->secondaryResource.address != NULL) {
+        evtPolygonMovieInitWork(assets, assets->mainResource.address, assets->secondaryResource.address, assets->tertiaryResource.address);
         assets->flags |= 8;
     }
 }

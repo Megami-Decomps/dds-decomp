@@ -48,7 +48,7 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0036D440[];
 
-s32 func_00263EF8(u64 request) {
+s32 func_00263EF8(void *request) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 inputFlags;
@@ -60,7 +60,7 @@ s32 func_00263EF8(u64 request) {
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_00285670((s32)&work->transition, &work->transition.state, 0, request);
+    result = func_00285670(&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
@@ -134,14 +134,14 @@ s32 mnuDrawItemPanelDuringRequest(s32 request) {
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
-    return menuRunPanel((s32)context, 1, request);
+    return menuRunPanel(context, 1, (void *)request);
 }
 
 s32 func_00264238(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, input);
+    return menuRunPanel((void *)context, 2, (void *)input);
 }
 
 u32 mnuBeginPanelEntryAndCaptureSoundMode(void) {
@@ -165,7 +165,7 @@ extern void mnuClearPanelGroupSelection(s32);
 extern void mnuBindPresentMenuEntry(void *, s32 *);
 extern char D_0036D45C[];
 
-s32 func_002642D0(u64 request) {
+s32 func_002642D0(void *request) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 result;
@@ -173,7 +173,7 @@ s32 func_002642D0(u64 request) {
     work = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_00285670((s32)&work->transition, &work->transition.state, 0, request);
+    result = func_00285670(&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
@@ -203,14 +203,14 @@ s32 func_00264498(s32 request) {
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
-    return menuRunPanel((s32)context, 1, request);
+    return menuRunPanel(context, 1, (void *)request);
 }
 
 s32 func_002644F0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, input);
+    return menuRunPanel((void *)context, 2, (void *)input);
 }
 
 u32 func_00264538(void) {
@@ -243,13 +243,13 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern char D_0036D478[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
-s32 mnuRunPanelWithIdleFallback(u64 request) {
+s32 mnuRunPanelWithIdleFallback(void *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     s32 *panelState = &context->transition.state;
     s32 result;
 
     evtStageTestUpdateCamera();
-    result = func_00285670((s32)&context->transition, panelState, 0, request);
+    result = func_00285670(&context->transition, panelState, 0, request);
     if (result != 0) {
         return result;
     }
@@ -264,14 +264,14 @@ s32 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 0);
-    return menuRunPanel((s32)context, 1, request);
+    return menuRunPanel(context, 1, (void *)request);
 }
 
 s32 func_002646F8(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    return menuRunPanel(context, 2, input);
+    return menuRunPanel((void *)context, 2, (void *)input);
 }
 
 
