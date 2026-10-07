@@ -463,7 +463,7 @@ extern f32 D_0038BB00[];
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern s32 *fldGetPlayerSceneStateAddress();
+extern u32 *fldGetPlayerSceneStateAddress(void);
 
 extern void dds3SetCameraFieldOfView(s32, f32);
 
@@ -2517,7 +2517,7 @@ extern void func_0012F908(void);
 
 s32 fldUpdateCameraFollow(void) {
     FldAreaWork *cam;
-    s32 *world = fldGetPlayerSceneStateAddress();
+    u32 *world = fldGetPlayerSceneStateAddress();
     if (*world != 0 && fldPlayerObject != 0) {
         fldRestoreSceneModelColors();
         if (fldGetUnselectedWorldEntry() != 0) {
