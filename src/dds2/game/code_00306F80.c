@@ -2,15 +2,11 @@
 #include "fpu.h"
 #include "itf_grid_text.h"
 #include "sdf.h"
+#include "mnu.h"
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
-
-typedef struct GridPosition {
-    s32 x; // 0x00
-    s32 y; // 0x04
-} GridPosition; // 0x08
 
 /* Four words filled together; their corner/channel interpretation is unknown. */
 typedef struct UiQuadWords {
@@ -136,10 +132,10 @@ void itfGridCopyEntryQuad(s32 object, s32 index) {
     } while (-1 < remaining);
 }
 
-/* Store the two grid position coordinates. */
-void itfGridStorePosition(GridPosition *position, s32 x, s32 y) {
-    position->x = x;
-    position->y = y;
+/* Bind one real resource-set/index pair. */
+void itfGridStorePosition(MenuGridSlot *slot, EffectSlotSet *resource, s32 index) {
+    slot->set = resource;
+    slot->index = index;
 }
 
 extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
