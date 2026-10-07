@@ -88,6 +88,8 @@ extern EffectSlotSet *effCreateResourceSlotSet(u32 *, u32, u32);
 extern void func_00266460(u32, MenuEffectResources *);
 extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
+extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
 /* The directory and strings are owned by code_00265AD8. */
@@ -1268,8 +1270,8 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F58);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F88);
 
-s32 func_00269418(s32 object) {
-    switch (*(s32 *)(object + 0x20)) {
+s32 func_00269418(MenuList *list) {
+    switch (list->count) {
     case 2: return 0x3a;
     case 3: return 0x3b;
     case 4: return 0x3c;
@@ -1398,7 +1400,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 
 
-extern void func_00269638(void);
+extern void func_00269638(s32, MenuSlotState *);
 
 extern void func_00269478(s32, s32);
 
