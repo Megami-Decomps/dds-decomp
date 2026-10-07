@@ -161,7 +161,7 @@ extern s32 mdlViewerEnd(KwlnTask *);
 
 s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
-void fldDrawPackedRgbEditor(s32, s32, s32, s32, s32, s32, s32);
+void fldDrawPackedRgbEditor(void *, s32, s32, s32, u32, s32);
 
 void effApplyNodeScale(s32, float);
 
@@ -177,7 +177,7 @@ s32 mdlUpdateViewerCursor(s16 *, s32);
 
 extern void sdfPktInit(void *, s32, s32, s32, s32);
 
-extern s32 sdfFormatSifPacket();
+extern void *sdfFormatSifPacket(void *, const char *, ...);
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
@@ -186,7 +186,7 @@ void func_0021B9F8(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
-void sdfAppendPacket(s32, s32);
+void sdfAppendPacket(SdfListHead *, u32);
 
 
 void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
@@ -476,7 +476,7 @@ u16 func_002193F0(MdlRecord *record) {
     return record->unk10;
 }
 
-extern s32 sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
+extern void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *format, ...);
 extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[], D_003ABAD0[];
 extern char D_003BBB80[], D_003BBB88[];
 
@@ -501,35 +501,35 @@ void func_002193F8(s32 packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRe
             char *label = record->kind == 1 ? D_003BBB80 : D_003BBB88;
 
             if (record->parameter.part.count == 1) {
-                sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+                sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x, y, depth, textStyle,
                                                                     D_003ABA80, label, record->payload.word,
-                                                                    record->parameter.part.partIndex));
+                                                                    record->parameter.part.partIndex)));
                 return;
             }
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x, y, depth, textStyle,
                                                                 D_003ABA90, label, record->payload.word,
                                                                 record->payload.word + record->parameter.part.count - 1,
-                                                                record->parameter.part.partIndex));
+                                                                record->parameter.part.partIndex)));
             return;
         }
         case 3:
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x, y, depth, textStyle,
                                                                 D_003ABAA0, record->payload.word,
-                                                                record->parameter.word));
+                                                                record->parameter.word)));
             return;
         case 4:
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x, y, depth, textStyle,
                                                                 D_003ABAB0, record->payload.stream.selectorA,
-                                                                record->payload.stream.selectorB));
+                                                                record->payload.stream.selectorB)));
             return;
         case 5:
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y, depth, textStyle,
-                                                                D_003ABAC0, record->payload.word));
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+                                                                D_003ABAC0, record->payload.word)));
             return;
         }
     } else {
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y, depth, textStyle,
-                                                            D_003ABAD0, record->kind));
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+                                                            D_003ABAD0, record->kind)));
     }
 }
 
@@ -563,26 +563,26 @@ void mdlDrawMarkParamsPanel(s32 packetList, s32 x, s32 y, s32 depth, EffMarkPara
     s32 colorIndex;
     s32 channelIndex;
 
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, y, depth, 0, "MARK0:%d", params->mark0));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, y + 0x60, depth, 0, "MARK1:%d", params->mark1));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, y + 0xC0, depth, 0, "START:%d", params->start));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, y + 0x120, depth, 0, "END  :%d", params->end));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, y + 0x180, depth, 0, "ITRVL:%d", params->interval));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, y + 0x1E0, depth, 0, "FACE :%d", params->face));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, y + 0x240, depth, 0, "BLEND:%d", params->blend));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, y, depth, 0, "MARK0:%d", params->mark0)));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, y + 0x60, depth, 0, "MARK1:%d", params->mark1)));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, y + 0xC0, depth, 0, "START:%d", params->start)));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, y + 0x120, depth, 0, "END  :%d", params->end)));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, y + 0x180, depth, 0, "ITRVL:%d", params->interval)));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, y + 0x1E0, depth, 0, "FACE :%d", params->face)));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, y + 0x240, depth, 0, "BLEND:%d", params->blend)));
     for (colorIndex = 0; colorIndex != MDL_MARK_COLOR_COUNT; colorIndex++) {
         packedColor = params->colors[colorIndex];
-        sdfAppendPacket(packetList, func_0011D3E8(x + 0x480, colorY, depth, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040));
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(func_0011D3E8(x + 0x480, colorY, depth, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040)));
         for (channelIndex = 0; channelIndex != MDL_COLOR_CHANNEL_COUNT; channelIndex++) {
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(labelX, colorY, depth, D_003679B0[channelIndex], D_003679B8[channelIndex]));
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x + 0x240, colorY, depth, 0, D_003BBBB0, packedColor & MDL_COLOR_BYTE_MASK));
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(labelX, colorY, depth, D_003679B0[channelIndex], D_003679B8[channelIndex])));
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x + 0x240, colorY, depth, 0, D_003BBBB0, packedColor & MDL_COLOR_BYTE_MASK)));
             packedColor >>= MDL_COLOR_BYTE_BITS;
             colorY += 0x60;
         }
         colorY += 0x60;
     }
     if (selectedField >= 0) {
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y + D_00367980[selectedField], depth, 0, D_003BBBB8));
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(x, y + D_00367980[selectedField], depth, 0, D_003BBBB8)));
     }
 }
 
@@ -1106,7 +1106,7 @@ void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 heigh
     s32 packet;
 
     packet = D_003D7B10[0];
-    sdfAppendPacket(packet, mdlBuildViewerRectanglePacket(x, y, depth, width, height));
+    sdfAppendPacket((SdfListHead *)(packet), (u32)(mdlBuildViewerRectanglePacket(x, y, depth, width, height)));
 }
 
 extern s8 sdfPadButtonStates[];
@@ -1304,7 +1304,7 @@ void func_0021ABB8(void) {
     const char *format;
     s32 displayMode;
     s32 nodeCount;
-    s32 formatted;
+    void *formatted;
 
     mdlAppendViewerRectToDrawList(0x7E10, 0x8608, 0xFF0080, 0xEA0, 0x90, 0);
     sdfPktInit(&packet, 0x7E40, 0x8620, 0xFF0080, 0);
@@ -1314,8 +1314,7 @@ void func_0021ABB8(void) {
     } else {
         format = D_003ABCB0;
     }
-    sdfAppendPacket(mdlViewerState.packetList,
-                    sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
+    sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId)));
 
     nodeCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], 0);
     if (nodeCount == 0) {
@@ -1329,7 +1328,7 @@ void func_0021ABB8(void) {
         formatted = sdfFormatSifPacket(&packet, format,
                                        mdlGetNodeField2C(mdlViewerState.resources[0], 0), nodeCount - 1);
     }
-    sdfAppendPacket(mdlViewerState.packetList, formatted);
+    sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(formatted));
 }
 
 extern s32 mdlHasNode(s32 resource, s32 id);
@@ -1532,13 +1531,13 @@ void func_0021B510(void) {
     }
 }
 
-extern s32 D_00367B10[];
+extern const char *D_00367B10[];
 
-extern s32 sdfCreateFormattedSifCommand();
+
 
 void mdlDrawViewerIndexedLabelOverlay(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[mdlViewerState.labelIndexA]));
+    sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[mdlViewerState.labelIndexA])));
 }
 
 u32 mdlRunViewerIndexedLabelTask(void) {
@@ -1658,11 +1657,11 @@ void func_0021B9F8(void) {
     }
 }
 
-extern s32 D_00367B18[];
+extern const char *D_00367B18[];
 
 void mdlDrawViewerSelectionLabel(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[mdlViewerState.labelIndexB]));
+    sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[mdlViewerState.labelIndexB])));
 }
 
 s32 mdlRunViewerSelectionLabelTask(void) {
@@ -1740,12 +1739,12 @@ void mdlDrawViewerMotionTimeline(void) {
         }
         playheadX += 0x8200;
         sdfAppendFillRectanglePacket(packetList, 0x800000E0, 0, playheadX, 0x7960, playheadX, 0x79C0, 0xFF0090, 0);
-        sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->currentFrame, motion->frameCount));
+        sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->currentFrame, motion->frameCount)));
     } else {
-        sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
+        sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]")));
     }
     textStyle = mdlViewerState.unitStepMode != 0 ? 2 : 0;
-    sdfAppendPacket(mdlViewerState.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, textStyle, D_003BBC80, mdlViewerState.viewerScale));
+    sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, textStyle, D_003BBC80, mdlViewerState.viewerScale)));
 }
 
 u32 mdlUpdateViewerScaleTask(void) {
@@ -1889,13 +1888,13 @@ void mdlDrawViewerTexturePreview(void) {
         selectedNumber = index + (count > 0);
     }
     packetList = mdlViewerState.packetList;
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7180, 0x7A20,
-        0xFF0080, 0, D_003ABDA8, selectedNumber, count));
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(0x7180, 0x7A20,
+        0xFF0080, 0, D_003ABDA8, selectedNumber, count)));
     if (count > 0) {
         width = node->textures[index]->width;
         height = node->textures[index]->height;
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7780, 0x7A20,
-            0xFF0080, 0, D_003BBC88, width, height));
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(0x7780, 0x7A20,
+            0xFF0080, 0, D_003BBC88, width, height)));
         sdfConsCreateDrawPacket(packetList, node->textures[index], 0);
         displayWidth = width << 4;
         displayHeight = height << 3;
@@ -2017,7 +2016,60 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE70);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE80);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021CB80);
+extern const s32 D_00367B38[];
+extern const char *D_00367B60[];
+extern const char *D_00367B70[];
+extern char D_003BBC90[];
+extern char D_003BBC98[];
+extern char D_003BBCA0[];
+extern char D_003BBCA8[];
+
+void func_0021CB80(void) {
+    /* The native prologue fills and then indexes these three status bytes
+     * at sp+0..2; this is a real temporary stack table, not a source view. */
+    s8 enabled[3];
+    s32 packetList;
+    s32 i;
+    s32 y;
+    s32 style;
+    s16 value;
+
+    mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0x1320, 0x5D0, 0);
+    enabled[0] = mdlViewerState.unk0E;
+    packetList = mdlViewerState.packetList;
+    enabled[1] = mdlIsDebugTimeGraph();
+    enabled[2] = mdlViewerState.unk0F;
+    for (i = 0, y = 0x7A80; i < 3; i++, y += 0x60) {
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7300, y, 0xFF0080, 0, D_00367B60[i],
+            enabled[i] == 0 ? D_003BBC90 : D_003BBC98)));
+    }
+    if (mdlViewerState.unk09 < 20) {
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7240, D_00367B38[mdlViewerState.unk3C], 0xFF0080, 0, D_003BBCA0)));
+    }
+    fldDrawPackedRgbEditor((void *)packetList, 0x7300, D_00367B38[3],
+                           mdlViewerState.unk3E == 1 ? mdlViewerState.unk3C - 3 : -1,
+                           D_003BA8EC, 0);
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+        0x7B40, 0x7C60, 0xFF0080, 0, "BACK COLOR")));
+    for (i = 0; i < 3; i++) {
+        /* The native channel loop clears the selected channel value before the switch. */
+        value = 0;
+        switch (i) {
+        case 0: value = mdlViewerState.unk4A; break;
+        case 1: value = mdlViewerState.unk4C; break;
+        case 2: value = mdlViewerState.unk4E; break;
+        }
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7300, 0x7D80 + i * 0x60, 0xFF0080, 0, D_00367B70[i], value)));
+        style = i == mdlViewerState.unk3C - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7F00, 0x7D80 + i * 0x60, 0xFF0080, style, D_003BBCA8, value)));
+    }
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+        0x7300, 0x7F00, 0xFF0080, 0, "SAVE CONFIG")));
+}
 
 u32 mdlRunViewerSettingsTask(void) {
     mdlUpdateViewerSettingsInput();
@@ -2127,7 +2179,7 @@ void mdlSubmitViewerIntermediateDrawPacket(void) {
         if (mdlViewerState.taskPhase >= 2) {
             packetList = sdfCreateResetPacketList();
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            sdfAppendPacket(packetList, (s32)func_002EF2E0(D_00367B80, D_00367BE0, 6, 0x80));
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)((s32)func_002EF2E0(D_00367B80, D_00367BE0, 6, 0x80)));
             D_00325048.submit(&D_00325048, packetList);
         }
     }
@@ -2156,7 +2208,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
             D_003BBCB8 = 1;
             func_002EA2E0(drawPacket, 0x100);
         }
-        sdfAppendPacket(packetList, drawPacket);
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(drawPacket));
         D_00325048.submit(&D_00325048, packetList);
     }
 }
@@ -2199,7 +2251,7 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
         for (recordIndex = 0; recordIndex != recordCount; recordIndex++) {
             sdfSetLookAtBasisFromRecord(resource->inner, recordCursor);
             recordCursor += MDL_MAP_POSITION_RECORD_BYTES;
-            sdfAppendPacket(packetList, (s32)func_002EF2E0(D_00367C50, D_00367CB0, 6, 0x80));
+            sdfAppendPacket((SdfListHead *)(packetList), (u32)((s32)func_002EF2E0(D_00367C50, D_00367CB0, 6, 0x80)));
         }
         D_00325048.submit(&D_00325048, packetList);
     }
@@ -2429,8 +2481,8 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E618);
 void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
 
-    fldDrawPackedRgbEditor(mdlViewerControlState.unk08, first, second,
-                  (mdlViewerControlState.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1, packedColor);
+    fldDrawPackedRgbEditor((void *)(mdlViewerControlState.unk08), first, second,
+                  (mdlViewerControlState.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1);
 }
 
 typedef struct MdlValueEdit {
