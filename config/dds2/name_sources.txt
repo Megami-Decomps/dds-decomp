@@ -5313,7 +5313,9 @@
 0x00307428	itfSubmitGridPacketsAndDraw	inferred	Builds optional overlay and main grid descriptor packets then dispatches the draw callback. [names_reviewed15.tsv]
 0x003074F0	itfGetGridResourceEntryData	inferred	M141; sources=names_pending_main.tsv [names_qp10.tsv]
 0x003075A0	itfSetGridDescriptorControlBit	inferred	Changes the selected grid descriptor control word by clearing upper bits and setting one flag. [names_reviewed15.tsv]
+0x00307710	itfGridApplyQuadraticZoomBoundsAndFadeAlpha	inferred	sqrt(delta) times fixed-point phase is squared for quadratic bounds easing; symmetrically updates bounds, scales four corner alpha bytes, and returns cycle step
 0x00307BA8	itfUpdateAngleAndGetCycleStep	inferred	Converts a fixed-point angle to degrees and returns its cycle step. [names_reviewed8.tsv]
+0x00307D70	itfGridApplyLinearZoomBoundsAndFadeAlpha	inferred	linear fixed-point delta times phase updates symmetric bounds, scales four corner alpha bytes, and returns cycle step
 0x00308020	itfGridUnpackColorChannels	inferred	Unpacks four color bytes into two 64-bit channel words.
 0x003081A8	itfGridDrawBooleanDescriptor	inferred	Normalizes the input byte to zero or one and submits alternate Boolean grid draw descriptors.
 0x00308288	itfSetPrimaryFramebufferAlphaFlag	inferred	confidence=high; matched-C; src/dds2/game/code_00306F80.c:373:func_00308288; Normalizes the byte flag to zero/one and submits GS FBA_1 (0x4A) through the requested draw surface.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]

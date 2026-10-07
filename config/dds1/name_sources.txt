@@ -5680,7 +5680,9 @@
 0x002BFB50	itfGridCopyEntryQuad	inferred	Byte-identical dds2 twin 0x00307340; Copies four words from a grid entry's later record into its earlier record. [names_conflicts.tsv]
 0x002BFB98	itfGridStorePosition	inferred	Writes the supplied x and y coordinates into a position pair.
 0x002BFBA8	itfGridApplySqrtBoundsAndColorScale	inferred	readability/matching review (QP16)
+0x002BFCE0	itfGridApplyQuadraticZoomBoundsAndFadeAlpha	inferred	sqrt(delta) times fixed-point phase is squared for quadratic bounds easing; symmetrically updates bounds, scales four corner alpha bytes, and returns cycle step
 0x002C0178	itfUpdateAngleAndGetCycleStep	inferred	Converts a fixed-point angle to degrees and returns its cycle step. [names_reviewed8.tsv]
+0x002C0340	itfGridApplyLinearZoomBoundsAndFadeAlpha	inferred	linear fixed-point delta times phase updates symmetric bounds, scales four corner alpha bytes, and returns cycle step
 0x002C05F0	itfGridUnpackColorChannels	inferred	Unpacks four color bytes into two 64-bit channel words.
 0x002C0858	itfSetPrimaryFramebufferAlphaFlag	inferred	confidence=high; matched-C; src/dds1/game/code_002BF790.c:242:func_002C0858; Normalizes the byte flag to zero/one and submits GS FBA_1 (0x4A) through the requested draw surface.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x002C0878	itfSubmitToggledGridWord	inferred	Submits a word and one of two descriptor opcodes to the grid renderer. [names_reviewed8.tsv]

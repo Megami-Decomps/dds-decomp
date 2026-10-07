@@ -236,7 +236,7 @@ void itfSetGridDescriptorControlBit(s32 object, s32 index) {
 INCLUDE_ASM(const s32, "game/code_00306F80", itfGridApplySqrtBoundsAndColorScale);
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
-s32 func_00307710(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 squares[2];
     s32 deltas[2];
@@ -310,7 +310,7 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ow
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307C30);
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
-s32 func_00307D70(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 scaled[2];
     s32 deltas[2];
