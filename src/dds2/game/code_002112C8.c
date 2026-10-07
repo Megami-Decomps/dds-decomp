@@ -6379,7 +6379,69 @@ s32 btlLiftLinkedTargetAndUpdateMotion(s32 object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002242F8);
+extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001E3108(void *, f32 *);
+
+s32 func_002242F8(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
+    BtlState *battle;
+    BtlUnit *unit;
+    s32 cameraKind;
+    f32 position[4];
+    f32 z;
+    f32 adjustedZ;
+
+    if (btlIsActorCategoryMarked((s32)command)) {
+        return 0;
+    }
+    battle = btlGetRuntime();
+    if (command->link->unit->flags & 0x200) {
+        if (modeA == 1 || modeB != 1) {
+            return 0;
+        }
+        if (btlHasLinkedEffectNodeTrigger(command)) {
+            btlFaceLinkedTargetAndFlagDirection((u8 *)command, (u8 *)command);
+            command->flags |= 0x800;
+            command->stepKind = 0xE;
+            return 1;
+        }
+        cameraKind = datActionAnimationRecords[command->actionCode].cameraKind;
+        if (cameraKind < 8) {
+            if (cameraKind >= 6) {
+                btlSetupCameraPoseAimUnit(command, &command->frontCamera, &command->backCamera);
+                return 1;
+            }
+        }
+        func_001ECCB0(command, &command->frontCamera, &command->backCamera);
+        return 1;
+    }
+    if (command->actionCode == 0x105 || command->actionCode == 0x12D) {
+        for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x400) {
+                    if (unit->partyRecord.unitId == 0x126) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (unit != NULL) {
+            func_001E3108(unit, position);
+            z = position[2];
+            if (command->actionCode == 0x105) {
+                adjustedZ = z + -400.0f;
+            } else {
+                adjustedZ = z + 150.0f;
+            }
+            position[2] = adjustedZ;
+            btlSetUnitPosition(unit, position);
+        }
+        return 0;
+    }
+    btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+    command->stepKind = 4;
+    return 1;
+}
 
 /* Update linked motion only for a group-0x200 owner with request 0xE; return 1 on update. */
 s32 func_00224500(s32 object) {
