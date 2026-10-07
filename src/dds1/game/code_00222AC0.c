@@ -12,7 +12,7 @@
 extern EvtUnitVectorSlot D_003D7BD8[7];
 
 
-extern void func_002E1938(s32, SdfLightSources, f32 *);
+extern void func_002E1938(void *, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
@@ -435,8 +435,8 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_002E1938(unit->endpointWorkAddress, desc, color);
-    unit->value = unit->endpointWorkAddress;
+    func_002E1938(unit->endpointWork, desc, color);
+    unit->value = (u32)unit->endpointWork;
 }
 
 /* Find the vector of the slot bound to `id`, else of the first slot in state 2. */

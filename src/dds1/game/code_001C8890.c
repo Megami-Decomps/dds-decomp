@@ -4421,7 +4421,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
     }
     func_002D9748(overlay, model->inner);
     if (unit->flags & 2) {
-        overlay->lighting = (void *)unit->ext->endpointWorkAddress;
+        overlay->lighting = unit->ext->endpointWork;
     } else {
         overlay->lighting = NULL;
     }
@@ -4490,7 +4490,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                     sdfReleaseDevSlot(unit->transparencyModel, 1, 1);
                     unit->transparencyModel = 0;
                     if (unit->flags & 2) {
-                        info->inner->lighting = (void *)unit->ext->endpointWorkAddress;
+                        info->inner->lighting = unit->ext->endpointWork;
                     } else {
                         info->inner->lighting = 0;
                     }

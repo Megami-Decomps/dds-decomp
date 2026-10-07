@@ -28,6 +28,7 @@ extern u8 kwlnDefaultColorVector[];
 
 extern void sdfStepWrappingFloatCounter(s32 path);
 extern void *sdfAllocSizeClassBlock(s32 size);
+extern void sdfReleaseChipBlock(void *block);
 extern void dds3InterpolatePathVectorVU(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
 extern void effObjSetInnerFirstVec(void *obj, void *vec);
@@ -586,7 +587,7 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
 
 
 extern void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit);
-extern void func_0033A7E8(s32, SdfLightSources, f32 *);
+extern void func_0033A7E8(void *, SdfLightSources, f32 *);
 
 /* Rebuild the unit's endpoint render work from its own colour/vector when the
  * value-change flag is set; otherwise defer to the matching-slot selector. */
@@ -627,8 +628,8 @@ void func_0023C5F0(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_0033A7E8(unit->endpointWorkAddress, desc, color);
-    unit->value = unit->endpointWorkAddress;
+    func_0033A7E8(unit->endpointWork, desc, color);
+    unit->value = (u32)unit->endpointWork;
 }
 
 void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
@@ -821,7 +822,7 @@ EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
     work->color5C = 0x80303030;
     work->color50 = 0x80303030;
     endpoint = sdfAllocSizeClassBlock(0xE0);
-    work->endpointWorkAddress = (s32)endpoint;
+    work->endpointWork = endpoint;
     memset(endpoint, 0, 0xE0);
     work->value = 0;
     *(u32 *)((u8 *)work + 0xD8) = 0;
@@ -840,16 +841,16 @@ EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
 }
 
 s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
-    s32 handle;
+    void *endpointWork;
 
     if (work == NULL) {
         return 1;
     }
-    handle = work->endpointWorkAddress;
+    endpointWork = work->endpointWork;
     work->owner->inner->lighting = 0;
-    if (handle != 0) {
-        sdfReleaseChipBlock(handle);
-        work->endpointWorkAddress = 0;
+    if (endpointWork != NULL) {
+        sdfReleaseChipBlock(endpointWork);
+        work->endpointWork = NULL;
     }
     if (work->pathHandle != 0) {
         dds3FreePathObject(work->pathHandle);
