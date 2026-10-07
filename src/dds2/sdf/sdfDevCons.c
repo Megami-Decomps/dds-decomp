@@ -32,7 +32,7 @@ extern void *memset(void *dst, s32 c, u32 n);
 
 void func_0033CE08(DevConsState *arg0, s32 arg1, s32 arg2);
 
-void func_00360E78(void *arg0, const char *arg1, void *arg2);
+s32 func_00360E78(char *destination, const char *format, void *args);
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
 void sdfDevConsAdvanceRow(DevConsState *console) {
