@@ -12,21 +12,21 @@ void *sdfAllocSizeClassBlock(s32 arg);
 
 void dds3GrowWorldValueChain(void *arg, s32 arg1);
 
-void dds3RemoveCurrentWorldValueEntry(IndexObj *arg);
+void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);
 
-s32 dds3SeekWorldNode(void *arg0, void *arg1);
+s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
 
 void *dds3GetWorldValueCount(void *arg0, void *arg1, s32 arg2);
 
 void dds3ResetObjectValueCursor(void *arg);
 
-void *dds3ReadIndexedWorldObjectWord(void *arg);
+u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 s32 dds3AdvanceObjectValueCursor(void *arg);
 
 void sdfReleaseChipBlock(void *arg);
 
-void dds3ReleaseWorldValueEntries(IndexObj *arg);
+void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);
 
 #define DDS3_WORLD_NODE_KIND 1
 #define DDS3_WORLD_INDEX_NODE_BYTES 0x10
@@ -179,7 +179,7 @@ void dds3DestroyWorldIndexNode(NodeB *indexNode) {
         return;
     }
     worldInfo = dds3ActiveWorld->info;
-    dds3ReleaseWorldValueEntries(indexNode);
+    dds3ReleaseWorldValueEntries((WorldValueIndices *)indexNode);
     if (indexNode->previous == NULL) {
         worldInfo->firstIndex = indexNode->next;
     } else {
@@ -200,14 +200,14 @@ INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3ReleaseWorldValueEntries);
 /* Reset the cursor and remove the first matching value, or all matches when
  * processAllMatches is nonzero. Return whether any match was processed.
  * Retain the existing count prototype and three-argument call convention. */
-s32 dds3ProcessMatchingWorldNodes(void *indexNode, void *targetWord, s32 processAllMatches) {
+s32 dds3ProcessMatchingWorldNodes(WorldValueIndices *indexNode, void *targetWord, s32 processAllMatches) {
     s32 processedMatch;
 
     processedMatch = 0;
     if (dds3GetWorldValueCount(indexNode, targetWord, processAllMatches) != NULL) {
         dds3ResetObjectValueCursor(indexNode);
         do {
-            if (dds3SeekWorldNode(indexNode, targetWord) != 1) {
+            if (dds3SeekWorldNode(indexNode, (u32)targetWord) != 1) {
                 break;
             }
             dds3RemoveCurrentWorldValueEntry(indexNode);
@@ -220,12 +220,12 @@ s32 dds3ProcessMatchingWorldNodes(void *indexNode, void *targetWord, s32 process
 /* Search from the current cursor without resetting it; leave it on a match.
  * A NULL payload terminates before comparison, even if later entries remain,
  * so a NULL target never matches. Return 1 for a match, otherwise 0. */
-s32 dds3SeekWorldNode(void *indexNode, void *targetWord) {
-    void *candidateWord;
+s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord) {
+    u32 candidateWord;
 
     do {
         candidateWord = dds3ReadIndexedWorldObjectWord(indexNode);
-        if (candidateWord == NULL) {
+        if (candidateWord == 0) {
             return 0;
         }
         if (targetWord == candidateWord) {
