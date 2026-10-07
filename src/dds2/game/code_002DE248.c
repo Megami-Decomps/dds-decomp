@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "eff_blur.h"
 #include "eff_curve.h"
 #include "file.h"
@@ -376,7 +377,7 @@ extern void *fileCreateCallbackRequest(const char *, s32, s32, s32);
 
 extern u32 func_00305148();
 
-extern SdfModel *sdfModelCreateWithAlternateItems(DevRequest *, void *);
+
 
 extern void *sdfAllocSizeClassBlock(s32);
 
