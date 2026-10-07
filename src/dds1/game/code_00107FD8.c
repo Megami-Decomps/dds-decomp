@@ -483,7 +483,42 @@ void func_00108F00(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108FA0);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
+extern void sdfQueueGouraudTexturedQuad(
+    s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
+    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2,
+    s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
+    s32 depth, s32 (*allocate)(s32));
+
+void func_00108FA0(s32 x, s32 y, s32 width, s32 height,
+                   s32 u, s32 v, s32 textureWidth, s32 textureHeight,
+                   u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
+    SdfListHead *list;
+    SdfPoolNode *surface;
+    s32 left, top, right, bottom;
+    s32 uLeft, vTop, uRight, vBottom;
+
+    list = (SdfListHead *)sdfCreateResetPacketList();
+    sdfConsCreateDrawPacket(list, texture, 0);
+    left = (x << 4) + 0x7000;
+    top = (y << 3);
+    right = (x << 4) + (width << 4) + 0x7000;
+    bottom = top + (height << 3) + 0x7900;
+    top += 0x7900;
+    uLeft = (u << 4);
+    vTop = (v << 4);
+    uRight = uLeft + (textureWidth << 4);
+    vBottom = vTop + (textureHeight << 4);
+    sdfQueueGouraudTexturedQuad((s32)list, 0x40,
+        left, top, uLeft, vTop, color0,
+        right, top, uRight, vTop, color1,
+        left, bottom, uLeft, vBottom, color3,
+        right, bottom, uRight, vBottom, color2,
+        -1, NULL);
+    surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    surface->append((SdfListHead *)surface, list);
+}
 
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
 void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
