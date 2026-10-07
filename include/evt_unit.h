@@ -15,9 +15,16 @@ typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_VALUE = 4
 } EvtUnitMotionState;
 
-/* EvtUnit.flags bit selecting path-follow motion from progress 1 toward 0. */
+/* Bits consumed by the event unit's motion, value and visual transitions. */
 enum EvtUnitFlags {
-    EVT_UNIT_FLAG_PATH_REVERSE = 0x4
+    EVT_UNIT_FLAG_PATH_REVERSE = 0x4,
+    EVT_UNIT_FLAG_RGB_TRANSITION = 0x8000,
+    EVT_UNIT_FLAG_ALPHA_TRANSITION = 0x10000,
+    EVT_UNIT_FLAG_VALUE_CHANGED = 0x20000,
+    EVT_UNIT_FLAG_TARGET_TRANSITION = 0x40000,
+    EVT_UNIT_FLAG_TARGET_BLEND_IN = 0x80000,
+    EVT_UNIT_FLAG_TARGET_BLEND_OUT = 0x100000,
+    EVT_UNIT_FLAG_TARGET_BLEND_PHASES = 0x180000
 };
 
 /* Shared light-target payload used by the event manager and battle base-light task. */
