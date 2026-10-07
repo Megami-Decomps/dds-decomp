@@ -961,10 +961,16 @@ typedef struct SdfSceneNode {
     SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
     SdfPacket header;  /* 0x10 */
-    u64 draw[24];      /* 0x30 */
+    u64 draw[8];       /* 0x30 */
+    SdfPacket contextOne[2]; /* 0x70 */
+    SdfPacket contextTwo[2]; /* 0xB0 */
     u64 limits[10];    /* 0xF0 */
     u64 regs[8];       /* 0x140 */
+    u64 framePacketWords[4]; /* 0x180 */
+    SdfTexBuf texturePackets[2]; /* 0x1A0 */
 } SdfSceneNode;
+
+typedef char SdfSceneNode_size_must_be_0x220[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
 
 extern void sdfRefreshSceneNodePackets();
 
