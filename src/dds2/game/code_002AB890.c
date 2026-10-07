@@ -2,6 +2,7 @@
 #include "mnu_staff.h"
 #include "mnu_list.h"
 #include "dat_state.h"
+#include "eff.h"
 
 
 extern u32 kwlnTaskGetUserValue();
@@ -102,7 +103,6 @@ typedef struct MenuCatalogItem {
 
 extern const MenuCatalogItem D_003E7200[18];
 extern char D_00437BC8[];
-extern void func_002AC750();
 extern void mnuSetWindowContainerLayout(MenuWindowContainer *, u32, u32, u32, u32, u32, u32, u32, u32);
 extern void func_002AC050();
 extern s32 func_002C54B0(s32);
@@ -202,7 +202,48 @@ s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, Menu
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC750);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void itfGridCopyEntryQuad(s32, s32);
+
+void func_002AC750(s32 x, s32 y, s32 depth, struct MenuList *list,
+                   struct MenuListNode *node, s32 drawArg) {
+    MenuStaffContext *owner = (MenuStaffContext *)list->context;
+    s32 listScale = list->scale;
+    s32 selected = 0;
+
+    if (list->cursor == node) {
+        if (!(list->stateFlags & 8)) {
+            selected = 1;
+        }
+    }
+    if (node == list->first) {
+        if (selected) {
+            EffectSlotSet *resources = (EffectSlotSet *)owner->spriteArg2;
+
+            resources->workEntries[1].geometry.cornerColors[0] = 0x89FEFF80;
+            resources->workEntries[1].geometry.cornerColors[1] = 0x89FEFF80;
+            resources->workEntries[1].geometry.cornerColors[2] = 0x89FEFF80;
+            resources->workEntries[1].geometry.cornerColors[3] = 0x89FEFF80;
+            func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
+                          resources, 1, 0x53);
+            itfGridCopyEntryQuad((s32)(EffectSlotSet *)owner->spriteArg2, 1);
+
+            func_00306CD0(x - 0x20, y - 8, 0, 0x100, 0,
+                          (EffectSlotSet *)owner->spriteArg0, 0x1F, 0x53);
+            func_00306CD0(x + 0x960, y - 8, 0, 0x100, 0,
+                          (EffectSlotSet *)owner->spriteArg0, 0x1F, 0x53);
+        } else {
+            func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
+                          (EffectSlotSet *)owner->spriteArg2, 1, 0x53);
+            func_00306CD0(x + 0x60, y, 0, 0xFF, 0,
+                          (EffectSlotSet *)owner->spriteArg0, 0xA, 0x53);
+            func_00306CD0(x + 0x950, y, 0, 0xFF, 0,
+                          (EffectSlotSet *)owner->spriteArg0, 0xA, 0x53);
+        }
+    } else {
+        func_002AB890(x, y, depth, (s32)list, (s32)node, drawArg);
+    }
+}
 
 
 /* Build the catalog window from the eighteen item records and owned quantities. */
