@@ -173,8 +173,8 @@ void dds3ReleaseCameraWorldNode(void) {
 }
 
 /* Load the owned look-at matrix into vf28-vf31. */
-void dds3LoadObjectMatrixPointerIntoVu(void *obj) {
-    VU0_LOAD_MATRIX(((CameraData *)((EffWorldNode *)obj)->data)->matrix);
+void dds3LoadObjectMatrixPointerIntoVu(EffWorldNode *camera) {
+    VU0_LOAD_MATRIX(((CameraData *)camera->data)->matrix);
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */
