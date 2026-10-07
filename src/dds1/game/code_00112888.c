@@ -1,16 +1,8 @@
 #include "common.h"
 #include "eff_object.h"
 
-typedef struct WorldInnerState {
-    u8 pad00[0x80];
-    ObjBase *unk80;
-    u8 pad84[4];
-    u32 state88;
-    u8 pad8C[4]; /* Complete native 0x90-byte allocation at 00112958. */
-} WorldInnerState;
-
-
 extern void *sdfAllocSizeClassBlock(s32);
+extern s32 effObjInnerCreate(EffWorldNode *object);
 
 /* Each object kind keeps its handle in a different structure. */
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object) {
@@ -40,15 +32,15 @@ void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value) {
 
 /* Allocate the inner state and associate it with its world-object handle. */
 u32 dds3CreateWorldInnerState(EffWorldNode *object) {
-    WorldInnerState *inner;
+    CameraData *inner;
     ObjBase *objectBase;
 
-    effObjInnerCreate();
+    effObjInnerCreate(object);
     inner = sdfAllocSizeClassBlock(0x90);
     object->data = inner;
     objectBase = dds3CreateSlotResourceState(object);
-    inner->unk80 = objectBase;
+    inner->handle = objectBase;
     dds3SetObjectFlags(object, 0x62);
-    inner->state88 = 0;
+    inner->fovUpdatePending = 0;
     return 1;
 }
