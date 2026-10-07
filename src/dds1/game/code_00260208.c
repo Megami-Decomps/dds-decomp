@@ -500,10 +500,10 @@ extern s32 mnuAllocateValueRecord(s32);
 extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtSetMessageWindowPageValue(s32);
 extern void func_001A1530(BrsRewardSummary *);
-extern void brsBuildRewardRows(BrsRewardBatch *, BrsRewardSummary *);
-extern void brsBuildLevelUpList(BrsRewardBatch *);
-extern void brsBuildProfileCapList(BrsRewardBatch *);
-extern void brsBuildActiveUnitProgressRows(BrsProgressRow *);
+extern s32 brsBuildRewardRows(BrsRewardBatch *, BrsRewardSummary *);
+extern s32 brsBuildLevelUpList(BrsRewardBatch *);
+extern s32 brsBuildProfileCapList(BrsRewardBatch *);
+extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
 extern char D_0036C858[];
 extern char D_003AFAA8[];
 
@@ -534,7 +534,7 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     brsBuildLevelUpList(primary);
     secondary = &work->secondaryRewards;
     brsBuildProfileCapList(secondary);
-    brsBuildActiveUnitProgressRows(party);
+    brsBuildActiveUnitProgressRows(&work->partyProgress);
     brsMarkPartyRowsFromLists(party, primary, secondary);
     work->fadeProgress = 0x100;
     brsTaskLatchPendingRows(work);
@@ -800,4 +800,3 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC538);
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC540);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC548);
-

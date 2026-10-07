@@ -525,6 +525,10 @@ extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
 extern s32 mnuAllocateValueRecord(s32);
 extern char D_003D05C8[];
+extern s32 func_0029D008(BrsRewardBatch *, BrsRewardSummary *);
+extern s32 func_0029D2D8(BrsRewardBatch *);
+extern s32 brsBuildProfileCapList(BrsRewardBatch *);
+extern void func_0029DA98(BrsActiveProgressList *);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
 
@@ -557,7 +561,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     func_0029D2D8(primary);
     secondary = &work->secondaryRewards;
     brsBuildProfileCapList(secondary);
-    func_0029DA98(party);
+    func_0029DA98(&work->partyProgress);
     brsMarkPartyRowsFromLists(party, primary, secondary);
     work->fadeProgress = 0x100;
     brsTaskLatchPendingRows(work);
@@ -723,4 +727,3 @@ INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437998);
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A0);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A8);
-
