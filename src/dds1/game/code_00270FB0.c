@@ -671,18 +671,18 @@ void func_00272668(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 dra
 }
 
 void mnuDrawStaffCampScreen(s32 kind, s32 task) {
-    u8 *menu = (u8 *)kwlnTaskGetUserValue(task);
+    StaffMenuWork *menu = (StaffMenuWork *)kwlnTaskGetUserValue(task);
 
-    mnuDrawBackdrop(menu + 0x13C, 0x20);
+    mnuDrawBackdrop((MenuAssets *)menu->background, 0x20);
     if (func_002719F0(task) == 0) {
         return;
     }
-    func_0027E8D8(-0x10, -8, 0, (s32)((StaffMenuWork *)menu)->scrollPanel, 0x53);
-    mnuDrawPanelListDefault(0, 0, 0, menu + 0x15C, 0x53);
+    func_0027E8D8(-0x10, -8, 0, (s32)menu->scrollPanel, 0x53);
+    mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)((u8 *)menu + 0x15C), 0x53);
     if (kind == 0) {
-        itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, *(s32 *)(menu + 0x64), 6, 0x53);
-        itfDrawGridWithResolvedSlot(0x17A0, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0xF, 0x53);
-        itfDrawGridWithResolvedSlot(0x1E40, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0x10, 0x53);
+        itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, menu->staffSlots.baseResources[1], 6, 0x53);
+        itfDrawGridWithResolvedSlot(0x17A0, 0x78, 0, 1, menu->staffSlots.baseResources[0], 0xF, 0x53);
+        itfDrawGridWithResolvedSlot(0x1E40, 0x78, 0, 1, menu->staffSlots.baseResources[0], 0x10, 0x53);
     }
 }
 
