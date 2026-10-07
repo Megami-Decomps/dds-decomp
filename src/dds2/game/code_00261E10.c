@@ -24,6 +24,9 @@ extern s32 evtGetMessageWindowControlState(void);
 extern s32 kwlnFadeIsActive(void);
 
 extern u32 kwlnTaskGetUserValue();
+extern s32 datAddCurrencyClamped(s32);
+extern s32 mnuCampFindListedItemIndex(s32);
+extern void mdlFlagClear(s32);
 extern void func_002619A8(s32, s32);
 extern void func_0025FD78(s32);
 extern void func_00297320(s32);
@@ -860,7 +863,6 @@ u32 func_00264848(void) {
 }
 
 extern void ptyAdjustItemQuantity(s32, s32);
-extern void datAddCurrencyClamped(s32);
 extern s32 func_00260DF0(s32);
 extern u8 func_00260FE8(s32, s32);
 extern u8 func_00261018(s32, s32);

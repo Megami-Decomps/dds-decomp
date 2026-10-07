@@ -508,6 +508,10 @@ void evtAccumulateStateScore(s32 stateAddress) {
     }
 }
 
+extern s32 datAddCurrencyClamped(s32);
+extern u32 func_002CD800(u32);
+extern void mdlFlagSet(s32);
+
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247420);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247588);
