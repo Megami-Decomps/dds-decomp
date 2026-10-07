@@ -12137,6 +12137,16 @@ typedef char BattleFormationActionTableSizeCheck[(sizeof(BattleFormationActionTa
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F5D08);
 
+typedef struct BattleFormationActionArgs {
+    BattleActionLinkState *link;
+    BtlUnit *first;
+    BtlUnit *second;
+    u32 actionId;
+    u32 unk10;
+} BattleFormationActionArgs;
+
+extern BattleFormationActionTable *D_003BAA64;
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5328);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5340);
@@ -12150,16 +12160,6 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5390);
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A53B0);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A53D0);
-
-typedef struct BattleFormationActionArgs {
-    BattleActionLinkState *link;
-    BtlUnit *first;
-    BtlUnit *second;
-    u32 actionId;
-    u32 unk10;
-} BattleFormationActionArgs;
-
-extern BattleFormationActionTable *D_003BAA64;
 
 u32 func_001F5ED8(BattleFormationActionArgs *args) {
     BattleActionLinkState *link;
