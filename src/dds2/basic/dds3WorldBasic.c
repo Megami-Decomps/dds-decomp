@@ -197,16 +197,16 @@ INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3RemoveCurrentWorldValueEntry)
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3ReleaseWorldValueEntries);
 
-/* Reset the cursor and remove the first matching value, or all matches when
- * processAllMatches is nonzero. Return whether any match was processed. */
-s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, void *targetWord, s32 processAllMatches) {
+/* Reset the cursor and remove this node's matching address once, or all matches
+ * when processAllMatches is nonzero. Return whether any match was processed. */
+s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNode *targetNode, s32 processAllMatches) {
     s32 processedMatch;
 
     processedMatch = 0;
     if (dds3GetWorldValueCount(indexNode) != 0) {
         dds3ResetObjectValueCursor(indexNode);
         do {
-            if (dds3SeekWorldNode(indexNode, (u32)targetWord) != 1) {
+            if (dds3SeekWorldNode(indexNode, (u32)targetNode) != 1) {
                 break;
             }
             dds3RemoveCurrentWorldValueEntry(indexNode);
