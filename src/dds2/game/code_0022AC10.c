@@ -312,7 +312,7 @@ extern void sdfInitPacketList(void *);
 
 extern void sdfAppendPacket(void *, s32);
 
-extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, void *, u32);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_00436EF8[];
 
@@ -1824,7 +1824,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
             if (itemIndex != selectedIndex) {
                 selectionFlags = 0;
             }
-            sdfAppendPacket(indexPackets, sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, D_00436EF8, itemIndex));
+            sdfAppendPacket(indexPackets, (u32)sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, (const char *)D_00436EF8, itemIndex));
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
