@@ -9,6 +9,7 @@
 #include "btl_action.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
+#include "eff_transform.h"
 #include "mdl.h"
 #include "sdf.h"
 
@@ -3891,13 +3892,47 @@ BtlRuntimeTask *func_001E6798(void) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", btlUnitBaseLightTask);
+typedef struct BtlUnitBaseLightArgs {
+    BtlUnit *unit;
+    s32 delay;
+} BtlUnitBaseLightArgs;
 
-extern u32 btlUnitBaseLightTask(u32 *);
+/* vu0 routine: SDK quadword copies restore source colours and light direction. */
+u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
+    BtlUnit *unit = work->unit;
+    EvtUnit *ext;
+    EvtTargetInfo *info;
+    EffWorldNode *target;
+
+    if (unit->flags & 2) {
+        if (work->delay >= 2) {
+            ext = unit->ext;
+            evtSetUnitStatusFlags(ext);
+            target = (EffWorldNode *)ext->currentTransitionValue;
+            if (target != NULL && (ext->flags & 0x40000)) {
+                info = target->data;
+                PCP_COPY_VECTOR(unit->colorStart, info->firstColor);
+                PCP_COPY_VECTOR(unit->colorEnd, info->secondColor);
+                PCP_COPY_VECTOR(unit->lightDirection, info->direction);
+            } else {
+                f32 *defaultLight = D_0037F770[0];
+                PCP_COPY_VECTOR(unit->colorStart, defaultLight);
+                PCP_COPY_VECTOR(unit->colorEnd, kwlnDefaultColorVector);
+                PCP_COPY_VECTOR(unit->lightDirection, defaultLight + 4);
+                btlBossDebugPrintf("btl:base light error[%p]\n", unit);
+            }
+            unit->stateFlags |= 0x10;
+            btlBossDebugPrintf("btl:base light set[%p]\n", unit);
+            return 1;
+        }
+        work->delay++;
+    }
+    return 0;
+}
 
 BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlUnitBaseLightArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->callback = btlUnitBaseLightTask;
@@ -3905,8 +3940,8 @@ BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->option = 0;
+    args->unit = unit;
+    args->delay = 0;
     return task;
 }
 

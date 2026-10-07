@@ -5570,16 +5570,6 @@ SoundTask *func_001D97D8(void) {
     return task;
 }
 
-typedef struct EvtTargetInfo {
-    f32 firstColor[4];
-    f32 direction[4];
-    u8 pad20[0x20];
-    f32 secondColor[4];
-    f32 nearDistance, farDistance;
-    f32 auxFirst, auxSecond;
-    u32 unk60;
-    u32 flags;
-} EvtTargetInfo;
 typedef struct BtlUnitBaseLightArgs {
     BtlUnit *unit;
     s32 delay;

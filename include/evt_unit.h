@@ -6,6 +6,20 @@
 struct MdlCtx;
 struct SdfTex;
 
+/* Shared light-target payload used by the event manager and battle base-light task. */
+typedef struct EvtTargetInfo {
+    f32 firstColor[4];           /* 0x00 */
+    f32 direction[4];            /* 0x10 */
+    u8 pad20[0x20];
+    f32 secondColor[4];          /* 0x40 */
+    f32 nearDistance, farDistance;
+    f32 auxFirst, auxSecond;
+    u32 unk60;
+    u32 flags;                  /* 0x64: bit 3 selects the unit's own vector. */
+} EvtTargetInfo;
+
+typedef char EvtTargetInfoSizeCheck[sizeof(EvtTargetInfo) == 0x68 ? 1 : -1];
+
 /* Effect-vector data saved/restored during the motion dry run. Planar aim
  * passes orientation to the quaternion-to-matrix VU routine. */
 typedef struct EvtEffData {
@@ -180,11 +194,12 @@ typedef struct EvtUnit {
 typedef struct EvtPackEntry {
     s32 kind;                     /* 0x00 */
     s32 dataSize;                 /* 0x04: package byte count loaded at DDS1 241E7C. */
-    u8 pad08[4];
+    s32 cueCount;                 /* 0x08: type-6 count at DDS2 0025D5EC/0025D634. */
     u32 dataOffset;               /* 0x0C: relative to the retained file base */
     s32 secondaryResourceId;      /* 0x10 */
     s32 resourceId;               /* 0x14 */
-    u8 pad18[8];
+    u8 pad18[4];
+    s32 motionId;                 /* 0x1C: type-6 motion index at DDS2 0025D5D4. */
 } EvtPackEntry;
 
 typedef struct EvtPackHeader {
