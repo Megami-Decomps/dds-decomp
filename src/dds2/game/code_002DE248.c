@@ -460,8 +460,6 @@ extern u32 effSharedScalyStripResource;
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
-extern s32 *effAllocateCopiedEffectPayload(u32, void *, s32);
-
 extern s32 btlGetRuntime(void);
 
 extern s32 effTemporaryFileJob;
@@ -7154,22 +7152,22 @@ void effResetObjectSlots(u8 *work) {
     }
 }
 
-s32 *effAllocateCopiedEffectPayload(u32 owner, void *source, s32 size) {
+EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, void *source, s32 size) {
     u32 headerSize = 0x40;
     u8 *base = sdfAllocGeneralBlock(size + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
-    u8 *node = body;
+    EffCopiedPayload *node = (EffCopiedPayload *)body;
 
     body += headerSize;
     if (size <= 0) {
         body = 0;
     }
-    ((EffCopiedPayload *)node)->allocation = base;
-    ((EffCopiedPayload *)node)->size = size;
-    ((EffCopiedPayload *)node)->body = body;
-    ((EffCopiedPayload *)node)->state = 0;
+    node->allocation = base;
+    node->size = size;
+    node->body = body;
+    node->state = 0;
     memcpy(body, source, size);
-    return (s32 *)node;
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F6A80);
