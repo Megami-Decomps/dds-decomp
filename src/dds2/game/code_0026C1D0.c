@@ -492,8 +492,13 @@ typedef struct {
 } EvtPanelRecord;
 
 typedef struct EvtMantraNodePositionRecord {
-    u16 flags;
-    s16 id;
+    union {
+        u32 packedHeader; /* Flags and signed ID also have a native word view. */
+        struct {
+            u16 flags;
+            s16 id;
+        };
+    };
     s16 firstKey;  /* 0x04 */
     s16 secondKey; /* 0x06 */
     struct EvtMantraNodePositionRecord *neighbors[6];
@@ -615,7 +620,114 @@ s32 evtReleaseMantraSelectionWork(EvtMantraWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
+extern s32 mnuGetActiveMantraModelFlagState(void);
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern s32 func_00316020(DatPartyRecord *, u16);
+extern s32 func_00314B00(DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordCap(u16);
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
+extern s32 func_00315C68(u32, u32, DatPartyRecord *, u16, u32 *);
+extern s32 func_00315FA0(u32, DatPartyRecord *, u16);
+extern s32 func_0028F128(u16, s8);
+extern s32 func_0026D590(u16, s32);
+extern const char D_00425098[];
+
+/* Populate mantra selection flags from rank, profile state and node rules. */
+void func_0026D168(void *selection, s32 unitAddress, s32 mode) {
+    EvtMantraWork *work = selection;
+    DatPartyRecord *unit = (DatPartyRecord *)unitAddress;
+    s32 rank;
+    u32 selected;
+    u16 *entry;
+    EvtMantraNodePositionRecord *node;
+    s32 i = 0;
+
+    rank = mnuGetActiveMantraModelFlagState();
+    evtPrintDeveloperConsoleMessage(D_00425098, rank);
+    selected = scrGetSelectedScriptEntryId(unit);
+    entry = work->entries;
+    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->recordsAddress;
+    for (; i < (s32)mnuMantraNodePositionTable->recordCount; i++, node++, entry++) {
+        *entry = 0;
+        if (node->id != 0) {
+            s32 rankMet;
+            if (rank < ((s32)(node->packedHeader << 24) >> 28)) {
+                rankMet = 0;
+            } else {
+                rankMet = 1;
+            }
+            if (func_00316020(unit, node->id) == 0) {
+                goto unavailable;
+            } else {
+                if (selected == node->id) {
+                    *entry |= 0x400;
+                }
+                if (func_00314B00(unit, node->id)) {
+                    *entry |= 0x200;
+                }
+                if (ptyGetProfileRecordCap(node->id) == ptyGetProfileRecordValue(unit, node->id)) {
+                    *entry |= 0x100;
+                }
+                if ((node->packedHeader & 0xF) == 3) {
+                    if (func_00315C68(0, 4, unit, node->id, 0) == 0) {
+                        goto unavailable;
+                    }
+                    if (mode != 0) {
+                        if (func_0028F128(node->id, (s8)unit->unitId) == 0) {
+                            goto unavailable;
+                        }
+                        *entry = (*entry & 0xFFF0) | 1;
+                    } else {
+                        *entry = (*entry & 0xFFF0) | 1;
+                    }
+                } else if (func_00315FA0(0, unit, node->id) != 0 || rankMet) {
+                    switch ((s32)(node->packedHeader << 28) >> 28) {
+                    case 2:
+                        if (func_0026D590(node->id, mode)) {
+                            *entry |= 0x800;
+                        }
+                        if (func_00315C68(1, 2, unit, node->id, 0)) {
+                            if ((*entry >> 8) & 8) {
+                                if (node->packedHeader & 0x100) {
+                                    *entry = (*entry & 0xFFF0) | 0x101;
+                                } else {
+                                    *entry = (*entry & 0xFFF0) | 1;
+                                }
+                            } else {
+                                *entry = (*entry & 0xFFF0) | 2;
+                            }
+                        } else {
+                            *entry = (*entry & 0xFFF0) | 2;
+                        }
+                        if ((node->packedHeader & 0x100) && ((*entry >> 8) & 8)) {
+                            *entry = (*entry & 0xFFF0) | 0x101;
+                        }
+                        break;
+                    case 1:
+                    case 4:
+                        if (func_00315FA0(1, unit, node->id)) {
+                            *entry = (*entry & 0xFFF0) | 1;
+                        } else if (func_00315C68(1, 2, unit, node->id, 0)) {
+                            *entry = (*entry & 0xFFF0) | 1;
+                        } else if ((*entry >> 8) & 2) {
+                            *entry = (*entry & 0xFFF0) | 1;
+                        } else {
+                            *entry = (*entry & 0xFFF0) | 2;
+                        }
+                        break;
+                    }
+                } else {
+                    goto unavailable;
+                }
+            }
+        }
+        continue;
+    unavailable:
+        *entry = (*entry & 0xFFF0) | 3;
+    }
+}
+
 
 
 
@@ -703,6 +815,8 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DBB8);
 void func_0026DBD8(u32 context) {
     scrTestEntryFlag(context, 0, 1);
 }
+
+INCLUDE_RODATA(const s32, "game/code_0026C1D0", D_00425098);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", dspWindowHandle);
 
