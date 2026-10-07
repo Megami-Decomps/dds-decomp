@@ -1257,6 +1257,7 @@
 0x001770F8	effSetRingScale	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:198:func_001770F8; Sets the effect ring scale used by its record-pool rendering.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00177100	effCopyRingTransformMatrix	inferred	Copies the ring transform matrix through VU0 registers. [names_reviewed8.tsv]
 0x00177220	effBuildOrbitingArcQuadPoints	inferred	confidence=high; src/dds2/game/code_00176E28.c:func_00177220; Computes orbit position and oriented/scaled directions, then writes the indexed arc-quad point group. [names_qp9.tsv]
+0x00177760	effRecordPoolCreateFiveVertexGroups	inferred	Allocates a record pool for five-vertex groups, with five positions and five colors per requested group; paired DDS1 twin 0x0016FB08.
 0x00177880	effReleaseRecordGroupAssetAndHandle	inferred	Queues effect record group asset release and disposes its secondary handle. [names_reviewed16.tsv]
 0x001778B0	effDrawScaledRecordPool	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:331:func_001778B0; Builds a scaled-and-translated identity transform, emits record-pool position/color packets in fan chunks, and submits them through the selected draw mode.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00177B60	effGetIndexedEffectGroupRecord	inferred	Computes the indexed resource record within an effect record group. [names_reviewed16.tsv]

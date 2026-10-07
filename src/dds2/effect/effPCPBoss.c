@@ -137,7 +137,7 @@ extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 extern void func_00164C68(u32 system, u32 value);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
-extern EffRecordPool *func_00177760(u32 cellCount);
+extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
@@ -194,7 +194,7 @@ void func_0018C288(EffBossWork *work)
         for (i = 0, group = work->groups; i < work->groupCount; i++, group++) {
             EffBossCell *cell;
 
-            group->drawPool = func_00177760(work->cellCount);
+            group->drawPool = effRecordPoolCreateFiveVertexGroups(work->cellCount);
             if (work->head.directionMode == 0) {
                 group->direction[0] = 0.0f;
                 group->direction[1] = -1.0f;

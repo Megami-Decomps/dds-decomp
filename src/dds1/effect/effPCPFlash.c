@@ -581,7 +581,7 @@ extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern u32 effMiscRand(void *state);
-extern EffRecordPool *func_0016FB08(u32 cellCount);
+extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
 PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakWork *src) {
     SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
@@ -599,7 +599,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakWork *src) {
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = func_0016FB08(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
     record->drawMode = work->unk3C;
     range = work->randomRange;
@@ -870,7 +870,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = func_0016FB08(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
     record->drawMode = work->unk44;
     work->resourceHandle = record;
@@ -1378,7 +1378,7 @@ PcpFlashOrbitArcWork *source;
         ring->randomRange = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    record = func_0016FB08(ring->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(ring->particleCount);
     record->scale = 1.0f;
     record->drawMode = ring->unk54;
     ring->resourceHandle = record;
@@ -1636,7 +1636,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = func_0016FB08(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
     record->drawMode = work->unk48;
     range = work->randomRange;
@@ -2353,7 +2353,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = func_0016FB08(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
     record->drawMode = work->unk4C;
     work->resourceHandle = record;
