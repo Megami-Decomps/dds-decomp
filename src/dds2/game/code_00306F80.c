@@ -141,8 +141,11 @@ void itfGridStorePosition(GridPosition *position, s32 x, s32 y) {
     position->y = y;
 }
 
-void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, u32 width, u32 height, u32 data, u32 context) {
-    sdfCreateDescriptorPacket(context, packetHandle, 0, 0, width, height, data, 0);
+extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, s32 width, s32 height, u8 *data,
+                  SdfListHead *context) {
+    sdfCreateDescriptorPacket(context, (s32)packetHandle, 0, 0, width, height, (s32)data, 0);
 }
 
 /* The overlay packet is present only when this work flag is set. */
@@ -151,7 +154,7 @@ u8 itfGridGetOverlayFlag(GridDrawWork *work) {
 }
 
 /* Two overlay kinds use a 16x16 region; other kinds use 8x2. */
-void itfDrawGridOverlayPacket(GridDrawWork *work, s32 x, s32 y) {
+void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, SdfListHead *context) {
     s32 width;
     s32 height;
     if (work->overlayKind == 0x13 || work->overlayKind == 0x1B) {
@@ -161,7 +164,7 @@ void itfDrawGridOverlayPacket(GridDrawWork *work, s32 x, s32 y) {
         width = 8;
         height = 2;
     }
-    itfCreateGridPacketWithDefaultFlags(work->overlayHandle, width, height, x, y);
+    itfCreateGridPacketWithDefaultFlags(work->overlayHandle, width, height, data, context);
 }
 
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -179,11 +182,11 @@ GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 ki
     sdfInitPacketList(context);
     cursor = data + (data[1] & 0xF0) + 0x40;
     if (itfGridGetOverlayFlag(object) != 0) {
-        itfDrawGridOverlayPacket(object, (s32)cursor, (s32)context);
+        itfDrawGridOverlayPacket(object, cursor, context);
         cursor += object->overlayDataSize;
     }
     itfCreateGridPacketWithDefaultFlags(object->packetHandle, object->width,
-                  object->height, (s32)cursor, (u32)context);
+                  object->height, cursor, context);
     entry = &kwlnDrawSurfaces[kind];
     entry->append((SdfListHead *)entry, context);
     return object;
