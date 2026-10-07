@@ -403,7 +403,7 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
 MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value);
 
 
-extern void func_002B0278(s32);
+extern void mnuDrawStaffPartySelectionPanel(s32);
 
 typedef struct MenuPartyView {
     u8 pad00[0x18];
@@ -419,7 +419,7 @@ extern void func_002AF2E0(s32, s32, s32, MenuContext *);
 extern void mnuSetPanelItemsFromRow(s32, u32);
 extern void mnuClearStaffSceneConfigEntries(s32);
 
-void func_002B0278(s32 task) {
+void mnuDrawStaffPartySelectionPanel(s32 task) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(task);
     MenuPartyView *view = (MenuPartyView *)context->party;
     DatPartyRecord *unit = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
@@ -474,7 +474,7 @@ void func_002B0278(s32 task) {
 
 s32 mnuAdvanceStaffValuePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    func_002B0278(callback);
+    mnuDrawStaffPartySelectionPanel(callback);
     return menuSetHandler(context, 1, callback);
 }
 
@@ -532,7 +532,7 @@ s32 mnuUpdatePartySlotAssignmentPopup(s32 callback) {
 
 s32 mnuStartPanelDispatch(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    func_002B0278(callback);
+    mnuDrawStaffPartySelectionPanel(callback);
     return menuSetHandler(context, 1, callback);
 }
 
@@ -600,7 +600,7 @@ s32 mnuPartySlotConfirmClearUpdate(s32 callback) {
 
 s32 mnuAdvancePartyClearPopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    func_002B0278(callback);
+    mnuDrawStaffPartySelectionPanel(callback);
     return menuSetHandler(context, 1, callback);
 }
 
@@ -649,7 +649,7 @@ extern void func_002C4328(u8 *, s32, u32, PartyPanel *);
 extern void mnuRefreshWindowSlots(MenuPageWindow *, s32);
 extern void func_002BCAB0();
 
-void func_002B12B0(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
+void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
     s32 activeCount = context->partyPanel.unk0;
     s32 lastSlot = context->partyPanel.unk4;

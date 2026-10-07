@@ -463,6 +463,7 @@
 0x0011B2C0	ptyGetRoundedAveragePartyLevel	inferred	Averages levels of occupied party entries, rounding fractional results up and returning zero if empty. [names_reviewed15.tsv]
 0x0011B328	ptyCloneTemplateAtPartyMaxLevel	inferred	U1
 0x0011B6F0	ptyInitRosterAndClearItem	inferred	R_Names31 B92
+0x0011BC80	ptyMergeSavedUnitTemplates	inferred	Fam
 0x0011C868	ptyMatchAffinityPermutation	inferred	confidence=high; matched-C; src/dds2/game/code_0011A118.c:443:func_0011C868; Counts required affinity slots, checks the six gameplay actor orders, and succeeds when the occupied actors match all requirements; no compiler-order search is performed.; source=names_P5.tsv:5 [names_qp11.tsv]
 0x0011D050	ptyClearSelectedSkillFlagsFromActiveEntries	inferred	Clears a selected skill-flag group from every active party entry. [names_reviewed16.tsv]
 0x0011D2D8	evtClearRandomStatusFlags	inferred	RNG-gated clearing of status mask 0x5D0 on qualified occupied roster entries.
@@ -2087,6 +2088,7 @@
 0x001B0C18	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001B0D28	btlMapActionCode	inferred	Maps action codes 0x31-0x33 and 0x185 to 0x35, 0x186 to 0x1E, 0x193 to 0x25, otherwise consults category table
 0x001B1640	btlQueryUnitChannelFlags	inferred	Returns channel flags for two units, adding a status-dependent bit. [names_reviewed8.tsv]
+0x001B16B0	btlGetAdjustedSlotAffinity	inferred	Light1b
 0x001B1F80	btlCalculateEnemyExperienceReward	inferred	Scales enemy experience points by the acquirer ratio and special multiplier. [names_reviewed12.tsv]
 0x001B21E0	btlGetEnemyMoney	inferred	dds1 twin 001A7D38; logs "btl:money=%d" [names_reviewed2.tsv]
 0x001B2298	btlCalculateHuntEpReward	inferred	Scales EP reward by a computed ratio and logs it as hunt EP. [names_reviewed12.tsv]
@@ -2123,6 +2125,7 @@
 0x001B45C8	btlHasSpecialAbilityOrModelFlag	inferred	Checks a matching special ability or its alternative model flag. [names_reviewed14.tsv]
 0x001B4738	btlRollActorEligibilityWithAbilityOverride	inferred	Rejects blocked actor states, accepts a special ability or rolls the battle RNG. [names_reviewed8.tsv]
 0x001B47E0	btlHasEnemyRecordDefeatExemptionFlag	inferred	Checks an enemy record flag that suppresses value-based unit defeat evaluation. [names_reviewed12.tsv]
+0x001B4828	btlGetHuntPenaltyFlags	inferred	Near95b
 0x001B5288	btlRestoreUnitMinimumValueAndClearStatus	inferred	Clears unit and resource flags while restoring a zero current value to one. [names_reviewed14.tsv]
 0x001B5440	btlCanUseActorCommandForModelEntry	inferred	Combines a battle hook, model entry state and command record restrictions. [names_reviewed14.tsv]
 0x001B5510	btlIsActorModeActionCodeAllowed	inferred	Rejects selected actor action codes when the actor is in the special mode. [names_reviewed14.tsv]
@@ -2136,6 +2139,7 @@
 0x001B6C80	btlReleaseAndClearChipBlock	inferred	Releases a battle chip block and clears the global handle. [names_reviewed10.tsv]
 0x001B7208	btlInitializeActionRecordWithScale	inferred	Initializes an action record with owner arguments, scale and a derived slot value. [names_reviewed17.tsv]
 0x001B7238	btlPanelResourcesLoad	inferred	loads /battle/panel/batle_01.spr, batle_02.spr, battle_03.spr into the block at D_00436804; DDS1 twin func_001AC628
+0x001B73E8	btlResetSceneSlotFades	inferred	Near95b
 0x001B7900	btlClearSharedBattleStateWords	inferred	Clears the consecutive state words in the shared battle work region. [names_reviewed17.tsv]
 0x001B7BF0	btlCreateMahenPanelTask	inferred	LeverAudit
 0x001B7DC0	btlIsNamedBattleTaskRegistered	inferred	Requires the indexed battle task to be registered and its named task to exist. [names_reviewed17.tsv]
@@ -2195,6 +2199,7 @@
 0x001C91D8	fldDispatchSceneKindHandler	inferred	switch on func_001C82D8(arg, control->kind) to per-kind handlers func_001C92A0/9EA0/9BE8/98E8/9DC8
 0x001C9DC8	btlDrawRetreatCommandLabel	inferred	Draws the literal Retreat command label in the battle menu. [names_reviewed12.tsv]
 0x001CA390	btlCheckScenePairResult	inferred	confidence=high; matched-C; src/dds2/game/code_001C7FF8.c:489:func_001CA390; Queries self and both optional scene objects; returns self result first, then first-object result, then second-object result.; source=reviewed-prior-QP15 [names_qp15.tsv]
+0x001CA490	btlUpdateBattleSceneCommands	inferred	TaskPurist4
 0x001CA760	fldClearBattleSceneObject	inferred	Releases the scene object's task work, clears BattleSceneWork.sceneObject, then runs scene teardown.
 0x001CA790	fldInitializeSceneObject	inferred	Clears 0x30-byte scene object and initializes owner, owner+0x20 subregion, and active flag.
 0x001CA7E0	fldGetSceneObjectTaskUserData	inferred	Finds the scene object task by name and returns its user data. [names_reviewed13.tsv]
@@ -3087,6 +3092,7 @@
 0x00226A60	btlBindEffectUnitAndClearStateFlags	inferred	Records effect unit on battle context while clearing two runtime flags and masking its status. [names_reviewed21.tsv]
 0x00226BB8	btlBeginEffectActorFadeOut	inferred	Clears a tracked actor and starts its effect fade with speed and offset. [names_reviewed10.tsv]
 0x00226E98	btlCheckActiveEffectForSpecialTarget	inferred	Checks target special mode and active battle effect before returning command flag selection. [names_reviewed12.tsv]
+0x00226F58	btlUpdateLinkedEffectUnitTransforms	inferred	U2
 0x00227660	btlRemapEffectActiveCombatantAction	inferred	Remaps selected combatant actions while the unit and effect are active. [names_reviewed14.tsv]
 0x00227748	btlFindFlaggedSpecialSpeciesUnit	inferred	For category one and species 0x119, finds an active battle unit of that species with the 0x400 and 0x2 flags.
 0x002277D8	btlGetCanonicalCombatantKind	inferred	confidence=medium; matched-C; src/dds2/game/code_00227288.c:454:func_002277D8; Collapses three related combatant kinds to one canonical kind and otherwise returns stored kind.; source=revalidated-unapplied-names_R_Names24m.tsv:35 [names_qp12_apply.tsv]
@@ -4286,6 +4292,7 @@
 0x002AFDD0	mnuIsStaffRequirementUnmet	inferred	R_Names31 B91
 0x002B0170	mnuSetPanelItemsFromRow	inferred	applies func_002C2AA8 to the five entries using the last non-zero slot of a D_003E72xx row [names_M59_D2Mid.tsv]
 0x002B0228	mnuClearStaffSceneConfigEntries	inferred	Clears the configured values in all five staff scene entries. [names_reviewed13.tsv]
+0x002B0278	mnuDrawStaffPartySelectionPanel	inferred	FreshD2
 0x002B0578	mnuAdvanceStaffValuePopup	inferred	medium confidence; src/dds2/game/code_002B0278.c func_002B0578: Prepares the active staff-value page and runs its popup advance mode; retail page table D_003E7530 references this callback. [names_reviewed25.tsv]
 0x002B05C8	mnuFinishStaffValuePopup	inferred	medium confidence; src/dds2/game/code_002B0278.c func_002B05C8: Performs shared menu cleanup and runs popup completion mode for the staff-value page in retail D_003E7530. [names_reviewed25.tsv]
 0x002B0610	mnuEnterSelectedResourceLabel	inferred	Reads a selected resource through the menu owner, then configures its display using the shared label setup calls.
@@ -4299,6 +4306,7 @@
 0x002B0D00	mnuFinishPartyClearPopup	inferred	medium confidence; src/dds2/game/code_002B0278.c func_002B0D00: Performs shared menu cleanup and runs popup completion mode for the sequence following party-slot clear confirmation. [names_reviewed25.tsv]
 0x002B1150	mnuDestroyPartySelectionWindow	inferred	Destroys party selection window stored in menu work; twin 0x00274EE0. [names_R_FuncNames5.tsv]
 0x002B1178	mnuCopyPartyEntries	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x002B12B0	mnuAssignSelectedPartyEntry	inferred	U1
 0x002B15F8	mnuRestorePartyEntriesAndRefresh	inferred	confidence=high; src/dds2/game/code_002B0278.c:func_002B15F8; Clears each party entry's in-use bit, copies the backup rows back over the global party block, then rebuilds the party panel textures, slots and cursor. [names_qp9.tsv]
 0x002B1780	mnuCountActiveSlots	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuCountActiveSlots behavior.
 0x002B17C0	mnuClearPartySelectionAndActivateSlots	inferred	Copies party entries, zeros backup, marks five panels and clears linked list node flags. [names_reviewed5.tsv]
@@ -5513,6 +5521,7 @@
 0x00317010	evtCallShooting	inferred	confidence=high; src/dds2/game/code_00316E08.c:func_00317010; Prints the call_shooting console line, submits admin mode 0x1D and destroys the named script processes. [names_qp9.tsv]
 0x00317958	mdlLoadViewerPackageFromWork	inferred	medium confidence; src/dds2/game/code_00316E08.c func_00317958: Reads the work package ID and two resource values, then loads viewer kind 5 with fixed options 0x101. [names_reviewed25.tsv]
 0x00317E48	mnuDestroyShootingWork	inferred	U2
+0x00319FF0	mnuUpdateTimedEffectPosition	inferred	TaskPurist4
 0x0031A690	mnuInitializeHighScoreState	inferred	confidence=high; src/dds2/game/code_0031A638.c:22:func_0031A690; Ensures flag-selected high-score minimum and initializes work score fields.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A770	mnuUpdateHighScoreFlag	inferred	confidence=high; src/dds2/game/code_0031A638.c:47:func_0031A770; Commits improved work score to global high score and sets/clears new-high-score flag.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A920	mnuTickScoreProgressState	inferred	readability/matching review (QP16)
@@ -6164,6 +6173,7 @@
 0x00357230	dpadd	inferred	ee-gcc soft-double add libcall, beside fptodp/dptofp
 0x00357288	dpsub	inferred	soft-double subtract; fdlibm sin/cos return x-x through it for Inf/NaN
 0x003572F0	dpmul	inferred	soft-double multiply libcall
+0x00357708	litodp	inferred	Fam-3
 0x00357890	dptofp	inferred	libgcc fp-bit double->float, follows fptodp; func_003269F0 wraps a double sqrt in it
 0x0037F550	effSharedRandomState	inferred	confidence=high; src/dds2/game/code_00102DC8.c:D_0037F550; type=PRNG state storage (u8[]); refs=kwlnInitMagicState,btlSelectActorAction; Seeded with a fixed value and passed to random generators for effect frame, position and scale variation. [names_qp9.tsv]
 0x0037F5E0	sdfSceneProjectionParameters	inferred	confidence=high; data D_0037F5E0; matched-C-users=4; src/dds2/game/code_00102DC8.c:411:evtResetDisplayProjectionAndVectorState; src/dds2/game/code_002BE628.c:2165:mnuResetWorkFloats; src/dds2/game/code_002BE628.c:2337:evtStageTestUpdateCamera; src/dds2/game/code_00233660.c:1857:mdlLoadViewerPresentationConfig; Passed to projection construction and scene/viewer matrix-packet builders; data-twin=D_003245E0, supported by 4 independently paired matched functions.; retail-data-start=asm/dds2/data/data.data.s:380.; seed-placeholder=D_0037F5E0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]

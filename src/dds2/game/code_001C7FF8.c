@@ -474,7 +474,7 @@ INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A00);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A10);
 
-s32 func_001CA490(KwlnTask *task) {
+s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleSceneObject *object = (BattleSceneObject *)kwlnTaskGetUserValue(task);
     BattleActorPanelWork *panel;
@@ -721,7 +721,7 @@ void func_001CAB60(ActionStateLink *task) {
         scene = (BattleSceneWork *)btlGetRuntime();
         object = sdfAllocAndClearQuadwords(0x30);
         fldInitializeSceneObject(object, task);
-        handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1, func_001CA490, fldClearBattleSceneObject,
+        handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateBattleSceneCommands, fldClearBattleSceneObject,
                                 (s32)object);
         func_00101968(scene->taskParent, handle);
         scene->sceneObject = handle;

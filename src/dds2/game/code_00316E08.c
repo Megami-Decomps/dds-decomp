@@ -39,7 +39,7 @@ extern void mnuDestroyAllModelNodeContexts(MnuNodeList *);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
 extern void fileQueueSetPosition(struct FileQueue *, void *);
-extern void func_00319FF0(void);
+extern void mnuUpdateTimedEffectPosition(void);
 
 typedef struct SoundSlot SoundSlot;
 extern SoundSlot *dds3ClaimSoundSlot(u32, u32);
@@ -393,10 +393,10 @@ void func_00319F48(void) {
     lists = D_0043891C->effectWork->lists;
     D_00438930 = mnuClaimPositionedEffectRecord(lists + 2, NULL, 0,
                                                position[0], position[1], position[2], 0.5f);
-    func_00319FF0();
+    mnuUpdateTimedEffectPosition();
 }
 
-void func_00319FF0(void) {
+void mnuUpdateTimedEffectPosition(void) {
     MenuProgressParameters *origin;
     s32 y, x;
     f32 value;

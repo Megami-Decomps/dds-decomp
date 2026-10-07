@@ -205,7 +205,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF560);
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 func_001FF8D8(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
     s8 matches[3];
     u32 predicates[3];
     u32 firstTier, endTier;

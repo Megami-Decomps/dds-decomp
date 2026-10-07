@@ -73,7 +73,7 @@ extern void btlSetEffectCameraKeys(s32 command, f32, f32, f32, f32, f32, f32, f3
 
 
 void func_00227288(void) {
-    func_00226F58();
+    btlUpdateLinkedEffectUnitTransforms();
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002272A0);

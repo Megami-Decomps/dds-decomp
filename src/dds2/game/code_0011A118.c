@@ -812,7 +812,7 @@ extern s32 scrSetFlag(DatPartyRecord *, u16);
 
 /* Merge saved templates 1 and 2 into roster 8, taking their greater level
  * and stats and combining both sets of profile and skill flags. */
-void func_0011BC80(DatPartyRecord *entry) {
+void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
     DatPartyRecord first;
     DatPartyRecord second;
     s32 index;
