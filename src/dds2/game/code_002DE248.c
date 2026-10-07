@@ -7197,7 +7197,7 @@ extern void dds3FreePathObject(Dds3PathCurveWork *path);
 
 extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
-void effReleaseTargetSlots(EffCopiedPayload *payload) {
+void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
     EffWorldNode **tails = payload->effects;
     Dds3PathCurveWork **heads = payload->targets;
     u32 i;

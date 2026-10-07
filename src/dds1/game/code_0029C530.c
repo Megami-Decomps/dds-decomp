@@ -6846,7 +6846,7 @@ EffCopiedPayload *effCloneEffectPayloadFromOwner(EffCopiedPayloadWork *work) {
     return effect;
 }
 
-void effReleaseTargetSlots(EffCopiedPayload *payload) {
+void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
     EffWorldNode **effects = payload->effects;
     Dds3PathCurveWork **targets = payload->targets;
     u32 i;
