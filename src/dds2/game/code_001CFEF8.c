@@ -381,17 +381,11 @@ void fldAdvanceSceneGroupInitialization(BtlState *scene) {
     btlResetSceneSlotFades();
 }
 
-typedef struct SceneEffectRequest {
-    u8 startKind;
-    u8 pad01[7];
-    u16 taskId;
-} SceneEffectRequest;
-
 extern void btlTickActorEntryCountdowns(u8 *);
 extern void btlResetBattleHistoryCounters(void);
 extern void btlClearActorSelectedEntryIndex(BtlUnit *);
-extern void btlRefreshUnitMotionSelection(u8 *);
-extern SceneEffectRequest *btlCreateEffObjC(BtlUnit *, s32);
+extern void btlRefreshUnitMotionSelection(BtlUnit *);
+extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
 
 /* Advance the scene after its bound actor tasks finish their preparation. */
 extern s32 btlAdvanceSceneWhenActorTasksReady(BtlState *);
@@ -1413,4 +1407,3 @@ INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436908);
 INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436910);
 
 INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436918);
-
