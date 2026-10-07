@@ -10,7 +10,7 @@ EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 
 void *sdfAllocSizeClassBlock(s32 arg);
 
-void dds3GrowWorldValueChain(void *arg, s32 arg1);
+void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 
 void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);
 
@@ -163,7 +163,7 @@ NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
         indexNode->previous = worldInfo->lastIndex;
         worldInfo->lastIndex = indexNode;
     }
-    dds3GrowWorldValueChain(indexNode, initialCount);
+    dds3GrowWorldValueChain((WorldValueIndices *)indexNode, initialCount);
     return indexNode;
 }
 
