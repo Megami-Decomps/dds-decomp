@@ -10,7 +10,7 @@ extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 extern void dds3SetSlotKey(void *, void *);
 extern void dds3ReplaceObjectResource(void *);
 
-s32 dds3GetWorldSecondaryObject(void);
+void *dds3GetWorldSecondaryObject(void);
 extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
@@ -23,7 +23,7 @@ extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3SetWorldSecondaryObject(void *);
 extern void dds3SetWorldObject(void *);
-extern void dds3SetWorldObjectValue(void *, u32);
+extern void dds3SetWorldObjectValue(EffWorldNode *, u32);
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);
