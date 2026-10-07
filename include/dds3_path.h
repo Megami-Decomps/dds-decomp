@@ -21,7 +21,7 @@ typedef struct Dds3PathKeyframes {
 
 /* Complete 0x24-byte state allocated by dds3CreatePathCurveWork. */
 typedef struct Dds3PathCurveWork {
-    s32 state;
+    s32 direction; /* 0 counts up, 1 counts down; other values do not step. */
     u32 flags;
     f32 duration; /* Greatest final frame across the retained channels. */
     f32 time;

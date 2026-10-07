@@ -172,7 +172,7 @@ void evtSetWorldSlotValue(void *object, u32 value) {
 
     slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
-        sdfSetFloatCounterDirection((u32 *)&slotData->state, value);
+        sdfSetFloatCounterDirection((u32 *)&slotData->direction, value);
     }
 }
 
