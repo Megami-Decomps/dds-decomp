@@ -793,7 +793,65 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     party->freezePanel = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1C68);
+s32 func_002B1C68(s32 callback) {
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue();
+    PartyMenuData *menuWork = (PartyMenuData *)context->party;
+    s32 inputFlags = mnuMapPadMaskToFlags(0x33);
+    s32 *popup = context->popupState;
+    MenuWindowContainer *window = menuWork->primaryWindow;
+    s32 entryIndex = window->list->cursor->index;
+    s32 state = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
+
+    if (state != 0) {
+        return state;
+    }
+    if (*popup == 0) {
+        if ((inputFlags & 0x300000) == 0) {
+            func_002B9808(window);
+        }
+        if (inputFlags & 0x10) {
+            mnuRetreatWindowListSelection(window);
+        }
+        if (inputFlags & 0x20) {
+            mnuAdvanceWindowListSelection(window);
+        }
+        mnuClearWindowPanelTransitionFlag(window);
+        if (inputFlags & 1) {
+            switch (mnuIsFinalItemIndex(window->list->cursor->index, (s32)window->list)) {
+            case 0:
+                if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
+                    window->list->cursor->flags48 |= 1;
+                    mnuAssignSelectedPartyEntry(entryIndex, 2, 0, context);
+                } else {
+                    inputFlags = 0x8000;
+                }
+                break;
+            case 1:
+                if (menuWork->selection > 0) {
+                    mnuPreparePartyPanelTransition((s32)context);
+                } else {
+                    inputFlags = 0x8000;
+                }
+                break;
+            }
+        } else if (menuWork->activeCount == menuWork->selection) {
+            mnuPreparePartyPanelTransition((s32)context);
+        }
+        if (inputFlags & 2) {
+            if (menuWork->selection > 0) {
+                mnuInitPartyPanelSlots(&context->partyPanel);
+                mnuClearPartySelectionAndActivateSlots((s32)context);
+                func_002BCAB0(&context->partyWindow);
+            } else {
+                mnuSetPopupEntryFlagged(popup, D_003E7588);
+                mnuConfigurePanelResource(context->panelHandle, context->displayHandle, 0, 1);
+                mnuBeginWindowFadeTransition(context->imageHandle, &context->transition);
+            }
+        }
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1EA8);
 
