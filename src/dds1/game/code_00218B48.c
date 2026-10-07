@@ -2932,3 +2932,4 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
+

@@ -1286,13 +1286,13 @@ void mnuFreeIconSprites(u32 *menu) {
     sdfReleaseChipBlock(menu);
 }
 
-void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, s32 *menu, s32 param) {
+void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuSprites *menu, s32 param) {
     u32 i;
 
     if (skip == 0) {
-        func_002BF4E0(0, 0, depth, menu[15], 0, menu[4], 0, param);
+        func_002BF4E0(0, 0, depth, menu->profileFade, 0, menu->firstSprite, 0, param);
         for (i = 0; i < 4; i++) {
-            func_002BF4E0(0, 0, depth, menu[15], 0, menu[6 + i], 0, param);
+            func_002BF4E0(0, 0, depth, menu->profileFade, 0, menu->sprites[i], 0, param);
         }
     }
 }
@@ -1751,7 +1751,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 evtGetIndexedEventRecordId(s32);
-extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
+extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern u8 *D_003BAA84;
 extern u8 *datCommandRecords;
@@ -1780,10 +1780,10 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     if (value != 0) {
         glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
         func_003014F0(text, D_003BC720, *(s16 *)(datCommandRecords + evtGetIndexedEventRecordId(value) * 0x38 + 0x18));
-        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)text, glyphAddress);
+        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, text, glyphAddress);
     } else {
         glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
-        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, glyphAddress);
+        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, D_003BC738, glyphAddress);
     }
     func_001958A0((struct FrFontGlyph *)glyphAddress, 1, param);
     frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
@@ -1838,7 +1838,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
+void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, MenuPageSlot *unusedSlot,
                      s32 partyIndex, s32 param) {
     s32 outValue;
     s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
@@ -1880,7 +1880,7 @@ void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
         if (remainingExp != 0) {
             func_003014F0(text, D_003BC740, remainingExp);
             glyph = (struct FrFontGlyph *)func_001978E8(x + 0xDF0,
-                0x160, depth, color, (s32)text, 0);
+                0x160, depth, color, text, 0);
             func_001958A0(glyph, 1, surface);
             frFontQueueGlyphInSelectedSlot(glyph);
         }
@@ -1888,11 +1888,11 @@ void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
     if (slot->windowSprites != NULL) {
         if (flags & 0x400) {
             mnuDrawIconSpriteGroup(x, y, depth, 0,
-                (s32 *)slot->windowSprites, surface);
+                slot->windowSprites, surface);
         }
         /* This profile fade is independent of the sprite slide's drawAlpha. */
         mnuDrawSelectedPartyProfileLabel(x, y, depth,
-            slot->windowSprites->profileFade, slot->windowSprites->unkC, (s32)slot,
+            slot->windowSprites->profileFade, slot->windowSprites->unkC, slot,
             partyIndex, surface);
         if (slot->windowSprites->fadeOut == 0) {
             if (slot->windowSprites->profileFade > 0) {
