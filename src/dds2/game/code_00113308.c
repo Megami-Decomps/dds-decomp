@@ -7,6 +7,8 @@
 #include "eff.h"
 #include "btl_sound.h"
 
+extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
+
 extern void *dds3GetWorldSecondaryObject(void);
 
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
@@ -244,7 +246,7 @@ void evtDestroyEffectObjectData(EffectObject *object) {
         evtReleaseUnitTransitionWork(data->transitionWork);
         data->transitionWork = 0;
     }
-    dds3ReleaseObjectBaseResources(object);
+    dds3ReleaseObjectBaseResources((EffWorldNode *)object);
     dds3DestroyObjectBase(data->modelHolder);
     sdfReleaseChipBlock(object->data);
 }

@@ -7,6 +7,8 @@
 #include "eff.h"
 #include "btl_sound.h"
 
+extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
+
 typedef struct EffectObject {
     u8 pad00[0x18];
     EffectObjectData *data;
@@ -226,7 +228,7 @@ void evtDestroyEffectObjectData(EffectObject *obj) {
         evtReleaseUnitTransitionWork(data->transitionWork);
         data->transitionWork = 0;
     }
-    dds3ReleaseObjectBaseResources(obj);
+    dds3ReleaseObjectBaseResources((EffWorldNode *)obj);
     dds3DestroyObjectBase(data->modelHolder);
     sdfReleaseChipBlock(obj->data);
 }
