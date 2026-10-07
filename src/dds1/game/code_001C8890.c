@@ -341,6 +341,10 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern u32 kwlnDrawControlFlags;
+extern BtlUnit *btlCreateUnit(void);
+extern void btlDestroyUnit(u8 *);
+extern void func_001D4E60(BtlUnit *, BtlUnit *);
+extern void sdfQueueNonzeroResourceId(s32);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -626,6 +630,21 @@ typedef struct BtlRotationTaskArgs {
     s32 count;
     BtlUnit *unit;
 } BtlRotationTaskArgs;
+
+/* Constructor-owned model-change arguments; btlAllocTask reserves 0x1C bytes. */
+typedef struct BtlModelChangeArgs {
+    BtlUnit *unit;
+    u32 resourceKind;
+    u32 resourceId;
+    s32 delay;
+    u32 duration;
+    s32 elapsed;
+    u8 phase;
+    u8 transitionMode;
+    u8 reserved1A[2];
+} BtlModelChangeArgs;
+typedef char BtlModelChangeArgsSizeCheck[(sizeof(BtlModelChangeArgs) == 0x1C) ? 1 : -1];
+typedef char BtlModelChangeArgsPhaseCheck[((u32)&((BtlModelChangeArgs *)0)->phase == 0x18) ? 1 : -1];
 
 typedef struct BtlFadeArgs {
     BtlUnit *unit;
@@ -4731,26 +4750,26 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BE8);
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3C08);
 
 void btlBeginModelChange(u32 argumentsAddress) {
-    u32 *arguments = (u32 *)argumentsAddress;
-    s32 owner = arguments[0];
-    u32 model = arguments[1];
-    u32 variant = arguments[2];
+    BtlModelChangeArgs *arguments = (BtlModelChangeArgs *)argumentsAddress;
+    BtlUnit *owner = arguments->unit;
+    u32 model = arguments->resourceKind;
+    u32 variant = arguments->resourceId;
     s32 status = btlHasMatchingModel(model, variant);
 
     if (status == 0) {
-        btlRequestModelAssetByMode(owner, model, variant);
-        *(u32 *)(owner + 0x118) = (*(u32 *)(owner + 0x118) | 1) & ~2;
+        btlRequestModelAssetByMode((u32)owner, model, variant);
+        owner->gunResourceFlags = (owner->gunResourceFlags | 1) & ~2;
         btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D8190);
 
-extern u32 func_001D8190(u32 *);
+extern u32 func_001D8190(BtlModelChangeArgs *);
 
 u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5) {
     u8 *task = btlAllocTask(0x1C);
-    u32 *args;
+    BtlModelChangeArgs *args;
     task[0] = 1;
     task[0x10] = 0;
     *(u16 *)(task + 0x20) = 0x1A;
@@ -4758,15 +4777,15 @@ u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u
     *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
     *(void **)(task + 0x48) = btlBeginModelChange;
     *(void **)(task + 0x4C) = func_001D8190;
-    args = (u32 *)btlGetTaskArguments((s32)task);
-    args[0] = (u32)unit;
-    args[1] = arg1;
-    args[2] = arg2;
-    args[3] = arg3;
-    args[4] = arg4;
-    *((u8 *)args + 0x19) = arg5;
-    *((u8 *)args + 0x18) = 0;
-    args[5] = 0;
+    args = (BtlModelChangeArgs *)btlGetTaskArguments((s32)task);
+    args->unit = (BtlUnit *)unit;
+    args->resourceKind = arg1;
+    args->resourceId = arg2;
+    args->delay = arg3;
+    args->duration = arg4;
+    args->transitionMode = arg5;
+    args->phase = 0;
+    args->elapsed = 0;
     return task;
 }
 
