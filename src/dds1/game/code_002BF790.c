@@ -680,7 +680,7 @@ u32 itfGetGridListLinkFlags(GridTextWidget *owner) {
     return flags;
 }
 
-GridTextListItem *func_002C1A30(GridTextWidget *owner, const char *text, u32 value) {
+GridTextListItem *itfAppendGridTextItem(GridTextWidget *owner, const char *text, u32 value) {
     GridTextListItem *item = (GridTextListItem *)sdfAllocSizeClassBlock(0x2C);
     GridTextListItem *tail;
     s32 length;
@@ -737,7 +737,7 @@ void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, GridTextListItem 
     }
 }
 
-s32 func_002C1D78(GridTextWidget *widget, GridTextListItem *item,
+s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *item,
                   GridNumericDescriptor *descriptor) {
     GridNumericDescriptor *copy;
     f32 maximum;
@@ -913,7 +913,7 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
 extern void fldLmapSubmitPositionedCommandPacket(s32, s32, s32, s32, s32, s32);
 
 /* Draw visible local-map rows and invoke the selected row callback once. */
-void func_002C22F0(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
+void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
                    s32 surfaceIndex) {
     char text[0x100];
     GridTextListItem *item;
