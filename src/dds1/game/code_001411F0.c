@@ -1898,7 +1898,7 @@ typedef struct FldModelResource {
     FldModelDescriptor *descriptor;
 } FldModelResource;
 
-extern s32 *dds3GetObjectBaseResourceHandle();
+extern u32 dds3GetObjectBaseResourceHandle(void *);
 extern void mdlAddEntryPlain(FldModelResource *, s32, s32);
 extern void mdlAddEntryFlagged(FldModelResource *, s32, s32);
 extern s32 fldTestSceneControlFlags(s32);
@@ -1911,7 +1911,7 @@ void fldUpdateObjectActivation(void) {
         switch (fldObjectSlots[i].unk8) {
         case 0:
             if (fldObjectSlots[i].activationRequested == 1) {
-                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((void *)fldObjectSlots[i].unk0);
                 mdlAddEntryPlain(resource, 0, 1);
                 fldObjectSlots[i].unk8 = fldObjectSlots[i].activationRequested;
                 switch (fldObjectSlots[i].effectVariant) {
@@ -1934,14 +1934,14 @@ void fldUpdateObjectActivation(void) {
                     break;
                 }
             } else {
-                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((void *)fldObjectSlots[i].unk0);
                 if (resource->descriptor->kind == 5) {
                     mdlAddEntryPlain(resource, 0, 0);
                 }
             }
             break;
         case 1:
-            resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+            resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((void *)fldObjectSlots[i].unk0);
             if (resource->descriptor->kind == 5) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
@@ -1950,7 +1950,7 @@ void fldUpdateObjectActivation(void) {
             break;
         case 2:
             if (fldTestSceneControlFlags(0x40)) {
-                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((void *)fldObjectSlots[i].unk0);
                 mdlAddEntryFlagged(resource, 0, 3);
                 fldObjectSlots[i].activationRequested = 3;
                 fldObjectSlots[i].unk8 = 3;
@@ -2543,11 +2543,51 @@ s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BA50);
+extern s32 fldSparkControlState[];
+extern s32 D_003D62DC[];
+struct EffWorldNode;
+extern void effObjSetInnerFirstVec(struct EffWorldNode *, u128 *);
+extern void effObjSetInnerSecondVec(struct EffWorldNode *, u128 *);
+
+s32 func_0014BA50(s32 index, s32 reserved) {
+    s32 slot;
+    s32 i;
+    s32 candidate;
+    s32 *flags;
+    u128 position;
+
+    if (reserved == 0) {
+        slot = -1;
+        for (i = 0; i < 16; i++) {
+            candidate = (fldSparkControlState[15] + i) % 16;
+            if (fldSparkObjectEntries[candidate].unk4 == -1) {
+                slot = candidate;
+                break;
+            }
+        }
+    } else {
+        slot = 16;
+    }
+    if (slot < 0) {
+        return 0;
+    }
+    D_003D62DC[0] = (slot + 1) % 16;
+    if (fldSparkSlots[index].hasVectors == 1) {
+        PCP_COPY_VECTOR(&position, fldSparkSlots[index].pos);
+        effObjSetInnerFirstVec((struct EffWorldNode *)fldSparkObjectEntries[slot].unk0, (u128 *)fldSparkSlots[index].pos);
+        effObjSetInnerSecondVec((struct EffWorldNode *)fldSparkObjectEntries[slot].unk0, (u128 *)fldSparkSlots[index].vel);
+        flags = (s32 *)dds3GetObjectBaseResourceHandle((void *)fldSparkObjectEntries[slot].unk0);
+        *flags &= ~1;
+        fldSparkSlots[index].objectSlot = slot;
+        fldSparkObjectEntries[slot].unk4 = index;
+        return 1;
+    }
+    return 0;
+}
 
 extern void effObjSetInnerFirstVec();
 
-extern s32 *dds3GetObjectBaseResourceHandle();
+extern u32 dds3GetObjectBaseResourceHandle(void *);
 
 extern void dds3ClearObjectFlags();
 
@@ -2563,9 +2603,9 @@ void fldFreeSparkSlot(s32 index) {
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
         vec.v[0] = fldSparkSlots[index].pos[0];
         vec.v[2] = fldSparkSlots[index].pos[2];
-        effObjSetInnerFirstVec(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].unk0, &vec);
+        effObjSetInnerFirstVec((struct EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].unk0, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].unk0;
-        flags = dds3GetObjectBaseResourceHandle(obj);
+        flags = (s32 *)dds3GetObjectBaseResourceHandle((void *)obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
@@ -2578,7 +2618,7 @@ extern s32 fldSparkControlState[];
 
 extern void func_0014B688();
 
-extern void func_0014BA50();
+extern s32 func_0014BA50(s32, s32);
 
 void fldUpdateSparkSlots(void) {
     s32 i;
