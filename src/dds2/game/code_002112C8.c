@@ -4067,7 +4067,65 @@ s32 btlMotionOffsetForActor(s32 actor, s32 base) {
     return base;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B368);
+/* Side-indexed status tables use a 0x270 stride in their native accessor. */
+typedef struct BtlActorStatusRecord {
+    u8 pad00[0xFC];
+    f32 unkFC; /* Scale used by the default-motion case below. */
+    u8 pad100[0x170];
+} BtlActorStatusRecord;
+
+extern void btlSetUnitRotation(BtlUnit *, f32 *);
+extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
+extern void btlUpdateSpecialActorFormation(void);
+extern f32 D_003BF6B0[4];
+
+void func_0021B368(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = battle->units;
+    f32 position[4] __attribute__((aligned(16)));
+    BtlActorStatusRecord *table;
+    s32 mode;
+
+    while (unit != 0) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                mode = unit->mode;
+                if (mode < 0x113) {
+                    if (mode >= 0x110) {
+                        btlSetUnitRotation(unit, D_003BF6B0);
+                        unit->flags &= ~0x80000;
+                        /* Retail resets xyz; the copied fourth lane is unspecified. */
+                        VEC3_SPLAT(position, 0.0f);
+                        PCP_COPY_VECTOR(unit->position, position);
+                        btlSetUnitPosition(unit, position);
+                    }
+                }
+                mode = unit->mode;
+                if (mode < 0x113) {
+                    if (mode >= 0x111) {
+                        switch (unit->unkEC) {
+                        case 0x10:
+                            unit->unkF8 = 0;
+                            unit->unkFA = 0;
+                            btlApplyUnitMotionSelection(unit, unit->effectIndex,
+                                                       unit->effectParameter,
+                                                       unit->effectScale);
+                            break;
+                        case 0xB:
+                            table = (BtlActorStatusRecord *)
+                                btlGetSideIndexedActorStatusTable(unit->resourceKind,
+                                                                 unit->resourceIndex);
+                            btlApplyUnitMotionSelection(unit, 0xA, 1, table->unkFC);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        unit = unit->nextActor;
+    }
+    btlUpdateSpecialActorFormation();
+}
 
 void func_0021B4A8(void) {
     func_0021B368();
@@ -4692,7 +4750,7 @@ extern void func_00224F88(u32);
 
 extern void func_001ADFE0(u32, u32, u32);
 
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, f32 *);
 
 extern void func_002218C8(void);
 
@@ -4726,7 +4784,7 @@ typedef struct BattleActionByteState {
 
 
 /* Handle returned by btlFindUnitByActor; these fields drive its action task. */
-extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
+extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 /* When the action-state byte changes, restore the marked unit's saved motion. */
 void btlRestoreMarkedUnitMotionOnStateChange(void) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
