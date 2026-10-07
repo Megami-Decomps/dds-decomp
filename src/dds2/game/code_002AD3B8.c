@@ -2,6 +2,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
+#include "dat_command.h"
 
 /* Staff callbacks receive a task handle as an integer word. Preserve the
  * native parameter widths and the short-arity task-user-value calls. */
@@ -47,7 +48,6 @@ extern void frFontSetChainFlag(s32, s32);
 extern s32 func_0019D550(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern s32 datCommandRecords;
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
 extern s32 mnuGetPartyEntryMenuValue();
@@ -515,7 +515,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
 
     itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
     if (entryId != 0) {
-        func_0035C860(captionText, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(entryId) * 0x38 + datCommandRecords + 0x18));
+        func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].stat18);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChainFlag(fontHandle, 4);
         func_0019D550(fontHandle, 1, 0x53);

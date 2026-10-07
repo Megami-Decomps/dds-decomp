@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "dat_command.h"
 #include "eff.h"
 #include "mnu.h"
 
@@ -43,16 +44,9 @@ s8 func_002BDA78(s32 value) {
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDAA8);
 
 
-typedef struct MenuCommandRecord {
-    u8 pad00[0x18];
-    s16 unk18;
-    u8 pad1A[0x1E];
-} MenuCommandRecord;
-
 /* Text builders return integer glyph handles; frFont consumes glyph pointers. */
 typedef struct FrFontGlyph FrFontGlyph;
 
-extern MenuCommandRecord *datCommandRecords;
 extern const u8 (*D_00435E5C)[25];
 extern char D_00437C40[];
 extern u32 uiBlendColors(u32, u32, u32);
@@ -97,7 +91,7 @@ void func_002BDC38(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSpri
     value = mnuGetPartyEntryMenuValue(party);
     if (value != 0) {
         glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
-        func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].unk18);
+        func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].stat18);
         glyph = func_0019F5E8(x + 0x1050, 0x360, depth, color, text, glyph);
         if (page->unk74 != 0) {
             frFontSetChainFlag((FrFontGlyph *)glyph, 4);
