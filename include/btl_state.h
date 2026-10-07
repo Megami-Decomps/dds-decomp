@@ -8,6 +8,25 @@ struct KwlnTask;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
 
+/* Three-byte scene scheduling slot; IDs move with their group/countdown. */
+typedef struct BtlSceneSlot {
+    u8 group;
+    u8 remaining;
+    u8 id;
+} BtlSceneSlot;
+
+typedef struct BtlSceneFadingRecord {
+    BtlSceneSlot slot;
+    u8 alpha;
+    s32 target;
+} BtlSceneFadingRecord;
+
+typedef struct BtlItemDrop {
+    u16 id;
+    u8 count;
+    u8 pad03;
+} BtlItemDrop;
+
 #ifdef VERSION_DDS2
 typedef struct BattleLinkedEffectState {
     u32 actor;
@@ -75,7 +94,8 @@ typedef struct BtlState {
     u8 requestMode; /* 0x25E: script sets this to 4 with requestArgument */
     u8 pad25F[0x11];
     s32 encounterPack; /* 0x270: ENC PACK test selection (func_00215FF8) */
-    u8 pad274[8];
+    s32 adjustmentGroupIndex; /* 0x274: encounter reward lookup in code_001A1960 */
+    s32 adjustmentEntryIndex; /* 0x278: entry within that encounter group */
     s32 battleMode; /* 0x27C */
     s32 requestArgument; /* 0x280: sign-extended script halfword */
     u8 pad284[4];
@@ -85,9 +105,26 @@ typedef struct BtlState {
     struct KwlnTask *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
-    u8 pad2A8[0x200];
+    s32 sceneObject; /* 0x2A8: fldDestroySceneTasksAndBuffers destroys this task handle. */
+    s32 spriteObject; /* 0x2AC: same cleanup destroys the sprite task. */
+    s32 cleanupTask; /* 0x2B0: fldCreateSceneCleanupTask stores its task handle. */
+    BtlItemDrop itemDrops[3]; /* 0x2B4: battle defeat item aggregation in code_001A1960 */
+    s32 moneyEarned;
+    u8 pad2C4[4];
+    s32 experienceEarned; /* 0x2C8: defeat experience accumulator */
+    s32 epEarned; /* 0x2CC: distinct defeat EP accumulator */
+    u8 pad2D0[4];
+    BtlSceneSlot slots[8]; /* 0x2D4: fldClearSceneSlotsAndGroups resets all eight. */
+    BtlTask *groupPrimary[20]; /* 0x2EC: scene-group lists in code_001C48A8 */
+    BtlTask *groupSecondary[45]; /* 0x33C */
+    BtlTask *groupTertiary[15]; /* 0x3F0 */
+    u8 pad42C[0x20];
+    BtlSceneFadingRecord fading[8]; /* 0x44C: fldInitSceneFadeRecords initializes these. */
+    u8 pad48C[0x18];
+    struct EffectSlotSet *resA; /* 0x4A4: btlLoadResourceBlock stores resA at retail 0x001AC740. */
     struct EffectSlotSet *resB; /* 0x4A8: resource slots used for battle-number glyphs */
-    u8 pad4AC[8];
+    struct EffectSlotSet *resC; /* 0x4AC: btlReleaseResourceBlock clears this at retail 0x001AC7B4. */
+    u8 pad4B0[4];
     u32 buttonTextureHandle; /* 0x4B4 */
     struct SoundResourceNode *resources[0x31]; /* 0x4B8: SYSEFF resource slots, indexed like DDS2's */
     u8 pad57C[0x10];
@@ -137,19 +174,6 @@ typedef struct BtlState {
 struct ActionStateLink;
 struct SceneTask;
 struct BtlLinkedCommand;
-
-/* Three-byte scene scheduling slot; IDs move with their group/countdown. */
-typedef struct BtlSceneSlot {
-    u8 group;
-    u8 remaining;
-    u8 id;
-} BtlSceneSlot;
-
-typedef struct BtlSceneFadingRecord {
-    BtlSceneSlot slot;
-    u8 alpha;
-    s32 target;
-} BtlSceneFadingRecord;
 
 /* DDS2 0x1A9F30 loads the whole +0x2AC word; 0x1D0020 loads its two
  * signed halfword IDs separately for the field/background resource tasks. */
@@ -253,13 +277,13 @@ typedef struct BtlState {
     u32 sceneObject; /* 0x2D0 */
     u32 spriteObject;
     u32 sceneStatus;
-    u8 pad2DC[0xC];
+    BtlItemDrop itemDrops[3]; /* 0x2DC */
     s32 moneyEarned;
     s32 moneyTotal;
-    u8 pad2F0[4];
-    s32 experienceEarned;
+    s32 experienceEarned; /* 0x2F0 */
+    s32 epEarned; /* 0x2F4 */
     s32 unk2F8;
-    u8 pad2FC[2];
+    u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103 */
     BtlSceneSlot slots[8]; /* 0x2FE */
     u8 pad316[2];
     struct SceneTask *groupPrimary[20]; /* 0x318 */
@@ -339,7 +363,8 @@ typedef struct BtlState {
     void (*linkedActionHook)(struct ActionStateLink *);
     u8 pad6AC[0x24];
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
-    u8 pad6D4[0xC];
+    u8 pad6D4[8];
+    s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: func_001B0B30 calls the range override. */
     s32 (*hook6E0)(BtlUnit *);
     s32 (*hook6E4)(BtlUnit *);
     s32 (*hook6E8)(BtlUnit *);
