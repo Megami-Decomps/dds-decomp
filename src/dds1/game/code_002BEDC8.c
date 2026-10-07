@@ -1,7 +1,7 @@
 #include "common.h"
 #include "eff.h"
 
-extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 
 /* 0x80 leaves the copied corner words unchanged. */
 void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValues, u32 edge) {
@@ -39,7 +39,7 @@ INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BEEA0);
 
 extern void sdfSubmitGsTestOneRegisterPacket();
 extern void effSelectPresetAndDispatch(u32, u32, u32, u32, u32, u32, u32, u32);
-extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 extern void func_002BEEA0(s32, s32, s32, s32, s32, u32 *, u32 *,
                         s32 *, s32, s32, s32, s32, u32, s32);
 extern void func_002BE8A8(s32, s32, s32, s32, s32, s32 *, s32,
@@ -107,7 +107,7 @@ void func_002BF400(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot,
 }
 void func_002BF438(s32 x, s32 y, s32 z, u32 *palette, s32 flags, EffectSlotSet *set, s32 slot, s32 layer) {
     effDrawTextureSlot(x, y, z, (s32)palette, flags, set, slot,
-                  (BdWork *)effGetSlotWorkOrOverride((s32)set, slot), layer);
+                  (BdWork *)effGetSlotWorkOrOverride(set, slot), layer);
 }
 
 
