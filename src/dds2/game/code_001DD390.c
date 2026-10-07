@@ -7554,9 +7554,74 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00201268);
+s32 func_00201268(SceneLightRestoreArgs *args) {
+    BtlState *work;
+    BtlUnit *unit;
+    s32 listener;
+    u32 firstColor;
+    u32 secondColor;
+    u32 packedStart[4];
+    u32 packedEnd[4];
 
-extern s32 func_00201268(SceneLightRestoreArgs *);
+    if (D_00436AD4 == 0) {
+        return 1;
+    }
+    D_00436AD4--;
+    if (D_00436AD4 == 0) {
+        work = (BtlState *)btlGetRuntime();
+        if (work->battleFlags & 0x20000000) {
+            return 1;
+        }
+        if (D_0037F770[0][0] == 0.0f && D_0037F770[0][1] == 0.0f && D_0037F770[0][2] == 0.0f) {
+            VEC3_SPLAT(D_0037F770[0], 0.0078125f);
+        }
+        listener = work->unk228;
+        D_00452F50.transform.position[0] = work->baselineLightColor[0];
+        D_00452F50.transform.position[1] = work->baselineLightColor[1];
+        D_00452F50.transform.position[2] = work->baselineLightColor[2];
+        D_00452F50.transform.scale[0] = work->baselineAmbientColor[0];
+        D_00452F50.transform.scale[1] = work->baselineAmbientColor[1];
+        D_00452F50.transform.scale[2] = work->baselineAmbientColor[2];
+        D_00452F50.unk00 = 0;
+        D_00452F50.flags = 0;
+        D_00452F50.mode = 0;
+        D_00452F50.transform.rotation[0] = 0.0f;
+        D_00452F50.transform.rotation[1] = 0.0f;
+        D_00452F50.transform.rotation[2] = 0.0f;
+        D_00452F50.transform.rotation[3] = 0.0f;
+        dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_00452F50);
+        evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->unk228, args->value);
+        PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);
+        PCP_COPY_VECTOR_F32(work->ambientColor, work->baselineAmbientColor);
+        PCP_COPY_VECTOR_F32(work->lightDirection, work->baselineLightDirection);
+        for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+            if (!(unit->flags & 2)) {
+                continue;
+            }
+            if (!(unit->stateFlags & 0x10)) {
+                continue;
+            }
+            if (unit->ext != NULL) {
+                evtSetUnitStatusFlags(unit->ext);
+                VU0_LOAD_VF(vf10, unit->colorStart);
+                EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+                firstColor = packedStart[0];
+                VU0_LOAD_VF(vf10, unit->colorEnd);
+                EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+                secondColor = packedEnd[0];
+                func_0023C870(unit->ext, args->value, firstColor, secondColor);
+                VU0_LOAD_VF(vf10, unit->lightDirection);
+                evtSetUnitNormalizedDirection(unit->ext, args->value);
+            }
+        }
+        D_0037F770[0][4] = work->baselineLightDirection[0];
+        D_0037F770[0][5] = work->baselineLightDirection[1];
+        D_0037F770[0][6] = work->baselineLightDirection[2];
+    }
+    return 1;
+}
+
+
 
 BtlRuntimeTask *func_002014A8(value)
     u32 value;
