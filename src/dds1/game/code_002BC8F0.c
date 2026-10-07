@@ -814,7 +814,11 @@ u32 effClampSlotPhaseAtStart(s32 work, s32 index, EffTimedState *effect) {
     return 1;
 }
 
-EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, BdWork *entry) {
+EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entryData) {
+    /* Alternate payloads may be only 0x6C bytes; direct access here is limited to timed states.
+     * Bucket callbacks retain their existing kind-specific pointer contract.
+     */
+    BdWork *entry = (BdWork *)entryData;
     EffTimedState *states = entry->states;
     BdWork *record = &effect->workEntries[slot];
     s32 idle = 1;
