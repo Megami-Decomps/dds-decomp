@@ -1,5 +1,7 @@
 #include "common.h"
 #include "mnu_result.h"
+#include "mnu_list.h"
+#include "mnu_shop.h"
 
 extern s32 kwlnTaskGetTaskByName(char *);
 extern s32 kwlnTaskGetUserValue();
@@ -76,68 +78,55 @@ void func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
                          D_0036C728[8][BRS_ICON_ID], option);
 }
 
-typedef struct {
-    u32 value;
-    u32 mode;
-} MenuCommand;
+void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {
+    MnuShopListContext *command;
 
-typedef struct {
-    u8 pad00[0x30];
-    MenuCommand *command; /* 0x30 */
-    u8 pad34[0x74];
-    s32 frames;           /* 0xA8 */
-    s32 mode;             /* 0xAC: command phase, 0–3 */
-} MenuCommandWork;
-
-void mnuStorePendingMenuCommandValue(MenuCommandWork *work, u32 value) {
-    MenuCommand *command;
-
-    command = work->command;
-    if (command != (MenuCommand *)0x0) {
-        command->value = value;
+    command = list->context;
+    if (command != (MnuShopListContext *)0x0) {
+        command->countdown = value;
         command->mode = 1;
     }
 }
 
-void func_00260550(MenuCommandWork *work, u32 value) {
-    MenuCommand *command;
+void func_00260550(struct MenuList *list, u32 value) {
+    MnuShopListContext *command;
 
-    command = work->command;
-    if (command != (MenuCommand *)0x0) {
-        command->value = value;
+    command = list->context;
+    if (command != (MnuShopListContext *)0x0) {
+        command->countdown = value;
         command->mode = 2;
     }
 }
 
-void func_00260570(MenuCommandWork *work, u32 value) {
-    MenuCommand *command;
+void func_00260570(struct MenuList *list, u32 value) {
+    MnuShopListContext *command;
 
-    command = work->command;
-    if (command != (MenuCommand *)0x0) {
-        command->value = value;
+    command = list->context;
+    if (command != (MnuShopListContext *)0x0) {
+        command->countdown = value;
         command->mode = 1;
     }
 }
 
-void func_00260590(MenuCommandWork *work, u32 value) {
-    MenuCommand *command;
+void func_00260590(struct MenuList *list, u32 value) {
+    MnuShopListContext *command;
 
-    command = work->command;
-    if (command != (MenuCommand *)0x0) {
-        command->value = value;
+    command = list->context;
+    if (command != (MnuShopListContext *)0x0) {
+        command->countdown = value;
         command->mode = 2;
     }
 }
 
-void mnuSetCommandPhase(MenuCommandWork *work, u32 mode) {
-    work->mode = mode;
+void mnuSetCommandPhase(ShopScene *work, u32 mode) {
+    work->action = mode;
     work->frames = 0;
 }
 
-s32 mnuStaffTickState(MenuCommandWork *work) {
+s32 mnuStaffTickState(ShopScene *work) {
     s32 count;
 
-    switch (work->mode) {
+    switch (work->action) {
     case 0:
         count = work->frames + 1;
         work->frames = count;
@@ -167,8 +156,8 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00260670);
  * The counter is compared as a float because retail loads 10.0f into $f1 and
  * converts the counter with cvt.s.w (lui at,0x4120 / mtc1 / cvt.s.w / c.lt.s).
  * Phase 8 uses c.le.s, so it fires one frame earlier than 4 and 5. */
-s32 mnuTickExtendedCommandPhase(MenuCommandWork *work) {
-    switch (work->mode) {
+s32 mnuTickExtendedCommandPhase(ShopScene *work) {
+    switch (work->action) {
     case 4:
         work->frames = work->frames + 1;
         if ((f32)work->frames > 10.0f) {
@@ -198,8 +187,8 @@ s32 mnuTickExtendedCommandPhase(MenuCommandWork *work) {
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260AB0);
 
 /* Phase machine for phases 9-12: 9 waits for the frame counter to pass 10.0f, 10 and 12 for it to reach 10.0f, 11 reports at once. */
-s32 mnuTickCommandWaitPhase(MenuCommandWork *work) {
-    switch (work->mode) {
+s32 mnuTickCommandWaitPhase(ShopScene *work) {
+    switch (work->action) {
     case 9:
         work->frames = work->frames + 1;
         if ((f32)work->frames > 10.0f) {
@@ -223,6 +212,18 @@ s32 mnuTickCommandWaitPhase(MenuCommandWork *work) {
     }
     return -1;
 }
+
+extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
+extern void func_00260100(ShopScene *, s32);
+extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
+extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
+extern void func_0025F7F0(s32, s32, s32, ShopScene *, u32, s32);
+extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
+extern void itfEmitSelectedGlyph(ShopScene *, s32, s32, u32, u32);
+extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
+extern void func_0025FC38(s32, s32, s32, ShopScene *, s32, s32);
+extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
+extern void func_0025FB30(s32, s32, s32, ShopScene *, s32);
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00261760);
 
