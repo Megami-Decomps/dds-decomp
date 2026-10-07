@@ -140,7 +140,7 @@ typedef struct EvtRuntime {
     char **itemNames; /* 0x22C8 */
     s32 charCol; /* 0x22CC */
     s32 charRow; /* 0x22D0 */
-    u8 pad22D4[0x20];
+    s8 nameStorage[0x20]; /* 0x22D4: editable name, then secondary text at +0xC. */
     s32 entryCursor; /* 0x22F4 */
     s32 entryFirst; /* 0x22F8 */
     s32 frameColumn; /* 0x22FC: horizontal cursor in the selected frame row */
@@ -776,7 +776,7 @@ s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
     return 2;
 }
 
-extern s8 D_003C9688[];
+extern s8 D_003C9688[][12];
 extern char D_004374E8[]; /* "%c" */
 
 /* Draw eleven characters from a twelve-byte keyboard row and highlight the
@@ -794,11 +794,61 @@ void evtDrawKeyboardRow(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
                 color = 5;
             }
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (i + 1) * 0xC0, y, 0xFEFFFF, color, D_004374E8, D_003C9688[row * 12 + i]));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (i + 1) * 0xC0, y, 0xFEFFFF, color, D_004374E8, D_003C9688[row][i]));
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002515C8);
+/* Draw the keyboard and edit the eight-character name when input is active. */
+s32 func_002515C8(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 input;
+    s32 length;
+    s32 key;
+
+    list = sdfCreateResetPacketList();
+    evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, (u8 *)ctx,
+                     evtDrawInputValueRow, evtDrawKeyboardRow);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+                                    (SdfListHead *)list);
+    if (ctx->actionMode != 3) {
+        return 0;
+    }
+    input = kwlnStepTwoListCursors(0, 11, 4, 11, 4, NULL, NULL,
+                                  &ctx->charCol, &ctx->charRow);
+    if (input < 0) {
+        return -1;
+    }
+    if (input == 1) {
+        key = D_003C9688[ctx->charRow][ctx->charCol];
+        if (ctx->charRow == 3 && ctx->charCol >= 4) {
+            switch (key) {
+            case 'B':
+            case 'S':
+                for (length = 0; ctx->nameStorage[length] != 0; length++) {
+                }
+                if (length > 0) {
+                    ctx->nameStorage[length - 1] = 0;
+                }
+                break;
+            case 'K':
+            case 'O':
+                if (ctx->nameStorage[0] != 0) {
+                    return 1;
+                }
+                break;
+            }
+        } else {
+            for (length = 0; ctx->nameStorage[length] != 0; length++) {
+            }
+            if (length < 8) {
+                ctx->nameStorage[length] = key;
+                ctx->nameStorage[length + 1] = 0;
+            }
+        }
+    }
+    return 0;
+}
+
 
 extern u16 D_004372B0;
 extern u16 D_004372B2;
