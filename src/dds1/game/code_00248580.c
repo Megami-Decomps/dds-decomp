@@ -932,7 +932,7 @@ extern const char D_003AF678[];
 
 extern s32 D_003BC3E4;
 
-extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
+extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(s32), void (*)(s32), void *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(s32);
@@ -1129,15 +1129,15 @@ void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
     }
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting((s32)state->batch, *slot, state->effect[4], 0, 5, 2);
+        effConfigureWithDefaultSetting((u32)state->batch, *slot, state->effect[4], 0, 5, 2);
         break;
     case 2:
-        effConfigureWithDefaultSetting((s32)state->batch, *slot, state->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)state->batch, *slot, state->effect[5], 0, 0, 2);
         break;
     case 3:
-        effConfigureWithDefaultSetting((s32)state->batch, *slot, state->effect[4], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)state->batch, *slot, state->effect[4], 0, 0, 2);
         if (slot[1] >= 0) {
-            effConfigureWithDefaultSetting((s32)state->batch, slot[1], state->effect[5], 0, 0, 2);
+            effConfigureWithDefaultSetting((u32)state->batch, slot[1], state->effect[5], 0, 0, 2);
         }
         break;
     }
@@ -1263,7 +1263,8 @@ extern void func_002E96D8(s32);
 extern void func_002E9730(void);
 
 
-extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
+struct EffectSlotSet;
+extern void itfSetGridEntryQuantizedAndRefresh(struct EffectSlotSet *, s32, s32, s32, s32, s32);
 
 void func_0024A728(u32 mode, s32 context) {
     MenuTerminalWork *work = (MenuTerminalWork *)context;
@@ -1274,11 +1275,11 @@ void func_0024A728(u32 mode, s32 context) {
     index = fldGetModeFrameRecordIndex((SceneFrameOwner *)context);
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting((s32)work->batch, index, work->effect[0], 0, 0, 2);
-        effConfigureWithDefaultSetting((s32)work->batch, 4, work->effect[6], 0, 0, 14);
-        effConfigureWithDefaultSetting((s32)work->batch, 6, work->effect[0], 0, 0, 2);
-        itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[5], 0, 5, 3);
+        effConfigureWithDefaultSetting((u32)work->batch, index, work->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)work->batch, 4, work->effect[6], 0, 0, 14);
+        effConfigureWithDefaultSetting((u32)work->batch, 6, work->effect[0], 0, 0, 2);
+        itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting((u32)work->batch, 7, work->effect[5], 0, 5, 3);
         i = 0;
         entries = work->alternateBatch->records[0].values;
         for (; i < 4; i++) {
@@ -1286,20 +1287,53 @@ void func_0024A728(u32 mode, s32 context) {
         }
         break;
     case 2:
-        effConfigureWithDefaultSetting((s32)work->batch, index, work->effect[3], 0, 0xF, 2);
-        effConfigureWithDefaultSetting((s32)work->batch, 6, work->effect[3], 0, 0xF, 2);
-        itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, 0, 0);
-        effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[3], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)work->batch, index, work->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting((u32)work->batch, 6, work->effect[3], 0, 0xF, 2);
+        itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 7, 0, 0, 0, 0);
+        effConfigureWithDefaultSetting((u32)work->batch, 7, work->effect[3], 0, 0, 2);
         return;
     case 3:
-        itfSetGridEntryQuantizedAndRefresh((s32)work->batch, 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting((s32)work->batch, 7, work->effect[5], 0, 0, 3);
-        effConfigureWithDefaultSetting((s32)work->alternateBatch, 0, work->effect[5], 0, 0, 2);
+        itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting((u32)work->batch, 7, work->effect[5], 0, 0, 3);
+        effConfigureWithDefaultSetting((u32)work->alternateBatch, 0, work->effect[5], 0, 0, 2);
         break;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024A930);
+extern const s32 D_003AF6B0[6][2];
+
+/* Draw the terminal's frame layers and the selected resource's progress. */
+void func_0024A930(MenuTerminalWork *work) {
+    s32 positions[6][2];
+    s32 index;
+    u32 scale;
+
+    memcpy(positions, D_003AF6B0, sizeof(positions));
+    index = fldGetModeFrameRecordIndex((SceneFrameOwner *)work);
+    itfDrawGridWithResolvedSlot(positions[0][0], positions[0][1], 0, 0x81,
+        (s32)work->batch, index, MNU_TEXT_DRAW_PRIORITY);
+    scale = ((u32)work->batch->records[index].unk14 << 8) /
+        work->batch->records[index].unk84;
+    if (work->mode != 2) {
+        func_002BF4E0(positions[1][0], positions[1][1], 0, scale, 0x81,
+            work->batch, 4, MNU_TEXT_DRAW_PRIORITY);
+    }
+    itfDrawGridWithResolvedSlot(positions[3][0], positions[3][1], 0, 0x81,
+        (s32)work->batch, 7, MNU_TEXT_DRAW_PRIORITY);
+    itfDrawGridWithResolvedSlot(positions[3][0], positions[3][1], 0, 0x81,
+        (s32)work->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
+    if (work->reduced != 2) {
+        itfDrawGridWithResolvedSlot(positions[2][0], positions[2][1], 0, 0x81,
+            (s32)work->batch, 6, MNU_TEXT_DRAW_PRIORITY);
+        mnuQueueFontGlyphFromAtlasSlot(positions[4][0], positions[4][1], 0,
+            work->batch->records[index].unk14 | 0xA09DC300,
+            work->selectedSlot, work->reduced);
+    } else {
+        func_002BF4E0(positions[5][0], positions[5][1], 0, scale, 0x81,
+            work->batch, 0x33, MNU_TEXT_DRAW_PRIORITY);
+    }
+}
+
 
 typedef struct {
     u8 pad00[0x70];
@@ -1321,7 +1355,51 @@ s32 func_0024AB28(MenuSelectorContext *context) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024AB70);
+/* Update the old and selected terminal-effect slots from the chosen mode. */
+void func_0024AB70(u32 mode, s32 context) {
+    MenuTerminalWork *work = (MenuTerminalWork *)context;
+    s32 effect = 0;
+    s32 style = 0;
+    s32 layer = 0;
+    s32 width = 0;
+    s32 height = 0;
+    s32 selected;
+    s32 resourceOffset;
+    s32 *resource;
+
+    switch (mode) {
+    case 1:
+        width = -256;
+        layer = 2;
+        style = 5;
+        effect = 2;
+        break;
+    case 3:
+        width = -256;
+        height = 0;
+        layer = 2;
+        style = 7;
+        effect = 2;
+        break;
+    case 4:
+        width = 0;
+    case 2:
+        height = 256;
+        layer = 2;
+        style = 4;
+        effect = 3;
+        break;
+    }
+    resourceOffset = sizeof(work->effect[0]) * effect;
+    resourceOffset += (s32)((u8 *)&work->effect[0] - (u8 *)work);
+    resource = (s32 *)((u8 *)work + resourceOffset);
+    itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 8, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting((u32)work->batch, 8, *resource, 0, style, layer);
+    selected = func_0024AB28((MenuSelectorContext *)work);
+    itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, selected, 0, width, 0, height);
+    effConfigureWithDefaultSetting((u32)work->batch, selected, *resource, 0, style, layer);
+}
+
 
 
 extern s32 D_003AF6E0[2][2];
@@ -1527,7 +1605,6 @@ extern void func_0024DD78(void);
 extern void func_0024A340(s32, s32);
 
 
-extern void func_0024A930(s32);
 
 extern void mnuDrawTerminalSelectedSlots(s32);
 
@@ -1652,7 +1729,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(void *request) {
         return 0;
     }
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930(state);
+    func_0024A930((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, request);
 }
@@ -1674,7 +1751,7 @@ s32 evtBClearAndReset(void) {
     return 1;
 }
 
-extern void func_0024AB70(s32, s32);
+extern void func_0024AB70(u32, s32);
 
 u32 evtBeginSelectionExitFade(void) {
     s32 context = kwlnTaskGetUserValue();
@@ -1812,7 +1889,7 @@ s32 func_0024BC18(s32 item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930(state);
+    func_0024A930((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);
 }
@@ -1879,7 +1956,7 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930(state);
+    func_0024A930((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     if (*(s32 *)(state + 0x7C) == 0) {
         mnuDrawTerminalAmountText(1, state);
@@ -2022,7 +2099,7 @@ s32 evtBPollSelectionChainPanel(s32 item) {
             func_0024A340(0, state);
         }
         mnuDispatchTransitionHostCallbacks((TransitionHost *)state);
-        func_0024A930(state);
+        func_0024A930((MenuTerminalWork *)state);
         mnuDrawTerminalSelectedSlots(state);
     }
     return menuRunPanel((void *)state, 1, (void *)item);
@@ -2097,7 +2174,7 @@ s32 func_0024C7E8(s32 item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930(state);
+    func_0024A930((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);
 }
@@ -2147,7 +2224,7 @@ s32 mnuPrepareDispatchStateAndBindHandler(s32 item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930(state);
+    func_0024A930((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);
 }
@@ -2248,7 +2325,7 @@ s32 evtBDispatchSyncD2(s32 item) {
     }
     mnuDispatchTransitionHostCallbacks(state);
     if (((EvtBContext *)state)->dispatchMode != 3) {
-        func_0024A930(state);
+        func_0024A930((MenuTerminalWork *)state);
     }
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);

@@ -12114,10 +12114,38 @@ void btlAlignTripleFormationWithTarget(BattleActionLinkState *link, BtlUnit *fir
     }
 }
 
-void func_001F5D00(void) {
+void func_001F5D00(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
 }
 
+enum {
+    BATTLE_FORMATION_ACTION_FIRST = 0x1AB,
+    BATTLE_FORMATION_ACTION_COUNT = 0x55
+};
+
+typedef struct BattleFormationActionRow {
+    u16 unknown00;
+    u16 kind;
+    s8 actorSelector[3];
+    u8 unknown07;
+} BattleFormationActionRow;
+typedef char BattleFormationActionRowSizeCheck[(sizeof(BattleFormationActionRow) == 8) ? 1 : -1];
+
+typedef struct BattleFormationActionTable {
+    BattleFormationActionRow rows[BATTLE_FORMATION_ACTION_COUNT];
+} BattleFormationActionTable;
+typedef char BattleFormationActionTableSizeCheck[(sizeof(BattleFormationActionTable) == 0x2A8) ? 1 : -1];
+
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F5D08);
+
+typedef struct BattleFormationActionArgs {
+    BattleActionLinkState *link;
+    BtlUnit *first;
+    BtlUnit *second;
+    u32 actionId;
+    u32 unk10;
+} BattleFormationActionArgs;
+
+extern BattleFormationActionTable *D_003BAA64;
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5328);
 
@@ -12133,9 +12161,68 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A53B0);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A53D0);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F5ED8);
+u32 func_001F5ED8(BattleFormationActionArgs *args) {
+    BattleActionLinkState *link;
+    BtlUnit *first;
+    BattleFormationActionRow *row;
+    BtlState *runtime;
 
-extern u32 func_001F5ED8(u32 *);
+    runtime = (BtlState *)btlGetRuntime();
+    first = args->first;
+    if (first == 0) {
+        if (args->second == 0) {
+            return 1;
+        }
+    }
+
+    link = args->link;
+    if (link->unit->flags & 0x400) {
+        row = (BattleFormationActionRow *)((u8 *)D_003BAA64 +
+              args->actionId * sizeof(BattleFormationActionRow) -
+              BATTLE_FORMATION_ACTION_FIRST * sizeof(BattleFormationActionRow));
+        if (row->kind == 7) {
+            func_001F5D00(args->link, first, args->second);
+        }
+        return 1;
+    }
+
+    row = (BattleFormationActionRow *)((u8 *)D_003BAA64 +
+          args->actionId * sizeof(BattleFormationActionRow) -
+          BATTLE_FORMATION_ACTION_FIRST * sizeof(BattleFormationActionRow));
+    switch (row->kind) {
+    case 0:
+        break;
+    case 1:
+        if (runtime->commandRestrictFlags & 0x200) {
+            break;
+        }
+        btlPlaceTripleFormationAroundCenter(link, first, args->second);
+        break;
+    case 2:
+        if (runtime->commandRestrictFlags & 0x200) {
+            break;
+        }
+        btlPlaceTripleFormationAroundTarget(link, first, args->second);
+        break;
+    case 3:
+        btlPlaceTripleFormationAroundMiddleActor(link, first, args->second);
+        break;
+    case 4:
+        btlOrientFrontAndBackUnitsTowardTargets(link, first, args->second);
+        break;
+    case 5:
+        break;
+    case 6:
+        btlAlignTripleFormationWithTarget(link, first, args->second);
+        break;
+    default:
+        break;
+    }
+    return 1;
+}
+
+
+extern u32 func_001F5ED8(BattleFormationActionArgs *);
 
 u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel, u32 flags) {
     u8 *task = btlAllocTask(20);
