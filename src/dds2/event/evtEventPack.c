@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "evt_unit.h"
+#include "evt_motion_se.h"
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -84,16 +85,16 @@ extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)
 extern char D_00424890[];
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
-void evtCreateMotionSeTask(s32 taskArg, s32 namePart1, s32 namePart2) {
+void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
-    s32 *params;
+    EvtMotionSeTaskParams *params;
 
-    func_0035C860(taskName, D_00424890, namePart1, namePart2);
+    func_0035C860(taskName, D_00424890, eventTaskId, resourceId);
     params = sdfAllocSizeClassBlock(0xC);
     memset(params, 0, 0xC);
-    params[0] = taskArg;
-    params[1] = namePart1;
-    params[2] = namePart2;
+    params->modelKey = modelKey;
+    params->eventTaskId = eventTaskId;
+    params->resourceId = resourceId;
     kwlnTaskCreate(taskName, 0x3EC, 0, 0, func_0025D4D0, evtFreeEventPackState, params);
 }
 
