@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_channel.h"
 #include "pcp_vu0.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
@@ -1499,41 +1500,16 @@ void effEventInstallBillParticleSet(void) {
     effEventBillSetCreate(D_003563F0);
 }
 
-typedef struct EffEventChannelHead {
-    f32 controlPoints[4][4];
-    u8 enabled;
-    u8 pad41[3];
-    u32 count;
-    s32 steps;
-    s32 spread;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 jitter[4];
-    u8 pad68[0x100];
-} EffEventChannelHead;
-
-typedef struct EffEventChannelRecord {
-    s32 delay;
-    void *param;
-} EffEventChannelRecord;
-
-typedef struct EffEventChannelWork {
-    EffEventChannelHead head;
-    EffEventChannelRecord *records;
-    s32 *slots;
-    SdfMemBlock *buffer;
-} EffEventChannelWork;
-
 extern void *effAllocSlotArray(u32);
 extern void *effParamWorkCreate(u16, void *);
 extern void *effParamWorkDuplicate(void *);
 
 void *effEventCreateChannelFromParams(void *source, u16 kind, void *params) {
-    EffEventChannelHead *head = source;
+    EffChanHead *head = source;
     u32 recordCount = head->count;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(recordCount * sizeof(EffEventChannelRecord) + sizeof(EffEventChannelWork));
-    EffEventChannelWork *work = (EffEventChannelWork *)sdfResourceRetainAddress(allocation);
-    EffEventChannelRecord *record = (EffEventChannelRecord *)(work + 1);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocation);
+    EffChanRecord *record = (EffChanRecord *)(work + 1);
     void *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;

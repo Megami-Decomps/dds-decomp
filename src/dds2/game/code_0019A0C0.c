@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff.h"
+#include "eff_channel.h"
 #include "pcp_vu0.h"
 
 #define EFF_CURVE_COMPONENT_COUNT 3
@@ -39,8 +40,6 @@ typedef struct EffRec38 {
     f32 scaledRandomValue; /* 0x30 */
     f32 randomScale;       /* 0x34 */
 } EffRec38;
-
-typedef struct EffChanWork EffChanWork;
 
 /* Emitter handle for effFillRandRecords: target primitive at +0x8. */
 typedef struct EffEmit {
@@ -89,25 +88,6 @@ extern void func_0019B1F0(EffPrim *arg0, void *arg1);
 extern void effMathReleaseWorkResource(void *work);
 extern void effDispatchParameterDataAndFreeWork(void *handle);
 
-/* Header block copied into every channel work (0x168 bytes): the random record count and modulus live inside it. */
-typedef struct EffChanHead {
-    f32 controlPoints[4][4];
-    u8 enabled;    /* 0x40: keep completed channels cycling */
-    u8 pad41[3];
-    u32 count;      /* 0x44: number of random records */
-    s32 steps;
-    s32 spread;     /* 0x4C: modulus of the start delay */
-    s32 fadeIn;     /* 0x50: frames to reach full opacity */
-    s32 fadeOut;    /* 0x54: frames to fade out */
-    f32 jitter[4];
-    u8 pad68[0x100];
-} EffChanHead; /* 0x168 */
-
-typedef struct EffChanRecord {
-    s32 delay;      /* 0x00 */
-    void *param;    /* 0x04 */
-} EffChanRecord; /* 0x8 */
-
 typedef struct EffChanSourceOwner {
     u8 pad00[4];
     void *param;    /* 0x04 */
@@ -117,13 +97,6 @@ typedef struct EffChanSource {
     EffChanHead head;
     EffChanSourceOwner *owner; /* 0x168 */
 } EffChanSource;
-
-struct EffChanWork {
-    EffChanHead head;
-    EffChanRecord *records; /* 0x168 */
-    s32 *slots;             /* 0x16C */
-    void *buffer;           /* 0x170 */
-};
 
 extern void *effAllocSlotArray(u32 count);
 extern void *effParamWorkDuplicate(void *param);
