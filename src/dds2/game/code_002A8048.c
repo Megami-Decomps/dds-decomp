@@ -39,7 +39,7 @@ typedef struct MovieList {
     s16 total;
     s8 playing;
     u8 padF;
-    s32 packets;
+    SdfListHead *packets;
 } MovieList;
 
 extern MovieList mnuMovieList;
@@ -159,7 +159,7 @@ void mnuClearMovieList(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A8048", func_002A8268);
 
-u32 mnuGetMovieListNodeAtOffset(void) {
+MovieListNode *mnuGetMovieListNodeAtOffset(void) {
     MovieListNode *entry = mnuMovieList.head;
     s32 remaining = mnuMovieList.cursor;
     if (entry != 0 && remaining > 0) {
@@ -168,7 +168,7 @@ u32 mnuGetMovieListNodeAtOffset(void) {
             remaining--;
         } while (entry != 0 && remaining > 0);
     }
-    return (u32)entry;
+    return entry;
 }
 
 INCLUDE_SDATA(const s32, "game/code_002A8048", mnuMovieShutdownCounter);
@@ -186,7 +186,7 @@ void mnuDrawMovieList(void) {
     if (mnuMovieList.head == NULL || mnuMovieList.playing != 0) {
         return;
     }
-    packets = (SdfListHead *)mnuMovieList.packets;
+    packets = mnuMovieList.packets;
     sdfAppendPacket(packets, func_0011F250(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000, 0x60404040));
     selected = mnuMovieList.cursor;
     i = mnuMovieList.top;
