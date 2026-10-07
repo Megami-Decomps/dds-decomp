@@ -659,19 +659,21 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
 
-/* Create the DDS2 sprite-position record with its native initial value. */
-void *mnuAllocateSimpleSprite(s32 x, s32 y, s32 z) {
+/* Create the DDS2 simple sprite state from its three resource sets. */
+MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
+                                       struct EffectSlotSet *resourceSet1,
+                                       struct EffectSlotSet *resourceSet2) {
     MenuSpriteState *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
-    sprite->resourceSets[0] = (struct EffectSlotSet *)x;
-    sprite->resourceSets[1] = (struct EffectSlotSet *)y;
-    sprite->resourceSets[2] = (struct EffectSlotSet *)z;
+    sprite->resourceSets[0] = resourceSet0;
+    sprite->resourceSets[1] = resourceSet1;
+    sprite->resourceSets[2] = resourceSet2;
     sprite->initialValue = 0x100;
     return sprite;
 }
 
-void mnuFreeSimpleSpriteWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSimpleSpriteWork(MenuSpriteState *sprite) {
+    sdfReleaseChipBlock(sprite);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C16F0);
@@ -2955,4 +2957,3 @@ INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB0);
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB8);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CBC);
-

@@ -237,6 +237,12 @@ typedef char MenuSpriteState_initialValue_offset_check[
 MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *, struct EffectSlotSet *, struct EffectSlotSet *);
 void mnuFreeSpriteStateWork(MenuSpriteState *);
 
+#ifdef VERSION_DDS2
+MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *, struct EffectSlotSet *,
+                                       struct EffectSlotSet *);
+void mnuFreeSimpleSpriteWork(MenuSpriteState *);
+#endif
+
 #ifndef VERSION_DDS2
 /* DDS1's simple sprite owns five effect resource sets and a blend factor. */
 typedef struct MenuSimpleSpriteState {
@@ -563,7 +569,7 @@ typedef struct MenuProgressHost {
     MenuPageWindow partyWindow;
     u32 panelGroup;
 #ifdef VERSION_DDS2
-    s32 effectResource;
+    MenuSpriteState *effectResource;
     s32 currentEffect;
 #else
     MenuSimpleSpriteState *effectResource;
