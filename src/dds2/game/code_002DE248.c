@@ -11248,11 +11248,6 @@ s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
     return 1;
 }
 
-typedef struct EffStateSource {
-    u8 pad_00[0x14];
-    u32 kind;       // 0x14
-} EffStateSource;
-
 extern u32 effResetRecordRun(u8 *, u32, u32);
 
 u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
@@ -11263,10 +11258,10 @@ u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
 
     for (i = 0; i < 2; i++) {
         EffTimedState *state = &states[i];
-        EffStateSource *source = (EffStateSource *)state->source;
+        EffMappedRecord *source = (EffMappedRecord *)state->source;
 
-        if (source != 0 && source->kind != 0) {
-            EffRecordBucket *bucket = &D_00400508[source->kind];
+        if (source != 0 && source->category != 0) {
+            EffRecordBucket *bucket = &D_00400508[source->category];
             s32 step = bucket->step(record, (BdWork *)entry, state);
 
             if (state->delay > 0) {

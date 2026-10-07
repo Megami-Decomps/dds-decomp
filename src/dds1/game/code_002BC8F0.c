@@ -103,11 +103,6 @@ extern RefObj *D_003BC978[2];
 
 
 
-typedef struct EffStateSource {
-    u8 pad_00[0x14];
-    u32 kind; // 0x14
-} EffStateSource;
-
 extern EffRecordBucket D_0038FD88[];
 
 
@@ -827,10 +822,10 @@ u8 *effUpdateTimedStates(u8 *effect, u32 slot, u8 *entry) {
 
     for (i = 0; i < 2; i++) {
         EffTimedState *state = &states[i];
-        EffStateSource *source = (EffStateSource *)state->source;
+        EffMappedRecord *source = (EffMappedRecord *)state->source;
 
-        if (source != 0 && source->kind != 0) {
-            EffRecordBucket *group = &D_0038FD88[source->kind];
+        if (source != 0 && source->category != 0) {
+            EffRecordBucket *group = &D_0038FD88[source->category];
             s32 step = group->step(record, (BdWork *)entry, state);
 
             if (state->delay > 0) {
