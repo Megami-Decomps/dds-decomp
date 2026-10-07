@@ -3323,7 +3323,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     return 1;
 }
 
-void func_001AD5A0(void) {
+void btlRequestGuidePanelClose(void) {
     u8 *puVar1;
     KwlnTask *temp_v0;
 

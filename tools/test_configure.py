@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import sys
 import tempfile
 import types
@@ -27,6 +28,72 @@ from tools import progress  # noqa: E402
 
 
 class ConfigureTests(unittest.TestCase):
+    def test_timestamp_restore_only_reverts_unchanged_existing_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            unchanged = root / "unchanged.s"
+            changed = root / "changed.s"
+            deleted = root / "deleted.s"
+            new = root / "new.s"
+            unchanged.write_bytes(b"same")
+            changed.write_bytes(b"before")
+            deleted.write_bytes(b"gone")
+            old_times = (1_600_000_000_123_456_789, 1_600_000_001_987_654_321)
+            for path in (unchanged, changed, deleted):
+                os.utime(path, ns=old_times)
+
+            snapshot = configure.snapshot_generated_files([root])
+            unchanged.unlink()
+            unchanged.write_bytes(b"same")
+            changed.write_bytes(b"after")
+            deleted.unlink()
+            new.write_bytes(b"new")
+            fresh_times = (1_700_000_000_111_222_333, 1_700_000_001_444_555_666)
+            for path in (unchanged, changed, new):
+                os.utime(path, ns=fresh_times)
+
+            configure.restore_unchanged_timestamps(snapshot)
+
+            self.assertEqual(
+                (unchanged.stat().st_atime_ns, unchanged.stat().st_mtime_ns), old_times
+            )
+            self.assertEqual(changed.stat().st_mtime_ns, fresh_times[1])
+            self.assertEqual(new.stat().st_mtime_ns, fresh_times[1])
+            self.assertFalse(deleted.exists())
+
+    def test_timestamp_snapshot_skips_symlinks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "target.s"
+            link = root / "link.s"
+            target.write_bytes(b"target")
+            link.symlink_to(target)
+
+            snapshot = configure.snapshot_generated_files([link])
+
+            self.assertEqual(snapshot, {})
+            self.assertTrue(link.is_symlink())
+
+    def test_timestamp_restore_does_not_follow_replacement_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / "generated.s"
+            target = root / "target.s"
+            path.write_bytes(b"same")
+            target.write_bytes(b"same")
+            snapshot = configure.snapshot_generated_files([path])
+            path.unlink()
+            path.symlink_to(target)
+            link_times = (1_700_000_000_111_222_333, 1_700_000_001_444_555_666)
+            os.utime(path, ns=link_times, follow_symlinks=False)
+            target_mtime = target.stat().st_mtime_ns
+
+            configure.restore_unchanged_timestamps(snapshot)
+
+            self.assertTrue(path.is_symlink())
+            self.assertEqual(path.lstat().st_mtime_ns, link_times[1])
+            self.assertEqual(target.stat().st_mtime_ns, target_mtime)
+
     def test_field_archive_bases_are_available_when_all_expected_files_exist(self) -> None:
         with tempfile.TemporaryDirectory() as tmp, patch.object(configure, "ROOT", Path(tmp)):
             sources = [Path("f001_000.lbasm"), Path("f002_000.lbasm")]
