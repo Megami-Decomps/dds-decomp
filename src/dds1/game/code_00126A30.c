@@ -2526,7 +2526,107 @@ void func_0012EA40(u32 index, u32 value) {
     D_003BAD38 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EA50);
+void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
+    s32 currentMotion;
+
+    if (D_0032E4C8[0] == 1) {
+        if ((s32)D_003BAD40 > 0) {
+            if (--D_003BAD40 != 0) {
+                return;
+            }
+            mdlResumeAllContextMotions((MdlCtx *)fldCameraModelObject);
+        }
+        currentMotion = D_003BAD3C;
+        switch (motion) {
+        case 1:
+            break;
+        case 2:
+            if ((s32)D_003BAD38 > 0) {
+                motion = 3;
+            }
+            break;
+        case 3:
+            if (currentMotion == 0x66) {
+                motion = 2;
+                currentMotion = 2;
+            }
+            break;
+        default:
+            if (currentMotion == 0x66) {
+                motion = 2;
+                currentMotion = 2;
+            } else {
+                motion = 3;
+            }
+            break;
+        }
+        if (D_003BAD34 == 1) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
+            D_003BAD34 = -1;
+            if (motion == 2 && D_003BAD3C == 3) {
+                D_003BAD3C = motion;
+                ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+            }
+        } else if (D_003BAD34 == 0x66) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 0x66;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 2) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 2;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 3) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 3, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 3;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 3, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 5) {
+            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 5, 0.0f, blendFrames);
+            D_003BAD34 = -1;
+            D_003BAD3C = 5;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 5, blendFrames, blendFrames);
+        } else if (D_003BAD34 == 6) {
+            if (motion == 1) {
+                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 2.0f);
+                mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 6);
+                D_003BAD34 = -1;
+            } else {
+                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 2.0f);
+                mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 4);
+                D_003BAD34 = -1;
+                D_003BAD3C = 4;
+                ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 4, blendFrames, blendFrames);
+            }
+        } else if (currentMotion != motion && D_003BAD3C != 5) {
+            D_003BAD3C = motion;
+            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.5f;
+            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, motion, blendFrames, blendFrames);
+            if (D_003BAD38 == 0) {
+                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
+            }
+        }
+        if ((s32)D_003BAD38 > 0) {
+            D_003BAD38--;
+        }
+    } else if (modelMotion != motion) {
+        ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
+        mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, motion, blendFrames, blendFrames);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EEA0);
 
