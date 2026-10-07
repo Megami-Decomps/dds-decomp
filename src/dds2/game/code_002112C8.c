@@ -4192,7 +4192,7 @@ extern s64 btlAdvanceRuntimeSequenceCounter(void);
 
 extern u32 btlCreateUnit(void);
 
-extern void func_001AA898(s32, s32);
+extern void func_001AA898(DatPartyRecord *, s32);
 
 extern u8 *btlCreateModelLoadPollTask(s32, s32, s32, s32);
 
@@ -4207,7 +4207,7 @@ s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
         return btlAdvanceRuntimeSequenceCounter();
     }
     *slot = btlCreateUnit();
-    func_001AA898(*slot + 0x120, 0x110);
+    func_001AA898((DatPartyRecord *)(*slot + 0x120), 0x110);
     task = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
