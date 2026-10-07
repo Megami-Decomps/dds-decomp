@@ -3130,7 +3130,41 @@ void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 sdfViewUpVector[];
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017D2F8);
+/* vu0 routine: place three staggered groups in the camera-relative basis. */
+void func_0017D2F8(EffPCPTripleWork *work) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 basis[4][4] __attribute__((aligned(16)));
+    s32 frame = work->frame;
+    u32 color = work->color;
+    u32 group;
+    u32 index;
+
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    VU0_STORE_MATRIX(basis);
+    for (group = 0; group < 3; group++) {
+        s32 start = work->head.groupStartFrame[group];
+        if (frame >= start) {
+            VU0_LOAD_VF(vf11, work->head.origin);
+            VU0_LOAD_MATRIX(basis);
+            position[0] = work->head.offset[group][0];
+            position[1] = work->head.offset[group][1];
+            position[2] = 0;
+            VU0_LOAD_VF_MEMORY(vf10, position);
+            VU0_CLEAR_W(vf10);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, position);
+            for (index = 0; index < 7; index++) {
+                if (frame >= (s32)((u32)work->head.handleDelay[index] + (u32)start)) {
+                    effSetNodeParameterValue((struct EffNode *)work->handles[group * 7 + index], color);
+                    effCopyVectorToNodeInstance((struct EffNode *)work->handles[group * 7 + index], position);
+                    effUpdateNode((struct EffNode *)work->handles[group * 7 + index]);
+                }
+            }
+        }
+    }
+    work->frame = (s32)((u32)work->frame + 1);
+}
 
 void effPcpCopySpanVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
