@@ -12,7 +12,7 @@ void func_0031A830(MnuShootingWork *timer);
 
 /* Advance progress for the selected record mode unless the final-band timer is active. */
 void func_0031A638(MenuRuntimeRecord *record, MenuRuntimeRecord *unused, MnuShootingWork *timer) {
-    if ((record->state.bytes[1] & 0xF) == 4 && timer->completed <= 0) {
+    if ((record->state.kind & 0xF) == 4 && timer->completed <= 0) {
         timer->progress++;
         timer->updateCount++;
         func_0031A830(timer);
