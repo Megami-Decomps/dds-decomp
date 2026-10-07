@@ -9,6 +9,7 @@
 #include "mnu_shop.h"
 #include "mdl.h"
 #include "dat_state.h"
+#include "eff.h"
 
 struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
@@ -599,8 +600,28 @@ void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
     coordinates[2] = 10;
 }
 
-s32 mnuRateByThreshold(s32 object) {
-    s32 value = *(s32 *)(object + 0x10);
+typedef struct MenuEffectBoundsOwner {
+    s32 initialValue;
+    u8 pad04[0x0C];
+    s32 quantizedSpan;
+    s32 *settings;
+    u8 settingIndex;
+    s8 positionY;
+    u8 pad1A[2];
+    EffectSlotSet *resourceSets[7];
+    EffectSlotSet *leftGrid;
+    EffectSlotSet *rightGrid;
+    MenuEffectNode *effects[2];
+    s32 updateState;
+    s32 opacity;
+    s32 pad50;
+} MenuEffectBoundsOwner;
+
+typedef char MenuEffectBoundsOwner_size_check[
+    (sizeof(MenuEffectBoundsOwner) == 0x54) ? 1 : -1];
+
+s32 mnuRateByThreshold(MenuEffectBoundsOwner *owner) {
+    s32 value = owner->quantizedSpan;
 
     if (value < 0x32) {
         return (value >= 0x14) ? 1 : 2;
@@ -608,21 +629,49 @@ s32 mnuRateByThreshold(s32 object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283D10);
+extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
+
+/* Split the scaled grid width by its rate category and clear the paired grid. */
+void func_00283D10(MenuEffectBoundsOwner *owner) {
+    s32 span = (owner->resourceSets[1]->workEntries[0].geometry.bounds[2]
+                * owner->quantizedSpan) / 100;
+    s32 rate = mnuRateByThreshold(owner);
+    s32 bounds[2];
+
+    switch (rate) {
+    default:
+        bounds[0] = span / 5;
+        bounds[1] = (span * 90) / 100;
+        break;
+    case 1:
+        bounds[0] = span / 5;
+        bounds[1] = (span * 90) / 100;
+        break;
+    case 2:
+        bounds[0] = 0;
+        bounds[1] = span;
+        break;
+    }
+
+    bounds[0] -= 0x30;
+    bounds[1] -= 0x30;
+    itfGridSetQuantizedBounds(owner->leftGrid, 0, bounds[0], 0, bounds[1], 0);
+    itfGridSetQuantizedBounds(owner->rightGrid, 0, 0, 0, 0, 0);
+}
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
-void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
+void mnuCyclePairedEffectSetting(MenuEffectBoundsOwner *pair) {
     s32 *settings;
     s32 setting;
 
     func_00283D10(pair);
-    mnuSetPairedEffectPositions(pair);
+    mnuSetPairedEffectPositions((MenuEffectPair *)pair);
     settings = pair->settings;
     setting = 0;
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting(pair->configurationHandle, 0, (s32)pair->first, 0, setting, 0);
+    effConfigureWithDefaultSetting((s32)pair->leftGrid, 0, (s32)pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
