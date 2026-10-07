@@ -229,9 +229,9 @@ extern u32 fldSceneReady;
 
 extern u32 D_00436364;
 
-extern u32 D_00436354;
+extern s32 D_00436354;
 
-extern u32 D_0043635C;
+extern s32 D_0043635C;
 
 extern s32 D_00436350;
 
@@ -241,7 +241,7 @@ extern s32 D_00436360;
 
 extern void sdfReleaseResourceAllocation(s32);
 
-extern void func_0014E6A8();
+extern s32 func_0014E6A8();
 
 extern SdfTex *D_0043637C;
 
@@ -2514,7 +2514,120 @@ void func_0014E698(void) {
     D_00436354 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014E6A8);
+/* Render the field title through delay, fade-in, hold and fade-out phases. */
+s32 func_0014E6A8(void) {
+    s32 alpha;
+    u32 color;
+    s32 nextFrame;
+
+    if (D_00436364 == 0) {
+        fldSelectDisplayBuffer(0x53);
+    } else {
+        fldSelectDisplayBuffer(0x5E);
+    }
+    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 1);
+    func_0012BE18(0);
+    switch (D_00436354) {
+    case 0:
+        if (D_0043635C > 0) {
+            D_0043635C--;
+        }
+        if (D_0043635C == 0) {
+            D_00436354 = 1;
+            D_00436350 = 0;
+        }
+        return 0;
+    case 1:
+        if (D_00436350 >= 20) {
+            alpha = (D_00436350 - 19) * 128 / 15;
+            if (alpha > 128) {
+                alpha = 128;
+            }
+            color = (alpha << 24) | 0x808080;
+            fldSubmitSpriteRect(0xF3, 0x134, 0x100, 0x40, 0, 0, 0x100, 0x40, color, D_00436368);
+            if (D_00389780[0] == 12) {
+                fldSubmitSpriteRect(0xC5, 0x149, 0x65, 0x1A, 1, 1, 0x65, 0x1A, color, D_0043636C);
+            }
+        }
+        if (D_00436350 >= 20 && D_00436350 < 30) {
+            func_0012BE18(1);
+            alpha = (D_00436350 - 20) * 128 / 10;
+            if (alpha > 128) {
+                alpha = 128;
+            }
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            color = alpha << 24;
+            fldSubmitSpriteRect(0xF3, 0x134, 0x100, 0x40, 0, 0, 0x100, 0x40, color | 0x807060, D_00436368);
+            if (D_00389780[0] == 12) {
+                fldSubmitSpriteRect(0xC5, 0x149, 0x65, 0x1A, 1, 1, 0x65, 0x1A, color | 0x808080, D_0043636C);
+            }
+            func_0012BE18(0);
+        }
+        if (D_00436350 >= 30) {
+            func_0012BE18(1);
+            alpha = (48 - D_00436350) * 128 / 18;
+            if (alpha > 128) {
+                alpha = 128;
+            }
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            color = alpha << 24;
+            fldSubmitSpriteRect(0xF3, 0x134, 0x100, 0x40, 0, 0, 0x100, 0x40, color | 0x807060, D_00436368);
+            if (D_00389780[0] == 12) {
+                fldSubmitSpriteRect(0xC5, 0x149, 0x65, 0x1A, 1, 1, 0x65, 0x1A, color | 0x808080, D_0043636C);
+            }
+            func_0012BE18(0);
+        }
+        nextFrame = D_00436350 + 1;
+        if (nextFrame > 60) {
+            D_00436350 = 0;
+            D_00436354++;
+        } else {
+            D_00436350 = nextFrame;
+        }
+        break;
+    case 2:
+        fldSubmitSpriteRect(0xF3, 0x134, 0x100, 0x40, 0, 0, 0x100, 0x40, 0x80808080, D_00436368);
+        if (D_00389780[0] == 12) {
+            fldSubmitSpriteRect(0xC5, 0x149, 0x65, 0x1A, 1, 1, 0x65, 0x1A, 0x80808080, D_0043636C);
+        }
+        nextFrame = D_00436350 + 1;
+        if (nextFrame > 60) {
+            D_00436350 = 0;
+            D_00436354++;
+        } else {
+            D_00436350 = nextFrame;
+        }
+        break;
+    case 3:
+        alpha = (20 - D_00436350) * 128 / 20;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        if (alpha > 128) {
+            alpha = 128;
+        }
+        color = (alpha << 24) | 0x808080;
+        fldSubmitSpriteRect(0xF3, 0x134, 0x100, 0x40, 0, 0, 0x100, 0x40, color, D_00436368);
+        if (D_00389780[0] == 12) {
+            fldSubmitSpriteRect(0xC5, 0x149, 0x65, 0x1A, 1, 1, 0x65, 0x1A, color, D_0043636C);
+        }
+        nextFrame = D_00436350 + 1;
+        if (nextFrame > D_00436360) {
+            D_00436350 = 0;
+            D_00436354++;
+        } else {
+            D_00436350 = nextFrame;
+        }
+        break;
+    default:
+        return -1;
+    }
+    return 0;
+}
 
 void fldReleaseTitleTextures(void) {
     if (D_00436368 != 0) {
