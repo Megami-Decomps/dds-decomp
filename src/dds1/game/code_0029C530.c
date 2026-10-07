@@ -123,8 +123,6 @@ extern s32 btlGetRuntime(void);
 
 extern void kwlnPadStartMotor(s32, u8, s32);
 
-extern u32 effAllocateCopiedEffectPayload(u32, u32, s32);
-
 extern void billDispatchByKind(void *);
 
 extern u8 *effAllocateTexturedStripWork();
@@ -6805,22 +6803,22 @@ void effResetObjectSlots(u8 *work) {
     }
 }
 
-u32 effAllocateCopiedEffectPayload(u32 owner, u32 source, s32 size) {
+EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, u32 source, s32 size) {
     u32 headerSize = 0x40;
     u8 *base = sdfAllocGeneralBlock(size + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
-    u8 *node = body;
+    EffCopiedPayload *node = (EffCopiedPayload *)body;
 
     body += headerSize;
     if (size <= 0) {
         body = 0;
     }
-    ((EffCopiedPayload *)node)->allocation = base;
-    ((EffCopiedPayload *)node)->size = size;
-    ((EffCopiedPayload *)node)->body = body;
-    ((EffCopiedPayload *)node)->state = 0;
+    node->allocation = base;
+    node->size = size;
+    node->body = body;
+    node->state = 0;
     memcpy(body, (void *)source, size);
-    return (u32)node;
+    return node;
 }
 
 
@@ -6842,8 +6840,8 @@ u32 effCreateInitializedObject(u32 type, u32 parameter, u32 index) {
 u32 effCloneEffectPayloadFromOwner(s32 work) {
     u32 effect;
 
-    effect = effAllocateCopiedEffectPayload(((EffCopiedPayloadWork *)work)->parameter, ((EffCopiedPayloadWork *)work)->payload->body,
-                                                ((EffCopiedPayloadWork *)work)->payload->size);
+    effect = (u32)effAllocateCopiedEffectPayload(((EffCopiedPayloadWork *)work)->parameter, ((EffCopiedPayloadWork *)work)->payload->body,
+                                                    ((EffCopiedPayloadWork *)work)->payload->size);
     func_002B3420(effect);
     return effect;
 }
