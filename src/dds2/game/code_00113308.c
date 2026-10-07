@@ -282,7 +282,7 @@ extern void effObjInnerVecBackup(f32 *);
 extern void func_00113D18(EffectObject *);
 extern void func_00113560(EffectObject *);
 extern void func_00113408(EffectObject *, const f32 *);
-extern f32 *func_001178B8(s32);
+extern void *func_001178B8(EffWorldNode *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
 s32 effUpdateFollowModelTransform(EffectObject *obj) {
