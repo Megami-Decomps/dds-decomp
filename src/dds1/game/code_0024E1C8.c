@@ -475,7 +475,33 @@ void func_0024F210(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
                   context);
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F338);
+void func_0024F338(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 spriteIndex, s32 flags, s32 context, f32 scaleX,
+                   f32 scaleY) {
+    {
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[D_0036B7F0[placementIndex][0]];
+
+        resource->workEntries[spriteIndex].width =
+            (s32)(scaleX * (f32)resource->workEntries[spriteIndex].sourceWidth) << 4;
+        resource->workEntries[spriteIndex].height =
+            (s32)(scaleY * (f32)resource->workEntries[spriteIndex].sourceHeight) << 3;
+    }
+    func_002BF4E0(
+        (s32)((f32)(x + D_0036B7F0[placementIndex][MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+        (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+        z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+        D_0036C698[5], spriteIndex, context);
+    {
+        EffectSlotSet *resource =
+            (EffectSlotSet *)D_0036C698[D_0036B7F0[placementIndex][0]];
+
+        resource->workEntries[spriteIndex].width =
+            resource->workEntries[spriteIndex].sourceWidth << 4;
+        resource->workEntries[spriteIndex].height =
+            resource->workEntries[spriteIndex].sourceHeight << 3;
+    }
+}
 
 extern u8 D_0036C568[];
 extern void effRequestResourceByMode(char *, void *, s32, void *);
@@ -647,7 +673,6 @@ typedef struct MnuPartyRecord {
 } MnuPartyRecord;
 
 extern MnuResourceList *mnuCreateListState(s32, s32, s32);
-extern MnuResourceSelectionNode *mnuListAppendNode(MnuResourceList *, s32);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void func_00254C68();
 extern void *memset(void *, s32, u32);
@@ -677,7 +702,8 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     i = MNU_PARTY_ORDER_COUNT - 1;
     do {
         if (*orderCursor != 0) {
-            MnuResourceSelectionNode *selectionNode = mnuListAppendNode(list, 0);
+            MnuResourceSelectionNode *selectionNode =
+                (MnuResourceSelectionNode *)mnuListAppendNode((struct MenuList *)list, NULL);
             MnuProfileProgress *progress = sdfAllocSizeClassBlock(sizeof(MnuProfileProgress));
             selectionNode->selectionAddress = (u32)progress;
             mnuInitializeProfileProgress(*orderCursor - 1, progress);

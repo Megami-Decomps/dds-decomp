@@ -5,6 +5,7 @@
 #include "sdf.h"
 #include "eff.h"
 #include "evt_world.h"
+#include "mnu_list.h"
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;
@@ -158,7 +159,6 @@ extern struct MenuList *mnuCreateListState(u32, u32, s32);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
-extern SdfCounterChannel *mnuListAppendNode(s32, s32);
 extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern s16 sdfGetCounterChannelValueAtIndex(s32);
@@ -370,7 +370,8 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
-            channel = mnuListAppendNode(sdfActiveCounterRuntime, 0);
+            channel = (SdfCounterChannel *)mnuListAppendNode(
+                (struct MenuList *)sdfActiveCounterRuntime, NULL);
             display = sdfAllocSizeClassBlock(0x10);
             memset(display, 0, 0x10);
             display->value = i + 1;

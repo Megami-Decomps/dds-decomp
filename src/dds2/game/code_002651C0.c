@@ -8,7 +8,6 @@ extern u32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 
-extern void func_0025FD78(s32);
 
 extern void func_00297970(s32);
 
@@ -103,7 +102,7 @@ s32 evtMenuPollWindow(s32 callback) {
 
 s32 func_00265360(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    func_0025FD78(context);
+    func_0025FD78((MenuTerminalContext *)context);
     func_00297970(context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
@@ -164,7 +163,7 @@ INCLUDE_ASM(const s32, "game/code_002651C0", func_002655C0);
 
 s32 func_002657F8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    func_0025FD78(context);
+    func_0025FD78((MenuTerminalContext *)context);
     func_00297970(context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }

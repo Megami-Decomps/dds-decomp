@@ -91,7 +91,6 @@ extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u3
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
 extern void func_00272BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 mnuIsBulletItemId(s32);
-extern struct MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
 extern char *D_003BAA84;
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 extern void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *, u32);
@@ -113,7 +112,7 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     window->list->drawCallback = func_00272BC0;
     do {
         if (((SaveItemCounts *)datGameState)->counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
-            node = mnuAppendWindowListNode(window, (s32)(D_003BAA84 + textOffset));
+            node = mnuAppendWindowListNode(window, D_003BAA84 + textOffset);
             quantity = ((SaveItemCounts *)datGameState)->counts[itemId];
             node->sortKeySecondary = itemId;
             node->sortKeyPrimary = quantity;

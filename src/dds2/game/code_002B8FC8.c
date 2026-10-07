@@ -786,7 +786,6 @@ u32 mnuDestroyListState(MenuList *list);
 
 void mnuUpdateListScrollFlags(MenuList *list);
 
-MenuListNode * mnuListAppendNode();
 
 s32 mnuListContainsFinalNode(MenuList *list);
 
@@ -987,14 +986,13 @@ void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window) {
     window->flags = window->flags & MNU_WINDOW_TRANSITION_CLEAR_MASK;
 }
 
-MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value) {
-    return mnuListAppendNode((u32)menu->list, value);
+MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, const void *value) {
+    return mnuListAppendNode(menu->list, value);
 }
 
-extern MenuListNode *func_002B83A0(MenuList *list, MenuListNode *anchor, s32 value, s32 mode, u32 options);
 
 /* Insert `value` beside anchor in the window's list (see func_002B83A0). */
-MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, s32 value, s32 mode, u32 options) {
+MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, const void *value, s32 mode, u32 options) {
     return func_002B83A0(menu->list, anchor, value, mode, options);
 }
 

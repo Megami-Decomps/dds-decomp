@@ -55,7 +55,6 @@ extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
 extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
-extern struct MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
 extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
 extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
@@ -76,7 +75,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     window->list->drawCallback = func_002AB890;
     do {
         if (datGameState->inventory.counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
-            node = mnuAppendWindowListNode(window, (s32)((char *)D_00435E5C + textOffset));
+            node = mnuAppendWindowListNode(window, (char *)D_00435E5C + textOffset);
             quantity = datGameState->inventory.counts[itemId];
             node->sortKeySecondary = itemId;
             node->sortKeyPrimary = quantity;
@@ -131,7 +130,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AC050;
-    node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
+    node = mnuAppendWindowListNode(window, D_00437BC8);
     node->sortKeyPrimary = 0;
     node->sortKeySecondary = 0;
     node->sortKeyTertiary = 0;
@@ -140,7 +139,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
             catalogOrdinal = *ordinal;
             if (catalogOrdinal != 0) {
                 if (datGameState->inventory.counts[itemId] != 0) {
-                    node = mnuAppendWindowListNode(window, (s32)D_00435E5C[itemId]);
+                    node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
                     node->sortKeyPrimary = datGameState->inventory.counts[itemId];
                     node->sortKeySecondary = itemId;
                     node->sortKeyTertiary = catalogOrdinal;
@@ -159,7 +158,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
                         showUnknown = 0;
                     }
                     if (showUnknown) {
-                        node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
+                        node = mnuAppendWindowListNode(window, D_00437BC8);
                         node->sortKeyPrimary = 0;
                         node->sortKeySecondary = 0;
                         node->sortKeyTertiary = catalogOrdinal;
@@ -223,7 +222,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AC750;
-    node = mnuAppendWindowListNode(window, (s32)D_00437BC8);
+    node = mnuAppendWindowListNode(window, D_00437BC8);
     node->sortKeyPrimary = 0;
     node->sortKeySecondary = 0;
     node->sortKeyTertiary = 0;
@@ -232,7 +231,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
         itemId = catalog->itemId;
         catalog++;
         if (datGameState->inventory.counts[itemId] != 0) {
-            node = mnuAppendWindowListNode(window, (s32)D_00435E5C[itemId]);
+            node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
             node->sortKeyPrimary = datGameState->inventory.counts[itemId];
             node->sortKeySecondary = itemId;
             node->sortKeyTertiary = ordinal;

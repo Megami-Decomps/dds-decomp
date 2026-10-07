@@ -520,6 +520,12 @@ functions use trampolines and are a different case.
 - Repeated `unit->entrySlots[index].f` accesses retain separate address
   pseudos and `daddu` copies; caching a slot pointer merges them
   (`func_001ADDD0`).
+- DDS1's temporary movie-sprite scaler at `0x0026E798` is exact with direct
+  `EffectSlotSet.workEntries[index]` accesses for scaled and restored width
+  and height. The primary `BdWork` owns the signed source bounds at
+  `+0x7C/+0x80`; a cached work pointer preserves the behavior but changes
+  row-base registers and post-draw load/store scheduling (18/66 words differ).
+  Do not replace this owner with a compact movie-only record view.
 - When retail computes one scaled row base and then copies it for several
   component loads, preserve a genuinely homogeneous row as a multidimensional
   scalar array. Paired `mnuDrawSprite` is exact with its signed-halfword table
@@ -2226,6 +2232,15 @@ owners rather than shadow prefix records. Existing SDK address-word and
 byte-pointer interfaces remain explicit boundaries; member addresses do
 not require integer offset arithmetic.
 
+This scene embeds the complete `0x168`-byte `MenuCampEffect` at `+0x210`,
+not just its `0x60`-byte resource prefix: the sixteen spark records and badge
+fade continue through `+0x377`, before `windowResource` at `+0x378`.
+DDS2 `0x0025FD78` draws effect slots 1, 2 and 3 for scene types 0 and 2,
+setting slot 3's primary `BdWork.angleDegrees` to 90 degrees. Types 1 and 3
+pass `&scene->campEffect` to `mnuDrawCampIconBackdrop`; resource loading and
+teardown borrow `&scene->campEffect.resources`. The renderer and every live
+caller use `MenuTerminalContext *` and a void return contract.
+
 The shop transaction at DDS2 `0x00263FB0` borrows the selected row
 through `window->list->cursor->camp`, not an event-object prefix.
 Its full-width value times `MenuTerminalContext.multiplier` determines
@@ -2237,6 +2252,17 @@ the row's displayed value from its preserved `camp.price`.
 
 The provider unit is clean at 38 matching functions, and the complete
 event consumer unit at 75, with zero differences and no checker flags.
+
+The generic `0x74`-byte list node's value at `+0x04` is an opaque
+`const void *`, passed unchanged by both games' append and insertion APIs.
+DDS1 `0x00245A40` passes a 25-byte caption-table row and DDS2
+`0x002B0FA0` passes a party-caption entry; null entries do not establish a
+separate scalar variant. Actual item/command IDs occupy the distinct
+`camp.value` payload at `+0x60`. The DDS1 item-list constructor uses the
+price record's byte flags at `+0x00` and word price at `+0x04`, excludes
+IDs `0xA0`–`0xBF`, and otherwise selects `0x60`–`0x7F` prices by solar phase.
+It releases the prior list context before destroying the old window,
+then attaches the new draw callback and zeroed context to the new list.
 
 
 ## Camera-color keys borrow the complete camera setting

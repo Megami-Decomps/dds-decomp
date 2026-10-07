@@ -41,7 +41,6 @@ extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern u32 mnuDestroyListState(struct MenuList *);
 extern void mnuSelectFirstListNode(struct MenuList *);
 
-extern struct MenuListNode *mnuListAppendNode(struct MenuList *, s32);
 
 extern void func_0026D480();
 extern void sndSetSequenceVolumePan(s32, s32, s32);

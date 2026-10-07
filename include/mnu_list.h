@@ -14,7 +14,7 @@ typedef struct MenuThresholdEntry {
 /* Native list owner, shared by both games' allocator and window consumers. */
 struct MenuListNode {
     s32 index;
-    s32 value;
+    const void *value; /* 0x04: DDS1 245A40 and DDS2 2B0FA0 pass caption/table-entry pointers. */
     struct {
         u32 sprite;
         u32 effect;
@@ -66,6 +66,23 @@ struct MenuList {
     u32 categoryMarkerEnabled; /* 0x38: draw the active category marker. */
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
+
+struct MenuWindowContainer;
+struct MenuListNode *mnuListAppendNode(struct MenuList *list, const void *value);
+struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, const void *value);
+
+/* Insert the same opaque entry value while preserving the list cursor/window. */
+#ifdef VERSION_DDS1
+struct MenuListNode *func_0027B540(struct MenuList *list, struct MenuListNode *anchor,
+                                const void *value, s32 mode, u32 options);
+struct MenuListNode *func_0027C688(struct MenuWindowContainer *window, struct MenuListNode *anchor,
+                                const void *value, s32 mode, u32 options);
+#else
+struct MenuListNode *func_002B83A0(struct MenuList *list, struct MenuListNode *anchor,
+                                const void *value, s32 mode, u32 options);
+struct MenuListNode *func_002B9708(struct MenuWindowContainer *window, struct MenuListNode *anchor,
+                                const void *value, s32 mode, u32 options);
+#endif
 
 #ifdef VERSION_DDS1
 struct MenuListNode *mnuAdvanceListCursorDefault(struct MenuList *list);

@@ -284,7 +284,6 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
 extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern struct MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
 extern void func_00274BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *);
 extern char D_003BC6E8[];
@@ -308,7 +307,7 @@ void func_00274D48(CampMenuContext *context) {
             node->sortKeySecondary = datGameState->party[i].level;
         }
     }
-    mnuAppendWindowListNode(window, (s32)D_003BC6E8);
+    mnuAppendWindowListNode(window, D_003BC6E8);
     window->list->visibleCount = window->list->count;
     switch (window->list->count) {
     case 2:
