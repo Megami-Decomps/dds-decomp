@@ -5364,13 +5364,16 @@
 0x0030A700	fldLmapSubmitPositionedCommandPacket	inferred	src/dds2/game/code_0030A128.c func_0030A700: Builds rectangle header with GS coordinate biases, formats command packet and submits to selected surface. Twin of DDS1 func_002C2BF8. [names_reviewed24.tsv]
 0x0030A7C8	fldLmapSubmitScaledSpritePacket	inferred	src/dds2/game/code_0030A128.c func_0030A7C8: Builds sprite packet with GS coordinate biases and scaled dimensions, then submits to selected surface. Twin of DDS1 func_002C2CC0. [names_reviewed24.tsv]
 0x0030A970	fldStartLmapTask	inferred	DDS1 twin 002C2E38 (DDS2 additionally allocates and clears the 0x88 task state) [names_M33_SmallSweep2.tsv]
+0x0030AAB0	fldLocalMapTrackSlotFromMode	inferred	Maps the local-map mode to the track-selection ordinal consumed by fldCountMaskBitsBeforeOrdinal; paired with DDS1 002C2F40 with title-specific mode encodings.
 0x0030AB20	fldInitializeLmapTaskVariant	inferred	Clears task state and chooses variant 1..3 from mdlFlagTest(0x1c) and mdlFlagTest(0x13).
 0x0030AB88	fldShutdownLmapResources	inferred	DDS1 twin 002C2FF8 [names_M33_SmallSweep2.tsv]
 0x0030B078	fldInitializeLocalMapScene	inferred	confidence=high; matched-C; src/dds2/game/code_0030A128.c:403:func_0030B078; Semantic local-map setup counterpart: selects stage mode from story flags, installs the camera/counter/map/message/light resources and starts music/fade. DDS2 adds a third stage mode and chooses black/white fade from story state.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x0030B470	fldDrawLocalMapOverlay	inferred	Draws the local-map frame then state-specific selected marker and transition UI; paired behavior with DDS1 002C3420.
 0x0030B568	fldPackLocalMapFlagStates	inferred	confidence=medium; matched-C; src/dds2/game/code_0030A128.c:451:func_0030B568; Packs the queried eight flag states into a permuted byte mask in the local-map scene unit.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0030B600	mdlCollectFlagBitsIntoMask	inferred	Packs six model flag predicates into their designated output bits. [names_reviewed10.tsv]
 0x0030B680	fldDisplayLocalMapCounterMessage	inferred	Formats the selected counter word and starts the local-map message entry, then captures window sound mode. [names_reviewed9.tsv]
 0x0030B6D8	fldLmapToggleOverlay	inferred	DDS1 twin 002C36E8 [names_M33_SmallSweep2.tsv]
+0x0030B728	sdfClearCounterDisplayFlags	inferred	Clears map-selection flags corresponding to the committed counter index; paired behavior with DDS1 002C3738, retaining title-specific flag IDs.
 0x0030B7D0	fldCreateLocalMapCamera	inferred	Creates a world object tagged Lmap_Cam and attaches it to local-map world. [names_reviewed8.tsv]
 0x0030B838	sdfInitInnerVectors	inferred	sets inner first/second vec on D_004388B4 then vtbl refresh
 0x0030BA98	sdfInitializeMapCounterSelection	inferred	readability/matching review (QP16)

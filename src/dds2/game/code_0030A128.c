@@ -46,7 +46,7 @@ extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern void *sdfAllocGeneralBlock(s32 size);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
-extern s32 func_0030AAB0(s32);
+extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern void func_0030A8A8(void);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 D_00438890;
@@ -329,7 +329,7 @@ void fldStartLmapTask(s32 mode) {
 
     memset(taskData, 0, 0x88);
     if (mode != 0) {
-        D_00438890 = func_0030AAB0(mode);
+        D_00438890 = fldLocalMapTrackSlotFromMode(mode);
     } else {
         D_00438890 = 1;
     }
@@ -349,40 +349,39 @@ s32 fldLmapTaskExists(void) {
 void func_0030AA68(const char *fmt, ...) {
 }
 
-/* Counter kind -> timer preset. Kinds 5, 6 and 13 have no arm of their own,
- * so they fall through to the default of 1. */
+/* Map a local-map mode to its track-selection ordinal; unmapped modes use 1. */
 INCLUDE_RODATA(const s32, "game/code_0030A128", fldLocalMapTaskName);
 
-s32 func_0030AAB0(s32 kind) {
-    s32 preset = 1;
+s32 fldLocalMapTrackSlotFromMode(s32 mode) {
+    s32 slot = 1;
 
-    switch (kind - 4) {
+    switch (mode - 4) {
     case 0:
-        preset = 1;
+        slot = 1;
         break;
     case 3:
-        preset = 3;
+        slot = 3;
         break;
     case 4:
-        preset = 2;
+        slot = 2;
         break;
     case 5:
-        preset = 7;
+        slot = 7;
         break;
     case 6:
-        preset = 8;
+        slot = 8;
         break;
     case 7:
-        preset = 4;
+        slot = 4;
         break;
     case 8:
-        preset = 6;
+        slot = 6;
         break;
     case 9:
-        preset = 5;
+        slot = 5;
         break;
     }
-    return preset;
+    return slot;
 }
 
 /* The 0x1C flag takes precedence over 0x13 when selecting the map variant. */
@@ -475,7 +474,7 @@ void fldInitializeLocalMapScene(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B1E8);
 
-void func_0030B470(void) {
+void fldDrawLocalMapOverlay(void) {
     func_00134A18();
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x21, 0, 0x53);
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x22, 0, 0x53);
@@ -561,7 +560,7 @@ s32 fldLmapToggleOverlay(void) {
 extern s32 sdfCounterGetDisplayValue(void);
 extern void mdlFlagClear(s32 flag);
 
-void func_0030B728(void) {
+void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);
 
     if (flags & 2) {
