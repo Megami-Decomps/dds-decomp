@@ -181,7 +181,7 @@ extern void effRequestMappedResource(char *, char *, u32 *);
 
 extern void mnuFreeWindowSprites();
 
-extern void mnuHideIconGroup();
+extern void mnuClearEntryFlags();
 
 extern s32 evtGetCapturedWindowPanelValue();
 
@@ -2989,7 +2989,7 @@ extern void effInitializeSlotWork();
 
 
 /* Reset low sprite flags only for a present first sprite and a supported panel kind. */
-void mnuHideIconGroup(MenuIconState *group);
+void mnuClearEntryFlags(MenuIconState *group);
 
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
 void mnuReleaseResourceList(MenuIconState *list);

@@ -178,7 +178,7 @@ extern void effRequestMappedResource(char *, char *, u32 *);
 
 extern void mnuFreeWindowSprites();
 
-extern void mnuHideIconGroup();
+extern void mnuClearEntryFlags();
 
 extern s32 evtGetCapturedWindowPanelValue();
 
@@ -1013,7 +1013,7 @@ MenuListNode *mnuAdvanceListSelection(MenuWindowContainer *menu, s32 step) {
     MenuListNode *selected = mnuListAdvanceCursor(menu->list, step, 0);
     if (selected != NULL) {
         selected->selectionByte54 = 0;
-        mnuHideIconGroup(&menu->panel);
+        mnuClearEntryFlags(&menu->panel);
     }
     return selected;
 }
@@ -1023,7 +1023,7 @@ MenuListNode *mnuReverseListSelection(MenuWindowContainer *menu, s32 step) {
     MenuListNode *selected = mnuListRetreatCursor(menu->list, step, 0);
     if (selected != NULL) {
         selected->selectionByte54 = 0;
-        mnuHideIconGroup(&menu->panel);
+        mnuClearEntryFlags(&menu->panel);
     }
     return selected;
 }
@@ -1207,7 +1207,7 @@ extern void effInitializeSlotWork(s32, s32);
 
 
 /* Reset low sprite flags only for a present first sprite and a supported panel kind. */
-void mnuHideIconGroup(MenuIconState *group) {
+void mnuClearEntryFlags(MenuIconState *group) {
     s32 spriteIndex;
     if (group->sprite[0] != NULL && group->kind < MNU_PANEL_KIND_LIMIT) {
         for (spriteIndex = 0; spriteIndex < group->count; spriteIndex++) {
