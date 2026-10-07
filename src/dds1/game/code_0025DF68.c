@@ -21,7 +21,26 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025DF68);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E108);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E308);
+extern void func_0025E420(ShopScene *, s32, s32);
+
+/* Draw the fixed shop frame, then its pulsing icon. */
+void func_0025E308(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
+    u32 texture = D_003BC520;
+
+    func_002BF4E0(D_0036C728[32][BRS_ICON_X] << 4,
+                  D_0036C728[32][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[32][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[27][BRS_ICON_X] << 4,
+                  D_0036C728[27][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[27][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[28][BRS_ICON_X] << 4,
+                  D_0036C728[28][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[28][BRS_ICON_ID], mode);
+    func_002BF4E0(D_0036C728[0][BRS_ICON_X] << 4,
+                  D_0036C728[0][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, D_0036C728[0][BRS_ICON_ID], mode);
+    func_0025E420(scene, 0x100, mode);
+}
 
 extern f32 sdfSinPoly(f32);
 
