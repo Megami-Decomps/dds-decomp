@@ -6509,7 +6509,137 @@ extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
 extern void func_00221D00(EvtUnit *, s32, u32, u32);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2A48);
+void func_002B2A48(EffActiveResource *work) {
+    EffectVectorRequest request;
+    BtlUnit *actors[16];
+    f32 direction[4];
+    f32 origin[4];
+    u32 packedStart[4];
+    u32 packedEnd[4];
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    EffActorLightConfig *config = work->payload;
+    u32 frame = work->frame;
+    u32 count = effCollectModelEffectActors(actors, config->actorSelection);
+    u32 index;
+    EvtUnit *effect;
+
+    request.count = config->direction.count;
+    request.size = config->direction.size;
+    request.unk04 = config->direction.unk04;
+    switch (config->direction.kind) {
+    case 0:
+        request.kind = 0;
+        break;
+    case 1:
+        {
+            void *owner = (void *)effBTLFieldColorGetOriginalSelector();
+            request.kind = 0;
+            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    case 2:
+        {
+            void *owner = (void *)effBTLFieldColorGetVariantSelector();
+            request.kind = 0;
+            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    case 3:
+        request.kind = 1;
+        break;
+    case 4:
+        request.kind = 2;
+        break;
+    case 5:
+        request.kind = 3;
+        break;
+    case 6:
+        {
+            void *owner = (void *)effBTLFieldColorGetOverrideSelector();
+            request.kind = 6;
+            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    case 7:
+        {
+            void *owner = (void *)effBTLFieldColorGetFinalSelector();
+            request.kind = 7;
+            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    }
+    if (frame == 0) {
+        for (index = 0; index < count; index++) {
+            if (actors[index]->stateFlags & 0x10) {
+                effect = actors[index]->ext;
+                evtSetUnitStatusFlags(effect);
+                if (config->colorFadeIn != -1 && config->colorFadeOut != -1) {
+                    func_00221D00(effect, config->colorFadeIn, config->firstColor, config->secondColor);
+                }
+                if (config->directionFadeIn != -1 && config->directionFadeOut != -1) {
+                    if (request.kind == 3) {
+                        if (actors[index]->stateFlags & 0x8000) {
+                            btlUnitGetEffectPosVU(actors[index]);
+                        } else {
+                            btlUnitGetMuzzlePosVU(actors[index]);
+                        }
+                        VU0_LOAD_VF(vf11, work->position);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_NORMALIZE_VF10();
+                    } else if (request.kind < 0xB) {
+                        effBattleMiscDirectionTo(actors[index], &request, direction);
+                        VU0_LOAD_VF(vf10, direction);
+                    } else {
+                        if (actors[index]->stateFlags & 0x8000) {
+                            btlUnitGetEffectPosVU(actors[index]);
+                        } else {
+                            btlUnitGetMuzzlePosVU(actors[index]);
+                        }
+                        VU0_LOAD_VF(vf11, origin);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_NORMALIZE_VF10();
+                    }
+                    evtSetUnitNormalizedDirection(effect, config->directionFadeIn);
+                }
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->colorFadeOut) {
+        for (index = 0; index < count; index++) {
+            if (actors[index]->stateFlags & 0x10) {
+                u32 firstColor;
+                u32 secondColor;
+                effect = actors[index]->ext;
+                if (btlCameraVectorHasNaN()) {
+                    firstColor = btlBlendColorVec(battle->lightColor, actors[index]->colorStart, 0.3f);
+                    secondColor = btlBlendColorVec(battle->ambientColor, actors[index]->colorEnd, 0.3f);
+                } else {
+                    VU0_LOAD_VF(vf10, actors[index]->colorStart);
+                    EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+                    firstColor = packedStart[0];
+                    VU0_LOAD_VF(vf10, actors[index]->colorEnd);
+                    EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+                    secondColor = packedEnd[0];
+                }
+                func_00221D00(effect, config->colorFadeOut, firstColor, secondColor);
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->directionFadeOut) {
+        for (index = 0; index < count; index++) {
+            if (actors[index]->stateFlags & 0x10) {
+                effect = actors[index]->ext;
+                VU0_LOAD_VF(vf10, actors[index]->lightDirection);
+                evtSetUnitNormalizedDirection(effect, config->directionFadeOut);
+            }
+        }
+    }
+}
+
 
 extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
 
