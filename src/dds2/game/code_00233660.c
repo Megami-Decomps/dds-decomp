@@ -169,6 +169,8 @@ extern s8 D_00453560[];
 
 void mdlUpdateViewerSelectedModelFromPad(void);
 
+void mdlCleanupViewerTasksAndResources(void);
+
 void mdlDrawViewerSelectionLabel(void);
 
 extern s32 kwlnTaskGetTaskByName(void *name);
