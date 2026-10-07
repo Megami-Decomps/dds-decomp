@@ -1844,6 +1844,9 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
+extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
+extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
+
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012AEB0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B090);
@@ -1945,7 +1948,7 @@ void fldReleaseBackgroundBuffer(void) {
 }
 
 extern u32 D_003980F0[];
-extern u32 sdfAllocatePacketList(s32);
+extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
 extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
