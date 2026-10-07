@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_command.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_action.h"
@@ -295,20 +296,6 @@ typedef struct BtlActionTableEntry {
     u8 pad1E[2];
 } BtlActionTableEntry;
 
-typedef struct BtlCategoryTableEntry {
-    u8 flags00;            /* 0x00 */
-    u8 pad01[2];
-    u8 kind03;             /* 0x03 */
-    u8 pad04[4];
-    u8 restriction;        /* 0x08 */
-    u8 flags09;            /* 0x09 */
-    u8 pad0A[0x1A];
-    u32 flags24;           /* 0x24 */
-    u8 pad28[8];
-    s32 categoryType;      /* 0x30 */
-    u8 pad34[4];
-} BtlCategoryTableEntry;
-
 typedef struct BtlResourceTableEntry {
     u32 flags;
     u8 pad04[72];
@@ -531,7 +518,6 @@ extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
-extern s32 datCommandRecords;
 
 extern s32 datActionAnimationRecords;
 
