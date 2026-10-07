@@ -324,7 +324,7 @@ typedef struct StaffMenuRuntime {
     s32 staffView;
     s32 staffSelection;
     s32 staffExit;
-    u8 pad20[4];
+    MenuIconState *iconPanel; /* 0x20: created and released with the staff panels. */
     s32 active;
     s32 idleFrames;
     s32 motionSelection;
@@ -1277,7 +1277,49 @@ void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSprite
     mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, (u32 *)resource, spriteFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3788);
+void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
+
+s32 func_002B3788(s32 callback) {
+    s32 contextAddress = (s32)kwlnTaskGetUserValue();
+    MenuContext *context = (MenuContext *)contextAddress;
+    DatGameState *gameState = datGameState;
+    StaffMenuRuntime *menuWork = (StaffMenuRuntime *)context->party;
+    s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
+    DatPartyRecord *partyEntry = &gameState->party[partyIndex];
+
+    mnuDrawCampIconBackdropByKind(2, callback);
+    mnuDrawSelectedPartySlotMarkers((s32)&context->partyWindow,
+                                    (StaffSlots *)&context->displayHandle);
+
+    if (menuWork->staffMode == 0) {
+        context->partyWindow.flags = (context->partyWindow.flags | 0x200) & ~0x80;
+    } else {
+        context->partyWindow.flags |= 0x280;
+    }
+
+    if (menuWork->staffMode == 0) {
+        mnuDrawPartySkillAndStatusPanel(partyEntry, (s32)&context->partyWindow,
+                                        context->panelGroup, (s32)context->panelRequest,
+                                        (s32)&context->displayHandle, 0x53);
+        func_002AA7A0(5, context->displayHandle);
+    } else {
+        mnuDrawProfilePanelAndSprite(partyEntry, (u32)&context->partyWindow,
+                                     context->panelEffects, (u32)context->resourceList,
+                                     (u32)&context->displayHandle, 0x53);
+        if (menuWork->staffView == 0) {
+            func_002AA7A0(6, context->displayHandle);
+        } else {
+            func_002AA7A0(4, context->displayHandle);
+        }
+    }
+
+    if (menuWork->staffView == 0) {
+        mnuDrawIconPanelFullFade(0, 0, 0, menuWork->iconPanel, 0x53);
+        mnuUpdateWindowPanelHandleStatesKindFourFive(menuWork->iconPanel);
+    }
+    evtStageTestUpdate(D_00380788);
+    return menuSetHandler((void *)context, 1, (void *)callback);
+}
 
 void mnuIdleVoiceTimer(s32 object) {
     u32 count;
