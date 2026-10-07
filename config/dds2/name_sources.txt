@@ -339,6 +339,7 @@
 0x00112B80	dds3CreateCameraData	inferred	Camera kind-4 creation callback: creates the node transform, allocates CameraData, attaches its ObjBase handle and clears the pending-FOV flag.
 0x00112BE0	dds3DestroyCameraData	inferred	Releases the nested camera handle and data; mirrors DDS1 dds3DestroyCameraData.
 0x00112C20	dds3UpdateCameraObject	inferred	Updates a changed camera transform, publishes the selected camera vectors, and applies a pending field-of-view change.
+0x00112D08	dds3DrawCameraObject	inferred	Kind-4 EffWorldOps draw callback; native ops table at 0x00385110 stores this function in its fourth slot.
 0x00112D10	dds3RebuildCameraBasis	inferred	Transforms the camera eye and up vectors through its inner node and rebuilds the look-at basis.
 0x00112DD8	dds3GetCameraHandle	inferred	Returns the nested camera object's handle; mirrors DDS1 dds3GetCameraHandle.
 0x00112DE8	dds3CreateCameraObjectWithSlotData	inferred	Creates a camera object, stores its supplied value and ensures backing slot data. [names_reviewed10.tsv]
