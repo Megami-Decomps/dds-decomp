@@ -4,6 +4,9 @@
 #include "itf_grid_text.h"
 #include "sdf.h"
 
+extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern u8 *effUpdateTimedStates(u8 *, u32, u8 *);
+
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
@@ -38,24 +41,24 @@ void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags,
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
 /* Resolve an entry by key, falling back to the object's stored value. */
-s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
-    s32 entry = effGetSlotWorkOrOverride(object, key);
+s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
+    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride((s32)object, key);
     s32 result;
 
-    if (*(s32 *)(entry + 0x30) == 0) {
+    if (entry->states[0].delay == 0) {
         func_002BF828(object, key);
     }
-    result = effUpdateTimedStates(object, key, entry);
+    result = (s32)effUpdateTimedStates((u8 *)object, (u32)key, (u8 *)entry);
     if (result == 0) {
-        result = ((EffectSlotSet *)object)->defaultValue;
+        result = object->defaultValue;
     }
     return result;
 }
 
 extern void func_002BD3D8(void *, s32, void *);
 
-void itfSetGridEntryQuantizedAndRefresh(u8 *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    EffectSlotDescription *entry = &((EffectSlotSet *)object)->descriptions[index];
+void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    EffectSlotDescription *entry = &object->descriptions[index];
     s32 record = effGetSlotWorkOrOverride((s32)object, index);
 
     entry->xOffset = x >> 4;
@@ -66,10 +69,10 @@ void itfSetGridEntryQuantizedAndRefresh(u8 *object, s32 index, s32 x, s32 y, s32
 }
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
-void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
+void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
                    s32 width, s32 height) {
-    EffectSlotDescription *entry = &((EffectSlotSet *)object)->descriptions[index];
-    u32 *destination = (u32 *)((EffectSlotSet *)object)->workEntries[index].bounds.grid.quantizedBounds;
+    EffectSlotDescription *entry = &object->descriptions[index];
+    u32 *destination = (u32 *)object->workEntries[index].bounds.grid.quantizedBounds;
     u32 *source;
     s32 remaining = 3;
     entry->xOffset = x >> 4;
@@ -82,8 +85,8 @@ void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,
     } while (--remaining >= 0);
 }
 
-void itfGridSetBounds(s32 object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
+void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride((s32)object, index);
     widget->parameters[0] = x;
     widget->parameters[1] = y;
     widget->parameters[2] = width;
