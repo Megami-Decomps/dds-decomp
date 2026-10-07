@@ -195,7 +195,7 @@ void dds3AdminSetControlFlag(void);
 
 void func_00101A80(s32, s32);
 
-void mdlCleanupViewerTasksAndResources();
+void mdlCleanupViewerTasksAndResources(void);
 
 void sdfPacInitializeDispatchPacket(void *buffer, s32);
 
@@ -2410,7 +2410,7 @@ extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 flag);
 
 extern void func_00103498(const char *name, s32, s32, s32);
 
-void mdlCleanupViewerTasksAndResources(MdlViewState *view) {
+void mdlCleanupViewerTasksAndResources(void) {
     s32 i;
 
     mdlFreeViewResources();
