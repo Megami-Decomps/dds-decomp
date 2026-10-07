@@ -1966,7 +1966,61 @@ void func_0012B090(s32 mode) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B2B0);
+/* Submit the field overlay's fixed register state and textured sprite payload. */
+void func_0012B2B0(s32 alpha) {
+    SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
+    SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    s32 sprite;
+    FldSpriteVertex *vertex;
+    SdfPoolNode *surface;
+
+    sdfAppendDmaPrimary((s32)list,
+        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+    texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfAppendPacket(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x33001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = ((u64)(u32)alpha << 32) | 0x64;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, (u32)blendPacket);
+    sprite = (s32)sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = alpha;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF8;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xDFF;
+    vertex->corner[1].x = 0x8FF8;
+    vertex->corner[1].y = 0x86FB;
+    vertex->corner[1].mask = 0;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(list, sprite);
+    surface = &kwlnDrawSurfaces[fldDisplayRow];
+    surface->append((SdfListHead *)surface, list);
+}
+
 
 typedef struct FldMarkerPacket {
     f32 pos[3];
