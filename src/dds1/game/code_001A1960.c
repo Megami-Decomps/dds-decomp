@@ -362,8 +362,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2258);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2608);
 
-s32 btlGetEntryFlagsUnlessDisabled(s32 entry) {
-    DatPartyRecord *record = (DatPartyRecord *)entry;
+s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     if ((record->flags & 4) != 0) {
         return 0;
     }
@@ -1814,7 +1813,7 @@ s32 btlCalculateAbilityRecoveryAmount(u8 *actor) {
 }
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *actor, s32 delta) {
-    if (btlGetEntryFlagsUnlessDisabled((s32)(actor + 0x120)) & 4) return 0;
+    if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)actor)->partyRecord) & 4) return 0;
     if (btlHasEnemyRecordDefeatExemptionFlag((s32)actor)) return 0;
     if ((((BtlUnit *)actor)->partyRecord.status & 0x7FFF) == 0x4000) return 1;
     if ((*(u32 *)(btlGetRuntime() + 0x1F4) & 0x80) == 0) return 0;
@@ -1997,7 +1996,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
     if ((((BtlUnit *)actor)->partyRecord.status & 0x40) != 0) {
         return 0;
     }
-    return (btlGetEntryFlagsUnlessDisabled(actor + 0x120) & 0x40) < 1;
+    return (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)actor)->partyRecord) & 0x40) < 1;
 }
 
 extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);

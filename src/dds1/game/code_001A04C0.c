@@ -21,9 +21,9 @@ extern u64 *func_001A0910(s32, s32, s32, s32, s32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern s32 datComputeSkillBoostedMaxHp();
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
-extern s32 datComputeSkillBoostedMaxMp();
+extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 extern u64 btlAdvanceRuntimeSequenceCounter();
 
@@ -475,27 +475,17 @@ s32 btlGetRuntime(void) {
     return btlRuntime;
 }
 
-/* Shared party/enemy entry prefix consumed by the HP/MP/status accessors. */
-typedef struct BtlEntry {
-    u16 flags;
-    u8 pad2[4];
-    u16 hp;     /* 0x06 */
-    u16 maxHp;  /* 0x08: cached skill-adjusted maximum */
-    u16 mp;     /* 0x0A */
-    u16 maxMp;  /* 0x0C: cached skill-adjusted maximum */
-    u16 status; /* 0x0E */
-} BtlEntry;
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
 /* Read current HP from a unit-entry address. */
-s32 btlReadCurrentUnitHp(void *entryAddress) {
-    return ((BtlEntry *)entryAddress)->hp;
+s32 btlReadCurrentUnitHp(DatPartyRecord *entryAddress) {
+    return entryAddress->hp;
 }
 
 /* Read current MP from a unit-entry address. */
-u16 btlReadCurrentUnitMp(s32 entryAddress) {
-    return ((BtlEntry *)entryAddress)->mp;
+u16 btlReadCurrentUnitMp(DatPartyRecord *entryAddress) {
+    return entryAddress->mp;
 }
 
 void btlComputeProfileMaxHp(void) {
@@ -506,11 +496,11 @@ void btlComputeProfileMaxMp(void) {
     ptyComputeMaxMp();
 }
 
-u32 btlComputeSkillAdjustedMaxHp(s32 object) {
+u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *object) {
     return datComputeSkillBoostedMaxHp(object);
 }
 
-u32 btlComputeSkillAdjustedMaxMp(s32 object) {
+u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *object) {
     return datComputeSkillBoostedMaxMp(object);
 }
 
@@ -524,8 +514,8 @@ void btlAdjustUnitMp(u8 *object, s32 value) {
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 entryAddress) {
-    BtlEntry *entry = (BtlEntry *)entryAddress;
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress) {
+    DatPartyRecord *entry = entryAddress;
     u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
     entry->maxHp = maxHp;
@@ -537,19 +527,19 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 entryAddress) {
 
 /* Cache the skill-adjusted maximum and return current MP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 entryAddress) {
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
     u16 currentMp = btlReadCurrentUnitMp(entryAddress);
     u32 maxMp = btlComputeSkillAdjustedMaxMp(entryAddress);
-    ((BtlEntry *)entryAddress)->maxMp = maxMp;
+    entryAddress->maxMp = maxMp;
     if (maxMp < currentMp) {
-        ((BtlEntry *)entryAddress)->mp = maxMp;
+        entryAddress->mp = maxMp;
     }
-    return ((BtlEntry *)entryAddress)->mp;
+    return entryAddress->mp;
 }
 
 /* Return the low 15 status bits; do not expose the stored high bit. */
 u16 btlReadUnitStatusMask(s32 entryAddress) {
-    return ((BtlEntry *)entryAddress)->status & BTL_ENTRY_STATUS_MASK;
+    return ((DatPartyRecord *)entryAddress)->status & BTL_ENTRY_STATUS_MASK;
 }
 
 void func_001A1948() {

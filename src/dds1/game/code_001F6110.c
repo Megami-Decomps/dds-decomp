@@ -118,8 +118,8 @@ typedef struct BtlVec3 {
 
 extern f32 bfWaitReadArgFloat(s32);
 
-extern s32 btlReadCurrentUnitHp(void *);
-extern s32 btlComputeSkillAdjustedMaxHp(void *);
+extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 extern void effMiscQuaternionToMatrixVU(void);
