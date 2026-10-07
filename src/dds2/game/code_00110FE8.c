@@ -23,7 +23,7 @@ s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, s32 value) {
     return 0;
 }
 
-s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, s32 value) {
+s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *value) {
     EvtWorldSlot *slots;
     s32 i;
 
@@ -38,7 +38,7 @@ s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, s32 value) {
             continue;
         }
         do {
-            if (node == (EffWorldNode *)value) {
+            if (node == value) {
                 return 1;
             }
             node = node->next;
