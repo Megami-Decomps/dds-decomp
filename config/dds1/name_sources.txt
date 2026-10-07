@@ -5568,7 +5568,7 @@
 0x002B3130	effResetDefaultColorTables	inferred	eff copies two quadwords from *D_00324770 and one from D_00324780 then clears D_003BC9AC
 0x002B3350	effResetCopiedPayloadTargets	inferred	zeros state and flags on each non-null path target in the copied payload
 0x002B3390	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
-0x002B3588	effCreateInitializedObject	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B3588	effCreateAndInitializeCopiedPayload	inferred	Allocates copied payload storage, relocates its packed transfer data, then invokes the initializer; the matched DDS2 helper performs the same sequence.
 0x002B35C8	effCloneEffectPayloadFromOwner	inferred	Copies a payload read from owner record into a reference-backed work and initializes it. [names_reviewed5.tsv]
 0x002B3608	effDestroyCopiedEffectPayload	inferred	releases the five retained path targets and world nodes before freeing the copied payload allocation
 0x002B3AC0	effApplyOverlaySpecs	inferred	wrong or missing short module prefix [names_audit.tsv]
