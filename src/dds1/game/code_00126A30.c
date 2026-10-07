@@ -4032,12 +4032,12 @@ typedef struct FldTaskInfo {
     s32 unk0;
     s32 slot;
 } FldTaskInfo;
-extern u32 dds3GetPathState(void *);
+extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
     s32 slotIndex;
     void *world;
-    u32 task;
+    void *task;
     FldTaskInfo *taskInfo;
 
     D_003BAE2C = 1;
@@ -4052,9 +4052,9 @@ void fldResetTaskSlots(void) {
         for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
             taskInfo = *(FldTaskInfo **)(D_003307B0[slotIndex] + 8);
             if (taskInfo->slot >= 0) {
-                task = dds3GetPathState(dds3FindWorldObjectNodeByKey(world, *(u32 *)D_003C92E0[taskInfo->slot], 0xD));
-                if (scrFindNamedProcessNode(task) != 0) {
-                    evtDestroyNamedTask((s32)dds3GetWorldObject(), task);
+                task = dds3GetWorldObjectPayload((EffWorldNode *)dds3FindWorldObjectNodeByKey(world, *(u32 *)D_003C92E0[taskInfo->slot], 0xD));
+                if (scrFindNamedProcessNode((u32)task) != 0) {
+                    evtDestroyNamedTask((s32)dds3GetWorldObject(), (u32)task);
                 }
             }
         }
