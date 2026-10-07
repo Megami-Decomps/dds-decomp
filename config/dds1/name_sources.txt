@@ -2015,8 +2015,9 @@
 0x00184038	effEventWorkClone	inferred	clone of the 0x40 event work (duplicates resource handle, shares owner) [names_reviewed2.tsv]
 0x00184090	effDestroyParticleEvents	inferred	eff effect resources and animation in effect/effPCPMisc.c
 0x00184130	effPcpUpdateMapMotionEvents	inferred	readability/matching review (QP16)
-0x00184538	effBossCellRandomize	inferred	Randomizes one 0x14-byte cell (x/y/z blend, flip, delay); called per cell by func_00184630 [names_M61_EffVu.tsv]
-0x00184890	effBossCreate	inferred	copies the 0x8C param head, creates param work (kind 3), runs func_00184630 [names_M61_EffVu.tsv]
+0x00184538	effBossCellRandomize	inferred	Randomizes one 0x14-byte cell (x/y/z blend, flip, delay); called per cell by effBossInitializeModelGroups [names_M61_EffVu.tsv]
+0x00184630	effBossInitializeModelGroups	inferred	Builds the owner’s model-derived map groups: reads frame/map-position counts, allocates the cell system and retained group/cell block, initializes each draw pool, then seeds cells. Called by effBossCreate and effBossCloneWorkAndParameters; twin=0x0018C288.
+0x00184890	effBossCreate	inferred	copies the 0x8C param head, creates param work (kind 3), runs effBossInitializeModelGroups [names_M61_EffVu.tsv]
 0x001849C0	effPCPBossApplyTwoBlocks	inferred	Fetches effect parameter blocks 0 and 1 and passes both to the boss effect worker; DDS2 twin 0018C618.
 0x00184A08	effBossCloneWorkAndParameters	inferred	Copies boss effect state while duplicating owned parameter work and resetting color. [names_reviewed12.tsv]
 0x00184B30	effBossDestroy	inferred	frees record groups, particle system, param work, then the work [names_M61_EffVu.tsv]
@@ -2034,6 +2035,7 @@
 0x00185B00	effBossCloneWithGroups	inferred	func_00184A08 clone then copies per-group fields from the source [names_M61_EffVu.tsv]
 0x00185B78	effBossReleaseWorkCallback	inferred	confidence=high; matched-C; src/dds1/effect/effPCPBoss.c:501:func_00185B78; Callback adapter releases boss work through destructor; destructor releases owner, group buffers and parameters.; twin=0x0018D7D0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00185B90	effBossUpdateGeometryCallback	inferred	confidence=medium; matched-C; src/dds1/effect/effPCPBoss.c:505:func_00185B90; Callback adapter advances boss grouped geometry; retail callee rebuilds strips/colors and increments frame.; twin=0x0018D7E8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00185BA8	effBossSetPositionCallback	inferred	Forwards the descriptor-supplied boss work and position pointers unchanged to effBossSetPosition; registered in the boss operation descriptor at 0x00354790; twin=0x0018D800.
 0x00185BC0	effBossApplyGroupTint	inferred	confidence=high; matched-C; src/dds1/effect/effPCPBoss.c:534:func_00185BC0; Applies a tint input to the owning boss trail/cell work through its color update entry.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00185E18	effFreePairedResources	inferred	Releases both resource handles at offsets 0x74 and 0x70 before freeing the containing object.
 0x00185E50	effUpdatePairedResources	inferred	per-frame fade (in/out ratio) of the two paired resources: blended colour plus lerped vectors [names_M83_Lerp.tsv]

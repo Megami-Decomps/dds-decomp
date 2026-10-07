@@ -145,7 +145,7 @@ extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
 extern f32 D_004334C4;
-extern void func_0018C288(EffBossWork *work);
+extern void effBossInitializeModelGroups(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
 extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
 extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
@@ -167,7 +167,7 @@ void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
 }
 
 /* Create a draw pool and delayed cells for each model map-position group. */
-void func_0018C288(EffBossWork *work)
+void effBossInitializeModelGroups(EffBossWork *work)
 {
     MdlCtx *model = effParamWorkGetData(work->paramWork);
     EffBossGroup *group;
@@ -241,7 +241,7 @@ EffBossWork *effBossCreate(EffBossParams *src, void *param1) {
     work->frame = 0;
     work->color = 0x80808080;
     work->paramWork = effParamWorkCreate(3, param1);
-    func_0018C288(work);
+    effBossInitializeModelGroups(work);
     return work;
 }
 
@@ -264,7 +264,7 @@ EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src) {
     work->frame = 0;
     work->color = 0x80808080;
     work->paramWork = effParamWorkDuplicate(src->paramWork);
-    func_0018C288(work);
+    effBossInitializeModelGroups(work);
     return work;
 }
 
@@ -583,7 +583,7 @@ void effBossUpdateGeometryCallback(void *work) {
     func_0018C820(work);
 }
 
-void func_0018D800(void *work, void *position) {
+void effBossSetPositionCallback(void *work, void *position) {
     effBossSetPosition(work, position);
 }
 
