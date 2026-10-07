@@ -91,7 +91,7 @@ extern void func_00104290(void);
 extern void *D_003BD6A8;
 extern s32 kwlnTextureCountIncompleteResources(void);
 extern s32 func_003014F0();
-extern s32 sdfCreateFormattedSifCommand();
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern s32 sdfCreateResetPacketList(void);
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003C2620[];
@@ -474,12 +474,12 @@ void kwlnDrawImageOutline(s32 packetList, SdfTex *image) {
 }
 
 /* Append the zero-based viewer page and final page index; an empty list prints -1. */
-void kwlnTextureDrawPageCounter(void *packetList) {
+void kwlnTextureDrawPageCounter(SdfListHead *packetList) {
     char pageText[0x70];
     s32 pageIndex = kwlnTextureGetPageIndex();
     s32 resourceCount = kwlnTextureCountIncompleteResources();
     func_003014F0(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
 }
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
@@ -1065,10 +1065,10 @@ void kwlnDrawBlurErrorCounters(void) {
             packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
             sdfInitPacketList(packetList);
             if (kwlnDistanceBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
+                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
             }
             if (kwlnRippleBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
+                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
             }
             D_00325708.append((SdfListHead *)&D_00325708, packetList);
         }
