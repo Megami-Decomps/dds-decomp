@@ -4,7 +4,10 @@
 
 extern s32 itfFindGridNodeByKey(u32, u32);
 
-extern s32 func_002C1B30(u32);
+typedef struct GridTextWidget GridTextWidget;
+typedef struct GridTextListItem GridTextListItem;
+
+extern GridTextListItem *func_002C1B30(GridTextWidget *);
 
 typedef struct GridPosition {
     s32 x; // 0x00
@@ -17,10 +20,8 @@ typedef struct UiQuadWords {
 } UiQuadWords; // 0x10
 
 
-typedef struct GridTextListItem GridTextListItem;
-
 /* Native 0x40-byte text/list widget. Navigation and child layout share these links. */
-typedef struct GridTextWidget {
+struct GridTextWidget {
     char *text;          /* 0x00 */
     u16 textLength;      /* 0x04 */
     s16 rows;            /* 0x06 */
@@ -38,7 +39,7 @@ typedef struct GridTextWidget {
     u32 reference;       /* 0x30 */
     u8 pad34[8];
     s32 rowOffset;       /* 0x3C */
-} GridTextWidget;
+};
 
 /* Native 0x2C-byte list item. parameter points to a range or numeric kind
  * for value rows; plain text rows leave it NULL. */
@@ -638,12 +639,12 @@ void itfSetGridDimensions(GridTextWidget *widget, s32 columns, s32 rows) {
 }
 
 u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
-    s64 next;
+    GridTextListItem *next;
 
     sdfReleaseChipBlock(widget->text);
     do {
         next = func_002C1B30(widget);
-    } while (next != 0);
+    } while (next != NULL);
     sdfReleaseChipBlock(widget);
     return 1;
 }
@@ -665,18 +666,18 @@ typedef struct GridNumericDescriptor {
 
 /* Destroy linked child widgets recursively before releasing the parent widget. */
 u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
-    u32 childLink;
+    GridTextListItem *childLink;
 
     sdfReleaseChipBlock(widget->text);
-    childLink = (u32)widget->selected;
-    if (childLink != 0) {
+    childLink = widget->selected;
+    if (childLink != NULL) {
         do {
-            u32 childWidget = (u32)((GridTextListItem *)childLink)->child;
-            if (childWidget != 0) {
-                itfDestroyGridTextWidgetTree((GridTextWidget *)childWidget);
+            GridTextWidget *childWidget = childLink->child;
+            if (childWidget != NULL) {
+                itfDestroyGridTextWidgetTree(childWidget);
             }
             childLink = func_002C1B30(widget);
-        } while (childLink != 0);
+        } while (childLink != NULL);
     }
     sdfReleaseChipBlock(widget);
     return 1;
