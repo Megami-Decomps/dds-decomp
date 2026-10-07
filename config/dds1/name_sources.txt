@@ -379,7 +379,8 @@
 0x0010FA98	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
 0x0010FAA8	dds3GetWorldNodeValue	inferred	Returns the kind-selected u32 value at EffWorldNode +0x08, or zero for a null node.
 0x0010FAC0	dds3AllocateWorldObjectEntry	inferred	confidence=high; src/dds1/game/code_0010F8D8.c:func_0010FAC0; Allocates and initializes the object entry, including negative counter sentinels, and reports allocation success. [names_qp9.tsv]
-0x0010FBF8	dds3DispatchWorldEntryCallbackTarget	inferred	confidence=high; src/dds1/game/code_0010F8D8.c:func_0010FBF8; Passes the world entry callback target to its dispatcher only when the target word is nonzero. [names_qp9.tsv]
+0x0010FBC8	dds3DispatchWorldEntryUpdateCallback	inferred	Calls the retained callback target's EffWorldOps.update through dds3InvokeWorldCallbackFirst; return value is ignored and this helper returns 1.
+0x0010FBF8	dds3DispatchWorldEntryDrawCallback	inferred	Calls the retained callback target's EffWorldOps.draw through dds3InvokeWorldCallbackSecond; return value is ignored and this helper returns 1.
 0x0010FD30	dds3DestroyWorld	inferred	Destroys the global world object and clears its global pointer.
 0x0010FD60	dds3SetWorldObject	inferred	Stores a supplied object in the world's info offset 0x8 when a world exists.
 0x0010FD80	dds3GetWorldObject	inferred	Returns the world's info offset 0x8 object or null if no world exists.

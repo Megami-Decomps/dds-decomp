@@ -166,7 +166,7 @@ void func_0010FD58(WorldObject *object)
     sdfReleaseChipBlock(entry);
 }
 
-u32 func_0010FDF0(WorldObject *obj) {
+u32 dds3DispatchWorldEntryUpdateCallback(WorldObject *obj) {
     EffWorldNode *callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;
@@ -176,7 +176,7 @@ u32 func_0010FDF0(WorldObject *obj) {
     return 1;
 }
 
-u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
+u32 dds3DispatchWorldEntryDrawCallback(WorldObject *obj) {
     EffWorldNode *callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;

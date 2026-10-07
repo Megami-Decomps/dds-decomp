@@ -256,6 +256,8 @@
 0x0010FCA8	dds3AdvanceWorldCounter	inferred	Increments the world-side counter while restricting it to the low sixteen bits.
 0x0010FCC0	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
 0x0010FCD0	dds3GetWorldNodeValue	inferred	Returns the kind-selected u32 value at EffWorldNode +0x08, or zero for a null node.
+0x0010FDF0	dds3DispatchWorldEntryUpdateCallback	inferred	Paired body calls the retained callback target's EffWorldOps.update through dds3InvokeWorldCallbackFirst; return value is ignored and this helper returns 1.
+0x0010FE20	dds3DispatchWorldEntryDrawCallback	inferred	Paired body calls the retained callback target's EffWorldOps.draw through dds3InvokeWorldCallbackSecond; return value is ignored and this helper returns 1.
 0x0010FF58	dds3DestroyWorld	inferred	Releases the global world object and clears its pointer, matching DDS1 dds3DestroyWorld.
 0x0010FF88	dds3SetWorldObject	inferred	Stores the primary object in world info; identical role to DDS1 dds3SetWorldObject.
 0x0010FFA8	dds3GetWorldObject	inferred	Returns the primary object in world info; identical role to DDS1 dds3GetWorldObject.
