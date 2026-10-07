@@ -48,10 +48,6 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
 extern void mnuFreeOptionalBlock(u32);
 extern u32 func_0035A828(s32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
-extern u8 *mnuGetResourceRecordByIndex(s32 index);
-extern MenuWorkEntry *mnuFindUnusedWorkEntry(void);
-extern void func_00322E18(u32 node, u32 context, s32 mode, s32 x, s32 y,
-                          f32 progress);
 extern u32 mnuGetActiveEffectWorkEntry(void);
 
 typedef struct ShortRecord {
@@ -519,9 +515,9 @@ f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     MenuRegistry *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
     if ((registry->table->flags & 1) != 0) {
         u8 *progressState = mnuGetResourceProgressStepState();
-        u8 *resourceRecord = mnuGetResourceRecordByIndex(entry->unk08);
+        MenuResourceRecord *resourceRecord = mnuGetResourceRecordByIndex(entry->unk08);
         return entry->y0 +
-            (f32)((s32)*(u16 *)(progressState + 2) - *(s32 *)(resourceRecord + 0xc));
+            (f32)((s32)*(u16 *)(progressState + 2) - resourceRecord->progress);
     }
     return entry->y0;
 }
@@ -766,11 +762,11 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
 
 
-u32 mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
-    u32 entry = (u32)mnuFindUnusedWorkEntry();
-    if (entry != 0) {
+MenuWorkEntry *mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
+    MenuWorkEntry *entry = mnuFindUnusedWorkEntry();
+    if (entry != NULL) {
         func_00322E18(entry, context, 0, (s32)x, (s32)y, progress);
-        ((MenuWorkEntry *)entry)->flags |= 0x10;
+        entry->flags |= 0x10;
     }
     return entry;
 }
