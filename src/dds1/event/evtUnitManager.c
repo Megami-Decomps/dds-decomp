@@ -765,13 +765,13 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
     }
 }
 
-s32 evtGetWorldUnitNestedValue(s32 id) {
+EvtUnit *evtGetWorldUnitNestedValue(s32 id) {
     u8 *obj = (u8 *)dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, 5);
 
     if (obj != NULL) {
-        return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+        return (EvtUnit *)*(s32 *)(*(u8 **)(obj + 0x18) + 8);
     }
-    return (s32)obj;
+    return NULL;
 }
 
 s32 evtUnitGetNestedValue(u8 *obj) {
