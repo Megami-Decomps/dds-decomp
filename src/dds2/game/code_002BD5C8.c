@@ -272,7 +272,47 @@ void func_002BE240(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE438);
+extern const s32 D_0042B028[8];
+extern const s32 D_00437C50[];
+
+/* Party-page slot, including the resource handles initialized by
+ * mnuLoadPanelSectionResources and both queued commands. */
+typedef struct MenuPageSpriteSlot {
+    s32 kind;
+    u32 flags;
+    u8 pad08[8];
+    struct EffectSlotSet *icon[3];
+    MenuPageBar hp;
+    MenuPageBar mp;
+    struct EffectSlotSet *frame[8];
+    struct MenuSprites *windowSprites;
+    u32 iconBundle;
+    u32 sectionResources[3]; /* 0xE4 */
+    MenuQueuedCommand commands[2]; /* 0xF0 */
+} MenuPageSpriteSlot;
+
+typedef char MenuPageSpriteSlot_size_check[
+    sizeof(MenuPageSpriteSlot) == sizeof(MenuPageSlot) ? 1 : -1];
+typedef char MenuPageSpriteSlot_resources_check[
+    (u32)&((MenuPageSpriteSlot *)0)->sectionResources == 0xE4 ? 1 : -1];
+
+void func_002BE438(s32 x, s32 y, s32 z, MenuPageSpriteSlot *slot,
+                   s32 coordinateSet, s32 skipSprites, s32 spriteArg) {
+    s32 firstPosition[2];
+    s32 alternatePositions[8];
+
+    memcpy(firstPosition, D_00437C50, sizeof(firstPosition));
+    memcpy(alternatePositions, D_0042B028, sizeof(alternatePositions));
+    if (skipSprites == 0) {
+        func_00306CD0(x + firstPosition[0], y + firstPosition[1], z,
+                      0x100, 1, slot->sectionResources[0], 0, spriteArg);
+        func_00306CD0(x + alternatePositions[0], y + alternatePositions[1], z,
+                      0x100, 1, slot->sectionResources[1], 0, spriteArg);
+        func_00306CD0(x + alternatePositions[coordinateSet * 2 + 2],
+                      y + alternatePositions[coordinateSet * 2 + 3], z,
+                      0x100, 1, slot->sectionResources[2], 0, spriteArg);
+    }
+}
 
 void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount) {
     s32 i;
