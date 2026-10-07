@@ -37,7 +37,7 @@ extern const char *D_004367CC;
 
 extern s32 dds3FindEntryIndex();
 
-extern s32 btlGetIndexedPartyEntryRecord(s32);
+extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
 extern KwlnTask *func_00101820(u32 priority);
 
@@ -398,28 +398,10 @@ extern UiOwnerRef *D_003B4778[];
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
 extern void func_001A7798(UiSprite *sprite);
 
-/* Party/enemy entry; the HP/MP/status prefix is shared with DDS1. */
-typedef struct BtlEntry {
-    u16 flags;
-    u8 pad2[4];
-    u16 hp;
-    u16 maxHp; /* 0x08: cached skill-adjusted maximum */
-    u16 mp;
-    u16 maxMp; /* 0x0C: cached skill-adjusted maximum */
-    u16 status;
-    u8 pad10[4];
-    u16 unk14;
-    u8 unk16[5];
-    u8 pad1B[0x191];
-    u16 unk1AC;
-    u16 unk1AE;
-    u16 unk1B0;
-    u8 pad1B2[0x12];
-} BtlEntry;
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
-extern s32 datComputeSkillBoostedMaxHp();
-extern s32 datComputeSkillBoostedMaxMp();
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 /* Enable context rendering for every font object in the linked chain. */
 void frFontEnableNodeContextModes(s32 fontObject) {
@@ -1705,13 +1687,13 @@ s32 btlGetRuntime(void) {
 }
 
 /* Read current HP from a unit-entry address. */
-s32 btlReadCurrentUnitHp(void *entryAddress) {
-    return ((BtlEntry *)entryAddress)->hp;
+s32 btlReadCurrentUnitHp(DatPartyRecord *entry) {
+    return entry->hp;
 }
 
 /* Read current MP from a unit-entry address. */
-u16 btlReadCurrentUnitMp(s32 entryAddress) {
-    return ((BtlEntry *)entryAddress)->mp;
+u16 btlReadCurrentUnitMp(DatPartyRecord *entry) {
+    return entry->mp;
 }
 
 void btlComputeProfileMaxHp(void) {
@@ -1722,12 +1704,12 @@ void btlComputeProfileMaxMp(void) {
     ptyComputeMaxMp();
 }
 
-s32 btlComputeSkillAdjustedMaxHp(void *stats) {
+s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *stats) {
     return datComputeSkillBoostedMaxHp(stats);
 }
 
-s32 btlComputeSkillAdjustedMaxMp() {
-    return datComputeSkillBoostedMaxMp();
+s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
+    return datComputeSkillBoostedMaxMp(stats);
 }
 
 void btlAdjustUnitHp(void) {
@@ -1740,8 +1722,8 @@ void btlAdjustUnitMp(void) {
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 entryAddress) {
-    BtlEntry *entry = (BtlEntry *)entryAddress;
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress) {
+    DatPartyRecord *entry = entryAddress;
     u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
     entry->maxHp = maxHp;
@@ -1753,19 +1735,19 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 entryAddress) {
 
 /* Cache the skill-adjusted maximum and return current MP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 entryAddress) {
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
     u16 currentMp = btlReadCurrentUnitMp(entryAddress);
     u32 maxMp = btlComputeSkillAdjustedMaxMp(entryAddress);
-    ((BtlEntry *)entryAddress)->maxMp = maxMp;
+    entryAddress->maxMp = maxMp;
     if (maxMp < currentMp) {
-        ((BtlEntry *)entryAddress)->mp = maxMp;
+        entryAddress->mp = maxMp;
     }
-    return ((BtlEntry *)entryAddress)->mp;
+    return entryAddress->mp;
 }
 
 /* Return the low 15 status bits; do not expose the stored high bit. */
 u16 btlReadUnitStatusMask(s32 entryAddress) {
-    return ((BtlEntry *)entryAddress)->status & BTL_ENTRY_STATUS_MASK;
+    return ((DatPartyRecord *)entryAddress)->status & BTL_ENTRY_STATUS_MASK;
 }
 
 void func_001AA850(void) {
@@ -1817,14 +1799,14 @@ void func_001AA898(DatPartyRecord *entry, s32 index) {
     entry->mp = datEnemyRecords[index].mp;
 }
 
-s32 btlGetActorEntryData(UiObject *actor) {
-    s32 entry;
+DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
+    DatPartyRecord *entry;
 
     if ((actor->flags & 0x400) == 0) {
-        entry = btlGetIndexedPartyEntryRecord(actor->kind);
+        entry = btlGetIndexedPartyEntryRecord(actor->unk2E4);
         return entry;
     }
-    return (s32)&actor->entryMask;
+    return &actor->partyRecord;
 }
 
 s32 btlGetCurrentPartyEntryRecord(void) {
@@ -1834,13 +1816,13 @@ s32 btlGetCurrentPartyEntryRecord(void) {
     return (s32)&datGameState->party[temp_v0];
 }
 
-s32 btlGetIndexedPartyEntryRecord(s32 index) {
-    return (s32)&datGameState->party[index];
+DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
+    return &datGameState->party[index];
 }
 
-void btlSyncPlayerWork(UiObject *actor) {
-    BtlEntry *src = (BtlEntry *)&actor->entryMask;
-    BtlEntry *dst = (BtlEntry *)btlGetIndexedPartyEntryRecord(actor->kind);
+void btlSyncPlayerWork(BtlUnit *actor) {
+    DatPartyRecord *src = &actor->partyRecord;
+    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->unk2E4);
     s32 maxHp;
     s32 maxMp;
     if (src->flags & 0x1000) {
@@ -1853,16 +1835,16 @@ void btlSyncPlayerWork(UiObject *actor) {
     } else {
         dst->flags &= ~0x4000;
     }
-    dst->unk14 = src->unk14;
+    dst->level = src->level;
     maxHp = datComputeSkillBoostedMaxHp(dst);
     maxMp = datComputeSkillBoostedMaxMp(dst);
     dst->hp = src->hp < maxHp ? src->hp : maxHp;
     dst->mp = src->mp < maxMp ? src->mp : maxMp;
-    memcpy(dst->unk16, src->unk16, 5);
+    memcpy(dst->baseStats, src->baseStats, 5);
     dst->status = src->status & 0x7FFF;
     dst->unk1AC = src->unk1AC;
     dst->unk1AE = src->unk1AE;
-    dst->unk1B0 = src->unk1B0;
+    dst->actionSlot = (u16)src->actionSlot;
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
 
@@ -1896,8 +1878,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB160);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB510);
 
-s32 btlGetEntryFlagsUnlessDisabled(s32 entry) {
-    DatPartyRecord *record = (DatPartyRecord *)entry;
+s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     if ((record->flags & 4) != 0) {
         return 0;
     }
@@ -2929,7 +2910,7 @@ s32 btlHasEnabledSpecialAbilityForSlot(s32 unit, u32 slot) {
 
 f32 func_001AEC18(s32 unit) {
     s32 stats = unit + 0x120;
-    void *entry = (void *)stats;
+    DatPartyRecord *entry = &((BtlUnit *)unit)->partyRecord;
     s32 maximum;
     s32 percentage;
 
@@ -3480,7 +3461,7 @@ s32 btlCalculateAbilityRecoveryAmount(u8 *unit) {
 extern s32 btlHasEnemyRecordDefeatExemptionFlag();
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *unit, s32 delta) {
-    if (btlGetEntryFlagsUnlessDisabled((s32)unit + 0x120) & 4) {
+    if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)unit)->partyRecord) & 4) {
         return 0;
     }
     if (btlHasEnemyRecordDefeatExemptionFlag(unit) != 0) {
@@ -3664,7 +3645,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
     if ((((UiObject *)actor)->statusFlags & 0x40) != 0) {
         return 0;
     }
-    return (btlGetEntryFlagsUnlessDisabled(actor + 0x120) & 0x40) < 1;
+    return (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)actor)->partyRecord) & 0x40) < 1;
 }
 
 extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
@@ -4196,7 +4177,7 @@ s32 func_001B4918(UiObject *unit, UiObject *target) {
             if ((unit->statusFlags & 0x40) != 0) {
                 continue;
             }
-            if ((btlGetEntryFlagsUnlessDisabled((s32)target + 0x120) & 0x40) != 0) {
+            if ((btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)target)->partyRecord) & 0x40) != 0) {
                 continue;
             }
         }

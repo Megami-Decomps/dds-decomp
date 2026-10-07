@@ -493,7 +493,9 @@ extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(void *, s32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
-extern s32 btlGetEntryFlagsUnlessDisabled(const void *);
+extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *);
+extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *);
 extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
 extern void evtUnitSetStoredParameter(void *, s32);
 extern void evtSetTransitionMotionScale(void *, f32);
@@ -757,7 +759,7 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
 s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     s32 code;
 
-    btlGetEntryFlagsUnlessDisabled(&actor->partyRecord.flags);
+    btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
     if (arg6 >= 0) {
         switch (datCommandRecords[arg6].unk30) {
         case 1:
@@ -2064,7 +2066,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     if ((unit->flags & 2) == 0) {
         return;
     }
-    entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord.flags);
+    entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
     work = (BtlState *)btlGetRuntime();
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
@@ -2514,24 +2516,24 @@ typedef struct {
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004179E0);
 
-s32 btlClassifySpecialEntryObject(BattleEntryHeader *entry) {
+s32 btlClassifySpecialEntryObject(BtlUnit *entry) {
     if (!(entry->flags & 0x400)) {
         return 0;
     }
-    switch (entry->objectId) {
+    switch (entry->partyRecord.unitId) {
     case 0x109: case 0x10A: case 0x110: case 0x111: case 0x112:
     case 0x119: case 0x11D: case 0x11E: case 0x11F: case 0x120:
     case 0x121: case 0x127: case 0x12E: case 0x12F: case 0x131:
     case 0x132: case 0x133: case 0x134: case 0x135: case 0x136:
         return 2;
     default:
-        return (btlGetEntryFlagsUnlessDisabled((u8 *)entry + 0x120) >> 14) & 1;
+        return (btlGetEntryFlagsUnlessDisabled(&entry->partyRecord) >> 14) & 1;
     }
 }
 
-void btlCopyUnitStats(s32 unit, s32 source) {
-    DatPartyRecord *stats = &((BtlUnit *)unit)->partyRecord;
-    *stats = *(DatPartyRecord *)source;
+void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
+    DatPartyRecord *stats = &unit->partyRecord;
+    *stats = *source;
     btlRefreshUnitMaximumHpAndClampCurrentHp(stats);
     btlRefreshUnitMaximumMpAndClampCurrentMp(stats);
 }

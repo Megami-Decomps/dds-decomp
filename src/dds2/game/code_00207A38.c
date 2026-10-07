@@ -277,9 +277,9 @@ typedef union BtlVec4 {
     u128 q;
 } BtlVec4;
 
-extern s32 btlReadCurrentUnitHp(void *);
+extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
-extern s32 btlComputeSkillAdjustedMaxHp(void *);
+extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern s32 D_00435E7C;
 
@@ -2123,7 +2123,7 @@ u32 btlScriptReturnUnitHpRatioPercent(void) {
     }
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & sideMask) && !(unit->flags & 0x20) && unit->owner == lookupId) {
-            void *unitStats = &unit->partyRecord.flags;
+            DatPartyRecord *unitStats = &unit->partyRecord;
             s32 currentHp = btlReadCurrentUnitHp(unitStats);
             s32 maximumHp = btlComputeSkillAdjustedMaxHp(unitStats);
             if (!((u32)(maximumHp * hpPercentThreshold) < (u32)(currentHp * BTL_HP_PERCENT_SCALE))) {
