@@ -461,7 +461,31 @@ void mnuReleaseSelectedProgressPanel(MenuSlotState *host) {
 }
 
 extern void func_00267238();
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00267238);
+extern u32 mnuBlendListNodeColorByFlags(u32, MenuListNode *);
+void func_00267238(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node, s32 priority) {
+    s32 width = list->scale;
+    MenuSlotState *host = (MenuSlotState *)list->context;
+    s32 isCurrent = node == list->cursor;
+    u32 chainFlags = 0;
+    u32 color;
+    FrFontGlyph *glyph;
+
+    if (node->flags48 & 1) {
+        width /= 2;
+    }
+    if (isCurrent) {
+        func_00306CD0(x, y, 0, width, 0, (EffectSlotSet *)host->resourceBank[0], 0x18, priority);
+        chainFlags = 4;
+    }
+    color = (node->flags48 & 1) ? 0xA09DC320 : 0xA09DC380;
+    color = mnuBlendListNodeColorByFlags(color, node);
+    color = uiBlendColors(color, color & ~0xFF, width);
+    glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
+    frFontSetChainFlag(glyph, chainFlags);
+    func_0019D550(glyph, 1, priority);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
+
 
 typedef struct MenuSlotKind {
     s16 kind;
