@@ -42,7 +42,7 @@ extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern void *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
