@@ -228,7 +228,7 @@ void dds3SetWorldObjectDataValue(EffWorldNode *object, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001102C8", dds3AppendWorldObjectNode);
 
-extern void effObjNodeDestroy(void *node);
+extern void effObjNodeDestroy(EffWorldNode *node);
 
 /* Unlink a world list node from its kind's list in the owner's data and destroy it. */
 void dds3RemoveWorldObjectNode(EffWorldNode *node) {
