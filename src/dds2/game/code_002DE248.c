@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3_path.h"
+#include "eff_transform.h"
 #include "sdf_model.h"
 #include "eff_blur.h"
 #include "eff_curve.h"
@@ -7128,7 +7129,7 @@ typedef struct EffCopiedPayload {
     s32 size;            // 0x04
     u32 state;           // 0x08
     u32 unk0C;
-    u32 effects[5];      // 0x10
+    EffWorldNode *effects[5]; // 0x10
     Dds3PathCurveWork *targets[5]; // 0x24
     u8 *allocation;      // 0x38
     u8 pad3C[4];
@@ -7196,10 +7197,10 @@ s32 *effCloneEffectPayloadFromOwner(s32 owner) {
 
 extern void dds3FreePathObject(Dds3PathCurveWork *path);
 
-extern void dds3RemoveWorldObjectNode();
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
 void effReleaseTargetSlots(u32 *obj) {
-    u32 *tails = ((EffCopiedPayload *)obj)->effects;
+    EffWorldNode **tails = ((EffCopiedPayload *)obj)->effects;
     Dds3PathCurveWork **heads = ((EffCopiedPayload *)obj)->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
