@@ -39,7 +39,7 @@ enum {
 };
 
 extern MenuIconPlacement D_003D03F0[];
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void func_00294680(MenuTerminalContext *, s32, s32);
 
 
@@ -159,7 +159,60 @@ void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) 
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296298);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00296430);
+struct FrFontGlyph;
+
+extern s32 func_0035C860(char *, const char *, ...);
+extern u32 func_0019F798(s32, s32, s32, u32, char *, s32);
+extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
+extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+extern char D_00437978[]; /* "%d" */
+
+/* Fade the selected row's icons and quantity while preserving its row snapshot. */
+void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
+                   u32 alpha, s32 option) {
+    char text[16];
+    struct MenuList *list = scene->window->list;
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    f32 opacity;
+    s32 row;
+    s32 firstIndex;
+    s32 textOffset;
+    u32 color;
+    struct FrFontGlyph *glyph;
+
+    if (list->count != 0) {
+        firstIndex = list->head->index;
+        opacity = (f32)alpha * 0.00390625f;
+        row = list->cursor->index - firstIndex;
+        func_00306CD0((D_003D03F0[19][MENU_ICON_X] + 8) << 4,
+                      (D_003D03F0[19][MENU_ICON_Y] + row * 22) << 3,
+                      0, (u32)((1.0f - opacity) * 256.0f), 0, texture,
+                      D_003D03F0[19][MENU_ICON_FRAME], option);
+        func_00306CD0(0x600, (152 + row * 22) << 3, 0,
+                      (u32)((1.0f - opacity) * 128.0f + 128.0f),
+                      0, texture, 0x20, option);
+        func_00306CD0(0xD10, (152 + row * 22) << 3, 0,
+                      (u32)((1.0f - opacity) * 128.0f + 128.0f),
+                      0, texture, 0x21, option);
+        func_00306CD0((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
+                      (D_003D03F0[29][MENU_ICON_Y] + row * 22) << 3,
+                      0, (u32)(opacity * 256.0f), 0, texture,
+                      D_003D03F0[29][MENU_ICON_FRAME], option);
+        color = (s32)(opacity * 128.0f) | 0xA09DC300;
+        textOffset = 0x70;
+        if (scene->multiplier / 10 != 0) {
+            textOffset = 0;
+        }
+        func_0035C860(text, D_00437978, scene->multiplier);
+        glyph = (struct FrFontGlyph *)func_0019F798(
+            0xD30 + textOffset, (135 + row * 22) << 3, depth, color, text, 0);
+        frFontSetChainFlag(glyph, 4);
+        func_0019D550(glyph, 1, option);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+}
+
 
 void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
     s32 texture = (s32)D_00438FC8->effectSlots[0];
@@ -195,11 +248,6 @@ void func_002968B8(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s
     }
 }
 
-extern s32 func_0035C860(char *, const char *, ...);
-extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
-extern void frFontSetChainFlag(s32, u8);
-extern void func_0019D550(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
 extern char D_00437980[];
 
 void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
@@ -207,7 +255,7 @@ void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
     s32 texture = (s32)D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
 
     func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
@@ -216,7 +264,7 @@ void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
     inner = object->list;
     if (inner->count != 0) {
         func_0035C860(text, D_00437980, 0);
-        glyph = func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
+        glyph = (struct FrFontGlyph *)func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
         func_0019D550(glyph, 1, option);
         frFontQueueGlyphInSelectedSlot(glyph);
@@ -238,7 +286,7 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
 
     func_00306CD0(
         x + D_003D03F0[25][MENU_ICON_X] * 16,
@@ -248,7 +296,7 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     func_0035C860(text, D_00437980, 0);
-    glyph = func_0019F798(x + 0x1910, y + 0x290, z, value, text, 0);
+    glyph = (struct FrFontGlyph *)func_0019F798(x + 0x1910, y + 0x290, z, value, text, 0);
     frFontSetChainFlag(glyph, 4);
     func_0019D550(glyph, 1, option);
     frFontQueueGlyphInSelectedSlot(glyph);
@@ -259,7 +307,7 @@ void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
     s32 texture = (s32)D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
 
     func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
@@ -268,7 +316,7 @@ void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
     inner = object->list;
     if (inner->count != 0) {
         func_0035C860(text, D_00437980, inner->cursor->camp.value * panel->multiplier);
-        glyph = func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
+        glyph = (struct FrFontGlyph *)func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
         func_0019D550(glyph, 1, option);
         frFontQueueGlyphInSelectedSlot(glyph);
@@ -298,7 +346,7 @@ void func_00296D90(MenuTerminalContext *state, s32 style) {
     }
 
     {
-        s32 glyph = func_0019F798(0x1910, 0x1D0, 0, style, text, 0);
+        struct FrFontGlyph *glyph = (struct FrFontGlyph *)func_0019F798(0x1910, 0x1D0, 0, style, text, 0);
 
         func_0019D550(glyph, 1, 0x53);
         frFontQueueGlyphInSelectedSlot(glyph);
