@@ -562,7 +562,7 @@ typedef struct EffPCPBeamNode {
     f32 *points;
     u32 *colors;
     SdfAsset *assetHandle;
-    u32 allocationHandle;
+    SdfMemBlock *allocationHandle;
 } EffPCPBeamNode;
 
 typedef struct EffPCPBeamParams {
@@ -4435,7 +4435,7 @@ extern void func_003332D0(struct SdfTextParam *asset, f32 scale);
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     u32 count = segments * 4 + 4;
     EffPCPBeamNode *node = sdfAllocSizeClassBlock(sizeof(EffPCPBeamNode));
-    void *allocation = sdfAllocGeneralBlock(count * 20);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 20);
     f32 *points = sdfResourceRetainAddress(allocation);
 
     memset(points, 0, count * 20);
@@ -4444,7 +4444,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     node->colors = (u32 *)(points + count * 4);
     node->vertexCount = count;
     node->color = 0x80808080;
-    node->allocationHandle = (u32)allocation;
+    node->allocationHandle = allocation;
     node->scale = 1.0f;
     node->assetHandle = sdfCreateAssetWithDrawEntries();
     func_003332D0((struct SdfTextParam *)node->assetHandle, 1.0f);
