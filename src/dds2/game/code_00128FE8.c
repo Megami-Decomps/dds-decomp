@@ -221,6 +221,7 @@ extern u32 fldCachedRoomResourceSize, D_00436004, D_00436008, D_0043600C;
 
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
+extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -265,7 +266,7 @@ extern void *func_0033B050(SdfPrimitiveRequest *);
 
 extern u32 D_0040B2A0[];
 
-extern u32 sdfAllocatePacketList(s32);
+extern s32 sdfAllocatePacketList(s32 (*allocatorArgument)(s32));
 
 extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
@@ -1913,7 +1914,70 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D3E0);
+void func_0012D3E0(void) {
+    SdfListHead *packetList;
+    SdfDmaNode *dmaPacket;
+    s32 drawBufferIndex;
+    u64 *firstPacket;
+    u64 *secondPacket;
+    s32 columnPacket;
+    FldSpriteVertex *vertex;
+    SdfPoolNode *surface;
+
+    packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
+    sdfAppendDmaPrimary((s32)packetList,
+                        (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
+                        dmaPacket);
+
+    /* Set texture alpha and flush the texture cache. */
+    firstPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    firstPacket[0] = 3;
+    firstPacket[1] = 0x5000000310000000ULL;
+    firstPacket[2] = 0x1000000000008002ULL;
+    firstPacket[3] = 14;
+    firstPacket[4] = 0x0000008000000080ULL;
+    firstPacket[5] = 0x3B;
+    firstPacket[6] = 0;
+    firstPacket[7] = 0x3F;
+    sdfAppendPacket(packetList, (u32)firstPacket);
+
+    /* Set the primary-context alpha test and blending values. */
+    secondPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    secondPacket[0] = 3;
+    secondPacket[1] = 0x5000000310000000ULL;
+    secondPacket[2] = 0x1000000000008002ULL;
+    secondPacket[3] = 14;
+    secondPacket[4] = 0x0000000000031001ULL;
+    secondPacket[5] = 0x47;
+    secondPacket[6] = 0x44;
+    secondPacket[7] = 0x42;
+    sdfAppendPacket(packetList, (u32)secondPacket);
+
+    columnPacket = (s32)sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(columnPacket);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = 0x30;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF7;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0x3FFF;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xE00;
+    vertex->corner[1].x = 0x9009;
+    vertex->corner[1].y = 0x8705;
+    vertex->corner[1].mask = 0x3FFF;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(packetList, (u32)columnPacket);
+
+    surface = &kwlnDrawSurfaces[fldDisplayRow];
+    surface->append((SdfListHead *)surface, packetList);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012D5C0);
 
