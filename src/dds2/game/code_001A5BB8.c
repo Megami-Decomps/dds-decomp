@@ -2296,7 +2296,84 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD310);
+extern s32 btlRollAiBucket(void);
+extern u32 effMiscRandMod(void *state, u32 modulus);
+
+u32 func_001AD310(BtlUnit *enemyUnit, s32 mode) {
+    u16 count = 0;
+    u16 bonus = 0;
+    u32 selected = 0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    DatEnemyRecord *enemy = &datEnemyRecords[enemyUnit->partyRecord.unitId];
+    BtlUnit *unit;
+    u16 total;
+    u16 index;
+    u16 roll;
+
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        u32 flags = unit->flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                if (!(flags & 0xE0)) {
+                    if (btlCheckSpecialAbility(&unit->partyRecord, 0x27B)) {
+                        count++;
+                    }
+                }
+            }
+        }
+    }
+    if (count != 0) {
+        switch (count) {
+        case 1:
+            bonus = datAbilityParameters[0x27B - BTL_ABILITY_PARAMETER_FIRST_SKILL].parameterA;
+            break;
+        case 2:
+            bonus = datAbilityParameters[0x27B - BTL_ABILITY_PARAMETER_FIRST_SKILL].parameterA;
+            bonus += (u16)datAbilityParameters[0x27B - BTL_ABILITY_PARAMETER_FIRST_SKILL].parameterB;
+            break;
+        default:
+            bonus = datAbilityParameters[0x27B - BTL_ABILITY_PARAMETER_FIRST_SKILL].parameterA;
+            bonus += datAbilityParameters[0x27B - BTL_ABILITY_PARAMETER_FIRST_SKILL].parameterB * 2;
+            break;
+        }
+    }
+    if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
+        mdlFlagTest(enemy->overrideFlag)) {
+        if ((u8)btlRollAiBucket() < enemy->overrideChance) {
+            selected = enemy->overrideAction;
+        }
+    }
+    if (selected == 0) {
+        total = 0;
+        for (index = 0; index < 2; index++) {
+            if (enemy->unk3E[index] != 0) {
+                if (btlIsEventThresholdSatisfiedForEntry(enemy->unk3E[index])) {
+                    btlBossDebugPrintf("btl:event item check[%X]\n", enemy->unk3E[index]);
+                } else {
+                    total += enemy->actionChances[index];
+                }
+            }
+        }
+        if (total != 0 && btlRollAiBucket() < total + bonus) {
+            roll = effMiscRandMod(0, total);
+            total = 0;
+            for (index = 0; index < 2; index++) {
+                if (enemy->unk3E[index] != 0) {
+                    if (btlIsEventThresholdSatisfiedForEntry(enemy->unk3E[index])) {
+                        btlBossDebugPrintf("btl:event item check[%X]\n", enemy->unk3E[index]);
+                    } else {
+                        total += enemy->actionChances[index];
+                        if (roll < total) {
+                            selected = enemy->unk3E[index];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return selected;
+}
 
 void func_001AD5B0(u16 item) {
     BattleController *controller = (BattleController *)btlGetRuntime();
