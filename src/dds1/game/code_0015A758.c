@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_draw.h"
 #include "eff.h"
 
 #include "pcp_vu0.h"
@@ -13,22 +14,33 @@ extern ParListNode *parRecordListHead;
 
 /* Particle object (layout mirrors effect/parManager.c ParObj, which owns
  * the type; only the fields this TU touches are named here). */
+struct ParTable;
+struct EffTrackPolyList;
+struct ParSystem;
+
 typedef struct ParObj {
     u8 pad00[0x10];    /* 0x00 */
     f32 scaleX;         /* 0x10: billboard child X scale */
     f32 scaleY;         /* 0x14: billboard child Y scale */
-    u8 pad18[0x10];    /* 0x18 */
+    u8 pad18[8];
+    s32 particleCount; /* 0x20 */
+    s32 lifetimeFrames; /* 0x24 */
     s32 unk28;          /* 0x28 */
     s16 billboardMode;  /* 0x2C */
-    u8 pad2E[0x5E];    /* 0x2E */
+    u8 pad2E[2];
+    ParKindState kindState; /* 0x30 */
+    u8 pad48[0x44];    /* 0x48: includes the existing color ramp */
     f32 scale8C;       /* 0x8C scaled by effParScaleComponent */
-    u8 pad90[0x14];    /* 0x90 */
+    f32 spinDegrees; /* 0x90 */
+    u8 pad94[8];
+    u8 alternateSpin; /* 0x9C */
+    u8 pad9D[7];
     u32 unkA4;         /* 0xA4 */
     u8 padA8[0x48];    /* 0xA8 */
     u32 valueF0;       /* 0xF0 settable param */
     s32 billId;         /* 0xF4 */
-    u8 padF8[4];       /* 0xF8 */
-    void *unkFC;       /* 0xFC */
+    EffectBufferTail *buffer;       /* 0xF8 */
+    u32 pendingRestartSteps;       /* 0xFC */
     u8 pad100[0x40];   /* 0x100 */
     u16 dispatchIndex; /* 0x140: particle dispatch table index */
     u16 restartFlag;   /* 0x142 set to 1 after mode changes */
@@ -39,12 +51,6 @@ typedef struct ParObj {
     void *child;       /* 0x174 */
 } ParObj;
 
-/* Particle dispatch entry (0xC bytes, mirrors effect/parManager.c). */
-typedef struct ParDispatch {
-    void *(*func)(); /* 0x0 */
-    u32 unk4;        /* 0x4 */
-    u32 unk8;        /* 0x8 */
-} ParDispatch; /* 0xC */
 
 /* Kind resource owner: release flag and handles at +0x10/+0x40. */
 typedef struct ParReleaseRecord {
@@ -284,7 +290,83 @@ void parObjDispatch(ParObj *object) {
     D_0034E258[object->dispatchIndex].func(object);
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A9A0);
+extern void billSetEntryFrameMode0(BillObj *, u32);
+extern void billInvokeCallback(BillObj *);
+
+/* Apply queued updates, then draw live records and submit the kind's resource. */
+void func_0015A9A0(ParObj *effect) {
+    EffectBufferRecord *record;
+    BillObj *billboard;
+    u32 step;
+    s32 particleCount;
+    s32 lifetime;
+    f32 scaleStep;
+    f32 spinStep;
+    f32 spinDirection;
+    f32 alternate;
+
+    if (effect->restartFlag == 0) {
+        return;
+    }
+    if (effect->pendingRestartSteps == 0) {
+        parKindConstructorEntries[effect->dispatchIndex].update(effect);
+    } else {
+        for (step = 0; step < effect->pendingRestartSteps; step++) {
+            parKindConstructorEntries[effect->dispatchIndex].update(effect);
+        }
+        particleCount = effect->particleCount;
+        scaleStep = (effect->scale8C - effect->scaleX) / effect->lifetimeFrames;
+        spinStep = effect->spinDegrees * (3.14159265f / 180.0f);
+        alternate = effect->alternateSpin ? -1.0f : 1.0f;
+        for (step = 0; step < effect->pendingRestartSteps; step++) {
+            s32 recordIndex;
+
+            record = effect->buffer->records;
+            spinDirection = 1.0f;
+            for (recordIndex = 0; recordIndex < particleCount; recordIndex++, record++) {
+                if (record->unk20 >= 0) {
+                    record->scale += scaleStep;
+                    record->spin += spinStep * spinDirection;
+                }
+                spinDirection *= alternate;
+            }
+        }
+        effect->pendingRestartSteps = 0;
+    }
+    /* Capture the draw owners before deriving this frame's scale/spin steps. */
+    record = effect->buffer->records;
+    billboard = (BillObj *)effect->billId;
+    particleCount = effect->particleCount;
+    scaleStep = (effect->scale8C - effect->scaleX) / effect->lifetimeFrames;
+    lifetime = effect->lifetimeFrames;
+    spinStep = effect->spinDegrees * (3.14159265f / 180.0f);
+    alternate = effect->alternateSpin ? -1.0f : 1.0f;
+    spinDirection = 1.0f;
+    if (particleCount > 0) {
+        step = particleCount;
+        do {
+            s32 age = record->unk20;
+
+            if (age < lifetime && age >= 0) {
+                PCP_COPY_VECTOR(billboard, record->position);
+                billboard->lengthScale = record->spin;
+                billboard->childParam = record->unk24;
+                billboard->childScaleX = billboard->childScaleY = record->scale;
+                record->scale += scaleStep;
+                if (record->scale < 0) {
+                    record->scale = 0;
+                }
+                record->spin += spinStep * spinDirection;
+                billSetEntryFrameMode0(billboard, age);
+                billInvokeCallback(billboard);
+            }
+            spinDirection *= alternate;
+            --step;
+            ++record;
+        } while (step != 0);
+    }
+    parSubmitKindDrawing(&effect->kindState);
+}
 
 void parRestartInstanceCallback(void) {
     parRestartKind();

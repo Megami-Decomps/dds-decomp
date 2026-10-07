@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_draw.h"
 
 #include "ee_mmi.h"
 
@@ -45,7 +46,7 @@ typedef struct {
 
 /* The slot table and its allocation owner are one record, not two views.
  * The native allocator returns this header after the point/slot arrays. */
-typedef struct {
+typedef struct ParTable {
     u16 slotCount;
     u16 pointCapacity;
     ParSlot *slots;
@@ -53,22 +54,7 @@ typedef struct {
     SdfMemBlock *resource;
 } ParTable; /* 0x10 */
 
-/* Kind 1 uses a point-history table; kinds 2..4 use the same word as a
- * floating-point scale. Only those scaled kinds reach the scale accessor. */
-typedef struct {
-    u16 kind;
-    u8 pad02[6];
-    union {
-        ParTable *table;
-        f32 scale;
-    } value;
-    u8 pad0C[4];
-    struct ParSystem *primaryDrawSystem; /* kind 2 */
-    union {
-        struct ParSystem *system;       /* kind 3 */
-        struct EffTrackPolyList *modelList; /* kind 4 */
-    } secondaryDraw;
-} ParKindState; /* 0x18 */
+
 
 /* Record contents depend on the emitter; radial records are ParBurstPacket. */
 typedef struct {
@@ -77,7 +63,7 @@ typedef struct {
 } ParBuffer; /* 0x08 */
 
 /* Common emitter header. Radial-only fields belong to ParBurstEmitter's tail. */
-typedef struct {
+typedef struct ParObj {
     f32 origin[4];                /* 0x00 */
     f32 billboardScale;           /* 0x10: radial packet's base scale */
     f32 billboardScaleY;          /* 0x14 */
@@ -135,11 +121,6 @@ extern void (*D_003AAC20[])();
 
 /* Constructor, update and destructor operations share one 0xC-byte entry,
  * selected by the emitter's 16-bit dispatch index at +0x140. */
-typedef struct {
-    void *(*func)();          /* 0x0: constructor */
-    void (*update)(ParObj *); /* 0x4 */
-    void (*destroy)();        /* 0x8 */
-} ParDispatch; /* 0xC bytes */
 
 extern ParDispatch parKindConstructorEntries[];
 
@@ -423,7 +404,46 @@ void parDispatchByKind(ParObj *obj) {
     parKindConstructorEntries[obj->dispatchIndex].destroy();
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00161FE8);
+/* Draw live particles after applying the requested number of emitter updates. */
+void func_00161FE8(ParObj *effect) {
+    EffectBufferRecord *record;
+    BillObj *billboard;
+    u32 step;
+    s32 particleCount;
+    s32 lifetime;
+
+    if (effect->restartFlag == 0) {
+        return;
+    }
+    if (effect->pendingRestartSteps == 0) {
+        parKindConstructorEntries[effect->dispatchIndex].update(effect);
+    } else {
+        for (step = 0; step < effect->pendingRestartSteps; step++) {
+            parKindConstructorEntries[effect->dispatchIndex].update(effect);
+        }
+        effect->pendingRestartSteps = 0;
+    }
+    billboard = effect->billboard;
+    record = effect->buffer->records;
+    particleCount = effect->particleCount;
+    lifetime = effect->lifetimeFrames;
+    billSetChildScaleComponents(billboard, effect->billboardScale, effect->billboardScaleY);
+    if (particleCount > 0) {
+        step = particleCount;
+        do {
+            s32 age = record->unk20;
+
+            if (age < lifetime && age >= 0) {
+                PCP_COPY_VECTOR(billboard, record->position);
+                billboard->childParam = record->unk24;
+                billInvokeCallback(billboard);
+            }
+            step--;
+            record++;
+        } while (step != 0);
+    }
+    parSubmitKindDrawing(&effect->kindState);
+}
 
 /* Create another object of the same dispatch index; the existing call forwards
    no explicit arguments and this interface does not return the new object. */

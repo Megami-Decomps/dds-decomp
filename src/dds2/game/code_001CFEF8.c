@@ -175,7 +175,7 @@ extern s32 btlReleaseScriptResourceA();
 
 extern s32 btlReleaseScriptResource();
 
-extern s32 btlCreateSoundUpdateTask();
+extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 
 extern s32 btlCreateSoundReleaseTask();
 

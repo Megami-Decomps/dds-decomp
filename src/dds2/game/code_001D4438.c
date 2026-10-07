@@ -147,7 +147,7 @@ extern void btlSpawnBattleWorldAction();
 extern void btlCreateRainEffect();
 extern s32 btlReleaseScriptResourceA();
 extern s32 btlReleaseScriptResource();
-extern s32 btlCreateSoundUpdateTask();
+extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 extern s32 btlCreateSoundReleaseTask();
 extern s32 btlCreateWaitUnitListIdleTask();
 extern s32 btlCreateApplyToActiveActorsTask();
@@ -509,7 +509,8 @@ typedef struct SoundSceneEntry {
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
 
-extern s64 func_00201520(void);
+struct SceneLightRestoreArgs;
+extern s64 func_00201520(struct SceneLightRestoreArgs *);
 
 extern s64 func_00201718(void);
 

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl.h"
 #include "btl_action.h"
+extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "pcp_vu0.h"
 #include "dat_state.h"
 
