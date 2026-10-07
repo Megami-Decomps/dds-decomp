@@ -424,6 +424,15 @@ def owns_rodata(version, unit, section="rodata"):
     return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
 
 
+def asm_literal_users(source_text, asm_dir, syms, addr):
+    """Find remaining ASM consumers in the source being checked."""
+    names = set(re.findall(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);', source_text, re.M))
+    sym = next((n for n, a in syms.items() if a == addr), f"D_{addr:08X}")
+    pat = re.compile(rf"%(?:hi|lo|gp_rel)\({re.escape(sym)}\)")
+    return sorted(n for n in names if (asm_dir / f"{n}.s").exists()
+                  and pat.search((asm_dir / f"{n}.s").read_text()))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("unit", type=Path)
@@ -433,6 +442,8 @@ def main():
     ap.add_argument("--cflags", default="", help="extra cc1 flags (experiments; see flag_probe.py)")
     args = ap.parse_args()
     unit = args.unit.resolve()
+    source = args.source.resolve() if args.source else unit
+    source_text = source.read_text()
     version = unit.relative_to(ROOT / "src").parts[0]
     unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
     syms = symbols(version)
@@ -453,7 +464,7 @@ def main():
         env_s = dict(env, DDS_KEEP_S=str(asm_text))
         extra = args.cflags.split()
         r = subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM", *extra,
-                            str(args.source.resolve() if args.source else unit), "-o", str(obj)],
+                            str(source), "-o", str(obj)],
                            capture_output=True, text=True, env=env_s)
         asm_share = inline_asm_share(asm_text.read_text()) if asm_text.exists() else {}
         if r.returncode:
@@ -502,7 +513,7 @@ def main():
         ro_diff = None    # first retail address where the full unit's .rodata differs
         full = Path(tmp) / "full.o"
         rf = subprocess.run([str(ROOT / "tools/cc.sh"), *extra,
-                             str(args.source.resolve() if args.source else unit), "-o", str(full)],
+                             str(source), "-o", str(full)],
                             capture_output=True, text=True, env=env)
         if rf.returncode == 0:
             ftext, frel = text_section(full), relocations(full)[".text"]
@@ -719,13 +730,8 @@ def main():
             ok += 1
             print(f"OK   {name} @ 0x{addr:08X} ({size} bytes)")
     asm_dir = ROOT / "asm" / version / "nonmatchings" / unit_name
-    asm_names = set(re.findall(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);', unit.read_text(), re.M))
-
     def asm_users(addr):
-        sym = next((n for n, a in syms.items() if a == addr), f"D_{addr:08X}")
-        pat = re.compile(rf"%(?:hi|lo|gp_rel)\({re.escape(sym)}\)")
-        return sorted(n for n in asm_names if (asm_dir / f"{n}.s").exists()
-                      and pat.search((asm_dir / f"{n}.s").read_text()))
+        return asm_literal_users(source_text, asm_dir, syms, addr)
     # The unit's whole .rodata as splat split it (symbols later moved into
     # function files are listed there too).
     ro_file = ROOT / "asm" / version / "data" / f"{unit_name}.rodata.s"
@@ -765,7 +771,7 @@ def main():
             return 0
         return nxt - end
 
-    included = set(re.findall(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);', unit.read_text(), re.M))
+    included = set(re.findall(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);', source_text, re.M))
     eeasm_dir = ROOT / "build" / "eeasm" / "asm" / version / "nonmatchings" / unit_name
 
     def realigned(addr):
