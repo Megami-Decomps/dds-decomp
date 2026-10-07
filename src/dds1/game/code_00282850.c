@@ -151,18 +151,25 @@ extern s32 sdfAllocSizeClassBlock(u32);
 
 extern s32 func_002877A8(void);
 
+typedef struct MenuPanelItem MenuPanelItem;
+
 typedef struct MenuPanelGroup {
     u8 pad00[0x0C];
-    s32 children[5]; /* 0x0C */
+    MenuPanelItem *children[5]; /* 0x0C */
     u32 selection;    /* 0x20 */
     s32 initialValue; /* 0x24: initialized to 0x100 */
 } MenuPanelGroup;
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
-struct MenuPanelItem;
-extern void mnuSetPanelItemSelection(struct MenuPanelItem *, s32);
-extern void mnuSetPanelItemOption(struct MenuPanelItem *, u32);
+extern MenuPanelItem *mnuCreatePanelItem(void);
+extern void mnuPositionPanelGroupPoints(MenuPanelItem *, s32, s32);
+extern void mnuPositionPanelItemPoints(MenuPanelItem *, s32, s32);
+extern void mnuFreePanelItemWork(MenuPanelItem *);
+extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
+extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
+extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
+extern void sdfReleaseChipBlock();
 
 extern char D_003B2608[]; /* "battle stage test" */
 
@@ -444,7 +451,7 @@ s32 mnuCreatePanelGroup(s32 parent) {
     MenuPanelGroup *group = sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
-        s32 panelItem = mnuCreatePanelItem();
+        MenuPanelItem *panelItem = mnuCreatePanelItem();
         mnuPositionPanelGroupPoints(panelItem, parent, panelIndex);
         group->children[panelIndex] = panelItem;
     }
@@ -462,7 +469,6 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
     sdfReleaseChipBlock(group);
 }
 
-extern void mnuPositionPanelItemPoints(s32, s32, s32);
 /* Configure all five panel items against the same grid object. */
 void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject) {
     s32 panelIndex;
@@ -487,8 +493,8 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283110);
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
-    mnuSetPanelItemSelection((struct MenuPanelItem *)group->children[index], selection);
-    mnuSetPanelItemOption((struct MenuPanelItem *)group->children[index], option);
+    mnuSetPanelItemSelection(group->children[index], selection);
+    mnuSetPanelItemOption(group->children[index], option);
 }
 
 typedef struct MenuSpriteState {
@@ -726,7 +732,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002845F8);
 void func_00284880(void) {
 }
 
-typedef struct MenuPanelItem {
+struct MenuPanelItem {
     u8 pad00[0x10];
     u32 value10;
     s32 value14;
@@ -738,21 +744,20 @@ typedef struct MenuPanelItem {
     u8 pad84[4];
     u32 initialValue; /* 0x88 */
     u32 selectionRamp; /* 0x8C */
-} MenuPanelItem;
+};
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
-s32 mnuCreatePanelItem(void) {
+MenuPanelItem *mnuCreatePanelItem(void) {
     MenuPanelItem *panelItem = sdfAllocSizeClassBlock(MNU_PANEL_ITEM_BYTES);
     memset(panelItem, 0, MNU_PANEL_ITEM_BYTES);
     panelItem->value14 = 0x63;
     panelItem->value10 = 0x8c;
     panelItem->initialValue = 0x100;
-    return (s32)panelItem;
+    return panelItem;
 }
 
-void mnuPositionPanelGroupPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
+void mnuPositionPanelGroupPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 2, 1, 3, 4};
-    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
     itfGridStorePosition(&item->groupPoints[0], gridObject, 3);
     itfSetGridEntryQuantizedAndRefresh(item->groupPoints[0].x, item->groupPoints[0].y, 0xD30, 0x20, 0, 0);
@@ -771,9 +776,8 @@ void mnuPositionPanelGroupPoints(s32 itemAddress, s32 gridObject, s32 panelIndex
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuPositionPanelItemPoints(s32 itemAddress, s32 gridObject, s32 panelIndex) {
+void mnuPositionPanelItemPoints(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
-    MenuPanelItem *item = (MenuPanelItem *)itemAddress;
 
     itfGridStorePosition(&item->points[0], gridObject, 7);
     itfSetGridEntryQuantizedAndRefresh(item->points[0].x, item->points[0].y, 0, 0, 0, 0);
@@ -807,8 +811,8 @@ void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
     item->option = option;
 }
 
-void mnuFreePanelItemWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreePanelItemWork(MenuPanelItem *item) {
+    sdfReleaseChipBlock(item);
 }
 
 extern void func_00284C48(s32, s32, s32, u32, s32, MenuPanelItem *, s32);
