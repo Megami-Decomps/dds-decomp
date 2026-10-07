@@ -505,6 +505,7 @@
 0x00113DD0	effObjSetRoomNumber	inferred	caller stores fldParseRoomNumberFromName(resource->name) in EffectObjectData.word04
 0x00113E20	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
 0x00113E30	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.
+0x00113E40	effObjSetOpacityPassEnabled	inferred	Callers gate effObjSubmitTransformOpacityPasses; setter stores the pass-enabled word.
 0x00113E48	effObjInitializeTransformData	inferred	confidence=high; matched-C; src/dds1/game/code_001130E0.c:455:func_00113E48; Creates inner transform and transform-data allocation, clears it, creates resource state and initializes homogeneous offset/position vectors plus object flags 0xE2.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00113EE8	evtReleaseEffectObjectHandleAndData	inferred	Frees the effect-object inner state, resource handle and allocated data. [names_reviewed10.tsv]
 0x001141C0	effObjSubmitTransformOpacityPasses	inferred	U3
@@ -6776,6 +6777,7 @@
 0x003BA9B8	dds3WorldCounter	inferred	confidence=high; src/dds1/game/code_0010F8D8.c:dds3AdvanceWorldCounter; World sequence counter incremented modulo 0x10000. [names_qp9.tsv]
 0x003BA9BC	dds3ActiveWorld	inferred	confidence=high; matched_users=src/dds1/game/code_001102C8.c:dds3AdvanceObjectValueCursor, src/dds1/basic/dds3WorldBasic.c:dds3AppendWorldIndexNode; Shared World pointer anchors world state, object cursors and intrusive world-index lists. [names_qp9.tsv]
 0x003BA9C0	dds3SlotRingCursor	inferred	confidence=high; src/dds1/game/code_00111610.c:dds3SpawnSlotRingObj3; Next slot-ring index, incremented and wrapped modulo ten. [names_qp9.tsv]
+0x003BA9D0	effObjOpacityPassEnabled	inferred	Read by effObjSubmitTransformOpacityPasses as the opacity-pass early-return gate.
 0x003BA9E0	sdfRuntimeTaskName	inferred	confidence=high; data D_003BA9E0; matched-C-users=2; src/dds1/game/code_00117438.c:225:sdfCreateRuntimeTask; src/dds1/game/code_00117438.c:240:sdfDestroyRuntimeTask; Runtime state allocation creates this named task; teardown destroys same name; data-twin=D_00435DB0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00117438.sdata.s:10.; seed-placeholder=D_003BA9E0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BAA00	datGameState	inferred	confidence=medium; matched_users=src/dds1/script/scrTraceCode.c:bfOpNegate, src/dds1/script/scrTraceCode.c:bfWaitReadArgFloat; Shared typed runtime state contains script integer/float variables, party records, currency and game flags; no save-format-only claim. [names_qp9.tsv]
 0x003BAA18	datRosterDetails	inferred	confidence=high; matched_users=src/dds1/game/code_00119900.c:evtPushRosterBaseValue, src/dds1/game/code_00119900.c:evtPushSelectedScaledStat; Roster-indexed detail rows supply the base value and scale used by script stat-return operations. [names_qp9.tsv]

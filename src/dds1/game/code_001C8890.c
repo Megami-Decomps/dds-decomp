@@ -17,6 +17,7 @@
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 
 extern void sdfReleaseChipBlock(void *block);
@@ -9528,7 +9529,7 @@ void sndResetTransition(void) {
 
 void btlClearTintAndEnableCamera(void) {
     btlQueueTintTransitionToZero(0);
-    func_00113E40(1);
+    effObjSetOpacityPassEnabled(1);
 }
 
 extern f32 *D_00324770[];
@@ -9539,12 +9540,12 @@ void btlUpdateTintAndWorldLight(void) {
 
     if (position[0] == 0.0f && position[1] == 0.0f &&
         position[2] == 0.0f) {
-        func_00113E40(0);
+        effObjSetOpacityPassEnabled(0);
     } else {
-        func_00113E40(1);
+        effObjSetOpacityPassEnabled(1);
     }
     if (*(u32 *)(context + 0x1F8) & 0x20) {
-        func_00113E40(0);
+        effObjSetOpacityPassEnabled(0);
     }
     btlStepBlendColor();
 }
