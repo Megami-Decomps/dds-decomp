@@ -365,7 +365,42 @@ s32 evtAppendValueChangeDebugLabel(s32 list, s32 x, s32 y) {
     return 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002357B8);
+extern char D_003ADE00[]; /* "     %.1f" */
+extern char D_003ADE10[]; /* " L,R = VALUE-+0.1" */
+extern char D_003ADE28[]; /* " U,D = VALUE-+1.0" */
+extern char D_003ADE40[];
+extern char D_003ADE50[];
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE00);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE10);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE28);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE40);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
+
+void func_002357B8(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    switch (index) {
+    case 0:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003ADE00,
+                                                                 ctx->floatValue));
+        return;
+    case 2:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE10));
+        return;
+    case 3:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE28));
+        return;
+    case 4:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        return;
+    case 5:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        break;
+    }
+}
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
@@ -419,12 +454,6 @@ s32 evtDrawValueChangeNoticeRow(s32 list, s32 x, s32 y) {
 extern char D_003ADE40[];
 extern char D_003ADE50[];
 extern char D_003ADE78[];
-
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE40);
-
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
-
-INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003ADE60);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
 
@@ -2915,4 +2944,3 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC358);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC360);
-

@@ -405,9 +405,43 @@ s32 evtAppendValueChangeDebugLabel(s32 list, s32 x, s32 y) {
     return 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250558);
+extern char D_004233B0[]; /* "     %.1f" */
+extern char D_004233C0[]; /* " L,R = VALUE-+0.1" */
+extern char D_004233D8[]; /* " U,D = VALUE-+1.0" */
+extern char D_004233F0[]; /* " RR  = ENTER" */
+extern char D_00423400[]; /* " RD  = CANCEL" */
 
-extern s32 func_00250558(s32, s32, s32, s32, EvtRuntime *);
+INCLUDE_RODATA(const s32, "game/code_00250010", D_004233B0);
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_004233C0);
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_004233D8);
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_004233F0);
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00423400);
+
+void func_00250558(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    switch (index) {
+    case 0:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_004233B0,
+                                                                 ctx->floatValue));
+        return;
+    case 2:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004233C0));
+        return;
+    case 3:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004233D8));
+        return;
+    case 4:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004233F0));
+        return;
+    case 5:
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423400));
+        break;
+    }
+}
+
 /* Edit the bounded float only in mode 8. Confirm precedes cancel; coarse steps
  * replace fine steps before the value is clamped to the runtime limits. */
 s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
@@ -451,12 +485,6 @@ s32 evtDrawValueChangeNoticeRow(s32 list, s32 x, s32 y) {
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004233F0);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423400);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", jtbl_00423410);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423428);
 
