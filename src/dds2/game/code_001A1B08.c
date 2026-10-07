@@ -425,7 +425,40 @@ void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2658);
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A29D8);
+extern DrawColorRec D_003B4720;
+extern DrawColorRec D_003B4730;
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
+
+/* Bind the texture for the left cap, then draw the center and reversed right
+ * cap. Insets are captured before the first submission; Y bounds are live. */
+void func_001A29D8(UiSprite *panel, SdfListHead *command) {
+    DrawVertex rect[2];
+    DrawColorRec *color = (DrawColorRec *)&panel->unk2C;
+    UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
+    s32 leftInset = panel->left + 0x3E0;
+    s32 rightInset = panel->right - 0x3E0;
+
+    rect[0].x = panel->left;
+    rect[0].y = panel->top;
+    rect[1].x = leftInset;
+    rect[1].y = panel->bottom;
+    itfQueueTextureBoundQuadPacket(rect, &D_003B4720, color, panel->unk0C,
+                                  payload->texture, 0, command);
+
+    rect[0].x = leftInset;
+    rect[0].y = panel->top;
+    rect[1].x = rightInset;
+    rect[1].y = panel->bottom;
+    itfQueueColoredTexturedQuadPacket(rect, &D_003B4730, color, panel->unk0C, 0, command);
+
+    rect[0].x = panel->right;
+    rect[0].y = panel->top;
+    rect[1].x = rightInset;
+    rect[1].y = panel->bottom;
+    itfQueueColoredTexturedQuadPacket(rect, &D_003B4720, color, panel->unk0C, 0, command);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2AF0);
 
