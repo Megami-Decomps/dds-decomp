@@ -4421,6 +4421,7 @@
 0x002B9678	mnuCreateListWithDefaults	inferred	Creates a menu list from four incoming parameters and a local copy of the twelve-byte D_0042AF00 defaults.
 0x002B96D8	mnuClearWindowPanelTransitionFlag	inferred	Clears bit four in passed window container flags; all callers supply container, matching first-game 0027C658. [names_reviewed18.tsv]
 0x002B96F0	mnuAppendWindowListNode	inferred	Sequel twin of first-game 0027C670; appends a new node to passed window container list. [names_reviewed18.tsv]
+0x002B9720	mnuRemoveWindowListCursorNode	inferred	Removes and frees the window list's cursor node; the staff-item caller removes a row whose inventory count is zero
 0x002B97D8	mnuAdvanceWindowListSelection	inferred	Same window-to-list adapter as DDS1; advances list selection with default direction. [names_reviewed18.tsv]
 0x002B97F0	mnuRetreatWindowListSelection	inferred	Same window-to-list adapter as DDS1; retreats list selection with default direction. [names_reviewed18.tsv]
 0x002B9838	mnuInitIconSprites	inferred	wrong or missing short module prefix [names_audit.tsv]

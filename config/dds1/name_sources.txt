@@ -4718,6 +4718,7 @@
 0x0027C620	mnuAttachWindowTextureState	inferred	Creates a window texture state from four inputs and stores resulting handle in window. [names_reviewed21.tsv]
 0x0027C658	mnuClearWindowPanelTransitionFlag	inferred	Clears bit four of the window-container flags, the flag read by animated selection drawing. [names_reviewed18.tsv]
 0x0027C670	mnuAppendWindowListNode	inferred	Appends new list node to MenuWindowContainer list referenced by supplied window. [names_reviewed18.tsv]
+0x0027C6A0	mnuRemoveWindowListCursorNode	inferred	Removes and frees the window list's cursor node; the staff-item caller removes a row whose inventory count is zero
 0x0027C6B8	mnuAdvanceListSelection	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027C708	mnuReverseListSelection	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027C758	mnuAdvanceWindowListSelection	inferred	Adapts window container to its list and advances selection by default direction. [names_reviewed18.tsv]
