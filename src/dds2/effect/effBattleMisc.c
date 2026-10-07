@@ -25,7 +25,7 @@ extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
+extern void sdfVuBuildLookAtBasis(void *target, void *origin, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern void func_003364B8(f32 value);
 extern void func_00336818(f32 value);
