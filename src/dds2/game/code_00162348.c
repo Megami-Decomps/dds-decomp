@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_draw.h"
 
 #include "eff.h"
 
@@ -6,29 +7,40 @@
 #include "ee_mmi.h"
 
 /* Particle object layout mirrors the matching DDS1 unit and parManager. */
+struct ParTable;
+struct EffTrackPolyList;
+struct ParSystem;
+
 typedef struct ParObj {
     u8 pad00[0x10];    /* 0x00 */
     f32 scaleX;         /* 0x10: billboard child X scale */
     f32 scaleY;         /* 0x14: billboard child Y scale */
-    u8 pad18[0x10];    /* 0x18 */
+    u8 pad18[8];
+    s32 particleCount; /* 0x20 */
+    s32 lifetimeFrames; /* 0x24 */
     s32 unk28;          /* 0x28 */
     s16 billboardMode;  /* 0x2C */
-    u8 pad2E[0x5E];    /* 0x2E */
-    f32 scale8C;       /* 0x8C */
-    u8 pad90[0x14];    /* 0x90 */
+    u8 pad2E[2];
+    ParKindState kindState; /* 0x30 */
+    u8 pad48[0x44];    /* 0x48: includes the existing color ramp */
+    f32 scale8C;       /* 0x8C scaled by effParScaleComponent */
+    f32 spinDegrees; /* 0x90 */
+    u8 pad94[8];
+    u8 alternateSpin; /* 0x9C */
+    u8 pad9D[7];
     u32 unkA4;         /* 0xA4 */
     u8 padA8[0x48];    /* 0xA8 */
-    u32 valueF0;       /* 0xF0 */
-    s32 billId;        /* 0xF4 */
-    u8 padF8[4];       /* 0xF8 */
-    void *unkFC;       /* 0xFC */
+    u32 valueF0;       /* 0xF0 settable param */
+    s32 billId;         /* 0xF4 */
+    EffectBufferTail *buffer;       /* 0xF8 */
+    u32 pendingRestartSteps;       /* 0xFC */
     u8 pad100[0x40];   /* 0x100 */
     u16 dispatchIndex; /* 0x140: particle dispatch table index */
-    u16 restartFlag;   /* 0x142: set after mode changes */
-    u8 pad144[0x0C];
-    u8 mode150;
-    u8 mode151;
-    u8 pad152[0x22];
+    u16 restartFlag;   /* 0x142 set to 1 after mode changes */
+    u8 pad144[0x0C];   /* 0x144 */
+    u8 mode150;        /* 0x150 mode byte for some kinds */
+    u8 mode151;        /* 0x151 mode byte for the other kinds */
+    u8 pad152[0x22];   /* 0x152 */
     void *child;       /* 0x174 */
 } ParObj;
 
@@ -229,7 +241,7 @@ s32 parObjGetMode(ParObj *object) {
     }
 }
 
-extern BillDispatch parKindConstructorEntries[];
+extern ParDispatch parKindConstructorEntries[];
 
 extern s32 billCloneObjectRetainingSharedData(s32 id);
 
@@ -285,6 +297,9 @@ ParObj *parInstantiateKind(ParObj *source) {
 void parObjDispatch(ParObj *object) {
     D_003AAB88[object->dispatchIndex].func();
 }
+
+extern void billSetEntryFrameMode0(BillObj *, u32);
+extern void billInvokeCallback(BillObj *);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162590);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_draw.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "pcp_vu0.h"
@@ -42,7 +43,7 @@ typedef struct {
 
 /* The slot table and its allocation owner are one record, not two views.
  * The native allocator returns this header after the point/slot arrays. */
-typedef struct {
+typedef struct ParTable {
     u16 slotCount;
     u16 pointCapacity;
     ParSlot *slots;
@@ -50,22 +51,7 @@ typedef struct {
     SdfMemBlock *resource;
 } ParTable; /* 0x10 */
 
-/* Kind 1 uses a point-history table; kinds 2..4 use the same word as a
- * floating-point scale. Only those scaled kinds reach the scale accessor. */
-typedef struct {
-    u16 kind;
-    u8 pad02[6];
-    union {
-        ParTable *table;
-        f32 scale;
-    } value;
-    u8 pad0C[4];
-    struct ParSystem *primaryDrawSystem; /* kind 2 */
-    union {
-        struct ParSystem *system;       /* kind 3 */
-        struct EffTrackPolyList *modelList; /* kind 4 */
-    } secondaryDraw;
-} ParKindState; /* 0x18 */
+
 
 /* Record contents depend on the emitter; radial records are ParBurstPacket. */
 typedef struct {
@@ -74,7 +60,7 @@ typedef struct {
 } ParBuffer; /* 0x08 */
 
 /* Common emitter header. Radial-only fields belong to ParBurstEmitter's tail. */
-typedef struct {
+typedef struct ParObj {
     f32 origin[4];                /* 0x00 */
     f32 billboardScale;           /* 0x10: radial packet's base scale */
     f32 billboardScaleY;          /* 0x14 */
@@ -131,11 +117,6 @@ typedef struct {
 
 /* Constructor, update and destructor operations share one 0xC-byte entry,
  * selected by the emitter's 16-bit dispatch index at +0x140. */
-typedef struct {
-    void *(*func)();          /* 0x0: constructor */
-    void (*update)(ParObj *); /* 0x4 */
-    void (*destroy)();        /* 0x8 */
-} ParDispatch; /* 0xC bytes */
 
 extern ParDispatch parKindConstructorEntries[];
 extern void (*D_0034E2F0[])();

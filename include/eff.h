@@ -493,13 +493,51 @@ typedef struct EffectConfig {
     u8 pad02[10];
 } EffectConfig;
 
+struct ParTable;
+struct ParSystem;
+struct EffTrackPolyList;
+
+/* Kind 1 uses a point-history table; kinds 2..4 use the same word as a
+ * floating-point scale. Only those scaled kinds reach the scale accessor. */
+typedef struct ParKindState {
+    u16 kind;
+    u8 pad02[6];
+    union {
+        struct ParTable *table;
+        f32 scale;
+    } value;
+    u8 pad0C[4];
+    struct ParSystem *primaryDrawSystem; /* kind 2 */
+    union {
+        struct ParSystem *system;       /* kind 3 */
+        struct EffTrackPolyList *modelList; /* kind 4 */
+    } secondaryDraw;
+} ParKindState; /* 0x18 */
+
+typedef char ParKindState_size_must_be_0x18[(sizeof(ParKindState) == 0x18) ? 1 : -1];
+
+/* Each particle kind has constructor, per-frame update and release callbacks. */
+struct ParObj;
+typedef struct ParDispatch {
+    void *(*func)();
+    void (*update)(struct ParObj *);
+    void (*destroy)();
+} ParDispatch; /* 0x0C */
+
+typedef char ParDispatch_size_must_be_0x0C[(sizeof(ParDispatch) == 0x0C) ? 1 : -1];
+
 /* Per-resource effect buffer entry (0x40); DDS1/2 game/code_00151F58/00159B48.c. */
 typedef struct EffectBufferRecord {
-    u8 pad00[0x20];
+    f32 position[4];
+    u8 pad10[0x10];
     s32 unk20;       /* 0x20: per-record tag, decays by decayStep */
     s32 unk24;
-    u8 pad28[0x18];
+    f32 scale;      /* 0x28: current billboard scale */
+    f32 spin;       /* 0x2C: current billboard rotation */
+    u8 pad30[0x10];
 } EffectBufferRecord;
+
+typedef char EffectBufferRecord_size_must_be_0x40[(sizeof(EffectBufferRecord) == 0x40) ? 1 : -1];
 
 /* Buffer allocation and record array owner (0x8); DDS1/2 game/code_00151F58/00159B48.c. */
 typedef struct EffectBufferTail {
