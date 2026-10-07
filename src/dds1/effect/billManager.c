@@ -25,7 +25,7 @@ extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 extern void sdfAppendReferencePacket(SdfListHead *list, u32 packet);
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
-extern u32 sdfTexGetPrimaryBuffer(SdfTex *texture);
+extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);
 extern s32 sdfTexGetPrimaryBufferSize(SdfTex *texture);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
 extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
@@ -70,7 +70,7 @@ void func_001502B0(BillObj *obj, BillChildPayload *child) {
         sdfInitPacketList(child->pendingLists[selected]);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            sdfTexGetPrimaryBuffer((SdfTex *)child->value),
+            (u32)sdfTexGetPrimaryBuffer((SdfTex *)child->value),
             sdfTexGetPrimaryBufferSize((SdfTex *)child->value));
         sdfAppendReferencePacket(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
@@ -202,7 +202,7 @@ extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void sdfAppendDmaTagToList(SdfListHead *list, u32 packet);
 extern void func_002D4C80(s32 source, u32 packet, s32 variant);
-extern s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture);
+extern SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture);
 extern s32 sdfTexGetSecondaryBufferSize(SdfTex *texture);
 extern f32 D_0034E040[4];
 extern f32 D_0034E050[4];
@@ -265,12 +265,12 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
         sdfAppendPacket(node->packetList, (u32)state);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            sdfTexGetPrimaryBuffer((SdfTex *)node->children[0]->value),
+            (u32)sdfTexGetPrimaryBuffer((SdfTex *)node->children[0]->value),
             sdfTexGetPrimaryBufferSize((SdfTex *)node->children[0]->value));
         sdfAppendReferencePacket(node->packetList, packet);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            sdfTexGetOrInitializeSecondaryBuffer((SdfTex *)node->children[1]->value),
+            (u32)sdfTexGetOrInitializeSecondaryBuffer((SdfTex *)node->children[1]->value),
             sdfTexGetSecondaryBufferSize((SdfTex *)node->children[1]->value));
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfAllocPacketAligned(0x38);

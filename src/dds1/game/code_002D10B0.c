@@ -77,8 +77,8 @@ extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 arg1);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
-void sdfTexCreateSecondPacket(void);
-void sdfTexRefreshResourcePackets(void);
+void sdfTexCreateSecondPacket(SdfTex *texture);
+void sdfTexRefreshResourcePackets(SdfTex *texture);
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *sdfAllocAndClearQuadwords(s32 size);
@@ -671,8 +671,8 @@ void sdfTexInitializeSemaphore(void) {
     sdfResetSemaphoreState(obj);
 }
 
-u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
-    return (u32)texture->primaryBuffer;
+SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture) {
+    return texture->primaryBuffer;
 }
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
@@ -686,15 +686,15 @@ s32 sdfTexGetPrimaryBufferSize(SdfTex *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
-s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
+SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buf;
 
     buf = texture->secondaryBuffer;
     if (buf == NULL) {
-        sdfTexCreateSecondPacket();
+        sdfTexCreateSecondPacket(texture);
         buf = texture->secondaryBuffer;
     }
-    return (s32)buf;
+    return buf;
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
@@ -790,7 +790,7 @@ void sdfTexSetSecondaryPacketBits(SdfTex *texture, s32 magFilter, s32 minFilter)
     SdfTexBuf *buffer = texture->secondaryBuffer;
 
     if (buffer == NULL) {
-        sdfTexCreateSecondPacket();
+        sdfTexCreateSecondPacket(texture);
         buffer = texture->secondaryBuffer;
     }
     buffer->samplingState = (buffer->samplingState & ~SDF_TEX_FILTER_MASK) | (magFilter << SDF_MAG_FILTER_SHIFT) | (minFilter << SDF_MIN_FILTER_SHIFT);
@@ -798,7 +798,7 @@ void sdfTexSetSecondaryPacketBits(SdfTex *texture, s32 magFilter, s32 minFilter)
 
 void sdfTexSetClampMode(SdfTex *texture, u8 value) {
     texture->clampMode = value;
-    sdfTexRefreshResourcePackets();
+    sdfTexRefreshResourcePackets(texture);
 }
 
 /* Borrow pixels or copy them to the selected heap; return the source cursor after the transfer bytes. */
