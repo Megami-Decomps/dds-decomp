@@ -5824,6 +5824,7 @@
 0x0032D5E0	sdfBuildCenteredViewBoundsPacket	inferred	Encodes symmetric positive and negative view bounds in packet words. [names_reviewed8.tsv]
 0x0032D6B0	sdfBuildSceneDrawHeader	inferred	Initializes packet header before writing scene draw fields. [names_reviewed8.tsv]
 0x0032D758	sdfBuildTextureScenePacket	inferred	confidence=high; src/dds2/game/code_0032C278.c:func_0032D758; Builds texture setup for both rendering contexts, centered bounds, test/blend registers, and the draw packet. [names_qp9.tsv]
+0x0032D898	sdfRefreshSceneNodePackets	inferred	Registered scene callback rebuilds both frame/depth contexts and refreshes paired FRAME words and texture packets from the retained graph view and buffer index.
 0x0032DAF0	sdfAppendLinkedPacketPayload	inferred	Appends a node to its pointer list and its payload at offset sixteen to the packet list.
 0x0032DD98	sdfQueueFramePackets	inferred	readability/matching review (QP16)
 0x0032DE98	sdfSetNonnegativePacketIndex	inferred	Clamps negative index values to zero before storing current packet index. [names_reviewed8.tsv]
