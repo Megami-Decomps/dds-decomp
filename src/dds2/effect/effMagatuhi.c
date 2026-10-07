@@ -226,7 +226,7 @@ typedef struct {
 } EffMagatuhiSlot;
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
  * The vector scratch w and the raw accesses below retain their native forms. */
-void func_00191AD0(EffMagatuhiWideFirst *work, s32 index) {
+void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     EffMagatuhiDriftParticle *particle = &work->particles[index];
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
@@ -318,7 +318,7 @@ void func_00191CD0(EffMagatuhiWideFirst *work) {
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
         if (age == 0) {
-            func_00191AD0(work, i);
+            effMagatuhiInitWideFirstParticle(work, i);
         }
         if (age > 0 && age <= life) {
             if (slot->step == 0.0f) {
