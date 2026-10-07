@@ -165,7 +165,7 @@ typedef struct EvtRuntime {
     char **itemNames; /* 0x22C8 */
     s32 charCol; /* 0x22CC */
     s32 charRow; /* 0x22D0 */
-    u8 pad22D4[0x20];
+    char nameStorage[32]; /* 0x22D4 */
     s32 entryCursor; /* 0x22F4 */
     s32 entryFirst;  /* 0x22F8 */
     s32 frameColumn; /* 0x22FC: column cursor within the selected frame row */
@@ -675,7 +675,7 @@ s32 mnuDrawInfoWindowA(s32 x, s32 y, u8 *work) {
 
 extern char D_003BC090[];
 extern char D_003BC0A0[];
-extern u8 D_003688B8[];
+extern s8 D_003688B8[][12];
 
 
 /* Draw the runtime title when present; return two rows used, or zero for no title. */
@@ -731,7 +731,7 @@ s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
  * runtime character selection, using mode 3 for the active color. */
 void evtDrawKeyboardRow(s32 list, s32 xPosition, s32 y, s32 row, EvtRuntime *work) {
     s32 x = xPosition + 0xC0;
-    u8 *table = &D_003688B8[row * 0xC];
+    s8 *table = D_003688B8[row];
     s32 i = 0;
     s32 color;
     s8 ch;
@@ -750,7 +750,57 @@ void evtDrawKeyboardRow(s32 list, s32 xPosition, s32 y, s32 row, EvtRuntime *wor
     } while (i < 0xB);
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00236828);
+/* Draw the keyboard and edit the eight-character name when input is active. */
+s32 func_00236828(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 input;
+    s32 length;
+    s32 key;
+
+    list = sdfCreateResetPacketList();
+    evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, (u8 *)ctx,
+                     evtDrawInputValueRow, evtDrawKeyboardRow);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+                                    (SdfListHead *)list);
+    if (ctx->actionMode != 3) {
+        return 0;
+    }
+    input = kwlnStepTwoListCursors(0, 11, 4, 11, 4, NULL, NULL,
+                                  &ctx->charCol, &ctx->charRow);
+    if (input < 0) {
+        return -1;
+    }
+    if (input == 1) {
+        key = D_003688B8[ctx->charRow][ctx->charCol];
+        if (ctx->charRow == 3 && ctx->charCol >= 4) {
+            switch (key) {
+            case 'B':
+            case 'S':
+                for (length = 0; ctx->nameStorage[length] != 0; length++) {
+                }
+                if (length > 0) {
+                    ctx->nameStorage[length - 1] = 0;
+                }
+                break;
+            case 'K':
+            case 'O':
+                if (ctx->nameStorage[0] != 0) {
+                    return 1;
+                }
+                break;
+            }
+        } else {
+            for (length = 0; ctx->nameStorage[length] != 0; length++) {
+            }
+            if (length < 8) {
+                ctx->nameStorage[length] = key;
+                ctx->nameStorage[length + 1] = 0;
+            }
+        }
+    }
+    return 0;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0B8);
 
