@@ -3145,7 +3145,46 @@ s32 btlDispatchNamedChunkNode(void *query) {
     return D_003BD86C;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00207E68);
+void func_00207E68(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *selected = NULL;
+    BtlUnit *head = state->units;
+    BtlUnit *unit;
+    BattleEffectState *effect;
+    BtlUnit *actor;
+
+    for (unit = head; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->lookupId == 1) {
+                    selected = unit;
+                    break;
+                }
+            }
+        }
+    }
+    for (unit = head; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit != selected) {
+                    PCP_COPY_VECTOR_F32(unit->position, selected->position);
+                    btlSetUnitPosition(unit, selected->position);
+                    PCP_COPY_VECTOR_F32(unit->rotation, selected->rotation);
+                    btlSetUnitRotation(unit, selected->rotation);
+                }
+            }
+        }
+    }
+    effect = state->effect;
+    actor = effect->actor;
+    if (actor != NULL) {
+        PCP_COPY_VECTOR_F32(actor->position, selected->position);
+        btlSetUnitPosition(actor, selected->position);
+        actor = effect->actor;
+        PCP_COPY_VECTOR_F32(actor->rotation, selected->rotation);
+        btlSetUnitRotation(actor, selected->rotation);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00207FF0);
 
