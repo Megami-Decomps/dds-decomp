@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
 #include "eff.h"
@@ -679,26 +680,6 @@ void dds3RefreshStoredVec3(WorldObj *obj) {
     dst->vec[1] = src[0x11];
     dst->vec[2] = src[0x12];
 }
-
-/* Kind-7 object data is allocated and cleared at 0x50 bytes by
- * evtInitializeEffectObjectData; the final 0x20 bytes are opaque here. */
-typedef struct EffectDependencyState {
-    ObjBase *objectHandle;
-    u32 flags;
-    s32 state;
-    void *handle;
-    u32 word10;
-    u32 word14;
-    void *word18;
-    u8 pad1C[4];
-    void *owner;
-    u16 entryId;
-    u16 ownerKind;
-    void *vector;
-    void *node;
-    u8 pad30[0x20];
-} EffectDependencyState;
-typedef char EffectDependencyStateSizeCheck[sizeof(EffectDependencyState) == 0x50 ? 1 : -1];
 
 struct EffEventWork;
 extern void effDestroyNode(struct EffNode *);

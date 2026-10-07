@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "eff.h"
@@ -55,21 +56,7 @@ extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
 
 extern void *sdfReleaseResourceAllocation(void *arg);
 
-typedef struct {
-    void *objectHandle; /* 0x0 returned by effObjGetObjectHandle */
-    u32 flags; /* 0x4 effect flag bits */
-    s32 state;   /* 0x8: checked for states 5 (node update) and 6 (parameter access) */
-    void *bill; /* 0xC bill object */
-    u32 unk10;   /* 0x10 cleared when an owner is attached */
-    u32 unk14;   /* 0x14 cleared when an owner is attached */
-    void *unk18; /* 0x18 cleared when an owner is attached */
-    u8 pad1C[4]; /* 0x1C */
-    void *owner; /* 0x20 owning effect object */
-    u16 entryId; /* 0x24 forwarded to the bill parameter lookup */
-    u16 ownerKind; /* 0x26 copied from owner's kind */
-    void *vector; /* 0x28 passed to effEventCreate */
-    void *node; /* 0x2C released and replaced by effObjReplaceActiveEventNode */
-} EffectData; /* 0x30 bytes */
+
 
 
 typedef struct EffectObj {
@@ -78,15 +65,15 @@ typedef struct EffectObj {
     u8 pad8[7];       /* 0x8 */
     u8 kind;           /* 0xF checked ==7 by effObjGetReadyData */
     u8 pad10[8];       /* 0x10 */
-    EffectData *data; /* 0x18 */
+    EffectDependencyState *data; /* 0x18 */
     ObjectTransform *params; /* Separately allocated position, rotation and scale owner. */
 } EffectObj;
 
-EffectData *effObjGetReadyData(EffectObj *obj);
+EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 
 /* Release dependencies, object base, then slot data; the object and data must exist. */
 void effObjReleaseObjectData(u32 object) {
-    EffectData *data;
+    EffectDependencyState *data;
     EffectObj *obj;
 
     obj = (EffectObj *)object;
@@ -110,7 +97,7 @@ extern void billInvokeCallback(struct BillObj *bill);
 extern void func_00197F60(void *node);
 
 s32 func_00114BF0(EffectObj *obj) {
-    EffectData *data;
+    EffectDependencyState *data;
 
     data = obj->data;
     func_00116078(obj);
@@ -125,14 +112,14 @@ s32 func_00114BF0(EffectObj *obj) {
     case 1:
     case 7:
     case 8:
-        if (data->bill != NULL) {
-            effUpdateNode(data->bill);
+        if (data->handle != NULL) {
+            effUpdateNode(data->handle);
         }
         break;
     case 2:
     case 3:
-        if (data->bill != NULL) {
-            billInvokeCallback(data->bill);
+        if (data->handle != NULL) {
+            billInvokeCallback(data->handle);
         }
         break;
     case 5:
@@ -151,7 +138,7 @@ u32 effObjGetObjectHandle(EffectObj *obj) {
 
 EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secondVec) {
     EffectObj *obj;
-    EffectData *data;
+    EffectDependencyState *data;
 
     obj = dds3AppendWorldObjectNode(7);
     if (obj == NULL) {
@@ -165,7 +152,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     data = obj->data;
     data->flags = 0;
     data->state = 0;
-    data->bill = NULL;
+    data->handle = NULL;
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
@@ -184,7 +171,7 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
 {
     u8 vector[0x10];
     EffectObj *obj;
-    EffectData *data;
+    EffectDependencyState *data;
     void *handle;
     void *id;
 
@@ -197,7 +184,7 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
     VU0_STORE_VF(vf10, vector);
     effCopyVector(bill, vector);
     data = obj->data;
-    data->bill = bill;
+    data->handle = bill;
     data->flags = 0;
     data->state = 2;
     data->owner = NULL;
@@ -217,7 +204,7 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
 void effObjSpawnSharedBillClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
     u64 bill;
 
-    bill = billCloneObjectRetainingSharedData((u32)obj->data->bill);
+    bill = billCloneObjectRetainingSharedData((u32)obj->data->handle);
     effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
@@ -237,7 +224,7 @@ void effObjCreateResourceKindOne(u64 resourceId, u64 firstVectorAddress, u64 sec
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
 void func_00114F30(EffectObj *obj) {
-    billSetKind1Entry((u32)obj->data->bill);
+    billSetKind1Entry((u32)obj->data->handle);
 }
 
 /* Create a state-three bill effect and attach the first kind-two world node if present.
@@ -249,7 +236,7 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
 {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
-    EffectData *data;
+    EffectDependencyState *data;
     void *objectHandle;
     void *worldNode;
 
@@ -263,7 +250,7 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
     effCopyVector(bill, copiedVector);
     data = obj->data;
     data->state = EFF_OBJ_STATE_BILL_NODE;
-    data->bill = bill;
+    data->handle = bill;
     data->flags = 0;
     data->owner = NULL;
     data->entryId = 0;
@@ -282,7 +269,7 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
 void effObjSpawnSharedBillNodeClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
     u64 bill;
 
-    bill = billCloneObjectRetainingSharedData((u32)obj->data->bill);
+    bill = billCloneObjectRetainingSharedData((u32)obj->data->handle);
     effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
 }
 
@@ -311,7 +298,7 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
 {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
-    EffectData *data;
+    EffectDependencyState *data;
     void *objectHandle;
     void *worldNode;
 
@@ -325,7 +312,7 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
     effCopyVectorToNodeInstance(bill, copiedVector);
     data = obj->data;
     data->state = EFF_OBJ_STATE_BOUND_BILL;
-    data->bill = bill;
+    data->handle = bill;
     data->flags = 0;
     data->owner = NULL;
     data->entryId = 0;
@@ -364,7 +351,7 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
 {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
-    EffectData *data;
+    EffectDependencyState *data;
     void *objectHandle;
     void *worldNode;
 
@@ -378,7 +365,7 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
     effCopyVectorToNodeInstance(bill, copiedVector);
     data = obj->data;
     data->state = EFF_OBJ_STATE_BOUND_BILL;
-    data->bill = bill;
+    data->handle = bill;
     data->flags = 0;
     data->owner = NULL;
     data->entryId = 0;
@@ -424,7 +411,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *
 /* For state-five data with a bill and vector, release the old event node and replace it.
    The lookup uses only the low sixteen bits; its result replaces the released node. */
 void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
-    EffectData *data;
+    EffectDependencyState *data;
 
     data = obj->data;
     if (data->state != EFF_OBJ_STATE_EVENT_NODE) {
@@ -433,14 +420,14 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
     if (data->vector == NULL) {
         return;
     }
-    if (data->bill == NULL) {
+    if (data->handle == NULL) {
         return;
     }
     if (data->node != NULL) {
         effEventReleaseNode(data->node);
         data->node = NULL;
     }
-    data->node = effEventCreate(data->bill, entryId & EFF_OBJ_ENTRY_ID_MASK, data->vector);
+    data->node = effEventCreate(data->handle, entryId & EFF_OBJ_ENTRY_ID_MASK, data->vector);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115600);
@@ -462,7 +449,7 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     f32 fourRows[20];
     struct EffNode *bill;
     EffectObj *obj;
-    EffectData *data;
+    EffectDependencyState *data;
     void *objectHandle;
     void *worldNode;
 
@@ -484,7 +471,7 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     } else {
         data->state = EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS;
     }
-    data->bill = bill;
+    data->handle = bill;
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
@@ -531,8 +518,8 @@ void *effObjCreateKindFromResource(s32 kind, void *resource) {
 
 /* Return data only for a non-NULL effect-kind object in parameter-ready state.
    Matching objects are still assumed to contain valid slot data. */
-EffectData *effObjGetReadyData(EffectObj *obj) {
-    EffectData *data;
+EffectDependencyState *effObjGetReadyData(EffectObj *obj) {
+    EffectDependencyState *data;
 
     data = NULL;
     if (obj == NULL) {
@@ -575,16 +562,16 @@ extern void effMagatuhiDispatchByKind(void *bill);
    Native implicit-int fall-through leaves the return value unspecified. */
 effObjDispatchReadyState(EffectObj *obj) {
     if (obj->kind == EFF_OBJ_KIND) {
-        EffectData *data = obj->data;
+        EffectDependencyState *data = obj->data;
 
         switch (data->state) {
         case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:
             break;
         case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
-            effMagatuhiInitializeInterpolatedHistory(data->bill);
+            effMagatuhiInitializeInterpolatedHistory(data->handle);
             break;
         case EFF_OBJ_STATE_BOUND_BILL:
-            effMagatuhiDispatchByKind(data->bill);
+            effMagatuhiDispatchByKind(data->handle);
             break;
         }
     }
@@ -594,7 +581,7 @@ effObjDispatchReadyState(EffectObj *obj) {
    An unavailable input leaves its destination row/scalar unchanged, not zeroed. */
 s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectObj *second, EffectObj *third, EffectObj *fourth)
 {
-    EffectData *data;
+    EffectDependencyState *data;
     f32 *parameterRows;
 
     if (obj->kind != EFF_OBJ_KIND) {
@@ -612,7 +599,7 @@ s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectO
             VU0_STORE_VF(vf10, parameterRows + 4);
             parameterRows[9] = effObjGetIntParam(second);
         }
-        effMagatuhiCopyFloatBlock(data->bill, parameterRows);
+        effMagatuhiCopyFloatBlock(data->handle, parameterRows);
         return 1;
     case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
         parameterRows = data->vector;
@@ -632,7 +619,7 @@ s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectO
             VU0_STORE_VF(vf10, parameterRows + 12);
             parameterRows[19] = effObjGetIntParam(fourth);
         }
-        effMagatuhiSetControlPointParams(data->bill, parameterRows);
+        effMagatuhiSetControlPointParams(data->handle, parameterRows);
         return 1;
     }
     return 0;
@@ -651,7 +638,7 @@ void effObjClearFlags(EffectObj *obj, u32 flags) {
 /* Accept owner kinds [4,10) or seventeen, reset link bookkeeping, and return one.
    Unsupported kinds return zero without changing the destination; owner must exist. */
 s32 effObjBindValidatedOwner(EffectObj *obj, EffectObj *owner) {
-    EffectData *data;
+    EffectDependencyState *data;
     u8 kind;
 
     kind = owner->kind;
@@ -659,14 +646,14 @@ s32 effObjBindValidatedOwner(EffectObj *obj, EffectObj *owner) {
         return 0;
     }
     data = obj->data;
-    data->unk18 = NULL;
+    data->word18 = NULL;
     data->owner = owner;
     data->entryId = 0;
     data->flags |= EFF_OBJ_FLAG_OWNER_LINK;
     data->flags &= ~EFF_OBJ_FLAG_OWNER_BILL_ENTRY;
-    data->unk10 = 0;
+    data->word10 = 0;
     data->ownerKind = owner->kind;
-    data->unk14 = 0;
+    data->word14 = 0;
     return 1;
 }
 
@@ -685,7 +672,7 @@ typedef struct {
 /* Forward the saved entry only for flagged kind-five owners whose bill state is zero.
    Owner/bill/parameter pointers are trusted once the flag selects this path. */
 void effObjForwardOwnerBillEntry(EffectObj *obj) {
-    EffectData *data;
+    EffectDependencyState *data;
     EffectObj *owner;
     BillPayload *bill;
 
@@ -693,7 +680,7 @@ void effObjForwardOwnerBillEntry(EffectObj *obj) {
     if (data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) {
         owner = data->owner;
         if (owner->kind == EFF_OBJ_OWNER_BILL_KIND) {
-            bill = owner->data->bill;
+            bill = owner->data->handle;
             if (bill->state != 0) {
                 return;
             }
@@ -705,7 +692,7 @@ void effObjForwardOwnerBillEntry(EffectObj *obj) {
 /* Save a truncated u16 entry and enable forwarding after owner validation.
    Native status is always one, including rejected owners. */
 s32 effObjBindOwnerBillEntry(EffectObj *obj, EffectObj *owner, s32 entryId) {
-    EffectData *data;
+    EffectDependencyState *data;
 
     if (effObjBindValidatedOwner(obj, owner) == 0) {
         return 1;
