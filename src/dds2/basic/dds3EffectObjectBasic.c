@@ -131,9 +131,9 @@ s32 func_00114BF0(EffectObj *obj) {
     return 1;
 }
 
-/* Return the object-base address as the native u32 handle, without validation. */
-u32 effObjGetObjectHandle(EffectObj *obj) {
-    return (u32)obj->data->objectHandle;
+/* Return the owned object base without validating the object or its data. */
+ObjBase *effObjGetObjectHandle(EffWorldNode *object) {
+    return ((EffectDependencyState *)object->data)->objectHandle;
 }
 
 EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secondVec) {
@@ -172,7 +172,7 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
     u8 vector[0x10];
     EffectObj *obj;
     EffectDependencyState *data;
-    void *handle;
+    ObjBase *handle;
     void *id;
 
     memset(vector, 0, sizeof(vector));
@@ -190,11 +190,11 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    handle = effObjGetObjectHandle(obj);
-    ((ObjBase *)handle)->resourceState = 2;
+    handle = effObjGetObjectHandle((EffWorldNode *)obj);
+    handle->resourceState = 2;
     id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
-        ((ObjBase *)handle)->slots[5] = id;
+        handle->slots[5] = id;
         dds3EnsureWorldNodeInSlot(id, obj);
     }
     return obj;
@@ -237,7 +237,7 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
     EffectDependencyState *data;
-    void *objectHandle;
+    ObjBase *objectHandle;
     void *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
@@ -255,11 +255,11 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    objectHandle = effObjGetObjectHandle(obj);
-    ((ObjBase *)objectHandle)->resourceState = 2;
+    objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
+    objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        ((ObjBase *)objectHandle)->slots[5] = worldNode;
+        objectHandle->slots[5] = worldNode;
         dds3EnsureWorldNodeInSlot(worldNode, obj);
     }
     return obj;
@@ -299,7 +299,7 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
     EffectDependencyState *data;
-    void *objectHandle;
+    ObjBase *objectHandle;
     void *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
@@ -317,11 +317,11 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    objectHandle = effObjGetObjectHandle(obj);
-    ((ObjBase *)objectHandle)->resourceState = 2;
+    objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
+    objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        ((ObjBase *)objectHandle)->slots[5] = worldNode;
+        objectHandle->slots[5] = worldNode;
         dds3EnsureWorldNodeInSlot(worldNode, obj);
     }
     return obj;
@@ -352,7 +352,7 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
     EffectDependencyState *data;
-    void *objectHandle;
+    ObjBase *objectHandle;
     void *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
@@ -370,11 +370,11 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    objectHandle = effObjGetObjectHandle(obj);
-    ((ObjBase *)objectHandle)->resourceState = 2;
+    objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
+    objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        ((ObjBase *)objectHandle)->slots[5] = worldNode;
+        objectHandle->slots[5] = worldNode;
         dds3EnsureWorldNodeInSlot(worldNode, obj);
     }
     return obj;
@@ -450,7 +450,7 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     struct EffNode *bill;
     EffectObj *obj;
     EffectDependencyState *data;
-    void *objectHandle;
+    ObjBase *objectHandle;
     void *worldNode;
 
     memset(firstVector, 0, sizeof(firstVector));
@@ -489,11 +489,11 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
         effMagatuhiSetControlPointParams(bill, data->vector);
         break;
     }
-    objectHandle = effObjGetObjectHandle(obj);
-    ((ObjBase *)objectHandle)->resourceState = 2;
+    objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
+    objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        ((ObjBase *)objectHandle)->slots[5] = worldNode;
+        objectHandle->slots[5] = worldNode;
         dds3EnsureWorldNodeInSlot(worldNode, obj);
     }
     return obj;
