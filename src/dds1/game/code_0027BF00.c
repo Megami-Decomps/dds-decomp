@@ -1860,7 +1860,57 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_002812E8);
+extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern char D_003BC740[];
+
+void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
+                   s32 partyIndex, u32 flags, s32 surface) {
+    char text[0x40];
+    DatPartyRecord *unit = &datGameState->party[partyIndex];
+    s32 color;
+    s32 remainingExp;
+    struct FrFontGlyph *glyph;
+
+    if (slot->iconBundle != 0) {
+        mnuDrawAndUpdateFadingSprites(x, y, depth, slot->kind,
+            (MenuIconBundle *)slot->iconBundle, surface);
+        color = uiBlendColors(0xFFF06480, 0xFFF06400,
+            ((MenuIconBundle *)slot->iconBundle)->fade);
+        remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
+        if (remainingExp != 0) {
+            func_003014F0(text, D_003BC740, remainingExp);
+            glyph = (struct FrFontGlyph *)func_001978E8(x + 0xDF0,
+                0x160, depth, color, (s32)text, 0);
+            func_001958A0(glyph, 1, surface);
+            frFontQueueGlyphInSelectedSlot(glyph);
+        }
+    }
+    if (slot->windowSprites != NULL) {
+        if (flags & 0x400) {
+            mnuDrawIconSpriteGroup(x, y, depth, 0,
+                (s32 *)slot->windowSprites, surface);
+        }
+        /* This profile fade is independent of the sprite slide's drawAlpha. */
+        mnuDrawSelectedPartyProfileLabel(x, y, depth,
+            slot->windowSprites->profileFade, slot->windowSprites->unkC, (s32)slot,
+            partyIndex, surface);
+        if (slot->windowSprites->fadeOut == 0) {
+            if (slot->windowSprites->profileFade > 0) {
+                slot->windowSprites->profileFade -= 0x20;
+            }
+            if (slot->windowSprites->profileFade < 0) {
+                slot->windowSprites->profileFade = 0;
+            }
+        } else {
+            if (slot->windowSprites->profileFade < 0x100) {
+                slot->windowSprites->profileFade += 0x20;
+            }
+            if (slot->windowSprites->profileFade > 0x100) {
+                slot->windowSprites->profileFade = 0x100;
+            }
+        }
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC718);
 
