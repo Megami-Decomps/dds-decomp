@@ -1,15 +1,10 @@
 #include "common.h"
 #include "evt_unit.h"
+#include "eff_transform.h"
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
-
-typedef struct EventUnitData {
-    u8 pad00[8];
-    s32 value08;
-} EventUnitData;
-
 
 typedef struct EvtTargetInfo {
     f32 firstColor[4];
@@ -30,13 +25,6 @@ typedef struct EvtTarget {
 
 extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
-
-/* World-list node, not EvtUnit work: the nested address is in its data record.
- * In particular, this +0x18 pointer is not the work's float vector at +0x10. */
-typedef struct EvtUnitNode {
-    u8 pad00[0x18];
-    EventUnitData *data;
-} EvtUnitNode;
 
 extern void sdfStepWrappingFloatCounter(s32 path);
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -796,11 +784,11 @@ EvtUnit *evtGetWorldUnitNestedValue(s32 id) {
     return NULL;
 }
 
-s32 evtUnitGetNestedValue(EvtUnitNode *unit) {
+EvtUnit *evtUnitGetNestedValue(EffWorldNode *unit) {
     if (unit == NULL) {
-        return 0;
+        return NULL;
     }
-    return unit->data->value08;
+    return (EvtUnit *)*(s32 *)((u8 *)unit->data + 8);
 }
 
 extern f32 D_004215D0[];

@@ -3316,7 +3316,7 @@ extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
 extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
 
-extern s32 evtUnitGetNestedValue(u8 *object);
+extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
 extern void func_00221D00(EvtUnit *unit, s32 index, s32 colorA, s32 colorB);
 extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
@@ -3383,7 +3383,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
         vec[3] = 1.0f;
         kwlnSetBackgroundColorTarget(0, vec);
 
-        unit = (EvtUnit *)evtUnitGetNestedValue((u8 *)fldPlayerObject);
+        unit = evtUnitGetNestedValue((EffWorldNode *)fldPlayerObject);
         evtSetUnitStatusFlags(unit);
         red = light->unitColorA[0] * 128.0f;
         green = light->unitColorA[1] * 128.0f;

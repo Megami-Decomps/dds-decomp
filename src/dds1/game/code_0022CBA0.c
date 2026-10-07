@@ -442,7 +442,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D528);
 
 
 extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *, s32, const u8 *);
-extern s32 evtUnitGetNestedValue(u8 *);
+extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
 extern void evtSetUnitValueTransition(EvtUnit *, s32, s32);
 extern void evtEndUnitValueTransition(EvtUnit *, s32);
 
@@ -483,7 +483,7 @@ void func_0022E098(s32 time, EventViewerState *viewer) {
                     }
                     node = node->next;
                 }
-                unit = (EvtUnit *)evtUnitGetNestedValue((u8 *)object);
+                unit = evtUnitGetNestedValue(object);
                 if (selected != NULL) {
                     if (selected->enabled != 0) {
                         if (unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {

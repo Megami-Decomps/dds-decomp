@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_unit.h"
+#include "eff_transform.h"
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
@@ -774,11 +775,11 @@ EvtUnit *evtGetWorldUnitNestedValue(s32 id) {
     return NULL;
 }
 
-s32 evtUnitGetNestedValue(u8 *obj) {
+EvtUnit *evtUnitGetNestedValue(EffWorldNode *obj) {
     if (obj == NULL) {
-        return 0;
+        return NULL;
     }
-    return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+    return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
