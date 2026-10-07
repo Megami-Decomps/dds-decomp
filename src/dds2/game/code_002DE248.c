@@ -4281,11 +4281,16 @@ void effRandomizeParticleFields(s32 *work) {
     }
 }
 
+/* Class kinds 1 and 4 copy the complete 0x88-byte serialized record. */
 typedef struct EffPointSetTableSource {
-    u8 pad00[0x38];
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    s32 duration;
     u32 count;     /* 0x38: rows, one point set each */
     s32 layers;    /* 0x3C: at least 3 */
-    u8 pad40[0x28];
+    u8 pad40[0x1C];
+    u8 drawFlag;  /* 0x5C: copied into the point set's draw flag */
+    u8 pad5D[0x0B];
     f32 unk68;     /* 0x68: fade-in share of a set */
     f32 unk6C;     /* 0x6C: end of the full-alpha span */
     u32 colorA;    /* 0x70: low 24 bits kept, top byte ramped */
@@ -4295,10 +4300,19 @@ typedef struct EffPointSetTableSource {
     f32 unk84;     /* 0x84: copied separately from the descriptor prefix */
 } EffPointSetTableSource;
 
+
+/* The factory appends the copied parameters to its real 0x40-byte header. */
+typedef struct EffPointSetClassWork {
+    EffClassWork header;
+    EffPointSetTableSource parameters;
+} EffPointSetClassWork;
+typedef char EffPointSetTableSource_size[(sizeof(EffPointSetTableSource) == 0x88) ? 1 : -1];
+typedef char EffPointSetClassWork_size[(sizeof(EffPointSetClassWork) == 0xC8) ? 1 : -1];
+
 typedef struct EffPointSetRow {
     EffPointSet *set; /* 0x00 */
     s32 key;          /* 0x04 */
-    u32 pad08;
+    u32 color;        /* 0x08: packed color written by the class updater */
     f32 angle;        /* 0x0C: phase of the radial class instance */
 } EffPointSetRow;
 
@@ -4671,7 +4685,7 @@ void effSeedBillboardFrameCounters(s32 *work) {
 typedef struct EffAlternatingPointSetRow {
     EffPointSet *set;
     s32 key;
-    u32 unk08;
+    u32 color;
 } EffAlternatingPointSetRow;
 
 typedef struct EffAlternatingPointSetTable {
