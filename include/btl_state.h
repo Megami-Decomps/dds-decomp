@@ -8,6 +8,18 @@ struct KwlnTask;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
 
+#ifdef VERSION_DDS2
+typedef struct BattleLinkedEffectState {
+    u32 actor;
+    struct BtlUnit *linkedUnit;
+    u32 value;
+    u16 timer;
+    u8 active, phase;
+    u32 effect;
+    f32 speed;
+} BattleLinkedEffectState;
+#endif
+
 /* Full battle-work layout for state users; unit/task-only users include btl.h. */
 #ifdef VERSION_DDS1
 
