@@ -15,8 +15,8 @@ extern void effReleaseRecordGroupResources(EffRecordPool *pool);
 extern void effDrawQuadRecordPool(EffRecordPool *pool);
 
 
-extern s32 effGetGroupIndexRecord(EffRecordPool *pool, s32 index);
-extern s32 effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
+extern void *effGetGroupIndexRecord(EffRecordPool *pool, s32 index);
+extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern f32 D_003B1230[];
 extern f32 D_003B1260[];
 extern f32 D_003B1240[];
