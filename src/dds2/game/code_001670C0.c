@@ -1,7 +1,20 @@
 #include "common.h"
+#include "kwln_sprite.h"
 
 #include "pcp_vu0.h"
 #include "eff.h"
+
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
+extern void *sdfConsAllocateColumnPacket(s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
+extern s32 kwlnGetDrawBufferIndex(void);
+extern s32 kwlnTextureGetHeldReference(void);
+extern u8 kwlnFrameDrawPacketRecords[];
+extern SdfPoolNode D_0037FB88;
+extern SdfPoolNode D_00380588;
 
 extern BillDispatch billObjectCallbacks[];
 
@@ -32,8 +45,8 @@ extern f32 D_0037F860[];
 extern u8 D_00380870[];
 extern s32 D_00435CD0;
 extern s8 D_00436408;
-extern s32 D_0043640C;
-extern s32 D_00436410;
+extern u32 D_0043640C;
+extern u32 D_00436410;
 
 typedef struct EffectEntry {
     u8 pad00[0x10];
@@ -205,7 +218,7 @@ void effWriteGouraudTexturedQuadPacket(u64 *packet, s32 primitive,
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-s32 effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
+void effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
                  s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
@@ -217,7 +230,7 @@ s32 effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
     effWriteGouraudTexturedQuadPacket(packet + 2, primitive, x0, y0, s0, t0, color0,
                  x1, y1, s1, t1, color1, x2, y2, s2, t2, color2,
                  x3, y3, s3, t3, color3, depth);
-    return sdfAppendPacket(chain, packet);
+    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
 }
 
 void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
@@ -241,7 +254,7 @@ void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-s32 effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
+void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
@@ -251,7 +264,7 @@ s32 effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
     packet[1] = 0x5000000510000000ULL;
     billWriteFloatTextureTrianglePacket(packet + 2, color, primitive, x0, y0, u0, v0,
                  x1, y1, u1, v1, x2, y2, u2, v2, depth);
-    return sdfAppendPacket(chain, packet);
+    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
 }
 
 u64 *effBuildDrawPacketWithFlags(u32 flags) {
