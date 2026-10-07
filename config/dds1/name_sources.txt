@@ -2604,6 +2604,7 @@
 0x001AD3A8	btlHasRegisteredAnalysisPanelTask	inferred	confidence=high; matched-C; src/dds1/game/code_001A1960.c:2200:func_001AD3A8; Requires tracked analysis-panel handle to remain registered and named analysis task to exist.; twin=0x001B7FB8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001AD3F0	btlGetRegisteredTaskValueOrDefault	inferred	Returns a registered task value or a fixed default when unavailable. [names_reviewed9.tsv]
 0x001AD468	btlCreateGuidePanelTask	inferred	U0
+0x001AD5A0	btlRequestGuidePanelClose	inferred	Guide task constructor and registration check use the same task name; dialog release caller requests state 2 before its close transition; paired native function is a relocation twin.
 0x001AD5D8	btlHasRegisteredGuidePanelTask	inferred	confidence=high; src/dds1/game/code_001A1960.c:func_001AD5D8; Requires tracked task slot nine to remain registered and the retail bpnl_guide_nm named task to exist. [names_qp9.tsv]
 0x001AD620	btlSetTaskPhase5	inferred	task phase = 5, state byte 3
 0x001AD668	btlSetTrackedTaskDisplayMode	inferred	Changes the registered task display mode and its state values. [names_reviewed8.tsv]
