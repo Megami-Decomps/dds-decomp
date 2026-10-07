@@ -64,7 +64,7 @@ extern void evtEndObjectValueTransition(EffWorldNode *object);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *memory);
 
-extern void dds3SetObjectFlags(void *, s32);
+extern void dds3SetObjectFlags(void *object, u32 mask);
 
 u32 dds3GetEffectDataHandle(EffectObject *object) {
     return (u32)object->data->handle;
@@ -156,7 +156,7 @@ void func_00113408(EffectObject *obj, const f32 *targetPosition) {
     data->word34 = 0;
 }
 
-extern void dds3ClearObjectFlags(EffectObject *, s32);
+extern void dds3ClearObjectFlags(void *object, u32 mask);
 
 void func_00113560(EffectObject *object) {
     EffectObjectData *data = object->data;
@@ -263,7 +263,7 @@ typedef struct EffVec4 {
 
 extern EffVec4 D_004128A0;
 extern EffVec4 D_004128B0;
-extern s32 dds3TestObjectFlags(EffectObject *, s32);
+extern u8 dds3TestObjectFlags(void *object, u32 mask);
 extern s32 effObjTestNodeFlags(f32 *, s32);
 extern void effObjInnerVecInit(EffLocalNode *);
 extern s32 func_0023DA70(EffLocalNode *, EffectObject *);
