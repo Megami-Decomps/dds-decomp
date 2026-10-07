@@ -135,7 +135,7 @@ void dds3LoadWorldTransformSetup(WorldTransformOwner *object, WorldTransformSetu
 }
 
 /* Load rotation, position and scale from a parameter block. */
-void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformParams *params) {
+void dds3LoadWorldTransformParams(EffWorldNode *object, WorldTransformParams *params) {
     WorldTransformData *data = object->data;
 
     data->rotation[0] = params->rotation[0];

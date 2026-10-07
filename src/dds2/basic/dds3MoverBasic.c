@@ -4,24 +4,11 @@
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 
-typedef struct MoverTarget {
-    u8 pad00[0xF];
-    u8 kind;
-    u8 pad10[8];
-    void *data;
-    ObjectTransform *inner;
-} MoverTarget;
-
 typedef struct {
-    MoverTarget *target;
+    EffWorldNode *target;
     Dds3PathCurveWork *path;
-    s32 (*update)(ObjectTransform *, MoverTarget *);
+    s32 (*update)(ObjectTransform *, EffWorldNode *);
 } MoverWork;
-
-typedef struct {
-    u8 pad00[0x18];
-    MoverWork *work;
-} MoverObject;
 
 typedef struct {
     u8 pad00[0x20];
@@ -38,14 +25,14 @@ extern void dds3InterpolatePathVectorVU(Dds3PathCurveWork *);
 extern void dds3PreparePathVectorPair(Dds3PathCurveWork *);
 extern f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *);
 extern void dds3InterpolatePathOutput(Dds3PathCurveWork *, WorldTransformParams *);
-extern void dds3LoadWorldTransformParams(MoverTarget *, WorldTransformParams *);
+extern void dds3LoadWorldTransformParams(EffWorldNode *, WorldTransformParams *);
 extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *);
-extern void effObjSetInnerFirstVec(MoverTarget *, void *);
-extern void effObjSetInnerSecondVec(MoverTarget *, void *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, void *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, void *);
 extern void effObjInnerVecInit(ObjectTransform *);
-extern void effObjMulInnerThirdVec(MoverTarget *, void *);
-extern void effObjQuatMulInnerSecondVec(MoverTarget *, u128 *);
-extern void effObjAddInnerFirstVec(MoverTarget *, void *);
+extern void effObjMulInnerThirdVec(EffWorldNode *, void *);
+extern void effObjQuatMulInnerSecondVec(EffWorldNode *, u128 *);
+extern void effObjAddInnerFirstVec(EffWorldNode *, void *);
 
 #define DDS3_MOVER_POSITION_CHANNEL_BIT 1
 #define DDS3_MOVER_ROTATION_CHANNEL_BIT 2
@@ -59,15 +46,15 @@ extern void effObjAddInnerFirstVec(MoverTarget *, void *);
 /* Apply enabled absolute path channels and step the path counter once, or apply
  * a callback-built relative transform when its return value is exactly 1.
  * Always return 1, even when no channel or callback transform was applied. */
-s32 dds3UpdateMoverTransform(MoverObject *object)
+s32 dds3UpdateMoverTransform(EffWorldNode *object)
 {
     f32 pathVector[4];
     WorldTransformParams transformParams;
     ObjectTransform relativeTransform;
-    MoverWork *work = object->work;
-    MoverTarget *target = work->target;
+    MoverWork *work = object->data;
+    EffWorldNode *target = work->target;
     ObjectTransform *inner = target->inner;
-    s32 (*updateCallback)(ObjectTransform *, MoverTarget *);
+    s32 (*updateCallback)(ObjectTransform *, EffWorldNode *);
     MoverScalarData *cameraData;
     f32 fieldOfView;
 
@@ -76,7 +63,7 @@ s32 dds3UpdateMoverTransform(MoverObject *object)
             dds3InterpolatePathVectorVU(work->path);
             VU0_STORE_VF(vf10, pathVector);
             effObjSetInnerFirstVec(target, pathVector);
-            if (target->kind == DDS3_MOVER_POSITION_COPY_KIND) {
+            if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
                 PCP_COPY_VECTOR(&((MoverPositionData *)target->data)->position, pathVector);
             }
         }
@@ -86,7 +73,7 @@ s32 dds3UpdateMoverTransform(MoverObject *object)
             effObjSetInnerSecondVec(target, pathVector);
         }
         if (work->path->flags & DDS3_MOVER_FOV_CHANNEL_BIT) {
-            if (target->kind == DDS3_MOVER_CAMERA_KIND) {
+            if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {
                 fieldOfView = sdfSampleActiveLinearCurve(work->path);
                 cameraData = target->data;
                 cameraData->fieldOfView = fieldOfView;
@@ -94,7 +81,7 @@ s32 dds3UpdateMoverTransform(MoverObject *object)
             }
         }
         if (work->path->flags & DDS3_MOVER_WORLD_TRANSFORM_CHANNEL_BIT) {
-            if (target->kind == DDS3_MOVER_WORLD_TRANSFORM_KIND) {
+            if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_WORLD_TRANSFORM_KIND) {
                 dds3InterpolatePathOutput(work->path, &transformParams);
                 dds3LoadWorldTransformParams(target, &transformParams);
             }
