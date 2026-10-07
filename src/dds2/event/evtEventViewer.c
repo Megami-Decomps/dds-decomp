@@ -4,8 +4,8 @@
 
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
-extern s32 dds3GetWorldObject(void);
-extern s32 dds3FindIndexedObjectChainNodeByName(s32 world, s32 type, const char *name);
+extern void *dds3GetWorldObject(void);
+extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 type, const u8 *name);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 
@@ -438,15 +438,17 @@ s32 evtEventViewerAddName(const char *name, EvtViewer *viewer) {
     return index;
 }
 
-/* Look up a name record by index in the world object (type 7). */
-s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer) {
+struct EffectObj;
+
+/* Look up a named kind-7 effect object by index. */
+struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtViewer *viewer) {
     if (index < 0) {
-        return 0;
+        return NULL;
     }
-    return dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 7, viewer->names[index]);
+    return (struct EffectObj *)dds3FindIndexedObjectChainNodeByName(
+        (EffWorldNode *)dds3GetWorldObject(), 7, (const u8 *)viewer->names[index]);
 }
 
-struct EffectObj;
 struct PolyMovieObject;
 extern u32 *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
@@ -532,7 +534,9 @@ extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescript
 extern s32 func_00115318(s32 arg, f32 *vec0, f32 *vec1);
 extern s32 func_00115AA8(s32 mode, s32 arg);
 extern void effObjDispatchReadyState(s32 obj);
-extern s32 effObjCopyMagatuhiSourceParameters(s32 obj, s32 a, s32 b, s32 c, s32 d);
+extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
+                                               struct EffectObj *second, struct EffectObj *third,
+                                               struct EffectObj *fourth);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
 s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtViewer *viewer) {
@@ -540,9 +544,9 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
     f32 vec1[4];
     s32 handle = 0;
     s32 slot;
-    s32 n0;
-    s32 n1;
-    s32 n2;
+    struct EffectObj *n0;
+    struct EffectObj *n1;
+    struct EffectObj *n2;
 
     memset(vec0, 0, 0x10);
     memset(vec1, 0, 0x10);
@@ -585,7 +589,8 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
         n0 = evtEventViewerGetNameObject(params->u.names[0], viewer);
         n1 = evtEventViewerGetNameObject(params->u.names[1], viewer);
         n2 = evtEventViewerGetNameObject(params->u.names[2], viewer);
-        effObjCopyMagatuhiSourceParameters(handle, n0, n1, n2, evtEventViewerGetNameObject(params->u.names[3], viewer));
+        effObjCopyMagatuhiSourceParameters((struct EffectObj *)handle, n0, n1, n2,
+                                           evtEventViewerGetNameObject(params->u.names[3], viewer));
         if (params->unk9 != 0) {
             effObjDispatchReadyState(handle);
         }
