@@ -102,11 +102,11 @@ ObjBase *dds3GetCameraHandle(EffWorldNode *camera) {
 }
 
 
-/* Append a camera-kind world object, store its scalar, and allocate slot data. */
-EffWorldNode *dds3CreateCameraObjectWithSlotData(s32 value) {
+/* Append a camera-kind node, set its key, and ensure slot data. */
+EffWorldNode *dds3CreateCameraObjectWithSlotData(s32 key) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(4);
 
-    obj->key = value;
+    obj->key = key;
     dds3EnsureSlotData(obj);
     return obj;
 }
