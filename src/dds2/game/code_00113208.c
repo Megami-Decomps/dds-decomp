@@ -51,4 +51,5 @@ EffWorldNode *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVect
         dds3RegisterObjectInHandlerIndex(obj);
         return obj;
     }
+    return NULL;
 }
