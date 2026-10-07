@@ -733,7 +733,44 @@ s32 func_00263F50(s32 progressDelta) {
     return datGameState->progressTotal;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00263FB0);
+/* Apply the selected shop transaction and preserve its progress baseline. */
+s32 func_00263FB0(KwlnTask *task) {
+    MenuTerminalContext *state;
+    CampWindowParams *values;
+    s32 itemId;
+    s32 operation;
+    s32 total;
+
+    state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    values = &state->window->list->cursor->camp;
+    itemId = values->id;
+    operation = state->ownedWindows[0]->list->cursor->camp.value + 1;
+    total = values->value * state->multiplier;
+    state->unkC8 = datGameState->progressTotal;
+    switch (operation) {
+    case 1:
+    case 2:
+    case 3:
+        datAddCurrencyClamped(-total);
+        if (mnuCampFindListedItemIndex(itemId) < 0) {
+            datGameState->inventory.counts[itemId] += state->multiplier;
+        }
+        if (!evtIsAllowedId(itemId)) {
+            func_00263F50(total / 100);
+        }
+        break;
+    case 4:
+        datAddCurrencyClamped(total);
+        datGameState->inventory.counts[itemId] -= state->multiplier;
+        if (itemId == 0x54) {
+            mdlFlagClear(0xA20);
+        }
+        func_00263F50(total / 100);
+        break;
+    }
+    values->value = values->price;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00261E10", func_00264120);
 
