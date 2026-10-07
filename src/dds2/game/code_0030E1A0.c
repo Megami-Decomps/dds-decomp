@@ -1,16 +1,10 @@
 #include "common.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
-
-typedef struct FieldTransitionStyle {
-    s32 unk0;
-    s32 unk4;
-    s32 kind;
-} FieldTransitionStyle;
+#include "fld_lmap_task.h"
 
 extern u32 sdfCounterAnimationValue;
 extern u32 D_004390A0;
-extern FieldTransitionStyle *D_0043888C;
 extern void fldDrawTransitionBackdrop(f32);
 extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -52,7 +46,7 @@ void mnuDrawAnimatedTransition(s32 opening) {
     }
     fldDrawTransitionBackdrop(progress);
     if (D_0043888C != 0) {
-        switch (D_0043888C->kind) {
+        switch (D_0043888C->variant) {
         case 1:
             sdfDrawScaledCenteredSlotImage((1.0f - glow) * 10.0f, 1.0f,
                          385, 303, 0, (s32)(glow * 104.0f), 19, 0, 84);

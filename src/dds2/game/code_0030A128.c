@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
+#include "fld_lmap_task.h"
 
 extern s32 func_0030AC10(void);
 
@@ -28,12 +29,6 @@ extern char fldLocalMapTaskName[]; /* "LmapMain" */
 extern void fldShutdownLmapResources(void);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
-
-typedef struct LmapTaskState {
-    u32 value0;       /* Purpose not established */
-    u32 value4;       /* Cleared when the Lmap task initializes */
-    u32 variant;      /* 1..3, selected by the two model flags */
-} LmapTaskState;
 
 typedef GridTextListItem LmapNode;
 typedef GridTextWidget LmapList;
@@ -325,7 +320,7 @@ INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A8A8);
 
 void fldStartLmapTask(s32 mode) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(0x88);
-    u32 *taskData = (u32 *)sdfMemoryGetBlockAddress(allocation);
+    LmapTaskState *taskData = (LmapTaskState *)sdfMemoryGetBlockAddress(allocation);
 
     memset(taskData, 0, 0x88);
     if (mode != 0) {
@@ -333,7 +328,7 @@ void fldStartLmapTask(s32 mode) {
     } else {
         D_00438890 = 1;
     }
-    fldInitializeLmapTaskVariant((LmapTaskState *)taskData);
+    fldInitializeLmapTaskVariant(taskData);
     kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, func_0030A8A8, 0, taskData);
 }
 
@@ -403,7 +398,7 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
         }
     }
     task->variant = variant;
-    task->value4 = 0;
+    task->phase = 0;
 }
 
 void fldShutdownLmapResources(void) {
