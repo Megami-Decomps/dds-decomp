@@ -407,7 +407,7 @@ extern u32 effModelUpdateControlFlags;
 
 extern void *fileResolvePrimaryBuffer();
 
-extern s32 fileResolveSecondaryBuffer(void *);
+extern void *fileResolveSecondaryBuffer(FileJobPayload *);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
@@ -474,7 +474,7 @@ extern u32 effSharedScalyStripResource;
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
-extern s32 *effAllocateCopiedEffectPayload(u32, u32, s32);
+extern s32 *effAllocateCopiedEffectPayload(u32, void *, s32);
 
 extern s32 btlGetRuntime(void);
 
@@ -1419,7 +1419,7 @@ extern s32 *effCreateResourceHolderFromSelectedKind(s32 *, u16);
 EffKindWork *func_002DFDB8(FileJob *work) {
     void *source = fileResolvePrimaryBuffer(work);
     EffKindWork *effect = effAllocateKindWork(work->option, source);
-    s32 *secondary = (s32 *)fileResolveSecondaryBuffer(work);
+    s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
     if (secondary != NULL) {
         if (D_003E9810[effect->kind].initialize != NULL) {
@@ -1517,7 +1517,7 @@ EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
 EffKindWork *effCreateAlternateKindWorkFromFile(FileJob *work) {
     void *source = fileResolvePrimaryBuffer(work);
     EffKindWork *effect = effAllocateAlternateKindWork(work->option, source);
-    s32 *secondary = (s32 *)fileResolveSecondaryBuffer(work);
+    s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
     if (secondary != NULL) {
         if (D_003E98A0[effect->kind].initialize != NULL) {
@@ -1652,7 +1652,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
            ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
-        billCreateIndexed(1, fileResolveSecondaryBuffer(source));
+        billCreateIndexed(1, fileResolveSecondaryBuffer((FileJobPayload *)source));
     return work;
 }
 
@@ -2693,7 +2693,7 @@ u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
 }
 
 u8 *effCreateFileResourceInstance(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer(work);
+    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
     void *source;
     switch (((FileJob *)work)->slots[0].selector) {
     case 1:
@@ -3690,7 +3690,7 @@ void effConfigureSurfaceNodeByKind(s32 *object, s32 kind, s32 *settings) {
 
 s32 effCreateSurfaceNodeFromFile(s32 *source) {
     s32 *object = (s32 *)effResourceReferenceReplaceFromFile((u8 *)source);
-    s32 *data = (s32 *)fileResolveSecondaryBuffer(source);
+    s32 *data = fileResolveSecondaryBuffer((FileJobPayload *)source);
     if (data != NULL) {
         effConfigureSurfaceNodeByKind(object, ((FileJob *)source)->slots[0].selector, data);
     }
@@ -5555,7 +5555,7 @@ u8 *effCreateResourceInstanceB(u16 kind, void *source, u32 extra) {
 extern u8 *effCreateResourceInstanceB(u16, void *, u32);
 
 u8 *effCreateFileResourceInstanceB(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer(work);
+    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
     void *source;
     switch (((FileJob *)work)->slots[0].selector) {
     case 1:
@@ -6408,7 +6408,7 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
 
 u32 effCreateModelResourceFromFile(u8 *work) {
     void *first = fileResolvePrimaryBuffer(work);
-    void *second = fileResolveSecondaryBuffer(work);
+    void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
     return effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
 
@@ -6838,7 +6838,7 @@ void effResetObjectSlots(u8 *work) {
     }
 }
 
-s32 *effAllocateCopiedEffectPayload(u32 owner, u32 source, s32 size) {
+s32 *effAllocateCopiedEffectPayload(u32 owner, void *source, s32 size) {
     u32 headerSize = 0x40;
     u8 *base = sdfAllocGeneralBlock(size + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
@@ -6852,7 +6852,7 @@ s32 *effAllocateCopiedEffectPayload(u32 owner, u32 source, s32 size) {
     ((EffCopiedPayload *)node)->size = size;
     ((EffCopiedPayload *)node)->body = body;
     ((EffCopiedPayload *)node)->state = 0;
-    memcpy(body, (void *)source, size);
+    memcpy(body, source, size);
     return (s32 *)node;
 }
 
@@ -6862,7 +6862,7 @@ extern void fldRelocatePackedTransferChunk(s32, s32);
 
 extern void func_002F6A80(s32 *);
 
-s32 *effCreateRelocatedEffectPayload(u32 owner, u32 unused, u32 source, u32 kind) {
+s32 *effCreateRelocatedEffectPayload(u32 owner, u32 unused, void *source, u32 kind) {
     s32 *work = effAllocateCopiedEffectPayload(owner, source, kind);
     s32 object = *work;
     fldRelocatePackedTransferChunk(object, object + 8);
@@ -7702,7 +7702,7 @@ u8 *effAllocateResourcePayload(u16 kind, void *source) {
     return effect;
 }
 
-u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, s32 secondary, u32 param) {
+u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, void *secondary, u32 param) {
     u8 *effect = effAllocateResourcePayload(kind, source);
 
     if (btlIsRuntimeAllocated() != 0) {
@@ -7716,11 +7716,11 @@ u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, s32 secondary, u32 
     return effect;
 }
 
-void effCreateActiveResourceFromFile(s32 *source) {
+void effCreateActiveResourceFromFile(FileJobPayload *source) {
     void *primary = fileResolvePrimaryBuffer(source);
-    s32 secondary = fileResolveSecondaryBuffer(source);
-    func_002F9608(((FileJob *)source)->option, primary,
-                  ((FileJob *)source)->slots[0].selector, secondary, ((FileJob *)source)->slots[1].size);
+    void *secondary = fileResolveSecondaryBuffer(source);
+    func_002F9608(source->option, primary,
+                  source->primary.selector, secondary, source->secondary.size);
 }
 
 void effDestroyResourceInstance(u32 *obj) {
@@ -7945,30 +7945,30 @@ s32 *func_002FA5B8(s32 *source) {
 
 extern void effRebuildResourceEntries(u8 *, u32, s32 *);
 
-extern void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *, u32, u32);
+extern void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *, void *, u32);
 
-extern void effRebuildResourceEntryClones(EffectSlotNode80 *, s32);
+extern void effRebuildResourceEntryClones(EffectSlotNode80 *, FileQueue *);
 
-s32 *func_002FA5F0(u8 *request) {
+s32 *func_002FA5F0(FileJobPayload *request) {
     u8 *buffer = fileResolvePrimaryBuffer(request);
     s32 *size = (s32 *)(buffer + 0x50);
     s32 *work = func_002FA5B8(size);
-    s32 secondary;
+    void *secondary;
     u32 kind;
 
     memcpy(&((EffectSlotNode80 *)work)->randomDirection, buffer, 0x50);
-    effRebuildResourceEntries((u8 *)work, ((FileJob *)request)->option, size);
+    effRebuildResourceEntries((u8 *)work, request->option, size);
     secondary = fileResolveSecondaryBuffer(request);
     if (secondary != 0) {
-        kind = ((FileJob *)request)->slots[0].selector;
+        kind = request->primary.selector;
         switch (kind) {
         case 3:
-            effReplaceEffectSlotModelAndDeviceResources((EffectSlotNode80 *)work, secondary, ((FileJob *)request)->slots[1].size);
-            kind = ((FileJob *)request)->slots[0].selector;
+            effReplaceEffectSlotModelAndDeviceResources((EffectSlotNode80 *)work, secondary, request->secondary.size);
+            kind = request->primary.selector;
             break;
         case 6:
             effRebuildResourceEntryClones(work, secondary);
-            kind = ((FileJob *)request)->slots[0].selector;
+            kind = request->primary.selector;
             break;
         }
         ((EffectSlotNode80 *)work)->resourceKind = kind;
@@ -8087,7 +8087,7 @@ void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
     }
 }
 
-void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, u32 kind, u32 config) {
+void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, void *source, u32 config) {
     BattleGroupNode *modelData;
     MdlCtx *model;
     void *deviceSlot;
@@ -8100,7 +8100,7 @@ void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, u32 kin
         sdfReleaseDevSlot(work->deviceSlot, 1, 1);
         work->deviceSlot = 0;
     }
-    model = func_002DC1D0((void *)kind, config);
+    model = func_002DC1D0(source, config);
     modelData = model->sub;
     work->model = model;
     deviceSlot = sdfModelCreateWithAlternateItems(modelData->resourceList, modelData->itemList);
@@ -8108,7 +8108,7 @@ void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, u32 kin
 }
 
 /* Rebuilds the surface job queue of one record bucket and clones the first job. */
-void effRebuildResourceEntryClones(EffectSlotNode80 *obj, s32 secondary) {
+void effRebuildResourceEntryClones(EffectSlotNode80 *obj, FileQueue *secondary) {
     u32 count = ((EffRecordBucket *)obj->record)->count;
     u32 i;
     s32 size;
@@ -8125,7 +8125,7 @@ void effRebuildResourceEntryClones(EffectSlotNode80 *obj, s32 secondary) {
     if (size != 0) {
         obj->entryAllocation = (u32)sdfAllocGeneralBlock(size);
         obj->resourceEntries = sdfResourceRetainAddress(obj->entryAllocation);
-        ((void **)obj->resourceEntries)[0] = fileCloneQueueEntries((FileQueue *)secondary);
+        ((void **)obj->resourceEntries)[0] = fileCloneQueueEntries(secondary);
         for (i = 1; i < count; i++) {
             ((void **)obj->resourceEntries)[i] = fileQueueClone(((void **)obj->resourceEntries)[0]);
         }
@@ -8195,19 +8195,22 @@ typedef struct EffSharedEffectResource {
     MdlCtx *model;
     u32 deviceSlot;
     u32 data;
-    u8 pad0C[4];
+    u32 unk0C;
     u16 references;
-    u8 pad12[0xA];
-    u32 allocation;
+    u8 pad12[2];
+    void *entries;
+    u32 entriesSize;
+    SdfMemBlock *allocation;
 } EffSharedEffectResource;
 typedef struct EffSharedEffectWork {
-    u8 pad00[0x20];
+    f32 position[4];
+    f32 rotation[4];
     u32 unk20;
     f32 unk24;
     u32 unk28;
     EffectBlob data;       // 0x2C through 0x477
     EffSharedEffectResource *resource; // 0x478, shared resource whose reference count is at +0x10
-    u32 allocation;        // 0x47C
+    SdfMemBlock *allocation; /* 0x47C: general-heap descriptor, not the retained address */
 } EffSharedEffectWork;
 
 void effApplySharedModelParameters(EffSharedEffectWork *work) {
@@ -8245,7 +8248,36 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
     mdlSetAllResourceFrames(work->resource->model, work->data.frame);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB5C0);
+/* General-heap descriptors and retained buffer addresses are distinct owners. */
+u8 *func_002FB5C0(FileJobPayload *source) {
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(EffSharedEffectWork));
+    EffSharedEffectWork *work = (EffSharedEffectWork *)sdfResourceRetainAddress(allocation);
+    void *secondary;
+
+    memset(work, 0, sizeof(*work));
+    work->allocation = allocation;
+    /* Retail initializes both vectors with sqc2 vf0 through SDK-style VU macros. */
+    VU0_STORE_VF(vf0, work->position);
+    VU0_STORE_VF(vf0, work->rotation);
+    work->unk20 = 0x80808080;
+    work->unk24 = 1.0f;
+    if (source != NULL) {
+        work->data = *(EffectBlob *)fileResolvePrimaryBuffer(source);
+        work->resource = sdfAllocSizeClassBlock(sizeof(*work->resource));
+        work->resource->model = NULL;
+        work->resource->deviceSlot = 0;
+        work->resource->data = 0;
+        work->resource->unk0C = func_001003F8();
+        work->resource->references = 1;
+        work->resource->data = (u32)sdfAllocAndClearQuadwords(0xE0);
+        secondary = fileResolveSecondaryBuffer(source);
+        work->resource->allocation = sdfAllocGeneralBlock(source->secondary.size);
+        work->resource->entriesSize = source->secondary.size;
+        work->resource->entries = (void *)sdfResourceRetainAddress(work->resource->allocation);
+        memcpy(work->resource->entries, secondary, work->resource->entriesSize);
+    }
+    return (u8 *)work;
+}
 
 
 
@@ -8278,7 +8310,6 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
 }
 
 
-extern u8 *func_002FB5C0(s32);
 
 s32 effCloneEffectRequest(u8 *src) {
     u8 *dst = func_002FB5C0(0);
