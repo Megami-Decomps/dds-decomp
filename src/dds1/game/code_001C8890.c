@@ -2894,7 +2894,77 @@ typedef struct BtlHuntExpArgs {
 typedef char BtlHuntExpArgsSizeCheck[sizeof(BtlHuntExpArgs) == 8 ? 1 : -1];
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D3688);
+u32 func_001D3688(s32 address) {
+    BtlHuntExpArgs *args = (BtlHuntExpArgs *)address;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    BtlUnit *head;
+    DatPartyRecord *record;
+    u32 count;
+    u32 index;
+    u32 share;
+
+    if (args->amount == 0) {
+        return 1;
+    }
+    if (args->actor->flags & 0x400) {
+        return 1;
+    }
+    if (btlCheckSpecialAbility((s32)&args->actor->partyRecord, 0x24C)) {
+        count = 0;
+        record = btlGetIndexedPartyEntryRecord(args->actor->unk2C4);
+        record->huntExp += args->amount;
+        head = battle->units;
+        for (unit = head; unit != NULL; unit = unit->next) {
+            u32 flags = unit->flags;
+            if (flags & 0x200) {
+                if (flags & 1) {
+                    if (args->actor != unit && !(flags & 0x20) && !(unit->partyRecord.status & 0x40)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        for (index = 0; index < 5; index++) {
+            u16 flags = datGameState->party[index].flags;
+            if (flags & 1) {
+                if (!(flags & 2) && !(datGameState->party[index].status & 0x4040)) {
+                    count++;
+                }
+            }
+        }
+        if (count == 0) {
+            return 1;
+        }
+        share = (u32)((f32)args->amount / (f32)count);
+        for (unit = head; unit != NULL; unit = unit->next) {
+            u32 flags = unit->flags;
+            if (flags & 0x200) {
+                if (flags & 1) {
+                    if (args->actor != unit && !(flags & 0x20) && !(unit->partyRecord.status & 0x40)) {
+                        record = btlGetIndexedPartyEntryRecord(unit->unk2C4);
+                        record->huntExp += share;
+                    }
+                }
+            }
+        }
+        for (index = 0; index < 5; index++) {
+            u16 flags = datGameState->party[index].flags;
+            if (flags & 1) {
+                if (!(flags & 2) && !(datGameState->party[index].status & 0x4040)) {
+                    datGameState->party[index].huntExp += share;
+                }
+            }
+        }
+        btlBossDebugPrintf("btl:AUTO ep=%d[%d],count=%d\n", share, args->amount, count);
+    } else {
+        record = btlGetIndexedPartyEntryRecord(args->actor->unk2C4);
+        record->huntExp += args->amount;
+        btlBossDebugPrintf("btl:hunt ep=%d[%p]\n", args->amount, record);
+    }
+    return 1;
+}
+
 
 extern u32 func_001D3688(s32);
 
