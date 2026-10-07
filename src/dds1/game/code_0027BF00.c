@@ -48,9 +48,9 @@ extern void func_0027D850(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
 
 extern void *func_0027F230(s32, s32, s32);
 
-extern void func_0027DA80(s32, s32, s32, s32, MenuPanelHandles *, s32);
+extern void mnuDrawFourPanelIconsAtOffsets(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
-extern void func_0027DBD0(s32, s32, s32, s32, MenuPanelHandles *, s32);
+extern void mnuDrawPanelIconPairsAtFixedPositions(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
 extern void func_0027C140();
 
@@ -620,7 +620,7 @@ void mnuReleaseResourceList(s32 *object) {
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027D850);
 
 /* Draw the four row icons at their table-owned offsets. */
-void func_0027DA80(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
+void mnuDrawFourPanelIconsAtOffsets(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
     MenuPanelPositionTable4 table = D_003B2380;
 
     func_002BF4E0(x + table.positions[0].x, y + table.positions[0].y, depth, alpha, 1,
@@ -634,7 +634,7 @@ void func_0027DA80(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, 
 }
 
 /* Draw two stacked icon pairs; the table already contains absolute screen positions. */
-void func_0027DBD0(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
+void mnuDrawPanelIconPairsAtFixedPositions(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
     MenuPanelPositionTable2 table = D_003B23A0;
     s32 positionX = table.positions[0].x;
     s32 positionY = table.positions[0].y;
@@ -654,10 +654,10 @@ void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *panel
         func_0027D850(x, y, depth, fade, panel, selectionMode, drawArg);
         return;
     case 1:
-        func_0027DA80(x, y, depth, MNU_FULL_FADE, panel, drawArg);
+        mnuDrawFourPanelIconsAtOffsets(x, y, depth, MNU_FULL_FADE, panel, drawArg);
         return;
     case 2:
-        func_0027DBD0(x, y, depth, fade, panel, drawArg);
+        mnuDrawPanelIconPairsAtFixedPositions(x, y, depth, fade, panel, drawArg);
         break;
     }
 }
