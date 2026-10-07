@@ -283,7 +283,7 @@ s32 effGetSlotAt(EffArrHdr *table, s32 index) {
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, s32);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 extern void sdfProjectVuVectorToScreen();
@@ -394,7 +394,7 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
 void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)(sdfCreateFormattedSifCommand(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, arg3)));
+    sdfAppendPacket(list, (u32)(sdfCreateFormattedSifCommand(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, (const char *)arg3)));
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
