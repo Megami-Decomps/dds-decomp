@@ -426,7 +426,8 @@ u32 func_002CD7F0(u32 arg0, u32 arg1) {
     return arg1;
 }
 
-u32 func_002CD7F8(void) {
+u32 func_002CD7F8(u32 itemId) {
+    (void)itemId;
     return 0;
 }
 
