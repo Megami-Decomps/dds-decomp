@@ -6773,8 +6773,8 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002B3178);
 typedef struct EffCopiedPayload {
     u8 *body;            // 0x00
     s32 size;            // 0x04
-    u32 state;           // 0x08
-    u32 unk0C;
+    u32 slotCount;       // 0x08: populated effect/target pairs
+    u32 selectedTargetIndex; // 0x0C: chosen target path slot
     EffWorldNode *effects[5]; // 0x10
     Dds3PathCurveWork *targets[5]; // 0x24
     u8 *allocation;      // 0x38
@@ -6816,7 +6816,7 @@ EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, 
     node->allocation = base;
     node->size = size;
     node->body = body;
-    node->state = 0;
+    node->slotCount = 0;
     memcpy(body, source, size);
     return node;
 }
