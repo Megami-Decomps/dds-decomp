@@ -315,7 +315,34 @@ extern const MenuCommandScatterLayout D_0042B0D0;
 typedef char MenuCommandScatterLayout_size_check[
     sizeof(MenuCommandScatterLayout) == 0x38 ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF478);
+void func_002BF478(s32 unusedX, s32 unusedY, s32 unusedDepth,
+                  MenuQueuedCommand *command, s32 surface) {
+    MenuCommandScatterLayout layout = D_0042B0D0;
+    s32 phase = command->initialValue;
+    s32 fade;
+    s32 offset;
+    u32 i;
+    MenuPoint *position;
+
+    if (phase < 0x100) {
+        fade = phase;
+    } else {
+        fade = 0x200 - phase;
+    }
+    offset = (s32)fsqrtf((f32)((s32)fsqrtf(256.0f) * 8));
+    offset = offset * phase / 0x200;
+    offset = 0xA00 - offset * offset;
+    command->resources->workEntries[0x3D].height = offset;
+    func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3D, surface);
+    command->resources->workEntries[0x3E].height = offset;
+    func_00306CD0(0, 0xE00 - offset, 0, fade, 0, command->resources, 0x3E, surface);
+    func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3C, surface);
+    for (i = 0, position = layout.points; i < 7; i++, position++) {
+        func_00306CD0(position->x, position->y, 0, fade, 0,
+                      command->resources, 0x3B, surface);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF660);
 
