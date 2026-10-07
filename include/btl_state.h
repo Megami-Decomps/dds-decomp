@@ -46,14 +46,15 @@ typedef struct BattleLinkedEffectState {
  * This is one object, not separate script/event/actor-update contexts. Holes
  * remain opaque. DDS2 has a different layout, not a uniform offset shift. */
 typedef struct BtlState {
-    u8 pad000[0x10];
+    f32 position[4]; /* 0x00: battle origin added to the camera offset at 001DC11C. */
     f32 baselineLightDirection[4];
     f32 baselineLightColor[4];
     f32 baselineAmbientColor[4];
     f32 lightDirection[4];
     f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
     f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
-    u8 pad070[0x30];
+    BtlCamState camera; /* 0x70: active camera pose; fov stored at 001DC110. */
+    u8 pad098[8];
     BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
     u8 pad0C8[0x68];
     BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
@@ -61,7 +62,9 @@ typedef struct BtlState {
     u32 runtimeFlags; /* 0x160 */
     u8 pad164[0x1C];
     s32 debugCameraProgress; /* 0x180 */
-    u8 pad184[0x1C];
+    u8 pad184[4];
+    BtlIndexList *pendingSoundList; /* 0x188: allocated at 001DC1F0, stored at 001DC1FC. */
+    u8 pad18C[0x14];
     f32 debugCameraParameter; /* 0x1A0 */
     u8 pad1A4[0x1C];
     s16 eventTaskId; /* 0x1C0: -1 when no event task is available */
@@ -82,7 +85,7 @@ typedef struct BtlState {
     u32 battleFlags; /* 0x1F4 */
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk_1FC; /* Bit 0x800 bypasses command-block-reason checks. */
-    u8 pad200[4];
+    struct EffWorldNode *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
     s32 listener; /* 0x204: stored world-node address. */
     u8 pad208[0x1C];
     BtlTask *tasks; /* 0x224 */
@@ -208,14 +211,15 @@ typedef union BtlBackgroundId {
  * 0x1AA6F8. Its script-owner/task pair is +0x2C4/+0x2C8, not DDS1's
  * offsets plus 0x24. Scene groups, actor lists and SYSEFF slots belong here. */
 typedef struct BtlState {
-    u8 pad000[0x10];
+    f32 position[4]; /* 0x00: battle origin added to the camera offset at 001E9444. */
     f32 baselineLightDirection[4]; /* 0x10: initializer source for current direction. */
     f32 baselineLightColor[4]; /* 0x20: initializer source for current light color. */
     f32 baselineAmbientColor[4]; /* 0x30: initializer source for current ambient color. */
     f32 lightDirection[4]; /* 0x40: current scene light direction. */
     f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
     f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
-    u8 pad070[0x30];
+    BtlCamState camera; /* 0x70: active camera pose; fov stored at 001E9438. */
+    u8 pad098[8];
     BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
     u8 pad0C8[0x68];
     BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
@@ -249,7 +253,7 @@ typedef struct BtlState {
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk220;
-    u8 pad224[4];
+    struct EffWorldNode *cameraObject; /* 0x224: world camera stored at 001E9514. */
     s32 unk228;
     s32 currentScene; /* 0x22C */
     s32 queuedScene;
