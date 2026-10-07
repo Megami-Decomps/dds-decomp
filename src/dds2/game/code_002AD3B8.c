@@ -32,7 +32,6 @@ extern void func_002B2C88(s32, s32, s32, s32);
 extern void mnuClearPageSelectionHandles(s32);
 extern void mnuClearEntries(s32);
 extern void mnuDestroyPanelGroup(s32);
-extern void mnuFreeSpriteStateWork(s32);
 extern void func_002C1B68(u32 *, u32);
 extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(s32, s32);
@@ -86,7 +85,6 @@ extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetWindowResource(s32, u32 *, s32, s32, s32, s32, s32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, u32 *, s32, s32);
 extern void *mnuCreatePanelGroup(s32, s32, s32);
-extern void *mnuCreateSpriteState(s32, s32, s32);
 
 typedef struct MenuListNode MenuListNode;
 typedef struct MenuList MenuList;
@@ -405,7 +403,9 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 1, 0);
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
-    context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
+    context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
+                                                 (struct EffectSlotSet *)context->spriteArg1,
+                                                 (struct EffectSlotSet *)context->group);
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
@@ -428,7 +428,7 @@ s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
-        mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork(((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
@@ -550,7 +550,9 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
         func_002BB9C8(slot->contents[0].windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
-    context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
+    context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
+                                                 (struct EffectSlotSet *)context->spriteArg1,
+                                                 (struct EffectSlotSet *)context->group);
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
@@ -573,7 +575,7 @@ s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
-        mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork(((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
@@ -696,7 +698,9 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
         func_002BB9C8(slot->contents[0].windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, context->spriteArg2);
-    context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
+    context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
+                                                 (struct EffectSlotSet *)context->spriteArg1,
+                                                 (struct EffectSlotSet *)context->group);
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
     func_002B2C88((s32)window, 1, 0, 0);
@@ -722,7 +726,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
         ((MenuStaffContext *)context)->panelHandle = 0;
     }
     if (((MenuStaffContext *)context)->spriteHandle != 0) {
-        mnuFreeSpriteStateWork((s32)((MenuStaffContext *)context)->spriteHandle);
+        mnuFreeSpriteStateWork(((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);

@@ -221,6 +221,22 @@ typedef struct MenuPoint {
 
 struct EffectSlotSet;
 
+/* Native sprite-state allocation: three resource-set owners and a state word. */
+typedef struct MenuSpriteState {
+    u8 pad00[0x10];
+    struct EffectSlotSet *resourceSets[3];
+    s32 initialValue; /* 0x1C: initialized to 0x100 */
+} MenuSpriteState;
+
+typedef char MenuSpriteState_size_must_be_0x20[(sizeof(MenuSpriteState) == 0x20) ? 1 : -1];
+typedef char MenuSpriteState_resourceSets_offset_check[
+    ((u32)&((MenuSpriteState *)0)->resourceSets == 0x10) ? 1 : -1];
+typedef char MenuSpriteState_initialValue_offset_check[
+    ((u32)&((MenuSpriteState *)0)->initialValue == 0x1C) ? 1 : -1];
+
+MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *, struct EffectSlotSet *, struct EffectSlotSet *);
+void mnuFreeSpriteStateWork(MenuSpriteState *);
+
 /* An indexed render slot owned by an effect resource set. */
 typedef struct MenuGridSlot {
     struct EffectSlotSet *set;
@@ -621,7 +637,7 @@ typedef struct MenuStaffContext {
     struct MenuList *selection; /* 0xA914: retained party-selection list */
     u8 padA918[0x11C];
     void *panelHandle;    /* 0xAA34 */
-    void *spriteHandle;   /* 0xAA38 */
+    MenuSpriteState *spriteHandle; /* 0xAA38 */
     u8 padAA3C[0xC];
     void *menu;           /* 0xAA48: menu-mode-specific child allocation */
     u8 padAA4C[4];

@@ -265,7 +265,7 @@ typedef struct MenuContext {
     MenuPageWindow partyWindow; /* 0x284: lists, page slots and selection */
     PartyPanel partyPanel; /* 0xA928: counters and five native 0x34-byte entries */
     s32 panelGroup;        /* 0xAA34 */
-    s32 panelRequest;      /* 0xAA38 */
+    MenuSpriteState *panelRequest; /* 0xAA38 */
     s32 panelEffects;      /* 0xAA3C */
     u8 padAA40[8];
     s32 party;             /* 0xAA48 */
@@ -967,7 +967,6 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
 extern s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
-extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern s32 mnuAllocateSimpleSprite(s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -989,9 +988,9 @@ s32 mnuCreatePanels(s32 callback) {
     mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
     menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
                                                    (s32)menuContext->displayResource, 0);
-    menuContext->panelRequest = mnuCreateSpriteState(menuContext->resourceHandle,
-                                                       (s32)menuContext->displayResource,
-                                                       menuContext->displayHandle);
+    menuContext->panelRequest = mnuCreateSpriteState((struct EffectSlotSet *)menuContext->resourceHandle,
+                                                    (struct EffectSlotSet *)menuContext->displayResource,
+                                                    (struct EffectSlotSet *)menuContext->displayHandle);
     menuContext->panelEffects = mnuAllocateSimpleSprite(menuContext->resourceHandle,
                                                          menuContext->alternateResource,
                                                          menuContext->displayHandle);

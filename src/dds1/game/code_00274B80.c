@@ -137,7 +137,7 @@ typedef struct CampMenuContext {
     s32 finalPanelSlot;       /* 0x7F0: last displayed slot */
     u8 pad7F4[0x104];
     s32 sceneGroup;           /* 0x8F8 */
-    s32 sprite;               /* 0x8FC */
+    MenuSpriteState *sprite;  /* 0x8FC */
     s32 effect;               /* 0x900 */
     u8 pad904[8];
     s32 menu;                 /* 0x90C */
@@ -598,7 +598,6 @@ extern void btlStopStage();
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
 extern void mnuDestroyPanelGroup();
-extern void mnuFreeSpriteStateWork();
 extern void mnuFreeSimpleSpriteWork();
 extern void mnuFreeProfilePanelWork();
 extern void mnuReleaseResourceList(MenuPanelHandles *);

@@ -631,27 +631,21 @@ void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId) {
     } while (nextIndex < 5);
 }
 
-typedef struct MenuSpriteState {
-    u8 pad00[0x10];
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 initialValue; /* 0x1C: initialized to 0x100 */
-} MenuSpriteState;
-
-/* Create a zeroed sprite-position state with its native initial value. */
-void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
+/* Create the sprite-resource state with its native initial value. */
+MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
+                                      struct EffectSlotSet *resourceSet1,
+                                      struct EffectSlotSet *resourceSet2) {
     MenuSpriteState *spriteState = sdfAllocSizeClassBlock(MNU_SPRITE_STATE_BYTES);
     memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
-    spriteState->x = x;
-    spriteState->y = y;
-    spriteState->z = z;
+    spriteState->resourceSets[0] = resourceSet0;
+    spriteState->resourceSets[1] = resourceSet1;
+    spriteState->resourceSets[2] = resourceSet2;
     spriteState->initialValue = 0x100;
     return spriteState;
 }
 
-void mnuFreeSpriteStateWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
+    sdfReleaseChipBlock(spriteState);
 }
 
 /* The sequel selects its draw variant from the range index plus eight. */
@@ -669,9 +663,9 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
 void *mnuAllocateSimpleSprite(s32 x, s32 y, s32 z) {
     MenuSpriteState *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
-    sprite->x = x;
-    sprite->y = y;
-    sprite->z = z;
+    sprite->resourceSets[0] = (struct EffectSlotSet *)x;
+    sprite->resourceSets[1] = (struct EffectSlotSet *)y;
+    sprite->resourceSets[2] = (struct EffectSlotSet *)z;
     sprite->initialValue = 0x100;
     return sprite;
 }
