@@ -343,7 +343,7 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
-void func_00284508(u32, u32, u32, u32, u32, u32);
+void func_00284508(s32 x, s32 y, s32 z, s32 amount, u32 handle, s32 packet);
 extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
 extern void func_00274A70();
@@ -3538,7 +3538,96 @@ void func_0027FDB8(void) {
 void func_0027FDC0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027FDC8);
+/* Mantra node mastery flash: fade states 6-9 as the other nodes; state 1 pulses the node in and out over 90
+ * frames (returns 1 when done); state 3 flashes the node with three orbiting sparks over 40 frames. */
+s32 func_0027FDC8(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    MantraPanelAnimation *panel = (MantraPanelAnimation *)object;
+    f32 scale;
+    f32 pulse;
+    f32 phase;
+    f32 angle;
+    s32 alpha;
+    s32 i;
+
+    switch ((panel->flags >> 19) & 0xF) {
+    case 6:
+        scale = panel->frame * 0.25f;
+        mnuDrawMantraSprite(x, y, z, (s32)(amount * scale), 0x77, 0, packet);
+        break;
+    case 8:
+        scale = panel->frame / 10.0f;
+        mnuDrawMantraSprite(x, y, z, (s32)(amount * scale), 0x77, 0, packet);
+        break;
+    case 7:
+        scale = panel->frame * 0.25f;
+        scale = 1.0f - scale;
+        mnuDrawMantraSprite(x, y, z, (s32)(amount * scale), 0x77, 0, packet);
+        break;
+    case 9:
+        scale = panel->frame / 10.0f;
+        scale = 1.0f - scale;
+        mnuDrawMantraSprite(x, y, z, (s32)(amount * scale), 0x77, 0, packet);
+        break;
+    case 0:
+        mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
+        break;
+    case 1:
+        panel->frame++;
+        if (panel->frame < 20) {
+            scale = panel->frame / 20.0f;
+        } else {
+            scale = 1.0f;
+            if (panel->frame >= 70) {
+                if (panel->frame < 90) {
+                    scale = (90 - panel->frame) / 20.0f;
+                } else {
+                    scale = 0.0f;
+                }
+            }
+        }
+        alpha = amount * sdfSinPoly(scale * 1.5707963f) * 0.3f;
+        mnuDrawMantraSprite(x, y, 0, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, 0, alpha, 0xB4, 0x20, packet);
+        if (panel->frame >= 90) {
+            return 1;
+        }
+        break;
+    case 3:
+        panel->frame++;
+        if (panel->frame < 20) {
+            scale = panel->frame / 20.0f;
+        } else {
+            scale = (40 - panel->frame) / 20.0f;
+        }
+        alpha = amount * sdfSinPoly(scale * 1.5707963f) * 0.8f;
+        mnuDrawMantraSprite(x, y, 0, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, 0, alpha, 0xB4, 0x20, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+        uiDrawActiveSurfaceRegion(packet);
+        mnuDrawMantraSprite(x, y, 0, amount, 0x7C, 0x60, packet);
+        sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+        pulse = panel->frame / 40.0f;
+        scale = panel->frame / 60.0f;
+        pulse = sdfSinPoly(pulse * 3.1415926f);
+        phase = scale * -6.2831853f;
+        for (i = 0; i < 3; i++) {
+            angle = phase + i * 2.0943951f;
+            mnuDrawMantraSprite((s32)(x + sdfEvaluateCosineViaSinePhaseShift(angle) * 15.0f),
+                                (s32)(y + -sdfSinPoly(angle) * 15.0f), 0, (s32)(amount * pulse * 0.5f), 0x7D, 0,
+                                packet);
+        }
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
+        if (panel->frame >= 40) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 void mnuResetMantraPanelAnimationStates(u32 unused, s32 view) {
     ((MantraPanelAnimation *)view)->stateA = 0;
@@ -3771,7 +3860,63 @@ void mnuFreeMantraSparkleEmitter(u32 sprite) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284508);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+
+void func_00284508(s32 x, s32 y, s32 z, s32 amount, u32 handle, s32 packet) {
+    MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)handle;
+    MantraSparkle *spark;
+    u32 i;
+    f32 progress;
+    f32 brightness;
+    f32 angle;
+    s32 drawX;
+    s32 drawY;
+
+    emitter->duration--;
+    if (emitter->duration < 0) {
+        func_00284818(emitter);
+        if (emitter->kind == 0) {
+            emitter->duration = effMiscRandUnitFloat(0) * 10.0f + 5.0f;
+        } else {
+            emitter->duration = 1;
+        }
+    }
+    spark = emitter->sparkle;
+    for (i = 0; i < 10; i++, spark++) {
+        if (spark->active) {
+            progress = (f32)spark->age / (f32)spark->life;
+            brightness = (sdfSinPoly(progress * (3.14159265f * 2.0f) + (3.14159265f * -0.5f)) + 1.0f) * 0.5f;
+            /* Retail caps progress rather than the computed brightness here. */
+            if (brightness > 1.0f) {
+                progress = 1.0f;
+            }
+            if (emitter->kind == 0) {
+                drawX = spark->vx + x;
+                drawY = spark->vy + y;
+            } else {
+                if (progress <= 0.3f) {
+                    brightness = sdfSinPoly(progress * (3.14159265f * 0.5f) / 0.3f);
+                } else {
+                    brightness = 1.0f - (progress - 0.3f) / 0.7f;
+                }
+                if ((s32)spark->vx & 1) {
+                    progress = 1.0f - progress;
+                }
+                angle = progress * (3.14159265f * 2.5f);
+                drawX = spark->vx * sdfEvaluateCosineViaSinePhaseShift(angle) + x;
+                drawY = spark->vy * sdfSinPoly(angle) + y;
+            }
+            mnuDrawMantraSprite(drawX, drawY, z, (s32)(amount * brightness), 0x8F, 0, packet);
+            spark->age++;
+            if (spark->age > spark->life) {
+                spark->active = 0;
+                emitter->count--;
+            }
+        }
+    }
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((x - 128) << 4, (y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
+}
 
 MantraSparkle *func_00284818(MantraSparkleEmitter *emitter) {
     MantraSparkle *spark = emitter->sparkle;

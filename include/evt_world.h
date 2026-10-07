@@ -34,6 +34,16 @@ typedef struct EvtResourcePair {
     u32 unk04;
 } EvtResourcePair;
 
+/* Loaded resource table header: the resource handle, the origin of a
+ * 32-byte-stride record array, and its record count. */
+typedef struct EvtLoadedRecord {
+    u32 handle; /* 0x0: released by sdfReleaseResourceAllocation */
+    s32 recordsAddress; /* 0x4: origin of a 32-byte-stride lookup */
+    u32 recordCount; /* 0x8: bound used by the coordinate search */
+} EvtLoadedRecord;
+
+typedef char EvtLoadedRecord_size_must_be_0x0C[(sizeof(EvtLoadedRecord) == 0x0C) ? 1 : -1];
+
 /* The primary object returned by dds3GetWorldObject, not the World/WorldInfo
  * handle that owns it. Event lookup, lip-sync and viewer code share this chain:
  * object +0x18 -> table +0x08 -> 0x0C-byte slot entries, each with head +0x04.
