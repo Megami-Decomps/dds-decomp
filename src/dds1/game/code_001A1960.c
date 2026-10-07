@@ -133,7 +133,7 @@ extern s32 D_00358510[];
 
 extern s32 D_00359A78[];
 
-extern s32 mdlFlagTest(u32);
+extern s32 mdlFlagTest(s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -691,7 +691,27 @@ s32 btlSelectActorAction(s32 object) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A4130);
+s32 func_001A4130(s32 actorAddress, s32 mode) {
+    BtlUnit *actor = (BtlUnit *)actorAddress;
+    DatEnemyRecord *enemy = &datEnemyRecords[actor->partyRecord.unitId];
+    s32 action = 0;
+    u16 i;
+
+    extern u32 btlRollAiBucket(void);
+
+    if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
+        mdlFlagTest(enemy->overrideFlag) != 0) {
+        if ((u8)btlRollAiBucket() < enemy->overrideChance) {
+            action = enemy->overrideAction;
+        }
+    }
+    for (i = 0; i < 2 && action == 0; i++) {
+        if (enemy->unk3E[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
+            action = enemy->unk3E[i];
+        }
+    }
+    return action;
+}
 
 void func_001A4240(u16 item) {
     BattleController *controller = (BattleController *)btlGetRuntime();
