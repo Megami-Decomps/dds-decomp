@@ -826,11 +826,10 @@ EvtUnit *func_0023CC60(EvtEffObj *effObj, MdlCtx *owner) {
 
     VU0_LOAD_VF(vf10, defaultVector);
     VU0_STORE_VF_UNCLOBBERED(vf10, work->vec10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, (f32 *)((u8 *)work + 0x40));
-    /* These initialized color words fall in the unit's untyped padding. */
-    *(u32 *)((u8 *)work + 0x0C) = 0x00B2B2B2;
+    VU0_STORE_VF_UNCLOBBERED(vf10, work->vec40);
+    work->color0C = 0x00B2B2B2;
     work->color = 0x00B2B2B2;
-    *(u32 *)((u8 *)work + 0x5C) = 0x80303030;
+    work->color5C = 0x80303030;
     work->color50 = 0x80303030;
     endpoint = sdfAllocSizeClassBlock(0xE0);
     work->endpointWorkAddress = (s32)endpoint;
