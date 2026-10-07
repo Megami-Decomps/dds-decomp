@@ -14,7 +14,7 @@ ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object) {
     handle = 0;
     switch ((object->kindTag >> 24) - 4) {
     case 0: handle = dds3GetCameraHandle(object); break;
-    case 1: handle = func_00113230(object); break;
+    case 1: handle = dds3GetEffectObjectModelHolder(object); break;
     case 2: handle = (ObjBase *)effObjGetDataHandle(object); break;
     case 3: handle = (ObjBase *)effObjGetObjectHandle(object); break;
     case 4: handle = (ObjBase *)dds3GetResourceOwnerHandle(object); break;
