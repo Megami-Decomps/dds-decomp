@@ -4,7 +4,7 @@
 
 extern World *dds3ActiveWorld;
 
-void effObjNodeDestroy(void *arg);
+void effObjNodeDestroy(EffWorldNode *node);
 
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 
