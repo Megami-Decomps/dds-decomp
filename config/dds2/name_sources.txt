@@ -1971,6 +1971,7 @@
 0x001A4B98	itfMesSetEntryLastColorChannel	inferred	confidence=high; matched-C; src/dds2/interface/itfMesManager.c:889:func_001A4B98; Stores the fourth color channel used when entry glyphs are built; leaves the field layout and other channels unchanged.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001A4BB8	itfMesSetWindowCallbackAddress	inferred	Stores a callback address on the specified window. [names_reviewed6.tsv]
 0x001A4BD8	itfMesInit	inferred	twin [names_M67_Named.tsv]
+0x001A4CF8	itfMesRunPanelLayoutInspector	inferred	Runs the interactive message-window panel layout inspector, editing bounds/index and displaying coordinates and offsets.
 0x001A50C0	itfMesClearGlobalWords	inferred	Clears all three words of the message manager's D_003B4770 global.
 0x001A50D8	itfMesDestroyWindow	inferred	frees window mes state, effect handles, releases pool node
 0x001A5228	itfMesGetWindowEntryItems	inferred	Returns the selected window entry's item list. [names_reviewed6.tsv]

@@ -2432,6 +2432,7 @@
 0x0019CC90	itfMesSetGlobalFlags	inferred	Sets bits in the global 16-bit message flags word.
 0x0019CCA8	itfMesClearGlobalFlags	inferred	Clears bits in the global 16-bit message flags word.
 0x0019CCC8	itfMesGetGlobalFlags	inferred	Returns the global 16-bit message flags word.
+0x0019CCD8	itfMesRunPanelLayoutInspector	inferred	Runs the interactive message-window panel layout inspector, editing bounds/index and displaying coordinates and offsets.
 0x0019D160	itfMesRelocate	inferred	applies the fixup table to a message blob once, then sets its relocated flag
 0x0019D1A8	itfMesIsMsgData	inferred	returns true when the header magic at +8 is MSG0 or MSG1
 0x0019D1D8	itfMesGetEntry	inferred	Returns the message entry at the supplied index from the window's subrecord.

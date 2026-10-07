@@ -1125,7 +1125,7 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D00);
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D10);
 
-s32 func_001A4CF8(void) {
+s32 itfMesRunPanelLayoutInspector(void) {
     ItfMesBlkA4 *panel;
     UiSprite *panelSprite;
     s32 *position;
