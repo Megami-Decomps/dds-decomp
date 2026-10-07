@@ -128,17 +128,18 @@ extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 extern void func_00187C08(EffSolidRectParams *arg);
 extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
-extern s32 sdfAllocGeneralBlock(s32);
-extern u8 *sdfResourceRetainAddress(s32);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
-    s32 handle = sdfAllocGeneralBlock(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
-    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
+    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfResourceRetainAddress(allocation);
     EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
-    table->allocation = (void *)handle;
+    table->allocation = allocation;
     table->slots = slot;
     table->unk4 = count; /* The shared array header's slot count. */
     if (count != 0) {
@@ -155,7 +156,7 @@ EffArrHdr *effCreateSlotArray(u32 count) {
 
 /* Release the allocation handle stored after the contiguous slot array. */
 void effReleaseSlotArrayAllocation(EffArrHdr *header) {
-    sdfReleaseResourceAllocation((u32)header->allocation);
+    sdfReleaseResourceAllocation(header->allocation);
 }
 
 /* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
@@ -1353,7 +1354,7 @@ typedef struct {
     EffEventBillParticle *particles; /* 0x7C */
     u8 flag;              /* 0x80 */
     u8 pad81[3];
-    u32 allocationHandle; /* Owner follows its particles in this allocation. */
+    SdfMemBlock *allocationHandle; /* Owner follows its particles in this allocation. */
 } EffEventBillSet; /* 0x88 */
 
 extern void *billCreateFromResource(s32 kind, const char *path);
@@ -1364,7 +1365,7 @@ INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
     u32 particleCount = src->particleCount;
     u32 particleBytes = particleCount * sizeof(EffEventBillParticle);
-    u32 allocationHandle = sdfAllocGeneralBlock(particleBytes + sizeof(EffEventBillSet));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(particleBytes + sizeof(EffEventBillSet));
     EffEventBillParticle *particle = (EffEventBillParticle *)sdfResourceRetainAddress(allocationHandle);
     EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + particleBytes);
     u32 i;
@@ -1520,7 +1521,7 @@ typedef struct EffEventChannelWork {
     EffEventChannelHead head;
     EffEventChannelRecord *records;
     s32 *slots;
-    s32 buffer;
+    SdfMemBlock *buffer;
 } EffEventChannelWork;
 
 extern void *effAllocSlotArray(u32);
@@ -1530,15 +1531,15 @@ extern void *effParamWorkDuplicate(void *);
 void *effEventCreateChannelFromParams(void *source, u16 kind, void *params) {
     EffEventChannelHead *head = source;
     u32 recordCount = head->count;
-    s32 handle = sdfAllocGeneralBlock(recordCount * sizeof(EffEventChannelRecord) + sizeof(EffEventChannelWork));
-    EffEventChannelWork *work = (EffEventChannelWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(recordCount * sizeof(EffEventChannelRecord) + sizeof(EffEventChannelWork));
+    EffEventChannelWork *work = (EffEventChannelWork *)sdfResourceRetainAddress(allocation);
     EffEventChannelRecord *record = (EffEventChannelRecord *)(work + 1);
     void *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;
 
     work->head = *head;
-    work->buffer = handle;
+    work->buffer = allocation;
     work->records = record;
     if (work->head.spread <= 0) {
         work->head.spread = 1;
