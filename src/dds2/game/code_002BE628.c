@@ -1126,7 +1126,7 @@ void mnuClearPanelTransitionState(u32 stateAddress) {
     memset(stateAddress, 0, MNU_POPUP_STATE_BYTES);
 }
 
-void func_002C3E78(s32 action, MenuPopupEntry *entry, MenuPopupState *state, u32 argument) {
+void mnuApplyPanelTransitionAction(s32 action, MenuPopupEntry *entry, MenuPopupState *state, u32 argument) {
     MenuPopupCallback callback;
     MenuPopupEntry *saved;
     s32 i;
@@ -1173,7 +1173,7 @@ void mnuDrainPanelTransitions(u32 stateAddress, u32 callbackArgument) {
 
     entryCount = *(s32 *)stateAddress;
     while (entryCount != 0) {
-        func_002C3E78(1, NULL, (MenuPopupState *)stateAddress, callbackArgument);
+        mnuApplyPanelTransitionAction(1, NULL, (MenuPopupState *)stateAddress, callbackArgument);
         entryCount = *(s32 *)stateAddress;
     }
 }
