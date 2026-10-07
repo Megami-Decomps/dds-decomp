@@ -6188,6 +6188,7 @@
 0x002D7670	sdfBuildQuadPacket	inferred	four-corner packet fill, kind 0x102
 0x002D7720	sdfAppendClosedRectanglePacket	inferred	Allocates and appends five-vertex rectangle packet closing its first vertex. [names_reviewed8.tsv]
 0x002D7810	sdfInitializeObjectListRequest	inferred	Initializes synchronized request with object-list destructor. [names_reviewed8.tsv]
+0x002D7830	sdfCreateDrawNode	inferred	Allocates and clears the complete0x100 draw node, initializes self-links, color/sentinel and default transforms.
 0x002D78F0	sdfFreeNodeLists	inferred	Traverses two node lists and releases their allocations.
 0x002D7988	sdfReleaseFreeRoot	inferred	Byte-identical dds2 twin 0x00330838; Releases the root's node lists, workspace and root allocation. [names_conflicts.tsv]
 0x002D79C0	sdfCreateBufferedTransformSlot	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1501:func_002D79C0; Allocates a cleared slot, creates a buffered request and initializes identity matrix, zero vector and unit scale.; source=revalidated-unapplied-names_R_Names31.tsv:44 [names_qp12_apply.tsv]
