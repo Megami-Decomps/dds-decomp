@@ -700,7 +700,7 @@ extern s32 sndGetEffectNodeParameter(s32, u16);
 
 
 
-extern s32 btlDoesEnabledStatusMatchCurrentId(void *, s32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
@@ -1653,7 +1653,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         spawned->startCondition.kind = 4;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        if (!btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord.flags, 0xE0)) {
+        if (!btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xE0)) {
             spawned = fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
             spawned->startCondition.kind = 4;
             spawned->startCondition.value.handle = sound->handle;
@@ -1781,7 +1781,7 @@ void func_001DA740(BtlTask *task) {
         spawned->startCondition.kind = 4;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        if (!btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord.flags, 0xE0)) {
+        if (!btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xE0)) {
             spawned = fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
             spawned->startCondition.kind = 4;
             spawned->startCondition.value.handle = sound->handle;
@@ -1885,7 +1885,7 @@ void btlCommandTaskStartEffects(ActionStateLink *task) {
         }
         delay = (task->unit->flags & 0x200) ? 0xF : 0x1E;
         countdown = 0x32;
-        if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord.flags, 0xDF) != 0) {
+        if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xDF) != 0) {
             countdown = 0;
         }
         break;

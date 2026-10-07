@@ -323,7 +323,6 @@ extern s32 btlAnyUnitHasActionInSlots();
 extern s32 func_001B3200(s32);
 
 extern s32 func_00213F58(s32, s16, s8);
-extern s8 *datCommandSelectors;
 
 extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
@@ -1407,7 +1406,7 @@ s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
         for (i = 0; i < 0x13; i++) {
             value = btlElementToBitIndex(mask, i);
             if (value != 0x80) {
-                if (datCommandSelectors[actionId * 2] == value) {
+                if (datCommandSelectors[actionId].stat == value) {
                     if (force != 0) {
                         return 1;
                     }
@@ -1419,7 +1418,7 @@ s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
         }
         return 0;
     }
-    if (datCommandSelectors[actionId * 2] == mask) {
+    if (datCommandSelectors[actionId].stat == mask) {
         if (force != 0) {
             return 1;
         }
@@ -1535,7 +1534,7 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
             if (actionId == 0) {
                 continue;
             }
-            if ((u32)(*(u8 *)(datCommandSelectors + actionId * 2) - 0x10) < 2U) {
+            if ((u32)((u8)datCommandSelectors[actionId].stat - 0x10) < 2U) {
                 continue;
             }
             actionEntry = (DatCommandRecord *)(actionId * 0x38 + (s32)datCommandRecords);
@@ -1799,7 +1798,7 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
     state = (BtlState *)btlGetRuntime();
     if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
         if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) && !(datBattleSceneRecords[state->battleMode].flags & 1)) {
-            if (datCommandSelectors[command * 2 + 1] != 1) {
+            if (datCommandSelectors[command].kind != 1) {
                 func_0035B6E0(D_00419C80);
                 return 0;
             }
@@ -2319,7 +2318,7 @@ BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
     if ((u32)(kind - 1) >= 0x29F) {
         return command->link->unit;
     }
-    if (datCommandSelectors[kind * 2 + 1] != 1) {
+    if (datCommandSelectors[kind].kind != 1) {
         return command->link->unit;
     }
     if (command->linkedA == NULL && command->linkedB == NULL) {
@@ -3810,7 +3809,7 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color) {
 
 
 
-s8 btlDispatchNamedChunkNode(s32 name) {
+s8 btlDispatchNamedChunkNode(const char *name) {
     BtlUnit *battler = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
     EvtUnit *resource;
     SdfModel *chunk;
@@ -3826,7 +3825,7 @@ s8 btlDispatchNamedChunkNode(s32 name) {
     }
     resource = battler->ext;
     chunk = resource->owner->inner;
-    index = sdfNamedChunkFindId(chunk, (const char *)name);
+    index = sdfNamedChunkFindId(chunk, name);
     if (index == -1) {
         return 1;
     }
@@ -3852,12 +3851,12 @@ void btlResetNamedChunkNodeTree(SdfDrawNode *node) {
     }
 }
 
-void btlClearNamedChunkFlags(s32 name) {
+void btlClearNamedChunkFlags(const char *name) {
     BtlUnit *battler = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
     if (battler != 0 && (battler->flags & 2) != 0) {
         EvtUnit *resource = battler->ext;
         SdfModel *chunk = resource->owner->inner;
-        s32 index = sdfNamedChunkFindId(chunk, (const char *)name);
+        s32 index = sdfNamedChunkFindId(chunk, name);
         if (index != -1) {
             DevRequest *data = chunk->list;
             SdfDrawNode **entries = data->buffer;
@@ -3971,7 +3970,45 @@ void btlUpdateSpecialActorFormation(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A778);
+extern s32 mdlGetNodeField2C(MdlCtx *context, s32 searchId);
+extern s32 mdlGetNodeInt1C(MdlCtx *context, s32 searchId);
+extern char D_00436CE0[];
+extern char D_00436CE8[];
+
+void func_0021A778(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = battle->units;
+
+    while (unit != NULL) {
+        s32 flags = unit->flags;
+
+        if (flags & 2) {
+            if (flags & 0x400) {
+                s32 unitId = unit->partyRecord.unitId;
+
+                if (unitId < 0x113) {
+                    if (unitId >= 0x111) {
+                        s32 nodeIndex = unitId == 0x111 ? 1 : 2;
+
+                        if (mdlGetNodeField2C(unit->ext->owner, nodeIndex) == 0x11) {
+                            if (unit->ext->slotC[nodeIndex] < mdlGetNodeInt1C(unit->ext->owner, nodeIndex)) {
+                                btlClearNamedChunkFlags(unit->partyRecord.unitId == 0x111 ? D_00436CE0 : D_00436CE8);
+                                unit->stateFlags &= ~0x80000;
+                            }
+                        } else if (unit->flags & 0xE0) {
+                            if (btlDispatchNamedChunkNode(unit->partyRecord.unitId == 0x111 ? D_00436CE0 : D_00436CE8)) {
+                                unit->stateFlags |= 0x80000;
+                            } else {
+                                unit->stateFlags &= ~0x80000;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        unit = unit->nextActor;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", btlReturnUnitToGroup);
 
@@ -5013,10 +5050,10 @@ void func_0021F3E8(ActionStateLink *actor) {
         s32 skillId = entry->effectData[i];
         s32 category;
         if ((u32)(skillId - 1) >= 0x21F) continue;
-        category = datCommandSelectors[skillId * 2 + 1];
+        category = datCommandSelectors[skillId].kind;
         if (category == 2) continue;
         if (category == 1) continue;
-        switch (datCommandSelectors[skillId * 2]) {
+        switch (datCommandSelectors[skillId].stat) {
         case -1:
         case 15:
         case 16:

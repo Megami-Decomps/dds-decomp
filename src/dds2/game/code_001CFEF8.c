@@ -40,7 +40,7 @@
 #define FLD_SCENE_TASK_FLAGS_OFFSET 8
 
 extern s32 btlGetRuntime(void);
-extern s32 btlDoesEnabledStatusMatchCurrentId(s32, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 extern void btlDispatchStateHandler(void *, s32);
 extern u64 btlStartTask(void *);
@@ -1105,7 +1105,7 @@ void fldUpdateSceneGroupTask(SceneTask *task) {
             scene->battleFlags |= 8;
         }
         if ((*(u64 *)&task->flags & 0x400000100LL) == 0) {
-            if (btlDoesEnabledStatusMatchCurrentId((s32)&actor->partyRecord.flags, 0xDE) != 0) {
+            if (btlDoesEnabledStatusMatchCurrentId(&actor->partyRecord, 0xDE) != 0) {
                 task->options |= 4;
             }
         } else {

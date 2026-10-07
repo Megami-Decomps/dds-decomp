@@ -4059,24 +4059,32 @@ void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
     VU0_STORE_VF(vf10, worldPosition);
 }
 
+typedef struct SdfTextParam SdfTextParam;
+extern s32 sdfLoadMapRecordPositionVector(SdfTextParam *, s32);
+extern void mdlLoadPrimaryVectorVU(MdlCtx *);
+extern void mdlLoadSecondaryVectorVU(MdlCtx *);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
+extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
+
 extern void btlRefreshUnitFxVectors(BtlUnit *);
 
 s32 btlSetActorEffectParameter(object, value)
-u8 *object;
+BtlUnit *object;
 s32 value;
 {
-    s32 (*callback)(u8 *, s32);
-    if ((*(u32 *)(object + 0x110) & 2) == 0) {
+    s32 (*callback)(BtlUnit *, s32);
+    if ((object->flags & 2) == 0) {
         return 0;
     }
-    callback = *(s32 (**)(u8 *, s32))(btlGetRuntime() + 0x5BC);
+    callback = ((BtlState *)btlGetRuntime())->effectParameterCallback;
     if (callback != 0) {
         value = callback(object, value);
     }
     btlRefreshUnitFxVectors(object);
     {
-        MdlCtx *owner = ((BtlUnit *)object)->ext->owner;
-        return (s8)sdfLoadMapRecordPositionVector(owner->inner, value);
+        MdlCtx *owner = object->ext->owner;
+        return (s8)sdfLoadMapRecordPositionVector((SdfTextParam *)owner->inner, value);
     }
 }
 
@@ -4090,26 +4098,56 @@ void btlSetActorEffectParameterOrMuzzlePosition(u32 arg0, s32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D6428);
+/* vu0 routine: preserve the actor's primary and secondary vectors while
+ * evaluating the requested model record; return the sampled vector in vf10. */
+s32 func_001D6428(BtlUnit *unit, s32 value) {
+    f32 currentVector[4] __attribute__((aligned(16)));
+    f32 primaryVector[4] __attribute__((aligned(16)));
+    f32 secondaryVector[4] __attribute__((aligned(16)));
+    s32 (*callback)(BtlUnit *, s32);
+    s8 result;
 
-extern s32 sdfLoadMapRecordLookAtBasis(s32, s32);
-
-s32 btlSetActorAlternateEffectParameter(object, value)
-u8 *object;
-s32 value;
-{
-    s32 (*callback)(u8 *, s32);
-    if ((*(u32 *)(object + 0x110) & 2) == 0) {
+    if ((unit->flags & 2) == 0) {
         return 0;
     }
-    callback = *(s32 (**)(u8 *, s32))(btlGetRuntime() + 0x5BC);
+    callback = ((BtlState *)btlGetRuntime())->effectParameterCallback;
+    if (callback != NULL) {
+        value = callback(unit, value);
+    }
+    mdlLoadPrimaryVectorVU(unit->ext->owner);
+    VU0_STORE_VF_UNCLOBBERED(vf10, primaryVector);
+    mdlLoadSecondaryVectorVU(unit->ext->owner);
+    VU0_STORE_VF_UNCLOBBERED(vf10, secondaryVector);
+    btlRefreshUnitFxVectors(unit);
+    result = sdfLoadMapRecordPositionVector((SdfTextParam *)unit->ext->owner->inner, value);
+    VU0_STORE_VF_UNCLOBBERED(vf10, currentVector);
+    VU0_LOAD_VF(vf10, primaryVector);
+    mdlStorePrimaryVectorVU(unit->ext->owner);
+    VU0_LOAD_VF(vf10, secondaryVector);
+    mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
+    sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
+    VU0_LOAD_VF(vf10, currentVector);
+    return result;
+}
+
+extern s32 sdfLoadMapRecordLookAtBasis(SdfTextParam *, s32);
+
+s32 btlSetActorAlternateEffectParameter(object, value)
+BtlUnit *object;
+s32 value;
+{
+    s32 (*callback)(BtlUnit *, s32);
+    if ((object->flags & 2) == 0) {
+        return 0;
+    }
+    callback = ((BtlState *)btlGetRuntime())->effectParameterCallback;
     if (callback != 0) {
         value = callback(object, value);
     }
     btlRefreshUnitFxVectors(object);
     {
-        MdlCtx *owner = ((BtlUnit *)object)->ext->owner;
-        return (s8)sdfLoadMapRecordLookAtBasis(owner->inner, value);
+        MdlCtx *owner = object->ext->owner;
+        return (s8)sdfLoadMapRecordLookAtBasis((SdfTextParam *)owner->inner, value);
     }
 }
 
@@ -4192,11 +4230,6 @@ extern void effObjFetchInnerFirstVec(u32);
 
 extern void effObjFetchInnerSecondVecNorm(u32);
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
-
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
-
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
@@ -7539,7 +7572,6 @@ u8 *out;
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DF410);
 
-extern s32 func_001D6428(u8 *, s32);
 extern f32 func_002FA148(f32);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E40);
@@ -7572,7 +7604,7 @@ void btlPrepareRandomizedActionCameraPose(CameraPoseAction *action, CameraPoseTr
         to->fov = fov;
         span = func_001F66D8(flags & 0x600, 0, 0) * 1.25f;
         VU0_STORE_VF(vf10, from->position);
-        if (func_001D6428((u8 *)unit, 1) == 0) {
+        if (func_001D6428(unit, 1) == 0) {
             btlUnitGetMuzzlePosVU((u8 *)unit);
         }
         VU0_STORE_VF(vf10, to->position);
@@ -7665,7 +7697,7 @@ void func_001DFAE0(CameraPoseAction *action, CameraPoseTransform *to, CameraPose
         }
         fov = action->transform.fov;
         to->fov = fov;
-        if (func_001D6428((u8 *)unit, 1) == 0) {
+        if (func_001D6428(unit, 1) == 0) {
             btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF(vf10, to->position);
@@ -7716,7 +7748,7 @@ void btlSetupCameraPoseAimUnit(CameraPoseAction *action, CameraPoseTransform *fr
     btlCopyUnitRotationQuaternion((u8 *)unit, quat);
     fov = action->transform.fov;
     from->fov = fov;
-    if (func_001D6428((u8 *)unit, 1) == 0) {
+    if (func_001D6428(unit, 1) == 0) {
         btlUnitGetMuzzlePosVU(unit);
     }
     VU0_STORE_VF(vf10, &from->position);
@@ -10532,8 +10564,8 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
 void btlUpdateJobPositionFromModel(s32 *args) {
     f32 pos[4];
 
-    if (sdfLoadMapRecordPositionVector(*(s32 *)(args[1] + 0x18), 1) == 0) {
-        mdlLoadPrimaryVectorVU(args[1]);
+    if (sdfLoadMapRecordPositionVector((SdfTextParam *)((MdlCtx *)args[1])->inner, 1) == 0) {
+        mdlLoadPrimaryVectorVU((MdlCtx *)args[1]);
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         pos[1] -= 150.0f;
     } else {

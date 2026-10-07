@@ -98,10 +98,6 @@ typedef struct EvtScriptContext {
 } EvtScriptContext;
 typedef char EvtScriptContextSizeCheck[sizeof(EvtScriptContext) == 0x18 ? 1 : -1];
 
-typedef struct EventModeSlot {
-    s8 stat;
-    s8 kind;             /* 0x01 */
-} EventModeSlot;
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
@@ -115,7 +111,6 @@ extern s32 scrReadIntParameter(s32 idx);
 
 extern s32 datGetStatWithStatusOverride(s32 arg0, s32 arg1);
 
-extern s32 datCommandSelectors;
 
 extern s32 datRosterDetails;
 
@@ -1113,7 +1108,7 @@ extern s32 btlResolveUnitValueWithOverride(s32, s32);
 extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
-    s8 statIndex = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0.third].stat;
+    s8 statIndex = datCommandSelectors[D_0043E5C0.third].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -1136,7 +1131,7 @@ s32 evtPushFirstRosterSelectedStat(void) {
 
 /* Push the second entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushSecondRosterSelectedStat(void) {
-    s8 statIndex = ((EventModeSlot *)datCommandSelectors)[D_0043E5C0.third].stat;
+    s8 statIndex = datCommandSelectors[D_0043E5C0.third].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -1223,7 +1218,7 @@ s32 evtPushSecondRosterStatEligibility(void) {
 s32 evtPushSelectedStatOrRosterLowValue(void) {
     s32 statValue;
     s32 commandIndex = D_0043E5C0.third;
-    if (((EventModeSlot *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+    if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         u16 rosterIndex = ((DatPartyRecord *)D_0043E5C0.first)->unitId;
         statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateA;
     } else {
@@ -1238,7 +1233,7 @@ s32 evtPushSelectedScaledStat(void) {
     s32 statValue;
     s32 commandIndex = D_0043E5C0.third;
     statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
-    if (((EventModeSlot *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+    if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         u16 rosterIndex = ((DatPartyRecord *)D_0043E5C0.first)->unitId;
         statValue = (s32)((f32)statValue * ((EventRosterStat *)datRosterDetails)[rosterIndex].multiplier);
     }
@@ -1296,7 +1291,7 @@ s32 evtPushEntryIndexedStatOption(void) {
 s32 evtPushSelectedTotalOrRosterHighValue(void) {
     s32 statValue;
     s32 commandIndex = D_0043E5C0.third;
-    if (((EventModeSlot *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+    if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         u16 rosterIndex = ((DatPartyRecord *)D_0043E5C0.first)->unitId;
         statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateB;
     } else {

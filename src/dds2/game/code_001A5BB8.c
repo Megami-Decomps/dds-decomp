@@ -215,7 +215,6 @@ extern s32 D_003B6928[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern s32 datCommandSelectors;
 
 extern char D_00415158[];
 
@@ -238,9 +237,9 @@ extern s32 btlCheckSpecialAbility(s32, s32);
 
 extern s32 mdlFlagTest(s32);
 
-extern u32 mnuGetPartyEntryCurrentId(s32);
+extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 
-extern s32 btlDoesEnabledStatusMatchCurrentId(s32, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 extern s32 evtCheckValueThreshold(s32, s32);
 
@@ -1917,9 +1916,9 @@ s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
     return value == 0 ? 1 : value;
 }
 
-s32 btlGetSlotValueAdjustedForSpecialAbility(s32 battler, s32 slot) {
+s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot) {
     s32 value = datAffinityRecords[slot - DAT_AFFINITY_FIRST_COMMAND].slotCost;
-    if (btlDoesEnabledStatusMatchCurrentId(battler + 0x120, 0xe4) && (u32)value >= 2) {
+    if (btlDoesEnabledStatusMatchCurrentId(&battler->partyRecord, 0xe4) && (u32)value >= 2) {
         value--;
     }
     return value;
@@ -1927,7 +1926,42 @@ s32 btlGetSlotValueAdjustedForSpecialAbility(s32 battler, s32 slot) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABA40);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABB10);
+s32 func_001ABB10(BtlUnit *unit, s32 command) {
+    u32 availableSlots;
+
+    if (command == 0) {
+        return 0;
+    }
+    if ((unit->partyRecord.flags & 0x10) && (unit->flags & 0x200)) {
+        if ((datCommandRecords[command].kind != 0 &&
+             datCommandRecords[command].kind != 2) ||
+            datCommandRecords[command].costMode >= 2) {
+            return 7;
+        }
+    }
+    if ((datCommandRecords[command].kind == 1 ||
+         datCommandRecords[command].costMode == 2) &&
+        (unit->partyRecord.status & 0x7FFF) == 0x10) {
+        return 3;
+    }
+    if (datCommandSelectors[command].kind == 2 &&
+        (unit->partyRecord.status & 0x7FFF) == 0x40) {
+        return 5;
+    }
+    if (datCommandSelectors[command].kind == 1) {
+        if ((unit->partyRecord.status & 0x7FFF) == 0x1000) {
+            return 4;
+        }
+        availableSlots = fldCountSceneSlots();
+        if (availableSlots < btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
+            return 6;
+        }
+    }
+    if (datCommandRecords[command].flags & 4) {
+        return 0;
+    }
+    return func_001ABA40(unit, command);
+}
 
 s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, UiObject *first, UiObject *second,
                   UiObject *third, s32 command) {
@@ -1998,7 +2032,7 @@ s8 btlGetActorIndexedSignedValue(UiObject *object, s32 index) {
     if (index == 0 && (object->flags & 0x400) != 0) {
         return datEnemyRecords[object->index].unk46;
     }
-    return *(s8 *)(datCommandSelectors + index * 2);
+    return datCommandSelectors[index].stat;
 }
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
@@ -2189,8 +2223,8 @@ s32 func_001AD118(DatSkillOwner *unit, s32 skill) {
     return 0;
 }
 
-s32 btlDoesEnabledStatusMatchCurrentId(s32 status, u32 value) {
-    if (*(u16 *)status & 0x20) {
+s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *status, u32 value) {
+    if (status->flags & 0x20) {
         return 0;
     }
     return mnuGetPartyEntryCurrentId(status) == value;
@@ -2864,11 +2898,11 @@ s32 btlHasMappedSpecialAbilityForSlot(s32 unit, u32 slot) {
         if (btlCheckSpecialAbility(unit + 0x120, 0x269)) {
             return 1;
         }
-        if (btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF7)) {
+        if (btlDoesEnabledStatusMatchCurrentId((DatPartyRecord *)(unit + 0x120), 0xF7)) {
             return 1;
         }
     }
-    if (slot == 3 && btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF2)) {
+    if (slot == 3 && btlDoesEnabledStatusMatchCurrentId((DatPartyRecord *)(unit + 0x120), 0xF2)) {
         return 1;
     }
     return 0;
@@ -2899,10 +2933,10 @@ s32 btlHasEnabledSpecialAbilityForSlot(s32 unit, u32 slot) {
             return 1;
         }
     }
-    if (slot == 8 && btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF0)) {
+    if (slot == 8 && btlDoesEnabledStatusMatchCurrentId((DatPartyRecord *)(unit + 0x120), 0xF0)) {
         return 1;
     }
-    if (slot == 9 && btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF1)) {
+    if (slot == 9 && btlDoesEnabledStatusMatchCurrentId((DatPartyRecord *)(unit + 0x120), 0xF1)) {
         return 1;
     }
     return 0;
@@ -2949,7 +2983,7 @@ f32 btlGetClampedBattleTableValue(void) {
 }
 
 s32 sndGetResourceForIndex(s32 index) {
-    s8 resource = *(s8 *)(datCommandSelectors + index * 2);
+    s8 resource = datCommandSelectors[index].stat;
     if (resource < 0) {
         return 0;
     }
@@ -3133,10 +3167,6 @@ f32 func_001B0B20(void) {
     return 1.5f;
 }
 
-typedef struct EventModeSlot {
-    s8 stat;
-    s8 kind;
-} EventModeSlot;
 
 typedef struct EventRosterStat {
     s16 base;
@@ -3169,8 +3199,7 @@ u8 func_001B0B30(UiObject *unit, s32 command) {
     if (command == 0) {
         return 1;
     }
-    if (((EventModeSlot *)datCommandSelectors)[command].kind == 5 &&
-        (unit->flags & 0x200)) {
+    if (datCommandSelectors[command].kind == 5 && (unit->flags & 0x200)) {
         minimum = ((EventRosterStat *)datRosterDetails)[unit->index].rangeMin;
         maximum = ((EventRosterStat *)datRosterDetails)[unit->index].rangeMax;
     } else {
@@ -3204,7 +3233,7 @@ s32 func_001B0C68(UiObject *unit, s32 actionId) {
     s32 *delayTable;
     s32 *delay;
 
-    if (actionId == 0 || ((EventModeSlot *)datCommandSelectors)[actionId].kind == 5) {
+    if (actionId == 0 || datCommandSelectors[actionId].kind == 5) {
         if ((*(u64 *)&unit->flags & 0x1200) == 0x200 &&
             (*(u64 *)&unit->entryMask & 0xFFFF00000010ULL) == 0x600000000ULL) {
             return 9;
@@ -3232,7 +3261,7 @@ s32 btlMapActionCode(s32 unused, u32 id) {
     case 0x193:
         return 0x25;
     default:
-        return *(s8 *)(datCommandSelectors + id * 2 + 1) == 2 ? 0x2D : 0;
+        return datCommandSelectors[id].kind == 2 ? 0x2D : 0;
     }
 }
 
@@ -3805,7 +3834,7 @@ s32 btlChooseEligibleSkill(s32 object) {
         u32 id = *ids++;
         if (id != 0) {
             if (id < 0x2A0) {
-                s32 category = *(s8 *)(datCommandSelectors + id * 2 + 1);
+                s32 category = datCommandSelectors[id].kind;
                 if (category != 2) {
                     if (category != 4) {
                         if ((datCommandRecords[id].unk_01 & 2) != 0) {
@@ -4962,7 +4991,29 @@ s32 btlSetTaskPhase2(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7B20);
+extern void btlUpdateActorSlotPresentationState(BtlUnit *, s8, s8);
+
+void func_001B7B20(BtlUnit *unit, s8 side) {
+    KwlnTask *task;
+    BattleActorPanelWork *work;
+    u32 index;
+
+    if (unit->flags & 0x200) {
+        index = unit->lookupId;
+        task = kwlnTaskGetTaskByName(D_004367CC);
+        if (task != NULL) {
+            work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+            if (side == 0) {
+                work->activeEntries[index].hpState = 0x10;
+                work->activeEntries[index].hpHighlightLevel = 0x7F;
+            } else {
+                work->activeEntries[index].mpState = 0x10;
+                work->activeEntries[index].mpHighlightLevel = 0x7F;
+            }
+            btlUpdateActorSlotPresentationState(unit, 0, 2);
+        }
+    }
+}
 
 /* Mahen entries carry a halfword key and a displayed byte value. */
 typedef struct MesWindowItem {

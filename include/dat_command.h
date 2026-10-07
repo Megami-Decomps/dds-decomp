@@ -53,6 +53,15 @@ typedef char DatCommandAttributeOffsetCheck[((u32)&((DatCommandRecord *)0)->attr
 typedef char DatCommandRequirementOffsetCheck[((u32)&((DatCommandRecord *)0)->requirementBits == 0x28) ? 1 : -1];
 typedef char DatCommandLastStatOffsetCheck[((u32)&((DatCommandRecord *)0)->stat36 == 0x36) ? 1 : -1];
 
+/* Two-byte command selectors; DDS2 func_001ABB10 reads the signed kind at +1. */
+typedef struct DatCommandSelector {
+    s8 stat;
+    s8 kind;
+} DatCommandSelector;
+
+typedef char DatCommandSelectorSizeCheck[sizeof(DatCommandSelector) == 2 ? 1 : -1];
+
 extern DatCommandRecord *datCommandRecords;
+extern DatCommandSelector *datCommandSelectors;
 
 #endif /* DAT_COMMAND_H */
