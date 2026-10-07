@@ -457,8 +457,8 @@ void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
     particle->unk08 = work->params.unk44;
 }
 
-extern s32 effPcpScatterGetRecordAddress(PcpScatterPool *, s32);
-extern s32 effPcpScatterGetAuxRecordAddress(PcpScatterPool *, s32);
+extern u128 *effPcpScatterGetRecordAddress(PcpScatterPool *, s32);
+extern u32 *effPcpScatterGetAuxRecordAddress(PcpScatterPool *, s32);
 extern void effPcpScatterDrawPool(PcpScatterPool *);
 extern u32 effBlendColor(u32, u32, f32);
 extern f32 sdfAtan2Poly(f32 ratio);
@@ -515,8 +515,8 @@ void func_00170F28(PcpScatterRadialWork *work) {
 
     for (; i < count; i++, particle++) {
         s32 age = particle->age;
-        u128 *vertices = (u128 *)effPcpScatterGetRecordAddress(work->childWork, i);
-        u32 *colors = (u32 *)effPcpScatterGetAuxRecordAddress(work->childWork, i);
+        u128 *vertices = effPcpScatterGetRecordAddress(work->childWork, i);
+        u32 *colors = effPcpScatterGetAuxRecordAddress(work->childWork, i);
         if (age == 0) {
             effPcpScatterInitRadialParticle(work, i);
         } else if (age > 0) {
@@ -847,8 +847,8 @@ void func_00171B28(PcpScatterSpinWork *work) {
 
     for (; i < count; i++, particle++) {
         s32 age = particle->age;
-        u128 *vertices = (u128 *)effPcpScatterGetRecordAddress(work->childWork, i);
-        u32 *colors = (u32 *)effPcpScatterGetAuxRecordAddress(work->childWork, i);
+        u128 *vertices = effPcpScatterGetRecordAddress(work->childWork, i);
+        u32 *colors = effPcpScatterGetAuxRecordAddress(work->childWork, i);
         if (age == 0) {
             effScatterSpriteSpawn(work, i);
         } else if (age > 0) {
@@ -1290,15 +1290,15 @@ void effPcpScatterSharePoolResource(PcpScatterPool *work, PcpScatterPool *src)
 }
 
 /* Return an unchecked byte address for the indexed primary record. */
-s32 effPcpScatterGetRecordAddress(PcpScatterPool *work, s32 index)
+u128 *effPcpScatterGetRecordAddress(PcpScatterPool *work, s32 index)
 {
-    return work->recordBase + index * EFF_SCATTER_RECORD_BYTES;
+    return (u128 *)(work->recordBase + index * EFF_SCATTER_RECORD_BYTES);
 }
 
 /* Return an unchecked byte address for the indexed auxiliary record. */
-s32 effPcpScatterGetAuxRecordAddress(PcpScatterPool *work, s32 index)
+u32 *effPcpScatterGetAuxRecordAddress(PcpScatterPool *work, s32 index)
 {
-    return work->auxRecordBase + index * EFF_SCATTER_AUX_RECORD_BYTES;
+    return (u32 *)(work->auxRecordBase + index * EFF_SCATTER_AUX_RECORD_BYTES);
 }
 
 /* Return a texture owner with one reference and its acquired texture handle. */
