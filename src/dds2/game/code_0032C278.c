@@ -152,7 +152,7 @@ void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 
 void sdfConnectPacketLists();
 
-void func_0032DC80();
+void sdfPrepareFrameDepthPacket();
 
 extern void *sdfPendingQueueHead;
 
@@ -1065,7 +1065,7 @@ void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
     sdfAppendReferencePacket(list, (u32)node);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DC80);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfPrepareFrameDepthPacket);
 
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
     sdfInitializeDmaReferenceTag(packet->packets, 2);
@@ -1073,7 +1073,7 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
     packet->source = source;
     packet->data = data;
     packet->region = region;
-    packet->prepare = func_0032DC80;
+    packet->prepare = sdfPrepareFrameDepthPacket;
 }
 
 void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {

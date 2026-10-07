@@ -4863,6 +4863,7 @@
 0x00285178	mnuCacheProfilePanelGridPositions	inferred	Stores the menu profile panel origin and two selected grid positions. [names_reviewed14.tsv]
 0x00285440	mnuDrawAndAdvanceProfilePanel	inferred	Draws profile panel and wraps its frame counter after limit. [names_reviewed5.tsv]
 0x00285490	mnuClearPanelTransitionState	inferred	Clears panel transition work area before processing. [names_reviewed8.tsv]
+0x002854B0	mnuApplyPanelTransitionAction	inferred	matched-body; maintains the MenuPopupEntry transition stack, registers and de-duplicates enter callbacks, and pops entries with optional leave callbacks; native callers dispatch add and pop actions
 0x00285600	mnuDrainPanelTransitions	inferred	Updates panel transition until the active-state word clears. [names_reviewed5.tsv]
 0x00285658	mnuHasPopupSelectionFlag	inferred	Tests popup-selection flag in supplied menu state. [names_reviewed8.tsv]
 0x002858D8	mnuIsPopupEntryValue	inferred	Compares value stored in popup entry with requested value. [names_reviewed5.tsv]
@@ -6138,6 +6139,7 @@
 0x002D4C40	sdfAppendLinkedPacketPayload	inferred	Links the supplied packet node in one list and appends its payload at offset 0x10 to another.
 0x002D4D10	sdfAppendDmaPrimary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D4D70	sdfAppendDmaSecondary	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
+0x002D4DD0	sdfPrepareFrameDepthPacket	inferred	Packet-builder callback selects FRAME/ZBUF context registers and writes packed frame/depth values for the selected graph buffer.
 0x002D4E70	sdfInitPacketBuilder	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D4EE8	sdfQueueFramePackets	inferred	readability/matching review (QP16)
 0x002D4FE8	sdfSetNonnegativePacketIndex	inferred	Clamps negative index values to zero before storing current packet index. [names_reviewed8.tsv]

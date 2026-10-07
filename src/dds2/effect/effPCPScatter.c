@@ -36,7 +36,7 @@ extern void sdfComposeVuMatrixFromRegisters(void);
 
 extern void *effParamTableGetBlock(void *, s32);
 
-extern u32 effPcpScatterResAddRef(u32);
+extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern u8 D_003AA868[];
 extern f32 effMiscRandUnitFloat(void *state);
@@ -1284,18 +1284,18 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
 
 /* Acquire a new texture owner and store it in the pool. */
 void effPcpScatterCreatePoolResource(PcpScatterPool *pool, u32 resId) {
-    u32 resource;
+    PcpScatterRes *resource;
 
-    resource = (u32)effPcpScatterResCreate(resId);
-    pool->sharedResource = (PcpScatterRes *)resource;
+    resource = effPcpScatterResCreate(resId);
+    pool->sharedResource = resource;
 }
 
 /* Take a reference to the source pool's texture owner; no null guard is added. */
 void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *src) {
-    u32 resource;
+    PcpScatterRes *resource;
 
-    resource = effPcpScatterResAddRef((u32)src->sharedResource);
-    dst->sharedResource = (PcpScatterRes *)resource;
+    resource = effPcpScatterResAddRef(src->sharedResource);
+    dst->sharedResource = resource;
 }
 
 /* Return an unchecked byte address for the indexed primary record. */
@@ -1332,11 +1332,10 @@ void effPcpScatterResRelease(PcpScatterRes *res) {
     }
 }
 
-/* Retain the texture owner and return its unchanged raw-word handle. */
-u32 effPcpScatterResAddRef(u32 handle) {
-    PcpScatterRes *resource = (PcpScatterRes *)handle;
+/* Retain the texture owner and return the same pointer. */
+PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *resource) {
     resource->refCount = resource->refCount + 1;
-    return handle;
+    return resource;
 }
 
 /* The first ring variant copies this complete 0x138-byte parameter block.

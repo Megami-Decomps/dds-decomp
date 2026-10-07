@@ -4555,6 +4555,7 @@
 0x002C33A8	mnuSetGroupProperties	inferred	Stores four properties at offsets 0x18, 0x1C, 0x24, and 0x28.
 0x002C3E08	mnuDrawAndAdvanceProfilePanel	inferred	Draws profile panel and wraps its frame counter after limit. [names_reviewed5.tsv]
 0x002C3E58	mnuClearPanelTransitionState	inferred	Clears panel transition work area before processing. [names_reviewed8.tsv]
+0x002C3E78	mnuApplyPanelTransitionAction	inferred	matched-body; maintains the MenuPopupEntry transition stack, registers and de-duplicates enter callbacks, and pops entries with optional leave callbacks; native callers dispatch add and pop actions
 0x002C3FC8	mnuDrainPanelTransitions	inferred	Updates panel transition until the active-state word clears. [names_reviewed5.tsv]
 0x002C4020	mnuHasPopupSelectionFlag	inferred	Tests popup-selection flag in supplied menu state. [names_reviewed8.tsv]
 0x002C42A0	mnuIsPopupEntryValue	inferred	Compares value stored in popup entry with requested value. [names_reviewed5.tsv]
@@ -5828,6 +5829,7 @@
 0x0032D758	sdfBuildTextureScenePacket	inferred	confidence=high; src/dds2/game/code_0032C278.c:func_0032D758; Builds texture setup for both rendering contexts, centered bounds, test/blend registers, and the draw packet. [names_qp9.tsv]
 0x0032D898	sdfRefreshSceneNodePackets	inferred	Registered scene callback rebuilds both frame/depth contexts and refreshes paired FRAME words and texture packets from the retained graph view and buffer index.
 0x0032DAF0	sdfAppendLinkedPacketPayload	inferred	Appends a node to its pointer list and its payload at offset sixteen to the packet list.
+0x0032DC80	sdfPrepareFrameDepthPacket	inferred	Packet-builder callback selects FRAME/ZBUF context registers and writes packed frame/depth values for the selected graph buffer.
 0x0032DD98	sdfQueueFramePackets	inferred	readability/matching review (QP16)
 0x0032DE98	sdfSetNonnegativePacketIndex	inferred	Clamps negative index values to zero before storing current packet index. [names_reviewed8.tsv]
 0x0032DEB0	sdfResetPacketSlotState	inferred	Zeroes current packet index and two related slot-state words. [names_reviewed8.tsv]
