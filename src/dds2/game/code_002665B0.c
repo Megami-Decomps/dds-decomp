@@ -1338,7 +1338,61 @@ s32 func_00269418(MenuList *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269478);
+/* Configure the terminal selection grid for its entry and transition mode. */
+void func_00269478(u32 mode, s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    s32 effectIndex = 0;
+    s32 materialFlags = 0;
+    s32 height = 0;
+    s32 color = 0;
+    s32 yOffset = 0;
+    s32 slot;
+    s32 *effect;
+
+    switch (mode) {
+    case 2:
+        color = 2;
+        materialFlags = 4;
+        yOffset = 0;
+        height = 0x100;
+        effectIndex = 3;
+        break;
+    case 3:
+        color = 2;
+        materialFlags = 7;
+        yOffset = -0x100;
+        height = 0;
+        effectIndex = 2;
+        break;
+    case 4:
+        materialFlags = 4;
+        yOffset = 0;
+        height = 0x100;
+        effectIndex = 3;
+        break;
+    }
+    slot = func_00269418(state->secondaryList);
+    /* The context word transports the terminal state address. */
+    effect = (s32 *)(effectIndex * sizeof(state->effect[0]) + context +
+        (u32)&((MenuSlotState *)0)->effect);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        slot, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(state->resourceBank[0], slot, *effect,
+        0, materialFlags, color);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        0x40, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x40, *effect,
+        0, materialFlags, color);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        0x41, 0, yOffset, 0, height);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x41, *effect,
+        0, materialFlags, color);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+        0x42, 0, yOffset, 0, height);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x42, *effect,
+        0, materialFlags, color);
+}
+
 
 void func_00269638(s32 close, MenuSlotState *host) {
     struct {
@@ -1517,7 +1571,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 extern void func_00269638(s32, MenuSlotState *);
 
-extern void func_00269478(s32, s32);
+extern void func_00269478(u32, s32);
 
 
 
