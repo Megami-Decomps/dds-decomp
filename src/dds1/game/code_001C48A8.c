@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "btl_state.h"
 #include "btl_action.h"
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "pcp_vu0.h"
@@ -600,7 +601,45 @@ void fldMarkLinkedSceneActors(s32 context) {
     btlFlagTasksForUpdate();
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C7028);
+extern void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId);
+extern void dds3WorkClear(void);
+extern s32 btlCountRegisteredTasks(void);
+
+s32 func_001C7028(s32 sceneAddress) {
+    BtlState *scene = (BtlState *)sceneAddress;
+    u32 i;
+
+    if (scene->tasks != NULL) {
+        return 0;
+    }
+    for (i = 0; i < 5; i++) {
+        if (datGameState->party[i].flags & 1) {
+            if (!(scene->commandRestrictFlags & 0x40)) {
+                if ((datGameState->party[i].flags & 2) &&
+                    (datGameState->party[i].status & 0x7FFF) != 0x4000 &&
+                    datGameState->party[i].hp != 0) {
+                    ptyApplySkillRecovery(&datGameState->party[i], 0x22A);
+                    ptyApplySkillRecovery(&datGameState->party[i], 0x22B);
+                }
+                if ((datGameState->party[i].status & 0x4000) ||
+                    datGameState->party[i].hp == 0) {
+                    datGameState->party[i].status &= ~0x4000;
+                    datGameState->party[i].hp = 1;
+                }
+            }
+        }
+    }
+    dds3WorkClear();
+    if (!(scene->commandRestrictFlags & 0x40)) {
+        for (i = 0; i < 5; i++) {
+            func_001A1960(&datGameState->party[i], -0x5D1);
+        }
+    }
+    if (btlCountRegisteredTasks() == 0) {
+        scene->battleFlags &= ~1;
+    }
+    return 0;
+}
 
 void fldMarkSceneRefresh(s32 scene) {
     func_00215FE0(scene);
