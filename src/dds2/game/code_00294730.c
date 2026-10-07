@@ -79,7 +79,25 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294D50);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00294EB8);
+extern void func_002B9A40(s32, s32, s32, s32, struct MenuList *, u32, s32);
+void func_00294EB8(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    s32 i;
+
+    func_00306CD0(x + (D_003D03F0[57][MENU_ICON_X] << 4),
+                  y + (D_003D03F0[57][MENU_ICON_Y] << 3),
+                  0, scale, 0, texture, D_003D03F0[57][MENU_ICON_FRAME], option);
+    for (i = 0; i < object->window->list->visibleCount; i++) {
+        func_00306CD0(x + (D_003D03F0[18][MENU_ICON_X] << 4),
+                      y + (D_003D03F0[18][MENU_ICON_Y] << 3),
+                      0, scale, 0, texture, D_003D03F0[18][MENU_ICON_FRAME], option);
+        y += 0xB0;
+    }
+    func_00306CD0(D_003D03F0[17][MENU_ICON_X] << 4, D_003D03F0[17][MENU_ICON_Y] << 3,
+                  0, scale, 0, texture, D_003D03F0[17][MENU_ICON_FRAME], option);
+    func_002B9A40(0x2D0, 0x450, 0, scale, object->window->list, object->windowResource, option);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00295030);
 
