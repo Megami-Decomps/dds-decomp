@@ -732,10 +732,8 @@ void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
 
 
 void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
-    u8 *work = (u8 *)unit;
-
-    *(s16 *)(work + 0x1B6) = duration;
-    *(s16 *)(work + 0x1B4) = 0;
+    unit->rgbDuration = duration;
+    unit->rgbElapsed = 0;
     if (duration == 0) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
@@ -745,16 +743,14 @@ void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
         u32 currentRgb = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF;
 
         unit->color60 = (unit->color60 & 0xFF000000) | currentRgb;
-        *(u32 *)(work + 0x64) = (*(u32 *)(work + 0x64) & 0xFF000000) | (color & 0xFFFFFF);
+        unit->color64 = (unit->color64 & 0xFF000000) | (color & 0xFFFFFF);
         unit->flags |= 0x8000;
     }
 }
 
 void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
-    u8 *work = (u8 *)unit;
-
-    *(s16 *)(work + 0x1BA) = duration;
-    *(s16 *)(work + 0x1B8) = 0;
+    unit->alphaDuration = duration;
+    unit->alphaElapsed = 0;
     if (duration == 0) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
@@ -764,7 +760,7 @@ void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
         u32 currentAlpha = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000;
 
         unit->color60 = (unit->color60 & 0xFFFFFF) | currentAlpha;
-        *(u32 *)(work + 0x64) = (*(u32 *)(work + 0x64) & 0xFFFFFF) | (color & 0xFF000000);
+        unit->color64 = (unit->color64 & 0xFFFFFF) | (color & 0xFF000000);
         unit->flags |= 0x10000;
     }
 }
