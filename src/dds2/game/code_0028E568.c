@@ -34,6 +34,11 @@ typedef struct MantraNodePos {
     struct MantraNodePos *entries[6];
 } MantraNodePos;
 
+typedef struct MantraProfileRequirement {
+    u16 id;
+    u16 reserved;
+} MantraProfileRequirement;
+
 typedef struct MantraMenuSlot {
     u8 nodeId;
     u8 pad01[7];
@@ -68,12 +73,21 @@ typedef struct MenuSearchObject {
 } MenuSearchObject; /* Full 0xC08-byte status-resource allocation. */
 
 extern s32 mnuGetMantraNodePositionRecord(s16);
+extern s32 mnuGetActiveMantraModelFlagState(void);
+
+extern const MantraProfileRequirement D_003D0078[16];
+extern const MantraProfileRequirement D_003D00B8[12];
+extern const MantraProfileRequirement D_003D00E8[18];
+extern const char D_00427390[];
+extern const char D_004273C0[];
+extern const char D_004273E0[];
+extern const char D_004273F0[];
 
 extern s32 mnuGetNodeValueByIndex();
 
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 
-extern s32 ptyGetProfileRecordCap(u16);
+extern u32 ptyGetProfileRecordCap(u16);
 
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
@@ -133,17 +147,77 @@ INCLUDE_ASM(const s32, "game/code_0028E568", func_0028EF50);
 
 INCLUDE_ASM(const s32, "game/code_0028E568", func_0028F128);
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272F8);
+/* Select a menu row whose mantra profile cannot advance at the current model
+ * state; if none qualifies, search party profiles against the active rank set. */
+s32 func_0028F380(MenuSearchObject *object, MenuSearchState *state) {
+    MantraNodePos *record;
+    MantraNodePos *entry;
+    MantraMenuSlot *slot;
+    MenuSearchNode *node;
+    DatPartyRecord *party;
+    const MantraProfileRequirement *requirements;
+    u32 value;
+    u32 cap;
+    s32 modelFlagState;
+    s32 slotIndex;
+    s32 entryIndex;
+    s32 requirementCount;
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427330);
+    slotIndex = 0;
+    slot = &object->work.slots[0];
+    modelFlagState = mnuGetActiveMantraModelFlagState();
+    evtPrintDeveloperConsoleMessage(D_00427390, modelFlagState);
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427340);
+    for (; slotIndex < 5; slotIndex++, slot++) {
+        if (slot->nodeId != 0) {
+            entryIndex = 0;
+            record = (MantraNodePos *)mnuGetMantraNodePositionRecord(slot->nodeId);
+            for (; entryIndex < 6; entryIndex++) {
+                entry = record->entries[entryIndex];
+                if (entry != 0 && modelFlagState < entry->modelFlagState) {
+                    evtPrintDeveloperConsoleMessage(D_004273C0, slotIndex);
+                    state->requestedId = record->id;
+                    state->selectedIndex = slotIndex;
+                    return 1;
+                }
+            }
+        }
+    }
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427360);
+    evtPrintDeveloperConsoleMessage(D_004273E0);
+    if (modelFlagState == 0) {
+        requirements = D_003D0078;
+        requirementCount = 16;
+    } else if (modelFlagState == 1) {
+        requirements = D_003D00B8;
+        requirementCount = 12;
+    } else {
+        requirements = D_003D00E8;
+        requirementCount = 18;
+    }
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427380);
+    node = object->list->head;
+    slotIndex = 0;
+    for (; node != 0; slotIndex++, node = node->next) {
+        party = node->value;
+        for (entryIndex = 0; entryIndex < requirementCount; entryIndex++) {
+            u16 id = requirements[entryIndex].id;
 
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028F380);
+            if (id != 0) {
+                value = ptyGetProfileRecordValue(party, id);
+                cap = ptyGetProfileRecordCap(id);
+                if (value == cap) {
+                    evtPrintDeveloperConsoleMessage(D_004273F0, slotIndex,
+                                                    party->unitId, id);
+                    state->requestedId = id;
+                    state->selectedIndex = slotIndex;
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *state) {
     MantraMenuWork *work = &object->work;
@@ -216,6 +290,24 @@ s32 mnuSelectMatchingNode(MenuSearchObject *object, MenuSearchState *state) {
     }
     return 0;
 }
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272F8);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427330);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427340);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427360);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427380);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427390);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273C0);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273E0);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273F0);
 
 void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
     u32 flags = 0;
