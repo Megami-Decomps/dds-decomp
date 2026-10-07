@@ -483,6 +483,7 @@
 0x00112EE8	dds3TransformCameraVectorsByInnerRotation	inferred	confidence=high; matched-C; src/dds1/basic/dds3CameraObjectBasic.c:163:func_00112EE8; Transforms camera directions with inner quaternion rotation and optional rotated/translated position.; twin=0x00113110, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00112FE0	dds3GetCameraMode	inferred	Returns camera data's word at offset 0x84, also written by the neighboring setter.
 0x00112FF0	dds3SetCameraMode	inferred	Stores the supplied mode at camera data offset 0x84 only when changed.
+0x00113008	dds3GetEffectObjectModelHolder	inferred	Returns the kind-5 EffectObjectData.modelHolder base at offset 0x0C; paired with DDS2 0x00113230.
 0x00113018	dds3SpawnCameraSlotObj5	inferred	type 5 object; null-checked; falls off end returning obj
 0x001130C8	ddsReleaseUnitObject	inferred	src/dds1/basic/dds3UnitObjectBasic.c:func_001130C8; Unit-object cleanup entry called when clearing field object handles; delegates world-node removal without adding state. Registration: fldClearObjectEntryHandles. [names_qp9.tsv]
 0x001130E0	dds3GetEffectDataHandle	inferred	confidence=high; src/dds1/game/code_001130E0.c:func_001130E0; Returns the handle field from the effect object data. [names_qp9.tsv]

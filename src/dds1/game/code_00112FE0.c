@@ -12,7 +12,7 @@ void dds3SetCameraMode(EffWorldNode *camera, s32 mode) {
     }
 }
 
-ObjBase *func_00113008(EffWorldNode *object) {
+ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object) {
     return ((EffectObjectData *)object->data)->modelHolder;
 }
 

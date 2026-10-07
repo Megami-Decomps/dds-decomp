@@ -37,9 +37,5 @@ typedef struct EffectTransformData {
 typedef char EffectTransformData_size_must_be_0x30[(sizeof(EffectTransformData) == 0x30) ? 1 : -1];
 typedef char EffectTransformData_position_at_0x20[((u32)&((EffectTransformData *)0)->position == 0x20) ? 1 : -1];
 
-#ifdef VERSION_DDS1
-ObjBase *func_00113008(EffWorldNode *object);
-#elif VERSION_DDS2
-ObjBase *func_00113230(EffWorldNode *object);
-#endif
+ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 #endif

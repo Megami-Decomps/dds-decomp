@@ -349,6 +349,7 @@
 0x001130E8	dds3SetCameraFieldOfView	inferred	Stores the camera field of view in radians and marks it for publication by the camera update callback.
 0x00113100	dds3GetCameraFieldOfView	inferred	Returns the camera field of view in radians.
 0x00113110	dds3TransformCameraVectorsByInnerRotation	inferred	confidence=high; matched-C; src/dds2/basic/dds3CameraObjectBasic.c:161:func_00113110; Transforms camera directions with inner quaternion rotation and optional rotated/translated position.; twin=0x00112EE8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00113230	dds3GetEffectObjectModelHolder	inferred	Returns the kind-5 EffectObjectData.modelHolder base at offset 0x0C; paired with DDS1 0x00113008.
 0x001132F0	ddsReleaseUnitObject	inferred	src/dds2/basic/dds3UnitObjectBasic.c:func_001132F0; Unit-object cleanup entry called when clearing field object handles; delegates world-node removal without adding state. Registration: fldClearObjectEntryHandles. [names_qp9.tsv]
 0x00113308	dds3GetEffectDataHandle	inferred	confidence=high; src/dds2/game/code_00113308.c:func_00113308; Returns the handle field from the effect object data. [names_qp9.tsv]
 0x00113318	effObjGetTransitionWork	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:82:func_00113318; Returns the effect object data transitionWork pointer.; source=revalidated-unapplied-names_R_Names31.tsv:3 [names_qp12_apply.tsv]

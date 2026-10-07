@@ -30,6 +30,7 @@ extern u32 D_003BA9D0;
 extern u64 dds3GetWorldSecondaryObject(void);
 
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
+extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 extern void effObjInnerCreate();
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void dds3SetObjectFlags(void *, s32);
@@ -382,7 +383,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     if (target == NULL) {
         return 1;
     }
-    config = (MdlCtx *)func_00113008((EffWorldNode *)obj)->resourceHandle;
+    config = (MdlCtx *)dds3GetEffectObjectModelHolder((EffWorldNode *)obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
         level = target->height;
     } else {
