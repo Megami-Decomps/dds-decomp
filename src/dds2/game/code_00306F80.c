@@ -4,7 +4,7 @@
 typedef struct GridTextWidget GridTextWidget;
 typedef struct GridTextListItem GridTextListItem;
 
-extern GridTextListItem *func_00309638(GridTextWidget *);
+extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
 extern s32 itfFindGridNodeByKey(u32, u32);
 
@@ -778,7 +778,7 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
 
     sdfReleaseChipBlock(widget->text);
     do {
-        next = func_00309638(widget);
+        next = itfRemoveSelectedGridTextItem(widget);
     } while (next != NULL);
     sdfReleaseChipBlock(widget);
     return 1;
@@ -796,7 +796,7 @@ u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
             if (childWidget != NULL) {
                 itfDestroyGridTextWidgetTree(childWidget);
             }
-            childLink = func_00309638(widget);
+            childLink = itfRemoveSelectedGridTextItem(widget);
         } while (childLink != NULL);
     }
     sdfReleaseChipBlock(widget);
@@ -878,7 +878,7 @@ GridTextListItem *func_00309538(GridTextWidget *owner, const char *text, u32 val
     return item;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00309638);
+INCLUDE_ASM(const s32, "game/code_00306F80", itfRemoveSelectedGridTextItem);
 
 /* Replace the owned text and grow the optional parent column to fit its byte length. */
 void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, u8 *node, const char *text) {
