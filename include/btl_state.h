@@ -73,7 +73,7 @@ typedef struct BtlState {
     s32 sequenceHandle; /* 0x1E4 */
     s32 scriptHandle; /* 0x1E8 */
     void *eventAssets; /* 0x1EC */
-    u8 pad1F0[4];
+    s32 frame; /* 0x1F0 */
     u32 battleFlags; /* 0x1F4 */
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk_1FC; /* Bit 0x800 bypasses command-block-reason checks. */
@@ -125,7 +125,9 @@ typedef struct BtlState {
     BtlTask *groupTertiary[15]; /* 0x3F0 */
     u8 pad42C[0x20];
     BtlSceneFadingRecord fading[8]; /* 0x44C: fldInitSceneFadeRecords initializes these. */
-    u8 pad48C[0x18];
+    u8 pad48C[8];
+    f32 modelFrameScale; /* 0x494 */
+    u8 pad498[0xC];
     struct EffectSlotSet *resA; /* 0x4A4: btlLoadResourceBlock stores resA at retail 0x001AC740. */
     struct EffectSlotSet *resB; /* 0x4A8: resource slots used for battle-number glyphs */
     struct EffectSlotSet *resC; /* 0x4AC: btlReleaseResourceBlock clears this at retail 0x001AC7B4. */
@@ -147,7 +149,7 @@ typedef struct BtlState {
     void (*cleanup)(void); /* 0x5D0 */
     u8 pad5D4[4];
     void (*prepareModelUnit)(BtlUnit *); /* 0x5D8 */
-    u8 pad5DC[4];
+    void (*beforeMotionUpdate)(void); /* 0x5DC */
     void (*finishModelUnit)(BtlUnit *); /* 0x5E0 */
     u8 pad5E4[0xC];
     void (*updateCallback)(void); /* 0x5F0 */
