@@ -1451,18 +1451,93 @@ void evtUnlinkWorkNode(ScrData *node) {
     scrNamedProcessCount--;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
-
-INCLUDE_ASM(const s32, "game/code_00107FD8", bfContextCreate);
 
 typedef struct BfFlw0Header {
     u8 pad00[8];
     u32 magic;
     u8 pad0C[4];
     s32 sectionCount;
-    u8 pad14[0xC];
+    s16 intCount;
+    s16 floatCount;
+    u8 pad18[8];
     ScrSection sections[1];
 } BfFlw0Header;
+
+extern void *sdfAllocSizeClassBlock(s32 size);
+extern s32 itfMesCreateWindow(void *data);
+
+INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
+
+ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *procedures,
+                        ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
+                        char *strings, s32 procedureIndex) {
+    BfFlw0Header *header = rawHeader;
+    ScrData *process;
+    s32 i;
+    s8 *types;
+    ScrStackValue *values;
+
+    if (header == NULL || sections == NULL || procedures == NULL ||
+        instructions == NULL || procedureIndex < 0 ||
+        procedureIndex >= sections->count) {
+        return NULL;
+    }
+    process = sdfAllocSizeClassBlock(0xF4);
+    if (process == NULL) {
+        return NULL;
+    }
+    i = 0;
+    while ((process->name[i] = procedures[procedureIndex].name[i]) != '\0') {
+        i++;
+    }
+    process->pc = procedures[procedureIndex].addr;
+    process->sp = 0;
+    values = process->stackValues;
+    types = process->stackTypes;
+    for (i = 27; i >= 0; i--) {
+        *types++ = 0;
+        values++->i = 0;
+    }
+    process->sections = sections;
+    process->labels = labels;
+    process->instructions = instructions;
+    process->strings = strings;
+    process->procedureIndex = procedureIndex;
+    process->resourceIndex = -1;
+    process->scriptHeader = header;
+    process->procedures = procedures;
+    process->auxiliaryData = auxiliaryData;
+    process->timer = 0;
+    process->cmdTimer = 0;
+    process->scriptHandle = NULL;
+    process->localInt = NULL;
+    process->localFloat = NULL;
+    process->task = NULL;
+    process->previous = NULL;
+    process->next = NULL;
+    if (header->intCount > 0) {
+        process->localInt = sdfAllocSizeClassBlock(header->intCount * sizeof(s32));
+        for (i = 0; i < header->intCount; i++) {
+            process->localInt[i] = 0;
+        }
+    } else {
+        process->localInt = NULL;
+    }
+    if (header->floatCount > 0) {
+        process->localFloat = sdfAllocSizeClassBlock(header->floatCount * sizeof(f32));
+        for (i = 0; i < header->floatCount; i++) {
+            process->localFloat[i] = 0;
+        }
+    } else {
+        process->localFloat = NULL;
+    }
+    if (auxiliaryData != NULL) {
+        process->resourceIndex = itfMesCreateWindow(auxiliaryData);
+    }
+    evtLinkWorkNode(process);
+    evtPrintDeveloperConsoleMessage("start <%s>\n", procedures[procedureIndex].name);
+    return process;
+}
 
 
 /* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
