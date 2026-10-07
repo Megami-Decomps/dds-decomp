@@ -67,7 +67,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventPack", func_002420B8);
+INCLUDE_ASM(const s32, "event/evtEventPack", evtUpdateMotionSeTask);
 
 /* Free the current task's user-value block. */
 void evtFreeEventPackState(void)
@@ -75,7 +75,7 @@ void evtFreeEventPackState(void)
     sdfReleaseChipBlock(kwlnTaskGetUserValue());
 }
 
-void func_002420B8(void);
+void evtUpdateMotionSeTask(void);
 extern void func_003014F0(char *, char *, ...);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
@@ -92,7 +92,7 @@ void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     params->modelKey = modelKey;
     params->eventTaskId = eventTaskId;
     params->resourceId = resourceId;
-    kwlnTaskCreate(taskName, 0x3EC, 0, 0, func_002420B8, evtFreeEventPackState, params);
+    kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeEventPackState, params);
 }
 
 extern char D_003AF270[];
