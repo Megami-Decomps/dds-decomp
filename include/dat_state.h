@@ -76,8 +76,13 @@ typedef struct DatPartyRecord {
 #ifdef VERSION_DDS1
     s8 profileId;
     u8 pad56[2];
-    u32 skillFlags[76];                    /* 0x058: eight four-bit skill states per word. */
-    u8 pad188[4];
+    union {
+        struct {
+            u32 skillFlags[76]; /* Eight four-bit states per word. */
+            u8 pad188[4];
+        };
+        u32 skillSnapshotWords[77]; /* Stock merge includes the reserved trailing word. */
+    };
     u16 unk18C;
     u16 unk18E;
     u16 unk190;
