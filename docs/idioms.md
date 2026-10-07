@@ -2724,3 +2724,39 @@ DDS2 `itfGridApplySqrtBoundsAndColorScale` (`0x003075D8`, 312 bytes) and
 the mapped record's real `status` pointer. The complete grid unit checks
 `67 match, 0 differ`; the bounds and palette cursors remain natural C.
 
+## Battle ability queries receive the party record
+
+`btlCheckSpecialAbility` forwards its first argument to `datUnitHasSkill`,
+so that argument is a `DatPartyRecord *`, not an integer actor address.
+Actor-facing slot and recovery helpers receive a `BtlUnit *` and pass
+`&unit->partyRecord`, the native subobject at `+0x120`.
+`btlApplyCommandAbilityMultiplier` also receives a party record: the
+combined-party caller passes a local record snapshot, not a whole actor.
+
+The display identifier at `+0xE0` is unsigned: DDS1
+`btlIsActorModeActionCodeAllowed` compares it with `sltiu` at `0x001AAAF8`.
+The canonical members are `displaySpecies` in DDS1 and `combatantKind` in
+DDS2; their other current consumers use equality or forward the identifier
+to model-loading helpers, not signed ordering or arithmetic shifts.
+
+
+## Battle entry tasks retain their native pointer owners
+
+DDS1 `func_001D4E98` obtains model resources through `BtlUnit.resourceLink`
+and `effectObject`; the battle callbacks at `+0x5C4`, `+0x5D8` and `+0x5E0`
+receive the unit itself. DDS2 `func_001D08A8` sequences the native 64-bit
+task dependencies through `beginBattleEntryTasks` and `finishEnemyEntryTasks`,
+with `selectEntryModelVariant` receiving the current unit.
+Actor-transparency payloads contain a `BtlUnit *`; actor-effect payloads
+contain the allocated 32-byte `SoundResourceNode *`, not its distinct
+24-byte `SoundEffectNode` prefix.
+
+## Paired billboard packets interleave both child streams
+
+DDS1 `func_00150EB0` and DDS2 `func_00158AA0` build seven-entry local color
+and UV arrays from both `BillPacketWork` children. Each vertex's first
+two UV components come from child zero and its last two from child one;
+the paired packet builder consumes those arrays before both counts reset.
+The paired builder is DDS1 `func_002E2BB8` / DDS2 `func_0033BA68`, distinct
+from the compact single-stream vertex builder.
+

@@ -363,7 +363,43 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00150EB0);
+extern u32 func_002E2BB8(u128 *, void *, void *, void *, s32, void *(*)(s32));
+
+void func_00150EB0(BillRenderPair *pair) {
+    u32 colors[7][2];
+    u16 uv[7][4][4];
+    BillPacketWork *data[2];
+    s32 count;
+    s32 i;
+
+    data[0] = pair->children[0]->work;
+    data[1] = pair->children[1]->work;
+    count = data[1]->count;
+    for (i = 0; i < count; i++) {
+        colors[i][0] = data[0]->colors[i];
+        colors[i][1] = data[1]->colors[i];
+        uv[i][0][0] = data[0]->uv[i].components[0];
+        uv[i][0][1] = data[0]->uv[i].components[1];
+        uv[i][1][0] = data[0]->uv[i].components[2];
+        uv[i][1][1] = data[0]->uv[i].components[3];
+        uv[i][2][0] = data[0]->uv[i].components[4];
+        uv[i][2][1] = data[0]->uv[i].components[5];
+        uv[i][3][0] = data[0]->uv[i].components[6];
+        uv[i][3][1] = data[0]->uv[i].components[7];
+        uv[i][0][2] = data[1]->uv[i].components[0];
+        uv[i][0][3] = data[1]->uv[i].components[1];
+        uv[i][1][2] = data[1]->uv[i].components[2];
+        uv[i][1][3] = data[1]->uv[i].components[3];
+        uv[i][2][2] = data[1]->uv[i].components[4];
+        uv[i][2][3] = data[1]->uv[i].components[5];
+        uv[i][3][2] = data[1]->uv[i].components[6];
+        uv[i][3][3] = data[1]->uv[i].components[7];
+    }
+    sdfAppendPacket(pair->packetList,
+        func_002E2BB8((u128 *)data[1]->positions, colors, uv, data[1]->offsets, count, NULL));
+    data[0]->count = 0;
+    data[1]->count = 0;
+}
 
 extern SdfPoolNode D_00325228;
 extern void func_002D4CC8(const void *, void *, s32);

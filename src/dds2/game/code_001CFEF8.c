@@ -319,7 +319,223 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D08A8);
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
+extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
+extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
+extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
+extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
+extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
+extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *, u32, u32);
+extern BtlRuntimeTask *func_001E5FF8(BtlUnit *, s32);
+extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
+extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
+extern BtlRuntimeTask *sndCreateEarringTask(void);
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
+extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
+extern s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *);
+
+void func_001D08A8(BtlState *scene) {
+    BtlUnit *unit;
+    BtlUnit *tail;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *load;
+    BtlRuntimeTask *light;
+    BtlRuntimeTask *lastFade = NULL;
+    u64 chain;
+    u64 firstPrimary;
+    s32 kind;
+    s32 delay;
+    s32 havePrimary;
+
+    chain = btlAdvanceRuntimeSequenceCounter();
+    firstPrimary = btlAdvanceRuntimeSequenceCounter();
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
+    btlStartTask(btlCreateCommandSoundTask(0, 2));
+    if (scene->beginBattleEntryTasks != NULL) {
+        chain = scene->beginBattleEntryTasks(0);
+    }
+    tail = NULL;
+    for (unit = scene->units; unit != NULL; unit = unit->nextActor) {
+        if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
+            kind = scene->selectEntryModelVariant != NULL ? scene->selectEntryModelVariant(unit) : unit->combatantKind;
+            load = btlCreateModelLoadPollTask(unit, unit->unkDC, kind, 0);
+            load->startCondition.kind = 4;
+            load->startDelay = 1;
+            load->startCondition.value.handle = chain;
+            btlStartTask(load);
+            if (!(scene->commandRestrictFlags & 0xC) && btlIsActorModeActionCodeAllowed(unit)) {
+                task = btlCreateActorTransparencyTask(unit);
+                task->startCondition.kind = 4;
+                task->startDelay = 1;
+                task->startCondition.value.handle = load->handle;
+                btlStartTask(task);
+            }
+            light = btlCreateUnitBaseLightTask(unit);
+            light->startCondition.kind = 4;
+            light->startCondition.value.handle = load->handle;
+            light->ownerId = 0x8000000000000003ULL;
+            btlStartTask(light);
+            chain = light->handle;
+        }
+        tail = unit;
+    }
+    delay = 1;
+    for (unit = tail; unit != NULL; unit = unit->previousActor) {
+        if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
+            if (!(unit->stateFlags & 0x800) && !(scene->commandRestrictFlags & 0x100008)) {
+                if (!(scene->commandRestrictFlags & 4) && btlIsActorModeActionCodeAllowed(unit)) {
+                    lastFade = func_001E5FF8(unit, 8);
+                } else {
+                    lastFade = btlCreateUnitFadeInTask(unit, 4, 6);
+                }
+                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.value.handle = chain;
+                lastFade->startDelay = delay;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+                if (scene->commandRestrictFlags & 4) {
+                    task = sndCreateActorEffectTask(scene->resources[46], unit, 0x10);
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = chain;
+                    task->startDelay = delay;
+                    task->ownerId = 0x8000000000000003ULL;
+                    btlStartTask(task);
+                }
+                if (!(scene->commandRestrictFlags & 4)) {
+                    delay += 8;
+                } else {
+                    delay += 10;
+                }
+            } else {
+                lastFade = func_001E5FF8(unit, 0);
+                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.value.handle = chain;
+                lastFade->startDelay = delay;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+            }
+        }
+    }
+    if (scene->finishEnemyEntryTasks != NULL) {
+        scene->finishEnemyEntryTasks(chain);
+    }
+    if (scene->commandRestrictFlags & 0x100000) {
+        task = btlCreateImmediateCompletionTask();
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = chain;
+        task->ownerId = 0x8000000000000004ULL;
+        btlStartTask(task);
+    }
+    havePrimary = 0;
+    for (unit = tail; unit != NULL; unit = unit->previousActor) {
+        if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
+            if ((btlUnitStatusPair(unit) & 0x0010000000001000ULL) == 0x1000) {
+                load = btlCreateModelLoadPollTask(unit, unit->unkDC, unit->combatantKind, 0);
+            } else {
+                load = btlCreateModelLoadPollTask(unit, unit->modelId, unit->modelVariant, 0);
+            }
+            load->startCondition.kind = 4;
+            load->startDelay = 1;
+            load->startCondition.value.handle = chain;
+            btlStartTask(load);
+            light = btlCreateUnitBaseLightTask(unit);
+            light->startCondition.kind = 4;
+            light->startCondition.value.handle = load->handle;
+            light->ownerId = 0x8000000000000003ULL;
+            btlStartTask(light);
+            chain = light->handle;
+            if (!havePrimary) {
+                firstPrimary = chain;
+                havePrimary = 1;
+            }
+            if (!(unit->stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
+                lastFade = btlCreateUnitFadeInTask(unit, 4, 6);
+                lastFade->startCondition.kind = 4;
+                lastFade->startDelay = 1;
+                lastFade->startCondition.value.handle = light->handle;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+                if ((scene->commandRestrictFlags & 2) && !btlHasSpecialAbilityOrModelFlag(&unit->partyRecord)) {
+                    task = sndCreateActorEffectTask(scene->resources[46], unit, 0x10);
+                    task->startCondition.kind = 4;
+                    task->startDelay = 1;
+                    task->startCondition.value.handle = light->handle;
+                    btlStartTask(task);
+                }
+            } else {
+                lastFade = func_001E5FF8(unit, 0);
+                lastFade->startCondition.kind = 4;
+                lastFade->startDelay = 1;
+                lastFade->startCondition.value.handle = light->handle;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+            }
+        }
+    }
+    for (unit = tail; unit != NULL; unit = unit->previousActor) {
+        if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
+            task = btlCreateGunLoadPollTask(unit);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = chain;
+            btlStartTask(task);
+        }
+    }
+    if (havePrimary) {
+        task = sndCreateEarringTask();
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = firstPrimary;
+        task->ownerId = 0x8000000000000003ULL;
+        btlStartTask(task);
+    }
+    switch (scene->encounterKind) {
+        case 1:
+            task = btlCreateEffObjB(NULL, 0xD);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = chain;
+            task->ownerId = 0x8000000000000003ULL;
+            btlStartTask(task);
+            break;
+        case 2:
+            task = btlCreateEffObjB(NULL, 0xAB);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = chain;
+            task->ownerId = 0x8000000000000003ULL;
+            btlStartTask(task);
+            break;
+        case 3:
+            task = btlCreateEffObjB(NULL, 0xDD);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = chain;
+            task->ownerId = 0x8000000000000003ULL;
+            btlStartTask(task);
+            break;
+    }
+    if (scene->battleFlags & 0x4000) {
+        task = btlCreateEffObjB(NULL, 0x88);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = chain;
+        task->ownerId = 0x8000000000000003ULL;
+        btlStartTask(task);
+    }
+    if (lastFade != NULL) {
+        task = btlCreateImmediateCompletionTask();
+        task->startCondition.kind = 4;
+        task->startDelay = 6;
+        task->startCondition.value.handle = lastFade->handle;
+        task->ownerId = 0x8000000000000003ULL;
+        btlStartTask(task);
+    }
+    if (!(scene->commandRestrictFlags & 0x40000)) {
+        task = btlCreateSoundUpdateTask(12);
+        task->startCondition.kind = 7;
+        task->startCondition.value.owner = 0x8000000000000003ULL;
+        btlStartTask(task);
+    }
+}
+
 
 s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
     u32 i;
@@ -397,9 +613,6 @@ extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);
 extern void btlStartSecondaryScriptTask(void);
 extern void btlStartSkillEventTask(s32);
-extern struct SoundTask *btlCreateCommandSoundUpdateTask(void);
-extern u8 *btlCreateSecondaryCommandSoundTask(void);
-extern void *btlCreateCommandSoundTask(s32, s32);
 extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern u32 kwlnDrawControlFlags;

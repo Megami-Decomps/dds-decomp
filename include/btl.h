@@ -98,7 +98,7 @@ typedef struct BtlUnit {
     s32 modelVariant; /* 0xD4: its variant argument */
     u8 padD8[4];
     s32 unkDC; /* 0xDC: model for the slot-0x10 model-change command, with displaySpecies */
-    s32 displaySpecies; /* 0xE0 */
+    u32 displaySpecies; /* 0xE0 */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
     s32 unkEC;
@@ -185,7 +185,7 @@ typedef struct BtlUnit {
     s32 modelVariant; /* 0xD4: its variant argument */
     u8 padD8[4];
     s32 unkDC; /* 0xDC: mode actor selector paired with combatantKind. */
-    s32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
+    u32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
     s32 unkEC;

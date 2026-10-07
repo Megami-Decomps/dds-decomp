@@ -447,9 +447,26 @@ void func_0024EF68(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F0D0);
+void func_0024F0D0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                  s32 selector, s32 flags, s32 context,
+                  f32 scaleX, f32 scaleY) {
+    s8 spriteMap[15] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 17, 18 };
+    s32 sprite;
 
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF720);
+    sprite = spriteMap[(D_0036B7F0[placementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
+                        (selector * 4)) & 0xF];
+    if (sprite == -1) {
+        return;
+    }
+    func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex]
+                                           [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + D_0036B7F0[placementIndex]
+                                           [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags, D_0036C6AC[0], sprite, context);
+}
+
 
 void func_0024F210(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
                    s32 coordinatePlacementIndex, s32 selector, s32 flags,

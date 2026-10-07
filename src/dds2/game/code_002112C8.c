@@ -324,18 +324,19 @@ extern s32 func_001B3200(s32);
 
 extern s32 func_00213F58(s32, s16, s8);
 
-extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
+extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
+extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlElementToBitIndex(s32, s32);
 
 
-extern s32 btlHasMappedSpecialAbilityForSlot(s32, u32);
+extern s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 btlHasSpecialAbility274(void *, s32);
+extern s32 btlHasSpecialAbility274(BtlUnit *, u32);
 
-extern s32 btlHasEnabledSpecialAbilityForSlot(void *, s32);
+extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
 extern s32 btlGroup400UnitHasAction(void *, s32);
 
@@ -1348,7 +1349,7 @@ s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
 s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x200) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 0) {
             return 1;
         }
     }
@@ -1358,7 +1359,7 @@ s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x200) == 1) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 1) {
             return 0;
         }
     }
@@ -1368,7 +1369,7 @@ s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
 s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x400) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 0) {
             return 1;
         }
     }
@@ -1378,7 +1379,7 @@ s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x400) == 1) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 1) {
             return 0;
         }
     }
@@ -1604,7 +1605,7 @@ s32 btlIsHistoryCounterEmpty(void) {
 s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if (btlUnitBlocksElementQuery((s32)battler, action, 0x200)) {
+        if (btlUnitBlocksElementQuery(battler, action, 0x200)) {
             return 1;
         }
     }
@@ -1658,8 +1659,8 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 id, s32 mask) {
     return 0;
 }
 
-s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
-    u32 flags = ((BtlUnit *)unit)->flags;
+s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
+    u32 flags = unit->flags;
     s32 stat;
     s32 value;
     if (flags & 1) {
@@ -1673,17 +1674,17 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                         if (index == 0x80) {
                             continue;
                         }
-                        value = func_001ABF50((BtlUnit *)unit, index);
-                        if (btlHasEnabledSpecialAbilityForSlot((void *)unit, index) != 0 || (value & 0x20000) ||
-                            (stat == 0x20000 && btlTestSelectedItemCategoryMask((BtlUnit *)unit, index) != 0)) {
+                        value = func_001ABF50(unit, index);
+                        if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0 || (value & 0x20000) ||
+                            (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, index) != 0)) {
                             return 1;
                         }
                     }
                     return 0;
                 }
-                value = func_001ABF50((BtlUnit *)unit, action);
-                if (btlHasEnabledSpecialAbilityForSlot((void *)unit, action) != 0 || (value & 0x20000) ||
-                    (stat == 0x20000 && btlTestSelectedItemCategoryMask((BtlUnit *)unit, action) != 0)) {
+                value = func_001ABF50(unit, action);
+                if (btlHasEnabledSpecialAbilityForSlot(unit, action) != 0 || (value & 0x20000) ||
+                    (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, action) != 0)) {
                     return 1;
                 }
             }
@@ -1694,8 +1695,8 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00214928);
 
-s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
-    u32 flags = ((BtlUnit *)unit)->flags;
+s32 btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
+    u32 flags = unit->flags;
     if (flags & 1) {
         if (flags & mask) {
             if (!(flags & 0x20)) {
@@ -1706,8 +1707,8 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                         if (index == 0x80) {
                             continue;
                         }
-                        if (btlTestSelectedItemCategoryMask((BtlUnit *)unit, index) != 0 ||
-                            btlHasMappedSpecialAbilityForSlot((s32)unit, index) != 0 ||
+                        if (btlTestSelectedItemCategoryMask(unit, index) != 0 ||
+                            btlHasMappedSpecialAbilityForSlot(unit, index) != 0 ||
                             btlHasSpecialAbility274(unit, index) != 0 ||
                             btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
                             return 0;
@@ -1715,8 +1716,8 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                     }
                     return 1;
                 }
-                if (btlTestSelectedItemCategoryMask((BtlUnit *)unit, action) != 0 ||
-                    btlHasMappedSpecialAbilityForSlot((s32)unit, action) != 0 ||
+                if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
+                    btlHasMappedSpecialAbilityForSlot(unit, action) != 0 ||
                     btlHasSpecialAbility274(unit, action) != 0) {
                     return 0;
                 }
@@ -1730,7 +1731,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
 s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x200) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 0) {
             return 0;
         }
     }
@@ -1740,7 +1741,7 @@ s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
 s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
-        if (btlUnitBlocksElementQueryForGroup((u8 *)battler, action, 0x400) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 0) {
             return 0;
         }
     }
@@ -2253,11 +2254,11 @@ s32 btlSelectTargetsPassingCheck(s32 task, s32 action) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
 
             if (unit->flags & 0x200) {
-                if (btlUnitBlocksElementQueryForGroup((u8 *)unit, action, 0x200) == 1) {
+                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
                     picked[i] = 1;
                 }
             } else {
-                if (btlUnitBlocksElementQueryForGroup((u8 *)unit, action, 0x400) == 1) {
+                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == 1) {
                     picked[i] = 1;
                 }
             }
