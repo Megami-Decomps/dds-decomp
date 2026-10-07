@@ -11,6 +11,7 @@ extern FldInfTable D_00332E30;
 #include "fld.h"
 #include "mdl.h"
 #include "scr.h"
+#include "kwln.h"
 #include "dat_state.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
@@ -248,7 +249,7 @@ extern u32 fldPendingArea;
 extern u32 fldPendingFloor;
 extern u32 D_003BAD98;
 extern u32 D_003BAD9C;
-extern u32 D_003BADA0;
+extern f32 D_003BADA0;
 extern u32 D_003BADA4;
 extern u32 D_003BADC8;
 extern u32 D_003BADD8;
@@ -342,7 +343,7 @@ extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfResourceRetainAddress(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
-extern s32 *dds3FindObjectChainNodeByName();
+extern EffWorldNode *dds3FindObjectChainNodeByName();
 extern void fldClearMenuEntries();
 extern void fldDestroyTitleTask();
 extern void fldPlayPendingSounds();
@@ -459,7 +460,7 @@ extern void *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetModelHolder(void *, u32);
 extern s32 fldParseRoomNumberFromName(const char *);
-extern void func_00113DD0(void *, u32);
+extern void effObjSetRoomNumber(void *, u32);
 extern void *dds3FindWorldObjectNodeByKey(void *, u32, s32);
 extern void dds3SetSlotByKind(void *, void *);
 extern void func_00111F40(void *);
@@ -534,7 +535,7 @@ void fldCreateResourceScriptObjects(void) {
         } else {
             effObjSetModelHolder(object, 7);
         }
-        func_00113DD0(object, fldParseRoomNumberFromName(resource->name));
+        effObjSetRoomNumber(object, fldParseRoomNumberFromName(resource->name));
         dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));
         func_00111F40(object);
         binding = D_003BD7B8;
@@ -3295,12 +3296,71 @@ void fldBeginSelectedValueTransition(u32 value) {
     func_00132FD0(previousValue, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00132BD0);
-
+extern char D_003A0138[];
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
-extern void func_00221D00(EvtUnit *unit, s32 index, s32 colorA, s32 colorB);
+extern void func_00221D00(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
+
+/* Alternate the selected value at the requested rate, and apply live lighting edits. */
+void func_00132BD0(void) {
+    EvtUnit *player;
+    f32 direction[4];
+    s32 red, green, blue;
+    u32 colorA, colorB;
+
+    switch ((s32)D_003BAD9C) {
+    case 0: /* Disabled. */
+        break;
+    case 1:
+        D_003BADA0 += 1.0f;
+        if (D_003BADA0 == 30.0f) {
+            func_00132FD0((D_003BADA4 + 1) & 0xFF, 30);
+        } else if (D_003BADA0 == 60.0f) {
+            func_00132FD0(D_003BADA4, 30);
+            D_003BADA0 = 0;
+        }
+        break;
+    case 2:
+        D_003BADA0 += 1.0f;
+        if (D_003BADA0 == 15.0f) {
+            func_00132FD0((D_003BADA4 + 1) & 0xFF, 1);
+        } else if (D_003BADA0 == 30.0f) {
+            func_00132FD0(D_003BADA4, 1);
+            D_003BADA0 = 0;
+        }
+        break;
+    case 3:
+        D_003BADA0 += 1.0f;
+        if (D_003BADA0 == 60.0f) {
+            func_00132FD0((D_003BADA4 + 1) & 0xFF, 60);
+        } else if (D_003BADA0 == 120.0f) {
+            func_00132FD0(D_003BADA4, 60);
+            D_003BADA0 = 0;
+        }
+        break;
+    }
+    if (kwlnTaskGetTaskByName(D_003A0138) != NULL) {
+        player = evtUnitGetNestedValue((EffWorldNode *)fldPlayerObject);
+        evtSetUnitStatusFlags(player);
+        red = D_00330670[0] * 128.0f;
+        green = D_00330670[1] * 128.0f;
+        blue = D_00330670[2] * 128.0f;
+        colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+        red = D_003306C0[0] * 128.0f;
+        green = D_003306C0[1] * 128.0f;
+        blue = D_003306C0[2] * 128.0f;
+        colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+        func_00221D00(player, 0, colorA, colorB);
+        direction[0] = D_00330670[4];
+        direction[1] = D_00330670[5];
+        direction[2] = D_00330670[6];
+        direction[3] = 0.0f;
+        VU0_LOAD_VF(vf10, direction);
+        evtSetUnitNormalizedDirection(player, 0);
+    }
+}
 
 /* VU0 direction setters consume vf10, as in the DDS2 lighting routine. */
 void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
@@ -4620,6 +4680,8 @@ const char *func_0013C9E0(const char *eventName) {
     return 0;
 }
 
+INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0138);
+
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0150);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013CBA8);
@@ -5043,7 +5105,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
  * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
-    s32 *objectNode;
+    EffWorldNode *objectNode;
     s32 secondaryMotion;
 
     switch (attribute) {
@@ -5052,12 +5114,12 @@ s32 fldGetActorStat0(s32 attribute) {
     case 1:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 2:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 3:
         secondaryMotion = (u16)actor->secondaryMotion;
@@ -5077,7 +5139,7 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0280);
 
 s32 fldGetActorStat1(u32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
-    s32 *objectNode;
+    EffWorldNode *objectNode;
 
     switch (attribute) {
     case 0:
@@ -5097,12 +5159,12 @@ s32 fldGetActorStat1(u32 attribute) {
     case 1:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 2:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
         return actor->secondaryMotion;
     case 3:
@@ -5118,7 +5180,7 @@ s32 fldGetActorStat1(u32 attribute) {
 s32 fldGetActorMotionEntry(u32 attribute) {
     FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
     s16 motionIndex = actor->motion;
-    s32 *objectNode;
+    EffWorldNode *objectNode;
     s32 flags;
 
     switch (attribute) {
@@ -5127,12 +5189,12 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     case 1:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].primaryName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 2:
         objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].secondaryName);
         if (objectNode != NULL) {
-            return objectNode[1];
+            return objectNode->key;
         }
     case 3:
         D_003BAE44 = D_00336A60[motionIndex].unk24;

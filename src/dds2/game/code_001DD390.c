@@ -14,6 +14,7 @@
 #include "sdf.h"
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern void effObjSetOpacityPassEnabled(u32 enabled);
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -4282,7 +4283,93 @@ BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E7648);
+typedef struct BtlActorMotionSlot {
+    u8 pad00[4];
+    s16 kind; /* 0x04 */
+    s16 alphaStartFrame; /* 0x06 */
+    f32 alphaFrameScale; /* 0x08 */
+    u8 pad0C[4];
+    s16 alphaDuration; /* 0x10 */
+    u8 pad12[2];
+} BtlActorMotionSlot;
+
+typedef struct BtlActorStatusRecord {
+    u8 pad00[0x2A];
+    u16 model; /* 0x2A */
+    BtlActorMotionSlot motions[29]; /* 0x2C; provider stride 0x270 */
+} BtlActorStatusRecord;
+
+/* Update motion completion, alpha transitions, and the selected-unit color pulse. */
+void func_001E7648(void) {
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    BtlActorStatusRecord *status;
+    s32 parameter;
+    s32 frame;
+    s32 index;
+    f32 pulse;
+    u32 packed[4];
+    /* Three boss installers publish no-argument hooks in this opaque slot. */
+    void (*beforeMotionUpdate)(void) = *(void (**)(void))runtime->pad610;
+
+    if (beforeMotionUpdate != NULL) {
+        beforeMotionUpdate();
+    }
+    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+        if (!(unit->flags & 0x600) || !(unit->flags & 2)) {
+            continue;
+        }
+        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+            unit->resourceKind, unit->resourceIndex);
+        if (unit->flags & 0x40000000) {
+            btlSeekRandomModelFrame(unit);
+            unit->flags &= ~0x40000000;
+        }
+        if (unit->flags & 0x80000000) {
+            parameter = 1;
+            if (runtime->hook5D4 != NULL) {
+                parameter = runtime->hook5D4(unit, 1, 0);
+            }
+            if (unit->unkEC != parameter && parameter != -1) {
+                btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
+            } else {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                if (frame >= status->model) {
+                    sdfMotionSampleAtFrame(unit->ext->owner->first, (f32)status->model);
+                    btlResetUnitModelProgress(unit);
+                    unit->flags &= ~0x80000000;
+                }
+            }
+        }
+        if (unit->updateFlags & 2) {
+            if (unit->updateFlags & 4) {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                index = unit->unkEC;
+                if (index == mdlGetNodeField2C(unit->ext->owner, 0)) {
+                    if (frame >= status->motions[index].alphaStartFrame) {
+                        evtSetUnitAlphaTransition(unit->ext,
+                            (s32)((f32)status->motions[index].alphaDuration /
+                                (status->motions[index].alphaFrameScale * runtime->unk4C8)),
+                            unit->overlayColor & 0xFFFFFF);
+                        unit->updateFlags &= ~4;
+                    }
+                }
+            }
+            unit->overlayColor = mdlGetBroadcastValue(unit->ext->owner);
+        }
+        if (unit->flags & 0x8000) {
+            /* The pulse uses the signed global counter at +0x214, not scene frame +0x234. */
+            pulse = (f32)(*(s32 *)runtime->pad214 % 30) / 15.0f;
+            if (pulse > 1.0f) {
+                pulse = 2.0f - pulse;
+            }
+            VU0_SET_ONES_XYZ(vf10);
+            VU0_SCALAR_OP(pulse * 1.6f + 0.3f, "vmulx.xyzw vf10, vf10, vf2x");
+            EE_MMI_RGBA_PACK(packed[0]);
+            btlBlendUnitColor(unit, (packed[0] & 0xFFFFFF) | 0x80000000, 0);
+        }
+    }
+}
 
 extern void func_001E3E20(BtlUnit *);
 extern void func_002034A8(struct SoundResourceLink *);
@@ -7380,7 +7467,60 @@ s32 btlCountUnitsByFlags(u32 mask) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001FF5D8);
+func_001FF5D8(s32 action, s32 state) {
+    memset(D_003BD7D0, 0, sizeof(SoundCursor));
+    switch (((BtlLinkedCommand *)action)->link->unit->partyRecord.unitId) {
+    case 1:
+        func_001FA480(action, state, D_003BC0A0[4]);
+        func_001F5868(action, state, 2, 4);
+        CURSOR->unk_0C = 2;
+        func_001F5320(action, state, 2, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 4:
+        func_001FA480(action, state, D_003BC0A0[4]);
+        func_001F5868(action, state, 2, 0);
+        CURSOR->unk_0C = 0;
+        func_001F5320(action, state, 2, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 3:
+    case 5:
+    case 6:
+        func_001FA480(action, state, D_003BC0A0[3]);
+        func_001F5868(action, state, 2, 2);
+        CURSOR->unk_0C = 1;
+        func_001F5320(action, state, 2, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 7:
+        func_001FA480(action, state, D_003BC0A0[3]);
+        func_001F5868(action, state, 2, 7);
+        CURSOR->unk_0C = 5;
+        func_001F5320(action, state, 2, 2);
+        CURSOR->unk_00 = 1;
+        break;
+    case 2:
+        func_001FA480(action, state, D_003BC0A0[4]);
+        func_001F5868(action, state, 2, 8);
+        CURSOR->unk_0C = 2;
+        func_001F5320(action, state, 2, 2);
+        CURSOR->unk_00 = 1;
+        break;
+    case 8:
+        func_001FA480(action, state, D_003BC0A0[4]);
+        func_001F5868(action, state, 2, 9);
+        CURSOR->unk_0C = 6;
+        func_001F5320(action, state, 2, 2);
+        CURSOR->unk_00 = 1;
+        break;
+    default:
+        if (btlHasSingleLinkedResource(action)) {
+            func_001EEB78((BtlLinkedCommand *)action, &((BtlLinkedCommand *)action)->camera, 1);
+        }
+        break;
+    }
+}
 
 void btlAdvanceCursorForUnmarkedUnit(s32 action, s32 state) {
     if (CURSOR->unk_00 == 1) {
@@ -7816,7 +7956,7 @@ void sndResetTransition(void) {
 
 void btlClearTintAndEnableCamera(void) {
     btlQueueTintTransitionToZero(0);
-    func_00114068(1);
+    effObjSetOpacityPassEnabled(1);
 }
 
 void btlUpdateTintAndWorldLight(void) {
@@ -7825,12 +7965,12 @@ void btlUpdateTintAndWorldLight(void) {
 
     if (position[0] == 0.0f && position[1] == 0.0f &&
         position[2] == 0.0f) {
-        func_00114068(0);
+        effObjSetOpacityPassEnabled(0);
     } else {
-        func_00114068(1);
+        effObjSetOpacityPassEnabled(1);
     }
     if (((BtlState *)context)->commandRestrictFlags & 0x20) {
-        func_00114068(0);
+        effObjSetOpacityPassEnabled(0);
     }
     btlStepBlendColor();
 }

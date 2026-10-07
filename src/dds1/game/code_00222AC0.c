@@ -207,7 +207,7 @@ typedef struct EvtWorldUnitRef {
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
     if (frames > 0 && frames <= 100) {
         work->linkedUnit = NULL;
-        work->motionState = 3;
+        work->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
         PCP_COPY_VECTOR(work->targetVector, vector);
         work->motionParameter = frames;
         work->directionOffset = 0;
@@ -228,7 +228,7 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 
 void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
     work->motionSubmode = mode;
-    work->motionState = 1;
+    work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = 0;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(work->targetVector, vector);
@@ -303,7 +303,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         work->flags |= 0x10;
         break;
     }
-    work->motionState = 1;
+    work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = 2;
     work->linkedUnit = pathSource;
     dds3InterpolatePathVectorVU(path);
@@ -320,7 +320,7 @@ s32 evtStartUnitModeWithValue(EvtUnit *work, s32 value) {
     if (value != 0) {
         work->unk94 = value;
         work->motionTicks = 0;
-        work->motionState = 4;
+        work->motionState = EVT_UNIT_MOTION_STATE_VALUE;
         ret = 1;
     }
     return ret;

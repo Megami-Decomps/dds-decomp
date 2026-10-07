@@ -38,7 +38,8 @@ typedef struct SdfBattleParameters {
     u8 padB50[0x1C];
     f32 specialAffinityScale; /* 0xB6C */
     f32 criticalScale; /* 0xB70: special-mode multiplier for the critical roll. */
-    u8 padB74[0xC];
+    u8 padB74[8];
+    f32 preemptiveModeScale; /* 0xB7C: encounter-kind-3 preemptive chance scale. */
     f32 majinRewardScale; /* 0xB80: DDS2 battle-mode-3 experience multiplier. */
     u8 padB84[0x14];
     s8 criticalPartyAttackerBias; /* 0xB98: signed critical chance adjustments. */

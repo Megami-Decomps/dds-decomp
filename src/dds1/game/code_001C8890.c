@@ -17,6 +17,7 @@
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 
 extern void sdfReleaseChipBlock(void *block);
@@ -3687,14 +3688,14 @@ void func_001D4E98(BtlUnit *unit, u32 kind, u32 id) {
     unit->flags |= 0x40000000;
     if (unit->flags & 0x20) {
         model = unit->ext->owner;
-        unit->ext->motionState = 0;
+        unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         unit->ext->flags &= ~0xA0;
         mdlAddEntryPlain(model, 0, 0xB);
         unit->unkEC = 0xB;
         sdfMotionSampleAtFrame(model->first, model->first->frameCount);
         unit->flags = unit->flags & 0x7FFFFFFF & 0xBFFFFFFF;
     } else if (btlTestActorStatusPredicate(unit)) {
-        unit->ext->motionState = 0;
+        unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         model = unit->ext->owner;
         unit->ext->flags &= ~0xA0;
         status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, id);
@@ -9528,7 +9529,7 @@ void sndResetTransition(void) {
 
 void btlClearTintAndEnableCamera(void) {
     btlQueueTintTransitionToZero(0);
-    func_00113E40(1);
+    effObjSetOpacityPassEnabled(1);
 }
 
 extern f32 *D_00324770[];
@@ -9539,12 +9540,12 @@ void btlUpdateTintAndWorldLight(void) {
 
     if (position[0] == 0.0f && position[1] == 0.0f &&
         position[2] == 0.0f) {
-        func_00113E40(0);
+        effObjSetOpacityPassEnabled(0);
     } else {
-        func_00113E40(1);
+        effObjSetOpacityPassEnabled(1);
     }
     if (*(u32 *)(context + 0x1F8) & 0x20) {
-        func_00113E40(0);
+        effObjSetOpacityPassEnabled(0);
     }
     btlStepBlendColor();
 }

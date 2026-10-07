@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "eff_object.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
@@ -26,7 +27,7 @@ void func_00111258(void *slot, void *owner);
 void dds3RemoveWorldObjectNode(void *node);
 void dds3DestroyWorldIndexNode(NodeB *node);
 void sdfReleaseChipBlock(void *block);
-void dds3ReleaseObjectBaseResources(World *world);
+void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
 
 #define DDS3_OBJECT_SLOT_COUNT 8
@@ -141,19 +142,19 @@ u32 dds3GetObjectBaseResourceHandle(void *object) {
 /* A nonzero handle releases model/context state (0) or device/motion state (1),
  * then clears the handle and marks state 3. Other states skip backend release;
  * an absent handle leaves state untouched, and the stored motion pointer remains. */
-void dds3ReleaseObjectBaseResources(World *world) {
+void dds3ReleaseObjectBaseResources(EffWorldNode *object) {
     ObjBase *base;
-    WorldInfo *info;
+    EffectObjectData *data;
 
-    base = dds3GetObjectOwnedHandle(world);
+    base = dds3GetObjectOwnedHandle(object);
     if (base->resourceHandle != 0) {
         if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
             if (base->resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
                 mdlDestroyContext((MdlCtx *)base->resourceHandle);
-                info = world->info;
-                if (info->primaryObject != NULL) {
-                    evtReleaseUnitTransitionWork(info->primaryObject);
-                    info->primaryObject = NULL;
+                data = object->data;
+                if (data->transitionWork != NULL) {
+                    evtReleaseUnitTransitionWork(data->transitionWork);
+                    data->transitionWork = NULL;
                 }
             }
         } else {

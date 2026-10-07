@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "fld_inf.h"
 #include "sdf_primitive.h"
 #include "dds3obj.h"
@@ -23,10 +24,18 @@ typedef struct DmaPacketHeader DmaPacketHeader;
 typedef struct FldUnitLightParams {
     f32 color[4];
     f32 direction[4];
+    f32 unknown[8];
 } FldUnitLightParams;
 
+typedef struct FldUnitLightColor {
+    f32 color[4];
+} FldUnitLightColor;
+
+typedef char FldUnitLightParams_size_must_be_0x40[(sizeof(FldUnitLightParams) == 0x40) ? 1 : -1];
+typedef char FldUnitLightColor_size_must_be_0x10[(sizeof(FldUnitLightColor) == 0x10) ? 1 : -1];
+
 extern FldUnitLightParams D_0038BB10;
-extern FldUnitLightParams D_0038BB60;
+extern FldUnitLightColor D_0038BB60;
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
 extern void evtSetUnitStatusFlags(EvtUnit *);
 extern void func_0023C870(EvtUnit *, s32, u32, u32);
@@ -345,13 +354,15 @@ extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 
 extern u32 D_0043612C;
 
-extern u32 D_00436130;
+extern f32 D_00436130;
 
 extern u32 D_00436134;
 
 extern u32 D_003899B4[];
 
 extern void func_00135A68(u32 value, s32 enabled);
+extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
+extern char D_00413388[];
 
 extern u32 D_00436128;
 
@@ -531,7 +542,7 @@ extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetModelHolder(struct EffectObject *, u32);
 extern s32 fldParseRoomNumberFromName(char *);
-extern void func_00113FF8(struct EffectObject *, u32);
+extern void effObjSetRoomNumber(struct EffectObject *, u32);
 extern struct EffWorldNode *dds3FindWorldObjectNodeByKey(struct EffWorldNode *, u32, s32);
 extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
 extern void func_00112168(void *);
@@ -606,7 +617,7 @@ void fldCreateResourceScriptObjects(void) {
         } else {
             effObjSetModelHolder(object, 7);
         }
-        func_00113FF8(object, fldParseRoomNumberFromName((char *)resource->name));
+        effObjSetRoomNumber(object, fldParseRoomNumberFromName((char *)resource->name));
         dds3SetSlotByKind(object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
         func_00112168(object);
         binding = D_00438EC0;
@@ -1279,7 +1290,41 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     descriptor->append((SdfListHead *)descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B690);
+extern void sdfQueueGouraudTexturedQuad(
+    s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
+    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2,
+    s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
+    s32 depth, s32 (*allocate)(s32));
+
+void func_0012B690(s32 x, s32 y, s32 width, s32 height,
+                   s32 u, s32 v, s32 textureWidth, s32 textureHeight,
+                   u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
+    SdfListHead *list;
+    SdfPoolNode *surface;
+    s32 left, top, right, bottom;
+    s32 uLeft, vTop, uRight, vBottom;
+
+    list = (SdfListHead *)sdfCreateResetPacketList();
+    sdfConsCreateDrawPacket(list, texture, 0);
+    left = (x << 4) + 0x7000;
+    top = (y << 3);
+    right = (x << 4) + (width << 4) + 0x7000;
+    bottom = top + (height << 3) + 0x7900;
+    top += 0x7900;
+    uLeft = (u << 4);
+    vTop = (v << 4);
+    uRight = uLeft + (textureWidth << 4);
+    vBottom = vTop + (textureHeight << 4);
+    sdfQueueGouraudTexturedQuad((s32)list, 0x40,
+        left, top, uLeft, vTop, color0,
+        right, top, uRight, vTop, color1,
+        left, bottom, uLeft, vBottom, color3,
+        right, bottom, uRight, vBottom, color2,
+        -1, NULL);
+    surface = &kwlnDrawSurfaces[fldDisplayRow];
+    surface->append((SdfListHead *)surface, list);
+}
 
 void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
     s32 handle = (s32)sdfConsAllocateColumnPacket(1);
@@ -3340,7 +3385,63 @@ void fldBeginSelectedValueTransition(u32 value) {
     func_00135A68(selectedValue, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_001355D8);
+void func_001355D8(void) {
+    EvtUnit *player;
+    f32 direction[4];
+    s32 red, green, blue;
+    u32 colorA, colorB;
+
+    switch ((s32)D_0043612C) {
+    case 0: /* Disabled. */
+        break;
+    case 1:
+        D_00436130 += 1.0f;
+        if (D_00436130 == 30.0f) {
+            func_00135A68((D_00436134 + 1) & 0xFF, 30);
+        } else if (D_00436130 == 60.0f) {
+            func_00135A68(D_00436134, 30);
+            D_00436130 = 0;
+        }
+        break;
+    case 2:
+        D_00436130 += 1.0f;
+        if (D_00436130 == 15.0f) {
+            func_00135A68((D_00436134 + 1) & 0xFF, 1);
+        } else if (D_00436130 == 30.0f) {
+            func_00135A68(D_00436134, 1);
+            D_00436130 = 0;
+        }
+        break;
+    case 3:
+        D_00436130 += 1.0f;
+        if (D_00436130 == 60.0f) {
+            func_00135A68((D_00436134 + 1) & 0xFF, 60);
+        } else if (D_00436130 == 120.0f) {
+            func_00135A68(D_00436134, 60);
+            D_00436130 = 0;
+        }
+        break;
+    }
+    if (kwlnTaskGetTaskByName(D_00413388) != NULL) {
+        player = evtUnitGetNestedValue((EffWorldNode *)fldPlayerObject);
+        evtSetUnitStatusFlags(player);
+        red = D_0038BB10.color[0] * 128.0f;
+        green = D_0038BB10.color[1] * 128.0f;
+        blue = D_0038BB10.color[2] * 128.0f;
+        colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+        red = D_0038BB60.color[0] * 128.0f;
+        green = D_0038BB60.color[1] * 128.0f;
+        blue = D_0038BB60.color[2] * 128.0f;
+        colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+        func_0023C870(player, 0, colorA, colorB);
+        direction[0] = D_0038BB10.direction[0];
+        direction[1] = D_0038BB10.direction[1];
+        direction[2] = D_0038BB10.direction[2];
+        direction[3] = 0.0f;
+        VU0_LOAD_VF(vf10, direction);
+        evtSetUnitNormalizedDirection(player, 0);
+    }
+}
 
 /* vu0 routine: the event direction setter takes its vector in vf10. */
 void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
@@ -3415,6 +3516,8 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00135D80);
 void func_00136098(void) {
     dds3ClearObjectFlags(fldPlayerObject, 0x100);
 }
+
+INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413388);
 
 INCLUDE_SDATA(const s32, "game/code_00128FE8", D_00435FA0);
 

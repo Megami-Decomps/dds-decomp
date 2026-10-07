@@ -1707,7 +1707,117 @@ s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002036E8);
+/* Combines three AI predicate target rows before choosing an index-list entry. */
+s32 func_002036E8(s32 actor) {
+    u16 flags[3][12];
+    s32 kinds[3];
+    s32 values[3]; /* Decoded payloads are retained but not consumed by this selector. */
+    s32 enabled[3];
+    u32 matching;
+    u32 count;
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u16 i;
+    u16 j;
+
+    switch (matching) {
+    case 0:
+        for (i = 0; i < 3; i++) {
+            memset(flags[i], 0, sizeof(flags[i]));
+            enabled[i] = 0;
+        }
+        for (i = 0; i < 3; i++) {
+            kinds[i] = datEnemyAiRecords[btlActionScratchWork->speciesId]
+                .decisions[btlActionScratchWork->rowIndex].predicates[i];
+            values[i] = kinds[i] & 0x3FFFFF;
+            kinds[i] = (kinds[i] & 0xFFC00000) >> 22;
+        }
+        switch (btlActionScratchWork->conditionKind) {
+        case 0:
+            enabled[0] = enabled[1] = enabled[2] = 1;
+            break;
+        case 1:
+            enabled[0] = enabled[1] = 1;
+            break;
+        case 2:
+            enabled[0] = enabled[2] = 1;
+            break;
+        case 3:
+            enabled[1] = enabled[2] = 1;
+            break;
+        case 4:
+            enabled[0] = 1;
+            break;
+        case 5:
+            enabled[1] = 1;
+            break;
+        case 6:
+            enabled[2] = 1;
+            break;
+        default:
+            enabled[0] = 0x50;
+            break;
+        }
+        if (enabled[0] != 0x50) {
+            for (i = 0; i < 3; i++) {
+                if (enabled[i] != 0) {
+                    switch (kinds[i]) {
+                    case 1:
+                    case 7:
+                    case 18:
+                    case 24:
+                        for (j = 0; j < count; j++) {
+                            if (((BtlUnit *)btlGetIndexListEntry(list, j))->identity ==
+                                ((BtlTask *)actor)->unit->identity) {
+                                flags[i][j] = 1;
+                            }
+                        }
+                        break;
+                    /* The other recognized predicate kinds accept every list entry. */
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 11:
+                    case 12:
+                    case 13:
+                    case 14:
+                    case 15:
+                    case 16:
+                    case 17:
+                    case 19:
+                    case 20:
+                    case 21:
+                    case 22:
+                    case 23:
+                    default:
+                        for (j = 0; j < count; j++) {
+                            btlGetIndexListEntry(list, j);
+                            flags[i][j] = 1;
+                        }
+                        break;
+                    }
+                }
+            }
+            for (i = 0; i < 12; i++) {
+                flags[0][i] |= flags[1][i];
+                flags[0][i] |= flags[2][i];
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices,
+                               func_002024A8(list, flags[0], count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", btlSelectLowestRankTarget);
 
