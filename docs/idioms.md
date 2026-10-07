@@ -2655,3 +2655,28 @@ The item-use callback and its complete unit are text/data exact
 field-effect provider's pre-existing sound arms and development hooks,
 remains unchanged by the pointer-contract cutover.
 
+
+## Motion-sound callbacks retain the pack's native format records
+
+The 448-byte DDS1/DDS2 `evtUpdateMotionSeTask` twins use the existing
+`EvtMotionSeTaskParams`, a kind-5 payload's `EvtUnit *` at `+0x08`,
+and `MdlCtx`'s first motion. Convert its floating current frame to a
+signed word before comparing the type-6 pack's 16-byte cue records.
+The pack entry's cue count and motion ID are signed words at `+0x08`
+and `+0x1C`. A missing object, pack, or unit returns `-1`; the ordinary
+continuation and event-ID exclusion return zero.
+
+Replacing the last assembly body also removes format records carried
+with that body's data. Own the existing `"mse_%d_%d"` and script-path
+records in C at their native order, preserving their 16/32-byte extents,
+eight-byte alignment, and trailing zeros. Do not drop the pack's three
+small-data includes or literalize their strings.
+
+Both normal objects retain exactly 24 bytes of small data and contain
+no `.lit4` or `.lit8`. Losing the format records shrinks `.rodata` from
+144 to 95 bytes; its following alignment shifts the later banks by
+48 bytes and can push unrelated literal relocations outside the fixed
+retail gp window. Restoring the actual data owners, not changing flags
+or adding a fake float symbol, produces both retail-SHA-exact executables
+in the isolated full build.
+

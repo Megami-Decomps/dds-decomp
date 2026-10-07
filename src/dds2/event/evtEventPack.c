@@ -3,6 +3,13 @@
 #include "evt_unit.h"
 #include "file.h"
 #include "evt_motion_se.h"
+#include "eff_transform.h"
+#include "mdl.h"
+
+extern EffWorldNode *dds3GetWorldObject(void);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, s32, s32);
+extern Motion *mdlFindNodeById(MdlCtx *, s32);
+extern s32 evtSetBgmVolumePan(s32, s32);
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -122,7 +129,53 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventPack", evtUpdateMotionSeTask);
+s32 evtUpdateMotionSeTask(void) {
+    EvtMotionSeTaskParams *params;
+    EffWorldNode *node;
+    EvtPackLoadState *data;
+    EvtUnit *unit;
+    u16 motionId;
+    s32 frame;
+    s32 entryIndex;
+    s32 cueIndex;
+    EvtMotionSeCue *cues;
+
+    params = (EvtMotionSeTaskParams *)kwlnTaskGetUserValue();
+    if (dds3GetWorldObject() == NULL) {
+        return -1;
+    }
+    node = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), params->modelKey, 5);
+    if (node == NULL) {
+        return -1;
+    }
+    data = evtGetTaskData(params->eventTaskId);
+    if (data == NULL) {
+        return -1;
+    }
+    if (params->eventTaskId < 600) {
+        return 0;
+    }
+    unit = ((EvtMotionSeUnitLink *)node->data)->unit;
+    if (unit == NULL) {
+        return -1;
+    }
+    motionId = mdlFindNodeById(unit->owner, 0)->motionIndex;
+    frame = unit->owner->first->currentFrame;
+    for (entryIndex = 0; entryIndex < data->header->entryCount; entryIndex++) {
+        if (data->entries[entryIndex].kind == 6 &&
+            data->entries[entryIndex].resourceId == params->resourceId &&
+            data->entries[entryIndex].motionId == motionId) {
+            cues = (EvtMotionSeCue *)(data->data + data->entries[entryIndex].dataOffset);
+            for (cueIndex = 0; cueIndex < data->entries[entryIndex].cueCount; cueIndex++) {
+                if (cues[cueIndex].frame == frame) {
+                    evtSetBgmVolumePan(params->eventTaskId, cues[cueIndex].fade);
+                    func_0035B6E0("EVE_SE motno = %d, frame = %d\n", motionId, frame);
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 /* Free the current task's user-value block. */
 void evtFreeEventPackState(void) {
@@ -132,11 +185,11 @@ void evtFreeEventPackState(void) {
     sdfReleaseChipBlock(stateHandle);
 }
 
-void evtUpdateMotionSeTask(void);
-extern void func_0035C860(char *, char *, ...);
+extern void func_0035C860(char *, const char *, ...);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
-extern char D_00424890[];
+extern void kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(), void (*)(), void *);
+/* Preserve the complete native format record, including its trailing zeros. */
+const char D_00424890[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
 void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
@@ -152,7 +205,7 @@ void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeEventPackState, params);
 }
 
-extern char D_004248A0[];
+const char D_004248A0[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
 extern char D_004377E0[];
 extern char D_00453C50[];
 
@@ -278,10 +331,6 @@ void evtReleaseEventPackResources(void) {
     }
     sdfReleaseChipBlock(stateHandle);
 }
-
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_00424890);
-
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_004248A0);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377D8);
 
