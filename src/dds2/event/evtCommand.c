@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -133,9 +134,9 @@ typedef struct EvtWorldUnit {
 
 extern char D_00421F68[];
 
-void evtSetWorldSlotStatusFlag();
+void evtSetWorldSlotStatusFlag(void *unit);
 
-void evtClearWorldSlotStatusFlag();
+void evtClearWorldSlotStatusFlag(void *unit);
 
 void evtScaleSlotByClampedMultiplier(void *unit, f32 value);
 
@@ -145,7 +146,7 @@ s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enab
 
 extern u32 fldAreaState[];
 
-void evtSetWorldSlotValue(void *unit, s32 value);
+void evtSetWorldSlotValue(void *unit, u32 value);
 
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
@@ -703,7 +704,7 @@ extern void *effObjGetDataHandle(void *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3SetSlotKey(ObjectWithResource *, u32);
 extern void dds3ReplaceObjectResource(ObjectWithResource *);
-extern u32 dds3GetObjectResourceHandle(ObjectWithResource *);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(ObjectWithResource *);
 extern void func_001177D0(u32, s32);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
@@ -712,7 +713,7 @@ s32 func_00241F10(void) {
     EvtWorldUnit *target;
     ObjBase *data;
     ObjectWithResource *slot;
-    u32 path;
+    Dds3PathCurveWork *path;
     s32 room;
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
@@ -743,7 +744,7 @@ s32 func_00241F10(void) {
         return 1;
     switch (scrReadIntParameter(2)) {
     case 0:
-        func_001177D0(path, 0);
+        func_001177D0((u32 *)&path->state, 0);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -751,7 +752,7 @@ s32 func_00241F10(void) {
         }
         break;
     case 1:
-        func_001177D0(path, 1);
+        func_001177D0((u32 *)&path->state, 1);
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
@@ -769,7 +770,7 @@ s32 func_00242100(void) {
     void *target;
     ObjBase *data;
     ObjectWithResource *slot;
-    u32 path;
+    Dds3PathCurveWork *path;
     s32 targetId;
     s32 mode;
 
@@ -810,10 +811,10 @@ s32 func_00242100(void) {
     mode = scrReadIntParameter(2);
     switch (mode) {
     case 0:
-        func_001177D0(path, 0);
+        func_001177D0((u32 *)&path->state, 0);
         break;
     case 1:
-        func_001177D0(path, 1);
+        func_001177D0((u32 *)&path->state, 1);
         break;
     }
     return 1;

@@ -414,6 +414,7 @@
 0x00116D40	dds3SetPathStateValue	inferred	Writes the value in the object state's +0x10 word.
 0x00116D50	dds3GetPathStateValueById	inferred	Resolves the secondary-world path by ID and reads its state word.
 0x00116DE0	dds3GetPathState	inferred	Returns the path object's state pointer at +0x18.
+0x00116DE8	dds3SamplePathKeyframeInterval	inferred	Finds the containing path keyframe interval and its normalized interpolation weight; falls back to the final interval with weight one; paired twin 0x00116B80.
 0x00116FA0	dds3CreatePathCurveWork	inferred	readability/matching review (QP16)
 0x00117340	dds3InterpolatePathOutput	inferred	confidence=high; src/dds2/basic/dds3PathBasic.c:func_00117340; Locates the path segment/fraction for the current time and linearly interpolates three vector groups; clears the output when the path flag is disabled. [names_qp9.tsv]
 0x001176A0	sdfSampleActiveLinearCurve	inferred	src/dds2/game/code_001176A0.c func_001176A0: Samples adjacent curve values using located time fraction; returns zero when inactive. Twin of DDS1 func_00117438. [names_reviewed24.tsv]
@@ -1257,6 +1258,7 @@
 0x001770F8	effSetRingScale	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:198:func_001770F8; Sets the effect ring scale used by its record-pool rendering.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00177100	effCopyRingTransformMatrix	inferred	Copies the ring transform matrix through VU0 registers. [names_reviewed8.tsv]
 0x00177220	effBuildOrbitingArcQuadPoints	inferred	confidence=high; src/dds2/game/code_00176E28.c:func_00177220; Computes orbit position and oriented/scaled directions, then writes the indexed arc-quad point group. [names_qp9.tsv]
+0x00177760	effRecordPoolCreateFiveVertexGroups	inferred	Allocates a record pool for five-vertex groups, with five positions and five colors per requested group; paired DDS1 twin 0x0016FB08.
 0x00177880	effReleaseRecordGroupAssetAndHandle	inferred	Queues effect record group asset release and disposes its secondary handle. [names_reviewed16.tsv]
 0x001778B0	effDrawScaledRecordPool	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:331:func_001778B0; Builds a scaled-and-translated identity transform, emits record-pool position/color packets in fan chunks, and submits them through the selected draw mode.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00177B60	effGetIndexedEffectGroupRecord	inferred	Computes the indexed resource record within an effect record group. [names_reviewed16.tsv]
@@ -1647,8 +1649,9 @@
 0x0018BC28	effPcpEventWorkCreateFromTable	inferred	reads three event parameter blocks and constructs event work [names_reviewed5.tsv]
 0x0018BC90	effEventWorkClone	inferred	dds1 func_00184038 twin [names_reviewed2.tsv]
 0x0018BD88	effPcpUpdateMapMotionEvents	inferred	readability/matching review (QP16)
-0x0018C190	effBossCellRandomize	inferred	Randomizes one 0x14-byte cell (x/y/z blend, flip, delay); called per cell by func_00184630 [names_M61_EffVu.tsv]
-0x0018C4E8	effBossCreate	inferred	copies the 0x8C param head, creates param work (kind 3), runs func_00184630 [names_M61_EffVu.tsv]
+0x0018C190	effBossCellRandomize	inferred	Randomizes one 0x14-byte cell (x/y/z blend, flip, delay); called per cell by effBossInitializeModelGroups [names_M61_EffVu.tsv]
+0x0018C288	effBossInitializeModelGroups	inferred	Builds the owner’s model-derived map groups: reads frame/map-position counts, allocates the cell system and retained group/cell block, initializes each draw pool, then seeds cells. Called by effBossCreate and effBossCloneWorkAndParameters; twin=0x00184630.
+0x0018C4E8	effBossCreate	inferred	copies the 0x8C param head, creates param work (kind 3), runs effBossInitializeModelGroups [names_M61_EffVu.tsv]
 0x0018C618	effPCPBossApplyTwoBlocks	inferred	Fetches effect parameter blocks 0 and 1 and passes both to the boss effect worker; DDS1 twin 001849C0.
 0x0018C660	effBossCloneWorkAndParameters	inferred	Copies boss effect state while duplicating owned parameter work and resetting color. [names_reviewed12.tsv]
 0x0018C788	effBossDestroy	inferred	frees record groups, particle system, param work, then the work [names_M61_EffVu.tsv]
@@ -1663,6 +1666,7 @@
 0x0018D758	effBossCloneWithGroups	inferred	func_00184A08 clone then copies per-group fields from the source [names_M61_EffVu.tsv]
 0x0018D7D0	effBossReleaseWorkCallback	inferred	confidence=high; matched-C; src/dds2/effect/effPCPBoss.c:506:func_0018D7D0; Callback adapter releases boss work through destructor; destructor releases owner, group buffers and parameters.; twin=0x00185B78, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0018D7E8	effBossUpdateGeometryCallback	inferred	confidence=medium; matched-C; src/dds2/effect/effPCPBoss.c:510:func_0018D7E8; Callback adapter advances boss grouped geometry; retail callee rebuilds strips/colors and increments frame.; twin=0x00185B90, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x0018D800	effBossSetPositionCallback	inferred	Forwards the descriptor-supplied boss work and position pointers unchanged to effBossSetPosition; registered in the boss operation descriptor at 0x003B10C0; twin=0x00185BA8.
 0x0018D818	effBossApplyGroupTint	inferred	confidence=high; matched-C; src/dds2/effect/effPCPBoss.c:539:func_0018D818; Applies a tint input to the owning boss trail/cell work through its color update entry.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x0018DAA8	effUpdatePairedResources	inferred	DDS1 0x00185E50 twin [names_M83_Lerp.tsv]
 0x0018DC68	effCopyPairedResourceEndpoint	inferred	High: copies only the leading vector used as the paired resources' interpolation endpoint; DDS1 twin 0x00186030. [names_reviewed23.tsv]
@@ -1729,10 +1733,12 @@
 0x001922B0	effMagatuhiCreateBezierHistoryWork	inferred	readability/matching review (QP16)
 0x00192438	effMagatuhiReleaseWideWorkResources	inferred	Releases math and owner resources plus retained allocation from wide work. [names_reviewed6.tsv]
 0x00192470	effMagatuhiBuildBezierControlPointsVU	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:269:func_00192470; Builds all four cubic control points with independently configured camera/path-perpendicular jitter, resets the per-slot parameter and life-derived step, and initializes the associated value work.; source=names_P6.tsv:3 [names_qp12_apply.tsv]
+0x00192778	effMagatuhiUpdateBezierHistoryParticles	inferred	Advances delayed Bezier history particles, samples curve slots, applies fade, submits positions and respawns expired particles; the Magatuhi operation row at 0x003B2068 stores this function at +0x14; paired DDS1 twin 0x0018AB40.
 0x00192990	effMagatuhiSetControlPointParams	inferred	readability/matching review (QP16)
 0x00192C20	effMagatuhiCreateRingWork	inferred	readability/matching review (QP16)
 0x00192E08	effMagatuhiReleaseOwnerAndBuffer	inferred	Releases the first managed resource and its owned buffer. [names_reviewed6.tsv]
 0x00192E38	effMagatuhiInitParticleA	inferred	randomizes a 0x18 particle then func_00189C80/effMagatuhiSetValue [names_M61_EffVu.tsv]
+0x00192F80	effMagatuhiUpdateRingParticles	inferred	Updates ring particle positions, fade and respawn state; the Magatuhi operation row at 0x003B2080 stores this function at +0x14; paired DDS1 twin 0x0018B348.
 0x00193238	effMagatuhiSetRingOrigin	inferred	readability/matching review (QP16)
 0x00193250	effMagatuhiSetRingColor	inferred	readability/matching review (QP16)
 0x00193258	effMagatuhiCopyRingMatrix	inferred	readability/matching review (QP16)
@@ -1740,12 +1746,14 @@
 0x00193488	effMagatuhiCreateOrbitWork	inferred	readability/matching review (QP16)
 0x00193638	effMagatuhiReleaseOwnerAndExtraBuffer	inferred	Releases the second managed resource and its extra buffer. [names_reviewed6.tsv]
 0x00193668	effMagatuhiInitOrbitParticle	inferred	readability/matching review (QP16)
+0x001937C0	effMagatuhiUpdateOrbitParticles	inferred	Updates orbit particle positions, fade and respawn state while advancing height, angle and radius; the Magatuhi operation row at 0x003B2098 stores this function at +0x14; paired DDS1 twin 0x0018BB88.
 0x00193A88	effMagatuhiSetOrbitOrigin	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:687:func_00193A88; Copies the orbit effect origin vector used by the particle update.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x00193AA0	effMagatuhiSetOrbitColor	inferred	readability/matching review (QP16)
 0x00193AA8	effMagatuhiCopyOrbitMatrix	inferred	readability/matching review (QP16)
 0x00193CF8	effMagatuhiCreateDriftWork	inferred	readability/matching review (QP16)
 0x00193EE0	effMagatuhiReleaseSecondaryOwnerAndBuffer	inferred	Releases the work's second managed resource and regular owned buffer. [names_reviewed6.tsv]
 0x00193F10	effMagatuhiInitializeDriftParticle	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:823:func_00193F10; Randomizes normalized planar position/drift, scale, angle and lift, then resets the particle value slot.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x00194100	effMagatuhiUpdateDriftParticles	inferred	Updates drift particle positions, fade and respawn state while accumulating lift and advancing scale and angle; the Magatuhi operation row at 0x003B20B0 stores this function at +0x14; paired DDS1 twin 0x0018C4C8.
 0x001943E0	effMagatuhiSetDriftOrigin	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:863:func_001943E0; Copies the drift effect origin vector.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001943F8	effMagatuhiSetDriftColor	inferred	readability/matching review (QP16)
 0x00194400	effMagatuhiCopyDriftMatrix	inferred	readability/matching review (QP16)

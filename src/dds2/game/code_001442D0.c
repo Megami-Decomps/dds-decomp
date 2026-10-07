@@ -1,5 +1,7 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "mdl.h"
@@ -76,7 +78,7 @@ typedef struct FldSlot0C {
     s32 unk8;
 } FldSlot0C; /* 0xC bytes */
 
-extern s32 D_003A5470[];
+extern SdfModel *D_003A5470[];
 
 extern FldSlot0C D_0044F818[];
 
@@ -430,7 +432,7 @@ typedef struct {
     u8 pad0[4];
     FldItem *items;
     u32 count;
-    s32 model;         /* 0xC */
+    SdfItemListRef *model; /* 0xC */
     FldPoint *pos;     /* 0x10 */
 } FldSceneRecord; /* 0x14 bytes */
 
@@ -1321,7 +1323,7 @@ void fldReleaseResourceSlots(void) {
     frFontSetSharedRenderFlags(0x54);
 }
 
-extern void sdfReleaseDevSlot(s32, s32, s32);
+extern void sdfReleaseDevSlot(SdfModel *, s32, s32);
 
 void fldReleaseSceneDevSlotsAndTextures(void) {
     s32 i;
@@ -1451,11 +1453,11 @@ void fldEnterSceneCamera(void) {
     D_0037FB30.unk4 = 255.0f;
     D_0037FB30.unkC = 20000.0f;
     D_0037FB30.unk10 = 0x108010;
-    D_0037F980.offsetX = 2244.0f;
-    D_0037F980.offsetY = 2118.0f;
+    D_0037F980.camera.offsetX = 2244.0f;
+    D_0037F980.camera.offsetY = 2118.0f;
 }
 
-extern s32 sdfModelCreateWithAlternateItems(s32, s32);
+
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
@@ -1511,8 +1513,8 @@ void fldLoadSceneModelsAndCamera(void) {
     D_0037FB30.unk4 = 255.0f;
     D_0037FB30.unkC = 20000.0f;
     D_0037FB30.unk10 = 0x108010;
-    D_0037F980.offsetX = 2241.0f;
-    D_0037F980.offsetY = 2113.0f;
+    D_0037F980.camera.offsetX = 2241.0f;
+    D_0037F980.camera.offsetY = 2113.0f;
 }
 
 void fldReleaseMenuSlotsAfterWait(void) {

@@ -121,10 +121,20 @@ u32 sndSendCommandPacket(u32 command, u32 value, void *data, u32 size);
 
 u32 func_002E87A8(u32 command, u32 value, void *data, u32 size);
 
-/* Opaque IPU DMA environment saved at the end of the native stream node. */
+/* sceIpuStopDMA saves nine MMIO words; sceIpuRestartDMA restores them. */
 typedef struct IpuDmaState {
-    u8 pad0[8];
+    u32 inputAddress;
+    u32 inputTagAddress;
+    u32 inputQwords;
+    u32 inputControl;
+    u32 outputAddress;
+    u32 outputQwords;
+    u32 outputControl;
+    u32 bitPointer;
+    u32 ipuControl;
 } IpuDmaState;
+
+typedef char IpuDmaStateSizeCheck[sizeof(IpuDmaState) == 0x24 ? 1 : -1];
 
 /* One 0x8C allocation owns the independent stream/sound links, feed ring
  * and IPU completion state; these are not separate prefix-only objects. */
@@ -172,9 +182,9 @@ typedef struct SdfStreamFrameNode {
     u8 unk65;
     u8 pad66[2];
     IpuDmaState dma;
-    u32 unk70;
-    u8 pad74[0x18];
 } SdfStreamFrameNode;
+typedef char SdfStreamFrameNodeSizeCheck[sizeof(SdfStreamFrameNode) == SDF_STREAM_NODE_BYTES ? 1 : -1];
+typedef char SdfStreamFrameNodeDmaOffsetCheck[((u32)&((SdfStreamFrameNode *)0)->dma == 0x68) ? 1 : -1];
 typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
 
 typedef struct SoundFormat {
@@ -1397,7 +1407,7 @@ void sdfIpuDmaCompletionWorker(void) {
             continue;
         }
         sceIpuStopDMA(&work->dma);
-        if (work->unk70 == 0) {
+        if (work->dma.inputQwords == 0) {
             work->unk11 = 0;
         }
         if (work->firstStop == 0) {

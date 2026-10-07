@@ -1,31 +1,12 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "dds3_path.h"
 #include "pcp_vu0.h"
 
-typedef f32 PathEntry12[3];
+typedef f32 PathPositionKey[3];
+typedef f32 PathQuaternionKey[4];
 
-typedef struct {
-    u8 data[0x10];
-} PathEntry16;
-
-typedef struct {
-    f32 f[10];
-} PathEntry40;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-} PathOut;
-
-void func_00116DE8(u32 *index, f32 *fraction, Dds3PathKeyframes *keys, f32 time);
+void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *keys, f32 time);
 
 void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
@@ -40,12 +21,12 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     u32 index;
     f32 fraction;
     Dds3PathKeyframes *data;
-    PathEntry12 *entries;
+    PathPositionKey *entries;
 
     if (path->flags & 1) {
         data = path->positionKeys;
-        func_00116DE8(&index, &fraction, data, path->time);
-        entries = (PathEntry12 *)data->data;
+        dds3SamplePathKeyframeInterval(&index, &fraction, data, path->time);
+        entries = (PathPositionKey *)data->data;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1][0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1][1]);
         VU0_SET_VF10_COMPONENT(z, entries[index + 1][2]);
@@ -66,13 +47,13 @@ void dds3PreparePathVectorPair(Dds3PathCurveWork *arg) {
     u32 idx;
     f32 frac;
     Dds3PathKeyframes *data;
-    PathEntry16 *base;
-    PathEntry16 *p1;
-    PathEntry16 *p2;
+    PathQuaternionKey *base;
+    PathQuaternionKey *p1;
+    PathQuaternionKey *p2;
     if (arg->flags & 2) {
         data = arg->rotationKeys;
-        func_00116DE8(&idx, &frac, data, arg->time);
-        base = (PathEntry16 *)data->data;
+        dds3SamplePathKeyframeInterval(&idx, &frac, data, arg->time);
+        base = (PathQuaternionKey *)data->data;
         p1 = &base[idx];
         VU0_LOAD_VF_MEMORY(vf10, p1);
         p2 = &base[idx] + 1;
@@ -84,58 +65,58 @@ void dds3PreparePathVectorPair(Dds3PathCurveWork *arg) {
 }
 
 /* vu0 routine: lerp the three key vectors (xyzw, xyz, xyz) of path entries `index` and `index + 1` at the sampled fraction into out, or clear out */
-void dds3InterpolatePathOutput(Dds3PathCurveWork *path, PathOut *out) {
+void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *out) {
     u32 index;
     f32 fraction;
     Dds3PathKeyframes *data;
-    PathEntry40 *entries;
+    WorldTransformParams *entries;
 
     if (path->flags & 0x10) {
         data = path->transformKeys;
-        func_00116DE8(&index, &fraction, data, path->time);
-        entries = (PathEntry40 *)data->data;
-        VU0_SET_VF10_COMPONENT(x, entries[index + 1].f[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[index + 1].f[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[index + 1].f[2]);
-        VU0_SET_VF10_W(entries[index + 1].f[3]);
+        dds3SamplePathKeyframeInterval(&index, &fraction, data, path->time);
+        entries = (WorldTransformParams *)data->data;
+        VU0_SET_VF10_COMPONENT(x, entries[index + 1].rotation[0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index + 1].rotation[1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index + 1].rotation[2]);
+        VU0_SET_VF10_W(entries[index + 1].rotation[3]);
         VU0_SCALAR_OP(fraction, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_MOVE_VF(vf11, vf10);
-        VU0_SET_VF10_COMPONENT(x, entries[index].f[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[index].f[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[index].f[2]);
-        VU0_SET_VF10_W(entries[index].f[3]);
+        VU0_SET_VF10_COMPONENT(x, entries[index].rotation[0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index].rotation[1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index].rotation[2]);
+        VU0_SET_VF10_W(entries[index].rotation[3]);
         VU0_SCALAR_OP(1.0f - fraction, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(out->unk0);
-        VU0_GET_VF10_Y(out->unk4);
-        VU0_GET_VF10_Z(out->unk8);
-        VU0_GET_VF10_W(out->unkC);
-        VU0_SET_VF10_COMPONENT(x, entries[index + 1].f[4]);
-        VU0_SET_VF10_COMPONENT(y, entries[index + 1].f[5]);
-        VU0_SET_VF10_COMPONENT(z, entries[index + 1].f[6]);
+        VU0_GET_VF10_X(out->rotation[0]);
+        VU0_GET_VF10_Y(out->rotation[1]);
+        VU0_GET_VF10_Z(out->rotation[2]);
+        VU0_GET_VF10_W(out->rotation[3]);
+        VU0_SET_VF10_COMPONENT(x, entries[index + 1].position[0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index + 1].position[1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index + 1].position[2]);
         VU0_SCALAR_OP(fraction, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_MOVE_VF(vf11, vf10);
-        VU0_SET_VF10_COMPONENT(x, entries[index].f[4]);
-        VU0_SET_VF10_COMPONENT(y, entries[index].f[5]);
-        VU0_SET_VF10_COMPONENT(z, entries[index].f[6]);
+        VU0_SET_VF10_COMPONENT(x, entries[index].position[0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index].position[1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index].position[2]);
         VU0_SCALAR_OP(1.0f - fraction, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(out->unk10);
-        VU0_GET_VF10_Y(out->unk14);
-        VU0_GET_VF10_Z(out->unk18);
-        VU0_SET_VF10_COMPONENT(x, entries[index + 1].f[7]);
-        VU0_SET_VF10_COMPONENT(y, entries[index + 1].f[8]);
-        VU0_SET_VF10_COMPONENT(z, entries[index + 1].f[9]);
+        VU0_GET_VF10_X(out->position[0]);
+        VU0_GET_VF10_Y(out->position[1]);
+        VU0_GET_VF10_Z(out->position[2]);
+        VU0_SET_VF10_COMPONENT(x, entries[index + 1].scale[0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index + 1].scale[1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index + 1].scale[2]);
         VU0_SCALAR_OP(fraction, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_MOVE_VF(vf11, vf10);
-        VU0_SET_VF10_COMPONENT(x, entries[index].f[7]);
-        VU0_SET_VF10_COMPONENT(y, entries[index].f[8]);
-        VU0_SET_VF10_COMPONENT(z, entries[index].f[9]);
+        VU0_SET_VF10_COMPONENT(x, entries[index].scale[0]);
+        VU0_SET_VF10_COMPONENT(y, entries[index].scale[1]);
+        VU0_SET_VF10_COMPONENT(z, entries[index].scale[2]);
         VU0_SCALAR_OP(1.0f - fraction, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(out->unk1C);
-        VU0_GET_VF10_Y(out->unk20);
-        VU0_GET_VF10_Z(out->unk24);
+        VU0_GET_VF10_X(out->scale[0]);
+        VU0_GET_VF10_Y(out->scale[1]);
+        VU0_GET_VF10_Z(out->scale[2]);
     } else {
         memset(out, 0, 0x28);
     }

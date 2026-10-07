@@ -371,8 +371,8 @@ void func_0016F7B0(EffRingWork *work)
     effDrawTransformedRecordPool(handle);
 }
 
-extern EffRecordPool *func_0016FB08(u32 count);
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FB08);
+extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
+INCLUDE_ASM(const s32, "game/code_0016F1D0", effRecordPoolCreateFiveVertexGroups);
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *group) {
@@ -559,8 +559,8 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
 }
 
 /* Address three quadword positions for one triangle. */
-s32 effGetGroupRecordByIndex(EffRecordPool *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES;
+void *effGetGroupRecordByIndex(EffRecordPool *group, s32 groupIndex) {
+    return (void *)(group->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES);
 }
 
 /* Address three packed color words for one triangle. */
@@ -647,18 +647,18 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
 }
 
 /* Address four quadword positions for one quad. */
-s32 effGetRecordGroupElement(EffRecordPool *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES;
+void *effGetRecordGroupElement(EffRecordPool *group, s32 groupIndex) {
+    return (void *)(group->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES);
 }
 
 /* Address four packed color words for one quad. */
-s32 effGetRecordGroupAuxEntry(EffRecordPool *group, s32 groupIndex) {
-    return group->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES;
+void *effGetRecordGroupAuxEntry(EffRecordPool *group, s32 groupIndex) {
+    return (void *)(group->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES);
 }
 
 /* Allocate five-vertex fan groups, then set the returned header's matrix. */
 EffRecordPool *effAllocateIdentityMatrixWork(u32 fanCount) {
-    EffRecordPool *pool = func_0016FB08(fanCount);
+    EffRecordPool *pool = effRecordPoolCreateFiveVertexGroups(fanCount);
 
     EE_MMI_UNIT_MATRIX(pool->matrix);
     return pool;

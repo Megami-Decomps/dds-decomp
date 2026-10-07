@@ -62,7 +62,7 @@ extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
 extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern s32 func_00167A10(EffPacketParams *);
-extern EffRecordPool *func_00177760(u32 count);
+extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
 extern void func_001781F8(EffRecordPool *pool);
 extern s32 effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
 
@@ -377,7 +377,7 @@ void func_00177408(EffRingWork *work)
     effDrawTransformedRecordPool(handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177760);
+INCLUDE_ASM(const s32, "game/code_00176E28", effRecordPoolCreateFiveVertexGroups);
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
@@ -563,8 +563,8 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
 }
 
 /* Address three quadword positions for one triangle. */
-s32 effGetGroupRecordByIndex(EffRecordPool *pool, s32 groupIndex) {
-    return pool->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES;
+void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 groupIndex) {
+    return (void *)(pool->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES);
 }
 
 /* Address three packed color words for one triangle. */
@@ -651,20 +651,20 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
 }
 
 /* Address four quadword positions for one quad. */
-s32 effGetRecordGroupElement(EffRecordPool *pool, s32 groupIndex) {
-    return pool->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES;
+void *effGetRecordGroupElement(EffRecordPool *pool, s32 groupIndex) {
+    return (void *)(pool->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES);
 }
 
 /* Address four packed color words for one quad. */
-s32 effGetRecordGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
-    return pool->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES;
+void *effGetRecordGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
+    return (void *)(pool->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES);
 }
 
 /* Allocate five-vertex fan groups, then set the returned header's matrix. */
 EffRecordPool *effAllocateIdentityMatrixWork(u32 fanCount) {
     EffRecordPool *pool;
 
-    pool = func_00177760(fanCount);
+    pool = effRecordPoolCreateFiveVertexGroups(fanCount);
     EE_MMI_UNIT_MATRIX(pool->matrix);
     return pool;
 }

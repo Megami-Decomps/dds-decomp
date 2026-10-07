@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
@@ -4445,7 +4446,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
     }
 }
 
-extern SdfModel *sdfModelCreateWithItems(void *, void *);
+
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3B70);
 

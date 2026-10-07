@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "btl.h"
 #include "btl_command.h"
 #include "btl_state.h"
@@ -2744,7 +2745,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
     }
 }
 
-extern SdfModel *sdfModelCreateWithItems(void *, void *);
+
 extern void dds3SetObjectFlags(s32, s32);
 
 void btlCreateUnitTransparency(BtlUnit *unit) {
