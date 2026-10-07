@@ -60,7 +60,7 @@ extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
 extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
 
-void func_002ABD60(MenuStaffContext *owner) {
+void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
     MenuWindowContainer *window;
     struct MenuListNode *node;

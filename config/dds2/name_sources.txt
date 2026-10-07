@@ -4260,6 +4260,7 @@
 0x002AB650	mtrMantraFindIndex	inferred	Scans the 0x12 entries of 0x1C bytes at 0x003E7200 for a matching u16 id at +0 and returns index+1, 0 when absent [names_L1_LiteSweep.tsv]
 0x002ABCD0	mnuDestroyResourceOwnerWindowContainers	inferred	Destroys both window containers held in a menu resource set. [names_reviewed17.tsv]
 0x002ABD08	mnuIsStaffWindowReadyForItem	inferred	L69; sources=names_pending_main.tsv [names_qp10.tsv]
+0x002ABD60	mnuCreateStaffBulletItemWindow	inferred	Matched DDS2 staff bullet-item window constructor; DDS1 counterpart mnuCreateStaffBulletItemWindow; creates and populates the bullet-item inventory window using DDS2 layout and item bounds.
 0x002AC408	mnuCreateOrderedStaffItemWindow	inferred	U3
 0x002AC688	mnuUpdateStaffEntrySelectionFlags	inferred	confidence=high; matched-C; src/dds2/game/code_002AB890.c:86:func_002AC688; Peer-matched C proposal: M143; source=names_pending_main.tsv:145 [names_qp13.tsv]
 0x002AC8F0	mnuCreateOwnedCatalogItemWindow	inferred	U0
