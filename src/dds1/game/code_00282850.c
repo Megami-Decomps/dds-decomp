@@ -5,6 +5,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "eff.h"
 #include "mnu_shop.h"
 #include "mdl.h"
 #include "dat_state.h"
@@ -853,8 +854,54 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
     itfGridStorePosition(&panel->completed, grid, completedIndex);
 }
 
-extern void func_00285208(s32, s32, s32, MenuProfilePanel *, s32);
-INCLUDE_ASM(const s32, "game/code_00282850", func_00285208);
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
+extern void uiDrawTexturedSurfaceAtFarDepth(s32);
+extern void func_002C1548(s32, s32);
+extern void uiDrawSurfaceAtNearDepth(u32);
+/* Draw the filled profile bar and its animated background strips. */
+void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
+    s32 progress = panel->option;
+    s32 capacity = panel->capValue;
+    s32 percent = progress * 100 / capacity;
+    u32 opacity = panel->opacity;
+    EffectSlotSet *slots;
+    s32 index;
+    s32 croppedWidth;
+    s32 offset;
+    s32 baseShift;
+    s32 tile;
+
+    if (progress == capacity) {
+        func_002BF4E0(x + 0x2A0, y - 0x30, z, opacity, 0,
+                     (s32)panel->completed.set, panel->completed.index, surface);
+        return;
+    }
+    slots = panel->fill.set;
+    index = panel->fill.index;
+    croppedWidth = slots->workEntries[index].sourceWidth
+                 - slots->workEntries[index].sourceWidth * percent / 100;
+    slots->workEntries[index].parameters[2] = -croppedWidth;
+    slots->workEntries[index].geometry.bounds[2] = (slots->workEntries[index].sourceWidth - croppedWidth) << 4;
+    func_002BF4E0(x, y, z, opacity, 0, (s32)slots, index, surface);
+    if (index != panel->background.index) {
+        uiDrawTexturedSurfaceAtFarDepth(surface);
+        itfDrawGridWithResolvedSlot(x, y, z, 0x21, (s32)slots, index, surface);
+        func_002C1548(0, surface);
+        slots = panel->background.set;
+        index = panel->background.index;
+        offset = (s32)((u32)panel->phase << 7) / 0x200;
+        baseShift = 0x200 - panel->phase;
+        for (tile = 0; tile < 0x1200; tile += 0x200) {
+            slots->workEntries[index].geometry.bounds[2] =
+                offset + (slots->workEntries[index].sourceWidth << 4);
+            func_002BF4E0(x + tile - baseShift, y, z, opacity, 0x21,
+                         (s32)slots, index, surface);
+            x += offset;
+            offset += 0x80;
+        }
+        uiDrawSurfaceAtNearDepth(surface);
+    }
+}
 
 /* Draw first, then advance the native phase by twelve with a single period subtraction. */
 void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option) {
