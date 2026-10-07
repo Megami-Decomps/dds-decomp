@@ -218,7 +218,58 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE240);
+extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern char D_00437C48[];
+extern void mnuDrawFadeIcons(s32, s32, s32, s32, MenuIconBundle *, s32);
+extern void mnuDrawIconRow(s32, s32, s32, s32, MenuSprites *, s32);
+
+void func_002BE240(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
+                   s32 partyIndex, u32 flags, s32 surface) {
+    char text[0x40];
+    DatPartyRecord *unit = &datGameState->party[partyIndex];
+    u32 color;
+    s32 remainingExp;
+    FrFontGlyph *glyph;
+
+    if (slot->iconBundle != 0) {
+        mnuDrawFadeIcons(x, y, depth, slot->kind,
+            (MenuIconBundle *)slot->iconBundle, surface);
+        color = uiBlendColors(0xA09DC380, 0xA09DC300,
+            ((MenuIconBundle *)slot->iconBundle)->fade);
+        remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
+        if (remainingExp != 0) {
+            func_0035C860(text, D_00437C48, remainingExp);
+            glyph = (FrFontGlyph *)func_0019F5E8(0x1A50,
+                0xD8, depth, color, text, 0);
+            frFontSetChainFlag(glyph, 3);
+            func_0019D550(glyph, 1, surface);
+            frFontQueueGlyphInSelectedSlot(glyph);
+        }
+    }
+    if (slot->windowSprites != NULL) {
+        if (flags & 0x200) {
+            mnuDrawIconRow(x, y, depth, 0, slot->windowSprites, surface);
+        }
+        mnuDrawSelectedPartyProfileLabel(x, y, depth,
+            slot->windowSprites->fade, slot->windowSprites->unkC, (s32)slot,
+            partyIndex, surface);
+        if (slot->windowSprites->fadeOut == 0) {
+            if (slot->windowSprites->fade > 0) {
+                slot->windowSprites->fade -= 0x20;
+            }
+            if (slot->windowSprites->fade < 0) {
+                slot->windowSprites->fade = 0;
+            }
+        } else {
+            if (slot->windowSprites->fade < 0x100) {
+                slot->windowSprites->fade += 0x20;
+            }
+            if (slot->windowSprites->fade > 0x100) {
+                slot->windowSprites->fade = 0x100;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE438);
 
