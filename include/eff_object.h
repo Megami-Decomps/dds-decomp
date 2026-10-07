@@ -1,12 +1,12 @@
 #ifndef EFF_OBJECT_H
 #define EFF_OBJECT_H
 #include "dds3obj.h"
-struct EffFollowRec;
+struct EvtUnit;
 /* Kind-5 constructors allocate and clear the complete 0x40-byte payload. */
 typedef struct EffectObjectData {
     ObjBase *handle;
     u32 word04;
-    struct EffFollowRec *transitionWork; /* 0x08: object transition work */
+    struct EvtUnit *transitionWork; /* 0x08: object transition work */
     ObjBase *modelHolder; /* 0x0C: owned base retains the model resource. */
     s32 activeId;
     u32 word14;
