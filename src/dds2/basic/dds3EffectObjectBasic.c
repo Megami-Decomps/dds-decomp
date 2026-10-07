@@ -78,7 +78,7 @@ void effObjReleaseObjectData(u32 object) {
 
     obj = (EffectObj *)object;
     data = obj->data;
-    func_00114640(data);
+    effObjReleaseStateDependencies(data);
     effObjFreeInner(object);
     dds3DestroyObjectBase((u32)data->objectHandle);
     sdfReleaseChipBlock((u32)obj->data);

@@ -28,4 +28,6 @@ typedef char EffectDependencyState_handle_at_0x0C[((u32)&((EffectDependencyState
 typedef char EffectDependencyState_owner_at_0x20[((u32)&((EffectDependencyState *)0)->owner == 0x20) ? 1 : -1];
 typedef char EffectDependencyState_node_at_0x2C[((u32)&((EffectDependencyState *)0)->node == 0x2C) ? 1 : -1];
 
+void effObjReleaseStateDependencies(EffectDependencyState *state);
+
 #endif

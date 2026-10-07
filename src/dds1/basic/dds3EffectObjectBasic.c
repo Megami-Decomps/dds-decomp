@@ -39,7 +39,6 @@ typedef struct EffectObj {
     EffectParameters *params; /* 0x1C vector base read by effObjLoadReadyParameterVector/effObjGetIntParam */
 } EffectObj;
 
-void func_001143D8(void *arg);
 void effObjFreeInner(void *arg);
 void dds3DestroyObjectBase(void *arg);
 void sdfReleaseChipBlock(void *arg);
@@ -105,7 +104,7 @@ void effObjReleaseObjectData(EffectObj *obj) {
     EffectDependencyState *data;
 
     data = obj->data;
-    func_001143D8(data);
+    effObjReleaseStateDependencies(data);
     effObjFreeInner(obj);
     dds3DestroyObjectBase(data->objectHandle);
     sdfReleaseChipBlock(obj->data);
