@@ -140,16 +140,16 @@ void *dds3GetSlot(void *object, s32 slotIndex) {
 }
 
 /* Return the world-index node word also used when destroying the full base. */
-u32 dds3GetObjectIndexNode(void) {
+u32 dds3GetObjectIndexNode(void *object) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle();
+    base = dds3GetObjectOwnedHandle(object);
     return base->worldIndexNode;
 }
 
 /* Return the primary resource-handle word, whose interpretation depends on state. */
-u32 dds3GetObjectBaseResourceHandle(void) {
-    return dds3GetObjectOwnedHandle()->resourceHandle;
+u32 dds3GetObjectBaseResourceHandle(void *object) {
+    return dds3GetObjectOwnedHandle(object)->resourceHandle;
 }
 
 /* A nonzero handle releases model/context state (0) or device/motion state (1),
