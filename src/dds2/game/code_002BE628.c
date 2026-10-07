@@ -213,15 +213,15 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 typedef struct MenuList MenuList;
 
 
-/* Set the separate +0x100 word in both content banks of every page. */
-void mnuSetPanelSlotValues(MenuPageWindow *menu, s32 value) {
+/* Give both complete commands in each page the same draw resource. */
+void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *value) {
     MenuPageSlot *panel = menu->slots;
     s32 i;
     s32 j;
 
     for (i = 0; i < 5; i++, panel++) {
         for (j = 0; j < 2; j++) {
-            panel->contents[j].unk100 = value;
+            panel->commands[j].resources = value;
         }
     }
 }
@@ -241,22 +241,21 @@ void func_002BEE38(MenuQueuedCommand *entry) {
  * is below 0x200. Retail has no explicit return: its last call is a plain jal. */
 s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) {
     MenuPageSlot *panel = &menu->slots[window];
-    s32 *count = &panel->contents[0].command.initialValue;
     s32 best = 0x200;
     s32 bestIndex = 0;
     s32 i;
     MenuQueuedCommand *entry;
     u32 flags;
 
-    /* Selection words are one content-bank stride apart. */
-    for (i = 0; i < 2; i++, count += sizeof(MenuPageSlotContent) / sizeof(*count)) {
-        if (*count < best) {
-            best = *count;
+    /* Both command records carry their own selection value. */
+    for (i = 0; i < 2; i++) {
+        if (panel->commands[i].initialValue < best) {
+            best = panel->commands[i].initialValue;
             bestIndex = i;
         }
     }
     flags = datGameState->party[window].flags;
-    entry = &panel->contents[bestIndex].command;
+    entry = &panel->commands[bestIndex];
     entry->initialValue = 0x200;
     entry->argument = argument;
     entry->kind = kind;
@@ -290,17 +289,17 @@ void mnuClearSpriteRecord(MenuQueuedCommand *entry) {
     entry->argument = 0;
 }
 
-/* Clear both command headers; they are embedded in separate content banks. */
+/* Clear only the two command headers, preserving resources and particle arrays. */
 void mnuClearPairedSpriteRecords(MenuPageWindow *menu, s32 index) {
     MenuQueuedCommand *entry;
     s32 remaining;
 
     remaining = 1;
-    entry = &menu->slots[index].contents[0].command;
+    entry = &menu->slots[index].commands[0];
     do {
         remaining = remaining - 1;
         mnuClearSpriteRecord(entry);
-        entry = (MenuQueuedCommand *)((u8 *)entry + sizeof(MenuPageSlotContent));
+        entry++;
     } while (-1 < remaining);
 }
 
@@ -399,7 +398,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     MenuSprites *node;
 
     mnuCalcListEntryOffset(positionOffset, menu, 0);
-    node = panel->contents[0].windowSprites;
+    node = panel->windowSprites;
     if (node != NULL) {
         node->unkC = overrideValue;
     }
@@ -411,7 +410,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     } else {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     }
-    node = panel->contents[0].windowSprites;
+    node = panel->windowSprites;
     if (node != NULL) {
         node->unkC = 0;
     }

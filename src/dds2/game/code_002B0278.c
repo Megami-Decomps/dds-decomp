@@ -1038,7 +1038,7 @@ s32 mnuDestroyPanels(s32 callback) {
 }
 
 void mnuResetSelectedPanelOpacity(s32 context) {
-    ((MenuContext *)context)->partyWindow.slots[((MenuContext *)context)->partyWindow.lists[0]->cursor->index].contents[0].windowSprites->fade = 0x100;
+    ((MenuContext *)context)->partyWindow.slots[((MenuContext *)context)->partyWindow.lists[0]->cursor->index].windowSprites->fade = 0x100;
 }
 
 /* Switch the party page, rebuilding its panels; previous takes priority.
@@ -1142,7 +1142,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
 void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles) {
     s32 alpha;
 
-    alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].contents[0].windowSprites->fade;
+    alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].windowSprites->fade;
     func_00306CD0(0xa0, 0xa30, 0, alpha, 1, handles[1], 0x55, 0x53);
     func_00306CD0(0x30, 0xaf8, 0, alpha, 1, *handles, 0x1a, 0x53);
 }
@@ -3255,7 +3255,7 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source);
 /* Copy eight resource handles into the window's secondary handle bank. */
 void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source);
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, s32 *source);
+void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source);
 
 
 
