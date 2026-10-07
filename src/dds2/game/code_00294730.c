@@ -168,7 +168,51 @@ extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 extern char D_00437978[]; /* "%d" */
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00296430);
+/* Fade the selected row's icons and quantity while preserving its row snapshot. */
+void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
+                   u32 alpha, s32 option) {
+    char text[16];
+    struct MenuList *list = scene->window->list;
+    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    f32 opacity;
+    s32 row;
+    s32 firstIndex;
+    s32 textOffset;
+    u32 color;
+    struct FrFontGlyph *glyph;
+
+    if (list->count != 0) {
+        firstIndex = list->head->index;
+        opacity = (f32)alpha * 0.00390625f;
+        row = list->cursor->index - firstIndex;
+        func_00306CD0((D_003D03F0[19][MENU_ICON_X] + 8) << 4,
+                      (D_003D03F0[19][MENU_ICON_Y] + row * 22) << 3,
+                      0, (u32)((1.0f - opacity) * 256.0f), 0, texture,
+                      D_003D03F0[19][MENU_ICON_FRAME], option);
+        func_00306CD0(0x600, (152 + row * 22) << 3, 0,
+                      (u32)((1.0f - opacity) * 128.0f + 128.0f),
+                      0, texture, 0x20, option);
+        func_00306CD0(0xD10, (152 + row * 22) << 3, 0,
+                      (u32)((1.0f - opacity) * 128.0f + 128.0f),
+                      0, texture, 0x21, option);
+        func_00306CD0((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
+                      (D_003D03F0[29][MENU_ICON_Y] + row * 22) << 3,
+                      0, (u32)(opacity * 256.0f), 0, texture,
+                      D_003D03F0[29][MENU_ICON_FRAME], option);
+        color = (s32)(opacity * 128.0f) | 0xA09DC300;
+        textOffset = 0x70;
+        if (scene->multiplier / 10 != 0) {
+            textOffset = 0;
+        }
+        func_0035C860(text, D_00437978, scene->multiplier);
+        glyph = (struct FrFontGlyph *)func_0019F798(
+            0xD30 + textOffset, (135 + row * 22) << 3, depth, color, text, 0);
+        frFontSetChainFlag(glyph, 4);
+        func_0019D550(glyph, 1, option);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+}
+
 
 void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
     s32 texture = (s32)D_00438FC8->effectSlots[0];
