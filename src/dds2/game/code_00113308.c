@@ -573,12 +573,17 @@ u32 func_00114008(u64 id) {
     return object->data->word04;
 }
 
-void evtSetObjectTransitionWork(EffectObject *object, u32 value) {
-    object->data->transitionWork = (EffFollowRec *)value;
+/* Payload word 8 is interpreted by object kind, not always as a pointer. */
+void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value) {
+    u32 *payload = object->data;
+
+    payload[2] = value;
 }
 
-u32 evtGetObjectTransitionWork(EffectObject *object) {
-    return (u32)object->data->transitionWork;
+u32 dds3GetObjectPayloadWord8(EffWorldNode *object) {
+    u32 *payload = object->data;
+
+    return payload[2];
 }
 
 void func_00114068(u32 value) {

@@ -3533,7 +3533,7 @@ s32 btlGetSubtaskActorMotionClass(void) {
 extern char D_0041A378[]; /* "md_01all_02" */
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 dds3FindIndexedObjectChainNodeByName(u64, s32, char *);
-extern void evtSetObjectTransitionWork(s32, s32);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 s32 func_002198D8(u8 *unit) {
     s32 handle;
@@ -3547,7 +3547,7 @@ s32 func_002198D8(u8 *unit) {
     if (handle == 0) {
         return 1;
     }
-    evtSetObjectTransitionWork(handle, 1);
+    dds3SetObjectPayloadWord8((EffWorldNode *)handle, 1);
     return 1;
 }
 
@@ -3563,7 +3563,7 @@ s32 func_00219950(u8 *unit) {
     if (handle == 0) {
         return 1;
     }
-    evtSetObjectTransitionWork(handle, 2);
+    dds3SetObjectPayloadWord8((EffWorldNode *)handle, 2);
     return 1;
 }
 

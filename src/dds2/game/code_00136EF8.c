@@ -1815,7 +1815,7 @@ void fldBeginNpcInteractionById(s32 id) {
 }
 
 extern s32 func_0035B6E0(const char *, ...);
-extern void evtSetObjectTransitionWork(void *, u32);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 s32 func_00143910(u32 key, f32 *x, f32 *y, f32 *z) {
     f32 weights[50] = {
@@ -1882,7 +1882,7 @@ s32 func_00143910(u32 key, f32 *x, f32 *y, f32 *z) {
                 node = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), key, 6);
                 if (node != NULL) {
                     func_0035B6E0("DOOR SISETU FADE 6\n");
-                    evtSetObjectTransitionWork(node, 9);
+                    dds3SetObjectPayloadWord8(node, 9);
                 }
             }
             row->transitionFrame++;

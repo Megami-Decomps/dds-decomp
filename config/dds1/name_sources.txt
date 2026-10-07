@@ -7115,3 +7115,5 @@
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
+0x00113E20	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
+0x00113E30	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.
