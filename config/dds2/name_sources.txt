@@ -4291,6 +4291,7 @@
 0x002AE2D0	mnuPrepareStaffSelectionChangeDialog	inferred	Compares requested and current party values and prepares the matching dialog. [names_reviewed13.tsv]
 0x002AE408	mnuStaffListInput	inferred	buttons 0x100/0x200 select prev/next via func_002AE1F0 and func_002AE0B0; twins 0x002AEEA8 and 0x002AFC58 use menu+0x14/+0x18 [names_M59_D2Mid.tsv]
 0x002AE7C8	mnuDrawStaffCaption	inferred	sprintf a 16-byte caption then func_0019F5E8 text glyph [names_M59_D2Mid.tsv]
+0x002AE888	mnuDrawStaffPartyValuePage	inferred	Matched DDS2 staff party-value page renderer; DDS1 counterpart mnuDrawStaffPartyValuePage; draws the selected party record and item list, updates the caption and advances the page dispatcher.
 0x002AEAA0	mnuInitializeStaffPageWithSlotAsset	inferred	Selects a page and conditionally activates its selected slot resource. [names_reviewed13.tsv]
 0x002AEC10	mnuReleaseStaffSelectionPageResources	inferred	Releases the selection-list page window, panel, sprite and texture handles after its state-specific cleanup. [names_reviewed13.tsv]
 0x002AECF0	mnuStaffEntrySwapLabels	inferred	selects a label set by (current,target) entry indexes; sibling of func_002AE2D0 [names_M59_D2Mid.tsv]
