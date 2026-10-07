@@ -408,9 +408,9 @@ void btlAdjustUnitHp(u8 *object, s32 value);
 
 void btlAdjustUnitMp(u8 *object, s32 value);
 
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object);
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *object);
 
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object);
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *object);
 
 void func_001A1948();
 
@@ -454,7 +454,7 @@ void btlClearSceneTaskActiveFlag(s32 arg0);
 
 s32 btlGetActorBedAssetIdFromIndex(s32 arg0);
 
-s32 btlGetEntryFlagsUnlessDisabled(s32 entry);
+s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 
 struct EvtUnit;
 extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
@@ -1972,7 +1972,7 @@ void btlStartActorDefeatTransition(s32 command) {
             btlStartTask(object);
             actor->flags &= ~1;
         } else {
-            entryFlags = btlGetEntryFlagsUnlessDisabled((s32)profile);
+            entryFlags = btlGetEntryFlagsUnlessDisabled(profile);
             result = 0;
             if (work->hook5E4 != 0) {
                 result = work->hook5E4(actor);
@@ -2022,7 +2022,7 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
         if ((actor->flags & 0x400) == 0) {
             return;
         }
-        entryFlags = btlGetEntryFlagsUnlessDisabled((s32)&actor->partyRecord);
+        entryFlags = btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
         if ((actor->flags & 0x40) == 0 && !(entryFlags & 0x200)) {
             return;
         }
@@ -2413,7 +2413,7 @@ u32 btlClassifyActionOperand(u8 *actor, u8 *argument) {
 s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     s32 code;
 
-    btlGetEntryFlagsUnlessDisabled((s32)(arg0 + 0x120));
+    btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)arg0)->partyRecord);
     if (arg6 >= 0) {
         switch (*(u32 *)(datCommandRecords + arg6 * 56 + 0x30)) {
         case 1:
@@ -3691,7 +3691,7 @@ void btlRefreshUnitMotionSelection(u8 *unit) {
     if ((*(u32 *)(unit + 0x110) & 2) == 0) {
         return;
     }
-    entryFlags = btlGetEntryFlagsUnlessDisabled((s32)(unit + 0x120));
+    entryFlags = btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)unit)->partyRecord);
     context = (u8 *)btlGetRuntime();
     if (*(u32 *)(unit + 0xE8) & 2) {
         color = (*(u32 *)(unit + 0x84) & 0xFFFFFF) | 0x80000000;
@@ -4138,8 +4138,8 @@ void btlUnitFaceTargetScaled(u8 *object, u8 *target, f32 scale) {
 void btlCopyUnitStats(s32 arg0, s32 arg1) {
     DatPartyRecord *record = &((BtlUnit *)arg0)->partyRecord;
     *record = *(DatPartyRecord *)arg1;
-    btlRefreshUnitMaximumHpAndClampCurrentHp((s32)record);
-    btlRefreshUnitMaximumMpAndClampCurrentMp((s32)record);
+    btlRefreshUnitMaximumHpAndClampCurrentHp(record);
+    btlRefreshUnitMaximumMpAndClampCurrentMp(record);
 }
 
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
