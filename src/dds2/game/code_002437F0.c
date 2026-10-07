@@ -9,7 +9,10 @@ typedef struct SolarNoiseLayer {
 } SolarNoiseLayer;
 
 typedef struct SolarNoiseState {
-    u8 pad00[8];
+    s16 centerX;
+    s16 centerY;
+    s16 radiusX;
+    s16 radiusY;
     u16 spawnAge;
     s16 spawnInterval;
     u16 activeCount;
@@ -308,7 +311,46 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
     return timer->active.signedByte;
 }
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_002441F8);
+extern s32 evtGetMirroredSolarPhase(void);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+
+void func_002441F8(SolarNoiseState *state) {
+    u8 phase = evtGetMirroredSolarPhase();
+    s32 spawnLimit = (s32)((f32)phase * 10.0f * 0.125f + 5.0f);
+    SolarNoiseLayer *layer;
+    s8 *active;
+    s32 i;
+    f32 angle;
+
+    state->spawnAge++;
+    if ((s16)state->spawnAge > state->spawnInterval) {
+        state->spawnAge = 0;
+        if (state->activeCount < 10 && state->activeCount < spawnLimit) {
+            state->activeCount++;
+            for (i = 0; i < 10; i++) {
+                if (state->layers[i].active == 0) {
+                    angle = effMiscRandUnitFloat(0) * 6.2831852f;
+                    state->layers[i].x = (s32)((f32)state->centerX +
+                        (f32)state->radiusX * sdfEvaluateCosineViaSinePhaseShift(angle));
+                    state->layers[i].y = (s32)((f32)state->centerY +
+                        (f32)state->radiusY * sdfSinPoly(angle));
+                    state->layers[i].age = 0;
+                    state->layers[i].active = 1;
+                    state->layers[i].scale = (s32)(effMiscRandUnitFloat(0) * 100.0f + 100.0f);
+                    break;
+                }
+            }
+        }
+    }
+    layer = state->layers;
+    active = &layer->active;
+    for (i = 9; i >= 0; i--, layer++, active += sizeof(*layer)) {
+        if (*active != 0 &&
+            evtAdvanceSolarShortLayerTimer((SolarLayerTimer *)layer) == 0) {
+            state->activeCount--;
+        }
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_002437F0", D_00437210);
 

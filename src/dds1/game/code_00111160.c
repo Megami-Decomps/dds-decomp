@@ -1,6 +1,8 @@
 #include "common.h"
 #include "eff_transform.h"
 
+struct NodeB;
+
 s32 func_00111160(u32 kind) {
     s32 result = 0;
 
@@ -47,17 +49,17 @@ s32 dds3GetWorldSlotValue(u8 *object, s32 index) {
 }
 
 extern u32 dds3GetWorldValueCount();
-extern void *dds3AppendWorldIndexNode();
+extern struct NodeB *dds3AppendWorldIndexNode(s32 initialCount);
 extern u32 dds3ReadIndexedWorldObjectWord();
 extern u32 dds3AdvanceObjectValueCursor();
-extern void dds3DestroyWorldIndexNode();
+extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void *dds3CopyWorldListToValueChain(void *object, s32 kind);
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
 void *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
     s32 slot = dds3GetWorldSlotValue(object, index);
-    void *result;
+    struct NodeB *result;
     u32 word;
 
     if (dds3GetWorldValueCount(slot) == 0) {
@@ -92,7 +94,7 @@ void *dds3GetFirstWorldObjectNodeOfKind2(void) {
     }
     dds3ResetObjectValueCursor(indexObject);
     node = (void *)dds3ReadIndexedWorldObjectWord(indexObject);
-    dds3DestroyWorldIndexNode(indexObject);
+    dds3DestroyWorldIndexNode((struct NodeB *)indexObject);
     return node;
 }
 

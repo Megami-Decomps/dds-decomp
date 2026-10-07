@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
 #define SOLAR_FADE_IN 2
@@ -14,7 +16,7 @@ void evtInitializeVisualData(s32 visualAddress);
 
 void evtBeginSolarOverlayFadeIn(s32 fadeDuration);
 
-void func_0022AB90(void);
+s32 func_0022AB90(void);
 s32 evtGetMirroredSolarPhase(void);
 void evtUpdateSolarPhaseTransition(u32 overlayAddress);
 void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha, s32 mirroredPhase, u32 overlayAddress, s32 renderContext);
@@ -154,7 +156,75 @@ void *evtGetTestTaskUpdateCallback(void) {
     return (void *)func_0022AB90;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022A248", func_0022AB90);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern void kwlnDrawSpriteCell(u32, s32, s32, s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sdfPathExists(char *);
+extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
+extern void mdlFlagClearAll(void);
+extern SdfPoolNode D_00325708;
+extern u8 D_00324510[2][2][16];
+extern s32 D_003BBDEC;
+extern const char D_003ACC68[];
+extern const char D_003ACC78[];
+extern const char D_003ACC88[];
+
+s32 func_0022AB90(void) {
+    char path[0x40];
+    SdfListHead *list;
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    kwlnDrawSpriteCell((u32)list, 0x84, 0x54, 0x15, 10);
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, D_003ACC68));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, D_003ACC78, D_003BBDEC));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, D_003ACC88));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER"));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500"));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
+    D_00325708.append((SdfListHead *)&D_00325708, list);
+
+    if ((s8)D_00324510[1][0][1] < 0) {
+        func_003014F0(path, "/event/e%03d/e%03d/scr/e%03d.bf",
+                      D_003BBDEC - D_003BBDEC % 10, D_003BBDEC, D_003BBDEC);
+        if (sdfPathExists(path) != 0) {
+            D_003BA8EC = 0x80000000;
+            scrCreateProcessTaskFromResource(0x3EB, path, 0);
+            return (s32)func_0022AB60;
+        }
+    }
+    if ((s8)D_00324510[1][0][3] < 0) {
+        mdlFlagClearAll();
+        return (s32)evtGetTestTaskUpdateCallback;
+    }
+    if (D_00324510[1][0][5] & 2) {
+        D_003BBDEC++;
+    }
+    if ((D_00324510[1][0][4] & 2) && D_003BBDEC > 500) {
+        D_003BBDEC--;
+    }
+    if ((s8)D_00324510[1][0][2] < 0) {
+        D_003BBDEC = 500;
+    }
+    if ((s8)D_00324510[1][0][0] < 0) {
+        D_003BBDEC = 600;
+    }
+    if ((D_00324510[1][0][8] & 2) && D_003BBDEC > 500) {
+        D_003BBDEC -= 100;
+        if (D_003BBDEC < 500) {
+            D_003BBDEC = 500;
+        }
+    }
+    if (D_00324510[1][0][10] & 2) {
+        D_003BBDEC += 100;
+    }
+    return 0;
+}
+
 
 /* Test-task teardown destroys the named script processes. */
 void evtDestroyTestTaskScripts(void) {

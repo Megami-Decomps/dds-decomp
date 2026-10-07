@@ -22,8 +22,8 @@ u32 func_001167F8(void) {
     return 1;
 }
 
-u32 func_00116800(EffWorldNode *object) {
-    return (u32)((EffLightData *)object->data)->resourceState;
+ObjBase *dds3GetLightObjectResource(EffWorldNode *object) {
+    return ((EffLightData *)object->data)->resourceState;
 }
 
 EffWorldNode *evtSpawnActionObj9(s32 value) {

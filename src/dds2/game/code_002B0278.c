@@ -1663,7 +1663,64 @@ void mnuCampMenuHandleInput(s32 callback) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5580);
+/* Apply a selected skill to the current slot, then process window input. */
+void func_002B5580(s32 callback) {
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue();
+    SkillMenuRuntime *menuWork = (SkillMenuRuntime *)context->party;
+    u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
+    MenuWindowContainer *window = menuWork->selectedWindow;
+    MenuList *list = window->list;
+    DatPartyRecord *partyEntry;
+    MenuWindowContainer **skillWindowSlot;
+    MenuWindowContainer *skillWindow;
+    MenuListNode *selectedNode;
+    s32 selectedSlot;
+    s32 skillId;
+    s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
+    MenuListNode *categoryCursor = menuWork->categoryList->cursor;
+    DatGameState *gameState = datGameState;
+
+    list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
+    partyEntry = &gameState->party[partyIndex];
+    skillWindowSlot = &menuWork->skillWindows[categoryCursor->index];
+    skillWindow = *skillWindowSlot;
+    if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
+        selectedNode = skillWindow->list->cursor;
+        selectedSlot = list->cursor->index;
+        if (selectedNode->index == 0) {
+            mnuClearPartySkillSlot(partyEntry, selectedSlot);
+        } else {
+            skillId = selectedNode->sortKeyPrimary;
+            if (skillId != 0xFFFF) {
+                mnuAddPartySkillIfMissing(partyEntry, (u16)skillId, selectedSlot);
+            } else {
+                inputFlags = MNU_STAFF_INPUT_REJECTED;
+            }
+        }
+        window = mnuSeekSelectedWindowCursor(0, callback);
+        mnuInitPartyPanelSlots(&context->partyPanel);
+        func_002BCAB0(&context->partyWindow);
+        mnuSetPopupEntryFlagged(context->popupState, D_003E7790);
+        func_002B45D8(context);
+        window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
+    }
+    if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
+        mnuSetPopupEntryFlagged(context->popupState, D_003E7790);
+    }
+    if (window != 0) {
+        if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
+            func_002B9808((s32)window);
+        }
+        if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
+            mnuRetreatWindowListSelection((s32)window);
+        }
+        if (inputFlags & MNU_STAFF_INPUT_NEXT) {
+            mnuAdvanceWindowListSelection((s32)window);
+        }
+        mnuClearWindowPanelTransitionFlag(window);
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
+    }
+}
 
 void mnuSwapPartySkillSlots(DatPartyRecord *party, s32 firstSlot, s32 secondSlot) {
     u16 value = party->effectData[firstSlot];

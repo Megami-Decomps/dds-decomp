@@ -3,9 +3,11 @@
 #include "evt_world.h"
 #include "kwln.h"
 
-extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
-extern void *sdfResourceRetainAddress(void *resource);
-extern void sdfReleaseResourceAllocation(void *arg);
+struct SdfMemBlock;
+
+extern void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
+extern u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
@@ -25,7 +27,7 @@ void dds3ClearSceneObjectState(EffWorldNode *worldNode) {
 /* Load another scene's named resource and give the scene object ownership. */
 s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) {
     EvtWorldTable *worldData;
-    void *resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     u32 resolvedAddress;
     void *resourceAddress;
 
@@ -36,7 +38,7 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
     if (worldData->unk18 != 0) {
         evtReleaseSceneResource(worldNode);
     }
-    resourceHandle = sdfReadNamedResource((void *)resourceName, &resolvedAddress, 0);
+    resourceHandle = sdfReadNamedResource(resourceName, &resolvedAddress, 0);
     resourceAddress = (void *)resolvedAddress;
     if (resourceAddress == NULL) {
         return 0;
@@ -52,7 +54,7 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
  * a NULL resolved address fails attachment without undoing the retain. */
 s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
     s32 result = 0;
-    void *resourceAddress;
+    u32 resourceAddress;
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (resourceHandle == NULL) {
@@ -61,10 +63,10 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
     if (worldData->unk18 != 0) {
         evtReleaseSceneResource(worldNode);
     }
-    resourceAddress = sdfResourceRetainAddress(resourceHandle);
-    if (resourceAddress != NULL) {
+    resourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)resourceHandle);
+    if (resourceAddress != 0) {
         worldData->unk18 = (u32)resourceHandle;
-        worldData->unk1C = (u32)resourceAddress;
+        worldData->unk1C = resourceAddress;
         return 1;
     }
     return result;
@@ -76,7 +78,7 @@ void evtReleaseSceneResource(EffWorldNode *worldNode) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (worldData->unk18 != 0) {
-        sdfReleaseResourceAllocation((void *)worldData->unk18);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)worldData->unk18);
     }
     worldData->unk18 = 0;
     worldData->unk1C = 0;

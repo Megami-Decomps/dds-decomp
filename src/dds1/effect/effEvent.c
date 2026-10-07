@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
@@ -383,7 +384,78 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     scene->append((SdfListHead *)scene, (SdfListHead *)task);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018EB08);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
+extern void *func_002EF2B0(const f32 [][4], const u32 *, s32, u32);
+extern void func_002DD608(f32);
+extern void sdfComposeVuMatrixFromRegisters(void);
+extern SdfPoolNode kwlnDrawSurfaces[];
+
+void func_0018EB08(const f32 *center, u32 color, f32 radius) {
+    f32 point[4] __attribute__((aligned(16)));
+    f32 matrix[4][4] __attribute__((aligned(16)));
+    f32 vertices[40][4] __attribute__((aligned(16)));
+    u32 colors[40];
+    SdfListHead *list;
+    SdfPoolNode *surface;
+    f32 (*out)[4];
+    f32 latitude;
+    f32 longitude;
+    f32 ringRadius;
+    f32 ringY;
+    u32 pass;
+    u32 ring = 0;
+    u32 segment;
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    do {
+        colors[ring++] = color;
+    } while (ring < 40);
+
+    EE_MMI_UNIT_MATRIX(matrix);
+    for (pass = 0; pass < 2; pass++) {
+        latitude = 0.0f;
+        for (ring = 0; ring < 14; ring++) {
+            latitude += 0.20943949f;
+            out = vertices;
+            longitude = 0.0f;
+            ringY = radius * sdfEvaluateCosineViaSinePhaseShift(latitude);
+            ringRadius = radius * sdfSinPoly(latitude);
+            VU0_LOAD_MATRIX(matrix);
+            VU0_LOAD_VF(vf11, center);
+            point[0] = ringRadius;
+            point[1] = ringY;
+            point[2] = 0.0f;
+            VU0_LOAD_VF(vf10, point);
+            VU0_CLEAR_W(vf10);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_ADD(vf10, vf10, vf11);
+
+            for (segment = 0; segment < 20; segment++) {
+                VU0_STORE_VF(vf10, *out);
+                out++;
+                longitude += 0.31415924429893494f;
+                point[0] = sdfEvaluateCosineViaSinePhaseShift(longitude) * ringRadius;
+                point[1] = ringY;
+                point[2] = sdfSinPoly(longitude) * ringRadius;
+                VU0_LOAD_VF(vf10, point);
+                VU0_CLEAR_W(vf10);
+                VU0_APPLY_MATRIX(vf10, vf10);
+                VU0_ADD(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, *out);
+                out++;
+            }
+            sdfAppendPacket(list, (u32)func_002EF2B0(vertices, colors, 40, 0x80));
+        }
+        func_002DD608(1.5707963f);
+        VU0_LOAD_MATRIX_B_F32(matrix);
+        sdfComposeVuMatrixFromRegisters();
+        VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+    }
+    surface = &kwlnDrawSurfaces[55];
+    surface->append((SdfListHead *)surface, list);
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
 

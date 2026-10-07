@@ -2122,7 +2122,80 @@ u8 fldGetCampSceneControlMode(void) {
     return fldTestSceneControlFlags(0x20) != 0 ? 0 : 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00124F58);
+extern void *dds3GetWorldObject(void);
+extern void dds3SetWorldObjectDataValue(EffWorldNode *, s8);
+extern void kwlnFadeStartIn(s32);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void func_00131688(void);
+extern u8 fldHasPendingSceneFlags(void);
+extern void fldSetCameraNodeModeWithTen(void);
+extern void kwlnFadeStartOut(s32);
+extern void mnuCreateCampTasks(void);
+extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtSetSolarOverlayFullyTransparent(void);
+extern void fldApplySkyLightSetToPlayerVU(void);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void fldClearSceneLifecycleFlags(u32);
+extern u8 fldTestSceneLifecycleFlags(u32);
+extern s16 D_0032E4D8[];
+
+s32 func_00124F58(void) {
+    FldAreaWork *scene;
+    s32 control;
+
+    if (D_003BABEC > 0) {
+        D_003BABEC--;
+        if (D_003BABEC == 0) {
+            dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+            kwlnFadeStartIn(4);
+            mnuCreateCampTasks();
+        }
+        return 0;
+    }
+    if (fldTestSceneControlFlags(0x20) == 0 && fldGetCampSceneControlMode() == 3) {
+        fldClearSceneLifecycleFlags(1);
+        fldPreparePlayerSceneCameraTarget();
+        evtSetSolarOverlayFullyVisible();
+        /* Retail retains both branches of this shared scene-state gate. */
+        if (D_0032E4D8[0] != 0) {
+            fldApplySkyLightSetToPlayerVU();
+        } else {
+            fldApplySkyLightSetToPlayerVU();
+        }
+        dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+        fldSetSceneControlFlags(0x20);
+        kwlnFadeStartOut(0);
+        kwlnFadeStartIn(8);
+        return 0;
+    }
+    control = fldTestSceneControlFlags(0x20);
+    if (control == 0) {
+        return control;
+    }
+    control = fldTestSceneControlFlags(0x40);
+    if (control == 0) {
+        return control;
+    }
+    if (fldTestSceneLifecycleFlags(1) == 1 || fldHasPendingSceneFlags() != 0 || fldGetSceneReadyFlag() != 0) {
+        return 0;
+    }
+    scene = &fldAreaState;
+    if (scene->sceneMode == 0 && (s8)D_00324530[0] < 0) {
+        sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
+        fldSetSceneLifecycleFlags(1);
+        fldResetPlayerSceneObjectState();
+        func_00131688();
+        evtSetSolarOverlayFullyTransparent();
+        scene->sceneMode = 4;
+        scene->sceneState = 5;
+        fldClearSceneControlFlags(0x20);
+        kwlnFadeInStart(0, 0, 0, 4);
+        D_003BABEC = 5;
+        fldSetCameraNodeModeWithTen();
+    }
+    return 0;
+}
+
 
 u8 fldGetSceneReadyOrPendingState(void) {
     if (D_003BABF0 > 0) {
@@ -2131,15 +2204,8 @@ u8 fldGetSceneReadyOrPendingState(void) {
     return fldGetSceneReadyFlag() != 0;
 }
 
-extern void *dds3GetWorldObject(void);
 struct ObjBase;
-extern void dds3SetWorldObjectDataValue(struct ObjBase *, s8);
-extern void kwlnFadeStartIn(s32);
-extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00145B18(void);
-extern void func_00131688(void);
-extern u8 fldHasPendingSceneFlags(void);
-extern void fldSetCameraNodeModeWithTen(void);
 extern void func_00121B88(s32, s32, f32, f32, f32);
 extern void evtStartSceneResourceTask(u64, void *);
 

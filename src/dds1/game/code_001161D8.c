@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_light.h"
+#include "eff_event.h"
 
 
 extern s32 effObjInnerCreate(EffWorldNode *object);
@@ -21,8 +22,8 @@ EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *s
     return obj;
 }
 
-u32 dds3GetResourceOwnerHandle(EffWorldNode *object) {
-    return *((u32 *)object->data);
+ObjBase *dds3GetResourceOwnerHandle(EffWorldNode *object) {
+    return ((DdsSlotResourceBlock *)object->data)->resourceState;
 }
 
 

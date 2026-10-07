@@ -5,9 +5,11 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "eff.h"
 #include "mnu_shop.h"
 #include "mdl.h"
 #include "dat_state.h"
+#include "eff.h"
 
 struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
@@ -598,8 +600,28 @@ void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
     coordinates[2] = 10;
 }
 
-s32 mnuRateByThreshold(s32 object) {
-    s32 value = *(s32 *)(object + 0x10);
+typedef struct MenuEffectBoundsOwner {
+    s32 initialValue;
+    u8 pad04[0x0C];
+    s32 quantizedSpan;
+    s32 *settings;
+    u8 settingIndex;
+    s8 positionY;
+    u8 pad1A[2];
+    EffectSlotSet *resourceSets[7];
+    EffectSlotSet *leftGrid;
+    EffectSlotSet *rightGrid;
+    MenuEffectNode *effects[2];
+    s32 updateState;
+    s32 opacity;
+    s32 pad50;
+} MenuEffectBoundsOwner;
+
+typedef char MenuEffectBoundsOwner_size_check[
+    (sizeof(MenuEffectBoundsOwner) == 0x54) ? 1 : -1];
+
+s32 mnuRateByThreshold(MenuEffectBoundsOwner *owner) {
+    s32 value = owner->quantizedSpan;
 
     if (value < 0x32) {
         return (value >= 0x14) ? 1 : 2;
@@ -607,21 +629,49 @@ s32 mnuRateByThreshold(s32 object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283D10);
+extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
+
+/* Split the scaled grid width by its rate category and clear the paired grid. */
+void func_00283D10(MenuEffectBoundsOwner *owner) {
+    s32 span = (owner->resourceSets[1]->workEntries[0].geometry.bounds[2]
+                * owner->quantizedSpan) / 100;
+    s32 rate = mnuRateByThreshold(owner);
+    s32 bounds[2];
+
+    switch (rate) {
+    default:
+        bounds[0] = span / 5;
+        bounds[1] = (span * 90) / 100;
+        break;
+    case 1:
+        bounds[0] = span / 5;
+        bounds[1] = (span * 90) / 100;
+        break;
+    case 2:
+        bounds[0] = 0;
+        bounds[1] = span;
+        break;
+    }
+
+    bounds[0] -= 0x30;
+    bounds[1] -= 0x30;
+    itfGridSetQuantizedBounds(owner->leftGrid, 0, bounds[0], 0, bounds[1], 0);
+    itfGridSetQuantizedBounds(owner->rightGrid, 0, 0, 0, 0, 0);
+}
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
-void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
+void mnuCyclePairedEffectSetting(MenuEffectBoundsOwner *pair) {
     s32 *settings;
     s32 setting;
 
     func_00283D10(pair);
-    mnuSetPairedEffectPositions(pair);
+    mnuSetPairedEffectPositions((MenuEffectPair *)pair);
     settings = pair->settings;
     setting = 0;
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting(pair->configurationHandle, 0, (s32)pair->first, 0, setting, 0);
+    effConfigureWithDefaultSetting((s32)pair->leftGrid, 0, (s32)pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
@@ -853,8 +903,54 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
     itfGridStorePosition(&panel->completed, grid, completedIndex);
 }
 
-extern void func_00285208(s32, s32, s32, MenuProfilePanel *, s32);
-INCLUDE_ASM(const s32, "game/code_00282850", func_00285208);
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
+extern void uiDrawTexturedSurfaceAtFarDepth(s32);
+extern void func_002C1548(s32, s32);
+extern void uiDrawSurfaceAtNearDepth(u32);
+/* Draw the filled profile bar and its animated background strips. */
+void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
+    s32 progress = panel->option;
+    s32 capacity = panel->capValue;
+    s32 percent = progress * 100 / capacity;
+    u32 opacity = panel->opacity;
+    EffectSlotSet *slots;
+    s32 index;
+    s32 croppedWidth;
+    s32 offset;
+    s32 baseShift;
+    s32 tile;
+
+    if (progress == capacity) {
+        func_002BF4E0(x + 0x2A0, y - 0x30, z, opacity, 0,
+                     (s32)panel->completed.set, panel->completed.index, surface);
+        return;
+    }
+    slots = panel->fill.set;
+    index = panel->fill.index;
+    croppedWidth = slots->workEntries[index].sourceWidth
+                 - slots->workEntries[index].sourceWidth * percent / 100;
+    slots->workEntries[index].parameters[2] = -croppedWidth;
+    slots->workEntries[index].geometry.bounds[2] = (slots->workEntries[index].sourceWidth - croppedWidth) << 4;
+    func_002BF4E0(x, y, z, opacity, 0, (s32)slots, index, surface);
+    if (index != panel->background.index) {
+        uiDrawTexturedSurfaceAtFarDepth(surface);
+        itfDrawGridWithResolvedSlot(x, y, z, 0x21, (s32)slots, index, surface);
+        func_002C1548(0, surface);
+        slots = panel->background.set;
+        index = panel->background.index;
+        offset = (s32)((u32)panel->phase << 7) / 0x200;
+        baseShift = 0x200 - panel->phase;
+        for (tile = 0; tile < 0x1200; tile += 0x200) {
+            slots->workEntries[index].geometry.bounds[2] =
+                offset + (slots->workEntries[index].sourceWidth << 4);
+            func_002BF4E0(x + tile - baseShift, y, z, opacity, 0x21,
+                         (s32)slots, index, surface);
+            x += offset;
+            offset += 0x80;
+        }
+        uiDrawSurfaceAtNearDepth(surface);
+    }
+}
 
 /* Draw first, then advance the native phase by twelve with a single period subtraction. */
 void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option) {
