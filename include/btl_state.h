@@ -145,7 +145,8 @@ typedef struct BtlState {
     void (*bossCleanup)(void); /* 0x594 */
     u8 pad598[0x20];
     s32 unk_5B8;
-    u8 pad5BC[0x14];
+    s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
+    u8 pad5C0[0x10];
     void (*cleanup)(void); /* 0x5D0 */
     u8 pad5D4[0x1C];
     void (*updateCallback)(void); /* 0x5F0 */
@@ -351,7 +352,7 @@ typedef struct BtlState {
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5E0 */
     s32 (*sceneCallback)(); /* 0x5E4 */
     u8 pad5E8[8];
-    s32 (*hook5F0)(BtlUnit *, s32);
+    s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5F0: same override, DDS2 001E3264. */
     u8 pad5F4[4];
     BtlUnit *(*findModelActor)(s32, s32); /* 0x5F8 */
     u8 pad5FC[0x10];

@@ -45,11 +45,12 @@ s8 func_002BDA78(s32 value) {
 typedef struct FrFontGlyph FrFontGlyph;
 
 extern const u8 (*D_00435E5C)[25];
+extern char D_00437C38[];
 extern char D_00437C40[];
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mdlFlagTest(u32);
 extern s32 mnuGetPartyEntryMenuValue(DatPartyRecord *);
-extern s32 mnuGetPartyEntryCurrentId(DatPartyRecord *);
+extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
@@ -103,9 +104,9 @@ void func_002BDC38(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSpri
 
         if (resource != NULL) {
             if (i == 2) {
-                func_00306CD0(x - 0x40, 0x10, depth, alpha, 0, (s32)page->item[2], 0, param);
+                func_00306CD0(x - 0x40, 0x10, depth, alpha, 0, page->item[2], 0, param);
             } else {
-                func_00306CD0(x, 0x20, depth, alpha, 0, (s32)resource, 0, param);
+                func_00306CD0(x, 0x20, depth, alpha, 0, resource, 0, param);
             }
         }
         i++;
@@ -122,7 +123,7 @@ void func_002BDC38(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSpri
         func_0019D550((FrFontGlyph *)glyph, 1, param);
         frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
     } else {
-        func_00306CD0(x, 0x20, depth, alpha, 0, (s32)page->cursor[0], 0, param);
+        func_00306CD0(x, 0x20, depth, alpha, 0, page->cursor[0], 0, param);
     }
 
     if (showCurrent != 0) {
@@ -140,11 +141,11 @@ void func_002BDC38(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSpri
             func_0019D550((FrFontGlyph *)glyph, 1, param);
             frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
             if (page->flags & 1) {
-                func_00306CD0(x + 0xE30, 0x408, depth, alpha, 0, (s32)page->cursor[3], 0, param);
-                func_002BDAA8(x + 0x1020, 0x438, alpha, value, (s32)page->cursor[2], 0);
+                func_00306CD0(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, param);
+                func_002BDAA8(x + 0x1020, 0x438, alpha, value, page->cursor[2], 0);
             }
         } else {
-            func_00306CD0(x, 0x20, depth, alpha, 0, (s32)page->cursor[1], 0, param);
+            func_00306CD0(x, 0x20, depth, alpha, 0, page->cursor[1], 0, param);
         }
     }
 

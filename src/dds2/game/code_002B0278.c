@@ -9,6 +9,8 @@ extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #include "fpu.h"
 #include "sdf.h"
 
+extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
+
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
 #define MNU_ENTRY_MARKED_COLOR 0x89BDC940

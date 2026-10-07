@@ -68,13 +68,6 @@ typedef struct SdfPackedValue {
 #define SDF_PACKED_FLAG 0x8000
 #define SDF_PACKED_VALUE_MASK 0x7FFF
 
-/* Byte 0 supplies an entry/resource code; byte 1 selects the script kind. */
-typedef struct SdfUnitMode {
-    s8 code; /* 0x00: used as a resource index by sound/UI consumers */
-    s8 kind; /* 0x01: 5 selects the alternate unit script */
-} SdfUnitMode;
-
-extern SdfUnitMode *datCommandSelectors;
 
 /* The 0x20 flag selects base enemy vitals instead of the party script path. */
 #define SDF_UNIT_ENEMY 0x20

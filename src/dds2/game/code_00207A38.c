@@ -6,6 +6,7 @@
 #include "kwln.h"
 #include "scr.h"
 #include "sdf.h"
+#include "dat_command.h"
 
 extern u64 btlStartTask();
 
@@ -1184,7 +1185,6 @@ typedef struct BtlActionProbe {
     void *actionProbeSecond;   // 0x08
 } BtlActionProbe;
 
-extern s8 *datCommandSelectors;
 extern s32 func_001B2F50(void *, s32);
 extern s32 func_001ACD10(void *, s32, BtlActionProbe *);
 
@@ -1196,7 +1196,7 @@ u32 btlScriptSelectActionEntry(void) {
 
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     commandId = scrReadIntParameter(0);
-    if (datCommandSelectors[commandId * 2 + 1] == 1) {
+    if (datCommandSelectors[commandId].kind == 1) {
         if (func_001B2F50((void *)context->actor, commandId) != 0 &&
             func_001ACD10((void *)context->actor, commandId, &probe) != 0) {
             context->actionProbeFirst = probe.actionProbeFirst;

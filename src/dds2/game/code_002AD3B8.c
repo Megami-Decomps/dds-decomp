@@ -49,7 +49,7 @@ extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
 extern s32 mnuGetPartyEntryMenuValue();
-extern u16 mnuGetPartyEntryCurrentId(s32);
+extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
 extern void ptyAdjustItemQuantity();
@@ -616,7 +616,7 @@ s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
 
 void mnuStaffEntrySwapLabels(s32 context, u8 *entry, s32 target) {
     u8 *menu = ((MenuStaffContext *)context)->menu;
-    s32 current = mnuGetPartyEntryCurrentId((s32)entry);
+    s32 current = mnuGetPartyEntryCurrentId((DatPartyRecord *)entry);
 
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
     if (target == 0) {
@@ -772,7 +772,7 @@ void mnuPrepareStaffValueChangeDialog(s32 context, u8 *entry, s32 unused, s32 fl
     s32 base;
 
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
-    current = mnuGetPartyEntryCurrentId((s32)entry);
+    current = mnuGetPartyEntryCurrentId((DatPartyRecord *)entry);
     evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
     evtCopyEntryStringToActiveWindow(1, D_003E7400[menu->thirdListIndex]);
     func_0035C860(valueText, D_00437BD8, menu->thirdListValue);
@@ -908,7 +908,7 @@ s32 func_002AFE18(s32 task) {
         mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
         mnuClearWindowPanelTransitionFlag(window);
         if (input & 1) {
-            current = mnuGetPartyEntryCurrentId((s32)party);
+            current = mnuGetPartyEntryCurrentId(party);
             if (current != 0) {
                 if (menu->windows[4]->list->cursor->index == 0) {
                     if (func_002BDA50(current) != 0) {

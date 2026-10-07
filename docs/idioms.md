@@ -1194,14 +1194,25 @@ result in `s32`; the old `u64` declarations were not evidence of packed
 values or a wide return. The draw controller reads the canonical party
 record's `itemId` at +0x1B2, not an alternate record view.
 
-An actor's stat data is not established as a full embedded party record.
-`btlSyncPlayerWork` retains the actor's `+0x120` stat base separately from
-the original actor pointer, but DDS2's native actor links at `+0x174` and
-`+0x178` conflict with the saved record's profile and skill-flag storage.
-The shared stat-prefix owner remains an open question. Do not restore a
-private party-shaped actor view, add a union or fabricate a cached pointer
-merely to reproduce this function's register allocation; its honest
-canonical-field candidate remains parked and retail assembly stays active.
+Both games now embed the complete canonical `DatPartyRecord` in `BtlUnit`
+at `+0x120`. Actor stat getters, command-power snapshots and status checks
+use that record directly rather than a second actor-stat prefix. The earlier
+`+0x174`/`+0x178` actor-link interpretation was superseded by the shared
+record layout; it is not evidence for an overlapping owner.
+
+DDS1's escape query at `0x001A8640` instead walks the real
+`BtlState.units` chain. Its unsigned halfword loads at `0x001A86B4` and
+`0x001A86E0` read `BtlUnit.partyRecord.status`: the complete party record
+starts at `+0x120`, and its status word is at `+0x0E` (`+0x12E` overall).
+The `0x2A0F` eligibility mask belongs to that record, not a second actor-flags owner.
+
+DDS2's command-block query at `0x001ABB10` reads the shared two-byte
+`DatCommandSelector` rows: the signed resource/stat selector is byte 0,
+and the signed kind is byte 1. Kind 0 and kind 2 both reach the cost-mode
+restriction; treating kind 2 as an unconditional exemption changes behavior.
+The slot-cost query accepts `BtlUnit *`, and the enabled-current-ID check
+and `mnuGetPartyEntryCurrentId` accept `DatPartyRecord *`; the latter returns
+the record's `u16 itemId`, not a word-sized address or a second record view.
 
 DDS1's camera-selection command stores its selected actor in
 `BtlLinkedCommand.selectedUnit` at `+0x100`, then reads the native `u16`
@@ -1209,6 +1220,32 @@ DDS1's camera-selection command stores its selected actor in
 complete owners; the adjacent store/load is not evidence for a new command
 or state-prefix view. DDS2's corresponding command uses its existing
 selected-actor field at `+0x120` and mode field at `+0x268`.
+
+DDS1's actor-presentation bridge at `0x001B83D8` receives a complete
+`BtlTask *`: `task->unit` at `+0x18` supplies the native 64-bit actor
+identity compared against `BtlState.units`. Its signed mode/value bytes
+update the selected `BattleActorPanelWork.activeEntries` record rather
+than an overlapping panel-row prefix. The command scene borrows the task
+through `BattleSceneObject.owner`; the reset callback at `0x001C9E20`
+passes that same task type and sets its existing `flags` member.
+
+DDS2's special-actor chunk update at `0x0021A778` walks
+`BtlState.units` and compares the signed `EvtUnit.slotC` frame threshold
+against the model's current frame. The unsigned ID is
+`BtlUnit.partyRecord.unitId` at `+0x124`, not an independent mode field.
+Promote it to a meaningful `s32` local for the ID-range tests; the retail
+code uses `lhu` followed by signed `slti`. The named-chunk fade/reset helpers take
+actual `const char *` names, not integer prototypes requiring pointer casts.
+
+DDS1's actor-effect task update at `0x001F1470` transfers the already-matched
+DDS2 counterpart at `0x00202100` through the same complete task-argument owner.
+Its `ActorEffectOwner` union has two real uses: a dereferenced actor pointer
+and the encoded word stored by the field-color selector API. The effect
+factory at `0x00160958` allocates a `0x128`-byte block and returns its address;
+the event and battle callers agree on an opaque pointer return and pointer
+owner argument. The selected-unit task still transports that return in its
+native word-array argument slot; typed actor-effect callers store it without casts.
+
 
 ## SDK packet words versus GS payload words
 
@@ -2138,6 +2175,14 @@ signed entry index, not XY coordinates. The draw routine dereferences the
 set's work-entry bank and reads the selected `BdWork.sourceWidth`; its
 phase and opacity are the words at `+0x34` and `+0x38`.
 
+DDS1's scaled variant draw at `0x0024F338` uses the same complete
+`EffectSlotSet`/`BdWork` pair as its exact `0x0024EF68` neighbor. It temporarily
+scales the selected entry's width and height, draws through resource-table
+slot 5, then reloads the placement-selected resource before restoring its
+native dimensions. Retail re-resolves the resource across the drawing callback;
+do not replace these owners with a sprite-resource prefix or cache the
+pre-call work-bank pointer for the restore.
+
 The generic two-word `itfGridStorePosition` setter's name does not prove
 that these cached words are positions. Pass the actual slot record and
 the genuine grid/fill-index inputs explicitly. The native first call
@@ -2180,6 +2225,15 @@ real `MenuWindowContainer`, `MenuList`, `MenuListNode.camp` and window-state
 owners rather than shadow prefix records. Existing SDK address-word and
 byte-pointer interfaces remain explicit boundaries; member addresses do
 not require integer offset arithmetic.
+
+The shop transaction at DDS2 `0x00263FB0` borrows the selected row
+through `window->list->cursor->camp`, not an event-object prefix.
+Its full-width value times `MenuTerminalContext.multiplier` determines
+the currency delta; `DatGameState.inventory.counts` consumes only the
+multiplier's low byte. A purchase increments ordinary inventory only
+when the listed-item lookup is negative, but the allowed-ID progress
+test is independent of that lookup. Both purchase and sale restore
+the row's displayed value from its preserved `camp.price`.
 
 The provider unit is clean at 38 matching functions, and the complete
 event consumer unit at 75, with zero differences and no checker flags.
@@ -2350,6 +2404,21 @@ node and select its inner allocation; transform flag/backup helpers
 accept the transform itself. Do not confuse the kind-specific payload
 with this inner owner.
 
+The kind-dispatch getter at DDS1 `0x00112888` / DDS2 `0x00112AB0`
+also receives this complete world node. Reading `kindTag >> 24` keeps
+the native byte load at `+0x0F` without a second short owner view.
+`dds3CreateWorldInnerState` (`0x00112958` / `0x00112B80`) separately
+allocates `0x90` bytes of kind-specific work and stores that pointer at
+`+0x18`; its historical "inner" name does not mean `ObjectTransform`.
+That work owns an `ObjBase *` at `+0x80` and a state word at `+0x88`.
+
+The model viewer's attachment routine (DDS1 `0x0021FD50`, DDS2
+`0x0023A8C0`) looks up two such nodes: kind 5 is the destination and
+kind `0x11` supplies two adjacent float vectors through `data`.
+The source payload is borrowed as float vectors, not another short
+world header. Its final VU0 store addresses the destination's separate
+transform vector at `+0x70` through `ObjectTransform`.
+
 The kind directory `D_003299C0` points at complete six-word (`0x18`-byte)
 `EffWorldOps` tables. Their first four entries are create, destroy, update
 and draw callbacks; both remaining words are zero. Kind 1 selects
@@ -2373,4 +2442,36 @@ already-matched world and script constructor schedules. The exact shared
 representation therefore remains a plain node with opaque payload and
 kind-specific interpretation at the consumer boundary. No matched C
 constructor is replaced with assembly to accommodate a type cutover.
+
+## Reload caller-owned coordinates across viewport updates
+
+DDS1 `func_00250E88` (`0x00250E88`, 216 bytes) scrolls a viewport toward
+the signed X/Y entries in `D_0036B7F0`. Reuse the existing
+`MnuVariantSpritePlacement` six-halfword row contract from
+`code_0024E1C8` and `code_00259498`, rather than inventing another struct
+view of the same table.
+
+The initial X value is retained for its upper-bound check. After the Y
+updates, however, the lower X adjustment reloads `*xCoordinate`: the
+caller's X/Y pointers may alias. Keeping the initial X value across those
+Y writes changes the function's behavior. The natural write-first update
+`*xCoordinate += deltaX - 0x13C; x = *xCoordinate;` also reproduces the
+retail store followed by the cached bound-check value. This source was
+text-exact under `check_unit.py`; no scheduling-only temporary is needed.
+
+## Resolve actual predicate contracts before scheduling work
+
+DDS2 `func_0028A018` (`0x0028A018`, 220 bytes plus four bytes of padding)
+prints `mtrChkMantraCompleteMaster!!` and checks the six mastery flags
+through a nine-entry unit-index map. Its owner is `DatPartyRecord`, not
+an integer with an ad hoc `+4` access. The actual providers are
+`s32 mdlFlagTest(s32)`, `s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *)`,
+and the existing variadic `void evtPrintDeveloperConsoleMessage`.
+
+With these contracts, ordinary automatic array initializers and early
+returns are text-exact. The arrays replace their two source
+`INCLUDE_RODATA` markers; the list caller converts its existing opaque
+word into the party-record pointer at the consumer boundary. The full
+unit gate preserves all 23 compiled functions without instruction or
+delay-slot forcing.
 

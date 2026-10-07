@@ -493,7 +493,7 @@ struct FileQueue;
 extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 
-extern s32 btlDoesEnabledStatusMatchCurrentId(void *, s32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void sdfQueueNonzeroResourceId(s32);
@@ -600,7 +600,6 @@ extern void btlUpdateActionSeqs(void);
 extern void btlDestroyAllActionSeqs(void);
 
 
-extern s8 *datCommandSelectors;
 extern s32 btlGetLoggedIndexedCommandItem(s32);
 extern void scrSetGlobalBitFlag(u32);
 
@@ -626,7 +625,7 @@ void func_001DD390(u8 *command, u8 *argument) {
     case 3:
     case 7:
     case 8:
-        if (*(s8 *)(datCommandSelectors + *(s32 *)(argument + 4) * 2 + 1) != 1) {
+        if (datCommandSelectors[*(s32 *)(argument + 4)].kind != 1) {
             btlDispatchStateHandler(command, 0xE);
         } else {
             if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x200) {
@@ -2349,7 +2348,13 @@ void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
     VU0_STORE_VF(vf10, dst);
 }
 
-extern s32 sdfLoadMapRecordPositionVector(s32, s32);
+typedef struct SdfTextParam SdfTextParam;
+extern s32 sdfLoadMapRecordPositionVector(SdfTextParam *, s32);
+extern void mdlLoadPrimaryVectorVU(MdlCtx *);
+extern void mdlLoadSecondaryVectorVU(MdlCtx *);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
+extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
 
@@ -2358,12 +2363,12 @@ s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
     if (!(unit->flags & 2)) {
         return 0;
     }
-    hook = ((BtlState *)btlGetRuntime())->hook5F0;
+    hook = ((BtlState *)btlGetRuntime())->effectParameterCallback;
     if (hook != 0) {
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return sdfLoadMapRecordPositionVector(unit->ext->owner->inner, mode);
+    return sdfLoadMapRecordPositionVector((SdfTextParam *)unit->ext->owner->inner, mode);
 }
 
 void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
@@ -2372,9 +2377,39 @@ void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E3230);
+/* vu0 routine: preserve the actor's primary and secondary vectors while
+ * evaluating the requested model record; return the sampled vector in vf10. */
+s32 func_001E3230(BtlUnit *unit, s32 value) {
+    f32 currentVector[4] __attribute__((aligned(16)));
+    f32 primaryVector[4] __attribute__((aligned(16)));
+    f32 secondaryVector[4] __attribute__((aligned(16)));
+    s32 (*callback)(BtlUnit *, s32);
+    s8 result;
 
-extern s32 sdfLoadMapRecordLookAtBasis(s32, s32);
+    if ((unit->flags & 2) == 0) {
+        return 0;
+    }
+    callback = ((BtlState *)btlGetRuntime())->effectParameterCallback;
+    if (callback != NULL) {
+        value = callback(unit, value);
+    }
+    mdlLoadPrimaryVectorVU(unit->ext->owner);
+    VU0_STORE_VF_UNCLOBBERED(vf10, primaryVector);
+    mdlLoadSecondaryVectorVU(unit->ext->owner);
+    VU0_STORE_VF_UNCLOBBERED(vf10, secondaryVector);
+    btlRefreshUnitFxVectors(unit);
+    result = sdfLoadMapRecordPositionVector((SdfTextParam *)unit->ext->owner->inner, value);
+    VU0_STORE_VF_UNCLOBBERED(vf10, currentVector);
+    VU0_LOAD_VF(vf10, primaryVector);
+    mdlStorePrimaryVectorVU(unit->ext->owner);
+    VU0_LOAD_VF(vf10, secondaryVector);
+    mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
+    sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
+    VU0_LOAD_VF(vf10, currentVector);
+    return result;
+}
+
+extern s32 sdfLoadMapRecordLookAtBasis(SdfTextParam *, s32);
 
 s8 btlSetActorAlternateEffectParameter(unit, mode)
     BtlUnit *unit;
@@ -2384,12 +2419,12 @@ s8 btlSetActorAlternateEffectParameter(unit, mode)
     if (!(unit->flags & 2)) {
         return 0;
     }
-    hook = ((BtlState *)btlGetRuntime())->hook5F0;
+    hook = ((BtlState *)btlGetRuntime())->effectParameterCallback;
     if (hook != 0) {
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return sdfLoadMapRecordLookAtBasis(unit->ext->owner->inner, mode);
+    return sdfLoadMapRecordLookAtBasis((SdfTextParam *)unit->ext->owner->inner, mode);
 }
 
 void btlSetAlternateEffectParameterOrMuzzlePosition(void) {
@@ -2470,11 +2505,6 @@ extern void effObjFetchInnerFirstVec(s32);
 
 extern void effObjFetchInnerSecondVecNorm(s32);
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
-
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
-
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
@@ -9013,7 +9043,6 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     return node;
 }
 
-extern void mdlLoadPrimaryVectorVU(s32);
 
 extern void fileQueueSetPosition(s32, f32 *);
 
@@ -9021,8 +9050,8 @@ extern void fileQueueUpdate(s32);
 
 void btlUpdateJobPositionFromModel(s32 *args) {
     f32 pos[4];
-    if (sdfLoadMapRecordPositionVector(*(s32 *)(args[1] + 0x18), 1) == 0) {
-        mdlLoadPrimaryVectorVU(args[1]);
+    if (sdfLoadMapRecordPositionVector((SdfTextParam *)((MdlCtx *)args[1])->inner, 1) == 0) {
+        mdlLoadPrimaryVectorVU((MdlCtx *)args[1]);
         VU0_STORE_VF(vf10, pos);
         pos[1] -= 150.0f;
     } else {

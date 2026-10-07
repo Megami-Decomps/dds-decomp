@@ -83,7 +83,6 @@ extern void mnuReleaseResourceList(struct MenuIconState *list);
 extern u32 effCreateStatusBatch(u32);
 
 
-extern s32 datCommandSelectors;
 
 
 
@@ -1779,7 +1778,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
 
 /* Test for the exact signed-byte marker one, not merely a nonzero selector byte. */
 u8 mnuIsAbilityValueMarked(u32 commandId) {
-    return *(s8 *)((commandId & MNU_COMMAND_ID_MASK) * 2 + datCommandSelectors) == '\x01';
+    return datCommandSelectors[commandId & MNU_COMMAND_ID_MASK].stat == '\x01';
 }
 
 s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
@@ -1890,8 +1889,8 @@ u32 mnuSetPartyEntryCurrentId(u32 entry, u32 id) {
     return 1;
 }
 
-u16 mnuGetPartyEntryCurrentId(s32 entry) {
-    return ((DatPartyRecord *)entry)->itemId;
+u16 mnuGetPartyEntryCurrentId(DatPartyRecord *entry) {
+    return entry->itemId;
 }
 
 DatPartyRecord *mnuFindPartySlotByCurrentId(u32 id) {
