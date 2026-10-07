@@ -1,27 +1,16 @@
 #include "common.h"
-#include "dds3obj.h"
+#include "eff_light.h"
+#include "eff_object.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
 extern f32 *D_00324770[];
 extern u8 kwlnDefaultColorVector[];
 
-typedef struct WorldUnitState {
-    u8 pad00[8];
-    u32 unit; /* 0x08: passed to the unit value transition helpers */
-    u8 pad0C[0x58];
-    u32 flags;           /* 0x64 */
-    u32 colorA;          /* 0x68 packed from D_00324770 */
-    u32 colorB;          /* 0x6C packed from kwlnDefaultColorVector */
-    s16 unk70;           /* 0x70 */
-    u8 pad72[2];
-    u32 value74; /* Meaning unknown; exposed by func_00116598. */
-} WorldUnitState;
-
-typedef struct WorldUnitOwner {
-    u8 pad00[0x18];
-    WorldUnitState *state;
-} WorldUnitOwner;
+struct EvtUnit;
+extern void evtSetUnitValueTransition(struct EvtUnit *unit, s32 value, s32 duration);
+extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
@@ -30,8 +19,8 @@ u32 func_00116590(void) {
     return 1;
 }
 
-u32 func_00116598(WorldUnitOwner *object) {
-    return object->state->value74;
+u32 func_00116598(EffWorldNode *object) {
+    return (u32)((EffLightData *)object->data)->resourceState;
 }
 
 
@@ -47,12 +36,12 @@ EffWorldNode *evtSpawnActionObj9(s32 value) {
     return obj;
 }
 
-void evtReleaseActionWorldNode(void) {
-    dds3RemoveWorldObjectNode();
+void evtReleaseActionWorldNode(EffWorldNode *object) {
+    dds3RemoveWorldObjectNode(object);
 }
 
-void evtBeginUnitValueColorTransition(WorldUnitOwner *object, s32 value) {
-    WorldUnitState *state = object->state;
+void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 value) {
+    EffLightData *state = object->data;
     s32 color1[4];
     s32 color2[4];
     u32 packed1;
@@ -63,32 +52,35 @@ void evtBeginUnitValueColorTransition(WorldUnitOwner *object, s32 value) {
         state->flags &= ~2;
     } else {
         state->flags |= 2;
-        state->unk70 = value;
+        state->blendFrames = value;
         VU0_LOAD_VF(vf10, D_00324770[0]);
         EE_MMI_RGBA_PACK_F128(packed1);
         color1[0] = packed1;
-        state->colorA = color1[0];
+        state->packedColorA = color1[0];
         VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
         EE_MMI_RGBA_PACK(packed2);
         color2[0] = packed2;
-        state->colorB = color2[0];
+        state->packedColorB = color2[0];
     }
 }
 
-void dds3ClearUnitObjectLowFlags(WorldUnitOwner *object) {
-    object->state->flags = object->state->flags & 0xfffffffc;
+void dds3ClearUnitObjectLowFlags(EffWorldNode *object) {
+    EffLightData *data = object->data;
+
+    data->flags = data->flags & 0xfffffffc;
 }
 
-void evtSetUnitValueTransitionForObject(void *value, void *owner, s32 duration) {
-    WorldUnitOwner *object = owner;
+/* Kind-5 effect payloads retain transition work separately from light data. */
+void evtSetUnitValueTransitionForObject(void *value, EffWorldNode *object, s32 duration) {
+    EffectObjectData *data = object->data;
 
-    evtSetUnitValueTransition(object->state->unit, value, duration);
+    evtSetUnitValueTransition((struct EvtUnit *)data->transitionWork, (s32)value, duration);
 }
 
-void evtEndUnitValueTransitionForObject(void *owner, s32 duration) {
-    WorldUnitOwner *object = owner;
+void evtEndUnitValueTransitionForObject(EffWorldNode *object, s32 duration) {
+    EffectObjectData *data = object->data;
 
-    evtEndUnitValueTransition(object->state->unit, duration);
+    evtEndUnitValueTransition((struct EvtUnit *)data->transitionWork, duration);
 }
 
 
@@ -104,13 +96,8 @@ typedef struct WorldTransformData {
 } WorldTransformData;
 
 
-typedef struct WorldTransformOwner {
-    u8 pad00[0x18];
-    WorldTransformData *data;
-} WorldTransformOwner;
-
 /* Load flags, mode and the transform block from a setup record. */
-void dds3LoadWorldTransformSetup(WorldTransformOwner *object, WorldTransformSetup *setup) {
+void dds3LoadWorldTransformSetup(EffWorldNode *object, WorldTransformSetup *setup) {
     WorldTransformData *data = object->data;
 
     data->flags = 0;

@@ -7711,11 +7711,9 @@ void btlTickFieldSwayAndTint(void) {
     btlDrawTintIfVisible();
 }
 
-struct WorldTransformOwner;
-struct WorldUnitOwner;
 extern WorldTransformSetup D_00452F50;
-extern void dds3LoadWorldTransformSetup(struct WorldTransformOwner *, WorldTransformSetup *);
-extern void evtBeginUnitValueColorTransition(struct WorldUnitOwner *, s32);
+extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
+extern void evtBeginUnitValueColorTransition(EffWorldNode *, s32);
 
 void func_00200930(f32 *position, f32 *scale, s32 value) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -7734,8 +7732,8 @@ void func_00200930(f32 *position, f32 *scale, s32 value) {
     D_00452F50.transform.rotation[1] = 0.0f;
     D_00452F50.transform.rotation[2] = 0.0f;
     D_00452F50.transform.rotation[3] = 0.0f;
-    dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_00452F50);
-    evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->unk228, value);
+    dds3LoadWorldTransformSetup((EffWorldNode *)listener, &D_00452F50);
+    evtBeginUnitValueColorTransition((EffWorldNode *)work->unk228, value);
 }
 
 void btlCreateRainEffect(u32 kind, u32 arg) {
@@ -8008,8 +8006,8 @@ s32 func_00201268(SceneLightRestoreArgs *args) {
         D_00452F50.transform.rotation[1] = 0.0f;
         D_00452F50.transform.rotation[2] = 0.0f;
         D_00452F50.transform.rotation[3] = 0.0f;
-        dds3LoadWorldTransformSetup((struct WorldTransformOwner *)listener, &D_00452F50);
-        evtBeginUnitValueColorTransition((struct WorldUnitOwner *)work->unk228, args->value);
+        dds3LoadWorldTransformSetup((EffWorldNode *)listener, &D_00452F50);
+        evtBeginUnitValueColorTransition((EffWorldNode *)work->unk228, args->value);
         PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);
         PCP_COPY_VECTOR_F32(work->ambientColor, work->baselineAmbientColor);
         PCP_COPY_VECTOR_F32(work->lightDirection, work->baselineLightDirection);

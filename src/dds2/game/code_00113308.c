@@ -428,15 +428,15 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     return 1;
 }
 
-extern void evtEndUnitValueTransitionForObject(void *, s32);
-extern void evtSetUnitValueTransitionForObject(void *, void *, s32);
+extern void evtEndUnitValueTransitionForObject(EffWorldNode *, s32);
+extern void evtSetUnitValueTransitionForObject(void *, EffWorldNode *, s32);
 
 void evtEndObjectValueTransition(EffectObject *object) {
     EffectObjectData *data;
 
     data = object->data;
     if (data->activeId != -1) {
-        evtEndUnitValueTransitionForObject(object, 10);
+        evtEndUnitValueTransitionForObject((EffWorldNode *)object, 10);
         data->activeId = 0xffffffff;
     }
 }
@@ -486,7 +486,7 @@ void func_00113D18(EffectObject *object) {
             if (!(otherData->flags & 4) &&
                 func_0010FBD0(object->source, other->source) == 0 &&
                 data->activeId == other->valueId) {
-                evtEndUnitValueTransitionForObject(object, 10);
+                evtEndUnitValueTransitionForObject((EffWorldNode *)object, 10);
                 data->activeId = -1;
             }
         } while (dds3AdvanceObjectValueCursor(list) != 0);
@@ -512,7 +512,7 @@ destroy_list:
         return;
 
 attach_transition:
-        evtSetUnitValueTransitionForObject(other, object, 10);
+        evtSetUnitValueTransitionForObject(other, (EffWorldNode *)object, 10);
         data->activeId = other->valueId;
         dds3DestroyWorldIndexNode(list);
     }
