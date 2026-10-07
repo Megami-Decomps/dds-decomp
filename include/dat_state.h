@@ -138,6 +138,14 @@ typedef struct DatProfileRecord {
     u32 flags;
 } DatProfileRecord;
 
+#ifdef VERSION_DDS2
+/* Each unit owns one complete 0x580-byte bank of 176 profile records. */
+typedef struct DatProfileBank {
+    DatProfileRecord records[176];
+} DatProfileBank;
+typedef char DatProfileBankSizeCheck[sizeof(DatProfileBank) == 0x580 ? 1 : -1];
+#endif
+
 /* Eight-skill output shared by profile builders and reward renderers. */
 typedef struct PrfSkillList {
     u32 flags[8];
@@ -196,7 +204,7 @@ typedef struct DatGameState {
     u32 scriptFlags[4];                    /* 0x16EF0 */
     u32 battleFlags[4];                    /* 0x16F00 */
     DatMantraBitmap mantraBits[16];        /* 0x16F10 */
-    DatProfileRecord profileRecords[16][176]; /* 0x17210 */
+    DatProfileBank profileBanks[16]; /* 0x17210 */
     DatPartyRecord templates[16];          /* 0x1CA10: the initializer clears sixteen records. */
     u32 savedCurrency;                    /* 0x1E650 */
     s32 progressTotal;                    /* 0x1E654 */

@@ -723,7 +723,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
     evtCopyRosterTableValue(entry);
     gameState = datGameState;
     memcpy(&gameState->mantraBits[2], &gameState->mantraBits[1], sizeof(gameState->mantraBits[2]));
-    memcpy(gameState->profileRecords[2], gameState->profileRecords[1], sizeof(gameState->profileRecords[2]));
+    memcpy(gameState->profileBanks[2].records, gameState->profileBanks[1].records, sizeof(gameState->profileBanks[2].records));
     func_00286618();
     entry->itemId = 0;
 }
@@ -759,7 +759,7 @@ void func_0011B9A0(DatPartyRecord *entry, s32 initFlags) {
     }
     gameState = datGameState;
     memcpy(&gameState->mantraBits[3], &gameState->mantraBits[7], sizeof(gameState->mantraBits[3]));
-    memcpy(gameState->profileRecords[3], gameState->profileRecords[7], sizeof(gameState->profileRecords[3]));
+    memcpy(gameState->profileBanks[3].records, gameState->profileBanks[7].records, sizeof(gameState->profileBanks[3].records));
     func_002866C8();
     if (!(initFlags & 2)) {
         func_003140C8(1, entry);
