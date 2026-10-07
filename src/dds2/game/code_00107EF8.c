@@ -491,9 +491,70 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108EC0);
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109028);
 
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
-INCLUDE_ASM(const s32, "game/code_00107EF8", evtSubmitGradientRectAtDepth);
+void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
+    s32 coords[8];
+    s32 command;
+    s32 packet;
+    u64 *dst;
+    s32 i;
+    s32 *pos;
+    SdfPoolNode *descriptor;
 
-extern void evtSubmitGradientRectAtDepth();
+    u32 r0 = color0 & 0xFF;
+    u32 g0 = (color0 >> 8) & 0xFF;
+    u32 b0 = (color0 >> 16) & 0xFF;
+    u32 a0 = (u32)color0 >> 24;
+    u32 r1 = color1 & 0xFF;
+    u32 g1 = (color1 >> 8) & 0xFF;
+    u32 b1 = (color1 >> 16) & 0xFF;
+    u32 a1 = (u32)color1 >> 24;
+    u32 r2 = color2 & 0xFF;
+    u32 g2 = (color2 >> 8) & 0xFF;
+    u32 b2 = (color2 >> 16) & 0xFF;
+    u32 a2 = (u32)color2 >> 24;
+    u32 r3 = color3 & 0xFF;
+    u32 g3 = (color3 >> 8) & 0xFF;
+    u32 b3 = (color3 >> 16) & 0xFF;
+    u32 a3 = (u32)color3 >> 24;
+
+    coords[0] = x * 16;
+    coords[1] = y * 8;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 8;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 8;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 8;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    for (i = 0, pos = coords; i < 4; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        } else {
+            dst[0] = (u64)r3 | ((u64)g3 << 32);
+            dst[1] = (u64)b3 | ((u64)a3 << 32);
+        }
+        dst += 2;
+        dst[1] = depth;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) |
+            ((u64)(pos[1] + 0x7900) << 32);
+        dst += 2;
+        pos += 2;
+    }
+    sdfAppendPacket((SdfListHead *)command, packet);
+    descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
+}
 
 /* Submit the four-corner gradient rectangle with the native default depth.
    The inserted 0xFFFFFF is depth, not a white color. */
