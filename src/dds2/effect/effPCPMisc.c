@@ -3240,8 +3240,8 @@ extern f32 func_00208000(u32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern f32 sdfAtan2(f32 y, f32 x);
-extern void effSetNodeParameterValue(s32 node, u32 color);
-extern void effUpdateNode(s32 node);
+extern void effSetNodeParameterValue(struct EffNode *node, u32 value);
+extern void effUpdateNode(struct EffNode *node);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */
@@ -3297,8 +3297,8 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         } else {
             t = 1.0f;
         }
-        effSetNodeParameterValue(node, effBlendColor(work->color & 0xFFFFFF, work->color, t));
-        effUpdateNode(node);
+        effSetNodeParameterValue((struct EffNode *)node, effBlendColor(work->color & 0xFFFFFF, work->color, t));
+        effUpdateNode((struct EffNode *)node);
     }
     work->frame++;
 }
