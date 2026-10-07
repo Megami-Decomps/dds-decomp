@@ -258,7 +258,7 @@ typedef struct EffWork {
     u8 unk28[0xC];
     struct EffWork *prev; /* Previous node in the file-resource chain (+0x34). */
     void *next;
-    u32 textureHandle; /* Retained texture reference. */
+    SdfTex *textureHandle; /* Retained texture reference. */
 } EffWork;
 
 /* Effect callback dispatch entry (0x18); DDS1/2 game/code_0018CAC8/00194700.c. */
