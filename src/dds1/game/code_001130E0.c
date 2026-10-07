@@ -506,8 +506,10 @@ attach_transition:
     }
 }
 
-u32 effObjGetDataHandle(EffectObject *obj) {
-    return obj->data->handle;
+ObjBase *effObjGetDataHandle(EffWorldNode *object) {
+    EffectTransformData *data = object->data;
+
+    return data->resourceState;
 }
 
 typedef struct WorldSubState {

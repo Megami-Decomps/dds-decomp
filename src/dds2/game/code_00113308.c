@@ -522,8 +522,10 @@ attach_transition:
     }
 }
 
-u32 effObjGetDataHandle(EffectObject *object) {
-    return object->data->handle;
+ObjBase *effObjGetDataHandle(EffWorldNode *object) {
+    EffectTransformData *data = object->data;
+
+    return data->resourceState;
 }
 
 extern WorldObj *dds3AppendWorldObjectNode();

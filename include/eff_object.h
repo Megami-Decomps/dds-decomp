@@ -38,4 +38,5 @@ typedef char EffectTransformData_size_must_be_0x30[(sizeof(EffectTransformData) 
 typedef char EffectTransformData_position_at_0x20[((u32)&((EffectTransformData *)0)->position == 0x20) ? 1 : -1];
 
 ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
+ObjBase *effObjGetDataHandle(EffWorldNode *object);
 #endif
