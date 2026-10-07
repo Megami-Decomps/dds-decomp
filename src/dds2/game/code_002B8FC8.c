@@ -508,7 +508,7 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback);
 
 void mnuDrawSlotIcons(s32 x, s32 context);
 
-void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles);
+void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
 
