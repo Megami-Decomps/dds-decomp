@@ -5977,7 +5977,7 @@ typedef struct {
 typedef struct {
     EffPCPEventParamHead params;
     EffPCPMapEventEntry *entries;
-    u32 entriesHandle;
+    SdfMemBlock *entriesHandle;
     EffPCPEventOwner *owner;
     u32 modelResource;
     f32 scale;
@@ -6013,8 +6013,8 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     work->frameLimit = model->motion->frameCount;
     count = sdfCountMapPositionRecords(model->inner);
     work->count = count;
-    work->entriesHandle = (u32)sdfAllocGeneralBlock(count << 5);
-    entry = sdfResourceRetainAddress((void *)work->entriesHandle);
+    work->entriesHandle = sdfAllocGeneralBlock(count << 5);
+    entry = sdfResourceRetainAddress(work->entriesHandle);
     work->entries = entry;
     place.pos[0] = 0;
     place.pos[1] = 0;
