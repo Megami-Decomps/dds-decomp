@@ -158,6 +158,10 @@ typedef struct FldAreaWork {
     f32 overrideAngle; /* Queued angle copied to targetAngle by the C consumer. */
 } FldAreaWork;
 extern FldCamRow fldCameraFollowRows[];
+extern f32 D_00330630[];
+extern s32 D_003BAD24;
+extern s32 D_003BAD28;
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern f32 D_00330650[];
 extern f32 D_00330660[];
 extern f32 sdfSinPoly(f32);
@@ -272,13 +276,14 @@ extern void func_00132FD0(u32 arg0, s32 arg1);
 extern s32 strcmp(const char *a, const char *b);
 extern f32 D_003BAD20;
 extern char fldEncounterTaskName[];
-extern u8 D_003C9230[];
+extern f32 D_003C9230[];
 extern f32 D_003C9220[];
 extern s32 fldEncProc(void);
 extern void fldResetEncounterAsyncState(void);
 extern s32 func_00213808(void);
 extern void btlClearRuntimeState(void);
-extern void dds3TransformCameraVectorsByInnerRotation(s64 arg0, void *arg1, void *arg2);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
+                                                      f32 *targetPositionOut);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern u32 fldAreaLoadRequest;
@@ -2512,7 +2517,32 @@ void fldUpdateCameraProjectionEndpoints(void) {
     D_00330660[3] = 1.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012D3D8);
+void func_0012D3D8(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } nearPoint, farPoint;
+    s32 *world = fldGetPlayerSceneStateAddress();
+    f32 ratio = (f32)D_003BAD24 / (f32)D_003BAD28;
+    f32 remaining = 1.0f - ratio;
+    EffWorldNode *node;
+
+    nearPoint.f[0] = D_00330650[0] * ratio + D_00330630[0] * remaining;
+    nearPoint.f[1] = D_00330650[1] * ratio + D_00330630[1] * remaining;
+    nearPoint.f[2] = D_00330650[2] * ratio + D_00330630[2] * remaining;
+    farPoint.f[0] = D_00330660[0] * ratio + D_00330660[0] * remaining;
+    farPoint.f[1] = D_00330660[1] * ratio + D_00330660[1] * remaining;
+    farPoint.f[2] = D_00330660[2] * ratio + D_00330660[2] * remaining;
+    PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
+    PCP_COPY_VECTOR(fldLookAtFarPoint, &farPoint);
+    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, &farPoint.q);
+    node = (EffWorldNode *)(u32)*world;
+    node->ops->update(node);
+    D_003BAD24++;
+    if (D_003BAD28 < D_003BAD24) {
+        ((FldAreaWork *)fldAreaState)->mode = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012D528);
 
@@ -2537,7 +2567,7 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
-    dds3TransformCameraVectorsByInnerRotation((s32)dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230,
+    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230,
                                               D_003C9220);
     D_003BAD20 = 0;
 }
@@ -2828,7 +2858,7 @@ void fldUpdateCameraTarget(void) {
             vec.f[0] = st->targetX;
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
-            effObjSetInnerFirstVec(fldPlayerObject, vec.f);
+            effObjSetInnerFirstVec((EffWorldNode *)fldPlayerObject, &vec.q);
             st->positionPending = 0;
             effObjFetchInnerFirstVec(fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
@@ -5223,7 +5253,7 @@ void fldReleaseActorTasksById(s32 id) {
 }
 
 extern s32 func_003003F0(const char *, ...);
-extern void evtSetObjectTransitionWork(void *, u32);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Advance an actor slot's first/second interpolation (ease-weighted for 40-frame moves) or start its door
  * transition, returning the current values for the key. */
@@ -5292,7 +5322,7 @@ s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z) {
                 node = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), key, 6);
                 if (node != NULL) {
                     func_003003F0("DOOR SISETU FADE 6\n");
-                    evtSetObjectTransitionWork(node, 9);
+                    dds3SetObjectPayloadWord8(node, 9);
                 }
             }
             row->transitionFrame++;

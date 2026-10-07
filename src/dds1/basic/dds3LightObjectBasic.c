@@ -1,41 +1,21 @@
-#include "common.h"
+#include "eff_light.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-typedef struct {
-    f32 unk0[4];
-    u8 pad10[0x30];
-    f32 unk40[4];
-    u8 pad50[0x14];
-    s32 unk64;
-    s32 unk68;
-    s32 unk6C;
-    u16 unk70;
-    u16 unk72;
-    s32 resource;
-    void *buffer;
-} LightData;
-
-typedef struct {
-    u8 pad[0x18];
-    LightData *data;
-} LightObject;
-
-
-void effObjFreeInner(void *arg);
-void dds3DestroyObjectBase(s32 arg);
+void effObjFreeInner(EffWorldNode *object);
+void dds3DestroyObjectBase(ObjBase *object);
 void sdfReleaseChipBlock(void *arg);
 void *memset(void *s, s32 c, u32 n);
 extern void *D_00324770[];
 extern void *kwlnDefaultColorVector[];
 
 /* Releases the light's buffer and resource before freeing the object itself. */
-void lightReleaseObject(LightObject *light) {
-    LightData *data;
+void lightReleaseObject(EffWorldNode *light) {
+    EffLightData *data;
 
     data = light->data;
     sdfReleaseChipBlock(data->buffer);
-    dds3DestroyObjectBase(data->resource);
+    dds3DestroyObjectBase(data->resourceState);
     sdfReleaseChipBlock(light->data);
     light->data = NULL;
     effObjFreeInner(light);

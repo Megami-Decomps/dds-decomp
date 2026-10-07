@@ -43,10 +43,11 @@ typedef struct BtlRuntimeTask {
     u8 pad68[8];
 } BtlRuntimeTask;
 
-/* Eight-byte ability parameter rows; only the leading coefficient is decoded. */
+/* Eight-byte ability parameter rows: coefficient and two integer parameters. */
 typedef struct BtlAbilityParameter {
     f32 value;
-    u8 unk04[4];
+    u16 parameterA; /* 0x04: base item-find chance for skill 0x27B. */
+    s16 parameterB; /* 0x06: additional item-find chance, signed when scaled. */
 } BtlAbilityParameter;
 
 #ifdef VERSION_DDS2

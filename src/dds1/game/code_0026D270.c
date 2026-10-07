@@ -8,7 +8,43 @@ extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u32 func_0026BED0(void);
 
-INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D270);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern f32 sdfSinPoly(f32);
+
+void func_0026D270(void) {
+    f32 factor;
+    f32 alpha;
+
+    switch (mnuMovieMenuState->unk34) {
+    case 0:
+        if (mnuMovieMenuState->cursor < 10) {
+            factor = mnuMovieMenuState->cursor / 10.0f;
+            alpha = sdfSinPoly(factor * 1.5707963f) * 128.0f;
+        } else {
+            factor = (30 - mnuMovieMenuState->cursor) / 20.0f;
+            alpha = factor * 64.0f + 48.0f;
+        }
+        mnuDrawSprite(0, 0, 0, (s32)alpha, 0, 6, 0x53);
+        if (mnuMovieMenuState->cursor < 5) {
+            factor = 0.0f;
+        } else if (mnuMovieMenuState->cursor < 10) {
+            factor = (mnuMovieMenuState->cursor - 5) / 5.0f;
+            factor = sdfSinPoly(factor * 1.5707963f);
+        } else {
+            factor = (30 - mnuMovieMenuState->cursor) / 20.0f;
+        }
+        mnuDrawSprite(0, 0, 0, (s32)(factor * 128.0f), 0, 6, 0x53);
+        return;
+    case 1:
+    case 2:
+        factor = mnuMovieMenuState->cursor / 90.0f;
+        factor = sdfSinPoly(factor * 6.2831852f - 1.5707963f);
+        factor = (factor + 1.0f) * 0.5f;
+        mnuDrawSprite(0, 0, 0, (s32)(factor * 64.0f + 48.0f), 0, 6, 0x53);
+        break;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D480);
 
@@ -59,8 +95,6 @@ void mnuTitleResetSequenceTimers(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D660);
 
-extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
-extern f32 sdfSinPoly(f32);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 void func_0026D808(void) {

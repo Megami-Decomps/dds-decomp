@@ -117,7 +117,8 @@ extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern s32 D_00438944;
-extern void dds3SetCameraVector(s32 object, void *vector);
+struct EffWorldNode;
+extern void dds3SetCameraVector(struct EffWorldNode *camera, void *vector);
 extern void effObjSetInnerFirstVec(void *node, u128 *vector);
 
 /* Reload the camera vectors, invoke its update callback, then restore both copies
@@ -127,7 +128,7 @@ void func_0031B188(void) {
     void (*updateCamera)(void *);
     u8 *cameraData;
 
-    dds3SetCameraVector(D_00438944, D_0040ABD0);
+    dds3SetCameraVector((struct EffWorldNode *)D_00438944, D_0040ABD0);
     effObjSetInnerFirstVec((void *)D_00438944, (u128 *)D_0040ABC0);
     cameraObject = (u8 *)D_00438944;
     updateCamera = *(void (**)(void *))(*(u8 **)(cameraObject + 0x10) + 8);

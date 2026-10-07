@@ -10,9 +10,9 @@ extern void sdfReleaseChipBlock(void *block);
 extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
-extern void effObjSetInnerFirstVec(EffWorldNode *obj, void *vec);
-extern void effObjSetInnerSecondVec(EffWorldNode *obj, void *vec);
-extern void effObjInnerVecBackup(s32 inner);
+extern void effObjSetInnerFirstVec(EffWorldNode *obj, u128 *vec);
+extern void effObjSetInnerSecondVec(EffWorldNode *obj, u128 *vec);
+extern void effObjInnerVecBackup(ObjectTransform *inner);
 extern void dds3RebuildCameraBasis(EffWorldNode *obj);
 extern u8 D_0039F6F8[];
 extern u8 D_0039F708[];
@@ -22,8 +22,8 @@ typedef struct {
 } CameraVector;
 extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
 extern void *dds3GetWorldSecondaryObject(void);
-extern s32 effObjTestNodeFlags(void *node, s32 flags);
-extern void effObjClearNodeFlags(void *node, s32 flags);
+extern u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
+extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void func_00106488(f32 value);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
@@ -51,7 +51,7 @@ s32 dds3UpdateCameraObject(EffWorldNode *camera) {
     if (effObjTestNodeFlags(inner, 1) == 1) {
         effObjClearNodeFlags(inner, 1);
         dds3RebuildCameraBasis(camera);
-        effObjInnerVecBackup((s32)inner);
+        effObjInnerVecBackup(inner);
     }
     if (dds3GetWorldCameraObject(dds3GetWorldSecondaryObject()) == camera) {
         PCP_COPY_VECTOR(sdfViewTargetVector, &inner->position);
@@ -126,7 +126,7 @@ EffWorldNode *dds3CreateCameraObject(s32 counter, void *targetPosition, void *ro
     data->fieldOfView = 0.6283185f;
     effObjSetInnerSecondVec(camera, rotation);
     effObjSetInnerFirstVec(camera, targetPosition);
-    effObjInnerVecBackup((s32)camera->inner);
+    effObjInnerVecBackup(camera->inner);
     PCP_COPY_VECTOR(&data->localUp, &initialUp);
     PCP_COPY_VECTOR(&data->localEyeOffset, &initialEyeOffset);
     dds3RebuildCameraBasis(camera);
@@ -141,7 +141,7 @@ EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, 
     data->fieldOfView = 0.6283185f;
     data->eyeIsRelative = 0;
     effObjSetInnerFirstVec(obj, targetPosition);
-    effObjInnerVecBackup((s32)obj->inner);
+    effObjInnerVecBackup(obj->inner);
     PCP_COPY_VECTOR(&data->localUp, localUp);
     PCP_COPY_VECTOR(&data->worldEye, worldEye);
     dds3RebuildCameraBasis(obj);
@@ -157,7 +157,7 @@ EffWorldNode *dds3CreateCameraObjectWithVectors(s32 slotValue, f32 fieldOfView, 
     data->fieldOfView = fieldOfView;
     data->eyeIsRelative = eyeIsRelative;
     effObjSetInnerFirstVec(obj, targetPosition);
-    effObjInnerVecBackup((s32)obj->inner);
+    effObjInnerVecBackup(obj->inner);
     PCP_COPY_VECTOR(&data->localUp, localUp);
     PCP_COPY_VECTOR(&data->localEyeOffset, eyeVector);
     if (eyeIsRelative == 0) {
@@ -177,13 +177,13 @@ void dds3LoadObjectMatrixPointerIntoVu(void *obj) {
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */
-void dds3SetCameraVector(void *obj, void *src) {
-    PCP_COPY_VECTOR(&((CameraData *)((EffWorldNode *)obj)->data)->worldEye, src);
+void dds3SetCameraVector(EffWorldNode *camera, void *src) {
+    PCP_COPY_VECTOR(&((CameraData *)camera->data)->worldEye, src);
 }
 
 /* Return the camera's world-space eye vector in vf10. */
-void dds3LoadCameraVectorVU(void *camera) {
-    u8 *eye = (u8 *)&((CameraData *)((EffWorldNode *)camera)->data)->worldEye;
+void dds3LoadCameraVectorVU(EffWorldNode *camera) {
+    u8 *eye = (u8 *)&((CameraData *)camera->data)->worldEye;
 
     VU0_LOAD_VF_MEMORY(vf10, eye);
 }

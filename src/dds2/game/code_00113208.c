@@ -4,23 +4,23 @@
 
 
 
-extern EffWorldNode *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
-extern void dds3EnsureSlotData();
+extern void dds3EnsureSlotData(void *object);
 
-extern void effObjSetInnerFirstVec();
+extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
 
-extern void effObjSetInnerSecondVec();
+extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
 
-extern void effObjInnerVecBackup();
+extern void effObjInnerVecBackup(ObjectTransform *node);
 
 extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
 
-extern void dds3ExchangeSlot();
+extern void *dds3ExchangeSlot(void *object, void *slotData, s32 slotIndex);
 
-extern void dds3RegisterObjectInHandlerIndex();
+extern s32 dds3RegisterObjectInHandlerIndex(void *object);
 
-u32 dds3GetCameraMode(EffWorldNode *object) {
+s32 dds3GetCameraMode(EffWorldNode *object) {
     return ((CameraData *)object->data)->eyeIsRelative;
 }
 
@@ -30,7 +30,7 @@ void dds3SetCameraMode(EffWorldNode *object, s32 value) {
     }
 }
 
-ObjBase *func_00113230(EffWorldNode *object) {
+ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object) {
     return ((EffectObjectData *)object->data)->modelHolder;
 }
 

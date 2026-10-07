@@ -1503,7 +1503,59 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00345488);
+extern u32 D_00438D04;
+
+/* Advance playback cadence, refill active feeds and retry a deferred IPU input. */
+void func_00345488(s32 cadence) {
+    SdfStreamFrameNode *node = (SdfStreamFrameNode *)D_00439204;
+    s32 elapsed;
+    s32 interruptsEnabled;
+
+    if (node != NULL && node->pad12 != 0) {
+        sdfSoundStartIpuInputDma(node);
+    }
+    node = sdfSoundNodeHead;
+    while (node != NULL) {
+        if (node->unk13 != 0) {
+            node->unk13--;
+        }
+        elapsed = node->pad17;
+        /* The playback provider views the same 0x8C stream allocation. */
+        switch (node->firstStop) {
+        case 1:
+            sdfSubmitBufferedPlayback((MidiPlaybackState *)node);
+            node->firstStop = 2;
+            node->pad17 = node->playbackMode;
+            break;
+        case 2:
+            if (D_00438D04 != 1) {
+                elapsed += node->playbackMode;
+                if (elapsed >= cadence) {
+                    if (sdfSubmitBufferedPlayback((MidiPlaybackState *)node) != 0) {
+                        elapsed -= cadence;
+                    }
+                }
+                node->pad17 = elapsed;
+            }
+            break;
+        }
+        if (node->active == 1) {
+            sdfStreamInitializeFromHeader(node);
+            if (D_00438D04 != 1) {
+                if (node->filledSlots < SDF_STREAM_RING_SLOTS) {
+                    interruptsEnabled = func_0036DE70();
+                    sndFillStreamFeedRing(node);
+                    if (interruptsEnabled != 0) {
+                        EIntr();
+                    }
+                }
+                node->read(node, node->source, 2, NULL, 0);
+            }
+        }
+        node = node->next;
+    }
+    func_003450D8(0);
+}
 
 void sdfSoundInitAndAppendNode(u8 *state, s32 format, s32 source, s32 size, s32 resource) {
     sdfStreamOpen(state, format, source, size);

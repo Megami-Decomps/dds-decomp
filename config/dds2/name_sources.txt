@@ -256,6 +256,9 @@
 0x0010FCA8	dds3AdvanceWorldCounter	inferred	Increments the world-side counter while restricting it to the low sixteen bits.
 0x0010FCC0	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
 0x0010FCD0	dds3GetWorldNodeValue	inferred	Returns the kind-selected u32 value at EffWorldNode +0x08, or zero for a null node.
+0x0010FD58	dds3DestroyWorldObjectEntry	inferred	Paired body releases the entry's world-node and index-node lists, optional resource, and 0x28-byte entry allocation; a null entry is a no-op.
+0x0010FDF0	dds3DispatchWorldEntryUpdateCallback	inferred	Paired body calls the retained callback target's EffWorldOps.update through dds3InvokeWorldCallbackFirst; return value is ignored and this helper returns 1.
+0x0010FE20	dds3DispatchWorldEntryDrawCallback	inferred	Paired body calls the retained callback target's EffWorldOps.draw through dds3InvokeWorldCallbackSecond; return value is ignored and this helper returns 1.
 0x0010FF58	dds3DestroyWorld	inferred	Releases the global world object and clears its pointer, matching DDS1 dds3DestroyWorld.
 0x0010FF88	dds3SetWorldObject	inferred	Stores the primary object in world info; identical role to DDS1 dds3SetWorldObject.
 0x0010FFA8	dds3GetWorldObject	inferred	Returns the primary object in world info; identical role to DDS1 dds3GetWorldObject.
@@ -264,7 +267,9 @@
 0x00110008	dds3AppendWorldNode	inferred	Appends a node to the global world's doubly linked list; identical role to DDS1 dds3AppendWorldNode.
 0x001100F0	dds3AppendWorldIndexNode	inferred	Allocates and initializes a 16-byte NodeB, appends it to WorldInfo's index-node chain, and initializes it with the requested index.
 0x001101A8	dds3DestroyWorldIndexNode	inferred	Unlinks the supplied index node from the world's doubly linked list and frees it.
-0x00110408	dds3ProcessMatchingWorldNodes	inferred	Starts a world-node iteration and invokes the node processor for each matching target until none remain or one match is processed.
+0x00110240	dds3RemoveCurrentWorldValueEntry	inferred	confidence=high; matched-C; src/dds2/basic/dds3WorldBasic.c:dds3RemoveMatchingWorldValueEntries; Removes the current cursor-selected entry from the world value list and repairs neighboring and free-list links. twin=0x00110018.
+0x00110348	dds3ReleaseWorldValueEntries	inferred	confidence=high; matched-C; src/dds2/basic/dds3WorldBasic.c:dds3DestroyWorldIndexNode; Releases every value entry owned by the index node, restores the pool links, and clears its cursor/count. twin=0x00110120.
+0x00110408	dds3RemoveMatchingWorldValueEntries	inferred	confidence=high; matched-C; src/dds2/basic/dds3WorldBasic.c:dds3RemoveMatchingWorldValueEntries; Searches the indexed value chain and removes the first match, or all matches when requested; returns whether any entry was removed. twin=0x001101E0.
 0x00110498	dds3SeekWorldNode	inferred	Advances a world-node iterator until its current node is the requested target or iteration ends.
 0x001104F0	dds3GrowWorldValueChain	inferred	High: removes requested entries from the global free chain and appends them to the object's indexed value chain; DDS1 twin 0x001102C8. [names_reviewed23.tsv]
 0x00110628	dds3GetWorldValueCount	inferred	High: returns the object's indexed-entry count, or zero for a null object; DDS1 twin 0x00110400. [names_reviewed23.tsv]
@@ -331,7 +336,7 @@
 0x00112978	dds3EnsureSlotData	inferred	Creates and attaches slot-one data only when the object has no existing slot-one entry.
 0x00112AB0	dds3GetObjectOwnedHandle	inferred	DDS2 twin of DDS1 0x00112888 (same subtype byte, same six getters) [names_L13_FinishUnits.tsv]
 0x00112B58	dds3SetOwnedWorldInnerValue	inferred	Stores a value in the owned inner world-object state. [names_reviewed10.tsv]
-0x00112B80	dds3CreateWorldInnerState	inferred	Allocates 0x90-byte inner state, stores owner handle and initializes flags.
+0x00112B80	dds3CreateCameraData	inferred	Camera kind-4 creation callback: creates the node transform, allocates CameraData, attaches its ObjBase handle and clears the pending-FOV flag.
 0x00112BE0	dds3DestroyCameraData	inferred	Releases the nested camera handle and data; mirrors DDS1 dds3DestroyCameraData.
 0x00112C20	dds3UpdateCameraObject	inferred	Updates a changed camera transform, publishes the selected camera vectors, and applies a pending field-of-view change.
 0x00112D10	dds3RebuildCameraBasis	inferred	Transforms the camera eye and up vectors through its inner node and rebuilds the look-at basis.
@@ -346,6 +351,7 @@
 0x001130E8	dds3SetCameraFieldOfView	inferred	Stores the camera field of view in radians and marks it for publication by the camera update callback.
 0x00113100	dds3GetCameraFieldOfView	inferred	Returns the camera field of view in radians.
 0x00113110	dds3TransformCameraVectorsByInnerRotation	inferred	confidence=high; matched-C; src/dds2/basic/dds3CameraObjectBasic.c:161:func_00113110; Transforms camera directions with inner quaternion rotation and optional rotated/translated position.; twin=0x00112EE8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00113230	dds3GetEffectObjectModelHolder	inferred	Returns the kind-5 EffectObjectData.modelHolder base at offset 0x0C; paired with DDS1 0x00113008.
 0x001132F0	ddsReleaseUnitObject	inferred	src/dds2/basic/dds3UnitObjectBasic.c:func_001132F0; Unit-object cleanup entry called when clearing field object handles; delegates world-node removal without adding state. Registration: fldClearObjectEntryHandles. [names_qp9.tsv]
 0x00113308	dds3GetEffectDataHandle	inferred	confidence=high; src/dds2/game/code_00113308.c:func_00113308; Returns the handle field from the effect object data. [names_qp9.tsv]
 0x00113318	effObjGetTransitionWork	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:82:func_00113318; Returns the effect object data transitionWork pointer.; source=revalidated-unapplied-names_R_Names31.tsv:3 [names_qp12_apply.tsv]
@@ -358,8 +364,8 @@
 0x00113CD0	evtEndObjectValueTransition	inferred	Ends the object value transition and clears its active identifier. [names_reviewed8.tsv]
 0x00113F00	effObjGetDataHandle	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:396:func_00113F00; Returns the handle word in the effect object data record, not the world-object pointer or transition-work pointer.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00113FE8	effObjSetModelHolder	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:434:func_00113FE8; Stores the supplied pointer in the effect object modelHolder member.; source=revalidated-unapplied-names_R_Names31.tsv:4 [names_qp12_apply.tsv]
-0x00114048	evtSetObjectTransitionWork	inferred	Sequel twin of first-game event object transition work setter; writes same object-data member. [names_reviewed18.tsv]
-0x00114058	evtGetObjectTransitionWork	inferred	Sequel twin of first-game event object transition work getter; reads same object-data member. [names_reviewed18.tsv]
+0x00114048	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
+0x00114058	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.
 0x00114070	effObjInitializeTransformData	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:463:func_00114070; Creates inner transform and transform-data allocation, clears it, creates resource state and initializes homogeneous offset/position vectors plus object flags 0xE2.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00114110	evtReleaseEffectObjectHandleAndData	inferred	Frees the effect-object inner state, resource handle and allocated data. [names_reviewed10.tsv]
 0x00114428	effObjSubmitTransformOpacityPasses	inferred	U1
@@ -5190,9 +5196,12 @@
 0x002F5BC8	effResolveRequestPositionIntoVu	inferred	Selects a resource by vector request, queries its position and loads it into VU0. [names_reviewed14.tsv]
 0x002F5D70	effCollectModelEffectActors	inferred	Selects model-bearing actors by kind and active flags from the actor linked list. [names_reviewed5.tsv]
 0x002F6450	effSyncLinkedActorChildParameter	inferred	For flagged linked actors copies source parameter to child and updates child with that value. [names_reviewed5.tsv]
+0x002F69B0	effResetCopiedPayloadTargets	inferred	zeros state and flags on each non-null path target in the copied payload
 0x002F69F0	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
-0x002F6BE8	effCreateRelocatedEffectPayload	inferred	Copies effect payload, relocates its packed transfer data and initializes its work. [names_reviewed5.tsv]
+0x002F6A80	effInitializeCopiedPayloadSlots	inferred	Walks payload descriptors, creates each child effect and path target, stores paired slots, clears unused slots, then records the populated count and selected target index.
+0x002F6BE8	effCreateAndInitializeCopiedPayload	inferred	Allocates copied payload storage, relocates its packed transfer data, then invokes the initializer; the matched DDS1 helper performs the same sequence.
 0x002F6C30	effCloneEffectPayloadFromOwner	inferred	Copies a payload read from owner record into a reference-backed work and initializes it. [names_reviewed5.tsv]
+0x002F6C70	effDestroyCopiedEffectPayload	inferred	releases the five retained path targets and world nodes before freeing the copied payload allocation
 0x002F7128	effApplySelectedActorEffects	inferred	confidence=high; src/dds2/game/code_002DE248.c:func_002F7128; Collects selected model actors and applies eligible indexed effects with a unit scale, respecting hold/actor flags and looping. [names_qp9.tsv]
 0x002F72D8	effApplyBattleStateTint	inferred	Medium: passes the selected battle state's stored vectors to the same immediate transition callee used for RGB tint, gated by both bits of 0x06000000. [names_qp9.tsv]
 0x002F7320	effStartTintTransitionFromColors	inferred	At frame 0 unpacks two packed RGB words from the effect record into float triples (/255) and starts a tint transition over the given duration [names_M80_EffLarge.tsv]

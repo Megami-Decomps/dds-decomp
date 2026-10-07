@@ -379,7 +379,9 @@
 0x0010FA98	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
 0x0010FAA8	dds3GetWorldNodeValue	inferred	Returns the kind-selected u32 value at EffWorldNode +0x08, or zero for a null node.
 0x0010FAC0	dds3AllocateWorldObjectEntry	inferred	confidence=high; src/dds1/game/code_0010F8D8.c:func_0010FAC0; Allocates and initializes the object entry, including negative counter sentinels, and reports allocation success. [names_qp9.tsv]
-0x0010FBF8	dds3DispatchWorldEntryCallbackTarget	inferred	confidence=high; src/dds1/game/code_0010F8D8.c:func_0010FBF8; Passes the world entry callback target to its dispatcher only when the target word is nonzero. [names_qp9.tsv]
+0x0010FB30	dds3DestroyWorldObjectEntry	inferred	Releases the entry's world-node and index-node lists, optional resource, and 0x28-byte entry allocation; a null entry is a no-op.
+0x0010FBC8	dds3DispatchWorldEntryUpdateCallback	inferred	Calls the retained callback target's EffWorldOps.update through dds3InvokeWorldCallbackFirst; return value is ignored and this helper returns 1.
+0x0010FBF8	dds3DispatchWorldEntryDrawCallback	inferred	Calls the retained callback target's EffWorldOps.draw through dds3InvokeWorldCallbackSecond; return value is ignored and this helper returns 1.
 0x0010FD30	dds3DestroyWorld	inferred	Destroys the global world object and clears its global pointer.
 0x0010FD60	dds3SetWorldObject	inferred	Stores a supplied object in the world's info offset 0x8 when a world exists.
 0x0010FD80	dds3GetWorldObject	inferred	Returns the world's info offset 0x8 object or null if no world exists.
@@ -389,7 +391,7 @@
 0x0010FE48	dds3DestroyWorldNode	inferred	Clears world references to the supplied node and calls effObjNodeDestroy.
 0x0010FEC8	dds3AppendWorldIndexNode	inferred	Byte-identical dds2 twin 0x001100F0; Allocates and initializes a 16-byte NodeB, appends it to WorldInfo's index-node chain, and initializes it with the requested index. [names_conflicts.tsv]
 0x0010FF80	dds3DestroyWorldIndexNode	inferred	Byte-identical dds2 twin 0x001101A8; Unlinks the supplied index node from the world's doubly linked list and frees it. [names_conflicts.tsv]
-0x001101E0	dds3ProcessMatchingWorldNodes	inferred	Byte-identical dds2 twin 0x00110408; Starts a world-node iteration and invokes the node processor for each matching target until none remain or one match is processed. [names_conflicts.tsv]
+0x001101E0	dds3RemoveMatchingWorldValueEntries	inferred	confidence=high; matched-C; src/dds1/basic/dds3WorldBasic.c:dds3RemoveMatchingWorldValueEntries; Searches the indexed value chain and removes the first match, or all matches when requested; returns whether any entry was removed. twin=0x00110408.
 0x00110270	dds3SeekWorldNode	inferred	Byte-identical dds2 twin 0x00110498; Advances a world-node iterator until its current node is the requested target or iteration ends. [names_conflicts.tsv]
 0x001102C8	dds3GrowWorldValueChain	inferred	High: removes requested entries from the global free chain and appends them to the object's indexed value chain. [names_reviewed23.tsv]
 0x00110400	dds3GetWorldValueCount	inferred	High: returns the object's indexed-entry count, or zero for a null object. [names_reviewed23.tsv]
@@ -424,6 +426,8 @@
 0x00110ED0	dds3FindIndexedObjectChainNodeByName	inferred	confidence=high; src/dds1/game/code_00110DC0.c:func_00110ED0; Walks an indexed object chain, skips null/empty names and compares complete strings for a matching node. CORRECTED: body takes an explicit index argument and searches only that chain; proposed name dropped that and collided in meaning with dds3FindObjectChainNodeByName = 0x00110F80, which loops 0..0x11 over this function. [names_qp9.tsv]
 0x00110F80	dds3FindObjectChainNodeByName	inferred	Searches each world-object chain for a node with the supplied name. [names_reviewed10.tsv]
 0x00110FF0	dds3CreatePairedWorldIndexNodes	inferred	confidence=high; matched-C; src/dds1/game/code_00110DC0.c:135:func_00110FF0; Allocates two pointer slots and fills both with newly appended world index nodes.; source=revalidated-unapplied-names_R_Names31.tsv:1 [names_qp12_apply.tsv]
+0x00110018	dds3RemoveCurrentWorldValueEntry	inferred	confidence=high; matched-C; src/dds1/basic/dds3WorldBasic.c:dds3RemoveMatchingWorldValueEntries; Removes the current cursor-selected entry from the world value list and repairs neighboring and free-list links. twin=0x00110240.
+0x00110120	dds3ReleaseWorldValueEntries	inferred	confidence=high; matched-C; src/dds1/basic/dds3WorldBasic.c:dds3DestroyWorldIndexNode; Releases every value entry owned by the index node, restores the pool links, and clears its cursor/count. twin=0x00110348.
 0x00111050	dds3DestroyObjectPointerChains	inferred	Exchanges object slots, destroys both index nodes and releases pointer storage. [names_reviewed8.tsv]
 0x001110D8	ddsDispatchFirstWorldIndexAreas	inferred	src/dds1/game/code_00110DC0.c:func_001110D8; Traverses the first owned world-index chain and invokes the area callback for each visited value; returns success. Registration: world-index callback record 0x00329A38. [names_qp9.tsv]
 0x00111108	dds3ExchangeAreaSlot	inferred	Exchanges object slot 5 with null and returns success.
@@ -463,7 +467,7 @@
 0x00112868	dds3GetSlot1Data	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112888	dds3GetObjectOwnedHandle	inferred	switch on the object subtype byte at +0x0F dispatches to the six per-type handle getters; returns 0 for other subtypes [names_L13_FinishUnits.tsv]
 0x00112930	dds3SetOwnedWorldInnerValue	inferred	Stores a value in the owned inner world-object state. [names_reviewed10.tsv]
-0x00112958	dds3CreateWorldInnerState	inferred	Allocates 0x90-byte inner state, stores owner handle and initializes flags.
+0x00112958	dds3CreateCameraData	inferred	Camera kind-4 creation callback: creates the node transform, allocates CameraData, attaches its ObjBase handle and clears the pending-FOV flag.
 0x001129B8	dds3DestroyCameraData	inferred	Releases the camera data handle then frees the camera data allocation.
 0x001129F8	dds3UpdateCameraObject	inferred	Updates a changed camera transform, publishes the selected camera vectors, and applies a pending field-of-view change.
 0x00112AE8	dds3RebuildCameraBasis	inferred	Transforms the camera eye and up vectors through its inner node and rebuilds the look-at basis.
@@ -481,6 +485,7 @@
 0x00112EE8	dds3TransformCameraVectorsByInnerRotation	inferred	confidence=high; matched-C; src/dds1/basic/dds3CameraObjectBasic.c:163:func_00112EE8; Transforms camera directions with inner quaternion rotation and optional rotated/translated position.; twin=0x00113110, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00112FE0	dds3GetCameraMode	inferred	Returns camera data's word at offset 0x84, also written by the neighboring setter.
 0x00112FF0	dds3SetCameraMode	inferred	Stores the supplied mode at camera data offset 0x84 only when changed.
+0x00113008	dds3GetEffectObjectModelHolder	inferred	Returns the kind-5 EffectObjectData.modelHolder base at offset 0x0C; paired with DDS2 0x00113230.
 0x00113018	dds3SpawnCameraSlotObj5	inferred	type 5 object; null-checked; falls off end returning obj
 0x001130C8	ddsReleaseUnitObject	inferred	src/dds1/basic/dds3UnitObjectBasic.c:func_001130C8; Unit-object cleanup entry called when clearing field object handles; delegates world-node removal without adding state. Registration: fldClearObjectEntryHandles. [names_qp9.tsv]
 0x001130E0	dds3GetEffectDataHandle	inferred	confidence=high; src/dds1/game/code_001130E0.c:func_001130E0; Returns the handle field from the effect object data. [names_qp9.tsv]
@@ -5561,11 +5566,12 @@
 0x002B2E98	effSyncLinkedActorChildParameter	inferred	For flagged linked actors copies source parameter to child and updates child with that value. [names_reviewed5.tsv]
 0x002B3090	effComputeLightDirectionVU	inferred	normalizes (vec - D_003DCBE0) with vrsqrt, stores D_003DCBA0, calls func_002E1938; returns 0 unless func_001A1438 and D_003BC9AC
 0x002B3130	effResetDefaultColorTables	inferred	eff copies two quadwords from *D_00324770 and one from D_00324780 then clears D_003BC9AC
-0x002B3350	effResetObjectSlots	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B3350	effResetCopiedPayloadTargets	inferred	zeros state and flags on each non-null path target in the copied payload
 0x002B3390	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
-0x002B3588	effCreateInitializedObject	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B3420	effInitializeCopiedPayloadSlots	inferred	Walks payload descriptors, creates each child effect and path target, stores paired slots, clears unused slots, then records the populated count and selected target index.
+0x002B3588	effCreateAndInitializeCopiedPayload	inferred	Allocates copied payload storage, relocates its packed transfer data, then invokes the initializer; the matched DDS2 helper performs the same sequence.
 0x002B35C8	effCloneEffectPayloadFromOwner	inferred	Copies a payload read from owner record into a reference-backed work and initializes it. [names_reviewed5.tsv]
-0x002B3608	effReleaseTargetSlots	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B3608	effDestroyCopiedEffectPayload	inferred	releases the five retained path targets and world nodes before freeing the copied payload allocation
 0x002B3AC0	effApplyOverlaySpecs	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002B3BB8	effReportResourceStatus	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B3C20	effApplyBattleStateTint	inferred	Medium: passes the selected battle state's stored vectors to the same immediate transition callee used for RGB tint, gated by any bit of 0x06000000. [names_qp9.tsv]
@@ -7110,3 +7116,5 @@
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
+0x00113E20	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
+0x00113E30	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.

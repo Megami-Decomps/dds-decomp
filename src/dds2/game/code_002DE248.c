@@ -1,4 +1,6 @@
 #include "common.h"
+#include "dds3_path.h"
+#include "eff_transform.h"
 #include "sdf_model.h"
 #include "eff_blur.h"
 #include "eff_curve.h"
@@ -457,8 +459,6 @@ extern s32 effSharedStripReferenceCount;
 extern u32 effSharedScalyStripResource;
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
-
-extern s32 *effAllocateCopiedEffectPayload(u32, void *, s32);
 
 extern s32 btlGetRuntime(void);
 
@@ -7125,11 +7125,11 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F67D8);
 typedef struct EffCopiedPayload {
     u8 *body;            // 0x00
     s32 size;            // 0x04
-    u32 state;           // 0x08
-    u32 unk0C;
-    u32 effects[5];      // 0x10
-    u32 targets[5];      // 0x24
-    u8 *allocation;      // 0x38
+    u32 slotCount;       // 0x08: populated effect/target pairs
+    u32 selectedTargetIndex; // 0x0C: chosen target path slot
+    EffWorldNode *effects[5]; // 0x10
+    Dds3PathCurveWork *targets[5]; // 0x24
+    SdfMemBlock *allocation; // 0x38
     u8 pad3C[4];
 } EffCopiedPayload;
 
@@ -7140,66 +7140,66 @@ typedef struct EffCopiedPayloadWork {
     u32 parameter;
 } EffCopiedPayloadWork;
 
-void effResetObjectSlots(u8 *work) {
-    u32 *objects = ((EffCopiedPayloadWork *)work)->payload->targets;
+void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
+    Dds3PathCurveWork **objects = work->payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
-        u32 object = objects[i];
+        Dds3PathCurveWork *object = objects[i];
         if (object != 0) {
-            ((EffectObjectFlag *)object)->state = 0;
-            ((EffectObjectFlag *)object)->flags = 0;
+            object->direction = 0;
+            object->time = 0.0f;
         }
     }
 }
 
-s32 *effAllocateCopiedEffectPayload(u32 owner, void *source, s32 size) {
+EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, s32 size) {
     u32 headerSize = 0x40;
-    u8 *base = sdfAllocGeneralBlock(size + headerSize);
+    SdfMemBlock *base = sdfAllocGeneralBlock(size + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
-    u8 *node = body;
+    EffCopiedPayload *node = (EffCopiedPayload *)body;
 
     body += headerSize;
     if (size <= 0) {
         body = 0;
     }
-    ((EffCopiedPayload *)node)->allocation = base;
-    ((EffCopiedPayload *)node)->size = size;
-    ((EffCopiedPayload *)node)->body = body;
-    ((EffCopiedPayload *)node)->state = 0;
+    node->allocation = base;
+    node->size = size;
+    node->body = body;
+    node->slotCount = 0;
     memcpy(body, source, size);
-    return (s32 *)node;
+    return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F6A80);
+INCLUDE_ASM(const s32, "game/code_002DE248", effInitializeCopiedPayloadSlots);
 
 extern void fldRelocatePackedTransferChunk(s32, s32);
 
-extern void func_002F6A80(s32 *);
+extern void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload);
 
-s32 *effCreateRelocatedEffectPayload(u32 owner, u32 unused, void *source, u32 kind) {
-    s32 *work = effAllocateCopiedEffectPayload(owner, source, kind);
-    s32 object = *work;
+EffCopiedPayload *effCreateAndInitializeCopiedPayload(u32 owner, u32 unused, const void *source, s32 size) {
+    EffCopiedPayload *work = effAllocateCopiedEffectPayload(owner, source, size);
+    s32 object = *(s32 *)work;
     fldRelocatePackedTransferChunk(object, object + 8);
-    func_002F6A80(work);
+    effInitializeCopiedPayloadSlots(work);
     return work;
 }
 
-s32 *effCloneEffectPayloadFromOwner(s32 owner) {
-    s32 *work;
+EffCopiedPayload *effCloneEffectPayloadFromOwner(EffCopiedPayloadWork *owner) {
+    EffCopiedPayload *work;
 
-    work = effAllocateCopiedEffectPayload(((EffCopiedPayloadWork *)owner)->parameter, ((EffCopiedPayloadWork *)owner)->payload->body,
-                                                ((EffCopiedPayloadWork *)owner)->payload->size);
-    func_002F6A80(work);
+    work = effAllocateCopiedEffectPayload(owner->parameter, owner->payload->body,
+                                                owner->payload->size);
+    effInitializeCopiedPayloadSlots(work);
     return work;
 }
 
-extern void dds3FreePathObject();
+extern void dds3FreePathObject(Dds3PathCurveWork *path);
 
-extern void dds3RemoveWorldObjectNode();
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
-void effReleaseTargetSlots(u32 *obj) {
-    u32 *tails = ((EffCopiedPayload *)obj)->effects;
-    u32 *heads = ((EffCopiedPayload *)obj)->targets;
+void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
+    EffWorldNode **tails = payload->effects;
+    Dds3PathCurveWork **heads = payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
         if (*heads != 0) {
@@ -7211,7 +7211,7 @@ void effReleaseTargetSlots(u32 *obj) {
         }
         tails++;
     }
-    sdfReleaseResourceAllocation(((EffCopiedPayload *)obj)->allocation);
+    sdfReleaseResourceAllocation(payload->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F6D00);
