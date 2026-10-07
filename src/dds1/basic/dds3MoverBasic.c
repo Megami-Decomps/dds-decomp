@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "pcp_vu0.h"
 
 /* Stack transform node shared with effObjInnerVecInit and its vector modifiers. */
@@ -21,13 +22,8 @@ typedef struct MoverTarget {
 } MoverTarget;
 
 typedef struct {
-    u32 unk00;
-    u32 flags;
-} MoverPath;
-
-typedef struct {
     MoverTarget *target;
-    MoverPath *path;
+    Dds3PathCurveWork *path;
     s32 (*update)(EffLocalNode *, MoverTarget *);
 } MoverWork;
 
@@ -47,12 +43,12 @@ typedef struct {
     f32 fieldOfView;
 } MoverScalarData;
 
-extern void dds3InterpolatePathVectorVU(MoverPath *);
-extern void dds3PreparePathVectorPair(MoverPath *);
-extern f32 sdfSampleActiveLinearCurve(MoverPath *);
-extern void dds3InterpolatePathOutput(MoverPath *, f32 *);
+extern void dds3InterpolatePathVectorVU(Dds3PathCurveWork *);
+extern void dds3PreparePathVectorPair(Dds3PathCurveWork *);
+extern f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *);
+extern void dds3InterpolatePathOutput(Dds3PathCurveWork *, f32 *);
 extern void dds3LoadWorldTransformParams(MoverTarget *, f32 *);
-extern s32 sdfStepWrappingFloatCounter(MoverPath *);
+extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *);
 extern void effObjSetInnerFirstVec(MoverTarget *, void *);
 extern void effObjSetInnerSecondVec(MoverTarget *, void *);
 extern void effObjInnerVecInit(EffLocalNode *);
