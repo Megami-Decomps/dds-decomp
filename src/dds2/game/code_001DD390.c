@@ -4444,8 +4444,8 @@ BtlRuntimeTask *btlCreateCommandSoundTask(s32 actor, s32 mode) {
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0x2A;
-    if (actor != 0 && ((BtlUnit *)actor)->link18 != 0) {
-        task->ownerId = ((BtlUnit *)actor)->link18->owner;
+    if (actor != 0 && ((ActionStateLink *)actor)->unit != 0) {
+        task->ownerId = ((ActionStateLink *)actor)->unit->owner;
     }
     task->callback = btlExecuteCommandSoundTask;
     task->onStart = 0;
@@ -9520,12 +9520,12 @@ void btlRepositionPartyAroundBattleCenter(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00206090);
 
-void btlMoveOtherUnitsAway(BtlUnit *unit) {
+void btlMoveOtherUnitsAway(ActionStateLink *link) {
     f32 pos[4];
     BtlUnit *other = ((BtlState *)btlGetRuntime())->units;
-    u32 mask = unit->link18->flags & 0x600;
+    u32 mask = link->unit->flags & 0x600;
     for (; other != NULL; other = other->nextActor) {
-        if ((other->flags & 1) && (other->flags & mask) && other != unit->link18) {
+        if ((other->flags & 1) && (other->flags & mask) && other != link->unit) {
             btlClearUnitDefeatCandidate(other);
             if ((btlUnitStatusPair(other) & 0x102) == 0x102) {
                 func_001E3108(other, pos);
@@ -9536,9 +9536,9 @@ void btlMoveOtherUnitsAway(BtlUnit *unit) {
             }
         }
     }
-    func_001E3108(unit->link18, pos);
+    func_001E3108(link->unit, pos);
     pos[0] = 0;
-    btlSetUnitPosition(unit->link18, pos);
+    btlSetUnitPosition(link->unit, pos);
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
@@ -9944,12 +9944,12 @@ s32 btlMoveOtherUnitsForCategory(u32 *command) {
         return 1;
     }
     if (category >= 0x5B) {
-        btlMoveOtherUnitsAway((BtlUnit *)command[0]);
+        btlMoveOtherUnitsAway((ActionStateLink *)command[0]);
     }
     return 1;
 }
 
-BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *unit, s32 option, s32 target) {
+BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 option, s32 target) {
     BtlRuntimeTask *task = btlAllocTask(12);
     SoundTaskArgs *args;
     task->startCondition.kind = 1;
@@ -9957,9 +9957,9 @@ BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *unit, s32 option, s32 targe
     task->callback = btlMoveOtherUnitsForCategory;
     task->taskId = 0x64;
     task->onStart = 0;
-    task->ownerId = unit->link18->owner;
+    task->ownerId = link->unit->owner;
     args = btlGetTaskArguments((s32)task);
-    args->actor = unit;
+    args->actor = link;
     args->option = option;
     args->unk_08 = target;
     return task;
@@ -9968,7 +9968,7 @@ BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *unit, s32 option, s32 targe
 INCLUDE_ASM(const s32, "game/code_001DD390", func_002077C0);
 extern s32 func_002077C0(u32 *);
 
-BtlRuntimeTask *btlCreateSoundPlaybackTask(BtlUnit *unit, u32 soundId, u32 variant, u32 channel, u32 flags) {
+BtlRuntimeTask *btlCreateSoundPlaybackTask(ActionStateLink *link, u32 soundId, u32 variant, u32 channel, u32 flags) {
     BtlRuntimeTask *task = btlAllocTask(20);
     SoundTaskArgs *args;
     task->startCondition.kind = 1;
@@ -9976,9 +9976,9 @@ BtlRuntimeTask *btlCreateSoundPlaybackTask(BtlUnit *unit, u32 soundId, u32 varia
     task->callback = func_002077C0;
     task->taskId = 0x65;
     task->onStart = 0;
-    task->ownerId = unit->link18->owner;
+    task->ownerId = link->unit->owner;
     args = btlGetTaskArguments((s32)task);
-    args->actor = unit;
+    args->actor = link;
     args->option = soundId;
     args->unk_08 = variant;
     args->unk_0C = channel;

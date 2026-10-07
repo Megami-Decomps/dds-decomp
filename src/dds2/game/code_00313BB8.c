@@ -9,6 +9,8 @@ extern void memset();
 #include "itf.h"
 #include "dat_state.h"
 
+extern void mdlFlagSet(s32);
+
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
 #define SCR_FLAG_WORD_INDEX_SHIFT 3
@@ -114,7 +116,33 @@ extern u16 D_004052F8[][80];
 
 extern void func_0011CA88(DatPartyRecord *);
 
-extern u32 D_00401328[][9];
+/* Native profile parameter data: 176 complete 0x24-byte records. */
+typedef struct PrfProfileParameters {
+    u32 flags;
+    u8 value04;
+    u8 value05;
+    u16 requiredLevel;
+    u32 capacity;
+    u8 parameters[6];
+    u16 skills[8];
+    u16 reserved22;
+} PrfProfileParameters;
+
+typedef char PrfProfileParametersLayoutCheck[
+    (sizeof(PrfProfileParameters) == 0x24 &&
+     (u32)&((PrfProfileParameters *)0)->flags == 0 &&
+     (u32)&((PrfProfileParameters *)0)->value04 == 4 &&
+     (u32)&((PrfProfileParameters *)0)->value05 == 5 &&
+     (u32)&((PrfProfileParameters *)0)->requiredLevel == 6 &&
+     (u32)&((PrfProfileParameters *)0)->capacity == 8 &&
+     (u32)&((PrfProfileParameters *)0)->parameters == 0xC &&
+     (u32)&((PrfProfileParameters *)0)->skills == 0x12 &&
+     (u32)&((PrfProfileParameters *)0)->reserved22 == 0x22) ? 1 : -1];
+
+extern PrfProfileParameters D_00401320[PRF_PROFILE_COUNT];
+typedef char PrfProfileParametersTableExtentCheck[
+    (sizeof(D_00401320) == 0x18C0) ? 1 : -1];
+
 
 extern s32 func_00314C10(DatPartyRecord *);
 
@@ -134,11 +162,11 @@ extern ScriptFlagSlot D_00404AA8[];
 
 extern u32 scrGetEntryRequirementFlags(u16);
 
-extern u8 D_00401324[];
 
-extern u8 D_00401325[];
 
-extern u16 D_00401326[];
+
+
+
 
 extern u8 D_0045C828[];
 
@@ -152,11 +180,11 @@ typedef struct MantraNodePos {
 
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
-extern u8 D_00401320[][36];
 
-extern u8 D_0040132C[];
 
-extern u16 D_00401332[];
+
+
+
 
 
 extern s32 func_00359A98(const char *, const char *);
@@ -356,7 +384,7 @@ u32 scrGetIndexedRecordAddress(u32 scriptId, s32 *record) {
 
 /* Read the configured capacity for an unchecked profile ID. */
 u32 ptyGetProfileRecordCap(u16 profileId) {
-    return D_00401328[profileId][0];
+    return D_00401320[profileId].capacity;
 }
 
 void ptySetProfileRecordValue(DatPartyRecord *work, u16 scriptId, u32 value) {
@@ -659,22 +687,22 @@ s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId) {
 
 /* Read a byte parameter from the unchecked profile row. */
 u8 func_003151D0(u16 profileId) {
-    return D_00401324[profileId * PRF_PROFILE_PARAM_BYTES];
+    return D_00401320[profileId].value04;
 }
 
 /* Read the threshold used by the profile-level check. */
 u16 prfGetRequiredProfileLevel(u16 profileId) {
-    return D_00401326[profileId * (PRF_PROFILE_PARAM_BYTES / sizeof(D_00401326[0]))];
+    return D_00401320[profileId].requiredLevel;
 }
 
 /* Read a byte parameter from the unchecked profile row. */
 u8 func_00315220(u16 profileId) {
-    return D_00401325[profileId * PRF_PROFILE_PARAM_BYTES];
+    return D_00401320[profileId].value05;
 }
 
 /* Read an unchecked byte offset within the profile parameter row. */
 u32 prfGetIndexedProfileByte(u16 profileId, s32 byteIndex) {
-    return D_0040132C[byteIndex + profileId * PRF_PROFILE_PARAM_BYTES];
+    return D_00401320[profileId].parameters[byteIndex];
 }
 
 /* Read the selected profile's indexed byte when a selection is present.
@@ -692,7 +720,7 @@ u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex) {
     if (skillIndex >= PRF_SKILL_LIST_ENTRY_COUNT) {
         return 0;
     }
-    return D_00401332[profileId * PRF_SKILL_TABLE_STRIDE + skillIndex];
+    return D_00401320[profileId].skills[skillIndex];
 }
 
 u32 func_00315318(void) {
@@ -723,7 +751,7 @@ s32 func_00315388(u16 profile, PrfSkillList *output) {
 
     memset(&list, 0, sizeof(PrfSkillList));
     list.count = 0;
-    skills = &D_00401332[profile * 18];
+    skills = D_00401320[profile].skills;
     for (i = 0; i < 8; i++) {
         skill = *skills++;
         if (skill != 0) {
@@ -753,7 +781,7 @@ s32 prfBuildSkillList(DatPartyRecord *unit, DatProfileRecord *unusedProfile, Prf
     selectedProfileId = unit->profileId;
     compactedList.count = 0;
     if (selectedProfileId != 0) {
-        profileSkillCursor = &D_00401332[selectedProfileId * PRF_SKILL_TABLE_STRIDE];
+        profileSkillCursor = D_00401320[selectedProfileId].skills;
         for (sourceIndex = 0; sourceIndex < PRF_SKILL_LIST_ENTRY_COUNT; sourceIndex++) {
             skillId = *profileSkillCursor++;
             if (skillId != 0) {
@@ -838,7 +866,7 @@ s32 ptyProfileCountAtLeast(DatPartyRecord *unit, PrfRequirementOperand *operand)
 
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
         if (func_00314990(unit, (u16)profileIndex)) {
-            if (D_00401320[profileIndex][5] >= operand->profileThreshold) {
+            if (D_00401320[profileIndex].value05 >= operand->profileThreshold) {
                 matchedCount++;
             }
         }
@@ -957,7 +985,7 @@ s32 func_00315FA0(u32 mode, DatPartyRecord *unit, u16 id) {
 
 /* Read requirement flags for an unchecked profile ID. */
 u32 scrGetEntryRequirementFlags(u16 requirementId) {
-    return *(u32 *)D_00401320[requirementId];
+    return D_00401320[requirementId].flags;
 }
 
 /* Read the rule-state word for an unchecked requirement ID. */
