@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "eff.h"
 #include "mnu.h"
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD5C8);
@@ -204,25 +205,14 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE240);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE438);
 
-typedef struct MenuBlendContext {
-    u8 pad00[0x14];
-    s32 result[4];
-    u8 pad24[0x60];
-    s32 source[4];
-} MenuBlendContext;
-
-typedef struct MenuBlendObject {
-    u8 pad00[0x18];
-    MenuBlendContext *context;
-} MenuBlendObject;
-
-void mnuBlendPanelSlots(MenuBlendObject *dst, MenuBlendObject *src, s32 amount) {
+void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        dst->context->result[i] = uiBlendColors(dst->context->source[i],
-                                             src->context->source[i],
-                                             amount / 2 + 0x80);
+        dst->workEntries->cornerColors[i] = uiBlendColors(
+            dst->workEntries->savedColors[i],
+            src->workEntries->savedColors[i],
+            amount / 2 + 0x80);
     }
 }
 INCLUDE_RODATA(const s32, "game/code_002BD5C8", D_0042B028);
@@ -238,4 +228,3 @@ INCLUDE_SDATA(const s32, "game/code_002BD5C8", D_00437C40);
 INCLUDE_SDATA(const s32, "game/code_002BD5C8", D_00437C48);
 
 INCLUDE_SDATA(const s32, "game/code_002BD5C8", D_00437C50);
-
