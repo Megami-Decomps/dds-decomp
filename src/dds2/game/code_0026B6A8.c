@@ -249,25 +249,6 @@ s32 mnuFirstPresentMainCharacterIndex(void) {
     return 0;
 }
 
-typedef struct DspScrollingStrip {
-    void *resource;
-    s32 frameIndex;
-    s32 horizontalOffset;
-    s32 verticalOffset;
-    s32 scrollSpeed;
-} DspScrollingStrip;
-
-typedef struct DspScrollingStripState {
-    s32 unk0;
-    s32 layout;
-    s32 unk8;
-    void *resource;
-    s32 layer;
-    s32 unk14;
-    s32 unk18;
-    DspScrollingStrip strips[6];
-} DspScrollingStripState;
-
 s32 func_0026BD38(s32 index) {
     return index == 1 ? 4 : 6;
 }
