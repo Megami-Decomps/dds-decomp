@@ -6824,7 +6824,8 @@ EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, 
 
 INCLUDE_ASM(const s32, "game/code_0029C530", effInitializeCopiedPayloadSlots);
 
-extern void fldRelocatePackedTransferChunk(u32, u32);
+struct FldTransferChunk;
+extern void fldRelocatePackedTransferChunk(u32, struct FldTransferChunk *);
 extern void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload);
 
 
@@ -6832,7 +6833,7 @@ extern void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload);
 EffCopiedPayload *effCreateAndInitializeCopiedPayload(u32 type, const void *source, s32 size) {
     EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, size);
     u32 child = *(u32 *)effect;
-    fldRelocatePackedTransferChunk(child, child + 8);
+    fldRelocatePackedTransferChunk(child, (struct FldTransferChunk *)(child + 8));
     effInitializeCopiedPayloadSlots(effect);
     return effect;
 }
