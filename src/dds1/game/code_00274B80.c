@@ -491,7 +491,43 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_002755E0);
+extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
+struct MenuPanelResources;
+extern void mnuLoadPanelSectionResources(struct MenuPanelResources *, u32, u32,
+                                         u32, s32);
+
+s32 func_002755E0(KwlnTask *task) {
+    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(PartyMenuData));
+    PartyMenuData *menu = (PartyMenuData *)sdfResourceRetainAddress(allocation);
+    s32 i;
+
+    context->menu = (s32)menu;
+    memset(menu, 0, sizeof(*menu));
+    menu->allocation = (s32)allocation;
+
+    func_00274B80((u32)context);
+    func_00274D48(context);
+    mnuLoadPanelSectionResources((struct MenuPanelResources *)&context->partyWindow.slots[0],
+                                context->panelResource, 0x11, 0x21, -1);
+    mnuLoadPanelSectionResources((struct MenuPanelResources *)&context->partyWindow.slots[1],
+                                context->panelResource, 0x11, 0x22, 0x23);
+    mnuLoadPanelSectionResources((struct MenuPanelResources *)&context->partyWindow.slots[2],
+                                context->panelResource, 0x11, 0x22, 0x24);
+
+    mnuClearPartySelectionAndActivateSlots((s32)context);
+    for (i = 0; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
+        memcpy(&menu->original[i], &datGameState->party[i], sizeof(menu->original[i]));
+        memcpy(menu->panelSnapshots[i],
+               (u8 *)&context->partyWindow.slots[i] + 0x1C,
+               sizeof(menu->panelSnapshots[i]));
+    }
+
+    mnuActivatePanelAndConfigureGridResources((u32 *)context->display,
+                                              context->panelResource, 0, 1);
+    menu->fadeB = menu->fadeA = MNU_FULL_FADE;
+    return 1;
+}
 
 s32 mnuShopReleaseResources(void) {
     s32 context = kwlnTaskGetUserValue();
