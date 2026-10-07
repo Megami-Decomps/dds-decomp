@@ -196,7 +196,7 @@ extern s32 fldSwayOffset;
 
 extern SdfFlagListWork *fldCameraColorEffect;
 extern u32 fldCameraColorEnabled;
-extern s32 fldRainTextureReference;
+extern SdfTex *fldRainTextureReference;
 extern s32 fldRainTextureResource;
 
 extern s32 fldCameraModelObject;
@@ -262,6 +262,7 @@ extern u8 D_0032F260[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void fldResetRecordState(void);
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);

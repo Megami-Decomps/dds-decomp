@@ -85,7 +85,7 @@ extern SdfFlagListWork *fldCameraColorEffect;
 
 extern u32 fldCameraColorEnabled;
 
-extern s32 fldRainTextureReference;
+extern SdfTex *fldRainTextureReference;
 
 extern s32 fldRainTextureResource;
 
@@ -146,6 +146,7 @@ extern u8 D_0038A700[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 
 extern f32 D_004360B0;
 
