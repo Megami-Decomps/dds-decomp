@@ -24,6 +24,19 @@ typedef struct EffectObjectData {
 typedef char EffectObjectData_size_must_be_0x40[(sizeof(EffectObjectData) == 0x40) ? 1 : -1];
 typedef char EffectObjectData_modelHolder_at_0x0C[((u32)&((EffectObjectData *)0)->modelHolder == 0x0C) ? 1 : -1];
 typedef char EffectObjectData_tail_at_0x3C[((u32)&((EffectObjectData *)0)->limitMax3C == 0x3C) ? 1 : -1];
+
+/* Kind-6 world nodes allocate this complete transform payload at 0x30 bytes. */
+typedef struct EffectTransformData {
+    ObjBase *resourceState;
+    u32 flags;
+    u32 opacityMode;
+    s32 activeId;
+    f32 offset[4];
+    f32 position[4];
+} EffectTransformData;
+typedef char EffectTransformData_size_must_be_0x30[(sizeof(EffectTransformData) == 0x30) ? 1 : -1];
+typedef char EffectTransformData_position_at_0x20[((u32)&((EffectTransformData *)0)->position == 0x20) ? 1 : -1];
+
 #ifdef VERSION_DDS1
 ObjBase *func_00113008(EffWorldNode *object);
 #elif VERSION_DDS2
