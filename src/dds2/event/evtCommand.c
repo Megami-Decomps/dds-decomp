@@ -584,8 +584,8 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00241B98);
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern u32 dds3AdvanceWorldCounter(void);
-extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
-extern void effObjSetInnerFloat(s32 obj, f32 value);
+extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
+extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
 s32 evtCommandCreateWorldEffectObject(void) {
