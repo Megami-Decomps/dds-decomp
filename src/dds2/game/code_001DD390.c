@@ -1250,8 +1250,8 @@ u32 btlAddEpFromPacket(s32 packetAddress) {
     if (packet->actor->flags & 0x400) {
         return 1;
     }
-    work->experienceEarned += packet->amount;
-    btlBossDebugPrintf("btl:epall=%d[%d](packet)\n", work->experienceEarned, packet->amount);
+    work->epEarned += packet->amount;
+    btlBossDebugPrintf("btl:epall=%d[%d](packet)\n", work->epEarned, packet->amount);
     return 1;
 }
 

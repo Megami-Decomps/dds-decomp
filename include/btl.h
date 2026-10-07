@@ -38,14 +38,14 @@ typedef union BtlUnitFlagPair {
     } words;
 } BtlUnitFlagPair;
 
-#ifdef VERSION_DDS1
-/* Seven signed status-entry records embedded in a DDS1 battle unit. */
+/* Six-byte status-entry record; each game's battle unit contains seven. */
 typedef struct BtlUnitEntrySlot {
     s16 code;
     s16 unk02;
     s16 countdown;
 } BtlUnitEntrySlot;
 
+#ifdef VERSION_DDS1
 /* Battle unit, DDS1 (0x348). Retail accessors distinguish world rotation at
  * +0x40 from the orientation quaternion at +0x70; body/muzzle offsets are
  * +0x90/+0xA0 respectively. Effect origin/scene extension are +0x31C/+0x320.
@@ -241,7 +241,8 @@ typedef struct BtlUnit {
     s16 actionSlot; /* 0x2D0: same per-unit queued action operand as DDS1 */
     u8 pad2D2[0x12];
     u8 unk2E4;
-    u8 pad2E5[0x2B];
+    u8 pad2E5;
+    BtlUnitEntrySlot entrySlots[7]; /* 0x2E6: btlClearActorEntrySlot clears each signed record. */
     s32 unk310;
     s32 unk314;
     struct SoundResourceNode *node318;
