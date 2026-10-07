@@ -39,7 +39,9 @@ typedef struct SceneFrameTable SceneFrameTable;
 
 typedef struct MenuSlotState {
     s32 heapHandle;
-    u8 pad04[0x58];
+    u8 pad04[4];
+    MenuPopupState transitionWork; /* 0x08 */
+    u8 pad54[8];
     EvtResourcePair messageResources; /* 0x5C */
     s32 batch;     /* 0x64 */
     s32 backdrop;   /* 0x68 */
@@ -72,7 +74,6 @@ extern void evtLoadResourcePair(u32, EvtResourcePair *);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void mnuSnapshotCampTextureHandles(u32 *);
 extern void func_002673B8();
-extern void mnuClearPanelTransitionState(u8 *);
 extern void mnuResetGradientFadeColor(u8 *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
@@ -855,7 +856,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     obj = (u8 *)sdfResourceRetainAddress(handle);
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     *(s32 *)obj = handle;
-    mnuClearPanelTransitionState(obj + 8);
+    mnuClearPanelTransitionState(&((MenuSlotState *)obj)->transitionWork);
     mnuTerminalCreateEffects((MenuSlotState *)obj);
     ((MenuSlotState *)obj)->reduced = reduced;
     ((MenuSlotState *)obj)->mode = reduced;
@@ -875,7 +876,6 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
 }
 
 extern void func_00266808(u32 *work);
-extern void mnuDrainPanelTransitions(u8 *state, s32 arg);
 extern s32 dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern void sdfReleaseResourceAllocation(s32 handle);
@@ -893,7 +893,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         mnuReleaseWorkResources((u8 *)work);
         func_00266808((u32 *)work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
-        mnuDrainPanelTransitions((u8 *)work + 8, arg);
+        mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfReleaseResourceAllocation(work->heapHandle);

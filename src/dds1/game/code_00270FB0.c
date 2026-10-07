@@ -7,7 +7,7 @@
 typedef struct StaffMenuWork {
     u32 resource;
     u8 pad04[4];
-    u8 panel[0x4C];
+    MenuPopupState panel;
     u8 pad54[8];
     EffectList *resourceQueue;
     StaffSlots staffSlots;
@@ -430,7 +430,6 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *menu) {
 extern u32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(u32);
 extern void *memset(void *, s32, u32);
-extern void mnuClearPanelTransitionState(s32);
 extern s8 dds3AdminReadPreviousSignedSample(void);
 extern EffectList *mnuAllocateValueRecord(u32);
 extern void mnuInitPartyPanelSlots(void *);
@@ -450,7 +449,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
 
     memset(menu, 0, sizeof(*menu));
     menu->resource = allocation;
-    mnuClearPanelTransitionState((s32)menu->panel);
+    mnuClearPanelTransitionState(&menu->panel);
     /* Mode also selects the normal or alternate staff image table. */
     if (dds3AdminReadPreviousSignedSample() != 0) {
         menu->resourceQueue = mnuAllocateValueRecord(1);
@@ -480,7 +479,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     if (menu == NULL) {
         return;
     }
-    mnuDrainPanelTransitions(menu->panel, task);
+    mnuDrainPanelTransitions(&menu->panel, task);
     mnuReleaseStaffSpriteAndResourceHandles(menu);
     mnuDestroyScrollPanel(menu->scrollPanel);
     mnuShutdownContext(menu->background + 0x20);

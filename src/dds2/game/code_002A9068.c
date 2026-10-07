@@ -40,8 +40,6 @@ extern void func_00101968(s32, s32);
 
 extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
-extern void mnuClearPanelTransitionState(u8 *);
-
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
 extern s32 mnuAllocateValueRecord(s32);
@@ -720,7 +718,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
     ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
     effectBytes = menuBytes + 0x11C;
-    mnuClearPanelTransitionState(menuBytes + 8);
+    mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     if (dds3AdminReadPreviousSignedSample() != 0) {
         ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(1);
     } else {
@@ -747,7 +745,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     if (menuBytes == NULL) {
         return;
     }
-    mnuDrainPanelTransitions(menuBytes + 8, task);
+    mnuDrainPanelTransitions((MenuPopupState *)(menuBytes + 8), task);
     mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
     mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->modelHandle);
     mnuShutdownContext(menuBytes + 0x284);

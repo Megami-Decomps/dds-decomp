@@ -1122,8 +1122,8 @@ void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *panelWords, s32 opt
 
 
 /* Clear the complete native popup-transition state, including saved entry addresses. */
-void mnuClearPanelTransitionState(u32 stateAddress) {
-    memset(stateAddress, 0, MNU_POPUP_STATE_BYTES);
+void mnuClearPanelTransitionState(MenuPopupState *state) {
+    memset(state, 0, MNU_POPUP_STATE_BYTES);
 }
 
 void mnuApplyPanelTransitionAction(s32 action, MenuPopupEntry *entry, MenuPopupState *state, u32 argument) {
@@ -1168,13 +1168,13 @@ void mnuApplyPanelTransitionAction(s32 action, MenuPopupEntry *entry, MenuPopupS
 }
 
 /* Pop saved entries with their leave callbacks until the state count reaches zero. */
-void mnuDrainPanelTransitions(u32 stateAddress, u32 callbackArgument) {
+void mnuDrainPanelTransitions(MenuPopupState *state, u32 callbackArgument) {
     s32 entryCount;
 
-    entryCount = *(s32 *)stateAddress;
+    entryCount = state->count;
     while (entryCount != 0) {
-        mnuApplyPanelTransitionAction(1, NULL, (MenuPopupState *)stateAddress, callbackArgument);
-        entryCount = *(s32 *)stateAddress;
+        mnuApplyPanelTransitionAction(1, NULL, state, callbackArgument);
+        entryCount = state->count;
     }
 }
 
