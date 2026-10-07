@@ -33,6 +33,14 @@ extern MenuTitleState *mnuMovieMenuState;
 
 extern u16 mnuMovieTaskState;
 
+/* Complete A8..BB scroll control retained by the staff-task allocation. */
+typedef struct StaffScrollTransition {
+    s32 mode;
+    s32 opacity;
+    s32 scrolling;
+    s32 y;
+    s32 countdown;
+} StaffScrollTransition;
 typedef struct {
     u32 mode;           /* 0x00 */
     s32 opacity;        /* 0x04: signed fade clamps */
@@ -45,15 +53,21 @@ typedef struct {
     u32 sprite;
     s32 state;
     s32 frame;
-    u8 pad10[0x7C];
+    u8 pad10[8];
+    SlideBar slideBar; /* 0x18 */
+    u32 backdropState[0x1B]; /* 0x20: opaque renderer state */
     MnuTitlePaletteTransition paletteTransition; /* 0x8C */
-    u8 padA8[0x14];
+    StaffScrollTransition scrollTransition; /* 0xA8 */
     s32 scrollPaused; /* 0xBC: suppresses staff text and frame advancement. */
     u8 padC0[0x14];
     s32 streamPhase;
 } StaffTaskState;
 
 extern StaffTaskState *mnuMovieWork;
+/* Retail 0x003E4A7C is a scalar in non-small .data. */
+extern s32 D_003E4A7C __attribute__((section(".data")));
+extern u32 D_00437AB8;
+extern void func_002A6F88(u32 *);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -816,15 +830,15 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6858);
 
-void mnuFadeSetState(u32 *state, u32 mode) {
+void mnuFadeSetState(SlideBar *state, u32 mode) {
     switch (mode) {
-    case 2: state[1] = 0; mode = 0; break;
-    case 3: mode = 1; state[1] = 0x200; break;
+    case 2: state->pos = 0; mode = 0; break;
+    case 3: mode = 1; state->pos = 0x200; break;
     }
-    state[0] = mode;
+    state->active = mode;
 }
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, void *, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     u32 sprite = mnuMovieWork->sprite;
@@ -832,7 +846,7 @@ void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }
-    func_00306CD0(0, 0, 0, bar->pos / 2, 0, sprite, 9, 0x53);
+    func_00306CD0(0, 0, 0, bar->pos / 2, 0, (void *)sprite, 9, 0x53);
     if (bar->active == 0) {
         bar->pos -= 8;
     } else {
@@ -877,24 +891,50 @@ void mnuTitleSetPaletteTransition(MnuTitlePaletteTransition *state, s32 mode) {
     state->mode = mode;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A73C0);
+void func_002A73C0(MnuTitlePaletteTransition *state) {
+    void *sprite = (void *)mnuMovieWork->sprite;
+    s32 frame;
+    s32 index;
+    s32 alpha;
 
-void mnuFadeSetStateB(u32 *state, u32 mode) {
-    switch (mode) {
-    case 2: state[1] = 0; mode = 0; break;
-    case 3: mode = 1; state[1] = 0x200; break;
+    if (state->mode == 0 && state->opacity == 0) {
+        return;
     }
-    state[0] = mode;
+    frame = mnuMovieWork->frame;
+    index = state->phase;
+    frame %= 256;
+    alpha = state->opacity * (255 - frame) / 512;
+    func_00306CD0(0, 0, 0, alpha, 0, sprite, state->spriteIndices[index], 0x53);
+    alpha = state->opacity * frame / 512;
+    index = (state->phase + 1) % 4;
+    func_00306CD0(0, 0, 0, alpha, 0, sprite, state->spriteIndices[index], 0x53);
+    if (frame == 255) {
+        if (index == 0) {
+            func_002A7260(state, 1);
+        }
+        state->phase = index;
+    }
+    if (state->mode == 0) {
+        state->opacity -= 8;
+    } else {
+        state->opacity += 8;
+    }
+    if (state->opacity < 0) {
+        state->opacity = 0;
+    }
+    if (state->opacity > 512) {
+        state->opacity = 512;
+    }
 }
 
-/* Complete A8..BB scroll control retained by the staff-task allocation. */
-typedef struct StaffScrollTransition {
-    s32 mode;
-    s32 opacity;
-    s32 scrolling;
-    s32 y;
-    s32 countdown;
-} StaffScrollTransition;
+void mnuFadeSetStateB(StaffScrollTransition *state, u32 mode) {
+    switch (mode) {
+    case 2: state->opacity = 0; mode = 0; break;
+    case 3: mode = 1; state->opacity = 0x200; break;
+    }
+    state->mode = mode;
+}
+
 
 extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
@@ -906,10 +946,10 @@ void func_002A75A8(StaffScrollTransition *state) {
     s32 fade = state->opacity / 2;
 
     uiDrawTexturedSurfaceAtFarDepth(0x53);
-    func_00306CD0(0, 0, 0, fade, 0x60, (u32)sprites, 4, 0x53);
+    func_00306CD0(0, 0, 0, fade, 0x60, sprites, 4, 0x53);
     func_00308F78(1, 0x53);
     if (state->scrolling != 0) {
-        func_00306CD0(0, state->y, 0, fade, 0x60, (u32)sprites, 7, 0x53);
+        func_00306CD0(0, state->y, 0, fade, 0x60, sprites, 7, 0x53);
     }
     uiDrawSurfaceAtNearDepth(0x53);
     if (state->scrolling == 0) {
@@ -942,7 +982,40 @@ void func_002A75A8(StaffScrollTransition *state) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7730);
+s32 func_002A7730(void) {
+    s32 seconds;
+    s32 endSeconds;
+
+    if (mnuMovieWork->frame == 0) {
+        mnuFadeSetState(&mnuMovieWork->slideBar, 2);
+        mnuFadeSetStateOff(mnuMovieWork->backdropState, 2);
+        mnuTitleSetPaletteTransition(&mnuMovieWork->paletteTransition, 2);
+        mnuFadeSetStateB(&mnuMovieWork->scrollTransition, 2);
+    }
+    seconds = mnuMovieWork->frame / 60;
+    endSeconds = D_003E4A7C / 60;
+    if (endSeconds + 5 < seconds) {
+        mnuFadeSetState(&mnuMovieWork->slideBar, 0);
+        mnuFadeSetStateOff(mnuMovieWork->backdropState, 0);
+        mnuTitleSetPaletteTransition(&mnuMovieWork->paletteTransition, 0);
+        mnuFadeSetStateB(&mnuMovieWork->scrollTransition, 0);
+    } else {
+        mnuFadeSetStateOff(mnuMovieWork->backdropState, 1);
+        mnuTitleSetPaletteTransition(&mnuMovieWork->paletteTransition, 1);
+        mnuFadeSetStateB(&mnuMovieWork->scrollTransition, 1);
+    }
+    if (D_00437AB8 == 4 || D_00437AB8 == 5) {
+        mnuFadeSetState(&mnuMovieWork->slideBar, 2);
+    } else {
+        mnuFadeSetState(&mnuMovieWork->slideBar, 3);
+    }
+    mnuAdvanceSpriteSlideBar(&mnuMovieWork->slideBar);
+    func_002A6F88(mnuMovieWork->backdropState);
+    func_002A73C0(&mnuMovieWork->paletteTransition);
+    func_002A75A8(&mnuMovieWork->scrollTransition);
+    func_002A6858();
+    return 0;
+}
 
 void mnuFinishStaffMovieAndFreeState(void) {
     s64 pending;
@@ -966,7 +1039,6 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
 }
 
 extern u32 D_00437AB4;
-extern u32 D_00437AB8;
 
 void mnuInitializeMovieRollViewport(void) {
     D_00437AB8 = 4;
