@@ -563,8 +563,8 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
 }
 
 /* Address three quadword positions for one triangle. */
-s32 effGetGroupRecordByIndex(EffRecordPool *pool, s32 groupIndex) {
-    return pool->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES;
+void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 groupIndex) {
+    return (void *)(pool->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES);
 }
 
 /* Address three packed color words for one triangle. */
@@ -651,13 +651,13 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
 }
 
 /* Address four quadword positions for one quad. */
-s32 effGetRecordGroupElement(EffRecordPool *pool, s32 groupIndex) {
-    return pool->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES;
+void *effGetRecordGroupElement(EffRecordPool *pool, s32 groupIndex) {
+    return (void *)(pool->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES);
 }
 
 /* Address four packed color words for one quad. */
-s32 effGetRecordGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
-    return pool->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES;
+void *effGetRecordGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
+    return (void *)(pool->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES);
 }
 
 /* Allocate five-vertex fan groups, then set the returned header's matrix. */
