@@ -5,6 +5,7 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
@@ -1422,8 +1423,8 @@ s32 btlUpdateRuntimeFadeState(void) {
     if (btlRuntimeState.active == 0) {
         return 0;
     }
-    D_0037F980.offsetX = 2048.0f;
-    D_0037F980.offsetY = 2048.0f;
+    D_0037F980.camera.offsetX = 2048.0f;
+    D_0037F980.camera.offsetY = 2048.0f;
     switch (btlRuntimeState.state) {
     case 1:
         if (btlRuntimeState.fadeMode < 2) {

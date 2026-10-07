@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
@@ -48,15 +49,12 @@ extern void func_003312A8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 extern void func_00331590(void *arg0, void *arg1);
 
-typedef struct {
+struct SdfItemList {
     s32 count;           /* 0x00: entry count */
     u8 pad_0x04[0x0C];   /* 0x04 */
     u8 firstItem;        /* 0x10: entries, 0x50 stride */
-} SdfItemList;
+};
 
-typedef struct {
-    SdfItemList *items;   /* 0x00 */
-} SdfItemListRef;
 
 /* Per-item record applied to a draw node by sdfDrawNodeSetFromItem (0x50 bytes). */
 typedef struct {
@@ -77,7 +75,6 @@ extern void func_00340DC8(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
-extern SdfModel *sdfModelCreateFromAssetData(void *arg0, void *arg1);
 
 
 extern void sdfMultiplyVuMatrixInPlace(void);
