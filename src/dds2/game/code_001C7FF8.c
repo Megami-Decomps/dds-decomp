@@ -527,10 +527,10 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
             slot = object->commandData->linkedUnit->lookupId;
             panel->activeEntries[slot].unk100 = 0;
             panel->activeEntries[slot].pendingSceneState = 5;
-            panel->activeEntries[slot].unk1C4 = 3;
+            panel->activeEntries[slot].hpState = 3;
             panel->activeEntries[slot].hpLevel = datGameState->party[panel->partyRecordIndex].hp;
             panel->activeEntries[slot].hpTarget = panel->activeEntries[slot].hpLevel;
-            panel->activeEntries[slot].unk1C5 = 3;
+            panel->activeEntries[slot].mpState = 3;
             panel->activeEntries[slot].mpLevel = datGameState->party[panel->partyRecordIndex].mp;
             panel->activeEntries[slot].mpTarget = panel->activeEntries[slot].mpLevel;
             panel->activeEntries[slot].presentationState = 2;

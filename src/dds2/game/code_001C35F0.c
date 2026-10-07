@@ -3,6 +3,8 @@
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_resource.h"
+#include "btl_command.h"
+#include "btl_ui.h"
 
 typedef struct UiSlotEntry {
     u8 pad00[0x18];
@@ -23,7 +25,7 @@ typedef struct UiInputState {
 
 
 
-extern u32 D_004367CC;
+extern const char *D_004367CC;
 
 extern u32 kwlnTaskGetUserValue(void *);
 
@@ -35,7 +37,53 @@ extern s32 btlGetRuntime(void);
 extern u8 btlHasRequiredActorStatusBits(BtlUnit *node);
 
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
+extern const char *btlCommandPanelTaskNameRef;
+extern void func_001C3A38(BattleActorPanelWork *, s8);
+extern void btlUpdateActorSlotStates(u8 *, s8);
+extern void func_001C3DB0(ActionStateLink *, BattleActorPanelWork *, s8);
+
+void func_001C35F0(ActionStateLink *actor, s8 mode, s8 value) {
+    s32 count;
+    u8 slot;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
+    void *task;
+    BattleActorPanelWork *work;
+
+    if (battle->battleFlags & 0x8000) {
+        if (kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef) != NULL) {
+            return;
+        }
+    }
+    count = 0;
+    slot = 0;
+    for (; node != NULL; node = node->nextActor) {
+        if (btlHasRequiredActorStatusBits(node) != 0) {
+            slot = node->lookupId;
+            if (actor->unit->owner == node->owner) {
+                break;
+            }
+            count++;
+        }
+    }
+    if (count >= 3) {
+        return;
+    }
+    task = kwlnTaskGetTaskByName(D_004367CC);
+    if (task == NULL) {
+        return;
+    }
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    func_001C3A38(work, mode);
+    btlUpdateActorSlotStates((u8 *)work, 0);
+    work->activeEntries[slot].presentationState = 2;
+    work->activeEntries[slot].presentationValue = value;
+    if (mode == 0) {
+        func_001C3DB0(actor, work, 0);
+    } else if (mode == 2) {
+        func_001C3DB0(actor, work, 1);
+    }
+}
 void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     s32 count = 0;
     u8 slot = 0;
@@ -60,7 +108,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
         if (task != 0) {
             entry = (u8 *)kwlnTaskGetUserValue(task);
             if (mode != 2) {
-                func_001C3A38(entry, mode);
+                func_001C3A38((BattleActorPanelWork *)entry, mode);
             }
             offset = slot * 0x290 + 0x10;
             slotEntry = (UiSlotRow *)(entry + offset);
@@ -159,16 +207,6 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C5D10);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6010);
 
-typedef struct BattleStatPulse {
-    s8 active;
-    u8 pad01[3];
-    u32 phase;
-    s32 progress;
-    s32 yOffset;
-    s16 alpha;
-    u8 pad12[2];
-} BattleStatPulse;
-typedef char BattleStatPulse_size_must_be_0x14[(sizeof(BattleStatPulse) == 0x14) ? 1 : -1];
 
 typedef struct BattlePanelColors {
     u32 values[4];
@@ -300,11 +338,11 @@ typedef struct BtlTrackedState {
     s32 threshold;
 } BtlTrackedState;
 extern BtlTrackedState *btlTrackedTaskHandles;
-extern u32 btlCommandPanelTaskNameRef;
+extern const char *btlCommandPanelTaskNameRef;
 
 s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
-    s64 first;
-    s64 second;
+    void *first;
+    void *second;
 
     if (btlTrackedTaskHandles != 0) {
         first = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
@@ -323,7 +361,7 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7DB8);
 
 extern s32 btlAreLinkedSceneCountersAtThreshold(void);
-extern void func_001C35F0(s32, s32, s32);
+extern void func_001C35F0(ActionStateLink *, s8, s8);
 
 s32 btlUpdateCommandUiTransition(void) {
     BtlTrackedState *flow;

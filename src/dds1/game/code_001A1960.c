@@ -2784,23 +2784,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001AC080);
 
 
 
-/* 0x2C-byte action record shared by the initializer, updater and renderer. */
-typedef struct BattleMirroredSpriteRecord {
-    s8 active;
-    u8 pad01;
-    s16 slot;
-    f32 scale;
-    s32 restoredWidth;
-    s32 restoredHeight;
-    s32 width;
-    s32 height;
-    s32 x;
-    s32 y;
-    s32 secondX;
-    s32 frame;
-    s8 alpha;
-    u8 pad29[3];
-} BattleMirroredSpriteRecord;
 
 void func_001AC398(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
     if (count > 0) {
@@ -4685,16 +4668,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BAB08);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BAE08);
 
-typedef struct BattleStatPulse {
-    s8 active;
-    u8 pad01[3];
-    u32 phase;
-    s32 progress;
-    s32 yOffset;
-    s16 alpha;
-    u8 pad12[2];
-} BattleStatPulse;
-typedef char BattleStatPulse_size_must_be_0x14[(sizeof(BattleStatPulse) == 0x14) ? 1 : -1];
 
 extern const BattlePanelColors D_003A2D68;
 
@@ -5188,10 +5161,10 @@ s32 func_001BF0F8(KwlnTask *task) {
             slot = object->commandData->linkedUnit->lookupId;
             panel->activeEntries[slot].unk100 = 0;
             panel->activeEntries[slot].pendingSceneState = 5;
-            panel->activeEntries[slot].unk1C4 = 3;
+            panel->activeEntries[slot].hpState = 3;
             panel->activeEntries[slot].hpLevel = datGameState->party[panel->partyRecordIndex].hp;
             panel->activeEntries[slot].hpTarget = panel->activeEntries[slot].hpLevel;
-            panel->activeEntries[slot].unk1C5 = 3;
+            panel->activeEntries[slot].mpState = 3;
             panel->activeEntries[slot].mpLevel = datGameState->party[panel->partyRecordIndex].mp;
             panel->activeEntries[slot].mpTarget = panel->activeEntries[slot].mpLevel;
             panel->activeEntries[slot].presentationState = 2;
