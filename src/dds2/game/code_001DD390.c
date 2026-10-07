@@ -4283,7 +4283,93 @@ BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E7648);
+typedef struct BtlActorMotionSlot {
+    u8 pad00[4];
+    s16 kind; /* 0x04 */
+    s16 alphaStartFrame; /* 0x06 */
+    f32 alphaFrameScale; /* 0x08 */
+    u8 pad0C[4];
+    s16 alphaDuration; /* 0x10 */
+    u8 pad12[2];
+} BtlActorMotionSlot;
+
+typedef struct BtlActorStatusRecord {
+    u8 pad00[0x2A];
+    u16 model; /* 0x2A */
+    BtlActorMotionSlot motions[29]; /* 0x2C; provider stride 0x270 */
+} BtlActorStatusRecord;
+
+/* Update motion completion, alpha transitions, and the selected-unit color pulse. */
+void func_001E7648(void) {
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    BtlActorStatusRecord *status;
+    s32 parameter;
+    s32 frame;
+    s32 index;
+    f32 pulse;
+    u32 packed[4];
+    /* Three boss installers publish no-argument hooks in this opaque slot. */
+    void (*beforeMotionUpdate)(void) = *(void (**)(void))runtime->pad610;
+
+    if (beforeMotionUpdate != NULL) {
+        beforeMotionUpdate();
+    }
+    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+        if (!(unit->flags & 0x600) || !(unit->flags & 2)) {
+            continue;
+        }
+        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+            unit->resourceKind, unit->resourceIndex);
+        if (unit->flags & 0x40000000) {
+            btlSeekRandomModelFrame(unit);
+            unit->flags &= ~0x40000000;
+        }
+        if (unit->flags & 0x80000000) {
+            parameter = 1;
+            if (runtime->hook5D4 != NULL) {
+                parameter = runtime->hook5D4(unit, 1, 0);
+            }
+            if (unit->unkEC != parameter && parameter != -1) {
+                btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
+            } else {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                if (frame >= status->model) {
+                    sdfMotionSampleAtFrame(unit->ext->owner->first, (f32)status->model);
+                    btlResetUnitModelProgress(unit);
+                    unit->flags &= ~0x80000000;
+                }
+            }
+        }
+        if (unit->updateFlags & 2) {
+            if (unit->updateFlags & 4) {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                index = unit->unkEC;
+                if (index == mdlGetNodeField2C(unit->ext->owner, 0)) {
+                    if (frame >= status->motions[index].alphaStartFrame) {
+                        evtSetUnitAlphaTransition(unit->ext,
+                            (s32)((f32)status->motions[index].alphaDuration /
+                                (status->motions[index].alphaFrameScale * runtime->unk4C8)),
+                            unit->overlayColor & 0xFFFFFF);
+                        unit->updateFlags &= ~4;
+                    }
+                }
+            }
+            unit->overlayColor = mdlGetBroadcastValue(unit->ext->owner);
+        }
+        if (unit->flags & 0x8000) {
+            /* The pulse uses the signed global counter at +0x214, not scene frame +0x234. */
+            pulse = (f32)(*(s32 *)runtime->pad214 % 30) / 15.0f;
+            if (pulse > 1.0f) {
+                pulse = 2.0f - pulse;
+            }
+            VU0_SET_ONES_XYZ(vf10);
+            VU0_SCALAR_OP(pulse * 1.6f + 0.3f, "vmulx.xyzw vf10, vf10, vf2x");
+            EE_MMI_RGBA_PACK(packed[0]);
+            btlBlendUnitColor(unit, (packed[0] & 0xFFFFFF) | 0x80000000, 0);
+        }
+    }
+}
 
 extern void func_001E3E20(BtlUnit *);
 extern void func_002034A8(struct SoundResourceLink *);
