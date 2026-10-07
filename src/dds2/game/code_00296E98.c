@@ -75,7 +75,7 @@ extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *unit, u32 amount);
-extern void func_00299988(BrsSkillPackageWork *, s32, u16, u32, s32, s32, s32);
+extern void func_00299988(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 typedef s16 BrsIconRecord[4];
 
