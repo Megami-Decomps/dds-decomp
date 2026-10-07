@@ -3,11 +3,8 @@
 #include "dds3_path.h"
 #include "pcp_vu0.h"
 
-typedef f32 PathEntry12[3];
-
-typedef struct {
-    u8 data[0x10];
-} PathEntry16;
+typedef f32 PathPositionKey[3];
+typedef f32 PathQuaternionKey[4];
 
 void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *keys, f32 time);
 void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
@@ -26,12 +23,12 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     u32 index;
     f32 fraction;
     Dds3PathKeyframes *data;
-    PathEntry12 *entries;
+    PathPositionKey *entries;
 
     if (path->flags & 1) {
         data = path->positionKeys;
         dds3SamplePathKeyframeInterval(&index, &fraction, data, path->time);
-        entries = (PathEntry12 *)data->data;
+        entries = (PathPositionKey *)data->data;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1][0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1][1]);
         VU0_SET_VF10_COMPONENT(z, entries[index + 1][2]);
@@ -52,13 +49,13 @@ void dds3PreparePathVectorPair(Dds3PathCurveWork *path) {
     u32 index;
     f32 fraction;
     Dds3PathKeyframes *vectorData;
-    PathEntry16 *entries;
-    PathEntry16 *first;
-    PathEntry16 *second;
+    PathQuaternionKey *entries;
+    PathQuaternionKey *first;
+    PathQuaternionKey *second;
     if (path->flags & 2) {
         vectorData = path->rotationKeys;
         dds3SamplePathKeyframeInterval(&index, &fraction, vectorData, path->time);
-        entries = (PathEntry16 *)vectorData->data;
+        entries = (PathQuaternionKey *)vectorData->data;
         first = &entries[index];
         VU0_LOAD_VF_MEMORY(vf10, first);
         second = &entries[index] + 1;
