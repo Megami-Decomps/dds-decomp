@@ -73,9 +73,8 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 
 extern s32 func_002C6CE8(void);
 
-struct ResourceList;
-extern struct ResourceList *func_002B9FF8(u32 mode, s32 resource, ...);
-extern void mnuReleaseResourceList(struct ResourceList *list);
+extern struct MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
+extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 extern u32 effCreateStatusBatch(u32);
 
@@ -472,7 +471,7 @@ typedef struct MenuPanelState {
     u32 thirdValueB; /* 0x7C */
     u32 thirdValueC; /* 0x80 */
     u8 pad84[4];
-    struct ResourceList *resourceHandle; /* 0x88 */
+    struct MenuIconState *resourceHandle; /* 0x88 */
 } MenuPanelState;
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
@@ -486,7 +485,7 @@ void *mnuCreatePanelState(s32 width, s32 height) {
 }
 
 void mnuDestroyPanelState(MenuPanelState *panel) {
-    struct ResourceList *resourceHandle;
+    struct MenuIconState *resourceHandle;
 
     resourceHandle = panel->resourceHandle;
     if (resourceHandle != 0) {
