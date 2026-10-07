@@ -388,7 +388,7 @@ extern s32 mnuGetEntryUseStatus(s32, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
+MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
 void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state);
 void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second);
 void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
@@ -1291,7 +1291,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, s32 callback) {
         placement = defaults.indices[2];
         break;
     }
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
+    window = mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
     mnuSetWindowContainerState(window, MNU_FULL_FADE);
     mnuInitializeBasicWindowLayout(window, context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
