@@ -9,6 +9,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff.h"
+#include "eff_record_bucket.h"
 #include "sdf.h"
 
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
@@ -294,13 +295,6 @@ extern EffKindDesc D_003E98A0[];
 
 
 extern s32 effFileQueue;
-
-typedef struct EffRecordBucket {
-    u8 pad_00[4];
-    s32 (*step)(BdWork *, BdWork *, EffTimedState *); /* 0x04 */
-    u32 count;
-    u8 *records;
-} EffRecordBucket;
 
 extern EffRecordBucket D_00400508[];
 
