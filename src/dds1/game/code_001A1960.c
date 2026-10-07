@@ -3270,14 +3270,21 @@ u32 func_001AD428(void) {
     return 1;
 }
 
+/* Registered guide-panel task: fade, four corner colors, and message selection. */
 typedef struct BtlGuidePanelWork {
     s8 state;
-    u8 pad01[0x1B];
+    u8 pad01[7];
+    u16 fadeLevel;             /* 0x08: clamped with signed-halfword tests */
+    u8 pad0A[2];
+    BattlePanelColors colors;  /* 0x0C: TL, TR, BR, BL */
     s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
+    s32 y;
+    s32 windowIndex;
+    s32 entryIndex;
 } BtlGuidePanelWork;
+
+typedef char BtlGuidePanelWorkSizeCheck[sizeof(BtlGuidePanelWork) == 0x2C ? 1 : -1];
+
 
 extern s32 func_001B09A8(KwlnTask *);
 extern void btlReleaseMessageWindowTask(KwlnTask *);
@@ -3286,7 +3293,7 @@ extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern void btlSetTrackedTaskHandle(s32, s32);
 
-s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
+s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     BattleController *context = (BattleController *)btlGetRuntime();
     BtlGuidePanelWork *data;
     s32 task;
@@ -3306,9 +3313,9 @@ s32 btlCreateGuidePanelTask(s32 arg0, s32 arg1) {
     data = sdfAllocAndClearQuadwords(sizeof(*data));
     data->state = 0;
     data->unk1C = 0x18;
-    data->unk20 = 0x60;
-    data->unk24 = arg0;
-    data->unk28 = arg1;
+    data->y = 0x60;
+    data->windowIndex = windowIndex;
+    data->entryIndex = entryIndex;
     task = (s32)kwlnTaskCreate(D_003BB3C4, 0x2B0E, 1, 1, func_001B09A8,
                           btlReleaseMessageWindowTask, (u32)data);
     func_00101A80(context->taskParent, (KwlnTask *)task);
@@ -3754,9 +3761,9 @@ u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delt
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B09A8);
 
 void btlReleaseMessageWindowTask(KwlnTask *task) {
-    s32 *entry = (s32 *)kwlnTaskGetUserValue(task);
-    itfMesCleanupWindow(entry[9], 0);
-    sdfReleaseChipBlock(entry);
+    BtlGuidePanelWork *work = kwlnTaskGetUserValue(task);
+    itfMesCleanupWindow(work->windowIndex, 0);
+    sdfReleaseChipBlock(work);
     btlSetTrackedTaskHandle(9, 0);
 }
 

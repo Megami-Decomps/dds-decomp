@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_sprite.h"
 #include "dds3Admin.h"
 #include "kwln.h"
 #include "sdf.h"
@@ -179,21 +180,6 @@ s32 kwlnPrepareFrameDrawPackets(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_00101D30);
-
-/* Sprite vertex record of a column packet: colour, then two corners of the quad. */
-typedef struct KwlnSpriteCorner {
-    s32 u, v;
-    u8 pad08[8];
-    s32 x, y;
-    s32 mask;
-    s16 flag;
-    u8 pad1E[2];
-} KwlnSpriteCorner;
-
-typedef struct KwlnSpriteVertex {
-    s32 r, g, b, a;
-    KwlnSpriteCorner corner[2];
-} KwlnSpriteVertex;
 
 extern u64 *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);

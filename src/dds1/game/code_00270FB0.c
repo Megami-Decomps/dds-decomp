@@ -183,7 +183,21 @@ u32 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, StaffMenuWork 
 extern s8 D_003BC6B5;
 
 extern void movReleaseActivePartyCategoryModels(u32 *, s32, StaffMenuWork *);
-INCLUDE_ASM(const s32, "game/code_00270FB0", movReleaseActivePartyCategoryModels);
+/* Release the base model and the adjusted one-based indices of active party models. */
+void movReleaseActivePartyCategoryModels(u32 *modelHandles, s32 unusedCount, StaffMenuWork *unusedWork) {
+    s32 partyIndex;
+
+    effResolveAndReleaseResource(modelHandles[0]);
+    for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
+        DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
+
+        if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
+            s32 modelIndex = partyRecord->unitId + D_003BC6B5;
+
+            effResolveAndReleaseResource((modelHandles + modelIndex)[-1]);
+        }
+    }
+}
 
 /* Resolve all category entries, except party models selected by active records. */
 void movReleaseCategoryModels(s32 category, StaffMenuWork *menu) {

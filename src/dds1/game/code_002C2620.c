@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "itf_grid_text.h"
 
 extern void fldShutdownLmapResources(void);
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
@@ -93,32 +94,8 @@ extern u32 D_003BA8EC;
 extern s32 D_003BD240;
 extern u32 D_003BD258;
 
-/* Cursor window over a doubly linked node list (prev at 0x18, next at 0x1C). */
-typedef struct LmapNode {
-    u8 unk0[0x18];
-    struct LmapNode *prev; /* 0x18 */
-    struct LmapNode *next; /* 0x1C */
-    struct LmapList *child; /* 0x20 */
-} LmapNode;
-
-typedef struct LmapList {
-    u8 unk0[6];
-    u16 windowCapacity; /* 0x6: maximum visible span */
-    s16 cursorOffset;   /* 0x8: cursor position relative to windowStart */
-    u8 unkA[2];
-    u32 flags;       /* 0xC: bit 0 locks the list */
-    LmapNode *windowStart; /* 0x10 */
-    LmapNode *rangeFirst;  /* 0x14 */
-    LmapNode *cursor;      /* 0x18 */
-    LmapNode *rangeLast;   /* 0x1C */
-    s32 x;
-    s32 y;
-    s32 width;
-    s32 height;
-    u8 pad30[4];
-    void (*selected)(struct LmapList *);
-    void (*draw)(s32, s32, s32, struct LmapList *, s32);
-} LmapList;
+typedef GridTextListItem LmapNode;
+typedef GridTextWidget LmapList;
 
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
 extern LmapNode *sdfGridSeekLastNode(LmapList *);
@@ -129,47 +106,47 @@ extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 
 /* Move the visible start forward without moving the cursor. */
 LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
-    LmapNode *cursor = list->cursor;
-    LmapNode *windowStart = list->windowStart;
+    LmapNode *cursor = list->selected;
+    LmapNode *windowStart = list->firstVisible;
 
-    if (cursor == list->rangeLast) {
+    if (cursor == list->tail) {
         return cursor;
     }
     windowStart = windowStart->next;
     if (windowStart == NULL) {
         return cursor;
     }
-    list->cursorOffset--;
-    list->windowStart = windowStart;
+    list->cursorRow--;
+    list->firstVisible = windowStart;
     return cursor;
 }
 
 /* Move the visible start backward only when a full forward span is available. */
 LmapNode *fldLmapExpandWindowBackward(LmapList *list) {
-    LmapNode *cursor = list->cursor;
-    LmapNode *windowStart = list->windowStart;
+    LmapNode *cursor = list->selected;
+    LmapNode *windowStart = list->firstVisible;
     LmapNode *scanNode;
     s32 stepIndex;
 
-    if (cursor == list->rangeFirst) {
+    if (cursor == list->head) {
         return cursor;
     }
     scanNode = windowStart;
-    for (stepIndex = 0; stepIndex < list->windowCapacity; stepIndex++) {
+    for (stepIndex = 0; stepIndex < list->rows; stepIndex++) {
         if (scanNode == NULL) {
             return cursor;
         }
         scanNode = scanNode->next;
     }
-    windowStart = windowStart->prev;
-    list->windowStart = windowStart;
-    list->cursorOffset++;
+    windowStart = windowStart->previous;
+    list->firstVisible = windowStart;
+    list->cursorRow++;
     return cursor;
 }
 
 /* Advance the unlocked cursor, wrapping at the range end and following its window. */
 LmapNode *fldLmapAdvanceCursor(LmapList *list) {
-    LmapNode *cursor = list->cursor;
+    LmapNode *cursor = list->selected;
     LmapNode *nextNode;
 
     if (cursor == 0) {
@@ -178,18 +155,18 @@ LmapNode *fldLmapAdvanceCursor(LmapList *list) {
     if (list->flags & 1) {
         return cursor;
     }
-    if (cursor == list->rangeLast) {
+    if (cursor == list->tail) {
         sdfGridSeekFirstNode(list);
-        return list->cursor;
+        return list->selected;
     }
     nextNode = cursor->next;
     if (nextNode == 0) {
         return cursor;
     }
     cursor = nextNode;
-    list->cursor = cursor;
-    list->cursorOffset++;
-    if (list->cursorOffset >= list->windowCapacity - 1) {
+    list->selected = cursor;
+    list->cursorRow++;
+    if (list->cursorRow >= list->rows - 1) {
         cursor = fldLmapAdvanceWindowStart(list);
     }
     return cursor;
@@ -197,7 +174,7 @@ LmapNode *fldLmapAdvanceCursor(LmapList *list) {
 
 /* Rewind the unlocked cursor, wrapping at the range start and following its window. */
 LmapNode *fldLmapRewindCursor(LmapList *list) {
-    LmapNode *cursor = list->cursor;
+    LmapNode *cursor = list->selected;
     LmapNode *previousNode;
 
     if (cursor == 0) {
@@ -206,18 +183,18 @@ LmapNode *fldLmapRewindCursor(LmapList *list) {
     if (list->flags & 1) {
         return cursor;
     }
-    if (cursor == list->rangeFirst) {
+    if (cursor == list->head) {
         sdfGridSeekLastNode(list);
-        return list->cursor;
+        return list->selected;
     }
-    previousNode = cursor->prev;
+    previousNode = cursor->previous;
     if (previousNode == 0) {
         return cursor;
     }
     cursor = previousNode;
-    list->cursor = cursor;
-    list->cursorOffset--;
-    if (list->cursorOffset <= 0) {
+    list->selected = cursor;
+    list->cursorRow--;
+    if (list->cursorRow <= 0) {
         cursor = fldLmapExpandWindowBackward(list);
     }
     return cursor;
@@ -232,7 +209,7 @@ LmapNode *fldLmapAdvanceThroughWindow(LmapList *list) {
     if (list->flags & 1) {
         return 0;
     }
-    steps = list->windowCapacity * 2 - list->cursorOffset;
+    steps = list->rows * 2 - list->cursorRow;
     for (i = 0; i < steps; i++) {
         result = fldLmapAdvanceCursor(list);
     }
@@ -248,7 +225,7 @@ LmapNode *fldLmapRewindThroughWindow(LmapList *list) {
     if (list->flags & 1) {
         return 0;
     }
-    steps = list->windowCapacity + list->cursorOffset;
+    steps = list->rows + list->cursorRow;
     for (i = 0; i < steps; i++) {
         result = fldLmapRewindCursor(list);
     }
@@ -297,8 +274,8 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
         }
     }
     func_002C22F0(x, y, z, list, channel);
-    if (list->draw != 0) {
-        list->draw(list->x + x, list->y + y, z, list, channel);
+    if (list->onDraw != 0) {
+        list->onDraw(list->x + x, list->y + y, z, list, channel);
     }
     if ((list->flags & 0x10) && D_003BD238 >= 2) {
         list->flags &= ~1;
@@ -309,11 +286,11 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
     } else {
         D_003BD968 = list;
         if (list->flags & 0x21) {
-            if (list->cursor->child != 0) {
-                fldLmapDrawListTree(x + ((list->width + 8) << 4), y, z, list->cursor->child, channel);
+            if (list->selected->child != 0) {
+                fldLmapDrawListTree(x + ((list->width + 8) << 4), y, z, list->selected->child, channel);
             }
-        } else if ((list->flags & 2) && list->selected != 0) {
-            list->selected(list);
+        } else if ((list->flags & 2) && list->onSelect != 0) {
+            list->onSelect(list);
         }
     }
     D_003BD238--;

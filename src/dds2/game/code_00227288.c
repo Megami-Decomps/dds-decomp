@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "dat_state.h"
 
 extern void btlSetActorEffectParameterOrMuzzlePosition();
 
@@ -15,7 +16,6 @@ extern void func_001E88A8();
 
 extern s32 mdlFlagTest(s32);
 
-extern s32 datGameState;
 
 extern s32 btlGetRuntime(void);
 
@@ -573,7 +573,7 @@ void func_002292D8(void) {
     hasKindTwo = 0;
     markedCount = 0;
     activeCount = 0;
-    entry = (u16 *)(datGameState + 0xa60);
+    entry = (u16 *)((u32)datGameState + 0xa60);
     index = 0;
     do {
         flags = *entry;
@@ -648,7 +648,24 @@ INCLUDE_ASM(const s32, "game/code_00227288", btlRemapListedUnitAction);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
-INCLUDE_ASM(const s32, "game/code_00227288", btlIsSceneUnitModeListed);
+s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
+    BtlState *battle;
+    u16 *listedMode;
+    u32 i;
+
+    if ((unit->flags & 0x400) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    i = 0;
+    listedMode = ((DatBattleSceneRecord *)(battle->battleMode * (s32)sizeof(DatBattleSceneRecord) + (u32)datBattleSceneRecords))->unitModes;
+    for (; i < 0xB; i++) {
+        if (listedMode[i] == unit->mode) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00229728);
 
