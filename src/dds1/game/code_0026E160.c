@@ -23,6 +23,18 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 
 extern void func_0026DED0(void *, SdfList *, void *, s8);
 
+typedef struct SpriteSpawnNode {
+    s32 x;
+    s32 y;
+    s32 framesLeft;
+    s32 duration;
+    u8 direction;
+    s8 mode;
+    u8 generations;
+    u8 variant;
+} SpriteSpawnNode;
+typedef char SpriteSpawnNode_size[(sizeof(SpriteSpawnNode) == 0x14) ? 1 : -1];
+
 typedef struct MovieResourceGroup {
     s32 allocation;
     SdfList *tasks[10];
@@ -34,7 +46,7 @@ extern void func_0026DEA8();
 
 SdfList *mnuTickMovieGroup(MovieResourceGroup *owner, SdfList *group) {
     SdfListNode *list = group->head;
-    u8 *node;
+    SpriteSpawnNode *node;
 
     if (list == NULL) {
         sdfDestroyTaskWork(group);
@@ -42,11 +54,11 @@ SdfList *mnuTickMovieGroup(MovieResourceGroup *owner, SdfList *group) {
     }
     do {
         node = list->value;
-        *(s32 *)(node + 8) = *(s32 *)(node + 8) - 1;
-        if (*(s32 *)(node + 8) == *(s32 *)(node + 0xC) - 5 && *(u8 *)(node + 0x12) != 0) {
-            func_0026DED0(owner, group, node, *(s8 *)(node + 0x11));
+        node->framesLeft = node->framesLeft - 1;
+        if (node->framesLeft == node->duration - 5 && node->generations != 0) {
+            func_0026DED0(owner, group, node, node->mode);
         }
-        if (*(s32 *)(node + 8) == 0) {
+        if (node->framesLeft == 0) {
             list = sdfListRemoveNode(group, list);
         } else {
             list = list->next;
