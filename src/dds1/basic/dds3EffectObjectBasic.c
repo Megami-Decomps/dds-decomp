@@ -116,7 +116,6 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001145C0);
 struct BillObj;
 struct EffNode;
 
-extern void func_00115E10(EffectObj *obj);
 extern u8 dds3TestObjectFlags(void *obj, s32 flags);
 extern void effUpdateNode(struct EffNode *node);
 extern void billInvokeCallback(struct BillObj *bill);
@@ -126,7 +125,7 @@ s32 func_00114988(EffectObj *obj) {
     EffectDependencyState *data;
 
     data = obj->data;
-    func_00115E10(obj);
+    effUpdateConfiguredBillboard((EffWorldNode *)obj);
     if ((data->flags & 1) == 0) {
         return 1;
     }

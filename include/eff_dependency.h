@@ -36,6 +36,7 @@ typedef char EffectDependencyState_config_at_0x3C[((u32)&((EffectDependencyState
 typedef char EffectDependencyState_position_at_0x40[((u32)&((EffectDependencyState *)0)->sourcePosition == 0x40) ? 1 : -1];
 
 void dds3ResetWorldResourceState(EffWorldNode *object);
+void effUpdateConfiguredBillboard(EffWorldNode *object);
 
 void effObjReleaseStateDependencies(EffectDependencyState *state);
 

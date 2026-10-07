@@ -533,6 +533,7 @@
 0x00115C80	effObjBindOwnerBillEntry	inferred	binds validated owner and marks an entry ID for forwarding [names_reviewed5.tsv]
 0x00115CD8	dds3ResetWorldResourceState	inferred	Clears a world resource state counters and active flags. [names_reviewed11.tsv]
 0x00115D08	billCopySourceVectorAndSetConfig	inferred	Copies source vector into billboard resource and attaches its config. [names_reviewed21.tsv]
+0x00115E10	effUpdateConfiguredBillboard	inferred	Updates kind-seven configured billboard eligibility, position offset and distance-based color or entry.
 0x00116148	dds3ReleaseEventData	inferred	Releases the event data handle and frees the event data allocation.
 0x00116188	dds3BackupEventNodeVectorsIfFlagged	inferred	EventObj node at +0x1C: test flag 1, clear it, then effObjInnerVecBackup.
 0x001161D8	dds3SpawnInnerVecObj8	inferred	type 8 object with first/second inner vectors
