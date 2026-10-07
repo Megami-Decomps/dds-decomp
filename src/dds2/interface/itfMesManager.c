@@ -208,7 +208,7 @@ void func_00154F18(s32);
 
 void itfMesSetWindowHighFlags(s32 window, u32 mask);
 
-void func_001A45C0(s32 window, s32 x, s32 y, s32 width);
+void func_001A45C0(s32 window, s32 slotIndex, s32 value, s32 selector);
 
 void itfMesClearWindowHighFlags(s32 window, u32 mask);
 
@@ -419,20 +419,20 @@ u32 func_001A3568(void) {
     return 1;
 }
 
-/* Read x, y and width in order for the script window; return 1. */
-s32 itfMesScriptSetWindowGeometry(void) {
+/* Read the text-slot index, value and selector from script parameters. */
+s32 itfMesScriptSetTextSlotFromValue(void) {
     s32 window = scrGetWindow();
-    s32 x;
-    s32 y;
-    s32 width;
+    s32 slotIndex;
+    s32 value;
+    s32 selector;
 
     if (window < 0) {
         return 1;
     }
-    x = scrReadIntParameter(0);
-    y = scrReadIntParameter(1);
-    width = scrReadIntParameter(2);
-    func_001A45C0(window, x, y, width);
+    slotIndex = scrReadIntParameter(0);
+    value = scrReadIntParameter(1);
+    selector = scrReadIntParameter(2);
+    func_001A45C0(window, slotIndex, value, selector);
     return 1;
 }
 

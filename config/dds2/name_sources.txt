@@ -1943,6 +1943,7 @@
 0x001A31E0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
 0x001A3458	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x001A34D0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]
+0x001A3570	itfMesScriptSetTextSlotFromValue	inferred	Reads script slot, value and selector arguments and installs the selected text in the active message window.
 0x001A38A0	itfMesGetGlobalWindowValue	inferred	Returns the stored word at offset 4 of the message manager's global window state.
 0x001A38D8	itfMesCreateWindow	inferred	twin of DDS1 0x0019B8A8: acquires a pool node, allocates the 0x1E0-byte message state, installs the sub resource, resets the sub blocks and bumps the window count at D_00452940 [names_M71_ItfBlur.tsv]
 0x001A39D0	itfMesDestroyWindowIfPresent	inferred	Checks window index and state pointer before destroying it. [names_reviewed6.tsv]
