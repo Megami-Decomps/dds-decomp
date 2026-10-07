@@ -3502,8 +3502,8 @@ s32 fileTestSlotFlagsBit(kind, flags)
     }
 }
 
-void fileTestSavedSlotFlags(u32 kind) {
-    fileTestSlotFlagsBit(kind, datGameState + 0xa54);
+s32 fileTestSavedSlotFlags(u32 kind) {
+    return fileTestSlotFlagsBit(kind, (s32 *)(datGameState + 0xA54));
 }
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D1058);
