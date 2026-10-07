@@ -122,7 +122,7 @@ void dds3DestroyWorldNode(EffWorldNode *worldNode) {
 /* Append a separate index node, then request initialCount entries from the shared
  * value pool. Only the upper-bound check occurs here: negative counts can still
  * produce a linked empty node when the growth helper rejects the request. */
-void *dds3AppendWorldIndexNode(s32 initialCount) {
+NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
     WorldInfo *worldInfo;
     NodeB *indexNode;
 

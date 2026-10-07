@@ -1,6 +1,8 @@
 #include "common.h"
 #include "evt_world.h"
 
+struct NodeB;
+
 /* Scalar and paired-index payloads are separate from the world's list table. */
 typedef struct WorldObjectPointer {
     u8 pad00[0x18];
@@ -149,7 +151,7 @@ void dds3DestroyObjectPointerChains(WorldObjectPointer *object) {
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void *dds3AppendWorldIndexNode(s32 index);
+extern struct NodeB *dds3AppendWorldIndexNode(s32 initialCount);
 
 u32 func_001110D0(void) {
     return 1;
