@@ -291,7 +291,8 @@ typedef struct BtlState {
     u8 pad2A8[4];
     BtlBackgroundId background; /* 0x2AC */
     s32 loadStep;
-    u8 pad2B4[0x10];
+    u8 specialEncounterBlocked; /* 0x2B4: scene setup latch blocks special encounter rolls. */
+    u8 pad2B5[0xF];
     struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetCurrentActor */
     s32 boundTask; /* 0x2CC */
