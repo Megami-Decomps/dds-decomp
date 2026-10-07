@@ -99,7 +99,7 @@ typedef struct EffParticleRecord {
 extern u32 effParModulateColors(u32, u32);
 
 typedef struct EffTemplatePacketList {
-    u8 pad00[0x10];
+    f32 origin[4];
     f32 x; /* 0x10 */
     f32 y; /* 0x14 */
     f32 z; /* 0x18 */
@@ -110,16 +110,37 @@ typedef struct EffTemplatePacketList {
     u16 kind; /* 0x30: resource type */
     u8 pad32[2];
     u16 subrecordCount; /* 0x34: subrecords per packet */
-    u8 pad36[0x6A];
+    u8 pad36[0x12];
+    u8 fade[0x4C]; /* 0x48 */
+    f32 speedJitter; /* 0x94 */
+    f32 spinJitter; /* 0x98 */
+    u8 pad9C[4];
     s32 templateSize; /* 0xA0: prefix copied before appending tail bytes */
-    u8 padA4[0x54];
+    u8 padA4[0xC];
+    f32 matrix[16]; /* 0xB0 */
+    u32 colorMask; /* 0xF0 */
+    u8 padF4[4];
     EffectBufferTail *buffer; /* 0xF8 */
-    u8 padFC[0x58];
-    s32 decayStep; /* 0x154 */
+    u8 padFC[0x46];
+    u16 active; /* 0x142 */
+    u8 pad144[0xC];
+    u8 randomSphere; /* 0x150 */
+    u8 restart; /* 0x151 */
+    u8 pad152[2];
+    union {
+        s32 decayStep; /* 0x154: subtraction from each later packet tag */
+        u32 delayRange; /* 0x154: bounded-radius spawn delay */
+    };
     f32 recordScale; /* 0x158 */
     union {
         f32 tailValues[4]; /* 0x15C-0x168: variant-specific scaled values */
         u32 tailWords[4];
+        struct {
+            f32 targetRadius; /* 0x15C */
+            f32 motionMagnitude; /* 0x160 */
+            f32 accelerationPct; /* 0x164 */
+            f32 unk168;
+        };
     };
     s32 recordList; /* 0x16C: start of the three-word packet records */
     s32 recordsPerPacket; /* 0x170 */
@@ -127,6 +148,8 @@ typedef struct EffTemplatePacketList {
     void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
     s32 auxiliaryAllocation; /* 0x17C */
 } EffTemplatePacketList;
+
+typedef char EffTemplatePacketList_layout_preserved[(sizeof(EffTemplatePacketList) == 0x180) ? 1 : -1];
 
 typedef struct EffInstance {
     u8 localMatrix[0x40]; /* 0x00 */
@@ -2367,7 +2390,142 @@ void effFreePacketRecordScaleTemplate(u32 effect) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EE70);
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F1C0);
+extern f32 D_003AAAB0[4];
+void func_0015EE70(EffTemplatePacketList *, s32);
+
+/* Reflect moving packets at the frame's entry radius. The first record's
+ * updated radius becomes the boundary on the following frame. */
+void func_0015F1C0(EffTemplatePacketList *effect) {
+    f32 origin[4];
+    f32 previousPosition[4];
+    /* Retail leaves the fourth broadcast components uninitialized. The
+     * XYZW operations propagate those W lanes into the packet stores. */
+    f32 reflectionScale[4];
+    f32 normal[4];
+    f32 boundaryScale[4];
+    s32 completedCount = 0;
+    s32 repeatEnabled;
+    EffPacket *packet = (EffPacket *)effect->buffer->records;
+    u32 subeffectKind = effect->kind;
+    s32 lifetimeFrames;
+    s32 packetCount;
+    s32 index;
+    f32 radiusStep;
+    f32 targetRadius;
+    f32 radius;
+    f32 velocityScale;
+
+    parUpdateSharedScaleAndDelta(&effect->kind);
+    lifetimeFrames = (s32)effect->packetTag;
+    targetRadius = effect->targetRadius;
+    radiusStep = (targetRadius - effect->recordScale) / lifetimeFrames;
+    velocityScale = effect->accelerationPct / 100.0f + 1.0f;
+    packetCount = (s32)effect->packetCount;
+    repeatEnabled = effect->restart;
+    radius = packet->f34;
+    if (radiusStep >= 0.0f) {
+        if (radius < targetRadius) {
+            packet->f34 = radius + radiusStep;
+            if (packet->f34 > targetRadius) {
+                packet->f34 = targetRadius;
+            }
+        }
+    } else {
+        if (radius > targetRadius) {
+            packet->f34 = radius + radiusStep;
+            if (packet->f34 < targetRadius) {
+                packet->f34 = targetRadius;
+            }
+        }
+    }
+    PCP_COPY_VECTOR(origin, effect->origin);
+    for (index = 0; index < packetCount; index++, packet++) {
+        s32 age = packet->age;
+        f32 distance;
+        f32 dot;
+        f32 dx, dy, dz;
+        f32 magnitude;
+
+        if (age == EFF_PACKET_INITIAL_TAG) {
+            func_0015EE70(effect, index);
+            age = packet->age;
+        }
+        if (age >= 0) {
+            packet->color = func_001616A8(effect->fade, packet->color, age);
+            packet->color = effParModulateColors(packet->color, effect->colorMask);
+            if (subeffectKind != 0) {
+                PCP_COPY_VECTOR(previousPosition, packet->pos);
+            }
+            magnitude = packet->f30;
+            dx = packet->vel[0] * magnitude;
+            dy = packet->vel[1] * magnitude;
+            dz = packet->vel[2] * magnitude;
+            packet->pos[0] += dx;
+            packet->pos[1] += dy;
+            packet->pos[2] += dz;
+            magnitude *= velocityScale;
+            packet->f30 = magnitude;
+            VU0_LOAD_VF(vf10, packet->pos);
+            VU0_LOAD_VF(vf11, origin);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_MOVE_VF(vf12, vf10);
+            VU0_LENGTH_VF10(distance);
+            VU0_MOVE_VF(vf10, vf12);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, normal);
+            if (distance > radius) {
+                VU0_LOAD_VF(vf10, packet->vel);
+                VU0_LOAD_VF(vf11, D_003AAAB0);
+                VU0_MUL(vf10, vf10, vf11);
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_LOAD_VF(vf10, origin);
+                VU0_LOAD_VF(vf11, packet->pos);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                VU0_MOVE_VF(vf11, vf12);
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_DOT_XYZ(dot, vf10, vf11);
+                reflectionScale[0] = dot * 2.0f;
+                reflectionScale[1] = dot * 2.0f;
+                reflectionScale[2] = dot * 2.0f;
+                VU0_LOAD_VF(vf10, reflectionScale);
+                VU0_MOVE_VF(vf11, vf12);
+                VU0_MUL(vf10, vf10, vf11);
+                VU0_LOAD_VF(vf11, packet->vel);
+                VU0_ADD(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                VU0_STORE_VF(vf10, packet->vel);
+                boundaryScale[0] = radius;
+                boundaryScale[1] = radius;
+                boundaryScale[2] = radius;
+                VU0_LOAD_VF(vf10, normal);
+                VU0_LOAD_VF(vf11, boundaryScale);
+                VU0_MUL(vf10, vf10, vf11);
+                VU0_LOAD_VF(vf11, origin);
+                VU0_ADD(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, packet->pos);
+            }
+            if (subeffectKind != 0) {
+                VU0_LOAD_VF(vf12, previousPosition);
+                VU0_LOAD_VF(vf10, packet->pos);
+                parDispatchKindUpdate(&effect->kind, index, packet->color, packet->speed);
+            }
+        }
+        age++;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = EFF_PACKET_INITIAL_TAG;
+            } else {
+                parDispatchKindInit(&effect->kind, index);
+                completedCount++;
+                if (completedCount >= packetCount) {
+                    effect->active = 0;
+                }
+            }
+        }
+        packet->age = age;
+    }
+}
 
 void func_0015F560(void) {
     effInitParticleRecord();
