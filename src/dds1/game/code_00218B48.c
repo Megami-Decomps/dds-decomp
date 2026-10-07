@@ -2016,7 +2016,60 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE70);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE80);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021CB80);
+extern const s32 D_00367B38[];
+extern const char *D_00367B60[];
+extern const char *D_00367B70[];
+extern char D_003BBC90[];
+extern char D_003BBC98[];
+extern char D_003BBCA0[];
+extern char D_003BBCA8[];
+
+void func_0021CB80(void) {
+    /* The native prologue fills and then indexes these three status bytes
+     * at sp+0..2; this is a real temporary stack table, not a source view. */
+    s8 enabled[3];
+    s32 packetList;
+    s32 i;
+    s32 y;
+    s32 style;
+    s16 value;
+
+    mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0x1320, 0x5D0, 0);
+    enabled[0] = mdlViewerState.unk0E;
+    packetList = mdlViewerState.packetList;
+    enabled[1] = mdlIsDebugTimeGraph();
+    enabled[2] = mdlViewerState.unk0F;
+    for (i = 0, y = 0x7A80; i < 3; i++, y += 0x60) {
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7300, y, 0xFF0080, 0, D_00367B60[i],
+            enabled[i] == 0 ? D_003BBC90 : D_003BBC98)));
+    }
+    if (mdlViewerState.unk09 < 20) {
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7240, D_00367B38[mdlViewerState.unk3C], 0xFF0080, 0, D_003BBCA0)));
+    }
+    fldDrawPackedRgbEditor((void *)packetList, 0x7300, D_00367B38[3],
+                           mdlViewerState.unk3E == 1 ? mdlViewerState.unk3C - 3 : -1,
+                           D_003BA8EC, 0);
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+        0x7B40, 0x7C60, 0xFF0080, 0, "BACK COLOR")));
+    for (i = 0; i < 3; i++) {
+        /* The native channel loop clears the selected channel value before the switch. */
+        value = 0;
+        switch (i) {
+        case 0: value = mdlViewerState.unk4A; break;
+        case 1: value = mdlViewerState.unk4C; break;
+        case 2: value = mdlViewerState.unk4E; break;
+        }
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7300, 0x7D80 + i * 0x60, 0xFF0080, 0, D_00367B70[i], value)));
+        style = i == mdlViewerState.unk3C - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
+        sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+            0x7F00, 0x7D80 + i * 0x60, 0xFF0080, style, D_003BBCA8, value)));
+    }
+    sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(
+        0x7300, 0x7F00, 0xFF0080, 0, "SAVE CONFIG")));
+}
 
 u32 mdlRunViewerSettingsTask(void) {
     mdlUpdateViewerSettingsInput();
