@@ -52,7 +52,7 @@ extern u32 dds3GetWorldValueCount();
 extern struct NodeB *dds3AppendWorldIndexNode(s32 initialCount);
 extern u32 dds3ReadIndexedWorldObjectWord();
 extern u32 dds3AdvanceObjectValueCursor();
-extern void dds3DestroyWorldIndexNode();
+extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void *dds3CopyWorldListToValueChain(void *object, s32 kind);
 
@@ -94,7 +94,7 @@ void *dds3GetFirstWorldObjectNodeOfKind2(void) {
     }
     dds3ResetObjectValueCursor(indexObject);
     node = (void *)dds3ReadIndexedWorldObjectWord(indexObject);
-    dds3DestroyWorldIndexNode(indexObject);
+    dds3DestroyWorldIndexNode((struct NodeB *)indexObject);
     return node;
 }
 

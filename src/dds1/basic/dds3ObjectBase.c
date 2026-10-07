@@ -24,7 +24,7 @@ void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void sdfDestroyMotion(void *arg);
 void func_00111258(void *slot, void *owner);
 void dds3RemoveWorldObjectNode(void *node);
-void dds3DestroyWorldIndexNode(u32 node);
+void dds3DestroyWorldIndexNode(NodeB *node);
 void sdfReleaseChipBlock(void *block);
 void dds3ReleaseObjectBaseResources(World *world);
 
@@ -63,7 +63,7 @@ void dds3DestroyObjectBase(ObjBase *base) {
     if (base->devSlot != 0) {
         sdfReleaseDevSlot(base->devSlot, 1, 1);
     }
-    dds3DestroyWorldIndexNode(base->worldIndexNode);
+    dds3DestroyWorldIndexNode((NodeB *)base->worldIndexNode);
     sdfReleaseChipBlock(base);
 }
 
