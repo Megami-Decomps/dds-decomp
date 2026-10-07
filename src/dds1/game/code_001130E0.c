@@ -31,8 +31,8 @@ u32 dds3GetEffectDataHandle(EffectObject *obj) {
     return (u32)obj->data->handle;
 }
 
-u32 effObjGetTransitionWork(EffectObject *obj) {
-    return (u32)obj->data->transitionWork;
+EvtUnit *effObjGetTransitionWork(EffWorldNode *object) {
+    return ((EffectObjectData *)object->data)->transitionWork;
 }
 
 void func_00113100(EffectObject *obj, u32 value) {
@@ -323,31 +323,16 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
     return 1;
 }
 
-typedef struct FollowTargetInfo {
-    u32 flags;       /* 0x00 */
-    u8 pad04[0x14];
-    s32 mapRecord;   /* 0x18 */
-} FollowTargetInfo;
-
-typedef struct FollowTarget {
-    u8 pad00[0x8C];
-    FollowTargetInfo *info; /* 0x8C */
-    u8 pad90[0x43];
-    u8 height;       /* 0xD3 */
-    f32 offsetY;     /* 0xD4 */
-} FollowTarget;
-
-
-
 extern void func_001122F0(void *, EffWorldNode *);
 extern void func_0011ECC8(EffectObject *);
-extern s32 sdfLoadMapRecordPositionVector(s32, s32);
+typedef struct SdfTextParam SdfTextParam;
+extern s32 sdfLoadMapRecordPositionVector(SdfTextParam *param, s32 id);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 extern u8 D_00325788[];
 
 s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     f32 vec[4];
-    FollowTarget *target;
+    EvtUnit *target;
     MdlCtx *config;
     s32 level;
     s32 pickMode;
@@ -357,8 +342,8 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     if (dds3TestObjectFlags(obj, 1)) {
         return 1;
     }
-    target = (FollowTarget *)effObjGetTransitionWork(obj);
-    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->info->flags & 1)) {
+    target = effObjGetTransitionWork((EffWorldNode *)obj);
+    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->owner->flags & 1)) {
         func_0011ECC8(obj);
     }
     if ((s32)obj->data->word14 == -1) {
@@ -377,14 +362,14 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     }
     config = (MdlCtx *)dds3GetEffectObjectModelHolder((EffWorldNode *)obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
-        level = target->height;
+        level = target->unkD3;
     } else {
         level = config->inner->color >> 24;
     }
     pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
-    if (sdfLoadMapRecordPositionVector(target->info->mapRecord, 0)) {
+    if (sdfLoadMapRecordPositionVector((SdfTextParam *)target->owner->inner, 0)) {
         VU0_STORE_VF(vf10, vec);
-        vec[1] = pickMode == 1 ? target->offsetY : obj->source[0x11];
+        vec[1] = pickMode == 1 ? target->unkD4 : obj->source[0x11];
         func_0011E280(level, vec[0], vec[1], vec[2], obj->source[0x31]);
     } else {
         if (effObjTestNodeFlags(obj->source, 8)) {
@@ -397,7 +382,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
             vec[2] = obj->source[0x12];
         }
         if (pickMode == 1) {
-            vec[1] = target->offsetY;
+            vec[1] = target->unkD4;
         }
         func_0011E280(level, vec[0], vec[1], vec[2], obj->source[0x31]);
     }
