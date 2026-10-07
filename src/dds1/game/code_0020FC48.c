@@ -1410,13 +1410,13 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     runtime->options |= 1;
 }
 
-extern void func_002D5CD0(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfCreateGraphBufferCopyPacket(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void btlInitializeOverlayGraphics(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
     SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    func_002D5CD0(packetList, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfCreateGraphBufferCopyPacket(packetList, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
     btlRuntimeState.options |= 1;

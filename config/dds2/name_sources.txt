@@ -5813,7 +5813,7 @@
 0x0032D218	sdfConnectPacketLists	inferred	confidence=high; matched-C; src/dds2/game/code_0032C278.c:583:func_0032D218; Connects the previous list tail to the next list first node, inserting changed reference DMA nodes or inheriting missing reference sources before patching the final NEXT tag.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0032D3F0	sdfClearLinkedPacketList	inferred	Clears all four linked-packet list header fields. [names_reviewed8.tsv]
 0x0032D408	sdfAppendLinkedPacketNode	inferred	Appends a pointer-linked packet node to a list and clears the node's next pointer.
-0x0032D428	sdfClearPacketListHead	inferred	Clears packet list head and first-node pointer. [names_reviewed8.tsv]
+0x0032D428	sdfClearPacketChain	inferred	Clears the linked-packet chain head and tail pointers.
 0x0032D438	sdfAppendPacketChainNode	inferred	Links a node after the stored tail or installs it as head. [names_reviewed8.tsv]
 0x0032D460	sdfInitializeDmaReferenceTag	inferred	Initializes packet DMA tag with source address and GIF marker. [names_reviewed8.tsv]
 0x0032D4A0	sdfBuildDmaReferenceChain	inferred	Builds chained DMA reference and terminal tag words. [names_reviewed8.tsv]
@@ -5846,6 +5846,7 @@
 0x0032E918	sdfWriteImageTransferRegisters	inferred	L13
 0x0032E9C8	sdfInitializeExtendedDrawPacket	inferred	Initializes extended draw packet DMA header and writes its payload. [names_reviewed8.tsv]
 0x0032EB40	sdfPatchPacketResourceReference	inferred	Patches low packet reference bits from indexed resource table entry. [names_reviewed8.tsv]
+0x0032EB80	sdfCreateGraphBufferCopyPacket	inferred	Builds a local-to-local GS copy packet from graph buffer zero into the destination, publishing its linked metadata node and DMA payload.
 0x0032ECA8	sdfBuildPacket116	inferred	GIF packet with 0x116 flag
 0x0032ED60	sdfAppendTexturedLinePacket	inferred	Allocates and appends packet containing UV and XYZ for two vertices. [names_reviewed8.tsv]
 0x0032EE88	sdfBuildTriPacket104	inferred	GIF packet with 0x104 flag and three vertex pairs
