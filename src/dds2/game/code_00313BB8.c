@@ -2,6 +2,7 @@
 #include "dsp_name.h"
 #include "common.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 extern void memset();
 
 #include "fpu.h"
@@ -1233,14 +1234,14 @@ void func_00316680(SdfFlagListWork *work) {
     color = func_002D7458(&work->params.color, &work->params.alpha, frame, maxFrames);
     count = work->params.count;
     spawnRange = count >> 4;
-    halfFov = sdfSceneProjectionParameters.fov * 0.5f;
+    halfFov = sdfSceneProjectionParameters.camera.fov * 0.5f;
     mark = work->marks;
     vertices = work->vertices;
     colors = work->colors;
     spreadX = sdfAtan2Poly(halfFov * 1.5f * 512.0f / 448.0f);
     spreadY = sdfAtan2Poly(halfFov);
     /* Retail evaluates these two as well and never uses the results. */
-    sdfAtan2Poly(sdfSceneProjectionParameters.fov);
+    sdfAtan2Poly(sdfSceneProjectionParameters.camera.fov);
     sdfAtan2Poly(3.14159265f / 4.0f);
     if (spawnRange != 0) {
         spawn = effMiscRand(effSharedRandomState) % spawnRange + 1;

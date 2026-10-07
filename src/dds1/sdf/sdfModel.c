@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
@@ -56,15 +57,12 @@ typedef struct {
     s32 fourthWord;
 } SdfMsg;
 
-typedef struct {
+struct SdfItemList {
     s32 count;           /* 0x00: entry count */
     u8 pad_0x04[0x0C];   /* 0x04 */
     u8 firstItem;        /* 0x10: entries, 0x50 stride */
-} SdfItemList;
+};
 
-typedef struct {
-    SdfItemList *items;   /* 0x00 */
-} SdfItemListRef;
 
 /* Per-item record applied to a draw node by sdfDrawNodeSetFromItem (0x50 bytes). */
 typedef struct {
@@ -80,7 +78,6 @@ typedef struct {
     s32 boundsAddress; /* 0x40: optional local-box corners used by clipping */
 } SdfItem;
 
-extern SdfModel *sdfModelCreateFromAssetData(void *arg0, void *arg1);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_002E7F20(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);

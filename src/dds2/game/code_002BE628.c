@@ -4,6 +4,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "sdf.h"
+#include "sdf_projection.h"
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
@@ -2388,8 +2389,6 @@ void func_002C6758(s32 encodedIndex, f32 *rotation) {
 }
 
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
-extern void sdfConsCacheTransformedNode(void *node, void *matrix);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 D_003E7960[];
 extern u8 sdfViewTargetVector[];
@@ -2428,7 +2427,7 @@ void evtStageTestResetViewAndLighting(void)
     kwlnSetBackgroundColorTarget(0, backgroundColor);
     kwlnSetDrawColorTarget(0, drawColor);
     evtSetDrawVectorTarget(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
-    sdfSceneProjectionParameters.fov = 0.7551905f;
+    sdfSceneProjectionParameters.camera.fov = 0.7551905f;
     PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
     PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
     PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);
@@ -2438,8 +2437,8 @@ void evtStageTestResetViewAndLighting(void)
 
 /* Set the horizontal projection offset while retaining the native GS-coordinate bias. */
 void mnuSetStageTestCameraOffset(f32 offset) {
-    sdfSceneProjectionParameters.offsetY = EVT_STAGE_PROJECTION_BIAS;
-    sdfSceneProjectionParameters.offsetX = offset + EVT_STAGE_PROJECTION_BIAS;
+    sdfSceneProjectionParameters.camera.offsetY = EVT_STAGE_PROJECTION_BIAS;
+    sdfSceneProjectionParameters.camera.offsetX = offset + EVT_STAGE_PROJECTION_BIAS;
     evtStageTestResetViewAndLighting();
 }
 
@@ -2492,8 +2491,8 @@ void evtStageTestStop(void) {
 /* Stop the viewer and reset both projection offsets to the native coordinate bias. */
 void mnuResetWorkFloats(void) {
     evtStageTestStop();
-    sdfSceneProjectionParameters.offsetX = EVT_STAGE_PROJECTION_BIAS;
-    sdfSceneProjectionParameters.offsetY = EVT_STAGE_PROJECTION_BIAS;
+    sdfSceneProjectionParameters.camera.offsetX = EVT_STAGE_PROJECTION_BIAS;
+    sdfSceneProjectionParameters.camera.offsetY = EVT_STAGE_PROJECTION_BIAS;
 }
 
 /* Remember the model asset request result for the stage viewer. */
@@ -2663,7 +2662,7 @@ void evtStageTestUpdateCamera(void)
     PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
     PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
     PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);
-    sdfCameraBuildProjection(&sdfSceneProjectionParameters);
+    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
@@ -2678,7 +2677,7 @@ void evtStageTestUpdateCamera(void)
     VU0_STORE_VF_UNCLOBBERED(vf10, &target);
     sdfVuBuildLookAtBasis(&eye, &target, sdfViewUpVector);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
-    sdfConsBuildMatrixPacket(D_003820F0 + drawBufferIndex * 8000, &sdfSceneProjectionParameters, sdfViewMatrix);
+    sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_003820F0 + drawBufferIndex * 8000), &sdfSceneProjectionParameters, sdfViewMatrix);
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
