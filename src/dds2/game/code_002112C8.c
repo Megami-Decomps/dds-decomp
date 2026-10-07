@@ -8,6 +8,7 @@
 #include "btl_state.h"
 #include "eff_transform.h"
 #include "dat_state.h"
+#include "dat_command.h"
 #include "evt_unit.h"
 #include "mdl.h"
 
@@ -323,8 +324,6 @@ extern s32 func_001B3200(s32);
 
 extern s32 func_00213F58(s32, s16, s8);
 extern s8 *datCommandSelectors;
-
-extern s32 datCommandRecords;
 
 extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
@@ -1412,7 +1411,7 @@ s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
                     if (force != 0) {
                         return 1;
                     }
-                    if ((u8)(*(u8 *)(datCommandRecords + actionId * 0x38 + 9) - 1) < 2) {
+                    if ((u8)(datCommandRecords[actionId].options - 1) < 2) {
                         return 1;
                     }
                 }
@@ -1424,7 +1423,7 @@ s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
         if (force != 0) {
             return 1;
         }
-        if ((u8)(*(u8 *)(datCommandRecords + actionId * 0x38 + 9) - 1) < 2) {
+        if ((u8)(datCommandRecords[actionId].options - 1) < 2) {
             return 1;
         }
     }
@@ -1520,7 +1519,7 @@ s32 btlAnyEnemyHasFullActionSet(void) {
 s32 btlHasEligibleQueuedSpecialAction(void) {
     u8 *actor;
     BtlUnit *unit;
-    u8 *actionEntry;
+    DatCommandRecord *actionEntry;
     s16 actionId;
     s32 i;
     for (actor = (u8 *)((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = (u8 *)((ActionStateLink *)actor)->next) {
@@ -1539,11 +1538,11 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
             if ((u32)(*(u8 *)(datCommandSelectors + actionId * 2) - 0x10) < 2U) {
                 continue;
             }
-            actionEntry = (u8 *)(actionId * 0x38 + datCommandRecords);
-            if (actionEntry[8] == 0) {
+            actionEntry = (DatCommandRecord *)(actionId * 0x38 + (s32)datCommandRecords);
+            if (actionEntry->unk_08 == 0) {
                 continue;
             }
-            if (actionEntry[9] != 2) {
+            if (actionEntry->options != 2) {
                 continue;
             }
             return 1;
@@ -4981,16 +4980,6 @@ s32 btlIsSpecialMotion(ActionUnit *actor) {
     }
 }
 
-typedef struct BattleCommandRecord {
-    u8 pad00;
-    u8 flags;
-    u8 pad02[6];
-    u8 enabled;
-    u8 pad09[0xD];
-    u16 kind;
-    u8 pad18[0x20];
-} BattleCommandRecord;
-
 /* Pick a permitted shadow skill from the corresponding party member's list. */
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041AAC8);
 
@@ -5035,7 +5024,7 @@ void func_0021F3E8(ActionStateLink *actor) {
         case 18:
             continue;
         }
-        if (!(((BattleCommandRecord *)datCommandRecords)[skillId].flags & 2)) continue;
+        if (!(datCommandRecords[skillId].unk_01 & 2)) continue;
         switch (skillId) {
         case 0x09:
         case 0x12:
@@ -6798,7 +6787,7 @@ f32 func_00226308(BattleActionUnit *unit, s32 actor, s32 command, s32 mode) {
 
     if (mode == 1) {
         if ((unit->flags & 0x400) != 0 && unit->kind == 0x127) {
-            switch (((BattleCommandRecord *)datCommandRecords)[command].kind) {
+            switch (datCommandRecords[command].primaryLimitKind) {
             case 3:
             case 4:
             case 5:
@@ -7125,7 +7114,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     }
     if (actor->flags & 0x200) {
         if (command != 0) {
-            if (((BattleCommandRecord *)datCommandRecords)[command].enabled == 0) {
+            if (datCommandRecords[command].unk_08 == 0) {
                 return 0;
             }
         }
