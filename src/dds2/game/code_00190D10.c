@@ -83,7 +83,7 @@ EffMagatuhiValueWork *func_00190E58(s32 count, s32 frames, f32 param08, s32 para
     resource->validCounts = (u16 *)validCounts;
     resource->angleRows = (f32 (*)[4])angleValues;
     resource->allocationHandle = allocation;
-    resource->texture = effGetResourceFirstWord(0);
+    resource->texture = (SdfTex *)effGetResourceFirstWord(0);
 
     defaults = D_00452110;
     i = 0;
