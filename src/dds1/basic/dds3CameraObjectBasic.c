@@ -70,7 +70,7 @@ u32 func_00112AE0(void) {
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
-extern void sdfVuBuildLookAtBasis(void *eye, void *target, void *up);
+extern void sdfVuBuildLookAtBasis(void *target, void *origin, void *up);
 
 /* Transform the local eye/up vectors through the inner node and rebuild the
  * world-space look-at basis. */
@@ -112,7 +112,7 @@ EffWorldNode *dds3CreateCameraObjectWithSlotData(s32 key) {
 }
 
 /* Create a camera with the default local eye/up vectors and relative eye mode. */
-EffWorldNode *dds3CreateCameraObject(s32 counter, void *targetPosition, void *rotation) {
+EffWorldNode *dds3CreateCameraObject(s32 key, void *targetPosition, void *rotation) {
     CameraVector initialUp;
     CameraVector initialEyeOffset;
     EffWorldNode *camera;
@@ -120,7 +120,7 @@ EffWorldNode *dds3CreateCameraObject(s32 counter, void *targetPosition, void *ro
 
     initialUp = *(CameraVector *)D_0039F6F8;
     initialEyeOffset = *(CameraVector *)D_0039F708;
-    camera = dds3CreateCameraObjectWithSlotData(counter);
+    camera = dds3CreateCameraObjectWithSlotData(key);
     data = ((CameraData *)camera->data);
     data->eyeIsRelative = 1;
     data->fieldOfView = 0.6283185f;
@@ -134,8 +134,8 @@ EffWorldNode *dds3CreateCameraObject(s32 counter, void *targetPosition, void *ro
 }
 
 /* Create a camera with an explicit world eye and an up vector rotated by its node. */
-EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp) {
-    EffWorldNode *obj = dds3CreateCameraObjectWithSlotData(value);
+EffWorldNode *dds3CreateConfiguredCameraObject(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp) {
+    EffWorldNode *obj = dds3CreateCameraObjectWithSlotData(key);
     CameraData *data = obj->data;
 
     data->fieldOfView = 0.6283185f;
@@ -150,8 +150,8 @@ EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, 
 
 /* Store the eye vector as a local offset; flag 0 also seeds the world eye.
  * The basis rebuild transforms that offset only when eyeIsRelative is 1. */
-EffWorldNode *dds3CreateCameraObjectWithVectors(s32 slotValue, f32 fieldOfView, void *targetPosition, u128 *eyeVector, u128 *localUp, s32 eyeIsRelative) {
-    EffWorldNode *obj = dds3CreateCameraObjectWithSlotData(slotValue);
+EffWorldNode *dds3CreateCameraObjectWithVectors(s32 key, f32 fieldOfView, void *targetPosition, u128 *eyeVector, u128 *localUp, s32 eyeIsRelative) {
+    EffWorldNode *obj = dds3CreateCameraObjectWithSlotData(key);
     CameraData *data = obj->data;
 
     data->fieldOfView = fieldOfView;
