@@ -47,8 +47,8 @@ extern void sdfReleaseChipBlock(void *ptr);
 extern void effReleaseScatterObject(u32 res);
 extern void sdfQueueAssetRelease(u32 res);
 extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
-extern u32 sdfTexAcquireResourceTexture(u32 resId);
-extern void sdfTexReleaseReferenceViaHandler(u32 res);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
@@ -1243,7 +1243,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket((s32)packet, 0);
     if (pool->sharedResource != NULL) {
-        func_002DA438(pool->drawAsset, pool->sharedResource->textureHandle);
+        func_002DA438(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
         D_003D6580->texcoords = D_00354AC0;
     } else {
         D_003D6580->texcoords = NULL;
@@ -1307,7 +1307,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     PcpScatterRes *res;
 
     res = sdfAllocSizeClassBlock(EFF_SCATTER_RES_BYTES);
-    res->textureHandle = sdfTexAcquireResourceTexture(resId);
+    res->textureHandle = sdfTexAcquireResourceTexture((void *)resId);
     res->refCount = 1;
     return res;
 }
