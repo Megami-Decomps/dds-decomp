@@ -51,7 +51,7 @@ extern u32 effMiscRand(void *state);
 
 extern u8 D_003AA868[];
 
-extern s32 effMathGetSlotAt(void *slots, s32 index);
+extern void *effMathGetSlotAt(void *slots, s32 index);
 
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 

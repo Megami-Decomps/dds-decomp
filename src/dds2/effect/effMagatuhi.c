@@ -161,7 +161,7 @@ extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern s32 effMathGetSlotAt(void *slots, s32 index);
+extern void *effMathGetSlotAt(void *slots, s32 index);
 
 
 void func_001918B8(EffMagatuhiValueWork *valueWork, s32 index) {

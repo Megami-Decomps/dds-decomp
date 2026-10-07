@@ -65,6 +65,6 @@ void effMathResetBezierSlot(EffArrHdr *table, s32 index) {
     slot->t = 0;
 }
 
-s32 effMathGetSlotAt(EffArrHdr *table, s32 index) {
-    return (s32)&((EffCubicBezierSlot *)table->slots)[index];
+void *effMathGetSlotAt(EffArrHdr *table, s32 index) {
+    return &((EffCubicBezierSlot *)table->slots)[index];
 }
