@@ -6818,7 +6818,70 @@ typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F64D8);
+/* Tint selected eligible actors, then restore their original RGB at fade-out. */
+void func_002F64D8(EffActiveResource *work) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *actors[16];
+    EffActorTintConfig *config = work->payload;
+    u32 frame = work->frame;
+    u32 color = config->color;
+    u32 count = effCollectModelEffectActors(actors, config->actorSelection);
+    u32 i;
+
+    if (frame == 0) {
+        for (i = 0; i < count; i++) {
+            if (actors[i]->flags & 2) {
+                if (actors[i]->flags & 0xE0) {
+                    s32 handled;
+
+                    if (actors[i]->flags & 0x200) {
+                        continue;
+                    }
+                    handled = 0;
+                    if (state->hook618 != NULL) {
+                        handled = state->hook618(actors[i]);
+                    }
+                    if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
+                        continue;
+                    }
+                }
+                {
+                    u32 baseColor = actors[i]->baseColor;
+                    EvtUnit *effect = actors[i]->ext;
+                    u32 blended;
+
+                    if ((baseColor & 0xFFFFFF) != 0x808080) {
+                        blended = (color & baseColor) + (((color ^ baseColor) & 0xFEFEFEFE) >> 1);
+                    } else {
+                        blended = color;
+                    }
+                    evtSetUnitRgbTransition(effect, config->fadeIn, blended);
+                }
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->fadeOut) {
+        for (i = 0; i < count; i++) {
+            if (actors[i]->flags & 2) {
+                if (actors[i]->flags & 0xE0) {
+                    s32 handled;
+
+                    if (actors[i]->flags & 0x200) {
+                        continue;
+                    }
+                    handled = 0;
+                    if (state->hook618 != NULL) {
+                        handled = state->hook618(actors[i]);
+                    }
+                    if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
+                        continue;
+                    }
+                }
+                evtSetUnitRgbTransition(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
+            }
+        }
+    }
+}
 
 s32 effComputeLightDirectionVU(MdlCtx *model, void *target) {
     if (btlIsRuntimeAllocated() == 0) {
