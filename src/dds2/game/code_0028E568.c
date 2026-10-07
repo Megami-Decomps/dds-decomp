@@ -64,7 +64,8 @@ typedef struct MenuSearchObject {
     MenuSearchList *list;
     u8 pad8[0x238];
     MantraMenuWork work;
-} MenuSearchObject;
+    u8 paddingC04[4];
+} MenuSearchObject; /* Full 0xC08-byte status-resource allocation. */
 
 extern s32 mnuGetMantraNodePositionRecord(s16);
 
@@ -76,7 +77,43 @@ extern s32 ptyGetProfileRecordCap(u16);
 
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028E568);
+/* Full selection work allocated by evtAllocateMantraSelectionWork. */
+typedef struct MantraLimitSlot {
+    u32 allocation;
+    u32 capacity;
+    u16 *values;
+    u8 data[0x160];
+} MantraLimitSlot;
+
+typedef char MenuSearchObject_size_must_be_0xC08[(sizeof(MenuSearchObject) == 0xC08) ? 1 : -1];
+typedef char MantraLimitSlot_size_must_be_0x16C[(sizeof(MantraLimitSlot) == 0x16C) ? 1 : -1];
+
+struct MantraPanelPool;
+struct MantraPanelAnimation;
+extern u32 func_002890A8(void *object);
+extern struct MantraPanelAnimation *mnuSpawnPanelSlotA(struct MantraPanelPool *, s32, s8, s16, s16, u32);
+extern void mnuOffsetPanelAndSetVisualParams(struct MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
+extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
+extern void mnuStorePanelEntry(s32, s32);
+
+/* Mark the selected mantra node and start its panel animation. */
+void func_0028E568(MenuSearchObject *menu, u16 nodeId) {
+    u32 selected;
+    MantraLimitSlot *slot;
+    u16 *entry;
+    struct MantraPanelAnimation *panel;
+
+    mnuGetMantraNodePositionRecord((s16)nodeId);
+    selected = func_002890A8(menu);
+    slot = (MantraLimitSlot *)menu->work.spriteHandles[selected];
+    entry = slot->values + nodeId;
+    *entry = (*entry & 0xFFF0) | 1;
+    panel = mnuSpawnPanelSlotA((struct MantraPanelPool *)menu->work.displaySprite,
+                              nodeId, 8, 0, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+    mnuQueuePanelAnimationTransition(panel, 3, 0);
+    mnuStorePanelEntry(0x20009, 0x14);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028E568", func_0028E638);
 
@@ -202,10 +239,7 @@ void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
     }
 }
 
-typedef struct MantraLimitSlot {
-    u8 pad0[8];
-    u16 *values;
-} MantraLimitSlot;
+
 
 extern u32 func_002890A8(void *object);
 
