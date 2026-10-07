@@ -1,3 +1,4 @@
+#include "fpu.h"
 #include "common.h"
 #include "dat_command.h"
 #include "dds3obj.h"
@@ -10,7 +11,7 @@
 #include "eff.h"
 #include "dat_state.h"
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 #define MNU_PANEL_ITEM_COUNT 5
 #define MNU_PANEL_STATE_BYTES 0x8C
@@ -213,15 +214,15 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
 typedef struct MenuList MenuList;
 
 
-/* Set the separate +0x100 word in both content banks of every page. */
-void mnuSetPanelSlotValues(MenuPageWindow *menu, s32 value) {
+/* Give both complete commands in each page the same draw resource. */
+void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *value) {
     MenuPageSlot *panel = menu->slots;
     s32 i;
     s32 j;
 
     for (i = 0; i < 5; i++, panel++) {
         for (j = 0; j < 2; j++) {
-            panel->contents[j].unk100 = value;
+            panel->commands[j].resources = value;
         }
     }
 }
@@ -241,22 +242,21 @@ void func_002BEE38(MenuQueuedCommand *entry) {
  * is below 0x200. Retail has no explicit return: its last call is a plain jal. */
 s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) {
     MenuPageSlot *panel = &menu->slots[window];
-    s32 *count = &panel->contents[0].command.initialValue;
     s32 best = 0x200;
     s32 bestIndex = 0;
     s32 i;
     MenuQueuedCommand *entry;
     u32 flags;
 
-    /* Selection words are one content-bank stride apart. */
-    for (i = 0; i < 2; i++, count += sizeof(MenuPageSlotContent) / sizeof(*count)) {
-        if (*count < best) {
-            best = *count;
+    /* Both command records carry their own selection value. */
+    for (i = 0; i < 2; i++) {
+        if (panel->commands[i].initialValue < best) {
+            best = panel->commands[i].initialValue;
             bestIndex = i;
         }
     }
     flags = datGameState->party[window].flags;
-    entry = &panel->contents[bestIndex].command;
+    entry = &panel->commands[bestIndex];
     entry->initialValue = 0x200;
     entry->argument = argument;
     entry->kind = kind;
@@ -290,17 +290,17 @@ void mnuClearSpriteRecord(MenuQueuedCommand *entry) {
     entry->argument = 0;
 }
 
-/* Clear both command headers; they are embedded in separate content banks. */
+/* Clear only the two command headers, preserving resources and particle arrays. */
 void mnuClearPairedSpriteRecords(MenuPageWindow *menu, s32 index) {
     MenuQueuedCommand *entry;
     s32 remaining;
 
     remaining = 1;
-    entry = &menu->slots[index].contents[0].command;
+    entry = &menu->slots[index].commands[0];
     do {
         remaining = remaining - 1;
         mnuClearSpriteRecord(entry);
-        entry = (MenuQueuedCommand *)((u8 *)entry + sizeof(MenuPageSlotContent));
+        entry++;
     } while (-1 < remaining);
 }
 
@@ -308,7 +308,41 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF000);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF238);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF478);
+typedef struct MenuCommandScatterLayout {
+    MenuPoint points[7];
+} MenuCommandScatterLayout;
+extern const MenuCommandScatterLayout D_0042B0D0;
+typedef char MenuCommandScatterLayout_size_check[
+    sizeof(MenuCommandScatterLayout) == 0x38 ? 1 : -1];
+
+void func_002BF478(s32 unusedX, s32 unusedY, s32 unusedDepth,
+                  MenuQueuedCommand *command, s32 surface) {
+    MenuCommandScatterLayout layout = D_0042B0D0;
+    s32 phase = command->initialValue;
+    s32 fade;
+    s32 offset;
+    u32 i;
+    MenuPoint *position;
+
+    if (phase < 0x100) {
+        fade = phase;
+    } else {
+        fade = 0x200 - phase;
+    }
+    offset = (s32)fsqrtf((f32)((s32)fsqrtf(256.0f) * 8));
+    offset = offset * phase / 0x200;
+    offset = 0xA00 - offset * offset;
+    command->resources->workEntries[0x3D].height = offset;
+    func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3D, surface);
+    command->resources->workEntries[0x3E].height = offset;
+    func_00306CD0(0, 0xE00 - offset, 0, fade, 0, command->resources, 0x3E, surface);
+    func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3C, surface);
+    for (i = 0, position = layout.points; i < 7; i++, position++) {
+        func_00306CD0(position->x, position->y, 0, fade, 0,
+                      command->resources, 0x3B, surface);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF660);
 
@@ -399,7 +433,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     MenuSprites *node;
 
     mnuCalcListEntryOffset(positionOffset, menu, 0);
-    node = panel->contents[0].windowSprites;
+    node = panel->windowSprites;
     if (node != NULL) {
         node->unkC = overrideValue;
     }
@@ -411,7 +445,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     } else {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     }
-    node = panel->contents[0].windowSprites;
+    node = panel->windowSprites;
     if (node != NULL) {
         node->unkC = 0;
     }
@@ -642,7 +676,7 @@ void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
 
 /* The sequel selects its draw variant from the range index plus eight. */
 void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
-                                    u16 rangeId, u32 drawArg, u32 texture) {
+                                    u16 rangeId, EffectSlotSet *drawArg, u32 texture) {
     s32 rangeIndex;
 
     rangeIndex = mnuLookupRangeEntry(rangeId);
@@ -706,7 +740,7 @@ void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     }
 }
 
-void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, s32 drawArg, s32 variant, s32 texture) {
+void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, EffectSlotSet *drawArg, s32 variant, s32 texture) {
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -867,7 +901,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
     BdWork *work;
 
     func_002C22D0(x, y, depth, color, fade, value, limit, pair, flags);
-    func_00306CD0(x, y, depth, fade, 1, pair->textures[0], 0, flags);
+    func_00306CD0(x, y, depth, fade, 1, (EffectSlotSet *)pair->textures[0], 0, flags);
     if (value != 0) {
         texture = (EffectSlotSet *)pair->textures[1];
         work = texture->workEntries;
@@ -875,8 +909,8 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
         quantizedWidth = barWidth * 16;
         work->width = quantizedWidth;
         work->parameters[2] = ~(77 - barWidth);
-        func_00306CD0(x, y, depth, fade, 1, (s32)texture, 0, flags);
-        func_00306CD0(x + quantizedWidth, y, depth, fade, 1, pair->textures[2], 0, flags);
+        func_00306CD0(x, y, depth, fade, 1, texture, 0, flags);
+        func_00306CD0(x + quantizedWidth, y, depth, fade, 1, (EffectSlotSet *)pair->textures[2], 0, flags);
         func_002C1E48(x, y, depth, fade, pair, flags);
     }
     if (pair->fadeOut == 0) {
@@ -1019,17 +1053,17 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     u32 color;
     FrFontGlyph *glyph;
 
-    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[0].set,
+    func_00306CD0(x, y, depth, fade, 0, item->spriteGridSlots[0].set,
                   item->spriteGridSlots[0].index, flags);
-    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[1].set,
+    func_00306CD0(x, y, depth, fade, 0, item->spriteGridSlots[1].set,
                   item->spriteGridSlots[1].index, flags);
     func_002C2AE8(x, y, depth, fade, mode, item, flags);
-    func_00306CD0(x, y, depth, fade, 0, (s32)item->spriteGridSlots[8].set,
+    func_00306CD0(x, y, depth, fade, 0, item->spriteGridSlots[8].set,
                   item->spriteGridSlots[8].index, flags);
     if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
-        func_00306CD0(x, y, depth, fade, 0, (s32)item->gridSlots[0].set,
+        func_00306CD0(x, y, depth, fade, 0, item->gridSlots[0].set,
                       item->gridSlots[0].index, flags);
-        func_00306CD0(x, y, depth, fade, 0, (s32)item->gridSlots[4].set,
+        func_00306CD0(x, y, depth, fade, 0, item->gridSlots[4].set,
                       item->gridSlots[4].index, flags);
     }
     value = item->value18;
