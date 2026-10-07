@@ -350,7 +350,7 @@ typedef struct FollowTarget {
 
 
 
-extern void func_001122F0(void *, EffectObject *);
+extern void func_001122F0(void *, EffWorldNode *);
 extern void func_0011ECC8(EffectObject *);
 extern s32 sdfLoadMapRecordPositionVector(s32, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
@@ -373,9 +373,9 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
         func_0011ECC8(obj);
     }
     if ((s32)obj->data->word14 == -1) {
-        func_001122F0(D_00325788, obj);
+        func_001122F0(D_00325788, (EffWorldNode *)obj);
     } else {
-        func_001122F0(D_00325788 + (s32)obj->data->word14 * 0x10, obj);
+        func_001122F0(D_00325788 + (s32)obj->data->word14 * 0x10, (EffWorldNode *)obj);
     }
     if (!dds3TestObjectFlags(obj, 0x400)) {
         return 1;
@@ -635,18 +635,18 @@ extern u8 D_00325808[];
 
 /* Submit the normal pass and the opacity-mode pass, temporarily neutralizing
  * the tint while the player is hidden. */
-s32 effObjSubmitTransformOpacityPasses(EffectObject *obj) {
+s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
     EffectTransformData *data;
     u32 opacityMode;
 
     if (D_003BA9D0 == 0) {
         return 1;
     }
-    data = (EffectTransformData *)obj->data;
+    data = object->data;
     if (data->activeId == -1) {
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
-        func_001122F0(D_00325788, obj);
+        func_001122F0(D_00325788, object);
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     } else {
@@ -655,22 +655,22 @@ s32 effObjSubmitTransformOpacityPasses(EffectObject *obj) {
         opacityMode = data->opacityMode;
         if (opacityMode < 5) {
             if (opacityMode >= 3) {
-                if (obj->color != 0x80808080) {
+                if (object->color != 0x80808080) {
                     if (dds3TestObjectFlags(fldPlayerObject, 1)) {
-                        u32 savedColor = obj->color;
+                        u32 savedColor = object->color;
 
-                        obj->color = 0x80808080;
-                        func_001122F0(D_00325788 + data->activeId * 0x10, obj);
-                        obj->color = savedColor;
+                        object->color = 0x80808080;
+                        func_001122F0(D_00325788 + data->activeId * 0x10, object);
+                        object->color = savedColor;
                     } else {
-                        func_001122F0(D_00325808, obj);
+                        func_001122F0(D_00325808, object);
                     }
                 } else {
-                    func_001122F0(D_00325788 + data->activeId * 0x10, obj);
+                    func_001122F0(D_00325788 + data->activeId * 0x10, object);
                 }
             }
         }
-        func_001122F0(D_00325788 + data->activeId * 0x10, obj);
+        func_001122F0(D_00325788 + data->activeId * 0x10, object);
         fldSelectDisplayBuffer(0x22);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     }
