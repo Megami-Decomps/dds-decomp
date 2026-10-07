@@ -166,7 +166,7 @@ void func_0030E880(void) {
     D_004390A4 = 0;
 }
 
-extern s32 sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32, f32);
+extern void sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32, f32);
 
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
@@ -177,7 +177,9 @@ void fldReleaseMapRequestQueues(void) {
     func_0030EF18((u32 *)D_004390B0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E910);
+void func_0030E910(s32 x, s32 y, s32 alpha, f32 scale) {
+    sdfDrawUniformlyScaledSlotImage(x, y, 0, alpha, 0x20, 0, 0x54, scale);
+}
 
 INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E940);
 

@@ -216,7 +216,7 @@ typedef struct BtlSelectCtrl {
 
 typedef struct SoundTask SoundTask;
 extern SoundTask *sndCreateStationedSeTask(u32);
-extern u32 btlCreateScriptResourceTask(u32, u32);
+extern u32 btlCreateScriptResourceTask(BtlUnit *, u32);
 
 
 extern void fldAppendSceneGroupHandle(s32);
@@ -2665,7 +2665,7 @@ void func_00217EB8(ActionStateLink *action) {
             }
             if (unit != 0) {
                 if (unit->flags & 0xE0) {
-                    task = (BtlRuntimeTask *)btlCreateScriptResourceTask((u32)unit, 0x64);
+                    task = (BtlRuntimeTask *)btlCreateScriptResourceTask(unit, 0x64);
                     task->ownerId = action->unit->owner;
                     task->startDelay = 0xE;
                     btlStartTask(task);
@@ -2868,7 +2868,39 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     handle->flags &= ~8;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00218520);
+extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
+extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
+extern void sdfMotionSampleAtFrame(Motion *, f32);
+
+/* These two three-ID resource families retain the saved motion for selectors 16/17. */
+void func_00218520(BtlUnit *unit, s32 selector, s32 firstParameter, s32 secondParameter, s32 mode, f32 frameStep) {
+    if (unit->flags & 0x400) {
+        if (selector < 18) {
+            if (selector >= 16) {
+                u32 resourceId = unit->resourceIndex;
+                switch (resourceId) {
+                case 0x104:
+                case 0x105:
+                case 0x106:
+                case 0x138:
+                case 0x139:
+                case 0x13A:
+                    selector = unit->effectIndex;
+                    mode = 1;
+                    firstParameter = unit->unkF8;
+                    secondParameter = unit->unkFA;
+                    break;
+                }
+            }
+        }
+    }
+    evtPrepareUnitMotionState(unit->ext, selector, firstParameter, secondParameter, mode);
+    unit->ext->owner->first->frameStep = frameStep;
+    if (secondParameter == 0) {
+        mdlAddEntryFlagged(unit->ext->owner, 0, selector);
+        sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
+    }
+}
 
 s32 btlOverrideSpecialModeCheckResult(BtlUnit *unit, s32 kind, s32 fallback) {
     if (kind == 0xB) {
@@ -3455,7 +3487,7 @@ void func_002195E0(ActionStateLink *record) {
     default:
         return;
     }
-    task = (BtlRuntimeTask *)btlCreateScriptResourceTask((u32)ctrl->prevUnit, resource);
+    task = (BtlRuntimeTask *)btlCreateScriptResourceTask(ctrl->prevUnit, resource);
     task->startDelay = 0xE;
     btlStartTask(task);
     follow = (BtlRuntimeTask *)sndCreateStationedSeTask(work->soundTaskBase + variant);
@@ -5335,8 +5367,53 @@ s32 btlSelectMarkedActorAndClearEntryFlags(ActionUnit *unit, u32 *entry) {
     }
 }
 
-extern void btlQueueLoneFreeTeamHandle(void);
-INCLUDE_ASM(const s32, "game/code_002112C8", btlQueueLoneFreeTeamHandle);
+void btlQueueLoneFreeTeamHandle(void)
+{
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *actor;
+    BtlUnit *first;
+    BtlUnit *second;
+    s32 firstUnavailable;
+    s32 secondUnavailable;
+    ActionStateLink *handle;
+
+    if (battle->effect->actor != 0) {
+        first = NULL;
+        second = NULL;
+        firstUnavailable = 1;
+        secondUnavailable = 1;
+        for (actor = battle->units; actor != NULL; actor = actor->nextActor) {
+            if (actor->flags & 1) {
+                if (actor->flags & 0x400) {
+                    switch (actor->partyRecord.unitId) {
+                    case 0x10E:
+                        first = actor;
+                        if (!(actor->flags & 0xE0)) {
+                            firstUnavailable = 0;
+                        }
+                        break;
+                    case 0x10F:
+                        second = actor;
+                        if (!(actor->flags & 0xE0)) {
+                            secondUnavailable = 0;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        if (!((firstUnavailable == 0 && secondUnavailable == 0) ||
+              (firstUnavailable != 0 && secondUnavailable != 0))) {
+            BtlUnit *selectedUnit = firstUnavailable ? second : first;
+
+            handle = btlFindUnitByActor(selectedUnit);
+            fldAppendSceneGroupHandle((s32)handle);
+            handle->indexWork.phase = 0x11;
+            handle->flags |= 8;
+            btlAppendIndexListEntry(handle->indexWork.indices, handle->unit);
+        }
+    }
+}
 
 /* Consume the selected actor after starting resource and sound tasks. Sound's
  * condition observes the resource task's running phase, not its completion.
@@ -5348,7 +5425,7 @@ void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     BtlRuntimeTask *sound;
 
     if (*slot != 0) {
-        task = (BtlRuntimeTask *)btlCreateScriptResourceTask((u32)*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
+        task = (BtlRuntimeTask *)btlCreateScriptResourceTask(*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
         task->ownerId = ((ActionUnit *)unit->parentUnit)->ownerId;
         task->startDelay = 0xE;
         btlStartTask(task);
@@ -5547,7 +5624,23 @@ void btlResetActionScale(void) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00221568);
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00221760);
+extern f32 *D_0037F770[];
+extern void evtSetUnitRgbTransition(struct EvtUnit *unit, s32 duration, u32 color);
+
+void func_00221760(void) {
+    BattleLinkedEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
+    BtlUnit *actor;
+    u32 packed[4];
+
+    if (effect != NULL) {
+        actor = (BtlUnit *)effect->actor;
+        if (actor != NULL && (actor->flags & 2)) {
+            VU0_LOAD_VF(vf10, D_0037F770[0]);
+            EE_MMI_RGBA_PACK(packed[0]);
+            evtSetUnitRgbTransition(actor->ext, 0, packed[0]);
+        }
+    }
+}
 
 void btlDestroyActionActor(void) {
     s32 *actorHandle;

@@ -2494,7 +2494,18 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADBD0);
+f32 func_001ADBD0(BtlTask *task) {
+    if (task == NULL) {
+        return 1.0f;
+    }
+    if (((BtlState *)btlGetRuntime())->battleFlags & 0x8000) {
+        if ((btlUnitStatusPair(task->unit) & 0x1200) != 0x200
+            || (task->unit->partyRecord.flags & 0x10)) {
+            return 3.0f;
+        }
+    }
+    return 1.0f;
+}
 
 void btlClearAllActorEntrySlots(u32 arg0) {
     u32 temp_v0;

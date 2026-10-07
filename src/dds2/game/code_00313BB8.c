@@ -1063,7 +1063,12 @@ u8 prfReq18GetWord3220(s32 entryIndex) {
     return D_00404A90[entryIndex].active;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", prfReqGetPair);
+s32 prfReqGetPair(s32 index, s32 requirement, s32 *minimum) {
+    if (minimum != NULL) {
+        *minimum = D_00404A90[index].requirement[requirement].minimum;
+    }
+    return D_00404A90[index].requirement[requirement].id;
+}
 
 /* Read the flag ID in an unchecked prerequisite-table entry. */
 u32 prfReq18GetWord3234(s32 entryIndex) {

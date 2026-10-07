@@ -932,7 +932,11 @@ void sdfDrawScaledCenteredSlotImage(f32 scaleX, f32 scaleY, s32 x, s32 y, s32 z,
         SDF_SPRITE(placementIndex)->sourceHeight << 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", sdfDrawUniformlyScaledSlotImage);
+void sdfDrawUniformlyScaledSlotImage(s32 x, s32 y, s32 z, s32 alpha,
+    s32 placementIndex, s32 flags, s32 context, f32 scale) {
+    sdfDrawScaledCenteredSlotImage(scale, scale, x, y, z, alpha,
+        placementIndex, flags, context);
+}
 
 /* Load the ten numbered "sname" tiles plus the two fixed local-map images. */
 s32 fldLoadLocalMapResources(void) {
