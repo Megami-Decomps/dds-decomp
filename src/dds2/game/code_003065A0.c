@@ -1,6 +1,7 @@
 #include "common.h"
+#include "eff.h"
 
-extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 
 extern void func_00306970(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
@@ -44,7 +45,7 @@ void func_00306BF0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a
 }
 void func_00306C28(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7) {
     func_00306970(a0, a1, a2, a3, a4, a5, a6,
-                  effGetSlotWorkOrOverride(a5, a6), a7);
+                  (s32)effGetSlotWorkOrOverride((EffectSlotSet *)a5, a6), a7);
 }
 
 

@@ -34,7 +34,7 @@ typedef struct GridDrawWork {
     s32 overlayDataSize;     /* 0x34 */
 } GridDrawWork;
 
-extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
 
 extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
@@ -61,14 +61,14 @@ typedef struct GridAngleSlot {
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, u32 object, u32 index, u32 surfaceIndex) {
-    u32 renderEntry = effGetSlotWorkOrOverride(object, index);
-    func_00306BF0(offsetX, offsetY, z, drawFlags, object, index, renderEntry, surfaceIndex);
+    void *renderEntry = effGetSlotWorkOrOverride((EffectSlotSet *)object, index);
+    func_00306BF0(offsetX, offsetY, z, drawFlags, object, index, (s32)renderEntry, surfaceIndex);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307018);
 
 s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
-    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride((s32)object, key);
+    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride(object, key);
     s32 result;
 
     if (entry->states[0].delay == 0) {
@@ -81,12 +81,12 @@ s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
     return result;
 }
 
-extern void func_00304B18();
+extern void func_00304B18(void *, s32, void *);
 
 /* Store grid bounds in the renderer's fixed-point coordinate units. */
 void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     EffectSlotDescription *entry = &object->descriptions[index];
-    s32 record = effGetSlotWorkOrOverride((s32)object, index);
+    void *record = effGetSlotWorkOrOverride(object, index);
 
     entry->xOffset = x >> 4;
     entry->yOffset = y >> 3;
@@ -114,7 +114,7 @@ void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
 
 /* Set the unquantized bounds of the selected grid widget. */
 void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride((s32)object, index);
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
     widget->parameters[0] = x;
     widget->parameters[1] = y;
     widget->parameters[2] = width;

@@ -10950,16 +10950,16 @@ u32 effReleaseSlotWorkAllocation(s32 owner) {
 }
 
 /* Return the normal slot address unless its stored alternate address is nonzero. */
-s32 effGetSlotWorkOrOverride(s32 owner, s32 slotIndex) {
+void *effGetSlotWorkOrOverride(EffectSlotSet *owner, s32 slotIndex) {
     s32 alternateAddress;
     s32 entryAddress;
 
-    entryAddress = slotIndex * EFF_SLOT_WORK_BYTES + (s32)((EffectSlotSet *)owner)->workEntries;
+    entryAddress = slotIndex * EFF_SLOT_WORK_BYTES + (s32)owner->workEntries;
     alternateAddress = ((BdWork *)entryAddress)->alternate.address;
     if (alternateAddress != 0) {
         entryAddress = alternateAddress;
     }
-    return entryAddress;
+    return (void *)entryAddress;
 }
 
 /* Start at zero when bit zero is set, otherwise at the full 16.16 endpoint.

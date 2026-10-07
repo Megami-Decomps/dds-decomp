@@ -4,7 +4,7 @@
 #include "itf_grid_text.h"
 #include "sdf.h"
 
-extern s32 effGetSlotWorkOrOverride(s32, s32);
+extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, BdWork *);
 
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
@@ -34,15 +34,16 @@ extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, s32 object, s32 index, s32 surfaceIndex) {
-    s32 renderEntry = effGetSlotWorkOrOverride(object, index);
-    func_002BF400(offsetX, offsetY, z, drawFlags, object, index, renderEntry, surfaceIndex);
+    void *renderEntry = effGetSlotWorkOrOverride((EffectSlotSet *)object, index);
+    func_002BF400(offsetX, offsetY, z, drawFlags, (EffectSlotSet *)object, index, (BdWork *)renderEntry,
+                  surfaceIndex);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
 
 /* Resolve an entry by key, falling back to the object's stored value. */
 s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
-    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride((s32)object, key);
+    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride(object, key);
     s32 result;
 
     if (entry->states[0].delay == 0) {
@@ -59,13 +60,13 @@ extern void func_002BD3D8(void *, s32, void *);
 
 void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     EffectSlotDescription *entry = &object->descriptions[index];
-    s32 record = effGetSlotWorkOrOverride((s32)object, index);
+    void *record = effGetSlotWorkOrOverride(object, index);
 
     entry->xOffset = x >> 4;
     entry->yOffset = y >> 3;
     entry->width = width >> 4;
     entry->height = height >> 3;
-    func_002BD3D8(object, index, (void *)(s32)record);
+    func_002BD3D8(object, index, record);
 }
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
@@ -86,7 +87,7 @@ void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
 }
 
 void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride((s32)object, index);
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
     widget->parameters[0] = x;
     widget->parameters[1] = y;
     widget->parameters[2] = width;
