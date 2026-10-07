@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_command.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "sdf.h"
@@ -80,7 +81,6 @@ extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 extern u32 effCreateStatusBatch(u32);
 
-extern s32 datCommandRecords;
 
 extern s32 datCommandSelectors;
 
@@ -117,19 +117,7 @@ extern u16 D_003E7902[];
 
 extern s8 D_003E792A[];
 
-typedef struct RangeEntry {
-    u8 pad00;
-    u8 flags;
-    u8 pad02;
-    u8 kind;
-    u16 value;
-    u16 addition;
-    u8 pad08[0x1C];
-    u8 secondaryKind; /* 0x24 */
-    u8 pad25;
-    u16 secondaryValue; /* 0x26 */
-    u8 pad28[0x10];
-} RangeEntry;
+
 
 extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
 
@@ -1603,24 +1591,24 @@ u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
 
 /* Only secondary-kind-2 entries expose the paired value. */
 u16 mnuGetSecondaryValueIfKind2(s32 commandId) {
-    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
+    DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
 
-    if (command->secondaryKind != 2) {
+    if (command->attribute.parts.kind != 2) {
         return 0;
     }
-    return command->secondaryValue;
+    return command->attribute.parts.flagMask;
 }
 
 /* Return the native value/cost kind from the low-sixteen-bit command ID. */
 u8 mnuGetRangeEntryKind(u32 commandId) {
-    return ((RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords))->kind;
+    return ((DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords))->costMode;
 }
 
 /* HP-kind values use max HP as a percentage basis; other kinds retain the stored value. */
 u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
-    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
-    u16 entryValue = command->value;
-    u16 flatAddition = command->addition;
+    DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
+    u16 entryValue = command->costPercentage;
+    u16 flatAddition = command->costBase;
     if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == MNU_COST_KIND_HP) {
         entryValue = flatAddition + ((DatPartyRecord *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
     }
@@ -1629,9 +1617,9 @@ u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
 
 s32 mnuGetRangeEntryFlatValue(s32 id) {
     s32 index = id & 0xFFFF;
-    RangeEntry *record = (RangeEntry *)(index * 0x38 + datCommandRecords);
-    s32 scale = record->value;
-    s32 addition = record->addition;
+    DatCommandRecord *record = (DatCommandRecord *)(index * 0x38 + (s32)datCommandRecords);
+    s32 scale = record->costPercentage;
+    s32 addition = record->costBase;
 
     if (mnuGetRangeEntryKind(index) == 1) {
         return scale + addition;
@@ -1641,7 +1629,7 @@ s32 mnuGetRangeEntryFlatValue(s32 id) {
 
 /* Compare the stored raw HP/MP cost; equality is affordable and other kinds pass. */
 s32 mnuCanAffordEntryCost(u16 commandId, s32 actorAddress) {
-    u16 cost = ((RangeEntry *)datCommandRecords)[commandId].value;
+    u16 cost = datCommandRecords[commandId].costPercentage;
     s32 costKind = mnuGetRangeEntryKind(commandId);
 
     switch (costKind) {
@@ -1664,15 +1652,15 @@ extern s32 mnuCanAffordEntryCost(u16, s32);
 /* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
 s32 mnuGetEntryUseStatus(s32 actorAddress, u16 commandId) {
     if (mnuCanAffordEntryCost(commandId, actorAddress) == 0) return -1;
-    if ((((RangeEntry *)(datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->flags & 1) == 0) return 1;
+    if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->unk_01 & 1) == 0) return 1;
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return 0;
     return 1;
 }
 
 /* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */
 s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
-    s32 costKind = ((RangeEntry *)datCommandRecords)[commandId].kind;
-    u16 cost = ((RangeEntry *)datCommandRecords)[commandId].value;
+    s32 costKind = datCommandRecords[commandId].costMode;
+    u16 cost = datCommandRecords[commandId].costPercentage;
 
     switch (costKind) {
     case MNU_COST_KIND_HP:
@@ -1691,10 +1679,10 @@ s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
 
 /* Deduct an affordable stored HP/MP cost; unhandled kinds succeed without a deduction. */
 s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
-    RangeEntry *command = (RangeEntry *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + datCommandRecords);
-    u16 cost = command->value;
+    DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
+    u16 cost = command->costPercentage;
 
-    switch (command->kind) {
+    switch (command->costMode) {
     case MNU_COST_KIND_HP:
         if (((DatPartyRecord *)actorEntry)->hp < cost) {
             return 0;
@@ -1718,7 +1706,7 @@ s32 mnuGetAbilityByteCategory(u16 commandId) {
     if (commandId == 0) {
         return 1;
     }
-    category = *(u8 *)(datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES + 8);
+    category = datCommandRecords[commandId].unk_08;
     switch (category) {
     case 0:
         return 1;
