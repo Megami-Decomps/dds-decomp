@@ -237,6 +237,10 @@ typedef char MenuSpriteState_initialValue_offset_check[
 MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *, struct EffectSlotSet *, struct EffectSlotSet *);
 void mnuFreeSpriteStateWork(MenuSpriteState *);
 
+#ifndef VERSION_DDS2
+void mnuDrawPartyInfoSprites(s32, s32, s32, void *, MenuSpriteState *, s32);
+#endif
+
 #ifdef VERSION_DDS2
 MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *, struct EffectSlotSet *,
                                        struct EffectSlotSet *);
