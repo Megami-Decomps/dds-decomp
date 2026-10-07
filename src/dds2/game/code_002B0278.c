@@ -230,7 +230,7 @@ extern u32 func_002B9FF8();
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
-extern void mnuHideWindowHandlesKindFourFive(MenuIconState *);
+extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_003E75E0[];
@@ -3052,7 +3052,7 @@ void func_002BA7A8(u32 x, u32 y, u32 depth, u32 fade, MenuIconState *panel, u32 
 void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
 
 
-void mnuHideWindowHandlesKindFourFive(MenuIconState *obj);
+void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *obj);
 
 /* Rebuild the first-node pointer by walking backward from the cursor. */
 void mnuRebuildListFirstFromCursor(MenuList *list);
