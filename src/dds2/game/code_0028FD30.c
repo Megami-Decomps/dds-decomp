@@ -401,7 +401,22 @@ u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateSelectedPanelSlot);
+extern void func_0026D168(void *, s32, s32);
+extern void *evtAllocateMantraSelectionWork(s32, s32);
+
+s32 mnuUpdateSelectedPanelSlot(MenuPanelObject *object) {
+    s32 index;
+    s32 source;
+
+    index = func_002890A8((MenuContainer *)object);
+    source = object->list->cursor->unk70;
+    if (object->state.slots[index] != 0) {
+        func_0026D168(object->state.slots[index], source, 0);
+    } else {
+        object->state.slots[index] = evtAllocateMantraSelectionWork(source, 0);
+    }
+    return 1;
+}
 
 u16 mnuGetSelectedPanelValue(MenuPanelObject *object) {
     s32 values;
