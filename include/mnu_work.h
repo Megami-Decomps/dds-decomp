@@ -48,7 +48,8 @@ typedef struct MenuWorkEntry {
             u32 active : 1;
             u32 updated : 1;
             u32 finished : 1;
-            u32 unk3 : 2;
+            u32 pendingDeactivate : 1; /* bit 3: dispatch then deactivate */
+            u32 pendingStart : 1; /* bit 4: set by mnuCreateAnimatedEffect */
             u32 unk5 : 1;
             u32 unk6 : 8;
             u32 unk14 : 5;
@@ -133,7 +134,8 @@ typedef struct MenuRegistryTable MenuRegistryTable;
 typedef struct MenuRegistry {
     u8 pad00[4];
     u32 parameterIndex;
-    u8 pad08[4];
+    s16 unk08; /* 0x08: signed half-value threshold in func_00323748 */
+    u8 pad0A[2];
     MenuRegistryTable *table;
     u8 pad10[8];
     u16 score;
@@ -142,6 +144,8 @@ typedef struct MenuRegistry {
 
 typedef char MenuResourceLayoutsAssert[
     (sizeof(MenuProgressParameters)==0x10 &&
+     (unsigned long)&((MenuRegistry*)0)->unk08==8 &&
+     sizeof(((MenuRegistry*)0)->unk08)==2 &&
      sizeof(MenuRegistryParameters)==0x30 &&
      (unsigned long)&((MenuRegistryParameters*)0)->unk26==0x26 &&
      (unsigned long)&((MenuRegistryParameters*)0)->unk2A==0x2A &&
