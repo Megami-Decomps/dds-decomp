@@ -538,7 +538,39 @@ void mnuVisitActiveWorkAndEffectEntry(s32 context) {
     D_004389A8((MenuWorkEntry *)mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00323748);
+void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
+    MenuRegistry *registry;
+
+    if (entry->flagsBits.pendingStart) {
+        D_004389A0(entry, context);
+        entry->flagsBits.pendingStart = 0;
+    }
+    if (entry->flagsBits.updated) {
+        entry->flagsBits.updated = 0;
+        if (!entry->flagsBits.unk5) {
+            if ((entry->tag & 0xFFFF0000) == 0x02010000) {
+                registry = mnuGetMenuRecordRegistryEntry(entry->tag);
+                if (entry->remaining <= (registry->unk08 >> 1)) {
+                    entry->flagsBits.unk5 = 1;
+                }
+            }
+        }
+    }
+    if (entry->flagsBits.finished) {
+        if ((entry->tag & 0xFFFF0000) == 0x01000000) {
+            entry->flags |= 0x4000;
+            D_004389A4(entry, context);
+        } else {
+            entry->flagsBits.pendingDeactivate = 1;
+        }
+    }
+    if (entry->flagsBits.pendingDeactivate) {
+        D_004389A4(entry, context);
+        entry->flagsBits.finished = 0;
+        mnuDeactivateWorkEntry(entry);
+    }
+}
+
 
 /* Walk allocated entries; only entries carrying the active bit are visited. */
 void mnuVisitActiveRecords(s32 context) {
@@ -548,7 +580,7 @@ void mnuVisitActiveRecords(s32 context) {
         do {
             MenuWorkEntry *entry = (MenuWorkEntry *)(mnuWorkEntryPool + byteOffset);
             if ((entry->flags & MNU_WORK_ACTIVE) != 0) {
-                func_00323748(entry, context);
+                func_00323748(entry, (struct MnuShootingWork *)context);
             }
             entryIndex++;
             byteOffset += 0x48;
