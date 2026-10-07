@@ -1317,7 +1317,48 @@ void func_00268CC0(u32 mode, s32 context) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00268EC8);
+/* Draw terminal grids and the selected effect text. */
+void func_00268EC8(s32 context) {
+    MenuSlotState *state = (MenuSlotState *)context;
+    EffectPair position[6] = {
+        {0, 0}, {0x200, 0xF0}, {0x1280, 0xC8},
+        {0x840, 0x220}, {0x1500, 0xD0}, {0x1410, 0x1E0}
+    };
+    s32 index = fldGetModeFrameRecordIndex(context);
+    EffectSlotSet *batch;
+    BdWork *record;
+    u32 progress;
+
+    if (D_00437859 == 0) {
+        return;
+    }
+    itfDrawGridWithResolvedSlot(position[0].firstValue, position[0].secondValue, 0, 0x81,
+                                state->resourceBank[0], index, MNU_TEXT_DRAW_PRIORITY);
+    batch = (EffectSlotSet *)state->resourceBank[0];
+    record = (BdWork *)(sizeof(*batch->workEntries) * index + (u32)batch->workEntries);
+    progress = ((u32)*(u8 *)&record->geometry.cornerColors[0] << 8) /
+        *(u8 *)&record->savedColors[0];
+    if (state->reduced != 2) {
+        func_00306CD0(position[1].firstValue, position[1].secondValue, 0,
+                      progress, 0x81, batch, 4, MNU_TEXT_DRAW_PRIORITY);
+        batch = (EffectSlotSet *)state->resourceBank[0];
+    }
+    if (*(s32 *)((u8 *)state + 0xA0) != 0) {
+        position[3].firstValue += 0x320;
+    }
+    itfDrawGridWithResolvedSlot(position[3].firstValue, position[3].secondValue, 0, 0x81,
+                                (u32)batch, 7, MNU_TEXT_DRAW_PRIORITY);
+    itfDrawGridWithResolvedSlot(position[3].firstValue, position[3].secondValue, 0, 0x81,
+                                (u32)state->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
+    if (state->mode != 2) {
+        itfDrawGridWithResolvedSlot(position[2].firstValue, position[2].secondValue, 0, 0x81,
+                                    state->resourceBank[0], 6, MNU_TEXT_DRAW_PRIORITY);
+        mnuQueueFontGlyphFromSelectedAtlasSlot(position[4].firstValue, position[4].secondValue,
+                                                0, *(u8 *)&((EffectSlotSet *)state->resourceBank[0])->workEntries[6].geometry.cornerColors[0] | 0xA09DC300,
+                                                (s8)state->slotCopy, (s8)state->mode);
+    }
+}
+
 
 /* Configure three terminal grid entries from the current mode's effect. */
 void func_002690A8(u32 mode, s32 context) {
@@ -1366,8 +1407,6 @@ void func_002690A8(u32 mode, s32 context) {
 
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00269230);
-
-INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F58);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F88);
 
