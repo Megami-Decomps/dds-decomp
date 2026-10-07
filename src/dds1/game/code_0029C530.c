@@ -6832,8 +6832,9 @@ extern void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload);
 
 EffCopiedPayload *effCreateAndInitializeCopiedPayload(u32 type, const void *source, s32 size) {
     EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, size);
-    u32 child = *(u32 *)effect;
-    fldRelocatePackedTransferChunk(child, (struct FldTransferChunk *)(child + 8));
+    u32 bodyAddress = (u32)effect->body;
+    fldRelocatePackedTransferChunk(bodyAddress,
+                                   (struct FldTransferChunk *)(bodyAddress + 8));
     effInitializeCopiedPayloadSlots(effect);
     return effect;
 }
