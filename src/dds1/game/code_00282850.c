@@ -370,14 +370,14 @@ typedef struct MenuPanelState {
     u32 state; /* 0x14 */
     u32 firstValueA; /* 0x18 */
     u32 firstValueB; /* 0x1C */
-    MenuPoint firstPosition; /* 0x20 */
+    MenuGridSlot firstSlot; /* 0x20 */
     u32 secondValueA; /* 0x28 */
     u32 secondValueB; /* 0x2C */
-    MenuPoint secondPosition; /* 0x30 */
-    MenuPoint thirdPosition; /* 0x38 */
+    MenuGridSlot secondSlot; /* 0x30 */
+    MenuGridSlot thirdSlot; /* 0x38 */
     u32 thirdValueA; /* 0x40 */
     u32 thirdValueB; /* 0x44 */
-    MenuPoint fourthPosition; /* 0x48 */
+    MenuGridSlot fourthSlot; /* 0x48 */
     u32 fourthValueA; /* 0x50 */
     u32 fourthValueB; /* 0x54 */
     u32 fourthValueC; /* 0x58 */
@@ -407,36 +407,36 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void func_00282CA8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_00282CA8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
-    itfGridStorePosition(&panel->firstPosition, x, y);
+    itfGridStorePosition(&panel->firstSlot, resource, index);
 }
 
-void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
-    itfGridStorePosition(&panel->secondPosition, x, y);
+    itfGridStorePosition(&panel->secondSlot, resource, index);
 }
 
 void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 target) {
     panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
 }
 
-void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y) {
+void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index) {
     panel->thirdValueA = valueA;
     panel->thirdValueB = valueB;
-    itfGridStorePosition(&panel->thirdPosition, x, y);
+    itfGridStorePosition(&panel->thirdSlot, resource, index);
 }
 
-void func_00282D50(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
-                                    u32 y, u32 additionalValue) {
+void func_00282D50(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
+                                    u32 index, u32 additionalValue) {
     panel->fourthValueA = valueA;
     panel->fourthValueB = valueB;
-    itfGridStorePosition(&panel->fourthPosition, x, y);
+    itfGridStorePosition(&panel->fourthSlot, resource, index);
     panel->fourthValueC = additionalValue;
 }
 
