@@ -357,8 +357,8 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 void func_00319E48(MenuRuntimeRecord *record) {
     MnuModelNode *node;
 
-    if ((record->state.bytes[1] & 0xF0) == 0x40) {
-        if (record->state.bytes[1] == 0x44) {
+    if ((record->state.kind & 0xF0) == 0x40) {
+        if (record->state.kind == 0x44) {
             dds3ClaimSoundSlot(0x1E00001, 0);
         } else if ((record->state.word & 0x1E) == 4 ||
                    (record->state.word & 0x1E) == 6) {
@@ -366,7 +366,7 @@ void func_00319E48(MenuRuntimeRecord *record) {
         }
     }
     node = D_0040ABF8.object.modelNode;
-    if (record->state.bytes[1] == 0x44) {
+    if (record->state.kind == 0x44) {
         node->model->first->frameStep = 1.0f;
         node->savedModelValue = 1.0f;
         mdlAddEntryFlaggedEx(node->model, 0, 2, 0.0f, 0.0f);

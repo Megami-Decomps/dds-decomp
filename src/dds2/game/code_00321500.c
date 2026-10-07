@@ -95,11 +95,12 @@ typedef struct MenuCallbackNode {
     void (*callback)(u32, s32);
 } MenuCallbackNode;
 
-typedef struct MenuWordPair {
-    u32 first;
-    u32 second;
-    u8 pad08[8];
-} MenuWordPair;
+typedef struct MenuRuntimeList {
+    MenuRuntimeRecord *records;
+    s32 capacity;
+    u32 activeCount;
+    u32 unk0C;
+} MenuRuntimeList;
 
 
 
@@ -208,49 +209,118 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00321A30);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321C60);
 
-void func_00321E18(u32 first, u32 second) {
-    memset(D_0045C870, 0, 16);
-    ((MenuWordPair *)D_0045C870)->first = first;
-    ((MenuWordPair *)D_0045C870)->second = second;
+void func_00321E18(MenuRuntimeRecord *records, s32 capacity) {
+    memset(D_0045C870, 0, sizeof(MenuRuntimeList));
+    ((MenuRuntimeList *)D_0045C870)->records = records;
+    ((MenuRuntimeList *)D_0045C870)->capacity = capacity;
 }
 
-void func_00321E70(u32 first, u32 second) {
-    memset(D_0045C880, 0, 16);
-    ((MenuWordPair *)D_0045C880)->first = first;
-    ((MenuWordPair *)D_0045C880)->second = second;
+void func_00321E70(MenuRuntimeRecord *records, s32 capacity) {
+    memset(D_0045C880, 0, sizeof(MenuRuntimeList));
+    ((MenuRuntimeList *)D_0045C880)->records = records;
+    ((MenuRuntimeList *)D_0045C880)->capacity = capacity;
 }
 
-u8 *func_00321EC8(void) {
-    return D_0045C870;
+MenuRuntimeList *func_00321EC8(void) {
+    return (MenuRuntimeList *)D_0045C870;
 }
 
-u8 *func_00321ED8(void) {
-    return D_0045C880;
+MenuRuntimeList *func_00321ED8(void) {
+    return (MenuRuntimeList *)D_0045C880;
 }
 
-void mnuClearPackedMenuRecordBlock(u32 *record) {
-    memset((void *)record[0], 0, record[1] * 36);
+void mnuClearPackedMenuRecordBlock(MenuRuntimeList *list) {
+    memset(list->records, 0, list->capacity * sizeof(*list->records));
 }
 
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321F18);
 
-void mnuDeactivateListRecord(u32 *list, u32 *record) {
-    u32 flags = record[0];
-    u32 count = list[2];
-    record[0] = flags & ~1u;
-    list[2] = count - 1;
+void mnuDeactivateListRecord(MenuRuntimeList *list, MenuRuntimeRecord *record) {
+    u32 flags = record->state.word;
+    u32 count = list->activeCount;
+    record->state.word = flags & ~1u;
+    list->activeCount = count - 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00321F98);
+extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
+extern f64 cos(f64);
+extern f64 sin(f64);
+extern s32 func_0035C200(void);
+
+void func_00321F98(MenuRuntimeList *list) {
+    MenuProgressParameters *parameters;
+    MenuRuntimeRecord *record;
+    MenuWorkEntry *work;
+    s32 i;
+    s32 x;
+    s32 y;
+    f32 angle;
+    f32 pi;
+
+    parameters = mnuGetResourceProgressParameters();
+    record = list->records;
+    for (i = 0; i < list->capacity; i++, record++) {
+        if (record->state.word & MNU_WORK_ACTIVE) {
+            if ((record->state.kind & 0xF) >= 4) {
+                work = (MenuWorkEntry *)mnuGetActiveEffectWorkEntry();
+                record->unk04 = work->x0;
+                record->unk08 = mnuEvaluateTimedValue(work);
+            }
+            pi = 3.1415926f;
+            angle = record->state.directionDegrees * pi / 180.0f +
+                    record->angle + 1.5707963f;
+            record->unk18 += record->speed * cos(angle);
+            record->unk1C -= record->speed * sin(angle);
+            x = record->unk18 + record->unk0C + record->unk04;
+            y = record->unk1C + record->unk10 + record->unk08;
+            if ((record->state.kind & 0xF) == 3) {
+                if (x < 0.0f) {
+                    x = 0;
+                }
+                if (x > parameters->width) {
+                    x = parameters->width;
+                }
+                if (y < 0.0f) {
+                    y = 0;
+                }
+                if (y > parameters->height) {
+                    y = parameters->height;
+                }
+                if (x <= 0.0f) {
+                    record->angle = (-135.0f + (func_0035C200() % 100) *
+                                     90.0f / 100.0f) * pi / 180.0f;
+                } else if (x >= parameters->width) {
+                    record->angle = (135.0f - (func_0035C200() % 100) *
+                                     90.0f / 100.0f) * pi / 180.0f;
+                } else if (y <= 0.0f) {
+                    record->angle = ((func_0035C200() % 100) *
+                                     90.0f / 100.0f + 135.0f) * pi / 180.0f;
+                } else if (y >= parameters->height) {
+                    record->angle = (-45.0f + (func_0035C200() % 100) *
+                                     90.0f / 100.0f) * pi / 180.0f;
+                }
+            } else if (x < -50.0f || x > parameters->width + 50.0f ||
+                       y < -150.0f || y > parameters->height + 50.0f) {
+                mnuDeactivateListRecord(list, record);
+            }
+            if (record->remaining > 0) {
+                record->remaining--;
+                if (record->remaining == 0) {
+                    mnuDeactivateListRecord(list, record);
+                }
+            }
+        }
+    }
+}
 
 void func_003223F8(void) {
-    func_00321F98(D_0045C870);
+    func_00321F98((MenuRuntimeList *)D_0045C870);
 }
 
 
 void func_00322418(void) {
-    func_00321F98(D_0045C880);
+    func_00321F98((MenuRuntimeList *)D_0045C880);
 }
 
 

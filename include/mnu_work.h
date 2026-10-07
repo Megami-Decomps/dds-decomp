@@ -62,18 +62,25 @@ typedef struct MenuWorkEntry {
 
 typedef union MenuRuntimeState {
     u32 word;
-    u8 bytes[4];
+    struct {
+        u8 flags;
+        u8 kind;
+        s16 directionDegrees;
+    };
 } MenuRuntimeState;
 
 /* The two separately allocated runtime arrays use 0x24-byte records. */
 typedef struct MenuRuntimeRecord {
     MenuRuntimeState state;
     f32 unk04;
-    u8 pad08[4];
+    f32 unk08;
     f32 unk0C;
-    u8 pad10[8];
+    f32 unk10;
+    f32 angle;
     f32 unk18;
-    u8 pad1C[8];
+    f32 unk1C;
+    s16 speed;
+    s16 remaining;
 } MenuRuntimeRecord;
 
 typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWorkEntry)==0x48 &&
@@ -103,9 +110,18 @@ typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWork
     (unsigned long)&((MenuWorkEntry*)0)->pad44==0x44 &&
     sizeof(((MenuWorkEntry*)0)->pad44)==4)?1:-1];
 typedef char MenuRuntimeLayoutAssert[(sizeof(MenuRuntimeRecord)==0x24 && sizeof(MenuRuntimeState)==4 &&
+    (unsigned long)&((MenuRuntimeState*)0)->flags==0 &&
+    (unsigned long)&((MenuRuntimeState*)0)->kind==1 &&
+    (unsigned long)&((MenuRuntimeState*)0)->directionDegrees==2 &&
     (unsigned long)&((MenuRuntimeRecord*)0)->unk04==4 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->unk08==8 &&
     (unsigned long)&((MenuRuntimeRecord*)0)->unk0C==0x0C &&
-    (unsigned long)&((MenuRuntimeRecord*)0)->unk18==0x18)?1:-1];
+    (unsigned long)&((MenuRuntimeRecord*)0)->unk10==0x10 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->angle==0x14 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->unk18==0x18 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->unk1C==0x1C &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->speed==0x20 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->remaining==0x22)?1:-1];
 
 typedef void (*MenuWorkCallback)(MenuWorkEntry *, struct MnuShootingWork *);
 typedef void (*MenuRuntimeCallback)(MenuRuntimeRecord *);
