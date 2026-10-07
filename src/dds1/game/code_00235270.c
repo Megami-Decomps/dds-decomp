@@ -2785,7 +2785,7 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern void effSetCh72Id(u32);
 
-void evtRefreshTaskData(s32 taskId, s32 key) {
+void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetTaskData(taskId);
     s32 address = evtFindTaskResourceEntryByKey(taskId, key);
     if (address != 0) {
