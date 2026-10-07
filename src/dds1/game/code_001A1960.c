@@ -2948,7 +2948,53 @@ void btlReleaseResourceBlock(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlResetSceneSlotFades);
+extern s32 func_001ACAE0(void);
+extern void func_001AC9E8(s32, s32);
+extern void btlClearTaskActorSlots(void);
+extern s32 func_001AD758(s32);
+
+s32 btlResetSceneSlotFades(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    SceneSlotFadeWork *state;
+    ActorSlotOrder **bank;
+    s32 kind;
+    s32 count;
+    s32 i;
+
+    memset(D_003BD83C, 0, sizeof(*D_003BD83C));
+    memset(D_003BD840[0], 0, sizeof(*D_003BD840[0]));
+    memset(D_003BD840[1], 0, sizeof(*D_003BD840[1]));
+    btlTrackedTaskHandles->fadeKindsCached = 0;
+    func_001ACAE0();
+    if (battle->mode == 1) {
+        kind = 0;
+        count = btlTrackedTaskHandles->fadeKindACount;
+        D_003BD83C->enabled[1] = 0;
+    } else {
+        kind = 1;
+        count = btlTrackedTaskHandles->fadeKindBCount;
+        D_003BD83C->enabled[0] = 0;
+    }
+    bank = &D_003BD840[kind];
+    D_003BD83C->currentIndex = count;
+    D_003BD83C->lastIndex = count;
+    D_003BD83C->bank = kind;
+    D_003BD83C->enabled[kind] = 1;
+    D_003BD83C->phase[0][kind] = 1;
+    D_003BD83C->timer = 0;
+    (*bank)->state[0] = 1;
+    state = D_003BD83C;
+    state->unk18 = 0;
+    state->completed = 0;
+    for (i = 0; i < count; i++) {
+        (*bank)->unk6C[i] = 30.0f;
+        (*bank)->unk8C[i] = 130;
+    }
+    func_001AC9E8(kind, count);
+    btlClearTaskActorSlots();
+    return func_001AD758(kind);
+}
+
 
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {
