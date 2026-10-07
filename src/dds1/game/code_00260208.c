@@ -383,7 +383,7 @@ extern s32 ptyComputeTotalExp(DatPartyRecord *, s32);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
-extern void func_00262A30(BrsSkillPackageWork *, s32, u16, u32, s32, s32, s32);
+extern void func_00262A30(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(DatPartyRecord *unit) {

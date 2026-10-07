@@ -2845,3 +2845,90 @@ The 508-byte target matches all 127 words on the first natural form.
 Its complete live unit reports `37 match, 0 differ` without context,
 rodata, undefined-symbol or shared-data diagnostics.
 
+
+## Mantra grid and frame share one display-work owner
+
+DDS1 `func_00257BD8` advances the grid at `+0x484` and the wrapping frame
+at `+0x490` in the same allocation. Both fields belong to the existing
+`MantraPulseDisplayWork`, along with scroll coordinates at `+0x5A0/+0x5A2`
+and flags at `+0x5AC`; a shorter `DisplayGridWork` view is unnecessary.
+Folding the frame into the primary owner and deleting that duplicate view
+preserves all offsets and leaves `code_00257200` at `9 match, 0 differ`.
+This layout closure does not change the separate profile-progress API.
+
+## Retained battle operands use one copied argument packet
+
+DDS2 `btlCreateActorParameterDeltaTask`, `btlCreateDeferredActorStatsTask`,
+`btlCreateMaskedActorEntryUpdateTask` and `btlCreateQueuedActorEntrySelectionTask`
+allocate `0x30` argument bytes: one `BtlUnit *` followed by the complete
+`0x2C` `BtlOperandEntry`. The deferred-stat and entry-selection callbacks
+read that same packet, not shorter overlapping views. A fixed-size `memcpy`
+copies the operand with the native unaligned-copy sequence after the actor
+pointer is stored. Their provider unit checks `521 match, 0 differ`.
+
+`BattleIndexWork.skillId` remains a signed word. A consumer's halfword load
+can result from narrowing that word to a 16-bit selection ID; it does not
+by itself establish a word/halfword union. Keeping the word restores the
+unchanged DDS1 `btlRunAiAction` and its unit checks `207 match, 0 differ`.
+
+The group's dispatch kind retains its game-specific signedness: DDS1 uses
+`s32`, DDS2 `u32`. DDS2 `btlGetCommandEffectId` bounds its low dispatch cases
+with `sltiu`; restoring the unsigned owner member leaves `code_0020E850`
+at `60 match, 0 differ`.
+
+
+## Actor overlay consumers read the low effect flags
+
+DDS1 `effApplyOverlaySpecs` (`002B3AC0`) loads a halfword at actor
+`+0x310`; DDS2 `effApplySelectedActorEffects` (`002F7128`) loads the
+corresponding halfword at `+0x330`. Both test `0x10` before applying an
+overlay. DDS2 additionally tests `0x40` and skips overlay IDs `0`, `2`
+and `0xA` when it is set. These are reads of `BtlUnit.effectLink.flags`,
+not the packed eight-byte flags/reference state or its reference count.
+
+
+## Integer VM setter return contract remains prototype debt
+
+`scrSetIntegerReturnValue` has a void C provider in both games. The retail
+leaf happens to leave `scrCurrentContext` in `$2`, and the already-matched
+model-return commands (`00225620`/`00225880` in DDS1 and
+`00240280`/`002404E0` in DDS2) retain a local `s32` declaration that propagates
+that word. This is an unresolved wrong-prototype dependency, not evidence
+that the setter's public API returns a context pointer.
+
+An explicit `ScrData *` return preserves the setter's own instructions, but
+changes unchanged flag-query consumers from `$2` to `$3` for their load,
+mask and store sequence. Without independent evidence for a return value,
+the typed-return closure is parked; its provider and existing consumers
+remain as they were. Do not promote the incidental register value into a
+new public return contract merely to make those commands match.
+
+## Result animation level arguments are promoted integers
+
+DDS2 `func_00299988` receives the level in a 32-bit integer argument and
+stores its low halfword into both `BrsProgressAnimation.level` fields.
+Both retail callers in `func_00299018` deliberately load `$6` with
+`lhu` from `DatPartyRecord.level`; the callee does not normalize `$6`
+to a 16-bit formal. Its declaration therefore uses `s32`, even though
+the destination members are 16-bit. The current caller unit checks
+`40 match, 0 differ`; the setter body remains `INCLUDE_ASM`.
+
+DDS1 twin `func_00262A30` has the same promoted level contract: the
+two calls in `brsApplyPartyRewards` deliberately `lhu` into `$6`,
+and the setter stores `$6` directly into the two halfword levels.
+Its source-local declaration also uses `s32`; the complete twin unit
+checks `42 match, 0 differ`, with its setter body still `INCLUDE_ASM`.
+
+
+## Field area and actor-row owner fields
+
+DDS1 `code_00126A30` uses its existing `FldAreaWork` for the floor at
+`+0x14` and signed event-state halfword at `+0x104`; the shorter local
+`FldAreaState` view is removed. Both games' field-event dispatchers store
+the command's value at area-work `+0x24`; this write-only word stays
+`unk24`, without inventing a stronger meaning.
+
+The DDS1 actor row loads `+0x36` with `lh`, passing it either as a flag ID
+or a deferred-field selector. `sequenceValue` keeps those roles neutral.
+DDS2 copies the row's string at `+0x55` with `strcpy`, matching DDS1's
+existing `taskName[0xF]`; neither change alters the `0x6C` wire stride.

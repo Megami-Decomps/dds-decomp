@@ -49,7 +49,7 @@ typedef struct FldActorEntry {
     s8 flags31;
     s16 variant;
     s16 sequenceKind; /* 0x34: zero selects the default kind */
-    u8 pad36[2];
+    s16 sequenceValue; /* 0x36: flag ID or deferred-field selector */
     char sequenceName[0xC]; /* 0x38 */
     s8 linkKind; /* 0x44 */
     s8 rowIndex;
@@ -82,7 +82,7 @@ typedef struct FldActorEntry {
     s8 unk52;
     s8 unk53;
     s8 flags54;
-    char pad55[0xF];
+    char taskName[0xF]; /* 0x55 */
     u8 flags64;
     s8 unk65;
     s8 unk66;

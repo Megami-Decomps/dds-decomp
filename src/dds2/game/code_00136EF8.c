@@ -318,7 +318,9 @@ typedef struct FldAreaState {
     u8 pad0[0x10];
     s32 area;
     s32 floor;
-    u8 pad18[0x40];
+    u8 pad18[0xC];
+    s32 unk24;
+    u8 pad28[0x30];
     s32 unk58;
     u8 pad5C[8];
     f32 negatedAngle;
