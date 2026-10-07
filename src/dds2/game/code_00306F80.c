@@ -841,17 +841,17 @@ GridTextListItem *func_00309538(GridTextWidget *owner, const char *text, u32 val
 INCLUDE_ASM(const s32, "game/code_00306F80", itfRemoveSelectedGridTextItem);
 
 /* Replace the owned text and grow the optional parent column to fit its byte length. */
-void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, u8 *node, const char *text) {
+void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, GridTextListItem *item, const char *text) {
     s32 textLength;
     s32 textBytes;
     char *textCopy;
 
-    sdfReleaseChipBlock(*(u32 *)node);
+    sdfReleaseChipBlock(item->text);
     textLength = strlen(text);
     textBytes = textLength + 1;
     textCopy = (char *)sdfAllocSizeClassBlock(textBytes);
-    *(u16 *)(node + 4) = textBytes;
-    *(char **)node = textCopy;
+    item->textLength = textBytes;
+    item->text = textCopy;
     memcpy(textCopy, text, textBytes);
     if (widget != NULL) {
         itfExpandWidgetColumnWidth(textLength, widget);
