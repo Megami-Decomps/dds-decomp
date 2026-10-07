@@ -7140,7 +7140,7 @@ typedef struct EffCopiedPayloadWork {
     u32 parameter;
 } EffCopiedPayloadWork;
 
-void effResetObjectSlots(EffCopiedPayloadWork *work) {
+void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
     Dds3PathCurveWork **objects = work->payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {

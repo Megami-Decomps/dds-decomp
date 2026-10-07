@@ -5196,6 +5196,7 @@
 0x002F5BC8	effResolveRequestPositionIntoVu	inferred	Selects a resource by vector request, queries its position and loads it into VU0. [names_reviewed14.tsv]
 0x002F5D70	effCollectModelEffectActors	inferred	Selects model-bearing actors by kind and active flags from the actor linked list. [names_reviewed5.tsv]
 0x002F6450	effSyncLinkedActorChildParameter	inferred	For flagged linked actors copies source parameter to child and updates child with that value. [names_reviewed5.tsv]
+0x002F69B0	effResetCopiedPayloadTargets	inferred	zeros state and flags on each non-null path target in the copied payload
 0x002F69F0	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
 0x002F6BE8	effCreateRelocatedEffectPayload	inferred	Copies effect payload, relocates its packed transfer data and initializes its work. [names_reviewed5.tsv]
 0x002F6C30	effCloneEffectPayloadFromOwner	inferred	Copies a payload read from owner record into a reference-backed work and initializes it. [names_reviewed5.tsv]
