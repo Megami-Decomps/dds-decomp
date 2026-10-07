@@ -83,17 +83,44 @@ extern s32 effComputeLightDirectionVU(MdlCtx *, void *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 
-extern void *func_002DDAA8(void *);
-
-/* Reference-counted object header (layout inferred from field accesses). */
+/* Reference-counted texture object at the end of its combined allocation. */
 typedef struct RefObj {
-    u8 pad_0x00[0x14]; // 0x00
-    s32 refCount;      // 0x14 incremented with the global reference count
-    s32 unk18;         // 0x18
-    s32 cnt1C;         // 0x1C
+    u8 *base;                 // 0x00: retained base of the combined allocation
+    u8 *pixels;               // 0x04: image data after the palette
+    u8 *palette;              // 0x08: palette data after the copied header
+    s32 paletteWidth;         // 0x0C
+    s32 paletteHeight;        // 0x10
+    s32 refCount;             // 0x14
+    s32 index;                // 0x18
+    u32 allocationHandle;     // 0x1C: handle released with the final reference
 } RefObj; // 0x20
 
+typedef struct SdfTextureFileHeader {
+    u8 unk00;
+    u8 flags;
+    u8 pad02[0xE];
+    u8 unk10;
+    u8 unk11;
+    s16 width;
+    s16 height;
+    u8 pixelFormat;
+    u8 clutFormat;
+    u16 lodParameters;
+    u8 unk1A;
+    u8 clampMode;
+    s32 resourceKey;
+    s32 unk20;
+    u8 pad24[0x1C];
+} SdfTextureFileHeader;
+
+typedef char SdfTextureFileHeader_size_must_be_0x40[
+    (sizeof(SdfTextureFileHeader) == 0x40) ? 1 : -1];
+typedef char RefObj_size_must_be_0x20[(sizeof(RefObj) == 0x20) ? 1 : -1];
+
+extern RefObj *func_002DDAA8(SdfTextureFileHeader *);
+
 extern u32 effSharedTextureReferenceCount;
+extern SdfTex *D_00437E40;
 
 extern MdlCtx *func_00232198(s32 group, s32 id);
 
@@ -594,17 +621,69 @@ void effObjectListCountersReset(void) {
     D_00437E38 = 0xffffffff;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDAA8);
+extern s32 sdfFormatImageSize(u32 format, s32 width, s32 height);
+extern SdfTex *func_0032B968(s32, s32, u32, u32, u32, u32);
+extern void sdfTexCreateFirstPacket(SdfTex *texture);
+
+RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
+    u32 paletteWidth;
+    u32 paletteHeight;
+    s32 paletteBytes;
+    s32 imageBytes;
+    s32 payloadBytes;
+    s32 textureOffset;
+    u32 allocationHandle;
+    u8 *cursor;
+    RefObj *texture;
+
+    if ((source->pixelFormat == 0x13) || (source->pixelFormat == 0x1B)) {
+        paletteWidth = 0x10;
+        paletteHeight = 0x10;
+    } else {
+        paletteWidth = 8;
+        paletteHeight = 2;
+    }
+
+    paletteBytes = sdfFormatImageSize(source->unk11, paletteWidth, paletteHeight) << 4;
+    imageBytes = sdfFormatImageSize(source->pixelFormat, source->width, source->height) << 4;
+    payloadBytes = imageBytes + paletteBytes;
+    textureOffset = payloadBytes + 0x40;
+    allocationHandle = (u32)sdfAllocGeneralBlock(payloadBytes + 0x60);
+    cursor = (u8 *)sdfResourceRetainAddress(allocationHandle);
+    texture = (RefObj *)(cursor + textureOffset);
+    texture->base = cursor;
+    cursor += 0x40;
+    texture->palette = cursor;
+    cursor += paletteBytes;
+    texture->pixels = cursor;
+    texture->paletteWidth = paletteWidth;
+    texture->paletteHeight = paletteHeight;
+    texture->refCount = 0;
+    texture->index = -1;
+    texture->allocationHandle = allocationHandle;
+
+    memcpy(texture->base, source, 0x40);
+    cursor = (u8 *)source + 0x40 + (source->flags & 0xF0);
+    memcpy(texture->palette, cursor, paletteBytes);
+    cursor += paletteBytes;
+    memcpy(texture->pixels, cursor, imageBytes);
+
+    if (effSharedTextureReferenceCount == 0) {
+        D_00437E40 = func_0032B968(0x100, 0x100, 0x13, 0, 0, 1);
+        sdfTexCreateFirstPacket(D_00437E40);
+    }
+    effSharedTextureReferenceCount++;
+    texture->refCount++;
+    return texture;
+}
 
 u32 effCloneSharedReferenceWithValue(u32 source, u32 value) {
     RefObj *copy;
 
     copy = (RefObj *)func_002DDAA8((void *)source);
-    copy->unk18 = value;
+    copy->index = value;
     return (u32)copy;
 }
-
-extern SdfTex *D_00437E40;
 
 void effReleaseSharedReference(RefObj *obj) {
     if (--effSharedTextureReferenceCount == 0) {
@@ -616,7 +695,7 @@ void effReleaseSharedReference(RefObj *obj) {
         sdfTexReleaseReference(texture);
     }
     if (--obj->refCount == 0) {
-        sdfReleaseResourceAllocation(obj->cnt1C);
+        sdfReleaseResourceAllocation(obj->allocationHandle);
     }
 }
 
@@ -674,8 +753,8 @@ void effReleaseReferenceHolder(u32 *holder) {
     }
 }
 
-RefObj *effReferenceObjectRetain(RefObj *obj) {
-    obj->cnt1C++;
+EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {
+    obj->refCount++;
     return obj;
 }
 
