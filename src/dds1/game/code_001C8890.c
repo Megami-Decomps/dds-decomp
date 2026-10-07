@@ -2886,23 +2886,31 @@ void *func_001D3618(u8 *owner) {
     return task;
 }
 
+/* Complete eight-byte argument allocation owned by the hunt-EP task. */
+typedef struct BtlHuntExpArgs {
+    BtlUnit *actor;
+    u32 amount;
+} BtlHuntExpArgs;
+typedef char BtlHuntExpArgsSizeCheck[sizeof(BtlHuntExpArgs) == 8 ? 1 : -1];
+extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
+
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001D3688);
 
-extern void func_001D3688();
+extern u32 func_001D3688(s32);
 
-u8 *btlCreateActorSoundOptionTask(u8 *arg0, s32 arg1) {
+u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
     u8 *task = btlAllocTask(8);
-    u32 *data;
+    BtlHuntExpArgs *data;
 
     task[0x10] = 0;
     task[0] = 1;
     *(u16 *)(task + 0x20) = 0x4C;
     *(void **)(task + 0x4C) = func_001D3688;
-    *(u64 *)(task + 0x40) = *(u64 *)(arg0 + 0x108);
+    *(u64 *)(task + 0x40) = arg0->identity;
     *(s32 *)(task + 0x48) = 0;
     data = btlGetTaskArguments(task);
-    data[0] = (u32)arg0;
-    data[1] = (u32)arg1;
+    data->actor = arg0;
+    data->amount = (u32)arg1;
     return task;
 }
 
