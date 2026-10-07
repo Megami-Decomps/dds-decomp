@@ -519,7 +519,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
 }
 
 /* Draw the selected party member's value page and advance its dispatch. */
-s32 func_002AE888(s32 task) {
+s32 mnuDrawStaffPartyValuePage(s32 task) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = ((MenuStaffContext *)context)->menu;
     s32 index = ((MenuStaffContext *)context)->selection->cursor->index;
