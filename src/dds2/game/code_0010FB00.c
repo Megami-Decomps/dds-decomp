@@ -8,14 +8,20 @@ extern u32 dds3WorldCounter;
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 
 typedef struct WorldEntry {
-    void *worldNodes;
+    EffWorldNode *worldNodes;
     u32 unk04;
-    void *callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
+    EffWorldNode *callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
     u32 unk0C;
     void *resource;
-    u8 pad14[0x0C];
-    void *worldIndexNodes;
+    u32 unk14;
+    s16 unk18;
+    s16 unk1A;
+    s16 unk1C;
+    s16 unk1E;
+    NodeB *worldIndexNodes;
+    u32 unk24;
 } WorldEntry;
+typedef char WorldEntry_size_must_be_0x28[(sizeof(WorldEntry) == 0x28) ? 1 : -1];
 
 typedef struct {
     u8 pad0[0x18];
@@ -24,7 +30,7 @@ typedef struct {
 } WorldObject;
 
 extern void dds3DestroyWorldNode(EffWorldNode *node);
-extern void dds3DestroyWorldIndexNode(void *node);
+extern void dds3DestroyWorldIndexNode(NodeB *node);
 extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);
 
@@ -112,38 +118,32 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
     return value;
 }
 
-typedef struct WorldNode {
-    u32 unk00; u32 unk04; u32 unk08; u32 unk0C; u32 unk10; u32 unk14;
-    s16 counter18; s16 counter1A; s16 counter1C; s16 counter1E;
-    u32 unk20; u32 unk24;
-} WorldNode;
-
 extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Allocate and clear a world node, then attach it as the object's entry.
    The assignment order is load-bearing: ee-gcc hoists the last statement's
-   store out of the independent group, so counter1C stays last and the entry
+   store out of the independent group, so unk1C stays last and the entry
    store follows it. */
 s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
-    WorldNode *node;
+    WorldEntry *entry;
 
-    node = (WorldNode *)sdfAllocSizeClassBlock(0x28);
-    if (node == NULL) {
+    entry = (WorldEntry *)sdfAllocSizeClassBlock(0x28);
+    if (entry == NULL) {
         return 0;
     }
-    node->unk00 = 0;
-    node->unk04 = 0;
-    node->unk08 = 0;
-    node->unk0C = 0;
-    node->unk10 = 0;
-    node->unk14 = 0;
-    node->counter18 = 0;
-    node->counter1A = -1;
-    node->counter1E = 0;
-    node->unk20 = 0;
-    node->unk24 = 0;
-    node->counter1C = -1;
-    object->entry = (WorldEntry *)node;
+    entry->worldNodes = NULL;
+    entry->unk04 = 0;
+    entry->callbackTarget = NULL;
+    entry->unk0C = 0;
+    entry->resource = NULL;
+    entry->unk14 = 0;
+    entry->unk18 = 0;
+    entry->unk1A = -1;
+    entry->unk1E = 0;
+    entry->worldIndexNodes = NULL;
+    entry->unk24 = 0;
+    entry->unk1C = -1;
+    object->entry = entry;
     return 1;
 }
 
@@ -167,21 +167,21 @@ void func_0010FD58(WorldObject *object)
 }
 
 u32 func_0010FDF0(WorldObject *obj) {
-    void *callbackTarget;
+    EffWorldNode *callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        dds3InvokeWorldCallbackFirst((EffWorldNode *)callbackTarget);
+        dds3InvokeWorldCallbackFirst(callbackTarget);
     }
     return 1;
 }
 
 u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
-    void *callbackTarget;
+    EffWorldNode *callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        dds3InvokeWorldCallbackSecond((EffWorldNode *)callbackTarget);
+        dds3InvokeWorldCallbackSecond(callbackTarget);
     }
     return 1;
 }
