@@ -448,10 +448,10 @@ typedef struct EffectValueObject {
 
 struct NodeB;
 extern struct NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
-extern s32 dds3GetWorldValueCount(void *);
-extern s32 dds3ResetObjectValueCursor(void *);
-extern u32 dds3ReadIndexedWorldObjectWord(void *);
-extern s32 dds3AdvanceObjectValueCursor(void *);
+extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
+extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
+extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
+extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern s32 func_0010FBD0(f32 *, f32 *);
 void func_00113D18(EffectObject *object) {
@@ -468,13 +468,13 @@ void func_00113D18(EffectObject *object) {
     if (list == NULL) {
         return;
     }
-    if (dds3GetWorldValueCount(list) == 0) {
+    if (dds3GetWorldValueCount((WorldValueIndices *)list) == 0) {
         dds3DestroyWorldIndexNode(list);
         return;
     }
-    if (dds3ResetObjectValueCursor(list) != 0) {
+    if (dds3ResetObjectValueCursor((WorldValueIndices *)list) != 0) {
         do {
-            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord(list);
+            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
                 func_0010FBD0(object->source, other->source) == 0 &&
@@ -482,23 +482,23 @@ void func_00113D18(EffectObject *object) {
                 evtEndUnitValueTransitionForObject((EffWorldNode *)object, 10);
                 data->activeId = -1;
             }
-        } while (dds3AdvanceObjectValueCursor(list) != 0);
+        } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
     }
     dds3DestroyWorldIndexNode(list);
 
     if (data->activeId == -1) {
         list = dds3CopyWorldListToValueChain(world, 9);
-        if (dds3ResetObjectValueCursor(list) == 0) {
+        if (dds3ResetObjectValueCursor((WorldValueIndices *)list) == 0) {
             goto destroy_list;
         }
         do {
-            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord(list);
+            other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
                 func_0010FBD0(object->source, other->source) != 0) {
                 goto attach_transition;
             }
-        } while (dds3AdvanceObjectValueCursor(list) != 0);
+        } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
 
 destroy_list:
         dds3DestroyWorldIndexNode(list);
