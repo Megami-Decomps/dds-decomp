@@ -130,11 +130,15 @@ typedef struct CameraData {
     u128 localUp;
     u128 worldEye;
     u128 worldUp;
-    u32 handle;
+    ObjBase *handle;
     s32 eyeIsRelative;
     u32 fovUpdatePending; /* Bit 0 requests a field-of-view update. */
     f32 fieldOfView;      /* Radians. */
 } CameraData;
+
+typedef char CameraData_size_must_be_0x90[(sizeof(CameraData) == 0x90) ? 1 : -1];
+
+ObjBase *dds3GetCameraHandle(EffWorldNode *camera);
 
 
 #endif /* DDS3OBJ_H */
