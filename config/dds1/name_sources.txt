@@ -6087,6 +6087,7 @@
 0x002D2C30	sdfTexRelease	inferred	Releases texture allocations, unlinks the texture, and frees its reference and record.
 0x002D2CB8	sdfTexReleaseReference	inferred	Decrements the texture reference count and releases its texture when it reaches zero.
 0x002D2D00	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_002D3C30.
+0x002D2D48	sdfBuildTextureStatePacket	inferred	Builds the 0x40 SdfTexBuf GIF packet with TEX1, TEX0 and CLAMP state; variant selects primary or secondary register IDs.
 0x002D2EB0	sdfTexCreateResourcePacket	inferred	Allocates and initializes a texture resource packet from the primary and secondary resource words.
 0x002D2FB0	sdfTexRefreshResourcePackets	inferred	confidence=high; matched-C; src/dds1/sdf/sdfTex.c:129:func_002D2FB0; Rebuilds existing primary/secondary texture packets while preserving each TEX0 TCC bit.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x002D30C8	sdfTexCreateFromFileHeader	inferred	readability/matching review (QP16)

@@ -5790,6 +5790,7 @@
 0x0032B8D8	sdfTexGetPaletteByteSize	inferred	Returns colors-per-palette times bytes-per-color times palette count.
 0x0032B948	sdfTexCopyImageData	inferred	Copies source bytes into texture->data using texture->dataSize.
 0x0032BBB0	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_0032CAE0.
+0x0032BBF8	sdfBuildTextureStatePacket	inferred	Builds the 0x40 SdfTexBuf GIF packet with TEX1, TEX0 and CLAMP state; variant selects primary or secondary register IDs.
 0x0032BD60	sdfTexCreateResourcePacket	inferred	Allocates and initializes a texture resource packet from its primary and secondary resource words.
 0x0032BE00	sdfTexCreateFirstPacket	inferred	Stores the first generated resource packet on the texture.
 0x0032BE30	sdfTexCreateSecondPacket	inferred	Stores the second generated resource packet on the texture.

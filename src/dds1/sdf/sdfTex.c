@@ -37,7 +37,7 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
 void *sdfAllocSizeClassBlock(s32 arg0);
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
-void func_002D2D48(void *arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4, u32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
+void sdfBuildTextureStatePacket(void *arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4, u32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
@@ -119,7 +119,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2D48);
+INCLUDE_ASM(const s32, "sdf/sdfTex", sdfBuildTextureStatePacket);
 
 /* Allocate and populate one of the two resource packet variants. */
 void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
@@ -130,7 +130,7 @@ void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     packet = sdfAllocSizeClassBlock(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
     secondary = sdfTexGetSecondaryResourceWord(texture);
-    func_002D2D48(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
+    sdfBuildTextureStatePacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
     return packet;
 }
 
@@ -150,7 +150,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 
     buffer = texture->primaryBuffer;
     if (buffer != NULL) {
-        func_002D2D48(buffer, texture->width, texture->height,
+        sdfBuildTextureStatePacket(buffer, texture->width, texture->height,
                      sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
                      sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,
@@ -160,7 +160,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 
     buffer = texture->secondaryBuffer;
     if (buffer != NULL) {
-        func_002D2D48(buffer, texture->width, texture->height,
+        sdfBuildTextureStatePacket(buffer, texture->width, texture->height,
                      sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
                      sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,
