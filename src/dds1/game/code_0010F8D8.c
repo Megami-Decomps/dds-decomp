@@ -2,26 +2,9 @@
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 
-
-typedef struct WorldEntry {
-    EffWorldNode *worldNodes; /* 0x00 */
-    u32 unk04;
-    EffWorldNode *callbackTarget; /* 0x08: forwarded to both lifecycle helpers */
-    u32 unk0C;
-    void *resource; /* 0x10 */
-    u32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    s16 unk1E;
-    NodeB *worldIndexNodes; /* 0x20 */
-    u32 unk24;
-} WorldEntry;
-typedef char WorldEntry_size_must_be_0x28[(sizeof(WorldEntry) == 0x28) ? 1 : -1];
-
 typedef struct {
     u8 pad0[0x18];
-    WorldEntry *entry;
+    WorldInfo *entry;
     ObjectTransform *transform;
 } WorldObject;
 
@@ -117,65 +100,65 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
     return value;
 }
 
-/* Allocate and clear a world node, then attach it as the object's entry.
-   The assignment order is load-bearing: ee-gcc hoists the last statement's
-   store out of the independent group, so unk1C stays last and the entry
-   store follows it. */
-s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
-    WorldEntry *entry;
+/* Allocate and clear the world node's 0x28-byte WorldInfo payload. The native
+   callback stores the payload on the node before initializing its fields. */
+s32 dds3AllocateWorldObjectEntry(EffWorldNode *object) {
+    WorldInfo *entry;
 
-    entry = (WorldEntry *)sdfAllocSizeClassBlock(0x28);
+    entry = (WorldInfo *)sdfAllocSizeClassBlock(0x28);
     if (entry == NULL) {
         return 0;
     }
-    entry->worldNodes = NULL;
-    entry->unk04 = 0;
-    entry->callbackTarget = NULL;
-    entry->unk0C = 0;
-    entry->resource = NULL;
-    entry->unk14 = 0;
-    entry->unk18 = 0;
-    entry->unk1A = -1;
-    entry->unk1E = 0;
-    entry->worldIndexNodes = NULL;
-    entry->unk24 = 0;
-    entry->unk1C = -1;
-    object->entry = entry;
+    object->data = entry;
+    entry->firstNode = NULL;
+    entry->lastNode = NULL;
+    entry->primaryObject = NULL;
+    entry->secondaryObject = NULL;
+    entry->entryAllocation = NULL;
+    entry->entries = NULL;
+    entry->entryCapacity = 0;
+    entry->freeHeadIndex = -1;
+    entry->freeEntryCount = 0;
+    entry->firstIndex = NULL;
+    entry->lastIndex = NULL;
+    entry->freeTailIndex = -1;
     return 1;
 }
 
-void dds3DestroyWorldObjectEntry(WorldObject *object) {
-    WorldEntry *entry = object->entry;
+void dds3DestroyWorldObjectEntry(EffWorldNode *object) {
+    WorldInfo *entry = object->data;
 
     if (entry == NULL) {
         return;
     }
-    while (entry->worldNodes != NULL) {
-        dds3DestroyWorldNode(entry->worldNodes);
+    while (entry->firstNode != NULL) {
+        dds3DestroyWorldNode(entry->firstNode);
     }
-    while (entry->worldIndexNodes != NULL) {
-        dds3DestroyWorldIndexNode(entry->worldIndexNodes);
+    while (entry->firstIndex != NULL) {
+        dds3DestroyWorldIndexNode(entry->firstIndex);
     }
-    if (entry->resource != NULL) {
-        sdfReleaseResourceAllocation(entry->resource);
+    if (entry->entryAllocation != NULL) {
+        sdfReleaseResourceAllocation(entry->entryAllocation);
     }
     sdfReleaseChipBlock(entry);
 }
 
-u32 dds3DispatchWorldEntryUpdateCallback(WorldObject *obj) {
+u32 dds3DispatchWorldEntryUpdateCallback(EffWorldNode *obj) {
+    WorldInfo *entry = obj->data;
     EffWorldNode *callbackTarget;
 
-    callbackTarget = obj->entry->callbackTarget;
+    callbackTarget = (EffWorldNode *)entry->primaryObject;
     if (callbackTarget != NULL) {
         dds3InvokeWorldCallbackFirst(callbackTarget);
     }
     return 1;
 }
 
-u32 dds3DispatchWorldEntryDrawCallback(WorldObject *obj) {
+u32 dds3DispatchWorldEntryDrawCallback(EffWorldNode *obj) {
+    WorldInfo *entry = obj->data;
     EffWorldNode *callbackTarget;
 
-    callbackTarget = obj->entry->callbackTarget;
+    callbackTarget = (EffWorldNode *)entry->primaryObject;
     if (callbackTarget != NULL) {
         dds3InvokeWorldCallbackSecond(callbackTarget);
     }
