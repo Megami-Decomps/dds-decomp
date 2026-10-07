@@ -271,7 +271,7 @@ void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
 /* Drift until the particle enters the capture radius, then follow a randomized
  * cubic path to the target. Fade-in takes priority over an overlapping fade-out.
  * Preserve the native unwritten point w and unchecked fade divisors. */
-void func_0018A098(EffMagatuhiWideFirst *work) {
+void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
     f32 point[4];
     f32 origin[4];
     f32 basePosition[4];

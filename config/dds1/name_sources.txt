@@ -2097,6 +2097,7 @@
 0x00189C98	effMagatuhiCreateFirst	inferred	first-family create: 0x30 particles before work [names_M61_EffVu.tsv]
 0x00189E60	effMagatuhiReleaseMathOwnerAndBuffer	inferred	Releases math resource, owner and allocated buffer held in wide work. [names_reviewed6.tsv]
 0x00189E98	effMagatuhiInitWideFirstParticle	inferred	Initializes the indexed WideFirst particle and its curve/value slots on the age-zero updater path; paired DDS2 twin 0x00191AD0.
+0x0018A098	effMagatuhiUpdateWideFirst	inferred	Advances WideFirst drift/capture and Bezier motion, fades and submits particles, and handles respawn; effect-operation callback data references this function at 0x00355734; paired DDS2 twin 0x00191CD0.
 0x0018A610	effMagatuhiCopyFloatBlock	inferred	copies eight floats from the source block to the destination block with remapped offsets
 0x0018A678	effMagatuhiCreateBezierHistoryWork	inferred	readability/matching review (QP16)
 0x0018A800	effMagatuhiReleaseWideWorkResources	inferred	Releases math and owner resources plus retained allocation from wide work. [names_reviewed6.tsv]
