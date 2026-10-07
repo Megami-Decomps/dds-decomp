@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
 #include "mdl.h"
 #include "evt_unit.h"
 #include "scr.h"
@@ -152,11 +153,7 @@ extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfCreatePatchableResourcePacket(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, void *, s32, s32, s32);
-
 extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
-
-extern void sdfCreateGraphBufferCopyPacket(SdfListHead *, SdfLinkedPacketList *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s32);
 
@@ -1380,7 +1377,7 @@ void btlInitializeGraphicsRuntime(void) {
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
     context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, runtime->resource, 0, 0, 0);
+    sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->resource, 0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
 }
@@ -1400,7 +1397,7 @@ void btlInitializeOverlayGraphics(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
     SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    sdfCreateGraphBufferCopyPacket(packetList, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfCreateGraphBufferCopyPacket(packetList, context, ((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
     btlRuntimeState.options |= 1;

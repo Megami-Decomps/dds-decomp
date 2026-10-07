@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
@@ -248,7 +249,7 @@ void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
  * The drawing arguments remain opaque and are forwarded to the native builder. */
 void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
-                   s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+                   s32 arg4, s32 arg5, s32 resourceAddress, s32 arg7, s32 arg8,
                    s32 (*allocatePacket)(s32)) {
     s32 packetAddress;
 
@@ -258,7 +259,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
     packetAddress = allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     ((SdfNode *)packetAddress)->unk4 = (u32)sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket((SdfResourcePacket *)(packetAddress + SDF_QWORD_BYTES),
-        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, resourceAddress, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packetAddress);
     sdfAppendPacketRange(list, packetAddress + SDF_QWORD_BYTES, packetAddress + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
@@ -1319,7 +1320,7 @@ extern SdfGraphObj D_003980E0;
 
 /* Build a local-to-local GS copy from graph buffer zero into destination. */
 void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *linkedList,
-                   SdfTexHead *destination, s32 destinationX, s32 destinationY,
+                   SdfTexResource *destination, s32 destinationX, s32 destinationY,
                    s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
                    s32 resourceIndexXor, s32 (*allocPacket)(s32)) {
     SdfNode *packet;
@@ -1334,7 +1335,7 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
     drawPacket = (SdfPacket *)(packet + 1);
 
     sdfInitializeExtendedDrawPacket(
-        drawPacket, destination->address, destination->width,
+        drawPacket, destination->word, destination->width,
         destination->format, destinationX, destinationY, D_003980E0.buffers[0]->word,
         D_003980E0.width, D_003980E0.bufferFormat, sourceX, sourceY, transferWidth,
         transferHeight, 2);

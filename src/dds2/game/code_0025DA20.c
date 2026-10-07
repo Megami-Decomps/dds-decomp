@@ -3,6 +3,7 @@
 #include "mnu_shop.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
 #include "kwln.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -826,9 +827,6 @@ extern u8 D_00380860[];
 extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
-extern void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
-                                            s32 width, s32 height, void *resource, s32 arg7,
-                                            s32 arg8, s32 (*alloc)(s32));
 extern void sdfAppendPacketChainNode(SdfPacketChain *head, SdfLinkedPacketList *node);
 
 void func_0025EFD8(CampScene *scene) {
@@ -846,7 +844,7 @@ void func_0025EFD8(CampScene *scene) {
     context = (SdfLinkedPacketList *)sdfAllocPacketAligned(0x10);
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket((SdfListHead *)surface, context, 0, 0, 0x200, 0xE0,
-                                    (void *)scene->descriptorHandle, 0, 0, 0);
+                                    scene->descriptorHandle, 0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
     D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)surface);
 }
