@@ -1,0 +1,33 @@
+--- a/src/dds1/effect/parManager.c
++++ b/src/dds1/effect/parManager.c
+@@ -42,7 +42,7 @@
+ 
+ /* The slot table and its allocation owner are one record, not two views.
+  * The native allocator returns this header after the point/slot arrays. */
+-typedef struct {
++typedef struct ParTable {
+     u16 slotCount;
+     u16 pointCapacity;
+     ParSlot *slots;
+--- a/src/dds2/effect/parManager.c
++++ b/src/dds2/effect/parManager.c
+@@ -45,7 +45,7 @@
+ 
+ /* The slot table and its allocation owner are one record, not two views.
+  * The native allocator returns this header after the point/slot arrays. */
+-typedef struct {
++typedef struct ParTable {
+     u16 slotCount;
+     u16 pointCapacity;
+     ParSlot *slots;
+--- a/src/dds1/game/code_0015A758.c
++++ b/src/dds1/game/code_0015A758.c
+@@ -474,7 +474,7 @@
+     effTrackPolySetIndexedColor(particle, index, (color & 0xFF000000) | 0x808080);
+ }
+ 
+-u32 func_0015B220(void) {
++u32 func_0015B220(u16 pointCapacity) {
+     return 0;
+ }
+ 
