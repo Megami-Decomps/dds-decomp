@@ -3,20 +3,9 @@
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
+#include "evt_unit.h"
 #include "eff.h"
 #include "btl_sound.h"
-
-/* Follow record the object tracks (angle, flags and kind at the end of a longer record). */
-typedef struct EffFollowRec {
-    u8 pad00[0x98];
-    f32 angle;   /* 0x98 */
-    u8 pad9C[0xC];
-    u32 flags;   /* 0xA8 */
-    s16 kind;    /* 0xAC */
-} EffFollowRec;
-
-
-
 
 typedef struct EffectObject {
     u8 pad00[0x18];
@@ -278,7 +267,7 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
     if (model != NULL && effObjTestNodeFlags(obj->source, 1) == 1) {
         effObjClearNodeFlags(obj->source, 1);
         if (data->transitionWork != 0) {
-            if (data->transitionWork->kind == 0 || data->transitionWork->kind == 3) {
+            if (data->transitionWork->motionState == 0 || data->transitionWork->motionState == 3) {
                 if (data->transitionWork->flags & 0x40) {
                     flag = 1;
                 }
@@ -292,8 +281,8 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
             VU0_MOVE_VF(vf11, vf10);
             VU0_MOVE_VF(vf10, vf0);
             VU0_CLEAR_W(vf10);
-            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->angle) * 0.01f, "vaddx.x vf10, vf0, vf2x");
-            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->angle) * 0.004f, "vaddx.y vf10, vf0, vf2x");
+            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->wobblePhase) * 0.01f, "vaddx.x vf10, vf0, vf2x");
+            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->wobblePhase) * 0.004f, "vaddx.y vf10, vf0, vf2x");
             VU0_MUL(vf10, vf10, vf11);
             VU0_ADD(vf10, vf10, vf11);
         }
@@ -303,7 +292,7 @@ s32 effUpdateFollowModelTransform(EffectObject *obj) {
         if (data->transitionWork != 0 && flag != 0) {
             VU0_MOVE_VF(vf11, vf10);
             VU0_LOAD_VF(vf10, &axis);
-            effMiscAxisAngleToQuaternionVU(sdfSinPoly(data->transitionWork->angle) * 0.006f);
+            effMiscAxisAngleToQuaternionVU(sdfSinPoly(data->transitionWork->wobblePhase) * 0.006f);
             effMiscQuatMultiplyVU();
         }
         if (data->word18 & 1) {
