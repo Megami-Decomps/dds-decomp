@@ -15,6 +15,7 @@ extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 #include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
+#include "dat_command.h"
 
 extern void sdfReleaseChipBlock(void *block);
 extern s32 btlIsUnitInActiveList(void *unit);
@@ -90,21 +91,6 @@ typedef struct BtlActionTableEntry {
     u16 flags;             /* 0x1C */
     u8 pad1E[2];
 } BtlActionTableEntry;
-
-typedef struct BtlCategoryTableEntry {
-    u8 flags00;            /* 0x00 */
-    u8 pad01[2];
-    u8 kind03;             /* 0x03 */
-    u8 pad04[4];
-    u8 restriction;        /* 0x08 */
-    u8 flags09;            /* 0x09 */
-    u8 pad0A[0x1A];
-    u32 flags24;           /* 0x24 */
-    u8 pad28[6];
-    u16 unk2E;
-    s32 categoryType;      /* 0x30 */
-    u8 pad34[4];
-} BtlCategoryTableEntry;
 
 typedef struct BtlResourceTableEntry {
     u32 flags;
@@ -298,8 +284,6 @@ typedef struct SoundResourceNode {
 extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern void sndFormatResourceNameFromUnitMode(s32, s32);
-
-extern s32 datCommandRecords;
 
 extern s32 datActionAnimationRecords;
 
@@ -775,7 +759,7 @@ s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 ar
 
     btlGetEntryFlagsUnlessDisabled(&actor->partyRecord.flags);
     if (arg6 >= 0) {
-        switch (((BtlCategoryTableEntry *)datCommandRecords)[arg6].categoryType) {
+        switch (datCommandRecords[arg6].unk30) {
         case 1:
         case 2:
         case 9:
@@ -788,7 +772,7 @@ s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 ar
             break;
         }
     }
-    if ((((BtlCategoryTableEntry *)datCommandRecords)[arg6].flags24 & 0x400000FF) == 0x40000002) {
+    if ((datCommandRecords[arg6].attribute.bits & 0x400000FF) == 0x40000002) {
         return -1;
     }
     if (arg1 & 0x50004) {
@@ -823,7 +807,7 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
         case 0x1A5:
             return 0;
         }
-        switch (((BtlCategoryTableEntry *)datCommandRecords)[index].categoryType) {
+        switch (datCommandRecords[index].unk30) {
         case 1:
         case 2:
         case 9:
@@ -1057,7 +1041,7 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    if (((BtlCategoryTableEntry *)datCommandRecords)[args->category].flags00 & 8) {
+    if (datCommandRecords[args->category].flags & 8) {
         btlAdjustUnitHp(&unit->partyRecord.flags, -0x7FFF);
         func_001AA850(&unit->partyRecord.flags, 0x4000);
         unit->flags |= 0x20;
@@ -1065,7 +1049,7 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     if (args->amount == 0) {
         return 1;
     }
-    switch (((BtlCategoryTableEntry *)datCommandRecords)[args->category].kind03) {
+    switch (datCommandRecords[args->category].costMode) {
     case 1:
         btlAdjustUnitHp(&unit->partyRecord.flags, -args->amount);
         return 1;
@@ -5275,7 +5259,7 @@ s32 btlIsActorCategoryTypeTwo(s32 actor) {
     if (category == 0) {
         return 0;
     }
-    return ((BtlCategoryTableEntry *)datCommandRecords)[category].categoryType == 2;
+    return datCommandRecords[category].unk30 == 2;
 }
 
 extern s32 btlIsActorCategoryMarked(s32);
@@ -5299,7 +5283,7 @@ s32 btlCanUseActorCategoryFlag2(s32 actor) {
 s32 btlHasSingleLinkedResource(s32 actor) {
     s32 category = ((BtlLinkedCommand *)actor)->actionCode;
 
-    if (category != 0 && ((BtlCategoryTableEntry *)datCommandRecords)[category].restriction != 0) {
+    if (category != 0 && datCommandRecords[category].unk_08 != 0) {
         return 0;
     }
     return btlGetIndexListCount(((BtlLinkedCommand *)actor)->targetList) == 1;
@@ -5311,7 +5295,7 @@ s32 btlCanUseActorCategoryFlag4(s32 actor) {
     if (category == 0) {
         return 0;
     }
-    if ((((BtlCategoryTableEntry *)datCommandRecords)[category].flags09 & 1) == 0) {
+    if ((datCommandRecords[category].options & 1) == 0) {
         if (!btlCanUseLinkedActor(actor)) {
             return 0;
         }
@@ -5325,7 +5309,7 @@ s32 btlIsActorCategoryMarked(s32 actor) {
     if (category == 0) {
         return 0;
     }
-    return ((BtlCategoryTableEntry *)datCommandRecords)[category].categoryType == 1;
+    return datCommandRecords[category].unk30 == 1;
 }
 
 s32 btlHasActorCategoryFlag40(s32 actor) {
@@ -8567,7 +8551,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     u16 effectId;
 
     if (actor->unk310 > 0) {
-        effectId = ((BtlCategoryTableEntry *)datCommandRecords)[actor->unk310].unk2E;
+        effectId = datCommandRecords[actor->unk310].unk2E;
     } else {
         effectId = 0;
     }
