@@ -2891,12 +2891,12 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     SdfTex *texture;
     if (address != 0) {
         if (data->effect72 != 0) {
-            sdfTexReleaseReferenceViaHandler((SdfTex *)data->effect72);
+            sdfTexReleaseReferenceViaHandler(data->effect72);
             data->effect72 = 0;
         }
         texture = sdfTexAcquireResourceTexture((void *)address);
         effSetCh72Id((u32)texture);
-        data->effect72 = (s32)texture;
+        data->effect72 = texture;
     }
 }
 

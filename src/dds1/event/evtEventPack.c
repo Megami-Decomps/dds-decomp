@@ -179,7 +179,7 @@ extern void effInitCh72Id(void);
 extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
-extern void sdfTexReleaseReferenceViaHandler(s32);
+extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void sdfReleaseResourceAllocation(s32);
 
@@ -198,15 +198,15 @@ void evtReleaseEventPackResources(void) {
         }
         if (state->effect71 != 0) {
             effInitCh71Id();
-            sdfTexReleaseReferenceViaHandler(state->effect71);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)state->effect71);
         }
         if (state->effect76 != 0) {
             effInitCh76Id();
-            sdfTexReleaseReferenceViaHandler(state->effect76);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)state->effect76);
         }
         if (state->effect75 != 0) {
             effInitCh75Id();
-            sdfTexReleaseReferenceViaHandler(state->effect75);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)state->effect75);
         }
         if (state->fileHandle != 0) {
             filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
