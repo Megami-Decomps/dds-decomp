@@ -150,7 +150,6 @@ u32 mnuDestroyListState(MenuList *list);
 
 MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
-MenuListNode *mnuListAppendNode(MenuList *list, s32 value);
 
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
@@ -342,13 +341,12 @@ void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window) {
     window->flags = window->flags & MNU_WINDOW_TRANSITION_CLEAR_MASK;
 }
 
-MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *window, s32 value) {
+MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *window, const void *value) {
     return mnuListAppendNode(window->list, value);
 }
 
-extern MenuListNode *func_0027B540(MenuList *list, MenuListNode *anchor, s32 value, s32 mode, u32 options);
 
-MenuListNode *func_0027C688(MenuWindowContainer *window, MenuListNode *anchor, s32 value, s32 mode, u32 options) {
+MenuListNode *func_0027C688(MenuWindowContainer *window, MenuListNode *anchor, const void *value, s32 mode, u32 options) {
     return func_0027B540(window->list, anchor, value, mode, options);
 }
 

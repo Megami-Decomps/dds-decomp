@@ -449,7 +449,7 @@ void mnuUpdateListScrollFlags(MenuList *list) {
 
 MenuListNode *mnuListAppendNode(list, value)
     MenuList *list;
-    s32 value;
+    const void *value;
 {
     MenuListNode *node = sdfAllocAndClearQuadwords(0x74);
     s32 index = list->count;
@@ -503,7 +503,7 @@ MenuListNode *mnuListAdvanceCursor(MenuList *, s32, s32);
 MenuListNode *mnuListRetreatCursor(MenuList *, s32, s32);
 
 MenuListNode *func_0027B540(MenuList *list, MenuListNode *anchor,
-                         s32 value, s32 mode, u32 options) {
+                         const void *value, s32 mode, u32 options) {
     MenuListNode *node;
     MenuListNode *walk;
 

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "mnu.h"
+#include "mnu_list.h"
 
 extern s32 mnuGetSlidePathSegmentWeight(s32);
 extern s32 D_003E38A0[];
@@ -20,7 +21,7 @@ typedef struct SpriteMenuState {
     u8 pad00[8];
     s32 spriteHandle; /* 0x08 */
     u8 pad0C[0x18];
-    s32 list;         /* 0x24 */
+    struct MenuList *list; /* 0x24: generic selection-list owner. */
 } SpriteMenuState;
 
 typedef struct SpriteMenuList {
@@ -59,19 +60,18 @@ void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
 
 extern struct MenuList *mnuCreateListState(u32, u32, s32);
 
-extern void mnuDestroyListState(s32);
+extern u32 mnuDestroyListState(struct MenuList *);
 
-extern void mnuListAppendNode(s32, s32);
 
 extern void func_002A5A78();
 
 void mnuRecreateMenuSelectionList(void) {
     s32 i;
-    s32 node;
+    struct MenuList *node;
     if (((SpriteMenuState *)mnuMovieMenuState)->list != 0) {
         mnuDestroyListState(((SpriteMenuState *)mnuMovieMenuState)->list);
     }
-    node = (s32)mnuCreateListState(0, 3, 0);
+    node = mnuCreateListState(0, 3, 0);
     ((SpriteMenuState *)mnuMovieMenuState)->list = node;
     ((SpriteMenuList *)node)->callback = func_002A5A78;
     for (i = 0; i < 3; i++) {

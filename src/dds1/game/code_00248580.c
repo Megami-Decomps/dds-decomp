@@ -115,7 +115,6 @@ extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
 extern struct MenuList *mnuCreateListState();
 
-extern s32 mnuListAppendNode(s32, s32);
 
 extern void func_002491B8(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 
@@ -339,7 +338,7 @@ void mnuBuildTerminalNodeList(MenuTerminalWork *host) {
 
             if (recoveryCost != 0) {
                 MenuProgressNode *node =
-                    (MenuProgressNode *)mnuListAppendNode(host->list, (s32)D_003BC3F8);
+                    (MenuProgressNode *)mnuListAppendNode(host->list, D_003BC3F8);
                 MenuThresholdEntry *entry = (MenuThresholdEntry *)&node->entryIndex;
 
                 node->panel = 0;
@@ -434,16 +433,16 @@ void func_002491B8(s32 x, s32 y, s32 arg2, struct MenuList *list,
 
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
-s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
-    s32 list = (s32)mnuCreateListState(0, count, 0x15, callback);
+struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
+    struct MenuList *list = mnuCreateListState(0, count, 0x15, callback);
     s32 entryIndex;
-    *(s32 *)(list + 0x30) = callback;
-    *(s32 *)(list + 0x2c) = (s32)func_002491B8;
-    *(s32 *)(list + 0x3c) = 0;
+    list->context = (void *)callback;
+    list->drawCallback = func_002491B8;
+    list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
         if (entryIndex != excluded) {
-            s32 node = mnuListAppendNode(list, (s32)D_003BC3F8);
-            *(s32 *)(node + 0x60) = items[entryIndex];
+            struct MenuListNode *node = mnuListAppendNode(list, D_003BC3F8);
+            node->camp.value = items[entryIndex];
         }
     }
     return list;

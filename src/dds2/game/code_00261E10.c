@@ -28,7 +28,6 @@ extern s32 datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
 extern void mdlFlagClear(s32);
 extern void func_002619A8(s32, s32);
-extern void func_0025FD78(s32);
 extern void func_00297320(s32);
 extern void func_00297970(s32);
 
@@ -151,7 +150,7 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00261F48);
 
 s32 func_00262190(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297320(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -196,7 +195,7 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00262330);
 
 s32 func_00262598(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297970(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -241,7 +240,7 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00262740);
 
 s32 func_002629A8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297970(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -286,7 +285,7 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00262B50);
 
 s32 func_00262DB8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297970(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -391,7 +390,7 @@ s32 func_00262F78(KwlnTask *task) {
 
 s32 func_00263180(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297970(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -455,7 +454,7 @@ s32 evtOpenProgressResultPopupWhenIdle(s32 callbackContext) {
 
 s32 func_002633F0(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297320(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -487,7 +486,7 @@ s32 func_002635E8(s32 callbackContext) {
 
 s32 func_00263658(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297320(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -530,7 +529,7 @@ s32 evtQueryStateProgress(s32 callbackContext) {
 
 s32 evtDispatchProgressCallback(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00294930(stateAddress, ((MenuTerminalContext *)stateAddress)->retryFrames);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -643,7 +642,7 @@ s32 evtPollQuantitySelection(s32 callbackContext) {
 
 s32 func_00263B98(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00298648((MenuTerminalContext *)stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -803,7 +802,7 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00264120);
 
 s32 evtDispatchSceneReadyFollowup(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     if (((MenuTerminalContext *)stateAddress)->sceneReady == 1) {
         func_00297970(stateAddress);
     } else {
@@ -881,7 +880,7 @@ extern void func_00296E98(s32, u32, s32, s32);
 s32 func_00264480(s32 callbackContext) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue();
 
-    func_0025FD78((s32)state);
+    func_0025FD78(state);
     switch (state->dispatchMode) {
     case 1:
         func_00294B40(0, 0, 0, state, 0x100, 0x53);
@@ -1012,7 +1011,7 @@ s32 evtAdvancePendingRewards(s32 callbackContext) {
 
 s32 func_00264AB8(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297970(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -1068,7 +1067,7 @@ s32 evtOpenSlotAdvancePopupWhenIdle(s32 callbackContext) {
 
 s32 func_00264CE0(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297970(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -1135,7 +1134,7 @@ s32 evtTriggerProgressGateThenOpenPopup(s32 callbackContext) {
 
 s32 func_00264F98(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();
-    func_0025FD78(stateAddress);
+    func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297970(stateAddress);
     return func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, &((MenuTerminalContext *)stateAddress)->popupState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }

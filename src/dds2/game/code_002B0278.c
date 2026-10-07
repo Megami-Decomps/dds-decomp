@@ -395,7 +395,6 @@ void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 secon
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
 void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom);
-MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, s32 value);
 
 
 extern void mnuDrawStaffPartySelectionPanel(s32);
@@ -651,7 +650,7 @@ void func_002B0FA0(MenuContext *context) {
             node->sortKeySecondary = datGameState->party[i].level;
         }
     }
-    mnuAppendWindowListNode(window, (s32)D_00437BE8);
+    mnuAppendWindowListNode(window, D_00437BE8);
     window->list->visibleCount = window->list->count;
     switch (window->list->count) {
     case 1:
@@ -1352,14 +1351,14 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, s32 callback) {
         MenuListNode *node;
 
         if (skill != 0) {
-            node = mnuAppendWindowListNode(window, (s32)D_00435E64[skill]);
+            node = mnuAppendWindowListNode(window, D_00435E64[skill]);
             node->sortKeySecondary = i;
             node->sortKeyPrimary = skill;
             if (selectionMode != 0 && mnuGetEntryUseStatus((s32)entry, skill) != 0) {
                 node->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
             }
         } else {
-            node = mnuAppendWindowListNode(window, (s32)D_00437C00);
+            node = mnuAppendWindowListNode(window, D_00437C00);
             node->sortKeySecondary = node->sortKeyPrimary = 0;
         }
     }
@@ -2508,7 +2507,7 @@ void mnuUpdateListScrollFlags(MenuList *list) {
 
 MenuListNode *mnuListAppendNode(list, value)
     MenuList *list;
-    s32 value;
+    const void *value;
 {
     MenuListNode *node = sdfAllocAndClearQuadwords(0x74);
     s32 index = list->count;
@@ -2564,7 +2563,7 @@ MenuListNode *mnuListRetreatCursor(MenuList *, s32, s32);
 /* Insert a node holding `value` before (or, with options & 2, after) anchor, keeping the visible window and
  * cursor in place. */
 MenuListNode *func_002B83A0(MenuList *list, MenuListNode *anchor,
-                         s32 value, s32 mode, u32 options) {
+                         const void *value, s32 mode, u32 options) {
     MenuListNode *node;
     MenuListNode *walk;
 
@@ -2977,7 +2976,6 @@ void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second,
 void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window);
 
 
-MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, s32 value, s32 mode, u32 options);
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu);
 

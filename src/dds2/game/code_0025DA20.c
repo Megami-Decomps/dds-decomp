@@ -106,7 +106,6 @@ extern s32 func_00101820(u32);
 
 extern s32 func_00261B98(s32);
 
-extern void func_0025FD78(s32);
 
 extern char D_00437838[]; /* "camp" */
 
@@ -1081,7 +1080,7 @@ void func_0025FA28(MenuTerminalContext *scene) {
     case 3:
         scene->effectSlots[1] = (struct EffectSlotSet *)effLoadIndexedResource(
             (s32)"/facility/spr/shop/", (s32)D_003CE470[2], 0);
-        func_0025F8B8((u32)scene->effectSlots[1], &scene->effectResources);
+        func_0025F8B8((u32)scene->effectSlots[1], &scene->campEffect.resources);
         break;
     }
     scene->effectSlots[2] = (struct EffectSlotSet *)effLoadIndexedResource(
@@ -1134,7 +1133,7 @@ void mnuShopReleaseWindowAndEffectResources(MenuTerminalContext *scene) {
     switch (scene->type) {
     case 1:
     case 3:
-        mnuShopDestroyNestedEffectBatch(&scene->effectResources);
+        mnuShopDestroyNestedEffectBatch(&scene->campEffect.resources);
         break;
     case 0:
     case 2:
@@ -1144,7 +1143,25 @@ void mnuShopReleaseWindowAndEffectResources(MenuTerminalContext *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FD78);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
+
+/* The shop layouts use slot 1 as their background and slot 3 as the rotated portrait. */
+void func_0025FD78(MenuTerminalContext *scene) {
+    switch (scene->type) {
+    case 0:
+    case 2:
+        func_00306CD0(0, 0, 0, 0x100, 0, scene->effectSlots[1], 0, 0x53);
+        func_00306CD0(0xE30, 0x610, 0, 0x100, 0, scene->effectSlots[2], 0, 0x53);
+        scene->effectSlots[3]->workEntries[0].angleDegrees = 90.0f;
+        func_00306CD0(0x9F0, 0x610, 0, 0x100, 2, scene->effectSlots[3], 0, 0x53);
+        return;
+    case 1:
+    case 3:
+        mnuDrawCampIconBackdrop(&scene->campEffect, 0x53);
+        break;
+    }
+}
 
 s32 mnuCampHasEligibleOwnedItems(void) {
     s32 result = 0;
@@ -1172,7 +1189,6 @@ s32 mnuCampHasEligibleOwnedItems(void) {
     return result;
 }
 
-extern struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, s32 value);
 extern MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
                                                        s32 visibleCount, s32 rowSpacing);
 extern void func_00295400(void);
@@ -1760,7 +1776,7 @@ s32 func_00261538(MenuTerminalContext *scene) {
             continue;
         }
         node = mnuAppendWindowListNode(scene->window,
-            (s32)(D_00435E5C + id * 0x19));
+            D_00435E5C + id * 0x19);
         func_002B9808(scene->window);
         window = scene->window;
         mnuAdvanceListCursorDefault(window->list);
@@ -1808,7 +1824,7 @@ s32 func_00261670(MenuTerminalContext *scene) {
             continue;
         }
         node = mnuAppendWindowListNode(scene->window,
-            (s32)(D_00435E5C + id * 0x19));
+            D_00435E5C + id * 0x19);
         func_002B9808(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
@@ -1857,7 +1873,7 @@ s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
             continue;
         }
         node = mnuAppendWindowListNode(scene->window,
-            (s32)(D_00435E5C + id * 0x19));
+            D_00435E5C + id * 0x19);
         func_002B9808(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
@@ -1908,7 +1924,7 @@ s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
             continue;
         }
         node = mnuAppendWindowListNode(scene->window,
-            (s32)(D_00435E5C + id * 0x19));
+            D_00435E5C + id * 0x19);
         func_002B9808(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;

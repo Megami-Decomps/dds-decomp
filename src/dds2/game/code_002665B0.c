@@ -191,7 +191,6 @@ extern KwlnTask *D_0043785C;
 
 extern struct MenuList *mnuCreateListState();
 
-extern struct MenuListNode *mnuListAppendNode(struct MenuList *, s32);
 
 extern u8 D_00437870[];
 
@@ -547,7 +546,7 @@ void func_002673B8(MenuSlotState *host) {
         }
         name = (char *)D_003A41A8[i].encodedText;
         if (strlen(name) != 0) {
-            node = mnuListAppendNode(host->secondaryList, (s32)D_00437870);
+            node = mnuListAppendNode(host->secondaryList, D_00437870);
             node->camp.value = i;
             node->title = name;
         }
@@ -584,7 +583,7 @@ MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, void *o
     list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
         if (entryIndex != excluded) {
-            MenuListNode *node = mnuListAppendNode(list, (s32)D_00437870);
+            MenuListNode *node = mnuListAppendNode(list, D_00437870);
             node->camp.value = items[entryIndex];
         }
     }

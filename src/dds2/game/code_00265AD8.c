@@ -1,6 +1,5 @@
 #include "mnu.h"
 
-extern void func_0025FD78(s32);
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -93,7 +92,7 @@ s32 evtAdvancePopupWithOptionalPreparation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     if (*(s32 *)(context + 0xE0) != 0) {
-        func_0025FD78(context);
+        func_0025FD78((MenuTerminalContext *)context);
     }
     if (*(s32 *)(context + 0xB8) != 0) {
         func_00294758(context, *(s32 *)(context + 0xB8));
@@ -139,7 +138,7 @@ s32 mnuPollMessageWindowBeforeClosing(s32 callback) {
 s32 func_00265FE8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
-    func_0025FD78(context);
+    func_0025FD78((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -181,7 +180,7 @@ s32 mnuWaitForFadeBeforePopup(s32 callback) {
 s32 func_00266188(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
-    func_0025FD78(context);
+    func_0025FD78((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 

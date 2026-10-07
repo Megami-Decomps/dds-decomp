@@ -944,7 +944,6 @@ s32 mnuShopHasPendingFlag(void) {
 
 
 
-extern struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, s32 value);
 extern void func_0025E820();
 
 MenuWindowContainer *func_002443F8(const void *unused, s32 count, ShopScene *settings) {
@@ -1208,7 +1207,8 @@ typedef struct ShopSourcePriceRow {
 } ShopSourcePriceRow;
 
 typedef struct ShopItemPriceRecord {
-    u8 pad00[4];
+    u8 flags;
+    u8 pad01[3];
     s32 price;
 } ShopItemPriceRecord;
 
@@ -1431,7 +1431,51 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00245628);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002457E8);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245A40);
+extern u32 D_0036A260[][16];
+extern char (*D_003BAA84)[25];
+extern u8 evtGetSolarPhase(void);
+extern void func_0025ECD0();
+
+s32 func_00245A40(ShopScene *scene) {
+    CampWindowParams *parameters;
+    void *block;
+    u32 value;
+    s32 phase;
+    s32 i;
+
+    if (scene->window != NULL) {
+        if (scene->window->list->context != NULL) {
+            sdfReleaseChipBlock(scene->window->list->context);
+            scene->window->list->context = NULL;
+        }
+        mnuDestroyWindowContainer(scene->window);
+    }
+    scene->window = (MenuWindowContainer *)mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
+    for (i = 0; i < 0xC0; i++) {
+        scene->atLimit = 1;
+        if ((u32)(i - 0xA0) >= 0x20 && datGameState->inventory.counts[i] != 0) {
+            if ((((ShopItemPriceRecord *)datItemSkillRecords)[i].flags & 3) != 0) {
+                parameters = &mnuAppendWindowListNode(scene->window, D_003BAA84[i])->camp;
+                value = (u32)((ShopItemPriceRecord *)datItemSkillRecords)[i].price >> 1;
+                parameters->id = i;
+                parameters->value = value;
+                parameters->price = value;
+            } else if ((u32)(i - 0x60) < 0x20) {
+                parameters = &mnuAppendWindowListNode(scene->window, D_003BAA84[i])->camp;
+                phase = evtGetSolarPhase();
+                value = D_0036A260[i - 0x60][phase];
+                parameters->id = i;
+                parameters->value = value;
+                parameters->price = value;
+            }
+        }
+    }
+    scene->window->list->drawCallback = func_0025ECD0;
+    block = sdfAllocSizeClassBlock(0x10);
+    memset(block, 0, 0x10);
+    scene->window->list->context = block;
+    return scene->window->list->count;
+}
 
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
 

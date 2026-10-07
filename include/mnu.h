@@ -628,8 +628,7 @@ typedef struct MenuTerminalContext {
     s32 prepared;
     s32 delayFrames;
     DspScrollingStripState panelWork[2];
-    MenuEffectResources effectResources;
-    u8 pad270[0x108];
+    MenuCampEffect campEffect; /* 0x210: resources, sixteen sparks and badge fade; DDS2 0025FE58. */
     u32 windowResource;
     MenuGradientFade gradientFade;
     u8 rewardGranted;
@@ -640,9 +639,10 @@ typedef struct MenuTerminalContext {
 typedef char MenuTerminalContext_size_must_be_0x38C[(sizeof(MenuTerminalContext) == 0x38C) ? 1 : -1];
 typedef char MenuTerminalContext_firstPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[0] == 0xE8) ? 1 : -1];
 typedef char MenuTerminalContext_secondPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[1] == 0x17C) ? 1 : -1];
-typedef char MenuTerminalContext_effectResources_offset[((u32)&((MenuTerminalContext *)0)->effectResources == 0x210) ? 1 : -1];
+typedef char MenuTerminalContext_campEffect_offset[((u32)&((MenuTerminalContext *)0)->campEffect == 0x210) ? 1 : -1];
 
 extern MenuTerminalContext *D_00438FC8;
+void func_0025FD78(MenuTerminalContext *scene);
 
 
 typedef struct MenuIconSprites {
