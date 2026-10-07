@@ -327,9 +327,9 @@ void sdfSaveResetSnapshot(void) {
     D_00438E94 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
     copy = sdfMemoryGetBlockAddress(D_00438E94);
     memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
-    D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileRecords));
+    D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileBanks));
     copy = sdfMemoryGetBlockAddress(D_00438E98);
-    memcpy(copy, datGameState->profileRecords, sizeof(datGameState->profileRecords));
+    memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
     func_0011D130();
     D_00438E9C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
     copy = sdfMemoryGetBlockAddress(D_00438E9C);

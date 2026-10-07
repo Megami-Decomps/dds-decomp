@@ -5183,7 +5183,51 @@ void func_00220368(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00220450);
+/* This command mode allocates exactly three state bytes. */
+typedef struct BattleMarkedCommandState {
+    u8 requested;
+    u8 current;
+    u8 actionFlag;
+} BattleMarkedCommandState;
+
+void func_00220450(BtlUnit *unused, s32 *delta) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleMarkedCommandState *state = (BattleMarkedCommandState *)battle->effect;
+    ActionStateLink *actor;
+
+    if (delta[10] & 0x8000) {
+        actor = battle->tasks;
+        if (actor != NULL) {
+            while (actor != NULL) {
+                if (actor->pendingFlags & 8) {
+                    BtlUnit *unit = actor->unit;
+                    u32 flags = unit->flags;
+
+                    if (flags & 1) {
+                        if (flags & 0x400) {
+                            if (unit->partyRecord.unitId == 0x11B) {
+                                break;
+                            }
+                        }
+                    }
+                }
+                actor = actor->next;
+            }
+            if (actor != NULL) {
+                switch (state->current) {
+                case 0:
+                    state->requested = 1;
+                    actor->actionNumber = 4;
+                    break;
+                case 1:
+                    state->requested = 0;
+                    actor->actionNumber = 2;
+                    break;
+                }
+            }
+        }
+    }
+}
 
 u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
     u8 *state = ((BattleActionScene *)btlGetRuntime())->state;
