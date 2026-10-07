@@ -61,39 +61,30 @@ s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FBD0);
 
-typedef struct WorldCallbackTable {
-    u8 pad00[8];
-    s32 (*onFirst)(void *);  /* 0x08 */
-    s32 (*onSecond)(void *); /* 0x0C */
-} WorldCallbackTable;
 
-typedef struct WorldCallbackHolder {
-    u8 pad00[0x10];
-    WorldCallbackTable *callbacks; /* 0x10 */
-} WorldCallbackHolder;
 
 /* Invoke the holder's first / second lifecycle callback when present; the result is 1 when there is nothing to call. */
-s32 dds3InvokeWorldCallbackFirst(WorldCallbackHolder *holder) {
+s32 dds3InvokeWorldCallbackFirst(EffWorldNode *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
-        WorldCallbackTable *table = holder->callbacks;
+        EffWorldOps *table = holder->ops;
 
-        if (table != NULL && table->onFirst != NULL) {
-            result = table->onFirst(holder);
+        if (table != NULL && table->update != NULL) {
+            result = table->update(holder);
         }
     }
     return result;
 }
 
-s32 dds3InvokeWorldCallbackSecond(WorldCallbackHolder *holder) {
+s32 dds3InvokeWorldCallbackSecond(EffWorldNode *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
-        WorldCallbackTable *table = holder->callbacks;
+        EffWorldOps *table = holder->ops;
 
-        if (table != NULL && table->onSecond != NULL) {
-            result = table->onSecond(holder);
+        if (table != NULL && table->draw != NULL) {
+            result = table->draw(holder);
         }
     }
     return result;
@@ -180,7 +171,7 @@ u32 func_0010FDF0(WorldObject *obj) {
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        dds3InvokeWorldCallbackFirst((WorldCallbackHolder *)callbackTarget);
+        dds3InvokeWorldCallbackFirst((EffWorldNode *)callbackTarget);
     }
     return 1;
 }
@@ -190,7 +181,7 @@ u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
 
     callbackTarget = obj->entry->callbackTarget;
     if (callbackTarget != NULL) {
-        dds3InvokeWorldCallbackSecond((WorldCallbackHolder *)callbackTarget);
+        dds3InvokeWorldCallbackSecond((EffWorldNode *)callbackTarget);
     }
     return 1;
 }

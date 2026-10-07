@@ -23,14 +23,8 @@ typedef struct WorldUnitOwner {
     WorldUnitState *state;
 } WorldUnitOwner;
 
-typedef struct ActionObj {
-    u8 unk0[4];   /* 0x0 */
-    s32 unk4;     /* 0x4 */
-    u8 unk8[0x14]; /* 0x8 */
-    s32 unk1C;    /* 0x1C */
-} ActionObj;
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 
@@ -44,10 +38,10 @@ u32 func_00116800(WorldUnitOwner *object) {
     return object->state->value74;
 }
 
-ActionObj *evtSpawnActionObj9(s32 value) {
-    ActionObj *obj = dds3AppendWorldObjectNode(9);
+EffWorldNode *evtSpawnActionObj9(s32 value) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(9);
 
-    obj->unk4 = value;
+    obj->key = value;
     dds3EnsureSlotData(obj);
     return obj;
 }

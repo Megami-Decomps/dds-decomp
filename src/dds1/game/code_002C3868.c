@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_transform.h"
 #include "gs_packet.h"
 #include "sdf.h"
 
@@ -100,15 +101,7 @@ extern void effObjSetInnerFirstVec(s32, void *);
 
 extern void effObjSetInnerSecondVec(s32, void *);
 
-typedef struct EffObjVtbl {
-    u8 pad00[8];
-    void (*refresh)(s32);       /* 0x08 */
-} EffObjVtbl;
 
-typedef struct EffObjHeader {
-    u8 pad00[0x10];
-    EffObjVtbl *vtbl;           /* 0x10 */
-} EffObjHeader;
 
 extern void sdfCounterDestroyRuntime(SdfCounterRuntime *);
 
@@ -136,7 +129,7 @@ extern MapResource fldLocalMapTextureResource;
 void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
     effObjSetInnerSecondVec(fldLocalMapCameraObject, &fldLocalMapSecondCameraVector);
-    ((EffObjHeader *)fldLocalMapCameraObject)->vtbl->refresh(fldLocalMapCameraObject);
+    ((EffWorldNode *)fldLocalMapCameraObject)->ops->update(fldLocalMapCameraObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C38B0);

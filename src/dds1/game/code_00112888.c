@@ -24,7 +24,7 @@ ObjBase *dds3GetObjectOwnedHandle(WorldInnerOwner *object) {
     handle = 0;
     switch (object->kind - 4) {
     case 0: handle = (ObjBase *)dds3GetCameraHandle(object); break;
-    case 1: handle = func_00113008((NodeA *)object); break;
+    case 1: handle = func_00113008((EffWorldNode *)object); break;
     case 2: handle = (ObjBase *)effObjGetDataHandle(object); break;
     case 3: handle = (ObjBase *)effObjGetObjectHandle(object); break;
     case 4: handle = (ObjBase *)dds3GetResourceOwnerHandle(object); break;

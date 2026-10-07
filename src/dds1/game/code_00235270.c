@@ -90,14 +90,6 @@ typedef struct EvtRuntimeChild {
 
 /* World-slot node borrowed by a viewer group. Its data is slot-specific;
  * model groups use EvtModelSlot, while all named nodes share the list links. */
-typedef struct EvtWorldNode {
-    u8 pad00[8];
-    char *name; /* 0x08 */
-    u8 pad0C[0xC];
-    void *data; /* 0x18 */
-    u8 pad1C[4];
-    struct EvtWorldNode *next; /* 0x20 */
-} EvtWorldNode;
 
 /* The native 0x84-byte viewer entry owns its child list and borrows info.
  * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
@@ -110,7 +102,7 @@ typedef struct EvtRuntimeGroup {
         u16 shortValue; /* 0x08: truncated value in metadata */
     } entryHeader;
     u8 pad0C[4];
-    EvtWorldNode *info; /* 0x10 */
+    EffWorldNode *info; /* 0x10 */
     u8 pad14[8];
     s16 metadataValue; /* 0x1C */
     s8 metadataByte1;  /* 0x1E */
@@ -998,13 +990,13 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 
-extern EvtWorldObject *dds3GetWorldObject();
+extern EffWorldNode *dds3GetWorldObject();
 
 void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     s32 color;
     s32 count;
     s32 i;
-    EvtWorldNode *node;
+    EffWorldNode *node;
 
     color = 4;
     if (ctx->groupFirst + ctx->groupCursor != index) {
@@ -1017,11 +1009,11 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = dds3GetWorldObject()->table->slots[i].head; node != NULL; node = node->next) {
-                if (node->name != NULL) {
+            for (node = ((EvtWorldTable *)dds3GetWorldObject()->data)->slots[i].head; node != NULL; node = node->next) {
+                if (((char *)node->value) != NULL) {
                     count++;
                     if (count == index) {
-                        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, node->name));
+                        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->value)));
                         return;
                     }
                 }
@@ -1035,10 +1027,10 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00238A88);
 extern char D_003BC240[]; /* "P%d:" */
 extern char D_003BC248[]; /* "   %s" */
 extern s32 evtEventViewerGetPendingNode();
-extern EvtWorldNode *dds3FindObjectChainNodeByName(EvtWorldObject *world, char *name);
+extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, char *name);
 
 void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
-    EvtWorldNode *node;
+    EffWorldNode *node;
     s32 color;
     s32 slot;
 
@@ -1053,7 +1045,7 @@ void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *
     }
     sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
     if (node != NULL) {
-        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC248, node->name));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->value)));
     } else {
         sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "   -----------------------"));
     }
@@ -1798,7 +1790,7 @@ void evtDrawGroupListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 1) {
             if (n == index) {
-                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, group->info->name));
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->value)));
                 return;
             }
             n++;

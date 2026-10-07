@@ -3013,7 +3013,21 @@ s32 btlIsUnitListReady(void) {
 }
 
 extern void btlAttachActionEffectToUnit(BtlUnit *unit);
-INCLUDE_ASM(const s32, "game/code_002112C8", btlAttachActionEffectToUnit);
+void btlAttachActionEffectToUnit(BtlUnit *unit) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)battle->effect;
+    f32 position[3];
+
+    ctrl->unit = unit;
+    unit->flags &= ~0x100;
+    unit->flags &= ~8;
+    unit->stateFlags |= 0x180;
+    unit->conditionFlags = 0;
+    position[0] = 0.0f;
+    position[1] = 10000.0f;
+    position[2] = -10000.0f;
+    effObjSetInnerFirstVec(unit->effectObject, position);
+}
 
 void btlCommitSelectedUnit(void) {
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub;
@@ -7064,7 +7078,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
 extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 extern void btlBeginEffectActorFadeOut(void);
 extern void func_001E3108(void *, f32 *);
-extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern void func_00226AB0(BtlUnit *);
 
 void func_00226F58(void) {
@@ -7125,14 +7139,14 @@ void func_00226F58(void) {
             mainUnit->resourceIndex == 0x12E && (mainUnit->flags & 2)) {
             func_001E3108(mainUnit, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec((EffTransformNode *)mainUnit->effectObject,
+            effObjSetInnerFirstVec((EffWorldNode *)mainUnit->effectObject,
                 (u128 *)position);
         }
         if ((twin->flags & 0xE0) && !(mainUnit->flags & 0xE0) &&
             twin->resourceIndex == 0x12F && (twin->flags & 2)) {
             func_001E3108(twin, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec((EffTransformNode *)twin->effectObject,
+            effObjSetInnerFirstVec((EffWorldNode *)twin->effectObject,
                 (u128 *)position);
         }
     } else {

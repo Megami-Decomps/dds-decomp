@@ -100,25 +100,21 @@ void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
     }
 }
 
-typedef struct EvtWorldNode {
-    u8 pad00[0x20];
-    struct EvtWorldNode *next; /* 0x20 */
-} EvtWorldNode;
 
 
-extern EvtWorldObject *dds3GetWorldObject(void);
+extern EffWorldNode *dds3GetWorldObject(void);
 extern void dds3SetObjectModeAndDefaultWeight(void *node, s32 value);
 
 s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
-    EvtWorldObject *world = dds3GetWorldObject();
-    EvtWorldNode *node;
+    EffWorldNode *world = dds3GetWorldObject();
+    EffWorldNode *node;
     s32 value;
 
     if (world == NULL) {
         return 0;
     }
     value = index * 3 + base;
-    for (node = world->table->slots[6].head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldTable *)world->data)->slots[6].head; node != NULL; node = node->next) {
         dds3SetObjectModeAndDefaultWeight(node, value);
     }
     return 1;

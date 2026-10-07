@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_transform.h"
 #include "fpu.h"
 #include "gs_packet.h"
 #include "sdf.h"
@@ -123,15 +124,7 @@ extern MapResource fldLocalMapTextureResource;
 
 extern u32 fldReleaseMapResource(s32 *);
 
-typedef struct EffObjVtbl {
-    u8 pad00[8];
-    void (*refresh)(s32);       /* 0x08 */
-} EffObjVtbl;
 
-typedef struct EffObjHeader {
-    u8 pad00[0x10];
-    EffObjVtbl *vtbl;           /* 0x10 */
-} EffObjHeader;
 
 extern u8 D_00400BB0[];
 
@@ -202,7 +195,7 @@ extern s32 fldLoadMapResource(const char *, MapResource *);
 void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
     effObjSetInnerSecondVec(fldLocalMapCameraObject, &fldLocalMapSecondCameraVector);
-    ((EffObjHeader *)fldLocalMapCameraObject)->vtbl->refresh(fldLocalMapCameraObject);
+    ((EffWorldNode *)fldLocalMapCameraObject)->ops->update(fldLocalMapCameraObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030B880);
@@ -324,11 +317,10 @@ s32 sdfStepSelectedMapCameraTransition(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 
-typedef struct WorldChainNode WorldChainNode;
 typedef struct EffectObject EffectObject;
 
 extern void *dds3GetWorldSecondaryObject(void);
-extern WorldChainNode *dds3FindIndexedObjectChainNodeByName(EvtWorldObject *world, s32 type, const u8 *name);
+extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 type, const u8 *name);
 extern void evtSetObjectTransitionWork(EffectObject *object, u32 value);
 
 /* Fixed-width names identify the corresponding local-map model chain. */
@@ -342,7 +334,7 @@ void func_0030C250(s32 index, s32 value) {
         "md_01all_02",
         "md_01all_02"
     };
-    WorldChainNode *node;
+    EffWorldNode *node;
     s32 modelIndex;
 
     if (index != 0) {

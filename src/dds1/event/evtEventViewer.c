@@ -96,8 +96,7 @@ EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
 void func_0022BF00(EvtViewer *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer);
 void evtEventViewerFreeBuffer(EvtEvNode *node);
-struct WorldListNode;
-void dds3RemoveWorldObjectNode(struct WorldListNode *ptr);
+void dds3RemoveWorldObjectNode(struct EffWorldNode *ptr);
 void *sdfAllocSizeClassBlock(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 s32 dds3GetWorldObject(void);
@@ -472,7 +471,7 @@ s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer)
 
 struct EffectObj;
 struct PolyMovieObject;
-extern u32 *dds3FindObjectChainNodeByName(EvtWorldObject *, const u8 *);
+extern u32 *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
@@ -492,7 +491,7 @@ void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtViewer *
         return;
     }
     owner = (ObjData *)dds3FindObjectChainNodeByName(
-        (EvtWorldObject *)dds3GetWorldObject(),
+        (EffWorldNode *)dds3GetWorldObject(),
         (const u8 *)viewer->names[value]);
     if (owner == NULL) {
         return;

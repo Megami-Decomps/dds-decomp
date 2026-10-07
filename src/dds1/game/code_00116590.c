@@ -25,10 +25,6 @@ typedef struct WorldUnitOwner {
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-typedef struct ObjWithWork {
-    u8 unk0[0x18];
-    u32 *work;
-} ObjWithWork;
 
 u32 func_00116590(void) {
     return 1;
@@ -38,21 +34,15 @@ u32 func_00116598(WorldUnitOwner *object) {
     return object->state->value74;
 }
 
-typedef struct ActionObj {
-    u8 unk0[4];   /* 0x0 */
-    s32 unk4;     /* 0x4 */
-    u8 unk8[0x14]; /* 0x8 */
-    s32 unk1C;    /* 0x1C */
-} ActionObj;
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 
-ActionObj *evtSpawnActionObj9(s32 value) {
-    ActionObj *obj = dds3AppendWorldObjectNode(9);
+EffWorldNode *evtSpawnActionObj9(s32 value) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(9);
 
-    obj->unk4 = value;
+    obj->key = value;
     dds3EnsureSlotData(obj);
     return obj;
 }
@@ -163,10 +153,10 @@ void dds3LoadWorldTransformParams(WorldTransformOwner *object, WorldTransformPar
     data->scaleW = 1.0f;
 }
 
-u32 dds3AllocateUnitObjectWork(ObjWithWork *obj) {
+u32 dds3AllocateUnitObjectWork(EffWorldNode *obj) {
     void *work = sdfAllocSizeClassBlock(0x1C);
 
-    obj->work = work;
+    obj->data = work;
     memset(work, 0, 0x1C);
     return 1;
 }

@@ -127,7 +127,7 @@ extern void func_00285960(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel
 extern void func_002E7F20(f32, f32, f32);
 extern void mdlUpdateContextRotationBasisFromQuaternion(s32);
 
-extern CameraObject *evtCreateWorldObjectAtTransform(f32 *, f32 *);
+extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern char D_003BC7C8[];
 
 
@@ -2376,9 +2376,9 @@ u32 func_00288458(void) {
 void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
-    CameraObject *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
+    EffWorldNode *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
 
-    cameraTarget->caption = D_003BC7C8;
+    cameraTarget->value = (u32)D_003BC7C8;
     return func_00288458;
 }
 

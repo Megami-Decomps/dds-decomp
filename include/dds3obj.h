@@ -2,6 +2,7 @@
 #define DDS3OBJ_H
 
 #include "common.h"
+#include "eff_transform.h"
 
 /* The slot-state constructor allocates and clears this complete 0xB4-byte owner.
  * Object resources, indexed slots and motion control share the same record. */
@@ -46,17 +47,6 @@ typedef struct {
     u8 kind; /* Selects a slot in ObjBase. */
 } ObjData;
 
-/* Shared world-node prefix through its list links (0x28). Key is compared by
- * world lookup; kind-0x11 field probes read the position payload at +0x18. */
-typedef struct NodeA {
-    u8 pad00[4];
-    u32 key; /* +0x04 */
-    u8 pad08[0x10];
-    void *payload; /* +0x18: payload type depends on the node kind. */
-    struct ObjectTransform *inner; /* +0x1C: separately allocated transform. */
-    struct NodeA *next;
-    struct NodeA *previous;
-} NodeA;
 
 /* Doubly linked world index node (0x10); DDS1/2 basic/dds3WorldBasic.c. */
 typedef struct NodeB {
@@ -77,8 +67,8 @@ typedef struct {
 
 /* World node lists, object slots and index range (0x28); DDS1/2 basic/dds3WorldBasic.c. */
 typedef struct {
-    NodeA *firstNode;
-    NodeA *lastNode;
+    EffWorldNode *firstNode;
+    EffWorldNode *lastNode;
     void *primaryObject;
     void *secondaryObject;
     u8 pad10[4];
@@ -132,20 +122,6 @@ typedef struct WorldTransformSetup {
     WorldTransformParams transform;
 } WorldTransformSetup;
 
-/* Separately allocated 0xD0-byte world-node transform. Its matrix, position,
- * quaternion and scale are consumed by the generic and camera VU0 routines. */
-typedef struct ObjectTransform {
-    u128 matrix[4];
-    f32 position[4];
-    f32 rotation[4];
-    f32 scale[4];
-    f32 smoothedPosition[4]; /* 0x70: lagged position used by the field camera. */
-    u8 pad80[0x40];
-    u32 flags;
-    f32 radius;
-    u32 unkC8;
-    u8 padCC[4];
-} ObjectTransform;
 
 /* Kind-4 world-node data: cached look-at matrix and eye/up vectors (0x90). */
 typedef struct CameraData {
@@ -160,16 +136,5 @@ typedef struct CameraData {
     f32 fieldOfView;      /* Radians. */
 } CameraData;
 
-/* Kind-4 specialization of the world node; its caption is shown by camera debug. */
-typedef struct CameraObject {
-    u8 unk0[4];
-    s32 unk4;
-    char *caption;
-    u8 pad0C[0x0C];
-    CameraData *data;
-    ObjectTransform *inner;
-    struct CameraObject *next;
-    struct CameraObject *previous;
-} CameraObject;
 
 #endif /* DDS3OBJ_H */

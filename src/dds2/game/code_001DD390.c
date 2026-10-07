@@ -233,7 +233,7 @@ extern u32 D_00436AD4;
 
 extern u32 dds3AdvanceWorldCounter(void);
 
-extern struct ActionObj *evtSpawnActionObj9(s32);
+extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
@@ -4189,7 +4189,7 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->resourceIndex);
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
-        inner = ((NodeA *)unit->effectObject)->inner;
+        inner = ((EffWorldNode *)unit->effectObject)->inner;
         inner->flags |= 1;
         inner->flags &= ~2;
         VU0_STORE_VF(vf10, inner->scale);
@@ -4899,9 +4899,9 @@ s32 btlPositionActorIndexUnits(BtlLinkedCommand *action) {
 
 
 void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
-    CameraObject *object;
+    EffWorldNode *object;
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
-        object = (CameraObject *)dds3GetWorldCameraObject(dds3GetWorldObject());
+        object = (EffWorldNode *)dds3GetWorldCameraObject(dds3GetWorldObject());
         if (object != 0) {
             btlBossDebugPrintfN(arg0, (s32)arg1, 0, "P:%.1f %.1f %.1f", (double)object->inner->position[0],
                                 (double)object->inner->position[1], (double)object->inner->position[2]);

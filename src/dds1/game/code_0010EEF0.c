@@ -16,7 +16,7 @@ extern void effMiscQuatMultiplyVU(void);
 
 
 
-void effObjInnerVecInit(EffTransformNode *node);
+void effObjInnerVecInit(ObjectTransform *node);
 
 
 u32 func_0010EEF0(void) {
@@ -107,15 +107,15 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     return 0;
 }
 
-extern EffTransformOwner *D_003299C0[];
-void effObjNodeDestroy(EffTransformNode *node);
+extern EffWorldOps *D_003299C0[EFF_WORLD_KIND_COUNT];
+void effObjNodeDestroy(EffWorldNode *node);
 
 /* Allocate a node of `kind`, link its owner and run the owner's create hook. */
-EffTransformNode *dds3CreateWorldNodeForKind(u32 kind) {
-    EffTransformNode *node;
-    EffTransformOwner *owner;
+EffWorldNode *dds3CreateWorldNodeForKind(u32 kind) {
+    EffWorldNode *node;
+    EffWorldOps *ops;
 
-    if (kind >= 0x12) {
+    if (kind >= EFF_WORLD_KIND_COUNT) {
         return NULL;
     }
     node = sdfAllocSizeClassBlock(0x44);
@@ -125,20 +125,20 @@ EffTransformNode *dds3CreateWorldNodeForKind(u32 kind) {
     node->kindTag = kind << 24;
     node->color = 0x80808080;
     node->word0 = 0;
-    node->word4 = 0;
-    node->word8 = 0;
-    owner = D_003299C0[kind];
-    node->owner = owner;
+    node->key = 0;
+    node->value = 0;
+    ops = D_003299C0[kind];
+    node->ops = ops;
     node->word14 = 0;
-    node->ownerData = 0;
+    node->data = NULL;
     node->inner = NULL;
-    node->prev = NULL;
     node->next = NULL;
+    node->previous = NULL;
     node->word28 = 0;
     node->word2C = 0;
-    node->word30 = 0;
-    if (owner != NULL && owner->create != NULL) {
-        if (owner->create(node) != 1) {
+    node->owner = NULL;
+    if (ops != NULL && ops->create != NULL) {
+        if (ops->create(node) != 1) {
             effObjNodeDestroy(node);
             return NULL;
         }
@@ -147,32 +147,32 @@ EffTransformNode *dds3CreateWorldNodeForKind(u32 kind) {
 }
 
 /* Notify the owner before unlinking and freeing this transform node. */
-void effObjNodeDestroy(EffTransformNode *node) {
-    EffTransformOwner *owner;
-    EffTransformNode *next;
-    EffTransformNode *prev;
+void effObjNodeDestroy(EffWorldNode *node) {
+    EffWorldOps *owner;
+    EffWorldNode *next;
+    EffWorldNode *prev;
 
     if (node != NULL) {
-        owner = node->owner;
+        owner = node->ops;
         if (owner != NULL) {
-            if (owner->notify != NULL) {
-                owner->notify(node);
+            if (owner->destroy != NULL) {
+                owner->destroy(node);
             }
         }
-        next = node->next;
+        next = node->previous;
         if (next != NULL) {
-            next->prev = node->prev;
+            next->next = node->next;
         }
-        prev = node->prev;
+        prev = node->next;
         if (prev != NULL) {
-            prev->next = node->next;
+            prev->previous = node->previous;
         }
         sdfReleaseChipBlock(node);
     }
 }
 
-s32 effObjInnerCreate(EffTransformNode *node) {
-    EffTransformNode *inner;
+s32 effObjInnerCreate(EffWorldNode *node) {
+    ObjectTransform *inner;
 
     if (node == NULL) {
         return 0;
@@ -180,21 +180,21 @@ s32 effObjInnerCreate(EffTransformNode *node) {
     if (node->inner != NULL) {
         return 0;
     }
-    inner = sdfAllocSizeClassBlock(sizeof(EffTransformNode));
+    inner = sdfAllocSizeClassBlock(sizeof(ObjectTransform));
     if (inner == NULL) {
         return 0;
     }
     inner->flags = 1;
     effObjInnerVecInit(inner);
-    VU0_STORE_VF(vf0, &inner->vecB0);
+    VU0_STORE_VF(vf0, &inner->unkB0);
     node->inner = inner;
     inner->unkC8 = 0;
-    inner->scalar = 0.0f;
+    inner->radius = 0.0f;
     return 1;
 }
 
-void effObjFreeInner(EffTransformNode *node) {
-    EffTransformNode *inner;
+void effObjFreeInner(EffWorldNode *node) {
+    ObjectTransform *inner;
 
     if (node != NULL) {
         inner = node->inner;
@@ -205,92 +205,92 @@ void effObjFreeInner(EffTransformNode *node) {
     }
 }
 
-void effObjSetNodeFlags(EffTransformNode *node, u32 flags) {
+void effObjSetNodeFlags(ObjectTransform *node, u32 flags) {
     node->flags |= flags;
 }
 
-void effObjClearNodeFlags(EffTransformNode *node, u32 flags) {
+void effObjClearNodeFlags(ObjectTransform *node, u32 flags) {
     node->flags &= ~flags;
 }
 
-u8 effObjTestNodeFlags(EffTransformNode *node, u32 flags) {
+u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags) {
     return (node->flags & flags) != 0;
 }
 
-void effObjInnerVecInit(EffTransformNode *node) {
-    u8 *p40 = (u8 *)&node->vec40;
+void effObjInnerVecInit(ObjectTransform *node) {
+    u8 *p40 = (u8 *)&node->position;
     u8 *p50;
     u8 *p60;
 
     VU0_STORE_VF(vf0, p40);
-    p50 = (u8 *)&node->vec50;
+    p50 = (u8 *)&node->rotation;
     VU0_STORE_VF(vf0, p50);
     VU0_SET_ONES_XYZ(vf10);
-    p60 = (u8 *)&node->vec60;
+    p60 = (u8 *)&node->scale;
     VU0_STORE_VF(vf10, p60);
 }
 
-void effObjInnerVecBackup(EffTransformNode *node) {
-    PCP_COPY_VECTOR(&node->vecA0, &node->vec60);
-    PCP_COPY_VECTOR(&node->vec90, &node->vec50);
-    PCP_COPY_VECTOR(&node->vec80, &node->vec40);
+void effObjInnerVecBackup(ObjectTransform *node) {
+    PCP_COPY_VECTOR(&node->savedScale, &node->scale);
+    PCP_COPY_VECTOR(&node->savedRotation, &node->rotation);
+    PCP_COPY_VECTOR(&node->savedPosition, &node->position);
 }
 
-void effObjSetInnerFloat(EffTransformNode *node, f32 value) {
-    node->inner->scalar = value;
+void effObjSetInnerFloat(EffWorldNode *node, f32 value) {
+    node->inner->radius = value;
 }
 
-f32 effObjGetInnerFloat(EffTransformNode *node) {
-    return node->inner->scalar;
+f32 effObjGetInnerFloat(EffWorldNode *node) {
+    return node->inner->radius;
 }
 
-void effObjSetInnerFirstVec(EffTransformNode *node, u128 *vector) {
-    EffTransformNode *inner = node->inner;
-    u128 *dst = &inner->vec40;
+void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector) {
+    ObjectTransform *inner = node->inner;
+    f32 *dst = inner->position;
 
     inner->flags = (inner->flags | 1) & ~2;
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjSetInnerSecondVec(EffTransformNode *node, u128 *vector) {
-    EffTransformNode *inner = node->inner;
-    u128 *dst = &inner->vec50;
+void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector) {
+    ObjectTransform *inner = node->inner;
+    f32 *dst = inner->rotation;
 
     inner->flags = (inner->flags | 1) & ~2;
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjSetInnerThirdVec(EffTransformNode *node, u128 *vector) {
-    EffTransformNode *inner = node->inner;
-    u128 *dst = &inner->vec60;
+void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector) {
+    ObjectTransform *inner = node->inner;
+    f32 *dst = inner->scale;
 
     inner->flags = (inner->flags | 1) & ~2;
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjFetchInnerFirstVec(EffTransformNode *node) {
-    u8 *p = (u8 *)&node->inner->vec40;
+void effObjFetchInnerFirstVec(EffWorldNode *node) {
+    u8 *p = (u8 *)&node->inner->position;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
     VU0_SET_W_ONE(vf10);
 }
 
-void effObjFetchInnerSecondVecNorm(EffTransformNode *node) {
-    u8 *p = (u8 *)&node->inner->vec50;
+void effObjFetchInnerSecondVecNorm(EffWorldNode *node) {
+    u8 *p = (u8 *)&node->inner->rotation;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
     effMiscNormalizeVU();
 }
 
-void effObjFetchInnerThirdVec(EffTransformNode *node) {
-    u8 *p = (u8 *)&node->inner->vec60;
+void effObjFetchInnerThirdVec(EffWorldNode *node) {
+    u8 *p = (u8 *)&node->inner->scale;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
 }
 
-void effObjAddInnerFirstVec(EffTransformNode *node, void *vector) {
-    EffTransformNode *inner = node->inner;
-    u8 *src = (u8 *)&inner->vec40;
+void effObjAddInnerFirstVec(EffWorldNode *node, void *vector) {
+    ObjectTransform *inner = node->inner;
+    u8 *src = (u8 *)&inner->position;
     u8 *dst;
 
     inner->flags = (inner->flags | 1) & ~2;
@@ -300,19 +300,19 @@ void effObjAddInnerFirstVec(EffTransformNode *node, void *vector) {
     VU0_STORE_VF10_BASE_OFF(dst, inner, 0x40);
 }
 
-void effObjQuatMulInnerSecondVec(EffTransformNode *node, u128 *vector) {
-    EffTransformNode *inner = node->inner;
+void effObjQuatMulInnerSecondVec(EffWorldNode *node, u128 *vector) {
+    ObjectTransform *inner = node->inner;
 
     inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
-    VU0_LOAD_VF($vf10, &inner->vec50);
+    VU0_LOAD_VF($vf10, &inner->rotation);
     VU0_LOAD_VF($vf11, vector);
     effMiscQuatMultiplyVU();
-    VU0_STORE_VF($vf10, &inner->vec50);
+    VU0_STORE_VF($vf10, &inner->rotation);
 }
 
-void effObjMulInnerThirdVec(EffTransformNode *node, void *vector) {
-    EffTransformNode *inner = node->inner;
-    u8 *src = (u8 *)&inner->vec60;
+void effObjMulInnerThirdVec(EffWorldNode *node, void *vector) {
+    ObjectTransform *inner = node->inner;
+    u8 *src = (u8 *)&inner->scale;
     u8 *dst;
 
     inner->flags = (inner->flags | 1) & ~2;

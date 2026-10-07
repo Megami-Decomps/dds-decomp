@@ -389,7 +389,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffectObject *obj) {
     if (target == NULL) {
         return 1;
     }
-    config = (MdlCtx *)func_00113008((NodeA *)obj)->resourceHandle;
+    config = (MdlCtx *)func_00113008((EffWorldNode *)obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
         level = target->height;
     } else {

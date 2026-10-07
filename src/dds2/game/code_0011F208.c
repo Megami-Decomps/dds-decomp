@@ -1029,25 +1029,69 @@ enum {
 };
 
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldSetRoomModeFlag);
+void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        if (enabled) {
+            datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0] |= 1 << bit;
+        } else {
+            datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0] &= ~(1 << bit);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldTestRoomModeFlag);
+s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0];
+        return (flags >> bit) & 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldSetRoomObjectModeFlag);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldTestRoomObjectModeFlag);
+s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[1];
+        return (flags >> bit) & 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldSetRoomSceneFlag);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldTestRoomSceneFlag);
+s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[2];
+        return (flags >> bit) & 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldSetMapTargetFlag);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldTestMapTargetFlag);
+s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[3];
+        return (flags >> bit) & 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldSetAlternateMapTargetFlag);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldTestAlternateMapTargetFlag);
+s32 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[4];
+        return (flags >> bit) & 1;
+    }
+    return 0;
+}
 
 /* Store a byte at valueOffset within the selected slot's values area. */
 void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset, s32 value) {
@@ -1067,19 +1111,60 @@ s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset) {
     return value == FIELD_MAP_EMPTY_VALUE ? -1 : value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldSetMapSlotAuxiliaryFlag);
+void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        if (enabled) {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] |= 1 << bit;
+        } else {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] &= ~(1 << bit);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldTestMapSlotAuxiliaryFlag);
+s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0];
+        return (flags >> bit) & 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldSetMapSlotValueFlag);
+void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        if (enabled) {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] |= 1 << bit;
+        } else {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] &= ~(1 << bit);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldTestMapSlotValueFlag);
+s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1];
+        return (flags >> bit) & 1;
+    }
+    return 0;
+}
 
 extern void fldActivateObjectById(s32);
 extern void func_0011C6A0(s32);
 
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldActivateFlaggedObject);
+void fldActivateFlaggedObject(u32 flagIndex) {
+    datGameState->activationFlags[(s32)flagIndex >> 3] |= 1 << (flagIndex & 7);
+    fldActivateObjectById(flagIndex);
+    if (flagIndex >= 0xF0 && flagIndex < 0x100) {
+        mdlFlagSet(flagIndex + 0x610);
+    }
+    if (D_003A8EB0[flagIndex].kind == 2) {
+        func_0011C6A0(D_003A8EB0[flagIndex].parameter);
+    }
+}
 
 
 u8 fldTestObjectActivationFlag(u32 flagIndex) {
@@ -2187,7 +2272,7 @@ u8 fldGetSceneReadyOrPendingState(void) {
 }
 
 extern void *dds3GetWorldObject(void);
-extern void dds3SetWorldObjectDataValue(EvtWorldObject *, s8);
+extern void dds3SetWorldObjectDataValue(EffWorldNode *, s8);
 extern void kwlnFadeStartIn(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00149A00(void);
