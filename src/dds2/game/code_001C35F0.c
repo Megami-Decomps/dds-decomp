@@ -181,13 +181,69 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3EC0);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C43F8);
 
+extern f32 sdfSinPoly(f32);
+
 INCLUDE_RODATA(const s32, "game/code_001C35F0", D_00416840);
 
 INCLUDE_RODATA(const s32, "game/code_001C35F0", D_00416858);
 
 INCLUDE_RODATA(const s32, "game/code_001C35F0", D_00416870);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C4520);
+void func_001C4520(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
+    s32 i;
+
+    switch (reserve == 0 ? work->activeEntries[slot].presentationState :
+                           work->reserveEntries[slot].presentationState) {
+    case 1:
+        for (i = 0; i < 8; i++) {
+            if (reserve == 0) {
+                work->activeEntries[slot].highlightPhase[i] =
+                    (work->activeEntries[slot].highlightPhase[i] + 8) % 360;
+                work->activeEntries[slot].highlightLevel[i] =
+                    (sdfSinPoly(((work->activeEntries[slot].highlightPhase[i] + 90) % 360) /
+                               180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
+            } else {
+                work->reserveEntries[slot].highlightPhase[i] =
+                    (work->reserveEntries[slot].highlightPhase[i] + 8) % 360;
+                work->reserveEntries[slot].highlightLevel[i] =
+                    (sdfSinPoly(((work->reserveEntries[slot].highlightPhase[i] + 90) % 360) /
+                               180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
+            }
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        for (i = 0; i < 8; i++) {
+            if (reserve == 0) {
+                if (work->activeEntries[slot].highlightLevel[i] != 0) {
+                    work->activeEntries[slot].highlightLevel[i]--;
+                }
+            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else {
+                work->reserveEntries[slot].highlightLevel[i] = 0;
+            }
+        }
+        break;
+    case 0:
+    case 4:
+        for (i = 0; i < 8; i++) {
+            if (reserve == 0) {
+                if (work->activeEntries[slot].highlightLevel[i] >= 32) {
+                    work->activeEntries[slot].highlightLevel[i] -= 32;
+                } else {
+                    work->activeEntries[slot].highlightLevel[i] = 0;
+                }
+            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else {
+                work->reserveEntries[slot].highlightLevel[i] = 0;
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C4900);
 
@@ -214,7 +270,6 @@ typedef struct BattlePanelColors {
 
 extern const BattlePanelColors D_004168D8;
 extern BtlResBlock *btlResourceBlock;
-extern f32 sdfSinPoly(f32);
 extern void func_00306C28(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat) {

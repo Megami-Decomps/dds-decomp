@@ -245,9 +245,9 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_003A67D0);
 }
 
-extern s32 evtFindTaskResourceEntryByKey(s16, s32);
+extern void *evtFindTaskResourceEntryByKey(u32, s32);
 
-extern void btlCreateIndexedSoundResourceNode(s32, u32);
+extern void btlCreateIndexedSoundResourceNode(s32, void *);
 
 extern char D_003A67E8[];
 extern char D_003A6810[];
@@ -264,7 +264,7 @@ void func_002101C8(void) {
     for (resourceIndex = 0; resourceIndex < BTL_EVENT_SOUND_RESOURCE_COUNT; resourceIndex++) {
         s32 resourceKey = resourceIndex + BTL_EVENT_SOUND_KEY_FIRST;
         s32 slotIndex;
-        s32 resourceValue;
+        void *resourceValue;
 
         resourceValue = evtFindTaskResourceEntryByKey(battleState->eventTaskId, resourceKey);
         slotIndex = resourceIndex + BTL_EVENT_SOUND_SLOT_FIRST;
@@ -301,7 +301,7 @@ s32 btlCommandSelectEventAction(void) {
     s32 actionKey = scrReadIntParameter(2);
     u8 *selectedUnit;
     BtlState *battleState;
-    s32 actionResource;
+    void *actionResource;
     if (modeSelector == 0) {
         selectedUnit = (u8 *)btlFindUnitByModeClear(unitId);
     } else {
@@ -438,7 +438,7 @@ typedef struct BattleTask {
 } BattleTask;
 
 typedef struct BattleTaskData {
-    void *battler;
+    BtlUnit *battler;
     s32 action;
     s32 frames;
 } BattleTaskData;
@@ -448,7 +448,32 @@ extern BattleTask *btlAllocTask(s32);
 
 extern s32 func_00210670(void *);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00210670);
+s32 func_00210670(void *args) {
+    BattleTaskData *data = args;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    void *resource;
+    BtlUnit *unit;
+
+    if (data->frames == 0) {
+        if ((data->battler->flags & 2) == 0) {
+            return 1;
+        }
+        resource = evtFindTaskResourceEntryByKey(battle->eventTaskId, data->action);
+        if (resource == 0) {
+            return 1;
+        }
+        unit = data->battler;
+        battle->eventResult = resource;
+        battle->eventUnit = unit;
+        battle->eventAction = data->action;
+        battle->eventActive = 1;
+    }
+    if (battle->eventActive == 0) {
+        return 1;
+    }
+    data->frames++;
+    return 0;
+}
 
 /* Queue a battler/action task with zero elapsed frames; return the task. */
 void *btlCreateActionTask(void *battler, s32 action) {

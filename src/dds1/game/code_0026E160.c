@@ -1,6 +1,7 @@
 #include "common.h"
 #include "mnu.h"
 #include "mnu_movie.h"
+#include "eff.h"
 #include "sdf.h"
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
@@ -165,13 +166,21 @@ void func_0026E608(s32 alpha) {
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, 0x53);
 }
 
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_002BF4E0(s32, s32, s32, u32, u32, EffectSlotSet *, s32, s32);
 
 void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 mode, s32 flag, s32 param) {
-    func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), flag, sprite, mode, param);
+    func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), flag, (EffectSlotSet *)sprite, mode, param);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E798);
+void func_0026E798(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set,
+                   s32 index, s32 option, s32 texture, f32 scaleX, f32 scaleY) {
+    set->workEntries[index].width = (s32)(scaleX * set->workEntries[index].sourceWidth) << 4;
+    set->workEntries[index].height = (s32)(scaleY * set->workEntries[index].sourceHeight) << 3;
+    func_002BF4E0(x << 4, y << 3, z,
+                 (u32)((f32)(alpha << 8) * 0.0078125f), option, set, index, texture);
+    set->workEntries[index].width = set->workEntries[index].sourceWidth << 4;
+    set->workEntries[index].height = set->workEntries[index].sourceHeight << 3;
+}
 
 void mnuLoadMovieRollSprite(void) {
     mnuMovieWork->spriteSet = effLoadIndexedResource(D_003BC620, "roll.spr", 0);

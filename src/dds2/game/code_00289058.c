@@ -3,7 +3,9 @@
 #include "mnu_list.h"
 #include "dat_state.h"
 
-extern s32 func_0028A018(s32);
+extern s32 func_0028A018(DatPartyRecord *);
+extern s32 mdlFlagTest(s32);
+extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
 extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 func_00314990(DatPartyRecord *, u16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
@@ -305,11 +307,21 @@ s32 mnuCheckRequiredMantraEntries(DatPartyRecord *unit) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00289058", D_00426370);
+s32 func_0028A018(DatPartyRecord *unit) {
+    u16 flagIds[6] = {0x9A0, 0x9A1, 0x9A2, 0x9A3, 0x9A4, 0x9A5};
+    u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
 
-INCLUDE_RODATA(const s32, "game/code_00289058", D_00426380);
-
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028A018);
+    evtPrintDeveloperConsoleMessage("mtrChkMantraCompleteMaster!!\n");
+    if (mdlFlagTest(flagIds[flagIndices[unit->unitId]]) != 0) {
+        return 0;
+    }
+    evtPrintDeveloperConsoleMessage("Bit Check None ....\n");
+    if (prfAreAllRequiredProfileFlagsSet(unit) == 0) {
+        return 0;
+    }
+    evtPrintDeveloperConsoleMessage("Mantra All Master!!\n");
+    return 1;
+}
 
 s32 mnuSetSelectedMantraOptionFlag(DatPartyRecord *party) {
     u16 flagIds[6] = {0x9a0, 0x9a1, 0x9a2, 0x9a3, 0x9a4, 0x9a5};
@@ -322,7 +334,7 @@ s32 mnuFindFirstMatchingListItemIndex(MenuContainer *object) {
     struct MenuListNode *node = object->list->first;
     s32 index = 0;
     while (node != 0) {
-        if (func_0028A018(node->unk70) != 0) {
+        if (func_0028A018((DatPartyRecord *)node->unk70) != 0) {
             return index;
         }
         node = node->next;

@@ -2680,3 +2680,23 @@ retail gp window. Restoring the actual data owners, not changing flags
 or adding a fake float symbol, produces both retail-SHA-exact executables
 in the isolated full build.
 
+## DDS2 terminal panel fade uses a mode switch and early disable guard
+
+`func_00268838` (`0x00268838`, 364 bytes) uses the existing `MenuSlotState`
+owner. Mode zero draws two overlays and decrements a positive hold counter;
+modes one and two clear that counter. Negative modes and modes above two
+preserve it, so replacing the switch with a nonzero-mode test is incorrect.
+Reduced mode also clears the hold counter.
+
+The bank's `+0x18` pointer is `EffectSlotSet.workEntries`; the `+0xC4`
+angle write is `workEntries[1].angleDegrees`, not an offset in the bank.
+Fade-in adds twelve and clamps to 256; fade-out subtracts seventeen and
+clamps to zero. The two final draws use the scene's owned
+`DspScrollingStripState` records.
+
+An early disabled-state return leaves the last panel draw as an unconditional
+terminal statement, reproducing the native sibling tail call. The enclosing
+conditional form was four words shorter. The typed implementation and all
+eight task-address caller conversions pass the normal whole-unit checker:
+`114 match, 0 differ`, with no context or data diagnostics.
+

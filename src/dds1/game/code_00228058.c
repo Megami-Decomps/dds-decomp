@@ -64,7 +64,7 @@ s32 scrReadIntParameter(s32 idx);
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
 extern char D_003ACA78[];
-extern s32 evtFindTaskResourceEntryByKey(u32 id, s32 key);
+extern void *evtFindTaskResourceEntryByKey(u32, s32);
 extern KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
 extern KwlnTask *evtCreateTask(s32, const char *);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
@@ -74,7 +74,7 @@ INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 u32 evtCreateTextureEntryChildTask(void) {
     ScrData *work;
     s32 id;
-    s32 entry;
+    struct SdfTex *entry;
     KwlnTask *task;
 
     work = scrGetCurrentContext();
@@ -91,7 +91,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         evtPrintDeveloperConsoleMessage("TEX_BE not fount RID = %d\n", scrReadIntParameter(1));
         return 1;
     }
-    task = evtCreateTaskWithValue(0x2AFE, (struct SdfTex *)entry);
+    task = evtCreateTaskWithValue(0x2AFE, entry);
     func_00101A80(work->task, task);
     scrSetIntegerReturnValue((s32)task);
     return 1;

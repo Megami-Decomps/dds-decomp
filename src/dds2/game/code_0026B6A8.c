@@ -1,6 +1,7 @@
 #include "dsp_name.h"
 #include "mnu.h"
 #include "dat_state.h"
+#include "eff.h"
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -297,7 +298,66 @@ void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal, 
     state->unk18 = horizontal;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BEC0);
+extern void uiDrawTexturedSurfaceAtFarDepth(s32);
+extern void uiDrawSurfaceAtNearDepth(s32);
+extern void func_00306CD0(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
+extern void func_00308F78(s32, s32);
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, EffectSlotSet *, s32, s32);
+
+typedef struct DspStripVerticalOffsets {
+    s8 values[2][2][6];
+} DspStripVerticalOffsets;
+
+extern const DspStripVerticalOffsets D_00425018;
+
+void func_0026BEC0(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex) {
+    DspStripVerticalOffsets verticalOffsets = D_00425018;
+    DspScrollingStrip *strip;
+    EffectSlotSet *resource;
+    s8 *offsets;
+    s32 frameIndex;
+    s32 stripY;
+    s32 stripX;
+    s32 wrapOffset;
+    s32 i;
+    s32 count;
+
+    count = func_0026BD38(state->layout);
+    for (i = 0; i < count; i++) {
+        strip = &state->strips[i];
+        uiDrawTexturedSurfaceAtFarDepth(surfaceIndex);
+        resource = state->resource;
+        frameIndex = state->layer;
+        if (strip->scrollSpeed < 0) {
+            offsets = verticalOffsets.values[state->layout][0];
+            func_00306CD0(0, y, z, opacity / 4, 0x60, resource, frameIndex + 1, surfaceIndex);
+        } else {
+            offsets = verticalOffsets.values[state->layout][1];
+            func_00306CD0(state->unk14, state->unk18, z, opacity / 10, 0x60,
+                resource, frameIndex + 2, surfaceIndex);
+        }
+        stripX = x + (strip->horizontalOffset & ~0xF);
+        stripY = y + strip->verticalOffset + (offsets[i] << 3);
+        resource = strip->resource;
+        frameIndex = strip->frameIndex;
+        func_00308F78(0, surfaceIndex);
+        itfDrawGridWithResolvedSlot(stripX, stripY, z, 0x60, resource, frameIndex, surfaceIndex);
+        wrapOffset = strip->scrollSpeed < 0 ? 0x2000 : -0x2000;
+        func_00308F78(0, surfaceIndex);
+        resource->descriptions[frameIndex].flags &= ~4;
+        itfDrawGridWithResolvedSlot(stripX + wrapOffset, stripY, z, 0x60,
+            resource, frameIndex, surfaceIndex);
+        strip->horizontalOffset += strip->scrollSpeed;
+        if (strip->horizontalOffset > 0x2000) {
+            strip->horizontalOffset -= 0x2000;
+        }
+        if (strip->horizontalOffset < -0x2000) {
+            strip->horizontalOffset += 0x2000;
+        }
+    }
+    uiDrawSurfaceAtNearDepth(surfaceIndex);
+}
+
 
 u32 func_0026C168(void) {
     return 0xffffffff;

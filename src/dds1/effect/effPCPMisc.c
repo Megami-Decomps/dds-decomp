@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
 #include "mdl.h"
@@ -156,10 +157,6 @@ typedef char EffPCPChargeWork_size_must_be_0x1354[(sizeof(EffPCPChargeWork) == 0
 
 
 
-typedef struct {
-    u8 pad00[0xC3C];
-    u32 active;
-} EffPCPEventOwner;
 
 
 
@@ -333,7 +330,7 @@ extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u32 sdfCountMapPositionRecords(void *model);
-extern u32 effEventCreate(EffPCPEventOwner *owner, s32 kind, void *place);
+extern u32 effEventCreate(SoundMixer *owner, s32 kind, void *place);
 
 
 extern u8 D_00355008[];
@@ -5169,7 +5166,7 @@ typedef struct EffPCPEventPlace {
     u32 color;
 } EffPCPEventPlace;
 
-extern EffPCPEventOwner *func_00190100(void *params);
+extern SoundMixer *func_00190100(SoundMixer *params);
 
 /* Serialized drift ranges followed by the retained event array. */
 typedef struct EffPCPDriftEventParams {
@@ -5196,7 +5193,7 @@ typedef struct EffPCPDriftEvent {
 typedef struct EffPCPDriftEventWork {
     EffPCPDriftEventParams params;
     EffPCPDriftEvent *entries;
-    EffPCPEventOwner *owner;
+    SoundMixer *owner;
     u8 unk10C;
     u8 pad10D[3];
     f32 scale;
@@ -5438,7 +5435,7 @@ typedef struct EffPCPPairedEvent {
 typedef struct EffPCPPairedEventWork {
     EffPCPPairedEventParams params;
     EffPCPPairedEvent *entries;
-    EffPCPEventOwner *ownerA, *ownerB;
+    SoundMixer *ownerA, *ownerB;
     u8 unk98;
     u8 pad99[3];
     u32 color;
@@ -5731,7 +5728,7 @@ typedef struct EffPCPSpawnRangeEvent {
 typedef struct EffPCPSpawnRangeWork {
     EffPCPSpawnRangeParams params;
     EffPCPSpawnRangeEvent *entries;
-    EffPCPEventOwner *owner;
+    SoundMixer *owner;
     u8 unk9C;
     u8 pad9D[3];
     f32 scale;
@@ -5978,7 +5975,7 @@ typedef struct {
     EffPCPEventParamHead params;
     EffPCPMapEventEntry *entries;
     SdfMemBlock *entriesHandle;
-    EffPCPEventOwner *owner;
+    SoundMixer *owner;
     u32 modelResource;
     f32 scale;
     s32 frame;

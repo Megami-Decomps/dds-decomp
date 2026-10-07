@@ -1089,7 +1089,38 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00253938);
+s32 func_00253938(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 i;
+    s32 count = 0;
+    s32 list;
+    s32 shown = 0x17;
+    EffWorldNode *node;
+
+    list = sdfCreateResetPacketList();
+    for (i = 0; i < 0x12; i++) {
+        if (i != EVT_WORLD_SLOT_MOVIE) {
+            for (node = ((EvtWorldTable *)dds3GetWorldObject()->data)->slots[i].head;
+                 node != NULL; node = node->next) {
+                if (node->value != NULL) {
+                    count++;
+                }
+            }
+        }
+    }
+    count++;
+    evtDrawMenuFrame(list, x, y, 0x1A, 0x17, ctx->groupFirst, count, ctx,
+                     NULL, evtViewerDrawWorldNodeRow);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+                                    (SdfListHead *)list);
+    if (ctx->actionMode != 10) {
+        return 0;
+    }
+    if (count < shown) {
+        shown = count;
+    }
+    return kwlnStepTwoListCursors(0, 1, count, 1, shown, NULL,
+                                 &ctx->groupFirst, NULL, &ctx->groupCursor);
+}
 
 extern char D_004376A8[]; /* "P%d:" */
 extern char D_004376B0[]; /* "   %s" */
@@ -2855,7 +2886,7 @@ void *evtGetTaskData(u32 taskId) {
 }
 
 
-s32 evtFindTaskResourceEntryByKey(u32 id, s32 key) {
+void *evtFindTaskResourceEntryByKey(u32 id, s32 key) {
     s32 task;
     EvtPackLoadState *data;
     s32 i;
@@ -2870,7 +2901,7 @@ s32 evtFindTaskResourceEntryByKey(u32 id, s32 key) {
     }
     for (i = 0; i < data->header->entryCount; i++) {
         if (data->entries[i].secondaryResourceId == key) {
-            return (s32)(data->data + data->entries[i].dataOffset);
+            return data->data + data->entries[i].dataOffset;
         }
     }
     return 0;
@@ -2882,14 +2913,14 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetTaskData(taskId);
-    s32 address = evtFindTaskResourceEntryByKey(taskId, key);
+    void *address = evtFindTaskResourceEntryByKey(taskId, key);
     SdfTex *texture;
     if (address != 0) {
         if (data->effect72 != 0) {
             sdfTexReleaseReferenceViaHandler(data->effect72);
             data->effect72 = 0;
         }
-        texture = sdfTexAcquireResourceTexture((void *)address);
+        texture = sdfTexAcquireResourceTexture(address);
         effSetCh72Id((u32)texture);
         data->effect72 = texture;
     }
@@ -2930,7 +2961,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
 
     memset(vecA, 0, 0x10);
     memset(vecB, 0, 0x10);
-    found = (void *)evtFindTaskResourceEntryByKey(taskId, key);
+    found = evtFindTaskResourceEntryByKey(taskId, key);
     if (found != 0) {
         obj = func_00115500(found, vecA, vecB);
         if (obj != 0) {

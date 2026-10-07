@@ -37,6 +37,9 @@ typedef struct {
 
 extern SceneEntry D_0036BE38[];
 
+typedef s16 MnuVariantSpritePlacement[6];
+extern MnuVariantSpritePlacement D_0036B7F0[];
+
 /* Fields initialized and released around the scene's 0x5B0-byte work block. */
 typedef struct MenuSceneWork {
     s32 allocationHandle; /* 0x000 */
@@ -93,7 +96,35 @@ typedef struct MenuSceneEntry {
 
 extern void sdfReleaseChipBlock(void *);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00250E88);
+void func_00250E88(s32 *xCoordinate, s32 *yCoordinate, u16 index,
+                   s32 maximumX, s32 maximumY) {
+    s32 x = *xCoordinate;
+    s32 deltaX = D_0036B7F0[index][2] - x;
+    s32 deltaY = D_0036B7F0[index][3] - *yCoordinate;
+
+    if (deltaX >= 0x13D) {
+        *xCoordinate += deltaX - 0x13C;
+        x = *xCoordinate;
+    }
+    if (maximumX < x) {
+        *xCoordinate = maximumX;
+    }
+    if (deltaY >= 0x9C) {
+        *yCoordinate += deltaY - 0x9B;
+    }
+    if (maximumY < *yCoordinate) {
+        *yCoordinate = maximumY;
+    }
+    if (deltaX < 0x82) {
+        /* Reload X after updating Y; the caller's coordinate pointers may alias. */
+        s32 adjustedX = *xCoordinate + deltaX - 0x82;
+        *xCoordinate = adjustedX < 0 ? 0 : adjustedX;
+    }
+    if (deltaY < 0x19) {
+        s32 adjustedY = *yCoordinate + deltaY - 0x19;
+        *yCoordinate = adjustedY < 0 ? 0 : adjustedY;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250F60);
 

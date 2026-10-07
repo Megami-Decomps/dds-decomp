@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 
@@ -2327,22 +2328,21 @@ typedef struct EffPCPEventPlace {
     u32 color;
 } EffPCPEventPlace;
 
-typedef struct EffPCPEventOwner EffPCPEventOwner;
 
 typedef struct EffGroup {
     EffGroupParams params;
     EffGroupSlot *slots;
     u32 color;
-    EffPCPEventOwner *owner;
+    SoundMixer *owner;
     u8 hasHandle58;
     u8 pad5D[3];
     SdfMemBlock *allocation;
 } EffGroup;
 
-extern u32 func_00197D38();
+extern SoundMixer *func_00197D38(SoundMixer *);
 extern EffFragmentResources *func_00171598(s32, s32);
 extern void func_001717E8(EffFragmentResources *, u32 *);
-extern void *effEventCreate(u32, u16, EffPCPEventPlace *);
+extern void *effEventCreate(SoundMixer *, u16, EffPCPEventPlace *);
 
 EffGroup *func_0016F850(src, eventParams)
 EffGroup *src;
@@ -2362,7 +2362,7 @@ void *eventParams;
     work->hasHandle58 = 1;
     work->slots = slot;
     work->color = 0x80808080;
-    work->owner = (EffPCPEventOwner *)func_00197D38(eventParams);
+    work->owner = func_00197D38(eventParams);
     a = work->params.unk38;
     if (a == 0) {
         work->params.unk38 = 1;
@@ -2400,7 +2400,7 @@ void *eventParams;
         slot->curve.pointIndex = 0;
         slot->curve.t = 0;
         slot->curve.parameterStep = 0;
-        slot->node = effEventCreate((u32)work->owner, 2, &place);
+        slot->node = effEventCreate(work->owner, 2, &place);
     }
     return work;
 }
@@ -2468,7 +2468,7 @@ EffGroup *func_0016FB18(EffGroup *src) {
         slot->curve.pointIndex = 0;
         slot->curve.t = 0;
         slot->curve.parameterStep = 0;
-        slot->node = effEventCreate((u32)work->owner, 2, &place);
+        slot->node = effEventCreate(work->owner, 2, &place);
     }
     return work;
 }
