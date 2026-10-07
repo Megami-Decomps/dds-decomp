@@ -856,7 +856,7 @@ void btlPointOffPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC, f32 *point) {
 
 /* vu0 routine: vf10 = vertexC + direction * dot(direction, vertexA - vertexC).
  * Direction is the normalized in-plane double cross, not a triangle normal. */
-void btlProjectOnPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
+f32 btlProjectOnPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
     f32 direction[4];
     f32 projection;
     btlTriangleNormalVU(vertexA, vertexB, vertexC);
@@ -870,6 +870,7 @@ void btlProjectOnPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
     VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_LOAD_VF(vf11, vertexC);
     VU0_ADD(vf10, vf10, vf11);
+    return projection;
 }
 
 /* Inclusive box test; either corner order is accepted independently per axis. */
