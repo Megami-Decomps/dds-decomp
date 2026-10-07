@@ -75,7 +75,7 @@ extern s32 mnuSeekListNode(s32, struct MenuList *);
 extern void mnuResetListNodeFadeCounters(struct MenuList *);
 extern void sndSetSequenceVolumePan();
 extern void mnuSelectPage(u32 *, s32);
-extern void func_002ABD60(MenuStaffContext *);
+extern void mnuCreateStaffBulletItemWindow(MenuStaffContext *);
 extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
 extern s32 mdlFlagTest();
@@ -389,7 +389,7 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
     s32 index = context->selection->cursor->index;
 
     mnuSelectPage(window, index);
-    func_002ABD60(context);
+    mnuCreateStaffBulletItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 1, 0);
@@ -941,3 +941,4 @@ void mnuClearStaffSceneConfigEntries(MenuPanelGroup *config) {
 INCLUDE_SDATA(const s32, "game/code_002AD3B8", D_00437BD0);
 
 INCLUDE_SDATA(const s32, "game/code_002AD3B8", D_00437BD8);
+
