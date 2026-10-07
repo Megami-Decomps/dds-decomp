@@ -1237,7 +1237,7 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
 s32 evtPushSelectedScaledStat(void) {
     s32 statValue;
     s32 commandIndex = D_0043E5C0.third;
-    statValue = datCommandRecords[commandIndex].attribute.parts.stat25;
+    statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
     if (((EventModeSlot *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         u16 rosterIndex = ((DatPartyRecord *)D_0043E5C0.first)->unitId;
         statValue = (s32)((f32)statValue * ((EventRosterStat *)datRosterDetails)[rosterIndex].multiplier);
