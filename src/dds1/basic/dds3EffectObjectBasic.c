@@ -70,7 +70,7 @@ extern struct EffNode *effCreateNodeFromDescriptor(struct EffNodeDescriptor *des
 extern u32 dds3AdvanceWorldCounter(void);
 extern void effCopyVector(void *source, void *destination);
 
-extern void *dds3GetFirstWorldObjectNodeOfKind2(void);
+extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
 
 extern void *billCreateFromResource(s32 kind, s32 resourceId);
@@ -116,7 +116,6 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001145C0);
 struct BillObj;
 struct EffNode;
 
-extern void func_00115E10(EffectObj *obj);
 extern u8 dds3TestObjectFlags(void *obj, s32 flags);
 extern void effUpdateNode(struct EffNode *node);
 extern void billInvokeCallback(struct BillObj *bill);
@@ -126,7 +125,7 @@ s32 func_00114988(EffectObj *obj) {
     EffectDependencyState *data;
 
     data = obj->data;
-    func_00115E10(obj);
+    effUpdateConfiguredBillboard((EffWorldNode *)obj);
     if ((data->flags & 1) == 0) {
         return 1;
     }
@@ -191,7 +190,7 @@ EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *handle;
-    void *id;
+    EffWorldNode *id;
 
     memset(vector, 0, sizeof(vector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
@@ -254,7 +253,7 @@ EffectObj *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVectorA
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
@@ -312,7 +311,7 @@ EffectObj *effObjCreateWithBoundBill(void *bill, void *firstVector, s32 secondVe
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
@@ -361,7 +360,7 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secon
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
     obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
@@ -456,7 +455,7 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
-    void *worldNode;
+    EffWorldNode *worldNode;
 
     memset(firstVector, 0, sizeof(firstVector));
     memset(secondVector, 0, sizeof(secondVector));

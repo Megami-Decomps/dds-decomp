@@ -179,7 +179,7 @@ s32 scrCommandStartPadMotor(void)
 }
 
 extern char D_00412668[];
-s32 func_001063A8(f32 arg0);
+void sdfSetViewFieldOfView(f32 arg0);
 
 s32 scrCommandSetCameraFov(void)
 {
@@ -191,7 +191,7 @@ s32 scrCommandSetCameraFov(void)
         evtPrintDeveloperConsoleMessage(D_00412668, fovy);
         return 1;
     }
-    func_001063A8(fovy);
+    sdfSetViewFieldOfView(fovy);
     return 1;
 }
 

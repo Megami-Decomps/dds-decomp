@@ -25,7 +25,7 @@ extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
+extern void sdfVuBuildLookAtBasis(void *target, void *origin, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern void func_002DD608(f32 value);
 extern void func_002DD968(f32 value);
@@ -239,7 +239,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
     f32 height;
     f32 out[4];
     f32 dir[4];
-    struct EffWorldNode *object;
+    struct EffWorldNode *camera;
     s32 lengthParam = param->unk04;
     u32 sub = param->size;
     u32 kind = param->count;
@@ -248,11 +248,11 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
         length = (f32)lengthParam;
     }
     if (sub == 9 || kind == 4) {
-        object = dds3GetWorldCameraObject(dds3GetWorldObject());
+        camera = dds3GetWorldCameraObject(dds3GetWorldObject());
         dir[0] = dir[1] = dir[2] = 750.0f;
-        dds3LoadCameraVectorVU(object);
+        dds3LoadCameraVectorVU(camera);
         VU0_MOVE_VF(vf11, vf10);
-        effObjFetchInnerFirstVec(object);
+        effObjFetchInnerFirstVec(camera);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
         VU0_LOAD_VF(vf11, dir);

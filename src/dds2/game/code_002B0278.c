@@ -324,7 +324,7 @@ typedef struct StaffMenuRuntime {
     s32 staffView;
     s32 staffSelection;
     s32 staffExit;
-    u8 pad20[4];
+    MenuIconState *iconPanel; /* 0x20: created and released with the staff panels. */
     s32 active;
     s32 idleFrames;
     s32 motionSelection;
@@ -771,7 +771,52 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     func_002BCA98(&((MenuContext *)context)->partyWindow);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B18E8);
+struct MenuSlotEffectHandles;
+typedef struct MenuScrollPanel MenuScrollPanel;
+extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32 model,
+                                         u32 firstValue, u32 secondValue, s32 thirdValue);
+extern void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 color);
+
+s32 func_002B18E8(void) {
+    s32 contextAddress = (s32)kwlnTaskGetUserValue();
+    MenuContext *context = (MenuContext *)contextAddress;
+    s32 allocation = sdfAllocGeneralBlock(sizeof(PartyMenuData));
+    PartyMenuData *menuWork =
+        (PartyMenuData *)sdfResourceRetainAddress((SdfMemBlock *)allocation);
+    s32 slotIndex;
+
+    context->party = (s32)menuWork;
+    memset(menuWork, 0, sizeof(*menuWork));
+    menuWork->allocation = allocation;
+    func_002B0D50((u32)contextAddress);
+    func_002B0FA0(context);
+
+    mnuLoadPanelSectionResources(
+        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[0],
+        context->panelModel, 5, 8, 0xB);
+    mnuLoadPanelSectionResources(
+        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[1],
+        context->panelModel, 5, 9, 0xB);
+    mnuLoadPanelSectionResources(
+        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[2],
+        context->panelModel, 5, 0xA, 0xB);
+
+    mnuClearPartySelectionAndActivateSlots(contextAddress);
+    for (slotIndex = 0; slotIndex < 5; slotIndex++) {
+        memcpy(&menuWork->original[slotIndex], &datGameState->party[slotIndex],
+               sizeof(DatPartyRecord));
+        memcpy(menuWork->panelSnapshots[slotIndex],
+               &context->partyWindow.slots[slotIndex].hp,
+               2 * sizeof(MenuPageBar));
+    }
+
+    mnuConfigurePanelResource((MenuScrollPanel *)context->panelHandle,
+                              context->panelModel, 0, 0);
+    mnuBeginWindowFadeTransition(menuWork->primaryWindow, &context->transition);
+    menuWork->fadeA = MNU_FULL_FADE;
+    menuWork->fadeB = MNU_FULL_FADE;
+    return 1;
+}
 
 u32 mnuReleasePartySelectionResources(void) {
     s32 context = kwlnTaskGetUserValue();
@@ -793,7 +838,65 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     party->freezePanel = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1C68);
+s32 func_002B1C68(s32 callback) {
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue();
+    PartyMenuData *menuWork = (PartyMenuData *)context->party;
+    s32 inputFlags = mnuMapPadMaskToFlags(0x33);
+    s32 *popup = context->popupState;
+    MenuWindowContainer *window = menuWork->primaryWindow;
+    s32 entryIndex = window->list->cursor->index;
+    s32 state = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
+
+    if (state != 0) {
+        return state;
+    }
+    if (*popup == 0) {
+        if ((inputFlags & 0x300000) == 0) {
+            func_002B9808(window);
+        }
+        if (inputFlags & 0x10) {
+            mnuRetreatWindowListSelection(window);
+        }
+        if (inputFlags & 0x20) {
+            mnuAdvanceWindowListSelection(window);
+        }
+        mnuClearWindowPanelTransitionFlag(window);
+        if (inputFlags & 1) {
+            switch (mnuIsFinalItemIndex(window->list->cursor->index, (s32)window->list)) {
+            case 0:
+                if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
+                    window->list->cursor->flags48 |= 1;
+                    mnuAssignSelectedPartyEntry(entryIndex, 2, 0, context);
+                } else {
+                    inputFlags = 0x8000;
+                }
+                break;
+            case 1:
+                if (menuWork->selection > 0) {
+                    mnuPreparePartyPanelTransition((s32)context);
+                } else {
+                    inputFlags = 0x8000;
+                }
+                break;
+            }
+        } else if (menuWork->activeCount == menuWork->selection) {
+            mnuPreparePartyPanelTransition((s32)context);
+        }
+        if (inputFlags & 2) {
+            if (menuWork->selection > 0) {
+                mnuInitPartyPanelSlots(&context->partyPanel);
+                mnuClearPartySelectionAndActivateSlots((s32)context);
+                func_002BCAB0(&context->partyWindow);
+            } else {
+                mnuSetPopupEntryFlagged(popup, D_003E7588);
+                mnuConfigurePanelResource(context->panelHandle, context->displayHandle, 0, 1);
+                mnuBeginWindowFadeTransition(context->imageHandle, &context->transition);
+            }
+        }
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1EA8);
 
@@ -1219,7 +1322,49 @@ void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSprite
     mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, (u32 *)resource, spriteFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3788);
+void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
+
+s32 func_002B3788(s32 callback) {
+    s32 contextAddress = (s32)kwlnTaskGetUserValue();
+    MenuContext *context = (MenuContext *)contextAddress;
+    DatGameState *gameState = datGameState;
+    StaffMenuRuntime *menuWork = (StaffMenuRuntime *)context->party;
+    s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
+    DatPartyRecord *partyEntry = &gameState->party[partyIndex];
+
+    mnuDrawCampIconBackdropByKind(2, callback);
+    mnuDrawSelectedPartySlotMarkers((s32)&context->partyWindow,
+                                    (StaffSlots *)&context->displayHandle);
+
+    if (menuWork->staffMode == 0) {
+        context->partyWindow.flags = (context->partyWindow.flags | 0x200) & ~0x80;
+    } else {
+        context->partyWindow.flags |= 0x280;
+    }
+
+    if (menuWork->staffMode == 0) {
+        mnuDrawPartySkillAndStatusPanel(partyEntry, (s32)&context->partyWindow,
+                                        context->panelGroup, (s32)context->panelRequest,
+                                        (s32)&context->displayHandle, 0x53);
+        func_002AA7A0(5, context->displayHandle);
+    } else {
+        mnuDrawProfilePanelAndSprite(partyEntry, (u32)&context->partyWindow,
+                                     context->panelEffects, (u32)context->resourceList,
+                                     (u32)&context->displayHandle, 0x53);
+        if (menuWork->staffView == 0) {
+            func_002AA7A0(6, context->displayHandle);
+        } else {
+            func_002AA7A0(4, context->displayHandle);
+        }
+    }
+
+    if (menuWork->staffView == 0) {
+        mnuDrawIconPanelFullFade(0, 0, 0, menuWork->iconPanel, 0x53);
+        mnuUpdateWindowPanelHandleStatesKindFourFive(menuWork->iconPanel);
+    }
+    evtStageTestUpdate(D_00380788);
+    return menuSetHandler((void *)context, 1, (void *)callback);
+}
 
 void mnuIdleVoiceTimer(s32 object) {
     u32 count;
@@ -2145,7 +2290,58 @@ void mnuDrawSelectionLabel(u16 id) {
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)label);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6898);
+extern MenuPoint D_00437C08[];
+extern MenuPoint D_00437C10[];
+extern MenuPoint D_00437C18[];
+extern const char *D_003E77C8[16];
+extern u8 (*D_00435E68)[33];
+extern s32 ptyGetAffinityKind(s32, s32);
+extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
+
+/* Draw each of the command's three partner requirements. */
+void func_002B6898(u16 affinity, s32 resource, s32 labels) {
+    MenuPoint position = D_00437C08[0];
+    MenuPoint textOffset = D_00437C10[0];
+    MenuPoint iconOffset = D_00437C18[0];
+    s32 x = position.x;
+    s32 y = position.y;
+    s32 i;
+
+    for (i = 0; i < 3; i++, y += 0xC0) {
+        s32 kind = ptyGetAffinityKind(affinity, i);
+        FrFontGlyph *glyph = 0;
+
+        if (kind < 0) {
+            if (kind == -1) {
+                s32 requirement = ptyGetAffinityFlagsWithoutOverride(affinity, i);
+                if (requirement > 0) {
+                    s32 range = mnuLookupRangeEntry((u16)requirement);
+                    itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
+                                               0, 1, labels, range + 1, 0x53);
+                    glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
+                                                       0, 0xA09DC380,
+                                                       (const char *)D_00435E64[requirement], 0);
+                }
+            } else {
+                s32 requirement = ptyGetAffinityFlagsWithoutOverride(affinity, i);
+                glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
+                                                   0, 0xA09DC380,
+                                                   (const char *)D_00435E68[requirement], 0);
+                itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
+                                           0, 1, resource, 0xA, 0x53);
+            }
+        } else {
+            glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
+                                               0, 0xA09DC380, D_003E77C8[kind], 0);
+            itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
+                                       0, 1, resource, 0xA, 0x53);
+        }
+        if (glyph != 0) {
+            func_0019D550(glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(glyph);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6B00);
 
@@ -2252,7 +2448,60 @@ s32 mnuUpdateSkillListInput(s32 callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7228);
+typedef struct MnuCampPanelDrawRecord {
+    EffectSlotSet *resource;
+    s32 sprite;
+    s32 xOffset;
+    s32 yOffset;
+} MnuCampPanelDrawRecord;
+
+typedef struct MnuCampPanelOrigins {
+    MenuPoint primary;
+    MenuPoint secondary;
+} MnuCampPanelOrigins;
+
+extern const MnuCampPanelOrigins D_0042AE48;
+
+void func_002B7228(MenuContext *context) {
+    MnuCampPanelDrawRecord primaryRows[5] = {
+        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)context->labelHandle, 0x0C, 0x2A0, 0x38},
+        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
+        {(EffectSlotSet *)context->labelHandle, 0x10, 0x180, 0x138},
+    };
+    MnuCampPanelDrawRecord secondaryRows[4] = {
+        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)context->resourceHandle, 0x0E, 0x2C0, 0x50},
+        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
+    };
+    MnuCampPanelOrigins origins = D_0042AE48;
+    s32 i;
+
+    i = 0;
+    do {
+        func_00306CD0(primaryRows[i].xOffset + origins.primary.x, primaryRows[i].yOffset + origins.primary.y,
+            0, 0x100, 1, primaryRows[i].resource, primaryRows[i].sprite, 0x53);
+        i++;
+    } while (i < 4);
+    {
+        s32 x = primaryRows[4].xOffset + origins.primary.x;
+        s32 y = primaryRows[4].yOffset + origins.primary.y;
+        i = 2;
+        do {
+            i--;
+            func_00306CD0(x, y, 0, 0x100, 1, primaryRows[4].resource, primaryRows[4].sprite, 0x53);
+            y += 0xC0;
+        } while (i >= 0);
+    }
+    i = 0;
+    do {
+        func_00306CD0(secondaryRows[i].xOffset + origins.secondary.x, secondaryRows[i].yOffset + origins.secondary.y,
+            0, 0x100, 1, secondaryRows[i].resource, secondaryRows[i].sprite, 0x53);
+        i++;
+    } while (i < 4);
+}
 
 void func_002B7588(s32 context) {
     s32 index;
@@ -2270,7 +2519,7 @@ s32 mnuCampMenuDrawStatus(s32 callback) {
     mnuCreateStaffImageSprite(0x14);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     label = ((MenuWindowContainer *)*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4))->list->cursor->sortKeyPrimary;
-    func_002B7228(context);
+    func_002B7228((MenuContext *)context);
     if (label != 0 && label != 0xffff) {
         label = (u16)label;
         mnuDrawSelectionLabel(label);

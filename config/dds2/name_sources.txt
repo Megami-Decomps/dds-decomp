@@ -63,6 +63,7 @@
 0x00106108	kwlnFadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]
 0x00106160	kwlnFadeSetMode	inferred	stores D_00435CFC mode; mode 0 clears the two counters, otherwise sets alpha byte 0x80 [names_reviewed2.tsv]
 0x00106188	kwlnStepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106268, input-family pairing. [names_qp10.tsv]
+0x001063A8	sdfSetViewFieldOfView	inferred	confidence=high; matched-C provider and paired native twin 0x00106488; Stores the shared view field of view in radians for camera projection and screen-plane mapping.
 0x00106460	kwlnDrawSnapshotSolidRect	inferred	confidence=high; func_00106460 saves the current solid rectangle parameters and stages or immediately applies pending parameters.; sources=names_R_Structs54.tsv; twin=0x00106540, input-family pairing. [names_qp10.tsv]
 0x00106658	kwlnDrawSetupE08FromCh75	inferred	readability/matching review (QP16)
 0x00106810	kwlnDrawSetOverlayTransition	inferred	readability/matching review (QP16)
@@ -339,6 +340,7 @@
 0x00112B80	dds3CreateCameraData	inferred	Camera kind-4 creation callback: creates the node transform, allocates CameraData, attaches its ObjBase handle and clears the pending-FOV flag.
 0x00112BE0	dds3DestroyCameraData	inferred	Releases the nested camera handle and data; mirrors DDS1 dds3DestroyCameraData.
 0x00112C20	dds3UpdateCameraObject	inferred	Updates a changed camera transform, publishes the selected camera vectors, and applies a pending field-of-view change.
+0x00112D08	dds3DrawCameraObject	inferred	Kind-4 EffWorldOps draw callback; native ops table at 0x00385110 stores this function in its fourth slot.
 0x00112D10	dds3RebuildCameraBasis	inferred	Transforms the camera eye and up vectors through its inner node and rebuilds the look-at basis.
 0x00112DD8	dds3GetCameraHandle	inferred	Returns the nested camera object's handle; mirrors DDS1 dds3GetCameraHandle.
 0x00112DE8	dds3CreateCameraObjectWithSlotData	inferred	Creates a camera object, stores its supplied value and ensures backing slot data. [names_reviewed10.tsv]
@@ -398,6 +400,7 @@
 0x00115EE8	effObjBindOwnerBillEntry	inferred	binds validated owner and marks an entry ID for forwarding [names_reviewed5.tsv]
 0x00115F40	dds3ResetWorldResourceState	inferred	Clears a world resource state counters and active flags. [names_reviewed11.tsv]
 0x00115F70	billCopySourceVectorAndSetConfig	inferred	Copies source vector into billboard resource and attaches its config. [names_reviewed21.tsv]
+0x00116078	effUpdateConfiguredBillboard	inferred	Updates kind-seven configured billboard eligibility, position offset and distance-based color or entry.
 0x00116360	dds3InitializeResourceOwner	inferred	Allocates an inner owner record, obtains its world-object resource handle, and stores the handle in the record.
 0x001163B0	dds3ReleaseEventData	inferred	Releases the event object's nested handle and frees its data; mirrors DDS1 dds3ReleaseEventData.
 0x001163F0	dds3BackupEventNodeVectorsIfFlagged	inferred	EventObj node at +0x1C: test flag 1, clear it, then effObjInnerVecBackup.

@@ -7,14 +7,14 @@ typedef f32 PathPositionKey[3];
 typedef f32 PathQuaternionKey[4];
 
 void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *keys, f32 time);
-void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
+void effMiscQuaternionNlerpVU(f32 blendAmount);
 void *memset(void *s, s32 c, u32 n);
 
-void effFreeBuffers(s32 arg);
+void effFreeBuffers(struct EffPrim *primitive);
 void sdfReleaseChipBlock(void *arg);
 
 void dds3FreePathObject(Dds3PathCurveWork *path) {
-    effFreeBuffers((s32)path->primitiveCurve);
+    effFreeBuffers(path->primitiveCurve);
     sdfReleaseChipBlock(path);
 }
 
@@ -60,7 +60,7 @@ void dds3PreparePathVectorPair(Dds3PathCurveWork *path) {
         VU0_LOAD_VF_MEMORY(vf10, first);
         second = &entries[index] + 1;
         VU0_LOAD_VF_MEMORY(vf11, second);
-        effMiscQuaternionNlerpVU(second, fraction);
+        effMiscQuaternionNlerpVU(fraction);
     } else {
         VU0_MOVE_VF(vf10, vf0);
     }

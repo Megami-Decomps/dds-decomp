@@ -1,6 +1,8 @@
 #include "common.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
+#include "btl_state.h"
+#include "mnu_result.h"
 #include "sdf.h"
 
 typedef struct UiQuadColor {
@@ -424,7 +426,40 @@ void btlResetActorEntryState(void) {
     memset((void *)(btlRuntime + 0x2B4), 0, 12);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A1530);
+extern const char D_003A1698[];
+extern const char D_003A16B8[];
+extern const char D_003A16C8[];
+extern const char D_003A16D8[];
+extern const char D_003A16E8[];
+
+/* Snapshot battle rewards for the result screen. */
+u32 func_001A1530(BrsRewardSummary *rewards) {
+    BtlState *runtime;
+    u32 i;
+
+    if (btlIsRuntimeAllocated() == 0) {
+        return 0;
+    }
+    runtime = (BtlState *)btlRuntime;
+    rewards->macca = *(u32 *)runtime->pad2C4;
+    rewards->totalExp = runtime->experienceEarned;
+    rewards->totalAp = *(s32 *)runtime->pad2D0;
+    btlBossDebugPrintf(D_003A1698);
+    btlBossDebugPrintf(D_003A16B8, rewards->macca);
+    btlBossDebugPrintf(D_003A16C8, rewards->totalExp);
+    btlBossDebugPrintf(D_003A16D8, rewards->totalAp);
+    for (i = 0; i < 5; i++) {
+        rewards->unitApBonus[i] = datGameState->party[i].huntExp;
+        btlBossDebugPrintf(D_003A16E8, rewards->unitApBonus[i], datGameState->party[i].unitId);
+    }
+    btlBossDebugPrintf(D_003A1698);
+    for (i = 0; i < 3; i++) {
+        rewards->icons[i].id = ((BtlState *)btlRuntime)->itemDrops[i].id;
+        rewards->icons[i].param = ((BtlState *)btlRuntime)->itemDrops[i].count;
+    }
+    return 1;
+}
+
 
 typedef struct EncBgEntry {
     s32 unk00;
@@ -545,3 +580,14 @@ u16 btlReadUnitStatusMask(s32 entryAddress) {
 void func_001A1948() {
     sdfRaisePackedChannelValue();
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A1698);
+
+INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16B8);
+
+INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16C8);
+
+INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16D8);
+
+INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16E8);
+

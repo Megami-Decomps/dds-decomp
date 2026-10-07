@@ -7,7 +7,7 @@ void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(void *arg);
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 void *sdfAllocSizeClassBlock(s32 arg);
-void dds3GrowWorldValueChain(void *arg, s32 arg1);
+void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);
 void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);
 s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
@@ -151,7 +151,7 @@ NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
         indexNode->previous = worldInfo->lastIndex;
         worldInfo->lastIndex = indexNode;
     }
-    dds3GrowWorldValueChain(indexNode, initialCount);
+    dds3GrowWorldValueChain((WorldValueIndices *)indexNode, initialCount);
     return indexNode;
 }
 

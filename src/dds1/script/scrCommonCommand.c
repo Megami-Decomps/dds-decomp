@@ -16,7 +16,7 @@ s32 kwlnDrawSetDc8Second(s32 arg0);
 s32 kwlnDrawSetE08Fifth(s32 arg0);
 s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_00106488(f32 arg0);
+void sdfSetViewFieldOfView(f32 arg0);
 s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 s32 fptodp(void);
 extern ScrComGlobals *datGameState;
@@ -179,7 +179,7 @@ s32 scrCommandSetCameraFov(void)
         evtPrintDeveloperConsoleMessage(D_0039F4E8, fovy);
         return 1;
     }
-    func_00106488(fovy);
+    sdfSetViewFieldOfView(fovy);
     return 1;
 }
 

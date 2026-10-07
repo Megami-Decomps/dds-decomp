@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "eff_transform.h"
 #include "dat_state.h"
 
 extern void btlSetActorEffectParameterOrMuzzlePosition();
@@ -173,7 +174,90 @@ s32 btlGetCanonicalCombatantKind(BtlUnit *unit) {
     return unit->combatantKind;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00227820);
+extern void effObjFetchInnerFirstVec(EffWorldNode *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+
+/* Lower the linked actor, or return eligible actors to ground level. */
+void func_00227820(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleLinkedEffectState *effect;
+    f32 vector[4] __attribute__((aligned(16)));
+    f32 height;
+    f32 speed;
+    f32 limit;
+
+    if ((battle->battleFlags & 0x80000) == 0) {
+        return;
+    }
+    effect = battle->effect;
+    if (effect->actor != 0) {
+        BtlUnit *selected = (BtlUnit *)effect->actor;
+        BtlUnit *actor;
+        if ((selected->flags & 2) == 0) {
+            return;
+        }
+        effObjFetchInnerFirstVec((EffWorldNode *)selected->effectObject);
+        VU0_STORE_VF(vf10, (u128 *)vector);
+        if (!(vector[1] > -125.0f)) {
+            return;
+        }
+        actor = (BtlUnit *)effect->actor;
+        limit = actor->resourceIndex == 0x16 ? -62.5f : -125.0f;
+        height = effect->height - effect->speed;
+        speed = effect->speed / 1.11f;
+        effect->height = height;
+        effect->speed = speed;
+        if (height < limit) {
+            effect->height = limit;
+        }
+        vector[1] = effect->height;
+        effObjSetInnerFirstVec((EffWorldNode *)actor->effectObject, (u128 *)vector);
+        return;
+    }
+
+    {
+        BtlUnit *unit = battle->units;
+        if (unit == NULL) {
+            return;
+        }
+        {
+            f32 ceiling = 10000.0f;
+            f32 lowerLimit = -1.0f;
+            f32 decay = 1.05f;
+            f32 zero = 0.0f;
+
+            while (unit != NULL) {
+                u32 flags = unit->flags;
+
+                if (flags & 1) {
+                    if (flags & 0x200) {
+                        if (flags & 2) {
+                            effObjFetchInnerFirstVec((EffWorldNode *)unit->effectObject);
+                            VU0_STORE_VF(vf10, (u128 *)vector);
+                            if (!(vector[1] > ceiling)) {
+                                if (vector[1] < lowerLimit) {
+                                    height = effect->height + effect->speed;
+                                    speed = effect->speed * decay;
+                                    effect->height = height;
+                                    effect->speed = speed;
+                                    if (height > zero) {
+                                        effect->height = zero;
+                                    }
+                                    vector[1] = effect->height;
+                                    effObjSetInnerFirstVec((EffWorldNode *)unit->effectObject, (u128 *)vector);
+                                } else {
+                                    vector[1] = zero;
+                                    effObjSetInnerFirstVec((EffWorldNode *)unit->effectObject, (u128 *)vector);
+                                }
+                            }
+                        }
+                    }
+                }
+                unit = unit->nextActor;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002279F0);
 
