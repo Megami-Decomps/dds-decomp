@@ -73,7 +73,9 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 
 extern s32 func_002C6CE8(void);
 
-extern u32 func_002B9FF8(u32);
+struct ResourceList;
+extern struct ResourceList *func_002B9FF8(u32 mode, s32 resource, ...);
+extern void mnuReleaseResourceList(struct ResourceList *list);
 
 extern u32 effCreateStatusBatch(u32);
 
@@ -470,7 +472,7 @@ typedef struct MenuPanelState {
     u32 thirdValueB; /* 0x7C */
     u32 thirdValueC; /* 0x80 */
     u8 pad84[4];
-    u32 resourceHandle; /* 0x88 */
+    struct ResourceList *resourceHandle; /* 0x88 */
 } MenuPanelState;
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
@@ -484,7 +486,7 @@ void *mnuCreatePanelState(s32 width, s32 height) {
 }
 
 void mnuDestroyPanelState(MenuPanelState *panel) {
-    s32 resourceHandle;
+    struct ResourceList *resourceHandle;
 
     resourceHandle = panel->resourceHandle;
     if (resourceHandle != 0) {
@@ -515,11 +517,8 @@ void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, s32 guideX, 
     panel->corners[4].y = y + 0xF0;
 }
 
-void mnuInitializePanelResource(MenuPanelState *panel) {
-    u32 resourceHandle;
-
-    resourceHandle = func_002B9FF8(5);
-    panel->resourceHandle = resourceHandle;
+void mnuInitializePanelResource(MenuPanelState *panel, s32 resource) {
+    panel->resourceHandle = func_002B9FF8(5, resource);
 }
 
 void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
