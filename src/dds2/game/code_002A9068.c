@@ -40,8 +40,6 @@ extern void func_00101968(s32, s32);
 
 extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
-extern void mnuClearPanelTransitionState(u8 *);
-
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
 extern s32 mnuAllocateValueRecord(s32);
@@ -475,15 +473,16 @@ void movReleaseTitleEffects(u32 *resourceSlots) {
 
 void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *resources,
                                      u32 unused, PartyPanel *records) {
-    /* The SDK returns u32 handles; this bank snapshots their resolved instances. */
+    /* Loader callbacks publish instance addresses through these u32 output slots. */
     func_002BCD90(container, records, (struct EffectSlotSet *)resources->baseResources[0],
-                 1, resources->baseResources[1], 0x2d, resources->baseResources[1], 0x1d);
+                 1, (struct EffectSlotSet *)resources->baseResources[1], 0x2d,
+                 (struct EffectSlotSet *)resources->baseResources[1], 0x1d);
     func_002BC498(container, resources->baseResources[1]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);
     func_002BCA98(container);
-    mnuSetPanelSlotValues(container, resources->baseResources[1]);
+    mnuSetPanelSlotValues(container, (struct EffectSlotSet *)resources->baseResources[1]);
 }
 
 /* Snapshot base handles, then queue the main, extra and paired sprite groups.
@@ -720,7 +719,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
     ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
     effectBytes = menuBytes + 0x11C;
-    mnuClearPanelTransitionState(menuBytes + 8);
+    mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     if (dds3AdminReadPreviousSignedSample() != 0) {
         ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(1);
     } else {
@@ -747,7 +746,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     if (menuBytes == NULL) {
         return;
     }
-    mnuDrainPanelTransitions(menuBytes + 8, task);
+    mnuDrainPanelTransitions((MenuPopupState *)(menuBytes + 8), task);
     mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
     mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->modelHandle);
     mnuShutdownContext(menuBytes + 0x284);

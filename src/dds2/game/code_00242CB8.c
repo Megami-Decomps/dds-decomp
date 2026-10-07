@@ -387,7 +387,52 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243568);
+extern s32 D_004371FC;
+extern void fldConsumePrimarySceneFlag(void);
+extern void fldConsumeSecondarySceneFlag(void);
+extern void fldConsumeFieldTransitionFlag(void);
+extern void fldConsumeSceneCommandFlag(void);
+extern s32 mdlFlagTest(s32);
+extern void mdlFlagClear(s32);
+
+/* Advance the enabled solar clock and expire its associated field controls. */
+void func_00243568(f32 delta) {
+    if (datGameState->world.flags & 1) {
+        datGameState->world.phaseTimer += delta;
+        if (datGameState->world.phaseTimer > 4500.0f) {
+            datGameState->world.phaseTimer = 0;
+            evtSetSolarPhase((datGameState->world.phase + 1) & 0xF);
+            D_004371FC = 30;
+            if (evtGetMirroredSolarPhase() == 0) {
+                fldConsumePrimarySceneFlag();
+                fldConsumeSecondarySceneFlag();
+            }
+            if (datGameState->world.fieldFlags & 4) {
+                datGameState->world.unkA4C++;
+                if (datGameState->world.unkA4C >= 6U) {
+                    fldConsumeFieldTransitionFlag();
+                    datGameState->world.unkA4C = 0;
+                }
+            }
+            if (datGameState->world.fieldFlags & 8) {
+                datGameState->world.overlayFlag++;
+                if (datGameState->world.overlayFlag >= 6) {
+                    fldConsumeSceneCommandFlag();
+                    datGameState->world.overlayFlag = 0;
+                }
+            }
+            if (mdlFlagTest(0x802)) {
+                datGameState->world.secondaryPhase++;
+                if (datGameState->world.secondaryPhase >= 81) {
+                    mdlFlagClear(0x802);
+                    datGameState->world.secondaryPhase = 0;
+                }
+            }
+            datGameState->world.unkA48 = 0;
+        }
+    }
+}
+
 
 /* The first word holds the solar-noise sprite; total work size is 0x104. */
 typedef struct {

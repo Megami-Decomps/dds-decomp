@@ -1,6 +1,8 @@
 #include "common.h"
 #include "scr.h"
 
+struct EvtUnit;
+
 extern char *scrReadStringParameter(s32 idx);
 
 extern void scrSetIntegerReturnValue(s32 value);
@@ -37,13 +39,13 @@ extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
 extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
-extern void func_00147DB0(s32 handle);
+extern void func_00147DB0(struct EvtUnit *unit);
 
 extern s32 fldFindEffectByName(char *str);
 
 extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
-extern s32 evtGetWorldUnitNestedValue(s32 param);
+extern struct EvtUnit *evtGetWorldUnitNestedValue(s32 param);
 
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */

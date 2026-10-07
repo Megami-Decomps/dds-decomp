@@ -86,14 +86,14 @@ enum {
 };
 
 extern BrsIconRecord D_003D03F0[];
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw the selected result icon, then the fixed companion at the same alpha. */
 void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     f32 strength;
-    s32 layer;
+    struct EffectSlotSet *layer;
 
-    layer = (s32)D_00438FC8->effectSlots[0];
+    layer = D_00438FC8->effectSlots[0];
     strength = (f32)alpha * 0.00390625f;
     iconIndex += 3;
     func_00306CD0(D_003D03F0[iconIndex][BRS_ICON_X] << 4,
@@ -109,11 +109,11 @@ void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
 void func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
     f32 normalized;
     f32 companionPosition;
-    s32 layer;
+    struct EffectSlotSet *layer;
     s32 companionX;
     s32 selectedIndex;
 
-    layer = (s32)D_00438FC8->effectSlots[0];
+    layer = D_00438FC8->effectSlots[0];
     normalized = (f32)value * 0.00390625f;
     selectedIndex = entryIndex + 3;
     func_00306CD0(D_003D03F0[selectedIndex][BRS_ICON_X] << 4,
@@ -657,7 +657,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     work = sdfResourceRetainAddress(handle);
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->handle = handle;
-    mnuClearPanelTransitionState(work->transition.data);
+    mnuClearPanelTransitionState(&work->transition.data);
     work->fadeTarget = mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_003D05C8);
     evtSetMessageWindowPageValue(200);
@@ -683,7 +683,6 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
 
 extern u32 kwlnTaskGetUserValue();
 extern void effDestroyResourceSlotSet(s32);
-extern void mnuDrainPanelTransitions(s32, s32);
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 extern void func_00303D58(s32);
@@ -697,7 +696,7 @@ void brsStaffTaskDestroy(s32 taskArg) {
     if (context->teardownHandle != 0) {
         effDestroyResourceSlotSet(context->teardownHandle);
     }
-    mnuDrainPanelTransitions((s32)context->transition.data, taskArg);
+    mnuDrainPanelTransitions(&context->transition.data, taskArg);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }

@@ -2,6 +2,7 @@
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_result.h"
+#include "kwln.h"
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
@@ -40,6 +41,8 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
 extern void itfUpdateFadeColor(BrsSkillPackageWork *);
 extern void mnuDrawTitleFadeSprites(BrsSkillPackageWork *);
 extern void brsStepAnimDecay(BrsSkillPackageWork *);
+extern void func_00266250(s32, s32, s32, s32, BrsActiveProgressList *, s32);
+
 extern void func_00264B08();
 extern void func_00264D90();
 
@@ -265,7 +268,8 @@ void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
 
 extern u32 uiBlendColors(u32, u32, s32);
 
-u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource) {
+/* The row renderer also passes its context word; this blend helper ignores it. */
+u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource, s32 context) {
     ptyGetCurrentProfileId(resource->unit);
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }
@@ -283,7 +287,77 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_00266250);
+extern char D_003AFBA0[];
+extern u8 D_00324510[2][2][16];
+extern KwlnTask *kwlnTaskGetTaskByName(const char *);
+extern u32 kwlnTaskGetUserValue(KwlnTask *);
+extern void func_002665E0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00266668(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00266B10(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00266BC0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00266E28(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00268AB8(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_002673C8(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00268D40(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00267850(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00267E20(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00267FF0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00268590(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void func_00266908(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern s32 brsPollResultCounterCompletion(void);
+extern void func_002E8DD0(u32 sound);
+
+void func_00266250(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
+    KwlnTask *task;
+    BrsSkillPackageWork *work = NULL;
+    DatPartyRecord *unit;
+    s32 i;
+    s32 count;
+
+    task = kwlnTaskGetTaskByName(D_003AFBA0);
+    if (task != NULL) {
+        work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    }
+    if (((s8)D_00324510[1][0][1] < 0 || (D_00324510[1][0][3] & 2)) && work->opacity >= 0x80) {
+        work->unkD4D = 1;
+    }
+    count = list->count;
+    for (i = 0; i < count; i++) {
+        if (work != NULL) {
+            BrsProgressRow *row = &list->rows[i];
+
+            func_002665E0(x, y, z, work, row, context, i);
+            func_00266668(x, y, z, work, row, context, i);
+            func_00266B10(x, y, z, work, row, context, i);
+            func_00266BC0(x, y, z, work, row, context, i);
+            mnuBlendNeutralColorAlpha(x, y, z, alpha, row, context);
+            func_00266E28(x, y, z, work, row, context, i);
+            func_00268AB8(x, y, z, work, row, context, i);
+            func_002673C8(x, y, z, work, row, context, i);
+            func_00268D40(x, y, z, work, row, context, i);
+            func_00267850(x, y, z, work, row, context, i);
+            func_00267E20(x, y, z, work, row, context, i);
+            func_00267FF0(x, y, z, work, row, context, i);
+            func_00268590(x, y, z, work, row, context, i);
+            func_00266908(x, y, z, work, row, context, i);
+            count = list->count;
+        }
+        unit = list->rows[i].unit;
+        if (unit->flags & 2) {
+            if (i + 1 >= count || (list->rows[i + 1].unit->flags & 2)) {
+                y += 0x1E0;
+            } else {
+                y += 0x258;
+            }
+        } else {
+            y += 0x1E0;
+        }
+    }
+    if (brsPollResultCounterCompletion() != 0 && work != NULL && work->resultPhase == 1) {
+        work->resultPhase = 2;
+        func_002E8DD0(20);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002653A0", D_003AFBA0);
 

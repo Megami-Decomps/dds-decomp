@@ -32,7 +32,7 @@ void sdfReleaseChipBlock(void *arg0);
 
 void sdfFreeMemoryFromEitherHeap(void *arg0);
 
-void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
+SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 
 void *sdfAllocSizeClassBlock(s32 arg0);
 
@@ -42,7 +42,10 @@ u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 
-void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4, u32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
+void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,
+    u32 primaryResourceWord, s32 pixelFormat, u32 secondaryResourceWord,
+    s32 clutFormat, s32 textureColorComponents, s32 maxMipLevel,
+    s32 lodParameters, s32 clampMode, s32 variant);
 
 extern u8 sdfTextureReleaseQueue;
 
@@ -129,18 +132,18 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BBF8);
+INCLUDE_ASM(const s32, "sdf/sdfTex", sdfBuildTextureStatePacket);
 
 /* Allocate and populate one of the two resource packet variants. */
-void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
-    void *packet;
+SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
+    SdfTexBuf *packet;
     u32 primary;
     u32 secondary;
 
     packet = sdfAllocSizeClassBlock(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
     secondary = sdfTexGetSecondaryResourceWord(texture);
-    func_0032BBF8(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
+    sdfBuildTextureStatePacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
     return packet;
 }
 
@@ -160,7 +163,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 
     buffer = texture->primaryBuffer;
     if (buffer != NULL) {
-        func_0032BBF8(buffer, texture->width, texture->height,
+        sdfBuildTextureStatePacket(buffer, texture->width, texture->height,
                      sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
                      sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,
@@ -170,7 +173,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 
     buffer = texture->secondaryBuffer;
     if (buffer != NULL) {
-        func_0032BBF8(buffer, texture->width, texture->height,
+        sdfBuildTextureStatePacket(buffer, texture->width, texture->height,
                      sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
                      sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,

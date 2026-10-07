@@ -148,7 +148,7 @@ void sdfWriteImageTransferRegisters(SdfPacket *packet, u32 destinationBufferAddr
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
 void sdfDestroyObjectList();
 void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
-void func_002D4DD0();
+void sdfPrepareFrameDepthPacket();
 s32 sdfAllocPacketAligned(s32 size);
 void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
 void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
@@ -961,10 +961,16 @@ typedef struct SdfSceneNode {
     SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
     SdfPacket header;  /* 0x10 */
-    u64 draw[24];      /* 0x30 */
+    u64 draw[8];       /* 0x30 */
+    SdfPacket contextOne[2]; /* 0x70 */
+    SdfPacket contextTwo[2]; /* 0xB0 */
     u64 limits[10];    /* 0xF0 */
     u64 regs[8];       /* 0x140 */
+    u64 framePacketWords[4]; /* 0x180 */
+    SdfTexBuf texturePackets[2]; /* 0x1A0 */
 } SdfSceneNode;
+
+typedef char SdfSceneNode_size_must_be_0x220[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
 
 extern void sdfRefreshSceneNodePackets();
 
@@ -1021,7 +1027,7 @@ void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
     sdfAppendReferencePacket(list, (u32)node);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4DD0);
+INCLUDE_ASM(const s32, "game/code_002D33C8", sdfPrepareFrameDepthPacket);
 
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
     sdfInitializeDmaReferenceTag(packet->packets, 2);
@@ -1029,7 +1035,7 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
     packet->source = source;
     packet->data = data;
     packet->region = region;
-    packet->prepare = func_002D4DD0;
+    packet->prepare = sdfPrepareFrameDepthPacket;
 }
 
 void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {

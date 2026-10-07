@@ -96,20 +96,20 @@ u32 dds3AdvanceWorldCounter(void) {
     return dds3WorldCounter;
 }
 
-void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, void *callbackTarget) {
-    if (entry != NULL) {
-        entry->callbackTarget = callbackTarget;
+void dds3SetWorldNodeValue(EffWorldNode *node, u32 value) {
+    if (node != NULL) {
+        node->value = value;
     }
 }
 
-void *dds3GetWorldEntryCallbackTarget(WorldEntry *entry) {
-    void *callbackTarget;
+u32 dds3GetWorldNodeValue(EffWorldNode *node) {
+    u32 value;
 
-    callbackTarget = NULL;
-    if (entry != NULL) {
-        callbackTarget = entry->callbackTarget;
+    value = 0;
+    if (node != NULL) {
+        value = node->value;
     }
-    return callbackTarget;
+    return value;
 }
 
 typedef struct WorldNode {

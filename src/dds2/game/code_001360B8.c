@@ -104,8 +104,8 @@ void fldInitializeDisplayPointerTable(void) {
 extern s32 D_00389780[];
 extern s32 D_00436168;
 extern u32 fldPlayerObject;
-struct EvtUnitNode;
-extern s32 evtUnitGetNestedValue(struct EvtUnitNode *unit);
+struct EffWorldNode;
+extern EvtUnit *evtUnitGetNestedValue(struct EffWorldNode *unit);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
 extern void func_0023C870(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
@@ -173,7 +173,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
         vec[3] = 1.0f;
         kwlnSetBackgroundColorTarget(0, vec);
 
-        unit = (EvtUnit *)evtUnitGetNestedValue((struct EvtUnitNode *)fldPlayerObject);
+        unit = evtUnitGetNestedValue((struct EffWorldNode *)fldPlayerObject);
         evtSetUnitStatusFlags(unit);
         red = light->unitColorA[0] * 128.0f;
         green = light->unitColorA[1] * 128.0f;

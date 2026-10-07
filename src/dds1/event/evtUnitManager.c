@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_unit.h"
+#include "eff_transform.h"
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
@@ -72,8 +73,9 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_003BD358, D_003BD35C;
-extern s32 dds3GetWorldObject(void);
-extern s32 dds3ContainsNodeInObjectChain(s32, s32, s32);
+extern void *dds3GetWorldObject(void);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, s32);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
 extern s32 sdfLoadMapRecordPositionVector(void *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void func_00107DE8(void);
@@ -83,7 +85,7 @@ extern void sdfSetTextFloatPairOverride(void *, f32, f32);
 extern void sdfClearTextFloatPairOverride(void *);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
-void func_00220910(EvtUnit *unit) {
+void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     f32 identity[4];
     f32 targetDirection[4];
     f32 previousDirection[4];
@@ -708,10 +710,8 @@ void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
 
 
 void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
-    u8 *work = (u8 *)unit;
-
-    *(s16 *)(work + 0x156) = duration;
-    *(s16 *)(work + 0x154) = 0;
+    unit->rgbDuration = duration;
+    unit->rgbElapsed = 0;
     if (duration == 0) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
@@ -721,16 +721,14 @@ void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
         u32 currentRgb = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF;
 
         unit->color60 = (unit->color60 & 0xFF000000) | currentRgb;
-        *(u32 *)(work + 0x64) = (*(u32 *)(work + 0x64) & 0xFF000000) | (color & 0xFFFFFF);
+        unit->color64 = (unit->color64 & 0xFF000000) | (color & 0xFFFFFF);
         unit->flags |= 0x8000;
     }
 }
 
 void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
-    u8 *work = (u8 *)unit;
-
-    *(s16 *)(work + 0x15A) = duration;
-    *(s16 *)(work + 0x158) = 0;
+    unit->alphaDuration = duration;
+    unit->alphaElapsed = 0;
     if (duration == 0) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
@@ -740,7 +738,7 @@ void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
         u32 currentAlpha = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000;
 
         unit->color60 = (unit->color60 & 0xFFFFFF) | currentAlpha;
-        *(u32 *)(work + 0x64) = (*(u32 *)(work + 0x64) & 0xFFFFFF) | (color & 0xFF000000);
+        unit->color64 = (unit->color64 & 0xFFFFFF) | (color & 0xFF000000);
         unit->flags |= 0x10000;
     }
 }
@@ -769,26 +767,26 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
     }
 }
 
-s32 evtGetWorldUnitNestedValue(s32 id) {
-    u8 *obj = (u8 *)dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, 5);
+EvtUnit *evtGetWorldUnitNestedValue(s32 id) {
+    EffWorldNode *obj = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, 5);
 
     if (obj != NULL) {
-        return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+        return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
     }
-    return (s32)obj;
+    return NULL;
 }
 
-s32 evtUnitGetNestedValue(u8 *obj) {
+EvtUnit *evtUnitGetNestedValue(EffWorldNode *obj) {
     if (obj == NULL) {
-        return 0;
+        return NULL;
     }
-    return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
+    return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern const s32 D_003AC060[];
 
-EvtUnit *func_002220F0(EvtEffObj *effObj, MdlCtx *owner) {
+EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
     EvtUnit *work;
     void *endpoint;
     f32 defaultVector[4];
@@ -808,11 +806,10 @@ EvtUnit *func_002220F0(EvtEffObj *effObj, MdlCtx *owner) {
 
     VU0_LOAD_VF(vf10, defaultVector);
     VU0_STORE_VF_UNCLOBBERED(vf10, work->vec10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, (f32 *)((u8 *)work + 0x40));
-    /* The initialized color words at +0x0C are still untyped padding. */
-    *(u32 *)((u8 *)work + 0x0C) = 0x00B2B2B2;
+    VU0_STORE_VF_UNCLOBBERED(vf10, work->vec40);
+    work->color0C = 0x00B2B2B2;
     work->color = 0x00B2B2B2;
-    *(u32 *)((u8 *)work + 0x5C) = 0x80303030;
+    work->color5C = 0x80303030;
     work->color50 = 0x80303030;
     endpoint = sdfAllocSizeClassBlock(0xE0);
     work->endpointWorkAddress = (s32)endpoint;

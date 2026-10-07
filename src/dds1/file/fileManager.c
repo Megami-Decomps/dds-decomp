@@ -326,12 +326,12 @@ FileWindowSlot *fileWindowSlotCreate(s32 requestNameAddress, s32 firstValue, s32
 
 /* Queue the value-pair request without completion context. Preserve the
  * existing K&R parameter declarations and their signed integer representations. */
-void fileQueueWindowSlotRequest(requestNameAddress, firstValue, secondValue)
+FileWindowSlot *fileQueueWindowSlotRequest(requestNameAddress, firstValue, secondValue)
 s32 requestNameAddress;
 s32 firstValue;
 s32 secondValue;
 {
-    fileWindowSlotCreate(requestNameAddress, firstValue, secondValue, 0, 0);
+    return fileWindowSlotCreate(requestNameAddress, firstValue, secondValue, 0, 0);
 }
 
 extern void sdfDevQueueRead(u32 handle, u32 buffer, u32 size);

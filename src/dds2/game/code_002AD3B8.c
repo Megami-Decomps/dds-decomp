@@ -578,7 +578,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(slot->contents[0].windowSprites, 1);
+        func_002BB9C8(slot->windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
@@ -726,7 +726,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(slot->contents[0].windowSprites, 1);
+        func_002BB9C8(slot->windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, context->spriteArg2);
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,

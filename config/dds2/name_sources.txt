@@ -254,8 +254,8 @@
 0x0010FC28	dds3InvokeWorldCallbackFirst	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FA00, input-family pairing. [names_qp10.tsv]
 0x0010FC68	dds3InvokeWorldCallbackSecond	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FA40, input-family pairing. [names_qp10.tsv]
 0x0010FCA8	dds3AdvanceWorldCounter	inferred	Increments the world-side counter while restricting it to the low sixteen bits.
-0x0010FCC0	dds3SetWorldEntryCallbackTarget	inferred	Writes an object pointer to WorldEntry offset 0x08, later passed to the two callback dispatchers after null checks.
-0x0010FCD0	dds3GetWorldEntryCallbackTarget	inferred	Returns the pointer at WorldEntry offset 0x08, or null if the entry itself is null.
+0x0010FCC0	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
+0x0010FCD0	dds3GetWorldNodeValue	inferred	Returns the kind-selected u32 value at EffWorldNode +0x08, or zero for a null node.
 0x0010FF58	dds3DestroyWorld	inferred	Releases the global world object and clears its pointer, matching DDS1 dds3DestroyWorld.
 0x0010FF88	dds3SetWorldObject	inferred	Stores the primary object in world info; identical role to DDS1 dds3SetWorldObject.
 0x0010FFA8	dds3GetWorldObject	inferred	Returns the primary object in world info; identical role to DDS1 dds3GetWorldObject.
@@ -1718,6 +1718,8 @@
 0x00190A48	effTrackPolyDrawStrips	inferred	Builds packet draws for active track-poly point ranges; DDS1 twin. [names_qp9.tsv]
 0x00190D10	effCloneMagatuhiWithColorResource	inferred	src/dds2/game/code_00190D10.c func_00190D10: Copies Magatuhi parameters, creates new subresource and fills its color table. Twin of DDS1 func_001890D8. [names_reviewed24.tsv]
 0x00190DB0	effReleaseMagatuhiOwner	inferred	Releases the Magatuhi resource at owner offset 0x1C and frees the owner record.
+0x00190DF8	effResetMagatuhiValueSlot	inferred	resets one indexed value-work slot's counters, color, and angles
+0x00190E58	effCreateMagatuhiValueWork	inferred	allocates and initializes the indexed value-work owner and slots
 0x001917C8	effMagatuhiSetValue	inferred	Stores a value at the requested index in the Magatuhi work's indexed value table.
 0x001917E0	effMagatuhiFillColorTable	inferred	count04 effBlendColor samples from colorA to colorB [names_M61_EffVu.tsv]
 0x001918D0	effMagatuhiCreateFirst	inferred	first-family create: 0x30 particles before work [names_M61_EffVu.tsv]
@@ -3274,6 +3276,7 @@
 0x0023B170	evtComputePlanarTargetDirectionVu	inferred	Derives a normalized planar target direction from a model quaternion. [names_reviewed10.tsv]
 0x0023B2B8	evtUnitStepScaledValue	inferred	twin dds1 0x00220748 [names_M55_VuScalar.tsv]
 0x0023B3A0	evtMeasurePathTrajectoryLength	inferred	Samples path at increments of one twentieth; sums distances and restores saved scale. [names_reviewed6.tsv]
+0x0023B480	evtAdvanceUnitVisualTransitions	inferred	Advances an event unit's model colour and directional transition state; paired exact DDS1 C twin.
 0x0023C400	evtLoadUnitFirstColorVectorVU	inferred	Chooses packed unit color or target/default first vector and loads VU register vf10. [names_reviewed6.tsv]
 0x0023C4B0	evtLoadUnitSecondColorVectorVU	inferred	Chooses second packed color or target/default vector and loads VU register vf10. [names_reviewed6.tsv]
 0x0023C568	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]
@@ -3286,6 +3289,7 @@
 0x0023CB68	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]
 0x0023CC00	evtGetWorldUnitNestedValue	inferred	Looks up a world object of kind five by id and reads its inner value if found. [names_reviewed6.tsv]
 0x0023CC48	evtUnitGetNestedValue	inferred	Returns the nested object's word at offset eight when the event unit pointer is present.
+0x0023CC60	evtCreateUnitTransitionWork	inferred	Allocates and initializes complete event unit transition work and its owned endpoint block; native caller stores it for the paired release API.
 0x0023CD98	evtReleaseUnitTransitionWork	inferred	Clears nested reference and frees its path, handle and work block. [names_reviewed6.tsv]
 0x0023CE08	evtGetUnitMotionState	inferred	Returns the unit state read by motion-completion check. [names_reviewed6.tsv]
 0x0023CE20	evtStoreUnitMotionShortParameters	inferred	Stores two signed short parameters in event unit motion state. [names_reviewed6.tsv]
@@ -3572,6 +3576,7 @@
 0x0025D008	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x0025D0B8	evtRefreshTaskEffectTexture	inferred	DDS1 twin: replaces the event task's retained effect texture when the keyed resource is present, updates channel 72, and stores the replacement at task-data +0x38.
 0x0025D140	evtSpawnResourceObject	inferred	DDS1 twin 0x00241D28 [names_M95_Event.tsv]
+0x0025D230	evtCreateModelFromPackResource	inferred	DDS1 twin: evtOpBindMotionSoundToModel requests a kind-5 pack payload and uses the returned model handle to create its motion-SE task.
 0x0025D390	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
 0x0025D4D0	evtUpdateMotionSeTask	inferred	DDS1 twin: registered motion-SE task callback matching resource motion and frame cues before updating the event sound sequence
 0x0025D6B0	evtCreateMotionSeTask	inferred	twin of DDS1 evtCreateMotionSeTask
@@ -4555,6 +4560,7 @@
 0x002C33A8	mnuSetGroupProperties	inferred	Stores four properties at offsets 0x18, 0x1C, 0x24, and 0x28.
 0x002C3E08	mnuDrawAndAdvanceProfilePanel	inferred	Draws profile panel and wraps its frame counter after limit. [names_reviewed5.tsv]
 0x002C3E58	mnuClearPanelTransitionState	inferred	Clears panel transition work area before processing. [names_reviewed8.tsv]
+0x002C3E78	mnuApplyPanelTransitionAction	inferred	matched-body; maintains the MenuPopupEntry transition stack, registers and de-duplicates enter callbacks, and pops entries with optional leave callbacks; native callers dispatch add and pop actions
 0x002C3FC8	mnuDrainPanelTransitions	inferred	Updates panel transition until the active-state word clears. [names_reviewed5.tsv]
 0x002C4020	mnuHasPopupSelectionFlag	inferred	Tests popup-selection flag in supplied menu state. [names_reviewed8.tsv]
 0x002C42A0	mnuIsPopupEntryValue	inferred	Compares value stored in popup entry with requested value. [names_reviewed5.tsv]
@@ -5788,6 +5794,7 @@
 0x0032B8D8	sdfTexGetPaletteByteSize	inferred	Returns colors-per-palette times bytes-per-color times palette count.
 0x0032B948	sdfTexCopyImageData	inferred	Copies source bytes into texture->data using texture->dataSize.
 0x0032BBB0	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_0032CAE0.
+0x0032BBF8	sdfBuildTextureStatePacket	inferred	Builds the 0x40 SdfTexBuf GIF packet with TEX1, TEX0 and CLAMP state; variant selects primary or secondary register IDs.
 0x0032BD60	sdfTexCreateResourcePacket	inferred	Allocates and initializes a texture resource packet from its primary and secondary resource words.
 0x0032BE00	sdfTexCreateFirstPacket	inferred	Stores the first generated resource packet on the texture.
 0x0032BE30	sdfTexCreateSecondPacket	inferred	Stores the second generated resource packet on the texture.
@@ -5828,6 +5835,7 @@
 0x0032D758	sdfBuildTextureScenePacket	inferred	confidence=high; src/dds2/game/code_0032C278.c:func_0032D758; Builds texture setup for both rendering contexts, centered bounds, test/blend registers, and the draw packet. [names_qp9.tsv]
 0x0032D898	sdfRefreshSceneNodePackets	inferred	Registered scene callback rebuilds both frame/depth contexts and refreshes paired FRAME words and texture packets from the retained graph view and buffer index.
 0x0032DAF0	sdfAppendLinkedPacketPayload	inferred	Appends a node to its pointer list and its payload at offset sixteen to the packet list.
+0x0032DC80	sdfPrepareFrameDepthPacket	inferred	Packet-builder callback selects FRAME/ZBUF context registers and writes packed frame/depth values for the selected graph buffer.
 0x0032DD98	sdfQueueFramePackets	inferred	readability/matching review (QP16)
 0x0032DE98	sdfSetNonnegativePacketIndex	inferred	Clamps negative index values to zero before storing current packet index. [names_reviewed8.tsv]
 0x0032DEB0	sdfResetPacketSlotState	inferred	Zeroes current packet index and two related slot-state words. [names_reviewed8.tsv]

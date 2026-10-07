@@ -4,6 +4,8 @@
 #include "eff.h"
 #include "mnu_shop.h"
 
+extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
+
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
 #define MNU_ENTRY_MARKED_COLOR 0x89BDC940
@@ -199,9 +201,11 @@ extern s32 D_00435E6C;
 
 extern void mnuDrawCampIconBackdropByKind();
 
-extern s32 effHasFirstTextureHandle();
+extern u8 effHasFirstTextureHandle(s32);
+extern u32 effDestroyResourceSlotSet(u32);
+extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
-extern void effReleaseTextureHandlesAndResetSlots();
+extern void effReleaseTextureHandlesAndResetSlots(u32);
 
 extern void func_002AAC98();
 
@@ -270,7 +274,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
-extern void effResolveAndReleaseResource(s32);
+extern void effResolveAndReleaseResource(u32 *);
 
 
 /* Menu state handler installer: the call is inlined at each use, so callers
@@ -506,7 +510,7 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback);
 
 void mnuDrawSlotIcons(s32 x, s32 context);
 
-void mnuDrawSelectedPartySlotMarkers(s32 context, u32 *handles);
+void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
 
@@ -786,16 +790,6 @@ MenuListNode * mnuListAppendNode();
 
 s32 mnuListContainsFinalNode(MenuList *list);
 
-
-
-
-
-typedef struct MenuSpriteRef {
-    s32 sprite;
-    s32 effect;
-} MenuSpriteRef;
-
-
 void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect);
 
 void *mnuWalkNodeList(s32 index, MenuList *list);
@@ -1070,7 +1064,7 @@ MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value
 void mnuReleaseWindowTextures(MenuIconSprites *menu) {
     u32 spriteIndex = 0;
     do {
-        effDestroyResourceSlotSet(menu->sprite[spriteIndex]);
+        effDestroyResourceSlotSet((u32)menu->sprite[spriteIndex]);
         spriteIndex++;
     } while (spriteIndex < MNU_WINDOW_RESOURCE_SPRITES);
     sdfReleaseResourceAllocation(menu->handle);
@@ -1225,7 +1219,7 @@ void mnuReleaseResourceList(MenuIconState *list) {
 
     for (slotIndex = 0; slotIndex < list->count; slotIndex++) {
         if (list->sprite[slotIndex] != 0) {
-            effDestroyResourceSlotSet(list->sprite[slotIndex]);
+            effDestroyResourceSlotSet((u32)list->sprite[slotIndex]);
         }
     }
     sdfReleaseChipBlock(list);
@@ -1705,9 +1699,9 @@ typedef struct MenuScrollPanel {
     u32 firstSprite;
     u32 secondSprite;
     u8 pad10[4];
-    MenuSpriteRef positions[3]; /* 0x14 */
-    MenuSpriteRef active;       /* 0x2C */
-    MenuSpriteRef pending;      /* 0x34 */
+    MenuGridSlot positions[3]; /* 0x14 */
+    MenuGridSlot active;       /* 0x2C */
+    MenuGridSlot pending;      /* 0x34 */
     ScrollHandle *handles[3];
 } MenuScrollPanel;
 
@@ -1749,9 +1743,9 @@ MenuScrollPanel *mnuCreateScrollPanel(u32 owner) {
     memset(menu, 0, 0x48);
     menu->firstSprite = 0;
     menu->secondSprite = 0;
-    itfGridStorePosition(&menu->positions[0], owner, 0x40);
-    itfGridStorePosition(&menu->positions[1], owner, 0x41);
-    itfGridStorePosition(&menu->positions[2], owner, 0x44);
+    itfGridStorePosition(&menu->positions[0], (EffectSlotSet *)owner, 0x40);
+    itfGridStorePosition(&menu->positions[1], (EffectSlotSet *)owner, 0x41);
+    itfGridStorePosition(&menu->positions[2], (EffectSlotSet *)owner, 0x44);
     itfGridStorePosition(&menu->active, 0, 0);
     itfGridStorePosition(&menu->pending, 0, 0);
     mnuInitScrollHandles(menu);
@@ -1765,14 +1759,14 @@ void mnuDestroyScrollPanel(MenuScrollPanel *menu) {
 
 
 void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
-    s32 pendingHandle;
+    EffectSlotSet *pendingHandle;
 
-    pendingHandle = context->pending.sprite;
-    context->active.sprite = pendingHandle;
-    context->active.effect = context->pending.effect;
-    context->pending.sprite = 0;
+    pendingHandle = context->pending.set;
+    context->active.set = pendingHandle;
+    context->active.index = context->pending.index;
+    context->pending.set = 0;
     if (pendingHandle != 0) {
-        effConfigureWithDefaultSetting(pendingHandle, context->pending.effect,
+        effConfigureWithDefaultSetting((u32)pendingHandle, context->pending.index,
                                        context->handles[2], 0, 10, 2);
         return;
     }
@@ -1781,13 +1775,13 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
 void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 color) {
     mnuActivatePendingPanelResource(menu);
     menu->color = color;
-    menu->pending.sprite = model;
-    menu->pending.effect = value;
+    menu->pending.set = (EffectSlotSet *)model;
+    menu->pending.index = value;
     effConfigureIndexedSlotResource(model, value, menu->handles[0], 0, 3);
 }
 
 u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
-    return resources->active.sprite != 0;
+    return resources->active.set != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BB510);
@@ -1848,11 +1842,11 @@ void mnuReleasePartyPanelTextures(s32 menu) {
 
 void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve) {
     MenuPageSlot *entry = &((MenuPageWindow *)menu)->slots[index];
-    entry->contents[0].hp.fadeOut = 0;
-    entry->contents[0].mp.fadeOut = 0;
+    entry->hp.fadeOut = 0;
+    entry->mp.fadeOut = 0;
     if (preserve == 0) {
-        entry->contents[0].hp.fade = 0x100;
-        entry->contents[0].mp.fade = 0x100;
+        entry->hp.fade = 0x100;
+        entry->mp.fade = 0x100;
     }
 }
 
@@ -1958,7 +1952,7 @@ void *func_002BBA38(s32 kind, s32 mainResource, s32 itemResource,
 }
 
 
-extern s32 effDestroyResourceSlotSet();
+
 
 extern void sdfReleaseChipBlock();
 
@@ -1966,16 +1960,16 @@ extern void sdfReleaseChipBlock();
 void mnuFreeIconSprites(MenuSprites *menu) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        effDestroyResourceSlotSet(menu->icon[i]);
+        effDestroyResourceSlotSet((u32)menu->icon[i]);
     }
     for (i = 0; i < 11; i++) {
         if (menu->item[i] != NULL) {
-            effDestroyResourceSlotSet(menu->item[i]);
+            effDestroyResourceSlotSet((u32)menu->item[i]);
         }
     }
     for (i = 0; i < 4; i++) {
         if (menu->cursor[i] != NULL) {
-            effDestroyResourceSlotSet(menu->cursor[i]);
+            effDestroyResourceSlotSet((u32)menu->cursor[i]);
         }
     }
     sdfReleaseChipBlock(menu);
@@ -1998,12 +1992,12 @@ extern void *func_002BBA38();
 
 void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
     mnuSelectPage((MenuPageWindow *)menu, index);
-    ((MenuPageWindow *)menu)->slots[index].contents[0].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
+    ((MenuPageWindow *)menu)->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
     ((MenuPageWindow *)menu)->flags |= 0x80;
 }
 
 void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 second) {
-    MenuSprites **slot = &((MenuPageWindow *)menu)->slots[index].contents[0].windowSprites;
+    MenuSprites **slot = &((MenuPageWindow *)menu)->slots[index].windowSprites;
     if (*slot != NULL) {
         (*slot)->unk74 = first;
         (*slot)->unk75 = second;
@@ -2011,7 +2005,7 @@ void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 seco
 }
 
 void mnuClearEntries(u8 *menu) {
-    MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].contents[0].windowSprites;
+    MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].windowSprites;
     u32 i = 0;
     mnuClearPageSelectionHandles(menu);
     do {
@@ -2087,11 +2081,11 @@ void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource) {
     u32 bundle;
 
     bundle = mnuCreateIconBundle(resource);
-    ((MenuPageWindow *)menu)->slots[index].contents[0].iconBundle = bundle;
+    ((MenuPageWindow *)menu)->slots[index].iconBundle = bundle;
 }
 
 void mnuReleasePartyIconBundles(u8 *menu) {
-    u32 *bundle = &((MenuPageWindow *)menu)->slots[0].contents[0].iconBundle;
+    u32 *bundle = &((MenuPageWindow *)menu)->slots[0].iconBundle;
     u32 i = 0;
     do {
         u32 resource = *bundle;
@@ -2128,16 +2122,16 @@ void mnuReleasePartyPanelSpriteTextures(u8 *menu) {
 /* Copy eight resource handles into the window's primary handle bank. */
 void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source) {
     u32 value;
-    s32 *destination;
+    EffectSlotSet **destination;
     u32 index;
 
-    destination = menu->handlesA;
+    destination = menu->mainResources;
     index = 0;
     do {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = value;
+        *destination = (EffectSlotSet *)value;
         destination = destination + 1;
     } while (index < 8);
 }
@@ -2145,38 +2139,108 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source) {
 /* Copy eight resource handles into the window's secondary handle bank. */
 void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source) {
     u32 value;
-    s32 *destination;
+    EffectSlotSet **destination;
     u32 index;
 
-    destination = menu->handlesB;
+    destination = menu->mainResources + 8;
     index = 0;
     do {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = value;
+        *destination = (EffectSlotSet *)value;
         destination = destination + 1;
     } while (index < 8);
 }
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, s32 *source) {
+void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        effResolveAndReleaseResource(source[i]);
-        destination->handlesC[i] = source[i];
+        effResolveAndReleaseResource((u32 *)(source[i]));
+        destination->handlesC[i] = (EffectSlotSet *)source[i];
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BC690);
+void func_002BC690(MenuPageWindow *menu, s32 index, s32 kind) {
+    MenuPageSlot *slot = &menu->slots[index];
+    DatPartyRecord *actor = &datGameState->party[menu->records->slots[index].index];
+    s32 resourceIndex;
+    s32 statusIndex;
+
+    slot->kind = kind;
+    slot->flags = 0;
+    if (slot->icon[0] != 0) {
+        effDestroyResourceSlotSet((u32)slot->icon[0]);
+    }
+    if (slot->icon[1] != 0) {
+        effDestroyResourceSlotSet((u32)slot->icon[1]);
+    }
+    if (slot->icon[2] != 0) {
+        effDestroyResourceSlotSet((u32)slot->icon[2]);
+    }
+    if (kind < 3) {
+        if (kind > 0) {
+            slot->icon[0] = effCreateResourceSlotSet((u32 *)menu->resources, menu->slot, 1);
+            slot->icon[1] = effCreateResourceSlotSet((u32 *)menu->secondaryResource, menu->secondarySlot, 1);
+        } else {
+            slot->icon[0] = effCreateResourceSlotSet((u32 *)menu->resources, menu->slot, 1);
+            slot->icon[1] = 0;
+        }
+    } else {
+        slot->icon[0] = effCreateResourceSlotSet((u32 *)menu->resources, menu->slot, 1);
+        slot->icon[1] = 0;
+    }
+    slot->icon[2] = effCreateResourceSlotSet((u32 *)menu->alternateResource, menu->alternateSlot, 1);
+    if (slot->frame[0] != 0) effDestroyResourceSlotSet((u32)slot->frame[0]);
+    if (slot->frame[1] != 0) effDestroyResourceSlotSet((u32)slot->frame[1]);
+    if (slot->frame[2] != 0) effDestroyResourceSlotSet((u32)slot->frame[2]);
+    if (slot->frame[3] != 0) effDestroyResourceSlotSet((u32)slot->frame[3]);
+    if (slot->frame[6] != 0) effDestroyResourceSlotSet((u32)slot->frame[6]);
+    if (slot->frame[7] != 0) effDestroyResourceSlotSet((u32)slot->frame[7]);
+    if (slot->frame[4] != 0) {
+        effDestroyResourceSlotSet((u32)slot->frame[4]);
+        effDestroyResourceSlotSet((u32)slot->frame[5]);
+    }
+    resourceIndex = menu->records->slots[index].unk8;
+    if (resourceIndex >= 0) {
+        if (effHasFirstTextureHandle((s32)menu->mainResources[resourceIndex]) == 0) {
+            effResolveAndReleaseResource((u32 *)menu->mainResources[resourceIndex]);
+            effResolveAndReleaseResource((u32 *)menu->mainResources[resourceIndex + 8]);
+        }
+        slot->frame[0] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 0, 1);
+        slot->frame[1] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 3, 1);
+        slot->frame[2] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 4, 1);
+        slot->frame[3] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 5, 1);
+        slot->frame[6] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 1, 1);
+        slot->frame[4] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex + 8], 0, 1);
+        slot->frame[5] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex + 8], 1, 1);
+    } else {
+        slot->frame[0] = 0;
+        slot->frame[1] = 0;
+        slot->frame[2] = 0;
+        slot->frame[3] = 0;
+        slot->frame[6] = 0;
+        slot->frame[4] = 0;
+        slot->frame[5] = 0;
+    }
+    statusIndex = mnuGetSelectionFromFlags(actor);
+    if (statusIndex >= 0) {
+        slot->frame[7] = effCreateResourceSlotSet((u32 *)menu->handlesC[statusIndex], 0, 1);
+    } else {
+        slot->frame[7] = 0;
+    }
+}
+
+
 
 void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     u32 i;
-    s32 *res;
+    EffectSlotSet **res;
     if (flag == 0) {
-        for (i = 0, res = menu->handlesA; i < 8; i++, res++) {
-            if (effHasFirstTextureHandle(*res) != 0) {
-                effReleaseTextureHandlesAndResetSlots(*res);
-                effReleaseTextureHandlesAndResetSlots(res[8]);
+        for (i = 0, res = menu->mainResources; i < 8; i++, res++) {
+            if (effHasFirstTextureHandle((s32)(*res)) != 0) {
+                effReleaseTextureHandlesAndResetSlots((u32)(*res));
+                effReleaseTextureHandlesAndResetSlots((u32)res[8]);
             }
         }
     }
@@ -2231,8 +2295,8 @@ void mnuRebuildScrollLists(MenuPageWindow *context, PartyPanel *records) {
 
 void mnuClearPageSelection(MenuPageWindow *menu) {
     if (menu->selected >= 0) {
-        menu->slots[menu->selected].contents[0].hp.fade = 0x100;
-        menu->slots[menu->selected].contents[0].mp.fade = 0x100;
+        menu->slots[menu->selected].hp.fade = 0x100;
+        menu->slots[menu->selected].mp.fade = 0x100;
         menu->selected = -1;
     }
     menu->flags &= ~0x200;
@@ -2244,33 +2308,33 @@ INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BCD90);
 void mnuFreeWindowSprites(MenuPageSlot *win) {
     u32 i;
     for (i = 0; i < 3; i++) {
-        if (win->contents[0].icon[i] != 0) {
-            effDestroyResourceSlotSet(win->contents[0].icon[i]);
+        if (win->icon[i] != 0) {
+            effDestroyResourceSlotSet((u32)win->icon[i]);
         }
     }
-    if (win->contents[0].frame[0] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[0]);
+    if (win->frame[0] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[0]);
     }
-    if (win->contents[0].frame[1] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[1]);
+    if (win->frame[1] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[1]);
     }
-    if (win->contents[0].frame[2] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[2]);
+    if (win->frame[2] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[2]);
     }
-    if (win->contents[0].frame[3] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[3]);
+    if (win->frame[3] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[3]);
     }
-    if (win->contents[0].frame[4] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[4]);
+    if (win->frame[4] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[4]);
     }
-    if (win->contents[0].frame[5] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[5]);
+    if (win->frame[5] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[5]);
     }
-    if (win->contents[0].frame[6] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[6]);
+    if (win->frame[6] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[6]);
     }
-    if (win->contents[0].frame[7] != 0) {
-        effDestroyResourceSlotSet(win->contents[0].frame[7]);
+    if (win->frame[7] != 0) {
+        effDestroyResourceSlotSet((u32)win->frame[7]);
     }
 }
 
@@ -2294,9 +2358,9 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
             s32 id = window->records->slots[i].unk8;
 
             if (id >= 0) {
-                if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
-                    effResolveAndReleaseResource(window->handlesA[id]);
-                    effResolveAndReleaseResource(window->handlesB[id]);
+                if (effHasFirstTextureHandle((s32)(window->mainResources[id])) == 0) {
+                    effResolveAndReleaseResource((u32 *)(window->mainResources[id]));
+                    effResolveAndReleaseResource((u32 *)(window->mainResources[id + 8]));
                 }
             }
         }
@@ -2313,18 +2377,18 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
         record = &window->records->slots[i];
         id = record->unk8;
         if (id >= 0) {
-            if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
-                effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
-                effReleaseTextureHandlesAndResetSlots(window->handlesB[id]);
+            if (effHasFirstTextureHandle((s32)(window->mainResources[id])) != 0) {
+                effReleaseTextureHandlesAndResetSlots((u32)(window->mainResources[id]));
+                effReleaseTextureHandlesAndResetSlots((u32)(window->mainResources[id + 8]));
             }
         }
     }
     record = &window->records->slots[selected];
     id = record->unk8;
     if (id >= 0) {
-        if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
-            effResolveAndReleaseResource(window->handlesA[id]);
-            effResolveAndReleaseResource(window->handlesB[id]);
+        if (effHasFirstTextureHandle((s32)(window->mainResources[id])) == 0) {
+            effResolveAndReleaseResource((u32 *)(window->mainResources[id]));
+            effResolveAndReleaseResource((u32 *)(window->mainResources[id + 8]));
         }
     }
 }
@@ -2333,11 +2397,11 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
 INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuSelectPage);
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window) {
-    s32 *resource = window->handlesC;
+    EffectSlotSet **resource = window->handlesC;
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        effResolveAndReleaseResource(*resource++);
+        effResolveAndReleaseResource((u32 *)(*resource++));
     }
     if (window->selected >= 0) {
         mnuResolveUnselectedPageHandles(window);

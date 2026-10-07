@@ -45,7 +45,8 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
-extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
+struct EffWorldNode;
+extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern void effObjSetInnerFloat(s32 object, f32 value);
 
@@ -941,7 +942,7 @@ INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD48);
 
 void mnuCreateTitleCameraWorldEntry(void) {
     mnuTitleCameraObject = dds3CreateCameraObject(dds3AdvanceWorldCounter(), (f32 *)D_003DC1C0, (f32 *)D_003DC1D0);
-    dds3SetWorldEntryCallbackTarget(mnuTitleCameraObject, "title_camera");
+    dds3SetWorldNodeValue(mnuTitleCameraObject, (u32)"title_camera");
     effObjSetInnerFloat(mnuTitleCameraObject, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), mnuTitleCameraObject);
 }
