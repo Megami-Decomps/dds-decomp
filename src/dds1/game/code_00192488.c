@@ -69,7 +69,7 @@ extern void func_00192ED0(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
-extern s32 effMathGetSlotAt(void *slots, s32 index);
+extern void *effMathGetSlotAt(void *slots, s32 index);
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 extern void func_001931E0(void *arg0, s32 arg1, u32 arg2);
 extern void func_001934E8(EffPrim *arg0, f32 *arg1);
