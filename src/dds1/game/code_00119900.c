@@ -192,7 +192,27 @@ s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_00119A00);
+/* Flag-range items have one slot; every quantity range caps at 99. */
+s32 func_00119A00(s32 itemId) {
+    s32 quantity = datGameState->inventory.counts[itemId];
+
+    if (itemId >= 0xA0) {
+        if (quantity >= PTY_ITEM_MAX_QUANTITY) {
+            return 1;
+        }
+    } else if (itemId >= PTY_ITEM_FLAG_FIRST) {
+        if (quantity > 0) {
+            return 1;
+        }
+    } else if (itemId >= 0x60) {
+        if (quantity >= PTY_ITEM_MAX_QUANTITY) {
+            return 1;
+        }
+    } else if (quantity >= PTY_ITEM_MAX_QUANTITY) {
+        return 1;
+    }
+    return 0;
+}
 
 u8 evtGetFlaggedRosterValue(s32 entryAddress) {
     DatPartyRecord *entry = (DatPartyRecord *)entryAddress;
