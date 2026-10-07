@@ -7,6 +7,25 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "dds3obj.h"
+
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void effMiscQuatMultiplyVU(void);
+extern u32 dds3AdvanceWorldCounter(void);
+extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
+extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
+extern EffWorldNode *dds3GetWorldSecondaryObject(void);
+extern void dds3SetWorldPlayerObject(EffWorldNode *world, EffWorldNode *node);
+extern void func_00112058(EffWorldNode *node, s32 kind, s32 resource);
+extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
+extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
+extern void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector);
+extern void sdfSetTextFloatPairOverride(void *param, f32 first, f32 second);
+extern void func_00136718(void);
+extern void func_001526B8(void);
+extern void func_00153FA0(void);
+extern EffWorldNode *D_00435F1C;
+extern MdlCtx *D_00435F20;
 
 extern void func_001542D8(void);
 extern void func_001523F0(void);
@@ -3695,11 +3714,44 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00153D60);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153FA0);
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414020);
+void func_001540E8(void) {
+    f32 position[4] __attribute__((aligned(16))) = {0, 0, 0, 1.0f};
+    f32 rotation[4] __attribute__((aligned(16))) = {0, 0, 0, 1.0f};
+    f32 axis[4] __attribute__((aligned(16))) = {0, 1.0f, 0, 1.0f};
+    f32 scale[4] __attribute__((aligned(16))) = {1.2f, 1.2f, 1.2f, 1.0f};
+    ObjectTransform *inner;
+    EffWorldNode *object;
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414030);
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001540E8);
+    VU0_LOAD_VF(vf10, axis);
+    effMiscAxisAngleToQuaternionVU(3.14159265f);
+    VU0_LOAD_VF(vf11, rotation);
+    effMiscQuatMultiplyVU();
+    /* The SDK store is followed by opaque consumers, with no scalar readback. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+    D_00435F1C = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
+    dds3SetWorldNodeValue(D_00435F1C, (u32)"OIKAKE_UNIT");
+    dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), D_00435F1C);
+    func_00112058(D_00435F1C, 1, 0x103);
+    effObjSetInnerFloat(D_00435F1C, 180.0f);
+    dds3SetObjectFlags(D_00435F1C, 0x400);
+    position[0] = 800.0f;
+    position[1] = 0.0f;
+    position[2] = 800.0f;
+    object = D_00435F1C;
+    inner = object->inner;
+    PCP_COPY_VECTOR_F32(inner->position, position);
+    PCP_COPY_VECTOR_F32(inner->smoothedPosition, position);
+    PCP_COPY_VECTOR_F32(inner->rotation, rotation);
+    effObjSetInnerFirstVec(object, position);
+    effObjSetInnerSecondVec(D_00435F1C, (u128 *)rotation);
+    effObjSetInnerThirdVec(D_00435F1C, (u128 *)scale);
+    D_00435F20 = (MdlCtx *)dds3GetObjectBaseResourceHandle(D_00435F1C);
+    mdlAddEntryFlagged(D_00435F20, 0, 0x11);
+    sdfSetTextFloatPairOverride(D_00435F20->inner, 15.0f, 0.0f);
+    func_00136718();
+    func_001526B8();
+    func_00153FA0();
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001542D8);
 
