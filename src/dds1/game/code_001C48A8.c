@@ -485,7 +485,7 @@ extern void brsTaskAllowUpdate(void);
 
 extern void evtBeginSolarOverlayFadeOut(s32);
 
-extern void func_001A1960();
+extern void func_001A1960(DatPartyRecord *, s32);
 
 extern s32 mnuIsTitleEntryAvailable();
 
@@ -758,7 +758,7 @@ void btlSortSceneGroupByPriorityDesc(BtlTask **group, s32 entryCount) {
             BtlTask *first = pairCursor[0];
             BtlTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                func_001A29D0((s32)&first->unit->statBits, 3) < func_001A29D0((s32)&second->unit->statBits, 3)) {
+                func_001A29D0((s32)&first->unit->partyRecord, 3) < func_001A29D0((s32)&second->unit->partyRecord, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;
