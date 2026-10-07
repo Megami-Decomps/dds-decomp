@@ -140,11 +140,11 @@ s32 sdfStepWrappingFloatCounter(SdfCounter *counter) {
     return result;
 }
 
-void func_00117568(u32 *destination, u32 value) {
+void sdfSetFloatCounterDirection(u32 *destination, u32 value) {
     *destination = value;
 }
 
-u32 func_00117570(u32 *source) {
+u32 sdfGetFloatCounterDirection(u32 *source) {
     return *source;
 }
 
