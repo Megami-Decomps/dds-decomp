@@ -237,7 +237,46 @@ u8 func_002665C8() {
     return unlocked != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002665E8);
+/* Load the terminal's resource bank and configure its active panel layout. */
+void func_002665E8(MenuSlotState *scene) {
+    s32 i;
+
+    scene->reducedMode = func_002665C8(scene);
+    if (scene->reducedMode == 0) {
+        for (i = 0; i < 3; i++) {
+            scene->resourceBank[i] = (s32)effLoadIndexedResource(
+                (s32)D_00424E48, (s32)D_003CE7A8[i], 1);
+            effResolveAndReleaseResource((u32 *)scene->resourceBank[i]);
+        }
+        scene->resourceBank[3] = (s32)effLoadIndexedResource(
+            (s32)D_00424E48,
+            (s32)D_003CE7C0[mnuFirstPresentMainCharacterIndex()], 1);
+        effResolveAndReleaseResource((u32 *)scene->resourceBank[3]);
+        mnuInitScrollingStripState(&scene->panels[0], 0,
+            (void *)scene->resourceBank[0], 0x46, 0x43);
+        func_0026BE28(&scene->panels[0], 1, 0x10, 0x20);
+        mnuInitScrollingStripState(&scene->panels[1], 0,
+            (void *)scene->resourceBank[0], 0x46, 0x43);
+        func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
+        func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
+        func_00266460((u32)scene->resourceBank[2], &scene->campEffect.resources);
+    } else {
+        for (i = 0; i < 2; i++) {
+            scene->resourceBank[i] = (s32)effLoadIndexedResource(
+                (s32)D_00424E48, (s32)D_003CE7B8[i], 1);
+            effResolveAndReleaseResource((u32 *)scene->resourceBank[i]);
+        }
+        mnuInitScrollingStripState(&scene->panels[0], 1,
+            (void *)scene->resourceBank[0], 0x46, 0x43);
+        func_0026BE28(&scene->panels[0], 1, 0x10, 0x20);
+        mnuInitScrollingStripState(&scene->panels[1], 1,
+            (void *)scene->resourceBank[0], 0x46, 0x43);
+        func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
+        func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
+    }
+    scene->alternateBatch = effCreateResourceSlotSet(
+        (u32 *)scene->resourceBank[0], 7, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
 
