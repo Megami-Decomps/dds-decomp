@@ -63,6 +63,7 @@
 0x00106108	kwlnFadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]
 0x00106160	kwlnFadeSetMode	inferred	stores D_00435CFC mode; mode 0 clears the two counters, otherwise sets alpha byte 0x80 [names_reviewed2.tsv]
 0x00106188	kwlnStepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106268, input-family pairing. [names_qp10.tsv]
+0x001063A8	sdfSetViewFieldOfView	inferred	confidence=high; matched-C provider and paired native twin 0x00106488; Stores the shared view field of view in radians for camera projection and screen-plane mapping.
 0x00106460	kwlnDrawSnapshotSolidRect	inferred	confidence=high; func_00106460 saves the current solid rectangle parameters and stages or immediately applies pending parameters.; sources=names_R_Structs54.tsv; twin=0x00106540, input-family pairing. [names_qp10.tsv]
 0x00106658	kwlnDrawSetupE08FromCh75	inferred	readability/matching review (QP16)
 0x00106810	kwlnDrawSetOverlayTransition	inferred	readability/matching review (QP16)

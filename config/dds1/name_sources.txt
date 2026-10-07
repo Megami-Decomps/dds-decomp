@@ -80,6 +80,7 @@
 0x00106160	kwlnFadeBackgroundStartIn	inferred	mirror of func_001060C8 (alpha 0x80, D_003245EC[2] = 2041.0) [names_reviewed2.tsv]
 0x001061E8	kwlnFadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]
 0x00106268	kwlnStepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106188, input-family pairing. [names_qp10.tsv]
+0x00106488	sdfSetViewFieldOfView	inferred	confidence=high; matched-C provider and paired native twin 0x001063A8; Stores the shared view field of view in radians for camera projection and screen-plane mapping.
 0x00106498	kwlnDrawCopyRow128	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
 0x001064B0	kwlnDrawCopyWords20	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
 0x001064E8	dds3DrawSetIndexedWord	inferred	Stores the supplied word at the indexed draw-state table entry.

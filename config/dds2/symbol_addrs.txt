@@ -74,6 +74,7 @@ kwlnFadeBackgroundStartIn = 0x00106080; // type:func
 kwlnFadeIsBackgroundOverlayActive = 0x00106108; // type:func
 kwlnFadeSetMode = 0x00106160; // type:func
 kwlnStepBackgroundFade = 0x00106188; // type:func
+sdfSetViewFieldOfView = 0x001063A8; // type:func
 kwlnDrawSnapshotSolidRect = 0x00106460; // type:func
 kwlnDrawSetupE08FromCh75 = 0x00106658; // type:func
 kwlnDrawSetOverlayTransition = 0x00106810; // type:func
