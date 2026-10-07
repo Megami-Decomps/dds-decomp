@@ -18,11 +18,11 @@ s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
 
 u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
-void dds3ResetObjectValueCursor(void *arg);
+u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
 u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
-s32 dds3AdvanceObjectValueCursor(void *arg);
+u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
 void sdfReleaseChipBlock(void *arg);
 
