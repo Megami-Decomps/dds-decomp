@@ -561,7 +561,7 @@ typedef struct EffPCPBeamNode {
     u32 vertexCount;
     f32 *points;
     u32 *colors;
-    u32 assetHandle;
+    SdfAsset *assetHandle;
     u32 allocationHandle;
 } EffPCPBeamNode;
 
@@ -4427,8 +4427,9 @@ typedef struct EffPCPBeamDrawParams {
 } EffPCPBeamDrawParams;
 
 extern EffPCPBeamDrawParams D_004520B0;
-extern void *sdfCreateAssetWithDrawEntries(void);
-extern void func_003332D0(void *asset, f32 scale);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+struct SdfTextParam;
+extern void func_003332D0(struct SdfTextParam *asset, f32 scale);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
@@ -4445,8 +4446,8 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     node->color = 0x80808080;
     node->allocationHandle = (u32)allocation;
     node->scale = 1.0f;
-    node->assetHandle = (u32)sdfCreateAssetWithDrawEntries();
-    func_003332D0((void *)node->assetHandle, 1.0f);
+    node->assetHandle = sdfCreateAssetWithDrawEntries();
+    func_003332D0((struct SdfTextParam *)node->assetHandle, 1.0f);
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&D_004520B0, 0, sizeof(D_004520B0));
@@ -4455,7 +4456,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
 }
 
 void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
-    sdfQueueAssetRelease(work->assetHandle);
+    sdfQueueAssetRelease((s32)work->assetHandle);
     sdfReleaseResourceAllocation(work->allocationHandle);
     sdfReleaseChipBlock(work);
 }
@@ -4493,7 +4494,7 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     VU0_LOAD_MATRIX_B(scaleMatrix);
     sdfComposeVuMatrixFromRegisters();
     sdfConsAppendVuPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, (void *)node->assetHandle, 0);
+    sdfConsAppendAssetPacket((s32)list, node->assetHandle, 0);
     count = node->vertexCount;
     D_004520B0.colors = node->colors;
     D_004520B0.points = node->points;
