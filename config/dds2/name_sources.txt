@@ -4441,7 +4441,7 @@
 0x002B9CF8	mnuDrawWindowDecorations	inferred	U0
 0x002B9DD8	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
 0x002B9EA0	mnuDrawWindowContainer	inferred	Draws icon rows, selected panel and window frame then advances fade state. [names_reviewed5.tsv]
-0x002BA268	mnuHideIconGroup	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x002BA268	mnuClearEntryFlags	inferred	Clears bit 0 from each present panel slot flags and reinitializes its work; callers use it after advancing or retreating list selection. DDS1 equivalent: mnuClearEntryFlags at 0x0027D740.
 0x002BA378	mnuDrawIconPanelFade	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BA518	mnuDrawIconRow6	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BA660	mnuDrawIconPair	inferred	wrong or missing short module prefix [names_audit.tsv]
