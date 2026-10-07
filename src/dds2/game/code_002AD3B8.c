@@ -43,8 +43,9 @@ extern s32 itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
-extern s32 func_0019D550(s32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(s32);
+typedef struct FrFontGlyph FrFontGlyph;
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
@@ -553,8 +554,8 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
         func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].stat18);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChainFlag(fontHandle, 4);
-        func_0019D550(fontHandle, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot(fontHandle);
+        func_0019D550((FrFontGlyph *)fontHandle, 1, 0x53);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)fontHandle);
     }
 }
 
@@ -826,11 +827,61 @@ s32 func_002AF020(KwlnTask *task) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF2E0);
 
-INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACA0);
+s32 func_002AF5E0(KwlnTask *task) {
+    extern u32 kwlnTaskGetUserValue(KwlnTask *);
+    extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+    extern void func_002BDAA8(s32, s32, s32, s32, s32, s32);
+    extern s32 func_002AF2E0(s32, s32, s32, MenuStaffContext *);
+    extern char D_0042AD08[];
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
+    const u8 *slotsCaption = (const u8 *)D_0042AD08;
+    MenuStaffChoices *menu = context->menu;
+    DatPartyRecord *party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    MenuList *list;
+    s32 selectionId;
+    s32 owned;
+    FrFontGlyph *glyph;
 
-INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
-
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF5E0);
+    mnuDrawCampIconBackdropByKind(1, (s32)task);
+    mnuCreateStaffImageSprite(10);
+    if (menu->windows[3]->list->count != 0) {
+        selectionId = menu->windows[3]->list->cursor->sortKeySecondary;
+    } else {
+        selectionId = 0;
+    }
+    mnuApplyPackedGroupValues(context->panelHandle, selectionId);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, party, context->panelHandle, 1, 0x53);
+    list = menu->windows[3]->list;
+    if (list->cursor->index == 0) {
+        list->stateFlags |= 0x10;
+    } else {
+        list->stateFlags &= ~0x10;
+    }
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, 0x53);
+    if (menu->windows[3]->list->count != 0) {
+        owned = menu->windows[3]->list->cursor->sortKeyPrimary;
+        selectionId = menu->windows[3]->list->cursor->sortKeySecondary;
+        if (owned != 0) {
+            func_002AAC70(1, selectionId, D_00435E70, (s32)context, 1, 1, 0x53);
+        } else {
+            func_002AAC98(1, 0, 0, (s32)context, 1, 0x53);
+        }
+        func_002AF2E0(0, 0, selectionId, context);
+        if (owned != 0 && mdlFlagTest(0x990) != 0) {
+            glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
+            func_0019D550(glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(glyph);
+            func_002BDAA8(0x770, 0xB98, 0x100, selectionId, context->spriteArg0, 0x2C);
+        }
+    } else {
+        func_00306CD0(0x390, 0x570, 0, menu->windows[3]->state, 1,
+                     (struct EffectSlotSet *)context->spriteArg2, 0x11, 0x53);
+        func_002AAC98(1, 0, 0, (s32)context, 1, 0x53);
+        func_002AF2E0(0, 0, 0, context);
+    }
+    func_002AA7A0(1, context->group);
+    return menuSetHandler(context, 1, task);
+}
 
 /* Request value one from the message-window worker before the value-page teardown. */
 s32 mnuExitStaffValuePage(s32 task) {
@@ -1105,6 +1156,12 @@ void mnuClearStaffSceneConfigEntries(MenuPanelGroup *config) {
         func_002C2AA8(config->entries[i], 0);
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACA0);
+
+INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
+
+INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042AD08);
 
 INCLUDE_SDATA(const s32, "game/code_002AD3B8", D_00437BD0);
 
