@@ -524,7 +524,7 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
     void *world;
 
     world = dds3GetWorldObject();
-    dds3FindWorldObjectNodeByKey(world, id, kind);
+    return dds3FindWorldObjectNodeByKey(world, id, kind);
 }
 
 u32 evtGetWorldObjectId(void) {
