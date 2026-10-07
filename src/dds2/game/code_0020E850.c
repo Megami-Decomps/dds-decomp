@@ -135,7 +135,7 @@ extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
-extern s32 func_0035C860();
+extern s32 func_0035C860(char *, const char *, ...);
 extern void itfMesCopyStringToWindowTableSlot(s32, s32, char *);
 extern s32 D_00435E64;
 extern u8 D_003BEB28[];
