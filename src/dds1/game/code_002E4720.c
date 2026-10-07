@@ -221,7 +221,108 @@ extern u32 D_00398660[96];
 /* Cached texture keeps the provider's opaque pointer/address boundary. */
 extern void *D_003BDA34;
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
+/* A DMA tag followed by the console's complete GS setup and glyph GIF tag.
+ * The separately emitted glyph stream follows this 0x60-byte fixed header. */
+typedef struct SdfConsolePacketHeader {
+    u16 quadwordCount;
+    u8 reserved02;
+    u8 tagKind;
+    u32 nextAddress;
+    u32 vifNop;
+    u32 vifDirect;
+    u64 setupTag;
+    u64 setupRegisters;
+    u64 textureClamp;
+    u64 textureClampRegister;
+    u64 textureFilter;
+    u64 textureFilterRegister;
+    u64 textureState;
+    u64 textureStateRegister;
+    u64 glyphTag;
+    u64 glyphRegisters;
+} SdfConsolePacketHeader;
+
+/* One sprite in GIF register-list order; two such records fill five qwords. */
+typedef struct SdfConsoleGlyph {
+    u64 color;
+    u64 firstUv;
+    u64 firstPosition;
+    u64 secondUv;
+    u64 secondPosition;
+} SdfConsoleGlyph;
+
+typedef char SdfConsolePacketHeader_size_must_be_0x60[
+    sizeof(SdfConsolePacketHeader) == 0x60 ? 1 : -1];
+typedef char SdfConsoleGlyph_size_must_be_0x28[
+    sizeof(SdfConsoleGlyph) == 0x28 ? 1 : -1];
+
+void *func_002E4720(SifCommand *input, const char *format, void *arguments) {
+    char text[0x200];
+    s32 formattedCount;
+    u8 *start;
+    u8 *cursor;
+    SdfConsolePacketHeader *header;
+    u8 *textCursor;
+    s32 character;
+    s32 glyphCount;
+    u32 color;
+    u64 position;
+    s32 quadwordCount;
+
+    sdfDevConsInit();
+    formattedCount = func_00305B08(text, format, arguments);
+    start = (u8 *)sdfGetPacketCursor();
+    if (formattedCount == 0) {
+        *(u128 *)start = 0;
+        cursor = start + 0x10;
+    } else {
+        header = (SdfConsolePacketHeader *)start;
+        cursor = start + sizeof(*header);
+        glyphCount = 0;
+        /* This dual-use command carries x, y, depth and RGBA in its four words. */
+        position = (u32)((u16)input->source | ((u32)(u16)input->end << 16)) |
+                   ((u64)(u32)input->argument << 32);
+        color = input->command;
+        textCursor = (u8 *)text;
+        while ((character = *textCursor++) != 0) {
+            if (character >= 0x20) {
+                SdfConsoleGlyph *glyph = (SdfConsoleGlyph *)cursor;
+                u32 uv = D_00398660[character - 0x20];
+
+                glyph->color = color;
+                glyph->firstUv = uv;
+                glyph->firstPosition = position;
+                glyph->secondUv = (u32)(uv + 0x00C000C0);
+                glyph->secondPosition = position + 0x006000C0;
+                cursor += sizeof(*glyph);
+                glyphCount++;
+            }
+            /* Control bytes consume the same horizontal advance as glyphs. */
+            position += 0xC0;
+        }
+        if (glyphCount & 1) {
+            *(u64 *)cursor = 0;
+            cursor += sizeof(u64);
+        }
+        quadwordCount = ((s32)(cursor - start) >> 4) - 1;
+        input->source = (u16)position;
+        header->quadwordCount = quadwordCount;
+        header->vifNop = 0;
+        header->vifDirect = 0x50000000 | quadwordCount;
+        header->setupTag = 0x10AB400000000003ULL;
+        header->setupRegisters = 0xEEE;
+        header->textureClamp = 0;
+        header->textureClampRegister = 8;
+        header->textureFilter = 1;
+        header->textureFilterRegister = 0x14;
+        header->textureState = sdfTexGetPrimaryTextureState((struct SdfTex *)D_003BDA34);
+        header->textureStateRegister = 6;
+        header->glyphTag = 0x5400000000008000ULL | glyphCount;
+        header->glyphRegisters = 0x53531;
+    }
+    sdfSetPacketCursorAligned((s32)cursor);
+    return start;
+}
 
 void *sdfFormatSifPacket(void *packet, const char *format, ...) {
     __builtin_va_list args;
