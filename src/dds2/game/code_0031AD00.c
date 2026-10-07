@@ -4,7 +4,7 @@ extern u32 dds3AdvanceWorldCounter(void);
 extern s32 dds3CreateConfiguredCameraObject(s32 arg0, void *arg1, void *arg2, void *arg3);
 struct EffWorldNode;
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
-extern void dds3SetCameraVector(s32 arg0, void *arg1);
+extern void dds3SetCameraVector(struct EffWorldNode *camera, void *vector);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
 extern s32 dds3GetWorldSecondaryObject(void);
 extern struct EffWorldNode *dds3SetWorldCameraObject(struct EffWorldNode *world, struct EffWorldNode *camera);
@@ -131,7 +131,7 @@ void func_0031B0F8(void) {
     object = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, vector, D_0040ABB0);
     D_00438944 = object;
     dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)D_00438938);
-    dds3SetCameraVector(D_00438944, vector);
+    dds3SetCameraVector((struct EffWorldNode *)D_00438944, vector);
     effObjSetInnerFloat(D_00438944, 2.0f);
     object = dds3GetWorldSecondaryObject();
     dds3SetWorldCameraObject((struct EffWorldNode *)object, (struct EffWorldNode *)D_00438944);
