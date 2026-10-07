@@ -4224,7 +4224,63 @@ void __udivdi3(u32 arg0, u32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B3B28);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B3BE0);
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
+/* Preserve the native forwarded chance word; the empty provider ignores it. */
+extern void func_0011EBE8();
+extern const char D_004156F8[];
+
+s32 func_001B3BE0(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    s32 chance;
+    f32 ratio;
+    u32 i;
+
+    if (state->battleFlags & 0x4000) {
+        if (state->requestMode == 2 || state->requestMode == 4) {
+            if (datBattleSceneRecords[state->battleMode].flags & 2) {
+                return 2;
+            }
+        }
+        return 1;
+    }
+    if (datBattleSceneRecords[state->battleMode].flags & 4) {
+        return 1;
+    }
+    if (state->encounterKind != 3 &&
+        (datBattleSceneRecords[state->battleMode].flags & 2)) {
+        return 2;
+    }
+    if (state->specialEncounterBlocked) {
+        return 2;
+    }
+    ratio = 1.0f;
+    chance = evtRunContext(0x17, 0, 0, 0, 0);
+    if (state->encounterKind == 3) {
+        ratio = datBattleParameters->preemptiveModeScale;
+    }
+    for (i = 0; i < 5; i++) {
+        if (datGameState->party[i].flags & 1) {
+            if (datGameState->party[i].flags & 2) {
+                if (btlCheckSpecialAbility(&datGameState->party[i], 0x24E)) {
+                    ratio *= datAbilityParameters[0x24E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+                }
+            }
+        }
+    }
+    chance = (s32)((f32)chance * ratio);
+    if (state->encounterKind != 3) {
+        if (chance < 60) {
+            chance = 60;
+        } else if (chance > 80) {
+            chance = 80;
+        }
+    }
+    btlBossDebugPrintf(D_004156F8, chance, ratio);
+    func_0011EBE8(chance);
+    return btlRollAiBucket() < chance ? 1 : 2;
+}
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004156F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B3DD8);
 
