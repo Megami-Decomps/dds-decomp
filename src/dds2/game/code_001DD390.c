@@ -437,7 +437,7 @@ extern void func_001FA480(s32, s32, s32);
 
 extern void func_001FBAC0(s32, s32);
 
-extern s32 func_001FB908(s32, s32, s32, s32);
+extern s32 func_001FB908(s32, BtlCamState *, s8, s8);
 
 typedef struct SoundCursor {
     u16 unk_00;
@@ -451,6 +451,9 @@ typedef struct SoundCursor {
     s16 unk_0A;
     s16 unk_0C;
     u16 unk_0E;
+    u8 pad10[4];
+    s8 busy; /* 0x14: nonzero suspends camera endpoint updates. */
+    u8 pad15[0x11B];
 } SoundCursor;
 
 #define CURSOR ((SoundCursor *)D_003BD7D0)
@@ -6983,7 +6986,7 @@ void btlAdvancePlayerCursorAnimation(s32 action, s32 state) {
     if (!(((BtlLinkedCommand *)action)->link->unit->flags & 0x400)) {
         func_001FA480(action, state, D_003BBFA8[CURSOR->unk_0A]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 0);
+        func_001FB908(action, (BtlCamState *)state, 0, 0);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
@@ -7048,7 +7051,7 @@ void func_001F4F10(BtlLinkedCommand *action, s32 state) {
     if (!(action->link->unit->flags & 0x400)) {
         func_001FA480((s32)action, state, D_003BBFC8[CURSOR->unk_0C]);
         func_001FBAC0((s32)action, state);
-        func_001FB908((s32)action, state, 0, 0);
+        func_001FB908((s32)action, (BtlCamState *)state, 0, 0);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 :
             CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
@@ -7061,7 +7064,7 @@ void func_001F4F10(BtlLinkedCommand *action, s32 state) {
         case 0x1C3:
             func_001FA480((s32)action, state, D_003BBFC8[CURSOR->unk_0C]);
             func_001FBAC0((s32)action, state);
-            func_001FB908((s32)action, state, 0, 0);
+            func_001FB908((s32)action, (BtlCamState *)state, 0, 0);
             CURSOR->frame++;
             CURSOR->frame = CURSOR->frame <= 0 ? 0 :
                 CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
@@ -7178,7 +7181,63 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F5868);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001FA480);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001FB908);
+/* vu0 routine: constrain a camera pose endpoint to the enabled height planes. */
+s32 func_001FB908(s32 action, BtlCamState *pose, s8 bypassUpper, s8 bypassLower) {
+    union {
+        u128 q;
+        f32 f[4];
+    } point, plane;
+    f32 distance;
+    f32 adjustedDistance;
+    f32 planeDistance;
+    f32 pointDistance;
+    f32 scale;
+
+    if (CURSOR->busy != 0) {
+        return 0;
+    }
+    VU0_LOAD_VF(vf10, pose->direction);
+    VU0_NEGATE_XYZ(vf10);
+    distance = pose->distance;
+    VU0_SCALAR_OP(distance, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, pose->position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, &point);
+    if (bypassUpper == 0 && -24.0f <= point.f[1]) {
+        VU0_LOAD_VF(vf10, pose->position);
+        VU0_STORE_VF(vf10, &plane);
+        plane.f[1] = -24.0f;
+        VU0_LOAD_VF(vf10, pose->position);
+        VU0_LOAD_VF(vf11, &plane);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(planeDistance);
+        VU0_NORMALIZE_VF10();
+        scale = distance * distance - planeDistance * planeDistance;
+        point.f[1] = pose->position[1];
+        scale = fsqrtf(scale);
+        VU0_LOAD_VF(vf10, &point);
+        VU0_LOAD_VF(vf11, pose->position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(pointDistance);
+        VU0_NORMALIZE_VF10();
+        VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, &plane);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, &point);
+    }
+    if (bypassLower == 0 && point.f[1] < -900.0f) {
+        point.f[1] = -900.0f;
+    }
+    VU0_LOAD_VF(vf10, pose->position);
+    VU0_LOAD_VF(vf11, &point);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(adjustedDistance);
+    pose->distance = adjustedDistance;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, pose->direction);
+    return 1;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001FBAC0);
 
@@ -7250,7 +7309,7 @@ void btlAdvanceCursorForUnmarkedUnit(s32 action, s32 state) {
         if (!(((BtlLinkedCommand *)action)->link->unit->flags & 0x400)) {
             func_001FA480(action, state, D_003BC0A0[CURSOR->unk_0C]);
             func_001FBAC0(action, state);
-            func_001FB908(action, state, 0, 1);
+            func_001FB908(action, (BtlCamState *)state, 0, 1);
             CURSOR->frame++;
             CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
         }
@@ -7269,7 +7328,7 @@ void btlAdvanceCommandCursorOrAction(s32 action, s32 state) {
         }
         func_001FA480(action, state, D_003BC0C0[CURSOR->unk_0C]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 1);
+        func_001FB908(action, (BtlCamState *)state, 0, 1);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
@@ -7319,7 +7378,7 @@ void func_001FFAD8(s32 action, s32 state) {
         }
         func_001FA480(action, state, D_003BC0C8[CURSOR->unk_0C]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 1);
+        func_001FB908(action, (BtlCamState *)state, 0, 1);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
@@ -7346,7 +7405,7 @@ void btlAdvanceTargetCursorAnimation(s32 action, s32 state) {
     if (!(((BtlLinkedCommand *)action)->link->unit->flags & 0x400)) {
         func_001FA480(action, state, D_003BC090[CURSOR->unk_0C]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 1);
+        func_001FB908(action, (BtlCamState *)state, 0, 1);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
@@ -7383,7 +7442,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, void *state) {
     memset(D_003BD7D0, 0, 0x130);
     func_001F5868((s32)action, (s32)state, 2, 3);
     func_001F5320((s32)action, (s32)state, 0, 0);
-    func_001FB908((s32)action, (s32)state, 0, 1);
+    func_001FB908((s32)action, (BtlCamState *)state, 0, 1);
     btlFlagMatchingUnitsDefeatCandidate(0x600);
     unit = action->link->unit;
     if (unit->flags & 0x80000) {
@@ -7416,7 +7475,7 @@ s32 btlInitCursorAndApplyAction(s32 action, s32 state) {
     memset(D_003BD7D0, 0, 0x130);
     func_001F5868(action, state, 2, 6);
     func_001F5320(action, state, 0, 0);
-    result = func_001FB908(action, state, 0, 1);
+    result = func_001FB908(action, (BtlCamState *)state, 0, 1);
     CURSOR->unk_0C = 2;
     return result;
 }
