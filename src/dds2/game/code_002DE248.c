@@ -7197,9 +7197,9 @@ extern void dds3FreePathObject(Dds3PathCurveWork *path);
 
 extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
-void effReleaseTargetSlots(u32 *obj) {
-    EffWorldNode **tails = ((EffCopiedPayload *)obj)->effects;
-    Dds3PathCurveWork **heads = ((EffCopiedPayload *)obj)->targets;
+void effReleaseTargetSlots(EffCopiedPayload *payload) {
+    EffWorldNode **tails = payload->effects;
+    Dds3PathCurveWork **heads = payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
         if (*heads != 0) {
@@ -7211,7 +7211,7 @@ void effReleaseTargetSlots(u32 *obj) {
         }
         tails++;
     }
-    sdfReleaseResourceAllocation(((EffCopiedPayload *)obj)->allocation);
+    sdfReleaseResourceAllocation(payload->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F6D00);
