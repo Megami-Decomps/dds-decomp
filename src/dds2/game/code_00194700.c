@@ -19,7 +19,9 @@ extern s8 D_0043643D;
 #define EFF_SLOT_BYTES 0x38
 #define EFF_SLOT_HEADER_BYTES 0xC
 
-extern u32 sdfTexAcquireResourceTexture(u32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
+
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern u64 sdfReadNamedResource(u64, u32 *, u64);
 
@@ -469,12 +471,12 @@ INCLUDE_ASM(const s32, "game/code_00194700", func_001950F0);
 
 /* Release any retained texture reference, clear its handle, and free the work block. */
 void effFreeWork(EffWork *work) {
-    s32 textureHandle;
+    SdfTex *texture;
 
-    textureHandle = work->textureHandle;
-    if (textureHandle != 0) {
-        sdfTexReleaseReferenceViaHandler(textureHandle);
-        work->textureHandle = 0;
+    texture = work->textureHandle;
+    if (texture != NULL) {
+        sdfTexReleaseReferenceViaHandler(texture);
+        work->textureHandle = NULL;
     }
     sdfReleaseChipBlock(work);
 }
@@ -521,17 +523,17 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
 /* Release the previous texture reference before loading/acquiring its replacement.
    Release the temporary loaded resource afterward; native failure results are unchecked. */
 void effSetWorkTextureResource(EffWork *work, u64 textureResource) {
-    u32 textureHandle;
+    SdfTex *texture;
     u64 loadedResource;
     u32 resourceWords[4];
 
-    if (work->textureHandle != 0) {
+    if (work->textureHandle != NULL) {
         sdfTexReleaseReferenceViaHandler(work->textureHandle);
-        work->textureHandle = 0;
+        work->textureHandle = NULL;
     }
     loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
-    textureHandle = sdfTexAcquireResourceTexture(resourceWords[0]);
-    work->textureHandle = textureHandle;
+    texture = sdfTexAcquireResourceTexture((void *)resourceWords[0]);
+    work->textureHandle = texture;
     sdfReleaseResourceAllocation(loadedResource);
 }
 
