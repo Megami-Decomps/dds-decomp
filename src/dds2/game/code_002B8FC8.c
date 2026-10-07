@@ -2169,7 +2169,77 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BC690);
+void func_002BC690(MenuPageWindow *menu, s32 index, s32 kind) {
+    MenuPageSlot *slot = &menu->slots[index];
+    DatPartyRecord *actor = &datGameState->party[menu->records->slots[index].index];
+    s32 resourceIndex;
+    s32 statusIndex;
+
+    slot->kind = kind;
+    slot->flags = 0;
+    if (slot->icon[0] != 0) {
+        effDestroyResourceSlotSet((u32)slot->icon[0]);
+    }
+    if (slot->icon[1] != 0) {
+        effDestroyResourceSlotSet((u32)slot->icon[1]);
+    }
+    if (slot->icon[2] != 0) {
+        effDestroyResourceSlotSet((u32)slot->icon[2]);
+    }
+    if (kind < 3) {
+        if (kind > 0) {
+            slot->icon[0] = effCreateResourceSlotSet((u32 *)menu->resources, menu->slot, 1);
+            slot->icon[1] = effCreateResourceSlotSet((u32 *)menu->secondaryResource, menu->secondarySlot, 1);
+        } else {
+            slot->icon[0] = effCreateResourceSlotSet((u32 *)menu->resources, menu->slot, 1);
+            slot->icon[1] = 0;
+        }
+    } else {
+        slot->icon[0] = effCreateResourceSlotSet((u32 *)menu->resources, menu->slot, 1);
+        slot->icon[1] = 0;
+    }
+    slot->icon[2] = effCreateResourceSlotSet((u32 *)menu->alternateResource, menu->alternateSlot, 1);
+    if (slot->frame[0] != 0) effDestroyResourceSlotSet((u32)slot->frame[0]);
+    if (slot->frame[1] != 0) effDestroyResourceSlotSet((u32)slot->frame[1]);
+    if (slot->frame[2] != 0) effDestroyResourceSlotSet((u32)slot->frame[2]);
+    if (slot->frame[3] != 0) effDestroyResourceSlotSet((u32)slot->frame[3]);
+    if (slot->frame[6] != 0) effDestroyResourceSlotSet((u32)slot->frame[6]);
+    if (slot->frame[7] != 0) effDestroyResourceSlotSet((u32)slot->frame[7]);
+    if (slot->frame[4] != 0) {
+        effDestroyResourceSlotSet((u32)slot->frame[4]);
+        effDestroyResourceSlotSet((u32)slot->frame[5]);
+    }
+    resourceIndex = menu->records->slots[index].unk8;
+    if (resourceIndex >= 0) {
+        if (effHasFirstTextureHandle((s32)menu->mainResources[resourceIndex]) == 0) {
+            effResolveAndReleaseResource((u32 *)menu->mainResources[resourceIndex]);
+            effResolveAndReleaseResource((u32 *)menu->mainResources[resourceIndex + 8]);
+        }
+        slot->frame[0] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 0, 1);
+        slot->frame[1] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 3, 1);
+        slot->frame[2] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 4, 1);
+        slot->frame[3] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 5, 1);
+        slot->frame[6] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex], 1, 1);
+        slot->frame[4] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex + 8], 0, 1);
+        slot->frame[5] = effCreateResourceSlotSet((u32 *)menu->mainResources[resourceIndex + 8], 1, 1);
+    } else {
+        slot->frame[0] = 0;
+        slot->frame[1] = 0;
+        slot->frame[2] = 0;
+        slot->frame[3] = 0;
+        slot->frame[6] = 0;
+        slot->frame[4] = 0;
+        slot->frame[5] = 0;
+    }
+    statusIndex = mnuGetSelectionFromFlags(actor);
+    if (statusIndex >= 0) {
+        slot->frame[7] = effCreateResourceSlotSet((u32 *)menu->handlesC[statusIndex], 0, 1);
+    } else {
+        slot->frame[7] = 0;
+    }
+}
+
+
 
 void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     u32 i;
