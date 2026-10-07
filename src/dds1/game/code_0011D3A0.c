@@ -1,6 +1,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "field_stage.h"
 #include "eff_blur.h"
 #include "fpu.h"
 #include "fld.h"
@@ -191,7 +192,7 @@ typedef struct FieldPlayerSceneWork {
 } FieldPlayerSceneWork;
 
 extern FieldPlayerSceneWork D_0032F1A0;
-extern s16 D_0032DDB0[];
+extern FieldStageCoordinate D_0032DDB0[];
 extern u8 D_0033F068[];
 extern u8 D_00342868[];
 extern u32 dds3AdvanceWorldCounter(void);
@@ -1055,32 +1056,32 @@ s32 fldGetLocationCoordinateValue(s32 x, s32 y) {
 
 /* Search all 640 stage entries; the miss result is 640 rather than zero. */
 u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
-    s16 *record = D_0032DDB0;
+    FieldStageCoordinate *record = D_0032DDB0;
     s32 index = 0;
     s32 visited = 0;
 
     do {
-        if (record[0] == x && record[1] == y) {
+        if (record->x == x && record->y == y) {
             return index;
         }
         index++;
         visited++;
-        record += 8;
+        record++;
     } while (visited < FIELD_STAGE_INDEX_SCAN_LIMIT);
     return index;
 }
 
 /* This pointer lookup searches only the first 96 stage entries; NULL on miss. */
-s16 * fldFindStageCoordinateRecord(s32 x, s32 y) {
-    s16 *record = D_0032DDB0;
+FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
+    FieldStageCoordinate *record = D_0032DDB0;
     s32 index = 0;
 
     do {
-        if (record[0] == x && record[1] == y) {
+        if (record->x == x && record->y == y) {
             return record;
         }
         index++;
-        record += 8;
+        record++;
     } while (index < FIELD_STAGE_RECORD_SCAN_LIMIT);
     return NULL;
 }

@@ -1,9 +1,10 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "dds3obj.h"
 
 typedef struct ObjectResource {
     u32 owner;      /* 0x00: object passed to the slot constructor */
-    u32 pathHandle;          /* 0x04: constructed curve work released before replacement */
+    Dds3PathCurveWork *pathWork;          /* 0x04: constructed curve work released before replacement */
     u32 value;      /* 0x08 */
     u32 sourceObjectAddress; /* 0x0C: object supplying the replacement curve table */
 } ObjectResource;
@@ -24,7 +25,8 @@ typedef struct ObjectWithResource {
 
 #define DDS3_SLOT_RING_ENTRY_COUNT 10
 
-extern u32 dds3CreatePathCurveWork(u32);
+extern Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *);
+extern void dds3FreePathObject(Dds3PathCurveWork *);
 
 extern ObjectWithResource *dds3AppendWorldObjectNode();
 extern u32 dds3AdvanceWorldCounter(void);
@@ -66,32 +68,32 @@ void dds3SetSlotKey(ObjectWithResource *object, u32 sourceObjectAddress) {
  * source object address. The source is not an integer resource ID. */
 void dds3ReplaceObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
-    u32 pathHandle;
+    Dds3PathCurveWork *pathWork;
 
     resource = object->resource;
-    if (resource->pathHandle != 0) {
-        dds3FreePathObject(resource->pathHandle);
+    if (resource->pathWork != 0) {
+        dds3FreePathObject(resource->pathWork);
     }
-    pathHandle = dds3CreatePathCurveWork(resource->sourceObjectAddress);
-    resource->pathHandle = pathHandle;
+    pathWork = dds3CreatePathCurveWork((EffWorldNode *)resource->sourceObjectAddress);
+    resource->pathWork = pathWork;
 }
 
 /* Release nonzero curve work and clear its handle, retaining the source address. */
 void dds3ReleaseObjectResource(ObjectWithResource *object) {
     ObjectResource *resource;
-    s32 pathHandle;
+    Dds3PathCurveWork *pathWork;
 
     resource = object->resource;
-    pathHandle = resource->pathHandle;
-    if (pathHandle != 0) {
-        dds3FreePathObject(pathHandle);
-        resource->pathHandle = 0;
+    pathWork = resource->pathWork;
+    if (pathWork != 0) {
+        dds3FreePathObject(pathWork);
+        resource->pathWork = 0;
     }
 }
 
 /* Return the currently stored curve-work handle. */
-u32 dds3GetObjectResourceHandle(ObjectWithResource *object) {
-    return object->resource->pathHandle;
+Dds3PathCurveWork *dds3GetObjectResourceHandle(ObjectWithResource *object) {
+    return object->resource->pathWork;
 }
 
 void func_00111740(void) {

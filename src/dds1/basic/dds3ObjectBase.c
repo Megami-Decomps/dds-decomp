@@ -1,10 +1,13 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
 extern void *dds3SpawnSlotRingObj3(void *arg);
 extern void *dds3GetSlot(void *arg0, s32 index);
+struct ObjectWithResource;
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct ObjectWithResource *);
 
 
 s32 dds3SelectSlotForObjectKind(u8 arg);
@@ -343,10 +346,9 @@ void dds3ReleaseSlot1Data(void *object) {
     dds3ReleaseObjectResource(dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT));
 }
 
-/* Legacy name: this void entry calls the curve-work getter but discards its
- * result. It neither returns slot data nor checks that the data slot exists. */
-void dds3GetSlot1Data(void *object) {
-    dds3GetObjectResourceHandle(dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT));
+/* Return the data slot's retained curve work; the data slot must exist. */
+Dds3PathCurveWork *dds3GetSlot1Data(void *object) {
+    return dds3GetObjectResourceHandle(dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT));
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);

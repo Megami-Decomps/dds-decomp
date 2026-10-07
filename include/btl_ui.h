@@ -189,11 +189,12 @@ typedef struct BattleActorPanelEntry {
     u8 pad1EA[2];
     BattleStatPulse hpBarPulse;
     BattleStatPulse mpBarPulse;
-    u8 unk214;
-    u8 unk215;
+    /* Signed frame counters, clamped to 0..12 before stacking three pulses. */
+    s8 unk214;
+    s8 unk215;
     u8 pad216[2];
-    u8 unk218[3][0x14];
-    u8 unk254[3][0x14];
+    BattleStatPulse hpBarPulses[3];
+    BattleStatPulse mpBarPulses[3];
 } BattleActorPanelEntry;
 
 typedef struct BattleActorPanelWork {

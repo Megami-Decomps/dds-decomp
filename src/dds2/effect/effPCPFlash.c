@@ -26,8 +26,8 @@ extern f32 D_003B1270[];
 extern f32 D_003B1280[];
 extern f32 D_003B12A0[];
 extern f32 D_003B1220[];
-extern s32 effGetGroupRecordByIndex(EffRecordPool *pool, s32 index);
-extern s32 effGetRecordGroupElement(EffRecordPool *pool, s32 index);
+extern void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 index);
+extern void *effGetRecordGroupElement(EffRecordPool *pool, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
@@ -567,7 +567,7 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
 
 extern u32 effMiscRand(void *);
 extern u8 D_003AA868[];
-extern EffRecordPool *func_00177760(u32 cellCount);
+extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
 PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     PcpFlashStreakWork *src;
@@ -587,7 +587,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
     record->drawMode = work->unk3C;
     range = work->randomRange;
@@ -868,7 +868,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
     record->drawMode = work->unk44;
     work->resourceHandle = record;
@@ -1152,7 +1152,7 @@ void effFlashAccumulatingParticleSetRenderScale(PcpFlashAccumulatingWork *work, 
     work->renderScale = value;
 }
 
-extern s32 effGetRecordGroupAuxEntry(EffRecordPool *, s32);
+extern void *effGetRecordGroupAuxEntry(EffRecordPool *, s32);
 
 void func_00173718(PcpFlashAccumulatingWork *work, s32 index, u32 param) {
     u32 *colors;
@@ -1179,7 +1179,7 @@ void func_00173718(PcpFlashAccumulatingWork *work, s32 index, u32 param) {
 void func_00173808(PcpFlashAccumulatingWork *work, s32 index)
 {
     PcpFlashAccumulatingParticle *part = &work->parts[index];
-    f32 *quad = effGetRecordGroupElement((u32)work->resourceHandle, index * 2);
+    f32 *quad = effGetRecordGroupElement(work->resourceHandle, index * 2);
     f32 offset[4];
     f32 unit[4];
     f32 middle[4];
@@ -1250,7 +1250,7 @@ void func_00173808(PcpFlashAccumulatingWork *work, s32 index)
     VU0_LOAD_VF(vf11, outer);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    mirror = effGetRecordGroupElement((u32)work->resourceHandle, index * 2 + 1);
+    mirror = effGetRecordGroupElement(work->resourceHandle, index * 2 + 1);
     PCP_COPY_VECTOR(mirror + 8, quad + 8);
     PCP_COPY_VECTOR(mirror + 4, quad + 4);
     PCP_COPY_VECTOR(mirror + 12, quad + 12);
@@ -1372,7 +1372,7 @@ PcpFlashOrbitArcWork *source;
         ring->randomRange = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    record = func_00177760(ring->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(ring->particleCount);
     record->scale = 1.0f;
     record->drawMode = ring->unk54;
     ring->resourceHandle = record;
@@ -1627,7 +1627,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
     record->drawMode = work->unk48;
     range = work->randomRange;
@@ -2338,7 +2338,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = func_00177760(work->particleCount);
+    record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
     record->drawMode = work->unk4C;
     work->resourceHandle = record;

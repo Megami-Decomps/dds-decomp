@@ -1,6 +1,10 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "dds3obj.h"
 #include "evt_world.h"
+
+struct EvtScaledValue;
+extern void func_00117568(u32 *destination, u32 value);
 
 
 extern void dds3SetSlotKey(void *, void *);
@@ -8,9 +12,9 @@ extern void dds3ReplaceObjectResource(void *);
 
 s32 dds3GetWorldSecondaryObject(void);
 extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
-s32 dds3GetSlot1Data(void);
-void sdfFreezeFloatCounter(s32 ctx);
-void sdfUnfreezeFloatCounter(s32 ctx);
+Dds3PathCurveWork *dds3GetSlot1Data(void *object);
+void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
+void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
 extern char D_003AC038[];
 extern void *func_00101218(s32, s32);
 extern void func_003003F0(char *, void *);
@@ -125,33 +129,33 @@ void evtCreateEventScriptProcess(s32 eventId) {
 
 INCLUDE_ASM(const s32, "event/evtStage", func_00220178);
 
-void evtSetWorldSlotStatusFlag(void)
+void evtSetWorldSlotStatusFlag(void *object)
 {
-    s32 slotData;
+    Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data();
+    slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
-        sdfFreezeFloatCounter(slotData);
+        sdfFreezeFloatCounter((struct EvtScaledValue *)slotData);
     }
 }
 
-void evtClearWorldSlotStatusFlag(void)
+void evtClearWorldSlotStatusFlag(void *object)
 {
-    s32 slotData;
+    Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data();
+    slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
-        sdfUnfreezeFloatCounter(slotData);
+        sdfUnfreezeFloatCounter((struct EvtScaledValue *)slotData);
     }
 }
 
-extern void evtScaleValueByMultiplier(s32 slotData, f32 multiplier);
+extern void evtScaleValueByMultiplier(f32 multiplier, struct EvtScaledValue *slotData);
 
-/* The unit remains an ABI argument; scaling resolves the active slot itself. */
-void evtScaleSlotByClampedMultiplier(void *unused, f32 multiplier) {
-    s32 slotData;
+/* Scale the object's retained path time within the clamped multiplier range. */
+void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
+    Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data();
+    slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
         if (multiplier < 0.0f) {
             multiplier = 0.0f;
@@ -159,16 +163,16 @@ void evtScaleSlotByClampedMultiplier(void *unused, f32 multiplier) {
         if (multiplier > 1.0f) {
             multiplier = 1.0f;
         }
-        evtScaleValueByMultiplier(slotData, multiplier);
+        evtScaleValueByMultiplier(multiplier, (struct EvtScaledValue *)slotData);
     }
 }
 
-void evtSetWorldSlotValue(s32 unused, void *data) {
-    s32 slotData;
+void evtSetWorldSlotValue(void *object, u32 value) {
+    Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data();
+    slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
-        func_00117568(slotData, data);
+        func_00117568((u32 *)&slotData->state, value);
     }
 }
 

@@ -1,17 +1,20 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "pcp_vu0.h"
 
 extern void *dds3GetSlot(void *obj, s32 index);
-extern void *dds3GetObjectResourceHandle(void *slot);
-extern s32 func_001177D8(void *handle);
-extern f32 evtGetValueScaleFactor(void *handle);
+struct ObjectWithResource;
+struct EvtScaledValue;
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct ObjectWithResource *slot);
+extern u32 func_001177D8(u32 *handle);
+extern f32 evtGetValueScaleFactor(struct EvtScaledValue *handle);
 
 s32 evtCheckWorldObjectResourceScale(void *obj) {
     f32 target = 1.0f;
     void *slot;
-    void *handle;
+    Dds3PathCurveWork *handle;
     s32 kind;
 
     if (obj == NULL) {
@@ -25,33 +28,33 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
     if (handle == NULL) {
         return -1;
     }
-    kind = func_001177D8(handle);
+    kind = func_001177D8((u32 *)&handle->state);
     if (kind != 0) {
         if (kind != 1) {
             return -1;
         }
         target = 0.0f;
     }
-    if (evtGetValueScaleFactor(handle) == target) {
+    if (evtGetValueScaleFactor((struct EvtScaledValue *)handle) == target) {
         return 0;
     }
     return 1;
 }
 
-extern void *dds3GetSlot1Data(void *obj);
-extern void sdfEnableFloatCounterWrap(void *data);
-extern void sdfDisableFloatCounterWrap(void *data);
+extern Dds3PathCurveWork *dds3GetSlot1Data(void *obj);
+extern void sdfEnableFloatCounterWrap(struct EvtScaledValue *data);
+extern void sdfDisableFloatCounterWrap(struct EvtScaledValue *data);
 
 void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
-    void *data = dds3GetSlot1Data(obj);
+    Dds3PathCurveWork *data = dds3GetSlot1Data(obj);
 
     if (data == NULL) {
         return;
     }
     if (flag != 0) {
-        sdfEnableFloatCounterWrap(data);
+        sdfEnableFloatCounterWrap((struct EvtScaledValue *)data);
     } else {
-        sdfDisableFloatCounterWrap(data);
+        sdfDisableFloatCounterWrap((struct EvtScaledValue *)data);
     }
 }
 

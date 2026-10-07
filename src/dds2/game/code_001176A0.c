@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "eff_transform.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
@@ -104,33 +105,19 @@ extern u32 sdfRollActionHit(s32 channel, s32 arg1, SdfPackedValue *item);
 
 extern void scrDestroyWorkTask(void);
 
-typedef struct SdfCurveTable {
-    u8 pad00[4];
-    f32 *values;          /* 0x04 */
-} SdfCurveTable;
-
-typedef struct SdfCurveUser {
-    u8 pad00[4];
-    u32 flags;            /* 0x04: bit 2 = curve active */
-    u8 pad08[4];
-    f32 time;             /* 0x0C */
-    u8 pad10[0xC];
-    SdfCurveTable *curve; /* 0x1C */
-} SdfCurveUser;
-
-extern void func_00116DE8(s32 *index, f32 *fraction, void *table, f32 time);
+extern void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *table, f32 time);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 sdfSampleActiveLinearCurve(SdfCurveUser *user) {
-    s32 index;
+f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
+    u32 index;
     f32 fraction;
-    SdfCurveTable *curve;
+    Dds3PathKeyframes *curve;
     f32 *values;
 
     if (user->flags & 4) {
-        curve = user->curve;
-        func_00116DE8(&index, &fraction, curve, user->time);
-        values = curve->values;
+        curve = user->scalarKeys;
+        dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->time);
+        values = curve->data;
         return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
     }
     return 0.0f;

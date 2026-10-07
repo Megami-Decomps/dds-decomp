@@ -37,7 +37,7 @@ class ConfigureTests(unittest.TestCase):
             writer.build.call_args,
             (("build.ninja", "configure"), {
                 "implicit": ["config/dds1/main.yaml"],
-                "variables": {"args": "dds1 --no-split"},
+                "variables": {"args": "dds1"},
             }),
         )
 
@@ -69,6 +69,22 @@ class ConfigureTests(unittest.TestCase):
                 # pass follows the real cache gate and does not split again.
                 configure.run_splat("dds1", yaml, force=False)
                 self.assertEqual(run.call_count, forced_run_count)
+
+                # A later symbol rename must refresh generated references even
+                # when the previous explicit invocation skipped splitting.
+                (config / "symbol_addrs.txt").write_text("renamed_symbol = 0x1;\n")
+                configure.run_splat("dds1", yaml, force=False)
+                self.assertGreater(run.call_count, forced_run_count)
+
+    def test_no_split_does_not_disable_future_symbol_regeneration(self) -> None:
+        writer = Mock()
+        configure.write_configure_build(
+            writer, [], ["dds1", "dds2", "--no-split"]
+        )
+        self.assertEqual(
+            writer.build.call_args.kwargs["variables"]["args"],
+            "dds1 dds2",
+        )
 
     def test_timestamp_restore_only_reverts_unchanged_existing_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
