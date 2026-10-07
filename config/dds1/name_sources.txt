@@ -440,6 +440,7 @@
 0x001116B8	dds3ReplaceObjectResource	inferred	Byte-identical dds2 twin 0x001118E0; Releases any existing object resource and acquires a replacement by the stored resource ID. [names_conflicts.tsv]
 0x001116F8	dds3ReleaseObjectResource	inferred	Byte-identical dds2 twin 0x00111920; Releases the nested resource handle and clears its slot. [names_conflicts.tsv]
 0x00111730	dds3GetObjectResourceHandle	inferred	Byte-identical dds2 twin 0x00111958; Returns the resource handle from nested object data. [names_conflicts.tsv]
+0x00111740	dds3InvokeMoverUpdate	inferred	Forwards the native a0 EffWorldNode through dds3UpdateMoverTransform and discards its return value; DDS2 twin 0x00111968.
 0x00111758	dds3SelectSlotForObjectKind	inferred	readability/matching review (QP16)
 0x001117A8	dds3CreateSlotResourceState	inferred	confidence=high; src/dds1/game/code_00111610.c:142:func_001117A8; Allocates/clears slot resource state, attaches world index node, and initializes slot indices to empty.; sources=names_M143.tsv; twin=0x001119D0, input-family pairing. [names_qp10.tsv]
 0x00111840	dds3DestroyObjectBase	inferred	confidence=high; src/dds1/basic/dds3ObjectBase.c:func_00111840; Removes owned world nodes, releases development and world-index resources, then frees the object-base block. [names_qp9.tsv]
@@ -561,6 +562,8 @@
 0x001170D8	dds3InterpolatePathOutput	inferred	confidence=high; src/dds1/basic/dds3PathBasic.c:func_001170D8; Locates the path segment/fraction for the current time and linearly interpolates three vector groups; clears the output when the path flag is disabled. [names_qp9.tsv]
 0x00117438	sdfSampleActiveLinearCurve	inferred	src/dds1/game/code_00117438.c func_00117438: Samples adjacent curve values using located time fraction; returns zero when inactive. [names_reviewed24.tsv]
 0x001174C0	sdfStepWrappingFloatCounter	inferred	src/dds1/game/code_00117438.c func_001174C0: Steps up or down by one, supports freeze and wrapping flags and reports nonwrapping exhaustion. [names_reviewed24.tsv]
+0x00117568	sdfSetFloatCounterDirection	inferred	Writes the first direction word shared by path work and the wrapping float counter; zero counts up, one counts down, and other values leave the value unchanged; paired twin 0x001177D0.
+0x00117570	sdfGetFloatCounterDirection	inferred	Reads the first direction word shared by path work and the wrapping float counter; zero counts up, one counts down, and other values leave the value unchanged; paired twin 0x001177D8.
 0x00117578	evtScaleValueByMultiplier	inferred	Stores the scaled float as a supplied multiplier times the object's base float.
 0x00117588	evtGetValueScaleFactor	inferred	Returns the scaled float divided by its base float.
 0x001175A8	sdfFreezeFloatCounter	inferred	src/dds1/game/code_00117438.c func_001175A8: Sets flag eight used by float-counter step routine to suppress stepping. [names_reviewed24.tsv]

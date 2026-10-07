@@ -53,7 +53,8 @@ typedef struct {
     u32 sprite;
     s32 state;
     s32 frame;
-    u8 pad10[8];
+    s32 movieFrame; /* 0x10: staff movie fade-out frame count. */
+    s32 fadeFrame; /* 0x14: staff movie decoder-ready hold count. */
     SlideBar slideBar; /* 0x18 */
     u32 backdropState[0x1B]; /* 0x20: opaque renderer state */
     MnuTitlePaletteTransition paletteTransition; /* 0x8C */
@@ -362,7 +363,7 @@ u32 mnuIsTitleMovieDrawActive(void) {
     return state;
 }
 
-extern void sdfSetGridScaledDrawBounds(u32, u32, u32, u32, u32);
+extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5F80);
 
@@ -1372,4 +1373,3 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A348);
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A380);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A3B0);
-

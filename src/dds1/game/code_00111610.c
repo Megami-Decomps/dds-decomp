@@ -33,6 +33,7 @@ extern u32 dds3AdvanceWorldCounter(void);
 extern SlotEntry dds3SlotRingEntries[];
 extern s32 dds3SlotRingCursor;
 
+extern s32 dds3UpdateMoverTransform(EffWorldNode *object);
 
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
@@ -96,8 +97,8 @@ Dds3PathCurveWork *dds3GetObjectResourceHandle(ObjectWithResource *object) {
     return object->resource->pathWork;
 }
 
-void func_00111740(void) {
-    dds3UpdateMoverTransform();
+void dds3InvokeMoverUpdate(EffWorldNode *object) {
+    dds3UpdateMoverTransform(object);
 }
 
 /* Number of slots a given object kind occupies in the slot ring. */
