@@ -335,7 +335,7 @@ void evtResetUnitVectorSlots(void) {
 
     for (i = 0; i < 7; i++) {
         mnuInitializeCampPanelVisualDefaults(&D_003D7BD8[i].vec[0], &D_003D7BD8[i].vec[4], &D_003D7BD8[i].vec[8], &D_003D7BD8[i].vec[12], &D_003D7BD8[i].vec[13]);
-        D_003D7BD8[i].state = 0;
+        D_003D7BD8[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
         D_003D7BD8[i].id = 0;
     }
 }
@@ -355,7 +355,7 @@ void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpo
         D_003D7BD8[slotIndex].vec[9] = color[1];
         D_003D7BD8[slotIndex].vec[10] = color[2];
         D_003D7BD8[slotIndex].vec[11] = 1.0f;
-        if (slotState == 3) {
+        if (slotState == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND) {
             D_003D7BD8[slotIndex].id = unitId;
         } else {
             D_003D7BD8[slotIndex].id = 0;
@@ -371,14 +371,14 @@ s32 func_00223718(s32 id, f32 *out) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 3 && D_003D7BD8[i].id == id) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == id) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 7; i++) {
-            if (D_003D7BD8[i].state == 2) {
+            if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -402,14 +402,14 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 3 && D_003D7BD8[i].id == (s32)unit) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == (s32)unit) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 7; i++) {
-            if (D_003D7BD8[i].state == 2) {
+            if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -444,14 +444,14 @@ s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 3 && D_003D7BD8[i].id == id) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == id) {
             *outX = D_003D7BD8[i].vec[12];
             *outY = D_003D7BD8[i].vec[13];
             return 1;
         }
     }
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 2) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
             *outX = D_003D7BD8[i].vec[12];
             *outY = D_003D7BD8[i].vec[13];
             return 1;
