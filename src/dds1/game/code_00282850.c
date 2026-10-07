@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 #include "sdf.h"
+#include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mnu_shop.h"
@@ -2390,7 +2391,6 @@ extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
-extern s32 sdfCreateFormattedSifCommand();
 extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
@@ -2400,10 +2400,10 @@ void *evtBattleStageTestScreen(void) {
 
     sdfInitPacketList(packetList);
     kwlnDrawSpriteCell(packetList, 0x84, 0x46, 0x14, 9);
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
-    sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
     if (D_00324510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_003BC7D0, D_003BC7D4);
