@@ -178,7 +178,7 @@ void dds3LoadObjectMatrixPointerIntoVu(EffWorldNode *camera) {
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */
-void dds3SetCameraVector(EffWorldNode *camera, void *worldEye) {
+void dds3SetCameraVector(EffWorldNode *camera, u128 *worldEye) {
     PCP_COPY_VECTOR(&((CameraData *)camera->data)->worldEye, worldEye);
 }
 
