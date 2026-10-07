@@ -5659,12 +5659,12 @@ void btlReleaseMessageWindowTask(KwlnTask *task) {
     btlSetTrackedTaskHandle(9, 0);
 }
 
-u32 func_001BB8D0(UiObject *object, s32 current, s32 total, s8 mode) {
+u32 func_001BB8D0(BtlUnit *object, s32 current, s32 total, s8 mode) {
     u32 color;
 
     if (mode == 1 && (object->flags & 0x20) != 0) {
         color = 0x4F4E3E40;
-    } else if ((object->statusFlags & 0x4800) != 0) {
+    } else if ((object->conditionFlags & 0x4800) != 0) {
         color = 0x4F4E3E40;
     } else if (current * 2 >= total) {
         color = 0xA09DC380;
