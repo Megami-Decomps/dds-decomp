@@ -4126,7 +4126,45 @@ void effPcpScaledEffectRelease(EffPCPGrowWork *work) {
 
 extern void effThunderScaleVectorDimensions(f32 factor, struct EffThunderVectorWork *work);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180080);
+/* Preserve the resource query before applying its growth and fade timeline. */
+void func_00180080(EffPCPGrowWork *work) {
+    s32 frame;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 base;
+    f32 extent;
+    f32 scale;
+    f32 opacity;
+    u32 color;
+
+    func_00163540((u32)work->handle);
+    frame = work->frame;
+    duration = work->duration;
+    if (duration < frame) {
+        return;
+    }
+    base = (f32)work->base;
+    extent = (f32)work->target;
+    extent -= base;
+    extent = base + extent * ((f32)frame / (f32)duration);
+    scale = extent / base;
+    fadeIn = work->fadeIn;
+    fadeOut = work->fadeOut;
+    if (frame < fadeIn && fadeIn != 0) {
+        opacity = (f32)frame / (f32)fadeIn;
+    } else if ((s32)((u32)duration - (u32)frame) <= fadeOut && fadeOut != 0) {
+        opacity = (f32)(s32)((u32)duration - (u32)frame) / (f32)fadeOut;
+    } else {
+        opacity = 1.0f;
+    }
+    color = work->color;
+    effThunderSetVectorTint(work->handle, effBlendColor(color & 0xFFFFFF, color, opacity));
+    func_00163508(work->handle, work->position);
+    effThunderScaleVectorDimensions(work->scale * scale, work->handle);
+    effThunderUpdateVectorCells(work->handle);
+    work->frame = (s32)((u32)work->frame + 1);
+}
 
 void effPcpCopyScaledThunderVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
