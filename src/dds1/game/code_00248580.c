@@ -392,7 +392,46 @@ s32 mnuSlotKindsInSameGroup(s32 index, s32 requestedKind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", mnuBuildEligibleSlotList);
+extern MenuSlotKind D_0032EFE0[];
+
+extern void func_00248E68(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+
+/* Build eligible slot labels for this terminal mode. */
+void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
+    struct MenuList *list;
+    s32 requestedKind;
+    s32 i;
+
+    list = mnuCreateListState(0, 4, 0x15);
+    list->scale = 0;
+    list->drawCallback = func_00248E68;
+    list->context = host;
+    host->owner = (MenuProgressOwner *)list;
+    if (host->mode == 0) {
+        requestedKind = D_0032EF18[host->initState].kind;
+    } else {
+        requestedKind = D_0032EFE0[host->initState].kind;
+    }
+    for (i = 0; i < 50; i++) {
+        if (host->mode == 0 && host->initState == i) {
+            continue;
+        }
+        if (mdlFlagTest(D_0032EF18[i].unk2) == 0 &&
+            D_0032EF18[i].unk2 != 0) {
+            continue;
+        }
+        if (mnuSlotKindsInSameGroup(i, requestedKind) == 0) {
+            continue;
+        }
+        if (strlen((char *)D_00347C68[i].encodedText) != 0) {
+            struct MenuListNode *node =
+                mnuListAppendNode((struct MenuList *)host->owner, D_003BC3F8);
+
+            node->terminal.entryId = i;
+            node->title = (char *)D_00347C68[i].encodedText;
+        }
+    }
+}
 
 /* Return whether model flag 0x902 is clear; its storyline meaning is not asserted. */
 u8 func_00249198(void) {
@@ -1039,26 +1078,17 @@ s32 func_0024A1D8(s32 action, s32 context) {
     return 0;
 }
 
-typedef struct {
-    u8 pad00[6];
-    u16 hp;          /* 0x06 */
-    u16 maxHp;       /* 0x08 */
-    u16 mp;          /* 0x0A */
-    u16 maxMp;       /* 0x0C */
-    u16 statusFlags; /* 0x0E */
-} SceneOptionRecord;
-
 /* Restore current HP/MP to their stored maxima and clear exactly the charged status bits.
  * No boosted-max calculation or range validation is performed here. */
-void fldSaveSceneOptionsAndClearFlags(SceneOptionRecord *option) {
-    u16 statusFlags = option->statusFlags;
+void fldSaveSceneOptionsAndClearFlags(DatPartyRecord *option) {
+    u16 statusFlags = option->status;
     u16 maxHp = option->maxHp;
     u16 maxMp = option->maxMp;
     u16 retainedStatus = statusFlags & MNU_RECOVERY_STATUS_KEEP_MASK;
 
     option->hp = maxHp;
     option->mp = maxMp;
-    option->statusFlags = retainedStatus;
+    option->status = retainedStatus;
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024A2D8);
@@ -1928,7 +1958,55 @@ u32 evtBEnterStateA(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024BDB8);
+/* Process recovery input only while popup dispatch is idle. A successful
+ * purchase restores the selected party member, releases its panel and charges
+ * the stored cost; unavailable entries replace confirmation with error sound. */
+s32 func_0024BDB8(KwlnTask *request) {
+    MenuTerminalWork *host = (MenuTerminalWork *)kwlnTaskGetUserValue(request);
+    u32 buttons = mnuMapPadMaskToFlags(0x33);
+    s32 *dispatch = &host->popupState;
+    s32 result = func_00285670(&host->transitionWork, dispatch, 0, request);
+    struct MenuListNode *node;
+    MenuThresholdEntry *entry;
+
+    if (result != 0) {
+        return result;
+    }
+    if (*dispatch == 0) {
+        if (buttons & 1) {
+            node = ((struct MenuList *)host->list)->cursor;
+            if (!(node->flags48 & 1)) {
+                entry = &node->terminal;
+                buttons = 0;
+                fldSaveSceneOptionsAndClearFlags(&datGameState->party[entry->entryId]);
+                sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+                mnuReleaseSelectedProgressPanel(host);
+                datAddCurrencyClamped(-entry->requiredAmount);
+                mnuRefreshThresholdNodeFlags(host->list);
+                if (((struct MenuList *)host->list)->count == 0) {
+                    mnuSetPopupEntryFlagged(dispatch, D_0036ACF8);
+                }
+            } else {
+                buttons = 0x8000;
+            }
+        }
+        if (buttons & 2) {
+            mnuSetPopupEntryFlagged(dispatch, D_0036ACF8);
+        }
+        if (!(buttons & 0x300000)) {
+            mnuClearListFlagsOneAndTwo(&((struct MenuList *)host->list)->stateFlags);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatListCursorDefault((struct MenuList *)host->list);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceListCursorDefault((struct MenuList *)host->list);
+        }
+        mnuPlayInputSound(0, buttons, &((struct MenuList *)host->list)->stateFlags);
+    }
+    return 0;
+}
+
 
 void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     SceneFrameOwner *scene = (SceneFrameOwner *)context;
