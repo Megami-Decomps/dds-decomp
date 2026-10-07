@@ -54,7 +54,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
 extern void ptyAdjustItemQuantity();
 extern void mnuRefreshStaffWindowDescription();
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 extern char D_003E74F8[];
 extern char D_003E7514[];
 extern char D_003E7530[];
@@ -79,6 +79,10 @@ extern void mnuCreateStaffBulletItemWindow(MenuStaffContext *);
 extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
 extern s32 mdlFlagTest();
+extern void mnuDrawCampIconBackdropByKind(s32, s32);
+extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, DatPartyRecord *, MenuPanelGroup *, s32, s32);
+extern void func_002AAC70(u32, u32, u32, u32, u32, u32, u32);
+extern s32 D_00435E70;
 extern void func_002BB9C8(MenuSprites *, u32);
 extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetWindowResource(s32, u32 *, s32, s32, s32, s32, s32);
@@ -101,7 +105,7 @@ s32 mnuStaffImageEnterA(s32 task) {
         mnuRefreshStaffWindowDescription(context, 0);
     } else {
         if (menu->secondListState == 0) {
-            func_00306CD0(0x390, 0x570, 0, object->state, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+            func_00306CD0(0x390, 0x570, 0, object->state, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
@@ -341,7 +345,7 @@ s32 mnuStaffImageEnterD(s32 task) {
     if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, object->state, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+        func_00306CD0(0x390, 0x570, 0, object->state, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(2, ((MenuStaffContext *)context)->group);
@@ -514,7 +518,43 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE888);
+/* Draw the selected party member's value page and advance its dispatch. */
+s32 func_002AE888(s32 task) {
+    s32 context = kwlnTaskGetUserValue();
+    MenuStaffChoices *menu = ((MenuStaffContext *)context)->menu;
+    s32 index = ((MenuStaffContext *)context)->selection->cursor->index;
+    DatPartyRecord *partyEntry = &datGameState->party[index];
+    MenuWindowContainer *window;
+    MenuList *list;
+
+    mnuDrawCampIconBackdropByKind(1, task);
+    mnuCreateStaffImageSprite(8);
+    mnuApplyPackedGroupValues(((MenuStaffContext *)context)->panelHandle, partyEntry->itemId);
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, partyEntry,
+                               ((MenuStaffContext *)context)->panelHandle, 0, 0x53);
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0,
+                                     (s32)((MenuStaffContext *)context)->tail, 0x53);
+    window = menu->windows[2];
+    list = window->list;
+    if (list->count != 0) {
+        MenuListNode *node = list->cursor;
+        s32 selectedLabel = node->sortKeySecondary;
+
+        if (node->sortKeyPrimary != 0) {
+            func_002AAC70(1, selectedLabel, D_00435E70, context, 1, 1, 0x53);
+        } else {
+            func_002AAC98(1, 0, 0, context, 1, 0x53);
+        }
+        mnuDrawStaffCaption(selectedLabel, (u8 *)context);
+    } else {
+        func_00306CD0(0x390, 0x570, 0, window->state, 1,
+                     (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+        func_002AAC98(1, 0, 0, context, 1, 0x53);
+        mnuDrawStaffCaption(0, (u8 *)context);
+    }
+    func_002AA7A0(1, ((MenuStaffContext *)context)->group);
+    return menuSetHandler((void *)context, 1, (void *)task);
+}
 
 /* Request value one from the message-window worker before the teardown phase. */
 s32 func_002AEA58(s32 task) {
