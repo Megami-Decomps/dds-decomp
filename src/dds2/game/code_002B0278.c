@@ -2290,7 +2290,58 @@ void mnuDrawSelectionLabel(u16 id) {
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)label);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6898);
+extern MenuPoint D_00437C08[];
+extern MenuPoint D_00437C10[];
+extern MenuPoint D_00437C18[];
+extern const char *D_003E77C8[16];
+extern u8 (*D_00435E68)[33];
+extern s32 ptyGetAffinityKind(s32, s32);
+extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
+
+/* Draw each of the command's three partner requirements. */
+void func_002B6898(u16 affinity, s32 resource, s32 labels) {
+    MenuPoint position = D_00437C08[0];
+    MenuPoint textOffset = D_00437C10[0];
+    MenuPoint iconOffset = D_00437C18[0];
+    s32 x = position.x;
+    s32 y = position.y;
+    s32 i;
+
+    for (i = 0; i < 3; i++, y += 0xC0) {
+        s32 kind = ptyGetAffinityKind(affinity, i);
+        FrFontGlyph *glyph = 0;
+
+        if (kind < 0) {
+            if (kind == -1) {
+                s32 requirement = ptyGetAffinityFlagsWithoutOverride(affinity, i);
+                if (requirement > 0) {
+                    s32 range = mnuLookupRangeEntry((u16)requirement);
+                    itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
+                                               0, 1, labels, range + 1, 0x53);
+                    glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
+                                                       0, 0xA09DC380,
+                                                       (const char *)D_00435E64[requirement], 0);
+                }
+            } else {
+                s32 requirement = ptyGetAffinityFlagsWithoutOverride(affinity, i);
+                glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
+                                                   0, 0xA09DC380,
+                                                   (const char *)D_00435E68[requirement], 0);
+                itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
+                                           0, 1, resource, 0xA, 0x53);
+            }
+        } else {
+            glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
+                                               0, 0xA09DC380, D_003E77C8[kind], 0);
+            itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
+                                       0, 1, resource, 0xA, 0x53);
+        }
+        if (glyph != 0) {
+            func_0019D550(glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(glyph);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6B00);
 
