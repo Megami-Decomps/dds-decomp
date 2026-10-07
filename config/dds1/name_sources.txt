@@ -6120,7 +6120,7 @@
 0x002D4490	sdfFlushPoolNodes	inferred	chains packet lists of pool nodes and terminates the tail [names_M37_SmallSweep6.tsv]
 0x002D4540	sdfClearLinkedPacketList	inferred	Clears all four linked-packet list header fields. [names_reviewed8.tsv]
 0x002D4558	sdfAppendLinkedPacketNode	inferred	Appends a node to the list's first/last pointer chain and clears its next word.
-0x002D4578	sdfClearPacketListHead	inferred	Clears packet list head and first-node pointer. [names_reviewed8.tsv]
+0x002D4578	sdfClearPacketChain	inferred	Clears the linked-packet chain head and tail pointers.
 0x002D4588	sdfAppendPacketChainNode	inferred	Links a node after the stored tail or installs it as head. [names_reviewed8.tsv]
 0x002D45B0	sdfInitializeDmaReferenceTag	inferred	Initializes packet DMA tag with source address and GIF marker. [names_reviewed8.tsv]
 0x002D45F0	sdfBuildDmaReferenceChain	inferred	Builds chained DMA reference and terminal tag words. [names_reviewed8.tsv]
@@ -6162,6 +6162,7 @@
 0x002D5B18	sdfInitializeExtendedDrawPacket	inferred	Initializes extended draw packet DMA header and writes its payload. [names_reviewed8.tsv]
 0x002D5B70	sdfCreateExtendedPacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D5C90	sdfPatchPacketResourceReference	inferred	Patches low packet reference bits from indexed resource table entry. [names_reviewed8.tsv]
+0x002D5CD0	sdfCreateGraphBufferCopyPacket	inferred	Builds a local-to-local GS copy packet from graph buffer zero into the destination, publishing its linked metadata node and DMA payload.
 0x002D5EB0	sdfAppendTexturedLinePacket	inferred	Allocates and appends packet containing UV and XYZ for two vertices. [names_reviewed8.tsv]
 0x002D5FD8	sdfBuildTriPacket104	inferred	Byte-identical dds2 twin 0x0032EE88; GIF packet with 0x104 flag and three vertex pairs [names_conflicts.tsv]
 0x002D6080	sdfQueueFlatTriangle	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1101:func_002D6080; Allocates a DMA/VIF packet containing three same-color XY vertices and appends it to the list.; source=revalidated-unapplied-names_R_Names31.tsv:34 [names_qp12_apply.tsv]

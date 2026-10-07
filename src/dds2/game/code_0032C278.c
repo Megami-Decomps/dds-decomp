@@ -831,7 +831,7 @@ void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node) {
     *node = 0;
 }
 
-void sdfClearPacketListHead(SdfPacketChain *chain) {
+void sdfClearPacketChain(SdfPacketChain *chain) {
     chain->head = NULL;
     chain->tail = NULL;
 }
@@ -1360,7 +1360,7 @@ void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
 extern SdfGraphObj D_0040B290;
 
 /* Build a local-to-local GS copy from graph buffer zero into destination. */
-void func_0032EB80(SdfListHead *drawList, SdfLinkedPacketList *linkedList,
+void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *linkedList,
                    SdfTexHead *destination, s32 destinationX, s32 destinationY,
                    s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
                    s32 resourceIndexXor, s32 (*allocPacket)(s32)) {
