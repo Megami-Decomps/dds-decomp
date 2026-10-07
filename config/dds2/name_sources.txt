@@ -5337,6 +5337,7 @@
 0x00309200	itfActivateGridTextWidget	inferred	Enables the activation flag on an existing text widget. [names_reviewed8.tsv]
 0x00309480	itfExpandWidgetColumnWidth	inferred	DDS1 has the same unprefixed symbol; game/code_00306F80 uses itf for the already-described expandWidgetColumnWidth behavior.
 0x003094C8	itfGetGridListLinkFlags	inferred	Reports head presence and whether the list spans its requested count. [names_reviewed8.tsv]
+0x00309638	itfRemoveSelectedGridTextItem	inferred	Unlinks and releases the selected grid-text item, updates indices/visible links, and returns the new selected item; paired native helpers and both destructor callers agree.
 0x003097D0	itfReplaceGridTextAndExpandColumn	inferred	Replaces copied grid cell text and expands its column when needed. [names_reviewed8.tsv]
 0x00309A20	itfAdvanceGridScrollPosition	inferred	Adds one or more steps to the selected scroll position and wraps above its maximum.
 0x00309A90	itfAdvanceSelectedGridScroll	inferred	Scrolls the selected grid node forward when enabled. [names_reviewed8.tsv]

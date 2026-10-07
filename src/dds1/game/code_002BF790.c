@@ -7,7 +7,7 @@ extern s32 itfFindGridNodeByKey(u32, u32);
 typedef struct GridTextWidget GridTextWidget;
 typedef struct GridTextListItem GridTextListItem;
 
-extern GridTextListItem *func_002C1B30(GridTextWidget *);
+extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
 typedef struct GridPosition {
     s32 x; // 0x00
@@ -643,7 +643,7 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
 
     sdfReleaseChipBlock(widget->text);
     do {
-        next = func_002C1B30(widget);
+        next = itfRemoveSelectedGridTextItem(widget);
     } while (next != NULL);
     sdfReleaseChipBlock(widget);
     return 1;
@@ -676,7 +676,7 @@ u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
             if (childWidget != NULL) {
                 itfDestroyGridTextWidgetTree(childWidget);
             }
-            childLink = func_002C1B30(widget);
+            childLink = itfRemoveSelectedGridTextItem(widget);
         } while (childLink != NULL);
     }
     sdfReleaseChipBlock(widget);
@@ -757,7 +757,7 @@ GridTextListItem *func_002C1A30(GridTextWidget *owner, const char *text, u32 val
     return item;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1B30);
+INCLUDE_ASM(const s32, "game/code_002BF790", itfRemoveSelectedGridTextItem);
 
 /* Replace the owned text and grow the optional parent column to fit its byte length. */
 void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, u8 *node, const char *text) {
