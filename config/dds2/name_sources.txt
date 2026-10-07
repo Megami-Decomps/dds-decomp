@@ -5198,7 +5198,7 @@
 0x002F6450	effSyncLinkedActorChildParameter	inferred	For flagged linked actors copies source parameter to child and updates child with that value. [names_reviewed5.tsv]
 0x002F69B0	effResetCopiedPayloadTargets	inferred	zeros state and flags on each non-null path target in the copied payload
 0x002F69F0	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
-0x002F6BE8	effCreateRelocatedEffectPayload	inferred	Copies effect payload, relocates its packed transfer data and initializes its work. [names_reviewed5.tsv]
+0x002F6BE8	effCreateAndInitializeCopiedPayload	inferred	Allocates copied payload storage, relocates its packed transfer data, then invokes the initializer; the matched DDS1 helper performs the same sequence.
 0x002F6C30	effCloneEffectPayloadFromOwner	inferred	Copies a payload read from owner record into a reference-backed work and initializes it. [names_reviewed5.tsv]
 0x002F6C70	effDestroyCopiedEffectPayload	inferred	releases the five retained path targets and world nodes before freeing the copied payload allocation
 0x002F7128	effApplySelectedActorEffects	inferred	confidence=high; src/dds2/game/code_002DE248.c:func_002F7128; Collects selected model actors and applies eligible indexed effects with a unit scale, respecting hold/actor flags and looping. [names_qp9.tsv]
