@@ -7,7 +7,7 @@ extern void dds3SetSlotKey(void *, void *);
 extern void dds3ReplaceObjectResource(void *);
 
 s32 dds3GetWorldSecondaryObject(void);
-void dds3DestroyWorldNode(s32 ctx);
+extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
 s32 dds3GetSlot1Data(void);
 void sdfFreezeFloatCounter(s32 ctx);
 void sdfUnfreezeFloatCounter(s32 ctx);
@@ -35,9 +35,9 @@ extern void func_003014F0(char *, char *, ...);
 
 void evtDestroySecondaryWorldNode(void)
 {
-    s32 node;
+    EffWorldNode *node;
 
-    node = dds3GetWorldSecondaryObject();
+    node = (EffWorldNode *)dds3GetWorldSecondaryObject();
     if (node != 0) {
         dds3DestroyWorldNode(node);
     }
