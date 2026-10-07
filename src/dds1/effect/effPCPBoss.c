@@ -9,7 +9,7 @@ typedef struct EffParamWork EffParamWork;
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_00184BC8(void *work);
-extern void effBossSetPosition();
+extern void effBossSetPosition(void *dst, void *src);
 extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
@@ -287,9 +287,7 @@ void effBossDestroy(EffBossWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184BC8);
 
-void effBossSetPosition(dst, src)
-void *dst;
-void *src;
+void effBossSetPosition(void *dst, void *src)
 {
     PCP_COPY_VECTOR(dst, src);
 }
@@ -582,8 +580,8 @@ void effBossUpdateGeometryCallback(void *work) {
     func_00184BC8(work);
 }
 
-void func_00185BA8(void *work) {
-    effBossSetPosition(work);
+void func_00185BA8(void *work, void *position) {
+    effBossSetPosition(work, position);
 }
 
 void effBossApplyGroupTint(EffBossWork *work, s32 value) {
