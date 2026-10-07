@@ -237,6 +237,27 @@ typedef char MenuSpriteState_initialValue_offset_check[
 MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *, struct EffectSlotSet *, struct EffectSlotSet *);
 void mnuFreeSpriteStateWork(MenuSpriteState *);
 
+#ifndef VERSION_DDS2
+/* DDS1's simple sprite owns five effect resource sets and a blend factor. */
+typedef struct MenuSimpleSpriteState {
+    u8 pad00[0x10];
+    struct EffectSlotSet *resourceSets[5];
+    u32 blendFactor; /* 0x24: initial color-blend weight */
+} MenuSimpleSpriteState;
+
+typedef char MenuSimpleSpriteState_size_must_be_0x28[
+    (sizeof(MenuSimpleSpriteState) == 0x28) ? 1 : -1];
+typedef char MenuSimpleSpriteState_resourceSets_offset_check[
+    ((u32)&((MenuSimpleSpriteState *)0)->resourceSets == 0x10) ? 1 : -1];
+typedef char MenuSimpleSpriteState_blendFactor_offset_check[
+    ((u32)&((MenuSimpleSpriteState *)0)->blendFactor == 0x24) ? 1 : -1];
+
+MenuSimpleSpriteState *mnuAllocateSimpleSprite(
+    struct EffectSlotSet *, struct EffectSlotSet *, struct EffectSlotSet *,
+    struct EffectSlotSet *, struct EffectSlotSet *);
+void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *);
+#endif
+
 /* An indexed render slot owned by an effect resource set. */
 typedef struct MenuGridSlot {
     struct EffectSlotSet *set;
@@ -541,10 +562,11 @@ typedef struct MenuProgressHost {
     PartyPanel partyPanel;
     MenuPageWindow partyWindow;
     u32 panelGroup;
-    s32 effectResource;
 #ifdef VERSION_DDS2
+    s32 effectResource;
     s32 currentEffect;
 #else
+    MenuSimpleSpriteState *effectResource;
     MenuProfilePanel *currentEffect;
 #endif
 } MenuProgressHost;

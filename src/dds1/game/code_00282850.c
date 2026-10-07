@@ -530,21 +530,24 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
 
-/* Create the DDS1 sprite record, including its color and texture words. */
-u32 *mnuAllocateSimpleSprite(u32 x, u32 y, u32 z, u32 color, u32 texture) {
-    u32 *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
+/* Create the DDS1 sprite record, including its five resource sets and blend weight. */
+MenuSimpleSpriteState *mnuAllocateSimpleSprite(
+    struct EffectSlotSet *resourceSet0, struct EffectSlotSet *resourceSet1,
+    struct EffectSlotSet *resourceSet2, struct EffectSlotSet *resourceSet3,
+    struct EffectSlotSet *resourceSet4) {
+    MenuSimpleSpriteState *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
-    sprite[4] = x;
-    sprite[5] = y;
-    sprite[6] = z;
-    sprite[7] = color;
-    sprite[8] = texture;
-    sprite[9] = 0x100;
+    sprite->resourceSets[0] = resourceSet0;
+    sprite->resourceSets[1] = resourceSet1;
+    sprite->resourceSets[2] = resourceSet2;
+    sprite->resourceSets[3] = resourceSet3;
+    sprite->resourceSets[4] = resourceSet4;
+    sprite->blendFactor = 0x100;
     return sprite;
 }
 
-void mnuFreeSimpleSpriteWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *sprite) {
+    sdfReleaseChipBlock(sprite);
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00283838);
