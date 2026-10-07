@@ -827,7 +827,7 @@ extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 
 extern u16 dds3GetWorldValueCount(s32 object);
 extern u32 dds3AdvanceObjectValueCursor(void *object);
-extern NodeB *dds3CopyWorldListToValueChain(void *object, s32 kind);
+extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 extern void dds3DestroyWorldIndexNode(NodeB *node);
 extern u32 dds3ResetObjectValueCursor(void *object);
 

@@ -53,7 +53,7 @@ WorldValueIndices *dds3GetWorldSlotValue(u8 *object, s32 index) {
 extern NodeB *dds3AppendWorldIndexNode(s32 initialCount);
 extern void dds3DestroyWorldIndexNode(NodeB *node);
 extern void *dds3GetWorldSecondaryObject(void);
-extern NodeB *dds3CopyWorldListToValueChain(void *object, s32 kind);
+extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
 NodeB *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {

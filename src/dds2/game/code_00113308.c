@@ -7,7 +7,7 @@
 #include "eff.h"
 #include "btl_sound.h"
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
@@ -447,7 +447,7 @@ typedef struct EffectValueObject {
 } EffectValueObject;
 
 struct NodeB;
-extern struct NodeB *dds3CopyWorldListToValueChain();
+extern struct NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 extern s32 dds3GetWorldValueCount(void *);
 extern s32 dds3ResetObjectValueCursor(void *);
 extern u32 dds3ReadIndexedWorldObjectWord(void *);
@@ -456,7 +456,7 @@ extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern s32 func_0010FBD0(f32 *, f32 *);
 void func_00113D18(EffectObject *object) {
     EffectObjectData *data = object->data;
-    u64 world = dds3GetWorldSecondaryObject();
+    EffWorldNode *world = dds3GetWorldSecondaryObject();
     struct NodeB *list;
     EffectValueObject *other;
     EffectValueData *otherData;

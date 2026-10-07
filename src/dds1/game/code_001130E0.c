@@ -17,7 +17,7 @@ typedef struct EffectObject {
 
 extern u32 D_003BA9D0;
 
-extern u64 dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 
 extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
@@ -430,7 +430,7 @@ typedef struct EffectValueObject {
     f32 *source;
 } EffectValueObject;
 
-extern struct NodeB *dds3CopyWorldListToValueChain();
+extern struct NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 extern s32 dds3GetWorldValueCount(void *);
 extern s32 dds3ResetObjectValueCursor(void *);
 extern u32 dds3ReadIndexedWorldObjectWord(void *);
@@ -440,7 +440,7 @@ extern void dds3DestroyWorldIndexNode(struct NodeB *node);
 extern s32 func_0010F9A8(f32 *, f32 *);
 void func_00113AF0(EffectObject *obj) {
     EffectObjectData *data = obj->data;
-    u64 world = dds3GetWorldSecondaryObject();
+    EffWorldNode *world = dds3GetWorldSecondaryObject();
     struct NodeB *list;
     EffectValueObject *other;
     EffectValueData *otherData;
