@@ -1761,7 +1761,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     s32 value;
     s32 alpha;
     s32 color;
-    s32 item;
+    s32 glyphAddress;
 
     value = mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex]);
     alpha = page->drawAlpha;
@@ -1773,15 +1773,15 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
         i++;
     } while (i < 2);
     if (value != 0) {
-        item = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
+        glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
         func_003014F0(text, D_003BC720, *(s16 *)(datCommandRecords + evtGetIndexedEventRecordId(value) * 0x38 + 0x18));
-        item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)text, item);
+        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)text, glyphAddress);
     } else {
-        item = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
-        item = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, item);
+        glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
+        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, (s32)D_003BC738, glyphAddress);
     }
-    func_001958A0((struct FrFontGlyph *)item, 1, param);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)item);
+    func_001958A0((struct FrFontGlyph *)glyphAddress, 1, param);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
             page->drawAlpha += 16;
@@ -1821,37 +1821,37 @@ extern void frFontSetChildColors(struct TextStyleNode *, u32);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
-    struct FrFontGlyph *item;
+    struct FrFontGlyph *glyph;
     s32 width;
 
     func_002CD0D8(textId & 0xFFFF, 1, text);
-    item = func_001951C8(text, 0, 0, 0, 0);
-    frFontSetChildColors((struct TextStyleNode *)item, color);
-    width = frFontMeasureGlyphChain(item) + 8;
-    frFontSetContextPair((struct FrFontCtx *)item, x - (width * 0x10 >> 1) + 0x5F0, y);
-    func_001958A0(item, 1, param);
-    frFontQueueGlyphInSelectedSlot(item);
+    glyph = func_001951C8(text, 0, 0, 0, 0);
+    frFontSetChildColors((struct TextStyleNode *)glyph, color);
+    width = frFontMeasureGlyphChain(glyph) + 8;
+    frFontSetContextPair((struct FrFontCtx *)glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
+    func_001958A0(glyph, 1, param);
+    frFontQueueGlyphInSelectedSlot(glyph);
 }
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                      s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
+    s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
-    s32 texture;
-    s32 item;
+    s32 color;
+    s32 glyphAddress;
 
-    texture = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
-    code = selectedCode != 0 ? selectedCode : cost;
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    code = selectedCode != 0 ? selectedCode : profileId;
     if (code != 0) {
         if (func_002CD240(code & 0xFFFF, &outValue) != 0) {
-            mnuDrawCenteredLabel(0x1120, 0x5F0, depth, texture, code, param);
+            mnuDrawCenteredLabel(0x1120, 0x5F0, depth, color, code, param);
             return;
         }
-        item = itfCreateConvertedTextGlyph(0, 0, depth, texture, (const u8 *)outValue, 0);
-        func_00196088(0x1710, 0x5F0, item);
-        func_001958A0((struct FrFontGlyph *)item, 1, param);
-        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)item);
+        glyphAddress = itfCreateConvertedTextGlyph(0, 0, depth, color, (const u8 *)outValue, 0);
+        func_00196088(0x1710, 0x5F0, glyphAddress);
+        func_001958A0((struct FrFontGlyph *)glyphAddress, 1, param);
+        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
     }
 }
 
