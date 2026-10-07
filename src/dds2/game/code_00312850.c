@@ -11,7 +11,7 @@ extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void func_00313BA8(s32, s32);
 
-extern s32 sdfReleaseResourceAllocation(u32);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern void sdfReleaseChipBlock();
 
@@ -59,6 +59,8 @@ typedef struct TaskWork {
     SdfList *list;
     SdfListNode *currentNode; /* Next node to visit; reset to the list head at pass end. */
 } TaskWork;
+
+extern void sdfRemoveTaskItem(TaskWork *, s32);
 
 /* Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
  * The high word selects active, suspended, or pending-activation dispatch modes. */
@@ -187,12 +189,12 @@ TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, vo
     return work;
 }
 
-s64 sdfDestroyTaskResourceWork(TaskWork *work) {
+void sdfDestroyTaskResourceWork(TaskWork *work) {
     if (work != NULL) {
         sdfDestroyTaskWork(work->list);
         sdfReleaseChipBlock(work->primaryTaskName);
         sdfReleaseChipBlock(work->secondaryTaskName);
-        return sdfReleaseResourceAllocation(work->allocation);
+        sdfReleaseResourceAllocation((SdfMemBlock *)work->allocation);
     }
 }
 
@@ -345,12 +347,12 @@ void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
     grid->rowMargin = rowMargin;
 }
 
-/* Release cells and invoke onDestroy(0, userData); a nonnull grid returns the allocation-release result. */
-s64 sdfDestroyGridWork(SdfGrid *owner) {
+/* Release cells, invoke onDestroy(0, userData), then release the grid header allocation. */
+void sdfDestroyGridWork(SdfGrid *owner) {
     if (owner != NULL) {
         sdfGridReleaseAllCells();
         owner->onDestroy(0, owner->userData);
-        return sdfReleaseResourceAllocation(owner->allocation);
+        sdfReleaseResourceAllocation((SdfMemBlock *)owner->allocation);
     }
 }
 

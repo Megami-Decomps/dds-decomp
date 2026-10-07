@@ -308,7 +308,75 @@ u32 *func_00325BB0(const SdfResourceVectorRecord30 *source, s32 count) {
     return owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325CC8);
+typedef struct SdfRelocatedResource {
+    u32 unk00;
+    u16 firstCount;
+    u16 secondCount;
+    void *data;
+    DdsCountedPayload *groups;
+    u32 unk10;
+} SdfRelocatedResource;
+
+extern u32 *func_0031FA60(ResourceList **);
+extern void dds3ApplyNamedRelocations(u32 *);
+extern u32 *dds3WritePendingNamedReferenceValues(u32 *);
+extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
+extern void func_0035A880(void *);
+
+SdfRelocatedResource *func_00325CC8(u32 *owner, ResourceList **source,
+                                  ResourceList **groups) {
+    SdfRelocatedResource *result;
+    ResourceNode *node;
+    DdsCountedPayload *payload;
+    DdsCountedPayload *record;
+    u32 *sourceHeader;
+    u32 *relocationHeader;
+    void *data;
+    void *relocations;
+    u8 *cursor;
+    u32 size;
+
+    if (source == NULL || groups == NULL) {
+        return NULL;
+    }
+    size = 0;
+    result = func_00324F50(owner, sizeof(*result));
+    memset(result, 0, sizeof(*result));
+    sourceHeader = func_0031FA60(source);
+    dds3ApplyNamedRelocations(sourceHeader);
+    relocationHeader = dds3WritePendingNamedReferenceValues(sourceHeader);
+    data = func_00324F50(owner, *sourceHeader);
+    memset(data, 0, *sourceHeader);
+    relocations = func_00324F50(owner, *relocationHeader);
+    memset(relocations, 0, *relocationHeader);
+    dds3ApplyRelocationOffsets(data, data, relocations, *relocationHeader);
+    func_0035A880(relocations);
+    result->data = data;
+    result->firstCount = (*source)->count.packed;
+    for (node = (*groups)->first; node != NULL; node = node->next) {
+        payload = (DdsCountedPayload *)node->handle;
+        size += payload->count * 8 + sizeof(*payload);
+    }
+    result->groups = func_00324F50(owner, size);
+    memset(result->groups, 0, size);
+    result->secondCount = (*groups)->count.packed;
+    record = result->groups;
+    for (node = (*groups)->first; node != NULL; node = node->next) {
+        payload = (DdsCountedPayload *)node->handle;
+        memcpy(record, payload, sizeof(*record));
+        record++;
+    }
+    cursor = (u8 *)record;
+    record = result->groups;
+    for (node = (*groups)->first; node != NULL; node = node->next) {
+        payload = (DdsCountedPayload *)node->handle;
+        memcpy(cursor, payload->data, payload->count * 8);
+        record->data = cursor;
+        record++;
+        cursor += payload->count * 8;
+    }
+    return result;
+}
 
 void func_00325EC8(f32 *vector, f32 angle) {
     f32 rotated[4];
