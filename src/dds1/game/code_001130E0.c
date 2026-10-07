@@ -539,8 +539,10 @@ WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     return obj;
 }
 
-void func_00113DA8(void) {
-    dds3RemoveWorldObjectNode();
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
+
+void func_00113DA8(EffWorldNode *node) {
+    dds3RemoveWorldObjectNode(node);
 }
 
 void effObjSetModelHolder(EffectObject *obj, u32 value) {
