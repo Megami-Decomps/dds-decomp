@@ -10,11 +10,11 @@ void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes
 void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
 
-void effFreeBuffers(s32 arg);
+void effFreeBuffers(struct EffPrim *primitive);
 void sdfReleaseChipBlock(void *arg);
 
 void dds3FreePathObject(Dds3PathCurveWork *path) {
-    effFreeBuffers((s32)path->primitiveCurve);
+    effFreeBuffers(path->primitiveCurve);
     sdfReleaseChipBlock(path);
 }
 
