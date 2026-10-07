@@ -771,7 +771,52 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     func_002BCA98(&((MenuContext *)context)->partyWindow);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B18E8);
+struct MenuSlotEffectHandles;
+typedef struct MenuScrollPanel MenuScrollPanel;
+extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32 model,
+                                         u32 firstValue, u32 secondValue, s32 thirdValue);
+extern void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 color);
+
+s32 func_002B18E8(void) {
+    s32 contextAddress = (s32)kwlnTaskGetUserValue();
+    MenuContext *context = (MenuContext *)contextAddress;
+    s32 allocation = sdfAllocGeneralBlock(sizeof(PartyMenuData));
+    PartyMenuData *menuWork =
+        (PartyMenuData *)sdfResourceRetainAddress((SdfMemBlock *)allocation);
+    s32 slotIndex;
+
+    context->party = (s32)menuWork;
+    memset(menuWork, 0, sizeof(*menuWork));
+    menuWork->allocation = allocation;
+    func_002B0D50((u32)contextAddress);
+    func_002B0FA0(context);
+
+    mnuLoadPanelSectionResources(
+        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[0],
+        context->panelModel, 5, 8, 0xB);
+    mnuLoadPanelSectionResources(
+        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[1],
+        context->panelModel, 5, 9, 0xB);
+    mnuLoadPanelSectionResources(
+        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[2],
+        context->panelModel, 5, 0xA, 0xB);
+
+    mnuClearPartySelectionAndActivateSlots(contextAddress);
+    for (slotIndex = 0; slotIndex < 5; slotIndex++) {
+        memcpy(&menuWork->original[slotIndex], &datGameState->party[slotIndex],
+               sizeof(DatPartyRecord));
+        memcpy(menuWork->panelSnapshots[slotIndex],
+               &context->partyWindow.slots[slotIndex].hp,
+               2 * sizeof(MenuPageBar));
+    }
+
+    mnuConfigurePanelResource((MenuScrollPanel *)context->panelHandle,
+                              context->panelModel, 0, 0);
+    mnuBeginWindowFadeTransition(menuWork->primaryWindow, &context->transition);
+    menuWork->fadeA = MNU_FULL_FADE;
+    menuWork->fadeB = MNU_FULL_FADE;
+    return 1;
+}
 
 u32 mnuReleasePartySelectionResources(void) {
     s32 context = kwlnTaskGetUserValue();
