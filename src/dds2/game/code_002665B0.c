@@ -3,6 +3,7 @@
 #include "evt_world.h"
 #include "mnu_list.h"
 #include "eff.h"
+#include "dat_state.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -27,7 +28,7 @@ extern s32 func_00268588(s32);
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 
-extern void func_00266C08();
+extern void func_00266C08(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern void evtCreateEventScriptProcess(s32);
@@ -103,8 +104,8 @@ extern void func_002673B8();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 uiBlendColors(u32, u32, s32);
-extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
+extern u32 uiBlendColors(u32, u32, u32);
+extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern char mnuNumberSpriteFormat[];
 
 typedef struct EffectPair {
@@ -153,7 +154,6 @@ extern s32 movAreTitleEffectsReady(s32, s32);
 
 extern void mnuReleaseStaffMenuResources(s32);
 
-extern s32 datGameState;
 
 extern s32 sdfAllocGeneralBlock(s32);
 
@@ -207,13 +207,6 @@ typedef struct MenuListNode MenuListNode;
 
 typedef struct MenuList MenuList;
 
-typedef struct MenuTitleResource {
-    u8 pad00[6];
-    u16 hp;
-    u16 maxHp;
-    u16 mp;
-    u16 maxMp;
-} MenuTitleResource;
 
 
 
@@ -314,9 +307,14 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 }
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern s32 func_0019F6C8();
-extern void func_0019D550(s32, s32, s32);
-extern s32 frFontQueueGlyphInSelectedSlot(s32);
+typedef struct FrFontGlyph FrFontGlyph;
+extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
+extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
+extern u32 mnuGetPanelRatioColor(s32, s32, s32);
+extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
+extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 /* Fixed-width text rows used by both font drawing and message substitution.
  * The font helper decodes single-byte and two-byte characters from this data. */
 typedef struct MenuTextEntry {
@@ -330,49 +328,39 @@ extern MenuTextEntry D_003A47E8[];
  * The signed-byte slot is not bounds checked; DDS2 subtracts 0x120 from gridX. */
 void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
     u8 *text;
-    s32 handle;
+    FrFontGlyph *handle;
 
     if (alternate == 0) {
         text = D_003A41A8[slot].encodedText;
     } else {
         text = D_003A47E8[slot].encodedText;
     }
-    handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
+    handle = (FrFontGlyph *)itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
     func_0019D550(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-/* Party vitals and status word, not a screen rectangle. Full stride is 0x1C4. */
-typedef struct BoxRecord {
-    u16 unitFlags; /* 0x00: bit 0 set when the party slot is active */
-    u8 pad02[4];
-    u16 hp;        /* 0x06 */
-    u16 maxHp;     /* 0x08 */
-    u16 mp;        /* 0x0A */
-    u16 maxMp;     /* 0x0C */
-    u16 statusFlags; /* 0x0E */
-} BoxRecord;
 
 /* Price recovery from missing HP/MP plus the five charged status bits.
  * Preserve DDS2's arithmetic and separate truncations; deficits are not clamped. */
-s32 mnuTerminalScoreBox(BoxRecord *unit) {
+s32 mnuTerminalScoreBox(DatPartyRecord *unit) {
     f32 missingMp = unit->maxMp - unit->mp;
     f32 missingHp = unit->maxHp - unit->hp;
     s32 statusCost = 0;
 
-    if (unit->statusFlags & 0x400) {
+    if (unit->status & 0x400) {
         statusCost = 100;
     }
-    if (unit->statusFlags & 0x100) {
+    if (unit->status & 0x100) {
         statusCost += 50;
     }
-    if (unit->statusFlags & 0x80) {
+    if (unit->status & 0x80) {
         statusCost += 100;
     }
-    if (unit->statusFlags & 0x40) {
+    if (unit->status & 0x40) {
         statusCost += 100;
     }
-    if (unit->statusFlags & 0x10) {
+    if (unit->status & 0x10) {
         statusCost += 100;
     }
     return (s32)(missingHp * 1.8f) + (s32)(missingMp * (missingMp / 40.0f + 5.0f)) + statusCost;
@@ -382,10 +370,10 @@ s32 mnuTerminalScoreBox(BoxRecord *unit) {
 void mnuRefreshThresholdNodeFlags(MenuList *list) {
     MenuListNode *node = list->first;
     if (node != 0) {
-        s32 base = datGameState;
+        DatGameState *base = datGameState;
         do {
-            u32 currency = *(u32 *)(base + 0x3c);
-            if (currency < node->sortKeySecondary) {
+            u32 currency = (u32)base->header.currency;
+            if (currency < (u32)node->terminal.requiredAmount) {
                 node->flags48 |= 1;
             } else {
                 node->flags48 &= ~1u;
@@ -398,10 +386,10 @@ void mnuRefreshThresholdNodeFlags(MenuList *list) {
 /* Draw formatted numeric text using a blend toward the color with its low byte clear. */
 void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number, u32 color, s32 priority) {
     char text[16];
-    s32 sprite;
+    FrFontGlyph *sprite;
 
     func_0035C860(text, mnuNumberSpriteFormat, number);
-    sprite = func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), (s32)text, 0);
+    sprite = (FrFontGlyph *)func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     func_0019D550(sprite, 1, priority);
     frFontQueueGlyphInSelectedSlot(sprite);
 }
@@ -412,7 +400,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x50 stride.
  * The source is a party-vitals record; the context supplies the retained camp texture. */
-s32 mnuCreateDualPercentPanel(MenuTitleResource *unit, MenuSlotState *host) {
+s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, MenuSlotState *host) {
     s32 panel = sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
@@ -438,9 +426,9 @@ void mnuReleaseDualPercentPanel(s32 panel) {
 void mnuCreateThresholdNodePanels(MenuSlotState *host) {
     MenuListNode *node = host->progressList->first;
     while (node != 0) {
-        s32 partyIndex = node->camp.value;
+        s32 partyIndex = node->terminal.entryId;
         node->childPanel =
-            mnuCreateDualPercentPanel((MenuTitleResource *)(datGameState + partyIndex * MNU_PARTY_RECORD_BYTES + 0xa60), host);
+            mnuCreateDualPercentPanel(&datGameState->party[partyIndex], host);
         node = node->next;
     }
 }
@@ -1737,30 +1725,25 @@ u32 evtBEnterStateA(void) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A598);
 
-typedef struct DatGameCounters {
-    u8 pad00[0x3C];
-    s32 currency;
-} DatGameCounters;
 
-extern s32 datGameState;
 extern char D_00437868[];
 
 void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     EventDispatchState *state = (EventDispatchState *)context;
     s32 index;
-    s32 font;
+    FrFontGlyph *font;
     u32 color;
     char text[16];
 
     index = fldGetModeFrameRecordIndex(context);
-    func_0035C860(text, D_00437868, ((DatGameCounters *)datGameState)->currency);
+    func_0035C860(text, D_00437868, datGameState->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
         color = *(u8 *)&((EffectSlotSet *)((MenuSlotState *)context)->resourceBank[0])->workEntries[index].cornerColors[0] | 0xA09DC300;
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->thresholdOwner->scale);
     }
-    font = func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
+    font = (FrFontGlyph *)func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
     func_0019D550(font, 1, 0x52);
     frFontQueueGlyphInSelectedSlot(font);
 }
