@@ -250,7 +250,7 @@ void fldLocalMapDrawScrollIndicators(s32 offsetX, s32 offsetY, s32 z, u32 color,
 extern s32 D_00438888;
 extern LmapList *D_00439088;
 extern void fldLmapSubmitScaledSpritePacket(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_00309DF8(s32, s32, s32, LmapList *, s32);
+extern void itfDrawGridTextRows(s32, s32, s32, LmapList *, s32);
 
 void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
     u32 color;
@@ -264,7 +264,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
             fldLocalMapDrawScrollIndicators(x, y, z, 0x60806080, list, channel);
         }
     }
-    func_00309DF8(x, y, z, list, channel);
+    itfDrawGridTextRows(x, y, z, list, channel);
     if (list->onDraw != 0) {
         list->onDraw(list->x + x, list->y + y, z, list, channel);
     }

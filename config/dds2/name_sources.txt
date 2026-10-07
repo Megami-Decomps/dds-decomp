@@ -5338,14 +5338,17 @@
 0x00309200	itfActivateGridTextWidget	inferred	Enables the activation flag on an existing text widget. [names_reviewed8.tsv]
 0x00309480	itfExpandWidgetColumnWidth	inferred	DDS1 has the same unprefixed symbol; game/code_00306F80 uses itf for the already-described expandWidgetColumnWidth behavior.
 0x003094C8	itfGetGridListLinkFlags	inferred	Reports head presence and whether the list spans its requested count. [names_reviewed8.tsv]
+0x00309538	itfAppendGridTextItem	inferred	Paired DDS1 constructor: allocates owned text, links the widget tail, initializes empty-list selection and assigns the item index.
 0x00309638	itfRemoveSelectedGridTextItem	inferred	Unlinks and releases the selected grid-text item, updates indices/visible links, and returns the new selected item; paired native helpers and both destructor callers agree.
 0x003097D0	itfReplaceGridTextAndExpandColumn	inferred	Replaces copied grid cell text and expands its column when needed. [names_reviewed8.tsv]
+0x00309880	itfSetGridNumericItemDescriptor	inferred	Paired DDS1 setter: copies the numeric descriptor, initializes item value and computes the formatted column width.
 0x00309A20	itfAdvanceGridScrollPosition	inferred	Adds one or more steps to the selected scroll position and wraps above its maximum.
 0x00309A90	itfAdvanceSelectedGridScroll	inferred	Scrolls the selected grid node forward when enabled. [names_reviewed8.tsv]
 0x00309AD8	itfReverseGridScrollPosition	inferred	Subtracts one or more steps from the selected scroll position and wraps below its minimum.
 0x00309B48	itfReverseSelectedGridScroll	inferred	Scrolls the selected grid node backward when enabled. [names_reviewed8.tsv]
 0x00309B90	itfGetGridChildLayoutMode	inferred	Computes grid child layout mode from widget flags and child identity. [names_reviewed8.tsv]
 0x00309C00	itfFormatGridValueEntryText	inferred	confidence=high; src/dds2/game/code_00306F80.c:func_00309C00; Formats labeled decimal/hex/float entries or a custom formatter and optionally prefixes a decimal/hex row index. [names_qp9.tsv]
+0x00309DF8	itfDrawGridTextRows	inferred	Paired DDS1 visible-row renderer, including selection highlights and callback; called by the local-map list renderer.
 0x0030A048	itfFindGridNodeByKey	inferred	Searches the grid's linked nodes for the requested halfword key.
 0x0030A070	sdfGridSeekSelectedNodeByIndex	inferred	Traverses a grid node list to the selected index and tracks skipped nodes. [names_reviewed10.tsv]
 0x0030A0E8	sdfGridSeekFirstNode	inferred	Seeks to the first grid node via the indexed selection routine. [names_reviewed11.tsv]
