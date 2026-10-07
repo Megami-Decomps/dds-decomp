@@ -784,7 +784,7 @@ s32 evtUnitGetNestedValue(u8 *obj) {
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern const s32 D_003AC060[];
 
-EvtUnit *func_002220F0(EvtEffObj *effObj, MdlCtx *owner) {
+EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
     EvtUnit *work;
     void *endpoint;
     f32 defaultVector[4];

@@ -3289,6 +3289,7 @@
 0x0023CB68	evtConfigureUnitTransition	inferred	Clears transition flags for zero or initializes direction and transition flags otherwise. [names_reviewed6.tsv]
 0x0023CC00	evtGetWorldUnitNestedValue	inferred	Looks up a world object of kind five by id and reads its inner value if found. [names_reviewed6.tsv]
 0x0023CC48	evtUnitGetNestedValue	inferred	Returns the nested object's word at offset eight when the event unit pointer is present.
+0x0023CC60	evtCreateUnitTransitionWork	inferred	Allocates and initializes complete event unit transition work and its owned endpoint block; native caller stores it for the paired release API.
 0x0023CD98	evtReleaseUnitTransitionWork	inferred	Clears nested reference and frees its path, handle and work block. [names_reviewed6.tsv]
 0x0023CE08	evtGetUnitMotionState	inferred	Returns the unit state read by motion-completion check. [names_reviewed6.tsv]
 0x0023CE20	evtStoreUnitMotionShortParameters	inferred	Stores two signed short parameters in event unit motion state. [names_reviewed6.tsv]

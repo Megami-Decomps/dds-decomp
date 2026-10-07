@@ -805,7 +805,7 @@ s32 evtUnitGetNestedValue(EvtUnitNode *unit) {
 
 extern f32 D_004215D0[];
 
-EvtUnit *func_0023CC60(EvtEffObj *effObj, MdlCtx *owner) {
+EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
     EvtUnit *work;
     void *endpoint;
     f32 defaultVector[4];
