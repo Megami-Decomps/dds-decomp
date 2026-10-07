@@ -2,6 +2,8 @@
 #include "sdf.h"
 
 typedef struct FrFontGlyph FrFontGlyph;
+typedef struct FrFontCtx FrFontCtx;
+struct TextStyleNode;
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, s32);
@@ -764,21 +766,21 @@ void mnuDrawStaffPanelGridBackdrop(s32 flag, s32 obj) {
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276F70);
 
 extern void frFontAddSharedGlyphFlags(s32);
-extern s32 frFontAppendGlyphFromData(s32, s32, s32, s32, s32);
-extern void frFontSetContextPair(s32, s32, s32);
-extern void frFontStoreShiftedContextValue(s32, s32);
-extern void frFontSetChildColors(s32, u32);
-extern void frFontClearFlagBits(s32);
+extern FrFontCtx *frFontAppendGlyphFromData(void *, s8, s8, s8, s32);
+extern void frFontSetContextPair(FrFontCtx *, u32, u32);
+extern void frFontStoreShiftedContextValue(FrFontCtx *, u32);
+extern void frFontSetChildColors(struct TextStyleNode *, u32);
+extern u8 frFontClearFlagBits(u8);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param) {
-    s32 item;
+    FrFontCtx *item;
     s32 top = y - 0x10;
 
     frFontAddSharedGlyphFlags(1);
-    item = frFontAppendGlyphFromData(textId, 0, 0, 0, 0);
+    item = frFontAppendGlyphFromData((void *)textId, 0, 0, 0, 0);
     frFontSetContextPair(item, x, top);
     frFontStoreShiftedContextValue(item, scale * 0x10);
-    frFontSetChildColors(item, color);
+    frFontSetChildColors((struct TextStyleNode *)item, color);
     frFontClearFlagBits(1);
     func_001958A0((FrFontGlyph *)item, 1, param);
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);

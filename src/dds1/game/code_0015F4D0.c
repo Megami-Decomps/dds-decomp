@@ -1,6 +1,19 @@
 #include "common.h"
+#include "kwln_sprite.h"
 #include "pcp_vu0.h"
 #include "eff.h"
+
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
+extern void *sdfConsAllocateColumnPacket(s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
+extern s32 kwlnGetDrawBufferIndex(void);
+extern s32 kwlnTextureGetHeldReference(void);
+extern u8 kwlnFrameDrawPacketRecords[];
+extern SdfPoolNode D_00324B88;
+extern SdfPoolNode D_00325588;
 
 extern BillDispatch billObjectCallbacks[];
 
@@ -27,8 +40,8 @@ extern f32 D_00324860[];
 extern u8 D_00325870[];
 extern s32 D_003BA900;
 extern s8 D_003BB018;
-extern s32 D_003BB01C;
-extern s32 D_003BB020;
+extern u32 D_003BB01C;
+extern u32 D_003BB020;
 
 typedef struct EffectDispatchState {
     u8 pad00[0xB0];
@@ -200,7 +213,7 @@ void effWriteGouraudTexturedQuadPacket(u64 *packet, s32 primitive,
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-s32 effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
+void effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
                  s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
@@ -212,7 +225,7 @@ s32 effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
     effWriteGouraudTexturedQuadPacket(packet + 2, primitive, x0, y0, s0, t0, color0,
                  x1, y1, s1, t1, color1, x2, y2, s2, t2, color2,
                  x3, y3, s3, t3, color3, depth);
-    return sdfAppendPacket(chain, packet);
+    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
 }
 
 void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
@@ -236,7 +249,7 @@ void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-s32 effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
+void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
@@ -246,7 +259,7 @@ s32 effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
     packet[1] = 0x5000000510000000ULL;
     billWriteFloatTextureTrianglePacket(packet + 2, color, primitive, x0, y0, u0, v0,
                  x1, y1, u1, v1, x2, y2, u2, v2, depth);
-    return sdfAppendPacket(chain, packet);
+    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
 }
 
 u64 *effBuildDrawPacketWithFlags(u32 flags) {
@@ -300,7 +313,98 @@ void dds3StartCrossfade(s32 frames) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_001602F8);
+/* Capture the first frame, then draw the held texture with a decreasing alpha. */
+void func_001602F8(void) {
+    SdfListHead *list;
+    SdfDmaNode *reference;
+    u64 *texturePacket;
+    u64 *blendPacket;
+    void *sprite;
+    KwlnSpriteVertex *vertex;
+    u32 alpha;
+
+    if (D_003BB018 == 0) {
+        return;
+    }
+    if (D_003BB01C == D_003BB020) {
+        func_00160690();
+        return;
+    }
+    if (D_003BB01C == 0) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        reference = sdfAllocPacketAligned(0x20);
+        sdfAppendDmaPrimary((s32)list,
+            (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40),
+            reference);
+        texturePacket = sdfAllocPacketAligned(0x40);
+        texturePacket[0] = 3;
+        texturePacket[1] = 0x5000000310000000ULL;
+        texturePacket[2] = 0x1000000000008002ULL;
+        texturePacket[3] = 0xE;
+        texturePacket[4] = 0x8000000080ULL;
+        texturePacket[5] = 0x3B;
+        texturePacket[6] = 0;
+        texturePacket[7] = 0x3F;
+        sdfAppendPacket(list, (u32)texturePacket);
+        blendPacket = sdfAllocPacketAligned(0x40);
+        blendPacket[0] = 3;
+        blendPacket[1] = 0x5000000310000000ULL;
+        blendPacket[2] = 0x1000000000008002ULL;
+        blendPacket[3] = 0xE;
+        blendPacket[4] = 0x31001;
+        blendPacket[5] = 0x47;
+        blendPacket[6] = 0x44;
+        blendPacket[7] = 0x42;
+        sdfAppendPacket(list, (u32)blendPacket);
+        sprite = sdfConsAllocateColumnPacket(1);
+        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
+        vertex->r = 0x80;
+        vertex->g = 0x80;
+        vertex->b = 0x80;
+        vertex->a = 0x80;
+        vertex->corner[0].u = 0;
+        vertex->corner[0].v = 0;
+        vertex->corner[0].x = 0x77F8;
+        vertex->corner[0].y = 0x78F8;
+        vertex->corner[0].mask = 0xFF0000;
+        vertex->corner[0].flag = 0;
+        vertex->corner[1].u = 0x2000;
+        vertex->corner[1].v = 0xE00;
+        vertex->corner[1].x = 0x87F8;
+        vertex->corner[1].y = 0x86F8;
+        vertex->corner[1].mask = 0xFF0000;
+        vertex->corner[1].flag = 0;
+        sdfAppendPacket(list, (u32)sprite);
+        D_00324B88.append((SdfListHead *)&D_00324B88, list);
+    }
+    D_003BB01C = (u32)D_003BB01C + 1;
+    alpha = (128 - (u32)((f32)(u32)D_003BB01C * 128.0f /
+                       (f32)(u32)D_003BB020)) & 0xFF;
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfConsCreateDrawPacket(list, (SdfTex *)kwlnTextureGetHeldReference(), 0);
+    sprite = sdfConsAllocateColumnPacket(1);
+    vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = alpha;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x7000;
+    vertex->corner[0].y = 0x7900;
+    vertex->corner[0].mask = 0xFF0000;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x1000;
+    vertex->corner[1].v = 0xE00;
+    vertex->corner[1].x = 0x9000;
+    vertex->corner[1].y = 0x8700;
+    vertex->corner[1].mask = 0xFF0000;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(list, (u32)sprite);
+    D_00325588.append((SdfListHead *)&D_00325588, list);
+}
 
 void func_00160690(void) {
     kwlnTextureClearReferenceFlag();
