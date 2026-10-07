@@ -1,6 +1,8 @@
 #include "common.h"
 #include "btl_state.h"
 #include "btl_command.h"
+#include "btl_action.h"
+#include "btl_task.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -110,7 +112,78 @@ INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020CCC0);
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D168);
 
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D2E0);
+extern s8 btlGetActorIndexedSignedValue(s32, s32);
+extern s32 btlMapCommandToSkill(u32);
+extern s32 func_001F12E8(u32, u32, u8 *, u16);
+struct SoundTask;
+extern struct SoundTask *sndCreateStationedSeTask(u32);
+
+void func_0020D2E0(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
+                   u64 ownerId, u64 prerequisiteHandle, s32 condition) {
+    BtlRuntimeTask *created;
+    BtlRuntimeTask *sound;
+    BtlState *state;
+    BtlUnit *unit;
+    s32 species;
+
+    if ((task->unit->flags & 0x200) == 0) {
+        return;
+    }
+    if ((supplied->flags & 0x400) == 0) {
+        return;
+    }
+    if (supplied->partyRecord.unitId != 0x11B) {
+        return;
+    }
+
+    state = (BtlState *)btlGetRuntime();
+    species = btlMapCommandToSkill(
+        (u32)btlGetActorIndexedSignedValue((s32)task->unit, task->indexWork.skillId));
+    if (species == -1) {
+        return;
+    }
+
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->partyRecord.unitId == species) {
+                    break;
+                }
+            }
+        }
+    }
+    if (unit == NULL) {
+        return;
+    }
+
+    created = (BtlRuntimeTask *)func_001F12E8(
+        (u32)state->resources[species - 0x12A], (u32)unit, (u8 *)supplied, 0);
+    switch (condition) {
+    case -1:
+    case 2:
+    case 3:
+    case 4:
+        created->startCondition.kind = 4;
+        created->startCondition.value.handle = prerequisiteHandle;
+        break;
+    case 0:
+    case 1:
+        created->startCondition.kind = 7;
+        created->startCondition.value.owner = ownerId;
+        break;
+    default:
+        created->startCondition.kind = 7;
+        created->startCondition.value.owner = ownerId;
+        break;
+    }
+    btlStartTask(created);
+
+    sound = (BtlRuntimeTask *)sndCreateStationedSeTask(
+        (u32)(state->sequenceHandle + species - 0x130));
+    sound->startCondition.kind = 5;
+    sound->startCondition.value.handle = created->handle;
+    btlStartTask(sound);
+}
 
 s32 btlAllowsSpeciesCondition(BtlUnit *unit, BtlUnit *other, s32 condition) {
     s32 kind;
