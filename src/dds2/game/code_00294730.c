@@ -39,7 +39,7 @@ enum {
 };
 
 extern MenuIconPlacement D_003D03F0[];
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, void *, s32, s32);
 extern void func_00294680(MenuTerminalContext *, s32, s32);
 
 
@@ -51,21 +51,21 @@ void func_00294B40(s32 x, s32 y, s32 depth, MenuTerminalContext *object,
     u32 index;
 
     func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
-                  0, scale, 0, (s32)D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
+                  0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], option);
     func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], option);
     func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], option);
     func_00294680(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
     func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
-                  0, scale, 0, (s32)D_00438FC8->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
+                  0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
                   D_003D03F0[index][MENU_ICON_FRAME], option);
 }
 
 extern f32 sdfSinPoly(f32);
 
 void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 drawArg) {
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 alpha;
 
     alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
@@ -79,9 +79,9 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294D50);
 
-extern void func_002B9A40(s32, s32, s32, s32, struct MenuList *, u32, s32);
+extern void func_002B9A40(s32, s32, s32, s32, struct MenuList *, void *, s32);
 void func_00294EB8(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 i;
 
     func_00306CD0(x + (D_003D03F0[57][MENU_ICON_X] << 4),
@@ -95,7 +95,7 @@ void func_00294EB8(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 sc
     }
     func_00306CD0(D_003D03F0[17][MENU_ICON_X] << 4, D_003D03F0[17][MENU_ICON_Y] << 3,
                   0, scale, 0, texture, D_003D03F0[17][MENU_ICON_FRAME], option);
-    func_002B9A40(0x2D0, 0x450, 0, scale, object->window->list, object->windowResource, option);
+    func_002B9A40(0x2D0, 0x450, 0, scale, object->window->list, (void *)object->windowResource, option);
 }
 
 
@@ -146,7 +146,7 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
 void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
     MenuWindowContainer *object = (MenuWindowContainer *)objectData;
     struct MenuList *inner = object->list;
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuTerminalWindowState *state = inner->context;
     s32 mode = state->command.mode;
     s32 flags = inner->flags;
@@ -191,7 +191,7 @@ void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
                    u32 alpha, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     f32 opacity;
     s32 row;
     s32 firstIndex;
@@ -233,7 +233,7 @@ void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
 
 
 void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
@@ -250,7 +250,7 @@ void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) 
 }
 
 void func_002968B8(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s32 option) {
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
@@ -270,7 +270,7 @@ extern char D_00437980[];
 
 void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
     struct FrFontGlyph *glyph;
@@ -293,7 +293,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
     func_00306CD0(
         x + D_003D03F0[26][MENU_ICON_X] * 16,
         y + D_003D03F0[26][MENU_ICON_Y] * 8,
-        z, scale, 0, (s32)D_00438FC8->effectSlots[0],
+        z, scale, 0, D_00438FC8->effectSlots[0],
         D_003D03F0[26][MENU_ICON_FRAME], option
     );
 }
@@ -309,7 +309,7 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     func_00306CD0(
         x + D_003D03F0[25][MENU_ICON_X] * 16,
         y + D_003D03F0[25][MENU_ICON_Y] * 8,
-        z, scale, 0, (s32)D_00438FC8->effectSlots[0],
+        z, scale, 0, D_00438FC8->effectSlots[0],
         D_003D03F0[25][MENU_ICON_FRAME], option
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
@@ -322,7 +322,7 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
 
 void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
-    s32 texture = (s32)D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
     struct FrFontGlyph *glyph;
