@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "eff.h"
@@ -3419,7 +3420,94 @@ s32 btlMapActionCode(s32 unused, u32 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0DB0);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+
+typedef struct BtlAnimationModeRow {
+    u8 mode;
+    u8 pad01[3];
+    s32 delay;
+} BtlAnimationModeRow;
+
+/* Sort same-side targets for the selected animation, or perform thirteen swaps. */
+void func_001B0DB0(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
+    BtlUnit *pair[2];
+    f32 muzzle[2][4];
+    u32 randomIndices[2];
+    u32 count;
+    u32 mode;
+    u32 i;
+    u32 last;
+    s32 sorted;
+
+    count = btlGetIndexListCount(targets);
+    if (count < 2) {
+        return;
+    }
+    if ((unit->flags & 0x200) != 0 &&
+        datCommandSelectors[actionId].kind == 5) {
+        mode = unit->partyRecord.unitId == 6 ? 2 : 0;
+    } else {
+        u32 delayIndex = ((BtlActionAnimationRecord *)datActionAnimationRecords)[actionId].delayIndex;
+        mode = ((BtlAnimationModeRow *)D_003B4EF0)[delayIndex].mode;
+    }
+    switch (mode) {
+    case 0:
+        btlBossDebugPrintf("btl:anim=non\n");
+        return;
+    case 1:
+        btlBossDebugPrintf("btl:anim=left\n");
+        break;
+    case 2:
+        btlBossDebugPrintf("btl:anim=right\n");
+        break;
+    case 3:
+        btlBossDebugPrintf("btl:anim=rand\n");
+        break;
+    }
+    if (mode != 3) {
+        last = count - 1;
+        do {
+            sorted = 1;
+            for (i = 0; i < last; i++) {
+                pair[0] = btlGetIndexListEntry(targets, i);
+                pair[1] = btlGetIndexListEntry(targets, i + 1);
+                btlUnitGetMuzzlePosVU(pair[0]);
+                VU0_STORE_VF(vf10, muzzle[0]);
+                btlUnitGetMuzzlePosVU(pair[1]);
+                VU0_STORE_VF(vf10, muzzle[1]);
+                if ((pair[0]->flags & 0x400) && (pair[1]->flags & 0x400)) {
+                    if (mode == 1) {
+                        if (muzzle[0][0] > muzzle[1][0]) {
+                            btlSwapIndexListEntries(targets, i, i + 1);
+                            sorted = 0;
+                        }
+                    } else if (muzzle[0][0] < muzzle[1][0]) {
+                        btlSwapIndexListEntries(targets, i, i + 1);
+                        sorted = 0;
+                    }
+                } else if ((pair[0]->flags & 0x200) && (pair[1]->flags & 0x200)) {
+                    if (mode == 1) {
+                        if (muzzle[0][0] < muzzle[1][0]) {
+                            btlSwapIndexListEntries(targets, i, i + 1);
+                            sorted = 0;
+                        }
+                    } else if (muzzle[0][0] > muzzle[1][0]) {
+                        btlSwapIndexListEntries(targets, i, i + 1);
+                        sorted = 0;
+                    }
+                }
+            }
+        } while (sorted == 0);
+    } else {
+        for (i = 0; i < 13; i++) {
+            randomIndices[0] = effMiscRandMod(0, count);
+            randomIndices[1] = effMiscRandMod(0, count);
+            if (randomIndices[0] != randomIndices[1]) {
+                btlSwapIndexListEntries(targets, randomIndices[0], randomIndices[1]);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1090);
 
