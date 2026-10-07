@@ -378,8 +378,11 @@ typedef struct MenuPanelState {
     MenuPanelHandles *resourceHandle; /* 0x60 */
 } MenuPanelState;
 
+typedef char MenuPanelStateSizeCheck[(sizeof(MenuPanelState) == MNU_PANEL_STATE_BYTES) ? 1 : -1];
+typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0)->resourceHandle == 0x60) ? 1 : -1];
+
 /* Allocate a zeroed native panel state with the requested dimensions. */
-void *mnuCreatePanelState(s32 width, s32 height) {
+MenuPanelState *mnuCreatePanelState(s32 width, s32 height) {
     MenuPanelState *panel = sdfAllocSizeClassBlock(MNU_PANEL_STATE_BYTES);
     memset(panel, 0, MNU_PANEL_STATE_BYTES);
     panel->width = width;
