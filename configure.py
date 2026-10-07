@@ -215,7 +215,7 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
 
 def write_configure_build(n, configure_inputs: list[str], argv: list[str]) -> None:
     """Write the Ninja regeneration edge without persisting one-shot options."""
-    generator_args = [arg for arg in argv if arg != "--force-split"]
+    generator_args = [arg for arg in argv if arg not in ("--force-split", "--no-split")]
     n.build(
         "build.ninja",
         "configure",
