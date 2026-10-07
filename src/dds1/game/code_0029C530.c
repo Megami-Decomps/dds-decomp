@@ -6426,7 +6426,45 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2938);
+extern void evtConfigureUnitTransition(EvtUnit *, s32);
+
+/* Restore actor light endpoints and directions when the field-light effect ends. */
+void func_002B2938(u32 unusedResource) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    u32 first[4];
+    u32 second[4];
+
+    if ((state->battleFlags & 0x6000000) == 0) {
+        return;
+    }
+    unit = state->units;
+    while (unit != NULL) {
+        if (unit->flags & 2) {
+            EvtUnit *effect = unit->ext;
+
+            if (effect != NULL) {
+                u32 firstColor;
+                u32 secondColor;
+
+                VU0_LOAD_VF(vf10, unit->colorStart);
+                EE_MMI_RGBA_PACK_UNIT(first[0], 128.0f);
+                firstColor = first[0];
+                VU0_LOAD_VF(vf10, unit->colorEnd);
+                EE_MMI_RGBA_PACK_UNIT(second[0], 128.0f);
+                secondColor = second[0];
+                effect->color0C = effect->firstCurrent = effect->color = firstColor;
+                effect->color5C = effect->color54 = effect->color50 = secondColor;
+                VU0_LOAD_VF(vf10, unit->lightDirection);
+                VU0_STORE_VF(vf10, unit->ext->vec10);
+                VU0_STORE_VF(vf10, unit->ext->vec20);
+                VU0_STORE_VF(vf10, unit->ext->vec40);
+                evtConfigureUnitTransition(unit->ext, 0);
+            }
+        }
+        unit = unit->next;
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B2A48);
