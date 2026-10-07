@@ -46,7 +46,10 @@ typedef struct BattleLinkedEffectState {
  * This is one object, not separate script/event/actor-update contexts. Holes
  * remain opaque. DDS2 has a different layout, not a uniform offset shift. */
 typedef struct BtlState {
-    u8 pad000[0xA0];
+    u8 pad000[0x50];
+    f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
+    f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
+    u8 pad070[0x30];
     BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
     u8 pad0C8[0x68];
     BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
@@ -190,7 +193,10 @@ typedef union BtlBackgroundId {
  * 0x1AA6F8. Its script-owner/task pair is +0x2C4/+0x2C8, not DDS1's
  * offsets plus 0x24. Scene groups, actor lists and SYSEFF slots belong here. */
 typedef struct BtlState {
-    u8 pad000[0xA0];
+    u8 pad000[0x50];
+    f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
+    f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
+    u8 pad070[0x30];
     BtlCamState debugStartCamera; /* 0xA0: captured debug camera's initial pose. */
     u8 pad0C8[0x68];
     BtlCamState debugEndCamera; /* 0x130: captured debug camera's final pose. */
