@@ -22,7 +22,7 @@ extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_002723B0(s32, s32);
 extern void func_00273A30(s32, s32);
-extern void mnuDrawStaffPanelGridBackdrop(s32, s32);
+extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mdlFlagTest(s32);
@@ -442,7 +442,7 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
     StaffImageList *list;
     StaffImageWindow *window;
 
-    mnuDrawStaffPanelGridBackdrop(1, context + 0x60);
+    mnuDrawStaffPanelGridBackdrop(1, (StaffSlots *)(context + 0x60));
     mnuDrawStaffCampScreen(1, task);
     mnuCreateStaffImageSprite(8);
     func_00283110(0xEB0, 0x518, 0, partyEntry,
