@@ -12,6 +12,20 @@ extern s32 func_002C6CE8(void);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
+extern s32 func_00298648(MenuTerminalContext *);
+extern void func_00294B40(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void func_00296D90(MenuTerminalContext *, s32);
+extern void func_00294EB8(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void func_00295030(s32, s32, s32, MenuTerminalContext *, s32, s32, s32);
+extern void func_00296430(s32, s32, s32, MenuTerminalContext *, u32, s32);
+extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
+extern void itfEmitSelectedGlyph(MenuTerminalContext *, s32, s32, u32, u32);
+extern void func_00296C58(s32, s32, s32, MenuTerminalContext *, s32);
+extern void func_002968B8(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void func_00296298(s32, s32, s32, MenuTerminalContext *, s32);
+extern void func_002967A0(s32, s32, s32, MenuTerminalContext *, s32);
+
+
 extern void func_00297200(struct MenuList *, u32);
 
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
