@@ -315,6 +315,7 @@
 0x001118E0	dds3ReplaceObjectResource	inferred	Releases any existing object resource and acquires a replacement by the stored resource ID.
 0x00111920	dds3ReleaseObjectResource	inferred	Releases the nested resource handle and clears its slot.
 0x00111958	dds3GetObjectResourceHandle	inferred	Returns the resource handle from nested object data.
+0x00111968	dds3InvokeMoverUpdate	inferred	Forwards the native a0 EffWorldNode through dds3UpdateMoverTransform and discards its return value; DDS1 twin 0x00111740.
 0x00111980	dds3SelectSlotForObjectKind	inferred	readability/matching review (QP16)
 0x001119D0	dds3CreateSlotResourceState	inferred	confidence=high; Paired slot-state constructor; allocates/clears state, attaches world index node and initializes empty slot indices.; sources=names_M143.tsv; twin=0x001117A8, input-family pairing. [names_qp10.tsv]
 0x00111A68	dds3DestroyObjectBase	inferred	confidence=high; src/dds2/basic/dds3ObjectBase.c:func_00111A68; Removes owned world nodes, releases development and world-index resources, then frees the object-base block. [names_qp9.tsv]
