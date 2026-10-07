@@ -2079,7 +2079,46 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC360);
 
 
 extern s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1);
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlFindEligibleTargetForMultiActorCommand);
+s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
+    ActionStateLink *action = (ActionStateLink *)arg0;
+    u32 count;
+    u32 i;
+    s32 command;
+    s32 index;
+
+    if (action == NULL || targets == NULL) {
+        return 0;
+    }
+    count = btlGetIndexListCount(targets);
+    if (count < 2) {
+        return 0;
+    }
+    command = action->indexWork.phase;
+    switch (command) {
+    case 2:
+    case 3:
+    case 4:
+    case 7:
+    case 8:
+        if (command == 4) {
+            index = btlGetLoggedIndexedCommandItem(action->indexWork.reference);
+        } else {
+            index = action->indexWork.skillId;
+        }
+        if (*(u8 *)(datCommandRecords + index * 56 + 8) == 0 &&
+            *(u8 *)(datCommandRecords + index * 56 + 0x24) == 2 &&
+            *(u16 *)(datCommandRecords + index * 56 + 0x26) != 0) {
+            for (i = 0; i < count; i++) {
+                if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
+                     ((BtlUnit *)btlGetIndexListEntry(targets, i))->conditionFlags) != 0) {
+                    return i;
+                }
+            }
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC648);
 
@@ -4064,7 +4103,43 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(UiObject *object) {
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415840);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4828);
+extern s32 effMiscRand(void *);
+
+u32 func_001B4828(s32 unit, BtlUnit *enemy) {
+    DatEnemyRecord *record;
+    s32 chance;
+    u16 status;
+    u16 flags;
+
+    if (btlCheckSpecialAbility(unit + 0x120, 0x245) != 0) {
+        return 0;
+    }
+    status = enemy->conditionFlags & 0x7FFF;
+    record = &datEnemyRecords[enemy->mode];
+    switch (status) {
+    case 0x400:
+        chance = record->huntPenaltyChance * 3;
+        break;
+    case 0x80:
+        chance = record->huntPenaltyChance * 2 + 30;
+        break;
+    default:
+        chance = record->huntPenaltyChance;
+        break;
+    }
+    btlBossDebugPrintf("btl:hunt bad = %d%%\n", chance);
+    if (chance == 0) {
+        return 0;
+    }
+    if (btlRollAiBucket() >= chance) {
+        return 0;
+    }
+    flags = record->huntPenaltyFlags;
+    if (flags == 0x18) {
+        return (effMiscRand(effSharedRandomState) & 1) ? 0x10 : 8;
+    }
+    return flags & 0x18;
+}
 
 typedef struct BtlAiActionEntry {
     s32 abilityId;
@@ -4724,7 +4799,54 @@ void btlReleaseResourceBlock(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B73E8);
+extern SceneSlotFadeWork *D_00438F54;
+extern ActorSlotOrder *D_00438F58[2];
+extern s32 func_001B76F0(void);
+extern void func_001B75F8(s32, s32);
+extern void btlClearTaskActorSlots(void);
+extern s32 func_001B8368(s32);
+
+s32 func_001B73E8(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    SceneSlotFadeWork *state;
+    ActorSlotOrder **bank;
+    s32 kind;
+    s32 count;
+    s32 i;
+
+    memset(D_00438F54, 0, sizeof(*D_00438F54));
+    memset(D_00438F58[0], 0, sizeof(*D_00438F58[0]));
+    memset(D_00438F58[1], 0, sizeof(*D_00438F58[1]));
+    btlTrackedTaskHandles->fadeKindsCached = 0;
+    func_001B76F0();
+    if (battle->mode == 1) {
+        kind = 0;
+        count = btlTrackedTaskHandles->fadeKindACount;
+        D_00438F54->enabled[1] = 0;
+    } else {
+        kind = 1;
+        count = btlTrackedTaskHandles->fadeKindBCount;
+        D_00438F54->enabled[0] = 0;
+    }
+    bank = &D_00438F58[kind];
+    D_00438F54->currentIndex = count;
+    D_00438F54->lastIndex = count;
+    D_00438F54->bank = kind;
+    D_00438F54->enabled[kind] = 1;
+    D_00438F54->phase[0][kind] = 1;
+    D_00438F54->timer = 0;
+    (*bank)->state[0] = 1;
+    state = D_00438F54;
+    state->unk18 = 0;
+    state->completed = 0;
+    for (i = 0; i < count; i++) {
+        (*bank)->unk6C[i] = 30.0f;
+        (*bank)->unk8C[i] = 130;
+    }
+    func_001B75F8(kind, count);
+    btlClearTaskActorSlots();
+    return func_001B8368(kind);
+}
 
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {

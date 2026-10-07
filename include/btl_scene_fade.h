@@ -13,7 +13,9 @@ typedef struct SceneSlotFadeWork {
     s32 bank;
     u8 unk08[4];
     u8 completed;
-    u8 unk0D[0x13];
+    u8 unk0D[0xB];
+    s32 unk18; /* Cleared independently from completed by the scene-slot reset. */
+    u8 unk1C[4];
     s8 currentIndex;
     s8 lastIndex;
     s8 phase[10][2];
@@ -41,7 +43,9 @@ typedef struct ActorSlotOrder {
     s8 state[8];
 #endif
     s32 entries[8];
-    u8 unk2C[0x80];
+    u8 unk2C[0x40];
+    f32 unk6C[8]; /* Scene-slot reset initializes these per-slot values to 30.0f. */
+    s32 unk8C[8]; /* Corresponding per-slot values initially set to 130. */
     s8 secondaryState[8]; /* Independent color cycle, states 0 through 8. */
     s32 colorAdjustments[8][4]; /* Signed values clamped to 0..127. */
     u8 unk134[0xC0];
