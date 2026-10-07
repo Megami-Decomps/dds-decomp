@@ -67,7 +67,7 @@ typedef struct {
 
 /* Both vector-based variants allocate this 0x64-byte work followed by cells.
    Their scale, tint and teardown callbacks use the same constructor layout. */
-typedef struct {
+typedef struct EffThunderVectorWork {
     EffThunderVectorParams head;
     EffThunderVectorCell *cells; /* 0x4C */
     u32 tintColor;      /* 0x50 multiplies each cell's sampled/faded color */
