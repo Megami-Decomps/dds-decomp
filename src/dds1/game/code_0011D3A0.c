@@ -828,7 +828,16 @@ enum {
     FIELD_MAP_EMPTY_VALUE = 0xff,
 };
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetRoomModeFlag);
+void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        if (enabled) {
+            datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0] |= 1 << bit;
+        } else {
+            datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0] &= ~(1 << bit);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestRoomModeFlag);
 
@@ -866,11 +875,29 @@ s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset) {
     return value == FIELD_MAP_EMPTY_VALUE ? -1 : value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetMapSlotAuxiliaryFlag);
+void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        if (enabled) {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] |= 1 << bit;
+        } else {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] &= ~(1 << bit);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestMapSlotAuxiliaryFlag);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldSetMapSlotValueFlag);
+void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
+    if (mapId < FIELD_MAP_ID_LIMIT) {
+        s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
+        if (enabled) {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] |= 1 << bit;
+        } else {
+            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] &= ~(1 << bit);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldTestMapSlotValueFlag);
 
