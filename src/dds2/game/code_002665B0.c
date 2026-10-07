@@ -1283,7 +1283,65 @@ s32 func_00269418(MenuList *list) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00269478);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269638);
+void func_00269638(s32 close, MenuSlotState *host) {
+    struct {
+        s32 slot;
+        s32 x;
+        s32 y;
+    } rows[4] = {
+        {0, 0x1C0, 0x238},
+        {0x40, 0x1C0, 0x380},
+        {0x41, 0x320, 0x2F8},
+        {0x42, 0x3B0, 0x3D8}
+    };
+    s32 count = host->secondaryList->count;
+    s32 slot;
+    s32 x;
+    s32 y;
+    s32 i;
+    u32 progress;
+    EffectSlotSet *slots;
+
+    if (count > 7) {
+        count = 7;
+    }
+    itfDrawGridWithResolvedSlot(rows[2].x, rows[2].y, 0, 0x80,
+                               host->resourceBank[0], rows[2].slot, 0x52);
+    slot = rows[3].slot;
+    x = rows[3].x;
+    y = rows[3].y;
+    for (i = 0; i < count; i++) {
+        itfDrawGridWithResolvedSlot(x, y, 0, 0,
+                                   host->resourceBank[0], slot, 0x52);
+        y += 0xB0;
+    }
+    itfGridLookupValueOrDefault((EffectSlotSet *)host->resourceBank[0], slot);
+    mnuCallInitWide(0x3B0, 0x3D8, 0, (s32)host->secondaryList, 0x52);
+    slot = func_00269418(host->secondaryList);
+    itfDrawGridWithResolvedSlot(rows[0].x, rows[0].y, 0, 0x80,
+                               host->resourceBank[0], slot, 0x52);
+    itfDrawGridWithResolvedSlot(rows[1].x, rows[1].y + count * 0xB0 - 0xB0, 0, 0x80,
+                               host->resourceBank[0], rows[1].slot, 0x52);
+    slot = func_00269418(host->secondaryList);
+    slots = (EffectSlotSet *)host->resourceBank[0];
+    progress = ((u32)*(u8 *)&slots->workEntries[slot].cornerColors[0] << 8) /
+               *(u8 *)&slots->workEntries[slot].savedColors[0];
+    if (close != 0) {
+        if (host->secondaryList->scale > 0) {
+            host->secondaryList->scale -= 0x40;
+        }
+        if (host->secondaryList->scale < 0) {
+            host->secondaryList->scale = 0;
+        }
+    } else if (progress == 0x100) {
+        if (host->secondaryList->scale < 0x100) {
+            host->secondaryList->scale += 0x40;
+        }
+        if (host->secondaryList->scale > 0x100) {
+            host->secondaryList->scale = 0x100;
+        }
+    }
+}
 
 
 
@@ -2183,7 +2241,6 @@ s32 evtBDispatchSyncC(s32 request) {
 
     return menuSetHandler(state, 2, (void *)request);
 }
-INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FC8);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FF8);
 
