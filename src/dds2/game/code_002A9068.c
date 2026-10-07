@@ -475,15 +475,16 @@ void movReleaseTitleEffects(u32 *resourceSlots) {
 
 void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *resources,
                                      u32 unused, PartyPanel *records) {
-    /* The SDK returns u32 handles; this bank snapshots their resolved instances. */
+    /* Loader callbacks publish instance addresses through these u32 output slots. */
     func_002BCD90(container, records, (struct EffectSlotSet *)resources->baseResources[0],
-                 1, resources->baseResources[1], 0x2d, resources->baseResources[1], 0x1d);
+                 1, (struct EffectSlotSet *)resources->baseResources[1], 0x2d,
+                 (struct EffectSlotSet *)resources->baseResources[1], 0x1d);
     func_002BC498(container, resources->baseResources[1]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);
     func_002BCA98(container);
-    mnuSetPanelSlotValues(container, resources->baseResources[1]);
+    mnuSetPanelSlotValues(container, (struct EffectSlotSet *)resources->baseResources[1]);
 }
 
 /* Snapshot base handles, then queue the main, extra and paired sprite groups.

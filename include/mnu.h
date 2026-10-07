@@ -373,6 +373,22 @@ typedef struct MenuPageBar {
     s32 holdEffectUpdate;
 } MenuPageBar;
 
+/* One command owns both complete 128-entry record arrays. The second
+ * initializer explicitly writes all 128 entries, independent of table spacing. */
+typedef struct MenuCommandPosition {
+    s32 x;
+    s32 y;
+    s32 targetX;
+    s32 targetY;
+} MenuCommandPosition;
+
+typedef struct MenuCommandMotion {
+    s32 value; /* Phase step for kind 0, opacity factor for kind 1. */
+    s32 delay;
+    s32 phase;
+    s32 scale;
+} MenuCommandMotion;
+
 typedef struct MenuQueuedCommand {
     u32 unk0;
     s32 kind;
@@ -381,31 +397,44 @@ typedef struct MenuQueuedCommand {
     s32 unk10;
     s32 initialValue;
     s32 argument;
+    struct EffectSlotSet *resources; /* 0x1C: the real draw resource instance. */
+    s32 particleCount;
+    MenuCommandPosition positions[128]; /* 0x24 */
+    MenuCommandMotion motion[128];      /* 0x824 */
 } MenuQueuedCommand;
 
-/* A page owns two content banks; sprite/stat fields belong to each bank. */
-typedef struct MenuPageSlotContent {
-    u8 pad00[4];
-    u32 icon[3];
-    MenuPageBar hp;
-    MenuPageBar mp;
-    u32 frame[8];
-    struct MenuSprites *windowSprites;
-    u32 iconBundle;
-    u32 unkD8;
-    u8 padDC[8];
-    MenuQueuedCommand command;
-    s32 unk100;
-    u8 pad104[0xF20];
-} MenuPageSlotContent;
-
+/* One resource prefix followed by two complete command records. Resource
+ * destructors visit this prefix once, while command routines use 0x1024 strides. */
 typedef struct MenuPageSlot {
     s32 kind;
     u32 flags;
-    u8 pad08[4];
-    MenuPageSlotContent contents[2];
-    u8 pad2054[0xE4];
+    u8 pad08[8];
+    struct EffectSlotSet *icon[3]; /* 0x10 */
+    MenuPageBar hp;               /* 0x1C */
+    MenuPageBar mp;               /* 0x6C */
+    struct EffectSlotSet *frame[8]; /* 0xBC */
+    struct MenuSprites *windowSprites; /* 0xDC */
+    u32 iconBundle;
+    u32 unkE4;
+    u8 padE8[8];
+    MenuQueuedCommand commands[2]; /* 0xF0 and 0x1114 */
 } MenuPageSlot;
+
+typedef char MenuCommandPosition_size_check[(sizeof(MenuCommandPosition) == 0x10) ? 1 : -1];
+typedef char MenuCommandMotion_size_check[(sizeof(MenuCommandMotion) == 0x10) ? 1 : -1];
+typedef char MenuQueuedCommand_size_check[(sizeof(MenuQueuedCommand) == 0x1024) ? 1 : -1];
+typedef char MenuQueuedCommand_resource_check[((u32)&((MenuQueuedCommand *)0)->resources == 0x1C) ? 1 : -1];
+typedef char MenuQueuedCommand_count_check[((u32)&((MenuQueuedCommand *)0)->particleCount == 0x20) ? 1 : -1];
+typedef char MenuQueuedCommand_positions_check[((u32)&((MenuQueuedCommand *)0)->positions == 0x24) ? 1 : -1];
+typedef char MenuQueuedCommand_motion_check[((u32)&((MenuQueuedCommand *)0)->motion == 0x824) ? 1 : -1];
+typedef char MenuPageSlot_size_check[(sizeof(MenuPageSlot) == 0x2138) ? 1 : -1];
+typedef char MenuPageSlot_icon_check[((u32)&((MenuPageSlot *)0)->icon == 0x10) ? 1 : -1];
+typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->hp == 0x1C) ? 1 : -1];
+typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->mp == 0x6C) ? 1 : -1];
+typedef char MenuPageSlot_frame_check[((u32)&((MenuPageSlot *)0)->frame == 0xBC) ? 1 : -1];
+typedef char MenuPageSlot_sprites_check[((u32)&((MenuPageSlot *)0)->windowSprites == 0xDC) ? 1 : -1];
+typedef char MenuPageSlot_commands_check[((u32)&((MenuPageSlot *)0)->commands == 0xF0) ? 1 : -1];
+
 #else
 typedef struct MenuPageSlot {
     s32 kind;
@@ -433,9 +462,9 @@ typedef struct MenuPageWindow {
 #ifdef VERSION_DDS2
     struct EffectSlotSet *resources; /* 0x0C: resolved base-resource handle */
     s32 slot;
-    u32 secondaryResource;
+    struct EffectSlotSet *secondaryResource;
     s32 secondarySlot;
-    u32 alternateResource;
+    struct EffectSlotSet *alternateResource;
     s32 alternateSlot;
 #else
     s32 source;
@@ -445,9 +474,15 @@ typedef struct MenuPageWindow {
     s32 unk1C;
     s32 unk20;
 #endif
+#ifdef VERSION_DDS2
+    /* One main resource bank, copied and consumed in two eight-entry halves. */
+    struct EffectSlotSet *mainResources[16];
+    struct EffectSlotSet *handlesC[5];
+#else
     s32 handlesA[8];
     s32 handlesB[8];
     s32 handlesC[5];
+#endif
     MenuPageSlot slots[5];
     struct MenuList *lists[2];
     s32 selected;
@@ -458,6 +493,12 @@ typedef struct MenuPageWindow {
 #ifdef VERSION_DDS2
 typedef char MenuPageWindow_size_must_be_0xA6A4[
     sizeof(MenuPageWindow) == 0xA6A4 ? 1 : -1];
+typedef char MenuPageWindow_mainResources_offset_check[
+    ((u32)&((MenuPageWindow *)0)->mainResources == 0x24) ? 1 : -1];
+typedef char MenuPageWindow_mainResources_extent_check[
+    sizeof(((MenuPageWindow *)0)->mainResources) == 0x40 ? 1 : -1];
+typedef char MenuPageWindow_extraResources_offset_check[
+    ((u32)&((MenuPageWindow *)0)->handlesC == 0x64) ? 1 : -1];
 typedef char MenuPageWindow_resources_offset_check[
     ((u32)&((MenuPageWindow *)0)->resources == 0x0C) ? 1 : -1];
 typedef char MenuPageWindow_slot_offset_check[
@@ -472,7 +513,11 @@ typedef char MenuPageWindow_alternateSlot_offset_check[
     ((u32)&((MenuPageWindow *)0)->alternateSlot == 0x20) ? 1 : -1];
 
 void func_002BCD90(MenuPageWindow *, PartyPanel *, struct EffectSlotSet *,
-                   s32, u32, s32, u32, s32);
+                   s32, struct EffectSlotSet *, s32, struct EffectSlotSet *, s32);
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *, u32 *);
+void mnuCopySecondaryWindowHandles(MenuPageWindow *, u32 *);
+void mnuRegisterResourceHandles(MenuPageWindow *, u32 *);
+void mnuSetPanelSlotValues(MenuPageWindow *, struct EffectSlotSet *);
 void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 #endif
 
