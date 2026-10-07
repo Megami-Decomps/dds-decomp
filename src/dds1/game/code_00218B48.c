@@ -1237,15 +1237,16 @@ void mdlLoadViewerResourceAndResetCursors(void) {
     mdlViewerState.nodeCursor = 0;
 }
 
-extern u128 D_003D7B20;
-
-extern u128 D_003D7B30;
-
-extern u128 D_003D7B40;
-
 typedef struct {
     f32 x, y, z, w;
 } __attribute__((aligned(16))) MdlEyeVec;
+
+extern MdlEyeVec D_003D7B20;
+
+extern MdlEyeVec D_003D7B30;
+
+extern u128 D_003D7B40;
+
 
 extern MdlEyeVec D_00367A10;
 
@@ -2267,11 +2268,12 @@ extern char D_003BBCD0[]; /* "%f" */
 extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
-extern void fileWaitReady(s32 file);
+extern void fileWaitReady(u32 requestAddress);
 extern s32 fileGetResourceHandle(s32 file);
 extern char *fileGetLoadedDataAddress(s32 file);
 extern s32 fileGetResourceSize(s32 file);
-extern void filePollEntryCleanup(s32 file);
+struct FileCleanup;
+extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern s32 func_00301588();
 extern s32 memcmp(const void *, const void *, u32);
 
@@ -2302,7 +2304,7 @@ void mdlLoadViewerPresentationConfig(void) {
     resourceHandle = fileGetResourceHandle(fileRequest);
     fileData = fileGetLoadedDataAddress(fileRequest);
     fileSize = fileGetResourceSize(fileRequest);
-    filePollEntryCleanup(fileRequest);
+    filePollEntryCleanup((struct FileCleanup *)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
