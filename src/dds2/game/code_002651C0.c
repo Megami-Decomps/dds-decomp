@@ -89,7 +89,7 @@ u32 func_002652D8(void) {
 s32 evtMenuPollWindow(s32 callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
     s32 *window = &context->popupState;
-    s32 state = func_002C4038(context->transitionWork, window, 0, (void *)callback);
+    s32 state = func_002C4038(&context->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {

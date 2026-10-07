@@ -657,7 +657,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     work = sdfResourceRetainAddress(handle);
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->handle = handle;
-    mnuClearPanelTransitionState(work->transition.data);
+    mnuClearPanelTransitionState(&work->transition.data);
     work->fadeTarget = mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_003D05C8);
     evtSetMessageWindowPageValue(200);
@@ -683,7 +683,6 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
 
 extern u32 kwlnTaskGetUserValue();
 extern void effDestroyResourceSlotSet(s32);
-extern void mnuDrainPanelTransitions(s32, s32);
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 extern void func_00303D58(s32);
@@ -697,7 +696,7 @@ void brsStaffTaskDestroy(s32 taskArg) {
     if (context->teardownHandle != 0) {
         effDestroyResourceSlotSet(context->teardownHandle);
     }
-    mnuDrainPanelTransitions((s32)context->transition.data, taskArg);
+    mnuDrainPanelTransitions(&context->transition.data, taskArg);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }

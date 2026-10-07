@@ -48,7 +48,7 @@ typedef struct BrsActiveProgressList {
 } BrsActiveProgressList;
 
 typedef struct BrsResultTransition {
-    u8 data[0x4C];
+    MenuPopupState data;
     s32 state;
 } BrsResultTransition;
 

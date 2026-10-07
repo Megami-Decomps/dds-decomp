@@ -2,29 +2,10 @@
 #define MNU_H
 
 #include "common.h"
+#include "mnu_transition.h"
 #ifdef VERSION_DDS2
 #include "mnu_shop.h"
 #endif
-
-typedef u32 (*MenuPopupCallback)();
-
-typedef struct MenuPopupEntry {
-    u32 flags;
-    MenuPopupCallback enter;
-    MenuPopupCallback leave;
-    MenuPopupCallback start;
-    MenuPopupCallback update;
-    MenuPopupCallback finish;
-    MenuPopupCallback canEnter;
-} MenuPopupEntry;
-
-/* Both games keep sixteen saved entries and the two closed-entry addresses. */
-typedef struct MenuPopupState {
-    s32 count;
-    MenuPopupEntry *entries[16];
-    s32 entryAddress;
-    s32 lastEntryAddress;
-} MenuPopupState;
 
 /* DDS2 scheduler word: zero or the encoded next-handler address. */
 extern s32 func_002C4038(void *work, s32 *entrySlot, s32 mode, void *callback);
@@ -557,7 +538,7 @@ typedef struct MenuTerminalContext {
     s32 resourceHandle;
     u8 pad04[4];
     s32 type;
-    u8 transitionWork[0x4C];
+    MenuPopupState transitionWork;
     s32 popupState;
     s32 stateTable;
     s32 messageResources[2];

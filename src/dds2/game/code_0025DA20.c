@@ -51,7 +51,6 @@ extern s32 mnuFinishCampPopup(s32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern u8 *sdfResourceRetainAddress(s32);
-extern void mnuClearPanelTransitionState(u8 *);
 extern void mnuInitializeShopStatusBatches(MenuTerminalContext *);
 extern void func_002945B8(MenuTerminalContext *);
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
@@ -133,8 +132,6 @@ extern void mnuReleaseWindowTextures();
 extern void effDestroyResourceSlotSet();
 
 extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
-
-extern void mnuDrainPanelTransitions(s32, s32);
 
 extern s32 dspCloseChannel(void);
 
@@ -1330,7 +1327,7 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     obj = (MenuTerminalContext *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
     obj->resourceHandle = handle;
-    mnuClearPanelTransitionState(obj->transitionWork);
+    mnuClearPanelTransitionState(&obj->transitionWork);
     mnuInitializeShopStatusBatches(obj);
     obj->options = func_00260460();
     obj->availableCount = mnuCountActivePartyEntries();
@@ -1350,7 +1347,7 @@ void mnuTerminalReleaseContextAndResources(s32 arg) {
         mnuShopReleaseWindowSprites(0, scene);
         mnuShopReleaseWindowAndEffectResources(scene);
         mnuShopReleaseSceneObjects(scene);
-        mnuDrainPanelTransitions((s32)scene->transitionWork, arg);
+        mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->messageResources);
         sdfReleaseResourceAllocation(scene->resourceHandle);
@@ -1416,7 +1413,7 @@ s32 mnuCampConsumePanelTaskCompletion(void) {
 }
 
 static inline s32 campSetHandler(MenuTerminalContext *context, s32 mode, void *callback) {
-    return func_002C4038(context->transitionWork, &context->popupState, mode, callback);
+    return func_002C4038(&context->transitionWork, &context->popupState, mode, callback);
 }
 
 s32 mnuPreparePopupAndDispatchSelection(s32 callback) {
