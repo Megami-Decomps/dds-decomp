@@ -154,9 +154,10 @@ extern u32 func_0029C230(u32);
 
 extern void *fileDuplicateJob(void *);
 
-extern s32 sdfAllocGeneralBlock();
+struct SdfMemBlock;
+extern struct SdfMemBlock *sdfAllocGeneralBlock(s32);
 
-extern s32 sdfResourceRetainAddress();
+extern u32 sdfResourceRetainAddress();
 
 typedef struct DevState DevState;
 extern DevState *sdfDevCreateCommandState(s32);
@@ -637,7 +638,12 @@ typedef struct FileQueue {
     u8 pad78[8];
     s32 count;
     u32 unk84;
-    FileJob *last;   /* 0x88: append end */
+    /* Disk reads at 295A90/2D5B38 use a relative job offset here;
+     * runtime append at 293F60/2D3FC8 stores the tail pointer. */
+    union {
+        FileJob *last;
+        u32 entryOffset;
+    };              /* 0x88 */
     FileJob *first;  /* 0x8C: traversal start */
 } FileQueue;
 extern void fileQueueSetPosition(FileQueue *queue, void *vec);
@@ -4756,7 +4762,46 @@ INCLUDE_ASM(const s32, "game/code_0028A150", func_00295018);
 
 INCLUDE_ASM(const s32, "game/code_0028A150", func_002954F0);
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_002959E8);
+FileQueue *func_002959E8(s32 entry) {
+    DevState *command = sdfDevCreateCommandState(entry);
+    s32 size;
+    struct SdfMemBlock *allocation;
+    FileQueue *image;
+    FileQueue *queue;
+    FileJob *copy;
+    FileJob *src;
+    u32 i;
+
+    if (command == NULL) {
+        return NULL;
+    }
+    size = sdfDevQueueControlAndWait(command);
+    allocation = sdfAllocGeneralBlock(size);
+    image = (FileQueue *)sdfResourceRetainAddress(allocation);
+    sdfDevQueueReadAndWait(command, image, size);
+    sdfDevWaitThenReleaseCommandState(command);
+    queue = fileQueueCreate();
+    PCP_COPY_VECTOR(queue->offset, image->offset);
+    PCP_COPY_VECTOR(queue->axis, image->offset);
+    queue->transformValue = image->transformValue;
+    queue->unk68 = image->unk68;
+    for (i = 0, src = (FileJob *)((u8 *)image + image->entryOffset);
+         i < image->count; i++, src++) {
+        if ((src->flags & 1) == 0) {
+            copy = fileDuplicateAndAppendJob(queue, (u8 *)image + src->id);
+        } else {
+            copy = fileJobDuplicateAfter(queue, fileQueueGetAt(queue, src->id));
+        }
+        if (src->flags & 2) {
+            fileQueueLinkJobToSectorLeader(queue, copy, fileQueueGetAt(queue, src->sector));
+        }
+        fileJobCopyHeader(copy, src);
+        strcpy(copy->name, src->name);
+        copy->flags = src->flags;
+    }
+    sdfReleaseResourceAllocation(allocation);
+    return queue;
+}
 
 FileJob *fileQueueFindById(FileQueue *queue, u32 id) {
     FileJob *job = queue->first;
