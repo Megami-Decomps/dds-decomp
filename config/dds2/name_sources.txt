@@ -1730,10 +1730,12 @@
 0x001922B0	effMagatuhiCreateBezierHistoryWork	inferred	readability/matching review (QP16)
 0x00192438	effMagatuhiReleaseWideWorkResources	inferred	Releases math and owner resources plus retained allocation from wide work. [names_reviewed6.tsv]
 0x00192470	effMagatuhiBuildBezierControlPointsVU	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:269:func_00192470; Builds all four cubic control points with independently configured camera/path-perpendicular jitter, resets the per-slot parameter and life-derived step, and initializes the associated value work.; source=names_P6.tsv:3 [names_qp12_apply.tsv]
+0x00192778	effMagatuhiUpdateBezierHistoryParticles	inferred	Advances delayed Bezier history particles, samples curve slots, applies fade, submits positions and respawns expired particles; the Magatuhi operation row at 0x003B2068 stores this function at +0x14; paired DDS1 twin 0x0018AB40.
 0x00192990	effMagatuhiSetControlPointParams	inferred	readability/matching review (QP16)
 0x00192C20	effMagatuhiCreateRingWork	inferred	readability/matching review (QP16)
 0x00192E08	effMagatuhiReleaseOwnerAndBuffer	inferred	Releases the first managed resource and its owned buffer. [names_reviewed6.tsv]
 0x00192E38	effMagatuhiInitParticleA	inferred	randomizes a 0x18 particle then func_00189C80/effMagatuhiSetValue [names_M61_EffVu.tsv]
+0x00192F80	effMagatuhiUpdateRingParticles	inferred	Updates ring particle positions, fade and respawn state; the Magatuhi operation row at 0x003B2080 stores this function at +0x14; paired DDS1 twin 0x0018B348.
 0x00193238	effMagatuhiSetRingOrigin	inferred	readability/matching review (QP16)
 0x00193250	effMagatuhiSetRingColor	inferred	readability/matching review (QP16)
 0x00193258	effMagatuhiCopyRingMatrix	inferred	readability/matching review (QP16)
@@ -1741,12 +1743,14 @@
 0x00193488	effMagatuhiCreateOrbitWork	inferred	readability/matching review (QP16)
 0x00193638	effMagatuhiReleaseOwnerAndExtraBuffer	inferred	Releases the second managed resource and its extra buffer. [names_reviewed6.tsv]
 0x00193668	effMagatuhiInitOrbitParticle	inferred	readability/matching review (QP16)
+0x001937C0	effMagatuhiUpdateOrbitParticles	inferred	Updates orbit particle positions, fade and respawn state while advancing height, angle and radius; the Magatuhi operation row at 0x003B2098 stores this function at +0x14; paired DDS1 twin 0x0018BB88.
 0x00193A88	effMagatuhiSetOrbitOrigin	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:687:func_00193A88; Copies the orbit effect origin vector used by the particle update.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x00193AA0	effMagatuhiSetOrbitColor	inferred	readability/matching review (QP16)
 0x00193AA8	effMagatuhiCopyOrbitMatrix	inferred	readability/matching review (QP16)
 0x00193CF8	effMagatuhiCreateDriftWork	inferred	readability/matching review (QP16)
 0x00193EE0	effMagatuhiReleaseSecondaryOwnerAndBuffer	inferred	Releases the work's second managed resource and regular owned buffer. [names_reviewed6.tsv]
 0x00193F10	effMagatuhiInitializeDriftParticle	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:823:func_00193F10; Randomizes normalized planar position/drift, scale, angle and lift, then resets the particle value slot.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x00194100	effMagatuhiUpdateDriftParticles	inferred	Updates drift particle positions, fade and respawn state while accumulating lift and advancing scale and angle; the Magatuhi operation row at 0x003B20B0 stores this function at +0x14; paired DDS1 twin 0x0018C4C8.
 0x001943E0	effMagatuhiSetDriftOrigin	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:863:func_001943E0; Copies the drift effect origin vector.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001943F8	effMagatuhiSetDriftColor	inferred	readability/matching review (QP16)
 0x00194400	effMagatuhiCopyDriftMatrix	inferred	readability/matching review (QP16)

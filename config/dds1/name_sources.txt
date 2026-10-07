@@ -2103,11 +2103,13 @@
 0x0018A678	effMagatuhiCreateBezierHistoryWork	inferred	readability/matching review (QP16)
 0x0018A800	effMagatuhiReleaseWideWorkResources	inferred	Releases math and owner resources plus retained allocation from wide work. [names_reviewed6.tsv]
 0x0018A838	effMagatuhiBuildBezierControlPointsVU	inferred	confidence=high; matched-C; src/dds1/effect/effMagatuhi.c:269:func_0018A838; Builds all four cubic control points with independently configured camera/path-perpendicular jitter, resets the per-slot parameter and life-derived step, and initializes the associated value work.; source=names_P6.tsv:3 [names_qp12_apply.tsv]
+0x0018AB40	effMagatuhiUpdateBezierHistoryParticles	inferred	Advances delayed Bezier history particles, samples curve slots, applies fade, submits positions and respawns expired particles; the Magatuhi operation row at 0x00355738 stores this function at +0x14; paired DDS2 twin 0x00192778.
 0x0018AD58	effMagatuhiSetControlPointParams	inferred	readability/matching review (QP16)
 0x0018ADD8	effMagatuhiInitializeInterpolatedHistory	inferred	confidence=high; src/dds1/effect/effMagatuhi.c:func_0018ADD8; Randomizes grouped start delays, samples two scaled positions and fills value-work history by interpolation. [names_qp9.tsv]
 0x0018AFE8	effMagatuhiCreateRingWork	inferred	readability/matching review (QP16)
 0x0018B1D0	effMagatuhiReleaseOwnerAndBuffer	inferred	Releases the first managed resource and its owned buffer. [names_reviewed6.tsv]
 0x0018B200	effMagatuhiInitParticleA	inferred	randomizes a 0x18 particle then func_00189C80/effMagatuhiSetValue [names_M61_EffVu.tsv]
+0x0018B348	effMagatuhiUpdateRingParticles	inferred	Updates ring particle positions, fade and respawn state; the Magatuhi operation row at 0x00355750 stores this function at +0x14; paired DDS2 twin 0x00192F80.
 0x0018B600	effMagatuhiSetRingOrigin	inferred	readability/matching review (QP16)
 0x0018B618	effMagatuhiSetRingColor	inferred	readability/matching review (QP16)
 0x0018B620	effMagatuhiCopyRingMatrix	inferred	readability/matching review (QP16)
@@ -2115,6 +2117,7 @@
 0x0018B850	effMagatuhiCreateOrbitWork	inferred	readability/matching review (QP16)
 0x0018BA00	effMagatuhiReleaseOwnerAndExtraBuffer	inferred	Releases the second managed resource and its extra buffer. [names_reviewed6.tsv]
 0x0018BA30	effMagatuhiInitOrbitParticle	inferred	readability/matching review (QP16)
+0x0018BB88	effMagatuhiUpdateOrbitParticles	inferred	Updates orbit particle positions, fade and respawn state while advancing height, angle and radius; the Magatuhi operation row at 0x00355768 stores this function at +0x14; paired DDS2 twin 0x001937C0.
 0x0018BE50	effMagatuhiSetOrbitOrigin	inferred	confidence=high; matched-C; src/dds1/effect/effMagatuhi.c:687:func_0018BE50; Copies the orbit effect origin vector used by the particle update.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x0018BE68	effMagatuhiSetOrbitColor	inferred	readability/matching review (QP16)
 0x0018BE70	effMagatuhiCopyOrbitMatrix	inferred	readability/matching review (QP16)
@@ -2122,6 +2125,7 @@
 0x0018C0C0	effMagatuhiCreateDriftWork	inferred	readability/matching review (QP16)
 0x0018C2A8	effMagatuhiReleaseSecondaryOwnerAndBuffer	inferred	Releases the work's second managed resource and regular owned buffer. [names_reviewed6.tsv]
 0x0018C2D8	effMagatuhiInitializeDriftParticle	inferred	confidence=high; matched-C; src/dds1/effect/effMagatuhi.c:823:func_0018C2D8; Randomizes normalized planar position/drift, scale, angle and lift, then resets the particle value slot.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x0018C4C8	effMagatuhiUpdateDriftParticles	inferred	Updates drift particle positions, fade and respawn state while accumulating lift and advancing scale and angle; the Magatuhi operation row at 0x00355780 stores this function at +0x14; paired DDS2 twin 0x00194100.
 0x0018C7A8	effMagatuhiSetDriftOrigin	inferred	confidence=high; matched-C; src/dds1/effect/effMagatuhi.c:863:func_0018C7A8; Copies the drift effect origin vector.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x0018C7C0	effMagatuhiSetDriftColor	inferred	readability/matching review (QP16)
 0x0018C7C8	effMagatuhiCopyDriftMatrix	inferred	readability/matching review (QP16)
