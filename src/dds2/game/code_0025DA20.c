@@ -1058,6 +1058,14 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AE0);
 
+extern s32 mnuFirstPresentMainCharacterIndex(void);
+extern u32 effLoadIndexedResource(s32 category, s32 index, s32 keepAllocation);
+extern MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
+                    u32 resourceHandle, s32 *indices, u32 unused);
+extern const char *D_003CE470[4];
+extern const char *D_003CE480[]; /* Two entries in external .data, not small data. */
+extern const char *D_003CE488[4];
+
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
 
 
