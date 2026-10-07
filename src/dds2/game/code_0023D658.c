@@ -499,12 +499,12 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     unit->value = (u32)unit->endpointWork;
 }
 
-/* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
-s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
+/* Find auxiliary coordinates for the unit-bound slot, else the shared fallback. */
+s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == id) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == (s32)unit) {
             *outX = evtUnitVectorSlots[i].vec[12];
             *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
