@@ -19,7 +19,7 @@ typedef struct UiQuadWords {
 } UiQuadWords; // 0x10
 
 
-extern s32 sdfGridSeekSelectedNodeByIndex(s32, void *);
+extern s32 sdfGridSeekSelectedNodeByIndex(s32, GridTextWidget *);
 
 
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -997,30 +997,29 @@ GridTextListItem *itfFindGridNodeByKey(u32 key, GridTextWidget *widget) {
     return item;
 }
 
-s32 sdfGridSeekSelectedNodeByIndex(s32 index, void *w) {
-    u8 *widget = (u8 *)w;
-    s16 count = ((GridTextWidget *)widget)->itemCount;
+s32 sdfGridSeekSelectedNodeByIndex(s32 index, GridTextWidget *widget) {
+    s16 count = widget->itemCount;
     u16 width;
-    u8 *first;
+    GridTextListItem *first;
 
     if (index >= count) {
         return 0;
     }
-    first = (u8 *)((GridTextWidget *)widget)->head;
-    ((GridTextWidget *)widget)->cursorRow = 0;
-    ((GridTextWidget *)widget)->firstVisible = (GridTextListItem *)first;
-    ((GridTextWidget *)widget)->selected = (GridTextListItem *)first;
+    first = widget->head;
+    widget->cursorRow = 0;
+    widget->firstVisible = first;
+    widget->selected = first;
     if (index > 0) {
-        width = (u16)((GridTextWidget *)widget)->rows;
+        width = (u16)widget->rows;
         do {
-            u8 *current = (u8 *)((GridTextWidget *)widget)->firstVisible;
-            if (width >= count - ((GridTextListItem *)current)->index) {
-                ((GridTextWidget *)widget)->cursorRow++;
+            GridTextListItem *current = widget->firstVisible;
+            if (width >= count - current->index) {
+                widget->cursorRow++;
             } else {
-                ((GridTextWidget *)widget)->firstVisible = ((GridTextListItem *)current)->next;
+                widget->firstVisible = current->next;
             }
-            current = (u8 *)((GridTextWidget *)widget)->selected;
-            ((GridTextWidget *)widget)->selected = ((GridTextListItem *)current)->next;
+            current = widget->selected;
+            widget->selected = current->next;
         } while (--index != 0);
     }
     return 1;
