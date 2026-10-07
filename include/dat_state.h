@@ -90,7 +90,8 @@ typedef struct DatPartyRecord {
     u8 profileId;
     u8 pad56[2];
     u32 skillFlags[85];                    /* 0x058: scrClearFlagsTable clears all 0x154 bytes. */
-    u8 pad1AC[4];
+    u16 unk1AC; /* Synced from the active battle record. */
+    u16 unk1AE; /* Synced from the active battle record. */
     s16 actionSlot;
     u16 itemId;
     s32 randomizedValue;                  /* 0x1B4: initialized to 0x12 minus a four-way roll. */
