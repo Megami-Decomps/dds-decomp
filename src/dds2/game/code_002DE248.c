@@ -2936,6 +2936,35 @@ typedef struct EffPointSet {
     u8 *allocation; // 0x1C
 } EffPointSet;
 
+/* Class kind 3 copies this complete 0x68-byte serialized parameter record.
+ * The color/alpha prefix is the existing interpolation provider's layout;
+ * alphaTrack.surfaceIndex at 0x28 also selects the point-set draw type. */
+typedef struct EffRadialRingParams {
+    SdfColorTrack colorTrack; /* 0x00 */
+    SdfAlphaTrack alphaTrack; /* 0x24 */
+    u32 duration;            /* 0x34 */
+    u32 segments;            /* 0x38 */
+    u8 flag;                 /* 0x3C */
+    u8 pad3D[3];
+    f32 baseRadius;          /* 0x40 */
+    u32 firstColor;          /* 0x44 */
+    u32 middleColor;         /* 0x48 */
+    u32 lastColor;           /* 0x4C */
+    f32 widths[3];           /* 0x50 */
+    f32 speed;               /* 0x5C */
+    f32 acceleration;        /* 0x60 */
+    u8 reverseTime;          /* 0x64 */
+    u8 pad65[3];
+} EffRadialRingParams;
+
+/* Class kind 3 owns a separately allocated four-byte point-set reference. */
+typedef struct EffRingResource {
+    EffPointSet *pointSet;
+} EffRingResource;
+
+typedef char EffRadialRingParams_size_must_be_0x68[(sizeof(EffRadialRingParams) == 0x68) ? 1 : -1];
+typedef char EffRingResource_size_must_be_0x04[(sizeof(EffRingResource) == 0x04) ? 1 : -1];
+
 /* Release the track set's retained reference, draw asset, and allocation. */
 void effReleaseResourceRefs(EffTrackSet *work) {
     s32 *count;
@@ -3305,14 +3334,14 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     }
 }
 
-void effResetClassRingFrame(s32 work) {
-    ((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->ring->frame = 0;
+void effResetClassRingFrame(EffClassWork *work) {
+    ((EffRingResource *)work->resource)->pointSet->color = 0;
 }
 
 /* Create a point-set reference and initialize four colors per segment. */
-u32 *effCreateRingHandle(u8 *work) {
-    u32 *pointSetRef = sdfAllocSizeClassBlock(4);
-    u32 segments = ((EffRingSource *)work)->segments;
+EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
+    EffRingResource *pointSetRef = sdfAllocSizeClassBlock(sizeof(EffRingResource));
+    u32 segments = work->segments;
     EffPointSet *pointSet;
     u32 *entry;
     u32 groups;
@@ -3322,16 +3351,16 @@ u32 *effCreateRingHandle(u8 *work) {
     u32 third;
 
     if (segments < 3) {
-        ((EffRingSource *)work)->segments = 3;
+        work->segments = 3;
         segments = 3;
     }
     pointSet = (EffPointSet *)effCreatePointSet4(segments);
-    first = ((EffRingSource *)work)->firstColor;
+    first = work->firstColor;
     groups = pointSet->rows / 4;
-    *pointSetRef = (u32)pointSet;
+    pointSetRef->pointSet = pointSet;
     entry = (u32 *)pointSet->tail;
-    second = ((EffRingSource *)work)->middleColor;
-    third = ((EffRingSource *)work)->lastColor;
+    second = work->middleColor;
+    third = work->lastColor;
     for (i = 0; i < groups; i++) {
         entry[0] = first;
         entry[1] = second;
@@ -3342,19 +3371,19 @@ u32 *effCreateRingHandle(u8 *work) {
     return pointSetRef;
 }
 
-void effReleaseRingHandle(u32 handle) {
-    effAssetQueueRelease(*(u32 *)handle);
-    sdfReleaseChipBlock(handle);
+void effReleaseRingHandle(EffRingResource *handle) {
+    effAssetQueueRelease((u32)handle->pointSet);
+    sdfReleaseChipBlock((u32)handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E6F48);
 
-void billDrawCellBlendB(BillCellDrawWork *work) {
-    u8 *config = work->config;
-    u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
-    u32 *list = work->instances;
-    u8 *out = (u8 *)list[0];
+void billDrawCellBlendB(EffClassWork *work) {
+    EffRadialRingParams *config = work->payload;
+    u32 limit = work->frame;
+    u32 progress = config->duration;
+    EffRingResource *list = (EffRingResource *)work->resource;
+    EffPointSet *out = list->pointSet;
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -3366,9 +3395,9 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&config->colorTrack, &config->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    color1[0] = work->baseColor;
+    color1[0] = work->color;
     EE_MMI_RGBA_UNPACK(color1, unit);
     VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
@@ -3376,11 +3405,11 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
+    out->color = blended[0];
     if ((packed & 0xFF000000) != 0) {
-        ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-        ((EffBillOutput *)out)->outputMode = ((EffBillConfig *)config)->outputMode;
-        VU0_LOAD_VF(vf10, work->transform);
+        out->type = config->alphaTrack.surfaceIndex;
+        out->flag = config->flag;
+        VU0_LOAD_VF(vf10, work->vectors.orientation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003E9100);
         VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
@@ -3389,7 +3418,7 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups(out, mtx);
+        effDrawFourPointGroups((u8 *)out, mtx);
     }
 }
 
