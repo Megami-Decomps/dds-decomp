@@ -404,7 +404,46 @@ void parDispatchByKind(ParObj *obj) {
     parKindConstructorEntries[obj->dispatchIndex].destroy();
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00161FE8);
+/* Draw live particles after applying the requested number of emitter updates. */
+void func_00161FE8(ParObj *effect) {
+    EffectBufferRecord *record;
+    BillObj *billboard;
+    u32 step;
+    s32 particleCount;
+    s32 lifetime;
+
+    if (effect->restartFlag == 0) {
+        return;
+    }
+    if (effect->pendingRestartSteps == 0) {
+        parKindConstructorEntries[effect->dispatchIndex].update(effect);
+    } else {
+        for (step = 0; step < effect->pendingRestartSteps; step++) {
+            parKindConstructorEntries[effect->dispatchIndex].update(effect);
+        }
+        effect->pendingRestartSteps = 0;
+    }
+    billboard = effect->billboard;
+    record = effect->buffer->records;
+    particleCount = effect->particleCount;
+    lifetime = effect->lifetimeFrames;
+    billSetChildScaleComponents(billboard, effect->billboardScale, effect->billboardScaleY);
+    if (particleCount > 0) {
+        step = particleCount;
+        do {
+            s32 age = record->unk20;
+
+            if (age < lifetime && age >= 0) {
+                PCP_COPY_VECTOR(billboard, record->position);
+                billboard->childParam = record->unk24;
+                billInvokeCallback(billboard);
+            }
+            step--;
+            record++;
+        } while (step != 0);
+    }
+    parSubmitKindDrawing(&effect->kindState);
+}
 
 /* Create another object of the same dispatch index; the existing call forwards
    no explicit arguments and this interface does not return the new object. */
