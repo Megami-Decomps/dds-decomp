@@ -4145,28 +4145,31 @@ BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void) {
     return task;
 }
 
-u32 btlCreateActorTransparency(u32 *task) {
-    BtlUnit *unit = *(BtlUnit **)task;
+typedef struct BtlActorTransparencyArgs {
+    BtlUnit *unit;
+} BtlActorTransparencyArgs;
+
+u32 btlCreateActorTransparency(BtlActorTransparencyArgs *args) {
+    BtlUnit *unit = args->unit;
     if (!(unit->flags & 2)) {
         return 0;
     }
     btlCreateUnitTransparency(unit);
-    (*(BtlUnit **)task)->flags |= 0x20000;
+    args->unit->flags |= 0x20000;
     return 1;
 }
 
-extern u32 btlCreateActorTransparency(u32 *);
 
-BtlRuntimeTask *btlCreateActorTransparencyTask(u32 value) {
+BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlActorTransparencyArgs *args;
     task->startCondition.kind = 1;
     task->taskId = 0x25;
     task->callback = btlCreateActorTransparency;
     task->endCondition.kind = 0;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->value = value;
+    args->unit = unit;
     return task;
 }
 
@@ -4944,7 +4947,7 @@ u32 btlApplyCameraKeysAndMarkRuntimeChange(u32 taskArgs) {
 
     work = btlGetRuntime();
     btlApplyEffectCameraKeyframes(taskArgs);
-    ((BtlState *)work)->runtimeFlags |= 0x80000;
+    ((BtlState *)work)->cameraCommand.flags |= 0x80000;
     return 1;
 }
 
@@ -4992,7 +4995,7 @@ void func_001E9410(void) {
     CameraData *data;
     BtlState *battle = (BtlState *)btlGetRuntime();
 
-    battle->camera.fov = 0.6981317f;
+    battle->cameraCommand.camera.fov = 0.6981317f;
     VU0_LOAD_VF(vf10, D_003B6D70);
     VU0_LOAD_VF(vf11, battle->position);
     VU0_ADD(vf10, vf10, vf11);
@@ -5013,17 +5016,17 @@ void func_001E9410(void) {
     dds3SetCameraFieldOfView(camera, 0.6981317f);
     dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
     battle->cameraObject = camera;
-    battle->pendingSoundList = btlAllocateIndexList(13);
+    battle->cameraCommand.targetList = btlAllocateIndexList(13);
     battle->battleFlags |= 0x10;
 }
 
 void btlClearPendingSoundList(void) {
     s32 context = btlGetRuntime();
-    BtlIndexList *list = ((BtlState *)context)->pendingSoundList;
+    BtlIndexList *list = ((BtlState *)context)->cameraCommand.targetList;
 
     if (list != 0) {
         btlFreeIndexList(list);
-        ((BtlState *)context)->pendingSoundList = 0;
+        ((BtlState *)context)->cameraCommand.targetList = 0;
     }
     ((BtlState *)context)->battleFlags &= ~0x10;
 }
@@ -5084,7 +5087,7 @@ u32 btlGetActiveUnitId(void) {
     s32 workAddress;
 
     workAddress = btlGetRuntime();
-    return ((BtlState *)workAddress)->activeUnitId;
+    return ((BtlState *)workAddress)->cameraCommand.status;
 }
 
 f32 btlGetPoseBlendProgress(u8 *unit) {
@@ -5093,15 +5096,15 @@ f32 btlGetPoseBlendProgress(u8 *unit) {
 
 s32 btlIsUnitInActiveList(void *unit) {
     u8 *work = (u8 *)btlGetRuntime();
-    u8 *slot = (u8 *)((BtlState *)work)->activeSlot;
+    u8 *slot = (u8 *)((BtlState *)work)->cameraCommand.link;
     u32 count;
     u32 i;
     if (slot != 0 && ((BtlActiveSlot *)slot)->unit == unit) {
         return 1;
     }
-    count = btlGetIndexListCount(((BtlState *)work)->pendingSoundList);
+    count = btlGetIndexListCount(((BtlState *)work)->cameraCommand.targetList);
     for (i = 0; i < count; i++) {
-        if (btlGetIndexListEntry(((BtlState *)work)->pendingSoundList, i) == unit) {
+        if (btlGetIndexListEntry(((BtlState *)work)->cameraCommand.targetList, i) == unit) {
             return 1;
         }
     }
@@ -5112,30 +5115,30 @@ void btlResetActiveUnitList(void) {
     s32 workAddress;
 
     workAddress = btlGetRuntime();
-    ((BtlState *)workAddress)->activeSlot = 0;
-    ((BtlState *)workAddress)->runtimeFlags = ((BtlState *)workAddress)->runtimeFlags | 0x400;
-    btlClearIndexList(((BtlState *)workAddress)->pendingSoundList);
+    ((BtlState *)workAddress)->cameraCommand.link = 0;
+    ((BtlState *)workAddress)->cameraCommand.flags = ((BtlState *)workAddress)->cameraCommand.flags | 0x400;
+    btlClearIndexList(((BtlState *)workAddress)->cameraCommand.targetList);
 }
 
 void btlClearRuntimeFlag2000(void) {
     s32 workAddress;
 
     workAddress = btlGetRuntime();
-    ((BtlState *)workAddress)->runtimeFlags = ((BtlState *)workAddress)->runtimeFlags & 0xffffdfff;
+    ((BtlState *)workAddress)->cameraCommand.flags = ((BtlState *)workAddress)->cameraCommand.flags & 0xffffdfff;
 }
 
 void btlSetRuntimeFlag2000(void) {
     s32 workAddress;
 
     workAddress = btlGetRuntime();
-    ((BtlState *)workAddress)->runtimeFlags = ((BtlState *)workAddress)->runtimeFlags | 0x2000;
+    ((BtlState *)workAddress)->cameraCommand.flags = ((BtlState *)workAddress)->cameraCommand.flags | 0x2000;
 }
 
 u32 btlIsRuntimeFlag2000Clear(void) {
     s32 workAddress;
 
     workAddress = btlGetRuntime();
-    return ((((s32)((BtlState *)workAddress)->runtimeFlags >> 0xd)) ^ 1U) & 1;
+    return ((((s32)((BtlState *)workAddress)->cameraCommand.flags >> 0xd)) ^ 1U) & 1;
 }
 
 typedef struct WorldObjectSub {
@@ -5259,7 +5262,7 @@ void btlResetCameraMotion(s32 action) {
     BtlUnit *unit;
     f32 current;
     f32 limit;
-    if (work->activeUnitId == 1 || btlHasSingleLinkedResource(action) != 0) {
+    if (work->cameraCommand.status == 1 || btlHasSingleLinkedResource(action) != 0) {
         for (unit = work->units; unit != 0; unit = unit->nextActor) {
             if (unit->flags & 1) {
                 if (unit->flags & 0x200) {
@@ -8288,7 +8291,7 @@ typedef union ActorEffectOwner {
 } ActorEffectOwner;
 
 typedef struct ActorEffectTaskArgs {
-    SoundEffectNode *source;
+    SoundResourceNode *source;
     SoundVoice *effect;
     ActorEffectOwner owner;
     u32 duration;
@@ -8296,14 +8299,14 @@ typedef struct ActorEffectTaskArgs {
 } ActorEffectTaskArgs;
 
 void sndStartEffectTask(ActorEffectTaskArgs *args) {
-    SoundEffectNode *source;
+    SoundResourceNode *source;
     BtlUnit *unit;
 
     args->effect = 0;
     sndCreateSystemEffect((u32 *)args->source);
     source = args->source;
     unit = args->owner.unit;
-    source->referenceCount++;
+    source->unk_04++;
     unit->unk334++;
 }
 
@@ -8319,7 +8322,7 @@ s32 func_00202100(ActorEffectTaskArgs *args) {
         return 1;
     }
     if (args->effect == 0) {
-        args->effect = func_00168548(args->source->handle, 0, unit, 0);
+        args->effect = func_00168548(args->source->resourceHandle, 0, unit, 0);
         effBattleUpdateSelectedValue(args->effect, args->duration);
     }
     if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
@@ -8344,7 +8347,7 @@ s32 func_00202100(ActorEffectTaskArgs *args) {
 }
 
 void sndFinishActorEffectTask(ActorEffectTaskArgs *args) {
-    SoundEffectNode *source;
+    SoundResourceNode *source;
     BtlUnit *unit;
 
     if (args->effect != 0) {
@@ -8352,13 +8355,13 @@ void sndFinishActorEffectTask(ActorEffectTaskArgs *args) {
     }
     source = args->source;
     unit = args->owner.unit;
-    source->referenceCount--;
+    source->unk_04--;
     unit->unk334--;
     sndDeleteSystemEffect((u32 *)source);
 }
 
 
-BtlRuntimeTask *sndCreateActorEffectTask(SoundEffectNode *source, BtlUnit *owner, u32 duration) {
+BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source, BtlUnit *owner, u32 duration) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(ActorEffectTaskArgs));
     ActorEffectTaskArgs *args;
 

@@ -233,7 +233,42 @@ void itfSetGridDescriptorControlBit(s32 object, s32 index) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00306F80", itfGridApplySqrtBoundsAndColorScale);
+s32 itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+    GridAngleTable *table;
+    s32 deltas[2];
+    EffectSlotGeometry *geometry = &out->geometry;
+    s32 *dimensions = geometry->bounds;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 factor;
+    s32 i = 0;
+
+    table = (GridAngleTable *)((EffMappedRecord *)owner->source)->status;
+    deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
+    deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
+    for (; i < 2; i++) {
+        s32 delta = deltas[i];
+        s32 scaled = (s32)(fsqrtf((f32)delta) * (f32)owner->value * (1.0f / 65536.0f));
+        if (delta > 0) {
+            dimensions[i] = delta - scaled * scaled;
+        } else {
+            dimensions[i] = scaled * scaled + delta;
+        }
+    }
+    if (table->mirrored != 0) {
+        factor = 0x10000 - owner->value;
+    } else {
+        factor = owner->value;
+    }
+    sourceColor = rectangle->savedColors;
+    destColor = geometry->cornerColors;
+    for (i = 0; i < 4; i++, sourceColor++, destColor++) {
+        u32 color = *sourceColor;
+        s32 alpha = *(u8 *)sourceColor;
+        *destColor = (color & ~0xFF) | (alpha * factor / 0x10000);
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
 s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
@@ -256,8 +291,8 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
     fractionalMask = 0xFFFF;
     deltas[0] = table->divisor << 4;
     deltas[1] = (((table->mirrored << 12) / 640) * rectangle->sourceHeight) / rectangle->sourceWidth;
-    previous[0] = out->xOffset;
-    previous[1] = out->yOffset;
+    previous[0] = out->geometry.bounds[0];
+    previous[1] = out->geometry.bounds[1];
     scaledWidth = (s32)(fsqrtf((f32)deltas[0]) * (f32)owner->value * (1.0f / 65536.0f));
     squares[0] = scaledWidth * scaledWidth;
     widthAdjustment = -((deltas[0] - squares[0]) / 2);
@@ -265,13 +300,13 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
     squares[1] = scaledHeight * scaledHeight;
     heightAdjustment = -((deltas[1] - squares[1]) / 2);
 
-    out->xOffset = widthAdjustment;
-    out->width += (previous[0] - widthAdjustment) * 2;
-    out->yOffset = heightAdjustment;
-    out->height += (previous[1] - heightAdjustment) * 2;
+    out->geometry.bounds[0] = widthAdjustment;
+    out->geometry.bounds[2] += (previous[0] - widthAdjustment) * 2;
+    out->geometry.bounds[1] = heightAdjustment;
+    out->geometry.bounds[3] += (previous[1] - heightAdjustment) * 2;
 
     sourceColor = rectangle->savedColors;
-    destColor = out->cornerColors;
+    destColor = out->geometry.cornerColors;
     i = 3;
 
     for (; i >= 0; i--, sourceColor++, destColor++) {
@@ -299,9 +334,9 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ow
 
     do {
         if (table->mirrored == 0) {
-            out->angleDegrees = 360.0f - (f32)owner->value * 360.0f * (1.0f / 65536.0f);
+            out->geometry.angleDegrees = 360.0f - (f32)owner->value * 360.0f * (1.0f / 65536.0f);
         } else {
-            out->angleDegrees = (f32)owner->value * 360.0f * (1.0f / 65536.0f);
+            out->geometry.angleDegrees = (f32)owner->value * 360.0f * (1.0f / 65536.0f);
         }
     } while (--repetitions >= 0);
     return 0x10000 / table->divisor;
@@ -332,16 +367,16 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     deltas[0] = table->divisor << 4;
     deltas[1] = (((table->mirrored << 12) / 640) * rectangle->sourceHeight) / rectangle->sourceWidth;
     angle = owner->value;
-    previous[0] = out->xOffset;
-    previous[1] = out->yOffset;
+    previous[0] = out->geometry.bounds[0];
+    previous[1] = out->geometry.bounds[1];
     scaledWidth = deltas[0] * angle;
     if (scaledWidth < 0) {
         scaledWidth += 0xFFFF;
     }
     scaled[0] = scaledWidth >> 16;
     widthAdjustment = -((deltas[0] - scaled[0]) / 2);
-    out->xOffset = widthAdjustment;
-    out->width += (previous[0] - widthAdjustment) * 2;
+    out->geometry.bounds[0] = widthAdjustment;
+    out->geometry.bounds[2] += (previous[0] - widthAdjustment) * 2;
 
     scaledHeight = deltas[1] * angle;
     if (scaledHeight < 0) {
@@ -349,11 +384,11 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     }
     scaled[1] = scaledHeight >> 16;
     heightAdjustment = -((deltas[1] - scaled[1]) / 2);
-    out->yOffset = heightAdjustment;
-    out->height += (previous[1] - heightAdjustment) * 2;
+    out->geometry.bounds[1] = heightAdjustment;
+    out->geometry.bounds[3] += (previous[1] - heightAdjustment) * 2;
 
     sourceColor = rectangle->savedColors;
-    destColor = out->cornerColors;
+    destColor = out->geometry.cornerColors;
     i = 3;
     for (; i >= 0; i--, sourceColor++, destColor++) {
         u32 color = *sourceColor;
@@ -369,7 +404,43 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     return 0x10000 / table->cycleDivisor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307EF8);
+s32 func_00307EF8(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+    GridAngleTable *table;
+    s32 deltas[2];
+    EffectSlotGeometry *geometry = &out->geometry;
+    s32 *dimensions = geometry->bounds;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 factor;
+    s32 i = 0;
+
+    table = (GridAngleTable *)((EffMappedRecord *)owner->source)->status;
+    deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
+    deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
+    for (; i < 2; i++) {
+        s32 delta = deltas[i];
+        s32 magnitude = delta < 0 ? -delta : delta;
+        s32 amount = magnitude * owner->value / 0x10000;
+        if (delta > 0) {
+            dimensions[i] = delta - amount;
+        } else {
+            dimensions[i] = delta + amount;
+        }
+    }
+    if (table->mirrored != 0) {
+        factor = 0x10000 - owner->value;
+    } else {
+        factor = owner->value;
+    }
+    sourceColor = rectangle->savedColors;
+    destColor = geometry->cornerColors;
+    for (i = 0; i < 4; i++, sourceColor++, destColor++) {
+        u32 color = *sourceColor;
+        s32 alpha = *(u8 *)sourceColor;
+        *destColor = (color & ~0xFF) | (alpha * factor / 0x10000);
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Unpack engine RGBA order into GS packed R/G and B/A word pairs. */
 void itfGridUnpackColorChannels(u64 *channels, u32 color) {

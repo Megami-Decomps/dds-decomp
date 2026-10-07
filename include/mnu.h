@@ -334,9 +334,35 @@ typedef struct MenuProfilePanel {
 typedef char MenuProfilePanel_size_must_be_0x3C[(sizeof(MenuProfilePanel) == 0x3C) ? 1 : -1];
 #endif
 
-#ifdef VERSION_DDS2
-struct MenuEffectNode;
+typedef struct MenuEffectPosition {
+    u8 pad00[0x20];
+    s32 *coordinates;
+} MenuEffectPosition;
 
+typedef struct MenuEffectNode {
+    u8 pad00[8];
+    MenuEffectPosition *position;
+} MenuEffectNode;
+
+/* DDS1 paired numeric-bar effects; callers also set the draw opacity. */
+typedef struct MenuEffectPair {
+    u8 pad00[0x14];
+    s32 *settings;
+    u8 settingIndex;
+    s8 positionY;
+    u8 pad1A[0x1E];
+    s32 configurationHandle;
+    u8 pad3C[4];
+    MenuEffectNode *first;
+    MenuEffectNode *second;
+    u8 pad48[4];
+    u32 opacity;
+} MenuEffectPair;
+
+typedef char MenuEffectPair_opacity_offset_check[
+    ((u32)&((MenuEffectPair *)0)->opacity == 0x4C) ? 1 : -1];
+
+#ifdef VERSION_DDS2
 /* Complete 0x50-byte texture/effect owner embedded in each page bank. */
 typedef struct MenuPageBar {
     s32 variant;

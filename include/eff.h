@@ -760,16 +760,18 @@ typedef struct EffTimedState {
     u8 *source;
 } EffTimedState;
 
+/* Draw geometry is copied together; grid easing walks the bound coordinates. */
+typedef struct EffectSlotGeometry {
+    s32 bounds[4];
+    u32 cornerColors[4];
+    f32 angleDegrees;
+} EffectSlotGeometry;
+
 /* Native 0xA0-byte slot work. Material, grid and textured-surface operations
  * use overlapping payload fields in the same slot, not separate allocations. */
 typedef struct BdWork {
     s32 flags;           /* 0x00 */
-    s32 xOffset;         /* 0x04 */
-    s32 yOffset;         /* 0x08 */
-    s32 width;           /* 0x0C */
-    s32 height;          /* 0x10 */
-    u32 cornerColors[4]; /* 0x14 */
-    f32 angleDegrees;    /* 0x24 */
+    EffectSlotGeometry geometry; /* 0x04: x, y, width, height, colors, angle */
     EffTimedState states[2]; /* 0x28 */
     /* Per-mode words: corner-color offsets, grid x/y/width/height, or bar crop. */
     s32 parameters[4];   /* 0x50: bar crop width uses word 2 */

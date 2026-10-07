@@ -3,6 +3,7 @@
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "dat_state.h"
+#include "eff.h"
 
 typedef struct FrFontGlyph FrFontGlyph;
 typedef struct FrFontCtx FrFontCtx;
@@ -17,7 +18,14 @@ extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, u32);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern s32 func_002CD240(u16, const char **);
+extern void func_002845F8(s32, s32, s32, u32, u16, s32, MenuEffectPair *, u32);
+extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern void func_00196088(s32, s32, s32);
+extern char D_003BC6F0[], D_003BC6F8[];
 extern char D_003BC700[];
 
 #define MNU_STAFF_PARTY_SLOT_COUNT 5
@@ -453,7 +461,62 @@ void mnuPreparePartyPanelTransition(s32 menu) {
 }
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00275920);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00275B40);
+void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *mpBar,
+                   DatPartyRecord *entry, EffectSlotSet *marker, u32 opacity,
+                   u32 iconOpacity, s32 dim) {
+    const char *name;
+    s32 profile = ptyGetCurrentProfileId(entry);
+    u32 color = uiBlendColors(0xA09DC380, 0xA09DC300, opacity);
+    FrFontGlyph *glyph;
+    s32 i;
+
+    func_002BF4E0(0x350, 0x938, 0, opacity, 1, sets[0], 0x25, 0x53);
+    func_002BF4E0(0x350, 0x990, 0, opacity, 1, sets[0], 0x26, 0x53);
+    func_002BF4E0(0x350, 0xBA0, 0, opacity, 1, sets[0], 0x27, 0x53);
+    for (i = 0; i < 4; i++) {
+        if (!dim) {
+            sets[entry->unitId]->workEntries[0].geometry.cornerColors[i] =
+                sets[entry->unitId]->workEntries[0].savedColors[i];
+        } else {
+            sets[entry->unitId]->workEntries[0].geometry.cornerColors[i] =
+                uiBlendColors(sets[entry->unitId]->workEntries[0].savedColors[i],
+                              sets[entry->unitId]->workEntries[0].savedColors[i] & 0xFF,
+                              0x80);
+        }
+    }
+    func_002BF4E0(0, 0x840, 0, iconOpacity, 1, sets[entry->unitId], 0, 0x53);
+    func_002BF4E0(0x4C0, 0x8B0, 0, opacity, 1, sets[0], 9, 0x53);
+    func_002BF4E0(0x4C0, 0xAE8, 0, opacity, 1, sets[0], 10, 0x53);
+    func_002BF4E0(0x560, 0xC98, 0, opacity, 1, sets[0], 0x1F, 0x53);
+    hpBar->opacity = opacity;
+    func_002845F8(0x6E0, 0x9B8, 0, color, entry->hp, -1, hpBar, 0x53);
+    mpBar->opacity = opacity;
+    func_002845F8(0x6E0, 0xA48, 0, color, entry->mp, -1, mpBar, 0x53);
+    func_002BF4E0(0x740, 0xCB0, 0, opacity, 1, sets[0], 0x1D, 0x53);
+    func_002BF4E0(0x11D0, 0xCB0, 0, opacity, 1, sets[0], 0x1E, 0x53);
+    if (profile) {
+        if (func_002CD240(profile, &name)) {
+            mnuDrawCenteredLabel(0x650, 0xBC8, 0, color, profile, 0x53);
+        } else {
+            glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+                0x640, 0xBE8, 0, color, (const u8 *)name, 0);
+            func_00196088(0xD20, 0xBE8, (s32)glyph);
+            func_001958A0(glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(glyph);
+        }
+    } else {
+        glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            0x640, 0xBE8, 0, color, (const u8 *)D_003BC6F0, 0);
+        glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, (s32)glyph);
+        func_001958A0(glyph, 1, 0x53);
+        frFontQueueGlyphInSelectedSlot(glyph);
+    }
+    if (marker) {
+        func_002BF4E0(0x970, 0x8B0, 0, opacity, 1, sets[0], 0x1C, 0x53);
+        func_002BF4E0(0x970, 0x8B0, 0, opacity, 1, marker, 0, 0x53);
+    }
+}
 
 
 /* Two-stage fade: B rises first when opening, A falls first when closing.
@@ -894,7 +957,7 @@ u32 func_00277638(void) {
 
 void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
                    s32 actor, u16 rangeId, s32 style, s32 dim,
-                   s32 specialResource, s32 costResource, u32 texture) {
+                   EffectSlotSet *specialResource, EffectSlotSet *costResource, u32 texture) {
     char text[16];
     u32 color;
     s32 value;

@@ -48,6 +48,6 @@ void func_00294680(MenuTerminalContext *w, s32 a1, s32 a2) {
     }
     func_00306CD0(0xE30, 0x610, 0, a1, 0, w->effectSlots[2], 1, a2);
     work = w->effectSlots[3]->workEntries;
-    work[1].angleDegrees = 90.0f;
+    work[1].geometry.angleDegrees = 90.0f;
     func_00306CD0(0x9F0, 0x610, 0, a1, 2, w->effectSlots[3], 1, a2);
 }

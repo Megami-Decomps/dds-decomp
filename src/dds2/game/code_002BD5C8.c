@@ -278,7 +278,7 @@ void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        dst->workEntries->cornerColors[i] = uiBlendColors(
+        dst->workEntries->geometry.cornerColors[i] = uiBlendColors(
             dst->workEntries->savedColors[i],
             src->workEntries->savedColors[i],
             amount / 2 + 0x80);

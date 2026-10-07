@@ -70,11 +70,11 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
         y += description->yOffset * 8;
     }
     if (flags & 0x10) {
-        x -= draw->xOffset;
-        y -= draw->yOffset;
+        x -= draw->geometry.bounds[0];
+        y -= draw->geometry.bounds[1];
     } else {
-        x += draw->xOffset;
-        y += draw->yOffset;
+        x += draw->geometry.bounds[0];
+        y += draw->geometry.bounds[1];
     }
     if (description->flags & 4) {
         flip = 1;
@@ -87,23 +87,23 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
     }
     kind = description->flags & 3;
     if (description->flags & 8) {
-        effSelectPresetAndDispatch(x, y, z, draw->width, draw->height,
+        effSelectPresetAndDispatch(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3],
                                    color, mode, buffer);
     } else {
         for (i = 0; i < 4; i++) {
             colors[i] = description->colors[i] + draw->parameters[i];
         }
-        func_002BEEA0(x, y, z, draw->width, draw->height, description->rect,
+        func_002BEEA0(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], description->rect,
                      draw->bounds.texture.rect, colors, color, kind, mode, flip, texture, buffer);
-        func_002BE8A8(x, y, z, draw->width, draw->height, colors, color,
-                     kind, draw->angleDegrees, mode, flip, texture, buffer);
+        func_002BE8A8(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], colors, color,
+                     kind, draw->geometry.angleDegrees, mode, flip, texture, buffer);
     }
     if (flags & 0x80) {
         effUpdateTimedStates(set, slotIndex, draw);
     }
 }
 void func_002BF400(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer) {
-    effDrawTextureSlot(x, y, z, (s32)entry->cornerColors, flags, set, slot, entry, layer);
+    effDrawTextureSlot(x, y, z, (s32)entry->geometry.cornerColors, flags, set, slot, entry, layer);
 }
 void func_002BF438(s32 x, s32 y, s32 z, u32 *palette, s32 flags, EffectSlotSet *set, s32 slot, s32 layer) {
     effDrawTextureSlot(x, y, z, (s32)palette, flags, set, slot,

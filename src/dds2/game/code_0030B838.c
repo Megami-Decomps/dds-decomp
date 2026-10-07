@@ -896,19 +896,19 @@ void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
 
 void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2,
                   u32 color3, s32 placementIndex, u32 flags, u32 context) {
-    SDF_SPRITE(placementIndex)->cornerColors[0] = color0;
-    SDF_SPRITE(placementIndex)->cornerColors[1] = color1;
-    SDF_SPRITE(placementIndex)->cornerColors[2] = color2;
-    SDF_SPRITE(placementIndex)->cornerColors[3] = color3;
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[0] = color0;
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[1] = color1;
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[2] = color2;
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[3] = color3;
     itfDrawGridWithResolvedSlot((x + D_00400DF0[placementIndex][2]) << 4,
                                 (y + D_00400DF0[placementIndex][3]) << 3,
                                 z, flags,
                                 sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
                                 D_00400DF0[placementIndex][1], context);
-    SDF_SPRITE(placementIndex)->cornerColors[0] = SDF_SPRITE(placementIndex)->savedColors[0];
-    SDF_SPRITE(placementIndex)->cornerColors[1] = SDF_SPRITE(placementIndex)->savedColors[1];
-    SDF_SPRITE(placementIndex)->cornerColors[2] = SDF_SPRITE(placementIndex)->savedColors[2];
-    SDF_SPRITE(placementIndex)->cornerColors[3] = SDF_SPRITE(placementIndex)->savedColors[3];
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[0] = SDF_SPRITE(placementIndex)->savedColors[0];
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[1] = SDF_SPRITE(placementIndex)->savedColors[1];
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[2] = SDF_SPRITE(placementIndex)->savedColors[2];
+    SDF_SPRITE(placementIndex)->geometry.cornerColors[3] = SDF_SPRITE(placementIndex)->savedColors[3];
 }
 
 
@@ -917,18 +917,18 @@ void sdfDrawScaledCenteredSlotImage(f32 scaleX, f32 scaleY, s32 x, s32 y, s32 z,
     s32 width;
     s32 height;
 
-    width = SDF_SPRITE(placementIndex)->width =
+    width = SDF_SPRITE(placementIndex)->geometry.bounds[2] =
         (s32)(scaleX * (f32)SDF_SPRITE(placementIndex)->sourceWidth) << 4;
-    height = SDF_SPRITE(placementIndex)->height =
+    height = SDF_SPRITE(placementIndex)->geometry.bounds[3] =
         (s32)(scaleY * (f32)SDF_SPRITE(placementIndex)->sourceHeight) << 3;
     func_00306CD0(((x + D_00400DF0[placementIndex][2]) << 4) - (width >> 1),
                   ((y + D_00400DF0[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
                   D_00400DF0[placementIndex][1], context);
-    SDF_SPRITE(placementIndex)->width =
+    SDF_SPRITE(placementIndex)->geometry.bounds[2] =
         SDF_SPRITE(placementIndex)->sourceWidth << 4;
-    SDF_SPRITE(placementIndex)->height =
+    SDF_SPRITE(placementIndex)->geometry.bounds[3] =
         SDF_SPRITE(placementIndex)->sourceHeight << 3;
 }
 

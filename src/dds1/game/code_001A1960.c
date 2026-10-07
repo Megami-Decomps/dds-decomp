@@ -1364,12 +1364,12 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
     return total;
 }
 
-s32 btlTestActorStatusPredicate(s32 object) {
-    s32 (*predicate)(s32) = *(s32 (**)(s32))(btlGetRuntime() + 0x650);
+s32 btlTestActorStatusPredicate(BtlUnit *object) {
+    s32 (*predicate)(BtlUnit *) = *(s32 (**)(BtlUnit *))(btlGetRuntime() + 0x650);
     if (predicate != 0 && predicate(object) != 0) {
         return 1;
     }
-    return (((BtlUnit *)object)->partyRecord.status & 0x806) != 0;
+    return (object->partyRecord.status & 0x806) != 0;
 }
 
 s32 btlComputeStatusPenaltyFifth(s32 object) {
@@ -2910,8 +2910,8 @@ void func_001AC4A8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
         do {
             if (record->active != 0) {
                 u32 color;
-                btlResourceBlock->resA->workEntries[record->slot].width = record->width;
-                btlResourceBlock->resA->workEntries[record->slot].height = record->height;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[2] = record->width;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[3] = record->height;
                 color = record->alpha | 0x80808000;
                 colors.values[0] = color;
                 colors.values[1] = color;
@@ -2919,8 +2919,8 @@ void func_001AC4A8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
                 colors.values[3] = color;
                 func_002BF438(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
                 func_002BF438(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
-                btlResourceBlock->resA->workEntries[record->slot].width = record->restoredWidth << 4;
-                btlResourceBlock->resA->workEntries[record->slot].height = record->restoredHeight << 3;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[2] = record->restoredWidth << 4;
+                btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[3] = record->restoredHeight << 3;
             }
             record++;
         } while (--remaining != 0);
@@ -4234,11 +4234,11 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
     colors.values[3] = work->fadeLevels[3] | 0x80808000;
     if (work->verticalShift > 0) {
-        btlResourceBlock->resC->workEntries[0x15].height =
+        btlResourceBlock->resC->workEntries[0x15].geometry.bounds[3] =
             (btlResourceBlock->resC->workEntries[0x15].sourceHeight << 3) - (work->verticalShift << 4);
-        btlResourceBlock->resC->workEntries[0x16].height =
+        btlResourceBlock->resC->workEntries[0x16].geometry.bounds[3] =
             (btlResourceBlock->resC->workEntries[0x16].sourceHeight << 3) - (work->verticalShift << 4);
-        btlResourceBlock->resC->workEntries[0x17].height =
+        btlResourceBlock->resC->workEntries[0x17].geometry.bounds[3] =
             (btlResourceBlock->resC->workEntries[0x17].sourceHeight << 3) - (work->verticalShift << 4);
     }
     func_002BF438(work->initial[1].x << 4, (work->initial[1].y + work->verticalShift) << 3,
@@ -4253,17 +4253,17 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     colors.values[1] = work->fadeLevels[3] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
     colors.values[3] = work->fadeLevels[0] | 0x80808000;
-    btlResourceBlock->resC->workEntries[0x16].width = width << 4;
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = width << 4;
     func_002BF438((0x100 - width / 2) << 4, (work->initial[1].y + work->verticalShift) << 3,
                   0, colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width =
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     if (work->verticalShift > 0) {
-        btlResourceBlock->resC->workEntries[0x15].height =
+        btlResourceBlock->resC->workEntries[0x15].geometry.bounds[3] =
             btlResourceBlock->resC->workEntries[0x15].sourceHeight << 3;
-        btlResourceBlock->resC->workEntries[0x16].height =
+        btlResourceBlock->resC->workEntries[0x16].geometry.bounds[3] =
             btlResourceBlock->resC->workEntries[0x16].sourceHeight << 3;
-        btlResourceBlock->resC->workEntries[0x17].height =
+        btlResourceBlock->resC->workEntries[0x17].geometry.bounds[3] =
             btlResourceBlock->resC->workEntries[0x17].sourceHeight << 3;
     }
     return 0;
@@ -4359,10 +4359,10 @@ s32 btlDrawTimedDialogTask(KwlnTask *task) {
     half = width / 32;
     func_002BF438(((width >> 4) - half + 0x105) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width = (width >> 4) << 4;
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = (width >> 4) << 4;
     func_002BF438((0x100 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width =
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     func_002BF438((0x92 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
@@ -4746,7 +4746,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B8650);
 
-void btlResetActorSlotPresentationValue(BtlUnit *object) {
+void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *sceneObject) {
     s32 count = 0;
     u8 slot = 0;
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -4827,7 +4827,61 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2CE8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2D00);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B9318);
+void func_001B9318(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
+    s32 i;
+
+    switch (reserve == 0 ? work->activeEntries[slot].presentationState :
+                           work->reserveEntries[slot].presentationState) {
+    case 1:
+        for (i = 0; i < 8; i++) {
+            if (reserve == 0) {
+                work->activeEntries[slot].highlightPhase[i] =
+                    (work->activeEntries[slot].highlightPhase[i] + 8) % 360;
+                work->activeEntries[slot].highlightLevel[i] =
+                    (sdfSinPoly(((work->activeEntries[slot].highlightPhase[i] + 90) % 360) /
+                               180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
+            } else {
+                work->reserveEntries[slot].highlightPhase[i] =
+                    (work->reserveEntries[slot].highlightPhase[i] + 8) % 360;
+                work->reserveEntries[slot].highlightLevel[i] =
+                    (sdfSinPoly(((work->reserveEntries[slot].highlightPhase[i] + 90) % 360) /
+                               180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
+            }
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        for (i = 0; i < 8; i++) {
+            if (reserve == 0) {
+                if (work->activeEntries[slot].highlightLevel[i] != 0) {
+                    work->activeEntries[slot].highlightLevel[i]--;
+                }
+            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else {
+                work->reserveEntries[slot].highlightLevel[i] = 0;
+            }
+        }
+        break;
+    case 0:
+    case 4:
+        for (i = 0; i < 8; i++) {
+            if (reserve == 0) {
+                if (work->activeEntries[slot].highlightLevel[i] >= 32) {
+                    work->activeEntries[slot].highlightLevel[i] -= 32;
+                } else {
+                    work->activeEntries[slot].highlightLevel[i] = 0;
+                }
+            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else {
+                work->reserveEntries[slot].highlightLevel[i] = 0;
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B96F8);
 
@@ -5561,10 +5615,10 @@ void btlDrawCenteredPanelSegments(s32 width) {
     s32 x = width - half + 0x105;
     func_002BF438(x * 0x10, 0x200, 0, color, 0,
                   btlResourceBlock->resC, 0x17, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width = width << 4;
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = width << 4;
     func_002BF438((0x100 - half) * 0x10, 0x200, 0, color, 0,
                   btlResourceBlock->resC, 0x16, 0x53);
-    btlResourceBlock->resC->workEntries[0x16].width =
+    btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     func_002BF438((0x92 - half) * 0x10, 0x200, 0, color, 0,
                   btlResourceBlock->resC, 0x15, 0x53);
@@ -5799,8 +5853,8 @@ void func_001C2938(s32 bank, s32 index) {
 
 
 void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
-    work->workEntries[index].width = work->workEntries[index].sourceWidth << 4;
-    work->workEntries[index].height = work->workEntries[index].sourceHeight << 3;
+    work->workEntries[index].geometry.bounds[2] = work->workEntries[index].sourceWidth << 4;
+    work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001C2E90);

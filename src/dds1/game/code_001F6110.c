@@ -123,7 +123,7 @@ extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 extern void effMiscQuaternionToMatrixVU(void);
-extern void effObjFetchInnerFirstVec(u32);
+extern void effObjFetchInnerFirstVec(struct EffWorldNode *);
 
 extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
 

@@ -333,9 +333,9 @@ void func_002BF478(s32 unusedX, s32 unusedY, s32 unusedDepth,
     offset = (s32)fsqrtf((f32)((s32)fsqrtf(256.0f) * 8));
     offset = offset * phase / 0x200;
     offset = 0xA00 - offset * offset;
-    command->resources->workEntries[0x3D].height = offset;
+    command->resources->workEntries[0x3D].geometry.bounds[3] = offset;
     func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3D, surface);
-    command->resources->workEntries[0x3E].height = offset;
+    command->resources->workEntries[0x3E].geometry.bounds[3] = offset;
     func_00306CD0(0, 0xE00 - offset, 0, fade, 0, command->resources, 0x3E, surface);
     func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3C, surface);
     for (i = 0, position = layout.points; i < 7; i++, position++) {
@@ -750,16 +750,6 @@ void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, E
     }
 }
 
-typedef struct MenuEffectPosition {
-    u8 pad00[0x20];
-    s32 *coordinates;
-} MenuEffectPosition;
-
-typedef struct MenuEffectNode {
-    u8 pad00[8];
-    MenuEffectPosition *position;
-} MenuEffectNode;
-
 /* Set both effect positions; only the first Y comes from the active menu entry. */
 void mnuSetPairedEffectPositions(MenuPageBar *pair) {
     MenuEffectNode *first = pair->effects[0];
@@ -908,7 +898,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
         work = texture->workEntries;
         barWidth = pair->quantizedSpan * 77 / 100;
         quantizedWidth = barWidth * 16;
-        work->width = quantizedWidth;
+        work->geometry.bounds[2] = quantizedWidth;
         work->parameters[2] = ~(77 - barWidth);
         func_00306CD0(x, y, depth, fade, 1, texture, 0, flags);
         func_00306CD0(x + quantizedWidth, y, depth, fade, 1, (EffectSlotSet *)pair->textures[2], 0, flags);

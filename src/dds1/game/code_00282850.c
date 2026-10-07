@@ -581,28 +581,6 @@ void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     }
 }
 
-typedef struct MenuEffectPosition {
-    u8 pad00[0x20];
-    s32 *coordinates;
-} MenuEffectPosition;
-
-typedef struct MenuEffectNode {
-    u8 pad00[8];
-    MenuEffectPosition *position;
-} MenuEffectNode;
-
-typedef struct MenuEffectPair {
-    u8 pad00[0x14];
-    s32 *settings; /* 0x14: four selectable effect settings */
-    u8 settingIndex; /* 0x18 */
-    s8 positionY; /* 0x19 */
-    u8 pad1A[0x1E];
-    s32 configurationHandle; /* 0x38 */
-    u8 pad3C[0x04];
-    MenuEffectNode *first;  /* 0x40 */
-    MenuEffectNode *second; /* 0x44 */
-} MenuEffectPair;
-
 /* Set both effect positions; only the first Y comes from the active menu entry. */
 void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
     MenuEffectNode *first = pair->first;

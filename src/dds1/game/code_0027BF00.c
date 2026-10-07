@@ -222,9 +222,9 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, s32 entry) {
     s32 colorIndex;
 
     for (colorIndex = 0; colorIndex < MNU_ENTRY_COLOR_COUNT; colorIndex++) {
-        s32 previousColor = menu->workEntries[index].cornerColors[colorIndex];
+        s32 previousColor = menu->workEntries[index].geometry.cornerColors[colorIndex];
 
-        menu->workEntries[index].cornerColors[colorIndex] = mnuDispatchByFlag(previousColor, entry);
+        menu->workEntries[index].geometry.cornerColors[colorIndex] = mnuDispatchByFlag(previousColor, entry);
     }
 }
 

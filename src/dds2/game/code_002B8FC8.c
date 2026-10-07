@@ -884,9 +884,9 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) 
     s32 colorIndex;
 
     for (colorIndex = 0; colorIndex < MNU_ENTRY_COLOR_COUNT; colorIndex++) {
-        u32 previousColor = menu->workEntries[index].cornerColors[colorIndex];
+        u32 previousColor = menu->workEntries[index].geometry.cornerColors[colorIndex];
 
-        menu->workEntries[index].cornerColors[colorIndex] = mnuBlendListNodeColorByFlags(previousColor, entry);
+        menu->workEntries[index].geometry.cornerColors[colorIndex] = mnuBlendListNodeColorByFlags(previousColor, entry);
     }
 }
 
@@ -1252,9 +1252,9 @@ void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, 
         }
         func_00306CD0(x + table.pos[i].x, y + table.pos[i].y, z, a, 1, state->sprite[i], 0, arg);
     }
-    state->sprite[0]->workEntries->width = width;
+    state->sprite[0]->workEntries->geometry.bounds[2] = width;
     if (state->count >= 3) {
-        state->sprite[2]->workEntries->width = width;
+        state->sprite[2]->workEntries->geometry.bounds[2] = width;
     }
 }
 

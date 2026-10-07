@@ -1121,7 +1121,7 @@ void mnuDrawTerminalBackdrop(s32 address) {
         case 0:
             func_00306CD0(0, 0, 0, 0x100, 0, (EffectSlotSet *)state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
             bank = (EffectSlotSet *)state->resourceBank[3];
-            bank->workEntries[0].angleDegrees = 90.0f;
+            bank->workEntries[0].geometry.angleDegrees = 90.0f;
             func_00306CD0(0x7B0, 0x698, 0, 0x100, 2, (EffectSlotSet *)state->resourceBank[3], 0, MNU_TEXT_DRAW_PRIORITY);
             break;
         case 1:
@@ -1135,9 +1135,9 @@ void mnuDrawTerminalBackdrop(s32 address) {
         func_00306CD0(0x60, -0x30, 0, 0x100, 0, (EffectSlotSet *)resource, 1, MNU_TEXT_DRAW_PRIORITY);
         bank = (EffectSlotSet *)resource;
         work = &bank->workEntries[1];
-        work->angleDegrees += 0.6f;
-        if (work->angleDegrees > 360.0f) {
-            work->angleDegrees -= 360.0f;
+        work->geometry.angleDegrees += 0.6f;
+        if (work->geometry.angleDegrees > 360.0f) {
+            work->geometry.angleDegrees -= 360.0f;
         }
     }
 }
@@ -1154,7 +1154,7 @@ void func_00268838(s32 decrement, MenuSlotState *state) {
         case 0:
             func_00306CD0(0, 0, 0, state->panelFade, 1,
                          (EffectSlotSet *)state->resourceBank[1], 1, 0x52);
-            ((EffectSlotSet *)state->resourceBank[3])->workEntries[1].angleDegrees = 90.0f;
+            ((EffectSlotSet *)state->resourceBank[3])->workEntries[1].geometry.angleDegrees = 90.0f;
             func_00306CD0(0x7B0, 0x698, 0, state->panelFade, 3,
                          (EffectSlotSet *)state->resourceBank[3], 1, 0x52);
             if (state->panelHoldFrames > 0) {
@@ -1274,7 +1274,7 @@ u8 func_00268C08(MenuSlotState *scene) {
     s32 index;
 
     index = fldGetModeFrameRecordIndex((s32)scene);
-    return *(u8 *)&((EffectSlotSet *)scene->resourceBank[0])->workEntries[index].cornerColors[0];
+    return *(u8 *)&((EffectSlotSet *)scene->resourceBank[0])->workEntries[index].geometry.cornerColors[0];
 }
 
 
@@ -1306,7 +1306,7 @@ void func_00268CC0(u32 mode, s32 context) {
         itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 7, 0, 0, -0x400, 0);
         effConfigureWithDefaultSetting(state->resourceBank[0], 7, state->effect[5], 0, 5, 3);
         i = 0;
-        entries = state->alternateBatch->workEntries[0].cornerColors;
+        entries = state->alternateBatch->workEntries[0].geometry.cornerColors;
         for (; i < 4; i++) {
             entries[i] = 0;
         }
@@ -1389,7 +1389,7 @@ void func_00269638(s32 close, MenuSlotState *host) {
                                host->resourceBank[0], rows[1].slot, 0x52);
     slot = func_00269418(host->secondaryList);
     slots = (EffectSlotSet *)host->resourceBank[0];
-    progress = ((u32)*(u8 *)&slots->workEntries[slot].cornerColors[0] << 8) /
+    progress = ((u32)*(u8 *)&slots->workEntries[slot].geometry.cornerColors[0] << 8) /
                *(u8 *)&slots->workEntries[slot].savedColors[0];
     if (close != 0) {
         if (host->secondaryList->scale > 0) {
@@ -1864,7 +1864,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     func_0035C860(text, D_00437868, datGameState->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
-        color = *(u8 *)&((EffectSlotSet *)((MenuSlotState *)context)->resourceBank[0])->workEntries[index].cornerColors[0] | 0xA09DC300;
+        color = *(u8 *)&((EffectSlotSet *)((MenuSlotState *)context)->resourceBank[0])->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->thresholdOwner->scale);
     }

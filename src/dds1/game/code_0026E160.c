@@ -174,12 +174,12 @@ void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 mode
 
 void func_0026E798(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set,
                    s32 index, s32 option, s32 texture, f32 scaleX, f32 scaleY) {
-    set->workEntries[index].width = (s32)(scaleX * set->workEntries[index].sourceWidth) << 4;
-    set->workEntries[index].height = (s32)(scaleY * set->workEntries[index].sourceHeight) << 3;
+    set->workEntries[index].geometry.bounds[2] = (s32)(scaleX * set->workEntries[index].sourceWidth) << 4;
+    set->workEntries[index].geometry.bounds[3] = (s32)(scaleY * set->workEntries[index].sourceHeight) << 3;
     func_002BF4E0(x << 4, y << 3, z,
                  (u32)((f32)(alpha << 8) * 0.0078125f), option, set, index, texture);
-    set->workEntries[index].width = set->workEntries[index].sourceWidth << 4;
-    set->workEntries[index].height = set->workEntries[index].sourceHeight << 3;
+    set->workEntries[index].geometry.bounds[2] = set->workEntries[index].sourceWidth << 4;
+    set->workEntries[index].geometry.bounds[3] = set->workEntries[index].sourceHeight << 3;
 }
 
 void mnuLoadMovieRollSprite(void) {
