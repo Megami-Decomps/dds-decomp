@@ -643,7 +643,7 @@ extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
 extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern void *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 extern void dds3DestroyWorldIndexNode(NodeB *node);
 
@@ -664,7 +664,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 mode;
     char *name;
     s32 room;
-    void *list;
+    NodeB *list;
     FldWorldItem *item;
 
     world = scrReadIntParameter(0);
@@ -705,7 +705,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
                     }
                 }
             } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
-            dds3DestroyWorldIndexNode((NodeB *)list);
+            dds3DestroyWorldIndexNode(list);
         }
     }
     return 1;
@@ -717,7 +717,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     s32 mode;
     char *name;
     s32 room;
-    void *list;
+    NodeB *list;
     FldWorldItem *item;
 
     world = scrReadIntParameter(0);
@@ -761,7 +761,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                     }
                 }
             } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
-            dds3DestroyWorldIndexNode((NodeB *)list);
+            dds3DestroyWorldIndexNode(list);
         }
     }
     return 1;
