@@ -182,8 +182,8 @@ void dds3SetCameraVector(void *obj, void *src) {
 }
 
 /* Return the camera's world-space eye vector in vf10. */
-void dds3LoadCameraVectorVU(void *camera) {
-    u8 *eye = (u8 *)&((CameraData *)((EffWorldNode *)camera)->data)->worldEye;
+void dds3LoadCameraVectorVU(EffWorldNode *camera) {
+    u8 *eye = (u8 *)&((CameraData *)camera->data)->worldEye;
 
     VU0_LOAD_VF_MEMORY(vf10, eye);
 }
