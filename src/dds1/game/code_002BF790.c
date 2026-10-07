@@ -2,6 +2,7 @@
 #include "fpu.h"
 #include "eff.h"
 #include "itf_grid_text.h"
+#include "sdf.h"
 
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
@@ -21,17 +22,12 @@ typedef struct UiQuadWords {
 extern s32 sdfGridSeekSelectedNodeByIndex(s32, void *);
 
 
-typedef struct RenderCallbackEntry {
-    u8 reserved[0x10];
-    void (*draw)(void *, s32);
-    u8 tail[0xC];
-} RenderCallbackEntry;
-
-extern RenderCallbackEntry kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfInitPacketList(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, s32 object, s32 index, s32 surfaceIndex) {
@@ -280,8 +276,8 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     u32 normalized = value != 0;
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
-    s32 context;
-    RenderCallbackEntry *entry;
+    SdfListHead *context;
+    SdfPoolNode *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
@@ -291,11 +287,11 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x4B;
     }
-    context = sdfAllocPacketAligned(0x20);
+    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
-    sdfAppendPacket(context, packet);
+    sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->draw(entry, context);
+    entry->append((SdfListHead *)entry, context);
 }
 
 void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
@@ -305,8 +301,8 @@ void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
 void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
-    s32 context;
-    RenderCallbackEntry *entry;
+    SdfListHead *context;
+    SdfPoolNode *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
@@ -316,11 +312,11 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x48;
     }
-    context = sdfAllocPacketAligned(0x20);
+    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
-    sdfAppendPacket(context, packet);
+    sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->draw(entry, context);
+    entry->append((SdfListHead *)entry, context);
 }
 
 void sdfSubmitGsTestOneRegisterPacket(data, kind)
@@ -333,8 +329,8 @@ void sdfSubmitGsTestOneRegisterPacket(data, kind)
 void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
-    s32 context;
-    RenderCallbackEntry *entry;
+    SdfListHead *context;
+    SdfPoolNode *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
@@ -344,11 +340,11 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x43;
     }
-    context = sdfAllocPacketAligned(0x20);
+    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
-    sdfAppendPacket(context, packet);
+    sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->draw(entry, context);
+    entry->append((SdfListHead *)entry, context);
 }
 
 void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
@@ -358,35 +354,35 @@ void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
 void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
-    s32 context;
-    RenderCallbackEntry *entry;
+    SdfListHead *context;
+    SdfPoolNode *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
-    context = sdfAllocPacketAligned(0x20);
+    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
-    sdfAppendPacket(context, packet);
+    sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->draw(entry, context);
+    entry->append((SdfListHead *)entry, context);
 }
 
 void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
-    s32 context;
-    RenderCallbackEntry *entry;
+    SdfListHead *context;
+    SdfPoolNode *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
-    context = sdfAllocPacketAligned(0x20);
+    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
-    sdfAppendPacket(context, packet);
+    sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->draw(entry, context);
+    entry->append((SdfListHead *)entry, context);
 }
 
 /* Fill all four words with value without assigning a corner or channel order. */
@@ -442,31 +438,31 @@ extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
-extern void sdfAppendDmaTagToList(void *, void *);
+extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
-    void *list = sdfAllocPacketAligned(0x20);
+    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     void *texture;
-    sdfInitPacketList((s32)list);
+    sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
-    sdfAppendDmaTagToList(list, texture);
+    sdfAppendDmaTagToList(list, (u32)texture);
     {
-        u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
 void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
-    void *list = sdfAllocPacketAligned(0x20);
+    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     void *texture;
-    sdfInitPacketList((s32)list);
+    sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
-    sdfAppendDmaTagToList(list, texture);
+    sdfAppendDmaTagToList(list, (u32)texture);
     {
-        u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
+        surface->append((SdfListHead *)surface, list);
     }
 }
 
@@ -1039,4 +1035,3 @@ s32 sdfGridSeekLastNode(s32 widget) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_002BF790", fldLocalMapTaskName);
-
