@@ -1,0 +1,65 @@
+--- a/src/dds1/game/code_00151F58.c
++++ b/src/dds1/game/code_00151F58.c
+@@ -2404,7 +2404,61 @@
+     sdfReleaseChipBlock(effect);
+ }
+ 
+-INCLUDE_ASM(const s32, "game/code_00151F58", func_00157280);
++/* Initialize a packet inside a bounded radius, or along the authored planar ring. */
++void func_00157280(EffTemplatePacketList *effect, s32 index) {
++    f32 direction[4];
++    EffPacket *packet = (EffPacket *)effect->buffer->records;
++    f32 radius;
++    f32 value;
++
++    packet += index;
++    if (effect->randomSphere) {
++        radius = effect->recordScale;
++        direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
++        direction[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
++        direction[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
++        VU0_LOAD_VF(vf10, direction);
++        VU0_NORMALIZE_VF10();
++        VU0_STORE_VF(vf10, direction);
++        packet->pos[0] = radius * effMiscRandUnitFloat(D_0034DF38) * direction[0];
++        packet->pos[1] = radius * effMiscRandUnitFloat(D_0034DF38) * direction[1];
++        packet->pos[2] = radius * effMiscRandUnitFloat(D_0034DF38) * direction[2];
++        VU0_LOAD_MATRIX(effect->matrix);
++        VU0_LOAD_VF(vf10, packet->pos);
++        VU0_APPLY_MATRIX(vf10, vf10);
++        VU0_STORE_VF(vf10, packet->pos);
++        packet->pos[0] += effect->origin[0];
++        packet->pos[1] += effect->origin[1];
++        packet->pos[2] += effect->origin[2];
++        direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
++        direction[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
++        direction[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
++        VU0_LOAD_VF(vf10, direction);
++        VU0_NORMALIZE_VF10();
++        VU0_STORE_VF(vf10, packet->vel);
++    } else {
++        PCP_COPY_VECTOR(packet->pos, effect->origin);
++        value = (3.14159265f * 2.0f) / effect->packetCount * index;
++        direction[0] = sdfEvaluateCosineViaSinePhaseShift(value);
++        direction[1] = sdfSinPoly(value);
++        direction[2] = 0;
++        VU0_LOAD_VF(vf10, direction);
++        VU0_NORMALIZE_VF10();
++        VU0_STORE_VF(vf10, packet->vel);
++    }
++    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->delayRange + 1));
++    packet->color = 0;
++    packet->f30 = effect->motionMagnitude;
++    value = effect->speedJitter;
++    packet->speed = effect->x * (effMiscRandUnitFloat(D_0034DF38) * value + (1.0f - value));
++    value = effect->spinJitter;
++    if (value != 0) {
++        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * value + (1.0f - value)) * (3.14159265f * 2.0f);
++    } else {
++        packet->spin = 0;
++    }
++    parDispatchKindInit(&effect->kind, index);
++}
+ 
+ extern f32 D_0034E180[4];
+ void func_00157280(EffTemplatePacketList *, s32);

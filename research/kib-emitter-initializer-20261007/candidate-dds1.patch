@@ -1,0 +1,139 @@
+--- a/src/dds1/game/code_00151F58.c
++++ b/src/dds1/game/code_00151F58.c
+@@ -51,6 +51,11 @@
+     u8 pad144[0xC];
+ } EffEmitterHead;
+ 
++typedef struct ParColorRamp ParColorRamp;
++typedef struct ParTable ParTable;
++typedef struct ParSystem ParSystem;
++typedef struct EffTrackPolyList EffTrackPolyList;
++
+ typedef struct EffTemplatePacketList {
+     f32 origin[4];
+     f32 x; /* 0x10 */
+@@ -59,22 +64,37 @@
+     u8 pad1C[4];
+     u32 packetCount;
+     s32 packetTag; /* 0x24: cleared when cloning a prefix */
+-    u8 pad28[8];
++    s32 billboardIndex; /* 0x28 */
++    s16 billboardMode; /* 0x2C: same bits become an unsigned bucket for subeffects */
++    u8 pad2E[2];
+     u16 kind; /* 0x30: resource type */
+     u8 pad32[2];
+     u16 subrecordCount; /* 0x34: subrecords per packet */
+-    u8 pad36[0x12];
++    u8 pad36[2];
++    ParTable *pointTable; /* 0x38, kind 1 */
++    u32 primaryColor; /* 0x3C */
++    union {
++        u32 secondaryColor; /* kind 3/4 input */
++        ParSystem *primaryCells; /* kind 2 output */
++    }; /* 0x40 */
++    union {
++        ParSystem *secondaryCells; /* kind 3 */
++        EffTrackPolyList *tracks; /* kind 4 */
++    }; /* 0x44 */
+     u8 fade[0x4C]; /* 0x48 */
+     f32 speedJitter; /* 0x94 */
+     f32 spinJitter; /* 0x98 */
+     u8 pad9C[4];
+     s32 templateSize; /* 0xA0: prefix copied before the appended tail */
+-    u8 padA4[0xC];
++    u32 restartStepCount; /* 0xA4 */
++    u8 padA8[8];
+     f32 matrix[16]; /* 0xB0 */
+     u32 colorMask; /* 0xF0 */
+-    u8 padF4[4];
++    BillObj *billboard; /* 0xF4: slot retained by a kind-1 table */
+     EffectBufferTail *buffer;
+-    u8 padFC[0x46];
++    u32 pendingRestartSteps; /* 0xFC */
++    f32 sourceMatrix[16]; /* 0x100 */
++    u16 dispatchIndex; /* 0x140 */
+     u16 active; /* 0x142 */
+     u8 pad144[0xC];
+     u8 randomSphere; /* 0x150 */
+@@ -163,13 +183,14 @@
+ 
+ /* Create a billboard sharing the indexed entry's resource. Word two of the
+  * resource stores the reference count; the BillObj entryList is not an emitter. */
+-void effRetainResource(s32 index) {
++u32 effRetainResource(s32 index) {
+     BillObj *effect = (BillObj *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
+     s32 *resource = ((BillObj *)effBillResourceOwners[index])->entryList;
+     s32 references = resource[2];
+ 
+     effect->entryList = resource;
+     resource[2] = references + 1;
++    return (u32)effect;
+ }
+ 
+ u32 func_00151FC0(void) {
+@@ -869,7 +890,64 @@
+     sdfReleaseResourceAllocation(*allocationSlot);
+ }
+ 
+-INCLUDE_ASM(const s32, "game/code_00151F58", func_00153740);
++/* Opaque provider owners; the ramp occupies the first 0x44 bytes of fade. */
++extern void parInitColorRamp(ParColorRamp *, s32);
++extern ParTable *func_00159C08(s32 count, u16 pointCapacity, BillObj **billboardRef);
++extern u32 func_0015B220(u16 pointCapacity);
++extern ParSystem *parAllocateCellSystem(s32, s32, s32, u32);
++extern void parDispatchSub(void *, s32, void *, void *);
++extern void func_0015D078(s32 recordAddress, u16 bucket);
++extern EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *, u32);
++
++/* Allocate the common emitter resources selected by its kind. */
++void func_00153740(s32 address) {
++    EffTemplatePacketList *effect = (EffTemplatePacketList *)address;
++    EffTrackPolyParams params;
++
++    effect->templateSize = 0x150;
++    effect->buffer = effAllocateBuffer(effect->packetCount);
++    if (effect->billboardIndex != -1) {
++        effect->billboard = (BillObj *)effRetainResource(effect->billboardIndex);
++        billSetChildScaleComponents(effect->billboard, effect->x, effect->y);
++        billSetBillboardMode(effect->billboard, effect->billboardMode);
++    }
++    parInitColorRamp((ParColorRamp *)effect->fade, effect->packetTag);
++    switch (effect->kind) {
++    case 1:
++        effect->pointTable = func_00159C08(effect->packetCount, effect->subrecordCount, &effect->billboard);
++        break;
++    case 2:
++        effect->primaryCells = parAllocateCellSystem(effect->packetCount, effect->subrecordCount,
++                                                    func_0015B220(effect->subrecordCount), 0);
++        parDispatchSub(effect->primaryCells, 1, (void *)effect->primaryColor, (void *)effect->primaryColor);
++        func_0015D078((s32)effect->primaryCells, (u16)effect->billboardMode);
++        break;
++    case 3:
++        effect->secondaryCells = parAllocateCellSystem(effect->packetCount, effect->subrecordCount,
++                                                      func_0015B220(effect->subrecordCount), 1);
++        parDispatchSub(effect->secondaryCells, 1, (void *)effect->primaryColor, (void *)effect->secondaryColor);
++        func_0015D078((s32)effect->secondaryCells, (u16)effect->billboardMode);
++        break;
++    case 4:
++        /* This list receives endpoints manually. Its model/id/range prefix is
++         * not initialized or consumed by the emitter's reset/push/draw path. */
++        params.sampleInterval = 1;
++        params.historyLength = effect->subrecordCount;
++        params.unk1C = 10;
++        params.kind = (u16)effect->billboardMode;
++        params.gradientColors[0] = effect->primaryColor;
++        params.gradientColors[1] = effect->primaryColor;
++        params.gradientColors[2] = effect->secondaryColor;
++        params.gradientColors[3] = effect->secondaryColor;
++        effect->tracks = effTrackPolyCreateModelWorkList(&params, effect->packetCount);
++        break;
++    }
++    effect->pendingRestartSteps = effect->restartStepCount;
++    VU0_LOAD_MATRIX(effect->matrix);
++    VU0_STORE_MATRIX(effect->sourceMatrix);
++    effect->active = 1;
++    effect->colorMask = 0x80808080;
++}
+ 
+ /* Release the selected sub-effect resource, billboard and packet-buffer
+  * allocation described by the common emitter prefix. */
