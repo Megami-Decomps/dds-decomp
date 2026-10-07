@@ -100,10 +100,8 @@ typedef struct {
     u8 pad11[3];
 } EffBossCell; /* 0x14 */
 
-typedef struct EffBossDrawPool EffBossDrawPool;
-
 typedef struct {
-    EffBossDrawPool *drawPool;
+    EffRecordPool *drawPool;
     f32 direction[3]; /* Unit Y initially; mode 2 refreshes it from the model. */
     u8 pad10[4];
     f32 rotationAngle;
@@ -139,17 +137,17 @@ extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 extern void func_0015D078(u32 system, u32 value);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
-extern EffBossDrawPool *func_0016FB08(s32 cellCount);
-extern void *effGetIndexedEffectGroupRecord(EffBossDrawPool *pool, s32 index);
-extern EffBossColorSlot *effGetIndexedEffectGroupIndexEntry(EffBossDrawPool *pool, s32 index);
-extern void effSetVectorIncrementBits(EffBossDrawPool *pool, u32 bits);
+extern EffRecordPool *func_0016FB08(u32 cellCount);
+extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
+extern EffBossColorSlot *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
+extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 extern f32 D_003B9308;
 extern void func_00184630(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
-extern void effReleaseRecordGroupAssetAndHandle(EffBossDrawPool *pool);
+extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
 extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
 extern void parReleaseCellSystem(u32 system);
 
