@@ -7,7 +7,7 @@ s32 dds3InvokeAreaCallback(void *arg);
 
 s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
 
-s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, s32 value) {
+s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
     EffWorldNode *node;
 
     if (object == NULL || value == 0) {
@@ -15,7 +15,7 @@ s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, s32 value) {
     }
     node = ((EvtWorldTable *)object->data)->slots[index].head;
     while (node != NULL) {
-        if (node == (EffWorldNode *)value) {
+        if (node == value) {
             return 1;
         }
         node = node->next;

@@ -13,7 +13,7 @@ void dds3DestroyWorldIndexNode(struct NodeB *node);
 
 void sdfReleaseChipBlock(void *arg);
 
-const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, s32 value) {
+const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
     EffWorldNode *node;
 
     if (object == NULL || value == 0) {
@@ -21,7 +21,7 @@ const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, s32 val
     }
     node = ((EvtWorldTable *)object->data)->slots[index].head;
     while (node != NULL) {
-        if (node == (EffWorldNode *)value) {
+        if (node == value) {
             return 1;
         }
         node = node->next;

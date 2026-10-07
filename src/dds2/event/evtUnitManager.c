@@ -76,7 +76,7 @@ extern u32 mdlGetBroadcastValue(MdlCtx *);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_00438A48, D_00438A4C;
 extern void *dds3GetWorldObject(void);
-extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, s32);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
 extern s32 sdfLoadMapRecordPositionVector(void *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
@@ -169,14 +169,16 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     if (flags & 0x40000) {
         if (unit->currentTransitionValue == 0) {
             unit->flags = flags & ~0x40000;
-        } else if (!dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9, unit->currentTransitionValue)) {
+        } else if (!dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9,
+                                                 (EffWorldNode *)unit->currentTransitionValue)) {
             unit->currentTransitionValue = 0;
             unit->previousTransitionValue = 0;
             unit->flags &= ~0x40000;
         }
     }
     if (unit->previousTransitionValue &&
-        !dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9, unit->previousTransitionValue)) {
+        !dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9,
+                                       (EffWorldNode *)unit->previousTransitionValue)) {
         unit->previousTransitionValue = 0;
     }
     transition = 0.0f;
