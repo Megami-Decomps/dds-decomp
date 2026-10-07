@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "dat_state.h"
 
 #define MTR_RECORD_COUNT 32
@@ -100,7 +101,8 @@ extern void func_00289BA0(struct MnuStatusResource *);
 extern s32 func_00288920(struct MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *, s8);
 
-extern s32 func_00312810(u32, s32);
+struct TaskWork;
+extern s32 func_00312810(struct TaskWork *, s32);
 
 extern u32 mnuMantraSelectionResource;
 extern void mnuReleaseMantraPanelPositionTable(void);
@@ -123,10 +125,10 @@ extern void mnuReleaseMantraMenuDrawResources(void *);
 
 extern void dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(u32);
-struct TaskWork;
 struct SdfTaskItemDesc;
 extern struct SdfTaskItemDesc D_003CFCD4;
 extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
+extern void sdfSetTaskItemMode(void *, s32, u32);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(u32 *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
@@ -190,6 +192,11 @@ typedef struct MnuStatusResource {
     u8 padC04[4];
 } MnuStatusResource; /* 0xC08 */
 
+extern s32 func_00288748(MnuStatusResource *);
+extern s32 mnuPollTitleEffectsReady(MenuProgressHost *);
+extern void mnuRebuildProfilePanelFromRenderSnapshot(MnuStatusResource *);
+extern struct SdfTaskItemDesc D_003CFCE8;
+
 extern s32 func_00287078(MtrResourceLoadState *, u16);
 
 extern void mtrInitUnitSelectionWork(MnuStatusResource *);
@@ -248,7 +255,7 @@ void mnuStopResourceTask(void) {
 }
 
 s32 func_00287030(void) {
-    MnuStatusResource *selected = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *selected = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     s32 result = func_00287078(&selected->resourceLoad, 0);
 
     if (result != 0) {
@@ -264,7 +271,7 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
 /* Initialize the unit-selection state of the current resource-task work; return zero. */
 s32 mtrUnitSelectInit(void) {
-    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
 
     mtrInitUnitSelectionWork(resourceWork);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
@@ -273,26 +280,54 @@ s32 mtrUnitSelectInit(void) {
 
 /* Release the current work's unit-selection list, profile panel and drawing resources. */
 void mtrUnitSelectRelease(void) {
-    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
 
     mnuReleaseSelectionWorkResources(resourceWork);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectRelease\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
+/* Status 3 continues this selection task; only status 4 ends it. */
+s32 func_00287670(s32 mode) {
+    MnuStatusResource *resource = (MnuStatusResource *)func_00312810(
+        (struct TaskWork *)mnuMantraSelectionResource, -1);
+
+    switch (func_00288748(resource)) {
+    case 1:
+        if (resource->flags.unk00 == 0) {
+            if (mnuPollTitleEffectsReady(resource->progressHost) == 0) {
+                resource->flags.unk00 = 1;
+            }
+        } else {
+            resource->flags.unk00 = 0;
+            resource->flags.visible = 1;
+            mnuRebuildProfilePanelFromRenderSnapshot(resource);
+        }
+        break;
+    case 2:
+        sdfAttachTaskItem((struct TaskWork *)mnuMantraSelectionResource,
+                          &D_003CFCE8);
+        sdfSetTaskItemMode((void *)mnuMantraSelectionResource, mode, 2);
+        /* fall through */
+    case 3:
+        break;
+    case 4:
+        return -1;
+    }
+    return 0;
+}
 
 /* Draw the current unit-selection resource; the handler's native u64 return is always zero. */
 u64 func_00287768(void) {
     MnuStatusResource *resourceWork;
 
-    resourceWork = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    resourceWork = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     func_00288920(resourceWork);
     return 0;
 }
 
 /* Enter mantra selection on the current work address and disable terminal-track mode; return zero. */
 s32 mtrMantraSelectInit(void) {
-    u64 resourceAddress = func_00312810(mnuMantraSelectionResource, -1);
+    u64 resourceAddress = func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
 
     mnuEnableTerminalTrackMode(0);
     mnuOpenMantraSelectionAndLoadTitleStream(resourceAddress);
@@ -303,7 +338,7 @@ s32 mtrMantraSelectInit(void) {
 /* Release mantra visuals, clear the work's visible bit and restore terminal-track mode. */
 void mtrMantraSelectRelease(void) {
     MnuStatusResource *resourceWork =
-        (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+        (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
 
     mnuReleaseMantraPanelPositionTable();
     mnuCleanupMantraVisualsAndResetTitleStream(resourceWork);
@@ -321,7 +356,7 @@ extern void sdfSetTaskItemMode(void *, s32, u32);
  * case 4 requests task-item mode (1,1) and returns -1, while other results return zero. */
 s32 func_00287848(s32 key) {
     mnuTickPanelSoundEntries();
-    switch (func_0028A1D0((MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1))) {
+    switch (func_0028A1D0((MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1))) {
     case 1:
         break;
     case 2:
@@ -340,7 +375,7 @@ s32 func_00287848(s32 key) {
 u64 func_00287900(void) {
     u64 resourceAddress;
 
-    resourceAddress = func_00312810(mnuMantraSelectionResource, -1);
+    resourceAddress = func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     func_0028B1B0(resourceAddress);
     return 0;
 }
@@ -349,14 +384,12 @@ extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void func_00267B40(s32, MenuProgressHost *);
 extern void mnuEnsureProfilePanelEffect(s32, MenuProgressHost *);
-extern void mnuInitPartyPanelSlots(PartyPanel *);
-extern void func_002BCAB0(MenuPageWindow *);
 extern char D_00426208[];
 extern char D_00426218[];
 
 /* Initialize the equip panel from the selected party entry and selector. */
 s32 mtrMantraEquipInit(void) {
-    MnuStatusResource *work = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     MnuPartySnapshot *snapshot = &work->snapshot;
     MtrEquipState *equip = &work->equip;
     u8 *selector;
@@ -399,7 +432,7 @@ extern s8 evtStageTestUpdate(s32);
 extern u8 D_00380818[];
 
 s32 func_00288158(void) {
-    MnuStatusResource *work = (MnuStatusResource *)func_00312810(mnuMantraSelectionResource, -1);
+    MnuStatusResource *work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     f32 ratio;
     s32 value;
 
@@ -548,7 +581,6 @@ s32 func_00288920(MnuStatusResource *resourceWork) {
 extern s8 D_0037F510[];
 extern MenuListNode *mnuRetreatListCursorDefault(MenuList *);
 extern MenuListNode *mnuAdvanceListCursorDefault(MenuList *);
-extern void mnuRebuildProfilePanelFromRenderSnapshot(MnuStatusResource *);
 extern void mnuClearListFlagsOneAndTwo(MenuList *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 

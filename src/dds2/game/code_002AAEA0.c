@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
@@ -14,7 +15,6 @@ extern u8 D_003E7200[];
 
 extern u8 D_003E73F8[];
 
-extern s32 mnuUseFieldSkillOnParty(s32, s32, s32);
 extern u32 mnuMapPadMaskToFlags(s32);
 extern s32 func_002A9AB8(s32);
 extern void func_002B9808(MenuWindowContainer *);
@@ -48,7 +48,7 @@ u32 mnuPrepareCampFieldSkillDisplay(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    if (mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 0) == 0) {
+    if (mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 0) == 0) {
         ((CampVisualWork *)context)->skillFlagRoot->list->last->flags48 |= 1;
     } else {
         ((CampVisualWork *)context)->skillFlagRoot->list->last->flags48 &= ~1;
@@ -194,7 +194,7 @@ s32 mnuPollCampFieldSkillAndPopup(s32 callback) {
     if (state != 0) {
         return state;
     }
-    mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 1);
+    mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 1);
     mnuSetPopupEntry(&((CampVisualWork *)context)->popup, D_003E7034);
     return 0;
 }

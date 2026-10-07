@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "mnu_shop.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
@@ -124,7 +125,6 @@ extern void mnuShopReleaseWindowSprites();
 
 extern void sdfReleaseChipBlock();
 
-extern void mnuDestroyWindowContainer();
 
 extern void mnuShopReleaseWindowAndEffectResources();
 

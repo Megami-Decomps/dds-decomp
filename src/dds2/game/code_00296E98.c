@@ -1,6 +1,7 @@
 #include "common.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
+#include "mnu_staff.h"
 
 
 extern u8 brsUiUpdateAllowed;
@@ -38,7 +39,6 @@ extern s8 brsTaskState;
 
 extern void sndEnsureMidiBankResident(s32);
 
-extern void mnuInitPartyPanelSlots(PartyPanel *);
 
 extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
 
@@ -787,8 +787,8 @@ s32 brsTaskIsFadeIdle(void) {
 
 void mnuRefreshSelectedUnitPanels(u32 unused, BrsSkillPackageWork *menu) {
     mnuInitPartyPanelSlots(&menu->partyPanel);
-    func_002BCA98((s32)&menu->partyWindow);
-    func_002BCAB0((s32)&menu->partyWindow);
+    func_002BCA98(&menu->partyWindow);
+    func_002BCAB0(&menu->partyWindow);
 }
 
 void mnuStaffCopyPanelBlock(DatPartyRecord *src, BrsSkillPackageWork *base) {
