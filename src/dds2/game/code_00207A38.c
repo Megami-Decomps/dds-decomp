@@ -2593,7 +2593,8 @@ void btlBossDebugPrintf(const char *format, ...) {
 void btlBossDebugPrintfN(s32 a, s32 b, s32 c, s32 d, ...) {
 }
 
-void func_0020D1B0(void) {
+/* Retail discards debug text while retaining the callers' four-argument ABI. */
+void func_0020D1B0(s32 x, s32 y, s32 style, const char *text) {
 }
 
 void func_0020D1B8(void) {
