@@ -65,7 +65,32 @@ void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C618);
+extern const s32 D_004284E0[9][3];
+extern s32 mdlFlagTest(u32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, void *, s32, s32);
+
+void func_0029C618(BrsSkillPackageWork *work) {
+    s32 table[9][3];
+    s32 count;
+    s32 i;
+    u32 scale;
+
+    memcpy(table, D_004284E0, sizeof(table));
+    count = mdlFlagTest(0x290) ? 9 : 8;
+    if (work->teardownHandle != 0) {
+        for (i = 0; i < count; i++) {
+            scale = (work->opacity << 8) >> 7;
+            func_00306CD0(table[i][0] << 4, table[i][1] << 3,
+                         0, scale, 0, (void *)work->teardownHandle,
+                         table[i][2], 0x53);
+            if (i == 0) {
+                mnuTitleDrawBurstSprites(scale, 0x53);
+                func_00306CD0(0, 0, 0, 0x100, 0,
+                             (void *)work->teardownHandle, 0x25, 0x53);
+            }
+        }
+    }
+}
 
 void func_0029C800(void) {
 }
