@@ -1,15 +1,8 @@
 #include "common.h"
 #include "dds3obj.h"
 
-typedef struct ActionObj {
-    u8 unk0[4];   /* 0x0 */
-    s32 initialValue; /* 0x4 */
-    u8 unk8[0x10]; /* 0x8 */
-    u32 *resource; /* 0x18: resource owner's nested handle */
-    s32 unk1C;     /* 0x1C */
-} ActionObj;
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode();
 extern void dds3EnsureSlotData();
 
 extern void effObjSetInnerFirstVec();
@@ -17,18 +10,18 @@ extern void effObjSetInnerSecondVec();
 extern void effObjInnerVecBackup();
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */
-ActionObj *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
-    ActionObj *obj = dds3AppendWorldObjectNode(8);
+EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(8);
 
-    obj->initialValue = initialValue;
+    obj->key = initialValue;
     effObjSetInnerFirstVec(obj, firstVector);
     effObjSetInnerSecondVec(obj, secondVector);
-    effObjInnerVecBackup(obj->unk1C);
+    effObjInnerVecBackup(obj->inner);
     return obj;
 }
 
-u32 dds3GetResourceOwnerHandle(ActionObj *object) {
-    return *object->resource;
+u32 dds3GetResourceOwnerHandle(EffWorldNode *object) {
+    return *((u32 *)object->data);
 }
 
 
@@ -59,12 +52,12 @@ typedef struct InnerVecObj {
 } InnerVecObj;
 
 /* Build the inner-vector object of a world object and fill in its default state. */
-u32 dds3InitializeInnerVectorEffectObject(ActionObj *object) {
+u32 dds3InitializeInnerVectorEffectObject(EffWorldNode *object) {
     InnerVecObj *obj;
 
     effObjInnerCreate();
     obj = (InnerVecObj *)sdfAllocSizeClassBlock(0x7C);
-    object->resource = (u32 *)obj;
+    object->data = obj;
     obj->unk74 = dds3CreateSlotResourceState(object);
     dds3SetObjectFlags(object, 0x62);
     obj->unk64 = 0;

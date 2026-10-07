@@ -2331,3 +2331,46 @@ The allocator's unlink helper instead borrows the existing `0x10`-byte
 `SdfListNode` projection or byte-offset view is not a second list owner.
 Both titles pass the actual allocation and its predecessor directly.
 
+
+## World nodes own separate transforms and kind-specific work
+
+`dds3CreateWorldNodeForKind` (DDS1 `0x0010F418`, DDS2 `0x0010F640`)
+requests `0x44` bytes: **68 decimal**, not `0x68`. `EffWorldNode` is this
+primary owner. Camera, action, script and event-slot nodes share its
+metadata, callbacks, payload pointer and links; they are not independent
+short object headers. Its high tag byte selects the kind. The payload at
+`+0x18` remains opaque in the shared owner, with each kind using its own
+existing work type at the consumer boundary.
+
+The separate `ObjectTransform` allocation is `0xD0` bytes
+(`effObjInnerCreate`, DDS1 `0x0010F570`, DDS2 `0x0010F798`). The world node's
+`inner` at `+0x1C` points to its matrix, position/rotation/scale, saved and
+smoothed vectors, and flags at `+0xC0`. Vector setters accept the world
+node and select its inner allocation; transform flag/backup helpers
+accept the transform itself. Do not confuse the kind-specific payload
+with this inner owner.
+
+The kind directory `D_003299C0` points at complete six-word (`0x18`-byte)
+`EffWorldOps` tables. Their first four entries are create, destroy, update
+and draw callbacks; both remaining words are zero. Kind 1 selects
+`D_00329A20` and its initializer at DDS1 `0x00110578`, which allocates a
+`0x40`-byte `EvtWorldTable` and eighteen `0x0C`-byte slots. Each slot's
+endpoints are borrowed `EffWorldNode *` values.
+
+Kind 1 also uses the first eight metadata bytes as `WorldValueIndices`:
+the head, tail and cursor indices followed by the entry count. The cursor
+helper at DDS1 `0x00110490` demonstrates this interpretation. The same
+index record occurs in a separate `0x10`-byte allocation at `0x0010FEC8`,
+so its accessors retain the index-record type rather than pretending
+every index record is an entire world node. Kind 2 instead stores its
+object key in the second metadata word (`evtSpawnActionObj2`,
+DDS1 `0x00111188`). The value word can hold either a scalar or a native
+caption address; caption consumers interpret that word as a string
+pointer at the use site.
+
+A shared tagged union was tested and rejected: its aliasing changed the
+already-matched world and script constructor schedules. The exact shared
+representation therefore remains a plain node with opaque payload and
+kind-specific interpretation at the consumer boundary. No matched C
+constructor is replaced with assembly to accommodate a type cutover.
+

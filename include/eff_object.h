@@ -25,8 +25,8 @@ typedef char EffectObjectData_size_must_be_0x40[(sizeof(EffectObjectData) == 0x4
 typedef char EffectObjectData_modelHolder_at_0x0C[((u32)&((EffectObjectData *)0)->modelHolder == 0x0C) ? 1 : -1];
 typedef char EffectObjectData_tail_at_0x3C[((u32)&((EffectObjectData *)0)->limitMax3C == 0x3C) ? 1 : -1];
 #ifdef VERSION_DDS1
-ObjBase *func_00113008(NodeA *object);
+ObjBase *func_00113008(EffWorldNode *object);
 #elif VERSION_DDS2
-ObjBase *func_00113230(NodeA *object);
+ObjBase *func_00113230(EffWorldNode *object);
 #endif
 #endif

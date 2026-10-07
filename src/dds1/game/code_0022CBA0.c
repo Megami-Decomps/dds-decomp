@@ -10,6 +10,8 @@
 #include "eff_blur.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_object.h"
+#include "mdl.h"
 
 extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 struct EvtViewer;
@@ -101,7 +103,7 @@ typedef struct EventViewerState {
     u8 pad2030[4];
     struct EvtViewTrack *tracks; /* 0x2034 */
     u8 pad2038[4];
-    struct EvtWorldLink *objects[127];
+    struct EffWorldNode *objects[127];
     s32 unk2238;
     struct {
         u16 id;
@@ -257,7 +259,7 @@ typedef struct EvtViewTrack {
     s32 kind;                 /* 0x00 */
     u8 pad04[0xC];
     union {
-        EffTransformNode *transform;
+        EffWorldNode *transform;
         s32 transitionValue;
         u32 handle;
     } owner;                  /* 0x10: payload role is selected by kind */
@@ -453,16 +455,8 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D420);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D528);
 
-typedef struct EvtWorldLink {
-    u8 pad00[8];
-    u8 *name;
-    u8 pad0C[0xC];
-    void *data;
-    u8 pad1C[4];
-    struct EvtWorldLink *next;
-} EvtWorldLink;
 
-extern EvtWorldLink *dds3FindIndexedObjectChainNodeByName(EvtWorldObject *, s32, const u8 *);
+extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *, s32, const u8 *);
 extern s32 evtUnitGetNestedValue(u8 *);
 extern void evtSetUnitValueTransition(EvtUnit *, s32, s32);
 extern void evtEndUnitValueTransition(EvtUnit *, s32);
@@ -470,7 +464,7 @@ extern void evtEndUnitValueTransition(EvtUnit *, s32);
 /* At time, selects each named unit's latest kind-9 transition key and starts,
  * ends or leaves its value transition according to the selected key flags. */
 void func_0022E098(s32 time, EventViewerState *viewer) {
-    EvtWorldLink *object;
+    EffWorldNode *object;
     EvtViewTrack *node;
     EvtViewKey *key;
     EvtViewKey *selected;
@@ -479,9 +473,9 @@ void func_0022E098(s32 time, EventViewerState *viewer) {
     s32 selectedTime;
 
     if (dds3GetWorldObject() != NULL) {
-        object = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head;
+        object = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
         while (object != NULL) {
-            if (object->name != NULL) {
+            if (((u8 *)object->value) != NULL) {
                 selected = NULL;
                 selectedValue = 0;
                 selectedTime = -1;
@@ -545,7 +539,7 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     s32 time;
 
     if (dds3GetWorldObject() != 0) {
-        table = (s32)((EvtWorldObject *)dds3GetWorldObject())->table;
+        table = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
         if (table != 0) {
             slots = (s32)((EvtWorldTable *)table)->slots;
             if (slots != 0) {
@@ -568,7 +562,7 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
                             }
                             node = node->next;
                         }
-                        object = (s32)((EvtWorldLink *)object)->next;
+                        object = (s32)((EffWorldNode *)object)->next;
                     } while (object != 0);
                 }
             }
@@ -588,7 +582,7 @@ void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
     EvtViewTrack *found;
 
     if (dds3GetWorldObject() != 0) {
-        object = (s32)((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head;
+        object = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
         if (object != 0) {
             do {
                 node = viewer->tracks;
@@ -603,7 +597,7 @@ void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
                 if (found != NULL) {
                     func_0022EB10(position, object, node, viewer, 0);
                 }
-                object = (s32)((EvtWorldLink *)object)->next;
+                object = (s32)((EffWorldNode *)object)->next;
             } while (object != 0);
         }
     }
@@ -618,7 +612,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
     EvtViewKey *glyph;
     EvtViewKey *best;
     s32 bestFrame;
-    u8 *lod;
+    SdfModel *lod;
     s8 level;
 
     while (node != NULL) {
@@ -635,13 +629,13 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
                     glyph = glyph->next;
                 } while (glyph != NULL);
             }
-            lod = *(u8 **)(*(s32 *)(*(s32 *)(node->owner.transform->ownerData + 0xC) + 0xC) + 0x18);
+            lod = ((MdlCtx *)((EffectObjectData *)node->owner.transform->data)->modelHolder->resourceHandle)->inner;
             if (best == NULL) {
-                lod[0x98] = 0;
+                lod->lodIndex = 0;
             } else {
                 level = best->channel.value;
                 if (sdfGetLodChunkValue(lod) >= level) {
-                    lod[0x98] = best->channel.value;
+                    lod->lodIndex = best->channel.value;
                 }
             }
         }
@@ -649,10 +643,10 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
     }
 }
 
-extern void effObjSetInnerFirstVec(EffTransformNode *, u128 *);
-extern void effObjSetInnerSecondVec(EffTransformNode *, u128 *);
-extern void effObjFetchInnerFirstVec(EffTransformNode *);
-extern u32 *dds3FindObjectChainNodeByName(EvtWorldObject *, const u8 *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+extern void effObjFetchInnerFirstVec(EffWorldNode *);
+extern u32 *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
@@ -685,7 +679,7 @@ void func_0022F038(s32 position, EventViewerState *viewer) {
                     effObjSetInnerSecondVec(node->owner.transform,
                         (u128 *)node->savedSecondVector);
                     effObjFetchInnerFirstVec(node->owner.transform);
-                    VU0_STORE_VF(vf10, &node->owner.transform->inner->vec70);
+                    VU0_STORE_VF(vf10, &node->owner.transform->inner->smoothedPosition);
                     node->objectAttached = 0;
                 }
             } else if (best->frame == position) {
@@ -697,14 +691,14 @@ void func_0022F038(s32 position, EventViewerState *viewer) {
                     effObjSetInnerSecondVec(node->owner.transform,
                         (u128 *)node->savedSecondVector);
                     effObjFetchInnerFirstVec(node->owner.transform);
-                    VU0_STORE_VF(vf10, &node->owner.transform->inner->vec70);
+                    VU0_STORE_VF(vf10, &node->owner.transform->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {
                     u32 *object = dds3FindObjectChainNodeByName(
                         dds3GetWorldObject(), viewer->unitNames[channel]);
 
                     mdlAttachWorldObjectToSourceVector(
-                        node->owner.transform->word4, object[1]);
+                        node->owner.transform->key, object[1]);
                     node->objectAttached = 1;
                 }
             }
@@ -988,7 +982,7 @@ extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 
 void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
     EventViewerState *viewer = (EventViewerState *)viewerAddr;
     EvtWorldTable *table;
-    EvtWorldLink *object;
+    EffWorldNode *object;
     EvtViewTrack *track;
     EvtViewTrack *found;
     EvtViewKey *key;
@@ -1000,7 +994,7 @@ void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
     if (dds3GetWorldObject() == NULL) {
         return;
     }
-    table = ((EvtWorldObject *)dds3GetWorldObject())->table;
+    table = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
     object = table->slots[5].head;
     while (object != NULL) {
         track = viewer->tracks;

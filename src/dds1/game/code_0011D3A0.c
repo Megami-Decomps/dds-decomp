@@ -2038,7 +2038,8 @@ u8 fldGetSceneReadyOrPendingState(void) {
 }
 
 extern void *dds3GetWorldObject(void);
-extern void dds3SetWorldObjectDataValue(EvtWorldObject *, s8);
+struct ObjBase;
+extern void dds3SetWorldObjectDataValue(struct ObjBase *, s8);
 extern void kwlnFadeStartIn(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00145B18(void);

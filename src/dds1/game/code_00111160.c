@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_transform.h"
 
 s32 func_00111160(u32 kind) {
     s32 result = 0;
@@ -11,21 +12,14 @@ s32 func_00111160(u32 kind) {
     return result;
 }
 
-typedef struct ActionObj {
-    u8 unk0[4];   /* 0x0 */
-    s32 unk4;     /* 0x4 */
-    s32 unk8;     /* 0x8 */
-    u8 unkC[0xC]; /* 0xC */
-    void *unk18;  /* 0x18 */
-} ActionObj;
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode();
 
-ActionObj *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
-    ActionObj *obj = dds3AppendWorldObjectNode(2);
+EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(2);
 
-    obj->unk4 = firstValue;
-    obj->unk8 = secondValue;
+    obj->key = firstValue;
+    obj->value = secondValue;
     return obj;
 }
 
@@ -104,21 +98,17 @@ void *dds3GetFirstWorldObjectNodeOfKind2(void) {
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-typedef struct ObjWithWork {
-    u8 unk0[0x18];
-    u32 *work;
-} ObjWithWork;
 
-s32 dds3AllocateClearedObjectWork(ObjWithWork *obj) {
-    obj->work = sdfAllocSizeClassBlock(0x10);
-    memset(obj->work, 0, 0x10);
+s32 dds3AllocateClearedObjectWork(EffWorldNode *obj) {
+    obj->data = sdfAllocSizeClassBlock(0x10);
+    memset(obj->data, 0, 0x10);
     return 1;
 }
 
-void dds3ReleaseWorldSlotResource(ObjWithWork *obj) {
+void dds3ReleaseWorldSlotResource(EffWorldNode *obj) {
     u32 *slot;
 
-    slot = obj->work;
+    slot = ((u32 *)obj->data);
     dds3ReleaseObjectResource();
     dds3ExchangeSlot(*slot, 0, 1);
     sdfReleaseChipBlock(slot);

@@ -518,7 +518,7 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
 typedef struct FldScriptResource {
     u8 pad00[0x10];
     u8 parameters[0x10];
-    s32 unk20;
+    struct MotionTable *unk20;
 } FldScriptResource;
 
 typedef struct FldResourceName {
@@ -530,24 +530,22 @@ extern FldFileResource *D_00438EB8;
 extern u32 D_00438EBC;
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
-extern s32 D_00435FA4;
-extern s32 evtCreateScriptObjectWithResource(s32, s32, s32, s32, s32);
+extern struct DevRequest *D_00435FA4;
+extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
 struct WorldObj;
 struct EffectObject;
 struct WorldEntry;
-struct WorldListNode;
-struct WorldChainNode;
-struct EvtWorldObject;
+struct EffWorldNode;
 extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldEntryCallbackTarget(struct WorldEntry *, void *);
 extern void effObjSetModelHolder(struct EffectObject *, u32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void func_00113FF8(struct EffectObject *, u32);
-extern struct WorldListNode *dds3FindWorldObjectNodeByKey(struct EvtWorldObject *, u32, s32);
+extern struct EffWorldNode *dds3FindWorldObjectNodeByKey(struct EffWorldNode *, u32, s32);
 extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
 extern void func_00112168(void *);
 extern void fldSetRecordValueById(s32, s32);
-extern struct WorldChainNode *dds3FindIndexedObjectChainNodeByName(struct EvtWorldObject *, s32, const u8 *);
+extern struct EffWorldNode *dds3FindIndexedObjectChainNodeByName(struct EffWorldNode *, s32, const u8 *);
 extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
 void fldCreateResourceScriptObjects(void) {
@@ -571,8 +569,8 @@ void fldCreateResourceScriptObjects(void) {
     world = dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++, resource++) {
         script = resource->data;
-        evtCreateScriptObjectWithResource(resource->id, (s32)script->parameters,
-                                         script->unk20, D_00435FA4, (s32)resource->name);
+        evtCreateScriptObjectWithResource(resource->id, script->parameters,
+                                         script->unk20, D_00435FA4, resource->name);
         /* Retail fills both 16-byte stack vectors before creating the object. */
         if (resource->transform != NULL) {
             position[0] = resource->transform[0];
@@ -1078,7 +1076,7 @@ extern u32 D_00444940[];
 
 extern s32 D_00435FA0;
 
-extern s32 D_00435FA4;
+extern struct DevRequest *D_00435FA4;
 
 extern FldTransferChunk *D_00435FA8;
 
@@ -2421,7 +2419,7 @@ extern void effObjSetNodeFlags(void *, s32);
 void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
     f32 phase = D_004360B0;
-    CameraObject *camera;
+    EffWorldNode *camera;
 
     if (D_004360AC != 0) {
         if (D_004360AC == 1) {
@@ -2436,7 +2434,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_004360AC == -2) {
             direction = -1.0f;
         }
-        camera = (CameraObject *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = (EffWorldNode *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
         if (D_004360AC == 1 || D_004360AC == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;

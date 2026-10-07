@@ -7,15 +7,8 @@ typedef struct WorldResourceOwner {
 } WorldResourceOwner;
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */
-typedef struct ActionObj {
-    u8 unk0[4];   /* 0x0 */
-    s32 initialValue; /* 0x4 */
-    u8 unk8[0x10]; /* 0x8 */
-    u32 *resource; /* 0x18: resource owner's nested handle */
-    s32 unk1C;     /* 0x1C */
-} ActionObj;
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void effObjSetInnerFirstVec();
 
@@ -23,13 +16,13 @@ extern void effObjSetInnerSecondVec();
 
 extern void effObjInnerVecBackup();
 
-ActionObj *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
-    ActionObj *obj = dds3AppendWorldObjectNode(8);
+EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(8);
 
-    obj->initialValue = initialValue;
+    obj->key = initialValue;
     effObjSetInnerFirstVec(obj, firstVector);
     effObjSetInnerSecondVec(obj, secondVector);
-    effObjInnerVecBackup(obj->unk1C);
+    effObjInnerVecBackup(obj->inner);
     return obj;
 }
 

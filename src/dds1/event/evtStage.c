@@ -44,16 +44,15 @@ void evtDestroySecondaryWorldNode(void)
 }
 
 
-struct WorldListNode;
-extern void dds3RemoveWorldObjectNode(struct WorldListNode *node);
+extern void dds3RemoveWorldObjectNode(struct EffWorldNode *node);
 
 /* Detach every unit node from the secondary object's per-kind list. */
 void evtDrainSecondaryWorldNodes(void) {
-    EvtWorldObject *object = (EvtWorldObject *)dds3GetWorldSecondaryObject();
+    EffWorldNode *object = (EffWorldNode *)dds3GetWorldSecondaryObject();
     EvtWorldTable *table;
 
     if (object != NULL) {
-        table = object->table;
+        table = ((EvtWorldTable *)object->data);
         while (table->slots[EVT_WORLD_SLOT_UNIT].head != NULL) {
             dds3RemoveWorldObjectNode(table->slots[EVT_WORLD_SLOT_UNIT].head);
         }

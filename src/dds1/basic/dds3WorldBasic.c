@@ -71,7 +71,7 @@ void *dds3GetWorldSecondaryObject(void) {
  * Missing active world or failed creation returns NULL without changing the list. */
 void *dds3AppendWorldNode(void) {
     WorldInfo *worldInfo;
-    NodeA *worldNode;
+    EffWorldNode *worldNode;
 
     if (dds3ActiveWorld == NULL) {
         return NULL;
@@ -94,7 +94,7 @@ void *dds3AppendWorldNode(void) {
 
 /* Clear boundary and selected-object references before generic node destruction.
  * NULL node or missing active world leaves the node untouched. */
-void dds3DestroyWorldNode(NodeA *worldNode) {
+void dds3DestroyWorldNode(EffWorldNode *worldNode) {
     WorldInfo *worldInfo;
 
     if (worldNode == NULL) {

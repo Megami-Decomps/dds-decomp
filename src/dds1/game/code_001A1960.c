@@ -2324,9 +2324,9 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(s32 object) {
     return ((s32)datEnemyRecords[((BtlUnit *)object)->mode].flags & 0x100) > 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);
-
 extern s32 effMiscRand(void *);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1DA0);
 
 u32 func_001A9F40(s32 unit, BtlUnit *enemy) {
     DatEnemyRecord *record;

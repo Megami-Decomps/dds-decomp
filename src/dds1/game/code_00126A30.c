@@ -418,7 +418,7 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
 typedef struct FldScriptResource {
     u8 pad00[0x10];
     u8 parameters[0x10];
-    s32 unk20;
+    struct MotionTable *unk20;
 } FldScriptResource;
 
 typedef struct FldResourceName {
@@ -430,8 +430,8 @@ extern FldFileResource *D_003BD7B0;
 extern u32 D_003BD7B4;
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
-extern s32 D_003BAC14;
-extern s32 evtCreateScriptObjectWithResource(s32, s32, s32, s32, s32);
+extern struct DevRequest *D_003BAC14;
+extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
 extern void *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldEntryCallbackTarget(void *, const char *);
 extern void effObjSetModelHolder(void *, u32);
@@ -465,8 +465,8 @@ void fldCreateResourceScriptObjects(void) {
     world = dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++, resource++) {
         script = resource->data;
-        evtCreateScriptObjectWithResource(resource->id, (s32)script->parameters,
-                                         script->unk20, D_003BAC14, (s32)resource->name);
+        evtCreateScriptObjectWithResource(resource->id, script->parameters,
+                                         script->unk20, D_003BAC14, resource->name);
         /* Retail fills both 16-byte stack vectors before creating the object. */
         if (resource->transform != NULL) {
             position[0] = resource->transform[0];
@@ -2369,7 +2369,7 @@ extern void effObjSetNodeFlags(void *, s32);
 void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
     f32 phase = D_003BAD20;
-    CameraObject *camera;
+    EffWorldNode *camera;
 
     if (D_003BAD1C != 0) {
         if (D_003BAD1C == 1) {
@@ -2384,7 +2384,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_003BAD1C == -2) {
             direction = -1.0f;
         }
-        camera = (CameraObject *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = (EffWorldNode *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
         if (D_003BAD1C == 1 || D_003BAD1C == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;
@@ -3794,7 +3794,7 @@ typedef struct FldProbeActor {
 
 extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
-s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, EffWorldNode *entry) {
     f32 dir[4];
     f32 position[4];
     f32 length;
@@ -3811,7 +3811,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
             kind = *((FldProbeKind *)D_003307B0[i][8])->kind;
             switch (kind) {
             case 0:
-                source = entry->payload;
+                source = entry->data;
                 position[0] = source[0];
                 position[1] = source[1];
                 position[2] = source[2];
@@ -3862,7 +3862,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
 }
 
 /* vu0 routine: the alternate entry probe only constrains facing, not range. */
-s32 fldTestRoomProbeFacing(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacing(FldProbeActor *actor, EffWorldNode *entry) {
     f32 dir[4];
     f32 position[4];
     f32 dot;
@@ -3877,7 +3877,7 @@ s32 fldTestRoomProbeFacing(FldProbeActor *actor, NodeA *entry) {
             kind = *((FldProbeKind *)D_003307B0[i][8])->kind;
             switch (kind) {
             case 0:
-                PCP_COPY_VECTOR(position, entry->payload);
+                PCP_COPY_VECTOR(position, entry->data);
                 VU0_LOAD_VF(vf10, actor->target->quaternion);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);

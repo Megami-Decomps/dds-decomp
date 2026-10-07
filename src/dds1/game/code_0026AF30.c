@@ -1,21 +1,13 @@
 #include "common.h"
+#include "eff_transform.h"
 
 extern f32 D_003DC1C0[4];
 
 extern f32 D_003DC1D0[4];
 
-typedef struct WorldCallbackTable {
-    u8 pad00[8];
-    s32 (*onFirst)(void *);
-    s32 (*onSecond)(void *);
-} WorldCallbackTable;
 
-typedef struct WorldCallbackHolder {
-    u8 pad00[0x10];
-    WorldCallbackTable *callbacks;
-} WorldCallbackHolder;
 
-extern WorldCallbackHolder *mnuTitleCameraObject;
+extern EffWorldNode *mnuTitleCameraObject;
 
 extern void fldReleaseCameraColorEffect(void);
 
@@ -46,7 +38,7 @@ extern void fldApplyLightSetIndex(s32);
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
     effObjSetInnerFirstVec(mnuTitleCameraObject, D_003DC1C0);
     effObjSetInnerSecondVec(mnuTitleCameraObject, D_003DC1D0);
-    return mnuTitleCameraObject->callbacks->onFirst(mnuTitleCameraObject);
+    return mnuTitleCameraObject->ops->update(mnuTitleCameraObject);
 }
 
 void func_0026AF78(void) {

@@ -2,6 +2,7 @@
 #define EVT_WORLD_H
 
 #include "common.h"
+#include "eff_transform.h"
 
 /* Native 0x0A-byte frame editor row: count followed by eight signed column kinds. */
 typedef struct EvtFrameTableEntry {
@@ -47,8 +48,8 @@ struct SdfMemBlock;
 /* The object's 18 per-kind intrusive lists. */
 typedef struct EvtWorldSlot {
     s32 count;
-    void *head; /* 0x04: interpreted by the slot-specific node type */
-    void *tail;
+    EffWorldNode *head;
+    EffWorldNode *tail;
 } EvtWorldSlot;
 
 typedef struct EvtWorldTable {
@@ -64,13 +65,5 @@ typedef struct EvtWorldTable {
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
 } EvtWorldTable;
 
-typedef struct EvtWorldObject {
-    s16 headIndex;
-    s16 tailIndex;
-    s16 cursorIndex;
-    u16 entryCount;
-    u8 pad08[0x10];
-    EvtWorldTable *table; /* 0x18 */
-} EvtWorldObject;
 
 #endif /* EVT_WORLD_H */

@@ -843,7 +843,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
     if (id == 0) {
         return;
     }
-    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == id) {
             unit = node->link->unit;
@@ -871,7 +871,7 @@ void evtLipsStopFunction(void) {
     if (D_004371F0 == 0) {
         return;
     }
-    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == D_004371F0) {
             unit = node->link->unit;

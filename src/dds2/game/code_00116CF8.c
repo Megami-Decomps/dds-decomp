@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_transform.h"
 #include "eff.h"
 
 extern u64 dds3GetWorldSecondaryObject(void);
@@ -21,27 +22,20 @@ typedef struct Dds3PathKeyframes {
     u32 *frames;
 } Dds3PathKeyframes;
 
-typedef struct ActionObj {
-    u8 unk0[4];   /* 0x0 */
-    s32 unk4;     /* 0x4 */
-    s32 unk8;     /* 0x8 */
-    u8 unkC[0xC]; /* 0xC */
-    void *unk18;  /* 0x18 */
-} ActionObj;
 
 typedef struct ActionSub {
     u8 unk0[0x10];
     s32 unk10;
 } ActionSub;
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode();
 
-ActionObj *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
-    ActionObj *obj = dds3AppendWorldObjectNode(0xB);
+EffWorldNode *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(0xB);
 
-    obj->unk8 = d;
-    ((ActionSub *)obj->unk18)->unk10 = 0;
-    obj->unk4 = a;
+    obj->value = d;
+    ((ActionSub *)obj->data)->unk10 = 0;
+    obj->key = a;
     return obj;
 }
 
@@ -58,12 +52,12 @@ u32 dds3GetPathStateValueById(u64 id) {
     return path->state->value;
 }
 
-ActionObj *evtSpawnActionObjD(s32 a, void *work, s32 c) {
-    ActionObj *obj = dds3AppendWorldObjectNode(0xD);
+EffWorldNode *evtSpawnActionObjD(s32 a, void *work, s32 c) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(0xD);
 
-    obj->unk18 = work;
-    obj->unk4 = a;
-    obj->unk8 = c;
+    obj->data = work;
+    obj->key = a;
+    obj->value = c;
     return obj;
 }
 
@@ -88,12 +82,12 @@ void func_00116DE8(u32 *segment, f32 *weight, Dds3PathKeyframes *keys, f32 frame
     *weight = 1.0f;
 }
 
-ActionObj *evtSpawnActionObj10(s32 a, void *work, s32 c) {
-    ActionObj *obj = dds3AppendWorldObjectNode(0x10);
+EffWorldNode *evtSpawnActionObj10(s32 a, void *work, s32 c) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(0x10);
 
-    obj->unk4 = a;
-    obj->unk8 = c;
-    obj->unk18 = work;
+    obj->key = a;
+    obj->value = c;
+    obj->data = work;
     return obj;
 }
 
@@ -123,8 +117,8 @@ extern void *sdfAllocSizeClassBlock(s32 bytes);
 extern void *memset(void *destination, s32 value, u32 bytes);
 extern EffPrim *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
 
-Dds3PathCurveWork *dds3CreatePathCurveWork(ActionObj *object) {
-    Dds3PathCurveTable *table = object->unk18;
+Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
+    Dds3PathCurveTable *table = object->data;
     Dds3PathCurveEntry *entry;
     Dds3PathKeyframes *keys;
     Dds3PathCurveWork *work;

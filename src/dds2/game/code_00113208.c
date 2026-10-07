@@ -2,20 +2,9 @@
 #include "eff_object.h"
 
 
-typedef struct CameraSlotState {
-    s32 unk0;   /* 0x0 */
-    s32 unk4;   /* 0x4 */
-} CameraSlotState;
 
-typedef struct ActionObj {
-    u8 unk0[4];             /* 0x0 */
-    s32 unk4;               /* 0x4 */
-    u8 unk8[0x10];          /* 0x8 */
-    CameraSlotState *state; /* 0x18 */
-    s32 unk1C;              /* 0x1C */
-} ActionObj;
 
-extern ActionObj *dds3AppendWorldObjectNode();
+extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 
@@ -31,31 +20,33 @@ extern void dds3ExchangeSlot();
 
 extern void dds3RegisterObjectInHandlerIndex();
 
-u32 dds3GetCameraMode(CameraObject *object) {
-    return object->data->eyeIsRelative;
+u32 dds3GetCameraMode(EffWorldNode *object) {
+    return ((CameraData *)object->data)->eyeIsRelative;
 }
 
-void dds3SetCameraMode(CameraObject *object, s32 value) {
-    if (object->data->eyeIsRelative != value) {
-        object->data->eyeIsRelative = value;
+void dds3SetCameraMode(EffWorldNode *object, s32 value) {
+    if (((CameraData *)object->data)->eyeIsRelative != value) {
+        ((CameraData *)object->data)->eyeIsRelative = value;
     }
 }
 
-ObjBase *func_00113230(NodeA *object) {
-    return ((EffectObjectData *)object->payload)->modelHolder;
+ObjBase *func_00113230(EffWorldNode *object) {
+    return ((EffectObjectData *)object->data)->modelHolder;
 }
 
-ActionObj *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVector) {
-    ActionObj *obj = dds3AppendWorldObjectNode(5);
+EffWorldNode *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVector) {
+    EffWorldNode *obj = dds3AppendWorldObjectNode(5);
+    EffectObjectData *data;
 
     if (obj != NULL) {
-        obj->unk4 = a;
+        obj->key = a;
         dds3EnsureSlotData(obj);
         effObjSetInnerFirstVec(obj, firstVector);
         effObjSetInnerSecondVec(obj, secondVector);
-        effObjInnerVecBackup(obj->unk1C);
-        obj->state->unk0 = -1;
-        obj->state->unk4 = 0;
+        effObjInnerVecBackup(obj->inner);
+        data = ((EffectObjectData *)obj->data);
+        data->handle = (ObjBase *)-1;
+        data->word04 = 0;
         dds3ExchangeSlot(obj, dds3GetFirstWorldObjectNodeOfKind2(), 5);
         dds3RegisterObjectInHandlerIndex(obj);
         return obj;

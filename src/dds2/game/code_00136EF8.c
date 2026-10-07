@@ -210,11 +210,9 @@ typedef struct FldTaskInfo {
     s32 slot;
 } FldTaskInfo;
 
-typedef struct ActionObj ActionObj;
 
-typedef struct WorldListNode WorldListNode;
 
-extern WorldListNode *dds3FindWorldObjectNodeByKey(EvtWorldObject *object, u32 key, s32 kind);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 
 extern u32 dds3GetPathState(s32 path);
 
@@ -699,7 +697,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
     s32 slotIndex;
-    EvtWorldObject *world;
+    EffWorldNode *world;
     u32 task;
     FldTaskInfo *taskInfo;
 
@@ -725,7 +723,7 @@ void fldResetTaskSlots(void) {
 }
 
 /* Append a display value and return its index; no capacity check is performed. */
-s32 fldPushDisplayValue(u32 value, ActionObj *unusedObject) {
+s32 fldPushDisplayValue(u32 value, EffWorldNode *unusedObject) {
     s32 index = D_004361B8;
     D_00444A30[index] = value;
     D_004361B8 = index + 1;
@@ -752,7 +750,7 @@ typedef struct FldProbeActor {
 
 extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
-s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, EffWorldNode *entry) {
     f32 dir[4];
     f32 position[4];
     f32 length;
@@ -769,7 +767,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
             kind = *((FldProbeKind *)D_0038BC50[i][8])->kind;
             switch (kind) {
             case 0:
-                source = entry->payload;
+                source = entry->data;
                 position[0] = source[0];
                 position[1] = source[1];
                 position[2] = source[2];
@@ -820,7 +818,7 @@ s32 fldTestRoomProbeFacingAndRange(FldProbeActor *actor, NodeA *entry) {
 }
 
 /* vu0 routine: the alternate entry probe only constrains facing, not range. */
-s32 fldTestRoomProbeFacing(FldProbeActor *actor, NodeA *entry) {
+s32 fldTestRoomProbeFacing(FldProbeActor *actor, EffWorldNode *entry) {
     f32 dir[4];
     f32 position[4];
     f32 dot;
@@ -835,7 +833,7 @@ s32 fldTestRoomProbeFacing(FldProbeActor *actor, NodeA *entry) {
             kind = *((FldProbeKind *)D_0038BC50[i][8])->kind;
             switch (kind) {
             case 0:
-                PCP_COPY_VECTOR(position, entry->payload);
+                PCP_COPY_VECTOR(position, entry->data);
                 VU0_LOAD_VF(vf10, actor->target->quaternion);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);
@@ -1821,7 +1819,7 @@ s32 func_00143910(u32 key, f32 *x, f32 *y, f32 *z) {
     };
     s32 i;
     FldActorRow *row;
-    WorldListNode *node;
+    EffWorldNode *node;
 
     if (D_00389780[0] >= 200) {
         return 0;

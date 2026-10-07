@@ -582,7 +582,7 @@ extern void func_001300A0(void);
 /* The kind-4 lookup returns a camera with a separately owned world transform. */
 s32 fldCmdFocusCameraOnObject(void) {
     FldWorkView *work;
-    CameraObject *obj;
+    EffWorldNode *obj;
     u64 world = dds3GetWorldSecondaryObject();
 
     obj = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 4);

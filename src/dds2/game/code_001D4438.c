@@ -468,7 +468,7 @@ extern u32 D_00436AD4;
 
 extern u32 dds3AdvanceWorldCounter(void);
 
-extern struct ActionObj *evtSpawnActionObj9(s32);
+extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
