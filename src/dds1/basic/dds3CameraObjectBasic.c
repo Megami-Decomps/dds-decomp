@@ -4,6 +4,9 @@
 #include "pcp_vu0.h"
 
 
+extern void effObjFreeInner(EffWorldNode *node);
+extern void dds3DestroyObjectBase(ObjBase *base);
+extern void sdfReleaseChipBlock(void *block);
 extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
@@ -31,9 +34,9 @@ extern u8 sdfViewUpVector[];
 void dds3DestroyCameraData(EffWorldNode *camera) {
     CameraData *data;
 
-    effObjFreeInner();
+    effObjFreeInner(camera);
     data = ((CameraData *)camera->data);
-    dds3DestroyObjectBase(data->handle);
+    dds3DestroyObjectBase((ObjBase *)data->handle);
     sdfReleaseChipBlock(data);
 }
 
