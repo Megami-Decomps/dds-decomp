@@ -142,7 +142,7 @@ typedef struct CampMenuContext {
     u8 pad904[8];
     s32 menu;                 /* 0x90C */
     u8 pad910[0x10];
-    s32 extraResource;        /* 0x920 */
+    MenuProfilePanel *extraResource; /* 0x920 */
 } CampMenuContext;
 
 typedef struct StaffMenuWork {
@@ -594,7 +594,7 @@ extern void func_00276720();
 extern void btlStopStage();
 extern void mnuClearEntries();
 extern void mnuReleasePartyIconBundles();
-extern void mnuFreeProfilePanelWork();
+extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 extern void mnuStoreScrollPanelSelectionAndGridPosition();
 
