@@ -63,7 +63,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern NodeB *dds3CopyWorldListToValueChain(void *object, s32 kind);
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-void *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
+NodeB *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
     WorldValueIndices *slot = (WorldValueIndices *)(u32)dds3GetWorldSlotValue((u8 *)object, index);
     NodeB *result;
     u32 word;
