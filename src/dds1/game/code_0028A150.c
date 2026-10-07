@@ -3038,7 +3038,36 @@ void fileCursorPulseUpdate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00290A88);
+extern const s32 D_003B28A0[3][2];
+
+void func_00290A88(s32 x, s32 y, s32 surface) {
+    s32 texturePositions[3][2] = {{54, 39}, {54, 67}, {54, 39}};
+    s32 offsets[3][2];
+    s32 i;
+
+    memcpy(offsets, D_003B28A0, sizeof(offsets));
+    evtSetDrawSurfaceIndex(surface);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    for (i = 0; i < 3; i++) {
+        s32 mode = fileCursorPulseState.mode[i];
+
+        if (mode < 2) {
+            if (mode >= 0) {
+                func_00108FA0(x + fileCursorPulseState.pos[i][0] + offsets[i][0],
+                             y + fileCursorPulseState.pos[i][1] + offsets[i][1],
+                             27, 26,
+                             texturePositions[mode][0], texturePositions[mode][1],
+                             27, 26,
+                             ((u32)fileCursorPulseState.alpha[i] << 24) | 0x808080,
+                             ((u32)fileCursorPulseState.alpha[i] << 24) | 0x808080,
+                             ((u32)fileCursorPulseState.alpha[i] << 24) | 0x808080,
+                             ((u32)fileCursorPulseState.alpha[i] << 24) | 0x808080,
+                             D_003BC87C);
+            }
+        }
+    }
+}
 
 void fileLoadSetMode(s8 mode) {
     fileLoadMenuState.unk14 = 0;
