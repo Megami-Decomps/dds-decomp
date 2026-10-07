@@ -1,6 +1,8 @@
 #include "common.h"
 #include "eff_object.h"
 
+extern ObjBase *dds3GetLightObjectResource(EffWorldNode *object);
+
 
 
 extern void *sdfAllocSizeClassBlock(s32);
@@ -18,7 +20,7 @@ ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object) {
     case 2: handle = (ObjBase *)effObjGetDataHandle(object); break;
     case 3: handle = (ObjBase *)effObjGetObjectHandle(object); break;
     case 4: handle = (ObjBase *)dds3GetResourceOwnerHandle(object); break;
-    case 5: handle = (ObjBase *)func_00116800(object); break;
+    case 5: handle = dds3GetLightObjectResource(object); break;
     }
     return handle;
 }
