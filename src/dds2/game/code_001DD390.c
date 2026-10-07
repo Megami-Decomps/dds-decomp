@@ -3866,13 +3866,24 @@ BtlRuntimeTask *btlCreateActorTransparencyTask(u32 value) {
     return task;
 }
 
+typedef struct BtlActorModelBlendArgs {
+    BtlUnit *unit;
+    BtlUnit *target;
+    s32 index;
+    s32 previousModelValue;
+    s32 value;
+    f32 scale;
+    u32 stage;
+} BtlActorModelBlendArgs;
+typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
+
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E72B0);
 
 extern u32 func_001E72B0(u32 *);
 
 BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 index, u32 value, f32 scale) {
-    BtlRuntimeTask *task = btlAllocTask(0x1C);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlActorModelBlendArgs));
+    BtlActorModelBlendArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->callback = func_001E72B0;
@@ -3880,13 +3891,13 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 inde
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments((s32)task);
-    args->actor = unit;
-    args->option = target;
-    args->unk_08 = index;
-    args->unk_10 = value;
-    args->scale14 = scale;
-    args->unk_0C = -1;
-    args->unk_18 = 0;
+    args->unit = unit;
+    args->target = (BtlUnit *)target;
+    args->index = index;
+    args->value = value;
+    args->scale = scale;
+    args->previousModelValue = -1;
+    args->stage = 0;
     return task;
 }
 
