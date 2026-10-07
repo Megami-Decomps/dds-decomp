@@ -2,9 +2,12 @@
 """Focused tests for relocation-aware unit verification."""
 
 import struct
+import tempfile
 import unittest
+from pathlib import Path
 
 from check_unit import (
+    asm_literal_users,
     bss_ownership_problems,
     bss_symbols,
     common_symbols,
@@ -21,6 +24,38 @@ from check_unit import (
     symbols,
     trim_sdata_item,
 )
+
+
+class AsmLiteralSharingTests(unittest.TestCase):
+    def test_candidate_replaces_self_but_preserves_remaining_asm_sharing(self):
+        production = '\n'.join([
+            'INCLUDE_ASM(s32, "game/unit", target);',
+            'INCLUDE_ASM(s32, "game/unit", other);',
+        ])
+        candidate = production.replace(
+            'INCLUDE_ASM(s32, "game/unit", target);',
+            'const char ownLiteral[] = "own";\nvoid target(void) {}',
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            asm_dir = Path(tmp)
+            (asm_dir / "target.s").write_text(
+                'lui $a0, %hi(ownLiteral)\naddiu $a1, $gp, %gp_rel(D_00300010)\n'
+            )
+            (asm_dir / "other.s").write_text(
+                'addiu $a0, $gp, %gp_rel(D_00300010)\n'
+            )
+            syms = {"ownLiteral": 0x00300000}
+            self.assertEqual(
+                asm_literal_users(production, asm_dir, syms, 0x00300000),
+                ["target"],
+            )
+            self.assertEqual(
+                asm_literal_users(candidate, asm_dir, syms, 0x00300000), [],
+            )
+            self.assertEqual(
+                asm_literal_users(candidate, asm_dir, syms, 0x00300010),
+                ["other"],
+            )
 
 
 class SdataRelocationTests(unittest.TestCase):
