@@ -525,10 +525,9 @@ extern struct DevRequest *D_00435FA4;
 extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
 struct WorldObj;
 struct EffectObject;
-struct WorldEntry;
 struct EffWorldNode;
 extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
-extern void dds3SetWorldEntryCallbackTarget(struct WorldEntry *, void *);
+extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetModelHolder(struct EffectObject *, u32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void func_00113FF8(struct EffectObject *, u32);
@@ -583,7 +582,7 @@ void fldCreateResourceScriptObjects(void) {
             rotation[3] = 0.0f;
         }
         object = dds3SpawnInnerVecObj6(resource->id, position, rotation);
-        dds3SetWorldEntryCallbackTarget(object, (void *)resource->name);
+        dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)resource->name);
         if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
             if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
                 effObjSetModelHolder(object, 6);

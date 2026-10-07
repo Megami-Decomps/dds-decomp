@@ -254,8 +254,8 @@
 0x0010FC28	dds3InvokeWorldCallbackFirst	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FA00, input-family pairing. [names_qp10.tsv]
 0x0010FC68	dds3InvokeWorldCallbackSecond	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FA40, input-family pairing. [names_qp10.tsv]
 0x0010FCA8	dds3AdvanceWorldCounter	inferred	Increments the world-side counter while restricting it to the low sixteen bits.
-0x0010FCC0	dds3SetWorldEntryCallbackTarget	inferred	Writes an object pointer to WorldEntry offset 0x08, later passed to the two callback dispatchers after null checks.
-0x0010FCD0	dds3GetWorldEntryCallbackTarget	inferred	Returns the pointer at WorldEntry offset 0x08, or null if the entry itself is null.
+0x0010FCC0	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
+0x0010FCD0	dds3GetWorldNodeValue	inferred	Returns the kind-selected u32 value at EffWorldNode +0x08, or zero for a null node.
 0x0010FF58	dds3DestroyWorld	inferred	Releases the global world object and clears its pointer, matching DDS1 dds3DestroyWorld.
 0x0010FF88	dds3SetWorldObject	inferred	Stores the primary object in world info; identical role to DDS1 dds3SetWorldObject.
 0x0010FFA8	dds3GetWorldObject	inferred	Returns the primary object in world info; identical role to DDS1 dds3GetWorldObject.
