@@ -7090,3 +7090,6 @@
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
 0x00188A78	effTrackPolyResampleHistory	inferred	First-pair initialization, fixed-step linear extension for short history and Catmull-Rom resampling for established history; both endpoint callers pass the retained track history and a new point pair.
+0x00185BD8	effBossCreatePairedChainResources	inferred	Allocates the retained resource owner, copies its parameters and creates two four-point Thunder chains.
+0x00185DE0	effBossCreatePairedChainsFromTable	inferred	Gets parameter block zero from the packed table and forwards it to the paired-chain resource constructor.
+0x00185E00	effBossCreatePairedChainsFromParams	inferred	Forwards the supplied parameter address unchanged to the paired-chain resource constructor.

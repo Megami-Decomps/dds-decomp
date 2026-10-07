@@ -10,7 +10,7 @@ typedef struct EffParamWork EffParamWork;
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_0018C820(void *work);
 extern void effBossSetPosition();
-extern PairedEffectResources *func_0018D830(PairedEffectParams *src);
+extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -596,7 +596,7 @@ void effBossApplyGroupTint(EffBossWork *work, s32 value) {
 }
 
 /* Create paired four-point chains; the update fills their point vectors. */
-PairedEffectResources *func_0018D830(PairedEffectParams *src)
+PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src)
 {
     PairedEffectResources *work = sdfAllocSizeClassBlock(sizeof(PairedEffectResources));
     EffThunderGroupParams chain;
@@ -611,13 +611,13 @@ PairedEffectResources *func_0018D830(PairedEffectParams *src)
     return work;
 }
 
-PairedEffectResources *func_0018DA38(void *data) {
+PairedEffectResources *effBossCreatePairedChainsFromTable(void *data) {
     void *work;
 
     work = effParamTableGetBlock(data, 0);
-    return func_0018D830(work);
+    return effBossCreatePairedChainResources(work);
 }
 
-PairedEffectResources *func_0018DA58(void *work) {
-    return func_0018D830(work);
+PairedEffectResources *effBossCreatePairedChainsFromParams(void *work) {
+    return effBossCreatePairedChainResources(work);
 }
