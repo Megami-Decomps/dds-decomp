@@ -6540,8 +6540,8 @@ extern f32 D_00359EA0[4], D_00359EB0[4];
 extern f32 D_00359E80[4], D_00359E90[4];
 extern u32 D_003BB660;
 extern void *dds3GetWorldObject(void);
-extern EffWorldNode *dds3GetWorldCameraObject(void *);
-extern void dds3SetWorldCameraObject(void *, EffWorldNode *);
+extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
@@ -6734,19 +6734,19 @@ extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
 extern void func_00106488(f32);
 void btlRefreshWorldCameraHandle(void) {
     WorldObj *object;
-    u32 handle;
+    EffWorldNode *handle;
     if (((BattleController *)btlGetRuntime())->flags & 2) {
         object = dds3GetWorldObject();
         if (object != NULL) {
-            handle = dds3GetWorldCameraObject(object);
+            handle = dds3GetWorldCameraObject((EffWorldNode *)object);
             if (handle != 0) {
                 if (((EffWorldNode *)handle)->next != NULL) {
-                    handle = (u32)((EffWorldNode *)handle)->next;
+                    handle = handle->next;
                 } else {
-                    handle = object->head->sub->handle;
+                    handle = (EffWorldNode *)object->head->sub->handle;
                 }
-                dds3SetWorldCameraObject(object, handle);
-                func_00106488(dds3GetCameraFieldOfView((EffWorldNode *)handle));
+                dds3SetWorldCameraObject((EffWorldNode *)object, handle);
+                func_00106488(dds3GetCameraFieldOfView(handle));
             }
         }
     }
@@ -6761,7 +6761,7 @@ s32 btlGetWorldObjectDefault(void) {
     if (!(((BattleController *)btlGetRuntime())->flags & 2)) {
         return D_003BB668;
     }
-    camera = (EffWorldNode *)dds3GetWorldCameraObject(dds3GetWorldObject());
+    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
     if (camera == NULL) {
         return D_003BB668;
     }
@@ -6777,7 +6777,7 @@ s32 btlIsWorldMotionIdle(void) {
         return 0;
     }
     {
-        EffWorldNode *camera = (EffWorldNode *)dds3GetWorldCameraObject(dds3GetWorldObject());
+        EffWorldNode *camera = dds3GetWorldCameraObject(dds3GetWorldObject());
         if (camera == NULL) {
             return 0;
         }
@@ -6868,7 +6868,7 @@ void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
     EffWorldNode *object;
 
     if (((BattleController *)btlGetRuntime())->flags & 2) {
-        object = (EffWorldNode *)dds3GetWorldCameraObject(dds3GetWorldObject());
+        object = dds3GetWorldCameraObject(dds3GetWorldObject());
         if (object != 0) {
             btlBossDebugPrintfN(arg0, (s32)arg1, 0, (s32)D_003A3DF0,
                                 (double)object->inner->position[0],

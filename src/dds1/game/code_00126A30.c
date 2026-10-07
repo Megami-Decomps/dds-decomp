@@ -212,7 +212,7 @@ extern u32 D_003BAD40;
 extern u32 D_003BAD1C;
 
 extern void *dds3GetWorldObject(void);
-extern s32 dds3GetWorldCameraObject(s32);
+extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
 extern s64 fldGetPlayerSceneState(void);
 
 
@@ -2529,7 +2529,7 @@ s64 fldGetUnselectedWorldEntry(void) {
     s64 selectedEntry;
 
     worldObject = (s32)dds3GetWorldObject();
-    currentEntry = dds3GetWorldCameraObject(worldObject);
+    currentEntry = (s32)dds3GetWorldCameraObject((EffWorldNode *)worldObject);
     selectedEntry = fldGetPlayerSceneState();
     if (selectedEntry == currentEntry) {
         currentEntry = 0;
@@ -2539,7 +2539,8 @@ s64 fldGetUnselectedWorldEntry(void) {
 
 void fldSetCameraMoveMode(u32 value) {
     D_003BAD1C = value;
-    dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject((s32)dds3GetWorldObject()), D_003C9230, D_003C9220);
+    dds3TransformCameraVectorsByInnerRotation((s32)dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230,
+                                              D_003C9220);
     D_003BAD20 = 0;
 }
 
@@ -2564,7 +2565,7 @@ void fldUpdateCameraMoveOscillation(void) {
         if (D_003BAD1C == -2) {
             direction = -1.0f;
         }
-        camera = (EffWorldNode *)dds3GetWorldCameraObject((s32)dds3GetWorldObject());
+        camera = dds3GetWorldCameraObject(dds3GetWorldObject());
         if (D_003BAD1C == 1 || D_003BAD1C == -1) {
             if (phase < 3.14f) {
                 phase += 0.2f;
@@ -4782,11 +4783,11 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     }
 }
 
-extern void dds3SetWorldCameraObject(void *, u32);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 void func_0013DDF0(const char *name) {
     FldActorEntry *entry;
     char *entryName;
-    u32 *camera;
+    EffWorldNode *camera;
     s32 i;
 
     if (name == NULL) {
@@ -4807,9 +4808,9 @@ void func_0013DDF0(const char *name) {
                     return;
                 }
                 if (entry->variantMode == 0 && entry->linkKind == 3) {
-                    camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4,
-                                                                 entry->linkName);
-                    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)camera);
+                    camera = (EffWorldNode *)dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4,
+                                                                                  entry->linkName);
+                    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
                     fldEnableCameraObjectFlag();
                     return;
                 }

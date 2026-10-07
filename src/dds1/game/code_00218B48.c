@@ -2670,7 +2670,7 @@ extern void dds3EnsureSlotData();
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern void dds3SetWorldCameraObject(void *world, s32 object);
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *object);
 
 extern void func_001127A0(s32 object, s32 arg);
 
@@ -2686,7 +2686,7 @@ void mdlSpawnViewerWorldObject(void) {
     object = dds3CreateCameraObject(dds3AdvanceWorldCounter(), position, rotation);
     effObjSetInnerFloat(object, 10.0f);
     dds3EnsureSlotData(object);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), object);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)object);
     func_001127A0(object, 0);
 }
 

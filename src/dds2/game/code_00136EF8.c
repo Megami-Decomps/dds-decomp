@@ -32,7 +32,7 @@ static inline f32 fldNormalizeProbeVector(void) {
 
 extern void *dds3GetWorldObject(void);
 extern u32 *dds3FindIndexedObjectChainNodeByName();
-extern void dds3SetWorldCameraObject();
+extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 extern s32 mdlFlagTest(s32);
 extern int strcmp(const char *, const char *);
@@ -1479,7 +1479,7 @@ void func_00140A58(const char *name) {
                 }
                 if (entry->variantMode == 0 && entry->linkKind == 3) {
                     camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4, entry->linkName);
-                    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
+                    dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)camera);
                     fldHideSceneModelsAndResetCamera();
                     return;
                 }
