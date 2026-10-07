@@ -3,7 +3,7 @@
 #include "eff.h"
 #include "itf_grid_text.h"
 
-extern s32 itfFindGridNodeByKey(u32, u32);
+extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
@@ -785,67 +785,59 @@ s32 func_002C1D78(GridTextWidget *widget, GridTextListItem *item,
 }
 
 /* Advance by at least one configured step; crossing the maximum wraps to minimum. */
-void itfAdvanceGridScrollPosition(u32 widget, u32 key, s32 steps) {
-    s32 range;
-    s32 entry;
+void itfAdvanceGridScrollPosition(GridTextWidget *widget, u32 key, s32 steps) {
+    GridScrollRange *range;
+    GridTextListItem *entry;
     float *position;
     float delta;
     float previous;
 
     entry = itfFindGridNodeByKey(key, widget);
-    range = (s32)((GridTextListItem *)entry)->parameter;
-    position = &((GridTextListItem *)entry)->number;
-    delta = ((GridScrollRange *)range)->step;
+    range = entry->parameter;
+    position = &entry->number;
+    delta = range->step;
     if (1 < steps) {
         delta = delta * (float)(s32)steps;
     }
     previous = *position;
     *position = previous + delta;
-    if (((GridScrollRange *)range)->maximum < previous + delta) {
-        *position = ((GridScrollRange *)range)->minimum;
+    if (range->maximum < previous + delta) {
+        *position = range->minimum;
     }
 }
 
-void itfAdvanceSelectedGridScroll(u32 widget, u32 steps) {
-    s32 widgetAddress;
-
-    widgetAddress = (s32)widget;
-    if ((((GridTextWidget *)widgetAddress)->flags & 1) != 0) {
-        itfAdvanceGridScrollPosition(widget, (u32)((GridTextWidget *)widgetAddress)->selected->index + ((GridTextWidget *)widgetAddress)->rowOffset,
-                                    steps);
+void itfAdvanceSelectedGridScroll(GridTextWidget *widget, u32 steps) {
+    if ((widget->flags & 1) != 0) {
+        itfAdvanceGridScrollPosition(widget, (u32)widget->selected->index + widget->rowOffset, steps);
         return;
     }
 }
 
 /* Reverse by at least one configured step; crossing the minimum wraps to maximum. */
-void itfReverseGridScrollPosition(u32 widget, u32 key, s32 steps) {
-    s32 range;
-    s32 entry;
+void itfReverseGridScrollPosition(GridTextWidget *widget, u32 key, s32 steps) {
+    GridScrollRange *range;
+    GridTextListItem *entry;
     float *position;
     float delta;
     float previous;
 
     entry = itfFindGridNodeByKey(key, widget);
-    range = (s32)((GridTextListItem *)entry)->parameter;
-    position = &((GridTextListItem *)entry)->number;
-    delta = ((GridScrollRange *)range)->step;
+    range = entry->parameter;
+    position = &entry->number;
+    delta = range->step;
     if (1 < steps) {
         delta = delta * (float)(s32)steps;
     }
     previous = *position;
     *position = previous - delta;
-    if (previous - delta < ((GridScrollRange *)range)->minimum) {
-        *position = ((GridScrollRange *)range)->maximum;
+    if (previous - delta < range->minimum) {
+        *position = range->maximum;
     }
 }
 
-void itfReverseSelectedGridScroll(u32 widget, u32 steps) {
-    s32 widgetAddress;
-
-    widgetAddress = (s32)widget;
-    if ((((GridTextWidget *)widgetAddress)->flags & 1) != 0) {
-        itfReverseGridScrollPosition(widget, (u32)((GridTextWidget *)widgetAddress)->selected->index + ((GridTextWidget *)widgetAddress)->rowOffset,
-                                    steps);
+void itfReverseSelectedGridScroll(GridTextWidget *widget, u32 steps) {
+    if ((widget->flags & 1) != 0) {
+        itfReverseGridScrollPosition(widget, (u32)widget->selected->index + widget->rowOffset, steps);
         return;
     }
 }
@@ -1000,14 +992,13 @@ void func_002C22F0(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
     }
 }
 
-s32 itfFindGridNodeByKey(u32 key, u32 head) {
-    u32 n;
+GridTextListItem *itfFindGridNodeByKey(u32 key, GridTextWidget *widget) {
+    GridTextListItem *item = widget->head;
 
-    n = (u32)((GridTextWidget *)head)->head;
-    while (n != 0 && ((GridTextListItem *)n)->index != key) {
-        n = (u32)((GridTextListItem *)n)->next;
+    while (item != NULL && item->index != key) {
+        item = item->next;
     }
-    return n;
+    return item;
 }
 
 s32 sdfGridSeekSelectedNodeByIndex(s32 index, void *w) {
