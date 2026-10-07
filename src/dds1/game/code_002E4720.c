@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_draw.h"
+#include "sdf_sif_command.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 #define SDF_DEV_DEFAULT_PRIORITY 0x48
@@ -64,14 +65,6 @@
 #define SDF_ASIN_SAMPLE_COUNT 128
 
 extern char D_003B4690[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
-
-typedef struct SifCommand {
-    s32 source;  /* 0x0 */
-    s32 end;     /* 0x4 */
-    s32 argument; /* 0x8 */
-    u32 command; /* 0xC */
-} SifCommand;
-
 
 typedef struct DevState {
     struct DevState *next; /* 0x0 */

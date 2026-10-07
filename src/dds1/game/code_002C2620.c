@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
+#include "sdf_sif_command.h"
 
 extern void fldShutdownLmapResources(void);
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
@@ -302,7 +303,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
-extern void sdfPktInit(void *, s32, s32, s32, s32);
+extern void sdfPktInit(SifCommand *, s32, s32, s32, s32);
 extern void *sdfFormatSifPacket(void *, const char *, ...);
 extern void *func_0011D3E8();
 
@@ -310,11 +311,11 @@ extern void *func_0011D3E8();
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 argument, s32 index, const char *command, s32 surfaceIndex) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfPoolNode *drawSurface;
-    u8 packetHeader[0x10];
+    SifCommand packetHeader;
 
     sdfInitPacketList(packetList);
-    sdfPktInit(packetHeader, x + 0x7000, y + 0x7900, argument, index);
-    sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(packetHeader, command));
+    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, argument, index);
+    sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(&packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
