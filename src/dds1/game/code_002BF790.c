@@ -1026,12 +1026,12 @@ s32 sdfGridSeekSelectedNodeByIndex(s32 index, void *w) {
     return 1;
 }
 
-void sdfGridSeekFirstNode(u32 widget) {
-    sdfGridSeekSelectedNodeByIndex(0, widget);
+s32 sdfGridSeekFirstNode(GridTextWidget *widget) {
+    return sdfGridSeekSelectedNodeByIndex(0, widget);
 }
 
-s32 sdfGridSeekLastNode(s32 widget) {
-    return sdfGridSeekSelectedNodeByIndex(((GridTextWidget *)widget)->itemCount - 1, (void *)widget);
+s32 sdfGridSeekLastNode(GridTextWidget *widget) {
+    return sdfGridSeekSelectedNodeByIndex(widget->itemCount - 1, widget);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002BF790", fldLocalMapTaskName);

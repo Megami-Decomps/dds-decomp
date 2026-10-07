@@ -97,8 +97,8 @@ extern u32 D_003BD258;
 typedef GridTextListItem LmapNode;
 typedef GridTextWidget LmapList;
 
-extern LmapNode *sdfGridSeekFirstNode(LmapList *);
-extern LmapNode *sdfGridSeekLastNode(LmapList *);
+extern s32 sdfGridSeekFirstNode(GridTextWidget *);
+extern s32 sdfGridSeekLastNode(GridTextWidget *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);

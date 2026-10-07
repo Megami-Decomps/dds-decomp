@@ -1146,10 +1146,10 @@ s32 sdfGridSeekSelectedNodeByIndex(s32 index, u8 *widget) {
     return 1;
 }
 
-void sdfGridSeekFirstNode(u32 widget) {
-    sdfGridSeekSelectedNodeByIndex(0, widget);
+s32 sdfGridSeekFirstNode(GridTextWidget *widget) {
+    return sdfGridSeekSelectedNodeByIndex(0, (u8 *)widget);
 }
 
-void sdfGridSeekLastNode(u8 *entry) {
-    sdfGridSeekSelectedNodeByIndex(((GridTextWidget *)entry)->itemCount - 1, entry);
+s32 sdfGridSeekLastNode(GridTextWidget *widget) {
+    return sdfGridSeekSelectedNodeByIndex(widget->itemCount - 1, (u8 *)widget);
 }
