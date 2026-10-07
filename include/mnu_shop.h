@@ -84,7 +84,7 @@ typedef struct MenuWindowContainer {
     u32 flags;
     s32 width;
     s32 height;
-    u8 pad10[4];
+    u32 unk10; /* Set by staff-panel setup; meaning unknown. */
     struct MenuList *list;
     s32 entryValue;
     s32 entryX;
