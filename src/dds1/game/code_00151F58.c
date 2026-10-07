@@ -2683,11 +2683,22 @@ typedef struct EffOffsetGravityEmitter {
     EffEmitterHead head;
     u8 mode;         /* 0x150 */
     u8 loop;         /* 0x151 */
-    u8 pad152[0x1A];
+    u8 pad152[2];
+    u32 spread;      /* 0x154: random activation delay bound */
+    u8 randomDir;    /* 0x158 */
+    u8 pad159[3];
+    f32 radius;      /* 0x15C */
+    f32 cone;        /* 0x160: horizontal direction weight */
+    f32 gravity;     /* 0x164: divided by 100 for acceleration */
+    f32 speed;       /* 0x168: launch magnitude */
     f32 decayPct;    /* 0x16C */
+    f32 jitter;      /* 0x170: launch magnitude jitter */
 } EffOffsetGravityEmitter;
 
 void func_00157D28(EffOffsetGravityEmitter *effect, s32 index);
+/* Twelve authored velocity directions, stored as four-float vectors. */
+extern f32 D_0034E190[12][4];
+
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00157D28);
 
 /* Accumulate motion in the stored offset, then add the emitter origin.
