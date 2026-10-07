@@ -52,6 +52,13 @@ mutations. A nonzero view selector applies the corresponding view row. A
 nonzero `ex` selector applies its extra-action row. DDS stores the view
 selector in one byte; values with the high bit set are preserved numerically.
 
+`fldGetActorSlotAttribute` (DDS1 `0x0013d410`, DDS2 `0x0013fff8`) reads
+the current interaction set's message row at `actorId - 10`. Attribute `0`
+returns its signed row kind, `1` its signed message ID, and `2` whether its
+view selector has bit `0x80` set. Other attribute selectors return zero.
+Both runtimes use the primary `FldInfTable`/`FldInfMessageRow` layout rather
+than independent aliases for individual row fields.
+
 ## Source form
 
 Source begins with `inf 1`. It is defined relative to the canonical template
