@@ -2,7 +2,7 @@
 #include "mnu_shooting.h"
 struct EffWorldNode;
 extern u32 dds3AdvanceWorldCounter(void);
-extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 arg0, void *arg1, void *arg2, void *arg3);
+extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void dds3SetCameraVector(struct EffWorldNode *camera, void *vector);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
@@ -128,7 +128,7 @@ void func_0031B0F8(void) {
     s32 object;
     u8 *vector = D_0040ABD0;
 
-    object = (s32)dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, vector, D_0040ABB0);
+    object = (s32)dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), D_0040ABC0, (u128 *)vector, (u128 *)D_0040ABB0);
     D_00438944 = object;
     dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)D_00438938);
     dds3SetCameraVector((struct EffWorldNode *)D_00438944, vector);
