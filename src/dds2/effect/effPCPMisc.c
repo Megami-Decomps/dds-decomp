@@ -503,24 +503,25 @@ typedef struct EffPCPFadeTimerLong {
 } EffPCPFadeTimerLong;
 
 
-extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
+extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
 /* Three view-relative offsets and stagger thresholds for seven handles per group. */
 typedef struct {
     f32 origin[4];
     f32 offset[3][2];
-    u32 groupStartFrame[3];
-    u32 handleDelay[7];
+    s32 groupStartFrame[3];
+    s32 handleDelay[7];
 } EffPCPTripleParams;
 
 typedef struct {
     EffPCPTripleParams head;
-    u32 frame;
+    s32 frame;
     u32 color;
-    u32 handleA[7];
-    u32 handleB[7];
-    u32 handleC[7];
+    u32 handles[21];
 } EffPCPTripleWork;
+
+typedef char EffPCPTripleParamsSizeCheck[sizeof(EffPCPTripleParams) == 0x50 ? 1 : -1];
+typedef char EffPCPTripleWorkSizeCheck[sizeof(EffPCPTripleWork) == 0xAC ? 1 : -1];
 
 extern u32 effCreateNodeFromDescriptor(u32 param);
 
@@ -3240,8 +3241,8 @@ extern f32 func_00208000(u32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern f32 sdfAtan2(f32 y, f32 x);
-extern void effSetNodeParameterValue(s32 node, u32 color);
-extern void effUpdateNode(s32 node);
+extern void effSetNodeParameterValue(struct EffNode *node, u32 value);
+extern void effUpdateNode(struct EffNode *node);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */
@@ -3297,8 +3298,8 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         } else {
             t = 1.0f;
         }
-        effSetNodeParameterValue(node, effBlendColor(work->color & 0xFFFFFF, work->color, t));
-        effUpdateNode(node);
+        effSetNodeParameterValue((struct EffNode *)node, effBlendColor(work->color & 0xFFFFFF, work->color, t));
+        effUpdateNode((struct EffNode *)node);
     }
     work->frame++;
 }
@@ -3320,7 +3321,7 @@ void effPcpCopyHalfTurnMatrix(void *dst, void *src) {
 ;
 }
 
-void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
+void *effPcpTripleHandleCreate(void *block0, void **blocks) {
     EffPCPTripleWork *work;
     u32 *handle;
     u32 i;
@@ -3329,9 +3330,9 @@ void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
     work->head = *(EffPCPTripleParams *)block0;
     work->frame = 0;
     work->color = 0x80808080;
-    handle = work->handleA;
+    handle = work->handles;
     for (i = 0; i < 7; i++) {
-        handle[0] = effCreateNodeFromDescriptor(blocks[i]);
+        handle[0] = effCreateNodeFromDescriptor((u32)blocks[i]);
         handle[7] = effCloneSourceWithTypeHandler(handle[0]);
         handle[14] = effCloneSourceWithTypeHandler(handle[0]);
         handle++;
@@ -3366,8 +3367,8 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     work->head = src->head;
     work->frame = 0;
     work->color = 0x80808080;
-    from = src->handleC;
-    to = work->handleC;
+    from = (src->handles + 14);
+    to = (work->handles + 14);
     for (i = 0; i < 7; i++) {
         to[-14] = effCloneSourceWithTypeHandler(from[-14]);
         to[-7] = effCloneSourceWithTypeHandler(from[-7]);
@@ -3379,7 +3380,7 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
 }
 
 void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
-    u32 *p = work->handleA;
+    u32 *p = work->handles;
     u32 i;
 
     for (i = 0; i < 7; i++) {
@@ -3391,7 +3392,44 @@ void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184F50);
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern u8 sdfViewUpVector[];
+
+/* vu0 routine: place three staggered groups in the camera-relative basis. */
+void func_00184F50(EffPCPTripleWork *work) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 basis[4][4] __attribute__((aligned(16)));
+    s32 frame = work->frame;
+    u32 color = work->color;
+    u32 group;
+    u32 index;
+
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    VU0_STORE_MATRIX(basis);
+    for (group = 0; group < 3; group++) {
+        s32 start = work->head.groupStartFrame[group];
+        if (frame >= start) {
+            VU0_LOAD_VF(vf11, work->head.origin);
+            VU0_LOAD_MATRIX(basis);
+            position[0] = work->head.offset[group][0];
+            position[1] = work->head.offset[group][1];
+            position[2] = 0;
+            VU0_LOAD_VF_MEMORY(vf10, position);
+            VU0_CLEAR_W(vf10);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, position);
+            for (index = 0; index < 7; index++) {
+                if (frame >= (s32)((u32)work->head.handleDelay[index] + (u32)start)) {
+                    effSetNodeParameterValue((struct EffNode *)work->handles[group * 7 + index], color);
+                    effCopyVectorToNodeInstance((struct EffNode *)work->handles[group * 7 + index], position);
+                    effUpdateNode((struct EffNode *)work->handles[group * 7 + index]);
+                }
+            }
+        }
+    }
+    work->frame = (s32)((u32)work->frame + 1);
+}
 
 void effPcpCopySpanVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -4609,8 +4647,6 @@ void effRotateNested(EffPCPBeamWork *work, void *src) {
 }
 
 
-extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
 /* Fill the node's point buffer with four concentric rings (radius, +stepA, +stepB, +stepC) of unit directions, rotated by the VU matrix. */

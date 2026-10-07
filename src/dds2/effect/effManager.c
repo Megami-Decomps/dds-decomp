@@ -11,7 +11,7 @@ typedef struct EffTypeOps {
     s32 (*fn10)();           /* 0x10: returns 1 when absent */
     void (*fn14)(s32, const void *); /* 0x14: copy a supplied vector into the instance. */
     void (*fn18)(s32, const void *); /* 0x18: apply a supplied transform matrix. */
-    void (*fn1C)(s32);       /* 0x1C */
+    void (*fn1C)(s32, u32);       /* 0x1C: opaque parameter word */
     void (*fn20)();          /* 0x20 */
     s32 (*fn24)();           /* 0x24: returns 1 when absent */
     void (*fn28)();          /* 0x28 */
@@ -101,8 +101,8 @@ void effApplyNodeTransformMatrix(EffNode *node, const void *matrix) {
     effNodeTypeOperations[node->type].fn18(node->instance, matrix);
 }
 
-void effSetNodeParameterValue(EffNode *node) {
-    effNodeTypeOperations[node->type].fn1C(node->instance);
+void effSetNodeParameterValue(EffNode *node, u32 value) {
+    effNodeTypeOperations[node->type].fn1C(node->instance, value);
 }
 
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag) {
