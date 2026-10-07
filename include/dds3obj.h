@@ -58,34 +58,36 @@ typedef struct NodeB {
     struct NodeB *previous;
 } NodeB;
 
-/* World lookup entry (0x8); DDS1/2 basic/dds3WorldBasic.c via WorldInfo. */
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    s16 unk6;
-} Entry;
+/* Eight-byte entries link both allocated and free world value chains. */
+typedef struct WorldValueEntry {
+    s32 value;
+    s16 nextIndex;
+    s16 previousIndex;
+} WorldValueEntry;
 
-/* World node lists, object slots and index range (0x28); DDS1/2 basic/dds3WorldBasic.c. */
+typedef char WorldValueEntry_size_must_be_0x08[(sizeof(WorldValueEntry) == 0x08) ? 1 : -1];
+
+struct SdfMemBlock;
+
+/* Complete kind-0 payload: node lists, selected objects and the value-entry pool. */
 typedef struct {
     EffWorldNode *firstNode;
     EffWorldNode *lastNode;
     void *primaryObject;
     void *secondaryObject;
-    u8 pad10[4];
-    Entry *unk14;
-    u8 pad18[2];
-    u16 unk1A;
-    s16 unk1C;
-    u16 unk1E;
+    struct SdfMemBlock *entryAllocation; /* 0x10: descriptor, distinct from its data */
+    WorldValueEntry *entries;           /* 0x14: retained allocation address */
+    u16 entryCapacity;                  /* 0x18: initial entry count */
+    s16 freeHeadIndex;                  /* 0x1A: -1 when the pool is exhausted */
+    s16 freeTailIndex;                  /* 0x1C */
+    u16 freeEntryCount;                 /* 0x1E */
     NodeB *firstIndex;
     NodeB *lastIndex;
 } WorldInfo;
 
-/* World handle pointing at its index/list state (0x1C); DDS1/2 basic/dds3WorldBasic.c. */
-typedef struct {
-    u8 pad[0x18];
-    WorldInfo *info;
-} World;
+typedef char WorldInfo_size_must_be_0x28[(sizeof(WorldInfo) == 0x28) ? 1 : -1];
+typedef char WorldInfo_entries_at_0x14[((u32)&((WorldInfo *)0)->entries == 0x14) ? 1 : -1];
+typedef char WorldInfo_firstIndex_at_0x20[((u32)&((WorldInfo *)0)->firstIndex == 0x20) ? 1 : -1];
 
 /* Four-halfword world index key (0x8); DDS1/2 basic/dds3WorldBasic.c. */
 typedef struct {
