@@ -135,7 +135,7 @@ extern s32 mdlFlagTest(u32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern u32 fldGetSceneScriptTaskUserData(void);
+extern SceneAiWork *fldGetSceneScriptTaskUserData(void);
 
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
@@ -5463,20 +5463,20 @@ void fldReleaseSceneSprite(KwlnTask *arg0) {
     *(u32 *)(temp_v1 + 0x2ac) = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", fldGetSceneScriptTaskUserData);
-
-u32 fldGetSceneScriptState(void) {
-    u32 *puVar1;
-
-    puVar1 = (u32 *)fldGetSceneScriptTaskUserData();
-    return *puVar1;
+SceneAiWork *fldGetSceneScriptTaskUserData(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3A0);
+    if (task == 0) {
+        return 0;
+    }
+    return (SceneAiWork *)kwlnTaskGetUserValue(task);
 }
 
-u32 fldGetSceneScriptValue(void) {
-    u32 *puVar1;
+s32 fldGetSceneScriptState(void) {
+    return fldGetSceneScriptTaskUserData()->state;
+}
 
-    puVar1 = (u32 *)(fldGetSceneScriptTaskUserData() + 0x10);
-    return *puVar1;
+BtlIndexList *fldGetSceneScriptValue(void) {
+    return fldGetSceneScriptTaskUserData()->listB;
 }
 
 extern s32 fldStepSceneStateMachine(KwlnTask *);
@@ -5507,11 +5507,11 @@ void fldCreateSceneSpriteTask(s32 arg0) {
 }
 
 void fldMarkActiveSceneScriptState(void) {
-    u32 *temp_v0;
+    SceneAiWork *work;
 
-    temp_v0 = (u32 *)fldGetSceneScriptTaskUserData();
-    if (temp_v0 != 0) {
-        *temp_v0 = 6;
+    work = fldGetSceneScriptTaskUserData();
+    if (work != 0) {
+        work->state = 6;
     }
 }
 
