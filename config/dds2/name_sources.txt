@@ -1724,6 +1724,7 @@
 0x001917E0	effMagatuhiFillColorTable	inferred	count04 effBlendColor samples from colorA to colorB [names_M61_EffVu.tsv]
 0x001918D0	effMagatuhiCreateFirst	inferred	first-family create: 0x30 particles before work [names_M61_EffVu.tsv]
 0x00191A98	effMagatuhiReleaseMathOwnerAndBuffer	inferred	Releases math resource, owner and allocated buffer held in wide work. [names_reviewed6.tsv]
+0x00191AD0	effMagatuhiInitWideFirstParticle	inferred	Initializes the indexed WideFirst particle and its curve/value slots on the age-zero updater path; paired DDS1 twin 0x00189E98.
 0x001922B0	effMagatuhiCreateBezierHistoryWork	inferred	readability/matching review (QP16)
 0x00192438	effMagatuhiReleaseWideWorkResources	inferred	Releases math and owner resources plus retained allocation from wide work. [names_reviewed6.tsv]
 0x00192470	effMagatuhiBuildBezierControlPointsVU	inferred	confidence=high; matched-C; src/dds2/effect/effMagatuhi.c:269:func_00192470; Builds all four cubic control points with independently configured camera/path-perpendicular jitter, resets the per-slot parameter and life-derived step, and initializes the associated value work.; source=names_P6.tsv:3 [names_qp12_apply.tsv]
