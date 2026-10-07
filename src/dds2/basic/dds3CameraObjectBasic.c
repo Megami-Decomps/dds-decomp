@@ -53,7 +53,8 @@ s32 dds3UpdateCameraObject(EffWorldNode *camera) {
     return 1;
 }
 
-u32 func_00112D08(void) {
+/* The camera draw callback has no geometry to submit. */
+s32 dds3DrawCameraObject(EffWorldNode *camera) {
     return 1;
 }
 
