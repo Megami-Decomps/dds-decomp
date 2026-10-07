@@ -177,8 +177,8 @@ void dds3LoadObjectMatrixPointerIntoVu(EffWorldNode *camera) {
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */
-void dds3SetCameraVector(EffWorldNode *camera, void *src) {
-    PCP_COPY_VECTOR(&((CameraData *)camera->data)->worldEye, src);
+void dds3SetCameraVector(EffWorldNode *camera, void *worldEye) {
+    PCP_COPY_VECTOR(&((CameraData *)camera->data)->worldEye, worldEye);
 }
 
 /* Return the camera's world-space eye vector in vf10. */
@@ -189,9 +189,9 @@ void dds3LoadCameraVectorVU(EffWorldNode *camera) {
 }
 
 /* Cache a field of view in radians and request its next active-camera update. */
-void dds3SetCameraFieldOfView(EffWorldNode *camera, f32 value) {
+void dds3SetCameraFieldOfView(EffWorldNode *camera, f32 fieldOfView) {
     CameraData *state = camera->data;
-    state->fieldOfView = value;
+    state->fieldOfView = fieldOfView;
     state->fovUpdatePending |= 1;
 }
 
