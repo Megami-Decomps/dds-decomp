@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "mnu.h"
+#include "eff.h"
 #include "mnu_list.h"
 
 extern KwlnTask *kwlnTaskCreate();
@@ -886,7 +887,60 @@ void mnuFadeSetStateB(u32 *state, u32 mode) {
     state[0] = mode;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A75A8);
+/* Complete A8..BB scroll control retained by the staff-task allocation. */
+typedef struct StaffScrollTransition {
+    s32 mode;
+    s32 opacity;
+    s32 scrolling;
+    s32 y;
+    s32 countdown;
+} StaffScrollTransition;
+
+extern void uiDrawTexturedSurfaceAtFarDepth(u32);
+extern void uiDrawSurfaceAtNearDepth(u32);
+extern void func_00308F78(s32, u32);
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *);
+void func_002A75A8(StaffScrollTransition *state) {
+    EffectSlotSet *sprites = (EffectSlotSet *)mnuMovieWork->sprite;
+    s32 fade = state->opacity / 2;
+
+    uiDrawTexturedSurfaceAtFarDepth(0x53);
+    func_00306CD0(0, 0, 0, fade, 0x60, (u32)sprites, 4, 0x53);
+    func_00308F78(1, 0x53);
+    if (state->scrolling != 0) {
+        func_00306CD0(0, state->y, 0, fade, 0x60, (u32)sprites, 7, 0x53);
+    }
+    uiDrawSurfaceAtNearDepth(0x53);
+    if (state->scrolling == 0) {
+        if (state->countdown == 0) {
+            if (effMiscRand(0) % 180U == 0) {
+                state->scrolling = 1;
+                state->y = (sprites->workEntries[7].sourceHeight + 0x1C0) << 3;
+            }
+        } else {
+            state->countdown--;
+        }
+    } else {
+        state->y -= 0xA0;
+        if (state->y < -(sprites->workEntries[7].sourceHeight << 3)) {
+            state->scrolling = 0;
+            state->countdown = 120;
+        }
+    }
+    if (state->mode == 0) {
+        state->opacity -= 8;
+    } else {
+        state->opacity += 8;
+    }
+    if (state->opacity < 0) {
+        state->opacity = 0;
+    }
+    if (state->opacity > 0x200) {
+        state->opacity = 0x200;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7730);
 

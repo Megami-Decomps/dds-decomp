@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "pcp_vu0.h"
 
 typedef f32 PathEntry12[3];
@@ -8,35 +9,8 @@ typedef struct {
 } PathEntry16;
 
 typedef struct {
-    s32 unk0;
-    PathEntry12 *unk4;
-} PathData14;
-
-typedef struct {
-    s32 unk0;
-    PathEntry16 *entries;
-} PathData18;
-
-typedef struct {
     f32 f[10];
 } PathEntry40;
-
-typedef struct {
-    s32 unk0;
-    PathEntry40 *entries;
-} PathData20;
-
-typedef struct {
-    s32 unk0;
-    s32 flags;
-    s32 unk8;
-    f32 time;
-    s32 bufferHandle;
-    PathData14 *unk14;
-    PathData18 *vectorData;
-    s32 unk1C;
-    PathData20 *sampleData;
-} PathObj;
 
 typedef struct {
     f32 unk0;
@@ -51,29 +25,29 @@ typedef struct {
     f32 unk24;
 } PathOut;
 
-void func_00116B80(s32 *arg0, f32 *arg1, f32 arg2, void *arg3);
+void func_00116B80(u32 *index, f32 *fraction, Dds3PathKeyframes *keys, f32 time);
 void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
 
 void effFreeBuffers(s32 arg);
 void sdfReleaseChipBlock(void *arg);
 
-void dds3FreePathObject(PathObj *path) {
-    effFreeBuffers(path->bufferHandle);
+void dds3FreePathObject(Dds3PathCurveWork *path) {
+    effFreeBuffers((s32)path->primitiveCurve);
     sdfReleaseChipBlock(path);
 }
 
 /* vu0 routine: interpolate the path's XYZ keys into vf10. */
-void dds3InterpolatePathVectorVU(PathObj *path) {
-    s32 index;
+void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
+    u32 index;
     f32 fraction;
-    PathData14 *data;
+    Dds3PathKeyframes *data;
     PathEntry12 *entries;
 
     if (path->flags & 1) {
-        data = path->unk14;
-        func_00116B80(&index, &fraction, path->time, data);
-        entries = data->unk4;
+        data = path->positionKeys;
+        func_00116B80(&index, &fraction, data, path->time);
+        entries = (PathEntry12 *)data->data;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1][0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1][1]);
         VU0_SET_VF10_COMPONENT(z, entries[index + 1][2]);
@@ -90,17 +64,17 @@ void dds3InterpolatePathVectorVU(PathObj *path) {
     }
 }
 
-void dds3PreparePathVectorPair(PathObj *path) {
-    s32 index;
+void dds3PreparePathVectorPair(Dds3PathCurveWork *path) {
+    u32 index;
     f32 fraction;
-    PathData18 *vectorData;
+    Dds3PathKeyframes *vectorData;
     PathEntry16 *entries;
     PathEntry16 *first;
     PathEntry16 *second;
     if (path->flags & 2) {
-        vectorData = path->vectorData;
-        func_00116B80(&index, &fraction, path->time, vectorData);
-        entries = vectorData->entries;
+        vectorData = path->rotationKeys;
+        func_00116B80(&index, &fraction, vectorData, path->time);
+        entries = (PathEntry16 *)vectorData->data;
         first = &entries[index];
         VU0_LOAD_VF_MEMORY(vf10, first);
         second = &entries[index] + 1;
@@ -112,16 +86,16 @@ void dds3PreparePathVectorPair(PathObj *path) {
 }
 
 /* vu0 routine: lerp the three key vectors (xyzw, xyz, xyz) of path entries `index` and `index + 1` at the sampled fraction into out, or clear out */
-void dds3InterpolatePathOutput(PathObj *path, PathOut *out) {
-    s32 index;
+void dds3InterpolatePathOutput(Dds3PathCurveWork *path, PathOut *out) {
+    u32 index;
     f32 fraction;
-    PathData20 *data;
+    Dds3PathKeyframes *data;
     PathEntry40 *entries;
 
     if (path->flags & 0x10) {
-        data = path->sampleData;
-        func_00116B80(&index, &fraction, path->time, data);
-        entries = data->entries;
+        data = path->transformKeys;
+        func_00116B80(&index, &fraction, data, path->time);
+        entries = (PathEntry40 *)data->data;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1].f[0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1].f[1]);
         VU0_SET_VF10_COMPONENT(z, entries[index + 1].f[2]);

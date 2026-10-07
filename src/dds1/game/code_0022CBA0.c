@@ -63,7 +63,7 @@ s32 evtEventViewerGetPendingNode(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void *dds3GetWorldObject(void);
-void dds3SetWorldCameraObject(s32 arg0, u32 arg1);
+EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *object);
 f32 dds3GetCameraFieldOfView(s32 arg0);
 s32 func_00106488(f32 arg0);
 void mnuStopMovieDrawTask(void);
@@ -430,7 +430,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
     if (entry == 0) {
         return;
     }
-    dds3SetWorldCameraObject((s32)dds3GetWorldObject(), entry);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)entry);
     func_00106488(dds3GetCameraFieldOfView(entry));
 }
 

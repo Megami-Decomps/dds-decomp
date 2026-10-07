@@ -70,7 +70,7 @@ typedef struct EvtUnit {
         u8 pad64[4];
         u32 color64;                /* Destination packed RGB/alpha word */
     };
-    s32 endpointWorkAddress;       /* 0x68: owned allocation used for endpoint setup */
+    void *endpointWork;            /* 0x68: owned 0xE0 endpoint-work allocation */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
     EvtEffObj *effObj;             /* 0x80 */

@@ -6718,7 +6718,58 @@ s32 btlLiftUnitForLinkedTarget(s32 object) {
 
 
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002259A0);
+extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
+    s32 cameraKind;
+    u32 shot;
+
+    if (btlIsActorCategoryMarked((s32)command)) {
+        return 0;
+    }
+    btlGetRuntime();
+    if (command->link->unit->flags & 0x200) {
+        if (modeA == 1 || modeB != 1) {
+            return 0;
+        }
+        if (btlHasLinkedEffectNodeTrigger(command)) {
+            btlSelectTargetCameraPose((BattleActionUnit *)command);
+            command->flags |= 0x800;
+            return 1;
+        }
+        cameraKind = datActionAnimationRecords[command->actionCode].cameraKind;
+        if (cameraKind < 8) {
+            if (cameraKind >= 6) {
+                btlSetupCameraPoseAimUnit(command, &command->frontCamera, &command->backCamera);
+                return 1;
+            }
+        }
+        func_001ECCB0(command, &command->frontCamera, &command->backCamera);
+        return 1;
+    }
+    if (modeA != 1 || modeB == 1) {
+        command->flags |= 0x800;
+        func_002251A0((s32)command);
+        return 1;
+    }
+    if (command->actionCode == 0x109) {
+        command->flags |= 0x800;
+        return 1;
+    }
+    shot = effMiscRandMod(NULL, 3);
+    switch (shot) {
+    case 0:
+    case 1:
+        func_002251A0((s32)command);
+        break;
+    case 2:
+        btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+        command->stepKind = 4;
+        break;
+    }
+    return 1;
+}
 
 extern s32 btlIsActorCategoryMarked(s32);
 extern void btlSetRuntimeFlag2000(void);

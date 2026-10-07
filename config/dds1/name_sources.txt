@@ -2096,6 +2096,8 @@
 0x00189BA8	effMagatuhiFillColorTable	inferred	count04 effBlendColor samples from colorA to colorB [names_M61_EffVu.tsv]
 0x00189C98	effMagatuhiCreateFirst	inferred	first-family create: 0x30 particles before work [names_M61_EffVu.tsv]
 0x00189E60	effMagatuhiReleaseMathOwnerAndBuffer	inferred	Releases math resource, owner and allocated buffer held in wide work. [names_reviewed6.tsv]
+0x00189E98	effMagatuhiInitWideFirstParticle	inferred	Initializes the indexed WideFirst particle and its curve/value slots on the age-zero updater path; paired DDS2 twin 0x00191AD0.
+0x0018A098	effMagatuhiUpdateWideFirst	inferred	Advances WideFirst drift/capture and Bezier motion, fades and submits particles, and handles respawn; effect-operation callback data references this function at 0x00355734; paired DDS2 twin 0x00191CD0.
 0x0018A610	effMagatuhiCopyFloatBlock	inferred	copies eight floats from the source block to the destination block with remapped offsets
 0x0018A678	effMagatuhiCreateBezierHistoryWork	inferred	readability/matching review (QP16)
 0x0018A800	effMagatuhiReleaseWideWorkResources	inferred	Releases math and owner resources plus retained allocation from wide work. [names_reviewed6.tsv]
@@ -7089,3 +7091,8 @@
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
+0x00188A78	effTrackPolyResampleHistory	inferred	First-pair initialization, fixed-step linear extension for short history and Catmull-Rom resampling for established history; both endpoint callers pass the retained track history and a new point pair.
+0x00185BD8	effBossCreatePairedChainResources	inferred	Allocates the retained resource owner, copies its parameters and creates two four-point Thunder chains.
+0x00185DE0	effBossCreatePairedChainsFromTable	inferred	Gets parameter block zero from the packed table and forwards it to the paired-chain resource constructor.
+0x00185E00	effBossCreatePairedChainsFromParams	inferred	Forwards the supplied parameter address unchanged to the paired-chain resource constructor.
+0x0018E0C8	effMathStepBezierSlotDirect	inferred	Evaluates the cubic from a direct slot, writes homogeneous output, advances and clamps t, and reports whether interpolation continues; direct-input sibling of effMathStepBezierSlot.

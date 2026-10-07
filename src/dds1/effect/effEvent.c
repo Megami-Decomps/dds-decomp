@@ -253,9 +253,9 @@ void effInitSlotTail(EffArrHdr *table, s32 index) {
     slot->pointIndex = slot->t = 0;
 }
 
-/* Return the selected slot address through the native signed-word interface. */
-s32 effGetSlotAt(EffArrHdr *table, s32 index) {
-    return (s32)&((EffSegmentedBezierSlot *)table->slots)[index];
+/* Return the selected slot; index bounds remain the caller's responsibility. */
+EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
+    return &((EffSegmentedBezierSlot *)table->slots)[index];
 }
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);

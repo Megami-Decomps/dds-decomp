@@ -51,7 +51,7 @@ extern u32 effMiscRand(void *state);
 
 extern u8 D_003AA868[];
 
-extern s32 effMathGetSlotAt(void *slots, s32 index);
+extern void *effMathGetSlotAt(void *slots, s32 index);
 
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 
@@ -108,7 +108,7 @@ extern void effParamWorkInvokeCallback(void *param);
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
 EffChanWork *effChanWorkCreate(EffChanSource *source) {
     u32 recordCount = source->head.count;
-    void *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocationHandle);
     EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
     void *parameterTemplate;

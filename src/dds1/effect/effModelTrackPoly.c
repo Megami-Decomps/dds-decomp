@@ -46,7 +46,7 @@ void effTrackPolyReset(EffTrackPolyWork *work) {
 }
 
 extern s32 sdfLoadMapRecordPositionVector(void *param, s32 id);
-void func_00188A78(EffTrackPolyData *data, u128 *src);
+void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src);
 
 void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
     MdlCtx *model = work->params.model;
@@ -56,11 +56,11 @@ void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
     VU0_STORE_VF(vf10, points);
     sdfLoadMapRecordPositionVector(model->inner, work->params.idB);
     VU0_STORE_VF(vf10, &points[1]);
-    func_00188A78(work->data, points);
+    effTrackPolyResampleHistory(work->data, points);
 }
 
 void effTrackPolyPushWorkEndpoints(EffTrackPolyWork *work, void *data) {
-    func_00188A78(work->data, data);
+    effTrackPolyResampleHistory(work->data, data);
 }
 
 void effTrackPolySetColor(EffTrackPolyWork *work, u32 color) {
@@ -322,7 +322,7 @@ void effTrackPolyAppendPointPair(EffTrackPolyData *data, u128 *src) {
 
 /* Resample the newest history span at a fixed interval, smoothing established
  * tracks with Catmull-Rom interpolation and linearly extending short tracks. */
-void func_00188A78(EffTrackPolyData *data, u128 *src) {
+void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src) {
     f32 points0[4][4];
     f32 points1[4][4];
     f32 base0[4];

@@ -1,6 +1,8 @@
 #include "mnu.h"
 #include "sdf.h"
 #include "mnu_shop.h"
+#include "mnu_list.h"
+#include "dat_state.h"
 
 typedef struct FrFontGlyph FrFontGlyph;
 typedef struct FrFontCtx FrFontCtx;
@@ -94,7 +96,7 @@ typedef struct PartyEntryCopy {
 typedef struct PartyMenuData {
     s32 allocation;
     u8 pad04[4];
-    struct MenuSelectionState *primaryWindow; /* 0x08 */
+    MenuWindowContainer *primaryWindow;   /* 0x08: owned generic window */
     PartyEntryCopy original[5];               /* 0x0C */
     PartyEntryCopy current[5];
     s32 activeCount; /* 0x1074 */
@@ -122,7 +124,11 @@ typedef struct CampMenuContext {
     s32 staffParam;           /* 0x80 */
     u8 pad84[0x5C];
     s32 variant;              /* 0xE0 */
-    u8 padE4[0x40];
+    u8 padE4[0xC];
+    s32 panelResource;        /* 0xF0: grid resource handle */
+    u8 padF4[0x28];
+    const void *partySelectionLayout; /* 0x11C: copied panel layout address */
+    u8 pad120[4];
     s32 panel;                /* 0x124 */
     u8 pad128[4];
     s32 panelList;            /* 0x12C */
@@ -201,7 +207,7 @@ typedef struct MenuInputNode {
     MenuInputFlags *flags; /* 0x14 */
 } MenuInputNode;
 
-extern void mnuForwardDupArg(s32, s32, s32, s32, s32);
+extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
 extern void mnuSeekListNode(s32, s32);
 
 
@@ -251,7 +257,6 @@ extern s32 func_002877A8(void);
 
 extern u32 kwlnTaskGetUserValue();
 
-extern s32 datGameState;
 
 extern s32 D_003BAA7C;
 extern u32 itfDrawUnderscoreTextSegment();
@@ -276,7 +281,55 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00274D48);
+extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+extern struct MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *, s32);
+extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
+extern void func_00274BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *);
+extern char D_003BC6E8[];
+void func_00274D48(CampMenuContext *context) {
+    PartyMenuData *party = (PartyMenuData *)context->menu;
+    MenuWindowContainer *window;
+    s32 i;
+    s32 placement;
+
+    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x140, 0x10, 6, 0x15);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuForwardDupArg(window, context->option, 0, context->panelResource, 0x20);
+    mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0x30, 0x530, -0x90, 0xA10);
+    window->list->context = context;
+    window->list->drawCallback = func_00274BC0;
+    for (i = 0; i < 5; i++) {
+        if ((datGameState->party[i].flags & 1) != 0) {
+            s32 id = datGameState->party[i].unitId;
+            struct MenuListNode *node = mnuAppendWindowListNode(window, D_003BAA70 + id * 17);
+            node->sortKeyPrimary = id - 1;
+            node->sortKeySecondary = datGameState->party[i].level;
+        }
+    }
+    mnuAppendWindowListNode(window, (s32)D_003BC6E8);
+    window->list->visibleCount = window->list->count;
+    switch (window->list->count) {
+    case 2:
+        placement = 0x26;
+        break;
+    case 3:
+        placement = 0x28;
+        break;
+    case 4:
+        placement = 0x2A;
+        break;
+    case 5:
+        placement = 0x2C;
+        break;
+    default:
+        placement = 0x12;
+        break;
+    }
+    mnuInitializeWindowEntryPlacement(0, window, context->option, 0xA, placement);
+    party->primaryWindow = window;
+}
 
 void mnuDestroyPartySelectionWindow(s32 context) {
     mnuDestroyWindowContainer((u32)((PartyMenuData *)((CampMenuContext *)context)->menu)->primaryWindow);
@@ -294,8 +347,8 @@ void mnuCopyPartyEntries(context)
 
     menuWork->activeCount = 0;
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
-        *entryCursor = *(PartyEntryCopy *)(copyByteOffset + datGameState + MNU_STAFF_PARTY_BASE);
-        if (((PartyEntryCopy *)(datGameState + flagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
+        *entryCursor = *(PartyEntryCopy *)(copyByteOffset + (s32)datGameState + MNU_STAFF_PARTY_BASE);
+        if (((PartyEntryCopy *)((s32)datGameState + flagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
             menuWork->activeCount = menuWork->activeCount + 1;
         }
         flagsByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
@@ -329,7 +382,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
     }
     backupByteOffset = 0;
     for (entryCounter = MNU_STAFF_PARTY_LAST_SLOT; entryCounter >= 0; entryCounter--) {
-        *(PartyEntryCopy *)(backupByteOffset + datGameState + MNU_STAFF_PARTY_BASE) = *(PartyEntryCopy *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
+        *(PartyEntryCopy *)(backupByteOffset + (s32)datGameState + MNU_STAFF_PARTY_BASE) = *(PartyEntryCopy *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
         backupByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
     }
     panelWork = context + MNU_STAFF_PARTY_PANEL_BASE;
@@ -343,7 +396,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
 s32 mnuCountActiveSlots(void) {
     s32 entryCountdown;
     s32 activeCount = 0;
-    u16 *entryFlagsCursor = (u16 *)(datGameState + MNU_STAFF_PARTY_BASE);
+    u16 *entryFlagsCursor = (u16 *)((s32)datGameState + MNU_STAFF_PARTY_BASE);
 
     for (entryCountdown = MNU_STAFF_PARTY_LAST_SLOT; entryCountdown >= 0; entryCountdown--) {
         activeCount += *entryFlagsCursor & MNU_STAFF_PARTY_ACTIVE_BIT;
@@ -722,7 +775,7 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback) {
 }
 
 void mnuDrawSlotIcons(s32 x, s32 context) {
-    s32 slot = datGameState + *(((CampMenuContext *)context)->partySelection->selectedSlot) * 0x1a4 + 0xa60;
+    s32 slot = (s32)datGameState + *(((CampMenuContext *)context)->partySelection->selectedSlot) * 0x1a4 + 0xa60;
     s32 i;
     s32 y;
     s32 handle;
@@ -1024,7 +1077,7 @@ s32 mnuCampMenuInit(void) {
     memset(menu, 0, 0x38);
     *menu = handle;
     func_00277DD0(context);
-    mnuForwardDupArg(work->panelList, work->option, 0, 0, 0);
+    mnuForwardDupArg((MenuWindowContainer *)work->panelList, work->option, 0, 0, 0);
     switch (*((MenuSelectionState *)work->panel)->list->selectedSlot) {
     case 0:
         mnuActivatePanelAndConfigureGridResources(work->display, work->variant, 0, 1);
@@ -1193,7 +1246,7 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_REORDER_INPUT_MASK);
     MenuSelectionState *window = (MenuSelectionState *)menuWork->selectedList;
-    s32 partyEntry = datGameState + *((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot * MNU_STAFF_PARTY_ENTRY_BYTES + MNU_STAFF_PARTY_BASE;
+    s32 partyEntry = (s32)datGameState + *((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot * MNU_STAFF_PARTY_ENTRY_BYTES + MNU_STAFF_PARTY_BASE;
     MenuSelectionList *list = window->list;
 
     list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;

@@ -3171,7 +3171,29 @@ s32 btlSetTaskPhase2(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACF10);
+extern void btlUpdateActorSlotPresentationState(BtlUnit *, s8, s8);
+
+void func_001ACF10(BtlUnit *unit, s8 side) {
+    KwlnTask *task;
+    BattleActorPanelWork *work;
+    u32 index;
+
+    if (unit->flags & 0x200) {
+        index = unit->lookupId;
+        task = kwlnTaskGetTaskByName(D_003BB3B0);
+        if (task != NULL) {
+            work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+            if (side == 0) {
+                work->activeEntries[index].hpState = 0x10;
+                work->activeEntries[index].hpHighlightLevel = 0x7F;
+            } else {
+                work->activeEntries[index].mpState = 0x10;
+                work->activeEntries[index].mpHighlightLevel = 0x7F;
+            }
+            btlUpdateActorSlotPresentationState(unit, 0, 2);
+        }
+    }
+}
 
 typedef struct { u16 flag; u16 unk_02; } MesWindowState;
 

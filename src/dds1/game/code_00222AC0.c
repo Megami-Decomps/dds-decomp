@@ -12,7 +12,7 @@
 extern EvtUnitVectorSlot D_003D7BD8[7];
 
 
-extern void func_002E1938(s32, SdfLightSources, f32 *);
+extern void func_002E1938(void *, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
@@ -70,7 +70,7 @@ extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 
 
 extern void *dds3FindWorldObjectNodeByKey(void *world, s32 objectId, s32 kind);
-extern void *dds3GetWorldPlayerObject(void *world);
+extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void effObjDispatchReadyState(void *arg0);
 extern void dds3RemoveWorldObjectNode(void *arg0);
@@ -435,8 +435,8 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_002E1938(unit->endpointWorkAddress, desc, color);
-    unit->value = unit->endpointWorkAddress;
+    func_002E1938(unit->endpointWork, desc, color);
+    unit->value = (u32)unit->endpointWork;
 }
 
 /* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
@@ -469,14 +469,14 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
 
 u32 evtGetWorldObjectId(void) {
     void *world;
-    EvtUnit *object;
+    EffWorldNode *object;
     s32 id;
 
     world = dds3GetWorldObject();
     object = dds3GetWorldPlayerObject(world);
     id = -1;
     if (object != NULL) {
-        id = object->objectId;
+        id = object->key;
     }
     scrSetIntegerReturnValue(id);
     return 1;

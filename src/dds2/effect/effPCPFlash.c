@@ -15,8 +15,8 @@ extern void effReleaseRecordGroupResources(EffRecordPool *pool);
 extern void effDrawQuadRecordPool(EffRecordPool *pool);
 
 
-extern s32 effGetGroupIndexRecord(EffRecordPool *pool, s32 index);
-extern s32 effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
+extern void *effGetGroupIndexRecord(EffRecordPool *pool, s32 index);
+extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern f32 D_003B1230[];
 extern f32 D_003B1260[];
 extern f32 D_003B1240[];
@@ -626,7 +626,7 @@ void effFlashRotatingStreakSetRenderScale(PcpFlashStreakWork *work, f32 value)
     work->renderScale = value;
 }
 
-extern s32 effGetIndexedEffectGroupIndexEntry();
+extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 
 typedef struct PcpFlashQuadColorSlot {
     s32 color[5];
@@ -638,7 +638,7 @@ void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 flag,
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -916,7 +916,7 @@ void effFlashOrbitScalingSetParticleColors(PcpFlashScalingOrbitWork *work, s32 f
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -1671,7 +1671,7 @@ void effFlashRotatingQuadSetParticleColors(PcpFlashRotatingQuadWork *work, s32 f
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -2386,7 +2386,7 @@ void effFlashFadingOrbitSetParticleColors(PcpFlashFadingOrbitWork *work, s32 fla
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);

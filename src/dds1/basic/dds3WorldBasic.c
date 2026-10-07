@@ -5,7 +5,7 @@ extern World *dds3ActiveWorld;
 
 void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(void *arg);
-void *dds3CreateWorldNodeForKind(s32 arg);
+EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 void *sdfAllocSizeClassBlock(s32 arg);
 void dds3GrowWorldValueChain(void *arg, s32 arg1);
 void func_00110120(IndexObj *arg);
@@ -69,7 +69,7 @@ void *dds3GetWorldSecondaryObject(void) {
 
 /* Create a kind-1 world node and append it at the tail.
  * Missing active world or failed creation returns NULL without changing the list. */
-void *dds3AppendWorldNode(void) {
+EffWorldNode *dds3AppendWorldNode(void) {
     WorldInfo *worldInfo;
     EffWorldNode *worldNode;
 

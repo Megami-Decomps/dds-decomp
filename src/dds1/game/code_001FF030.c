@@ -2439,7 +2439,7 @@ u32 func_002055F0(void) {
     return 2;
 }
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 extern void mdlFlagSet(u32);
 
@@ -3145,9 +3145,146 @@ s32 btlDispatchNamedChunkNode(void *query) {
     return D_003BD86C;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00207E68);
+void func_00207E68(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *selected = NULL;
+    BtlUnit *head = state->units;
+    BtlUnit *unit;
+    BattleEffectState *effect;
+    BtlUnit *actor;
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00207FF0);
+    for (unit = head; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->lookupId == 1) {
+                    selected = unit;
+                    break;
+                }
+            }
+        }
+    }
+    for (unit = head; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit != selected) {
+                    PCP_COPY_VECTOR_F32(unit->position, selected->position);
+                    btlSetUnitPosition(unit, selected->position);
+                    PCP_COPY_VECTOR_F32(unit->rotation, selected->rotation);
+                    btlSetUnitRotation(unit, selected->rotation);
+                }
+            }
+        }
+    }
+    effect = state->effect;
+    actor = effect->actor;
+    if (actor != NULL) {
+        PCP_COPY_VECTOR_F32(actor->position, selected->position);
+        btlSetUnitPosition(actor, selected->position);
+        actor = effect->actor;
+        PCP_COPY_VECTOR_F32(actor->rotation, selected->rotation);
+        btlSetUnitRotation(actor, selected->rotation);
+    }
+}
+
+extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+
+s32 func_00207FF0(BtlUnit *unit, s32 animation) {
+    BtlState *state;
+    BtlUnit *current;
+    s32 species;
+    u32 currentMotion;
+    s32 currentAnimation;
+    s32 allHaveStateFlags;
+    s32 allLow;
+
+    if (!(unit->flags & 0x400)) {
+        return animation;
+    }
+    if (!(unit->flags & 2)) {
+        return animation;
+    }
+    state = (BtlState *)btlGetRuntime();
+    if (animation == 4) {
+        species = unit->partyRecord.unitId;
+        switch (species) {
+        case 0x10A: return 4;
+        case 0x12E: return 5;
+        case 0x12F: return 6;
+        }
+    }
+    if (animation == 3) {
+        species = unit->partyRecord.unitId;
+        switch (species) {
+        case 0x10A: return 14;
+        case 0x12E: return 15;
+        case 0x12F: return 16;
+        }
+    }
+    if (animation == 1) {
+        s32 currentSpecies;
+        currentMotion = mdlGetNodeField2C(unit->ext->owner, 0);
+        if (currentMotion == animation) {
+            return -1;
+        }
+        currentSpecies = unit->partyRecord.unitId;
+        switch (currentSpecies) {
+        case 0x10A:
+            switch (currentMotion) {
+            case 8:
+            case 12:
+                return 1;
+            default:
+                return 7;
+            }
+        case 0x12E:
+            switch (currentMotion) {
+            case 7:
+            case 12:
+                return 1;
+            default:
+                return 8;
+            }
+        case 0x12F:
+            switch (currentMotion) {
+            case 7:
+            case 8:
+                return 1;
+            default:
+                return 12;
+            }
+        }
+    }
+    if (animation == 13) {
+        currentAnimation = unit->unkEC;
+        switch (currentAnimation) {
+        case 1:
+        case 11:
+        case 18:
+            return -1;
+        }
+    }
+    if ((u32)animation - 10 < 2) {
+        allHaveStateFlags = 1;
+        allLow = 1;
+        for (current = state->units; current != NULL; current = current->next) {
+            if (current->flags & 1) {
+                if (current->flags & 0x400) {
+                    if (!(current->flags & 0xE0)) {
+                        allHaveStateFlags = 0;
+                    }
+                    if (!btlIsCurrentValueBelowQuarterThreshold(current)) {
+                        allLow = 0;
+                    }
+                }
+            }
+        }
+        if (allHaveStateFlags && animation == 11) {
+            return 11;
+        }
+        return allLow ? 10 : 0;
+    }
+    return animation;
+}
 
 s32 btlAdjustSpeciesAnimation(u8 *unit, s32 animation) {
     s32 species;
@@ -3534,8 +3671,6 @@ void btlDestroyActiveMemberSlot(void) {
         *data = 0;
     }
 }
-
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 
 extern void evtSetUnitAlphaTransition(EvtUnit *, s32, s32);
 
