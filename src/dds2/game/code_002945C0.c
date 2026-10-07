@@ -2,15 +2,21 @@
 #include "mnu_list.h"
 #include "eff.h"
 
-extern u32 D_00435E70;
-extern u64 itfDrawBankTextWithLayoutFlags(u64, u64, u64, u16, u32, u64);
+struct FrFontGlyph;
+struct TextStyleNode;
+
+extern s32 D_00435E70;
+extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern void frFontSetChildColors(struct TextStyleNode *, u32);
+extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
 
-void itfEmitSelectedGlyph(MenuTerminalContext *context, u64 unused, u64 parentGlyph,
-                  u64 color, u64 glyphAttribute) {
+void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFlags,
+                          u32 color, u32 renderFlags) {
     struct MenuList *list;
     CampWindowParams *data;
-    u64 glyph;
+    s32 glyphAddress;
     s32 y;
     u32 code;
 
@@ -23,10 +29,10 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, u64 unused, u64 parentGl
         } else {
             y = 0xB08;
         }
-        glyph = itfDrawBankTextWithLayoutFlags(0x600, y, 1, code, D_00435E70, parentGlyph);
-        frFontSetChildColors(glyph, color);
-        func_0019D550(glyph, 1, glyphAttribute);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        glyphAddress = itfDrawBankTextWithLayoutFlags(0x600, y, 1, code, D_00435E70, layoutFlags);
+        frFontSetChildColors((struct TextStyleNode *)glyphAddress, color);
+        func_0019D550((struct FrFontGlyph *)glyphAddress, 1, renderFlags);
+        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
         return;
     }
 }

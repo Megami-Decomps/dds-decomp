@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mnu.h"
+#include "mnu_movie.h"
 #include "sdf.h"
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
@@ -177,18 +178,6 @@ void mnuLoadMovieRollSprite(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E8D8);
-
-typedef struct MnuMovieRollEntry {
-    f32 x;
-    f32 y;
-    s16 timer;
-    s16 duration;
-    s8 active;
-    u8 pad0D[3];
-    f32 velocity;
-    s32 sprite;
-    s32 column;
-} MnuMovieRollEntry;
 
 extern s32 effMiscRandMod(s32, s32);
 
