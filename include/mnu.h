@@ -706,7 +706,7 @@ typedef struct MenuProgressHost {
     MenuPanelGroup *panelGroup;
 #ifdef VERSION_DDS2
     MenuSpriteState *effectResource;
-    s32 currentEffect;
+    MenuProfilePanel *currentEffect;
 #else
     MenuSimpleSpriteState *effectResource;
     MenuProfilePanel *currentEffect;

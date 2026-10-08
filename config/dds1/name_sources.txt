@@ -6144,6 +6144,7 @@
 0x002D2950	sdfTexAllocHead	inferred	readability/matching review (QP16)
 0x002D2A28	sdfTexGetPaletteByteSize	inferred	Returns colors-per-palette times bytes-per-color times palette count.
 0x002D2A98	sdfTexCopyImageData	inferred	Copies source bytes into texture->data using texture->dataSize.
+0x002D2AB8	sdfTexCreateWithAllocatedResources	inferred	Allocates the mip resource and optional palette, then creates the SdfTex; called by file-header creation and effect shared-texture creation.
 0x002D2C30	sdfTexRelease	inferred	Releases texture allocations, unlinks the texture, and frees its reference and record.
 0x002D2CB8	sdfTexReleaseReference	inferred	Decrements the texture reference count and releases its texture when it reaches zero.
 0x002D2D00	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_002D3C30.

@@ -218,7 +218,7 @@ extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern u32 mnuCreateIconBundle(u32);
 
-extern MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
+extern MenuIconState *func_002B9FF8();
 
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
@@ -933,7 +933,7 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
 
 extern s32 mnuGetSelectionFromFlags(s32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
-extern void mnuSetGroupProperties(u32 *, u32, u32, u32, u32);
+extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void mnuFreeProfilePanelWork(void *);
 
@@ -1135,7 +1135,7 @@ s32 mnuCreatePanels(s32 callback) {
         (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel(data);
     menuContext->resourceList = (u32 *)profile;
-    mnuSetGroupProperties((u32 *)profile, menuContext->displayHandle,
+    mnuSetGroupProperties(profile, menuContext->displayHandle,
                           menuContext->alternateResource, 1, 2);
     party->iconPanel = func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
