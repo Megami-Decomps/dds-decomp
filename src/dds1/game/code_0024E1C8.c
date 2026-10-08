@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff.h"
 #include "mnu_list.h"
+#include "mnu_profile_progress.h"
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 #define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
@@ -19,16 +20,9 @@
 extern s32 func_002CB3B8(u32, u32);
 
 extern u8 *datGameState;
-extern s32 scrGetSelectedOperandIndex(void *);
-extern u32 ptyGetProfileRecordValue(void *, u16);
+extern s8 scrGetSelectedOperandIndex(struct DatPartyRecord *);
+extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 extern u32 prfGetCapValue(u16);
-
-typedef struct MnuProfileProgress {
-    void *unit;
-    s32 profileId;
-    u32 value;
-    u32 cap;
-} MnuProfileProgress;
 
 
 extern u8 mnuResourceTaskName[];
@@ -654,12 +648,14 @@ s32 mnuGetMantraSourceValue(u16 profileId) {
 /* Populate a progress record from a party row's selected profile and its current/cap values. */
 void mnuInitializeProfileProgress(u16 partyIndex, MnuProfileProgress *progress) {
     s32 recordOffset = partyIndex * MNU_PARTY_RECORD_BYTES;
-    void *partyRecord = datGameState + recordOffset + MNU_GAME_PARTY_RECORD_OFFSET;
+    struct DatPartyRecord *partyRecord =
+        (struct DatPartyRecord *)(datGameState + recordOffset + MNU_GAME_PARTY_RECORD_OFFSET);
 
-    progress->unit = partyRecord;
+    progress->partyRecord = partyRecord;
     progress->profileId = scrGetSelectedOperandIndex(partyRecord);
-    progress->value = ptyGetProfileRecordValue(datGameState + recordOffset + MNU_GAME_PARTY_RECORD_OFFSET,
-                                              progress->profileId);
+    progress->value = ptyGetProfileRecordValue(
+        (struct DatPartyRecord *)(datGameState + recordOffset + MNU_GAME_PARTY_RECORD_OFFSET),
+        progress->profileId);
     progress->cap = prfGetCapValue(progress->profileId);
 }
 
@@ -1016,9 +1012,9 @@ s32 func_002508D8(u16 profileId) {
         return 1;
     }
     if (prfGetCapValue(requiredProfiles[0]) ==
-        ptyGetProfileRecordValue(progress->unit, requiredProfiles[0])) {
+        ptyGetProfileRecordValue(progress->partyRecord, requiredProfiles[0])) {
         if (prfGetCapValue(requiredProfiles[1]) ==
-            ptyGetProfileRecordValue(progress->unit, requiredProfiles[1])) {
+            ptyGetProfileRecordValue(progress->partyRecord, requiredProfiles[1])) {
             return 1;
         }
     }
