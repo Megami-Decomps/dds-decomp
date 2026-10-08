@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_param.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
@@ -35,12 +36,6 @@ typedef struct EffDispatchEntry {
     void *(*callback5)(void *);       /* 0x24 */
 } EffDispatchEntry; /* 0x28 */
 
-/* Compact work: a halfword effect kind and an opaque callback payload. */
-typedef struct EffParamWork {
-    u16 kind;     /* 0x00 effect kind */
-    u8 pad02[2];  /* 0x02 */
-    void *payload; /* 0x04 callback payload */
-} EffParamWork; /* 0x08 */
 
 /* Extended work: a full-word kind, fallback-table index, and payload. */
 typedef struct EffParamWorkEx {
@@ -273,8 +268,8 @@ void func_00162948(void) {
 }
 
 /* Return the compact work's payload address without changing its ownership. */
-u32 effParamWorkGetData(EffParamWork *work) {
-    return (u32)work->payload;
+void *effParamWorkGetData(EffParamWork *work) {
+    return work->payload;
 }
 
 /* Return the compact work's halfword effect kind. */
@@ -573,9 +568,8 @@ u32 effParamTableGetWord2(void *table, s32 index) {
     return *(u32 *)(bytes + EFF_PARAM_KIND_WORD_OFFSET);
 }
 
-/* Create compact work from a table record; retain the legacy parameter type
- * even though this argument is used as a raw table rather than a work owner. */
-EffParamWork *effParamCreateFromTable(EffParamWork *table, s32 index) {
+/* Create compact work from a serialized table record. */
+EffParamWork *effParamCreateFromTable(void *table, s32 index) {
     u16 kind;
     void *source;
 

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_param.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -808,15 +809,12 @@ struct PcpScatterRadialWork {
     PcpScatterPool *childWork;
     SdfMemBlock *ownedResource;
     u32 duplicatedCount;
-    u32 *duplicatedHandles;
+    EffParamWork **duplicatedHandles;
     SdfMemBlock *duplicateAllocation;
 };
 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);
-extern u32 effParamWorkCreate(s32 kind, void *params);
-extern u32 effParamWorkDuplicate(u32 handle);
-
 PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParams)
     const PcpScatterRadialParams *params;
     u32 resource;
@@ -825,7 +823,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     PcpScatterRadialWork *work;
     PcpScatterRadialParticle *particle;
     SdfMemBlock *handle;
-    u32 *handles;
+    EffParamWork **handles;
     u32 count;
     u32 i;
     s32 delaySpread;
@@ -856,7 +854,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
         }
         count = work->duplicatedCount;
         handle = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = (u32 *)sdfResourceRetainAddress(handle);
+        handles = (EffParamWork **)sdfResourceRetainAddress(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = handles;
         work->duplicatedHandles[0] = effParamWorkCreate(6, particleParams);
