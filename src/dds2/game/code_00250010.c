@@ -2386,7 +2386,7 @@ void evtViewerDrawGroupRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-s32 func_002569D0(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 count = 0;
     u32 packets;

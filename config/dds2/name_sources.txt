@@ -529,6 +529,7 @@
 0x0011E2A8	evtSelectFineStatGrade	inferred	confidence=high; src/dds2/game/code_0011A118.c:func_0011E2A8; Same ratio conversion with ten-percent steps, grading 0..9 down through 100/90/80/.../30. [names_qp9.tsv]
 0x0011E430	evtPushRosterOrGlobalCounterValue	inferred	Pushes the global counter or a roster panel value depending on the active entry flag. [names_reviewed15.tsv]
 0x0011E498	evtTestSolarPhaseOrModelFlag	inferred	Interprets condition type: solar-phase bitset or model flag, returning matched state. [names_reviewed7.tsv]
+0x0011E528	btlSelectConditionalEncounterGroup	inferred	U3
 0x0011E728	btlCheckScenePartyLevelThreshold	inferred	R_Names31 B92
 0x0011ED88	scrCmdSetEntryFlagsInBothStores	inferred	Finds script entry by identifier and sets matching flag in primary and secondary script flag stores. [names_reviewed19.tsv]
 0x0011EE28	dds3AppendIntrusiveNode	inferred	Appends a node to a two-pointer intrusive list using a caller-selected link offset.
@@ -2111,6 +2112,7 @@
 0x001AD200	btlSelectActorAction	inferred	Uses current actor's selected action, falling back to randomly selecting action 2 or 9.
 0x001AD248	btlIsEventThresholdSatisfiedForEntry	inferred	Tests a selected event entry and its counterpart threshold values. [names_reviewed14.tsv]
 0x001AD698	btlAccumulateEnemyDefeatRewards	inferred	U1
+0x001ADBD0	btlGetActorStateScale	inferred	Wave4
 0x001ADC48	btlClearAllActorEntrySlots	inferred	Clears every actor entry slot in the battle record. [names_reviewed10.tsv]
 0x001ADC98	btlActorEntryIsExpired	inferred	Byte-identical dds1 twin 0x001A48B0; slot code non-zero and countdown < 1 [names_conflicts.tsv]
 0x001ADCD0	btlMatchActorEntryCode	inferred	Compares the selected actor slot's code against the matching table's two codes and returns which comparison matched.
@@ -2642,6 +2644,7 @@
 0x00201578	btlQueueTintTransitionWhenEnabled	inferred	Queues a tint transition unless the battle state disables it. [names_reviewed8.tsv]
 0x00201738	btlCreateSoundReleaseTask	inferred	Creates sndCreateReleaseTask and assigns battle task ID 8. [names_R_FuncNames3.tsv]
 0x00201770	btlExtendTaskFrameLimit	inferred	Increases a task frame limit only when the new limit is greater. [names_reviewed12.tsv]
+0x00201C98	sndUpdateReferencedBattleEffect	inferred	U3-4
 0x00201F08	btlCreateReferencedSoundEffectTask	inferred	Creates a sound task with effect reference acquire/release and optional sound overrides. [names_reviewed13.tsv]
 0x00202288	sndFinishActorEffectTask	inferred	Releases effect handle, decrements effect and unit references, deletes system effect. [names_reviewed5.tsv]
 0x002022E0	sndCreateActorEffectTask	inferred	Allocates actor-owned task with system effect create/start and matching finish cleanup. [names_reviewed5.tsv]
@@ -3089,6 +3092,8 @@
 0x00221498	btlResetDelayedActionTimer	inferred	Resets the timer when the matching delayed action starts. [names_reviewed13.tsv]
 0x002214C0	btlTickDelayedMarkedAction	inferred	Advances its timer and clears runtime status when the marked delay expires. [names_reviewed13.tsv]
 0x00221538	btlResetActionScale	inferred	Sets the action scene state float at offset 0x04 to 1.0; the action scale lookup reads this same field.
+0x00221568	btlCreateLinkedActorTransformTasks	inferred	U3-4
+0x00221760	btlRestoreLinkedActorSceneColor	inferred	Wave4
 0x002217E8	btlDestroyActionActor	inferred	If the action scene state's first word holds an actor, calls btlDestroyUnit and clears the actor handle.
 0x00221888	btlMarkSpecialActionUnit	inferred	Sets unit state bit 0x20000 when its action mode is one of 0x11D through 0x121.
 0x00221988	btlAdvanceBrahmaRatioOnAction	inferred	Multiplies and caps the BRAHMA ratio for the flagged parent action. [names_reviewed13.tsv]
@@ -3587,6 +3592,7 @@
 0x00254F80	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state; DDS1 twin. [names_qp9.tsv]
 0x00255360	evtDrawGroupListRow	inferred	DDS1 twin 0x0023A4B0 [names_M95_Event.tsv]
 0x002566F8	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
+0x002569D0	evtViewerDrawGroupWindow	inferred	Light1d2
 0x002570B8	evtPollRuntimeControlReady	inferred	Returns negative and clears runtime control state if external control poll is false. [names_reviewed7.tsv]
 0x002588B8	evtAssignRuntimeChildSequenceAndCount	inferred	Numbers children of the selected runtime group and returns their count. [names_reviewed17.tsv]
 0x00258920	evtIndexGroupTypeElevenChildren	inferred	confidence=high; src/dds2/game/code_00250010.c:func_00258920; Assigns sequential child indices only for runtime group tag 0xB; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
@@ -3770,6 +3776,7 @@
 0x002685C0	evtIsFadeCompleteAndMessageWindowIdle	inferred	Tests whether fading is finished and the message window is idle. [names_reviewed10.tsv]
 0x002686D0	fldSaveSceneOptionsAndClearFlags	inferred	Copies both current scene options into their previous slots and retains only flag bits 0xFA2F.
 0x002686F0	mnuDrawTerminalBackdrop	inferred	U1
+0x00268838	mnuDrawAndStepTerminalPanelFade	inferred	Light1d2
 0x002689D0	mnuTerminalConfigureEffects	inferred	Per-mode effConfigureWithDefaultSetting for the current and previous slot. [names_M44_Mid3.tsv]
 0x00268AA0	mnuTerminalSelectSlot	inferred	Remaps the requested slot through a 5-entry table, then reconfigures effects. [names_M44_Mid3.tsv]
 0x00268B48	mnuDrawTerminalSelectedSlots	inferred	confidence=high; Paired terminal selected-slot renderer; canonical name agrees with the DDS1 proposal.; sources=names_M143.tsv,names_R_Names35.tsv; twin=0x0024A610, input-family pairing. [names_qp10.tsv]
@@ -4047,7 +4054,9 @@
 0x00285A60	mnuEvaluateActiveSparkleSine	inferred	medium confidence; src/dds2/game/code_0026DBF8.c func_00285A60: For an active sparkle, evaluates sine of the remaining lifetime fraction times pi; no C-visible result is stored. [names_reviewed25.tsv]
 0x00285BD8	mnuAllocateMantraEffectSlotPool	inferred	Allocates count-sized effect slot pool and initializes size, timing and callback header. [names_reviewed7.tsv]
 0x00285CB8	mnuReleaseOptionalResourceSlot	inferred	Releases the resource named by a nonnull menu resource slot.
+0x00285CE8	mtrUpdateGridPropagation	inferred	Wave4
 0x00286270	mnuDrawCellScaledGrid	inferred	high confidence; src/dds2/game/code_00285CE8.c func_00286270: Converts x/cell width by 16 and y/cell height by 8, sets neutral RGB bits and submits the grid rectangle. [names_reviewed25.tsv]
+0x002862B0	mtrAdvanceGridCellPropagation	inferred	Wave4
 0x00286350	mtrMantraEventBitPush	evidence	Prints its own debug string "*****************[mtrMantraEventBitPush()]*****************\n" via func_0010AE38; allocates 0x76 bytes, packs the 0x920..0x98F and 0x9A0..0x9A5 model flags into it [names_L1_LiteSweep.tsv]
 0x00286410	mtrMantraEventBitPop	evidence	Prints its own debug string "*****************[mtrMantraEventBitPop()]*****************\n" via func_0010AE38; restores the same model flags from the 0x76-byte block and releases it [names_L1_LiteSweep.tsv]
 0x002864D0	mtrMantraBitResetUnit	evidence	Prints its own debug string "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n" via func_0010AE38 after clearing 0xB0 script entry low flags [names_L1_LiteSweep.tsv]
@@ -5499,6 +5508,7 @@
 0x0030E180	sdfCounterStepDownAnimationValue	inferred	Subtracts two while the animation value is positive, otherwise clears it. [names_reviewed10.tsv]
 0x0030E1A0	mnuDrawAnimatedTransition	inferred	U1
 0x0030E390	fldDrawTransitionBackdrop	inferred	TaskPurist
+0x0030E910	fldDrawMapRequestMarker	inferred	Wave4
 0x0030EA70	sdfCommitPendingVectorAndMarkChanged	inferred	Copies a pending vector into the active vector and sets its change flag. [names_reviewed17.tsv]
 0x0030EAA8	fldUpdateMapRequestQueues	inferred	U2
 0x0030ECC0	fldDrawSelectedMapMarker	inferred	U3
@@ -5770,6 +5780,7 @@
 0x00324F98	mnuRemoveLinkedResourceByHandle	inferred	high confidence; src/dds2/game/code_00324DF8.c func_00324F98: Looks up the implicit handle in the second owned resource list and removes the found node with notification. [names_reviewed25.tsv]
 0x00324FD0	sdfCloneNestedResourceRecord	inferred	FreshD2
 0x00325688	sdfCloneOwnedResourceRecords	inferred	readability/matching review (QP16)
+0x00325CC8	sdfCloneRelocatedResourceGroups	inferred	U3-4
 0x003268A8	sdfVectorAdd	inferred	Adds the three delta components in place to a vector.
 0x003268E0	sdfVectorSubtract	inferred	Subtracts three delta components in place from a vector.
 0x00326918	sdfVectorAddComponents	inferred	confidence=high; matched-C; src/dds2/game/code_00324DF8.c:139:func_00326918; Adds the supplied x, y and z scalars to the corresponding three vector components in place; no normalization or fourth-component write.; source=fresh-R_Names31-today [names_qp11.tsv]

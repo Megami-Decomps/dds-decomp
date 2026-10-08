@@ -695,6 +695,7 @@
 0x0011C5D8	evtPushRosterBaseValue	inferred	Indexes roster details using current event entry and pushes base value. [names_reviewed7.tsv]
 0x0011C610	evtSelectFineStatGrade	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011C700	evtTestSolarPhaseOrModelFlag	inferred	Interprets condition type: solar-phase bitset or model flag, returning matched state. [names_reviewed7.tsv]
+0x0011C790	btlSelectConditionalEncounterGroup	inferred	U3
 0x0011C990	btlCheckScenePartyLevelThreshold	inferred	R_Names31 B92
 0x0011CE18	dds3WorkClear	inferred	zeroes s32 at +0x1360, s16 at +0x1364 of D_003BAA00 base and D_003BAAB8 flag
 0x0011CE50	evtPushRequestedRosterPresence	inferred	Reads roster index from script, searches active roster entry and returns its presence flag. [names_reviewed18.tsv]
@@ -3036,6 +3037,7 @@
 0x001F3200	sndDestroyFileQueueWrapper	inferred	DDS2 00203E90 twin; destroys contained file queue then frees wrapper [names_R_FuncNames2.tsv]
 0x001F3238	sndSetStationedSeVolume	inferred	DDS2 00203EC8 twin; sets sequence volume 0x58 pan 0x3F [names_R_FuncNames2.tsv]
 0x001F3258	sndSetStationedSeHighVolume	inferred	DDS2 00203EE8 twin; sets sequence volume 0x319C pan 0x3F [names_R_FuncNames2.tsv]
+0x001F3278	sndStartBattleSceneStream	inferred	Wave3b
 0x001F3390	sndIsStreamStatusTwoOrThree	inferred	DDS2 00203FD8 twin; tests status from audio subsystem equals two or three [names_R_FuncNames2.tsv]
 0x001F33F0	btlAdvanceTitleState	inferred	DDS2 00204038 twin; calls mnuAdvanceTitleStateUnderSemaphore [names_R_FuncNames2.tsv]
 0x001F3408	btlAdvanceTitleStateWithAudioCleanup	inferred	DDS2 00204050 twin; advances title and issues two sound cleanup commands [names_R_FuncNames2.tsv]
@@ -4044,6 +4046,7 @@
 0x0023B8F8	mnuDrawTimedPrompt	inferred	Window builder with a countdown at work+0x23E4 and confirm/cancel from the pad state
 0x0023B9D8	evtSetRuntimeCommandValues	inferred	Stores the three supplied values in successive runtime command fields at offsets 0x23E4, 0x23E8 and 0x23EC.
 0x0023B9E8	evtViewerDrawGroupRow	evidence	DDS2 twin func_00256898; "CURRENT", "DEFFAULT", then type 0x18 groups by entryName [names_M74_BattleLarge.tsv]
+0x0023BB20	evtViewerDrawGroupWindow	inferred	R1
 0x0023C178	evtSynchronizeSelectedEntry	inferred	Mirrors the event runtime selection into the active task and global slot.
 0x0023C208	evtPollRuntimeControlReady	inferred	Returns negative and clears runtime control state if external control poll is false. [names_reviewed7.tsv]
 0x0023D420	evtPollEffectFrameControl	inferred	readability/matching review (QP16)
@@ -4680,6 +4683,7 @@
 0x002764D8	mnuStaffPopupUpdate	inferred	popup handler: button 1 stores the selected panel and opens popup, button 2 cancels; DDS2 twin func_002B2A28 [names_M81_D1Menu.tsv]
 0x002765E8	mnuDrawStaffCampPageWithImage	inferred	Draws staff camp content, chooses an image sprite and runs the active panel. [names_reviewed10.tsv]
 0x002766E8	mnuStepStaffCampPageControl	inferred	confidence=medium; matched-C; src/dds1/game/code_00274B80.c:525:func_002766E8; Runs the current staff camp page control callback through panel mode two; paired with the adjacent staff camp page draw operation.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00276898	mnuInitializeStaffPartyScene	inferred	Light1d2
 0x00276A18	mnuStaffReleasePanelScene	inferred	Stops stage, clears the staff panel entries and releases optional panels and menu resources.
 0x00276B10	mnuResetSelectedPanelOpacity	inferred	Restores full opacity in the selected party panel slot. [names_reviewed13.tsv]
 0x00276B38	mnuStaffSwitchPartyPage	inferred	Moves the staff selection cursor on page input, releases its panel and refreshes. [names_reviewed13.tsv]
