@@ -82,9 +82,7 @@ extern BattleCmdPanel *btlCommandPanelWork;
 
 extern const char *btlMahenPanelTaskNameRef;
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
-extern s32 kwlnTaskIsRegistered(KwlnTask *task);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delay);
 extern void func_00101968(KwlnTask *parent, KwlnTask *child);

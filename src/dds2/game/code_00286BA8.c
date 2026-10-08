@@ -1,4 +1,5 @@
 #include "mnu_mantra.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_staff.h"
