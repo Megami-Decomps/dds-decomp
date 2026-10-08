@@ -318,7 +318,7 @@ extern void func_001C92A0(s32, s32, s32, s32);
 
 extern void func_001C9EA0(s32);
 
-extern void func_001C9BE8(s32);
+extern void func_001C9BE8(BattleSceneObject *);
 
 extern void func_001C98E8(s32);
 
@@ -333,7 +333,7 @@ void fldDispatchSceneKindHandler(s32 sceneContext) {
         func_001C9EA0(sceneContext);
         return;
     case 2:
-        func_001C9BE8(sceneContext);
+        func_001C9BE8((BattleSceneObject *)sceneContext);
         return;
     case 3:
         func_001C98E8(sceneContext);
