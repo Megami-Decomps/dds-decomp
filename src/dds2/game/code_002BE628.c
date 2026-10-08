@@ -71,7 +71,7 @@ typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
-extern void mnuClearWindowPanelTransitionFlag();
+
 extern void func_002BE730();
 extern void func_002BED10(MenuQueuedCommand *entry);
 
@@ -628,8 +628,8 @@ void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *m
     mnuAdvancePanelTransition(menu);
 }
 
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 option) {
-    mnuDrawListPanels(x, y, depth, 0, (MenuPageWindow *)source, mode);
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 mode) {
+    mnuDrawListPanels(x, y, depth, 0, window, mode);
 }
 
 
@@ -1605,7 +1605,7 @@ void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
             if (bottom == 0) {
                 *buttons &= ~0x800;
             }
-            mnuClearWindowPanelTransitionFlag(menu);
+            mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)menu);
             return;
         }
     }

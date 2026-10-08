@@ -65,10 +65,9 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
 extern void func_002B9808(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+
 extern void mnuHandlePanelListPageJumpInput();
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+
 extern void mnuRetreatListCursorDefault(struct MenuList *);
 extern void mnuAdvanceListCursorDefault(struct MenuList *);
 extern void mnuClearListFlagsOneAndTwo(u32 *);

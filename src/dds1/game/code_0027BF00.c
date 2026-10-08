@@ -83,11 +83,6 @@ typedef struct MenuListNode MenuListNode;
 
 extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
-
-
-
-
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 typedef struct ScrollParams {
