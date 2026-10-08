@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "eff_resource_slots.h"
 #include "common.h"
 #include "mnu_staff.h"
 #include "kwln.h"
@@ -56,7 +57,6 @@ extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
 extern s8 mnuCampTaskState;
 
-extern void effResolveAndReleaseResource(u32);
 
 extern s32 D_003BC614;
 
@@ -83,7 +83,6 @@ extern ResourceRef8 D_0037C210[];
 
 extern char D_003B2020[];
 
-extern u32 effLoadIndexedResource(char *, s32, s32);
 
 #define MNU_STAFF_BASE_RESOURCE_COUNT 7
 #define MNU_STAFF_MAIN_RESOURCE_COUNT 16
@@ -106,7 +105,7 @@ void mnuLoadStaffImageHandles(void) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        D_003DC5C8[resourceIndex] = effLoadIndexedResource(D_003B2020, D_0037C210[resourceIndex].index, MNU_STAFF_RETAIN_RESOURCE);
+        D_003DC5C8[resourceIndex] = (u32)effLoadIndexedResource(D_003B2020, (const char *)D_0037C210[resourceIndex].index, MNU_STAFF_RETAIN_RESOURCE);
     }
 }
 
@@ -118,7 +117,7 @@ void mnuResolveStaffImageHandles(u32 *destination) {
         u32 *sourceSlot = &D_003DC5C8[resourceIndex];
         u32 *destinationSlot = &destination[resourceIndex];
 
-        effResolveAndReleaseResource(*sourceSlot);
+        effResolveAndReleaseResource((struct EffectSlotSet *)*sourceSlot);
         *destinationSlot = *sourceSlot;
     }
 }
@@ -128,7 +127,7 @@ void mnuReleaseStaffImageHandles(u32 *resources) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         u32 *outputSlot = &resources[resourceIndex];
-        effReleaseTextureHandlesAndResetSlots(D_003DC5C8[resourceIndex]);
+        effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)D_003DC5C8[resourceIndex]);
         *outputSlot = 0;
     }
 }
@@ -167,14 +166,14 @@ extern void movReleaseActivePartyCategoryModels(u32 *, s32, StaffMenuWork *);
 void movReleaseActivePartyCategoryModels(u32 *modelHandles, s32 unusedCount, StaffMenuWork *unusedWork) {
     s32 partyIndex;
 
-    effResolveAndReleaseResource(modelHandles[0]);
+        effResolveAndReleaseResource((struct EffectSlotSet *)modelHandles[0]);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
         DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
             s32 modelIndex = partyRecord->unitId + D_003BC6B5;
 
-            effResolveAndReleaseResource((modelHandles + modelIndex)[-1]);
+            effResolveAndReleaseResource((struct EffectSlotSet *)(modelHandles + modelIndex)[-1]);
         }
     }
 }
@@ -186,14 +185,13 @@ void movReleaseCategoryModels(s32 category, StaffMenuWork *menu) {
     if (category != MNU_STAFF_PARTY_CATEGORY) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
-            effResolveAndReleaseResource(modelHandles[resourceIndex]);
+            effResolveAndReleaseResource((struct EffectSlotSet *)modelHandles[resourceIndex]);
         }
     } else {
         movReleaseActivePartyCategoryModels(modelHandles, entryCount, menu);
     }
 }
 
-extern void effReleaseTextureHandlesAndResetSlots(u32);
 
 /* Release each category entry's textures without overwriting the handle array. */
 void mnuReleaseStaffCategoryTextureHandles(category, menu)
@@ -207,7 +205,7 @@ StaffMenuWork *menu;
     if (entryCount > 0) {
         u32 *handleCursor = entries;
         do {
-            effReleaseTextureHandlesAndResetSlots(*handleCursor++);
+            effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*handleCursor++);
         } while (++resourceIndex < entryCount);
     }
 }
@@ -320,13 +318,13 @@ void mnuReleaseStaffResourceGroups(StaffSlots *resources) {
 
     mnuReleaseStaffImageHandles(resources->baseResources);
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet((u32)resources->mainResources[resourceIndex]);
+        effDestroyResourceSlotSet(resources->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet((u32)resources->extraResources[resourceIndex]);
+        effDestroyResourceSlotSet(resources->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet((u32)resources->pairResources[resourceIndex]);
+        effDestroyResourceSlotSet(resources->pairResources[resourceIndex]);
     }
 }
 
@@ -366,15 +364,15 @@ s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {
 
     mnuReleaseStaffResourceGroups(&menu->staffSlots);
     for (i = 0; i < 2; i++) {
-        effDestroyResourceSlotSet(menu->categoryPair[i]);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)menu->categoryPair[i]);
     }
     for (i = 0; i < 4; i++) {
-        effDestroyResourceSlotSet(menu->categoryGroup[i]);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)menu->categoryGroup[i]);
     }
     for (i = 0; i < 9; i++) {
-        effDestroyResourceSlotSet(menu->partyModels[i]);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)menu->partyModels[i]);
     }
-    return effDestroyResourceSlotSet(menu->singleResource);
+    return (s32)effDestroyResourceSlotSet((struct EffectSlotSet *)menu->singleResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_002719F0);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_movie.h"
@@ -165,7 +166,7 @@ void func_0026E798(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set,
 }
 
 void mnuLoadMovieRollSprite(void) {
-    mnuMovieWork->spriteSet = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
+    mnuMovieWork->spriteSet = (u32)effLoadIndexedResource(D_003BC620, "roll.spr", 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E8D8);
