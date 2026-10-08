@@ -12523,3 +12523,61 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A5410);
 
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E0);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E8);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", btlDeferredTaskTail);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", btlDeferredTaskHead);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5F8);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB600);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB608);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB610);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB618);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB620);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB628);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB630);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB638);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB640);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB648);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB650);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB658);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB660);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB664);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB668);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB670);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB678);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB680);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB690);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB694);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", btlTintTransitionHoldCount);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB6A0);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB6A8);
+
+INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB6B0);
+

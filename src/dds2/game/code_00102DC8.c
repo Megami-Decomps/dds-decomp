@@ -19,7 +19,7 @@ extern u32 kwlnTextureReferenceFlag;
 
 extern u32 D_00435CC4;
 
-extern s32 kwlnHeldTextureReference;
+extern SdfTex *kwlnHeldTextureReference;
 
 extern u16 D_00435CE8;
 
@@ -945,14 +945,15 @@ extern u16 D_00435CCE;
 extern void kwlnTextureReleaseHeldReference(void);
 extern void func_00105290(void);
 extern u32 sdfAllocImageBuffer(u32 width, u32 height, u32 mode);
-extern s32 sdfTexCreateResourceWithReference(u32 width, u32 height, u32 a, u32 b, u32 buffer, u32 c, u32 d, u32 e);
-extern void sdfTexSetClampMode(s32 texture, s32 mode);
-extern void sdfTexCreateFirstPacket(s32 texture);
+extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary);
+extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
+extern void sdfTexCreateFirstPacket(SdfTex *texture);
+extern void sdfTexReleaseReference(SdfTex *texture);
 
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
 s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
-    s32 textureHandle;
+    SdfTex *texture;
 
     if (kwlnHeldTextureReference != 0) {
         kwlnTextureReleaseHeldReference();
@@ -964,13 +965,13 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     if (D_00435CC4 == 0) {
         return 0;
     }
-    textureHandle = sdfTexCreateResourceWithReference(width, height, 0, 0, D_00435CC4, 0, 0, 0);
-    if (textureHandle == 0) {
+    texture = sdfTexCreateResourceWithReference(width, height, 0, 0, D_00435CC4, 0, 0, 0);
+    if (texture == 0) {
         return 0;
     }
-    kwlnHeldTextureReference = textureHandle;
-    sdfTexSetClampMode(textureHandle, KWLN_HELD_TEXTURE_CLAMP_MODE);
-    sdfTexCreateFirstPacket(textureHandle);
+    kwlnHeldTextureReference = texture;
+    sdfTexSetClampMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
+    sdfTexCreateFirstPacket(texture);
     D_0037F7B0.camera.aspect = value;
     D_0037F7B0.camera.width = width;
     D_0037F7B0.camera.height = height;
@@ -1007,7 +1008,7 @@ u32 kwlnTextureGetReferenceFlag(void) {
     return kwlnTextureReferenceFlag;
 }
 
-s32 kwlnTextureGetHeldReference(void) {
+SdfTex *kwlnTextureGetHeldReference(void) {
     return kwlnHeldTextureReference;
 }
 

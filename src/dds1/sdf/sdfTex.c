@@ -68,7 +68,7 @@ void sdfTexRelease(SdfTex *texture) {
     SdfTex *next;
     SdfTex *prev;
 
-    if (texture->reference->unk0 == NULL) {
+    if (texture->reference->cloneSource == NULL) {
         sdfUpdateTextureHeadsWithInterruptsMasked(texture->primaryResource);
     }
     sdfUpdateTextureHeadsWithInterruptsMasked(texture->secondaryResource);
@@ -100,7 +100,7 @@ void sdfTexReleaseReference(SdfTex *texture) {
         count = ref->refCount - 1;
         ref->refCount = count;
         if (count == 0) {
-            texture->unk20 = 0;
+            texture->resourceKey = 0;
             sdfTexRelease(texture);
         }
     }
@@ -116,7 +116,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         count = ref->refCount - 1;
         ref->refCount = count;
         if (count == 0) {
-            texture->unk20 = 0;
+            texture->resourceKey = 0;
             sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
         }
     }
@@ -173,7 +173,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 }
 
 extern SdfTex *func_002D2AB8(s32, s32, u32, u32, u32, u32);
-extern u8 func_002D2390(SdfTex *);
+extern u8 sdfTexGetPaletteCount(SdfTex *);
 extern void func_002D2A58(SdfTex *);
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *, s32, u8 *, s32);
 extern s32 sdfTexFormatSizeHint(s32);
@@ -193,7 +193,7 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     if (key != 0) {
         SdfTex *existing = sdfResourceListHead;
         while (existing != NULL) {
-            if (existing->unk20 == key) {
+            if (existing->resourceKey == key) {
                 existing->reference->refCount++;
                 return existing;
             }
@@ -204,10 +204,10 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     texture->lodParameters = header->lodParameters;
     texture->unk1E = header->unk1A;
     texture->clampMode = header->clampMode;
-    texture->unk20 = header->resourceKey;
-    texture->unk24 = header->unk20;
+    texture->resourceKey = header->resourceKey;
+    texture->battleTextureSlot = header->unk20;
     pixels = (u8 *)header + (header->flags & 0xF0) + sizeof(*header);
-    if (func_002D2390(texture) != 0) {
+    if (sdfTexGetPaletteCount(texture) != 0) {
         func_002D2A58(texture);
         sdfTexCopyImageData(texture, pixels);
         pixels = sdfTexSubmitPixelsForFormat(texture, sdfTexGetSecondaryResourceWord(texture), pixels, mode);

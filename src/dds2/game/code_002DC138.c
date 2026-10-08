@@ -288,7 +288,7 @@ typedef struct EffBattleTexHeaders {
     u8 *slot2; // 0x5B4
 } EffBattleTexHeaders;
 
-extern s32 func_0032B240();
+extern u8 sdfTexGetPaletteCount(SdfTex *texture);
 
 extern u8 *sdfTexSubmitPixelsForFormat(void *, u32, u8 *, s32);
 
@@ -311,7 +311,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
         s16 height;
         u8 format;
 
-        switch (tex->unk24) {
+        switch (tex->battleTextureSlot) {
         case 1:
             header = battle->slot1;
             break;
@@ -323,7 +323,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
             break;
         }
         pixels = header + (header[1] & 0xF0) + 0x40;
-        if (func_0032B240(tex) != 0) {
+        if (sdfTexGetPaletteCount(tex) != 0) {
             pixels = sdfTexSubmitPixelsForFormat(tex, sdfTexGetSecondaryResourceWord(tex), pixels, 1);
         }
         width = tex->width;

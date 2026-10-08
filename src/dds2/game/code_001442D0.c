@@ -4364,9 +4364,70 @@ void fldSetTargetGuideEnabled(s32 active) {
     D_00451D3C[0] = 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414000);
+/* Five-word rows are shared by the object producer and the guide update. */
+typedef struct FieldGuideObjectSlot {
+    EffWorldNode *object;
+    MdlCtx *model;
+    u32 active;
+    s16 gridX;
+    s16 gridY;
+    f32 progress;
+} FieldGuideObjectSlot;
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00153D60);
+typedef char FieldGuideObjectSlot_size_must_be_0x14[
+    (sizeof(FieldGuideObjectSlot) == 0x14) ? 1 : -1];
+
+extern FieldGuideObjectSlot D_00451DB0[15];
+
+void func_00153D60(s32 gridX, s32 gridY, s32 slot) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 rotation[4] __attribute__((aligned(16)));
+    f32 stepX;
+    f32 stepY;
+    s16 stepScaleX;
+    s16 stepScaleY;
+    EffWorldNode *object;
+    MdlCtx *model;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(rotation, 0, sizeof(rotation));
+    rotation[3] = 1.0f;
+    {
+        f32 scale[4] __attribute__((aligned(16))) = {1.2f, 1.2f, 1.2f, 1.0f};
+        stepX = (f32)D_004363BC;
+        stepY = (f32)D_004363BE;
+        object = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position,
+                                        rotation);
+        dds3SetWorldNodeValue(object, (u32)"TUKAMI_UNIT");
+        dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), object);
+        func_00112058(object, 2, 0x10);
+        effObjSetInnerFloat(object, 180.0f);
+
+        stepScaleX = D_004363C0;
+        stepScaleY = D_004363C2;
+        stepX += (f32)stepScaleX * (f32)gridX;
+        stepY += (f32)-stepScaleY * (f32)gridY;
+        position[0] = stepX;
+        position[1] = 0.0f;
+        position[2] = stepY;
+        scale[0] = 1.0f;
+        scale[1] = 0.5f;
+        scale[2] = 1.0f;
+        PCP_COPY_VECTOR_F32(object->inner->position, position);
+        PCP_COPY_VECTOR_F32(object->inner->smoothedPosition, position);
+        PCP_COPY_VECTOR_F32(object->inner->rotation, rotation);
+        effObjSetInnerFirstVec(object, (u128 *)position);
+        effObjSetInnerSecondVec(object, (u128 *)rotation);
+        effObjSetInnerThirdVec(object, (u128 *)scale);
+
+        model = (MdlCtx *)dds3GetObjectBaseResourceHandle(object);
+        mdlAddEntryFlagged(model, 0, 0);
+        sdfSetTextFloatPairOverride(model->inner, 15.0f, 0.0f);
+        D_00451DB0[slot].model = model;
+        D_00451DB0[slot].object = object;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153FA0);
 

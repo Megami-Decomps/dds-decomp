@@ -11,6 +11,8 @@ typedef struct MenuThresholdEntry {
     s32 requiredAmount;
 } MenuThresholdEntry;
 
+struct DatPartyRecord;
+
 /* Native list owner, shared by both games' allocator and window consumers. */
 struct MenuListNode {
     s32 index;
@@ -44,6 +46,7 @@ struct MenuListNode {
         u32 unk70;
         s32 childPanel;
         char *title;
+        struct DatPartyRecord *partyRecord;
     };
 };
 struct MenuList {

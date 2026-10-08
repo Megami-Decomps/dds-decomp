@@ -200,12 +200,13 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
     sdfReleaseResourceAllocation(record->handle);
 }
 
-extern s32 itfMesCreateWindow(void);
+struct ItfMesSub;
+extern s32 itfMesCreateWindow(struct ItfMesSub *);
 /* Create the singleton message window only when its handle is negative.
  * The page setup remains unconditional after the allocation attempt. */
-s32 evtCreateMessageWindowIfMissing(void) {
+s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *definition) {
     if (dspWindowHandle < 0) {
-        dspWindowHandle = itfMesCreateWindow();
+        dspWindowHandle = itfMesCreateWindow(definition);
         itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
         return 1;
     }
