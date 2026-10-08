@@ -12,7 +12,6 @@ extern BillDispatch D_0034E068[];
 void *sdfAllocSizeClassBlock(s32 size);
 struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 void sdfReleaseChipBlock(void *arg);
-void effReleaseSharedTextureRecord(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 BillData *billCreateAnimationDataFromResource(void *arg);
 
