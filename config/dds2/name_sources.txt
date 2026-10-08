@@ -1879,6 +1879,7 @@
 0x00197ED8	effEventCopySerializedRecord	inferred	readability/matching review (QP16)
 0x00197F40	effEventSetScale	inferred	readability/matching review (QP16)
 0x00197F58	effEventSetState	inferred	Writes the supplied value to the event node's state word.
+0x00197F60	effEventUpdateEffectParameters	inferred	confidence=high; paired native bodies; updates active effect rows from event position/orientation, dispatches position/matrix/color values and advances the effect cursor; paired DDS1 0x00190328.
 0x00198278	effEventLightCreate	inferred	0x3C holder: handle, owner event, 0x30 init block, active flag [names_M61_EffVu.tsv]
 0x00198340	effEventLightDestroy	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:829:func_00198340; Releases light owner, conditionally releases cloned handle and frees light work.; twin=0x00190708, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00198380	effEventLightClone	inferred	clone: new owner event from src handle + init block copy [names_M61_EffVu.tsv]
