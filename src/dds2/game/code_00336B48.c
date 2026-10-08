@@ -497,15 +497,15 @@ void sdfVuEmitTexturedTriangleBatches(work)
                 *(u64 *)out = 0xE;
                 out += 2;
                 first = 0;
-                *(u64 *)out = asset->unk38;
+                *(u64 *)out = asset->primaryTextureState.sampling;
                 out += 2;
                 *(u64 *)out = 0x14;
                 out += 2;
-                *(u64 *)out = asset->unk40;
+                *(u64 *)out = asset->primaryTextureState.texture;
                 out += 2;
                 *(u64 *)out = 6;
                 out += 2;
-                *(u64 *)out = asset->unk48;
+                *(u64 *)out = asset->primaryTextureState.clamp;
                 out += 2;
                 *(u64 *)out = 8;
                 out += 2;
@@ -699,8 +699,9 @@ void func_00339188(u32 workAddress) {
             func_003378C8(work, paramC);
             break;
     }
-    sdfBuildChunkedVuNodeTransfer(work, asset->unk50, asset->unk58,
-                                  asset->unk60, asset->unk20, 0);
+    sdfBuildChunkedVuNodeTransfer(work, asset->secondaryTextureState.sampling,
+                                  asset->secondaryTextureState.texture,
+                                  asset->secondaryTextureState.clamp, asset->unk20, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00339270);
