@@ -115,6 +115,7 @@ extern u32 D_0047B440[16];
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern SdfStreamFrameNode *D_00439208;
+extern s32 D_004391F4;
 
 extern SdfStreamFrameNode *sdfStreamNodeListHead;
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
@@ -1383,7 +1384,28 @@ s32 func_00345268(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00345298);
+s32 func_00345298(void) {
+    SdfStreamFrameNode *stream = D_00439208;
+
+    if (stream != NULL) {
+        D_004391F4 = stream->unk48;
+        D_00439208 = NULL;
+        if (stream->unk11 != 0 && stream->active == 1) {
+            if (stream->pad64 != 0) {
+                stream->pad64 = 0;
+                stream->firstSlot++;
+                if (stream->firstSlot == SDF_STREAM_RING_SLOTS) {
+                    stream->firstSlot = 0;
+                }
+                stream->filledSlots--;
+            }
+            sndFillStreamFeedRing(stream);
+            sdfSoundStartIpuInputDma(stream);
+        }
+    }
+    EE_ENABLE_INTERRUPTS_SYNC();
+    return 0;
+}
 
 /* Return the indexed earlier entry only when enabled; the byte index is unchecked. */
 u32 sdfMidiPreviousEntry(MidiChannel *channel) {
@@ -1539,7 +1561,6 @@ extern void func_003668B8();
 extern void sceIpuInit();
 extern void _StartThread();
 extern void sdfIpuDmaCompletionWorker();
-extern void func_00345298();
 
 void sdfSoundInitIpuStream(void) {
     sceIpuInit();
