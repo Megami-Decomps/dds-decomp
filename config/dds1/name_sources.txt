@@ -3569,7 +3569,8 @@
 0x00217EE0	mdlCheckNodeByte30	inferred	finds node by id, returns 2 when missing else whether byte at +0x30 equals 5
 0x00217F18	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
 0x00217F40	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
-0x00217FB8	mdlUpdateContextRotationBasisFromQuaternion	inferred	Converts the context quaternion to rotation basis vectors. [names_reviewed11.tsv]
+0x00217FA0	mdlLoadRotationQuaternionVU	inferred	Loads SdfModel.rotationQuaternion at +0x60 into vf10; viewer and actor callers use it as the stored rotation quaternion.
+0x00217FB8	mdlUpdateContextRotationBasisFromQuaternion	inferred	Stores vf10 as SdfModel.rotationQuaternion at +0x60, then converts it to rotation basis vectors.
 0x002180A8	mdlBroadcastMasked	inferred	stores arg to inner +0x1C then walks list14 with (arg & 0xFF000000)|0x808080
 0x002180E0	mdlBroadcastValue	inferred	stores arg to inner +0x1C then walks list14 with arg
 0x00218100	mdlSetAmountOnAllContextResources	inferred	Applies an amount to every resource node owned by the model context. [names_reviewed10.tsv]
