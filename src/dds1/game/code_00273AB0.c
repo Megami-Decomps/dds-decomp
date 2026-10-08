@@ -2,8 +2,8 @@
 #include "kwln.h"
 #include "dat_state.h"
 
-/* Staff callbacks receive a task handle as an integer word. Preserve the
- * native parameter widths and the short-arity task-user-value calls. */
+/* Legacy staff callbacks retain their word-address interfaces; the exit
+ * callback forwards its task pointer to the task-user-value provider. */
 #define MNU_STAFF_INPUT_CONFIRM 1
 #define MNU_STAFF_INPUT_CANCEL 2
 #define MNU_STAFF_INPUT_PREVIOUS_ROW 0x10
@@ -12,6 +12,7 @@
 #define MNU_STAFF_INPUT_NEXT_PAGE 0x200
 
 extern void func_0024DD78(void);
+extern s32 evtGetMessageWindowControlState(void);
 
 extern u32 kwlnTaskGetUserValue();
 
@@ -73,14 +74,17 @@ typedef struct StaffImageList {
 
 /* Staff menu state: selected objects and the current selection. */
 typedef struct StaffImageChoices {
-    u8 pad00[8];
+    u32 allocation; /* 0x00: retained resource allocation */
+    u32 pad04;
     StaffImageList *primaryObject;   /* 0x08 */
     StaffImageList *secondaryObject; /* 0x0C */
     StaffImageList *list; /* 0x10 */
     s32 currentSelection; /* 0x14 */
     u8 pad18[0xC];
     s32 listState; /* 0x24 */
+    s32 pendingItem; /* 0x28: successful staff-item use, cleared by exit */
 } StaffImageChoices;
+typedef char StaffImageChoices_size[sizeof(StaffImageChoices) == 0x2C ? 1 : -1];
 
 typedef struct StaffImageContext {
     u8 pad00[0x54];
@@ -105,7 +109,11 @@ typedef struct StaffImageContext {
     MenuSpriteState *spriteHandle; /* 0x8FC */
     u8 pad900[0xC];
     StaffImageChoices *menu; /* 0x90C */
+    s32 displayMode; /* 0x910 */
+    MenuGradientFade gradient; /* 0x914 */
+    u8 pad920[4];
 } StaffImageContext;
+typedef char StaffImageContext_size[sizeof(StaffImageContext) == 0x924 ? 1 : -1];
 
 extern void mnuSelectPage(void *, u32);
 extern void mnuCreateStaffBulletItemWindow();
@@ -144,7 +152,25 @@ s32 mnuStaffImageEnterA(s32 task) {
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
-INCLUDE_ASM(const s32, "game/code_00273AB0", mnuStaffImageExitA);
+extern s32 mnuIsStaffWindowReadyForItem(s32 itemId, s32 context);
+
+s32 mnuStaffImageExitA(KwlnTask *task) {
+    StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue(task);
+    StaffImageChoices *menu = context->menu;
+    s32 item;
+
+    func_0024DD78();
+    if (evtGetMessageWindowControlState() == 0) {
+        item = menu->pendingItem;
+        if (item != 0) {
+            menu->pendingItem = 0;
+            if (mnuIsStaffWindowReadyForItem((u16)item, (s32)context) == 0) {
+                mnuSetPopupEntry((s32)&context->popupState, (s32)D_0037C9AC);
+            }
+        }
+    }
+    return menuRunPanel(context, 2, task);
+}
 
 
 u32 func_00273C40(void) {
