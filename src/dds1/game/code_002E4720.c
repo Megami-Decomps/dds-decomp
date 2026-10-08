@@ -4,23 +4,12 @@
 #include "sdf_draw.h"
 #include "sdf_sif_command.h"
 #include "sdf_dev_event.h"
+#include "sdf_dev_protocol.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 #define SDF_DEV_DEFAULT_PRIORITY 0x48
 #define SDF_DEV_OVERRIDE_PRIORITY 0x78
 #define SDF_DEV_PRIORITY_OVERRIDE_TICKS 3
-
-/* One-based request IDs; host-file dispatch subtracts the first ID. */
-#define SDF_DEV_OPERATION_NONE 0
-#define SDF_DEV_OPERATION_OPEN_READ 1
-#define SDF_DEV_OPERATION_OPEN_WRITE 2
-#define SDF_DEV_OPERATION_SEEK 3
-#define SDF_DEV_OPERATION_GET_SIZE 4
-#define SDF_DEV_OPERATION_READ 5
-#define SDF_DEV_OPERATION_WRITE 6
-#define SDF_DEV_OPERATION_CLOSE 7
-#define SDF_DEV_OPERATION_READ_BUFFER 8
-#define SDF_DEV_OPERATION_WRITE_BUFFER 9
 
 #define SDF_DEV_FILE_OPEN_READ 1
 #define SDF_DEV_FILE_OPEN_WRITE 0x202
@@ -81,15 +70,6 @@ typedef struct DevState {
     void (*callback)(struct DevState *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4); /* 0x38 */
     s32 callbackContext; /* 0x3C */
 } DevState;
-
-#define SDF_DEV_STATE_OPENING 2
-#define SDF_DEV_STATE_SEEKING 3
-#define SDF_DEV_STATE_READING 4
-#define SDF_DEV_STATE_WRITING 5
-#define SDF_DEV_STATE_CLOSING 6
-#define SDF_DEV_STATE_ACTIVE 7
-#define SDF_DEV_STATE_COMPLETE 8
-#define SDF_DEV_STATE_INACTIVE 9
 
 /* Native 0x18 worker record; semaphore-only addresses point inside this array,
  * not at a separately allocated table. */
@@ -1284,9 +1264,9 @@ void D_002E6538(DevWorkerEntry *worker) {
         }
 
         operation = state->operation - 1;
-        state->operation = 0;
+        state->operation = SDF_DEV_OPERATION_NONE;
         switch (operation) {
-        case 0:
+        case SDF_DEV_OPERATION_OPEN_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
             result = sdfDevOpenDiscFileAndGetSize(state->resource);
             if (result < 0) {
@@ -1301,7 +1281,7 @@ void D_002E6538(DevWorkerEntry *worker) {
             }
             continue;
 
-        case 3:
+        case SDF_DEV_OPERATION_GET_SIZE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_ACTIVE;
             callback = state->callback;
             if (callback != NULL) {
@@ -1310,7 +1290,7 @@ void D_002E6538(DevWorkerEntry *worker) {
             }
             continue;
 
-        case 4:
+        case SDF_DEV_OPERATION_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_READING;
             result = func_002E5398(state->requestData, state->requestExtra);
             if (result < 0) {
@@ -1326,7 +1306,7 @@ void D_002E6538(DevWorkerEntry *worker) {
             }
             continue;
 
-        case 6:
+        case SDF_DEV_OPERATION_CLOSE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_CLOSING;
             sdfServicePendingOperationUnderSemaphore();
             sdfDevRecycleCompletedState(state);
@@ -1337,7 +1317,7 @@ void D_002E6538(DevWorkerEntry *worker) {
             }
             continue;
 
-        case 7:
+        case SDF_DEV_OPERATION_READ_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
             result = sdfDevOpenDiscFileAndGetSize(state->resource);
             if (result < 0) {
@@ -1373,10 +1353,10 @@ void D_002E6538(DevWorkerEntry *worker) {
             }
             continue;
 
-        case 1:
-        case 2:
-        case 5:
-        case 8:
+        case SDF_DEV_OPERATION_OPEN_WRITE - SDF_DEV_OPERATION_OPEN_READ:
+        case SDF_DEV_OPERATION_SEEK - SDF_DEV_OPERATION_OPEN_READ:
+        case SDF_DEV_OPERATION_WRITE - SDF_DEV_OPERATION_OPEN_READ:
+        case SDF_DEV_OPERATION_WRITE_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             sdfDevDeactivate(state, 0);
             continue;
 
@@ -1519,7 +1499,7 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
         return -1;
     }
     state->requestExtra = extra;
-    state->operation = 5;
+    state->operation = SDF_DEV_OPERATION_READ;
     state->requestData = data;
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
