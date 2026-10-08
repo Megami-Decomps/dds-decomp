@@ -114,7 +114,7 @@ extern u8 D_00437A48[];
 
 extern u8 D_003E3760[];
 extern u32 effLoadIndexedResource(const char *path, const char *name, u32 mode);
-extern void effRequestResourceByMode(const char *path, const char *name, u32 mode, u32 *handle);
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 
 void func_002A3D70(void) {
