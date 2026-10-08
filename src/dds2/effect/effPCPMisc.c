@@ -667,11 +667,6 @@ extern void effThunderReleaseFragmentWork(void *work);
    are declared unchecked. */
 extern void *effPcpCreateDelayedEventEntries();
 
-/* Effect initializers implemented in assembly below (effScatterCreateRadialWork lives in
-   another unit). Each is entered with and without spawn arguments, so they
-   are declared unchecked. */
-extern void *effPcpEventWorkCreate();
-
 typedef struct EffPCPRingWork {
     f32 pos[4];
     u32 color10;
@@ -6069,7 +6064,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
 
 
 /* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
-void *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
+EffPCPMapEventWork *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
     EffPCPMapEventWork *work = sdfAllocSizeClassBlock(0x40);
 
     work->params = *head;
