@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_slot.h"
 #include "kwln.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
@@ -3727,16 +3728,16 @@ void func_001D4E98(BtlUnit *unit, u32 kind, u32 id) {
 extern const char D_003A3AD0[];
 
 void btlReleaseActorModelResources(u8 *object) {
-    s32 sound;
+    SoundSlotOwner *sound;
     s32 load;
     EffWorldNode *model;
     u32 state;
     u32 flags;
     if (object[0xCC] == 0) {
-        sound = *(s32 *)(object + 0x308);
+        sound = *(SoundSlotOwner **)(object + 0x308);
         if (sound != 0) {
             sndReleaseSlotOwner(sound);
-            *(s32 *)(object + 0x308) = 0;
+            *(SoundSlotOwner **)(object + 0x308) = 0;
         }
         load = *(s32 *)(object + 0x324);
         if (load != 0) {
@@ -11884,24 +11885,6 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
-/* Retain and per-slot loading state, embedded after the category/id key. */
-typedef struct SoundSlotWork {
-    u32 refCount; /* Shared retain count; release frees only on the zero transition. */
-    s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
-    s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
-    s32 fileRequests[0x1D];
-    s32 resourceHandles[0x1D];
-} SoundSlotWork;
-
-/* Shared motion-SE owner: queued files become resource handles before playback. */
-typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
-    s32 category;
-    s32 id;
-    SoundSlotWork work;
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
 typedef struct SoundTaskArgs {
     BtlUnit *actor;
@@ -12019,8 +12002,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
 }
 
 /* The last reference cleans queued files and resource handles, then unlinks/frees. */
-void sndReleaseSlotOwner(u8 *ownerAddress) {
-    SoundSlotOwner *node = (SoundSlotOwner *)ownerAddress;
+void sndReleaseSlotOwner(SoundSlotOwner *node) {
     u32 count = node->work.refCount - 1;
     node->work.refCount = count;
     if (count == 0) {
@@ -12054,7 +12036,7 @@ void sndReleaseAllSlotOwners(void) {
     while (node != 0) {
         SoundSlotOwner *next = node->next;
 
-        sndReleaseSlotOwner((u8 *)node);
+        sndReleaseSlotOwner(node);
         node = next;
     }
 }
