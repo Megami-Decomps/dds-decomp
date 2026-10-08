@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "common.h"
 #include "kwln.h"
@@ -9,8 +10,6 @@
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
 #include "kwln_task_lifecycle.h"
-
-extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
 
 extern u32 mnuMovieShutdownCounter;
 
@@ -593,7 +592,7 @@ typedef struct StaffResourceHeader {
 
 void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unused,
                    u32 layer) {
-    itfDrawGridWithResolvedSlot(drawWork + 0x60, y, z, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
+    itfDrawGridWithResolvedSlot(drawWork + 0x60, y, z, 1, (struct EffectSlotSet *)(u32)*(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
                   layer);
 }
 
@@ -1018,13 +1017,13 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
         if (rows[kind].x[i] != 0) {
             if (rows[kind].gridIds[i] == 0x1F) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y - 2) << 3, 0, 1,
-                                           slot, 0x1F, 0x53);
+                                           (struct EffectSlotSet *)(u32)slot, 0x1F, 0x53);
             } else if (rows[kind].gridIds[i] == 8) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y + 2) << 3, 0, 1,
-                                           slot, 8, 0x53);
+                                           (struct EffectSlotSet *)(u32)slot, 8, 0x53);
             } else {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, y << 3, 0, 1,
-                                           slot, rows[kind].gridIds[i], 0x53);
+                                           (struct EffectSlotSet *)(u32)slot, rows[kind].gridIds[i], 0x53);
             }
         }
     }
@@ -1079,7 +1078,7 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
     }
     for (i = 0; i < 4; i++) {
         itfDrawGridWithResolvedSlot(pieces[i].x, pieces[i].y + 0x918, 0,
-                                   drawOption, menu->titleContext, pieces[i].gridId, layer);
+                                   drawOption, (struct EffectSlotSet *)(u32)menu->titleContext, pieces[i].gridId, layer);
     }
     if (textTable != 0) {
         if (conditionTable != 0 && ((s32 *)conditionTable)[labelIndex] != 0) {

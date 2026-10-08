@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu_input.h"
 #include "mnu.h"
@@ -183,7 +184,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
         s32 index = selected * MNU_ENTRY_SPRITE_COUNT + spriteIndex;
         u32 sprite = node->sprites[index].sprite;
         if (sprite != 0) {
-            itfDrawGridWithResolvedSlot(x, y, depth, 0, sprite, node->sprites[index].effect, drawArg);
+            itfDrawGridWithResolvedSlot(x, y, depth, 0, (EffectSlotSet *)(u32)sprite, node->sprites[index].effect, drawArg);
         }
         spriteIndex++;
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);
@@ -502,16 +503,16 @@ void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 target) {
 /* Always draw slot zero; masks one/two select the two three-slot banks.
  * Reset the six auxiliary slots through the existing grid lookup after drawing. */
 void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
-    itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[0], 0, param);
+    itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[0], 0, param);
     if (mask & 1) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[1], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[2], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[3], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[1], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[2], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[3], 0, param);
     }
     if (mask & 2) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[4], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[5], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[6], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[4], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, param);
     }
     itfGridLookupValueOrDefault((s32)(u32)group->sprites[1], 0);
     itfGridLookupValueOrDefault((s32)(u32)group->sprites[2], 0);
@@ -1033,7 +1034,7 @@ void mnuDrawPanelGridAndSubmitSurface(u8 *panel, s32 y, s32 unknown,
                    u32 *sprite, s32 flag) {
     uiDrawActiveSurfaceRegion(flag);
     itfDrawGridWithResolvedSlot((s32)(panel + 0x10), y + 0xf8, 0xffffff, 1,
-                   sprite[6], sprite[7], flag);
+                   (EffectSlotSet *)(u32)sprite[6], sprite[7], flag);
     sdfDispatchSurfaceWithPreparedTexturePacket(flag);
 }
 

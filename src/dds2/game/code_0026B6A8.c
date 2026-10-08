@@ -1,4 +1,5 @@
 #include "kwln.h"
+#include "itf_draw_grid.h"
 #include "dsp_name.h"
 #include "mnu.h"
 #include "dat_state.h"
@@ -305,8 +306,6 @@ extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void uiDrawSurfaceAtNearDepth(s32);
 extern void func_00306CD0(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern void func_00308F78(s32, s32);
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, EffectSlotSet *, s32, s32);
-
 typedef struct DspStripVerticalOffsets {
     s8 values[2][2][6];
 } DspStripVerticalOffsets;

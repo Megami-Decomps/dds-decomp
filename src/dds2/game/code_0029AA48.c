@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu_result.h"
 
@@ -67,7 +68,6 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
 }
 
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
-extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
 extern void func_002C10F0(s32, s32, s32, DatPartyRecord *, MenuSpriteState *, s32);
 extern s8 evtStageTestUpdate(s32);
 extern char D_00380788[];
@@ -77,7 +77,7 @@ void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
     s32 i;
 
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x19, 0x53);
-    itfDrawGridWithResolvedSlot(0x1740, 0x510, 0, 1, context->unitHandle, 0xA, 0x53);
+    itfDrawGridWithResolvedSlot(0x1740, 0x510, 0, 1, (struct EffectSlotSet *)(u32)context->unitHandle, 0xA, 0x53);
     context->partyWindow.flags |= 0x200;
     mnuDrawPanelListDefault(0, 0, 0, &context->partyWindow, 0x53);
 

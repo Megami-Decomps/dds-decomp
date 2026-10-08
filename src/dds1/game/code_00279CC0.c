@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -134,7 +135,6 @@ extern s32 ptyGetAffinityKind(s32, s32);
 extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
 extern s32 mnuLookupRangeEntry(u16);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern const u8 *D_0037CCC8[16];
 extern const u8 *D_003BAA8C;
 
@@ -154,14 +154,14 @@ void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
                 if (flags > 0) {
                     s32 rangeIndex = mnuLookupRangeEntry((u16)flags);
                     itfDrawGridWithResolvedSlot(
-                        0x2C0, y - 0x10, 0, 1, rangeResource,
+                        0x2C0, y - 0x10, 0, 1, (EffectSlotSet *)(u32)rangeResource,
                         rangeIndex * 2 + 10, 0x53);
                     glyph = itfCreateConvertedTextGlyph(
                         0x420, y, 0, 0xA09DC380,
                         D_003BAA8C + flags * 17, 0);
                 } else {
                     itfDrawGridWithResolvedSlot(
-                        0x420, y + 0x38, 0, 1, placeholderResource, 9, 0x53);
+                        0x420, y + 0x38, 0, 1, (EffectSlotSet *)(u32)placeholderResource, 9, 0x53);
                 }
             } else {
                 s32 flags = ptyGetAffinityFlagsWithoutOverride((s32)affinityId, slot);
@@ -302,11 +302,11 @@ typedef struct MenuContextSprites {
 } MenuContextSprites;
 
 void mnuDrawSkillMenuFrameIcons(s32 context) {
-    itfDrawGridWithResolvedSlot(0x1c0, 0xa60, 0, 1, ((MenuContextSprites *)context)->sprite74, 0x1f, 0x53);
-    itfDrawGridWithResolvedSlot(0x150, 0xa00, 0, 1, ((MenuContextSprites *)context)->sprite74, 0, 0x53);
-    itfDrawGridWithResolvedSlot(0xbb0, 0xa00, 0, 1, ((MenuContextSprites *)context)->sprite74, 0, 0x53);
-    itfDrawGridWithResolvedSlot(0x250, 0x9c0, 0, 1, ((MenuContextSprites *)context)->spriteE4, 0x18, 0x53);
-    itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, ((MenuContextSprites *)context)->sprite64, 2, 0x53);
+    itfDrawGridWithResolvedSlot(0x1c0, 0xa60, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite74, 0x1f, 0x53);
+    itfDrawGridWithResolvedSlot(0x150, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0xbb0, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0x250, 0x9c0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->spriteE4, 0x18, 0x53);
+    itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite64, 2, 0x53);
 }
 
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -410,15 +410,15 @@ void mnuReleaseAssets(MenuAssets *assets) {
 
 void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
     uiDrawTexturedSurfaceAtFarDepth(drawArg);
-    itfDrawGridWithResolvedSlot(0xffffffffffffff90, 0xa0, 0, 0x61, assets->sprites[4], 0, drawArg);
-    itfDrawGridWithResolvedSlot(0xfffffffffffffb90, 0x808, 0, 0x61, assets->sprites[4], 1, drawArg);
-    itfDrawGridWithResolvedSlot(0x1050, 0xfffffffffffffc18, 0, 0x61, assets->sprites[4], 2, drawArg);
-    itfDrawGridWithResolvedSlot(0x10b0, 0x3c0, 0, 0x61, assets->sprites[4], 3, drawArg);
-    itfDrawGridWithResolvedSlot(0x1300, 0xb70, 0, 0x61, assets->sprites[4], 4, drawArg);
+    itfDrawGridWithResolvedSlot(0xffffffffffffff90, 0xa0, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 0, drawArg);
+    itfDrawGridWithResolvedSlot(0xfffffffffffffb90, 0x808, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 1, drawArg);
+    itfDrawGridWithResolvedSlot(0x1050, 0xfffffffffffffc18, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 2, drawArg);
+    itfDrawGridWithResolvedSlot(0x10b0, 0x3c0, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 3, drawArg);
+    itfDrawGridWithResolvedSlot(0x1300, 0xb70, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 4, drawArg);
     func_002C1548(0, drawArg);
     itfGridLookupValueOrDefault(assets->sprites[4], 0);
     itfGridLookupValueOrDefault(assets->sprites[4], 1);
-    itfDrawGridWithResolvedSlot(0, 0, 0, 0x60, assets->sprites[1], 0, drawArg);
+    itfDrawGridWithResolvedSlot(0, 0, 0, 0x60, (EffectSlotSet *)(u32)assets->sprites[1], 0, drawArg);
     itfGridLookupValueOrDefault(assets->sprites[1], 0);
     uiDrawSurfaceAtNearDepth(drawArg);
 }
@@ -444,7 +444,7 @@ void mnuDrawCursorIcons(MenuAssets *assets, s32 arg) {
 void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
     sdfSubmitGsTestOneRegisterPacket(0x30000);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
-    itfDrawGridWithResolvedSlot(0, 0, 0, 0, assets->sprites[0], 0, option);
+    itfDrawGridWithResolvedSlot(0, 0, 0, 0, (EffectSlotSet *)(u32)assets->sprites[0], 0, option);
     mnuDrawCursorIcons(assets, option);
     mnuDrawCampBackdropDecoration(assets, option);
 }

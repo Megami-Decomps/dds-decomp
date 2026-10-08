@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -85,8 +86,6 @@ extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 
 extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
-
-extern void itfDrawGridWithResolvedSlot();
 
 extern void mnuClearListFlagsOneAndTwo();
 
@@ -834,7 +833,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
         s32 index = selected * MNU_ENTRY_SPRITE_COUNT + spriteIndex;
         u32 sprite = node->sprites[index].sprite;
         if (sprite != 0) {
-            itfDrawGridWithResolvedSlot(x, y, depth, 0, sprite, node->sprites[index].effect, drawArg);
+            itfDrawGridWithResolvedSlot(x, y, depth, 0, (EffectSlotSet *)(u32)sprite, node->sprites[index].effect, drawArg);
         }
         spriteIndex++;
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);

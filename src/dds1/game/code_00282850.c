@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "common.h"
 #include "sdf_dev_state.h"
@@ -928,7 +929,6 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
     itfGridStorePosition(&panel->completed, grid, completedIndex);
 }
 
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void func_002C1548(s32, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
@@ -959,7 +959,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
     func_002BF4E0(x, y, z, opacity, 0, (s32)slots, index, surface);
     if (index != panel->background.index) {
         uiDrawTexturedSurfaceAtFarDepth(surface);
-        itfDrawGridWithResolvedSlot(x, y, z, 0x21, (s32)slots, index, surface);
+        itfDrawGridWithResolvedSlot(x, y, z, 0x21, slots, index, surface);
         func_002C1548(0, surface);
         slots = panel->background.set;
         index = panel->background.index;

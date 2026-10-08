@@ -1,6 +1,7 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -147,7 +148,6 @@ typedef struct EffectPair {
 } EffectPair;
 
 extern EffectPair D_003BC400[];
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
 extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
@@ -1221,7 +1221,7 @@ void mnuDrawTerminalSelectedSlots(s32 context) {
     for (i = 0, slot = state->cursor; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
         if (*slot >= 0) {
             itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
-                                        (s32)state->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
+                                        (struct EffectSlotSet *)(u32)state->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
         }
     }
     if (state->mode == 2) {
@@ -1360,7 +1360,7 @@ void func_0024A930(MenuTerminalWork *work) {
     memcpy(positions, D_003AF6B0, sizeof(positions));
     index = fldGetModeFrameRecordIndex((SceneFrameOwner *)work);
     itfDrawGridWithResolvedSlot(positions[0][0], positions[0][1], 0, 0x81,
-        (s32)work->batch, index, MNU_TEXT_DRAW_PRIORITY);
+        (struct EffectSlotSet *)(u32)work->batch, index, MNU_TEXT_DRAW_PRIORITY);
     scale = ((u32)work->batch->records[index].unk14 << 8) /
         work->batch->records[index].unk84;
     if (work->mode != 2) {
@@ -1368,12 +1368,12 @@ void func_0024A930(MenuTerminalWork *work) {
             work->batch, 4, MNU_TEXT_DRAW_PRIORITY);
     }
     itfDrawGridWithResolvedSlot(positions[3][0], positions[3][1], 0, 0x81,
-        (s32)work->batch, 7, MNU_TEXT_DRAW_PRIORITY);
+        (struct EffectSlotSet *)(u32)work->batch, 7, MNU_TEXT_DRAW_PRIORITY);
     itfDrawGridWithResolvedSlot(positions[3][0], positions[3][1], 0, 0x81,
-        (s32)work->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
+        (struct EffectSlotSet *)(u32)work->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
     if (work->reduced != 2) {
         itfDrawGridWithResolvedSlot(positions[2][0], positions[2][1], 0, 0x81,
-            (s32)work->batch, 6, MNU_TEXT_DRAW_PRIORITY);
+            (struct EffectSlotSet *)(u32)work->batch, 6, MNU_TEXT_DRAW_PRIORITY);
         mnuQueueFontGlyphFromAtlasSlot(positions[4][0], positions[4][1], 0,
             work->batch->records[index].unk14 | 0xA09DC300,
             work->selectedSlot, work->reduced);
@@ -1468,10 +1468,10 @@ void func_0024ACD8(s32 close, s32 context) {
 
     memcpy(positions, D_003AF6E0, sizeof(positions));
     itfDrawGridWithResolvedSlot(positions[1][0], positions[1][1], 0, 0x80,
-        (s32)work->batch, func_0024AB28((MenuSelectorContext *)work), 0x53);
+        (struct EffectSlotSet *)(u32)work->batch, func_0024AB28((MenuSelectorContext *)work), 0x53);
     mnuCallInitWide(0x330, 0x340, 0, (s32)work->listResource, 0x53);
     itfDrawGridWithResolvedSlot(positions[0][0], positions[0][1], 0, 0x80,
-        (s32)work->batch, 8, 0x53);
+        (struct EffectSlotSet *)(u32)work->batch, 8, 0x53);
     frames = work->batch;
     progress = ((u32)frames->records[8].unk14 << 8) / frames->records[8].unk84;
     if (close != 0) {
@@ -1500,10 +1500,10 @@ void mnuDrawOwnerProgressAndFade(s32 close, s32 context) {
     SceneFrameTable *frames;
 
     itfDrawGridWithResolvedSlot(positions.entries[1].firstValue, positions.entries[1].secondValue, 0, 0x80,
-                                (s32)work->batch, 10, 0x53);
+                                (struct EffectSlotSet *)(u32)work->batch, 10, 0x53);
     mnuCallInitWide(0x330, 0x2E8, 0, (s32)work->owner, 0x53);
     itfDrawGridWithResolvedSlot(positions.entries[0].firstValue, positions.entries[0].secondValue, 0, 0x80,
-                                (s32)work->batch, 9, 0x53);
+                                (struct EffectSlotSet *)(u32)work->batch, 9, 0x53);
     frames = work->batch;
     progress = ((u32)frames->records[9].unk14 << 8) /
                frames->records[9].unk84;
@@ -1570,7 +1570,7 @@ void func_0024B168(s32 close, MenuTerminalWork *work) {
     s32 scale;
 
     itfDrawGridWithResolvedSlot(positions.entries[0].firstValue,
-        positions.entries[0].secondValue, 0, 0x80, (s32)work->batch, 0x1A, 0x53);
+        positions.entries[0].secondValue, 0, 0x80, (struct EffectSlotSet *)(u32)work->batch, 0x1A, 0x53);
     scale = ((u32)work->batch->records[0x1A].unk14 << 8) /
         work->batch->records[0x1A].unk84;
     if (close != 0) {
