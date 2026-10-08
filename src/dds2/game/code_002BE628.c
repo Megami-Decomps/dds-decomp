@@ -16,6 +16,26 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 
+/* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
+struct MenuPanelItem {
+    u8 pad00[0x10];
+    u32 value10;
+    s32 value14;
+    s32 value18;
+    u32 option;
+    s32 selection;
+    u32 value24;
+    u32 value28;
+    MenuGridSlot spriteGridSlots[9]; /* 0x2C */
+    MenuGridSlot gridSlots[5]; /* 0x74 */
+    u8 pad9C[4];
+    u32 initialValue; /* 0xA0 */
+    u32 selectionRamp; /* 0xA4 */
+    s32 phase;
+};
+
+extern void mnuSetGroupPair(struct MenuPanelItem *, u32, u32);
+
 extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
 
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
@@ -71,7 +91,7 @@ typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
-extern void mnuClearWindowPanelTransitionFlag();
+
 extern void func_002BE730();
 extern void func_002BED10(MenuQueuedCommand *entry);
 
@@ -628,8 +648,8 @@ void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *m
     mnuAdvancePanelTransition(menu);
 }
 
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 option) {
-    mnuDrawListPanels(x, y, depth, 0, (MenuPageWindow *)source, mode);
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 mode) {
+    mnuDrawListPanels(x, y, depth, 0, window, mode);
 }
 
 
@@ -727,7 +747,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
 
-extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32, s32, s32);
+extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, EffectSlotSet *, s32, s32);
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
@@ -736,7 +756,7 @@ extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 
 /* Create the five panel items owned by this group and clear its selection. */
-MenuPanelGroup *mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
+MenuPanelGroup *mnuCreatePanelGroup(s32 owner, EffectSlotSet *texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     MenuPanelItem **itemCursor = group->entries;
     s32 panelIndex;
@@ -1077,23 +1097,6 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
     }
 }
 
-/* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
-struct MenuPanelItem {
-    u8 pad00[0x10];
-    u32 value10;
-    s32 value14;
-    s32 value18;
-    u32 option;
-    s32 selection;
-    u32 value24;
-    u32 value28;
-    MenuGridSlot spriteGridSlots[9]; /* 0x2C */
-    MenuGridSlot gridSlots[5]; /* 0x74 */
-    u8 pad9C[4];
-    u32 initialValue; /* 0xA0 */
-    u32 selectionRamp; /* 0xA4 */
-    s32 phase;
-};
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
 MenuPanelItem *mnuCreatePanelItem(void) {
@@ -1108,11 +1111,11 @@ MenuPanelItem *mnuCreatePanelItem(void) {
 
 /* Bind the panel item's nine sprite cells to their grid entries (the extra pair only when an extra grid
  * exists) and pick the panel's label entry. */
-void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, s32 secondaryGrid, s32 extraGrid, s32 panelIndex) {
+void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, EffectSlotSet *secondaryGrid, s32 extraGrid, s32 panelIndex) {
     s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
 
-    itfGridStorePosition(&item->spriteGridSlots[0], (EffectSlotSet *)secondaryGrid, 4);
-    itfGridStorePosition(&item->spriteGridSlots[1], (EffectSlotSet *)secondaryGrid, 5);
+    itfGridStorePosition(&item->spriteGridSlots[0], secondaryGrid, 4);
+    itfGridStorePosition(&item->spriteGridSlots[1], secondaryGrid, 5);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[1].set, item->spriteGridSlots[1].index, 0xD40, 0x40, 0, 0);
     itfGridStorePosition(&item->spriteGridSlots[2], (EffectSlotSet *)primaryGrid, 0x51);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[2].set, item->spriteGridSlots[2].index, 0x4B0, 0x48, 0, 0);
@@ -1158,9 +1161,9 @@ void func_002C2A88(MenuPanelItem *item, u32 value) {
     item->value10 = value;
 }
 
-void mnuSetGroupPair(u32 *entry, u32 left, u32 right) {
-    entry[6] = left;
-    entry[7] = right;
+void mnuSetGroupPair(MenuPanelItem *entry, u32 left, u32 right) {
+    entry->value18 = left;
+    entry->option = right;
 }
 
 void mnuStorePanelItemValue(MenuPanelItem *item, u32 value) {
@@ -1605,7 +1608,7 @@ void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
             if (bottom == 0) {
                 *buttons &= ~0x800;
             }
-            mnuClearWindowPanelTransitionFlag(menu);
+            mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)menu);
             return;
         }
     }

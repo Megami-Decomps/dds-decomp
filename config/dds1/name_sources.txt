@@ -1291,6 +1291,7 @@
 0x0015A2F8	effParModulateColors	inferred	multiplies particle RGBA channels using VU [names_reviewed5.tsv]
 0x0015A378	parCreateIndexed	inferred	creates particle via D_0034E250 table, stamps index at +0x140
 0x0015A3C0	parDispatchByKind	inferred	runs D_0034E258 command for particle kind
+0x0015A3F8	parUpdateAndDrawObject	inferred	updates the selected particle kind and submits live particles plus kind-specific drawing
 0x0015A5B8	parCloneKind	inferred	creates particle via table from object kind, stamps kind
 0x0015A608	parRestartKind	inferred	runs D_0034E2F0 kind func, sets +0x142 to 1, links +0xA4 to +0xFC
 0x0015A658	parScaleAndRestartKind	inferred	src/dds1/effect/parManager.c func_0015A658: Calls factor dispatch, scales kinds 2 through 4 and arms particle restart. [names_reviewed24.tsv]

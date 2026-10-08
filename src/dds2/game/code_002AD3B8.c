@@ -65,10 +65,9 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
 extern void func_002B9808(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+
 extern void mnuHandlePanelListPageJumpInput();
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+
 extern void mnuRetreatListCursorDefault(struct MenuList *);
 extern void mnuAdvanceListCursorDefault(struct MenuList *);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
@@ -435,7 +434,7 @@ s32 mnuInitializeSelectedStaffPage(KwlnTask *task) {
     mnuReleaseStaffMenuResources(&context->group);
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 1, 0);
-    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
+    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, (struct EffectSlotSet *)context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
@@ -697,7 +696,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
     }
-    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
+    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, (struct EffectSlotSet *)context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
@@ -983,7 +982,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
     }
-    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, context->spriteArg2);
+    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, (struct EffectSlotSet *)context->spriteArg1, context->spriteArg2);
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);

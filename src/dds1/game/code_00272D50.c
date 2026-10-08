@@ -247,9 +247,7 @@ s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
 extern void mnuSetPopupEntry(s32, s32);
 extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_0027C788(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0037C9C8[];
 extern char D_0037C9E4[];

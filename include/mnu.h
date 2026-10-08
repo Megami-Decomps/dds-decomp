@@ -12,6 +12,10 @@ struct MenuWindowContainer;
 struct MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width,
                                                     s32 height, s32 visibleCount,
                                                     s32 rowSpacing);
+void mnuRetreatWindowListSelection(struct MenuWindowContainer *window);
+void mnuAdvanceWindowListSelection(struct MenuWindowContainer *window);
+/* Clear only the window's panel-transition bit. */
+void mnuClearWindowPanelTransitionFlag(struct MenuWindowContainer *window);
 
 /* DDS2 scheduler word: zero or the encoded next-handler address. */
 extern s32 func_002C4038(void *work, s32 *entrySlot, s32 mode, void *callback);
@@ -276,7 +280,7 @@ struct MenuPanelItem;
 typedef struct MenuPanelGroup {
     u8 pad00[0x0C];
 #ifdef VERSION_DDS2
-    s32 texture; /* 0x0C */
+    struct EffectSlotSet *texture; /* 0x0C */
     struct MenuPanelItem *entries[5]; /* 0x10 */
     u32 selection; /* 0x24 */
     s32 initialValue; /* 0x28 */
@@ -301,7 +305,7 @@ typedef char MenuPanelGroup_initialValue_offset[((u32)&((MenuPanelGroup *)0)->in
 #endif
 
 #ifdef VERSION_DDS2
-extern MenuPanelGroup *mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode);
+extern MenuPanelGroup *mnuCreatePanelGroup(s32 owner, struct EffectSlotSet *texture, s32 mode);
 #else
 extern MenuPanelGroup *mnuCreatePanelGroup(s32 parent);
 #endif
@@ -543,6 +547,9 @@ typedef struct MenuPageWindow {
     s32 scrollOffset;
     s32 fade;
 } MenuPageWindow;
+
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
+                             MenuPageWindow *window, s32 mode);
 
 #ifdef VERSION_DDS2
 typedef char MenuPageWindow_size_must_be_0xA6A4[

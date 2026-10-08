@@ -68,8 +68,7 @@ extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_00260550(struct MenuList *, u32);
 extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
 extern void func_0027C788(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_0036AAF4[];
 extern void mnuSelectLastListNode(struct MenuList *);
@@ -668,7 +667,6 @@ extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025FD50(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 
 s32 func_00247A78(KwlnTask *callbackContext) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(callbackContext);

@@ -1,4 +1,5 @@
 #include "eff_bill.h"
+#include "eff_point_set.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
@@ -2768,18 +2769,7 @@ typedef struct EffRingSource {
     u32 lastColor;      // 0x4C
 } EffRingSource;
 
-/* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
-typedef struct EffPointSet {
-    u32 type;       // 0x00
-    u32 color;      // 0x04
-    s32 rows;       // 0x08
-    u8 flag;        // 0x0C
-    u8 pad_0D[3];
-    u8 *buffer;     // 0x10
-    u8 *tail;       // 0x14
-    s32 *handle;    // 0x18
-    u8 *allocation; // 0x1C
-} EffPointSet;
+
 
 /* Class kind 3 copies this complete 0x68-byte serialized parameter record.
  * The color/alpha prefix is the existing interpolation provider's layout;
@@ -3051,7 +3041,7 @@ typedef struct EffClassDrawState {
     };
     u32 effect;
     u32 references;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
 } EffClassDrawState;
 
 void effResetRingResourceFrame(s32 work) {
@@ -3166,7 +3156,7 @@ extern u8 *effPayloadPointerSet(u16, void *);
 EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     u32 count = source->ring.segments;
     u32 size;
-    void *allocation;
+    struct SdfMemBlock *allocation;
     f32 *scales;
     EffClassDrawState *state;
     EffTrackSet *tracks;
@@ -3181,9 +3171,9 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     }
     size = count * sizeof(f32);
     allocation = sdfAllocGeneralBlock(size + sizeof(EffClassDrawState));
-    scales = (f32 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
+    scales = (f32 *)sdfResourceRetainAddress(allocation);
     state = (EffClassDrawState *)((u8 *)scales + size);
-    state->allocation = (u32)allocation;
+    state->allocation = allocation;
     state->scales = scales;
     memcpy(source->classConfig, source, sizeof(source->classConfig));
     state->effect = (u32)effPayloadPointerSet(1, source->classConfig);
@@ -3206,7 +3196,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
 void effReleaseClassDrawResources(s32 work) {
     effReleaseResourceRefs(((EffClassDrawState *)work)->references);
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffClassDrawState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
 }
 
 typedef struct EffClassFrameResource {
@@ -3531,7 +3521,7 @@ u8 *effCreatePointSet4(u32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
@@ -4861,7 +4851,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -6542,7 +6532,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
