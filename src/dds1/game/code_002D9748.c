@@ -134,7 +134,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void);
 u8 *sdfParseAssetParameterFlags(SdfAsset *, DevRequest *, u8 *);
 void sdfAppendAssetToResourceList(DevRequest *, SdfAsset *);
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
-void sdfApplyAssetSecondaryEntry(SdfAsset *, void *);
+void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
 void sdfPostmultiplyVuMatrixFromMemory(void *);
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
 extern f32 sdfSinPoly(f32 angle);
@@ -771,9 +771,9 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     entry->unk14 = asset->unk28;
     texture = asset->texture;
     if (texture != NULL) {
-        entry->unk38 = sdfTexGetPrimarySamplingState(texture);
-        entry->unk40 = sdfTexGetPrimaryTextureState(texture);
-        entry->unk48 = sdfTexGetPrimaryClampState(texture);
+        entry->primaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
+        entry->primaryTextureState.texture = sdfTexGetPrimaryTextureState(texture);
+        entry->primaryTextureState.clamp = sdfTexGetPrimaryClampState(texture);
     }
 }
 
@@ -827,31 +827,21 @@ void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, u8 *entry) {
     func_002DAB80(entry + 0x68, asset->third);
 }
 
-typedef struct SdfDrawPacket {
-    u8 pad00[0xC];
-    u32 color; /* 0x0C */
-    u8 pad10[0x10];
-    u32 paletteValue; /* 0x20 */
-    u32 mode;         /* 0x24 */
-    u8 pad28[0x28];
-    u64 textureWords[3]; /* 0x50, 0x58, 0x60 */
-} SdfDrawPacket;
-
 /* Copy color, unchecked mode/palette state and optional GS texture words,
  * then apply the secondary scalar block to the entry's native location. */
-void sdfApplyAssetSecondaryEntry(SdfAsset *asset, void *drawEntry) {
-    u8 *entryBytes = drawEntry;
+void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
+    u8 *entryBytes = (u8 *)drawEntry;
     SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
-    ((SdfDrawPacket *)entryBytes)->color = asset->unk18;
+    drawEntry->unk0C = asset->unk18;
     packetMode = asset->secondaryMode;
-    ((SdfDrawPacket *)entryBytes)->mode = packetMode;
-    ((SdfDrawPacket *)entryBytes)->paletteValue = D_00398198[packetMode];
+    drawEntry->mode = packetMode;
+    drawEntry->unk20 = D_00398198[packetMode];
     if (texture != NULL) {
-        ((SdfDrawPacket *)entryBytes)->textureWords[0] = sdfTexGetPrimarySamplingState(texture);
-        ((SdfDrawPacket *)entryBytes)->textureWords[1] = sdfTexGetPrimaryTextureState(texture);
-        ((SdfDrawPacket *)entryBytes)->textureWords[2] = sdfTexGetPrimaryClampState(texture);
+        drawEntry->secondaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
+        drawEntry->secondaryTextureState.texture = sdfTexGetPrimaryTextureState(texture);
+        drawEntry->secondaryTextureState.clamp = sdfTexGetPrimaryClampState(texture);
     }
     func_002DAB80(entryBytes + 0x80, asset->fourth);
 }
