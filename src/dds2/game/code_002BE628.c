@@ -628,8 +628,8 @@ void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *m
     mnuAdvancePanelTransition(menu);
 }
 
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, s32 source, s32 mode, s32 option) {
-    mnuDrawListPanels(x, y, depth, 0, (MenuPageWindow *)source, mode);
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 mode) {
+    mnuDrawListPanels(x, y, depth, 0, window, mode);
 }
 
 
