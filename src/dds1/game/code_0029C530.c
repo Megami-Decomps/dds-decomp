@@ -127,8 +127,6 @@ extern s32 btlGetRuntime(void);
 
 extern void kwlnPadStartMotor(s32, u8, s32);
 
-extern void billDispatchByKind(void *);
-
 extern u8 *effAllocateTexturedStripWork();
 
 extern u32 effScalyTextureHandle;

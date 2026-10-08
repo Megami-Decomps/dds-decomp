@@ -789,7 +789,7 @@ void mdlDestroyPartList(DevRequest *partList) {
 
             switch (partEntry->kind) {
             case MDL_PART_BILLBOARD:
-                billDispatchByKind(partEntry->object);
+                billDispatchByKind((BillObj *)(u32)partEntry->object);
                 break;
             case MDL_PART_EFFECT:
                 effDestroyNode(partEntry->object);
@@ -1032,7 +1032,7 @@ void mdlApplyResourceEntries(s32 resourceAddress, s32 recordId, s32 subtype) {
 void mdlDestroyResourceItem(MdlResourceItem *item) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billDispatchByKind(item->payload.part.handle);
+        billDispatchByKind((BillObj *)(u32)item->payload.part.handle);
         break;
     case MDL_RESOURCE_EFFECT:
         effDestroyNode(item->payload.part.handle);
