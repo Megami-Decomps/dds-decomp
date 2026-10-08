@@ -17,7 +17,7 @@ extern void mnuCreateStaffImageSprite(s32);
 
 
 extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
-extern void func_002AB8F0(s32);
+extern void func_002AB8F0(MenuStaffContext *);
 
 extern u8 func_002BDA50(s32 index);
 
@@ -30,7 +30,108 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_002AB690(arg0, arg1, arg2, 0x200, arg3, arg4, arg5);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AB8F0);
+extern char (*D_00435E5C)[25];
+extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
+extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
+extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
+extern s32 mnuIsBulletItemId(s32);
+extern s32 func_002C54B0(s32);
+extern s32 func_002C5498(s32);
+extern s32 mtrMantraFindIndex(s32);
+extern s32 evtCheckValueThreshold(s32 itemId, s32 minimum);
+extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
+extern u8 *datItemSkillRecords;
+
+typedef struct MenuCatalogItem {
+    u16 itemId;
+    u8 pad02[0x1A];
+} MenuCatalogItem;
+
+extern const MenuCatalogItem D_003E7200[18];
+extern char D_00437BC8[];
+
+void func_002AB8F0(MenuStaffContext *owner) {
+    MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
+    const MenuCatalogItem *catalog;
+    s32 itemId;
+    u32 catalogItemId;
+
+    window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowPanelBounds(window, owner->unkF8, 0, 0, 0, 0);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xD, 7);
+    window->list->context = owner;
+    window->list->drawCallback = func_002AB8C0;
+
+    for (itemId = 1; itemId < 0x100; itemId++) {
+        if (datGameState->inventory.counts[itemId] != 0 && (datItemSkillRecords[itemId * 8] & 3) != 0 &&
+            mnuIsBulletItemId(itemId) == 0 && func_002C54B0(itemId) == 0 &&
+            func_002C5498(itemId) == 0 && mtrMantraFindIndex(itemId) == 0) {
+            u32 quantity;
+
+            node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
+            quantity = datGameState->inventory.counts[itemId];
+            node->sortKeySecondary = itemId;
+            node->sortKeyPrimary = quantity;
+            if ((datItemSkillRecords[itemId * 8] & 1) == 0 || func_002C5498(itemId) != 0) {
+                node->flags48 |= 1;
+            }
+        }
+    }
+
+    catalog = D_003E7200;
+    for (itemId = 0; (u32)itemId < 0x12; itemId++, catalog++) {
+        catalogItemId = catalog->itemId;
+        if (datGameState->inventory.counts[catalogItemId] != 0) {
+            u32 quantity;
+
+            node = mnuAppendWindowListNode(window, D_00435E5C[catalogItemId]);
+            quantity = datGameState->inventory.counts[catalogItemId];
+            node->flags48 |= 1;
+            node->sortKeySecondary = catalogItemId;
+            node->sortKeyPrimary = quantity;
+        }
+    }
+
+    for (itemId = 1; itemId < 0x100; itemId++) {
+        if (datGameState->inventory.counts[itemId] != 0 && func_002C5498(itemId) != 0) {
+            u32 quantity;
+
+            node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
+            quantity = datGameState->inventory.counts[itemId];
+            node->flags48 |= 1;
+            node->sortKeyPrimary = quantity;
+            node->sortKeySecondary = itemId;
+        }
+    }
+
+    resources->windows[0] = window;
+    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0xF);
+    mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, owner->spriteArg0);
+
+    window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    window->list->context = owner;
+    window->list->drawCallback = mnuDrawCampGridResourceSlot;
+
+    for (itemId = 1; itemId < 0x100; itemId++) {
+        if (evtCheckValueThreshold(itemId, 1) != 0 && (datItemSkillRecords[itemId * 8] & 4) != 0) {
+            node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
+            node->sortKeyPrimary = 1;
+            node->sortKeySecondary = itemId;
+        }
+    }
+
+    resources->windows[1] = window;
+    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x13);
+    mnuCreateListWithDefaults(resources->windows[1], 0, 0, 0, owner->spriteArg0);
+}
 
 void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
     MenuStaffChoices *resources;
@@ -50,14 +151,6 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *owner) {
     }
     return resources->windows[0]->list->count != 0;
 }
-
-extern char (*D_00435E5C)[25];
-extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
-extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
-extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
-extern s32 mnuIsBulletItemId(s32);
 
 void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
@@ -96,16 +189,8 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 
-typedef struct MenuCatalogItem {
-    u16 itemId;
-    u8 pad02[0x1A];
-} MenuCatalogItem;
-
-extern const MenuCatalogItem D_003E7200[18];
-extern char D_00437BC8[];
 extern void mnuSetWindowContainerLayout(MenuWindowContainer *, u32, u32, u32, u32, u32, u32, u32, u32);
 extern void func_002AC050();
-extern s32 func_002C54B0(s32);
 extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
 extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
 extern s32 mtrMantraIdIsValid(s32);
@@ -313,7 +398,7 @@ u32 mnuInitializeWindowOwnerResourceSet(void) {
     memset(resource, 0, 0x54);
     resource->allocation = handle;
     func_002ACB18((u32)context);
-    func_002AB8F0((s32)context);
+    func_002AB8F0(context);
     mnuConfigurePanelResource(context->unk118, context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
     mnuSeekListNode(0, context->activeWindow->list);
