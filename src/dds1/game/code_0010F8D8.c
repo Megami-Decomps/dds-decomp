@@ -2,12 +2,6 @@
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 
-typedef struct {
-    u8 pad0[0x18];
-    WorldInfo *entry;
-    ObjectTransform *transform;
-} WorldObject;
-
 extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
@@ -17,8 +11,8 @@ extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
-void dds3LoadOrBuildObjectMatrix(WorldObject *object) {
-    ObjectTransform *transform = object->transform;
+void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
+    ObjectTransform *transform = object->inner;
     u32 flags = transform->flags;
 
     if (flags & 2) {

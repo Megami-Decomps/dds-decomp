@@ -602,7 +602,7 @@ void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
 }
 
 extern u32 dds3GetObjectBaseResourceHandle(EffWorldNode *);
-extern void dds3LoadOrBuildObjectMatrix(u8 *object);
+extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 extern s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 
@@ -711,7 +711,7 @@ s32 func_00113F28(EffWorldNode *object) {
         effObjClearNodeFlags(object->inner, 1);
         effObjFetchInnerSecondVecNorm(object);
         VU0_STORE_VF(vf10, model->unk60);
-        dds3LoadOrBuildObjectMatrix((u8 *)object);
+        dds3LoadOrBuildObjectMatrix(object);
         effObjFetchInnerFirstVec(object);
         if (func_00140BE8(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
             f32 x = coordinates[0];

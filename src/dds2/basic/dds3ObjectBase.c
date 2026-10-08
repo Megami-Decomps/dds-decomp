@@ -186,7 +186,7 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112058);
 
 extern SdfModel *evtCreateModelFromObject(void *object);
 extern Motion *evtAttachScriptToObject(void *object, SdfModel *model);
-extern void dds3LoadOrBuildObjectMatrix(u8 *object);
+extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 extern void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame);
 
 void func_00112168(void *object) {
@@ -199,7 +199,7 @@ void func_00112168(void *object) {
     slot = dds3GetSlot(object, 3);
     model = evtCreateModelFromObject(slot);
     motion = evtAttachScriptToObject(slot, model);
-    dds3LoadOrBuildObjectMatrix((u8 *)object);
+    dds3LoadOrBuildObjectMatrix((EffWorldNode *)object);
     VU0_STORE_MATRIX(model->matrix);
     sdfModelUpdateRootTransforms(model, 0);
     sdfModelUpdateRootTransforms(model, 1);
