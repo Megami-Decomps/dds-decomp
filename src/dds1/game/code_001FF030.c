@@ -2874,13 +2874,13 @@ u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
     return 0;
 }
 
-s32 btlGetAdjustedUnitDisplaySpecies(s32 unit) {
-    s32 mode = ((BtlUnit *)unit)->partyRecord.unitId;
+s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit) {
+    s32 mode = unit->partyRecord.unitId;
 
     if ((mode >= 0x107) && ((mode < 0x109) || (mode == 0x124))) {
         return 0x124;
     }
-    return ((BtlUnit *)unit)->displaySpecies;
+    return unit->displaySpecies;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00206450);
@@ -2902,7 +2902,7 @@ extern s32 btlCreateSecondaryCommandSoundTask();
 
 extern s32 btlCreateCommandSoundTask();
 
-extern s32 btlCreateEffObjB();
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
 extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
 
