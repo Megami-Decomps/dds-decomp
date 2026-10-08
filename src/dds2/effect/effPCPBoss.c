@@ -2,12 +2,11 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_param.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
-
-typedef struct EffParamWork EffParamWork;
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -18,9 +17,6 @@ extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern EffParamWork *effParamWorkCreate(s32 kind, void *params);
-extern EffParamWork *effParamWorkDuplicate(EffParamWork *param);
-extern void effDispatchParameterDataAndFreeWork(EffParamWork *handle);
 extern void sdfReleaseChipBlock(void *work);
 extern u32 func_001695C8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
@@ -30,7 +26,6 @@ extern void sdfInvertRigidVuTransform(void);
 extern void effParamWorkCallback0(EffParamWork *handle, void *vec);
 extern void effParamWorkCallback2(EffParamWork *handle, void *matrix);
 extern void effParamWorkCallback3(EffParamWork *handle, u32 value);
-extern void effParamWorkInvokeCallback(EffParamWork *handle);
 extern u8 D_003B1FF0[];
 
 /* Boss effect work: two parameter-set handles released on free. */
@@ -133,7 +128,6 @@ typedef struct {
 } EffBossColorSlot;
 
 
-extern void *effParamWorkGetData(EffParamWork *handle);
 extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);

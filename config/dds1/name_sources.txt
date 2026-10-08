@@ -2,6 +2,8 @@
 0x00100518	kwlnGetDrawBufferIndex	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:47:func_00100518; Returns current draw buffer selector used throughout matched frame-packet and scene/viewer double-buffer indexing; twin=0x00100400, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x001006E0	kwlnTaskRemoveFromStateQueue	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:107:func_001006E0; M141; source=names_pending_main.tsv:112; review=Unlinks a task from its delayed-start, active or delayed-destroy state queue, repairing head/tail and neighboring links. [names_qp11.tsv]
 0x00100858	kwlnTaskInsertIntoOrderedStateQueue	inferred	confidence=high; src/dds1/game/code_00100000.c:func_00100858; Selects the queue from task state, inserts by ascending comparison key, repairs links and increments that queue count. [names_qp9.tsv]
+0x00100B40	kwlnTaskStep	inferred	Prepares input state, runs the task callback, applies transition or destruction and advances its timer
+0x00100D40	kwlnTaskRunScheduledUpdates	inferred	Merges scheduled queues by priority and invokes the per-task step
 0x00100E68	kwlnTaskFinalizeDestroy	inferred	Recursively destroys children, invokes destroy callback, detaches and frees task.
 0x00100FC8	kwlnTaskUpdateFlagsRecursive	inferred	confidence=high; matched-C; src/dds1/kernel/dds3KernelCore.c:161:func_00100FC8; Sets or clears only task flag bits admitted by mask 0x0FFFFFF0, then applies the same operation recursively to each child and descendant.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x001012B0	kwlnTraverseDiagnosticTaskQueue	inferred	confidence=high; matched-C; src/dds1/kernel/dds3KernelCore.c:195:func_001012B0; Traverses listNext to the end of the supplied task queue; the queue-diagnostic caller supplies all three scheduler heads. The label argument is unused and this body does not print.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -5295,6 +5297,8 @@
 0x00296EC0	fileSendLoadObjectRecordVector	inferred	DDS2 002D73C0 candidate twin (tentative score 1.000); calls menuRecordSetVector on load object record [names_R_FuncNames2.tsv]
 0x00296ED8	fileCopyLoadObjectRecordVector	inferred	DDS2 002D73D8 candidate twin (tentative score 1.000); calls func_002DC0F0 on load object record [names_R_FuncNames2.tsv]
 0x00296F18	fileResetSlotStates	inferred	file file requests and records in game/code_0028A0E0.c
+0x00296F58	effSampleColorAlphaTracks	inferred	Samples paired color and alpha tracks at the supplied frame over their signed duration and returns packed RGBA.
+0x00297270	effSampleScalarCurve	inferred	Samples an EffScalarCurve at the supplied frame over its signed duration; returns the interpolated scalar.
 0x002973E8	fileSampleKeyTracks	inferred	samples colour, scale and heading tracks of a view block at a frame; mode 2 derives the heading from two projected points [names_M65_VuFollowup.tsv]
 0x00297558	fileInvalidateSlotGroup	inferred	sets state=-1 on columns*rows consecutive 0x20-byte slots [names_M48_PcpMisc.tsv]
 0x002975C8	fileCopyAndInvalidateSlotGroup	inferred	copies slot over the group first slot and marks its state -1 [names_M48_PcpMisc.tsv]
@@ -6673,7 +6677,12 @@
 0x002EC818	sdfSoundInitFormattedAndAppendNode	inferred	Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x002EC900	sdfSoundShutdownIpuStreamHandlers	inferred	confidence=high; matched-C; src/dds1/game/code_002E9708.c:1192:func_002EC900; requires-symbol-registration; Removes the registered IPU DMA handlers, clears their handles and disables the completion sources.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x002ECA48	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
+0x002ED008	sdfMovieHandleLinearDeviceEvent	inferred	Handles device open, size, read, and release events for a movie's linear stream.
 0x002ED198	sdfMovieProcessPendingData	inferred	Checks movie buffer space and invokes the data handler with at most 0x4000 pending units.
+0x002ED230	sdfMovieHandlePacDeviceEvent	inferred	Handles device events for movie PAC header, mask, and payload reads.
+0x002ED5C0	sdfMovieLinearStreamReadCallback	inferred	SdfStreamRead callback for linear movie buffer queries, copies, and refill requests.
+0x002ED760	sdfMoviePacStreamReadCallback	inferred	SdfStreamRead callback for movie PAC buffer queries, copies, and refill requests.
+0x002ED8D0	sdfMovieInitializeStreamWork	inferred	Selects and initializes the movie linear or PAC stream work.
 0x002EDAE0	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
 0x002EDBB8	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds1/game/code_002ED8D0.c:99:func_002EDBB8; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002EDBD8	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds1/game/code_002ED8D0.c:func_002EDBD8; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
@@ -6830,6 +6839,7 @@
 0x003BA814	kwlnDelayedDestroyTaskCount	inferred	confidence=high; matched_users=src/dds1/kernel/dds3KernelCore.c:kwlnTaskGetStateList, src/dds1/game/code_00100000.c:func_00100858; State-three task insertion increments this count; corresponding list is the delayed-destroy task list. [names_qp9.tsv]
 0x003BA818	kwlnActiveTaskHead	inferred	confidence=high; matched_users=src/dds1/kernel/dds3KernelCore.c:kwlnTaskIsRegistered, src/dds1/game/code_00100000.c:func_00100858; State-two ordered task insertion updates this list head; registration scans it between delayed-start/destroy lists. [names_qp9.tsv]
 0x003BA820	kwlnActiveTaskCount	inferred	confidence=high; matched_users=src/dds1/kernel/dds3KernelCore.c:kwlnTaskGetStateList, src/dds1/game/code_00100000.c:func_00100858; State-two task insertion increments this count; state query returns it alongside the active task list. [names_qp9.tsv]
+0x003BA824	kwlnExecutingTask	inferred	Scoped task pointer stored and cleared by the per-task step
 0x003BA848	dds3AdminTaskName	inferred	confidence=high; data D_003BA848; matched-C-users=2; src/dds1/game/code_00102ED8.c:143:kwlnDebugTaskCreate; src/dds1/game/code_00101B08.c:185:dds3GetAdminTaskWork; Task lookup/create and admin work accessor use this task-name string; data-twin=D_00435C18, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00101B08.sdata.s:22.; seed-placeholder=D_003BA848; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BA8D8	kwlnCurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:kwlnLoadDefaultResource, src/dds1/game/code_00102ED8.c:kwlnTextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. [names_qp9.tsv]
 0x003BA8DC	kwlnTextureViewerPageIndex	inferred	confidence=high; data D_003BA8DC; matched-C-users=2; src/dds1/game/code_00102ED8.c:294:kwlnTextureGetPageIndex; src/dds1/game/code_00102ED8.c:300:kwlnTextureViewerHandlePad; Texture viewer input changes this index; page accessor returns it; data-twin=D_00435CAC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00102ED8.sdata.s:223.; seed-placeholder=D_003BA8DC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]

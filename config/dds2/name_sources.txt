@@ -4,6 +4,8 @@
 0x00100740	kwlnTaskInsertIntoOrderedStateQueue	inferred	confidence=high; src/dds2/game/code_00100000.c:func_00100740; Selects the queue from task state, inserts by ascending comparison key, repairs links and increments that queue count. [names_qp9.tsv]
 0x00100980	kwlnTaskActivate	inferred	Moves a task into state two and clears its start timer.
 0x001009C8	kwlnTaskAdvanceStartDelays	inferred	Counts down queued task delays and activates tasks on expiry.
+0x00100A28	kwlnTaskStep	inferred	Paired per-task input, callback transition, destroy and timer step
+0x00100C28	kwlnTaskRunScheduledUpdates	inferred	Paired priority-merged scheduled task queue dispatcher
 0x00100D50	kwlnTaskFinalizeDestroy	inferred	Recursively destroys children, invokes destroy callback, detaches and frees task.
 0x00100DD8	kwlnTaskRequestDestroy	inferred	Moves a live task into state three and destroys it when its delay is zero.
 0x00100E50	kwlnTaskAdvanceDestroyDelays	inferred	Counts down destruction delays and completes destruction on expiry.
@@ -4943,6 +4945,8 @@
 0x002D73D8	fileCopyLoadObjectRecordVector	inferred	calls func_002DC0F0 on load object record [names_R_FuncNames2.tsv]
 0x002D73F0	fileSetRecordWordFour	inferred	writes passed u32 to record offset +4 [names_R_FuncNames2.tsv]
 0x002D73F8	fileSetLoadObjectScale	inferred	Updates the loader object's scale and notifies its record work.
+0x002D7458	effSampleColorAlphaTracks	inferred	DDS2 twin of the paired color and alpha track sampler.
+0x002D7770	effSampleScalarCurve	inferred	DDS2 twin of DDS1 curve sampler; samples an EffScalarCurve at the supplied frame over its signed duration.
 0x002D78E8	fileSampleKeyTracks	inferred	dds1 twin func_002973E8 (mode 2 heading is 0 when the projected points coincide) [names_M65_VuFollowup.tsv]
 0x002D7A58	fileInvalidateSlotGroup	inferred	unified with DDS1 twin (was fileResetSlotGroupStates)
 0x002D7AC8	fileCopyAndInvalidateSlotGroup	inferred	twin of DDS1 name (QP5 conflict)
@@ -6304,6 +6308,11 @@
 0x003456C0	sdfSoundInitFormattedAndAppendNode	inferred	Byte-identical DDS1 counterpart: Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x003456F8	sdfSoundInitIpuStream	inferred	sceIpuInit, IPU_CMD write, registers DMA handlers 3/4 and starts thread
 0x003458F0	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
+0x00345EB0	sdfMovieHandleLinearDeviceEvent	inferred	Handles device open, size, read, and release events for a movie's linear stream.
+0x003460D8	sdfMovieHandlePacDeviceEvent	inferred	Handles device events for movie PAC header, mask, and payload reads.
+0x00346468	sdfMovieLinearStreamReadCallback	inferred	SdfStreamRead callback for linear movie buffer queries, copies, and refill requests.
+0x00346608	sdfMoviePacStreamReadCallback	inferred	SdfStreamRead callback for movie PAC buffer queries, copies, and refill requests.
+0x00346778	sdfMovieInitializeStreamWork	inferred	Selects and initializes the movie linear or PAC stream work.
 0x00346988	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
 0x00346A60	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_00346778.c:111:func_00346A60; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
@@ -6437,6 +6446,7 @@
 0x00435BE4	kwlnDelayedDestroyTaskCount	inferred	confidence=high; matched_users=src/dds2/kernel/dds3KernelCore.c:kwlnTaskGetStateList, src/dds2/game/code_00100000.c:func_00100740; State-three task insertion increments this count; corresponding list is the delayed-destroy task list. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00435BE8	kwlnActiveTaskHead	inferred	confidence=high; matched_users=src/dds2/kernel/dds3KernelCore.c:kwlnTaskIsRegistered, src/dds2/game/code_00100000.c:func_00100740; State-two ordered task insertion updates this list head; registration scans it between delayed-start/destroy lists. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00435BF0	kwlnActiveTaskCount	inferred	confidence=high; matched_users=src/dds2/kernel/dds3KernelCore.c:kwlnTaskGetStateList, src/dds2/game/code_00100000.c:func_00100740; State-two task insertion increments this count; state query returns it alongside the active task list. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x00435BF4	kwlnExecutingTask	inferred	Scoped task pointer stored and cleared by the per-task step
 0x00435C18	dds3AdminTaskName	inferred	confidence=high; data D_00435C18; matched-C-users=2; src/dds2/game/code_00102DC8.c:162:kwlnDebugTaskCreate; src/dds2/game/code_001019F0.c:184:dds3GetAdminTaskWork; Task lookup/create and admin work accessor use this task-name string; data-twin=D_003BA848, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_001019F0.sdata.s:22.; seed-placeholder=D_00435C18; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00435CA8	kwlnCurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds2/game/code_00102DC8.c:kwlnLoadDefaultResource, src/dds2/game/code_00102DC8.c:kwlnTextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00435CAC	kwlnTextureViewerPageIndex	inferred	confidence=high; data D_00435CAC; matched-C-users=2; src/dds2/game/code_00102DC8.c:313:kwlnTextureGetPageIndex; src/dds2/game/code_00102DC8.c:319:kwlnTextureViewerHandlePad; Texture viewer input changes this index; page accessor returns it; data-twin=D_003BA8DC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_00102DC8.sdata.s:223.; seed-placeholder=D_00435CAC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]

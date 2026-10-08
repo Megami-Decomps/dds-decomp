@@ -853,7 +853,38 @@ void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6180);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6480);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern void mnuResetTitleStreamAfterFileIdle(void);
+extern void func_002A2200(s32);
+
+void func_002A6480(void)
+{
+    if (mnuMovieWork->frame / 60 > D_003E4A7C / 60 - 4) {
+        return;
+    }
+    if (mnuMovieWork->streamPhase == 3) {
+        return;
+    }
+    if (mnuMovieWork->frame < 3601) {
+        return;
+    }
+    if (D_00437AB8 == 4) {
+        switch (mnuPollTitleStreamStateLocked()) {
+        case 0: /* MNU_STREAM_LOAD_IDLE */
+            mnuMovieWork->streamPhase = 2;
+            func_002A2200(23);
+            break;
+        case 1: /* MNU_STREAM_LOAD_PENDING */
+            break;
+        case 2: /* MNU_STREAM_LOAD_COPIED */
+            mnuMovieWork->streamPhase = 3;
+            mnuResetTitleStreamAfterFileIdle();
+            break;
+        }
+    } else {
+        mnuMovieWork->streamPhase = 1;
+    }
+}
 
 extern s32 func_002A6580(void);
 
@@ -1143,7 +1174,7 @@ extern char D_0042A338[]; /* "mnuMovieDraw" */
 
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
-        func_00346778(&mnuMovieDrawContext, descriptor, fileName);
+        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, descriptor, fileName);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
@@ -1199,7 +1230,7 @@ s32 func_002A7DB0(void) {
     }
     if (sdfSoundGetCommandStatus() == 0) {
         movie = &mnuMovieDrawContext;
-        func_00346778(movie, &D_00457DB0, D_00457DC8);
+        sdfMovieInitializeStreamWork(movie, &D_00457DB0, D_00457DC8);
         movie->soundNode.textureHead = D_00437AD8;
         movie->soundNode.width = D_00437ADC;
         movie->soundNode.height = D_00437AE0;
@@ -1234,7 +1265,7 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
         return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, func_002A7DB0, 0, 0);
     } else {
         D_00437AD4 = 0;
-        func_00346778(&mnuMovieDrawContext, &D_00457DB0, file);
+        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, &D_00457DB0, file);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2AFB, 1, 1, mnuMovieDraw, 0, 0);
     }
     return mnuMovieDrawTask;
