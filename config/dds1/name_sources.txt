@@ -5763,6 +5763,7 @@
 0x002BC510	effResetFileResourceManager	inferred	Zeros manager counters and handles and sets its initial file-resource state. [names_reviewed5.tsv]
 0x002BC538	effClassifyResourceMask	inferred	Maps a recognized single-bit resource mask to its category index. [names_reviewed5.tsv]
 0x002BC5C0	mnuAllocateValueRecord	inferred	Creates zeroed menu work carrying initial value; callers create progress-host and staff-menu work. [names_reviewed5.tsv]
+0x002BC618	effDestroyEffectList	inferred	frees the allocated EffectList header with sdfReleaseChipBlock; entry nodes are managed separately
 0x002BC630	mnuGetValueRecordOwner	inferred	Returns the initial owner/value stored in the first word of this menu record. [names_reviewed5.tsv]
 0x002BC638	effAppendListEntry	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BC6F0	effRemoveListEntry	inferred	eff effect resources and animation in game/code_0029A840.c

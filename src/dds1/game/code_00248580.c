@@ -1,6 +1,7 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
+#include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
 #include "itf_draw_grid.h"
@@ -613,7 +614,6 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
-extern void func_002BC618(struct EffectList *);
 extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
 extern void mnuReleaseStaffMenuTextureHandles(u32 *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
@@ -639,7 +639,7 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     mnuShutdownContext(&work->partyWindow);
     mnuReleaseStaffMenuTextureHandles(work->staffSlots.baseResources);
     mnuReleaseStaffResourceGroups(&work->staffSlots);
-    func_002BC618(work->titleEffectHandle);
+    effDestroyEffectList(work->titleEffectHandle);
     sdfReleaseResourceAllocation(work->allocation);
 }
 
