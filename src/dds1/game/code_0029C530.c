@@ -508,7 +508,6 @@ extern EffKindDesc D_0037E7E8[];
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
-extern u32 effGetResourceFirstWord(u32);
 
 /* VU0 model helpers consume vf10 directly, matching the original macro-mode setup. */
 extern void func_002B0B70(u8 *, void *);
@@ -1234,7 +1233,7 @@ EffKindWork *effCreateKindWorkFromFile(FileJob *work) {
                 effect->target = (u32)sdfTexAcquireResourceTexture(secondary);
                 break;
             case 4:
-                effect->target = effGetResourceFirstWord(secondary[0]);
+                effect->target = (u32)effGetBillResourceTexture(secondary[0]);
                 break;
             }
             D_0037E770[effect->kind].initialize(effect, effect->target);
@@ -1328,7 +1327,7 @@ EffKindWork *effCreateKindWorkFromFileB(FileJob *work) {
                 effect->target = (u32)sdfTexAcquireResourceTexture(secondary);
                 break;
             case 4:
-                effect->target = effGetResourceFirstWord(secondary[0]);
+                effect->target = (u32)effGetBillResourceTexture(secondary[0]);
                 break;
             }
             D_0037E7E8[effect->kind].initialize(effect, effect->target);

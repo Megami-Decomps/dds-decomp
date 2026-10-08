@@ -7,6 +7,9 @@ struct BillObj;
 struct BillData;
 struct BillOut;
 struct BillChildPayload;
+struct SdfTex;
+
+struct SdfTex *effGetBillResourceTexture(s32 index);
 
 /* The selected kind interprets the opaque payload word. */
 struct BillObj *billCreateIndexed(s32 kind, u32 data);

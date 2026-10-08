@@ -1,8 +1,8 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "eff_blur.h"
 
-extern s32 effGetResourceFirstWord(s32);
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_0034DF38[];
@@ -22,7 +22,7 @@ void effBlurSetHandle(EffBlurScatterWork *work, u32 sourceHandle) {
 
 /* Acquire the first variant's source handle from the effect manager. */
 void effBlurAcquireHandle(EffBlurScatterWork *work) {
-    work->sourceHandle = effGetResourceFirstWord(2);
+    work->sourceHandle = (u32)effGetBillResourceTexture(2);
 }
 
 void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
@@ -63,7 +63,7 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
     work->params = *params;
     work->allocation = allocation;
     work->slots = (EffBlurScatterSlot *)(work + 1);
-    work->sourceHandle = effGetResourceFirstWord(2);
+    work->sourceHandle = (u32)effGetBillResourceTexture(2);
     slot = work->slots;
     for (i = 0; i < 100; i++, slot++) {
         effBlurInitializeScatterSlot(work, slot);
@@ -139,7 +139,7 @@ void effBlurSetSecondSetting(EffBlurScaleWork *work, u32 sourceHandle) {
 
 /* Both acquisition callbacks request selector 2; the second factory uses 3. */
 void effBlurAcquireSecondHandle(EffBlurScaleWork *work) {
-    work->sourceHandle = effGetResourceFirstWord(2);
+    work->sourceHandle = (u32)effGetBillResourceTexture(2);
 }
 
 /* Fixed-point edges: 16 units per x pixel and 8 per y pixel.

@@ -1521,7 +1521,6 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
-extern s32 effGetResourceFirstWord(s32);
 
 typedef struct EffKindAssetHolder {
     s32 kind;
@@ -1538,7 +1537,7 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
         object[2] = (s32)sdfTexAcquireResourceTexture(source);
         break;
     case 4:
-        object[2] = effGetResourceFirstWord(*source);
+        object[2] = (s32)effGetBillResourceTexture(*source);
         break;
     }
     return object;
