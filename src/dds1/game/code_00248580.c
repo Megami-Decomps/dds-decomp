@@ -4,6 +4,7 @@
 #include "mnu_list.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PERCENT_PAIR_BYTES 0xA8
@@ -956,7 +957,6 @@ extern s32 evtGetMessageWindowControlState(void);
 
 
 
-extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 
 extern const char D_003AF658[];
 

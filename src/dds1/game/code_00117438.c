@@ -7,6 +7,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "sdf.h"
+#include "kwln_task_lifecycle.h"
 
 extern u32 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
@@ -54,7 +55,6 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char sdfRuntimeTaskName[];
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
 void evtResetWorldAndProfileRuntime(void);

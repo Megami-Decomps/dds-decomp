@@ -322,7 +322,6 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern void sdfReleaseChipBlock(void *);
 
-extern void sdfQueueNonzeroResourceId(void *);
 
 extern void mdlDestroyContext(MdlCtx *);
 
@@ -1539,7 +1538,7 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     sdfCreateDescriptorPacket(packetList, (s32)kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
-    sdfQueueNonzeroResourceId(runtime->handle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
     runtime->options |= 1;
@@ -1652,7 +1651,7 @@ void btlClearRuntimeState(void) {
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
     if (handle != 0) {
-        sdfQueueNonzeroResourceId(handle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
         btlRuntimeState.handle = 0;
         btlRuntimeState.resource = 0;
     }
@@ -2280,7 +2279,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
     }
     if (ownsResources != 0) {
         sdfResourceListRelease(groupNode->resourceList, 1);
-        sdfQueueNonzeroResourceId((void *)groupNode->requestHandle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));

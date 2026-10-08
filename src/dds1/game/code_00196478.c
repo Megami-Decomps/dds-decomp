@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -44,8 +45,6 @@ extern void func_003003F0(const char *);
 extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern u32 itfFontTestScriptTask;
-extern s64 kwlnTaskGetRegisteredState(u32);
-
 extern u32 D_003BB18C;
 
 extern SdfTex *itfBackgroundSpriteTexture;
@@ -989,11 +988,11 @@ void itfReleaseFontTestTaskResources(void) {
 
 /* Draw first, then report all bits set only for a task awaiting destruction. */
 u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
-    s64 taskState;
+    s32 taskState;
     u32 readyMask;
 
     itfDrawBackgroundSprite();
-    taskState = kwlnTaskGetRegisteredState(itfFontTestScriptTask);
+    taskState = kwlnTaskGetRegisteredState((KwlnTask *)itfFontTestScriptTask);
     readyMask = 0xffffffff;
     if (taskState != KWLN_TASK_DESTROY_PENDING) {
         readyMask = 0;

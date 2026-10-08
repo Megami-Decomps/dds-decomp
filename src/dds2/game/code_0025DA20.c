@@ -14,6 +14,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "fld.h"
+#include "kwln_task_lifecycle.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -102,9 +103,8 @@ extern void evtViewerCleanupMessageWindow();
 
 extern void evtViewerDispatchFlagMode();
 
-extern s64 evtFindTaskById(void);
-
-extern s32 func_00101820(u32);
+extern s32 evtFindTaskById(u32 taskId);
+extern KwlnTask *func_00101820(u32 priority);
 
 
 extern s32 func_00261B98(s32);
@@ -202,7 +202,7 @@ void mnuCampCreateTask(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
     EvtPackLoadState *taskData;
 
-    if (evtFindTaskById() == 0) {
+    if (evtFindTaskById(taskId) == 0) {
         evtFormatTaskName(taskId, taskName);
         taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
@@ -212,22 +212,22 @@ void mnuCampCreateTask(s32 taskId) {
     }
 }
 
-void mnuCampDestroyTaskById(void) {
-    s64 taskHandle;
+void mnuCampDestroyTaskById(s32 taskId) {
+    s32 taskHandle;
 
-    taskHandle = evtFindTaskById();
+    taskHandle = evtFindTaskById(taskId);
     if (taskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy(taskHandle, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)(u32)taskHandle, 0);
         return;
     }
 }
 
 /* Drain every camp task at the scheduler priority used during creation. */
 void mnuCampDestroyAllTasks(void) {
-    s64 taskHandle;
+    KwlnTask *task;
 
-    while (taskHandle = func_00101820(CAMP_TASK_PRIORITY), taskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy(taskHandle, 0);
+    while (task = func_00101820(CAMP_TASK_PRIORITY), task != NULL) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
     }
 }
 

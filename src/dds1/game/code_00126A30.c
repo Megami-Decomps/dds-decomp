@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
 extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
 #include "evt_unit.h"
@@ -318,7 +319,6 @@ extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
 extern s32 func_00213B50(void);
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 fldValueRecordCount;
 extern s32 D_003BADF8;
 extern s32 D_003BADEC;
@@ -328,7 +328,6 @@ extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 extern u32 fldAreaCachedResource;
 extern u32 fldAreaPackedArchive;
 extern u8 D_003BAC90[];
-extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern void func_00288788(u32 arg0);
 extern void mdlSuspendAllContextMotions(MdlCtx *ctx);
 extern void mdlResumeAllContextMotions(MdlCtx *ctx);
@@ -359,7 +358,6 @@ extern void fldResetZoneRecordsAndActorSlots();
 extern void fldResetPendingSounds();
 extern void fldReleaseSceneRecordChunk();
 extern void fldReleaseMenuSlotsAfterWait();
-extern void kwlnTaskDestroyWithHierarchyByName();
 extern void mnuReleaseResourceEntries();
 extern void sdfResourceListRelease();
 extern void fldReleaseBackgroundBuffer(void);
@@ -723,7 +721,7 @@ void fldFreeDisplayObjects(void) {
 
         if (node != NULL) {
             do {
-                sdfQueueNonzeroResourceId(node->resourceHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->resourceHandle);
                 node = node->next;
             } while (node != NULL);
         }
@@ -923,19 +921,19 @@ void fldLoadAreaPackedResources(void) {
             switch (entry->kind) {
             case 1:
                 fldCopyInfoTable((const void *)entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 2:
                 fldSetNpcPalette(entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 3:
                 fldUploadSkyBuffer(entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 4:
                 fldCopyActorWaypointTable(entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 5:
                 fldAreaCachedResource = (u32)sdfAllocGeneralBlock(
@@ -943,7 +941,7 @@ void fldLoadAreaPackedResources(void) {
                 memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldAreaCachedResource),
                        (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)entry->blockHandle),
                        sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 6:
                 fldSetSceneRecordChunk(entry->payload, entry->blockHandle);
@@ -958,7 +956,7 @@ void fldReleaseAreaResourceCache(void) {
     u32 resourceHandle = fldAreaCachedResource;
 
     if (resourceHandle != 0) {
-        sdfQueueNonzeroResourceId(resourceHandle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceHandle);
         fldAreaCachedResource = 0;
     }
     resourceHandle = fldAreaPackedArchive;
@@ -1026,7 +1024,7 @@ void fldReleaseFieldResources(void) {
     D_003BAC14 = 0;
     for (i = 0; i < 4; i++) {
         if (D_003C91E0[i] != 0) {
-            sdfQueueNonzeroResourceId(D_003C91E0[i]);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003C91E0[i]);
             D_003C91E0[i] = 0;
             D_003C91F0[i] = 0;
         }
@@ -1051,19 +1049,19 @@ void fldReleaseFieldResources(void) {
     D_003BAC10 = 0;
     D_003BAC4C = 0;
     if (D_003BAC50 != 0) {
-        sdfQueueNonzeroResourceId(D_003BAC50);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC50);
         D_003BAC50 = 0;
     }
     if (D_003BAC54 != 0) {
-        sdfQueueNonzeroResourceId(D_003BAC54);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC54);
         D_003BAC54 = 0;
     }
     if (D_003BAC58 != 0) {
-        sdfQueueNonzeroResourceId(D_003BAC58);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC58);
         D_003BAC58 = 0;
     }
     if (D_003BAC5C != 0) {
-        sdfQueueNonzeroResourceId(D_003BAC5C);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC5C);
         D_003BAC5C = 0;
     }
     if (fldAreaState[4] < 0xC8 && fldAreaState[7] != fldAreaState[4]) {
@@ -1075,7 +1073,7 @@ void fldReleaseFieldResources(void) {
         if (node != 0) {
             do {
                 if (i > 0) {
-                    sdfQueueNonzeroResourceId(node->resourceHandle);
+                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->resourceHandle);
                 }
                 node = node->next;
                 i++;
@@ -3379,7 +3377,7 @@ void fldReleaseSkyResources(void) {
         fldRainTextureReference = 0;
     }
     if (fldRainTextureResource != 0) {
-        sdfQueueNonzeroResourceId(fldRainTextureResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     if (fldCameraColorEffect != 0) {
@@ -3951,7 +3949,7 @@ void fldInitializeCameraColorResource(void) {
     fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
-        sdfQueueNonzeroResourceId(fldRainTextureResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     fldUpdateCameraColorEffect(fldCameraSettings);
@@ -4023,10 +4021,10 @@ void fldAllocateRecordStorage(void) {
 /* Release both retained resources and clear the usable buffer addresses. */
 void fldReleaseRecordStorage(void) {
     sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldValueRecordResource);
-    sdfQueueNonzeroResourceId(fldValueRecordResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldValueRecordResource);
     fldValueRecords = 0;
     sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldAuxRecordResource);
-    sdfQueueNonzeroResourceId(fldAuxRecordResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldAuxRecordResource);
     fldAuxRecordBuffer = 0;
 }
 
@@ -4643,7 +4641,7 @@ u32 fldDestroyTaskSlot(u32 slot) {
     u32 *task = &D_003308B0[slot];
 
     if (kwlnTaskIsRegistered((KwlnTask *)*task) != 0) {
-        kwlnTaskDestroyWithHierarchy(*task, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)*task, 0);
     }
     *task = 0;
     return 0;

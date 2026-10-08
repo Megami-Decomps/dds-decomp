@@ -1,10 +1,12 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "btl_state.h"
 #include "mnu_result.h"
 #include "sdf.h"
+#include "kwln_task_lifecycle.h"
 
 typedef struct UiQuadColor {
     s32 red;
@@ -186,7 +188,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 
     temp_v0 = kwlnTaskFindByPriority(0x3f9);
     if (temp_v0 != 0) {
-        kwlnTaskDestroyWithHierarchy(*(u32 *)(btlRuntime + 0x29c), 1);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)*(u32 *)(btlRuntime + 0x29c), 1);
         return;
     }
 }

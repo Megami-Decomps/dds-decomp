@@ -5,10 +5,10 @@
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_list.h"
+#include "kwln_task_lifecycle.h"
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
-extern void sdfQueueNonzeroResourceId(s32);
 extern u32 effLoadIndexedResource(const char *, const char *, s32);
 extern u32 effDestroyResourceSlotSet(u32);
 
@@ -1084,7 +1084,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    sdfQueueNonzeroResourceId((s32)mnuMovieWork->handle);
+    sdfQueueGeneralAllocationRelease(mnuMovieWork->handle);
     mnuMovieWork = NULL;
 }
 
@@ -1254,7 +1254,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 

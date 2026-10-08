@@ -15,6 +15,7 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
+#include "kwln_task_lifecycle.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
@@ -111,7 +112,6 @@ u16 evtViewerPopHistory(EvtRuntime *viewer);
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 struct PolyMovieObject;
 
@@ -1868,7 +1868,6 @@ extern void func_0014E668();
 extern void kwlnCancelConfiguredFadeFrames();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
-extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
@@ -1901,7 +1900,7 @@ void evtViewerRelease(viewer)
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (viewer->pendingResource != 0) {
-        sdfQueueNonzeroResourceId(viewer->pendingResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }

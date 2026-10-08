@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "evt_world.h"
 #include "evt_solar.h"
+#include "kwln_task_lifecycle.h"
 
 extern void evtSetContextFlag(KwlnTask *);
 extern void evtClearContextFlag(KwlnTask *);
@@ -43,7 +44,6 @@ void sdfReleaseChipBlock(void *memory);
 
 void evtBeginSolarOverlayFadeIn(s32 arg0);
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 extern s32 fileMenuTaskExists(void);
 extern u32 func_001200E0(void);
 void func_0035B6E0(const char *fmt, ...);
