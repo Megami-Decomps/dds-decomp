@@ -11350,11 +11350,11 @@ void effInitializeSlotPhase(EffTimedState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_00304B18);
+INCLUDE_ASM(const s32, "game/code_002DE248", effInitializeSlotWorkFromDescription);
 
 /* Initialize the normal slot entry at the unchanged 0xA0-byte stride. */
 void effInitializeSlotWork(EffectSlotSet *owner, s32 slotIndex) {
-    func_00304B18(owner, slotIndex, &owner->workEntries[slotIndex]);
+    effInitializeSlotWorkFromDescription(owner, slotIndex, &owner->workEntries[slotIndex]);
 }
 
 /* Reset every normal work slot in source order. */
@@ -11371,7 +11371,7 @@ void effInitializeAllSlotWork(EffectSlotSet *owner) {
 void effAttachSlotWorkOwner(EffectSlotSet *owner, s32 slotIndex, BdWork *entry) {
     entry->owner = owner;
     entry->slotIndex = slotIndex;
-    func_00304B18(owner, slotIndex, entry);
+    effInitializeSlotWorkFromDescription(owner, slotIndex, entry);
 }
 
 /* Clear the complete normal slot, then restore owner/index and initialize it. */

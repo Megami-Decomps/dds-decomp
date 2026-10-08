@@ -59,6 +59,8 @@ void effResetSlotWork(struct EffectSlotSet *owner, u32 slotIndex);
 void effResolveAndReleaseResource(struct EffectSlotSet *owner);
 void effResolveAndReleaseSelectedResource(struct EffectSlotSet *owner, s32 slot);
 void effInitializeSlotWork(struct EffectSlotSet *owner, s32 slotIndex);
+void effInitializeSlotWorkFromDescription(struct EffectSlotSet *owner, s32 slotIndex,
+                                          void *payload);
 #ifdef VERSION_DDS2
 void effReleaseSlotTextureReferencesAndResetWork(struct EffectSlotSet *owner, s32 preserveWork);
 #endif

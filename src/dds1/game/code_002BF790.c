@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "eff.h"
+#include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "itf_grid_text.h"
 #include "itf_draw_grid.h"
@@ -48,8 +49,6 @@ void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags,
                   surfaceIndex);
 }
 
-extern void func_002BD3D8(void *, s32, void *);
-
 /* Advance the indexed slot's timed source and carry its active state forward. */
 void func_002BF828(EffectSlotSet *owner, s32 index) {
     BdWork *base = &owner->workEntries[index];
@@ -74,7 +73,7 @@ void func_002BF828(EffectSlotSet *owner, s32 index) {
             }
             base->slotOffset = 0;
         }
-        func_002BD3D8(owner, index + base->slotOffset, previous);
+        effInitializeSlotWorkFromDescription(owner, index + base->slotOffset, previous);
         next = (BdWork *)effGetSlotWorkOrOverride(owner, index + base->slotOffset);
         next->states[0].flags = previous->states[0].flags;
         next->states[0].source = previous->states[0].source;
@@ -107,7 +106,7 @@ void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x,
     entry->yOffset = y >> 3;
     entry->width = width >> 4;
     entry->height = height >> 3;
-    func_002BD3D8(object, index, record);
+    effInitializeSlotWorkFromDescription(object, index, record);
 }
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
