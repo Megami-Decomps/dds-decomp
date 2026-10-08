@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "kwln.h"
@@ -4308,12 +4309,12 @@ s32 value;
     }
 }
 
-void btlSetActorEffectParameterOrMuzzlePosition(u32 arg0, s32 arg1) {
+void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
     s64 temp_v0;
 
-    temp_v0 = btlSetActorEffectParameter((BtlUnit *)arg0, arg1);
+    temp_v0 = btlSetActorEffectParameter(unit, mode);
     if (temp_v0 == 0) {
-        btlUnitGetMuzzlePosVU(arg0);
+        btlUnitGetMuzzlePosVU(unit);
         return;
     }
 }
@@ -9370,10 +9371,10 @@ void func_001ECCA8(BtlLinkedCommand *command, BtlCamState *pose,
                     }
                     break;
                 case 8:
-                    btlSetActorEffectParameterOrMuzzlePosition((u32)command->task->unit, 1);
+                    btlSetActorEffectParameterOrMuzzlePosition(command->task->unit, 1);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
                     savedPosition[1] -= 200.0f;
-                    btlSetActorEffectParameterOrMuzzlePosition((u32)command->targetList->entries[0], 1);
+                    btlSetActorEffectParameterOrMuzzlePosition(command->targetList->entries[0], 1);
                     VU0_STORE_VF_UNCLOBBERED(vf10, focus);
                     VU0_LOAD_VF(vf10, focus);
                     VU0_LOAD_VF(vf11, savedPosition);
