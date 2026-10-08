@@ -441,8 +441,6 @@ extern u32 *effPcpScatterGetAuxRecordAddress(PcpScatterPool *, s32);
 extern void effPcpScatterDrawPool(PcpScatterPool *);
 extern u32 effBlendColor(u32, u32, f32);
 extern f32 sdfAtan2Poly(f32 ratio);
-extern void effParamWorkCallback3(u32 handle, u32 color);
-extern void effParamWorkCallback0(u32 handle, void *position);
 
 /* Advance radial particles and build each six-vertex strip in the shared pool. */
 void func_00170F28(PcpScatterRadialWork *work) {
@@ -595,12 +593,12 @@ void func_00170F28(PcpScatterRadialWork *work) {
         }
         if (duplicates && age >= duplicateStart && age >= 0 && i % perGroup == 0) {
             u32 group = i / perGroup;
-            effParamWorkCallback3((u32)work->duplicatedHandles[group], baseColor);
+            effParamWorkCallback3(work->duplicatedHandles[group], baseColor);
             VU0_LOAD_VF(vf10, work->params.origin);
             VU0_LOAD_VF(vf11, duplicatePosition);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, duplicatePosition);
-            effParamWorkCallback0((u32)work->duplicatedHandles[group], duplicatePosition);
+            effParamWorkCallback0(work->duplicatedHandles[group], duplicatePosition);
             effParamWorkInvokeCallback(work->duplicatedHandles[group]);
         }
         particle->age++;
@@ -929,12 +927,12 @@ void func_00171B28(PcpScatterSpinWork *work) {
         }
         if (duplicates && age >= duplicateStart && age >= 0 && i % perGroup == 0) {
             u32 group = i / perGroup;
-            effParamWorkCallback3((u32)work->duplicatedHandles[group], baseColor);
+            effParamWorkCallback3(work->duplicatedHandles[group], baseColor);
             VU0_LOAD_VF(vf10, work->params.origin);
             VU0_LOAD_VF(vf11, duplicatePosition);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, duplicatePosition);
-            effParamWorkCallback0((u32)work->duplicatedHandles[group], duplicatePosition);
+            effParamWorkCallback0(work->duplicatedHandles[group], duplicatePosition);
             effParamWorkInvokeCallback(work->duplicatedHandles[group]);
         }
         particle->age++;

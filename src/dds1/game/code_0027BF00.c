@@ -115,7 +115,6 @@ extern s32 sdfAllocSizeClassBlock(u32);
 
 extern struct MenuWindowSpriteGroup *mnuCreateWindowState(u32, u32, u32, u32);
 
-extern MenuListNode *func_0027B888(MenuList *);
 
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -335,7 +334,7 @@ MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *windo
 }
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *window) {
-    func_0027B888(window->list);
+    mnuRemoveListCursorNode(window->list);
 }
 
 /* Advance selection; clear its byte and panel sprite flags only when a node is returned. */

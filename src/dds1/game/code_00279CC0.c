@@ -53,7 +53,6 @@ extern char D_0037CC20[];
 
 
 
-extern MenuListNode *func_0027B888(MenuList *);
 
 
 
@@ -468,7 +467,7 @@ u32 mnuDestroyListState(MenuList *list) {
     MenuListNode *pending;
 
     do {
-        pending = func_0027B888(list);
+        pending = mnuRemoveListCursorNode(list);
     } while (pending != 0);
     sdfReleaseChipBlock(list);
     return 1;
@@ -651,7 +650,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027B888);
+INCLUDE_ASM(const s32, "game/code_00279CC0", mnuRemoveListCursorNode);
 
 
 
