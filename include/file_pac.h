@@ -3,19 +3,11 @@
 
 #include "common.h"
 #include "sdf_pac_packet.h"
+#include "sdf_pac_work.h"
 
 struct FileNode;
 struct PacBuf;
 struct PacAlloc;
-
-/* PAC queue item: allocation handle and decoder cursor precede packet data. */
-typedef struct PacWork {
-    struct PacWork *next;
-    struct PacState *owner;
-    s32 resourceHandle;
-    u8 *dataCursor;
-    u8 packet[1];
-} PacWork;
 
 /* 0x38-byte PAC decoder state; resource packets are linked through queueHead.
  * Event 0 supplies a payload-size word; event 1 omits it. Keep the
@@ -62,7 +54,4 @@ typedef char PacState_size_must_be_0x38[(sizeof(PacState) == 0x38) ? 1 : -1];
 typedef char FilePacRequest_size_must_be_0x70[(sizeof(FilePacRequest) == 0x70) ? 1 : -1];
 typedef char FilePacRequest_queue_must_be_at_0x60[
     ((u32)&((FilePacRequest *)0)->packet.queueHead == 0x60) ? 1 : -1];
-typedef char PacWork_resource_must_be_at_0x08[
-    ((u32)&((PacWork *)0)->resourceHandle == 0x08) ? 1 : -1];
-
 #endif /* FILE_PAC_H */
