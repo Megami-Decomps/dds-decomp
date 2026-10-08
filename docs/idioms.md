@@ -3176,3 +3176,14 @@ The selected queue can use direct indexed load/store through
 `frFontWork.glyphSlots`; no byte-offset view is needed. Glyph construction
 uses a named `FrFontEntry *` for the selected resource's glyph-count bound.
 
+
+## Mantra tutorial fields
+
+DDS2 `002933F0` uses the existing `MenuPanelState`'s signed timer at
+`+6`, unsigned resume state at `+7`, signed message dimensions at
+`+0x558/+0x55A`, and selected-node pointer at `+0x5DC`. The enclosing
+object's message-window word is at `+0x44`; the state remains at
+`+0x240`. These are primary-owner fields, not a second tutorial view.
+`00292B90` and `002917C0` are void transition constructors; the
+tutorial's actual status-polling helper is `00292CF0`.
+

@@ -105,9 +105,14 @@ typedef struct MenuMantraRecord {
 } MenuMantraRecord;
 
 typedef struct MenuPanelState {
-    u8 pad00[0x554];
+    u8 pad00[6];
+    s8 tutorialTimer;
+    u8 tutorialState;
+    u8 pad08[0x54C];
     u32 drawFlags;
-    u8 pad558[8];
+    s16 messageWidth;
+    s16 messageHeight;
+    u8 pad55C[4];
     MantraNodePos *defaultSelector;
     MantraNodePos *alternateSelector;
     u8 pad568[4];
@@ -115,7 +120,7 @@ typedef struct MenuPanelState {
     u32 collectedValues[8];
     s32 savedSelection;
     s32 collectedCount;
-    u8 pad5DC[4];
+    MantraNodePos *tutorialCurrentNode;
     s8 selectionIndex;
     u8 pad5E1[3];
     MenuMantraRecord records[112];
@@ -137,7 +142,9 @@ typedef struct MenuPanelState {
 typedef struct MenuPanelObject {
     u8 pad00[4];
     struct MenuList *list;
-    u8 pad08[0x238];
+    u8 pad08[0x3C];
+    void *messageWindow;
+    u8 pad48[0x1F8];
     MenuPanelState state;
 } MenuPanelObject;
 extern void func_00291338(void);
