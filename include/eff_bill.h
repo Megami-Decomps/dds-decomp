@@ -6,6 +6,32 @@
 
 #include "eff_curve.h"
 
+/* Lens-flare constructors copy 0x40 bytes into a 0x58-byte owner at +0x18
+ * (DDS1 0029C620 / DDS2 002DE338). Draw callbacks read strength with LWC1,
+ * compare frame/limit signed, and select the flare set with LBU at +0x54. */
+typedef struct EffLensFlareParams {
+    SdfColorTrack colorCurve;
+    SdfAlphaTrack alphaCurve;
+    f32 strength;
+    s32 limit;
+    u8 flareSet;
+    u8 pad3D[3];
+} EffLensFlareParams;
+
+typedef struct EffFadeVectorWork {
+    f32 vector[4];
+    s32 frame;
+    u32 color;
+    EffLensFlareParams source;
+} EffFadeVectorWork;
+
+typedef char EffLensFlareParamsSizeCheck[(sizeof(EffLensFlareParams) == 0x40) ? 1 : -1];
+typedef char EffLensFlareStrengthOffsetCheck[((u32)&((EffLensFlareParams *)0)->strength == 0x34) ? 1 : -1];
+typedef char EffLensFlareLimitOffsetCheck[((u32)&((EffLensFlareParams *)0)->limit == 0x38) ? 1 : -1];
+typedef char EffLensFlareSetOffsetCheck[((u32)&((EffLensFlareParams *)0)->flareSet == 0x3C) ? 1 : -1];
+typedef char EffFadeVectorWorkSizeCheck[(sizeof(EffFadeVectorWork) == 0x58) ? 1 : -1];
+typedef char EffFadeVectorSourceOffsetCheck[((u32)&((EffFadeVectorWork *)0)->source == 0x18) ? 1 : -1];
+
 /* Class operations select the copied parameter format and own this 0x40-byte
  * header. The resource word is the class factory's returned handle/address. */
 typedef struct EffClassWork {
