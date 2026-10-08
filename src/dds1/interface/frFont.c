@@ -108,7 +108,7 @@ void func_001946C8(void) {
     s32 bufferIndex = 0;
     s32 sourceWordOffset = 0;
     FrFontSystem *work = &frFontWork;
-    s32 *imageBuffer = work->imageBuffers;
+    u32 *imageBuffer = work->imageBuffers;
     u8 *sourceTable = D_00356478;
 
     do {

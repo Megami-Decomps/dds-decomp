@@ -123,7 +123,7 @@ void func_0019C358(void) {
     s32 bufferIndex = 0;
     s32 sourceWordOffset = 0;
     FrFontSystem *work = &frFontWork;
-    s32 *imageBuffer = work->imageBuffers;
+    u32 *imageBuffer = work->imageBuffers;
     u8 *sourceTable = D_003B2DA8;
 
     do {
