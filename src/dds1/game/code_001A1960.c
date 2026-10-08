@@ -908,7 +908,23 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-INCLUDE_ASM(const f32, "game/code_001A1960", func_001A47F0);
+f32 func_001A47F0(BtlTask *task) {
+    BtlState *battle;
+    BtlUnit *unit;
+
+    if (task == NULL) {
+        return 1.0f;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    if ((battle->battleFlags & 0x8000) != 0) {
+        unit = task->unit;
+        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
+            return 1.0f;
+        }
+        return 3.0f;
+    }
+    return 1.0f;
+}
 
 void btlClearAllActorEntrySlots(u32 arg0) {
     u32 temp_v0;
