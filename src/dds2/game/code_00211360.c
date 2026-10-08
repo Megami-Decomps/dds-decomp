@@ -60,9 +60,9 @@ extern s32 btlIsSelectedActorStatusAndRecordClear();
 
 extern s32 func_00212CB8(u32, u32, u32);
 
-extern s32 btlHasAvailableOption(void);
+extern u8 btlHasAvailableOption(u32);
 
-extern s32 func_001ABB10(void);
+extern s32 func_001ABB10(BtlUnit *, s32);
 
 extern s8 btlHistoryCounter;
 
@@ -1017,10 +1017,10 @@ s32 btlUnitStatAtLeast(BtlUnit *unit, u32 limit) {
     return 1;
 }
 
-u8 func_00213728(void) {
+u8 func_00213728(u32 unitAddress) {
     s64 result;
 
-    result = btlHasAvailableOption();
+    result = btlHasAvailableOption(unitAddress);
     return result != 0;
 }
 
@@ -1073,10 +1073,10 @@ s32 btlUnitHasFlag1000(s32 unitAddress) {
     return (((s32)((BtlUnit *)unitAddress)->flags & 0x1000) > 0);
 }
 
-u8 btlIsCommandAvailable(void) {
+u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
     s64 result;
 
-    result = func_001ABB10();
+    result = func_001ABB10(unit, command);
     return result == 0;
 }
 

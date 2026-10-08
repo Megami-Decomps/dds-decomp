@@ -68,7 +68,7 @@ extern void mnuDrawWindowSprites();
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
-extern s32 func_002CD240(s32, u8 **);
+extern s32 func_002CD240(u16, u8 **);
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
