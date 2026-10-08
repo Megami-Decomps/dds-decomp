@@ -51,6 +51,12 @@ typedef struct MenuSceneWork {
     u8 pad50C[0x34];
     s32 coordinateA;      /* 0x540 */
     s32 coordinateB;      /* 0x544 */
+    u8 pad548[0x5C];
+    s16 scrollX;          /* 0x5A4 */
+    s16 scrollY;          /* 0x5A6 */
+    u8 pad5A8[4];
+    u8 boundsFlags;       /* 0x5AC */
+    u8 pad5AD[3];
 } MenuSceneWork;
 
 
@@ -128,7 +134,24 @@ void func_00250E88(s32 *xCoordinate, s32 *yCoordinate, u16 index,
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250F60);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00251260);
+void func_00251260(MenuSceneWork *work) {
+    MenuSceneEntry *entry = (MenuSceneEntry *)work->gridHandle->cursor->value;
+    s32 maximumX = 0x307;
+    u8 flags = work->boundsFlags;
+    s32 position[2];
+
+    if ((flags & 4) == 0) {
+        maximumX = 0x2C8;
+        if ((flags & 2) == 0) {
+            maximumX = (flags & 1) != 0 ? 0x24C : 0x1BE;
+        }
+    }
+    position[0] = work->scrollX;
+    position[1] = work->scrollY;
+    func_00250E88(&position[0], &position[1], entry->sceneId, maximumX, 0x38E);
+    work->scrollX = position[0];
+    work->scrollY = position[1];
+}
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002512F0);
 
