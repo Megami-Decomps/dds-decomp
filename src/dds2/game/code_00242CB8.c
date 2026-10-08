@@ -3,6 +3,7 @@
 #include "scr.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "evt_event_pack.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 
@@ -50,7 +51,6 @@ void func_0035B6E0(const char *fmt, ...);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
-void *evtFindTaskResourceEntryByKey(u32, s32);
 KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
 KwlnTask *evtCreateTask(s32, const char *);
 s32 evtPreloadBgm(s32 id);
