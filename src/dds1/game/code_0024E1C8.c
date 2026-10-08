@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "mnu_list.h"
 #include "mnu_profile_progress.h"
+#include "prf_requirement.h"
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 #define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
@@ -611,38 +612,20 @@ void mnuStopResourceTask(void) {
     mnuSceneResourceContext = 0;
 }
 
-/* One of the two 0x14-byte slots of a mantra source entry. */
-typedef struct {
-    s32 value;      /* 0x00 */
-    u8 pad04[8];
-    u32 slotFlags;      /* 0x0C: bit 5 marks this mantra source slot active */
-    u8 pad10[4];
-} MnuSourceSlot;
-
-/* Mantra source entry behind prfReqGetEntryRecord (0x54 bytes). */
-typedef struct {
-    u8 pad00[0x2C];
-    u32 flags;             /* 0x2C: bit 5 selects slot 0 */
-    u8 pad30[4];
-    MnuSourceSlot slot[2]; /* 0x34 */
-} MnuSourceEntry;
-
-extern MnuSourceEntry *prfReqGetEntryRecord(u16 index);
-
 /* Pick the value of the first active slot, preferring slot 0. */
 s32 mnuGetMantraSourceValue(u16 profileId) {
     s32 defaultValue = 0;
-    MnuSourceEntry *sourceEntry = prfReqGetEntryRecord(profileId);
+    PrfDds1RequirementRecord *sourceEntry = prfReqGetEntryRecord(profileId);
     s32 slotIndex = 0;
 
-    if (sourceEntry->flags & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
+    if (sourceEntry->slots[0].status & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
         slotIndex = 0;
-    } else if (sourceEntry->slot[0].slotFlags & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
+    } else if (sourceEntry->slots[1].status & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
         slotIndex = 1;
     } else {
         return defaultValue;
     }
-    return sourceEntry->slot[slotIndex].value;
+    return sourceEntry->slots[slotIndex].sourceValue;
 }
 
 /* Populate a progress record from a party row's selected profile and its current/cap values. */
@@ -930,21 +913,6 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
     return 0;
 }
 
-typedef struct MnuProfileRequirementSlot {
-    s32 status;
-    u8 pad04[8];
-    u8 requirements[8];
-} MnuProfileRequirementSlot;
-
-typedef struct MnuProfileRequirementRecord {
-    u8 pad00[4];
-    u32 flags04;
-    u8 pad08[0x10];
-    u32 flags18;
-    u8 pad1C[0x10];
-    MnuProfileRequirementSlot slots[2];
-} MnuProfileRequirementRecord;
-
 /* Summarize two requirement slots: bit 0 marks a qualifying list of at least two IDs;
  * bit 1 reflects the conjunction of the two native record flags. */
 s32 func_00250758(u16 profileId) {
@@ -985,17 +953,17 @@ s32 func_00250758(u16 profileId) {
 /* Return the first status-exactly-one requirement list when summary bit 0 is set, otherwise NULL. */
 u8 *func_00250820(u16 profileId) {
     s32 slotIndex = 0;
-    MnuProfileRequirementRecord *profileRecord;
+    PrfDds1RequirementRecord *profileRecord;
 
     if ((func_00250758(profileId) & 1) != 0) {
-        profileRecord = (MnuProfileRequirementRecord *)prfReqGetEntryRecord(profileId);
+        profileRecord = prfReqGetEntryRecord(profileId);
         while (profileRecord->slots[slotIndex].status != 1) {
             slotIndex++;
             if (slotIndex >= MNU_REQUIREMENT_SLOT_COUNT) {
                 return NULL;
             }
         }
-        return profileRecord->slots[slotIndex].requirements;
+        return profileRecord->slots[slotIndex].profileIds;
     }
     return NULL;
 }

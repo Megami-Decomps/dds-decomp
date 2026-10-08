@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "itf.h"
 #include "dat_state.h"
+#include "prf_requirement.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -117,15 +118,7 @@ extern Entry24B D_00393220[];
 
 extern Entry24W D_00393234[];
 
-/* 84-byte table entries (full layout unknown; stride inferred from index math). */
-typedef struct Entry84W {
-    u32 v0;             // 0x00
-    u8 pad_0x04[0x50]; // 0x04
-} Entry84W; // 0x54
-
 extern void ptySetProfileFlag1(DatPartyRecord *, u16);
-
-extern Entry84W D_00391230[];
 
 /* 28-byte table entries (full layout unknown; stride inferred from index math). */
 typedef struct Entry28W {
@@ -846,7 +839,7 @@ u32 prfIsRequirementExcluded(u16 requirementId) {
 
 /* Read the rule-state word for an unchecked requirement ID. */
 u32 prfReq54GetWord1230(u16 requirementId) {
-    return D_00391230[requirementId].v0;
+    return D_00391230[requirementId].unknown00;
 }
 
 typedef struct PrfFallbackGroup {
@@ -944,7 +937,7 @@ void sdfSetAllFlagsFromTable(void) {
     } while (entryIndex++ >= 0);
 }
 
-Entry84W *prfReqGetEntryRecord(u16 index) {
+PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 index) {
     return &D_00391230[index];
 }
 
