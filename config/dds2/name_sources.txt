@@ -4838,7 +4838,7 @@
 0x002D1300	mnuCreateConfigTasks	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior.
 0x002D13F0	fileConsumeConfigTaskReady	inferred	returns one while config task state=1, clears final state=2 [names_R_FuncNames2.tsv]
 0x002D1428	fileGetConfigTaskSlot	inferred	returns one of four slots from config task or zero [names_R_FuncNames2.tsv]
-0x002D1910	fileGetConfigTaskFailure	inferred	reports -1 when config task result negative, else 0 [names_R_FuncNames2.tsv]
+0x002D1910	fileUpdateConfigOwnerTask	inferred	Returns the signed task-update control word: zero keeps this owner callback installed; -1 requests active-task destruction when the config result is negative.
 0x002D2C50	effLoadCommonTexturesAndResetRenderFlags	inferred	Loads the flash, wind and scaly effect textures then clears render flags. [names_reviewed15.tsv]
 0x002D2CA8	fileResetRenderFlags	inferred	Zeroes the same render flag word used by fileSetRenderFlag. [names_reviewed5.tsv]
 0x002D2CB0	effGetPacketSubmissionSurface	inferred	returns the indexed SdfPoolNode used by native effect packet submission callers
