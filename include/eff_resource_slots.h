@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct EffectSlotSet;
+struct BdWork;
 struct SdfMemBlock;
 struct EffMappedResource;
 struct EffTimedState;
@@ -47,6 +48,11 @@ struct EffectSlotSet *effCreateResourceSlotSetFromAllocation(
     struct SdfMemBlock *resourceAllocation, u32 keepAllocation);
 
 struct EffectSlotSet *effCreateResourceSlotSet(struct EffectSlotSet *source, u32 slot, u32 count);
+u32 effReleaseSlotWorkAllocation(struct EffectSlotSet *owner);
+void effInitializeAllSlotWork(struct EffectSlotSet *owner);
+void effAttachSlotWorkOwner(struct EffectSlotSet *owner, s32 slotIndex,
+                            struct BdWork *entry);
+void effResetSlotWork(struct EffectSlotSet *owner, u32 slotIndex);
 void effResolveAndReleaseResource(struct EffectSlotSet *owner);
 void effResolveAndReleaseSelectedResource(struct EffectSlotSet *owner, s32 slot);
 void effReleaseTextureHandlesAndResetSlots(struct EffectSlotSet *owner);
