@@ -305,7 +305,7 @@ void func_00162590(ParObj *effect) {
             record = effect->buffer->records;
             spinDirection = 1.0f;
             for (recordIndex = 0; recordIndex < particleCount; recordIndex++, record++) {
-                if (record->unk20 >= 0) {
+                if (record->age >= 0) {
                     record->scale += scaleStep;
                     record->spin += spinStep * spinDirection;
                 }
@@ -326,12 +326,12 @@ void func_00162590(ParObj *effect) {
     if (particleCount > 0) {
         step = particleCount;
         do {
-            s32 age = record->unk20;
+            s32 age = record->age;
 
             if (age < lifetime && age >= 0) {
                 PCP_COPY_VECTOR(billboard, record->position);
                 billboard->rotationAngle = record->spin;
-                billboard->childParam = record->unk24;
+                billboard->childParam = record->color;
                 billboard->childScaleX = billboard->childScaleY = record->scale;
                 record->scale += scaleStep;
                 if (record->scale < 0) {

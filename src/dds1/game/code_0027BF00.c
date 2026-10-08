@@ -466,18 +466,18 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027CF28);
 extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
 typedef struct MenuWindowSpriteGroup {
-    s32 resourceHandle;
+    struct SdfMemBlock *allocation;
     u8 pad4[8];
-    s32 sprites[7];
+    struct EffectSlotSet *sprites[7];
 } MenuWindowSpriteGroup;
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
-    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
+    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(allocation);
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
-    group->resourceHandle = allocationHandle;
+    group->allocation = allocation;
     func_0027CF28(group, source, mode, variant, option);
     return group;
 }
@@ -486,40 +486,40 @@ MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u
 void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     u32 spriteIndex;
     for (spriteIndex = 0; spriteIndex < MNU_WINDOW_RESOURCE_SPRITES; spriteIndex++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)group->sprites[spriteIndex]);
+        effDestroyResourceSlotSet(group->sprites[spriteIndex]);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(group->resourceHandle));
+    sdfReleaseResourceAllocation(group->allocation);
 }
 
 void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 target) {
-    effConfigureWithDefaultSetting(group->sprites[1], 0, target, 0, 0x14, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[2], 0, target, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[3], 0, target, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[4], 0, target, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[5], 0, target, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[6], 0, target, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting((s32)(u32)group->sprites[1], 0, target, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting((s32)(u32)group->sprites[2], 0, target, 1, 10, 0xc);
+    effConfigureWithDefaultSetting((s32)(u32)group->sprites[3], 0, target, 2, 0, 0xc);
+    effConfigureWithDefaultSetting((s32)(u32)group->sprites[4], 0, target, 2, 0, 0xc);
+    effConfigureWithDefaultSetting((s32)(u32)group->sprites[5], 0, target, 1, 10, 0xc);
+    effConfigureWithDefaultSetting((s32)(u32)group->sprites[6], 0, target, 0, 0x14, 0xc);
 }
 
 /* Always draw slot zero; masks one/two select the two three-slot banks.
  * Reset the six auxiliary slots through the existing grid lookup after drawing. */
 void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
-    itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[0], 0, param);
+    itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[0], 0, param);
     if (mask & 1) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[1], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[2], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[3], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[1], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[2], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[3], 0, param);
     }
     if (mask & 2) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[4], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[4], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[5], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, (s32)(u32)group->sprites[6], 0, param);
     }
-    itfGridLookupValueOrDefault(group->sprites[1], 0);
-    itfGridLookupValueOrDefault(group->sprites[2], 0);
-    itfGridLookupValueOrDefault(group->sprites[3], 0);
-    itfGridLookupValueOrDefault(group->sprites[4], 0);
-    itfGridLookupValueOrDefault(group->sprites[5], 0);
-    itfGridLookupValueOrDefault(group->sprites[6], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[1], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[2], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[3], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[4], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[5], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[6], 0);
 }
 
 typedef struct MenuPanelSlotIndices {
