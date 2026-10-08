@@ -292,9 +292,9 @@ EffModelOwner *effCreateFloorModelOwner(u8 *source) {
     return owner;
 }
 
-void effMarkFloorModelForDestruction(u8 *work) {
-    u32 flags = ((EffModelOwner *)work)->flags | 2;
-    ((EffModelOwner *)work)->flags = flags;
+void effMarkFloorModelForDestruction(EffModelOwner *work) {
+    u32 flags = work->flags | 2;
+    work->flags = flags;
     if ((flags & 4) == 0) {
         effDestroyModelOwner(work);
     }
@@ -302,10 +302,10 @@ void effMarkFloorModelForDestruction(u8 *work) {
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
-u32 *effDuplicateFloorModelOwner(u8 *source) {
-    u32 *owner = (u32 *)effCreateModelOwner(0);
+EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
+    EffModelOwner *owner = effCreateModelOwner(0);
 
-    owner[0] = *(u32 *)source;
+    *(u32 *)owner = *(u32 *)source;
     effRecreateModelFromSource(owner, source);
     effUploadModelTextures(owner);
     if (btlIsRuntimeAllocated() != 0 && btlIsCurrentActorFullyMarked() == 0) {
@@ -366,16 +366,16 @@ void func_0029AE88(EffModelOwner *owner) {
 
 extern u32 effModelUpdateControlFlags;
 
-void effMarkFloorModelForUpdate(u8 *work) {
-    u32 previous = ((EffModelOwner *)work)->flags;
+void effMarkFloorModelForUpdate(EffModelOwner *work) {
+    u32 previous = work->flags;
     u32 flags = previous | 1;
-    ((EffModelOwner *)work)->flags = flags;
+    work->flags = flags;
     if ((flags & 4) == 0) {
         if ((effModelUpdateControlFlags & 1) == 0) {
-            func_0029AE88((EffModelOwner *)work);
+            func_0029AE88(work);
         }
     } else if ((effModelUpdateControlFlags & 1) != 0) {
-        ((EffModelOwner *)work)->flags = previous | 0x31;
+        work->flags = previous | 0x31;
     }
 }
 
