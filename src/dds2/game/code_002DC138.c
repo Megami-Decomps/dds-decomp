@@ -15,11 +15,12 @@ typedef struct EffModelOwner {
 
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
-extern u32 sdfResourceRetainAddress();
+extern u32 sdfResourceRetainAddress(SdfMemBlock *);
+extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern u32 effModelUpdateControlFlags;
 
-extern void *fileResolvePrimaryBuffer();
+extern void *fileResolvePrimaryBuffer(FileJobPayload *);
 
 extern void *fileResolveSecondaryBuffer(FileJobPayload *);
 
@@ -43,7 +44,7 @@ extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
 extern u16 D_00437E2C;
 
-extern EffModelOwner *effCreateModelOwner();
+extern void *effCreateModelOwner(void *);
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
@@ -129,7 +130,7 @@ extern u16 mdlGetContextResourceGroup(MdlCtx *);
 extern u16 mdlGetContextResourceId(MdlCtx *);
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
-extern void *sdfAllocGeneralBlock(u32);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 
 /* Initialize the VU transforms and the first node's float slot, if present. */
@@ -179,7 +180,8 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 }
 
 
-EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
+void *effCreateModelOwner(void *input) {
+    FileJobPayload *source = input;
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
@@ -330,8 +332,10 @@ void effUploadModelTextures(EffModelOwner *owner) {
     } while (i < 2);
 }
 
+extern void effFloorModelListPush(EffModelOwner *);
+
 /* Track floor models only while battle is active and the current actor is not fully marked. */
-EffModelOwner *effCreateFloorModelOwner(u8 *source) {
+void *effCreateFloorModelOwner(void *source) {
     EffModelOwner *owner;
     s32 battleActive;
 
@@ -347,7 +351,7 @@ EffModelOwner *effCreateFloorModelOwner(u8 *source) {
 void effMarkFloorModelForDestruction(u32 *p) {
     ((EffModelOwner *)p)->flags |= 2;
     if (!(((EffModelOwner *)p)->flags & 4)) {
-        effDestroyModelOwner(p);
+        effDestroyModelOwner((EffModelOwner *)p);
     }
 }
 
@@ -490,22 +494,52 @@ void mdlMarkAndProcessObjectNodes(void) {
     } while (node != NULL);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCCE8);
+typedef struct FileQueue FileQueue;
+
+typedef struct EffResourceConfig {
+    u8 unknown00[0x34];
+    s32 plainEntry; /* Duration, also selects plain versus flagged entry. */
+    f32 frameStep;
+} EffResourceConfig;
+
+typedef struct EffResourceExtendedConfig {
+    EffResourceConfig base;
+    u8 unknown3C[0x38];
+} EffResourceExtendedConfig;
 
 typedef struct EffResourceOwner {
     u32 count;
-    u32 unk04;
-    u8 pad_08[0x34];
-    u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
-    u8 pad_40[0x78];
-    void **entries;
-    void *buffer;
+    s32 unk04;
+    EffResourceConfig base;
+    EffResourceExtendedConfig extended;
+    FileQueue **entries;
+    SdfMemBlock *buffer;
     MdlCtx *model;
 } EffResourceOwner;
 
-extern void fileQueueDestroy(s32);
+typedef char EffResourceConfig_size_check[sizeof(EffResourceConfig) == 0x3C ? 1 : -1];
+typedef char EffResourceExtendedConfig_size_check[sizeof(EffResourceExtendedConfig) == 0x74 ? 1 : -1];
+typedef char EffResourceOwner_size_check[sizeof(EffResourceOwner) == 0xC4 ? 1 : -1];
+typedef char EffResourceOwner_base_check[(u32)&((EffResourceOwner *)0)->base == 8 ? 1 : -1];
+typedef char EffResourceOwner_extended_check[(u32)&((EffResourceOwner *)0)->extended == 0x44 ? 1 : -1];
+typedef char EffResourceOwner_entries_check[(u32)&((EffResourceOwner *)0)->entries == 0xB8 ? 1 : -1];
+typedef char EffResourceOwner_buffer_check[(u32)&((EffResourceOwner *)0)->buffer == 0xBC ? 1 : -1];
+typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model == 0xC0 ? 1 : -1];
 
-void effDestroyResourceOwner(EffResourceOwner *owner) {
+extern u32 sdfCountMapPositionRecords(SdfModel *model);
+extern FileQueue *fileQueueClone(FileQueue *);
+extern FileQueue *fileCloneQueueEntries(FileQueue *);
+extern void *func_002DCCE8(void *);
+extern void *sdfAllocSizeClassBlock(s32);
+extern void *memset(void *, s32, u32);
+extern void *memcpy(void *, const void *, u32);
+
+INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCCE8);
+
+extern void fileQueueDestroy(FileQueue *);
+
+void effDestroyResourceOwner(void *work) {
+    EffResourceOwner *owner = work;
     u32 i;
 
     if (owner->model != 0) {
@@ -513,35 +547,31 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
     }
     if (owner->buffer != 0) {
         for (i = 0; i < owner->count; i++) {
-            fileQueueDestroy((s32)owner->entries[i]);
+            fileQueueDestroy(owner->entries[i]);
         }
-        sdfReleaseResourceAllocation((u32)owner->buffer);
+        sdfReleaseResourceAllocation(owner->buffer);
     }
     sdfReleaseChipBlock(owner);
 }
 
-typedef struct { u32 word[0xF]; } EffectBlob3C;
 
-typedef struct { u32 word[0x1D]; } EffectBlob74;
+extern void effCopyResourceOwner(void *, void *);
 
-extern u8 *func_002DCCE8(s32);
+void *effDuplicateModelOwner(void *source, u16 unusedType) {
+    EffResourceOwner *src = source;
+    EffResourceOwner *dst = func_002DCCE8(0);
 
-extern void effCopyResourceOwner(EffResourceOwner *, EffResourceOwner *);
-
-s32 effDuplicateModelOwner(u8 *src) {
-    u8 *dst = func_002DCCE8(0);
-
-    *(EffectBlob3C *)(dst + 8) = *(EffectBlob3C *)(src + 8);
-    *(EffectBlob74 *)(dst + 0x44) = *(EffectBlob74 *)(src + 0x44);
-    effCopyResourceOwner((EffResourceOwner *)dst, (EffResourceOwner *)src);
-    return (s32)dst;
+    dst->base = src->base;
+    dst->extended = src->extended;
+    effCopyResourceOwner(dst, src);
+    return dst;
 }
 
-extern u32 sdfCountMapPositionRecords(SdfModel *model);
 
-extern void *fileQueueClone(void *);
 
-void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
+void effCopyResourceOwner(void *destination, void *source) {
+    EffResourceOwner *dst = destination;
+    EffResourceOwner *src = source;
     u32 i;
 
     if (dst->model != 0) {
@@ -550,7 +580,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     dst->model = func_00232198(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
     effInitModelVUState(dst->model);
     if (dst->model->first != NULL) {
-        if (dst->plainEntry != 0) {
+        if (dst->base.plainEntry != 0) {
             mdlAddEntryPlain(dst->model, 0, 0);
         } else {
             mdlAddEntryFlagged(dst->model, 0, 0);
@@ -560,60 +590,65 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     if (src->buffer != 0) {
         if (dst->buffer != 0) {
             for (i = 0; i < dst->count; i++) {
-                fileQueueDestroy((s32)dst->entries[i]);
+                fileQueueDestroy(dst->entries[i]);
             }
-            sdfReleaseResourceAllocation((u32)dst->buffer);
+            sdfReleaseResourceAllocation(dst->buffer);
         }
         dst->buffer = sdfAllocGeneralBlock(dst->count * 4);
-        dst->entries = (void **)sdfResourceRetainAddress((u32)dst->buffer);
+        dst->entries = (FileQueue **)sdfResourceRetainAddress(dst->buffer);
         for (i = 0; i < dst->count; i++) {
             dst->entries[i] = fileQueueClone(*src->entries);
         }
     }
 }
 
-extern void fileQueueNotifyAllJobsComplete(s32);
+extern void fileQueueNotifyAllJobsComplete(u8 *);
 
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
-void func_002DD3C0(s32 *work) {
-    if (((EffResourceOwner *)work)->buffer != NULL) {
-        u32 count = ((EffResourceOwner *)work)->count;
+void func_002DD3C0(void *work) {
+    EffResourceOwner *owner = work;
+    if (owner->buffer != NULL) {
+        u32 count = owner->count;
         u32 i = 0;
-        s32 *entries = (s32 *)((EffResourceOwner *)work)->entries;
+        FileQueue **entries = owner->entries;
         if (count != 0) {
             do {
-                fileQueueNotifyAllJobsComplete(*entries);
+                fileQueueNotifyAllJobsComplete((u8 *)*entries);
                 entries++;
                 i++;
             } while (i < count);
         }
     }
-    sdfMotionSampleAtFrame(((EffResourceOwner *)work)->model->first, 0.0f);
-    ((EffResourceOwner *)work)->unk04 = 0;
+    sdfMotionSampleAtFrame(owner->model->first, 0.0f);
+    owner->unk04 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DD448);
 
-void effLoadModelPrimaryVector(u8 *obj, u8 *vec) {
+void effLoadModelPrimaryVector(void *obj, void *vec) {
+    EffResourceOwner *owner = obj;
 VU0_LOAD_VF_MEMORY(vf10, vec);
-    mdlStorePrimaryVectorVU(((EffResourceOwner *)obj)->model);
+    mdlStorePrimaryVectorVU(owner->model);
 }
 
-void effSetModelRotationQuaternion(u8 *obj, u8 *vec) {
+void effSetModelRotationQuaternion(void *obj, void *vec) {
+    EffResourceOwner *owner = obj;
 VU0_LOAD_VF_MEMORY(vf10, vec);
-    mdlUpdateContextRotationBasisFromQuaternion(((EffResourceOwner *)obj)->model);
+    mdlUpdateContextRotationBasisFromQuaternion(owner->model);
 }
 
-void effPropagateResourceModelMask(EffResourceOwner *model, u32 color) {
+void effPropagateResourceModelMask(void *work, u32 color) {
+    EffResourceOwner *model = work;
     mdlBroadcastMasked(model->model, color);
 }
 
-void effScaleModelVec(u8 *work, float scale) {
+void effScaleModelVec(void *work, float scale) {
+    EffResourceOwner *owner = work;
     u32 bits;
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
-    mdlStoreTertiaryVectorVU(((EffResourceOwner *)work)->model);
+    mdlStoreTertiaryVectorVU(owner->model);
 }
 
 void effObjectListCountersReset(void) {
@@ -649,7 +684,7 @@ RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
     payloadBytes = imageBytes + paletteBytes;
     textureOffset = payloadBytes + 0x40;
     allocationHandle = (u32)sdfAllocGeneralBlock(payloadBytes + 0x60);
-    cursor = (u8 *)sdfResourceRetainAddress(allocationHandle);
+    cursor = (u8 *)sdfResourceRetainAddress((SdfMemBlock *)allocationHandle);
     texture = (RefObj *)(cursor + textureOffset);
     texture->base = cursor;
     cursor += 0x40;
@@ -695,7 +730,7 @@ void effReleaseSharedReference(RefObj *obj) {
         sdfTexReleaseReference(texture);
     }
     if (--obj->refCount == 0) {
-        sdfReleaseResourceAllocation(obj->allocationHandle);
+        sdfReleaseResourceAllocation((SdfMemBlock *)obj->allocationHandle);
     }
 }
 
@@ -749,7 +784,7 @@ void effReleaseReferenceHolder(u32 *holder) {
         for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
             effReleaseSharedReference(((EffExpandedList *)holder)->handles[i]);
         }
-        sdfReleaseResourceAllocation(((EffExpandedList *)holder)->buffer);
+        sdfReleaseResourceAllocation((SdfMemBlock *)((EffExpandedList *)holder)->buffer);
     }
 }
 
