@@ -555,6 +555,11 @@ typedef struct MenuPageWindow {
     s32 fade;
 } MenuPageWindow;
 
+#ifdef VERSION_DDS2
+/* Marks the window-sprite mode toggled by page setup and entry resets. */
+#define MNU_PAGE_WINDOW_SPRITE_MODE 0x80
+#endif
+
 void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
                              MenuPageWindow *window, s32 mode);
 

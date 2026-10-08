@@ -68,7 +68,7 @@ extern void mnuDrawWindowSprites();
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
-extern s32 func_002CD240(s32, u8 **);
+extern s32 func_002CD240(u16, u8 **);
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
@@ -247,7 +247,7 @@ MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32
     window->height = height;
     window->id = id;
     list = mnuCreateListState(id, visibleCount, rowSpacing);
-    window->fade = 0;
+    window->fadeScale = 0;
     window->list = list;
     return window;
 }
@@ -268,8 +268,8 @@ void mnuSetWindowOverlaySprite(MenuWindowContainer *window, u32 sprite) {
     window->overlaySprite = sprite;
 }
 
-void mnuSetWindowContainerState(MenuWindowContainer *window, u32 fade) {
-    window->fade = fade;
+void mnuSetWindowFadeScale(MenuWindowContainer *window, u32 fadeScale) {
+    window->fadeScale = fadeScale;
 }
 
 void mnuConfigureWindowSpriteAndGrid(MenuWindowContainer *window, s32 x, s32 y, u32 sprite,
@@ -388,7 +388,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
     MenuList *list;
     MenuPanelHandles *panel;
     s32 selectionMode;
-    s32 fadeScale = window->fade;
+    s32 fadeScale = window->fadeScale;
 
     if (window->panel.handles[0] != NULL) {
         if (window->flags & MNU_WINDOW_TRANSITION_FLAG) {
@@ -425,7 +425,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
 
 /* Draw the window, then advance its fade scale without a post-addition clamp. */
 void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg) {
-    s32 fadeScale = menu->fade;
+    s32 fadeScale = menu->fadeScale;
     s32 value;
     struct MenuWindowSpriteGroup *textures;
 
@@ -441,9 +441,9 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     if (textures != NULL) {
         mnuDrawWindowSprites(x, y, depth, menu->list->flags, textures, drawArg);
     }
-    value = menu->fade;
+    value = menu->fadeScale;
     if (value < MNU_FULL_FADE) {
-        menu->fade = value + MNU_WINDOW_FADE_STEP;
+        menu->fadeScale = value + MNU_WINDOW_FADE_STEP;
     }
     menu->flags |= MNU_WINDOW_TRANSITION_FLAG;
 }

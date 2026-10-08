@@ -392,9 +392,9 @@ void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
     menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
     menu->images[1] = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
-    mnuSetWindowContainerState(menu->images[1], 0x100);
+    mnuSetWindowFadeScale(menu->images[1], 0x100);
     menu->images[2] = func_00271B50(D_0037B980, 2, 0x200, menu, 0);
-    mnuSetWindowContainerState(menu->images[2], 0x100);
+    mnuSetWindowFadeScale(menu->images[2], 0x100);
 }
 
 /* Destroy the menu windows, then release their associated resource list. */

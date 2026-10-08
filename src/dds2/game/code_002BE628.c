@@ -618,7 +618,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     /* Both arms are identical in retail; kept as written. */
-    if (menu->flags & 0x80) {
+    if (menu->flags & MNU_PAGE_WINDOW_SPRITE_MODE) {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     } else {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
@@ -894,17 +894,17 @@ void func_002C1B68(u32 *out, u32 value) {
 }
 
 extern u32 uiBlendColors(u32, u32, u32);
-extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Draw two clear corners and two blended corners, then step the bounded blend value. */
 void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
-    s32 cornerColors[4];
+    u32 cornerColors[4];
     s32 color = state->color;
 
     color = uiBlendColors(color, color & ~0xFF, state->blend);
-    panelSetVec4((u32 *)cornerColors, 0, 0, color, color);
+    panelSetVec4(cornerColors, 0, 0, color, color);
 
-    uiDrawGradientColorRect(0, 0x700, 0, 0x2000, 0x700, (u32)cornerColors, surface);
+    uiDrawGradientColorRect(0, 0x700, 0, 0x2000, 0x700, cornerColors, surface);
     if (state->active != 0) {
         state->blend += MNU_GRADIENT_FADE_STEP;
         if (state->blend > MNU_TRANSITION_LIMIT) {
@@ -2371,8 +2371,8 @@ s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRe
             ptySkillApplyFieldUseEffect(page, id & 0xFFFF, target, entry);
             mnuConsumeEntryCost(id & 0xFFFF, target);
             mnuInitPartyPanelSlots(partyPanel);
-            func_002BCA98(page);
-            func_002BCAB0(page);
+            mnuReleaseAndRefreshWindowSlots(page);
+            mnuRefreshPartyPanelBars(page);
         }
         return 2;
     }

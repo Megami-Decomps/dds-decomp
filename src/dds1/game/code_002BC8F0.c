@@ -1070,10 +1070,12 @@ void func_002BE728(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY,
 
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BE8A8);
 
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
+
 void effSelectPresetAndDispatch(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4, u32 arg5, u32 presetMode, u32 presetValue) {
     effSelectPresetByKind(presetMode, presetValue);
-    uiDrawGradientColorRect(arg0, arg1, arg2, arg3, arg4, arg5, presetValue);
+    uiDrawGradientColorRect(arg0, arg1, arg2, arg3, arg4, (const u32 *)arg5, presetValue);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, presetValue);
 }
 

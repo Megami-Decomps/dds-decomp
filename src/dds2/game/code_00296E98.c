@@ -783,8 +783,8 @@ s32 brsTaskIsFadeIdle(void) {
 
 void mnuRefreshSelectedUnitPanels(u32 unused, BrsSkillPackageWork *menu) {
     mnuInitPartyPanelSlots(&menu->partyPanel);
-    func_002BCA98(&menu->partyWindow);
-    func_002BCAB0(&menu->partyWindow);
+    mnuReleaseAndRefreshWindowSlots(&menu->partyWindow);
+    mnuRefreshPartyPanelBars(&menu->partyWindow);
 }
 
 void mnuStaffCopyPanelBlock(DatPartyRecord *src, BrsSkillPackageWork *base) {
