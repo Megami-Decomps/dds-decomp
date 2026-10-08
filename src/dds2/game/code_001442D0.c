@@ -4138,15 +4138,15 @@ s32 func_00153560(s32 unusedArea, s32 unusedRoom) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
-
 extern FieldGridCoordPair D_003AA6A8[10];
 extern FieldGridCoordPair D_003AA6D0[10];
 extern FieldGridCoordPair D_003AA6F8[10];
 
 /* Select the target guide's route endpoint, motion state and model visibility. */
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
+
 void func_001536B8(s32 mode) {
     s32 previousMode;
 
