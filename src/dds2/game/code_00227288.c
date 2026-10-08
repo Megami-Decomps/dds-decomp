@@ -792,7 +792,7 @@ s32 btlConsumeReadyEventScriptResource(void) {
 
 void func_002292D8(void) {
     u16 flags;
-    u16 *entry;
+    DatPartyRecord *entry;
     u32 markedCount;
     u32 index;
     u32 activeCount;
@@ -801,12 +801,12 @@ void func_002292D8(void) {
     hasKindTwo = 0;
     markedCount = 0;
     activeCount = 0;
-    entry = (u16 *)((u32)datGameState + 0xa60);
+    entry = datGameState->party;
     index = 0;
     do {
-        flags = *entry;
+        flags = entry->flags;
         if ((flags & 1) != 0) {
-            if (entry[2] == 2) {
+            if (entry->unitId == 2) {
                 if ((flags & 2) != 0) {
                     return;
                 }
@@ -818,7 +818,7 @@ void func_002292D8(void) {
             }
         }
         index = index + 1;
-        entry = entry + 0xe2;
+        entry++;
     } while (index < 5);
     if (((activeCount < 4) && (markedCount < 3)) && (hasKindTwo)) {
         func_0011AEE0(2);
@@ -1124,4 +1124,3 @@ INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F90);
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F96);
 
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F98);
-
