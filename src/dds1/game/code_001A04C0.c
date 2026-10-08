@@ -597,3 +597,65 @@ INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16D8);
 
 INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16E8);
 
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2B4);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2B8);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2C0);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2C8);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2D0);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2D8);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2E0);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", btlRuntime);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2E8);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2F0);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2F8);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB300);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB308);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB310);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB318);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB320);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB328);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB330);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB338);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB340);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB348);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB350);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB358);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB360);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB368);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB370);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB378);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB380);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB388);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB390);
+
+INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB398);
+
