@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "btl_action.h"
 #include "btl.h"
@@ -450,7 +451,7 @@ BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
         task->taskId = 0x3A;
         break;
     }
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->identity;
     task->callback = func_001FD5C8;
     task->onFinish = effDecrementFirstCountdown;
@@ -484,7 +485,7 @@ BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->taskId = 0x3B;
     task->ownerId = owner->identity;
     task->callback = func_001FDA78;
@@ -544,7 +545,7 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->taskId = 0x40;
     task->ownerId = owner->identity;
     task->callback = btlPollActorOrEntryLabelTask;
@@ -579,7 +580,7 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 arg) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->taskId = 0x41;
     task->ownerId = owner->identity;
     task->callback = btlPollTimedTaskLink;
@@ -653,7 +654,7 @@ BtlRuntimeTask *btlCreateEffObjA(BtlUnit *owner, s32 arg) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x42;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
@@ -698,7 +699,7 @@ BtlRuntimeTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x3C;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
@@ -738,7 +739,7 @@ BtlRuntimeTask *btlCreateEffObjC(BtlUnit *owner, s32 messageId) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x3D;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
@@ -761,7 +762,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->taskId = 0x3E;
     task->ownerId = owner->identity;
     task->callback = func_001FE658;
@@ -798,7 +799,7 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedPresentation(BtlUnit *owner, s32 messag
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->taskId = 0x3F;
     task->ownerId = owner->identity;
     task->callback = btlPollTimedPresentationTask;
@@ -831,7 +832,7 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x43;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
@@ -876,7 +877,7 @@ BtlRuntimeTask *btlCreateEffectTask44(BtlUnit *owner) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->taskId = 0x44;
     task->ownerId = owner->identity;
     task->callback = btlWaitEffectTask;
