@@ -48,7 +48,6 @@ extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern void func_00260020();
 extern s32 mnuCampHasEligibleOwnedItems();
-extern struct MenuListNode *func_002B86E8(struct MenuList *);
 extern s32 D_003CE14C[];
 extern u8 D_003CE620[];
 extern u8 D_003CE400[];
@@ -773,7 +772,7 @@ s32 evtUpdateSlotItemCompletionState(KwlnTask *task) {
     s32 itemId = ((MenuTerminalContext *)stateAddress)->window->list->cursor->camp.id;
     if (nextStage == 4) {
         if (datGameState->inventory.counts[itemId] == 0) {
-            func_002B86E8(((MenuTerminalContext *)stateAddress)->window->list);
+            mnuRemoveListCursorNode(((MenuTerminalContext *)stateAddress)->window->list);
         }
         if (((MenuTerminalContext *)stateAddress)->window->list->count == 0) {
             ((MenuTerminalContext *)stateAddress)->dispatchMode = 2;

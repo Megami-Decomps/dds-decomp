@@ -8039,16 +8039,52 @@ void func_002F99E0(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F99E8);
-
 /* Alternate particle handles share a header but occupy distinct slots. */
 typedef struct EffParticleShared {
-    u8 pad00[8];
+    u32 color;
+    u32 option;
     u32 state;
     u8 pad0C[0x98];
     BillObj *billHandle;  // 0xA4: retained billboard cloned from the source resource.
     struct EffExpandedList *reference; // 0xA8
 } EffParticleShared;
+
+u8 *func_002F99E8(FileJobPayload *source) {
+    EffParticleShared *work = sdfAllocSizeClassBlock(sizeof(EffParticleShared));
+    void *buffer;
+
+    memset(work, 0, sizeof(EffParticleShared));
+    work->color = 0x80808080;
+    work->billHandle = NULL;
+    work->reference = NULL;
+    if (source == NULL) {
+        return (u8 *)work;
+    }
+    work->option = source->option;
+    buffer = fileResolvePrimaryBuffer(source);
+    memcpy(work->pad0C, buffer, sizeof(work->pad0C));
+    buffer = fileResolveSecondaryBuffer(source);
+    if (buffer != NULL) {
+        switch (source->primary.selector) {
+        case 1:
+            work->billHandle = billCreateIndexed(0, (u32)buffer);
+            break;
+        case 2:
+            work->billHandle = billCreateIndexed(1, (u32)buffer);
+            break;
+        case 4:
+            work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
+            break;
+        case 7:
+            work->reference = func_002DDF48((u32)buffer);
+            break;
+        }
+        if (work->billHandle != NULL) {
+            billMarkKindOneFlag(work->billHandle);
+        }
+    }
+    return (u8 *)work;
+}
 
 void effReleaseParticleResources(u32 *p) {
     BillObj *billboard = ((EffParticleShared *)p)->billHandle;
