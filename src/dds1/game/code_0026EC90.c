@@ -20,7 +20,8 @@ extern char D_003B1168[]; /* "staffProc" */
 
 extern u8 D_0037B168[];
 
-extern u32 mnuMovieDrawTask;
+extern KwlnTask *mnuMovieDrawTask;
+extern KwlnTask *kwlnTaskCreate();
 
 extern u16 mnuMovieTaskState;
 
@@ -208,7 +209,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy((KwlnTask *)mnuMovieDrawTask, 0);
+    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 
