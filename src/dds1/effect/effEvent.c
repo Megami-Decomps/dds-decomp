@@ -124,7 +124,7 @@ extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
-extern EffResourceRectWork *effCloneResourceTemplate(void *arg);
+extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
 extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
@@ -762,7 +762,7 @@ void effInitCh75Id(void) {
 void effInitWorks(void) {
     effBlurPixelWork = effCloneBlurTemplate(D_003558D8);
     effFilterBlurWork = effBlurCreateScatterWork((EffBlurScatterParams *)D_003558A8);
-    effTexturedSquareWork = effCloneResourceTemplate(D_00355948);
+    effTexturedSquareWork = effCloneResourceTemplate((EffResourceRectParams *)D_00355948);
     effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_00355970);
     effGetCh76Work()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }

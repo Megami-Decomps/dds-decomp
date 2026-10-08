@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff.h"
 #include "eff_blur.h"
+#include "sdf_chip.h"
 
 extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
@@ -87,8 +88,8 @@ EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
     return dst;
 }
 
-void func_0018FC88(void) {
-    sdfReleaseChipBlock();
+void func_0018FC88(EffResourceRectWork *work) {
+    sdfReleaseChipBlock(work);
 }
 
 
