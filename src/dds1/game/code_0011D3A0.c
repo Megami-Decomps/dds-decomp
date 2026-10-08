@@ -2504,7 +2504,7 @@ s32 fldProcSequence(void) {
             blur.y = 0;
             blur.positionSpread = 0x100;
             blur.size = 200;
-            D_003BABE4 = func_00186F90(&blur);
+            D_003BABE4 = effBlurCreateScatterWork(&blur);
         } else if (coordinateFlags & 0x80) {
             blur.count = 60;
             blur.delaySpread = 15;
@@ -2517,7 +2517,7 @@ s32 fldProcSequence(void) {
             blur.y = 0;
             blur.positionSpread = 0x100;
             blur.size = 136;
-            D_003BABE4 = func_00186F90(&blur);
+            D_003BABE4 = effBlurCreateScatterWork(&blur);
         }
         kwlnFadeStartOut(0);
         fldPrepareSceneBgmArchive();

@@ -1725,7 +1725,9 @@
 0x0018EA60	effBlurSetHandle	inferred	Stores a handle at offset 0x2c of the blur filter.
 0x0018EA68	effBlurAcquireHandle	inferred	Obtains a resource of type two and stores its handle on the filter.
 0x0018EA98	effBlurInitializeScatterSlot	inferred	confidence=high; matched-C; src/dds2/effect/effBlur_Filter.c:144:func_0018EA98; Randomizes the scatter slot delay and center, initializes its angle/color/options, and builds the screen-centered rectangle from the configured size.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x0018EBC8	effBlurCreateScatterWork	inferred	Paired factory allocates EffBlurScatterWork and initializes its 100 scatter slots from EffBlurScatterParams.
 0x0018ECB8	effBlurReleaseFirstResource	inferred	Releases the 0x30 resource of the first blur-filter variant.
+0x0018ECD0	effBlurStepScatterSlotsAndDraw	inferred	Paired update advances scatter slots, computes UV displacement and alpha, appends active rectangle packets, and submits the list.
 0x0018EED8	effBlurCopyParamsKeepHeader	inferred	twin of DDS1 0x001872A0 [names_M71_ItfBlur.tsv]
 0x0018EF40	effBlurSetSecondSetting	inferred	Sets the 0x2c work setting for the second blur-filter variant.
 0x0018EF48	effBlurAcquireSecondHandle	inferred	Acquires the second variant's 0x2c handle from func_00159BB8(2).
