@@ -1724,11 +1724,11 @@ typedef struct EffFrameState {
 
 void effClearBillFrames(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -1747,23 +1747,16 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
-    ((EffFrameState *)node)->entries = body;
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 0, handle);
+    ((EffBillFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->entries = body;
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 0, handle);
     return node;
 }
 
-/* Shared billboard work prefix: retained references and the backing allocation. */
-typedef struct EffBillOwnedWork {
-    u32 reserved;
-    u32 references; /* 0x04 */
-    u32 allocation; /* 0x08 */
-} EffBillOwnedWork;
-
 /* Release the frame node's shared tracks and backing allocation. */
 void effReleaseBillFrameNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillOwnedWork *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E0900);
@@ -1821,11 +1814,11 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
 
 void billResetCellIndices(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -1844,15 +1837,15 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, handle);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
 }
 
 void billReleaseCellNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E11D0);
@@ -1901,11 +1894,11 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
 
 void billResetParticleIndices(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -1924,15 +1917,15 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, handle);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
 }
 
 void billReleaseParticleNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E1BB0);
@@ -1981,11 +1974,11 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
 
 void effClearAnimatedFrames(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2013,7 +2006,7 @@ u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
 void effInitializeAlternatingTransformRows(u8 *work, u8 *descriptor) {
     u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
-        f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
+        f32 *row = (f32 *)((EffBillFrameState *)work)->asset->columns;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -2044,7 +2037,7 @@ extern u8 *billAllocateAnimatedTransformEntries();
 u8 *billCreateAnimatedTransform(EffBillAnimatedFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocateAnimatedTransformEntries(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
@@ -2054,14 +2047,14 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocateAnimatedTransformEntries(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
 
 void billReleaseAlternatingTransformNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillOwnedWork *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E26A0);
@@ -2110,11 +2103,11 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
 
 void billResetEmitterIndices(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2132,7 +2125,7 @@ u8 *billAllocEmitterNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -2140,7 +2133,7 @@ u8 *billAllocEmitterNode(u8 *config) {
 void billInitializeEmitterRows(u8 *work, u8 *descriptor) {
     u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
-        f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
+        f32 *row = (f32 *)((EffBillFrameState *)work)->asset->columns;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -2171,7 +2164,7 @@ extern u8 *billAllocEmitterNode();
 u8 *billCreateEmitterTransform(EffBillEmitterFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocEmitterNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
@@ -2181,14 +2174,14 @@ u8 *billCloneEmitterTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocEmitterNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
 
 void billReleaseEmitterNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillOwnedWork *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E3008);
@@ -2237,11 +2230,11 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
 
 void effClearStripFrames(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2259,7 +2252,7 @@ u8 *billAllocStripNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -2267,7 +2260,7 @@ u8 *billAllocStripNode(u8 *config) {
 void billInitializeStripRows(u8 *work, u8 *descriptor) {
     u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
-        f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
+        f32 *row = (f32 *)((EffBillFrameState *)work)->asset->columns;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -2298,7 +2291,7 @@ extern u8 *billAllocStripNode();
 u8 *billCreateStripTransform(EffBillStripFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocStripNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
     billInitializeStripRows(work, descriptor);
     return work;
 }
@@ -2308,14 +2301,14 @@ u8 *billCloneStripTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocStripNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
     billInitializeStripRows(work, descriptor);
     return work;
 }
 
 void billReleaseStripNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillOwnedWork *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E39B0);
@@ -2364,11 +2357,11 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
 
 void billResetTrailIndices(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2388,13 +2381,13 @@ u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
     body += headerSize;
     *(u8 **)(node + 8) = base;
     *(u8 **)node = body;
-    ((EffBillOwnedWork *)node)->references = effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 0, handle);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 0, handle);
     return node;
 }
 
 void billReleaseTrailNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillOwnedWork *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4320);
@@ -2443,11 +2436,11 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
 
 void billResetQuadIndices(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
-    u8 *descriptor = ((EffFrameState *)source)->asset;
-    u8 *entry = ((EffFrameState *)source)->entries;
+    EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
+    u8 *entry = ((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
-    memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
+    memset(descriptor->buffer, 0, descriptor->rows * 0x10);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -2465,7 +2458,7 @@ u8 *billAllocQuadNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -2473,7 +2466,7 @@ u8 *billAllocQuadNode(u8 *config) {
 void billInitializeQuadRows(u8 *work, u8 *descriptor) {
     u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
-        f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
+        f32 *row = (f32 *)((EffBillFrameState *)work)->asset->columns;
         u32 index;
 
         for (index = 0; index < count; index++, row += 8) {
@@ -2504,7 +2497,7 @@ extern u8 *billAllocQuadNode();
 u8 *billCreateQuadTransform(EffBillQuadFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocQuadNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
@@ -2514,14 +2507,14 @@ u8 *billCloneQuadTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocQuadNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
+    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
 
 void billReleaseQuadNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillOwnedWork *)work)->allocation));
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4E80);
@@ -2680,23 +2673,6 @@ void effSetActiveInstanceColor(s32 work, u32 value) {
 void effSetActiveInstanceMatrixComponent(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
-
-typedef struct EffTrackSet {
-    u32 type;      // 0x00
-    u32 color;     // 0x04
-    s32 rows;      // 0x08
-    u16 kind;      // 0x0C
-    u8 pad_0E[2];
-    s32 count;     // 0x10
-    u8 flag;       // 0x14
-    u8 pad_15[3];
-    void *shared;    // 0x18: optional retained reference
-    u8 *buffer;    // 0x1C
-    u8 *columns;   // 0x20
-    u8 *tail;      // 0x24
-    s32 *handle;   // 0x28
-    u8 *allocation; // 0x2C
-} EffTrackSet;
 
 extern s32 *sdfCreateAssetWithDrawEntries(void);
 

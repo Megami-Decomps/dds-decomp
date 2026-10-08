@@ -46,14 +46,19 @@ typedef struct EffBillOutputHeader {
 
 typedef struct EffBillFrameHeader {
     EffBillOutputHeader output;
-    u8 unk40[0x16];
+    u8 unk40[4];
+    f32 fadeInFraction;
+    f32 fadeOutFraction;
+    s32 lifetime;
+    s32 spawnCount;
+    u8 respawn;
+    u8 spawnAllOnStart;
     u8 mode;
     u8 pad57;
 } EffBillFrameHeader;
 
 /* DDS2 003E9950 / DDS1 0037E8A0 resource kinds 1..8 copy the following
- * record lengths. Only the header and animated-duration word are recovered;
- * the remaining bytes are still serialized data, not matching scratch space. */
+ * record lengths. Unrecovered bytes remain serialized data. */
 typedef struct EffBillFrameConfig {
     EffBillFrameHeader frame;
     u8 unk58[0x28];
@@ -61,8 +66,58 @@ typedef struct EffBillFrameConfig {
 
 typedef struct EffBillCellConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x34];
+    u32 colorA;
+    u32 colorB;
+    f32 extent;
+    u8 unk64[4];
+    f32 extentJitter;
+    f32 radius;
+    f32 radiusJitter;
+    f32 centerOffset;
+    f32 centerOffsetJitter;
+    f32 velocity;
+    f32 velocityJitter;
+    f32 acceleration;
+    u8 reverse;
+    u8 pad89[3];
 } EffBillCellConfig; /* kind 2, 0x8C */
+
+/* Track-set allocations end with this 0x30-byte header. Kind selects the
+ * geometry and optional column strides; tail follows the geometry buffer. */
+typedef struct EffTrackSet {
+    u32 type;
+    u32 color;
+    s32 rows;
+    u16 kind;
+    u8 pad0E[2];
+    s32 count;
+    u8 flag;
+    u8 pad15[3];
+    void *shared;
+    u8 *buffer;
+    u8 *columns;
+    u8 *tail;
+    s32 *handle;
+    u8 *allocation;
+} EffTrackSet;
+
+/* Resource kinds 1..8 allocate sixteen bytes before their entry array. */
+typedef struct EffBillFrameState {
+    u8 *entries;
+    EffTrackSet *asset;
+    u32 allocation;
+    u32 unk0C;
+} EffBillFrameState;
+
+typedef struct EffBillCellEntry {
+    s32 age;
+    f32 velocity;
+    f32 angle;
+    f32 radiusA;
+    f32 radiusB;
+    f32 centerOffset;
+    f32 extent;
+} EffBillCellEntry;
 
 typedef struct EffBillParticleConfig {
     EffBillFrameHeader frame;
