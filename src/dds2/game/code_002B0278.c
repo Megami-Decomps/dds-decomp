@@ -2122,7 +2122,7 @@ s32 ptySkillMenuApplyFieldUseAndCost(id, context)
         return 0;
     }
     if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
-        mnuConsumeEntryCost(id, (u8 *)slotA);
+        mnuConsumeEntryCost(id, slotA);
         mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         func_002BCA98(window);
         func_002BCAB0(window);

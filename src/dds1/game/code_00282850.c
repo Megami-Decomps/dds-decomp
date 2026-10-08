@@ -1553,22 +1553,22 @@ s32 mnuIsEntryCostUnaffordable(u16 commandId, DatPartyRecord *actor) {
 }
 
 /* Deduct an affordable stored HP/MP cost; unhandled kinds succeed without a deduction. */
-s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
+s32 mnuConsumeEntryCost(s32 commandId, DatPartyRecord *actorEntry) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     u16 cost = command->costPercentage;
 
     switch (command->costMode) {
     case DAT_COMMAND_COST_MODE_HP:
-        if (((DatPartyRecord *)actorEntry)->hp < cost) {
+        if (actorEntry->hp < cost) {
             return 0;
         }
-        datAdjustCurrentHp(actorEntry, -cost);
+        datAdjustCurrentHp((u8 *)actorEntry, -cost);
         return 1;
     case DAT_COMMAND_COST_MODE_MP:
-        if (((DatPartyRecord *)actorEntry)->mp < cost) {
+        if (actorEntry->mp < cost) {
             return 0;
         }
-        datAdjustCurrentMp(actorEntry, -cost);
+        datAdjustCurrentMp((u8 *)actorEntry, -cost);
         return 1;
     default:
         return 1;
