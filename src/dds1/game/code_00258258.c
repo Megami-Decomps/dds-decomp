@@ -1,6 +1,7 @@
 #include "common.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_profile_progress.h"
+#include "sdf_grid.h"
 
 typedef struct MantraNeighborRecord {
     s32 kind;
@@ -174,12 +175,6 @@ void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
 }
 
 extern s32 mnuSceneResourceContext;
-typedef struct MantraPulseGrid MantraPulseGrid;
-
-typedef struct MantraPulseEntry {
-    s32 unk_0;
-    MnuMantraGridEntry *scene;
-} MantraPulseEntry;
 
 
 
@@ -189,13 +184,13 @@ extern void *func_002CB3B8(s32 arg0, s32 arg1);
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
 extern void func_00258EB8(MnuMantraGridEntry *entry);
 
-void func_002593E0(MnuProfileProgress *target, MantraPulseGrid *grid, MantraPulseEntry *entry) {
+void func_002593E0(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry) {
     void *scene;
     MnuMantraGridEntry *displayEntry;
     u32 flags;
 
     scene = func_002CB3B8(mnuSceneResourceContext, 1);
-    displayEntry = entry->scene;
+    displayEntry = (MnuMantraGridEntry *)(u32)entry->value;
     displayEntry->frame += 1;
     if ((f32)displayEntry->frame > 60.0f) {
         displayEntry->frame = 0;

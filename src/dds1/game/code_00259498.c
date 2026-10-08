@@ -3,6 +3,7 @@
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
+#include "sdf_grid.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -22,12 +23,6 @@ extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
 typedef s16 MnuVariantSpritePlacement[6];
 
-typedef struct MantraPulseEntry {
-    s32 unk00;
-    MnuMantraGridEntry *scene;
-} MantraPulseEntry;
-
-typedef struct MantraPulseGrid MantraPulseGrid;
 extern MnuVariantSpritePlacement D_0036B7F0[];
 extern s32 mnuSceneResourceContext;
 extern void *func_002CB3B8(s32, s32);
@@ -41,8 +36,8 @@ INCLUDE_ASM(const s32, "game/code_00259498", func_00259498);
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A0);
 
 void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
-                   MnuProfileProgress *profileOwner, MantraPulseGrid *grid,
-                   f32 scaleX, f32 scaleY, MantraPulseEntry *entry,
+                   MnuProfileProgress *profileOwner, SdfGrid *grid,
+                   f32 scaleX, f32 scaleY, SdfGridCell *entry,
                    s32 context) {
     u8 mappedIds[6] = { 5, 15, 45, 52, 63, 68 };
     MnuMantraGridEntry *scene;
@@ -56,7 +51,7 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
         s32 display;
 
         display = (s32)func_002CB3B8(mnuSceneResourceContext, 1);
-        scene = entry->scene;
+        scene = (MnuMantraGridEntry *)(u32)entry->value;
         pulse = 0.0f;
         scene->frame++;
         if ((f32)scene->frame > 60.0f) {
@@ -106,16 +101,6 @@ typedef struct MantraPrerequisiteState {
     u32 unk04;
     s32 state;
 } MantraPrerequisiteState;
-
-struct MantraPulseGrid {
-    u8 pad00[4];
-    MantraPulseEntry *entries;
-    u8 pad08[0xC];
-    s32 stride;
-    void (*drawEntry)(s32, s32, s32, MantraPulseGrid *, MantraPulseEntry *, s32);
-    u8 pad1C[0x14];
-    MantraPrerequisiteState *prerequisites;
-};
 
 typedef struct MantraPrerequisiteRecord {
     u32 unk00;
@@ -184,8 +169,8 @@ extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 /* Retail clears four prerequisite flag words at +0x84, then stores results
  * at +0xE4 without reading them; preserve this original write-only work. */
-void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
-                   MantraPulseEntry *entry, s32 context) {
+void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
+                              SdfGridCell *entry, s32 context) {
     u32 prerequisiteFlags[4];
     MnuMantraGridEntry *scene;
     MnuProfileProgress *selection;
@@ -197,12 +182,12 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
     u32 flags;
     u32 color;
 
-    scene = entry->scene;
+    scene = (MnuMantraGridEntry *)(u32)entry->value;
     if (scene == NULL) {
         return;
     }
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    states = grid->prerequisites;
+    states = (MantraPrerequisiteState *)(u32)grid->userData;
     display = func_002CB3B8(mnuSceneResourceContext, 1);
     record = &D_0036AE80[scene->sceneId];
     alpha = display->alpha;
