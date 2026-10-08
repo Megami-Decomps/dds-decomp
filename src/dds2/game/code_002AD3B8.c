@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -39,7 +40,6 @@ extern char D_00437BD8[];
 extern s32 D_003E7400[];
 extern s32 func_002BDA50();
 extern s32 func_002BDA78();
-extern s32 itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
@@ -620,7 +620,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
     char captionText[16];
     s32 fontHandle;
 
-    itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
+    itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, (struct EffectSlotSet *)(u32)((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
     if (entryId != 0) {
         func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);

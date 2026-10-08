@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_transform.h"
 #include "fpu.h"
@@ -191,8 +192,6 @@ extern void func_00108EC0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32,
 /* Resource bank, entry index, X offset, Y offset. */
 extern s32 D_00400DF0[][4];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
-extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
-
 #define SDF_SPRITE(index) (((EffectSlotSet *)sdfInstalledSpriteSlots[D_00400DF0[index][0]])->workEntries + D_00400DF0[index][1])
 
 
@@ -901,7 +900,7 @@ void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2,
     itfDrawGridWithResolvedSlot((x + D_00400DF0[placementIndex][2]) << 4,
                                 (y + D_00400DF0[placementIndex][3]) << 3,
                                 z, flags,
-                                sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
+                                (EffectSlotSet *)(u32)sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
                                 D_00400DF0[placementIndex][1], context);
     SDF_SPRITE(placementIndex)->geometry.cornerColors[0] = SDF_SPRITE(placementIndex)->savedColors[0];
     SDF_SPRITE(placementIndex)->geometry.cornerColors[1] = SDF_SPRITE(placementIndex)->savedColors[1];
