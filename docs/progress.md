@@ -1,45 +1,104 @@
 # Reading progress
 
-- `python tools/progress.py` reports current **source coverage** after splitting:
-  game functions and their retail code bytes that no longer use `INCLUDE_ASM`.
-  This inventory does not compile or independently verify the functions.
-- [decomp.dev](https://decomp.dev/Megami-Decomps/dds-decomp) uses the generated **objdiff comparison reports**.
-  Exact matching credits only functions with a 100% comparison result; fuzzy
-  matching also gives partial credit for similar instructions. These are
-  different measures from source coverage.
-- The primary reports cover **Atlus game/engine EE code**, the C reconstruction
-  target. Their overall totals and **Atlus game/engine** category contain the
-  same units, including unfinished game functions. The headline and code-byte
-  badges measure matching bytes; the separate function badges measure matching
-  function counts. A short function and a large function contribute equally
-  only to the latter.
-- **Sony SDK / C runtime** code was linked from prebuilt libraries and remains
-  assembly. **VU1 microcode (binary)** is the binary `.vutext` program, which
-  splat exposes as a text unit rather than individual EE functions. These are
-  outside the primary game-code denominator and `tools/progress.py`, but stay
-  in the full-binary audit reports and local objdiff configurations.
-- The reports do not currently set objdiff's **complete/linked** metadata.
-  A zero there is not a measurement of source coverage or build success.
+## The headline: verified production C
 
-Objdiff bases are compiled separately with `-DSKIP_ASM`. ee-gcc 2.96 can select
-different instructions when the surrounding source or compiler pathnames
-change, so an accepted C function can score below 100% in that comparison.
-Relocatable objects can also represent the same linked address or literal with
-different relocation kinds. `tools/check_unit.py` checks against the linked
-retail executable and recognizes these matches. See
-[the matching workflow](CONTRIBUTING.md#3-verify) and
-[compiler context](idioms.md#code-that-changes-with-unrelated-text-context).
-The report generator corrects only explicitly configured relocation-only
-cases after resolving every source instruction against that same executable.
-Its checked source-object/fallback partition keeps assembly functions in the
-denominator with zero C credit. Other context discrepancies remain visible;
-use the unit checks and retail checksum build when validating a match.
+The [decomp.dev tracker](https://decomp.dev/Megami-Decomps/dds-decomp) and README
+badges measure **production-exact, source-owned game code**. A function receives
+its full retail byte size only when the normal production build proves that
+an eligible C function supplies those exact linked bytes. Unfinished
+`INCLUDE_ASM` functions stay in the denominator and receive zero C credit,
+even when their assembly is byte-identical. Function-count badges use the same
+ownership rule; a short and a large function each count once there.
 
-`ninja report` generates both views: `build/<v>/report.json` is the primary
-game-code report, and `build/<v>/report.all.json` retains game, SDK/runtime,
-and VU1 units with their separate categories. The root `report.json` combines
-both games' full-binary reports. CI publishes the primary files as
-`dds1_report` and `dds2_report` for decomp.dev and the full-binary files in the
-separate **build-audit** artifact on [the build run](https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml). Objdiff computes
-each report's scope and raw totals. `tools/reconcile_report.py` applies the
-bounded linked-word corrections to the primary, audit, and combined reports.
+The primary reports cover **Atlus game/engine EE code**, the C reconstruction
+target. SDK/runtime libraries and binary VU1 microcode are excluded from this
+denominator. They remain in the full-binary audit reports and local objdiff
+projects, under separate categories.
+
+## Why the old numbers disagreed
+
+`python tools/progress.py` inventories retail functions no longer named by an
+`INCLUDE_ASM` directive. It does not compile or verify C. This source coverage
+is useful, but cannot establish a match by itself.
+
+Local objdiff bases are compiled separately with `-DSKIP_ASM`. Removing the
+assembly changes compiler context; ee-gcc 2.96 can then select different
+instructions. Relocatable objects can also encode the same final address or
+literal with different relocation representations. GCC additionally gives
+nested C functions local suffixes such as `.0`, which can prevent name-based
+pairing. The production function can be exact in all these cases.
+
+Raw objdiff **exact** credit requires a function's entire comparison score to
+be 100%. A small comparison difference therefore removes the function's whole
+size from exact progress, not just the differing instructions. **Fuzzy** credit
+is a separate, partially weighted diagnostic.
+
+Earlier reports reconciled only the functions explicitly listed in a manual
+manifest. That fixed a bounded set of relocation differences but left the
+same systematic problem elsewhere. The production-proof pipeline replaces
+that exception list for every game-code unit automatically. Source coverage
+and production-exact coverage should agree when every inventoried function
+has eligible, complete production proof. They are not equated by assumption:
+assembly-heavy C wrappers can be ineligible, and missing or mismatched proof
+fails report generation.
+
+The first published increase from this change is an **accounting correction
+for already reconstructed, verified code**, not new decompilation work.
+Historical tracker points used the older comparison rule; the raw reports
+remain available to inspect that difference.
+
+## What the proof checks
+
+`tools/production_report.py` requires all of the following:
+
+1. A receipt written by the successful production compile binds its object,
+   compiler assembly, source, headers, assembly includes and per-unit flags.
+   A receipt written by the successful link binds those inputs, the linked
+   ELF and its map. Changed or missing inputs invalidate the evidence.
+2. Compiler-generated `.ent` declarations outside `#APP` blocks identify C
+   providers. Every other function must have an actual assembly include in
+   that compilation. Together they must exactly partition the report's
+   functions and sizes, and all linked game-code units must be present in
+   the report. The existing `check_unit` ASMBODY policy and documented
+   `libvu0`/`vu0 routine` exceptions also apply.
+3. Each production object's function span must match the unit's link-map
+   contribution, retail symbol address, size, and linked ELF symbol. Nested
+   `.N` names are accepted only when this full identity is unambiguous.
+4. Every linked function's bytes match retail. The complete file-backed load
+   image, including data and literal pools, must also equal the pinned retail
+   executable. The linker resolves relocations; the reporter never masks
+   instruction bits or maintains a second partial relocation implementation.
+
+A checksum pass alone is insufficient: an all-assembly build still earns zero
+C credit. Missing, stale, ambiguous or mismatching evidence is a build error,
+not permission to promote a function. This also means publishing reports
+requires the matching production build and locally available retail inputs.
+`ninja objdiff` and the raw report targets remain available for comparison
+work without production-proof publication.
+
+## Reports and diagnostics
+
+`ninja report` generates:
+
+- `build/<v>/report.json`: primary game-code report, published to decomp.dev as
+  `dds1_report` or `dds2_report`.
+- `build/<v>/report.all.json`: game, SDK/runtime and VU1 audit report.
+- `report.json`: combined full-binary report for the configured games.
+- Each report's `.raw` file: untouched SKIP_ASM objdiff comparison output.
+- Each report's `.proof.json` file: per-function C/assembly ownership,
+  production identity, exact result and original raw comparison score.
+
+The standard objdiff report schema, function sizes, denominators and category
+membership are preserved. Published game-function comparison fields represent
+production-exact C credit (100 or 0); the raw files retain the original fuzzy
+scores. Data comparison measures remain raw objdiff diagnostics and do not
+measure C ownership. Objdiff's complete/linked metadata is not set; a zero
+there does not describe source coverage or build success.
+
+CI includes the raw reports and non-binary function-proof summaries in the
+**build-audit** artifact on the [build run](https://github.com/Megami-Decomps/dds-decomp/actions/workflows/build.yml).
+Compile/link receipts and private retail or generated binary/assembly files
+are local build evidence and are not uploaded.
+
+For reconstruction checks, continue to use
+[`check_unit` and the retail checksum build](CONTRIBUTING.md#3-verify).

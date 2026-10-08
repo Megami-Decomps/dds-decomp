@@ -379,7 +379,7 @@ class ObjdiffProgressTests(unittest.TestCase):
         self.assertEqual(builds["report.json.raw"].kwargs, {
             "implicit": all_objects + ["objdiff.json"], "variables": {"project": "."},
         })
-        self.assertEqual(builds["report.json"].args, ("report.json", "reconcile_report", "report.json.raw"))
+        self.assertEqual(builds["report.json"].args, ("report.json", "production_report", "report.json.raw"))
         self.assertEqual(builds["report.json"].kwargs["variables"], {"scope": "all"})
         expected_reports = {"report.json"}
         for version, rows in self.units.items():
@@ -393,7 +393,7 @@ class ObjdiffProgressTests(unittest.TestCase):
                 self.assertEqual(builds[f"{out}.raw"].kwargs, {
                     "implicit": objects + [f"{project}/objdiff.json"], "variables": {"project": project},
                 })
-                self.assertEqual(builds[out].args, (out, "reconcile_report", f"{out}.raw"))
+                self.assertEqual(builds[out].args, (out, "production_report", f"{out}.raw"))
                 self.assertEqual(builds[out].kwargs["variables"], {"scope": version})
         self.assertEqual(set(builds["report"].args[2]), expected_reports)
         writer.rule.assert_any_call(
@@ -409,14 +409,15 @@ class ObjdiffProgressTests(unittest.TestCase):
                     writer, {version: self.units[version] for version in versions}
                 )
                 for call in writer.build.call_args_list:
-                    if call.args[1] != "reconcile_report":
+                    if call.args[1] != "production_report":
                         continue
                     scope = call.kwargs["variables"]["scope"]
                     expected_versions = versions if scope == "all" else (scope,)
                     dependencies = call.kwargs["implicit"]
                     for version in ("dds1", "dds2"):
                         for dependency in (
-                            f"build/{version}/base/src/{version}/effect/effPCPMisc.o",
+                            f"build/{version}/{configure.VERSIONS[version]['serial']}.ok",
+                            f"build/{version}/{configure.VERSIONS[version]['serial']}.elf.proof.json",
                             f"config/{version}/symbol_addrs.txt",
                             f"orig/{version}/{configure.VERSIONS[version]['serial']}",
                         ):
