@@ -185,7 +185,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern EffectConfig D_003AA884[];
 
-s32 billCreateIndexed(s32 kind, s32 index);
 
 
 
@@ -194,7 +193,7 @@ void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the BillObj payload is not an emitter. */
 u32 effRetainResource(s32 index) {
-    BillObj *effect = (BillObj *)billCreateIndexed(D_003AA884[index].billboardKind, 0);
+    BillObj *effect = billCreateIndexed(D_003AA884[index].billboardKind, 0);
     BillChildPayload *resource = ((BillObj *)effBillResourceOwners[index])->child;
     s32 references = resource->refCount;
 
@@ -237,7 +236,36 @@ void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", billSetBillboardMode);
+/* Narrow mode for the child kinds, or update each resolved animation entry. */
+void billSetBillboardMode(BillObj *effect, s32 mode) {
+    mode = (s16)mode;
+    switch (effect->kind) {
+    case 0:
+    case 3:
+        effect->requestedPacketListIndex = mode;
+        break;
+    case 1: {
+        s32 entryCount = effect->entryCount;
+        if (entryCount > 0) {
+            s32 remaining = entryCount;
+            BillOut *entries = effect->resolvedEntries;
+            s32 index = 0;
+            do {
+                BillAnimationEntry *entry = entries[index].entry;
+                u32 flags = entry->flags & ~6U;
+                entry->flags = flags;
+                if (mode == 2) {
+                    entry->flags = flags | 2;
+                } else if (mode == 3) {
+                    entry->flags = flags | 4;
+                }
+                index++;
+            } while (--remaining != 0);
+        }
+        break;
+    }
+    }
+}
 
 
 
@@ -464,7 +492,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A150);
 u8 *billCreateUnitObject(s32 entryIndex) {
     EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    instance->billboard = (BillObj *)billCreateIndexed(1, entryIndex);
+    instance->billboard = billCreateIndexed(1, entryIndex);
     instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     EE_MMI_UNIT_MATRIX(instance->transform);
