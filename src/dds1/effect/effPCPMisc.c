@@ -298,8 +298,6 @@ extern void effPcpBuildConcentricRingPoints(void *work, f32 radius);
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *obj, s32 state);
 extern void mdlStorePrimaryVectorVU(void *obj);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
-extern void effParamWorkCallback0(u32 handle, void *vec);
-extern void effParamWorkCallback3(u32 handle, u32 value);
 extern u8 D_00325828[];
 extern void mdlBroadcastMasked(void *obj, u32 mask);
 extern u32 func_00163540(u32 value);
@@ -401,7 +399,6 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
 extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
-extern void effParamWorkCallback2(u32 handle, void *mtx);
 extern void mdlAddEntryPlain(void *obj, s32 a, s32 b);
 
 typedef struct EffPCPTwinWork {
@@ -425,8 +422,8 @@ void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
 
     func_002DD688((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 6.283185f);
     VU0_STORE_MATRIX_NOCLOBBER(mtx);
-    effParamWorkCallback2((u32)work->pair[index][0], mtx);
-    effParamWorkCallback2((u32)work->pair[index][1], mtx);
+    effParamWorkCallback2(work->pair[index][0], mtx);
+    effParamWorkCallback2(work->pair[index][1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->pair[index][0]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->pair[index][1]), 0, 0);
     work->counter[index] = effMiscRand(D_0034DF38) % 10;
@@ -502,7 +499,6 @@ EffPCPTwinWork *effTwinEffectClone(EffPCPTwinWork *src) {
     return work;
 }
 
-extern void effParamWorkCallback1(u32 handle, f32 value);
 
 /* Per-frame update of the 8 twin slots: a slot whose countdown reached zero
  * fires its handle pair; after frame 0x18 its position is pushed to the shared
@@ -522,8 +518,8 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         obj[1] = effParamWorkGetData(work->pair[i][1]);
         VU0_LOAD_VF(vf10, work);
         mdlStorePrimaryVectorVU(obj[0]);
-        effParamWorkCallback1((u32)work->pair[i][0], work->scale * 1.5f);
-        effParamWorkCallback1((u32)work->pair[i][1], 1.75f);
+        effParamWorkCallback1(work->pair[i][0], work->scale * 1.5f);
+        effParamWorkCallback1(work->pair[i][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
         mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
         sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
@@ -532,7 +528,7 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         mdlStorePrimaryVectorVU(obj[1]);
         mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00325828);
         if (work->frame > 0x18) {
-            effParamWorkCallback0((u32)work->shared[i], posp);
+            effParamWorkCallback0(work->shared[i], posp);
             effParamWorkInvokeCallback(work->shared[i]);
         }
     }
@@ -558,8 +554,8 @@ void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
 
     func_002DD688((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 6.283185f);
     VU0_STORE_MATRIX_NOCLOBBER(mtx);
-    effParamWorkCallback2((u32)work->handle[index * 2], mtx);
-    effParamWorkCallback2((u32)work->handle[index * 2 + 1], mtx);
+    effParamWorkCallback2(work->handle[index * 2], mtx);
+    effParamWorkCallback2(work->handle[index * 2 + 1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, 0);
     work->offset[index] = effMiscRandUnitFloat(D_0034DF38) * 150.0f;
@@ -623,7 +619,6 @@ EffPCPStaggered *effCreatePairedResourceWork(EffPCPStaggered *source) {
     return work;
 }
 
-extern void effParamWorkCallback1(u32 handle, f32 value);
 
 void effPcpStaggerUpdate(EffPCPStaggered *work) {
     MdlCtx *obj[2];
@@ -641,8 +636,8 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             pos[1] = (work->y - work->offset[i] + 100.0f) * work->scale;
             VU0_LOAD_VF(vf10, pos);
             mdlStorePrimaryVectorVU(obj[0]);
-            effParamWorkCallback1((u32)work->handle[i * 2], work->scale * 1.5f);
-            effParamWorkCallback1((u32)work->handle[i * 2 + 1], 1.5f);
+            effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
+            effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
             mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
@@ -696,7 +691,7 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
         func_002DD708(angle);
     }
     VU0_STORE_MATRIX(mtx);
-    effParamWorkCallback2((u32)work->handle[i][j], mtx);
+    effParamWorkCallback2(work->handle[i][j], mtx);
     if ((j + 1) & 1) {
         work->state[i][j] = 0;
     } else {
@@ -767,7 +762,6 @@ EffPCPCrossWork *effCrossEffectClone(EffPCPCrossWork *src) {
     return work;
 }
 
-extern void effParamWorkCallback1(u32 handle, f32 value);
 
 /* Per-frame update of the cross effect: scales the anchor model and fires each
  * of the 12 slots whose countdown has expired. */
@@ -780,7 +774,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     anchor = effParamWorkGetData(work->base);
     VU0_LOAD_VF(vf10, work);
     mdlStorePrimaryVectorVU(anchor);
-    effParamWorkCallback1((u32)work->base, work->scale);
+    effParamWorkCallback1(work->base, work->scale);
     mdlProcessContextNodesAndTransforms(anchor, (s32)D_00325828);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
@@ -981,8 +975,8 @@ void func_00178790(EffPCPChargeWork *work) {
     bill = effParamWorkGetData(work->primaryHandle);
     model = effParamWorkGetData(work->secondaryHandle);
     scale = work->scale * 1.5f;
-    effParamWorkCallback1((u32)work->secondaryHandle, scale);
-    effParamWorkCallback0((u32)work->secondaryHandle, work->vectorWords);
+    effParamWorkCallback1(work->secondaryHandle, scale);
+    effParamWorkCallback0(work->secondaryHandle, work->vectorWords);
     mdlProcessContextNodesAndTransforms(model, (s32)D_00325828);
     captureRow = work->historyCount;
     if (captureRow < 25) {
@@ -1077,11 +1071,11 @@ void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
     obj = effParamWorkGetData(work->primaryHandle);
     VU0_LOAD_VF_MEMORY(vf10, work);
     mdlStorePrimaryVectorVU(obj);
-    effParamWorkCallback3((u32)work->secondaryHandle, work->color);
+    effParamWorkCallback3(work->secondaryHandle, work->color);
     mdlProcessContextNodesAndTransforms(obj, (s32)D_00325828);
     sdfLoadMapRecordPositionVector(obj->inner, 1);
     VU0_STORE_VF_TO_MEMORY(vf10, vec);
-    effParamWorkCallback0((u32)work->secondaryHandle, &vec);
+    effParamWorkCallback0(work->secondaryHandle, &vec);
     effParamWorkInvokeCallback(work->secondaryHandle);
 }
 
@@ -3544,20 +3538,19 @@ void effSpinSingleRelease(EffPCPSpinWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void effParamWorkCallback2(u32 handle, void *mtx);
 
 void effSpinEffectUpdate(EffPCPSpinWork *work) {
     EffParamWork *handle = work->handle0;
     u128 mtx[4];
 
-    effParamWorkCallback0((u32)handle, work);
-    effParamWorkCallback1((u32)handle, work->scale);
-    effParamWorkCallback3((u32)handle, work->color);
+    effParamWorkCallback0(handle, work);
+    effParamWorkCallback1(handle, work->scale);
+    effParamWorkCallback3(handle, work->color);
     func_002DD688(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(mtx);
-    effParamWorkCallback2((u32)handle, mtx);
+    effParamWorkCallback2(handle, mtx);
     effParamWorkInvokeCallback(handle);
     work->frame++;
 }
@@ -3621,18 +3614,18 @@ void effSpinPairUpdateDelayed(EffPCPSpinWork *work) {
 
     handle[0] = work->handle0;
     handle[1] = work->handle1;
-    effParamWorkCallback0((u32)handle[0], work);
-    effParamWorkCallback0((u32)handle[1], work);
-    effParamWorkCallback1((u32)handle[0], work->scale);
-    effParamWorkCallback1((u32)handle[1], work->scale);
-    effParamWorkCallback3((u32)handle[0], work->color);
-    effParamWorkCallback3((u32)handle[1], work->color);
+    effParamWorkCallback0(handle[0], work);
+    effParamWorkCallback0(handle[1], work);
+    effParamWorkCallback1(handle[0], work->scale);
+    effParamWorkCallback1(handle[1], work->scale);
+    effParamWorkCallback3(handle[0], work->color);
+    effParamWorkCallback3(handle[1], work->color);
     func_002DD688(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
-    effParamWorkCallback2((u32)handle[0], mtx);
-    effParamWorkCallback2((u32)handle[1], mtx);
+    effParamWorkCallback2(handle[0], mtx);
+    effParamWorkCallback2(handle[1], mtx);
     effParamWorkInvokeCallback(handle[0]);
     if (work->frame >= 0x1F) {
         effParamWorkInvokeCallback(handle[1]);
@@ -3697,18 +3690,18 @@ void effPcpUpdateSpinningPair(EffPCPSpinWork *work) {
 
     handle[0] = work->handle0;
     handle[1] = work->handle1;
-    effParamWorkCallback0((u32)handle[0], work);
-    effParamWorkCallback0((u32)handle[1], work);
-    effParamWorkCallback1((u32)handle[0], work->scale);
-    effParamWorkCallback1((u32)handle[1], work->scale);
-    effParamWorkCallback3((u32)handle[0], work->color);
-    effParamWorkCallback3((u32)handle[1], work->color);
+    effParamWorkCallback0(handle[0], work);
+    effParamWorkCallback0(handle[1], work);
+    effParamWorkCallback1(handle[0], work->scale);
+    effParamWorkCallback1(handle[1], work->scale);
+    effParamWorkCallback3(handle[0], work->color);
+    effParamWorkCallback3(handle[1], work->color);
     func_002DD688(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
-    effParamWorkCallback2((u32)handle[0], mtx);
-    effParamWorkCallback2((u32)handle[1], mtx);
+    effParamWorkCallback2(handle[0], mtx);
+    effParamWorkCallback2(handle[1], mtx);
     effParamWorkInvokeCallback(handle[0]);
     if (work->frame >= 0x1F) {
         effParamWorkInvokeCallback(handle[1]);

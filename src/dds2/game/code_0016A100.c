@@ -28,12 +28,12 @@ typedef struct EffDispatchEntry {
     void (*dispatch)(void *);         /* 0x04 */
     void (*release)(void *);          /* 0x08 */
     void *(*duplicate)(void *);       /* 0x0C */
-    void *(*callback0)(void *);       /* 0x10 */
+    void (*callback0)(void *, void *);       /* 0x10 */
     void (*setScale)(void *, f32);    /* 0x14 */
-    void *(*callback2)(void *);       /* 0x18 */
-    void *(*callback3)(void *);       /* 0x1C */
-    void *(*callback4)(void *);       /* 0x20 */
-    void *(*callback5)(void *);       /* 0x24 */
+    void (*callback2)(void *, void *);       /* 0x18 */
+    void (*callback3)(void *, u32);       /* 0x1C */
+    void (*callback4)(void *, void *);       /* 0x20 */
+    void (*callback5)(void *, f32);       /* 0x24 */
 } EffDispatchEntry; /* 0x28 */
 
 
@@ -65,12 +65,6 @@ extern u16 mdlGetContextResourceGroup(MdlCtx *);
 
 extern u16 mdlGetContextResourceId(MdlCtx *);
 
-/* Extended work: a full-word kind, fallback-table index, and payload. */
-typedef struct EffParamWorkEx {
-    u32 kind;       /* 0x00 effect kind */
-    u32 tableIndex; /* 0x04 fallback index, retained for cloning */
-    void *payload;  /* 0x08 callback payload */
-} EffParamWorkEx; /* 0x0C */
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
 extern s32 btlGetRuntime(void);
@@ -131,7 +125,7 @@ typedef struct {
     f32 baseFirst;      /* 0x54 */
     f32 baseSecond;     /* 0x58 */
     ParSystem *system;  /* 0x5C: allocated cell system */
-    u32 handle;         /* 0x60 */
+    struct SdfMemBlock *allocation; /* 0x60: containing work allocation */
 } EffThunderWork4C; /* 0x64 */
 
 typedef struct EffBattleUnitColorCommand {
@@ -347,9 +341,9 @@ EffParamWork *effParamWorkDuplicate(EffParamWork *source) {
 }
 
 /* Optional compact-work operations, indexed by effect kind. */
-void effParamWorkCallback0(EffParamWork *work) {
+void effParamWorkCallback0(EffParamWork *work, void *source) {
     if (effParamWorkFactories[work->kind].callback0 != NULL) {
-        effParamWorkFactories[work->kind].callback0(work->payload);
+        effParamWorkFactories[work->kind].callback0(work->payload, source);
     }
 }
 
@@ -359,38 +353,38 @@ void effParamWorkCallback1(EffParamWork *work, f32 scale) {
     }
 }
 
-void effParamWorkCallback2(EffParamWork *work) {
+void effParamWorkCallback2(EffParamWork *work, void *matrix) {
     if (effParamWorkFactories[work->kind].callback2 != NULL) {
-        effParamWorkFactories[work->kind].callback2(work->payload);
+        effParamWorkFactories[work->kind].callback2(work->payload, matrix);
     }
 }
 
-void effParamWorkCallback3(EffParamWork *work) {
+void effParamWorkCallback3(EffParamWork *work, u32 value) {
     if (effParamWorkFactories[work->kind].callback3 != NULL) {
-        effParamWorkFactories[work->kind].callback3(work->payload);
+        effParamWorkFactories[work->kind].callback3(work->payload, value);
     }
 }
 
-void effParamWorkCallback4(EffParamWork *work) {
+void effParamWorkCallback4(EffParamWork *work, void *matrix) {
     if (effParamWorkFactories[work->kind].callback4 != NULL) {
-        effParamWorkFactories[work->kind].callback4(work->payload);
+        effParamWorkFactories[work->kind].callback4(work->payload, matrix);
     }
 }
 
-void effParamWorkCallback5(EffParamWork *work) {
+void effParamWorkCallback5(EffParamWork *work, f32 sizeInput) {
     if (effParamWorkFactories[work->kind].callback5 != NULL) {
-        effParamWorkFactories[work->kind].callback5(work->payload);
+        effParamWorkFactories[work->kind].callback5(work->payload, sizeInput);
     }
 }
 
-/* Select billboard kind zero; the index is passed through without validation. */
-void func_0016A890(u32 index) {
-    billCreateIndexed(0, index);
+/* Create a child billboard from its resource data. */
+BillObj *effParamCreateChildBillboard(void *resourceData) {
+    return billCreateIndexed(0, (u32)resourceData);
 }
 
-/* Select billboard kind one; the index is passed through without validation. */
-void func_0016A8B0(u32 index) {
-    billCreateIndexed(1, index);
+/* Create an animated billboard from its serialized resource data. */
+BillObj *effParamCreateAnimatedBillboard(void *resourceData) {
+    return billCreateIndexed(1, (u32)resourceData);
 }
 
 /* Use the same floating value for both billboard child-scale components. */
@@ -493,8 +487,8 @@ void func_0016AB30(void *work, u32 color) {
 
 extern EffDispatchEntry effParameterWorkOperations[];
 extern void **D_003AFFD0[];
-extern u32 func_0016AEA0(u32 *word);
-extern u32 func_0016AEA8(s32 address);
+extern u32 effParamDescriptorGetKind(const u32 *descriptor);
+extern u32 effParamDescriptorGetTableIndex(const u32 *descriptor);
 
 /* Create extended work from a kind/index descriptor. Kinds with a duplicate
  * callback consume the raw descriptor; other kinds use the fallback table. */
@@ -502,8 +496,8 @@ EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     EffParamWorkEx *work;
 
     work = sdfAllocSizeClassBlock(EFF_PARAM_EXTENDED_WORK_BYTES);
-    work->kind = func_0016AEA0(source);
-    work->tableIndex = func_0016AEA8((s32)source);
+    work->kind = effParamDescriptorGetKind(source);
+    work->tableIndex = effParamDescriptorGetTableIndex(source);
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {
         work->payload = effParameterWorkOperations[work->kind].create(D_003AFFD0[work->kind][work->tableIndex]);
     } else {
@@ -540,9 +534,9 @@ EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *source) {
 
 /* Optional extended-work dispatches; preserve the native column order,
  * including the reversed fourth/fifth column addresses. */
-void effParamWorkExCallback0(EffParamWorkEx *work) {
+void effParamWorkExCallback0(EffParamWorkEx *work, void *source) {
     if (effParameterWorkOperations[work->kind].callback0 != NULL) {
-        effParameterWorkOperations[work->kind].callback0(work->payload);
+        effParameterWorkOperations[work->kind].callback0(work->payload, source);
     }
 }
 
@@ -552,38 +546,38 @@ void effParamWorkExCallback1(EffParamWorkEx *work, f32 scale) {
     }
 }
 
-void effParamWorkExCallback2(EffParamWorkEx *work) {
+void effParamWorkExCallback2(EffParamWorkEx *work, void *matrix) {
     if (effParameterWorkOperations[work->kind].callback2 != NULL) {
-        effParameterWorkOperations[work->kind].callback2(work->payload);
+        effParameterWorkOperations[work->kind].callback2(work->payload, matrix);
     }
 }
 
-void effParamWorkExCallback3(EffParamWorkEx *work) {
+void effParamWorkExCallback3(EffParamWorkEx *work, void *matrix) {
     if (effParameterWorkOperations[work->kind].callback4 != NULL) {
-        effParameterWorkOperations[work->kind].callback4(work->payload);
+        effParameterWorkOperations[work->kind].callback4(work->payload, matrix);
     }
 }
 
-void effParamWorkExCallback4(EffParamWorkEx *work) {
+void effParamWorkExCallback4(EffParamWorkEx *work, u32 value) {
     if (effParameterWorkOperations[work->kind].callback3 != NULL) {
-        effParameterWorkOperations[work->kind].callback3(work->payload);
+        effParameterWorkOperations[work->kind].callback3(work->payload, value);
     }
 }
 
-void effParamWorkExCallback5(EffParamWorkEx *work) {
+void effParamWorkExCallback5(EffParamWorkEx *work, f32 sizeInput) {
     if (effParameterWorkOperations[work->kind].callback5 != NULL) {
-        effParameterWorkOperations[work->kind].callback5(work->payload);
+        effParameterWorkOperations[work->kind].callback5(work->payload, sizeInput);
     }
 }
 
-/* Read the descriptor's full-word effect kind. */
-u32 func_0016AEA0(u32 *word) {
-    return *word;
+/* Read the descriptor's first word as the extended-work kind. */
+u32 effParamDescriptorGetKind(const u32 *descriptor) {
+    return descriptor[0];
 }
 
-/* Read the descriptor's full-word fallback-table index at +4. */
-u32 func_0016AEA8(s32 address) {
-    return *(u32 *)(address + 4);
+/* Read the descriptor's second word as its fallback table index. */
+u32 effParamDescriptorGetTableIndex(const u32 *descriptor) {
+    return descriptor[1];
 }
 
 /* Records follow a 16-byte header and have a 16-byte stride. Block offsets
@@ -626,15 +620,15 @@ EffParamWork *effParamCreateFromTable(void *table, s32 index) {
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
-    u32 allocationHandle = (u32)sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
-    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
+    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(allocation);
     u32 cellIndex;
 
     work->head = *source;
     work->cells = (EffThunderCell2C *)(work + 1);
     work->baseFirst = source->scaledFirst;
     work->baseSecond = source->scaledSecond;
-    work->handle = allocationHandle;
+    work->allocation = allocation;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     parSetCellDrawBucket(work->system, work->head.systemParam);

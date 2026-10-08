@@ -26,7 +26,6 @@
 
 extern void mnuCreateResourceTask(void);
 
-extern s32 func_0027B888(u32);
 
 extern s8 D_003BC3E1;
 
@@ -361,7 +360,7 @@ void mnuReleaseProgressWorkList(MenuTerminalWork *work) {
 /* Release the selected recovery panel, then pass its owning list to the follow-up. */
 void mnuReleaseSelectedProgressPanel(MenuTerminalWork *work) {
     mnuReleaseDualPercentPanel(work->list->selectedNode->panel);
-    func_0027B888((u32)work->list);
+    mnuRemoveListCursorNode((struct MenuList *)work->list);
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248E68);
