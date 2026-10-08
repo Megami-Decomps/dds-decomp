@@ -1403,7 +1403,66 @@ void func_002690A8(u32 mode, s32 context) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269230);
+typedef struct MnuTerminalPlacement {
+    s32 slot;
+    s32 x;
+    s32 y;
+} MnuTerminalPlacement;
+
+typedef struct MnuTerminalLayout {
+    MnuTerminalPlacement entries[3];
+} MnuTerminalLayout;
+
+extern const MnuTerminalLayout D_00424F88;
+
+/* Draw the terminal rows and step their visibility after the panel fade. */
+void func_00269230(s32 closing, MenuSlotState *state) {
+    MnuTerminalLayout layout = D_00424F88;
+    s32 row = 0;
+    s32 rowSlot;
+    s32 rowX;
+    s32 rowY;
+    BdWork *work;
+    u32 fade;
+
+    itfDrawGridWithResolvedSlot(layout.entries[1].x, layout.entries[1].y,
+        0, 0x80, (u32)state->resourceBank[0], layout.entries[1].slot,
+        MNU_TEXT_DRAW_PRIORITY);
+    rowSlot = layout.entries[2].slot;
+    rowX = layout.entries[2].x;
+    rowY = layout.entries[2].y;
+    for (; row < state->menuList->count; row++) {
+        itfDrawGridWithResolvedSlot(rowX, rowY, 0, 0, (u32)state->resourceBank[0],
+            rowSlot, MNU_TEXT_DRAW_PRIORITY);
+        rowY += 0xB0;
+    }
+    itfGridLookupValueOrDefault(state->resourceBank[0], rowSlot);
+    mnuCallInitWide(0x3B0, 0x3D8, 0, (s32)state->menuList,
+                    MNU_TEXT_DRAW_PRIORITY);
+    rowY = layout.entries[0].y;
+    itfDrawGridWithResolvedSlot(layout.entries[0].x, rowY - 0x50,
+        0, 0x80, (u32)state->resourceBank[0], layout.entries[0].slot,
+        MNU_TEXT_DRAW_PRIORITY);
+
+    work = state->resourceBank[0]->workEntries;
+    fade = ((u32)*(u8 *)&work[8].geometry.cornerColors[0] << 8) /
+           *(u8 *)&work[8].savedColors[0];
+    if (closing != 0) {
+        if (state->menuList->scale > 0) {
+            state->menuList->scale -= 0x40;
+        }
+        if (state->menuList->scale < 0) {
+            state->menuList->scale = 0;
+        }
+    } else if (fade == 0x100) {
+        if (state->menuList->scale < 0x100) {
+            state->menuList->scale += 0x40;
+        }
+        if (state->menuList->scale > 0x100) {
+            state->menuList->scale = fade;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F88);
 
@@ -1808,7 +1867,6 @@ s32 evtClearDispatchVisualFlag(KwlnTask *task) {
 
 extern void func_002690A8(u32, s32);
 
-extern void func_00269230(void);
 
 
 extern void mnuReleaseResourceGroup(s32);
