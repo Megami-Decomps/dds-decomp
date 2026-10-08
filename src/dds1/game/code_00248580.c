@@ -637,7 +637,6 @@ extern void mnuInitPartyPanelSlots(PartyPanel *);
 extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
 extern void mnuReleaseStaffMenuTextureHandles(u32 *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
-extern void mnuShutdownContext(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 

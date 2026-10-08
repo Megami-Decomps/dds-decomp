@@ -1568,13 +1568,13 @@ void mnuReleaseHandles(MenuPageSlot *page) {
     }
 }
 
-void mnuShutdownContext(s32 context) {
+void mnuShutdownContext(MenuPageWindow *window) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        mnuReleaseHandles(&((MenuPageWindow *)context)->slots[i]);
+        mnuReleaseHandles(&window->slots[i]);
     }
-    mnuReleasePartyPanelSpriteTextures(context);
-    mnuDestroyWindowOwnedLists(context);
+    mnuReleasePartyPanelSpriteTextures((s32)window);
+    mnuDestroyWindowOwnedLists(window);
 }
 
 void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
