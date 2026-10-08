@@ -11,6 +11,7 @@ extern void func_002DA3C0(void *, u32);
 extern void func_002DA3F0(void *, u32);
 #include "eff.h"
 #include "par_table.h"
+#include "par_kind_api.h"
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_FRAME_MODE_BITS 6
@@ -967,7 +968,6 @@ typedef struct EffRingEmitter {
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void parDispatchKindInit(void *work, s32 index);
 
 /* Seed one ring packet's phase, radius and vertical motion, then its subeffect. */
 void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
@@ -1012,10 +1012,8 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
-extern void parUpdateSharedScaleAndDelta(void *sub);
 extern u32 func_00159AB8(void *fade, u32 color, s32 age);
 extern u32 effParModulateColors(u32 color, u32 mask);
-void parDispatchKindUpdate(void *work, s32 index, u32 color, f32 speed);
 
 /* Advance ring motion and ages; repeat by tagging packets for the next update.
  * completedCount counts expired nonrepeating packets in this update only. */
@@ -2419,7 +2417,7 @@ void func_001575D0(EffTemplatePacketList *effect) {
     f32 radius;
     f32 velocityScale;
 
-    parUpdateSharedScaleAndDelta(&effect->kind);
+    parUpdateSharedScaleAndDelta((ParKindState *)&effect->kind);
     lifetimeFrames = (s32)effect->packetTag;
     targetRadius = effect->targetRadius;
     radiusStep = (targetRadius - effect->recordScale) / lifetimeFrames;
@@ -2512,7 +2510,7 @@ void func_001575D0(EffTemplatePacketList *effect) {
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, previousPosition);
                 VU0_LOAD_VF(vf10, packet->pos);
-                parDispatchKindUpdate(&effect->kind, index, packet->color, packet->speed);
+                parDispatchKindUpdate((ParKindState *)&effect->kind, index, packet->color, packet->speed);
             }
         }
         age++;
@@ -2520,7 +2518,7 @@ void func_001575D0(EffTemplatePacketList *effect) {
             if (repeatEnabled) {
                 age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->kind, index);
+                parDispatchKindInit((ParKindState *)&effect->kind, index);
                 completedCount++;
                 if (completedCount >= packetCount) {
                     effect->active = 0;

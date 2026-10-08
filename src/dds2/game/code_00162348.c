@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "par_kind_api.h"
 #include "par_draw_block.h"
 
 #include "eff.h"
@@ -98,13 +99,13 @@ extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
 extern s32 parObjGetMode();
 
-extern void func_001618E0(s32);
+extern void func_001618E0(struct ParTable *table, s32 index, u32 color, f32 speed);
 
-extern void parUpdateBillboardCrossStrip();
+extern void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color);
 
-extern void parUpdateBillboardCrossTriangle();
+extern void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color);
 
-extern void parUpdateTrackPolygonCrossAxes();
+extern void parUpdateTrackPolygonCrossAxes(s32 particle, s32 index, u32 color);
 
 extern void effBillSetEntryValue(s32, s32, u32);
 
@@ -413,19 +414,19 @@ void parUpdateSharedScaleAndDelta(ParKindState *obj) {
     VU0_STORE_VF($vf10, D_00451F30);
 }
 
-void parDispatchKindUpdate(ParKindState *work) {
+void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
     switch ((u16)work->kind) {
     case 1:
-        func_001618E0((s32)work->value.table);
+        func_001618E0(work->value.table, index, color, speed);
         return;
     case 2:
-        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem);
+        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem, index, color);
         return;
     case 3:
-        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system);
+        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system, index, color);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList);
+        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList, index, color);
         break;
     }
 }

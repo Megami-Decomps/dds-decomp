@@ -14,6 +14,7 @@ extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 #include "par_table.h"
+#include "par_kind_api.h"
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_VARIANT_MASK 0xFFFF
@@ -951,9 +952,6 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
 extern u32 effMiscRand(void *state);
-void parDispatchKindInit(void *work, s32 index);
-void parDispatchKindUpdate(void *work, s32 index, u32 color, f32 speed);
-extern void parUpdateSharedScaleAndDelta(void *sub);
 extern u32 func_001616A8(void *fade, u32 color, s32 age);
 
 typedef struct EffRingEmitter {
@@ -2401,7 +2399,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
     f32 radius;
     f32 velocityScale;
 
-    parUpdateSharedScaleAndDelta(&effect->kind);
+    parUpdateSharedScaleAndDelta((ParKindState *)&effect->kind);
     lifetimeFrames = (s32)effect->packetTag;
     targetRadius = effect->targetRadius;
     radiusStep = (targetRadius - effect->recordScale) / lifetimeFrames;
@@ -2494,7 +2492,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, previousPosition);
                 VU0_LOAD_VF(vf10, packet->pos);
-                parDispatchKindUpdate(&effect->kind, index, packet->color, packet->speed);
+                parDispatchKindUpdate((ParKindState *)&effect->kind, index, packet->color, packet->speed);
             }
         }
         age++;
@@ -2502,7 +2500,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             if (repeatEnabled) {
                 age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->kind, index);
+                parDispatchKindInit((ParKindState *)&effect->kind, index);
                 completedCount++;
                 if (completedCount >= packetCount) {
                     effect->active = 0;
