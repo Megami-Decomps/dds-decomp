@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_scene_work.h"
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 extern s32 func_002CB3B8(u32, u32);
@@ -8,7 +9,7 @@ extern s32 func_00255E08();
 extern void func_0024E5A0(s32, s32, s32, s32, s32, s32, f32, f32);
 extern void func_0025D2F8(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawMantraCostAfterListAdvance(s32, s32, s32, s32);
-extern void mnuChooseDisplaySpriteKindFromEntryFlags(s32, s32, s32);
+extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00254758(s32, s32, s32, s32, s32);
 
@@ -95,7 +96,8 @@ s32 mnuDrawMantraCostTransition(void) {
     default:
         break;
     }
-    mnuChooseDisplaySpriteKindFromEntryFlags(nodeNext, 0x80, 0x53);
+    mnuChooseDisplaySpriteKindFromEntryFlags((MenuSceneWork *)(u32)nodeNext,
+                                             0x80, 0x53);
     func_0024E260(0, 0, 0, 0x80, 0xD, 0x53);
     return 0;
 }
