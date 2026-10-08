@@ -506,35 +506,20 @@ void func_0025E288(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDi
     func_0025E460(lo, hi, display, ratio);
 }
 
-typedef struct CampListLayout {
-    s32 width0;
-    s32 width1;
-    s32 width2;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    u8 pad18[8];
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-} CampListLayout;
 
-void mnuInitializeCampListLayoutDefaults(CampListLayout *layout) {
-    layout->width0 = 150;
-    layout->width1 = 150;
-    layout->unk10 = 80;
-    layout->width2 = 150;
-    layout->unkC = 30;
-    layout->unk14 = 1;
-    layout->unk20 = 7;
-    layout->unk24 = 4;
-    layout->unk28 = 10;
-    layout->unk2C = 32;
-    layout->unk30 = 16;
-    layout->unk34 = 16;
+void mnuInitializeCampListLayoutDefaults(EvtBlendKey *layout) {
+    layout->w[0] = 150;
+    layout->w[1] = 150;
+    layout->x = 80;
+    layout->w[2] = 150;
+    layout->w[3] = 30;
+    layout->flagWord = 1;
+    layout->y[0] = 7;
+    layout->y[1] = 4;
+    layout->y[2] = 10;
+    layout->z[0] = 32;
+    layout->z[1] = 16;
+    layout->z[2] = 16;
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E390);
