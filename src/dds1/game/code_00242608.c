@@ -695,8 +695,8 @@ void mnuEnterCampSceneMenuState(CampScene *scene) {
     }
 }
 
-extern s32 kwlnHeldTextureReference;
-extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
+extern SdfTex *kwlnHeldTextureReference;
+extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 extern void func_00243BF0(CampScene *scene);
 extern void mnuShopSubmitDescriptor(CampScene *scene);
 extern void func_00243EC8(CampScene *scene);
@@ -762,7 +762,7 @@ void mnuShopSubmitDescriptor(CampScene *scene) {
 
     if (scene->descriptorResource != 0) {
         drawPacket = sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket(drawPacket, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, scene->descriptorResource, 0);
+        sdfCreateDescriptorPacket(drawPacket, (s32)kwlnHeldTextureReference->primaryResource, 0, 0, CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, scene->descriptorResource, 0);
         D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)drawPacket);
     }
 }
