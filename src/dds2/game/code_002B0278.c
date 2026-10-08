@@ -331,9 +331,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
-
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 

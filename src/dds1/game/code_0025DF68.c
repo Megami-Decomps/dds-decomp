@@ -172,7 +172,6 @@ extern s32 ptyCountBulletItem(s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_00197A98(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern char D_003BC4F0[];
 
 /* Draw the selected item quantity; bullets include matching party slot values. */

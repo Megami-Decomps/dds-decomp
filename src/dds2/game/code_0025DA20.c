@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -798,7 +799,7 @@ void mnuCampInitFontResource(EvtRuntime *scene) {
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
-    frFontQueueGlyphInSelectedSlot(scene->glyph);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -2109,7 +2110,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
         frFontSetChildColors(handle, 0x80808040);
         func_0019D550(handle, 0, flags);
-        frFontQueueGlyphInSelectedSlot(handle);
+        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
     }
 }
 
