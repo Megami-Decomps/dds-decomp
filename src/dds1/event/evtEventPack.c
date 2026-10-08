@@ -332,3 +332,4 @@ INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC368);
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC370);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC378);
+
