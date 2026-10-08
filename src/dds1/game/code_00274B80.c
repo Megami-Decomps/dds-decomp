@@ -2,15 +2,14 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
 #include "mnu_list.h"
 #include "dat_state.h"
 #include "kwln.h"
 #include "eff.h"
 #include "itf.h"
-struct MenuScrollPanel;
 extern u32 kwlnTaskGetUserValue();
 extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
-extern void mnuStoreScrollPanelSelectionAndGridPosition(struct MenuScrollPanel *, u32, u32, u32);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
@@ -265,7 +264,6 @@ extern void mnuClearListFlags();
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void evtStageTestInit(s32);
-extern void mnuActivatePanelAndConfigureGridResources(u32 *, s32, s32, s32);
 
 extern s32 func_002877A8(void);
 
@@ -519,7 +517,7 @@ s32 func_002755E0(KwlnTask *task) {
                sizeof(menu->panelSnapshots[i]));
     }
 
-    mnuActivatePanelAndConfigureGridResources((u32 *)context->display,
+    mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->display,
                                               context->panelResource, 0, 1);
     menu->fadeB = menu->fadeA = MNU_FULL_FADE;
     return 1;
@@ -538,7 +536,9 @@ s32 mnuShopReleaseResources(void) {
 void mnuPreparePartyPanelTransition(s32 menu) {
     mnuRestorePartyEntriesAndRefresh();
     mnuSetPopupEntryFlagged(menu + 0x54, (s32)D_0037CA58);
-    mnuActivatePanelAndConfigureGridResources(((CampMenuContext *)menu)->display, ((CampMenuContext *)menu)->displayVariant, 0, 1);
+    mnuActivatePanelAndConfigureGridResources(
+        (MenuScrollPanel *)(u32)((CampMenuContext *)menu)->display,
+        ((CampMenuContext *)menu)->displayVariant, 0, 1);
 }
 s32 func_00275920(s32 callback) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
@@ -591,7 +591,9 @@ s32 func_00275920(s32 callback) {
                 func_00280048((s32)&context->partyWindow);
             } else {
                 mnuSetPopupEntryFlagged((s32)popup, D_0037CA58);
-                mnuActivatePanelAndConfigureGridResources((u32 *)context->display, context->displayVariant, 0, 1);
+                mnuActivatePanelAndConfigureGridResources(
+                    (MenuScrollPanel *)(u32)context->display,
+                    context->displayVariant, 0, 1);
             }
         }
         mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
@@ -851,7 +853,9 @@ s32 mnuStaffPopupUpdate(s32 callback) {
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             mnuSetPopupEntryFlagged((s32)popupState, D_0037CA78);
-            mnuActivatePanelAndConfigureGridResources(((CampMenuContext *)context)->display, ((CampMenuContext *)context)->displayVariant, 0, 1);
+            mnuActivatePanelAndConfigureGridResources(
+                (MenuScrollPanel *)(u32)((CampMenuContext *)context)->display,
+                ((CampMenuContext *)context)->displayVariant, 0, 1);
             mnuClearListFlags(0, panelWork);
         }
         mnuPlayInputSound(0, inputFlags, 0);
@@ -1371,13 +1375,16 @@ s32 mnuCampMenuInit(void) {
     mnuForwardDupArg((MenuWindowContainer *)work->panelList, work->option, 0, 0, 0);
     switch (*((MenuSelectionState *)work->panel)->list->selectedSlot) {
     case 0:
-        mnuActivatePanelAndConfigureGridResources(work->display, work->variant, 0, 1);
+        mnuActivatePanelAndConfigureGridResources(
+            (MenuScrollPanel *)(u32)work->display, work->variant, 0, 1);
         break;
     case 2:
-        mnuActivatePanelAndConfigureGridResources(work->display, work->variant, 0x35, 0x36);
+        mnuActivatePanelAndConfigureGridResources(
+            (MenuScrollPanel *)(u32)work->display, work->variant, 0x35, 0x36);
         break;
     default:
-        mnuActivatePanelAndConfigureGridResources(work->display, work->variant, 0x33, 0x34);
+        mnuActivatePanelAndConfigureGridResources(
+            (MenuScrollPanel *)(u32)work->display, work->variant, 0x33, 0x34);
         break;
     }
     mnuSeekListNode(0, ((MenuSelectionState *)work->panelList)->list);
