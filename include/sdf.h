@@ -440,6 +440,16 @@ typedef union SdfDrawTransform {
     u64 words[3];
 } SdfDrawTransform;
 
+/* The cached GS TEX1, TEX0 and CLAMP values shared by texture draw records. */
+typedef struct SdfGsTextureStateValues {
+    u64 sampling;
+    u64 texture;
+    u64 clamp;
+} SdfGsTextureStateValues;
+
+typedef char SdfGsTextureStateValues_size_must_be_0x18[
+    (sizeof(SdfGsTextureStateValues) == 0x18) ? 1 : -1];
+
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
 typedef struct SdfAssetEntry {
     u32 pad00;             /* 0x00 */
@@ -455,12 +465,8 @@ typedef struct SdfAssetEntry {
     f32 y;                 /* 0x28 */
     f32 x;                 /* 0x2C */
     u8 pad30[8];           /* 0x30 */
-    u64 unk38;             /* 0x38 */
-    u64 unk40;             /* 0x40 */
-    u64 unk48;             /* 0x48 */
-    u64 unk50;             /* 0x50 */
-    u64 unk58;             /* 0x58 */
-    u64 unk60;             /* 0x60 */
+    SdfGsTextureStateValues primaryTextureState; /* 0x38 */
+    SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
     SdfDrawTransform transforms[2]; /* 0x68 */
     u32 unk98;             /* 0x98 */
     u32 unk9C;             /* 0x9C */
@@ -468,6 +474,12 @@ typedef struct SdfAssetEntry {
 
 typedef char SdfAssetEntry_size_must_be_0xA0[
     (sizeof(SdfAssetEntry) == 0xA0) ? 1 : -1];
+typedef char SdfAssetEntry_primaryTextureState_offset_must_be_0x38[
+    ((u32)&((SdfAssetEntry *)0)->primaryTextureState == 0x38) ? 1 : -1];
+typedef char SdfAssetEntry_secondaryTextureState_offset_must_be_0x50[
+    ((u32)&((SdfAssetEntry *)0)->secondaryTextureState == 0x50) ? 1 : -1];
+typedef char SdfAssetEntry_transforms_offset_must_be_0x68[
+    ((u32)&((SdfAssetEntry *)0)->transforms == 0x68) ? 1 : -1];
 
 /* Linked thread registry entry (0x8); DDS1/2 sdfThread and thread-control units. */
 typedef struct SdfThreadNode {
