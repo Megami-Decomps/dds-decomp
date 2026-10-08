@@ -5483,6 +5483,7 @@
 0x00305068	effReleaseTextureHandlesAndResetSlots	inferred	Releases and clears all texture handles then resets slots; DDS2 counterpart delegates to helper. [names_R_FuncNames4.tsv]
 0x00305080	effHasFirstTextureHandle	inferred	Returns whether the first handle pointed to by offset 0x24 is nonzero. [names_R_FuncNames4.tsv]
 0x00305110	effDestroyPayload	inferred	Releases allocation at header offset 0 then frees 0x0c-byte payload header. [names_R_FuncNames4.tsv]
+0x00305148	effCreateResourceSlotSetFromAllocation	inferred	Builds the slot owner and its descriptor, work and texture arrays from an allocation descriptor.
 0x003054E8	effDestroyResourceSlotSet	inferred	Releases owned file/texture and slot buffers, then frees resource slot set. [names_R_FuncNames4.tsv]
 0x00305558	effSetSlotResourceAndFlags	inferred	Stores slot flags and resource pointer, initializes flagged phase, increments attachment count. [names_R_FuncNames4.tsv]
 0x003055A0	effSetSlotIndexedResource	inferred	Attaches indexed 0x24-byte resource record to slot with selected flags. [names_R_FuncNames4.tsv]

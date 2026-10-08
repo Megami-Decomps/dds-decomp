@@ -8,6 +8,7 @@
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "eff_resource_slots.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "btl_state.h"
@@ -232,7 +233,6 @@ extern void func_00288788(void *);
 extern void *fileQueuePlainDispatchRequest(u32);
 
 
-extern void *func_002BD9C0(u32, u32);
 
 /* Battle state: resource headers for texture slots 1 and 2. */
 
@@ -9486,7 +9486,7 @@ s32 effPollResourceList(EffectList *list) {
                     if (item->kind == 1) {
                         node = list->first;
                         buffer = item->buffer;
-                        *node->reference = func_002BD9C0(buffer, node->kind);
+                        *node->reference = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)buffer, node->kind);
                         if (node->kind == 0) {
                             sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(buffer));
                         }

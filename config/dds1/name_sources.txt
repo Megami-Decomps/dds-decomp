@@ -5822,6 +5822,7 @@
 0x002BD8F8	effHasFirstTextureHandle	inferred	Returns whether the first handle pointed to by offset 0x24 is nonzero. [names_R_FuncNames4.tsv]
 0x002BD908	effCreatePayload	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BD988	effDestroyPayload	inferred	Releases allocation at header offset 0 then frees 0x0c-byte payload header. [names_R_FuncNames4.tsv]
+0x002BD9C0	effCreateResourceSlotSetFromAllocation	inferred	Builds the slot owner and its descriptor, work and texture arrays from an allocation descriptor.
 0x002BDBC0	effCreateResourceSlotSet	inferred	eff allocates count 0x80/0xA0-byte slots and copies slot template from source (DDS2 twin func_00305348)
 0x002BDD60	effDestroyResourceSlotSet	inferred	Releases owned file/texture and slot buffers, then frees resource slot set. [names_R_FuncNames4.tsv]
 0x002BDDD0	effSetSlotResourceAndFlags	inferred	Stores slot flags and resource pointer, initializes flagged phase, increments attachment count. [names_R_FuncNames4.tsv]
