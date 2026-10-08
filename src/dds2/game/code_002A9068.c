@@ -625,10 +625,10 @@ void mnuStaffInitResourceLists(u8 *work) {
     ((StaffResourceHeader *)work)->resourceLists[0] = mnuCreateStaffResourceListWindow(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
     list = mnuCreateStaffResourceListWindow(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
     ((StaffResourceHeader *)work)->resourceLists[1] = list;
-    mnuSetWindowContainerState(list, 0x100);
+    mnuSetWindowFadeScale(list, 0x100);
     list = mnuCreateStaffResourceListWindow(D_003E5708, 2, 0x1C0, 0x10, work, 0);
     ((StaffResourceHeader *)work)->resourceLists[2] = list;
-    mnuSetWindowContainerState(list, 0x100);
+    mnuSetWindowFadeScale(list, 0x100);
     mnuInitializeWindowFadeState(ctx);
     mnuBeginWindowFadeTransition(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }

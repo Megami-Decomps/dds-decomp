@@ -893,7 +893,7 @@ MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
     window->height = height;
     window->id = id;
     list = mnuCreateListState(id, visibleCount, rowSpacing);
-    window->state = 0;
+    window->fadeScale = 0;
     window->list = list;
     return window;
 }
@@ -911,8 +911,8 @@ void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout) {
     menu->decorations[2].sprite = layout;
 }
 
-void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state) {
-    menu->state = state;
+void mnuSetWindowFadeScale(MenuWindowContainer *menu, u32 fadeScale) {
+    menu->fadeScale = fadeScale;
 }
 
 void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
@@ -1089,14 +1089,14 @@ void func_002B9A40(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
 }
 
 void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, u32 option) {
-    func_002B9A40(x - 0xf0, y - 8, flags, window->state,
+    func_002B9A40(x - 0xf0, y - 8, flags, window->fadeScale,
                   window->list, window->resource, option);
 }
 
 void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, s32 count, s32 option) {
     s32 i;
     s32 sprite = window->sprite20;
-    s32 state = window->state;
+    s32 state = window->fadeScale;
     s32 field = window->field1C;
     if (sprite != 0) {
         if (field == 0) {
@@ -1117,7 +1117,7 @@ void mnuDrawVisibleWindowIconRows(u32 x, u32 y, u32 flags, MenuWindowContainer *
 void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 option)
 {
     u32 i;
-    u32 state = window->state;
+    u32 state = window->fadeScale;
 
     for (i = 0; i < 3; i++) {
         u32 sprite = window->decorations[i].sprite;
@@ -1136,7 +1136,7 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
 void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
     MenuList *list;
     s32 selectionMode;
-    s32 fadeScale = window->state;
+    s32 fadeScale = window->fadeScale;
 
     if (window->panel.sprite[0] != NULL) {
         list = window->list;
@@ -1166,7 +1166,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
 
 /* Draw the window, then advance its fade scale without a post-addition clamp. */
 void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg) {
-    s32 fadeScale = menu->state;
+    s32 fadeScale = menu->fadeScale;
     s32 value;
 
     menu->list->scale = fadeScale;
@@ -1180,9 +1180,9 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     if (menu->resource != 0) {
         mnuDrawWindowResourceSpriteRows(x, y, depth, menu, drawArg);
     }
-    value = menu->state;
+    value = menu->fadeScale;
     if (value < MNU_FULL_FADE) {
-        menu->state = value + MNU_WINDOW_FADE_STEP;
+        menu->fadeScale = value + MNU_WINDOW_FADE_STEP;
     }
     menu->flags |= MNU_WINDOW_TRANSITION_FLAG;
 }
@@ -1713,7 +1713,7 @@ void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, MenuFadeFields *m
 
     if (menu->previousProgress < 0x200) {
         menu->previousWindow.originY = 160 * menu->previousProgress / 512;
-        mnuSetWindowContainerState(&menu->previousWindow, 256 - menu->previousProgress / 2);
+        mnuSetWindowFadeScale(&menu->previousWindow, 256 - menu->previousProgress / 2);
         if (menu->hasResourceCopy != 0) {
             menu->previousWindow.resource = &menu->savedResource;
         }
@@ -1722,7 +1722,7 @@ void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, MenuFadeFields *m
     if (menu->currentWindow != NULL) {
         t = fsqrtf(40.0f) * (512 - menu->currentProgress) / 512.0f;
         menu->currentWindow->originY = -8 * (s32)(t * t);
-        mnuSetWindowContainerState(menu->currentWindow, menu->currentProgress / 2);
+        mnuSetWindowFadeScale(menu->currentWindow, menu->currentProgress / 2);
         if (menu->currentWindow->panel.fade == 0) {
             menu->currentWindow->flags &= ~4;
         }
@@ -2033,7 +2033,7 @@ extern void *func_002BBA38();
 void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
     mnuSelectPage(menu, index);
     menu->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
-    menu->flags |= 0x80;
+    menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
 void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 first, u32 second) {
@@ -2056,7 +2056,7 @@ void mnuClearEntries(MenuPageWindow *menu) {
         i++;
         entry += sizeof(MenuPageSlot) / sizeof(*entry);
     } while (i < 5);
-    menu->flags &= ~0x80;
+    menu->flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
 
