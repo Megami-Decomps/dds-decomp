@@ -263,7 +263,7 @@ extern void effObjInnerVecBackup(ObjectTransform *);
 extern void func_00113D18(EffWorldNode *);
 extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
 extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
-extern void *func_001178B8(EffWorldNode *node);
+extern void *dds3GetWorldNodeData(EffWorldNode *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
 s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
@@ -336,7 +336,9 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     }
     if (dds3TestObjectFlags(obj, 0x2000)) {
         if (data->pendingTargetKey != 0) {
-            effObjStepFollowAngleTowardPosition(obj, func_001178B8(dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)));
+            effObjStepFollowAngleTowardPosition(
+                obj, dds3GetWorldNodeData(dds3FindWorldObjectNodeByKey(
+                    dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)));
         } else {
             effObjStepFollowAngleTowardZero(obj);
         }

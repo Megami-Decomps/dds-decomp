@@ -589,6 +589,7 @@
 0x001175D0	sdfEnableFloatCounterWrap	inferred	src/dds1/game/code_00117438.c func_001175D0: Sets flag 0x20 used by counter step routine to wrap at endpoint. [names_reviewed24.tsv]
 0x001175E0	sdfDisableFloatCounterWrap	inferred	src/dds1/game/code_00117438.c func_001175E0: Clears flag 0x20 used by counter step routine for endpoint wrapping. [names_reviewed24.tsv]
 0x001175F8	evtSpawnActionObj11	inferred	constructor for type 0x11
+0x00117650	dds3GetWorldNodeData	inferred	Returns the canonical EffWorldNode.data pointer at offset +0x18; the payload interpretation depends on node kind.
 0x00117658	evtLoadValueVectorIntoVu	inferred	Loads the event value pointer vector directly into VU0 VF10; no scaling occurs. [names_reviewed16.tsv]
 0x00117678	evtLoadValueSecondaryVectorIntoVu	inferred	Loads the second vector quadword directly; the value getter performs no scaling. [names_reviewed18.tsv]
 0x001176A0	sdfCreateRuntimeTask	inferred	allocates/zeroes the 0x33600 GBWK runtime and schedules its tick task

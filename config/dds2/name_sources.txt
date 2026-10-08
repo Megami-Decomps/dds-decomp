@@ -443,6 +443,7 @@
 0x00117820	sdfUnfreezeFloatCounter	inferred	src/dds2/game/code_001176A0.c func_00117820: Clears flag eight tested by float-counter step routine before stepping. Twin of DDS1 func_001175B8. [names_reviewed24.tsv]
 0x00117838	sdfEnableFloatCounterWrap	inferred	src/dds2/game/code_001176A0.c func_00117838: Sets flag 0x20 used by counter step routine to wrap at endpoint. Twin of DDS1 func_001175D0. [names_reviewed24.tsv]
 0x00117848	sdfDisableFloatCounterWrap	inferred	src/dds2/game/code_001176A0.c func_00117848: Clears flag 0x20 used by counter step routine for endpoint wrapping. Twin of DDS1 func_001175E0. [names_reviewed24.tsv]
+0x001178B8	dds3GetWorldNodeData	inferred	Returns the canonical EffWorldNode.data pointer at offset +0x18; the payload interpretation depends on node kind.
 0x001178C0	evtLoadValueVectorIntoVu	inferred	Loads the event value pointer vector directly into VU0 VF10; no scaling occurs. [names_reviewed16.tsv]
 0x00117A10	evtResetWorldAndProfileRuntime	inferred	Clears script state and reinitializes world and profile runtime records. [names_reviewed9.tsv]
 0x00117A88	sdfSaveResetSnapshot	inferred	TaskPurist
