@@ -315,6 +315,8 @@ struct BillData;
 struct BillChildPayload;
 
 /* Billboard common prefix and animation-list view (max 0x64); child allocations are 0x34 bytes. */
+struct BillOut;
+
 typedef struct BillObj {
     f32 unk0;
     f32 unk4;
@@ -341,7 +343,7 @@ typedef struct BillObj {
     u32 modeFlags; /* 0x54: bits 0x40/0x80 select billboard entry modes */
     u32 unk58;
     s32 entryCount;
-    void *unk60;
+    struct BillOut *resolvedEntries; /* 0x60: runtime animation state array */
 } BillObj;
 
 typedef char BillObj_size_must_be_0x64[
