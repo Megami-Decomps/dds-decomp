@@ -1,6 +1,6 @@
+#include "kwln.h"
 #include "mnu.h"
 
-extern s32 kwlnTaskGetUserValue();
 
 extern void mnuCampMenuHandleInput(s32);
 extern void ptySkillMenuHandleSelection(s32);
@@ -101,8 +101,8 @@ extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuSetPanelState(s32, s32);
 extern void func_00282DA0(s32, s32, s32, s32, s32);
 
-s32 ptySkillMenuUpdate(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 ptySkillMenuUpdate(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state != 0) {
@@ -157,8 +157,8 @@ void ptySkillMenuCopyPageState(s32 context) {
     }
 }
 
-s32 ptySkillMenuEnterPage(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 ptySkillMenuEnterPage(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
     s32 label;
@@ -192,8 +192,8 @@ s32 ptySkillMenuEnterPage(s32 callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 ptySkillMenuDispatchPageRequest(s32 selection) {
-    s32 context = kwlnTaskGetUserValue();
+s32 ptySkillMenuDispatchPageRequest(KwlnTask *selection) {
+    s32 context = kwlnTaskGetUserValue(selection);
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
@@ -240,8 +240,8 @@ void mnuFlagMatchingEntries(s32 context) {
     }
 }
 
-s32 ptySkillMenuHandleFieldUse(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
@@ -275,8 +275,8 @@ s32 ptySkillMenuHandleFieldUse(s32 callback) {
     return 0;
 }
 
-s32 ptySkillMenuEnterConfirm(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     func_00272778(callback);
     mnuCreateStaffImageSprite(3);
@@ -287,8 +287,8 @@ s32 ptySkillMenuEnterConfirm(s32 callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 ptySkillMenuDispatchConfirmRequest(s32 selection) {
-    s32 context = kwlnTaskGetUserValue();
+s32 ptySkillMenuDispatchConfirmRequest(KwlnTask *selection) {
+    s32 context = kwlnTaskGetUserValue(selection);
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
@@ -296,8 +296,8 @@ extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
-s32 ptySkillMenuOpenPartyPage(s32 menu) {
-    u8 *ctx = (u8 *)kwlnTaskGetUserValue();
+s32 ptySkillMenuOpenPartyPage(KwlnTask *menu) {
+    u8 *ctx = (u8 *)kwlnTaskGetUserValue(menu);
     MenuPageWindow *panel = (MenuPageWindow *)(ctx + 0x15C);
 
     mnuSelectPage(panel, ((SkillMenuContext *)ctx)->selection->cursor->index);
@@ -307,8 +307,8 @@ s32 ptySkillMenuOpenPartyPage(s32 menu) {
     return 1;
 }
 
-s32 mnuCloseSelectionAndReleasePartyPanel(s32 selection) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuCloseSelectionAndReleasePartyPanel(KwlnTask *selection) {
+    s32 context = kwlnTaskGetUserValue(selection);
     mnuDestroySelectedPartyWindow(selection);
     mnuDestroySkillMenuWindows(context);
     mnuReleasePageHandlesAndClearSelection((MenuPageWindow *)(context + 0x15c));
@@ -318,8 +318,8 @@ s32 mnuCloseSelectionAndReleasePartyPanel(s32 selection) {
 extern void mnuClearListFlagsOneAndTwo();
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
-s32 ptySkillMenuHandlePageSwitch(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 ptySkillMenuHandlePageSwitch(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 changed = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
 

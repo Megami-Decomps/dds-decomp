@@ -1,7 +1,7 @@
 #include "common.h"
 
+#include "kwln.h"
 extern u32 fldInputPanelTaskHandle;
-extern void *kwlnTaskGetUserValue();
 extern void sdfReleaseChipBlock(void *);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
@@ -10,10 +10,10 @@ extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*
 
 extern void fldInitializeTitleBannerTask(void);
 
-void fldReleasePanelState(void) {
+void fldReleasePanelState(KwlnTask *task) {
     void *panelState;
 
-    panelState = kwlnTaskGetUserValue();
+    panelState = (void *)kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock(panelState);
     fldInputPanelTaskHandle = 0;
 }
@@ -31,7 +31,7 @@ void fldDestroyPanelTaskIfPresent(void) {
 void *func_00141190(s32 value) {
     u16 *panelState;
 
-    panelState = kwlnTaskGetUserValue(fldInputPanelTaskHandle);
+    panelState = (u16 *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
     panelState[2] = value;
     return panelState;
 }
@@ -39,7 +39,7 @@ void *func_00141190(s32 value) {
 void *func_001411C0(s32 value) {
     u16 *panelState;
 
-    panelState = kwlnTaskGetUserValue(fldInputPanelTaskHandle);
+    panelState = (u16 *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
     panelState[1] = value;
     return panelState;
 }

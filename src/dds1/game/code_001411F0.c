@@ -201,7 +201,7 @@ extern void sndStartTrackDefault(s32 arg0);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void kwlnTaskSetUserValue(s32 arg0, void *arg1);
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 extern s32 fldFieldTaskUpdate(void);
 
@@ -255,7 +255,6 @@ typedef struct {
 
 extern FldClear18 fldPendingSounds[];
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void sdfReleaseChipBlock(void *allocation);
 
 extern void fldSelectDisplayBuffer(u32);
@@ -363,7 +362,7 @@ s32 fldFieldTaskUpdate(void) {
     return 0;
 }
 
-void *fldFieldTaskCreate(s32 task) {
+void *fldFieldTaskCreate(KwlnTask *task) {
     s32 *work;
 
     work = sdfAllocSizeClassBlock(0x10);
@@ -371,7 +370,7 @@ void *fldFieldTaskCreate(s32 task) {
     work[1] = 0;
     work[2] = 0;
     work[3] = 0;
-    kwlnTaskSetUserValue(task, work);
+    kwlnTaskSetUserValue(task, (u32)work);
     return fldFieldTaskUpdate;
 }
 

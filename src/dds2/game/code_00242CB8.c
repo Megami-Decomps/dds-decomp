@@ -22,7 +22,6 @@ extern u32 kwlnDrawControlFlags;
 extern s32 scrGetCommandTimer(void);
 
 
-u32 kwlnTaskGetUserValue(KwlnTask *task);
 
 extern char D_00437208[];
 

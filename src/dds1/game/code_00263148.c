@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu_result.h"
 
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
@@ -6,7 +7,6 @@ extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 kwlnTaskGetUserValue();
 
 extern void dspSetActive(s32);
 
@@ -124,9 +124,9 @@ extern void func_002E8E50(void);
 extern char D_0036D494[];
 extern char D_0036D408[];
 
-s32 prfCapTaskStep(void *request) {
+s32 prfCapTaskStep(KwlnTask *request) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 *dispatchStatus = &scene->transition.state;
 
     result = func_00285670(&scene->transition.data, dispatchStatus, 0, request);
@@ -169,21 +169,21 @@ s32 prfCapTaskStep(void *request) {
     return result;
 }
 
-s32 func_00263570(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 func_00263570(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 func_002635C0(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002635C0(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 /* Clear the scene's two selection-processing markers; return 1. */
-s32 mnuResetItemSelectionMarkers(void) {
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuResetItemSelectionMarkers(KwlnTask *task) {
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     scene->selectedRow = 0;
     scene->resetStateB = 0;
     return 1;
@@ -267,16 +267,16 @@ extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
 extern s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *);
 extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
-extern u32 mnuInitializeItemSelectionExtent(void *);
+extern u32 mnuInitializeItemSelectionExtent(KwlnTask *task);
 extern void mnuSetPopupEntry(s32 *, void *);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void func_002E96D8(u32);
 extern char D_0036D424[];
 extern char D_0036D45C[];
 
-s32 func_00263838(void *request) {
+s32 func_00263838(KwlnTask *request) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 *dispatchStatus;
     s32 *slots;
 
@@ -402,8 +402,8 @@ void func_00263B78(BrsSkillPackageWork *scene, s32 copyOptions) {
 }
 
 
-s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -413,8 +413,8 @@ s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -424,7 +424,7 @@ s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
 }
 
 /* Bound the selection extent by the remaining capacity after five components. */
-u32 mnuInitializeItemSelectionExtent(void *unused) {
+u32 mnuInitializeItemSelectionExtent(KwlnTask *task) {
     s8 component;
     BrsSkillPackageWork *scene;
     s32 *slot;
@@ -433,7 +433,7 @@ u32 mnuInitializeItemSelectionExtent(void *unused) {
     s32 extent;
     s32 sum;
 
-    scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     sum = 0;
     remaining = DAT_BASE_STAT_COUNT - 1;
     extent = scene->selectedRewardRow->values.amount * 3;

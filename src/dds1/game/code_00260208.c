@@ -1,11 +1,11 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 
 extern s32 kwlnTaskGetTaskByName(char *);
-extern s32 kwlnTaskGetUserValue();
 extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *);
 extern s32 func_002877A8(void);
 
@@ -644,8 +644,8 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
 extern void func_002BC618(s32);
 extern void dspCloseChannel(void);
 
-void brsStaffTaskDestroy(s32 arg0) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+void brsStaffTaskDestroy(KwlnTask *arg0) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(arg0);
 
     if (context->teardownHandle != 0) {
         effDestroyResourceSlotSet(context->teardownHandle);
@@ -726,7 +726,7 @@ s32 func_002629A8(void) {
     if (task == 0) {
         return 0;
     }
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue((KwlnTask *)task);
     if (0x100 - work->fadeProgress <= 0 &&
         brsTaskIsUiUpdateAllowed(work) != 0 &&
         work->opacityReady == 1) {

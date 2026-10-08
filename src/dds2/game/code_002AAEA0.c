@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
@@ -5,7 +6,6 @@
 #include "dat_state.h"
 #include "mnu_scroll_panel.h"
 
-extern s32 kwlnTaskGetUserValue();
 
 extern s64 fileConsumeConfigTaskReady(void);
 
@@ -45,10 +45,10 @@ typedef struct CampVisualWork {
     u32 titleSlide;        /* 0xB1D8 */
 } CampVisualWork;
 
-u32 mnuPrepareCampFieldSkillDisplay(void) {
+u32 mnuPrepareCampFieldSkillDisplay(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     if (mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 0) == 0) {
         ((CampVisualWork *)context)->skillFlagRoot->list->last->flags48 |= 1;
     } else {
@@ -60,22 +60,22 @@ u32 mnuPrepareCampFieldSkillDisplay(void) {
     return 1;
 }
 
-u32 mnuStartCampTitleFadeOut(void) {
+u32 mnuStartCampTitleFadeOut(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     ((CampVisualWork *)context)->titleFadingOut = 1;
     return 1;
 }
 
 /* Handle the selected field skill after both dispatch and resource readiness. */
-s32 mnuHandleCampFieldSkillInput(s32 callback) {
+s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     CampVisualWork *context;
     s32 *popup;
     u32 input;
     s32 state;
 
-    context = (CampVisualWork *)kwlnTaskGetUserValue();
+    context = (CampVisualWork *)kwlnTaskGetUserValue(callback);
     input = mnuMapPadMaskToFlags(0x33);
     popup = &context->popup;
     state = func_002C4038(context->dispatchState, popup, 0, (void *)callback);
@@ -119,17 +119,17 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB0E0);
 
-s32 mnuFinishStaffConfigPopup(s32 callback) {
+s32 mnuFinishStaffConfigPopup(KwlnTask *callback) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(callback);
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 mnuOpenCampConfigPanelTasks(void) {
+u32 mnuOpenCampConfigPanelTasks(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuSwitchCampVisualCategory(5, context);
     mnuConfigurePanelResource(((CampVisualWork *)context)->modelHandle, ((CampVisualWork *)context)->panelResource, 0, 0);
     mnuCreateConfigTasks(0);
@@ -137,17 +137,17 @@ u32 mnuOpenCampConfigPanelTasks(void) {
 }
 
 /* Switch the staff display to the alternate resource at context + 0x60. */
-u32 mnuConfigureCampDrawContextPanel(void) {
+u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuConfigurePanelResource(((CampVisualWork *)context)->modelHandle, ((CampVisualWork *)context)->drawContext, 0, 1);
     return 1;
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
-s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s32 state = func_002C4038(((CampVisualWork *)context)->dispatchState, dispatchEntry, 0, (void *)callback);
     if (state == 0) {
@@ -159,10 +159,10 @@ s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     return state;
 }
 
-s32 mnuDrawStaffImageScreen(s32 callback) {
+s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(callback);
     mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
     func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->modelHandle, 0x54);
     mnuCreateStaffImageSprite(0x18);
@@ -170,10 +170,10 @@ s32 mnuDrawStaffImageScreen(s32 callback) {
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 mnuFinishStaffImagePopup(s32 callback) {
+s32 mnuFinishStaffImagePopup(KwlnTask *callback) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(callback);
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
@@ -181,16 +181,16 @@ u32 func_002AB3A0(void) {
     return 1;
 }
 
-u32 func_002AB3A8(void) {
-    mnuPrepareCampFieldSkillDisplay();
+u32 func_002AB3A8(KwlnTask *task) {
+    mnuPrepareCampFieldSkillDisplay(task);
     return 1;
 }
 
-s32 mnuPollCampFieldSkillAndPopup(s32 callback) {
+s32 mnuPollCampFieldSkillAndPopup(KwlnTask *callback) {
     s32 context;
     s32 state;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(callback);
     state = menuSetHandler((void *)context, 0, (void *)callback);
     if (state != 0) {
         return state;
@@ -202,10 +202,10 @@ s32 mnuPollCampFieldSkillAndPopup(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB448);
 
-s32 mnuFinishFieldSkillPopup(s32 callback) {
+s32 mnuFinishFieldSkillPopup(KwlnTask *callback) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(callback);
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 

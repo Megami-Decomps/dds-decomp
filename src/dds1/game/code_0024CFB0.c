@@ -61,7 +61,6 @@ extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddres
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
-extern s32 kwlnTaskGetUserValue();
 
 extern u32 effMiscRand(void *);
 
@@ -163,8 +162,8 @@ s32 dspStartFlagEvent(s32 context) {
 }
 
 /* Initialize the current terminal task's resource bank and mode-zero fade track. */
-s32 mnuPrepareTerminalPanelState(void) {
-    s32 *work = (s32 *)kwlnTaskGetUserValue();
+s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
+    s32 *work = (s32 *)kwlnTaskGetUserValue(task);
 
     mnuTerminalSelectResourceBank(work);
     mnuApplyFadeTrackMode(0, work);
@@ -177,8 +176,8 @@ u32 func_0024D260(void) {
 
 /* Propagate the panel worker's nonzero result before considering a flag-event popup.
  * When its popup slot and message control are idle, fall back if no event starts. */
-s32 dspUpdateFlagEvent(s32 request) {
-    s32 workAddress = kwlnTaskGetUserValue();
+s32 dspUpdateFlagEvent(KwlnTask *request) {
+    s32 workAddress = kwlnTaskGetUserValue(request);
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     if (result != 0) {
@@ -195,25 +194,25 @@ s32 dspUpdateFlagEvent(s32 request) {
 }
 
 /* Prepare the current terminal work and dispatch panel mode one. */
-s32 mnuDispatchTerminalPanel(s32 request) {
-    s32 workAddress = kwlnTaskGetUserValue();
+s32 mnuDispatchTerminalPanel(KwlnTask *request) {
+    s32 workAddress = kwlnTaskGetUserValue(request);
     func_0024A2D8(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Request the message-window transition before dispatching terminal panel mode two. */
-s32 mnuDispatchTerminalPanelExit(s32 request) {
-    s32 workAddress = kwlnTaskGetUserValue();
+s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
+    s32 workAddress = kwlnTaskGetUserValue(request);
     func_0024DD78();
     return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
 
 /* Reset display slots for a zero exit marker, otherwise start the existing fade-in.
  * Preserve the legacy zero-argument active-flag call; no index is supplied here. */
-u32 mnuApplyTerminalExitFadeOrReset(void) {
+u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {
     s32 workAddress;
 
-    workAddress = kwlnTaskGetUserValue();
+    workAddress = kwlnTaskGetUserValue(task);
     if (*(s32 *)(workAddress + 0xdc) == 0) {
         evtClearActiveFlag();
         evtSetBoundedDisplayValue(0, 1);
@@ -226,8 +225,8 @@ u32 mnuApplyTerminalExitFadeOrReset(void) {
 }
 
 /* Select the terminal's mode-one fade track before starting the black fade-out. */
-s32 mnuStartTerminalPanelFadeOut(void) {
-    s32 workAddress = kwlnTaskGetUserValue();
+s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
+    s32 workAddress = kwlnTaskGetUserValue(task);
 
     mnuApplyFadeTrackMode(1, workAddress);
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -243,8 +242,8 @@ extern char D_0036AE48[];
 /* Propagate the panel worker result; create a ready popup only for an empty slot.
  * Kind zero waits for the named task unless active flag zero overrides the wait;
  * other kinds wait for the fade to finish. */
-s32 mnuUpdateTerminalReadyPopup(s32 request) {
-    s32 workAddress = kwlnTaskGetUserValue();
+s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
+    s32 workAddress = kwlnTaskGetUserValue(request);
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     s32 ready;
@@ -269,31 +268,31 @@ s32 mnuUpdateTerminalReadyPopup(s32 request) {
 }
 
 /* Prepare the current work and dispatch panel mode one; distinct callback role unknown. */
-s32 func_0024D500(s32 request) {
-    s32 workAddress = kwlnTaskGetUserValue();
+s32 func_0024D500(KwlnTask *request) {
+    s32 workAddress = kwlnTaskGetUserValue(request);
     func_0024A2D8(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Dispatch current work in panel mode two without the message transition request. */
-s32 func_0024D550(s32 request) {
-    s32 workAddress = kwlnTaskGetUserValue();
+s32 func_0024D550(KwlnTask *request) {
+    s32 workAddress = kwlnTaskGetUserValue(request);
 
     return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
 
 /* Clear the terminal task's stored selection word and report completion. */
-u32 mnuClearTerminalPanelSelection(void) {
+u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
     s32 workAddress;
 
-    workAddress = kwlnTaskGetUserValue();
+    workAddress = kwlnTaskGetUserValue(task);
     *(u32 *)(workAddress + 0x90) = 0;
     return 1;
 }
 
 /* Release the current task's menu resources before rebuilding its terminal menus. */
-s32 mnuRebuildTerminalMenuResources(void) {
-    s32 *work = (s32 *)kwlnTaskGetUserValue();
+s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
+    s32 *work = (s32 *)kwlnTaskGetUserValue(task);
 
     mnuReleaseWorkResources(work);
     mnuTerminalBuildMenus(work);

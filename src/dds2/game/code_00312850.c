@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -111,15 +112,15 @@ extern char D_004388D8[];
 extern char D_004388E0[];
 extern void sdfCallbackWorkOnRemove();
 
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
 extern void kwlnTaskCreate();
 extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
-extern void sdfReleaseCurrentTaskOwnedResources(void);
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
-extern void sdfReleaseCurrentTaskOwnedResources(void);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern void kwlnTaskCreate();
 
 extern void func_00312E20(void);
@@ -215,7 +216,6 @@ void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *entry) {
     sdfDestroyCallbackWork(entry);
 }
 
-extern void *kwlnTaskGetUserValue(void);
 
 /* Visit one entry: initialize, remove if pending, otherwise update.
  * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
@@ -285,8 +285,8 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-s32 sdfTaskWorkRunAllEntries(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -296,8 +296,8 @@ s32 sdfTaskWorkRunAllEntries(void) {
     return 0;
 }
 
-s32 sdfTaskWorkRunAll(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAll(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -307,8 +307,8 @@ s32 sdfTaskWorkRunAll(void) {
     return 0;
 }
 
-void sdfReleaseCurrentTaskOwnedResources(void) {
-    sdfDestroyTaskResourceWork(kwlnTaskGetUserValue());
+void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
+    sdfDestroyTaskResourceWork((void *)kwlnTaskGetUserValue(task));
 }
 
 void func_00312E20(void) {

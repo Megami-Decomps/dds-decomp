@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -107,15 +108,15 @@ extern char D_004388D8[];
 extern char D_004388E0[];
 extern void sdfCallbackWorkOnRemove();
 
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
 extern void kwlnTaskCreate();
 extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
-extern void sdfReleaseCurrentTaskOwnedResources(void);
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
-extern void sdfReleaseCurrentTaskOwnedResources(void);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern void kwlnTaskCreate();
 
 extern void func_00312E20(void);
