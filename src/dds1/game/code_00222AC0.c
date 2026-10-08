@@ -39,14 +39,9 @@ extern u32 evtWindowMotionUnit;
 extern s32 D_003BBDB0;
 
 /* Event lip-sync registry: world -> root -> list -> unit links. */
-typedef struct EvtLipsModel {
-    u8 pad00[0x18];
-    void *chunk;        /* 0x18 */
-} EvtLipsModel;
-
 typedef struct EvtLipsMh {
     u8 pad00[0x0C];
-    EvtLipsModel *model; /* 0x0C */
+    MdlCtx *model;      /* 0x0C */
 } EvtLipsMh;
 
 typedef struct EvtLipsLink {
@@ -737,7 +732,7 @@ INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC2A0);
 
 void evtLipsExecFunction(s32 id, s32 motion) {
     void *unit = NULL;
-    EvtLipsModel *model = NULL;
+    MdlCtx *model = NULL;
     EffWorldNode *node;
 
     if (id == 0) {
@@ -745,7 +740,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
     }
     for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = ((EvtLipsLink *)node->data)->mh->model;
-        if (sdfGetUniqueChunkValue(model->chunk) == id) {
+        if (sdfGetUniqueChunkValue(model->inner) == id) {
             unit = ((EvtLipsLink *)node->data)->unit;
             break;
         }
@@ -754,7 +749,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         func_003003F0("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (motion >= mdlGetNodeRefHalf((MdlCtx *)model, 2)) {
+    if (motion >= mdlGetNodeRefHalf(model, 2)) {
         func_003003F0("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
@@ -765,7 +760,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
 
 void evtLipsStopFunction(void) {
     void *unit = NULL;
-    EvtLipsModel *model = NULL;
+    MdlCtx *model = NULL;
     EffWorldNode *node;
 
     if (D_003BBDB0 == 0) {
@@ -773,7 +768,7 @@ void evtLipsStopFunction(void) {
     }
     for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = ((EvtLipsLink *)node->data)->mh->model;
-        if (sdfGetUniqueChunkValue(model->chunk) == D_003BBDB0) {
+        if (sdfGetUniqueChunkValue(model->inner) == D_003BBDB0) {
             unit = ((EvtLipsLink *)node->data)->unit;
             break;
         }
@@ -782,7 +777,7 @@ void evtLipsStopFunction(void) {
         func_003003F0("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (mdlGetNodeRefHalf((MdlCtx *)model, 2) == 0) {
+    if (mdlGetNodeRefHalf(model, 2) == 0) {
         func_003003F0("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
