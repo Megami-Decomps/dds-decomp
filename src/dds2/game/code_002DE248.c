@@ -413,7 +413,7 @@ extern u128 D_00458470[];
 extern SdfLightSources D_003E9F50;
 
 
-extern void sdfTexReleaseReference();
+extern void sdfTexReleaseReference(SdfTex *texture);
 
 extern void effReleaseSharedReference();
 
@@ -1572,13 +1572,13 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
     return object;
 }
 
-extern void sdfTexReleaseReferenceViaHandler(s32);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 void effKindAssetReferenceRelease(s32 *object) {
     object[1]--;
     if (object[1] == 0) {
         if (object[0] != 4) {
-            sdfTexReleaseReferenceViaHandler(object[2]);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)object[2]);
         }
         sdfReleaseChipBlock(object);
     }
@@ -11344,7 +11344,7 @@ void effResolveAndReleaseSelectedResource(u32 *owner, s32 mapping) {
     }
 }
 
-extern void sdfTexReleaseReference(s32, u32, u32);
+extern void sdfTexReleaseReference(SdfTex *texture);
 
 void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
     u32 i = 0;
@@ -11356,7 +11356,7 @@ void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
         do {
             if (resources[i] != 0) {
                 u32 *current;
-                sdfTexReleaseReference(resources[i], (u32)resources, count);
+                sdfTexReleaseReference((SdfTex *)resources[i]);
                 current = (u32 *)((EffectSlotSet *)owner)->handles;
                 count = ((EffectSlotSet *)owner)->textureCount;
                 resources = current;

@@ -7,6 +7,8 @@
 #include "sdf.h"
 #include "dat_command.h"
 
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
+
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
     BTL_RESOURCE_NAME_RECORD_BYTES = 0x38,
@@ -2649,7 +2651,7 @@ INCLUDE_ASM(const s32, "game/code_001F6110", func_001FBA38);
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     s32 textureHandle = descriptor->handle;
     if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(textureHandle);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
     }
     sdfReleaseChipBlock(descriptor);
 }
@@ -2710,7 +2712,6 @@ u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
     return resource->selectedEntry->value;
 }
 
-extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void sdfReleaseResourceAllocation(s32);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
@@ -2721,7 +2722,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 name
     s32 textureHandle = descriptor->handle;
     s32 allocationHandle;
     if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(textureHandle);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
         descriptor->handle = 0;
     }
     allocationHandle = sdfReadNamedResource(nameAddress, &loadedResource, 0);
@@ -2735,7 +2736,7 @@ extern s32 sdfTexAcquireResourceTexture(s32);
 void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 textureResource) {
     s32 textureHandle = descriptor->handle;
     if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(textureHandle);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
         descriptor->handle = 0;
     }
     descriptor->handle = sdfTexAcquireResourceTexture(textureResource);

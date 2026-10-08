@@ -8,7 +8,7 @@ typedef struct {
 } Picture;
 
 extern void *kwlnTaskGetUserValue(void);
-extern void sdfTexReleaseReferenceViaHandler(void *);
+extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern void sdfReleaseChipBlock(void *);
 
 extern u8 D_003C9498[];
@@ -50,7 +50,7 @@ void evtPictureReleaseTaskTextureAndState(void) {
 
     picture = kwlnTaskGetUserValue();
     if (picture->texture != 0) {
-        sdfTexReleaseReferenceViaHandler(picture->texture);
+        sdfTexReleaseReferenceViaHandler((struct SdfTex *)picture->texture);
         picture->texture = 0;
     }
     sdfReleaseChipBlock(picture);

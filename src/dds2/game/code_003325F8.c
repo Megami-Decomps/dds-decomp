@@ -134,7 +134,7 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *, void *);
 
 void func_0032C278(u32 asset, s32 arg, f32 value);
 
-void sdfTexReleaseReferenceViaHandler(u32);
+void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
@@ -390,7 +390,7 @@ void sdfResourceListRelease(DevRequest *list, s32 releaseItems) {
     if (releaseItems != 0) {
         itemCount = list->usedCount;
         for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-            sdfTexReleaseReferenceViaHandler(((u32 *)list->buffer)[itemIndex]);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)((u32 *)list->buffer)[itemIndex]);
         }
     }
     sdfDestroyDevRequest(list);
