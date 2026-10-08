@@ -145,7 +145,7 @@ void effInitModelVUState(MdlCtx *model) {
         mdlAddEntryPlain(model, 0, 0);
         model->first->frameStep = 1.0f;
     }
-    model->flags &= ~1;
+    model->flags &= ~MDL_SKIP_TRANSFORMS;
 }
 
 MdlCtx *func_002DC1D0(void *kind, u32 flags) {

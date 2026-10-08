@@ -624,7 +624,7 @@ u8 *mnuAcquireUnusedModelNode(u32 *group) {
             if ((entry->flags & 1) == 0) {
                 MdlCtx *model = entry->model;
                 if (model != 0) {
-                    model->flags &= ~1U;
+                    model->flags &= ~MDL_SKIP_TRANSFORMS;
                     entry->value48 = 0;
                     entry->value4A = 0;
                     entry->flags = 1;
@@ -697,11 +697,11 @@ void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resource
     }
 }
 
-/* Release the node's active state and set bit 0 in its model's flag word. */
+/* Release the node's active state and suspend its model's transform updates. */
 void mnuDeactivateModelNode(s32 nodeAddress) {
     MnuModelNode *node = (MnuModelNode *)nodeAddress;
     node->flags = 0;
-    node->model->flags = node->model->flags | 1;
+    node->model->flags |= MDL_SKIP_TRANSFORMS;
 }
 
 void mnuSetNodePairValue(u8 *node, s32 value) {
@@ -819,9 +819,9 @@ void mnuSetNodeModelBroadcastByte(u8 *node, u8 highByte) {
 void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
     MnuModelNode *entry = (MnuModelNode *)node;
     if (selector == 1) {
-        entry->model->flags &= ~1U;
+        entry->model->flags &= ~MDL_SKIP_TRANSFORMS;
     } else {
-        entry->model->flags |= 1U;
+        entry->model->flags |= MDL_SKIP_TRANSFORMS;
     }
 }
 

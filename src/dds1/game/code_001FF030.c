@@ -3005,16 +3005,16 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            other->ext->owner->flags &= ~1;
+            other->ext->owner->flags &= ~MDL_SKIP_TRANSFORMS;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            other->ext->owner->flags &= ~1;
+            other->ext->owner->flags &= ~MDL_SKIP_TRANSFORMS;
         } else {
-            other->ext->owner->flags |= 1;
+            other->ext->owner->flags |= MDL_SKIP_TRANSFORMS;
         }
         return 0;
     }
@@ -3044,16 +3044,16 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            other->ext->owner->flags |= 1;
+            other->ext->owner->flags |= MDL_SKIP_TRANSFORMS;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            other->ext->owner->flags &= ~1;
+            other->ext->owner->flags &= ~MDL_SKIP_TRANSFORMS;
         } else {
-            other->ext->owner->flags |= 1;
+            other->ext->owner->flags |= MDL_SKIP_TRANSFORMS;
         }
         return 0;
     }
