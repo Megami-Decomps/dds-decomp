@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -863,7 +864,7 @@ EffectBufferTail *effAllocateBuffer(s32 recordCount) {
 }
 
 void effReleaseBufferAllocation(u32 *allocationSlot) {
-    sdfReleaseResourceAllocation(*allocationSlot);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*allocationSlot));
 }
 
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00153740);
@@ -2957,7 +2958,7 @@ s32 effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeDiscAuxTemplate(u32 effect) {
-    sdfReleaseResourceAllocation(((EffTemplatePacketList *)effect)->auxiliaryAllocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffTemplatePacketList *)effect)->auxiliaryAllocation));
     effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "itf.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
@@ -35,7 +36,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void sdfTexReleaseReference(SdfTex *);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);

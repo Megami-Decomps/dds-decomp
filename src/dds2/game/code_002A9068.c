@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -27,7 +28,6 @@ extern s8 mnuCampTaskState;
 
 extern s8 D_00437B73;
 
-extern void sdfReleaseResourceAllocation(u32);
 
 extern void *memset(void *, s32, u32);
 
@@ -752,7 +752,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuReleaseTitleEffectResourceGroups(menuBytes);
     movReleaseTitleEffects(menuBytes);
     func_00303D58(((CampVisualWork *)menuBytes)->menuResource);
-    sdfReleaseResourceAllocation(((CampVisualWork *)menuBytes)->allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((CampVisualWork *)menuBytes)->allocationHandle));
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_003425D8();
 }

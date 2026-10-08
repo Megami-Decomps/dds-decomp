@@ -1,5 +1,6 @@
 #include "eff_bill.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "btl_state.h"
@@ -1576,7 +1577,7 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 resource) {
 /* Release the frame node's shared tracks and backing allocation. */
 void effReleaseBillFrameNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029E898);
@@ -1688,7 +1689,7 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 resource) {
 
 void billReleaseCellNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029F168);
@@ -1768,7 +1769,7 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 resource) {
 
 void billReleaseParticleNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029FB48);
@@ -1906,7 +1907,7 @@ u8 *billCloneAnimatedTransform(u8 *work) {
 
 void billReleaseAlternatingTransformNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0638);
@@ -2032,7 +2033,7 @@ u8 *billCloneEmitterTransform(u8 *work) {
 
 void billReleaseEmitterNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0FA0);
@@ -2161,7 +2162,7 @@ u8 *billCloneStripTransform(u8 *work) {
 
 void billReleaseStripNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A1948);
@@ -2242,7 +2243,7 @@ u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 resource) {
 
 void billReleaseTrailNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A22B8);
@@ -2368,7 +2369,7 @@ u8 *billCloneQuadTransform(u8 *work) {
 
 void billReleaseQuadNode(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)work)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A2E18);
@@ -2721,7 +2722,7 @@ void effReleaseResourceRefs(u8 *work) {
         }
     }
     sdfQueueAssetRelease((u32)refs->handle);
-    sdfReleaseResourceAllocation((u32)refs->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)refs->allocation));
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
@@ -2930,7 +2931,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
 void effReleaseClassDrawResources(s32 work) {
     effReleaseResourceRefs(((EffClassDrawState *)work)->references);
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
-    sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffClassDrawState *)work)->allocation));
 }
 
 typedef struct EffClassFrameResource {
@@ -3253,7 +3254,7 @@ u8 *effCreatePointSet4(u32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
@@ -3446,13 +3447,13 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
-        sdfReleaseResourceAllocation(node->jobBuffer);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->jobBuffer));
     }
     if (node->index != 0) {
         for (i = 0; i < node->handleCount; i++) {
             effReleaseSurfaceGridBuffers(((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation(node->handleBuffer);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
     }
     if (node->resourceHolder != 0) {
         effReleaseReferenceHolder(node->resourceHolder);
@@ -3511,7 +3512,7 @@ void func_002A5DE0(EffectSurfaceNode *dst, u8 *work) {
             for (i = 0; i < count; i++) {
                 fileJobDestroy(dst->jobs[i]);
             }
-            sdfReleaseResourceAllocation(dst->jobBuffer);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->jobBuffer));
             dst->jobs = 0;
             dst->jobBuffer = 0;
         }
@@ -3553,7 +3554,7 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
         for (i = 0; i < node->handleCount; i++) {
             effReleaseSurfaceGridBuffers(((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation(node->handleBuffer);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
     }
     node->handleBuffer = (u32)sdfAllocGeneralBlock(size);
     node->index = sdfResourceRetainAddress(node->handleBuffer);
@@ -3623,7 +3624,7 @@ void effRebuildSurfaceJobs(EffectSurfaceNode *node, void *source) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
-        sdfReleaseResourceAllocation(node->jobBuffer);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->jobBuffer));
         node->jobs = 0;
         node->jobBuffer = 0;
     }
@@ -3814,7 +3815,7 @@ void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
 
 void effReleaseSurfaceGridBuffers(s32 work) {
     sdfQueueAssetRelease((u32)((EffSurfaceGridNode *)work)->handle);
-    sdfReleaseResourceAllocation((u32)((EffSurfaceGridNode *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffSurfaceGridNode *)work)->allocation));
 }
 
 void effResetSurfaceGridFrame(s32 work) {
@@ -4323,7 +4324,7 @@ void effReleaseBillPointEntries(u8 *work) {
             entry += 0x30;
         } while (++index < count);
     }
-    sdfReleaseResourceAllocation((u32)((EffScaleRange *)state)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffScaleRange *)state)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9DA8);
@@ -4429,7 +4430,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -4751,7 +4752,7 @@ void effReleaseRingFadeTable(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ABDE0);
@@ -4921,7 +4922,7 @@ void effReleaseBillFadeTable(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ACA40);
@@ -5090,7 +5091,7 @@ void effReleaseCompactRingFadeTable(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AD6B8);
@@ -5293,7 +5294,7 @@ void effSharedAssetReferenceRelease(s32 work) {
         effReleaseSharedReference(((EffRibbonWork *)work)->resource);
     }
     sdfQueueAssetRelease(((EffRibbonWork *)work)->handle);
-    sdfReleaseResourceAllocation(((EffRibbonWork *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffRibbonWork *)work)->allocation));
 }
 
 u32 effCloneRibbonWithSharedResource(u32 work) {
@@ -5419,7 +5420,7 @@ void effReleaseTextureAnimationWork(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AEC60);
@@ -5531,7 +5532,7 @@ void effReleaseAnimationFrameResources(u8 *work) {
     if (((EffAnimationState *)state)->record != 0) {
         fileReleaseGridRecordHandle(((EffAnimationState *)state)->record);
     }
-    sdfReleaseResourceAllocation(((EffAnimationState *)state)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffAnimationState *)state)->allocation));
 }
 
 void effSynchronizeFileTransform(u8 *work) {
@@ -5616,7 +5617,7 @@ void effReleaseBillboardFrameAsset(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
 }
 
 typedef struct EffStripWork {
@@ -5854,7 +5855,7 @@ u32 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
 void effReleaseScalyStripResources(s32 work) {
     effReleaseScalyTextureReference(effSharedScalyStripResource);
     sdfQueueAssetRelease(((EffStripWork *)work)->handle);
-    sdfReleaseResourceAllocation(((EffStripWork *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffStripWork *)work)->allocation));
 }
 
 /* Recreate the source strip's dimensions and retain another shared texture reference. */
@@ -6046,7 +6047,7 @@ void effReleaseParticleList(u8 *list) {
             effReleaseResourceRefs((u8 *)entry->references);
         }
     }
-    sdfReleaseResourceAllocation(((EffSpanTable *)list)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffSpanTable *)list)->allocation));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1560);
@@ -6180,7 +6181,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((u32)((EffPointSet *)work)->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -9110,7 +9111,7 @@ u32 fileLoadEffectSlotHelp(void) {
         oldAllocation = resource->allocationHandle;
         effQueuedFileHandle = queuedFile;
         if (oldAllocation != 0) {
-            sdfReleaseResourceAllocation(oldAllocation);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(oldAllocation));
         }
         resource->allocationHandle = allocation;
         resource->buffer = buffer;
@@ -9395,7 +9396,7 @@ s32 effPollResourceList(EffectList *list) {
                         buffer = item->buffer;
                         *node->reference = func_002BD9C0(buffer, node->kind);
                         if (node->kind == 0) {
-                            sdfReleaseResourceAllocation(buffer);
+                            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(buffer));
                         }
                         effRemoveListEntry(list);
                     }

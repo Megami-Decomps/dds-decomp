@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -644,7 +645,6 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
 
 extern void func_002BC618(s32);
 extern void dspCloseChannel(void);
-extern void sdfReleaseResourceAllocation(s32);
 
 void brsStaffTaskDestroy(s32 arg0) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
@@ -658,7 +658,7 @@ void brsStaffTaskDestroy(s32 arg0) {
     }
     func_002BC618(context->fadeTarget);
     dspCloseChannel();
-    sdfReleaseResourceAllocation(context->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
     brsTaskState = 2;
 }
 
@@ -810,7 +810,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
 extern void mnuClearEntries(MenuPageWindow *window);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);
-extern void mnuResetPartyPanelFade(s32 window, s32 index, s32 unused,
+extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, s32 unused,
                                    s32 retainScale);
 extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource,
                                  s32 option);
@@ -837,7 +837,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuClearEntries(window);
         mnuReleasePartyIconBundles(window);
         mnuSelectPage(window, page);
-        mnuResetPartyPanelFade((s32)window, page, 0, 0);
+        mnuResetPartyPanelFade(window, page, 0, 0);
         mnuSetWindowResource(page, window, (s32)work->staffSlots.pairResources[0],
                              (s32)work->staffSlots.pairResources[1]);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);

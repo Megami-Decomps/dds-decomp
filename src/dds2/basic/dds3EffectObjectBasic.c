@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
@@ -55,7 +56,6 @@ extern void effMagatuhiSetControlPointParams(void *, const void *);
 
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
-extern void *sdfReleaseResourceAllocation(void *arg);
 
 
 

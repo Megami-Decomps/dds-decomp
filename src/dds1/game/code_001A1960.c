@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "pcp_vu0.h"
@@ -5068,7 +5069,7 @@ void btlReleaseStwrPanelResource(KwlnTask *arg0) {
     u32 temp_v0;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
-    sdfReleaseResourceAllocation(*(s32 *)temp_v0);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)temp_v0));
     btlSetTrackedTaskHandle(3, 0);
 }
 
@@ -5121,7 +5122,7 @@ void btlReleaseTrackedTaskResource(void) {
 
     temp_v0 = kwlnTaskGetTaskByName(D_003BB3B0);
     temp_v1 = kwlnTaskGetUserValue(temp_v0);
-    sdfReleaseResourceAllocation(*(s32 *)(temp_v1 + 0x1200));
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)(temp_v1 + 0x1200)));
     btlSetTrackedTaskHandle(8, 0);
 }
 
