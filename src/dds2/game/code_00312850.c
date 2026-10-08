@@ -11,13 +11,11 @@ extern s8 D_0037F510[];
 
 
 
-extern void func_00313BA8(s32, s32);
 
 
 extern void sdfReleaseChipBlock();
 
 
-extern void sdfDestroyCallbackWork();
 
 
 
@@ -64,16 +62,12 @@ extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
-extern void func_00313BA8(s32, s32);
 
-extern s32 func_00313BA0(void);
-extern s32 func_00313BB0(s32, s32);
 
 extern u32 strlen(const char *);
 extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
-extern void sdfCallbackWorkOnRemove();
 
 extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
 extern s32 sdfTaskWorkRunAll(KwlnTask *task);
@@ -147,22 +141,22 @@ SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
                   SDF_TASK_ENTRY_INITIALIZE_ONCE | SDF_TASK_ENTRY_PENDING_ACTIVATION;
     work->key = item->key;
     if (item->init == NULL) {
-        work->init = func_00313BA0;
+        work->init = sdfDefaultTaskEntryInit;
     } else {
         work->init = item->init;
     }
     if (item->destroy == NULL) {
-        work->destroy = func_00313BA8;
+        work->destroy = sdfNoOpKeyValueCallback;
     } else {
         work->destroy = item->destroy;
     }
     if (item->update == NULL) {
-        work->update = func_00313BB0;
+        work->update = sdfDefaultTaskEntryUpdate;
     } else {
         work->update = item->update;
     }
     if (item->callback == NULL) {
-        work->callback = (void (*)(s32, s32))func_00313BB0;
+        work->callback = (void (*)(s32, s32))sdfDefaultTaskEntryUpdate;
     } else {
         work->callback = item->callback;
     }
@@ -178,7 +172,7 @@ void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
     }
 }
 
-void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *entry) {
+void sdfCallbackWorkOnRemove(s32 key, SdfTaskEntry *entry) {
     sdfDestroyCallbackWork(entry);
 }
 
@@ -479,13 +473,13 @@ float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
     return addend + multiplicand * multiplier;
 }
 
-s32 func_00313BA0(void) {
+s32 sdfDefaultTaskEntryInit(void) {
     return 0;
 }
 
-void func_00313BA8(s32 key, s32 initResult) {
+void sdfNoOpKeyValueCallback(s32 key, s32 initResult) {
 }
 
-s32 func_00313BB0(s32 key, s32 initResult) {
+s32 sdfDefaultTaskEntryUpdate(s32 key, s32 initResult) {
     return 0;
 }

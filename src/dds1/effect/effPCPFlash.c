@@ -34,9 +34,6 @@ extern f32 sdfSinPoly(f32 angle);
 extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 
 
-/* The callback-table entry forwards its parameter block to the factory. */
-extern void *effFlashOrbitArcCreate();
-
 
 typedef struct PcpFlashColorSlot {
     s32 first;
@@ -581,7 +578,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 extern u32 effMiscRand(void *state);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
-PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakWork *src) {
+PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakParams *src) {
     SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
     PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
@@ -612,9 +609,9 @@ void effFlashRotatingStreakSpawnFromTable(void *data)
     effFlashRotatingStreakCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016A878(PcpFlashStreakWork *src)
+PcpFlashStreakWork *func_0016A878(PcpFlashStreakParams *src)
 {
-    effFlashRotatingStreakCreate(src);
+    return effFlashRotatingStreakCreate(src);
 }
 
 void effFlashRotatingStreakDestroy(PcpFlashStreakWork *work)
@@ -847,10 +844,9 @@ void effFlashUpdateStreak(PcpFlashStreakWork *work) {
     effDrawScaledRecordPool(handle);
 }
 
-PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(src)
-    PcpFlashScalingOrbitWork *src;
+PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashScalingOrbitWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashScalingOrbitWork));
     PcpFlashScalingOrbitWork *work = (PcpFlashScalingOrbitWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     f32 angle;
@@ -858,7 +854,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(src)
     u32 range;
     u32 i;
 
-    memcpy(work, src, 0x48);
+    memcpy(work, params, 0x48);
     work->parts = (PcpFlashOrbitParticle *)(work + 1);
     work->allocationHandle = handle;
     work->tintColor = 0x80808080;
@@ -887,9 +883,9 @@ void effFlashOrbitScalingSpawnFromTable(void *data)
     effFlashOrbitScalingCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016B230(void)
+PcpFlashScalingOrbitWork *func_0016B230(PcpFlashScalingOrbitParams *params)
 {
-    effFlashOrbitScalingCreate();
+    return effFlashOrbitScalingCreate(params);
 }
 
 void effFlashOrbitScalingDestroy(PcpFlashScalingOrbitWork *work)
@@ -1090,10 +1086,9 @@ void effFlashOrbitScalingUpdate(PcpFlashScalingOrbitWork *work) {
 extern EffRecordPool *effRecordPoolCreate(s32 quadCount);
 
 /* Clone the 0x50-byte parameter block, then spread the particles evenly around the orbit from -pi/2 with random negative start ages (two handle slots per particle). */
-PcpFlashAccumulatingWork *effFlashAccumulatingCreate(src)
-    PcpFlashAccumulatingWork *src;
+PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashAccumulatingParticle) + sizeof(PcpFlashAccumulatingWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashAccumulatingParticle) + sizeof(PcpFlashAccumulatingWork));
     PcpFlashAccumulatingWork *work = (PcpFlashAccumulatingWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     f32 angle;
@@ -1101,7 +1096,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(src)
     u32 range;
     u32 i;
 
-    memcpy(work, src, 0x50);
+    memcpy(work, params, 0x50);
     work->parts = (PcpFlashAccumulatingParticle *)(work + 1);
     work->allocationHandle = handle;
     work->tintColor = 0x80808080;
@@ -1130,9 +1125,9 @@ void effFlashAccumulatingParticleSpawnFromTable(void *data)
     effFlashAccumulatingCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016BA58(void)
+PcpFlashAccumulatingWork *func_0016BA58(PcpFlashAccumulatingParams *params)
 {
-    effFlashAccumulatingCreate();
+    return effFlashAccumulatingCreate(params);
 }
 
 void effFlashAccumulatingParticleDestroy(PcpFlashAccumulatingWork *work)
@@ -1348,8 +1343,7 @@ typedef struct PcpFlashOrbitArcBlock {
     PcpFlashMotionParticle parts[1];
 } PcpFlashOrbitArcBlock;
 
-void *effFlashOrbitArcCreate(source)
-PcpFlashOrbitArcWork *source;
+PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
 {
     SdfMemBlock *handle;
     PcpFlashOrbitArcBlock *block;
@@ -1360,10 +1354,10 @@ PcpFlashOrbitArcWork *source;
     u32 spread;
     u32 i;
 
-    handle = sdfAllocGeneralBlock((u32)source->particleCount * 16 + 0x80);
+    handle = sdfAllocGeneralBlock((u32)params->particleCount * 16 + 0x80);
     block = (PcpFlashOrbitArcBlock *)sdfResourceRetainAddress(handle);
     ring = &block->header;
-    memcpy(ring, source, 0x58);
+    memcpy(ring, params, 0x58);
     ring->parts = block->parts;
     ring->allocationHandle = handle;
     ring->tintColor = 0x80808080;
@@ -1395,9 +1389,9 @@ void effFlashOrbitArcSpawnFromTable(void *data)
     effFlashOrbitArcCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016C358(void)
+PcpFlashOrbitArcWork *func_0016C358(PcpFlashOrbitArcParams *params)
 {
-    effFlashOrbitArcCreate();
+    return effFlashOrbitArcCreate(params);
 }
 
 void effFlashOrbitArcDestroy(PcpFlashOrbitArcWork *work)
@@ -1616,16 +1610,15 @@ void func_0016C698(PcpFlashOrbitArcWork *work)
     effDrawScaledRecordPool(handle);
 }
 
-PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(src)
-    PcpFlashRotatingQuadWork *src;
+PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingQuadParticle) + sizeof(PcpFlashRotatingQuadWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashRotatingQuadParticle) + sizeof(PcpFlashRotatingQuadWork));
     PcpFlashRotatingQuadWork *work = (PcpFlashRotatingQuadWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     u32 range;
     u32 i;
 
-    memcpy(work, src, 0x4C);
+    memcpy(work, params, 0x4C);
     work->parts = (PcpFlashRotatingQuadParticle *)(work + 1);
     work->allocationHandle = handle;
     work->tintColor = 0x80808080;
@@ -1649,9 +1642,9 @@ void effFlashRotatingQuadSpawnFromTable(void *data)
     effFlashRotatingQuadCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016CBD0(void)
+PcpFlashRotatingQuadWork *func_0016CBD0(PcpFlashRotatingQuadParams *params)
 {
-    effFlashRotatingQuadCreate();
+    return effFlashRotatingQuadCreate(params);
 }
 
 void effFlashRotatingQuadDestroy(PcpFlashRotatingQuadWork *work)
@@ -1876,15 +1869,14 @@ void effFlashRotatingQuadUpdate(PcpFlashRotatingQuadWork *work) {
 
 extern EffRecordPool *effRecordPoolCreateTriple(s32 count);
 
-PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(src)
-    PcpFlashRadialTriangleWork *src;
+PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(PcpFlashRadialTriangleParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashRadialTriangleWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashRadialTriangleWork));
     PcpFlashRadialTriangleWork *work = (PcpFlashRadialTriangleWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     u32 i;
 
-    memcpy(work, src, 0x3C);
+    memcpy(work, params, 0x3C);
     work->parts = (PcpFlashMotionParticle *)(work + 1);
     work->tintColor = 0x80808080;
     work->allocationHandle = handle;
@@ -1904,9 +1896,9 @@ void effFlashRadialTriangleSpawnFromTable(void *data)
     effFlashRadialTriangleCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016D400(void)
+PcpFlashRadialTriangleWork *func_0016D400(PcpFlashRadialTriangleParams *params)
 {
-    effFlashRadialTriangleCreate();
+    return effFlashRadialTriangleCreate(params);
 }
 
 void effFlashRadialTriangleDestroy(PcpFlashRadialTriangleWork *work)
@@ -2068,16 +2060,15 @@ void effFlashRadialTriangleUpdate(PcpFlashRadialTriangleWork *work) {
 }
 
 /* Clone the 0xD0-byte parameter block, then give every particle a random negative start age (two handle slots per particle). */
-PcpFlashRadialStripWork *effFlashRadialStripCreate(src)
-    PcpFlashRadialStripWork *src;
+PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRadialStripParticle) + sizeof(PcpFlashRadialStripWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashRadialStripParticle) + sizeof(PcpFlashRadialStripWork));
     PcpFlashRadialStripWork *work = (PcpFlashRadialStripWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     u32 range;
     u32 i;
 
-    memcpy(work, src, 0xD0);
+    memcpy(work, params, 0xD0);
     work->parts = (PcpFlashRadialStripParticle *)(work + 1);
     work->allocationHandle = handle;
     work->tintColor = 0x80808080;
@@ -2102,9 +2093,9 @@ void effFlashRadialStripSpawnFromTable(void *data)
     effFlashRadialStripCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016DB38(void)
+PcpFlashRadialStripWork *func_0016DB38(PcpFlashRadialStripParams *params)
 {
-    effFlashRadialStripCreate();
+    return effFlashRadialStripCreate(params);
 }
 
 void effFlashRadialStripDestroy(PcpFlashRadialStripWork *work)
@@ -2330,10 +2321,9 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
 }
 
 /* Clone the 0x50-byte parameter block, then spread the particles evenly around the orbit from -pi/2 with random negative start ages. */
-PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(src)
-    PcpFlashFadingOrbitWork *src;
+PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashFadingOrbitWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashFadingOrbitWork));
     PcpFlashFadingOrbitWork *work = (PcpFlashFadingOrbitWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     f32 angle;
@@ -2341,7 +2331,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(src)
     u32 range;
     u32 i;
 
-    memcpy(work, src, 0x50);
+    memcpy(work, params, 0x50);
     work->parts = (PcpFlashOrbitParticle *)(work + 1);
     work->allocationHandle = handle;
     work->tintColor = 0x80808080;
@@ -2370,9 +2360,9 @@ void effFlashFadingOrbitSpawnFromTable(void *data)
     effFlashFadingOrbitCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016E4E0(void)
+PcpFlashFadingOrbitWork *func_0016E4E0(PcpFlashFadingOrbitParams *params)
 {
-    effFlashFadingOrbitCreate();
+    return effFlashFadingOrbitCreate(params);
 }
 
 void effFlashFadingOrbitDestroy(PcpFlashFadingOrbitWork *work)
@@ -2578,15 +2568,14 @@ void effFlashFadingOrbitUpdate(PcpFlashFadingOrbitWork *work) {
     effDrawScaledRecordPool(handle);
 }
 
-PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(src)
-    PcpFlashOffsetRadialWork *src;
+PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(PcpFlashOffsetRadialParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashOffsetRadialWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashOffsetRadialWork));
     PcpFlashOffsetRadialWork *work = (PcpFlashOffsetRadialWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     u32 i;
 
-    memcpy(work, src, 0x40);
+    memcpy(work, params, 0x40);
     work->parts = (PcpFlashMotionParticle *)(work + 1);
     work->tintColor = 0x80808080;
     work->allocationHandle = handle;
@@ -2606,9 +2595,9 @@ void effFlashOffsetRadialTriangleSpawnFromTable(void *data)
     effFlashOffsetRadialTriangleCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016EC60(void)
+PcpFlashOffsetRadialWork *func_0016EC60(PcpFlashOffsetRadialParams *params)
 {
-    effFlashOffsetRadialTriangleCreate();
+    return effFlashOffsetRadialTriangleCreate(params);
 }
 
 void effFlashOffsetRadialTriangleDestroy(PcpFlashOffsetRadialWork *work)

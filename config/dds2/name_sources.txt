@@ -1322,6 +1322,7 @@
 0x001784E0	effSetRecordPoolDrawMode	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:673:func_001784E0; Sets the record-pool submission mode used to choose the draw sink or alternate blend packet path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001784E8	effSetRecordPoolColor	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:678:func_001784E8; Sets the packed color supplied to the record-pool packet builder.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001784F0	effSetRecordPoolScale	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:682:func_001784F0; Sets the uniform scale used by the scaled record-pool transform.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001784F8	effScatterCreateRadialWork	inferred	allocates and initializes radial work with particles, a child pool, and optional duplicate group work
 0x001787E0	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
 0x001789C0	effPcpScatterInitRadialParticle	inferred	readability/matching review (QP16)
 0x00179168	effScatterCopyRadialVector	inferred	queued
@@ -1388,6 +1389,7 @@
 0x0017D770	effScatterSetFlatInstanceScale	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B18, input-family pairing. [names_qp10.tsv]
 0x0017D778	effScatterSetFlatInstanceColor	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B20, input-family pairing. [names_qp10.tsv]
 0x0017D780	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B28, input-family pairing. [names_qp10.tsv]
+0x0017D7A8	effScatterCreateDrawObject	inferred	allocates a drawable owner with geometry arrays and an SDF asset for scatter effects
 0x0017DD08	effGetScatterEntry	inferred	Returns the indexed word from a scatter object's entry table.
 0x0017DD20	effScatterStoreSourceTransformMatrix	inferred	Copies a source transform matrix into scatter effect work using VU registers. [names_reviewed14.tsv]
 0x0017DD50	effNeedleCreateWork	inferred	U3
@@ -5554,8 +5556,10 @@
 0x00310BF8	sdfQuaternionMagnitude	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionMagnitude behavior.
 0x00310C18	sdfQuaternionInverse	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionInverse behavior.
 0x00310CB0	sdfQuaternionNormalize	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionNormalize behavior.
+0x00310D28	sdfQuatFromAxisAngle	inferred	Normalizes XYZ and uses nonnegative sqrt((1-cos(angle))/2) and sqrt((1+cos(angle))/2) half-angle components.
 0x00310DE8	sdfQuatFromVectors	inferred	normalizes two directions, cross product plus sqrt(2*(dot+1)) gives the shortest-arc quaternion; twin of DDS1 func_002C9A08 [names_M90_MovieDraw.tsv]
 0x00310EB0	sdfQuatFromEuler	inferred	confidence=high; matched-C; src/dds2/game/code_00310BC8.c:253:func_00310EB0; requires-symbol-registration; Builds quaternion components from sine/cosine of negative Euler half angles; identical named DDS1 math body.; source=reviewed-prior-QP15 [names_qp15.tsv]
+0x00310FD0	sdfQuatToAxisAngle	inferred	Writes XYZ divided by sqrt(1-W*W), with small-denominator fallback, and angle twice acos(W).
 0x003110F0	sdfQuaternionBlendNormalize	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionBlendNormalize behavior.
 0x00311178	sdfQuatSlerp	inferred	slerp with shorter-arc negation and sdfQuaternionBlendNormalize fallback; twin of DDS1 func_002C9D98 [names_M90_MovieDraw.tsv]
 0x003118E8	sdfDivideVerticalMagnitudeByForwardDot	inferred	Divides the absolute vertical direction component by the target forward dot product. [names_reviewed9.tsv]
@@ -5594,6 +5598,9 @@
 0x00313898	sdfGridDrawVisibleCells	inferred	confidence=high; matched-C; src/dds2/game/code_00310BC8.c:1134:func_00313898; Traverses the visible row/column window beginning at viewportOrigin and invokes drawCell at cellWidth/cellHeight-spaced screen positions.; source=names_P5.tsv:9 [names_qp11.tsv]
 0x003139D8	sdfGridReleaseAllCells	inferred	re-indexes every cell and calls releaseCell on nonzero values [names_M49_GridSdf.tsv]
 0x00313B90	sdfMultiplyAddFloat	inferred	Returns a float multiplied by a factor and added to an offset. [names_reviewed9.tsv]
+0x00313BA0	sdfDefaultTaskEntryInit	inferred	Default task entry initializer returns zero.
+0x00313BA8	sdfNoOpKeyValueCallback	inferred	Default list and task entry teardown callback ignores both key and value.
+0x00313BB0	sdfDefaultTaskEntryUpdate	inferred	Default task entry update returns zero; reused by the legacy callback fallback.
 0x00313BB8	sdfAppendFormattedDebugLogPair	inferred	Opens debug.log, writes a formatted pair and closes the file. [names_reviewed13.tsv]
 0x00313F88	ptyLoadPresetSkillSlots	inferred	Loads eight preset skill IDs, marks each nonzero flag and saves it in a skill slot; exact DDS1 twin. [names_reviewed13.tsv]
 0x00314020	ptyMarkPresetSkillPool	inferred	Marks forty preset skill IDs and conditionally merges stock skills; exact DDS1 twin. [names_reviewed13.tsv]

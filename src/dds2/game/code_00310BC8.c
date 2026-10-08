@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 
@@ -12,13 +13,11 @@ extern s8 D_0037F510[];
 
 
 
-extern void func_00313BA8(s32, s32);
 
 
 extern void sdfReleaseChipBlock();
 
 
-extern void sdfDestroyCallbackWork();
 
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
@@ -63,16 +62,12 @@ extern void sdfVec3ScaleInPlace(f32, f32 *);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
-extern void func_00313BA8(s32, s32);
 
-extern s32 func_00313BA0(void);
-extern s32 func_00313BB0(s32, s32);
 
 extern u32 strlen(const char *);
 extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
-extern void sdfCallbackWorkOnRemove();
 
 extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
 extern s32 sdfTaskWorkRunAll(KwlnTask *task);
@@ -109,7 +104,7 @@ void sdfQuaternionNormalize(float *values) {
 }
 
 /* Quaternion from an axis and angle. */
-void func_00310D28(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
+void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
     f32 axis[4];
     f32 a;
     f32 b;
@@ -167,7 +162,7 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
     out[3] = cz * cy * cx - sz * sy * sx;
 }
 
-void func_00310FD0(f32 *axis, f32 *angle, f32 *quaternion) {
+void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion) {
     f32 w = quaternion[3];
     f32 twiceAngle = 2.0f * func_003532B8(w);
     f32 scale = fsqrtf(1.0f - w * w);
@@ -501,8 +496,8 @@ SdfList *sdfCreateTaskHeader(void *userData) {
     memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;
     obj->userData = userData;
-    obj->onRemove = func_00313BA8;
-    obj->onDestroy = func_00313BA8;
+    obj->onRemove = sdfNoOpKeyValueCallback;
+    obj->onDestroy = sdfNoOpKeyValueCallback;
     return obj;
 }
 
