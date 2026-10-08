@@ -1258,7 +1258,7 @@ extern u16 D_003B1640[8];
 extern f32 D_003B1650[8];
 
 /* vu0 routine: capture staggered model points, then draw their growing history. */
-void func_001803E8(EffPCPChargeWork *work) {
+void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
     f32 position[4] __attribute__((aligned(16)));
     u32 i;
     u32 color;
