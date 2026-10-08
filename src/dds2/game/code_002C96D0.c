@@ -562,7 +562,7 @@ extern s32 D_00437D2C;
 
 extern void *fileBuildMainBlobAfterDelete(void);
 
-extern void *func_002CC210();
+extern void *func_002CC210(void);
 
 extern void mcDeleteFilePath(void);
 
@@ -1920,14 +1920,72 @@ s32 fileRequestBaseIcon(void) {
     return fileBeginRequest("base.ico", &D_00439034, &D_00439038, fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CC210);
+extern DatGameState *D_00439010;
+extern u32 D_00439014;
+
+void *func_002CC210(void) {
+    char filename[0x50];
+    FileRecordHeader *header;
+    s32 slot = fileReqGetSelectedSlot(fileMemoryCardRequestContext);
+
+    mcdFormatSaveSlotName(filename, slot);
+    datGameState->header.magic[0] = 'V';
+    datGameState->header.magic[1] = 'E';
+    datGameState->header.magic[2] = 'R';
+    datGameState->header.version = 3;
+    datGameState->header.mapGroup = datGameState->vr.previewX;
+    datGameState->header.mapIndex = datGameState->vr.previewY;
+    datGameState->header.playTicks = datGameState->header.secondTick;
+    datGameState->header.partyIds[0] = datGameState->party[0].unitId;
+    datGameState->header.partyIds[1] = datGameState->party[1].unitId;
+    datGameState->header.partyIds[2] = datGameState->party[2].unitId;
+    datGameState->header.partyIds[3] = datGameState->party[3].unitId;
+    datGameState->header.partyIds[4] = datGameState->party[4].unitId;
+    datGameState->header.partyIds[5] = 0;
+    datGameState->header.partyIds[6] = 0;
+    datGameState->header.partyIds[7] = 0;
+    datGameState->header.partyLevels[0] = datGameState->party[0].level;
+    datGameState->header.partyLevels[1] = datGameState->party[1].level;
+    datGameState->header.partyLevels[2] = datGameState->party[2].level;
+    datGameState->header.partyLevels[3] = datGameState->party[3].level;
+    datGameState->header.partyLevels[4] = datGameState->party[4].level;
+    datGameState->header.partyLevels[5] = 0;
+    datGameState->header.partyLevels[6] = 0;
+    datGameState->header.partyLevels[7] = 0;
+
+    header = (FileRecordHeader *)datGameState;
+    D_004580C0[slot].signature[0] = header->signature[0];
+    D_004580C0[slot].signature[1] = header->signature[1];
+    D_004580C0[slot].signature[2] = header->signature[2];
+    D_004580C0[slot].version = header->version;
+    D_004580C0[slot].mapGroup = header->mapGroup;
+    D_004580C0[slot].mapIndex = header->mapIndex;
+    D_004580C0[slot].playTicks = header->playTicks;
+    D_004580C0[slot].status = header->status;
+    D_004580C0[slot].newCycle = header->newCycle;
+    memcpy(D_004580C0[slot].party, header->party, 8);
+    memcpy(D_004580C0[slot].levels, header->levels, 8);
+    D_004580C0[slot].money = header->money;
+    D_004580C0[slot].progressWords[0] = header->progressWords[0];
+    D_004580C0[slot].progressWords[1] = header->progressWords[1];
+    D_004580C0[slot].progressWords[2] = header->progressWords[2];
+    D_00439010 = datGameState;
+    D_00439014 = sizeof(DatGameState);
+    if (D_00437D08 == 0 || D_00437D08 == 2) {
+        return (void *)fileBeginRequest(filename, &D_00439010, &D_00439014,
+                                       fileRequestBaseIcon, NULL);
+    }
+    return (void *)fileBeginRequest(filename, &D_00439010, &D_00439014,
+                                   fileBeginLabeledSlotWrite, NULL);
+}
 
 void *mcChooseLoadPath(void) {
     u32 entry = fileMemoryCardRequestContext;
     s32 slot = fileReqGetSelectedSlot(entry);
     u32 flags = fileReqGetSlotFlags(entry, slot);
     if (!(flags & 8)) {
-        return func_002CC210(entry, D_0042B6B8);
+        /* Preserve the legacy context/path dispatch to this global-state endpoint. */
+        return ((void *(*)())func_002CC210)(entry, D_0042B6B8);
     }
     mcDeleteFilePath();
     return fileBuildMainBlobAfterDelete;
