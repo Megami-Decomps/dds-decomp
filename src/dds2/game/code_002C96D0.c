@@ -170,7 +170,7 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern s32 dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(s32, s32);
 extern void fileWaitReady(u32);
-extern void sdfReleaseMemorySlot(void *);
+
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 D_00437D38;
@@ -2905,7 +2905,7 @@ void fileReleaseMenuResources(void) {
             filePollEntryCleanup(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfReleaseMemorySlot(&D_00439030);
+        sdfReleaseMemorySlot((s32 *)&D_00439030);
         kwlnTaskDestroyWithHierarchyByName("FileMentCalc", 1);
         func_00100498();
     }
