@@ -2104,7 +2104,37 @@ void fldReleaseTextureSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B5D8);
+extern u32 fldPlayerObject;
+extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern void func_00336538(f32 angle);
+
+void func_0014B5D8(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 matrix[4][4] __attribute__((aligned(16)));
+    f32 angle;
+    s32 i;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    effObjFetchInnerSecondVecNorm((EffWorldNode *)fldPlayerObject);
+    angle = effMiscComputeQuaternionRotatedReferenceAngle();
+    for (i = 0; i < 4; i++) {
+        if (fldEffectTextureNodes[i] != 0) {
+            position[0] = FLD_WORK->x;
+            position[1] = FLD_WORK->y;
+            position[2] = FLD_WORK->z;
+            if (i == 3) {
+                position[1] -= 100.0f;
+            }
+            effCopyVectorToNodeInstance((EffNode *)fldEffectTextureNodes[i], position);
+            func_00336538(-angle);
+            VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+            effApplyNodeTransformMatrix((EffNode *)fldEffectTextureNodes[i], matrix);
+            effUpdateNode(fldEffectTextureNodes[i]);
+        }
+    }
+}
 
 typedef struct FieldResourceIds {
     s32 entries[2];
