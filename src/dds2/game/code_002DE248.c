@@ -8049,13 +8049,14 @@ typedef struct EffParticleShared {
     u8 pad00[8];
     u32 state;
     u8 pad0C[0x98];
-    u32 billHandle;       // 0xA4
+    BillObj *billHandle;  // 0xA4: retained billboard cloned from the source resource.
     struct EffExpandedList *reference; // 0xA8
 } EffParticleShared;
 
 void effReleaseParticleResources(u32 *p) {
-    if (p[0xA4 / 4] != 0) {
-        billDispatchByKind(p[0xA4 / 4]);
+    BillObj *billboard = ((EffParticleShared *)p)->billHandle;
+    if (billboard != NULL) {
+        billDispatchByKind(billboard);
     }
     if (p[0xA8 / 4] != 0) {
         effReleaseReferenceHolder((struct EffExpandedList *)p[0xA8 / 4]);
@@ -8071,16 +8072,16 @@ u8 *effCloneParticleSharedResource(u8 *source) {
 }
 
 void effReplaceSharedResource(u8 *dst, u8 *src) {
-    u32 handle;
+    BillObj *billboard;
 
     if (((EffParticleShared *)src)->billHandle != 0) {
         if (((EffParticleShared *)dst)->billHandle != 0) {
             billDispatchByKind(((EffParticleShared *)dst)->billHandle);
         }
-        handle = (u32)billCloneObjectRetainingSharedData(
-            (struct BillObj *)((EffParticleShared *)src)->billHandle);
-        ((EffParticleShared *)dst)->billHandle = handle;
-        billMarkKindOneFlag((struct BillObj *)(handle));
+        billboard = billCloneObjectRetainingSharedData(
+            ((EffParticleShared *)src)->billHandle);
+        ((EffParticleShared *)dst)->billHandle = billboard;
+        billMarkKindOneFlag(billboard);
     } else {
         if (((EffParticleShared *)dst)->reference != 0) {
             effReleaseReferenceHolder(((EffParticleShared *)dst)->reference);
