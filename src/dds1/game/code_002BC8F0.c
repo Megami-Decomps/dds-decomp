@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -386,8 +387,6 @@ EffectOwnerRecord *list;
     } while (--bucketCountdown >= 0);
 }
 
-extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, s32, s32);
-
 extern void itfGridLookupValueOrDefault(void *, s32);
 
 /* Dispatch every bucket record and optionally refresh its owner/slot lookup. */
@@ -398,7 +397,7 @@ u32 effDispatchRecordBuckets(u32 refresh, EffectOwnerRecord *list, s32 drawOptio
     do {
         EffectRecord *record = *bucketHead;
         while (record != 0) {
-            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (u32)list->owner, record->slot, drawOption);
+            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (EffectSlotSet *)list->owner, record->slot, drawOption);
             if (refresh != 0) {
                 itfGridLookupValueOrDefault(list->owner, record->slot);
             }

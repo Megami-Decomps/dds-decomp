@@ -1,4 +1,5 @@
 #include "eff_bill.h"
+#include "itf_draw_grid.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
@@ -11188,7 +11189,7 @@ s32 effDispatchRecordBuckets(s32 refresh, EffectOwnerRecord *list, s32 drawOptio
     for (bucketCountdown = EFF_RECORD_LAST_BUCKET; bucketCountdown >= 0; bucketCountdown--, bucketHead++) {
         EffectRecord *record = *bucketHead;
         while (record != 0) {
-            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (u32)list->owner, record->slot, drawOption);
+            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (EffectSlotSet *)(u32)list->owner, record->slot, drawOption);
             if (refresh != 0) {
                 itfGridLookupValueOrDefault((u32)list->owner, record->slot);
             }
