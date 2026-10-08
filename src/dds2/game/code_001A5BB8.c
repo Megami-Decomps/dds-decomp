@@ -1486,16 +1486,13 @@ u64 btlAdvanceRuntimeSequenceCounter(void) {
     return value;
 }
 
+/* Clear the battle model flags; the exclusive upper limit differs by title. */
 void btlClearModelFlagRange(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 flagIndex;
 
-    temp_v1 = 0xbe0;
-    do {
-        temp_v0 = temp_v1 + 1;
-        mdlFlagClear(temp_v1);
-        temp_v1 = temp_v0;
-    } while (temp_v0 < 0xc00);
+    for (flagIndex = 0xBE0; flagIndex < 0xC00; flagIndex++) {
+        mdlFlagClear(flagIndex);
+    }
 }
 
 extern s32 btlUpdateFadeColor(void);
