@@ -80,7 +80,7 @@ typedef struct MdlViewState {
     s16 unk3E;
     s16 editorMode; /* 0x40: 0 selects records, 1 edits a mark record */
     s16 unk42;
-    s16 unk44;
+    s16 effectListScroll; /* 0x44: first visible effect row */
     s16 markFieldCursor; /* 0x46: selected row in the mark parameter editor */
     s16 unk48;
     s16 unk4A;
@@ -2135,7 +2135,146 @@ void mdlUpdateViewerMarkEditorInput(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D198);
+extern const char D_003ABEB0[];
+extern const char D_003BBCB0[];
+extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void func_0021D198(void) {
+    MdlViewState *state = &mdlViewerState;
+    MdlCtx *resource;
+    MdlRecord *firstList;
+    MdlRecord *secondList;
+    MdlRecord *record;
+    s32 firstCount;
+    s32 secondCount;
+    s32 totalCount;
+    s32 firstRemaining;
+    s32 selected;
+    s32 scroll;
+    s32 skipCount;
+    s32 rowCount;
+    s32 markerY;
+    s32 descriptionY;
+    s32 packetList;
+
+    mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0xF60, 0x270, 0);
+    resource = state->resources[0];
+    packetList = state->packetList;
+    firstList = mdlFindViewerRecord(resource, -1);
+    firstCount = mdlCountRecords((s32)firstList);
+    secondList = mdlFindViewerRecord(resource, state->activeEntryId);
+    secondCount = mdlCountRecords((s32)secondList);
+    totalCount = firstCount + secondCount;
+
+    if (totalCount == 0) {
+        sdfAppendPacket((SdfListHead *)packetList,
+                        (u32)sdfCreateFormattedSifCommand(0x7300, 0x7A20,
+                                                         0xFF0080, 0,
+                                                         D_003ABEB0));
+    } else {
+        s32 maxScroll = totalCount - 6;
+
+        if (maxScroll < 0) {
+            maxScroll = 0;
+        }
+        scroll = state->effectListScroll;
+        if (scroll > maxScroll) {
+            scroll = maxScroll;
+        }
+
+        firstRemaining = firstCount;
+        if (firstCount != 0) {
+            record = mdlGetFirstRecord((s32)firstList);
+        } else {
+            record = mdlGetFirstRecord((s32)secondList);
+        }
+
+        selected = mdlViewerState.unk42;
+        if (selected >= totalCount) {
+            selected = totalCount - 1;
+            mdlViewerState.unk42 = selected;
+        }
+        if (selected < scroll) {
+            scroll = selected;
+        } else if (selected >= scroll + 6) {
+            scroll = selected - 5;
+        }
+        mdlViewerState.effectListScroll = scroll;
+
+        skipCount = scroll;
+        rowCount = 0;
+        if (record != NULL) {
+            descriptionY = 0x7A20;
+            do {
+                s32 selectionMarker = ' ';
+
+                if (skipCount > 0) {
+                    skipCount--;
+                } else {
+                    s32 listMarker = ' ';
+                    s32 selectedStyle = 0;
+
+                    if (selected == 0) {
+                        if (mdlViewerState.editorMode == 0) {
+                            selectionMarker = '>';
+                        } else {
+                            selectedStyle = 4;
+                        }
+                    }
+
+                    if (firstRemaining > 0) {
+                        listMarker = '*';
+                    }
+
+                    markerY = 0x7A20 + rowCount * 0x60;
+                    if (selectionMarker != ' ' || listMarker != ' ') {
+                        sdfAppendPacket((SdfListHead *)packetList,
+                                        (u32)sdfCreateFormattedSifCommand(
+                                            0x7180, markerY, 0xFF0080, selectedStyle,
+                                            D_003BBCB0, selectionMarker, listMarker));
+                    }
+
+                    func_002193F8(packetList, 0x7300, descriptionY, 0xFF0080,
+                                  selectedStyle, record);
+                    descriptionY += 0x60;
+                    rowCount++;
+                }
+
+                if (firstRemaining > 0 && --firstRemaining == 0) {
+                    record = secondList != NULL ? mdlGetFirstRecord((s32)secondList) : NULL;
+                } else {
+                    record = mdlGetNextRecord(record);
+                }
+                selected--;
+                if (rowCount >= 6) {
+                    break;
+                }
+            } while (record != NULL);
+        }
+
+        if (scroll != 0) {
+            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+                                 0x8040, 0x7A30, 0x8000, 0x7A70,
+                                 0x8080, 0x7A70, 0xFF0080, NULL);
+        }
+        if (record != NULL) {
+            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+                                 0x8000, 0x7C10, 0x8080, 0x7C10,
+                                 0x8040, 0x7C50, 0xFF0080, NULL);
+        }
+    }
+
+    if (mdlViewerState.editorMode == 1) {
+        MdlRecord *markRecord = func_0021CF00();
+
+        if (markRecord != NULL && mdlRecordMatchesId(markRecord, 3)) {
+            mdlAppendViewerRectToDrawList(0x8590, 0x7A08, 0xFF007F, 0x960, 0xA50, 0);
+            mdlDrawMarkParamsPanel(packetList, 0x85C0, 0x7A20, 0xFF0080,
+                                   (EffMarkParams *)markRecord,
+                                   mdlViewerState.markFieldCursor);
+        }
+    }
+}
 
 u32 mdlRunViewerEffectEditorTask(void) {
     mdlUpdateViewerMarkEditorInput();
@@ -2281,6 +2420,8 @@ extern s32 func_00301588();
 extern s32 memcmp(const void *, const void *, u32);
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABEB0);
+
 void mdlLoadViewerPresentationConfig(void) {
     s32 fileRequest;
     s32 resourceHandle;
