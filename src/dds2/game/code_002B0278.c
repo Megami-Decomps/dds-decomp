@@ -132,9 +132,9 @@ extern u8 frFontClearFlagBits(u8);
 
 extern char D_003E7588[];
 
-extern char D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 
-extern void evtStageTestUpdate();
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 
 extern char D_003E7790[];
 
@@ -1324,7 +1324,7 @@ s32 func_002B3788(KwlnTask *callback) {
         mnuDrawIconPanelFullFade(0, 0, 0, menuWork->iconPanel, 0x53);
         mnuUpdateWindowPanelHandleStatesKindFourFive(menuWork->iconPanel);
     }
-    evtStageTestUpdate(D_00380788);
+    evtStageTestUpdate(D_00380788[0]);
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
