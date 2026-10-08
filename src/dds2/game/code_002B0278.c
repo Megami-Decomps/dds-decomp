@@ -946,20 +946,22 @@ void mnuReleaseMenuWindowHandles(s32 context) {
 }
 
 /* Release both staff resource slots; their menu indices differ between games. */
-void mnuReleaseStaffMenuResources(s32 menuWork) {
-    u32 *resourceCursor = (u32 *)(menuWork + 8);
+void mnuReleaseStaffMenuResources(void *resourceBase) {
+    struct EffectSlotSet **resourceCursor = (struct EffectSlotSet **)(
+        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
     s32 resourceCountdown = 1;
     do {
-        effResolveAndReleaseResource((struct EffectSlotSet *)*resourceCursor++);
+        effResolveAndReleaseResource(*resourceCursor++);
     } while (--resourceCountdown >= 0);
 }
 
 /* Reset texture handles for the same two resource slots. */
-void mnuReleaseStaffMenuTextureHandles(s32 menuWork) {
-    u32 *resourceCursor = (u32 *)(menuWork + 8);
+void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
+    struct EffectSlotSet **resourceCursor = (struct EffectSlotSet **)(
+        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
     s32 resourceCountdown = 1;
     do {
-        effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*resourceCursor++);
+        effReleaseTextureHandlesAndResetSlots(*resourceCursor++);
     } while (--resourceCountdown >= 0);
 }
 
@@ -1252,8 +1254,8 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
     s32 alpha;
 
     alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].windowSprites->fade;
-    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[1], 0x55, 0x53);
-    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[0], 0x1a, 0x53);
+    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, resources->baseResources[1], 0x55, 0x53);
+    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, resources->baseResources[0], 0x1a, 0x53);
 }
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {
