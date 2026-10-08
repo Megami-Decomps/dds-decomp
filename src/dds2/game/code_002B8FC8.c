@@ -98,7 +98,6 @@ extern char D_003E75C4[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, MenuWindowContainer *, s32);
 
-extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void func_002AAE80();
 
@@ -969,7 +968,7 @@ MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *menu,
 }
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu) {
-    func_002B86E8(menu->list);
+    mnuRemoveListCursorNode(menu->list);
 }
 
 /* Advance selection; clear its byte and panel sprite flags only when a node is returned. */

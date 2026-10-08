@@ -76,6 +76,8 @@ s32 mnuSeekListNode(s32 index, struct MenuList *list);
 s32 mnuGetListViewportHeight(struct MenuList *list);
 /* Clear the animation timer on every node in the list. */
 void mnuResetListNodeFadeCounters(struct MenuList *list);
+/* Remove and free the cursor node, returning the updated cursor or NULL. */
+struct MenuListNode *mnuRemoveListCursorNode(struct MenuList *list);
 
 #ifdef VERSION_DDS2
 /* Draw the track and thumb for a list that exceeds its visible row count. */
