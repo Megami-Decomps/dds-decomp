@@ -819,15 +819,15 @@ typedef struct EffectSlotDescription {
 
 /* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */
 typedef struct EffectSlotSet {
-    u32 sourceAllocation;
+    struct SdfMemBlock *sourceAllocation;
     u32 unk04;
     u32 count;
-    u32 descriptionAllocation;
+    struct SdfMemBlock *descriptionAllocation;
     EffectSlotDescription *descriptions;
-    u32 workAllocation;
+    struct SdfMemBlock *workAllocation;
     BdWork *workEntries;
     u32 textureCount;
-    u32 textureAllocation;
+    struct SdfMemBlock *textureAllocation;
     void **handles;
     s32 defaultValue;
     u8 pad2C[4];
