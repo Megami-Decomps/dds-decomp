@@ -355,16 +355,15 @@ typedef char MenuGridSlot_size_must_be_8[(sizeof(MenuGridSlot) == 8) ? 1 : -1];
 typedef struct MenuProfilePanel {
     u8 pad00[0x10];
 #ifdef VERSION_DDS2
-    u32 unk10;
-    s32 unk14;
-    u32 resourceHandle; /* 0x18: set from the owning progress host */
-    u32 unk1C;
+    s32 capValue;
+    s32 option;
+    struct EffectSlotSet *sets[2]; /* 0x18: panel and particle resources. */
     u32 unk20;
-    u32 unk24;
-    u32 unk28;
-    u32 unk2C[5];
+    s32 trailIndex;
+    s32 particleIndex;
+    s32 randomOpacity[5];
     s32 phase;
-    u32 unk44;
+    s32 opacity;
 #else
     s32 capValue;
     s32 option;
@@ -377,7 +376,10 @@ typedef struct MenuProfilePanel {
 #endif
 } MenuProfilePanel;
 
-#ifndef VERSION_DDS2
+#ifdef VERSION_DDS2
+typedef char MenuProfilePanel_dds2_size_check[(sizeof(MenuProfilePanel) == 0x48) ? 1 : -1];
+typedef char MenuProfilePanel_dds2_sets_check[((u32)&((MenuProfilePanel *)0)->sets == 0x18) ? 1 : -1];
+#else
 typedef char MenuProfilePanel_size_must_be_0x3C[(sizeof(MenuProfilePanel) == 0x3C) ? 1 : -1];
 #endif
 
@@ -755,7 +757,7 @@ typedef struct MenuTerminalContext {
     MenuCampEffect campEffect; /* 0x210: resources, sixteen sparks and badge fade; DDS2 0025FE58. */
     struct MenuIconSprites *windowResource;
     MenuGradientFade gradientFade;
-    u8 rewardGranted;
+    s8 rewardGranted;
     s8 sceneReady;
     u8 pad38A[2];
 } MenuTerminalContext;

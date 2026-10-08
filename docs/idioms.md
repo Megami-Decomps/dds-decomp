@@ -4628,3 +4628,12 @@ at their existing calls. DDS1 keeps its different 0x3C profile layout.
 Its already-matched `00285208` shows the authentic direct-indexed
 `BdWork.sourceWidth` crop and `geometry.bounds[2]` update idiom, but is
 not a byte-identical donor for DDS2's longer `002C33C0` renderer.
+
+## Resource effect wrappers forward their pointer arguments and result
+
+DDS1 `00115298` and DDS2 `00115500` are the same constructor forwarder:
+the resource and two vector pointers reach the inner constructor unchanged,
+and callers consume its returned object pointer. A `void(void)` declaration
+only happened to preserve those registers in the old wrapper's machine code;
+the real three-pointer, pointer-returning contract is now explicit in both.
+This closure does not change the separately parked script-setter return ABI.
