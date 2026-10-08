@@ -25,9 +25,28 @@ typedef char SdfTaskItemDesc_size_must_be_0x14[
      (u32)&((SdfTaskItemDesc *)0)->callback == 0x10)
         ? 1 : -1];
 
-/* Allocated entry stored as a task worker list-node value (0x1C).
- * Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
- * The high word selects active, suspended, or pending-activation dispatch modes. */
+/* Low-bit controls shared by the task-entry update and callback passes. */
+#define SDF_TASK_ENTRY_UPDATE_ENABLED 0x00000001
+#define SDF_TASK_ENTRY_CALLBACK_ENABLED 0x00000002
+#define SDF_TASK_ENTRY_INITIALIZE_ONCE 0x00000004
+#define SDF_TASK_ENTRY_REMOVE_PENDING 0x00008000
+
+/* Exact high-word states handled by the task-entry dispatchers. */
+#define SDF_TASK_ENTRY_ACTIVE 0x00010000
+#define SDF_TASK_ENTRY_SUSPENDED 0x00020000
+#define SDF_TASK_ENTRY_PENDING_ACTIVATION 0x00100000
+#define SDF_TASK_ENTRY_STATE_MASK 0xFFFF0000
+
+/* Mode arguments accepted by sdfSetTaskItemMode: 0 ORs active/update/callback,
+ * 1 queues activation, 2 suspends, 3 selects callback only, and 4 selects update
+ * only. The two single-pass modes preserve the other low controls. */
+#define SDF_TASK_ITEM_MODE_ENABLE_UPDATE_AND_CALLBACK 0
+#define SDF_TASK_ITEM_MODE_PENDING_ACTIVATION 1
+#define SDF_TASK_ITEM_MODE_SUSPENDED 2
+#define SDF_TASK_ITEM_MODE_CALLBACK_ONLY 3
+#define SDF_TASK_ITEM_MODE_UPDATE_ONLY 4
+
+/* Allocated entry stored as a task worker list-node value (0x1C). */
 typedef struct SdfTaskEntry {
     u32 flags;                     /* 0x00 */
     s32 key;                       /* 0x04 */
@@ -76,5 +95,6 @@ void sdfAttachTaskItem(TaskWork *, SdfTaskItemDesc *);
 void sdfRemoveTaskItem(TaskWork *, s32);
 SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *, s32);
 void sdfSetTaskItemMode(TaskWork *, s32, u32);
+SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *);
 
 #endif /* SDF_TASK_WORK_H */
