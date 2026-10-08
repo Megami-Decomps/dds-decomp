@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_staff.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -408,7 +409,6 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *menu) {
 extern void *memset(void *, s32, u32);
 extern s8 dds3AdminReadPreviousSignedSample(void);
 extern EffectList *mnuAllocateValueRecord(u32);
-extern void mnuInitPartyPanelSlots(void *);
 extern void func_0027AD80(void *);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern char D_0037B9E0[];
@@ -432,7 +432,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     } else {
         menu->resourceQueue = mnuAllocateValueRecord(0);
     }
-    mnuInitPartyPanelSlots(menu->partyPanel);
+    mnuInitPartyPanelSlots((PartyPanel *)menu->partyPanel);
     func_0027AD80(menu->background);
     evtCreateMessageWindowIfMissing((s32)D_0037B9E0);
     func_00271368(menu);

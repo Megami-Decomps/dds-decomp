@@ -17,7 +17,6 @@ extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
-extern void mnuInitPartyPanelSlots(s32);
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);
 extern s32 mnuGetAbilityTargetCategory(u16);
@@ -210,7 +209,7 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     if (ptySkillApplyFieldUseEffect((MenuPageWindow *)window, id,
                                     selectedEntry, targetEntry) != 0) {
         mnuConsumeEntryCost(id, selectedEntry);
-        mnuInitPartyPanelSlots(context + 0x7EC);
+        mnuInitPartyPanelSlots((PartyPanel *)(context + 0x7EC));
         mnuUpdateHandleStates((MenuPageWindow *)window);
         func_00280048(window);
         return 1;

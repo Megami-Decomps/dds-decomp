@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_staff.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
@@ -501,7 +502,6 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
 extern char D_003AFA88[];
 extern char D_003AFA98[];
 extern void sndEnsureMidiBankResident(s32);
-extern void mnuInitPartyPanelSlots(s32);
 extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
 extern void effRequestResourceByMode(char *, char *, s32, s32);
 extern void mnuRequestBaseAssets(MenuAssets *);
@@ -512,7 +512,7 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
         return 0;
     }
     sndEnsureMidiBankResident(0x50000);
-    mnuInitPartyPanelSlots((s32)&work->partyPanel);
+    mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->fadeTarget, &work->staffSlots);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0, (s32)&work->unitHandle);
     mnuRequestBaseAssets(&work->assets);
@@ -744,7 +744,7 @@ s32 brsTaskIsFadeIdle(void) {
 }
 
 void mnuRefreshSelectedUnitPanels(DatPartyRecord *unused, BrsSkillPackageWork *menu) {
-    mnuInitPartyPanelSlots((s32)&menu->partyPanel);
+    mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuUpdateHandleStates(&menu->partyWindow);
     func_00280048((s32)&menu->partyWindow);
 }
