@@ -871,7 +871,7 @@ typedef struct MdlPartRec {
 } MdlPartRec;
 
 
-extern void *sdfChunkFindRecordById(void *chunk, s32 id);
+extern void *sdfChunkFindRecordById(SdfModel *model, s32 id);
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
 s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
@@ -2194,11 +2194,12 @@ extern s32 sdfCreateResetPacketList(void);
 
 extern void *func_00348188(const f32 (*)[4], const u32 *, s32, u32);
 
-extern s32 sdfCountMapPositionRecords(s32);
+extern u32 sdfCountMapPositionRecords(SdfModel *model);
 
-extern s32 sdfChunkFindByTag(s32, s32);
+extern void *sdfChunkFindByTag(SdfModel *model, s32 tag);
 
-extern void sdfSetLookAtBasisFromRecord(s32, s32);
+struct SdfMapPositionRecord;
+extern void sdfSetLookAtBasisFromRecord(SdfModel *model, struct SdfMapPositionRecord *record);
 
 extern f32 D_003C8930[][4];
 
@@ -2278,19 +2279,19 @@ INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
 
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
 void mdlDrawMapPositionRecords(MdlCtx *resource) {
-    s32 recordCount = sdfCountMapPositionRecords((s32)resource->inner);
+    s32 recordCount = sdfCountMapPositionRecords(resource->inner);
 
     if (recordCount > 0) {
         s32 recordIndex = 0;
         s32 packetList = sdfCreateResetPacketList();
-        s32 recordCursor = sdfChunkFindByTag((s32)resource->inner, MDL_MAP_POSITION_TAG) + MDL_MAP_POSITION_DATA_OFFSET;
+        u8 *recordCursor = (u8 *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + MDL_MAP_POSITION_DATA_OFFSET;
 
         do {
-            s32 currentRecord = recordCursor;
+            u8 *currentRecord = recordCursor;
 
             recordIndex++;
             recordCursor += MDL_MAP_POSITION_RECORD_BYTES;
-            sdfSetLookAtBasisFromRecord((s32)resource->inner, currentRecord);
+            sdfSetLookAtBasisFromRecord(resource->inner, (struct SdfMapPositionRecord *)currentRecord);
             sdfAppendPacket(packetList, (s32)func_00348188(D_003C8A00, D_003C8A60, 6, 0x80));
         } while (recordIndex != recordCount);
         D_00380048.submit(&D_00380048, packetList);

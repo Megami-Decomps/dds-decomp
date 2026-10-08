@@ -537,7 +537,7 @@ s32 effDuplicateModelOwner(u8 *src) {
     return (s32)dst;
 }
 
-extern u32 sdfCountMapPositionRecords(u32);
+extern u32 sdfCountMapPositionRecords(SdfModel *model);
 
 extern void *fileQueueClone(void *);
 
@@ -556,7 +556,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
             mdlAddEntryFlagged(dst->model, 0, 0);
         }
     }
-    dst->count = sdfCountMapPositionRecords((u32)dst->model->inner);
+    dst->count = sdfCountMapPositionRecords(dst->model->inner);
     if (src->buffer != 0) {
         if (dst->buffer != 0) {
             for (i = 0; i < dst->count; i++) {

@@ -4137,8 +4137,7 @@ void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
     VU0_STORE_VF(vf10, worldPosition);
 }
 
-typedef struct SdfTextParam SdfTextParam;
-extern s32 sdfLoadMapRecordPositionVector(SdfTextParam *, s32);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void mdlLoadSecondaryVectorVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
@@ -4162,7 +4161,7 @@ s32 value;
     btlRefreshUnitFxVectors(object);
     {
         MdlCtx *owner = object->ext->owner;
-        return (s8)sdfLoadMapRecordPositionVector((SdfTextParam *)owner->inner, value);
+        return (s8)sdfLoadMapRecordPositionVector(owner->inner, value);
     }
 }
 
@@ -4197,7 +4196,7 @@ s32 func_001D6428(BtlUnit *unit, s32 value) {
     mdlLoadSecondaryVectorVU(unit->ext->owner);
     VU0_STORE_VF_UNCLOBBERED(vf10, secondaryVector);
     btlRefreshUnitFxVectors(unit);
-    result = sdfLoadMapRecordPositionVector((SdfTextParam *)unit->ext->owner->inner, value);
+    result = sdfLoadMapRecordPositionVector(unit->ext->owner->inner, value);
     VU0_STORE_VF_UNCLOBBERED(vf10, currentVector);
     VU0_LOAD_VF(vf10, primaryVector);
     mdlStorePrimaryVectorVU(unit->ext->owner);
@@ -4208,7 +4207,7 @@ s32 func_001D6428(BtlUnit *unit, s32 value) {
     return result;
 }
 
-extern s32 sdfLoadMapRecordLookAtBasis(SdfTextParam *, s32);
+extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *, s32);
 
 s32 btlSetActorAlternateEffectParameter(object, value)
 BtlUnit *object;
@@ -4225,7 +4224,7 @@ s32 value;
     btlRefreshUnitFxVectors(object);
     {
         MdlCtx *owner = object->ext->owner;
-        return (s8)sdfLoadMapRecordLookAtBasis((SdfTextParam *)owner->inner, value);
+        return (s8)sdfLoadMapRecordLookAtBasis(owner->inner, value);
     }
 }
 
@@ -10860,7 +10859,7 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
 void btlUpdateJobPositionFromModel(s32 *args) {
     f32 pos[4];
 
-    if (sdfLoadMapRecordPositionVector((SdfTextParam *)((MdlCtx *)args[1])->inner, 1) == 0) {
+    if (sdfLoadMapRecordPositionVector(((MdlCtx *)args[1])->inner, 1) == 0) {
         mdlLoadPrimaryVectorVU((MdlCtx *)args[1]);
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         pos[1] -= 150.0f;

@@ -675,7 +675,7 @@ void evtViewerSyncWorldGroups(u32 position, EventViewerState *viewer) {
     }
 }
 
-extern s32 sdfGetLodChunkValue();
+extern u32 sdfGetLodChunkValue(SdfModel *model);
 
 /* Applies the latest kind-6 key at/before position to a kind-1 track's LOD
  * byte, provided the requested signed-byte level is supported by its chunk. */
@@ -706,7 +706,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
                 lod->lodIndex = 0;
             } else {
                 level = best->p0C.sb[0];
-                if (sdfGetLodChunkValue(lod) >= level) {
+                if ((s32)sdfGetLodChunkValue(lod) >= level) {
                     lod->lodIndex = best->p0C.sb[0];
                 }
             }

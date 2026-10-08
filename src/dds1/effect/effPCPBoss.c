@@ -132,7 +132,7 @@ typedef struct {
 
 extern void *effParamWorkGetData(EffParamWork *handle);
 extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
-extern u32 sdfCountMapPositionRecords(void *chunk);
+extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(u32 system, u32 value);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
