@@ -1,17 +1,17 @@
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
+#include "dat_state.h"
 
 extern s32 mnuUseStaffItem(s32, s32);
 
 extern u32 kwlnTaskGetUserValue();
 
-extern u8 *datGameState;
-
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
 extern void *memset(void *, s32, u32);
-extern void func_00272D50(s32);
+typedef struct StaffDisplayContext StaffDisplayContext;
+extern void func_00272D50(StaffDisplayContext *);
 extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
 extern void mnuActivatePanelAndConfigureGridResources(s32, s32, s32, s32);
 extern s32 mnuSeekListNode(s32, s32);
@@ -34,7 +34,7 @@ typedef struct SaveItemCounts {
 
 
 /* One staff display work allocation owns the window resources and party target list. */
-typedef struct {
+struct StaffDisplayContext {
     u8 pad00[0x54];
     s32 popupState;
     u8 pad58[0x14];
@@ -59,13 +59,94 @@ typedef struct {
     s32 displayMode; /* 0x910 */
     MenuGradientFade gradient; /* 0x914 */
     u8 pad920[4];
-} StaffDisplayContext;
+};
 typedef char StaffDisplayContext_size[(sizeof(StaffDisplayContext) == 0x924) ? 1 : -1];
 
 extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_00272D50);
+typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
+extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
+extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
+extern void func_00272BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+extern s32 mnuIsBulletItemId(s32);
+extern char *D_003BAA84;
+extern u8 *datItemSkillRecords;
+extern s32 func_00286A00(s32);
+extern s32 evtCheckValueThreshold(s32, s32);
+extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
+extern void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *, u32);
+
+void func_00272D50(StaffDisplayContext *context) {
+    StaffWindowResources *resources = context->resources;
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
+    s32 itemId;
+    s32 textOffset;
+    s32 secondTextOffset;
+    s32 minimumQuantity;
+
+    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
+    mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
+    window->list->context = context;
+    window->list->drawCallback = func_00272BC0;
+
+    itemId = 1;
+    textOffset = 0x19;
+    do {
+        u8 itemFlags;
+        u32 quantity;
+
+        if (datGameState->inventory.counts[itemId] != 0) {
+            itemFlags = datItemSkillRecords[itemId * 8];
+            if (((itemFlags & 3) != 0 || func_00286A00(itemId) != 0) &&
+                mnuIsBulletItemId(itemId) == 0) {
+                node = mnuAppendWindowListNode(window, D_003BAA84 + textOffset);
+                quantity = datGameState->inventory.counts[itemId];
+                node->sortKeySecondary = itemId;
+                node->sortKeyPrimary = quantity;
+                if ((datItemSkillRecords[itemId * 8] & 1) == 0 || func_00286A00(itemId) != 0) {
+                    node->flags48 |= 1;
+                }
+            }
+        }
+        itemId++;
+        textOffset += 0x19;
+    } while (itemId < 0xC0);
+
+    itemId = 1;
+    minimumQuantity = 1;
+    resources->windows[0] = window;
+    mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 0xD);
+    mnuAttachWindowTextureState(resources->windows[0], -0xE0, 0x370, 0, context->unkDC);
+    mnuConfigureWindowSpriteSlots(resources->windows[0]->textures, context->spriteResource);
+
+    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x1B0, 0x10, 8, 0x15);
+    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
+    mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
+
+    secondTextOffset = 0x19;
+    do {
+        if (evtCheckValueThreshold(itemId, minimumQuantity) != 0 &&
+            (datItemSkillRecords[itemId * 8] & 4) != 0) {
+            node = mnuAppendWindowListNode(window, D_003BAA84 + secondTextOffset);
+            node->sortKeyPrimary = minimumQuantity;
+            node->sortKeySecondary = itemId;
+        }
+        itemId++;
+        secondTextOffset += 0x19;
+    } while (itemId < 0xC0);
+
+    resources->windows[1] = window;
+    mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 0xE);
+    mnuAttachWindowTextureState(resources->windows[1], -0xE0, 0x370, 0, context->unkDC);
+    mnuConfigureWindowSpriteSlots(resources->windows[1]->textures, context->spriteResource);
+}
 
 void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
     StaffWindowResources *resources;
@@ -88,16 +169,6 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId, s32 context) {
     return resources->windows[0]->list->count != 0;
 }
 
-typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
-extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
-extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
-extern void func_00272BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
-extern s32 mnuIsBulletItemId(s32);
-extern char *D_003BAA84;
-extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
-extern void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *, u32);
 
 /* Create the extra staff window and populate it with owned bullet items. */
 void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
@@ -155,7 +226,7 @@ s32 mnuInitializeStaffDisplayResources(void) {
     memset(resources, 0, 0x2C);
     resources->allocation = handle;
     func_00273390((u32)context);
-    func_00272D50((s32)context);
+    func_00272D50(context);
     mnuForwardDupArg(context->activeWindow, context->unk74, 0, 0, 0);
     mnuActivatePanelAndConfigureGridResources(context->unk138, context->unkD8, 0, 1);
     mnuSeekListNode(0, (s32)context->activeWindow->list);
@@ -281,7 +352,7 @@ extern void func_00280048(s32);
  * party panels. Returns 1 when the item was consumed. */
 s32 mnuUseStaffItem(s32 itemId, s32 context) {
     s32 partyPanel = context + 0x15C;
-    s32 targetUnit = datGameState + ((StaffDisplayContext *)context)->selectionList->cursor->index * 0x1A4 + 0xA60;
+    s32 targetUnit = (s32)&datGameState->party[((StaffDisplayContext *)context)->selectionList->cursor->index];
     s32 result = btlItemApplyDirectEffect(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
