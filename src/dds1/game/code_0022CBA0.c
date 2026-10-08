@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_viewer.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -15,18 +16,18 @@
 #include "evt_polygon_movie.h"
 
 extern u32 kwlnTaskGetUserValue(KwlnTask *task);
-struct EvtViewer;
-struct EventViewerState;
-struct CampScene;
+struct EvtRuntime;
+struct EvtRuntime;
+struct EvtRuntime;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
-s32 evtViewerHasUpdateFlag(struct EventViewerState *viewer);
+s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
-void evtEventViewerReset(struct EvtViewer *viewer);
+void evtEventViewerReset(struct EvtRuntime *viewer);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void func_00232E20(PolyMovieWork *work);
 extern s32 mnuPollTitleStreamStateLocked(void);
@@ -60,7 +61,6 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
-s32 evtEventViewerGetPendingNode(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void *dds3GetWorldObject(void);
@@ -72,204 +72,22 @@ void mnuCheckMovieDecoderStatus(void);
 
 /* Handles retained by the viewer and by its owning task context. */
 
-typedef struct EventViewerState {
-    u32 resourceHandle; /* 0x00 */
-    s32 flags;
-    PolyMovieWork *windowContext; /* 0x08: owns the message-window handle at +0x104 */
-    s32 frameCount; /* 0x0C */
-    s32 glyphAdvanceStart;    /* 0x10 */
-    s32 glyphAdvanceLimit;    /* 0x14 */
-    s32 glyphAdvancePosition; /* 0x18 */
-    s32 previousGlyphPosition; /* 0x1C */
-    u8 pad20[4];
-    u8 unitNames[256][32];
-    s32 selectedEntry;
-    u8 pad2028[4];
-    s32 fallbackEntry;
-    u8 pad2030[4];
-    struct EvtViewTrack *tracks; /* 0x2034 */
-    u8 pad2038[4];
-    struct EffWorldNode *objects[127];
-    s32 unk2238;
-    struct {
-        u16 id;
-        u16 a;
-        u16 b;
-        u16 pad6;
-    } history[8];
-    s32 historyCount;
-    u32 currentId;
-    s32 commandResetId; /* 0x2284 */
-    u8 pad2288[4];
-    void *unk228C;
-    s32 blurRectangleEnabled;
-    s32 texturedBlurEnabled;
-    s32 filterBlurEnabled;
-    s32 colorRectangleEnabled;
-    s32 texturedSquareEnabled;
-    s32 staggeredBlurEnabled;
-    s32 selectionMode; /* 0x22A8: command mode zero, one or two */
-    s32 unk22AC;
-    u8 pad22B0[4];
-    s32 unk22B4;
-    s32 unk22B8;
-    s32 optionSelection; /* 0x22BC */
-    s32 optionCount; /* 0x22C0 */
-    const char *optionTitle; /* 0x22C4 */
-    const char **optionNames; /* 0x22C8 */
-    s32 commandResetA; /* 0x22CC: cleared on command mode three */
-    s32 commandResetB; /* 0x22D0 */
-    u8 commandResetC;  /* 0x22D4 */
-    u8 pad22D5[0xB];
-    u8 commandResetD;  /* 0x22E0 */
-    u8 pad22E1[7];
-    char eventName[0x14];
-    s32 commandTableOffset; /* 0x22FC: byte offset into command descriptors */
-    s32 unk2300;
-    s32 unk2304;
-    struct EvtViewTrack *sel; /* 0x2308: selected timeline track */
-    s32 commandCategory; /* 0x230C: selected parameter category. */
-    u32 commandValue; /* 0x2310: value of the active command */
-    s32 commandMinimum; /* 0x2314 */
-    s32 commandMaximum; /* 0x2318 */
-    f32 unk231C;
-    f32 unk2320;
-    f32 unk2324;
-    s32 unk2328;
-    s32 unk232C;
-    f32 commandMatrix[12];
-    f32 savedCommandMatrix[12];
-    s32 unk2390;
-    s32 unk2394;
-    s32 unk2398;
-    u8 pad239C[4];
-    s32 unk23A0;
-    s32 unk23A4;
-    f32 commandX; /* 0x23A8 */
-    f32 commandY; /* 0x23AC */
-    f32 unk23B0;
-    f32 unk23B4;
-    s32 unk23B8;
-    u8 pad23BC[4];
-    s32 updateCount;
-    u8 pad23C4;
-    u8 windowActive;
-    s16 unk23C6;
-    s32 unk23C8;
-    u8 pad23CC[4];
-    s32 ch71; /* 0x23D0 */
-    s32 ch72; /* 0x23D4 */
-    s32 ch76; /* 0x23D8 */
-    s32 ch75; /* 0x23DC */
-    u8 pad23E0[0x10];
-    s32 glyphTickCount; /* 0x23F0 */
-    s32 unk23F4;
-    s32 framebufferQuadEnabled;
-    u8 pad23FC[8];
-    s32 unk2404;
-    s32 unk2408;
-    s32 unk240C;
-    u32 glyph; /* 0x2410: FrFontGlyph passed to frFontDrawGlyphInDefaultMode */
-    s32 timedActive; /* 0x2414: gated time interval */
-    s32 timedStart;  /* 0x2418 */
-    s32 timedEnd;    /* 0x241C: negative is an open endpoint */
-    u8 slotType; /* 0x2420 */
-    u8 slotFlag; /* 0x2421 */
-    u8 pad2422[2];
-    f32 slotValue; /* 0x2424 */
-    s32 pendingWork;  /* 0x2428: reset when pendingResource is released */
-    s32 pendingResource; /* 0x242C */
-    u8 pad2430[0x10];
-    s32 titleStreamWaitFrames; /* 0x2440 */
-    u8 pad2444[0x2C];
-    s32 voicePending; /* 0x2470 */
-    s32 voiceMessage; /* 0x2474 */
-    s32 unk2478;
-    u8 pad247C[4];
-    s32 voiceFrame; /* 0x2480: glyph position saved when voice playback conflicts. */
-    u8 pad2484[4];
-    s32 commandStart; /* 0x2488 */
-    u8 pad248C[4]; /* allocated as 0x2490 bytes */
-} EventViewerState;
+
 
 /* Script-command parameter slots have byte, halfword, word and float views. */
-typedef union EvtViewParam {
-    f32 f;
-    s32 i;
-    u32 u;
-    u16 h[2];
-    s16 sh[2];
-    u8 b[4];
-    s8 sb[4];
-} EvtViewParam;
 
-u16 evtViewerPopHistory(EventViewerState *viewer);
+
+u16 evtViewerPopHistory(EvtRuntime *viewer);
 
 /* Timeline key shared by several track kinds, not a rendered font glyph.
  * The selector/channel widths depend on the enclosing track and key kind. */
-typedef struct EvtViewKey {
-    u16 frame; /* 0x00: track-local frame position. */
-    u16 duration;
-    s32 interpolationMode;
-    union {
-        EvtViewParam p08;
-        struct {
-            union { s8 kind; s16 unitIndex; } selector;
-            s16 enabled;
-        };
-    };
-    union {
-        EvtViewParam p0C;
-        struct {
-            union { s8 value; s16 objectIndex; u8 bytes[2]; } channel;
-            s16 param;
-        };
-    };
-    union {
-        EvtViewParam p10;
-        struct { s16 condition; u8 pad12[2]; };
-    };
-    union {
-        EvtViewParam p14;
-        union { s16 condition; f32 value; } parameter14;
-    };
-    EvtViewParam p18;
-    EvtViewParam p1C;
-    u8 pad20[0xC];
-    void *payload;
-    struct EvtViewKey *next;
-    struct EvtViewKey *previous;
-} EvtViewKey;
+
 
 /* Linked timeline track. Saved vectors and the attachment latch are used by
  * kind-1 world-object tracks; the vectors keep their original embedded layout. */
-typedef struct EvtViewTrack {
-    s32 kind;                 /* 0x00 */
-    u8 pad04[0xC];
-    union {
-        EffWorldNode *transform;
-        s32 transitionValue;
-        u32 handle;
-    } owner;                  /* 0x10: payload role is selected by kind */
-    s32 argument14; /* Kind-18 resource argument. */
-    u8 pad18[4];
-    s16 frameOffset; /* 0x1C: added to relative key frames. */
-    s8 playbackTimeMode; /* 0x1E */
-    u8 pad1F[5];
-    s32 unk24;
-    s32 keyMode;              /* 0x28: mode 1 uses the viewer's pending key */
-    f32 savedFirstVector[4]; /* 0x2C: restored when detaching a world object. */
-    f32 savedSecondVector[4]; /* 0x3C */
-    s32 objectAttached; /* 0x4C: world-object attachment needs restoring. */
-    s32 hasKeys; /* 0x50 */
-    EvtViewKey *keys; /* 0x54 */
-    EvtViewKey *lastKey; /* 0x58 */
-    u8 pad5C[0x20];
-    struct EvtViewTrack *next; /* 0x7C */
-    struct EvtViewTrack *previous; /* 0x80 */
-} EvtViewTrack;
 
-extern void evtReorderListNodes(EvtViewTrack *track);
+
+extern void evtReorderListNodes(EvtRuntimeGroup *track);
 
 extern void func_00243048(u16 *from, u16 *to, u8 *out, f32 ratio);
 typedef struct CampDisplayDefaults CampDisplayDefaults;
@@ -277,7 +95,7 @@ extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *displ
 
 /* Interpolates parameter keys at the viewer's current frame, accounting for
  * the track offset. A missing next key leaves the interpolation ratio at zero. */
-void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewTrack *node, u16 *from, u16 *to) {
+void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node, u16 *from, u16 *to) {
     u8 out[0x20];
     f32 ratio = 0.0f;
 
@@ -285,39 +103,39 @@ void evtViewerApplyInterpolatedNodeKey(EventViewerState *viewer, EvtViewTrack *n
         if (to != NULL) {
             s32 start = *from;
             f32 span = *to - start;
-            f32 elapsed = viewer->glyphAdvancePosition - (start + node->frameOffset);
+            f32 elapsed = viewer->curFrame - (start + node->metadataValue);
 
             if (span != 0.0f) {
                 ratio = elapsed / span;
             }
         }
         func_00243048(from, to, out, ratio);
-        mnuDrawCampScaledTexture((SdfTex *)node->unk24, (CampDisplayDefaults *)out);
+        mnuDrawCampScaledTexture((SdfTex *)node->entryValue, (CampDisplayDefaults *)out);
     }
 }
 
 /* Applies kind-24 parameter tracks using bracketing keys, or the pending key
  * when keyMode is 1. Traversal uses the shared timeline-key record. */
-void evtViewerApplyParameterKeyTracks(EventViewerState *viewer) {
-    EvtViewTrack *node = viewer->tracks;
-    s32 position = viewer->glyphAdvancePosition;
+void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
+    EvtRuntimeGroup *node = viewer->groups;
+    s32 position = viewer->curFrame;
 
     while (node != NULL) {
-        if (node->kind == 24) {
-            if (node->keyMode == 1) {
-                u16 *key = (u16 *)evtEventViewerGetPendingNode((s32)viewer);
+        if (node->type == 24) {
+            if (node->unk28 == 1) {
+                u16 *key = (u16 *)evtEventViewerGetPendingNode(viewer);
                 evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
             } else {
-                EvtViewKey *glyph = node->keys;
-                EvtViewKey *from;
+                EvtRuntimeChild *glyph = node->children;
+                EvtRuntimeChild *from;
 
-                while (glyph != NULL && position >= glyph->frame + node->frameOffset) {
+                while (glyph != NULL && position >= glyph->frame + node->metadataValue) {
                     glyph = glyph->next;
                 }
                 if (glyph != NULL) {
-                    from = glyph->previous;
+                    from = glyph->prev;
                 } else {
-                    from = node->lastKey;
+                    from = node->lastChild;
                 }
                 evtViewerApplyInterpolatedNodeKey(viewer, node, (u16 *)from, (u16 *)glyph);
             }
@@ -383,7 +201,7 @@ extern void effEnableColorRectangle(void);
 extern void effDisableColorRectangle(void);
 extern void func_00243A18();
 
-void func_0022CD30(EventViewerState *viewer) {
+void func_0022CD30(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
         effDrawBlurRectangle(effGetLoadDescA());
     }
@@ -421,11 +239,11 @@ void func_0022CD30(EventViewerState *viewer) {
     evtViewerApplyParameterKeyTracks(viewer);
 }
 
-void evtViewerApplySelectedEntry(EventViewerState *viewer) {
+void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
     s32 entry;
     s32 selected;
 
-    selected = viewer->selectedEntry;
+    selected = viewer->activeEntryIndex;
     if (selected != 0) {
         entry = selected;
     } else {
@@ -452,11 +270,11 @@ extern void evtEndUnitValueTransition(EvtUnit *, s32);
 
 /* At time, selects each named unit's latest kind-9 transition key and starts,
  * ends or leaves its value transition according to the selected key flags. */
-void func_0022E098(s32 time, EventViewerState *viewer) {
+void func_0022E098(s32 time, EvtRuntime *viewer) {
     EffWorldNode *object;
-    EvtViewTrack *node;
-    EvtViewKey *key;
-    EvtViewKey *selected;
+    EvtRuntimeGroup *node;
+    EvtRuntimeChild *key;
+    EvtRuntimeChild *selected;
     EvtUnit *unit;
     s32 selectedValue;
     s32 selectedTime;
@@ -468,17 +286,17 @@ void func_0022E098(s32 time, EventViewerState *viewer) {
                 selected = NULL;
                 selectedValue = 0;
                 selectedTime = -1;
-                node = viewer->tracks;
+                node = viewer->groups;
                 while (node != NULL) {
-                    if (node->kind == 9) {
-                        key = node->keys;
+                    if (node->type == 9) {
+                        key = node->children;
                         while (key != NULL) {
-                            if (time >= key->frame + node->frameOffset && key->selector.unitIndex >= 0 &&
+                            if (time >= key->frame + node->metadataValue && key->p08.sh[0] >= 0 &&
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
-                                    EVT_WORLD_SLOT_UNIT, viewer->unitNames[key->selector.unitIndex])) {
-                                if (selectedTime < key->frame + node->frameOffset) {
-                                    selectedValue = node->owner.transitionValue;
-                                    selectedTime = key->frame + node->frameOffset;
+                                    EVT_WORLD_SLOT_UNIT, viewer->entryName[key->p08.sh[0]])) {
+                                if (selectedTime < key->frame + node->metadataValue) {
+                                    selectedValue = node->transitionValue;
+                                    selectedTime = key->frame + node->metadataValue;
                                     selected = key;
                                 }
                             }
@@ -489,7 +307,7 @@ void func_0022E098(s32 time, EventViewerState *viewer) {
                 }
                 unit = evtUnitGetNestedValue(object);
                 if (selected != NULL) {
-                    if (selected->enabled != 0) {
+                    if (selected->p08.sh[1] != 0) {
                         if (unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {
                             evtSetUnitValueTransition(unit, (EffWorldNode *)selectedValue, selected->duration);
                         }
@@ -520,11 +338,11 @@ extern void evtPolygonMovieClampTime(s32 object, s32 arg1, s32 start, s32 end);
 
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset) and the supplied endTime. */
-void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
+void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     s32 table;
     s32 slots;
     s32 object;
-    EvtViewTrack *node;
+    EvtRuntimeGroup *node;
     s32 time;
 
     if (dds3GetWorldObject() != 0) {
@@ -535,16 +353,16 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
                 object = (s32)((EvtWorldSlot *)slots)[EVT_WORLD_SLOT_MOVIE].head;
                 if (object != 0) {
                     do {
-                        node = viewer->tracks;
+                        node = viewer->groups;
                         while (node != NULL) {
-                            if (node->owner.handle != 0 && object == dds3GetSlot(node->owner.handle, 1)) {
-                                if (node->kind == 2) {
+                            if (node->handle != 0 && object == dds3GetSlot(node->handle, 1)) {
+                                if (node->type == 2) {
                                     time = 0;
-                                    if (node->hasKeys != 0) {
-                                        time = node->keys->frame;
+                                    if (node->childCount != 0) {
+                                        time = node->children->frame;
                                     }
                                 } else {
-                                    time = node->frameOffset;
+                                    time = node->metadataValue;
                                 }
                                 evtPolygonMovieClampTime(object, 0, time, endTime);
                                 break;
@@ -565,19 +383,19 @@ extern void func_0022EB10();
 
 /* Updates world units at position using the first track whose owner word
  * matches that unit's object-chain node. */
-void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
+void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer) {
     s32 object;
-    EvtViewTrack *node;
-    EvtViewTrack *found;
+    EvtRuntimeGroup *node;
+    EvtRuntimeGroup *found;
 
     if (dds3GetWorldObject() != 0) {
         object = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
         if (object != 0) {
             do {
-                node = viewer->tracks;
+                node = viewer->groups;
                 found = NULL;
                 while (node != NULL) {
-                    if (node->owner.handle == object) {
+                    if (node->handle == object) {
                         found = node;
                         break;
                     }
@@ -596,35 +414,35 @@ extern u32 sdfGetLodChunkValue(SdfModel *model);
 
 /* Applies the latest kind-6 key at/before position to a kind-1 track's LOD
  * byte, provided the requested signed-byte level is supported by its chunk. */
-void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
-    EvtViewTrack *node = viewer->tracks;
-    EvtViewKey *glyph;
-    EvtViewKey *best;
+void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer) {
+    EvtRuntimeGroup *node = viewer->groups;
+    EvtRuntimeChild *glyph;
+    EvtRuntimeChild *best;
     s32 bestFrame;
     SdfModel *lod;
     s8 level;
 
     while (node != NULL) {
-        if (node->kind == 1) {
-            glyph = node->keys;
+        if (node->type == 1) {
+            glyph = node->children;
             bestFrame = -1;
             best = NULL;
             if (glyph != NULL) {
                 do {
-                    if (position >= glyph->frame && bestFrame < glyph->frame && glyph->selector.kind == 6) {
+                    if (position >= glyph->frame && bestFrame < glyph->frame && glyph->p08.sb[0] == 6) {
                         bestFrame = glyph->frame;
                         best = glyph;
                     }
                     glyph = glyph->next;
                 } while (glyph != NULL);
             }
-            lod = ((MdlCtx *)((EffectObjectData *)node->owner.transform->data)->modelHolder->resourceHandle)->inner;
+            lod = ((MdlCtx *)((EffectObjectData *)node->info->data)->modelHolder->resourceHandle)->inner;
             if (best == NULL) {
                 lod->lodIndex = 0;
             } else {
-                level = best->channel.value;
+                level = best->p0C.sb[0];
                 if ((s32)sdfGetLodChunkValue(lod) >= level) {
-                    lod->lodIndex = best->channel.value;
+                    lod->lodIndex = best->p0C.sb[0];
                 }
             }
         }
@@ -640,20 +458,20 @@ extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
  * restores the saved vectors; losing the active key restores them once too. */
-void func_0022F038(s32 position, EventViewerState *viewer) {
-    EvtViewTrack *node = viewer->tracks;
-    EvtViewKey *glyph;
-    EvtViewKey *best;
+void func_0022F038(s32 position, EvtRuntime *viewer) {
+    EvtRuntimeGroup *node = viewer->groups;
+    EvtRuntimeChild *glyph;
+    EvtRuntimeChild *best;
     s32 bestFrame;
 
     while (node != NULL) {
-        if (node->kind == 1) {
-            glyph = node->keys;
+        if (node->type == 1) {
+            glyph = node->children;
             bestFrame = -1;
             best = NULL;
             if (glyph != NULL) {
                 do {
-                    if (glyph->selector.kind == 7 && position >= glyph->frame &&
+                    if (glyph->p08.sb[0] == 7 && position >= glyph->frame &&
                         bestFrame < glyph->frame) {
                         bestFrame = glyph->frame;
                         best = glyph;
@@ -663,31 +481,31 @@ void func_0022F038(s32 position, EventViewerState *viewer) {
             }
             if (best == NULL) {
                 if (node->objectAttached == 1) {
-                    effObjSetInnerFirstVec(node->owner.transform,
+                    effObjSetInnerFirstVec(node->info,
                         (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec(node->owner.transform,
+                    effObjSetInnerSecondVec(node->info,
                         (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec(node->owner.transform);
-                    VU0_STORE_VF(vf10, &node->owner.transform->inner->smoothedPosition);
+                    effObjFetchInnerFirstVec(node->info);
+                    VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 }
             } else if (best->frame == position) {
-                s16 channel = best->channel.objectIndex;
+                s16 channel = best->p0C.sh[0];
 
                 if (channel == -1) {
-                    effObjSetInnerFirstVec(node->owner.transform,
+                    effObjSetInnerFirstVec(node->info,
                         (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec(node->owner.transform,
+                    effObjSetInnerSecondVec(node->info,
                         (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec(node->owner.transform);
-                    VU0_STORE_VF(vf10, &node->owner.transform->inner->smoothedPosition);
+                    effObjFetchInnerFirstVec(node->info);
+                    VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {
                     EffWorldNode *object = dds3FindObjectChainNodeByName(
-                        dds3GetWorldObject(), viewer->unitNames[channel]);
+                        dds3GetWorldObject(), viewer->entryName[channel]);
 
                     mdlAttachWorldObjectToSourceVector(
-                        node->owner.transform->key, object->key);
+                        node->info->key, object->key);
                     node->objectAttached = 1;
                 }
             }
@@ -696,30 +514,29 @@ void func_0022F038(s32 position, EventViewerState *viewer) {
     }
 }
 
-struct CampPacked;
-extern void mnuUnpackNibbleFields(struct CampPacked *, s32 *, s32 *);
+extern void mnuUnpackNibbleFields(EvtRuntimeChild *, s32 *, s32 *);
 extern u32 itfMesGetWindowEntryItems(s32, s32);
-void evtViewerMarkWindowActive(EventViewerState *viewer);
+void evtViewerMarkWindowActive(EvtRuntime *viewer);
 
 /* Activates the message window thirty frames before a kind-4 key when its
  * unpacked entry is ready. id is the current timeline position, not a glyph ID. */
-void evtViewerActivateWindowForGlyphEntry(s32 id, EventViewerState *viewer) {
+void evtViewerActivateWindowForGlyphEntry(s32 id, EvtRuntime *viewer) {
     s32 low;
     s32 high;
-    EvtViewTrack *node;
-    EvtViewKey *glyph;
+    EvtRuntimeGroup *node;
+    EvtRuntimeChild *glyph;
 
     if (viewer->windowContext != 0) {
         if (viewer->windowContext->handle != -1) {
-            for (node = viewer->tracks; node != NULL; node = node->next) {
-                if (node->kind != 4) {
+            for (node = viewer->groups; node != NULL; node = node->next) {
+                if (node->type != 4) {
                     continue;
                 }
-                for (glyph = node->keys; glyph != NULL; glyph = glyph->next) {
+                for (glyph = node->children; glyph != NULL; glyph = glyph->next) {
                     if (glyph->frame - 30 != id) {
                         continue;
                     }
-                    mnuUnpackNibbleFields((struct CampPacked *)glyph, &low, &high);
+                    mnuUnpackNibbleFields(glyph, &low, &high);
                     if (itfMesGetWindowEntryItems(
                             viewer->windowContext->handle, low) != 1) {
                         continue;
@@ -733,7 +550,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 id, EventViewerState *viewer) {
     }
 }
 
-void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
+void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
     s64 active;
 
     active = evtViewerHasUpdateFlag(viewer);
@@ -745,23 +562,23 @@ void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
 extern s32 campAnyPackedFlagSet(void *scene);
 extern s32 scrCommandIsProcessControlFlagClear(void);
 extern u32 mnuCampGetSecondaryOption(void *scene);
-extern void mnuReleaseCampSceneRegisteredIds();
+extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSoundSetChannelCount(u32 channels);
 extern s32 fldTitleIsActive(void);
 extern void func_0014A298(s32 active);
-void evtViewerCleanupMessageWindow(EventViewerState *viewer);
+void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
-void func_0022F2E0(EventViewerState *viewer) {
+void func_0022F2E0(EvtRuntime *viewer) {
     if (campAnyPackedFlagSet(viewer) == 1 || scrCommandIsProcessControlFlagClear() == 0) {
         if (viewer->glyphTickCount == 0) {
             viewer->glyphTickCount = 1;
         }
         return;
     }
-    if (viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 30) {
-        if (viewer->glyphAdvanceStart + 20 >= viewer->glyphAdvancePosition) {
+    if (viewer->curFrame < viewer->frameRange.word - 30) {
+        if (viewer->headerFirst + 20 >= viewer->curFrame) {
             return;
         }
     } else {
@@ -787,12 +604,12 @@ void func_0022F2E0(EventViewerState *viewer) {
 }
 
 /* Test the viewer's update flag. */
-s32 evtViewerHasUpdateFlag(EventViewerState *viewer) {
-    return (viewer->flags & 0x10) > 0;
+s32 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
+    return ((s32)viewer->flags & 0x10) > 0;
 }
 
 /* Fades the viewer's background colour over its update countdown. */
-void func_0022F418(EventViewerState *viewer) {
+void func_0022F418(EvtRuntime *viewer) {
     s32 fade = 0;
 
     kwlnGetDrawBufferIndex();
@@ -821,31 +638,31 @@ void func_0022F418(EventViewerState *viewer) {
 }
 
 /* Applies the effect-channel assignments driven by the viewer's tracks. */
-void func_0022F550(s32 frame, EventViewerState *viewer) {
-    EvtViewTrack *track = viewer->tracks;
+void func_0022F550(s32 frame, EvtRuntime *viewer) {
+    EvtRuntimeGroup *track = viewer->groups;
 
     while (track != NULL) {
-        if ((u32)(track->kind - 0xE) < 2 || track->kind == 0x17 || track->kind == 0x11) {
-            EvtViewKey *key = track->keys;
+        if ((u32)(track->type - 0xE) < 2 || track->type == 0x17 || track->type == 0x11) {
+            EvtRuntimeChild *key = track->children;
             s32 value = 0;
 
             while (key != NULL) {
-                if (track->kind != 0x11 || evtViewerTestIndexedCondition(key->parameter14.condition) != 0) {
-                    if (frame < key->frame + track->frameOffset) {
+                if (track->type != 0x11 || evtViewerTestIndexedCondition(key->p14.sh[0]) != 0) {
+                    if (frame < key->frame + track->metadataValue) {
                         break;
                     }
-                    if (key->condition != 0) {
+                    if (key->p10.sh[0] != 0) {
                         value = 0;
-                        if (key->condition != 1) {
+                        if (key->p10.sh[0] != 1) {
                             value = ((EvtCampEntry *)mnuCampFindEntryByName(
-                                         viewer, (char *)viewer->unitNames[key->condition - 2]))->value;
+                                         viewer, (char *)viewer->entryName[key->p10.sh[0] - 2]))->value;
                         }
                     }
                 }
                 key = key->next;
             }
 
-            switch (track->kind) {
+            switch (track->type) {
             case 0xE:
                 if (viewer->ch71 != value) {
                     viewer->ch71 = value;
@@ -893,16 +710,16 @@ void func_0022F550(s32 frame, EventViewerState *viewer) {
 }
 
 /* Advance or stop the timed viewer action according to the current position. */
-s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
+s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
     if (viewer->timedActive == 1) {
-        if (viewer->glyphAdvancePosition < viewer->timedStart) {
+        if (viewer->curFrame < viewer->timedStart) {
             mnuStopMovieDrawTask();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
         } else if (viewer->timedEnd == -1) {
             mnuCheckMovieDecoderStatus();
-        } else if (viewer->glyphAdvancePosition >= viewer->timedEnd) {
+        } else if (viewer->curFrame >= viewer->timedEnd) {
             mnuStopMovieDrawTask();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
@@ -913,14 +730,14 @@ s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F7F8);
 
-void func_0022F9F0(EventViewerState *viewer) {
+void func_0022F9F0(EvtRuntime *viewer) {
 }
 
 /* Tick the current glyph while text is advancing; wrap after thirty ticks. */
-void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
+void evtViewerAdvanceGlyphTick(EvtRuntime *viewer) {
     s32 nextTick;
 
-    if ((viewer->glyphAdvancePosition < viewer->glyphAdvanceLimit - 3) && (0 < viewer->glyphTickCount))
+    if ((viewer->curFrame < viewer->frameRange.word - 3) && (0 < viewer->glyphTickCount))
     {
         frFontDrawGlyphInDefaultMode(viewer->glyph);
         nextTick = viewer->glyphTickCount + 1;
@@ -931,22 +748,22 @@ void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
     }
 }
 
-void func_0022FA60(EventViewerState *viewer) {
+void func_0022FA60(EvtRuntime *viewer) {
 }
 
 s32 evtViewerTestIndexedCondition(u32 condition);
 
 /* Returns the latest eligible kind-5 key at/before position for channel, or
  * NULL. The condition must pass; equal-frame ties retain the first key visited. */
-EvtViewKey *evtViewerFindLatestMatchingGlyph(EvtViewTrack *group, s32 position, s32 channel) {
+EvtRuntimeChild *evtViewerFindLatestMatchingGlyph(EvtRuntimeGroup *group, s32 position, s32 channel) {
     s32 bestFrame = -1;
-    EvtViewKey *best = NULL;
-    EvtViewKey *glyph = group->keys;
+    EvtRuntimeChild *best = NULL;
+    EvtRuntimeChild *glyph = group->children;
 
     if (glyph != NULL) {
         do {
-            if (position >= glyph->frame && bestFrame < glyph->frame && glyph->selector.kind == 5 &&
-                glyph->channel.value == channel && evtViewerTestIndexedCondition(glyph->condition) == 1) {
+            if (position >= glyph->frame && bestFrame < glyph->frame && glyph->p08.sb[0] == 5 &&
+                glyph->p0C.sb[0] == channel && evtViewerTestIndexedCondition(glyph->p10.sh[0]) == 1) {
                 bestFrame = glyph->frame;
                 best = glyph;
             }
@@ -969,12 +786,12 @@ extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
 void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
-    EventViewerState *viewer = (EventViewerState *)viewerAddr;
+    EvtRuntime *viewer = (EvtRuntime *)viewerAddr;
     EvtWorldTable *table;
     EffWorldNode *object;
-    EvtViewTrack *track;
-    EvtViewTrack *found;
-    EvtViewKey *key;
+    EvtRuntimeGroup *track;
+    EvtRuntimeGroup *found;
+    EvtRuntimeChild *key;
     Motion *motion;
     void *counter;
     void *movie;
@@ -986,10 +803,10 @@ void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
     table = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
     object = table->slots[5].head;
     while (object != NULL) {
-        track = viewer->tracks;
+        track = viewer->groups;
         found = NULL;
         while (track != NULL) {
-            if (track->owner.handle == (u32)object) {
+            if (track->handle == (u32)object) {
                 found = track;
                 break;
             }
@@ -1025,26 +842,26 @@ void func_0022FB30(s32 mode, u32 frame, s32 viewerAddr) {
         }
         object = object->next;
     }
-    track = viewer->tracks;
+    track = viewer->groups;
     while (track != NULL) {
-        switch (track->kind) {
+        switch (track->type) {
         case 3: case 18: case 20: case 21: case 26:
-            key = track->keys;
+            key = track->children;
             useTrackTime = 0;
             while (key != NULL) {
-                switch (track->kind) {
+                switch (track->type) {
                 case 3: case 26:
-                    useTrackTime = track->playbackTimeMode;
+                    useTrackTime = track->metadataByte1;
                     /* These track kinds use the same indexed movie lookup. */
                 case 20: case 21:
-                    if (key->selector.kind < 0) {
+                    if (key->p08.sb[0] < 0) {
                         break;
                     }
-                    object = viewer->objects[key->selector.kind];
+                    object = viewer->objects[key->p08.sb[0]];
                     goto updateMovie;
                 case 18:
                     object = key->payload;
-                    useTrackTime = track->playbackTimeMode;
+                    useTrackTime = track->metadataByte1;
 updateMovie:
                     if (object != NULL) {
                         movie = dds3GetObjectOwnedHandle(object)->slots[1];
@@ -1068,31 +885,31 @@ updateMovie:
 
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
-void evtViewerDispatchFlagMode(EventViewerState *viewer) {
+void evtViewerDispatchFlagMode(EvtRuntime *viewer) {
     if ((viewer->flags & 1) != 0) {
-        func_0022FB30(0, viewer->glyphAdvancePosition, (u32)viewer);
+        func_0022FB30(0, viewer->curFrame, (u32)viewer);
         return;
     }
-    func_0022FB30(1, viewer->glyphAdvancePosition, (u32)viewer);
+    func_0022FB30(1, viewer->curFrame, (u32)viewer);
 }
 
 /* Returns the address word of the nearest kind-2 key strictly after the current
  * frame, or zero. Equal-distance ties retain the first key visited. */
-s32 evtViewFindNextGlyph(EventViewerState *viewer) {
-    EvtViewKey *result = NULL;
+s32 evtViewFindNextGlyph(EvtRuntime *viewer) {
+    EvtRuntimeChild *result = NULL;
     s32 best = 99999;
-    EvtViewTrack *node = viewer->tracks;
+    EvtRuntimeGroup *node = viewer->groups;
 
     while (node != NULL) {
-        if (node->kind == 2) {
-            EvtViewKey *glyph = node->keys;
+        if (node->type == 2) {
+            EvtRuntimeChild *glyph = node->children;
 
             if (glyph != NULL) {
                 do {
                     s32 frame = glyph->frame;
 
-                    if (viewer->glyphAdvancePosition < frame) {
-                        s32 distance = frame - viewer->glyphAdvancePosition;
+                    if (viewer->curFrame < frame) {
+                        s32 distance = frame - viewer->curFrame;
 
                         if (distance < best) {
                             best = distance;
@@ -1110,21 +927,21 @@ s32 evtViewFindNextGlyph(EventViewerState *viewer) {
 
 /* Returns the address word of the nearest kind-2 key strictly before the current
  * frame, or zero. Equal-distance ties retain the first key visited. */
-s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
-    EvtViewKey *result = NULL;
+s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
+    EvtRuntimeChild *result = NULL;
     s32 best = 99999;
-    EvtViewTrack *node = viewer->tracks;
+    EvtRuntimeGroup *node = viewer->groups;
 
     while (node != NULL) {
-        if (node->kind == 2) {
-            EvtViewKey *glyph = node->keys;
+        if (node->type == 2) {
+            EvtRuntimeChild *glyph = node->children;
 
             if (glyph != NULL) {
                 do {
                     s32 frame = glyph->frame;
 
-                    if (frame < viewer->glyphAdvancePosition) {
-                        s32 distance = viewer->glyphAdvancePosition - frame;
+                    if (frame < viewer->curFrame) {
+                        s32 distance = viewer->curFrame - frame;
 
                         if (distance < best) {
                             best = distance;
@@ -1141,10 +958,10 @@ s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
 }
 
 void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, s32 viewerAddr) {
-    EventViewerState *viewer = (EventViewerState *)viewerAddr;
+    EvtRuntime *viewer = (EvtRuntime *)viewerAddr;
     s32 count = viewer->historyCount + 1;
 
-    viewer->currentId = mode;
+    viewer->actionMode = mode;
     viewer->historyCount = count;
     viewer->history[count].id = mode;
     viewer->history[count].a = first;
@@ -1152,27 +969,27 @@ void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, s32 viewerAddr
     if (mode > 0) {
         if (mode >= 3) {
             if (mode == 3) {
-                viewer->commandResetA = 0;
-                viewer->commandResetB = 0;
-                viewer->commandResetC = 0;
-                viewer->commandResetD = 0;
+                viewer->charCol = 0;
+                viewer->charRow = 0;
+                viewer->nameStorage[0] = 0;
+                viewer->nameStorage[0xC] = 0;
             }
         }
     }
 }
 
-u16 evtViewerPopHistory(EventViewerState *viewer) {
+u16 evtViewerPopHistory(EvtRuntime *viewer) {
     u16 id;
     s32 index;
 
     index = viewer->historyCount - 1;
     if (viewer->historyCount == 0) {
-        viewer->currentId = 0;
+        viewer->actionMode = 0;
         return 0;
     }
     viewer->historyCount = index;
     id = viewer->history[index].id;
-    viewer->currentId = (u32)id;
+    viewer->actionMode = (u32)id;
     return id;
 }
 
@@ -1183,10 +1000,10 @@ extern void itfPanelSetPairFirst(s32,s16);
 extern void itfMesCleanupWindow(s32,s32);
 extern void itfMesFinishWindowAndClearStatus(s32);
 extern void itfMesResetWindow(s32);
-void evtViewerMarkWindowInactive(EventViewerState *);
-void func_00230140(EventViewerState *);
+void evtViewerMarkWindowInactive(EvtRuntime *);
+void func_00230140(EvtRuntime *);
 
-void func_0022FFC8(EventViewerState *viewer) {
+void func_0022FFC8(EvtRuntime *viewer) {
     if (viewer->windowContext == 0) {
         return;
     }
@@ -1211,7 +1028,7 @@ void func_0022FFC8(EventViewerState *viewer) {
 }
 
 
-void evtViewerCleanupMessageWindow(EventViewerState *viewer) {
+void evtViewerCleanupMessageWindow(EvtRuntime *viewer) {
     PolyMovieWork *windowContext;
     s32 window;
 
@@ -1234,11 +1051,11 @@ void evtViewerCleanupMessageWindow(EventViewerState *viewer) {
     viewer->pad23C4 = 0;
 }
 
-void evtViewerMarkWindowActive(EventViewerState *viewer) {
+void evtViewerMarkWindowActive(EvtRuntime *viewer) {
     viewer->windowActive = 1;
 }
 
-void evtViewerMarkWindowInactive(EventViewerState *viewer) {
+void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
     viewer->windowActive = 0;
 }
 
@@ -1268,63 +1085,63 @@ INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD2D0);
 
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD2E0);
 
-s32 func_00230478(s32 arg0, s32 arg1, EventViewerState *viewer) {
-    switch ((u32)viewer->selectionMode) {
+s32 func_00230478(s32 arg0, s32 arg1, EvtRuntime *viewer) {
+    switch ((u32)viewer->inputA) {
     case 0:
     case 1:
     case 2:
-        viewer->commandResetA = 0;
-        viewer->commandResetB = 0;
+        viewer->charCol = 0;
+        viewer->charRow = 0;
         evtViewerPushCommandHistory(9, 0xE4, 0x3C, (s32)viewer);
         break;
     case 5:
-        viewer->commandValue = viewer->frameCount - 1;
-        viewer->commandMinimum = viewer->glyphAdvanceLimit;
-        viewer->commandMaximum = 10000;
+        viewer->value = viewer->headerThird - 1;
+        viewer->valueMin = viewer->frameRange.word;
+        viewer->valueMax = 10000;
         evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
         break;
     case 3:
     case 4:
-        viewer->optionSelection = 0;
-        viewer->optionCount = 2;
-        viewer->optionTitle = "FRAME SET.OK? ";
-        viewer->optionNames = D_00368410;
+        viewer->cursor = 0;
+        viewer->itemCount = 2;
+        viewer->title = "FRAME SET.OK? ";
+        viewer->itemNames = D_00368410;
         evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
         break;
     case 6:
         viewer->commandStart = 1;
         viewer->flags |= 1;
         evtViewerDispatchFlagMode(viewer);
-        viewer->currentId = 0;
+        viewer->actionMode = 0;
         viewer->historyCount = 0;
         viewer->commandResetId = 0;
         D_003BBE94 = 0;
         return 1;
     case 7:
-        viewer->optionSelection = mnuCampGetPrimaryOption(viewer);
-        viewer->optionCount = 2;
-        viewer->optionTitle = "START FRAME SELECT";
-        viewer->optionNames = D_00368430;
+        viewer->cursor = mnuCampGetPrimaryOption(viewer);
+        viewer->itemCount = 2;
+        viewer->title = "START FRAME SELECT";
+        viewer->itemNames = D_00368430;
         evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
         break;
     case 8:
-        viewer->commandValue = 0;
-        viewer->commandMinimum = -5000;
-        viewer->commandMaximum = 5000;
+        viewer->value = 0;
+        viewer->valueMin = -5000;
+        viewer->valueMax = 5000;
         evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
         break;
     case 9:
-        viewer->optionSelection = mnuCampGetPrimaryOption(viewer);
-        viewer->optionCount = 2;
-        viewer->optionTitle = "SET BISTAMODE";
-        viewer->optionNames = D_00368418;
+        viewer->cursor = mnuCampGetPrimaryOption(viewer);
+        viewer->itemCount = 2;
+        viewer->title = "SET BISTAMODE";
+        viewer->itemNames = D_00368418;
         evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
         break;
     case 10:
-        viewer->optionSelection = mnuCampGetSecondaryOption(viewer);
-        viewer->optionCount = 3;
-        viewer->optionTitle = "SET SKIPMODE";
-        viewer->optionNames = D_00368420;
+        viewer->cursor = mnuCampGetSecondaryOption(viewer);
+        viewer->itemCount = 3;
+        viewer->title = "SET SKIPMODE";
+        viewer->itemNames = D_00368420;
         evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
         break;
     }
@@ -1368,21 +1185,21 @@ INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003AD570);
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230A68);
 
 /* Store the edited timing or selector halfword in the pending timeline key. */
-s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    EvtViewKey *key = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
-    EvtViewTrack *track;
+s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *key = evtEventViewerGetPendingNode(viewer);
+    EvtRuntimeGroup *track;
     s32 kind;
     s8 category;
 
     if (key != NULL) {
-        track = viewer->sel;
-        kind = track->kind;
-        category = D_0036876A[viewer->commandTableOffset + kind * 10];
+        track = viewer->frameGroup;
+        kind = track->type;
+        category = D_0036876A[viewer->frameColumn + kind * 10];
         switch (category) {
         case 0:
-            key->frame = viewer->commandValue - track->frameOffset;
+            key->frame = viewer->value - track->metadataValue;
             evtReorderListNodes(track);
-            func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+            func_0022E5A0(viewer->curFrame, viewer);
             break;
         case 9:
             switch (kind) {
@@ -1390,15 +1207,15 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EventViewerState
             case 20:
             case 21:
             case 26:
-                key->enabled = viewer->commandValue;
+                key->p08.sh[1] = viewer->value;
                 break;
             case 18:
-                key->selector.unitIndex = viewer->commandValue;
+                key->p08.sh[0] = viewer->value;
                 break;
             }
             break;
         case 15:
-            key->duration = viewer->commandValue;
+            key->duration = viewer->value;
             break;
         }
         evtViewerPopHistory(viewer);
@@ -1409,9 +1226,9 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EventViewerState
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231950);
 
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
-s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    s32 value = viewer->commandValue;
-    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+    s32 value = viewer->value;
+    EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
 
     if (entry == NULL) {
         return 0;
@@ -1420,21 +1237,21 @@ s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EventViewerState *viewer) {
     if (((u32)(value << 16) >> 28) != 0) {
         entry->p08.h[1] = 0;
     }
-    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    func_0022E5A0(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
 
 /* Store the command value in the selected halfword of a viewer entry. */
-u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EventViewerState *viewer) {
-    EvtViewKey *entry;
+u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *entry;
     u32 value;
     s32 slot;
 
-    value = viewer->commandValue;
-    entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+    value = viewer->value;
+    entry = evtEventViewerGetPendingNode(viewer);
     if (entry != 0) {
-        slot = viewer->sel->kind - 1;
+        slot = viewer->frameGroup->type - 1;
         if ((u32)slot < 0x11u) {
             switch (slot) {
             case 3:
@@ -1453,7 +1270,7 @@ u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EventViewerSt
                 break;
             }
         }
-        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+        func_0022E5A0(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1464,13 +1281,13 @@ u32 func_00231CC0(void) {
 }
 
 /* Copy the current command word into the selected script entry. */
-u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EventViewerState *viewer) {
-    EvtViewKey *entry;
+u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *entry;
 
-    entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+    entry = evtEventViewerGetPendingNode(viewer);
     if (entry != 0) {
-        entry->p0C.i = viewer->commandValue;
-        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+        entry->p0C.i = viewer->value;
+        func_0022E5A0(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1478,8 +1295,8 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EventViewerState 
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231D18);
 
-u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EventViewerState *viewer) {
-    EvtViewKey *record = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *record = evtEventViewerGetPendingNode(viewer);
     if (record != NULL) {
         f32 *dst = record->payload;
         f32 *src = viewer->commandMatrix + 8;
@@ -1492,7 +1309,7 @@ u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EventViewerState *viewer) {
             src++;
             dst++;
         } while (index >= 0);
-        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+        func_0022E5A0(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1500,36 +1317,36 @@ u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EventViewerState *viewer) {
 }
 
 /* Transfer a selected two-component viewer position to the command entry. */
-s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
 
     if (entry == NULL) {
         return 0;
     }
-    if (viewer->sel == 0) {
+    if (viewer->frameGroup == 0) {
         return 0;
     }
-    entry->p08.f = viewer->commandX;
-    entry->p0C.f = viewer->commandY;
-    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    entry->p08.f = viewer->floatEditX;
+    entry->p0C.f = viewer->floatEditY;
+    func_0022E5A0(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
 
 u32 evtViewCmdCancelSelection(u32 unused0, u32 unused1, u32 viewerAddr) {
-    evtViewerPopHistory((EventViewerState *)viewerAddr);
+    evtViewerPopHistory((EvtRuntime *)viewerAddr);
     return 0;
 }
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdResolveSlot);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
-s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
 
-    entry->p0C.b[0] = viewer->slotType;
-    entry->p0C.b[1] = viewer->slotFlag;
-    entry->p14.f = viewer->slotValue;
-    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    entry->p0C.b[0] = viewer->shadowMode;
+    entry->p0C.b[1] = viewer->shadowAlpha;
+    entry->p14.f = viewer->shadowY;
+    func_0022E5A0(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1538,23 +1355,23 @@ extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
 extern s32 func_003014F0(char *buffer, const char *format, ...);
-extern void func_0023E7F8(s32 slot, EventViewerState *viewer);
-extern void evtReloadEventViewer(s32 slot, EventViewerState *viewer);
+extern void func_0023E7F8(s32 slot, EvtRuntime *viewer);
+extern void evtReloadEventViewer(s32 slot, EvtRuntime *viewer);
 
 /* Apply one of three viewer selection modes to the selected slots. */
-s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EventViewerState *viewer) {
+s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     s32 applied = 0;
-    s32 mode = viewer->selectionMode;
+    s32 mode = viewer->inputA;
 
     if (mode < 3) {
         if (mode >= 0) {
             func_003014F0(viewer->eventName, D_003ADA98, D_003BBE78, D_003BBE7A);
-            if (viewer->selectionMode == 0) {
+            if (viewer->inputA == 0) {
                 func_0023E7F8(0, viewer);
                 func_0023E7F8(1, viewer);
-            } else if (viewer->selectionMode == 1) {
+            } else if (viewer->inputA == 1) {
                 evtReloadEventViewer(0, viewer);
-            } else if (viewer->selectionMode == 2) {
+            } else if (viewer->inputA == 2) {
                 evtReloadEventViewer(1, viewer);
             }
             applied = 1;
@@ -1565,11 +1382,11 @@ s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232108);
 
-u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, u32 viewerAddr) {
-    if (evtEventViewerGetPendingNode(viewerAddr) != 0) {
-        ((EventViewerState *)viewerAddr)->unk22AC = 0;
-        ((EventViewerState *)viewerAddr)->unk22B4 = 0;
-        evtViewerPushCommandHistory(0xa, 0x9c, 0x54, viewerAddr);
+u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+    if (evtEventViewerGetPendingNode(viewer) != 0) {
+        viewer->groupFirst = 0;
+        viewer->groupCursor = 0;
+        evtViewerPushCommandHistory(0xa, 0x9c, 0x54, (s32)viewer);
         return 0;
     }
 }
@@ -1577,13 +1394,13 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, u32 viewer
 /* Restore default effect parameters for the selected timeline key. */
 INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADA98);
 
-s32 func_00232438(s32 unused0, s32 unused1, EventViewerState *viewer) {
-    EvtViewKey *entry = (EvtViewKey *)evtEventViewerGetPendingNode((s32)viewer);
+s32 func_00232438(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
     u128 *destination;
     u128 *source;
     EvtViewerDrawVector *draw;
 
-    switch (viewer->sel->kind) {
+    switch (viewer->frameGroup->type) {
     case 10:
         switch (viewer->commandCategory) {
         case 13:
@@ -1629,7 +1446,7 @@ s32 func_00232438(s32 unused0, s32 unused1, EventViewerState *viewer) {
         memcpy(entry->payload, effEventGetResourceTemplateSetupParams(), 0x24);
         break;
     }
-    func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    func_0022E5A0(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1641,13 +1458,13 @@ extern s16 D_003BBE7C;
 extern s8 D_00324510[];
 extern s32 itfMesStartEntry(s32, s32, s32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void mnuAdvanceShopMenuState(struct CampScene *);
+extern void mnuAdvanceShopMenuState(struct EvtRuntime *);
 extern s32 func_00270088(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
 s32 evtViewerUpdateFrame(KwlnTask *task) {
-    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
+    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     s32 flags;
 
     D_003BBE7C = 0;
@@ -1661,7 +1478,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         if (D_00324510[0x22] < 0) {
             viewer->flags = flags | 1;
             evtViewerDispatchFlagMode(viewer);
-            viewer->currentId = 0;
+            viewer->actionMode = 0;
             viewer->historyCount = 0;
             viewer->commandResetId = 0;
             evtViewerPushCommandHistory(1, 0x24, 0x18, (s32)viewer);
@@ -1669,7 +1486,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         }
         func_0022FA60(viewer);
     } else {
-        if (viewer->glyphAdvancePosition == viewer->glyphAdvanceStart) {
+        if (viewer->curFrame == viewer->headerFirst) {
             viewer->flags = flags & ~1;
             evtViewerDispatchFlagMode(viewer);
         }
@@ -1686,18 +1503,18 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",
             viewer->voiceMessage);
     }
-    if (viewer->glyphAdvancePosition != viewer->previousGlyphPosition) {
-        func_0022E5A0(viewer->glyphAdvancePosition, viewer);
+    if (viewer->curFrame != viewer->previousGlyphPosition) {
+        func_0022E5A0(viewer->curFrame, viewer);
     }
-    viewer->previousGlyphPosition = viewer->glyphAdvancePosition;
+    viewer->previousGlyphPosition = viewer->curFrame;
     if (viewer->flags & 8) {
         evtViewerApplySelectedEntry(viewer);
     }
     func_0022FFC8(viewer);
     func_0022F418(viewer);
-    mnuAdvanceShopMenuState((struct CampScene *)viewer);
+    mnuAdvanceShopMenuState((struct EvtRuntime *)viewer);
     if (viewer->flags & 8) {
-        if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
+        if (viewer->curFrame >= viewer->frameRange.word) {
             return -1;
         }
         if (evtViewerHasUpdateFlag(viewer) == 1 && viewer->updateCount >= 25) {
@@ -1705,17 +1522,17 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         }
     }
     if (!(viewer->flags & 1)) {
-        if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
+        if (viewer->curFrame >= viewer->frameRange.word) {
             if (!(viewer->flags & 8)) {
                 viewer->flags ^= 1;
                 evtViewerDispatchFlagMode(viewer);
             }
         } else if (viewer->timedActive == 1) {
             if (func_00270088() == 2) {
-                viewer->glyphAdvancePosition++;
+                viewer->curFrame++;
             }
         } else {
-            viewer->glyphAdvancePosition++;
+            viewer->curFrame++;
         }
     }
     return 0;
@@ -1726,7 +1543,7 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
     void *viewer;
 
     viewer = (void *)kwlnTaskGetUserValue((KwlnTask *)task);
-    func_0022E5A0(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
+    func_0022E5A0(((EvtRuntime *)viewer)->curFrame, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (void *)evtViewerUpdateFrame;
@@ -1734,9 +1551,9 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
 
 /* Initialize the active viewer and schedule its next update callback. */
 void *evtViewerInitializeUpdateSequence(KwlnTask *task) {
-    struct EvtViewer *viewer;
+    struct EvtRuntime *viewer;
 
-    viewer = (struct EvtViewer *)kwlnTaskGetUserValue(task);
+    viewer = (struct EvtRuntime *)kwlnTaskGetUserValue(task);
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     kwlnDrawControlFlags |= 0x2000000;
@@ -1745,7 +1562,7 @@ void *evtViewerInitializeUpdateSequence(KwlnTask *task) {
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
 void *evtViewerAdvanceUpdate(KwlnTask *task) {
-    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
+    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *window;
     s32 windowFlags;
 
@@ -1775,7 +1592,7 @@ void *evtViewerAdvanceUpdate(KwlnTask *task) {
 }
 
 void *evtViewerStartUpdate(KwlnTask *task) {
-    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
+    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *context;
     u16 eventId;
     u16 sceneId;
@@ -1796,7 +1613,7 @@ void *evtViewerStartUpdate(KwlnTask *task) {
 }
 
 extern f32 D_00324590[];
-extern void mnuReleaseCampSceneRegisteredIds();
+extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
 extern void func_0014A298();
@@ -1808,15 +1625,13 @@ extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
-extern void sdfReleaseResourceAllocation();
+extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
 extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
-void evtViewerCleanupMessageWindow(EventViewerState *viewer);
+void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
-void evtViewerReleaseResources(viewer)
-    EventViewerState *viewer;
-{
-    mnuReleaseCampSceneRegisteredIds();
+void evtViewerReleaseResources(EvtRuntime *viewer) {
+    mnuReleaseCampSceneRegisteredIds(viewer);
     evtResetUnitVectorSlots();
     evtViewerCleanupMessageWindow(viewer);
     mnuCampLinkFontGlyph(viewer);
@@ -1856,22 +1671,24 @@ void evtViewerReleaseResources(viewer)
 
 /* Destroy the currently active event viewer. */
 void func_00232D08(KwlnTask *task) {
-    EventViewerState *viewer;
+    EvtRuntime *viewer;
 
-    viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
+    viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     evtViewerReleaseResources(viewer);
 }
 
 /* Alternate destroy callback for the same active viewer. */
 void func_00232D28(KwlnTask *task) {
-    EventViewerState *viewer;
+    EvtRuntime *viewer;
 
-    viewer = (EventViewerState *)kwlnTaskGetUserValue(task);
+    viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     evtViewerReleaseResources(viewer);
 }
 
-void func_00232D48(void *unused) {
-    mnuCampInitFontResource();
+extern void mnuCampInitFontResource(EvtRuntime *viewer);
+
+void func_00232D48(EvtRuntime *viewer) {
+    mnuCampInitFontResource(viewer);
 }
 
 extern u32 D_003BA8EC;
@@ -1883,14 +1700,14 @@ extern s32 evtCreateSkyTask(void);
 
 void evtViewerCreateTaskWithSky(void) {
     SdfMemBlock *viewerHandle;
-    u32 *viewer;
+    EvtRuntime *viewer;
     void *viewerTask;
 
     D_003BA8EC = 0x80000000;
     viewerHandle = sdfAllocGeneralBlock(0x2490);
-    viewer = (u32 *)sdfResourceRetainAddress(viewerHandle);
+    viewer = (EvtRuntime *)sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x2490);
-    *viewer = (u32)viewerHandle;
+    viewer->resourceHandle = viewerHandle;
     viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_00232D08, viewer);
     func_00101A80((s32)viewerTask, evtCreateSkyTask());
     func_00232D48(viewer);
