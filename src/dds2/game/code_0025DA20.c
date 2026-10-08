@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -137,7 +138,6 @@ extern s32 dspCloseChannel(void);
 
 extern void evtReleaseResourcePairHandle();
 
-extern void sdfReleaseResourceAllocation();
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
@@ -977,7 +977,7 @@ void func_0025F8B8(u32 object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424A90;
     CampEffectRows rows = D_00424AC0;
     u32 dataAddress;
-    u64 allocation;
+    struct SdfMemBlock *allocation;
     u32 mappedResource;
 
     allocation = sdfReadNamedResource(D_00424AE0, &dataAddress, 0);
@@ -1361,7 +1361,7 @@ void mnuTerminalReleaseContextAndResources(s32 arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->messageResources);
-        sdfReleaseResourceAllocation(scene->resourceHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
         mnuPanelTaskCompletionState = 2;
     }
 }

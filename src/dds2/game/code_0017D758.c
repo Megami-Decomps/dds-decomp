@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff.h"
@@ -106,7 +107,7 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
         effPcpScatterResRelease(object->sharedResource);
     }
     sdfQueueAssetRelease(object->asset);
-    sdfReleaseResourceAllocation(object->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(object->allocation));
     sdfReleaseChipBlock(object);
 }
 

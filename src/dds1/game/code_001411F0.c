@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff_transform.h"
 #include "sdf_model.h"
 #include "sdf.h"
@@ -2573,7 +2574,6 @@ void fldReleaseTitleTextureReference(void) {
 
 extern void fldTitle(void);
 
-extern void sdfReleaseResourceAllocation(s32);
 
 extern u32 D_003BAFA4;
 
@@ -2599,7 +2599,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     func_003014F0(path, D_003A0810, field);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&resourceAddress, 0);
     D_003BAFB4 = sdfTexAcquireResourceTexture((void *)resourceAddress);
-    sdfReleaseResourceAllocation(handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
     }
@@ -2724,7 +2724,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     func_003014F0(path, "/fld/f/pnl/ds%03d.tmx", id);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&data, 0);
     D_003BAFC4 = sdfTexAcquireResourceTexture((void *)data);
-    sdfReleaseResourceAllocation(handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
     }

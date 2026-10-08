@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 
@@ -120,7 +121,6 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
 
 extern void dds3ClearSceneObjectState(EffWorldNode *object);
 extern void evtReleaseSceneResource(EffWorldNode *object);
-extern void sdfReleaseResourceAllocation(struct SdfMemBlock *resource);
 void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
 /* Destroy every node of every list, then release the data block and scene state. */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -9,7 +10,6 @@ extern BillDispatch D_0034E068[];
 
 void *sdfAllocSizeClassBlock(s32 size);
 struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-void sdfReleaseResourceAllocation(void *arg);
 void sdfReleaseChipBlock(void *arg);
 void effReleaseSharedTextureRecord(void *arg);
 void func_001502B0(BillObj *obj, BillChildPayload *child);

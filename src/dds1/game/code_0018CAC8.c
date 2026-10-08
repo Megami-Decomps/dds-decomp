@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
@@ -42,7 +43,6 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void sdfReleaseChipBlock(void *arg0);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-extern void sdfReleaseResourceAllocation(u64 arg0);
 extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_003101B8(s32 directory);
 extern void func_003014F0();
