@@ -307,7 +307,70 @@ advanceLine:
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E5D8);
+extern s8 D_00436550;
+
+FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
+    u8 encodedText[3];
+    s32 value;
+    u8 *bytes = stream->bytes;
+
+    if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
+        stream->offset += 4;
+    }
+    D_0043654C &= ~1;
+    D_0043654C &= ~2;
+    D_0043654C &= ~4;
+    D_0043654C &= ~8;
+    frFontAddSharedGlyphFlags(1);
+    frFontClearFlagBits(2);
+    bytes = stream->bytes;
+    for (;;) {
+        value = bytes[stream->offset++];
+        if (value == 0) {
+            break;
+        }
+        if ((value & 0xF0) == 0xF0) {
+            if (func_0019E1B8(value, stream)) {
+                break;
+            }
+        } else if (value == 10) {
+            if (!(frFontSharedGlyphFlags & 4)) {
+                continue;
+            }
+            frFontAdvanceContextCursor(stream);
+        } else {
+            frFontCheckPendingGlyphState(stream);
+            if (value < 0x80) {
+                encodedText[0] = value;
+                encodedText[1] = 0;
+                stream->glyphChain = func_0019CE78(encodedText, stream->channel0,
+                    stream->channel1, stream->channel2, stream->glyphChain);
+            } else {
+                value = (value << 8) | stream->bytes[stream->offset++];
+                if (value <= 0xC07F) {
+                    encodedText[0] = (u32)value >> 8;
+                    encodedText[1] = value;
+                    encodedText[2] = 0;
+                    stream->glyphChain = func_0019CE78(encodedText, stream->channel0,
+                        stream->channel1, stream->channel2, stream->glyphChain);
+                } else {
+                    value -= 0x4000;
+                    encodedText[0] = (u32)value >> 8;
+                    encodedText[1] = value;
+                    encodedText[2] = 0;
+                    stream->glyphChain = func_0019CE78(encodedText, 8,
+                        stream->channel1, stream->channel2, stream->glyphChain);
+                }
+            }
+            frFontSetFlagAndMeasureGlyphs(stream->glyphChain, D_00436550);
+            frFontStoreShiftedContextValue(stream->glyphChain, stream->z);
+        }
+        bytes = stream->bytes;
+    }
+    frFontClearFlagBits(1);
+    frFontAddSharedGlyphFlags(2);
+    return stream->glyphChain;
+}
 
 FrFontGlyph *itfDrawDefaultColorText(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub) {
     return itfDrawEncodedTextStream(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
