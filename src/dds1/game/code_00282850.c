@@ -1782,8 +1782,8 @@ s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
 }
 
 
-extern s32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
-extern s32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
