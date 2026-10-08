@@ -2883,7 +2883,7 @@ typedef struct EffClassDrawState {
     };
     u32 effect;
     u32 references;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
 } EffClassDrawState;
 
 void effResetRingResourceFrame(s32 work) {
@@ -3001,7 +3001,7 @@ extern u8 *effPayloadPointerSet(u16, void *);
 EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     u32 count = source->ring.segments;
     u32 size;
-    void *allocation;
+    struct SdfMemBlock *allocation;
     f32 *scales;
     EffClassDrawState *state;
     EffTrackSet *tracks;
@@ -3016,9 +3016,9 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     }
     size = count * sizeof(f32);
     allocation = sdfAllocGeneralBlock(size + sizeof(EffClassDrawState));
-    scales = (f32 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
+    scales = (f32 *)sdfResourceRetainAddress(allocation);
     state = (EffClassDrawState *)((u8 *)scales + size);
-    state->allocation = (u32)allocation;
+    state->allocation = allocation;
     state->scales = scales;
     memcpy(source->classConfig, source, sizeof(source->classConfig));
     state->effect = (u32)effPayloadPointerSet(1, source->classConfig);
@@ -3041,7 +3041,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
 void effReleaseClassDrawResources(s32 work) {
     effReleaseResourceRefs(((EffClassDrawState *)work)->references);
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffClassDrawState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
 }
 
 typedef struct EffClassFrameResource {
