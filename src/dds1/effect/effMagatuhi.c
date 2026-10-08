@@ -22,6 +22,7 @@
 #define EFF_MAGATUHI_REPLAY_RING 2
 #define EFF_MAGATUHI_REPLAY_ORBIT 3
 #define EFF_MAGATUHI_REPLAY_DRIFT 4
+#define EFF_MAGATUHI_HISTORY_MINIMUM 8
 
 
 /* Callback input prefix; type 3 contains an effect-dispatch object at +8. */
@@ -133,8 +134,104 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001893D8);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00189818);
+extern f32 effMiscRandUnitFloat(void *state);
+extern u8 D_0034DF38[];
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfSinPoly(f32 angle);
 
+void func_00189818(EffMagatuhiValueWork *work, s32 index, void *vectorArg) {
+    f32 (*newSlot)[4];
+    f32 (*replayPosition)[4];
+    f32 (*historyPosition)[4];
+    f32 *angleRow;
+    f32 *scalarOutput;
+    f32 viewDirection[4];
+    f32 baseLimit = work->unk08;
+    f32 limit;
+    f32 phaseScalar;
+    f32 radial;
+    u32 historyCount = work->historyCount;
+    u32 writeIndex = work->writeIndices[index];
+    u32 validCount = work->validCounts[index];
+    u32 rowBase = index * historyCount;
+    u32 linearIndex;
+    u32 historyIndex;
+
+    historyPosition = &work->positions[rowBase + writeIndex];
+    writeIndex++;
+    if (writeIndex >= historyCount) {
+        writeIndex = 0;
+    }
+
+    linearIndex = rowBase + writeIndex;
+    newSlot = work->positions + linearIndex;
+    scalarOutput = work->unk1C + linearIndex;
+    PCP_COPY_VECTOR(newSlot, vectorArg);
+    angleRow = work->angleRows[index];
+
+    angleRow[2] += 0.21816613f;
+    if (3.14159265f <= angleRow[2]) {
+        angleRow[2] -= 3.14159265f;
+        angleRow[3] = effMiscRandUnitFloat(D_0034DF38) * 1.5f;
+    }
+
+    phaseScalar = sdfSinPoly(angleRow[2]);
+    *scalarOutput = phaseScalar * angleRow[3] + 1.0f;
+
+    if (validCount >= EFF_MAGATUHI_HISTORY_MINIMUM) {
+        historyIndex = writeIndex < (EFF_MAGATUHI_REPLAY_GROUP_STRIDE + EFF_MAGATUHI_CONTROL_POINT_COUNT)
+                           ? historyCount + writeIndex - (EFF_MAGATUHI_REPLAY_GROUP_STRIDE + EFF_MAGATUHI_CONTROL_POINT_COUNT)
+                           : writeIndex - (EFF_MAGATUHI_REPLAY_GROUP_STRIDE + EFF_MAGATUHI_CONTROL_POINT_COUNT);
+        replayPosition = &work->positions[rowBase + historyIndex];
+        angleRow = work->angleRows[index];
+        angleRow[0] += work->unk0C;
+        if (6.2831853f <= angleRow[0]) {
+            angleRow[0] -= 6.2831853f;
+            if (angleRow[1] < 1.0f) {
+                angleRow[1] += (effMiscRandUnitFloat(D_0034DF38) * 0.4f + 0.60000003f) * 0.25f;
+            } else if (0.5f < angleRow[1]) {
+                angleRow[1] -= (effMiscRandUnitFloat(D_0034DF38) * 0.4f + 0.60000003f) * 0.25f;
+            }
+        }
+
+        VU0_LOAD_VF(vf10, sdfViewTargetVector);
+        VU0_LOAD_VF(vf11, sdfViewEyeVector);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_MOVE_VF(vf12, vf10);
+        VU0_LOAD_VF(vf10, vectorArg);
+        VU0_LOAD_VF(vf11, historyPosition);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_MOVE_VF(vf11, vf12);
+        VU0_CROSS_XYZ(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, viewDirection);
+        radial = sdfSinPoly(angleRow[0]) * angleRow[1];
+        (*replayPosition)[0] += viewDirection[0] * radial;
+        (*replayPosition)[1] += viewDirection[1] * radial;
+        (*replayPosition)[2] += viewDirection[2] * radial;
+    }
+
+    VU0_LOAD_VF(vf11, vectorArg);
+    VU0_LOAD_VF(vf10, historyPosition);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(radial);
+    limit = baseLimit * 3.0f;
+    if (limit < radial) {
+        VEC3_SPLAT(viewDirection, limit);
+        VU0_NORMALIZE_VF10();
+        VU0_LOAD_VF(vf11, viewDirection);
+        VU0_MUL(vf10, vf10, vf11);
+    }
+    VU0_STORE_VF(vf10, historyPosition);
+
+    work->writeIndices[index] = writeIndex;
+    validCount++;
+    if (validCount > historyCount) {
+        validCount = historyCount;
+    }
+    work->validCounts[index] = validCount;
+}
 /* Store a per-slot packed color; the native path does not validate the index. */
 void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color) {
     work->slotColors[index] = color;
