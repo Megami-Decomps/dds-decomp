@@ -7866,16 +7866,17 @@ void func_001DEE38(void) {
     func_001E4E50();
 }
 
-void btlStartLinkedDefeatCandidateAction(u8 *actor) {
-    u8 *resource = *(u8 **)(actor + 0xF4);
-    btlAppendIndexListEntry(*(struct BtlIndexList **)(actor + 0x118), *(void **)(resource + 0x18));
-    func_001E5198(actor, (u8 *)&((BtlLinkedCommand *)actor)->frontCamera,
-                 (u8 *)&((BtlLinkedCommand *)actor)->backCamera);
+extern void func_001E5198(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+void btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *action) {
+    BtlTask *task = action->task;
+    btlAppendIndexListEntry(action->targetList, task->unit);
+    func_001E5198(action, &action->frontCamera, &action->backCamera);
     btlClearAllUnitDefeatCandidates();
-    resource = *(u8 **)(actor + 0xF4);
-    btlFlagUnitDefeatCandidate(*(BtlUnit **)(resource + 0x18));
-    *(f32 *)(actor + 0x130) = 50.0f;
-    *(u32 *)(actor + 0xF0) |= 0x41;
+    task = action->task;
+    btlFlagUnitDefeatCandidate(task->unit);
+    action->motionParameter = 50.0f;
+    action->flags |= 0x41;
 }
 
 void func_001DEEC0(void) {
