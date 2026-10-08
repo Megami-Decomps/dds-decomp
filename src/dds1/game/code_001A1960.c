@@ -2519,13 +2519,13 @@ void func_001A94A0(u32 arg0) {
 s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
     s32 sum = 0;
     s32 count = 0;
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
-                    s32 value = datGetStatWithStatusOverride((DatPartyRecord *)(node + 0x120), attribute);
+                if ((actor->partyRecord.flags & mask) != 0) {
+                    s32 value = datGetStatWithStatusOverride(&actor->partyRecord, attribute);
                     count++;
                     sum += value;
                 }
