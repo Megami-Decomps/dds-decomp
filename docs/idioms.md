@@ -3571,3 +3571,18 @@ the node's `0x40` quadword and use its W lane, the `weight` at `0x4C`;
 the other three words are the linked-list and source pointers.
 Complete this primary owner rather than introducing a second clip-vertex
 view. The triangle classifiers remain assembly until their C matches.
+
+## Timed battle-camera instruction banks
+
+DDS1 `001ECCA8` and DDS2 `001FD400` consume `0x10`-byte instructions
+and `0x80`-byte parameter records; the latter have a signed terminal byte
+at `0x70`. The real progress loop advances the parameter index only when
+the time window has expired and that record is not terminal.
+
+The DDS2 cursor keeps one primary `0x130`-byte owner: `pathEnd`/`pathStart`
+at `0x20`/`0x30`, captured direction at `0x80`, and distance at `0x90`.
+The input motion factor is stored separately from the stepped exponential
+range; path distance is the measured length times the stepped factor.
+Use the existing VU0 macros for the native COP2 vector work. The target's
+own assembly file contains its fourteen-entry jump table, not another
+function's data; the natural C switch reproduces those entries.
