@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
 extern void func_00333288(void *, u32);
 extern void func_00333270(void *, u32);
@@ -177,7 +178,7 @@ typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
 void func_0015AA30(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
 typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
-void func_0015AD18(SdfListHead *packet, EffCompositeGsDescriptor *source);
+void effDrawCompositeTextureQuad(SdfListHead *packet, EffCompositeGsDescriptor *source);
 
 void func_0015B330(s32 effect);
 
@@ -692,11 +693,11 @@ extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 extern void func_0033B8B0(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
-void func_0015AD18(SdfListHead *list, EffCompositeGsDescriptor *source) {
+void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *source) {
     f32 matrix[16] __attribute__((aligned(16)));
     f32 corners[4][2];
-    u64 *state;
-    u64 *textureState;
+    SdfGsBlendPacket *state;
+    SdfGsTexturePacket *textureState;
     u8 *geometry;
     u32 framePacket;
     u64 restoreBlend;
@@ -708,69 +709,69 @@ void func_0015AD18(SdfListHead *list, EffCompositeGsDescriptor *source) {
     func_0032DB30((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
     sdfAppendDmaTagToList(list, framePacket);
 
-    state = (u64 *)sdfAllocPacketAligned(0x40);
-    state[0] = 3;
-    state[1] = 0x5000000310000000ULL;
-    state[2] = 0x1000000000008002ULL;
-    state[3] = 0xE;
-    state[4] = 0x51001;
-    state[5] = 0x47;
-    state[6] = 0x44;
-    state[7] = 0x42;
+    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    state->header.dmaTag = 3;
+    state->header.vifCommands = 0x5000000310000000ULL;
+    state->header.gifTag = 0x1000000000008002ULL;
+    state->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    state->test.value = 0x51001;
+    state->test.registerId = SDF_GS_TEST_1;
+    state->alpha.value = 0x44;
+    state->alpha.registerId = SDF_GS_ALPHA_1;
     sdfAppendPacket(list, (u32)state);
 
-    state = (u64 *)sdfAllocPacketAligned(0x40);
-    state[0] = 3;
-    state[1] = 0x5000000310000000ULL;
-    state[2] = 0x1000000000008002ULL;
-    state[3] = 0xE;
-    state[4] = 0x51001;
-    state[5] = 0x48;
+    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    state->header.dmaTag = 3;
+    state->header.vifCommands = 0x5000000310000000ULL;
+    state->header.gifTag = 0x1000000000008002ULL;
+    state->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    state->test.value = 0x51001;
+    state->test.registerId = SDF_GS_TEST_2;
     switch (source->blendMode) {
     case 2:
-        state[6] = 0x58;
+        state->alpha.value = 0x58;
         restoreBlend = 0x48;
         break;
     case 3:
-        state[6] = 0x52;
+        state->alpha.value = 0x52;
         restoreBlend = 0x42;
         break;
     case 0:
     case 1:
-        state[6] = 0x54;
+        state->alpha.value = 0x54;
         restoreBlend = 0x44;
         break;
     default:
         restoreBlend = 0;
         break;
     }
-    state[7] = 0x43;
+    state->alpha.registerId = SDF_GS_ALPHA_2;
     sdfAppendPacket(list, (u32)state);
 
-    textureState = (u64 *)sdfAllocPacketAligned(0x50);
-    textureState[0] = 4;
-    textureState[1] = 0x5000000410000000ULL;
-    textureState[2] = 0x1000000000008003ULL;
-    textureState[3] = 0xE;
-    textureState[4] = sdfTexGetPrimarySamplingState(source->secondaryTexture);
-    textureState[5] = 0x14;
-    textureState[6] = sdfTexGetPrimaryTextureState(source->secondaryTexture);
-    textureState[7] = 6;
-    textureState[8] = source->secondaryClamp;
-    textureState[9] = 8;
+    textureState = (SdfGsTexturePacket *)sdfAllocPacketAligned(0x50);
+    textureState->header.dmaTag = 4;
+    textureState->header.vifCommands = 0x5000000410000000ULL;
+    textureState->header.gifTag = 0x1000000000008003ULL;
+    textureState->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    textureState->sampling.value = sdfTexGetPrimarySamplingState(source->secondaryTexture);
+    textureState->sampling.registerId = SDF_GS_TEX1_1;
+    textureState->texture.value = sdfTexGetPrimaryTextureState(source->secondaryTexture);
+    textureState->texture.registerId = SDF_GS_TEX0_1;
+    textureState->clamp.value = source->secondaryClamp;
+    textureState->clamp.registerId = SDF_GS_CLAMP_1;
     sdfAppendPacket(list, (u32)textureState);
 
-    textureState = (u64 *)sdfAllocPacketAligned(0x50);
-    textureState[0] = 4;
-    textureState[1] = 0x5000000410000000ULL;
-    textureState[2] = 0x1000000000008003ULL;
-    textureState[3] = 0xE;
-    textureState[4] = sdfTexGetPrimarySamplingState(source->primaryTexture);
-    textureState[5] = 0x15;
-    textureState[6] = sdfTexGetPrimaryTextureState(source->primaryTexture);
-    textureState[7] = 7;
-    textureState[8] = source->primaryClamp;
-    textureState[9] = 9;
+    textureState = (SdfGsTexturePacket *)sdfAllocPacketAligned(0x50);
+    textureState->header.dmaTag = 4;
+    textureState->header.vifCommands = 0x5000000410000000ULL;
+    textureState->header.gifTag = 0x1000000000008003ULL;
+    textureState->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    textureState->sampling.value = sdfTexGetPrimarySamplingState(source->primaryTexture);
+    textureState->sampling.registerId = SDF_GS_TEX1_2;
+    textureState->texture.value = sdfTexGetPrimaryTextureState(source->primaryTexture);
+    textureState->texture.registerId = SDF_GS_TEX0_2;
+    textureState->clamp.value = source->primaryClamp;
+    textureState->clamp.registerId = SDF_GS_CLAMP_2;
     sdfAppendPacket(list, (u32)textureState);
 
     EE_MMI_UNIT_MATRIX(matrix);
@@ -819,15 +820,15 @@ void func_0015AD18(SdfListHead *list, EffCompositeGsDescriptor *source) {
     func_0032DB78((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
     sdfAppendDmaTagToList(list, framePacket);
 
-    state = (u64 *)sdfAllocPacketAligned(0x40);
-    state[0] = 3;
-    state[1] = 0x5000000310000000ULL;
-    state[2] = 0x1000000000008002ULL;
-    state[3] = 0xE;
-    state[4] = 0x71801;
-    state[5] = 0x47;
-    state[6] = restoreBlend;
-    state[7] = 0x42;
+    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    state->header.dmaTag = 3;
+    state->header.vifCommands = 0x5000000310000000ULL;
+    state->header.gifTag = 0x1000000000008002ULL;
+    state->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    state->test.value = 0x71801;
+    state->test.registerId = SDF_GS_TEST_1;
+    state->alpha.value = restoreBlend;
+    state->alpha.registerId = SDF_GS_ALPHA_1;
     sdfAppendPacket(list, (u32)state);
 }
 
@@ -837,7 +838,7 @@ void effSubmitCompositeGsPacket(s32 sink, s32 source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
     sdfInitPacketList(packetAddress);
-    func_0015AD18((SdfListHead *)packetAddress, (EffCompositeGsDescriptor *)source);
+    effDrawCompositeTextureQuad((SdfListHead *)packetAddress, (EffCompositeGsDescriptor *)source);
     ((EffPacketSink *)sink)->submit(sink, packetAddress);
 }
 
