@@ -17,9 +17,9 @@ extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 extern s32 D_003BAA98;
 
-extern void func_001958A0(s32, s32, s32);
-
-extern void frFontQueueGlyphInSelectedSlot(s32);
+struct FrFontGlyph;
+extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -127,11 +127,61 @@ s32 func_0027A0A8(s32 callback) {
 void mnuDrawSelectionLabel(s32 selection) {
     s32 item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frFontSetChildColors(item, 0xA09DC366);
-    func_001958A0(item, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(item);
+    func_001958A0((struct FrFontGlyph *)(u32)item, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)item);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A140);
+extern s32 ptyGetAffinityKind(s32, s32);
+extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
+extern s32 mnuLookupRangeEntry(u16);
+extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
+extern const u8 *D_0037CCC8[16];
+extern const u8 *D_003BAA8C;
+
+/* Draw each affinity requirement, including range markers and optional text. */
+void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
+    s32 slot;
+    s32 y = 0xA80;
+
+    for (slot = 0; slot < 3; slot++, y += 0xC8) {
+        s32 kind = ptyGetAffinityKind((s32)affinityId, slot);
+        u32 glyph = 0;
+
+        if (kind < 0) {
+            if (kind == -1) {
+                s32 flags = ptyGetAffinityFlagsWithoutOverride((s32)affinityId, slot);
+
+                if (flags > 0) {
+                    s32 rangeIndex = mnuLookupRangeEntry((u16)flags);
+                    itfDrawGridWithResolvedSlot(
+                        0x2C0, y - 0x10, 0, 1, rangeResource,
+                        rangeIndex * 2 + 10, 0x53);
+                    glyph = itfCreateConvertedTextGlyph(
+                        0x420, y, 0, 0xA09DC380,
+                        D_003BAA8C + flags * 17, 0);
+                } else {
+                    itfDrawGridWithResolvedSlot(
+                        0x420, y + 0x38, 0, 1, placeholderResource, 9, 0x53);
+                }
+            } else {
+                s32 flags = ptyGetAffinityFlagsWithoutOverride((s32)affinityId, slot);
+
+                glyph = itfCreateConvertedTextGlyph(
+                    0x420, y, 0, 0xA09DC380,
+                    D_003BAA8C + flags * 17 + 0x2860, 0);
+            }
+        } else {
+            glyph = itfCreateConvertedTextGlyph(
+                0x420, y, 0, 0xA09DC380, D_0037CCC8[kind], 0);
+        }
+
+        if (glyph != 0) {
+            func_001958A0((struct FrFontGlyph *)(u32)glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A300);
 
