@@ -7,6 +7,7 @@
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
+#include "btl_model_record.h"
 #include "eff_transform.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -2755,13 +2756,6 @@ s32 btlMotionOffsetForActor(s32 actor, s32 base) {
     return base;
 }
 
-/* Side-indexed status tables use a 0x270 stride in their native accessor. */
-typedef struct BtlActorStatusRecord {
-    u8 pad00[0xFC];
-    f32 unkFC; /* Scale used by the default-motion case below. */
-    u8 pad100[0x170];
-} BtlActorStatusRecord;
-
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
@@ -2806,7 +2800,7 @@ void func_0021B368(void) {
                             table = (BtlActorStatusRecord *)
                                 btlGetSideIndexedActorStatusTable(unit->resourceKind,
                                                                  unit->resourceIndex);
-                            btlApplyUnitMotionSelection(unit, 0xA, 1, table->unkFC);
+                            btlApplyUnitMotionSelection(unit, 0xA, 1, table->motions[10].alphaFrameScale);
                             break;
                         }
                     }

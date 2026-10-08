@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_model.h"
 #include "btl.h"
+#include "btl_model_record.h"
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
@@ -1886,23 +1887,6 @@ extern void btlResetUnitModelProgress(BtlUnit *unit);
 extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 extern void func_001E1B80(BtlUnit *unit, BtlUnit *reused);
-
-typedef struct BtlActorMotionSlot {
-    u8 pad00[2];
-    u16 frameCount; /* 0x02 */
-    s16 kind; /* 0x04 */
-    s16 alphaStartFrame; /* 0x06 */
-    f32 alphaFrameScale; /* 0x08 */
-    u8 pad0C[4];
-    s16 alphaDuration; /* 0x10 */
-    u8 pad12[2];
-} BtlActorMotionSlot;
-
-typedef struct BtlActorStatusRecord {
-    u8 pad00[0x2A];
-    u16 model; /* 0x2A */
-    BtlActorMotionSlot motions[29]; /* 0x2C; provider stride 0x270 */
-} BtlActorStatusRecord;
 
 void func_001E1BB8(u8 *unitAddress, u32 kind, u32 index) {
     BtlUnit *unit = (BtlUnit *)unitAddress;
