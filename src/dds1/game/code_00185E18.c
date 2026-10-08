@@ -122,21 +122,6 @@ extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendDmaPrimary(s32 list, u32 source, struct SdfDmaNode *node);
 
-/* One ST/XYZ2 pair in the packed draw payload. */
-typedef struct BlurPacketVertex {
-    f32 s, t;
-    u8 pad08[8];
-    s32 x, y;
-    u32 depth;
-    u16 xyzControl;
-    u8 pad1E[2];
-} BlurPacketVertex;
-
-typedef struct BlurPacketQuad {
-    u32 color[4];
-    BlurPacketVertex vertices[4];
-} BlurPacketQuad;
-
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
