@@ -92,7 +92,7 @@ typedef struct FileManWork {
     struct FileCbNode *done;  /* 0x10: completed callbacks */
     void *unk14;              /* 0x14 */
     u32 unk18;                /* 0x18 */
-    u32 buffer;               /* 0x1C */
+    u8 *buffer;               /* 0x1C: retained base of the four device-read slots */
     FileManSlot slots[4];     /* 0x20 */
 } FileManWork;
 

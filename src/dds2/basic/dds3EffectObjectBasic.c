@@ -68,6 +68,8 @@ typedef struct EffectObj {
     ObjectTransform *params; /* Separately allocated position, rotation and scale owner. */
 } EffectObj;
 
+EffectObj *func_00115600(const char *name, void *firstVector, void *secondVector, f32 scale);
+
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 
 /* Release dependencies, object base, then slot data; the object and data must exist. */
@@ -197,12 +199,12 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
     return obj;
 }
 
-/* Clone the shared bill and forward both vector addresses; retain the wide DDS2 ABI. */
-void effObjSpawnSharedBillClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
+/* Clone the shared bill and return the newly constructed effect object. */
+EffectObj *effObjSpawnSharedBillClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
-    effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
 void effObjCreateIndexedKindOne(u32 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
@@ -211,12 +213,12 @@ void effObjCreateIndexedKindOne(u32 billId, u64 firstVectorAddress, u64 secondVe
     bill = billCreateIndexed(1, billId);
     effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
-/* Create a kind-one resource bill; the native constructor result is discarded. */
-void effObjCreateResourceKindOne(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
+/* Create a kind-one resource bill and return its effect object. */
+EffectObj *effObjCreateResourceKindOne(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
     BillObj *bill;
 
     bill = billCreateFromResource(1, path);
-    effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
@@ -262,12 +264,12 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
     return obj;
 }
 
-/* Clone the shared bill for the state-three constructor; ignore its return value. */
-void effObjSpawnSharedBillNodeClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
+/* Clone the shared bill and return its state-three effect object. */
+EffectObj *effObjSpawnSharedBillNodeClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
-    effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
 }
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
@@ -279,11 +281,11 @@ void effObjCreateIndexedKindZero(u32 billId, u64 firstVectorAddress, u64 secondV
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */
-void effObjCreateResourceKindZero(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
+EffectObj *effObjCreateResourceKindZero(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
     BillObj *bill;
 
     bill = billCreateFromResource(0, path);
-    effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
 }
 
 /* Bind the supplied bill through its node-instance vector copy, selecting state one.
@@ -477,8 +479,8 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115600);
 
-void func_001156C8(void) {
-    func_00115600();
+EffectObj *func_001156C8(const char *name, void *firstVector, void *secondVector, f32 scale) {
+    return func_00115600(name, firstVector, secondVector, scale);
 }
 
 extern const f32 D_00412980[10];
