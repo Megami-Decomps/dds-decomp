@@ -1,5 +1,6 @@
 #include "snd_ring.h"
 #include "common.h"
+#include "sce_io.h"
 
 #define SND_COMMAND_RING_ENTRY_COUNT 32
 #define SND_COMMAND_RING_INDEX_MASK (SND_COMMAND_RING_ENTRY_COUNT - 1)
@@ -134,16 +135,6 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_003417E0);
 
-typedef struct SceIoStat {
-    u32 mode;
-    u32 attributes;
-    u32 size;
-    u8 creationTime[8];
-    u8 accessTime[8];
-    u8 modificationTime[8];
-    u32 highSize;
-    u32 privateData[6];
-} SceIoStat;
 
 extern u8 sdfPfsDebugMode;
 extern s32 sceSifLoadModule(const char *, s32, const char *);

@@ -3373,8 +3373,9 @@ s32 sndGetResourceForIndex(s32 index) {
     return (s32)D_003B4E40[resource];
 }
 
-void *btlGetIndexedUiResource(UiObject *object) {
-    return D_003B4E88[object->index];
+/* The label resource index is the copied party record's unit ID. */
+void *btlGetIndexedUiResource(BtlUnit *unit) {
+    return D_003B4E88[unit->partyRecord.unitId];
 }
 
 typedef struct BattleSavedActorState {

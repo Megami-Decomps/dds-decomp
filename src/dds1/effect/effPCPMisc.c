@@ -6160,3 +6160,4 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB048);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04D);
+
