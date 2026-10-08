@@ -43,7 +43,6 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDes
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
 
-extern s32 kwlnTaskIsRegistered(KwlnTask *);
 extern void evtSetContextFlag(KwlnTask *);
 extern void evtClearContextFlag(KwlnTask *);
 extern void fldSetFadeTarget(s32, s32, s32);

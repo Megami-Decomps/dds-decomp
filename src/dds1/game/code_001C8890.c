@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
@@ -52,7 +53,6 @@ extern s32 btlAllocAndCheck(s32);
 extern u32 btlAssignTaskResultAndArgument(s32);
 extern void btlBindActorSlot(void *, s32);
 extern s32 btlRunRandomWeightedAiTableAction(BtlTask *);
-extern s32 kwlnTaskIsRegistered(s32);
 extern void btlDebugPrintf(const char *, ...);
 extern void btlBossDebugPrintf(const char *format, ...);
 extern u32 effMiscRandMod(void *state, u32 modulus);
@@ -116,6 +116,8 @@ extern void func_001E6368(BtlLinkedCommand *, BtlCamState *);
 extern void btlAdvanceCommandCursor(BtlLinkedCommand *, BtlCamState *);
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitLinkedUnitActionCursor(BtlTask *);
+extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
+extern void btlResetCameraMotion(BtlLinkedCommand *);
 
 extern s32 btlCountTasksForOwner(s64);
 
@@ -542,12 +544,6 @@ typedef struct BtlFadeArgs {
     u32 color;
 } BtlFadeArgs;
 
-typedef struct BtlCameraResetWork {
-    u8 pad_000[0x174];
-    s32 activeUnitId;
-    u8 pad_178[0xB0];
-    BtlUnit *actorList;
-} BtlCameraResetWork;
 
 
 
@@ -1177,7 +1173,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (kwlnTaskIsRegistered(scene->boundTask) == 0) {
+                } else if (kwlnTaskIsRegistered((KwlnTask *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
@@ -2420,12 +2416,12 @@ u32 btlClassifyActionOperand(u8 *actor, u8 *argument) {
     }
 }
 
-s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    s32 code;
+s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 commandIndex) {
+    s32 resultCode;
 
-    btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)arg0)->partyRecord);
-    if (arg6 >= 0) {
-        switch ((u32)datCommandRecords[arg6].unk30) {
+    btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
+    if (commandIndex >= 0) {
+        switch ((u32)datCommandRecords[commandIndex].unk30) {
         case 1:
         case 2:
         case 9:
@@ -2433,26 +2429,26 @@ s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8
             return -1;
         }
     }
-    if ((datCommandRecords[arg6].attribute.bits & 0x400000FF) == 0x40000002) {
+    if ((datCommandRecords[commandIndex].attribute.bits & 0x400000FF) == 0x40000002) {
         return -1;
     }
     if (arg1 & 0x50004) {
         return -1;
     }
     if (arg3 & 0xE0001) {
-        code = -1;
-    } else if ((*(u32 *)(arg0 + 0x110) & 0x200) != 0 && arg2 == 2 && arg4 == 1 && arg5 == 0) {
-        code = 0x12;
+        resultCode = -1;
+    } else if ((actor->flags & 0x200) != 0 && arg2 == 2 && arg4 == 1 && arg5 == 0) {
+        resultCode = 0x12;
     } else {
-        code = 1;
+        resultCode = 1;
     }
-    if (arg5 != 0 && (*(u64 *)(arg0 + 0x110) & 0x4000000200) == 0x200) {
-        code = 0xB;
+    if (arg5 != 0 && (btlUnitStatusPair(actor) & 0x4000000200) == 0x200) {
+        resultCode = 0xB;
     }
     if ((arg1 & 0x20001) == 0) {
-        code = -1;
+        resultCode = -1;
     }
-    return code;
+    return resultCode;
 }
 
 
@@ -6814,10 +6810,9 @@ u8 *btlCreateFloatTask29(u8 *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 
 }
 
 u32 btlRunCameraMotionResetTask(void) {
-    s32 temp_v0;
+    BtlState *work = (BtlState *)btlGetRuntime();
 
-    temp_v0 = btlGetRuntime();
-    btlResetCameraMotion(temp_v0 + 0x70);
+    btlResetCameraMotion(&work->cameraCommand);
     return 1;
 }
 
@@ -7119,14 +7114,14 @@ extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
-void btlResetCameraMotion(s32 action) {
-    BtlCameraResetWork *work = (BtlCameraResetWork *)btlGetRuntime();
+void btlResetCameraMotion(BtlLinkedCommand *action) {
+    BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     f32 current;
     f32 limit;
 
-    if (work->activeUnitId == 1 || btlHasSingleLinkedResource(action) != 0) {
-        unit = work->actorList;
+    if (work->cameraCommand.status == 1 || btlHasSingleLinkedResource(action) != 0) {
+        unit = work->units;
         if (unit != 0) {
             f32 fallbackScale = 0.7f;
             for (; unit != 0; unit = unit->next) {
@@ -7376,22 +7371,22 @@ s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor) {
     return 0;
 }
 
-s32 btlHasLinkedEffectNodeTrigger(u8 *fx) {
-    u8 *task;
-    u8 *owner;
+s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *fx) {
+    BtlTask *task;
+    BtlUnit *owner;
     s32 index;
-    u8 *table;
-    if (*(s32 *)(fx + 0xF4) == 0) {
+    BtlEffectResource *table;
+    if (fx->task == 0) {
         return 0;
     }
-    if (btlHasSingleLinkedResource() == 0) {
+    if (btlHasSingleLinkedResource(fx) == 0) {
         return 0;
     }
-    task = *(u8 **)(fx + 0xF4);
-    owner = *(u8 **)(task + 0x18);
-    index = *(s32 *)(task + 0x44);
-    table = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)(owner + 0xC4), *(s32 *)(owner + 0xC8));
-    return *(s16 *)(table + index * 0x14 + 0x2C) == 2;
+    task = fx->task;
+    owner = task->unit;
+    index = task->indexWork.slot;
+    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(owner->resourceKind, owner->species);
+    return table->nodes[index].triggerKind == 2;
 }
 
 s32 btlHasActorCategoryFlag100(BtlLinkedCommand *action) {
@@ -7433,12 +7428,12 @@ u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
     return 0;
 }
 
-s32 btlHasSingleLinkedResource(s32 actor) {
-    s32 index = *(s32 *)(actor + 0x114);
+s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
+    s32 index = actor->actionCode;
     if (index != 0 && datCommandRecords[index].targetType != 0) {
         return 0;
     }
-    return btlGetIndexListCount(*(struct BtlIndexList **)(actor + 0x118)) == 1;
+    return btlGetIndexListCount(actor->targetList) == 1;
 }
 
 u32 func_001DD2C0(BtlLinkedCommand *actor) {
@@ -7612,7 +7607,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
     }
     if (link->unit->flags & 0x200) {
         if (link->unit->flags & 0x1000) {
-            if (btlHasSingleLinkedResource((s32)action)) {
+            if (btlHasSingleLinkedResource(action)) {
                 action->stepKind = 9;
                 btlFlagUserAndTargetDefeat(action, action);
             } else {
@@ -7625,7 +7620,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
     } else {
         if (btlMatchLinkedActorFlags((s32)action)) {
             func_001E2FF8(action);
-        } else if (btlHasSingleLinkedResource((s32)action)) {
+        } else if (btlHasSingleLinkedResource(action)) {
             action->stepKind = 10;
             btlSetupActionCameraPair(action);
         } else {
@@ -7634,7 +7629,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
             action->motionParameter = 200.0f;
             action->flags |= 0x41;
         }
-        btlResetCameraMotion((s32)action);
+        btlResetCameraMotion(action);
     }
 }
 
@@ -8133,7 +8128,7 @@ void func_001DFAE0(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
     if (unit->flags & 2) {
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
-        if (btlHasSingleLinkedResource((s32)action) == 0) {
+        if (btlHasSingleLinkedResource(action) == 0) {
             func_001E16C0(action, from);
         } else {
             func_001E1288(action, from, 1);
@@ -8203,7 +8198,7 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
     if (unit->flags & 2) {
         btlFlagAllUnitsDefeatCandidate();
         count = btlGetIndexListCount(action->targetList);
-        if (btlHasSingleLinkedResource((s32)action) == 0) {
+        if (btlHasSingleLinkedResource(action) == 0) {
             func_001DEFE0(action, from, 17.5f);
             btlCopyMotionTransform((u8 *)to, (u8 *)from);
             btlInterpolateVectorStep(from->position);
@@ -8774,8 +8769,8 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4E50);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E5198);
 
-void func_001E5460(BtlLinkedCommand *arg0) {
-    btlFlagUserAndTargetDefeat(arg0, arg0);
+void func_001E5460(BtlLinkedCommand *action, BtlCamState *camera) {
+    btlFlagUserAndTargetDefeat(action, action);
 }
 
 
@@ -8847,8 +8842,8 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     func_001DB698(out);
 }
 
-void func_001E5700(u32 arg0) {
-    func_001E5460(arg0);
+void func_001E5700(BtlLinkedCommand *action, BtlCamState *camera) {
+    func_001E5460(action, camera);
 }
 
 void func_001E5718(BtlLinkedCommand *action, BtlCamState *out) {
@@ -8857,15 +8852,15 @@ void func_001E5718(BtlLinkedCommand *action, BtlCamState *out) {
 
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action) {
-    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
+void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    BtlState *work = (BtlState *)btlGetRuntime();
     u32 count;
     u32 mask;
     BtlUnit *unit;
 
     mask = ((BtlUnit *)btlGetIndexListEntry(action->targetList, 0))->flags & 0x600;
     count = 0;
-    for (unit = work->actorList; unit != 0; unit = unit->next) {
+    for (unit = work->units; unit != 0; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & mask) {
                 count++;

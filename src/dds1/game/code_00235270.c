@@ -1,7 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
-extern struct KwlnTask *kwlnTaskGetTaskByName(const char *name);
 extern s32 kwlnTaskDestroyWithHierarchy(struct KwlnTask *task, s32 delayTicks);
 
 #include "evt_world.h"
@@ -985,7 +984,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 
-extern EffWorldNode *dds3GetWorldObject();
+extern EffWorldNode *dds3GetWorldObject(void);
 
 void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     s32 color;
@@ -1843,7 +1842,7 @@ s32 func_0023A688(s32 x, s32 y, EvtRuntime *ctx) {
     return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
 }
 
-void func_0023A798(void) {
+void func_0023A798(u32 list, s32 x, s32 y, s32 row, EvtRuntime *runtime) {
 }
 
 extern f32 sdfViewMatrix[];
@@ -3894,7 +3893,7 @@ s32 evtFindTaskById(u32 taskId) {
     u8 taskName[32];
 
     evtFormatTaskName(taskId, taskName);
-    return (s32)kwlnTaskGetTaskByName(taskName);
+    return (s32)kwlnTaskGetTaskByName((const char *)taskName);
 }
 
 /* The script-visible second payload word has a task-kind-specific meaning. */

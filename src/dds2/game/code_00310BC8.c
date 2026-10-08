@@ -4,6 +4,7 @@
 
 #include "fpu.h"
 #include "sdf.h"
+#include "sdf_task_work.h"
 #include "itf.h"
 
 extern s8 D_0037F510[];
@@ -30,19 +31,9 @@ extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
-extern s32 kwlnTaskGetTaskByName(u32);
 
 
-/* Task item descriptor (0x14): key plus optional handlers, defaults filled in by func_00312A48. */
-typedef struct SdfTaskItemDesc {
-    s32 key;                         /* 0x00 */
-    s32 (*init)(void);               /* 0x04 */
-    void (*destroy)(s32, s32);       /* 0x08 */
-    s32 (*update)(s32, s32);         /* 0x0C */
-    void (*callback)(s32, s32);      /* 0x10 */
-} SdfTaskItemDesc;
-
-extern void *func_00312A48(SdfTaskItemDesc *);
+extern SdfTaskEntry *func_00312A48(SdfTaskItemDesc *);
 
 
 
@@ -60,27 +51,6 @@ extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern void func_00313A58(u8 *);
-
-
-typedef struct TaskWork {
-    u32 allocation;
-    char *primaryTaskName;
-    char *secondaryTaskName;
-    SdfList *list;
-    SdfListNode *currentNode; /* Next node to visit; reset to the list head at pass end. */
-} TaskWork;
-
-/* Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
- * The high word selects active, suspended, or pending-activation dispatch modes. */
-typedef struct SdfTaskEntry {
-    u32 flags;                   /* 0x00 */
-    s32 key;                     /* 0x04 */
-    s32 (*init)(void);           /* 0x08 */
-    void (*destroy)(s32, s32);   /* 0x0C */
-    s32 (*update)(s32, s32);     /* 0x10 */
-    void (*callback)(s32, s32);  /* 0x14 */
-    s32 initResult;              /* 0x18 */
-} SdfTaskEntry;
 
 
 extern f32 sdfQuatDot(f32 *, f32 *);
@@ -110,7 +80,6 @@ extern void sdfCallbackWorkOnRemove();
 extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
 extern s32 sdfTaskWorkRunAll(KwlnTask *task);
 extern void kwlnTaskCreate();
-extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
 extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
@@ -785,18 +754,18 @@ void sdfDestroyTaskWorkerTasks(TaskWork *work) {
 
 u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     u8 exists;
-    s64 task;
+    KwlnTask *task;
 
     exists = 0;
     if (work != NULL) {
-        task = kwlnTaskGetTaskByName((u32)work->primaryTaskName);
+        task = kwlnTaskGetTaskByName(work->primaryTaskName);
         exists = task != 0;
     }
     return exists;
 }
 
-s32 kwlnTaskExists(u32 name) {
-    return kwlnTaskGetTaskByName(name) != 0;
+s32 kwlnTaskExists(const char *name) {
+    return kwlnTaskGetTaskByName(name) != NULL;
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
@@ -813,12 +782,12 @@ void sdfRemoveTaskItem(TaskWork *work, s32 key) {
     }
 }
 
-s32 sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
+SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
     SdfListNode *item;
 
     item = sdfFindTaskListNodeByKey(work->list, key);
     if (item != NULL) {
-        return (s32)item->value;
+        return (SdfTaskEntry *)item->value;
     }
     return 0;
 }

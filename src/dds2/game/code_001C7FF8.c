@@ -17,7 +17,6 @@ extern ActorSlotOrder *D_00438F58[2];
 
 extern s32 btlGetRuntime(void);
 
-extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
@@ -491,10 +490,10 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
         btlUpdateSceneCommandSelection(object);
         if (btlAreLinkedSceneCountersAtThreshold()) {
             object->commandData->phase = 9;
-            panel = (BattleActorPanelWork *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(D_004367CC));
+            panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
             object->commandData->unk18 = panel->partyRecordIndex;
             object->state = 3;
-            ((SceneScriptState *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
+            ((SceneScriptState *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
             panel->activeEntries[slot].presentation.unkF0 = 0;
             panel->activeEntries[slot].presentation.pendingSceneState = 5;
@@ -529,17 +528,17 @@ void fldInitializeSceneObject(BattleSceneObject *object, ActionStateLink *owner)
 }
 
 BattleSceneObject *fldGetSceneObjectTaskUserData(void) {
-    u32 handle = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-    if (handle == 0) {
-        return (BattleSceneObject *)handle;
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    if (task == NULL) {
+        return NULL;
     }
-    return (BattleSceneObject *)kwlnTaskGetUserValue((KwlnTask *)handle);
+    return (BattleSceneObject *)kwlnTaskGetUserValue(task);
 }
 
 s32 fldGetSceneObjectState(void) {
-    s32 handle = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-    if (handle == 0) {
-        return handle;
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    if (task == NULL) {
+        return 0;
     }
     return fldGetSceneObjectTaskUserData()->state;
 }
@@ -956,11 +955,11 @@ s32 btlCreateAiWork(s32 source) {
     s32 count;
     btlGetRuntime();
     work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
-    object = (BattleSceneObject *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
+    object = (BattleSceneObject *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
     work->listA = btlAllocateIndexList(0xD);
     work->listB = btlAllocateIndexList(0xD);
     if (object->state == 8) {
-        other = (BattleActorPanelWork *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(D_004367CC));
+        other = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (datGameState->party[other->partyRecordIndex].status & 0x4800)) {
             func_001AC0F8(source, work->listA, 1, 4, -0x4801);
@@ -1001,11 +1000,11 @@ void fldReleaseSceneSprite(KwlnTask *arg) {
 }
 
 u32 fldGetSceneScriptTaskUserData(void) {
-    u32 handle = kwlnTaskGetTaskByName(D_004367B8);
-    if (handle == 0) {
-        return handle;
+    KwlnTask *task = kwlnTaskGetTaskByName(D_004367B8);
+    if (task == NULL) {
+        return 0;
     }
-    return kwlnTaskGetUserValue((KwlnTask *)handle);
+    return kwlnTaskGetUserValue(task);
 }
 
 u32 fldGetSceneScriptState(void) {

@@ -291,7 +291,6 @@ void func_0029DA98(BrsActiveProgressList *output) {
     }
 }
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 extern s8 D_0037F510[];
 extern char D_00428550[];
 extern void func_0029DF18(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);

@@ -360,7 +360,6 @@ extern u32 D_00436134;
 extern u32 D_003899B4[];
 
 extern void func_00135A68(u32 value, s32 enabled);
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 extern char D_00413388[];
 
 extern u32 D_00436128;

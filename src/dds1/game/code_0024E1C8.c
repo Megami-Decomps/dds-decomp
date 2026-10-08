@@ -1,10 +1,12 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "mnu_list.h"
 #include "mnu_profile_progress.h"
 #include "prf_requirement.h"
 #include "sdf_grid.h"
+#include "sdf_task_work.h"
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 #define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
@@ -592,7 +594,7 @@ void func_0024F6F0(s32 unused, MnuResourceTaskWork *resourceWork) {
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     MnuResourceTaskWork *resourceWork = func_0024F608();
-    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_0036C648, func_0024F6F0, resourceWork);
+    mnuSceneResourceContext = (u32)sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_0036C648, func_0024F6F0, resourceWork);
 }
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
@@ -606,7 +608,7 @@ s32 mnuCheckResourceTask(void) {
 
 /* Destroy the cached resource-task group and clear its handle. */
 void mnuStopResourceTask(void) {
-    sdfDestroyTaskWorkerTasks(mnuSceneResourceContext);
+    sdfDestroyTaskWorkerTasks((TaskWork *)mnuSceneResourceContext);
     mnuSceneResourceContext = 0;
 }
 

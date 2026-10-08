@@ -14,7 +14,6 @@
 extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
 
-extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 
@@ -266,7 +265,7 @@ extern f32 effMiscRandUnitFloat(void *state);
 extern void mdlAddEntryPlain(void *, s32, s32);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 effSharedRandomState[];
-extern void func_001EC5F0(u32);
+extern void func_001EC5F0(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 extern s32 func_001E88A8(u8 *);
 extern void mdlProcessContextNodesAndTransforms(void *, void *);
@@ -652,13 +651,13 @@ extern s32 D_003BC0C0[];
 extern s32 D_003BC0C8[];
 
 extern void func_001F3E48(s32);
-extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
+extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001FA480(s32, s32, s32);
+extern void func_001FA480(BtlLinkedCommand *, BtlCamState *, s32);
 
-extern void func_001FBAC0(s32, s32);
+extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
 
-extern s32 func_001FB908(s32, s32, s32, s32);
+extern s32 func_001FB908(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
 typedef struct SoundCursor {
     u16 unk_00;
@@ -701,8 +700,8 @@ extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
-extern void func_001F5868(s32, s32, s32, s32);
-extern void func_001F5320(s32, s32, s32, s32);
+extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
+extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
 extern void evtSetUnitAlphaTransition(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
@@ -1332,7 +1331,6 @@ extern void btlAssignTaskResultAndArgument();
 extern void btlBindActorSlot();
 extern void btlRunRandomWeightedAiTableAction();
 extern s32 btlAiCheckStatusRollEligibility();
-extern s32 kwlnTaskIsRegistered();
 
 /* AI task: binds the acting unit's slot on first run, then waits for the
  * pending AI task and dispatches state 0xB or 0xC. */
@@ -1362,7 +1360,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (kwlnTaskIsRegistered(scene->boundTask) == 0) {
+                } else if (kwlnTaskIsRegistered((KwlnTask *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");

@@ -1518,7 +1518,83 @@ void mnuCampMenuHandleInput(KwlnTask *task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuHandleSelection);
+/* The camp initializer allocates and clears this complete 0x38-byte child.
+ * Skill pages own four category windows and a separate selected-slot window. */
+typedef struct SkillMenuRuntime {
+    struct SdfMemBlock *allocation;
+    u8 pad04[4];
+    s32 active;
+    struct MenuList *categoryList;
+    MenuWindowContainer *skillWindows[4];
+    void *panel;
+    MenuWindowContainer *selectedWindow;
+    s32 activeMark;
+    s32 motionSelection;
+    u32 selectionFlags;
+    u32 selectedIndex;
+} SkillMenuRuntime;
+
+typedef char SkillMenuRuntimeSizeCheck[(sizeof(SkillMenuRuntime) == 0x38) ? 1 : -1];
+extern void ptySkillMenuRefreshEntries(s32);
+extern u8 D_0037CC90[];
+
+void ptySkillMenuHandleSelection(KwlnTask *callback) {
+    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(callback);
+    SkillMenuRuntime *menuWork = (SkillMenuRuntime *)context->menu;
+    u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
+    MenuWindowContainer *window = menuWork->selectedWindow;
+    struct MenuList *list = window->list;
+    DatPartyRecord *partyEntry;
+    MenuWindowContainer **skillWindowSlot;
+    MenuWindowContainer *skillWindow;
+    struct MenuListNode *selectedNode;
+    s32 selectedSlot;
+    s32 skillId;
+    s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
+    struct MenuListNode *categoryCursor = menuWork->categoryList->cursor;
+    DatGameState *gameState = datGameState;
+
+    list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
+    partyEntry = &gameState->party[partyIndex];
+    skillWindowSlot = &menuWork->skillWindows[categoryCursor->index];
+    skillWindow = *skillWindowSlot;
+    if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
+        selectedNode = skillWindow->list->cursor;
+        selectedSlot = list->cursor->index;
+        if (selectedNode->index == 0) {
+            mnuClearPartySkillSlot(partyEntry, selectedSlot);
+        } else {
+            skillId = selectedNode->sortKeyPrimary;
+            if (skillId != 0xFFFF) {
+                mnuAddPartySkillIfMissing(partyEntry, (u16)skillId, selectedSlot);
+            } else {
+                inputFlags = MNU_STAFF_INPUT_REJECTED;
+            }
+        }
+        window = (MenuWindowContainer *)ptySkillMenuRebuildAfterMutation(0, callback);
+        mnuInitPartyPanelSlots(&context->partyPanel);
+        func_00280048((s32)&context->partyWindow);
+        mnuSetPopupEntryFlagged((s32)&context->popupState, D_0037CC90);
+        ptySkillMenuRefreshEntries((s32)context);
+        window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
+    }
+    if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
+        mnuSetPopupEntryFlagged((s32)&context->popupState, D_0037CC90);
+    }
+    if (window != 0) {
+        if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
+            func_0027C788((s32)window);
+        }
+        if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
+            mnuRetreatWindowListSelection((s32)window);
+        }
+        if (inputFlags & MNU_STAFF_INPUT_NEXT) {
+            mnuAdvanceWindowListSelection((s32)window);
+        }
+        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
+    }
+}
 
 void mnuSwapPartySkillSlots(s32 entry, s32 firstSlot, s32 secondSlot) {
     u8 *slotBase = (u8 *)(entry + 2);

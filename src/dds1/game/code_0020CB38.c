@@ -558,7 +558,7 @@ s32 func_0020DE70(BtlLinkedCommand *command) {
 }
 
 extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
-extern s32 btlHasLinkedEffectNodeTrigger(u8 *);
+extern s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *);
 extern s32 func_0020DE70(BtlLinkedCommand *);
 extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
@@ -577,7 +577,7 @@ s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
         if (a == 1 || b != 1) {
             return 0;
         }
-        if (btlHasLinkedEffectNodeTrigger((u8 *)command) != 0) {
+        if (btlHasLinkedEffectNodeTrigger(command) != 0) {
             func_0020DE70(command);
             command->flags |= 0x800;
             return 1;

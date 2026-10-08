@@ -114,7 +114,6 @@ extern u32 D_00437A20[2];
 
 extern u32 D_00437A28;
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern char D_00428550[]; /* "result2_draw" */
 
 typedef struct BrsResultCounter {
