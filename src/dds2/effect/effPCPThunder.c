@@ -153,8 +153,6 @@ u32 func_0016B198(u32 value) {
 /* The descriptor owns the allocation; retention returns its 32-bit address. */
 extern void func_00164C68(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
-extern void parPrependCellNode(void *system);
-extern void parCellInit(void *system, s32 index);
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 
@@ -1994,7 +1992,6 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
 
 extern void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index);
 extern void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed);
-extern void parPrependCellNode(void *system);
 
 extern void sdfReleaseChipBlock(void *block);
 

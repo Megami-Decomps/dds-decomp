@@ -93,7 +93,6 @@ extern BillDispatch D_003AAB88[];
 
 extern u16 parGetRestartFlag(ParObj *obj);
 
-extern void parCellInit();
 
 
 extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);

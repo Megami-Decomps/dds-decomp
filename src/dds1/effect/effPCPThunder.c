@@ -152,8 +152,6 @@ u32 func_00163540(u32 value) {
 
 extern void func_0015D078(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
-extern void parPrependCellNode(void *system);
-extern void parCellInit(void *system, s32 index);
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
 
 
@@ -1986,7 +1984,6 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
 
 extern void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index);
 extern void func_001673D0(EffThunderFragmentWork *work, s32 index, const u128 *seed);
-extern void parPrependCellNode(void *system);
 
 extern void sdfReleaseChipBlock(void *block);
 

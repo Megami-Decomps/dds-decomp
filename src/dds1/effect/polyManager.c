@@ -129,7 +129,6 @@ typedef struct {
     struct SdfMemBlock *allocation; /* 0xFC */
 } PolyRotatingBand; /* 0x100, followed by 20-byte records */
 
-void parPrependCellNode(ParSystem *system);
 void polyUpdateBasicRingCells(PolyNode *obj);
 void func_0015DC70(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
