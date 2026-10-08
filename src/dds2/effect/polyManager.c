@@ -303,7 +303,7 @@ void polyReleaseBandNodeResources(PolyBand *obj) {
 }
 
 /* Seed band records with staggered inactive ages. */
-void func_00165CF0(PolyBand *obj) {
+void polyInitializeBandRecordAges(PolyBand *obj) {
     u32 count = obj->head.entryCount;
     PolyBandRecord *record = obj->records;
     u32 delayStep = obj->spawnDelayStep;
