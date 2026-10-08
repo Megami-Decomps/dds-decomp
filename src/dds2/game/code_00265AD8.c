@@ -1,3 +1,4 @@
+#include "eff_resource_slots.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -271,7 +272,6 @@ extern const CampMapArguments D_00424DE0;
 extern const CampEffectRows D_00424E10;
 extern const char D_00424E30[];
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-extern u32 effCreateMappedResource(u32);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
@@ -281,13 +281,13 @@ void func_00266460(u32 object, MenuEffectResources *resources) {
     CampEffectRows rows = D_00424E10;
     u32 dataAddress;
     struct SdfMemBlock *allocation;
-    u32 mappedResource;
+    struct EffMappedResource *mappedResource;
 
     allocation = sdfReadNamedResource(D_00424E30, &dataAddress, 0);
     mappedResource = effCreateMappedResource(dataAddress);
     sdfReleaseResourceAllocation(allocation);
     mnuInitializeMapPacket(1, mapArguments.values, 11, &resources->packet);
-    mnuSetCampEffectResourceHandles(object, mappedResource, resources);
+    mnuSetCampEffectResourceHandles(object, (u32)mappedResource, resources);
     mnuCopyCampEffectRowData(&rows, resources);
 }
 

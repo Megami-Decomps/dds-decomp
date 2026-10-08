@@ -15,7 +15,6 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern void effResetSlotWork(u32, u32);
 
-extern u32 effCreateMappedResource(u32);
 
 
 extern u32 fileGetResourceHandle(void);
@@ -263,10 +262,10 @@ void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 
 }
 
 /* Build mapped records from the retained source address, then release the original file allocation. */
-u32 effLoadMappedResource(const char *base, const char *name) {
+EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     char path[EFF_RESOURCE_PATH_BYTES];
     u32 sourceAddress;
-    u32 mappedResource;
+    EffMappedResource *mappedResource;
     u32 allocation;
 
     func_003014F0(path, D_003BD198, base, name);
@@ -280,12 +279,12 @@ u32 effLoadMappedResource(const char *base, const char *name) {
 void effCompleteMappedResourceJob(u64 job, u32 *outMappedResource) {
     u32 allocation;
     u32 sourceAddress;
-    u32 mappedResource;
+    EffMappedResource *mappedResource;
 
     allocation = fileGetResourceHandle();
     sourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     mappedResource = effCreateMappedResource(sourceAddress);
-    *outMappedResource = mappedResource;
+    *outMappedResource = (u32)mappedResource;
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
 }
@@ -479,14 +478,14 @@ struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *head
 
 
 /* Build the live batch header from the serialized count and owned record array. */
-u32 effCreateMappedResource(u32 sourceAddress) {
+EffMappedResource *effCreateMappedResource(u32 sourceAddress) {
     EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     EffMappedHeader header;
 
     mappedResource->allocation = effLoadMappedStatusRecords((u8 *)sourceAddress, &header);
     mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress(mappedResource->allocation);
     mappedResource->count = header.count;
-    return (u32)mappedResource;
+    return mappedResource;
 }
 
 /* Build one zeroed status record and allocate the category's required status storage. */

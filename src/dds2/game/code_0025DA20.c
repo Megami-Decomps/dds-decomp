@@ -1086,7 +1086,6 @@ extern const CampMapArguments D_00424A90;
 extern const CampEffectRows D_00424AC0;
 extern const char D_00424AE0[];
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-extern u32 effCreateMappedResource(u32);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
@@ -1097,13 +1096,13 @@ void func_0025F8B8(u32 object, MenuEffectResources *resources) {
     CampEffectRows rows = D_00424AC0;
     u32 dataAddress;
     struct SdfMemBlock *allocation;
-    u32 mappedResource;
+    struct EffMappedResource *mappedResource;
 
     allocation = sdfReadNamedResource(D_00424AE0, &dataAddress, 0);
     mappedResource = effCreateMappedResource(dataAddress);
     sdfReleaseResourceAllocation(allocation);
     mnuInitializeMapPacket(2, mapArguments.values, 11, &resources->packet);
-    mnuSetCampEffectResourceHandles(object, mappedResource, resources);
+    mnuSetCampEffectResourceHandles(object, (u32)mappedResource, resources);
     mnuCopyCampEffectRowData(&rows, resources);
     mnuOrEntryFlags(7, &resources->packet.type);
 }
