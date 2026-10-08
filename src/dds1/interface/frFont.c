@@ -564,39 +564,39 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
     FrFontGlyph *previousGlyph;
     u32 *fadeWord;
     u8 previousOption;
-    u8 fade = 0x80;
-    s32 ready = 0;
+    u8 previousFade = 0x80;
+    s32 canAdvanceFade = 0;
     s32 canStopLips = 1;
-    s32 jitter = 0;
+    s32 glyphJitter = 0;
 
     previousGlyph = glyph->previous;
     previousOption = 0;
     if (previousGlyph == NULL) {
         previousParent = parent->previous;
         if (previousParent != NULL && previousParent->link20.linkedGlyph != NULL) {
-            fade = previousParent->link20.linkedGlyph->u10.byte[0];
+            previousFade = previousParent->link20.linkedGlyph->u10.byte[0];
             previousOption = previousParent->link20.linkedGlyph->u14.b[2];
         }
     } else {
-        fade = previousGlyph->u10.byte[0];
+        previousFade = previousGlyph->u10.byte[0];
         previousParent = parent->previous;
     }
 
     fadeWord = &glyph->u10.word;
     if (previousOption == 0 || previousOption == glyph->u14.b[2]) {
-        if (fade >= threshold) {
-            ready = 1;
+        if (previousFade >= threshold) {
+            canAdvanceFade = 1;
         }
     } else {
-        ready = fade == 0x80;
+        canAdvanceFade = previousFade == 0x80;
     }
 
     if (previousParent != NULL && parent->link1C.firstChild == glyph && parent->unk40 == 0) {
         switch (previousParent->unk30) {
         case 0xF214:
             if (previousParent->unk3C > 0) {
-                ready = 0;
-                if (fade == 0x80) {
+                canAdvanceFade = 0;
+                if (previousFade == 0x80) {
                     previousParent->unk3C = previousParent->unk3C - 1;
                 }
             }
@@ -605,10 +605,10 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
             if (previousParent->unk3C != 0xFFFF) {
                 if (previousParent->unk3C > 0) {
                     previousParent->unk3C--;
-                    ready = 0;
+                    canAdvanceFade = 0;
                 }
             } else if (mnuQueryTitleSoundBusy() != 0) {
-                ready = 0;
+                canAdvanceFade = 0;
             }
             break;
         }
@@ -630,17 +630,17 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         }
     }
 
-    if (ready != 0) {
-        u32 word;
+    if (canAdvanceFade != 0) {
+        u32 currentFadeWord;
 
         if ((s8)step >= 0) {
             step = (step * 22) / (glyph->advance + parent->u0.b.b1);
         }
-        word = *fadeWord;
-        if ((u32)(0x80 - (word & 0xFF)) >= step) {
-            *fadeWord = word + step;
+        currentFadeWord = *fadeWord;
+        if ((u32)(0x80 - (currentFadeWord & 0xFF)) >= step) {
+            *fadeWord = currentFadeWord + step;
         } else {
-            *fadeWord = (word & ~0xFF) | 0x80;
+            *fadeWord = (currentFadeWord & ~0xFF) | 0x80;
         }
     }
 
@@ -650,11 +650,11 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
 
         if (currentFade >= 0) {
             if (glyph->u14.b[2] == 1) {
-                jitter = -((((glyphValue * 2) % 5) - 2) << 4);
+                glyphJitter = -((((glyphValue * 2) % 5) - 2) << 4);
             }
         }
     }
-    return jitter;
+    return glyphJitter;
 }
 
 /* Draw through the shared render flags with mode zero. */
