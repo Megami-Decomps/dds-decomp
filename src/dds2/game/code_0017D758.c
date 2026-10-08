@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -216,9 +217,7 @@ void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
     VU0_STORE_MATRIX(object->matrix);
 }
 
-extern u32 parAllocateCellSystem(u32, s32, s32, s32);
 extern void parDispatchSub(u32, s32, s32, s32);
-extern void func_00164C68(u32, u16);
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
@@ -248,8 +247,8 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     effBuildRadialFanStreams(resource, params->fanSegments, params->centerColor,
                             params->outerColor, params->radiusScale, params->viewOffset);
     work->system = parAllocateCellSystem(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub(work->system, 1, work->params.unk58, work->params.unk58);
-    func_00164C68(work->system, (u16)work->params.mode);
+    parDispatchSub((u32)work->system, 1, work->params.unk58, work->params.unk58);
+    parSetCellDrawBucket(work->system, (u16)work->params.mode);
 
     count = work->count;
     delayRange = params->randomDelayRange;

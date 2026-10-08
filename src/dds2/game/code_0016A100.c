@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
@@ -95,10 +96,7 @@ extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
 extern void sdfReleaseChipBlock(void *p);
 
-extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
-extern void func_00164C68(void *system, u32 value);
-extern void parRiseFallSymmetricCellAlpha(void *system, void *a, void *b, void *c);
 
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
 typedef struct {
@@ -137,7 +135,7 @@ typedef struct {
     u32 color;          /* 0x50 */
     f32 baseFirst;      /* 0x54 */
     f32 baseSecond;     /* 0x58 */
-    void *system;       /* 0x5C */
+    ParSystem *system;  /* 0x5C: allocated cell system */
     u32 handle;         /* 0x60 */
 } EffThunderWork4C; /* 0x64 */
 
@@ -645,7 +643,7 @@ EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
     work->handle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
-    func_00164C68(work->system, work->head.systemParam);
+    parSetCellDrawBucket(work->system, work->head.systemParam);
     for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
         work->cells[cellIndex].unk00 = 0;
         work->cells[cellIndex].unk04 = 0;

@@ -105,7 +105,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 extern s32 func_002C6CE8(void);
 
-extern struct MenuIconState *func_002B9FF8();
 extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 extern u32 effCreateStatusBatch(u32);
@@ -618,7 +617,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     /* Both arms are identical in retail; kept as written. */
-    if (menu->flags & 0x80) {
+    if (menu->flags & MNU_PAGE_WINDOW_SPRITE_MODE) {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     } else {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
@@ -722,7 +721,7 @@ void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, EffectSlotSe
 }
 
 void mnuInitializePanelResource(MenuPanelState *panel, s32 resource) {
-    panel->resourceHandle = func_002B9FF8(5, resource);
+    panel->resourceHandle = mnuCreatePanelIconState(5, resource);
 }
 
 void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
@@ -2371,8 +2370,8 @@ s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRe
             ptySkillApplyFieldUseEffect(page, id & 0xFFFF, target, entry);
             mnuConsumeEntryCost(id & 0xFFFF, target);
             mnuInitPartyPanelSlots(partyPanel);
-            func_002BCA98(page);
-            func_002BCAB0(page);
+            mnuReleaseAndRefreshWindowSlots(page);
+            mnuRefreshPartyPanelBars(page);
         }
         return 2;
     }

@@ -334,7 +334,7 @@ typedef struct SndPad {
     };
 } SndPad;
 extern SndPad D_0037F510;
-extern s32 func_001A6AB8();
+extern s32 func_001A6AB8(ItfMesBlk40 *);
 extern void itfResetBattleFadeState(BtlFade *, s32);
 
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
@@ -676,7 +676,33 @@ void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir) {
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6AB8);
+s32 func_001A6AB8(ItfMesBlk40 *selection) {
+    s32 i;
+
+    for (i = 0; i < selection->optionCount; i++) {
+        ItfMesOption *option = &selection->options[i];
+
+        if (D_0037F510.buttons[option->id] < 0) {
+            s32 prefixLength = option->value;
+            s32 rank = 0;
+            u32 mask = selection->panelValue;
+
+            if (prefixLength > 0) {
+                s32 remaining = prefixLength;
+                do {
+                    if ((mask & 1) == 0) {
+                        rank++;
+                    }
+                    mask >>= 1;
+                } while (--remaining != 0);
+            }
+            if ((mask & 1) == 0) {
+                return rank;
+            }
+        }
+    }
+    return -1;
+}
 
 
 void btlUpdateFadeIndicator(ItfMesState *panel) {

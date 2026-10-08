@@ -48,17 +48,21 @@ extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 
-extern u32 mnuAllocateMantraPanelBurstPool(void);
+typedef struct MantraBurstPool MantraBurstPool;
+typedef struct MantraSparkleEmitter MantraSparkleEmitter;
 
-extern u32 mnuAllocateMantraSparkleEmitter(s16);
+extern MantraBurstPool *mnuAllocateMantraPanelBurstPool(void);
+
+extern MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16);
 
 extern void *sdfAllocSizeClassBlock(s32);
 
 
-void mnuFreeMantraSparkleEmitter(u32 sprite);
+void mnuFreeMantraSparkleEmitter(MantraSparkleEmitter *sprite);
 
-void mnuReleaseMantraPanelBurstPool(u32 *obj);
-u32 mnuAllocateMantraBackgroundBurstPool(void);
+void mnuReleaseMantraPanelBurstPool(MantraBurstPool *obj);
+MantraBurstPool *mnuAllocateMantraBackgroundBurstPool(void);
+void mnuReleaseMantraBackgroundBurstPool(MantraBurstPool *obj);
 extern void mnuDrawCellScaledGrid();
 struct MantraDrawPool;
 extern struct MantraDrawItem *mnuRegisterMantraDrawItem(struct MantraDrawPool *, u32, s32 (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
@@ -172,8 +176,8 @@ typedef struct MantraPanelAnimation {
     u8 stateB;
     u8 stateC;
     u8 pad23;
-    u32 spriteHandle;
-    u32 burstPool;
+    MantraSparkleEmitter *spriteHandle;
+    MantraBurstPool *burstPool;
     s16 id;
     s16 transitionDelay;
 } MantraPanelAnimation;
@@ -288,8 +292,6 @@ typedef struct MantraFadeState {
     /* 0x20 */ u32 queuedFlags;
 } MantraFadeState;
 
-typedef struct MantraBurstPool MantraBurstPool;
-
 /* Background transition/fade data plus the separate burst-pool reference.
  * The transition word packs variant nibbles followed by a signed delay byte. */
 typedef struct MantraBackgroundState {
@@ -348,7 +350,7 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
-void func_00284508(s32 x, s32 y, s32 z, s32 amount, u32 handle, s32 packet);
+void func_00284508(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *handle, s32 packet);
 extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
 extern void func_00274A70();
@@ -1154,14 +1156,14 @@ u32 mnuInitMantraBackgroundDraw(void) {
     ((MantraBackgroundState *)data)->state = 1;
     ((MantraBackgroundState *)data)->transitionWord &= ~0xf;
     ((MantraBackgroundState *)data)->timing.transitionDelay = 0;
-    ((MantraBackgroundState *)data)->burstPool = (MantraBurstPool *)mnuAllocateMantraBackgroundBurstPool();
+    ((MantraBackgroundState *)data)->burstPool = mnuAllocateMantraBackgroundBurstPool();
     evtPrintDeveloperConsoleMessage("BG Draw Init\n");
     return data;
 }
 
 void mnuReleaseMantraBackgroundDraw(u32 obj) {
     s32 data = (s32)((MantraDrawItem *)obj)->data;
-    mnuReleaseMantraBackgroundBurstPool((u32 *)((MantraBackgroundState *)data)->burstPool);
+    mnuReleaseMantraBackgroundBurstPool(((MantraBackgroundState *)data)->burstPool);
     sdfReleaseChipBlock(data);
     evtPrintDeveloperConsoleMessage("BG Draw Release\n");
 }
@@ -3863,7 +3865,7 @@ s32 mnuDrawMantraPulseIconWithFadeState(s32 x, s32 y, s32 z, s32 amount, s32 unu
 }
 
 void btlInitPanelASprite(u32 unused, s32 view) {
-    u32 spriteHandle;
+    MantraSparkleEmitter *spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(1);
     ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
@@ -3888,7 +3890,7 @@ s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027C558);
 
 void mnuInitMantraPanelSpriteView(u32 unused, s32 view) {
-    u32 spriteHandle;
+    MantraSparkleEmitter *spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(2);
     ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
@@ -4005,17 +4007,16 @@ s32 mnuDrawMantraPanelSpriteTransition(s32 x, s32 y, s32 z, s32 amount, s32 unus
 }
 
 void btlInitPanelBSprites(u32 unused, s32 view) {
-    u32 resource;
+    MantraSparkleEmitter *resource;
 
     resource = mnuAllocateMantraSparkleEmitter(0);
     ((MantraPanelAnimation *)view)->spriteHandle = resource;
-    resource = mnuAllocateMantraPanelBurstPool();
-    ((MantraPanelAnimation *)view)->burstPool = resource;
+    ((MantraPanelAnimation *)view)->burstPool = mnuAllocateMantraPanelBurstPool();
 }
 
 void btlReleasePanelBSprites(s32 obj) {
     mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
-    mnuReleaseMantraPanelBurstPool((u32 *)((MantraPanelAnimation *)obj)->burstPool);
+    mnuReleaseMantraPanelBurstPool(((MantraPanelAnimation *)obj)->burstPool);
 }
 
 s32 btlDrawPanelB(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
@@ -4291,7 +4292,7 @@ s32 mnuDrawFadedMantraSingleCyclePanel(s32 x, s32 y, s32 z, s32 amount, s32 unus
 }
 
 void mnuInitMantraPanelAccentSprite(u32 unused, s32 view) {
-    u32 spriteHandle;
+    MantraSparkleEmitter *spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(1);
     ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
@@ -4447,16 +4448,16 @@ typedef struct MantraSparkle {
     f32 vy;
 } MantraSparkle;
 
-typedef struct MantraSparkleEmitter {
+struct MantraSparkleEmitter {
     MantraSparkle sparkle[10];
     s16 duration;
     s16 kind;
     s32 count;
-} MantraSparkleEmitter;
+};
 
 MantraSparkle *func_00284818(MantraSparkleEmitter *);
 
-u32 mnuAllocateMantraSparkleEmitter(s16 kind) {
+MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16 kind) {
     MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)sdfAllocSizeClassBlock(0xA8);
     MantraSparkle *spark;
 
@@ -4469,11 +4470,11 @@ u32 mnuAllocateMantraSparkleEmitter(s16 kind) {
     spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
     spark = func_00284818(emitter);
     spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
-    return (u32)emitter;
+    return emitter;
 }
 
 
-void mnuFreeMantraSparkleEmitter(u32 sprite) {
+void mnuFreeMantraSparkleEmitter(MantraSparkleEmitter *sprite) {
     if (sprite != 0) {
         sdfReleaseChipBlock(sprite);
     }
@@ -4481,8 +4482,7 @@ void mnuFreeMantraSparkleEmitter(u32 sprite) {
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void func_00284508(s32 x, s32 y, s32 z, s32 amount, u32 handle, s32 packet) {
-    MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)handle;
+void func_00284508(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *emitter, s32 packet) {
     MantraSparkle *spark;
     u32 i;
     f32 progress;
@@ -4606,25 +4606,25 @@ typedef struct MantraBurstSlot {
 } MantraBurstSlot;
 
 struct MantraBurstPool {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     MantraBurstSlot *slots;
     s32 count;
     u16 tick;
 };
 
-u32 mnuAllocateMantraPanelBurstPool(void) {
-    u32 handle = (u32)sdfAllocGeneralBlock(0x650);
-    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
+MantraBurstPool *mnuAllocateMantraPanelBurstPool(void) {
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(0x650);
+    u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
     ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
     ((MantraBurstPool *)block)->count = 0x64;
-    return block;
+    return (MantraBurstPool *)block;
 }
 
-void mnuReleaseMantraPanelBurstPool(u32 *obj) {
-    if (*obj != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*obj));
+void mnuReleaseMantraPanelBurstPool(MantraBurstPool *obj) {
+    if (obj->allocation != 0) {
+        sdfReleaseResourceAllocation(obj->allocation);
     }
 }
 
@@ -4663,19 +4663,19 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
     return 0;
 }
 
-u32 mnuAllocateMantraBackgroundBurstPool(void) {
-    u32 handle = (u32)sdfAllocGeneralBlock(0x650);
-    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
+MantraBurstPool *mnuAllocateMantraBackgroundBurstPool(void) {
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(0x650);
+    u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
     ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
     ((MantraBurstPool *)block)->count = 0x64;
-    return block;
+    return (MantraBurstPool *)block;
 }
 
-void mnuReleaseMantraBackgroundBurstPool(u32 *obj) {
-    if (*obj != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*obj));
+void mnuReleaseMantraBackgroundBurstPool(MantraBurstPool *obj) {
+    if (obj->allocation != 0) {
+        sdfReleaseResourceAllocation(obj->allocation);
     }
 }
 

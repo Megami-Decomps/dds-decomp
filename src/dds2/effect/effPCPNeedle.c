@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "eff.h"
@@ -15,18 +16,13 @@ extern void sdfBuildVuRotationFromAxisAngle(f32 *axis, f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 blend);
-extern void parUpdateCellVertexPair(u32 system, s32 index, f32 vertices[2][4]);
-extern void parFadeAlphaCell(u32 system, s32 index);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
-extern void parCellInit(u32 system, s32 index);
-extern void parPrependCellNode(u32 system);
 
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 D_003B1530[4];
 
 
-extern void parReleaseCellSystem(u32);
 extern void func_0017ED50(void *, void *);
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
@@ -197,13 +193,13 @@ void func_0017E080(EffPCPNeedleWork *work) {
                     VU0_MOVE_VF(vf10, vf12);
                     VU0_SUB(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, vertices[1]);
-                    parUpdateCellVertexPair(work->system, i, vertices);
+                    parUpdateCellVertexPair(work->system, i, (const u128 *)vertices);
                     parFadeAlphaCell(work->system, i);
-                    effBillSetEntryValue(work->system, i, (color & 0xFF000000) | 0x808080);
+                    effBillSetEntryValue((u32)work->system, i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
                 effSetResourceEntryValue(work->resource, i, 0);
-                effBillSetEntryValue(work->system, i, 0);
+                effBillSetEntryValue((u32)work->system, i, 0);
                 parCellInit(work->system, i);
             }
             slot->age++;

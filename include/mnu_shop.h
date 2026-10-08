@@ -37,6 +37,9 @@ struct MenuIconState {
     s32 fade;
 };
 
+/* Mode 5 callers pass only kind and resource; native mode 4 consumes material. */
+struct MenuIconState *mnuCreatePanelIconState();
+
 typedef struct MenuWindowContainer {
     s32 id;                /* 0x00 */
     u32 flags;             /* 0x04 */
@@ -58,7 +61,7 @@ typedef struct MenuWindowContainer {
     s32 scale54;           /* 0x54 */
     struct MenuIconState panel; /* 0x58: embedded drawable panel layout */
     struct MenuIconSprites *resource; /* 0x90: owned sprite-resource bundle */
-    u32 state;             /* 0x94 */
+    u32 fadeScale;         /* 0x94: window/list opacity scale; full fade is 0x100 */
 } MenuWindowContainer;
 
 typedef char MenuIconState_size_must_be_0x38[(sizeof(struct MenuIconState) == 0x38) ? 1 : -1];
@@ -101,7 +104,7 @@ typedef struct MenuWindowContainer {
     u8 pad44[8];
     MenuPanelHandles panel;
     struct MenuWindowSpriteGroup *textures;
-    s32 fade;
+    s32 fadeScale; /* 0x88: window/list opacity scale; full fade is 0x100 */
 } MenuWindowContainer;
 
 /* 2443F8 allocates 0x10 bytes. The operation-row renderer 25E820 reads
