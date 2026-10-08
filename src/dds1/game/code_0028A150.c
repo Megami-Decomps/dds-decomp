@@ -188,7 +188,7 @@ extern s32 fileBuildMainBlobAfterDelete(void);
 
 extern s32 fileSaveFileDescriptor;
 
-extern u32 fileSaveReadBufferResource;
+extern struct SdfMemBlock *fileSaveReadBufferResource;
 
 
 extern void mcCloseOpenFile(s32);
@@ -961,8 +961,8 @@ s32 fileReadSlotPreviewBegin(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(0x30);
-        fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
+        fileSaveReadBufferResource = sdfAllocGeneralBlock(0x30);
+        fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
         return (s32)fileReadSlotPreviewWait;
     }
@@ -978,7 +978,7 @@ s32 fileReadSlotPreviewWait(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)fileStoreSlotHeader;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -990,10 +990,10 @@ s32 fileStoreSlotHeader(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         memcpy(&D_003DC800[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return fileAdvanceSlotScan();
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -2261,8 +2261,8 @@ s32 fileLoadMainBlobBegin(void) {
         return 0;
     }
     size = fileMainBlobSize();
-    fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(size);
-    fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
+    fileSaveReadBufferResource = sdfAllocGeneralBlock(size);
+    fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
     if (status == MC_POLL_SUCCESS) {
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
         return (s32)mcHandleSetupResult;
@@ -2281,7 +2281,7 @@ s32 mcHandleSetupResult(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)mcdHandleSaveSetupDone;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return (s32)fileAbortSlotScanOnInput;
@@ -2299,7 +2299,7 @@ s32 mcdHandleSaveSetupDone(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         fileReloadSaveBuffer();
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         D_003BC7ED = 1;
         fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
@@ -2310,7 +2310,7 @@ s32 mcdHandleSaveSetupDone(void) {
         fileSetMenuFlowState(13);
         return fileSetMenuCallbackAndClearResult(-1);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return (s32)fileAbortSlotScanOnInput;
