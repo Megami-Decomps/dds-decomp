@@ -202,7 +202,7 @@ extern s32 mnuPercentOrHundred(u16, u16);
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
 extern s32 effDestroyPackedBatch(s32);
-extern void mnuFreeProfilePanelWork(void *);
+extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 
 
 typedef struct MenuListNode MenuListNode;
