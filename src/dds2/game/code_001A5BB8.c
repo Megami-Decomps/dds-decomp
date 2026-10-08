@@ -1924,13 +1924,13 @@ s32 func_001ABB10(BtlUnit *unit, s32 command) {
         return 0;
     }
     if ((unit->partyRecord.flags & 0x10) && (unit->flags & 0x200)) {
-        if ((datCommandRecords[command].kind != 0 &&
-             datCommandRecords[command].kind != 2) ||
+        if ((datCommandRecords[command].effectType != 0 &&
+             datCommandRecords[command].effectType != 2) ||
             datCommandRecords[command].costMode >= 2) {
             return 7;
         }
     }
-    if ((datCommandRecords[command].kind == 1 ||
+    if ((datCommandRecords[command].effectType == 1 ||
          datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) &&
         (unit->partyRecord.status & 0x7FFF) == 0x10) {
         return 3;
@@ -4093,7 +4093,7 @@ s32 btlChooseEligibleSkill(s32 object) {
 }
 
 f32 btlGetActionCategoryMultiplier(BtlUnit *unit, s32 unused, s32 index) {
-    s32 mode = datCommandRecords[index].primaryLimitKind;
+    s32 mode = datCommandRecords[index].hpType;
     f32 rate;
     if (mode < 0xE) {
         rate = 1.0f;
@@ -4110,7 +4110,7 @@ f32 btlGetActionCategoryMultiplier(BtlUnit *unit, s32 unused, s32 index) {
 }
 
 f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
-    s32 category = datCommandRecords[index].secondaryLimitKind;
+    s32 category = datCommandRecords[index].mpType;
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
@@ -4120,7 +4120,7 @@ f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
 }
 
 f32 btlGetActionRecordPercentAsFraction(s32 unused0, s32 unused1, s32 index) {
-    return (f32)datCommandRecords[index].unk22 / 100.0f;
+    return (f32)datCommandRecords[index].effectPercent / 100.0f;
 }
 
 s32 btlAdjustPointsForCombatFlags(s32 unused, u32 flags, u32 otherFlags, u32 value, s32 index) {
@@ -4140,8 +4140,8 @@ s32 btlAdjustPointsForCombatFlags(s32 unused, u32 flags, u32 otherFlags, u32 val
     }
     if (flags & 4) {
         entry = (DatCommandRecord *)(index * 56 + (s32)datCommandRecords);
-        code = entry->primaryLimitKind;
-        if (code != 8 && code != 10 && entry->kind != 2 &&
+        code = entry->hpType;
+        if (code != 8 && code != 10 && entry->effectType != 2 &&
             entry->unk30 != 4) {
             return value + 100;
         }
@@ -4172,8 +4172,8 @@ s32 btlGetCommandResultKindFromFlags(u32 flags, u32 otherFlags, s32 index) {
     }
     if (flags & 4) {
         entry = (DatCommandRecord *)(index * 56 + (s32)datCommandRecords);
-        code = entry->primaryLimitKind;
-        if (code != 8 && code != 10 && entry->kind != 2 &&
+        code = entry->hpType;
+        if (code != 8 && code != 10 && entry->effectType != 2 &&
             entry->unk30 != 4) {
             return 1;
         }

@@ -115,7 +115,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     value = mnuGetPartyEntryMenuValue(party);
     if (value != 0) {
         glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
-        func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].stat18);
+        func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
         glyph = func_0019F5E8(x + 0x1050, 0x360, depth, color, text, glyph);
         if (page->unk74 != 0) {
             frFontSetChainFlag((FrFontGlyph *)glyph, 4);
